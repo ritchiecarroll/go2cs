@@ -27,12 +27,12 @@ using go.path;
 
 partial class zip_package {
 
-internal static ж<godebug.Setting> zipinsecurepath = godebug.New("zipinsecurepath"u8);
+internal static ж<godebug.Setting> zipinsecurepath = godebug.New("zipinsecurepath");
 
-public static error ErrFormat = errors.New("zip: not a valid zip file"u8);
-public static error ErrAlgorithm = errors.New("zip: unsupported compression algorithm"u8);
-public static error ErrChecksum = errors.New("zip: checksum error"u8);
-public static error ErrInsecurePath = errors.New("zip: insecure file path"u8);
+public static error ErrFormat = errors.New("zip: not a valid zip file");
+public static error ErrAlgorithm = errors.New("zip: unsupported compression algorithm");
+public static error ErrChecksum = errors.New("zip: checksum error");
+public static error ErrInsecurePath = errors.New("zip: insecure file path");
 
 // A Reader serves content from a ZIP archive.
 partial struct Reader {
@@ -63,7 +63,7 @@ partial struct File {
     internal ж<Reader> zip;
     internal io.ReaderAt zipr;
     internal int64 headerOffset; // includes overall ZIP archive baseOffset
-    internal bool zip64;  // zip64 extended information extra field presence
+    internal bool zip64;         // zip64 extended information extra field presence
 }
 
 // OpenReader will open the Zip file specified by name and return a ReadCloser.
@@ -77,27 +77,28 @@ partial struct File {
 // the ErrInsecurePath error and use the returned reader.
 public static (ж<ReadCloser>, error) OpenReader(@string name) {
     var (f, err) = os.Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var fi, err) = f.Stat();
-    if (err != default!) {
+    if (err != nil) {
         f.Close();
-        return (default!, err);
+        return (default, err);
     }
     var r = @new<ReadCloser>();
     {
-        err = r.of(ReadCloser.ᏑReader).init(new os_FileжReaderAt(f), fi.Size()); if (err != default! && !AreEqual(err, ErrInsecurePath)) {
+        err = r.of(ReadCloser.ᏑReader).init(new os_FileжReaderAt(f), fi.Size()); if (err != nil && !AreEqual(err, ErrInsecurePath)) {
             f.Close();
-            return (default!, err);
+            return (default, err);
         }
     }
-    r.Value.f = f;
+    r.f = f;
     return (r, err);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zipSizeCannotBeNegativeˢ = "zip: size cannot be negative"u8;
+internal static ref readonly @string zipSizeCannotBeNegativeˢ => ref zipSizeCannotBeNegativeˢᵇ;
+private static readonly @string zipSizeCannotBeNegativeˢᵇ = "zip: size cannot be negative"u8;
 
 // NewReader returns a new [Reader] reading from r, which is assumed to
 // have the given size in bytes.
@@ -111,13 +112,13 @@ internal static readonly @string zipSizeCannotBeNegativeˢ = "zip: size cannot b
 // the [ErrInsecurePath] error and use the returned reader.
 public static (ж<Reader>, error) NewReader(io.ReaderAt r, int64 size) {
     if (size < 0) {
-        return (default!, errors.New(zipSizeCannotBeNegativeˢ));
+        return (default, errors.New(zipSizeCannotBeNegativeˢ));
     }
     var zr = @new<Reader>();
-    error err = default!;
+    error err = default;
     {
-        err = zr.init(r, size); if (err != default! && !AreEqual(err, ErrInsecurePath)) {
-            return (default!, err);
+        err = zr.init(r, size); if (err != nil && !AreEqual(err, ErrInsecurePath)) {
+            return (default, err);
         }
     }
     return (zr, err);
@@ -127,7 +128,7 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (end, baseOffset, err) = readDirectoryEnd(rdr, size);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     r.r = rdr;
@@ -138,13 +139,13 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
     // indicate it contains up to 1 << 128 - 1 files. Since each file has a
     // header which will be _at least_ 30 bytes we can safely preallocate
     // if (data size / 30) >= end.directoryRecords.
-    if ((~end).directorySize < (uint64)size && ((uint64)size - (~end).directorySize) / 30 >= (~end).directoryRecords) {
-        r.File = new slice<ж<File>>(0, (nint)((~end).directoryRecords));
+    if (end.directorySize < (uint64)size && ((uint64)size - end.directorySize) / 30 >= end.directoryRecords) {
+        r.File = new slice<ж<File>>(0, (nint)(end.directoryRecords));
     }
-    r.Comment = end.Value.comment;
+    r.Comment = end.comment;
     var rs = io.NewSectionReader(rdr, 0, size);
     {
-        (_, err) = rs.Seek(r.baseOffset + (int64)(~end).directoryOffset, io.SeekStart); if (err != default!) {
+        (_, err) = rs.Seek(r.baseOffset + (int64)end.directoryOffset, io.SeekStart); if (err != nil) {
             return err;
         }
     }
@@ -154,45 +155,45 @@ internal static error init(this ж<Reader> Ꮡr, io.ReaderAt rdr, int64 size) {
     // Gloss over this by reading headers until we encounter
     // a bad one, and then only report an ErrFormat or UnexpectedEOF if
     // the file count modulo 65536 is incorrect.
-    while (ᐧ) {
+    for (;;) {
         var f = Ꮡ(new File(zip: Ꮡr, zipr: rdr));
         err = readDirectoryHeader(ref (f).DerefOrNull(), new bufio_ReaderжReader(buf));
         if (AreEqual(err, ErrFormat) || AreEqual(err, io.ErrUnexpectedEOF)) {
             break;
         }
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
-        f.Value.headerOffset += r.baseOffset;
+        f.headerOffset += r.baseOffset;
         r.File = append(r.File, f);
     }
-    if ((uint16)len(r.File) != (uint16)(~end).directoryRecords) { // only compare 16 bits here
+    if ((uint16)len(r.File) != (uint16)end.directoryRecords) { // only compare 16 bits here
         // Return the readDirectoryHeader error if we read
         // the wrong number of directory entries.
         return err;
     }
     if (zipinsecurepath.Value() == "0"u8) {
         foreach (var (_, f) in r.File) {
-            if ((~f).Name == ""u8) {
+            if (f.Name == ""u8) {
                 // Zip permits an empty file name field.
                 continue;
             }
             // The zip specification states that names must use forward slashes,
             // so consider any backslashes in the name insecure.
-            if (!filepath.IsLocal((~f).Name) || strings.Contains((~f).Name, @"\"u8)) {
+            if (!filepath.IsLocal(f.Name) || strings.Contains(f.Name, @"\")) {
                 zipinsecurepath.IncNonDefault();
                 return ErrInsecurePath;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // RegisterDecompressor registers or overrides a custom decompressor for a
 // specific method ID. If a decompressor for a given method is not found,
 // [Reader] will default to looking up the decompressor at the package level.
 public static void RegisterDecompressor(this ref Reader r, uint16 method, Func<io.Reader, io.ReadCloser> dcomp) {
-    if (r.decompressors == default!) {
+    if (r.decompressors == nil) {
         r.decompressors = new map<uint16, Func<io.Reader, io.ReadCloser>>();
     }
     r.decompressors[method] = dcomp;
@@ -200,7 +201,7 @@ public static void RegisterDecompressor(this ref Reader r, uint16 method, Func<i
 
 internal static Func<io.Reader, io.ReadCloser> decompressor(this ref Reader r, uint16 method) {
     var dcomp = r.decompressors[method];
-    if (dcomp == default!) {
+    if (dcomp == nil) {
         dcomp = decompressor(method);
     }
     return dcomp;
@@ -217,14 +218,14 @@ public static error Close(this ref ReadCloser rc) {
 // Most callers should instead use [File.Open], which transparently
 // decompresses data and verifies checksums.
 public static (int64 offset, error err) DataOffset(this ref File f) {
-    int64 offset = default!;
-    error err = default!;
+    int64 offset = default;
+    error err = default;
 
     (var bodyOffset, err) = f.findBodyOffset();
-    if (err != default!) {
+    if (err != nil) {
         return (offset, err);
     }
-    return (f.headerOffset + bodyOffset, default!);
+    return (f.headerOffset + bodyOffset, default);
 }
 
 // Open returns a [ReadCloser] that provides access to the [File]'s contents.
@@ -233,10 +234,10 @@ public static (io.ReadCloser, error) Open(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var (bodyOffset, err) = f.findBodyOffset();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    if (strings.HasSuffix(f.Name, "/"u8)) {
+    if (strings.HasSuffix(f.Name, "/")) {
         // The ZIP specification (APPNOTE.TXT) specifies that directories, which
         // are technically zero-byte files, must not have any associated file
         // data. We previously tried failing here if f.CompressedSize64 != 0,
@@ -246,20 +247,20 @@ public static (io.ReadCloser, error) Open(this ж<File> Ꮡf) {
         // 0. We still want to fail when a directory has associated uncompressed
         // data, but we are tolerant of cases where the uncompressed size is
         // zero but compressed size is not.
-        if (f.UncompressedSize64 != 0){
-            return (new dirReaderжReadCloser(Ꮡ(new dirReader(ErrFormat))), default!);
+        if (f.UncompressedSize64 != 0) {
+            return (new dirReaderжReadCloser(Ꮡ(new dirReader(ErrFormat))), default);
         } else {
-            return (new dirReaderжReadCloser(Ꮡ(new dirReader(io.EOF))), default!);
+            return (new dirReaderжReadCloser(Ꮡ(new dirReader(io.EOF))), default);
         }
     }
     var size = (int64)f.CompressedSize64;
     var r = io.NewSectionReader(f.zipr, f.headerOffset + bodyOffset, size);
     var dcomp = f.zip.decompressor(f.Method);
-    if (dcomp == default!) {
-        return (default!, ErrAlgorithm);
+    if (dcomp == nil) {
+        return (default, ErrAlgorithm);
     }
     io.ReadCloser rc = dcomp(new io.SectionReaderжReader(r));
-    io.Reader desr = default!;
+    io.Reader desr = default;
     if (Ꮡf.of(File.ᏑFileHeader).hasDataDescriptor()) {
         desr = new io.SectionReaderжReader(io.NewSectionReader(f.zipr, f.headerOffset + bodyOffset + size, dataDescriptorLen));
     }
@@ -269,18 +270,18 @@ public static (io.ReadCloser, error) Open(this ж<File> Ꮡf) {
         f: Ꮡf,
         desr: desr
     )));
-    return (rc, default!);
+    return (rc, default);
 }
 
 // OpenRaw returns a [Reader] that provides access to the [File]'s contents without
 // decompression.
 public static (io.Reader, error) OpenRaw(this ref File f) {
     var (bodyOffset, err) = f.findBodyOffset();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var r = io.NewSectionReader(f.zipr, f.headerOffset + bodyOffset, (int64)f.CompressedSize64);
-    return (new io.SectionReaderжReader(r), default!);
+    return (new io.SectionReaderжReader(r), default);
 }
 
 partial struct dirReader {
@@ -292,7 +293,7 @@ internal static (nint, error) Read(this ref dirReader r, slice<byte> _) {
 }
 
 internal static error Close(this ref dirReader r) {
-    return default!;
+    return default;
 }
 
 partial struct checksumReader {
@@ -301,43 +302,42 @@ partial struct checksumReader {
     internal uint64 nread; // number of bytes read so far
     internal ж<File> f;
     internal io.Reader desr; // if non-nil, where to read the data descriptor
-    internal error err;     // sticky error
+    internal error err;      // sticky error
 }
 
 internal static (fs.FileInfo, error) Stat(this ref checksumReader r) {
-    return (new headerFileInfo(r.f.of(File.ᏑFileHeader)), default!);
+    return (new headerFileInfo(r.f.ᏑFileHeader), default);
 }
 
 internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    if (r.err != default!) {
+    if (r.err != nil) {
         return (0, r.err);
     }
     (n, err) = r.rc.Read(b);
     r.hash.Write(b.slice(0, n));
     r.nread += (uint64)n;
-    if (r.nread > (~r.f).UncompressedSize64) {
+    if (r.nread > r.f.UncompressedSize64) {
         return (0, ErrFormat);
     }
-    if (err == default!) {
+    if (err == nil) {
         return (n, err);
     }
     if (AreEqual(err, io.EOF)) {
-        if (r.nread != (~r.f).UncompressedSize64) {
+        if (r.nread != r.f.UncompressedSize64) {
             return (0, io.ErrUnexpectedEOF);
         }
-        if (r.desr != default!){
+        if (r.desr != nil) {
             {
-                var err1 = readDataDescriptor(r.desr, ref (r.f).DerefOrNull()); if (err1 != default!){
-                    if (AreEqual(err1, io.EOF)){
+                var err1 = readDataDescriptor(r.desr, ref (r.f).DerefOrNull()); if (err1 != nil) {
+                    if (AreEqual(err1, io.EOF)) {
                         err = io.ErrUnexpectedEOF;
                     } else {
                         err = err1;
                     }
-                } else 
-                if (r.hash.Sum32() != (~r.f).CRC32) {
+                } else if (r.hash.Sum32() != r.f.CRC32) {
                     err = ErrChecksum;
                 }
             }
@@ -345,7 +345,7 @@ internal static (nint n, error err) Read(this ref checksumReader r, slice<byte> 
             // If there's not a data descriptor, we still compare
             // the CRC32 of what we've read against the file header
             // or TOC's CRC32, if it seems like it was set.
-            if ((~r.f).CRC32 != 0 && r.hash.Sum32() != (~r.f).CRC32) {
+            if (r.f.CRC32 != 0 && r.hash.Sum32() != r.f.CRC32) {
                 err = ErrChecksum;
             }
         }
@@ -363,7 +363,7 @@ internal static error Close(this ref checksumReader r) {
 internal static (int64, error) findBodyOffset(this ref File f) {
     array<byte> buf = new(30); /* fileHeaderLen */
     {
-        var (_, err) = f.zipr.ReadAt(buf[..], f.headerOffset); if (err != default!) {
+        var (_, err) = f.zipr.ReadAt(buf[..], f.headerOffset); if (err != nil) {
             return (0, err);
         }
     }
@@ -376,7 +376,7 @@ internal static (int64, error) findBodyOffset(this ref File f) {
     b = b[22..]; // skip over most of the header
     nint filenameLen = (nint)b.uint16();
     nint extraLen = (nint)b.uint16();
-    return ((int64)((nint)fileHeaderLen + filenameLen + extraLen), default!);
+    return ((int64)((nint)fileHeaderLen + filenameLen + extraLen), default);
 }
 
 // readDirectoryHeader attempts to read a directory header from r.
@@ -385,7 +385,7 @@ internal static (int64, error) findBodyOffset(this ref File f) {
 internal static error readDirectoryHeader(ref File f, io.Reader r) {
     array<byte> buf = new(46); /* directoryHeaderLen */
     {
-        var (_, err) = io.ReadFull(r, buf[..]); if (err != default!) {
+        var (_, err) = io.ReadFull(r, buf[..]); if (err != nil) {
             return err;
         }
     }
@@ -414,7 +414,7 @@ internal static error readDirectoryHeader(ref File f, io.Reader r) {
     f.headerOffset = (int64)b.uint32();
     var d = new slice<byte>(filenameLen + extraLen + commentLen);
     {
-        var (_, err) = io.ReadFull(r, d); if (err != default!) {
+        var (_, err) = io.ReadFull(r, d); if (err != nil) {
             return err;
         }
     }
@@ -452,7 +452,7 @@ internal static error readDirectoryHeader(ref File f, io.Reader r) {
     // Best effort to find what we need.
     // Other zip authors might not even follow the basic format,
     // and we'll just ignore the Extra content in that case.
-    time.Time modified = default!;
+    time.Time modified = default;
 parseExtras:
     for (var extra = (readBuf)f.Extra; len(extra) >= 4; ) { // need at least tag and size
         var fieldTag = extra.uint16();
@@ -462,8 +462,8 @@ parseExtras:
         }
         var fieldBuf = extra.sub(fieldSize);
 
-        var exprᴛ1 = fieldTag;
-        if (exprᴛ1 == zip64ExtraID) {
+        switch (fieldTag) {
+        case var ᴛ when ᴛ == zip64ExtraID: {
             f.zip64 = true;
 
             // update directory values from the zip64 extra block.
@@ -491,12 +491,13 @@ parseExtras:
                 }
                 f.headerOffset = (int64)fieldBuf.uint64();
             }
+            break;
         }
-        else if (exprᴛ1 == ntfsExtraID) {
+        case var ᴛ when ᴛ == ntfsExtraID: {
             if (len(fieldBuf) < 4) {
                 goto continue_parseExtras;
             }
-            fieldBuf.uint32(); // reserved (ignored)
+            fieldBuf.uint32();           // reserved (ignored)
             while (len(fieldBuf) >= 4) { // need at least tag and size
                 var attrTag = fieldBuf.uint16();
                 nint attrSize = (nint)fieldBuf.uint16();
@@ -509,28 +510,31 @@ parseExtras:
                 }
 
                 UntypedFloat ticksPerSecond = 1e7; // Windows timestamp resolution
-                var ts = (int64)attrBuf.uint64(); // ModTime since Windows epoch
+                var ts = (int64)attrBuf.uint64();  // ModTime since Windows epoch
                 var secs = ts / (int64)ticksPerSecond;
                 var nsecs = (int64)(1e9D / ticksPerSecond) * (ts % (int64)ticksPerSecond);
                 var epoch = time.Date(1601, time.January, 1, 0, 0, 0, 0, time.ΔUTC);
                 modified = time.Unix(epoch.Unix() + secs, nsecs);
             }
+            break;
         }
-        else if (exprᴛ1 == unixExtraID || exprᴛ1 == infoZipUnixExtraID) {
+        case var ᴛ when ᴛ == unixExtraID || ᴛ == infoZipUnixExtraID: {
             if (len(fieldBuf) < 8) {
                 goto continue_parseExtras;
             }
-            fieldBuf.uint32(); // AcTime (ignored)
+            fieldBuf.uint32();                 // AcTime (ignored)
             var ts = (int64)fieldBuf.uint32(); // ModTime since Unix epoch
             modified = time.Unix(ts, 0);
+            break;
         }
-        else if (exprᴛ1 == extTimeExtraID) {
+        case var ᴛ when ᴛ == extTimeExtraID: {
             if (len(fieldBuf) < 5 || (uint8)(fieldBuf.uint8() & 1) == 0) {
                 goto continue_parseExtras;
             }
             var ts = (int64)fieldBuf.uint32(); // ModTime since Unix epoch
             modified = time.Unix(ts, 0);
-        }
+            break;
+        }}
 continue_parseExtras:;
     }
 break_parseExtras:;
@@ -567,7 +571,7 @@ break_parseExtras:;
         return ErrFormat;
     }
 
-    return default!;
+    return default;
 }
 
 internal static error readDataDescriptor(io.Reader r, ref File f) {
@@ -583,7 +587,7 @@ internal static error readDataDescriptor(io.Reader r, ref File f) {
     // dataDescriptorLen includes the size of the signature but
     // first read just those 4 bytes to see if it exists.
     {
-        var (_, err) = io.ReadFull(r, buf[..4]); if (err != default!) {
+        var (_, err) = io.ReadFull(r, buf[..4]); if (err != nil) {
             return err;
         }
     }
@@ -595,7 +599,7 @@ internal static error readDataDescriptor(io.Reader r, ref File f) {
         off += 4;
     }
     {
-        var (_, err) = io.ReadFull(r, buf.slice(off, 12)); if (err != default!) {
+        var (_, err) = io.ReadFull(r, buf.slice(off, 12)); if (err != nil) {
             return err;
         }
     }
@@ -610,19 +614,20 @@ internal static error readDataDescriptor(io.Reader r, ref File f) {
     // already have the sizes from the central directory so we can
     // just ignore these.
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zipInvalidCommentLengthˢ = "zip: invalid comment length"u8;
+internal static ref readonly @string zipInvalidCommentLengthˢ => ref zipInvalidCommentLengthˢᵇ;
+private static readonly @string zipInvalidCommentLengthˢᵇ = "zip: invalid comment length"u8;
 
 internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirectoryEnd(io.ReaderAt r, int64 size) {
-    int64 baseOffset = default!;
+    int64 baseOffset = default;
 
     // look for directoryEndSignature in the last 1k, then in the last 65k
-    slice<byte> buf = default!;
-    int64 directoryEndOffset = default!;
-    foreach (var (i, vᴛ1) in new int64[]{1024, 65 * 1024}.slice()) {
+    slice<byte> buf = default;
+    int64 directoryEndOffset = default;
+    foreach (var (i, vᴛ1) in slice<int64>([1024, 65 * 1024])) {
         var bLen = vᴛ1;
 
         if (bLen > size) {
@@ -630,8 +635,8 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
         }
         buf = new slice<byte>((nint)bLen);
         {
-            var (_, errΔ1) = r.ReadAt(buf, size - bLen); if (errΔ1 != default! && !AreEqual(errΔ1, io.EOF)) {
-                return (default!, 0, errΔ1);
+            var (_, errΔ1) = r.ReadAt(buf, size - bLen); if (errΔ1 != nil && !AreEqual(errΔ1, io.EOF)) {
+                return (default, 0, errΔ1);
             }
         }
         {
@@ -642,7 +647,7 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
             }
         }
         if (i == 1 || bLen == size) {
-            return (default!, 0, ErrFormat);
+            return (default, 0, ErrFormat);
         }
     }
 
@@ -657,35 +662,35 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
         directoryOffset: (uint64)b.uint32(),
         commentLen: b.uint16()
     ));
-    nint l = (nint)(~d).commentLen;
+    nint l = (nint)d.commentLen;
     if (l > len(b)) {
-        return (default!, 0, errors.New(zipInvalidCommentLengthˢ));
+        return (default, 0, errors.New(zipInvalidCommentLengthˢ));
     }
-    d.Value.comment = (@string)(slice<byte>)b.slice(0, l);
+    d.comment = (@string)(slice<byte>)b.slice(0, l);
 
     // These values mean that the file can be a zip64 file
-    if ((~d).directoryRecords == 0xffff || (~d).directorySize == 0xffff || (~d).directoryOffset == 0xffffffffU) {
+    if (d.directoryRecords == 0xffff || d.directorySize == 0xffff || d.directoryOffset == 0xffffffffU) {
         var (p, errΔ2) = findDirectory64End(r, directoryEndOffset);
-        if (errΔ2 == default! && p >= 0) {
+        if (errΔ2 == nil && p >= 0) {
             directoryEndOffset = p;
             errΔ2 = readDirectory64End(r, p, ref (d).DerefOrNull());
         }
-        if (errΔ2 != default!) {
-            return (default!, 0, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, 0, errΔ2);
         }
     }
 
     var maxInt64 = (uint64)(9223372036854775807UL);
-    if ((~d).directorySize > maxInt64 || (~d).directoryOffset > maxInt64) {
-        return (default!, 0, ErrFormat);
+    if (d.directorySize > maxInt64 || d.directoryOffset > maxInt64) {
+        return (default, 0, ErrFormat);
     }
 
-    baseOffset = directoryEndOffset - (int64)(~d).directorySize - (int64)(~d).directoryOffset;
+    baseOffset = directoryEndOffset - (int64)d.directorySize - (int64)d.directoryOffset;
 
     // Make sure directoryOffset points to somewhere in our file.
     {
-        var o = baseOffset + (int64)(~d).directoryOffset; if (o < 0 || o >= size) {
-            return (default!, 0, ErrFormat);
+        var o = baseOffset + (int64)d.directoryOffset; if (o < 0 || o >= size) {
+            return (default, 0, ErrFormat);
         }
     }
 
@@ -695,15 +700,15 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
     // We've seen files in which the directory end data gives us
     // an incorrect baseOffset.
     if (baseOffset > 0) {
-        var off = (int64)(~d).directoryOffset;
+        var off = (int64)d.directoryOffset;
         var rs = io.NewSectionReader(r, off, size - off);
-        var ᴛ1 = new File(nil);
-        if (readDirectoryHeader(ref ᴛ1, new io.SectionReaderжReader(rs)) == default!) {
+        var ᴛ1 = new File();
+        if (readDirectoryHeader(ref ᴛ1, new io.SectionReaderжReader(rs)) == nil) {
             baseOffset = 0;
         }
     }
 
-    return (d, baseOffset, default!);
+    return (d, baseOffset, default);
 }
 
 // findDirectory64End tries to read the zip64 locator just before the
@@ -712,28 +717,28 @@ internal static (ж<directoryEnd> dir, int64 baseOffset, error err) readDirector
 internal static (int64, error) findDirectory64End(io.ReaderAt r, int64 directoryEndOffset) {
     var locOffset = directoryEndOffset - (int64)directory64LocLen;
     if (locOffset < 0) {
-        return (-1, default!); // no need to look for a header outside the file
+        return (-1, default); // no need to look for a header outside the file
     }
     var buf = new slice<byte>(directory64LocLen);
     {
-        var (_, err) = r.ReadAt(buf, locOffset); if (err != default!) {
+        var (_, err) = r.ReadAt(buf, locOffset); if (err != nil) {
             return (-1, err);
         }
     }
     var b = (readBuf)buf;
     {
         var sig = b.uint32(); if (sig != directory64LocSignature) {
-            return (-1, default!);
+            return (-1, default);
         }
     }
     if (b.uint32() != 0) { // number of the disk with the start of the zip64 end of central directory
-        return (-1, default!); // the file is not a valid zip64-file
+        return (-1, default); // the file is not a valid zip64-file
     }
-    var p = b.uint64(); // relative offset of the zip64 end of central directory record
+    var p = b.uint64();    // relative offset of the zip64 end of central directory record
     if (b.uint32() != 1) { // total number of disks
-        return (-1, default!); // the file is not a valid zip64-file
+        return (-1, default); // the file is not a valid zip64-file
     }
-    return ((int64)p, default!);
+    return ((int64)p, default);
 }
 
 // readDirectory64End reads the zip64 directory end and updates the
@@ -741,7 +746,7 @@ internal static (int64, error) findDirectory64End(io.ReaderAt r, int64 directory
 internal static error /*err*/ readDirectory64End(io.ReaderAt r, int64 offset, ref directoryEnd d) {
     var buf = new slice<byte>(directory64EndLen);
     {
-        var (_, errΔ1) = r.ReadAt(buf, offset); if (errΔ1 != default!) {
+        var (_, errΔ1) = r.ReadAt(buf, offset); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -753,21 +758,21 @@ internal static error /*err*/ readDirectory64End(io.ReaderAt r, int64 offset, re
         }
     }
 
-    b = b[12..]; // skip dir size, version and version needed (uint64 + 2x uint16)
-    d.diskNbr = b.uint32(); // number of this disk
-    d.dirDiskNbr = b.uint32(); // number of the disk with the start of the central directory
+    b = b[12..];                       // skip dir size, version and version needed (uint64 + 2x uint16)
+    d.diskNbr = b.uint32();            // number of this disk
+    d.dirDiskNbr = b.uint32();         // number of the disk with the start of the central directory
     d.dirRecordsThisDisk = b.uint64(); // total number of entries in the central directory on this disk
-    d.directoryRecords = b.uint64(); // total number of entries in the central directory
-    d.directorySize = b.uint64(); // size of the central directory
-    d.directoryOffset = b.uint64(); // offset of start of central directory with respect to the starting disk number
+    d.directoryRecords = b.uint64();   // total number of entries in the central directory
+    d.directorySize = b.uint64();      // size of the central directory
+    d.directoryOffset = b.uint64();    // offset of start of central directory with respect to the starting disk number
 
-    return default!;
+    return default;
 }
 
 internal static nint findSignatureInBlock(slice<byte> b) {
     for (nint i = len(b) - (nint)directoryEndLen; i >= 0; i--) {
         // defined from directoryEndSignature in struct.go
-        if (b[i] == (rune)'P' && b[i + 1] == (rune)'K' && b[i + 2] == 0x05 && b[i + 3] == 0x06) {
+        if (b[i] == 'P' && b[i + 1] == 'K' && b[i + 2] == 0x05 && b[i + 3] == 0x06) {
             // n is length of comment
             nint n = (nint)b[i + (nint)directoryEndLen - 2] | (nint)b[i + (nint)directoryEndLen - 1] << 8;
             if (n + (nint)directoryEndLen + i > len(b)) {
@@ -833,12 +838,12 @@ internal static (fileInfoDirEntry, error) stat(this ж<fileListEntry> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.isDup) {
-        return (default!, errors.New(f.name + ": duplicate entries in zip file"u8));
+        return (default, errors.New(f.name + ": duplicate entries in zip file"u8));
     }
     if (!f.isDir) {
-        return (new headerFileInfo(f.@file.of(File.ᏑFileHeader)), default!);
+        return (new headerFileInfo(f.@file.ᏑFileHeader), default);
     }
-    return (new fileListEntryжfileInfoDirEntry(Ꮡf), default!);
+    return (new fileListEntryжfileInfoDirEntry(Ꮡf), default);
 }
 
 // Only used for directories.
@@ -864,18 +869,18 @@ internal static bool IsDir(this ref fileListEntry f) {
 }
 
 internal static any Sys(this ref fileListEntry f) {
-    return default!;
+    return default;
 }
 
 internal static time.Time ModTime(this ref fileListEntry f) {
     if (f.@file == nil) {
-        return new time.Time(nil);
+        return new time.Time();
     }
-    return (~f.@file).FileHeader.Modified.UTC();
+    return f.@file.FileHeader.Modified.UTC();
 }
 
 internal static (fs.FileInfo, error) Info(this ж<fileListEntry> Ꮡf) {
-    return (new fileListEntryжFileInfo(Ꮡf), default!);
+    return (new fileListEntryжFileInfo(Ꮡf), default);
 }
 
 internal static @string String(this ж<fileListEntry> Ꮡf) {
@@ -884,12 +889,12 @@ internal static @string String(this ж<fileListEntry> Ꮡf) {
 
 // toValidName coerces name to be a valid name for fs.FS.Open.
 internal static @string toValidName(@string name) {
-    name = strings.ReplaceAll(name, @"\"u8, @"/"u8);
+    name = strings.ReplaceAll(name, @"\", @"/");
     @string p = path.Clean(name);
 
-    p = strings.TrimPrefix(p, "/"u8);
+    p = strings.TrimPrefix(p, "/");
 
-    while (strings.HasPrefix(p, "../"u8)) {
+    while (strings.HasPrefix(p, "../")) {
         p = p[(int)(len("../"))..];
     }
 
@@ -897,7 +902,7 @@ internal static @string toValidName(@string name) {
 }
 
 internal static void initFileList(this ж<Reader> Ꮡr) {
-    Ꮡr.of(Reader.ᏑfileListOnce).Do(() => {
+    Ꮡr.ᏑfileListOnce.Do(() => {
         // Preallocate the minimum size of the index.
         // We may also synthesize additional directory entries.
         Ꮡr.Value.fileList = new slice<fileListEntry>(0, len(Ꮡr.Value.File));
@@ -912,8 +917,8 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
         var dirs = new map<@string, bool>();
 
         foreach (var (_, @file) in Ꮡr.Value.File) {
-            var isDir = len((~@file).Name) > 0 && (~@file).Name[len((~@file).Name) - 1] == (rune)'/';
-            @string name = toValidName((~@file).Name);
+            var isDir = len(@file.Name) > 0 && @file.Name[len(@file.Name) - 1] == '/';
+            @string name = toValidName(@file.Name);
             if (name == ""u8) {
                 continue;
             }
@@ -932,9 +937,9 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
             }
 
             @string dir = name;
-            while (ᐧ) {
+            for (;;) {
                 {
-                    nint idxΔ3 = strings.LastIndex(dir, "/"u8); if (idxΔ3 < 0){
+                    nint idxΔ3 = strings.LastIndex(dir, "/"); if (idxΔ3 < 0) {
                         break;
                     } else {
                         dir = dir.slice(0, idxΔ3);
@@ -953,7 +958,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
                 isDir: isDir
             );
             Ꮡr.Value.fileList = append(Ꮡr.Value.fileList, entry);
-            if (isDir){
+            if (isDir) {
                 knownDirs[name] = idx;
             } else {
                 files[name] = idx;
@@ -963,7 +968,7 @@ internal static void initFileList(this ж<Reader> Ꮡr) {
             {
                 var (_, ok) = knownDirs[dir, ꟷ]; if (!ok) {
                     {
-                        var (idx, okΔ1) = files[dir, ꟷ]; if (okΔ1){
+                        var (idx, okΔ1) = files[dir, ꟷ]; if (okΔ1) {
                             Ꮡr.Value.fileList[idx].isDup = true;
                         } else {
                             var entry = new fileListEntry(
@@ -1001,34 +1006,34 @@ public static (fs.File, error) Open(this ж<Reader> Ꮡr, @string name) {
     Ꮡr.initFileList();
 
     if (!fs.ValidPath(name)) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrInvalid))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrInvalid))));
     }
     var e = r.openLookup(name);
     if (e == nil) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open"u8, Path: name, Err: fs.ErrNotExist))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
     }
-    if ((~e).isDir) {
-        return (new openDirжFile(Ꮡ(new openDir(e, r.openReadDir(name), 0))), default!);
+    if (e.isDir) {
+        return (new openDirжFile(Ꮡ(new openDir(e, r.openReadDir(name), 0))), default);
     }
-    var (rc, err) = (~e).@file.Open();
-    if (err != default!) {
-        return (default!, err);
+    var (rc, err) = e.@file.Open();
+    if (err != nil) {
+        return (default, err);
     }
-    return (rc._<fs.File>(), default!);
+    return (rc._<fs.File>(), default);
 }
 
 internal static (@string dir, @string elem, bool isDir) split(@string name) {
-    bool isDir = default!;
+    bool isDir = default;
 
-    (name, isDir) = strings.CutSuffix(name, "/"u8);
-    nint i = strings.LastIndexByte(name, (rune)'/');
+    (name, isDir) = strings.CutSuffix(name, "/");
+    nint i = strings.LastIndexByte(name, (byte)'/');
     if (i < 0) {
         return (".", name, isDir);
     }
     return (name.slice(0, i), name.slice(i + 1), isDir);
 }
 
-internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./"u8, isDir: true));
+internal static ж<fileListEntry> dotFile = Ꮡ(new fileListEntry(name: "./", isDir: true));
 
 internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) {
     if (name == "."u8) {
@@ -1046,11 +1051,11 @@ internal static ж<fileListEntry> openLookup(this ref Reader r, @string name) {
     });
     if (i < len(files)) {
         @string fname = files[i].name;
-        if (fname == name || len(fname) == len(name) + 1 && fname[len(name)] == (rune)'/' && fname.slice(0, len(name)) == name) {
+        if (fname == name || len(fname) == len(name) + 1 && fname[len(name)] == '/' && fname.slice(0, len(name)) == name) {
             return Ꮡ(files, i);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static slice<fileListEntry> openReadDir(this ref Reader r, @string dir) {
@@ -1081,7 +1086,7 @@ partial struct openDir {
 }
 
 internal static error Close(this ref openDir d) {
-    return default!;
+    return default;
 }
 
 internal static (fs.FileInfo, error) Stat(this ref openDir d) {
@@ -1089,10 +1094,11 @@ internal static (fs.FileInfo, error) Stat(this ref openDir d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string isADirectoryˢ = "is a directory"u8;
+internal static ref readonly @string isADirectoryˢ => ref isADirectoryˢᵇ;
+private static readonly @string isADirectoryˢᵇ = "is a directory"u8;
 
 internal static (nint, error) Read(this ref openDir d, slice<byte> _) {
-    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read"u8, Path: (~d.e).name, Err: errors.New(isADirectoryˢ)))));
+    return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.e.name, Err: errors.New(isADirectoryˢ)))));
 }
 
 internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) {
@@ -1102,27 +1108,26 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
     }
     if (n == 0) {
         if (count <= 0) {
-            return (default!, default!);
+            return (default, default);
         }
-        return (default!, io.EOF);
+        return (default, io.EOF);
     }
     var list = new slice<fs.DirEntry>(n);
     foreach (var i in range(list)) {
         var (s, err) = Ꮡ(d.files, d.offset + i).stat();
-        if (err != default!){
-            return (default!, err);
-        } else 
-        if (((fs.FileInfo)(s)).Name() == "."u8 || !fs.ValidPath(((fs.FileInfo)(s)).Name())) {
-            return (default!, new fs.PathErrorжerror(Ꮡ(new fs.PathError(
-                Op: "readdir"u8,
-                Path: (~d.e).name,
+        if (err != nil) {
+            return (default, err);
+        } else if (((fs.FileInfo)(s)).Name() == "."u8 || !fs.ValidPath(((fs.FileInfo)(s)).Name())) {
+            return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(
+                Op: "readdir",
+                Path: d.e.name,
                 Err: fmt.Errorf("invalid file name: %v"u8, d.files[d.offset + i].name)
             ))));
         }
         list[i] = s;
     }
     d.offset += n;
-    return (list, default!);
+    return (list, default);
 }
 
 } // end zip_package

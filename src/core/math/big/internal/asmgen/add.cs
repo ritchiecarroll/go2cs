@@ -6,8 +6,10 @@ namespace go.math.big.@internal;
 partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zLenˢ = "z_len"u8;
-internal static readonly @string clearSavedCarryˢ = "clear saved carry"u8;
+internal static ref readonly @string zLenˢ => ref zLenˢᵇ;
+private static readonly @string zLenˢᵇ = "z_len"u8;
+internal static ref readonly @string clearSavedCarryˢ => ref clearSavedCarryˢᵇ;
+private static readonly @string clearSavedCarryˢᵇ = "clear saved carry"u8;
 
 // addOrSubVV generates addVV or subVV,
 // which do z, c = x ± y.
@@ -26,10 +28,10 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
 
     var n = f.Arg(zLenˢ);
     var p = f.Pipe();
-    p.SetHint("y"u8, HintMemOK); // allow y to be used from memory on x86
+    p.SetHint("y", HintMemOK); // allow y to be used from memory on x86
     p.Start(n, 1, 4);
     ref var c = ref heap(new ΔReg(), out var Ꮡc);
-    if (!(~a.Arch).CarrySafeLoop){
+    if (!a.Arch.CarrySafeLoop) {
         // Carry smashed by loop tests; allocate and save in register
         // around unrolled blocks.
         c = Ꮡa.Reg();
@@ -60,13 +62,13 @@ internal static void addOrSubVV(ж<Asm> Ꮡa, @string name) {
     p.Done();
 
     // Copy carry to output.
-    if (c.Valid()){
+    if (c.Valid()) {
         Ꮡa.ConvertCarry(which, c);
     } else {
         c = Ꮡa.RegHint(HintCarry);
         Ꮡa.SaveConvertCarry(which, c);
     }
-    f.StoreArg(c, "c"u8);
+    f.StoreArg(c, "c");
     Ꮡa.Free(c);
     Ꮡa.Ret();
 }

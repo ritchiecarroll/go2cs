@@ -12,11 +12,13 @@ using static go.@internal.coverage.slicereader_package;
 partial class slicereader_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string foobarˢ = "foobar"u8;
-internal static readonly @string bazbasherˢ = "bazbasher"u8;
+internal static ref readonly @string foobarˢ => ref foobarˢᵇ;
+private static readonly @string foobarˢᵇ = "foobar"u8;
+internal static ref readonly @string bazbasherˢ => ref bazbasherˢᵇ;
+private static readonly @string bazbasherˢᵇ = "bazbasher"u8;
 
-public static void TestSliceReader(ж<testing.T> Ꮡt) {
-    var b = new byte[]{}.slice();
+public static void TestSliceReader(ж<testing.T> t) {
+    var b = slice<byte>([]);
 
     var bt = new slice<byte>(4);
     var e32 = (uint32)1030507;
@@ -48,48 +50,48 @@ public static void TestSliceReader(ж<testing.T> Ꮡt) {
         var slr = NewReader(b, i == 0);
         var g32 = slr.ReadUint32();
         if (g32 != e32) {
-            Ꮡt.Fatalf("slr.ReadUint32() got %d want %d"u8, g32, e32);
+            t.Fatalf("slr.ReadUint32() got %d want %d", g32, e32);
         }
         var g64 = slr.ReadUint64();
         if (g64 != e64) {
-            Ꮡt.Fatalf("slr.ReadUint64() got %d want %d"u8, g64, e64);
+            t.Fatalf("slr.ReadUint64() got %d want %d", g64, e64);
         }
         g32 = (uint32)slr.ReadULEB128();
         if (g32 != e32) {
-            Ꮡt.Fatalf("slr.ReadULEB128() got %d want %d"u8, g32, e32);
+            t.Fatalf("slr.ReadULEB128() got %d want %d", g32, e32);
         }
         g64 = slr.ReadULEB128();
         if (g64 != e64) {
-            Ꮡt.Fatalf("slr.ReadULEB128() got %d want %d"u8, g64, e64);
+            t.Fatalf("slr.ReadULEB128() got %d want %d", g64, e64);
         }
         @string gs1 = readStr(slr);
         if (gs1 != s1) {
-            Ꮡt.Fatalf("readStr got %s want %s"u8, gs1, s1);
+            t.Fatalf("readStr got %s want %s", gs1, s1);
         }
         @string gs2 = readStr(slr);
         if (gs2 != s2) {
-            Ꮡt.Fatalf("readStr got %s want %s"u8, gs2, s2);
+            t.Fatalf("readStr got %s want %s", gs2, s2);
         }
         {
-            var (_, err) = slr.Seek(4, io.SeekStart); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var (_, err) = slr.Seek(4, io.SeekStart); if (err != nil) {
+                t.Fatal(err);
             }
         }
         var off = slr.Offset();
         if (off != 4) {
-            Ꮡt.Fatalf("Offset() returned %d wanted 4"u8, off);
+            t.Fatalf("Offset() returned %d wanted 4", off);
         }
         g64 = slr.ReadUint64();
         if (g64 != e64) {
-            Ꮡt.Fatalf("post-seek slr.ReadUint64() got %d want %d"u8, g64, e64);
+            t.Fatalf("post-seek slr.ReadUint64() got %d want %d", g64, e64);
         }
     }
 }
 
 internal static slice<byte> appendUleb128(slice<byte> b, nuint v) {
-    while (ᐧ) {
+    for (;;) {
         var c = (uint8)(v & 0x7f);
-        v >>= (int)(7);
+        v >>= 7;
         if (v != 0) {
             c |= (uint8)(0x80);
         }

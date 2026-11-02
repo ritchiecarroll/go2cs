@@ -631,7 +631,7 @@ and the struct itself was CS0542:
 partial struct Buffer {
     /*embed*/ public bytes_package.Buffer ΔBuffer;
     /*embed*/ public io_package.ReaderFrom ReaderFrom; // conflicts with and hides bytes.Buffer's ReaderFrom.
-    /*embed*/ public io_package.WriterTo WriterTo;   // conflicts with and hides bytes.Buffer's WriterTo.
+    /*embed*/ public io_package.WriterTo WriterTo;     // conflicts with and hides bytes.Buffer's WriterTo.
 }
 ```
 <!-- the unrenamed declaration, `Buffer`, inside struct `Buffer` is CS0542. -->

@@ -6,7 +6,8 @@ namespace go.math.big.@internal;
 partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string funcMulAddVWWZXWordMAˢ = "func mulAddVWW(z, x []Word, m, a Word) (c Word)"u8;
+internal static ref readonly @string funcMulAddVWWZXWordMAˢ => ref funcMulAddVWWZXWordMAˢᵇ;
+private static readonly @string funcMulAddVWWZXWordMAˢᵇ = "func mulAddVWW(z, x []Word, m, a Word) (c Word)"u8;
 
 // mulAddVWW generates mulAddVWW, which does z, c = x*m + a.
 internal static void mulAddVWW(ж<Asm> Ꮡa) {
@@ -18,12 +19,14 @@ internal static void mulAddVWW(ж<Asm> Ꮡa) {
         addMulVirtualCarry(f, 0);
         return;
     }
-    addMul(f, ""u8, "x"u8, 0);
+    addMul(f, ""u8, "x", 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string funcAddMulVVWWZXYWordMAˢ = "func addMulVVWW(z, x, y []Word, m, a Word) (c Word)"u8;
-internal static readonly @string altcarryˢ = "altcarry"u8;
+internal static ref readonly @string funcAddMulVVWWZXYWordMAˢ => ref funcAddMulVVWWZXYWordMAˢᵇ;
+private static readonly @string funcAddMulVVWWZXYWordMAˢᵇ = "func addMulVVWW(z, x, y []Word, m, a Word) (c Word)"u8;
+internal static ref readonly @string altcarryˢ => ref altcarryˢᵇ;
+private static readonly @string altcarryˢᵇ = "altcarry"u8;
 
 // addMulVVWW generates addMulVVWW which does z, c = x + y*m + a.
 // (A more pedantic name would be addMulAddVVWW.)
@@ -41,7 +44,7 @@ internal static void addMulVVWW(ж<Asm> Ꮡa) {
     // If the architecture optionally has two carries, test and emit both versions.
     if (Ꮡa.JmpEnable(OptionAltCarry, altcarryˢ)) {
         var regs = a.RegsUsed();
-        addMul(f, "x"u8, "y"u8, 1);
+        addMul(f, "x", "y", 1);
         Ꮡa.Label(altcarryˢ);
         a.SetOption(OptionAltCarry, true);
         a.SetRegsUsed(regs);
@@ -51,12 +54,14 @@ internal static void addMulVVWW(ж<Asm> Ꮡa) {
     }
 
     // Otherwise emit the one-carry form.
-    addMul(f, "x"u8, "y"u8, 1);
+    addMul(f, "x", "y", 1);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string multiplyˢ = "multiply"u8;
-internal static readonly @string addˢ = "add"u8;
+internal static ref readonly @string multiplyˢ => ref multiplyˢᵇ;
+private static readonly @string multiplyˢᵇ = "multiply"u8;
+internal static ref readonly @string addˢ => ref addˢᵇ;
+private static readonly @string addˢᵇ = "add"u8;
 
 // Computing z = addsrc + m*mulsrc + a, we need:
 //
@@ -194,13 +199,11 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
 
     var a = f.Asm;
     Hint mh = HintNone;
-    if ((~a).Arch == Arch386 && addsrc != ""u8) {
+    if (a.Arch == Arch386 && addsrc != ""u8) {
         mh = HintMemOK; // too few registers otherwise
     }
-    ref var m = ref heap<ΔReg>(out var Ꮡm);
-    m = f.ArgHint("m"u8, mh);
-    ref var c = ref heap<ΔReg>(out var Ꮡc);
-    c = f.Arg("a"u8);
+    ref var m = ref heap<ΔReg>(f.ArgHint("m", mh), out var Ꮡm);
+    ref var c = ref heap<ΔReg>(f.Arg("a"), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     var p = Ꮡf.Pipe();
@@ -208,17 +211,20 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
         p.SetHint(addsrc, HintMemOK);
     }
     p.SetHint(mulsrc, HintMulSrc);
-    var unroll = new nint[]{1, 4}.slice();
-    var exprᴛ1 = (~a).Arch;
-    if (exprᴛ1 == Arch386) {
-        unroll = new nint[]{1}.slice(); // too few registers
+    var unroll = slice<nint>([1, 4]);
+    switch (a.Arch) {
+    case var ᴛ when ᴛ == Arch386: {
+        unroll = slice<nint>([1]); // too few registers
+        break;
     }
-    else if (exprᴛ1 == ArchARM) {
+    case var ᴛ when ᴛ == ArchARM: {
         p.SetMaxColumns(2); // too few registers (but more than 386)
+        break;
     }
-    else if (exprᴛ1 == ArchARM64) {
-        unroll = new nint[]{1, 8}.slice(); // 5% speedup on c4as16
-    }
+    case var ᴛ when ᴛ == ArchARM64: {
+        unroll = slice<nint>([1, 8]); // 5% speedup on c4as16
+        break;
+    }}
 
     // See the large comment above for an explanation of the code being generated.
     // This is optimization strategy 1.
@@ -255,27 +261,26 @@ internal static void addMul(ж<ΔFunc> Ꮡf, @string addsrc, @string mulsrc, nin
         pʗ1.StoreN(@out);
     });
 
-    f.StoreArg(c, "c"u8);
+    f.StoreArg(c, "c");
     a.Ret();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string altˢ = "alt"u8;
-internal static readonly @string multiplyAndAddˢ = "multiply and add"u8;
+internal static ref readonly @string altˢ => ref altˢᵇ;
+private static readonly @string altˢᵇ = "alt"u8;
+internal static ref readonly @string multiplyAndAddˢ => ref multiplyAndAddˢᵇ;
+private static readonly @string multiplyAndAddˢᵇ = "multiply and add"u8;
 
 internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    ref var m = ref heap<ΔReg>(out var Ꮡm);
-    m = f.ArgHint("m"u8, HintMulSrc);
-    ref var c = ref heap<ΔReg>(out var Ꮡc);
-    c = f.Arg("a"u8);
+    ref var m = ref heap<ΔReg>(f.ArgHint("m", HintMulSrc), out var Ꮡm);
+    ref var c = ref heap<ΔReg>(f.Arg("a"), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     // On amd64, we need a non-immediate for the AtUnrollEnd adds.
-    ref var r0 = ref heap<ΔReg>(out var Ꮡr0);
-    r0 = a.ZR();
+    ref var r0 = ref heap<ΔReg>(a.ZR(), out var Ꮡr0);
     if (!r0.Valid()) {
         r0 = a.Reg();
         a.Mov(a.Imm(0), r0);
@@ -283,17 +288,16 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
 
     var p = Ꮡf.Pipe();
     p.SetLabel(altˢ);
-    p.SetHint("x"u8, HintMemOK);
-    p.SetHint("y"u8, HintMemOK);
-    if ((~a).Arch == ArchAMD64) {
+    p.SetHint("x", HintMemOK);
+    p.SetHint("y", HintMemOK);
+    if (a.Arch == ArchAMD64) {
         p.SetMaxColumns(2);
     }
 
     // See the large comment above for an explanation of the code being generated.
     // This is optimization strategy (2).
     ref var hi = ref heap(new ΔReg(), out var Ꮡhi);
-    ref var prev = ref heap<ΔReg>(out var Ꮡprev);
-    prev = c;
+    ref var prev = ref heap<ΔReg>(c, out var Ꮡprev);
     p.Start(n, 1, 8);
     var aʗ1 = a;
     p.AtUnrollStart(() => {
@@ -329,21 +333,20 @@ internal static void addMulAlt(ж<ΔFunc> Ꮡf) {
         pʗ1.StoreN(@out);
     });
 
-    f.StoreArg(c, "c"u8);
+    f.StoreArg(c, "c");
     a.Ret();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string syntheticCarryOneColumnˢ = "synthetic carry, one column at a time"u8;
+internal static ref readonly @string syntheticCarryOneColumnˢ => ref syntheticCarryOneColumnˢᵇ;
+private static readonly @string syntheticCarryOneColumnˢᵇ = "synthetic carry, one column at a time"u8;
 
 internal static void addMulVirtualCarry(ж<ΔFunc> Ꮡf, nint mulIndex) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
-    ref var m = ref heap<ΔReg>(out var Ꮡm);
-    m = f.Arg("m"u8);
-    ref var c = ref heap<ΔReg>(out var Ꮡc);
-    c = f.Arg("a"u8);
+    ref var m = ref heap<ΔReg>(f.Arg("m"), out var Ꮡm);
+    ref var c = ref heap<ΔReg>(f.Arg("a"), out var Ꮡc);
     var n = f.Arg(zLenˢ);
 
     // See the large comment above for an explanation of the code being generated.
@@ -369,7 +372,7 @@ internal static void addMulVirtualCarry(ж<ΔFunc> Ꮡf, nint mulIndex) {
         }
         pʗ1.StoreN(@out);
     });
-    f.StoreArg(c, "c"u8);
+    f.StoreArg(c, "c");
     a.Ret();
 }
 

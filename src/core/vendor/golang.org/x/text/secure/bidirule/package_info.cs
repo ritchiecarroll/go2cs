@@ -12,7 +12,6 @@
 // <ImportedTypeAliases>
 global using bidiꓸClass = go.vendor.golang.org.x.text.unicode.bidi_package.ΔClass;
 global using bidiꓸDirection = go.vendor.golang.org.x.text.unicode.bidi_package.ΔDirection;
-global using bidiꓸRun = go.vendor.golang.org.x.text.unicode.bidi_package.ΔRun;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,7 +47,7 @@ using static go.vendor.golang.org.x.text.secure.bidirule_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,8 +57,8 @@ using static go.vendor.golang.org.x.text.secure.bidirule_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule.go", "bidirule.cs", "AC9cAA8kADeOAQAJAoKCgpSCgpSUrLKCgoKClIKClJSokoKAgqSokoKAgqSokgAJGKKCqJCowoKCgpSCgoKUqMKClIKUtIKClLSk7oKCgriigoKCgpSCgriUyoKCgoKUgKS0tIKCxpSmooKCgoKUgoKClMqCgoKClICktLSCgsaU")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule10.0.0.go", "bidirule10.0.0.cs", "AAgSgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule.go", "bidirule.cs", "AC9cAA8kADeOAQAJAoKCgpSCgpSUrLKCgoKClIKClJSokoKAgqSokoKAgqSokgAJGKKCqJCowoKCgpSCgoKUqMKClIKUtIKClLSk7oKCgriigoKCgpSCgriUyoKCgoKUgKS0tIKCxpSmooKCgoKUgoKClMqCgoKClICktLSCgsaU")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/secure/bidirule/bidirule10.0.0.go", "bidirule10.0.0.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text.secure;

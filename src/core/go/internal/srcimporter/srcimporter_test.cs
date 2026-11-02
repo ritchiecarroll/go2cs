@@ -23,44 +23,46 @@ using static global::go.go.@internal.srcimporter_package;
 
 partial class srcimporter_internal_test_package {
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     flag.Parse();
-    build.Default.GOROOT = testenv.GOROOT(default!);
-    os.Exit(Ꮡm.Run());
+    build.Default.GOROOT = testenv.GOROOT(default);
+    os.Exit(m.Run());
 }
 
 internal static time.Duration maxTime => /* 2 * time.Second */ 2000000000;
 
 internal static ж<global::go.go.@internal.srcimporter_package.Importer> importer = New(build.ᏑDefault, token.NewFileSet(), new map<@string, ж<types.Package>>());
 
-internal static void doImport(ж<testing.T> Ꮡt, @string path, @string srcDir) {
+internal static void doImport(ж<testing.T> t, @string path, @string srcDir) {
     var t0 = time.Now();
     {
-        var (_, err) = importer.ImportFrom(path, srcDir, 0); if (err != default!) {
+        var (_, err) = importer.ImportFrom(path, srcDir, 0); if (err != nil) {
             // don't report an error if there's no buildable Go files
             {
                 var (_, nogo) = err._<ж<build.NoGoError>>(ᐧ); if (!nogo) {
-                    Ꮡt.Errorf("import %q failed (%v)"u8, path, err);
+                    t.Errorf("import %q failed (%v)", path, err);
                 }
             }
             return;
         }
     }
-    Ꮡt.Logf("import %q: %v"u8, path, time.Since(t0));
+    t.Logf("import %q: %v", path, time.Since(t0));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testingTimeUsedUpˢ = (@string)"testing time used up"u8;
-internal static readonly @string testdataˢ = "testdata"u8;
-internal static readonly @string srcˢ = "src"u8;
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
+internal static ref readonly @string srcˢ => ref srcˢᵇ;
+private static readonly @string srcˢᵇ = "src"u8;
 
 // walkDir imports the all the packages with the given path
 // prefix recursively. It returns the number of packages
 // imported and whether importing was aborted because time
 // has passed endTime.
-internal static (nint, bool) walkDir(ж<testing.T> Ꮡt, @string path, time.Time endTime) {
+internal static (nint, bool) walkDir(ж<testing.T> t, @string path, time.Time endTime) {
     if (time.Now().After(endTime)) {
-        Ꮡt.Log(testingTimeUsedUpˢ);
+        t.Log(testingTimeUsedUpˢ);
         return (0, true);
     }
 
@@ -69,28 +71,27 @@ internal static (nint, bool) walkDir(ж<testing.T> Ꮡt, @string path, time.Time
         return (0, false);
     }
 
-    var (list, err) = os.ReadDir(filepath.Join(testenv.GOROOT(new srcimporter_internal_test_package.testing_TжTB(Ꮡt)), srcˢ, path));
-    if (err != default!) {
-        Ꮡt.Fatalf("walkDir %s failed (%v)"u8, path, err);
+    var (list, err) = os.ReadDir(filepath.Join(testenv.GOROOT(new srcimporter_internal_test_package.testing_TжTB(t)), srcˢ, path));
+    if (err != nil) {
+        t.Fatalf("walkDir %s failed (%v)", path, err);
     }
 
     nint nimports = 0;
     var hasGoFiles = false;
     foreach (var (_, f) in list) {
-        if (f.IsDir()){
-            var (n, abort) = walkDir(Ꮡt, filepath.Join(path, f.Name()), endTime);
+        if (f.IsDir()) {
+            var (n, abort) = walkDir(t, filepath.Join(path, f.Name()), endTime);
             nimports += n;
             if (abort) {
                 return (nimports, true);
             }
-        } else 
-        if (strings.HasSuffix(f.Name(), ".go"u8)) {
+        } else if (strings.HasSuffix(f.Name(), ".go")) {
             hasGoFiles = true;
         }
     }
 
     if (hasGoFiles) {
-        doImport(Ꮡt, path, ""u8);
+        doImport(t, path, ""u8);
         nimports++;
     }
 
@@ -100,65 +101,65 @@ internal static (nint, bool) walkDir(ж<testing.T> Ꮡt, @string path, time.Time
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
 
-public static void TestImportStdLib(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestImportStdLib(ж<testing.T> t) {
+    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(t));
 
     if (testing.Short() && testenv.Builder() == ""u8) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     var dt = maxTime;
-    var (nimports, _) = walkDir(Ꮡt, ""u8, time.Now().Add(dt)); // installed packages
-    Ꮡt.Logf("tested %d imports"u8, nimports);
+    var (nimports, _) = walkDir(t, ""u8, time.Now().Add(dt)); // installed packages
+    t.Logf("tested %d imports", nimports);
 }
 
 partial struct importedObjectTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string want;
 }
-internal static slice<importedObjectTestsᴛ1> importedObjectTests = new importedObjectTestsᴛ1[]{
-    new("flag.Bool"u8, "func Bool(name string, value bool, usage string) *bool"u8),
-    new("io.Reader"u8, "type Reader interface{Read(p []byte) (n int, err error)}"u8),
-    new("io.ReadWriter"u8, "type ReadWriter interface{Reader; Writer}"u8), // go/types.gcCompatibilityMode is off => interface not flattened
-    new("math.Pi"u8, "const Pi untyped float"u8),
-    new("math.Sin"u8, "func Sin(x float64) float64"u8),
-    new("math/big.Int"u8, "type Int struct{neg bool; abs nat}"u8),
-    new("golang.org/x/text/unicode/norm.MaxSegmentSize"u8, "const MaxSegmentSize untyped int"u8)
-}.slice();
+internal static slice<importedObjectTestsᴛ1> importedObjectTests = slice<importedObjectTestsᴛ1>([
+    new("flag.Bool", "func Bool(name string, value bool, usage string) *bool"),
+    new("io.Reader", "type Reader interface{Read(p []byte) (n int, err error)}"),
+    new("io.ReadWriter", "type ReadWriter interface{Reader; Writer}"), // go/types.gcCompatibilityMode is off => interface not flattened
+    new("math.Pi", "const Pi untyped float"),
+    new("math.Sin", "func Sin(x float64) float64"),
+    new("math/big.Int", "type Int struct{neg bool; abs nat}"),
+    new("golang.org/x/text/unicode/norm.MaxSegmentSize", "const MaxSegmentSize untyped int")
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object invalidTestDataFormatˢ = (@string)"invalid test data format"u8;
 
-public static void TestImportedTypes(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestImportedTypes(ж<testing.T> t) {
+    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(t));
 
     foreach (var (_, test) in importedObjectTests) {
-        nint i = strings.LastIndex(test.name, "."u8);
+        nint i = strings.LastIndex(test.name, ".");
         if (i < 0) {
-            Ꮡt.Fatal(invalidTestDataFormatˢ);
+            t.Fatal(invalidTestDataFormatˢ);
         }
         @string importPath = test.name.slice(0, i);
         @string objName = test.name.slice(i + 1);
 
-        var (pkg, err) = importer.ImportFrom(importPath, "."u8, 0);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        var (pkg, err) = importer.ImportFrom(importPath, ".", 0);
+        if (err != nil) {
+            t.Error(err);
             continue;
         }
 
         var obj = pkg.Scope().Lookup(objName);
-        if (obj == default!) {
-            Ꮡt.Errorf("%s: object not found"u8, test.name);
+        if (obj == nil) {
+            t.Errorf("%s: object not found", test.name);
             continue;
         }
 
         @string got = types.ObjectString(obj, types.RelativeTo(pkg));
         if (got != test.want) {
-            Ꮡt.Errorf("%s: got %q; want %q"u8, test.name, got, test.want);
+            t.Errorf("%s: got %q; want %q", test.name, got, test.want);
         }
 
         {
             var (named, _) = obj.Type()._<ж<types.Named>>(ᐧ); if (named != nil) {
-                verifyInterfaceMethodRecvs(Ꮡt, named, 0);
+                verifyInterfaceMethodRecvs(t, named, 0);
             }
         }
     }
@@ -166,14 +167,14 @@ public static void TestImportedTypes(ж<testing.T> Ꮡt) {
 
 // verifyInterfaceMethodRecvs verifies that method receiver types
 // are named if the methods belong to a named interface type.
-internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Named> Ꮡnamed, nint level) {
+internal static void verifyInterfaceMethodRecvs(ж<testing.T> t, ж<types.Named> named, nint level) {
     // avoid endless recursion in case of an embedding bug that lead to a cycle
     if (level > 10) {
-        Ꮡt.Errorf("%s: embeds itself"u8, Ꮡnamed.OrTypedNil());
+        t.Errorf("%s: embeds itself", named.OrTypedNil());
         return;
     }
 
-    var (iface, _) = Ꮡnamed.Underlying()._<ж<types.Interface>>(ᐧ);
+    var (iface, _) = named.Underlying()._<ж<types.Interface>>(ᐧ);
     if (iface == nil) {
         return; // not an interface
     }
@@ -183,104 +184,110 @@ internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Nam
         var m = iface.ExplicitMethod(i);
         var recv = m.Signature().Recv();
         if (recv == nil) {
-            Ꮡt.Errorf("%s: missing receiver type"u8, m.OrTypedNil());
+            t.Errorf("%s: missing receiver type", m.OrTypedNil());
             continue;
         }
-        if (!AreEqual(recv.Type(), Ꮡnamed)) {
-            Ꮡt.Errorf("%s: got recv type %s; want %s"u8, m.OrTypedNil(), recv.Type(), Ꮡnamed.OrTypedNil());
+        if (!AreEqual(recv.Type(), named)) {
+            t.Errorf("%s: got recv type %s; want %s", m.OrTypedNil(), recv.Type(), named.OrTypedNil());
         }
     }
 
     // check embedded interfaces (they are named, too)
     for (nint i = 0; i < iface.NumEmbeddeds(); i++) {
         // embedding of interfaces cannot have cycles; recursion will terminate
-        verifyInterfaceMethodRecvs(Ꮡt, iface.Embedded(i), level + 1);
+        verifyInterfaceMethodRecvs(t, iface.Embedded(i), level + 1);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mathˢ = "math"u8;
-internal static readonly @string reimportˢ = "reimport"u8;
+internal static ref readonly @string mathˢ => ref mathˢᵇ;
+private static readonly @string mathˢᵇ = "math"u8;
+internal static ref readonly @string reimportˢ => ref reimportˢᵇ;
+private static readonly @string reimportˢᵇ = "reimport"u8;
 
-public static void TestReimport(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestReimport(ж<testing.T> t) {
+    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(t));
 
     // Reimporting a partially imported (incomplete) package is not supported (see issue #19337).
     // Make sure we recognize the situation and report an error.
 
     var mathPkg = types.NewPackage(mathˢ, mathˢ); // incomplete package
     var importer = New(build.ᏑDefault, token.NewFileSet(), new map<@string, ж<types.Package>>{[mathPkg.Path()] = mathPkg});
-    var (_, err) = importer.ImportFrom(mathˢ, "."u8, 0);
-    if (err == default! || !strings.HasPrefix(err.Error(), reimportˢ)) {
-        Ꮡt.Errorf("got %v; want reimport error"u8, err);
+    var (_, err) = importer.ImportFrom(mathˢ, ".", 0);
+    if (err == nil || !strings.HasPrefix(err.Error(), reimportˢ)) {
+        t.Errorf("got %v; want reimport error", err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goInternalSrcimporterˢ = "go/internal/srcimporter/testdata/issue20855"u8;
-internal static readonly @string funcInitMustHaveABodyˢ = "func init must have a body"u8;
+internal static ref readonly @string goInternalSrcimporterˢ => ref goInternalSrcimporterˢᵇ;
+private static readonly @string goInternalSrcimporterˢᵇ = "go/internal/srcimporter/testdata/issue20855"u8;
+internal static ref readonly @string funcInitMustHaveABodyˢ => ref funcInitMustHaveABodyˢᵇ;
+private static readonly @string funcInitMustHaveABodyˢᵇ = "func init must have a body"u8;
 internal static readonly object gotNoPackageDespiteNoˢ = (@string)"got no package despite no hard errors"u8;
 
-public static void TestIssue20855(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestIssue20855(ж<testing.T> t) {
+    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(t));
 
-    var (pkg, err) = importer.ImportFrom(goInternalSrcimporterˢ, "."u8, 0);
-    if (err == default! || !strings.Contains(err.Error(), funcInitMustHaveABodyˢ)) {
-        Ꮡt.Fatalf("got unexpected or no error: %v"u8, err);
+    var (pkg, err) = importer.ImportFrom(goInternalSrcimporterˢ, ".", 0);
+    if (err == nil || !strings.Contains(err.Error(), funcInitMustHaveABodyˢ)) {
+        t.Fatalf("got unexpected or no error: %v", err);
     }
     if (pkg == nil) {
-        Ꮡt.Error(gotNoPackageDespiteNoˢ);
+        t.Error(gotNoPackageDespiteNoˢ);
     }
 }
 
-internal static void testImportPath(ж<testing.T> Ꮡt, @string pkgPath) {
-    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+internal static void testImportPath(ж<testing.T> t, @string pkgPath) {
+    testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(t));
 
     @string pkgName = path.Base(pkgPath);
 
     var (pkg, err) = importer.Import(pkgPath);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     if (pkg.Name() != pkgName) {
-        Ꮡt.Errorf("got %q; want %q"u8, pkg.Name(), pkgName);
+        t.Errorf("got %q; want %q", pkg.Name(), pkgName);
     }
 
     if (pkg.Path() != pkgPath) {
-        Ꮡt.Errorf("got %q; want %q"u8, pkg.Path(), pkgPath);
+        t.Errorf("got %q; want %q", pkg.Path(), pkgPath);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataIssue23092ˢ = "./testdata/issue23092"u8;
+internal static ref readonly @string testdataIssue23092ˢ => ref testdataIssue23092ˢᵇ;
+private static readonly @string testdataIssue23092ˢᵇ = "./testdata/issue23092"u8;
 
 // TestIssue23092 tests relative imports.
-public static void TestIssue23092(ж<testing.T> Ꮡt) {
-    testImportPath(Ꮡt, testdataIssue23092ˢ);
+public static void TestIssue23092(ж<testing.T> t) {
+    testImportPath(t, testdataIssue23092ˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goInternalSrcimporterˢ2 = "go/internal/srcimporter/testdata/issue24392"u8;
+internal static ref readonly @string goInternalSrcimporterˢ2 => ref goInternalSrcimporterˢ2ᵇ;
+private static readonly @string goInternalSrcimporterˢ2ᵇ = "go/internal/srcimporter/testdata/issue24392"u8;
 
 // TestIssue24392 tests imports against a path containing 'testdata'.
-public static void TestIssue24392(ж<testing.T> Ꮡt) {
-    testImportPath(Ꮡt, goInternalSrcimporterˢ2);
+public static void TestIssue24392(ж<testing.T> t) {
+    testImportPath(t, goInternalSrcimporterˢ2);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cmdCgoInternalTestˢ = "cmd/cgo/internal/test"u8;
+internal static ref readonly @string cmdCgoInternalTestˢ => ref cmdCgoInternalTestˢᵇ;
+private static readonly @string cmdCgoInternalTestˢᵇ = "cmd/cgo/internal/test"u8;
 
-public static void TestCgo(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveCGO(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestCgo(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new srcimporter_internal_test_package.testing_TжTB(t));
+    testenv.MustHaveCGO(new srcimporter_internal_test_package.testing_TжTB(t));
 
-    ref var buildCtx = ref heap<build.Context>(out var ᏑbuildCtx);
-    buildCtx = build.Default;
+    ref var buildCtx = ref heap<build.Context>(build.Default, out var ᏑbuildCtx);
     var importer = New(ᏑbuildCtx, token.NewFileSet(), new map<@string, ж<types.Package>>());
     var (_, err) = importer.ImportFrom(cmdCgoInternalTestˢ, buildCtx.Dir, 0);
-    if (err != default!) {
-        Ꮡt.Fatalf("Import failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Import failed: %v", err);
     }
 }
 

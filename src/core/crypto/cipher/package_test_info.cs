@@ -7,19 +7,6 @@
 global using static global::go.crypto.cipher_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,7 +42,11 @@ using static global::go.crypto.cipher_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -65,17 +56,17 @@ using static global::go.crypto.cipher_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/cipher/benchmark_test.go", "benchmark_test.cs", "AA0cooKUgoKCgoKUgoK4ooKUgoKCgoKUlIKCuIKCgpSCpoKUgsqilIKCgpSCggALFoKCgoKClIKUgtyigpSCgoKCgriigpSCgoKCgg==", "52-54:1;55-57:2;59-61:3;62-64:4;92-102:1;93-95:1.1;96-98:1.2;99-101:1.3")]
-[assembly: go.GoPositionMap("crypto/cipher/cbc_aes_test.go", "cbc_aes_test.cs", "ABsqACpcgqaCgoKCgqaUgpSCgsqCpoKCgoKCppSClIKC")]
-[assembly: go.GoPositionMap("crypto/cipher/cbc_test.go", "cbc_test.cs", "ABkokoKCgpSClIKCpsqClIKUgoKm6IKCgpKUgqaCgoI=", "21-37:1;23-35:1.1;39-51:2")]
-[assembly: go.GoPositionMap("crypto/cipher/cfb_test.go", "cfb_test.cs", "ABssABo6goKCgpSCgpSCgpSCgqaCgqaCgpSCpoKClILKgoKCgqaCgoKCgoKUgoKClIL4hISClIKUgoKmkpSSyoKUgpSCgqaSlJI=", "122-139:1;133-135:1.1;136-138:1.2;142-159:2;153-155:2.1;156-158:2.2")]
-[assembly: go.GoPositionMap("crypto/cipher/common_test.go", "common_test.cs", "AAgS7pTKyg==")]
-[assembly: go.GoPositionMap("crypto/cipher/ctr_aes_test.go", "ctr_aes_test.cs", "AB46pAAnXIKmgoKUgoKCpoKCgoKCgILIgoKCgoKAgsiCyoIACwyygoKClICCtpQABhaysoKClJSClIKUggALGoKCgoKClIKUAAsYsoKClIKigoKClJSmgsqSwpLCgoKCgoKCAAkUgoKClAANDLKUgpQADBqCsoKCgoKmsoKypoKUgoKCggAMFpKCpoKClIKygpSCgpSCpoKUhJKCgpSCgpSCgoLegtyCgoKClA==", "148-171:1;203-236:1;221-234:1.1;223-232:1.1.1;271-298:1;279-296:1.1;281-294:1.1.1;313-352:1", "", "176=extractCounters/1/2/6,extractCounters/2/2/7;296=parseHex/1/10/1,parseHex/2/10/2,parseHex/3/10/3,parseHex/4/10/4,parseHex/5/10/5,parseHex/6/10/6,parseHex/7/10/7,parseHex/8/10/8,parseHex/9/10/9,parseHex/10/10/10")]
-[assembly: go.GoPositionMap("crypto/cipher/ctr_test.go", "ctr_test.cs", "ABQmgKKAooCkgoKCgsqCgriCgoKCgoKUgoKCgoKUgoKCyoKCgoKUgpSCgqbKgpSClIKCpriCgoKS", "62-78:1;64-76:1.1;80-92:2")]
-[assembly: go.GoPositionMap("crypto/cipher/gcm_fips140v1.26_test.go", "gcm_fips140v1.26_test.cs", "ACAqgoKCgoKCgoKUpoKCgpSSgoKmsoKSgoKmoqSigoKCgpSCgoKCgpSmypSCgoKCgoKCgpSCgoKCgoKUgoKCgg==", "34-38:1;39-44:2;45-54:3;47-52:3.1;56-104:4;57-62:4.1;63-71:4.2")]
-[assembly: go.GoPositionMap("crypto/cipher/gcm_test.go", "gcm_test.cs", "ACE03ICigKKAppLmgoKCgoKUpoKCgoKU+gDgAsYFgtaigoKUgoKClIKCpoKC2oKClMiCgsiCgsiCgIKCtoKCgqaCgqaCgoCCpKaCgIKklIKAgqS4gqaCgpSCgoLKgvbcgoKUgpSCgqaCgqaCpoKCyoLmlAAIFoKCgoKCgoKUgoKUgoIADgrGsoKClIKClIKClKiSgoKUgpiEgoKCgpSCgoKClMqSgoCCpIKClICCpICCpIKAgqSCgoKUgoKUgpSUgoKCgoKCgoCCgoKCgoIABxCS9oKUlIKUgpS4tpLIgpLakoCCpAAMDIKCgpKUgpKUgpKUgoKAgqSSAAkKgoKCgoKCgoKUpoKCgpSSgoKmsoKSgoKmoqSigoKCgqaCgoKCgoKCgoKClJSClJSCgpSUgoKUgpSUgpSmooKCgoKmgoKCgsqCgoKCgoKCgqaCgoKCgoKCgpSCgoKCgoKCgoKCgoK4goKCgpQ=", "42-50:1;43-49:1.1;51-59:2;52-58:2.1;596-610:1;642-674:2;705-736:1;715-715:1.1;718-720:1.2;719-719:1.2.1;724-726:1.3;725-725:1.3.1;730-735:1.4;734-734:1.4.1;741-762:1;742-745:1.1;746-749:1.2;750-753:1.3;754-761:1.4;778-782:1;783-788:2;789-798:3;791-796:3.1;800-846:4;801-806:4.1;848-899:5;849-854:5.1;856-863:5.2")]
-[assembly: go.GoPositionMap("crypto/cipher/modes_test.go", "modes_test.cs", "ABQsgu6CpoKCgoCCAAgQgqaCpoKCgoCCpIKAggAIEIKmgoKCgpSAgsyipoKUgoKAgraCgoCCpIKAgraCgoCCyKKCgoKCpg==")]
-[assembly: go.GoPositionMap("crypto/cipher/ofb_test.go", "ofb_test.cs", "AB8+ACdQgoKUgoKCpoKCgoKCgriCgoKCgoK4gsqEhIKUgpSCgqa4gpSClIKCpg==", "111-123:1;126-138:2")]
+[assembly: GoPositionMap("crypto/cipher/benchmark_test.go", "benchmark_test.cs", "AA0cooKUgoKCgoKUgoK4ooKUgoKCgoKUlIKCuIKCgpSCpoKUgsqilIKCgpSCggALFoKCgoKClIKUgtyigpSCgoKCgriigpSCgoKCgg==", "52-54:1;55-57:2;59-61:3;62-64:4;92-102:1;93-95:1.1;96-98:1.2;99-101:1.3")]
+[assembly: GoPositionMap("crypto/cipher/cbc_aes_test.go", "cbc_aes_test.cs", "ABsqACtcgqaCgoKCgqaUgpSCgsqCpoKCgoKCppSClIKC")]
+[assembly: GoPositionMap("crypto/cipher/cbc_test.go", "cbc_test.cs", "ABookoKCgpSClIKCpsqClIKUgoKm+IKCgoKUgqaCgoI=", "21-37:1;23-35:1.1;39-51:2")]
+[assembly: GoPositionMap("crypto/cipher/cfb_test.go", "cfb_test.cs", "ABssABo6goKCgpSCgpSCgpSCgqaCgqaCgpSCpoKClILKgoKCgqaCgoKCgoKUgoKClIIACQiEhIKUgpSCgqaSlJLKgpSClIKCppKUkg==", "122-139:1;133-135:1.1;136-138:1.2;142-159:2;153-155:2.1;156-158:2.2")]
+[assembly: GoPositionMap("crypto/cipher/common_test.go", "common_test.cs", "AAgS7pTKyg==")]
+[assembly: GoPositionMap("crypto/cipher/ctr_aes_test.go", "ctr_aes_test.cs", "AB46pAAnXIKmgoKUgoKCpoKCgoKCgILIgoKCgoKAgsiCyoIACwyygoKClICCtpQABhaysoKClJSClIKUggALGoKCgoKClIKUAAsYsoKClIKigoKClJSmgsqSwpLCgoKCgoKCAAkUgoKClAAWDLKUgpQADBqCsoKCgoKmsoKypoKUgoKCggAMFpKCpoKClIKygpSCgpSCpoKUhJKCgpSCgpSCgoLegtyCgoKClA==", "148-171:1;203-236:1;221-234:1.1;223-232:1.1.1;271-298:1;279-296:1.1;281-294:1.1.1;313-352:1", "", "176=extractCounters/1/2/6,extractCounters/2/2/7;305=parseHex/1/10/1,parseHex/2/10/2,parseHex/3/10/3,parseHex/4/10/4,parseHex/5/10/5,parseHex/6/10/6,parseHex/7/10/7,parseHex/8/10/8,parseHex/9/10/9,parseHex/10/10/10")]
+[assembly: GoPositionMap("crypto/cipher/ctr_test.go", "ctr_test.cs", "ABQmgKKAooCkgoKCgsqCgriCgoKCgoKUgoKCgoKUgoKCyoKCgoKUgpSCgqbKgpSClIKCpriCgoKC", "62-78:1;64-76:1.1;80-92:2")]
+[assembly: GoPositionMap("crypto/cipher/gcm_fips140v1.26_test.go", "gcm_fips140v1.26_test.cs", "ACQqgoKCgoKCgoKUpoKCgpSSgoKmsoKSgoKmoqSigoKCgpSCgoKCgpSmypSCgoKCgoKCgpSCgoKCgoKUgoKCgg==", "34-38:1;39-44:2;45-54:3;47-52:3.1;56-104:4;57-62:4.1;63-71:4.2")]
+[assembly: GoPositionMap("crypto/cipher/gcm_test.go", "gcm_test.cs", "ACE03ICigKKAppIACAaCgoKCgpSmgoKCgpT6AOACxgWC1oKCgpSCgoKUgoKmgoLagoKUyIKCyIKCyIKAgoK2goKCpoKCpoKCgIKkpoKAgqSUgoCCpLiCpoKClIKCgsqC9tyCgpSClIKCpoKCpoKmgoLKguaUAAgWgoKCgoKCgpSCgpSCggARCsaygoKUgoKUgoKUqJKCgpSCmISCgoKClIKCgoKUypKCgIKkgoKUgIKkgIKkgoCCpIKCgpSCgpSClJSCgoKCgoKCgIKCgoKCggAHEJIACQaClJSClIKUuLaSyIKS2pKAgqQAEAyCgoKSlIKSlIKSlIKCgIKkkgAMCoKCgoKCgoKClKaCgoKUkoKCprKCkoKCpqKkooKCgoKmgoKCgoKCgoKCgpSUgpSUgoKUlIKClIKUlIKUpqKCgoKCpoKCgoLKgoKCgoKCgoKmgoKCgoKCgoKUgoKCgoKCgoKCgoKCuIKCgoKU", "42-50:1;43-49:1.1;51-59:2;52-58:2.1;596-610:1;642-674:2;705-736:1;715-715:1.1;718-720:1.2;719-719:1.2.1;724-726:1.3;725-725:1.3.1;730-735:1.4;734-734:1.4.1;741-762:1;742-745:1.1;746-749:1.2;750-753:1.3;754-761:1.4;778-782:1;783-788:2;789-798:3;791-796:3.1;800-846:4;801-806:4.1;848-899:5;849-854:5.1;856-863:5.2")]
+[assembly: GoPositionMap("crypto/cipher/modes_test.go", "modes_test.cs", "ABQsgu6CpoKCgoCCAAgQgqaCpoKCgoCCpIKAggAIEIKmgoKCgpSAgsyipoKUgoKAgraCgoCCpIKAgraCgoCCyKKCgoKCpg==")]
+[assembly: GoPositionMap("crypto/cipher/ofb_test.go", "ofb_test.cs", "AB8+ACdQgoKUgoKCpoKCgoKCgriCgoKCgoK4gsqEhIKUgpSCgqa4gpSClIKCpg==", "111-123:1;126-138:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

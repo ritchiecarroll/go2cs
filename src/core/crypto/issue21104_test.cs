@@ -12,82 +12,87 @@ using global::go.crypto;
 partial class crypto_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string rc4ˢ = "RC4"u8;
+private static ref readonly @string rc4ˢ => ref rc4ˢᵇ;
+private static readonly @string rc4ˢᵇ = "RC4"u8;
 
-public static void TestRC4OutOfBoundsWrite(ж<testing.T> Ꮡt) {
+public static void TestRC4OutOfBoundsWrite(ж<testing.T> t) {
     // This cipherText is encrypted "0123456789"
-    var cipherText = new byte[]{238, 41, 187, 114, 151, 2, 107, 13, 178, 63}.slice();
-    var (cipher, err) = rc4.NewCipher(new byte[]{0}.slice());
-    if (err != default!) {
+    var cipherText = slice<byte>([238, 41, 187, 114, 151, 2, 107, 13, 178, 63]);
+    var (cipher, err) = rc4.NewCipher(slice<byte>([0]));
+    if (err != nil) {
         throw panic(err);
     }
-    test(Ꮡt, rc4ˢ, cipherText, cipher.XORKeyStream);
+    test(t, rc4ˢ, cipherText, cipher.XORKeyStream);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string ctrˢ = "CTR"u8;
+private static ref readonly @string ctrˢ => ref ctrˢᵇ;
+private static readonly @string ctrˢᵇ = "CTR"u8;
 
-public static void TestCTROutOfBoundsWrite(ж<testing.T> Ꮡt) {
-    testBlock(Ꮡt, ctrˢ, cipher.NewCTR);
+public static void TestCTROutOfBoundsWrite(ж<testing.T> t) {
+    testBlock(t, ctrˢ, cipher.NewCTR);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string ofbˢ = "OFB"u8;
+private static ref readonly @string ofbˢ => ref ofbˢᵇ;
+private static readonly @string ofbˢᵇ = "OFB"u8;
 
-public static void TestOFBOutOfBoundsWrite(ж<testing.T> Ꮡt) {
-    testBlock(Ꮡt, ofbˢ, cipher.NewOFB);
+public static void TestOFBOutOfBoundsWrite(ж<testing.T> t) {
+    testBlock(t, ofbˢ, cipher.NewOFB);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cfbEncryptˢ = "CFB Encrypt"u8;
+private static ref readonly @string cfbEncryptˢ => ref cfbEncryptˢᵇ;
+private static readonly @string cfbEncryptˢᵇ = "CFB Encrypt"u8;
 
-public static void TestCFBEncryptOutOfBoundsWrite(ж<testing.T> Ꮡt) {
-    testBlock(Ꮡt, cfbEncryptˢ, cipher.NewCFBEncrypter);
+public static void TestCFBEncryptOutOfBoundsWrite(ж<testing.T> t) {
+    testBlock(t, cfbEncryptˢ, cipher.NewCFBEncrypter);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cfbDecryptˢ = "CFB Decrypt"u8;
+private static ref readonly @string cfbDecryptˢ => ref cfbDecryptˢᵇ;
+private static readonly @string cfbDecryptˢᵇ = "CFB Decrypt"u8;
 
-public static void TestCFBDecryptOutOfBoundsWrite(ж<testing.T> Ꮡt) {
-    testBlock(Ꮡt, cfbDecryptˢ, cipher.NewCFBDecrypter);
+public static void TestCFBDecryptOutOfBoundsWrite(ж<testing.T> t) {
+    testBlock(t, cfbDecryptˢ, cipher.NewCFBDecrypter);
 }
 
-internal static void testBlock(ж<testing.T> Ꮡt, @string name, Func<cipher.Block, slice<byte>, cipher.Stream> newCipher) {
+internal static void testBlock(ж<testing.T> t, @string name, Func<cipher.Block, slice<byte>, cipher.Stream> newCipher) {
     // This cipherText is encrypted "0123456789"
-    var cipherText = new byte[]{86, 216, 121, 231, 219, 191, 26, 12, 176, 117}.slice();
+    var cipherText = slice<byte>([86, 216, 121, 231, 219, 191, 26, 12, 176, 117]);
     array<byte> iv = new(16);
     array<byte> key = new(16);
     var (block, err) = aes.NewCipher(key[..]);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     var stream = newCipher(block, iv[..]);
-    test(Ꮡt, name, cipherText, stream.XORKeyStream);
+    test(t, name, cipherText, stream.XORKeyStream);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abcdefghijˢ = "abcdefghij"u8;
+private static ref readonly @string abcdefghijˢ => ref abcdefghijˢᵇ;
+private static readonly @string abcdefghijˢᵇ = "abcdefghij"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string plainᶜ = "0123456789"u8;
+private static ref readonly @string plainᶜ => ref plainᶜᵇ;
+private static readonly @string plainᶜᵇ = "0123456789"u8;
 
-internal static void test(ж<testing.T> Ꮡt, @string name, slice<byte> cipherText, Action<slice<byte>, slice<byte>> xor) {
+internal static void test(ж<testing.T> t, @string name, slice<byte> cipherText, Action<slice<byte>, slice<byte>> xor) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         @string want = abcdefghijˢ;
         var plainText = slice<byte>(want);
         nint shorterLen = len(cipherText) / 2;
         var plainTextʗ1 = plainText;
         defer(() => {
             var err = recover();
-            if (err == default!) {
-                Ꮡt.Errorf("%v XORKeyStream expected to panic on len(dst) < len(src), but didn't"u8, name);
+            if (err == nil) {
+                t.Errorf("%v XORKeyStream expected to panic on len(dst) < len(src), but didn't", name);
             }
             @string plain = plainᶜ;
             if (plainTextʗ1[shorterLen] == plain[shorterLen]) {
-                Ꮡt.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v"u8, name, want, (@string)plainTextʗ1);
+                t.Errorf("%v XORKeyStream did out of bounds write, want %v, got %v", name, want, (@string)plainTextʗ1);
             }
         }, ref ᒐ);
         xor(plainText.slice(0, shorterLen), cipherText);

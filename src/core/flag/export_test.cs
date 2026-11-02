@@ -20,7 +20,7 @@ internal static void initᴛDefaultUsage() { DefaultUsage = Usage; }
 public static void ResetForTesting(Action usage) {
     CommandLine = NewFlagSet(Δos.Args[0], ContinueOnError);
     CommandLine.SetOutput(Δio.Discard);
-    CommandLine.Value.Usage = commandLineUsage;
+    CommandLine.Usage = commandLineUsage;
     Usage = usage;
 }
 

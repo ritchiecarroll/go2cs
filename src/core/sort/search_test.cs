@@ -27,36 +27,36 @@ partial struct testsᴛ1 /*dyn*/ {
     internal Func<nint, bool> f;
     internal nint i;
 }
-internal static slice<testsᴛ1> tests = new testsᴛ1[]{
-    new("empty"u8, 0, default!, 0),
-    new("1 1"u8, 1, (nint i) => i >= 1, 1),
-    new("1 true"u8, 1, (nint i) => true, 0),
-    new("1 false"u8, 1, (nint i) => false, 1),
-    new("1e9 991"u8, 1000000000, (nint i) => i >= 991, 991),
-    new("1e9 true"u8, 1000000000, (nint i) => true, 0),
-    new("1e9 false"u8, 1000000000, (nint i) => false, 1000000000),
-    new("data -20"u8, len(data), f(data, -20), 0),
-    new("data -10"u8, len(data), f(data, -10), 0),
-    new("data -9"u8, len(data), f(data, -9), 1),
-    new("data -6"u8, len(data), f(data, -6), 1),
-    new("data -5"u8, len(data), f(data, -5), 1),
-    new("data 3"u8, len(data), f(data, 3), 5),
-    new("data 11"u8, len(data), f(data, 11), 8),
-    new("data 99"u8, len(data), f(data, 99), 9),
-    new("data 100"u8, len(data), f(data, 100), 9),
-    new("data 101"u8, len(data), f(data, 101), 12),
-    new("data 10000"u8, len(data), f(data, 10000), 13),
-    new("data 10001"u8, len(data), f(data, 10001), 14),
-    new("descending a"u8, 7, (nint i) => new nint[]{99, 99, 59, 42, 7, 0, -1, -1}.slice()[i] <= 7, 4),
-    new("descending 7"u8, 1000000000, (nint i) => 1000000000 - i <= 7, 1000000000 - 7),
-    new("overflow"u8, 2000000000, (nint i) => false, 2000000000)
-}.slice();
+internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+    new("empty", 0, default, 0),
+    new("1 1", 1, (nint i) => i >= 1, 1),
+    new("1 true", 1, (nint i) => true, 0),
+    new("1 false", 1, (nint i) => false, 1),
+    new("1e9 991", 1000000000, (nint i) => i >= 991, 991),
+    new("1e9 true", 1000000000, (nint i) => true, 0),
+    new("1e9 false", 1000000000, (nint i) => false, 1000000000),
+    new("data -20", len(data), f(data, -20), 0),
+    new("data -10", len(data), f(data, -10), 0),
+    new("data -9", len(data), f(data, -9), 1),
+    new("data -6", len(data), f(data, -6), 1),
+    new("data -5", len(data), f(data, -5), 1),
+    new("data 3", len(data), f(data, 3), 5),
+    new("data 11", len(data), f(data, 11), 8),
+    new("data 99", len(data), f(data, 99), 9),
+    new("data 100", len(data), f(data, 100), 9),
+    new("data 101", len(data), f(data, 101), 12),
+    new("data 10000", len(data), f(data, 10000), 13),
+    new("data 10001", len(data), f(data, 10001), 14),
+    new("descending a", 7, (nint i) => slice<nint>([99, 99, 59, 42, 7, 0, -1, -1])[i] <= 7, 4),
+    new("descending 7", 1000000000, (nint i) => 1000000000 - i <= 7, 1000000000 - 7),
+    new("overflow", 2000000000, (nint i) => false, 2000000000)
+]);
 
-public static void TestSearch(ж<testing.T> Ꮡt) {
+public static void TestSearch(ж<testing.T> t) {
     foreach (var (_, e) in tests) {
         nint i = Search(e.n, e.f);
         if (i != e.i) {
-            Ꮡt.Errorf("%s: expected index %d; got %d"u8, e.name, e.i, i);
+            t.Errorf("%s: expected index %d; got %d", e.name, e.i, i);
         }
     }
 }
@@ -68,73 +68,73 @@ internal partial struct TestFind_tests /*dyn*/ {
     internal bool wantFound;
 }
 
-public static void TestFind(ж<testing.T> Ꮡt) {
-    var str1 = new @string[]{"foo"u8}.slice();
-    var str2 = new @string[]{"ab"u8, "ca"u8}.slice();
-    var str3 = new @string[]{"mo"u8, "qo"u8, "vo"u8}.slice();
-    var str4 = new @string[]{"ab"u8, "ad"u8, "ca"u8, "xy"u8}.slice();
+public static void TestFind(ж<testing.T> t) {
+    var str1 = slice<@string>(["foo"]);
+    var str2 = slice<@string>(["ab", "ca"]);
+    var str3 = slice<@string>(["mo", "qo", "vo"]);
+    var str4 = slice<@string>(["ab", "ad", "ca", "xy"]);
 
     // slice with repeating elements
-    var strRepeats = new @string[]{"ba"u8, "ca"u8, "da"u8, "da"u8, "da"u8, "ka"u8, "ma"u8, "ma"u8, "ta"u8}.slice();
+    var strRepeats = slice<@string>(["ba", "ca", "da", "da", "da", "ka", "ma", "ma", "ta"]);
 
     // slice with all element equal
-    var strSame = new @string[]{"xx"u8, "xx"u8, "xx"u8}.slice();
+    var strSame = slice<@string>(["xx", "xx", "xx"]);
 
-    var tests = new TestFind_tests[]{
-        new(new @string[]{}.slice(), "foo"u8, 0, false),
-        new(new @string[]{}.slice(), ""u8, 0, false),
+    var tests = slice<TestFind_tests>([
+        new(slice<@string>([]), "foo", 0, false),
+        new(slice<@string>([]), "", 0, false),
 
-        new(str1, "foo"u8, 0, true),
-        new(str1, "bar"u8, 0, false),
-        new(str1, "zx"u8, 1, false),
+        new(str1, "foo", 0, true),
+        new(str1, "bar", 0, false),
+        new(str1, "zx", 1, false),
 
-        new(str2, "aa"u8, 0, false),
-        new(str2, "ab"u8, 0, true),
-        new(str2, "ad"u8, 1, false),
-        new(str2, "ca"u8, 1, true),
-        new(str2, "ra"u8, 2, false),
+        new(str2, "aa", 0, false),
+        new(str2, "ab", 0, true),
+        new(str2, "ad", 1, false),
+        new(str2, "ca", 1, true),
+        new(str2, "ra", 2, false),
 
-        new(str3, "bb"u8, 0, false),
-        new(str3, "mo"u8, 0, true),
-        new(str3, "nb"u8, 1, false),
-        new(str3, "qo"u8, 1, true),
-        new(str3, "tr"u8, 2, false),
-        new(str3, "vo"u8, 2, true),
-        new(str3, "xr"u8, 3, false),
+        new(str3, "bb", 0, false),
+        new(str3, "mo", 0, true),
+        new(str3, "nb", 1, false),
+        new(str3, "qo", 1, true),
+        new(str3, "tr", 2, false),
+        new(str3, "vo", 2, true),
+        new(str3, "xr", 3, false),
 
-        new(str4, "aa"u8, 0, false),
-        new(str4, "ab"u8, 0, true),
-        new(str4, "ac"u8, 1, false),
-        new(str4, "ad"u8, 1, true),
-        new(str4, "ax"u8, 2, false),
-        new(str4, "ca"u8, 2, true),
-        new(str4, "cc"u8, 3, false),
-        new(str4, "dd"u8, 3, false),
-        new(str4, "xy"u8, 3, true),
-        new(str4, "zz"u8, 4, false),
+        new(str4, "aa", 0, false),
+        new(str4, "ab", 0, true),
+        new(str4, "ac", 1, false),
+        new(str4, "ad", 1, true),
+        new(str4, "ax", 2, false),
+        new(str4, "ca", 2, true),
+        new(str4, "cc", 3, false),
+        new(str4, "dd", 3, false),
+        new(str4, "xy", 3, true),
+        new(str4, "zz", 4, false),
 
-        new(strRepeats, "da"u8, 2, true),
-        new(strRepeats, "db"u8, 5, false),
-        new(strRepeats, "ma"u8, 6, true),
-        new(strRepeats, "mb"u8, 8, false),
+        new(strRepeats, "da", 2, true),
+        new(strRepeats, "db", 5, false),
+        new(strRepeats, "ma", 6, true),
+        new(strRepeats, "mb", 8, false),
 
-        new(strSame, "xx"u8, 0, true),
-        new(strSame, "ab"u8, 0, false),
-        new(strSame, "zz"u8, 3, false)
-    }.slice();
+        new(strSame, "xx", 0, true),
+        new(strSame, "ab", 0, false),
+        new(strSame, "zz", 3, false)
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestFind_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.target, (ж<testing.T> tΔ1) => {
+        t.Run(tt.target, (ж<testing.T> tΔ1) => {
             var ttʗ2 = ttʗ1;
             var cmp = (nint i) => stringspkg.Compare(ttʗ2.target, ttʗ2.data[i]);
 
             var (pos, found) = Find(len(ttʗ1.data), cmp);
             if (pos != ttʗ1.wantPos || found != ttʗ1.wantFound) {
-                tΔ1.Errorf("Find got (%v, %v), want (%v, %v)"u8, pos, found, ttʗ1.wantPos, ttʗ1.wantFound);
+                tΔ1.Errorf("Find got (%v, %v), want (%v, %v)", pos, found, ttʗ1.wantPos, ttʗ1.wantFound);
             }
         });
     }
@@ -149,7 +149,7 @@ internal static nint log2(nint x) {
     return bits.Len((nuint)(x - 1));
 }
 
-public static void TestSearchEfficiency(ж<testing.T> Ꮡt) {
+public static void TestSearchEfficiency(ж<testing.T> t) {
     nint n = 100;
     nint step = 1;
     for (nint exp = 2; exp < 10; exp++) {
@@ -164,10 +164,10 @@ public static void TestSearchEfficiency(ж<testing.T> Ꮡt) {
                 return iΔ1 >= x;
             });
             if (i != x) {
-                Ꮡt.Errorf("n = %d: expected index %d; got %d"u8, n, x, i);
+                t.Errorf("n = %d: expected index %d; got %d", n, x, i);
             }
             if (count > max) {
-                Ꮡt.Errorf("n = %d, x = %d: expected <= %d calls; got %d"u8, n, x, max, count);
+                t.Errorf("n = %d, x = %d: expected <= %d calls; got %d", n, x, max, count);
             }
         }
         n *= 10;
@@ -178,26 +178,26 @@ public static void TestSearchEfficiency(ж<testing.T> Ꮡt) {
 // Smoke tests for convenience wrappers - not comprehensive.
 internal static slice<float64> fdata = new slice<float64>(5){[0] = -3.14D, [1] = 0D, [2] = 1D, [3] = 2D, [4] = 1000.7D};
 
-internal static slice<@string> sdata = new slice<@string>(4){[0] = "f"u8, [1] = "foo"u8, [2] = "foobar"u8, [3] = "x"u8};
+internal static slice<@string> sdata = new slice<@string>(4){[0] = "f", [1] = "foo", [2] = "foobar", [3] = "x"};
 
 partial struct wrappertestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint result;
     internal nint i;
 }
-internal static slice<wrappertestsᴛ1> wrappertests = new wrappertestsᴛ1[]{
-    new("SearchInts"u8, SearchInts(data, 11), 8),
-    new("SearchFloat64s"u8, SearchFloat64s(fdata, 2.1D), 4),
-    new("SearchStrings"u8, SearchStrings(sdata, ""u8), 0),
-    new("IntSlice.Search"u8, ((sort.IntSlice)data).Search(0), 2),
-    new("Float64Slice.Search"u8, ((sort.Float64Slice)fdata).Search(2.0D), 3),
-    new("StringSlice.Search"u8, ((sort.StringSlice)sdata).Search("x"u8), 3)
-}.slice();
+internal static slice<wrappertestsᴛ1> wrappertests = slice<wrappertestsᴛ1>([
+    new("SearchInts", SearchInts(data, 11), 8),
+    new("SearchFloat64s", SearchFloat64s(fdata, 2.1D), 4),
+    new("SearchStrings", SearchStrings(sdata, ""), 0),
+    new("IntSlice.Search", ((sort.IntSlice)data).Search(0), 2),
+    new("Float64Slice.Search", ((sort.Float64Slice)fdata).Search(2.0D), 3),
+    new("StringSlice.Search", ((sort.StringSlice)sdata).Search("x"), 3)
+]);
 
-public static void TestSearchWrappers(ж<testing.T> Ꮡt) {
+public static void TestSearchWrappers(ж<testing.T> t) {
     foreach (var (_, e) in wrappertests) {
         if (e.result != e.i) {
-            Ꮡt.Errorf("%s: expected index %d; got %d"u8, e.name, e.i, e.result);
+            t.Errorf("%s: expected index %d; got %d", e.name, e.i, e.result);
         }
     }
 }
@@ -208,23 +208,23 @@ internal static void runSearchWrappers() {
     SearchStrings(sdata, ""u8);
     ((sort.IntSlice)data).Search(0);
     ((sort.Float64Slice)fdata).Search(2.0D);
-    ((sort.StringSlice)sdata).Search("x"u8);
+    ((sort.StringSlice)sdata).Search("x");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingMallocCountInˢ = (@string)"skipping malloc count in short mode"u8;
 internal static readonly object skippingGomaxprocs1ˢ = (@string)"skipping; GOMAXPROCS>1"u8;
 
-public static void TestSearchWrappersDontAlloc(ж<testing.T> Ꮡt) {
+public static void TestSearchWrappersDontAlloc(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingMallocCountInˢ);
+        t.Skip(skippingMallocCountInˢ);
     }
     if (Δruntime.GOMAXPROCS(0) > 1) {
-        Ꮡt.Skip(skippingGomaxprocs1ˢ);
+        t.Skip(skippingGomaxprocs1ˢ);
     }
     var allocs = testing.AllocsPerRun(100, runSearchWrappers);
     if (allocs != 0D) {
-        Ꮡt.Errorf("expected no allocs for runSearchWrappers, got %v"u8, allocs);
+        t.Errorf("expected no allocs for runSearchWrappers, got %v", allocs);
     }
 }
 
@@ -239,20 +239,20 @@ public static void BenchmarkSearchWrappers(ж<testing.B> Ꮡb) {
 // Abstract exhaustive test: all sizes up to 100,
 // all possible return values. If there are any small
 // corner cases, this test exercises them.
-public static void TestSearchExhaustive(ж<testing.T> Ꮡt) {
+public static void TestSearchExhaustive(ж<testing.T> t) {
     for (nint size = 0; size <= 100; size++) {
         for (nint targᴛ1 = 0; targᴛ1 <= size; targᴛ1++) {
             var targ = targᴛ1;
             nint i = Search(size, (nint iΔ1) => iΔ1 >= targ);
             if (i != targ) {
-                Ꮡt.Errorf("Search(%d, %d) = %d"u8, size, targ, i);
+                t.Errorf("Search(%d, %d) = %d", size, targ, i);
             }
         }
     }
 }
 
 // Abstract exhaustive test for Find.
-public static void TestFindExhaustive(ж<testing.T> Ꮡt) {
+public static void TestFindExhaustive(ж<testing.T> t) {
     // Test Find for different sequence sizes and search targets.
     // For each size, we have a (unmaterialized) sequence of integers:
     //   2,4...size*2
@@ -260,8 +260,8 @@ public static void TestFindExhaustive(ж<testing.T> Ꮡt) {
     for (nint size = 0; size <= 100; size++) {
         for (nint xᴛ1 = 1; xᴛ1 <= size * 2 + 1; xᴛ1++) {
             var x = xᴛ1;
-            bool wantFound = default!;
-            nint wantPos = default!;
+            bool wantFound = default;
+            nint wantPos = default;
 
             var cmp = (nint i) => {
                 // Encodes the unmaterialized sequence with elem[i] == (i+1)*2
@@ -269,7 +269,7 @@ public static void TestFindExhaustive(ж<testing.T> Ꮡt) {
             };
             var (pos, found) = Find(size, cmp);
 
-            if (x % 2 == 0){
+            if (x % 2 == 0) {
                 wantPos = x / 2 - 1;
                 wantFound = true;
             } else {
@@ -277,7 +277,7 @@ public static void TestFindExhaustive(ж<testing.T> Ꮡt) {
                 wantFound = false;
             }
             if (found != wantFound || pos != wantPos) {
-                Ꮡt.Errorf("Find(%d, %d): got (%v, %v), want (%v, %v)"u8, size, x, pos, found, wantPos, wantFound);
+                t.Errorf("Find(%d, %d): got (%v, %v), want (%v, %v)", size, x, pos, found, wantPos, wantFound);
             }
         }
     }

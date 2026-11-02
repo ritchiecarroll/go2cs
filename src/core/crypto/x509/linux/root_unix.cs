@@ -15,16 +15,18 @@ partial class x509_package {
 
 // certFileEnv is the environment variable which identifies where to locate
 // the SSL certificate file. If set this overrides the system default.
-internal static readonly @string certFileEnv = "SSL_CERT_FILE"u8;
+internal static ref readonly @string certFileEnv => ref certFileEnvᵇ;
+private static readonly @string certFileEnvᵇ = "SSL_CERT_FILE"u8;
 
 // certDirEnv is the environment variable which identifies which directory
 // to check for SSL certificate files. If set this overrides the system default.
 // It is a colon separated list of directories.
 // See https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html.
-internal static readonly @string certDirEnv = "SSL_CERT_DIR"u8;
+internal static ref readonly @string certDirEnv => ref certDirEnvᵇ;
+private static readonly @string certDirEnvᵇ = "SSL_CERT_DIR"u8;
 
-internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> Ꮡopts) {
-    return (default!, default!);
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ref Certificate c, ж<VerifyOptions> opts) {
+    return (default, default);
 }
 
 internal static (ж<CertPool>, error) loadSystemRoots() {
@@ -33,18 +35,18 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
     var files = certFiles;
     {
         @string f = os.Getenv(certFileEnv); if (f != ""u8) {
-            files = new @string[]{f}.slice();
+            files = slice<@string>([f]);
         }
     }
 
-    error firstErr = default!;
+    error firstErr = default;
     foreach (var (_, @file) in files) {
         var (data, err) = os.ReadFile(@file);
-        if (err == default!) {
+        if (err == nil) {
             roots.AppendCertsFromPEM(data);
             break;
         }
-        if (firstErr == default! && !os.IsNotExist(err)) {
+        if (firstErr == nil && !os.IsNotExist(err)) {
             firstErr = err;
         }
     }
@@ -56,39 +58,39 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
             // See:
             //  * https://golang.org/issue/35325
             //  * https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html
-            dirs = strings.Split(d, ":"u8);
+            dirs = strings.Split(d, ":");
         }
     }
 
     foreach (var (_, directory) in dirs) {
         var (fis, err) = readUniqueDirectoryEntries(directory);
-        if (err != default!) {
-            if (firstErr == default! && !os.IsNotExist(err)) {
+        if (err != nil) {
+            if (firstErr == nil && !os.IsNotExist(err)) {
                 firstErr = err;
             }
             continue;
         }
         foreach (var (_, fi) in fis) {
             var (data, errΔ1) = os.ReadFile(directory + "/"u8 + fi.Name());
-            if (errΔ1 == default!) {
+            if (errΔ1 == nil) {
                 roots.AppendCertsFromPEM(data);
             }
         }
     }
 
-    if (roots.len() > 0 || firstErr == default!) {
-        return (roots, default!);
+    if (roots.len() > 0 || firstErr == nil) {
+        return (roots, default);
     }
 
-    return (default!, firstErr);
+    return (default, firstErr);
 }
 
 // readUniqueDirectoryEntries is like os.ReadDir but omits
 // symlinks that point within the directory.
 internal static (slice<fs.DirEntry>, error) readUniqueDirectoryEntries(@string dir) {
     var (files, err) = os.ReadDir(dir);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var uniq = files[..0];
     foreach (var (_, f) in files) {
@@ -96,7 +98,7 @@ internal static (slice<fs.DirEntry>, error) readUniqueDirectoryEntries(@string d
             uniq = append(uniq, f);
         }
     }
-    return (uniq, default!);
+    return (uniq, default);
 }
 
 // isSameDirSymlink reports whether fi in dir is a symlink with a
@@ -106,7 +108,7 @@ internal static bool isSameDirSymlink(fs.DirEntry f, @string dir) {
         return false;
     }
     var (target, err) = os.Readlink(filepath.Join(dir, f.Name()));
-    return err == default! && !strings.Contains(target, "/"u8);
+    return err == nil && !strings.Contains(target, "/");
 }
 
 } // end x509_package

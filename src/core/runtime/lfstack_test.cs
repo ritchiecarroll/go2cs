@@ -26,28 +26,28 @@ partial struct MyNode {
 // checkptr passes on the unsafe shenanigans used.
 internal static ж<MyNode> allocMyNode(nint data) {
     var n = (ж<MyNode>)(uintptr)(runtime_internal_test_package.PersistentAlloc(/* unsafe.Sizeof(MyNode{}) */ (uintptr)24, runtime_internal_test_package.TagAlign));
-    runtime_internal_test_package.LFNodeValidate(n.of(MyNode.ᏑLFNode));
-    n.Value.data = data;
+    runtime_internal_test_package.LFNodeValidate(n.ᏑLFNode);
+    n.data = data;
     return n;
 }
 
-internal static ж<global::go.runtime_internal_test_package.LFNode> fromMyNode(ж<MyNode> Ꮡnode) {
-    return Ꮡnode.Reinterpret<MyNode, global::go.runtime_internal_test_package.LFNode>();
+internal static ж<global::go.runtime_internal_test_package.LFNode> fromMyNode(ж<MyNode> node) {
+    return node.Reinterpret<MyNode, global::go.runtime_internal_test_package.LFNode>();
 }
 
-internal static ж<MyNode> toMyNode(ж<global::go.runtime_internal_test_package.LFNode> Ꮡnode) {
-    return Ꮡnode.Reinterpret<global::go.runtime_internal_test_package.LFNode, MyNode>();
+internal static ж<MyNode> toMyNode(ж<global::go.runtime_internal_test_package.LFNode> node) {
+    return node.Reinterpret<global::go.runtime_internal_test_package.LFNode, MyNode>();
 }
 
 internal static any global;
 
-public static void TestLFStack(ж<testing.T> Ꮡt) {
+public static void TestLFStack(ж<testing.T> t) {
     var stack = @new<uint64>();
     global = stack.OrTypedNil(); // force heap allocation
 
     // Check the stack is initially empty.
     if (runtime_internal_test_package.LFStackPop(stack) != nil) {
-        Ꮡt.Fatalf("stack is not empty"u8);
+        t.Fatalf("stack is not empty");
     }
 
     // Push one element.
@@ -61,31 +61,31 @@ public static void TestLFStack(ж<testing.T> Ꮡt) {
     // Pop one element.
     node = toMyNode(runtime_internal_test_package.LFStackPop(stack));
     if (node == nil) {
-        Ꮡt.Fatalf("stack is empty"u8);
+        t.Fatalf("stack is empty");
     }
-    if ((~node).data != 43) {
-        Ꮡt.Fatalf("no lifo"u8);
+    if (node.data != 43) {
+        t.Fatalf("no lifo");
     }
 
     // Pop another.
     node = toMyNode(runtime_internal_test_package.LFStackPop(stack));
     if (node == nil) {
-        Ꮡt.Fatalf("stack is empty"u8);
+        t.Fatalf("stack is empty");
     }
-    if ((~node).data != 42) {
-        Ꮡt.Fatalf("no lifo"u8);
+    if (node.data != 42) {
+        t.Fatalf("no lifo");
     }
 
     // Check the stack is empty again.
     if (runtime_internal_test_package.LFStackPop(stack) != nil) {
-        Ꮡt.Fatalf("stack is not empty"u8);
+        t.Fatalf("stack is not empty");
     }
     if (stack.Value != 0) {
-        Ꮡt.Fatalf("stack is not empty"u8);
+        t.Fatalf("stack is not empty");
     }
 }
 
-public static partial void TestLFStackStress(ж<testing.T> Ꮡt) {
+public static partial void TestLFStackStress(ж<testing.T> t) {
     const nint K = 100;
     nint P = 4 * GOMAXPROCS(-1);
     nint N = 100000;
@@ -93,8 +93,7 @@ public static partial void TestLFStackStress(ж<testing.T> Ꮡt) {
         N /= 10;
     }
     // Create 2 stacks.
-    ref var stacks = ref heap<array<ж<uint64>>>(out var Ꮡstacks);
-    stacks = new ж<uint64>[]{@new<uint64>(), @new<uint64>()}.array();
+    ref var stacks = ref heap<array<ж<uint64>>>(new ж<uint64>[]{@new<uint64>(), @new<uint64>()}.array(), out var Ꮡstacks);
     // Push K elements randomly onto the stacks.
     nint sum = 0;
     for (nint i = 0; i < K; i++) {
@@ -125,21 +124,21 @@ public static partial void TestLFStackStress(ж<testing.T> Ꮡt) {
     nint sum2 = 0;
     nint cnt = 0;
     for (nint i = 0; i < 2; i++) {
-        while (ᐧ) {
+        for (;;) {
             var node = toMyNode(runtime_internal_test_package.LFStackPop(stacks[i]));
             if (node == nil) {
                 break;
             }
             cnt++;
-            sum2 += node.Value.data;
-            node.Value.Next = 0;
+            sum2 += node.data;
+            node.Next = 0;
         }
     }
     if (cnt != K) {
-        Ꮡt.Fatalf("Wrong number of nodes %d/%d"u8, cnt, (nint)(K));
+        t.Fatalf("Wrong number of nodes %d/%d", cnt, (nint)(K));
     }
     if (sum2 != sum) {
-        Ꮡt.Fatalf("Wrong sum %d/%d"u8, sum2, sum);
+        t.Fatalf("Wrong sum %d/%d", sum2, sum);
     }
 }
 

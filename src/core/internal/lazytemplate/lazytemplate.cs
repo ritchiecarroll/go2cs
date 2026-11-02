@@ -27,7 +27,7 @@ partial struct Template {
 internal static ж<template.Template> tp(this ж<Template> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    Ꮡr.of(Template.Ꮡonce).Do(Ꮡr.build);
+    Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.tmpl;
 }
 
@@ -41,7 +41,7 @@ public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) {
     return Ꮡr.tp().Execute(w, data);
 }
 
-internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"u8), ".test"u8);
+internal static bool inTest = len(os.Args) > 0 && strings.HasSuffix(strings.TrimSuffix(os.Args[0], ".exe"), ".test");
 
 // New creates a new lazy template, delaying the parsing work until it is first
 // needed. If the code is being run as part of tests, the template parsing will

@@ -47,7 +47,11 @@ using static go.@internal.trace.raw_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(TextReader))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,11 +61,11 @@ using static go.@internal.trace.raw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/raw/event.go", "event.cs", "AB9AwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
-[assembly: go.GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABg0koKSgpSokqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
-[assembly: go.GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB46koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgIKklIKCgpS4lKKCgoKClIKUgpSCgqa20oKCgpSCgpSCgpSmgoKCgpSCgqaClIKCgoKmgpSmgoKClIKClA==")]
-[assembly: go.GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgriC")]
-[assembly: go.GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIK4poKClIKCgsqCuIKCgriCgpQ=")]
+[assembly: GoPositionMap("internal/trace/raw/event.go", "event.cs", "ACBAwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
+[assembly: GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABg0koKSgpSokqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
+[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB86koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgIKklIKCgpS4lKKCgoKClIKUgpSCgqa20oKCgpSCgpSCgpSmgoKCgpSCgqaClIKCgoKmgpSmgoKClIKClA==")]
+[assembly: GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgriC")]
+[assembly: GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIK4poKClIKCgsqCuIKCgriCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

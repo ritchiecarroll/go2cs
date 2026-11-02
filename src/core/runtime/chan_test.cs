@@ -18,7 +18,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-public static partial void TestChan(ж<testing.T> Ꮡt) {
+public static partial void TestChan(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
@@ -35,22 +35,22 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 goǃ(() => {
                     _ = ᐸꟷ(cʗ1);
                     recv1 = true;
-                });
+                }, GoStack.Bounded);
                 var recv2 = false;
                 var cʗ2 = c;
                 goǃ(() => {
                     (_, _) = ᐸꟷ(cʗ2, ꟷ);
                     recv2 = true;
-                });
+                }, GoStack.Bounded);
                 time.Sleep(time.Millisecond);
                 if (recv1 || recv2) {
-                    Ꮡt.Fatalf("chan[%d]: receive from empty chan"u8, chanCap);
+                    t.Fatalf("chan[%d]: receive from empty chan", chanCap);
                 }
                 // Ensure that non-blocking receive does not block.
                 var selᴛ1 = c;
                 switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
                 case 0 when selᴛ1.ꟷᐳ(out _): {
-                    Ꮡt.Fatalf("chan[%d]: receive from empty chan"u8, chanCap);
+                    t.Fatalf("chan[%d]: receive from empty chan", chanCap);
                     break;
                 }
                 default: {
@@ -59,7 +59,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 var selᴛ2 = c;
                 switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
                 case 0 when selᴛ2.ꟷᐳ(out _, out _): {
-                    Ꮡt.Fatalf("chan[%d]: receive from empty chan"u8, chanCap);
+                    t.Fatalf("chan[%d]: receive from empty chan", chanCap);
                     break;
                 }
                 default: {
@@ -75,22 +75,21 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 for (nint i = 0; i < chanCap; i++) {
                     c.ᐸꟷ(i);
                 }
-                ref var sent = ref heap<uint32>(out var Ꮡsent);
-                sent = (uint32)0;
+                ref var sent = ref heap<uint32>((uint32)0, out var Ꮡsent);
                 var cʗ3 = c;
                 goǃ(() => {
                     cʗ3.ᐸꟷ(0);
                     atomic.StoreUint32(Ꮡsent, 1);
-                });
+                }, GoStack.Bounded);
                 time.Sleep(time.Millisecond);
                 if (atomic.LoadUint32(Ꮡsent) != 0) {
-                    Ꮡt.Fatalf("chan[%d]: send to full chan"u8, chanCap);
+                    t.Fatalf("chan[%d]: send to full chan", chanCap);
                 }
                 // Ensure that non-blocking send does not block.
                 var selᴛ3 = c.ᐸꟷ(0, ꓸꓸꓸ);
                 switch (trySelect(selᴛ3)) {
                 case 0: {
-                    Ꮡt.Fatalf("chan[%d]: send to full chan"u8, chanCap);
+                    t.Fatalf("chan[%d]: send to full chan", chanCap);
                     break;
                 }
                 default: {
@@ -109,17 +108,17 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 for (nint i = 0; i < chanCap; i++) {
                     nint v = ᐸꟷ(c);
                     if (v != i) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, i);
+                        t.Fatalf("chan[%d]: received %v, expected %v", chanCap, v, i);
                     }
                 }
                 {
                     nint v = ᐸꟷ(c); if (v != 0) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, (nint)0);
+                        t.Fatalf("chan[%d]: received %v, expected %v", chanCap, v, (nint)0);
                     }
                 }
                 {
                     var (v, ok) = ᐸꟷ(c, ꟷ); if (v != 0 || ok) {
-                        Ꮡt.Fatalf("chan[%d]: received %v/%v, expected %v/%v"u8, chanCap, v, ok, (nint)0, false);
+                        t.Fatalf("chan[%d]: received %v/%v, expected %v/%v", chanCap, v, ok, (nint)0, false);
                     }
                 }
             }
@@ -133,11 +132,11 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 goǃ(() => {
                     var (v, ok) = ᐸꟷ(cʗ4, ꟷ);
                     doneʗ1.ᐸꟷ(v == 0 && ok == false);
-                });
+                }, GoStack.Bounded);
                 time.Sleep(time.Millisecond);
                 close(c);
                 if (!ᐸꟷ(done)) {
-                    Ꮡt.Fatalf("chan[%d]: received non zero from closed chan"u8, chanCap);
+                    t.Fatalf("chan[%d]: received non zero from closed chan", chanCap);
                 }
             }
 
@@ -150,11 +149,11 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                     for (nint i = 0; i < 100; i++) {
                         cʗ5.ᐸꟷ(i);
                     }
-                });
+                }, GoStack.Bounded);
                 for (nint i = 0; i < 100; i++) {
                     nint v = ᐸꟷ(c);
                     if (v != i) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, i);
+                        t.Fatalf("chan[%d]: received %v, expected %v", chanCap, v, i);
                     }
                 }
 
@@ -164,14 +163,14 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                     for (nint i = 0; i < 100; i++) {
                         cʗ6.ᐸꟷ(i);
                     }
-                });
+                }, GoStack.Bounded);
                 for (nint i = 0; i < 100; i++) {
                     var (v, ok) = ᐸꟷ(c, ꟷ);
                     if (!ok) {
-                        Ꮡt.Fatalf("chan[%d]: receive failed, expected %v"u8, chanCap, i);
+                        t.Fatalf("chan[%d]: receive failed, expected %v", chanCap, i);
                     }
                     if (v != i) {
-                        Ꮡt.Fatalf("chan[%d]: received %v, expected %v"u8, chanCap, v, i);
+                        t.Fatalf("chan[%d]: received %v, expected %v", chanCap, v, i);
                     }
                 }
 
@@ -185,7 +184,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                         for (nint i = 0; i < L; i++) {
                             cʗ7.ᐸꟷ(i);
                         }
-                    });
+                    }, GoStack.Bounded);
                 }
                 var done = new channel<map<nint, nint>>(0);
                 for (nint p = 0; p < P; p++) {
@@ -198,7 +197,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                             recvΔ1[v] = recvΔ1[v] + 1;
                         }
                         doneʗ2.ᐸꟷ(recvΔ1);
-                    });
+                    }, GoStack.Bounded);
                 }
                 var recv = new map<nint, nint>();
                 for (nint p = 0; p < P; p++) {
@@ -207,11 +206,11 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                     }
                 }
                 if (len(recv) != L) {
-                    Ꮡt.Fatalf("chan[%d]: received %v values, expected %v"u8, chanCap, len(recv), (nint)(L));
+                    t.Fatalf("chan[%d]: received %v values, expected %v", chanCap, len(recv), (nint)(L));
                 }
                 foreach (var (_, v) in recv) {
                     if (v != P) {
-                        Ꮡt.Fatalf("chan[%d]: received %v values, expected %v"u8, chanCap, v, (nint)(P));
+                        t.Fatalf("chan[%d]: received %v values, expected %v", chanCap, v, (nint)(P));
                     }
                 }
             }
@@ -220,13 +219,13 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
                 // Test len/cap.
                 var c = new channel<nint>(chanCap);
                 if (len(c) != 0 || cap(c) != chanCap) {
-                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, (nint)0, chanCap, len(c), cap(c));
+                    t.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v", chanCap, (nint)0, chanCap, len(c), cap(c));
                 }
                 for (nint i = 0; i < chanCap; i++) {
                     c.ᐸꟷ(i);
                 }
                 if (len(c) != chanCap || cap(c) != chanCap) {
-                    Ꮡt.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v"u8, chanCap, chanCap, chanCap, len(c), cap(c));
+                    t.Fatalf("chan[%d]: bad len/cap, expect %v/%v, got %v/%v", chanCap, chanCap, chanCap, len(c), cap(c));
                 }
             }
         }
@@ -238,7 +237,7 @@ public static partial void TestChan(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object chanIsNotReadyˢ = (@string)"chan is not ready"u8;
 
-public static partial void TestNonblockRecvRace(ж<testing.T> Ꮡt) {
+public static partial void TestNonblockRecvRace(ж<testing.T> t) {
     nint n = 10000;
     if (testing.Short()) {
         n = 100;
@@ -254,13 +253,13 @@ public static partial void TestNonblockRecvRace(ж<testing.T> Ꮡt) {
                 break;
             }
             default: {
-                Ꮡt.Error(chanIsNotReadyˢ);
+                t.Error(chanIsNotReadyˢ);
                 break;
             }}
         });
         close(c);
         ᐸꟷ(c);
-        if (Ꮡt.Failed()) {
+        if (t.Failed()) {
             return;
         }
     }
@@ -283,7 +282,7 @@ internal static readonly object noChanIsReadyˢ = (@string)"no chan is ready"u8;
 // From the time the second goroutine is created, at least one of c1 and c2
 // is always ready for receiving, so the select in the second goroutine must
 // always receive from one or the other. It must never execute the default case.
-public static partial void TestNonblockSelectRace(ж<testing.T> Ꮡt) {
+public static partial void TestNonblockSelectRace(ж<testing.T> t) {
     nint n = 100000;
     if (testing.Short()) {
         n = 1000;
@@ -311,7 +310,7 @@ public static partial void TestNonblockSelectRace(ж<testing.T> Ꮡt) {
                 return;
             }}
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
         c2.ᐸꟷ(1);
         var selᴛ7 = c1;
         switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
@@ -322,13 +321,13 @@ public static partial void TestNonblockSelectRace(ж<testing.T> Ꮡt) {
             break;
         }}
         if (!ᐸꟷ(done)) {
-            Ꮡt.Fatal(noChanIsReadyˢ);
+            t.Fatal(noChanIsReadyˢ);
         }
     }
 }
 
 // Same as TestNonblockSelectRace, but close(c2) replaces c2 <- 1.
-public static partial void TestNonblockSelectRace2(ж<testing.T> Ꮡt) {
+public static partial void TestNonblockSelectRace2(ж<testing.T> t) {
     nint n = 100000;
     if (testing.Short()) {
         n = 1000;
@@ -356,7 +355,7 @@ public static partial void TestNonblockSelectRace2(ж<testing.T> Ꮡt) {
                 return;
             }}
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
         close(c2);
         var selᴛ10 = c1;
         switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
@@ -367,18 +366,18 @@ public static partial void TestNonblockSelectRace2(ж<testing.T> Ꮡt) {
             break;
         }}
         if (!ᐸꟷ(done)) {
-            Ꮡt.Fatal(noChanIsReadyˢ);
+            t.Fatal(noChanIsReadyˢ);
         }
     }
 }
 
-public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
+public static partial void TestSelfSelect(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Ensure that send/recv on the same chan in select
         // does not crash nor deadlock.
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
-        foreach (var (_, chanCap) in new nint[]{0, 10}.slice()) {
+        foreach (var (_, chanCap) in slice<nint>([0, 10])) {
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var c = new channel<nint>(chanCap);
@@ -390,7 +389,7 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
                     try {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint i = 0; i < 1000; i++) {
-                            if (p == 0 || i % 2 == 0){
+                            if (p == 0 || i % 2 == 0) {
                                 var selᴛ11 = cʗ1.ᐸꟷ(p, ꓸꓸꓸ);
                                 var selᴛ12 = cʗ1;
                                 switch (select(selᴛ11, ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
@@ -399,7 +398,7 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
                                 }
                                 case 1 when selᴛ12.ꟷᐳ(out var v): {
                                     if (chanCap == 0 && v == p) {
-                                        Ꮡt.Errorf("self receive"u8);
+                                        t.Errorf("self receive");
                                         return;
                                     }
                                     break;
@@ -410,7 +409,7 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
                                 switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), selᴛ14)) {
                                 case 0 when selᴛ13.ꟷᐳ(out var v): {
                                     if (chanCap == 0 && v == p) {
-                                        Ꮡt.Errorf("self receive"u8);
+                                        t.Errorf("self receive");
                                         return;
                                     }
                                     break;
@@ -432,7 +431,7 @@ public static partial void TestSelfSelect(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
+public static partial void TestSelectStress(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(10), ref ᒐ);
@@ -461,20 +460,19 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
                     cʗ1[k].ᐸꟷ(0);
                 }
                 Ꮡwg.Done();
-            });
+            }, GoStack.Bounded);
             var cʗ2 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
                     ᐸꟷ(cʗ2[k]);
                 }
                 Ꮡwg.Done();
-            });
+            }, GoStack.Bounded);
         }
         var cʗ3 = c;
         goǃ(() => {
             ref var n = ref heap(new array<nint>(4), out var Ꮡn);
-            ref var c1 = ref heap<array<channel<nint>>>(out var Ꮡc1);
-            c1 = cʗ3.Clone();
+            ref var c1 = ref heap<array<channel<nint>>>(cʗ3.Clone(), out var Ꮡc1);
             for (nint i = 0; i < 4 * N; i++) {
                 var selᴛ15 = c1[3].ᐸꟷ(0, ꓸꓸꓸ);
                 var selᴛ16 = c1[2].ᐸꟷ(0, ꓸꓸꓸ);
@@ -484,39 +482,38 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
                 case 0: {
                     n[3]++;
                     if (n[3] == N) {
-                        c1[3] = default!;
+                        c1[3] = default;
                     }
                     break;
                 }
                 case 1: {
                     n[2]++;
                     if (n[2] == N) {
-                        c1[2] = default!;
+                        c1[2] = default;
                     }
                     break;
                 }
                 case 2: {
                     n[0]++;
                     if (n[0] == N) {
-                        c1[0] = default!;
+                        c1[0] = default;
                     }
                     break;
                 }
                 case 3: {
                     n[1]++;
                     if (n[1] == N) {
-                        c1[1] = default!;
+                        c1[1] = default;
                     }
                     break;
                 }}
             }
             Ꮡwg.Done();
-        });
+        }, GoStack.Bounded);
         var cʗ4 = c;
         goǃ(() => {
             ref var n = ref heap(new array<nint>(4), out var Ꮡn);
-            ref var c1 = ref heap<array<channel<nint>>>(out var Ꮡc1);
-            c1 = cʗ4.Clone();
+            ref var c1 = ref heap<array<channel<nint>>>(cʗ4.Clone(), out var Ꮡc1);
             for (nint i = 0; i < 4 * N; i++) {
                 var selᴛ19 = c1[0];
                 var selᴛ20 = c1[1];
@@ -526,44 +523,44 @@ public static partial void TestSelectStress(ж<testing.T> Ꮡt) {
                 case 0 when selᴛ19.ꟷᐳ(out _): {
                     n[0]++;
                     if (n[0] == N) {
-                        c1[0] = default!;
+                        c1[0] = default;
                     }
                     break;
                 }
                 case 1 when selᴛ20.ꟷᐳ(out _): {
                     n[1]++;
                     if (n[1] == N) {
-                        c1[1] = default!;
+                        c1[1] = default;
                     }
                     break;
                 }
                 case 2 when selᴛ21.ꟷᐳ(out _): {
                     n[2]++;
                     if (n[2] == N) {
-                        c1[2] = default!;
+                        c1[2] = default;
                     }
                     break;
                 }
                 case 3 when selᴛ22.ꟷᐳ(out _): {
                     n[3]++;
                     if (n[3] == N) {
-                        c1[3] = default!;
+                        c1[3] = default;
                     }
                     break;
                 }}
             }
             Ꮡwg.Done();
-        });
+        }, GoStack.Bounded);
         Ꮡwg.Wait();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
+public static partial void TestSelectFairness(ж<testing.T> t) {
     UntypedInt trials = 10000;
     if (Δruntime.GOOS == "linux"u8 && Δruntime.GOARCH == "ppc64le"u8) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 22047);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 22047);
     }
     var c1 = new channel<byte>(trials + 1);
     var c2 = new channel<byte>(trials + 1);
@@ -587,8 +584,8 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            while (ᐧ) {
-                byte b = default!;
+            for (;;) {
+                byte b = default;
                 var selᴛ23 = c3ʗ1;
                 var selᴛ24 = c4ʗ1;
                 var selᴛ25 = c1ʗ1;
@@ -619,7 +616,7 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    });
+    }, GoStack.Bounded);
     nint cnt1 = 0;
     nint cnt2 = 0;
     for (nint i = 0; i < trials; i++) {
@@ -635,7 +632,7 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
                 break;
             }
             default: {
-                Ꮡt.Fatalf("unexpected value %d on channel"u8, b);
+                t.Fatalf("unexpected value %d on channel", b);
                 break;
             }}
         }
@@ -649,7 +646,7 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
     const float64 variance = /* trials * 0.5 * (1 - 0.5) */ 2500;
     var stddev = Δmath.Sqrt(variance);
     if (Δmath.Abs((float64)(cnt1 - mean)) > 10D * stddev) {
-        Ꮡt.Errorf("unfair select: in %d trials, results were %d, %d"u8, (nint)(trials), cnt1, cnt2);
+        t.Errorf("unfair select: in %d trials, results were %d, %d", (nint)(trials), cnt1, cnt2);
     }
     close(done);
     Ꮡwg.Wait();
@@ -658,8 +655,8 @@ public static partial void TestSelectFairness(ж<testing.T> Ꮡt) {
 internal partial struct TestChanSendInterface_mt /*dyn*/ {
 }
 
-public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
-    var m = Ꮡ(new TestChanSendInterface_mt(nil));
+public static void TestChanSendInterface(ж<testing.T> t) {
+    var m = Ꮡ(new TestChanSendInterface_mt());
     var c = new channel<any>(1);
     c.ᐸꟷ(m.OrTypedNil());
     var selᴛ29 = c.ᐸꟷ(m.OrTypedNil(), ꓸꓸꓸ);
@@ -671,7 +668,7 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
         break;
     }}
     var selᴛ30 = c.ᐸꟷ(m.OrTypedNil(), ꓸꓸꓸ);
-    var selᴛ31 = c.ᐸꟷ(Ꮡ(new TestChanSendInterface_mt(nil)), ꓸꓸꓸ);
+    var selᴛ31 = c.ᐸꟷ(Ꮡ(new TestChanSendInterface_mt()), ꓸꓸꓸ);
     switch (trySelect(selᴛ30, selᴛ31)) {
     case 0: {
         break;
@@ -684,9 +681,9 @@ public static void TestChanSendInterface(ж<testing.T> Ꮡt) {
     }}
 }
 
-public static partial void TestPseudoRandomSend(ж<testing.T> Ꮡt) {
+public static partial void TestPseudoRandomSend(ж<testing.T> t) {
     nint n = 100;
-    foreach (var (_, chanCap) in new nint[]{0, n}.slice()) {
+    foreach (var (_, chanCap) in slice<nint>([0, n])) {
         var c = new channel<nint>(chanCap);
         var l = new slice<nint>(n);
         ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
@@ -719,16 +716,16 @@ public static partial void TestPseudoRandomSend(ж<testing.T> Ꮡt) {
             n1 += i;
         }
         if (n0 <= n / 10 || n1 <= n / 10) {
-            Ꮡt.Errorf("Want pseudorandom, got %d zeros and %d ones (chan cap %d)"u8, n0, n1, chanCap);
+            t.Errorf("Want pseudorandom, got %d zeros and %d ones (chan cap %d)", n0, n1, chanCap);
         }
     }
 }
 
-public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
+public static partial void TestMultiConsumer(ж<testing.T> t) {
     UntypedInt nwork = 23;
     const nint niter = 271828;
 
-    var pn = new nint[]{2, 3, 7, 11, 13, 17, 19, 23, 27, 31}.slice();
+    var pn = slice<nint>([2, 3, 7, 11, 13, 17, 19, 23, 27, 31]);
 
     var q = new channel<nint>(nwork * 3);
     var r = new channel<nint>(nwork * 3);
@@ -766,7 +763,7 @@ public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
         close(qʗ2); // no more work
         Ꮡwg.Wait(); // workers done
         close(rʗ2); // ... so there can be no more results
-    });
+    }, GoStack.Bounded);
 
     // consume & check
     nint n = 0;
@@ -776,12 +773,12 @@ public static partial void TestMultiConsumer(ж<testing.T> Ꮡt) {
         s += v;
     }
     if (n != niter || s != expect) {
-        Ꮡt.Errorf("Expected sum %d (got %d) from %d iter (saw %d)"u8,
+        t.Errorf("Expected sum %d (got %d) from %d iter (saw %d)",
             expect, s, (nint)(niter), n);
     }
 }
 
-public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) {
+public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> t) {
     // make sure that channel operations still work when we are
     // blocked on a channel send and we shrink the stack.
     // NOTE: this test probably won't fail unless stack1.go:stackDebug
@@ -804,7 +801,7 @@ public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) 
     for (nint i = 0; i < n; i++) {
         nint x = ᐸꟷ(c);
         if (x != i) {
-            Ꮡt.Errorf("bad channel read: want %d, got %d"u8, i, x);
+            t.Errorf("bad channel read: want %d, got %d", i, x);
         }
         // Waste some time so sender can finish using lots of stack
         // and block in channel send.
@@ -815,12 +812,12 @@ public static partial void TestShrinkStackDuringBlockedSend(ж<testing.T> Ꮡt) 
     ᐸꟷ(done);
 }
 
-public static partial void TestNoShrinkStackWhileParking(ж<testing.T> Ꮡt) {
+public static partial void TestNoShrinkStackWhileParking(ж<testing.T> t) {
     if (Δruntime.GOOS == "netbsd"u8 && Δruntime.GOARCH == "arm64"u8) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 49382);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 49382);
     }
     if (Δruntime.GOOS == "openbsd"u8) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 51482);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 51482);
     }
 
     // The goal of this test is to trigger a "racy sudog adjustment"
@@ -867,9 +864,9 @@ public static partial void TestNoShrinkStackWhileParking(ж<testing.T> Ꮡt) {
         var c = new channel<nint>(0);
         var done = new channel<EmptyStruct>(0);
         var recvʗ1 = recv;
-        goǃ(recvʗ1, c.WithDirection(GoChanDir.Recv), done);
+        goǃ(recvʗ1, c.AsRecvOnly(), done);
         var sendʗ1 = send;
-        goǃ(sendʗ1, c.WithDirection(GoChanDir.Send), done);
+        goǃ(sendʗ1, c.AsSendOnly(), done);
         // Wait a little bit before triggering
         // the GC to make sure the sender and
         // receiver have gotten into their groove.
@@ -880,7 +877,7 @@ public static partial void TestNoShrinkStackWhileParking(ж<testing.T> Ꮡt) {
     }
 }
 
-public static partial void TestSelectDuplicateChannel(ж<testing.T> Ꮡt) {
+public static partial void TestSelectDuplicateChannel(ж<testing.T> t) {
     // This test makes sure we can queue a G on
     // the same channel multiple times.
     var c = new channel<nint>(0);
@@ -906,18 +903,18 @@ public static partial void TestSelectDuplicateChannel(ж<testing.T> Ꮡt) {
             break;
         }}
         eʗ1.ᐸꟷ(9);
-    });
+    }, GoStack.Bounded);
     time.Sleep(time.Millisecond); // make sure goroutine A gets queued first on c
 
     // goroutine B
     var cʗ2 = c;
     goǃ(() => {
         ᐸꟷ(cʗ2);
-    });
+    }, GoStack.Bounded);
     time.Sleep(time.Millisecond); // make sure goroutine B gets queued on c before continuing
 
     d.ᐸꟷ(7); // wake up A, it dequeues itself from c.  This operation used to corrupt c.recvq.
-    ᐸꟷ(e); // A tells us it's done
+    ᐸꟷ(e);   // A tells us it's done
     c.ᐸꟷ(8); // wake up B.  This operation used to fail because c.recvq was corrupted (it tries to wake up an already running G instead of B)
 }
 
@@ -926,7 +923,7 @@ internal static readonly object cxNoLongerPointsToValˢ = (@string)"cx no longer
 internal static readonly object valChangedˢ = (@string)"val changed"u8;
 internal static readonly object changingCxFailedToChangeˢ = (@string)"changing *cx failed to change val"u8;
 
-public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
+public static partial void TestSelectStackAdjust(ж<testing.T> t) {
     // Test that channel receive slots that contain local stack
     // pointers are adjusted correctly by stack shrinking.
     var c = new channel<ж<nint>>(0);
@@ -943,13 +940,12 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
         // We're ready to trigger GC and stack shrink.
         ready.ᐸꟷ(true);
 
-        ref var val = ref heap<nint>(out var Ꮡval);
-        val = 42;
-        ж<nint> cx = default!;
+        ref var val = ref heap<nint>(42, out var Ꮡval);
+        ж<nint> cx = default;
         cx = Ꮡval;
 
-        channel<ж<nint>> c2 = default!;
-        channel<ж<nint>> d2 = default!;
+        channel<ж<nint>> c2 = default;
+        channel<ж<nint>> d2 = default;
         if (dup) {
             c2 = cʗ1;
             d2 = dʗ1;
@@ -975,15 +971,14 @@ public static partial void TestSelectStackAdjust(ж<testing.T> Ꮡt) {
         }}
 
         // Check that pointer in cx was adjusted correctly.
-        if (cx != Ꮡval){
-            Ꮡt.Error(cxNoLongerPointsToValˢ);
-        } else 
-        if (val != 42){
-            Ꮡt.Error(valChangedˢ);
+        if (cx != Ꮡval) {
+            t.Error(cxNoLongerPointsToValˢ);
+        } else if (val != 42) {
+            t.Error(valChangedˢ);
         } else {
             cx.Value = 43;
             if (val != 43) {
-                Ꮡt.Error(changingCxFailedToChangeˢ);
+                t.Error(changingCxFailedToChangeˢ);
             }
         }
         ready.ᐸꟷ(true);
@@ -1012,50 +1007,54 @@ partial struct struct0 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string byteˢ = "Byte"u8;
-internal static readonly @string intˢ = "Int"u8;
-internal static readonly @string ptrˢ = "Ptr"u8;
-internal static readonly @string structˢ3 = "Struct"u8;
+internal static ref readonly @string byteˢ => ref byteˢᵇ;
+private static readonly @string byteˢᵇ = "Byte"u8;
+internal static ref readonly @string intˢ => ref intˢᵇ;
+private static readonly @string intˢᵇ = "Int"u8;
+internal static ref readonly @string ptrˢ => ref ptrˢᵇ;
+private static readonly @string ptrˢᵇ = "Ptr"u8;
+internal static ref readonly @string structˢ3 => ref structˢ3ᵇ;
+private static readonly @string structˢ3ᵇ = "Struct"u8;
 
-public static void BenchmarkMakeChan(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(byteˢ, (ж<testing.B> bΔ1) => {
-        channel<byte> x = default!;
+public static void BenchmarkMakeChan(ж<testing.B> b) {
+    b.Run(byteˢ, (ж<testing.B> bΔ1) => {
+        channel<byte> x = default;
         for (nint i = 0; i < (~bΔ1).N; i++) {
             x = new channel<byte>(8);
         }
         close(x);
     });
-    Ꮡb.Run(intˢ, (ж<testing.B> bΔ2) => {
-        channel<nint> x = default!;
+    b.Run(intˢ, (ж<testing.B> bΔ2) => {
+        channel<nint> x = default;
         for (nint i = 0; i < (~bΔ2).N; i++) {
             x = new channel<nint>(8);
         }
         close(x);
     });
-    Ꮡb.Run(ptrˢ, (ж<testing.B> bΔ3) => {
-        channel<ж<byte>> x = default!;
+    b.Run(ptrˢ, (ж<testing.B> bΔ3) => {
+        channel<ж<byte>> x = default;
         for (nint i = 0; i < (~bΔ3).N; i++) {
             x = new channel<ж<byte>>(8);
         }
         close(x);
     });
-    Ꮡb.Run(structˢ3, (ж<testing.B> bΔ4) => {
-        bΔ4.Run("0"u8, (ж<testing.B> bΔ5) => {
-            channel<struct0> x = default!;
+    b.Run(structˢ3, (ж<testing.B> bΔ4) => {
+        bΔ4.Run("0", (ж<testing.B> bΔ5) => {
+            channel<struct0> x = default;
             for (nint i = 0; i < (~bΔ5).N; i++) {
                 x = new channel<struct0>(8);
             }
             close(x);
         });
-        bΔ4.Run("32"u8, (ж<testing.B> bΔ6) => {
-            channel<struct32> x = default!;
+        bΔ4.Run("32", (ж<testing.B> bΔ6) => {
+            channel<struct32> x = default;
             for (nint i = 0; i < (~bΔ6).N; i++) {
                 x = new channel<struct32>(8);
             }
             close(x);
         });
-        bΔ4.Run("40"u8, (ж<testing.B> bΔ7) => {
-            channel<struct40> x = default!;
+        bΔ4.Run("40", (ж<testing.B> bΔ7) => {
+            channel<struct40> x = default;
             for (nint i = 0; i < (~bΔ7).N; i++) {
                 x = new channel<struct40>(8);
             }
@@ -1064,10 +1063,10 @@ public static void BenchmarkMakeChan(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkChanNonblocking(ж<testing.B> Ꮡb) {
+public static void BenchmarkChanNonblocking(ж<testing.B> b) {
     var myc = new channel<nint>(0);
     var mycʗ1 = myc;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             var selᴛ41 = mycʗ1;
             switch (trySelect(ᐸꟷ(selᴛ41, ꓸꓸꓸ))) {
@@ -1081,8 +1080,8 @@ public static void BenchmarkChanNonblocking(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkSelectUncontended(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkSelectUncontended(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         var myc1 = new channel<nint>(1);
         var myc2 = new channel<nint>(1);
         myc1.ᐸꟷ(0);
@@ -1102,7 +1101,7 @@ public static void BenchmarkSelectUncontended(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkSelectSyncContended(ж<testing.B> Ꮡb) {
+public static void BenchmarkSelectSyncContended(ж<testing.B> b) {
     var myc1 = new channel<nint>(0);
     var myc2 = new channel<nint>(0);
     var myc3 = new channel<nint>(0);
@@ -1111,13 +1110,13 @@ public static void BenchmarkSelectSyncContended(ж<testing.B> Ꮡb) {
     var myc1ʗ1 = myc1;
     var myc2ʗ1 = myc2;
     var myc3ʗ1 = myc3;
-    Ꮡb.RunParallel([MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.PB> pb) => {
+    b.RunParallel([MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.PB> pb) => {
         var doneʗ2 = doneʗ1;
         var myc1ʗ2 = myc1ʗ1;
         var myc2ʗ2 = myc2ʗ1;
         var myc3ʗ2 = myc3ʗ1;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 var selᴛ44 = myc1ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
                 var selᴛ45 = myc2ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
                 var selᴛ46 = myc3ʗ2.ᐸꟷ(0, ꓸꓸꓸ);
@@ -1136,7 +1135,7 @@ public static void BenchmarkSelectSyncContended(ж<testing.B> Ꮡb) {
                     return;
                 }}
             }
-        });
+        }, GoStack.Bounded);
         while (pb.Next()) {
             var selᴛ48 = myc1ʗ1;
             var selᴛ49 = myc2ʗ1;
@@ -1156,13 +1155,13 @@ public static void BenchmarkSelectSyncContended(ж<testing.B> Ꮡb) {
     close(done);
 }
 
-public static void BenchmarkSelectAsyncContended(ж<testing.B> Ꮡb) {
+public static void BenchmarkSelectAsyncContended(ж<testing.B> b) {
     nint procs = Δruntime.GOMAXPROCS(0);
     var myc1 = new channel<nint>(procs);
     var myc2 = new channel<nint>(procs);
     var myc1ʗ1 = myc1;
     var myc2ʗ1 = myc2;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         myc1ʗ1.ᐸꟷ(0);
         while (pb.Next()) {
             var selᴛ51 = myc1ʗ1;
@@ -1180,7 +1179,7 @@ public static void BenchmarkSelectAsyncContended(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkSelectNonblock(ж<testing.B> Ꮡb) {
+public static void BenchmarkSelectNonblock(ж<testing.B> b) {
     var myc1 = new channel<nint>(0);
     var myc2 = new channel<nint>(0);
     var myc3 = new channel<nint>(1);
@@ -1189,7 +1188,7 @@ public static void BenchmarkSelectNonblock(ж<testing.B> Ꮡb) {
     var myc2ʗ1 = myc2;
     var myc3ʗ1 = myc3;
     var myc4ʗ1 = myc4;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             var selᴛ53 = myc1ʗ1;
             switch (trySelect(ᐸꟷ(selᴛ53, ꓸꓸꓸ))) {
@@ -1227,9 +1226,9 @@ public static void BenchmarkSelectNonblock(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkChanUncontended(ж<testing.B> Ꮡb) {
+public static void BenchmarkChanUncontended(ж<testing.B> b) {
     const nint C = 100;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         var myc = new channel<nint>(C);
         while (pb.Next()) {
             for (nint i = 0; i < C; i++) {
@@ -1242,11 +1241,11 @@ public static void BenchmarkChanUncontended(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkChanContended(ж<testing.B> Ꮡb) {
+public static void BenchmarkChanContended(ж<testing.B> b) {
     const nint C = 100;
     var myc = new channel<nint>(C * Δruntime.GOMAXPROCS(0));
     var mycʗ1 = myc;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             for (nint i = 0; i < C; i++) {
                 mycʗ1.ᐸꟷ(0);
@@ -1263,21 +1262,20 @@ internal static partial void benchmarkChanSync(ж<testing.B> Ꮡb, nint work) {
 
     const nint CallsPerSched = 1000;
     nint procs = 2;
-    ref var N = ref heap<int32>(out var ᏑN);
-    N = (int32)(quo(b.N / CallsPerSched, procs) * procs);
+    ref var N = ref heap<int32>((int32)(quo(b.N / CallsPerSched, procs) * procs), out var ᏑN);
     var c = new channel<bool>(procs);
     var myc = new channel<nint>(0);
     for (nint p = 0; p < procs; p++) {
         var cʗ1 = c;
         var mycʗ1 = myc;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 var i = atomic.AddInt32(ᏑN, -1);
                 if (i < 0) {
                     break;
                 }
                 for (nint g = 0; g < CallsPerSched; g++) {
-                    if (i % 2 == 0){
+                    if (i % 2 == 0) {
                         ᐸꟷ(mycʗ1);
                         localWork(work);
                         mycʗ1.ᐸꟷ(0);
@@ -1291,19 +1289,19 @@ internal static partial void benchmarkChanSync(ж<testing.B> Ꮡb, nint work) {
                 }
             }
             cʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
     }
     for (nint p = 0; p < procs; p++) {
         ᐸꟷ(c);
     }
 }
 
-public static void BenchmarkChanSync(ж<testing.B> Ꮡb) {
-    benchmarkChanSync(Ꮡb, 0);
+public static void BenchmarkChanSync(ж<testing.B> b) {
+    benchmarkChanSync(b, 0);
 }
 
-public static void BenchmarkChanSyncWork(ж<testing.B> Ꮡb) {
-    benchmarkChanSync(Ꮡb, 1000);
+public static void BenchmarkChanSyncWork(ж<testing.B> b) {
+    benchmarkChanSync(b, 1000);
 }
 
 internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chanSize, nint localWork) {
@@ -1311,8 +1309,7 @@ internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chan
 
     const nint CallsPerSched = 1000;
     nint procs = Δruntime.GOMAXPROCS(-1);
-    ref var N = ref heap<int32>(out var ᏑN);
-    N = (int32)(b.N / CallsPerSched);
+    ref var N = ref heap<int32>((int32)(b.N / CallsPerSched), out var ᏑN);
     var c = new channel<bool>(2 * procs);
     var myc = new channel<nint>(chanSize);
     for (nint p = 0; p < procs; p++) {
@@ -1331,12 +1328,12 @@ internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chan
             }
             mycʗ1.ᐸꟷ(0);
             cʗ1.ᐸꟷ(foo == 42);
-        });
+        }, GoStack.Bounded);
         var cʗ2 = c;
         var mycʗ2 = myc;
         goǃ(() => {
             nint foo = 0;
-            while (ᐧ) {
+            for (;;) {
                 nint v = ᐸꟷ(mycʗ2);
                 if (v == 0) {
                     break;
@@ -1347,7 +1344,7 @@ internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chan
                 }
             }
             cʗ2.ᐸꟷ(foo == 42);
-        });
+        }, GoStack.Bounded);
     }
     for (nint p = 0; p < procs; p++) {
         ᐸꟷ(c);
@@ -1355,28 +1352,28 @@ internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chan
     }
 }
 
-public static void BenchmarkChanProdCons0(ж<testing.B> Ꮡb) {
-    benchmarkChanProdCons(Ꮡb, 0, 0);
+public static void BenchmarkChanProdCons0(ж<testing.B> b) {
+    benchmarkChanProdCons(b, 0, 0);
 }
 
-public static void BenchmarkChanProdCons10(ж<testing.B> Ꮡb) {
-    benchmarkChanProdCons(Ꮡb, 10, 0);
+public static void BenchmarkChanProdCons10(ж<testing.B> b) {
+    benchmarkChanProdCons(b, 10, 0);
 }
 
-public static void BenchmarkChanProdCons100(ж<testing.B> Ꮡb) {
-    benchmarkChanProdCons(Ꮡb, 100, 0);
+public static void BenchmarkChanProdCons100(ж<testing.B> b) {
+    benchmarkChanProdCons(b, 100, 0);
 }
 
-public static void BenchmarkChanProdConsWork0(ж<testing.B> Ꮡb) {
-    benchmarkChanProdCons(Ꮡb, 0, 100);
+public static void BenchmarkChanProdConsWork0(ж<testing.B> b) {
+    benchmarkChanProdCons(b, 0, 100);
 }
 
-public static void BenchmarkChanProdConsWork10(ж<testing.B> Ꮡb) {
-    benchmarkChanProdCons(Ꮡb, 10, 100);
+public static void BenchmarkChanProdConsWork10(ж<testing.B> b) {
+    benchmarkChanProdCons(b, 10, 100);
 }
 
-public static void BenchmarkChanProdConsWork100(ж<testing.B> Ꮡb) {
-    benchmarkChanProdCons(Ꮡb, 100, 100);
+public static void BenchmarkChanProdConsWork100(ж<testing.B> b) {
+    benchmarkChanProdCons(b, 100, 100);
 }
 
 public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
@@ -1384,8 +1381,7 @@ public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
 
     const nint CallsPerSched = 1000;
     nint procs = Δruntime.GOMAXPROCS(-1);
-    ref var N = ref heap<int32>(out var ᏑN);
-    N = (int32)(b.N / CallsPerSched);
+    ref var N = ref heap<int32>((int32)(b.N / CallsPerSched), out var ᏑN);
     var c = new channel<bool>(2 * procs);
     var myc = new channel<nint>(128);
     var myclose = new channel<bool>(0);
@@ -1432,7 +1428,7 @@ public static partial void BenchmarkSelectProdCons(ж<testing.B> Ꮡb) {
             // Intended to not fire during benchmarking.
             var mytimer = time.After(time.ΔHour);
 loop:
-            while (ᐧ) {
+            for (;;) {
                 var selᴛ60 = mycʗ2;
                 var selᴛ61 = mytimer;
                 var selᴛ62 = mycloseʗ2;
@@ -1481,8 +1477,8 @@ public static void BenchmarkReceiveDataFromClosedChan(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkChanCreation(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkChanCreation(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             var myc = new channel<nint>(1);
             myc.ᐸꟷ(0);
@@ -1494,12 +1490,12 @@ public static void BenchmarkChanCreation(ж<testing.B> Ꮡb) {
 internal partial struct BenchmarkChanSem_Empty /*dyn*/ {
 }
 
-public static void BenchmarkChanSem(ж<testing.B> Ꮡb) {
+public static void BenchmarkChanSem(ж<testing.B> b) {
     var myc = new channel<BenchmarkChanSem_Empty>(Δruntime.GOMAXPROCS(0));
     var mycʗ1 = myc;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            mycʗ1.ᐸꟷ(new BenchmarkChanSem_Empty(nil));
+            mycʗ1.ᐸꟷ(new BenchmarkChanSem_Empty());
             ᐸꟷ(mycʗ1);
         }
     });
@@ -1511,7 +1507,7 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
 
     const nint n = 1000;
     var c = new channel<bool>(0);
-    slice<channel<bool>> a = default!;
+    slice<channel<bool>> a = default;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(n);
     for (nint j = 0; j < n; j++) {
@@ -1532,7 +1528,7 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
                 }}
             }
             Ꮡwg.Done();
-        });
+        }, GoStack.Bounded);
     }
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, d) in a) {
@@ -1545,11 +1541,11 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unreachableˢ = (@string)"Unreachable"u8;
 
-public static void BenchmarkChanClosed(ж<testing.B> Ꮡb) {
+public static void BenchmarkChanClosed(ж<testing.B> b) {
     var c = new channel<EmptyStruct>(0);
     close(c);
     var cʗ1 = c;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             var selᴛ65 = cʗ1;
             switch (trySelect(ᐸꟷ(selᴛ65, ꓸꓸꓸ))) {
@@ -1557,7 +1553,7 @@ public static void BenchmarkChanClosed(ж<testing.B> Ꮡb) {
                 break;
             }
             default: {
-                Ꮡb.Error(unreachableˢ);
+                b.Error(unreachableˢ);
                 break;
             }}
         }

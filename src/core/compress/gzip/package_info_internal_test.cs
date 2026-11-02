@@ -29,10 +29,10 @@ using static go.compress.gzip_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABgiooKCgoKClIKClKaCgpSCgpSCgriCgoK4poKCgoKmlIKAgraAgraCgoKUgoKUgIKkgII=", "56-91:1")]
-[assembly: go.GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "AB40ANQC5AXYlIKUgoKCgpSSgpSCgoKUgoK4goKCgpSClIKCgpSCgsbU/IKClIKClJKCooKClJSUtAAICAAIBISSooKmlIKCgoCCuKSCgoKmgIKkgoKCpoCCyKaCggAICIIAEy6CgoKCgpSUgoCCpILcgpSCgoK4goI=", "463-471:1")]
-[assembly: go.GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikpSAgraCgpSAgqSCgpSClICCAAoMopSCgoKCgoCCpICCtoKClIKClIKUgpSClIKUgpSAgvqSgoKCgoKUgqaCgoCCpIKCAAgMogALHoKUgoKCgoKUgqaCgoKUgoKClIKClICCggAJCoKUgoKCgpSCgqaAgraCgqaUgoKmgIK2goKmgIL8koKCgoKCgpSCgpSCgriCgoKCgoKCgoKCggAHEIKAgoKkgqiSlKKCgIK2gu6Agg==", "", "", "314=Now/1/1/3")]
-[assembly: go.GoPositionMap("compress/gzip/issue14937_test.go", "issue14937_test.cs", "ABo0AAwIgpSUgoKUgoKClIKUlIKClJSClIK4ooKCgpSSgoKClJKCtA==", "40-48:1")]
+[assembly: GoPositionMap("compress/gzip/fuzz_test.go", "fuzz_test.cs", "ABoiooKCgoKClIKClKaCgpSCgpSCgriCgoK4poKCgoKmlIKAgraAgraCgoKUgoKUgIKkgII=", "56-91:1")]
+[assembly: GoPositionMap("compress/gzip/gunzip_test.go", "gunzip_test.cs", "AB40ANQC5AXYlIKUgoKCgpSSgpSCgoKUgoK4goKCgpSClIKCgpSCgsbk/IKClIKClJKCooKClJSUtAAICAAJBISSooKmlIKCgoCCuKSCgoKmgIKkgoKCpoCCyKaCggAICIIAEy6CgoKCgpSUgoCCpILcgpSCgoK4goI=", "463-471:1", "", "", "390:25,450:21")]
+[assembly: GoPositionMap("compress/gzip/gzip_test.go", "gzip_test.cs", "AA8ikpSAgraCgpSAgqSCgpSClICCAAwMopSCgoKCgoCCpICCtoKClIKClIKUgpSClIKUgpSAggAICpKCgoKCgpSCpoKCgIKkgoIACAyiAAsegpSCgoKCgpSCpoKCgpSCgoKUgoKUgIKCAAkKgpSCgoKClIKCpoCCtoKCppSCgqaAgraCgqaAgvySgoKCgoKClIKClIKCuIKCgoKCgoKCgoKCAAcQgoCCgqSCqJKUooKAgraC7oCC", "", "", "317=Now/1/1/3")]
+[assembly: GoPositionMap("compress/gzip/issue14937_test.go", "issue14937_test.cs", "ABo0AAwIgpSUgoKUgoKClIKUlIKClJSClIK4ooKCgpSSgoKClJKCtA==", "40-48:1", "", "", "82:21,89:21")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

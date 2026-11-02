@@ -14,14 +14,14 @@ partial class cpu_test_package {
 // Tests fetching data cache sizes. This test only checks that DataCacheSizes
 // won't explode. Otherwise it's just informational, and dumps the current
 // data cache sizes.
-public static void TestDataCacheSizes(ж<testing.T> Ꮡt) {
+public static void TestDataCacheSizes(ж<testing.T> t) {
     // N.B. Don't try to check these values because we don't know what
     // kind of environment we're running in. We don't want this test to
     // fail on some random x86 chip that happens to not support the right
     // CPUID bits for some reason.
     var caches = cpu.DataCacheSizes();
     foreach (var (i, size) in caches) {
-        Ꮡt.Logf("L%d: %d"u8, i + 1, size);
+        t.Logf("L%d: %d", i + 1, size);
     }
 }
 

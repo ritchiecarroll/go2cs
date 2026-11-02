@@ -9,8 +9,8 @@ partial class runtime_package {
 internal const bool canCreateFile = true;
 
 // create returns an fd to a write-only file.
-internal static int32 create(ж<byte> Ꮡname, int32 perm) {
-    return open(Ꮡname, (int32)((UntypedInt)(_O_CREAT | _O_WRONLY) | (int32)_O_TRUNC), perm);
+internal static int32 create(ж<byte> name, int32 perm) {
+    return open(name, (int32)((UntypedInt)(_O_CREAT | _O_WRONLY) | (int32)_O_TRUNC), perm);
 }
 
 } // end runtime_package

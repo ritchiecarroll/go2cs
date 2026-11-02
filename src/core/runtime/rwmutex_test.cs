@@ -20,12 +20,12 @@ using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
-internal static void parallelReader(ж<global::go.runtime_internal_test_package.RWMutex> Ꮡm, channel<bool> clocked, ж<atomic.Bool> Ꮡcunlock, channel<bool> cdone) {
-    Ꮡm.RLock();
+internal static void parallelReader(ж<global::go.runtime_internal_test_package.RWMutex> m, channel<bool> clocked, ж<atomic.Bool> cunlock, channel<bool> cdone) {
+    m.RLock();
     clocked.ᐸꟷ(true);
-    while (!Ꮡcunlock.Load()) {
+    while (!cunlock.Load()) {
     }
-    Ꮡm.RUnlock();
+    m.RUnlock();
     cdone.ᐸꟷ(true);
 }
 
@@ -53,11 +53,11 @@ internal static partial void doTestParallelReaders(nint numReaders) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object wasmHasNoThreadsYetˢ = (@string)"wasm has no threads yet"u8;
 
-public static void TestParallelRWMutexReaders(ж<testing.T> Ꮡt) {
+public static void TestParallelRWMutexReaders(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (GOARCH == "wasm"u8) {
-            Ꮡt.Skip(wasmHasNoThreadsYetˢ);
+            t.Skip(wasmHasNoThreadsYetˢ);
         }
         defer(GOMAXPROCS, GOMAXPROCS(-1), ref ᒐ);
         // If runtime triggers a forced GC during this test then it will deadlock,
@@ -77,32 +77,32 @@ public static void TestParallelRWMutexReaders(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void reader(ж<global::go.runtime_internal_test_package.RWMutex> Ꮡrwm, nint num_iterations, ж<int32> Ꮡactivity, channel<bool> cdone) {
+internal static void reader(ж<global::go.runtime_internal_test_package.RWMutex> rwm, nint num_iterations, ж<int32> activity, channel<bool> cdone) {
     for (nint i = 0; i < num_iterations; i++) {
-        Ꮡrwm.RLock();
-        var n = atomic.AddInt32(Ꮡactivity, 1);
+        rwm.RLock();
+        var n = atomic.AddInt32(activity, 1);
         if (n < 1 || n >= 10000) {
             throw panic(fmt.Sprintf("wlock(%d)\n"u8, n));
         }
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
         }
-        atomic.AddInt32(Ꮡactivity, -1);
-        Ꮡrwm.RUnlock();
+        atomic.AddInt32(activity, -1);
+        rwm.RUnlock();
     }
     cdone.ᐸꟷ(true);
 }
 
-internal static void writer(ж<global::go.runtime_internal_test_package.RWMutex> Ꮡrwm, nint num_iterations, ж<int32> Ꮡactivity, channel<bool> cdone) {
+internal static void writer(ж<global::go.runtime_internal_test_package.RWMutex> rwm, nint num_iterations, ж<int32> activity, channel<bool> cdone) {
     for (nint i = 0; i < num_iterations; i++) {
-        Ꮡrwm.Lock();
-        var n = atomic.AddInt32(Ꮡactivity, 10000);
+        rwm.Lock();
+        var n = atomic.AddInt32(activity, 10000);
         if (n != 10000) {
             throw panic(fmt.Sprintf("wlock(%d)\n"u8, n));
         }
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
         }
-        atomic.AddInt32(Ꮡactivity, -10000);
-        Ꮡrwm.Unlock();
+        atomic.AddInt32(activity, -10000);
+        rwm.Unlock();
     }
     cdone.ᐸꟷ(true);
 }
@@ -115,7 +115,7 @@ public static partial void HammerRWMutex(nint gomaxprocs, nint numReaders, nint 
     Ꮡrwm.Init();
     var cdone = new channel<bool>(0);
     goǃ(writer, Ꮡrwm, num_iterations, Ꮡactivity, cdone);
-    nint i = default!;
+    nint i = default;
     for (i = 0; i < numReaders / 2; i++) {
         goǃ(reader, Ꮡrwm, num_iterations, Ꮡactivity, cdone);
     }
@@ -129,7 +129,7 @@ public static partial void HammerRWMutex(nint gomaxprocs, nint numReaders, nint 
     }
 }
 
-public static void TestRWMutex(ж<testing.T> Ꮡt) {
+public static void TestRWMutex(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(GOMAXPROCS, GOMAXPROCS(-1), ref ᒐ);
@@ -157,8 +157,8 @@ internal partial struct BenchmarkRWMutexUncontended_PaddedRWMutex /*dyn*/ {
     internal array<uint32> pad = new(32);
 }
 
-public static void BenchmarkRWMutexUncontended(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkRWMutexUncontended(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         ref var rwm = ref heap(new BenchmarkRWMutexUncontended_PaddedRWMutex(), out var Ꮡrwm);
         Ꮡrwm.of(BenchmarkRWMutexUncontended_PaddedRWMutex.ᏑRWMutex).Init();
         while (pb.Next()) {
@@ -172,14 +172,14 @@ public static void BenchmarkRWMutexUncontended(ж<testing.B> Ꮡb) {
     });
 }
 
-internal static void benchmarkRWMutex(ж<testing.B> Ꮡb, nint localWork, nint writeRatio) {
+internal static void benchmarkRWMutex(ж<testing.B> b, nint localWork, nint writeRatio) {
     ref var rwm = ref heap(new global::go.runtime_internal_test_package.RWMutex(), out var Ꮡrwm);
     Ꮡrwm.Init();
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         nint foo = 0;
         while (pb.Next()) {
             foo++;
-            if (rem(foo, writeRatio) == 0){
+            if (rem(foo, writeRatio) == 0) {
                 Ꮡrwm.Lock();
                 Ꮡrwm.Unlock();
             } else {
@@ -195,20 +195,20 @@ internal static void benchmarkRWMutex(ж<testing.B> Ꮡb, nint localWork, nint w
     });
 }
 
-public static void BenchmarkRWMutexWrite100(ж<testing.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 0, 100);
+public static void BenchmarkRWMutexWrite100(ж<testing.B> b) {
+    benchmarkRWMutex(b, 0, 100);
 }
 
-public static void BenchmarkRWMutexWrite10(ж<testing.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 0, 10);
+public static void BenchmarkRWMutexWrite10(ж<testing.B> b) {
+    benchmarkRWMutex(b, 0, 10);
 }
 
-public static void BenchmarkRWMutexWorkWrite100(ж<testing.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 100, 100);
+public static void BenchmarkRWMutexWorkWrite100(ж<testing.B> b) {
+    benchmarkRWMutex(b, 100, 100);
 }
 
-public static void BenchmarkRWMutexWorkWrite10(ж<testing.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 100, 10);
+public static void BenchmarkRWMutexWorkWrite10(ж<testing.B> b) {
+    benchmarkRWMutex(b, 100, 10);
 }
 
 } // end runtime_test_package

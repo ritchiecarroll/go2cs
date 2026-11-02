@@ -31,15 +31,16 @@ public static (slice<byte>, error) Extract<H>(Func<H> h, slice<byte> secret, sli
 {
     var fh = fips140hash.UnwrapNew(h);
     {
-        var err = checkFIPS140Only(fh, secret); if (err != default!) {
-            return (default!, err);
+        var err = checkFIPS140Only(fh, secret); if (err != nil) {
+            return (default, err);
         }
     }
-    return (hkdf.Extract(fh, secret, salt), default!);
+    return (hkdf.Extract(fh, secret, salt), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hkdfRequestedKeyLengthˢ = "hkdf: requested key length too large"u8;
+internal static ref readonly @string hkdfRequestedKeyLengthˢ => ref hkdfRequestedKeyLengthˢᵇ;
+private static readonly @string hkdfRequestedKeyLengthˢᵇ = "hkdf: requested key length too large"u8;
 
 // Expand derives a key from the given hash, key, and optional context info,
 // returning a []byte of length keyLength that can be used as cryptographic key.
@@ -53,17 +54,17 @@ public static (slice<byte>, error) Expand<H>(Func<H> h, slice<byte> pseudorandom
 {
     var fh = fips140hash.UnwrapNew(h);
     {
-        var err = checkFIPS140Only(fh, pseudorandomKey); if (err != default!) {
-            return (default!, err);
+        var err = checkFIPS140Only(fh, pseudorandomKey); if (err != nil) {
+            return (default, err);
         }
     }
 
     nint limit = fh().Size() * 255;
     if (keyLength > limit) {
-        return (default!, errors.New(hkdfRequestedKeyLengthˢ));
+        return (default, errors.New(hkdfRequestedKeyLengthˢ));
     }
 
-    return (hkdf.Expand(fh, pseudorandomKey, info, keyLength), default!);
+    return (hkdf.Expand(fh, pseudorandomKey, info, keyLength), default);
 }
 
 // Key derives a key from the given hash, secret, salt and context info,
@@ -74,28 +75,30 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, slice<byte> secret, s
 {
     var fh = fips140hash.UnwrapNew(h);
     {
-        var err = checkFIPS140Only(fh, secret); if (err != default!) {
-            return (default!, err);
+        var err = checkFIPS140Only(fh, secret); if (err != nil) {
+            return (default, err);
         }
     }
 
     nint limit = fh().Size() * 255;
     if (keyLength > limit) {
-        return (default!, errors.New(hkdfRequestedKeyLengthˢ));
+        return (default, errors.New(hkdfRequestedKeyLengthˢ));
     }
 
-    return (hkdf.Key(fh, secret, salt, info, keyLength), default!);
+    return (hkdf.Key(fh, secret, salt, info, keyLength), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoHkdfUseOfKeysˢ = "crypto/hkdf: use of keys shorter than 112 bits is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoHkdfUseOfHashˢ = "crypto/hkdf: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoHkdfUseOfKeysˢ => ref cryptoHkdfUseOfKeysˢᵇ;
+private static readonly @string cryptoHkdfUseOfKeysˢᵇ = "crypto/hkdf: use of keys shorter than 112 bits is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoHkdfUseOfHashˢ => ref cryptoHkdfUseOfHashˢᵇ;
+private static readonly @string cryptoHkdfUseOfHashˢᵇ = "crypto/hkdf: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
 
 internal static error checkFIPS140Only<Hash>(Func<Hash> h, slice<byte> key)
     where Hash : hash.Hash
 {
     if (!fips140only.Enforced()) {
-        return default!;
+        return default;
     }
     if (len(key) < 112 / 8) {
         return errors.New(cryptoHkdfUseOfKeysˢ);
@@ -103,7 +106,7 @@ internal static error checkFIPS140Only<Hash>(Func<Hash> h, slice<byte> key)
     if (!fips140only.ApprovedHash(h())) {
         return errors.New(cryptoHkdfUseOfHashˢ);
     }
-    return default!;
+    return default;
 }
 
 } // end hkdf_package

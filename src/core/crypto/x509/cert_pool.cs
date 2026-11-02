@@ -93,14 +93,14 @@ public static ж<CertPool> Clone(this ref CertPool s) {
     foreach (var (k, v) in s.byName) {
         var indexes = new slice<nint>(builtin.len(v));
         copy(indexes, v);
-        p.Value.byName[k] = indexes;
+        p.byName[k] = indexes;
     }
     foreach (var (kᴛ1, _) in s.haveSum) {
         var k = kᴛ1.Clone();
 
-        p.Value.haveSum[k] = true;
+        p.haveSum[k] = true;
     }
-    copy((~p).lazyCerts, s.lazyCerts);
+    copy(p.lazyCerts, s.lazyCerts);
     return p;
 }
 
@@ -118,7 +118,7 @@ public static ж<CertPool> Clone(this ref CertPool s) {
 public static (ж<CertPool>, error) SystemCertPool() {
     {
         var sysRoots = systemRootsPool(); if (sysRoots != nil) {
-            return (sysRoots.Clone(), default!);
+            return (sysRoots.Clone(), default);
         }
     }
 
@@ -140,7 +140,7 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
     var mismatchKeyIDᴷ = new stackAppend<potentialParent>();
 
     if (Ꮡs == nil) {
-        return default!;
+        return default;
     }
 
     // consider all candidates where cert.Issuer matches cert.Subject.
@@ -149,21 +149,21 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
     //   AKID and SKID match
     //   AKID present, SKID missing / AKID missing, SKID present
     //   AKID and SKID don't match
-    slice<potentialParent> matchingKeyID = default!;
-    slice<potentialParent> oneKeyID = default!;
-    slice<potentialParent> mismatchKeyID = default!;
+    slice<potentialParent> matchingKeyID = default;
+    slice<potentialParent> oneKeyID = default;
+    slice<potentialParent> mismatchKeyID = default;
     foreach (var (_, c) in s.byName[tmpstring(cert.RawIssuer)]) {
         var (candidate, constraint, err) = s.cert(c);
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
-        var kidMatch = bytes.Equal((~candidate).SubjectKeyId, cert.AuthorityKeyId);
+        var kidMatch = bytes.Equal(candidate.SubjectKeyId, cert.AuthorityKeyId);
         switch (ᐧ) {
         case {} when kidMatch: {
             matchingKeyID = append(matchingKeyIDᴷ, matchingKeyID, new potentialParent(candidate, constraint));
             break;
         }
-        case {} when (builtin.len((~candidate).SubjectKeyId) == 0 && builtin.len(cert.AuthorityKeyId) > 0) || (builtin.len((~candidate).SubjectKeyId) > 0 && builtin.len(cert.AuthorityKeyId) == 0): {
+        case {} when (builtin.len(candidate.SubjectKeyId) == 0 && builtin.len(cert.AuthorityKeyId) > 0) || (builtin.len(candidate.SubjectKeyId) > 0 && builtin.len(cert.AuthorityKeyId) == 0): {
             oneKeyID = append(oneKeyIDᴷ, oneKeyID, new potentialParent(candidate, constraint));
             break;
         }
@@ -175,7 +175,7 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
 
     nint found = builtin.len(matchingKeyID) + builtin.len(oneKeyID) + builtin.len(mismatchKeyID);
     if (found == 0) {
-        return default!;
+        return default;
     }
     var candidates = new slice<potentialParent>(0, found);
     candidates = appendꓸꓸꓸ(candidates, matchingKeyID);
@@ -201,7 +201,7 @@ public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), default!);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), default);
 }
 
 // addCertFunc adds metadata about a certificate to a pool, along with
@@ -212,7 +212,7 @@ public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
 internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
     rawSum224 = rawSum224.Clone();
 
-    if (getCert == default!) {
+    if (getCert == nil) {
         throw panic("getCert can't be nil");
     }
 
@@ -242,33 +242,32 @@ internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
 // On many Linux systems, /etc/ssl/cert.pem will contain the system wide set
 // of root CAs in a format suitable for this function.
 public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) {
-    bool ok = default!;
+    bool ok = default;
 
     while (builtin.len(pemCerts) > 0) {
-        ж<pem.Block> block = default!;
+        ж<pem.Block> block = default;
         (block, pemCerts) = pem.Decode(pemCerts);
         if (block == nil) {
             break;
         }
-        if ((~block).Type != "CERTIFICATE"u8 || builtin.len((~block).Headers) != 0) {
+        if (block.Type != "CERTIFICATE"u8 || builtin.len(block.Headers) != 0) {
             continue;
         }
 
-        ref var certBytes = ref heap<slice<byte>>(out var ᏑcertBytes);
-        certBytes = block.Value.Bytes;
+        ref var certBytes = ref heap<slice<byte>>(block.Bytes, out var ᏑcertBytes);
         var (cert, err) = ParseCertificate(certBytes);
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         ref var lazyCert = ref heap(new AppendCertsFromPEM_lazyCert(), out var ᏑlazyCert);
-        s.addCertFunc(sha256.Sum224((~cert).Raw), (@string)(~cert).RawSubject, () => {
+        s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => {
             ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
                 // This can't fail, as the same bytes already parsed above.
                 (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
-                ᏑcertBytes.ValueSlot = default!;
+                ᏑcertBytes.ValueSlot = default;
             });
-            return (ᏑlazyCert.Value.v, default!);
-        }, default!);
+            return (ᏑlazyCert.Value.v, default);
+        }, default);
         ok = true;
     }
 
@@ -322,7 +321,7 @@ public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> �
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), constraint);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default), constraint);
 }
 
 } // end x509_package

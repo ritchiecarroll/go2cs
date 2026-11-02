@@ -14,7 +14,7 @@ partial class big_internal_test_package {
 
 // TestFloatSqrt64 tests that Float.Sqrt of numbers with 53bit mantissa
 // behaves like float math.Sqrt.
-public static void TestFloatSqrt64(ж<testing.T> Ꮡt) {
+public static void TestFloatSqrt64(ж<testing.T> t) {
     for (nint i = 0; i < 100000; i++) {
         if (i == 100 && testing.Short()) {
             break;
@@ -25,7 +25,7 @@ public static void TestFloatSqrt64(ж<testing.T> Ꮡt) {
         got.Sqrt(NewFloat(r));
         var want = NewFloat(math.Sqrt(r));
         if (got.Cmp(want) != 0) {
-            Ꮡt.Fatalf("Sqrt(%g) =\n got %g;\nwant %g"u8, r, got.OrTypedNil(), want.OrTypedNil());
+            t.Fatalf("Sqrt(%g) =\n got %g;\nwant %g", r, got.OrTypedNil(), want.OrTypedNil());
         }
     }
 }
@@ -35,27 +35,27 @@ internal partial struct TestFloatSqrt_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFloatSqrt_type[]{
+public static void TestFloatSqrt(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestFloatSqrt_type>([
         // Test values were generated on Wolfram Alpha using query
         //   'sqrt(N) to 350 digits'
         // 350 decimal digits give up to 1000 binary digits.
-        new("0.03125"u8, "0.17677669529663688110021109052621225982120898442211850914708496724884155980776337985629844179095519659187673077886403712811560450698134215158051518713749197892665283324093819909447499381264409775757143376369499645074628431682460775184106467733011114982619404115381053858929018135497032545349940642599871090667456829147610370507757690729404938184321879"u8),
-        new("0.125"u8, "0.35355339059327376220042218105242451964241796884423701829416993449768311961552675971259688358191039318375346155772807425623120901396268430316103037427498395785330566648187639818894998762528819551514286752738999290149256863364921550368212935466022229965238808230762107717858036270994065090699881285199742181334913658295220741015515381458809876368643757"u8),
-        new("0.5"u8, "0.70710678118654752440084436210484903928483593768847403658833986899536623923105351942519376716382078636750692311545614851246241802792536860632206074854996791570661133296375279637789997525057639103028573505477998580298513726729843100736425870932044459930477616461524215435716072541988130181399762570399484362669827316590441482031030762917619752737287514"u8),
-        new("2.0"u8, "1.4142135623730950488016887242096980785696718753769480731766797379907324784621070388503875343276415727350138462309122970249248360558507372126441214970999358314132226659275055927557999505011527820605714701095599716059702745345968620147285174186408891986095523292304843087143214508397626036279952514079896872533965463318088296406206152583523950547457503"u8),
-        new("3.0"u8, "1.7320508075688772935274463415058723669428052538103806280558069794519330169088000370811461867572485756756261414154067030299699450949989524788116555120943736485280932319023055820679748201010846749232650153123432669033228866506722546689218379712270471316603678615880190499865373798593894676503475065760507566183481296061009476021871903250831458295239598"u8),
-        new("4.0"u8, "2.0"u8),
+        new("0.03125", "0.17677669529663688110021109052621225982120898442211850914708496724884155980776337985629844179095519659187673077886403712811560450698134215158051518713749197892665283324093819909447499381264409775757143376369499645074628431682460775184106467733011114982619404115381053858929018135497032545349940642599871090667456829147610370507757690729404938184321879"),
+        new("0.125", "0.35355339059327376220042218105242451964241796884423701829416993449768311961552675971259688358191039318375346155772807425623120901396268430316103037427498395785330566648187639818894998762528819551514286752738999290149256863364921550368212935466022229965238808230762107717858036270994065090699881285199742181334913658295220741015515381458809876368643757"),
+        new("0.5", "0.70710678118654752440084436210484903928483593768847403658833986899536623923105351942519376716382078636750692311545614851246241802792536860632206074854996791570661133296375279637789997525057639103028573505477998580298513726729843100736425870932044459930477616461524215435716072541988130181399762570399484362669827316590441482031030762917619752737287514"),
+        new("2.0", "1.4142135623730950488016887242096980785696718753769480731766797379907324784621070388503875343276415727350138462309122970249248360558507372126441214970999358314132226659275055927557999505011527820605714701095599716059702745345968620147285174186408891986095523292304843087143214508397626036279952514079896872533965463318088296406206152583523950547457503"),
+        new("3.0", "1.7320508075688772935274463415058723669428052538103806280558069794519330169088000370811461867572485756756261414154067030299699450949989524788116555120943736485280932319023055820679748201010846749232650153123432669033228866506722546689218379712270471316603678615880190499865373798593894676503475065760507566183481296061009476021871903250831458295239598"),
+        new("4.0", "2.0"),
 
-        new("1p512"u8, "1p256"u8),
-        new("4p1024"u8, "2p512"u8),
-        new("9p2048"u8, "3p1024"u8),
+        new("1p512", "1p256"),
+        new("4p1024", "2p512"),
+        new("9p2048", "3p1024"),
 
-        new("1p-1024"u8, "1p-512"u8),
-        new("4p-2048"u8, "2p-1024"u8),
-        new("9p-4096"u8, "3p-2048"u8)
-    }.slice()) {
-        foreach (var (_, prec) in new nuint[]{24, 53, 64, 65, 100, 128, 129, 200, 256, 400, 600, 800, 1000}.slice()) {
+        new("1p-1024", "1p-512"),
+        new("4p-2048", "2p-1024"),
+        new("9p-4096", "3p-2048")
+    ])) {
+        foreach (var (_, prec) in slice<nuint>([24, 53, 64, 65, 100, 128, 129, 200, 256, 400, 600, 800, 1000])) {
             var x = @new<global::go.math.big_package.Float>().SetPrec(prec);
             x.Parse(test.x, 10);
 
@@ -63,7 +63,7 @@ public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
             var want = @new<global::go.math.big_package.Float>().SetPrec(prec);
             want.Parse(test.want, 10);
             if (got.Cmp(want) != 0) {
-                Ꮡt.Errorf("prec = %d, Sqrt(%v) =\ngot  %g;\nwant %g"u8,
+                t.Errorf("prec = %d, Sqrt(%v) =\ngot  %g;\nwant %g",
                     prec, test.x, got.OrTypedNil(), want.OrTypedNil());
             }
 
@@ -88,7 +88,7 @@ public static void TestFloatSqrt(ж<testing.T> Ꮡt) {
             var maxErr = @new<global::go.math.big_package.Float>().Mul(@new<global::go.math.big_package.Float>().SetMantExp(one, -(nint)prec + 1), got);
 
             if (err.Cmp(maxErr) >= 0) {
-                Ꮡt.Errorf("prec = %d, Sqrt(%v) =\ngot err  %g;\nwant maxErr %g"u8,
+                t.Errorf("prec = %d, Sqrt(%v) =\ngot err  %g;\nwant maxErr %g",
                     prec, test.x, err.OrTypedNil(), maxErr.OrTypedNil());
             }
         }
@@ -100,28 +100,28 @@ internal partial struct TestFloatSqrtSpecial_type /*dyn*/ {
     internal ж<global::go.math.big_package.Float> want;
 }
 
-public static void TestFloatSqrtSpecial(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFloatSqrtSpecial_type[]{
+public static void TestFloatSqrtSpecial(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestFloatSqrtSpecial_type>([
         new(NewFloat(+0D), NewFloat(+0D)),
         new(NewFloat(-0D), NewFloat(-0D)),
         new(NewFloat(math.Inf(+1)), NewFloat(math.Inf(+1)))
-    }.slice()) {
+    ])) {
         var got = @new<global::go.math.big_package.Float>().Sqrt(test.x);
-        if ((~got).neg != (~test.want).neg || (~got).form != (~test.want).form) {
-            Ꮡt.Errorf("Sqrt(%v) = %v (neg: %v); want %v (neg: %v)"u8,
-                test.x.OrTypedNil(), got.OrTypedNil(), (~got).neg, test.want.OrTypedNil(), (~test.want).neg);
+        if (got.neg != test.want.neg || got.form != test.want.form) {
+            t.Errorf("Sqrt(%v) = %v (neg: %v); want %v (neg: %v)",
+                test.x.OrTypedNil(), got.OrTypedNil(), got.neg, test.want.OrTypedNil(), test.want.neg);
         }
     }
 }
 
 // Benchmarks
-public static void BenchmarkFloatSqrt(ж<testing.B> Ꮡb) {
-    foreach (var (_, prec) in new nuint[]{64, 128, 256, 1000, 10000, 100000, 1000000}.slice()) {
+public static void BenchmarkFloatSqrt(ж<testing.B> b) {
+    foreach (var (_, prec) in slice<nuint>([64, 128, 256, 1000, 10000, 100000, 1000000])) {
         var x = NewFloat(2D);
         var z = @new<global::go.math.big_package.Float>().SetPrec(prec);
         var xʗ1 = x;
         var zʗ1 = z;
-        Ꮡb.Run(fmt.Sprintf("%v"u8, prec), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%v"u8, prec), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint n = 0; n < (~bΔ1).N; n++) {
                 zʗ1.Sqrt(xʗ1);

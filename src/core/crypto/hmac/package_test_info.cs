@@ -27,7 +27,7 @@ using static global::go.crypto.hmac_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -37,7 +37,7 @@ using static global::go.crypto.hmac_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/hmac/hmac_test.go", "hmac_test.cs", "AB46AIEElAiCsoKAgqSAgqSCgoKCuIKCgsq4ggAJDIKCgIKkgoKC+KKClIKCgoKmsgANDoKCgpSClIKUgpSCuIKCgpSi6oKCpqKAkqSmooKCgoKCgoKCuKKCgoKCgoKCgriigoKCgoKC", "581-581:1;588-588:1;604-609:1;610-610:2;642-644:1;643-643:1.1")]
+[assembly: GoPositionMap("crypto/hmac/hmac_test.go", "hmac_test.cs", "AB46AIEElAiCsoKAgqSAgqSCgoKCuIKCgsq4ggAJDIKCgIKkgoKC+KKClIKCgoKmsgANDoKCgpSClIKUgpSCuIKCgpSi6oKCpqKAkqSmooKCgoKCgoKCuKKCgoKCgoKCgriigoKCgoKC", "581-581:1;588-588:1;604-609:1;610-610:2;642-644:1;643-643:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -11,10 +11,10 @@ using errors = errors_package;
 
 partial class oserror_package {
 
-public static error ErrInvalid = errors.New("invalid argument"u8);
-public static error ErrPermission = errors.New("permission denied"u8);
-public static error ErrExist = errors.New("file already exists"u8);
-public static error ErrNotExist = errors.New("file does not exist"u8);
-public static error ErrClosed = errors.New("file already closed"u8);
+public static error ErrInvalid = errors.New("invalid argument");
+public static error ErrPermission = errors.New("permission denied");
+public static error ErrExist = errors.New("file already exists");
+public static error ErrNotExist = errors.New("file does not exist");
+public static error ErrClosed = errors.New("file already closed");
 
 } // end oserror_package

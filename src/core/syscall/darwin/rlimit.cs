@@ -30,10 +30,9 @@ internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ((StaticBox<a
 [GoInit] internal static void init() {
     ref var lim = ref heap(new Rlimit(), out var Ꮡlim);
     {
-        var err = Getrlimit(RLIMIT_NOFILE, Ꮡlim); if (err == default! && lim.Max > 0 && lim.Cur < lim.Max - 1) {
+        var err = Getrlimit(RLIMIT_NOFILE, Ꮡlim); if (err == nil && lim.Max > 0 && lim.Cur < lim.Max - 1) {
             ᏑorigRlimitNofile.Store(Ꮡlim);
-            ref var nlim = ref heap<Rlimit>(out var Ꮡnlim);
-            nlim = lim;
+            ref var nlim = ref heap<Rlimit>(lim, out var Ꮡnlim);
 
             // We set Cur to Max - 1 so that we are more likely to
             // detect cases where another process uses prlimit
@@ -49,13 +48,13 @@ internal static ref atomic.Pointer<Rlimit> origRlimitNofile => ref ((StaticBox<a
     }
 }
 
-public static error Setrlimit(nint resource, ж<Rlimit> Ꮡrlim) {
+public static error Setrlimit(nint resource, ж<Rlimit> rlim) {
     if (resource == RLIMIT_NOFILE) {
         // Store nil in origRlimitNofile to tell StartProcess
         // to not adjust the rlimit in the child process.
         ᏑorigRlimitNofile.Store(nil);
     }
-    return setrlimit(resource, Ꮡrlim);
+    return setrlimit(resource, rlim);
 }
 
 } // end syscall_package

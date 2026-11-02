@@ -35,220 +35,220 @@ partial struct testCase {
     internal slice<Func<map<@string, any>, @string>> checks;
 }
 
-internal static slice<testCase> cases = new testCase[]{
+internal static slice<testCase> cases = slice<testCase>([
     new(
-        name: "built-ins"u8,
-        explanation: withSource("this test expects slog.TimeKey, slog.LevelKey and slog.MessageKey"u8),
+        name: "built-ins",
+        explanation: withSource("this test expects slog.TimeKey, slog.LevelKey and slog.MessageKey"),
         f: (ж<slog.Logger> l) => {
-            l.Info("message"u8);
+            l.Info("message");
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
-            hasAttr(slog.MessageKey, (@string)"message"u8)
-        }.slice()
+            hasAttr(slog.MessageKey, "message")
+        ])
     ),
     new(
-        name: "attrs"u8,
-        explanation: withSource("a Handler should output attributes passed to the logging function"u8),
+        name: "attrs",
+        explanation: withSource("a Handler should output attributes passed to the logging function"),
         f: (ж<slog.Logger> l) => {
-            l.Info("message"u8, (@string)"k"u8, (@string)"v"u8);
+            l.Info("message", "k", "v");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            hasAttr("k"u8, (@string)"v"u8)
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            hasAttr("k", "v")
+        ])
     ),
     new(
-        name: "empty-attr"u8,
-        explanation: withSource("a Handler should ignore an empty Attr"u8),
+        name: "empty-attr",
+        explanation: withSource("a Handler should ignore an empty Attr"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, (@string)""u8, (any)(default!), (@string)"c"u8, (@string)"d"u8);
+            l.Info("msg", "a", "b", "", (any)(default), "c", "d");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            hasAttr("a"u8, (@string)"b"u8),
-            missingKey(""u8),
-            hasAttr("c"u8, (@string)"d"u8)
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            hasAttr("a", "b"),
+            missingKey(""),
+            hasAttr("c", "d")
+        ])
     ),
     new(
-        name: "zero-time"u8,
-        explanation: withSource("a Handler should ignore a zero Record.Time"u8),
+        name: "zero-time",
+        explanation: withSource("a Handler should ignore a zero Record.Time"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"k"u8, (@string)"v"u8);
+            l.Info("msg", "k", "v");
         },
         mod: (ж<slog.Record> r) => {
-            r.Value.Time = new time.Time(nil);
+            r.Time = new time.Time();
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             missingKey(slog.TimeKey)
-        }.slice()
+        ])
     ),
     new(
-        name: "WithAttrs"u8,
-        explanation: withSource("a Handler should include the attributes from the WithAttrs method"u8),
+        name: "WithAttrs",
+        explanation: withSource("a Handler should include the attributes from the WithAttrs method"),
         f: (ж<slog.Logger> l) => {
-            l.With((@string)"a"u8, (@string)"b"u8).Info("msg"u8, (@string)"k"u8, (@string)"v"u8);
+            l.With("a", "b").Info("msg", (@string)"k", (@string)"v");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            hasAttr("a"u8, (@string)"b"u8),
-            hasAttr("k"u8, (@string)"v"u8)
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            hasAttr("a", "b"),
+            hasAttr("k", "v")
+        ])
     ),
     new(
-        name: "groups"u8,
-        explanation: withSource("a Handler should handle Group attributes"u8),
+        name: "groups",
+        explanation: withSource("a Handler should handle Group attributes"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, slog.Group("G"u8, slog.String("c"u8, "d"u8)), (@string)"e"u8, (@string)"f"u8);
+            l.Info("msg", "a", "b", slog.Group("G", slog.String("c", "d")), "e", "f");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            hasAttr("a"u8, (@string)"b"u8),
-            inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
-            hasAttr("e"u8, (@string)"f"u8)
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            hasAttr("a", "b"),
+            inGroup("G", hasAttr("c", "d")),
+            hasAttr("e", "f")
+        ])
     ),
     new(
-        name: "empty-group"u8,
-        explanation: withSource("a Handler should ignore an empty group"u8),
+        name: "empty-group",
+        explanation: withSource("a Handler should ignore an empty group"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, slog.Group("G"u8), (@string)"e"u8, (@string)"f"u8);
+            l.Info("msg", "a", "b", slog.Group("G"), "e", "f");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            hasAttr("a"u8, (@string)"b"u8),
-            missingKey("G"u8),
-            hasAttr("e"u8, (@string)"f"u8)
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            hasAttr("a", "b"),
+            missingKey("G"),
+            hasAttr("e", "f")
+        ])
     ),
     new(
-        name: "inline-group"u8,
-        explanation: withSource("a Handler should inline the Attrs of a group with an empty key"u8),
+        name: "inline-group",
+        explanation: withSource("a Handler should inline the Attrs of a group with an empty key"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"a"u8, (@string)"b"u8, slog.Group(""u8, slog.String("c"u8, "d"u8)), (@string)"e"u8, (@string)"f"u8);
+            l.Info("msg", "a", "b", slog.Group("", slog.String("c", "d")), "e", "f");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            hasAttr("a"u8, (@string)"b"u8),
-            hasAttr("c"u8, (@string)"d"u8),
-            hasAttr("e"u8, (@string)"f"u8)
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            hasAttr("a", "b"),
+            hasAttr("c", "d"),
+            hasAttr("e", "f")
+        ])
     ),
     new(
-        name: "WithGroup"u8,
-        explanation: withSource("a Handler should handle the WithGroup method"u8),
+        name: "WithGroup",
+        explanation: withSource("a Handler should handle the WithGroup method"),
         f: (ж<slog.Logger> l) => {
-            l.WithGroup("G"u8).Info("msg"u8, (@string)"a"u8, (@string)"b"u8);
+            l.WithGroup("G").Info("msg", (@string)"a", (@string)"b");
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
-            hasAttr(slog.MessageKey, (@string)"msg"u8),
-            missingKey("a"u8),
-            inGroup("G"u8, hasAttr("a"u8, (@string)"b"u8))
-        }.slice()
+            hasAttr(slog.MessageKey, "msg"),
+            missingKey("a"),
+            inGroup("G", hasAttr("a", "b"))
+        ])
     ),
     new(
-        name: "multi-With"u8,
-        explanation: withSource("a Handler should handle multiple WithGroup and WithAttr calls"u8),
+        name: "multi-With",
+        explanation: withSource("a Handler should handle multiple WithGroup and WithAttr calls"),
         f: (ж<slog.Logger> l) => {
-            l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).Info("msg"u8, (@string)"e"u8, (@string)"f"u8);
+            l.With("a", "b").WithGroup("G").With((@string)"c", (@string)"d").WithGroup("H").Info("msg", (@string)"e", (@string)"f");
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
-            hasAttr(slog.MessageKey, (@string)"msg"u8),
-            hasAttr("a"u8, (@string)"b"u8),
-            inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
-            inGroup("G"u8, inGroup("H"u8, hasAttr("e"u8, (@string)"f"u8)))
-        }.slice()
+            hasAttr(slog.MessageKey, "msg"),
+            hasAttr("a", "b"),
+            inGroup("G", hasAttr("c", "d")),
+            inGroup("G", inGroup("H", hasAttr("e", "f")))
+        ])
     ),
     new(
-        name: "empty-group-record"u8,
-        explanation: withSource("a Handler should not output groups if there are no attributes"u8),
+        name: "empty-group-record",
+        explanation: withSource("a Handler should not output groups if there are no attributes"),
         f: (ж<slog.Logger> l) => {
-            l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).Info("msg"u8);
+            l.With("a", "b").WithGroup("G").With((@string)"c", (@string)"d").WithGroup("H").Info("msg");
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
-            hasAttr(slog.MessageKey, (@string)"msg"u8),
-            hasAttr("a"u8, (@string)"b"u8),
-            inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
-            inGroup("G"u8, missingKey("H"u8))
-        }.slice()
+            hasAttr(slog.MessageKey, "msg"),
+            hasAttr("a", "b"),
+            inGroup("G", hasAttr("c", "d")),
+            inGroup("G", missingKey("H"))
+        ])
     ),
     new(
-        name: "nested-empty-group-record"u8,
-        explanation: withSource("a Handler should not output nested groups if there are no attributes"u8),
+        name: "nested-empty-group-record",
+        explanation: withSource("a Handler should not output nested groups if there are no attributes"),
         f: (ж<slog.Logger> l) => {
-            l.With((@string)"a"u8, (@string)"b"u8).WithGroup("G"u8).With((@string)"c"u8, (@string)"d"u8).WithGroup("H"u8).WithGroup("I"u8).Info("msg"u8);
+            l.With("a", "b").WithGroup("G").With((@string)"c", (@string)"d").WithGroup("H").WithGroup("I").Info("msg");
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             hasKey(slog.TimeKey),
             hasKey(slog.LevelKey),
-            hasAttr(slog.MessageKey, (@string)"msg"u8),
-            hasAttr("a"u8, (@string)"b"u8),
-            inGroup("G"u8, hasAttr("c"u8, (@string)"d"u8)),
-            inGroup("G"u8, missingKey("H"u8)),
-            inGroup("G"u8, missingKey("I"u8))
-        }.slice()
+            hasAttr(slog.MessageKey, "msg"),
+            hasAttr("a", "b"),
+            inGroup("G", hasAttr("c", "d")),
+            inGroup("G", missingKey("H")),
+            inGroup("G", missingKey("I"))
+        ])
     ),
     new(
-        name: "resolve"u8,
-        explanation: withSource("a Handler should call Resolve on attribute values"u8),
+        name: "resolve",
+        explanation: withSource("a Handler should call Resolve on attribute values"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8, (@string)"k"u8, Ꮡ(new replace((@string)"replaced"u8)));
+            l.Info("msg", "k", Ꮡ(new replace((@string)"replaced")));
         },
-        checks: new Func<map<@string, any>, @string>[]{hasAttr("k"u8, (@string)"replaced"u8)}.slice()
+        checks: slice<Func<map<@string, any>, @string>>([hasAttr("k", "replaced")])
     ),
     new(
-        name: "resolve-groups"u8,
-        explanation: withSource("a Handler should call Resolve on attribute values in groups"u8),
+        name: "resolve-groups",
+        explanation: withSource("a Handler should call Resolve on attribute values in groups"),
         f: (ж<slog.Logger> l) => {
-            l.Info("msg"u8,
-                slog.Group("G"u8,
-                    slog.String("a"u8, "v1"u8),
-                    slog.Any("b"u8, Ꮡ(new replace((@string)"v2"u8)))));
+            l.Info("msg",
+                slog.Group("G",
+                    slog.String("a", "v1"),
+                    slog.Any("b", Ꮡ(new replace((@string)"v2")))));
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            inGroup("G"u8, hasAttr("a"u8, (@string)"v1"u8)),
-            inGroup("G"u8, hasAttr("b"u8, (@string)"v2"u8))
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            inGroup("G", hasAttr("a", "v1")),
+            inGroup("G", hasAttr("b", "v2"))
+        ])
     ),
     new(
-        name: "resolve-WithAttrs"u8,
-        explanation: withSource("a Handler should call Resolve on attribute values from WithAttrs"u8),
+        name: "resolve-WithAttrs",
+        explanation: withSource("a Handler should call Resolve on attribute values from WithAttrs"),
         f: (ж<slog.Logger> l) => {
-            l = l.With((@string)"k"u8, Ꮡ(new replace((@string)"replaced"u8)));
-            l.Info("msg"u8);
+            l = l.With("k", Ꮡ(new replace((@string)"replaced")));
+            l.Info("msg");
         },
-        checks: new Func<map<@string, any>, @string>[]{hasAttr("k"u8, (@string)"replaced"u8)}.slice()
+        checks: slice<Func<map<@string, any>, @string>>([hasAttr("k", "replaced")])
     ),
     new(
-        name: "resolve-WithAttrs-groups"u8,
-        explanation: withSource("a Handler should call Resolve on attribute values in groups from WithAttrs"u8),
+        name: "resolve-WithAttrs-groups",
+        explanation: withSource("a Handler should call Resolve on attribute values in groups from WithAttrs"),
         f: (ж<slog.Logger> l) => {
-            l = l.With(slog.Group("G"u8,
-                slog.String("a"u8, "v1"u8),
-                slog.Any("b"u8, Ꮡ(new replace((@string)"v2"u8)))));
-            l.Info("msg"u8);
+            l = l.With(slog.Group("G",
+                slog.String("a", "v1"),
+                slog.Any("b", Ꮡ(new replace((@string)"v2")))));
+            l.Info("msg");
         },
-        checks: new Func<map<@string, any>, @string>[]{
-            inGroup("G"u8, hasAttr("a"u8, (@string)"v1"u8)),
-            inGroup("G"u8, hasAttr("b"u8, (@string)"v2"u8))
-        }.slice()
+        checks: slice<Func<map<@string, any>, @string>>([
+            inGroup("G", hasAttr("a", "v1")),
+            inGroup("G", hasAttr("b", "v2"))
+        ])
     ),
     new(
-        name: "empty-PC"u8,
-        explanation: withSource("a Handler should not output SourceKey if the PC is zero"u8),
+        name: "empty-PC",
+        explanation: withSource("a Handler should not output SourceKey if the PC is zero"),
         f: (ж<slog.Logger> l) => {
-            l.Info("message"u8);
+            l.Info("message");
         },
         mod: (ж<slog.Record> r) => {
-            r.Value.PC = 0;
+            r.PC = 0;
         },
-        checks: new Func<map<@string, any>, @string>[]{
+        checks: slice<Func<map<@string, any>, @string>>([
             missingKey(slog.SourceKey)
-        }.slice()
+        ])
     )
-}.slice();
+]);
 
 // TestHandler tests a [slog.Handler].
 // If TestHandler finds any misbehaviors, it returns an error for each,
@@ -275,7 +275,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     // Run the handler on the test cases.
     foreach (var (_, c) in cases) {
         var ht = h;
-        if (c.mod != default!) {
+        if (c.mod != nil) {
             ht = new wrapperжΔHandler(Ꮡ(new wrapper(h, c.mod)));
         }
         var l = slog.New(ht);
@@ -283,7 +283,7 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
     }
 
     // Collect and check the results.
-    slice<error> errs = default!;
+    slice<error> errs = default;
     var res = results();
     {
         nint g = len(res);
@@ -308,15 +308,15 @@ public static error TestHandler(slogꓸHandler h, Func<slice<map<@string, any>>>
 // runs each case in a subtest. For each test case, it first calls newHandler to
 // get an instance of the handler under test, then runs the test case, then
 // calls result to get the result. If the test case fails, it calls t.Error.
-public static void Run(ж<testing.T> Ꮡt, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
+public static void Run(ж<testing.T> t, Func<ж<testing.T>, slogꓸHandler> newHandler, Func<ж<testing.T>, map<@string, any>> result) {
     foreach (var (_, vᴛ1) in cases) {
         ref var c = ref heap(new testCase(), out var Ꮡc);
         c = vᴛ1;
 
         var cʗ1 = c;
-        Ꮡt.Run(c.name, (ж<testing.T> tΔ1) => {
+        t.Run(c.name, (ж<testing.T> tΔ1) => {
             var h = newHandler(tΔ1);
-            if (cʗ1.mod != default!) {
+            if (cʗ1.mod != nil) {
                 h = new wrapperжΔHandler(Ꮡ(new wrapper(h, cʗ1.mod)));
             }
             var l = slog.New(h);
@@ -325,7 +325,7 @@ public static void Run(ж<testing.T> Ꮡt, Func<ж<testing.T>, slogꓸHandler> n
             foreach (var (_, check) in cʗ1.checks) {
                 {
                     @string p = check(got); if (p != ""u8) {
-                        tΔ1.Errorf("%s: %s"u8, p, cʗ1.explanation);
+                        tΔ1.Errorf("%s: %s", p, cʗ1.explanation);
                     }
                 }
             }

@@ -27,36 +27,36 @@ internal partial struct TestOpen_tests /*dyn*/ {
     internal error err;
 }
 
-public static void TestOpen(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestOpen(ж<testing.T> t) {
+    t.Parallel();
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
     @string @file = filepath.Join(dir, "a");
     var (f, err) = Δos.Create(@file);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     f.Close();
 
-    var tests = new TestOpen_tests[]{
-        new(dir, syscall.O_RDONLY, default!),
-        new(dir, syscall.O_CREAT, default!),
-        new(dir, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_CREAT), default!),
-        new(@file, (nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | Δos.O_CREATE), default!),
-        new(@file, (nint)((nint)(nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | Δos.O_CREATE) | Δos.O_TRUNC), default!),
-        new(@file, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default!),
-        new(dir, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default!),
+    var tests = slice<TestOpen_tests>([
+        new(dir, syscall.O_RDONLY, default),
+        new(dir, syscall.O_CREAT, default),
+        new(dir, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_CREAT), default),
+        new(@file, (nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | Δos.O_CREATE), default),
+        new(@file, (nint)((nint)(nint)((nint)(nint)((nint)syscall.O_APPEND | (nint)syscall.O_WRONLY) | Δos.O_CREATE) | Δos.O_TRUNC), default),
+        new(@file, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default),
+        new(dir, (nint)((nint)syscall.O_WRONLY | (nint)syscall.O_RDWR), default),
         new(dir, (nint)((nint)syscall.O_RDONLY | (nint)syscall.O_TRUNC), syscall.ERROR_ACCESS_DENIED),
         new(dir, syscall.O_WRONLY, syscall.EISDIR),
         new(dir, syscall.O_RDWR, syscall.EISDIR)
-    }.slice();
+    ]);
     foreach (var (i, tt) in tests) {
         var (h, errΔ1) = syscall.Open(tt.path, tt.flag, 432);
-        if (errΔ1 == default!) {
+        if (errΔ1 == nil) {
             syscall.CloseHandle(h);
         }
         if (!AreEqual(errΔ1, tt.err)) {
-            Ꮡt.Errorf("%d: Open got %q, want %q"u8, i, errΔ1, tt.err);
+            t.Errorf("%d: Open got %q, want %q", i, errΔ1, tt.err);
         }
     }
 }
@@ -64,18 +64,19 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object computerNameReturnedˢ = (@string)"ComputerName returned empty string"u8;
 
-public static void TestComputerName(ж<testing.T> Ꮡt) {
+public static void TestComputerName(ж<testing.T> t) {
     var (name, err) = syscall.ComputerName();
-    if (err != default!) {
-        Ꮡt.Fatalf("ComputerName failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ComputerName failed: %v", err);
     }
     if (len(name) == 0) {
-        Ꮡt.Error(computerNameReturnedˢ);
+        t.Error(computerNameReturnedˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string longNameAndExtensionˢ = "long_name.and_extension"u8;
+internal static ref readonly @string longNameAndExtensionˢ => ref longNameAndExtensionˢᵇ;
+private static readonly @string longNameAndExtensionˢᵇ = "long_name.and_extension"u8;
 
 internal partial struct TestWin32finddata_X /*dyn*/ {
     internal syscall.Win32finddata fd;
@@ -83,31 +84,30 @@ internal partial struct TestWin32finddata_X /*dyn*/ {
     internal array<byte> pad = new(10); // to protect ourselves
 }
 
-public static void TestWin32finddata(ж<testing.T> Ꮡt) {
-    @string dir = Ꮡt.TempDir();
+public static void TestWin32finddata(ж<testing.T> t) {
+    @string dir = t.TempDir();
 
     @string path = filepath.Join(dir, longNameAndExtensionˢ);
     var (f, err) = Δos.Create(path);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create %v: %v"u8, path, err);
+    if (err != nil) {
+        t.Fatalf("failed to create %v: %v", path, err);
     }
     f.Close();
-    byte want = 2;     // it is unlikely to have this character in the filename
-    ref var x = ref heap<TestWin32finddata_X>(out var Ꮡx);
-    x = new TestWin32finddata_X(got: want);
+    byte want = 2; // it is unlikely to have this character in the filename
+    ref var x = ref heap<TestWin32finddata_X>(new TestWin32finddata_X(got: want), out var Ꮡx);
 
     var (pathp, _) = syscall.UTF16PtrFromString(path);
     (var h, err) = syscall.FindFirstFile(pathp, Ꮡ((x.fd)));
-    if (err != default!) {
-        Ꮡt.Fatalf("FindFirstFile failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("FindFirstFile failed: %v", err);
     }
     err = syscall.FindClose(h);
-    if (err != default!) {
-        Ꮡt.Fatalf("FindClose failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("FindClose failed: %v", err);
     }
 
     if (x.got != want) {
-        Ꮡt.Fatalf("memory corruption: want=%d got=%d"u8, want, x.got);
+        t.Fatalf("memory corruption: want=%d got=%d", want, x.got);
     }
 }
 
@@ -116,50 +116,62 @@ internal static void abort(@string funcname, error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string kernel32Dllˢ = "kernel32.dll"u8;
-internal static readonly @string loadLibraryˢ = "LoadLibrary"u8;
-internal static readonly @string getVersionˢ = "GetVersion"u8;
-internal static readonly @string getProcAddressˢ = "GetProcAddress"u8;
+internal static ref readonly @string kernel32Dllˢ => ref kernel32Dllˢᵇ;
+private static readonly @string kernel32Dllˢᵇ = "kernel32.dll"u8;
+internal static ref readonly @string loadLibraryˢ => ref loadLibraryˢᵇ;
+private static readonly @string loadLibraryˢᵇ = "LoadLibrary"u8;
+internal static ref readonly @string getVersionˢ => ref getVersionˢᵇ;
+private static readonly @string getVersionˢᵇ = "GetVersion"u8;
+internal static ref readonly @string getProcAddressˢ => ref getProcAddressˢᵇ;
+private static readonly @string getProcAddressˢᵇ = "GetProcAddress"u8;
 
 public static void ExampleLoadLibrary() {
     GoFrame ᒐ = default;
     try {
         var (h, err) = syscall.LoadLibrary(kernel32Dllˢ);
-        if (err != default!) {
+        if (err != nil) {
             abort(loadLibraryˢ, err);
         }
         defer(syscall.FreeLibrary, h, ref ᒐ);
         (var proc, err) = syscall.GetProcAddress(h, getVersionˢ);
-        if (err != default!) {
+        if (err != nil) {
             abort(getProcAddressˢ, err);
         }
         var (r, _, _) = syscall.Syscall((uintptr)proc, 0, 0, 0, 0);
         var major = (byte)r;
         var minor = (uint8)(r >> 8);
         var build = (uint16)(r >> 16);
-        print((@string)"windows version "u8, major, (@string)"."u8, minor, (@string)" (Build "u8, build, (@string)")\n"u8);
+        print((@string)"windows version ", major, (@string)".", minor, (@string)" (Build ", build, (@string)")\n");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestTOKEN_ALL_ACCESS(ж<testing.T> Ꮡt) {
+public static partial void TestTOKEN_ALL_ACCESS(ж<testing.T> t) {
     if (syscall.TOKEN_ALL_ACCESS != 0xF01FF) {
-        Ꮡt.Errorf("TOKEN_ALL_ACCESS = %x, want 0xF01FF"u8, (nint)(syscall.TOKEN_ALL_ACCESS));
+        t.Errorf("TOKEN_ALL_ACCESS = %x, want 0xF01FF", (nint)(syscall.TOKEN_ALL_ACCESS));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gccˢ = "gcc"u8;
-internal static readonly @string helloworldGoˢ = "helloworld.go"u8;
-internal static readonly @string helloworldDllˢ = "helloworld.dll"u8;
-internal static readonly @string buildˢ = "build"u8;
-internal static readonly @string buildmodeˢ = "-buildmode"u8;
-internal static readonly @string cSharedˢ = "c-shared"u8;
-internal static readonly @string helloworldExeˢ = "helloworld.exe"u8;
+internal static ref readonly @string gccˢ => ref gccˢᵇ;
+private static readonly @string gccˢᵇ = "gcc"u8;
+internal static ref readonly @string helloworldGoˢ => ref helloworldGoˢᵇ;
+private static readonly @string helloworldGoˢᵇ = "helloworld.go"u8;
+internal static ref readonly @string helloworldDllˢ => ref helloworldDllˢᵇ;
+private static readonly @string helloworldDllˢᵇ = "helloworld.dll"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "build"u8;
+internal static ref readonly @string buildmodeˢ => ref buildmodeˢᵇ;
+private static readonly @string buildmodeˢᵇ = "-buildmode"u8;
+internal static ref readonly @string cSharedˢ => ref cSharedˢᵇ;
+private static readonly @string cSharedˢᵇ = "c-shared"u8;
+internal static ref readonly @string helloworldExeˢ => ref helloworldExeˢᵇ;
+private static readonly @string helloworldExeˢᵇ = "helloworld.exe"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dlltextᶜ = """
+internal static ref readonly @string dlltextᶜ => ref dlltextᶜᵇ;
+private static readonly @string dlltextᶜᵇ = """
 
 package main
 
@@ -178,7 +190,8 @@ func main() {}
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string exetextᶜ = """
+internal static ref readonly @string exetextᶜ => ref exetextᶜᵇ;
+private static readonly @string exetextᶜᵇ = """
 
 #include <stdlib.h>
 #include <windows.h>
@@ -192,136 +205,138 @@ int main(int argc, char *argv[])
 
 """u8.Raw();
 
-public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new syscall_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveCGO(new syscall_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveExecPath(new syscall_test_package.testing_TжTB(Ꮡt), gccˢ);
+public static void TestStdioAreInheritable(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new syscall_test_package.testing_TжTB(t));
+    testenv.MustHaveCGO(new syscall_test_package.testing_TжTB(t));
+    testenv.MustHaveExecPath(new syscall_test_package.testing_TжTB(t), gccˢ);
 
-    @string tmpdir = Ꮡt.TempDir();
+    @string tmpdir = t.TempDir();
 
     // build go dll
     @string dlltext = dlltextᶜ;
     @string dllsrc = filepath.Join(tmpdir, helloworldGoˢ);
     var err = Δos.WriteFile(dllsrc, slice<byte>(dlltext), 420);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     @string dll = filepath.Join(tmpdir, helloworldDllˢ);
-    var cmd = exec.Command(testenv.GoToolPath(new syscall_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", dll, buildmodeˢ, cSharedˢ, dllsrc);
+    var cmd = exec.Command(testenv.GoToolPath(new syscall_test_package.testing_TжTB(t)), buildˢ, "-o", dll, buildmodeˢ, cSharedˢ, dllsrc);
     (var @out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to build go library: %s\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("failed to build go library: %s\n%s", err, @out);
     }
 
     // build c exe
     @string exetext = exetextᶜ;
     @string exe = filepath.Join(tmpdir, helloworldExeˢ);
-    cmd = exec.Command(gccˢ, "-o"u8, exe, "-xc", "-");
-    cmd.Value.Stdin = new syscall_test_package.strings_ReaderжReader(strings.NewReader(fmt.Sprintf(exetext, dll)));
+    cmd = exec.Command(gccˢ, "-o", exe, "-xc", "-");
+    cmd.Stdin = new syscall_test_package.strings_ReaderжReader(strings.NewReader(fmt.Sprintf(exetext, dll)));
     (@out, err) = testenv.CleanCmdEnv(cmd).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to build c executable: %s\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("failed to build c executable: %s\n%s", err, @out);
     }
     (@out, err) = exec.Command(exe).Output();
-    if (err != default!) {
-        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, (@string)@out);
+    if (err != nil) {
+        t.Fatalf("c program execution failed: %v: %v", err, (@string)@out);
     }
 
     (var hostname, err) = Δos.Hostname();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    @string have = strings.ReplaceAll((@string)@out, "\n"u8, ""u8);
-    have = strings.ReplaceAll(have, "\r"u8, ""u8);
+    @string have = strings.ReplaceAll((@string)@out, "\n", ""u8);
+    have = strings.ReplaceAll(have, "\r", ""u8);
     @string want = fmt.Sprintf("%sHello World%s"u8, hostname, hostname);
     if (have != want) {
-        Ꮡt.Fatalf("c program output is wrong: got %q, want %q"u8, have, want);
+        t.Fatalf("c program output is wrong: got %q, want %q", have, want);
     }
 }
 
-public static void TestGetwd_DoesNotPanicWhenPathIsLong(ж<testing.T> Ꮡt) {
+public static void TestGetwd_DoesNotPanicWhenPathIsLong(ж<testing.T> t) {
     // Regression test for https://github.com/golang/go/issues/60051.
-    @string tmp = Ꮡt.TempDir();
-    Ꮡt.Chdir(tmp);
+    @string tmp = t.TempDir();
+    t.Chdir(tmp);
 
     // The length of a filename is also limited, so we can't reproduce the
     // crash by creating a single directory with a very long name; we need two
     // layers.
-    @string a200 = strings.Repeat("a"u8, 200);
+    @string a200 = strings.Repeat("a", 200);
     @string dirname = filepath.Join(tmp, a200, a200);
 
     var err = Δos.MkdirAll(dirname, 448);
-    if (err != default!) {
-        Ꮡt.Skipf("MkdirAll failed: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("MkdirAll failed: %v", err);
     }
     err = Δos.Chdir(dirname);
-    if (err != default!) {
-        Ꮡt.Skipf("Chdir failed: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("Chdir failed: %v", err);
     }
 
     syscall.Getwd();
 }
 
-public static void TestGetStartupInfo(ж<testing.T> Ꮡt) {
+public static void TestGetStartupInfo(ж<testing.T> t) {
     ref var si = ref heap(new syscall.StartupInfo(), out var Ꮡsi);
     var err = syscall.GetStartupInfo(Ꮡsi);
-    if (err != default!) {
+    if (err != nil) {
         // see https://go.dev/issue/31316
-        Ꮡt.Fatalf("GetStartupInfo: got error %v, want nil"u8, err);
+        t.Fatalf("GetStartupInfo: got error %v, want nil", err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string syscallNˢ = "SyscallN"u8;
-internal static readonly @string syscallˢ = "Syscall"u8;
+internal static ref readonly @string syscallNˢ => ref syscallNˢᵇ;
+private static readonly @string syscallNˢᵇ = "SyscallN"u8;
+internal static ref readonly @string syscallˢ => ref syscallˢᵇ;
+private static readonly @string syscallˢᵇ = "Syscall"u8;
 
-public static void TestSyscallAllocations(ж<testing.T> Ꮡt) {
+public static void TestSyscallAllocations(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.SkipIfOptimizationOff(new syscall_test_package.testing_TжTB(Ꮡt));
+        testenv.SkipIfOptimizationOff(new syscall_test_package.testing_TжTB(t));
 
         // Test that syscall.SyscallN arguments do not escape.
         // The function used (in this case GetVersion) doesn't matter
         // as long as it is always available and doesn't panic.
         var (h, err) = syscall.LoadLibrary(kernel32Dllˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         defer(syscall.FreeLibrary, h, ref ᒐ);
         (var proc, err) = syscall.GetProcAddress(h, getVersionˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         void testAllocs(ж<testing.T> tΔ1, @string name, Func<error> fn) {
             tΔ1.Run(name, (ж<testing.T> tΔ2) => {
                 nint n = (nint)testing.AllocsPerRun(10, () => {
                     {
-                        var errΔ1 = fn(); if (errΔ1 != default!) {
-                            tΔ2.Fatalf("%s: %v"u8, name, errΔ1);
+                        var errΔ1 = fn(); if (errΔ1 != nil) {
+                            tΔ2.Fatalf("%s: %v", name, errΔ1);
                         }
                     }
                 });
                 if (n > 0) {
-                    tΔ2.Errorf("allocs = %d, want 0"u8, n);
+                    tΔ2.Errorf("allocs = %d, want 0", n);
                 }
             });
         }
 
-        testAllocs(Ꮡt, syscallNˢ, error () => {
+        testAllocs(t, syscallNˢ, error () => {
             var (r0, _, e1) = syscall.SyscallN(proc, 0, 0, 0);
             if (r0 == 0) {
                 return e1;
             }
-            return default!;
+            return default;
         });
-        testAllocs(Ꮡt, syscallˢ, error () => {
+        testAllocs(t, syscallˢ, error () => {
             var (r0, _, e1) = syscall.Syscall(proc, 3, 0, 0, 0);
             if (r0 == 0) {
                 return e1;
             }
-            return default!;
+            return default;
         });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -331,29 +346,29 @@ public static void TestSyscallAllocations(ж<testing.T> Ꮡt) {
 public static void FuzzUTF16FromString(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    f.Add((@string)"hi"u8); // ASCII
-    f.Add((@string)"â"u8); // latin1
-    f.Add((@string)"ねこ"u8); // plane 0
-    f.Add((@string)"😃"u8); // extra Plane 0
-    f.Add(((@string)(new byte[]{0x90}))); // invalid byte
-    f.Add(((@string)(new byte[]{0xe3, 0x81}))); // truncated
+    f.Add("hi");                                      // ASCII
+    f.Add("â");                                       // latin1
+    f.Add("ねこ");                                      // plane 0
+    f.Add("😃");                                       // extra Plane 0
+    f.Add(((@string)(new byte[]{0x90})));             // invalid byte
+    f.Add(((@string)(new byte[]{0xe3, 0x81})));       // truncated
     f.Add(((@string)(new byte[]{0xe3, 0xc1, 0x81}))); // invalid middle byte
 
     Ꮡf.Fuzz((ж<testing.T> t, @string tst) => {
         var (res, err) = syscall.UTF16FromString(tst);
-        if (err != default!) {
-            if (strings.Contains(tst, "\x00"u8)) {
-                t.Skipf("input %q contains a NUL byte"u8, tst);
+        if (err != nil) {
+            if (strings.Contains(tst, "\x00")) {
+                t.Skipf("input %q contains a NUL byte", tst);
             }
-            t.Fatalf("UTF16FromString(%q): %v"u8, tst, err);
+            t.Fatalf("UTF16FromString(%q): %v", tst, err);
         }
-        t.Logf("UTF16FromString(%q) = %04x"u8, tst, res);
+        t.Logf("UTF16FromString(%q) = %04x", tst, res);
 
         if (len(res) < 1 || res[len(res) - 1] != 0) {
-            t.Fatalf("missing NUL terminator"u8);
+            t.Fatalf("missing NUL terminator");
         }
         if (len(res) > len(tst) + 1) {
-            t.Fatalf("len(%04x) > len(%q)+1"u8, res, tst);
+            t.Fatalf("len(%04x) > len(%q)+1", res, tst);
         }
     });
 }

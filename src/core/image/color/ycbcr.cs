@@ -38,16 +38,16 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     //
     // Note that -11056 - 21712 + 32768 equals 0.
     var cb = -11056 * r1 - 21712 * g1 + 32768 * b1 + (int32)(257 << 15);
-    if (((uint32)cb & 0xff000000U) == 0){
-        cb >>= (int)(16);
+    if (((uint32)cb & 0xff000000U) == 0) {
+        cb >>= 16;
     } else {
         cb = ~(cb >> 31);
     }
 
     // Note that 32768 - 27440 - 5328 equals 0.
     var cr = 32768 * r1 - 27440 * g1 - 5328 * b1 + (int32)(257 << 15);
-    if (((uint32)cr & 0xff000000U) == 0){
-        cr >>= (int)(16);
+    if (((uint32)cr & 0xff000000U) == 0) {
+        cr >>= 16;
     } else {
         cr = ~(cr >> 31);
     }
@@ -131,22 +131,22 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
     // statement will convert ^int32(0) to 0xff.
     // The code below to compute g and b uses a similar pattern.
     var r = yy1 + 91881 * cr1;
-    if (((uint32)r & 0xff000000U) == 0){
-        r >>= (int)(16);
+    if (((uint32)r & 0xff000000U) == 0) {
+        r >>= 16;
     } else {
         r = ~(r >> 31);
     }
 
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
-    if (((uint32)g & 0xff000000U) == 0){
-        g >>= (int)(16);
+    if (((uint32)g & 0xff000000U) == 0) {
+        g >>= 16;
     } else {
         g = ~(g >> 31);
     }
 
     var b = yy1 + 116130 * cb1;
-    if (((uint32)b & 0xff000000U) == 0){
-        b >>= (int)(16);
+    if (((uint32)b & 0xff000000U) == 0) {
+        b >>= 16;
     } else {
         b = ~(b >> 31);
     }
@@ -203,22 +203,22 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     // but uses fewer branches and is faster.
     // The code below to compute g and b uses a similar pattern.
     var r = yy1 + 91881 * cr1;
-    if (((uint32)r & 0xff000000U) == 0){
-        r >>= (int)(8);
+    if (((uint32)r & 0xff000000U) == 0) {
+        r >>= 8;
     } else {
         r = ~(r >> 31) & 0xffff;
     }
 
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
-    if (((uint32)g & 0xff000000U) == 0){
-        g >>= (int)(8);
+    if (((uint32)g & 0xff000000U) == 0) {
+        g >>= 8;
     } else {
         g = ~(g >> 31) & 0xffff;
     }
 
     var b = yy1 + 116130 * cb1;
-    if (((uint32)b & 0xff000000U) == 0){
-        b >>= (int)(8);
+    if (((uint32)b & 0xff000000U) == 0) {
+        b >>= 8;
     } else {
         b = ~(b >> 31) & 0xffff;
     }
@@ -265,22 +265,22 @@ public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     // but uses fewer branches and is faster.
     // The code below to compute g and b uses a similar pattern.
     var r = yy1 + 91881 * cr1;
-    if (((uint32)r & 0xff000000U) == 0){
-        r >>= (int)(8);
+    if (((uint32)r & 0xff000000U) == 0) {
+        r >>= 8;
     } else {
         r = ~(r >> 31) & 0xffff;
     }
 
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
-    if (((uint32)g & 0xff000000U) == 0){
-        g >>= (int)(8);
+    if (((uint32)g & 0xff000000U) == 0) {
+        g >>= 8;
     } else {
         g = ~(g >> 31) & 0xffff;
     }
 
     var b = yy1 + 116130 * cb1;
-    if (((uint32)b & 0xff000000U) == 0){
-        b >>= (int)(8);
+    if (((uint32)b & 0xff000000U) == 0) {
+        b >>= 8;
     } else {
         b = ~(b >> 31) & 0xffff;
     }

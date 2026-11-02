@@ -10,9 +10,9 @@ partial struct block {
     /*embed*/ internal blockExpanded blockExpanded;
 }
 
-internal static ж<Block> newBlock(ж<Block> Ꮡc, slice<byte> key) {
-    newBlockExpanded(Ꮡc.of(Block.ᏑblockExpanded), key);
-    return Ꮡc;
+internal static ж<Block> newBlock(ж<Block> c, slice<byte> key) {
+    newBlockExpanded(c.of(Block.ᏑblockExpanded), key);
+    return c;
 }
 
 internal static void encryptBlock(ref Block c, slice<byte> dst, slice<byte> src) {

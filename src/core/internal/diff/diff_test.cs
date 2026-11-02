@@ -20,29 +20,32 @@ internal static slice<byte> clean(slice<byte> text) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataTxtˢ = "testdata/*.txt"u8;
-internal static readonly @string haveˢ = "have"u8;
-internal static readonly @string wantˢ = "want"u8;
+internal static ref readonly @string testdataTxtˢ => ref testdataTxtˢᵇ;
+private static readonly @string testdataTxtˢᵇ = "testdata/*.txt"u8;
+internal static ref readonly @string haveˢ => ref haveˢᵇ;
+private static readonly @string haveˢᵇ = "have"u8;
+internal static ref readonly @string wantˢ => ref wantˢᵇ;
+private static readonly @string wantˢᵇ = "want"u8;
 
-public static void Test(ж<testing.T> Ꮡt) {
+public static void Test(ж<testing.T> t) {
     var (files, _) = filepath.Glob(testdataTxtˢ);
     if (len(files) == 0) {
-        Ꮡt.Fatalf("no testdata"u8);
+        t.Fatalf("no testdata");
     }
 
     foreach (var (_, @file) in files) {
-        Ꮡt.Run(filepath.Base(@file), (ж<testing.T> tΔ1) => {
+        t.Run(filepath.Base(@file), (ж<testing.T> tΔ1) => {
             var (a, err) = txtar.ParseFile(@file);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
-            if (len((~a).Files) != 3 || (~a).Files[2].Name != "diff"u8) {
-                tΔ1.Fatalf("%s: want three files, third named \"diff\""u8, @file);
+            if (len(a.Files) != 3 || a.Files[2].Name != "diff"u8) {
+                tΔ1.Fatalf("%s: want three files, third named \"diff\"", @file);
             }
-            var diffs = Diff((~a).Files[0].Name, clean((~a).Files[0].Data), (~a).Files[1].Name, clean((~a).Files[1].Data));
-            var want = clean((~a).Files[2].Data);
+            var diffs = Diff(a.Files[0].Name, clean(a.Files[0].Data), a.Files[1].Name, clean(a.Files[1].Data));
+            var want = clean(a.Files[2].Data);
             if (!bytes.Equal(diffs, want)) {
-                tΔ1.Fatalf("%s: have:\n%s\nwant:\n%s\n%s"u8, @file,
+                tΔ1.Fatalf("%s: have:\n%s\nwant:\n%s\n%s", @file,
                     diffs, want, Diff(haveˢ, diffs, wantˢ, want));
             }
         });

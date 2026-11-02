@@ -10,14 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +48,15 @@ using static go.debug.gosym_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(LineTable))]
+[assembly: GoFieldAccess(typeof(Obj))]
+[assembly: GoFieldAccess(typeof(Sym))]
+[assembly: GoFieldAccess(typeof(go.debug.gosym_package.Func))]
+[assembly: GoFieldAccess(typeof(lineFromAline_stackEnt))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,8 +66,8 @@ using static go.debug.gosym_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEykAQAMEoKCgoKUgoKUgoK0tLSCpJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCqqKClKjSgoKCAAcQlIKUypamyoKUlLS0tLS0tLS0lKaClIaolIKCgoKCgoKCgoKkgoKCgoKCgoKCpIKCgoKCgoKCgoKktKbkgoK4goKCgoKCgoKCggAHEJTYspKClJaCqLKSgoKCgoKCpoKokoCCpIKCgqiSgIKkgoKCqJKokoKUqLIACRaSqJKCgpSokqiSgpQACBSygqiSqLamlKaAooCigKKAooCqsoK4goKUgoKowoKClIKUlIKCgoKssqSSkoKCpgACEuKCppKSkpKSkoKCgoKUyoKUgoKUgqamlKjigoK4goKUgoLo4oKCuIKClIKCgoKClKaClIKAgqTo4oKCuIKCgqyygoKCgoKClJSUgoKm6OKClIKUlIKCgqaCgoKCpqKq8oKCuIKCtA==", "203-206:1;250-252:2;253-255:3;302-304:1;336-338:1;569-573:1;586-590:1;618-622:1;685-687:1", "", "356=nameOff/1/1/3,funcName/1/1/3")]
-[assembly: go.GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACFGkK7SgoKUgpSU6qLcgriCpoKCpoCCpKyypoKCuJSClMqCqJKCgIKCgsqmpAA5eoKCloKClIKCyoK0tIKkgoKClIKClJSCgoKClIKCgoKUlIKCgoKmgoKUgriCgoKCgpSClIKUgoKmgoKUgsqCgpSCgpSCgqiSgoKCgqaUgoKCgsiClIKClIKCpoKUlK7igoKClIKmgoKUgoKCgoKSgoKCgoKCgqaCgoKCgpSClLSClIKSgoKUgIKktpS0pIKUgqaClIKUgoKUyoKCgpSUpoKUpoKClpKCgIK2gqaCgoKClIKU2oCCpIKoooKCgpS0tPqCgoKCgoKCgoK4koKClIKClLSCgrSCgrbIgpSClKqigoKCgpS0pLaq4oCCpIKClJSs8oKCpoKCgpSmgoKUgoKCgqaqtIKClILIqqKCgoKmqJKCgpSCyAAMHAAJAgAAEJSCgpKUyMiClILI6IKUpoKCppSCuIKCgoKCgpSmgoKSgsiClNaUAAoWgAAKFIIAChaCgoKUgg==", "339-342:1;356-402:2")]
+[assembly: GoPositionMap("debug/gosym/pclntab.go", "pclntab.cs", "AEykAQAMEoKCgoKUgoKUgoK0tLSCpJSmgpKs0oKUgq7igpSCgqYAAhYACAIAAh4ADgKCqqKClKjSgoKCAAcQlIKUypamyoKUlLS0tLS0tLS0lKaClIaolIKCgoKCgoKCgoK0goKCgoKCgoKCtIKCgoKCgoKCgoK0xKbkgoK4goKCgoKCgoKCggAHEJTYsoKClJaCqLKSgoKCgoKCpoKokoCCpIKCgqiSgIKkgoKCqJKokoKUqLIACRaSqJKCgpSokqiSgpQACBSygqiSqLamlKaAooCigKKAooCqsoK4goKUgoKowoKClIKUlIKCgoKsspSCgoKCpgACEuKCpoKCgoKCgoKCgoKUyoKUgoKUgqamlKjigoK4goKUgoLo4oKCuIKClIKCgoKClKaClIKAgqTo4oKCuIKCgqyygoKCgoKClJSUgoKm6OKClIKUlIKCgqaCgoKCpqKq8oKCuIKCtA==", "203-206:1;250-252:2;253-255:3;302-304:1;336-338:1;569-573:1;586-590:1;618-622:1;685-687:1", "", "360=nameOff/1/1/3,funcName/1/1/3")]
+[assembly: GoPositionMap("debug/gosym/symtab.go", "symtab.cs", "ACFGkK7SgoKUgpSUAAgKotyCuIKmgoKmgIKkrLKmgoK4lIKUyoKokoKAgoKCyqakADl6goKWgoKUgoLKgrS0gqSCgoKUgoKUlIKCgoKUgoKCgpSUgoKCgqaCgpSCuIKCgoKClIKUgpSCgqaCgpSCyoKClIKClIKCqJKCgoKCppSCgoKCyIKUgoKUgoKmgpSUruKCgoKUgqaCgpSCgoKCgpKCgoKCgoKCpoKCgoKClIKUtIKUgoKCgpSAgqS2lLSkgpSCpoKUgpSCgpTKgoKClJSmgpSmgoKWkoKAgraCpoKCgoKUgpTagIKkgqiigoKClLS0+oKCgoKCgoKCgriCgoKUgoKUtIKCtIKCtsiClIKUqqKCgoKClLSktqrigIKkgoKUlKzygoKmgoKClKaCgpSCgoKCpqq0goKUgsiqooKCgqaokoKClILIAA0cAAkCAAAQlIKCgpTIyIKUgsjogpSmgoKmlIK4goKCgoKClKaCgoKCyIKU1pQAChaAAAoUggAKFoKCgpSC", "339-342:1;356-402:2")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

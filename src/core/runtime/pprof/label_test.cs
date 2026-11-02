@@ -16,8 +16,7 @@ using static go.runtime.pprof_package;
 partial class pprof_internal_test_package {
 
 internal static slice<label.Label> labelsSorted(context.Context ctx) {
-    ref var ls = ref heap<slice<label.Label>>(out var Ꮡls);
-    ls = new label.Label[]{}.slice();
+    ref var ls = ref heap<slice<label.Label>>(slice<label.Label>([]), out var Ꮡls);
     ForLabels(ctx, (@string key, @string value) => {
         Ꮡls.ValueSlot = append(Ꮡls.ValueSlot, new label.Label(Key: key, Value: value));
         return true;
@@ -27,21 +26,29 @@ internal static slice<label.Label> labelsSorted(context.Context ctx) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyˢ = "key"u8;
-internal static readonly @string valueˢ = "value"u8;
-internal static readonly @string key2ˢ = "key2"u8;
-internal static readonly @string value2ˢ = "value2"u8;
-internal static readonly @string value3ˢ = "value3"u8;
-internal static readonly @string key4ˢ = "key4"u8;
-internal static readonly @string value4aˢ = "value4a"u8;
-internal static readonly @string value4bˢ = "value4b"u8;
+internal static ref readonly @string keyˢ => ref keyˢᵇ;
+private static readonly @string keyˢᵇ = "key"u8;
+internal static ref readonly @string valueˢ => ref valueˢᵇ;
+private static readonly @string valueˢᵇ = "value"u8;
+internal static ref readonly @string key2ˢ => ref key2ˢᵇ;
+private static readonly @string key2ˢᵇ = "key2"u8;
+internal static ref readonly @string value2ˢ => ref value2ˢᵇ;
+private static readonly @string value2ˢᵇ = "value2"u8;
+internal static ref readonly @string value3ˢ => ref value3ˢᵇ;
+private static readonly @string value3ˢᵇ = "value3"u8;
+internal static ref readonly @string key4ˢ => ref key4ˢᵇ;
+private static readonly @string key4ˢᵇ = "key4"u8;
+internal static ref readonly @string value4aˢ => ref value4aˢᵇ;
+private static readonly @string value4aˢᵇ = "value4a"u8;
+internal static ref readonly @string value4bˢ => ref value4bˢᵇ;
+private static readonly @string value4bˢᵇ = "value4b"u8;
 
-public static void TestContextLabels(ж<testing.T> Ꮡt) {
+public static void TestContextLabels(ж<testing.T> t) {
     // Background context starts with no labels.
     var ctx = context.Background();
     var labels = labelsSorted(ctx);
     if (len(labels) != 0) {
-        Ꮡt.Errorf("labels on background context: want [], got %v "u8, labels);
+        t.Errorf("labels on background context: want [], got %v ", labels);
     }
 
     // Add a single label.
@@ -49,77 +56,84 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
     // Retrieve it with Label.
     var (v, ok) = Label(ctx, keyˢ);
     if (!ok || v != "value"u8) {
-        Ꮡt.Errorf(@"Label(ctx, ""key""): got %v, %v; want ""value"", ok"u8, v, ok);
+        t.Errorf(@"Label(ctx, ""key""): got %v, %v; want ""value"", ok", v, ok);
     }
     var gotLabels = labelsSorted(ctx);
-    var wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value"u8)}.slice();
+    var wantLabels = slice<label.Label>([new(Key: "key", Value: "value")]);
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
-        Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
+        t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
 
     // Add a label with a different key.
     ctx = WithLabels(ctx, Labels(key2ˢ, value2ˢ));
     (v, ok) = Label(ctx, key2ˢ);
     if (!ok || v != "value2"u8) {
-        Ꮡt.Errorf(@"Label(ctx, ""key2""): got %v, %v; want ""value2"", ok"u8, v, ok);
+        t.Errorf(@"Label(ctx, ""key2""): got %v, %v; want ""value2"", ok", v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value"u8), new(Key: "key2"u8, Value: "value2"u8)}.slice();
+    wantLabels = slice<label.Label>([new(Key: "key", Value: "value"), new(Key: "key2", Value: "value2")]);
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
-        Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
+        t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
 
     // Add label with first key to test label replacement.
     ctx = WithLabels(ctx, Labels(keyˢ, value3ˢ));
     (v, ok) = Label(ctx, keyˢ);
     if (!ok || v != "value3"u8) {
-        Ꮡt.Errorf(@"Label(ctx, ""key3""): got %v, %v; want ""value3"", ok"u8, v, ok);
+        t.Errorf(@"Label(ctx, ""key3""): got %v, %v; want ""value3"", ok", v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value3"u8), new(Key: "key2"u8, Value: "value2"u8)}.slice();
+    wantLabels = slice<label.Label>([new(Key: "key", Value: "value3"), new(Key: "key2", Value: "value2")]);
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
-        Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
+        t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
 
     // Labels called with two labels with the same key should pick the second.
     ctx = WithLabels(ctx, Labels(key4ˢ, value4aˢ, key4ˢ, value4bˢ));
     (v, ok) = Label(ctx, key4ˢ);
     if (!ok || v != "value4b"u8) {
-        Ꮡt.Errorf(@"Label(ctx, ""key4""): got %v, %v; want ""value4b"", ok"u8, v, ok);
+        t.Errorf(@"Label(ctx, ""key4""): got %v, %v; want ""value4b"", ok", v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value3"u8), new(Key: "key2"u8, Value: "value2"u8), new(Key: "key4"u8, Value: "value4b"u8)}.slice();
+    wantLabels = slice<label.Label>([new(Key: "key", Value: "value3"), new(Key: "key2", Value: "value2"), new(Key: "key4", Value: "value4b")]);
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
-        Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
+        t.Errorf("(sorted) labels on context: got %v, want %v", gotLabels, wantLabels);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ = "foo"u8;
-internal static readonly @string barˢ = "bar"u8;
-internal static readonly @string key1ˢ = "key1"u8;
-internal static readonly @string value1ˢ = "value1"u8;
-internal static readonly @string key3ˢ = "key3"u8;
-internal static readonly @string key4WithNewlineˢ = "key4WithNewline"u8;
-internal static readonly @string value4ˢ = "\nvalue4"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
+internal static ref readonly @string barˢ => ref barˢᵇ;
+private static readonly @string barˢᵇ = "bar"u8;
+internal static ref readonly @string key1ˢ => ref key1ˢᵇ;
+private static readonly @string key1ˢᵇ = "key1"u8;
+internal static ref readonly @string value1ˢ => ref value1ˢᵇ;
+private static readonly @string value1ˢᵇ = "value1"u8;
+internal static ref readonly @string key3ˢ => ref key3ˢᵇ;
+private static readonly @string key3ˢᵇ = "key3"u8;
+internal static ref readonly @string key4WithNewlineˢ => ref key4WithNewlineˢᵇ;
+private static readonly @string key4WithNewlineˢᵇ = "key4WithNewline"u8;
+internal static ref readonly @string value4ˢ => ref value4ˢᵇ;
+private static readonly @string value4ˢᵇ = "\nvalue4"u8;
 
 internal partial struct TestLabelMapStringer_type /*dyn*/ {
     internal global::go.runtime.pprof_package.labelMap m;
     internal @string expected;
 }
 
-public static void TestLabelMapStringer(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestLabelMapStringer_type[]{
+public static void TestLabelMapStringer(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestLabelMapStringer_type>([
         new(
-            m: new labelMap(nil
+            m: new labelMap(
                 // empty map
             ),
-            expected: "{}"u8
+            expected: "{}"
         ), new(
         m: new labelMap(
             label.NewSet(Labels(fooˢ, barˢ).list)
         ),
-        expected: @"{""foo"":""bar""}"u8
+        expected: @"{""foo"":""bar""}"
     ), new(
         m: new labelMap(
             label.NewSet(Labels(
@@ -129,32 +143,40 @@ public static void TestLabelMapStringer(ж<testing.T> Ꮡt) {
                 key3ˢ, value3ˢ,
                 key4WithNewlineˢ, value4ˢ).list)
         ),
-        expected: @"{""foo"":""bar"", ""key1"":""value1"", ""key2"":""value2"", ""key3"":""value3"", ""key4WithNewline"":""\nvalue4""}"u8
+        expected: @"{""foo"":""bar"", ""key1"":""value1"", ""key2"":""value2"", ""key3"":""value3"", ""key4WithNewline"":""\nvalue4""}"
     )
-    }.slice()) {
+    ])) {
         ref var tbl = ref heap(new TestLabelMapStringer_type(), out var Ꮡtbl);
         tbl = vᴛ1;
 
         {
             @string got = Ꮡtbl.of(TestLabelMapStringer_type.Ꮡm).String(); if (tbl.expected != got) {
-                Ꮡt.Errorf("%#v.String() = %q; want %q"u8, tbl.m, got, tbl.expected);
+                t.Errorf("%#v.String() = %q; want %q", tbl.m, got, tbl.expected);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string setOneˢ = "set-one"u8;
-internal static readonly @string mergeOneˢ = "merge-one"u8;
-internal static readonly @string val1ˢ = "val1"u8;
-internal static readonly @string overwriteOneˢ = "overwrite-one"u8;
-internal static readonly @string valˢ = "val"u8;
-internal static readonly @string setManyˢ = "set-many"u8;
-internal static readonly @string mergeManyˢ = "merge-many"u8;
-internal static readonly @string overwriteManyˢ = "overwrite-many"u8;
+internal static ref readonly @string setOneˢ => ref setOneˢᵇ;
+private static readonly @string setOneˢᵇ = "set-one"u8;
+internal static ref readonly @string mergeOneˢ => ref mergeOneˢᵇ;
+private static readonly @string mergeOneˢᵇ = "merge-one"u8;
+internal static ref readonly @string val1ˢ => ref val1ˢᵇ;
+private static readonly @string val1ˢᵇ = "val1"u8;
+internal static ref readonly @string overwriteOneˢ => ref overwriteOneˢᵇ;
+private static readonly @string overwriteOneˢᵇ = "overwrite-one"u8;
+internal static ref readonly @string valˢ => ref valˢᵇ;
+private static readonly @string valˢᵇ = "val"u8;
+internal static ref readonly @string setManyˢ => ref setManyˢᵇ;
+private static readonly @string setManyˢᵇ = "set-many"u8;
+internal static ref readonly @string mergeManyˢ => ref mergeManyˢᵇ;
+private static readonly @string mergeManyˢᵇ = "merge-many"u8;
+internal static ref readonly @string overwriteManyˢ => ref overwriteManyˢᵇ;
+private static readonly @string overwriteManyˢᵇ = "overwrite-many"u8;
 
-public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(setOneˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkLabels(ж<testing.B> b) {
+    b.Run(setOneˢ, (ж<testing.B> bΔ1) => {
         bΔ1.ReportAllocs();
         bΔ1.ResetTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -163,7 +185,7 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
         }
     });
 
-    Ꮡb.Run(mergeOneˢ, (ж<testing.B> bΔ2) => {
+    b.Run(mergeOneˢ, (ж<testing.B> bΔ2) => {
         var ctx = WithLabels(context.Background(), Labels(key1ˢ, val1ˢ));
 
         bΔ2.ReportAllocs();
@@ -174,7 +196,7 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
         }
     });
 
-    Ꮡb.Run(overwriteOneˢ, (ж<testing.B> bΔ3) => {
+    b.Run(overwriteOneˢ, (ж<testing.B> bΔ3) => {
         var ctx = WithLabels(context.Background(), Labels(keyˢ, valˢ));
 
         bΔ3.ReportAllocs();
@@ -185,7 +207,7 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
         }
     });
 
-    foreach (var (_, scenario) in new @string[]{"ordered"u8, "unordered"u8}.slice()) {
+    foreach (var (_, scenario) in slice<@string>(["ordered", "unordered"])) {
         ref var labels = ref heap<slice<@string>>(out var Ꮡlabels);
         for (nint i = 0; i < 10; i++) {
             labels = append(labels, fmt.Sprintf("key%03d"u8, i), fmt.Sprintf("value%03d"u8, i));
@@ -194,7 +216,7 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
             (labels[0], labels[len(labels) - 1]) = (labels[len(labels) - 1], labels[0]);
         }
 
-        Ꮡb.Run(scenario, (ж<testing.B> bΔ4) => {
+        b.Run(scenario, (ж<testing.B> bΔ4) => {
             bΔ4.Run(setManyˢ, (ж<testing.B> bΔ5) => {
                 bΔ5.ReportAllocs();
                 bΔ5.ResetTimer();

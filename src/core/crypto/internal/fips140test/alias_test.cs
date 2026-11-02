@@ -16,7 +16,7 @@ partial struct aliasingTestsᴛ1 /*dyn*/ {
     internal slice<byte> x, y;
     internal bool anyOverlap, inexactOverlap;
 }
-internal static slice<aliasingTestsᴛ1> aliasingTests = new aliasingTestsᴛ1[]{
+internal static slice<aliasingTestsᴛ1> aliasingTests = slice<aliasingTestsᴛ1>([
     new(a[..], b[..], false, false),
     new(a[..], b[..0], false, false),
     new(a[..], b[..50], false, false),
@@ -25,28 +25,28 @@ internal static slice<aliasingTestsᴛ1> aliasingTests = new aliasingTestsᴛ1[]
     new(a[..51], a[50..], true, true),
     new(a[..], a[..], true, false),
     new(a[..50], a[..60], true, false),
-    new(a[..], default!, false, false),
-    new(default!, default!, false, false),
+    new(a[..], default, false, false),
+    new(default, default, false, false),
     new(a[..], a[..0], false, false),
     new(a[..10], a.slice(0, 10, 20), true, false),
     new(a[..10], a.slice(5, 10, 20), true, true)
-}.slice();
+]);
 
-internal static void testAliasing(ж<testing.T> Ꮡt, nint i, slice<byte> x, slice<byte> y, bool anyOverlap, bool inexactOverlap) {
+internal static void testAliasing(ж<testing.T> t, nint i, slice<byte> x, slice<byte> y, bool anyOverlap, bool inexactOverlap) {
     var any = alias.AnyOverlap(x, y);
     if (any != anyOverlap) {
-        Ꮡt.Errorf("%d: wrong AnyOverlap result, expected %v, got %v"u8, i, anyOverlap, any);
+        t.Errorf("%d: wrong AnyOverlap result, expected %v, got %v", i, anyOverlap, any);
     }
     var inexact = alias.InexactOverlap(x, y);
     if (inexact != inexactOverlap) {
-        Ꮡt.Errorf("%d: wrong InexactOverlap result, expected %v, got %v"u8, i, inexactOverlap, any);
+        t.Errorf("%d: wrong InexactOverlap result, expected %v, got %v", i, inexactOverlap, any);
     }
 }
 
-public static void TestAliasing(ж<testing.T> Ꮡt) {
+public static void TestAliasing(ж<testing.T> t) {
     foreach (var (i, tt) in aliasingTests) {
-        testAliasing(Ꮡt, i, tt.x, tt.y, tt.anyOverlap, tt.inexactOverlap);
-        testAliasing(Ꮡt, i, tt.y, tt.x, tt.anyOverlap, tt.inexactOverlap);
+        testAliasing(t, i, tt.x, tt.y, tt.anyOverlap, tt.inexactOverlap);
+        testAliasing(t, i, tt.y, tt.x, tt.anyOverlap, tt.inexactOverlap);
     }
 }
 

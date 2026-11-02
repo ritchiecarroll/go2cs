@@ -7,7 +7,8 @@ namespace go;
 partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cannotOpenStandardFdsˢ = "cannot open standard fds"u8;
+internal static ref readonly @string cannotOpenStandardFdsˢ => ref cannotOpenStandardFdsˢᵇ;
+private static readonly @string cannotOpenStandardFdsˢᵇ = "cannot open standard fds"u8;
 
 internal static void checkfds() {
     if (islibrary || isarchive) {
@@ -31,17 +32,16 @@ internal static void checkfds() {
         }
 
         if (errno != EBADF) {
-            print((@string)"runtime: unexpected error while checking standard file descriptor "u8, i, (@string)", errno="u8, errno, (@string)"\n"u8);
+            print((@string)"runtime: unexpected error while checking standard file descriptor ", i, (@string)", errno=", errno, (@string)"\n");
             @throw(cannotOpenStandardFdsˢ);
         }
 
         {
-            var retΔ1 = open(Ꮡ(devNull, 0), O_RDWR, 0); if (retΔ1 < 0){
-                print((@string)"runtime: standard file descriptor "u8, i, (@string)" closed, unable to open /dev/null, errno="u8, errno, (@string)"\n"u8);
+            var retΔ1 = open(Ꮡ(devNull, 0), O_RDWR, 0); if (retΔ1 < 0) {
+                print((@string)"runtime: standard file descriptor ", i, (@string)" closed, unable to open /dev/null, errno=", errno, (@string)"\n");
                 @throw(cannotOpenStandardFdsˢ);
-            } else 
-            if (retΔ1 != (int32)i) {
-                print((@string)"runtime: opened unexpected file descriptor "u8, retΔ1, (@string)" when attempting to open "u8, i, (@string)"\n"u8);
+            } else if (retΔ1 != (int32)i) {
+                print((@string)"runtime: opened unexpected file descriptor ", retΔ1, (@string)" when attempting to open ", i, (@string)"\n");
                 @throw(cannotOpenStandardFdsˢ);
             }
         }

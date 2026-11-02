@@ -23,7 +23,7 @@ partial struct CovMetaBlob {
     public array<byte> Hash = new(16);
     public @string PkgPath;
     public nint PkgID;
-    public uint8 CounterMode; // coverage.CounterMode
+    public uint8 CounterMode;        // coverage.CounterMode
     public uint8 CounterGranularity; // coverage.CounterGranularity
 }
 
@@ -75,7 +75,7 @@ public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, /*[16]*/ array<byte
         CounterGranularity: cgran
     ));
     if (pkgid != -1) {
-        if (Meta.PkgMap == default!) {
+        if (Meta.PkgMap == nil) {
             Meta.PkgMap = new map<nint, nint>();
         }
         {

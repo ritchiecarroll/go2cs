@@ -12,65 +12,67 @@ using static go.net.textproto_package;
 partial class textproto_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooDˢ = "foo %d"u8;
+internal static ref readonly @string fooDˢ => ref fooDˢᵇ;
+private static readonly @string fooDˢᵇ = "foo %d"u8;
 
-public static void TestPrintfLine(ж<testing.T> Ꮡt) {
+public static void TestPrintfLine(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
     var err = w.PrintfLine(fooDˢ, (nint)123);
     {
-        @string s = buf.String(); if (s != "foo 123\r\n"u8 || err != default!) {
-            Ꮡt.Fatalf("s=%q; err=%s"u8, s, err);
+        @string s = buf.String(); if (s != "foo 123\r\n"u8 || err != nil) {
+            t.Fatalf("s=%q; err=%s", s, err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string abcDefGhiJklˢ = "abc\r\n..def\r\n...ghi\r\n..jkl\r\n..\r\n.\r\n"u8;
+internal static ref readonly @string abcDefGhiJklˢ => ref abcDefGhiJklˢᵇ;
+private static readonly @string abcDefGhiJklˢᵇ = "abc\r\n..def\r\n...ghi\r\n..jkl\r\n..\r\n.\r\n"u8;
 
-public static void TestDotWriter(ж<testing.T> Ꮡt) {
+public static void TestDotWriter(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
     var d = w.DotWriter();
     var (n, err) = d.Write(slice<byte>("abc\n.def\n..ghi\n.jkl\n."u8));
-    if (n != 21 || err != default!) {
-        Ꮡt.Fatalf("Write: %d, %s"u8, n, err);
+    if (n != 21 || err != nil) {
+        t.Fatalf("Write: %d, %s", n, err);
     }
     d.Close();
     @string want = abcDefGhiJklˢ;
     {
         @string s = buf.String(); if (s != want) {
-            Ꮡt.Fatalf("wrote %q"u8, s);
+            t.Fatalf("wrote %q", s);
         }
     }
 }
 
-public static void TestDotWriterCloseEmptyWrite(ж<testing.T> Ꮡt) {
+public static void TestDotWriterCloseEmptyWrite(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
     var d = w.DotWriter();
-    var (n, err) = d.Write(new byte[]{}.slice());
-    if (n != 0 || err != default!) {
-        Ꮡt.Fatalf("Write: %d, %s"u8, n, err);
+    var (n, err) = d.Write(slice<byte>([]));
+    if (n != 0 || err != nil) {
+        t.Fatalf("Write: %d, %s", n, err);
     }
     d.Close();
-    @string want = "\r\n.\r\n"u8;
+    @string want = "\r\n.\r\n";
     {
         @string s = buf.String(); if (s != want) {
-            Ꮡt.Fatalf("wrote %q; want %q"u8, s, want);
+            t.Fatalf("wrote %q; want %q", s, want);
         }
     }
 }
 
-public static void TestDotWriterCloseNoWrite(ж<testing.T> Ꮡt) {
+public static void TestDotWriterCloseNoWrite(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(bufio.NewWriter(new textproto_internal_test_package.strings_BuilderжWriter(Ꮡbuf)));
     var d = w.DotWriter();
     d.Close();
-    @string want = "\r\n.\r\n"u8;
+    @string want = "\r\n.\r\n";
     {
         @string s = buf.String(); if (s != want) {
-            Ꮡt.Fatalf("wrote %q; want %q"u8, s, want);
+            t.Fatalf("wrote %q; want %q", s, want);
         }
     }
 }

@@ -7,7 +7,7 @@ partial class norm_package {
 
 partial struct valueRange {
     internal uint16 value; // header: value:stride
-    internal byte lo, hi;   // header: lo:n
+    internal byte lo, hi;  // header: lo:n
 }
 
 partial struct sparseBlocks {
@@ -45,7 +45,7 @@ internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
         if (r.lo <= b && b <= r.hi) {
             return (uint16)(r.value + (uint16)((byte)(b - r.lo)) * header.value);
         }
-        if (b < r.lo){
+        if (b < r.lo) {
             hi = m;
         } else {
             lo = (uint16)(m + 1);

@@ -28,49 +28,49 @@ internal partial struct gunzipTest {
 }
 
 internal static slice<gunzipTest> gunzipTests;
-internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
+internal static void initᴛgunzipTests() { gunzipTests = slice<gunzipTest>([
     new( // has 1 empty fixed-huffman block
-        "empty.txt"u8,
-        "empty.txt"u8,
-        ""u8,
-        new byte[]{
+        "empty.txt",
+        "empty.txt",
+        "",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xf7, 0x5e, 0x14, 0x4a,
             0x00, 0x03, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0x03, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new(
-        ""u8,
-        "empty - with no file name"u8,
-        ""u8,
-        new byte[]{
+        "",
+        "empty - with no file name",
+        "",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88,
             0x00, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new( // has 1 non-empty fixed huffman block
-        "hello.txt"u8,
-        "hello.txt"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "hello.txt",
+        "hello.txt",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
             0xc9, 0x57, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0xe1,
             0x02, 0x00, 0x2d, 0x3b, 0x08, 0xaf, 0x0c, 0x00,
             0x00, 0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new( // concatenation
-        "hello.txt"u8,
-        "hello.txt x2"u8,
+        "hello.txt",
+        "hello.txt x2",
         "hello world\n"u8 + "hello world\n"u8,
-        new byte[]{
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
@@ -83,14 +83,14 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
             0xc9, 0x57, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0xe1,
             0x02, 0x00, 0x2d, 0x3b, 0x08, 0xaf, 0x0c, 0x00,
             0x00, 0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new( // has a fixed huffman block with some length-distance pairs
-        "shesells.txt"u8,
-        "shesells.txt"u8,
-        "she sells seashells by the seashore\n"u8,
-        new byte[]{
+        "shesells.txt",
+        "shesells.txt",
+        "she sells seashells by the seashore\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0x72, 0x66, 0x8b, 0x4a,
             0x00, 0x03, 0x73, 0x68, 0x65, 0x73, 0x65, 0x6c,
             0x6c, 0x73, 0x2e, 0x74, 0x78, 0x74, 0x00, 0x2b,
@@ -99,14 +99,14 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
             0xa5, 0x42, 0x09, 0x58, 0x18, 0x28, 0x90, 0x5f,
             0x94, 0xca, 0x05, 0x00, 0x76, 0xb0, 0x3b, 0xeb,
             0x24, 0x00, 0x00, 0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new( // has dynamic huffman blocks
-        "gettysburg"u8,
-        "gettysburg"u8,
+        "gettysburg",
+        "gettysburg",
         "  Four score and seven years ago our fathers brought forth on\n"u8 + "this continent, a new nation, conceived in Liberty, and dedicated\n"u8 + "to the proposition that all men are created equal.\n"u8 + "  Now we are engaged in a great Civil War, testing whether that\n"u8 + "nation, or any nation so conceived and so dedicated, can long\n"u8 + "endure.\n"u8 + "  We are met on a great battle-field of that war.\n"u8 + "  We have come to dedicate a portion of that field, as a final\n"u8 + "resting place for those who here gave their lives that that\n"u8 + "nation might live.  It is altogether fitting and proper that\n"u8 + "we should do this.\n"u8 + "  But, in a larger sense, we can not dedicate — we can not\n"u8 + "consecrate — we can not hallow — this ground.\n"u8 + "  The brave men, living and dead, who struggled here, have\n"u8 + "consecrated it, far above our poor power to add or detract.\n"u8 + "The world will little note, nor long remember what we say here,\n"u8 + "but it can never forget what they did here.\n"u8 + "  It is for us the living, rather, to be dedicated here to the\n"u8 + "unfinished work which they who fought here have thus far so\n"u8 + "nobly advanced.  It is rather for us to be here dedicated to\n"u8 + "the great task remaining before us — that from these honored\n"u8 + "dead we take increased devotion to that cause for which they\n"u8 + "gave the last full measure of devotion —\n"u8 + "  that we here highly resolve that these dead shall not have\n"u8 + "died in vain — that this nation, under God, shall have a new\n"u8 + "birth of freedom — and that government of the people, by the\n"u8 + "people, for the people, shall not perish from this earth.\n"u8 + "\n"u8 + "Abraham Lincoln, November 19, 1863, Gettysburg, Pennsylvania\n"u8,
-        new byte[]{
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xd1, 0x12, 0x2b, 0x4a,
             0x00, 0x03, 0x67, 0x65, 0x74, 0x74, 0x79, 0x73,
             0x62, 0x75, 0x72, 0x67, 0x00, 0x65, 0x54, 0xcd,
@@ -209,70 +209,70 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
             0xd6, 0xbd, 0x8c, 0x5b, 0x46, 0xd2, 0x7e, 0x48,
             0x4a, 0x65, 0x8f, 0x08, 0x42, 0x60, 0xf7, 0x0f,
             0xb9, 0x16, 0x0b, 0x0c, 0x1a, 0x06, 0x00, 0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new( // has 1 non-empty fixed huffman block then garbage
-        "hello.txt"u8,
-        "hello.txt + garbage"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "hello.txt",
+        "hello.txt + garbage",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
             0xc9, 0x57, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0xe1,
             0x02, 0x00, 0x2d, 0x3b, 0x08, 0xaf, 0x0c, 0x00,
-            0x00, 0x00, (rune)'g', (rune)'a', (rune)'r', (rune)'b', (rune)'a', (rune)'g', (rune)'e', (rune)'!', (rune)'!', (rune)'!'
-        }.slice(),
+            0x00, 0x00, (byte)'g', (byte)'a', (byte)'r', (byte)'b', (byte)'a', (byte)'g', (byte)'e', (byte)'!', (byte)'!', (byte)'!'
+        ]),
         ErrHeader
     ),
     new( // has 1 non-empty fixed huffman block not enough header
-        "hello.txt"u8,
-        "hello.txt + garbage"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "hello.txt",
+        "hello.txt + garbage",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
             0xc9, 0x57, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0xe1,
             0x02, 0x00, 0x2d, 0x3b, 0x08, 0xaf, 0x0c, 0x00,
             0x00, 0x00, gzipID1
-        }.slice(),
+        ]),
         io.ErrUnexpectedEOF
     ),
     new( // has 1 non-empty fixed huffman block but corrupt checksum
-        "hello.txt"u8,
-        "hello.txt + corrupt checksum"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "hello.txt",
+        "hello.txt + corrupt checksum",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
             0xc9, 0x57, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0xe1,
             0x02, 0x00, 0xff, 0xff, 0xff, 0xff, 0x0c, 0x00,
             0x00, 0x00
-        }.slice(),
+        ]),
         ErrChecksum
     ),
     new( // has 1 non-empty fixed huffman block but corrupt size
-        "hello.txt"u8,
-        "hello.txt + corrupt size"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "hello.txt",
+        "hello.txt + corrupt size",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
             0xc9, 0x57, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0xe1,
             0x02, 0x00, 0x2d, 0x3b, 0x08, 0xaf, 0xff, 0x00,
             0x00, 0x00
-        }.slice(),
+        ]),
         ErrChecksum
     ),
     new(
-        "f1l3n4m3.tXt"u8,
-        "header with all fields used"u8,
-        ""u8,
-        new byte[]{
+        "f1l3n4m3.tXt",
+        "header with all fields used",
+        "",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x1e, 0x70, 0xf0, 0xf9, 0x4a,
             0x00, 0xaa, 0x09, 0x00, 0x7a, 0x7a, 0x05, 0x00,
             0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x31, 0x6c,
@@ -312,34 +312,34 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
             0xff, 0x00, 0x92, 0xfd, 0x01, 0x00, 0x00, 0xff,
             0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00
-        }.slice(),
-        default!
+        ]),
+        default
     ),
     new(
-        ""u8,
-        "truncated gzip file amid raw-block"u8,
-        "hello"u8,
-        new byte[]{
+        "",
+        "truncated gzip file amid raw-block",
+        "hello",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
             0x00, 0x0c, 0x00, 0xf3, 0xff, 0x68, 0x65, 0x6c, 0x6c, 0x6f
-        }.slice(),
+        ]),
         io.ErrUnexpectedEOF
     ),
     new(
-        ""u8,
-        "truncated gzip file amid fixed-block"u8,
-        "He"u8,
-        new byte[]{
+        "",
+        "truncated gzip file amid fixed-block",
+        "He",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff,
             0xf2, 0x48, 0xcd
-        }.slice(),
+        ]),
         io.ErrUnexpectedEOF
     ),
     new(
-        "hello.txt"u8,
-        "gzip header with truncated name"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "hello.txt",
+        "gzip header with truncated name",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x08, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
@@ -348,14 +348,14 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
             0x00, 0x00,
             0x1f, 0x8b, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00,
             0x00, 0xff, 0x01
-        }.slice(),
+        ]),
         io.ErrUnexpectedEOF
     ),
     new(
-        ""u8,
-        "gzip header with truncated comment"u8,
-        "hello world\n"u8,
-        new byte[]{
+        "",
+        "gzip header with truncated comment",
+        "hello world\n",
+        slice<byte>([
             0x1f, 0x8b, 0x08, 0x10, 0xc8, 0x58, 0x13, 0x4a,
             0x00, 0x03, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x2e,
             0x74, 0x78, 0x74, 0x00, 0xcb, 0x48, 0xcd, 0xc9,
@@ -364,12 +364,12 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
             0x00, 0x00,
             0x1f, 0x8b, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00,
             0x00, 0xff, 0x01
-        }.slice(),
+        ]),
         io.ErrUnexpectedEOF
     )
-}.slice(); }
+]); }
 
-public static void TestDecompressor(ж<testing.T> Ꮡt) {
+public static void TestDecompressor(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Keep resetting this reader.
@@ -382,43 +382,43 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
             // Test NewReader.
             var @in = bytes.NewReader(tt.gzip);
             var (r2, err) = NewReader(new gzip_test_package.bytes_ReaderжReader(@in));
-            if (err != default!) {
-                Ꮡt.Errorf("%s: NewReader: %s"u8, tt.desc, err);
+            if (err != nil) {
+                t.Errorf("%s: NewReader: %s", tt.desc, err);
                 continue;
             }
             var r2ʗ1 = r2;
             defer(() => r2ʗ1.Close(), ref ᒐ);
-            if (tt.name != (~r2).Name) {
-                Ꮡt.Errorf("%s: got name %s"u8, tt.desc, (~r2).Name);
+            if (tt.name != r2.Name) {
+                t.Errorf("%s: got name %s", tt.desc, r2.Name);
             }
             b.Reset();
             (var n, err) = io.Copy(new gzip_test_package.bytes_BufferжWriter(b), new gzip_test_package.gzip_ReaderжReader(r2));
             if (!AreEqual(err, tt.err)) {
-                Ꮡt.Errorf("%s: io.Copy: %v want %v"u8, tt.desc, err, tt.err);
+                t.Errorf("%s: io.Copy: %v want %v", tt.desc, err, tt.err);
             }
             @string s = b.String();
             if (s != tt.raw) {
-                Ꮡt.Errorf("%s: got %d-byte %q want %d-byte %q"u8, tt.desc, n, s, len(tt.raw), tt.raw);
+                t.Errorf("%s: got %d-byte %q want %d-byte %q", tt.desc, n, s, len(tt.raw), tt.raw);
             }
 
             // Test Reader.Reset.
             @in = bytes.NewReader(tt.gzip);
             err = r1.Reset(new gzip_test_package.bytes_ReaderжReader(@in));
-            if (err != default!) {
-                Ꮡt.Errorf("%s: Reset: %s"u8, tt.desc, err);
+            if (err != nil) {
+                t.Errorf("%s: Reset: %s", tt.desc, err);
                 continue;
             }
-            if (tt.name != (~r1).Name) {
-                Ꮡt.Errorf("%s: got name %s"u8, tt.desc, (~r1).Name);
+            if (tt.name != r1.Name) {
+                t.Errorf("%s: got name %s", tt.desc, r1.Name);
             }
             b.Reset();
             (n, err) = io.Copy(new gzip_test_package.bytes_BufferжWriter(b), new gzip_test_package.gzip_ReaderжReader(r1));
             if (!AreEqual(err, tt.err)) {
-                Ꮡt.Errorf("%s: io.Copy: %v want %v"u8, tt.desc, err, tt.err);
+                t.Errorf("%s: io.Copy: %v want %v", tt.desc, err, tt.err);
             }
             s = b.String();
             if (s != tt.raw) {
-                Ꮡt.Errorf("%s: got %d-byte %q want %d-byte %q"u8, tt.desc, n, s, len(tt.raw), tt.raw);
+                t.Errorf("%s: got %d-byte %q want %d-byte %q", tt.desc, n, s, len(tt.raw), tt.raw);
             }
         }
     }
@@ -427,9 +427,10 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataIssue6550Gzˢ = "testdata/issue6550.gz.base64"u8;
+internal static ref readonly @string testdataIssue6550Gzˢ => ref testdataIssue6550Gzˢᵇ;
+private static readonly @string testdataIssue6550Gzˢᵇ = "testdata/issue6550.gz.base64"u8;
 
-public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
+public static partial void TestIssue6550(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Apple’s notarization service will recursively attempt to decompress
@@ -438,12 +439,12 @@ public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
         // base64-encoded version to avoid this.
         // See golang.org/issue/34986
         var (f, err) = os.Open(testdataIssue6550Gzˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         (var gzip, err) = NewReader(base64.NewDecoder(base64.StdEncoding, new gzip_test_package.os_FileжReader(f)));
-        if (err != default!) {
-            Ꮡt.Fatalf("NewReader(testdata/issue6550.gz): %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("NewReader(testdata/issue6550.gz): %v", err);
         }
         var gzipʗ1 = gzip;
         defer(() => gzipʗ1.Close(), ref ᒐ);
@@ -452,10 +453,10 @@ public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
         var gzipʗ2 = gzip;
         goǃ(() => {
             var (_, errΔ1) = io.Copy(io.Discard, new gzip_test_package.gzip_ReaderжReader(gzipʗ2));
-            if (errΔ1 == default!){
-                Ꮡt.Errorf("Copy succeeded"u8);
+            if (errΔ1 == nil) {
+                t.Errorf("Copy succeeded");
             } else {
-                Ꮡt.Logf("Copy failed (correctly): %v"u8, errΔ1);
+                t.Logf("Copy failed (correctly): %v", errΔ1);
             }
             doneʗ1.ᐸꟷ(true);
         });
@@ -463,7 +464,7 @@ public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
         var selᴛ2 = done;
         switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
-            Ꮡt.Errorf("Copy hung"u8);
+            t.Errorf("Copy hung");
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
@@ -479,26 +480,27 @@ public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
 internal static readonly object cannotFindHelloTxtX2Inˢ = (@string)"cannot find hello.txt x2 in gunzip tests"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string helloᶜ = "hello world\n"u8;
+internal static ref readonly @string helloᶜ => ref helloᶜᵇ;
+private static readonly @string helloᶜᵇ = "hello world\n"u8;
 
-public static void TestMultistreamFalse(ж<testing.T> Ꮡt) {
+public static void TestMultistreamFalse(ж<testing.T> t) {
     // Find concatenation test.
-    gunzipTest tt = default!;
+    gunzipTest tt = default;
     foreach (var (_, vᴛ1) in gunzipTests) {
         tt = vᴛ1;
 
-        if (strings.HasSuffix(tt.desc, " x2"u8)) {
+        if (strings.HasSuffix(tt.desc, " x2")) {
             goto Found;
         }
     }
-    Ꮡt.Fatal(cannotFindHelloTxtX2Inˢ);
+    t.Fatal(cannotFindHelloTxtX2Inˢ);
 
 Found:
     var br = bytes.NewReader(tt.gzip);
     ref var r = ref heap(new global::go.compress.gzip_package.Reader(), out var Ꮡr);
     {
-        var errΔ1 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("first reset: %v"u8, errΔ1);
+        var errΔ1 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (errΔ1 != nil) {
+            t.Fatalf("first reset: %v", errΔ1);
         }
     }
 
@@ -507,34 +509,34 @@ Found:
 
     r.Multistream(false);
     var (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
-    if (((sstring)data) != hello || err != default!) {
-        Ꮡt.Fatalf("first stream = %q, %v, want %q, %v"u8, (@string)data, err, hello, (any)(default!));
+    if (((sstring)data) != hello || err != nil) {
+        t.Fatalf("first stream = %q, %v, want %q, %v", (@string)data, err, hello, (any)(default));
     }
 
     {
-        var errΔ2 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("second reset: %v"u8, errΔ2);
+        var errΔ2 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (errΔ2 != nil) {
+            t.Fatalf("second reset: %v", errΔ2);
         }
     }
     r.Multistream(false);
     (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
-    if (((sstring)data) != hello || err != default!) {
-        Ꮡt.Fatalf("second stream = %q, %v, want %q, %v"u8, (@string)data, err, hello, (any)(default!));
+    if (((sstring)data) != hello || err != nil) {
+        t.Fatalf("second stream = %q, %v, want %q, %v", (@string)data, err, hello, (any)(default));
     }
 
     {
         var errΔ3 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (!AreEqual(errΔ3, io.EOF)) {
-            Ꮡt.Fatalf("third reset: err=%v, want io.EOF"u8, errΔ3);
+            t.Fatalf("third reset: err=%v, want io.EOF", errΔ3);
         }
     }
 }
 
-public static partial void TestNilStream(ж<testing.T> Ꮡt) {
+public static partial void TestNilStream(ж<testing.T> t) {
     // Go liberally interprets RFC 1952 section 2.2 to mean that a gzip file
     // consist of zero or more members. Thus, we test that a nil stream is okay.
-    var (_, err) = NewReader(new gzip_test_package.bytes_ReaderжReader(bytes.NewReader(default!)));
+    var (_, err) = NewReader(new gzip_test_package.bytes_ReaderжReader(bytes.NewReader(default)));
     if (!AreEqual(err, io.EOF)) {
-        Ꮡt.Fatalf("NewReader(nil) on empty stream: got %v, want io.EOF"u8, err);
+        t.Fatalf("NewReader(nil) on empty stream: got %v, want io.EOF", err);
     }
 }
 
@@ -543,62 +545,62 @@ internal partial struct TestTruncatedStreams_cases /*dyn*/ {
     internal slice<byte> data;
 }
 
-public static void TestTruncatedStreams(ж<testing.T> Ꮡt) {
-    var cases = new TestTruncatedStreams_cases[]{
+public static void TestTruncatedStreams(ж<testing.T> t) {
+    var cases = slice<TestTruncatedStreams_cases>([
         new(
-            name: "original"u8,
+            name: "original",
             data: slice<byte>(((@string)(new byte[]{0x1f, 0x8b, 0x08, 0x04, 0x00, 0x09, 0x6e, 0x88, 0x00, 0xff, 0x07, 0x00, 0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xcb, 0x48, 0xcd, 0xc9, 0xc9, 0xd7, 0x51, 0x28, 0xcf, 0x2f, 0xca, 0x49, 0x01, 0x04, 0x3a, 0x72, 0xab, 0xff, 0x0c, 0x00, 0x00, 0x00})))
         ),
         new(
-            name: "truncated name"u8,
-            data: new byte[]{
+            name: "truncated name",
+            data: slice<byte>([
                 0x1f, 0x8b, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x01
-            }.slice()
+            ])
         ),
         new(
-            name: "truncated comment"u8,
-            data: new byte[]{
+            name: "truncated comment",
+            data: slice<byte>([
                 0x1f, 0x8b, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x01
-            }.slice()
+            ])
         )
-    }.slice();
+    ]);
 
     // Intentionally iterate starting with at least one byte in the stream.
     foreach (var (_, tc) in cases) {
         for (nint i = 1; i < len(tc.data); i++) {
             var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader((@string)(tc.data.slice(0, i)))));
-            if (err != default!) {
+            if (err != nil) {
                 if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-                    Ꮡt.Errorf("NewReader(%s-%d) on truncated stream: got %v, want %v"u8, tc.name, i, err, io.ErrUnexpectedEOF);
+                    t.Errorf("NewReader(%s-%d) on truncated stream: got %v, want %v", tc.name, i, err, io.ErrUnexpectedEOF);
                 }
                 continue;
             }
             (_, err) = io.Copy(io.Discard, new gzip_test_package.gzip_ReaderжReader(r));
             {
                 var (ferr, ok) = err._<ж<flate.ReadError>>(ᐧ); if (ok) {
-                    err = ferr.Value.Err;
+                    err = ferr.Err;
                 }
             }
             if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-                Ꮡt.Errorf("io.Copy(%s-%d) on truncated stream: got %v, want %v"u8, tc.name, i, err, io.ErrUnexpectedEOF);
+                t.Errorf("io.Copy(%s-%d) on truncated stream: got %v, want %v", tc.name, i, err, io.ErrUnexpectedEOF);
             }
         }
     }
 }
 
-public static void TestCVE202230631(ж<testing.T> Ꮡt) {
-    slice<byte> empty = new byte[]{0x1f, 0x8b, 0x08, 0x00, 0xa7, 0x8f, 0x43, 0x62, 0x00,
-        0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice();
+public static void TestCVE202230631(ж<testing.T> t) {
+    slice<byte> empty = slice<byte>([0x1f, 0x8b, 0x08, 0x00, 0xa7, 0x8f, 0x43, 0x62, 0x00,
+        0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
     var r = bytes.NewReader(bytes.Repeat(empty, 4000000));
     var (z, err) = NewReader(new gzip_test_package.bytes_ReaderжReader(r));
-    if (err != default!) {
-        Ꮡt.Fatalf("NewReader: got %v, want nil"u8, err);
+    if (err != nil) {
+        t.Fatalf("NewReader: got %v, want nil", err);
     }
     // Prior to CVE-2022-30631 fix, this would cause an unrecoverable panic due
     // to stack exhaustion.
     (_, err) = z.Read(new slice<byte>(10));
     if (!AreEqual(err, io.EOF)) {
-        Ꮡt.Errorf("Reader.Read: got %v, want %v"u8, err, io.EOF);
+        t.Errorf("Reader.Read: got %v, want %v", err, io.EOF);
     }
 }
 

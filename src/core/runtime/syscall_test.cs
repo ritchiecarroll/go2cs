@@ -14,23 +14,24 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testsyscallˢ = "testsyscall"u8;
+internal static ref readonly @string testsyscallˢ => ref testsyscallˢᵇ;
+private static readonly @string testsyscallˢᵇ = "testsyscall"u8;
 
-public static void TestSyscallArgs(ж<testing.T> Ꮡt) {
+public static void TestSyscallArgs(ж<testing.T> t) {
     if (Δruntime.GOOS != "darwin"u8) {
-        Ꮡt.Skipf("skipping test: GOARCH=%s"u8, Δruntime.GOARCH);
+        t.Skipf("skipping test: GOARCH=%s", Δruntime.GOARCH);
     }
-    testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(t));
 
-    var (exe, err) = buildTestProg(Ꮡt, testsyscallˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (exe, err) = buildTestProg(t, testsyscallˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    var cmd = testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), exe);
+    var cmd = testenv.Command(new runtime_test_package.testing_TжTB(t), exe);
     {
-        var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("test program failed: %v\n%s"u8, errΔ1, @out);
+        var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != nil) {
+            t.Fatalf("test program failed: %v\n%s", errΔ1, @out);
         }
     }
 }

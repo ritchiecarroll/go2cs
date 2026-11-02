@@ -66,7 +66,7 @@ internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeCo
     testHookMu = new sync.MutexжLocker(@new<sync.Mutex>());
 
     testHookClientDoResult = (ж<global::go.net.http_package.Response> res, error err) => {
-        if (err != default!){
+        if (err != nil) {
             {
                 var (_, ok) = err._<ж<urlꓸError>>(ᐧ); if (!ok) {
                     throw panic(fmt.Sprintf("unexpected Client.Do error of type %T; want *url.Error"u8, err));
@@ -76,7 +76,7 @@ internal static void initᴛMaxWriteWaitBeforeConnReuse() { MaxWriteWaitBeforeCo
             if (res == nil) {
                 throw panic("Client.Do returned nil, nil");
             }
-            if ((~res).Body == default!) {
+            if (res.Body == nil) {
                 throw panic("Client.Do returned nil res.Body and no error");
             }
         }
@@ -121,10 +121,10 @@ public static void SetTestHookServerServe(Action<ж<global::go.net.http_package.
     testHookServerServe = fn;
 }
 
-public static void SetTestHookProxyConnectTimeout(ж<testing.T> Ꮡt, Func<context.Context, time.Duration, (context.Context, Action)> f) {
+public static void SetTestHookProxyConnectTimeout(ж<testing.T> t, Func<context.Context, time.Duration, (context.Context, Action)> f) {
     var orig = testHookProxyConnectTimeout;
     var origʗ1 = orig;
-    Ꮡt.Cleanup(() => {
+    t.Cleanup(() => {
         testHookProxyConnectTimeout = origʗ1;
     });
     testHookProxyConnectTimeout = f;
@@ -152,19 +152,19 @@ internal static nint NumPendingRequestsForTesting(this ж<global::go.net.http_pa
         ᒐd1 = true;
         return builtin.len(t.reqCanceler);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().reqMu.Unlock(); ᒐ.Run(); }
 }
 
 internal static slice<@string> /*keys*/ IdleConnKeysForTesting(this ж<global::go.net.http_package.Transport> Ꮡt) {
-    slice<@string> keys = default!;
+    slice<@string> keys = default;
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
         keys = new slice<@string>(0);
         t.idleMu.Lock();
-        defer(Ꮡt.of(global::go.net.http_package.Transport.ᏑidleMu).Unlock, ref ᒐ);
+        defer(Ꮡt.ᏑidleMu.Unlock, ref ᒐ);
         foreach (var (key, _) in t.idleConn) {
             keys = append(keys, key.String());
         }
@@ -185,7 +185,7 @@ internal static nint IdleConnKeyCountForTesting(this ж<global::go.net.http_pack
         ᒐd1 = true;
         return builtin.len(t.idleConn);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
 }
 
@@ -195,18 +195,18 @@ internal static slice<@string> IdleConnStrsForTesting(this ж<global::go.net.htt
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        slice<@string> ret = default!;
+        slice<@string> ret = default;
         t.idleMu.Lock();
         ᒐd1 = true;
         foreach (var (_, conns) in t.idleConn) {
             foreach (var (_, pc) in conns) {
-                ret = append(ret, (~pc).conn.LocalAddr().String() + "/"u8 + (~pc).conn.RemoteAddr().String());
+                ret = append(ret, pc.conn.LocalAddr().String() + "/"u8 + pc.conn.RemoteAddr().String());
             }
         }
         slices.Sort<slice<@string>, @string>(ret);
         return ret;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
 }
 
@@ -215,15 +215,15 @@ internal static slice<@string> IdleConnStrsForTesting_h2(this ж<global::go.net.
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        slice<@string> ret = default!;
-        var noDialPool = (~t.h2transport._<global::go.net.http_package.h2Transport, ж<global::go.net.http_package.http2Transport>>()).ConnPool._<global::go.net.http_package.http2ClientConnPool, http2noDialClientConnPool>();
+        slice<@string> ret = default;
+        var noDialPool = t.h2transport._<global::go.net.http_package.h2Transport, ж<global::go.net.http_package.http2Transport>>().ConnPool._<global::go.net.http_package.http2ClientConnPool, http2noDialClientConnPool>();
         var pool = noDialPool.http2clientConnPool;
 
-        pool.of(global::go.net.http_package.http2clientConnPool.Ꮡmu).Lock();
+        pool.Ꮡmu.Lock();
         var poolʗ1 = pool;
-        defer(poolʗ1.of(global::go.net.http_package.http2clientConnPool.Ꮡmu).Unlock, ref ᒐ);
+        defer(poolʗ1.Ꮡmu.Unlock, ref ᒐ);
 
-        foreach (var (k, ccs) in (~pool).conns) {
+        foreach (var (k, ccs) in pool.conns) {
             foreach (var (_, cc) in ccs) {
                 if (cc.idleState().canTakeNewRequest) {
                     ret = append(ret, k);
@@ -234,7 +234,7 @@ internal static slice<@string> IdleConnStrsForTesting_h2(this ж<global::go.net.
         slices.Sort<slice<@string>, @string>(ret);
         return ret;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -246,7 +246,7 @@ internal static nint IdleConnCountForTesting(this ж<global::go.net.http_package
 
         t.idleMu.Lock();
         ᒐd1 = true;
-        var key = new connectMethodKey(""u8, scheme, addr, false);
+        var key = new connectMethodKey("", scheme, addr, false);
         @string cacheKey = key.String();
         foreach (var (k, conns) in t.idleConn) {
             if (k.String() == cacheKey) {
@@ -255,7 +255,7 @@ internal static nint IdleConnCountForTesting(this ж<global::go.net.http_package
         }
         return 0;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
 }
 
@@ -269,7 +269,7 @@ internal static nint IdleConnWaitMapSizeForTesting(this ж<global::go.net.http_p
         ᒐd1 = true;
         return builtin.len(t.idleConnWait);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
 }
 
@@ -283,7 +283,7 @@ internal static bool IsIdleForTesting(this ж<global::go.net.http_package.Transp
         ᒐd1 = true;
         return t.closeIdle;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡt.DerefOrNull().idleMu.Unlock(); ᒐ.Run(); }
 }
 
@@ -297,15 +297,14 @@ internal static bool PutIdleTestConn(this ж<global::go.net.http_package.Transpo
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (c, _) = net.Pipe();
-    ref var key = ref heap<global::go.net.http_package.connectMethodKey>(out var Ꮡkey);
-    key = new connectMethodKey(""u8, scheme, addr, false);
+    ref var key = ref heap<global::go.net.http_package.connectMethodKey>(new connectMethodKey("", scheme, addr, false), out var Ꮡkey);
 
     if (t.MaxConnsPerHost > 0) {
         // Transport is tracking conns-per-host.
         // Increment connection count to account
         // for new persistConn created below.
         t.connsPerHostMu.Lock();
-        if (t.connsPerHost == default!) {
+        if (t.connsPerHost == nil) {
             t.connsPerHost = new map<global::go.net.http_package.connectMethodKey, nint>();
         }
         t.connsPerHost[key]++;
@@ -314,10 +313,10 @@ internal static bool PutIdleTestConn(this ж<global::go.net.http_package.Transpo
 
     return Ꮡt.tryPutIdleConn(Ꮡ(new persistConn(
         t: Ꮡt,
-        conn: c, // dummy
+        conn: c,                              // dummy
         closech: new channel<EmptyStruct>(0), // so it can be closed
         cacheKey: key
-    ))) == default!;
+    ))) == nil;
 }
 
 // PutIdleTestConnH2 reports whether it was able to insert a fresh
@@ -325,15 +324,14 @@ internal static bool PutIdleTestConn(this ж<global::go.net.http_package.Transpo
 internal static bool PutIdleTestConnH2(this ж<global::go.net.http_package.Transport> Ꮡt, @string scheme, @string addr, global::go.net.http_package.RoundTripper alt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    ref var key = ref heap<global::go.net.http_package.connectMethodKey>(out var Ꮡkey);
-    key = new connectMethodKey(""u8, scheme, addr, false);
+    ref var key = ref heap<global::go.net.http_package.connectMethodKey>(new connectMethodKey("", scheme, addr, false), out var Ꮡkey);
 
     if (t.MaxConnsPerHost > 0) {
         // Transport is tracking conns-per-host.
         // Increment connection count to account
         // for new persistConn created below.
         t.connsPerHostMu.Lock();
-        if (t.connsPerHost == default!) {
+        if (t.connsPerHost == nil) {
             t.connsPerHost = new map<global::go.net.http_package.connectMethodKey, nint>();
         }
         t.connsPerHost[key]++;
@@ -344,7 +342,7 @@ internal static bool PutIdleTestConnH2(this ж<global::go.net.http_package.Trans
         t: Ꮡt,
         alt: alt,
         cacheKey: key
-    ))) == default!;
+    ))) == nil;
 }
 
 // All test hooks must be non-nil so they can be called directly,
@@ -352,16 +350,16 @@ internal static bool PutIdleTestConnH2(this ж<global::go.net.http_package.Trans
 internal static void unnilTestHook(ж<Action> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    if (f == default!) {
+    if (f == nil) {
         f = nop;
     }
 }
 
-internal static Action<Action> hookSetter(ж<Action> Ꮡdst) {
+internal static Action<Action> hookSetter(ж<Action> dst) {
     return (Action fnʗp) => {
         ref var fn = ref heap(fnʗp, out var Ꮡfn);
         unnilTestHook(Ꮡfn);
-        Ꮡdst.ValueSlot = fn;
+        dst.ValueSlot = fn;
     };
 }
 
@@ -369,11 +367,11 @@ public static error ExportHttp2ConfigureTransport(ж<global::go.net.http_package
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (t2, err) = http2configureTransports(Ꮡt);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     t.h2transport = new global::go.net.http_package.http2Transportжh2Transport(t2);
-    return default!;
+    return default;
 }
 
 internal static bool ExportAllConnsIdle(this ж<global::go.net.http_package.Server> Ꮡs) {
@@ -392,7 +390,7 @@ internal static bool ExportAllConnsIdle(this ж<global::go.net.http_package.Serv
         }
         return true;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -411,12 +409,12 @@ internal static map<global::go.net.http_package.ConnState, nint> ExportAllConnsB
         }
         return states;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static ж<global::go.net.http_package.Request> WithT(this ref global::go.net.http_package.Request r, ж<testing.T> Ꮡt) {
-    return r.WithContext(context_package.WithValue(r.Context(), new tLogKey(nil), Ꮡt.Logf));
+internal static ж<global::go.net.http_package.Request> WithT(this ref global::go.net.http_package.Request r, ж<testing.T> t) {
+    return r.WithContext(context_package.WithValue(r.Context(), new tLogKey(), t.Logf));
 }
 
 public static Action /*restore*/ ExportSetH2GoawayTimeout(time.Duration d) {
@@ -442,7 +440,7 @@ public static void ExportCloseTransportConnsAbruptly(ж<global::go.net.http_pack
     tr.idleMu.Lock();
     foreach (var (_, pcs) in tr.idleConn) {
         foreach (var (_, pc) in pcs) {
-            (~pc).conn.Close();
+            pc.conn.Close();
         }
     }
     tr.idleMu.Unlock();
@@ -453,10 +451,10 @@ public static void ExportCloseTransportConnsAbruptly(ж<global::go.net.http_pack
 public static (net.Conn c, bool ok) ResponseWriterConnForTesting(global::go.net.http_package.ResponseWriter w) {
     {
         var (r, okΔ1) = w._<ж<global::go.net.http_package.response>>(ᐧ); if (okΔ1) {
-            return ((~(~r).conn).rwc, true);
+            return (r.conn.rwc, true);
         }
     }
-    return (default!, false);
+    return (default, false);
 }
 
 [GoInit] internal static void initΔ1() {
@@ -469,9 +467,9 @@ public static (net.Conn c, bool ok) ResponseWriterConnForTesting(global::go.net.
 
 // SetRSTAvoidanceDelay sets how long we are willing to wait between calling
 // CloseWrite on a connection and fully closing the connection.
-public static void SetRSTAvoidanceDelay(ж<testing.T> Ꮡt, time.Duration d) {
+public static void SetRSTAvoidanceDelay(ж<testing.T> t, time.Duration d) {
     var prevDelay = rstAvoidanceDelay;
-    Ꮡt.Cleanup(() => {
+    t.Cleanup(() => {
         rstAvoidanceDelay = prevDelay;
     });
     rstAvoidanceDelay = d;

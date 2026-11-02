@@ -27,24 +27,24 @@ internal static void langCompat(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡl
         return;
     }
     // len(s) > 2
-    if (strings.Contains(s, "_"u8)) {
-        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "underscore in numeric literal"u8);
+    if (strings.Contains(s, "_")) {
+        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "underscore in numeric literal");
         return;
     }
-    if (s[0] != (rune)'0') {
+    if (s[0] != '0') {
         return;
     }
     var radix = s[1];
-    if (radix == (rune)'b' || radix == (rune)'B') {
-        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "binary literal"u8);
+    if (radix == 'b' || radix == 'B') {
+        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "binary literal");
         return;
     }
-    if (radix == (rune)'o' || radix == (rune)'O') {
-        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "0o/0O-style octal literal"u8);
+    if (radix == 'o' || radix == 'O') {
+        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "0o/0O-style octal literal");
         return;
     }
-    if (lit.Kind != token.INT && (radix == (rune)'x' || radix == (rune)'X')) {
-        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "hexadecimal floating-point literal"u8);
+    if (lit.Kind != token.INT && (radix == 'x' || radix == 'X')) {
+        Ꮡcheck.versionErrorf(new ast_BasicLitжpositioner(Ꮡlit), go1_13, "hexadecimal floating-point literal");
     }
 }
 
@@ -52,8 +52,8 @@ internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
-    var exprᴛ1 = e.Kind;
-    if (exprᴛ1 == token.INT || exprᴛ1 == token.FLOAT || exprᴛ1 == token.IMAG) {
+    switch (e.Kind) {
+    case var ᴛ when ᴛ == token.INT || ᴛ == token.FLOAT || ᴛ == token.IMAG: {
         Ꮡcheck.langCompat(Ꮡe);
         // The max. mantissa precision for untyped numeric values
         // is 512 bits, or 4048 bits for each of the two integer
@@ -66,18 +66,19 @@ internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
         // allows for separators between all digits.
         const nint limit = 10000;
         if (len(e.Value) > limit) {
-            Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡe), InvalidConstVal, "excessively long constant: %s... (%d chars)"u8, e.Value[..10], len(e.Value));
+            Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡe), InvalidConstVal, "excessively long constant: %s... (%d chars)", e.Value[..10], len(e.Value));
             x.mode = invalid;
             return;
         }
-    }
+        break;
+    }}
     x.setConst(e.Kind, e.Value);
     if (x.mode == invalid) {
         // The parser already establishes syntactic correctness.
         // If we reach here it's because of number under-/overflow.
         // TODO(gri) setConst (and in turn the go/constant package)
         // should return an error describing the issue.
-        Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡe), InvalidConstVal, "malformed constant: %s"u8, e.Value);
+        Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡe), InvalidConstVal, "malformed constant: %s", e.Value);
         x.mode = invalid;
         return;
     }
@@ -87,7 +88,8 @@ internal static void basicLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string functionLiteralˢ = "<function literal>"u8;
+internal static ref readonly @string functionLiteralˢ => ref functionLiteralˢᵇ;
+private static readonly @string functionLiteralˢᵇ = "<function literal>"u8;
 
 internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.FuncLit> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -95,12 +97,12 @@ internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
     ref var e = ref Ꮡe.DerefOrNull();
 
     {
-        var (sig, ok) = Ꮡcheck.typ(new ast.FuncTypeжExpr(e.Type))._<ж<ΔSignature>>(ᐧ); if (ok){
+        var (sig, ok) = Ꮡcheck.typ(new ast.FuncTypeжExpr(e.Type))._<ж<ΔSignature>>(ᐧ); if (ok) {
             // Set the Scope's extent to the complete "func (...) {...}"
             // so that Scope.Innermost works correctly.
-            sig.Value.scope.Value.pos = e.Pos();
-            sig.Value.scope.Value.end = endPos(new ast.FuncLitжNode(Ꮡe));
-            if (!(~check.conf).IgnoreFuncBodies && e.Body != nil) {
+            sig.scope.pos = e.Pos();
+            sig.scope.end = endPos(new ast.FuncLitжNode(Ꮡe));
+            if (!check.conf.IgnoreFuncBodies && e.Body != nil) {
                 // Anonymous functions are considered part of the
                 // init expression/func declaration which contains
                 // them: use existing package-level declaration info.
@@ -115,37 +117,44 @@ internal static void funcLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast
                 var sigʗ1 = sig;
                 check.later(() => {
                     Ꮡcheck.funcBody(declʗ1, functionLiteralˢ, sigʗ1, Ꮡe.Value.Body, iotaʗ1);
-                }).describef(new ast_FuncLitжpositioner(Ꮡe), "func literal"u8);
+                }).describef(new ast_FuncLitжpositioner(Ꮡe), "func literal");
             }
             x.mode = value;
             x.typ = new ΔSignatureжΔType(sig);
         } else {
-            Ꮡcheck.errorf(new ast_FuncLitжpositioner(Ꮡe), InvalidSyntaxTree, "invalid function literal %v"u8, Ꮡe.OrTypedNil());
+            Ꮡcheck.errorf(new ast_FuncLitжpositioner(Ꮡe), InvalidSyntaxTree, "invalid function literal %v", Ꮡe.OrTypedNil());
             x.mode = invalid;
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingTypeInCompositeˢ = "missing type in composite literal"u8;
-internal static readonly @string mixtureOfFieldValueAndˢ = "mixture of field:value and value elements in struct literal"u8;
-internal static readonly @string structLiteralˢ = "struct literal"u8;
-internal static readonly @string missingKeyInMapLiteralˢ = "missing key in map literal"u8;
-internal static readonly @string mapLiteralˢ = "map literal"u8;
-internal static readonly @string elementˢ = " element"u8;
-internal static readonly @string noCommonUnderlyingTypeˢ = " (no common underlying type)"u8;
+internal static ref readonly @string missingTypeInCompositeˢ => ref missingTypeInCompositeˢᵇ;
+private static readonly @string missingTypeInCompositeˢᵇ = "missing type in composite literal"u8;
+internal static ref readonly @string mixtureOfFieldValueAndˢ => ref mixtureOfFieldValueAndˢᵇ;
+private static readonly @string mixtureOfFieldValueAndˢᵇ = "mixture of field:value and value elements in struct literal"u8;
+internal static ref readonly @string structLiteralˢ => ref structLiteralˢᵇ;
+private static readonly @string structLiteralˢᵇ = "struct literal"u8;
+internal static ref readonly @string missingKeyInMapLiteralˢ => ref missingKeyInMapLiteralˢᵇ;
+private static readonly @string missingKeyInMapLiteralˢᵇ = "missing key in map literal"u8;
+internal static ref readonly @string mapLiteralˢ => ref mapLiteralˢᵇ;
+private static readonly @string mapLiteralˢᵇ = "map literal"u8;
+internal static ref readonly @string elementˢ => ref elementˢᵇ;
+private static readonly @string elementˢᵇ = " element"u8;
+internal static ref readonly @string noCommonUnderlyingTypeˢ => ref noCommonUnderlyingTypeˢᵇ;
+private static readonly @string noCommonUnderlyingTypeˢᵇ = " (no common underlying type)"u8;
 
 internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CompositeLit> Ꮡe, ΔType hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
-    ΔType typ = default!;
-    ΔType @base = default!;
-    bool isElem = default!;    // true if composite literal is an element of an enclosing composite literal
+    ΔType typ = default;
+    ΔType @base = default;
+    bool isElem = default; // true if composite literal is an element of an enclosing composite literal
 
     switch (ᐧ) {
-    case {} when e.Type != default!: {
+    case {} when e.Type != nil: {
         // composite literal type present - use it
         // [...]T array types may only appear with composite literals.
         // Check for them here so we don't have to handle ... in general.
@@ -154,7 +163,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                 // We have an "open" [...]T array type.
                 // Create a new ArrayType with unknown length (-1)
                 // and finish setting it up after analyzing the literal.
-                typ = new ArrayжΔType(Ꮡ(new Array(len: -1, elem: Ꮡcheck.varType((~atyp).Elt))));
+                typ = new ArrayжΔType(Ꮡ(new Array(len: -1, elem: Ꮡcheck.varType(atyp.Elt))));
                 @base = typ;
                 break;
             }
@@ -163,12 +172,12 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         @base = typ;
         break;
     }
-    case {} when hint != default!: {
+    case {} when hint != nil: {
         // no composite literal type present - use hint (element type of enclosing type)
         typ = hint;
         @base = typ;
         // *T implies &T{}
-        var (u, _) = commonUnder(@base, default!);
+        var (u, _) = commonUnder(@base, default);
         {
             var (b, ok) = deref(u); if (ok) {
                 @base = b;
@@ -187,7 +196,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     }}
 
     {
-        var (u, _) = commonUnder(@base, default!);
+        var (u, _) = commonUnder(@base, default);
         switch (u.type()) {
         case ж<Struct> utyp: {
             if (len(e.Elts) == 0) {
@@ -196,9 +205,9 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             // Convention for error messages on invalid struct literals:
             // we mention the struct type only if it clarifies the error
             // (e.g., a duplicate field error doesn't need the struct type).
-            var fields = utyp.Value.fields;
+            var fields = utyp.fields;
             {
-                var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok){
+                var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok) {
                     // all elements must have keys
                     var visited = new slice<bool>(len(fields));
                     foreach (var (_, eΔ1) in e.Elts) {
@@ -207,33 +216,33 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                             Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
                             continue;
                         }
-                        var (key, _) = (~kv).Key._<ж<ast.Ident>>(ᐧ);
+                        var (key, _) = kv.Key._<ж<ast.Ident>>(ᐧ);
                         // do all possible checks early (before exiting due to errors)
                         // so we don't drop information on the floor
                         Ꮡcheck.expr(nil, Ꮡx, (~kv).Value);
                         if (key == nil) {
-                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), InvalidLitField, "invalid field name %s in struct literal"u8, (~kv).Key);
+                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), InvalidLitField, "invalid field name %s in struct literal", kv.Key);
                             continue;
                         }
-                        nint i = fieldIndex(fields, check.pkg, (~key).Name, false);
+                        nint i = fieldIndex(fields, check.pkg, key.Name, false);
                         if (i < 0) {
-                            Object alt = default!;
+                            Object alt = default;
                             {
-                                nint j = fieldIndex(fields, check.pkg, (~key).Name, true); if (j >= 0) {
+                                nint j = fieldIndex(fields, check.pkg, key.Name, true); if (j >= 0) {
                                     alt = new VarжObject(fields[j]);
                                 }
                             }
-                            @string msg = Ꮡcheck.lookupError(@base, (~key).Name, alt, true);
-                            Ꮡcheck.error(new ast_Exprᴠpositioner((~kv).Key), MissingLitField, msg);
+                            @string msg = Ꮡcheck.lookupError(@base, key.Name, alt, true);
+                            Ꮡcheck.error(new ast_Exprᴠpositioner(kv.Key), MissingLitField, msg);
                             continue;
                         }
                         var fld = fields[i];
                         check.recordUse(key, new VarжObject(fld));
-                        var etyp = fld.Value.typ;
+                        var etyp = fld.typ;
                         Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
                         // 0 <= i < len(fields)
                         if (visited[i]) {
-                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal"u8, (~key).Name);
+                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal", key.Name);
                             continue;
                         }
                         visited[i] = true;
@@ -249,20 +258,20 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                         }
                         Ꮡcheck.expr(nil, Ꮡx, eΔ2);
                         if (i >= len(fields)) {
-                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidStructLit, "too many values in struct literal of type %s"u8, @base);
+                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidStructLit, "too many values in struct literal of type %s", @base);
                             break; // cannot continue
                         }
                         // i < len(fields)
                         var fld = fields[i];
-                        if (!fld.of(Var.Ꮡobject).Exported() && (~fld).pkg != check.pkg) {
-                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnexportedLitField, "implicit assignment to unexported field %s in struct literal of type %s"u8, (~fld).name, @base);
+                        if (!fld.of(Var.Ꮡobject).Exported() && fld.pkg != check.pkg) {
+                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnexportedLitField, "implicit assignment to unexported field %s in struct literal of type %s", fld.name, @base);
                             continue;
                         }
-                        var etyp = fld.Value.typ;
+                        var etyp = fld.typ;
                         Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
                     }
                     if (len(e.Elts) < len(fields)) {
-                        Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s"u8, @base);
+                        Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s", @base);
                         // ok to continue
                     }
                 }
@@ -270,7 +279,7 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             break;
         }
         case ж<Array> utyp: {
-            var n = Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, (~utyp).len);
+            var n = Ꮡcheck.indexedElts(e.Elts, utyp.elem, utyp.len);
             // If we have an array of unknown length (usually [...]T arrays, but also
             // arrays [n]T where n is invalid) set the length now that we know it and
             // record the type for the array (usually done by check.typ which is not
@@ -279,27 +288,27 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             // the latter if we have a composite literal; e.g. for [n]int{1, 2, 3}
             // where n is invalid for some reason, it seems fair to assume it should
             // be 3 (see also Checked.arrayLength and go.dev/issue/27346).
-            if ((~utyp).len < 0) {
-                utyp.Value.len = n;
+            if (utyp.len < 0) {
+                utyp.len = n;
                 // e.Type is missing if we have a composite literal element
                 // that is itself a composite literal with omitted type. In
                 // that case there is nothing to record (there is no type in
                 // the source at that point).
-                if (e.Type != default!) {
-                    check.recordTypeAndValue(e.Type, typexpr, new ArrayжΔType(utyp), default!);
+                if (e.Type != nil) {
+                    check.recordTypeAndValue(e.Type, typexpr, new ArrayжΔType(utyp), default);
                 }
             }
             break;
         }
         case ж<Slice> utyp: {
-            Ꮡcheck.indexedElts(e.Elts, (~utyp).elem, -1);
+            Ꮡcheck.indexedElts(e.Elts, utyp.elem, -1);
             break;
         }
         case ж<Map> utyp: {
             // If the map key type is an interface (but not a type parameter),
             // the type of a constant key must be considered when checking for
             // duplicates.
-            var keyIsInterface = isNonTypeParamInterface((~utyp).key);
+            var keyIsInterface = isNonTypeParamInterface(utyp.key);
             var visited = new map<any, slice<ΔType>>(len(e.Elts));
             foreach (var (_, eΔ3) in e.Elts) {
                 var (kv, _) = eΔ3._<ж<ast.KeyValueExpr>>(ᐧ);
@@ -307,15 +316,15 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                     Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ3), MissingLitKey, missingKeyInMapLiteralˢ);
                     continue;
                 }
-                Ꮡcheck.exprWithHint(Ꮡx, (~kv).Key, (~utyp).key);
-                Ꮡcheck.assignment(Ꮡx, (~utyp).key, mapLiteralˢ);
+                Ꮡcheck.exprWithHint(Ꮡx, kv.Key, utyp.key);
+                Ꮡcheck.assignment(Ꮡx, utyp.key, mapLiteralˢ);
                 if (x.mode == invalid) {
                     continue;
                 }
                 if (x.mode == constant_) {
                     var duplicate = false;
                     var xkey = keyVal(x.val);
-                    if (keyIsInterface){
+                    if (keyIsInterface) {
                         foreach (var (_, vtyp) in visited[xkey]) {
                             if (Identical(vtyp, x.typ)) {
                                 duplicate = true;
@@ -325,15 +334,15 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
                         visited[xkey] = append(visited[xkey], x.typ);
                     } else {
                         (_, duplicate) = visited[xkey, ꟷ];
-                        visited[xkey] = default!;
+                        visited[xkey] = default;
                     }
                     if (duplicate) {
-                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), DuplicateLitKey, "duplicate key %s in map literal"u8, x.val);
+                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), DuplicateLitKey, "duplicate key %s in map literal", x.val);
                         continue;
                     }
                 }
-                Ꮡcheck.exprWithHint(Ꮡx, (~kv).Value, (~utyp).elem);
-                Ꮡcheck.assignment(Ꮡx, (~utyp).elem, mapLiteralˢ);
+                Ꮡcheck.exprWithHint(Ꮡx, (~kv).Value, utyp.elem);
+                Ꮡcheck.assignment(Ꮡx, utyp.elem, mapLiteralˢ);
             }
             break;
         }
@@ -356,15 +365,15 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             }
             // if utyp is invalid, an error was reported before
             if (isValid(utyp)) {
-                @string qualifier = default!;
+                @string qualifier = default;
                 if (isElem) {
                     qualifier = elementˢ;
                 }
-                @string cause = default!;
-                if (utyp == default!) {
+                @string cause = default;
+                if (utyp == nil) {
                     cause = noCommonUnderlyingTypeˢ;
                 }
-                Ꮡcheck.errorf(new ast_CompositeLitжpositioner(Ꮡe), InvalidLit, "invalid composite literal%s type %s%s"u8, qualifier, typ, cause);
+                Ꮡcheck.errorf(new ast_CompositeLitжpositioner(Ꮡe), InvalidLit, "invalid composite literal%s type %s%s", qualifier, typ, cause);
                 x.mode = invalid;
                 return;
             }
@@ -377,7 +386,8 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string arrayOrSliceLiteralˢ = "array or slice literal"u8;
+internal static ref readonly @string arrayOrSliceLiteralˢ => ref arrayOrSliceLiteralˢᵇ;
+private static readonly @string arrayOrSliceLiteralˢᵇ = "array or slice literal"u8;
 
 // indexedElts checks the elements (elts) of an array or slice composite literal
 // against the literal's element type (typ), and the element indices against
@@ -385,28 +395,27 @@ internal static readonly @string arrayOrSliceLiteralˢ = "array or slice literal
 // literal (maximum index value + 1).
 internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elts, ΔType typ, int64 length) {
     var visited = new map<int64, bool>(len(elts));
-    int64 index = default!;
-    int64 max = default!;
+    int64 index = default;
+    int64 max = default;
     foreach (var (_, e) in elts) {
         // determine and check index
         var validIndex = false;
         var eval = e;
         {
-            var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil){
+            var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
                 {
-                    var (typΔ1, i) = Ꮡcheck.index((~kv).Key, length); if (isValid(typΔ1)) {
-                        if (i >= 0){
+                    var (typΔ1, i) = Ꮡcheck.index(kv.Key, length); if (isValid(typΔ1)) {
+                        if (i >= 0) {
                             index = i;
                             validIndex = true;
                         } else {
-                            Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), InvalidLitIndex, "index %s must be integer constant"u8, (~kv).Key);
+                            Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), InvalidLitIndex, "index %s must be integer constant", kv.Key);
                         }
                     }
                 }
                 eval = kv.Value.Value;
-            } else 
-            if (length >= 0 && index >= length){
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), OversizeArrayLit, "index %d is out of bounds (>= %d)"u8, index, length);
+            } else if (length >= 0 && index >= length) {
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), OversizeArrayLit, "index %d is out of bounds (>= %d)", index, length);
             } else {
                 validIndex = true;
             }
@@ -415,7 +424,7 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
         // if we have a valid index, check for duplicate entries
         if (validIndex) {
             if (visited[index]) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), DuplicateLitKey, "duplicate index %d in array or slice literal"u8, index);
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), DuplicateLitKey, "duplicate index %d in array or slice literal", index);
             }
             visited[index] = true;
         }

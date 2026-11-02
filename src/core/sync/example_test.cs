@@ -24,11 +24,11 @@ internal static httpPkg http;
 // using a WaitGroup to block until all the fetches are complete.
 public static void ExampleWaitGroup() {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
-    slice<@string> urls = new @string[]{
-        "http://www.golang.org/"u8,
-        "http://www.google.com/"u8,
-        "http://www.example.com/"u8
-    }.slice();
+    slice<@string> urls = slice<@string>([
+        "http://www.golang.org/",
+        "http://www.google.com/",
+        "http://www.example.com/"
+    ]);
     foreach (var (_, url) in urls) {
         // Launch a goroutine to fetch the URL.
         Ꮡwg.Go(() => {
@@ -44,11 +44,11 @@ public static void ExampleWaitGroup() {
 // instead of Go.
 public static partial void ExampleWaitGroup_addAndDone() {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
-    slice<@string> urls = new @string[]{
-        "http://www.golang.org/"u8,
-        "http://www.google.com/"u8,
-        "http://www.example.com/"u8
-    }.slice();
+    slice<@string> urls = slice<@string>([
+        "http://www.golang.org/",
+        "http://www.google.com/",
+        "http://www.example.com/"
+    ]);
     foreach (var (_, url) in urls) {
         // Increment the WaitGroup counter.
         Ꮡwg.Add(1);
@@ -63,7 +63,7 @@ public static partial void ExampleWaitGroup_addAndDone() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, url);
+        }, url, GoStack.Bounded);
     }
     // Wait for all HTTP fetches to complete.
     Ꮡwg.Wait();
@@ -131,7 +131,8 @@ public static partial void ExampleOnceValue() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object readingFileOnceˢ = (@string)"Reading file once"u8;
-internal static readonly @string exampleTestGoˢ = "example_test.go"u8;
+internal static ref readonly @string exampleTestGoˢ => ref exampleTestGoˢᵇ;
+private static readonly @string exampleTestGoˢᵇ = "example_test.go"u8;
 internal static readonly object errorˢ = (@string)"error:"u8;
 
 // This example uses OnceValues to read a file just once.
@@ -146,7 +147,7 @@ public static partial void ExampleOnceValues() {
         var onceʗ1 = once;
         goǃ(() => {
             var (data, err) = onceʗ1();
-            if (err != default!) {
+            if (err != nil) {
                 fmt.Println(errorˢ, err);
             }
             _ = data; // Ignore the data for this example

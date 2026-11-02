@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,7 +57,22 @@ using static go.@internal.profile_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Edge))]
+[assembly: GoFieldAccess(typeof(Function))]
+[assembly: GoFieldAccess(typeof(Label))]
+[assembly: GoFieldAccess(typeof(Line))]
+[assembly: GoFieldAccess(typeof(Location))]
+[assembly: GoFieldAccess(typeof(Mapping))]
+[assembly: GoFieldAccess(typeof(Node))]
+[assembly: GoFieldAccess(typeof(NodeInfo))]
+[assembly: GoFieldAccess(typeof(Profile))]
+[assembly: GoFieldAccess(typeof(Sample))]
+[assembly: GoFieldAccess(typeof(go.@internal.profile_package.ValueType))]
+[assembly: GoFieldAccess(typeof(profileMerger))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -70,13 +82,13 @@ using static go.@internal.profile_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSAgoK2goK4goKUgpSClIKUgpSCgoKCgoCCpKa4goKCuIKCgriCgoK4goKCuIKCgriCgpSClAALGIKCggAJGtKUgoKCgqaCgoKCgqaCgoKCgoCCgoKUtqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCpoKmgoKmAAcQgqaCgoKUgrgABxCCgoK4gqaCgoKmAAkUgqaCgoKCgoKCgoKCpgANHIKmgoKCgoK43IKCgriCpoKCpgAHEIKmgoKCgoKmAA0cgoKCgpSmgoKUgoKUgg==", "", "", "41=addString/1/2/2,addString/2/2/3;56=addString/1/1/2")]
-[assembly: go.GoPositionMap("internal/profile/filter.go", "filter.cs", "AAse4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
-[assembly: go.GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgIKCgoKUgpS2goIACRaSqJKCgpSAgramAAgKpAATLrKCgILIgIK2poKmgqaCgoLcgoKCpqaCpoKCgoKCABAoooKUqMKCgoKCkoKClIKUgoKUAAgSgoCCpIKCgoKCgoKmgoKCpoKCpoKmlLimlIKCgpSClIKUlAAGEqKUpKQACBKCgpS4goKUvtKCgoKCgpSCgpSUpoKCgpSmsoKAgraAgqSmgoKUyoKowoKClKaUgoKUgrqylJSCpoKCpIKUgpSUrLKCgqaCqJKCgpTKgqaCgqaCgoKmgpSmgqaCgpQ=")]
-[assembly: go.GoPositionMap("internal/profile/merge.go", "merge.cs", "AA0q8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSAgraCgoK4goKCuIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqjCgoKmgoKUlIKClJQADBqigqaAgoK2gu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKmgILIgoCCgoKkAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgsiigoKCgoKUgoKUgoCCgraCuAANHIKs0oKmgqaCgqaqog==", "", "", "202=Join/1/3/1,Join/2/3/2,Join/3/3/3;365=mapFunction/1/1/1")]
-[assembly: go.GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoCCpKaSlIKCpoKAgraAgrao0oKCgpKC3tSCgpSCgtyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoK4goKCgpSC3IKCgpSCgqaCytrEgoCCpIKClIKmgoKClIKCgoKUgoKUgoKCgoKUlIKCgpS4goKCgIKkgpSCgoCCyoK2lLiCgoKClIKUgpSClAAHEK7igIK2poKmlIKClIKClIKCpoKCgriCrNKCpoKmgoK4qqKCgqaqooKCpqaygpSosoKUgoCCpICCtgAHFrSSgriCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4")]
-[assembly: go.GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCkqaCpoKmooKCgIK21oKCgoKClIKCAAgKgoKClIKCgoKUgoLGgpSCtIKCgpSClIK0gpSCtKbWgoKUpqKAgqSCgoSSgoKUgpSAgramooCCpIKmopSClIKCgpSAgqSUlIKAgqSCpqKAgqSCpqKUgpSCgoKUgIKklJSCgIKkgqaCgIKkgqaigoCCpIKmooCCpIKUlA==")]
-[assembly: go.GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKUgoKCgIKUgpSCguyUppSU3LiCgoKCgpSClIKClIKCAAUQopKUgoCCpIKAgraU")]
+[assembly: GoPositionMap("internal/profile/encode.go", "encode.cs", "AAsagqzigpSCgqaCgoKClIKCgoIABhCCgpSCgoKCAAYQgoK4goKmgoKClKaClKaCgoKmgpSAgoK2goK4goKUgpSClIKUgpSCgoKCgoCCpKa4goKCuIKCgriCgoK4goKCuIKCgriCgpSClAALGIKCggAJGtKUgoKCgqaCgoKCgqaCgoKCgoCCgoKUtqaCgqaCgoKikoKCgpSmgpSClIKClKaClICCtoCCgqSigoKmgoKCpoKmgoKmAAcQgqaCgoKUgrgABxCCgoK4gqaCgoKmAAkUgqaCgoKCgoKCgoKCpgANHIKmgoKCgoK43IKCgriCpoKCpgAHEIKmgoKCgoKmAA0cgoKCgpSmgoKUgoKUgg==", "", "", "41=addString/1/2/2,addString/2/2/3;56=addString/1/1/2")]
+[assembly: GoPositionMap("internal/profile/filter.go", "filter.cs", "AAse4oKCgoKCgqaCqtKCgoKClIK4goKClIK4")]
+[assembly: GoPositionMap("internal/profile/graph.go", "graph.cs", "AD2KAaKClKqigpSqoqrSgIKCgoKUgpS2goIACRaSqJKCgpSAgramAAgKpAATLrKCgILIgIK2poKmgqaCgoLcgoKCpqaCpoKCgoKCABAoooKUqMKCgoKCkoKClIKUgoKUAAgSgoCCpIKCgoKCgoKmgoKCpoKCpoKmlLimlIKCgpSClIKUlAAGEqKUpKQACBKCgpS4goKUvtKCgoKCgpSCgpSUpoKCgpSmsoKAgraAgqSmgoKUyoKowoKClKaUgoKUgrqylJSCpoKCpIKUgpSUrLKCgqaCqJKCgpTKgqaCgqaCgoKmgpSmgqaCgpQ=")]
+[assembly: GoPositionMap("internal/profile/merge.go", "merge.cs", "AA0q8oKUgoKmAAcQlIKClMqmgoLKgqa4rNSAgraCgoK4goKCuIKCgpSmgqaCgoKmABQuou6ClIKCgpSCgoKCgoKCyoKAgoKUpIKCgqjCgoKmgoKUlIKClJQADBqigqaAgoK2gu6CuIKAgoKkgoKCqJK4lIKUgoKClJSCAAgSooKmgILIgoCCgoKkAAsYpoKCgqqmtIKCgsqUtAAIDAAHEIK4pqKClICCpIKAgoKk7oKCgqiSAAweooKAgsiigoKCgoKUgoKUgoCCgraCuAANHIKs0oKmgqaCgqaqog==", "", "", "202=Join/1/3/1,Join/2/3/2,Join/3/3/3;365=mapFunction/1/1/1")]
+[assembly: GoPositionMap("internal/profile/profile.go", "profile.cs", "AHH4AaKCgqaCgoKUgoKUpoKCpoCCpKaSlIKCpoKAgraAgrao0oKCgpKC3tSCgpSCgtyCgoKUgpSUgoKClIKUlIKCgpSClIKAgoK2goCCgtqssoKCgoK4goKCgpSC3IKCgpSCgqaCyurEgoCCpIKClIKmgoKClIKCgoKUgoKUgoKCgoKUlIKCgpS4goKCgIKkgpSCgoCCyoK2lLiCgoKClIKUgpSClAAHEK7igIK2poKmlIKClIKClIKCpoKCgriCrNKCpoKmgoK4qqKCgqaqooKCpqaygpSosoKUgoCCpICCtgAHFrSSgriCgpSCgIK2qJKokoKUgoKUqJKClIKCgoKmgpSCgoK4", "", "", "", "182:21")]
+[assembly: GoPositionMap("internal/profile/proto.go", "proto.cs", "ACpagoKCpoKCgpSmgoKmlIKmgpSCgpSCgoKCgoKUgriCgpSmgoKmgoKUpoKUgoKUgoKCgoKClIK4goKmgoK4goKUuIKClKaigoKCgoKCgqaCgqaCpoKmooKCgIK25oKCgoKClIKCAAoKgoKClIKCgoKUgoLGgpSCtIKCgpSClIK0gpSCtKbmgoKUpqKAgqSCgoSSgoKUgpSAgramooCCpIKmopSClIKCgpSAgqSUlIKAgqSCpqKAgqSCpqKUgpSCgoKUgIKklJSCgIKkgqaCgIKkgqaigoCCpIKmooCCpIKUlA==")]
+[assembly: GoPositionMap("internal/profile/prune.go", "prune.cs", "AAsisoKUgoKCgIKUgpSCguyUppSU3LiCgoKCgpSClIKClIKCAAUQopKUgoCCpIKAgraU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

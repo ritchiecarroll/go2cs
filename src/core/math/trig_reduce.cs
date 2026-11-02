@@ -29,8 +29,8 @@ internal static UntypedInt reduceThreshold => /* 1 << 29 */ 536870912;
 // K. C. Ng et al, March 24, 1992
 // The simulated multi-precision calculation of x*B uses 64-bit integer arithmetic.
 internal static (uint64 j, float64 z) trigReduce(float64 x) {
-    uint64 j = default!;
-    float64 z = default!;
+    uint64 j = default;
+    float64 z = default;
 
     const float64 PI4 = /* Pi / 4 */ 0.7853981633974483;
     if (x < PI4) {

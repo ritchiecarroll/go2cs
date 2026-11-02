@@ -13,7 +13,8 @@ using static global::go.go.build_package;
 
 partial class build_internal_test_package {
 
-internal static readonly @string quote = "`"u8;
+internal static ref readonly @string quote => ref quoteᵇ;
+private static readonly @string quoteᵇ = "`"u8;
 
 internal partial struct readTest {
     // Test input contains ℙ where readGoInfo should stop.
@@ -21,22 +22,22 @@ internal partial struct readTest {
     internal @string err;
 }
 
-internal static slice<readTest> readGoInfoTests = new readTest[]{
+internal static slice<readTest> readGoInfoTests = slice<readTest>([
     new(
-        @"package p"u8,
-        ""u8
+        @"package p",
+        ""
     ),
     new(
-        @"package p; import ""x"""u8,
-        ""u8
+        @"package p; import ""x""",
+        ""
     ),
     new(
-        @"package p; import . ""x"""u8,
-        ""u8
+        @"package p; import . ""x""",
+        ""
     ),
     new(
-        @"package p; import ""x"";ℙvar x = 1"u8,
-        ""u8
+        @"package p; import ""x"";ℙvar x = 1",
+        ""
     ),
     new(
         """
@@ -73,30 +74,30 @@ package p
 		ℙvar x = 1
 		
 """.Raw(),
-        ""u8
+        ""
     ),
     new(
         "\ufeff𝔻"u8 + @"package p; import ""x"";ℙvar x = 1"u8,
-        ""u8
+        ""
     )
-}.slice();
+]);
 
-internal static slice<readTest> readCommentsTests = new readTest[]{
+internal static slice<readTest> readCommentsTests = slice<readTest>([
     new(
-        @"ℙpackage p"u8,
-        ""u8
+        @"ℙpackage p",
+        ""
     ),
     new(
-        @"ℙpackage p; import ""x"""u8,
-        ""u8
+        @"ℙpackage p; import ""x""",
+        ""
     ),
     new(
-        @"ℙpackage p; import . ""x"""u8,
-        ""u8
+        @"ℙpackage p; import . ""x""",
+        ""
     ),
     new(
         "\ufeff𝔻"u8 + @"ℙpackage p; import . ""x"""u8,
-        ""u8
+        ""
     ),
     new(
         """
@@ -111,7 +112,7 @@ internal static slice<readTest> readCommentsTests = new readTest[]{
 		// asdf
 		ℙHello, world
 """u8.Raw(),
-        ""u8
+        ""
     ),
     new(
         "\ufeff𝔻"u8 + """
@@ -126,18 +127,18 @@ internal static slice<readTest> readCommentsTests = new readTest[]{
 		// asdf
 		ℙHello, world
 """u8.Raw(),
-        ""u8
+        ""
     )
-}.slice();
+]);
 
-internal static void testRead(ж<testing.T> Ꮡt, slice<readTest> tests, Func<io.Reader, (slice<byte>, error)> read) {
+internal static void testRead(ж<testing.T> t, slice<readTest> tests, Func<io.Reader, (slice<byte>, error)> read) {
     foreach (var (i, tt) in tests) {
-        var (beforeP, afterP, _) = strings.Cut(tt.@in, "ℙ"u8);
+        var (beforeP, afterP, _) = strings.Cut(tt.@in, "ℙ");
         @string @in = beforeP + afterP;
         @string testOut = beforeP;
 
         {
-            var (beforeD, afterD, ok) = strings.Cut(beforeP, "𝔻"u8); if (ok) {
+            var (beforeD, afterD, ok) = strings.Cut(beforeP, "𝔻"); if (ok) {
                 @in = beforeD + afterD + afterP;
                 testOut = afterD;
             }
@@ -145,110 +146,110 @@ internal static void testRead(ж<testing.T> Ꮡt, slice<readTest> tests, Func<io
 
         var r = strings.NewReader(@in);
         var (buf, err) = read(new build_internal_test_package.strings_ReaderжReader(r));
-        if (err != default!) {
-            if (tt.err == ""u8){
-                Ꮡt.Errorf("#%d: err=%q, expected success (%q)"u8, i, err, (@string)buf);
-            } else 
-            if (!strings.Contains(err.Error(), tt.err)) {
-                Ꮡt.Errorf("#%d: err=%q, expected %q"u8, i, err, tt.err);
+        if (err != nil) {
+            if (tt.err == ""u8) {
+                t.Errorf("#%d: err=%q, expected success (%q)", i, err, (@string)buf);
+            } else if (!strings.Contains(err.Error(), tt.err)) {
+                t.Errorf("#%d: err=%q, expected %q", i, err, tt.err);
             }
             continue;
         }
         if (tt.err != ""u8) {
-            Ꮡt.Errorf("#%d: success, expected %q"u8, i, tt.err);
+            t.Errorf("#%d: success, expected %q", i, tt.err);
             continue;
         }
 
         @string @out = (@string)buf;
         if (@out != testOut) {
-            Ꮡt.Errorf("#%d: wrong output:\nhave %q\nwant %q\n"u8, i, @out, testOut);
+            t.Errorf("#%d: wrong output:\nhave %q\nwant %q\n", i, @out, testOut);
         }
     }
 }
 
-public static void TestReadGoInfo(ж<testing.T> Ꮡt) {
-    testRead(Ꮡt, readGoInfoTests, (io.Reader r) => {
+public static void TestReadGoInfo(ж<testing.T> t) {
+    testRead(t, readGoInfoTests, (io.Reader r) => {
         ref var info = ref heap(new global::go.go.build_package.fileInfo(), out var Ꮡinfo);
         var err = readGoInfo(r, ref (Ꮡinfo).DerefOrNull());
         return (info.header, err);
     });
 }
 
-public static void TestReadComments(ж<testing.T> Ꮡt) {
-    testRead(Ꮡt, readCommentsTests, readComments);
+public static void TestReadComments(ж<testing.T> t) {
+    testRead(t, readCommentsTests, readComments);
 }
 
-internal static slice<readTest> readFailuresTests = new readTest[]{
+internal static slice<readTest> readFailuresTests = slice<readTest>([
     new(
-        @"package"u8,
-        "syntax error"u8
+        @"package",
+        "syntax error"
     ),
     new(
-        "package p\n\x00\nimport `math`\n"u8,
-        "unexpected NUL in input"u8
+        "package p\n\x00\nimport `math`\n",
+        "unexpected NUL in input"
     ),
     new(
-        @"package p; import"u8,
-        "syntax error"u8
+        @"package p; import",
+        "syntax error"
     ),
     new(
-        @"package p; import """u8,
-        "syntax error"u8
+        @"package p; import """,
+        "syntax error"
     ),
     new(
-        "package p; import ` \n\n"u8,
-        "syntax error"u8
+        "package p; import ` \n\n",
+        "syntax error"
     ),
     new(
-        @"package p; import ""x"u8,
-        "syntax error"u8
+        @"package p; import ""x",
+        "syntax error"
     ),
     new(
-        @"package p; import _"u8,
-        "syntax error"u8
+        @"package p; import _",
+        "syntax error"
     ),
     new(
-        @"package p; import _ """u8,
-        "syntax error"u8
+        @"package p; import _ """,
+        "syntax error"
     ),
     new(
-        @"package p; import _ ""x"u8,
-        "syntax error"u8
+        @"package p; import _ ""x",
+        "syntax error"
     ),
     new(
-        @"package p; import ."u8,
-        "syntax error"u8
+        @"package p; import .",
+        "syntax error"
     ),
     new(
-        @"package p; import . """u8,
-        "syntax error"u8
+        @"package p; import . """,
+        "syntax error"
     ),
     new(
-        @"package p; import . ""x"u8,
-        "syntax error"u8
+        @"package p; import . ""x",
+        "syntax error"
     ),
     new(
-        @"package p; import ("u8,
-        "syntax error"u8
+        @"package p; import (",
+        "syntax error"
     ),
     new(
-        @"package p; import ("""u8,
-        "syntax error"u8
+        @"package p; import (""",
+        "syntax error"
     ),
     new(
-        @"package p; import (""x"u8,
-        "syntax error"u8
+        @"package p; import (""x",
+        "syntax error"
     ),
     new(
-        @"package p; import (""x"""u8,
-        "syntax error"u8
+        @"package p; import (""x""",
+        "syntax error"
     )
-}.slice();
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nulˢ = "NUL"u8;
+internal static ref readonly @string nulˢ => ref nulˢᵇ;
+private static readonly @string nulˢᵇ = "NUL"u8;
 
-public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
+public static void TestReadFailuresIgnored(ж<testing.T> t) {
     // Syntax errors should not be reported (false arg to readImports).
     // Instead, entire file should be the output and no error.
     // Convert tests not to return syntax errors.
@@ -256,11 +257,11 @@ public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
     copy(tests, readFailuresTests);
     foreach (var i in range(tests)) {
         var tt = Ꮡ(tests, i);
-        if (!strings.Contains((~tt).err, nulˢ)) {
-            tt.Value.err = ""u8;
+        if (!strings.Contains(tt.err, nulˢ)) {
+            tt.err = ""u8;
         }
     }
-    testRead(Ꮡt, tests, (io.Reader r) => {
+    testRead(t, tests, (io.Reader r) => {
         ref var info = ref heap(new global::go.go.build_package.fileInfo(), out var Ꮡinfo);
         var err = readGoInfo(r, ref (Ꮡinfo).DerefOrNull());
         return (info.header, err);
@@ -270,13 +271,13 @@ public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
 partial struct readEmbedTestsᴛ1 /*dyn*/ {
     internal @string @in, @out;
 }
-internal static slice<readEmbedTestsᴛ1> readEmbedTests = new readEmbedTestsᴛ1[]{
+internal static slice<readEmbedTestsᴛ1> readEmbedTests = slice<readEmbedTestsᴛ1>([
     new(
-        "package p\n"u8,
-        ""u8
+        "package p\n",
+        ""
     ),
     new(
-        "package p\nimport \"embed\"\nvar i int\n//go:embed x y z\nvar files embed.FS"u8,
+        "package p\nimport \"embed\"\nvar i int\n//go:embed x y z\nvar files embed.FS",
         """
 test:4:12:x
 		 test:4:14:y
@@ -284,7 +285,7 @@ test:4:12:x
 """u8.Raw()
     ),
     new(
-        "package p\nimport \"embed\"\nvar i int\n//go:embed x \"\\x79\" `z`\nvar files embed.FS"u8,
+        "package p\nimport \"embed\"\nvar i int\n//go:embed x \"\\x79\" `z`\nvar files embed.FS",
         """
 test:4:12:x
 		 test:4:14:y
@@ -292,7 +293,7 @@ test:4:12:x
 """u8.Raw()
     ),
     new(
-        "package p\nimport \"embed\"\nvar i int\n//go:embed x y\n//go:embed z\nvar files embed.FS"u8,
+        "package p\nimport \"embed\"\nvar i int\n//go:embed x y\n//go:embed z\nvar files embed.FS",
         """
 test:4:12:x
 		 test:4:14:y
@@ -300,7 +301,7 @@ test:4:12:x
 """u8.Raw()
     ),
     new(
-        "package p\nimport \"embed\"\nvar i int\n\t //go:embed x y\n\t //go:embed z\n\t var files embed.FS"u8,
+        "package p\nimport \"embed\"\nvar i int\n\t //go:embed x y\n\t //go:embed z\n\t var files embed.FS",
         """
 test:4:14:x
 		 test:4:16:y
@@ -308,7 +309,7 @@ test:4:14:x
 """u8.Raw()
     ),
     new(
-        "package p\nimport \"embed\"\n//go:embed x y z\nvar files embed.FS"u8,
+        "package p\nimport \"embed\"\n//go:embed x y z\nvar files embed.FS",
         """
 test:3:12:x
 		 test:3:14:y
@@ -316,7 +317,7 @@ test:3:12:x
 """u8.Raw()
     ),
     new(
-        "\ufeffpackage p\nimport \"embed\"\n//go:embed x y z\nvar files embed.FS"u8,
+        "\ufeffpackage p\nimport \"embed\"\n//go:embed x y z\nvar files embed.FS",
         """
 test:3:12:x
 		 test:3:14:y
@@ -324,8 +325,8 @@ test:3:12:x
 """u8.Raw()
     ),
     new(
-        "package p\nimport \"embed\"\nvar s = \"/*\"\n//go:embed x\nvar files embed.FS"u8,
-        @"test:4:12:x"u8
+        "package p\nimport \"embed\"\nvar s = \"/*\"\n//go:embed x\nvar files embed.FS",
+        @"test:4:12:x"
     ),
     new(
         """
@@ -335,53 +336,52 @@ package p
 		 //go:embed x
 		 var files embed.FS
 """u8.Raw(),
-        @"test:4:15:x"u8
+        @"test:4:15:x"
     ),
     new(
-        "package p\nimport \"embed\"\nvar s = `/*`\n//go:embed x\nvar files embed.FS"u8,
-        @"test:4:12:x"u8
+        "package p\nimport \"embed\"\nvar s = `/*`\n//go:embed x\nvar files embed.FS",
+        @"test:4:12:x"
     ),
     new(
-        "package p\nimport \"embed\"\nvar s = z/ *y\n//go:embed pointer\nvar pointer embed.FS"u8,
-        "test:4:12:pointer"u8
+        "package p\nimport \"embed\"\nvar s = z/ *y\n//go:embed pointer\nvar pointer embed.FS",
+        "test:4:12:pointer"
     ),
     new(
-        "package p\n//go:embed x y z\n"u8, // no import, no scan
-        ""u8
+        "package p\n//go:embed x y z\n", // no import, no scan
+        ""
     ),
     new(
-        "package p\n//go:embed x y z\nvar files embed.FS"u8, // no import, no scan
-        ""u8
+        "package p\n//go:embed x y z\nvar files embed.FS", // no import, no scan
+        ""
     ),
     new(
-        "\ufeffpackage p\n//go:embed x y z\nvar files embed.FS"u8, // no import, no scan
-        ""u8
+        "\ufeffpackage p\n//go:embed x y z\nvar files embed.FS", // no import, no scan
+        ""
     )
-}.slice();
+]);
 
-public static void TestReadEmbed(ж<testing.T> Ꮡt) {
+public static void TestReadEmbed(ж<testing.T> t) {
     var fset = token.NewFileSet();
     foreach (var (i, tt) in readEmbedTests) {
-        ref var info = ref heap<global::go.go.build_package.fileInfo>(out var Ꮡinfo);
-        info = new fileInfo(
-            name: "test"u8,
+        ref var info = ref heap<global::go.go.build_package.fileInfo>(new fileInfo(
+            name: "test",
             fset: fset
-        );
+        ), out var Ꮡinfo);
         var err = readGoInfo(new build_internal_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)), ref info);
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: %v"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: %v", i, err);
             continue;
         }
-        var b = Ꮡ(new strings.Builder(nil));
+        var b = Ꮡ(new strings.Builder());
         @string sep = ""u8;
         foreach (var (_, emb) in info.embeds) {
             fmt.Fprintf(new build_internal_test_package.strings_BuilderжWriter(b), "%s%v:%s"u8, sep, emb.pos, emb.pattern);
-            sep = "\n"u8;
+            sep = "\n";
         }
         @string got = b.String();
-        @string want = strings.Join(strings.Fields(tt.@out), "\n"u8);
+        @string want = strings.Join(strings.Fields(tt.@out), "\n");
         if (got != want) {
-            Ꮡt.Errorf("#%d: embeds:\n%s\nwant:\n%s"u8, i, got, want);
+            t.Errorf("#%d: embeds:\n%s\nwant:\n%s", i, got, want);
         }
     }
 }

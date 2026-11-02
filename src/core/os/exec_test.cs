@@ -21,24 +21,24 @@ internal static readonly object processLiteralsDoNotWorkˢ = (@string)"Process l
 internal static readonly object signalsSendNotifyNotˢ = (@string)"Signals send + notify not fully supported om wasm port"u8;
 internal static readonly object timeoutWaitingForSignalˢ = (@string)"timeout waiting for signal"u8;
 
-public static void TestProcessLiteral(ж<Δtesting.T> Ꮡt) {
+public static void TestProcessLiteral(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOOS == "windows"u8) {
-            Ꮡt.Skip(processLiteralsDoNotWorkˢ);
+            t.Skip(processLiteralsDoNotWorkˢ);
         }
         if (Δruntime.GOARCH == "wasm"u8) {
-            Ꮡt.Skip(signalsSendNotifyNotˢ);
+            t.Skip(signalsSendNotifyNotˢ);
         }
 
         var c = new channel<osꓸSignal>(1);
-        signal.Notify(c.WithDirection(GoChanDir.Send), Δos.Interrupt);
-        defer(signal.Stop, c.WithDirection(GoChanDir.Send), ref ᒐ);
+        signal.Notify(c.AsSendOnly(), Δos.Interrupt);
+        defer(signal.Stop, c.AsSendOnly(), ref ᒐ);
 
         var p = Ꮡ(new Δos.Process(Pid: Δos.Getpid()));
         {
-            var err = p.Signal(Δos.Interrupt); if (err != default!) {
-                Ꮡt.Fatalf("Signal got err %v, want nil"u8, err);
+            var err = p.Signal(Δos.Interrupt); if (err != nil) {
+                t.Fatalf("Signal got err %v, want nil", err);
             }
         }
 
@@ -47,7 +47,7 @@ public static void TestProcessLiteral(ж<Δtesting.T> Ꮡt) {
         var selᴛ2 = c;
         switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
-            Ꮡt.Error(timeoutWaitingForSignalˢ);
+            t.Error(timeoutWaitingForSignalˢ);
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
@@ -59,45 +59,45 @@ public static void TestProcessLiteral(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestProcessReleaseTwice(ж<Δtesting.T> Ꮡt) {
+public static void TestProcessReleaseTwice(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveGoBuild(new os_test_package.testing_TжTB(Ꮡt));
-        Ꮡt.Parallel();
+        testenv.MustHaveGoBuild(new os_test_package.testing_TжTB(t));
+        t.Parallel();
 
         var (r, w, err) = Δos.Pipe();
-        if (err != default!) {
-            Ꮡt.Fatalf("Pipe() got err %v, want nil"u8, err);
+        if (err != nil) {
+            t.Fatalf("Pipe() got err %v, want nil", err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
 
-        (var p, err) = Δos.StartProcess(testenv.GoToolPath(new os_test_package.testing_TжTB(Ꮡt)), new @string[]{"go"u8}.slice(), Ꮡ(new Δos.ProcAttr(
+        (var p, err) = Δos.StartProcess(testenv.GoToolPath(new os_test_package.testing_TжTB(t)), slice<@string>(["go"]), Ꮡ(new Δos.ProcAttr(
             // N.B. On Windows, StartProcess requires exactly 3 Files. Pass
             // in a dummy pipe to avoid irrelevant output on the test stdout.
-            Files: new ж<Δos.File>[]{r, w, w}.slice()
+            Files: slice<ж<Δos.File>>([r, w, w])
         )));
-        if (err != default!) {
-            Ꮡt.Fatalf("starting test process: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("starting test process: %v", err);
         }
         {
-            var errΔ1 = p.Release(); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("first Release: got err %v, want nil"u8, errΔ1);
+            var errΔ1 = p.Release(); if (errΔ1 != nil) {
+                t.Fatalf("first Release: got err %v, want nil", errΔ1);
             }
         }
 
         err = p.Release();
 
         // We want EINVAL from a second Release call only on Windows.
-        error want = default!;
+        error want = default;
         if (Δruntime.GOOS == "windows"u8) {
             want = syscall.EINVAL;
         }
 
         if (!AreEqual(err, want)) {
-            Ꮡt.Fatalf("second Release: got err %v, want %v"u8, err, want);
+            t.Fatalf("second Release: got err %v, want %v", err, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

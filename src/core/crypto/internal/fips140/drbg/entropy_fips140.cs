@@ -29,10 +29,10 @@ internal static readonly ж<entropy.ScratchBuffer> Ꮡmemory = new StaticBox<ent
 internal static ref entropy.ScratchBuffer memory => ref ((StaticBox<entropy.ScratchBuffer>)Ꮡmemory).ValueSlot;
 
 internal static ж<array<byte>> getEntropy() {
-    nint retries = default!;
+    nint retries = default;
     ref var seed = ref heap<array<byte>>(out var Ꮡseed);
     (seed, var err) = entropy.Seed(Ꮡmemory);
-    while (err != default!) {
+    while (err != nil) {
         // The CPU jitter-based SP 800-90B entropy source has a non-negligible
         // chance of failing the startup health tests.
         //

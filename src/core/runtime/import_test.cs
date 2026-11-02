@@ -35,12 +35,12 @@ partial class runtime_test_package {
     runtime_internal_test_package.TestenvOptimizationOff = testenv.OptimizationOff;
 }
 
-public static void TestInlineUnwinder(ж<testing.T> Ꮡt) {
-    runtime_internal_test_package.XTestInlineUnwinder(new runtime_test_package.testing_TжTestingT(Ꮡt));
+public static void TestInlineUnwinder(ж<testing.T> t) {
+    runtime_internal_test_package.XTestInlineUnwinder(new runtime_test_package.testing_TжTestingT(t));
 }
 
-public static void TestSPWrite(ж<testing.T> Ꮡt) {
-    runtime_internal_test_package.XTestSPWrite(new runtime_test_package.testing_TжTestingT(Ꮡt));
+public static void TestSPWrite(ж<testing.T> t) {
+    runtime_internal_test_package.XTestSPWrite(new runtime_test_package.testing_TжTestingT(t));
 }
 
 } // end runtime_test_package

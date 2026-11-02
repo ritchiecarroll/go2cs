@@ -26,28 +26,31 @@ using static go.image.gif_package;
 partial class gif_internal_test_package {
 
 // header, palette and trailer are parts of a valid 2x1 GIF image.
-internal static readonly @string headerStr = ((@string)(new byte[]{
+internal static ref readonly @string headerStr => ref headerStrᵇ;
+private static readonly @string headerStrᵇ = ((@string)(new byte[]{
     0x47, 0x49, 0x46, 0x38, 0x39, 0x61,
     0x02, 0x00, 0x01, 0x00, // width=2, height=1
     0x80, 0x00, 0x00 // headerFields=(a color table of 2 pixels), backgroundIndex, aspect
 }));
-internal static readonly @string paletteStr = "\x10\x20\x30\x40\x50\x60"u8; // the color table, also known as a palette
-internal static readonly @string trailerStr = "\x3b"u8;
+internal static ref readonly @string paletteStr => ref paletteStrᵇ;
+private static readonly @string paletteStrᵇ = "\x10\x20\x30\x40\x50\x60"u8; // the color table, also known as a palette
+internal static ref readonly @string trailerStr => ref trailerStrᵇ;
+private static readonly @string trailerStrᵇ = "\x3b"u8;
 
 // lzw.NewReader wants an io.ByteReader, this ensures we're compatible.
 internal static io.ByteReader _ᴛ1ʗ = new gif_internal_test_package.gif_blockReaderжByteReader(((ж<global::go.image.gif_package.blockReader>)nil));
 
 // lzwEncode returns an LZW encoding (with 2-bit literals) of in.
 internal static slice<byte> lzwEncode(slice<byte> @in) {
-    var b = Ꮡ(new bytes.Buffer(nil));
+    var b = Ꮡ(new bytes.Buffer());
     var w = lzw.NewWriter(new gif_internal_test_package.bytes_BufferжWriter(b), lzw.LSB, 2);
     {
-        var (_, err) = w.Write(@in); if (err != default!) {
+        var (_, err) = w.Write(@in); if (err != nil) {
             throw panic(err);
         }
     }
     {
-        var err = w.Close(); if (err != default!) {
+        var err = w.Close(); if (err != nil) {
             throw panic(err);
         }
     }
@@ -55,7 +58,8 @@ internal static slice<byte> lzwEncode(slice<byte> @in) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string extraᶜ = "\x02\x02\x02\x02"u8;
+internal static ref readonly @string extraᶜ => ref extraᶜᵇ;
+private static readonly @string extraᶜᵇ = "\x02\x02\x02\x02"u8;
 
 internal partial struct TestDecode_testCases /*dyn*/ {
     internal nint nPix; // The number of pixels in the image data.
@@ -67,45 +71,45 @@ internal partial struct TestDecode_testCases /*dyn*/ {
     internal error wantErr;
 }
 
-public static void TestDecode(ж<testing.T> Ꮡt) {
+public static void TestDecode(ж<testing.T> t) {
     // extra contains superfluous bytes to inject into the GIF, either at the end
     // of an existing data sub-block (past the LZW End of Information code) or in
     // a separate data sub-block. The 0x02 values are arbitrary.
     @string extra = extraᶜ;
 
-    var testCases = new TestDecode_testCases[]{
+    var testCases = slice<TestDecode_testCases>([
         new(0, 0, 0, errNotEnough),
         new(1, 0, 0, errNotEnough),
-        new(2, 0, 0, default!),
+        new(2, 0, 0, default),
         // An extra data sub-block after the compressed section with 1 byte which we
         // silently skip.
-        new(2, 0, 1, default!),
+        new(2, 0, 1, default),
         // An extra data sub-block after the compressed section with 2 bytes. In
         // this case we complain that there is too much data.
         new(2, 0, 2, errTooMuch),
         // Too much pixel data.
         new(3, 0, 0, errTooMuch),
         // An extra byte after LZW data, but inside the same data sub-block.
-        new(2, 1, 0, default!),
+        new(2, 1, 0, default),
         // Two extra bytes after LZW data, but inside the same data sub-block.
-        new(2, 2, 0, default!),
+        new(2, 2, 0, default),
         // Extra data exists in the final sub-block with LZW data, AND there is
         // a bogus sub-block following.
         new(2, 1, 1, errTooMuch)
-    }.slice();
+    ]);
     foreach (var (_, tc) in testCases) {
-        var b = Ꮡ(new bytes.Buffer(nil));
+        var b = Ꮡ(new bytes.Buffer());
         b.WriteString(headerStr);
         b.WriteString(paletteStr);
         // Write an image with bounds 2x1 but tc.nPix pixels. If tc.nPix != 2
         // then this should result in an invalid GIF image. First, write a
         // magic 0x2c (image descriptor) byte, bounds=(0,0)-(2,1), a flags
         // byte, and 2-bit LZW literals.
-        b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+        b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
         if (tc.nPix > 0) {
             var enc = lzwEncode(new slice<byte>(tc.nPix));
             if (len(enc) + tc.extraExisting > 0xff) {
-                Ꮡt.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d: compressed length %d is too large"u8,
+                t.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d: compressed length %d is too large",
                     tc.nPix, tc.extraExisting, tc.extraSeparate, len(enc));
                 continue;
             }
@@ -131,29 +135,29 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
 
         var (got, err) = Decode(new gif_internal_test_package.bytes_BufferжReader(b));
         if (!AreEqual(err, tc.wantErr)) {
-            Ꮡt.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d\ngot  %v\nwant %v"u8,
+            t.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d\ngot  %v\nwant %v",
                 tc.nPix, tc.extraExisting, tc.extraSeparate, err, tc.wantErr);
         }
 
-        if (tc.wantErr != default!) {
+        if (tc.wantErr != nil) {
             continue;
         }
         var want = Ꮡ(new image.Paletted(
-            Pix: new uint8[]{0, 0}.slice(),
+            Pix: slice<uint8>([0, 0]),
             Stride: 2,
             Rect: image.Rect(0, 0, 2, 1),
             Palette: new Δcolor.Palette(new Δcolor.Color[]{new colorꓸRGBA(0x10, 0x20, 0x30, 0xff), new colorꓸRGBA(0x40, 0x50, 0x60, 0xff)
             }.slice())
         ));
         if (!reflect.DeepEqual(got, want.OrTypedNil())) {
-            Ꮡt.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d\ngot  %v\nwant %v"u8,
+            t.Errorf("nPix=%d, extraExisting=%d, extraSeparate=%d\ngot  %v\nwant %v",
                 tc.nPix, tc.extraExisting, tc.extraSeparate, got, want.OrTypedNil());
         }
     }
 }
 
-public static void TestTransparentIndex(ж<testing.T> Ꮡt) {
-    var b = Ꮡ(new bytes.Buffer(nil));
+public static void TestTransparentIndex(ж<testing.T> t) {
+    var b = Ꮡ(new bytes.Buffer());
     b.WriteString(headerStr);
     b.WriteString(paletteStr);
     for (nint transparentIndex = 0; transparentIndex < 3; transparentIndex++) {
@@ -164,10 +168,10 @@ public static void TestTransparentIndex(ж<testing.T> Ꮡt) {
             b.WriteByte(0);
         }
         // Write an image with bounds 2x1, as per TestDecode.
-        b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
-        var enc = lzwEncode(new byte[]{0x00, 0x00}.slice());
+        b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
+        var enc = lzwEncode(slice<byte>([0x00, 0x00]));
         if (len(enc) > 0xff) {
-            Ꮡt.Fatalf("compressed length %d is too large"u8, len(enc));
+            t.Fatalf("compressed length %d is too large", len(enc));
         }
         b.WriteByte((byte)len(enc));
         b.Write(enc);
@@ -176,31 +180,31 @@ public static void TestTransparentIndex(ж<testing.T> Ꮡt) {
     b.WriteString(trailerStr);
 
     var (g, err) = DecodeAll(new gif_internal_test_package.bytes_BufferжReader(b));
-    if (err != default!) {
-        Ꮡt.Fatalf("DecodeAll: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("DecodeAll: %v", err);
     }
     var c0 = new colorꓸRGBA(paletteStr[0], paletteStr[1], paletteStr[2], 0xff);
     var c1 = new colorꓸRGBA(paletteStr[3], paletteStr[4], paletteStr[5], 0xff);
-    var cz = new colorꓸRGBA(nil);
-    var wants = new Δcolor.Palette[]{
-        new Δcolor.Color[]{cz, c1}.slice(),
-        new Δcolor.Color[]{c0, cz}.slice(),
-        new Δcolor.Color[]{c0, c1}.slice()
-    }.slice();
-    if (len((~g).Image) != len(wants)) {
-        Ꮡt.Fatalf("got %d images, want %d"u8, len((~g).Image), len(wants));
+    var cz = new colorꓸRGBA();
+    var wants = slice<Δcolor.Palette>([
+        slice<Δcolor.Color>([cz, c1]),
+        slice<Δcolor.Color>([c0, cz]),
+        slice<Δcolor.Color>([c0, c1])
+    ]);
+    if (len(g.Image) != len(wants)) {
+        t.Fatalf("got %d images, want %d", len(g.Image), len(wants));
     }
     foreach (var (i, want) in wants) {
-        var got = (~g).Image[i].Value.Palette;
+        var got = g.Image[i].Palette;
         if (!reflect.DeepEqual(got, want)) {
-            Ꮡt.Errorf("palette #%d:\ngot  %v\nwant %v"u8, i, got, want);
+            t.Errorf("palette #%d:\ngot  %v\nwant %v", i, got, want);
         }
     }
 }
 
 // testGIF is a simple GIF that we can modify to test different scenarios.
-internal static slice<byte> testGIF = new byte[]{
-    (rune)'G', (rune)'I', (rune)'F', (rune)'8', (rune)'9', (rune)'a',
+internal static slice<byte> testGIF = slice<byte>([
+    (byte)'G', (byte)'I', (byte)'F', (byte)'8', (byte)'9', (byte)'a',
     1, 0, 1, 0, // w=1, h=1 (6)
     128, 0, 0, // headerFields, bg, aspect (10)
     0, 0, 0, 1, 1, 1, // color table and graphics control (13)
@@ -213,36 +217,37 @@ internal static slice<byte> testGIF = new byte[]{
     0x02, 0x02, 0x4c, 0x01, 0x00, // lzw pixels
     // trailer
     0x3b
-}.slice();
+]);
 
-internal static void @try(ж<testing.T> Ꮡt, slice<byte> b, @string want) {
+internal static void @try(ж<testing.T> t, slice<byte> b, @string want) {
     var (_, err) = DecodeAll(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
-    @string got = default!;
-    if (err != default!) {
+    @string got = default;
+    if (err != nil) {
         got = err.Error();
     }
     if (got != want) {
-        Ꮡt.Fatalf("got %v, want %v"u8, got, want);
+        t.Fatalf("got %v, want %v", got, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gifTooMuchImageDataˢ = "gif: too much image data"u8;
+internal static ref readonly @string gifTooMuchImageDataˢ => ref gifTooMuchImageDataˢᵇ;
+private static readonly @string gifTooMuchImageDataˢᵇ = "gif: too much image data"u8;
 
-public static void TestBounds(ж<testing.T> Ꮡt) {
+public static void TestBounds(ж<testing.T> t) {
     // Make a local copy of testGIF.
     var gif = new slice<byte>(len(testGIF));
     copy(gif, testGIF);
     // Make the bounds too big, just by one.
     gif[32] = 2;
     @string want = gifFrameBoundsLargerThanˢ;
-    @try(Ꮡt, gif, want);
+    @try(t, gif, want);
 
     // Make the bounds too small; does not trigger bounds
     // check, but now there's too much data.
     gif[32] = 0;
     want = gifTooMuchImageDataˢ;
-    @try(Ꮡt, gif, want);
+    @try(t, gif, want);
     gif[32] = 1;
 
     // Make the bounds really big, expect an error.
@@ -250,47 +255,48 @@ public static void TestBounds(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 4; i++) {
         gif[32 + i] = 0xff;
     }
-    @try(Ꮡt, gif, want);
+    @try(t, gif, want);
 }
 
-public static void TestNoPalette(ж<testing.T> Ꮡt) {
-    var b = Ꮡ(new bytes.Buffer(nil));
+public static void TestNoPalette(ж<testing.T> t) {
+    var b = Ꮡ(new bytes.Buffer());
 
     // Manufacture a GIF with no palette, so any pixel at all
     // will be invalid.
     b.WriteString(headerStr[..(int)(len(headerStr) - 3)]);
-    b.WriteString("\x00\x00\x00"u8); // No global palette.
+    b.WriteString("\x00\x00\x00"); // No global palette.
 
     // Image descriptor: 2x1, no local palette, and 2-bit LZW literals.
-    b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+    b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
 
     // Encode the pixels: neither is in range, because there is no palette.
-    var enc = lzwEncode(new byte[]{0x00, 0x03}.slice());
+    var enc = lzwEncode(slice<byte>([0x00, 0x03]));
     b.WriteByte((byte)len(enc));
     b.Write(enc);
     b.WriteByte(0x00); // An empty block signifies the end of the image data.
 
     b.WriteString(trailerStr);
 
-    @try(Ꮡt, b.Bytes(), gifNoColorTableˢ);
+    @try(t, b.Bytes(), gifNoColorTableˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gifInvalidPixelValueˢ = "gif: invalid pixel value"u8;
+internal static ref readonly @string gifInvalidPixelValueˢ => ref gifInvalidPixelValueˢᵇ;
+private static readonly @string gifInvalidPixelValueˢᵇ = "gif: invalid pixel value"u8;
 
-public static void TestPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
-    foreach (var (_, pval) in new byte[]{0, 1, 2, 3}.slice()) {
-        var b = Ꮡ(new bytes.Buffer(nil));
+public static void TestPixelOutsidePaletteRange(ж<testing.T> t) {
+    foreach (var (_, pval) in slice<byte>([0, 1, 2, 3])) {
+        var b = Ꮡ(new bytes.Buffer());
 
         // Manufacture a GIF with a 2 color palette.
         b.WriteString(headerStr);
         b.WriteString(paletteStr);
 
         // Image descriptor: 2x1, no local palette, and 2-bit LZW literals.
-        b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+        b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
 
         // Encode the pixels; some pvals trigger the expected error.
-        var enc = lzwEncode(new byte[]{pval, pval}.slice());
+        var enc = lzwEncode(slice<byte>([pval, pval]));
         b.WriteByte((byte)len(enc));
         b.Write(enc);
         b.WriteByte(0x00); // An empty block signifies the end of the image data.
@@ -302,12 +308,12 @@ public static void TestPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
         if (pval >= 2) {
             want = gifInvalidPixelValueˢ;
         }
-        @try(Ꮡt, b.Bytes(), want);
+        @try(t, b.Bytes(), want);
     }
 }
 
-public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
-    var b = Ꮡ(new bytes.Buffer(nil));
+public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> t) {
+    var b = Ꮡ(new bytes.Buffer());
 
     // Manufacture a GIF with a 2 color palette.
     b.WriteString(headerStr);
@@ -323,17 +329,17 @@ public static void TestTransparentPixelOutsidePaletteRange(ж<testing.T> Ꮡt) {
     b.WriteString(((@string)(new byte[]{0x21, 0xf9, 0x04, 0x01, 0x00, 0x00, 0x03, 0x00})));
 
     // Image descriptor: 2x1, no local palette, and 2-bit LZW literals.
-    b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02"u8);
+    b.WriteString("\x2c\x00\x00\x00\x00\x02\x00\x01\x00\x00\x02");
 
     // Encode the pixels.
-    var enc = lzwEncode(new byte[]{0x03, 0x03}.slice());
+    var enc = lzwEncode(slice<byte>([0x03, 0x03]));
     b.WriteByte((byte)len(enc));
     b.Write(enc);
     b.WriteByte(0x00); // An empty block signifies the end of the image data.
 
     b.WriteString(trailerStr);
 
-    @try(Ꮡt, b.Bytes(), ""u8);
+    @try(t, b.Bytes(), ""u8);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -346,16 +352,16 @@ internal partial struct TestLoopCount_testCases /*dyn*/ {
     internal nint loopCount;
 }
 
-public static void TestLoopCount(ж<testing.T> Ꮡt) {
-    var testCases = new TestLoopCount_testCases[]{
+public static void TestLoopCount(ж<testing.T> t) {
+    var testCases = slice<TestLoopCount_testCases>([
         new(
-            "loopcount-missing"u8,
+            "loopcount-missing",
             slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 0 descriptor & color table
                 ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // image 0 image data & trailer
             -1
         ),
         new(
-            "loopcount-0"u8,
+            "loopcount-0",
             slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01, 0x00, 0x00, 0x00})) + // loop count = 0
                 ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 0 descriptor & color table
                 ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00})) + // image 0 image data
@@ -364,7 +370,7 @@ public static void TestLoopCount(ж<testing.T> Ꮡt) {
             0
         ),
         new(
-            "loopcount-1"u8,
+            "loopcount-1",
             slice<byte>(((@string)(new byte[]{0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x30, 0x30, 0x30, 0x00, 0x30, 0x30, 0x30})) + ((@string)(new byte[]{0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01, 0x01, 0x00, 0x00})) + // loop count = 1
                 ((@string)(new byte[]{0x2c, 0x30, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x0a, 0x00, 0x80, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30})) + // image 0 descriptor & color table
                 ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00})) + // image 0 image data
@@ -372,53 +378,55 @@ public static void TestLoopCount(ж<testing.T> Ꮡt) {
                 ((@string)(new byte[]{0x02, 0x08, 0xf0, 0x31, 0x75, 0xb9, 0xfd, 0x61, 0x6c, 0x05, 0x00, 0x3b}))), // image 1 image data & trailer
             1
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestLoopCount_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (img, err) = DecodeAll(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(tcʗ1.data)));
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(decodeAllˢ, err);
             }
             var w = @new<bytes.Buffer>();
             err = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(w), img);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(encodeAllˢ, err);
             }
             (var img1, err) = DecodeAll(new gif_internal_test_package.bytes_BufferжReader(w));
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(decodeAllˢ, err);
             }
-            if ((~img).LoopCount != tcʗ1.loopCount) {
-                tΔ1.Errorf("loop count mismatch: %d vs %d"u8, (~img).LoopCount, tcʗ1.loopCount);
+            if (img.LoopCount != tcʗ1.loopCount) {
+                tΔ1.Errorf("loop count mismatch: %d vs %d", img.LoopCount, tcʗ1.loopCount);
             }
-            if ((~img).LoopCount != (~img1).LoopCount) {
-                tΔ1.Errorf("loop count failed round-trip: %d vs %d"u8, (~img).LoopCount, (~img1).LoopCount);
+            if (img.LoopCount != img1.LoopCount) {
+                tΔ1.Errorf("loop count failed round-trip: %d vs %d", img.LoopCount, img1.LoopCount);
             }
         });
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gifˢ2 = "gif:"u8;
-internal static readonly @string unexpectedEofˢ = ": unexpected EOF"u8;
+internal static ref readonly @string gifˢ2 => ref gifˢ2ᵇ;
+private static readonly @string gifˢ2ᵇ = "gif:"u8;
+internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
+private static readonly @string unexpectedEofˢᵇ = ": unexpected EOF"u8;
 
-public static void TestUnexpectedEOF(ж<testing.T> Ꮡt) {
+public static void TestUnexpectedEOF(ж<testing.T> t) {
     for (nint i = len(testGIF) - 1; i >= 0; i--) {
         var (_, err) = DecodeAll(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(testGIF.slice(0, i))));
         if (AreEqual(err, errNotEnough)) {
             continue;
         }
         @string text = ""u8;
-        if (err != default!) {
+        if (err != nil) {
             text = err.Error();
         }
         if (!strings.HasPrefix(text, gifˢ2) || !strings.HasSuffix(text, unexpectedEofˢ)) {
-            Ꮡt.Errorf("Decode(testGIF[:%d]) = %v, want gif: ...: unexpected EOF"u8, i, err);
+            t.Errorf("Decode(testGIF[:%d]) = %v, want gif: ...: unexpected EOF", i, err);
         }
     }
 }
@@ -427,7 +435,7 @@ public static void TestUnexpectedEOF(ж<testing.T> Ꮡt) {
 internal static readonly object decodeˢ = (@string)"Decode:"u8;
 
 // See golang.org/issue/22237
-public static void TestDecodeMemoryConsumption(ж<testing.T> Ꮡt) {
+public static void TestDecodeMemoryConsumption(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         const nint frames = 3000;
@@ -438,13 +446,13 @@ public static void TestDecodeMemoryConsumption(ж<testing.T> Ꮡt) {
             Disposal: new slice<byte>(frames)
         ));
         for (nint i = 0; i < frames; i++) {
-            hugeGIF.Value.Image[i] = img;
-            hugeGIF.Value.Delay[i] = 60;
+            hugeGIF.Image[i] = img;
+            hugeGIF.Delay[i] = 60;
         }
         var buf = @new<bytes.Buffer>();
         {
-            var err = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(buf), hugeGIF); if (err != default!) {
-                Ꮡt.Fatal(encodeAllˢ, err);
+            var err = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(buf), hugeGIF); if (err != nil) {
+                t.Fatal(encodeAllˢ, err);
             }
         }
         var (s0, s1) = (@new<runtime.MemStats>(), @new<runtime.MemStats>());
@@ -452,14 +460,14 @@ public static void TestDecodeMemoryConsumption(ж<testing.T> Ꮡt) {
         defer(debug.SetGCPercent, debug.SetGCPercent(5), ref ᒐ);
         runtime.ReadMemStats(s0);
         {
-            var (_, err) = Decode(new gif_internal_test_package.bytes_BufferжReader(buf)); if (err != default!) {
-                Ꮡt.Fatal(decodeˢ, err);
+            var (_, err) = Decode(new gif_internal_test_package.bytes_BufferжReader(buf)); if (err != nil) {
+                t.Fatal(decodeˢ, err);
             }
         }
         runtime.ReadMemStats(s1);
         {
-            var heapDiff = (int64)((~s1).HeapAlloc - (~s0).HeapAlloc); if (heapDiff > (int64)30 << 20) {
-                Ꮡt.Fatalf("Decode of %d frames increased heap by %dMB"u8, (nint)(frames), heapDiff >> 20);
+            var heapDiff = (int64)(s1.HeapAlloc - s0.HeapAlloc); if (heapDiff > (int64)30 << 20) {
+                t.Fatalf("Decode of %d frames increased heap by %dMB", (nint)(frames), heapDiff >> 20);
             }
         }
     }
@@ -468,17 +476,18 @@ public static void TestDecodeMemoryConsumption(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataVideo001Gifˢ = "../testdata/video-001.gif"u8;
+internal static ref readonly @string testdataVideo001Gifˢ => ref testdataVideo001Gifˢᵇ;
+private static readonly @string testdataVideo001Gifˢᵇ = "../testdata/video-001.gif"u8;
 
 public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var (data, err) = os.ReadFile(testdataVideo001Gifˢ);
-    if (err != default!) {
+    if (err != nil) {
         Ꮡb.Fatal(err);
     }
     (var cfg, err) = DecodeConfig(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
-    if (err != default!) {
+    if (err != nil) {
         Ꮡb.Fatal(err);
     }
     b.SetBytes((int64)(cfg.Width * cfg.Height));
@@ -489,18 +498,18 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestReencodeExtendedPalette(ж<testing.T> Ꮡt) {
-    var (data, err) = hex.DecodeString("4749463839616c02020157220221ff0b280154ffffffff00000021474946306127dc213000ff84ff840000000000800021ffffffff8f4e4554530041508f8f0202020000000000000000000000000202020202020207020202022f31050000000000000021f904ab2c3826002c00000000c00001009800462b07fc1f02061202020602020202220202930202020202020202020202020286090222202222222222222222222222222222222222222222222222222220222222222222222222222222222222222222222222222222221a22222222332223222222222222222222222222222222222222224b222222222222002200002b474946312829021f0000000000cbff002f0202073121f904ab2c2c000021f92c3803002c00e0c0000000f932"u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+public static void TestReencodeExtendedPalette(ж<testing.T> t) {
+    var (data, err) = hex.DecodeString("4749463839616c02020157220221ff0b280154ffffffff00000021474946306127dc213000ff84ff840000000000800021ffffffff8f4e4554530041508f8f0202020000000000000000000000000202020202020207020202022f31050000000000000021f904ab2c3826002c00000000c00001009800462b07fc1f02061202020602020202220202930202020202020202020202020286090222202222222222222222222222222222222222222222222222222220222222222222222222222222222222222222222222222222221a22222222332223222222222222222222222222222222222222224b222222222222002200002b474946312829021f0000000000cbff002f0202073121f904ab2c2c000021f92c3803002c00e0c0000000f932");
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var img, err) = Decode(new gif_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     err = Encode(io.Discard, img, Ꮡ(new Options(NumColors: 1)));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 }
 

@@ -20,176 +20,183 @@ public partial struct GetLineTest {
     internal @string @in, out1, out2;
 }
 
-internal static slice<GetLineTest> getLineTests = new GetLineTest[]{
-    new("abc"u8, "abc"u8, ""u8),
-    new("abc\r"u8, "abc\r"u8, ""u8),
-    new("abc\n"u8, "abc"u8, ""u8),
-    new("abc\r\n"u8, "abc"u8, ""u8),
-    new("abc\nd"u8, "abc"u8, "d"u8),
-    new("abc\r\nd"u8, "abc"u8, "d"u8),
-    new("\nabc"u8, ""u8, "abc"u8),
-    new("\r\nabc"u8, ""u8, "abc"u8),
-    new("abc\t \nd"u8, "abc"u8, "d"u8),
-    new("\t abc\nd"u8, "\t abc"u8, "d"u8),
-    new("abc\n\t d"u8, "abc"u8, "\t d"u8),
-    new("abc\nd\t "u8, "abc"u8, "d\t "u8)
-}.slice();
+internal static slice<GetLineTest> getLineTests = slice<GetLineTest>([
+    new("abc", "abc", ""),
+    new("abc\r", "abc\r", ""),
+    new("abc\n", "abc", ""),
+    new("abc\r\n", "abc", ""),
+    new("abc\nd", "abc", "d"),
+    new("abc\r\nd", "abc", "d"),
+    new("\nabc", "", "abc"),
+    new("\r\nabc", "", "abc"),
+    new("abc\t \nd", "abc", "d"),
+    new("\t abc\nd", "\t abc", "d"),
+    new("abc\n\t d", "abc", "\t d"),
+    new("abc\nd\t ", "abc", "d\t ")
+]);
 
-public static void TestGetLine(ж<testing.T> Ꮡt) {
+public static void TestGetLine(ж<testing.T> t) {
     foreach (var (i, test) in getLineTests) {
         var (x, y, _) = getLine(slice<byte>(test.@in));
         if (((sstring)x) != test.out1 || ((sstring)y) != test.out2) {
-            Ꮡt.Errorf("#%d got:%+v,%+v want:%s,%s"u8, i, x, y, test.out1, test.out2);
+            t.Errorf("#%d got:%+v,%+v want:%s,%s", i, x, y, test.out1, test.out2);
         }
     }
 }
 
-public static void TestDecode(ж<testing.T> Ꮡt) {
+public static void TestDecode(ж<testing.T> t) {
     var (result, remainder) = Decode(slice<byte>(pemData));
     if (!reflect.DeepEqual(result.OrTypedNil(), certificate.OrTypedNil())) {
-        Ꮡt.Errorf("#0 got:%#v want:%#v"u8, result.OrTypedNil(), certificate.OrTypedNil());
+        t.Errorf("#0 got:%#v want:%#v", result.OrTypedNil(), certificate.OrTypedNil());
     }
 
     (result, remainder) = Decode(remainder);
     if (!reflect.DeepEqual(result.OrTypedNil(), privateKey.OrTypedNil())) {
-        Ꮡt.Errorf("#1 got:%#v want:%#v"u8, result.OrTypedNil(), privateKey.OrTypedNil());
+        t.Errorf("#1 got:%#v want:%#v", result.OrTypedNil(), privateKey.OrTypedNil());
     }
 
-    bool isEmpty(ж<global::go.encoding.pem_package.Block> block) => block != nil && (~block).Type == "EMPTY"u8 && len((~block).Headers) == 0 && len((~block).Bytes) == 0;
+    bool isEmpty(ж<global::go.encoding.pem_package.Block> block) => block != nil && block.Type == "EMPTY"u8 && len(block.Headers) == 0 && len(block.Bytes) == 0;
     (result, remainder) = Decode(remainder);
     if (!isEmpty(result)) {
-        Ꮡt.Errorf("#2 should be empty but got:%#v"u8, result.OrTypedNil());
+        t.Errorf("#2 should be empty but got:%#v", result.OrTypedNil());
     }
     (result, remainder) = Decode(remainder);
     if (!isEmpty(result)) {
-        Ꮡt.Errorf("#3 should be empty but got:%#v"u8, result.OrTypedNil());
+        t.Errorf("#3 should be empty but got:%#v", result.OrTypedNil());
     }
     (result, remainder) = Decode(remainder);
     if (!isEmpty(result)) {
-        Ꮡt.Errorf("#4 should be empty but got:%#v"u8, result.OrTypedNil());
+        t.Errorf("#4 should be empty but got:%#v", result.OrTypedNil());
     }
 
     (result, remainder) = Decode(remainder);
-    if (result == nil || (~result).Type != "VALID HEADERS"u8 || len((~result).Headers) != 1) {
-        Ꮡt.Errorf("#5 expected single header block but got :%v"u8, result.OrTypedNil());
+    if (result == nil || result.Type != "VALID HEADERS"u8 || len(result.Headers) != 1) {
+        t.Errorf("#5 expected single header block but got :%v", result.OrTypedNil());
     }
 
     if (len(remainder) != 0) {
-        Ꮡt.Errorf("expected nothing remaining of pemData, but found %s"u8, (@string)remainder);
+        t.Errorf("expected nothing remaining of pemData, but found %s", (@string)remainder);
     }
 
     (result, _) = Decode(slice<byte>(pemPrivateKey2));
     if (!reflect.DeepEqual(result.OrTypedNil(), privateKey2.OrTypedNil())) {
-        Ꮡt.Errorf("#2 got:%#v want:%#v"u8, result.OrTypedNil(), privateKey2.OrTypedNil());
+        t.Errorf("#2 got:%#v want:%#v", result.OrTypedNil(), privateKey2.OrTypedNil());
     }
 }
 
-internal static readonly @string pemTooFewEndingDashes = """
+internal static ref readonly @string pemTooFewEndingDashes => ref pemTooFewEndingDashesᵇ;
+private static readonly @string pemTooFewEndingDashesᵇ = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO----
 """u8.Raw();
 
-internal static readonly @string pemTooManyEndingDashes = """
+internal static ref readonly @string pemTooManyEndingDashes => ref pemTooManyEndingDashesᵇ;
+private static readonly @string pemTooManyEndingDashesᵇ = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO------
 """u8.Raw();
 
-internal static readonly @string pemTrailingNonWhitespace = """
+internal static ref readonly @string pemTrailingNonWhitespace => ref pemTrailingNonWhitespaceᵇ;
+private static readonly @string pemTrailingNonWhitespaceᵇ = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO----- .
 """u8.Raw();
 
-internal static readonly @string pemWrongEndingType = """
+internal static ref readonly @string pemWrongEndingType => ref pemWrongEndingTypeᵇ;
+private static readonly @string pemWrongEndingTypeᵇ = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END BAR-----
 """u8.Raw();
 
-internal static readonly @string pemMissingEndingSpace = """
+internal static ref readonly @string pemMissingEndingSpace => ref pemMissingEndingSpaceᵇ;
+private static readonly @string pemMissingEndingSpaceᵇ = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----ENDBAR-----
 """u8.Raw();
 
-internal static readonly @string pemMissingEndLine = """
+internal static ref readonly @string pemMissingEndLine => ref pemMissingEndLineᵇ;
+private static readonly @string pemMissingEndLineᵇ = """
 
 -----BEGIN FOO-----
 Header: 1
 """u8.Raw();
 
-internal static @string pemRepeatingBegin = strings.Repeat("-----BEGIN \n"u8, 10);
+internal static @string pemRepeatingBegin = strings.Repeat("-----BEGIN \n", 10);
 
 partial struct badPEMTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string input;
 }
-internal static slice<badPEMTestsᴛ1> badPEMTests = new badPEMTestsᴛ1[]{
+internal static slice<badPEMTestsᴛ1> badPEMTests = slice<badPEMTestsᴛ1>([
     new(
-        "too few trailing dashes"u8,
+        "too few trailing dashes",
         pemTooFewEndingDashes
     ),
     new(
-        "too many trailing dashes"u8,
+        "too many trailing dashes",
         pemTooManyEndingDashes
     ),
     new(
-        "trailing non-whitespace"u8,
+        "trailing non-whitespace",
         pemTrailingNonWhitespace
     ),
     new(
-        "incorrect ending type"u8,
+        "incorrect ending type",
         pemWrongEndingType
     ),
     new(
-        "missing ending space"u8,
+        "missing ending space",
         pemMissingEndingSpace
     ),
     new(
-        "repeating begin"u8,
+        "repeating begin",
         pemRepeatingBegin
     ),
     new(
-        "missing end line"u8,
+        "missing end line",
         pemMissingEndLine
     )
-}.slice();
+]);
 
-public static void TestBadDecode(ж<testing.T> Ꮡt) {
+public static void TestBadDecode(ж<testing.T> t) {
     foreach (var (_, test) in badPEMTests) {
         var (result, rest) = Decode(slice<byte>(test.input));
         if (result != nil) {
-            Ꮡt.Errorf("unexpected success while parsing %q"u8, test.name);
+            t.Errorf("unexpected success while parsing %q", test.name);
         }
         if (((sstring)rest) != test.input) {
-            Ꮡt.Errorf("unexpected rest: %q; want = %q"u8, rest, test.input);
+            t.Errorf("unexpected rest: %q; want = %q", rest, test.input);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string beginˢ = "-----BEGIN \n"u8;
+internal static ref readonly @string beginˢ => ref beginˢᵇ;
+private static readonly @string beginˢᵇ = "-----BEGIN \n"u8;
 
-public static void TestCVE202224675(ж<testing.T> Ꮡt) {
+public static void TestCVE202224675(ж<testing.T> t) {
     // Prior to CVE-2022-24675, this input would cause a stack overflow.
     var input = slice<byte>(strings.Repeat(beginˢ, 10000000));
     var (result, rest) = Decode(input);
     if (result != nil || !bytes.Equal(rest, input)) {
-        Ꮡt.Errorf("Encode of %#v decoded as %#v"u8, input, rest);
+        t.Errorf("Encode of %#v decoded as %#v", input, rest);
     }
 }
 
-public static partial void TestEncode(ж<testing.T> Ꮡt) {
+public static partial void TestEncode(ж<testing.T> t) {
     var r = EncodeToMemory(privateKey2);
     if (((sstring)r) != pemPrivateKey2) {
-        Ꮡt.Errorf("got:%s want:%s"u8, r, pemPrivateKey2);
+        t.Errorf("got:%s want:%s", r, pemPrivateKey2);
     }
 }
 
@@ -197,36 +204,37 @@ internal partial struct lineBreakerTest {
     internal @string @in, @out;
 }
 
-internal static readonly @string sixtyFourCharString = "0123456789012345678901234567890123456789012345678901234567890123"u8;
+internal static ref readonly @string sixtyFourCharString => ref sixtyFourCharStringᵇ;
+private static readonly @string sixtyFourCharStringᵇ = "0123456789012345678901234567890123456789012345678901234567890123"u8;
 
-internal static slice<lineBreakerTest> lineBreakerTests = new lineBreakerTest[]{
-    new(""u8, ""u8),
-    new("a"u8, "a\n"u8),
-    new("ab"u8, "ab\n"u8),
+internal static slice<lineBreakerTest> lineBreakerTests = slice<lineBreakerTest>([
+    new("", ""),
+    new("a", "a\n"),
+    new("ab", "ab\n"),
     new(sixtyFourCharString, sixtyFourCharString + "\n"),
     new(sixtyFourCharString + "X", sixtyFourCharString + "\nX\n"),
     new(sixtyFourCharString + sixtyFourCharString, sixtyFourCharString + "\n" + sixtyFourCharString + "\n")
-}.slice();
+]);
 
-public static void TestLineBreaker(ж<testing.T> Ꮡt) {
+public static void TestLineBreaker(ж<testing.T> t) {
     foreach (var (i, test) in lineBreakerTests) {
         var buf = @new<strings.Builder>();
         global::go.encoding.pem_package.lineBreaker breaker = new();
         breaker.@out = new pem_test_package.strings_BuilderжWriter(buf);
         var (_, err) = breaker.Write(slice<byte>(test.@in));
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: error from Write: %s"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: error from Write: %s", i, err);
             continue;
         }
         err = breaker.Close();
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: error from Close: %s"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: error from Close: %s", i, err);
             continue;
         }
 
         {
             @string got = buf.String(); if (got != test.@out) {
-                Ꮡt.Errorf("#%d: got:%s want:%s"u8, i, got, test.@out);
+                t.Errorf("#%d: got:%s want:%s", i, got, test.@out);
             }
         }
     }
@@ -238,68 +246,68 @@ public static void TestLineBreaker(ж<testing.T> Ꮡt) {
 
         for (nint iΔ1 = 0; iΔ1 < len(test.@in); iΔ1++) {
             var (_, errΔ1) = breaker.Write(slice<byte>(test.@in.slice(iΔ1, iΔ1 + 1)));
-            if (errΔ1 != default!) {
-                Ꮡt.Errorf("#%d: error from Write (byte by byte): %s"u8, iΔ1, errΔ1);
+            if (errΔ1 != nil) {
+                t.Errorf("#%d: error from Write (byte by byte): %s", iΔ1, errΔ1);
                 continue;
             }
         }
         var err = breaker.Close();
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: error from Close (byte by byte): %s"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: error from Close (byte by byte): %s", i, err);
             continue;
         }
 
         {
             @string got = buf.String(); if (got != test.@out) {
-                Ꮡt.Errorf("#%d: (byte by byte) got:%s want:%s"u8, i, got, test.@out);
+                t.Errorf("#%d: (byte by byte) got:%s want:%s", i, got, test.@out);
             }
         }
     }
 }
 
-public static void TestFuzz(ж<testing.T> Ꮡt) {
+public static void TestFuzz(ж<testing.T> t) {
     // PEM is a text-based format. Assume header fields with leading/trailing spaces
     // or embedded newlines will not round trip correctly and don't need to be tested.
-    bool isBad(@string s) => strings.ContainsAny(s, "\r\n"u8) || strings.TrimSpace(s) != s;
+    bool isBad(@string s) => strings.ContainsAny(s, "\r\n") || strings.TrimSpace(s) != s;
 
     var isBadʗ1 = isBad;
     var testRoundtrip = (global::go.encoding.pem_package.Block blockʗp) => {
         ref var block = ref heap(blockʗp, out var Ꮡblock);
         // Reject bad Type
         // Type with colons will proceed as key/val pair and cause an error.
-        if (isBadʗ1(block.Type) || strings.Contains(block.Type, ":"u8)) {
+        if (isBadʗ1(block.Type) || strings.Contains(block.Type, ":")) {
             return true;
         }
         foreach (var (key, val) in block.Headers) {
             // Reject bad key/val.
             // Also, keys with colons cannot be encoded, because : is the key: val separator.
-            if (isBadʗ1(key) || isBadʗ1(val) || strings.Contains(key, ":"u8)) {
+            if (isBadʗ1(key) || isBadʗ1(val) || strings.Contains(key, ":")) {
                 return true;
             }
         }
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         {
-            var err = Encode(new pem_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡblock); if (err != default!) {
-                Ꮡt.Errorf("Encode of %#v resulted in error: %s"u8, Ꮡblock, err);
+            var err = Encode(new pem_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡblock); if (err != nil) {
+                t.Errorf("Encode of %#v resulted in error: %s", Ꮡblock, err);
                 return false;
             }
         }
         var (decoded, rest) = Decode(buf.Bytes());
-        if (block.Headers == default!) {
+        if (block.Headers == nil) {
             // Encoder supports nil Headers but decoder returns initialized.
             block.Headers = new map<@string, @string>();
         }
-        if (block.Bytes == default!) {
+        if (block.Bytes == nil) {
             // Encoder supports nil Bytes but decoder returns initialized.
             block.Bytes = new slice<byte>(0);
         }
         if (!reflect.DeepEqual(decoded.OrTypedNil(), Ꮡblock)) {
-            Ꮡt.Errorf("Encode of %#v decoded as %#v"u8, Ꮡblock, decoded.OrTypedNil());
+            t.Errorf("Encode of %#v decoded as %#v", Ꮡblock, decoded.OrTypedNil());
             return false;
         }
         if (len(rest) != 0) {
-            Ꮡt.Errorf("Encode of %#v decoded correctly, but with %x left over"u8, block, rest);
+            t.Errorf("Encode of %#v decoded correctly, but with %x left over", block, rest);
             return false;
         }
         return true;
@@ -307,9 +315,9 @@ public static void TestFuzz(ж<testing.T> Ꮡt) {
 
     // Explicitly test the empty block.
     if (!testRoundtrip(new Block(
-        Type: "EMPTY"u8,
+        Type: "EMPTY",
         Headers: new map<@string, @string>(),
-        Bytes: new byte[]{}.slice()
+        Bytes: slice<byte>([])
     ))) {
         return;
     }
@@ -321,7 +329,7 @@ public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var data = Ꮡ(new Block(Bytes: new slice<byte>(65536)));
-    b.SetBytes((int64)len((~data).Bytes));
+    b.SetBytes((int64)len(data.Bytes));
     for (nint i = 0; i < b.N; i++) {
         Encode(io.Discard, data);
     }
@@ -421,9 +429,9 @@ Header: 1
 -----END VALID HEADERS-----
 """u8.Raw());
 
-internal static ж<global::go.encoding.pem_package.Block> certificate = Ꮡ(new Block(Type: "CERTIFICATE"u8,
+internal static ж<global::go.encoding.pem_package.Block> certificate = Ꮡ(new Block(Type: "CERTIFICATE",
     Headers: new map<@string, @string>{},
-    Bytes: new uint8[]{0x30, 0x82, 0x3, 0xe9, 0x30, 0x82, 0x3, 0x52, 0x2, 0x1,
+    Bytes: slice<uint8>([0x30, 0x82, 0x3, 0xe9, 0x30, 0x82, 0x3, 0x52, 0x2, 0x1,
         0x1, 0x30, 0xd, 0x6, 0x9, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd,
         0x1, 0x1, 0x5, 0x5, 0x0, 0x30, 0x81, 0x8b, 0x31, 0xb, 0x30,
         0x9, 0x6, 0x3, 0x55, 0x4, 0x6, 0x13, 0x2, 0x55, 0x53, 0x31,
@@ -521,12 +529,12 @@ internal static ж<global::go.encoding.pem_package.Block> certificate = Ꮡ(new 
         0x6c, 0x5f, 0x93, 0x77, 0x27, 0xf5, 0xae, 0x27, 0x52, 0x8e,
         0x3b, 0x99, 0xb6, 0xea, 0x44, 0x65, 0x1d, 0xa, 0x3b, 0x13,
         0x34, 0xf7, 0xf7, 0xbe, 0x20
-    }.slice()
+    ])
 ));
 
-internal static ж<global::go.encoding.pem_package.Block> privateKey = Ꮡ(new Block(Type: "RSA PRIVATE KEY"u8,
-    Headers: new map<@string, @string>{["DEK-Info"u8] = "DES-EDE3-CBC,80C7C7A09690757A"u8, ["Proc-Type"u8] = "4,ENCRYPTED"u8},
-    Bytes: new uint8[]{0x79, 0xa, 0x79, 0x66, 0x41, 0xfa, 0xb,
+internal static ж<global::go.encoding.pem_package.Block> privateKey = Ꮡ(new Block(Type: "RSA PRIVATE KEY",
+    Headers: new map<@string, @string>{["DEK-Info"] = "DES-EDE3-CBC,80C7C7A09690757A", ["Proc-Type"] = "4,ENCRYPTED"},
+    Bytes: slice<uint8>([0x79, 0xa, 0x79, 0x66, 0x41, 0xfa, 0xb,
         0x21, 0xc1, 0xcf, 0xb0, 0x59, 0x7d, 0x43, 0xf1, 0xc8, 0xb0,
         0x82, 0x99, 0xfb, 0x6c, 0x4, 0x9e, 0xc7, 0x96, 0xa1, 0x9b,
         0xf0, 0xb7, 0x76, 0xd5, 0xc4, 0xb0, 0x9f, 0x35, 0x99, 0xe3,
@@ -588,17 +596,17 @@ internal static ж<global::go.encoding.pem_package.Block> privateKey = Ꮡ(new B
         0x92, 0xd2, 0x9d, 0x7d, 0x1b, 0xdf, 0x61, 0x85, 0xbf, 0x88,
         0x54, 0x3, 0x42, 0xe1, 0xa9, 0x24, 0x74, 0x75, 0x78, 0x48,
         0xff, 0x22, 0xec, 0xc5, 0x4d, 0x66, 0x17, 0xd4, 0x9a
-    }.slice()
+    ])
 ));
 
 internal static ж<global::go.encoding.pem_package.Block> privateKey2 = Ꮡ(new Block(
-    Type: "RSA PRIVATE KEY"u8,
+    Type: "RSA PRIVATE KEY",
     Headers: new map<@string, @string>{
-        ["Proc-Type"u8] = "4,ENCRYPTED"u8,
-        ["DEK-Info"u8] = "AES-128-CBC,BFCD243FEDBB40A4AA6DDAA1335473A4"u8,
-        ["Content-Domain"u8] = "RFC822"u8
+        ["Proc-Type"] = "4,ENCRYPTED",
+        ["DEK-Info"] = "AES-128-CBC,BFCD243FEDBB40A4AA6DDAA1335473A4",
+        ["Content-Domain"] = "RFC822"
     },
-    Bytes: new uint8[]{
+    Bytes: slice<uint8>([
         0xa8, 0x35, 0xcc, 0x2b, 0xb9, 0xcb, 0x21, 0xab, 0xc0,
         0x9d, 0x76, 0x61, 0x0, 0xf4, 0x81, 0xad, 0x69, 0xd2,
         0xc0, 0x42, 0x41, 0x3b, 0xe4, 0x3c, 0xaf, 0x59, 0x5e,
@@ -635,7 +643,7 @@ internal static ж<global::go.encoding.pem_package.Block> privateKey2 = Ꮡ(new 
         0xb9, 0x78, 0xa3, 0x4, 0x84, 0x4, 0xd2, 0xda, 0x84,
         0x2d, 0x63, 0xdd, 0xf8, 0x50, 0x6a, 0xf6, 0xe3, 0xf5,
         0x65, 0x40, 0x7c, 0xa9
-    }.slice()
+    ])
 ));
 
 internal static @string pemPrivateKey2 = testingKey("""
@@ -655,30 +663,31 @@ tJQLJRZ+ItT5Irl4owSEBNLahC1j3fhQavbj9WVAfKk=
 
 """u8.Raw());
 
-public static void TestBadEncode(ж<testing.T> Ꮡt) {
-    var b = Ꮡ(new Block(Type: "BAD"u8, Headers: new map<@string, @string>{["X:Y"u8] = "Z"u8}));
+public static void TestBadEncode(ж<testing.T> t) {
+    var b = Ꮡ(new Block(Type: "BAD", Headers: new map<@string, @string>{["X:Y"] = "Z"}));
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var err = Encode(new pem_test_package.bytes_BufferжWriter(Ꮡbuf), b); if (err == default!) {
-            Ꮡt.Fatalf("Encode did not report invalid header"u8);
+        var err = Encode(new pem_test_package.bytes_BufferжWriter(Ꮡbuf), b); if (err == nil) {
+            t.Fatalf("Encode did not report invalid header");
         }
     }
     if (buf.Len() != 0) {
-        Ꮡt.Fatalf("Encode wrote data before reporting invalid header"u8);
+        t.Fatalf("Encode wrote data before reporting invalid header");
     }
     {
-        var data = EncodeToMemory(b); if (data != default!) {
-            Ꮡt.Fatalf("EncodeToMemory returned non-nil data"u8);
+        var data = EncodeToMemory(b); if (data != nil) {
+            t.Fatalf("EncodeToMemory returned non-nil data");
         }
     }
 }
 
 internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, "TESTING KEY"u8, "PRIVATE KEY"u8);
+    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testBlockˢ = "TEST BLOCK"u8;
+internal static ref readonly @string testBlockˢ => ref testBlockˢᵇ;
+private static readonly @string testBlockˢᵇ = "TEST BLOCK"u8;
 internal static readonly object expectedValidBlockˢ = (@string)"expected valid block"u8;
 
 internal partial struct TestDecodeStrangeCases_type /*dyn*/ {
@@ -686,12 +695,12 @@ internal partial struct TestDecodeStrangeCases_type /*dyn*/ {
     internal @string pem;
 }
 
-public static void TestDecodeStrangeCases(ж<testing.T> Ꮡt) {
+public static void TestDecodeStrangeCases(ж<testing.T> t) {
     @string sentinelType = testBlockˢ;
     var sentinelBytes = slice<byte>("hello"u8);
-    foreach (var (_, vᴛ1) in new TestDecodeStrangeCases_type[]{
+    foreach (var (_, vᴛ1) in slice<TestDecodeStrangeCases_type>([
         new(
-            name: "invalid section (not base64)"u8,
+            name: "invalid section (not base64)",
             pem: """
 -----BEGIN COMMENT-----
 foo foo foo
@@ -702,7 +711,7 @@ aGVsbG8=
 """u8.Raw()
         ),
         new(
-            name: "leading garbage on block"u8,
+            name: "leading garbage on block",
             pem: """
 foo foo foo-----BEGIN CERTIFICATE-----
 MCowBQYDK2VwAyEApVjJeLW5MoP6uR3+OeITokM+rBDng6dgl1vvhcy+wws=
@@ -713,7 +722,7 @@ aGVsbG8=
 """u8.Raw()
         ),
         new(
-            name: "leading garbage"u8,
+            name: "leading garbage",
             pem: """
 foo foo foo
 -----BEGIN TEST BLOCK-----
@@ -722,7 +731,7 @@ aGVsbG8=
 """u8.Raw()
         ),
         new(
-            name: "leading partial block"u8,
+            name: "leading partial block",
             pem: """
 foo foo foo
 -----END COMMENT-----
@@ -732,7 +741,7 @@ aGVsbG8=
 """u8.Raw()
         ),
         new(
-            name: "multiple BEGIN"u8,
+            name: "multiple BEGIN",
             pem: """
 -----BEGIN TEST BLOCK-----
 -----BEGIN TEST BLOCK-----
@@ -742,7 +751,7 @@ aGVsbG8=
 """u8.Raw()
         ),
         new(
-            name: "multiple END"u8,
+            name: "multiple END",
             pem: """
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
@@ -752,7 +761,7 @@ aGVsbG8=
 """u8.Raw()
         ),
         new(
-            name: "leading malformed BEGIN"u8,
+            name: "leading malformed BEGIN",
             pem: """
 -----BEGIN PUBLIC KEY
 aGVsbG8=
@@ -762,51 +771,52 @@ aGVsbG8=
 -----END TEST BLOCK-----
 """u8.Raw()
         )
-    }.slice()) {
+    ])) {
         ref var tc = ref heap(new TestDecodeStrangeCases_type(), out var Ꮡtc);
         tc = vᴛ1;
 
         var sentinelBytesʗ1 = sentinelBytes;
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (block, _) = Decode(slice<byte>(tcʗ1.pem));
             if (block == nil) {
                 tΔ1.Fatal(expectedValidBlockˢ);
             }
-            if ((~block).Type != sentinelType) {
-                tΔ1.Fatalf("unexpected block returned, got type %q, want type %q"u8, (~block).Type, sentinelType);
+            if (block.Type != sentinelType) {
+                tΔ1.Fatalf("unexpected block returned, got type %q, want type %q", block.Type, sentinelType);
             }
-            if (!bytes.Equal((~block).Bytes, sentinelBytesʗ1)) {
-                tΔ1.Fatalf("unexpected block content, got %x, want %x"u8, (~block).Bytes, sentinelBytesʗ1);
+            if (!bytes.Equal(block.Bytes, sentinelBytesʗ1)) {
+                tΔ1.Fatalf("unexpected block content, got %x, want %x", block.Bytes, sentinelBytesʗ1);
             }
         });
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string endPublicKeyˢ = """
+internal static ref readonly @string endPublicKeyˢ => ref endPublicKeyˢᵇ;
+private static readonly @string endPublicKeyˢᵇ = """
 
 -----END PUBLIC KEY-----
 """u8.Raw();
 internal static readonly object unexpectedBlockˢ = (@string)"unexpected block"u8;
 
-public static void TestJustEnd(ж<testing.T> Ꮡt) {
+public static void TestJustEnd(ж<testing.T> t) {
     @string pemData = endPublicKeyˢ;
 
     var (block, _) = Decode(slice<byte>(pemData));
     if (block != nil) {
-        Ꮡt.Fatal(unexpectedBlockˢ);
+        t.Fatal(unexpectedBlockˢ);
     }
 }
 
-public static void FuzzDecode(ж<testing.F> Ꮡf) {
-    Ꮡf.Fuzz((ж<testing.T> t, slice<byte> data) => {
+public static void FuzzDecode(ж<testing.F> f) {
+    f.Fuzz((ж<testing.T> t, slice<byte> data) => {
         Decode(data);
     });
 }
 
-public static void TestMissingEndTrailer(ж<testing.T> Ꮡt) {
-    Decode(new byte[]{0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x42, 0x45, 0x47, 0x49, 0x4e, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0xa, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x45, 0x4e, 0x44, 0x20}.slice());
+public static void TestMissingEndTrailer(ж<testing.T> t) {
+    Decode(slice<byte>([0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x42, 0x45, 0x47, 0x49, 0x4e, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0xa, 0x2d, 0x2d, 0x2d, 0x2d, 0x2d, 0x45, 0x4e, 0x44, 0x20]));
 }
 
 } // end pem_internal_test_package

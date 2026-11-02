@@ -7,19 +7,10 @@
 global using static global::go.errors_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -51,7 +42,11 @@ using static global::go.errors_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.io.fs_package.PathError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,10 +56,10 @@ using static global::go.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("errors/errors_test.go", "errors_test.cs", "ABEYlIKUgriCgriCgoI=")]
-[assembly: go.GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAggAICoKCgvqCppSC7LKCgoKUgoKCggAMGKKSgoIADgqCgoKCgoKUgpQADBKCgIKClAAMGIKkguqigoIACQ6CgIKCgpQACBCCgIKAgpQADBaCpIKCgpTK+qKCgpSCgoIACBaigoKUgoIACxKCgoKC", "", "", "26=Date/1/1/1;232=New/1/1/3")]
-[assembly: go.GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAAwIgoKCggANIIKClIIACQqCgoIAChqCgg==")]
-[assembly: go.GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKAggALFpSAooCigpS0tMSUABAGgoKCgoKClABbwAGylJKCooKClIKUgIIACQyCgtyCgsKClIKClKIACgiCgoKKlLq6urq6urq6uri6urq6urq6AAoYooKCgoKC+qKClIKC+qKCgoKC+qKCgoCCAAoKgoKUAAYUgoCCAAkOgP6AooD4gKKAAAkMgqaCgg==", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "34=New/1/1/27;139=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;336=New/1/1/1;352=New/1/1/1;356=New/1/1/1;364=New/1/1/1")]
+[assembly: GoPositionMap("errors/errors_test.go", "errors_test.cs", "ABQYlIKUgriCgriCgoI=")]
+[assembly: GoPositionMap("errors/example_test.go", "example_test.cs", "ABQqgqaC3IKAggAJCoKCggAICoKmlILssoKCgpSCgoKCAA0YopKCggAQCoKCgoKCgpSClAANEoKAgoKUAAwYgqSC6qKCggAJDoKAgoKClAAIEIKAgoCClAAMFoKkgoKClMr6ooKClIKCggAIFqKCgpSCggAMEoKCgoI=", "", "", "26=Date/1/1/1;238=New/1/1/3")]
+[assembly: GoPositionMap("errors/join_test.go", "join_test.cs", "AAsagoCCpICCpICCAA0IgoKCggANIIKClIIACQqCgoIAChqCgg==")]
+[assembly: GoPositionMap("errors/wrap_test.go", "wrap_test.cs", "ABUggoKClJTIAB9IspKAggALFpSAooCigpS0tMSUABEGgoKCgoKClABbwAGylIKCooKClIKUgIIACgyCgtyCgsKClIKClKIACgiCgoKKlLq6urq6urq6uri6urq6urq6AAoYgoKCgoKC+qKClIKC+qKCgoKC+qKCgoCCAAoKgoKUAAYUgoCCAAkOgP6AooAACAiAooAACgyCpoKC", "23-25:1;64-68:2;204-215:1;229-238:1;230-232:1.1;351-356:1", "", "34=New/1/1/27;140=New/1/4/46,New/2/4/66,New/3/4/71,New/4/4/81;337=New/1/1/1;353=New/1/1/1;357=New/1/1/1;365=New/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

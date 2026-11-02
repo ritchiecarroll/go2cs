@@ -8,7 +8,7 @@ partial class unicode_package {
 // IsDigit reports whether the rune is a decimal digit.
 public static bool IsDigit(rune r) {
     if (r <= MaxLatin1) {
-        return (rune)'0' <= r && r <= (rune)'9';
+        return '0' <= r && r <= '9';
     }
     return isExcludingLatin(ref (Digit).DerefOrNull(), r);
 }

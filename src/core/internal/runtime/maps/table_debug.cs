@@ -21,9 +21,9 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
 
     // For every non-empty slot, verify we can retrieve the key using Get.
     // Count the number of used and deleted slots.
-    uint16 used = default!;
-    uint16 deleted = default!;
-    uint16 empty = default!;
+    uint16 used = default;
+    uint16 deleted = default;
+    uint16 empty = default;
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
         for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
@@ -47,16 +47,16 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
 
                 // Can't lookup keys that don't compare equal
                 // to themselves (e.g., NaN).
-                if (!(~typ.Key).Equal(key, key)) {
+                if (!typ.Key.Equal(key, key)) {
                     continue;
                 }
 
                 {
                     var (_, ok) = t.Get(Ꮡtyp, Ꮡm, key); if (!ok) {
                         var hash = typ.Hasher(key, m.seed);
-                        print((@string)"invariant failed: slot("u8, i, (@string)"/"u8, j, (@string)"): key "u8);
-                        dump(key, (~typ.Key).Size_);
-                        print((@string)" not found [hash="u8, hash, (@string)", h2="u8, h2(hash), (@string)" h1="u8, h1(hash), (@string)"]\n"u8);
+                        print((@string)"invariant failed: slot(", i, (@string)"/", j, (@string)"): key ");
+                        dump(key, typ.Key.Size_);
+                        print((@string)" not found [hash=", hash, (@string)", h2=", h2(hash), (@string)" h1=", h1(hash), (@string)"]\n");
                         t.Print(Ꮡtyp, Ꮡm);
                         throw panic("invariant failed: slot: key not found");
                     }
@@ -67,31 +67,31 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
     }
 
     if (used != t.used) {
-        print((@string)"invariant failed: found "u8, used, (@string)" used slots, but used count is "u8, t.used, (@string)"\n"u8);
+        print((@string)"invariant failed: found ", used, (@string)" used slots, but used count is ", t.used, (@string)"\n");
         t.Print(Ꮡtyp, Ꮡm);
         throw panic("invariant failed: found mismatched used slot count");
     }
 
     var growthLeft = (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.MapGroupSlots - t.used - deleted);
     if (growthLeft != t.growthLeft) {
-        print((@string)"invariant failed: found "u8, t.growthLeft, (@string)" growthLeft, but expected "u8, growthLeft, (@string)"\n"u8);
+        print((@string)"invariant failed: found ", t.growthLeft, (@string)" growthLeft, but expected ", growthLeft, (@string)"\n");
         t.Print(Ꮡtyp, Ꮡm);
         throw panic("invariant failed: found mismatched growthLeft");
     }
     if (deleted != t.tombstones()) {
-        print((@string)"invariant failed: found "u8, deleted, (@string)" tombstones, but expected "u8, t.tombstones(), (@string)"\n"u8);
+        print((@string)"invariant failed: found ", deleted, (@string)" tombstones, but expected ", t.tombstones(), (@string)"\n");
         t.Print(Ꮡtyp, Ꮡm);
         throw panic("invariant failed: found mismatched tombstones");
     }
 
     if (empty == 0) {
-        print((@string)"invariant failed: found no empty slots (violates probe invariant)\n"u8);
+        print((@string)"invariant failed: found no empty slots (violates probe invariant)\n");
         t.Print(Ꮡtyp, Ꮡm);
         throw panic("invariant failed: found no empty slots (violates probe invariant)");
     }
 }
 
-public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> Ꮡm) {
+public static void Print(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
@@ -116,31 +116,34 @@ table{
 """u8.Raw());
 
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
-        print((@string)"\t\tgroup "u8, i, (@string)"\n"u8);
+        print((@string)"\t\tgroup ", i, (@string)"\n");
 
         var g = t.groups.group(Ꮡtyp, i);
         var ctrls = g.ctrls();
         for (var j = (uintptr)0; j < abi.MapGroupSlots; j++) {
-            print((@string)"\t\t\tslot "u8, j, (@string)"\n"u8);
+            print((@string)"\t\t\tslot ", j, (@string)"\n");
 
             var c = ctrls.get(j);
-            print((@string)"\t\t\t\tctrl "u8, c);
-            var exprᴛ1 = c;
-            if (exprᴛ1 == ctrlEmpty) {
-                print((@string)" (empty)\n"u8);
+            print((@string)"\t\t\t\tctrl ", c);
+            switch (c) {
+            case var ᴛ when ᴛ == ctrlEmpty: {
+                print((@string)" (empty)\n");
+                break;
             }
-            else if (exprᴛ1 == ctrlDeleted) {
-                print((@string)" (deleted)\n"u8);
+            case var ᴛ when ᴛ == ctrlDeleted: {
+                print((@string)" (deleted)\n");
+                break;
             }
-            else { /* default: */
-                print((@string)"\n"u8);
-            }
+            default: {
+                print((@string)"\n");
+                break;
+            }}
 
-            print((@string)"\t\t\t\tkey  "u8);
-            dump((uintptr)g.key(Ꮡtyp, j), (~typ.Key).Size_);
+            print((@string)"\t\t\t\tkey  ");
+            dump((uintptr)g.key(Ꮡtyp, j), typ.Key.Size_);
             println((@string)""u8);
-            print((@string)"\t\t\t\telem "u8);
-            dump((uintptr)g.elem(Ꮡtyp, j), (~typ.Elem).Size_);
+            print((@string)"\t\t\t\telem ");
+            dump((uintptr)g.elem(Ꮡtyp, j), typ.Elem.Size_);
             println((@string)""u8);
         }
     }
@@ -150,7 +153,7 @@ table{
 // outside the runtime.
 internal static void dump(@unsafe.Pointer ptr, uintptr size) {
     while (size > 0) {
-        print(~(ж<byte>)(uintptr)(ptr), (@string)" "u8);
+        print(~(ж<byte>)(uintptr)(ptr), (@string)" ");
         ptr = (@unsafe.Pointer)((uintptr)ptr + 1);
         size--;
     }

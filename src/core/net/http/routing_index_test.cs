@@ -12,7 +12,7 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-public static void TestIndex(ж<testing.T> Ꮡt) {
+public static void TestIndex(ж<testing.T> t) {
     // Generate every kind of pattern up to some number of segments,
     // and compare conflicts found during indexing with those found
     // by exhaustive comparison.
@@ -22,7 +22,7 @@ public static void TestIndex(ж<testing.T> Ꮡt) {
         var got = indexConflicts(pat, Ꮡidx);
         var want = trueConflicts(pat, patterns.slice(0, i));
         if (!slices.Equal<slice<@string>, @string>(got, want)) {
-            Ꮡt.Fatalf("%q:\ngot  %q\nwant %q"u8, pat.OrTypedNil(), got, want);
+            t.Fatalf("%q:\ngot  %q\nwant %q", pat.OrTypedNil(), got, want);
         }
         idx.addPattern(pat);
     }
@@ -31,7 +31,7 @@ public static void TestIndex(ж<testing.T> Ꮡt) {
 internal static slice<@string> trueConflicts(ж<global::go.net.http_package.pattern> Ꮡpat, slice<ж<global::go.net.http_package.pattern>> pats) {
     ref var pat = ref Ꮡpat.DerefOrNull();
 
-    slice<@string> s = default!;
+    slice<@string> s = default;
     foreach (var (_, p) in pats) {
         if (pat.conflictsWith(p)) {
             s = append(s, p.String());
@@ -41,15 +41,15 @@ internal static slice<@string> trueConflicts(ж<global::go.net.http_package.patt
     return s;
 }
 
-internal static slice<@string> indexConflicts(ж<global::go.net.http_package.pattern> Ꮡpat, ж<global::go.net.http_package.routingIndex> Ꮡidx) {
+internal static slice<@string> indexConflicts(ж<global::go.net.http_package.pattern> pat, ж<global::go.net.http_package.routingIndex> Ꮡidx) {
     ref var idx = ref Ꮡidx.DerefOrNull();
 
     ref var s = ref heap<slice<@string>>(out var Ꮡs);
-    idx.possiblyConflictingPatterns(Ꮡpat, (ж<global::go.net.http_package.pattern> p) => {
-        if (Ꮡpat.Value.conflictsWith(p)) {
+    idx.possiblyConflictingPatterns(pat, (ж<global::go.net.http_package.pattern> p) => {
+        if (pat.Value.conflictsWith(p)) {
             Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, p.String());
         }
-        return default!;
+        return default;
     });
     slices.Sort<slice<@string>, @string>(s);
     return slices.Compact<slice<@string>, @string>(s);
@@ -64,8 +64,8 @@ internal static slice<ж<global::go.net.http_package.pattern>> generatePatterns(
         // Replace duplicate wildcards with unique ones.
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         nint wc = 0;
-        while (ᐧ) {
-            nint i = strings.Index(s, "{x}"u8);
+        for (;;) {
+            nint i = strings.Index(s, "{x}");
             if (i < 0) {
                 Ꮡb.WriteString(s);
                 break;
@@ -76,16 +76,16 @@ internal static slice<ж<global::go.net.http_package.pattern>> generatePatterns(
             s = s.slice(i + 3);
         }
         var (pat, err) = parsePattern(b.String());
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
         Ꮡpats.ValueSlot = append(Ꮡpats.ValueSlot, pat);
     };
 
-    slice<@string> methods = new @string[]{""u8, "GET "u8, "HEAD "u8, "POST "u8}.slice();
-    slice<@string> hosts = new @string[]{""u8, "h1"u8, "h2"u8}.slice();
-    slice<@string> segs = new @string[]{"/a"u8, "/b"u8, "/{x}"u8}.slice();
-    slice<@string> finalSegs = new @string[]{"/a"u8, "/b"u8, "/{f}"u8, "/{m...}"u8, "/{$}"u8}.slice();
+    slice<@string> methods = slice<@string>(["", "GET ", "HEAD ", "POST "]);
+    slice<@string> hosts = slice<@string>(["", "h1", "h2"]);
+    slice<@string> segs = slice<@string>(["/a", "/b", "/{x}"]);
+    slice<@string> finalSegs = slice<@string>(["/a", "/b", "/{f}", "/{m...}", "/{$}"]);
 
     var g = genConcat(
         genChoice(methods),
@@ -163,7 +163,7 @@ public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
 
     // How fast is indexing if the corpus is all multis?
     const nint nMultis = 1000;
-    slice<ж<global::go.net.http_package.pattern>> pats = default!;
+    slice<ж<global::go.net.http_package.pattern>> pats = default;
     for (nint i = 0; i < nMultis; i++) {
         pats = append(patsᴷ, pats, mustParsePattern(new http_test_package.testing_BжTB(Ꮡb), fmt.Sprintf("/a/b/{x}/d%d/"u8, i)));
     }
@@ -173,7 +173,7 @@ public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
         foreach (var (_, p) in pats) {
             var got = indexConflicts(p, Ꮡidx);
             if (builtin.len(got) != 0) {
-                Ꮡb.Fatalf("got %d conflicts, want 0"u8, builtin.len(got));
+                Ꮡb.Fatalf("got %d conflicts, want 0", builtin.len(got));
             }
             idx.addPattern(p);
         }
@@ -182,7 +182,7 @@ public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
             {
                 nint g = builtin.len(idx.multis);
                 nint w = nMultis; if (g != w) {
-                    Ꮡb.Fatalf("got %d multis, want %d"u8, g, w);
+                    Ꮡb.Fatalf("got %d multis, want %d", g, w);
                 }
             }
         }

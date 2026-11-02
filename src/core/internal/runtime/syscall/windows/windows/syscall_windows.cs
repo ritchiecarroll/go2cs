@@ -19,9 +19,9 @@ public static UntypedInt MaxArgs => 42;
 // StdCallInfo is a structure used to pass parameters to the system call.
 partial struct StdCallInfo {
     public uintptr Fn;
-    public uintptr N; // number of parameters
+    public uintptr N;    // number of parameters
     public uintptr Args; // parameters
-    public uintptr R1; // return values
+    public uintptr R1;   // return values
     public uintptr R2;
     public uintptr Err; // error number
 }

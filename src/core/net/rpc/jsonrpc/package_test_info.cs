@@ -7,15 +7,7 @@
 global using static global::go.net.rpc.jsonrpc_package;
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
 global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 global using rpcꓸCall = go.net.rpc_package.ΔCall;
 // </ImportedTypeAliases>
 
@@ -48,7 +40,14 @@ using static global::go.net.rpc.jsonrpc_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Args))]
+[assembly: GoFieldAccess(typeof(Reply))]
+[assembly: GoFieldAccess(typeof(go.net.rpc_package.ΔCall))]
+[assembly: GoFieldAccess(typeof(pipe))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,7 +57,7 @@ using static global::go.net.rpc.jsonrpc_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("net/rpc/jsonrpc/all_test.go", "all_test.cs", "ACZGsoKmsoLWsoKUgqaC2qKCpqKCpqKCpoKCpqKCkoKUgoKAgqSCtKSigpKClIKCgIKkgrSkooKSgqaCgoKCgpSClIKUgsYACQTGgpSCtoKCgoKUgqaCgoKClIK4goKCgpSCgpSCpoKClIK4goKUgpKCtPSigpSCtoKSgoKUgriSgoKUgILIkoKClICCxKSCgpLWooKSlIKkgoKCgrQAEQSiggAEEoKAgqSCgsqClIKUguiCgpKokoKUAAwUgqaCpoKCgoKUpoKmgtaCpoKmgg==", "", "", "370=NewReader/1/1/5,NopCloser/1/1/7")]
+[assembly: GoPositionMap("net/rpc/jsonrpc/all_test.go", "all_test.cs", "ACZGsoKmsoLmsoKUgqaC2qKCpqKCpqKCpoKCpqKCkoKUgoKAgqSCtKSigpKClIKCgIKkgrSkooKSgqaCgoKCgpSClIKUgsYADATGgpSCtoKCgoKUgqaCgoKClIK4goKCgpSCgpSCpoKClIK4goKUgoKCtAAKBKKClIK2goKCgpSCuIKCgpSAgsiCgoKUgILEpIKCktaigpKUgqSCgoKCtAAUBIKCAAQSgoCCpIKCyoKUgpSC+IKCkqiSgpQADRSCpoKmgoKCgpSmgqaC5oKmgqaC", "", "", "374=NewReader/1/1/5,NopCloser/1/1/7", "108:21,132:21,156:21,203:21,280:21,324:15,336:19,337:19,341:21,410:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.rpc;

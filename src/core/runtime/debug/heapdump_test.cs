@@ -15,30 +15,31 @@ using go.io;
 partial class debug_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string heapdumptestˢ = "heapdumptest"u8;
+private static ref readonly @string heapdumptestˢ => ref heapdumptestˢᵇ;
+private static readonly @string heapdumptestˢᵇ = "heapdumptest"u8;
 
-public static void TestWriteHeapDumpNonempty(ж<testing.T> Ꮡt) {
+public static void TestWriteHeapDumpNonempty(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (runtime.GOOS == "js"u8) {
-            Ꮡt.Skipf("WriteHeapDump is not available on %s."u8, runtime.GOOS);
+            t.Skipf("WriteHeapDump is not available on %s.", runtime.GOOS);
         }
         var (f, err) = os.CreateTemp(""u8, heapdumptestˢ);
-        if (err != default!) {
-            Ꮡt.Fatalf("TempFile failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("TempFile failed: %v", err);
         }
         defer(os.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         WriteHeapDump(f.Fd());
         (var fi, err) = f.Stat();
-        if (err != default!) {
-            Ꮡt.Fatalf("Stat failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Stat failed: %v", err);
         }
         UntypedInt minSize = 1;
         {
             var size = fi.Size(); if (size < minSize) {
-                Ꮡt.Fatalf("Heap dump size %d bytes, expected at least %d bytes"u8, size, (nint)(minSize));
+                t.Fatalf("Heap dump size %d bytes, expected at least %d bytes", size, (nint)(minSize));
             }
         }
     }
@@ -50,39 +51,39 @@ partial struct Obj {
     internal nint x, y;
 }
 
-internal static void objfin(ж<Obj> Ꮡx) {
+internal static void objfin(ж<Obj> x) {
     //println("finalized", x)
 }
 
-public static void TestWriteHeapDumpFinalizers(ж<testing.T> Ꮡt) {
+public static void TestWriteHeapDumpFinalizers(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (runtime.GOOS == "js"u8) {
-            Ꮡt.Skipf("WriteHeapDump is not available on %s."u8, runtime.GOOS);
+            t.Skipf("WriteHeapDump is not available on %s.", runtime.GOOS);
         }
         var (f, err) = os.CreateTemp(""u8, heapdumptestˢ);
-        if (err != default!) {
-            Ꮡt.Fatalf("TempFile failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("TempFile failed: %v", err);
         }
         defer(os.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         // bug 9172: WriteHeapDump couldn't handle more than one finalizer
-        println((@string)"allocating objects"u8);
-        var x = Ꮡ(new Obj(nil));
+        println((@string)"allocating objects");
+        var x = Ꮡ(new Obj());
         runtime.SetFinalizer(x.OrTypedNil(), objfin);
-        var y = Ꮡ(new Obj(nil));
+        var y = Ꮡ(new Obj());
         runtime.SetFinalizer(y.OrTypedNil(), objfin);
 
         // Trigger collection of x and y, queueing of their finalizers.
-        println((@string)"starting gc"u8);
+        println((@string)"starting gc");
         runtime.GC();
 
         // Make sure WriteHeapDump doesn't fail with multiple queued finalizers.
-        println((@string)"starting dump"u8);
+        println((@string)"starting dump");
         WriteHeapDump(f.Fd());
-        println((@string)"done dump"u8);
+        println((@string)"done dump");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -99,19 +100,19 @@ partial interface I {
 public static partial void M<T>(this G<T> g) {
 }
 
-internal static I dummy = new G<nint>(nil);
+internal static I dummy = new G<nint>();
 
-internal static I dummy2 = new G<G<nint>>(nil);
+internal static I dummy2 = new G<G<nint>>();
 
-public static void TestWriteHeapDumpTypeName(ж<testing.T> Ꮡt) {
+public static void TestWriteHeapDumpTypeName(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (runtime.GOOS == "js"u8) {
-            Ꮡt.Skipf("WriteHeapDump is not available on %s."u8, runtime.GOOS);
+            t.Skipf("WriteHeapDump is not available on %s.", runtime.GOOS);
         }
         var (f, err) = os.CreateTemp(""u8, heapdumptestˢ);
-        if (err != default!) {
-            Ꮡt.Fatalf("TempFile failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("TempFile failed: %v", err);
         }
         defer(os.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;

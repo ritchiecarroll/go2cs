@@ -5,36 +5,52 @@ using Δruntime = runtime_package;
 
 partial class buildcfg_package {
 
-public static readonly @string DefaultGO386 = @"sse2"u8;
+public static ref readonly @string DefaultGO386 => ref DefaultGO386ᵇ;
+private static readonly @string DefaultGO386ᵇ = @"sse2"u8;
 
-public static readonly @string DefaultGOAMD64 = @"v1"u8;
+public static ref readonly @string DefaultGOAMD64 => ref DefaultGOAMD64ᵇ;
+private static readonly @string DefaultGOAMD64ᵇ = @"v1"u8;
 
-public static readonly @string DefaultGOARM = @"7"u8;
+public static ref readonly @string DefaultGOARM => ref DefaultGOARMᵇ;
+private static readonly @string DefaultGOARMᵇ = @"7"u8;
 
-public static readonly @string DefaultGOARM64 = @"v8.0"u8;
+public static ref readonly @string DefaultGOARM64 => ref DefaultGOARM64ᵇ;
+private static readonly @string DefaultGOARM64ᵇ = @"v8.0"u8;
 
-public static readonly @string DefaultGOMIPS = @"hardfloat"u8;
+public static ref readonly @string DefaultGOMIPS => ref DefaultGOMIPSᵇ;
+private static readonly @string DefaultGOMIPSᵇ = @"hardfloat"u8;
 
-public static readonly @string DefaultGOMIPS64 = @"hardfloat"u8;
+public static ref readonly @string DefaultGOMIPS64 => ref DefaultGOMIPS64ᵇ;
+private static readonly @string DefaultGOMIPS64ᵇ = @"hardfloat"u8;
 
-public static readonly @string DefaultGOPPC64 = @"power8"u8;
+public static ref readonly @string DefaultGOPPC64 => ref DefaultGOPPC64ᵇ;
+private static readonly @string DefaultGOPPC64ᵇ = @"power8"u8;
 
-public static readonly @string DefaultGORISCV64 = @"rva20u64"u8;
+public static ref readonly @string DefaultGORISCV64 => ref DefaultGORISCV64ᵇ;
+private static readonly @string DefaultGORISCV64ᵇ = @"rva20u64"u8;
 
-internal static readonly @string defaultGOEXPERIMENT = @""u8;
+internal static ref readonly @string defaultGOEXPERIMENT => ref defaultGOEXPERIMENTᵇ;
+private static readonly @string defaultGOEXPERIMENTᵇ = @""u8;
 
-internal static readonly @string defaultGO_EXTLINK_ENABLED = @""u8;
+internal static ref readonly @string defaultGO_EXTLINK_ENABLED => ref defaultGO_EXTLINK_ENABLEDᵇ;
+private static readonly @string defaultGO_EXTLINK_ENABLEDᵇ = @""u8;
 
-internal static readonly @string defaultGO_LDSO = @""u8;
+internal static ref readonly @string defaultGO_LDSO => ref defaultGO_LDSOᵇ;
+private static readonly @string defaultGO_LDSOᵇ = @""u8;
 
-internal static readonly @string version = @"go1.26.10"u8;
+internal static ref readonly @string version => ref versionᵇ;
+private static readonly @string versionᵇ = @"go1.26.10"u8;
 
-internal static readonly @string defaultGOOS = "linux";
+internal static ref readonly @string defaultGOOS => ref defaultGOOSᵇ;
+private static readonly @string defaultGOOSᵇ = "linux";
 
-internal static readonly @string defaultGOARCH = "amd64";
+internal static ref readonly @string defaultGOARCH => ref defaultGOARCHᵇ;
+private static readonly @string defaultGOARCHᵇ = "amd64";
 
-public static readonly @string DefaultGOFIPS140 = @"off"u8;
+public static ref readonly @string DefaultGOFIPS140 => ref DefaultGOFIPS140ᵇ;
+private static readonly @string DefaultGOFIPS140ᵇ = @"off"u8;
 
-public static readonly @string DefaultCGO_ENABLED = ""u8;
+public static ref readonly @string DefaultCGO_ENABLED => ref DefaultCGO_ENABLEDᵇ;
+private static readonly @string DefaultCGO_ENABLEDᵇ = ""u8;
 
 } // end buildcfg_package

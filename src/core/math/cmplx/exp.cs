@@ -58,7 +58,7 @@ public static complex128 Exp(complex128 x) {
                 return x;
             }
             case {} when math.IsInf(im, 0) || math.IsNaN(im): {
-                if (re < 0D){
+                if (re < 0D) {
                     return complex(0D, math.Copysign(0D, im));
                 } else {
                     return complex(math.Inf(1), math.NaN());

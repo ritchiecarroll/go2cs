@@ -37,18 +37,19 @@ partial class metrics_test_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pNamePUnitˢ = "^(?P<name>/[^:]+):(?P<unit>[^:*/]+(?:[*/][^:*/]+)*)$"u8;
+private static ref readonly @string pNamePUnitˢ => ref pNamePUnitˢᵇ;
+private static readonly @string pNamePUnitˢᵇ = "^(?P<name>/[^:]+):(?P<unit>[^:*/]+(?:[*/][^:*/]+)*)$"u8;
 
-public static void TestNames(ж<testing.T> Ꮡt) {
+public static void TestNames(ж<testing.T> t) {
     // Note that this regexp is promised in the package docs for Description. Do not change.
     var r = regexp.MustCompile(pNamePUnitˢ);
     var all = metrics.All();
     foreach (var (i, d) in all) {
         if (!r.MatchString(d.Name)) {
-            Ꮡt.Errorf("name %q does not match regexp %#q"u8, d.Name, r.OrTypedNil());
+            t.Errorf("name %q does not match regexp %#q", d.Name, r.OrTypedNil());
         }
         if (i > 0 && all[i - 1].Name >= all[i].Name) {
-            Ꮡt.Fatalf("allDesc not sorted: %s ≥ %s"u8, all[i - 1].Name, all[i].Name);
+            t.Fatalf("allDesc not sorted: %s ≥ %s", all[i - 1].Name, all[i].Name);
         }
     }
 
@@ -62,83 +63,86 @@ public static void TestNames(ж<testing.T> Ꮡt) {
 
     foreach (var (_, d) in all) {
         while (len(samples) > 0 && samples[0].Name < d.Name) {
-            Ꮡt.Errorf("%s: reported by runtime but not listed in All"u8, samples[0].Name);
+            t.Errorf("%s: reported by runtime but not listed in All", samples[0].Name);
             samples = samples[1..];
         }
         if (len(samples) == 0 || d.Name < samples[0].Name) {
-            Ꮡt.Errorf("%s: listed in All but not reported by runtime"u8, d.Name);
+            t.Errorf("%s: listed in All but not reported by runtime", d.Name);
             continue;
         }
         if (samples[0].Value.Kind() != d.Kind) {
-            Ꮡt.Errorf("%s: runtime reports %v but All reports %v"u8, d.Name, samples[0].Value.Kind(), d.Kind);
+            t.Errorf("%s: runtime reports %v but All reports %v", d.Name, samples[0].Value.Kind(), d.Kind);
         }
         samples = samples[1..];
     }
 }
 
 internal static @string wrap(@string prefix, @string text, nint width) {
-    var doc = Ꮡ(new comment.Doc(Content: new comment.Block[]{new comment.ParagraphжBlock(Ꮡ(new comment.Paragraph(Text: new commentꓸText[]{((comment.Plain)text)}.slice())))}.slice()));
+    var doc = Ꮡ(new comment.Doc(Content: slice<comment.Block>([new comment.ParagraphжBlock(Ꮡ(new comment.Paragraph(Text: slice<commentꓸText>([((comment.Plain)text)]))))])));
     var pr = Ꮡ(new comment.Printer(TextPrefix: prefix, TextWidth: width));
     return (@string)pr.Text(doc);
 }
 
-internal static @string formatDesc(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+internal static @string formatDesc(ж<testing.T> t) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     foreach (var (i, d) in metrics.All()) {
         if (i > 0) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "\n"u8);
         }
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%s\n"u8, d.Name);
-        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%s"u8, wrap("\t"u8, d.ΔDescription, 80 - 2 * 8));
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), "%s"u8, wrap("\t", d.ΔDescription, 80 - 2 * 8));
     }
     return b.String();
 }
 
-internal static ж<bool> generate = flag.Bool("generate"u8, false, "update doc.go for go generate"u8);
+internal static ж<bool> generate = flag.Bool("generate", false, "update doc.go for go generate");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string docGoˢ = "doc.go"u8;
+private static ref readonly @string docGoˢ => ref docGoˢᵇ;
+private static readonly @string docGoˢᵇ = "doc.go"u8;
 private static readonly object noDocCommentInDocGoˢ = (@string)"no doc comment in doc.go"u8;
-private static readonly @string runtimeMetricsˢ = "runtime/metrics"u8;
+private static ref readonly @string runtimeMetricsˢ => ref runtimeMetricsˢᵇ;
+private static readonly @string runtimeMetricsˢᵇ = "runtime/metrics"u8;
 private static readonly object docNewFromFilesLostDocˢ = (@string)"doc.NewFromFiles lost doc comment"u8;
-private static readonly @string supportedMetricsˢ = "Supported metrics"u8;
-private static readonly @string oldˢ = "old"u8;
-private static readonly @string wantˢ = "want"u8;
+private static ref readonly @string supportedMetricsˢ => ref supportedMetricsˢᵇ;
+private static readonly @string supportedMetricsˢᵇ = "Supported metrics"u8;
+private static ref readonly @string oldˢ => ref oldˢᵇ;
+private static readonly @string oldˢᵇ = "old"u8;
+private static ref readonly @string wantˢ => ref wantˢᵇ;
+private static readonly @string wantˢᵇ = "want"u8;
 
-public static void TestDocs(ж<testing.T> Ꮡt) {
-    @string want = formatDesc(Ꮡt);
+public static void TestDocs(ж<testing.T> t) {
+    @string want = formatDesc(t);
 
     var (src, err) = os.ReadFile(docGoˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var fset = token.NewFileSet();
     (var f, err) = parser.ParseFile(fset, docGoˢ, src, parser.ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    var fdoc = f.Value.Doc;
+    var fdoc = f.Doc;
     if (fdoc == nil) {
-        Ꮡt.Fatal(noDocCommentInDocGoˢ);
+        t.Fatal(noDocCommentInDocGoˢ);
     }
-    (var pkg, err) = doc.NewFromFiles(fset, new ж<ast.File>[]{f}.slice(), runtimeMetricsˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var pkg, err) = doc.NewFromFiles(fset, slice<ж<ast.File>>([f]), runtimeMetricsˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if ((~pkg).Doc == ""u8) {
-        Ꮡt.Fatal(docNewFromFilesLostDocˢ);
+    if (pkg.Doc == ""u8) {
+        t.Fatal(docNewFromFilesLostDocˢ);
     }
-    var docΔ1 = @new<comment.Parser>().Parse((~pkg).Doc);
+    var docΔ1 = @new<comment.Parser>().Parse(pkg.Doc);
     var expectCode = false;
     var foundCode = false;
     var updated = false;
-    foreach (var (_, block) in (~docΔ1).Content) {
+    foreach (var (_, block) in docΔ1.Content) {
         switch (block.type()) {
         case ж<comment.Heading> b: {
             expectCode = false;
-            if (AreEqual((~b).Text[0], ((comment.Plain)(@string)supportedMetricsˢ))) {
+            if (AreEqual(b.Text[0], ((comment.Plain)(@string)supportedMetricsˢ))) {
                 expectCode = true;
             }
             break;
@@ -146,11 +150,11 @@ public static void TestDocs(ж<testing.T> Ꮡt) {
         case ж<comment.Code> b: {
             if (expectCode) {
                 foundCode = true;
-                if ((~b).Text != want) {
+                if (b.Text != want) {
                     if (!generate.Value) {
-                        Ꮡt.Fatalf("doc comment out of date; use go generate to rebuild\n%s"u8, diff.Diff(oldˢ, slice<byte>((~b).Text), wantˢ, slice<byte>(want)));
+                        t.Fatalf("doc comment out of date; use go generate to rebuild\n%s", diff.Diff(oldˢ, slice<byte>(b.Text), wantˢ, slice<byte>(want)));
                     }
-                    b.Value.Text = want;
+                    b.Text = want;
                     updated = true;
                 }
             }
@@ -159,27 +163,26 @@ public static void TestDocs(ж<testing.T> Ꮡt) {
     }
 
     if (!foundCode) {
-        Ꮡt.Fatalf("did not find Supported metrics list in doc.go"u8);
+        t.Fatalf("did not find Supported metrics list in doc.go");
     }
-    if (updated){
+    if (updated) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "go test -generate: writing new doc.go\n"u8);
-        bytes.Buffer buf = default!;
-        buf.Write(src.slice(0, fdoc.Pos() - (~f).FileStart));
-        buf.WriteString("/*\n"u8);
+        bytes.Buffer buf = default;
+        buf.Write(src.slice(0, fdoc.Pos() - f.FileStart));
+        buf.WriteString("/*\n");
         buf.Write(@new<comment.Printer>().Comment(docΔ1));
-        buf.WriteString("*/"u8);
-        buf.Write(src.slice(fdoc.End() - (~f).FileStart));
+        buf.WriteString("*/");
+        buf.Write(src.slice(fdoc.End() - f.FileStart));
         var (srcΔ1, errΔ1) = format.Source(buf.Bytes());
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         {
-            var errΔ2 = os.WriteFile(docGoˢ, srcΔ1, 438); if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            var errΔ2 = os.WriteFile(docGoˢ, srcΔ1, 438); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
-    } else 
-    if (generate.Value) {
+    } else if (generate.Value) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "go test -generate: doc.go already up-to-date\n"u8);
     }
 }

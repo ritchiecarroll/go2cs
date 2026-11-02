@@ -102,20 +102,20 @@ public static float64 Log1p(float64 x) {
 }
 
 internal static float64 log1p(float64 x) {
-    const float64 Sqrt2M1 = 4.142135623730950488017e-01; // Sqrt(2)-1 = 0x3fda827999fcef34
-    const float64 Sqrt2HalfM1 = -2.928932188134524755992e-01; // Sqrt(2)/2-1 = 0xbfd2bec333018866
+    const float64 Sqrt2M1 = 4.142135623730950488017e-01;               // Sqrt(2)-1 = 0x3fda827999fcef34
+    const float64 Sqrt2HalfM1 = -2.928932188134524755992e-01;          // Sqrt(2)/2-1 = 0xbfd2bec333018866
     const float64 Small = /* 1.0 / (1 << 29) */ 1.862645149230957e-09; // 2**-29 = 0x3e20000000000000
-    const float64 Tiny = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54
-    const float64 Two53 = /* 1 << 53 */ 9007199254740992; // 2**53
-    const float64 Ln2Hi = 6.93147180369123816490e-01; // 3fe62e42fee00000
-    const float64 Ln2Lo = 1.90821492927058770002e-10; // 3dea39ef35793c76
-    const float64 Lp1 = 6.666666666666735130e-01; // 3FE5555555555593
-    const float64 Lp2 = 3.999999999940941908e-01; // 3FD999999997FA04
-    const float64 Lp3 = 2.857142874366239149e-01; // 3FD2492494229359
-    const float64 Lp4 = 2.222219843214978396e-01; // 3FCC71C51D8E78AF
-    const float64 Lp5 = 1.818357216161805012e-01; // 3FC7466496CB03DE
-    const float64 Lp6 = 1.531383769920937332e-01; // 3FC39A09D078C69F
-    const float64 Lp7 = 1.479819860511658591e-01; // 3FC2F112DF3E5244
+    const float64 Tiny = /* 1.0 / (1 << 54) */ 5.551115123125783e-17;  // 2**-54
+    const float64 Two53 = /* 1 << 53 */ 9007199254740992;              // 2**53
+    const float64 Ln2Hi = 6.93147180369123816490e-01;                  // 3fe62e42fee00000
+    const float64 Ln2Lo = 1.90821492927058770002e-10;                  // 3dea39ef35793c76
+    const float64 Lp1 = 6.666666666666735130e-01;                      // 3FE5555555555593
+    const float64 Lp2 = 3.999999999940941908e-01;                      // 3FD999999997FA04
+    const float64 Lp3 = 2.857142874366239149e-01;                      // 3FD2492494229359
+    const float64 Lp4 = 2.222219843214978396e-01;                      // 3FCC71C51D8E78AF
+    const float64 Lp5 = 1.818357216161805012e-01;                      // 3FC7466496CB03DE
+    const float64 Lp6 = 1.531383769920937332e-01;                      // 3FC39A09D078C69F
+    const float64 Lp7 = 1.479819860511658591e-01;                      // 3FC2F112DF3E5244
 
     // special cases
     switch (ᐧ) {
@@ -131,8 +131,8 @@ internal static float64 log1p(float64 x) {
 
     var absx = Abs(x);
 
-    float64 f = default!;
-    uint64 iu = default!;
+    float64 f = default;
+    uint64 iu = default;
     nint k = 1;
     if (absx < Sqrt2M1) { //  |x| < Sqrt(2)-1
         if (absx < Small) { // |x| < 2**-29
@@ -148,15 +148,15 @@ internal static float64 log1p(float64 x) {
             iu = 1;
         }
     }
-    float64 c = default!;
+    float64 c = default;
     if (k != 0) {
-        float64 u = default!;
-        if (absx < Two53){ // 1<<53
+        float64 u = default;
+        if (absx < Two53) { // 1<<53
             u = 1.0D + x;
             iu = Float64bits(u);
             k = (nint)((iu >> 52) - 1023);
             // correction term
-            if (k > 0){
+            if (k > 0) {
                 c = 1.0D - (u - x);
             } else {
                 c = x - (u - 1.0D);
@@ -169,7 +169,7 @@ internal static float64 log1p(float64 x) {
             c = 0D;
         }
         iu &= (uint64)(0x000fffffffffffffUL);
-        if (iu < 0x0006a09e667f3bcdUL){ // mantissa of Sqrt(2)
+        if (iu < 0x0006a09e667f3bcdUL) { // mantissa of Sqrt(2)
             u = Float64frombits(iu | 0x3ff0000000000000UL); // normalize u
         } else {
             k++;
@@ -179,9 +179,9 @@ internal static float64 log1p(float64 x) {
         f = u - 1.0D; // Sqrt(2)/2 < u < Sqrt(2)
     }
     var hfsq = 0.5D * f * f;
-    float64 s = default!;
-    float64 R = default!;
-    float64 z = default!;
+    float64 s = default;
+    float64 R = default;
+    float64 z = default;
     if (iu == 0) { // |f| < 2**-20
         if (f == 0D) {
             if (k == 0) {

@@ -16,7 +16,7 @@ partial class pprof_package {
 // go2cs generated this placeholder — func readMainModuleMapping is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (syscallꓸHandle, error) createModuleSnapshot() {
-    while (ᐧ) {
+    for (;;) {
         var (snap, err) = syscall.CreateToolhelp32Snapshot((uint32)((uint32)windows.TH32CS_SNAPMODULE | (uint32)windows.TH32CS_SNAPMODULE32), (uint32)syscall.Getpid());
         {
             var (errno, ok) = errors.AsType<syscall.Errno>(err); if (ok && errno == windows.ERROR_BAD_LENGTH) {

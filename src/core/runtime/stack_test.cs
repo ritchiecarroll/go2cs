@@ -14,7 +14,7 @@ using Δsync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
@@ -27,7 +27,7 @@ partial class runtime_test_package {
 
 // TestStackMem measures per-thread stack segment cache behavior.
 // The test consumed up to 500MB in the past.
-public static partial void TestStackMem(ж<testing.T> Ꮡt) {
+public static partial void TestStackMem(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         UntypedInt BatchSize = 32;
@@ -69,18 +69,18 @@ public static partial void TestStackMem(ж<testing.T> Ꮡt) {
         }
         var s1 = @new<Δruntime.MemStats>();
         ReadMemStats(s1);
-        var consumed = (int64)((~s1).StackSys - (~s0).StackSys);
-        Ꮡt.Logf("Consumed %vMB for stack mem"u8, consumed >> 20);
+        var consumed = (int64)(s1.StackSys - s0.StackSys);
+        t.Logf("Consumed %vMB for stack mem", consumed >> 20);
         var estimate = (int64)(8 * BatchSize * ArraySize * RecursionDepth); // 8 is to reduce flakiness.
         if (consumed > estimate) {
-            Ꮡt.Fatalf("Stack mem: want %v, got %v"u8, estimate, consumed);
+            t.Fatalf("Stack mem: want %v, got %v", estimate, consumed);
         }
         // Due to broken stack memory accounting (https://golang.org/issue/7468),
         // StackInuse can decrease during function execution, so we cast the values to int64.
-        var inuse = (int64)(~s1).StackInuse - (int64)(~s0).StackInuse;
-        Ꮡt.Logf("Inuse %vMB for stack mem"u8, inuse >> 20);
+        var inuse = (int64)s1.StackInuse - (int64)s0.StackInuse;
+        t.Logf("Inuse %vMB for stack mem", inuse >> 20);
         if (inuse > (int64)4 << 20) {
-            Ꮡt.Fatalf("Stack inuse: want %v, got %v"u8, (nint)(4 << 20), inuse);
+            t.Fatalf("Stack inuse: want %v, got %v", (nint)(4 << 20), inuse);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -103,14 +103,13 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
 
         // in a normal goroutine
-        time.Duration growDuration = default!;                // For debugging failures
+        time.Duration growDuration = default; // For debugging failures
         Ꮡwg.Add(1);
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                ref var start = ref heap<time.Time>(out var Ꮡstart);
-                start = time.Now();
+                ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart);
                 growStack(nil);
                 growDuration = time.Since(start);
             }
@@ -152,9 +151,8 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
-        ref var setFinalizerTime = ref heap<time.Time>(out var ᏑsetFinalizerTime);
-        setFinalizerTime = time.Now();
-        s = default!;
+        ref var setFinalizerTime = ref heap<time.Time>(time.Now(), out var ᏑsetFinalizerTime);
+        s = default;
 
         {
             var (d, ok) = t.Deadline(); if (ok) {
@@ -165,7 +163,7 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
                     // Panic — instead of calling t.Error and returning from the test — so
                     // that we get a useful goroutine dump if the test times out, especially
                     // if GOTRACEBACK=system or GOTRACEBACK=crash is set.
-                    if (!Ꮡstarted.Load()){
+                    if (!Ꮡstarted.Load()) {
                         throw panic("finalizer did not start");
                     } else {
                         throw panic(fmt.Sprintf("finalizer started %s ago (%s after registration) and ran %d iterations, but did not return"u8, time.Since(ᏑfinalizerStart.Value), ᏑfinalizerStart.Value.Sub(setFinalizerTimeʗ1), Ꮡprogress.Load()));
@@ -178,7 +176,7 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
 
         GC();
         Ꮡwg.Wait();
-        Ꮡt.Logf("finalizer started after %s and ran %d iterations in %v"u8, finalizerStart.Sub(setFinalizerTime), Ꮡprogress.Load(), time.Since(finalizerStart));
+        Ꮡt.Logf("finalizer started after %s and ran %d iterations in %v", finalizerStart.Sub(setFinalizerTime), Ꮡprogress.Load(), time.Since(finalizerStart));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -188,20 +186,19 @@ public static partial void TestStackGrowth(ж<testing.T> Ꮡt) {
 //func init() {
 //	growStack()
 //}
-internal static void growStack(ж<atomic.Uint32> Ꮡprogress) {
+internal static void growStack(ж<atomic.Uint32> progress) {
     nint n = 1 << 10;
     if (testing.Short()) {
         n = 1 << 8;
     }
     for (nint i = 0; i < n; i++) {
-        ref var x = ref heap<nint>(out var Ꮡx);
-        x = 0;
+        ref var x = ref heap<nint>(0, out var Ꮡx);
         growStackIter(Ꮡx, i);
         if (x != i + 1) {
             throw panic("stack is corrupted");
         }
-        if (Ꮡprogress != nil) {
-            Ꮡprogress.Store((uint32)i);
+        if (progress != nil) {
+            progress.Store((uint32)i);
         }
     }
     GC();
@@ -218,16 +215,15 @@ internal static void growStackIter(ж<nint> Ꮡp, nint n) {
         return;
     }
     p = n + 1;
-    ref var x = ref heap<nint>(out var Ꮡx);
-    x = 0;
+    ref var x = ref heap<nint>(0, out var Ꮡx);
     growStackIter(Ꮡx, n - 1);
     if (x != n) {
         throw panic("stack is corrupted");
     }
 }
 
-public static partial void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static partial void TestStackGrowthCallback(ж<testing.T> t) {
+    t.Parallel();
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
 
     // test stack growth at chan op
@@ -275,7 +271,7 @@ public static partial void TestStackGrowthCallback(ж<testing.T> Ꮡt) {
                 var doneʗ1 = done;
                 goǃ(() => {
                     doneʗ1.ᐸꟷ(true);
-                });
+                }, GoStack.Bounded);
                 ᐸꟷ(done);
             });
         }
@@ -307,14 +303,14 @@ internal static void set(ж<nint> Ꮡp, nint x) {
     p = x;
 }
 
-public static void TestDeferPtrs(ж<testing.T> Ꮡt) {
+public static void TestDeferPtrs(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var y = ref heap(new nint(), out var Ꮡy);
 
         defer(() => {
             if (Ꮡy.Value != 42) {
-                Ꮡt.Errorf("defer's stack references were not adjusted appropriately"u8);
+                t.Errorf("defer's stack references were not adjusted appropriately");
             }
         }, ref ᒐ);
         defer(set, Ꮡy, (nint)42, ref ᒐ);
@@ -333,13 +329,13 @@ partial struct bigBuf /*[4096]byte*/;
 // the bottom of the stack. The goal is to find a stack depth less than 4kB from
 // the end of the stack. Each trial runs in a different goroutine so that an earlier
 // stack growth does not invalidate a later attempt.
-public static partial void TestDeferPtrsGoexit(ж<testing.T> Ꮡt) {
+public static partial void TestDeferPtrsGoexit(ж<testing.T> t) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
         goǃ(testDeferPtrsGoexit, c, i);
         {
             nint n = ᐸꟷ(c); if (n != 42) {
-                Ꮡt.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)"u8, i, n);
+                t.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)", i, n);
             }
         }
     }
@@ -370,13 +366,13 @@ internal static void setBig(ж<nint> Ꮡp, nint x, bigBuf b) {
 // TestDeferPtrsPanic is like TestDeferPtrsGoexit, but it's using panic instead
 // of Goexit to run the Defers. Those two are different execution paths
 // in the runtime.
-public static partial void TestDeferPtrsPanic(ж<testing.T> Ꮡt) {
+public static partial void TestDeferPtrsPanic(ж<testing.T> t) {
     for (nint i = 0; i < 100; i++) {
         var c = new channel<nint>(1);
         goǃ(testDeferPtrsPanic, c, i);
         {
             nint n = ᐸꟷ(c); if (n != 42) {
-                Ꮡt.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)"u8, i, n);
+                t.Fatalf("defer's stack references were not adjusted appropriately (i=%d n=%d)", i, n);
             }
         }
     }
@@ -388,7 +384,7 @@ internal static void testDeferPtrsPanic(channel<nint> c, nint i) {
         ref var y = ref heap(new nint(), out var Ꮡy);
         var cʗ1 = c;
         defer(() => {
-            if (recover() == default!) {
+            if (recover() == nil) {
                 cʗ1.ᐸꟷ(-1);
                 return;
             }
@@ -422,14 +418,14 @@ internal static readonly object expectedPanicFromNilˢ = (@string)"expected pani
 // function and the inner function have the same SP, but it's critical
 // that we match up the defer correctly to get the right liveness map.
 // See issue #25499.
-public static void TestDeferLeafSigpanic(ж<testing.T> Ꮡt) {
+public static void TestDeferLeafSigpanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Push a defer that will walk the stack.
         defer(() => {
             {
-                var err = recover(); if (err == default!) {
-                    Ꮡt.Fatal(expectedPanicFromNilˢ);
+                var err = recover(); if (err == nil) {
+                    t.Fatal(expectedPanicFromNilˢ);
                 }
             }
             GC();
@@ -449,7 +445,7 @@ public static void TestDeferLeafSigpanic(ж<testing.T> Ꮡt) {
 // TestPanicUseStack checks that a chain of Panic structs on the stack are
 // updated correctly if the stack grows during the deferred execution that
 // happens as a result of the panic.
-public static void TestPanicUseStack(ж<testing.T> Ꮡt) {
+public static void TestPanicUseStack(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var pc = new slice<uintptr>(10000);
@@ -492,7 +488,7 @@ public static void TestPanicUseStack(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPanicFar(ж<testing.T> Ꮡt) {
+public static void TestPanicFar(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var xtree = ref heap<ж<xtreeNode>>(out var Ꮡxtree);
@@ -538,7 +534,7 @@ internal static void useStackAndCall(nint n, Action f) {
         f();
         return;
     }
-    array<byte> b = new(1024);                     // makes frame about 1KB
+    array<byte> b = new(1024); // makes frame about 1KB
     useStackAndCall(n - 1 + (nint)b[99], f);
 }
 
@@ -555,7 +551,7 @@ internal static void growing(channel<nint> c, channel<EmptyStruct> done) {
     done.ᐸꟷ(new EmptyStruct());
 }
 
-public static partial void TestStackCache(ж<testing.T> Ꮡt) {
+public static partial void TestStackCache(ж<testing.T> t) {
     // Allocate a bunch of goroutines and grow their stacks.
     // Repeat a few times to test the stack cache.
     const nint R = 4;
@@ -585,25 +581,25 @@ public static partial void TestStackCache(ж<testing.T> Ꮡt) {
     }
 }
 
-public static partial void TestStackOutput(ж<testing.T> Ꮡt) {
+public static partial void TestStackOutput(ж<testing.T> t) {
     var b = new slice<byte>(1024);
     @string stk = (@string)(b.slice(0, Stack(b, false)));
     if (!strings.HasPrefix(stk, goroutineˢ2)) {
-        Ꮡt.Errorf("Stack (len %d):\n%s"u8, len(stk), stk);
-        Ꮡt.Errorf("Stack output should begin with \"goroutine \""u8);
+        t.Errorf("Stack (len %d):\n%s", len(stk), stk);
+        t.Errorf("Stack output should begin with \"goroutine \"");
     }
 }
 
-public static partial void TestStackAllOutput(ж<testing.T> Ꮡt) {
+public static partial void TestStackAllOutput(ж<testing.T> t) {
     var b = new slice<byte>(1024);
     @string stk = (@string)(b.slice(0, Stack(b, true)));
     if (!strings.HasPrefix(stk, goroutineˢ2)) {
-        Ꮡt.Errorf("Stack (len %d):\n%s"u8, len(stk), stk);
-        Ꮡt.Errorf("Stack output should begin with \"goroutine \""u8);
+        t.Errorf("Stack (len %d):\n%s", len(stk), stk);
+        t.Errorf("Stack output should begin with \"goroutine \"");
     }
 }
 
-public static void TestStackPanic(ж<testing.T> Ꮡt) {
+public static void TestStackPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Test that stack copying copies panics correctly. This is difficult
@@ -613,8 +609,8 @@ public static void TestStackPanic(ж<testing.T> Ꮡt) {
         // the GC() call just before freedefer(d).
         defer(() => {
             {
-                var x = recover(); if (x == default!) {
-                    Ꮡt.Errorf("recover failed"u8);
+                var x = recover(); if (x == nil) {
+                    t.Errorf("recover failed");
                 }
             }
         }, ref ᒐ);
@@ -632,8 +628,7 @@ public static partial void BenchmarkStackCopyPtr(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         var cʗ1 = c;
         goǃ(() => {
-            ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
-            iΔ1 = 1000000;
+            ref var iΔ1 = ref heap<nint>(1000000, out var ᏑiΔ1);
             countp(ᏑiΔ1);
             cʗ1.ᐸꟷ(true);
         });
@@ -794,8 +789,7 @@ public static void Sum(int64 n, ж<stkobjT> Ꮡp) {
     if (n == 0) {
         return;
     }
-    ref var s = ref heap<stkobjT>(out var Ꮡs);
-    s = new stkobjT(p: Ꮡp, x: n);
+    ref var s = ref heap<stkobjT>(new stkobjT(p: Ꮡp, x: n), out var Ꮡs);
     Sum(n - 1, Ꮡs);
     p.x += s.x;
 }
@@ -829,9 +823,9 @@ public static partial void BenchmarkIssue18138(ж<testing.B> Ꮡb) {
         ᐸꟷ(c); // get token
         var cʗ1 = c;
         goǃ(() => {
-            useStackPtrs(1000, false); // uses ~1MB max
+            useStackPtrs(1000, false);     // uses ~1MB max
             var m = new slice<byte>(8192); // make GC trigger occasionally
-            cʗ1.ᐸꟷ(m); // return token
+            cʗ1.ᐸꟷ(m);                     // return token
         });
     }
 }
@@ -843,7 +837,7 @@ internal static void useStackPtrs(nint nʗp, bool b) {
         // This code contributes to the stack frame size, and hence to the
         // stack copying cost. But since b is always false, it costs no
         // execution time (not even the zeroing of a).
-        array<ж<nint>> a = new(128);                   // 1KB of pointers
+        array<ж<nint>> a = new(128); // 1KB of pointers
         a[n] = Ꮡn;
         n = a[0].Value;
     }
@@ -881,7 +875,7 @@ internal static void inlinablePanic(this structWithMethod s) {
     throw panic("panic");
 }
 
-public static void TestStackWrapperCaller(ж<testing.T> Ꮡt) {
+public static void TestStackWrapperCaller(ж<testing.T> t) {
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     // Force the compiler to construct a wrapper method.
     var wrapper = ((Func<ж<structWithMethod>, @string>)([GoWrapper("(*structWithMethod).caller")] (p0) => caller(panicwrapRecv(p0, "value method runtime_test.structWithMethod.caller called using nil *structWithMethod pointer").Value)));
@@ -889,21 +883,21 @@ public static void TestStackWrapperCaller(ж<testing.T> Ꮡt) {
     {
         @string dc = d.caller();
         @string ic = wrapper(Ꮡd); if (dc != ic) {
-            Ꮡt.Fatalf("direct caller %q != indirect caller %q"u8, dc, ic);
+            t.Fatalf("direct caller %q != indirect caller %q", dc, ic);
         }
     }
 }
 
-public static void TestStackWrapperCallers(ж<testing.T> Ꮡt) {
+public static void TestStackWrapperCallers(ж<testing.T> t) {
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     var wrapper = ((Func<ж<structWithMethod>, slice<uintptr>>)([GoWrapper("(*structWithMethod).callers")] (p0) => callers(panicwrapRecv(p0, "value method runtime_test.structWithMethod.callers called using nil *structWithMethod pointer").Value)));
     // Check that <autogenerated> doesn't appear in the stack trace.
     var pcs = wrapper(Ꮡd);
     var frames = CallersFrames(pcs);
-    while (ᐧ) {
+    for (;;) {
         var (fr, more) = frames.Next();
         if (fr.File == "<autogenerated>"u8) {
-            Ꮡt.Fatalf("<autogenerated> appears in stack trace: %+v"u8, fr);
+            t.Fatalf("<autogenerated> appears in stack trace: %+v", fr);
         }
         if (!more) {
             break;
@@ -912,22 +906,24 @@ public static void TestStackWrapperCallers(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string autogeneratedˢ = "<autogenerated>"u8;
+internal static ref readonly @string autogeneratedˢ => ref autogeneratedˢᵇ;
+private static readonly @string autogeneratedˢᵇ = "<autogenerated>"u8;
 
-public static void TestStackWrapperStack(ж<testing.T> Ꮡt) {
+public static void TestStackWrapperStack(ж<testing.T> t) {
     ref var d = ref heap(new structWithMethod(), out var Ꮡd);
     var wrapper = ((Func<ж<structWithMethod>, @string>)([GoWrapper("(*structWithMethod).stack")] (p0) => stack(panicwrapRecv(p0, "value method runtime_test.structWithMethod.stack called using nil *structWithMethod pointer").Value)));
     // Check that <autogenerated> doesn't appear in the stack trace.
     @string stk = wrapper(Ꮡd);
     if (strings.Contains(stk, autogeneratedˢ)) {
-        Ꮡt.Fatalf("<autogenerated> appears in stack trace:\n%s"u8, stk);
+        t.Fatalf("<autogenerated> appears in stack trace:\n%s", stk);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inlinablePanicˢ = "inlinablePanic(...)"u8;
+internal static ref readonly @string inlinablePanicˢ => ref inlinablePanicˢᵇ;
+private static readonly @string inlinablePanicˢᵇ = "inlinablePanic(...)"u8;
 
-public static void TestStackWrapperStackInlinePanic(ж<testing.T> Ꮡt) {
+public static void TestStackWrapperStackInlinePanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Test that inline unwinding correctly tracks the callee by creating a
@@ -938,18 +934,18 @@ public static void TestStackWrapperStackInlinePanic(ж<testing.T> Ꮡt) {
         var wrapper = ((Action<ж<structWithMethod>>)([GoWrapper("(*structWithMethod).inlinablePanic")] (p0) => inlinablePanic(panicwrapRecv(p0, "value method runtime_test.structWithMethod.inlinablePanic called using nil *structWithMethod pointer").Value)));
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var err = recover();
-            if (err == default!) {
-                Ꮡt.Fatalf("expected panic"u8);
+            if (err == nil) {
+                t.Fatalf("expected panic");
             }
             var buf = new slice<byte>((4 << 10));
             @string stk = (@string)(buf.slice(0, Stack(buf, false)));
             if (strings.Contains(stk, autogeneratedˢ)) {
-                Ꮡt.Fatalf("<autogenerated> appears in stack trace:\n%s"u8, stk);
+                t.Fatalf("<autogenerated> appears in stack trace:\n%s", stk);
             }
             // Self-check: make sure inlinablePanic got inlined.
             if (!testenv.OptimizationOff()) {
                 if (!strings.Contains(stk, inlinablePanicˢ)) {
-                    Ꮡt.Fatalf("inlinablePanic not inlined"u8);
+                    t.Fatalf("inlinablePanic not inlined");
                 }
             }
         }, ref ᒐ);
@@ -964,19 +960,23 @@ partial interface I {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sigpanicˢ = "sigpanic"u8;
-internal static readonly @string runtimeTestIMˢ = "runtime_test.I.M"u8;
-internal static readonly @string panicwrapˢ = "panicwrap"u8;
-internal static readonly @string runtimeTestˢ3 = "runtime_test.(*structWithMethod).nop"u8;
+internal static ref readonly @string sigpanicˢ => ref sigpanicˢᵇ;
+private static readonly @string sigpanicˢᵇ = "sigpanic"u8;
+internal static ref readonly @string runtimeTestIMˢ => ref runtimeTestIMˢᵇ;
+private static readonly @string runtimeTestIMˢᵇ = "runtime_test.I.M"u8;
+internal static ref readonly @string panicwrapˢ => ref panicwrapˢᵇ;
+private static readonly @string panicwrapˢᵇ = "panicwrap"u8;
+internal static ref readonly @string runtimeTestˢ3 => ref runtimeTestˢ3ᵇ;
+private static readonly @string runtimeTestˢ3ᵇ = "runtime_test.(*structWithMethod).nop"u8;
 
-public static void TestStackWrapperStackPanic(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(sigpanicˢ, (ж<testing.T> tΔ1) => {
+public static void TestStackWrapperStackPanic(ж<testing.T> t) {
+    t.Run(sigpanicˢ, (ж<testing.T> tΔ1) => {
         // nil calls to interface methods cause a sigpanic.
         testStackWrapperPanic(tΔ1, () => {
-            ((Action<I>)([GoWrapper("I.M")] (p0) => wrapperRecv(p0).M()))(default!);
+            ((Action<I>)([GoWrapper("I.M")] (p0) => wrapperRecv(p0).M()))(default);
         }, runtimeTestIMˢ);
     });
-    Ꮡt.Run(panicwrapˢ, (ж<testing.T> tΔ2) => {
+    t.Run(panicwrapˢ, (ж<testing.T> tΔ2) => {
         // Nil calls to value method wrappers call panicwrap.
         var wrapper = ((Action<ж<structWithMethod>>)([GoWrapper("(*structWithMethod).nop")] (p0) => nop(panicwrapRecv(p0, "value method runtime_test.structWithMethod.nop called using nil *structWithMethod pointer").Value)));
         var wrapperʗ1 = wrapper;
@@ -987,23 +987,24 @@ public static void TestStackWrapperStackPanic(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string callersFramesˢ = "CallersFrames"u8;
+internal static ref readonly @string callersFramesˢ => ref callersFramesˢᵇ;
+private static readonly @string callersFramesˢᵇ = "CallersFrames"u8;
 
-internal static void testStackWrapperPanic(ж<testing.T> Ꮡt, Action cb, @string expect) {
+internal static void testStackWrapperPanic(ж<testing.T> t, Action cb, @string expect) {
     // Test that the stack trace from a panicking wrapper includes
     // the wrapper, even though elide these when they don't panic.
-    Ꮡt.Run(callersFramesˢ, (ж<testing.T> tΔ1) => {
+    t.Run(callersFramesˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
                 var err = recover();
-                if (err == default!) {
-                    tΔ1.Fatalf("expected panic"u8);
+                if (err == nil) {
+                    tΔ1.Fatalf("expected panic");
                 }
                 var pcs = new slice<uintptr>(10);
                 nint n = Callers(0, pcs);
                 var frames = CallersFrames(pcs.slice(0, n));
-                while (ᐧ) {
+                for (;;) {
                     ref var frame = ref heap<Δruntime.Frame>(out var Ꮡframe);
                     (frame, var more) = frames.Next();
                     tΔ1.Log(frame.Function);
@@ -1014,25 +1015,25 @@ internal static void testStackWrapperPanic(ж<testing.T> Ꮡt, Action cb, @strin
                         break;
                     }
                 }
-                tΔ1.Fatalf("panicking wrapper %s missing from stack trace"u8, expect);
+                tΔ1.Fatalf("panicking wrapper %s missing from stack trace", expect);
             }, ref ᒐ);
             cb();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    Ꮡt.Run(stackˢ, (ж<testing.T> tΔ2) => {
+    t.Run(stackˢ, (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
             defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                 var err = recover();
-                if (err == default!) {
-                    tΔ2.Fatalf("expected panic"u8);
+                if (err == nil) {
+                    tΔ2.Fatalf("expected panic");
                 }
                 var buf = new slice<byte>((4 << 10));
                 @string stk = (@string)(buf.slice(0, Stack(buf, false)));
                 if (!strings.Contains(stk, "\n"u8 + expect)) {
-                    tΔ2.Fatalf("panicking wrapper %s missing from stack trace:\n%s"u8, expect, stk);
+                    tΔ2.Fatalf("panicking wrapper %s missing from stack trace:\n%s", expect, stk);
                 }
             }, ref ᒐ);
             cb();
@@ -1042,29 +1043,29 @@ internal static void testStackWrapperPanic(ж<testing.T> Ꮡt, Action cb, @strin
     });
 }
 
-public static void TestCallersFromWrapper(ж<testing.T> Ꮡt) {
+public static void TestCallersFromWrapper(ж<testing.T> t) {
     // Test that invoking CallersFrames on a stack where the first
     // PC is an autogenerated wrapper keeps the wrapper in the
     // trace. Normally we elide these, assuming that the wrapper
     // calls the thing you actually wanted to see, but in this
     // case we need to keep it.
     var pc = reflect.ValueOf(((Action<I>)([GoWrapper("I.M")] (p0) => wrapperRecv(p0).M()))).Pointer();
-    var frames = CallersFrames(new uintptr[]{pc}.slice());
+    var frames = CallersFrames(slice<uintptr>([pc]));
     var (frame, more) = frames.Next();
     if (frame.Function != "runtime_test.I.M"u8) {
-        Ꮡt.Fatalf("want function %s, got %s"u8, runtimeTestIMˢ, frame.Function);
+        t.Fatalf("want function %s, got %s", runtimeTestIMˢ, frame.Function);
     }
     if (more) {
-        Ꮡt.Fatalf("want 1 frame, got > 1"u8);
+        t.Fatalf("want 1 frame, got > 1");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object systemstackTailCallNotˢ = (@string)"systemstack tail call not implemented on ppc64x"u8;
 
-public static void TestTracebackSystemstack(ж<testing.T> Ꮡt) {
+public static void TestTracebackSystemstack(ж<testing.T> t) {
     if (GOARCH == "ppc64"u8 || GOARCH == "ppc64le"u8) {
-        Ꮡt.Skip(systemstackTailCallNotˢ);
+        t.Skip(systemstackTailCallNotˢ);
     }
 
     // Test that profiles correctly jump over systemstack,
@@ -1077,35 +1078,42 @@ public static void TestTracebackSystemstack(ж<testing.T> Ꮡt) {
     nint countOut = 0;
     var frames = CallersFrames(pcs);
     ref var tb = ref heap(new strings.Builder(), out var Ꮡtb);
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         fmt.Fprintf(new runtime_test_package.strings_BuilderжWriter(Ꮡtb), "\n%s+0x%x %s:%d"u8, frame.Function, frame.PC - frame.Entry, frame.File, frame.Line);
         var exprᴛ1 = frame.Function;
-        if (exprᴛ1 == "runtime.TracebackSystemstack"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "runtime.TracebackSystemstack"u8: {
             countIn++;
+            break;
         }
-        else if (exprᴛ1 == "runtime_test.TestTracebackSystemstack"u8) {
+        case {} when exprᴛ1 == "runtime_test.TestTracebackSystemstack"u8: {
             countOut++;
-        }
+            break;
+        }}
         if (!more) {
             break;
         }
     }
     if (countIn != 5 || countOut != 1) {
-        Ꮡt.Fatalf("expected 5 calls to TracebackSystemstack and 1 call to TestTracebackSystemstack, got:%s"u8, tb.String());
+        t.Fatalf("expected 5 calls to TracebackSystemstack and 1 call to TestTracebackSystemstack, got:%s", tb.String());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tracebackAncestorsˢ = "TracebackAncestors"u8;
-internal static readonly @string originatingFromGoroutineˢ = "originating from goroutine"u8;
-internal static readonly @string mainRecurseThenCallGoˢ = "main.recurseThenCallGo(...)"u8;
-internal static readonly @string mainRecurseThenCallGo0xˢ = "main.recurseThenCallGo(0x"u8;
+internal static ref readonly @string tracebackAncestorsˢ => ref tracebackAncestorsˢᵇ;
+private static readonly @string tracebackAncestorsˢᵇ = "TracebackAncestors"u8;
+internal static ref readonly @string originatingFromGoroutineˢ => ref originatingFromGoroutineˢᵇ;
+private static readonly @string originatingFromGoroutineˢᵇ = "originating from goroutine"u8;
+internal static ref readonly @string mainRecurseThenCallGoˢ => ref mainRecurseThenCallGoˢᵇ;
+private static readonly @string mainRecurseThenCallGoˢᵇ = "main.recurseThenCallGo(...)"u8;
+internal static ref readonly @string mainRecurseThenCallGo0xˢ => ref mainRecurseThenCallGo0xˢᵇ;
+private static readonly @string mainRecurseThenCallGo0xˢᵇ = "main.recurseThenCallGo(0x"u8;
 
-public static void TestTracebackAncestors(ж<testing.T> Ꮡt) {
+public static void TestTracebackAncestors(ж<testing.T> t) {
     var goroutineRegex = Δregexp.MustCompile(goroutine09ˢ);
-    foreach (var (_, tracebackDepth) in new nint[]{0, 1, 5, 50}.slice()) {
-        @string output = runTestProg(Ꮡt, testprogˢ, tracebackAncestorsˢ, fmt.Sprintf("GODEBUG=tracebackancestors=%d"u8, tracebackDepth));
+    foreach (var (_, tracebackDepth) in slice<nint>([0, 1, 5, 50])) {
+        @string output = runTestProg(t, testprogˢ, tracebackAncestorsˢ, fmt.Sprintf("GODEBUG=tracebackancestors=%d"u8, tracebackDepth));
 
         nint numGoroutines = 3;
         nint numFrames = 2;
@@ -1116,55 +1124,56 @@ public static void TestTracebackAncestors(ж<testing.T> Ꮡt) {
 
         var matches = goroutineRegex.FindAllStringSubmatch(output, -1);
         if (len(matches) != 2) {
-            Ꮡt.Fatalf("want 2 goroutines, got:\n%s"u8, output);
+            t.Fatalf("want 2 goroutines, got:\n%s", output);
         }
 
         // Check functions in the traceback.
-        var fns = new @string[]{"main.recurseThenCallGo"u8, "main.main"u8, "main.printStack"u8, "main.TracebackAncestors"u8}.slice();
+        var fns = slice<@string>(["main.recurseThenCallGo", "main.main", "main.printStack", "main.TracebackAncestors"]);
         foreach (var (_, fn) in fns) {
             if (!strings.Contains(output, "\n"u8 + fn + "("u8)) {
-                Ꮡt.Fatalf("expected %q function in traceback:\n%s"u8, fn, output);
+                t.Fatalf("expected %q function in traceback:\n%s", fn, output);
             }
         }
 
         {
             @string want = originatingFromGoroutineˢ;
             nint count = ancestorsExpected; if (strings.Count(output, want) != count) {
-                Ꮡt.Errorf("output does not contain %d instances of %q:\n%s"u8, count, want, output);
+                t.Errorf("output does not contain %d instances of %q:\n%s", count, want, output);
             }
         }
 
         {
             @string want = mainRecurseThenCallGoˢ;
             nint count = ancestorsExpected * (numFrames + 1); if (strings.Count(output, want) != count) {
-                Ꮡt.Errorf("output does not contain %d instances of %q:\n%s"u8, count, want, output);
+                t.Errorf("output does not contain %d instances of %q:\n%s", count, want, output);
             }
         }
 
         {
             @string want = mainRecurseThenCallGo0xˢ;
             nint count = 1; if (strings.Count(output, want) != count) {
-                Ꮡt.Errorf("output does not contain %d instances of %q:\n%s"u8, count, want, output);
+                t.Errorf("output does not contain %d instances of %q:\n%s", count, want, output);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string deferLivenessˢ = "DeferLiveness"u8;
+internal static ref readonly @string deferLivenessˢ => ref deferLivenessˢᵇ;
+private static readonly @string deferLivenessˢᵇ = "DeferLiveness"u8;
 
 // Test that defer closure is correctly scanned when the stack is scanned.
-public static partial void TestDeferLiveness(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, deferLivenessˢ, godebugClobberfree1ˢ);
+public static partial void TestDeferLiveness(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, deferLivenessˢ, godebugClobberfree1ˢ);
     if (output != ""u8) {
-        Ꮡt.Errorf("output:\n%s\n\nwant no output"u8, output);
+        t.Errorf("output:\n%s\n\nwant no output", output);
     }
 }
 
-public static partial void TestDeferHeapAndStack(ж<testing.T> Ꮡt) {
-    nint P = 4; // processors
+public static partial void TestDeferHeapAndStack(ж<testing.T> t) {
+    nint P = 4;     // processors
     nint N = 10000; //iterations
-    nint D = 200; // stack depth
+    nint D = 200;   // stack depth
 
     if (testing.Short()) {
         P /= 2;
@@ -1190,13 +1199,13 @@ public static partial void TestDeferHeapAndStack(ж<testing.T> Ꮡt) {
 
 // deferHeapAndStack(n) computes 2*n
 internal static nint /*r*/ deferHeapAndStack(nint n) {
-    nint r = default!;
+    nint r = default;
     GoFrame ᒐ = default;
     try {
         if (n == 0) {
             r = 0; goto ᒐdone;
         }
-        if (n % 2 == 0){
+        if (n % 2 == 0) {
             // heap-allocated defers
             for (nint i = 0; i < 2; i++) {
                 defer(() => {
@@ -1226,28 +1235,32 @@ internal static Action<any> escapeMe = (any x) => {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestAsanForcesˢ = (@string)"skipping test: ASAN forces heap allocation"u8;
-internal static readonly @string framePointerAdjustˢ = "FramePointerAdjust"u8;
+internal static ref readonly @string framePointerAdjustˢ => ref framePointerAdjustˢᵇ;
+private static readonly @string framePointerAdjustˢᵇ = "FramePointerAdjust"u8;
 
-public static void TestFramePointerAdjust(ж<testing.T> Ꮡt) {
+public static void TestFramePointerAdjust(ж<testing.T> t) {
     var exprᴛ1 = GOARCH;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8: {
+        break;
     }
-    else { /* default: */
-        Ꮡt.Skipf("frame pointer is not supported on %s"u8, GOARCH);
-    }
+    default: {
+        t.Skipf("frame pointer is not supported on %s", GOARCH);
+        break;
+    }}
     if (asan.Enabled) {
-        Ꮡt.Skip(skippingTestAsanForcesˢ);
+        t.Skip(skippingTestAsanForcesˢ);
     }
-    @string output = runTestProg(Ꮡt, testprogˢ, framePointerAdjustˢ);
+    @string output = runTestProg(t, testprogˢ, framePointerAdjustˢ);
     if (output != ""u8) {
-        Ꮡt.Errorf("output:\n%s\n\nwant no output"u8, output);
+        t.Errorf("output:\n%s\n\nwant no output", output);
     }
 }
 
 // TestSystemstackFramePointerAdjust is a regression test for issue 59692 that
 // ensures that the frame pointer of systemstack is correctly adjusted. See CL
 // 489015 for more details.
-public static void TestSystemstackFramePointerAdjust(ж<testing.T> Ꮡt) {
+public static void TestSystemstackFramePointerAdjust(ж<testing.T> t) {
     growAndShrinkStack(512, new byte[]{}.array(1024));
 }
 

@@ -15,12 +15,12 @@ partial class fs_test_package {
 
 internal static fstest.MapFS testFsys;
 internal static void initᴛtestFsys() { testFsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-    ["hello.txt"u8] = Ꮡ(new fstest.MapFile(
+    ["hello.txt"] = Ꮡ(new fstest.MapFile(
         Data: slice<byte>("hello, world"u8),
         Mode: 302,
         ModTime: time.Now(),
         Sys: ᏑsysValue)),
-    ["sub/goodbye.txt"u8] = Ꮡ(new fstest.MapFile(
+    ["sub/goodbye.txt"] = Ꮡ(new fstest.MapFile(
         Data: slice<byte>("goodbye, world"u8),
         Mode: 302,
         ModTime: time.Now(),
@@ -35,7 +35,7 @@ partial struct readFileOnly {
 }
 
 internal static (fs.File, error) Open(this readFileOnly _, @string name) {
-    return (default!, ErrNotExist);
+    return (default, ErrNotExist);
 }
 
 partial struct openOnly {
@@ -43,41 +43,42 @@ partial struct openOnly {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloTxtˢ = "hello.txt"u8;
+private static ref readonly @string helloTxtˢ => ref helloTxtˢᵇ;
+private static readonly @string helloTxtˢᵇ = "hello.txt"u8;
 private static readonly object helloWorldˢ = (@string)"hello, world"u8;
 
-public static void TestReadFile(ж<testing.T> Ꮡt) {
+public static void TestReadFile(ж<testing.T> t) {
     // Test that ReadFile uses the method when present.
     var (data, err) = ReadFile(new readFileOnly(new fstest_MapFSᴠReadFileFS(testFsys)), helloTxtˢ);
-    if (((sstring)data) != "hello, world"u8 || err != default!) {
-        Ꮡt.Fatalf(@"ReadFile(readFileOnly, ""hello.txt"") = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
+    if (((sstring)data) != "hello, world"u8 || err != nil) {
+        t.Fatalf(@"ReadFile(readFileOnly, ""hello.txt"") = %q, %v, want %q, nil", data, err, helloWorldˢ);
     }
 
     // Test that ReadFile uses Open when the method is not present.
     (data, err) = ReadFile(new openOnly(new fstest_MapFSᴠFS(testFsys)), helloTxtˢ);
-    if (((sstring)data) != "hello, world"u8 || err != default!) {
-        Ꮡt.Fatalf(@"ReadFile(openOnly, ""hello.txt"") = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
+    if (((sstring)data) != "hello, world"u8 || err != nil) {
+        t.Fatalf(@"ReadFile(openOnly, ""hello.txt"") = %q, %v, want %q, nil", data, err, helloWorldˢ);
     }
 
     // Test that ReadFile on Sub of . works (sub_test checks non-trivial subs).
-    (var sub, err) = Sub(new fstest_MapFSᴠFS(testFsys), "."u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var sub, err) = Sub(new fstest_MapFSᴠFS(testFsys), ".");
+    if (err != nil) {
+        t.Fatal(err);
     }
     (data, err) = ReadFile(sub, helloTxtˢ);
-    if (((sstring)data) != "hello, world"u8 || err != default!) {
-        Ꮡt.Fatalf(@"ReadFile(sub(.), ""hello.txt"") = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
+    if (((sstring)data) != "hello, world"u8 || err != nil) {
+        t.Fatalf(@"ReadFile(sub(.), ""hello.txt"") = %q, %v, want %q, nil", data, err, helloWorldˢ);
     }
 }
 
-public static void TestReadFilePath(ж<testing.T> Ꮡt) {
-    var fsys = os.DirFS(Ꮡt.TempDir());
+public static void TestReadFilePath(ж<testing.T> t) {
+    var fsys = os.DirFS(t.TempDir());
     var (_, err1) = ReadFile(fsys, nonExistentˢ);
     var (_, err2) = ReadFile(new TestReadDirPath_fsys(fsys), nonExistentˢ);
     {
         @string s1 = errorPath(err1);
         @string s2 = errorPath(err2); if (s1 != s2) {
-            Ꮡt.Fatalf("s1: %s != s2: %s"u8, s1, s2);
+            t.Fatalf("s1: %s != s2: %s", s1, s2);
         }
     }
 }

@@ -48,9 +48,9 @@ partial class runtime_package {
 // which prevents us from allocating more stack.
 //
 //go:nosplit
-internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> ᏑsysStat, @string vmaName) {
-    ᏑsysStat.add((int64)n);
-    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add((int64)n);
+internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> sysStat, @string vmaName) {
+    sysStat.add((int64)n);
+    ᏑgcController.ᏑmappedReady.Add((int64)n);
     @unsafe.Pointer Δp = (uintptr)sysAllocOS(n, vmaName);
 
     // When using ASAN leak detection, we must tell ASAN about
@@ -68,7 +68,7 @@ internal static @unsafe.Pointer sysAlloc(uintptr n, ж<sysMemStat> ᏑsysStat, @
 // sysUnused memory region are considered forfeit and the region must not be
 // accessed again until sysUsed is called.
 internal static void sysUnused(@unsafe.Pointer v, uintptr n) {
-    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
+    ᏑgcController.ᏑmappedReady.Add(-(int64)n);
     sysUnusedOS(v, n);
 }
 
@@ -89,7 +89,7 @@ internal static bool needZeroAfterSysUnused() {
 // Prepared and Ready memory. However, the caller must provide the exact amount
 // of Prepared memory for accounting purposes.
 internal static void sysUsed(@unsafe.Pointer v, uintptr n, uintptr prepared) {
-    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add((int64)prepared);
+    ᏑgcController.ᏑmappedReady.Add((int64)prepared);
     sysUsedOS(v, n);
 }
 
@@ -130,7 +130,7 @@ internal static void sysHugePageCollapse(@unsafe.Pointer v, uintptr n) {
 // which prevents us from allocating more stack.
 //
 //go:nosplit
-internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat) {
+internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> sysStat) {
     // When using ASAN leak detection, the memory being freed is known by
     // the sanitizer. We need to unregister it so it's not accessed by it.
     //
@@ -141,8 +141,8 @@ internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> Ꮡsys
         lsanunregisterrootregion(v, n);
     }
 
-    ᏑsysStat.add(-(int64)n);
-    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
+    sysStat.add(-(int64)n);
+    ᏑgcController.ᏑmappedReady.Add(-(int64)n);
     sysFreeOS(v, n);
 }
 
@@ -156,7 +156,7 @@ internal static void sysFree(@unsafe.Pointer v, uintptr n, ж<sysMemStat> Ꮡsys
 // If a transition from Prepared is ever introduced, create a new function
 // that elides the Ready state accounting.
 internal static void sysFault(@unsafe.Pointer v, uintptr n) {
-    ᏑgcController.of(gcControllerState.ᏑmappedReady).Add(-(int64)n);
+    ᏑgcController.ᏑmappedReady.Add(-(int64)n);
     sysFaultOS(v, n);
 }
 
@@ -184,8 +184,10 @@ internal static @unsafe.Pointer sysReserve(@unsafe.Pointer v, uintptr n, @string
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedHeapArenaHintˢ = "unexpected heap arena hint on sbrk platform"u8;
-internal static readonly @string failedToAllocateAlignedˢ = "failed to allocate aligned heap memory; too many retries"u8;
+internal static ref readonly @string unexpectedHeapArenaHintˢ => ref unexpectedHeapArenaHintˢᵇ;
+private static readonly @string unexpectedHeapArenaHintˢᵇ = "unexpected heap arena hint on sbrk platform"u8;
+internal static ref readonly @string failedToAllocateAlignedˢ => ref failedToAllocateAlignedˢᵇ;
+private static readonly @string failedToAllocateAlignedˢᵇ = "failed to allocate aligned heap memory; too many retries"u8;
 
 // sysReserveAligned transitions a memory region from None to Reserved.
 //
@@ -207,7 +209,7 @@ retry:
     var Δp = (uintptr)(uintptr)sysReserve(v, size + align, vmaName);
     switch (ᐧ) {
     case {} when Δp == 0: {
-        return (default!, 0);
+        return (default, 0);
     }
     case {} when (uintptr)(Δp & (align - 1)) == 0: {
         return ((@unsafe.Pointer)Δp, size + align);
@@ -285,8 +287,8 @@ internal static void sysUnreserve(@unsafe.Pointer v, uintptr n) {
 // memory region can be efficiently transitioned to Ready.
 //
 // sysStat must be non-nil.
-internal static void sysMap(@unsafe.Pointer v, uintptr n, ж<sysMemStat> ᏑsysStat, @string vmaName) {
-    ᏑsysStat.add((int64)n);
+internal static void sysMap(@unsafe.Pointer v, uintptr n, ж<sysMemStat> sysStat, @string vmaName) {
+    sysStat.add((int64)n);
     sysMapOS(v, n, vmaName);
 }
 

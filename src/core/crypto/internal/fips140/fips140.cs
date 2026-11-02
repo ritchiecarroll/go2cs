@@ -16,26 +16,34 @@ public static ref bool Enabled => ref ((StaticBox<bool>)ᏑEnabled).ValueSlot;
 internal static bool debug;
 
 [GoInit] internal static void init() {
-    @string v = godebug.Value("#fips140"u8);
+    @string v = godebug.Value("#fips140");
     var exprᴛ1 = v;
-    if (exprᴛ1 == "on"u8 || exprᴛ1 == "only"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "on"u8 || exprᴛ1 == "only"u8: {
         Enabled = true;
+        break;
     }
-    else if (exprᴛ1 == "debug"u8) {
+    case {} when exprᴛ1 == "debug"u8: {
         Enabled = true;
         debug = true;
+        break;
     }
-    else if (exprᴛ1 == "off"u8 || exprᴛ1 == ""u8) {
+    case {} when exprᴛ1 == "off"u8 || exprᴛ1 == ""u8: {
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("fips140: unknown GODEBUG setting fips140=" + v);
-    }
+        break;
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fips1403ModeIsˢ = "FIPS 140-3 mode is incompatible with the purego build tag"u8;
-private static readonly @string fips1403ModeIsˢ2 = "FIPS 140-3 mode is incompatible with ASAN"u8;
-private static readonly @string fips1403ModeIsˢ3 = "FIPS 140-3 mode is incompatible with GOEXPERIMENT=boringcrypto"u8;
+private static ref readonly @string fips1403ModeIsˢ => ref fips1403ModeIsˢᵇ;
+private static readonly @string fips1403ModeIsˢᵇ = "FIPS 140-3 mode is incompatible with the purego build tag"u8;
+private static ref readonly @string fips1403ModeIsˢ2 => ref fips1403ModeIsˢ2ᵇ;
+private static readonly @string fips1403ModeIsˢ2ᵇ = "FIPS 140-3 mode is incompatible with ASAN"u8;
+private static ref readonly @string fips1403ModeIsˢ3 => ref fips1403ModeIsˢ3ᵇ;
+private static readonly @string fips1403ModeIsˢ3ᵇ = "FIPS 140-3 mode is incompatible with GOEXPERIMENT=boringcrypto"u8;
 
 // Supported returns an error if FIPS 140-3 mode can't be enabled.
 public static error Supported() {
@@ -69,18 +77,20 @@ public static error Supported() {
         return errors.New(fips1403ModeIsˢ3);
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goCryptographicModuleˢ = "Go Cryptographic Module"u8;
+private static ref readonly @string goCryptographicModuleˢ => ref goCryptographicModuleˢᵇ;
+private static readonly @string goCryptographicModuleˢᵇ = "Go Cryptographic Module"u8;
 
 public static @string Name() {
     return goCryptographicModuleˢ;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string latestˢ = "latest"u8;
+private static ref readonly @string latestˢ => ref latestˢᵇ;
+private static readonly @string latestˢᵇ = "latest"u8;
 
 // Version returns the formal version (such as "v1.0.0") if building against a
 // frozen module with GOFIPS140. Otherwise, it returns "latest".

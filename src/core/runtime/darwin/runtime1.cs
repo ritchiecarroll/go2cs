@@ -38,18 +38,17 @@ internal static uint32 traceback_env;
 //
 //go:nosplit
 internal static (int32 level, bool all, bool crash) gotraceback() {
-    int32 level = default!;
-    bool all = default!;
-    bool crash = default!;
+    int32 level = default;
+    bool all = default;
+    bool crash = default;
 
     var gp = getg();
     var t = atomic.Load(Ꮡtraceback_cache);
     crash = (t & (uint32)tracebackCrash) != 0;
     all = (~(~gp).m).throwing > throwTypeUser || (t & (uint32)tracebackAll) != 0;
-    if ((~(~gp).m).traceback != 0){
+    if ((~(~gp).m).traceback != 0) {
         level = (int32)(~(~gp).m).traceback;
-    } else 
-    if ((~(~gp).m).throwing >= throwTypeRuntime){
+    } else if ((~(~gp).m).throwing >= throwTypeRuntime) {
         // Always include runtime frames in runtime throws unless
         // otherwise overridden by m.traceback.
         level = 2;
@@ -65,14 +64,14 @@ internal static ж<ж<byte>> argv;
 // nosplit for use in linux startup sysargs.
 //
 //go:nosplit
-internal static ж<byte> argv_index(ж<ж<byte>> Ꮡargv, int32 i) {
-    return ~(ж<ж<byte>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(Ꮡargv), (uintptr)i * (uintptr)goarch.PtrSize));
+internal static ж<byte> argv_index(ж<ж<byte>> argv, int32 i) {
+    return ~(ж<ж<byte>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)i * (uintptr)goarch.PtrSize));
 }
 
-internal static void args(int32 c, ж<ж<byte>> Ꮡv) {
+internal static void args(int32 c, ж<ж<byte>> v) {
     argc = c;
-    argv = Ꮡv;
-    sysargs(c, Ꮡv);
+    argv = v;
+    sysargs(c, v);
 }
 
 internal static void goargs() {
@@ -111,11 +110,16 @@ internal static ref uint64 test_z64 => ref ((StaticBox<uint64>)Ꮡtest_z64).Valu
 internal static uint64 test_x64;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cas64Failedˢ = "cas64 failed"u8;
-internal static readonly @string load64Failedˢ = "load64 failed"u8;
-internal static readonly @string store64Failedˢ = "store64 failed"u8;
-internal static readonly @string xadd64Failedˢ = "xadd64 failed"u8;
-internal static readonly @string xchg64Failedˢ = "xchg64 failed"u8;
+internal static ref readonly @string cas64Failedˢ => ref cas64Failedˢᵇ;
+private static readonly @string cas64Failedˢᵇ = "cas64 failed"u8;
+internal static ref readonly @string load64Failedˢ => ref load64Failedˢᵇ;
+private static readonly @string load64Failedˢᵇ = "load64 failed"u8;
+internal static ref readonly @string store64Failedˢ => ref store64Failedˢᵇ;
+private static readonly @string store64Failedˢᵇ = "store64 failed"u8;
+internal static ref readonly @string xadd64Failedˢ => ref xadd64Failedˢᵇ;
+private static readonly @string xadd64Failedˢᵇ = "xadd64 failed"u8;
+internal static ref readonly @string xchg64Failedˢ => ref xchg64Failedˢᵇ;
+private static readonly @string xchg64Failedˢᵇ = "xchg64 failed"u8;
 
 internal static void testAtomic64() {
     test_z64 = 42;
@@ -155,39 +159,72 @@ internal static void testAtomic64() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badAˢ = "bad a"u8;
-internal static readonly @string badBˢ = "bad b"u8;
-internal static readonly @string badCˢ = "bad c"u8;
-internal static readonly @string badDˢ = "bad d"u8;
-internal static readonly @string badEˢ = "bad e"u8;
-internal static readonly @string badFˢ = "bad f"u8;
-internal static readonly @string badGˢ = "bad g"u8;
-internal static readonly @string badHˢ = "bad h"u8;
-internal static readonly @string badIˢ = "bad i"u8;
-internal static readonly @string badJˢ = "bad j"u8;
-internal static readonly @string badKˢ = "bad k"u8;
-internal static readonly @string badLˢ = "bad l"u8;
-internal static readonly @string badUnsafeSizeofX1ˢ = "bad unsafe.Sizeof x1"u8;
-internal static readonly @string badOffsetofY1Yˢ = "bad offsetof y1.y"u8;
-internal static readonly @string badUnsafeSizeofY1ˢ = "bad unsafe.Sizeof y1"u8;
-internal static readonly @string cas1ˢ = "cas1"u8;
-internal static readonly @string cas2ˢ = "cas2"u8;
-internal static readonly @string cas3ˢ = "cas3"u8;
-internal static readonly @string cas4ˢ = "cas4"u8;
-internal static readonly @string cas5ˢ = "cas5"u8;
-internal static readonly @string cas6ˢ = "cas6"u8;
-internal static readonly @string atomicor8ˢ = "atomicor8"u8;
-internal static readonly @string atomicand8ˢ = "atomicand8"u8;
-internal static readonly @string float64nanˢ = "float64nan"u8;
-internal static readonly @string float64nan1ˢ = "float64nan1"u8;
-internal static readonly @string float64nan2ˢ = "float64nan2"u8;
-internal static readonly @string float64nan3ˢ = "float64nan3"u8;
-internal static readonly @string float32nanˢ = "float32nan"u8;
-internal static readonly @string float32nan1ˢ = "float32nan1"u8;
-internal static readonly @string float32nan2ˢ = "float32nan2"u8;
-internal static readonly @string float32nan3ˢ = "float32nan3"u8;
-internal static readonly @string fixedStackIsNotPowerOf2ˢ = "FixedStack is not power-of-2"u8;
-internal static readonly @string assemblyChecksFailedˢ = "assembly checks failed"u8;
+internal static ref readonly @string badAˢ => ref badAˢᵇ;
+private static readonly @string badAˢᵇ = "bad a"u8;
+internal static ref readonly @string badBˢ => ref badBˢᵇ;
+private static readonly @string badBˢᵇ = "bad b"u8;
+internal static ref readonly @string badCˢ => ref badCˢᵇ;
+private static readonly @string badCˢᵇ = "bad c"u8;
+internal static ref readonly @string badDˢ => ref badDˢᵇ;
+private static readonly @string badDˢᵇ = "bad d"u8;
+internal static ref readonly @string badEˢ => ref badEˢᵇ;
+private static readonly @string badEˢᵇ = "bad e"u8;
+internal static ref readonly @string badFˢ => ref badFˢᵇ;
+private static readonly @string badFˢᵇ = "bad f"u8;
+internal static ref readonly @string badGˢ => ref badGˢᵇ;
+private static readonly @string badGˢᵇ = "bad g"u8;
+internal static ref readonly @string badHˢ => ref badHˢᵇ;
+private static readonly @string badHˢᵇ = "bad h"u8;
+internal static ref readonly @string badIˢ => ref badIˢᵇ;
+private static readonly @string badIˢᵇ = "bad i"u8;
+internal static ref readonly @string badJˢ => ref badJˢᵇ;
+private static readonly @string badJˢᵇ = "bad j"u8;
+internal static ref readonly @string badKˢ => ref badKˢᵇ;
+private static readonly @string badKˢᵇ = "bad k"u8;
+internal static ref readonly @string badLˢ => ref badLˢᵇ;
+private static readonly @string badLˢᵇ = "bad l"u8;
+internal static ref readonly @string badUnsafeSizeofX1ˢ => ref badUnsafeSizeofX1ˢᵇ;
+private static readonly @string badUnsafeSizeofX1ˢᵇ = "bad unsafe.Sizeof x1"u8;
+internal static ref readonly @string badOffsetofY1Yˢ => ref badOffsetofY1Yˢᵇ;
+private static readonly @string badOffsetofY1Yˢᵇ = "bad offsetof y1.y"u8;
+internal static ref readonly @string badUnsafeSizeofY1ˢ => ref badUnsafeSizeofY1ˢᵇ;
+private static readonly @string badUnsafeSizeofY1ˢᵇ = "bad unsafe.Sizeof y1"u8;
+internal static ref readonly @string cas1ˢ => ref cas1ˢᵇ;
+private static readonly @string cas1ˢᵇ = "cas1"u8;
+internal static ref readonly @string cas2ˢ => ref cas2ˢᵇ;
+private static readonly @string cas2ˢᵇ = "cas2"u8;
+internal static ref readonly @string cas3ˢ => ref cas3ˢᵇ;
+private static readonly @string cas3ˢᵇ = "cas3"u8;
+internal static ref readonly @string cas4ˢ => ref cas4ˢᵇ;
+private static readonly @string cas4ˢᵇ = "cas4"u8;
+internal static ref readonly @string cas5ˢ => ref cas5ˢᵇ;
+private static readonly @string cas5ˢᵇ = "cas5"u8;
+internal static ref readonly @string cas6ˢ => ref cas6ˢᵇ;
+private static readonly @string cas6ˢᵇ = "cas6"u8;
+internal static ref readonly @string atomicor8ˢ => ref atomicor8ˢᵇ;
+private static readonly @string atomicor8ˢᵇ = "atomicor8"u8;
+internal static ref readonly @string atomicand8ˢ => ref atomicand8ˢᵇ;
+private static readonly @string atomicand8ˢᵇ = "atomicand8"u8;
+internal static ref readonly @string float64nanˢ => ref float64nanˢᵇ;
+private static readonly @string float64nanˢᵇ = "float64nan"u8;
+internal static ref readonly @string float64nan1ˢ => ref float64nan1ˢᵇ;
+private static readonly @string float64nan1ˢᵇ = "float64nan1"u8;
+internal static ref readonly @string float64nan2ˢ => ref float64nan2ˢᵇ;
+private static readonly @string float64nan2ˢᵇ = "float64nan2"u8;
+internal static ref readonly @string float64nan3ˢ => ref float64nan3ˢᵇ;
+private static readonly @string float64nan3ˢᵇ = "float64nan3"u8;
+internal static ref readonly @string float32nanˢ => ref float32nanˢᵇ;
+private static readonly @string float32nanˢᵇ = "float32nan"u8;
+internal static ref readonly @string float32nan1ˢ => ref float32nan1ˢᵇ;
+private static readonly @string float32nan1ˢᵇ = "float32nan1"u8;
+internal static ref readonly @string float32nan2ˢ => ref float32nan2ˢᵇ;
+private static readonly @string float32nan2ˢᵇ = "float32nan2"u8;
+internal static ref readonly @string float32nan3ˢ => ref float32nan3ˢᵇ;
+private static readonly @string float32nan3ˢᵇ = "float32nan3"u8;
+internal static ref readonly @string fixedStackIsNotPowerOf2ˢ => ref fixedStackIsNotPowerOf2ˢᵇ;
+private static readonly @string fixedStackIsNotPowerOf2ˢᵇ = "FixedStack is not power-of-2"u8;
+internal static ref readonly @string assemblyChecksFailedˢ => ref assemblyChecksFailedˢᵇ;
+private static readonly @string assemblyChecksFailedˢᵇ = "assembly checks failed"u8;
 
 internal partial struct check_x1t /*dyn*/ {
     internal uint8 x;
@@ -199,23 +236,23 @@ internal partial struct check_y1t /*dyn*/ {
 }
 
 internal static void check() {
-    int8 a = default!;
-    uint8 b = default!;
-    int16 c = default!;
-    uint16 d = default!;
-    int32 e = default!;
-    uint32 f = default!;
-    int64 g = default!;
-    uint64 h = default!;
+    int8 a = default;
+    uint8 b = default;
+    int16 c = default;
+    uint16 d = default;
+    int32 e = default;
+    uint32 f = default;
+    int64 g = default;
+    uint64 h = default;
     ref var i = ref heap(new float32(), out var Ꮡi);
     ref var i1 = ref heap(new float32(), out var Ꮡi1);
     ref var j = ref heap(new float64(), out var Ꮡj);
     ref var j1 = ref heap(new float64(), out var Ꮡj1);
-    @unsafe.Pointer k = default!;
-    ж<uint16> l = default!;
+    @unsafe.Pointer k = default;
+    ж<uint16> l = default;
     ref var m = ref heap(new array<byte>(4), out var Ꮡm);
-    check_x1t x1 = default!;
-    check_y1t y1 = default!;
+    check_x1t x1 = default;
+    check_y1t y1 = default;
 
     if (/* unsafe.Sizeof(a) */ (uintptr)1 != 1) {
         @throw(badAˢ);
@@ -345,9 +382,9 @@ internal static void check() {
 
 partial struct dbgVar {
     internal @string name;
-    internal ж<int32> value;     // for variables that can only be set at startup
+    internal ж<int32> value;         // for variables that can only be set at startup
     internal ж<atomic.Int32> atomic; // for variables that can be changed during execution
-    internal int32 def;         // default value (ideally zero)
+    internal int32 def;              // default value (ideally zero)
 }
 
 // Holds variables parsed from GODEBUG env var,
@@ -415,42 +452,42 @@ partial struct debugᴛ1 /*dyn*/ {
 internal static readonly ж<debugᴛ1> Ꮡdebug = new StaticBox<debugᴛ1>(default(debugᴛ1));
 internal static ref debugᴛ1 debug => ref ((StaticBox<debugᴛ1>)Ꮡdebug).ValueSlot;
 
-internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
-    Ꮡ(new dbgVar(name: "adaptivestackstart"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡadaptivestackstart))),
-    Ꮡ(new dbgVar(name: "asyncpreemptoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡasyncpreemptoff))),
-    Ꮡ(new dbgVar(name: "asynctimerchan"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan))),
-    Ꮡ(new dbgVar(name: "cgocheck"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡcgocheck))),
-    Ꮡ(new dbgVar(name: "clobberfree"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡclobberfree))),
-    Ꮡ(new dbgVar(name: "containermaxprocs"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡcontainermaxprocs), def: 1)),
-    Ꮡ(new dbgVar(name: "dataindependenttiming"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdataindependenttiming))),
-    Ꮡ(new dbgVar(name: "decoratemappings"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdecoratemappings), def: 1)),
-    Ꮡ(new dbgVar(name: "disablethp"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdisablethp))),
-    Ꮡ(new dbgVar(name: "dontfreezetheworld"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡdontfreezetheworld))),
-    Ꮡ(new dbgVar(name: "checkfinalizers"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡcheckfinalizers))),
-    Ꮡ(new dbgVar(name: "efence"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡefence))),
-    Ꮡ(new dbgVar(name: "gccheckmark"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgccheckmark))),
-    Ꮡ(new dbgVar(name: "gcpacertrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgcpacertrace))),
-    Ꮡ(new dbgVar(name: "gcshrinkstackoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgcshrinkstackoff))),
-    Ꮡ(new dbgVar(name: "gcstoptheworld"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgcstoptheworld))),
-    Ꮡ(new dbgVar(name: "gctrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡgctrace))),
-    Ꮡ(new dbgVar(name: "harddecommit"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡharddecommit))),
-    Ꮡ(new dbgVar(name: "inittrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡinittrace))),
-    Ꮡ(new dbgVar(name: "invalidptr"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡinvalidptr))),
-    Ꮡ(new dbgVar(name: "madvdontneed"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡmadvdontneed))),
-    Ꮡ(new dbgVar(name: "panicnil"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡpanicnil))),
-    Ꮡ(new dbgVar(name: "profstackdepth"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡprofstackdepth), def: 128)),
-    Ꮡ(new dbgVar(name: "sbrk"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡsbrk))),
-    Ꮡ(new dbgVar(name: "scavtrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡscavtrace))),
-    Ꮡ(new dbgVar(name: "scheddetail"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡscheddetail))),
-    Ꮡ(new dbgVar(name: "schedtrace"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡschedtrace))),
-    Ꮡ(new dbgVar(name: "traceadvanceperiod"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtraceadvanceperiod))),
-    Ꮡ(new dbgVar(name: "traceallocfree"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡtraceallocfree))),
-    Ꮡ(new dbgVar(name: "tracecheckstackownership"u8, value: Ꮡdebug.of(debugᴛ1.ᏑtraceCheckStackOwnership))),
-    Ꮡ(new dbgVar(name: "tracebackancestors"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtracebackancestors))),
-    Ꮡ(new dbgVar(name: "tracebacklabels"u8, atomic: Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels), def: 0)),
-    Ꮡ(new dbgVar(name: "tracefpunwindoff"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡtracefpunwindoff))),
-    Ꮡ(new dbgVar(name: "updatemaxprocs"u8, value: Ꮡdebug.of(debugᴛ1.Ꮡupdatemaxprocs), def: 1))
-}.slice();
+internal static slice<ж<dbgVar>> dbgvars = slice<ж<dbgVar>>([
+    Ꮡ(new dbgVar(name: "adaptivestackstart", value: Ꮡdebug.of(debugᴛ1.Ꮡadaptivestackstart))),
+    Ꮡ(new dbgVar(name: "asyncpreemptoff", value: Ꮡdebug.of(debugᴛ1.Ꮡasyncpreemptoff))),
+    Ꮡ(new dbgVar(name: "asynctimerchan", atomic: Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan))),
+    Ꮡ(new dbgVar(name: "cgocheck", value: Ꮡdebug.of(debugᴛ1.Ꮡcgocheck))),
+    Ꮡ(new dbgVar(name: "clobberfree", value: Ꮡdebug.of(debugᴛ1.Ꮡclobberfree))),
+    Ꮡ(new dbgVar(name: "containermaxprocs", value: Ꮡdebug.of(debugᴛ1.Ꮡcontainermaxprocs), def: 1)),
+    Ꮡ(new dbgVar(name: "dataindependenttiming", value: Ꮡdebug.of(debugᴛ1.Ꮡdataindependenttiming))),
+    Ꮡ(new dbgVar(name: "decoratemappings", value: Ꮡdebug.of(debugᴛ1.Ꮡdecoratemappings), def: 1)),
+    Ꮡ(new dbgVar(name: "disablethp", value: Ꮡdebug.of(debugᴛ1.Ꮡdisablethp))),
+    Ꮡ(new dbgVar(name: "dontfreezetheworld", value: Ꮡdebug.of(debugᴛ1.Ꮡdontfreezetheworld))),
+    Ꮡ(new dbgVar(name: "checkfinalizers", value: Ꮡdebug.of(debugᴛ1.Ꮡcheckfinalizers))),
+    Ꮡ(new dbgVar(name: "efence", value: Ꮡdebug.of(debugᴛ1.Ꮡefence))),
+    Ꮡ(new dbgVar(name: "gccheckmark", value: Ꮡdebug.of(debugᴛ1.Ꮡgccheckmark))),
+    Ꮡ(new dbgVar(name: "gcpacertrace", value: Ꮡdebug.of(debugᴛ1.Ꮡgcpacertrace))),
+    Ꮡ(new dbgVar(name: "gcshrinkstackoff", value: Ꮡdebug.of(debugᴛ1.Ꮡgcshrinkstackoff))),
+    Ꮡ(new dbgVar(name: "gcstoptheworld", value: Ꮡdebug.of(debugᴛ1.Ꮡgcstoptheworld))),
+    Ꮡ(new dbgVar(name: "gctrace", value: Ꮡdebug.of(debugᴛ1.Ꮡgctrace))),
+    Ꮡ(new dbgVar(name: "harddecommit", value: Ꮡdebug.of(debugᴛ1.Ꮡharddecommit))),
+    Ꮡ(new dbgVar(name: "inittrace", value: Ꮡdebug.of(debugᴛ1.Ꮡinittrace))),
+    Ꮡ(new dbgVar(name: "invalidptr", value: Ꮡdebug.of(debugᴛ1.Ꮡinvalidptr))),
+    Ꮡ(new dbgVar(name: "madvdontneed", value: Ꮡdebug.of(debugᴛ1.Ꮡmadvdontneed))),
+    Ꮡ(new dbgVar(name: "panicnil", atomic: Ꮡdebug.of(debugᴛ1.Ꮡpanicnil))),
+    Ꮡ(new dbgVar(name: "profstackdepth", value: Ꮡdebug.of(debugᴛ1.Ꮡprofstackdepth), def: 128)),
+    Ꮡ(new dbgVar(name: "sbrk", value: Ꮡdebug.of(debugᴛ1.Ꮡsbrk))),
+    Ꮡ(new dbgVar(name: "scavtrace", value: Ꮡdebug.of(debugᴛ1.Ꮡscavtrace))),
+    Ꮡ(new dbgVar(name: "scheddetail", value: Ꮡdebug.of(debugᴛ1.Ꮡscheddetail))),
+    Ꮡ(new dbgVar(name: "schedtrace", value: Ꮡdebug.of(debugᴛ1.Ꮡschedtrace))),
+    Ꮡ(new dbgVar(name: "traceadvanceperiod", value: Ꮡdebug.of(debugᴛ1.Ꮡtraceadvanceperiod))),
+    Ꮡ(new dbgVar(name: "traceallocfree", atomic: Ꮡdebug.of(debugᴛ1.Ꮡtraceallocfree))),
+    Ꮡ(new dbgVar(name: "tracecheckstackownership", value: Ꮡdebug.of(debugᴛ1.ᏑtraceCheckStackOwnership))),
+    Ꮡ(new dbgVar(name: "tracebackancestors", value: Ꮡdebug.of(debugᴛ1.Ꮡtracebackancestors))),
+    Ꮡ(new dbgVar(name: "tracebacklabels", atomic: Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels), def: 0)),
+    Ꮡ(new dbgVar(name: "tracefpunwindoff", value: Ꮡdebug.of(debugᴛ1.Ꮡtracefpunwindoff))),
+    Ꮡ(new dbgVar(name: "updatemaxprocs", value: Ꮡdebug.of(debugᴛ1.Ꮡupdatemaxprocs), def: 1))
+]);
 
 internal static void parseRuntimeDebugVars(@string godebug) {
     // defaults
@@ -472,21 +509,20 @@ internal static void parseRuntimeDebugVars(@string godebug) {
 
     // apply runtime defaults, if any
     foreach (var (_, v) in dbgvars) {
-        if ((~v).def != 0) {
+        if (v.def != 0) {
             // Every var should have either v.value or v.atomic set.
-            if ((~v).value != nil){
-                (~v).value.Value = v.Value.def;
-            } else 
-            if ((~v).atomic != nil) {
-                (~v).atomic.Store((~v).def);
+            if (v.value != nil) {
+                v.value.Value = v.def;
+            } else if (v.atomic != nil) {
+                v.atomic.Store(v.def);
             }
         }
     }
     // apply compile-time GODEBUG settings
-    parsegodebug(godebugDefault, default!);
+    parsegodebug(godebugDefault, default);
 
     // apply environment settings
-    parsegodebug(godebug, default!);
+    parsegodebug(godebug, default);
 
     debug.malloc = (debug.inittrace | debug.sbrk | debug.checkfinalizers) != 0;
     debug.profstackdepth = min(debug.profstackdepth, (int32)(maxProfStackDepth));
@@ -510,7 +546,8 @@ internal static void parseRuntimeDebugVars(@string godebug) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gotracebackˢ = "GOTRACEBACK"u8;
+internal static ref readonly @string gotracebackˢ => ref gotracebackˢᵇ;
+private static readonly @string gotracebackˢᵇ = "GOTRACEBACK"u8;
 
 internal static void finishDebugVarsSetup() {
     var Δp = @new<@string>();
@@ -531,14 +568,15 @@ internal static void reparsedebugvars(@string env) {
     parsegodebug(godebugDefault, seen);
     // apply defaults for as-yet-unseen variables
     foreach (var (_, v) in dbgvars) {
-        if ((~v).atomic != nil && !seen[(~v).name]) {
-            (~v).atomic.Store(0);
+        if (v.atomic != nil && !seen[v.name]) {
+            v.atomic.Store(0);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cgocheck1ModeIsNoLongerˢ = "cgocheck > 1 mode is no longer supported at runtime. Use GOEXPERIMENT=cgocheck2 at build time instead."u8;
+internal static ref readonly @string cgocheck1ModeIsNoLongerˢ => ref cgocheck1ModeIsNoLongerˢᵇ;
+private static readonly @string cgocheck1ModeIsNoLongerˢᵇ = "cgocheck > 1 mode is no longer supported at runtime. Use GOEXPERIMENT=cgocheck2 at build time instead."u8;
 
 // parsegodebug parses the godebug string, updating variables listed in dbgvars.
 // If seen == nil, this is startup time and we process the string left to right
@@ -552,11 +590,11 @@ internal static readonly @string cgocheck1ModeIsNoLongerˢ = "cgocheck > 1 mode 
 // cleargodebug(seen) to reset any now-unset values back to their defaults.
 internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
     for (@string Δp = godebug; Δp != ""u8; ) {
-        @string field = default!;
-        if (seen == default!){
+        @string field = default;
+        if (seen == nil) {
             // startup: process left to right, overwriting older settings with newer
-            nint iΔ1 = bytealg.IndexByteString(Δp, (rune)',');
-            if (iΔ1 < 0){
+            nint iΔ1 = bytealg.IndexByteString(Δp, (byte)',');
+            if (iΔ1 < 0) {
                 (field, Δp) = (Δp, "");
             } else {
                 (field, Δp) = (Δp.slice(0, iΔ1), Δp.slice(iΔ1 + 1));
@@ -564,16 +602,16 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         } else {
             // incremental update: process right to left, updating and skipping seen
             nint iΔ2 = len(Δp) - 1;
-            while (iΔ2 >= 0 && Δp[iΔ2] != (rune)',') {
+            while (iΔ2 >= 0 && Δp[iΔ2] != ',') {
                 iΔ2--;
             }
-            if (iΔ2 < 0){
+            if (iΔ2 < 0) {
                 (Δp, field) = ("", Δp);
             } else {
                 (Δp, field) = (Δp.slice(0, iΔ2), Δp.slice(iΔ2 + 1));
             }
         }
-        nint i = bytealg.IndexByteString(field, (rune)'=');
+        nint i = bytealg.IndexByteString(field, (byte)'=');
         if (i < 0) {
             continue;
         }
@@ -582,29 +620,28 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
         if (seen[key]) {
             continue;
         }
-        if (seen != default!) {
+        if (seen != nil) {
             seen[key] = true;
         }
 
         // Update MemProfileRate directly here since it
         // is int, not int32, and should only be updated
         // if specified in GODEBUG.
-        if (seen == default! && key == "memprofilerate"u8){
+        if (seen == nil && key == "memprofilerate"u8) {
             {
-                var (n, err) = strconv.Atoi(value); if (err == default!) {
+                var (n, err) = strconv.Atoi(value); if (err == nil) {
                     MemProfileRate = n;
                 }
             }
         } else {
             foreach (var (_, v) in dbgvars) {
-                if ((~v).name == key) {
+                if (v.name == key) {
                     {
-                        var (n, err) = strconv.ParseInt(value, 10, 32); if (err == default!) {
-                            if (seen == default! && (~v).value != nil){
-                                (~v).value.Value = (int32)n;
-                            } else 
-                            if ((~v).atomic != nil) {
-                                (~v).atomic.Store((int32)n);
+                        var (n, err) = strconv.ParseInt(value, 10, 32); if (err == nil) {
+                            if (seen == nil && v.value != nil) {
+                                v.value.Value = (int32)n;
+                            } else if (v.atomic != nil) {
+                                v.atomic.Store((int32)n);
                             }
                         }
                     }
@@ -620,7 +657,7 @@ internal static void parsegodebug(@string godebug, map<@string, bool> seen) {
 
 //go:linkname setTraceback runtime/debug.SetTraceback
 internal static void setTraceback(@string level) {
-    uint32 t = default!;
+    uint32 t = default;
     var exprᴛ1 = level;
     var matchᴛ1 = false;
     if (exprᴛ1 == "none"u8) { matchᴛ1 = true;
@@ -651,7 +688,7 @@ internal static void setTraceback(@string level) {
     if (fallthrough || !matchᴛ1) { /* default: */
         t = tracebackAll;
         {
-            var (n, err) = strconv.Atoi(level); if (err == default! && n == (nint)(uint32)n) {
+            var (n, err) = strconv.Atoi(level); if (err == nil && n == (nint)(uint32)n) {
                 t |= (uint32)(((uint32)n << (int)(tracebackShift)));
             }
         }
@@ -706,11 +743,11 @@ internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks(
     var retᴷ = new stackAppend<slice<int32>>(moves: true);
 
     var modules = activeModules();
-    var sections = new @unsafe.Pointer[]{(@unsafe.Pointer)(~modules[0]).types}.slice();
-    var ret = new slice<int32>[]{(~modules[0]).typelinks}.slice();
+    var sections = slice<@unsafe.Pointer>([(@unsafe.Pointer)modules[0].types]);
+    var ret = slice<slice<int32>>([modules[0].typelinks]);
     foreach (var (_, md) in modules[1..]) {
-        sections = append(sectionsᴷ, sections, (@unsafe.Pointer)(~md).types);
-        ret = append(retᴷ, ret, (~md).typelinks);
+        sections = append(sectionsᴷ, sections, (@unsafe.Pointer)md.types);
+        ret = append(retᴷ, ret, md.typelinks);
     }
     sections = move2heap(sectionsᴷ, sections);
     ret = move2heap(retᴷ, ret);
@@ -784,7 +821,7 @@ internal static @unsafe.Pointer reflectlite_resolveTypeOff(@unsafe.Pointer Δrty
 //go:linkname reflect_addReflectOff reflect.addReflectOff
 public static int32 reflect_addReflectOff(@unsafe.Pointer ptr) {
     reflectOffsLock();
-    if (reflectOffs.m == default!) {
+    if (reflectOffs.m == nil) {
         reflectOffs.m = new map<int32, @unsafe.Pointer>();
         reflectOffs.minv = new map<@unsafe.Pointer, int32>();
         reflectOffs.next = -1;

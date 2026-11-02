@@ -15,41 +15,50 @@ using go.testing;
 partial class fs_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fooˢ = "foo"u8;
-private static readonly @string barˢ = "bar"u8;
-private static readonly @string dirParentlinkˢ = "dir/parentlink"u8;
-private static readonly @string barˢ2 = "../bar"u8;
-private static readonly @string dirLinkˢ = "dir/link"u8;
-private static readonly @string fileˢ = "file"u8;
-private static readonly @string dirˢ = "dir"u8;
-private static readonly @string linkˢ = "link"u8;
-private static readonly @string parentlinkˢ = "parentlink"u8;
+private static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
+private static ref readonly @string barˢ => ref barˢᵇ;
+private static readonly @string barˢᵇ = "bar"u8;
+private static ref readonly @string dirParentlinkˢ => ref dirParentlinkˢᵇ;
+private static readonly @string dirParentlinkˢᵇ = "dir/parentlink"u8;
+private static ref readonly @string barˢ2 => ref barˢ2ᵇ;
+private static readonly @string barˢ2ᵇ = "../bar"u8;
+private static ref readonly @string dirLinkˢ => ref dirLinkˢᵇ;
+private static readonly @string dirLinkˢᵇ = "dir/link"u8;
+private static ref readonly @string fileˢ => ref fileˢᵇ;
+private static readonly @string fileˢᵇ = "file"u8;
+private static ref readonly @string dirˢ => ref dirˢᵇ;
+private static readonly @string dirˢᵇ = "dir"u8;
+private static ref readonly @string linkˢ => ref linkˢᵇ;
+private static readonly @string linkˢᵇ = "link"u8;
+private static ref readonly @string parentlinkˢ => ref parentlinkˢᵇ;
+private static readonly @string parentlinkˢᵇ = "parentlink"u8;
 
-public static partial void TestReadLink(ж<testing.T> Ꮡt) {
+public static partial void TestReadLink(ж<testing.T> t) {
     var testFS = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["foo"u8] = Ꮡ(new fstest.MapFile(
+        ["foo"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("bar"u8),
             Mode: (fs.FileMode)(ModeSymlink | 511))),
-        ["bar"u8] = Ꮡ(new fstest.MapFile(
+        ["bar"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("Hello, World!\n"u8),
             Mode: 420)),
 
-        ["dir/parentlink"u8] = Ꮡ(new fstest.MapFile(
+        ["dir/parentlink"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("../bar"u8),
             Mode: (fs.FileMode)(ModeSymlink | 511))),
-        ["dir/link"u8] = Ꮡ(new fstest.MapFile(
+        ["dir/link"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("file"u8),
             Mode: (fs.FileMode)(ModeSymlink | 511))),
-        ["dir/file"u8] = Ꮡ(new fstest.MapFile(
+        ["dir/file"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("Hello, World!\n"u8),
             Mode: 420))
     });
 
     void check(fs.FS fsys, @string name, @string want) {
-        Ꮡt.Helper();
+        t.Helper();
         var (got, errΔ1) = ReadLink(fsys, name);
-        if (got != want || errΔ1 != default!) {
-            Ꮡt.Errorf("ReadLink(%q) = %q, %v; want %q, <nil>"u8, name, got, errΔ1, want);
+        if (got != want || errΔ1 != nil) {
+            t.Errorf("ReadLink(%q) = %q, %v; want %q, <nil>", name, got, errΔ1, want);
         }
     }
 
@@ -59,43 +68,43 @@ public static partial void TestReadLink(ж<testing.T> Ꮡt) {
 
     // Test that ReadLink on Sub works.
     var (sub, err) = Sub(new fstest_MapFSᴠFS(testFS), dirˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     check(sub, linkˢ, fileˢ);
     check(sub, parentlinkˢ, barˢ2);
 }
 
-public static partial void TestLstat(ж<testing.T> Ꮡt) {
+public static partial void TestLstat(ж<testing.T> t) {
     var testFS = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["foo"u8] = Ꮡ(new fstest.MapFile(
+        ["foo"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("bar"u8),
             Mode: (fs.FileMode)(ModeSymlink | 511))),
-        ["bar"u8] = Ꮡ(new fstest.MapFile(
+        ["bar"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("Hello, World!\n"u8),
             Mode: 420)),
 
-        ["dir/parentlink"u8] = Ꮡ(new fstest.MapFile(
+        ["dir/parentlink"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("../bar"u8),
             Mode: (fs.FileMode)(ModeSymlink | 511))),
-        ["dir/link"u8] = Ꮡ(new fstest.MapFile(
+        ["dir/link"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("file"u8),
             Mode: (fs.FileMode)(ModeSymlink | 511))),
-        ["dir/file"u8] = Ꮡ(new fstest.MapFile(
+        ["dir/file"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("Hello, World!\n"u8),
             Mode: 420))
     });
 
     void check(fs.FS fsys, @string name, fs.FileMode want) {
-        Ꮡt.Helper();
+        t.Helper();
         var (info, errΔ1) = Lstat(fsys, name);
-        fs.FileMode got = default!;
-        if (errΔ1 == default!) {
+        fs.FileMode got = default;
+        if (errΔ1 == nil) {
             got = info.Mode();
         }
-        if (got != want || errΔ1 != default!) {
-            Ꮡt.Errorf("Lstat(%q) = %v, %v; want %v, <nil>"u8, name, got, errΔ1, want);
+        if (got != want || errΔ1 != nil) {
+            t.Errorf("Lstat(%q) = %v, %v; want %v, <nil>", name, got, errΔ1, want);
         }
     }
 
@@ -104,8 +113,8 @@ public static partial void TestLstat(ж<testing.T> Ꮡt) {
 
     // Test that Lstat on Sub works.
     var (sub, err) = Sub(new fstest_MapFSᴠFS(testFS), dirˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     check(sub, linkˢ, (fs.FileMode)(ModeSymlink | 511));
 }

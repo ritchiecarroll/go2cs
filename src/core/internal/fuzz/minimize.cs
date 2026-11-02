@@ -8,7 +8,7 @@ using reflect = reflect_package;
 partial class fuzz_package {
 
 internal static bool isMinimizable(reflectꓸType t) {
-    return AreEqual(t, reflect.TypeOf((@string)""u8)) || AreEqual(t, reflect.TypeOf(slice<byte>(default!)));
+    return AreEqual(t, reflect.TypeOf((@string)""u8)) || AreEqual(t, reflect.TypeOf(slice<byte>(default)));
 }
 
 internal static void minimizeBytes(slice<byte> v, Func<slice<byte>, bool> @try, Func<bool> shouldStop) {

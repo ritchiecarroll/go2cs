@@ -54,12 +54,12 @@ internal static error read(slice<byte> b) {
             // than 256 bytes, it might get interrupted by a signal.
             continue;
         }
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         b = b.slice(n);
     }
-    return default!;
+    return default;
 }
 
 } // end sysrand_package

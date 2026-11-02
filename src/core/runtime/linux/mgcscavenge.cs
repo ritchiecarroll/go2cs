@@ -146,7 +146,7 @@ internal const uint16 scavChunkHiOccPages = /* uint16(scavChunkHiOccFrac * pallo
 
 // heapRetained returns an estimate of the current heap RSS.
 internal static uint64 heapRetained() {
-    return ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load();
+    return ᏑgcController.ᏑheapInUse.load() + ᏑgcController.ᏑheapFree.load();
 }
 
 // gcPaceScavenger updates the scavenger's pacing, particularly
@@ -174,13 +174,13 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
 
     // mappedReady is comparable to memoryLimit, and represents how much total memory
     // the Go runtime has committed now (estimated).
-    var mappedReady = ᏑgcController.of(gcControllerState.ᏑmappedReady).Load();
+    var mappedReady = ᏑgcController.ᏑmappedReady.Load();
 
     // If we're below the goal already indicate that we don't need the background
     // scavenger for the memory limit. This may seems worrisome at first, but note
     // that the allocator will assist the background scavenger in the face of a memory
     // limit, so we'll be safe even if we stop the scavenger when we shouldn't have.
-    if (mappedReady <= memoryLimitGoal){
+    if (mappedReady <= memoryLimitGoal) {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑmemoryLimitGoal).Store(~(uint64)0);
     } else {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑmemoryLimitGoal).Store(memoryLimitGoal);
@@ -224,7 +224,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // If we're already below our goal, or within one page of our goal, then indicate
     // that we don't need the background scavenger for maintaining a memory overhead
     // proportional to the heap goal.
-    if (heapRetainedNow <= gcPercentGoal || heapRetainedNow - gcPercentGoal < (uint64)physPageSize){
+    if (heapRetainedNow <= gcPercentGoal || heapRetainedNow - gcPercentGoal < (uint64)physPageSize) {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑgcPercentGoal).Store(~(uint64)0);
     } else {
         ᏑΔscavenge.of(Δscavengeᴛ1.ᏑgcPercentGoal).Store(gcPercentGoal);
@@ -334,7 +334,8 @@ partial struct scavengerState {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string scavengerStateIsAlreadyˢ = "scavenger state is already wired"u8;
+internal static ref readonly @string scavengerStateIsAlreadyˢ => ref scavengerStateIsAlreadyˢᵇ;
+private static readonly @string scavengerStateIsAlreadyˢᵇ = "scavenger state is already wired"u8;
 
 // init initializes a scavenger state and wires to the current G.
 //
@@ -377,10 +378,10 @@ internal static void init(this ж<scavengerState> Ꮡs) {
     s.sleepRatio = startingScavSleepRatio;
 
     // Install real functions if stubs aren't present.
-    if (s.scavenge == default!) {
+    if (s.scavenge == nil) {
         s.scavenge = (uintptr n) => {
             var start = nanotime();
-            var r = Ꮡmheap_.of(mheap.Ꮡpages).scavenge(n, default!, false);
+            var r = Ꮡmheap_.Ꮡpages.scavenge(n, default, false);
             var end = nanotime();
             if (start >= end) {
                 return (r, 0);
@@ -389,35 +390,36 @@ internal static void init(this ж<scavengerState> Ꮡs) {
             return (r, end - start);
         };
     }
-    if (s.shouldStop == default!) {
+    if (s.shouldStop == nil) {
         s.shouldStop = () => {
             // If background scavenging is disabled or if there's no work to do just stop.
-            return heapRetained() <= ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑgcPercentGoal).Load() && ᏑgcController.of(gcControllerState.ᏑmappedReady).Load() <= ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑmemoryLimitGoal).Load();
+            return heapRetained() <= ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑgcPercentGoal).Load() && ᏑgcController.ᏑmappedReady.Load() <= ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑmemoryLimitGoal).Load();
         };
     }
-    if (s.gomaxprocs == default!) {
+    if (s.gomaxprocs == nil) {
         s.gomaxprocs = () => gomaxprocs;
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string triedToParkScavengerFromˢ = "tried to park scavenger from another goroutine"u8;
+internal static ref readonly @string triedToParkScavengerFromˢ => ref triedToParkScavengerFromˢᵇ;
+private static readonly @string triedToParkScavengerFromˢᵇ = "tried to park scavenger from another goroutine"u8;
 
 // park parks the scavenger goroutine.
 internal static void park(this ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @lock(Ꮡs.of(scavengerState.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (getg() != s.g) {
         @throw(triedToParkScavengerFromˢ);
     }
     s.parked = true;
-    goparkunlock(Ꮡs.of(scavengerState.Ꮡlock), waitReasonGCScavengeWait, traceBlockSystemGoroutine, 2);
+    goparkunlock(Ꮡs.Ꮡlock, waitReasonGCScavengeWait, traceBlockSystemGoroutine, 2);
 }
 
 // ready signals to sysmon that the scavenger should be awoken.
 internal static void ready(this ж<scavengerState> Ꮡs) {
-    Ꮡs.of(scavengerState.ᏑsysmonWake).Store(1);
+    Ꮡs.ᏑsysmonWake.Store(1);
 }
 
 // wake immediately unparks the scavenger if necessary.
@@ -426,10 +428,10 @@ internal static void ready(this ж<scavengerState> Ꮡs) {
 internal static void wake(this ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @lock(Ꮡs.of(scavengerState.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (s.parked) {
         // Unset sysmonWake, since the scavenger is now being awoken.
-        Ꮡs.of(scavengerState.ᏑsysmonWake).Store(0);
+        Ꮡs.ᏑsysmonWake.Store(0);
 
         // s.parked is unset to prevent a double wake-up.
         s.parked = false;
@@ -444,11 +446,12 @@ internal static void wake(this ж<scavengerState> Ꮡs) {
         list.push(s.g);
         injectglist(Ꮡlist);
     }
-    unlock(Ꮡs.of(scavengerState.Ꮡlock));
+    unlock(Ꮡs.Ꮡlock);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string triedToSleepScavengerˢ = "tried to sleep scavenger from another goroutine"u8;
+internal static ref readonly @string triedToSleepScavengerˢ => ref triedToSleepScavengerˢᵇ;
+private static readonly @string triedToSleepScavengerˢᵇ = "tried to sleep scavenger from another goroutine"u8;
 
 // sleep puts the scavenger to sleep based on the amount of time that it worked
 // in nanoseconds.
@@ -460,7 +463,7 @@ internal static readonly @string triedToSleepScavengerˢ = "tried to sleep scave
 internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @lock(Ꮡs.of(scavengerState.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (getg() != s.g) {
         @throw(triedToSleepScavengerˢ);
     }
@@ -486,8 +489,8 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
     // of time we worked, and the sleepRatio.
     var sleepTime = (int64)(worked / s.sleepRatio);
 
-    int64 slept = default!;
-    if (s.sleepStub == default!){
+    int64 slept = default;
+    if (s.sleepStub == nil) {
         // Set the timer.
         //
         // This must happen here instead of inside gopark
@@ -498,21 +501,21 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
 
         // Mark ourselves as asleep and go to sleep.
         s.parked = true;
-        goparkunlock(Ꮡs.of(scavengerState.Ꮡlock), waitReasonSleep, traceBlockSleep, 2);
+        goparkunlock(Ꮡs.Ꮡlock, waitReasonSleep, traceBlockSleep, 2);
 
         // How long we actually slept for.
         slept = nanotime() - start;
 
-        @lock(Ꮡs.of(scavengerState.Ꮡlock));
+        @lock(Ꮡs.Ꮡlock);
         // Stop the timer here because s.wake is unable to do it for us.
         // We don't really care if we succeed in stopping the timer. One
         // reason we might fail is that we've already woken up, but the timer
         // might be in the process of firing on some other P; essentially we're
         // racing with it. That's totally OK. Double wake-ups are perfectly safe.
         s.timer.stop();
-        unlock(Ꮡs.of(scavengerState.Ꮡlock));
+        unlock(Ꮡs.Ꮡlock);
     } else {
-        unlock(Ꮡs.of(scavengerState.Ꮡlock));
+        unlock(Ꮡs.Ꮡlock);
         slept = s.sleepStub(sleepTime);
     }
 
@@ -521,7 +524,7 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
         // worked and slept aren't exact measures of time, but it's OK to be a bit
         // sloppy here. We're just hoping we're avoiding some transient bad behavior.
         var t = slept + (int64)worked;
-        if (t > s.controllerCooldown){
+        if (t > s.controllerCooldown) {
             s.controllerCooldown = 0;
         } else {
             s.controllerCooldown -= t;
@@ -542,7 +545,7 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
     var cpuFraction = worked / (((float64)slept + worked) * (float64)s.gomaxprocs());
 
     // Update the critSleepRatio, adjusting until we reach our ideal fraction.
-    bool ok = default!;
+    bool ok = default;
     (s.sleepRatio, ok) = s.sleepController.next(cpuFraction, idealFraction, (float64)slept + worked);
     if (!ok) {
         // The core assumption of the controller, that we can get a proportional
@@ -561,14 +564,16 @@ internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) {
 internal static void controllerFailed(this ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @lock(Ꮡs.of(scavengerState.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     s.printControllerReset = true;
-    unlock(Ꮡs.of(scavengerState.Ꮡlock));
+    unlock(Ꮡs.Ꮡlock);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string triedToRunScavengerFromˢ = "tried to run scavenger from another goroutine"u8;
-internal static readonly @string releasedLessThanOneˢ = "released less than one physical page of memory"u8;
+internal static ref readonly @string triedToRunScavengerFromˢ => ref triedToRunScavengerFromˢᵇ;
+private static readonly @string triedToRunScavengerFromˢᵇ = "tried to run scavenger from another goroutine"u8;
+internal static ref readonly @string releasedLessThanOneˢ => ref releasedLessThanOneˢᵇ;
+private static readonly @string releasedLessThanOneˢᵇ = "released less than one physical page of memory"u8;
 
 // run is the body of the main scavenging loop.
 //
@@ -577,15 +582,15 @@ internal static readonly @string releasedLessThanOneˢ = "released less than one
 //
 // Must be run on the scavenger goroutine.
 internal static (uintptr released, float64 worked) run(this ж<scavengerState> Ꮡs) {
-    uintptr released = default!;
-    float64 worked = default!;
+    uintptr released = default;
+    float64 worked = default;
     ref var s = ref Ꮡs.DerefOrNull();
 
-    @lock(Ꮡs.of(scavengerState.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (getg() != s.g) {
         @throw(triedToRunScavengerFromˢ);
     }
-    unlock(Ꮡs.of(scavengerState.Ꮡlock));
+    unlock(Ꮡs.Ꮡlock);
 
     while (worked < minScavWorkTime) {
         // If something from outside tells us to stop early, stop.
@@ -616,7 +621,7 @@ internal static (uintptr released, float64 worked) run(this ж<scavengerState> �
         // (determined empirically), and conservatively ignore the impact of huge pages
         // on timing.
         const float64 approxWorkedNSPerPhysicalPage = 10e3;
-        if (duration == 0){
+        if (duration == 0) {
             worked += approxWorkedNSPerPhysicalPage * (float64)(r / physPageSize);
         } else {
             // TODO(mknyszek): If duration is small compared to worked, it could be
@@ -659,13 +664,13 @@ internal static void bgscavenge(channel<nint> c) {
     c.ᐸꟷ(1);
     Ꮡscavenger.park();
 
-    while (ᐧ) {
+    for (;;) {
         var (released, workTime) = Ꮡscavenger.run();
         if (released == 0) {
             Ꮡscavenger.park();
             continue;
         }
-        Ꮡmheap_.of(mheap.Ꮡpages).of(pageAlloc.Ꮡscav).of(pageAlloc_scav.ᏑreleasedBg).Add(released);
+        Ꮡmheap_.Ꮡpages.Ꮡscav.of(pageAlloc_scav.ᏑreleasedBg).Add(released);
         Ꮡscavenger.sleep(workTime);
     }
 }
@@ -682,14 +687,14 @@ internal static void bgscavenge(channel<nint> c) {
 internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) {
     var released = (uintptr)0;
     while (released < nbytes) {
-        var (ci, pageIdx) = Ꮡp.of(pageAlloc.Ꮡscav).of(pageAlloc_scav.Ꮡindex).find(force);
+        var (ci, pageIdx) = Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).find(force);
         if (ci == 0) {
             break;
         }
         systemstack(() => {
             released += Ꮡp.Value.scavengeOne(ci, pageIdx, nbytes - released);
         });
-        if (shouldStop != default! && shouldStop()) {
+        if (shouldStop != nil && shouldStop()) {
             break;
         }
     }
@@ -704,19 +709,18 @@ internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<b
 //
 // scavenger.lock must be held.
 internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, bool forced) {
-    assertLockHeld(Ꮡscavenger.of(scavengerState.Ꮡlock));
+    assertLockHeld(Ꮡscavenger.Ꮡlock);
 
     printlock();
-    print((@string)"scav "u8,
-        releasedBg >> 10, (@string)" KiB work (bg), "u8,
-        releasedEager >> 10, (@string)" KiB work (eager), "u8,
-        ᏑgcController.of(gcControllerState.ᏑheapReleased).load() >> 10, (@string)" KiB now, "u8,
-        (ᏑgcController.of(gcControllerState.ᏑheapInUse).load() * 100) / heapRetained(), (@string)"% util"u8);
-    if (forced){
-        print((@string)" (forced)"u8);
-    } else 
-    if (scavenger.printControllerReset) {
-        print((@string)" [controller reset]"u8);
+    print((@string)"scav ",
+        releasedBg >> 10, (@string)" KiB work (bg), ",
+        releasedEager >> 10, (@string)" KiB work (eager), ",
+        ᏑgcController.ᏑheapReleased.load() >> 10, (@string)" KiB now, ",
+        (ᏑgcController.ᏑheapInUse.load() * 100) / heapRetained(), (@string)"% util");
+    if (forced) {
+        print((@string)" (forced)");
+    } else if (scavenger.printControllerReset) {
+        print((@string)" [controller reset]");
         scavenger.printControllerReset = false;
     }
     println();
@@ -787,13 +791,13 @@ internal static uintptr scavengeOne(this ref pageAlloc Δp, chunkIdx ci, nuint s
                 // Update global accounting only when not in test, otherwise
                 // the runtime's accounting will be wrong.
                 var nbytes = (int64)(npages * (nuint)pageSize);
-                ᏑgcController.of(gcControllerState.ᏑheapReleased).add(nbytes);
-                ᏑgcController.of(gcControllerState.ᏑheapFree).add(-nbytes);
+                ᏑgcController.ᏑheapReleased.add(nbytes);
+                ᏑgcController.ᏑheapFree.add(-nbytes);
 
-                var stats = Ꮡmemstats.of(mstats.ᏑheapStats).acquire();
-                atomic.Xaddint64(stats.of(heapStatsDelta.Ꮡcommitted), -nbytes);
-                atomic.Xaddint64(stats.of(heapStatsDelta.Ꮡreleased), nbytes);
-                Ꮡmemstats.of(mstats.ᏑheapStats).release();
+                var stats = Ꮡmemstats.ᏑheapStats.acquire();
+                atomic.Xaddint64(stats.Ꮡcommitted, -nbytes);
+                atomic.Xaddint64(stats.Ꮡreleased, nbytes);
+                Ꮡmemstats.ᏑheapStats.release();
             }
 
             // Relock the heap, because now we need to make these pages
@@ -808,7 +812,7 @@ internal static uintptr scavengeOne(this ref pageAlloc Δp, chunkIdx ci, nuint s
             Δp.update(addr, (uintptr)npages, true, false);
 
             // Mark the range as scavenged.
-            Δp.chunkOf(ci).of(pallocData.Ꮡscavenged).setRange(@base, npages);
+            Δp.chunkOf(ci).Ꮡscavenged.setRange(@base, npages);
             unlock(Δp.mheapLock);
 
             return (uintptr)npages * (uintptr)pageSize;
@@ -822,7 +826,8 @@ internal static uintptr scavengeOne(this ref pageAlloc Δp, chunkIdx ci, nuint s
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badMValueˢ = "bad m value"u8;
+internal static ref readonly @string badMValueˢ => ref badMValueˢᵇ;
+private static readonly @string badMValueˢᵇ = "bad m value"u8;
 
 // fillAligned returns x but with all zeroes in m-aligned
 // groups of m bits set to 1 if any bit in the group is non-zero.
@@ -898,8 +903,10 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string minMustBeANonZeroPowerOfˢ = "min must be a non-zero power of 2"u8;
-internal static readonly @string minTooLargeˢ = "min too large"u8;
+internal static ref readonly @string minMustBeANonZeroPowerOfˢ => ref minMustBeANonZeroPowerOfˢᵇ;
+private static readonly @string minMustBeANonZeroPowerOfˢᵇ = "min must be a non-zero power of 2"u8;
+internal static ref readonly @string minTooLargeˢ => ref minTooLargeˢᵇ;
+private static readonly @string minTooLargeˢᵇ = "min too large"u8;
 
 // findScavengeCandidate returns a start index and a size for this pallocData
 // segment which represents a contiguous region of free and unscavenged memory.
@@ -922,12 +929,11 @@ internal static readonly @string minTooLargeˢ = "min too large"u8;
 // to be equal to max. max is allowed to be less than min, in which case it is as if
 // max == min.
 internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
-    if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0){
-        print((@string)"runtime: min = "u8, minimum, (@string)"\n"u8);
+    if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0) {
+        print((@string)"runtime: min = ", minimum, (@string)"\n");
         @throw(minMustBeANonZeroPowerOfˢ);
-    } else 
-    if (minimum > maxPagesPerPhysPage) {
-        print((@string)"runtime: min = "u8, minimum, (@string)"\n"u8);
+    } else if (minimum > maxPagesPerPhysPage) {
+        print((@string)"runtime: min = ", minimum, (@string)"\n");
         @throw(minTooLargeˢ);
     }
     // max may not be min-aligned, so we might accidentally truncate to
@@ -935,7 +941,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     // To prevent this, align max up to a multiple of min (which is always
     // a power of 2). This also prevents max from ever being less than
     // min, unless it's zero, so handle that explicitly.
-    if (max == 0){
+    if (max == 0) {
         max = minimum;
     } else {
         max = alignUp(max, minimum);
@@ -962,7 +968,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     nuint z1 = (nuint)sys.LeadingZeros64(~x);
     nuint run = (nuint)0;
     nuint end = (nuint)i * 64 + (64 - z1);
-    if (x.Lsh(z1) != 0){
+    if (x.Lsh(z1) != 0) {
         // After shifting out z1 bits, we still have 1s,
         // so the run ends inside this word.
         run = (nuint)sys.LeadingZeros64(x.Lsh(z1));
@@ -1080,29 +1086,29 @@ partial struct scavengeIndex {
 // init initializes the scavengeIndex.
 //
 // Returns the amount added to sysStat.
-internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    Ꮡs.of(scavengeIndex.ᏑsearchAddrBg).Clear();
-    Ꮡs.of(scavengeIndex.ᏑsearchAddrForce).Clear();
+    Ꮡs.ᏑsearchAddrBg.Clear();
+    Ꮡs.ᏑsearchAddrForce.Clear();
     s.freeHWM = minOffAddr;
     s.test = test;
-    return s.sysInit(test, ᏑsysStat);
+    return s.sysInit(test, sysStat);
 }
 
 // sysGrow updates the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> ᏑsysStat) {
+internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     // Update minHeapIdx. Note that even if there's no mapping work to do,
     // we may still have a new, lower minimum heap address.
-    var minHeapIdx = Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Load();
+    var minHeapIdx = Ꮡs.ᏑminHeapIdx.Load();
     {
-        var baseIdx = (uintptr)(nuint)chunkIndex(@base); if (minHeapIdx == 0 || baseIdx < minHeapIdx) {
-            Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Store(baseIdx);
+        var baseIdx = (uintptr)chunkIndex(@base); if (minHeapIdx == 0 || baseIdx < minHeapIdx) {
+            Ꮡs.ᏑminHeapIdx.Store(baseIdx);
         }
     }
-    return Ꮡs.sysGrow(@base, limit, ᏑsysStat);
+    return Ꮡs.sysGrow(@base, limit, sysStat);
 }
 
 // find returns the highest chunk index that may contain pages available to scavenge.
@@ -1110,9 +1116,9 @@ internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr
 internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var cursor = Ꮡs.of(scavengeIndex.ᏑsearchAddrBg);
+    var cursor = Ꮡs.ᏑsearchAddrBg;
     if (force) {
-        cursor = Ꮡs.of(scavengeIndex.ᏑsearchAddrForce);
+        cursor = Ꮡs.ᏑsearchAddrForce;
     }
     var (searchAddr, marked) = cursor.Load();
     if (searchAddr == minOffAddr.addr()) {
@@ -1122,7 +1128,7 @@ internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) 
 
     // Starting from searchAddr's chunk, iterate until we find a chunk with pages to scavenge.
     var gen = s.gen;
-    chunkIdx min = (chunkIdx)(nuint)Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Load();
+    chunkIdx min = (chunkIdx)(nuint)Ꮡs.ᏑminHeapIdx.Load();
     chunkIdx start = chunkIndex(searchAddr);
     // N.B. We'll never map the 0'th chunk, so minHeapIdx ensures this loop overflow.
     for (chunkIdx i = start; i >= min; i--) {
@@ -1136,7 +1142,7 @@ internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) 
         }
         // Try to reduce searchAddr to newSearchAddr.
         var newSearchAddr = chunkBase(i) + (uintptr)pallocChunkBytes - (uintptr)pageSize;
-        if (marked){
+        if (marked) {
             // Attempt to be the first one to decrease the searchAddr
             // after an increase. If we fail, that means there was another
             // increase, or somebody else got to it before us. Either way,
@@ -1195,9 +1201,9 @@ internal static void free(this ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, 
     // find only ever decreases it. Since we only ever race with
     // decreases, even if the value we loaded is stale, the actual
     // value will never be larger.
-    var (searchAddr, _) = Ꮡs.of(scavengeIndex.ᏑsearchAddrForce).Load();
+    var (searchAddr, _) = Ꮡs.ᏑsearchAddrForce.Load();
     if ((new offAddr(searchAddr)).lessThan(new offAddr(addr))) {
-        Ꮡs.of(scavengeIndex.ᏑsearchAddrForce).StoreMarked(addr);
+        Ꮡs.ᏑsearchAddrForce.StoreMarked(addr);
     }
 }
 
@@ -1210,9 +1216,9 @@ internal static void nextGen(this ж<scavengeIndex> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.gen++;
-    var (searchAddr, _) = Ꮡs.of(scavengeIndex.ᏑsearchAddrBg).Load();
+    var (searchAddr, _) = Ꮡs.ᏑsearchAddrBg.Load();
     if ((new offAddr(searchAddr)).lessThan(s.freeHWM)) {
-        Ꮡs.of(scavengeIndex.ᏑsearchAddrBg).StoreMarked(s.freeHWM.addr());
+        Ꮡs.ᏑsearchAddrBg.StoreMarked(s.freeHWM.addr());
     }
     s.freeHWM = minOffAddr;
 }
@@ -1236,13 +1242,13 @@ partial struct atomicScavChunkData {
 
 // load loads and unpacks a scavChunkData.
 internal static scavChunkData load(this ж<atomicScavChunkData> Ꮡsc) {
-    return unpackScavChunkData(Ꮡsc.of(atomicScavChunkData.Ꮡvalue).Load());
+    return unpackScavChunkData(Ꮡsc.Ꮡvalue.Load());
 }
 
 // store packs and writes a new scavChunkData. store must be serialized
 // with other calls to store.
 internal static void store(this ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) {
-    Ꮡsc.of(atomicScavChunkData.Ꮡvalue).Store(ssc.pack());
+    Ꮡsc.Ꮡvalue.Store(ssc.pack());
 }
 
 // scavChunkData tracks information about a palloc chunk for
@@ -1281,7 +1287,7 @@ internal static scavChunkData unpackScavChunkData(uint64 sc) {
 
 // pack returns sc packed into a uint64.
 internal static uint64 pack(this scavChunkData sc) {
-    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)(uint8)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
+    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
 }
 
 // scavChunkHasFree indicates whether the chunk has anything left to
@@ -1343,12 +1349,13 @@ internal static bool shouldScavenge(this scavChunkData sc, uint32 currGen, bool 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tooManyPagesAllocatedInˢ = "too many pages allocated in chunk?"u8;
+internal static ref readonly @string tooManyPagesAllocatedInˢ => ref tooManyPagesAllocatedInˢᵇ;
+private static readonly @string tooManyPagesAllocatedInˢᵇ = "too many pages allocated in chunk?"u8;
 
 // alloc updates sc given that npages were allocated in the corresponding chunk.
 internal static void alloc(this ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse + npages > pallocChunkPages) {
-        print((@string)"runtime: inUse="u8, sc.inUse, (@string)" npages="u8, npages, (@string)"\n"u8);
+        print((@string)"runtime: inUse=", sc.inUse, (@string)" npages=", npages, (@string)"\n");
         @throw(tooManyPagesAllocatedInˢ);
     }
     if (sc.gen != newGen) {
@@ -1363,12 +1370,13 @@ internal static void alloc(this ref scavChunkData sc, nuint npages, uint32 newGe
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string allocatedPagesBelowZeroˢ = "allocated pages below zero?"u8;
+internal static ref readonly @string allocatedPagesBelowZeroˢ => ref allocatedPagesBelowZeroˢᵇ;
+private static readonly @string allocatedPagesBelowZeroˢᵇ = "allocated pages below zero?"u8;
 
 // free updates sc given that npages was freed in the corresponding chunk.
 internal static void free(this ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse < npages) {
-        print((@string)"runtime: inUse="u8, sc.inUse, (@string)" npages="u8, npages, (@string)"\n"u8);
+        print((@string)"runtime: inUse=", sc.inUse, (@string)" npages=", npages, (@string)"\n");
         @throw(allocatedPagesBelowZeroˢ);
     }
     if (sc.gen != newGen) {
@@ -1389,7 +1397,7 @@ partial struct piController {
 // PI controller state.
     internal float64 errIntegral; // Integral of the error from t=0 to now.
     // Error flags.
-    internal bool errOverflow; // Set if errIntegral ever overflowed.
+    internal bool errOverflow;   // Set if errIntegral ever overflowed.
     internal bool inputOverflow; // Set if an operation with the input overflowed.
 }
 
@@ -1419,10 +1427,9 @@ internal static (float64, bool) next(this ref piController c, float64 input, flo
         c.inputOverflow = true;
         return (c.min, false);
     }
-    if (output < c.min){
+    if (output < c.min) {
         output = c.min;
-    } else 
-    if (output > c.max) {
+    } else if (output > c.max) {
         output = c.max;
     }
 

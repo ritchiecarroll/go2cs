@@ -29,21 +29,22 @@ using static global::go.math.rand.rand_internal_test_package;
 
 partial class rand_test_package {
 
-internal static ж<bool> update = flag.Bool("update"u8, false, "update golden results for regression test"u8);
+internal static ж<bool> update = flag.Bool("update", false, "update golden results for regression test");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string truncatedˢ = "truncated"u8;
-internal static readonly @string regressTestGoˢ = "regress_test.go"u8;
+internal static ref readonly @string truncatedˢ => ref truncatedˢᵇ;
+private static readonly @string truncatedˢᵇ = "truncated"u8;
+internal static ref readonly @string regressTestGoˢ => ref regressTestGoˢᵇ;
+private static readonly @string regressTestGoˢᵇ = "regress_test.go"u8;
 
-public static void TestRegress(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestRegress(ж<testing.T> t) {
     var argsᴷ = new stackAppend<reflectꓸValue>();
 
-    slice<int32> int32s = new int32[]{1, 10, 32, (int32)(1 << 20), (1 << 20) + 1, 1000000000, (int32)(1 << 30), (int32)(2147483648L - 2), (int32)(2147483648L - 1)}.slice();
-    slice<uint32> uint32s = new uint32[]{1, 10, 32, (uint32)1 << 20, (1 << 20) + 1, 1000000000, (uint32)1 << 30, (uint32)(2147483648L - 2), (uint32)(2147483648L - 1), unchecked((uint32)(4294967294UL)), unchecked((uint32)(4294967295UL))}.slice();
-    slice<int64> int64s = new int64[]{1, 10, 32, (int64)1 << 20, (1 << 20) + 1, 1000000000, (int64)1 << 30, 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L}.slice();
-    slice<uint64> uint64s = new uint64[]{1, 10, 32, (uint64)1 << 20, (1 << 20) + 1, 1000000000, (uint64)1 << 30, (uint64)(2147483648L - 2), (uint64)(2147483648L - 1), 1000000000000000000UL, (uint64)1 << 60, 9223372036854775806UL, 9223372036854775807UL, 18446744073709551614UL, 18446744073709551615UL}.slice();
-    slice<nint> permSizes = new nint[]{0, 1, 5, 8, 9, 10, 16}.slice();
+    slice<int32> int32s = slice<int32>([1, 10, 32, (int32)(1 << 20), (1 << 20) + 1, 1000000000, (int32)(1 << 30), (int32)(2147483648L - 2), (int32)(2147483648L - 1)]);
+    slice<uint32> uint32s = slice<uint32>([1, 10, 32, (uint32)1 << 20, (1 << 20) + 1, 1000000000, (uint32)1 << 30, (uint32)(2147483648L - 2), (uint32)(2147483648L - 1), unchecked((uint32)(4294967294UL)), unchecked((uint32)(4294967295UL))]);
+    slice<int64> int64s = slice<int64>([1, 10, 32, (int64)1 << 20, (1 << 20) + 1, 1000000000, (int64)1 << 30, 2147483648L - 2, 2147483648L - 1, 1000000000000000000L, 1152921504606846976L, 9223372036854775806L, 9223372036854775807L]);
+    slice<uint64> uint64s = slice<uint64>([1, 10, 32, (uint64)1 << 20, (1 << 20) + 1, 1000000000, (uint64)1 << 30, (uint64)(2147483648L - 2), (uint64)(2147483648L - 1), 1000000000000000000UL, (uint64)1 << 60, 9223372036854775806UL, 9223372036854775807UL, 18446744073709551614UL, 18446744073709551615UL]);
+    slice<nint> permSizes = slice<nint>([0, 1, 5, 8, 9, 10, 16]);
 
     nint n = reflect.TypeOf(New(new rand.PCGжSource(NewPCG(1, 2))).OrTypedNil()).NumMethod();
     nint p = 0;
@@ -64,33 +65,36 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
             continue;
         }
         for (nint repeat = 0; repeat < 20; repeat++) {
-            slice<reflectꓸValue> args = default!;
-            @string argstr = default!;
+            slice<reflectꓸValue> args = default;
+            @string argstr = default;
             if (mt.NumIn() == 1) {
-                any x = default!;
-                var exprᴛ1 = mt.In(0).Kind();
-                if (exprᴛ1 == reflect.ΔInt) {
-                    do {
-                        if (m.Name == "Perm"u8) {
-                            x = permSizes[repeat % len(permSizes)];
-                            break;
-                        }
-                        var big = int64s[repeat % len(int64s)];
-                        if ((int64)(nint)big != big) {
-                            // On 32-bit machine.
-                            // Consume an Int64 like on a 64-bit machine,
-                            // to keep the golden data the same on different architectures.
-                            r.Int64N(big);
-                            if (update.Value) {
-                                Ꮡt.Fatalf("must run -update on 64-bit machine"u8);
-                            }
-                            p++;
-                            goto continueᴛ2;
-                        }
-                        x = (nint)big;
-                    } while (false);
+                any x = default;
+                switch (mt.In(0).Kind()) {
+                default: {
+                    t.Fatalf("unexpected argument type for r.%s", m.Name);
+                    break;
                 }
-                else if (exprᴛ1 == reflect.ΔUint) {
+                case var ᴛ when ᴛ == reflect.ΔInt: {
+                    if (m.Name == "Perm"u8) {
+                        x = permSizes[repeat % len(permSizes)];
+                        break;
+                    }
+                    var big = int64s[repeat % len(int64s)];
+                    if ((int64)(nint)big != big) {
+                        // On 32-bit machine.
+                        // Consume an Int64 like on a 64-bit machine,
+                        // to keep the golden data the same on different architectures.
+                        r.Int64N(big);
+                        if (update.Value) {
+                            t.Fatalf("must run -update on 64-bit machine");
+                        }
+                        p++;
+                        continue;
+                    }
+                    x = (nint)big;
+                    break;
+                }
+                case var ᴛ when ᴛ == reflect.ΔUint: {
                     if (m.Name == "Uint"u8) {
                         continue;
                     }
@@ -98,33 +102,35 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
                     if ((uint64)(nuint)big != big) {
                         r.Uint64N(big); // what would happen on 64-bit machine, to keep stream in sync
                         if (update.Value) {
-                            Ꮡt.Fatalf("must run -update on 64-bit machine"u8);
+                            t.Fatalf("must run -update on 64-bit machine");
                         }
                         p++;
                         continue;
                     }
                     x = (nuint)big;
+                    break;
                 }
-                else if (exprᴛ1 == reflect.Int32) {
+                case var ᴛ when ᴛ == reflect.Int32: {
                     x = int32s[repeat % len(int32s)];
+                    break;
                 }
-                else if (exprᴛ1 == reflect.Int64) {
+                case var ᴛ when ᴛ == reflect.Int64: {
                     x = int64s[repeat % len(int64s)];
+                    break;
                 }
-                else if (exprᴛ1 == reflect.Uint32) {
+                case var ᴛ when ᴛ == reflect.Uint32: {
                     x = uint32s[repeat % len(uint32s)];
+                    break;
                 }
-                else if (exprᴛ1 == reflect.Uint64) {
+                case var ᴛ when ᴛ == reflect.Uint64: {
                     x = uint64s[repeat % len(uint64s)];
-                }
-                else { /* default: */
-                    Ꮡt.Fatalf("unexpected argument type for r.%s"u8, m.Name);
-                }
+                    break;
+                }}
                 argstr = fmt.Sprint(x);
                 args = append(argsᴷ, args, reflect.ValueOf(x));
             }
 
-            any @out = default!;
+            any @out = default;
             @out = mv.Call(args)[0].Interface();
             if (m.Name == "Int"u8 || m.Name == "IntN"u8) {
                 @out = (int64)(@out._<nint>());
@@ -132,22 +138,20 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
             if (m.Name == "Uint"u8 || m.Name == "UintN"u8) {
                 @out = (uint64)(@out._<nuint>());
             }
-            if (update.Value){
-                @string val = default!;
+            if (update.Value) {
+                @string val = default;
                 var big = (int64)(1152921504606846976L);
-                if ((int64)(nint)big != big && (m.Name == "Int"u8 || m.Name == "IntN"u8 || m.Name == "Uint"u8 || m.Name == "UintN"u8)){
+                if ((int64)(nint)big != big && (m.Name == "Int"u8 || m.Name == "IntN"u8 || m.Name == "Uint"u8 || m.Name == "UintN"u8)) {
                     // 32-bit machine cannot print 64-bit results
                     val = truncatedˢ;
-                } else 
-                if (reflect.TypeOf(@out).Kind() == reflect.ΔSlice){
+                } else if (reflect.TypeOf(@out).Kind() == reflect.ΔSlice) {
                     val = fmt.Sprintf("%#v"u8, @out);
                 } else {
                     val = fmt.Sprintf("%T(%v)"u8, @out, @out);
                 }
                 fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t%s, // %s(%s)\n"u8, val, m.Name, argstr);
-            } else 
-            if (p >= len(regressGolden)){
-                Ꮡt.Errorf("r.%s(%s) = %v, missing golden value"u8, m.Name, argstr, @out);
+            } else if (p >= len(regressGolden)) {
+                t.Errorf("r.%s(%s) = %v, missing golden value", m.Name, argstr, @out);
             } else {
                 var want = regressGolden[p];
                 if (m.Name == "Int"u8) {
@@ -157,29 +161,27 @@ public static void TestRegress(ж<testing.T> Ꮡt) {
                     want = (uint64)(nuint)(want._<uint64>());
                 }
                 if (!reflect.DeepEqual(@out, want)) {
-                    Ꮡt.Errorf("r.%s(%s) = %v, want %v"u8, m.Name, argstr, @out, want);
+                    t.Errorf("r.%s(%s) = %v, want %v", m.Name, argstr, @out, want);
                 }
             }
             p++;
-continueᴛ2:;
         }
     }
     if (update.Value) {
-        replace(Ꮡt, regressTestGoˢ, buf.Bytes());
+        replace(t, regressTestGoˢ, buf.Bytes());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object updateNotGivenˢ = (@string)"-update not given"u8;
-internal static readonly @string exampleTestGoˢ = "example_test.go"u8;
+internal static ref readonly @string exampleTestGoˢ => ref exampleTestGoˢᵇ;
+private static readonly @string exampleTestGoˢᵇ = "example_test.go"u8;
 
-public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
+public static partial void TestUpdateExample(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (!update.Value) {
-            Ꮡt.Skip(updateNotGivenˢ);
+            t.Skip(updateNotGivenˢ);
         }
 
         var oldStdout = os.Stdout;
@@ -189,8 +191,8 @@ public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var (r, w, err) = os.Pipe();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
@@ -206,19 +208,19 @@ public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
             wʗ2.Close();
         });
         (var @out, err) = io.ReadAll(new rand_test_package.os_FileжReader(r));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// Output:\n"u8);
-        foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
+        foreach (var (_, line) in strings.Split((@string)@out, "\n")) {
             if (line != ""u8) {
                 fmt.Fprintf(new rand_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// %s\n"u8, line);
             }
         }
 
-        replace(Ꮡt, exampleTestGoˢ, buf.Bytes());
+        replace(t, exampleTestGoˢ, buf.Bytes());
 
         // Exit so that Example_rand cannot fail.
         fmt.Printf("UPDATED; ignore non-zero exit status\n"u8);
@@ -238,103 +240,103 @@ public static partial void TestUpdateExample(ж<testing.T> Ꮡt) {
 // Replace searches file for an exact match for the text of the first line,
 // finds the closing brace, and then substitutes new for what used to be in the file.
 // This lets us update the regressGolden table during go test -update.
-internal static void replace(ж<testing.T> Ꮡt, @string @file, slice<byte> @new) {
+internal static void replace(ж<testing.T> t, @string @file, slice<byte> @new) {
     var (first, _, _) = bytes.Cut(@new, slice<byte>("\n"u8));
-    first = append(appendꓸꓸꓸ(slice<byte>("\n"u8), first), (byte)((rune)'\n'));
+    first = append(appendꓸꓸꓸ(slice<byte>("\n"u8), first), (byte)'\n');
     var (data, err) = os.ReadFile(@file);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     nint i = bytes.Index(data, first);
     if (i < 0) {
-        Ꮡt.Fatalf("cannot find %q in %s"u8, first, @file);
+        t.Fatalf("cannot find %q in %s", first, @file);
     }
     nint j = bytes.Index(data.slice(i + 1), slice<byte>("\n}\n"u8));
     if (j < 0) {
-        Ꮡt.Fatalf("cannot find end in %s"u8, @file);
+        t.Fatalf("cannot find end in %s", @file);
     }
     data = appendꓸꓸꓸ(appendꓸꓸꓸ(data.slice(0, i + 1, i + 1), @new), data.slice(i + 1 + j + 1));
     (data, err) = format.Source(data);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        var errΔ1 = os.WriteFile(@file, data, 438); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = os.WriteFile(@file, data, 438); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 }
 
-internal static slice<any> regressGolden = new any[]{
-    (float64)0.5931317151369719D, // ExpFloat64()
-    (float64)0.0680034588807843D, // ExpFloat64()
+internal static slice<any> regressGolden = slice<any>([
+    (float64)0.5931317151369719D,   // ExpFloat64()
+    (float64)0.0680034588807843D,   // ExpFloat64()
     (float64)0.036496967459790364D, // ExpFloat64()
-    (float64)2.460335459645379D, // ExpFloat64()
-    (float64)1.5792300208419903D, // ExpFloat64()
-    (float64)0.9149501499404387D, // ExpFloat64()
-    (float64)0.43463410545541104D, // ExpFloat64()
-    (float64)0.5513632046504593D, // ExpFloat64()
-    (float64)0.7426404617374481D, // ExpFloat64()
-    (float64)1.2334925132631804D, // ExpFloat64()
-    (float64)0.892529142200442D, // ExpFloat64()
-    (float64)0.21508763681487764D, // ExpFloat64()
-    (float64)1.0208588200798545D, // ExpFloat64()
-    (float64)0.7650739736831382D, // ExpFloat64()
-    (float64)0.7772788529257701D, // ExpFloat64()
-    (float64)1.102732861281323D, // ExpFloat64()
-    (float64)0.6982243043885805D, // ExpFloat64()
-    (float64)0.4981788638202421D, // ExpFloat64()
-    (float64)0.15806532306947937D, // ExpFloat64()
-    (float64)0.9419163802459202D, // ExpFloat64()
+    (float64)2.460335459645379D,    // ExpFloat64()
+    (float64)1.5792300208419903D,   // ExpFloat64()
+    (float64)0.9149501499404387D,   // ExpFloat64()
+    (float64)0.43463410545541104D,  // ExpFloat64()
+    (float64)0.5513632046504593D,   // ExpFloat64()
+    (float64)0.7426404617374481D,   // ExpFloat64()
+    (float64)1.2334925132631804D,   // ExpFloat64()
+    (float64)0.892529142200442D,    // ExpFloat64()
+    (float64)0.21508763681487764D,  // ExpFloat64()
+    (float64)1.0208588200798545D,   // ExpFloat64()
+    (float64)0.7650739736831382D,   // ExpFloat64()
+    (float64)0.7772788529257701D,   // ExpFloat64()
+    (float64)1.102732861281323D,    // ExpFloat64()
+    (float64)0.6982243043885805D,   // ExpFloat64()
+    (float64)0.4981788638202421D,   // ExpFloat64()
+    (float64)0.15806532306947937D,  // ExpFloat64()
+    (float64)0.9419163802459202D,   // ExpFloat64()
 
-    (float32)0.95955694F, // Float32()
-    (float32)0.8076733F, // Float32()
-    (float32)0.8135684F, // Float32()
-    (float32)0.92872405F, // Float32()
-    (float32)0.97472525F, // Float32()
-    (float32)0.5485458F, // Float32()
-    (float32)0.97740936F, // Float32()
+    (float32)0.95955694F,  // Float32()
+    (float32)0.8076733F,   // Float32()
+    (float32)0.8135684F,   // Float32()
+    (float32)0.92872405F,  // Float32()
+    (float32)0.97472525F,  // Float32()
+    (float32)0.5485458F,   // Float32()
+    (float32)0.97740936F,  // Float32()
     (float32)0.042272687F, // Float32()
-    (float32)0.99663067F, // Float32()
+    (float32)0.99663067F,  // Float32()
     (float32)0.035181105F, // Float32()
-    (float32)0.45059562F, // Float32()
-    (float32)0.86597633F, // Float32()
-    (float32)0.8954844F, // Float32()
+    (float32)0.45059562F,  // Float32()
+    (float32)0.86597633F,  // Float32()
+    (float32)0.8954844F,   // Float32()
     (float32)0.090798736F, // Float32()
-    (float32)0.46218646F, // Float32()
-    (float32)0.5955118F, // Float32()
-    (float32)0.08985227F, // Float32()
-    (float32)0.19820237F, // Float32()
-    (float32)0.7443699F, // Float32()
-    (float32)0.56461F, // Float32()
+    (float32)0.46218646F,  // Float32()
+    (float32)0.5955118F,   // Float32()
+    (float32)0.08985227F,  // Float32()
+    (float32)0.19820237F,  // Float32()
+    (float32)0.7443699F,   // Float32()
+    (float32)0.56461F,     // Float32()
 
-    (float64)0.6764556596678251D, // Float64()
-    (float64)0.4613862177205994D, // Float64()
-    (float64)0.5085473976760264D, // Float64()
-    (float64)0.4297927436037299D, // Float64()
-    (float64)0.797802349388613D, // Float64()
-    (float64)0.3883664855410056D, // Float64()
-    (float64)0.8192750264193612D, // Float64()
-    (float64)0.3381816951746133D, // Float64()
-    (float64)0.9730458047755973D, // Float64()
-    (float64)0.281449117585586D, // Float64()
-    (float64)0.6047654075331631D, // Float64()
-    (float64)0.9278107175107462D, // Float64()
+    (float64)0.6764556596678251D,  // Float64()
+    (float64)0.4613862177205994D,  // Float64()
+    (float64)0.5085473976760264D,  // Float64()
+    (float64)0.4297927436037299D,  // Float64()
+    (float64)0.797802349388613D,   // Float64()
+    (float64)0.3883664855410056D,  // Float64()
+    (float64)0.8192750264193612D,  // Float64()
+    (float64)0.3381816951746133D,  // Float64()
+    (float64)0.9730458047755973D,  // Float64()
+    (float64)0.281449117585586D,   // Float64()
+    (float64)0.6047654075331631D,  // Float64()
+    (float64)0.9278107175107462D,  // Float64()
     (float64)0.16387541502137226D, // Float64()
-    (float64)0.7263900707339023D, // Float64()
-    (float64)0.6974917552729882D, // Float64()
-    (float64)0.7640946923790318D, // Float64()
-    (float64)0.7188183661358182D, // Float64()
-    (float64)0.5856191500346635D, // Float64()
-    (float64)0.9549597149363428D, // Float64()
-    (float64)0.5168804691962643D, // Float64()
+    (float64)0.7263900707339023D,  // Float64()
+    (float64)0.6974917552729882D,  // Float64()
+    (float64)0.7640946923790318D,  // Float64()
+    (float64)0.7188183661358182D,  // Float64()
+    (float64)0.5856191500346635D,  // Float64()
+    (float64)0.9549597149363428D,  // Float64()
+    (float64)0.5168804691962643D,  // Float64()
 
     (int64)4969059760275911952L, // Int()
     (int64)2147869220224756844L, // Int()
     (int64)5246770554000605320L, // Int()
     (int64)5471241176507662746L, // Int()
     (int64)4321634407747778896L, // Int()
-    (int64)760102831717374652L, // Int()
+    (int64)760102831717374652L,  // Int()
     (int64)9221744211007427193L, // Int()
     (int64)8289669384274456462L, // Int()
     (int64)2449715415482412441L, // Int()
@@ -346,7 +348,7 @@ internal static slice<any> regressGolden = new any[]{
     (int64)7311121042813227358L, // Int()
     (int64)5231057920893523323L, // Int()
     (int64)4257872588489500903L, // Int()
-    (int64)158397175702351138L, // Int()
+    (int64)158397175702351138L,  // Int()
     (int64)1350674201389090105L, // Int()
     (int64)6093522341581845358L, // Int()
 
@@ -354,50 +356,50 @@ internal static slice<any> regressGolden = new any[]{
     (int32)1323786710, // Int32()
     (int32)1684546306, // Int32()
     (int32)1710678126, // Int32()
-    (int32)503104460, // Int32()
-    (int32)88487615, // Int32()
+    (int32)503104460,  // Int32()
+    (int32)88487615,   // Int32()
     (int32)1073552320, // Int32()
-    (int32)965044529, // Int32()
-    (int32)285184408, // Int32()
-    (int32)394559696, // Int32()
+    (int32)965044529,  // Int32()
+    (int32)285184408,  // Int32()
+    (int32)394559696,  // Int32()
     (int32)1421454622, // Int32()
-    (int32)955177040, // Int32()
+    (int32)955177040,  // Int32()
     (int32)2020777787, // Int32()
-    (int32)260808523, // Int32()
-    (int32)851126509, // Int32()
+    (int32)260808523,  // Int32()
+    (int32)851126509,  // Int32()
     (int32)1682717115, // Int32()
     (int32)1569423431, // Int32()
     (int32)1092181682, // Int32()
-    (int32)157239171, // Int32()
-    (int32)709379364, // Int32()
+    (int32)157239171,  // Int32()
+    (int32)709379364,  // Int32()
 
-    (int32)0, // Int32N(1)
-    (int32)6, // Int32N(10)
-    (int32)8, // Int32N(32)
-    (int32)704922, // Int32N(1048576)
-    (int32)245656, // Int32N(1048577)
-    (int32)41205257, // Int32N(1000000000)
-    (int32)43831929, // Int32N(1073741824)
-    (int32)965044528, // Int32N(2147483646)
-    (int32)285184408, // Int32N(2147483647)
-    (int32)0, // Int32N(1)
-    (int32)6, // Int32N(10)
-    (int32)10, // Int32N(32)
-    (int32)283579, // Int32N(1048576)
-    (int32)127348, // Int32N(1048577)
-    (int32)396336665, // Int32N(1000000000)
-    (int32)911873403, // Int32N(1073741824)
+    (int32)0,          // Int32N(1)
+    (int32)6,          // Int32N(10)
+    (int32)8,          // Int32N(32)
+    (int32)704922,     // Int32N(1048576)
+    (int32)245656,     // Int32N(1048577)
+    (int32)41205257,   // Int32N(1000000000)
+    (int32)43831929,   // Int32N(1073741824)
+    (int32)965044528,  // Int32N(2147483646)
+    (int32)285184408,  // Int32N(2147483647)
+    (int32)0,          // Int32N(1)
+    (int32)6,          // Int32N(10)
+    (int32)10,         // Int32N(32)
+    (int32)283579,     // Int32N(1048576)
+    (int32)127348,     // Int32N(1048577)
+    (int32)396336665,  // Int32N(1000000000)
+    (int32)911873403,  // Int32N(1073741824)
     (int32)1569423430, // Int32N(2147483646)
     (int32)1092181681, // Int32N(2147483647)
-    (int32)0, // Int32N(1)
-    (int32)3, // Int32N(10)
+    (int32)0,          // Int32N(1)
+    (int32)3,          // Int32N(10)
 
     (int64)4969059760275911952L, // Int64()
     (int64)2147869220224756844L, // Int64()
     (int64)5246770554000605320L, // Int64()
     (int64)5471241176507662746L, // Int64()
     (int64)4321634407747778896L, // Int64()
-    (int64)760102831717374652L, // Int64()
+    (int64)760102831717374652L,  // Int64()
     (int64)9221744211007427193L, // Int64()
     (int64)8289669384274456462L, // Int64()
     (int64)2449715415482412441L, // Int64()
@@ -409,219 +411,219 @@ internal static slice<any> regressGolden = new any[]{
     (int64)7311121042813227358L, // Int64()
     (int64)5231057920893523323L, // Int64()
     (int64)4257872588489500903L, // Int64()
-    (int64)158397175702351138L, // Int64()
+    (int64)158397175702351138L,  // Int64()
     (int64)1350674201389090105L, // Int64()
     (int64)6093522341581845358L, // Int64()
 
-    (int64)0, // Int64N(1)
-    (int64)6, // Int64N(10)
-    (int64)8, // Int64N(32)
-    (int64)704922, // Int64N(1048576)
-    (int64)245656, // Int64N(1048577)
-    (int64)41205257, // Int64N(1000000000)
-    (int64)43831929, // Int64N(1073741824)
-    (int64)965044528, // Int64N(2147483646)
-    (int64)285184408, // Int64N(2147483647)
-    (int64)183731176326946086L, // Int64N(1000000000000000000)
-    (int64)680987186633600239L, // Int64N(1152921504606846976)
+    (int64)0,                    // Int64N(1)
+    (int64)6,                    // Int64N(10)
+    (int64)8,                    // Int64N(32)
+    (int64)704922,               // Int64N(1048576)
+    (int64)245656,               // Int64N(1048577)
+    (int64)41205257,             // Int64N(1000000000)
+    (int64)43831929,             // Int64N(1073741824)
+    (int64)965044528,            // Int64N(2147483646)
+    (int64)285184408,            // Int64N(2147483647)
+    (int64)183731176326946086L,  // Int64N(1000000000000000000)
+    (int64)680987186633600239L,  // Int64N(1152921504606846976)
     (int64)4102454148908803108L, // Int64N(9223372036854775806)
     (int64)8679174511200971228L, // Int64N(9223372036854775807)
-    (int64)0, // Int64N(1)
-    (int64)3, // Int64N(10)
-    (int64)27, // Int64N(32)
-    (int64)665831, // Int64N(1048576)
-    (int64)533292, // Int64N(1048577)
-    (int64)73220195, // Int64N(1000000000)
-    (int64)686060398, // Int64N(1073741824)
+    (int64)0,                    // Int64N(1)
+    (int64)3,                    // Int64N(10)
+    (int64)27,                   // Int64N(32)
+    (int64)665831,               // Int64N(1048576)
+    (int64)533292,               // Int64N(1048577)
+    (int64)73220195,             // Int64N(1000000000)
+    (int64)686060398,            // Int64N(1073741824)
 
-    (int64)0, // IntN(1)
-    (int64)6, // IntN(10)
-    (int64)8, // IntN(32)
-    (int64)704922, // IntN(1048576)
-    (int64)245656, // IntN(1048577)
-    (int64)41205257, // IntN(1000000000)
-    (int64)43831929, // IntN(1073741824)
-    (int64)965044528, // IntN(2147483646)
-    (int64)285184408, // IntN(2147483647)
-    (int64)183731176326946086L, // IntN(1000000000000000000)
-    (int64)680987186633600239L, // IntN(1152921504606846976)
+    (int64)0,                    // IntN(1)
+    (int64)6,                    // IntN(10)
+    (int64)8,                    // IntN(32)
+    (int64)704922,               // IntN(1048576)
+    (int64)245656,               // IntN(1048577)
+    (int64)41205257,             // IntN(1000000000)
+    (int64)43831929,             // IntN(1073741824)
+    (int64)965044528,            // IntN(2147483646)
+    (int64)285184408,            // IntN(2147483647)
+    (int64)183731176326946086L,  // IntN(1000000000000000000)
+    (int64)680987186633600239L,  // IntN(1152921504606846976)
     (int64)4102454148908803108L, // IntN(9223372036854775806)
     (int64)8679174511200971228L, // IntN(9223372036854775807)
-    (int64)0, // IntN(1)
-    (int64)3, // IntN(10)
-    (int64)27, // IntN(32)
-    (int64)665831, // IntN(1048576)
-    (int64)533292, // IntN(1048577)
-    (int64)73220195, // IntN(1000000000)
-    (int64)686060398, // IntN(1073741824)
+    (int64)0,                    // IntN(1)
+    (int64)3,                    // IntN(10)
+    (int64)27,                   // IntN(32)
+    (int64)665831,               // IntN(1048576)
+    (int64)533292,               // IntN(1048577)
+    (int64)73220195,             // IntN(1000000000)
+    (int64)686060398,            // IntN(1073741824)
 
-    (float64)0.37944549835531083D, // NormFloat64()
-    (float64)0.07473804659119399D, // NormFloat64()
-    (float64)0.20006841200604142D, // NormFloat64()
-    (float64)(-1.1253144115495104D), // NormFloat64()
-    (float64)(-0.4005883316435388D), // NormFloat64()
-    (float64)(-3.0853771402394736D), // NormFloat64()
-    (float64)1.932330243076978D, // NormFloat64()
-    (float64)1.726131393719264D, // NormFloat64()
+    (float64)0.37944549835531083D,    // NormFloat64()
+    (float64)0.07473804659119399D,    // NormFloat64()
+    (float64)0.20006841200604142D,    // NormFloat64()
+    (float64)(-1.1253144115495104D),  // NormFloat64()
+    (float64)(-0.4005883316435388D),  // NormFloat64()
+    (float64)(-3.0853771402394736D),  // NormFloat64()
+    (float64)1.932330243076978D,      // NormFloat64()
+    (float64)1.726131393719264D,      // NormFloat64()
     (float64)(-0.11707238034168332D), // NormFloat64()
-    (float64)(-0.9303318111676635D), // NormFloat64()
+    (float64)(-0.9303318111676635D),  // NormFloat64()
     (float64)(-0.04750789419852852D), // NormFloat64()
-    (float64)0.22248301107582735D, // NormFloat64()
-    (float64)(-1.83630520614272D), // NormFloat64()
-    (float64)0.7259521217919809D, // NormFloat64()
-    (float64)0.8806882871913041D, // NormFloat64()
-    (float64)(-1.5022903484270484D), // NormFloat64()
-    (float64)0.5972577266810571D, // NormFloat64()
-    (float64)1.5631937339973658D, // NormFloat64()
-    (float64)(-0.3841235370075905D), // NormFloat64()
-    (float64)(-0.2967295854430667D), // NormFloat64()
+    (float64)0.22248301107582735D,    // NormFloat64()
+    (float64)(-1.83630520614272D),    // NormFloat64()
+    (float64)0.7259521217919809D,     // NormFloat64()
+    (float64)0.8806882871913041D,     // NormFloat64()
+    (float64)(-1.5022903484270484D),  // NormFloat64()
+    (float64)0.5972577266810571D,     // NormFloat64()
+    (float64)1.5631937339973658D,     // NormFloat64()
+    (float64)(-0.3841235370075905D),  // NormFloat64()
+    (float64)(-0.2967295854430667D),  // NormFloat64()
 
-    new nint[]{}.slice(), // Perm(0)
-    new nint[]{0}.slice(), // Perm(1)
-    new nint[]{1, 4, 2, 0, 3}.slice(), // Perm(5)
-    new nint[]{4, 3, 6, 1, 5, 2, 7, 0}.slice(), // Perm(8)
-    new nint[]{6, 5, 1, 8, 7, 2, 0, 3, 4}.slice(), // Perm(9)
-    new nint[]{9, 4, 2, 5, 6, 8, 1, 7, 0, 3}.slice(), // Perm(10)
-    new nint[]{5, 9, 3, 1, 4, 2, 10, 7, 15, 11, 0, 14, 13, 8, 6, 12}.slice(), // Perm(16)
-    new nint[]{}.slice(), // Perm(0)
-    new nint[]{0}.slice(), // Perm(1)
-    new nint[]{4, 2, 1, 3, 0}.slice(), // Perm(5)
-    new nint[]{0, 2, 3, 1, 5, 4, 6, 7}.slice(), // Perm(8)
-    new nint[]{2, 0, 8, 3, 4, 7, 6, 5, 1}.slice(), // Perm(9)
-    new nint[]{0, 6, 5, 3, 8, 4, 1, 2, 9, 7}.slice(), // Perm(10)
-    new nint[]{9, 14, 4, 11, 13, 8, 0, 6, 2, 12, 3, 7, 1, 10, 5, 15}.slice(), // Perm(16)
-    new nint[]{}.slice(), // Perm(0)
-    new nint[]{0}.slice(), // Perm(1)
-    new nint[]{2, 4, 0, 3, 1}.slice(), // Perm(5)
-    new nint[]{3, 2, 1, 0, 7, 5, 4, 6}.slice(), // Perm(8)
-    new nint[]{1, 3, 4, 5, 0, 2, 7, 8, 6}.slice(), // Perm(9)
-    new nint[]{1, 8, 4, 7, 2, 6, 5, 9, 0, 3}.slice(), // Perm(10)
+    slice<nint>([]),                             // Perm(0)
+    slice<nint>([0]),                            // Perm(1)
+    slice<nint>([1, 4, 2, 0, 3]),                // Perm(5)
+    slice<nint>([4, 3, 6, 1, 5, 2, 7, 0]),       // Perm(8)
+    slice<nint>([6, 5, 1, 8, 7, 2, 0, 3, 4]),    // Perm(9)
+    slice<nint>([9, 4, 2, 5, 6, 8, 1, 7, 0, 3]), // Perm(10)
+    slice<nint>([5, 9, 3, 1, 4, 2, 10, 7, 15, 11, 0, 14, 13, 8, 6, 12]), // Perm(16)
+    slice<nint>([]),                             // Perm(0)
+    slice<nint>([0]),                            // Perm(1)
+    slice<nint>([4, 2, 1, 3, 0]),                // Perm(5)
+    slice<nint>([0, 2, 3, 1, 5, 4, 6, 7]),       // Perm(8)
+    slice<nint>([2, 0, 8, 3, 4, 7, 6, 5, 1]),    // Perm(9)
+    slice<nint>([0, 6, 5, 3, 8, 4, 1, 2, 9, 7]), // Perm(10)
+    slice<nint>([9, 14, 4, 11, 13, 8, 0, 6, 2, 12, 3, 7, 1, 10, 5, 15]), // Perm(16)
+    slice<nint>([]),                             // Perm(0)
+    slice<nint>([0]),                            // Perm(1)
+    slice<nint>([2, 4, 0, 3, 1]),                // Perm(5)
+    slice<nint>([3, 2, 1, 0, 7, 5, 4, 6]),       // Perm(8)
+    slice<nint>([1, 3, 4, 5, 0, 2, 7, 8, 6]),    // Perm(9)
+    slice<nint>([1, 8, 4, 7, 2, 6, 5, 9, 0, 3]), // Perm(10)
 
     (uint64)14192431797130687760UL, // Uint()
     (uint64)11371241257079532652UL, // Uint()
     (uint64)14470142590855381128UL, // Uint()
     (uint64)14694613213362438554UL, // Uint()
-    (uint64)4321634407747778896UL, // Uint()
-    (uint64)760102831717374652UL, // Uint()
-    (uint64)9221744211007427193UL, // Uint()
-    (uint64)8289669384274456462UL, // Uint()
-    (uint64)2449715415482412441UL, // Uint()
-    (uint64)3389241988064777392UL, // Uint()
+    (uint64)4321634407747778896UL,  // Uint()
+    (uint64)760102831717374652UL,   // Uint()
+    (uint64)9221744211007427193UL,  // Uint()
+    (uint64)8289669384274456462UL,  // Uint()
+    (uint64)2449715415482412441UL,  // Uint()
+    (uint64)3389241988064777392UL,  // Uint()
     (uint64)12210202232702069999UL, // Uint()
-    (uint64)8204908297817606218UL, // Uint()
+    (uint64)8204908297817606218UL,  // Uint()
     (uint64)17358349022401942459UL, // Uint()
-    (uint64)2240328155279531677UL, // Uint()
-    (uint64)7311121042813227358UL, // Uint()
+    (uint64)2240328155279531677UL,  // Uint()
+    (uint64)7311121042813227358UL,  // Uint()
     (uint64)14454429957748299131UL, // Uint()
     (uint64)13481244625344276711UL, // Uint()
-    (uint64)9381769212557126946UL, // Uint()
-    (uint64)1350674201389090105UL, // Uint()
-    (uint64)6093522341581845358UL, // Uint()
+    (uint64)9381769212557126946UL,  // Uint()
+    (uint64)1350674201389090105UL,  // Uint()
+    (uint64)6093522341581845358UL,  // Uint()
 
     (uint32)3304433030U, // Uint32()
     (uint32)2647573421U, // Uint32()
     (uint32)3369092613U, // Uint32()
     (uint32)3421356252U, // Uint32()
-    (uint32)1006208920, // Uint32()
-    (uint32)176975231, // Uint32()
-    (uint32)2147104640, // Uint32()
-    (uint32)1930089058, // Uint32()
-    (uint32)570368816, // Uint32()
-    (uint32)789119393, // Uint32()
+    (uint32)1006208920,  // Uint32()
+    (uint32)176975231,   // Uint32()
+    (uint32)2147104640,  // Uint32()
+    (uint32)1930089058,  // Uint32()
+    (uint32)570368816,   // Uint32()
+    (uint32)789119393,   // Uint32()
     (uint32)2842909244U, // Uint32()
-    (uint32)1910354080, // Uint32()
+    (uint32)1910354080,  // Uint32()
     (uint32)4041555575U, // Uint32()
-    (uint32)521617046, // Uint32()
-    (uint32)1702253018, // Uint32()
+    (uint32)521617046,   // Uint32()
+    (uint32)1702253018,  // Uint32()
     (uint32)3365434230U, // Uint32()
     (uint32)3138846863U, // Uint32()
     (uint32)2184363364U, // Uint32()
-    (uint32)314478343, // Uint32()
-    (uint32)1418758728, // Uint32()
+    (uint32)314478343,   // Uint32()
+    (uint32)1418758728,  // Uint32()
 
-    (uint32)0, // Uint32N(1)
-    (uint32)6, // Uint32N(10)
-    (uint32)8, // Uint32N(32)
-    (uint32)704922, // Uint32N(1048576)
-    (uint32)245656, // Uint32N(1048577)
-    (uint32)41205257, // Uint32N(1000000000)
-    (uint32)43831929, // Uint32N(1073741824)
-    (uint32)965044528, // Uint32N(2147483646)
-    (uint32)285184408, // Uint32N(2147483647)
-    (uint32)789119393, // Uint32N(4294967294)
+    (uint32)0,           // Uint32N(1)
+    (uint32)6,           // Uint32N(10)
+    (uint32)8,           // Uint32N(32)
+    (uint32)704922,      // Uint32N(1048576)
+    (uint32)245656,      // Uint32N(1048577)
+    (uint32)41205257,    // Uint32N(1000000000)
+    (uint32)43831929,    // Uint32N(1073741824)
+    (uint32)965044528,   // Uint32N(2147483646)
+    (uint32)285184408,   // Uint32N(2147483647)
+    (uint32)789119393,   // Uint32N(4294967294)
     (uint32)2842909244U, // Uint32N(4294967295)
-    (uint32)0, // Uint32N(1)
-    (uint32)9, // Uint32N(10)
-    (uint32)29, // Uint32N(32)
-    (uint32)266590, // Uint32N(1048576)
-    (uint32)821640, // Uint32N(1048577)
-    (uint32)730819735, // Uint32N(1000000000)
-    (uint32)522841378, // Uint32N(1073741824)
-    (uint32)157239171, // Uint32N(2147483646)
-    (uint32)709379364, // Uint32N(2147483647)
+    (uint32)0,           // Uint32N(1)
+    (uint32)9,           // Uint32N(10)
+    (uint32)29,          // Uint32N(32)
+    (uint32)266590,      // Uint32N(1048576)
+    (uint32)821640,      // Uint32N(1048577)
+    (uint32)730819735,   // Uint32N(1000000000)
+    (uint32)522841378,   // Uint32N(1073741824)
+    (uint32)157239171,   // Uint32N(2147483646)
+    (uint32)709379364,   // Uint32N(2147483647)
 
     (uint64)14192431797130687760UL, // Uint64()
     (uint64)11371241257079532652UL, // Uint64()
     (uint64)14470142590855381128UL, // Uint64()
     (uint64)14694613213362438554UL, // Uint64()
-    (uint64)4321634407747778896UL, // Uint64()
-    (uint64)760102831717374652UL, // Uint64()
-    (uint64)9221744211007427193UL, // Uint64()
-    (uint64)8289669384274456462UL, // Uint64()
-    (uint64)2449715415482412441UL, // Uint64()
-    (uint64)3389241988064777392UL, // Uint64()
+    (uint64)4321634407747778896UL,  // Uint64()
+    (uint64)760102831717374652UL,   // Uint64()
+    (uint64)9221744211007427193UL,  // Uint64()
+    (uint64)8289669384274456462UL,  // Uint64()
+    (uint64)2449715415482412441UL,  // Uint64()
+    (uint64)3389241988064777392UL,  // Uint64()
     (uint64)12210202232702069999UL, // Uint64()
-    (uint64)8204908297817606218UL, // Uint64()
+    (uint64)8204908297817606218UL,  // Uint64()
     (uint64)17358349022401942459UL, // Uint64()
-    (uint64)2240328155279531677UL, // Uint64()
-    (uint64)7311121042813227358UL, // Uint64()
+    (uint64)2240328155279531677UL,  // Uint64()
+    (uint64)7311121042813227358UL,  // Uint64()
     (uint64)14454429957748299131UL, // Uint64()
     (uint64)13481244625344276711UL, // Uint64()
-    (uint64)9381769212557126946UL, // Uint64()
-    (uint64)1350674201389090105UL, // Uint64()
-    (uint64)6093522341581845358UL, // Uint64()
+    (uint64)9381769212557126946UL,  // Uint64()
+    (uint64)1350674201389090105UL,  // Uint64()
+    (uint64)6093522341581845358UL,  // Uint64()
 
-    (uint64)0, // Uint64N(1)
-    (uint64)6, // Uint64N(10)
-    (uint64)8, // Uint64N(32)
-    (uint64)704922, // Uint64N(1048576)
-    (uint64)245656, // Uint64N(1048577)
-    (uint64)41205257, // Uint64N(1000000000)
-    (uint64)43831929, // Uint64N(1073741824)
-    (uint64)965044528, // Uint64N(2147483646)
-    (uint64)285184408, // Uint64N(2147483647)
-    (uint64)183731176326946086UL, // Uint64N(1000000000000000000)
-    (uint64)680987186633600239UL, // Uint64N(1152921504606846976)
+    (uint64)0,                     // Uint64N(1)
+    (uint64)6,                     // Uint64N(10)
+    (uint64)8,                     // Uint64N(32)
+    (uint64)704922,                // Uint64N(1048576)
+    (uint64)245656,                // Uint64N(1048577)
+    (uint64)41205257,              // Uint64N(1000000000)
+    (uint64)43831929,              // Uint64N(1073741824)
+    (uint64)965044528,             // Uint64N(2147483646)
+    (uint64)285184408,             // Uint64N(2147483647)
+    (uint64)183731176326946086UL,  // Uint64N(1000000000000000000)
+    (uint64)680987186633600239UL,  // Uint64N(1152921504606846976)
     (uint64)4102454148908803108UL, // Uint64N(9223372036854775806)
     (uint64)8679174511200971228UL, // Uint64N(9223372036854775807)
     (uint64)2240328155279531676UL, // Uint64N(18446744073709551614)
     (uint64)7311121042813227357UL, // Uint64N(18446744073709551615)
-    (uint64)0, // Uint64N(1)
-    (uint64)7, // Uint64N(10)
-    (uint64)2, // Uint64N(32)
-    (uint64)312633, // Uint64N(1048576)
-    (uint64)346376, // Uint64N(1048577)
+    (uint64)0,                     // Uint64N(1)
+    (uint64)7,                     // Uint64N(10)
+    (uint64)2,                     // Uint64N(32)
+    (uint64)312633,                // Uint64N(1048576)
+    (uint64)346376,                // Uint64N(1048577)
 
-    (uint64)0, // UintN(1)
-    (uint64)6, // UintN(10)
-    (uint64)8, // UintN(32)
-    (uint64)704922, // UintN(1048576)
-    (uint64)245656, // UintN(1048577)
-    (uint64)41205257, // UintN(1000000000)
-    (uint64)43831929, // UintN(1073741824)
-    (uint64)965044528, // UintN(2147483646)
-    (uint64)285184408, // UintN(2147483647)
-    (uint64)183731176326946086UL, // UintN(1000000000000000000)
-    (uint64)680987186633600239UL, // UintN(1152921504606846976)
+    (uint64)0,                     // UintN(1)
+    (uint64)6,                     // UintN(10)
+    (uint64)8,                     // UintN(32)
+    (uint64)704922,                // UintN(1048576)
+    (uint64)245656,                // UintN(1048577)
+    (uint64)41205257,              // UintN(1000000000)
+    (uint64)43831929,              // UintN(1073741824)
+    (uint64)965044528,             // UintN(2147483646)
+    (uint64)285184408,             // UintN(2147483647)
+    (uint64)183731176326946086UL,  // UintN(1000000000000000000)
+    (uint64)680987186633600239UL,  // UintN(1152921504606846976)
     (uint64)4102454148908803108UL, // UintN(9223372036854775806)
     (uint64)8679174511200971228UL, // UintN(9223372036854775807)
     (uint64)2240328155279531676UL, // UintN(18446744073709551614)
     (uint64)7311121042813227357UL, // UintN(18446744073709551615)
-    (uint64)0, // UintN(1)
-    (uint64)7, // UintN(10)
-    (uint64)2, // UintN(32)
-    (uint64)312633, // UintN(1048576)
-    (uint64)346376 // UintN(1048577)
-}.slice();
+    (uint64)0,                     // UintN(1)
+    (uint64)7,                     // UintN(10)
+    (uint64)2,                     // UintN(32)
+    (uint64)312633,                // UintN(1048576)
+    (uint64)346376                 // UintN(1048577)
+]);
 
 } // end rand_test_package

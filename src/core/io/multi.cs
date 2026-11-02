@@ -20,15 +20,15 @@ partial struct multiReader {
 }
 
 internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     while (len(mr.readers) > 0) {
         // Optimization to flatten nested multiReaders (Issue 13558).
         if (len(mr.readers) == 1) {
             {
                 var (r, ok) = mr.readers[0]._<ж<multiReader>>(ᐧ); if (ok) {
-                    mr.readers = r.Value.readers;
+                    mr.readers = r.readers;
                     continue;
                 }
             }
@@ -37,13 +37,13 @@ internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p)
         if (AreEqual(err, EOF)) {
             // Use eofReader instead of nil to avoid nil panic
             // after performing flatten (Issue 18232).
-            mr.readers[0] = new eofReader(nil); // permit earlier GC
+            mr.readers[0] = new eofReader(); // permit earlier GC
             mr.readers = mr.readers[1..];
         }
         if (n > 0 || !AreEqual(err, EOF)) {
             if (AreEqual(err, EOF) && len(mr.readers) > 0) {
                 // Don't return EOF yet. More readers remain.
-                err = default!;
+                err = default;
             }
             return (n, err);
         }
@@ -56,27 +56,27 @@ internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w
 }
 
 internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) {
-    int64 sum = default!;
-    error err = default!;
+    int64 sum = default;
+    error err = default;
 
     foreach (var (i, r) in mr.readers) {
-        int64 n = default!;
+        int64 n = default;
         {
-            var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok){ // reuse buffer with nested multiReaders
+            var (subMr, ok) = r._<ж<multiReader>>(ᐧ); if (ok) { // reuse buffer with nested multiReaders
                 (n, err) = subMr.writeToWithBuffer(w, buf);
             } else {
                 (n, err) = copyBuffer(w, r, buf);
             }
         }
         sum += n;
-        if (err != default!) {
+        if (err != nil) {
             mr.readers = mr.readers.slice(i); // permit resume / retry after error
             return (sum, err);
         }
-        mr.readers[i] = default!; // permit early GC
+        mr.readers[i] = default; // permit early GC
     }
-    mr.readers = default!;
-    return (sum, default!);
+    mr.readers = default;
+    return (sum, default);
 }
 
 internal static WriterTo _ᴛ2ʗ = new multiReaderжWriterTo(((ж<multiReader>)nil));
@@ -98,12 +98,12 @@ partial struct multiWriter {
 }
 
 internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     foreach (var (_, w) in t.writers) {
         (n, err) = w.Write(p);
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         if (n != len(p)) {
@@ -111,28 +111,28 @@ internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p)
             return (n, err);
         }
     }
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static StringWriter _ᴛ3ʗ = new multiWriterжStringWriter(((ж<multiWriter>)nil));
 
 internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    slice<byte> p = default!;             // lazily initialized if/when needed
+    slice<byte> p = default; // lazily initialized if/when needed
     foreach (var (_, w) in t.writers) {
         {
-            var (sw, ok) = w._<StringWriter>(ᐧ); if (ok){
+            var (sw, ok) = w._<StringWriter>(ᐧ); if (ok) {
                 (n, err) = sw.WriteString(s);
             } else {
-                if (p == default!) {
+                if (p == nil) {
                     p = slice<byte>(s);
                 }
                 (n, err) = w.Write(p);
             }
         }
-        if (err != default!) {
+        if (err != nil) {
             return (n, err);
         }
         if (n != len(s)) {
@@ -140,7 +140,7 @@ internal static (nint n, error err) WriteString(this ref multiWriter t, @string 
             return (n, err);
         }
     }
-    return (len(s), default!);
+    return (len(s), default);
 }
 
 // MultiWriter creates a writer that duplicates its writes to all the
@@ -155,8 +155,8 @@ public static Writer MultiWriter(params ꓸꓸꓸWriter writersʗp) {
     var allWriters = new slice<Writer>(0, len(writers));
     foreach (var (_, w) in writers) {
         {
-            var (mw, ok) = w._<ж<multiWriter>>(ᐧ); if (ok){
-                allWriters = appendꓸꓸꓸ(allWriters, (~mw).writers);
+            var (mw, ok) = w._<ж<multiWriter>>(ᐧ); if (ok) {
+                allWriters = appendꓸꓸꓸ(allWriters, mw.writers);
             } else {
                 allWriters = append(allWriters, w);
             }

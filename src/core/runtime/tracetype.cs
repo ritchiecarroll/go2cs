@@ -13,7 +13,6 @@ using @internal.runtime;
 using @internal.trace;
 using atomic = @internal.runtime.atomic_package;
 
-[GoFieldAccess(typeof(abi.Type))]
 partial class runtime_package {
 
 // traceTypeTable maps types to unique uint32 ids.
@@ -33,7 +32,7 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
         return 0;
     }
     // Insert the pointer to the type itself.
-    var (id, _) = Ꮡt.of(traceTypeTable.Ꮡtab).put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(typ))), goarch.PtrSize);
+    var (id, _) = Ꮡt.Ꮡtab.put((uintptr)noescape(@unsafe.Pointer.FromBox(Ꮡ(typ))), goarch.PtrSize);
     System.GC.KeepAlive(Ꮡtyp);
     return id;
 }
@@ -44,12 +43,12 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
 internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
     {
-        var root = (ж<traceMapNode>)(uintptr)(Ꮡt.of(traceTypeTable.Ꮡtab).of(traceMap.Ꮡroot).Load()); if (root != nil) {
+        var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
             w = dumpTypesRec(root, w);
         }
     }
     w.flush().end();
-    Ꮡt.of(traceTypeTable.Ꮡtab).reset();
+    Ꮡt.Ꮡtab.reset();
 }
 
 internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w) {
@@ -66,7 +65,7 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
     // lots of varint sizes.
     //
     // Add 1 because we might also write a traceAllocFreeTypesBatch byte.
-    bool flushed = default!;
+    bool flushed = default;
     (w, flushed) = w.ensure(1 + maxBytes);
     if (flushed) {
         // Annotate the batch as containing types.

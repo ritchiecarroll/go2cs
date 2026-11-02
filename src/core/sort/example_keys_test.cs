@@ -54,12 +54,12 @@ internal static bool Less(this ref planetSorter s, nint i, nint j) {
     return s.by(Ꮡ(s.planets, i), Ꮡ(s.planets, j));
 }
 
-internal static slice<Planet> planets = new Planet[]{
-    new("Mercury"u8, 0.055D, 0.4D),
-    new("Venus"u8, 0.815D, 0.7D),
-    new("Earth"u8, 1.0D, 1.0D),
-    new("Mars"u8, 0.107D, 1.5D)
-}.slice();
+internal static slice<Planet> planets = slice<Planet>([
+    new("Mercury", 0.055D, 0.4D),
+    new("Venus", 0.815D, 0.7D),
+    new("Earth", 1.0D, 1.0D),
+    new("Mars", 0.107D, 1.5D)
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object byNameˢ = (@string)"By name:"u8;
@@ -70,9 +70,9 @@ internal static readonly object byDecreasingDistanceˢ = (@string)"By decreasing
 // Example_sortKeys demonstrates a technique for sorting a struct type using programmable sort criteria.
 public static void Example_sortKeys() {
     // Closures that order the Planet structure.
-    var name = (ж<Planet> p1, ж<Planet> p2) => (~p1).name < (~p2).name;
-    var mass = (ж<Planet> p1, ж<Planet> p2) => (~p1).mass < (~p2).mass;
-    var distance = (ж<Planet> p1, ж<Planet> p2) => (~p1).distance < (~p2).distance;
+    var name = (ж<Planet> p1, ж<Planet> p2) => p1.name < p2.name;
+    var mass = (ж<Planet> p1, ж<Planet> p2) => p1.mass < p2.mass;
+    var distance = (ж<Planet> p1, ж<Planet> p2) => p1.distance < p2.distance;
     var distanceʗ1 = distance;
     var decreasingDistance = (ж<Planet> p1, ж<Planet> p2) => distanceʗ1(p2, p1);
 

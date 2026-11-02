@@ -18,7 +18,7 @@ using static global::go.go.format_internal_test_package;
 
 partial class format_test_package {
 
-internal static ж<bool> debug = flag.Bool("debug"u8, false, "write .src files containing formatting input; for debugging"u8);
+internal static ж<bool> debug = flag.Bool("debug", false, "write .src files containing formatting input; for debugging");
 
 // array1 generates an array literal with n elements of the form:
 //
@@ -36,19 +36,19 @@ internal static ж<bool> debug = flag.Bool("debug"u8, false, "write .src files c
 internal static void array1(ж<bytes.Buffer> Ꮡbuf, nint n) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    buf.WriteString("var _ = [...]byte{\n"u8);
+    buf.WriteString("var _ = [...]byte{\n");
     for (nint i = 0; i < n; ) {
         if (i % 10 == 0) {
             fmt.Fprintf(new format_test_package.bytes_BufferжWriter(Ꮡbuf), "\t// %d\n"u8, i);
         }
-        buf.WriteByte((rune)'\t');
+        buf.WriteByte((byte)'\t');
         for (nint j = 0; j < 8; j++) {
             fmt.Fprintf(new format_test_package.bytes_BufferжWriter(Ꮡbuf), "0x%02x, "u8, (byte)i);
             i++;
         }
-        buf.WriteString("\n"u8);
+        buf.WriteString("\n");
     }
-    buf.WriteString("}\n"u8);
+    buf.WriteString("}\n");
 }
 
 partial struct testsᴛ1 /*dyn*/ {
@@ -56,15 +56,16 @@ partial struct testsᴛ1 /*dyn*/ {
     internal Action<ж<bytes.Buffer>, nint> gen;
     internal nint n;
 }
-internal static slice<testsᴛ1> tests = new testsᴛ1[]{
-    new("array1"u8, array1, 10000)
+internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
+    new("array1", array1, 10000)
     // add new test cases here as needed
-}.slice();
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePˢ = "package p\n"u8;
+internal static ref readonly @string packagePˢ => ref packagePˢᵇ;
+private static readonly @string packagePˢᵇ = "package p\n"u8;
 
-public static void BenchmarkFormat(ж<testing.B> Ꮡb) {
+public static void BenchmarkFormat(ж<testing.B> b) {
     ref var src = ref heap(new bytes.Buffer(), out var Ꮡsrc);
     foreach (var (_, t) in tests) {
         src.Reset();
@@ -75,20 +76,20 @@ public static void BenchmarkFormat(ж<testing.B> Ꮡb) {
         if (debug.Value) {
             @string filename = t.name + ".src"u8;
             var err = os.WriteFile(filename, data, 432);
-            if (err != default!) {
-                Ꮡb.Fatalf("couldn't write %s: %v"u8, filename, err);
+            if (err != nil) {
+                b.Fatalf("couldn't write %s: %v", filename, err);
             }
         }
 
         var dataʗ1 = data;
-        Ꮡb.Run(fmt.Sprintf("%s-%d"u8, t.name, t.n), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%s-%d"u8, t.name, t.n), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)len(dataʗ1));
             bΔ1.ReportAllocs();
             bΔ1.ResetTimer();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                error err = default!;
+                error err = default;
                 (sink, err) = format.Source(dataʗ1);
-                if (err != default!) {
+                if (err != nil) {
                     bΔ1.Fatal(err);
                 }
             }

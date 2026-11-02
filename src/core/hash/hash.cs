@@ -28,6 +28,9 @@ partial class hash_package {
 partial interface Hash :
     io.Writer
 {
+    // Write (via the embedded io.Writer interface) adds more data to the running hash.
+    // It never returns an error.
+    // io.Writer is inherited
     // Sum appends the current hash to b and returns the resulting slice.
     // It does not change the underlying hash state.
     slice<byte> Sum(slice<byte> b);
@@ -77,6 +80,12 @@ partial interface XOF :
     io.Reader,
     io.ReadWriter
 {
+    // Write absorbs more data into the XOF's state. It panics if called
+    // after Read.
+    // io.Writer is inherited
+    // Read reads more output from the XOF. It may return io.EOF if there
+    // is a limit to the XOF output length.
+    // io.Reader is inherited
     // Reset resets the XOF to its initial state.
     void Reset();
     // BlockSize returns the XOF's underlying block size.

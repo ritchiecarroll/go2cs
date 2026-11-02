@@ -16,33 +16,37 @@ using static global::go.go.doc.comment_package;
 partial class comment_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string listˢ = "list"u8;
-internal static readonly @string stdˢ = "std"u8;
-internal static readonly @string stdPkgsˢ = "stdPkgs"u8;
-internal static readonly @string wantˢ = "want"u8;
+internal static ref readonly @string listˢ => ref listˢᵇ;
+private static readonly @string listˢᵇ = "list"u8;
+internal static ref readonly @string stdˢ => ref stdˢᵇ;
+private static readonly @string stdˢᵇ = "std"u8;
+internal static ref readonly @string stdPkgsˢ => ref stdPkgsˢᵇ;
+private static readonly @string stdPkgsˢᵇ = "stdPkgs"u8;
+internal static ref readonly @string wantˢ => ref wantˢᵇ;
+private static readonly @string wantˢᵇ = "want"u8;
 
-public static void TestStd(ж<testing.T> Ꮡt) {
+public static void TestStd(ж<testing.T> t) {
     var listᴷ = new stackAppend<@string>();
 
-    var cmd = testenv.Command(new comment_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new comment_internal_test_package.testing_TжTB(Ꮡt)), listˢ, stdˢ);
-    cmd.Value.Env = append(cmd.Environ(), "GOEXPERIMENT=none"u8);
+    var cmd = testenv.Command(new comment_internal_test_package.testing_TжTB(t), testenv.GoToolPath(new comment_internal_test_package.testing_TжTB(t)), listˢ, stdˢ);
+    cmd.Env = append(cmd.Environ(), (@string)"GOEXPERIMENT=none");
     var (@out, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("%v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("%v\n%s", err, @out);
     }
 
-    slice<@string> list = default!;
+    slice<@string> list = default;
     foreach (var (_, pkg) in strings.Fields((@string)@out)) {
-        if (!strings.Contains(pkg, "/"u8)) {
+        if (!strings.Contains(pkg, "/")) {
             list = append(listᴷ, list, pkg);
         }
     }
     slices.Sort<slice<@string>, @string>(list);
 
-    @string have = strings.Join(stdPkgs, "\n"u8) + "\n"u8;
-    @string want = strings.Join(list, "\n"u8) + "\n"u8;
+    @string have = strings.Join(stdPkgs, "\n") + "\n"u8;
+    @string want = strings.Join(list, "\n") + "\n"u8;
     if (have != want) {
-        Ꮡt.Errorf("stdPkgs is out of date: regenerate with 'go generate'\n%s"u8, diff.Diff(stdPkgsˢ, slice<byte>(have), wantˢ, slice<byte>(want)));
+        t.Errorf("stdPkgs is out of date: regenerate with 'go generate'\n%s", diff.Diff(stdPkgsˢ, slice<byte>(have), wantˢ, slice<byte>(want)));
     }
 }
 

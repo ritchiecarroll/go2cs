@@ -8,27 +8,7 @@ global using static global::go.@internal.poll_package;
 global using static global::go.@internal.poll_internal_test_package;
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +30,14 @@ using static global::go.@internal.poll_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.@internal.poll_package.FD))]
+[assembly: GoFieldAccess(typeof(go.io.fs_package.PathError))]
+[assembly: GoFieldAccess(typeof(net_package.OpError))]
+[assembly: GoFieldAccess(typeof(os_package.SyscallError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,13 +47,13 @@ using static global::go.@internal.poll_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/poll/error_stub_test.go", "error_stub_test.cs", "AA0egqaC")]
-[assembly: go.GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABMggqKCgpTIlIKCgILEtoKCgIKkgIKkgIKkgIKk", "17-33:1")]
-[assembly: go.GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABcggpSClIKmgpSCpoKUgriCgoKmgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpqKkgoCSgJKApICAgJKAgICSgICAtoKCgoKC9qKCgoKUgoKUgriCgrSkooKCgoKUgoKCgoKCspKUgoKUgoKUgoLGgoKmgoKUgoKCgsaCgqaCgpSCgoKC6KSCgqaClIK0", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1")]
-[assembly: go.GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ABUeAA8qgoKCgg==")]
-[assembly: go.GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "ABYmgtaigoKClJKAgoKklIKSgqSmgoKUlIAACBS2poCC1gAYMILagpSClIKU5oKCgpSCgpS4gpSCgoKUgoKUpoKmggAIBoKCgoKClIKCgoKClICC", "106-108:1")]
-[assembly: go.GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABQegoKCgoKCooKCgIKCpLS2uIKClMjcgoKCgpSClA==", "16-34:1;21-30:1.1")]
-[assembly: go.GoPositionMap("internal/poll/writev_test.go", "writev_test.cs", "ABMaggAkUoKSgoI=")]
+[assembly: GoPositionMap("internal/poll/error_stub_test.go", "error_stub_test.cs", "AA0egqaC")]
+[assembly: GoPositionMap("internal/poll/error_test.go", "error_test.cs", "ABQggqKCgpTIlIKCgILEtoKCgIKkgIKkgIKkgIKk", "17-33:1", "", "", "30:25")]
+[assembly: GoPositionMap("internal/poll/fd_mutex_test.go", "fd_mutex_test.cs", "ABcggpSClIKmgpSCpoKUgriCgoKmgpSClIKUgriCgoKCgpKCgpS4gqTWgoLmtoKUguiCooKCpqKkgoCSgJKApICAgJKAgICSgICAtoKCgoKCAAkGooKCgpSCgpSCuIKCtKSigoKCgpSCgoKCgoKykpSCgpSCgpSCgsaCgqaCgpSCgoKCxoKCpoKClIKCgoLopIKCpoKUgrQ=", "66-72:1;98-105:1;99-103:1.1;108-108:2;109-109:3;110-110:4;112-112:5;113-113:6;114-114:7;126-138:1;159-209:1;160-162:1.1")]
+[assembly: GoPositionMap("internal/poll/fd_posix_test.go", "fd_posix_test.cs", "ABUeAA8qgoKCgg==")]
+[assembly: GoPositionMap("internal/poll/fd_windows_test.go", "fd_windows_test.cs", "ABYmguaigoKClIKAgoKklIKCgpSmgoKUlIAACBS2poCC1gAYMILKgpSClIKUAAgGgoKClIKClLiClIKCgpSCgpSmgqaCAAoGgoKCgoKUgoKCgoKUgII=", "106-108:1", "", "", "46:21")]
+[assembly: GoPositionMap("internal/poll/read_test.go", "read_test.cs", "ABUegoKCgoKCooKCgIKCpLS2uIKCpNjsgoKCgpSClA==", "16-34:1;21-30:1.1")]
+[assembly: GoPositionMap("internal/poll/writev_test.go", "writev_test.cs", "ABMaggAkUoKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

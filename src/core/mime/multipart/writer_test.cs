@@ -17,88 +17,91 @@ using static go.mime.multipart_package;
 partial class multipart_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string myfileˢ = "myfile"u8;
-internal static readonly @string myFileTxtˢ = "my-file.txt"u8;
-internal static readonly @string valˢ = "val"u8;
+internal static ref readonly @string myfileˢ => ref myfileˢᵇ;
+private static readonly @string myfileˢᵇ = "myfile"u8;
+internal static ref readonly @string myFileTxtˢ => ref myFileTxtˢᵇ;
+private static readonly @string myFileTxtˢᵇ = "my-file.txt"u8;
+internal static ref readonly @string valˢ => ref valˢᵇ;
+private static readonly @string valˢᵇ = "val"u8;
 internal static readonly object stringUnexpectedEmptyˢ = (@string)"String: unexpected empty result"u8;
 internal static readonly object stringUnexpectedNewlineˢ = (@string)"String: unexpected newline"u8;
 
-public static void TestWriter(ж<testing.T> Ꮡt) {
+public static void TestWriter(ж<testing.T> t) {
     var fileContents = slice<byte>("my file contents"u8);
 
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var w = NewWriter(new multipart_test_package.bytes_BufferжWriter(Ꮡb));
     {
         var (partΔ1, errΔ1) = w.CreateFormFile(myfileˢ, myFileTxtˢ);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("CreateFormFile: %v"u8, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatalf("CreateFormFile: %v", errΔ1);
         }
         partΔ1.Write(fileContents);
         errΔ1 = w.WriteField(keyˢ, valˢ);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("WriteField: %v"u8, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatalf("WriteField: %v", errΔ1);
         }
         partΔ1.Write(slice<byte>("val"u8));
         errΔ1 = w.Close();
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Close: %v"u8, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatalf("Close: %v", errΔ1);
         }
         @string s = Ꮡb.String();
         if (len(s) == 0) {
-            Ꮡt.Fatal(stringUnexpectedEmptyˢ);
+            t.Fatal(stringUnexpectedEmptyˢ);
         }
-        if (s[0] == (rune)'\r' || s[0] == (rune)'\n') {
-            Ꮡt.Fatal(stringUnexpectedNewlineˢ);
+        if (s[0] == '\r' || s[0] == '\n') {
+            t.Fatal(stringUnexpectedNewlineˢ);
         }
     }
 
     var r = NewReader(new multipart_test_package.bytes_BufferжReader(Ꮡb), w.Boundary());
 
     var (part, err) = r.NextPart();
-    if (err != default!) {
-        Ꮡt.Fatalf("part 1: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("part 1: %v", err);
     }
     {
         @string g = part.FormName();
         @string e = myfileˢ; if (g != e) {
-            Ꮡt.Errorf("part 1: want form name %q, got %q"u8, e, g);
+            t.Errorf("part 1: want form name %q, got %q", e, g);
         }
     }
     (var slurp, err) = io.ReadAll(new global::go.mime.multipart_package.PartжReader(part));
-    if (err != default!) {
-        Ꮡt.Fatalf("part 1: ReadAll: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("part 1: ReadAll: %v", err);
     }
     {
         @string e = (@string)fileContents;
         @string g = (@string)slurp; if (e != g) {
-            Ꮡt.Errorf("part 1: want contents %q, got %q"u8, e, g);
+            t.Errorf("part 1: want contents %q, got %q", e, g);
         }
     }
 
     (part, err) = r.NextPart();
-    if (err != default!) {
-        Ꮡt.Fatalf("part 2: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("part 2: %v", err);
     }
     {
         @string g = part.FormName();
         @string e = keyˢ; if (g != e) {
-            Ꮡt.Errorf("part 2: want form name %q, got %q"u8, e, g);
+            t.Errorf("part 2: want form name %q, got %q", e, g);
         }
     }
     (slurp, err) = io.ReadAll(new global::go.mime.multipart_package.PartжReader(part));
-    if (err != default!) {
-        Ꮡt.Fatalf("part 2: ReadAll: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("part 2: ReadAll: %v", err);
     }
     {
         @string e = valˢ;
         @string g = (@string)slurp; if (e != g) {
-            Ꮡt.Errorf("part 2: want contents %q, got %q"u8, e, g);
+            t.Errorf("part 2: want contents %q, got %q", e, g);
         }
     }
 
     (part, err) = r.NextPart();
-    if (part != nil || err == default!) {
-        Ꮡt.Fatalf("expected end of parts; got %v, %v"u8, part.OrTypedNil(), err);
+    if (part != nil || err == nil) {
+        t.Fatalf("expected end of parts; got %v, %v", part.OrTypedNil(), err);
     }
 }
 
@@ -110,45 +113,42 @@ internal partial struct TestWriterSetBoundary_tests /*dyn*/ {
     internal bool ok;
 }
 
-public static void TestWriterSetBoundary(ж<testing.T> Ꮡt) {
-    var tests = new TestWriterSetBoundary_tests[]{
-        new("abc"u8, true),
-        new(""u8, false),
-        new("ungültig"u8, false),
-        new("!"u8, false),
-        new(strings.Repeat("x"u8, 70), true),
-        new(strings.Repeat("x"u8, 71), false),
-        new("bad!ascii!"u8, false),
-        new("my-separator"u8, true),
-        new("with space"u8, true),
-        new("badspace "u8, false),
-        new("(boundary)"u8, true)
-    }.slice();
+public static void TestWriterSetBoundary(ж<testing.T> t) {
+    var tests = slice<TestWriterSetBoundary_tests>([
+        new("abc", true),
+        new("", false),
+        new("ungültig", false),
+        new("!", false),
+        new(strings.Repeat("x", 70), true),
+        new(strings.Repeat("x", 71), false),
+        new("bad!ascii!", false),
+        new("my-separator", true),
+        new("with space", true),
+        new("badspace ", false),
+        new("(boundary)", true)
+    ]);
     foreach (var (i, tt) in tests) {
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         var w = NewWriter(new multipart_test_package.strings_BuilderжWriter(Ꮡb));
         var err = w.SetBoundary(tt.b);
-        var got = err == default!;
-        if (got != tt.ok){
-            Ꮡt.Errorf("%d. boundary %q = %v (%v); want %v"u8, i, tt.b, got, err, tt.ok);
-        } else 
-        if (tt.ok) {
+        var got = err == nil;
+        if (got != tt.ok) {
+            t.Errorf("%d. boundary %q = %v (%v); want %v", i, tt.b, got, err, tt.ok);
+        } else if (tt.ok) {
             @string gotΔ1 = w.Boundary();
             if (gotΔ1 != tt.b) {
-                Ꮡt.Errorf("boundary = %q; want %q"u8, gotΔ1, tt.b);
+                t.Errorf("boundary = %q; want %q", gotΔ1, tt.b);
             }
 
             @string ct = w.FormDataContentType();
             var (mt, @params, errΔ1) = mime.ParseMediaType(ct);
-            if (errΔ1 != default!){
-                Ꮡt.Errorf("could not parse Content-Type %q: %v"u8, ct, errΔ1);
-            } else 
-            if (mt != "multipart/form-data"u8){
-                Ꮡt.Errorf("unexpected media type %q; want %q"u8, mt, multipartFormDataˢ);
-            } else 
-            {
+            if (errΔ1 != nil) {
+                t.Errorf("could not parse Content-Type %q: %v", ct, errΔ1);
+            } else if (mt != "multipart/form-data"u8) {
+                t.Errorf("unexpected media type %q; want %q", mt, multipartFormDataˢ);
+            } else {
                 @string bΔ1 = @params[boundaryˢ]; if (bΔ1 != tt.b) {
-                    Ꮡt.Errorf("unexpected boundary parameter %q; want %q"u8, bΔ1, tt.b);
+                    t.Errorf("unexpected boundary parameter %q; want %q", bΔ1, tt.b);
                 }
             }
 
@@ -156,7 +156,7 @@ public static void TestWriterSetBoundary(ж<testing.T> Ꮡt) {
             @string wantSub = "\r\n--"u8 + tt.b + "--\r\n"u8;
             {
                 @string gotΔ2 = b.String(); if (!strings.Contains(gotΔ2, wantSub)) {
-                    Ꮡt.Errorf("expected %q in output. got: %q"u8, wantSub, gotΔ2);
+                    t.Errorf("expected %q in output. got: %q", wantSub, gotΔ2);
                 }
             }
         }
@@ -164,9 +164,10 @@ public static void TestWriterSetBoundary(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ = "foo"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
 
-public static partial void TestWriterBoundaryGoroutines(ж<testing.T> Ꮡt) {
+public static partial void TestWriterBoundaryGoroutines(ж<testing.T> t) {
     // Verify there's no data race accessing any lazy boundary if it's used by
     // different goroutines. This was previously broken by
     // https://codereview.appspot.com/95760043/ and reverted in
@@ -184,29 +185,31 @@ public static partial void TestWriterBoundaryGoroutines(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mimeboundaryˢ = "MIMEBOUNDARY"u8;
-internal static readonly @string mimeboundaryA2B5B7B6C4M3ˢ = "--MIMEBOUNDARY\r\nA: 2\r\nB: 5\r\nB: 7\r\nB: 6\r\nC: 4\r\nM: 3\r\nZ: 1\r\n\r\nfoo\r\n--MIMEBOUNDARY--\r\n"u8;
+internal static ref readonly @string mimeboundaryˢ => ref mimeboundaryˢᵇ;
+private static readonly @string mimeboundaryˢᵇ = "MIMEBOUNDARY"u8;
+internal static ref readonly @string mimeboundaryA2B5B7B6C4M3ˢ => ref mimeboundaryA2B5B7B6C4M3ˢᵇ;
+private static readonly @string mimeboundaryA2B5B7B6C4M3ˢᵇ = "--MIMEBOUNDARY\r\nA: 2\r\nB: 5\r\nB: 7\r\nB: 6\r\nC: 4\r\nM: 3\r\nZ: 1\r\n\r\nfoo\r\n--MIMEBOUNDARY--\r\n"u8;
 
-public static void TestSortedHeader(ж<testing.T> Ꮡt) {
+public static void TestSortedHeader(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var w = NewWriter(new multipart_test_package.strings_BuilderжWriter(Ꮡbuf));
     {
-        var errΔ1 = w.SetBoundary(mimeboundaryˢ); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Error setting mime boundary: %v"u8, errΔ1);
+        var errΔ1 = w.SetBoundary(mimeboundaryˢ); if (errΔ1 != nil) {
+            t.Fatalf("Error setting mime boundary: %v", errΔ1);
         }
     }
 
     var header = new textproto.MIMEHeader(new map<@string, slice<@string>>{
-        ["A"u8] = new @string[]{"2"u8}.slice(),
-        ["B"u8] = new @string[]{"5"u8, "7"u8, "6"u8}.slice(),
-        ["C"u8] = new @string[]{"4"u8}.slice(),
-        ["M"u8] = new @string[]{"3"u8}.slice(),
-        ["Z"u8] = new @string[]{"1"u8}.slice()
+        ["A"] = slice<@string>(["2"]),
+        ["B"] = slice<@string>(["5", "7", "6"]),
+        ["C"] = slice<@string>(["4"]),
+        ["M"] = slice<@string>(["3"]),
+        ["Z"] = slice<@string>(["1"])
     });
 
     var (part, err) = w.CreatePart(header);
-    if (err != default!) {
-        Ꮡt.Fatalf("Unable to create part: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Unable to create part: %v", err);
     }
     part.Write(slice<byte>("foo"u8));
 
@@ -214,7 +217,7 @@ public static void TestSortedHeader(ж<testing.T> Ꮡt) {
 
     @string want = mimeboundaryA2B5B7B6C4M3ˢ;
     if (want != buf.String()) {
-        Ꮡt.Fatalf("\n got: %q\nwant: %q\n"u8, buf.String(), want);
+        t.Fatalf("\n got: %q\nwant: %q\n", buf.String(), want);
     }
 }
 
@@ -224,19 +227,19 @@ internal partial struct TestFileContentDisposition_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestFileContentDisposition(ж<testing.T> Ꮡt) {
-    var tests = new TestFileContentDisposition_tests[]{
-        new("somefield"u8, "somefile.txt"u8, @"form-data; name=""somefield""; filename=""somefile.txt"""u8),
-        new(@"field""withquotes"""u8, "somefile.txt"u8, @"form-data; name=""field\""withquotes\""""; filename=""somefile.txt"""u8),
-        new(@"somefield"u8, @"somefile""withquotes"".txt"u8, @"form-data; name=""somefield""; filename=""somefile\""withquotes\"".txt"""u8),
-        new(@"somefield\withbackslash"u8, "somefile.txt"u8, @"form-data; name=""somefield\\withbackslash""; filename=""somefile.txt"""u8),
-        new("somefield"u8, @"somefile\withbackslash.txt"u8, @"form-data; name=""somefield""; filename=""somefile\\withbackslash.txt"""u8),
-        new("a\rb\nc"u8, "e\rf\ng"u8, @"form-data; name=""a%0Db%0Ac""; filename=""e%0Df%0Ag"""u8)
-    }.slice();
+public static void TestFileContentDisposition(ж<testing.T> t) {
+    var tests = slice<TestFileContentDisposition_tests>([
+        new("somefield", "somefile.txt", @"form-data; name=""somefield""; filename=""somefile.txt"""),
+        new(@"field""withquotes""", "somefile.txt", @"form-data; name=""field\""withquotes\""""; filename=""somefile.txt"""),
+        new(@"somefield", @"somefile""withquotes"".txt", @"form-data; name=""somefield""; filename=""somefile\""withquotes\"".txt"""),
+        new(@"somefield\withbackslash", "somefile.txt", @"form-data; name=""somefield\\withbackslash""; filename=""somefile.txt"""),
+        new("somefield", @"somefile\withbackslash.txt", @"form-data; name=""somefield""; filename=""somefile\\withbackslash.txt"""),
+        new("a\rb\nc", "e\rf\ng", @"form-data; name=""a%0Db%0Ac""; filename=""e%0Df%0Ag""")
+    ]);
     foreach (var (i, tt) in tests) {
         {
             @string found = FileContentDisposition(tt.fieldname, tt.filename); if (found != tt.want) {
-                Ꮡt.Errorf(@"%d. found: ""%s""; want: ""%s"""u8, i, found, tt.want);
+                t.Errorf(@"%d. found: ""%s""; want: ""%s""", i, found, tt.want);
             }
         }
     }

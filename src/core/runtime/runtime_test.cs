@@ -39,13 +39,13 @@ partial class runtime_test_package {
 // The cmd/dist test passes both -test.short and -quick;
 // there are tests that only check testing.Short, and those tests will
 // not be skipped if only -quick is used.
-internal static ж<bool> flagQuick = flag.Bool("quick"u8, false, "skip slow tests, for cmd/dist test runtime:cpu124"u8);
+internal static ж<bool> flagQuick = flag.Bool("quick", false, "skip slow tests, for cmd/dist test runtime:cpu124");
 
 [GoInit] internal static void initΔ5() {
     // We're testing the runtime, so make tracebacks show things
     // in the runtime. This only raises the level, so it won't
     // override GOTRACEBACK=crash from the user.
-    runtime_internal_test_package.SetTracebackEnv("system"u8);
+    runtime_internal_test_package.SetTracebackEnv("system");
 }
 
 internal static error errf;
@@ -78,7 +78,7 @@ public static void BenchmarkIfaceCmpNil100(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         for (nint j = 0; j < 100; j++) {
-            if (errfn1() == default!) {
+            if (errfn1() == nil) {
                 Ꮡb.Fatal(badComparisonˢ);
             }
         }
@@ -92,11 +92,9 @@ internal static any efaceCmp2;
 public static void BenchmarkEfaceCmpDiff(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var x = ref heap<nint>(out var Ꮡx);
-    x = 5;
+    ref var x = ref heap<nint>(5, out var Ꮡx);
     efaceCmp1 = Ꮡx;
-    ref var y = ref heap<nint>(out var Ꮡy);
-    y = 6;
+    ref var y = ref heap<nint>(6, out var Ꮡy);
     efaceCmp2 = Ꮡy;
     for (nint i = 0; i < b.N; i++) {
         for (nint j = 0; j < 100; j++) {
@@ -133,7 +131,7 @@ internal static void defer1() {
     GoFrame ᒐ = default;
     try {
         defer((nint x, nint y, nint z) => {
-            if (recover() != default! || x != 1 || y != 2 || z != 3) {
+            if (recover() != nil || x != 1 || y != 2 || z != 3) {
                 throw panic("bad recover");
             }
         }, (nint)1, (nint)2, (nint)3, ref ᒐ);
@@ -155,7 +153,7 @@ internal static void defer2() {
     try {
         for (nint i = 0; i < 10; i++) {
             defer((nint x, nint y, nint z) => {
-                if (recover() != default! || x != 1 || y != 2 || z != 3) {
+                if (recover() != nil || x != 1 || y != 2 || z != 3) {
                     throw panic("bad recover");
                 }
             }, (nint)1, (nint)2, (nint)3, ref ᒐ);
@@ -172,7 +170,7 @@ public static void BenchmarkDeferMany(ж<testing.B> Ꮡb) {
 
         for (nint i = 0; i < b.N; i++) {
             defer((nint x, nint y, nint z) => {
-                if (recover() != default! || x != 1 || y != 2 || z != 3) {
+                if (recover() != nil || x != 1 || y != 2 || z != 3) {
                     throw panic("bad recover");
                 }
             }, (nint)1, (nint)2, (nint)3, ref ᒐ);
@@ -194,7 +192,7 @@ internal static void defer3() {
     GoFrame ᒐ = default;
     try {
         defer((nint x, nint y, nint z) => {
-            if (recover() == default!) {
+            if (recover() == nil) {
                 throw panic("failed recover");
             }
         }, (nint)1, (nint)2, (nint)3, ref ᒐ);
@@ -205,7 +203,7 @@ internal static void defer3() {
 }
 
 // golang.org/issue/7063
-public static void TestStopCPUProfilingWithProfilerOff(ж<testing.T> Ꮡt) {
+public static void TestStopCPUProfilingWithProfilerOff(ж<testing.T> t) {
     SetCPUProfileRate(0);
 }
 
@@ -221,7 +219,7 @@ public static void TestStopCPUProfilingWithProfilerOff(ж<testing.T> Ꮡt) {
 // addresses that normally an OS would reserve for itself, or malformed
 // addresses. Even so, we might have to remove one or two on different
 // systems. We will see.
-internal static slice<uint64> faultAddrs = new uint64[]{
+internal static slice<uint64> faultAddrs = slice<uint64>([
     // low addresses
     0,
     1,
@@ -243,21 +241,20 @@ internal static slice<uint64> faultAddrs = new uint64[]{
     0xff00000000000001UL,
     0xf000000000000001UL,
     0x8000000000000001UL
-}.slice();
+]);
 
-public static void TestSetPanicOnFault(ж<testing.T> Ꮡt) {
+public static void TestSetPanicOnFault(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var old = Δdebug.SetPanicOnFault(true);
         defer(Δdebug.SetPanicOnFault, old, ref ᒐ);
 
-        ref var nfault = ref heap<nint>(out var Ꮡnfault);
-        nfault = 0;
+        ref var nfault = ref heap<nint>(0, out var Ꮡnfault);
         foreach (var (_, addr) in faultAddrs) {
-            testSetPanicOnFault(Ꮡt, (uintptr)addr, Ꮡnfault);
+            testSetPanicOnFault(t, (uintptr)addr, Ꮡnfault);
         }
         if (nfault == 0) {
-            Ꮡt.Fatalf("none of the addresses faulted"u8);
+            t.Fatalf("none of the addresses faulted");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -269,17 +266,17 @@ public static void TestSetPanicOnFault(ж<testing.T> Ꮡt) {
 // so mark it as nocheckptr.
 //
 //go:nocheckptr
-internal static void testSetPanicOnFault(ж<testing.T> Ꮡt, uintptr addr, ж<nint> Ꮡnfault) {
+internal static void testSetPanicOnFault(ж<testing.T> t, uintptr addr, ж<nint> nfault) {
     GoFrame ᒐ = default;
     try {
         if (GOOS == "js"u8 || GOOS == "wasip1"u8) {
-            Ꮡt.Skip(GOOS + " does not support catching faults");
+            t.Skip(GOOS + " does not support catching faults");
         }
 
         defer(() => {
             {
-                var err = recover(); if (err != default!) {
-                    Ꮡnfault.Value++;
+                var err = recover(); if (err != nil) {
+                    nfault.Value++;
                 }
             }
         }, ref ᒐ);
@@ -289,7 +286,7 @@ internal static void testSetPanicOnFault(ж<testing.T> Ꮡt, uintptr addr, ж<ni
         // readable by user code. So just log the content.
         // If no addresses fault, we'll fail the test.
         var v = ~(ж<byte>)(uintptr)((@unsafe.Pointer)addr);
-        Ꮡt.Logf("addr %#x: %#x\n"u8, addr, v);
+        t.Logf("addr %#x: %#x\n", addr, v);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -309,27 +306,25 @@ internal static bool eqstring_generic(@string s1, @string s2) {
     return true;
 }
 
-public static void TestEqString(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestEqString(ж<testing.T> t) {
     // This isn't really an exhaustive test of == on strings, it's
     // just a convenient way of documenting (via eqstring_generic)
     // what == does.
-    var s = new @string[]{
-        ""u8,
-        "a"u8,
-        "c"u8,
-        "aaa"u8,
-        "ccc"u8,
+    var s = slice<@string>([
+        "",
+        "a",
+        "c",
+        "aaa",
+        "ccc",
         "cccc"u8[..3], // same contents, different string
-        "1234567890"u8
-    }.slice();
+        "1234567890"
+    ]);
     foreach (var (_, s1) in s) {
         foreach (var (_, s2) in s) {
             var x = s1 == s2;
             var y = eqstring_generic(s1, s2);
             if (x != y) {
-                Ꮡt.Errorf(@"(""%s"" == ""%s"") = %t, want %t"u8, s1, s2, x, y);
+                t.Errorf(@"(""%s"" == ""%s"") = %t, want %t", s1, s2, x, y);
             }
         }
     }
@@ -363,29 +358,29 @@ internal partial struct TestTrailingZero_T3 /*dyn*/ {
 internal partial struct TestTrailingZero_T5 /*dyn*/ {
 }
 
-public static void TestTrailingZero(ж<testing.T> Ꮡt) {
+public static void TestTrailingZero(ж<testing.T> t) {
     if (/* unsafe.Sizeof(T1{}) */ (uintptr)8 != 8) {
-        Ꮡt.Errorf("sizeof(%#v)==%d, want 8"u8, new TestTrailingZero_T1(nil), /* unsafe.Sizeof(T1{}) */ (uintptr)8);
+        t.Errorf("sizeof(%#v)==%d, want 8", new TestTrailingZero_T1(), /* unsafe.Sizeof(T1{}) */ (uintptr)8);
     }
     if (/* unsafe.Sizeof(T2{}) */ (uintptr)16 != 8 + /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8) {
-        Ꮡt.Errorf("sizeof(%#v)==%d, want %d"u8, new TestTrailingZero_T2(nil), /* unsafe.Sizeof(T2{}) */ (uintptr)16, 8 + /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
+        t.Errorf("sizeof(%#v)==%d, want %d", new TestTrailingZero_T2(), /* unsafe.Sizeof(T2{}) */ (uintptr)16, 8 + /* unsafe.Sizeof(uintptr(0)) */ (uintptr)8);
     }
     if (/* unsafe.Sizeof(T3{}) */ (uintptr)2 != 2) {
-        Ꮡt.Errorf("sizeof(%#v)==%d, want 2"u8, new TestTrailingZero_T3(nil), /* unsafe.Sizeof(T3{}) */ (uintptr)2);
+        t.Errorf("sizeof(%#v)==%d, want 2", new TestTrailingZero_T3(), /* unsafe.Sizeof(T3{}) */ (uintptr)2);
     }
     if (/* unsafe.Sizeof(T4{}) */ (uintptr)8 != 8) {
-        Ꮡt.Errorf("sizeof(%#v)==%d, want 8"u8, new TestTrailingZero_T4(nil), /* unsafe.Sizeof(T4{}) */ (uintptr)8);
+        t.Errorf("sizeof(%#v)==%d, want 8", new TestTrailingZero_T4(), /* unsafe.Sizeof(T4{}) */ (uintptr)8);
     }
     if (/* unsafe.Sizeof(T5{}) */ (uintptr)0 != 0) {
-        Ꮡt.Errorf("sizeof(%#v)==%d, want 0"u8, new TestTrailingZero_T5(nil), /* unsafe.Sizeof(T5{}) */ (uintptr)0);
+        t.Errorf("sizeof(%#v)==%d, want 0", new TestTrailingZero_T5(), /* unsafe.Sizeof(T5{}) */ (uintptr)0);
     }
 }
 
-public static void TestAppendGrowthHeap(ж<testing.T> Ꮡt) {
+public static void TestAppendGrowthHeap(ж<testing.T> t) {
     ref var x = ref heap<slice<int64>>(out var Ꮡx);
     void check(nint wantΔ1) {
         if (cap(Ꮡx.ValueSlot) != wantΔ1) {
-            Ꮡt.Errorf("len=%d, cap=%d, want cap=%d"u8, len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
+            t.Errorf("len=%d, cap=%d, want cap=%d", len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
         }
     }
 
@@ -404,16 +399,16 @@ public static void TestAppendGrowthHeap(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object instrumentationBreaksˢ = (@string)"instrumentation breaks this optimization"u8;
 
-public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
+public static void TestAppendGrowthStack(ж<testing.T> t) {
     var xᴷ = new stackAppend<int64>();
 
     if (race.Enabled || asan.Enabled || msan.Enabled) {
-        Ꮡt.Skip(instrumentationBreaksˢ);
+        t.Skip(instrumentationBreaksˢ);
     }
     ref var x = ref heap<slice<int64>>(out var Ꮡx);
     void check(nint wantΔ1) {
         if (cap(Ꮡx.ValueSlot) != wantΔ1) {
-            Ꮡt.Errorf("len=%d, cap=%d, want cap=%d"u8, len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
+            t.Errorf("len=%d, cap=%d, want cap=%d", len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
         }
     }
 
@@ -431,14 +426,14 @@ public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
     }
 }
 
-public static readonly ж<slice<int64>> ᏑOne = new StaticBox<slice<int64>>(new int64[]{1}.slice());
+public static readonly ж<slice<int64>> ᏑOne = new StaticBox<slice<int64>>(slice<int64>([1]));
 public static ref slice<int64> One => ref ((StaticBox<slice<int64>>)ᏑOne).ValueSlot;
 
-public static void TestAppendSliceGrowth(ж<testing.T> Ꮡt) {
+public static void TestAppendSliceGrowth(ж<testing.T> t) {
     ref var x = ref heap<slice<int64>>(out var Ꮡx);
     void check(nint wantΔ1) {
         if (cap(Ꮡx.ValueSlot) != wantΔ1) {
-            Ꮡt.Errorf("len=%d, cap=%d, want cap=%d"u8, len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
+            t.Errorf("len=%d, cap=%d, want cap=%d", len(Ꮡx.ValueSlot), cap(Ꮡx.ValueSlot), wantΔ1);
         }
     }
 
@@ -453,39 +448,47 @@ public static void TestAppendSliceGrowth(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestGoroutineProfileTrivial(ж<testing.T> Ꮡt) {
+public static void TestGoroutineProfileTrivial(ж<testing.T> t) {
     // Calling GoroutineProfile twice in a row should find the same number of goroutines,
     // but it's possible there are goroutines just about to exit, so we might end up
     // with fewer in the second call. Try a few times; it should converge once those
     // zombies are gone.
-    for (nint i = 0; ᐧ ; i++) {
-        var (n1, ok) = GoroutineProfile(default!); // should fail, there's at least 1 goroutine
+    for (nint i = 0; ; i++) {
+        var (n1, ok) = GoroutineProfile(default); // should fail, there's at least 1 goroutine
         if (n1 < 1 || ok) {
-            Ꮡt.Fatalf("GoroutineProfile(nil) = %d, %v, want >0, false"u8, n1, ok);
+            t.Fatalf("GoroutineProfile(nil) = %d, %v, want >0, false", n1, ok);
         }
         (var n2, ok) = GoroutineProfile(new slice<Δruntime.StackRecord>(n1, () => new()));
         if (n2 == n1 && ok) {
             break;
         }
-        Ꮡt.Logf("GoroutineProfile(%d) = %d, %v, want %d, true"u8, n1, n2, ok, n1);
+        t.Logf("GoroutineProfile(%d) = %d, %v, want %d, true", n1, n2, ok, n1);
         if (i >= 10) {
-            Ꮡt.Fatalf("GoroutineProfile not converging"u8);
+            t.Fatalf("GoroutineProfile not converging");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object goroutineProfileFailedˢ = (@string)"goroutine profile failed"u8;
-internal static readonly @string idleˢ = "idle"u8;
-internal static readonly @string loadedˢ = "loaded"u8;
-internal static readonly @string smallNilˢ = "small-nil"u8;
-internal static readonly @string smallˢ = "small"u8;
-internal static readonly @string largeNilˢ = "large-nil"u8;
-internal static readonly @string largeˢ = "large"u8;
-internal static readonly @string sparseNilˢ = "sparse-nil"u8;
-internal static readonly @string sparseˢ = "sparse"u8;
+internal static ref readonly @string idleˢ => ref idleˢᵇ;
+private static readonly @string idleˢᵇ = "idle"u8;
+internal static ref readonly @string loadedˢ => ref loadedˢᵇ;
+private static readonly @string loadedˢᵇ = "loaded"u8;
+internal static ref readonly @string smallNilˢ => ref smallNilˢᵇ;
+private static readonly @string smallNilˢᵇ = "small-nil"u8;
+internal static ref readonly @string smallˢ => ref smallˢᵇ;
+private static readonly @string smallˢᵇ = "small"u8;
+internal static ref readonly @string largeNilˢ => ref largeNilˢᵇ;
+private static readonly @string largeNilˢᵇ = "large-nil"u8;
+internal static ref readonly @string largeˢ => ref largeˢᵇ;
+private static readonly @string largeˢᵇ = "large"u8;
+internal static ref readonly @string sparseNilˢ => ref sparseNilˢᵇ;
+private static readonly @string sparseNilˢᵇ = "sparse-nil"u8;
+internal static ref readonly @string sparseˢ => ref sparseˢᵇ;
+private static readonly @string sparseˢᵇ = "sparse"u8;
 
-public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkGoroutineProfile(ж<testing.B> b) {
     Action<ж<testing.B>> run(Func<bool> fn) {
         var runOne = (ж<testing.B> bΔ1) => {
             var latenciesᴷ = new stackAppend<time.Duration>();
@@ -504,9 +507,9 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
 
             // Sort latencies then report percentiles.
             slices.Sort<slice<time.Duration>, time.Duration>(latencies);
-            bΔ1.ReportMetric((float64)(int64)latencies[len(latencies) * 50 / 100], p50Nsˢ);
-            bΔ1.ReportMetric((float64)(int64)latencies[len(latencies) * 90 / 100], p90Nsˢ);
-            bΔ1.ReportMetric((float64)(int64)latencies[len(latencies) * 99 / 100], p99Nsˢ);
+            bΔ1.ReportMetric((float64)latencies[len(latencies) * 50 / 100], p50Nsˢ);
+            bΔ1.ReportMetric((float64)latencies[len(latencies) * 90 / 100], p90Nsˢ);
+            bΔ1.ReportMetric((float64)latencies[len(latencies) * 99 / 100], p99Nsˢ);
         };
         var runOneʗ1 = runOne;
         return (ж<testing.B> bΔ2) => {
@@ -526,16 +529,15 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
     }
 
     // Measure the cost of counting goroutines
-    Ꮡb.Run(smallNilˢ, run(() => {
-        GoroutineProfile(default!);
+    b.Run(smallNilˢ, run(() => {
+        GoroutineProfile(default);
         return true;
     }));
 
     // Measure the cost with a small set of goroutines
     nint n = NumGoroutine();
-    ref var p = ref heap<slice<Δruntime.StackRecord>>(out var Ꮡp);
-    p = new slice<Δruntime.StackRecord>(2 * n + 2 * GOMAXPROCS(0), () => new());
-    Ꮡb.Run(smallˢ, run(() => {
+    ref var p = ref heap<slice<Δruntime.StackRecord>>(new slice<Δruntime.StackRecord>(2 * n + 2 * GOMAXPROCS(0), () => new()), out var Ꮡp);
+    b.Run(smallˢ, run(() => {
         var (_, ok) = GoroutineProfile(Ꮡp.ValueSlot);
         return ok;
     }));
@@ -552,19 +554,19 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
             Ꮡready.Done();
             ᐸꟷ(chʗ1);
             Ꮡdone.Done();
-        });
+        }, GoStack.Bounded);
     }
     Ꮡready.Wait();
 
     // Count goroutines with a large allgs list
-    Ꮡb.Run(largeNilˢ, run(() => {
-        GoroutineProfile(default!);
+    b.Run(largeNilˢ, run(() => {
+        GoroutineProfile(default);
         return true;
     }));
 
     n = NumGoroutine();
     p = new slice<Δruntime.StackRecord>(2 * n + 2 * GOMAXPROCS(0), () => new());
-    Ꮡb.Run(largeˢ, run(() => {
+    b.Run(largeˢ, run(() => {
         var (_, ok) = GoroutineProfile(Ꮡp.ValueSlot);
         return ok;
     }));
@@ -573,40 +575,40 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
     Ꮡdone.Wait();
 
     // Count goroutines with a large (but unused) allgs list
-    Ꮡb.Run(sparseNilˢ, run(() => {
-        GoroutineProfile(default!);
+    b.Run(sparseNilˢ, run(() => {
+        GoroutineProfile(default);
         return true;
     }));
 
     // Measure the cost of a large (but unused) allgs list
     n = NumGoroutine();
     p = new slice<Δruntime.StackRecord>(2 * n + 2 * GOMAXPROCS(0), () => new());
-    Ꮡb.Run(sparseˢ, run(() => {
+    b.Run(sparseˢ, run(() => {
         var (_, ok) = GoroutineProfile(Ꮡp.ValueSlot);
         return ok;
     }));
 }
 
-public static partial void TestVersion(ж<testing.T> Ꮡt) {
+public static partial void TestVersion(ж<testing.T> t) {
     // Test that version does not contain \r or \n.
     @string vers = Version();
-    if (strings.Contains(vers, "\r"u8) || strings.Contains(vers, "\n"u8)) {
-        Ꮡt.Fatalf("cr/nl in version: %q"u8, vers);
+    if (strings.Contains(vers, "\r") || strings.Contains(vers, "\n")) {
+        t.Fatalf("cr/nl in version: %q", vers);
     }
 }
 
-public static void BenchmarkProcYield(ж<testing.B> Ꮡb) {
+public static void BenchmarkProcYield(ж<testing.B> b) {
     Action<ж<testing.B>> benchN(uint32 n) => (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 runtime_internal_test_package.ProcYield(n);
             }
         };
 
-    Ꮡb.Run("1"u8, benchN(1));
-    Ꮡb.Run("10"u8, benchN(10));
-    Ꮡb.Run("30"u8, benchN(30)); // active_spin_cnt in lock_sema.go and lock_futex.go
-    Ꮡb.Run("100"u8, benchN(100));
-    Ꮡb.Run("1000"u8, benchN(1000));
+    b.Run("1", benchN(1));
+    b.Run("10", benchN(10));
+    b.Run("30", benchN(30)); // active_spin_cnt in lock_sema.go and lock_futex.go
+    b.Run("100", benchN(100));
+    b.Run("1000", benchN(1000));
 }
 
 public static void BenchmarkOSYield(ж<testing.B> Ꮡb) {
@@ -625,7 +627,7 @@ internal partial struct BenchmarkMutexContention_state /*dyn*/ {
     internal cpu.CacheLinePad ___;
 }
 
-public static partial void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkMutexContention(ж<testing.B> b) {
     // Measure throughput of a single mutex with all threads contending
     //
     // Share a single counter across all threads. Progress from any thread is
@@ -650,11 +652,11 @@ public static partial void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                while (ᐧ) {
+                for (;;) {
                     runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexContention_state.Ꮡlock));
                     var ours = Ꮡstate.of(BenchmarkMutexContention_state.Ꮡcount).Add(1);
                     runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexContention_state.Ꮡlock));
-                    if (ours >= (int64)Ꮡb.Value.N) {
+                    if (ours >= (int64)b.Value.N) {
                         return;
                     }
                 }
@@ -667,10 +669,14 @@ public static partial void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nsStreakP100ˢ = "ns/streak-p100"u8;
-internal static readonly @string nsStreakP90ˢ = "ns/streak-p90"u8;
-internal static readonly @string nsStarveP100ˢ = "ns/starve-p100"u8;
-internal static readonly @string nsStarveP90ˢ = "ns/starve-p90"u8;
+internal static ref readonly @string nsStreakP100ˢ => ref nsStreakP100ˢᵇ;
+private static readonly @string nsStreakP100ˢᵇ = "ns/streak-p100"u8;
+internal static ref readonly @string nsStreakP90ˢ => ref nsStreakP90ˢᵇ;
+private static readonly @string nsStreakP90ˢᵇ = "ns/streak-p90"u8;
+internal static ref readonly @string nsStarveP100ˢ => ref nsStarveP100ˢᵇ;
+private static readonly @string nsStarveP100ˢᵇ = "ns/starve-p100"u8;
+internal static ref readonly @string nsStarveP90ˢ => ref nsStarveP90ˢᵇ;
+private static readonly @string nsStarveP90ˢᵇ = "ns/starve-p90"u8;
 
 internal partial struct BenchmarkMutexCapture_state /*dyn*/ {
     internal cpu.CacheLinePad _;
@@ -706,16 +712,16 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
         Ꮡwg.Add(1);
         var histogramsʗ1 = histograms;
         goǃ(() => {
-            int64 prev = default!;
-            int64 streak = default!;
+            int64 prev = default;
+            int64 streak = default;
             ref var histogramΔ1 = ref heap(new array<array<nint>>(2, () => new(65)), out var ᏑhistogramΔ1);
-            while (ᐧ) {
+            for (;;) {
                 runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡlock));
                 var ours = Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡcount).Add(1);
                 runtime_internal_test_package.ΔUnlock(Ꮡstate.of(BenchmarkMutexCapture_state.Ꮡlock));
                 var delta = ours - prev - 1;
                 prev = ours;
-                if (delta == 0){
+                if (delta == 0) {
                     streak++;
                 } else {
                     histogramΔ1[0][global::go.math.bits_package.LeadingZeros64((uint64)streak)]++;
@@ -781,9 +787,12 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string soloˢ = "Solo"u8;
-internal static readonly @string fastPingPongˢ = "FastPingPong"u8;
-internal static readonly @string slowPingPongˢ = "SlowPingPong"u8;
+internal static ref readonly @string soloˢ => ref soloˢᵇ;
+private static readonly @string soloˢᵇ = "Solo"u8;
+internal static ref readonly @string fastPingPongˢ => ref fastPingPongˢᵇ;
+private static readonly @string fastPingPongˢᵇ = "FastPingPong"u8;
+internal static ref readonly @string slowPingPongˢ => ref slowPingPongˢᵇ;
+private static readonly @string slowPingPongˢᵇ = "SlowPingPong"u8;
 
 internal partial struct BenchmarkMutexHandoff_state /*dyn*/ {
     internal cpu.CacheLinePad _;
@@ -793,11 +802,11 @@ internal partial struct BenchmarkMutexHandoff_state /*dyn*/ {
     internal cpu.CacheLinePad ___;
 }
 
-public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
+public static void BenchmarkMutexHandoff(ж<testing.B> b) {
     Action<ж<testing.B>> testcase(Action<ж<Mutex>> delay) => [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             {
                 nint workers = 2; if (GOMAXPROCS(0) < workers) {
-                    bΔ1.Skipf("requires GOMAXPROCS >= %d"u8, workers);
+                    bΔ1.Skipf("requires GOMAXPROCS >= %d", workers);
                 }
             }
 
@@ -835,7 +844,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
-                    int64 t = default!;
+                    int64 t = default;
                     foreach (var _ᴛ1 in range((~bΔ1).N)) {
                         runtime_internal_test_package.ΔLock(Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡlock));
                         Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Add(2);
@@ -861,8 +870,8 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
-                    int64 t = default!;
-                    while (ᐧ) {
+                    int64 t = default;
+                    for (;;) {
                         switch ((Ꮡstate.of(BenchmarkMutexHandoff_state.Ꮡturn).Load() & 0x3)) {
                         case 0: {
                             break;
@@ -888,7 +897,7 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
             bΔ1.ReportMetric((float64)Ꮡdelta.Load() / (float64)(~bΔ1).N, nsOpˢ);
         };
 
-    Ꮡb.Run(soloˢ, (ж<testing.B> bΔ2) => {
+    b.Run(soloˢ, (ж<testing.B> bΔ2) => {
         ref var @lock = ref heap(new Mutex(), out var Ꮡlock);
         foreach (var _ᴛ2 in range((~bΔ2).N)) {
             runtime_internal_test_package.ΔLock(Ꮡlock);
@@ -896,9 +905,9 @@ public static void BenchmarkMutexHandoff(ж<testing.B> Ꮡb) {
         }
     });
 
-    Ꮡb.Run(fastPingPongˢ, testcase((ж<Mutex> l) => {
+    b.Run(fastPingPongˢ, testcase((ж<Mutex> l) => {
     }));
-    Ꮡb.Run(slowPingPongˢ, testcase((ж<Mutex> l) => {
+    b.Run(slowPingPongˢ, testcase((ж<Mutex> l) => {
         // Wait for the worker to stop spinning and prepare to sleep
         while (!runtime_internal_test_package.MutexContended(l)) {
         }

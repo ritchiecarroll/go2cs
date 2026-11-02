@@ -193,8 +193,7 @@ exact error for the targets it genuinely owns, so the guard cannot be an over-br
 
 ## A clause's `else` may only be dropped when EVERY preceding clause terminates
 Since seat #28 this governs only a switch with `fallthrough`: the shape below has none, so it now
-emits as a pattern switch, and the excerpt from `src/core` shows the chain until the corpus is
-regenerated. In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
+emits as a pattern switch, as the excerpt from `src/core` below shows. In the if-chain lowering the converter omits the `else` before a clause when the preceding clause
 ended in a `return` — the chain is then unnecessary, since control cannot reach the later clause
 anyway. Dropping the `else` is sound only when **every** preceding clause terminates; a *shallow* "the
 last statement emitted was a return" flag reports only the **immediately** preceding clause.
@@ -214,21 +213,22 @@ default:
 }
 ```
 
-The `break` case is not a Go terminating statement, so the default keeps its `else`:
+The `break` case is not a Go terminating statement, so in the if-chain the default keeps its `else`. As a
+pattern switch, each clause is its own `case`, so there is no `else` to lose:
 
-<!-- source: src/core/os/windows/exec_windows.cs:42-52 -->
+<!-- source: src/core/os/windows/exec_windows.cs:45-55 -->
 ```csharp
-        if (exprᴛ2 == syscall.WAIT_OBJECT_0) {
-            do {
-                break;
-            } while (false);
+        switch (s) {
+        case var ᴛ when ᴛ == syscall.WAIT_OBJECT_0: {
+            break;
+            break;
         }
-        else if (exprᴛ2 == syscall.WAIT_FAILED) {
-            (ps, err) = (default!, NewSyscallError(waitForSingleObjectˢ, e)); goto ᒐdone;
+        case var ᴛ when ᴛ == syscall.WAIT_FAILED: {
+            (ps, err) = (default, NewSyscallError(waitForSingleObjectˢ, e)); goto ᒐdone;
         }
-        else { /* default: */
-            (ps, err) = (default!, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
-        }
+        default: {
+            (ps, err) = (default, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
+        }}
 ```
 
 With the shallow flag, the returning `WAIT_FAILED` case would drop that `else`, and the default would
@@ -267,10 +267,10 @@ reached the end of the body" *is* "the fallthrough statement was reached" — wh
 be raised at the end rather than at the statement. In a break-wrapped case that equivalence holds only
 **inside** the wrapper, so the assignment goes there and a `break` skips it:
 
-<!-- source: src/core/time/format.cs:1312-1319 -->
+<!-- source: src/core/time/format.cs:1375-1382 -->
 ```csharp
             do {
-                if (len(value) >= 1 && value[0] == (rune)'Z') {
+                if (len(value) >= 1 && value[0] == 'Z') {
                     value = value[1..];
                     z = ΔUTC;
                     break;

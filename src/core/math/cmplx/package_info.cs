@@ -45,7 +45,7 @@ using static go.math.cmplx_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,20 +55,20 @@ using static go.math.cmplx_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/cmplx/abs.go", "abs.cs", "AA0akA==")]
-[assembly: go.GoPositionMap("math/cmplx/asin.go", "asin.cs", "AAlmACkCgKSkpJSkpMaUpKTGpIKCgoKCqJKApKSklKSkxpSkpMakgoIAAiIADgKCqJKClIKClAACSgAiAoCkpKSClKSkgoKClIKUgoKClIKCqJKCgg==")]
-[assembly: go.GoPositionMap("math/cmplx/conj.go", "conj.cs", "AAcQkA==")]
-[assembly: go.GoPositionMap("math/cmplx/exp.go", "exp.cs", "AAlmACkCgKSUpIKU6ILGgoI=")]
-[assembly: go.GoPositionMap("math/cmplx/isinf.go", "isinf.cs", "AAkUkoKUqJKC")]
-[assembly: go.GoPositionMap("math/cmplx/isnan.go", "isnan.cs", "AAkWopSklKiSgg==")]
-[assembly: go.GoPositionMap("math/cmplx/log.go", "log.cs", "AAlyAC8CqJKC")]
-[assembly: go.GoPositionMap("math/cmplx/phase.go", "phase.cs", "AAkWoA==")]
-[assembly: go.GoPositionMap("math/cmplx/polar.go", "polar.cs", "AAcUsg==")]
-[assembly: go.GoPositionMap("math/cmplx/pow.go", "pow.cs", "AAlkACgCgoKUgpSkgpSklJSCgpSCgoKCgpSC")]
-[assembly: go.GoPositionMap("math/cmplx/rect.go", "rect.cs", "AAkUkoI=")]
-[assembly: go.GoPositionMap("math/cmplx/sin.go", "sin.cs", "AAlqACsCgKSklKTGpIKCAAIiAA4CgKSklKTGpIKCAAIsABMCgKSklKTGpIKCAAIgAA0CgKSklKTGpIKCqJKClIKCgg==")]
-[assembly: go.GoPositionMap("math/cmplx/sqrt.go", "sqrt.cs", "AAl0ADAClIKUgpSSgpSCgoKUgpSCgpSCgoKUgoKUgoKCgoKUgoKUgpQ=")]
-[assembly: go.GoPositionMap("math/cmplx/tan.go", "tan.cs", "AAt8ADECgKSUlKSkgoKUgpQAAiAADQKApJSUpKSCgpQAAhYACBIACAKEAAoYgoKClgAGEIKCgpwAHDKSgoKUgoKCgpSClIKUgpSClKiSgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCpqYAAjoAGgKCgpSClA==")]
+[assembly: GoPositionMap("math/cmplx/abs.go", "abs.cs", "AA0akA==")]
+[assembly: GoPositionMap("math/cmplx/asin.go", "asin.cs", "AAlmACkCgKSkpJSkpMaUpKTGpIKCgoKCqJKApKSklKSkxpSkpMakgoIAAiIADgKCqJKClIKClAACSgAiAoCkpKSClKSkgoKClIKUgoKClIKCqJKCgg==")]
+[assembly: GoPositionMap("math/cmplx/conj.go", "conj.cs", "AAcQkA==")]
+[assembly: GoPositionMap("math/cmplx/exp.go", "exp.cs", "AAlmACkCgKSUpIKU6ILGgoI=")]
+[assembly: GoPositionMap("math/cmplx/isinf.go", "isinf.cs", "AAkUkoKUqJKC")]
+[assembly: GoPositionMap("math/cmplx/isnan.go", "isnan.cs", "AAkWopSklKiSgg==")]
+[assembly: GoPositionMap("math/cmplx/log.go", "log.cs", "AAlyAC8CqJKC")]
+[assembly: GoPositionMap("math/cmplx/phase.go", "phase.cs", "AAkWoA==")]
+[assembly: GoPositionMap("math/cmplx/polar.go", "polar.cs", "AAcUsg==")]
+[assembly: GoPositionMap("math/cmplx/pow.go", "pow.cs", "AAlkACgCgoKUgpSkgpSklJSCgpSCgoKCgpSC")]
+[assembly: GoPositionMap("math/cmplx/rect.go", "rect.cs", "AAkUkoI=")]
+[assembly: GoPositionMap("math/cmplx/sin.go", "sin.cs", "AAlqACsCgKSklKTGpIKCAAIiAA4CgKSklKTGpIKCAAIsABMCgKSklKTGpIKCAAIgAA0CgKSklKTGpIKCqJKClIKCgg==")]
+[assembly: GoPositionMap("math/cmplx/sqrt.go", "sqrt.cs", "AAl0ADAClIKUgpSCgpSCgoKUgpSCgpSCgoKUgoKUgoKCgoKUgoKUgpQ=")]
+[assembly: GoPositionMap("math/cmplx/tan.go", "tan.cs", "AAt8ADECgKSUlKSkgoKUgpQAAiAADQKApJSUpKSCgpQAAhYACBIACAKEAAoYgoKClgAGEIKCgpwAHDKSgoKUgoKCgpSClIKUgpSClKiSgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCpqYAAjoAGgKCgpSClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.math;

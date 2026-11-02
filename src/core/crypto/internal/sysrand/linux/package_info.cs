@@ -10,16 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,7 +45,7 @@ using static go.crypto.@internal.sysrand_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -65,8 +55,8 @@ using static go.crypto.@internal.sysrand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwACxYACQKmgqSAgoKClJSCxAANEIKClIKUgriClJQ=", "63-65:1")]
-[assembly: go.GoPositionMap("crypto/internal/sysrand/rand_getrandom.go", "rand_getrandom.cs", "AA8iAAoWAAgSgqaCgoKUgqaUuJSClJQ=")]
+[assembly: GoPositionMap("crypto/internal/sysrand/rand.go", "rand.cs", "ABQmgqwADBYACQKmgqSAgoKClJSCxAAOEIKClIKUgriClJQ=", "63-65:1", "", "", "53:25")]
+[assembly: GoPositionMap("crypto/internal/sysrand/rand_getrandom.go", "rand_getrandom.cs", "AA8iAAoWAAgSgqaCgoKUgqaUuJSClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

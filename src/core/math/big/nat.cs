@@ -77,7 +77,7 @@ internal static Δnat setWord(this Δnat z, Word x) {
 internal static Δnat setUint64(this Δnat z, uint64 x) {
     // single-word value
     {
-        Word w = (Word)(nuint)x; if ((uint64)(nuint)w == x) {
+        Word w = (Word)(nuint)x; if ((uint64)w == x) {
             return z.setWord(w);
         }
     }
@@ -154,7 +154,7 @@ internal static Δnat sub(this Δnat z, Δnat x, Δnat y) {
 }
 
 internal static nint /*r*/ cmp(this Δnat x, Δnat y) {
-    nint r = default!;
+    nint r = default;
 
     nint m = len(x);
     nint n = len(y);
@@ -207,7 +207,7 @@ internal static Δnat montgomery(this Δnat z, Δnat x, Δnat y, Δnat m, Word k
     }
     z = z.make(n * 2);
     clear(z);
-    Word c = default!;
+    Word c = default;
     for (nint i = 0; i < n; i++) {
         Word d = y[i];
         Word c2 = addMulVVWW(z.slice(i, n + i), z.slice(i, n + i), x, d, 0);
@@ -216,13 +216,13 @@ internal static Δnat montgomery(this Δnat z, Δnat x, Δnat y, Δnat m, Word k
         Word cx = c + c2;
         Word cy = cx + c3;
         z[n + i] = cy;
-        if (cx < c2 || cy < c3){
+        if (cx < c2 || cy < c3) {
             c = 1;
         } else {
             c = 0;
         }
     }
-    if (c != 0){
+    if (c != 0) {
         subVV(z.slice(0, n), z.slice(n), m);
     } else {
         copy(z.slice(0, n), z.slice(n));
@@ -277,7 +277,7 @@ internal static Δnat mulRange(this Δnat z, ж<stack> Ꮡstk, uint64 a, uint64 
             return z.setUint64(a);
         }
         case {} when a + 1 == b: {
-            return z.mul(Ꮡstk, ((Δnat)default!).setUint64(a), ((Δnat)default!).setUint64(b));
+            return z.mul(Ꮡstk, ((Δnat)default).setUint64(a), ((Δnat)default).setUint64(b));
         }}
 
         if (Ꮡstk == nil) {
@@ -286,9 +286,9 @@ internal static Δnat mulRange(this Δnat z, ж<stack> Ꮡstk, uint64 a, uint64 
         }
 
         var m = a + (b - a) / 2; // avoid overflow
-        return z.mul(Ꮡstk, ((Δnat)default!).mulRange(Ꮡstk, a, m), ((Δnat)default!).mulRange(Ꮡstk, m + 1, b));
+        return z.mul(Ꮡstk, ((Δnat)default).mulRange(Ꮡstk, a, m), ((Δnat)default).mulRange(Ꮡstk, m + 1, b));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -387,7 +387,7 @@ internal static nuint trailingZeroBits(this Δnat x) {
     if (len(x) == 0) {
         return 0;
     }
-    nuint i = default!;
+    nuint i = default;
     while (x[i] == 0) {
         i++;
     }
@@ -397,7 +397,7 @@ internal static nuint trailingZeroBits(this Δnat x) {
 
 // isPow2 returns i, true when x == 2**i and 0, false otherwise.
 internal static (nuint, bool) isPow2(this Δnat x) {
-    nuint i = default!;
+    nuint i = default;
     while (x[i] == 0) {
         i++;
     }
@@ -431,7 +431,7 @@ internal static Δnat lsh(this Δnat z, Δnat x, nuint s) {
     nint n = m + (nint)(s / (nuint)_W);
     z = z.make(n + 1);
     {
-        s %= _W; if (s == 0){
+        s %= _W; if (s == 0) {
             copy(z.slice(n - m, n), x);
             z[n] = 0;
         } else {
@@ -463,7 +463,7 @@ internal static Δnat rsh(this Δnat z, Δnat x, nuint s) {
 
     z = z.make(n);
     {
-        s %= _W; if (s == 0){
+        s %= _W; if (s == 0) {
             copy(z, x.slice(m - n));
         } else {
             rshVU(z, x.slice(m - n), s);
@@ -489,7 +489,7 @@ internal static Δnat setBit(this Δnat z, Δnat x, nuint i, nuint b) {
         return z.norm();
     }
     case 1: {
-        if (j >= n){
+        if (j >= n) {
             z = z.make(j + 1);
             clear(z.slice(n));
         } else {
@@ -626,7 +626,7 @@ internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, n
     ref var randΔ1 = ref Ꮡrand.DerefOrNull();
 
     if (alias(z, limit)) {
-        z = default!; // z is an alias for limit - cannot reuse
+        z = default; // z is an alias for limit - cannot reuse
     }
     z = z.make(len(limit));
 
@@ -636,21 +636,24 @@ internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, n
     }
     Word mask = ((Word)((nuint)1 << (int)(bitLengthOfMSW))) - 1;
 
-    while (ᐧ) {
-        var exprᴛ1 = _W;
-        if (exprᴛ1 == 32) {
+    for (;;) {
+        switch (_W) {
+        case var ᴛ when ᴛ == 32: {
             foreach (var i in range(z)) {
                 z[i] = (Word)(nuint)randΔ1.Uint32();
             }
+            break;
         }
-        else if (exprᴛ1 == 64) {
+        case var ᴛ when ᴛ == 64: {
             foreach (var i in range(z)) {
                 z[i] = (Word)(((Word)(nuint)randΔ1.Uint32()) | ((Word)(nuint)randΔ1.Uint32()) << 32);
             }
+            break;
         }
-        else { /* default: */
+        default: {
             throw panic("unknown word size");
-        }
+            break;
+        }}
         z[len(limit) - 1] &= (Word)(mask);
         if (z.cmp(limit) < 0) {
             break;
@@ -670,7 +673,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
 
         if (alias(z, x) || alias(z, y)) {
             // We cannot allow in-place modification of x or y.
-            z = default!;
+            z = default;
         }
 
         // x**y mod 1 == 0
@@ -737,7 +740,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
         Word v = y[len(y) - 1]; // v > 0 because y is normalized and y > 0
         nuint shift = nlz(v) + 1;
         v <<= shift;
-        Δnat q = default!;
+        Δnat q = default;
 
         UntypedInt mask = /* 1 << (_W - 1) */ 9223372036854775808;
 
@@ -748,8 +751,8 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
         nint w = (nint)_W - (nint)shift;
         // zz and r are used to avoid allocating in mul and div as
         // otherwise the arguments would alias.
-        Δnat zz = default!;
-        Δnat r = default!;
+        Δnat zz = default;
+        Δnat r = default;
         for (nint j = 0; j < w; j++) {
             zz = zz.sqr(Ꮡstk, z);
             (zz, z) = (z, zz);
@@ -790,7 +793,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
 
         return z.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -802,11 +805,11 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
 // For more details, see Ç. K. Koç, “Montgomery Reduction with Even Modulus”,
 // IEE Proceedings: Computers and Digital Techniques, 141(5) 314-316, September 1994.
 // http://www.people.vcu.edu/~jwang3/CMSC691/j34monex.pdf
-internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δnat m) {
+internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> stk, Δnat x, Δnat y, Δnat m) {
     // Split m = m₁ × m₂ where m₁ = 2ⁿ
     nuint n = m.trailingZeroBits();
-    var m1 = ((Δnat)default!).lsh(natOne, n);
-    var m2 = ((Δnat)default!).rsh(m, n);
+    var m1 = ((Δnat)default).lsh(natOne, n);
+    var m2 = ((Δnat)default).rsh(m, n);
 
     // We want z = x**y mod m.
     // z₁ = x**y mod m1 = (x**y mod m) mod m1 = z mod m1
@@ -814,8 +817,8 @@ internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> Ꮡstk, Δnat 
     // (We are using the math/big convention for names here,
     // where the computation is z = x**y mod m, so its parts are z1 and z2.
     // The paper is computing x = a**e mod n; it refers to these as x2 and z1.)
-    var z1 = ((Δnat)default!).expNN(Ꮡstk, x, y, m1, false);
-    var z2 = ((Δnat)default!).expNN(Ꮡstk, x, y, m2, false);
+    var z1 = ((Δnat)default).expNN(stk, x, y, m1, false);
+    var z2 = ((Δnat)default).expNN(stk, x, y, m2, false);
 
     // Reconstruct z from z₁, z₂ using CRT, using algorithm from paper,
     // which uses only a single modInverse (and an easy one at that).
@@ -833,12 +836,12 @@ internal static Δnat expNNMontgomeryEven(this Δnat z, ж<stack> Ꮡstk, Δnat 
     z1 = z1.subMod2N(z1, z2, n);
 
     // Reuse z2 for p = (z₁ - z₂) [in z1] * m2⁻¹ (mod m₁ [= 2ⁿ]).
-    var m2inv = ((Δnat)default!).modInverse(m2, m1);
-    z2 = z2.mul(Ꮡstk, z1, m2inv);
+    var m2inv = ((Δnat)default).modInverse(m2, m1);
+    z2 = z2.mul(stk, z1, m2inv);
     z2 = z2.trunc(z2, n);
 
     // Reuse z1 for p * m2.
-    z = z.add(z, z1.mul(Ꮡstk, z2, m2));
+    z = z.add(z, z1.mul(stk, z2, m2));
 
     return z;
 }
@@ -941,19 +944,19 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
 
         return z.norm();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // expNNMontgomery calculates x**y mod m using a fixed, 4-bit window.
 // Uses Montgomery representation.
-internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δnat m) {
+internal static Δnat expNNMontgomery(this Δnat z, ж<stack> stk, Δnat x, Δnat y, Δnat m) {
     nint numWords = len(m);
 
     // We want the lengths of x and m to be equal.
     // It is OK if x >= m as long as len(x) == len(m).
     if (len(x) > numWords) {
-        (_, x) = ((Δnat)default!).div(Ꮡstk, default!, x, m);
+        (_, x) = ((Δnat)default).div(stk, default, x, m);
         // Note: now len(x) <= numWords, not guaranteed ==.
     }
     if (len(x) < numWords) {
@@ -967,16 +970,16 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
     // Iteration for Multiplicative Inverses Modulo Prime Powers".
     Word k0 = 2 - m[0];
     Word t = m[0] - 1;
-    for (nint i = 1; i < _W; i <<= (int)(1)) {
+    for (nint i = 1; i < _W; i <<= 1) {
         t *= t;
         k0 *= (t + 1);
     }
     k0 = ((Word)0 - k0);
 
     // RR = 2**(2*_W*len(m)) mod m
-    var RR = ((Δnat)default!).setWord(1);
-    var zz = ((Δnat)default!).lsh(RR, (nuint)(2 * numWords * (nint)_W));
-    (_, RR) = ((Δnat)default!).div(Ꮡstk, RR, zz, m);
+    var RR = ((Δnat)default).setWord(1);
+    var zz = ((Δnat)default).lsh(RR, (nuint)(2 * numWords * (nint)_W));
+    (_, RR) = ((Δnat)default).div(stk, RR, zz, m);
     if (len(RR) < numWords) {
         zz = zz.make(numWords);
         copy(zz, RR);
@@ -1031,7 +1034,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
         // The div is not expected to be reached.
         zz = zz.sub(zz, m);
         if (zz.cmp(m) >= 0) {
-            (_, zz) = ((Δnat)default!).div(Ꮡstk, default!, zz, m);
+            (_, zz) = ((Δnat)default).div(stk, default, zz, m);
         }
     }
 
@@ -1043,7 +1046,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
 // cannot be represented in buf, bytes panics. The number i of unused
 // bytes at the beginning of buf is returned as result.
 internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
-    nint i = default!;
+    nint i = default;
 
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
@@ -1054,10 +1057,9 @@ internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
 
         for (nint j = 0; j < _S; j++) {
             i--;
-            if (i >= 0){
-                buf[i] = (byte)(nuint)d;
-            } else 
-            if ((byte)(nuint)d != 0) {
+            if (i >= 0) {
+                buf[i] = (byte)d;
+            } else if ((byte)d != 0) {
                 throw panic("math/big: buffer too small to fit value");
             }
             d >>= (int)(8);
@@ -1093,7 +1095,7 @@ internal static Δnat setBytes(this Δnat z, slice<byte> buf) {
         i -= _S;
     }
     if (i > 0) {
-        Word d = default!;
+        Word d = default;
         for (nuint s = (nuint)0; i > 0; s += 8) {
             d |= (Word)((((Word)(nuint)buf[i - 1]) << s));
             i--;
@@ -1115,7 +1117,7 @@ internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
             return z.set(x);
         }
         if (alias(z, x)) {
-            z = default!;
+            z = default;
         }
 
         if (Ꮡstk == nil) {
@@ -1128,13 +1130,13 @@ internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
         // https://members.loria.fr/PZimmermann/mca/pub226.html
         // If x is one less than a perfect square, the sequence oscillates between the correct z and z+1;
         // otherwise it converges to the correct z and stays there.
-        Δnat z1 = default!;
-        Δnat z2 = default!;
+        Δnat z1 = default;
+        Δnat z2 = default;
         z1 = z;
         z1 = z1.setUint64(1);
         z1 = z1.lsh(z1, (nuint)(x.bitLen() + 1) / 2); // must be ≥ √x
-        for (nint n = 0; ᐧ ; n++) {
-            (z2, _) = z2.div(Ꮡstk, default!, x, z1);
+        for (nint n = 0; ; n++) {
+            (z2, _) = z2.div(Ꮡstk, default, x, z1);
             z2 = z2.add(z2, z1);
             z2 = z2.rsh(z2, 1);
             if (z2.cmp(z1) >= 0) {
@@ -1148,26 +1150,26 @@ internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
             (z1, z2) = (z2, z1);
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // subMod2N returns z = (x - y) mod 2ⁿ.
 internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
     if ((nuint)x.bitLen() > n) {
-        if (alias(z, x)){
+        if (alias(z, x)) {
             // ok to overwrite x in place
             x = x.trunc(x, n);
         } else {
-            x = ((Δnat)default!).trunc(x, n);
+            x = ((Δnat)default).trunc(x, n);
         }
     }
     if ((nuint)y.bitLen() > n) {
-        if (alias(z, y)){
+        if (alias(z, y)) {
             // ok to overwrite y in place
             y = y.trunc(y, n);
         } else {
-            y = ((Δnat)default!).trunc(y, n);
+            y = ((Δnat)default).trunc(y, n);
         }
     }
     if (x.cmp(y) >= 0) {

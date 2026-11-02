@@ -30,9 +30,7 @@ partial class runtime_test_package {
 
 internal static nint testMemStatsCount;
 
-public static void TestMemStats(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestMemStats(ж<testing.T> t) {
     testMemStatsCount++;
 
     // Make sure there's at least one forced GC.
@@ -44,7 +42,7 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
 
     var nz = error (any x) => {
         if (!AreEqual(x, reflect.Zero(reflect.TypeOf(x)).Interface())) {
-            return default!;
+            return default;
         }
         return fmt.Errorf("zero value"u8);
     };
@@ -53,36 +51,36 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
             // with high -test.count values, so only run
             // them once.
             if (testMemStatsCount > 1) {
-                return default!;
+                return default;
             }
 
             if (reflect.ValueOf(x).Convert(reflect.TypeOf(thresh)).Float() < thresh) {
-                return default!;
+                return default;
             }
             return fmt.Errorf("insanely high value (overflow?); want <= %v"u8, thresh);
         };
     Func<any, error> eq(any x) => error (any y) => {
             if (AreEqual(x, y)) {
-                return default!;
+                return default;
             }
             return fmt.Errorf("want %v"u8, x);
         };
     // Of the uint fields, HeapReleased, HeapIdle can be 0.
     // PauseTotalNs can be 0 if timer resolution is poor.
     var fields = new map<@string, slice<Func<any, error>>>{
-        ["Alloc"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["TotalAlloc"u8] = new Func<any, error>[]{nz, le(1e11D)}.slice(), ["Sys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["Lookups"u8] = new Func<any, error>[]{eq((uint64)0)}.slice(), ["Mallocs"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["Frees"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["HeapAlloc"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["HeapSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["HeapIdle"u8] = new Func<any, error>[]{le(1e10D)}.slice(),
-        ["HeapInuse"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["HeapReleased"u8] = new Func<any, error>[]{le(1e10D)}.slice(), ["HeapObjects"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["StackInuse"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["StackSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["MSpanInuse"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["MSpanSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["MCacheInuse"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["MCacheSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["BuckHashSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["GCSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["OtherSys"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(),
-        ["NextGC"u8] = new Func<any, error>[]{nz, le(1e10D)}.slice(), ["LastGC"u8] = new Func<any, error>[]{nz}.slice(),
-        ["PauseTotalNs"u8] = new Func<any, error>[]{le(1e11D)}.slice(), ["PauseNs"u8] = default!, ["PauseEnd"u8] = default!,
-        ["NumGC"u8] = new Func<any, error>[]{nz, le(1e9D)}.slice(), ["NumForcedGC"u8] = new Func<any, error>[]{nz, le(1e9D)}.slice(),
-        ["GCCPUFraction"u8] = new Func<any, error>[]{le(0.99D)}.slice(), ["EnableGC"u8] = new Func<any, error>[]{eq(true)}.slice(), ["DebugGC"u8] = new Func<any, error>[]{eq(false)}.slice(),
-        ["BySize"u8] = default!
+        ["Alloc"] = slice<Func<any, error>>([nz, le(1e10D)]), ["TotalAlloc"] = slice<Func<any, error>>([nz, le(1e11D)]), ["Sys"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["Lookups"] = slice<Func<any, error>>([eq((uint64)0)]), ["Mallocs"] = slice<Func<any, error>>([nz, le(1e10D)]), ["Frees"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["HeapAlloc"] = slice<Func<any, error>>([nz, le(1e10D)]), ["HeapSys"] = slice<Func<any, error>>([nz, le(1e10D)]), ["HeapIdle"] = slice<Func<any, error>>([le(1e10D)]),
+        ["HeapInuse"] = slice<Func<any, error>>([nz, le(1e10D)]), ["HeapReleased"] = slice<Func<any, error>>([le(1e10D)]), ["HeapObjects"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["StackInuse"] = slice<Func<any, error>>([nz, le(1e10D)]), ["StackSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["MSpanInuse"] = slice<Func<any, error>>([nz, le(1e10D)]), ["MSpanSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["MCacheInuse"] = slice<Func<any, error>>([nz, le(1e10D)]), ["MCacheSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["BuckHashSys"] = slice<Func<any, error>>([nz, le(1e10D)]), ["GCSys"] = slice<Func<any, error>>([nz, le(1e10D)]), ["OtherSys"] = slice<Func<any, error>>([nz, le(1e10D)]),
+        ["NextGC"] = slice<Func<any, error>>([nz, le(1e10D)]), ["LastGC"] = slice<Func<any, error>>([nz]),
+        ["PauseTotalNs"] = slice<Func<any, error>>([le(1e11D)]), ["PauseNs"] = default, ["PauseEnd"] = default,
+        ["NumGC"] = slice<Func<any, error>>([nz, le(1e9D)]), ["NumForcedGC"] = slice<Func<any, error>>([nz, le(1e9D)]),
+        ["GCCPUFraction"] = slice<Func<any, error>>([le(0.99D)]), ["EnableGC"] = slice<Func<any, error>>([eq(true)]), ["DebugGC"] = slice<Func<any, error>>([eq(false)]),
+        ["BySize"] = default
     };
 
     var rst = reflect.ValueOf(st.OrTypedNil()).Elem();
@@ -91,79 +89,80 @@ public static void TestMemStats(ж<testing.T> Ꮡt) {
         var val = rst.Field(i).Interface();
         var (checks, ok) = fields[name, ꟷ];
         if (!ok) {
-            Ꮡt.Errorf("unknown MemStats field %s"u8, name);
+            t.Errorf("unknown MemStats field %s", name);
             continue;
         }
         foreach (var (_, check) in checks) {
             {
-                var err = check(val); if (err != default!) {
-                    Ꮡt.Errorf("%s = %v: %s"u8, name, val, err);
+                var err = check(val); if (err != nil) {
+                    t.Errorf("%s = %v: %s", name, val, err);
                 }
             }
         }
     }
 
-    if ((~st).Sys != (~st).HeapSys + (~st).StackSys + (~st).MSpanSys + (~st).MCacheSys + (~st).BuckHashSys + (~st).GCSys + (~st).OtherSys) {
-        Ꮡt.Fatalf("Bad sys value: %+v"u8, st.Value);
+    if (st.Sys != st.HeapSys + st.StackSys + st.MSpanSys + st.MCacheSys + st.BuckHashSys + st.GCSys + st.OtherSys) {
+        t.Fatalf("Bad sys value: %+v", st.Value);
     }
 
-    if ((~st).HeapIdle + (~st).HeapInuse != (~st).HeapSys) {
-        Ꮡt.Fatalf("HeapIdle(%d) + HeapInuse(%d) should be equal to HeapSys(%d), but isn't."u8, (~st).HeapIdle, (~st).HeapInuse, (~st).HeapSys);
+    if (st.HeapIdle + st.HeapInuse != st.HeapSys) {
+        t.Fatalf("HeapIdle(%d) + HeapInuse(%d) should be equal to HeapSys(%d), but isn't.", st.HeapIdle, st.HeapInuse, st.HeapSys);
     }
 
     {
-        var lpe = (~st).PauseEnd[(nint)((~st).NumGC + 255) % len((~st).PauseEnd)]; if ((~st).LastGC != lpe) {
-            Ꮡt.Fatalf("LastGC(%d) != last PauseEnd(%d)"u8, (~st).LastGC, lpe);
+        var lpe = st.PauseEnd[(nint)(st.NumGC + 255) % len(st.PauseEnd)]; if (st.LastGC != lpe) {
+            t.Fatalf("LastGC(%d) != last PauseEnd(%d)", st.LastGC, lpe);
         }
     }
 
-    uint64 pauseTotal = default!;
-    foreach (var (_, pause) in (~st).PauseNs.ΔRangeSnapshot()) {
+    uint64 pauseTotal = default;
+    foreach (var (_, pause) in st.PauseNs.ΔRangeSnapshot()) {
         pauseTotal += pause;
     }
-    if ((nint)(~st).NumGC < len((~st).PauseNs)){
+    if ((nint)st.NumGC < len(st.PauseNs)) {
         // We have all pauses, so this should be exact.
-        if ((~st).PauseTotalNs != pauseTotal) {
-            Ꮡt.Fatalf("PauseTotalNs(%d) != sum PauseNs(%d)"u8, (~st).PauseTotalNs, pauseTotal);
+        if (st.PauseTotalNs != pauseTotal) {
+            t.Fatalf("PauseTotalNs(%d) != sum PauseNs(%d)", st.PauseTotalNs, pauseTotal);
         }
-        for (nint i = (nint)(~st).NumGC; i < len((~st).PauseNs); i++) {
-            if ((~st).PauseNs[i] != 0) {
-                Ꮡt.Fatalf("Non-zero PauseNs[%d]: %+v"u8, i, st.OrTypedNil());
+        for (nint i = (nint)st.NumGC; i < len(st.PauseNs); i++) {
+            if (st.PauseNs[i] != 0) {
+                t.Fatalf("Non-zero PauseNs[%d]: %+v", i, st.OrTypedNil());
             }
-            if ((~st).PauseEnd[i] != 0) {
-                Ꮡt.Fatalf("Non-zero PauseEnd[%d]: %+v"u8, i, st.OrTypedNil());
+            if (st.PauseEnd[i] != 0) {
+                t.Fatalf("Non-zero PauseEnd[%d]: %+v", i, st.OrTypedNil());
             }
         }
     } else {
-        if ((~st).PauseTotalNs < pauseTotal) {
-            Ꮡt.Fatalf("PauseTotalNs(%d) < sum PauseNs(%d)"u8, (~st).PauseTotalNs, pauseTotal);
+        if (st.PauseTotalNs < pauseTotal) {
+            t.Fatalf("PauseTotalNs(%d) < sum PauseNs(%d)", st.PauseTotalNs, pauseTotal);
         }
     }
 
-    if ((~st).NumForcedGC > (~st).NumGC) {
-        Ꮡt.Fatalf("NumForcedGC(%d) > NumGC(%d)"u8, (~st).NumForcedGC, (~st).NumGC);
+    if (st.NumForcedGC > st.NumGC) {
+        t.Fatalf("NumForcedGC(%d) > NumGC(%d)", st.NumForcedGC, st.NumGC);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string foo0123456789ˢ = "foo0123456789"u8;
+internal static ref readonly @string foo0123456789ˢ => ref foo0123456789ˢᵇ;
+private static readonly @string foo0123456789ˢᵇ = "foo0123456789"u8;
 
-public static void TestStringConcatenationAllocs(ж<testing.T> Ꮡt) {
+public static void TestStringConcatenationAllocs(ж<testing.T> t) {
     var n = testing.AllocsPerRun(1000, () => {
         var b = new slice<byte>(10);
         for (nint i = 0; i < 10; i++) {
-            b[i] = (byte)((byte)i + (rune)'0');
+            b[i] = (byte)((byte)i + '0');
         }
         @string s = "foo"u8 + ((sstring)b);
         {
             @string want = foo0123456789ˢ; if (s != want) {
-                Ꮡt.Fatalf("want %v, got %v"u8, want, s);
+                t.Fatalf("want %v, got %v", want, s);
             }
         }
     });
     // Only string concatenation allocates.
     if (n != 1D) {
-        Ꮡt.Fatalf("want 1 allocation, got %v"u8, n);
+        t.Fatalf("want 1 allocation, got %v", n);
     }
 }
 
@@ -172,12 +171,12 @@ internal static readonly object tinyallocSuppressedWhenˢ = (@string)"tinyalloc 
 internal static readonly object tinyallocSuppressedWhenˢ2 = (@string)"tinyalloc suppressed when running in asan mode due to redzone"u8;
 internal static readonly object noBytesAllocatedWithinˢ = (@string)"no bytes allocated within the same 8-byte chunk"u8;
 
-public static void TestTinyAlloc(ж<testing.T> Ꮡt) {
+public static void TestTinyAlloc(ж<testing.T> t) {
     if (runtime_internal_test_package.Raceenabled) {
-        Ꮡt.Skip(tinyallocSuppressedWhenˢ);
+        t.Skip(tinyallocSuppressedWhenˢ);
     }
     if (asan.Enabled) {
-        Ꮡt.Skip(tinyallocSuppressedWhenˢ2);
+        t.Skip(tinyallocSuppressedWhenˢ2);
     }
     UntypedInt N = 16;
     array<@unsafe.Pointer> v = new(16); /* N */
@@ -191,7 +190,7 @@ public static void TestTinyAlloc(ж<testing.T> Ꮡt) {
     }
 
     if (len(chunks) == N) {
-        Ꮡt.Fatal(noBytesAllocatedWithinˢ);
+        t.Fatal(noBytesAllocatedWithinˢ);
     }
 }
 
@@ -203,12 +202,12 @@ partial struct obj12 {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unableToGetAFreshTinyˢ = (@string)"unable to get a fresh tiny slot"u8;
 
-public static void TestTinyAllocIssue37262(ж<testing.T> Ꮡt) {
+public static void TestTinyAllocIssue37262(ж<testing.T> t) {
     if (runtime_internal_test_package.Raceenabled) {
-        Ꮡt.Skip(tinyallocSuppressedWhenˢ);
+        t.Skip(tinyallocSuppressedWhenˢ);
     }
     if (asan.Enabled) {
-        Ꮡt.Skip(tinyallocSuppressedWhenˢ2);
+        t.Skip(tinyallocSuppressedWhenˢ2);
     }
     // Try to cause an alignment access fault
     // by atomically accessing the first 64-bit
@@ -235,7 +234,7 @@ public static void TestTinyAllocIssue37262(ж<testing.T> Ꮡt) {
     }
     if (!aligned) {
         runtime_internal_test_package.Releasem();
-        Ꮡt.Fatal(unableToGetAFreshTinyˢ);
+        t.Fatal(unableToGetAFreshTinyˢ);
     }
 
     // Create a 4-byte object so that the current
@@ -250,7 +249,7 @@ public static void TestTinyAllocIssue37262(ж<testing.T> Ꮡt) {
     var tinyObj12 = runtime_internal_test_package.Escape(@new<obj12>());
 
     // Try to atomically access "x.a".
-    atomic.StoreUint64(tinyObj12.of(obj12.Ꮡa), 10);
+    atomic.StoreUint64(tinyObj12.Ꮡa, 10);
 
     runtime_internal_test_package.Releasem();
 }
@@ -262,25 +261,25 @@ internal partial struct TestFreegc_tests /*dyn*/ {
 }
 
 // TestFreegc does basic testing of explicit frees.
-public static void TestFreegc(ж<testing.T> Ꮡt) {
-    var tests = new TestFreegc_tests[]{
+public static void TestFreegc(ж<testing.T> t) {
+    var tests = slice<TestFreegc_tests>([
         // Types without pointers.
-        new("size=16"u8, testFreegc<array<byte>, ᴀ16>, true), // smallest we support currently
-        new("size=17"u8, testFreegc<array<byte>, ᴀ17>, true),
-        new("size=64"u8, testFreegc<array<byte>, ᴀ64>, true),
-        new("size=500"u8, testFreegc<array<byte>, ᴀ500>, true),
-        new("size=512"u8, testFreegc<array<byte>, ᴀ512>, true),
-        new("size=4096"u8, testFreegc<array<byte>, ᴀ4096>, true),
-        new("size=20000"u8, testFreegc<array<byte>, ᴀ20000>, true), // not power of 2 or spc boundary
-        new("size=32KiB-8"u8, testFreegc<array<byte>, ᴀ32760>, true) // max noscan small object for 64-bit
-    }.slice();
+        new("size=16", testFreegc<array<byte>, ᴀ16>, true), // smallest we support currently
+        new("size=17", testFreegc<array<byte>, ᴀ17>, true),
+        new("size=64", testFreegc<array<byte>, ᴀ64>, true),
+        new("size=500", testFreegc<array<byte>, ᴀ500>, true),
+        new("size=512", testFreegc<array<byte>, ᴀ512>, true),
+        new("size=4096", testFreegc<array<byte>, ᴀ4096>, true),
+        new("size=20000", testFreegc<array<byte>, ᴀ20000>, true),  // not power of 2 or spc boundary
+        new("size=32KiB-8", testFreegc<array<byte>, ᴀ32760>, true) // max noscan small object for 64-bit
+    ]);
 
     // Run the tests twice if not in -short mode or not otherwise saving test time.
     // First while manually calling runtime.GC to slightly increase isolation (perhaps making
     // problems more reproducible).
     foreach (var (_, tt) in tests) {
         Δruntime.GC();
-        Ꮡt.Run(fmt.Sprintf("gc=yes/ptrs=%v/%s"u8, !tt.noscan, tt.size), tt.f(tt.noscan));
+        t.Run(fmt.Sprintf("gc=yes/ptrs=%v/%s"u8, !tt.noscan, tt.size), tt.f(tt.noscan));
     }
     Δruntime.GC();
 
@@ -291,25 +290,35 @@ public static void TestFreegc(ж<testing.T> Ꮡt) {
     // Again, but without manually calling runtime.GC in the loop (perhaps less isolation might
     // trigger problems).
     foreach (var (_, tt) in tests) {
-        Ꮡt.Run(fmt.Sprintf("gc=no/ptrs=%v/%s"u8, !tt.noscan, tt.size), tt.f(tt.noscan));
+        t.Run(fmt.Sprintf("gc=no/ptrs=%v/%s"u8, !tt.noscan, tt.size), tt.f(tt.noscan));
     }
     Δruntime.GC();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string basicFreeˢ = "basic-free"u8;
-internal static readonly @string stackFreeˢ = "stack-free"u8;
-internal static readonly @string allocsBaselineˢ = "allocs-baseline"u8;
-internal static readonly @string allocsWithFreeˢ = "allocs-with-free"u8;
+internal static ref readonly @string basicFreeˢ => ref basicFreeˢᵇ;
+private static readonly @string basicFreeˢᵇ = "basic-free"u8;
+internal static ref readonly @string stackFreeˢ => ref stackFreeˢᵇ;
+private static readonly @string stackFreeˢᵇ = "stack-free"u8;
+internal static ref readonly @string allocsBaselineˢ => ref allocsBaselineˢᵇ;
+private static readonly @string allocsBaselineˢᵇ = "allocs-baseline"u8;
+internal static ref readonly @string allocsWithFreeˢ => ref allocsWithFreeˢᵇ;
+private static readonly @string allocsWithFreeˢᵇ = "allocs-with-free"u8;
 internal static readonly object temporarilySkippingAllocˢ = (@string)"temporarily skipping alloc tests for GOEXPERIMENT=sizespecializedmalloc for pointer types"u8;
 internal static readonly object skippingAllocTestsWithˢ = (@string)"skipping alloc tests with runtime.freegc disabled"u8;
-internal static readonly @string freeMultipleˢ = "free-multiple"u8;
+internal static ref readonly @string freeMultipleˢ => ref freeMultipleˢᵇ;
+private static readonly @string freeMultipleˢᵇ = "free-multiple"u8;
 internal static readonly object skippingRemainingFreegcˢ = (@string)"skipping remaining freegc tests, was timing out on wasm"u8;
-internal static readonly @string freeManyˢ = "free-many"u8;
-internal static readonly @string duplicateCheckˢ = "duplicate-check"u8;
-internal static readonly @string freeOtherGoroutineˢ = "free-other-goroutine"u8;
-internal static readonly @string manyGoroutinesˢ = "many-goroutines"u8;
-internal static readonly @string assistCreditˢ = "assist-credit"u8;
+internal static ref readonly @string freeManyˢ => ref freeManyˢᵇ;
+private static readonly @string freeManyˢᵇ = "free-many"u8;
+internal static ref readonly @string duplicateCheckˢ => ref duplicateCheckˢᵇ;
+private static readonly @string duplicateCheckˢᵇ = "duplicate-check"u8;
+internal static ref readonly @string freeOtherGoroutineˢ => ref freeOtherGoroutineˢᵇ;
+private static readonly @string freeOtherGoroutineˢᵇ = "free-other-goroutine"u8;
+internal static ref readonly @string manyGoroutinesˢ => ref manyGoroutinesˢᵇ;
+private static readonly @string manyGoroutinesˢᵇ = "many-goroutines"u8;
+internal static ref readonly @string assistCreditˢ => ref assistCreditˢᵇ;
+private static readonly @string assistCreditˢᵇ = "assist-credit"u8;
 internal static readonly object temporarilySkipAssistˢ = (@string)"temporarily skip assist credit tests for GOEXPERIMENT=sizespecializedmalloc for pointer types"u8;
 internal static readonly object skippingAssistCreditTestˢ = (@string)"skipping assist credit test with runtime.freegc disabled"u8;
 
@@ -333,7 +342,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             var p = runtime_internal_test_package.Escape(GoArrayZero.New<T, Tᴀ>());
             T zero = GoArrayZero.Of<T, Tᴀ>();
             if (!AreEqual(p.ValueSlot, zero)) {
-                t.Fatalf("allocator returned non-zero memory: %v"u8, (p.ValueSlot).OrTypedNilOf());
+                t.Fatalf("allocator returned non-zero memory: %v", (p.ValueSlot).OrTypedNilOf());
             }
             return p;
         }
@@ -342,7 +351,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             t.Helper();
             T zero = GoArrayZero.Of<T, Tᴀ>();
             if (!AreEqual(p.ValueSlot, zero)) {
-                t.Fatalf("found non-zero memory before freegc (tests do not modify memory): %v"u8, (p.ValueSlot).OrTypedNilOf());
+                t.Fatalf("found non-zero memory before freegc (tests do not modify memory): %v", (p.ValueSlot).OrTypedNilOf());
             }
             runtime_internal_test_package.Freegc(@unsafe.Pointer.FromPinnedBox(p), @unsafe.Sizeof(p.ValueSlot), noscan);
         }
@@ -362,7 +371,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             foreach (var _ᴛ2 in range(100)) {
                 ref var x = ref heap(new array<byte>(32), out var Ꮡx);
                 ref var y = ref heap(new array<ж<nint>>(32), out var Ꮡy);
-                runtime_internal_test_package.Freegc(@unsafe.Pointer.FromPinnedBox(Ꮡx), /* unsafe.Sizeof(x) */ (uintptr)32, true); // noscan
+                runtime_internal_test_package.Freegc(@unsafe.Pointer.FromPinnedBox(Ꮡx), /* unsafe.Sizeof(x) */ (uintptr)32, true);   // noscan
                 runtime_internal_test_package.Freegc(@unsafe.Pointer.FromPinnedBox(Ꮡy), /* unsafe.Sizeof(y) */ (uintptr)256, false); // !noscan
             }
         });
@@ -387,7 +396,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             if (allocs < 100D) {
                 // TODO(thepudds): we get exactly 100 for almost all the tests, but investigate why
                 // ~101 allocs for TestFreegc/ptrs=true/size=32KiB-8.
-                tΔ3.Fatalf("expected >=100 allocations, got %v"u8, allocs);
+                tΔ3.Fatalf("expected >=100 allocations, got %v", allocs);
             }
         });
 
@@ -413,7 +422,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 }
             });
             if (allocs != 0D) {
-                tΔ4.Fatalf("expected 0 allocations, got %v"u8, allocs);
+                tΔ4.Fatalf("expected 0 allocations, got %v", allocs);
             }
         });
 
@@ -432,8 +441,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 tΔ5.Skip(skippingAllocTestsWithˢ);
             }
             const nint maxOutstanding = 20;
-            ref var s = ref heap<slice<ж<T>>>(out var Ꮡs);
-            Ꮡs.ValueSlot = new slice<ж<T>>(0, maxOutstanding);
+            ref var s = ref heap<slice<ж<T>>>(new slice<ж<T>>(0, maxOutstanding), out var Ꮡs);
             var allocʗ7 = allocʗ6;
             var freeʗ5 = freeʗ4;
             var allocs = testing.AllocsPerRun(100 * stressMultiple, () => {
@@ -447,7 +455,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 }
             });
             if (allocs != 0D) {
-                tΔ5.Fatalf("expected 0 allocations, got %v"u8, allocs);
+                tΔ5.Fatalf("expected 0 allocations, got %v", allocs);
             }
         });
 
@@ -490,13 +498,13 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             // TODO: maybe add randomness? allow more live pointers? do across goroutines?
             var live = new map<uintptr, bool>();
             foreach (var i in range(100 * stressMultiple)) {
-                slice<ж<T>> s = default!;
+                slice<ж<T>> s = default;
                 // Alloc 10 times, tracking the live pointer values.
                 foreach (var j in range(10)) {
                     var p = allocʗ9();
                     var uptr = (uintptr)p;
                     if (live[uptr]) {
-                        tΔ7.Fatalf("found duplicate pointer (0x%x). i: %d j: %d"u8, uptr, i, j);
+                        tΔ7.Fatalf("found duplicate pointer (0x%x). i: %d j: %d", uptr, i, j);
                     }
                     live[uptr] = true;
                     s = append(sᴷ, s, p);
@@ -505,7 +513,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 s = move2heap(sᴷ, s);
                 foreach (var k in range(s)) {
                     var p = s[k];
-                    s[k] = default!;
+                    s[k] = default;
                     var uptr = (uintptr)p;
                     freeʗ7(p);
                     delete(live, uptr);
@@ -520,7 +528,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
             // This also lightly simulates how the free code sees P migration or flushing
             // the mcache, assuming we have > 1 P. (Not using testing.AllocsPerRun here).
             nint iterations = 10 * stressMultiple * stressMultiple; // currently 10 (-short) or 1000
-            foreach (var (_, capacity) in new nint[]{2}.slice()) {
+            foreach (var (_, capacity) in slice<nint>([2])) {
                 foreach (var _ᴛ8 in range(iterations)) {
                     var ch = new channel<ж<T>>(capacity);
                     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -555,7 +563,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
         t.Run(manyGoroutinesˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ9) => {
             // Allocate across multiple goroutines, freeing on the same goroutine.
             // TODO: probably remove the duplicate checking here; not that useful.
-            var counts = new nint[]{1, 2, 4, 8, 10 * stressMultiple}.slice();
+            var counts = slice<nint>([1, 2, 4, 8, 10 * stressMultiple]);
             foreach (var (_, goroutines) in counts) {
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                 foreach (var _ᴛ11 in range(goroutines)) {
@@ -615,7 +623,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
                 defer(ᴛ1 => close(ᴛ1), done, ref ᒐ);
                 var doneʗ1 = done;
                 goǃ(() => {
-                    while (ᐧ) {
+                    for (;;) {
                         var selᴛ70 = doneʗ1;
                         switch (trySelect(ᐸꟷ(selᴛ70, ꓸꓸꓸ))) {
                         case 0 when selᴛ70.ꟷᐳ(out _): {
@@ -630,7 +638,7 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
 
                 // If making changes related to this test, consider testing locally with
                 // larger counts, like 100K or 1M.
-                var counts = new nint[]{1, 2, 10, 100 * stressMultiple}.slice();
+                var counts = slice<nint>([1, 2, 10, 100 * stressMultiple]);
                 // Dropping down to GOMAXPROCS=1 might help reduce noise.
                 defer(GOMAXPROCS, GOMAXPROCS(1), ref ᒐ);
                 var size = (int64)@unsafe.Sizeof(GoArrayZero.New<T, Tᴀ>().ValueSlot);
@@ -665,12 +673,12 @@ internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
 
                         var delta = creditEnd - creditStart;
                         if (delta != 0) {
-                            tΔ10.Logf("assist credit non-zero delta: %d"u8, delta);
-                            tΔ10.Logf("\t| size: %d i: %d count: %d"u8, size, i, count);
-                            tΔ10.Logf("\t| credit before: %d credit after: %d"u8, creditStart, creditEnd);
-                            tΔ10.Logf("\t| alloc delta: %d free delta: %d"u8,
+                            tΔ10.Logf("assist credit non-zero delta: %d", delta);
+                            tΔ10.Logf("\t| size: %d i: %d count: %d", size, i, count);
+                            tΔ10.Logf("\t| credit before: %d credit after: %d", creditStart, creditEnd);
+                            tΔ10.Logf("\t| alloc delta: %d free delta: %d",
                                 creditAfterAlloc - creditStart, creditEnd - creditAfterAlloc);
-                            tΔ10.Logf("\t| gcBlackenEnable (start / after alloc / end): %v/%v/%v"u8,
+                            tΔ10.Logf("\t| gcBlackenEnable (start / after alloc / end): %v/%v/%v",
                                 blackenStart, blackenAfterAlloc, blackenEnd);
                             tΔ10.FailNow();
                         }
@@ -692,13 +700,13 @@ private sealed class ᴀ500 : IGoArrayDims { public static nint[] Dims { get; } 
 private sealed class ᴀ512 : IGoArrayDims { public static nint[] Dims { get; } = [512]; }
 private sealed class ᴀ64 : IGoArrayDims { public static nint[] Dims { get; } = [64]; }
 
-public static void TestPageCacheLeak(ж<testing.T> Ꮡt) {
+public static void TestPageCacheLeak(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(GOMAXPROCS, GOMAXPROCS(1), ref ᒐ);
         var leaked = runtime_internal_test_package.PageCachePagesLeaked();
         if (leaked != 0) {
-            Ꮡt.Fatalf("found %d leaked pages in page caches"u8, leaked);
+            t.Fatalf("found %d leaked pages in page caches", leaked);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -706,29 +714,28 @@ public static void TestPageCacheLeak(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gcPhysˢ = "GCPhys"u8;
+internal static ref readonly @string gcPhysˢ => ref gcPhysˢᵇ;
+private static readonly @string gcPhysˢᵇ = "GCPhys"u8;
 
-public static void TestPhysicalMemoryUtilization(ж<testing.T> Ꮡt) {
-    @string got = runTestProg(Ꮡt, testprogˢ, gcPhysˢ);
-    @string want = "OK\n"u8;
+public static void TestPhysicalMemoryUtilization(ж<testing.T> t) {
+    @string got = runTestProg(t, testprogˢ, gcPhysˢ);
+    @string want = "OK\n";
     if (got != want) {
-        Ꮡt.Fatalf("expected %q, but got %q"u8, want, got);
+        t.Fatalf("expected %q, but got %q", want, got);
     }
 }
 
-public static void TestScavengedBitsCleared(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestScavengedBitsCleared(ж<testing.T> t) {
     array<global::go.runtime_internal_test_package.BitsMismatch> mismatches = new(128);
     {
         var (n, ok) = runtime_internal_test_package.CheckScavengedBitsCleared(mismatches[..]); if (!ok) {
-            Ꮡt.Errorf("uncleared scavenged bits"u8);
+            t.Errorf("uncleared scavenged bits");
             foreach (var (_, m) in mismatches.slice(0, n)) {
-                Ꮡt.Logf("\t@ address 0x%x"u8, m.Base);
-                Ꮡt.Logf("\t|  got: %064b"u8, m.Got);
-                Ꮡt.Logf("\t| want: %064b"u8, m.Want);
+                t.Logf("\t@ address 0x%x", m.Base);
+                t.Logf("\t|  got: %064b", m.Got);
+                t.Logf("\t| want: %064b", m.Want);
             }
-            Ꮡt.FailNow();
+            t.FailNow();
         }
     }
 }
@@ -740,21 +747,24 @@ partial struct acLink {
 internal static slice<ж<acLink>> arenaCollisionSink;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testArenaCollisionˢ = "TEST_ARENA_COLLISION"u8;
-internal static readonly @string testRunˢ5 = "-test.run=^TestArenaCollision$"u8;
-internal static readonly @string tooManyAddressSpaceˢ = "too many address space collisions"u8;
+internal static ref readonly @string testArenaCollisionˢ => ref testArenaCollisionˢᵇ;
+private static readonly @string testArenaCollisionˢᵇ = "TEST_ARENA_COLLISION"u8;
+internal static ref readonly @string testRunˢ5 => ref testRunˢ5ᵇ;
+private static readonly @string testRunˢ5ᵇ = "-test.run=^TestArenaCollision$"u8;
+internal static ref readonly @string tooManyAddressSpaceˢ => ref tooManyAddressSpaceˢᵇ;
+private static readonly @string tooManyAddressSpaceˢᵇ = "too many address space collisions"u8;
 internal static readonly object ranOutOfArenaHintsˢ = (@string)"ran out of arena hints"u8;
 
-public static void TestArenaCollision(ж<testing.T> Ꮡt) {
+public static void TestArenaCollision(ж<testing.T> t) {
     var disallowedᴷ = new stackAppend<array<uintptr>>();
 
     // Test that mheap.sysAlloc handles collisions with other
     // memory mappings.
     if (Δos.Getenv(testArenaCollisionˢ) != "1"u8) {
-        var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ5, testVˢ));
-        cmd.Value.Env = append((~cmd).Env, "TEST_ARENA_COLLISION=1"u8);
+        var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunˢ5, testVˢ));
+        cmd.Env = append(cmd.Env, (@string)"TEST_ARENA_COLLISION=1");
         var (@out, err) = cmd.CombinedOutput();
-        if (race.Enabled){
+        if (race.Enabled) {
             // This test runs the runtime out of hint
             // addresses, so it will start mapping the
             // heap wherever it can. The race detector
@@ -762,12 +772,11 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
             // expected failure.
             {
                 @string want = tooManyAddressSpaceˢ; if (!strings.Contains((@string)@out, want)) {
-                    Ꮡt.Fatalf("want %q, got:\n%s"u8, want, (@string)@out);
+                    t.Fatalf("want %q, got:\n%s", want, (@string)@out);
                 }
             }
-        } else 
-        if (!strings.Contains((@string)@out, passˢ) || err != default!) {
-            Ꮡt.Fatalf("%s\n(exit status %v)"u8, (@string)@out, err);
+        } else if (!strings.Contains((@string)@out, passˢ) || err != nil) {
+            t.Fatalf("%s\n(exit status %v)", (@string)@out, err);
         }
         return;
     }
@@ -782,9 +791,9 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
         // for the heap.
         var (start, end, ok) = runtime_internal_test_package.MapNextArenaHint();
         if (!ok) {
-            Ꮡt.Skipf("failed to reserve memory at next arena hint [%#x, %#x)"u8, start, end);
+            t.Skipf("failed to reserve memory at next arena hint [%#x, %#x)", start, end);
         }
-        Ꮡt.Logf("reserved [%#x, %#x)"u8, start, end);
+        t.Logf("reserved [%#x, %#x)", start, end);
         disallowed = append(disallowedᴷ, disallowed, new uintptr[]{start, end}.array());
 
         (var hint, ok) = runtime_internal_test_package.NextArenaHint();
@@ -793,17 +802,16 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
             // This might happen for a number of reasons, like if there's just something
             // else already mapped in the address space where we put our hints. This is
             // a bit more common than it used to be thanks to heap base randomization.
-            Ꮡt.Skip(ranOutOfArenaHintsˢ);
+            t.Skip(ranOutOfArenaHintsˢ);
         }
 
         // Allocate until the runtime tries to use the hint we
         // just mapped over.
-        while (ᐧ) {
+        for (;;) {
             {
-                var (next, okΔ1) = runtime_internal_test_package.NextArenaHint(); if (!okΔ1){
-                    Ꮡt.Skip(ranOutOfArenaHintsˢ);
-                } else 
-                if (next != hint) {
+                var (next, okΔ1) = runtime_internal_test_package.NextArenaHint(); if (!okΔ1) {
+                    t.Skip(ranOutOfArenaHintsˢ);
+                } else if (next != hint) {
                     break;
                 }
             }
@@ -816,7 +824,7 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
                 var d = vᴛ1.Clone();
 
                 if (d[0] <= p && p < d[1]) {
-                    Ꮡt.Fatalf("allocation %#x in reserved region [%#x, %#x)"u8, p, d[0], d[1]);
+                    t.Fatalf("allocation %#x in reserved region [%#x, %#x)", p, d[0], d[1]);
                 }
             }
         }
@@ -902,13 +910,13 @@ public static void BenchmarkMallocLargeStruct(ж<testing.B> Ꮡb) {
     }
 }
 
-internal static ж<nint> n = flag.Int("n"u8, 1000, "number of goroutines"u8);
+internal static ж<nint> n = flag.Int("n", 1000, "number of goroutines");
 
-public static void BenchmarkGoroutineSelect(ж<testing.B> Ꮡb) {
+public static void BenchmarkGoroutineSelect(ж<testing.B> b) {
     var quit = new channel<EmptyStruct>(0);
     var quitʗ1 = quit;
     var read = (channel<EmptyStruct> ch) => {
-        while (ᐧ) {
+        for (;;) {
             var selᴛ71 = ch;
             var selᴛ72 = quitʗ1;
             switch (select(ᐸꟷ(selᴛ71, ꓸꓸꓸ), ᐸꟷ(selᴛ72, ꓸꓸꓸ))) {
@@ -923,12 +931,12 @@ public static void BenchmarkGoroutineSelect(ж<testing.B> Ꮡb) {
             }}
         }
     };
-    benchHelper(Ꮡb, n.Value, read);
+    benchHelper(b, n.Value, read);
 }
 
-public static void BenchmarkGoroutineBlocking(ж<testing.B> Ꮡb) {
+public static void BenchmarkGoroutineBlocking(ж<testing.B> b) {
     var read = (channel<EmptyStruct> ch) => {
-        while (ᐧ) {
+        for (;;) {
             {
                 var (_, ok) = ᐸꟷ(ch, ꟷ); if (!ok) {
                     return;
@@ -936,15 +944,15 @@ public static void BenchmarkGoroutineBlocking(ж<testing.B> Ꮡb) {
             }
         }
     };
-    benchHelper(Ꮡb, n.Value, read);
+    benchHelper(b, n.Value, read);
 }
 
-public static void BenchmarkGoroutineForRange(ж<testing.B> Ꮡb) {
+public static void BenchmarkGoroutineForRange(ж<testing.B> b) {
     var read = (channel<EmptyStruct> ch) => {
         foreach (var _ᴛ1 in ch) {
         }
     };
-    benchHelper(Ꮡb, n.Value, read);
+    benchHelper(b, n.Value, read);
 }
 
 internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<channel<EmptyStruct>> read) {
@@ -961,7 +969,7 @@ internal static partial void benchHelper(ж<testing.B> Ꮡb, nint n, Action<chan
 
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, ch) in m) {
-            if (ch != default!) {
+            if (ch != nil) {
                 ch.ᐸꟷ(new EmptyStruct());
             }
         }
@@ -1003,16 +1011,18 @@ public static partial void BenchmarkGoroutineIdle(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mkmallocˢ = "_mkmalloc"u8;
-internal static readonly @string testˢ = "test"u8;
+internal static ref readonly @string mkmallocˢ => ref mkmallocˢᵇ;
+private static readonly @string mkmallocˢᵇ = "_mkmalloc"u8;
+internal static ref readonly @string testˢ => ref testˢᵇ;
+private static readonly @string testˢᵇ = "test"u8;
 
-public static void TestMkmalloc(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveExternalNetwork(new runtime_test_package.testing_TжTB(Ꮡt)); // To download the golang.org/x/tools dependency.
-    var (output, err) = exec.Command("go"u8, "-C"u8, mkmallocˢ, testˢ).CombinedOutput();
-    Ꮡt.Logf("test output:\n%s"u8, output);
-    if (err != default!) {
-        Ꮡt.Errorf("_mkmalloc tests failed: %v"u8, err);
+public static void TestMkmalloc(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
+    testenv.MustHaveExternalNetwork(new runtime_test_package.testing_TжTB(t)); // To download the golang.org/x/tools dependency.
+    var (output, err) = exec.Command("go", "-C", mkmallocˢ, testˢ).CombinedOutput();
+    t.Logf("test output:\n%s", output);
+    if (err != nil) {
+        t.Errorf("_mkmalloc tests failed: %v", err);
     }
 }
 

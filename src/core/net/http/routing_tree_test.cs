@@ -22,23 +22,23 @@ internal partial struct TestRoutingFirstSegment_type /*dyn*/ {
     internal slice<@string> want;
 }
 
-public static void TestRoutingFirstSegment(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestRoutingFirstSegment_type[]{
-        new("/a/b/c"u8, new @string[]{"a"u8, "b"u8, "c"u8}.slice()),
-        new("/a/b/"u8, new @string[]{"a"u8, "b"u8, "/"u8}.slice()),
-        new("/"u8, new @string[]{"/"u8}.slice()),
-        new("/a/%62/c"u8, new @string[]{"a"u8, "b"u8, "c"u8}.slice()),
-        new("/a%2Fb%2fc"u8, new @string[]{"a/b/c"u8}.slice())
-    }.slice()) {
-        slice<@string> got = default!;
+public static void TestRoutingFirstSegment(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestRoutingFirstSegment_type>([
+        new("/a/b/c", slice<@string>(["a", "b", "c"])),
+        new("/a/b/", slice<@string>(["a", "b", "/"])),
+        new("/", slice<@string>(["/"])),
+        new("/a/%62/c", slice<@string>(["a", "b", "c"])),
+        new("/a%2Fb%2fc", slice<@string>(["a/b/c"]))
+    ])) {
+        slice<@string> got = default;
         @string rest = test.@in;
         while (builtin.len(rest) > 0) {
-            @string seg = default!;
+            @string seg = default;
             (seg, rest) = firstSegment(rest);
             got = append(got, seg);
         }
         if (!slices.Equal<slice<@string>, @string>(got, test.want)) {
-            Ꮡt.Errorf("%q: got %v, want %v"u8, test.@in, got, test.want);
+            t.Errorf("%q: got %v, want %v", test.@in, got, test.want);
         }
     }
 }
@@ -47,14 +47,18 @@ public static void TestRoutingFirstSegment(ж<testing.T> Ꮡt) {
 internal static ж<global::go.net.http_package.routingNode> testTree;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gHIˢ = "/g/h/i"u8;
-internal static readonly @string gXJˢ = "/g/{x}/j"u8;
-internal static readonly @string aBXˢ = "/a/b/{x...}"u8;
-internal static readonly @string aBYˢ = "/a/b/{y}"u8;
+internal static ref readonly @string gHIˢ => ref gHIˢᵇ;
+private static readonly @string gHIˢᵇ = "/g/h/i"u8;
+internal static ref readonly @string gXJˢ => ref gXJˢᵇ;
+private static readonly @string gXJˢᵇ = "/g/{x}/j"u8;
+internal static ref readonly @string aBXˢ => ref aBXˢᵇ;
+private static readonly @string aBXˢᵇ = "/a/b/{x...}"u8;
+internal static ref readonly @string aBYˢ => ref aBYˢᵇ;
+private static readonly @string aBYˢᵇ = "/a/b/{y}"u8;
 
 internal static ж<global::go.net.http_package.routingNode> getTestTree() {
     if (testTree == nil) {
-        testTree = buildTree("/a"u8, "/a/b", "/a/{x}",
+        testTree = buildTree("/a", "/a/b", "/a/{x}",
             gHIˢ, gXJˢ,
             aBXˢ, aBYˢ, "/a/b/{$}");
     }
@@ -64,19 +68,20 @@ internal static ж<global::go.net.http_package.routingNode> getTestTree() {
 internal static ж<global::go.net.http_package.routingNode> buildTree(params ꓸꓸꓸstring patsʗp) {
     var pats = patsʗp.sslice();
 
-    var root = Ꮡ(new routingNode(nil));
+    var root = Ꮡ(new routingNode());
     foreach (var (_, p) in pats) {
         var (pat, err) = parsePattern(p);
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
-        root.addPattern(pat, default!);
+        root.addPattern(pat, default);
     }
     return root;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aAAXBABABYABMultiABXGJGXˢ = """
+internal static ref readonly @string aAAXBABABYABMultiABXGJGXˢ => ref aAAXBABABYABMultiABXGJGXˢᵇ;
+private static readonly @string aAAXBABABYABMultiABXGJGXˢᵇ = """
 "":
     "":
         "a":
@@ -101,14 +106,14 @@ internal static readonly @string aAAXBABABYABMultiABXGJGXˢ = """
 
 """u8.Raw();
 
-public static void TestRoutingAddPattern(ж<testing.T> Ꮡt) {
+public static void TestRoutingAddPattern(ж<testing.T> t) {
     @string want = aAAXBABABYABMultiABXGJGXˢ;
 
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     getTestTree().print(new http_test_package.strings_BuilderжWriter(Ꮡb), 0);
     @string got = b.String();
     if (got != want) {
-        Ꮡt.Errorf("got\n%s\nwant\n%s"u8, got, want);
+        t.Errorf("got\n%s\nwant\n%s", got, want);
     }
 }
 
@@ -119,49 +124,62 @@ internal partial struct testCase {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string itemˢ = "/item/"u8;
-internal static readonly @string postItemUserˢ = "POST /item/{user}"u8;
-internal static readonly @string getItemUserˢ = "GET /item/{user}"u8;
-internal static readonly @string itemUserˢ = "/item/{user}"u8;
-internal static readonly @string itemUserIdˢ = "/item/{user}/{id}"u8;
-internal static readonly @string itemUserNewˢ = "/item/{user}/new"u8;
-internal static readonly @string itemˢ2 = "/item/{$}"u8;
-internal static readonly @string postAltComItemUserˢ = "POST alt.com/item/{user}"u8;
-internal static readonly @string getHeadwinsˢ = "GET /headwins"u8;
-internal static readonly @string headHeadwinsˢ = "HEAD /headwins"u8;
-internal static readonly @string pathPˢ = "/path/{p...}"u8;
-internal static readonly @string aBWˢ = "/a/b/{w}"u8;
-internal static readonly @string aBWˢ2 = "/a/b/{w...}"u8;
+internal static ref readonly @string itemˢ => ref itemˢᵇ;
+private static readonly @string itemˢᵇ = "/item/"u8;
+internal static ref readonly @string postItemUserˢ => ref postItemUserˢᵇ;
+private static readonly @string postItemUserˢᵇ = "POST /item/{user}"u8;
+internal static ref readonly @string getItemUserˢ => ref getItemUserˢᵇ;
+private static readonly @string getItemUserˢᵇ = "GET /item/{user}"u8;
+internal static ref readonly @string itemUserˢ => ref itemUserˢᵇ;
+private static readonly @string itemUserˢᵇ = "/item/{user}"u8;
+internal static ref readonly @string itemUserIdˢ => ref itemUserIdˢᵇ;
+private static readonly @string itemUserIdˢᵇ = "/item/{user}/{id}"u8;
+internal static ref readonly @string itemUserNewˢ => ref itemUserNewˢᵇ;
+private static readonly @string itemUserNewˢᵇ = "/item/{user}/new"u8;
+internal static ref readonly @string itemˢ2 => ref itemˢ2ᵇ;
+private static readonly @string itemˢ2ᵇ = "/item/{$}"u8;
+internal static ref readonly @string postAltComItemUserˢ => ref postAltComItemUserˢᵇ;
+private static readonly @string postAltComItemUserˢᵇ = "POST alt.com/item/{user}"u8;
+internal static ref readonly @string getHeadwinsˢ => ref getHeadwinsˢᵇ;
+private static readonly @string getHeadwinsˢᵇ = "GET /headwins"u8;
+internal static ref readonly @string headHeadwinsˢ => ref headHeadwinsˢᵇ;
+private static readonly @string headHeadwinsˢᵇ = "HEAD /headwins"u8;
+internal static ref readonly @string pathPˢ => ref pathPˢᵇ;
+private static readonly @string pathPˢᵇ = "/path/{p...}"u8;
+internal static ref readonly @string aBWˢ => ref aBWˢᵇ;
+private static readonly @string aBWˢᵇ = "/a/b/{w}"u8;
+internal static ref readonly @string aBWˢ2 => ref aBWˢ2ᵇ;
+private static readonly @string aBWˢ2ᵇ = "/a/b/{w...}"u8;
 
-public static partial void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
+public static partial void TestRoutingNodeMatch(ж<testing.T> t) {
     void test(ж<global::go.net.http_package.routingNode> treeΔ1, slice<testCase> tests) {
-        Ꮡt.Helper();
+        t.Helper();
         foreach (var (_, testΔ1) in tests) {
             var (gotNode, gotMatches) = treeΔ1.match(testΔ1.host, testΔ1.method, testΔ1.path);
             @string got = ""u8;
             if (gotNode != nil) {
-                got = (~gotNode).pattern.String();
+                got = gotNode.pattern.String();
             }
             if (got != testΔ1.wantPat) {
-                Ꮡt.Errorf("%s, %s, %s: got %q, want %q"u8, testΔ1.host, testΔ1.method, testΔ1.path, got, testΔ1.wantPat);
+                t.Errorf("%s, %s, %s: got %q, want %q", testΔ1.host, testΔ1.method, testΔ1.path, got, testΔ1.wantPat);
             }
             if (!slices.Equal<slice<@string>, @string>(gotMatches, testΔ1.wantMatches)) {
-                Ꮡt.Errorf("%s, %s, %s: got matches %v, want %v"u8, testΔ1.host, testΔ1.method, testΔ1.path, gotMatches, testΔ1.wantMatches);
+                t.Errorf("%s, %s, %s: got matches %v, want %v", testΔ1.host, testΔ1.method, testΔ1.path, gotMatches, testΔ1.wantMatches);
             }
         }
     }
 
-    test(getTestTree(), new testCase[]{
-        new("GET"u8, ""u8, "/a"u8, "/a"u8, default!),
-        new("Get"u8, ""u8, "/b"u8, ""u8, default!),
-        new("Get"u8, ""u8, "/a/b"u8, "/a/b"u8, default!),
-        new("Get"u8, ""u8, "/a/c"u8, "/a/{x}"u8, new @string[]{"c"u8}.slice()),
-        new("Get"u8, ""u8, "/a/b/"u8, "/a/b/{$}"u8, default!),
-        new("Get"u8, ""u8, "/a/b/c"u8, "/a/b/{y}"u8, new @string[]{"c"u8}.slice()),
-        new("Get"u8, ""u8, "/a/b/c/d"u8, "/a/b/{x...}"u8, new @string[]{"c/d"u8}.slice()),
-        new("Get"u8, ""u8, "/g/h/i"u8, "/g/h/i"u8, default!),
-        new("Get"u8, ""u8, "/g/h/j"u8, "/g/{x}/j"u8, new @string[]{"h"u8}.slice())
-    }.slice());
+    test(getTestTree(), slice<testCase>([
+        new("GET", "", "/a", "/a", default),
+        new("Get", "", "/b", "", default),
+        new("Get", "", "/a/b", "/a/b", default),
+        new("Get", "", "/a/c", "/a/{x}", slice<@string>(["c"])),
+        new("Get", "", "/a/b/", "/a/b/{$}", default),
+        new("Get", "", "/a/b/c", "/a/b/{y}", slice<@string>(["c"])),
+        new("Get", "", "/a/b/c/d", "/a/b/{x...}", slice<@string>(["c/d"])),
+        new("Get", "", "/g/h/i", "/g/h/i", default),
+        new("Get", "", "/g/h/j", "/g/{x}/j", slice<@string>(["h"]))
+    ]));
 
     var tree = buildTree(
         itemˢ,
@@ -176,81 +194,86 @@ public static partial void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
         headHeadwinsˢ,
         pathPˢ);
 
-    test(tree, new testCase[]{
-        new("GET"u8, ""u8, "/item/jba"u8,
-            "GET /item/{user}"u8, new @string[]{"jba"u8}.slice()),
-        new("POST"u8, ""u8, "/item/jba"u8,
-            "POST /item/{user}"u8, new @string[]{"jba"u8}.slice()),
-        new("HEAD"u8, ""u8, "/item/jba"u8,
-            "GET /item/{user}"u8, new @string[]{"jba"u8}.slice()),
-        new("get"u8, ""u8, "/item/jba"u8,
-            "/item/{user}"u8, new @string[]{"jba"u8}.slice()), // method matches are case-sensitive
-        new("POST"u8, ""u8, "/item/jba/17"u8,
-            "/item/{user}/{id}"u8, new @string[]{"jba"u8, "17"u8}.slice()),
-        new("GET"u8, ""u8, "/item/jba/new"u8,
-            "/item/{user}/new"u8, new @string[]{"jba"u8}.slice()),
-        new("GET"u8, ""u8, "/item/"u8,
-            "/item/{$}"u8, new @string[]{}.slice()),
-        new("GET"u8, ""u8, "/item/jba/17/line2"u8,
-            "/item/"u8, default!),
-        new("POST"u8, "alt.com"u8, "/item/jba"u8,
-            "POST alt.com/item/{user}"u8, new @string[]{"jba"u8}.slice()),
-        new("GET"u8, "alt.com"u8, "/item/jba"u8,
-            "GET /item/{user}"u8, new @string[]{"jba"u8}.slice()),
-        new("GET"u8, ""u8, "/item"u8,
-            ""u8, default!), // does not match
-        new("GET"u8, ""u8, "/headwins"u8,
-            "GET /headwins"u8, default!),
-        new("HEAD"u8, ""u8, "/headwins"u8, // HEAD is more specific than GET
-            "HEAD /headwins"u8, default!),
-        new("GET"u8, ""u8, "/path/to/file"u8,
-            "/path/{p...}"u8, new @string[]{"to/file"u8}.slice()),
-        new("GET"u8, ""u8, "/path/*"u8,
-            "/path/{p...}"u8, new @string[]{"*"u8}.slice())
-    }.slice());
+    test(tree, slice<testCase>([
+        new("GET", "", "/item/jba",
+            "GET /item/{user}", slice<@string>(["jba"])),
+        new("POST", "", "/item/jba",
+            "POST /item/{user}", slice<@string>(["jba"])),
+        new("HEAD", "", "/item/jba",
+            "GET /item/{user}", slice<@string>(["jba"])),
+        new("get", "", "/item/jba",
+            "/item/{user}", slice<@string>(["jba"])), // method matches are case-sensitive
+        new("POST", "", "/item/jba/17",
+            "/item/{user}/{id}", slice<@string>(["jba", "17"])),
+        new("GET", "", "/item/jba/new",
+            "/item/{user}/new", slice<@string>(["jba"])),
+        new("GET", "", "/item/",
+            "/item/{$}", slice<@string>([])),
+        new("GET", "", "/item/jba/17/line2",
+            "/item/", default),
+        new("POST", "alt.com", "/item/jba",
+            "POST alt.com/item/{user}", slice<@string>(["jba"])),
+        new("GET", "alt.com", "/item/jba",
+            "GET /item/{user}", slice<@string>(["jba"])),
+        new("GET", "", "/item",
+            "", default), // does not match
+        new("GET", "", "/headwins",
+            "GET /headwins", default),
+        new("HEAD", "", "/headwins", // HEAD is more specific than GET
+            "HEAD /headwins", default),
+        new("GET", "", "/path/to/file",
+            "/path/{p...}", slice<@string>(["to/file"])),
+        new("GET", "", "/path/*",
+            "/path/{p...}", slice<@string>(["*"]))
+    ]));
 
     // A pattern ending in {$} should only match URLS with a trailing slash.
-    @string pat1 = "/a/b/{$}"u8;
-    test(buildTree(pat1), new testCase[]{
-        new("GET"u8, ""u8, "/a/b"u8, ""u8, default!),
-        new("GET"u8, ""u8, "/a/b/"u8, pat1, default!),
-        new("GET"u8, ""u8, "/a/b/c"u8, ""u8, default!),
-        new("GET"u8, ""u8, "/a/b/c/d"u8, ""u8, default!)
-    }.slice());
+    @string pat1 = "/a/b/{$}";
+    test(buildTree(pat1), slice<testCase>([
+        new("GET", "", "/a/b", "", default),
+        new("GET", "", "/a/b/", pat1, default),
+        new("GET", "", "/a/b/c", "", default),
+        new("GET", "", "/a/b/c/d", "", default)
+    ]));
 
     // A pattern ending in a single wildcard should not match a trailing slash URL.
     @string pat2 = aBWˢ;
-    test(buildTree(pat2), new testCase[]{
-        new("GET"u8, ""u8, "/a/b"u8, ""u8, default!),
-        new("GET"u8, ""u8, "/a/b/"u8, ""u8, default!),
-        new("GET"u8, ""u8, "/a/b/c"u8, pat2, new @string[]{"c"u8}.slice()),
-        new("GET"u8, ""u8, "/a/b/c/d"u8, ""u8, default!)
-    }.slice());
+    test(buildTree(pat2), slice<testCase>([
+        new("GET", "", "/a/b", "", default),
+        new("GET", "", "/a/b/", "", default),
+        new("GET", "", "/a/b/c", pat2, slice<@string>(["c"])),
+        new("GET", "", "/a/b/c/d", "", default)
+    ]));
 
     // A pattern ending in a multi wildcard should match both URLs.
     @string pat3 = aBWˢ2;
-    test(buildTree(pat3), new testCase[]{
-        new("GET"u8, ""u8, "/a/b"u8, ""u8, default!),
-        new("GET"u8, ""u8, "/a/b/"u8, pat3, new @string[]{""u8}.slice()),
-        new("GET"u8, ""u8, "/a/b/c"u8, pat3, new @string[]{"c"u8}.slice()),
-        new("GET"u8, ""u8, "/a/b/c/d"u8, pat3, new @string[]{"c/d"u8}.slice())
-    }.slice());
+    test(buildTree(pat3), slice<testCase>([
+        new("GET", "", "/a/b", "", default),
+        new("GET", "", "/a/b/", pat3, slice<@string>([""])),
+        new("GET", "", "/a/b/c", pat3, slice<@string>(["c"])),
+        new("GET", "", "/a/b/c/d", pat3, slice<@string>(["c/d"]))
+    ]));
 
     // All three of the above should work together.
-    test(buildTree(pat1, pat2, pat3), new testCase[]{
-        new("GET"u8, ""u8, "/a/b"u8, ""u8, default!),
-        new("GET"u8, ""u8, "/a/b/"u8, pat1, default!),
-        new("GET"u8, ""u8, "/a/b/c"u8, pat2, new @string[]{"c"u8}.slice()),
-        new("GET"u8, ""u8, "/a/b/c/d"u8, pat3, new @string[]{"c/d"u8}.slice())
-    }.slice());
+    test(buildTree(pat1, pat2, pat3), slice<testCase>([
+        new("GET", "", "/a/b", "", default),
+        new("GET", "", "/a/b/", pat1, default),
+        new("GET", "", "/a/b/c", pat2, slice<@string>(["c"])),
+        new("GET", "", "/a/b/c/d", pat3, slice<@string>(["c/d"]))
+    ]));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getAComˢ = "GET a.com/"u8;
-internal static readonly @string putBComˢ = "PUT b.com/"u8;
-internal static readonly @string postFooXˢ = "POST /foo/{x}"u8;
-internal static readonly @string postˢ2 = "POST /"u8;
-internal static readonly @string getˢ3 = "GET /"u8;
+internal static ref readonly @string getAComˢ => ref getAComˢᵇ;
+private static readonly @string getAComˢᵇ = "GET a.com/"u8;
+internal static ref readonly @string putBComˢ => ref putBComˢᵇ;
+private static readonly @string putBComˢᵇ = "PUT b.com/"u8;
+internal static ref readonly @string postFooXˢ => ref postFooXˢᵇ;
+private static readonly @string postFooXˢᵇ = "POST /foo/{x}"u8;
+internal static ref readonly @string postˢ2 => ref postˢ2ᵇ;
+private static readonly @string postˢ2ᵇ = "POST /"u8;
+internal static ref readonly @string getˢ3 => ref getˢ3ᵇ;
+private static readonly @string getˢ3ᵇ = "GET /"u8;
 
 internal partial struct TestMatchingMethods_type /*dyn*/ {
     internal @string name;
@@ -259,57 +282,57 @@ internal partial struct TestMatchingMethods_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestMatchingMethods(ж<testing.T> Ꮡt) {
+public static void TestMatchingMethods(ж<testing.T> t) {
     var hostTree = buildTree(getAComˢ, putBComˢ, postFooXˢ);
-    foreach (var (_, vᴛ1) in new TestMatchingMethods_type[]{
+    foreach (var (_, vᴛ1) in slice<TestMatchingMethods_type>([
         new(
-            "post"u8,
-            buildTree(postˢ2), ""u8, "/foo"u8,
-            "POST"u8
+            "post",
+            buildTree(postˢ2), "", "/foo",
+            "POST"
         ),
         new(
-            "get"u8,
-            buildTree(getˢ3), ""u8, "/foo"u8,
-            "GET,HEAD"u8
+            "get",
+            buildTree(getˢ3), "", "/foo",
+            "GET,HEAD"
         ),
         new(
-            "host"u8,
-            hostTree, ""u8, "/foo"u8,
-            ""u8
+            "host",
+            hostTree, "", "/foo",
+            ""
         ),
         new(
-            "host"u8,
-            hostTree, ""u8, "/foo/bar"u8,
-            "POST"u8
+            "host",
+            hostTree, "", "/foo/bar",
+            "POST"
         ),
         new(
-            "host2"u8,
-            hostTree, "a.com"u8, "/foo/bar"u8,
-            "GET,HEAD,POST"u8
+            "host2",
+            hostTree, "a.com", "/foo/bar",
+            "GET,HEAD,POST"
         ),
         new(
-            "host3"u8,
-            hostTree, "b.com"u8, "/bar"u8,
-            "PUT"u8
+            "host3",
+            hostTree, "b.com", "/bar",
+            "PUT"
         ),
         new(
             // This case shouldn't come up because we only call matchingMethods
             // when there was no match, but we include it for completeness.
-            "empty"u8,
-            buildTree("/"u8), ""u8, "/"u8,
-            ""u8
+            "empty",
+            buildTree("/"), "", "/",
+            ""
         )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestMatchingMethods_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             var ms = new map<@string, bool>{};
             testʗ1.tree.matchingMethods(testʗ1.host, testʗ1.path, ms);
-            @string got = strings.Join(slices.Sorted(maps.Keys<map<@string, bool>, @string, bool>(ms)), ","u8);
+            @string got = strings.Join(slices.Sorted(maps.Keys<map<@string, bool>, @string, bool>(ms)), ",");
             if (got != testʗ1.want) {
-                tΔ1.Errorf("got %s, want %s"u8, got, testʗ1.want);
+                tΔ1.Errorf("got %s, want %s", got, testʗ1.want);
             }
         });
     }
@@ -318,7 +341,7 @@ public static void TestMatchingMethods(ж<testing.T> Ꮡt) {
 internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn, io.Writer w, nint level) {
     ref var n = ref Ꮡn.DerefOrNull();
 
-    @string indent = strings.Repeat("    "u8, level);
+    @string indent = strings.Repeat("    ", level);
     if (n.pattern != nil) {
         fmt.Fprintf(w, "%s%q\n"u8, indent, n.pattern.OrTypedNil());
     }
@@ -328,7 +351,7 @@ internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn
     }
 
     ref var keys = ref heap<slice<@string>>(out var Ꮡkeys);
-    Ꮡn.of(global::go.net.http_package.routingNode.Ꮡchildren).eachPair((@string k, ж<global::go.net.http_package.routingNode> _Δp1) => {
+    Ꮡn.Ꮡchildren.eachPair((@string k, ж<global::go.net.http_package.routingNode> _Δp1) => {
         Ꮡkeys.ValueSlot = append(Ꮡkeys.ValueSlot, k);
         return true;
     });
@@ -336,7 +359,7 @@ internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn
 
     foreach (var (_, k) in keys) {
         fmt.Fprintf(w, "%s%q:\n"u8, indent, k);
-        var (nΔ1, _) = Ꮡn.of(global::go.net.http_package.routingNode.Ꮡchildren).find(k);
+        var (nΔ1, _) = Ꮡn.Ꮡchildren.find(k);
         nΔ1.print(w, level + 1);
     }
 

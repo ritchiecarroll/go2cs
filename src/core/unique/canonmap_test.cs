@@ -16,16 +16,16 @@ using static go.unique_package;
 
 partial class unique_internal_test_package {
 
-public static void TestCanonMap(ж<testing.T> Ꮡt) {
-    testCanonMap(Ꮡt, () => newCanonMap<@string>());
+public static void TestCanonMap(ж<testing.T> t) {
+    testCanonMap(t, () => newCanonMap<@string>());
 }
 
-public static void TestCanonMapBadHash(ж<testing.T> Ꮡt) {
-    testCanonMap(Ꮡt, () => newBadCanonMap<@string>());
+public static void TestCanonMapBadHash(ж<testing.T> t) {
+    testCanonMap(t, () => newBadCanonMap<@string>());
 }
 
-public static void TestCanonMapTruncHash(ж<testing.T> Ꮡt) {
-    testCanonMap(Ꮡt, () => {
+public static void TestCanonMapTruncHash(ж<testing.T> t) {
+    testCanonMap(t, () => {
         // Stub out the good hash function with a different terrible one
         // (truncated hash). Everything should still work as expected.
         // This is useful to test independently to catch issues with
@@ -35,25 +35,29 @@ public static void TestCanonMapTruncHash(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string loadEmptyˢ = "LoadEmpty"u8;
-internal static readonly @string loadOrStoreˢ = "LoadOrStore"u8;
-internal static readonly @string sequentialˢ = "Sequential"u8;
-internal static readonly @string concurrentUnsharedKeysˢ = "ConcurrentUnsharedKeys"u8;
+internal static ref readonly @string loadEmptyˢ => ref loadEmptyˢᵇ;
+private static readonly @string loadEmptyˢᵇ = "LoadEmpty"u8;
+internal static ref readonly @string loadOrStoreˢ => ref loadOrStoreˢᵇ;
+private static readonly @string loadOrStoreˢᵇ = "LoadOrStore"u8;
+internal static ref readonly @string sequentialˢ => ref sequentialˢᵇ;
+private static readonly @string sequentialˢᵇ = "Sequential"u8;
+internal static ref readonly @string concurrentUnsharedKeysˢ => ref concurrentUnsharedKeysˢᵇ;
+private static readonly @string concurrentUnsharedKeysˢᵇ = "ConcurrentUnsharedKeys"u8;
 
-internal static void testCanonMap(ж<testing.T> Ꮡt, Func<ж<global::go.unique_package.canonMap<@string>>> newMap) {
-    Ꮡt.Run(loadEmptyˢ, (ж<testing.T> tΔ1) => {
+internal static void testCanonMap(ж<testing.T> t, Func<ж<global::go.unique_package.canonMap<@string>>> newMap) {
+    t.Run(loadEmptyˢ, (ж<testing.T> tΔ1) => {
         var m = newMap();
 
         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
             expectMissing(tΔ1, s)(m.Load(s));
         }
     });
-    Ꮡt.Run(loadOrStoreˢ, (ж<testing.T> tΔ2) => {
+    t.Run(loadOrStoreˢ, (ж<testing.T> tΔ2) => {
         tΔ2.Run(sequentialˢ, (ж<testing.T> tΔ3) => {
             var refsᴷ = new stackAppend<ж<@string>>();
             var m = newMap();
 
-            slice<ж<@string>> refs = default!;
+            slice<ж<@string>> refs = default;
             foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                 expectMissing(tΔ3, s)(m.Load(s));
                 refs = append(refsᴷ, refs, expectPresent(tΔ3, s)(m.LoadOrStore(s)));
@@ -66,7 +70,7 @@ internal static void testCanonMap(ж<testing.T> Ꮡt, Func<ж<global::go.unique_
                 expectPresent(tΔ3, s)(m.LoadOrStore(s));
             }
             Δruntime.KeepAlive(refs);
-            refs = default!;
+            refs = default;
             drainCleanupQueue(tΔ3);
             foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                 expectMissing(tΔ3, s)(m.Load(s));
@@ -92,7 +96,7 @@ internal static void testCanonMap(ж<testing.T> Ꮡt, Func<ж<global::go.unique_
                             var refsᴷ = new stackAppend<ж<@string>>();
                             defer(Ꮡwg.Done, ref ᒐ);
 
-                            slice<ж<@string>> refs = default!;
+                            slice<ж<@string>> refs = default;
                             foreach (var (_, s) in testData.ΔRangeSnapshot()) {
                                 @string key = makeKeyʗ1(s, id);
                                 if (@try == 0) {
@@ -107,7 +111,7 @@ internal static void testCanonMap(ж<testing.T> Ꮡt, Func<ж<global::go.unique_
                                 expectPresent(tΔ4, key)(mʗ1.Load(key));
                                 {
                                     var (got, want) = (expectPresent(tΔ4, key)(mʗ1.LoadOrStore(key)), refs[iΔ1]); if (got != want) {
-                                        tΔ4.Errorf("canonical entry %p did not match ref %p"u8, got.OrTypedNil(), want.OrTypedNil());
+                                        tΔ4.Errorf("canonical entry %p did not match ref %p", got.OrTypedNil(), want.OrTypedNil());
                                     }
                                 }
                             }
@@ -156,27 +160,27 @@ internal static void testCanonMap(ж<testing.T> Ꮡt, Func<ж<global::go.unique_
     });
 }
 
-internal static Action<ж<T>> expectMissing<T>(ж<testing.T> Ꮡt, T key) {
-    Ꮡt.Helper();
+internal static Action<ж<T>> expectMissing<T>(ж<testing.T> t, T key) {
+    t.Helper();
     return (ж<T> got) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (got != nil) {
-            Ꮡt.Errorf("expected key %v to be missing from map, got %p"u8, (key).OrTypedNilOf(), got.OrTypedNil());
+            t.Errorf("expected key %v to be missing from map, got %p", (key).OrTypedNilOf(), got.OrTypedNil());
         }
     };
 }
 
-internal static Func<ж<T>, ж<T>> expectPresent<T>(ж<testing.T> Ꮡt, T key) {
-    Ꮡt.Helper();
+internal static Func<ж<T>, ж<T>> expectPresent<T>(ж<testing.T> t, T key) {
+    t.Helper();
     return (ж<T> got) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (got == nil) {
-            Ꮡt.Errorf("expected key %v to be present in map, got %p"u8, (key).OrTypedNilOf(), got.OrTypedNil());
+            t.Errorf("expected key %v to be present in map, got %p", (key).OrTypedNilOf(), got.OrTypedNil());
         }
         if (got != nil && !AreEqual(got.ValueSlot, key)) {
-            Ꮡt.Errorf("key %v is present in map, but canonical version has the wrong value: got %v, want %v"u8, (key).OrTypedNilOf(), (got.ValueSlot).OrTypedNilOf(), (key).OrTypedNilOf());
+            t.Errorf("key %v is present in map, but canonical version has the wrong value: got %v, want %v", (key).OrTypedNilOf(), (got.ValueSlot).OrTypedNilOf(), (key).OrTypedNilOf());
         }
         return got;
     };
@@ -188,7 +192,7 @@ internal static ж<global::go.unique_package.canonMap<T>> newBadCanonMap<T>() {
     // Stub out the good hash function with a terrible one.
     // Everything should still work as expected.
     var m = newCanonMap<T>();
-    m.Value.hash = uintptr (@unsafe.Pointer _Δp0, uintptr _Δp1) => (uintptr)(0);
+    m.hash = uintptr (@unsafe.Pointer _Δp0, uintptr _Δp1) => (uintptr)(0);
     return m;
 }
 
@@ -198,11 +202,11 @@ internal static ж<global::go.unique_package.canonMap<T>> newTruncCanonMap<T>() 
     // Stub out the good hash function with a terrible one.
     // Everything should still work as expected.
     var m = newCanonMap<T>();
-    map<@string, nint> mx = default!;
+    map<@string, nint> mx = default;
     var mapType = abi.TypeOf(mx).MapType();
-    var hasher = mapType.Value.Hasher;
+    var hasher = mapType.Hasher;
     var hasherʗ1 = hasher;
-    m.Value.hash = (@unsafe.Pointer p, uintptr n) => (uintptr)(hasherʗ1(p, n) & (uintptr)(((uintptr)1 << 4) - 1));
+    m.hash = (@unsafe.Pointer p, uintptr n) => (uintptr)(hasherʗ1(p, n) & (uintptr)(((uintptr)1 << 4) - 1));
     return m;
 }
 

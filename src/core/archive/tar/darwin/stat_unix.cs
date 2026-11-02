@@ -23,7 +23,7 @@ partial class tar_package {
 // userMap and groupMap cache UID and GID lookups for performance reasons.
 // The downside is that renaming uname or gname by the OS never takes effect.
 internal static readonly ж<sync.Map> ᏑuserMap = new StaticBox<sync.Map>(default(sync.Map));
-internal static ref sync.Map userMap => ref ((StaticBox<sync.Map>)ᏑuserMap).ValueSlot;       // map[int]string
+internal static ref sync.Map userMap => ref ((StaticBox<sync.Map>)ᏑuserMap).ValueSlot; // map[int]string
 internal static readonly ж<sync.Map> ᏑgroupMap = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map groupMap => ref ((StaticBox<sync.Map>)ᏑgroupMap).ValueSlot;
 
@@ -32,32 +32,30 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
 
     var (sys, ok) = fi.Sys()._<ж<syscall.Stat_t>>(ᐧ);
     if (!ok) {
-        return default!;
+        return default;
     }
-    h.Uid = (nint)(~sys).Uid;
-    h.Gid = (nint)(~sys).Gid;
+    h.Uid = (nint)sys.Uid;
+    h.Gid = (nint)sys.Gid;
     if (doNameLookups) {
         // Best effort at populating Uname and Gname.
         // The os/user functions may fail for any number of reasons
         // (not implemented on that platform, cgo not enabled, etc).
         {
-            var (u, okΔ1) = ᏑuserMap.Load(h.Uid); if (okΔ1){
+            var (u, okΔ1) = ᏑuserMap.Load(h.Uid); if (okΔ1) {
                 h.Uname = u._<@string>();
-            } else 
-            {
-                var (uΔ1, err) = user.LookupId(strconv.Itoa(h.Uid)); if (err == default!) {
-                    h.Uname = uΔ1.Value.Username;
+            } else {
+                var (uΔ1, err) = user.LookupId(strconv.Itoa(h.Uid)); if (err == nil) {
+                    h.Uname = uΔ1.Username;
                     ᏑuserMap.Store(h.Uid, h.Uname);
                 }
             }
         }
         {
-            var (g, okΔ2) = ᏑgroupMap.Load(h.Gid); if (okΔ2){
+            var (g, okΔ2) = ᏑgroupMap.Load(h.Gid); if (okΔ2) {
                 h.Gname = g._<@string>();
-            } else 
-            {
-                var (gΔ1, err) = user.LookupGroupId(strconv.Itoa(h.Gid)); if (err == default!) {
-                    h.Gname = gΔ1.Value.Name;
+            } else {
+                var (gΔ1, err) = user.LookupGroupId(strconv.Itoa(h.Gid)); if (err == nil) {
+                    h.Gname = gΔ1.Name;
                     ᏑgroupMap.Store(h.Gid, h.Gname);
                 }
             }
@@ -68,60 +66,69 @@ internal static error statUnix(fs.FileInfo fi, ж<Header> Ꮡh, bool doNameLooku
 
     // Best effort at populating Devmajor and Devminor.
     if (h.Typeflag == TypeChar || h.Typeflag == TypeBlock) {
-        var dev = (uint64)(~sys).Rdev; // May be int32 or uint32
+        var dev = (uint64)sys.Rdev; // May be int32 or uint32
         var exprᴛ1 = runtime.GOOS;
-        if (exprᴛ1 == "aix"u8) {
-            uint32 major = default!;
-            uint32 minor = default!;
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "aix"u8: {
+            uint32 major = default;
+            uint32 minor = default;
             major = (uint32)((dev & 0x3fffffff00000000UL) >> 32);
             minor = (uint32)((dev & 0x00000000ffffffffU) >> 0);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else if (exprᴛ1 == "linux"u8) {
+        case {} when exprᴛ1 == "linux"u8: {
             // Copied from golang.org/x/sys/unix/dev_linux.go.
             var major = (uint32)((dev & 0x00000000000fff00) >> 8);
             major |= (uint32)((uint32)((dev & 0xfffff00000000000UL) >> 32));
             var minor = (uint32)((dev & 0x00000000000000ff) >> 0);
             minor |= (uint32)((uint32)((dev & 0x00000ffffff00000UL) >> 12));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+        case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
             // Copied from golang.org/x/sys/unix/dev_darwin.go.
             var major = (uint32)((dev >> 24) & 0xff);
             var minor = (uint32)(dev & 0xffffff);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else if (exprᴛ1 == "dragonfly"u8) {
+        case {} when exprᴛ1 == "dragonfly"u8: {
             // Copied from golang.org/x/sys/unix/dev_dragonfly.go.
             var major = (uint32)((dev >> 8) & 0xff);
             var minor = (uint32)(dev & 0xffff00ffU);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else if (exprᴛ1 == "freebsd"u8) {
+        case {} when exprᴛ1 == "freebsd"u8: {
             // Copied from golang.org/x/sys/unix/dev_freebsd.go.
             var major = (uint32)((dev >> 8) & 0xff);
             var minor = (uint32)(dev & 0xffff00ffU);
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else if (exprᴛ1 == "netbsd"u8) {
+        case {} when exprᴛ1 == "netbsd"u8: {
             // Copied from golang.org/x/sys/unix/dev_netbsd.go.
             var major = (uint32)((dev & 0x000fff00) >> 8);
             var minor = (uint32)((dev & 0x000000ff) >> 0);
             minor |= (uint32)((uint32)((dev & 0xfff00000U) >> 12));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else if (exprᴛ1 == "openbsd"u8) {
+        case {} when exprᴛ1 == "openbsd"u8: {
             // Copied from golang.org/x/sys/unix/dev_openbsd.go.
             var major = (uint32)((dev & 0x0000ff00) >> 8);
             var minor = (uint32)((dev & 0x000000ff) >> 0);
             minor |= (uint32)((uint32)((dev & 0xffff0000U) >> 8));
             (h.Devmajor, h.Devminor) = ((int64)major, (int64)minor);
+            break;
         }
-        else { /* default: */
+        default: {
             // TODO: Implement solaris (see https://golang.org/issue/8106)
-        }
+            break;
+        }}
     }
-    return default!;
+    return default;
 }
 
 } // end tar_package

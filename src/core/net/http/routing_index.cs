@@ -25,21 +25,21 @@ partial struct routingIndex {
 }
 
 partial struct routingIndexKey {
-    internal nint pos;   // 0-based segment position
+    internal nint pos;  // 0-based segment position
     internal @string s; // literal, or empty for wildcard
 }
 
 internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
     ref var pat = ref Ꮡpat.DerefOrNull();
 
-    if (pat.lastSegment().multi){
+    if (pat.lastSegment().multi) {
         idx.multis = append(idx.multis, Ꮡpat);
     } else {
-        if (idx.segments == default!) {
+        if (idx.segments == nil) {
             idx.segments = new map<routingIndexKey, slice<ж<pattern>>>{};
         }
         foreach (var (pos, seg) in pat.segments) {
-            var key = new routingIndexKey(pos: pos, s: ""u8);
+            var key = new routingIndexKey(pos: pos, s: "");
             if (!seg.wild) {
                 key.s = seg.s;
             }
@@ -58,7 +58,7 @@ internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
 // We use this fact throughout, simplifying the implementation by returning more
 // patterns that we might need to.
 internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
-    error err = default!;
+    error err = default;
     ref var pat = ref Ꮡpat.DerefOrNull();
 
     // Terminology:
@@ -68,22 +68,22 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
 
     // apply f to all the pats, stopping on error.
     error apply(slice<ж<pattern>> pats) {
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         foreach (var (_, p) in pats) {
             err = f(p);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
         }
-        return default!;
+        return default;
     }
 
     // Our simple indexing scheme doesn't try to prune multi patterns; assume
     // any of them can match the argument.
     {
-        var errΔ1 = apply(idx.multis); if (errΔ1 != default!) {
+        var errΔ1 = apply(idx.multis); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -92,15 +92,15 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
         // an ordinary pattern matches do. So only other dollar or multi
         // patterns can conflict with a dollar pattern. Furthermore, conflicting
         // dollar patterns must have the {$} in the same position.
-        return apply(idx.segments[new routingIndexKey(s: "/"u8, pos: builtin.len(pat.segments) - 1)]);
+        return apply(idx.segments[new routingIndexKey(s: "/", pos: builtin.len(pat.segments) - 1)]);
     }
     // For ordinary and multi patterns, the only conflicts can be with a multi,
     // or a pattern that has the same literal or a wildcard at some literal
     // position.
     // We could intersect all the possible matches at each position, but we
     // do something simpler: we find the position with the fewest patterns.
-    slice<ж<pattern>> lmin = default!;
-    slice<ж<pattern>> wmin = default!;
+    slice<ж<pattern>> lmin = default;
+    slice<ж<pattern>> wmin = default;
     nint min = math.MaxInt;
     var hasLit = false;
     foreach (var (i, seg) in pat.segments) {
@@ -110,7 +110,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
         if (!seg.wild) {
             hasLit = true;
             var lpats = idx.segments[new routingIndexKey(s: seg.s, pos: i)];
-            var wpats = idx.segments[new routingIndexKey(s: ""u8, pos: i)];
+            var wpats = idx.segments[new routingIndexKey(s: "", pos: i)];
             {
                 nint sum = builtin.len(lpats) + builtin.len(wpats); if (sum < min) {
                     lmin = lpats;

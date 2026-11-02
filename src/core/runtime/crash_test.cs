@@ -40,41 +40,48 @@ partial class runtime_test_package {
 
 internal static slice<@string> toRemove;
 
-internal static readonly @string entrypointVar = "RUNTIME_TEST_ENTRYPOINT"u8;
+internal static ref readonly @string entrypointVar => ref entrypointVarᵇ;
+private static readonly @string entrypointVarᵇ = "RUNTIME_TEST_ENTRYPOINT"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string coreˢ = "core"u8;
+internal static ref readonly @string coreˢ => ref coreˢᵇ;
+private static readonly @string coreˢᵇ = "core"u8;
 internal static readonly object runtimeTestSomeTestLeftAˢ = (@string)"runtime.test: some test left a core file behind"u8;
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     {
         @string entrypoint = Δos.Getenv(entrypointVar);
         var exprᴛ1 = entrypoint;
-        if (exprᴛ1 == "panic"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "panic"u8: {
             crashViaPanic();
             throw panic("unreachable");
+            break;
         }
-        else if (exprᴛ1 == "trap"u8) {
+        case {} when exprᴛ1 == "trap"u8: {
             crashViaTrap();
             throw panic("unreachable");
+            break;
         }
-        else if (exprᴛ1 == ""u8) {
+        default: {
+            Δlog.Fatalf("invalid %s: %q", entrypointVar, entrypoint);
+            break;
+        }
+        case {} when exprᴛ1 == ""u8: {
             // fall through to normal behavior
-        }
-        else { /* default: */
-            Δlog.Fatalf("invalid %s: %q"u8, entrypointVar, entrypoint);
-        }
+            break;
+        }}
     }
 
     var (_, coreErrBefore) = Δos.Stat(coreˢ);
 
-    nint status = Ꮡm.Run();
+    nint status = m.Run();
     foreach (var (_, @file) in toRemove) {
         Δos.RemoveAll(@file);
     }
 
     var (_, coreErrAfter) = Δos.Stat(coreˢ);
-    if (coreErrBefore != default! && coreErrAfter == default!) {
+    if (coreErrBefore != nil && coreErrAfter == nil) {
         fmt.Fprintln(new Δos.FileжWriter(Δos.Stderr), runtimeTestSomeTestLeftAˢ);
         if (status == 0) {
             status = 1;
@@ -101,61 +108,60 @@ partial struct buildexe {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object quickˢ = (@string)"-quick"u8;
 
-internal static @string runTestProg(ж<testing.T> Ꮡt, @string binary, @string name, params ꓸꓸꓸstring envʗp) {
+internal static @string runTestProg(ж<testing.T> t, @string binary, @string name, params ꓸꓸꓸstring envʗp) {
     var env = envʗp.sslice();
 
     if (flagQuick.Value) {
-        Ꮡt.Skip(quickˢ);
+        t.Skip(quickˢ);
     }
 
-    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
-    Ꮡt.Helper();
+    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(t));
+    t.Helper();
 
-    var (exe, err) = buildTestProg(Ꮡt, binary);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (exe, err) = buildTestProg(t, binary);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    return runBuiltTestProg(Ꮡt, exe, name, env.ꓸꓸꓸ);
+    return runBuiltTestProg(t, exe, name, env.ꓸꓸꓸ);
 }
 
-internal static partial @string runBuiltTestProg(ж<testing.T> Ꮡt, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
+internal static partial @string runBuiltTestProg(ж<testing.T> t, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
     var env = envʗp.sslice();
 
-    Ꮡt.Helper();
+    t.Helper();
 
-    var (@out, _) = runBuiltTestProgErr(Ꮡt, exe, name, env.ꓸꓸꓸ);
+    var (@out, _) = runBuiltTestProgErr(t, exe, name, env.ꓸꓸꓸ);
     return @out;
 }
 
-internal static (@string, error) runBuiltTestProgErr(ж<testing.T> Ꮡt, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
+internal static (@string, error) runBuiltTestProgErr(ж<testing.T> t, @string exe, @string name, params ꓸꓸꓸstring envʗp) {
     var env = envʗp.sslice();
 
-    Ꮡt.Helper();
+    t.Helper();
 
     if (flagQuick.Value) {
-        Ꮡt.Skip(quickˢ);
+        t.Skip(quickˢ);
     }
 
     var start = time.Now();
 
-    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), exe, name));
-    cmd.Value.Env = appendꓸꓸꓸ((~cmd).Env, env);
+    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(t), exe, name));
+    cmd.Env = appendꓸꓸꓸ(cmd.Env, env);
     if (testing.Short()) {
-        cmd.Value.Env = append((~cmd).Env, "RUNTIME_TEST_SHORT=1"u8);
+        cmd.Env = append(cmd.Env, (@string)"RUNTIME_TEST_SHORT=1");
     }
     var (@out, err) = cmd.CombinedOutput();
-    if (err == default!){
-        Ꮡt.Logf("%v (%v): ok"u8, cmd.OrTypedNil(), time.Since(start));
+    if (err == nil) {
+        t.Logf("%v (%v): ok", cmd.OrTypedNil(), time.Since(start));
     } else {
         {
-            var (_, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok){
-                Ꮡt.Logf("%v: %v"u8, cmd.OrTypedNil(), err);
-            } else 
-            if (errors.Is(err, exec.ErrWaitDelay)){
-                Ꮡt.Fatalf("%v: %v"u8, cmd.OrTypedNil(), err);
+            var (_, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
+                t.Logf("%v: %v", cmd.OrTypedNil(), err);
+            } else if (errors.Is(err, exec.ErrWaitDelay)) {
+                t.Fatalf("%v: %v", cmd.OrTypedNil(), err);
             } else {
-                Ꮡt.Fatalf("%v failed to start: %v"u8, cmd.OrTypedNil(), err);
+                t.Fatalf("%v failed to start: %v", cmd.OrTypedNil(), err);
             }
         }
     }
@@ -165,38 +171,41 @@ internal static (@string, error) runBuiltTestProgErr(ж<testing.T> Ꮡt, @string
 internal static channel<bool> serializeBuild = new channel<bool>(2);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goBuildˢ = "go-build"u8;
-internal static readonly @string buildingTestCalledTSkipˢ = "building test called t.Skip"u8;
-internal static readonly @string goexperimentˢ = "GOEXPERIMENT="u8;
+internal static ref readonly @string goBuildˢ => ref goBuildˢᵇ;
+private static readonly @string goBuildˢᵇ = "go-build"u8;
+internal static ref readonly @string buildingTestCalledTSkipˢ => ref buildingTestCalledTSkipˢᵇ;
+private static readonly @string buildingTestCalledTSkipˢᵇ = "building test called t.Skip"u8;
+internal static ref readonly @string goexperimentˢ => ref goexperimentˢᵇ;
+private static readonly @string goexperimentˢᵇ = "GOEXPERIMENT="u8;
 
-internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binary, params ꓸꓸꓸstring flagsʗp) {
+internal static (@string, error) buildTestProg(ж<testing.T> t, @string binary, params ꓸꓸꓸstring flagsʗp) {
     var flags = flagsʗp.slice();
 
     if (flagQuick.Value) {
-        Ꮡt.Skip(quickˢ);
+        t.Skip(quickˢ);
     }
-    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(t));
 
     Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Lock();
     if (testprog.dir == ""u8) {
         var (dirΔ1, err) = Δos.MkdirTemp(""u8, goBuildˢ);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to create temp directory: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to create temp directory: %v", err);
         }
         testprog.dir = dirΔ1;
         toRemove = append(toRemove, dirΔ1);
     }
 
-    if (testprog.target == default!) {
+    if (testprog.target == nil) {
         testprog.target = new map<@string, ж<buildexe>>();
     }
     @string name = binary;
     if (len(flags) > 0) {
-        name += "_"u8 + strings.Join(flags, "_"u8);
+        name += "_"u8 + strings.Join(flags, "_");
     }
     var (target, ok) = testprog.target[name, ꟷ];
     if (!ok) {
-        target = Ꮡ(new buildexe(nil));
+        target = Ꮡ(new buildexe());
         testprog.target[name] = target;
     }
 
@@ -207,7 +216,7 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
     Ꮡtestprog.of(testprogᴛ1.ᏑMutex).Unlock();
 
     var targetʗ1 = target;
-    target.of(buildexe.Ꮡonce).Do(() => {
+    target.Ꮡonce.Do(() => {
         GoFrame ᒐ = default;
         try {
             // Only do two "go build"'s at a time,
@@ -218,99 +227,103 @@ internal static (@string, error) buildTestProg(ж<testing.T> Ꮡt, @string binar
             }, ref ᒐ);
 
             // Don't get confused if testenv.GoToolPath calls t.Skip.
-            targetʗ1.Value.err = errors.New(buildingTestCalledTSkipˢ);
+            targetʗ1.err = errors.New(buildingTestCalledTSkipˢ);
 
             if (asan.Enabled) {
-                flags = append(flags, "-asan"u8);
+                flags = append(flags, (@string)"-asan");
             }
             if (msan.Enabled) {
-                flags = append(flags, "-msan"u8);
+                flags = append(flags, (@string)"-msan");
             }
             if (race.Enabled) {
-                flags = append(flags, "-race"u8);
+                flags = append(flags, (@string)"-race");
             }
 
             @string exe = filepath.Join(dir, name + ".exe");
 
             var start = time.Now();
-            var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), appendꓸꓸꓸ(new @string[]{"build"u8, "-o"u8, exe}.slice(), flags).ꓸꓸꓸ);
-            Ꮡt.Logf("running %v"u8, cmd.OrTypedNil());
-            cmd.Value.Dir = "testdata/"u8 + binary;
+            var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), appendꓸꓸꓸ(slice<@string>(["build", "-o", exe]), flags).ꓸꓸꓸ);
+            t.Logf("running %v", cmd.OrTypedNil());
+            cmd.Dir = "testdata/"u8 + binary;
             cmd = testenv.CleanCmdEnv(cmd);
 
             // If tests need any experimental flags, add them here.
             //
             // TODO(vsaioc): Remove `goroutineleakprofile` once the feature is no longer experimental.
             var edited = false;
-            foreach (var i in range((~cmd).Env)) {
-                @string e = (~cmd).Env[i];
+            foreach (var i in range(cmd.Env)) {
+                @string e = cmd.Env[i];
                 {
                     var (_, vars, okΔ1) = strings.Cut(e, goexperimentˢ); if (okΔ1) {
-                        cmd.Value.Env[i] = "GOEXPERIMENT="u8 + vars + ",goroutineleakprofile"u8;
+                        cmd.Env[i] = "GOEXPERIMENT="u8 + vars + ",goroutineleakprofile"u8;
                         edited = true;
                         _ = vars;
                     }
                 }
             }
             if (!edited) {
-                cmd.Value.Env = append((~cmd).Env, "GOEXPERIMENT=goroutineleakprofile"u8);
+                cmd.Env = append(cmd.Env, (@string)"GOEXPERIMENT=goroutineleakprofile");
             }
 
             var (@out, err) = cmd.CombinedOutput();
-            if (err != default!){
-                targetʗ1.Value.err = fmt.Errorf("building %s %v: %v\n%s"u8, binary, flags, err, @out);
+            if (err != nil) {
+                targetʗ1.err = fmt.Errorf("building %s %v: %v\n%s"u8, binary, flags, err, @out);
             } else {
-                Ꮡt.Logf("built %v in %v"u8, name, time.Since(start));
-                targetʗ1.Value.exe = exe;
-                targetʗ1.Value.err = default!;
+                t.Logf("built %v in %v", name, time.Since(start));
+                targetʗ1.exe = exe;
+                targetʗ1.err = default;
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
 
-    return ((~target).exe, (~target).err);
+    return (target.exe, target.err);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string signalInVDSOˢ = "SignalInVDSO"u8;
-internal static readonly @string successˢ = "success\n"u8;
+internal static ref readonly @string signalInVDSOˢ => ref signalInVDSOˢᵇ;
+private static readonly @string signalInVDSOˢᵇ = "SignalInVDSO"u8;
+internal static ref readonly @string successˢ => ref successˢᵇ;
+private static readonly @string successˢᵇ = "success\n"u8;
 
-public static void TestVDSO(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprogˢ, signalInVDSOˢ);
+public static void TestVDSO(ж<testing.T> t) {
+    t.Parallel();
+    @string output = runTestProg(t, testprogˢ, signalInVDSOˢ);
     @string want = successˢ;
     if (output != want) {
-        Ꮡt.Fatalf("output:\n%s\n\nwanted:\n%s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwanted:\n%s", output, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string crashˢ = "Crash"u8;
-internal static readonly @string mainRecoveredDoneNewˢ = "main: recovered done\nnew-thread: recovered done\nsecond-new-thread: recovered done\nmain-again: recovered done\n"u8;
+internal static ref readonly @string crashˢ => ref crashˢᵇ;
+private static readonly @string crashˢᵇ = "Crash"u8;
+internal static ref readonly @string mainRecoveredDoneNewˢ => ref mainRecoveredDoneNewˢᵇ;
+private static readonly @string mainRecoveredDoneNewˢᵇ = "main: recovered done\nnew-thread: recovered done\nsecond-new-thread: recovered done\nmain-again: recovered done\n"u8;
 
 internal partial struct testCrashHandler_crashTest /*dyn*/ {
     public bool Cgo;
 }
 
-internal static void testCrashHandler(ж<testing.T> Ꮡt, bool cgo) {
-    @string output = default!;
-    if (cgo){
+internal static void testCrashHandler(ж<testing.T> t, bool cgo) {
+    @string output = default;
+    if (cgo) {
         if (Δruntime.GOOS == "freebsd"u8 && race.Enabled) {
-            Ꮡt.Skipf("race + cgo freebsd not supported. See https://go.dev/issue/73788."u8);
+            t.Skipf("race + cgo freebsd not supported. See https://go.dev/issue/73788.");
         }
-        output = runTestProg(Ꮡt, testprogcgoˢ, crashˢ);
+        output = runTestProg(t, testprogcgoˢ, crashˢ);
     } else {
-        output = runTestProg(Ꮡt, testprogˢ, crashˢ);
+        output = runTestProg(t, testprogˢ, crashˢ);
     }
     @string want = mainRecoveredDoneNewˢ;
     if (output != want) {
-        Ꮡt.Fatalf("output:\n%s\n\nwanted:\n%s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwanted:\n%s", output, want);
     }
 }
 
-public static void TestCrashHandler(ж<testing.T> Ꮡt) {
-    testCrashHandler(Ꮡt, false);
+public static void TestCrashHandler(ж<testing.T> t) {
+    testCrashHandler(t, false);
 }
 
 internal static testenv.SpecialBuildTypes deadlockBuildTypes = new testenv.SpecialBuildTypes(
@@ -322,119 +335,133 @@ internal static testenv.SpecialBuildTypes deadlockBuildTypes = new testenv.Speci
 );
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fatalErrorAllGoroutinesˢ = "fatal error: all goroutines are asleep - deadlock!\n"u8;
+internal static ref readonly @string fatalErrorAllGoroutinesˢ => ref fatalErrorAllGoroutinesˢᵇ;
+private static readonly @string fatalErrorAllGoroutinesˢᵇ = "fatal error: all goroutines are asleep - deadlock!\n"u8;
 
-internal static void testDeadlock(ж<testing.T> Ꮡt, @string name) {
+internal static void testDeadlock(ж<testing.T> t, @string name) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
-    @string output = runTestProg(Ꮡt, testprogˢ, name);
+    @string output = runTestProg(t, testprogˢ, name);
     @string want = fatalErrorAllGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string simpleDeadlockˢ = "SimpleDeadlock"u8;
+internal static ref readonly @string simpleDeadlockˢ => ref simpleDeadlockˢᵇ;
+private static readonly @string simpleDeadlockˢᵇ = "SimpleDeadlock"u8;
 
-public static void TestSimpleDeadlock(ж<testing.T> Ꮡt) {
-    testDeadlock(Ꮡt, simpleDeadlockˢ);
+public static void TestSimpleDeadlock(ж<testing.T> t) {
+    testDeadlock(t, simpleDeadlockˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string initDeadlockˢ = "InitDeadlock"u8;
+internal static ref readonly @string initDeadlockˢ => ref initDeadlockˢᵇ;
+private static readonly @string initDeadlockˢᵇ = "InitDeadlock"u8;
 
-public static void TestInitDeadlock(ж<testing.T> Ꮡt) {
-    testDeadlock(Ꮡt, initDeadlockˢ);
+public static void TestInitDeadlock(ж<testing.T> t) {
+    testDeadlock(t, initDeadlockˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lockedDeadlockˢ = "LockedDeadlock"u8;
+internal static ref readonly @string lockedDeadlockˢ => ref lockedDeadlockˢᵇ;
+private static readonly @string lockedDeadlockˢᵇ = "LockedDeadlock"u8;
 
-public static void TestLockedDeadlock(ж<testing.T> Ꮡt) {
-    testDeadlock(Ꮡt, lockedDeadlockˢ);
+public static void TestLockedDeadlock(ж<testing.T> t) {
+    testDeadlock(t, lockedDeadlockˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lockedDeadlock2ˢ = "LockedDeadlock2"u8;
+internal static ref readonly @string lockedDeadlock2ˢ => ref lockedDeadlock2ˢᵇ;
+private static readonly @string lockedDeadlock2ˢᵇ = "LockedDeadlock2"u8;
 
-public static void TestLockedDeadlock2(ж<testing.T> Ꮡt) {
-    testDeadlock(Ꮡt, lockedDeadlock2ˢ);
+public static void TestLockedDeadlock2(ж<testing.T> t) {
+    testDeadlock(t, lockedDeadlock2ˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goexitDeadlockˢ = "GoexitDeadlock"u8;
-internal static readonly @string noGoroutinesMainCalledˢ = "no goroutines (main called runtime.Goexit) - deadlock!"u8;
+internal static ref readonly @string goexitDeadlockˢ => ref goexitDeadlockˢᵇ;
+private static readonly @string goexitDeadlockˢᵇ = "GoexitDeadlock"u8;
+internal static ref readonly @string noGoroutinesMainCalledˢ => ref noGoroutinesMainCalledˢᵇ;
+private static readonly @string noGoroutinesMainCalledˢᵇ = "no goroutines (main called runtime.Goexit) - deadlock!"u8;
 
-public static void TestGoexitDeadlock(ж<testing.T> Ꮡt) {
+public static void TestGoexitDeadlock(ж<testing.T> t) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
-    @string output = runTestProg(Ꮡt, testprogˢ, goexitDeadlockˢ);
+    @string output = runTestProg(t, testprogˢ, goexitDeadlockˢ);
     @string want = noGoroutinesMainCalledˢ;
     if (!strings.Contains(output, want)) {
-        Ꮡt.Fatalf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwant output containing: %s", output, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stackOverflowˢ = "StackOverflow"u8;
+internal static ref readonly @string stackOverflowˢ => ref stackOverflowˢᵇ;
+private static readonly @string stackOverflowˢᵇ = "StackOverflow"u8;
 
-public static void TestStackOverflow(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, stackOverflowˢ);
-    var want = new @string[]{
-        "runtime: goroutine stack exceeds 1474560-byte limit\n"u8,
-        "fatal error: stack overflow"u8,
+public static void TestStackOverflow(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, stackOverflowˢ);
+    var want = slice<@string>([
+        "runtime: goroutine stack exceeds 1474560-byte limit\n",
+        "fatal error: stack overflow",
         // information about the current SP and stack bounds
-        "runtime: sp="u8,
-        "stack=["u8
-    }.slice();
+        "runtime: sp=",
+        "stack=["
+    ]);
     if (!strings.HasPrefix(output, want[0])) {
-        Ꮡt.Errorf("output does not start with %q"u8, want[0]);
+        t.Errorf("output does not start with %q", want[0]);
     }
     foreach (var (_, s) in want[1..]) {
         if (!strings.Contains(output, s)) {
-            Ꮡt.Errorf("output does not contain %q"u8, s);
+            t.Errorf("output does not contain %q", s);
         }
     }
-    if (Ꮡt.Failed()) {
-        Ꮡt.Logf("output:\n%s"u8, output);
+    if (t.Failed()) {
+        t.Logf("output:\n%s", output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string threadExhaustionˢ = "ThreadExhaustion"u8;
-internal static readonly @string runtimeProgramExceeds10ˢ = "runtime: program exceeds 10-thread limit\nfatal error: thread exhaustion"u8;
+internal static ref readonly @string threadExhaustionˢ => ref threadExhaustionˢᵇ;
+private static readonly @string threadExhaustionˢᵇ = "ThreadExhaustion"u8;
+internal static ref readonly @string runtimeProgramExceeds10ˢ => ref runtimeProgramExceeds10ˢᵇ;
+private static readonly @string runtimeProgramExceeds10ˢᵇ = "runtime: program exceeds 10-thread limit\nfatal error: thread exhaustion"u8;
 
-public static void TestThreadExhaustion(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, threadExhaustionˢ);
+public static void TestThreadExhaustion(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, threadExhaustionˢ);
     @string want = runtimeProgramExceeds10ˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recursivePanicˢ = "RecursivePanic"u8;
-internal static readonly @string wrapBadPanicAgainˢ = """
+internal static ref readonly @string recursivePanicˢ => ref recursivePanicˢᵇ;
+private static readonly @string recursivePanicˢᵇ = "RecursivePanic"u8;
+internal static ref readonly @string wrapBadPanicAgainˢ => ref wrapBadPanicAgainˢᵇ;
+private static readonly @string wrapBadPanicAgainˢᵇ = """
 wrap: bad
 panic: again
 
 
 """u8.Raw();
 
-public static void TestRecursivePanic(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, recursivePanicˢ);
+public static void TestRecursivePanic(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, recursivePanicˢ);
     @string want = wrapBadPanicAgainˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recursivePanic2ˢ = "RecursivePanic2"u8;
-internal static readonly @string firstPanicSecondPanicˢ = """
+internal static ref readonly @string recursivePanic2ˢ => ref recursivePanic2ˢᵇ;
+private static readonly @string recursivePanic2ˢᵇ = "RecursivePanic2"u8;
+internal static ref readonly @string firstPanicSecondPanicˢ => ref firstPanicSecondPanicˢᵇ;
+private static readonly @string firstPanicSecondPanicˢᵇ = """
 first panic
 second panic
 panic: third panic
@@ -442,142 +469,157 @@ panic: third panic
 
 """u8.Raw();
 
-public static void TestRecursivePanic2(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic2ˢ);
+public static void TestRecursivePanic2(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, recursivePanic2ˢ);
     @string want = firstPanicSecondPanicˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recursivePanic3ˢ = "RecursivePanic3"u8;
-internal static readonly @string panicFirstPanicˢ = """
+internal static ref readonly @string recursivePanic3ˢ => ref recursivePanic3ˢᵇ;
+private static readonly @string recursivePanic3ˢᵇ = "RecursivePanic3"u8;
+internal static ref readonly @string panicFirstPanicˢ => ref panicFirstPanicˢᵇ;
+private static readonly @string panicFirstPanicˢᵇ = """
 panic: first panic
 
 
 """u8.Raw();
 
-public static void TestRecursivePanic3(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic3ˢ);
+public static void TestRecursivePanic3(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, recursivePanic3ˢ);
     @string want = panicFirstPanicˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recursivePanic4ˢ = "RecursivePanic4"u8;
-internal static readonly @string panicFirstPanicRecoveredˢ = """
+internal static ref readonly @string recursivePanic4ˢ => ref recursivePanic4ˢᵇ;
+private static readonly @string recursivePanic4ˢᵇ = "RecursivePanic4"u8;
+internal static ref readonly @string panicFirstPanicRecoveredˢ => ref panicFirstPanicRecoveredˢᵇ;
+private static readonly @string panicFirstPanicRecoveredˢᵇ = """
 panic: first panic [recovered]
 	panic: second panic
 
 """u8.Raw();
 
-public static void TestRecursivePanic4(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic4ˢ);
+public static void TestRecursivePanic4(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, recursivePanic4ˢ);
     @string want = panicFirstPanicRecoveredˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string recursivePanic5ˢ = "RecursivePanic5"u8;
-internal static readonly @string firstPanicSecondPanicˢ2 = """
+internal static ref readonly @string recursivePanic5ˢ => ref recursivePanic5ˢᵇ;
+private static readonly @string recursivePanic5ˢᵇ = "RecursivePanic5"u8;
+internal static ref readonly @string firstPanicSecondPanicˢ2 => ref firstPanicSecondPanicˢ2ᵇ;
+private static readonly @string firstPanicSecondPanicˢ2ᵇ = """
 first panic
 second panic
 panic: third panic
 
 """u8.Raw();
 
-public static void TestRecursivePanic5(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, recursivePanic5ˢ);
+public static void TestRecursivePanic5(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, recursivePanic5ˢ);
     @string want = firstPanicSecondPanicˢ2;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string repanickedPanicˢ = "RepanickedPanic"u8;
-internal static readonly @string panicMessageRecoveredˢ = """
+internal static ref readonly @string repanickedPanicˢ => ref repanickedPanicˢᵇ;
+private static readonly @string repanickedPanicˢᵇ = "RepanickedPanic"u8;
+internal static ref readonly @string panicMessageRecoveredˢ => ref panicMessageRecoveredˢᵇ;
+private static readonly @string panicMessageRecoveredˢᵇ = """
 panic: message [recovered, repanicked]
 
 """u8.Raw();
 
-public static void TestRepanickedPanic(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, repanickedPanicˢ);
+public static void TestRepanickedPanic(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, repanickedPanicˢ);
     @string want = panicMessageRecoveredˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string repanickedMiddlePanicˢ = "RepanickedMiddlePanic"u8;
-internal static readonly @string panicInnerRecoveredPanicˢ = """
+internal static ref readonly @string repanickedMiddlePanicˢ => ref repanickedMiddlePanicˢᵇ;
+private static readonly @string repanickedMiddlePanicˢᵇ = "RepanickedMiddlePanic"u8;
+internal static ref readonly @string panicInnerRecoveredPanicˢ => ref panicInnerRecoveredPanicˢᵇ;
+private static readonly @string panicInnerRecoveredPanicˢᵇ = """
 panic: inner [recovered]
 	panic: middle [recovered, repanicked]
 	panic: outer
 
 """u8.Raw();
 
-public static void TestRepanickedMiddlePanic(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, repanickedMiddlePanicˢ);
+public static void TestRepanickedMiddlePanic(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, repanickedMiddlePanicˢ);
     @string want = panicInnerRecoveredPanicˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string repanickedPanicSandwichˢ = "RepanickedPanicSandwich"u8;
-internal static readonly @string panicOuterRecoveredPanicˢ = """
+internal static ref readonly @string repanickedPanicSandwichˢ => ref repanickedPanicSandwichˢᵇ;
+private static readonly @string repanickedPanicSandwichˢᵇ = "RepanickedPanicSandwich"u8;
+internal static ref readonly @string panicOuterRecoveredPanicˢ => ref panicOuterRecoveredPanicˢᵇ;
+private static readonly @string panicOuterRecoveredPanicˢᵇ = """
 panic: outer [recovered]
 	panic: inner [recovered]
 	panic: outer
 
 """u8.Raw();
 
-public static void TestRepanickedPanicSandwich(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, repanickedPanicSandwichˢ);
+public static void TestRepanickedPanicSandwich(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, repanickedPanicSandwichˢ);
     @string want = panicOuterRecoveredPanicˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string doublePanicWithSameValueˢ = "DoublePanicWithSameValue"u8;
-internal static readonly @string panicMessageˢ = """
+internal static ref readonly @string doublePanicWithSameValueˢ => ref doublePanicWithSameValueˢᵇ;
+private static readonly @string doublePanicWithSameValueˢᵇ = "DoublePanicWithSameValue"u8;
+internal static ref readonly @string panicMessageˢ => ref panicMessageˢᵇ;
+private static readonly @string panicMessageˢᵇ = """
 panic: message
 
 """u8.Raw();
 
-public static void TestDoublePanicWithSameValue(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, doublePanicWithSameValueˢ);
+public static void TestDoublePanicWithSameValue(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, doublePanicWithSameValueˢ);
     @string want = panicMessageˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goexitExitˢ = "GoexitExit"u8;
+internal static ref readonly @string goexitExitˢ => ref goexitExitˢᵇ;
+private static readonly @string goexitExitˢᵇ = "GoexitExit"u8;
 
-public static void TestGoexitCrash(ж<testing.T> Ꮡt) {
+public static void TestGoexitCrash(ж<testing.T> t) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
-    @string output = runTestProg(Ꮡt, testprogˢ, goexitExitˢ);
+    @string output = runTestProg(t, testprogˢ, goexitExitˢ);
     @string want = noGoroutinesMainCalledˢ;
     if (!strings.Contains(output, want)) {
-        Ꮡt.Fatalf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwant output containing: %s", output, want);
     }
 }
 
-public static partial void TestGoexitDefer(ж<testing.T> Ꮡt) {
+public static partial void TestGoexitDefer(ж<testing.T> t) {
     var c = new channel<EmptyStruct>(0);
     var cʗ1 = c;
     goǃ(() => {
@@ -586,8 +628,8 @@ public static partial void TestGoexitDefer(ж<testing.T> Ꮡt) {
             var cʗ2 = cʗ1;
             defer(() => {
                 var r = recover();
-                if (r != default!) {
-                    Ꮡt.Errorf("non-nil recover during Goexit"u8);
+                if (r != nil) {
+                    t.Errorf("non-nil recover during Goexit");
                 }
                 cʗ2.ᐸꟷ(new EmptyStruct());
             }, ref ᒐ);
@@ -601,76 +643,86 @@ public static partial void TestGoexitDefer(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goNilˢ = "GoNil"u8;
-internal static readonly @string goOfNilFuncValueˢ = "go of nil func value"u8;
+internal static ref readonly @string goNilˢ => ref goNilˢᵇ;
+private static readonly @string goNilˢᵇ = "GoNil"u8;
+internal static ref readonly @string goOfNilFuncValueˢ => ref goOfNilFuncValueˢᵇ;
+private static readonly @string goOfNilFuncValueˢᵇ = "go of nil func value"u8;
 
-public static void TestGoNil(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, goNilˢ);
+public static void TestGoNil(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, goNilˢ);
     @string want = goOfNilFuncValueˢ;
     if (!strings.Contains(output, want)) {
-        Ꮡt.Fatalf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwant output containing: %s", output, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mainGoroutineIDˢ = "MainGoroutineID"u8;
-internal static readonly @string panicTestGoroutine1ˢ = "panic: test\n\ngoroutine 1 [running]:\n"u8;
+internal static ref readonly @string mainGoroutineIDˢ => ref mainGoroutineIDˢᵇ;
+private static readonly @string mainGoroutineIDˢᵇ = "MainGoroutineID"u8;
+internal static ref readonly @string panicTestGoroutine1ˢ => ref panicTestGoroutine1ˢᵇ;
+private static readonly @string panicTestGoroutine1ˢᵇ = "panic: test\n\ngoroutine 1 [running]:\n"u8;
 
-public static void TestMainGoroutineID(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, mainGoroutineIDˢ);
+public static void TestMainGoroutineID(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, mainGoroutineIDˢ);
     @string want = panicTestGoroutine1ˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noHelperGoroutinesˢ = "NoHelperGoroutines"u8;
-internal static readonly @string goroutine09ˢ = @"goroutine [0-9]+ \["u8;
+internal static ref readonly @string noHelperGoroutinesˢ => ref noHelperGoroutinesˢᵇ;
+private static readonly @string noHelperGoroutinesˢᵇ = "NoHelperGoroutines"u8;
+internal static ref readonly @string goroutine09ˢ => ref goroutine09ˢᵇ;
+private static readonly @string goroutine09ˢᵇ = @"goroutine [0-9]+ \["u8;
 
-public static void TestNoHelperGoroutines(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, noHelperGoroutinesˢ);
+public static void TestNoHelperGoroutines(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, noHelperGoroutinesˢ);
     var matches = Δregexp.MustCompile(goroutine09ˢ).FindAllStringSubmatch(output, -1);
     if (len(matches) != 1 || matches[0][0] != "goroutine 1 [") {
-        Ꮡt.Fatalf("want to see only goroutine 1, see:\n%s"u8, output);
+        t.Fatalf("want to see only goroutine 1, see:\n%s", output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string breakpointˢ = "Breakpoint"u8;
-internal static readonly @string runtimeBreakpointˢ = "runtime.Breakpoint("u8;
+internal static ref readonly @string breakpointˢ => ref breakpointˢᵇ;
+private static readonly @string breakpointˢᵇ = "Breakpoint"u8;
+internal static ref readonly @string runtimeBreakpointˢ => ref runtimeBreakpointˢᵇ;
+private static readonly @string runtimeBreakpointˢᵇ = "runtime.Breakpoint("u8;
 
-public static void TestBreakpoint(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, breakpointˢ);
+public static void TestBreakpoint(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, breakpointˢ);
     // If runtime.Breakpoint() is inlined, then the stack trace prints
     // "runtime.Breakpoint(...)" instead of "runtime.Breakpoint()".
     @string want = runtimeBreakpointˢ;
     if (!strings.Contains(output, want)) {
-        Ꮡt.Fatalf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwant output containing: %s", output, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goexitInPanicˢ = "GoexitInPanic"u8;
-internal static readonly @string fatalErrorNoGoroutinesˢ = "fatal error: no goroutines (main called runtime.Goexit) - deadlock!"u8;
+internal static ref readonly @string goexitInPanicˢ => ref goexitInPanicˢᵇ;
+private static readonly @string goexitInPanicˢᵇ = "GoexitInPanic"u8;
+internal static ref readonly @string fatalErrorNoGoroutinesˢ => ref fatalErrorNoGoroutinesˢᵇ;
+private static readonly @string fatalErrorNoGoroutinesˢᵇ = "fatal error: no goroutines (main called runtime.Goexit) - deadlock!"u8;
 
-public static void TestGoexitInPanic(ж<testing.T> Ꮡt) {
+public static void TestGoexitInPanic(ж<testing.T> t) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
     // see issue 8774: this code used to trigger an infinite recursion
-    @string output = runTestProg(Ꮡt, testprogˢ, goexitInPanicˢ);
+    @string output = runTestProg(t, testprogˢ, goexitInPanicˢ);
     @string want = fatalErrorNoGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Issue 14965: Runtime panics should be of type runtime.Error
-public static void TestRuntimePanicWithRuntimeError(ж<testing.T> Ꮡt) {
+public static void TestRuntimePanicWithRuntimeError(ж<testing.T> t) {
     var testCases = new array<Action>(6){
         [0] = () => {
-            map<uint64, bool> m = default!;
+            map<uint64, bool> m = default;
             m[1234] = true;
         },
         [1] = () => {
@@ -692,7 +744,7 @@ public static void TestRuntimePanicWithRuntimeError(ж<testing.T> Ꮡt) {
             _ = new channel<bool>(n);
         },
         [5] = () => {
-            close((channel<bool>)(default!));
+            close((channel<bool>)(default));
         }
     };
 
@@ -700,14 +752,14 @@ public static void TestRuntimePanicWithRuntimeError(ж<testing.T> Ꮡt) {
         var got = panicValue(fn);
         {
             var (_, ok) = got._<runtimeꓸError>(ᐧ); if (!ok) {
-                Ꮡt.Errorf("test #%d: recovered value %v(type %T) does not implement runtime.Error"u8, i, got, got);
+                t.Errorf("test #%d: recovered value %v(type %T) does not implement runtime.Error", i, got, got);
             }
         }
     }
 }
 
 internal static any /*recovered*/ panicValue(Action fn) {
-    any recovered = default!;
+    any recovered = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
@@ -721,181 +773,199 @@ internal static any /*recovered*/ panicValue(Action fn) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicAfterGoexitˢ = "PanicAfterGoexit"u8;
-internal static readonly @string panicHelloˢ = "panic: hello"u8;
+internal static ref readonly @string panicAfterGoexitˢ => ref panicAfterGoexitˢᵇ;
+private static readonly @string panicAfterGoexitˢᵇ = "PanicAfterGoexit"u8;
+internal static ref readonly @string panicHelloˢ => ref panicHelloˢᵇ;
+private static readonly @string panicHelloˢᵇ = "panic: hello"u8;
 
-public static void TestPanicAfterGoexit(ж<testing.T> Ꮡt) {
+public static void TestPanicAfterGoexit(ж<testing.T> t) {
     // an uncaught panic should still work after goexit
-    @string output = runTestProg(Ꮡt, testprogˢ, panicAfterGoexitˢ);
+    @string output = runTestProg(t, testprogˢ, panicAfterGoexitˢ);
     @string want = panicHelloˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
-public static void TestRecoveredPanicAfterGoexit(ж<testing.T> Ꮡt) {
+public static void TestRecoveredPanicAfterGoexit(ж<testing.T> t) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
-    @string output = runTestProg(Ꮡt, testprogˢ, "RecoveredPanicAfterGoexit"u8);
+    @string output = runTestProg(t, testprogˢ, "RecoveredPanicAfterGoexit");
     @string want = fatalErrorNoGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
-public static void TestRecoverBeforePanicAfterGoexit(ж<testing.T> Ꮡt) {
+public static void TestRecoverBeforePanicAfterGoexit(ж<testing.T> t) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprogˢ, "RecoverBeforePanicAfterGoexit"u8);
+    t.Parallel();
+    @string output = runTestProg(t, testprogˢ, "RecoverBeforePanicAfterGoexit");
     @string want = fatalErrorNoGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
-public static void TestRecoverBeforePanicAfterGoexit2(ж<testing.T> Ꮡt) {
+public static void TestRecoverBeforePanicAfterGoexit2(ж<testing.T> t) {
     // External linking brings in cgo, causing deadlock detection not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(t), deadlockBuildTypes);
 
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprogˢ, "RecoverBeforePanicAfterGoexit2"u8);
+    t.Parallel();
+    @string output = runTestProg(t, testprogˢ, "RecoverBeforePanicAfterGoexit2");
     @string want = fatalErrorNoGoroutinesˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testprognetˢ = "testprognet"u8;
-internal static readonly @string netpollDeadlockˢ = "NetpollDeadlock"u8;
-internal static readonly @string doneˢ = "done\n"u8;
+internal static ref readonly @string testprognetˢ => ref testprognetˢᵇ;
+private static readonly @string testprognetˢᵇ = "testprognet"u8;
+internal static ref readonly @string netpollDeadlockˢ => ref netpollDeadlockˢᵇ;
+private static readonly @string netpollDeadlockˢᵇ = "NetpollDeadlock"u8;
+internal static ref readonly @string doneˢ => ref doneˢᵇ;
+private static readonly @string doneˢᵇ = "done\n"u8;
 
-public static void TestNetpollDeadlock(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprognetˢ, netpollDeadlockˢ);
+public static void TestNetpollDeadlock(ж<testing.T> t) {
+    t.Parallel();
+    @string output = runTestProg(t, testprognetˢ, netpollDeadlockˢ);
     @string want = doneˢ;
     if (!strings.HasSuffix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicTracebackˢ = "PanicTraceback"u8;
-internal static readonly @string panicHelloPanicPanicPt2ˢ = "panic: hello\n\tpanic: panic pt2\n\tpanic: panic pt1\n"u8;
+internal static ref readonly @string panicTracebackˢ => ref panicTracebackˢᵇ;
+private static readonly @string panicTracebackˢᵇ = "PanicTraceback"u8;
+internal static ref readonly @string panicHelloPanicPanicPt2ˢ => ref panicHelloPanicPanicPt2ˢᵇ;
+private static readonly @string panicHelloPanicPanicPt2ˢᵇ = "panic: hello\n\tpanic: panic pt2\n\tpanic: panic pt1\n"u8;
 
-public static void TestPanicTraceback(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprogˢ, panicTracebackˢ);
+public static void TestPanicTraceback(ж<testing.T> t) {
+    t.Parallel();
+    @string output = runTestProg(t, testprogˢ, panicTracebackˢ);
     @string want = panicHelloPanicPanicPt2ˢ;
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 
     // Check functions in the traceback.
-    var fns = new @string[]{"main.pt1.func1"u8, "panic"u8, "main.pt2.func1"u8, "panic"u8, "main.pt2"u8, "main.pt1"u8}.slice();
+    var fns = slice<@string>(["main.pt1.func1", "panic", "main.pt2.func1", "panic", "main.pt2", "main.pt1"]);
     foreach (var (_, fn) in fns) {
         var re = Δregexp.MustCompile(@"(?m)^"u8 + Δregexp.QuoteMeta(fn) + @"\(.*\n"u8);
         var idx = re.FindStringIndex(output);
-        if (idx == default!) {
-            Ꮡt.Fatalf("expected %q function in traceback:\n%s"u8, fn, output);
+        if (idx == nil) {
+            t.Fatalf("expected %q function in traceback:\n%s", fn, output);
         }
         output = output.slice(idx[1]);
     }
 }
 
-internal static partial void testPanicDeadlock(ж<testing.T> Ꮡt, @string name, @string want) {
+internal static partial void testPanicDeadlock(ж<testing.T> t, @string name, @string want) {
     // test issue 14432
-    @string output = runTestProg(Ꮡt, testprogˢ, name);
+    @string output = runTestProg(t, testprogˢ, name);
     if (!strings.HasPrefix(output, want)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goschedInPanicˢ = "GoschedInPanic"u8;
-internal static readonly @string panicErrorThatGoschedˢ = "panic: errorThatGosched\n\n"u8;
+internal static ref readonly @string goschedInPanicˢ => ref goschedInPanicˢᵇ;
+private static readonly @string goschedInPanicˢᵇ = "GoschedInPanic"u8;
+internal static ref readonly @string panicErrorThatGoschedˢ => ref panicErrorThatGoschedˢᵇ;
+private static readonly @string panicErrorThatGoschedˢᵇ = "panic: errorThatGosched\n\n"u8;
 
-public static partial void TestPanicDeadlockGosched(ж<testing.T> Ꮡt) {
-    testPanicDeadlock(Ꮡt, goschedInPanicˢ, panicErrorThatGoschedˢ);
+public static partial void TestPanicDeadlockGosched(ж<testing.T> t) {
+    testPanicDeadlock(t, goschedInPanicˢ, panicErrorThatGoschedˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string syscallInPanicˢ = "SyscallInPanic"u8;
-internal static readonly @string panic3ˢ = "1\n2\npanic: 3\n\n"u8;
+internal static ref readonly @string syscallInPanicˢ => ref syscallInPanicˢᵇ;
+private static readonly @string syscallInPanicˢᵇ = "SyscallInPanic"u8;
+internal static ref readonly @string panic3ˢ => ref panic3ˢᵇ;
+private static readonly @string panic3ˢᵇ = "1\n2\npanic: 3\n\n"u8;
 
-public static partial void TestPanicDeadlockSyscall(ж<testing.T> Ꮡt) {
-    testPanicDeadlock(Ꮡt, syscallInPanicˢ, panic3ˢ);
+public static partial void TestPanicDeadlockSyscall(ж<testing.T> t) {
+    testPanicDeadlock(t, syscallInPanicˢ, panic3ˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicLoopˢ = "PanicLoop"u8;
-internal static readonly @string panicWhilePrintingPanicˢ = "panic while printing panic value"u8;
+internal static ref readonly @string panicLoopˢ => ref panicLoopˢᵇ;
+private static readonly @string panicLoopˢᵇ = "PanicLoop"u8;
+internal static ref readonly @string panicWhilePrintingPanicˢ => ref panicWhilePrintingPanicˢᵇ;
+private static readonly @string panicWhilePrintingPanicˢᵇ = "panic while printing panic value"u8;
 
-public static void TestPanicLoop(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, panicLoopˢ);
+public static void TestPanicLoop(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, panicLoopˢ);
     {
         @string want = panicWhilePrintingPanicˢ; if (!strings.Contains(output, want)) {
-            Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
+            t.Errorf("output does not contain %q:\n%s", want, output);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string memProfˢ = "MemProf"u8;
-internal static readonly @string toolˢ = "tool"u8;
-internal static readonly @string pprofˢ = "pprof"u8;
-internal static readonly @string allocSpaceˢ = "-alloc_space"u8;
-internal static readonly @string topˢ = "-top"u8;
-internal static readonly @string pprofTmpdirˢ = "PPROF_TMPDIR="u8;
+internal static ref readonly @string memProfˢ => ref memProfˢᵇ;
+private static readonly @string memProfˢᵇ = "MemProf"u8;
+internal static ref readonly @string toolˢ => ref toolˢᵇ;
+private static readonly @string toolˢᵇ = "tool"u8;
+internal static ref readonly @string pprofˢ => ref pprofˢᵇ;
+private static readonly @string pprofˢᵇ = "pprof"u8;
+internal static ref readonly @string allocSpaceˢ => ref allocSpaceˢᵇ;
+private static readonly @string allocSpaceˢᵇ = "-alloc_space"u8;
+internal static ref readonly @string topˢ => ref topˢᵇ;
+private static readonly @string topˢᵇ = "-top"u8;
+internal static ref readonly @string pprofTmpdirˢ => ref pprofTmpdirˢᵇ;
+private static readonly @string pprofTmpdirˢᵇ = "PPROF_TMPDIR="u8;
 internal static readonly object missingMemProfInPprofˢ = (@string)"missing MemProf in pprof output"u8;
 
-public static void TestMemPprof(ж<testing.T> Ꮡt) {
+public static void TestMemPprof(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
 
-        var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (exe, err) = buildTestProg(t, testprogˢ);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         (var got, err) = testenv.CleanCmdEnv(exec.Command(exe, memProfˢ)).CombinedOutput();
-        if (err != default!) {
-            Ꮡt.Fatalf("testprog failed: %s, output:\n%s"u8, err, got);
+        if (err != nil) {
+            t.Fatalf("testprog failed: %s, output:\n%s", err, got);
         }
         @string fn = strings.TrimSpace((@string)got);
         defer(Δos.Remove, fn, ref ᒐ);
 
         for (nint @try = 0; @try < 2; @try++) {
-            var cmd = testenv.CleanCmdEnv(exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), toolˢ, pprofˢ, allocSpaceˢ, topˢ));
+            var cmd = testenv.CleanCmdEnv(exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), toolˢ, pprofˢ, allocSpaceˢ, topˢ));
             // Check that pprof works both with and without explicit executable on command line.
-            if (@try == 0){
-                cmd.Value.Args = append((~cmd).Args, exe, fn);
+            if (@try == 0) {
+                cmd.Args = append(cmd.Args, exe, fn);
             } else {
-                cmd.Value.Args = append((~cmd).Args, fn);
+                cmd.Args = append(cmd.Args, fn);
             }
             var found = false;
-            foreach (var (i, e) in (~cmd).Env) {
+            foreach (var (i, e) in cmd.Env) {
                 if (strings.HasPrefix(e, pprofTmpdirˢ)) {
-                    cmd.Value.Env[i] = "PPROF_TMPDIR="u8 + Δos.TempDir();
+                    cmd.Env[i] = "PPROF_TMPDIR="u8 + Δos.TempDir();
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                cmd.Value.Env = append((~cmd).Env, "PPROF_TMPDIR="u8 + Δos.TempDir());
+                cmd.Env = append(cmd.Env, "PPROF_TMPDIR="u8 + Δos.TempDir());
             }
 
             var (top, errΔ1) = cmd.CombinedOutput();
-            Ꮡt.Logf("%s:\n%s"u8, (~cmd).Args, top);
-            if (errΔ1 != default!){
-                Ꮡt.Error(errΔ1);
-            } else 
-            if (!bytes.Contains(top, slice<byte>("MemProf"u8))) {
-                Ꮡt.Error(missingMemProfInPprofˢ);
+            t.Logf("%s:\n%s", cmd.Args, top);
+            if (errΔ1 != nil) {
+                t.Error(errΔ1);
+            } else if (!bytes.Contains(top, slice<byte>("MemProf"u8))) {
+                t.Error(missingMemProfInPprofˢ);
             }
         }
     }
@@ -903,87 +973,93 @@ public static void TestMemPprof(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static ж<bool> concurrentMapTest = flag.Bool("run_concurrent_map_tests"u8, false, "also run flaky concurrent map tests"u8);
+internal static ж<bool> concurrentMapTest = flag.Bool("run_concurrent_map_tests", false, "also run flaky concurrent map tests");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingWithoutRunˢ = (@string)"skipping without -run_concurrent_map_tests"u8;
 internal static readonly object skippingTestRaceWillˢ = (@string)"skipping test: -race will catch the race, this test is for the built-in race detection"u8;
-internal static readonly @string concurrentMapWritesˢ = "concurrentMapWrites"u8;
-internal static readonly @string fatalErrorConcurrentMapˢ = "fatal error: concurrent map writes\n"u8;
-internal static readonly @string fatalErrorSmallMapWithNoˢ = "fatal error: small map with no empty slot (concurrent map writes?)\n"u8;
+internal static ref readonly @string concurrentMapWritesˢ => ref concurrentMapWritesˢᵇ;
+private static readonly @string concurrentMapWritesˢᵇ = "concurrentMapWrites"u8;
+internal static ref readonly @string fatalErrorConcurrentMapˢ => ref fatalErrorConcurrentMapˢᵇ;
+private static readonly @string fatalErrorConcurrentMapˢᵇ = "fatal error: concurrent map writes\n"u8;
+internal static ref readonly @string fatalErrorSmallMapWithNoˢ => ref fatalErrorSmallMapWithNoˢᵇ;
+private static readonly @string fatalErrorSmallMapWithNoˢᵇ = "fatal error: small map with no empty slot (concurrent map writes?)\n"u8;
 
-public static void TestConcurrentMapWrites(ж<testing.T> Ꮡt) {
+public static void TestConcurrentMapWrites(ж<testing.T> t) {
     if (!concurrentMapTest.Value) {
-        Ꮡt.Skip(skippingWithoutRunˢ);
+        t.Skip(skippingWithoutRunˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(skippingTestRaceWillˢ);
+        t.Skip(skippingTestRaceWillˢ);
     }
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
-    @string output = runTestProg(Ꮡt, testprogˢ, concurrentMapWritesˢ);
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
+    @string output = runTestProg(t, testprogˢ, concurrentMapWritesˢ);
     @string want = fatalErrorConcurrentMapˢ;
     // Concurrent writes can corrupt the map in a way that we
     // detect with a separate throw.
     @string want2 = fatalErrorSmallMapWithNoˢ;
     if (!strings.HasPrefix(output, want) && !strings.HasPrefix(output, want2)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string concurrentMapReadWriteˢ = "concurrentMapReadWrite"u8;
-internal static readonly @string fatalErrorConcurrentMapˢ2 = "fatal error: concurrent map read and map write\n"u8;
+internal static ref readonly @string concurrentMapReadWriteˢ => ref concurrentMapReadWriteˢᵇ;
+private static readonly @string concurrentMapReadWriteˢᵇ = "concurrentMapReadWrite"u8;
+internal static ref readonly @string fatalErrorConcurrentMapˢ2 => ref fatalErrorConcurrentMapˢ2ᵇ;
+private static readonly @string fatalErrorConcurrentMapˢ2ᵇ = "fatal error: concurrent map read and map write\n"u8;
 
-public static void TestConcurrentMapReadWrite(ж<testing.T> Ꮡt) {
+public static void TestConcurrentMapReadWrite(ж<testing.T> t) {
     if (!concurrentMapTest.Value) {
-        Ꮡt.Skip(skippingWithoutRunˢ);
+        t.Skip(skippingWithoutRunˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(skippingTestRaceWillˢ);
+        t.Skip(skippingTestRaceWillˢ);
     }
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
-    @string output = runTestProg(Ꮡt, testprogˢ, concurrentMapReadWriteˢ);
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
+    @string output = runTestProg(t, testprogˢ, concurrentMapReadWriteˢ);
     @string want = fatalErrorConcurrentMapˢ2;
     // Concurrent writes can corrupt the map in a way that we
     // detect with a separate throw.
     @string want2 = fatalErrorSmallMapWithNoˢ;
     if (!strings.HasPrefix(output, want) && !strings.HasPrefix(output, want2)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fatalErrorConcurrentMapˢ3 = "fatal error: concurrent map iteration and map write\n"u8;
+internal static ref readonly @string fatalErrorConcurrentMapˢ3 => ref fatalErrorConcurrentMapˢ3ᵇ;
+private static readonly @string fatalErrorConcurrentMapˢ3ᵇ = "fatal error: concurrent map iteration and map write\n"u8;
 
-public static void TestConcurrentMapIterateWrite(ж<testing.T> Ꮡt) {
+public static void TestConcurrentMapIterateWrite(ж<testing.T> t) {
     if (!concurrentMapTest.Value) {
-        Ꮡt.Skip(skippingWithoutRunˢ);
+        t.Skip(skippingWithoutRunˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(skippingTestRaceWillˢ);
+        t.Skip(skippingTestRaceWillˢ);
     }
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
-    @string output = runTestProg(Ꮡt, testprogˢ, "concurrentMapIterateWrite"u8);
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
+    @string output = runTestProg(t, testprogˢ, "concurrentMapIterateWrite");
     @string want = fatalErrorConcurrentMapˢ3;
     // Concurrent writes can corrupt the map in a way that we
     // detect with a separate throw.
     @string want2 = fatalErrorSmallMapWithNoˢ;
     if (!strings.HasPrefix(output, want) && !strings.HasPrefix(output, want2)) {
-        Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+        t.Fatalf("output does not start with %q:\n%s", want, output);
     }
 }
 
-public static void TestConcurrentMapWritesIssue69447(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestConcurrentMapWritesIssue69447(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
     if (race.Enabled) {
-        Ꮡt.Skip(skippingTestRaceWillˢ);
+        t.Skip(skippingTestRaceWillˢ);
     }
-    var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (exe, err) = buildTestProg(t, testprogˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
     for (nint i = 0; i < 200; i++) {
-        @string output = runBuiltTestProg(Ꮡt, exe, concurrentMapWritesˢ);
+        @string output = runBuiltTestProg(t, exe, concurrentMapWritesˢ);
         if (output == ""u8) {
             // If we didn't detect an error, that's ok.
             // This case makes this test not flaky like
@@ -998,7 +1074,7 @@ public static void TestConcurrentMapWritesIssue69447(ж<testing.T> Ꮡt) {
         // detect with a separate throw.
         @string want2 = fatalErrorSmallMapWithNoˢ;
         if (!strings.HasPrefix(output, want) && !strings.HasPrefix(output, want2)) {
-            Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
+            t.Fatalf("output does not start with %q:\n%s", want, output);
         }
     }
 }
@@ -1013,19 +1089,19 @@ internal static void negate(this ref point p) {
 }
 
 // Test for issue #10152.
-public static void TestPanicInlined(ж<testing.T> Ꮡt) {
+public static void TestPanicInlined(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var r = recover();
-            if (r == default!) {
-                Ꮡt.Fatalf("recover failed"u8);
+            if (r == nil) {
+                t.Fatalf("recover failed");
             }
             var buf = new slice<byte>(2048);
             nint n = Δruntime.Stack(buf, false);
             buf = buf.slice(0, n);
             if (!bytes.Contains(buf, slice<byte>("(*point).negate("u8))) {
-                Ꮡt.Fatalf("expecting stack trace to contain call to (*point).negate()"u8);
+                t.Fatalf("expecting stack trace to contain call to (*point).negate()");
             }
         }, ref ᒐ);
 
@@ -1037,16 +1113,17 @@ public static void TestPanicInlined(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicRaceˢ = "PanicRace"u8;
+internal static ref readonly @string panicRaceˢ => ref panicRaceˢᵇ;
+private static readonly @string panicRaceˢᵇ = "PanicRace"u8;
 
 // Test for issues #3934 and #20018.
 // We want to delay exiting until a panic print is complete.
-public static void TestPanicRace(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestPanicRace(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
 
-    var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (exe, err) = buildTestProg(t, testprogˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // The test is intentionally racy, and in my testing does not
@@ -1057,24 +1134,24 @@ public static void TestPanicRace(ж<testing.T> Ꮡt) {
 retry:
     for (nint i = 0; i < tries; i++) {
         var (got, errΔ1) = testenv.CleanCmdEnv(exec.Command(exe, panicRaceˢ)).CombinedOutput();
-        if (errΔ1 == default!) {
-            Ꮡt.Logf("try %d: program exited successfully, should have failed"u8, i + 1);
+        if (errΔ1 == nil) {
+            t.Logf("try %d: program exited successfully, should have failed", i + 1);
             continue;
         }
 
         if (i > 0) {
-            Ꮡt.Logf("try %d:\n"u8, i + 1);
+            t.Logf("try %d:\n", i + 1);
         }
-        Ꮡt.Logf("%s\n"u8, got);
+        t.Logf("%s\n", got);
 
-        var wants = new @string[]{
-            "panic: crash"u8,
-            "PanicRace"u8,
-            "created by "u8
-        }.slice();
+        var wants = slice<@string>([
+            "panic: crash",
+            "PanicRace",
+            "created by "
+        ]);
         foreach (var (_, want) in wants) {
             if (!bytes.Contains(got, slice<byte>(want))) {
-                Ꮡt.Logf("did not find expected string %q"u8, want);
+                t.Logf("did not find expected string %q", want);
                 goto continue_retry;
             }
         }
@@ -1084,65 +1161,70 @@ retry:
 continue_retry:;
     }
 break_retry:;
-    Ꮡt.Errorf("test ran %d times without producing expected output"u8, (nint)(tries));
+    t.Errorf("test ran %d times without producing expected output", (nint)(tries));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippedTestCheckptrModeˢ = (@string)"skipped test: checkptr mode catches the corruption"u8;
-internal static readonly @string badTracebackˢ = "BadTraceback"u8;
+internal static ref readonly @string badTracebackˢ => ref badTracebackˢᵇ;
+private static readonly @string badTracebackˢᵇ = "BadTraceback"u8;
 
-public static void TestBadTraceback(ж<testing.T> Ꮡt) {
+public static void TestBadTraceback(ж<testing.T> t) {
     if (asan.Enabled || msan.Enabled || race.Enabled) {
-        Ꮡt.Skip(skippedTestCheckptrModeˢ);
+        t.Skip(skippedTestCheckptrModeˢ);
     }
-    @string output = runTestProg(Ꮡt, testprogˢ, badTracebackˢ);
-    foreach (var (_, want) in new @string[]{
-        "unexpected return pc"u8,
-        "called from 0xbad"u8,
-        "00000bad"u8, // Smashed LR in hex dump
-        "<main.badLR"u8 // Symbolization in hex dump (badLR1 or badLR2)
-    }.slice()) {
+    @string output = runTestProg(t, testprogˢ, badTracebackˢ);
+    foreach (var (_, want) in slice<@string>([
+        "unexpected return pc",
+        "called from 0xbad",
+        "00000bad",   // Smashed LR in hex dump
+        "<main.badLR" // Symbolization in hex dump (badLR1 or badLR2)
+    ])) {
         if (!strings.Contains(output, want)) {
-            Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
+            t.Errorf("output does not contain %q:\n%s", want, output);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnSanitizersˢ = (@string)"skipping on sanitizers because the sanitizer runtime is external code"u8;
-internal static readonly @string timeProfˢ = "TimeProf"u8;
-internal static readonly @string gotracebackCrashˢ = "GOTRACEBACK=crash"u8;
-internal static readonly @string nodecount1ˢ = "-nodecount=1"u8;
+internal static ref readonly @string timeProfˢ => ref timeProfˢᵇ;
+private static readonly @string timeProfˢᵇ = "TimeProf"u8;
+internal static ref readonly @string gotracebackCrashˢ => ref gotracebackCrashˢᵇ;
+private static readonly @string gotracebackCrashˢᵇ = "GOTRACEBACK=crash"u8;
+internal static ref readonly @string nodecount1ˢ => ref nodecount1ˢᵇ;
+private static readonly @string nodecount1ˢᵇ = "-nodecount=1"u8;
 internal static readonly object profilerRefersToˢ = (@string)"profiler refers to ExternalCode"u8;
 
-public static void TestTimePprof(ж<testing.T> Ꮡt) {
+public static void TestTimePprof(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // This test is unreliable on any system in which nanotime
         // calls into libc.
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8) {
-            Ꮡt.Skipf("skipping on %s because nanotime calls libc"u8, Δruntime.GOOS);
-        }
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8: {
+            t.Skipf("skipping on %s because nanotime calls libc", Δruntime.GOOS);
+            break;
+        }}
         if (race.Enabled || asan.Enabled || msan.Enabled) {
-            Ꮡt.Skip(skippingOnSanitizersˢ);
+            t.Skip(skippingOnSanitizersˢ);
         }
 
         // Pass GOTRACEBACK for issue #41120 to try to get more
         // information on timeout.
-        @string fn = runTestProg(Ꮡt, testprogˢ, timeProfˢ, gotracebackCrashˢ);
+        @string fn = runTestProg(t, testprogˢ, timeProfˢ, gotracebackCrashˢ);
         fn = strings.TrimSpace(fn);
         defer(Δos.Remove, fn, ref ᒐ);
 
-        var cmd = testenv.CleanCmdEnv(exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), toolˢ, pprofˢ, topˢ, nodecount1ˢ, fn));
-        cmd.Value.Env = append((~cmd).Env, "PPROF_TMPDIR="u8 + Δos.TempDir());
+        var cmd = testenv.CleanCmdEnv(exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), toolˢ, pprofˢ, topˢ, nodecount1ˢ, fn));
+        cmd.Env = append(cmd.Env, "PPROF_TMPDIR="u8 + Δos.TempDir());
         var (top, err) = cmd.CombinedOutput();
-        Ꮡt.Logf("%s"u8, top);
-        if (err != default!){
-            Ꮡt.Error(err);
-        } else 
-        if (bytes.Contains(top, slice<byte>("ExternalCode"u8))) {
-            Ꮡt.Error(profilerRefersToˢ);
+        t.Logf("%s", top);
+        if (err != nil) {
+            t.Error(err);
+        } else if (bytes.Contains(top, slice<byte>("ExternalCode"u8))) {
+            t.Error(profilerRefersToˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1150,44 +1232,57 @@ public static void TestTimePprof(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string abortˢ = "Abort"u8;
-internal static readonly @string gotracebackSystemˢ = "GOTRACEBACK=system"u8;
-internal static readonly @string runtimeAbortˢ = "runtime.abort"u8;
-internal static readonly @string badˢ = "BAD"u8;
-internal static readonly @string sysBreakpointˢ = "sys: breakpoint"u8;
-internal static readonly @string exception0x80000003ˢ = "Exception 0x80000003"u8;
-internal static readonly @string sigtrapˢ = "SIGTRAP"u8;
+internal static ref readonly @string abortˢ => ref abortˢᵇ;
+private static readonly @string abortˢᵇ = "Abort"u8;
+internal static ref readonly @string gotracebackSystemˢ => ref gotracebackSystemˢᵇ;
+private static readonly @string gotracebackSystemˢᵇ = "GOTRACEBACK=system"u8;
+internal static ref readonly @string runtimeAbortˢ => ref runtimeAbortˢᵇ;
+private static readonly @string runtimeAbortˢᵇ = "runtime.abort"u8;
+internal static ref readonly @string badˢ => ref badˢᵇ;
+private static readonly @string badˢᵇ = "BAD"u8;
+internal static ref readonly @string sysBreakpointˢ => ref sysBreakpointˢᵇ;
+private static readonly @string sysBreakpointˢᵇ = "sys: breakpoint"u8;
+internal static ref readonly @string exception0x80000003ˢ => ref exception0x80000003ˢᵇ;
+private static readonly @string exception0x80000003ˢᵇ = "Exception 0x80000003"u8;
+internal static ref readonly @string sigtrapˢ => ref sigtrapˢᵇ;
+private static readonly @string sigtrapˢᵇ = "SIGTRAP"u8;
 
 // Test that runtime.abort does so.
-public static void TestAbort(ж<testing.T> Ꮡt) {
+public static void TestAbort(ж<testing.T> t) {
     // Pass GOTRACEBACK to ensure we get runtime frames.
-    @string output = runTestProg(Ꮡt, testprogˢ, abortˢ, gotracebackSystemˢ);
+    @string output = runTestProg(t, testprogˢ, abortˢ, gotracebackSystemˢ);
     {
         @string wantΔ1 = runtimeAbortˢ; if (!strings.Contains(output, wantΔ1)) {
-            Ꮡt.Errorf("output does not contain %q:\n%s"u8, wantΔ1, output);
+            t.Errorf("output does not contain %q:\n%s", wantΔ1, output);
         }
     }
     if (strings.Contains(output, badˢ)) {
-        Ꮡt.Errorf("output contains BAD:\n%s"u8, output);
+        t.Errorf("output contains BAD:\n%s", output);
     }
     // Check that it's a signal traceback.
-    @string want = "PC="u8;
+    @string want = "PC=";
     // For systems that use a breakpoint, check specifically for that.
     var exprᴛ1 = Δruntime.GOARCH;
-    if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8: {
         var exprᴛ2 = Δruntime.GOOS;
-        if (exprᴛ2 == "plan9"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ2 == "plan9"u8: {
             want = sysBreakpointˢ;
+            break;
         }
-        else if (exprᴛ2 == "windows"u8) {
+        case {} when exprᴛ2 == "windows"u8: {
             want = exception0x80000003ˢ;
+            break;
         }
-        else { /* default: */
+        default: {
             want = sigtrapˢ;
-        }
-    }
+            break;
+        }}
+        break;
+    }}
     if (!strings.Contains(output, want)) {
-        Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
+        t.Errorf("output does not contain %q:\n%s", want, output);
     }
 }
 
@@ -1196,26 +1291,26 @@ public static void TestAbort(ж<testing.T> Ꮡt) {
 [GoInit] internal static void init() {
     GoFrame ᒐ = default;
     try {
-        if (Δos.Getenv("GO_TEST_RUNTIME_PANIC"u8) == "1"u8) {
+        if (Δos.Getenv("GO_TEST_RUNTIME_PANIC") == "1"u8) {
             defer(() => {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recover(); if (r != nil) {
                         // We expect to crash, so exit 0
                         // to indicate failure.
                         Δos.Exit(0);
                     }
                 }
             }, ref ᒐ);
-            runtime_internal_test_package.PanicForTesting(default!, 1);
+            runtime_internal_test_package.PanicForTesting(default, 1);
             // We expect to crash, so exit 0 to indicate failure.
             Δos.Exit(0);
         }
-        if (Δos.Getenv("GO_TEST_RUNTIME_NPE_READMEMSTATS"u8) == "1"u8) {
+        if (Δos.Getenv("GO_TEST_RUNTIME_NPE_READMEMSTATS") == "1"u8) {
             Δruntime.ReadMemStats(nil);
             Δos.Exit(0);
         }
-        if (Δos.Getenv("GO_TEST_RUNTIME_NPE_FUNCMETHOD"u8) == "1"u8) {
-            ж<Δruntime.Func> f = default!;
+        if (Δos.Getenv("GO_TEST_RUNTIME_NPE_FUNCMETHOD") == "1"u8) {
+            ж<Δruntime.Func> f = default;
             _ = f.Entry();
             Δos.Exit(0);
         }
@@ -1225,84 +1320,91 @@ public static void TestAbort(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunTestRuntimePanicˢ = "-test.run=^TestRuntimePanic$"u8;
+internal static ref readonly @string testRunTestRuntimePanicˢ => ref testRunTestRuntimePanicˢᵇ;
+private static readonly @string testRunTestRuntimePanicˢᵇ = "-test.run=^TestRuntimePanic$"u8;
 internal static readonly object childProcessDidNotFailˢ = (@string)"child process did not fail"u8;
-internal static readonly @string runtimeˢ2 = "runtime.unexportedPanicForTesting"u8;
+internal static ref readonly @string runtimeˢ2 => ref runtimeˢ2ᵇ;
+private static readonly @string runtimeˢ2ᵇ = "runtime.unexportedPanicForTesting"u8;
 
-public static void TestRuntimePanic(ж<testing.T> Ꮡt) {
-    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestRuntimePanicˢ));
-    cmd.Value.Env = append((~cmd).Env, "GO_TEST_RUNTIME_PANIC=1"u8);
+public static void TestRuntimePanic(ж<testing.T> t) {
+    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunTestRuntimePanicˢ));
+    cmd.Env = append(cmd.Env, (@string)"GO_TEST_RUNTIME_PANIC=1");
     var (@out, err) = cmd.CombinedOutput();
-    Ꮡt.Logf("%s"u8, @out);
-    if (err == default!){
-        Ꮡt.Error(childProcessDidNotFailˢ);
-    } else 
-    {
+    t.Logf("%s", @out);
+    if (err == nil) {
+        t.Error(childProcessDidNotFailˢ);
+    } else {
         @string want = runtimeˢ2; if (!bytes.Contains(@out, slice<byte>(want))) {
-            Ꮡt.Errorf("output did not contain expected string %q"u8, want);
+            t.Errorf("output did not contain expected string %q", want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunˢ2 = "-test.run=^TestTracebackRuntimeFunction$"u8;
-internal static readonly @string runtimeReadMemStatsˢ = "runtime.ReadMemStats"u8;
+internal static ref readonly @string testRunˢ2 => ref testRunˢ2ᵇ;
+private static readonly @string testRunˢ2ᵇ = "-test.run=^TestTracebackRuntimeFunction$"u8;
+internal static ref readonly @string runtimeReadMemStatsˢ => ref runtimeReadMemStatsˢᵇ;
+private static readonly @string runtimeReadMemStatsˢᵇ = "runtime.ReadMemStats"u8;
 
-public static void TestTracebackRuntimeFunction(ж<testing.T> Ꮡt) {
-    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ2));
-    cmd.Value.Env = append((~cmd).Env, "GO_TEST_RUNTIME_NPE_READMEMSTATS=1"u8);
+public static void TestTracebackRuntimeFunction(ж<testing.T> t) {
+    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunˢ2));
+    cmd.Env = append(cmd.Env, (@string)"GO_TEST_RUNTIME_NPE_READMEMSTATS=1");
     var (@out, err) = cmd.CombinedOutput();
-    Ꮡt.Logf("%s"u8, @out);
-    if (err == default!){
-        Ꮡt.Error(childProcessDidNotFailˢ);
-    } else 
-    {
+    t.Logf("%s", @out);
+    if (err == nil) {
+        t.Error(childProcessDidNotFailˢ);
+    } else {
         @string want = runtimeReadMemStatsˢ; if (!bytes.Contains(@out, slice<byte>(want))) {
-            Ꮡt.Errorf("output did not contain expected string %q"u8, want);
+            t.Errorf("output did not contain expected string %q", want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunˢ3 = "-test.run=^TestTracebackRuntimeMethod$"u8;
-internal static readonly @string runtimeFuncEntryˢ = "runtime.(*Func).Entry"u8;
+internal static ref readonly @string testRunˢ3 => ref testRunˢ3ᵇ;
+private static readonly @string testRunˢ3ᵇ = "-test.run=^TestTracebackRuntimeMethod$"u8;
+internal static ref readonly @string runtimeFuncEntryˢ => ref runtimeFuncEntryˢᵇ;
+private static readonly @string runtimeFuncEntryˢᵇ = "runtime.(*Func).Entry"u8;
 
-public static void TestTracebackRuntimeMethod(ж<testing.T> Ꮡt) {
-    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ3));
-    cmd.Value.Env = append((~cmd).Env, "GO_TEST_RUNTIME_NPE_FUNCMETHOD=1"u8);
+public static void TestTracebackRuntimeMethod(ж<testing.T> t) {
+    var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunˢ3));
+    cmd.Env = append(cmd.Env, (@string)"GO_TEST_RUNTIME_NPE_FUNCMETHOD=1");
     var (@out, err) = cmd.CombinedOutput();
-    Ꮡt.Logf("%s"u8, @out);
-    if (err == default!){
-        Ꮡt.Error(childProcessDidNotFailˢ);
-    } else 
-    {
+    t.Logf("%s", @out);
+    if (err == nil) {
+        t.Error(childProcessDidNotFailˢ);
+    } else {
         @string want = runtimeFuncEntryˢ; if (!bytes.Contains(@out, slice<byte>(want))) {
-            Ꮡt.Errorf("output did not contain expected string %q"u8, want);
+            t.Errorf("output did not contain expected string %q", want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testG0StackOverflowˢ = "TEST_G0_STACK_OVERFLOW"u8;
-internal static readonly @string testRunˢ4 = "-test.run=^TestG0StackOverflow$"u8;
-internal static readonly @string morestackOnG0ˢ = "morestack on g0\n"u8;
-internal static readonly @string runtimeStackOverflowˢ = "runtime.stackOverflow"u8;
+internal static ref readonly @string testG0StackOverflowˢ => ref testG0StackOverflowˢᵇ;
+private static readonly @string testG0StackOverflowˢᵇ = "TEST_G0_STACK_OVERFLOW"u8;
+internal static ref readonly @string testRunˢ4 => ref testRunˢ4ᵇ;
+private static readonly @string testRunˢ4ᵇ = "-test.run=^TestG0StackOverflow$"u8;
+internal static ref readonly @string morestackOnG0ˢ => ref morestackOnG0ˢᵇ;
+private static readonly @string morestackOnG0ˢᵇ = "morestack on g0\n"u8;
+internal static ref readonly @string runtimeStackOverflowˢ => ref runtimeStackOverflowˢᵇ;
+private static readonly @string runtimeStackOverflowˢᵇ = "runtime.stackOverflow"u8;
 
 // Test that g0 stack overflows are handled gracefully.
-public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
+public static void TestG0StackOverflow(ж<testing.T> t) {
     if (Δruntime.GOOS == "ios"u8) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 62671);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 62671);
     }
 
     if (Δos.Getenv(testG0StackOverflowˢ) != "1"u8) {
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ4, testVˢ));
-        cmd.Value.Env = append((~cmd).Env, "TEST_G0_STACK_OVERFLOW=1"u8);
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(t), testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunˢ4, testVˢ));
+        cmd.Env = append(cmd.Env, (@string)"TEST_G0_STACK_OVERFLOW=1");
         var (@out, err) = cmd.CombinedOutput();
-        Ꮡt.Logf("output:\n%s"u8, @out);
+        t.Logf("output:\n%s", @out);
         // Don't check err since it's expected to crash.
         {
             nint n = strings.Count((@string)@out, morestackOnG0ˢ); if (n != 1) {
-                Ꮡt.Fatalf("%s\n(exit status %v)"u8, @out, err);
+                t.Fatalf("%s\n(exit status %v)", @out, err);
             }
         }
         if (runtime_internal_test_package.CrashStackImplemented) {
@@ -1310,7 +1412,7 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
             @string want = runtimeStackOverflowˢ;
             {
                 nint n = strings.Count((@string)@out, want); if (n < 5) {
-                    Ꮡt.Errorf("output does not contain %q at least 5 times:\n%s"u8, want, @out);
+                    t.Errorf("output does not contain %q at least 5 times:\n%s", want, @out);
                 }
             }
             return; // it's not a signal-style traceback
@@ -1318,8 +1420,8 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
         // Check that it's a signal-style traceback.
         if (Δruntime.GOOS != "windows"u8) {
             {
-                @string want = "PC="u8; if (!strings.Contains((@string)@out, want)) {
-                    Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, @out);
+                @string want = "PC="; if (!strings.Contains((@string)@out, want)) {
+                    t.Errorf("output does not contain %q:\n%s", want, @out);
                 }
             }
         }
@@ -1332,54 +1434,56 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
 // For TestCrashWhileTracing: test a panic without involving the testing
 // harness, as we rely on stdout only containing trace output.
 [GoInit] internal static void initΔ1() {
-    if (Δos.Getenv("TEST_CRASH_WHILE_TRACING"u8) == "1"u8) {
+    if (Δos.Getenv("TEST_CRASH_WHILE_TRACING") == "1"u8) {
         trace.Start(new Δos.FileжWriter(Δos.Stdout));
-        trace.Log(context.Background(), "xyzzy-cat"u8, "xyzzy-msg"u8);
+        trace.Log(context.Background(), "xyzzy-cat", "xyzzy-msg");
         throw panic("yzzyx");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object theProcessShouldHaveˢ = (@string)"the process should have panicked"u8;
-internal static readonly @string yzzyxˢ = "yzzyx\n"u8;
+internal static ref readonly @string yzzyxˢ => ref yzzyxˢᵇ;
+private static readonly @string yzzyxˢᵇ = "yzzyx\n"u8;
 
-public static void TestCrashWhileTracing(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestCrashWhileTracing(ж<testing.T> t) {
+    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(t));
 
-    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt))));
-    cmd.Value.Env = append((~cmd).Env, "TEST_CRASH_WHILE_TRACING=1"u8);
+    var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(t), testenv.Executable(new runtime_test_package.testing_TжTB(t))));
+    cmd.Env = append(cmd.Env, (@string)"TEST_CRASH_WHILE_TRACING=1");
     var (stdOut, err) = cmd.StdoutPipe();
     ref var errOut = ref heap(new bytes.Buffer(), out var ᏑerrOut);
-    cmd.Value.Stderr = new runtime_test_package.bytes_BufferжWriter(ᏑerrOut);
+    cmd.Stderr = new runtime_test_package.bytes_BufferжWriter(ᏑerrOut);
 
     {
-        var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("could not start subprocess: %v"u8, errΔ1);
+        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+            t.Fatalf("could not start subprocess: %v", errΔ1);
         }
     }
     (var r, err) = traceparse.NewReader(stdOut);
-    if (err != default!) {
-        Ꮡt.Fatalf("could not create trace.NewReader: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("could not create trace.NewReader: %v", err);
     }
-    bool seen = default!;
+    bool seen = default;
     nint nSync = 0;
     nint i = 1;
 loop:
-    for (; ᐧ ; i++) {
+    for (; ; i++) {
         var (ev, errΔ2) = r.ReadEvent();
-        if (errΔ2 != default!) {
+        if (errΔ2 != nil) {
             // We may have a broken tail to the trace -- that's OK.
             // We'll make sure we saw at least one complete generation.
             if (!AreEqual(errΔ2, Δio.EOF)) {
-                Ꮡt.Logf("error at event %d: %v"u8, i, errΔ2);
+                t.Logf("error at event %d: %v", i, errΔ2);
             }
             goto break_loop;
         }
-        var exprᴛ1 = ev.Kind();
-        if (exprᴛ1 == traceparse.EventSync) {
+        switch (ev.Kind()) {
+        case var ᴛ when ᴛ == traceparse.EventSync: {
             nSync = ev.Sync().N;
+            break;
         }
-        else if (exprᴛ1 == traceparse.EventLog) {
+        case var ᴛ when ᴛ == traceparse.EventLog: {
             var v = ev.Log();
             if (v.Category == "xyzzy-cat"u8 && v.Message == "xyzzy-msg"u8) {
                 // Should we already stop reading here? More events may come, but
@@ -1387,42 +1491,45 @@ loop:
                 // byte...
                 seen = true;
             }
-        }
+            break;
+        }}
 continue_loop:;
     }
 break_loop:;
     {
-        var errΔ3 = cmd.Wait(); if (errΔ3 == default!) {
-            Ꮡt.Error(theProcessShouldHaveˢ);
+        var errΔ3 = cmd.Wait(); if (errΔ3 == nil) {
+            t.Error(theProcessShouldHaveˢ);
         }
     }
     if (nSync <= 1) {
-        Ꮡt.Errorf("expected at least one full generation to have been emitted before the trace was considered broken"u8);
+        t.Errorf("expected at least one full generation to have been emitted before the trace was considered broken");
     }
     if (!seen) {
-        Ꮡt.Errorf("expected one matching log event matching, but none of the %d received trace events match"u8, i);
+        t.Errorf("expected one matching log event matching, but none of the %d received trace events match", i);
     }
-    Ꮡt.Logf("stderr output:\n%s"u8, ᏑerrOut.String());
+    t.Logf("stderr output:\n%s", ᏑerrOut.String());
     @string needle = yzzyxˢ;
     {
         nint n = strings.Count(ᏑerrOut.String(), needle); if (n != 1) {
-            Ꮡt.Fatalf("did not find expected panic message %q\n(exit status %v)"u8, needle, err);
+            t.Fatalf("did not find expected panic message %q\n(exit status %v)", needle, err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string doublePanicˢ = "DoublePanic"u8;
-internal static readonly @string godebugClobberfree1ˢ = "GODEBUG=clobberfree=1"u8;
+internal static ref readonly @string doublePanicˢ => ref doublePanicˢᵇ;
+private static readonly @string doublePanicˢᵇ = "DoublePanic"u8;
+internal static ref readonly @string godebugClobberfree1ˢ => ref godebugClobberfree1ˢᵇ;
+private static readonly @string godebugClobberfree1ˢᵇ = "GODEBUG=clobberfree=1"u8;
 
 // Test that panic message is not clobbered.
 // See issue 30150.
-public static void TestDoublePanic(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, doublePanicˢ, godebugClobberfree1ˢ);
-    var wants = new @string[]{"panic: XXX"u8, "panic: YYY"u8}.slice();
+public static void TestDoublePanic(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, doublePanicˢ, godebugClobberfree1ˢ);
+    var wants = slice<@string>(["panic: XXX", "panic: YYY"]);
     foreach (var (_, want) in wants) {
         if (!strings.Contains(output, want)) {
-            Ꮡt.Errorf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+            t.Errorf("output:\n%s\n\nwant output containing: %s", output, want);
         }
     }
 }
@@ -1434,97 +1541,113 @@ internal partial struct TestPanicWhilePanicking_tests /*dyn*/ {
 
 // Test that panic while panicking discards error message
 // See issue 52257
-public static void TestPanicWhilePanicking(ж<testing.T> Ꮡt) {
-    var tests = new TestPanicWhilePanicking_tests[]{
+public static void TestPanicWhilePanicking(ж<testing.T> t) {
+    var tests = slice<TestPanicWhilePanicking_tests>([
         new(
-            "panic while printing panic value: important multi-line\n\terror message"u8,
-            "ErrorPanic"u8
+            "panic while printing panic value: important multi-line\n\terror message",
+            "ErrorPanic"
         ),
         new(
-            "panic while printing panic value: important multi-line\n\tstringer message"u8,
-            "StringerPanic"u8
+            "panic while printing panic value: important multi-line\n\tstringer message",
+            "StringerPanic"
         ),
         new(
-            "panic while printing panic value: type"u8,
-            "DoubleErrorPanic"u8
+            "panic while printing panic value: type",
+            "DoubleErrorPanic"
         ),
         new(
-            "panic while printing panic value: type"u8,
-            "DoubleStringerPanic"u8
+            "panic while printing panic value: type",
+            "DoubleStringerPanic"
         ),
         new(
-            "panic while printing panic value: type"u8,
-            "CircularPanic"u8
+            "panic while printing panic value: type",
+            "CircularPanic"
         ),
         new(
-            "important multi-line\n\tstring message"u8,
-            "StringPanic"u8
+            "important multi-line\n\tstring message",
+            "StringPanic"
         ),
         new(
-            "nil"u8,
-            "NilPanic"u8
+            "nil",
+            "NilPanic"
         )
-    }.slice();
+    ]);
     foreach (var (_, x) in tests) {
-        @string output = runTestProg(Ꮡt, testprogˢ, x.Func);
+        @string output = runTestProg(t, testprogˢ, x.Func);
         if (!strings.Contains(output, x.Want)) {
-            Ꮡt.Errorf("output does not contain %q:\n%s"u8, x.Want, output);
+            t.Errorf("output does not contain %q:\n%s", x.Want, output);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unsafeSlicePtrIsNilAndˢ = "unsafe.Slice: ptr is nil and len is not zero"u8;
+internal static ref readonly @string unsafeSlicePtrIsNilAndˢ => ref unsafeSlicePtrIsNilAndˢᵇ;
+private static readonly @string unsafeSlicePtrIsNilAndˢᵇ = "unsafe.Slice: ptr is nil and len is not zero"u8;
 
-public static void TestPanicOnUnsafeSlice(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, "panicOnNilAndEleSizeIsZero"u8);
+public static void TestPanicOnUnsafeSlice(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, "panicOnNilAndEleSizeIsZero");
     // Note: This is normally a panic, but is a throw when checkptr is
     // enabled.
     @string want = unsafeSlicePtrIsNilAndˢ;
     if (!strings.Contains(output, want)) {
-        Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, output);
+        t.Errorf("output does not contain %q:\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string netpollWaitersˢ = "NetpollWaiters"u8;
+internal static ref readonly @string netpollWaitersˢ => ref netpollWaitersˢᵇ;
+private static readonly @string netpollWaitersˢᵇ = "NetpollWaiters"u8;
 
-public static void TestNetpollWaiters(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprognetˢ, netpollWaitersˢ);
-    @string want = "OK\n"u8;
+public static void TestNetpollWaiters(ж<testing.T> t) {
+    t.Parallel();
+    @string output = runTestProg(t, testprognetˢ, netpollWaitersˢ);
+    @string want = "OK\n";
     if (output != want) {
-        Ꮡt.Fatalf("output is not %q\n%s"u8, want, output);
+        t.Fatalf("output is not %q\n%s", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeRunFinalizersˢ = "runtime.runFinalizers"u8;
-internal static readonly @string cleanupˢ = "Cleanup"u8;
-internal static readonly @string runtimeRunCleanupsˢ = "runtime.runCleanups"u8;
-internal static readonly @string panicˢ = "Panic"u8;
-internal static readonly @string gotracebackAllˢ = "GOTRACEBACK=all"u8;
-internal static readonly @string goTestFinalizerDeadlockˢ = "GO_TEST_FINALIZER_DEADLOCK=panic"u8;
-internal static readonly @string stackˢ = "Stack"u8;
-internal static readonly @string goTestFinalizerDeadlockˢ2 = "GO_TEST_FINALIZER_DEADLOCK=stack"u8;
-internal static readonly @string pprofProtoˢ = "PprofProto"u8;
-internal static readonly @string goTestFinalizerDeadlockˢ3 = "GO_TEST_FINALIZER_DEADLOCK=pprof_proto"u8;
-internal static readonly @string pprofDebug1ˢ = "PprofDebug1"u8;
-internal static readonly @string goTestFinalizerDeadlockˢ4 = "GO_TEST_FINALIZER_DEADLOCK=pprof_debug1"u8;
-internal static readonly @string pprofDebug2ˢ = "PprofDebug2"u8;
-internal static readonly @string goTestFinalizerDeadlockˢ5 = "GO_TEST_FINALIZER_DEADLOCK=pprof_debug2"u8;
+internal static ref readonly @string runtimeRunFinalizersˢ => ref runtimeRunFinalizersˢᵇ;
+private static readonly @string runtimeRunFinalizersˢᵇ = "runtime.runFinalizers"u8;
+internal static ref readonly @string cleanupˢ => ref cleanupˢᵇ;
+private static readonly @string cleanupˢᵇ = "Cleanup"u8;
+internal static ref readonly @string runtimeRunCleanupsˢ => ref runtimeRunCleanupsˢᵇ;
+private static readonly @string runtimeRunCleanupsˢᵇ = "runtime.runCleanups"u8;
+internal static ref readonly @string panicˢ => ref panicˢᵇ;
+private static readonly @string panicˢᵇ = "Panic"u8;
+internal static ref readonly @string gotracebackAllˢ => ref gotracebackAllˢᵇ;
+private static readonly @string gotracebackAllˢᵇ = "GOTRACEBACK=all"u8;
+internal static ref readonly @string goTestFinalizerDeadlockˢ => ref goTestFinalizerDeadlockˢᵇ;
+private static readonly @string goTestFinalizerDeadlockˢᵇ = "GO_TEST_FINALIZER_DEADLOCK=panic"u8;
+internal static ref readonly @string stackˢ => ref stackˢᵇ;
+private static readonly @string stackˢᵇ = "Stack"u8;
+internal static ref readonly @string goTestFinalizerDeadlockˢ2 => ref goTestFinalizerDeadlockˢ2ᵇ;
+private static readonly @string goTestFinalizerDeadlockˢ2ᵇ = "GO_TEST_FINALIZER_DEADLOCK=stack"u8;
+internal static ref readonly @string pprofProtoˢ => ref pprofProtoˢᵇ;
+private static readonly @string pprofProtoˢᵇ = "PprofProto"u8;
+internal static ref readonly @string goTestFinalizerDeadlockˢ3 => ref goTestFinalizerDeadlockˢ3ᵇ;
+private static readonly @string goTestFinalizerDeadlockˢ3ᵇ = "GO_TEST_FINALIZER_DEADLOCK=pprof_proto"u8;
+internal static ref readonly @string pprofDebug1ˢ => ref pprofDebug1ˢᵇ;
+private static readonly @string pprofDebug1ˢᵇ = "PprofDebug1"u8;
+internal static ref readonly @string goTestFinalizerDeadlockˢ4 => ref goTestFinalizerDeadlockˢ4ᵇ;
+private static readonly @string goTestFinalizerDeadlockˢ4ᵇ = "GO_TEST_FINALIZER_DEADLOCK=pprof_debug1"u8;
+internal static ref readonly @string pprofDebug2ˢ => ref pprofDebug2ˢᵇ;
+private static readonly @string pprofDebug2ˢᵇ = "PprofDebug2"u8;
+internal static ref readonly @string goTestFinalizerDeadlockˢ5 => ref goTestFinalizerDeadlockˢ5ᵇ;
+private static readonly @string goTestFinalizerDeadlockˢ5ᵇ = "GO_TEST_FINALIZER_DEADLOCK=pprof_debug2"u8;
 
-public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> t) {
+    t.Parallel();
 
-    foreach (var (_, useCleanup) in new bool[]{false, true}.slice()) {
+    foreach (var (_, useCleanup) in slice<bool>([false, true])) {
         @string progName = finalizerˢ;
         @string want = runtimeRunFinalizersˢ;
         if (useCleanup) {
             progName = cleanupˢ;
             want = runtimeRunCleanupsˢ;
         }
-        Ꮡt.Run(progName, (ж<testing.T> tΔ1) => {
+        t.Run(progName, (ж<testing.T> tΔ1) => {
             // The runtime.runFinalizers/runtime.runCleanups frame should appear in panics, even if
             // runtime frames are normally hidden (GOTRACEBACK=all).
             tΔ1.Run(panicˢ, (ж<testing.T> tΔ2) => {
@@ -1532,7 +1655,7 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
                 @string output = runTestProg(tΔ2, testprogˢ, progName + "Deadlock"u8, gotracebackAllˢ, goTestFinalizerDeadlockˢ);
                 @string wantΔ1 = want + "()"u8;
                 if (!strings.Contains(output, wantΔ1)) {
-                    tΔ2.Errorf("output does not contain %q:\n%s"u8, wantΔ1, output);
+                    tΔ2.Errorf("output does not contain %q:\n%s", wantΔ1, output);
                 }
             });
 
@@ -1543,7 +1666,7 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
                 @string output = runTestProg(tΔ3, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ2);
                 @string wantΔ2 = want + "()"u8;
                 if (!strings.Contains(output, wantΔ2)) {
-                    tΔ3.Errorf("output does not contain %q:\n%s"u8, wantΔ2, output);
+                    tΔ3.Errorf("output does not contain %q:\n%s", wantΔ2, output);
                 }
             });
 
@@ -1554,23 +1677,23 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
                 @string output = runTestProg(tΔ4, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ3);
 
                 var (p, err) = profile.Parse(new runtime_test_package.strings_ReaderжReader(strings.NewReader(output)));
-                if (err != default!) {
+                if (err != nil) {
                     // Logging the binary proto data is not very nice, but it might
                     // be a text error message instead.
-                    tΔ4.Logf("Output: %s"u8, output);
-                    tΔ4.Fatalf("Error parsing proto output: %v"u8, err);
+                    tΔ4.Logf("Output: %s", output);
+                    tΔ4.Fatalf("Error parsing proto output: %v", err);
                 }
-                foreach (var (_, s) in (~p).Sample) {
-                    foreach (var (_, loc) in (~s).Location) {
-                        foreach (var (_, line) in (~loc).Line) {
-                            if ((~line.Function).Name == want) {
+                foreach (var (_, s) in p.Sample) {
+                    foreach (var (_, loc) in s.Location) {
+                        foreach (var (_, line) in loc.Line) {
+                            if (line.Function.Name == want) {
                                 // Done!
                                 return;
                             }
                         }
                     }
                 }
-                tΔ4.Errorf("Profile does not contain %q:\n%s"u8, want, p.OrTypedNil());
+                tΔ4.Errorf("Profile does not contain %q:\n%s", want, p.OrTypedNil());
             });
 
             // The runtime.runFinalizers/runtime.runCleanups frame should appear in goroutine
@@ -1580,7 +1703,7 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
                 @string output = runTestProg(tΔ5, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ4);
                 @string wantΔ3 = want + "+"u8;
                 if (!strings.Contains(output, wantΔ3)) {
-                    tΔ5.Errorf("output does not contain %q:\n%s"u8, wantΔ3, output);
+                    tΔ5.Errorf("output does not contain %q:\n%s", wantΔ3, output);
                 }
             });
 
@@ -1591,7 +1714,7 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
                 @string output = runTestProg(tΔ6, testprogˢ, progName + "Deadlock"u8, goTestFinalizerDeadlockˢ5);
                 @string wantΔ4 = want + "()"u8;
                 if (!strings.Contains(output, wantΔ4)) {
-                    tΔ6.Errorf("output does not contain %q:\n%s"u8, wantΔ4, output);
+                    tΔ6.Errorf("output does not contain %q:\n%s", wantΔ4, output);
                 }
             });
         });
@@ -1599,20 +1722,21 @@ public static void TestFinalizerOrCleanupDeadlock(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fatalErrorSemaphoreWakeˢ = "fatal error: semaphore wake of synctest goroutine from outside bubble"u8;
+internal static ref readonly @string fatalErrorSemaphoreWakeˢ => ref fatalErrorSemaphoreWakeˢᵇ;
+private static readonly @string fatalErrorSemaphoreWakeˢᵇ = "fatal error: semaphore wake of synctest goroutine from outside bubble"u8;
 
-public static void TestSynctestCondSignalFromNoBubble(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new @string[]{
-        "SynctestCond/signal/no_bubble"u8,
-        "SynctestCond/broadcast/no_bubble"u8,
-        "SynctestCond/signal/other_bubble"u8,
-        "SynctestCond/broadcast/other_bubble"u8
-    }.slice()) {
-        Ꮡt.Run(test, (ж<testing.T> tΔ1) => {
+public static void TestSynctestCondSignalFromNoBubble(ж<testing.T> t) {
+    foreach (var (_, test) in slice<@string>([
+        "SynctestCond/signal/no_bubble",
+        "SynctestCond/broadcast/no_bubble",
+        "SynctestCond/signal/other_bubble",
+        "SynctestCond/broadcast/other_bubble"
+    ])) {
+        t.Run(test, (ж<testing.T> tΔ1) => {
             @string output = runTestProg(tΔ1, testprogˢ, test);
             @string want = fatalErrorSemaphoreWakeˢ;
             if (!strings.Contains(output, want)) {
-                tΔ1.Fatalf("output:\n%s\n\nwant output containing: %s"u8, output, want);
+                tΔ1.Fatalf("output:\n%s\n\nwant output containing: %s", output, want);
             }
         });
     }

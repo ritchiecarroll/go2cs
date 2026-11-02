@@ -11,13 +11,13 @@ using go.@internal.syscall;
 
 partial class windows_test_package {
 
-public static void TestSupportUnixSocket(ж<testing.T> Ꮡt) {
+public static void TestSupportUnixSocket(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref heap(new syscall.WSAData(), out var Ꮡd);
         {
-            var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡd); if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            var errΔ1 = syscall.WSAStartup((uint32)0x202, Ꮡd); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
@@ -25,12 +25,12 @@ public static void TestSupportUnixSocket(ж<testing.T> Ꮡt) {
         // Test that SupportUnixSocket returns true if WSASocket succeeds with AF_UNIX.
         var got = Δwindows.SupportUnixSocket();
         var (s, err) = Δwindows.WSASocket(syscall.AF_UNIX, syscall.SOCK_STREAM, 0, nil, 0, Δwindows.WSA_FLAG_NO_HANDLE_INHERIT);
-        if (err == default!) {
+        if (err == nil) {
             syscall.Closesocket(s);
         }
         var want = !errors.Is(err, Δwindows.WSAEAFNOSUPPORT) && !errors.Is(err, Δwindows.WSAEINVAL);
         if (want != got) {
-            Ꮡt.Errorf("SupportUnixSocket = %v; want %v"u8, got, want);
+            t.Errorf("SupportUnixSocket = %v; want %v", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

@@ -80,11 +80,11 @@ internal static void traceSyncBatch(uintptr gen, uint64 frequency) {
     // Write out the clock snapshot event.
     var (sec, nsec, mono) = time_now();
     var ts = traceClockNow();
-    if (ts <= (~w.traceBuf).lastTime) {
-        ts = (~w.traceBuf).lastTime + 1;
+    if (ts <= w.traceBuf.lastTime) {
+        ts = w.traceBuf.lastTime + 1;
     }
-    var tsDiff = (uint64)(ts - (~w.traceBuf).lastTime);
-    w.traceBuf.Value.lastTime = ts;
+    var tsDiff = (uint64)(ts - w.traceBuf.lastTime);
+    w.traceBuf.lastTime = ts;
     w.@byte((byte)tracev2.EvClockSnapshot);
     w.varint(tsDiff);
     w.varint((uint64)mono);

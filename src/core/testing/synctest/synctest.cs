@@ -267,7 +267,7 @@ namespace go.testing;
 
 using synctest = @internal.synctest_package;
 using testing = testing_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 
 partial class synctest_package {
@@ -286,15 +286,15 @@ partial class synctest_package {
 //   - T.Context returns a [context.Context] with a Done channel
 //     associated with the bubble.
 //   - T.Run, T.Parallel, and T.Deadline must not be called.
-public static void Test(ж<testing.T> Ꮡt, Action<ж<testing.T>> f) {
-    bool ok = default!;
+public static void Test(ж<testing.T> t, Action<ж<testing.T>> f) {
+    bool ok = default;
     synctest.Run(() => {
-        ok = testingSynctestTest(Ꮡt, f);
+        ok = testingSynctestTest(t, f);
     });
     if (!ok) {
         // Fail the test outside the bubble,
         // so test durations get set using real time.
-        Ꮡt.FailNow();
+        t.FailNow();
     }
 }
 

@@ -187,7 +187,7 @@
       "value": "ᵇ",
       "goEscape": true,
       "goTrailing": "Suffix of the private backing field behind a struct-typed static read through a same-named ref readonly accessor (trueˢᵇ, seat #53). Variants: ᵇ",
-      "note": "U+1D47 - backing-field suffix for a struct-typed static read through its same-named ref readonly accessor (seat #53). It was hand-added to symbols.go without this entry, so every go generate dropped it; restored here with its comment, which the hand edit had stored double-encoded. Converter-only, so no Symbols.cs projection."
+      "note": "U+1D47 - seat #53: a struct-typed static is read through a same-named ref readonly accessor over a private backing field that carries this suffix, so the JIT inlines its readers (hoistedLiteralOperations.go). Converter-only, so no Symbols.cs projection."
     },
     {
       "name": "StackBufferMarker",

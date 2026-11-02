@@ -41,8 +41,8 @@ partial struct SockaddrDatalink {
 
 // Translate "kern.hostname" to []_C_int{0,1,2,3}.
 internal static (slice<_C_int> mib, error err) nametomib(@string name) {
-    slice<_C_int> mib = default!;
-    error err = default!;
+    slice<_C_int> mib = default;
+    error err = default;
 
     uintptr siz = /* unsafe.Sizeof(mib[0]) */ 4;
 
@@ -54,23 +54,22 @@ internal static (slice<_C_int> mib, error err) nametomib(@string name) {
     // will silently write 2 words farther than we specify
     // and we'll get memory corruption.
     ref var buf = ref heap(new array<_C_int>(14), out var Ꮡbuf);
-    ref var n = ref heap<uintptr>(out var Ꮡn);
-    n = (uintptr)CTL_MAXNAME * siz;
+    ref var n = ref heap<uintptr>((uintptr)CTL_MAXNAME * siz, out var Ꮡn);
 
     var p = Ꮡbuf.at<_C_int>(0).Reinterpret<_C_int, byte>();
     (var bytes, err) = ByteSliceFromString(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     // Magic sysctl: "setting" 0.3 to a string name
     // lets you read back the array of integers form.
     {
-        err = sysctl(new _C_int[]{0, 3}.slice(), p, Ꮡn, Ꮡ(bytes, 0), (uintptr)len(name)); if (err != default!) {
-            return (default!, err);
+        err = sysctl(slice<_C_int>([0, 3]), p, Ꮡn, Ꮡ(bytes, 0), (uintptr)len(name)); if (err != nil) {
+            return (default, err);
         }
     }
-    return (buf.slice(0, (nint)(n / siz)), default!);
+    return (buf.slice(0, (nint)(n / siz)), default);
 }
 
 internal static (uint64, bool) direntIno(slice<byte> buf) {
@@ -95,14 +94,14 @@ public static error /*err*/ PtraceDetach(nint pid) {
 
 //sysnb pipe(p *[2]int32) (err error)
 public static error /*err*/ Pipe(slice<nint> p) {
-    error err = default!;
+    error err = default;
 
     if (len(p) != 2) {
         return EINVAL;
     }
     ref var q = ref heap(new array<int32>(2), out var Ꮡq);
     err = pipe(Ꮡq);
-    if (err == default!) {
+    if (err == nil) {
         p[0] = (nint)q[0];
         p[1] = (nint)q[1];
     }
@@ -110,11 +109,11 @@ public static error /*err*/ Pipe(slice<nint> p) {
 }
 
 public static (nint n, error err) Getfsstat(slice<Statfs_t> buf, nint flags) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    @unsafe.Pointer _p0 = default!;
-    uintptr bufsize = default!;
+    @unsafe.Pointer _p0 = default;
+    uintptr bufsize = default;
     if (len(buf) > 0) {
         _p0 = @unsafe.Pointer.FromPinnedBox(Ꮡ(buf, 0));
         bufsize = /* unsafe.Sizeof(Statfs_t{}) */ (uintptr)2168 * (uintptr)len(buf);
@@ -248,8 +247,8 @@ public static error /*err*/ Kill(nint pid, ΔSignal signum) {
 }
 
 public static (uintptr dir, error err) fdopendir(nint fd) {
-    uintptr dir = default!;
-    error err = default!;
+    uintptr dir = default;
+    error err = default;
 
     var (r0, _, e1) = syscallPtr(abi.FuncPCABI0(libc_fdopendir_trampoline), (uintptr)fd, 0, 0);
     dir = r0;
@@ -262,11 +261,11 @@ public static (uintptr dir, error err) fdopendir(nint fd) {
 internal static partial void libc_fdopendir_trampoline();
 
 //go:cgo_import_dynamic libc_fdopendir fdopendir "/usr/lib/libSystem.B.dylib"
-internal static (nint n, error err) readlen(nint fd, ж<byte> Ꮡbuf, nint nbuf) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) readlen(nint fd, ж<byte> buf, nint nbuf) {
+    nint n = default;
+    error err = default;
 
-    var ᴋ1 = Ꮡbuf;
+    var ᴋ1 = buf;
         var (r0, _, e1) = syscall(abi.FuncPCABI0(libc_read_trampoline), (uintptr)fd, (uintptr)ᴋ1, (uintptr)nbuf);
     System.GC.KeepAlive(ᴋ1);
     n = (nint)r0;
@@ -334,9 +333,9 @@ internal static Errno errnoPtr(uintptr r, Errno e) {
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) syscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = syscalln(fn, a1, a2, a3);
     return (r1, r2, errno(r1, err));
@@ -346,9 +345,9 @@ internal static (uintptr r1, uintptr r2, Errno err) syscall(uintptr fn, uintptr 
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) syscallX(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = syscalln(fn, a1, a2, a3);
     return (r1, r2, errnoX(r1, err));
@@ -365,9 +364,9 @@ internal static (uintptr r1, uintptr r2, Errno err) syscallX(uintptr fn, uintptr
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) syscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = syscalln(fn, a1, a2, a3, a4, a5, a6);
     return (r1, r2, errno(r1, err));
@@ -377,9 +376,9 @@ internal static (uintptr r1, uintptr r2, Errno err) syscall6(uintptr fn, uintptr
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) syscall6X(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = syscalln(fn, a1, a2, a3, a4, a5, a6);
     return (r1, r2, errnoX(r1, err));
@@ -391,9 +390,9 @@ internal static (uintptr r1, uintptr r2, Errno err) syscall6X(uintptr fn, uintpt
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) syscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = syscalln(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     return (r1, r2, errno(r1, err));
@@ -404,9 +403,9 @@ internal static (uintptr r1, uintptr r2, Errno err) syscall9(uintptr fn, uintptr
 //go:norace
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) rawSyscall(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = rawsyscalln(fn, a1, a2, a3);
     return (r1, r2, errno(r1, err));
@@ -417,9 +416,9 @@ internal static (uintptr r1, uintptr r2, Errno err) rawSyscall(uintptr fn, uintp
 //go:norace
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) rawSyscall6(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = rawsyscalln(fn, a1, a2, a3, a4, a5, a6);
     return (r1, r2, errno(r1, err));
@@ -430,9 +429,9 @@ internal static (uintptr r1, uintptr r2, Errno err) rawSyscall6(uintptr fn, uint
 //go:norace
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) rawSyscall9(uintptr fn, uintptr a1, uintptr a2, uintptr a3, uintptr a4, uintptr a5, uintptr a6, uintptr a7, uintptr a8, uintptr a9) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
-    Errno err = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
+    Errno err = default;
 
     (r1, r2, err) = rawsyscalln(fn, a1, a2, a3, a4, a5, a6, a7, a8, a9);
     return (r1, r2, errno(r1, err));
@@ -442,8 +441,8 @@ internal static (uintptr r1, uintptr r2, Errno err) rawSyscall9(uintptr fn, uint
 //go:nosplit
 //go:uintptrkeepalive
 internal static (uintptr r1, uintptr r2, Errno err) syscallPtr(uintptr fn, uintptr a1, uintptr a2, uintptr a3) {
-    uintptr r1 = default!;
-    uintptr r2 = default!;
+    uintptr r1 = default;
+    uintptr r2 = default;
 
     (r1, r2, var e1) = syscalln(fn, a1, a2, a3);
     return (r1, r2, errnoPtr(r1, e1));

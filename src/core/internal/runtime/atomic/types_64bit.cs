@@ -16,7 +16,7 @@ partial class atomic_package {
 //
 //go:nosplit
 public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) {
-    return LoadAcq64(Ꮡu.of(Uint64.Ꮡvalue));
+    return LoadAcq64(Ꮡu.Ꮡvalue);
 }
 
 // StoreRelease is a partially unsynchronized version
@@ -29,7 +29,7 @@ public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) {
 //
 //go:nosplit
 public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) {
-    StoreRel64(Ꮡu.of(Uint64.Ꮡvalue), value);
+    StoreRel64(Ꮡu.Ꮡvalue, value);
 }
 
 } // end atomic_package

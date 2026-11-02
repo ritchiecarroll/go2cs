@@ -18,17 +18,17 @@ public static bool CanUseLongPaths { get => go.runtime_package.canUseLongPaths; 
 
 // UTF16PtrToString is like UTF16ToString, but takes *uint16
 // as a parameter instead of []uint16.
-public static @string UTF16PtrToString(ж<uint16> Ꮡp) {
-    if (Ꮡp == nil) {
+public static @string UTF16PtrToString(ж<uint16> p) {
+    if (p == nil) {
         return ""u8;
     }
-    @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(Ꮡp);
+    @unsafe.Pointer end = @unsafe.Pointer.FromPinnedBox(p);
     nint n = 0;
     while (~(ж<uint16>)(uintptr)(end) != 0) {
         end = (@unsafe.Pointer)((uintptr)end + /* unsafe.Sizeof(*p) */ (uintptr)2);
         n++;
     }
-    return syscall.UTF16ToString(@unsafe.Slice(Ꮡp, n));
+    return syscall.UTF16ToString(@unsafe.Slice(p, n));
 }
 
 public static syscall.Errno ERROR_INVALID_HANDLE => 6;
@@ -287,11 +287,11 @@ public static UntypedInt MOVEFILE_FAIL_IF_NOT_TRACKABLE => 0x20;
 
 public static error Rename(@string oldpath, @string newpath) {
     var (from, err) = syscall.UTF16PtrFromString(oldpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var to, err) = syscall.UTF16PtrFromString(newpath);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return MoveFileEx(from, to, MOVEFILE_REPLACE_EXISTING);
@@ -404,9 +404,9 @@ public static UntypedInt SERVICE_QUERY_STATUS => 4;
 //sys    OpenSCManager(machineName *uint16, databaseName *uint16, access uint32) (handle syscall.Handle, err error)  [failretval==0] = advapi32.OpenSCManagerW
 public static (@string, error) FinalPath(syscallꓸHandle h, uint32 flags) {
     var buf = new slice<uint16>(100);
-    while (ᐧ) {
+    for (;;) {
         var (n, err) = GetFinalPathNameByHandle(h, Ꮡ(buf, 0), (uint32)len(buf), flags);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         if (n < (uint32)len(buf)) {
@@ -414,7 +414,7 @@ public static (@string, error) FinalPath(syscallꓸHandle h, uint32 flags) {
         }
         buf = new slice<uint16>((nint)(n));
     }
-    return (syscall.UTF16ToString(buf), default!);
+    return (syscall.UTF16ToString(buf), default);
 }
 
 // QueryPerformanceCounter retrieves the current value of performance counter.

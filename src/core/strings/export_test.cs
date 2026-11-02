@@ -10,37 +10,36 @@ partial class strings_internal_test_package {
 internal static any ΔReplacer(this ж<global::go.strings_package.Replacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    Ꮡr.of(global::go.strings_package.Replacer.Ꮡonce).Do(Ꮡr.buildOnce);
+    Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
     return r.r;
 }
 
 internal static @string PrintTrie(this ж<global::go.strings_package.Replacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    Ꮡr.of(global::go.strings_package.Replacer.Ꮡonce).Do(Ꮡr.buildOnce);
+    Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
     var gen = r.r._<global::go.strings_package.replacer, ж<global::go.strings_package.genericReplacer>>();
-    return gen.printNode(gen.of(global::go.strings_package.genericReplacer.Ꮡroot), 0);
+    return gen.printNode(gen.Ꮡroot, 0);
 }
 
 internal static @string /*s*/ printNode(this ref global::go.strings_package.genericReplacer r, ж<global::go.strings_package.trieNode> Ꮡt, nint depth) {
-    @string s = default!;
+    @string s = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
-    if (t.priority > 0){
+    if (t.priority > 0) {
         s += "+"u8;
     } else {
         s += "-"u8;
     }
     s += "\n"u8;
 
-    if (t.prefix != ""u8){
-        s += Repeat("."u8, depth) + t.prefix;
+    if (t.prefix != ""u8) {
+        s += Repeat(".", depth) + t.prefix;
         s += r.printNode(t.next, depth + len(t.prefix));
-    } else 
-    if (t.table != default!) {
+    } else if (t.table != nil) {
         foreach (var (b, m) in r.mapping.ΔRangeSnapshot()) {
             if ((nint)m != r.tableSize && t.table[m] != nil) {
-                s += Repeat("."u8, depth) + ((@string)new byte[]{(byte)b}.slice());
+                s += Repeat(".", depth) + ((@string)slice<byte>([(byte)b]));
                 s += r.printNode(t.table[m], depth + 1);
             }
         }
@@ -54,7 +53,7 @@ public static nint StringFind(@string pattern, @string text) {
 
 public static (slice<nint>, slice<nint>) DumpTables(@string pattern) {
     var finder = makeStringFinder(pattern);
-    return ((~finder).badCharSkip[..], (~finder).goodSuffixSkip);
+    return (finder.badCharSkip[..], finder.goodSuffixSkip);
 }
 
 } // end strings_internal_test_package

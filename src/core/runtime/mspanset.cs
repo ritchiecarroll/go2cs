@@ -34,8 +34,8 @@ partial struct spanSet {
 // anyway. (In principle, we could do this during STW.)
     internal mutex spineLock;
     internal atomicSpanSetSpinePointer spine; // *[N]atomic.Pointer[spanSetBlock]
-    internal atomic.Uintptr spineLen;            // Spine array length
-    internal uintptr spineCap;                   // Spine array cap, accessed under spineLock
+    internal atomic.Uintptr spineLen;         // Spine array length
+    internal uintptr spineCap;                // Spine array cap, accessed under spineLock
     // index is the head and tail of the spanSet in a single field.
     // The head and the tail both represent an index into the logical
     // concatenation of all blocks, with the head always behind or
@@ -75,39 +75,39 @@ partial struct spanSetBlock {
 
 // push adds span s to buffer b. push is safe to call concurrently
 // with other push and pop operations.
-internal static void push(this ж<spanSet> Ꮡb, ж<mspan> Ꮡs) {
+internal static void push(this ж<spanSet> Ꮡb, ж<mspan> s) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Obtain our slot.
-    var cursor = (uintptr)(Ꮡb.of(spanSet.Ꮡindex).incTail().tail() - 1);
+    var cursor = (uintptr)(Ꮡb.Ꮡindex.incTail().tail() - 1);
     var (top, bottom) = (cursor / (uintptr)spanSetBlockEntries, cursor % (uintptr)spanSetBlockEntries);
 
     // Do we need to add a block?
-    var spineLen = Ꮡb.of(spanSet.ᏑspineLen).Load();
-    ж<spanSetBlock> block = default!;
+    var spineLen = Ꮡb.ᏑspineLen.Load();
+    ж<spanSetBlock> block = default;
 retry:
-    if (top < spineLen){
-        block = Ꮡb.of(spanSet.Ꮡspine).Load().lookup(top).Load();
+    if (top < spineLen) {
+        block = Ꮡb.Ꮡspine.Load().lookup(top).Load();
     } else {
         // Add a new block to the spine, potentially growing
         // the spine.
-        @lock(Ꮡb.of(spanSet.ᏑspineLock));
+        @lock(Ꮡb.ᏑspineLock);
         // spineLen cannot change until we release the lock,
         // but may have changed while we were waiting.
-        spineLen = Ꮡb.of(spanSet.ᏑspineLen).Load();
+        spineLen = Ꮡb.ᏑspineLen.Load();
         if (top < spineLen) {
-            unlock(Ꮡb.of(spanSet.ᏑspineLock));
+            unlock(Ꮡb.ᏑspineLock);
             goto retry;
         }
 
-        var spine = Ꮡb.of(spanSet.Ꮡspine).Load();
+        var spine = Ꮡb.Ꮡspine.Load();
         if (spineLen == b.spineCap) {
             // Grow the spine.
             var newCap = b.spineCap * 2;
             if (newCap == 0) {
                 newCap = spanSetInitSpineCap;
             }
-            @unsafe.Pointer newSpine = (uintptr)persistentalloc(newCap * (uintptr)goarch.PtrSize, cpu.CacheLineSize, Ꮡmemstats.of(mstats.ᏑgcMiscSys));
+            @unsafe.Pointer newSpine = (uintptr)persistentalloc(newCap * (uintptr)goarch.PtrSize, cpu.CacheLineSize, Ꮡmemstats.ᏑgcMiscSys);
             if (b.spineCap != 0) {
                 // Blocks are allocated off-heap, so
                 // no write barriers.
@@ -116,7 +116,7 @@ retry:
             spine = new spanSetSpinePointer(newSpine.Value);
 
             // Spine is allocated off-heap, so no write barrier.
-            Ꮡb.of(spanSet.Ꮡspine).StoreNoWB(spine);
+            Ꮡb.Ꮡspine.StoreNoWB(spine);
             b.spineCap = newCap;
             // We can't immediately free the old spine
             // since a concurrent push with a lower index
@@ -133,36 +133,36 @@ retry:
         // Add it to the spine.
         // Blocks are allocated off-heap, so no write barrier.
         spine.lookup(top).StoreNoWB(block);
-        Ꮡb.of(spanSet.ᏑspineLen).Store(spineLen + 1);
-        unlock(Ꮡb.of(spanSet.ᏑspineLock));
+        Ꮡb.ᏑspineLen.Store(spineLen + 1);
+        unlock(Ꮡb.ᏑspineLock);
     }
 
     // We have a block. Insert the span atomically, since there may be
     // concurrent readers via the block API.
-    block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).StoreNoWB(Ꮡs);
+    block.at(spanSetBlock.Ꮡspans, (ulong)(bottom)).StoreNoWB(s);
 }
 
 // pop removes and returns a span from buffer b, or nil if b is empty.
 // pop is safe to call concurrently with other pop and push operations.
 internal static ж<mspan> pop(this ж<spanSet> Ꮡb) {
-    uint32 head = default!;
-    uint32 tail = default!;
-    uint32 backoff = default!;
+    uint32 head = default;
+    uint32 tail = default;
+    uint32 backoff = default;
     // TODO: tweak backoff parameters on other architectures.
     if (GOARCH == "arm64"u8) {
         backoff = 128;
     }
 claimLoop:
-    while (ᐧ) {
-        var headtail = Ꮡb.of(spanSet.Ꮡindex).load();
+    for (;;) {
+        var headtail = Ꮡb.Ꮡindex.load();
         (head, tail) = headtail.split();
         if (head >= tail) {
             // The buf is empty, as far as we can tell.
-            return default!;
+            return default;
         }
         // Check if the head position we want to claim is actually
         // backed by a block.
-        var spineLen = Ꮡb.of(spanSet.ᏑspineLen).Load();
+        var spineLen = Ꮡb.ᏑspineLen.Load();
         if (spineLen <= (uintptr)head / (uintptr)spanSetBlockEntries) {
             // We're racing with a spine growth and the allocation of
             // a new block (and maybe a new spine!), and trying to grab
@@ -170,14 +170,14 @@ claimLoop:
             // Instead of spinning, let's just notify the caller that
             // there's nothing currently here. Spinning on this is
             // almost definitely not worth it.
-            return default!;
+            return default;
         }
         // Try to claim the current head by CASing in an updated head.
         // This may fail transiently due to a push which modifies the
         // tail, so keep trying while the head isn't changing.
         var want = head;
         while (want == head) {
-            if (Ꮡb.of(spanSet.Ꮡindex).cas(headtail, makeHeadTailIndex(want + 1, tail))) {
+            if (Ꮡb.Ꮡindex.cas(headtail, makeHeadTailIndex(want + 1, tail))) {
                 goto break_claimLoop;
             }
             // Use a backoff approach to reduce demand to the shared memory location
@@ -188,7 +188,7 @@ claimLoop:
             procyield(backoff);
             // Increase backoff time.
             backoff += backoff / 2;
-            headtail = Ꮡb.of(spanSet.Ꮡindex).load();
+            headtail = Ꮡb.Ꮡindex.load();
             (head, tail) = headtail.split();
         }
         // We failed to claim the spot we were after and the head changed,
@@ -202,7 +202,7 @@ break_claimLoop:;
     // We may be reading a stale spine pointer, but because the length
     // grows monotonically and we've already verified it, we'll definitely
     // be reading from a valid block.
-    var blockp = Ꮡb.of(spanSet.Ꮡspine).Load().lookup((uintptr)top);
+    var blockp = Ꮡb.Ꮡspine.Load().lookup((uintptr)top);
 
     // Given that the spine length is correct, we know we will never
     // see a nil block here, since the length is always updated after
@@ -243,9 +243,12 @@ break_claimLoop:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string attemptToClearNonEmptyˢ = "attempt to clear non-empty span set"u8;
-internal static readonly @string spanSetBlockWithUnpoppedˢ = "span set block with unpopped elements found in reset"u8;
-internal static readonly @string fullyEmptyUnfreedSpanSetˢ = "fully empty unfreed span set block found in reset"u8;
+internal static ref readonly @string attemptToClearNonEmptyˢ => ref attemptToClearNonEmptyˢᵇ;
+private static readonly @string attemptToClearNonEmptyˢᵇ = "attempt to clear non-empty span set"u8;
+internal static ref readonly @string spanSetBlockWithUnpoppedˢ => ref spanSetBlockWithUnpoppedˢᵇ;
+private static readonly @string spanSetBlockWithUnpoppedˢᵇ = "span set block with unpopped elements found in reset"u8;
+internal static ref readonly @string fullyEmptyUnfreedSpanSetˢ => ref fullyEmptyUnfreedSpanSetˢᵇ;
+private static readonly @string fullyEmptyUnfreedSpanSetˢᵇ = "fully empty unfreed span set block found in reset"u8;
 
 // reset resets a spanSet which is empty. It will also clean up
 // any left over blocks.
@@ -255,19 +258,19 @@ internal static readonly @string fullyEmptyUnfreedSpanSetˢ = "fully empty unfre
 // reset may not be called concurrently with any other operations
 // on the span set.
 internal static void reset(this ж<spanSet> Ꮡb) {
-    var (head, tail) = Ꮡb.of(spanSet.Ꮡindex).load().split();
+    var (head, tail) = Ꮡb.Ꮡindex.load().split();
     if (head < tail) {
-        print((@string)"head = "u8, head, (@string)", tail = "u8, tail, (@string)"\n"u8);
+        print((@string)"head = ", head, (@string)", tail = ", tail, (@string)"\n");
         @throw(attemptToClearNonEmptyˢ);
     }
     var top = head / (uint32)spanSetBlockEntries;
-    if ((uintptr)top < Ꮡb.of(spanSet.ᏑspineLen).Load()) {
+    if ((uintptr)top < Ꮡb.ᏑspineLen.Load()) {
         // If the head catches up to the tail and the set is empty,
         // we may not clean up the block containing the head and tail
         // since it may be pushed into again. In order to avoid leaking
         // memory since we're going to reset the head and tail, clean
         // up such a block now, if it exists.
-        var blockp = Ꮡb.of(spanSet.Ꮡspine).Load().lookup((uintptr)top);
+        var blockp = Ꮡb.Ꮡspine.Load().lookup((uintptr)top);
         var block = blockp.Load();
         if (block != nil) {
             // Check the popped value.
@@ -291,8 +294,8 @@ internal static void reset(this ж<spanSet> Ꮡb) {
             ᏑspanSetBlockPool.free(block);
         }
     }
-    Ꮡb.of(spanSet.Ꮡindex).reset();
-    Ꮡb.of(spanSet.ᏑspineLen).Store(0);
+    Ꮡb.Ꮡindex.reset();
+    Ꮡb.ᏑspineLen.Store(0);
 }
 
 // atomicSpanSetSpinePointer is an atomically-accessed spanSetSpinePointer.
@@ -306,14 +309,14 @@ partial struct atomicSpanSetSpinePointer {
 //
 // It has the same semantics as atomic.UnsafePointer.
 internal static spanSetSpinePointer Load(this ж<atomicSpanSetSpinePointer> Ꮡs) {
-    return new spanSetSpinePointer((uintptr)Ꮡs.of(atomicSpanSetSpinePointer.Ꮡa).Load());
+    return new spanSetSpinePointer((uintptr)Ꮡs.Ꮡa.Load());
 }
 
 // Stores the spanSetSpinePointer.
 //
 // It has the same semantics as [atomic.UnsafePointer].
 internal static void StoreNoWB(this ж<atomicSpanSetSpinePointer> Ꮡs, spanSetSpinePointer Δp) {
-    Ꮡs.of(atomicSpanSetSpinePointer.Ꮡa).StoreNoWB(Δp.p);
+    Ꮡs.Ꮡa.StoreNoWB(Δp.p);
 }
 
 // spanSetSpinePointer represents a pointer to a contiguous block of atomic.Pointer[spanSetBlock].
@@ -339,17 +342,17 @@ partial struct spanSetBlockAlloc {
 // persistentallocs a new one and returns it.
 internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
     {
-        var s = (ж<spanSetBlock>)(uintptr)(Ꮡp.of(spanSetBlockAlloc.Ꮡstack).pop()); if (s != nil) {
+        var s = (ж<spanSetBlock>)(uintptr)(Ꮡp.Ꮡstack.pop()); if (s != nil) {
             return s;
         }
     }
-    return (ж<spanSetBlock>)(uintptr)(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4608, builtin.max(cpu.CacheLineSize, (uintptr)(tagAlign)), Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+    return (ж<spanSetBlock>)(uintptr)(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4608, builtin.max(cpu.CacheLineSize, (uintptr)(tagAlign)), Ꮡmemstats.ᏑgcMiscSys));
 }
 
 // free returns a spanSetBlock back to the pool.
-internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> Ꮡblock) {
-    Ꮡblock.of(spanSetBlock.Ꮡpopped).Store(0);
-    Ꮡp.of(spanSetBlockAlloc.Ꮡstack).push(Ꮡblock.of(spanSetBlock.Ꮡlfnode));
+internal static void free(this ж<spanSetBlockAlloc> Ꮡp, ж<spanSetBlock> block) {
+    block.of(spanSetBlock.Ꮡpopped).Store(0);
+    Ꮡp.Ꮡstack.push(block.of(spanSetBlock.Ꮡlfnode));
 }
 
 // headTailIndex represents a combined 32-bit head and 32-bit tail
@@ -364,12 +367,12 @@ internal static headTailIndex makeHeadTailIndex(uint32 head, uint32 tail) {
 
 // head returns the head of a headTailIndex value.
 internal static uint32 head(this headTailIndex h) {
-    return (uint32)(uint64)((h >> 32));
+    return (uint32)(h >> 32);
 }
 
 // tail returns the tail of a headTailIndex value.
 internal static uint32 tail(this headTailIndex h) {
-    return (uint32)(uint64)h;
+    return (uint32)h;
 }
 
 // split splits the headTailIndex value into its parts.
@@ -384,33 +387,34 @@ partial struct atomicHeadTailIndex {
 
 // load atomically reads a headTailIndex value.
 internal static headTailIndex load(this ж<atomicHeadTailIndex> Ꮡh) {
-    return (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Load();
+    return (headTailIndex)Ꮡh.Ꮡu.Load();
 }
 
 // cas atomically compares-and-swaps a headTailIndex value.
 internal static bool cas(this ж<atomicHeadTailIndex> Ꮡh, headTailIndex old, headTailIndex @new) {
-    return Ꮡh.of(atomicHeadTailIndex.Ꮡu).CompareAndSwap((uint64)old, (uint64)@new);
+    return Ꮡh.Ꮡu.CompareAndSwap((uint64)old, (uint64)@new);
 }
 
 // incHead atomically increments the head of a headTailIndex.
 internal static headTailIndex incHead(this ж<atomicHeadTailIndex> Ꮡh) {
-    return (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(4294967296L);
+    return (headTailIndex)Ꮡh.Ꮡu.Add(4294967296L);
 }
 
 // decHead atomically decrements the head of a headTailIndex.
 internal static headTailIndex decHead(this ж<atomicHeadTailIndex> Ꮡh) {
-    return (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(-(4294967296L));
+    return (headTailIndex)Ꮡh.Ꮡu.Add(-(4294967296L));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string headTailIndexOverflowˢ = "headTailIndex overflow"u8;
+internal static ref readonly @string headTailIndexOverflowˢ => ref headTailIndexOverflowˢᵇ;
+private static readonly @string headTailIndexOverflowˢᵇ = "headTailIndex overflow"u8;
 
 // incTail atomically increments the tail of a headTailIndex.
 internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
-    var ht = (headTailIndex)Ꮡh.of(atomicHeadTailIndex.Ꮡu).Add(1);
+    var ht = (headTailIndex)Ꮡh.Ꮡu.Add(1);
     // Check for overflow.
     if (ht.tail() == 0) {
-        print((@string)"runtime: head = "u8, ht.head(), (@string)", tail = "u8, ht.tail(), (@string)"\n"u8);
+        print((@string)"runtime: head = ", ht.head(), (@string)", tail = ", ht.tail(), (@string)"\n");
         @throw(headTailIndexOverflowˢ);
     }
     return ht;
@@ -418,7 +422,7 @@ internal static headTailIndex incTail(this ж<atomicHeadTailIndex> Ꮡh) {
 
 // reset clears the headTailIndex to (0, 0).
 internal static void reset(this ж<atomicHeadTailIndex> Ꮡh) {
-    Ꮡh.of(atomicHeadTailIndex.Ꮡu).Store(0);
+    Ꮡh.Ꮡu.Store(0);
 }
 
 // atomicMSpanPointer is an atomic.Pointer[mspan]. Can't use generics because it's NotInHeap.
@@ -428,12 +432,12 @@ partial struct atomicMSpanPointer {
 
 // Load returns the *mspan.
 internal static ж<mspan> Load(this ж<atomicMSpanPointer> Ꮡp) {
-    return (ж<mspan>)(uintptr)(Ꮡp.of(atomicMSpanPointer.Ꮡp).Load());
+    return (ж<mspan>)(uintptr)(Ꮡp.Ꮡp.Load());
 }
 
 // StoreNoWB stores an *mspan.
-internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> Ꮡs) {
-    Ꮡp.of(atomicMSpanPointer.Ꮡp).StoreNoWB(@unsafe.Pointer.FromPinnedBox(Ꮡs));
+internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
+    Ꮡp.Ꮡp.StoreNoWB(@unsafe.Pointer.FromPinnedBox(s));
 }
 
 } // end runtime_package

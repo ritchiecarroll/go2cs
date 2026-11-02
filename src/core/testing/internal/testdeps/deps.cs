@@ -43,17 +43,17 @@ internal static @string matchPat;
 internal static ж<regexp.Regexp> matchRe;
 
 public static (bool result, error err) MatchString(this TestDeps _, @string pat, @string str) {
-    bool result = default!;
-    error err = default!;
+    bool result = default;
+    error err = default;
 
     if (matchRe == nil || matchPat != pat) {
         matchPat = pat;
         (matchRe, err) = regexp.Compile(matchPat);
-        if (err != default!) {
+        if (err != nil) {
             return (result, err);
         }
     }
-    return (matchRe.MatchString(str), default!);
+    return (matchRe.MatchString(str), default);
 }
 
 public static error StartCPUProfile(this TestDeps _, io.Writer w) {
@@ -91,28 +91,32 @@ partial struct testLog {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string getenvˢ = "getenv"u8;
+private static ref readonly @string getenvˢ => ref getenvˢᵇ;
+private static readonly @string getenvˢᵇ = "getenv"u8;
 
 internal static void Getenv(this ж<testLog> Ꮡl, @string key) {
     Ꮡl.add(getenvˢ, key);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string openˢ = "open"u8;
+private static ref readonly @string openˢ => ref openˢᵇ;
+private static readonly @string openˢᵇ = "open"u8;
 
 internal static void Open(this ж<testLog> Ꮡl, @string name) {
     Ꮡl.add(openˢ, name);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string statˢ = "stat"u8;
+private static ref readonly @string statˢ => ref statˢᵇ;
+private static readonly @string statˢᵇ = "stat"u8;
 
 internal static void Stat(this ж<testLog> Ꮡl, @string name) {
     Ꮡl.add(statˢ, name);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string chdirˢ = "chdir"u8;
+private static ref readonly @string chdirˢ => ref chdirˢᵇ;
+private static readonly @string chdirˢᵇ = "chdir"u8;
 
 internal static void Chdir(this ж<testLog> Ꮡl, @string name) {
     Ꮡl.add(chdirˢ, name);
@@ -125,7 +129,7 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
     try {
         ref var l = ref Ꮡl.DerefOrNull();
 
-        if (strings.Contains(name, "\n"u8) || name == ""u8) {
+        if (strings.Contains(name, "\n") || name == ""u8) {
             return;
         }
 
@@ -135,9 +139,9 @@ internal static void add(this ж<testLog> Ꮡl, @string op, @string name) {
             return;
         }
         l.w.WriteString(op);
-        l.w.WriteByte((rune)' ');
+        l.w.WriteByte((byte)' ');
         l.w.WriteString(name);
-        l.w.WriteByte((rune)'\n');
+        l.w.WriteByte((byte)'\n');
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡl.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
@@ -147,10 +151,11 @@ internal static readonly ж<testLog> Ꮡlog = new StaticBox<testLog>(default(tes
 internal static ref testLog log => ref ((StaticBox<testLog>)Ꮡlog).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testLogˢ = "# test log\n"u8;
+private static ref readonly @string testLogˢ => ref testLogˢᵇ;
+private static readonly @string testLogˢᵇ = "# test log\n"u8;
 
 public static void StartTestLog(this TestDeps _, io.Writer w) {
-    Ꮡlog.of(testLog.Ꮡmu).Lock();
+    Ꮡlog.Ꮡmu.Lock();
     log.w = bufio.NewWriter(w);
     if (!log.set) {
         // Tests that define TestMain and then run m.Run multiple times
@@ -161,19 +166,19 @@ public static void StartTestLog(this TestDeps _, io.Writer w) {
         testlog.SetLogger(new testLogжInterface(Ꮡlog));
         log.w.WriteString(testLogˢ); // known to cmd/go/internal/test/test.go
     }
-    Ꮡlog.of(testLog.Ꮡmu).Unlock();
+    Ꮡlog.Ꮡmu.Unlock();
 }
 
 public static error StopTestLog(this TestDeps _) {
     GoFrame ᒐ = default;
     try {
-        Ꮡlog.of(testLog.Ꮡmu).Lock();
-        defer(Ꮡlog.of(testLog.Ꮡmu).Unlock, ref ᒐ);
+        Ꮡlog.Ꮡmu.Lock();
+        defer(Ꮡlog.Ꮡmu.Unlock, ref ᒐ);
         var err = log.w.Flush();
-        log.w = default!;
+        log.w = default;
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -183,7 +188,7 @@ public static void SetPanicOnExit0(this TestDeps _, bool v) {
 }
 
 public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflectꓸType> types, @string corpusDir, @string cacheDir) {
-    error err = default!;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         // Fuzzing may be interrupted with a timeout or if the user presses ^C.
@@ -205,7 +210,7 @@ public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration tim
             CacheDir: cacheDir
         ));
         if (AreEqual(err, ctx.Err())) {
-            err = default!; goto ᒐdone;
+            err = default; goto ᒐdone;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -227,11 +232,11 @@ public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, erro
         defer(() => cancelʗ1(), ref ᒐ);
         var err = fuzz.RunFuzzWorker(ctx, fn);
         if (AreEqual(err, ctx.Err())) {
-            return default!;
+            return default;
         }
         return err;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -272,9 +277,9 @@ public static readonly ж<Action<bool>> ᏑCoverMarkProfileEmittedFunc = new Sta
 public static ref Action<bool> CoverMarkProfileEmittedFunc => ref ((StaticBox<Action<bool>>)ᏑCoverMarkProfileEmittedFunc).ValueSlot;
 
 public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) {
-    @string mode = default!;
-    Func<@string, @string, (@string, error)> tearDown = default!;
-    Func<float64> snapcov = default!;
+    @string mode = default;
+    Func<@string, @string, (@string, error)> tearDown = default;
+    Func<float64> snapcov = default;
 
     if (CoverMode == ""u8) {
         return (mode, tearDown, snapcov);
@@ -283,17 +288,20 @@ public static (@string mode, Func<@string, @string, (@string, error)> tearDown, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string gocoverdirˢ = "gocoverdir"u8;
-private static readonly @string errorSettingGocoverdirˢ = "error setting GOCOVERDIR: bad os.MkdirTemp return"u8;
-private static readonly @string errorGeneratingCoverageˢ = "error generating coverage report"u8;
+private static ref readonly @string gocoverdirˢ => ref gocoverdirˢᵇ;
+private static readonly @string gocoverdirˢᵇ = "gocoverdir"u8;
+private static ref readonly @string errorSettingGocoverdirˢ => ref errorSettingGocoverdirˢᵇ;
+private static readonly @string errorSettingGocoverdirˢᵇ = "error setting GOCOVERDIR: bad os.MkdirTemp return"u8;
+private static ref readonly @string errorGeneratingCoverageˢ => ref errorGeneratingCoverageˢᵇ;
+private static readonly @string errorGeneratingCoverageˢᵇ = "error generating coverage report"u8;
 
 internal static (@string, error) coverTearDown(@string coverprofile, @string gocoverdir) {
     GoFrame ᒐ = default;
     try {
-        error err = default!;
+        error err = default;
         if (gocoverdir == ""u8) {
             (gocoverdir, err) = os.MkdirTemp(""u8, gocoverdirˢ);
-            if (err != default!) {
+            if (err != nil) {
                 return (errorSettingGocoverdirˢ, err);
             }
             defer(os.RemoveAll, gocoverdir, ref ᒐ);
@@ -301,13 +309,13 @@ internal static (@string, error) coverTearDown(@string coverprofile, @string goc
         CoverMarkProfileEmittedFunc(true);
         @string cmode = CoverMode;
         {
-            var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != default!) {
+            var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != nil) {
                 return (errorGeneratingCoverageˢ, errΔ1);
             }
         }
-        return ("", default!);
+        return ("", default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

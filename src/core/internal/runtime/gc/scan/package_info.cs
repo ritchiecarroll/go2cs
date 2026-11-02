@@ -45,7 +45,7 @@ using static go.@internal.runtime.gc.scan_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,13 +55,13 @@ using static go.@internal.runtime.gc.scan_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/expand_amd64.go", "expand_amd64.cs", "AAoe")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/expand_reference.go", "expand_reference.cs", "AAweAAoKgsqClIK4goI=")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/filter.go", "filter.cs", "AAkYsoKCgoKClIKUgpSClIKU")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/filter_amd64.go", "filter_amd64.cs", "AAcS")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/scan_amd64.go", "scan_amd64.cs", "AA0agoKUpoKqkqaCqKQ=")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA4ewoKUooKClMqC3IIADRyCgoLuggAIEoIAAhDSggACEOSCuISSgpQ=")]
-[assembly: go.GoPositionMap("internal/runtime/gc/scan/scan_reference.go", "scan_reference.cs", "AA0qAAwCgoKCgoKUgpSCgpSClA==")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/expand_amd64.go", "expand_amd64.cs", "AAoe")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/expand_reference.go", "expand_reference.cs", "AAweAAoKgsqClIK4goI=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/filter.go", "filter.cs", "AAkYsoKCgoKClIKUgpSClIKU")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/filter_amd64.go", "filter_amd64.cs", "AAcS")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_amd64.go", "scan_amd64.cs", "AA0agoKUpoKqkqaCqKQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_go.go", "scan_go.cs", "AA4ewoKUooKClMqC3IIADRyCgoLuggAIEoIAAhDSggACEOSCuISSgpQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/scan/scan_reference.go", "scan_reference.cs", "AA0qAAwCgoKCgoKUgpSCgpSClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.gc;

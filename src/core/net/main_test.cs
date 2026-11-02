@@ -30,29 +30,29 @@ internal static ref socktest.Switch sw => ref ((StaticBox<socktest.Switch>)Ꮡsw
 internal static readonly ж<Δsync.Once> ᏑtestHookUninstaller = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once testHookUninstaller => ref ((StaticBox<Δsync.Once>)ᏑtestHookUninstaller).ValueSlot;
 
-internal static ж<bool> testTCPBig = flag.Bool("tcpbig"u8, false, "whether to test massive size of data per read or write call on TCP connection"u8);
+internal static ж<bool> testTCPBig = flag.Bool("tcpbig", false, "whether to test massive size of data per read or write call on TCP connection");
 
-internal static ж<bool> testDNSFlood = flag.Bool("dnsflood"u8, false, "whether to test DNS query flooding"u8);
+internal static ж<bool> testDNSFlood = flag.Bool("dnsflood", false, "whether to test DNS query flooding");
 
 // If external IPv4 connectivity exists, we can try dialing
 // non-node/interface local scope IPv4 addresses.
 // On Windows, Lookup APIs may not return IPv4-related
 // resource records when a node has no external IPv4
 // connectivity.
-internal static ж<bool> testIPv4 = flag.Bool("ipv4"u8, true, "assume external IPv4 connectivity exists"u8);
+internal static ж<bool> testIPv4 = flag.Bool("ipv4", true, "assume external IPv4 connectivity exists");
 
 // If external IPv6 connectivity exists, we can try dialing
 // non-node/interface local scope IPv6 addresses.
 // On Windows, Lookup APIs may not return IPv6-related
 // resource records when a node has no external IPv6
 // connectivity.
-internal static ж<bool> testIPv6 = flag.Bool("ipv6"u8, false, "assume external IPv6 connectivity exists"u8);
+internal static ж<bool> testIPv6 = flag.Bool("ipv6", false, "assume external IPv6 connectivity exists");
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     setupTestData();
     installTestHooks();
 
-    nint st = Ꮡm.Run();
+    nint st = m.Run();
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
     if (testing.Verbose()) {
@@ -69,10 +69,10 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 // not to support deadlines, or fails the test otherwise.
 internal static void mustSetDeadline(testing.TB t, Func<time.Time, error> m, time.Duration d) {
     var err = m(time.Now().Add(d));
-    if (err != default!) {
+    if (err != nil) {
         t.Helper();
         if (Δruntime.GOOS == "plan9"u8) {
-            t.Skipf("skipping: %s does not support deadlines"u8, Δruntime.GOOS);
+            t.Skipf("skipping: %s does not support deadlines", Δruntime.GOOS);
         }
         t.Fatal(err);
     }
@@ -88,87 +88,89 @@ internal static slice<ipv6LinkLocalUnicastTest> ipv6LinkLocalUnicastUDPTests;
 
 internal static void setupTestData() {
     if (supportsIPv4()) {
-        resolveTCPAddrTests = appendꓸꓸꓸ(resolveTCPAddrTests, new resolveTCPAddrTest[]{
-            new("tcp"u8, "localhost:1"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 1)), default!),
-            new("tcp4"u8, "localhost:2"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 2)), default!)
-        }.slice());
-        resolveUDPAddrTests = appendꓸꓸꓸ(resolveUDPAddrTests, new resolveUDPAddrTest[]{
-            new("udp"u8, "localhost:1"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 1)), default!),
-            new("udp4"u8, "localhost:2"u8, Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 2)), default!)
-        }.slice());
-        resolveIPAddrTests = appendꓸꓸꓸ(resolveIPAddrTests, new resolveIPAddrTest[]{
-            new("ip"u8, "localhost"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!),
-            new("ip4"u8, "localhost"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!)
-        }.slice());
+        resolveTCPAddrTests = appendꓸꓸꓸ(resolveTCPAddrTests, slice<resolveTCPAddrTest>([
+            new("tcp", "localhost:1", Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 1)), default),
+            new("tcp4", "localhost:2", Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 2)), default)
+        ]));
+        resolveUDPAddrTests = appendꓸꓸꓸ(resolveUDPAddrTests, slice<resolveUDPAddrTest>([
+            new("udp", "localhost:1", Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 1)), default),
+            new("udp4", "localhost:2", Ꮡ(new UDPAddr(IP: IPv4(127, 0, 0, 1), Port: 2)), default)
+        ]));
+        resolveIPAddrTests = appendꓸꓸꓸ(resolveIPAddrTests, slice<resolveIPAddrTest>([
+            new("ip", "localhost", Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default),
+            new("ip4", "localhost", Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default)
+        ]));
     }
 
     if (supportsIPv6()) {
-        resolveTCPAddrTests = append(resolveTCPAddrTests, new resolveTCPAddrTest("tcp6"u8, "localhost:3"u8, Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 3)), default!));
-        resolveUDPAddrTests = append(resolveUDPAddrTests, new resolveUDPAddrTest("udp6"u8, "localhost:3"u8, Ꮡ(new UDPAddr(IP: IPv6loopback, Port: 3)), default!));
-        resolveIPAddrTests = append(resolveIPAddrTests, new resolveIPAddrTest("ip6"u8, "localhost"u8, Ꮡ(new IPAddr(IP: IPv6loopback)), default!));
+        resolveTCPAddrTests = append(resolveTCPAddrTests, new resolveTCPAddrTest("tcp6", "localhost:3", Ꮡ(new TCPAddr(IP: IPv6loopback, Port: 3)), default));
+        resolveUDPAddrTests = append(resolveUDPAddrTests, new resolveUDPAddrTest("udp6", "localhost:3", Ꮡ(new UDPAddr(IP: IPv6loopback, Port: 3)), default));
+        resolveIPAddrTests = append(resolveIPAddrTests, new resolveIPAddrTest("ip6", "localhost", Ꮡ(new IPAddr(IP: IPv6loopback)), default));
 
         // Issue 20911: don't return IPv4 addresses for
         // Resolve*Addr calls of the IPv6 unspecified address.
-        resolveTCPAddrTests = append(resolveTCPAddrTests, new resolveTCPAddrTest("tcp"u8, "[::]:4"u8, Ꮡ(new TCPAddr(IP: IPv6unspecified, Port: 4)), default!));
-        resolveUDPAddrTests = append(resolveUDPAddrTests, new resolveUDPAddrTest("udp"u8, "[::]:4"u8, Ꮡ(new UDPAddr(IP: IPv6unspecified, Port: 4)), default!));
-        resolveIPAddrTests = append(resolveIPAddrTests, new resolveIPAddrTest("ip"u8, "::"u8, Ꮡ(new IPAddr(IP: IPv6unspecified)), default!));
+        resolveTCPAddrTests = append(resolveTCPAddrTests, new resolveTCPAddrTest("tcp", "[::]:4", Ꮡ(new TCPAddr(IP: IPv6unspecified, Port: 4)), default));
+        resolveUDPAddrTests = append(resolveUDPAddrTests, new resolveUDPAddrTest("udp", "[::]:4", Ꮡ(new UDPAddr(IP: IPv6unspecified, Port: 4)), default));
+        resolveIPAddrTests = append(resolveIPAddrTests, new resolveIPAddrTest("ip", "::", Ꮡ(new IPAddr(IP: IPv6unspecified)), default));
     }
 
     var ifi = loopbackInterface();
     if (ifi != nil) {
-        ref var index = ref heap<@string>(out var Ꮡindex);
-        index = fmt.Sprintf("%v"u8, (~ifi).Index);
-        resolveTCPAddrTests = appendꓸꓸꓸ(resolveTCPAddrTests, new resolveTCPAddrTest[]{
-            new("tcp6"u8, "[fe80::1%"u8 + (~ifi).Name + "]:1"u8, Ꮡ(new TCPAddr(IP: ParseIP(fe801ˢ), Port: 1, Zone: zoneCache.name((~ifi).Index))), default!),
-            new("tcp6"u8, "[fe80::1%"u8 + index + "]:2"u8, Ꮡ(new TCPAddr(IP: ParseIP(fe801ˢ), Port: 2, Zone: index)), default!)
-        }.slice());
-        resolveUDPAddrTests = appendꓸꓸꓸ(resolveUDPAddrTests, new resolveUDPAddrTest[]{
-            new("udp6"u8, "[fe80::1%"u8 + (~ifi).Name + "]:1"u8, Ꮡ(new UDPAddr(IP: ParseIP(fe801ˢ), Port: 1, Zone: zoneCache.name((~ifi).Index))), default!),
-            new("udp6"u8, "[fe80::1%"u8 + index + "]:2"u8, Ꮡ(new UDPAddr(IP: ParseIP(fe801ˢ), Port: 2, Zone: index)), default!)
-        }.slice());
-        resolveIPAddrTests = appendꓸꓸꓸ(resolveIPAddrTests, new resolveIPAddrTest[]{
-            new("ip6"u8, "fe80::1%"u8 + (~ifi).Name, Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: zoneCache.name((~ifi).Index))), default!),
-            new("ip6"u8, "fe80::1%"u8 + index, Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: index)), default!)
-        }.slice());
+        ref var index = ref heap<@string>(fmt.Sprintf("%v"u8, ifi.Index), out var Ꮡindex);
+        resolveTCPAddrTests = appendꓸꓸꓸ(resolveTCPAddrTests, slice<resolveTCPAddrTest>([
+            new("tcp6", "[fe80::1%"u8 + ifi.Name + "]:1"u8, Ꮡ(new TCPAddr(IP: ParseIP(fe801ˢ), Port: 1, Zone: zoneCache.name(ifi.Index))), default),
+            new("tcp6", "[fe80::1%"u8 + index + "]:2"u8, Ꮡ(new TCPAddr(IP: ParseIP(fe801ˢ), Port: 2, Zone: index)), default)
+        ]));
+        resolveUDPAddrTests = appendꓸꓸꓸ(resolveUDPAddrTests, slice<resolveUDPAddrTest>([
+            new("udp6", "[fe80::1%"u8 + ifi.Name + "]:1"u8, Ꮡ(new UDPAddr(IP: ParseIP(fe801ˢ), Port: 1, Zone: zoneCache.name(ifi.Index))), default),
+            new("udp6", "[fe80::1%"u8 + index + "]:2"u8, Ꮡ(new UDPAddr(IP: ParseIP(fe801ˢ), Port: 2, Zone: index)), default)
+        ]));
+        resolveIPAddrTests = appendꓸꓸꓸ(resolveIPAddrTests, slice<resolveIPAddrTest>([
+            new("ip6", "fe80::1%"u8 + ifi.Name, Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: zoneCache.name(ifi.Index))), default),
+            new("ip6", "fe80::1%"u8 + index, Ꮡ(new IPAddr(IP: ParseIP(fe801ˢ), Zone: index)), default)
+        ]));
     }
 
     @string addr = ipv6LinkLocalUnicastAddr(ifi);
     if (addr != ""u8) {
         if (Δruntime.GOOS != "dragonfly"u8) {
-            ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, new ipv6LinkLocalUnicastTest[]{
-                new("tcp"u8, "["u8 + addr + "%"u8 + (~ifi).Name + "]:0"u8, false)
-            }.slice());
-            ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, new ipv6LinkLocalUnicastTest[]{
-                new("udp"u8, "["u8 + addr + "%"u8 + (~ifi).Name + "]:0"u8, false)
-            }.slice());
+            ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, slice<ipv6LinkLocalUnicastTest>([
+                new("tcp", "["u8 + addr + "%"u8 + ifi.Name + "]:0"u8, false)
+            ]));
+            ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, slice<ipv6LinkLocalUnicastTest>([
+                new("udp", "["u8 + addr + "%"u8 + ifi.Name + "]:0"u8, false)
+            ]));
         }
-        ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, new ipv6LinkLocalUnicastTest[]{
-            new("tcp6"u8, "["u8 + addr + "%"u8 + (~ifi).Name + "]:0"u8, false)
-        }.slice());
-        ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, new ipv6LinkLocalUnicastTest[]{
-            new("udp6"u8, "["u8 + addr + "%"u8 + (~ifi).Name + "]:0"u8, false)
-        }.slice());
+        ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, slice<ipv6LinkLocalUnicastTest>([
+            new("tcp6", "["u8 + addr + "%"u8 + ifi.Name + "]:0"u8, false)
+        ]));
+        ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, slice<ipv6LinkLocalUnicastTest>([
+            new("udp6", "["u8 + addr + "%"u8 + ifi.Name + "]:0"u8, false)
+        ]));
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "netbsd"u8) {
-            ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, new ipv6LinkLocalUnicastTest[]{
-                new("tcp"u8, "[localhost%"u8 + (~ifi).Name + "]:0"u8, true),
-                new("tcp6"u8, "[localhost%"u8 + (~ifi).Name + "]:0"u8, true)
-            }.slice());
-            ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, new ipv6LinkLocalUnicastTest[]{
-                new("udp"u8, "[localhost%"u8 + (~ifi).Name + "]:0"u8, true),
-                new("udp6"u8, "[localhost%"u8 + (~ifi).Name + "]:0"u8, true)
-            }.slice());
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "netbsd"u8: {
+            ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, slice<ipv6LinkLocalUnicastTest>([
+                new("tcp", "[localhost%"u8 + ifi.Name + "]:0"u8, true),
+                new("tcp6", "[localhost%"u8 + ifi.Name + "]:0"u8, true)
+            ]));
+            ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, slice<ipv6LinkLocalUnicastTest>([
+                new("udp", "[localhost%"u8 + ifi.Name + "]:0"u8, true),
+                new("udp6", "[localhost%"u8 + ifi.Name + "]:0"u8, true)
+            ]));
+            break;
         }
-        else if (exprᴛ1 == "linux"u8) {
-            ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, new ipv6LinkLocalUnicastTest[]{
-                new("tcp"u8, "[ip6-localhost%"u8 + (~ifi).Name + "]:0"u8, true),
-                new("tcp6"u8, "[ip6-localhost%"u8 + (~ifi).Name + "]:0"u8, true)
-            }.slice());
-            ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, new ipv6LinkLocalUnicastTest[]{
-                new("udp"u8, "[ip6-localhost%"u8 + (~ifi).Name + "]:0"u8, true),
-                new("udp6"u8, "[ip6-localhost%"u8 + (~ifi).Name + "]:0"u8, true)
-            }.slice());
-        }
+        case {} when exprᴛ1 == "linux"u8: {
+            ipv6LinkLocalUnicastTCPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastTCPTests, slice<ipv6LinkLocalUnicastTest>([
+                new("tcp", "[ip6-localhost%"u8 + ifi.Name + "]:0"u8, true),
+                new("tcp6", "[ip6-localhost%"u8 + ifi.Name + "]:0"u8, true)
+            ]));
+            ipv6LinkLocalUnicastUDPTests = appendꓸꓸꓸ(ipv6LinkLocalUnicastUDPTests, slice<ipv6LinkLocalUnicastTest>([
+                new("udp", "[ip6-localhost%"u8 + ifi.Name + "]:0"u8, true),
+                new("udp6", "[ip6-localhost%"u8 + ifi.Name + "]:0"u8, true)
+            ]));
+            break;
+        }}
     }
 }
 
@@ -185,15 +187,16 @@ internal static void printRunningGoroutines() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string createdByNetˢ = "created by net"u8;
+internal static ref readonly @string createdByNetˢ => ref createdByNetˢᵇ;
+private static readonly @string createdByNetˢᵇ = "created by net"u8;
 
 // runningGoroutines returns a list of remaining goroutines.
 internal static partial slice<@string> runningGoroutines() {
-    slice<@string> gss = default!;
+    slice<@string> gss = default;
     var b = new slice<byte>((2 << 20));
     b = b.slice(0, Δruntime.Stack(b, true));
-    foreach (var s in range<@string>(strings.SplitSeq((@string)b, "\n\n"u8).Invoke)) {
-        var (_, stack, _) = strings.Cut(s, "\n"u8);
+    foreach (var s in range<@string>(strings.SplitSeq((@string)b, "\n\n").Invoke)) {
+        var (_, stack, _) = strings.Cut(s, "\n");
         stack = strings.TrimSpace(stack);
         if (!strings.Contains(stack, createdByNetˢ)) {
             continue;

@@ -6,8 +6,8 @@ namespace go;
 partial class runtime_package {
 
 // Numbers fundamental to the encoding.
-internal static UntypedInt runeError => /* '\uFFFD' */ 65533; // the "error" Rune or "Unicode replacement character"
-internal static UntypedInt runeSelf => 0x80; // characters below runeSelf are represented as themselves in a single byte.
+internal static UntypedInt runeError => /* '\uFFFD' */ 65533;     // the "error" Rune or "Unicode replacement character"
+internal static UntypedInt runeSelf => 0x80;                      // characters below runeSelf are represented as themselves in a single byte.
 internal static UntypedInt maxRune => /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
 
 // Code points in the surrogate range are not valid for UTF-8.
@@ -53,8 +53,8 @@ internal static nint countrunes(@string s) {
 // are encountered (runeerror, k + 1) is returned to ensure
 // progress when decoderune is used to iterate over a string.
 internal static (rune r, nint pos) decoderune(@string s, nint k) {
-    rune r = default!;
-    nint pos = default!;
+    rune r = default;
+    nint pos = default;
 
     pos = k;
 
@@ -138,7 +138,7 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
             Δp[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
             return 4;
         }
-        return default!;
+        return default;
     }
 }
 

@@ -18,16 +18,17 @@ using Δio = io_package;
 
 partial class testing_test_package {
 
-internal static ж<@string> testPanicTest = flag.String("test_panic_test"u8, ""u8, "TestPanic: indicates which test should panic"u8);
+internal static ж<@string> testPanicTest = flag.String("test_panic_test", "", "TestPanic: indicates which test should panic");
 
-internal static ж<bool> testPanicParallel = flag.Bool("test_panic_parallel"u8, false, "TestPanic: run subtests in parallel"u8);
+internal static ж<bool> testPanicParallel = flag.Bool("test_panic_parallel", false, "TestPanic: run subtests in parallel");
 
-internal static ж<bool> testPanicCleanup = flag.Bool("test_panic_cleanup"u8, false, "TestPanic: indicates whether test should call Cleanup"u8);
+internal static ж<bool> testPanicCleanup = flag.Bool("test_panic_cleanup", false, "TestPanic: indicates whether test should call Cleanup");
 
-internal static ж<@string> testPanicCleanupPanic = flag.String("test_panic_cleanup_panic"u8, ""u8, "TestPanic: indicate whether test should call Cleanup function that panics"u8);
+internal static ж<@string> testPanicCleanupPanic = flag.String("test_panic_cleanup_panic", "", "TestPanic: indicate whether test should call Cleanup function that panics");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testRunTestPanicHelperˢ = "-test.run=^TestPanicHelper$"u8;
+private static ref readonly @string testRunTestPanicHelperˢ => ref testRunTestPanicHelperˢᵇ;
+private static readonly @string testRunTestPanicHelperˢᵇ = "-test.run=^TestPanicHelper$"u8;
 
 internal partial struct TestPanic_testCases /*dyn*/ {
     internal @string desc;
@@ -35,12 +36,12 @@ internal partial struct TestPanic_testCases /*dyn*/ {
     internal @string want;
 }
 
-public static void TestPanic(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new testing_TжTB(Ꮡt));
+public static void TestPanic(ж<testing.T> t) {
+    testenv.MustHaveExec(new testing_TжTB(t));
 
-    var testCases = new TestPanic_testCases[]{new(
-        desc: "root test panics"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper"u8}.slice(),
+    var testCases = slice<TestPanic_testCases>([new(
+        desc: "root test panics",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper"]),
         want: """
 
 --- FAIL: TestPanicHelper (N.NNs)
@@ -49,8 +50,8 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
 
 """u8.Raw()
     ), new(
-        desc: "subtest panics"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8}.slice(),
+        desc: "subtest panics",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1"]),
         want: """
 
 --- FAIL: TestPanicHelper (N.NNs)
@@ -62,37 +63,8 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
 
 """u8.Raw()
     ), new(
-        desc: "subtest panics with cleanup"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8}.slice(),
-        want: """
-
-ran inner cleanup 1
-ran middle cleanup 1
-ran outer cleanup
---- FAIL: TestPanicHelper (N.NNs)
-    panic_test.go:NNN: TestPanicHelper
-    TestPanicHelper
-    --- FAIL: TestPanicHelper/1 (N.NNs)
-        panic_test.go:NNN: TestPanicHelper/1
-        TestPanicHelper/1
-
-"""u8.Raw()
-    ), new(
-        desc: "subtest panics with outer cleanup panic"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=outer"u8}.slice(),
-        want: """
-
-ran inner cleanup 1
-ran middle cleanup 1
-ran outer cleanup
---- FAIL: TestPanicHelper (N.NNs)
-    panic_test.go:NNN: TestPanicHelper
-    TestPanicHelper
-
-"""u8.Raw()
-    ), new(
-        desc: "subtest panics with middle cleanup panic"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=middle"u8}.slice(),
+        desc: "subtest panics with cleanup",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup"]),
         want: """
 
 ran inner cleanup 1
@@ -107,8 +79,21 @@ ran outer cleanup
 
 """u8.Raw()
     ), new(
-        desc: "subtest panics with inner cleanup panic"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=inner"u8}.slice(),
+        desc: "subtest panics with outer cleanup panic",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=outer"]),
+        want: """
+
+ran inner cleanup 1
+ran middle cleanup 1
+ran outer cleanup
+--- FAIL: TestPanicHelper (N.NNs)
+    panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
+
+"""u8.Raw()
+    ), new(
+        desc: "subtest panics with middle cleanup panic",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=middle"]),
         want: """
 
 ran inner cleanup 1
@@ -123,8 +108,8 @@ ran outer cleanup
 
 """u8.Raw()
     ), new(
-        desc: "parallel subtest panics with cleanup"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_parallel"u8}.slice(),
+        desc: "subtest panics with inner cleanup panic",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=inner"]),
         want: """
 
 ran inner cleanup 1
@@ -139,21 +124,8 @@ ran outer cleanup
 
 """u8.Raw()
     ), new(
-        desc: "parallel subtest panics with outer cleanup panic"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=outer"u8, "-test_panic_parallel"u8}.slice(),
-        want: """
-
-ran inner cleanup 1
-ran middle cleanup 1
-ran outer cleanup
---- FAIL: TestPanicHelper (N.NNs)
-    panic_test.go:NNN: TestPanicHelper
-    TestPanicHelper
-
-"""u8.Raw()
-    ), new(
-        desc: "parallel subtest panics with middle cleanup panic"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=middle"u8, "-test_panic_parallel"u8}.slice(),
+        desc: "parallel subtest panics with cleanup",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_parallel"]),
         want: """
 
 ran inner cleanup 1
@@ -168,8 +140,37 @@ ran outer cleanup
 
 """u8.Raw()
     ), new(
-        desc: "parallel subtest panics with inner cleanup panic"u8,
-        flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=inner"u8, "-test_panic_parallel"u8}.slice(),
+        desc: "parallel subtest panics with outer cleanup panic",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=outer", "-test_panic_parallel"]),
+        want: """
+
+ran inner cleanup 1
+ran middle cleanup 1
+ran outer cleanup
+--- FAIL: TestPanicHelper (N.NNs)
+    panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
+
+"""u8.Raw()
+    ), new(
+        desc: "parallel subtest panics with middle cleanup panic",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=middle", "-test_panic_parallel"]),
+        want: """
+
+ran inner cleanup 1
+ran middle cleanup 1
+ran outer cleanup
+--- FAIL: TestPanicHelper (N.NNs)
+    panic_test.go:NNN: TestPanicHelper
+    TestPanicHelper
+    --- FAIL: TestPanicHelper/1 (N.NNs)
+        panic_test.go:NNN: TestPanicHelper/1
+        TestPanicHelper/1
+
+"""u8.Raw()
+    ), new(
+        desc: "parallel subtest panics with inner cleanup panic",
+        flags: slice<@string>(["-test_panic_test=TestPanicHelper/1", "-test_panic_cleanup", "-test_panic_cleanup_panic=inner", "-test_panic_parallel"]),
         want: """
 
 ran inner cleanup 1
@@ -184,23 +185,23 @@ ran outer cleanup
 
 """u8.Raw()
     )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestPanic_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.desc, (ж<testing.T> tΔ1) => {
+        t.Run(tc.desc, (ж<testing.T> tΔ1) => {
             var cmd = exec.Command(testenv.Executable(new testing_TжTB(tΔ1)), testRunTestPanicHelperˢ);
-            cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, tcʗ1.flags);
-            cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
+            cmd.Args = appendꓸꓸꓸ(cmd.Args, tcʗ1.flags);
+            cmd.Env = append(Δos.Environ(), (@string)"GO_WANT_HELPER_PROCESS=1");
             var (b, _) = cmd.CombinedOutput();
             @string got = (@string)b;
             @string want = strings.TrimSpace(tcʗ1.want);
             @string re = makeRegexp(want);
             {
-                var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != default!) {
-                    tΔ1.Errorf("output:\ngot:\n%s\nwant:\n%s"u8, got, want);
+                var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != nil) {
+                    tΔ1.Errorf("output:\ngot:\n%s\nwant:\n%s", got, want);
                 }
             }
         });
@@ -208,13 +209,16 @@ ran outer cleanup
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nnnˢ = ":NNN:"u8;
-private static readonly @string nNNsˢ = "N\\.NNs"u8;
-private static readonly @string dDSˢ = @"\d*\.\d*s"u8;
+private static ref readonly @string nnnˢ => ref nnnˢᵇ;
+private static readonly @string nnnˢᵇ = ":NNN:"u8;
+private static ref readonly @string nNNsˢ => ref nNNsˢᵇ;
+private static readonly @string nNNsˢᵇ = "N\\.NNs"u8;
+private static ref readonly @string dDSˢ => ref dDSˢᵇ;
+private static readonly @string dDSˢᵇ = @"\d*\.\d*s"u8;
 
 internal static @string makeRegexp(@string s) {
     s = Δregexp.QuoteMeta(s);
-    s = strings.ReplaceAll(s, nnnˢ, @":\d+:"u8);
+    s = strings.ReplaceAll(s, nnnˢ, @":\d+:");
     s = strings.ReplaceAll(s, nNNsˢ, dDSˢ);
     return s;
 }
@@ -222,22 +226,25 @@ internal static @string makeRegexp(@string s) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object ranOuterCleanupˢ = (@string)"ran outer cleanup"u8;
 
-public static void TestPanicHelper(ж<testing.T> Ꮡt) {
+public static void TestPanicHelper(ж<testing.T> t) {
     if (Δos.Getenv(goWantHelperProcessˢ) != "1"u8) {
         return;
     }
-    Ꮡt.Log(Ꮡt.Name());
-    Ꮡt.Output().Write(slice<byte>(Ꮡt.Name()));
-    if (Ꮡt.Name() == testPanicTest.Value) {
+    t.Log(t.Name());
+    t.Output().Write(slice<byte>(t.Name()));
+    if (t.Name() == testPanicTest.Value) {
         throw panic("panic");
     }
     var exprᴛ1 = testPanicCleanupPanic.Value;
-    if (exprᴛ1 == ""u8 || exprᴛ1 == "outer"u8 || exprᴛ1 == "middle"u8 || exprᴛ1 == "inner"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "outer"u8 || exprᴛ1 == "middle"u8 || exprᴛ1 == "inner"u8: {
+        break;
     }
-    else { /* default: */
-        Ꮡt.Fatalf("bad -test_panic_cleanup_panic: %s"u8, testPanicCleanupPanic.Value);
-    }
-    Ꮡt.Cleanup(() => {
+    default: {
+        t.Fatalf("bad -test_panic_cleanup_panic: %s", testPanicCleanupPanic.Value);
+        break;
+    }}
+    t.Cleanup(() => {
         fmt.Println(ranOuterCleanupˢ);
         if (testPanicCleanupPanic.Value == "outer"u8) {
             throw panic("outer cleanup");
@@ -245,7 +252,7 @@ public static void TestPanicHelper(ж<testing.T> Ꮡt) {
     });
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
-        Ꮡt.Run(fmt.Sprintf("%v"u8, i), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("%v"u8, i), (ж<testing.T> tΔ1) => {
             var chosen = tΔ1.Name() == testPanicTest.Value;
             if (chosen && testPanicCleanup.Value) {
                 tΔ1.Cleanup(() => {
@@ -281,67 +288,66 @@ internal partial struct TestMorePanic_testCases /*dyn*/ {
     internal @string want;
 }
 
-public static void TestMorePanic(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestMorePanic(ж<testing.T> t) {
+    testenv.MustHaveExec(new testing_TжTB(t));
 
-    testenv.MustHaveExec(new testing_TжTB(Ꮡt));
-
-    var testCases = new TestMorePanic_testCases[]{
+    var testCases = slice<TestMorePanic_testCases>([
         new(
-            desc: "Issue 48502: call runtime.Goexit in t.Cleanup after panic"u8,
-            flags: new @string[]{"-test.run=^TestGoexitInCleanupAfterPanicHelper$"u8}.slice(),
+            desc: "Issue 48502: call runtime.Goexit in t.Cleanup after panic",
+            flags: slice<@string>(["-test.run=^TestGoexitInCleanupAfterPanicHelper$"]),
             want: """
 panic: die
 	panic: test executed panic(nil) or runtime.Goexit
 """u8.Raw()
         ),
         new(
-            desc: "Issue 48515: call t.Run in t.Cleanup should trigger panic"u8,
-            flags: new @string[]{"-test.run=^TestCallRunInCleanupHelper$"u8}.slice(),
-            want: @"panic: testing: t.Run called during t.Cleanup"u8
+            desc: "Issue 48515: call t.Run in t.Cleanup should trigger panic",
+            flags: slice<@string>(["-test.run=^TestCallRunInCleanupHelper$"]),
+            want: @"panic: testing: t.Run called during t.Cleanup"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tc) in testCases) {
-        var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)), tc.flags.ꓸꓸꓸ);
-        cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
+        var cmd = exec.Command(testenv.Executable(new testing_TжTB(t)), tc.flags.ꓸꓸꓸ);
+        cmd.Env = append(Δos.Environ(), (@string)"GO_WANT_HELPER_PROCESS=1");
         var (b, _) = cmd.CombinedOutput();
         @string got = (@string)b;
         @string want = tc.want;
         @string re = makeRegexp(want);
         {
-            var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != default!) {
-                Ꮡt.Errorf("output:\ngot:\n%s\nwant:\n%s"u8, got, want);
+            var (ok, err) = Δregexp.MatchString(re, got); if (!ok || err != nil) {
+                t.Errorf("output:\ngot:\n%s\nwant:\n%s", got, want);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string inCleanupˢ = "in-cleanup"u8;
+private static ref readonly @string inCleanupˢ => ref inCleanupˢᵇ;
+private static readonly @string inCleanupˢᵇ = "in-cleanup"u8;
 private static readonly object mustNotBeExecutedˢ = (@string)"must not be executed"u8;
 
-public static void TestCallRunInCleanupHelper(ж<testing.T> Ꮡt) {
+public static void TestCallRunInCleanupHelper(ж<testing.T> t) {
     if (Δos.Getenv(goWantHelperProcessˢ) != "1"u8) {
         return;
     }
 
-    Ꮡt.Cleanup(() => {
-        Ꮡt.Run(inCleanupˢ, (ж<testing.T> tΔ1) => {
+    t.Cleanup(() => {
+        t.Run(inCleanupˢ, (ж<testing.T> tΔ1) => {
             tΔ1.Log(mustNotBeExecutedˢ);
         });
     });
 }
 
-public static void TestGoexitInCleanupAfterPanicHelper(ж<testing.T> Ꮡt) {
+public static void TestGoexitInCleanupAfterPanicHelper(ж<testing.T> t) {
     if (Δos.Getenv(goWantHelperProcessˢ) != "1"u8) {
         return;
     }
 
-    Ꮡt.Cleanup(() => {
+    t.Cleanup(() => {
         Δruntime.Goexit();
     });
-    Ꮡt.Parallel();
+    t.Parallel();
     throw panic("die");
 }
 

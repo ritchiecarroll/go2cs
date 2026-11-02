@@ -6,131 +6,131 @@ namespace go.regexp;
 
 partial class syntax_package {
 
-internal static slice<rune> code1 = new rune[]{ /* \d */
+internal static slice<rune> code1 = slice<rune>([ /* \d */
     0x30, 0x39
-}.slice();
+]);
 
-internal static slice<rune> code2 = new rune[]{ /* \s */
+internal static slice<rune> code2 = slice<rune>([ /* \s */
     0x9, 0xa,
     0xc, 0xd,
     0x20, 0x20
-}.slice();
+]);
 
-internal static slice<rune> code3 = new rune[]{ /* \w */
+internal static slice<rune> code3 = slice<rune>([ /* \w */
     0x30, 0x39,
     0x41, 0x5a,
     0x5f, 0x5f,
     0x61, 0x7a
-}.slice();
+]);
 
 [GoLazy] partial class lazyᴛperlGroup { internal static map<@string, charGroup> perlGroup = new map<@string, charGroup>{
-    [@"\d"u8] = new(+1, code1),
-    [@"\D"u8] = new(-1, code1),
-    [@"\s"u8] = new(+1, code2),
-    [@"\S"u8] = new(-1, code2),
-    [@"\w"u8] = new(+1, code3),
-    [@"\W"u8] = new(-1, code3)
+    [@"\d"] = new(+1, code1),
+    [@"\D"] = new(-1, code1),
+    [@"\s"] = new(+1, code2),
+    [@"\S"] = new(-1, code2),
+    [@"\w"] = new(+1, code3),
+    [@"\W"] = new(-1, code3)
 }; }
 
-internal static slice<rune> code4 = new rune[]{ /* [:alnum:] */
+internal static slice<rune> code4 = slice<rune>([ /* [:alnum:] */
     0x30, 0x39,
     0x41, 0x5a,
     0x61, 0x7a
-}.slice();
+]);
 
-internal static slice<rune> code5 = new rune[]{ /* [:alpha:] */
+internal static slice<rune> code5 = slice<rune>([ /* [:alpha:] */
     0x41, 0x5a,
     0x61, 0x7a
-}.slice();
+]);
 
-internal static slice<rune> code6 = new rune[]{ /* [:ascii:] */
+internal static slice<rune> code6 = slice<rune>([ /* [:ascii:] */
     0x0, 0x7f
-}.slice();
+]);
 
-internal static slice<rune> code7 = new rune[]{ /* [:blank:] */
+internal static slice<rune> code7 = slice<rune>([ /* [:blank:] */
     0x9, 0x9,
     0x20, 0x20
-}.slice();
+]);
 
-internal static slice<rune> code8 = new rune[]{ /* [:cntrl:] */
+internal static slice<rune> code8 = slice<rune>([ /* [:cntrl:] */
     0x0, 0x1f,
     0x7f, 0x7f
-}.slice();
+]);
 
-internal static slice<rune> code9 = new rune[]{ /* [:digit:] */
+internal static slice<rune> code9 = slice<rune>([ /* [:digit:] */
     0x30, 0x39
-}.slice();
+]);
 
-internal static slice<rune> code10 = new rune[]{ /* [:graph:] */
+internal static slice<rune> code10 = slice<rune>([ /* [:graph:] */
     0x21, 0x7e
-}.slice();
+]);
 
-internal static slice<rune> code11 = new rune[]{ /* [:lower:] */
+internal static slice<rune> code11 = slice<rune>([ /* [:lower:] */
     0x61, 0x7a
-}.slice();
+]);
 
-internal static slice<rune> code12 = new rune[]{ /* [:print:] */
+internal static slice<rune> code12 = slice<rune>([ /* [:print:] */
     0x20, 0x7e
-}.slice();
+]);
 
-internal static slice<rune> code13 = new rune[]{ /* [:punct:] */
+internal static slice<rune> code13 = slice<rune>([ /* [:punct:] */
     0x21, 0x2f,
     0x3a, 0x40,
     0x5b, 0x60,
     0x7b, 0x7e
-}.slice();
+]);
 
-internal static slice<rune> code14 = new rune[]{ /* [:space:] */
+internal static slice<rune> code14 = slice<rune>([ /* [:space:] */
     0x9, 0xd,
     0x20, 0x20
-}.slice();
+]);
 
-internal static slice<rune> code15 = new rune[]{ /* [:upper:] */
+internal static slice<rune> code15 = slice<rune>([ /* [:upper:] */
     0x41, 0x5a
-}.slice();
+]);
 
-internal static slice<rune> code16 = new rune[]{ /* [:word:] */
+internal static slice<rune> code16 = slice<rune>([ /* [:word:] */
     0x30, 0x39,
     0x41, 0x5a,
     0x5f, 0x5f,
     0x61, 0x7a
-}.slice();
+]);
 
-internal static slice<rune> code17 = new rune[]{ /* [:xdigit:] */
+internal static slice<rune> code17 = slice<rune>([ /* [:xdigit:] */
     0x30, 0x39,
     0x41, 0x46,
     0x61, 0x66
-}.slice();
+]);
 
 [GoLazy] partial class lazyᴛposixGroup { internal static map<@string, charGroup> posixGroup = new map<@string, charGroup>{
-    [@"[:alnum:]"u8] = new(+1, code4),
-    [@"[:^alnum:]"u8] = new(-1, code4),
-    [@"[:alpha:]"u8] = new(+1, code5),
-    [@"[:^alpha:]"u8] = new(-1, code5),
-    [@"[:ascii:]"u8] = new(+1, code6),
-    [@"[:^ascii:]"u8] = new(-1, code6),
-    [@"[:blank:]"u8] = new(+1, code7),
-    [@"[:^blank:]"u8] = new(-1, code7),
-    [@"[:cntrl:]"u8] = new(+1, code8),
-    [@"[:^cntrl:]"u8] = new(-1, code8),
-    [@"[:digit:]"u8] = new(+1, code9),
-    [@"[:^digit:]"u8] = new(-1, code9),
-    [@"[:graph:]"u8] = new(+1, code10),
-    [@"[:^graph:]"u8] = new(-1, code10),
-    [@"[:lower:]"u8] = new(+1, code11),
-    [@"[:^lower:]"u8] = new(-1, code11),
-    [@"[:print:]"u8] = new(+1, code12),
-    [@"[:^print:]"u8] = new(-1, code12),
-    [@"[:punct:]"u8] = new(+1, code13),
-    [@"[:^punct:]"u8] = new(-1, code13),
-    [@"[:space:]"u8] = new(+1, code14),
-    [@"[:^space:]"u8] = new(-1, code14),
-    [@"[:upper:]"u8] = new(+1, code15),
-    [@"[:^upper:]"u8] = new(-1, code15),
-    [@"[:word:]"u8] = new(+1, code16),
-    [@"[:^word:]"u8] = new(-1, code16),
-    [@"[:xdigit:]"u8] = new(+1, code17),
-    [@"[:^xdigit:]"u8] = new(-1, code17)
+    [@"[:alnum:]"] = new(+1, code4),
+    [@"[:^alnum:]"] = new(-1, code4),
+    [@"[:alpha:]"] = new(+1, code5),
+    [@"[:^alpha:]"] = new(-1, code5),
+    [@"[:ascii:]"] = new(+1, code6),
+    [@"[:^ascii:]"] = new(-1, code6),
+    [@"[:blank:]"] = new(+1, code7),
+    [@"[:^blank:]"] = new(-1, code7),
+    [@"[:cntrl:]"] = new(+1, code8),
+    [@"[:^cntrl:]"] = new(-1, code8),
+    [@"[:digit:]"] = new(+1, code9),
+    [@"[:^digit:]"] = new(-1, code9),
+    [@"[:graph:]"] = new(+1, code10),
+    [@"[:^graph:]"] = new(-1, code10),
+    [@"[:lower:]"] = new(+1, code11),
+    [@"[:^lower:]"] = new(-1, code11),
+    [@"[:print:]"] = new(+1, code12),
+    [@"[:^print:]"] = new(-1, code12),
+    [@"[:punct:]"] = new(+1, code13),
+    [@"[:^punct:]"] = new(-1, code13),
+    [@"[:space:]"] = new(+1, code14),
+    [@"[:^space:]"] = new(-1, code14),
+    [@"[:upper:]"] = new(+1, code15),
+    [@"[:^upper:]"] = new(-1, code15),
+    [@"[:word:]"] = new(+1, code16),
+    [@"[:^word:]"] = new(-1, code16),
+    [@"[:xdigit:]"] = new(+1, code17),
+    [@"[:^xdigit:]"] = new(-1, code17)
 }; }
 
 } // end syntax_package

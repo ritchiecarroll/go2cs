@@ -10,12 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,7 +51,11 @@ using static go.os.user_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(User))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -67,11 +65,11 @@ using static go.os.user_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/user/listgroups_unix.go", "listgroups_unix.cs", "ABMmgoKUgoKmgoKCppSCgoKCgoKUAAkUgsoABxCClJSUlJSCuIKClJSCgqampqKCgpSk")]
-[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgALGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
-[assembly: go.GoPositionMap("os/user/lookup_stubs.go", "lookup_stubs.cs", "ABcugraCgqaSAAcQlIKUgsqClIKClIKClJSmgoCC2qaCgIKk", "", "", "36=currentGID/1/1/2,Getenv/1/1/3")]
-[assembly: go.GoPositionMap("os/user/lookup_unix.go", "lookup_unix.cs", "ABM4AAkCpoKCyoKClKaClMqCgqa4gu6CgpSCgriClIKU3IKCgpSCsoKmgtyUgIKkuIKAgpKCpKaCgIKSgqSqooKClIKygqaChJSAgqSAgqQAChaCuIKCgpSAgpKCpKaCgIKSgqSmooKClJLWooKClJLWooKClJLWooKClJI=", "99-117:1;146-175:1")]
-[assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
+[assembly: GoPositionMap("os/user/listgroups_unix.go", "listgroups_unix.cs", "ABQmgoKUgoKmgoKCppSCgoKCgoKUAAkUgsoABxCClJSUlJSCuIKClJSCgqampqKCgpSk", "", "", "", "111:21")]
+[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
+[assembly: GoPositionMap("os/user/lookup_stubs.go", "lookup_stubs.cs", "ABougqaCgqaSAAcQpIKUgtqClIKClIKClJSmgoCC2qaCgIKk", "", "", "38=currentGID/1/1/2,Getenv/1/1/3")]
+[assembly: GoPositionMap("os/user/lookup_unix.go", "lookup_unix.cs", "ABM4AAkCpoKCyoKClKaClMqCgqa4gu6CgpSCgriClIKU3IKCgpSCsoKmgtyUgIKkuIKAgoKCpKaCgIKCgqSqooKClIKygqaChJSAgqSAgqQAChaCuIKCgpSAgoKCpKaCgIKCgqSmooKClJLWooKClJLWooKClJLWooKClJI=", "99-117:1;146-175:1", "", "", "228:21,243:21,258:21,273:21")]
+[assembly: GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

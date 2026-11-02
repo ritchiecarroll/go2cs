@@ -29,7 +29,7 @@ using static global::go.unicode.utf16_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -39,7 +39,7 @@ using static global::go.unicode.utf16_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/utf16/utf16_test.go", "utf16_test.cs", "AA8gkoKUggAICIIACRqAggAKFAAHEIKCgoLKgoKCgpSCyqKCgoKCgoKClIKUlIKClIKUgoKCuIIACRQABxCClLKSgoKmgsqCgoKCAAgKAAcWgoKCggAICgAPJoKCgoLKtIKCuLSCgriilIKmgoKCyqKCgriigoK4ooKCgoKUuKKCgoKClLiigoI=", "131-136:1")]
+[assembly: GoPositionMap("unicode/utf16/utf16_test.go", "utf16_test.cs", "AA8gkoKUggAICIIACRqAggAKFAAHEIKCgoLKgoKCgpSCyoKCgoKCgoKClIKUlIKClIKUgoKCuIIACRQABxCClLKSgoKmgsqCgoKCAAgKAAcWgoKCggAICgAPJoKCgoLKtIKCuLSCgriilIKmgoKCyqKCgriigoK4ooKCgoKUuKKCgoKClLiigoI=", "131-136:1")]
 // </GoSourcePositionMaps>
 
 namespace go.unicode;

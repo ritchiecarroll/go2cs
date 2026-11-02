@@ -15,8 +15,8 @@ internal static bool matchFields(ж<ast.FieldList> Ꮡfields, Func<@string, bool
 
     if (Ꮡfields != nil) {
         foreach (var (_, field) in fields.List) {
-            foreach (var (_, name) in (~field).Names) {
-                if (f((~name).Name)) {
+            foreach (var (_, name) in field.Names) {
+                if (f(name.Name)) {
                     return true;
                 }
             }
@@ -29,28 +29,28 @@ internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
     foreach (var (_, dΔ1) in d.Specs) {
         switch (dΔ1.type()) {
         case ж<ast.ValueSpec> v: {
-            foreach (var (_, name) in (~v).Names) {
-                if (f((~name).Name)) {
+            foreach (var (_, name) in v.Names) {
+                if (f(name.Name)) {
                     return true;
                 }
             }
             break;
         }
         case ж<ast.TypeSpec> v: {
-            if (f((~(~v).Name).Name)) {
+            if (f(v.Name.Name)) {
                 return true;
             }
             // We don't match ordinary parameters in filterFuncs, so by analogy don't
             // match type parameters here.
-            switch ((~v).Type.type()) {
+            switch (v.Type.type()) {
             case ж<ast.StructType> t: {
-                if (matchFields((~t).Fields, f)) {
+                if (matchFields(t.Fields, f)) {
                     return true;
                 }
                 break;
             }
             case ж<ast.InterfaceType> t: {
-                if (matchFields((~t).Methods, f)) {
+                if (matchFields(t.Methods, f)) {
                     return true;
                 }
                 break;
@@ -64,7 +64,7 @@ internal static bool matchDecl(ref ast.GenDecl d, Func<@string, bool> f) {
 internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, bool> f) {
     nint w = 0;
     foreach (var (_, vd) in a) {
-        if (matchDecl(ref ((~vd).Decl).DerefOrNull(), f)) {
+        if (matchDecl(ref (vd.Decl).DerefOrNull(), f)) {
             a[w] = vd;
             w++;
         }
@@ -75,7 +75,7 @@ internal static slice<ж<Value>> filterValues(slice<ж<Value>> a, Func<@string, 
 internal static slice<ж<Func>> filterFuncs(slice<ж<Func>> a, Func<@string, bool> f) {
     nint w = 0;
     foreach (var (_, fd) in a) {
-        if (f((~fd).Name)) {
+        if (f(fd.Name)) {
             a[w] = fd;
             w++;
         }
@@ -87,15 +87,15 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, boo
     nint w = 0;
     foreach (var (_, td) in a) {
         nint n = 0; // number of matches
-        if (matchDecl(ref ((~td).Decl).DerefOrNull(), f)){
+        if (matchDecl(ref (td.Decl).DerefOrNull(), f)) {
             n = 1;
         } else {
             // type name doesn't match, but we may have matching consts, vars, factories or methods
-            td.Value.Consts = filterValues((~td).Consts, f);
-            td.Value.Vars = filterValues((~td).Vars, f);
-            td.Value.Funcs = filterFuncs((~td).Funcs, f);
-            td.Value.Methods = filterFuncs((~td).Methods, f);
-            n += len((~td).Consts) + len((~td).Vars) + len((~td).Funcs) + len((~td).Methods);
+            td.Consts = filterValues(td.Consts, f);
+            td.Vars = filterValues(td.Vars, f);
+            td.Funcs = filterFuncs(td.Funcs, f);
+            td.Methods = filterFuncs(td.Methods, f);
+            n += len(td.Consts) + len(td.Vars) + len(td.Funcs) + len(td.Methods);
         }
         if (n > 0) {
             a[w] = td;

@@ -128,7 +128,7 @@ public static color.Color At(this ref ΔRGBA p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.RGBA64(nil);
+        return new color.RGBA64();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -146,7 +146,7 @@ public static color.RGBA64 RGBA64At(this ref ΔRGBA p, nint x, nint y) {
 
 public static colorꓸRGBA RGBAAt(this ref ΔRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new colorꓸRGBA(nil);
+        return new colorꓸRGBA();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -204,7 +204,7 @@ public static Image SubImage(this ref ΔRGBA p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new ΔRGBAжImage(Ꮡ(new ΔRGBA(nil)));
+        return new ΔRGBAжImage(Ꮡ(new ΔRGBA()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new ΔRGBAжImage(Ꮡ(new ΔRGBA(
@@ -234,7 +234,8 @@ public static bool Opaque(this ref ΔRGBA p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rgbaˢ = "RGBA"u8;
+internal static ref readonly @string rgbaˢ => ref rgbaˢᵇ;
+private static readonly @string rgbaˢᵇ = "RGBA"u8;
 
 // NewRGBA returns a new [RGBA] image with the given bounds.
 public static ж<ΔRGBA> NewRGBA(Rectangle r) {
@@ -270,7 +271,7 @@ public static color.Color At(this ref RGBA64 p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref RGBA64 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.RGBA64(nil);
+        return new color.RGBA64();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
@@ -329,7 +330,7 @@ public static Image SubImage(this ref RGBA64 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new RGBA64жImage(Ꮡ(new RGBA64(nil)));
+        return new RGBA64жImage(Ꮡ(new RGBA64()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new RGBA64жImage(Ꮡ(new RGBA64(
@@ -359,7 +360,8 @@ public static bool Opaque(this ref RGBA64 p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rgba64ˢ = "RGBA64"u8;
+internal static ref readonly @string rgba64ˢ => ref rgba64ˢᵇ;
+private static readonly @string rgba64ˢᵇ = "RGBA64"u8;
 
 // NewRGBA64 returns a new [RGBA64] image with the given bounds.
 public static ж<RGBA64> NewRGBA64(Rectangle r) {
@@ -400,7 +402,7 @@ public static color.RGBA64 RGBA64At(this ref NRGBA p, nint x, nint y) {
 
 public static color.NRGBA NRGBAAt(this ref NRGBA p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.NRGBA(nil);
+        return new color.NRGBA();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -464,7 +466,7 @@ public static Image SubImage(this ref NRGBA p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new NRGBAжImage(Ꮡ(new NRGBA(nil)));
+        return new NRGBAжImage(Ꮡ(new NRGBA()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new NRGBAжImage(Ꮡ(new NRGBA(
@@ -494,7 +496,8 @@ public static bool Opaque(this ref NRGBA p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nrgbaˢ = "NRGBA"u8;
+internal static ref readonly @string nrgbaˢ => ref nrgbaˢᵇ;
+private static readonly @string nrgbaˢᵇ = "NRGBA"u8;
 
 // NewNRGBA returns a new [NRGBA] image with the given bounds.
 public static ж<NRGBA> NewNRGBA(Rectangle r) {
@@ -535,7 +538,7 @@ public static color.RGBA64 RGBA64At(this ref NRGBA64 p, nint x, nint y) {
 
 public static color.NRGBA64 NRGBA64At(this ref NRGBA64 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.NRGBA64(nil);
+        return new color.NRGBA64();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
@@ -616,7 +619,7 @@ public static Image SubImage(this ref NRGBA64 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new NRGBA64жImage(Ꮡ(new NRGBA64(nil)));
+        return new NRGBA64жImage(Ꮡ(new NRGBA64()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new NRGBA64жImage(Ꮡ(new NRGBA64(
@@ -646,7 +649,8 @@ public static bool Opaque(this ref NRGBA64 p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nrgba64ˢ = "NRGBA64"u8;
+internal static ref readonly @string nrgba64ˢ => ref nrgba64ˢᵇ;
+private static readonly @string nrgba64ˢᵇ = "NRGBA64"u8;
 
 // NewNRGBA64 returns a new [NRGBA64] image with the given bounds.
 public static ж<NRGBA64> NewNRGBA64(Rectangle r) {
@@ -688,7 +692,7 @@ public static color.RGBA64 RGBA64At(this ref Alpha p, nint x, nint y) {
 
 public static color.Alpha AlphaAt(this ref Alpha p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Alpha(nil);
+        return new color.Alpha();
     }
     nint i = p.PixOffset(x, y);
     return new color.Alpha(p.Pix[i]);
@@ -732,7 +736,7 @@ public static Image SubImage(this ref Alpha p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new AlphaжImage(Ꮡ(new Alpha(nil)));
+        return new AlphaжImage(Ꮡ(new Alpha()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new AlphaжImage(Ꮡ(new Alpha(
@@ -762,7 +766,8 @@ public static bool Opaque(this ref Alpha p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string alphaˢ = "Alpha"u8;
+internal static ref readonly @string alphaˢ => ref alphaˢᵇ;
+private static readonly @string alphaˢᵇ = "Alpha"u8;
 
 // NewAlpha returns a new [Alpha] image with the given bounds.
 public static ж<Alpha> NewAlpha(Rectangle r) {
@@ -803,7 +808,7 @@ public static color.RGBA64 RGBA64At(this ref Alpha16 p, nint x, nint y) {
 
 public static color.Alpha16 Alpha16At(this ref Alpha16 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Alpha16(nil);
+        return new color.Alpha16();
     }
     nint i = p.PixOffset(x, y);
     return new color.Alpha16((uint16)((uint16)((uint16)p.Pix[i + 0] << 8) | (uint16)p.Pix[i + 1]));
@@ -851,7 +856,7 @@ public static Image SubImage(this ref Alpha16 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new Alpha16жImage(Ꮡ(new Alpha16(nil)));
+        return new Alpha16жImage(Ꮡ(new Alpha16()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new Alpha16жImage(Ꮡ(new Alpha16(
@@ -881,7 +886,8 @@ public static bool Opaque(this ref Alpha16 p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string alpha16ˢ = "Alpha16"u8;
+internal static ref readonly @string alpha16ˢ => ref alpha16ˢᵇ;
+private static readonly @string alpha16ˢᵇ = "Alpha16"u8;
 
 // NewAlpha16 returns a new [Alpha16] image with the given bounds.
 public static ж<Alpha16> NewAlpha16(Rectangle r) {
@@ -923,7 +929,7 @@ public static color.RGBA64 RGBA64At(this ref Gray p, nint x, nint y) {
 
 public static color.Gray GrayAt(this ref Gray p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Gray(nil);
+        return new color.Gray();
     }
     nint i = p.PixOffset(x, y);
     return new color.Gray(p.Pix[i]);
@@ -969,7 +975,7 @@ public static Image SubImage(this ref Gray p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new GrayжImage(Ꮡ(new Gray(nil)));
+        return new GrayжImage(Ꮡ(new Gray()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new GrayжImage(Ꮡ(new Gray(
@@ -985,7 +991,8 @@ public static bool Opaque(this ref Gray p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string grayˢ = "Gray"u8;
+internal static ref readonly @string grayˢ => ref grayˢᵇ;
+private static readonly @string grayˢᵇ = "Gray"u8;
 
 // NewGray returns a new [Gray] image with the given bounds.
 public static ж<Gray> NewGray(Rectangle r) {
@@ -1026,7 +1033,7 @@ public static color.RGBA64 RGBA64At(this ref Gray16 p, nint x, nint y) {
 
 public static color.Gray16 Gray16At(this ref Gray16 p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.Gray16(nil);
+        return new color.Gray16();
     }
     nint i = p.PixOffset(x, y);
     return new color.Gray16((uint16)((uint16)((uint16)p.Pix[i + 0] << 8) | (uint16)p.Pix[i + 1]));
@@ -1076,7 +1083,7 @@ public static Image SubImage(this ref Gray16 p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new Gray16жImage(Ꮡ(new Gray16(nil)));
+        return new Gray16жImage(Ꮡ(new Gray16()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new Gray16жImage(Ꮡ(new Gray16(
@@ -1092,7 +1099,8 @@ public static bool Opaque(this ref Gray16 p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gray16ˢ = "Gray16"u8;
+internal static ref readonly @string gray16ˢ => ref gray16ˢᵇ;
+private static readonly @string gray16ˢᵇ = "Gray16"u8;
 
 // NewGray16 returns a new [Gray16] image with the given bounds.
 public static ж<Gray16> NewGray16(Rectangle r) {
@@ -1133,7 +1141,7 @@ public static color.RGBA64 RGBA64At(this ref CMYK p, nint x, nint y) {
 
 public static color.CMYK CMYKAt(this ref CMYK p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
-        return new color.CMYK(nil);
+        return new color.CMYK();
     }
     nint i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -1192,7 +1200,7 @@ public static Image SubImage(this ref CMYK p, Rectangle r) {
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
     // this, the Pix[i:] expression below can panic.
     if (r.Empty()) {
-        return new CMYKжImage(Ꮡ(new CMYK(nil)));
+        return new CMYKжImage(Ꮡ(new CMYK()));
     }
     nint i = p.PixOffset(r.Min.X, r.Min.Y);
     return new CMYKжImage(Ꮡ(new CMYK(
@@ -1208,7 +1216,8 @@ public static bool Opaque(this ref CMYK p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cmykˢ = "CMYK"u8;
+internal static ref readonly @string cmykˢ => ref cmykˢᵇ;
+private static readonly @string cmykˢᵇ = "CMYK"u8;
 
 // NewCMYK returns a new CMYK image with the given bounds.
 public static ж<CMYK> NewCMYK(Rectangle r) {
@@ -1242,7 +1251,7 @@ public static Rectangle Bounds(this ref Paletted p) {
 
 public static color.Color At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
-        return default!;
+        return default;
     }
     if (!(new Point(x, y).In(p.Rect))) {
         return p.Palette[0];
@@ -1253,10 +1262,10 @@ public static color.Color At(this ref Paletted p, nint x, nint y) {
 
 public static color.RGBA64 RGBA64At(this ref Paletted p, nint x, nint y) {
     if (len(p.Palette) == 0) {
-        return new color.RGBA64(nil);
+        return new color.RGBA64();
     }
-    var c = ((color.Color)default!);
-    if (!(new Point(x, y).In(p.Rect))){
+    var c = ((color.Color)default);
+    if (!(new Point(x, y).In(p.Rect))) {
         c = p.Palette[0];
     } else {
         nint i = p.PixOffset(x, y);
@@ -1355,7 +1364,8 @@ public static bool Opaque(this ref Paletted p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string palettedˢ = "Paletted"u8;
+internal static ref readonly @string palettedˢ => ref palettedˢᵇ;
+private static readonly @string palettedˢᵇ = "Paletted"u8;
 
 // NewPaletted returns a new [Paletted] image with the given width, height and
 // palette.

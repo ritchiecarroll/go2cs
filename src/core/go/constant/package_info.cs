@@ -12,9 +12,6 @@
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,7 +57,11 @@ using static go.go.constant_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(stringVal))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -70,8 +71,8 @@ using static go.go.constant_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/constant/kind_string.go", "kind_string.cs", "/oaigoKCgoLKlIKClA==")]
-[assembly: global::go.GoPositionMap("go/constant/value.go", "value.cs", "AG3OAYCigKKAooCigKKAooCigNSAooCmkoKCuIKCgpSUAAIQ8oKCgoKUgpSokoKClAACEuKCgoKClIKClIKUgoKUpoCigKKAppKmgsqAgoKmlL7CuIKmgqaA2oK0gsamgKSAooCigKKAooCkgoKClKaApIKmoqKioqKioqSAooCigKSAooCigKKAooCigKKApKKClKaCgoKUpqaUtIKUgsqmgoKUpoKAgpTKlICCyKQABhLCqqKClIKqwoKUgq7AppCmkoKU3JCmkoKUrLKClIKUAAIQ0oKmlICCpICCyICCyICCgILqgIKAguqAgsimAAIWAAgClKS0zKKUpLTOspSkpLTOspSkpLTKkpSCpIKkpIKktAAEEtKUgqSCpKSCpLQABB4ACwKUpKSkpKS0AAMeAAsClLSkpKSktL6ylIKClKSktM6ylJSklKSkpKSktAAMIKKClLTEtoKUgqKCgoK4gqaqopSCgoKCgoCCgoKCyIKCpoKmrsK0pKSCgsbEpKyytKSkgoLGxKSsspTUpMyi5KS0zKKU5KS0AAQS0rSmgv6CgoCC/oKCpoKCgILIgoKAguqAgtiqopSkgpTEpIK2qqLUpJSuwoKokoKuwpTkuJSkgIKkpKSkpIKCuIKUpLTE2oKUppSkuIKmgriktKSkpKSkAAMQwoC0tLSq2JSUxpSkxpSkpMbU7AACGAAJApSUpoKUpMiCgoKUgpSkgpSkgpSkpKSkpKSkpJSmgoKClKSkpKSkpKSkpKSUpoKCgpSkpKSklKaCgoKUpKSkpJSmgoKCkqaCtoK2goKCgoK2goKCgoKCgoKCgqSUpoLIgqaAooCigKKAqrKUpoKUlIKkyIKUgpSkyKaClKSkpKSklK7ClJSmgpSkyIKUpKSkpKTIpqamgoKClKTIgoKUpKSkpKTI")]
+[assembly: GoPositionMap("go/constant/kind_string.go", "kind_string.cs", "/oaigoKCgoLalIKClA==")]
+[assembly: GoPositionMap("go/constant/value.go", "value.cs", "AHLOAYCigKKAooCigKKAooCigOSAooCmkoKCuIKCgpSUAAIQ8oKCgoKUgpSokoKClAACEuKCgoKClIKClIKUgoKUpoCigKKAppKmgsqAgoKmlL7CuIKmgqaA2oK0gsamgKSAooCigKKAooCkgoKClKaApIKmoqKioqKioqSAooCigKSAooCigKKAooCigKKApKKClKaCgoKUpqaUtIKUgsqmgoKUpoKAgpTKlICCyKQABhLCqqKClIKqwoKUgq7AppCmkoKU3JCmkoKUrLKClIKUAAIQ0oKmlICCpICC2ICC2ICCgIL6gIKAgvqAgti2AAIWAAgClKS0zKKUpLTOspSkpLTOspSkpLTKkpSCpIKkpIKktAAEEtKUgqSCpKSCpLQABB4ACwKUpKSkpKS0AAMeAAsClLSkpKSktL6ylIKClKSktM6ylJSklKSkpKSktAAMIKKClLTEtoKUgqKCgoK4gqaqopSCgoKCgoCCgoKCyIKCpoKmrsK0pKSCgsbEpKyytKSkgoLGxKSsspTUpMyi5KS0zKKU5KS0AAQS0rSmgv6CgoCC/oKCpoKCgILIgoKAguqAgtiqopSkgpTEpIK2qqLUpJSuwoKokoKuwpTkyJSkgIKkpKSkpIKCyIKUpLTE2oKUppSkyIKmgriktKSkpKSkAAMQwoC0tLSq2JSUxpSkxpSkpMbU7AACGAAJApSUpoKUpMiCgoKUgpS0gpS0gpS0pLS0tLS0tKSmgoKClLS0tKS0tLS0tLSkpoKCgpS0tLS0pKaCgoKUtLS0tKSmgoKCkqaCxoLGgoKCgoLGgoKCgoKCgoKCgrSkpoLIgqaAooCigKKAqrKUpoKUlIKkyIKUgpSkyKaClKSkpKSklK7ClJSmgpSkyIKUpKSkpKTIpqamgoKClKTIgoKUpKSkpKTI")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

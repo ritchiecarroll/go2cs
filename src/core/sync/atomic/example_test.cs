@@ -23,17 +23,17 @@ internal static channel<nint> requests() {
 // The following example shows how to use Value for periodic program config updates
 // and propagation of the changes to worker goroutines.
 public static partial void ExampleValue_config() {
-    ref var config = ref heap(new atomic.Value(), out var Ꮡconfig);                    // holds current server configuration
+    ref var config = ref heap(new atomic.Value(), out var Ꮡconfig); // holds current server configuration
     // Create initial config value and store into config.
     Ꮡconfig.Store(loadConfig());
     goǃ(() => {
         // Reload config every 10 seconds
         // and update config value with the new version.
-        while (ᐧ) {
+        for (;;) {
             time.Sleep((time.Duration)(10000000000L));
             Ꮡconfig.Store(loadConfig());
         }
-    });
+    }, GoStack.Bounded);
     // Create worker goroutines that handle incoming requests
     // using the latest config value.
     for (nint i = 0; i < 10; i++) {
@@ -44,7 +44,7 @@ public static partial void ExampleValue_config() {
                 _ = r;
                 _ = c;
             }
-        });
+        }, GoStack.Bounded);
     }
 }
 
@@ -55,7 +55,7 @@ internal partial struct ExampleValue_readMostly_Map /*map[@string, @string]*/;
 public static void ExampleValue_readMostly() {
     ref var m = ref heap(new atomic.Value(), out var Ꮡm);
     Ꮡm.Store(new ExampleValue_readMostly_Map(0));
-    ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);                    // used only by writers
+    ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu); // used only by writers
     // read function can be used to read the data without further synchronization
     var read = @string (@string key) => {
         var m1 = Ꮡm.Load()._<ExampleValue_readMostly_Map>();
@@ -68,12 +68,12 @@ public static void ExampleValue_readMostly() {
             Ꮡmu.Lock(); // synchronize with other potential writers
             defer(Ꮡmu.Unlock, ref ᒐ);
             var m1 = Ꮡm.Load()._<ExampleValue_readMostly_Map>(); // load current value of the data structure
-            var m2 = new ExampleValue_readMostly_Map(0); // create a new value
+            var m2 = new ExampleValue_readMostly_Map(0);         // create a new value
             foreach (var (k, v) in m1) {
                 m2[k] = v; // copy all data from the current object to the new one
             }
             m2[key] = val; // do the update that we need
-            Ꮡm.Store(m2); // atomically replace the current object with the new one
+            Ꮡm.Store(m2);  // atomically replace the current object with the new one
             // At this point all new readers start working with the new version.
             // The old version will be garbage collected once the existing readers
             // (if any) are done with it.

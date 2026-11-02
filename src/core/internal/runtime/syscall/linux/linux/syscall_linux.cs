@@ -25,8 +25,8 @@ internal static readonly ж<uintptr> Ꮡ_zero = new StaticBox<uintptr>(default(u
 internal static ref uintptr _zero => ref ((StaticBox<uintptr>)Ꮡ_zero).ValueSlot;
 
 public static (int32 n, uintptr errno) EpollWait(int32 epfd, slice<EpollEvent> events, int32 maxev, int32 waitms) {
-    @unsafe.Pointer ev = default!;
-    if (len(events) > 0){
+    @unsafe.Pointer ev = default;
+    if (len(events) > 0) {
         ev = @unsafe.Pointer.FromPinnedBox(Ꮡ(events, 0));
     } else {
         ev = @unsafe.Pointer.FromBox(Ꮡ_zero);
@@ -37,8 +37,8 @@ public static (int32 n, uintptr errno) EpollWait(int32 epfd, slice<EpollEvent> e
     return ((int32)r1, e);
 }
 
-public static uintptr /*errno*/ EpollCtl(int32 epfd, int32 op, int32 fd, ж<EpollEvent> Ꮡevent) {
-    var ᴋ1 = Ꮡevent;
+public static uintptr /*errno*/ EpollCtl(int32 epfd, int32 op, int32 fd, ж<EpollEvent> @event) {
+    var ᴋ1 = @event;
         var (_, _, e) = Syscall6(SYS_EPOLL_CTL, (uintptr)epfd, (uintptr)op, (uintptr)fd, (uintptr)ᴋ1, 0, 0);
     System.GC.KeepAlive(ᴋ1);
     return e;
@@ -49,10 +49,10 @@ public static (int32 fd, uintptr errno) Eventfd(int32 initval, int32 flags) {
     return ((int32)r1, e);
 }
 
-public static (nint fd, uintptr errno) Open(ж<byte> Ꮡpath, nint mode, uint32 perm) {
+public static (nint fd, uintptr errno) Open(ж<byte> path, nint mode, uint32 perm) {
     // Use SYS_OPENAT to match the syscall package.
     nint dfd = AT_FDCWD;
-    var ᴋ2 = Ꮡpath;
+    var ᴋ2 = path;
         var (r1, _, e) = Syscall6(SYS_OPENAT, (uintptr)dfd, (uintptr)ᴋ2, (uintptr)(mode | (nint)O_LARGEFILE), (uintptr)perm, 0, 0);
     System.GC.KeepAlive(ᴋ2);
     return ((nint)r1, e);
@@ -64,8 +64,8 @@ public static uintptr /*errno*/ Close(nint fd) {
 }
 
 public static (nint n, uintptr errno) Read(nint fd, slice<byte> p) {
-    @unsafe.Pointer p0 = default!;
-    if (len(p) > 0){
+    @unsafe.Pointer p0 = default;
+    if (len(p) > 0) {
         p0 = @unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0));
     } else {
         p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);
@@ -77,35 +77,40 @@ public static (nint n, uintptr errno) Read(nint fd, slice<byte> p) {
 }
 
 public static (nint n, uintptr errno) Pread(nint fd, slice<byte> p, int64 offset) {
-    @unsafe.Pointer p0 = default!;
-    if (len(p) > 0){
+    @unsafe.Pointer p0 = default;
+    if (len(p) > 0) {
         p0 = @unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0));
     } else {
         p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);
     }
-    uintptr r1 = default!;
-    uintptr e = default!;
+    uintptr r1 = default;
+    uintptr e = default;
     var exprᴛ1 = goarch.GOARCH;
-    if (exprᴛ1 == "386"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8: {
         var ᴋ4 = p0;
                 (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ4, (uintptr)len(p), (uintptr)offset, (uintptr)(offset >> 32), 0);
         System.GC.KeepAlive(ᴋ4);
+        break;
     }
-    else if (exprᴛ1 == "arm"u8 || exprᴛ1 == "mipsle"u8) {
+    case {} when exprᴛ1 == "arm"u8 || exprᴛ1 == "mipsle"u8: {
         var ᴋ5 = p0;
                 (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ5, (uintptr)len(p), 0, (uintptr)offset, (uintptr)(offset >> 32));
         System.GC.KeepAlive(ᴋ5);
+        break;
     }
-    else if (exprᴛ1 == "mips"u8) {
+    case {} when exprᴛ1 == "mips"u8: {
         var ᴋ6 = p0;
                 (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ6, (uintptr)len(p), 0, (uintptr)(offset >> 32), (uintptr)offset);
         System.GC.KeepAlive(ᴋ6);
+        break;
     }
-    else { /* default: */
+    default: {
         var ᴋ7 = p0;
                 (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ7, (uintptr)len(p), (uintptr)offset, 0, 0);
         System.GC.KeepAlive(ᴋ7);
-    }
+        break;
+    }}
     return ((nint)r1, e);
 }
 
@@ -118,8 +123,8 @@ partial struct Utsname {
     public array<byte> Domainname = new(65);
 }
 
-public static uintptr /*errno*/ Uname(ж<Utsname> Ꮡbuf) {
-    var ᴋ8 = Ꮡbuf;
+public static uintptr /*errno*/ Uname(ж<Utsname> buf) {
+    var ᴋ8 = buf;
         var (_, _, e) = Syscall6(SYS_UNAME, (uintptr)ᴋ8, 0, 0, 0, 0, 0);
     System.GC.KeepAlive(ᴋ8);
     return e;

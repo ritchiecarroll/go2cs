@@ -18,7 +18,7 @@ partial class multipart_package {
 
 // ErrMessageTooLarge is returned by ReadForm if the message form
 // data is too large to be processed.
-public static error ErrMessageTooLarge = errors.New("multipart: message too large"u8);
+public static error ErrMessageTooLarge = errors.New("multipart: message too large");
 
 // TODO(adg,bradfitz): find a way to unify the DoS-prevention strategy here
 // with that of the http package's ParseForm.
@@ -34,11 +34,12 @@ public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) 
     return Ꮡr.readForm(maxMemory);
 }
 
-internal static ж<godebug.Setting> multipartfiles = godebug.New("#multipartfiles"u8);   // TODO: document and remove #
-internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartmaxparts"u8);
+internal static ж<godebug.Setting> multipartfiles = godebug.New("#multipartfiles"); // TODO: document and remove #
+internal static ж<godebug.Setting> multipartmaxparts = godebug.New("multipartmaxparts");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string multipartˢ = "multipart-"u8;
+internal static ref readonly @string multipartˢ => ref multipartˢᵇ;
+private static readonly @string multipartˢᵇ = "multipart-"u8;
 
 // os.File.ReadFrom will allocate its own copy buffer if we let io.Copy use it.
 internal partial struct readForm_writerOnly /*dyn*/ {
@@ -46,15 +47,15 @@ internal partial struct readForm_writerOnly /*dyn*/ {
 }
 
 internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) {
-    ж<Form> _ᴛ1 = default!;
-    error err = default!;
+    ж<Form> _ᴛ1 = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
         var form = Ꮡ(new Form(new map<@string, slice<@string>>(), new map<@string, slice<ж<FileHeader>>>()));
         ref var @file = ref heap<ж<os.File>>(out var Ꮡfile);
-        int64 fileOff = default!;
+        int64 fileOff = default;
         nint numDiskFiles = 0;
         var combineFiles = true;
         if (multipartfiles.Value() == "distinct"u8) {
@@ -65,7 +66,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         {
             @string s = multipartmaxparts.Value(); if (s != ""u8) {
                 {
-                    var (v, errΔ1) = strconv.Atoi(s); if (errΔ1 == default! && v >= 0) {
+                    var (v, errΔ1) = strconv.Atoi(s); if (errΔ1 == nil && v >= 0) {
                         maxParts = v;
                         multipartmaxparts.IncNonDefault();
                     }
@@ -78,19 +79,19 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         defer(() => {
             if (Ꮡfile.ValueSlot != nil) {
                 {
-                    var cerr = Ꮡfile.ValueSlot.Close(); if (err == default!) {
+                    var cerr = Ꮡfile.ValueSlot.Close(); if (err == nil) {
                         err = cerr;
                     }
                 }
             }
             if (combineFiles && numDiskFiles > 1) {
-                foreach (var (_, fhs) in (~formʗ1).File) {
+                foreach (var (_, fhs) in formʗ1.File) {
                     foreach (var (_, fh) in fhs) {
-                        fh.Value.tmpshared = true;
+                        fh.tmpshared = true;
                     }
                 }
             }
-            if (err != default!) {
+            if (err != nil) {
                 formʗ1.RemoveAll();
                 if (Ꮡfile.ValueSlot != nil) {
                     os.Remove(Ꮡfile.ValueSlot.Name());
@@ -122,17 +123,17 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
         if (maxMemoryBytes <= 0) {
             maxMemoryBytes = math.MaxInt64;
         }
-        slice<byte> copyBuf = default!;
-        while (ᐧ) {
+        slice<byte> copyBuf = default;
+        for (;;) {
             var (p, errΔ2) = Ꮡr.nextPart(false, maxMemoryBytes, maxHeaders);
             if (AreEqual(errΔ2, io.EOF)) {
                 break;
             }
-            if (errΔ2 != default!) {
-                (_ᴛ1, err) = (default!, errΔ2); goto ᒐdone;
+            if (errΔ2 != nil) {
+                (_ᴛ1, err) = (default, errΔ2); goto ᒐdone;
             }
             if (maxParts <= 0) {
-                (_ᴛ1, err) = (default!, ErrMessageTooLarge); goto ᒐdone;
+                (_ᴛ1, err) = (default, ErrMessageTooLarge); goto ᒐdone;
             }
             maxParts--;
 
@@ -140,8 +141,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             if (name == ""u8) {
                 continue;
             }
-            ref var filename = ref heap<@string>(out var Ꮡfilename);
-            filename = p.FileName();
+            ref var filename = ref heap<@string>(p.FileName(), out var Ꮡfilename);
 
             // Multiple values for the same key (one map entry, longer slice) are cheaper
             // than the same number of values for different keys (many map entries), but
@@ -152,7 +152,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             if (maxMemoryBytes < 0) {
                 // We can't actually take this path, since nextPart would already have
                 // rejected the MIME headers for being too large. Check anyway.
-                (_ᴛ1, err) = (default!, ErrMessageTooLarge); goto ᒐdone;
+                (_ᴛ1, err) = (default, ErrMessageTooLarge); goto ᒐdone;
             }
 
             ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
@@ -160,12 +160,12 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
             if (filename == ""u8) {
                 // value, store as string in memory
                 var (nΔ1, errΔ3) = io.CopyN(new bytes_BufferжWriter(Ꮡb), new PartжReader(p), maxMemoryBytes + 1);
-                if (errΔ3 != default! && !AreEqual(errΔ3, io.EOF)) {
-                    (_ᴛ1, err) = (default!, errΔ3); goto ᒐdone;
+                if (errΔ3 != nil && !AreEqual(errΔ3, io.EOF)) {
+                    (_ᴛ1, err) = (default, errΔ3); goto ᒐdone;
                 }
                 maxMemoryBytes -= nΔ1;
                 if (maxMemoryBytes < 0) {
-                    (_ᴛ1, err) = (default!, ErrMessageTooLarge); goto ᒐdone;
+                    (_ᴛ1, err) = (default, ErrMessageTooLarge); goto ᒐdone;
                 }
                 form.Value.Value[name] = append((~form).Value[name], Ꮡb.String());
                 continue;
@@ -173,65 +173,65 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
 
             // file, store in memory or on disk
             const int64 fileHeaderSize = 100;
-            maxMemoryBytes -= mimeHeaderSize((~p).Header);
+            maxMemoryBytes -= mimeHeaderSize(p.Header);
             maxMemoryBytes -= mapEntryOverhead;
             maxMemoryBytes -= fileHeaderSize;
             if (maxMemoryBytes < 0) {
-                (_ᴛ1, err) = (default!, ErrMessageTooLarge); goto ᒐdone;
+                (_ᴛ1, err) = (default, ErrMessageTooLarge); goto ᒐdone;
             }
-            foreach (var (_, v) in (~p).Header) {
+            foreach (var (_, v) in p.Header) {
                 maxHeaders -= (int64)len(v);
             }
             var fh = Ꮡ(new FileHeader(
                 Filename: filename,
-                Header: (~p).Header
+                Header: p.Header
             ));
             (var n, errΔ2) = io.CopyN(new bytes_BufferжWriter(Ꮡb), new PartжReader(p), maxFileMemoryBytes + 1);
-            if (errΔ2 != default! && !AreEqual(errΔ2, io.EOF)) {
-                (_ᴛ1, err) = (default!, errΔ2); goto ᒐdone;
+            if (errΔ2 != nil && !AreEqual(errΔ2, io.EOF)) {
+                (_ᴛ1, err) = (default, errΔ2); goto ᒐdone;
             }
-            if (n > maxFileMemoryBytes){
+            if (n > maxFileMemoryBytes) {
                 if (@file == nil) {
                     (@file, errΔ2) = os.CreateTemp(r.tempDir, multipartˢ);
-                    if (errΔ2 != default!) {
-                        (_ᴛ1, err) = (default!, errΔ2); goto ᒐdone;
+                    if (errΔ2 != nil) {
+                        (_ᴛ1, err) = (default, errΔ2); goto ᒐdone;
                     }
                 }
                 numDiskFiles++;
                 {
-                    var (_, errΔ4) = @file.Write(b.Bytes()); if (errΔ4 != default!) {
-                        (_ᴛ1, err) = (default!, errΔ4); goto ᒐdone;
+                    var (_, errΔ4) = @file.Write(b.Bytes()); if (errΔ4 != nil) {
+                        (_ᴛ1, err) = (default, errΔ4); goto ᒐdone;
                     }
                 }
-                if (copyBuf == default!) {
+                if (copyBuf == nil) {
                     copyBuf = new slice<byte>(32 * 1024); // same buffer size as io.Copy uses
                 }
                 var (remainingSize, errΔ5) = io.CopyBuffer(new readForm_writerOnly(new os.FileжWriter(@file)), new PartжReader(p), copyBuf);
-                if (errΔ5 != default!) {
-                    (_ᴛ1, err) = (default!, errΔ5); goto ᒐdone;
+                if (errΔ5 != nil) {
+                    (_ᴛ1, err) = (default, errΔ5); goto ᒐdone;
                 }
-                fh.Value.tmpfile = @file.Name();
-                fh.Value.Size = (int64)b.Len() + remainingSize;
-                fh.Value.tmpoff = fileOff;
-                fileOff += fh.Value.Size;
+                fh.tmpfile = @file.Name();
+                fh.Size = (int64)b.Len() + remainingSize;
+                fh.tmpoff = fileOff;
+                fileOff += fh.Size;
                 if (!combineFiles) {
                     {
-                        var errΔ6 = @file.Close(); if (errΔ6 != default!) {
-                            (_ᴛ1, err) = (default!, errΔ6); goto ᒐdone;
+                        var errΔ6 = @file.Close(); if (errΔ6 != nil) {
+                            (_ᴛ1, err) = (default, errΔ6); goto ᒐdone;
                         }
                     }
-                    @file = default!;
+                    @file = default;
                 }
             } else {
-                fh.Value.content = b.Bytes();
-                fh.Value.Size = (int64)len((~fh).content);
+                fh.content = b.Bytes();
+                fh.Size = (int64)len(fh.content);
                 maxFileMemoryBytes -= n;
                 maxMemoryBytes -= n;
             }
-            form.Value.File[name] = append((~form).File[name], fh);
+            form.File[name] = append(form.File[name], fh);
         }
 
-        (_ᴛ1, err) = (form, default!);
+        (_ᴛ1, err) = (form, default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -239,7 +239,7 @@ internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMe
 }
 
 internal static int64 /*size*/ mimeHeaderSize(textproto.MIMEHeader h) {
-    int64 size = default!;
+    int64 size = default;
 
     size = 400;
     foreach (var (k, vs) in h) {
@@ -264,12 +264,12 @@ partial struct Form {
 
 // RemoveAll removes any temporary files associated with a [Form].
 public static error RemoveAll(this ref Form f) {
-    error err = default!;
+    error err = default;
     foreach (var (_, fhs) in f.File) {
         foreach (var (_, fh) in fhs) {
-            if ((~fh).tmpfile != ""u8) {
-                var e = os.Remove((~fh).tmpfile);
-                if (e != default! && !errors.Is(e, os.ErrNotExist) && err == default!) {
+            if (fh.tmpfile != ""u8) {
+                var e = os.Remove(fh.tmpfile);
+                if (e != nil && !errors.Is(e, os.ErrNotExist) && err == nil) {
                     err = e;
                 }
             }
@@ -292,18 +292,18 @@ partial struct FileHeader {
 // Open opens and returns the [FileHeader]'s associated File.
 public static (File, error) Open(this ref FileHeader fh) {
     {
-        var b = fh.content; if (b != default!) {
+        var b = fh.content; if (b != nil) {
             var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
-            return (new sectionReadCloser(r, default!), default!);
+            return (new sectionReadCloser(r, default), default);
         }
     }
     if (fh.tmpshared) {
         var (f, err) = os.Open(fh.tmpfile);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var r = io.NewSectionReader(new os_FileжReaderAt(f), fh.tmpoff, fh.Size);
-        return (new sectionReadCloser(r, new os_FileжCloser(f)), default!);
+        return (new sectionReadCloser(r, new os_FileжCloser(f)), default);
     }
     var (ᴛ1, ᴛ2) = os.Open(fh.tmpfile);
     return (new os_FileжFile(ᴛ1), ᴛ2);
@@ -328,10 +328,10 @@ partial struct sectionReadCloser {
 }
 
 internal static error Close(this sectionReadCloser rc) {
-    if (rc.Closer != default!) {
+    if (rc.Closer != nil) {
         return rc.Closer.Close();
     }
-    return default!;
+    return default;
 }
 
 } // end multipart_package

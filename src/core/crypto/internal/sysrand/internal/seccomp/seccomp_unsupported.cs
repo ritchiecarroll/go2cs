@@ -9,7 +9,8 @@ using errors = errors_package;
 partial class seccomp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string disablingGetrandomIsNotˢ = "disabling getrandom is not supported on this system"u8;
+private static ref readonly @string disablingGetrandomIsNotˢ => ref disablingGetrandomIsNotˢᵇ;
+private static readonly @string disablingGetrandomIsNotˢᵇ = "disabling getrandom is not supported on this system"u8;
 
 public static error DisableGetrandom() {
     return errors.New(disablingGetrandomIsNotˢ);

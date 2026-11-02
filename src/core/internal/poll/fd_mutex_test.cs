@@ -21,52 +21,52 @@ partial class poll_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object brokenˢ = (@string)"broken"u8;
 
-public static void TestMutexLock(ж<testing.T> Ꮡt) {
+public static void TestMutexLock(ж<testing.T> t) {
     ref var mu = ref heap(new global::go.@internal.poll_internal_test_package.XFDMutex(), out var Ꮡmu);
 
     if (!Ꮡmu.Incref()) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (Ꮡmu.Decref()) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
 
     if (!Ꮡmu.RWLock(true)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (Ꮡmu.RWUnlock(true)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
 
     if (!Ꮡmu.RWLock(false)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (Ꮡmu.RWUnlock(false)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
 }
 
-public static void TestMutexClose(ж<testing.T> Ꮡt) {
+public static void TestMutexClose(ж<testing.T> t) {
     ref var mu = ref heap(new global::go.@internal.poll_internal_test_package.XFDMutex(), out var Ꮡmu);
     if (!Ꮡmu.IncrefAndClose()) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
 
     if (Ꮡmu.Incref()) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (Ꮡmu.RWLock(true)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (Ꮡmu.RWLock(false)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (Ꮡmu.IncrefAndClose()) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
 }
 
-public static partial void TestMutexCloseUnblock(ж<testing.T> Ꮡt) {
+public static partial void TestMutexCloseUnblock(ж<testing.T> t) {
     var c = new channel<bool>(4);
     ref var mu = ref heap(new global::go.@internal.poll_internal_test_package.XFDMutex(), out var Ꮡmu);
     Ꮡmu.RWLock(true);
@@ -74,7 +74,7 @@ public static partial void TestMutexCloseUnblock(ж<testing.T> Ꮡt) {
         var cʗ1 = c;
         goǃ(() => {
             if (Ꮡmu.RWLock(true)) {
-                Ꮡt.Error(brokenˢ);
+                t.Error(brokenˢ);
                 return;
             }
             cʗ1.ᐸꟷ(true);
@@ -85,7 +85,7 @@ public static partial void TestMutexCloseUnblock(ж<testing.T> Ꮡt) {
     var selᴛ1 = c;
     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out _): {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
         break;
     }
     default: {
@@ -100,28 +100,28 @@ public static partial void TestMutexCloseUnblock(ж<testing.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ3.ꟷᐳ(out _): {
-            Ꮡt.Fatal(brokenˢ);
+            t.Fatal(brokenˢ);
             break;
         }}
     }
     if (Ꮡmu.Decref()) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
     if (!Ꮡmu.RWUnlock(true)) {
-        Ꮡt.Fatal(brokenˢ);
+        t.Fatal(brokenˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object doesNotPanicˢ = (@string)"does not panic"u8;
 
-public static void TestMutexPanic(ж<testing.T> Ꮡt) {
+public static void TestMutexPanic(ж<testing.T> t) {
     void ensurePanics(Action f) {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                if (recover() == default!) {
-                    Ꮡt.Fatal(doesNotPanicˢ);
+                if (recover() == nil) {
+                    t.Fatal(doesNotPanicˢ);
                 }
             }, ref ᒐ);
             f();
@@ -168,23 +168,25 @@ public static void TestMutexPanic(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object didNotPanicˢ = (@string)"did not panic"u8;
-internal static readonly @string tooManyˢ = "too many"u8;
-internal static readonly @string inconsistentˢ = "inconsistent"u8;
+internal static ref readonly @string tooManyˢ => ref tooManyˢᵇ;
+private static readonly @string tooManyˢᵇ = "too many"u8;
+internal static ref readonly @string inconsistentˢ => ref inconsistentˢᵇ;
+private static readonly @string inconsistentˢᵇ = "inconsistent"u8;
 
-public static void TestMutexOverflowPanic(ж<testing.T> Ꮡt) {
+public static void TestMutexOverflowPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             var r = recover();
-            if (r == default!) {
-                Ꮡt.Fatal(didNotPanicˢ);
+            if (r == nil) {
+                t.Fatal(didNotPanicˢ);
             }
             var (msg, ok) = r._<@string>(ᐧ);
             if (!ok) {
-                Ꮡt.Fatalf("unexpected panic type %T"u8, r);
+                t.Fatalf("unexpected panic type %T", r);
             }
             if (!strings.Contains(msg, tooManyˢ) || strings.Contains(msg, inconsistentˢ)) {
-                Ꮡt.Fatalf("wrong panic message %q"u8, msg);
+                t.Fatalf("wrong panic message %q", msg);
             }
         }, ref ᒐ);
 
@@ -197,7 +199,7 @@ public static void TestMutexOverflowPanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestMutexStress(ж<testing.T> Ꮡt) {
+public static partial void TestMutexStress(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         nint P = 8;
@@ -218,54 +220,54 @@ public static partial void TestMutexStress(ж<testing.T> Ꮡt) {
                 try {
                     var doneʗ2 = doneʗ1;
                     defer(() => {
-                        doneʗ2.ᐸꟷ(!Ꮡt.Failed());
+                        doneʗ2.ᐸꟷ(!t.Failed());
                     }, ref ᒐ);
                     var r = rand.New(rand.NewSource(rand.Int63()));
                     for (nint i = 0; i < N; i++) {
                         switch (r.Intn(3)) {
                         case 0: {
                             if (!Ꮡmu.Incref()) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             if (Ꮡmu.Decref()) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             break;
                         }
                         case 1: {
                             if (!Ꮡmu.RWLock(true)) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             // Ensure that it provides mutual exclusion for readers.
                             if (ᏑreadState.Value[0] != ᏑreadState.Value[1]) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             ᏑreadState.Value[0]++;
                             ᏑreadState.Value[1]++;
                             if (Ꮡmu.RWUnlock(true)) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             break;
                         }
                         case 2: {
                             if (!Ꮡmu.RWLock(false)) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             // Ensure that it provides mutual exclusion for writers.
                             if (ᏑwriteState.Value[0] != ᏑwriteState.Value[1]) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             ᏑwriteState.Value[0]++;
                             ᏑwriteState.Value[1]++;
                             if (Ꮡmu.RWUnlock(false)) {
-                                Ꮡt.Error(brokenˢ);
+                                t.Error(brokenˢ);
                                 return;
                             }
                             break;
@@ -278,14 +280,14 @@ public static partial void TestMutexStress(ж<testing.T> Ꮡt) {
         }
         for (nint p = 0; p < P; p++) {
             if (!ᐸꟷ(done)) {
-                Ꮡt.FailNow();
+                t.FailNow();
             }
         }
         if (!Ꮡmu.IncrefAndClose()) {
-            Ꮡt.Fatal(brokenˢ);
+            t.Fatal(brokenˢ);
         }
         if (!Ꮡmu.Decref()) {
-            Ꮡt.Fatal(brokenˢ);
+            t.Fatal(brokenˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

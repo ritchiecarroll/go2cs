@@ -29,11 +29,11 @@ using static go.go.parser_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/parser/error_test.go", "error_test.cs", "ACdIurKCgoKUlJSmgoCCpAAIEpiilLiCgpSCgqSkgoKCkoKUlNiClLSCgoKUlM6igqaCgJSCgoKUgIKCttzagoKCyoKCgoKCpoKCkoKClJSCprjmgoKClIKCkoKCgpQ=", "42-50:1;192-200:1")]
-[assembly: global::go.GoPositionMap("go/parser/parser_test.go", "parser_test.cs", "ABMi7oKCgoLKgpSklKaA1IKCgoLogoKCguiCgoKClICCpIKCgpSAgqSCgvqCgoKCAA0IpoKCgqaAgsiCgoKmgILIgoKClIKUgILIgoCCyIKAgqSCgIK4koKCgoCC2oLogoKCuIKCgoKmgoKC+oKCgriCgoKCpoKCABAKogABEoKCpgAKFpKAgoKCgpSUgpSCgrYAHgiCAAAugqYAEyqSgoKUlIIAGQiCAAAkgpQABxCClIKCgoKUgoKC3KKCgoCCgoCCgIKCgoIACxKosoKCgqamgoKClICCpICCACsIggAAJIKUgoKCgoKClIKCgoL6kgALGIKCgqaSkpS0xoKmgoCCgoKUxgAYCoIAABaCgoK4gJK2gJIADQ6yuIKCgoKmgoKmgoKAgqSUgoKUgoKCAA4KgoaCgoKUgoIAEwgAMYYBopKClNaCgpSygpKCgpTcpoKCgpSUlIKCgoKmgoIAChCCsoKUgpKCgpTcpoKCgpSUlIKCgoKmgoIAChKSAAcQgoKCgqaSlIKCtsyS3IKCgvqCgoKCpoKCgpSCggAIDIKCgoKCyriCgoIACQiClIKCgqaCgoIACwqSAAUSgoKCggAOCoKMgoKCpgALHoKSgoIAFg6yAAEYgpSClIKUgqaClIKmgoKUgqaCggAMDra6AAQSgoKUgqKAgoK8gILIgILGlII=", "231-249:1;466-488:1;541-546:1;655-690:1;701-736:1;758-767:1;975-994:1")]
-[assembly: global::go.GoPositionMap("go/parser/performance_test.go", "performance_test.cs", "AA4alIKCgpSmooKCgILaooKCgILaooKCgoKCgpSCgg==")]
-[assembly: global::go.GoPositionMap("go/parser/resolver_test.go", "resolver_test.cs", "ABk8AAwCgoKCpoKSgoKCgoKC3IKClJKmgpSCgIKkpoIABRCigqSAgqSUrLKUlIKCgpSCpq7ygoKCgpSCgoKkpIKCgoCCpJSC2oKUpMamwoKUlIKClLS0gtY=", "38-72:1;55-61:1.1;80-86:1")]
-[assembly: global::go.GoPositionMap("go/parser/short_test.go", "short_test.cs", "AAsWAGvYAYKC6pKCpgBZtAGCgg==")]
+[assembly: GoPositionMap("go/parser/error_test.go", "error_test.cs", "ACdIyrKCgoKUlJSmgoCCpAAIEpiilLiCgpSCgqSkgoKCgoKUlNiClLSCgoKUlM6igqaCgJSCgoKUgIKCttzagoKCyoKCgoKCpoKCkoKClJSCprgACAaCgoKUgoKSgoKClA==", "42-50:1;192-200:1")]
+[assembly: GoPositionMap("go/parser/parser_test.go", "parser_test.cs", "ABMi7oKCgoLKgqSklKaA5IKCgoL4goKCgviCgoKClICCpIKCgpSAgqSCggAICoKCgoIAEQimgoKCpoCCyIKCgqaAgsiCgoKUgpSAgsiCgILIgoCCpIKAgriSgoKCgILaguiCgoK4goKCgqaCgoL6goKCuIKCgoKmgoIAEQqCAAESgoKmAAoWkoCCgoKClJSClIKCtgAeCIIAAC6CpgATKpKCgpSUggAZCIIAACSClAAHEIKUgoKCgpSCgoLcooKCgIKCgIKAgoKCggALEqiygoKCpqaCgoKUgIKkgIIAOwiCAAAkgpSCgoKCgoKUgoKCggAJCpIACxiCgoKmkpKUtMaCpoKAgoKClMYAHAqCAAAWgoKCuICStoCSAA8OsriCgoKCpoKCpoKCgIKklIKClIKCggAPCoKGgoKClIKCABMIADGGAaKSgpTWgoKUsoKSgoKU3KaCgoKUlJSCgoKCpoKCAAsQgrKClIKSgoKU3KaCgoKUlJSCgoKCpoKCAAsSkgAHEIKCgoKmkpSCgrbMktyCgoIACAqCgoKCpoKCgpSCggAJDIKCgoKCyriCgoIACwiClIKCgqaCgoIADAqSAAUSgoKCggAPCoKMgoKCpgALHoKSgoIAFw6yAAEYgpSClIKUgqaClIKmgoKUgqaCggAPDra6AAQSgoKUgqKAgoK8gILIgILGlII=", "231-249:1;466-488:1;541-546:1;655-690:1;701-736:1;758-767:1;975-994:1")]
+[assembly: GoPositionMap("go/parser/performance_test.go", "performance_test.cs", "AA4alIKCgpSmooKCgILaooKCgILaooKCgoKCgpSCgg==")]
+[assembly: GoPositionMap("go/parser/resolver_test.go", "resolver_test.cs", "ABs8AAwCgoKCpoKSgoKCgoKC3IKClJKmgpSCgIKkpoIABRCigqSAgqSUrLKUlIKCgpSCpq7ygoKCgpSCgoKkpIKCgoCCpJSC2oKUpMamwoKUlIKClLS0gtY=", "38-72:1;55-61:1.1;80-86:1")]
+[assembly: GoPositionMap("go/parser/short_test.go", "short_test.cs", "AAsWAGvYAYKC+pKCpgBZtAGCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

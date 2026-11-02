@@ -102,8 +102,8 @@ public static void SetPackage(this ref Formatter fm, @string importpath) {
     if (!ok) {
         ps = @new<pstate>();
         fm.pm[importpath] = ps;
-        ps.Value.unitTable = new map<extcu, uint32>();
-        ps.Value.funcTable = new map<fnfile, uint32>();
+        ps.unitTable = new map<extcu, uint32>();
+        ps.funcTable = new map<fnfile, uint32>();
     }
     fm.p = ps;
 }
@@ -116,16 +116,16 @@ public static void AddUnit(this ref Formatter fm, @string @file, @string fname, 
         throw panic("AddUnit invoked before SetPackage");
     }
     var fkey = new fnfile(@file: @file, fname: fname, lit: isfnlit);
-    var (idx, ok) = (~fm.p).funcTable[fkey, ꟷ];
+    var (idx, ok) = fm.p.funcTable[fkey, ꟷ];
     if (!ok) {
-        idx = (uint32)len((~fm.p).funcs);
-        fm.p.Value.funcs = append((~fm.p).funcs, fkey);
-        fm.p.Value.funcTable[fkey] = idx;
+        idx = (uint32)len(fm.p.funcs);
+        fm.p.funcs = append(fm.p.funcs, fkey);
+        fm.p.funcTable[fkey] = idx;
     }
     var ukey = new extcu(fnfid: idx, CoverableUnit: unit);
-    var pcount = (~fm.p).unitTable[ukey];
-    uint32 result = default!;
-    if (fm.cm == coverage.CtrModeSet){
+    var pcount = fm.p.unitTable[ukey];
+    uint32 result = default;
+    if (fm.cm == coverage.CtrModeSet) {
         if (count != 0 || pcount != 0) {
             result = 1;
         }
@@ -133,7 +133,7 @@ public static void AddUnit(this ref Formatter fm, @string @file, @string fname, 
         // Use saturating arithmetic.
         (result, _) = cmerge.SaturatingAdd(pcount, count);
     }
-    fm.p.Value.unitTable[ukey] = result;
+    fm.p.unitTable[ukey] = result;
 }
 
 // sortUnits sorts a slice of extcu objects in a package according to
@@ -195,7 +195,7 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
         }
     }
     {
-        var (_, err) = fmt.Fprintf(w, "mode: %s\n"u8, fm.cm.String()); if (err != default!) {
+        var (_, err) = fmt.Fprintf(w, "mode: %s\n"u8, fm.cm.String()); if (err != nil) {
             return err;
         }
     }
@@ -205,24 +205,24 @@ public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.W
         if (p == nil) {
             continue;
         }
-        var units = new slice<extcu>(0, () => new(nil), len((~p).unitTable));
-        foreach (var (u, _) in (~p).unitTable) {
+        var units = new slice<extcu>(0, () => new(nil), len(p.unitTable));
+        foreach (var (u, _) in p.unitTable) {
             units = append(unitsᴷ, units, u);
         }
         p.sortUnits(units);
         foreach (var (_, u) in units) {
-            var count = (~p).unitTable[u];
-            @string @file = (~p).funcs[u.fnfid].@file;
+            var count = p.unitTable[u];
+            @string @file = p.funcs[u.fnfid].@file;
             {
                 var (_, err) = fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n"u8,
                     @file, u.StLine, u.StCol,
-                    u.EnLine, u.EnCol, u.NxStmts, count); if (err != default!) {
+                    u.EnLine, u.EnCol, u.NxStmts, count); if (err != nil) {
                     return err;
                 }
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // EmitPercent writes out a "percentage covered" string to the writer
@@ -239,27 +239,26 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
     }
 
     error rep(uint64 cov, uint64 tot) {
-        if (tot != 0){
+        if (tot != 0) {
             {
                 var (_, err) = fmt.Fprintf(w, "coverage: %.1f%% of statements%s\n"u8,
-                    100.0D * (float64)cov / (float64)tot, inpkgs); if (err != default!) {
+                    100.0D * (float64)cov / (float64)tot, inpkgs); if (err != nil) {
                     return err;
                 }
             }
-        } else 
-        if (noteEmpty) {
+        } else if (noteEmpty) {
             {
-                var (_, err) = fmt.Fprintf(w, "coverage: [no statements]\n"u8); if (err != default!) {
+                var (_, err) = fmt.Fprintf(w, "coverage: [no statements]\n"u8); if (err != nil) {
                     return err;
                 }
             }
         }
-        return default!;
+        return default;
     }
 
     slices.Sort<slice<@string>, @string>(pkgs);
-    uint64 totalStmts = default!;
-    uint64 coveredStmts = default!;
+    uint64 totalStmts = default;
+    uint64 coveredStmts = default;
     foreach (var (_, importpath) in pkgs) {
         var p = fm.pm[importpath];
         if (p == nil) {
@@ -268,7 +267,7 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
         if (!aggregate) {
             (totalStmts, coveredStmts) = (0, 0);
         }
-        foreach (var (unit, count) in (~p).unitTable) {
+        foreach (var (unit, count) in p.unitTable) {
             var nx = (uint64)unit.NxStmts;
             totalStmts += nx;
             if (count != 0) {
@@ -277,12 +276,12 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
         }
         if (!aggregate) {
             {
-                var (_, err) = fmt.Fprintf(w, "\t%s\t\t"u8, importpath); if (err != default!) {
+                var (_, err) = fmt.Fprintf(w, "\t%s\t\t"u8, importpath); if (err != nil) {
                     return err;
                 }
             }
             {
-                var err = rep(coveredStmts, totalStmts); if (err != default!) {
+                var err = rep(coveredStmts, totalStmts); if (err != nil) {
                     return err;
                 }
             }
@@ -290,13 +289,13 @@ public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@strin
     }
     if (aggregate) {
         {
-            var err = rep(coveredStmts, totalStmts); if (err != default!) {
+            var err = rep(coveredStmts, totalStmts); if (err != nil) {
                 return err;
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -325,7 +324,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             }
             return 100.0D * (float64)covered / (float64)total;
         }
-        var tabber = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
+        var tabber = tabwriter.NewWriter(w, 1, 8, 1, (byte)'\t', 0);
         var tabberʗ1 = tabber;
         defer(() => tabberʗ1.Flush(), ref ᒐ);
         var allStmts = (uint64)0;
@@ -334,11 +333,11 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
         // Emit functions for each package, sorted by import path.
         foreach (var (_, importpath) in slices.Sorted(maps.Keys<map<@string, ж<pstate>>, @string, ж<pstate>>(fm.pm))) {
             var p = fm.pm[importpath];
-            if (len((~p).unitTable) == 0) {
+            if (len(p.unitTable) == 0) {
                 continue;
             }
-            var units = new slice<extcu>(0, () => new(nil), len((~p).unitTable));
-            foreach (var (u, _) in (~p).unitTable) {
+            var units = new slice<extcu>(0, () => new(nil), len(p.unitTable));
+            foreach (var (u, _) in p.unitTable) {
                 units = append(unitsᴷ, units, u);
             }
 
@@ -350,14 +349,14 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
             @string fname = ""u8;
             @string ffile = ""u8;
             var flit = false;
-            uint32 fline = default!;
-            uint64 cstmts = default!;
-            uint64 tstmts = default!;
+            uint32 fline = default;
+            uint64 cstmts = default;
+            uint64 tstmts = default;
             var pʗ1 = p;
             void captureFuncStart(extcu u) {
-                fname = (~pʗ1).funcs[u.fnfid].fname;
-                ffile = (~pʗ1).funcs[u.fnfid].@file;
-                flit = (~pʗ1).funcs[u.fnfid].lit;
+                fname = pʗ1.funcs[u.fnfid].fname;
+                ffile = pʗ1.funcs[u.fnfid].@file;
+                flit = pʗ1.funcs[u.fnfid].lit;
                 fline = u.StLine;
             }
             var captureFuncStartʗ1 = captureFuncStart;
@@ -369,7 +368,7 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
                 if (!flit) {
                     {
                         var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabberʗ2), "%s:%d:\t%s\t%.1f%%\n"u8,
-                            ffile, fline, fname, percʗ1(cstmts, tstmts)); if (err != default!) {
+                            ffile, fline, fname, percʗ1(cstmts, tstmts)); if (err != nil) {
                             return err;
                         }
                     }
@@ -379,42 +378,42 @@ public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) {
                 covStmts += cstmts;
                 tstmts = 0;
                 cstmts = 0;
-                return default!;
+                return default;
             }
             foreach (var (k, u) in units) {
-                if (k == 0){
+                if (k == 0) {
                     captureFuncStart(u);
                 } else {
-                    if (fname != (~p).funcs[u.fnfid].fname) {
+                    if (fname != p.funcs[u.fnfid].fname) {
                         // New function; emit entry for previous one.
                         {
-                            var err = emitFunc(u); if (err != default!) {
+                            var err = emitFunc(u); if (err != nil) {
                                 return err;
                             }
                         }
                     }
                 }
                 tstmts += (uint64)u.NxStmts;
-                var count = (~p).unitTable[u];
+                var count = p.unitTable[u];
                 if (count != 0) {
                     cstmts += (uint64)u.NxStmts;
                 }
             }
             {
-                var err = emitFunc(new extcu(nil)); if (err != default!) {
+                var err = emitFunc(new extcu()); if (err != nil) {
                     return err;
                 }
             }
         }
         {
             var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabber), "%s\t%s\t%.1f%%\n"u8,
-                totalˢ, statementsˢ, perc(covStmts, allStmts)); if (err != default!) {
+                totalˢ, statementsˢ, perc(covStmts, allStmts)); if (err != nil) {
                 return err;
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

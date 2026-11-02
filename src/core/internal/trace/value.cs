@@ -43,7 +43,8 @@ public static uint64 Uint64(this Value v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string valueBadˢ = "Value{Bad}"u8;
+internal static ref readonly @string valueBadˢ => ref valueBadˢᵇ;
+private static readonly @string valueBadˢᵇ = "Value{Bad}"u8;
 
 // String returns the string value for a ValueString, and otherwise
 // a string representation of the value for other kinds of values.
@@ -51,10 +52,10 @@ public static @string String(this Value v) {
     if (v.kind == ValueString) {
         return @unsafe.String((ж<byte>)(uintptr)(v.pointer), (nint)v.scalar);
     }
-    var exprᴛ1 = v.kind;
-    if (exprᴛ1 == ValueUint64) {
+    switch (v.kind) {
+    case var ᴛ when ᴛ == ValueUint64: {
         return fmt.Sprintf("Value{Uint64(%d)}"u8, v.Uint64());
-    }
+    }}
     return valueBadˢ;
 }
 

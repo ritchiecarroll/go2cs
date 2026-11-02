@@ -30,10 +30,10 @@ partial struct ΔRGBA {
 }
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this ΔRGBA c) {
-    uint32 r = default!;
-    uint32 g = default!;
-    uint32 b = default!;
-    uint32 a = default!;
+    uint32 r = default;
+    uint32 g = default;
+    uint32 b = default;
+    uint32 a = default;
 
     r = (uint32)c.R;
     r |= (uint32)((r << 8));
@@ -65,10 +65,10 @@ partial struct NRGBA {
 }
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA c) {
-    uint32 r = default!;
-    uint32 g = default!;
-    uint32 b = default!;
-    uint32 a = default!;
+    uint32 r = default;
+    uint32 g = default;
+    uint32 b = default;
+    uint32 a = default;
 
     r = (uint32)c.R;
     r |= (uint32)((r << 8));
@@ -94,10 +94,10 @@ partial struct NRGBA64 {
 }
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this NRGBA64 c) {
-    uint32 r = default!;
-    uint32 g = default!;
-    uint32 b = default!;
-    uint32 a = default!;
+    uint32 r = default;
+    uint32 g = default;
+    uint32 b = default;
+    uint32 a = default;
 
     r = (uint32)c.R;
     r *= (uint32)c.A;
@@ -118,7 +118,7 @@ partial struct Alpha {
 }
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha c) {
-    uint32 a = default!;
+    uint32 a = default;
 
     a = (uint32)c.A;
     a |= (uint32)((a << 8));
@@ -131,7 +131,7 @@ partial struct Alpha16 {
 }
 
 public static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA(this Alpha16 c) {
-    uint32 a = default!;
+    uint32 a = default;
 
     a = (uint32)c.A;
     return (a, a, a, a);
@@ -317,7 +317,7 @@ partial struct Palette /*[]Color*/;
 // Convert returns the palette color closest to c in Euclidean R,G,B space.
 public static Color Convert(this Palette p, Color c) {
     if (len(p) == 0) {
-        return default!;
+        return default;
     }
     return p[p.Index(c)];
 }

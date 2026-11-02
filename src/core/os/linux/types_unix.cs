@@ -31,7 +31,7 @@ internal static time.Time ModTime(this ref fileStat fs) {
 }
 
 internal static any Sys(this ж<fileStat> Ꮡfs) {
-    return Ꮡfs.of(fileStat.Ꮡsys);
+    return Ꮡfs.Ꮡsys;
 }
 
 internal static bool sameFile(ref fileStat fs1, ref fileStat fs2) {

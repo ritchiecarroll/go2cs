@@ -31,55 +31,55 @@ partial struct testImagesᴛ1 /*dyn*/ {
     internal Func<image> image;
 }
 internal static slice<testImagesᴛ1> testImages;
-internal static void initᴛtestImages() { testImages = new testImagesᴛ1[]{
-    new("rgba"u8, () => new image_internal_test_package.image_ΔRGBAжimage(NewRGBA(Rect(0, 0, 10, 10)))),
-    new("rgba64"u8, () => new image_internal_test_package.image_RGBA64жimage(NewRGBA64(Rect(0, 0, 10, 10)))),
-    new("nrgba"u8, () => new image_internal_test_package.image_NRGBAжimage(NewNRGBA(Rect(0, 0, 10, 10)))),
-    new("nrgba64"u8, () => new image_internal_test_package.image_NRGBA64жimage(NewNRGBA64(Rect(0, 0, 10, 10)))),
-    new("alpha"u8, () => new image_internal_test_package.image_Alphaжimage(NewAlpha(Rect(0, 0, 10, 10)))),
-    new("alpha16"u8, () => new image_internal_test_package.image_Alpha16жimage(NewAlpha16(Rect(0, 0, 10, 10)))),
-    new("gray"u8, () => new image_internal_test_package.image_Grayжimage(NewGray(Rect(0, 0, 10, 10)))),
-    new("gray16"u8, () => new image_internal_test_package.image_Gray16жimage(NewGray16(Rect(0, 0, 10, 10)))),
-    new("paletted"u8, () => new image_internal_test_package.image_Palettedжimage(NewPaletted(Rect(0, 0, 10, 10), new color.Palette(new color.Color[]{new image_test_package.image_UniformжColor(Transparent), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque)
+internal static void initᴛtestImages() { testImages = slice<testImagesᴛ1>([
+    new("rgba", () => new image_internal_test_package.image_ΔRGBAжimage(NewRGBA(Rect(0, 0, 10, 10)))),
+    new("rgba64", () => new image_internal_test_package.image_RGBA64жimage(NewRGBA64(Rect(0, 0, 10, 10)))),
+    new("nrgba", () => new image_internal_test_package.image_NRGBAжimage(NewNRGBA(Rect(0, 0, 10, 10)))),
+    new("nrgba64", () => new image_internal_test_package.image_NRGBA64жimage(NewNRGBA64(Rect(0, 0, 10, 10)))),
+    new("alpha", () => new image_internal_test_package.image_Alphaжimage(NewAlpha(Rect(0, 0, 10, 10)))),
+    new("alpha16", () => new image_internal_test_package.image_Alpha16жimage(NewAlpha16(Rect(0, 0, 10, 10)))),
+    new("gray", () => new image_internal_test_package.image_Grayжimage(NewGray(Rect(0, 0, 10, 10)))),
+    new("gray16", () => new image_internal_test_package.image_Gray16жimage(NewGray16(Rect(0, 0, 10, 10)))),
+    new("paletted", () => new image_internal_test_package.image_Palettedжimage(NewPaletted(Rect(0, 0, 10, 10), new color.Palette(new color.Color[]{new image_test_package.image_UniformжColor(Transparent), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque)
         }.slice()))))
-}.slice(); }
+]); }
 
-public static void TestImage(ж<testing.T> Ꮡt) {
+public static void TestImage(ж<testing.T> t) {
     foreach (var (_, tc) in testImages) {
         var m = tc.image();
         if (!Rect(0, 0, 10, 10).Eq(m.Bounds())) {
-            Ꮡt.Errorf("%T: want bounds %v, got %v"u8, m, Rect(0, 0, 10, 10), m.Bounds());
+            t.Errorf("%T: want bounds %v, got %v", m, Rect(0, 0, 10, 10), m.Bounds());
             continue;
         }
         if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(Transparent), m.At(6, 3))) {
-            Ꮡt.Errorf("%T: at (6, 3), want a zero color, got %v"u8, m, m.At(6, 3));
+            t.Errorf("%T: at (6, 3), want a zero color, got %v", m, m.At(6, 3));
             continue;
         }
         m.Set(6, 3, new image_test_package.image_UniformжColor(go.image_package.ΔOpaque));
         if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque), m.At(6, 3))) {
-            Ꮡt.Errorf("%T: at (6, 3), want a non-zero color, got %v"u8, m, m.At(6, 3));
+            t.Errorf("%T: at (6, 3), want a non-zero color, got %v", m, m.At(6, 3));
             continue;
         }
         if (!m.SubImage(Rect(6, 3, 7, 4))._<image>().Opaque()) {
-            Ꮡt.Errorf("%T: at (6, 3) was not opaque"u8, m);
+            t.Errorf("%T: at (6, 3) was not opaque", m);
             continue;
         }
         m = m.SubImage(Rect(3, 2, 9, 8))._<image>();
         if (!Rect(3, 2, 9, 8).Eq(m.Bounds())) {
-            Ꮡt.Errorf("%T: sub-image want bounds %v, got %v"u8, m, Rect(3, 2, 9, 8), m.Bounds());
+            t.Errorf("%T: sub-image want bounds %v, got %v", m, Rect(3, 2, 9, 8), m.Bounds());
             continue;
         }
         if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque), m.At(6, 3))) {
-            Ꮡt.Errorf("%T: sub-image at (6, 3), want a non-zero color, got %v"u8, m, m.At(6, 3));
+            t.Errorf("%T: sub-image at (6, 3), want a non-zero color, got %v", m, m.At(6, 3));
             continue;
         }
         if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(Transparent), m.At(3, 3))) {
-            Ꮡt.Errorf("%T: sub-image at (3, 3), want a zero color, got %v"u8, m, m.At(3, 3));
+            t.Errorf("%T: sub-image at (3, 3), want a zero color, got %v", m, m.At(3, 3));
             continue;
         }
         m.Set(3, 3, new image_test_package.image_UniformжColor(go.image_package.ΔOpaque));
         if (!cmp(m.ColorModel(), new image_test_package.image_UniformжColor(go.image_package.ΔOpaque), m.At(3, 3))) {
-            Ꮡt.Errorf("%T: sub-image at (3, 3), want a non-zero color, got %v"u8, m, m.At(3, 3));
+            t.Errorf("%T: sub-image at (3, 3), want a non-zero color, got %v", m, m.At(3, 3));
             continue;
         }
         // Test that taking an empty sub-image starting at a corner does not panic.
@@ -95,16 +95,14 @@ internal partial struct TestNewXxxBadRectangle_testCases /*dyn*/ {
     internal Action<global::go.image_package.Rectangle> f;
 }
 
-public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestNewXxxBadRectangle(ж<testing.T> t) {
     // call calls f(r) and reports whether it ran without panicking.
     bool /*ok*/ call(Action<global::go.image_package.Rectangle> f, global::go.image_package.Rectangle r) {
-        bool ok = default!;
+        bool ok = default;
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                if (recover() != default!) {
+                if (recover() != nil) {
                     ok = false;
                 }
             }, ref ᒐ);
@@ -116,50 +114,50 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
         ᒐdone: return ok;
     }
 
-    var testCases = new TestNewXxxBadRectangle_testCases[]{
-        new("RGBA"u8, (global::go.image_package.Rectangle r) => {
+    var testCases = slice<TestNewXxxBadRectangle_testCases>([
+        new("RGBA", (global::go.image_package.Rectangle r) => {
             NewRGBA(r);
         }),
-        new("RGBA64"u8, (global::go.image_package.Rectangle r) => {
+        new("RGBA64", (global::go.image_package.Rectangle r) => {
             NewRGBA64(r);
         }),
-        new("NRGBA"u8, (global::go.image_package.Rectangle r) => {
+        new("NRGBA", (global::go.image_package.Rectangle r) => {
             NewNRGBA(r);
         }),
-        new("NRGBA64"u8, (global::go.image_package.Rectangle r) => {
+        new("NRGBA64", (global::go.image_package.Rectangle r) => {
             NewNRGBA64(r);
         }),
-        new("Alpha"u8, (global::go.image_package.Rectangle r) => {
+        new("Alpha", (global::go.image_package.Rectangle r) => {
             NewAlpha(r);
         }),
-        new("Alpha16"u8, (global::go.image_package.Rectangle r) => {
+        new("Alpha16", (global::go.image_package.Rectangle r) => {
             NewAlpha16(r);
         }),
-        new("Gray"u8, (global::go.image_package.Rectangle r) => {
+        new("Gray", (global::go.image_package.Rectangle r) => {
             NewGray(r);
         }),
-        new("Gray16"u8, (global::go.image_package.Rectangle r) => {
+        new("Gray16", (global::go.image_package.Rectangle r) => {
             NewGray16(r);
         }),
-        new("CMYK"u8, (global::go.image_package.Rectangle r) => {
+        new("CMYK", (global::go.image_package.Rectangle r) => {
             NewCMYK(r);
         }),
-        new("Paletted"u8, (global::go.image_package.Rectangle r) => {
+        new("Paletted", (global::go.image_package.Rectangle r) => {
             NewPaletted(r, new color.Palette(new color.Color[]{color.Black, color.White}.slice()));
         }),
-        new("YCbCr"u8, (global::go.image_package.Rectangle r) => {
+        new("YCbCr", (global::go.image_package.Rectangle r) => {
             NewYCbCr(r, YCbCrSubsampleRatio422);
         }),
-        new("NYCbCrA"u8, (global::go.image_package.Rectangle r) => {
+        new("NYCbCrA", (global::go.image_package.Rectangle r) => {
             NewNYCbCrA(r, YCbCrSubsampleRatio444);
         })
-    }.slice();
+    ]);
 
     foreach (var (_, tc) in testCases) {
         // Calling NewXxx(r) should fail (panic, since NewXxx doesn't return an
         // error) unless r's width and height are both non-negative.
-        foreach (var (_, negDx) in new bool[]{false, true}.slice()) {
-            foreach (var (_, negDy) in new bool[]{false, true}.slice()) {
+        foreach (var (_, negDx) in slice<bool>([false, true])) {
+            foreach (var (_, negDy) in slice<bool>([false, true])) {
                 var r = new Rectangle(
                     Min: new Point(15, 28),
                     Max: new Point(16, 29)
@@ -174,7 +172,7 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
                 var got = call(tc.f, r);
                 var want = !negDx && !negDy;
                 if (got != want) {
-                    Ꮡt.Errorf("New%s: negDx=%t, negDy=%t: got %t, want %t"u8,
+                    t.Errorf("New%s: negDx=%t, negDy=%t: got %t, want %t",
                         tc.name, negDx, negDy, got, want);
                 }
             }
@@ -191,30 +189,30 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
                 Max: new Point(maxInt, maxInt)
             ));
             if (got) {
-                Ꮡt.Errorf("New%s: overflow: got ok, want !ok"u8, tc.name);
+                t.Errorf("New%s: overflow: got ok, want !ok", tc.name);
             }
         }
     }
 }
 
-public static void Test16BitsPerColorChannel(ж<testing.T> Ꮡt) {
-    var testColorModel = new color.Model[]{color.RGBA64Model, color.NRGBA64Model, color.Alpha16Model, color.Gray16Model
-    }.slice();
+public static void Test16BitsPerColorChannel(ж<testing.T> t) {
+    var testColorModel = slice<color.Model>([color.RGBA64Model, color.NRGBA64Model, color.Alpha16Model, color.Gray16Model
+    ]);
     foreach (var (_, cm) in testColorModel) {
         var c = cm.Convert(new color.RGBA64(0x1234, 0x1234, 0x1234, 0x1234)); // Premultiplied alpha.
         var (r, _, _, _) = c.RGBA();
         if (r != 0x1234) {
-            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, c, (nint)0x1234, r);
+            t.Errorf("%T: want red value 0x%04x got 0x%04x", c, (nint)0x1234, r);
             continue;
         }
     }
-    var testImage = new image[]{new image_internal_test_package.image_RGBA64жimage(NewRGBA64(Rect(0, 0, 10, 10))), new image_internal_test_package.image_NRGBA64жimage(NewNRGBA64(Rect(0, 0, 10, 10))), new image_internal_test_package.image_Alpha16жimage(NewAlpha16(Rect(0, 0, 10, 10))), new image_internal_test_package.image_Gray16жimage(NewGray16(Rect(0, 0, 10, 10)))
-    }.slice();
+    var testImage = slice<image>([new image_internal_test_package.image_RGBA64жimage(NewRGBA64(Rect(0, 0, 10, 10))), new image_internal_test_package.image_NRGBA64жimage(NewNRGBA64(Rect(0, 0, 10, 10))), new image_internal_test_package.image_Alpha16жimage(NewAlpha16(Rect(0, 0, 10, 10))), new image_internal_test_package.image_Gray16жimage(NewGray16(Rect(0, 0, 10, 10)))
+    ]);
     foreach (var (_, m) in testImage) {
         m.Set(1, 2, new color.NRGBA64(0xffff, 0xffff, 0xffff, 0x1357)); // Non-premultiplied alpha.
         var (r, _, _, _) = m.At(1, 2).RGBA();
         if (r != 0x1357) {
-            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, m, (nint)0x1357, r);
+            t.Errorf("%T: want red value 0x%04x got 0x%04x", m, (nint)0x1357, r);
             continue;
         }
     }
@@ -224,7 +222,7 @@ internal partial interface TestRGBA64Image_type /*dyn*/ {
     void SetRGBA64(nint x, nint y, color.RGBA64 c);
 }
 
-public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
+public static void TestRGBA64Image(ж<testing.T> t) {
     // memset sets every element of s to v.
     void memset(slice<byte> s, byte v) {
         foreach (var i in range(s)) {
@@ -233,8 +231,8 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
     }
 
     var r = Rect(0, 0, 3, 2);
-    var testCases = new global::go.image_package.Image[]{new global::go.image_package.AlphaжImage(NewAlpha(r)), new global::go.image_package.Alpha16жImage(NewAlpha16(r)), new global::go.image_package.CMYKжImage(NewCMYK(r)), new global::go.image_package.GrayжImage(NewGray(r)), new global::go.image_package.Gray16жImage(NewGray16(r)), new global::go.image_package.NRGBAжImage(NewNRGBA(r)), new global::go.image_package.NRGBA64жImage(NewNRGBA64(r)), new global::go.image_package.NYCbCrAжImage(NewNYCbCrA(r, YCbCrSubsampleRatio444)), new global::go.image_package.PalettedжImage(NewPaletted(r, palette.Plan9)), new image_test_package.image_ΔRGBAжImage(NewRGBA(r)), new global::go.image_package.RGBA64жImage(NewRGBA64(r)), new global::go.image_package.UniformжImage(NewUniform(new color.RGBA64(nil))), new global::go.image_package.YCbCrжImage(NewYCbCr(r, YCbCrSubsampleRatio444)), new image_test_package.image_RectangleᴠImage(r)
-    }.slice();
+    var testCases = slice<global::go.image_package.Image>([new global::go.image_package.AlphaжImage(NewAlpha(r)), new global::go.image_package.Alpha16жImage(NewAlpha16(r)), new global::go.image_package.CMYKжImage(NewCMYK(r)), new global::go.image_package.GrayжImage(NewGray(r)), new global::go.image_package.Gray16жImage(NewGray16(r)), new global::go.image_package.NRGBAжImage(NewNRGBA(r)), new global::go.image_package.NRGBA64жImage(NewNRGBA64(r)), new global::go.image_package.NYCbCrAжImage(NewNYCbCrA(r, YCbCrSubsampleRatio444)), new global::go.image_package.PalettedжImage(NewPaletted(r, palette.Plan9)), new image_test_package.image_ΔRGBAжImage(NewRGBA(r)), new global::go.image_package.RGBA64жImage(NewRGBA64(r)), new global::go.image_package.UniformжImage(NewUniform(new color.RGBA64())), new global::go.image_package.YCbCrжImage(NewYCbCr(r, YCbCrSubsampleRatio444)), new image_test_package.image_RectangleᴠImage(r)
+    ]);
     foreach (var (_, tc) in testCases) {
         switch (tc.type()) {
         // Most of the concrete image types in the testCases implement the
@@ -254,20 +252,20 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
             break;
         }
         case ж<global::go.image_package.NYCbCrA> tcΔ1: {
-            memset((~tcΔ1).YCbCr.Y, 0x77);
-            memset((~tcΔ1).YCbCr.Cb, 0x88);
-            memset((~tcΔ1).YCbCr.Cr, 0x99);
-            memset((~tcΔ1).A, 0xAA);
+            memset(tcΔ1.YCbCr.Y, 0x77);
+            memset(tcΔ1.YCbCr.Cb, 0x88);
+            memset(tcΔ1.YCbCr.Cr, 0x99);
+            memset(tcΔ1.A, 0xAA);
             break;
         }
         case ж<global::go.image_package.Uniform> tcΔ1: {
-            tcΔ1.Value.C = new color.RGBA64(0x7FFF, 0x3FFF, 0x0000, 0x7FFF);
+            tcΔ1.C = new color.RGBA64(0x7FFF, 0x3FFF, 0x0000, 0x7FFF);
             break;
         }
         case ж<global::go.image_package.YCbCr> tcΔ1: {
-            memset((~tcΔ1).Y, 0x77);
-            memset((~tcΔ1).Cb, 0x88);
-            memset((~tcΔ1).Cr, 0x99);
+            memset(tcΔ1.Y, 0x77);
+            memset(tcΔ1.Cb, 0x88);
+            memset(tcΔ1.Cr, 0x99);
             break;
         }
         case Rectangle tcΔ1: {
@@ -277,7 +275,7 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
         }
         default: {
             var tcΔ1 = tc;
-            Ꮡt.Errorf("could not initialize pixels for %T"u8, tcΔ1);
+            t.Errorf("could not initialize pixels for %T", tcΔ1);
             continue;
             break;
         }}
@@ -285,13 +283,13 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
         // Check that RGBA64At(x, y) is equivalent to At(x, y).RGBA().
         var (rgba64Image, ok) = tc._<RGBA64Image>(ᐧ);
         if (!ok) {
-            Ꮡt.Errorf("%T is not an RGBA64Image"u8, tc);
+            t.Errorf("%T is not an RGBA64Image", tc);
             continue;
         }
         var got = rgba64Image.RGBA64At(1, 1);
         var (wantR, wantG, wantB, wantA) = tc.At(1, 1).RGBA();
         if (((uint32)got.R != wantR) || ((uint32)got.G != wantG) || ((uint32)got.B != wantB) || ((uint32)got.A != wantA)) {
-            Ꮡt.Errorf("%T:\ngot  (0x%04X, 0x%04X, 0x%04X, 0x%04X)\n"u8 + "want (0x%04X, 0x%04X, 0x%04X, 0x%04X)"u8, tc,
+            t.Errorf("%T:\ngot  (0x%04X, 0x%04X, 0x%04X, 0x%04X)\n"u8 + "want (0x%04X, 0x%04X, 0x%04X, 0x%04X)"u8, tc,
                 got.R, got.G, got.B, got.A,
                 wantR, wantG, wantB, wantA);
             continue;
@@ -299,13 +297,13 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void BenchmarkAt(ж<testing.B> Ꮡb) {
+public static void BenchmarkAt(ж<testing.B> b) {
     foreach (var (_, vᴛ1) in testImages) {
         ref var tc = ref heap(new testImagesᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡb.Run(tc.name, (ж<testing.B> bΔ1) => {
+        b.Run(tc.name, (ж<testing.B> bΔ1) => {
             var m = tcʗ1.image();
             bΔ1.ReportAllocs();
             bΔ1.ResetTimer();
@@ -316,16 +314,15 @@ public static void BenchmarkAt(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkSet(ж<testing.B> Ꮡb) {
-    ref var c = ref heap<color.Gray>(out var Ꮡc);
-    c = new color.Gray(0xff);
+public static void BenchmarkSet(ж<testing.B> b) {
+    ref var c = ref heap<color.Gray>(new color.Gray(0xff), out var Ꮡc);
     foreach (var (_, vᴛ1) in testImages) {
         ref var tc = ref heap(new testImagesᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
         var cʗ1 = c;
         var tcʗ1 = tc;
-        Ꮡb.Run(tc.name, (ж<testing.B> bΔ1) => {
+        b.Run(tc.name, (ж<testing.B> bΔ1) => {
             var m = tcʗ1.image();
             bΔ1.ReportAllocs();
             bΔ1.ResetTimer();

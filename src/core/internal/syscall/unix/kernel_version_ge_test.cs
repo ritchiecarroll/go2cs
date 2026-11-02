@@ -15,58 +15,58 @@ internal partial struct TestKernelVersionGE_tests /*dyn*/ {
     internal bool want;
 }
 
-public static void TestKernelVersionGE(ж<testing.T> Ꮡt) {
+public static void TestKernelVersionGE(ж<testing.T> t) {
     var (major, minor) = unix.KernelVersion();
-    Ꮡt.Logf("Running on kernel %d.%d"u8, major, minor);
+    t.Logf("Running on kernel %d.%d", major, minor);
 
-    var tests = new TestKernelVersionGE_tests[]{
+    var tests = slice<TestKernelVersionGE_tests>([
         new(
-            name: "current version equals itself"u8,
+            name: "current version equals itself",
             x: major,
             y: minor,
             want: true
         ),
         new(
-            name: "older major version"u8,
+            name: "older major version",
             x: major - 1,
             y: 0,
             want: true
         ),
         new(
-            name: "same major, older minor version"u8,
+            name: "same major, older minor version",
             x: major,
             y: minor - 1,
             want: true
         ),
         new(
-            name: "newer major version"u8,
+            name: "newer major version",
             x: major + 1,
             y: 0,
             want: false
         ),
         new(
-            name: "same major, newer minor version"u8,
+            name: "same major, newer minor version",
             x: major,
             y: minor + 1,
             want: false
         ),
         new(
-            name: "min version (0.0)"u8,
+            name: "min version (0.0)",
             x: 0,
             y: 0,
             want: true
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestKernelVersionGE_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
             var got = unix.KernelVersionGE(ttʗ1.x, ttʗ1.y);
             if (got != ttʗ1.want) {
-                tΔ1.Errorf("KernelVersionGE(%d, %d): got %v, want %v"u8, ttʗ1.x, ttʗ1.y, got, ttʗ1.want);
+                tΔ1.Errorf("KernelVersionGE(%d, %d): got %v, want %v", ttʗ1.x, ttʗ1.y, got, ttʗ1.want);
             }
         });
     }

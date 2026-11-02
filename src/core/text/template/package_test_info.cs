@@ -8,20 +8,6 @@ global using static global::go.text.template_package;
 global using static global::go.text.template_internal_test_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,11 +28,10 @@ using static global::go.text.template_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.text.template_package.Template))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,8 +41,8 @@ using static global::go.text.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABkqooKClIKCgpSSgoKmAAgI6AAIEqbKpIKC2AAKCgAICO6muKSCgqaCgriCgpSCguoADAj47qa47IKCpoKCyoKCpoKCyoKClIKC/A==")]
-[assembly: go.GoPositionMap("text/template/link_test.go", "link_test.cs", "ADEkooKUggAAJpSAgqSCgoCCpIKClII=")]
+[assembly: GoPositionMap("text/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAkI6AAIEqbKpIKC2AAOCgAICO6muKSCgqaCgriCgpSCguoADwj47qa47IKCpoKCyoKCpoKCyoKClIKC/A==", "", "", "", "40:25")]
+[assembly: GoPositionMap("text/template/link_test.go", "link_test.cs", "ADUkooKUggAAJpSAgqSCgoCCpIKClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

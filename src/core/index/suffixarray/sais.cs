@@ -156,13 +156,13 @@ internal static void sais_8_32(slice<byte> text, nint textMax, slice<int32> sa, 
     // If there's only enough tmp for one slice,
     // we make it the bucket offsets and recompute
     // the character frequency each time we need it.
-    slice<int32> freq = default!;
-    slice<int32> bucket = default!;
-    if (builtin.len(tmp) >= 2 * textMax){
+    slice<int32> freq = default;
+    slice<int32> bucket = default;
+    if (builtin.len(tmp) >= 2 * textMax) {
         (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp.slice(0, textMax));
+        (freq, bucket) = (default, tmp.slice(0, textMax));
     }
 
     // The SAIS algorithm.
@@ -170,14 +170,14 @@ internal static void sais_8_32(slice<byte> text, nint textMax, slice<int32> sa, 
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_8_32(text, sa, freq, bucket);
-    if (numLMS <= 1){
+    if (numLMS <= 1) {
         // 0 or 1 items are already sorted. Do nothing.
     } else {
         induceSubL_8_32(text, sa, freq, bucket);
         induceSubS_8_32(text, sa, freq, bucket);
         length_8_32(text, sa, numLMS);
         nint maxID = assignID_8_32(text, sa, numLMS);
-        if (maxID < numLMS){
+        if (maxID < numLMS) {
             map_32(sa, numLMS);
             recurse_32(sa, tmp, numLMS, maxID);
             unmap_8_32(text, sa, numLMS);
@@ -209,10 +209,10 @@ internal static void sais_8_32(slice<byte> text, nint textMax, slice<int32> sa, 
 // the caller must set freq[0] = -1 to force recomputation
 // the next time it is needed.
 internal static slice<int32> freq_8_32(slice<byte> text, slice<int32> freq, slice<int32> bucket) {
-    if (freq != default! && freq[0] >= 0) {
+    if (freq != nil && freq[0] >= 0) {
         return freq; // already computed
     }
-    if (freq == default!) {
+    if (freq == nil) {
         freq = bucket;
     }
 
@@ -228,7 +228,7 @@ internal static slice<int32> freq_8_32(slice<byte> text, slice<int32> freq, slic
 // in the bucket for character c in a bucket-sort of text.
 internal static void bucketMin_8_32(slice<byte> text, slice<int32> freq, slice<int32> bucket) {
     freq = freq_8_32(text, freq, bucket);
-    freq = freq[..256]; // establish len(freq) = 256, so 0 ≤ i < 256 below
+    freq = freq[..256];     // establish len(freq) = 256, so 0 ≤ i < 256 below
     bucket = bucket[..256]; // eliminate bounds check for bucket[i] below
     var total = (int32)0;
     foreach (var (i, n) in freq) {
@@ -243,7 +243,7 @@ internal static void bucketMin_8_32(slice<byte> text, slice<int32> freq, slice<i
 // That is, max is one past the final index in that bucket.
 internal static void bucketMax_8_32(slice<byte> text, slice<int32> freq, slice<int32> bucket) {
     freq = freq_8_32(text, freq, bucket);
-    freq = freq[..256]; // establish len(freq) = 256, so 0 ≤ i < 256 below
+    freq = freq[..256];     // establish len(freq) = 256, so 0 ≤ i < 256 below
     bucket = bucket[..256]; // eliminate bounds check for bucket[i] below
     var total = (int32)0;
     foreach (var (i, n) in freq) {
@@ -308,10 +308,9 @@ internal static nint placeLMS_8_32(slice<byte> text, slice<int32> sa, slice<int3
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Bucket the index i+1 for the start of an LMS-substring.
@@ -553,17 +552,16 @@ internal static void length_8_32(slice<byte> text, slice<int32> sa, nint numLMS)
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
         cx = cx << 8 | (uint32)((byte)(c1 + 1)); // byte-only
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
-            int32 code = default!;
-            if (end == 0){
+            int32 code = default;
+            if (end == 0) {
                 code = 0;
             } else {
                 code = (int32)(end - j);
@@ -728,10 +726,9 @@ internal static void unmap_8_32(slice<byte> text, slice<int32> sa, nint numLMS) 
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Populate inverse map.

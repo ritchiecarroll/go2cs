@@ -99,54 +99,54 @@ internal static array<float64> _lgamA = new float64[]{
     2.20862790713908385557e-04D, // 0x3F2CF2ECED10E54D
     1.08011567247583939954e-04D, // 0x3F1C5088987DFB07
     2.52144565451257326939e-05D, // 0x3EFA7074428CFA52
-    4.48640949618915160150e-05D // 0x3F07858E90A45837
+    4.48640949618915160150e-05D  // 0x3F07858E90A45837
 }.array();
 
 internal static array<float64> _lgamR = new float64[]{
-    1.0D, // placeholder
+    1.0D,                        // placeholder
     1.39200533467621045958e+00D, // 0x3FF645A762C4AB74
     7.21935547567138069525e-01D, // 0x3FE71A1893D3DCDC
     1.71933865632803078993e-01D, // 0x3FC601EDCCFBDF27
     1.86459191715652901344e-02D, // 0x3F9317EA742ED475
     7.77942496381893596434e-04D, // 0x3F497DDACA41A95B
-    7.32668430744625636189e-06D // 0x3EDEBAF7A5B38140
+    7.32668430744625636189e-06D  // 0x3EDEBAF7A5B38140
 }.array();
 
 internal static array<float64> _lgamS = new float64[]{
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
-    2.14982415960608852501e-01D, // 0x3FCB848B36E20878
-    3.25778796408930981787e-01D, // 0x3FD4D98F4F139F59
-    1.46350472652464452805e-01D, // 0x3FC2BB9CBEE5F2F7
-    2.66422703033638609560e-02D, // 0x3F9B481C7E939961
-    1.84028451407337715652e-03D, // 0x3F5E26B67368F239
-    3.19475326584100867617e-05D // 0x3F00BFECDD17E945
+    2.14982415960608852501e-01D,  // 0x3FCB848B36E20878
+    3.25778796408930981787e-01D,  // 0x3FD4D98F4F139F59
+    1.46350472652464452805e-01D,  // 0x3FC2BB9CBEE5F2F7
+    2.66422703033638609560e-02D,  // 0x3F9B481C7E939961
+    1.84028451407337715652e-03D,  // 0x3F5E26B67368F239
+    3.19475326584100867617e-05D   // 0x3F00BFECDD17E945
 }.array();
 
 [GoLazy] partial class lazyᴛ_lgamT { internal static array<float64> _lgamT = new float64[]{
-    4.83836122723810047042e-01D, // 0x3FDEF72BC8EE38A2
+    4.83836122723810047042e-01D,  // 0x3FDEF72BC8EE38A2
     -1.47587722994593911752e-01D, // 0xBFC2E4278DC6C509
-    6.46249402391333854778e-02D, // 0x3FB08B4294D5419B
+    6.46249402391333854778e-02D,  // 0x3FB08B4294D5419B
     -3.27885410759859649565e-02D, // 0xBFA0C9A8DF35B713
-    1.79706750811820387126e-02D, // 0x3F9266E7970AF9EC
+    1.79706750811820387126e-02D,  // 0x3F9266E7970AF9EC
     -1.03142241298341437450e-02D, // 0xBF851F9FBA91EC6A
-    6.10053870246291332635e-03D, // 0x3F78FCE0E370E344
+    6.10053870246291332635e-03D,  // 0x3F78FCE0E370E344
     -3.68452016781138256760e-03D, // 0xBF6E2EFFB3E914D7
-    2.25964780900612472250e-03D, // 0x3F6282D32E15C915
+    2.25964780900612472250e-03D,  // 0x3F6282D32E15C915
     -1.40346469989232843813e-03D, // 0xBF56FE8EBF2D1AF1
-    8.81081882437654011382e-04D, // 0x3F4CDF0CEF61A8E9
+    8.81081882437654011382e-04D,  // 0x3F4CDF0CEF61A8E9
     -5.38595305356740546715e-04D, // 0xBF41A6109C73E0EC
-    3.15632070903625950361e-04D, // 0x3F34AF6D6C0EBBF7
+    3.15632070903625950361e-04D,  // 0x3F34AF6D6C0EBBF7
     -3.12754168375120860518e-04D, // 0xBF347F24ECC38C38
-    3.35529192635519073543e-04D // 0x3F35FD3EE8C2D3F4
+    3.35529192635519073543e-04D   // 0x3F35FD3EE8C2D3F4
 }.array(); }
 
 internal static array<float64> _lgamU = new float64[]{
     -7.72156649015328655494e-02D, // 0xBFB3C467E37DB0C8
-    6.32827064025093366517e-01D, // 0x3FE4401E8B005DFF
-    1.45492250137234768737e+00D, // 0x3FF7475CD119BD6F
-    9.77717527963372745603e-01D, // 0x3FEF497644EA8450
-    2.28963728064692451092e-01D, // 0x3FCD4EAEF6010924
-    1.33810918536787660377e-02D // 0x3F8B678BBF2BAB09
+    6.32827064025093366517e-01D,  // 0x3FE4401E8B005DFF
+    1.45492250137234768737e+00D,  // 0x3FF7475CD119BD6F
+    9.77717527963372745603e-01D,  // 0x3FEF497644EA8450
+    2.28963728064692451092e-01D,  // 0x3FCD4EAEF6010924
+    1.33810918536787660377e-02D   // 0x3F8B678BBF2BAB09
 }.array();
 
 internal static array<float64> _lgamV = new float64[]{
@@ -155,17 +155,17 @@ internal static array<float64> _lgamV = new float64[]{
     2.12848976379893395361e+00D, // 0x40010725A42B18F5
     7.69285150456672783825e-01D, // 0x3FE89DFBE45050AF
     1.04222645593369134254e-01D, // 0x3FBAAE55D6537C88
-    3.21709242282423911810e-03D // 0x3F6A5ABB57D0CF61
+    3.21709242282423911810e-03D  // 0x3F6A5ABB57D0CF61
 }.array();
 
 internal static array<float64> _lgamW = new float64[]{
-    4.18938533204672725052e-01D, // 0x3FDACFE390C97D69
-    8.33333333333329678849e-02D, // 0x3FB555555555553B
+    4.18938533204672725052e-01D,  // 0x3FDACFE390C97D69
+    8.33333333333329678849e-02D,  // 0x3FB555555555553B
     -2.77777777728775536470e-03D, // 0xBF66C16C16B02E5C
-    7.93650558643019558500e-04D, // 0x3F4A019F98CF38B6
+    7.93650558643019558500e-04D,  // 0x3F4A019F98CF38B6
     -5.95187557450339963135e-04D, // 0xBF4380CB8C0FE741
-    8.36339918996282139126e-04D, // 0x3F4B67BA4CDAD5D1
-    -1.63092934096575273989e-03D // 0xBF5AB89D0B9E43E4
+    8.36339918996282139126e-04D,  // 0x3F4B67BA4CDAD5D1
+    -1.63092934096575273989e-03D  // 0xBF5AB89D0B9E43E4
 }.array();
 
 // Lgamma returns the natural logarithm and sign (-1 or +1) of [Gamma](x).
@@ -178,16 +178,16 @@ internal static array<float64> _lgamW = new float64[]{
 //	Lgamma(-Inf) = -Inf
 //	Lgamma(NaN) = NaN
 public static (float64 lgamma, nint sign) Lgamma(float64 x) {
-    float64 lgamma = default!;
-    nint sign = default!;
+    float64 lgamma = default;
+    nint sign = default;
 
     UntypedFloat Ymin = 1.461632144968362245;
-    const float64 Two52 = /* 1 << 52 */ 4503599627370496; // 0x4330000000000000 ~4.5036e+15
-    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992; // 0x4340000000000000 ~9.0072e+15
-    const float64 Two58 = /* 1 << 58 */ 288230376151711744; // 0x4390000000000000 ~2.8823e+17
+    const float64 Two52 = /* 1 << 52 */ 4503599627370496;             // 0x4330000000000000 ~4.5036e+15
+    UntypedInt Two53 = /* 1 << 53 */ 9007199254740992;                // 0x4340000000000000 ~9.0072e+15
+    const float64 Two58 = /* 1 << 58 */ 288230376151711744;           // 0x4390000000000000 ~2.8823e+17
     const float64 Tiny = /* 1.0 / (1 << 70) */ 8.470329472543003e-22; // 0x3b90000000000000 ~8.47033e-22
-    UntypedFloat Tc = 1.46163214496836224576e+00; // 0x3FF762D86356BE3F
-    const float64 Tf = -1.21486290535849611461e-01; // 0xBFBF19B9BCC38A42
+    UntypedFloat Tc = 1.46163214496836224576e+00;                     // 0x3FF762D86356BE3F
+    const float64 Tf = -1.21486290535849611461e-01;                   // 0xBFBF19B9BCC38A42
     // Tt = -(tail of Tf)
     const float64 Tt = -3.63867699703950536541e-18; // 0xBC50C7CAA48A971F
     // special cases
@@ -219,7 +219,7 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
         lgamma = -Log(x);
         return (lgamma, sign);
     }
-    float64 nadj = default!;
+    float64 nadj = default;
     if (neg) {
         if (x >= Two52) { // |x| >= 2**52, must be -integer
             lgamma = Inf(1);
@@ -242,9 +242,9 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
         return (lgamma, sign);
     }
     case {} when x is < 2D: { // use lgamma(x) = lgamma(x+1) - log(x)
-        float64 y = default!;
-        nint i = default!;
-        if (x <= 0.9D){
+        float64 y = default;
+        nint i = default;
+        if (x <= 0.9D) {
             lgamma = -Log(x);
             switch (ᐧ) {
             case {} when x >= /* (Ymin - 1 + 0.27) */ 0.7316321449683623D: { // 0.7316 <= x <=  0.9
@@ -367,12 +367,12 @@ internal static float64 sinPi(float64 x) {
 
     // argument reduction
     var z = Floor(x);
-    nint n = default!;
-    if (z != x){ // inexact
+    nint n = default;
+    if (z != x) { // inexact
         x = Mod(x, 2D);
         n = (nint)(x * 4D);
     } else {
-        if (x >= Two53){ // x must be even
+        if (x >= Two53) { // x must be even
             x = 0D;
             n = 0;
         } else {
@@ -381,7 +381,7 @@ internal static float64 sinPi(float64 x) {
             }
             n = (nint)(1 & Float64bits(z));
             x = (float64)n;
-            n <<= (int)(2);
+            n <<= 2;
         }
     }
     switch (n) {

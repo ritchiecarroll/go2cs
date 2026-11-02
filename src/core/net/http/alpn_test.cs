@@ -24,32 +24,35 @@ partial class http_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object requestWithNoRemoteAddrˢ = (@string)"request with no RemoteAddr"u8;
-internal static readonly @string pathProtoˢ = "path=/,proto="u8;
-internal static readonly @string tcpˢ = "tcp"u8;
-internal static readonly @string pathFooProtoTls09ˢ = "path=/foo,proto=tls-0.9"u8;
+internal static ref readonly @string pathProtoˢ => ref pathProtoˢᵇ;
+private static readonly @string pathProtoˢᵇ = "path=/,proto="u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+internal static ref readonly @string pathFooProtoTls09ˢ => ref pathFooProtoTls09ˢᵇ;
+private static readonly @string pathFooProtoTls09ˢᵇ = "path=/foo,proto=tls-0.9"u8;
 
-public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
+public static void TestNextProtoUpgrade(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        setParallel(Ꮡt);
-        defer(afterTest, new http_test_package.testing_TжTB(Ꮡt), ref ᒐ);
+        setParallel(t);
+        defer(afterTest, new http_test_package.testing_TжTB(t), ref ᒐ);
         var ts = httptest.NewUnstartedServer(new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "path=%s,proto="u8, (~(~r).URL).Path);
-            if ((~r).TLS != nil) {
-                w.Write(slice<byte>((~(~r).TLS).NegotiatedProtocol));
+            fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "path=%s,proto="u8, r.URL.Path);
+            if (r.TLS != nil) {
+                w.Write(slice<byte>(r.TLS.NegotiatedProtocol));
             }
-            if ((~r).RemoteAddr == ""u8) {
-                Ꮡt.Error(requestWithNoRemoteAddrˢ);
+            if (r.RemoteAddr == ""u8) {
+                t.Error(requestWithNoRemoteAddrˢ);
             }
-            if ((~r).Body == default!) {
-                Ꮡt.Errorf("request with nil Body"u8);
+            if (r.Body == nil) {
+                t.Errorf("request with nil Body");
             }
         })));
-        ts.Value.TLS = Ꮡ(new tls.Config(
-            NextProtos: new @string[]{"unhandled-proto"u8, "tls-0.9"u8}.slice()
+        ts.TLS = Ꮡ(new tls.Config(
+            NextProtos: slice<@string>(["unhandled-proto", "tls-0.9"])
         ));
-        ts.Value.Config.Value.TLSNextProto = new map<@string, Action<ж<Δhttp.Server>, ж<tls.Conn>, httpꓸHandler>>{
-            ["tls-0.9"u8] = handleTLSProtocol09
+        ts.Config.TLSNextProto = new map<@string, Action<ж<Δhttp.Server>, ж<tls.Conn>, httpꓸHandler>>{
+            ["tls-0.9"] = handleTLSProtocol09
         };
         ts.StartTLS();
         var tsʗ1 = ts;
@@ -58,17 +61,17 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
         // Normal request, without NPN.
         {
             var c = ts.Client();
-            var (res, err) = c.Get((~ts).URL);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            var (res, err) = c.Get(ts.URL);
+            if (err != nil) {
+                t.Fatal(err);
             }
-            (var body, err) = io.ReadAll(new http_test_package.io_ReadCloserᴠReader((~res).Body));
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            (var body, err) = io.ReadAll(new http_test_package.io_ReadCloserᴠReader(res.Body));
+            if (err != nil) {
+                t.Fatal(err);
             }
             {
                 @string want = pathProtoˢ; if (((sstring)body) != want) {
-                    Ꮡt.Errorf("plain request = %q; want %q"u8, body, want);
+                    t.Errorf("plain request = %q; want %q", body, want);
                 }
             }
         }
@@ -81,7 +84,7 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
             var tr = Ꮡ(new Transport(
                 TLSClientConfig: Ꮡ(new tls.Config(
                     RootCAs: certPool,
-                    NextProtos: new @string[]{"unhandled-proto"u8}.slice()
+                    NextProtos: slice<@string>(["unhandled-proto"])
                 ))
             ));
             var trʗ1 = tr;
@@ -89,13 +92,13 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
             var c = Ꮡ(new Client(
                 Transport: new Δhttp.TransportжRoundTripper(tr)
             ));
-            var (res, err) = c.Get((~ts).URL);
-            if (err == default!) {
+            var (res, err) = c.Get(ts.URL);
+            if (err == nil) {
                 var resʗ1 = res;
-                defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+                defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
                 ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
                 res.Write(new http_test_package.bytes_BufferжWriter(Ꮡbuf));
-                Ꮡt.Errorf("expected error on unhandled-proto request; got: %s"u8, buf.Bytes());
+                t.Errorf("expected error on unhandled-proto request; got: %s", buf.Bytes());
             }
         }
 
@@ -103,20 +106,20 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
         // It is HTTP/0.9 over TLS.
         {
             var c = ts.Client();
-            var tlsConfig = (~c).Transport._<ж<Δhttp.Transport>>().Value.TLSClientConfig;
-            tlsConfig.Value.NextProtos = new @string[]{"tls-0.9"u8}.slice();
-            var (conn, err) = tls.Dial(tcpˢ, (~ts).Listener.Addr().String(), tlsConfig);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            var tlsConfig = c.Transport._<ж<Δhttp.Transport>>().TLSClientConfig;
+            tlsConfig.NextProtos = slice<@string>(["tls-0.9"]);
+            var (conn, err) = tls.Dial(tcpˢ, ts.Listener.Addr().String(), tlsConfig);
+            if (err != nil) {
+                t.Fatal(err);
             }
             conn.Write(slice<byte>("GET /foo\n"u8));
             (var body, err) = io.ReadAll(new http_test_package.tls_ConnжReader(conn));
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             {
                 @string want = pathFooProtoTls09ˢ; if (((sstring)body) != want) {
-                    Ꮡt.Errorf("plain request = %q; want %q"u8, body, want);
+                    t.Errorf("plain request = %q; want %q", body, want);
                 }
             }
         }
@@ -126,16 +129,19 @@ public static void TestNextProtoUpgrade(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getˢ = "GET "u8;
-internal static readonly @string getˢ2 = "GET"u8;
-internal static readonly @string http09ˢ = "HTTP/0.9"u8;
+internal static ref readonly @string getˢ => ref getˢᵇ;
+private static readonly @string getˢᵇ = "GET "u8;
+internal static ref readonly @string getˢ2 => ref getˢ2ᵇ;
+private static readonly @string getˢ2ᵇ = "GET"u8;
+internal static ref readonly @string http09ˢ => ref http09ˢᵇ;
+private static readonly @string http09ˢᵇ = "HTTP/0.9"u8;
 
 // handleTLSProtocol09 implements the HTTP/0.9 protocol over TLS, for the
 // TestNextProtoUpgrade test.
-internal static void handleTLSProtocol09(ж<Δhttp.Server> Ꮡsrv, ж<tls.Conn> Ꮡconn, httpꓸHandler h) {
-    var br = bufio.NewReader(new http_test_package.tls_ConnжReader(Ꮡconn));
-    var (line, err) = br.ReadString((rune)'\n');
-    if (err != default!) {
+internal static void handleTLSProtocol09(ж<Δhttp.Server> srv, ж<tls.Conn> conn, httpꓸHandler h) {
+    var br = bufio.NewReader(new http_test_package.tls_ConnжReader(conn));
+    var (line, err) = br.ReadString((byte)'\n');
+    if (err != nil) {
         return;
     }
     line = strings.TrimSpace(line);
@@ -143,11 +149,11 @@ internal static void handleTLSProtocol09(ж<Δhttp.Server> Ꮡsrv, ж<tls.Conn> 
     if (path == line) {
         return;
     }
-    var (req, _) = NewRequest(getˢ2, path, default!);
-    req.Value.Proto = http09ˢ;
-    req.Value.ProtoMajor = 0;
-    req.Value.ProtoMinor = 9;
-    var rw = Ꮡ(new http09Writer(new http_test_package.tls_ConnжWriter(Ꮡconn), new httpꓸHeader(0)));
+    var (req, _) = NewRequest(getˢ2, path, default);
+    req.Proto = http09ˢ;
+    req.ProtoMajor = 0;
+    req.ProtoMinor = 9;
+    var rw = Ꮡ(new http09Writer(new http_test_package.tls_ConnжWriter(conn), new httpꓸHeader(0)));
     h.ServeHTTP(new http_test_package.http09WriterжResponseWriter(rw), req);
 }
 

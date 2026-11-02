@@ -30,9 +30,9 @@ partial class runtime_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingSinceAesHashˢ = (@string)"skipping since AES hash implementation is used"u8;
 
-public static void TestMemHash32Equality(ж<testing.T> Ꮡt) {
+public static void TestMemHash32Equality(ж<testing.T> t) {
     if (runtime_internal_test_package.UseAeshash.Value) {
-        Ꮡt.Skip(skippingSinceAesHashˢ);
+        t.Skip(skippingSinceAesHashˢ);
     }
     ref var b = ref heap(new array<byte>(4), out var Ꮡb);
     var r = rand.New(rand.NewSource(1234));
@@ -42,14 +42,14 @@ public static void TestMemHash32Equality(ж<testing.T> Ꮡt) {
         var got = runtime_internal_test_package.MemHash32(@unsafe.Pointer.FromPinnedBox(Ꮡb), seed);
         var want = runtime_internal_test_package.MemHash(@unsafe.Pointer.FromPinnedBox(Ꮡb), seed, 4);
         if (got != want) {
-            Ꮡt.Errorf("MemHash32(%x, %v) = %v; want %v"u8, b, seed, got, want);
+            t.Errorf("MemHash32(%x, %v) = %v; want %v", b, seed, got, want);
         }
     }
 }
 
-public static void TestMemHash64Equality(ж<testing.T> Ꮡt) {
+public static void TestMemHash64Equality(ж<testing.T> t) {
     if (runtime_internal_test_package.UseAeshash.Value) {
-        Ꮡt.Skip(skippingSinceAesHashˢ);
+        t.Skip(skippingSinceAesHashˢ);
     }
     ref var b = ref heap(new array<byte>(8), out var Ꮡb);
     var r = rand.New(rand.NewSource(1234));
@@ -59,7 +59,7 @@ public static void TestMemHash64Equality(ж<testing.T> Ꮡt) {
         var got = runtime_internal_test_package.MemHash64(@unsafe.Pointer.FromPinnedBox(Ꮡb), seed);
         var want = runtime_internal_test_package.MemHash(@unsafe.Pointer.FromPinnedBox(Ꮡb), seed, 8);
         if (got != want) {
-            Ꮡt.Errorf("MemHash64(%x, %v) = %v; want %v"u8, b, seed, got, want);
+            t.Errorf("MemHash64(%x, %v) = %v; want %v", b, seed, got, want);
         }
     }
 }
@@ -75,7 +75,7 @@ public static void TestMemHash64Equality(ж<testing.T> Ꮡt) {
 // Sanity checks.
 // hash should not depend on values outside key.
 // hash should not depend on alignment.
-public static void TestSmhasherSanity(ж<testing.T> Ꮡt) {
+public static void TestSmhasherSanity(ж<testing.T> t) {
     var r = rand.New(rand.NewSource(1234));
     const nint REP = 10;
     UntypedInt KEYMAX = 128;
@@ -90,7 +90,7 @@ public static void TestSmhasherSanity(ж<testing.T> Ꮡt) {
                 randBytes(r, c[..]);
                 copy(c.slice((nint)PAD + i, (nint)PAD + i + n), b.slice(PAD, (nint)PAD + n));
                 if (runtime_internal_test_package.BytesHash(b.slice(PAD, (nint)PAD + n), 0) != runtime_internal_test_package.BytesHash(c.slice((nint)PAD + i, (nint)PAD + i + n), 0)) {
-                    Ꮡt.Errorf("hash depends on bytes outside key"u8);
+                    t.Errorf("hash depends on bytes outside key");
                 }
             }
         }
@@ -121,7 +121,7 @@ internal static void addS_seed(this ref HashSet s, @string x, uintptr seed) {
     s.add(runtime_internal_test_package.StringHash(x, seed));
 }
 
-internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
+internal static void check(this ref HashSet s, ж<testing.T> t) {
     var list = s.list;
     slices.Sort<slice<uintptr>, uintptr>(list);
 
@@ -138,31 +138,31 @@ internal static void check(this ref HashSet s, ж<testing.T> Ꮡt) {
     var expected = (float64)pairs / Δmath.Pow(2.0D, (float64)hashSize);
     var stddev = Δmath.Sqrt(expected);
     if ((float64)collisions > expected + SLOP * (3D * stddev + 1D)) {
-        Ꮡt.Errorf("unexpected number of collisions: got=%d mean=%f stddev=%f threshold=%f"u8, collisions, expected, stddev, expected + SLOP * (3D * stddev + 1D));
+        t.Errorf("unexpected number of collisions: got=%d mean=%f stddev=%f threshold=%f", collisions, expected, stddev, expected + SLOP * (3D * stddev + 1D));
     }
     // Reset for reuse
     s.list = s.list[..0];
 }
 
 // a string plus adding zeros must make distinct hashes
-public static void TestSmhasherAppendedZeros(ж<testing.T> Ꮡt) {
-    @string s = "hello"u8 + strings.Repeat("\x00"u8, 256);
+public static void TestSmhasherAppendedZeros(ж<testing.T> t) {
+    @string s = "hello"u8 + strings.Repeat("\x00", 256);
     var h = newHashSet();
     for (nint i = 0; i <= len(s); i++) {
         h.addS(s.slice(0, i));
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object tooLongForRaceModeˢ = (@string)"Too long for race mode"u8;
 
 // All 0-3 byte strings have distinct hashes.
-public static void TestSmhasherSmallKeys(ж<testing.T> Ꮡt) {
+public static void TestSmhasherSmallKeys(ж<testing.T> t) {
     if (race.Enabled) {
-        Ꮡt.Skip(tooLongForRaceModeˢ);
+        t.Skip(tooLongForRaceModeˢ);
     }
-    testenv.ParallelOn64Bit(Ꮡt);
+    testenv.ParallelOn64Bit(t);
     var h = newHashSet();
     array<byte> b = new(3);
     for (nint i = 0; i < 256; i++) {
@@ -179,12 +179,12 @@ public static void TestSmhasherSmallKeys(ж<testing.T> Ꮡt) {
             }
         }
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // Different length strings of all zeros have distinct hashes.
-public static void TestSmhasherZeros(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestSmhasherZeros(ж<testing.T> t) {
+    t.Parallel();
     nint N = 256 * 1024;
     if (testing.Short()) {
         N = 1024;
@@ -194,29 +194,29 @@ public static void TestSmhasherZeros(ж<testing.T> Ꮡt) {
     for (nint i = 0; i <= N; i++) {
         h.addB(b.slice(0, i));
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object tooSlowOnWasmˢ = (@string)"Too slow on wasm"u8;
 
 // Strings with up to two nonzero bytes all have distinct hashes.
-public static void TestSmhasherTwoNonzero(ж<testing.T> Ꮡt) {
+public static void TestSmhasherTwoNonzero(ж<testing.T> t) {
     if (GOARCH == "wasm"u8) {
-        Ꮡt.Skip(tooSlowOnWasmˢ);
+        t.Skip(tooSlowOnWasmˢ);
     }
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(tooLongForRaceModeˢ);
+        t.Skip(tooLongForRaceModeˢ);
     }
-    testenv.ParallelOn64Bit(Ꮡt);
+    testenv.ParallelOn64Bit(t);
     var h = newHashSet();
     for (nint n = 2; n <= 16; n++) {
         twoNonZero(h, n);
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
@@ -253,14 +253,14 @@ internal static void twoNonZero(ж<HashSet> Ꮡh, nint n) {
 }
 
 // Test strings with repeats, like "abcdabcdabcdabcd..."
-public static void TestSmhasherCyclic(ж<testing.T> Ꮡt) {
+public static void TestSmhasherCyclic(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(tooLongForRaceModeˢ);
+        t.Skip(tooLongForRaceModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
     var r = rand.New(rand.NewSource(1234));
     const nint REPEAT = 8;
     const nint N = 1000000;
@@ -278,36 +278,36 @@ public static void TestSmhasherCyclic(ж<testing.T> Ꮡt) {
             }
             h.addB(b);
         }
-        h.check(Ꮡt);
+        h.check(t);
     }
 }
 
 // Test strings with only a few bits set
-public static void TestSmhasherSparse(ж<testing.T> Ꮡt) {
+public static void TestSmhasherSparse(ж<testing.T> t) {
     if (GOARCH == "wasm"u8) {
-        Ꮡt.Skip(tooSlowOnWasmˢ);
+        t.Skip(tooSlowOnWasmˢ);
     }
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
     var h = newHashSet();
-    sparse(Ꮡt, h, 32, 6);
-    sparse(Ꮡt, h, 40, 6);
-    sparse(Ꮡt, h, 48, 5);
-    sparse(Ꮡt, h, 56, 5);
-    sparse(Ꮡt, h, 64, 5);
-    sparse(Ꮡt, h, 96, 4);
-    sparse(Ꮡt, h, 256, 3);
-    sparse(Ꮡt, h, 2048, 2);
+    sparse(t, h, 32, 6);
+    sparse(t, h, 40, 6);
+    sparse(t, h, 48, 5);
+    sparse(t, h, 56, 5);
+    sparse(t, h, 64, 5);
+    sparse(t, h, 96, 4);
+    sparse(t, h, 256, 3);
+    sparse(t, h, 2048, 2);
 }
 
-internal static void sparse(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, nint n, nint k) {
+internal static void sparse(ж<testing.T> t, ж<HashSet> Ꮡh, nint n, nint k) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var b = new slice<byte>(n / 8);
     setbits(Ꮡh, b, 0, k);
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // set up to k bits at index i and greater
@@ -327,31 +327,31 @@ internal static void setbits(ж<HashSet> Ꮡh, slice<byte> b, nint i, nint k) {
 
 // Test all possible combinations of n blocks from the set s.
 // "permutation" is a bad name here, but it is what Smhasher uses.
-public static void TestSmhasherPermutation(ж<testing.T> Ꮡt) {
+public static void TestSmhasherPermutation(ж<testing.T> t) {
     if (GOARCH == "wasm"u8) {
-        Ꮡt.Skip(tooSlowOnWasmˢ);
+        t.Skip(tooSlowOnWasmˢ);
     }
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(tooLongForRaceModeˢ);
+        t.Skip(tooLongForRaceModeˢ);
     }
-    testenv.ParallelOn64Bit(Ꮡt);
+    testenv.ParallelOn64Bit(t);
     var h = newHashSet();
-    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7}.slice(), 8);
-    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 8);
-    permutation(Ꮡt, h, new uint32[]{0, 1}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, (uint32)1 << 31}.slice(), 20);
-    permutation(Ꮡt, h, new uint32[]{0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29}.slice(), 6);
+    permutation(t, h, slice<uint32>([0, 1, 2, 3, 4, 5, 6, 7]), 8);
+    permutation(t, h, slice<uint32>([0, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29]), 8);
+    permutation(t, h, slice<uint32>([0, 1]), 20);
+    permutation(t, h, slice<uint32>([0, (uint32)1 << 31]), 20);
+    permutation(t, h, slice<uint32>([0, 1, 2, 3, 4, 5, 6, 7, (uint32)1 << 29, (uint32)2 << 29, (uint32)3 << 29, (uint32)4 << 29, (uint32)5 << 29, (uint32)6 << 29, (uint32)7 << 29]), 6);
 }
 
-internal static void permutation(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, slice<uint32> s, nint n) {
+internal static void permutation(ж<testing.T> t, ж<HashSet> Ꮡh, slice<uint32> s, nint n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var b = new slice<byte>(n * 4);
     genPerm(Ꮡh, b, s, 0);
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, nint n) {
@@ -368,12 +368,12 @@ internal static void genPerm(ж<HashSet> Ꮡh, slice<byte> b, slice<uint32> s, n
 }
 
 partial interface Key {
-    void clear();          // set bits all to 0
+    void clear();                // set bits all to 0
     void random(ж<rand.Rand> r); // set key to something random
-    nint bits();          // how many bits key has
-    void flipBit(nint i);  // flip bit i of the key
-    uintptr hash();       // hash the key
-    @string name();       // for error reporting
+    nint bits();                 // how many bits key has
+    void flipBit(nint i);        // flip bit i of the key
+    uintptr hash();              // hash the key
+    @string name();              // for error reporting
 }
 
 partial struct BytesKey {
@@ -384,8 +384,8 @@ internal static void clear(this ref BytesKey k) {
     builtin.clear(k.b);
 }
 
-internal static void random(this ref BytesKey k, ж<rand.Rand> Ꮡr) {
-    randBytes(Ꮡr, k.b);
+internal static void random(this ref BytesKey k, ж<rand.Rand> r) {
+    randBytes(r, k.b);
 }
 
 internal static nint bits(this ref BytesKey k) {
@@ -431,7 +431,8 @@ internal static partial uintptr hash(this ref Int32Key k) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string int32ˢ = "int32"u8;
+internal static ref readonly @string int32ˢ => ref int32ˢᵇ;
+private static readonly @string int32ˢᵇ = "int32"u8;
 
 internal static @string name(this ref Int32Key k) {
     return int32ˢ;
@@ -464,7 +465,8 @@ internal static partial uintptr hash(this ref Int64Key k) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string int64ˢ = "int64"u8;
+internal static ref readonly @string int64ˢ => ref int64ˢᵇ;
+private static readonly @string int64ˢᵇ = "int64"u8;
 
 internal static @string name(this ref Int64Key k) {
     return int64ˢ;
@@ -475,7 +477,7 @@ partial struct EfaceKey {
 }
 
 internal static void clear(this ref EfaceKey k) {
-    k.i = default!;
+    k.i = default;
 }
 
 internal static void random(this ref EfaceKey k, ж<rand.Rand> Ꮡr) {
@@ -500,7 +502,8 @@ internal static partial uintptr hash(this ref EfaceKey k) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string efaceˢ = "Eface"u8;
+internal static ref readonly @string efaceˢ => ref efaceˢᵇ;
+private static readonly @string efaceˢᵇ = "Eface"u8;
 
 internal static @string name(this ref EfaceKey k) {
     return efaceˢ;
@@ -517,7 +520,7 @@ internal static void F(this fInter x) {
 }
 
 internal static void clear(this ref IfaceKey k) {
-    k.i = default!;
+    k.i = default;
 }
 
 internal static void random(this ref IfaceKey k, ж<rand.Rand> Ꮡr) {
@@ -542,37 +545,38 @@ internal static partial uintptr hash(this ref IfaceKey k) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ifaceˢ = "Iface"u8;
+internal static ref readonly @string ifaceˢ => ref ifaceˢᵇ;
+private static readonly @string ifaceˢᵇ = "Iface"u8;
 
 internal static @string name(this ref IfaceKey k) {
     return ifaceˢ;
 }
 
 // Flipping a single bit of a key should flip each output bit with 50% probability.
-public static void TestSmhasherAvalanche(ж<testing.T> Ꮡt) {
+public static void TestSmhasherAvalanche(ж<testing.T> t) {
     if (GOARCH == "wasm"u8) {
-        Ꮡt.Skip(tooSlowOnWasmˢ);
+        t.Skip(tooSlowOnWasmˢ);
     }
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(tooLongForRaceModeˢ);
+        t.Skip(tooLongForRaceModeˢ);
     }
-    Ꮡt.Parallel();
-    avalancheTest1(Ꮡt, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(2)))));
-    avalancheTest1(Ꮡt, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(4)))));
-    avalancheTest1(Ꮡt, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(8)))));
-    avalancheTest1(Ꮡt, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(16)))));
-    avalancheTest1(Ꮡt, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(32)))));
-    avalancheTest1(Ꮡt, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(200)))));
-    avalancheTest1(Ꮡt, new runtime_test_package.Int32KeyжKey(Ꮡ(new Int32Key(nil))));
-    avalancheTest1(Ꮡt, new runtime_test_package.Int64KeyжKey(Ꮡ(new Int64Key(nil))));
-    avalancheTest1(Ꮡt, new runtime_test_package.EfaceKeyжKey(Ꮡ(new EfaceKey(nil))));
-    avalancheTest1(Ꮡt, new runtime_test_package.IfaceKeyжKey(Ꮡ(new IfaceKey(nil))));
+    t.Parallel();
+    avalancheTest1(t, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(2)))));
+    avalancheTest1(t, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(4)))));
+    avalancheTest1(t, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(8)))));
+    avalancheTest1(t, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(16)))));
+    avalancheTest1(t, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(32)))));
+    avalancheTest1(t, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(200)))));
+    avalancheTest1(t, new runtime_test_package.Int32KeyжKey(Ꮡ(new Int32Key())));
+    avalancheTest1(t, new runtime_test_package.Int64KeyжKey(Ꮡ(new Int64Key())));
+    avalancheTest1(t, new runtime_test_package.EfaceKeyжKey(Ꮡ(new EfaceKey())));
+    avalancheTest1(t, new runtime_test_package.IfaceKeyжKey(Ꮡ(new IfaceKey())));
 }
 
-internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
+internal static void avalancheTest1(ж<testing.T> t, Key k) {
     UntypedInt REP = 100000;
     var r = rand.New(rand.NewSource(1234));
     nint n = k.bits();
@@ -596,7 +600,7 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
             var g = Ꮡ(grid, i);
             for (nint j = 0; j < hashSize; j++) {
                 g.Value[j] += (nint)((uintptr)(d & 1));
-                d >>= (int)(1);
+                d >>= 1;
             }
         }
     }
@@ -607,7 +611,7 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
     // sum of coin flips such that a truly random experiment would have
     // all sums inside those bounds with 99% probability.
     nint N = n * hashSize;
-    float64 c = default!;
+    float64 c = default;
     // find c such that Prob(mean-c*stddev < x < mean+c*stddev)^N > .9999
     for (c = 0.0D; Δmath.Pow(Δmath.Erf(c / Δmath.Sqrt(2D)), (float64)N) < .9999D; c += .1D) {
     }
@@ -620,45 +624,45 @@ internal static void avalancheTest1(ж<testing.T> Ꮡt, Key k) {
         for (nint j = 0; j < hashSize; j++) {
             nint x = grid[i][j];
             if (x < low || x > high) {
-                Ꮡt.Errorf("bad bias for %s bit %d -> bit %d: %d/%d\n"u8, k.name(), i, j, x, (nint)(REP));
+                t.Errorf("bad bias for %s bit %d -> bit %d: %d/%d\n", k.name(), i, j, x, (nint)(REP));
             }
         }
     }
 }
 
 // All bit rotations of a set of distinct keys
-public static void TestSmhasherWindowed(ж<testing.T> Ꮡt) {
+public static void TestSmhasherWindowed(ж<testing.T> t) {
     if (race.Enabled) {
-        Ꮡt.Skip(tooLongForRaceModeˢ);
+        t.Skip(tooLongForRaceModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
     var h = newHashSet();
-    Ꮡt.Logf("32 bit keys"u8);
-    windowed(Ꮡt, h, new runtime_test_package.Int32KeyжKey(Ꮡ(new Int32Key(nil))));
-    Ꮡt.Logf("64 bit keys"u8);
-    windowed(Ꮡt, h, new runtime_test_package.Int64KeyжKey(Ꮡ(new Int64Key(nil))));
-    Ꮡt.Logf("string keys"u8);
-    windowed(Ꮡt, h, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(128)))));
+    t.Logf("32 bit keys");
+    windowed(t, h, new runtime_test_package.Int32KeyжKey(Ꮡ(new Int32Key())));
+    t.Logf("64 bit keys");
+    windowed(t, h, new runtime_test_package.Int64KeyжKey(Ꮡ(new Int64Key())));
+    t.Logf("string keys");
+    windowed(t, h, new runtime_test_package.BytesKeyжKey(Ꮡ(new BytesKey(new slice<byte>(128)))));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object flakyOn32BitSystemsˢ = (@string)"Flaky on 32-bit systems"u8;
 
-internal static void windowed(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, Key k) {
+internal static void windowed(ж<testing.T> t, ж<HashSet> Ꮡh, Key k) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (GOARCH == "wasm"u8) {
-        Ꮡt.Skip(tooSlowOnWasmˢ);
+        t.Skip(tooSlowOnWasmˢ);
     }
     if (runtime_internal_test_package.PtrSize == 4) {
         // This test tends to be flaky on 32-bit systems.
         // There's not enough bits in the hash output, so we
         // expect a nontrivial number of collisions, and it is
         // often quite a bit higher than expected. See issue 43130.
-        Ꮡt.Skip(flakyOn32BitSystemsˢ);
+        t.Skip(flakyOn32BitSystemsˢ);
     }
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
     UntypedInt BITS = 16;
 
@@ -672,31 +676,35 @@ internal static void windowed(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, Key k) {
             }
             h.add(k.hash());
         }
-        h.check(Ꮡt);
+        h.check(t);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ = "Foo"u8;
-internal static readonly @string barˢ = "Bar"u8;
-internal static readonly @string fooBarˢ = "FooBar"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "Foo"u8;
+internal static ref readonly @string barˢ => ref barˢᵇ;
+private static readonly @string barˢᵇ = "Bar"u8;
+internal static ref readonly @string fooBarˢ => ref fooBarˢᵇ;
+private static readonly @string fooBarˢᵇ = "FooBar"u8;
 
 // All keys of the form prefix + [A-Za-z0-9]*N + suffix.
-public static void TestSmhasherText(ж<testing.T> Ꮡt) {
+public static void TestSmhasherText(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
     var h = newHashSet();
-    text(Ꮡt, h, fooˢ, barˢ);
-    text(Ꮡt, h, fooBarˢ, ""u8);
-    text(Ꮡt, h, ""u8, fooBarˢ);
+    text(t, h, fooˢ, barˢ);
+    text(t, h, fooBarˢ, ""u8);
+    text(t, h, ""u8, fooBarˢ);
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string Sᶜ = "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrst0123456789"u8;
+internal static ref readonly @string Sᶜ => ref Sᶜᵇ;
+private static readonly @string Sᶜᵇ = "ABCDEFGHIJKLMNOPQRSTabcdefghijklmnopqrst0123456789"u8;
 
-internal static void text(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, @string prefix, @string suffix) {
+internal static void text(ж<testing.T> t, ж<HashSet> Ꮡh, @string prefix, @string suffix) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     const nint N = 4;
@@ -719,36 +727,39 @@ internal static void text(ж<testing.T> Ꮡt, ж<HashSet> Ꮡh, @string prefix, 
             }
         }
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloˢ = "hello"u8;
+internal static ref readonly @string helloˢ => ref helloˢᵇ;
+private static readonly @string helloˢᵇ = "hello"u8;
 
 // Make sure different seed values generate different hashes.
-public static void TestSmhasherSeed(ж<testing.T> Ꮡt) {
+public static void TestSmhasherSeed(ж<testing.T> t) {
     var h = newHashSet();
     const nint N = 100000;
     @string s = helloˢ;
     for (nint i = 0; i < N; i++) {
         h.addS_seed(s, (uintptr)i);
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testIssue66841ˢ = "TEST_ISSUE_66841"u8;
-internal static readonly @string testRunTestIssue66841ˢ = "-test.run=^TestIssue66841$"u8;
+internal static ref readonly @string testIssue66841ˢ => ref testIssue66841ˢᵇ;
+private static readonly @string testIssue66841ˢᵇ = "TEST_ISSUE_66841"u8;
+internal static ref readonly @string testRunTestIssue66841ˢ => ref testRunTestIssue66841ˢᵇ;
+private static readonly @string testRunTestIssue66841ˢᵇ = "-test.run=^TestIssue66841$"u8;
 
-public static void TestIssue66841(ж<testing.T> Ꮡt) {
+public static void TestIssue66841(ж<testing.T> t) {
     if (runtime_internal_test_package.UseAeshash.Value && Δos.Getenv(testIssue66841ˢ) == ""u8) {
         // We want to test the backup hash, so if we're running on a machine
         // that uses aeshash, exec ourselves while turning aes off.
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(Ꮡt), testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunTestIssue66841ˢ));
-        cmd.Value.Env = append((~cmd).Env, "GODEBUG=cpu.aes=off"u8, "TEST_ISSUE_66841=1");
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new runtime_test_package.testing_TжTB(t), testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunTestIssue66841ˢ));
+        cmd.Env = append(cmd.Env, (@string)"GODEBUG=cpu.aes=off", (@string)"TEST_ISSUE_66841=1");
         var (@out, err) = cmd.CombinedOutput();
-        if (err != default!) {
-            Ꮡt.Errorf("%s"u8, (@string)@out);
+        if (err != nil) {
+            t.Errorf("%s", (@string)@out);
         }
         // Fall through. Might as well run this test when aeshash is on also.
     }
@@ -759,7 +770,7 @@ public static void TestIssue66841(ж<testing.T> Ꮡt) {
         binary.LittleEndian.PutUint64(b[8..], (uint64)i);
         h.addB(b[..]);
     }
-    h.check(Ꮡt);
+    h.check(t);
 }
 
 // size of the hash output (32 or 64 bits)
@@ -776,7 +787,7 @@ internal static void randBytes(ж<rand.Rand> Ꮡr, slice<byte> b) {
 internal static void benchmarkHash(ж<testing.B> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string s = strings.Repeat("A"u8, n);
+    @string s = strings.Repeat("A", n);
 
     for (nint i = 0; i < b.N; i++) {
         runtime_internal_test_package.StringHash(s, 0);
@@ -784,34 +795,35 @@ internal static void benchmarkHash(ж<testing.B> Ꮡb, nint n) {
     b.SetBytes((int64)n);
 }
 
-public static void BenchmarkHash5(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, 5);
+public static void BenchmarkHash5(ж<testing.B> b) {
+    benchmarkHash(b, 5);
 }
 
-public static void BenchmarkHash16(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, 16);
+public static void BenchmarkHash16(ж<testing.B> b) {
+    benchmarkHash(b, 16);
 }
 
-public static void BenchmarkHash64(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, 64);
+public static void BenchmarkHash64(ж<testing.B> b) {
+    benchmarkHash(b, 64);
 }
 
-public static void BenchmarkHash1024(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, 1024);
+public static void BenchmarkHash1024(ж<testing.B> b) {
+    benchmarkHash(b, 1024);
 }
 
-public static void BenchmarkHash65536(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, 65536);
+public static void BenchmarkHash65536(ж<testing.B> b) {
+    benchmarkHash(b, 65536);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ2 = "foo"u8;
+internal static ref readonly @string fooˢ2 => ref fooˢ2ᵇ;
+private static readonly @string fooˢ2ᵇ = "foo"u8;
 
 // Make the key type at most 128 bytes. Otherwise,
 // we get an allocation per key.
 internal partial struct TestArrayHash_key /*[8]@string*/;
 
-public static void TestArrayHash(ж<testing.T> Ꮡt) {
+public static void TestArrayHash(ж<testing.T> t) {
     // Make sure that "" in arrays hash correctly. The hash
     // should at least scramble the input seed so that, e.g.,
     // {"","foo"} and {"foo",""} have different hashes.
@@ -828,7 +840,7 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
 
         // fill m with keys that have 4 "foo"s and 4 ""s.
         for (nint i = 0; i < 256; i++) {
-            TestArrayHash_key k = default!;
+            TestArrayHash_key k = default;
             nint cnt = 0;
             for (nuint j = (nuint)0; j < 8; j++) {
                 if ((i.Rsh(j) & 1) != 0) {
@@ -841,12 +853,12 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
             }
         }
         if (len(m) != 70) {
-            Ꮡt.Errorf("bad test: (8 choose 4) should be 70, not %d"u8, len(m));
+            t.Errorf("bad test: (8 choose 4) should be 70, not %d", len(m));
         }
     };
     {
         var n = testing.AllocsPerRun(10, f); if (n > 6D) {
-            Ꮡt.Errorf("too many allocs %f - hash not balanced"u8, n);
+            t.Errorf("too many allocs %f - hash not balanced", n);
         }
     }
 }
@@ -855,14 +867,14 @@ internal partial struct TestStructHash_key /*dyn*/ {
     internal @string a, b, c, d, e, f, g, h;
 }
 
-public static void TestStructHash(ж<testing.T> Ꮡt) {
+public static void TestStructHash(ж<testing.T> t) {
     // See the comment in TestArrayHash.
     var f = () => {
         var m = new map<TestStructHash_key, bool>(70);
 
         // fill m with keys that have 4 "foo"s and 4 ""s.
         for (nint i = 0; i < 256; i++) {
-            TestStructHash_key k = default!;
+            TestStructHash_key k = default;
             nint cnt = 0;
             if ((i & 1) != 0) {
                 k.a = fooˢ2;
@@ -901,12 +913,12 @@ public static void TestStructHash(ж<testing.T> Ꮡt) {
             }
         }
         if (len(m) != 70) {
-            Ꮡt.Errorf("bad test: (8 choose 4) should be 70, not %d"u8, len(m));
+            t.Errorf("bad test: (8 choose 4) should be 70, not %d", len(m));
         }
     };
     {
         var n = testing.AllocsPerRun(10, f); if (n > 6D) {
-            Ꮡt.Errorf("too many allocs %f - hash not balanced"u8, n);
+            t.Errorf("too many allocs %f - hash not balanced", n);
         }
     }
 }
@@ -918,7 +930,7 @@ public static void BenchmarkAlignedLoad(ж<testing.B> Ꮡb) {
 
     ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(0));
-    uint64 s = default!;
+    uint64 s = default;
     for (nint i = 0; i < b.N; i++) {
         s += runtime_internal_test_package.ReadUnaligned64(p);
     }
@@ -930,18 +942,18 @@ public static void BenchmarkUnalignedLoad(ж<testing.B> Ꮡb) {
 
     ref var buf = ref heap(new array<byte>(16), out var Ꮡbuf);
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡbuf.at<byte>(1));
-    uint64 s = default!;
+    uint64 s = default;
     for (nint i = 0; i < b.N; i++) {
         s += runtime_internal_test_package.ReadUnaligned64(p);
     }
     sink = s;
 }
 
-public static void TestCollisions(ж<testing.T> Ꮡt) {
+public static void TestCollisions(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
     for (nint i = 0; i < 16; i++) {
         for (nint j = 0; j < 16; j++) {
             if (j == i) {
@@ -958,7 +970,7 @@ public static void TestCollisions(ж<testing.T> Ꮡt) {
             nint avg = 41427;
             nint stdDev = 123;
             if (len(m) < avg - 40 * stdDev || len(m) > avg + 40 * stdDev) {
-                Ꮡt.Errorf("bad number of collisions i=%d j=%d outputs=%d out of 65536\n"u8, i, j, len(m));
+                t.Errorf("bad number of collisions i=%d j=%d outputs=%d out of 65536\n", i, j, len(m));
             }
         }
     }

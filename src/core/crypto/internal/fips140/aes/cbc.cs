@@ -45,7 +45,7 @@ public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slic
     if (len(src) == 0) {
         return;
     }
-    cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.of(CBCEncrypter.Ꮡiv), dst, src);
+    cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
 public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) {
@@ -108,7 +108,7 @@ public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slic
     if (len(src) == 0) {
         return;
     }
-    cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.of(CBCDecrypter.Ꮡiv), dst, src);
+    cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
 public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) {
@@ -135,7 +135,7 @@ internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>>
     while (start >= 0) {
         decryptBlock(ref b, dst.slice(start, end), src.slice(start, end));
 
-        if (start > 0){
+        if (start > 0) {
             subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), src.slice(prev, start));
         } else {
             // The first block is special because it uses the saved iv.

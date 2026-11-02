@@ -23,45 +23,47 @@ partial class rand_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingStartingAnotherˢ = (@string)"skipping starting another executable in short mode"u8;
-internal static readonly @string testRunTestDefaultRaceˢ = "-test.run=^TestDefaultRace$"u8;
+internal static ref readonly @string testRunTestDefaultRaceˢ => ref testRunTestDefaultRaceˢᵇ;
+private static readonly @string testRunTestDefaultRaceˢᵇ = "-test.run=^TestDefaultRace$"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string envᶜ = "GO_RAND_TEST_HELPER_CODE"u8;
+internal static ref readonly @string envᶜ => ref envᶜᵇ;
+private static readonly @string envᶜᵇ = "GO_RAND_TEST_HELPER_CODE"u8;
 
 // Test that racy access to the default functions behaves reasonably.
-public static void TestDefaultRace(ж<testing.T> Ꮡt) {
+public static void TestDefaultRace(ж<testing.T> t) {
     // Skip the test in short mode, but even in short mode run
     // the test if we are using the race detector, because part
     // of this is to see whether the race detector reports any problems.
     if (testing.Short() && !race.Enabled) {
-        Ꮡt.Skip(skippingStartingAnotherˢ);
+        t.Skip(skippingStartingAnotherˢ);
     }
 
     @string env = envᶜ;
     {
         @string v = os.Getenv(env); if (v != ""u8) {
-            doDefaultTest(Ꮡt, v);
+            doDefaultTest(t, v);
             return;
         }
     }
 
-    Ꮡt.Parallel();
+    t.Parallel();
 
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         var i = iᴛ1;
-        Ꮡt.Run(strconv.Itoa(i), (ж<testing.T> tΔ1) => {
+        t.Run(strconv.Itoa(i), (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var cmd = testenv.Command(new rand_test_package.testing_TжTB(tΔ1), testenv.Executable(new rand_test_package.testing_TжTB(tΔ1)), testRunTestDefaultRaceˢ);
             cmd = testenv.CleanCmdEnv(cmd);
-            cmd.Value.Env = append((~cmd).Env, fmt.Sprintf("GO_RAND_TEST_HELPER_CODE=%d"u8, i / 2));
+            cmd.Env = append(cmd.Env, fmt.Sprintf("GO_RAND_TEST_HELPER_CODE=%d"u8, i / 2));
             if (i % 2 != 0) {
-                cmd.Value.Env = append((~cmd).Env, "GODEBUG=randautoseed=0"u8);
+                cmd.Env = append(cmd.Env, (@string)"GODEBUG=randautoseed=0");
             }
             var (@out, err) = cmd.CombinedOutput();
             if (len(@out) > 0) {
-                tΔ1.Logf("%s"u8, @out);
+                tΔ1.Logf("%s", @out);
             }
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Error(err);
             }
         });
@@ -72,10 +74,10 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
 // top-level math/rand functions. Make sure that we can make concurrent
 // calls to top-level functions and to Seed without any duplicate values.
 // This will also give the race detector a change to report any problems.
-internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
+internal static partial void doDefaultTest(ж<testing.T> t, @string v) {
     var (code, err) = strconv.Atoi(v);
-    if (err != default!) {
-        Ꮡt.Fatalf("internal error: unrecognized code %q"u8, v);
+    if (err != nil) {
+        t.Fatalf("internal error: unrecognized code %q", v);
     }
 
     nint goroutines = runtime.GOMAXPROCS(0);
@@ -174,7 +176,7 @@ internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
         break;
     }
     default: {
-        Ꮡt.Fatalf("internal error: unrecognized code %d"u8, code);
+        t.Fatalf("internal error: unrecognized code %d", code);
         break;
     }}
 
@@ -182,12 +184,12 @@ internal static partial void doDefaultTest(ж<testing.T> Ꮡt, @string v) {
     goǃ(() => {
         Ꮡwg.Wait();
         close(chʗ4);
-    });
+    }, GoStack.Bounded);
 
     var m = new map<uint64, bool>();
     foreach (var i in ch) {
         if (m[i]) {
-            Ꮡt.Errorf("saw %d twice"u8, i);
+            t.Errorf("saw %d twice", i);
         }
         m[i] = true;
     }

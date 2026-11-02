@@ -24,19 +24,19 @@ partial class tls_package {
 // configured lists. Missing items are treated as if they were not implemented.
 //
 // They are applied when the fips140 GODEBUG is "on" or "only".
-internal static slice<uint16> allowedSupportedVersionsFIPS = new uint16[]{
+internal static slice<uint16> allowedSupportedVersionsFIPS = slice<uint16>([
     VersionTLS12,
     VersionTLS13
-}.slice();
-internal static slice<CurveID> allowedCurvePreferencesFIPS = new CurveID[]{
+]);
+internal static slice<CurveID> allowedCurvePreferencesFIPS = slice<CurveID>([
     X25519MLKEM768,
     SecP256r1MLKEM768,
     SecP384r1MLKEM1024,
     CurveP256,
     CurveP384,
     CurveP521
-}.slice();
-internal static slice<SignatureScheme> allowedSignatureAlgorithmsFIPS = new SignatureScheme[]{
+]);
+internal static slice<SignatureScheme> allowedSignatureAlgorithmsFIPS = slice<SignatureScheme>([
     PSSWithSHA256,
     ECDSAWithP256AndSHA256,
     Ed25519,
@@ -47,27 +47,27 @@ internal static slice<SignatureScheme> allowedSignatureAlgorithmsFIPS = new Sign
     PKCS1WithSHA512,
     ECDSAWithP384AndSHA384,
     ECDSAWithP521AndSHA512
-}.slice();
-internal static slice<uint16> allowedCipherSuitesFIPS = new uint16[]{
+]);
+internal static slice<uint16> allowedCipherSuitesFIPS = slice<uint16>([
     TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
     TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
     TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
     TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
     TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
     TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256
-}.slice();
-internal static slice<uint16> allowedCipherSuitesTLS13FIPS = new uint16[]{
+]);
+internal static slice<uint16> allowedCipherSuitesTLS13FIPS = slice<uint16>([
     TLS_AES_128_GCM_SHA256,
     TLS_AES_256_GCM_SHA384
-}.slice();
+]);
 
 internal static bool isCertificateAllowedFIPS(ref Δx509.Certificate c) {
     switch (c.PublicKey.type()) {
     case ж<rsa.PublicKey> k: {
-        return (~k).N.BitLen() >= 2048;
+        return k.N.BitLen() >= 2048;
     }
     case ж<ecdsa.PublicKey> k: {
-        return AreEqual((~k).Curve, elliptic.P256()) || AreEqual((~k).Curve, elliptic.P384()) || AreEqual((~k).Curve, elliptic.P521());
+        return AreEqual(k.Curve, elliptic.P256()) || AreEqual(k.Curve, elliptic.P384()) || AreEqual(k.Curve, elliptic.P521());
     }
     case ed25519.PublicKey k: {
         return true;

@@ -117,32 +117,32 @@ partial class math_package {
 //              erfc/erf(NaN) is NaN
 internal static UntypedFloat erx => 8.45062911510467529297e-01; // 0x3FEB0AC160000000
 // Coefficients for approximation to  erf in [0, 0.84375]
-internal static UntypedFloat efx => 1.28379167095512586316e-01; // 0x3FC06EBA8214DB69
+internal static UntypedFloat efx => 1.28379167095512586316e-01;  // 0x3FC06EBA8214DB69
 internal static UntypedFloat efx8 => 1.02703333676410069053e+00; // 0x3FF06EBA8214DB69
-internal static UntypedFloat pp0 => 1.28379167095512558561e-01; // 0x3FC06EBA8214DB68
+internal static UntypedFloat pp0 => 1.28379167095512558561e-01;  // 0x3FC06EBA8214DB68
 internal static UntypedFloat pp1 => -3.25042107247001499370e-01; // 0xBFD4CD7D691CB913
 internal static UntypedFloat pp2 => -2.84817495755985104766e-02; // 0xBF9D2A51DBD7194F
 internal static UntypedFloat pp3 => -5.77027029648944159157e-03; // 0xBF77A291236668E4
 internal static UntypedFloat pp4 => -2.37630166566501626084e-05; // 0xBEF8EAD6120016AC
-internal static UntypedFloat qq1 => 3.97917223959155352819e-01; // 0x3FD97779CDDADC09
-internal static UntypedFloat qq2 => 6.50222499887672944485e-02; // 0x3FB0A54C5536CEBA
-internal static UntypedFloat qq3 => 5.08130628187576562776e-03; // 0x3F74D022C4D36B0F
-internal static UntypedFloat qq4 => 1.32494738004321644526e-04; // 0x3F215DC9221C1A10
+internal static UntypedFloat qq1 => 3.97917223959155352819e-01;  // 0x3FD97779CDDADC09
+internal static UntypedFloat qq2 => 6.50222499887672944485e-02;  // 0x3FB0A54C5536CEBA
+internal static UntypedFloat qq3 => 5.08130628187576562776e-03;  // 0x3F74D022C4D36B0F
+internal static UntypedFloat qq4 => 1.32494738004321644526e-04;  // 0x3F215DC9221C1A10
 internal static UntypedFloat qq5 => -3.96022827877536812320e-06; // 0xBED09C4342A26120
 // Coefficients for approximation to  erf  in [0.84375, 1.25]
 internal static UntypedFloat pa0 => -2.36211856075265944077e-03; // 0xBF6359B8BEF77538
-internal static UntypedFloat pa1 => 4.14856118683748331666e-01; // 0x3FDA8D00AD92B34D
+internal static UntypedFloat pa1 => 4.14856118683748331666e-01;  // 0x3FDA8D00AD92B34D
 internal static UntypedFloat pa2 => -3.72207876035701323847e-01; // 0xBFD7D240FBB8C3F1
-internal static UntypedFloat pa3 => 3.18346619901161753674e-01; // 0x3FD45FCA805120E4
+internal static UntypedFloat pa3 => 3.18346619901161753674e-01;  // 0x3FD45FCA805120E4
 internal static UntypedFloat pa4 => -1.10894694282396677476e-01; // 0xBFBC63983D3E28EC
-internal static UntypedFloat pa5 => 3.54783043256182359371e-02; // 0x3FA22A36599795EB
+internal static UntypedFloat pa5 => 3.54783043256182359371e-02;  // 0x3FA22A36599795EB
 internal static UntypedFloat pa6 => -2.16637559486879084300e-03; // 0xBF61BF380A96073F
-internal static UntypedFloat qa1 => 1.06420880400844228286e-01; // 0x3FBB3E6618EEE323
-internal static UntypedFloat qa2 => 5.40397917702171048937e-01; // 0x3FE14AF092EB6F33
-internal static UntypedFloat qa3 => 7.18286544141962662868e-02; // 0x3FB2635CD99FE9A7
-internal static UntypedFloat qa4 => 1.26171219808761642112e-01; // 0x3FC02660E763351F
-internal static UntypedFloat qa5 => 1.36370839120290507362e-02; // 0x3F8BEDC26B51DD1C
-internal static UntypedFloat qa6 => 1.19844998467991074170e-02; // 0x3F888B545735151D
+internal static UntypedFloat qa1 => 1.06420880400844228286e-01;  // 0x3FBB3E6618EEE323
+internal static UntypedFloat qa2 => 5.40397917702171048937e-01;  // 0x3FE14AF092EB6F33
+internal static UntypedFloat qa3 => 7.18286544141962662868e-02;  // 0x3FB2635CD99FE9A7
+internal static UntypedFloat qa4 => 1.26171219808761642112e-01;  // 0x3FC02660E763351F
+internal static UntypedFloat qa5 => 1.36370839120290507362e-02;  // 0x3F8BEDC26B51DD1C
+internal static UntypedFloat qa6 => 1.19844998467991074170e-02;  // 0x3F888B545735151D
 // Coefficients for approximation to  erfc in [1.25, 1/0.35]
 internal static UntypedFloat ra0 => -9.86494403484714822705e-03; // 0xBF843412600D6435
 internal static UntypedFloat ra1 => -6.93858572707181764372e-01; // 0xBFE63416E4BA7360
@@ -152,13 +152,13 @@ internal static UntypedFloat ra4 => -1.62396669462573470355e+02; // 0xC0644CB184
 internal static UntypedFloat ra5 => -1.84605092906711035994e+02; // 0xC067135CEBCCABB2
 internal static UntypedFloat ra6 => -8.12874355063065934246e+01; // 0xC054526557E4D2F2
 internal static UntypedFloat ra7 => -9.81432934416914548592e+00; // 0xC023A0EFC69AC25C
-internal static UntypedFloat sa1 => 1.96512716674392571292e+01; // 0x4033A6B9BD707687
-internal static UntypedFloat sa2 => 1.37657754143519042600e+02; // 0x4061350C526AE721
-internal static UntypedFloat sa3 => 4.34565877475229228821e+02; // 0x407B290DD58A1A71
-internal static UntypedFloat sa4 => 6.45387271733267880336e+02; // 0x40842B1921EC2868
-internal static UntypedFloat sa5 => 4.29008140027567833386e+02; // 0x407AD02157700314
-internal static UntypedFloat sa6 => 1.08635005541779435134e+02; // 0x405B28A3EE48AE2C
-internal static UntypedFloat sa7 => 6.57024977031928170135e+00; // 0x401A47EF8E484A93
+internal static UntypedFloat sa1 => 1.96512716674392571292e+01;  // 0x4033A6B9BD707687
+internal static UntypedFloat sa2 => 1.37657754143519042600e+02;  // 0x4061350C526AE721
+internal static UntypedFloat sa3 => 4.34565877475229228821e+02;  // 0x407B290DD58A1A71
+internal static UntypedFloat sa4 => 6.45387271733267880336e+02;  // 0x40842B1921EC2868
+internal static UntypedFloat sa5 => 4.29008140027567833386e+02;  // 0x407AD02157700314
+internal static UntypedFloat sa6 => 1.08635005541779435134e+02;  // 0x405B28A3EE48AE2C
+internal static UntypedFloat sa7 => 6.57024977031928170135e+00;  // 0x401A47EF8E484A93
 internal static UntypedFloat sa8 => -6.04244152148580987438e-02; // 0xBFAEEFF2EE749A62
 // Coefficients for approximation to  erfc in [1/.35, 28]
 internal static UntypedFloat rb0 => -9.86494292470009928597e-03; // 0xBF84341239E86F4A
@@ -168,12 +168,12 @@ internal static UntypedFloat rb3 => -1.60636384855821916062e+02; // 0xC064145D43
 internal static UntypedFloat rb4 => -6.37566443368389627722e+02; // 0xC083EC881375F228
 internal static UntypedFloat rb5 => -1.02509513161107724954e+03; // 0xC09004616A2E5992
 internal static UntypedFloat rb6 => -4.83519191608651397019e+02; // 0xC07E384E9BDC383F
-internal static UntypedFloat sb1 => 3.03380607434824582924e+01; // 0x403E568B261D5190
-internal static UntypedFloat sb2 => 3.25792512996573918826e+02; // 0x40745CAE221B9F0A
-internal static UntypedFloat sb3 => 1.53672958608443695994e+03; // 0x409802EB189D5118
-internal static UntypedFloat sb4 => 3.19985821950859553908e+03; // 0x40A8FFB7688C246A
-internal static UntypedFloat sb5 => 2.55305040643316442583e+03; // 0x40A3F219CEDF3BE6
-internal static UntypedFloat sb6 => 4.74528541206955367215e+02; // 0x407DA874E79FE763
+internal static UntypedFloat sb1 => 3.03380607434824582924e+01;  // 0x403E568B261D5190
+internal static UntypedFloat sb2 => 3.25792512996573918826e+02;  // 0x40745CAE221B9F0A
+internal static UntypedFloat sb3 => 1.53672958608443695994e+03;  // 0x409802EB189D5118
+internal static UntypedFloat sb4 => 3.19985821950859553908e+03;  // 0x40A8FFB7688C246A
+internal static UntypedFloat sb5 => 2.55305040643316442583e+03;  // 0x40A3F219CEDF3BE6
+internal static UntypedFloat sb6 => 4.74528541206955367215e+02;  // 0x407DA874E79FE763
 internal static UntypedFloat sb7 => -2.24409524465858183362e+01; // 0xC03670E242712D62
 
 // Erf returns the error function of x.
@@ -191,7 +191,7 @@ public static float64 Erf(float64 x) {
 }
 
 internal static float64 erf(float64 x) {
-    const float64 VeryTiny = 2.848094538889218e-306; // 0x0080000000000000
+    const float64 VeryTiny = 2.848094538889218e-306;                   // 0x0080000000000000
     const float64 Small = /* 1.0 / (1 << 28) */ 3.725290298461914e-09; // 2**-28
     // special cases
     switch (ᐧ) {
@@ -210,9 +210,9 @@ internal static float64 erf(float64 x) {
         sign = true;
     }
     if (x < 0.84375D) { // |x| < 0.84375
-        float64 temp = default!;
-        if (x < Small){ // |x| < 2**-28
-            if (x < VeryTiny){
+        float64 temp = default;
+        if (x < Small) { // |x| < 2**-28
+            if (x < VeryTiny) {
                 temp = 0.125D * (8.0D * x + (float64)efx8 * x); // avoid underflow
             } else {
                 temp = x + (float64)efx * x;
@@ -245,9 +245,9 @@ internal static float64 erf(float64 x) {
         return 1D;
     }
     var s = 1D / (x * x);
-    float64 R = default!;
-    float64 S = default!;
-    if (x < 1D / 0.35D){ // |x| < 1 / 0.35  ~ 2.857143
+    float64 R = default;
+    float64 S = default;
+    if (x < 1D / 0.35D) { // |x| < 1 / 0.35  ~ 2.857143
         R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
         S = 1D + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
     } else { // |x| >= 1 / 0.35  ~ 2.857143
@@ -295,15 +295,15 @@ internal static float64 erfc(float64 x) {
         sign = true;
     }
     if (x < 0.84375D) { // |x| < 0.84375
-        float64 temp = default!;
-        if (x < Tiny){ // |x| < 2**-56
+        float64 temp = default;
+        if (x < Tiny) { // |x| < 2**-56
             temp = x;
         } else {
             var z = x * x;
             var r = (float64)pp0 + z * ((float64)pp1 + z * ((float64)pp2 + z * ((float64)pp3 + z * (float64)pp4)));
             var s = 1D + z * ((float64)qq1 + z * ((float64)qq2 + z * ((float64)qq3 + z * ((float64)qq4 + z * (float64)qq5))));
             var y = r / s;
-            if (x < 0.25D){ // |x| < 1/4
+            if (x < 0.25D) { // |x| < 1/4
                 temp = x + x * y;
             } else {
                 temp = 0.5D + (x * y + (x - 0.5D));
@@ -325,9 +325,9 @@ internal static float64 erfc(float64 x) {
     }
     if (x < 28D) { // |x| < 28
         var s = 1D / (x * x);
-        float64 R = default!;
-        float64 S = default!;
-        if (x < 1D / 0.35D){ // |x| < 1 / 0.35 ~ 2.857143
+        float64 R = default;
+        float64 S = default;
+        if (x < 1D / 0.35D) { // |x| < 1 / 0.35 ~ 2.857143
             R = (float64)ra0 + s * ((float64)ra1 + s * ((float64)ra2 + s * ((float64)ra3 + s * ((float64)ra4 + s * ((float64)ra5 + s * ((float64)ra6 + s * (float64)ra7))))));
             S = 1D + s * ((float64)sa1 + s * ((float64)sa2 + s * ((float64)sa3 + s * ((float64)sa4 + s * ((float64)sa5 + s * ((float64)sa6 + s * ((float64)sa7 + s * (float64)sa8)))))));
         } else { // |x| >= 1 / 0.35 ~ 2.857143

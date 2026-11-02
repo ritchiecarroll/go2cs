@@ -62,16 +62,16 @@ partial class math_package {
 // tan coefficients
 internal static array<float64> _tanP = new float64[]{
     -1.30936939181383777646e4D, // 0xc0c992d8d24f3f38
-    1.15351664838587416140e6D, // 0x413199eca5fc9ddd
-    -1.79565251976484877988e7D // 0xc1711fead3299176
+    1.15351664838587416140e6D,  // 0x413199eca5fc9ddd
+    -1.79565251976484877988e7D  // 0xc1711fead3299176
 }.array();
 
 internal static array<float64> _tanQ = new float64[]{
     1.00000000000000000000e0D,
-    1.36812963470692954678e4D, // 0x40cab8a5eeb36572
+    1.36812963470692954678e4D,  // 0x40cab8a5eeb36572
     -1.32089234440210967447e6D, // 0xc13427bc582abc96
-    2.50083801823357915839e7D, // 0x4177d98fc2ead8ef
-    -5.38695755929454629881e7D // 0xc189afe03cbe5a31
+    2.50083801823357915839e7D,  // 0x4177d98fc2ead8ef
+    -5.38695755929454629881e7D  // 0xc189afe03cbe5a31
 }.array();
 
 // Tan returns the tangent of the radian argument x.
@@ -89,8 +89,8 @@ public static float64 Tan(float64 x) {
 }
 
 internal static float64 tan(float64 x) {
-    const float64 PI4A = 7.85398125648498535156e-1; // 0x3fe921fb40000000, Pi/4 split into three parts
-    const float64 PI4B = 3.77489470793079817668e-8; // 0x3e64442d00000000,
+    const float64 PI4A = 7.85398125648498535156e-1;  // 0x3fe921fb40000000, Pi/4 split into three parts
+    const float64 PI4B = 3.77489470793079817668e-8;  // 0x3e64442d00000000,
     const float64 PI4C = 2.69515142907905952645e-15; // 0x3ce8469898cc5170,
     // special cases
     switch (ᐧ) {
@@ -107,14 +107,14 @@ internal static float64 tan(float64 x) {
         x = -x;
         sign = true;
     }
-    uint64 j = default!;
-    float64 y = default!;
-    float64 z = default!;
-    if (x >= reduceThreshold){
+    uint64 j = default;
+    float64 y = default;
+    float64 z = default;
+    if (x >= reduceThreshold) {
         (j, z) = trigReduce(x);
     } else {
         j = (uint64)(x * /* (4 / Pi) */ 1.2732395447351628D); // integer part of x/(Pi/4), as integer for tests on the phase angle
-        y = (float64)j; // integer part of x/(Pi/4), as float
+        y = (float64)j;                                       // integer part of x/(Pi/4), as float
 
         /* map zeros and singularities to origin */
         if ((j & 1) == 1) {
@@ -126,7 +126,7 @@ internal static float64 tan(float64 x) {
     }
     var zz = z * z;
 
-    if (zz > 1e-14D){
+    if (zz > 1e-14D) {
         y = z + z * (zz * (((_tanP[0] * zz) + _tanP[1]) * zz + _tanP[2]) / ((((zz + _tanQ[1]) * zz + _tanQ[2]) * zz + _tanQ[3]) * zz + _tanQ[4]));
     } else {
         y = z;

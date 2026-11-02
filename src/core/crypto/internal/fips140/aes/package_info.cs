@@ -47,7 +47,12 @@ using static go.crypto.@internal.fips140.aes_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(CBCDecrypter))]
+[assembly: GoFieldAccess(typeof(CBCEncrypter))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,15 +62,15 @@ using static go.crypto.@internal.fips140.aes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "AC5mksqCrMSuwraUpqKUpKSUpoCklIKClIKUgpSmlIKClIKUgpSssg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKUgoKCgqaCgoKmgrKCgoKCgoK4goKClIKCgpSCgoKCqJKClIKCgoKmgoKCpoKygoKCgoKCuIKCgpSCgoKUgoKCgqiSrpCowpaSgoKUgoKCkoKU3IKCgoKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_noasm.go", "aes_noasm.cs", "AAwagoKmgqaCpg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/cast.go", "cast.cs", "AA0cgoK4uLi4goKUgoKClIKClA==", "15-46:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaApKKClIKUgpSCgpSmgoKUpqKClIKmgoK4AAcU0qaApKKClIKUgpSCgpSmgoKUptiCgqaClIKUgqamgoI=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/cbc_noasm.go", "cbc_noasm.cs", "AAgSgqaC")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/const.go", "const.cs", "ABImABMoABMoABQsACJEACJEACJEACRMACJEACJEACJE")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquJKkgoKmAAcQopSCgoK8woCCgoKCAAUS4oKUgoKUlJSAhKKCgoKCgraCgoKCuIKCgoKUgoKCgpSCgoKCpoSigoIAAxLCgoKCgoKmgqaCgoI=", "", "", "38=BEUint64/1/2/2,BEUint64/2/2/3")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/ctr_noasm.go", "ctr_noasm.cs", "AAgSsqayprKmsg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/aes.go", "aes.cs", "AC5mksqCrMSuwsaUpqKUtLSkpoCklIKClIKUgpSmlIKClIKUgpSssg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/aes_generic.go", "aes_generic.cs", "AClUkoKUgoKCgqaCgoKmgrKCgoKCgoK4goKClIKCgpSCgoKCqJKClIKCgoKmgoKCpoKygoKCgoKCuIKCgpSCgoKUgoKCgqiSrpCowpaSgoKUgoKCgoKU3IKCgoKCgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/aes_noasm.go", "aes_noasm.cs", "AAwagoKmgqaCpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/cast.go", "cast.cs", "AA0cgoK4uLi4goKUgoKClIKClA==", "15-46:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/cbc.go", "cbc.cs", "ABIo0qaApKKClIKUgpSCgpSmgoKUpqKClIKmgoK4AAcU0qaApKKClIKUgpSCgpSmgoKUptiCgqaClIKUgqamgoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/cbc_noasm.go", "cbc_noasm.cs", "AAgSgqaC")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/const.go", "const.cs", "ABImABMoABMoABQsACJEACJEACJEACRMACJEACJEACJE")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/ctr.go", "ctr.cs", "ABcquIKkgoKmAAcQopSCgoK8woCCgoKCAAUS4oKUgoKUlJSAhKKCgoKCgraCgoKCuIKCgoKUgoKCgpSCgoKCpoSigoIAAxLCgoKCgoKmgqaCgoI=", "", "", "37=BEUint64/1/2/2,BEUint64/2/2/3")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/ctr_noasm.go", "ctr_noasm.cs", "AAgSsqayprKmsg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

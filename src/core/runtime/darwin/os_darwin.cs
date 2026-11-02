@@ -22,13 +22,15 @@ partial struct mOS {
 }
 
 internal static void unimplemented(@string name) {
-    println(name, (@string)"not implemented"u8);
+    println(name, (@string)"not implemented");
     ((ж<nint>)(uintptr)((@unsafe.Pointer)(uintptr)1231)).Value = 1231;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pthreadMutexInitˢ = "pthread_mutex_init"u8;
-internal static readonly @string pthreadCondInitˢ = "pthread_cond_init"u8;
+internal static ref readonly @string pthreadMutexInitˢ => ref pthreadMutexInitˢᵇ;
+private static readonly @string pthreadMutexInitˢᵇ = "pthread_mutex_init"u8;
+internal static ref readonly @string pthreadCondInitˢ => ref pthreadCondInitˢᵇ;
+private static readonly @string pthreadCondInitˢᵇ = "pthread_cond_init"u8;
 
 //go:nosplit
 internal static void semacreate(ж<m> Ꮡmp) {
@@ -51,11 +53,12 @@ internal static void semacreate(ж<m> Ꮡmp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string semasleepOnDarwinSignalˢ = "semasleep on Darwin signal stack"u8;
+internal static ref readonly @string semasleepOnDarwinSignalˢ => ref semasleepOnDarwinSignalˢᵇ;
+private static readonly @string semasleepOnDarwinSignalˢᵇ = "semasleep on Darwin signal stack"u8;
 
 //go:nosplit
 internal static int32 semasleep(int64 ns) {
-    int64 start = default!;
+    int64 start = default;
     if (ns >= 0) {
         start = nanotime();
     }
@@ -66,13 +69,13 @@ internal static int32 semasleep(int64 ns) {
         @throw(semasleepOnDarwinSignalˢ);
     }
     pthread_mutex_lock(mp.of(m.Ꮡmutex));
-    while (ᐧ) {
+    for (;;) {
         if ((~mp).count > 0) {
             mp.Value.count--;
             pthread_mutex_unlock(mp.of(m.Ꮡmutex));
             return 0;
         }
-        if (ns >= 0){
+        if (ns >= 0) {
             var spent = nanotime() - start;
             if (spent >= ns) {
                 pthread_mutex_unlock(mp.of(m.Ꮡmutex));
@@ -92,7 +95,8 @@ internal static int32 semasleep(int64 ns) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string semawakeupOnDarwinSignalˢ = "semawakeup on Darwin signal stack"u8;
+internal static ref readonly @string semawakeupOnDarwinSignalˢ => ref semawakeupOnDarwinSignalˢᵇ;
+private static readonly @string semawakeupOnDarwinSignalˢᵇ = "semawakeup on Darwin signal stack"u8;
 
 //go:nosplit
 internal static void semawakeup(ж<m> Ꮡmp) {
@@ -116,8 +120,10 @@ internal static int32 sigNoteRead;
 internal static int32 sigNoteWrite;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string duplicateSigNoteSetupˢ = "duplicate sigNoteSetup"u8;
-internal static readonly @string pipeFailedˢ = "pipe failed"u8;
+internal static ref readonly @string duplicateSigNoteSetupˢ => ref duplicateSigNoteSetupˢᵇ;
+private static readonly @string duplicateSigNoteSetupˢᵇ = "duplicate sigNoteSetup"u8;
+internal static ref readonly @string pipeFailedˢ => ref pipeFailedˢᵇ;
+private static readonly @string pipeFailedˢᵇ = "pipe failed"u8;
 
 // sigNoteSetup initializes a single, there-can-only-be-one, async-signal-safe note.
 //
@@ -134,7 +140,7 @@ internal static void sigNoteSetup(ж<note> _) {
         // Generalizing this would require avoiding the pipe-fork-closeonexec race, which entangles syscall.
         @throw(duplicateSigNoteSetupˢ);
     }
-    int32 errno = default!;
+    int32 errno = default;
     (sigNoteRead, sigNoteWrite, errno) = pipe();
     if (errno != 0) {
         @throw(pipeFailedˢ);
@@ -157,7 +163,7 @@ internal static void sigNoteWakeup(ж<note> _) {
 
 // sigNoteSleep waits for a note created by sigNoteSetup to be woken.
 internal static void sigNoteSleep(ж<note> _) {
-    while (ᐧ) {
+    for (;;) {
         ref var b = ref heap(new byte(), out var Ꮡb);
         entersyscallblock();
         var n = read(sigNoteRead, @unsafe.Pointer.FromPinnedBox(Ꮡb), 1);
@@ -180,17 +186,14 @@ internal static void osinit() {
 }
 
 internal static (int32, int32) sysctlbynameInt32(slice<byte> name) {
-    ref var @out = ref heap<int32>(out var Ꮡout);
-    @out = (int32)0;
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = /* unsafe.Sizeof(out) */ (uintptr)4;
+    ref var @out = ref heap<int32>((int32)0, out var Ꮡout);
+    ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctlbyname(Ꮡ(name, 0), Ꮡout.Reinterpret<int32, byte>(), Ꮡnout, nil, 0);
     return (ret, @out);
 }
 
 internal static int32 sysctlbynameBytes(slice<byte> name, slice<byte> @out) {
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = (uintptr)len(@out);
+    ref var nout = ref heap<uintptr>((uintptr)len(@out), out var Ꮡnout);
     var ret = sysctlbyname(Ꮡ(name, 0), Ꮡ(@out, 0), Ꮡnout, nil, 0);
     return ret;
 }
@@ -211,12 +214,9 @@ internal static UntypedInt _HW_PAGESIZE => 7;
 
 internal static int32 getCPUCount() {
     // Use sysctl to fetch hw.ncpu.
-    ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
-    mib = new uint32[]{_CTL_HW, _HW_NCPU}.array();
-    ref var @out = ref heap<uint32>(out var Ꮡout);
-    @out = (uint32)0;
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = /* unsafe.Sizeof(out) */ (uintptr)4;
+    ref var mib = ref heap<array<uint32>>(new uint32[]{_CTL_HW, _HW_NCPU}.array(), out var Ꮡmib);
+    ref var @out = ref heap<uint32>((uint32)0, out var Ꮡout);
+    ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctl(Ꮡmib.at<uint32>(0), 2, Ꮡout.Reinterpret<uint32, byte>(), Ꮡnout, nil, 0);
     if (ret >= 0 && (int32)@out > 0) {
         return (int32)@out;
@@ -226,12 +226,9 @@ internal static int32 getCPUCount() {
 
 internal static uintptr getPageSize() {
     // Use sysctl to fetch hw.pagesize.
-    ref var mib = ref heap<array<uint32>>(out var Ꮡmib);
-    mib = new uint32[]{_CTL_HW, _HW_PAGESIZE}.array();
-    ref var @out = ref heap<uint32>(out var Ꮡout);
-    @out = (uint32)0;
-    ref var nout = ref heap<uintptr>(out var Ꮡnout);
-    nout = /* unsafe.Sizeof(out) */ (uintptr)4;
+    ref var mib = ref heap<array<uint32>>(new uint32[]{_CTL_HW, _HW_PAGESIZE}.array(), out var Ꮡmib);
+    ref var @out = ref heap<uint32>((uint32)0, out var Ꮡout);
+    ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctl(Ꮡmib.at<uint32>(0), 2, Ꮡout.Reinterpret<uint32, byte>(), Ꮡnout, nil, 0);
     if (ret >= 0 && (int32)@out > 0) {
         return (uintptr)@out;
@@ -257,12 +254,12 @@ internal static void newosproc(ж<m> Ꮡmp) {
 
     @unsafe.Pointer stk = (@unsafe.Pointer)(~mp.g0).stack.hi;
     if (false) {
-        print((@string)"newosproc stk="u8, @unsafe.Pointer.OrTypedNil(stk), (@string)" m="u8, Ꮡmp.OrTypedNil(), (@string)" g="u8, mp.g0.OrTypedNil(), (@string)" id="u8, mp.id, (@string)" ostk="u8, Ꮡ(mp), (@string)"\n"u8);
+        print((@string)"newosproc stk=", @unsafe.Pointer.OrTypedNil(stk), (@string)" m=", Ꮡmp.OrTypedNil(), (@string)" g=", mp.g0.OrTypedNil(), (@string)" id=", mp.id, (@string)" ostk=", Ꮡ(mp), (@string)"\n");
     }
 
     // Initialize an attribute object.
     ref var attr = ref heap(new pthreadattr(), out var Ꮡattr);
-    int32 err = default!;
+    int32 err = default;
     err = pthread_attr_init(Ꮡattr);
     if (err != 0) {
         writeErrStr(failthreadcreate);
@@ -309,7 +306,7 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
 
     // Initialize an attribute object.
     ref var attr = ref heap(new pthreadattr(), out var Ꮡattr);
-    int32 err = default!;
+    int32 err = default;
     err = pthread_attr_init(Ꮡattr);
     if (err != 0) {
         writeErrStr(failthreadcreate);
@@ -326,7 +323,7 @@ internal static void newosproc0(uintptr stacksizeʗp, uintptr fn) {
         exit(1);
     }
     g0.stack.hi = stacksize; // for mstart
-    Ꮡmemstats.of(mstats.Ꮡstacks_sys).add((int64)stacksize);
+    Ꮡmemstats.Ꮡstacks_sys.add((int64)stacksize);
 
     // Tell the pthread library we won't join with this thread.
     if (pthread_attr_setdetachstate(Ꮡattr, _PTHREAD_CREATE_DETACHED) != 0) {
@@ -380,7 +377,7 @@ internal static void minit() {
         minitSignalStack();
     }
     minitSignalMask();
-    getg().Value.m.Value.procid = (uint64)(uintptr)pthread_self();
+    getg().Value.m.Value.procid = (uint64)pthread_self();
     libc_error_addr((~getg()).m.of(m.ᏑerrnoAddr));
 }
 
@@ -435,13 +432,13 @@ internal static void setsig(uint32 i, uintptr fn) {
     sa.sa_flags = (int32)((UntypedInt)(_SA_SIGINFO | _SA_ONSTACK) | (int32)_SA_RESTART);
     sa.sa_mask = ~(uint32)0;
     if (fn == abi.FuncPCABIInternal(sighandler)) { // abi.FuncPCABIInternal(sighandler) matches the callers in signal_unix.go
-        if (iscgo){
+        if (iscgo) {
             fn = abi.FuncPCABI0(cgoSigtramp);
         } else {
             fn = abi.FuncPCABI0(sigtramp);
         }
     }
-    (Ꮡsa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>()).Value = fn;
+    (Ꮡsa.Ꮡ__sigaction_u.Reinterpret<array<byte>, uintptr>()).Value = fn;
     sigaction(i, Ꮡsa, nil);
 }
 
@@ -456,12 +453,12 @@ internal static partial void cgoSigtramp();
 internal static void setsigstack(uint32 i) {
     ref var osa = ref heap(new usigactiont(), out var Ꮡosa);
     sigaction(i, nil, Ꮡosa);
-    var handler = ~Ꮡosa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>();
+    var handler = ~Ꮡosa.Ꮡ__sigaction_u.Reinterpret<array<byte>, uintptr>();
     if ((osa.sa_flags & (int32)_SA_ONSTACK) != 0) {
         return;
     }
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
-    (Ꮡsa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>()).Value = handler;
+    (Ꮡsa.Ꮡ__sigaction_u.Reinterpret<array<byte>, uintptr>()).Value = handler;
     sa.sa_mask = osa.sa_mask;
     sa.sa_flags = osa.sa_flags | (int32)_SA_ONSTACK;
     sigaction(i, Ꮡsa, nil);
@@ -472,14 +469,14 @@ internal static void setsigstack(uint32 i) {
 internal static uintptr getsig(uint32 i) {
     ref var sa = ref heap(new usigactiont(), out var Ꮡsa);
     sigaction(i, nil, Ꮡsa);
-    return ~Ꮡsa.of(usigactiont.Ꮡ__sigaction_u).Reinterpret<array<byte>, uintptr>();
+    return ~Ꮡsa.Ꮡ__sigaction_u.Reinterpret<array<byte>, uintptr>();
 }
 
 // setSignalstackSP sets the ss_sp field of a stackt.
 //
 //go:nosplit
-internal static void setSignalstackSP(ж<stackt> Ꮡs, uintptr sp) {
-    (Ꮡs.of(stackt.Ꮡss_sp).Reinterpret<ж<byte>, uintptr>()).Value = sp;
+internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
+    (s.Ꮡss_sp.Reinterpret<ж<byte>, uintptr>()).Value = sp;
 }
 
 //go:nosplit
@@ -505,15 +502,16 @@ internal static bool validSIGPROF(ref m mp, ref sigctxt c) {
 public static @string executablePath;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string executablePathˢ = "executable_path="u8;
+internal static ref readonly @string executablePathˢ => ref executablePathˢᵇ;
+private static readonly @string executablePathˢᵇ = "executable_path="u8;
 
-internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
+internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     // skip over argv, envv and the first string will be the path
     var n = argc + 1;
-    while (argv_index(Ꮡargv, n) != nil) {
+    while (argv_index(argv, n) != nil) {
         n++;
     }
-    executablePath = gostringnocopy(argv_index(Ꮡargv, n + 1));
+    executablePath = gostringnocopy(argv_index(argv, n + 1));
 
     // strip "executable_path=" prefix if available, it's added after OS X 10.11.
     executablePath = stringslite.TrimPrefix(executablePath, executablePathˢ);
@@ -528,7 +526,8 @@ internal static void signalM(ref m mp, nint sig) {
 internal static UntypedInt sigPerThreadSyscall => /* 1 << 31 */ 2147483648;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runPerThreadSyscallOnlyˢ = "runPerThreadSyscall only valid on linux"u8;
+internal static ref readonly @string runPerThreadSyscallOnlyˢ => ref runPerThreadSyscallOnlyˢᵇ;
+private static readonly @string runPerThreadSyscallOnlyˢᵇ = "runPerThreadSyscall only valid on linux"u8;
 
 //go:nosplit
 internal static void runPerThreadSyscall() {

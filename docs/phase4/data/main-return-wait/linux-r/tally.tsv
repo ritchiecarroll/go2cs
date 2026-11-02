@@ -1,0 +1,17 @@
+arm	mode	N	exit0	exit2	other	empty_stderr	exit2_with_panic_line	stdout_recovered	spinner_alive
+pad-go	idle	100	0	100	0	0	100	0	100
+pad-go	load	100	0	100	0	0	100	0	100
+r0-aot	idle	100	0	100	0	0	100	0	100
+r0-aot	load	100	0	100	0	0	100	0	100
+r0-jit	idle	100	0	100	0	0	100	0	100
+r0-jit	load	400	1	399	0	1	399	0	400
+r1-aot	idle	100	0	100	0	0	100	0	100
+r1-aot	load	100	0	100	0	0	100	0	100
+r1-jit	idle	100	0	100	0	0	100	0	100
+r1-jit	load	400	0	400	0	0	400	0	400
+rec-aot	idle	100	100	0	0	100	0	0	100
+rec-aot	load	100	100	0	0	100	0	0	100
+rec-go	idle	100	100	0	0	100	0	0	100
+rec-go	load	100	100	0	0	100	0	0	100
+rec-jit	idle	100	100	0	0	100	0	0	100
+rec-jit	load	100	100	0	0	100	0	0	100

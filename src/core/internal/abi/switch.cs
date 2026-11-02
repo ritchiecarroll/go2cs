@@ -17,7 +17,7 @@ partial struct InterfaceSwitch {
 }
 
 partial struct InterfaceSwitchCache {
-    public uintptr Mask;                      // mask for index. Must be a power of 2 minus 1
+    public uintptr Mask;                                      // mask for index. Must be a power of 2 minus 1
     public array<InterfaceSwitchCacheEntry> Entries = new(1); // Mask+1 entries total
 }
 
@@ -33,13 +33,13 @@ partial struct InterfaceSwitchCacheEntry {
 public static bool UseInterfaceSwitchCache(goarch.ArchFamilyType arch) {
     // We need an atomic load instruction to make the cache multithreaded-safe.
     // (AtomicLoadPtr needs to be implemented in cmd/compile/internal/ssa/_gen/ARCH.rules.)
-    var exprᴛ1 = arch;
-    if (exprᴛ1 == goarch.AMD64 || exprᴛ1 == goarch.ARM64 || exprᴛ1 == goarch.LOONG64 || exprᴛ1 == goarch.MIPS || exprᴛ1 == goarch.MIPS64 || exprᴛ1 == goarch.PPC64 || exprᴛ1 == goarch.RISCV64 || exprᴛ1 == goarch.S390X) {
+    switch (arch) {
+    case var ᴛ when ᴛ == goarch.AMD64 || ᴛ == goarch.ARM64 || ᴛ == goarch.LOONG64 || ᴛ == goarch.MIPS || ᴛ == goarch.MIPS64 || ᴛ == goarch.PPC64 || ᴛ == goarch.RISCV64 || ᴛ == goarch.S390X: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 partial struct TypeAssert {

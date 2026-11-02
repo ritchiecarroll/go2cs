@@ -17,7 +17,7 @@ internal static bool skipStdinCopyError(error err) {
     // completed successfully otherwise.
     // See Issue 9173.
     var (pe, ok) = err._<ж<fs.PathError>>(ᐧ);
-    return ok && (~pe).Op == "write"u8 && (~pe).Path == "|1"u8 && AreEqual((~pe).Err, syscall.EPIPE);
+    return ok && pe.Op == "write"u8 && pe.Path == "|1"u8 && AreEqual(pe.Err, syscall.EPIPE);
 }
 
 } // end exec_package

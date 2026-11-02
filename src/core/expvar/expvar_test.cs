@@ -32,79 +32,81 @@ partial class expvar_internal_test_package {
 public static void RemoveAll() {
     GoFrame ᒐ = default;
     try {
-        Ꮡvars.of(global::go.expvar_package.Map.ᏑkeysMu).Lock();
-        defer(Ꮡvars.of(global::go.expvar_package.Map.ᏑkeysMu).Unlock, ref ᒐ);
+        Ꮡvars.ᏑkeysMu.Lock();
+        defer(Ꮡvars.ᏑkeysMu.Unlock, ref ᒐ);
         foreach (var (_, k) in vars.keys) {
-            Ꮡvars.of(global::go.expvar_package.Map.Ꮡm).Delete(k);
+            Ꮡvars.Ꮡm.Delete(k);
         }
-        vars.keys = default!;
+        vars.keys = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingˢ = "missing"u8;
+internal static ref readonly @string missingˢ => ref missingˢᵇ;
+private static readonly @string missingˢᵇ = "missing"u8;
 
-public static void TestNil(ж<testing.T> Ꮡt) {
+public static void TestNil(ж<testing.T> t) {
     RemoveAll();
     var val = Get(missingˢ);
-    if (val != default!) {
-        Ꮡt.Errorf("got %v, want nil"u8, val);
+    if (val != nil) {
+        t.Errorf("got %v, want nil", val);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string requestsˢ = "requests"u8;
+internal static ref readonly @string requestsˢ => ref requestsˢᵇ;
+private static readonly @string requestsˢᵇ = "requests"u8;
 
-public static void TestInt(ж<testing.T> Ꮡt) {
+public static void TestInt(ж<testing.T> t) {
     RemoveAll();
     var reqs = NewInt(requestsˢ);
     {
         var i = reqs.Value(); if (i != 0) {
-            Ꮡt.Errorf("reqs.Value() = %v, want 0"u8, i);
+            t.Errorf("reqs.Value() = %v, want 0", i);
         }
     }
     if (reqs != Get(requestsˢ)._<ж<global::go.expvar_package.Int>>()) {
-        Ꮡt.Errorf("Get() failed."u8);
+        t.Errorf("Get() failed.");
     }
 
     reqs.Add(1);
     reqs.Add(3);
     {
         var i = reqs.Value(); if (i != 4) {
-            Ꮡt.Errorf("reqs.Value() = %v, want 4"u8, i);
+            t.Errorf("reqs.Value() = %v, want 4", i);
         }
     }
 
     {
         @string s = reqs.String(); if (s != "4"u8) {
-            Ꮡt.Errorf("reqs.String() = %q, want \"4\""u8, s);
+            t.Errorf("reqs.String() = %q, want \"4\"", s);
         }
     }
 
     reqs.Set(-2);
     {
         var i = reqs.Value(); if (i != -2) {
-            Ꮡt.Errorf("reqs.Value() = %v, want -2"u8, i);
+            t.Errorf("reqs.Value() = %v, want -2", i);
         }
     }
 }
 
-public static void BenchmarkIntAdd(ж<testing.B> Ꮡb) {
+public static void BenchmarkIntAdd(ж<testing.B> b) {
     ref var v = ref heap(new global::go.expvar_package.Int(), out var Ꮡv);
 
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             Ꮡv.Add(1);
         }
     });
 }
 
-public static void BenchmarkIntSet(ж<testing.B> Ꮡb) {
+public static void BenchmarkIntSet(ж<testing.B> b) {
     ref var v = ref heap(new global::go.expvar_package.Int(), out var Ꮡv);
 
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             Ꮡv.Set(1);
         }
@@ -112,54 +114,55 @@ public static void BenchmarkIntSet(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string requestsFloatˢ = "requests-float"u8;
+internal static ref readonly @string requestsFloatˢ => ref requestsFloatˢᵇ;
+private static readonly @string requestsFloatˢᵇ = "requests-float"u8;
 
-public static void TestFloat(ж<testing.T> Ꮡt) {
+public static void TestFloat(ж<testing.T> t) {
     RemoveAll();
     var reqs = NewFloat(requestsFloatˢ);
-    if (reqs.of(global::go.expvar_package.Float.Ꮡf).Load() != 0) {
-        Ꮡt.Errorf("reqs.f = %v, want 0"u8, reqs.of(global::go.expvar_package.Float.Ꮡf).Load());
+    if (reqs.Ꮡf.Load() != 0) {
+        t.Errorf("reqs.f = %v, want 0", reqs.Ꮡf.Load());
     }
     if (reqs != Get(requestsFloatˢ)._<ж<global::go.expvar_package.Float>>()) {
-        Ꮡt.Errorf("Get() failed."u8);
+        t.Errorf("Get() failed.");
     }
 
     reqs.Add(1.5D);
     reqs.Add(1.25D);
     {
         var v = reqs.Value(); if (v != 2.75D) {
-            Ꮡt.Errorf("reqs.Value() = %v, want 2.75"u8, v);
+            t.Errorf("reqs.Value() = %v, want 2.75", v);
         }
     }
 
     {
         @string s = reqs.String(); if (s != "2.75"u8) {
-            Ꮡt.Errorf("reqs.String() = %q, want \"4.64\""u8, s);
+            t.Errorf("reqs.String() = %q, want \"4.64\"", s);
         }
     }
 
     reqs.Add(-2D);
     {
         var v = reqs.Value(); if (v != 0.75D) {
-            Ꮡt.Errorf("reqs.Value() = %v, want 0.75"u8, v);
+            t.Errorf("reqs.Value() = %v, want 0.75", v);
         }
     }
 }
 
-public static void BenchmarkFloatAdd(ж<testing.B> Ꮡb) {
+public static void BenchmarkFloatAdd(ж<testing.B> b) {
     ref var f = ref heap(new global::go.expvar_package.Float(), out var Ꮡf);
 
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             Ꮡf.Add(1.0D);
         }
     });
 }
 
-public static void BenchmarkFloatSet(ж<testing.B> Ꮡb) {
+public static void BenchmarkFloatSet(ж<testing.B> b) {
     ref var f = ref heap(new global::go.expvar_package.Float(), out var Ꮡf);
 
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             Ꮡf.Set(1.0D);
         }
@@ -167,17 +170,21 @@ public static void BenchmarkFloatSet(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string myNameˢ = "my-name"u8;
-internal static readonly @string mikeˢ = "Mike"u8;
-internal static readonly @string mikeˢ2 = @"""Mike"""u8;
-internal static readonly @string u003cˢ = "\"\\u003c\""u8;
+internal static ref readonly @string myNameˢ => ref myNameˢᵇ;
+private static readonly @string myNameˢᵇ = "my-name"u8;
+internal static ref readonly @string mikeˢ => ref mikeˢᵇ;
+private static readonly @string mikeˢᵇ = "Mike"u8;
+internal static ref readonly @string mikeˢ2 => ref mikeˢ2ᵇ;
+private static readonly @string mikeˢ2ᵇ = @"""Mike"""u8;
+internal static ref readonly @string u003cˢ => ref u003cˢᵇ;
+private static readonly @string u003cˢᵇ = "\"\\u003c\""u8;
 
-public static void TestString(ж<testing.T> Ꮡt) {
+public static void TestString(ж<testing.T> t) {
     RemoveAll();
     var name = NewString(myNameˢ);
     {
         @string s = name.Value(); if (s != ""u8) {
-            Ꮡt.Errorf(@"NewString(""my-name"").Value() = %q, want """""u8, s);
+            t.Errorf(@"NewString(""my-name"").Value() = %q, want """"", s);
         }
     }
 
@@ -185,33 +192,34 @@ public static void TestString(ж<testing.T> Ꮡt) {
     {
         @string s = name.String();
         @string want = mikeˢ2; if (s != want) {
-            Ꮡt.Errorf(@"after name.Set(""Mike""), name.String() = %q, want %q"u8, s, want);
+            t.Errorf(@"after name.Set(""Mike""), name.String() = %q, want %q", s, want);
         }
     }
     {
         @string s = name.Value();
         @string want = mikeˢ; if (s != want) {
-            Ꮡt.Errorf(@"after name.Set(""Mike""), name.Value() = %q, want %q"u8, s, want);
+            t.Errorf(@"after name.Set(""Mike""), name.Value() = %q, want %q", s, want);
         }
     }
 
     // Make sure we produce safe JSON output.
-    name.Set("<"u8);
+    name.Set("<");
     {
         @string s = name.String();
         @string want = u003cˢ; if (s != want) {
-            Ꮡt.Errorf(@"after name.Set(""<""), name.String() = %q, want %q"u8, s, want);
+            t.Errorf(@"after name.Set(""<""), name.String() = %q, want %q", s, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string redˢ = "red"u8;
+internal static ref readonly @string redˢ => ref redˢᵇ;
+private static readonly @string redˢᵇ = "red"u8;
 
-public static void BenchmarkStringSet(ж<testing.B> Ꮡb) {
+public static void BenchmarkStringSet(ж<testing.B> b) {
     ref var s = ref heap(new global::go.expvar_package.ΔString(), out var Ꮡs);
 
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             Ꮡs.Set(redˢ);
         }
@@ -219,11 +227,14 @@ public static void BenchmarkStringSet(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bikeShedColorsˢ = "bike-shed-colors"u8;
-internal static readonly @string blueˢ = "blue"u8;
-internal static readonly @string chartreuseˢ = "chartreuse"u8;
+internal static ref readonly @string bikeShedColorsˢ => ref bikeShedColorsˢᵇ;
+private static readonly @string bikeShedColorsˢᵇ = "bike-shed-colors"u8;
+internal static ref readonly @string blueˢ => ref blueˢᵇ;
+private static readonly @string blueˢᵇ = "blue"u8;
+internal static ref readonly @string chartreuseˢ => ref chartreuseˢᵇ;
+private static readonly @string chartreuseˢᵇ = "chartreuse"u8;
 
-public static void TestMapInit(ж<testing.T> Ꮡt) {
+public static void TestMapInit(ж<testing.T> t) {
     RemoveAll();
     var colors = NewMap(bikeShedColorsˢ);
     colors.Add(redˢ, 1);
@@ -235,7 +246,7 @@ public static void TestMapInit(ж<testing.T> Ꮡt) {
         n++;
     });
     if (n != 3) {
-        Ꮡt.Errorf("after three Add calls with distinct keys, Do should invoke f 3 times; got %v"u8, n);
+        t.Errorf("after three Add calls with distinct keys, Do should invoke f 3 times; got %v", n);
     }
 
     colors.Init();
@@ -245,14 +256,15 @@ public static void TestMapInit(ж<testing.T> Ꮡt) {
         n++;
     });
     if (n != 0) {
-        Ꮡt.Errorf("after Init, Do should invoke f 0 times; got %v"u8, n);
+        t.Errorf("after Init, Do should invoke f 0 times; got %v", n);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string notfoundˢ = "notfound"u8;
+internal static ref readonly @string notfoundˢ => ref notfoundˢᵇ;
+private static readonly @string notfoundˢᵇ = "notfound"u8;
 
-public static void TestMapDelete(ж<testing.T> Ꮡt) {
+public static void TestMapDelete(ж<testing.T> t) {
     RemoveAll();
     var colors = NewMap(bikeShedColorsˢ);
 
@@ -265,13 +277,13 @@ public static void TestMapDelete(ж<testing.T> Ꮡt) {
         n++;
     });
     if (n != 2) {
-        Ꮡt.Errorf("after two Add calls with distinct keys, Do should invoke f 2 times; got %v"u8, n);
+        t.Errorf("after two Add calls with distinct keys, Do should invoke f 2 times; got %v", n);
     }
 
     colors.Delete(redˢ);
     {
-        var v = colors.Get(redˢ); if (v != default!) {
-            Ꮡt.Errorf("removed red, Get should return nil; got %v"u8, v);
+        var v = colors.Get(redˢ); if (v != nil) {
+            t.Errorf("removed red, Get should return nil; got %v", v);
         }
     }
     n = 0;
@@ -279,7 +291,7 @@ public static void TestMapDelete(ж<testing.T> Ꮡt) {
         n++;
     });
     if (n != 1) {
-        Ꮡt.Errorf("removed red, Do should invoke f 1 times; got %v"u8, n);
+        t.Errorf("removed red, Do should invoke f 1 times; got %v", n);
     }
 
     colors.Delete(notfoundˢ);
@@ -288,14 +300,14 @@ public static void TestMapDelete(ж<testing.T> Ꮡt) {
         n++;
     });
     if (n != 1) {
-        Ꮡt.Errorf("attempted to remove notfound, Do should invoke f 1 times; got %v"u8, n);
+        t.Errorf("attempted to remove notfound, Do should invoke f 1 times; got %v", n);
     }
 
     colors.Delete(blueˢ);
     colors.Delete(blueˢ);
     {
-        var v = colors.Get(blueˢ); if (v != default!) {
-            Ꮡt.Errorf("removed blue, Get should return nil; got %v"u8, v);
+        var v = colors.Get(blueˢ); if (v != nil) {
+            t.Errorf("removed blue, Get should return nil; got %v", v);
         }
     }
     n = 0;
@@ -303,18 +315,17 @@ public static void TestMapDelete(ж<testing.T> Ꮡt) {
         n++;
     });
     if (n != 0) {
-        Ꮡt.Errorf("all keys removed, Do should invoke f 0 times; got %v"u8, n);
+        t.Errorf("all keys removed, Do should invoke f 0 times; got %v", n);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string greenMidoriˢ = @"green ""midori"""u8;
+internal static ref readonly @string greenMidoriˢ => ref greenMidoriˢᵇ;
+private static readonly @string greenMidoriˢᵇ = @"green ""midori"""u8;
 internal static readonly object colorsStringDidnTProduceˢ = (@string)"colors.String() didn't produce a map."u8;
 internal static readonly object redKindIsNotANumberˢ = (@string)"red.Kind() is not a number."u8;
 
-public static void TestMapCounter(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestMapCounter(ж<testing.T> t) {
     RemoveAll();
     var colors = NewMap(bikeShedColorsˢ);
 
@@ -324,17 +335,17 @@ public static void TestMapCounter(ж<testing.T> Ꮡt) {
     colors.AddFloat(greenMidoriˢ, 4.125D);
     {
         var xΔ1 = colors.Get(redˢ)._<ж<global::go.expvar_package.Int>>().Value(); if (xΔ1 != 3) {
-            Ꮡt.Errorf("colors.m[\"red\"] = %v, want 3"u8, xΔ1);
+            t.Errorf("colors.m[\"red\"] = %v, want 3", xΔ1);
         }
     }
     {
         var xΔ2 = colors.Get(blueˢ)._<ж<global::go.expvar_package.Int>>().Value(); if (xΔ2 != 4) {
-            Ꮡt.Errorf("colors.m[\"blue\"] = %v, want 4"u8, xΔ2);
+            t.Errorf("colors.m[\"blue\"] = %v, want 4", xΔ2);
         }
     }
     {
         var xΔ3 = colors.Get(greenMidoriˢ)._<ж<global::go.expvar_package.Float>>().Value(); if (xΔ3 != 4.125D) {
-            Ꮡt.Errorf("colors.m[`green \"midori\"] = %v, want 4.125"u8, xΔ3);
+            t.Errorf("colors.m[`green \"midori\"] = %v, want 4.125", xΔ3);
         }
     }
 
@@ -343,64 +354,64 @@ public static void TestMapCounter(ж<testing.T> Ꮡt) {
     @string s = colors.String();
     ref var j = ref heap<any>(out var Ꮡj);
     var err = json.Unmarshal(slice<byte>(s), Ꮡj);
-    if (err != default!) {
-        Ꮡt.Errorf("colors.String() isn't valid JSON: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("colors.String() isn't valid JSON: %v", err);
     }
     var (m, ok) = j._<map<@string, any>>(ᐧ);
     if (!ok) {
-        Ꮡt.Error(colorsStringDidnTProduceˢ);
+        t.Error(colorsStringDidnTProduceˢ);
     }
     var red = m[redˢ];
     (var x, ok) = red._<float64>(ᐧ);
     if (!ok) {
-        Ꮡt.Error(redKindIsNotANumberˢ);
+        t.Error(redKindIsNotANumberˢ);
     }
     if (x != 3D) {
-        Ꮡt.Errorf("red = %v, want 3"u8, x);
+        t.Errorf("red = %v, want 3", x);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string issue527719ˢ = "issue527719"u8;
+internal static ref readonly @string issue527719ˢ => ref issue527719ˢᵇ;
+private static readonly @string issue527719ˢᵇ = "issue527719"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string keyᶜ = "key"u8;
+internal static ref readonly @string keyᶜ => ref keyᶜᵇ;
+private static readonly @string keyᶜᵇ = "key"u8;
 
-public static void TestMapNil(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestMapNil(ж<testing.T> t) {
     RemoveAll();
     @string key = keyᶜ;
     var m = NewMap(issue527719ˢ);
-    m.Set(key, default!);
+    m.Set(key, default);
     @string s = m.String();
     ref var j = ref heap<any>(out var Ꮡj);
     {
-        var err = json.Unmarshal(slice<byte>(s), Ꮡj); if (err != default!) {
-            Ꮡt.Fatalf("m.String() == %q isn't valid JSON: %v"u8, s, err);
+        var err = json.Unmarshal(slice<byte>(s), Ꮡj); if (err != nil) {
+            t.Fatalf("m.String() == %q isn't valid JSON: %v", s, err);
         }
     }
     var (m2, ok) = j._<map<@string, any>>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("m.String() produced %T, wanted a map"u8, j);
+        t.Fatalf("m.String() produced %T, wanted a map", j);
     }
     (var v, ok) = m2[key, ꟷ];
     if (!ok) {
-        Ꮡt.Fatalf("missing %q in %v"u8, key, m2);
+        t.Fatalf("missing %q in %v", key, m2);
     }
-    if (v != default!) {
-        Ꮡt.Fatalf("m[%q] = %v, want nil"u8, key, v);
+    if (v != nil) {
+        t.Fatalf("m[%q] = %v, want nil", key, v);
     }
 }
 
-public static void BenchmarkMapSet(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapSet(ж<testing.B> b) {
     var m = @new<global::go.expvar_package.Map>().Init();
 
     var v = @new<global::go.expvar_package.Int>();
 
     var mʗ1 = m;
     var vʗ1 = v;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             mʗ1.Set(redˢ, new global::go.expvar_package.IntжVar(vʗ1));
         }
@@ -462,9 +473,10 @@ public static void BenchmarkMapSetDifferentRandom(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloˢ = "Hello, !"u8;
+internal static ref readonly @string helloˢ => ref helloˢᵇ;
+private static readonly @string helloˢᵇ = "Hello, !"u8;
 
-public static void BenchmarkMapSetString(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapSetString(ж<testing.B> b) {
     var m = @new<global::go.expvar_package.Map>().Init();
 
     var v = @new<global::go.expvar_package.ΔString>();
@@ -472,15 +484,15 @@ public static void BenchmarkMapSetString(ж<testing.B> Ꮡb) {
 
     var mʗ1 = m;
     var vʗ1 = v;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             mʗ1.Set(redˢ, new expvar_internal_test_package.expvar_ΔStringжVar(vʗ1));
         }
     });
 }
 
-public static void BenchmarkMapAddSame(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkMapAddSame(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             var m = @new<global::go.expvar_package.Map>().Init();
             m.Add(redˢ, 1);
@@ -541,10 +553,10 @@ public static void BenchmarkMapAddDifferentRandom(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkMapAddSameSteadyState(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapAddSameSteadyState(ж<testing.B> b) {
     var m = @new<global::go.expvar_package.Map>().Init();
     var mʗ1 = m;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             mʗ1.Add(redˢ, 1);
         }
@@ -581,37 +593,40 @@ public static void BenchmarkMapAddDifferentSteadyState(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void TestFunc(ж<testing.T> Ꮡt) {
+public static void TestFunc(ж<testing.T> t) {
     RemoveAll();
     ref var x = ref heap<any>(out var Ꮡx);
 
-    x = new @string[]{"a"u8, "b"u8}.slice();
+    x = slice<@string>(["a", "b"]);
     var f = new global::go.expvar_package.Func(() => Ꮡx.ValueSlot);
     {
         @string s = f.String();
-        @string exp = @"[""a"",""b""]"u8; if (s != exp) {
-            Ꮡt.Errorf(@"f.String() = %q, want %q"u8, s, exp);
+        @string exp = @"[""a"",""b""]"; if (s != exp) {
+            t.Errorf(@"f.String() = %q, want %q", s, exp);
         }
     }
     {
         var v = f.Value(); if (!reflect.DeepEqual(v, x)) {
-            Ꮡt.Errorf(@"f.Value() = %q, want %q"u8, v, x);
+            t.Errorf(@"f.Value() = %q, want %q", v, x);
         }
     }
 
     x = (nint)17;
     {
         @string s = f.String();
-        @string exp = @"17"u8; if (s != exp) {
-            Ꮡt.Errorf(@"f.String() = %q, want %q"u8, s, exp);
+        @string exp = @"17"; if (s != exp) {
+            t.Errorf(@"f.String() = %q, want %q", s, exp);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string map1ˢ = "map1"u8;
-internal static readonly @string map2ˢ = "map2"u8;
-internal static readonly @string map1A1Z2Map2001122334455ˢ = """
+internal static ref readonly @string map1ˢ => ref map1ˢᵇ;
+private static readonly @string map1ˢᵇ = "map1"u8;
+internal static ref readonly @string map2ˢ => ref map2ˢᵇ;
+private static readonly @string map2ˢᵇ = "map2"u8;
+internal static ref readonly @string map1A1Z2Map2001122334455ˢ => ref map1A1Z2Map2001122334455ˢᵇ;
+private static readonly @string map1A1Z2Map2001122334455ˢᵇ = """
 {
 "map1": {"a": 1, "z": 2},
 "map2": {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8}
@@ -619,31 +634,35 @@ internal static readonly @string map1A1Z2Map2001122334455ˢ = """
 
 """u8.Raw();
 
-public static void TestHandler(ж<testing.T> Ꮡt) {
+public static void TestHandler(ж<testing.T> t) {
     RemoveAll();
     var m = NewMap(map1ˢ);
-    m.Add("a"u8, 1);
-    m.Add("z"u8, 2);
+    m.Add("a", 1);
+    m.Add("z", 2);
     var m2 = NewMap(map2ˢ);
     for (nint i = 0; i < 9; i++) {
         m2.Add(strconv.Itoa(i), (int64)i);
     }
     var rr = httptest.NewRecorder();
-    rr.Value.Body = @new<bytes.Buffer>();
+    rr.Body = @new<bytes.Buffer>();
     expvarHandler(new expvar_internal_test_package.httptest_ResponseRecorderжResponseWriter(rr), nil);
     @string want = map1A1Z2Map2001122334455ˢ;
     {
-        @string got = (~rr).Body.String(); if (got != want) {
-            Ꮡt.Errorf("HTTP handler wrote:\n%s\nWant:\n%s"u8, got, want);
+        @string got = rr.Body.String(); if (got != want) {
+            t.Errorf("HTTP handler wrote:\n%s\nWant:\n%s", got, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string str1ˢ = "str1"u8;
-internal static readonly @string helloWorldˢ = "hello, world!"u8;
-internal static readonly @string str2ˢ = "str2"u8;
-internal static readonly @string fizzBuzzˢ = "fizz buzz"u8;
+internal static ref readonly @string str1ˢ => ref str1ˢᵇ;
+private static readonly @string str1ˢᵇ = "str1"u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "hello, world!"u8;
+internal static ref readonly @string str2ˢ => ref str2ˢᵇ;
+private static readonly @string str2ˢᵇ = "str2"u8;
+internal static ref readonly @string fizzBuzzˢ => ref fizzBuzzˢᵇ;
+private static readonly @string fizzBuzzˢᵇ = "fizz buzz"u8;
 
 public static void BenchmarkMapString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -652,8 +671,8 @@ public static void BenchmarkMapString(ж<testing.B> Ꮡb) {
     ref var m1 = ref heap(new global::go.expvar_package.Map(), out var Ꮡm1);
     ref var m2 = ref heap(new global::go.expvar_package.Map(), out var Ꮡm2);
     Ꮡm.Set(map1ˢ, new global::go.expvar_package.MapжVar(Ꮡm1));
-    Ꮡm1.Add("a"u8, 1);
-    Ꮡm1.Add("z"u8, 2);
+    Ꮡm1.Add("a", 1);
+    Ꮡm1.Add("z", 2);
     Ꮡm.Set(map2ˢ, new global::go.expvar_package.MapжVar(Ꮡm2));
     for (nint i = 0; i < 9; i++) {
         Ꮡm2.Add(strconv.Itoa(i), (int64)i);
@@ -673,7 +692,8 @@ public static void BenchmarkMapString(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tcpˢ = "tcp"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
 public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
     GoFrame ᒐ = default;
@@ -697,9 +717,9 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
         // Setup P client/server connections.
         var clients = new slice<Δnet.Conn>(P);
         var servers = new slice<Δnet.Conn>(P);
-        var (ln, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
-        if (err != default!) {
-            Ꮡb.Fatalf("Listen failed: %v"u8, err);
+        var (ln, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0");
+        if (err != nil) {
+            Ꮡb.Fatalf("Listen failed: %v", err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
@@ -710,8 +730,8 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
         goǃ(() => {
             for (nint p = 0; p < P; p++) {
                 var (s, errΔ1) = lnʗ2.Accept();
-                if (errΔ1 != default!) {
-                    Ꮡb.Errorf("Accept failed: %v"u8, errΔ1);
+                if (errΔ1 != nil) {
+                    Ꮡb.Errorf("Accept failed: %v", errΔ1);
                     doneʗ1.ᐸꟷ(false);
                     return;
                 }
@@ -721,9 +741,9 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
         });
         for (nint p = 0; p < P; p++) {
             var (c, errΔ2) = Δnet.Dial(tcpˢ, ln.Addr().String());
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 ᐸꟷ(done);
-                Ꮡb.Fatalf("Dial failed: %v"u8, errΔ2);
+                Ꮡb.Fatalf("Dial failed: %v", errΔ2);
             }
             clients[p] = c;
         }
@@ -749,8 +769,8 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
                         }
                         buf[0] = v;
                         var (n, errΔ3) = c.Write(buf[..]);
-                        if (errΔ3 != default!) {
-                            Ꮡb.Errorf("Write failed: %v"u8, errΔ3);
+                        if (errΔ3 != nil) {
+                            Ꮡb.Errorf("Write failed: %v", errΔ3);
                             return;
                         }
 
@@ -774,8 +794,8 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
                     for (nint i = 0; i < N; i++) {
                         var (n, errΔ4) = s.Read(buf[..]);
 
-                        if (errΔ4 != default!) {
-                            Ꮡb.Errorf("Read failed: %v"u8, errΔ4);
+                        if (errΔ4 != nil) {
+                            Ꮡb.Errorf("Read failed: %v", errΔ4);
                             return;
                         }
 
@@ -801,8 +821,8 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
                         }
                         buf[0] = v;
                         var (n, errΔ5) = s.Write(buf[..]);
-                        if (errΔ5 != default!) {
-                            Ꮡb.Errorf("Write failed: %v"u8, errΔ5);
+                        if (errΔ5 != nil) {
+                            Ꮡb.Errorf("Write failed: %v", errΔ5);
                             return;
                         }
 
@@ -823,8 +843,8 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
                     for (nint i = 0; i < N; i++) {
                         var (n, errΔ6) = c.Read(buf[..]);
 
-                        if (errΔ6 != default!) {
-                            Ꮡb.Errorf("Read failed: %v"u8, errΔ6);
+                        if (errΔ6 != nil) {
+                            Ꮡb.Errorf("Read failed: %v", errΔ6);
                             return;
                         }
 
@@ -842,19 +862,18 @@ public static partial void BenchmarkRealworldExpvarUsage(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestAppendJSONQuote(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestAppendJSONQuote(ж<testing.T> t) {
     var bᴷ = new stackAppend<byte>();
 
-    slice<byte> b = default!;
+    slice<byte> b = default;
     for (nint i = 0; i < 128; i++) {
         b = append(bᴷ, b, (byte)i);
     }
-    b = append(b, ((@string)"\u2028\u2029"u8).ꓸꓸꓸ);
-    @string got = (@string)appendJSONQuote(default!, (@string)(b[..]));
+    b = append(b, ((@string)"\u2028\u2029").ꓸꓸꓸ);
+    @string got = (@string)appendJSONQuote(default, (@string)(b[..]));
     @string want = @""""u8 + @"\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\t\n\u000b\u000c\r\u000e\u000f"u8 + @"\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f"u8 + @" !\""#$%\u0026'()*+,-./0123456789:;\u003c=\u003e?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"u8 + "`"u8 + @"abcdefghijklmnopqrstuvwxyz{|}~"u8 + "\x7f"u8 + @"\u2028\u2029"""u8;
     if (got != want) {
-        Ꮡt.Errorf("appendJSONQuote mismatch:\ngot  %v\nwant %v"u8, got, want);
+        t.Errorf("appendJSONQuote mismatch:\ngot  %v\nwant %v", got, want);
     }
 }
 

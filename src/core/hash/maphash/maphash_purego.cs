@@ -50,8 +50,8 @@ internal static UntypedInt m5 => 0x1d8e4e27c47d124f;
 internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
     var p = key;
     var i = len;
-    uint64 a = default!;
-    uint64 b = default!;
+    uint64 a = default;
+    uint64 b = default;
     seed ^= (uint64)(hashkey[0]);
 
     if (i > 16) {
@@ -113,9 +113,9 @@ internal static uint64 comparableHash<T>(T v, ΔSeed seed) {
     return h.Sum64();
 }
 
-internal static void writeComparable<T>(ж<Hash> Ꮡh, T v) {
+internal static void writeComparable<T>(ж<Hash> h, T v) {
     var vv = reflect.ValueOf((v).OrTypedNilOf());
-    appendT(Ꮡh, vv);
+    appendT(h, vv);
 }
 
 // appendT hash a value.
@@ -123,20 +123,20 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     h.WriteString(v.Type().String());
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔInt) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔInt: {
         array<byte> buf = new(8);
         byteorder.LEPutUint64(buf[..], (uint64)v.Int());
         h.Write(buf[..]);
         return;
     }
-    if (exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uintptr) {
+    case var ᴛ when ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uintptr: {
         array<byte> buf = new(8);
         byteorder.LEPutUint64(buf[..], v.Uint());
         h.Write(buf[..]);
         return;
     }
-    if (exprᴛ1 == reflect.Array) {
+    case var ᴛ when ᴛ == reflect.Array: {
         array<byte> buf = new(8);
         foreach (var i in range<uint64>((uint64)v.Len())) {
             byteorder.LEPutUint64(buf[..], i);
@@ -147,11 +147,11 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         }
         return;
     }
-    if (exprᴛ1 == reflect.ΔString) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
         h.WriteString(v.String());
         return;
     }
-    if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         array<byte> buf = new(8);
         foreach (var i in range(v.NumField())) {
             var f = v.Field(i);
@@ -164,21 +164,21 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         }
         return;
     }
-    if (exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
+    case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         var c = v.Complex();
         h.float64(real(c));
         h.float64(imag(c));
         return;
     }
-    if (exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
+    case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
         h.float64(v.Float());
         return;
     }
-    if (exprᴛ1 == reflect.ΔBool) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
         h.WriteByte(btoi(v.Bool()));
         return;
     }
-    if (exprᴛ1 == reflect.ΔUnsafePointer || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.Chan) {
+    case var ᴛ when ᴛ == reflect.ΔUnsafePointer || ᴛ == reflect.ΔPointer || ᴛ == reflect.Chan: {
         array<byte> buf = new(8);
         // because pointing to the abi.Escape call in comparableReady,
         // So this is ok to hash pointer,
@@ -187,10 +187,10 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         h.Write(buf[..]);
         return;
     }
-    if (exprᴛ1 == reflect.ΔInterface) {
+    case var ᴛ when ᴛ == reflect.ΔInterface: {
         appendT(Ꮡh, v.Elem());
         return;
-    }
+    }}
     throw panic(errors.New("maphash: hash of unhashable type "u8 + v.Type().String()));
 }
 

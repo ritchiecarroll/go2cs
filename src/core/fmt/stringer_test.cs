@@ -107,27 +107,31 @@ public static @string String(this TS v) {
     return Sprintf("S: %q"u8, (@string)v);
 }
 
-internal static partial void check(ж<Δtesting.T> Ꮡt, @string got, @string want) {
+internal static partial void check(ж<Δtesting.T> t, @string got, @string want) {
     if (got != want) {
-        Ꮡt.Error(got, (@string)"!="u8, want);
+        t.Error(got, (@string)"!=", want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string i0I81I162I323I644ˢ = "I: 0 I8: 1 I16: 2 I32: 3 I64: 4"u8;
-internal static readonly @string u5U86U167U328U649Ui10ˢ = "U: 5 U8: 6 U16: 7 U32: 8 U64: 9 UI: 10"u8;
-internal static readonly @string f1000000F322000000F643ˢ = "F: 1.000000 F32: 2.000000 F64: 3.000000"u8;
-internal static readonly @string bTrueSXˢ = "B: true S: \"x\""u8;
+internal static ref readonly @string i0I81I162I323I644ˢ => ref i0I81I162I323I644ˢᵇ;
+private static readonly @string i0I81I162I323I644ˢᵇ = "I: 0 I8: 1 I16: 2 I32: 3 I64: 4"u8;
+internal static ref readonly @string u5U86U167U328U649Ui10ˢ => ref u5U86U167U328U649Ui10ˢᵇ;
+private static readonly @string u5U86U167U328U649Ui10ˢᵇ = "U: 5 U8: 6 U16: 7 U32: 8 U64: 9 UI: 10"u8;
+internal static ref readonly @string f1000000F322000000F643ˢ => ref f1000000F322000000F643ˢᵇ;
+private static readonly @string f1000000F322000000F643ˢᵇ = "F: 1.000000 F32: 2.000000 F64: 3.000000"u8;
+internal static ref readonly @string bTrueSXˢ => ref bTrueSXˢᵇ;
+private static readonly @string bTrueSXˢᵇ = "B: true S: \"x\""u8;
 
-public static void TestStringer(ж<Δtesting.T> Ꮡt) {
+public static void TestStringer(ж<Δtesting.T> t) {
     @string s = Sprintf("%v %v %v %v %v"u8, (TI)0, (TI8)1, (TI16)2, (TI32)3, (TI64)4);
-    check(Ꮡt, s, i0I81I162I323I644ˢ);
+    check(t, s, i0I81I162I323I644ˢ);
     s = Sprintf("%v %v %v %v %v %v"u8, (TU)5, (TU8)6, (TU16)7, (TU32)8, (TU64)9, (TUI)10);
-    check(Ꮡt, s, u5U86U167U328U649Ui10ˢ);
+    check(t, s, u5U86U167U328U649Ui10ˢ);
     s = Sprintf("%v %v %v"u8, (TF)1.0D, (TF32)2.0F, (TF64)3.0D);
-    check(Ꮡt, s, f1000000F322000000F643ˢ);
-    s = Sprintf("%v %v"u8, (TB)true, (TS)(@string)"x"u8);
-    check(Ꮡt, s, bTrueSXˢ);
+    check(t, s, f1000000F322000000F643ˢ);
+    s = Sprintf("%v %v"u8, (TB)true, (TS)(@string)"x");
+    check(t, s, bTrueSXˢ);
 }
 
 } // end fmt_test_package

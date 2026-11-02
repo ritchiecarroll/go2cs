@@ -8,7 +8,6 @@ global using static global::go.@internal.runtime.cgroup_package;
 global using static global::go.@internal.runtime.cgroup_internal_test_package;
 
 // <ImportedTypeAliases>
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +28,7 @@ using static global::go.@internal.runtime.cgroup_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -39,8 +38,8 @@ using static global::go.@internal.runtime.cgroup_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup_test.go", "cgroup_test.cs", "ABYeggAgTLKSgoKClJSCpoIADQyCADN0spKCgoKUlIKmgqaC3IKCkoKCgpQACwiCgpQALF6ykoKCgoKmgqaC3ILugoKCgoIACgyCAB5EspKCggARDIiygoKmgoKUgpSmAPMBsgOykoKCgpSCpoLcggAMGoKCgoKCAAUU4oKClLS2AAwGggAtYJKykoKC3JKykoKClIKCpqKCgpSigtyCAAgSgpKCgg==", "55-70:1;134-153:1;159-166:1;221-236:1;248-255:1;295-300:1;542-555:1;573-580:1;650-659:1;652-657:1.1;661-683:2;663-672:2.1;673-677:2.2;678-681:2.3;697-702:1")]
-[assembly: go.GoPositionMap("internal/runtime/cgroup/line_reader_test.go", "line_reader_test.cs", "ABMkgqSCAAkKAGbCAYKykoKUgoKCgpKCkoKUuIKCgqaCgpSC7qKClIKCgpKClIKCgpKClKaCpoKmgoI=", "126-158:1;166-195:1", "", "35=complete/1/13/13,incomplete/1/5/20,complete/2/13/27,incomplete/2/5/34,complete/3/13/43,complete/4/13/44,complete/5/13/55,complete/6/13/56,complete/7/13/57,complete/8/13/58,complete/9/13/66,incomplete/3/5/67,complete/10/13/77,incomplete/4/5/78,complete/11/13/79,complete/12/13/90,incomplete/5/5/91,complete/13/13/92")]
+[assembly: GoPositionMap("internal/runtime/cgroup/cgroup_test.go", "cgroup_test.cs", "ABYeggAgTLKSgoKClJSCpoIADQyCADN0spKCgoKUlIKmgqaC3IKCkoKCgpQACwiCgpQALF6ykoKCgoKmgqaC3ILugoKCgoIACgyCAB5EspKCggASDIiygoKmgoKUgpSmAPMBsgOykoKCgpSCpoLcggAMGoKCgoKCAAUU4oKClLS2AA4GggAtYJKykoKC3JKykoKClIKCpqKCgpSigtyCAAgSgpKCgg==", "55-70:1;134-153:1;159-166:1;221-236:1;248-255:1;295-300:1;542-555:1;573-580:1;650-659:1;652-657:1.1;661-683:2;663-672:2.1;673-677:2.2;678-681:2.3;697-702:1")]
+[assembly: GoPositionMap("internal/runtime/cgroup/line_reader_test.go", "line_reader_test.cs", "ABMkgqSCAAkKAGbCAYKykoKUgoKCgoKCgoKUuIKCgqaCgpSC7qKClIKCgpKClIKCgoKClKaCpoKmgoI=", "126-158:1;166-195:1", "", "35=complete/1/13/13,incomplete/1/5/20,complete/2/13/27,incomplete/2/5/34,complete/3/13/43,complete/4/13/44,complete/5/13/55,complete/6/13/56,complete/7/13/57,complete/8/13/58,complete/9/13/66,incomplete/3/5/67,complete/10/13/77,incomplete/4/5/78,complete/11/13/79,complete/12/13/90,incomplete/5/5/91,complete/13/13/92")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

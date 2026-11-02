@@ -13,7 +13,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-public static partial void TestCaller(ж<testing.T> Ꮡt) {
+public static partial void TestCaller(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         nint procs = Δruntime.GOMAXPROCS(-1);
@@ -22,7 +22,7 @@ public static partial void TestCaller(ж<testing.T> Ꮡt) {
             var cʗ1 = c;
             goǃ(() => {
                 for (nint i = 0; i < 1000; i++) {
-                    testCallerFoo(Ꮡt);
+                    testCallerFoo(t);
                 }
                 cʗ1.ᐸꟷ(true);
             });
@@ -40,24 +40,25 @@ public static partial void TestCaller(ж<testing.T> Ꮡt) {
 // in testCallerBar.
 //
 //go:noinline
-internal static partial void testCallerFoo(ж<testing.T> Ꮡt) {
-    testCallerBar(Ꮡt);
+internal static partial void testCallerFoo(ж<testing.T> t) {
+    testCallerBar(t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string symtabTestGoˢ = "symtab_test.go"u8;
-internal static readonly @string testCallerBarˢ = "testCallerBar"u8;
-internal static readonly @string testCallerFooˢ = "testCallerFoo"u8;
+internal static ref readonly @string symtabTestGoˢ => ref symtabTestGoˢᵇ;
+private static readonly @string symtabTestGoˢᵇ = "symtab_test.go"u8;
+internal static ref readonly @string testCallerBarˢ => ref testCallerBarˢᵇ;
+private static readonly @string testCallerBarˢᵇ = "testCallerBar"u8;
+internal static ref readonly @string testCallerFooˢ => ref testCallerFooˢᵇ;
+private static readonly @string testCallerFooˢᵇ = "testCallerFoo"u8;
 
 //go:noinline
-internal static partial void testCallerBar(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+internal static partial void testCallerBar(ж<testing.T> t) {
     for (nint i = 0; i < 2; i++) {
         var (pc, @file, line, ok) = Δruntime.Caller(i);
         var f = Δruntime.FuncForPC(pc);
         if (!ok || !strings.HasSuffix(@file, symtabTestGoˢ) || (i == 0 && !strings.HasSuffix(f.Name(), testCallerBarˢ)) || (i == 1 && !strings.HasSuffix(f.Name(), testCallerFooˢ)) || line < 5 || line > 1000 || f.Entry() >= pc) {
-            Ꮡt.Errorf("incorrect symbol info %d: %t %d %d %s %s %d"u8,
+            t.Errorf("incorrect symbol info %d: %t %d %d %s %s %d",
                 i, ok, f.Entry(), pc, f.Name(), @file, line);
         }
     }
@@ -73,7 +74,7 @@ internal static nint firstLine = lineNumber(); // 0
 
 // 1
 internal static nint lineVar1 = lineNumber();  // 2
-internal static nint lineVar2a = lineNumber();  // 3
+internal static nint lineVar2a = lineNumber(); // 3
 internal static nint lineVar2b = lineNumber();
 
 // 4
@@ -82,39 +83,39 @@ partial struct compLitᴛ1 /*dyn*/ {
 // 5
     internal nint lineA, lineB; // 6
 }
-internal static slice<compLitᴛ1> compLit = new compLitᴛ1[]{ // 7
+internal static slice<compLitᴛ1> compLit = slice<compLitᴛ1>([ // 7
     new( // 8
         lineNumber(), lineNumber() // 9
 
     ), // 10
     new( // 11
         lineNumber(), // 12
-        lineNumber() // 13
+        lineNumber()  // 13
 
     ), // 14
     new( // 15
         lineB: lineNumber(), // 16
-        lineA: lineNumber() // 17
+        lineA: lineNumber()  // 17
 
     ) // 18
-}.slice();
+]);
 
 internal static array<nint> arrayLit = new nint[]{lineNumber(), // 20
     lineNumber(), lineNumber(), // 21
     lineNumber() // 22
-}.array();                            // 23
+}.array();                                                        // 23
 
-internal static slice<nint> sliceLit = new nint[]{lineNumber(), // 24
+internal static slice<nint> sliceLit = slice<nint>([lineNumber(), // 24
     lineNumber(), lineNumber(), // 25
     lineNumber() // 26
-}.slice();                   // 27
+]);                                                           // 27
 
 internal static map<nint, nint> mapLit = new map<nint, nint>{ // 28
     [29] = lineNumber(), // 29
     [30] = lineNumber(), // 30
     [lineNumber()] = 31, // 31
-    [lineNumber()] = 32 // 32
-};                         // 33
+    [lineNumber()] = 32  // 32
+};                                           // 33
 
 internal static nint intLit = lineNumber() + // 34
     lineNumber() + // 35
@@ -123,7 +124,7 @@ internal static nint intLit = lineNumber() + // 34
 internal static void trythis() {
     // 37
     recordLines(lineNumber(), // 38
-        lineNumber(), // 39
+        lineNumber(),  // 39
         lineNumber()); // 40
 }
 
@@ -144,63 +145,63 @@ internal partial struct TestLineNumber_type /*dyn*/ {
     internal nint want;
 }
 
-public static void TestLineNumber(ж<testing.T> Ꮡt) {
+public static void TestLineNumber(ж<testing.T> t) {
     trythis();
-    foreach (var (_, test) in new TestLineNumber_type[]{
-        new("firstLine"u8, firstLine, 0),
-        new("lineVar1"u8, lineVar1, 2),
-        new("lineVar2a"u8, lineVar2a, 3),
-        new("lineVar2b"u8, lineVar2b, 3),
-        new("compLit[0].lineA"u8, compLit[0].lineA, 9),
-        new("compLit[0].lineB"u8, compLit[0].lineB, 9),
-        new("compLit[1].lineA"u8, compLit[1].lineA, 12),
-        new("compLit[1].lineB"u8, compLit[1].lineB, 13),
-        new("compLit[2].lineA"u8, compLit[2].lineA, 17),
-        new("compLit[2].lineB"u8, compLit[2].lineB, 16),
+    foreach (var (_, test) in slice<TestLineNumber_type>([
+        new("firstLine", firstLine, 0),
+        new("lineVar1", lineVar1, 2),
+        new("lineVar2a", lineVar2a, 3),
+        new("lineVar2b", lineVar2b, 3),
+        new("compLit[0].lineA", compLit[0].lineA, 9),
+        new("compLit[0].lineB", compLit[0].lineB, 9),
+        new("compLit[1].lineA", compLit[1].lineA, 12),
+        new("compLit[1].lineB", compLit[1].lineB, 13),
+        new("compLit[2].lineA", compLit[2].lineA, 17),
+        new("compLit[2].lineB", compLit[2].lineB, 16),
 
-        new("arrayLit[0]"u8, arrayLit[0], 20),
-        new("arrayLit[1]"u8, arrayLit[1], 21),
-        new("arrayLit[2]"u8, arrayLit[2], 21),
-        new("arrayLit[3]"u8, arrayLit[3], 22),
+        new("arrayLit[0]", arrayLit[0], 20),
+        new("arrayLit[1]", arrayLit[1], 21),
+        new("arrayLit[2]", arrayLit[2], 21),
+        new("arrayLit[3]", arrayLit[3], 22),
 
-        new("sliceLit[0]"u8, sliceLit[0], 24),
-        new("sliceLit[1]"u8, sliceLit[1], 25),
-        new("sliceLit[2]"u8, sliceLit[2], 25),
-        new("sliceLit[3]"u8, sliceLit[3], 26),
+        new("sliceLit[0]", sliceLit[0], 24),
+        new("sliceLit[1]", sliceLit[1], 25),
+        new("sliceLit[2]", sliceLit[2], 25),
+        new("sliceLit[3]", sliceLit[3], 26),
 
-        new("mapLit[29]"u8, mapLit[29], 29),
-        new("mapLit[30]"u8, mapLit[30], 30),
-        new("mapLit[31]"u8, mapLit[31 + firstLine] + firstLine, 31), // nb it's the key not the value
-        new("mapLit[32]"u8, mapLit[32 + firstLine] + firstLine, 32), // nb it's the key not the value
+        new("mapLit[29]", mapLit[29], 29),
+        new("mapLit[30]", mapLit[30], 30),
+        new("mapLit[31]", mapLit[31 + firstLine] + firstLine, 31), // nb it's the key not the value
+        new("mapLit[32]", mapLit[32 + firstLine] + firstLine, 32), // nb it's the key not the value
 
-        new("intLit"u8, intLit - 2 * firstLine, 34 + 35 + 36),
+        new("intLit", intLit - 2 * firstLine, 34 + 35 + 36),
 
-        new("l38"u8, l38, 38),
-        new("l39"u8, l39, 39),
-        new("l40"u8, l40, 40)
-    }.slice()) {
+        new("l38", l38, 38),
+        new("l39", l39, 39),
+        new("l40", l40, 40)
+    ])) {
         {
             nint got = test.val - firstLine; if (got != test.want) {
-                Ꮡt.Errorf("%s on firstLine+%d want firstLine+%d (firstLine=%d, val=%d)"u8,
+                t.Errorf("%s on firstLine+%d want firstLine+%d (firstLine=%d, val=%d)",
                     test.name, got, test.want, firstLine, test.val);
             }
         }
     }
 }
 
-public static void TestNilName(ж<testing.T> Ꮡt) {
+public static void TestNilName(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var ex = recover(); if (ex != default!) {
-                    Ꮡt.Fatalf("expected no nil panic, got=%v"u8, ex);
+                var ex = recover(); if (ex != nil) {
+                    t.Fatalf("expected no nil panic, got=%v", ex);
                 }
             }
         }, ref ᒐ);
         {
             @string got = (((ж<Δruntime.Func>)nil)).Name(); if (got != ""u8) {
-                Ꮡt.Errorf("Name() = %q, want %q"u8, got, (@string)""u8);
+                t.Errorf("Name() = %q, want %q", got, (@string)""u8);
             }
         }
     }
@@ -220,7 +221,7 @@ internal static void inlined() {
 // No inline to ensure this complete function appears in output.
 //
 //go:noinline
-internal static partial uintptr tracebackFunc(ж<testing.T> Ꮡt) {
+internal static partial uintptr tracebackFunc(ж<testing.T> t) {
     // This body must be more complex than a single call to inlined to get
     // an inline tree.
     inlined();
@@ -229,14 +230,15 @@ internal static partial uintptr tracebackFunc(ж<testing.T> Ꮡt) {
     // Acquire a PC in this function.
     var (pc, _, _, ok) = Δruntime.Caller(0);
     if (!ok) {
-        Ꮡt.Fatalf("Caller(0) got ok false, want true"u8);
+        t.Fatalf("Caller(0) got ok false, want true");
     }
 
     return pc;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tracebackFuncˢ = "tracebackFunc"u8;
+internal static ref readonly @string tracebackFuncˢ => ref tracebackFuncˢᵇ;
+private static readonly @string tracebackFuncˢᵇ = "tracebackFunc"u8;
 
 // Test that CallersFrames handles PCs in the alignment region between
 // functions (int 3 on amd64) without crashing.
@@ -260,13 +262,13 @@ internal static readonly @string tracebackFuncˢ = "tracebackFunc"u8;
 //     perfectly aligned).
 //
 // This is a regression test for issue 44971.
-public static void TestFunctionAlignmentTraceback(ж<testing.T> Ꮡt) {
-    var pc = tracebackFunc(Ꮡt);
+public static void TestFunctionAlignmentTraceback(ж<testing.T> t) {
+    var pc = tracebackFunc(t);
 
     // Double-check we got the right PC.
     var f = Δruntime.FuncForPC(pc);
     if (!strings.HasSuffix(f.Name(), tracebackFuncˢ)) {
-        Ꮡt.Fatalf("Caller(0) = %+v, want tracebackFunc"u8, f.OrTypedNil());
+        t.Fatalf("Caller(0) = %+v, want tracebackFunc", f.OrTypedNil());
     }
 
     // Iterate forward until we find a different function. Back up one
@@ -282,43 +284,46 @@ public static void TestFunctionAlignmentTraceback(ж<testing.T> Ꮡt) {
     if (Δruntime.GOARCH == "amd64"u8) {
         var code = ~(ж<uint8>)(uintptr)((@unsafe.Pointer)pc);
         if (code != 0xcc) { // INT $3
-            Ꮡt.Errorf("PC %v code got %#x want 0xcc"u8, pc, code);
+            t.Errorf("PC %v code got %#x want 0xcc", pc, code);
         }
     }
 
     // Finally ensure that Frames.Next doesn't crash when processing this
     // PC.
-    var frames = Δruntime.CallersFrames(new uintptr[]{pc}.slice());
+    var frames = Δruntime.CallersFrames(slice<uintptr>([pc]));
     var (frame, _) = frames.Next();
     if (frame.Func != f) {
-        Ꮡt.Errorf("frames.Next() got %+v want %+v"u8, frame.Func.OrTypedNil(), f.OrTypedNil());
+        t.Errorf("frames.Next() got %+v want %+v", frame.Func.OrTypedNil(), f.OrTypedNil());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object failedToLookUpPcˢ = (@string)"failed to look up PC"u8;
-internal static readonly @string nameˢ = "Name"u8;
-internal static readonly @string entryˢ = "Entry"u8;
+internal static ref readonly @string nameˢ => ref nameˢᵇ;
+private static readonly @string nameˢᵇ = "Name"u8;
+internal static ref readonly @string entryˢ => ref entryˢᵇ;
+private static readonly @string entryˢᵇ = "Entry"u8;
 internal static readonly object zeroPcˢ = (@string)"zero PC"u8;
-internal static readonly @string fileLineˢ = "FileLine"u8;
+internal static ref readonly @string fileLineˢ => ref fileLineˢᵇ;
+private static readonly @string fileLineˢᵇ = "FileLine"u8;
 
-public static partial void BenchmarkFunc(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkFunc(ж<testing.B> b) {
     var (pc, _, _, ok) = Δruntime.Caller(0);
     if (!ok) {
-        Ꮡb.Fatal(failedToLookUpPcˢ);
+        b.Fatal(failedToLookUpPcˢ);
     }
     var f = Δruntime.FuncForPC(pc);
     var fʗ1 = f;
-    Ꮡb.Run(nameˢ, (ж<testing.B> bΔ1) => {
+    b.Run(nameˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
             @string name = fʗ1.Name();
             if (name != "runtime_test.BenchmarkFunc"u8) {
-                bΔ1.Fatalf("unexpected name %q"u8, name);
+                bΔ1.Fatalf("unexpected name %q", name);
             }
         }
     });
     var fʗ2 = f;
-    Ꮡb.Run(entryˢ, (ж<testing.B> bΔ2) => {
+    b.Run(entryˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
             var pcΔ1 = fʗ2.Entry();
             if (pcΔ1 == 0) {
@@ -327,11 +332,11 @@ public static partial void BenchmarkFunc(ж<testing.B> Ꮡb) {
         }
     });
     var fʗ3 = f;
-    Ꮡb.Run(fileLineˢ, (ж<testing.B> bΔ3) => {
+    b.Run(fileLineˢ, (ж<testing.B> bΔ3) => {
         for (nint i = 0; i < (~bΔ3).N; i++) {
             var (@file, line) = fʗ3.FileLine(pc);
             if (!strings.HasSuffix(@file, symtabTestGoˢ) || line == 0) {
-                bΔ3.Fatalf("unexpected file/line %q:%d"u8, @file, line);
+                bΔ3.Fatalf("unexpected file/line %q:%d", @file, line);
             }
         }
     });

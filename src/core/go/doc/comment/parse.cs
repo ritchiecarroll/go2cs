@@ -22,8 +22,8 @@ partial struct Doc {
 // A LinkDef is a single link definition.
 partial struct LinkDef {
     public @string Text; // the link text
-    public @string URL; // the link URL
-    public bool Used;   // whether the comment uses the definition
+    public @string URL;  // the link URL
+    public bool Used;    // whether the comment uses the definition
 }
 
 // A Block is block-level content in a doc comment,
@@ -90,7 +90,7 @@ public static bool BlankBetween(this ref List l) {
         return true;
     }
     foreach (var (_, item) in l.Items) {
-        if (len((~item).Content) != 1) {
+        if (len(item.Content) != 1) {
             // Unreachable for parsed comments today,
             // since the only way to get multiple item.Content
             // is multiple paragraphs, which must have been
@@ -151,9 +151,9 @@ internal static void text(this Italic _) {
 
 // A Link is a link to a specific URL.
 partial struct Link {
-    public bool Auto;   // is this an automatic (implicit) link of a literal URL?
+    public bool Auto;         // is this an automatic (implicit) link of a literal URL?
     public slice<ΔText> Text; // text of link
-    public @string URL; // target URL of link
+    public @string URL;       // target URL of link
 }
 
 internal static void text(this ref Link _) {
@@ -171,8 +171,8 @@ partial struct DocLink {
     //  - Name: a link to a const, func, type, or var in this package
     //  - Recv, Name: a link to a method in this package
     public @string ImportPath; // import path
-    public @string Recv; // receiver type, without any pointer star, for methods
-    public @string Name; // const, func, type, var, or method name
+    public @string Recv;       // receiver type, without any pointer star, for methods
+    public @string Name;       // const, func, type, var, or method name
 }
 
 internal static void text(this ref DocLink _) {
@@ -245,13 +245,13 @@ partial struct parseDoc {
 // the first chance to resolve it, in case there's a different package imported as math,
 // and otherwise we refer to a built-in list of single-element standard library package names.
 internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) {
-    if (strings.Contains(pkg, "/"u8)) { // assume a full import path
+    if (strings.Contains(pkg, "/")) { // assume a full import path
         if (validImportPath(pkg)) {
             return (pkg, true);
         }
         return ("", false);
     }
-    if (d.LookupPackage != default!) {
+    if (d.LookupPackage != nil) {
         // Give LookupPackage a chance.
         {
             var (path, okΔ1) = d.LookupPackage(pkg); if (okΔ1) {
@@ -287,7 +287,7 @@ public static (@string importPath, bool ok) DefaultLookupPackage(@string name) {
 public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    var lines = unindent(strings.Split(text, "\n"u8));
+    var lines = unindent(strings.Split(text, "\n"));
     var d = Ꮡ(new parseDoc(
         Parser: Ꮡp,
         Doc: @new<Doc>(),
@@ -295,59 +295,65 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
         lines: lines,
         lookupSym: (@string recv, @string name) => false
     ));
-    if (p.LookupSym != default!) {
-        d.Value.lookupSym = p.LookupSym;
+    if (p.LookupSym != nil) {
+        d.lookupSym = p.LookupSym;
     }
 
     // First pass: break into block structure and collect known links.
     // The text is all recorded as Plain for now.
-    span prev = default!;
+    span prev = default;
     foreach (var (_, s) in parseSpans(lines)) {
-        Block b = default!;
-        var exprᴛ1 = s.kind;
-        if (exprᴛ1 == spanList) {
-            b = new ListжBlock(d.list(lines.slice(s.start, s.end), prev.end < s.start));
-        }
-        else if (exprᴛ1 == spanCode) {
-            b = new CodeжBlock(d.code(lines.slice(s.start, s.end)));
-        }
-        else if (exprᴛ1 == spanOldHeading) {
-            b = d.oldHeading(lines[s.start]);
-        }
-        else if (exprᴛ1 == spanHeading) {
-            b = d.heading(lines[s.start]);
-        }
-        else if (exprᴛ1 == spanPara) {
-            b = d.paragraph(lines.slice(s.start, s.end));
-        }
-        else { /* default: */
+        Block b = default;
+        switch (s.kind) {
+        default: {
             throw panic("go/doc/comment: internal error: unknown span kind");
+            break;
         }
-        if (b != default!) {
-            d.Value.Content = append((~d).Content, b);
+        case var ᴛ when ᴛ == spanList: {
+            b = new ListжBlock(d.list(lines.slice(s.start, s.end), prev.end < s.start));
+            break;
+        }
+        case var ᴛ when ᴛ == spanCode: {
+            b = new CodeжBlock(d.code(lines.slice(s.start, s.end)));
+            break;
+        }
+        case var ᴛ when ᴛ == spanOldHeading: {
+            b = d.oldHeading(lines[s.start]);
+            break;
+        }
+        case var ᴛ when ᴛ == spanHeading: {
+            b = d.heading(lines[s.start]);
+            break;
+        }
+        case var ᴛ when ᴛ == spanPara: {
+            b = d.paragraph(lines.slice(s.start, s.end));
+            break;
+        }}
+        if (b != nil) {
+            d.Content = append(d.Content, b);
         }
         prev = s;
     }
 
     // Second pass: interpret all the Plain text now that we know the links.
-    foreach (var (_, b) in (~d).Content) {
+    foreach (var (_, b) in d.Content) {
         switch (b.type()) {
         case ж<Paragraph> bΔ1: {
-            bΔ1.Value.Text = d.parseLinkedText((@string)((~bΔ1).Text[0]._<Plain>()));
+            bΔ1.Text = d.parseLinkedText((@string)(bΔ1.Text[0]._<Plain>()));
             break;
         }
         case ж<List> bΔ1: {
-            foreach (var (_, i) in (~bΔ1).Items) {
-                foreach (var (_, c) in (~i).Content) {
+            foreach (var (_, i) in bΔ1.Items) {
+                foreach (var (_, c) in i.Content) {
                     var pΔ1 = c._<ж<Paragraph>>();
-                    pΔ1.Value.Text = d.parseLinkedText((@string)((~pΔ1).Text[0]._<Plain>()));
+                    pΔ1.Text = d.parseLinkedText((@string)(pΔ1.Text[0]._<Plain>()));
                 }
             }
             break;
         }}
     }
 
-    return (~d).Doc;
+    return d.Doc;
 }
 
 // A span represents a single span of comment lines (lines[start:end])
@@ -371,7 +377,7 @@ internal static spanKind spanPara => 5;
 internal static slice<span> parseSpans(slice<@string> lines) {
     var spansᴷ = new stackAppend<span>(moves: true);
 
-    slice<span> spans = default!;
+    slice<span> spans = default;
 
     // The loop may process a line twice: once as unindented
     // and again forced indented. So the maximum expected
@@ -385,7 +391,7 @@ internal static slice<span> parseSpans(slice<@string> lines) {
     nint i = 0;
     nint forceIndent = 0;
 Spans:
-    while (ᐧ) {
+    for (;;) {
         // Skip blank lines.
         while (i < len(lines) && lines[i] == "") {
             i++;
@@ -399,10 +405,10 @@ Spans:
             }
         }
 
-        spanKind kind = default!;
+        spanKind kind = default;
         nint start = i;
         nint end = i;
-        if (i < forceIndent || indented(lines[i])){
+        if (i < forceIndent || indented(lines[i])) {
             // Indented (or force indented).
             // Ends before next unindented. (Blank lines are OK.)
             // If this is an unindented list that we are heuristically treating as indented,
@@ -437,11 +443,11 @@ Spans:
             // The heuristic will never trigger on a gofmt'ed comment,
             // because any gofmt'ed code block or list would be
             // followed by a blank line or end of comment.
-            if (end < len(lines) && strings.HasPrefix(lines[end], "}"u8)) {
+            if (end < len(lines) && strings.HasPrefix(lines[end], "}")) {
                 end++;
             }
 
-            if (isList(lines[start])){
+            if (isList(lines[start])) {
                 kind = spanList;
             } else {
                 kind = spanCode;
@@ -477,7 +483,7 @@ Spans:
                     }
                     break;
                 }
-                case {} when strings.HasSuffix(lines[i - 1], "{"u8) || strings.HasSuffix(lines[i - 1], @"\"u8): {
+                case {} when strings.HasSuffix(lines[i - 1], "{") || strings.HasSuffix(lines[i - 1], @"\"): {
                     // If the final unindented line ended in { or \
                     // it is probably the start of a misindented code block.
                     // Give the user a single line fix.
@@ -494,10 +500,9 @@ Spans:
             }
 
             // Span is either paragraph or heading.
-            if (end - start == 1 && isHeading(lines[start])){
+            if (end - start == 1 && isHeading(lines[start])) {
                 kind = spanHeading;
-            } else 
-            if (end - start == 1 && isOldHeading(lines[start], lines, start)){
+            } else if (end - start == 1 && isOldHeading(lines[start], lines, start)) {
                 kind = spanOldHeading;
             } else {
                 kind = spanPara;
@@ -517,7 +522,7 @@ break_Spans:;
 // indented reports whether line is indented
 // (starts with a leading space or tab).
 internal static bool indented(@string line) {
-    return line != ""u8 && (line[0] == (rune)' ' || line[0] == (rune)'\t');
+    return line != ""u8 && (line[0] == ' ' || line[0] == '\t');
 }
 
 // unindent removes any common space/tab prefix
@@ -533,7 +538,7 @@ internal static slice<@string> unindent(slice<@string> lines) {
         lines = lines.slice(0, len(lines) - 1);
     }
     if (len(lines) == 0) {
-        return default!;
+        return default;
     }
 
     // Compute and remove common indentation.
@@ -565,7 +570,7 @@ internal static slice<@string> unindent(slice<@string> lines) {
 
 // isBlank reports whether s is a blank line.
 internal static bool isBlank(@string s) {
-    return len(s) == 0 || (len(s) == 1 && s[0] == (rune)'\n');
+    return len(s) == 0 || (len(s) == 1 && s[0] == '\n');
 }
 
 // commonPrefix returns the longest common prefix of a and b.
@@ -580,7 +585,7 @@ internal static @string commonPrefix(@string a, @string b) {
 // leadingSpace returns the longest prefix of s consisting of spaces and tabs.
 internal static @string leadingSpace(@string s) {
     nint i = 0;
-    while (i < len(s) && (s[i] == (rune)' ' || s[i] == (rune)'\t')) {
+    while (i < len(s) && (s[i] == ' ' || s[i] == '\t')) {
         i++;
     }
     return s.slice(0, i);
@@ -608,32 +613,32 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
     }
 
     // exclude lines with illegal characters. we allow "(),"
-    if (strings.ContainsAny(line, ";:!?+*/=[]{}_^°&§~%#@<\">\\"u8)) {
+    if (strings.ContainsAny(line, ";:!?+*/=[]{}_^°&§~%#@<\">\\")) {
         return false;
     }
 
     // allow "'" for possessive "'s" only
-    for (@string b = line; ᐧ ; ) {
-        bool ok = default!;
+    for (@string b = line; ; ) {
+        bool ok = default;
         {
-            (_, b, ok) = strings.Cut(b, "'"u8); if (!ok) {
+            (_, b, ok) = strings.Cut(b, "'"); if (!ok) {
                 break;
             }
         }
-        if (b != "s"u8 && !strings.HasPrefix(b, "s "u8)) {
+        if (b != "s"u8 && !strings.HasPrefix(b, "s ")) {
             return false; // ' not followed by s and then end-of-word
         }
     }
 
     // allow "." when followed by non-space
-    for (@string b = line; ᐧ ; ) {
-        bool ok = default!;
+    for (@string b = line; ; ) {
+        bool ok = default;
         {
-            (_, b, ok) = strings.Cut(b, "."u8); if (!ok) {
+            (_, b, ok) = strings.Cut(b, "."); if (!ok) {
                 break;
             }
         }
-        if (b == ""u8 || strings.HasPrefix(b, " "u8)) {
+        if (b == ""u8 || strings.HasPrefix(b, " ")) {
             return false; // not followed by non-space
         }
     }
@@ -643,17 +648,17 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
 
 // oldHeading returns the *Heading for the given old-style section heading line.
 internal static Block oldHeading(this ref parseDoc d, @string line) {
-    return new HeadingжBlock(Ꮡ(new Heading(Text: new ΔText[]{((Plain)strings.TrimSpace(line))}.slice())));
+    return new HeadingжBlock(Ꮡ(new Heading(Text: slice<ΔText>([((Plain)strings.TrimSpace(line))]))));
 }
 
 // isHeading reports whether line is a new-style section heading.
 internal static bool isHeading(@string line) {
-    return len(line) >= 2 && line[0] == (rune)'#' && (line[1] == (rune)' ' || line[1] == (rune)'\t') && strings.TrimSpace(line) != "#"u8;
+    return len(line) >= 2 && line[0] == '#' && (line[1] == ' ' || line[1] == '\t') && strings.TrimSpace(line) != "#"u8;
 }
 
 // heading returns the *Heading for the given new-style section heading line.
 internal static Block heading(this ref parseDoc d, @string line) {
-    return new HeadingжBlock(Ꮡ(new Heading(Text: new ΔText[]{((Plain)strings.TrimSpace(line[1..]))}.slice())));
+    return new HeadingжBlock(Ꮡ(new Heading(Text: slice<ΔText>([((Plain)strings.TrimSpace(line[1..]))]))));
 }
 
 // code returns a code block built from the lines.
@@ -662,7 +667,7 @@ internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
 
     var body = unindent(lines);
     body = append(bodyᴷ, body, ""u8); // to get final \n from Join
-    return Ꮡ(new Code(Text: strings.Join(body, "\n"u8)));
+    return Ꮡ(new Code(Text: strings.Join(body, "\n")));
 }
 
 // paragraph returns a paragraph block built from the lines.
@@ -671,7 +676,7 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
     var defsᴷ = new stackAppend<ж<LinkDef>>(moves: true);
 
     // Is this a block of known links? Handle.
-    slice<ж<LinkDef>> defs = default!;
+    slice<ж<LinkDef>> defs = default;
     foreach (var (_, line) in lines) {
         var (def, ok) = parseLink(line);
         if (!ok) {
@@ -682,13 +687,13 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
     defs = move2heap(defsᴷ, defs);
     foreach (var (_, def) in defs) {
         d.Links = append(d.Links, def);
-        if (d.links[(~def).Text] == nil) {
-            d.links[(~def).Text] = def;
+        if (d.links[def.Text] == nil) {
+            d.links[def.Text] = def;
         }
     }
-    return default!;
+    return default;
 NoDefs:
-    return new ParagraphжBlock(Ꮡ(new Paragraph(Text: new ΔText[]{((Plain)strings.Join(lines, "\n"u8))}.slice())));
+    return new ParagraphжBlock(Ꮡ(new Paragraph(Text: slice<ΔText>([((Plain)strings.Join(lines, "\n"))]))));
 }
 
 // parseLink parses a single link definition line:
@@ -697,21 +702,19 @@ NoDefs:
 //
 // It returns the link definition and whether the line was well formed.
 internal static (ж<LinkDef>, bool) parseLink(@string line) {
-    if (line == ""u8 || line[0] != (rune)'[') {
-        return (default!, false);
+    if (line == ""u8 || line[0] != '[') {
+        return (default, false);
     }
-    nint i = strings.Index(line, "]:"u8);
-    if (i < 0 || i + 3 >= len(line) || (line[i + 2] != (rune)' ' && line[i + 2] != (rune)'\t')) {
-        return (default!, false);
+    nint i = strings.Index(line, "]:");
+    if (i < 0 || i + 3 >= len(line) || (line[i + 2] != ' ' && line[i + 2] != '\t')) {
+        return (default, false);
     }
 
-    ref var text = ref heap<@string>(out var Ꮡtext);
-    text = line.slice(1, i);
-    ref var url = ref heap<@string>(out var Ꮡurl);
-    url = strings.TrimSpace(line.slice(i + 3));
-    nint j = strings.Index(url, "://"u8);
+    ref var text = ref heap<@string>(line.slice(1, i), out var Ꮡtext);
+    ref var url = ref heap<@string>(strings.TrimSpace(line.slice(i + 3)), out var Ꮡurl);
+    nint j = strings.Index(url, "://");
     if (j < 0 || !isScheme(url.slice(0, j))) {
-        return (default!, false);
+        return (default, false);
     }
 
     // Line has right form and has valid scheme://.
@@ -733,12 +736,12 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
     void flush() {
         if (Ꮡitem.ValueSlot != nil) {
             {
-                var para = Ꮡd.Value.paragraph(Ꮡtext.ValueSlot); if (para != default!) {
-                    Ꮡitem.ValueSlot.Value.Content = append((~Ꮡitem.ValueSlot).Content, para);
+                var para = Ꮡd.Value.paragraph(Ꮡtext.ValueSlot); if (para != nil) {
+                    Ꮡitem.ValueSlot.Content = append(Ꮡitem.ValueSlot.Content, para);
                 }
             }
         }
-        Ꮡtext.ValueSlot = default!;
+        Ꮡtext.ValueSlot = default;
     }
 
     foreach (var (_, vᴛ1) in lines) {
@@ -751,13 +754,13 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
                 flush();
 
                 item = Ꮡ(new ListItem(Number: n));
-                list.Value.Items = append((~list).Items, item);
+                list.Items = append(list.Items, item);
                 line = after;
             }
         }
         line = strings.TrimSpace(line);
         if (line == ""u8) {
-            list.Value.ForceBlankBetween = true;
+            list.ForceBlankBetween = true;
             flush();
             continue;
         }
@@ -772,8 +775,8 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
 // the rest of the line, and ok == true.
 // Otherwise, it returns "", "", false.
 internal static (@string num, @string rest, bool ok) listMarker(@string line) {
-    @string num = default!;
-    @string rest = default!;
+    @string num = default;
+    @string rest = default;
 
     line = strings.TrimSpace(line);
     if (line == ""u8) {
@@ -782,15 +785,14 @@ internal static (@string num, @string rest, bool ok) listMarker(@string line) {
 
     // Can we find a marker?
     {
-        var (r, n) = utf8.DecodeRuneInString(line); if (r == (rune)'•' || r == (rune)'*' || r == (rune)'+' || r == (rune)'-'){
+        var (r, n) = utf8.DecodeRuneInString(line); if (r == '•' || r == '*' || r == '+' || r == '-') {
             (num, rest) = ("", line.slice(n));
-        } else 
-        if ((rune)'0' <= line[0] && line[0] <= (rune)'9'){
+        } else if ('0' <= line[0] && line[0] <= '9') {
             nint nΔ1 = 1;
-            while (nΔ1 < len(line) && (rune)'0' <= line[nΔ1] && line[nΔ1] <= (rune)'9') {
+            while (nΔ1 < len(line) && '0' <= line[nΔ1] && line[nΔ1] <= '9') {
                 nΔ1++;
             }
-            if (nΔ1 >= len(line) || (line[nΔ1] != (rune)'.' && line[nΔ1] != (rune)')')) {
+            if (nΔ1 >= len(line) || (line[nΔ1] != '.' && line[nΔ1] != ')')) {
                 return ("", "", false);
             }
             (num, rest) = (line.slice(0, nΔ1), line.slice(nΔ1 + 1));
@@ -838,33 +840,32 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
     }
 
     nint start = -1;
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     for (nint i = 0; i < len(text); i++) {
         var c = text[i];
-        if (c == (rune)'\n' || c == (rune)'\t') {
-            c = (rune)' ';
+        if (c == '\n' || c == '\t') {
+            c = (byte)' ';
         }
         switch (c) {
-        case (rune)'[': {
+        case (byte)'[': {
             start = i;
             break;
         }
-        case (rune)']': {
+        case (byte)']': {
             if (start >= 0) {
                 {
-                    var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok){
-                        def.Value.Used = true;
+                    var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok) {
+                        def.Used = true;
                         flush(start);
                         @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(
-                            Text: d.parseText(default!, text.slice(start + 1, i), false),
-                            URL: (~def).URL
+                            Text: d.parseText(default, text.slice(start + 1, i), false),
+                            URL: def.URL
                         )))));
                         wrote = i + 1;
-                    } else 
-                    {
+                    } else {
                         var (link, okΔ1) = d.docLink(text.slice(start + 1, i), text.slice(0, start), text.slice(i + 1)); if (okΔ1) {
                             flush(start);
-                            link.Value.Text = d.parseText(default!, text.slice(start + 1, i), false);
+                            link.Text = d.parseText(default, text.slice(start + 1, i), false);
                             @out = append(@out, (ΔText)(new DocLinkжΔText(link)));
                             wrote = i + 1;
                         }
@@ -891,22 +892,22 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
 // on the same line. Doc links must be preceded and followed by
 // punctuation, spaces, tabs, or the start or end of a line.
 internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) {
-    ж<DocLink> link = default!;
-    bool ok = default!;
+    ж<DocLink> link = default;
+    bool ok = default;
 
     if (before != ""u8) {
         var (r, _) = utf8.DecodeLastRuneInString(before);
-        if (!unicode.IsPunct(r) && r != (rune)' ' && r != (rune)'\t' && r != (rune)'\n') {
-            return (default!, false);
+        if (!unicode.IsPunct(r) && r != ' ' && r != '\t' && r != '\n') {
+            return (default, false);
         }
     }
     if (after != ""u8) {
         var (r, _) = utf8.DecodeRuneInString(after);
-        if (!unicode.IsPunct(r) && r != (rune)' ' && r != (rune)'\t' && r != (rune)'\n') {
-            return (default!, false);
+        if (!unicode.IsPunct(r) && r != ' ' && r != '\t' && r != '\n') {
+            return (default, false);
         }
     }
-    text = strings.TrimPrefix(text, "*"u8);
+    text = strings.TrimPrefix(text, "*");
     ref var pkg = ref heap<@string>(out var Ꮡpkg);
     ref var name = ref heap<@string>(out var Ꮡname);
     (pkg, name, ok) = splitDocName(text);
@@ -914,16 +915,16 @@ internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string
     if (ok) {
         (pkg, recv, _) = splitDocName(pkg);
     }
-    if (pkg != ""u8){
+    if (pkg != ""u8) {
         {
             (pkg, ok) = d.lookupPkg(pkg); if (!ok) {
-                return (default!, false);
+                return (default, false);
             }
         }
     } else {
         {
             ok = d.lookupSym(recv, name); if (!ok) {
-                return (default!, false);
+                return (default, false);
             }
         }
     }
@@ -939,10 +940,10 @@ internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string
 // then splitDocName returns before, name, true.
 // Otherwise it returns text, "", false.
 internal static (@string before, @string name, bool foundDot) splitDocName(@string text) {
-    @string before = default!;
-    @string name = default!;
+    @string before = default;
+    @string name = default;
 
-    nint i = strings.LastIndex(text, "."u8);
+    nint i = strings.LastIndex(text, ".");
     name = text.slice(i + 1);
     if (!isName(name)) {
         return (text, "", false);
@@ -986,7 +987,7 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
                     // That would allow creating links that display as one URL but
                     // when clicked go to a different URL. Not sure what the point
                     // of that is, so we're not doing that lookup here.
-                    @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: new ΔText[]{((Plain)url)}.slice(), URL: url)))));
+                    @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: slice<ΔText>([((Plain)url)]), URL: url)))));
                     i += len(url);
                     wrote = i;
                     continue;
@@ -1001,10 +1002,10 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
                         continue;
                     }
                     flush(i);
-                    if (url == ""u8){
+                    if (url == ""u8) {
                         @out = append(@out, (ΔText)((Italic)id));
                     } else {
-                        @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: new ΔText[]{((Italic)id)}.slice(), URL: url)))));
+                        @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(Auto: true, Text: slice<ΔText>([((Italic)id)]), URL: url)))));
                     }
                     i += len(id);
                     wrote = i;
@@ -1013,24 +1014,24 @@ internal static slice<ΔText> parseText(this ref parseDoc d, slice<ΔText> @out,
             }
         }
         switch (ᐧ) {
-        case {} when strings.HasPrefix(t, "``"u8): {
-            if (len(t) >= 3 && t[2] == (rune)'`') {
+        case {} when strings.HasPrefix(t, "``"): {
+            if (len(t) >= 3 && t[2] == '`') {
                 // Do not convert `` inside ```, in case people are mistakenly writing Markdown.
                 i += 3;
-                while (i < len(t) && t[i] == (rune)'`') {
+                while (i < len(t) && t[i] == '`') {
                     i++;
                 }
                 break;
             }
             writeUntil(i);
-            Ꮡw.WriteRune((rune)'“');
+            Ꮡw.WriteRune('“');
             i += 2;
             wrote = i;
             break;
         }
-        case {} when strings.HasPrefix(t, "''"u8): {
+        case {} when strings.HasPrefix(t, "''"): {
             writeUntil(i);
-            Ꮡw.WriteRune((rune)'”');
+            Ꮡw.WriteRune('”');
             i += 2;
             wrote = i;
             break;
@@ -1055,24 +1056,24 @@ internal static (@string url, bool ok) autoURL(@string s) {
     // Find the ://. Fast path to pick off non-URL,
     // since we call this at every position in the string.
     // The shortest possible URL is ftp://x, 7 bytes.
-    nint i = default!;
+    nint i = default;
     switch (ᐧ) {
     case {} when len(s) is < 7: {
         return ("", false);
     }
-    case {} when s[3] is (rune)':': {
+    case {} when s[3] is (byte)':': {
         i = 3;
         break;
     }
-    case {} when s[4] is (rune)':': {
+    case {} when s[4] is (byte)':': {
         i = 4;
         break;
     }
-    case {} when s[5] is (rune)':': {
+    case {} when s[5] is (byte)':': {
         i = 5;
         break;
     }
-    case {} when s[6] is (rune)':': {
+    case {} when s[6] is (byte)':': {
         i = 6;
         break;
     }
@@ -1111,7 +1112,7 @@ internal static (@string url, bool ok) autoURL(@string s) {
     // but only if they match (#5043, #22285).
     // We allow .,:;?! in the path but not at the end,
     // to avoid end-of-sentence punctuation (#18139, #16565).
-    var stk = new byte[]{}.slice();
+    var stk = slice<byte>([]);
     end = i;
 Path:
     for (; i < len(s); i++) {
@@ -1122,19 +1123,19 @@ Path:
             break;
         }
         switch (s[i]) {
-        case (rune)'(': {
-            stk = append(stkᴷ, stk, (byte)((rune)')'));
+        case (byte)'(': {
+            stk = append(stkᴷ, stk, (byte)')');
             break;
         }
-        case (rune)'{': {
-            stk = append(stk, (byte)((rune)'}'));
+        case (byte)'{': {
+            stk = append(stk, (byte)'}');
             break;
         }
-        case (rune)'[': {
-            stk = append(stk, (byte)((rune)']'));
+        case (byte)'[': {
+            stk = append(stk, (byte)']');
             break;
         }
-        case (rune)')' or (rune)'}' or (rune)']': {
+        case (byte)')' or (byte)'}' or (byte)']': {
             if (len(stk) == 0 || stk[len(stk) - 1] != s[i]) {
                 goto break_Path;
             }
@@ -1156,14 +1157,16 @@ break_Path:;
 // are added here, the fast path at the top of autoURL will need updating.
 internal static bool isScheme(@string s) {
     var exprᴛ1 = s;
-    if (exprᴛ1 == "file"u8 || exprᴛ1 == "ftp"u8 || exprᴛ1 == "gopher"u8 || exprᴛ1 == "http"u8 || exprᴛ1 == "https"u8 || exprᴛ1 == "mailto"u8 || exprᴛ1 == "nntp"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "file"u8 || exprᴛ1 == "ftp"u8 || exprᴛ1 == "gopher"u8 || exprᴛ1 == "http"u8 || exprᴛ1 == "https"u8 || exprᴛ1 == "mailto"u8 || exprᴛ1 == "nntp"u8: {
         return true;
-    }
+    }}
     return false;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ = GoBigConst.Parse("10633823862292363665388054147449749504");
+private static ref readonly GoBigConst maskᶜ => ref maskᶜᵇ;
+private static readonly GoBigConst maskᶜᵇ = GoBigConst.Parse("10633823862292363665388054147449749504");
 
 // isHost reports whether c is a byte that can appear in a URL host,
 // like www.example.com or user@[::1]:8080
@@ -1207,7 +1210,8 @@ internal static bool isPunct(byte c) {
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ1 = GoBigConst.Parse("148873535423923614449401688976238051328");
+private static ref readonly GoBigConst maskᶜ1 => ref maskᶜ1ᵇ;
+private static readonly GoBigConst maskᶜ1ᵇ = GoBigConst.Parse("148873535423923614449401688976238051328");
 
 // isPath reports whether c is a (non-punctuation) path byte.
 internal static bool isPath(byte c) {
@@ -1264,7 +1268,7 @@ internal static (@string id, bool ok) ident(@string s) {
     while (n < len(s)) {
         {
             var c = s[n]; if (c < utf8.RuneSelf) {
-                if (isIdentASCII(c) && (n > 0 || c < (rune)'0' || c > (rune)'9')) {
+                if (isIdentASCII(c) && (n > 0 || c < '0' || c > '9')) {
                     n++;
                     continue;
                 }
@@ -1282,7 +1286,8 @@ internal static (@string id, bool ok) ident(@string s) {
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ2 = GoBigConst.Parse("10633823849912963253799171395480977408");
+private static ref readonly GoBigConst maskᶜ2 => ref maskᶜ2ᵇ;
+private static readonly GoBigConst maskᶜ2ᵇ = GoBigConst.Parse("10633823849912963253799171395480977408");
 
 // isIdentASCII reports whether c is an ASCII identifier byte.
 internal static bool isIdentASCII(byte c) {
@@ -1309,18 +1314,18 @@ internal static bool validImportPath(@string path) {
     if (path == ""u8) {
         return false;
     }
-    if (path[0] == (rune)'-') {
+    if (path[0] == '-') {
         return false;
     }
-    if (strings.Contains(path, "//"u8)) {
+    if (strings.Contains(path, "//")) {
         return false;
     }
-    if (path[len(path) - 1] == (rune)'/') {
+    if (path[len(path) - 1] == '/') {
         return false;
     }
     nint elemStart = 0;
     foreach (var (i, r) in path) {
-        if (r == (rune)'/') {
+        if (r == '/') {
             if (!validImportPathElem(path.slice(elemStart, i))) {
                 return false;
             }
@@ -1331,7 +1336,7 @@ internal static bool validImportPath(@string path) {
 }
 
 internal static bool validImportPathElem(@string elem) {
-    if (elem == ""u8 || elem[0] == (rune)'.' || elem[len(elem) - 1] == (rune)'.') {
+    if (elem == ""u8 || elem[0] == '.' || elem[len(elem) - 1] == '.') {
         return false;
     }
     for (nint i = 0; i < len(elem); i++) {
@@ -1343,7 +1348,8 @@ internal static bool validImportPathElem(@string elem) {
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ3 = GoBigConst.Parse("95704415580147579119642937602632318976");
+private static ref readonly GoBigConst maskᶜ3 => ref maskᶜ3ᵇ;
+private static readonly GoBigConst maskᶜ3ᵇ = GoBigConst.Parse("95704415580147579119642937602632318976");
 
 internal static bool importPathOK(byte c) {
     // mask is a 128-bit bitmap with 1s for allowed bytes,

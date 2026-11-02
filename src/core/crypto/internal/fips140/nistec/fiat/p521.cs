@@ -32,9 +32,9 @@ public static ж<P521Element> One(this ж<P521Element> Ꮡe) {
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-public static nint Equal(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡt) {
+public static nint Equal(this ж<P521Element> Ꮡe, ж<P521Element> t) {
     var eBytes = Ꮡe.Bytes();
-    var tBytes = Ꮡt.Bytes();
+    var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
@@ -66,7 +66,7 @@ internal static slice<byte> bytes(this ж<P521Element> Ꮡe, /*[66]*/ ж<array<b
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
-    p521NonMontgomeryDomainFieldElement tmp = default!;
+    p521NonMontgomeryDomainFieldElement tmp = default;
     p521FromMontgomery(ref tmp, ref nonnil(ref e).x);
     var ᴛ1 = tmp.Value;
     p521ToBytes(ref (Ꮡout).DerefOrNull(), ref ᴛ1);
@@ -75,7 +75,8 @@ internal static slice<byte> bytes(this ж<P521Element> Ꮡe, /*[66]*/ ж<array<b
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string invalidP521Elementˢ = "invalid P521Element encoding"u8;
+private static ref readonly @string invalidP521Elementˢ => ref invalidP521Elementˢᵇ;
+private static readonly @string invalidP521Elementˢᵇ = "invalid P521Element encoding"u8;
 
 // SetBytes sets e = v, where v is a big-endian 66-byte encoding, and returns e.
 // If v is not 66 bytes or it encodes a value higher than 2^521 - 1,
@@ -84,7 +85,7 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p521ElementLen) {
-        return (default!, errors.New(invalidP521Elementˢ));
+        return (default, errors.New(invalidP521Elementˢ));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -92,17 +93,17 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
     slice<byte> minusOneEncoding = @new<P521Element>().Sub(
         @new<P521Element>(), @new<P521Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default!, errors.New(invalidP521Elementˢ));
+        return (default, errors.New(invalidP521Elementˢ));
     }
 
     ref var @in = ref heap(new array<byte>(66), out var Ꮡin);
     copy(@in[..], v);
     p521InvertEndianness(@in[..]);
-    p521NonMontgomeryDomainFieldElement tmp = default!;
+    p521NonMontgomeryDomainFieldElement tmp = default;
     var ᴛ2 = tmp.Value;
     p521FromBytes(ref ᴛ2, ref @in);
     p521ToMontgomery(ref nonnil(ref e).x, ref tmp);
-    return (Ꮡe, default!);
+    return (Ꮡe, default);
 }
 
 // Add sets e = t1 + t2, and returns e.

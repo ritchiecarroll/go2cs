@@ -20,26 +20,30 @@ partial class runtime_test_package {
 // This is the function we'll be testing.
 // It has a simple write barrier in it.
 internal static void setGlobalPointer() {
-    globalPointer = default!;
+    globalPointer = default;
 }
 
 internal static ж<nint> globalPointer;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string objdumpˢ = "objdump"u8;
-internal static readonly @string setGlobalPointerˢ = "setGlobalPointer"u8;
-internal static readonly @string unsafepointTestGoˢ = "unsafepoint_test.go:"u8;
+internal static ref readonly @string objdumpˢ => ref objdumpˢᵇ;
+private static readonly @string objdumpˢᵇ = "objdump"u8;
+internal static ref readonly @string setGlobalPointerˢ => ref setGlobalPointerˢᵇ;
+private static readonly @string setGlobalPointerˢᵇ = "setGlobalPointer"u8;
+internal static ref readonly @string unsafepointTestGoˢ => ref unsafepointTestGoˢᵇ;
+private static readonly @string unsafepointTestGoˢᵇ = "unsafepoint_test.go:"u8;
 
-public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestUnsafePoint(ж<testing.T> t) {
+    testenv.MustHaveExec(new runtime_test_package.testing_TжTB(t));
     var exprᴛ1 = Δruntime.GOARCH;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8: {
+        break;
     }
-    else { /* default: */
-        Ꮡt.Skipf("test not enabled for %s"u8, Δruntime.GOARCH);
-    }
+    default: {
+        t.Skipf("test not enabled for %s", Δruntime.GOARCH);
+        break;
+    }}
 
     // Get a reference we can use to ask the runtime about
     // which of its instructions are unsafe preemption points.
@@ -50,24 +54,24 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
     // and prevent this step from working. So there's a hack in
     // cmd/go/internal/test that exempts runtime tests from
     // symbol stripping.
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), toolˢ, objdumpˢ, "-s", setGlobalPointerˢ, Δos.Args[0]);
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), toolˢ, objdumpˢ, "-s", setGlobalPointerˢ, Δos.Args[0]);
     var (@out, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("can't objdump %v:\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("can't objdump %v:\n%s", err, @out);
     }
-    var lines = strings.Split((@string)@out, "\n"u8)[1..];
+    var lines = strings.Split((@string)@out, "\n")[1..];
 
     // Walk through assembly instructions, checking preemptible flags.
-    uint64 entry = default!;
-    bool startedWB = default!;
-    bool doneWB = default!;
+    uint64 entry = default;
+    bool startedWB = default;
+    bool doneWB = default;
     nint instructionCount = 0;
     nint unsafeCount = 0;
     foreach (var (_, vᴛ1) in lines) {
         var line = vᴛ1;
 
         line = strings.TrimSpace(line);
-        Ꮡt.Logf("%s"u8, line);
+        t.Logf("%s", line);
         var parts = strings.Fields(line);
         if (len(parts) < 4) {
             continue;
@@ -76,8 +80,8 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
             continue;
         }
         var (pc, errΔ1) = strconv.ParseUint(parts[1][2..], 16, 64);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("can't parse pc %s: %v"u8, parts[1], errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatalf("can't parse pc %s: %v", parts[1], errΔ1);
         }
         if (entry == 0) {
             entry = pc;
@@ -86,7 +90,7 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
         // don't match PCs in the address space. Only offsets from function
         // entry make sense.
         var @unsafe = runtime_internal_test_package.UnsafePoint(f.Entry() + (uintptr)(pc - entry));
-        Ꮡt.Logf("unsafe: %v\n"u8, @unsafe);
+        t.Logf("unsafe: %v\n", @unsafe);
         instructionCount++;
         if (@unsafe) {
             unsafeCount++;
@@ -94,12 +98,13 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
 
         // All the instructions inside the write barrier must be unpreemptible.
         if (startedWB && !doneWB && !@unsafe) {
-            Ꮡt.Errorf("instruction %s must be marked unsafe, but isn't"u8, parts[1]);
+            t.Errorf("instruction %s must be marked unsafe, but isn't", parts[1]);
         }
 
         // Detect whether we're in the write barrier.
         var exprᴛ2 = Δruntime.GOARCH;
-        if (exprᴛ2 == "arm64"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ2 == "arm64"u8: {
             if (parts[3] == "MOVWU") {
                 // The unpreemptible region starts after the
                 // load of runtime.writeBarrier.
@@ -110,22 +115,24 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
                 // write of nil.
                 doneWB = true;
             }
+            break;
         }
-        else if (exprᴛ2 == "amd64"u8) {
+        case {} when exprᴛ2 == "amd64"u8: {
             if (parts[3] == "CMPL") {
                 startedWB = true;
             }
             if (parts[3] == "MOVQ" && parts[4] == "$0x0,") {
                 doneWB = true;
             }
-        }
+            break;
+        }}
     }
 
     if (instructionCount == 0) {
-        Ꮡt.Errorf("no instructions"u8);
+        t.Errorf("no instructions");
     }
     if (unsafeCount == instructionCount) {
-        Ꮡt.Errorf("no interruptible instructions"u8);
+        t.Errorf("no interruptible instructions");
     }
     // Note that there are other instructions marked unpreemptible besides
     // just the ones required by the write barrier. Those include possibly

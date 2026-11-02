@@ -30,9 +30,12 @@ public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string preˢ = "<pre>"u8;
-internal static readonly @string preˢ2 = "</pre>\n"u8;
-internal static readonly @string valueˢ = @" value="""u8;
+internal static ref readonly @string preˢ => ref preˢᵇ;
+private static readonly @string preˢᵇ = "<pre>"u8;
+internal static ref readonly @string preˢ2 => ref preˢ2ᵇ;
+private static readonly @string preˢ2ᵇ = "</pre>\n"u8;
+internal static ref readonly @string valueˢ => ref valueˢᵇ;
+private static readonly @string valueˢᵇ = @" value="""u8;
 
 // block prints the block x to out.
 internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
@@ -46,65 +49,65 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
     }
     case ж<Paragraph> xΔ1: {
         if (!p.tight) {
-            @out.WriteString("<p>"u8);
+            @out.WriteString("<p>");
         }
-        p.text(Ꮡout, (~xΔ1).Text);
-        @out.WriteString("\n"u8);
+        p.text(Ꮡout, xΔ1.Text);
+        @out.WriteString("\n");
         break;
     }
     case ж<Heading> xΔ1: {
-        @out.WriteString("<h"u8);
+        @out.WriteString("<h");
         @string h = strconv.Itoa(p.headingLevel());
         @out.WriteString(h);
         {
             @string id = p.headingID(xΔ1); if (id != ""u8) {
-                @out.WriteString(@" id="""u8);
+                @out.WriteString(@" id=""");
                 p.escape(Ꮡout, id);
-                @out.WriteString(@""""u8);
+                @out.WriteString(@"""");
             }
         }
-        @out.WriteString(">"u8);
-        p.text(Ꮡout, (~xΔ1).Text);
-        @out.WriteString("</h"u8);
+        @out.WriteString(">");
+        p.text(Ꮡout, xΔ1.Text);
+        @out.WriteString("</h");
         @out.WriteString(h);
-        @out.WriteString(">\n"u8);
+        @out.WriteString(">\n");
         break;
     }
     case ж<Code> xΔ1: {
         @out.WriteString(preˢ);
-        p.escape(Ꮡout, (~xΔ1).Text);
+        p.escape(Ꮡout, xΔ1.Text);
         @out.WriteString(preˢ2);
         break;
     }
     case ж<List> xΔ1: {
-        @string kind = "ol>\n"u8;
-        if ((~(~xΔ1).Items[0]).Number == ""u8) {
-            kind = "ul>\n"u8;
+        @string kind = "ol>\n";
+        if (xΔ1.Items[0].Number == ""u8) {
+            kind = "ul>\n";
         }
-        @out.WriteString("<"u8);
+        @out.WriteString("<");
         @out.WriteString(kind);
-        @string next = "1"u8;
-        foreach (var (_, item) in (~xΔ1).Items) {
-            @out.WriteString("<li"u8);
+        @string next = "1";
+        foreach (var (_, item) in xΔ1.Items) {
+            @out.WriteString("<li");
             {
-                @string n = item.Value.Number; if (n != ""u8) {
+                @string n = item.Number; if (n != ""u8) {
                     if (n != next) {
                         @out.WriteString(valueˢ);
                         @out.WriteString(n);
-                        @out.WriteString(@""""u8);
+                        @out.WriteString(@"""");
                         next = n;
                     }
                     next = inc(next);
                 }
             }
-            @out.WriteString(">"u8);
+            @out.WriteString(">");
             p.tight = !xΔ1.BlankBetween();
-            foreach (var (_, blk) in (~item).Content) {
+            foreach (var (_, blk) in item.Content) {
                 p.block(Ꮡout, blk);
             }
             p.tight = false;
         }
-        @out.WriteString("</"u8);
+        @out.WriteString("</");
         @out.WriteString(kind);
         break;
     }}
@@ -115,17 +118,18 @@ internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Bloc
 internal static @string inc(@string s) {
     var b = slice<byte>(s);
     for (nint i = len(b) - 1; i >= 0; i--) {
-        if (b[i] < (rune)'9') {
+        if (b[i] < '9') {
             b[i]++;
             return (@string)b;
         }
-        b[i] = (rune)'0';
+        b[i] = (byte)'0';
     }
     return "1"u8 + ((sstring)b);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aHrefˢ = @"<a href="""u8;
+internal static ref readonly @string aHrefˢ => ref aHrefˢᵇ;
+private static readonly @string aHrefˢᵇ = @"<a href="""u8;
 
 // text prints the text sequence x to out.
 internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<ΔText> x) {
@@ -138,17 +142,17 @@ internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice
             break;
         }
         case Italic tΔ1: {
-            @out.WriteString("<i>"u8);
+            @out.WriteString("<i>");
             p.escape(Ꮡout, (@string)tΔ1);
-            @out.WriteString("</i>"u8);
+            @out.WriteString("</i>");
             break;
         }
         case ж<Link> tΔ1: {
             @out.WriteString(aHrefˢ);
-            p.escape(Ꮡout, (~tΔ1).URL);
-            @out.WriteString(@""">"u8);
-            p.text(Ꮡout, (~tΔ1).Text);
-            @out.WriteString("</a>"u8);
+            p.escape(Ꮡout, tΔ1.URL);
+            @out.WriteString(@""">");
+            p.text(Ꮡout, tΔ1.Text);
+            @out.WriteString("</a>");
             break;
         }
         case ж<DocLink> tΔ1: {
@@ -156,11 +160,11 @@ internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice
             if (url != ""u8) {
                 @out.WriteString(aHrefˢ);
                 p.escape(Ꮡout, url);
-                @out.WriteString(@""">"u8);
+                @out.WriteString(@""">");
             }
-            p.text(Ꮡout, (~tΔ1).Text);
+            p.text(Ꮡout, tΔ1.Text);
             if (url != ""u8) {
-                @out.WriteString("</a>"u8);
+                @out.WriteString("</a>");
             }
             break;
         }}
@@ -168,9 +172,12 @@ internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ampˢ = "&amp;"u8;
-internal static readonly @string quotˢ = "&quot;"u8;
-internal static readonly @string aposˢ = "&apos;"u8;
+internal static ref readonly @string ampˢ => ref ampˢᵇ;
+private static readonly @string ampˢᵇ = "&amp;"u8;
+internal static ref readonly @string quotˢ => ref quotˢᵇ;
+private static readonly @string quotˢᵇ = "&quot;"u8;
+internal static ref readonly @string aposˢ => ref aposˢᵇ;
+private static readonly @string aposˢᵇ = "&apos;"u8;
 
 // escape prints s to out as plain text,
 // escaping < & " ' and > to avoid being misinterpreted
@@ -181,33 +188,33 @@ internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @st
     nint start = 0;
     for (nint i = 0; i < len(s); i++) {
         switch (s[i]) {
-        case (rune)'<': {
+        case (byte)'<': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString("&lt;"u8);
+            @out.WriteString("&lt;");
             start = i + 1;
             break;
         }
-        case (rune)'&': {
+        case (byte)'&': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString(ampˢ);
             start = i + 1;
             break;
         }
-        case (rune)'"': {
+        case (byte)'"': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString(quotˢ);
             start = i + 1;
             break;
         }
-        case (rune)'\'': {
+        case (byte)'\'': {
             @out.WriteString(s.slice(start, i));
             @out.WriteString(aposˢ);
             start = i + 1;
             break;
         }
-        case (rune)'>': {
+        case (byte)'>': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString("&gt;"u8);
+            @out.WriteString("&gt;");
             start = i + 1;
             break;
         }}

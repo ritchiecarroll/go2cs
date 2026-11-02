@@ -49,7 +49,7 @@ public static Handle<T> Make<T>(T value) {
     var ptr = m.Load(value);
     if (ptr == nil) {
         // Insert a new value into the map.
-        ptr = m.LoadOrStore(clone(value, m.of(uniqueMap<T>.ᏑcloneSeq)));
+        ptr = m.LoadOrStore(clone(value, m.ᏑcloneSeq));
     }
     return new Handle<T>(ptr);
 }
@@ -64,7 +64,7 @@ public static Handle<T> Make<T>(T value) {
 // not enough to outweigh the cost of two map lookups. What is worth it though, is saving
 // on those allocations.
 internal static readonly ж<isync.HashTrieMap<ж<abi.Type>, any>> ᏑuniqueMaps = new StaticBox<isync.HashTrieMap<ж<abi.Type>, any>>(default(isync.HashTrieMap<ж<abi.Type>, any>));
-internal static ref isync.HashTrieMap<ж<abi.Type>, any> uniqueMaps => ref ((StaticBox<isync.HashTrieMap<ж<abi.Type>, any>>)ᏑuniqueMaps).ValueSlot;                                            // any is always a *uniqueMap[T].
+internal static ref isync.HashTrieMap<ж<abi.Type>, any> uniqueMaps => ref ((StaticBox<isync.HashTrieMap<ж<abi.Type>, any>>)ᏑuniqueMaps).ValueSlot; // any is always a *uniqueMap[T].
 
 partial struct uniqueMap<T> {
     /*embed*/ internal ж<canonMap<T>> canonMap;

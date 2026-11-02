@@ -365,7 +365,7 @@ family delegate and then invoked, exactly the `((<delegate>)(<lambda>))(<args>)`
 IIFE already uses, and the registration takes the temp-parameter form so there is something to invoke. For
 `defer func(dirs ...string) { for _, dir := range dirs { os.RemoveAll(dir) } }(dir1, dir2)`:
 
-<!-- source: src/core/html/template/examplefiles_test.cs:117-122 -->
+<!-- source: src/core/html/template/examplefiles_test.cs:121-126 -->
 ```csharp
 defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring dirsʗp) => {
     var dirs = dirsʗp.sslice();
@@ -520,7 +520,7 @@ defer panic(err)
 err = fmt.Errorf("second")     // Go recovers "first" — arguments evaluate at the defer
 ```
 
-<!-- source: src/core/go/types/check_test.cs:209 -->
+<!-- source: src/core/go/types/check_test.cs:216 -->
 ```csharp
 defer(ᴛ1 => throw panic(ᴛ1), err, ref ᒐ);
 ```
@@ -1128,17 +1128,17 @@ decls in at the statement's own start — it records that offset before conversi
 afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the `foreach` header is
 emitted much further down through a dozen different arms:
 
-<!-- source: src/core/context/x_test.cs:404-405, 409, 412, 439-448, 459 -->
+<!-- source: src/core/context/x_test.cs:417-418, 422, 425, 452-461, 472 -->
 ```csharp
     var bg = Background();
             var bgʗ1 = bg;
             …
             var bgʗ3 = bg;
     …
-    foreach (var (_, test) in new TestAllocs_type[]{
+    foreach (var (_, test) in slice<TestAllocs_type>([
         …
         new(
-            desc: "WithCancel(bg)"u8,
+            desc: "WithCancel(bg)",
             f: () => {
                 var (c, cancel) = WithCancel(bgʗ3);
                 cancel();
@@ -1148,7 +1148,7 @@ emitted much further down through a dozen different arms:
             gccgoLimit: 8D
         ),
     …
-    }.slice()) {
+    ])) {
 ```
 <!-- excerpt of src/core/context/x_test.cs (TestAllocs); the hoisted snapshots keep the splice's own indentation. -->
 
@@ -1333,14 +1333,14 @@ defer(Ꮡstate.free, ref ᒐ);          // binds the live variable's box
 This is not merely a compile fix — a value snapshot is taken at defer time, so it would miss any mutation the body makes to `state` before the deferred call runs; binding `Ꮡstate` matches Go's semantics of deferring against the *live* variable. Gated to an escaping local (a non-escaping one has no `Ꮡ` box and keeps the compiling `Ꮡ(copy)` form) used as a value receiver whose type is exactly the method's pointer-receiver pointee (an already-pointer receiver's box group is the pointer variable itself, whose snapshot name IS declared, so it is excluded). The same generalization silently corrects the closure form (`func(){ x.mutate() }` on an escaping value local previously mutated a lost copy — go/types conversions.go/typeset.go) and removes now-dead `var xʗ1 = x;` snapshots wherever the box was already used. (Guarded by the `DeferHeapLocalPtrMethod` behavioral test — a value local deferring a pointer-receiver method, mutated after the defer, with the deferred method observing the final value, output-compared vs Go.)
 
 The same box-ref treatment covers a **promoted** pointer-receiver method reached through **value embeds** — `lazyCert.Do(…)` on `var lazyCert struct { sync.Once; v *Certificate }` (crypto/x509 `AppendCertsFromPEM`): Go takes `&lazyCert.Once`, an address into the variable's own storage, so the closure must share the original variable. The detection resolves the call through `info.Selections` and walks the selection's embedded-field index path — only **value** embeds along the path root the address at the variable (a **pointer** embed re-roots it at that pointer's target, where the snapshot, which copies the pointer, stays sound). Emission then renders the promoted call through the box's field projection and field uses through the box read; the snapshot form had referenced a never-declared snapshot box (`ᏑlazyCertʗ1`, CS0103) *and* divorced the closure's writes from the original:
-<!-- source: src/core/crypto/x509/cert_pool.cs:265-270 -->
+<!-- source: src/core/crypto/x509/cert_pool.cs:264-269 -->
 ```csharp
 ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
     // This can't fail, as the same bytes already parsed above.
     (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
-    ᏑcertBytes.ValueSlot = default!;
+    ᏑcertBytes.ValueSlot = default;
 });
-return (ᏑlazyCert.Value.v, default!);
+return (ᏑlazyCert.Value.v, default);
 ```
 A variable marked box-ref is also never snapshot-copied by a **nested** literal — the box is a plain reference local that closures at any nesting depth capture directly, so the per-layer `var lazyCertʗ2 = lazyCertʗ1;` chains disappear with it. (Guarded by the `ClosureEmbeddedPromotedPtrMethod` behavioral test — an anonymous-struct local with a value embed whose pointer-receiver method is called from sibling and nested closures interleaved with field writes, cumulative counts observed vs Go.)
 
@@ -1351,9 +1351,9 @@ var prʗ1 = pr;                                 // snapshot copy — WRONG
 defer(Ꮡprʗ1.of(pkgReader.Ꮡfake).setLines, ref ᒐ);    // Ꮡprʗ1 never declared → CS0103
 ```
 The capture analysis matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
-<!-- source: src/core/go/internal/gcimporter/ureader.cs:66 -->
+<!-- source: src/core/go/internal/gcimporter/ureader.cs:65 -->
 ```csharp
-defer(Ꮡpr.of(pkgReader.Ꮡfake).setLines, ref ᒐ);
+defer(Ꮡpr.Ꮡfake.setLines, ref ᒐ);
 ```
 As with the direct case this is a write-visibility fix, not merely a compile fix: gcimporter registers the defer *before* importing (which populates `pr.fake.files`), so a snapshot would flush an empty file set. The same generalization corrects deferred **closures** that read such a variable — go/parser's `defer func(){ …; err = p.errors.Err() }()` snapshot-copied `p` at defer time, so the closure read the parser state from *before* parsing (errors always empty); box-ref renders those reads `Ꮡp.Value.errors…` against the live variable. A deeper chain (`p.a.b.m()`), a pointer field hop, or a method promoted through the field's own embeds keeps the existing snapshot handling. (Guarded by the `DeferHeapFieldPtrMethod` behavioral test — a heap-boxed value local deferring a pointer-receiver method on its value field, with lines appended after the defer observed by the deferred flush, output-compared vs Go.)
 

@@ -14,7 +14,7 @@ partial class rand_test_package {
 
 // TestConcurrent exercises the rand API concurrently, triggering situations
 // where the race detector is likely to detect issues.
-public static partial void TestConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrent(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         const nint numRoutines = 10;
@@ -27,7 +27,7 @@ public static partial void TestConcurrent(ж<testing.T> Ꮡt) {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
-                    int64 seed = default!;
+                    int64 seed = default;
                     for (nint j = 0; j < numCycles; j++) {
                         seed += (int64)ExpFloat64();
                         seed += (int64)Float32();

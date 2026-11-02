@@ -8,17 +8,7 @@ global using static global::go.net.url_package;
 global using static global::go.net.url_internal_test_package;
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using netꓸAddr = go.net_package.ΔAddr;
 global using netꓸError = go.net_package.ΔError;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
@@ -52,7 +42,12 @@ using static global::go.net.url_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.net.url_package.URL))]
+[assembly: GoFieldAccess(typeof(go.net.url_package.URL))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,7 +57,7 @@ using static global::go.net.url_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/example_test.go", "example_test.cs", "ABMegoIACAyCgoKClNyCggAIDIKCgoKUAA0MgoKCgoKCgoKCAA0QgoKCgoLcgoKCgoKUggAKDoKCgoKCAAgMgoKCgoKC7oKCgoKCgu6CgoKCgpSCAAwOgoKClIKCgoKC6JSCgpSCggAKDoKCgpSCgpT6goKClAAKCoKCgpSCggAMDoKCgpSCggAKDoKCgpSCgoKUAAgMgoKCggAKDIKCgqYACAyCgoKClAAICoKCgpSCgpSCgoCCAAkMgoKClIKCgpQACAyCgoKUgoKCAAoOggAHEIKC3IKCgoKUAAkKgtyCggAIDIKCgpS4goKClA==", "", "", "421=UserPassword/1/1/2;454=UserPassword/1/1/2")]
+[assembly: GoPositionMap("net/url/example_test.go", "example_test.cs", "ABQegoIACQyCgoKClNyCggAJDIKCgoKUABMMgoKCgoKCgoKCABEQgoKCgoLcgoKCgoKUggAMDoKCgoKCAAkMgoKCgoKC7oKCgoKCgu6CgoKCgpSCABAOgoKClIKCgoKC+JSCgpSCggAMDoKCgpSCgpQACAqCgoKUAAsKgoKClIKCAA0OgoKClIKCAAwOgoKClIKCgpQACQyCgoKCAA0MgoKCpgAJDIKCgoKUAAoKgoKClIKClIKCgIIACgyCgoKUgoKClAAJDIKCgpSCgoIADA6CAAcQgoLcgoKCgpQADAqC3IKCAAkMgoKClLiCgoKU", "", "", "460=UserPassword/1/1/2;496=UserPassword/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

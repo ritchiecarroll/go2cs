@@ -8,11 +8,11 @@ using syscall = syscall_package;
 partial class unix_package {
 
 public static error PidFDSendSignal(uintptr pidfd, syscallꓸSignal s) {
-    var (_, _, errno) = syscall.Syscall(pidfdSendSignalTrap, pidfd, (uintptr)(nint)s, 0);
+    var (_, _, errno) = syscall.Syscall(pidfdSendSignalTrap, pidfd, (uintptr)s, 0);
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static (uintptr, error) PidFDOpen(nint pid, nint flags) {
@@ -20,7 +20,7 @@ public static (uintptr, error) PidFDOpen(nint pid, nint flags) {
     if (errno != 0) {
         return (~(uintptr)0, errno);
     }
-    return ((uintptr)pidfd, default!);
+    return ((uintptr)pidfd, default);
 }
 
 } // end unix_package

@@ -10,11 +10,11 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-public static void TestFastLog2(ж<testing.T> Ꮡt) {
+public static void TestFastLog2(ж<testing.T> t) {
     // Compute the euclidean distance between math.Log2 and the FastLog2
     // implementation over the range of interest for heap sampling.
     UntypedInt randomBitCount = 26;
-    float64 e = default!;
+    float64 e = default;
 
     nint inc = 1;
     if (testing.Short()) {
@@ -29,7 +29,7 @@ public static void TestFastLog2(ж<testing.T> Ꮡt) {
     e = Δmath.Sqrt(e);
 
     if (e > 1.0D) {
-        Ꮡt.Fatalf("imprecision on fastlog2 implementation, want <=1.0, got %f"u8, e);
+        t.Fatalf("imprecision on fastlog2 implementation, want <=1.0, got %f", e);
     }
 }
 

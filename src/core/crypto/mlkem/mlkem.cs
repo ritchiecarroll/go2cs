@@ -45,22 +45,22 @@ partial struct DecapsulationKey768 {
 // a secure source. The decapsulation key must be kept secret.
 public static (ж<DecapsulationKey768>, error) GenerateKey768() {
     var (key, err) = mlkem.GenerateKey768();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new DecapsulationKey768(key)), default!);
+    return (Ꮡ(new DecapsulationKey768(key)), default);
 }
 
 // NewDecapsulationKey768 expands a decapsulation key from a 64-byte seed in the
 // "d || z" form. The seed must be uniformly random.
 public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte> seed) {
     var (key, err) = mlkem.NewDecapsulationKey768(seed);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new DecapsulationKey768(key)), default!);
+    return (Ꮡ(new DecapsulationKey768(key)), default);
 }
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
@@ -104,11 +104,11 @@ partial struct EncapsulationKey768 {
 // the encapsulation key is not valid, NewEncapsulationKey768 returns an error.
 public static (ж<EncapsulationKey768>, error) NewEncapsulationKey768(slice<byte> encapsulationKey) {
     var (key, err) = mlkem.NewEncapsulationKey768(encapsulationKey);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new EncapsulationKey768(key)), default!);
+    return (Ꮡ(new EncapsulationKey768(key)), default);
 }
 
 // Bytes returns the encapsulation key as a byte slice.
@@ -137,22 +137,22 @@ partial struct DecapsulationKey1024 {
 // a secure source. The decapsulation key must be kept secret.
 public static (ж<DecapsulationKey1024>, error) GenerateKey1024() {
     var (key, err) = mlkem.GenerateKey1024();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new DecapsulationKey1024(key)), default!);
+    return (Ꮡ(new DecapsulationKey1024(key)), default);
 }
 
 // NewDecapsulationKey1024 expands a decapsulation key from a 64-byte seed in the
 // "d || z" form. The seed must be uniformly random.
 public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<byte> seed) {
     var (key, err) = mlkem.NewDecapsulationKey1024(seed);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new DecapsulationKey1024(key)), default!);
+    return (Ꮡ(new DecapsulationKey1024(key)), default);
 }
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
@@ -196,11 +196,11 @@ partial struct EncapsulationKey1024 {
 // the encapsulation key is not valid, NewEncapsulationKey1024 returns an error.
 public static (ж<EncapsulationKey1024>, error) NewEncapsulationKey1024(slice<byte> encapsulationKey) {
     var (key, err) = mlkem.NewEncapsulationKey1024(encapsulationKey);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (Ꮡ(new EncapsulationKey1024(key)), default!);
+    return (Ꮡ(new EncapsulationKey1024(key)), default);
 }
 
 // Bytes returns the encapsulation key as a byte slice.

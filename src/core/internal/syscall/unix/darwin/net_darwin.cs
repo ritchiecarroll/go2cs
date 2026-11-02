@@ -51,18 +51,18 @@ internal static partial void libc_freeaddrinfo_trampoline();
 //go:cgo_import_dynamic libc_getnameinfo getnameinfo "/usr/lib/libSystem.B.dylib"
 internal static partial void libc_getnameinfo_trampoline();
 
-public static (nint, error) Getnameinfo(ж<syscall.RawSockaddr> Ꮡsa, nint salen, ж<byte> Ꮡhost, nint hostlen, ж<byte> Ꮡserv, nint servlen, nint flags) {
+public static (nint, error) Getnameinfo(ж<syscall.RawSockaddr> sa, nint salen, ж<byte> host, nint hostlen, ж<byte> serv, nint servlen, nint flags) {
     var (gerrno, _, errno) = syscall_syscall9(abi.FuncPCABI0(libc_getnameinfo_trampoline),
-        (uintptr)Ꮡsa,
+        (uintptr)sa,
         (uintptr)salen,
-        (uintptr)Ꮡhost,
+        (uintptr)host,
         (uintptr)hostlen,
-        (uintptr)Ꮡserv,
+        (uintptr)serv,
         (uintptr)servlen,
         (uintptr)flags,
         0,
         0);
-    error err = default!;
+    error err = default;
     if (errno != 0) {
         err = errno;
     }
@@ -82,8 +82,8 @@ public static @string GaiStrerror(nint ecode) {
 // Implemented in the runtime package.
 internal static partial @string gostring(ж<byte> _);
 
-public static @string GoString(ж<byte> Ꮡp) {
-    return gostring(Ꮡp);
+public static @string GoString(ж<byte> p) {
+    return gostring(p);
 }
 
 //go:linkname syscall_syscall syscall.syscall
@@ -108,40 +108,40 @@ partial struct ResState {
 //go:cgo_import_dynamic libresolv_res_9_ninit res_9_ninit "/usr/lib/libresolv.9.dylib"
 internal static partial void libresolv_res_9_ninit_trampoline();
 
-public static error ResNinit(ж<ResState> Ꮡstate) {
+public static error ResNinit(ж<ResState> state) {
     var (_, _, errno) = syscall_syscall(abi.FuncPCABI0(libresolv_res_9_ninit_trampoline),
-        (uintptr)Ꮡstate,
+        (uintptr)state,
         0, 0);
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 //go:cgo_import_dynamic libresolv_res_9_nclose res_9_nclose "/usr/lib/libresolv.9.dylib"
 internal static partial void libresolv_res_9_nclose_trampoline();
 
-public static void ResNclose(ж<ResState> Ꮡstate) {
+public static void ResNclose(ж<ResState> state) {
     syscall_syscall(abi.FuncPCABI0(libresolv_res_9_nclose_trampoline),
-        (uintptr)Ꮡstate,
+        (uintptr)state,
         0, 0);
 }
 
 //go:cgo_import_dynamic libresolv_res_9_nsearch res_9_nsearch "/usr/lib/libresolv.9.dylib"
 internal static partial void libresolv_res_9_nsearch_trampoline();
 
-public static (nint, error) ResNsearch(ж<ResState> Ꮡstate, ж<byte> Ꮡdname, nint @class, nint typ, ж<byte> Ꮡans, nint anslen) {
+public static (nint, error) ResNsearch(ж<ResState> state, ж<byte> dname, nint @class, nint typ, ж<byte> ans, nint anslen) {
     var (r1, _, errno) = syscall_syscall6(abi.FuncPCABI0(libresolv_res_9_nsearch_trampoline),
-        (uintptr)Ꮡstate,
-        (uintptr)Ꮡdname,
+        (uintptr)state,
+        (uintptr)dname,
         (uintptr)@class,
         (uintptr)typ,
-        (uintptr)Ꮡans,
+        (uintptr)ans,
         (uintptr)anslen);
     if (errno != 0) {
         return (0, errno);
     }
-    return ((nint)(int32)r1, default!);
+    return ((nint)(int32)r1, default);
 }
 
 } // end unix_package

@@ -9,39 +9,11 @@ global using static global::go.crypto.x509_internal_test_package;
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using execꓸError = go.os.exec_package.ΔError;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
-global using urlꓸError = go.net.url_package.ΔError;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -79,7 +51,25 @@ using static global::go.crypto.x509_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.crypto.x509_package.CertPool))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.x509_package.Certificate))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.x509_package.CertificateRequest))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.x509_package.RevocationList))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.x509_package.VerifyOptions))]
+[assembly: GoFieldAccess(typeof(go.crypto.dsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.dsa_package.PublicKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.ecdsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PublicKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.x509.pkix_package.CertificateList))]
+[assembly: GoFieldAccess(typeof(go.encoding.pem_package.Block))]
+[assembly: GoFieldAccess(typeof(go.net.url_package.URL))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.ExitError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -89,7 +79,7 @@ using static global::go.crypto.x509_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAsYgoKCgoKClIKClNyCgpSUAAcQgoKUgoKUgoKmgoKUlIKCppSCgqbcgoKUgoKmgoI=", "", "", "76=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;115=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
+[assembly: GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "ACEqgoKClIKUAAsYgoKCgoKClIKClNyCgpSUAAcQgoKUgoKUgoKmgoKUlIKCppSCgqbcgoKUgoKmgoI=", "", "", "78=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;117=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

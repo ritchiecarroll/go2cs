@@ -54,99 +54,99 @@ internal partial struct verifyTest {
 }
 
 internal static slice<verifyTest> verifyTests;
-internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
+internal static void initᴛverifyTests() { verifyTests = slice<verifyTest>([
     new(
-        name: "Valid"u8,
+        name: "Valid",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "www.google.com"u8,
+        dnsName: "www.google.com",
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["www.google.com", "GTS CA 1C3", "GTS Root R1"])
+        ])
     ),
     new(
-        name: "Valid (fqdn)"u8,
+        name: "Valid (fqdn)",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "www.google.com."u8,
+        dnsName: "www.google.com.",
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["www.google.com", "GTS CA 1C3", "GTS Root R1"])
+        ])
     ),
     new(
-        name: "MixedCase"u8,
+        name: "MixedCase",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "WwW.GooGLE.coM"u8,
+        dnsName: "WwW.GooGLE.coM",
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["www.google.com", "GTS CA 1C3", "GTS Root R1"])
+        ])
     ),
     new(
-        name: "HostnameMismatch"u8,
+        name: "HostnameMismatch",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "www.example.com"u8,
+        dnsName: "www.example.com",
 
-        errorCallback: expectHostnameError("certificate is valid for"u8)
+        errorCallback: expectHostnameError("certificate is valid for")
     ),
     new(
-        name: "TooManyDNS"u8,
-        leaf: generatePEMCertWithRepeatSAN(1677615892, 200, "fake.dns"u8),
-        roots: new @string[]{generatePEMCertWithRepeatSAN(1677615892, 200, "fake.dns"u8)}.slice(),
+        name: "TooManyDNS",
+        leaf: generatePEMCertWithRepeatSAN(1677615892, 200, "fake.dns"),
+        roots: slice<@string>([generatePEMCertWithRepeatSAN(1677615892, 200, "fake.dns")]),
         currentTime: 1677615892,
-        dnsName: "www.example.com"u8,
+        dnsName: "www.example.com",
         systemSkip: true, // does not chain to a system root
 
-        errorCallback: expectHostnameError("certificate is valid for 200 names, but none matched"u8)
+        errorCallback: expectHostnameError("certificate is valid for 200 names, but none matched")
     ),
     new(
-        name: "TooManyIPs"u8,
-        leaf: generatePEMCertWithRepeatSAN(1677615892, 150, "4.3.2.1"u8),
-        roots: new @string[]{generatePEMCertWithRepeatSAN(1677615892, 150, "4.3.2.1"u8)}.slice(),
+        name: "TooManyIPs",
+        leaf: generatePEMCertWithRepeatSAN(1677615892, 150, "4.3.2.1"),
+        roots: slice<@string>([generatePEMCertWithRepeatSAN(1677615892, 150, "4.3.2.1")]),
         currentTime: 1677615892,
-        dnsName: "1.2.3.4"u8,
+        dnsName: "1.2.3.4",
         systemSkip: true, // does not chain to a system root
 
-        errorCallback: expectHostnameError("certificate is valid for 150 IP SANs, but none matched"u8)
+        errorCallback: expectHostnameError("certificate is valid for 150 IP SANs, but none matched")
     ),
     new(
-        name: "IPMissing"u8,
+        name: "IPMissing",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "1.2.3.4"u8,
+        dnsName: "1.2.3.4",
 
-        errorCallback: expectHostnameError("doesn't contain any IP SANs"u8)
+        errorCallback: expectHostnameError("doesn't contain any IP SANs")
     ),
     new(
-        name: "Expired"u8,
+        name: "Expired",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1,
-        dnsName: "www.example.com"u8,
+        dnsName: "www.example.com",
 
         errorCallback: expectExpired
     ),
     new(
-        name: "MissingIntermediate"u8,
+        name: "MissingIntermediate",
         leaf: googleLeaf,
-        roots: new @string[]{gtsRoot}.slice(),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "www.google.com"u8,
+        dnsName: "www.google.com",
 
         // Skip when using systemVerify, since Windows
         // *will* find the missing intermediate cert.
@@ -154,27 +154,27 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
         errorCallback: expectAuthorityUnknown
     ),
     new(
-        name: "RootInIntermediates"u8,
+        name: "RootInIntermediates",
         leaf: googleLeaf,
-        intermediates: new @string[]{gtsRoot, gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsRoot, gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "www.google.com"u8,
+        dnsName: "www.google.com",
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"www.google.com"u8, "GTS CA 1C3"u8, "GTS Root R1"u8}.slice()
-        }.slice(),
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["www.google.com", "GTS CA 1C3", "GTS Root R1"])
+        ]),
         // CAPI doesn't build the chain with the duplicated GeoTrust
         // entry so the results don't match.
         systemLax: true
     ),
     new(
-        name: "InvalidHash"u8,
+        name: "InvalidHash",
         leaf: googleLeafWithInvalidHash,
-        intermediates: new @string[]{gtsIntermediate}.slice(),
-        roots: new @string[]{gtsRoot}.slice(),
+        intermediates: slice<@string>([gtsIntermediate]),
+        roots: slice<@string>([gtsRoot]),
         currentTime: 1677615892,
-        dnsName: "www.google.com"u8,
+        dnsName: "www.google.com",
 
         // The specific error message may not occur when using system
         // verification.
@@ -185,129 +185,129 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
     // with an E-mail Protection EKU but not a Server Auth one, checking that
     // the EKUs on the leaf are enforced.
     new(
-        name: "EKULeaf"u8,
+        name: "EKULeaf",
         leaf: smimeLeaf,
-        intermediates: new @string[]{smimeIntermediate}.slice(),
-        roots: new @string[]{smimeRoot}.slice(),
+        intermediates: slice<@string>([smimeIntermediate]),
+        roots: slice<@string>([smimeRoot]),
         currentTime: 1594673418,
 
         errorCallback: expectUsageError
     ),
     new(
-        name: "EKULeafExplicit"u8,
+        name: "EKULeafExplicit",
         leaf: smimeLeaf,
-        intermediates: new @string[]{smimeIntermediate}.slice(),
-        roots: new @string[]{smimeRoot}.slice(),
+        intermediates: slice<@string>([smimeIntermediate]),
+        roots: slice<@string>([smimeRoot]),
         currentTime: 1594673418,
-        keyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+        keyUsages: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
 
         errorCallback: expectUsageError
     ),
     new(
-        name: "EKULeafValid"u8,
+        name: "EKULeafValid",
         leaf: smimeLeaf,
-        intermediates: new @string[]{smimeIntermediate}.slice(),
-        roots: new @string[]{smimeRoot}.slice(),
+        intermediates: slice<@string>([smimeIntermediate]),
+        roots: slice<@string>([smimeRoot]),
         currentTime: 1594673418,
-        keyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageEmailProtection}.slice(),
+        keyUsages: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageEmailProtection]),
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"CORPORATIVO FICTICIO ACTIVO"u8, "EAEko Herri Administrazioen CA - CA AAPP Vascas (2)"u8, "IZENPE S.A."u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["CORPORATIVO FICTICIO ACTIVO", "EAEko Herri Administrazioen CA - CA AAPP Vascas (2)", "IZENPE S.A."])
+        ])
     ),
     new(
         // Check that a name constrained intermediate works even when
         // it lists multiple constraints.
-        name: "MultipleConstraints"u8,
+        name: "MultipleConstraints",
         leaf: nameConstraintsLeaf,
-        intermediates: new @string[]{nameConstraintsIntermediate1, nameConstraintsIntermediate2}.slice(),
-        roots: new @string[]{globalSignRoot}.slice(),
+        intermediates: slice<@string>([nameConstraintsIntermediate1, nameConstraintsIntermediate2]),
+        roots: slice<@string>([globalSignRoot]),
         currentTime: 1524771953,
-        dnsName: "udctest.ads.vt.edu"u8,
+        dnsName: "udctest.ads.vt.edu",
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{
-                "udctest.ads.vt.edu"u8,
-                "Virginia Tech Global Qualified Server CA"u8,
-                "Trusted Root CA SHA256 G2"u8,
-                "GlobalSign"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>([
+                "udctest.ads.vt.edu",
+                "Virginia Tech Global Qualified Server CA",
+                "Trusted Root CA SHA256 G2",
+                "GlobalSign"])
+        ])
     ),
     new(
         // Check that SHA-384 intermediates (which are popping up)
         // work.
-        name: "SHA-384"u8,
+        name: "SHA-384",
         leaf: trustAsiaLeaf,
-        intermediates: new @string[]{trustAsiaSHA384Intermediate}.slice(),
-        roots: new @string[]{digicertRoot}.slice(),
+        intermediates: slice<@string>([trustAsiaSHA384Intermediate]),
+        roots: slice<@string>([digicertRoot]),
         currentTime: 1558051200,
-        dnsName: "tm.cn"u8,
+        dnsName: "tm.cn",
 
         // CryptoAPI can find alternative validation paths.
         systemLax: true,
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{
-                "tm.cn"u8,
-                "TrustAsia ECC OV TLS Pro CA"u8,
-                "DigiCert Global Root CA"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>([
+                "tm.cn",
+                "TrustAsia ECC OV TLS Pro CA",
+                "DigiCert Global Root CA"])
+        ])
     ),
     new(
         // Putting a certificate as a root directly should work as a
         // way of saying “exactly this”.
-        name: "LeafInRoots"u8,
+        name: "LeafInRoots",
         leaf: selfSigned,
-        roots: new @string[]{selfSigned}.slice(),
+        roots: slice<@string>([selfSigned]),
         currentTime: 1471624472,
-        dnsName: "foo.example"u8,
+        dnsName: "foo.example",
         systemSkip: true, // does not chain to a system root
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"Acme Co"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["Acme Co"])
+        ])
     ),
     new(
         // Putting a certificate as a root directly should not skip
         // other checks however.
-        name: "LeafInRootsInvalid"u8,
+        name: "LeafInRootsInvalid",
         leaf: selfSigned,
-        roots: new @string[]{selfSigned}.slice(),
+        roots: slice<@string>([selfSigned]),
         currentTime: 1471624472,
-        dnsName: "notfoo.example"u8,
+        dnsName: "notfoo.example",
         systemSkip: true, // does not chain to a system root
 
-        errorCallback: expectHostnameError("certificate is valid for"u8)
+        errorCallback: expectHostnameError("certificate is valid for")
     ),
     new(
         // An X.509 v1 certificate should not be accepted as an
         // intermediate.
-        name: "X509v1Intermediate"u8,
+        name: "X509v1Intermediate",
         leaf: x509v1TestLeaf,
-        intermediates: new @string[]{x509v1TestIntermediate}.slice(),
-        roots: new @string[]{x509v1TestRoot}.slice(),
+        intermediates: slice<@string>([x509v1TestIntermediate]),
+        roots: slice<@string>([x509v1TestRoot]),
         currentTime: 1481753183,
         systemSkip: true, // does not chain to a system root
 
         errorCallback: expectNotAuthorizedError
     ),
     new(
-        name: "IgnoreCNWithSANs"u8,
+        name: "IgnoreCNWithSANs",
         leaf: ignoreCNWithSANLeaf,
-        dnsName: "foo.example.com"u8,
-        roots: new @string[]{ignoreCNWithSANRoot}.slice(),
+        dnsName: "foo.example.com",
+        roots: slice<@string>([ignoreCNWithSANRoot]),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
 
-        errorCallback: expectHostnameError("certificate is not valid for any names"u8)
+        errorCallback: expectHostnameError("certificate is not valid for any names")
     ),
     new(
         // Test that excluded names are respected.
-        name: "ExcludedNames"u8,
+        name: "ExcludedNames",
         leaf: excludedNamesLeaf,
-        dnsName: "bender.local"u8,
-        intermediates: new @string[]{excludedNamesIntermediate}.slice(),
-        roots: new @string[]{excludedNamesRoot}.slice(),
+        dnsName: "bender.local",
+        intermediates: slice<@string>([excludedNamesIntermediate]),
+        roots: slice<@string>([excludedNamesRoot]),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
 
@@ -316,10 +316,10 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
     new(
         // Test that unknown critical extensions in a leaf cause a
         // verify error.
-        name: "CriticalExtLeaf"u8,
+        name: "CriticalExtLeaf",
         leaf: criticalExtLeafWithExt,
-        intermediates: new @string[]{criticalExtIntermediate}.slice(),
-        roots: new @string[]{criticalExtRoot}.slice(),
+        intermediates: slice<@string>([criticalExtIntermediate]),
+        roots: slice<@string>([criticalExtRoot]),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
 
@@ -328,145 +328,142 @@ internal static void initᴛverifyTests() { verifyTests = new verifyTest[]{
     new(
         // Test that unknown critical extensions in an intermediate
         // cause a verify error.
-        name: "CriticalExtIntermediate"u8,
+        name: "CriticalExtIntermediate",
         leaf: criticalExtLeaf,
-        intermediates: new @string[]{criticalExtIntermediateWithExt}.slice(),
-        roots: new @string[]{criticalExtRoot}.slice(),
+        intermediates: slice<@string>([criticalExtIntermediateWithExt]),
+        roots: slice<@string>([criticalExtRoot]),
         currentTime: 1486684488,
         systemSkip: true, // does not chain to a system root
 
         errorCallback: expectUnhandledCriticalExtension
     ),
     new(
-        name: "ValidCN"u8,
+        name: "ValidCN",
         leaf: validCNWithoutSAN,
-        dnsName: "foo.example.com"u8,
-        roots: new @string[]{invalidCNRoot}.slice(),
+        dnsName: "foo.example.com",
+        roots: slice<@string>([invalidCNRoot]),
         currentTime: 1540000000,
         systemSkip: true, // does not chain to a system root
 
-        errorCallback: expectHostnameError("certificate relies on legacy Common Name field"u8)
+        errorCallback: expectHostnameError("certificate relies on legacy Common Name field")
     ),
     new(
         // A certificate with an AKID should still chain to a parent without SKID.
         // See Issue 30079.
-        name: "AKIDNoSKID"u8,
+        name: "AKIDNoSKID",
         leaf: leafWithAKID,
-        roots: new @string[]{rootWithoutSKID}.slice(),
+        roots: slice<@string>([rootWithoutSKID]),
         currentTime: 1550000000,
-        dnsName: "example"u8,
+        dnsName: "example",
         systemSkip: true, // does not chain to a system root
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"Acme LLC"u8, "Acme Co"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["Acme LLC", "Acme Co"])
+        ])
     ),
     new(
         // When there are two parents, one with an incorrect subject but matching SKID
         // and one with a correct subject but missing SKID, the latter should be
         // considered as a possible parent.
         leaf: leafMatchingAKIDMatchingIssuer,
-        roots: new @string[]{rootMatchingSKIDMismatchingSubject, rootMismatchingSKIDMatchingSubject}.slice(),
+        roots: slice<@string>([rootMatchingSKIDMismatchingSubject, rootMismatchingSKIDMatchingSubject]),
         currentTime: 1550000000,
-        dnsName: "example"u8,
+        dnsName: "example",
         systemSkip: true,
 
-        expectedChains: new slice<@string>[]{
-            new @string[]{"Leaf"u8, "Root B"u8}.slice()
-        }.slice()
+        expectedChains: slice<slice<@string>>([
+            slice<@string>(["Leaf", "Root B"])
+        ])
     )
-}.slice(); }
+]); }
 
 internal static Action<ж<testing.T>, error> expectHostnameError(@string msg) {
     return (ж<testing.T> t, error err) => {
         {
             var (_, ok) = err._<HostnameError>(ᐧ); if (!ok) {
-                t.Fatalf("error was not a HostnameError: %v"u8, err);
+                t.Fatalf("error was not a HostnameError: %v", err);
             }
         }
         if (!strings.Contains(err.Error(), msg)) {
-            t.Fatalf("HostnameError did not contain %q: %v"u8, msg, err);
+            t.Fatalf("HostnameError did not contain %q: %v", msg, err);
         }
     };
 }
 
-internal static partial void expectExpired(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectExpired(ж<testing.T> t, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != Expired) {
-            Ꮡt.Fatalf("error was not Expired: %v"u8, err);
+            t.Fatalf("error was not Expired: %v", err);
         }
     }
 }
 
-internal static partial void expectUsageError(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectUsageError(ж<testing.T> t, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != IncompatibleUsage) {
-            Ꮡt.Fatalf("error was not IncompatibleUsage: %v"u8, err);
+            t.Fatalf("error was not IncompatibleUsage: %v", err);
         }
     }
 }
 
-internal static void expectAuthorityUnknown(ж<testing.T> Ꮡt, error err) {
+internal static void expectAuthorityUnknown(ж<testing.T> t, error err) {
     var (e, ok) = err._<UnknownAuthorityError>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("error was not UnknownAuthorityError: %v"u8, err);
+        t.Fatalf("error was not UnknownAuthorityError: %v", err);
     }
     if (e.Cert == nil) {
-        Ꮡt.Fatalf("error was UnknownAuthorityError, but missing Cert: %v"u8, err);
+        t.Fatalf("error was UnknownAuthorityError, but missing Cert: %v", err);
     }
 }
 
-internal static void expectHashError(ж<testing.T> Ꮡt, error err) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    if (err == default!) {
-        Ꮡt.Fatalf("no error resulted from invalid hash"u8);
+internal static void expectHashError(ж<testing.T> t, error err) {
+    if (err == nil) {
+        t.Fatalf("no error resulted from invalid hash");
     }
     {
-        @string expected = "algorithm unimplemented"u8; if (!strings.Contains(err.Error(), expected)) {
-            Ꮡt.Fatalf("error resulting from invalid hash didn't contain '%s', rather it was: %v"u8, expected, err);
+        @string expected = "algorithm unimplemented"; if (!strings.Contains(err.Error(), expected)) {
+            t.Fatalf("error resulting from invalid hash didn't contain '%s', rather it was: %v", expected, err);
         }
     }
 }
 
-internal static partial void expectNameConstraintsError(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectNameConstraintsError(ж<testing.T> t, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != CANotAuthorizedForThisName) {
-            Ꮡt.Fatalf("error was not a CANotAuthorizedForThisName: %v"u8, err);
+            t.Fatalf("error was not a CANotAuthorizedForThisName: %v", err);
         }
     }
 }
 
-internal static partial void expectNotAuthorizedError(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectNotAuthorizedError(ж<testing.T> t, error err) {
     {
         var (inval, ok) = err._<CertificateInvalidError>(ᐧ); if (!ok || inval.Reason != NotAuthorizedToSign) {
-            Ꮡt.Fatalf("error was not a NotAuthorizedToSign: %v"u8, err);
+            t.Fatalf("error was not a NotAuthorizedToSign: %v", err);
         }
     }
 }
 
-internal static partial void expectUnhandledCriticalExtension(ж<testing.T> Ꮡt, error err) {
+internal static partial void expectUnhandledCriticalExtension(ж<testing.T> t, error err) {
     {
         var (_, ok) = err._<UnhandledCriticalExtension>(ᐧ); if (!ok) {
-            Ꮡt.Fatalf("error was not an UnhandledCriticalExtension: %v"u8, err);
+            t.Fatalf("error was not an UnhandledCriticalExtension: %v", err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string failedToDecodePemˢ = "failed to decode PEM"u8;
+internal static ref readonly @string failedToDecodePemˢ => ref failedToDecodePemˢᵇ;
+private static readonly @string failedToDecodePemˢᵇ = "failed to decode PEM"u8;
 
 internal static (ж<global::go.crypto.x509_package.Certificate>, error) certificateFromPEM(@string pemBytes) {
     var (block, _) = pem.Decode(slice<byte>(pemBytes));
     if (block == nil) {
-        return (default!, errors.New(failedToDecodePemˢ));
+        return (default, errors.New(failedToDecodePemˢ));
     }
-    return ParseCertificate((~block).Bytes);
+    return ParseCertificate(block.Bytes);
 }
 
-internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSystemRoots) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+internal static void testVerify(ж<testing.T> t, verifyTest test, bool useSystemRoots) {
     var opts = new VerifyOptions(
         Intermediates: NewCertPool(),
         DNSName: test.dnsName,
@@ -479,7 +476,7 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
         foreach (var (j, root) in test.roots) {
             var ok = opts.Roots.AppendCertsFromPEM(slice<byte>(root));
             if (!ok) {
-                Ꮡt.Fatalf("failed to parse root #%d"u8, j);
+                t.Fatalf("failed to parse root #%d", j);
             }
         }
     }
@@ -487,30 +484,30 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
     foreach (var (j, intermediate) in test.intermediates) {
         var ok = opts.Intermediates.AppendCertsFromPEM(slice<byte>(intermediate));
         if (!ok) {
-            Ꮡt.Fatalf("failed to parse intermediate #%d"u8, j);
+            t.Fatalf("failed to parse intermediate #%d", j);
         }
     }
 
     var (leaf, err) = certificateFromPEM(test.leaf);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse leaf: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse leaf: %v", err);
     }
 
     (var chains, err) = leaf.Verify(opts);
 
-    if (test.errorCallback == default! && err != default!) {
-        if (runtime.GOOS == "windows"u8 && strings.HasSuffix(testenv.Builder(), "-2008"u8) && err.Error() == "x509: certificate signed by unknown authority"u8) {
-            testenv.SkipFlaky(new x509_test_package.testing_TжTB(Ꮡt), 19564);
+    if (test.errorCallback == nil && err != nil) {
+        if (runtime.GOOS == "windows"u8 && strings.HasSuffix(testenv.Builder(), "-2008") && err.Error() == "x509: certificate signed by unknown authority"u8) {
+            testenv.SkipFlaky(new x509_test_package.testing_TжTB(t), 19564);
         }
-        Ꮡt.Fatalf("unexpected error: %v"u8, err);
+        t.Fatalf("unexpected error: %v", err);
     }
-    if (test.errorCallback != default!) {
-        if (useSystemRoots && test.systemLax){
-            if (err == default!) {
-                Ꮡt.Fatalf("expected error"u8);
+    if (test.errorCallback != nil) {
+        if (useSystemRoots && test.systemLax) {
+            if (err == nil) {
+                t.Fatalf("expected error");
             }
         } else {
-            test.errorCallback(Ꮡt, err);
+            test.errorCallback(t, err);
         }
     }
 
@@ -520,7 +517,7 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
         }
 
         foreach (var (k, cert) in chain) {
-            if (!strings.Contains(nameToKey(cert.of(global::go.crypto.x509_package.Certificate.ᏑSubject)), expectedChain[k])) {
+            if (!strings.Contains(nameToKey(cert.ᏑSubject), expectedChain[k])) {
                 return false;
             }
         }
@@ -532,7 +529,7 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
     // verifiers) multiple identical (looking) chains may be returned when two roots with the
     // same subject are present.
     foreach (var (_, expectedChain) in test.expectedChains) {
-        bool match = default!;
+        bool match = default;
         foreach (var (_, chain) in chains) {
             if (doesMatch(expectedChain, chain)) {
                 match = true;
@@ -541,7 +538,7 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
         }
 
         if (!match) {
-            Ꮡt.Errorf("No match found for %v"u8, expectedChain);
+            t.Errorf("No match found for %v", expectedChain);
         }
     }
 
@@ -555,31 +552,31 @@ internal static void testVerify(ж<testing.T> Ꮡt, verifyTest test, bool useSys
         }
         // Allow additional unknown chains if systemLax is set
         if (nMatched == 0 && test.systemLax == false || nMatched > 1) {
-            Ꮡt.Errorf("Got %v matches for chain %v"u8, nMatched, chainToDebugString(chain));
+            t.Errorf("Got %v matches for chain %v", nMatched, chainToDebugString(chain));
             foreach (var (_, expectedChain) in test.expectedChains) {
                 if (doesMatch(expectedChain, chain)) {
-                    Ꮡt.Errorf("\t matched %v"u8, expectedChain);
+                    t.Errorf("\t matched %v", expectedChain);
                 }
             }
         }
     }
 }
 
-public static void TestGoVerify(ж<testing.T> Ꮡt) {
+public static void TestGoVerify(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in verifyTests) {
         ref var test = ref heap(new verifyTest(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             testVerify(tΔ1, testʗ1, false);
         });
     }
 }
 
-public static void TestSystemVerify(ж<testing.T> Ꮡt) {
+public static void TestSystemVerify(ж<testing.T> t) {
     if (runtime.GOOS != "windows"u8) {
-        Ꮡt.Skipf("skipping verify test using system APIs on %q"u8, runtime.GOOS);
+        t.Skipf("skipping verify test using system APIs on %q", runtime.GOOS);
     }
 
     foreach (var (_, vᴛ1) in verifyTests) {
@@ -587,7 +584,7 @@ public static void TestSystemVerify(ж<testing.T> Ꮡt) {
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             if (testʗ1.systemSkip) {
                 tΔ1.SkipNow();
             }
@@ -597,12 +594,12 @@ public static void TestSystemVerify(ж<testing.T> Ꮡt) {
 }
 
 internal static @string chainToDebugString(slice<ж<global::go.crypto.x509_package.Certificate>> chain) {
-    @string chainStr = default!;
+    @string chainStr = default;
     foreach (var (_, cert) in chain) {
         if (builtin.len(chainStr) > 0) {
             chainStr += " -> "u8;
         }
-        chainStr += nameToKey(cert.of(global::go.crypto.x509_package.Certificate.ᏑSubject));
+        chainStr += nameToKey(cert.ᏑSubject);
     }
     return chainStr;
 }
@@ -610,37 +607,37 @@ internal static @string chainToDebugString(slice<ж<global::go.crypto.x509_packa
 internal static @string nameToKey(ж<pkix.Name> Ꮡname) {
     ref var name = ref Ꮡname.DerefOrNull();
 
-    return strings.Join(name.Country, ","u8) + "/"u8 + strings.Join(name.Organization, ","u8) + "/"u8 + strings.Join(name.OrganizationalUnit, ","u8) + "/"u8 + name.CommonName;
+    return strings.Join(name.Country, ",") + "/"u8 + strings.Join(name.Organization, ",") + "/"u8 + strings.Join(name.OrganizationalUnit, ",") + "/"u8 + name.CommonName;
 }
 
 internal static @string generatePEMCertWithRepeatSAN(int64 currentTime, nint count, @string san) {
-    ref var cert = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡcert);
-    cert = new Certificate(
+    ref var cert = ref heap<global::go.crypto.x509_package.Certificate>(new Certificate(
         NotBefore: time.Unix(currentTime, 0),
         NotAfter: time.Unix(currentTime, 0)
-    );
+    ), out var Ꮡcert);
     {
-        var ip = net.ParseIP(san); if (ip != default!){
-            cert.IPAddresses = slices.Repeat<slice<net.IP>, net.IP>(new net.IP[]{ip}.slice(), count);
+        var ip = net.ParseIP(san); if (ip != nil) {
+            cert.IPAddresses = slices.Repeat<slice<net.IP>, net.IP>(slice<net.IP>([ip]), count);
         } else {
-            cert.DNSNames = slices.Repeat<slice<@string>, @string>(new @string[]{san}.slice(), count);
+            cert.DNSNames = slices.Repeat<slice<@string>, @string>(slice<@string>([san]), count);
         }
     }
     var (privKey, err) = rsa.GenerateKey(rand.Reader, 4096);
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
-    (var certBytes, err) = CreateCertificate(rand.Reader, Ꮡcert, Ꮡcert, privKey.of(rsa.PrivateKey.ᏑPublicKey), privKey.OrTypedNil());
-    if (err != default!) {
+    (var certBytes, err) = CreateCertificate(rand.Reader, Ꮡcert, Ꮡcert, privKey.ᏑPublicKey, privKey.OrTypedNil());
+    if (err != nil) {
         log.Fatal(err);
     }
     return (@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
-        Type: "CERTIFICATE"u8,
+        Type: "CERTIFICATE",
         Bytes: certBytes
     )));
 }
 
-internal static readonly @string gtsIntermediate = """
+internal static ref readonly @string gtsIntermediate => ref gtsIntermediateᵇ;
+private static readonly @string gtsIntermediateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIFljCCA36gAwIBAgINAgO8U1lrNMcY9QFQZjANBgkqhkiG9w0BAQsFADBHMQsw
 CQYDVQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExMQzEU
@@ -675,7 +672,8 @@ juDEI/9bfU1lcKwrmz3O2+BtjjKAvpafkmO8l7tdufThcV4q5O8DIrGKZTqPwJNl
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string gtsRoot = """
+internal static ref readonly @string gtsRoot => ref gtsRootᵇ;
+private static readonly @string gtsRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIFVzCCAz+gAwIBAgINAgPlk28xsBNJiGuiFzANBgkqhkiG9w0BAQwFADBHMQsw
 CQYDVQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExMQzEU
@@ -709,7 +707,8 @@ bP6MvPJwNQzcmRk13NfIRmPVNnGuV/u3gm3c
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string googleLeaf = """
+internal static ref readonly @string googleLeaf => ref googleLeafᵇ;
+private static readonly @string googleLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIFUjCCBDqgAwIBAgIQERmRWTzVoz0SMeozw2RM3DANBgkqhkiG9w0BAQsFADBG
 MQswCQYDVQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExM
@@ -745,7 +744,8 @@ i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 
 // googleLeafWithInvalidHash is the same as googleLeaf, but the signature
 // algorithm in the certificate contains a nonsense OID.
-internal static readonly @string googleLeafWithInvalidHash = """
+internal static ref readonly @string googleLeafWithInvalidHash => ref googleLeafWithInvalidHashᵇ;
+private static readonly @string googleLeafWithInvalidHashᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIFUjCCBDqgAwIBAgIQERmRWTzVoz0SMeozw2RM3DANBgkqhkiG9w0BAQ4FADBG
 MQswCQYDVQQGEwJVUzEiMCAGA1UEChMZR29vZ2xlIFRydXN0IFNlcnZpY2VzIExM
@@ -779,7 +779,8 @@ i8eNLnKL9PXQ+5SwJFCzfEhcIZuhzg==
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string smimeLeaf = """
+internal static ref readonly @string smimeLeaf => ref smimeLeafᵇ;
+private static readonly @string smimeLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIIPDCCBiSgAwIBAgIQaMDxFS0pOMxZZeOBxoTJtjANBgkqhkiG9w0BAQsFADCB
 nTELMAkGA1UEBhMCRVMxFDASBgNVBAoMC0laRU5QRSBTLkEuMTowOAYDVQQLDDFB
@@ -828,7 +829,8 @@ Qd95nJKOkusQpy99X4dF/lfbYAQnnjnqh3DLD2gvYObXFaAYFaiBKTiMTV2X72F+
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string smimeIntermediate = """
+internal static ref readonly @string smimeIntermediate => ref smimeIntermediateᵇ;
+private static readonly @string smimeIntermediateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIHNzCCBSGgAwIBAgIQJMXIqlZvjuhMvqcFXOFkpDALBgkqhkiG9w0BAQswODEL
 MAkGA1UEBhMCRVMxFDASBgNVBAoMC0laRU5QRSBTLkEuMRMwEQYDVQQDDApJemVu
@@ -872,7 +874,8 @@ k+lzD44wofy8paAy9uC9Owae0zMEzhcsyRm7
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string smimeRoot = """
+internal static ref readonly @string smimeRoot => ref smimeRootᵇ;
+private static readonly @string smimeRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIF8TCCA9mgAwIBAgIQALC3WhZIX7/hy/WL1xnmfTANBgkqhkiG9w0BAQsFADA4
 MQswCQYDVQQGEwJFUzEUMBIGA1UECgwLSVpFTlBFIFMuQS4xEzARBgNVBAMMCkl6
@@ -1050,7 +1053,8 @@ WD9f
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string digicertRoot = """
+internal static ref readonly @string digicertRoot => ref digicertRootᵇ;
+private static readonly @string digicertRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh
 MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
@@ -1075,7 +1079,8 @@ CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string trustAsiaSHA384Intermediate = """
+internal static ref readonly @string trustAsiaSHA384Intermediate => ref trustAsiaSHA384Intermediateᵇ;
+private static readonly @string trustAsiaSHA384Intermediateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIID9zCCAt+gAwIBAgIQC965p4OR4AKrGlsyW0XrDzANBgkqhkiG9w0BAQwFADBh
 MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
@@ -1102,7 +1107,8 @@ rRzZxAYN36q1SX8=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string trustAsiaLeaf = """
+internal static ref readonly @string trustAsiaLeaf => ref trustAsiaLeafᵇ;
+private static readonly @string trustAsiaLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIEwTCCBEegAwIBAgIQBOjomZfHfhgz2bVYZVuf2DAKBggqhkjOPQQDAzBaMQsw
 CQYDVQQGEwJDTjElMCMGA1UEChMcVHJ1c3RBc2lhIFRlY2hub2xvZ2llcywgSW5j
@@ -1133,7 +1139,8 @@ EEeHB9vhZAEjQSePAfjR9aAGhXRa
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string selfSigned = """
+internal static ref readonly @string selfSigned => ref selfSignedᵇ;
+private static readonly @string selfSignedᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIC/DCCAeSgAwIBAgIRAK0SWRVmi67xU3z0gkgY+PkwDQYJKoZIhvcNAQELBQAw
 EjEQMA4GA1UEChMHQWNtZSBDbzAeFw0xNjA4MTkxNjMzNDdaFw0xNzA4MTkxNjMz
@@ -1154,7 +1161,8 @@ cw3ESZzThBwWqvPOtJdpXdm+r57pDW8qD+/0lY8wfImMNkQAyCUCLg/1Lxt/hrBj
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string issuerSubjectMatchRoot = """
+internal static ref readonly @string issuerSubjectMatchRoot => ref issuerSubjectMatchRootᵇ;
+private static readonly @string issuerSubjectMatchRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIICIDCCAYmgAwIBAgIIAj5CwoHlWuYwDQYJKoZIhvcNAQELBQAwIzEPMA0GA1UE
 ChMGR29sYW5nMRAwDgYDVQQDEwdSb290IGNhMB4XDTE1MDEwMTAwMDAwMFoXDTI1
@@ -1171,7 +1179,8 @@ eyfm5ITdK/WT9TzYhsU4AVZcn20=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string issuerSubjectMatchLeaf = """
+internal static ref readonly @string issuerSubjectMatchLeaf => ref issuerSubjectMatchLeafᵇ;
+private static readonly @string issuerSubjectMatchLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIICODCCAaGgAwIBAgIJAOjwnT/iW+qmMA0GCSqGSIb3DQEBCwUAMCMxDzANBgNV
 BAoTBkdvbGFuZzEQMA4GA1UEAxMHUm9vdCBDQTAeFw0xNTAxMDEwMDAwMDBaFw0y
@@ -1188,7 +1197,8 @@ vEA4PCJprUYmoj3q9MKSSRYDlq5kIbl87mSRR4GqtAwJKxIasvOvULOxziQ=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string x509v1TestRoot = """
+internal static ref readonly @string x509v1TestRoot => ref x509v1TestRootᵇ;
+private static readonly @string x509v1TestRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIICIDCCAYmgAwIBAgIIAj5CwoHlWuYwDQYJKoZIhvcNAQELBQAwIzEPMA0GA1UE
 ChMGR29sYW5nMRAwDgYDVQQDEwdSb290IENBMB4XDTE1MDEwMTAwMDAwMFoXDTI1
@@ -1205,7 +1215,8 @@ h2NtN34ard0hEfHc8qW8mkXdsysVmq6cPvFYaHz+dBtkHuHDoy8YQnC0zdN/WyYB
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string x509v1TestIntermediate = """
+internal static ref readonly @string x509v1TestIntermediate => ref x509v1TestIntermediateᵇ;
+private static readonly @string x509v1TestIntermediateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIByjCCATMCCQCCdEMsT8ykqTANBgkqhkiG9w0BAQsFADAjMQ8wDQYDVQQKEwZH
 b2xhbmcxEDAOBgNVBAMTB1Jvb3QgQ0EwHhcNMTUwMTAxMDAwMDAwWhcNMjUwMTAx
@@ -1220,7 +1231,8 @@ x5Wlq1u3YDL/j6s1nU2dQ3ySB/oP7J+vQ9V4QeM+
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string x509v1TestLeaf = """
+internal static ref readonly @string x509v1TestLeaf => ref x509v1TestLeafᵇ;
+private static readonly @string x509v1TestLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIICMzCCAZygAwIBAgIJAPo99mqJJrpJMA0GCSqGSIb3DQEBCwUAMDAxDzANBgNV
 BAoTBkdvbGFuZzEdMBsGA1UEAxMUWC41MDl2MSBpbnRlcm1lZGlhdGUwHhcNMTUw
@@ -1237,7 +1249,8 @@ CwUAA4GBADYzYUvaToO/ucBskPdqXV16AaakIhhSENswYVSl97/sODaxsjishKq9
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string ignoreCNWithSANRoot = """
+internal static ref readonly @string ignoreCNWithSANRoot => ref ignoreCNWithSANRootᵇ;
+private static readonly @string ignoreCNWithSANRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIDPzCCAiegAwIBAgIIJkzCwkNrPHMwDQYJKoZIhvcNAQELBQAwMDEQMA4GA1UE
 ChMHVEVTVElORzEcMBoGA1UEAxMTKipUZXN0aW5nKiogUm9vdCBDQTAeFw0xNTAx
@@ -1260,7 +1273,8 @@ BJ6bvwEAasFiLGP6Zbdmxb2hIA==
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string ignoreCNWithSANLeaf = """
+internal static ref readonly @string ignoreCNWithSANLeaf => ref ignoreCNWithSANLeafᵇ;
+private static readonly @string ignoreCNWithSANLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIDaTCCAlGgAwIBAgIJAONakvRTxgJhMA0GCSqGSIb3DQEBCwUAMDAxEDAOBgNV
 BAoTB1RFU1RJTkcxHDAaBgNVBAMTEyoqVGVzdGluZyoqIFJvb3QgQ0EwHhcNMTUw
@@ -1284,7 +1298,8 @@ xZbqP3Krgjj4XNaXjg==
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string excludedNamesLeaf = """
+internal static ref readonly @string excludedNamesLeaf => ref excludedNamesLeafᵇ;
+private static readonly @string excludedNamesLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIID4DCCAsigAwIBAgIHDUSFtJknhzANBgkqhkiG9w0BAQsFADCBnjELMAkGA1UE
 BhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExEjAQBgNVBAcMCUxvcyBHYXRvczEU
@@ -1310,7 +1325,8 @@ oEEOFtqVMIuQfR2isi08qW/JGOHc4sFoLYB8hvdaxKWSE19A
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string excludedNamesIntermediate = """
+internal static ref readonly @string excludedNamesIntermediate => ref excludedNamesIntermediateᵇ;
+private static readonly @string excludedNamesIntermediateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIDzTCCArWgAwIBAgIHDUSFqYeczDANBgkqhkiG9w0BAQsFADCBmTELMAkGA1UE
 BhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExEjAQBgNVBAcMCUxvcyBHYXRvczEU
@@ -1336,7 +1352,8 @@ zMBX1/lk4wkFckeUIlkD55Y=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string excludedNamesRoot = """
+internal static ref readonly @string excludedNamesRoot => ref excludedNamesRootᵇ;
+private static readonly @string excludedNamesRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIEGTCCAwGgAwIBAgIHDUSFpInn/zANBgkqhkiG9w0BAQsFADCBozELMAkGA1UE
 BhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExEjAQBgNVBAcMCUxvcyBHYXRvczEU
@@ -1363,7 +1380,8 @@ yU1yRHUqUYpN0DWFpsPbBqgM6uUAVO2ayBFhPgWUaqkmSbZ/Nq7isGvknaTmcIwT
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string invalidCNRoot = """
+internal static ref readonly @string invalidCNRoot => ref invalidCNRootᵇ;
+private static readonly @string invalidCNRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBFjCBvgIJAIsu4r+jb70UMAoGCCqGSM49BAMCMBQxEjAQBgNVBAsMCVRlc3Qg
 cm9vdDAeFw0xODA3MTExODMyMzVaFw0yODA3MDgxODMyMzVaMBQxEjAQBgNVBAsM
@@ -1374,7 +1392,8 @@ XzZZl0eW/ugCICgOfXeZ2GGy3wIC0352BaC3a8r5AAb2XSGNe+e9wNN6
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string validCNWithoutSAN = """
+internal static ref readonly @string validCNWithoutSAN => ref validCNWithoutSANᵇ;
+private static readonly @string validCNWithoutSANᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBJzCBzwIUB7q8t9mrDAL+UB1OFaMN5BEWFKQwCgYIKoZIzj0EAwIwFDESMBAG
 A1UECwwJVGVzdCByb290MB4XDTE4MDcxMTE4NDcyNFoXDTI4MDcwODE4NDcyNFow
@@ -1386,7 +1405,8 @@ h7olHCpY9yMRiz0=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string rootWithoutSKID = """
+internal static ref readonly @string rootWithoutSKID => ref rootWithoutSKIDᵇ;
+private static readonly @string rootWithoutSKIDᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBbzCCARSgAwIBAgIQeCkq3C8SOX/JM5PqYTl9cDAKBggqhkjOPQQDAjASMRAw
 DgYDVQQKEwdBY21lIENvMB4XDTE5MDIwNDIyNTYzNFoXDTI5MDIwMTIyNTYzNFow
@@ -1399,7 +1419,8 @@ AiEA3sn65V7G4tsjZEOpN0Jykn9uiTjqniqn/S/qmv8gIec=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string leafWithAKID = """
+internal static ref readonly @string leafWithAKID => ref leafWithAKIDᵇ;
+private static readonly @string leafWithAKIDᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBjTCCATSgAwIBAgIRAPCKYvADhKLPaWOtcTu2XYwwCgYIKoZIzj0EAwIwEjEQ
 MA4GA1UEChMHQWNtZSBDbzAeFw0xOTAyMDQyMzA2NTJaFw0yOTAyMDEyMzA2NTJa
@@ -1413,7 +1434,8 @@ ZZMqeJS7JldLx91sPUArY5A=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string rootMatchingSKIDMismatchingSubject = """
+internal static ref readonly @string rootMatchingSKIDMismatchingSubject => ref rootMatchingSKIDMismatchingSubjectᵇ;
+private static readonly @string rootMatchingSKIDMismatchingSubjectᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBQjCB6aADAgECAgEAMAoGCCqGSM49BAMCMBExDzANBgNVBAMTBlJvb3QgQTAe
 Fw0wOTExMTAyMzAwMDBaFw0xOTExMDgyMzAwMDBaMBExDzANBgNVBAMTBlJvb3Qg
@@ -1425,7 +1447,8 @@ MPs/wQIgFjjNvBoQEl7vSHTcRGCCcFMdlN4l0Dqc9YwGa9fyrQs=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string rootMismatchingSKIDMatchingSubject = """
+internal static ref readonly @string rootMismatchingSKIDMatchingSubject => ref rootMismatchingSKIDMatchingSubjectᵇ;
+private static readonly @string rootMismatchingSKIDMatchingSubjectᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBNDCB26ADAgECAgEAMAoGCCqGSM49BAMCMBExDzANBgNVBAMTBlJvb3QgQjAe
 Fw0wOTExMTAyMzAwMDBaFw0xOTExMDgyMzAwMDBaMBExDzANBgNVBAMTBlJvb3Qg
@@ -1437,7 +1460,8 @@ DtA5yoL9M2pDFF6ovFWnaCe+KlzSwAW/
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string leafMatchingAKIDMatchingIssuer = """
+internal static ref readonly @string leafMatchingAKIDMatchingIssuer => ref leafMatchingAKIDMatchingIssuerᵇ;
+private static readonly @string leafMatchingAKIDMatchingIssuerᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBNTCB26ADAgECAgEAMAoGCCqGSM49BAMCMBExDzANBgNVBAMTBlJvb3QgQjAe
 Fw0wOTExMTAyMzAwMDBaFw0xOTExMDgyMzAwMDBaMA8xDTALBgNVBAMTBExlYWYw
@@ -1455,26 +1479,26 @@ partial struct unknownAuthorityErrorTestsᴛ1 /*dyn*/ {
     internal @string expected;
 }
 internal static slice<unknownAuthorityErrorTestsᴛ1> unknownAuthorityErrorTests;
-internal static void initᴛunknownAuthorityErrorTests() { unknownAuthorityErrorTests = new unknownAuthorityErrorTestsᴛ1[]{
-    new("self-signed, cn"u8, selfSignedWithCommonName, "x509: certificate signed by unknown authority (possibly because of \"empty\" while trying to verify candidate authority certificate \"test\")"u8),
-    new("self-signed, no cn, org"u8, selfSignedNoCommonNameWithOrgName, "x509: certificate signed by unknown authority (possibly because of \"empty\" while trying to verify candidate authority certificate \"ca\")"u8),
-    new("self-signed, no cn, no org"u8, selfSignedNoCommonNameNoOrgName, "x509: certificate signed by unknown authority (possibly because of \"empty\" while trying to verify candidate authority certificate \"serial:0\")"u8)
-}.slice(); }
+internal static void initᴛunknownAuthorityErrorTests() { unknownAuthorityErrorTests = slice<unknownAuthorityErrorTestsᴛ1>([
+    new("self-signed, cn", selfSignedWithCommonName, "x509: certificate signed by unknown authority (possibly because of \"empty\" while trying to verify candidate authority certificate \"test\")"),
+    new("self-signed, no cn, org", selfSignedNoCommonNameWithOrgName, "x509: certificate signed by unknown authority (possibly because of \"empty\" while trying to verify candidate authority certificate \"ca\")"),
+    new("self-signed, no cn, no org", selfSignedNoCommonNameNoOrgName, "x509: certificate signed by unknown authority (possibly because of \"empty\" while trying to verify candidate authority certificate \"serial:0\")")
+]); }
 
-public static void TestUnknownAuthorityError(ж<testing.T> Ꮡt) {
+public static void TestUnknownAuthorityError(ж<testing.T> t) {
     foreach (var (i, vᴛ1) in unknownAuthorityErrorTests) {
         ref var tt = ref heap(new unknownAuthorityErrorTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
             var (der, _) = pem.Decode(slice<byte>(ttʗ1.cert));
             if (der == nil) {
-                tΔ1.Fatalf("#%d: Unable to decode PEM block"u8, i);
+                tΔ1.Fatalf("#%d: Unable to decode PEM block", i);
             }
-            var (c, err) = ParseCertificate((~der).Bytes);
-            if (err != default!) {
-                tΔ1.Fatalf("#%d: Unable to parse certificate -> %v"u8, i, err);
+            var (c, err) = ParseCertificate(der.Bytes);
+            if (err != nil) {
+                tΔ1.Fatalf("#%d: Unable to parse certificate -> %v", i, err);
             }
             var uae = Ꮡ(new UnknownAuthorityError(
                 Cert: c,
@@ -1483,13 +1507,14 @@ public static void TestUnknownAuthorityError(ж<testing.T> Ꮡt) {
             ));
             @string actual = (~uae).Error();
             if (actual != ttʗ1.expected) {
-                tΔ1.Errorf("#%d: UnknownAuthorityError.Error() response invalid actual: %s expected: %s"u8, i, actual, ttʗ1.expected);
+                tΔ1.Errorf("#%d: UnknownAuthorityError.Error() response invalid actual: %s expected: %s", i, actual, ttʗ1.expected);
             }
         });
     }
 }
 
-internal static readonly @string selfSignedWithCommonName = """
+internal static ref readonly @string selfSignedWithCommonName => ref selfSignedWithCommonNameᵇ;
+private static readonly @string selfSignedWithCommonNameᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIDCjCCAfKgAwIBAgIBADANBgkqhkiG9w0BAQsFADAaMQswCQYDVQQKEwJjYTEL
 MAkGA1UEAxMCY2EwHhcNMTYwODI4MTcwOTE4WhcNMjEwODI3MTcwOTE4WjAcMQsw
@@ -1511,7 +1536,8 @@ IuYkJwt6w+LH/9HZgf8=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string selfSignedNoCommonNameWithOrgName = """
+internal static ref readonly @string selfSignedNoCommonNameWithOrgName => ref selfSignedNoCommonNameWithOrgNameᵇ;
+private static readonly @string selfSignedNoCommonNameWithOrgNameᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIC+zCCAeOgAwIBAgIBADANBgkqhkiG9w0BAQsFADAaMQswCQYDVQQKEwJjYTEL
 MAkGA1UEAxMCY2EwHhcNMTYwODI4MTgxMzQ4WhcNMjEwODI3MTgxMzQ4WjANMQsw
@@ -1532,7 +1558,8 @@ DKnszq+AVw+K8hbeV2A7GqT7YfeqOAvSbatTDnDtKOPmlCnQui8A149VgZzXv7eU
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string selfSignedNoCommonNameNoOrgName = """
+internal static ref readonly @string selfSignedNoCommonNameNoOrgName => ref selfSignedNoCommonNameNoOrgNameᵇ;
+private static readonly @string selfSignedNoCommonNameNoOrgNameᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIC7jCCAdagAwIBAgIBADANBgkqhkiG9w0BAQsFADAaMQswCQYDVQQKEwJjYTEL
 MAkGA1UEAxMCY2EwHhcNMTYwODI4MTgxOTQ1WhcNMjEwODI3MTgxOTQ1WjAAMIIB
@@ -1553,7 +1580,8 @@ w67CoNRb81dy+4Q1lGpA8ORoLWh5fIq2t2eNGc4qB8vlTIKiESzAwu7u3sRfuWQi
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string criticalExtRoot = """
+internal static ref readonly @string criticalExtRoot => ref criticalExtRootᵇ;
+private static readonly @string criticalExtRootᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBqzCCAVGgAwIBAgIJAJ+mI/85cXApMAoGCCqGSM49BAMCMB0xDDAKBgNVBAoT
 A09yZzENMAsGA1UEAxMEUm9vdDAeFw0xNTAxMDEwMDAwMDBaFw0yNTAxMDEwMDAw
@@ -1567,7 +1595,8 @@ FizzGiLB47hGwjMuAiEA8e0um2Kr8FPQ4wmFKaTRKHMaZizCGl3m+RG5QsE1KWo=
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string criticalExtIntermediate = """
+internal static ref readonly @string criticalExtIntermediate => ref criticalExtIntermediateᵇ;
+private static readonly @string criticalExtIntermediateᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBszCCAVmgAwIBAgIJAL2kcGZKpzVqMAoGCCqGSM49BAMCMB0xDDAKBgNVBAoT
 A09yZzENMAsGA1UEAxMEUm9vdDAeFw0xNTAxMDEwMDAwMDBaFw0yNTAxMDEwMDAw
@@ -1582,7 +1611,8 @@ xXbdbm27KQ==
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string criticalExtLeafWithExt = """
+internal static ref readonly @string criticalExtLeafWithExt => ref criticalExtLeafWithExtᵇ;
+private static readonly @string criticalExtLeafWithExtᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBxTCCAWugAwIBAgIJAJZAUtw5ccb1MAoGCCqGSM49BAMCMCUxDDAKBgNVBAoT
 A09yZzEVMBMGA1UEAxMMSW50ZXJtZWRpYXRlMB4XDTE1MDEwMTAwMDAwMFoXDTI1
@@ -1597,7 +1627,8 @@ I+crEm4P5q72AnA/Iy0m24l7OvLuXObAmg==
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string criticalExtIntermediateWithExt = """
+internal static ref readonly @string criticalExtIntermediateWithExt => ref criticalExtIntermediateWithExtᵇ;
+private static readonly @string criticalExtIntermediateWithExtᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIB2TCCAX6gAwIBAgIIQD3NrSZtcUUwCgYIKoZIzj0EAwIwHTEMMAoGA1UEChMD
 T3JnMQ0wCwYDVQQDEwRSb290MB4XDTE1MDEwMTAwMDAwMFoXDTI1MDEwMTAwMDAw
@@ -1612,7 +1643,8 @@ c2qZ4Q0apT/kvgIhAKu2TnNQMIUdcO0BYQIl+Uhxc78dc9h4lO+YJB47pHGx
 -----END CERTIFICATE-----
 """u8.Raw();
 
-internal static readonly @string criticalExtLeaf = """
+internal static ref readonly @string criticalExtLeaf => ref criticalExtLeafᵇ;
+private static readonly @string criticalExtLeafᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIBzzCCAXWgAwIBAgIJANoWFIlhCI9MMAoGCCqGSM49BAMCMD0xDDAKBgNVBAoT
 A09yZzEtMCsGA1UEAxMkSW50ZXJtZWRpYXRlIHdpdGggQ3JpdGljYWwgRXh0ZW5z
@@ -1632,33 +1664,33 @@ internal partial struct TestValidHostname_tests /*dyn*/ {
     internal bool validInput, validPattern;
 }
 
-public static void TestValidHostname(ж<testing.T> Ꮡt) {
-    var tests = new TestValidHostname_tests[]{
-        new(host: "example.com"u8, validInput: true, validPattern: true),
-        new(host: "eXample123-.com"u8, validInput: true, validPattern: true),
-        new(host: "-eXample123-.com"u8),
-        new(host: ""u8),
-        new(host: "."u8),
-        new(host: "example..com"u8),
-        new(host: ".example.com"u8),
-        new(host: "example.com."u8, validInput: true),
-        new(host: "*.example.com."u8),
-        new(host: "*.example.com"u8, validPattern: true),
-        new(host: "*foo.example.com"u8),
-        new(host: "foo.*.example.com"u8),
-        new(host: "exa_mple.com"u8, validInput: true, validPattern: true),
-        new(host: "foo,bar"u8),
-        new(host: "project-dev:us-central1:main"u8)
-    }.slice();
+public static void TestValidHostname(ж<testing.T> t) {
+    var tests = slice<TestValidHostname_tests>([
+        new(host: "example.com", validInput: true, validPattern: true),
+        new(host: "eXample123-.com", validInput: true, validPattern: true),
+        new(host: "-eXample123-.com"),
+        new(host: ""),
+        new(host: "."),
+        new(host: "example..com"),
+        new(host: ".example.com"),
+        new(host: "example.com.", validInput: true),
+        new(host: "*.example.com."),
+        new(host: "*.example.com", validPattern: true),
+        new(host: "*foo.example.com"),
+        new(host: "foo.*.example.com"),
+        new(host: "exa_mple.com", validInput: true, validPattern: true),
+        new(host: "foo,bar"),
+        new(host: "project-dev:us-central1:main")
+    ]);
     foreach (var (_, tt) in tests) {
         {
             var got = validHostnamePattern(tt.host); if (got != tt.validPattern) {
-                Ꮡt.Errorf("validHostnamePattern(%q) = %v, want %v"u8, tt.host, got, tt.validPattern);
+                t.Errorf("validHostnamePattern(%q) = %v, want %v", tt.host, got, tt.validPattern);
             }
         }
         {
             var got = validHostnameInput(tt.host); if (got != tt.validInput) {
-                Ꮡt.Errorf("validHostnameInput(%q) = %v, want %v"u8, tt.host, got, tt.validInput);
+                t.Errorf("validHostnameInput(%q) = %v, want %v", tt.host, got, tt.validInput);
             }
         }
     }
@@ -1667,11 +1699,11 @@ public static void TestValidHostname(ж<testing.T> Ꮡt) {
 internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivateKey, error) generateCert(@string cn, bool isCA, ж<global::go.crypto.x509_package.Certificate> Ꮡissuer, cryptoꓸPrivateKey issuerKey, cryptoꓸPrivateKey priv) {
     ref var issuer = ref Ꮡissuer.DerefOrNull();
 
-    if (priv == default!) {
-        error errΔ1 = default!;
+    if (priv == nil) {
+        error errΔ1 = default;
         (priv, errΔ1) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-        if (errΔ1 != default!) {
-            return (default!, default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, default, errΔ1);
         }
     }
 
@@ -1683,10 +1715,10 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
         Subject: new pkix.Name(CommonName: cn),
         NotBefore: time.Now().Add((time.Duration)(-3600000000000L)),
         NotAfter: time.Now().Add((time.Duration)(86400000000000L)),
-        DNSNames: new @string[]{rand.Text()}.slice(),
+        DNSNames: slice<@string>([rand.Text()]),
 
         KeyUsage: (global::go.crypto.x509_package.KeyUsage)((global::go.crypto.x509_package.KeyUsage)(KeyUsageKeyEncipherment | KeyUsageDigitalSignature) | KeyUsageCertSign),
-        ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+        ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
         BasicConstraintsValid: true,
         IsCA: isCA
     ));
@@ -1696,32 +1728,32 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, cryptoꓸPrivat
     }
 
     var (derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡissuer, priv._<crypto.Signer>().Public(), issuerKey);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     (var cert, err) = ParseCertificate(derBytes);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
 
-    return (cert, priv, default!);
+    return (cert, priv, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingGenerationOfAˢ = (@string)"skipping generation of a long chains of certificates in short mode"u8;
-internal static readonly @string intermediateCaˢ = "Intermediate CA"u8;
-internal static readonly @string leafˢ = "Leaf"u8;
+internal static ref readonly @string intermediateCaˢ => ref intermediateCaˢᵇ;
+private static readonly @string intermediateCaˢᵇ = "Intermediate CA"u8;
+internal static ref readonly @string leafˢ => ref leafˢᵇ;
+private static readonly @string leafˢᵇ = "Leaf"u8;
 
 internal partial struct TestPathologicalChains_type /*dyn*/ {
     internal bool sameSubject;
     internal bool sameKey;
 }
 
-public static void TestPathologicalChains(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestPathologicalChains(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingGenerationOfAˢ);
+        t.Skip(skippingGenerationOfAˢ);
     }
 
     // Test four pathological cases, where the intermediates in the chain have
@@ -1741,45 +1773,45 @@ public static void TestPathologicalChains(ж<testing.T> Ꮡt) {
     //
     // In all cases, don't have a root in the pool, so a valid chain cannot actually be built.
 
-    foreach (var (_, vᴛ1) in new TestPathologicalChains_type[]{
+    foreach (var (_, vᴛ1) in slice<TestPathologicalChains_type>([
         new(sameSubject: false, sameKey: false),
         new(sameSubject: true, sameKey: false),
         new(sameSubject: false, sameKey: true),
         new(sameSubject: true, sameKey: true)
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestPathologicalChains_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(fmt.Sprintf("sameSubject=%t,sameKey=%t"u8, test.sameSubject, test.sameKey), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("sameSubject=%t,sameKey=%t"u8, test.sameSubject, test.sameKey), (ж<testing.T> tΔ1) => {
             var intermediates = NewCertPool();
 
-            cryptoꓸPrivateKey intermediateKey = default!;
+            cryptoꓸPrivateKey intermediateKey = default;
             if (testʗ1.sameKey) {
-                error errΔ1 = default!;
+                error errΔ1 = default;
                 (intermediateKey, errΔ1) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     tΔ1.Fatal(errΔ1);
                 }
             }
 
-            cryptoꓸPrivateKey leafSigner = default!;
-            ж<global::go.crypto.x509_package.Certificate> intermediate = default!;
+            cryptoꓸPrivateKey leafSigner = default;
+            ж<global::go.crypto.x509_package.Certificate> intermediate = default;
             foreach (var i in range(100)) {
                 @string cn = intermediateCaˢ;
                 if (!testʗ1.sameSubject) {
                     cn += fmt.Sprintf(" #%d"u8, i);
                 }
-                error errΔ2 = default!;
+                error errΔ2 = default;
                 (intermediate, leafSigner, errΔ2) = generateCert(cn, true, intermediate, leafSigner, intermediateKey);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     tΔ1.Fatal(errΔ2);
                 }
                 intermediates.AddCert(intermediate);
             }
 
-            var (leaf, _, err) = generateCert(leafˢ, false, intermediate, leafSigner, default!);
-            if (err != default!) {
+            var (leaf, _, err) = generateCert(leafˢ, false, intermediate, leafSigner, default);
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
 
@@ -1788,7 +1820,7 @@ public static void TestPathologicalChains(ж<testing.T> Ꮡt) {
                 Roots: NewCertPool(),
                 Intermediates: intermediates
             ));
-            tΔ1.Logf("verification took %v"u8, time.Since(start));
+            tΔ1.Logf("verification took %v", time.Since(start));
         });
     }
 }
@@ -1796,11 +1828,11 @@ public static void TestPathologicalChains(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object windowsAndDarwinDoNotUseˢ = (@string)"Windows and darwin do not use (or support) systemRoots"u8;
 
-public static void TestSystemRootsError(ж<testing.T> Ꮡt) {
+public static void TestSystemRootsError(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
-            Ꮡt.Skip(windowsAndDarwinDoNotUseˢ);
+            t.Skip(windowsAndDarwinDoNotUseˢ);
         }
 
         defer((ж<global::go.crypto.x509_package.CertPool> oldSystemRoots) => {
@@ -1809,27 +1841,27 @@ public static void TestSystemRootsError(ж<testing.T> Ꮡt) {
 
         var opts = new VerifyOptions(
             Intermediates: NewCertPool(),
-            DNSName: "www.google.com"u8,
+            DNSName: "www.google.com",
             CurrentTime: time.Unix(1677615892, 0)
         );
 
         {
             var ok = opts.Intermediates.AppendCertsFromPEM(slice<byte>(gtsIntermediate)); if (!ok) {
-                Ꮡt.Fatalf("failed to parse intermediate"u8);
+                t.Fatalf("failed to parse intermediate");
             }
         }
 
         var (leaf, err) = certificateFromPEM(googleLeaf);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to parse leaf: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to parse leaf: %v", err);
         }
 
-        systemRoots = default!;
+        systemRoots = default;
 
         (_, err) = leaf.Verify(opts);
         {
             var (_, ok) = err._<SystemRootsError>(ᐧ); if (!ok) {
-                Ꮡt.Errorf("error was not SystemRootsError: %v"u8, err);
+                t.Errorf("error was not SystemRootsError: %v", err);
             }
         }
     }
@@ -1838,70 +1870,76 @@ public static void TestSystemRootsError(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string err1ˢ = "err1"u8;
+internal static ref readonly @string err1ˢ => ref err1ˢᵇ;
+private static readonly @string err1ˢᵇ = "err1"u8;
 internal static readonly object errorsIsFailedWantedˢ = (@string)"errors.Is failed, wanted success"u8;
 
-public static void TestSystemRootsErrorUnwrap(ж<testing.T> Ꮡt) {
+public static void TestSystemRootsErrorUnwrap(ж<testing.T> t) {
     error err1 = errors.New(err1ˢ);
     var err = new SystemRootsError(Err: err1);
     if (!errors.Is(err, err1)) {
-        Ꮡt.Error(errorsIsFailedWantedˢ);
+        t.Error(errorsIsFailedWantedˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string swVersˢ = "sw_vers"u8;
-internal static readonly @string productVersionˢ = "-productVersion"u8;
+internal static ref readonly @string swVersˢ => ref swVersˢᵇ;
+private static readonly @string swVersˢᵇ = "sw_vers"u8;
+internal static ref readonly @string productVersionˢ => ref productVersionˢᵇ;
+private static readonly @string productVersionˢᵇ = "-productVersion"u8;
 
-internal static (nint, error) macosMajorVersion(ж<testing.T> Ꮡt) {
-    var cmd = testenv.Command(new x509_test_package.testing_TжTB(Ꮡt), swVersˢ, productVersionˢ);
+internal static (nint, error) macosMajorVersion(ж<testing.T> t) {
+    var cmd = testenv.Command(new x509_test_package.testing_TжTB(t), swVersˢ, productVersionˢ);
     var (@out, err) = cmd.Output();
-    if (err != default!) {
+    if (err != nil) {
         {
-            var (ee, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && builtin.len((~ee).Stderr) > 0) {
-                return (0, fmt.Errorf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, (~ee).Stderr));
+            var (ee, okΔ1) = err._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && builtin.len(ee.Stderr) > 0) {
+                return (0, fmt.Errorf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, ee.Stderr));
             }
         }
         return (0, fmt.Errorf("%v: %v"u8, cmd.OrTypedNil(), err));
     }
-    var (before, _, ok) = strings.Cut((@string)@out, "."u8);
+    var (before, _, ok) = strings.Cut((@string)@out, ".");
     (var major, err) = strconv.Atoi(before);
-    if (!ok || err != default!) {
+    if (!ok || err != nil) {
         return (0, fmt.Errorf("%v: unexpected output: %q"u8, cmd.OrTypedNil(), @out));
     }
 
-    return (major, default!);
+    return (major, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object onlyAffectsDarwinˢ = (@string)"only affects darwin"u8;
 internal static readonly object unableToDetermineMacOSˢ = (@string)"unable to determine macOS version"u8;
 internal static readonly object behaviorOnlyEnforcedInˢ = (@string)"behavior only enforced in macOS 11 and after"u8;
-internal static readonly @string leafˢ2 = "leaf"u8;
-internal static readonly @string invalidLeafCertificateˢ = "invalid leaf certificate"u8;
-internal static readonly @string intermediateˢ = "intermediate"u8;
+internal static ref readonly @string leafˢ2 => ref leafˢ2ᵇ;
+private static readonly @string leafˢ2ᵇ = "leaf"u8;
+internal static ref readonly @string invalidLeafCertificateˢ => ref invalidLeafCertificateˢᵇ;
+private static readonly @string invalidLeafCertificateˢᵇ = "invalid leaf certificate"u8;
+internal static ref readonly @string intermediateˢ => ref intermediateˢᵇ;
+private static readonly @string intermediateˢᵇ = "intermediate"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string badCertDataᶜ = ((@string)(new byte[]{0x30, 0x82, 0x01, 0x55, 0x30, 0x82, 0x01, 0x07, 0xa0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x01, 0x02, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x30, 0x52, 0x31, 0x50, 0x30, 0x4e, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x47, 0x64, 0x65, 0x72, 0x70, 0x6b, 0x65, 0x79, 0x38, 0x64, 0x63, 0x35, 0x38, 0x31, 0x30, 0x30, 0x62, 0x32, 0x34, 0x39, 0x33, 0x36, 0x31, 0x34, 0x65, 0x65, 0x31, 0x36, 0x39, 0x32, 0x38, 0x33, 0x31, 0x61, 0x34, 0x36, 0x31, 0x66, 0x33, 0x66, 0x34, 0x64, 0x64, 0x33, 0x66, 0x39, 0x62, 0x33, 0x62, 0x30, 0x38, 0x38, 0x65, 0x32, 0x34, 0x34, 0x66, 0x38, 0x38, 0x37, 0x66, 0x38, 0x31, 0x62, 0x34, 0x39, 0x30, 0x36, 0x61, 0x63, 0x32, 0x36, 0x30, 0x1e, 0x17, 0x0d, 0x32, 0x32, 0x30, 0x31, 0x31, 0x32, 0x32, 0x33, 0x35, 0x37, 0x35, 0x35, 0x5a, 0x17, 0x0d, 0x32, 0x32, 0x30, 0x33, 0x31, 0x33, 0x32, 0x33, 0x35, 0x37, 0x35, 0x35, 0x5a, 0x30, 0x52, 0x31, 0x50, 0x30, 0x4e, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x47, 0x64, 0x65, 0x72, 0x70, 0x6b, 0x65, 0x79, 0x38, 0x64, 0x63, 0x35, 0x38, 0x31, 0x30, 0x30, 0x62, 0x32, 0x34, 0x39, 0x33, 0x36, 0x31, 0x34, 0x65, 0x65, 0x31, 0x36, 0x39, 0x32, 0x38, 0x33, 0x31, 0x61, 0x34, 0x36, 0x31, 0x66, 0x33, 0x66, 0x34, 0x64, 0x64, 0x33, 0x66, 0x39, 0x62, 0x33, 0x62, 0x30, 0x38, 0x38, 0x65, 0x32, 0x34, 0x34, 0x66, 0x38, 0x38, 0x37, 0x66, 0x38, 0x31, 0x62, 0x34, 0x39, 0x30, 0x36, 0x61, 0x63, 0x32, 0x36, 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x21, 0x00, 0x62, 0x41, 0xd8, 0x65, 0xad, 0x57, 0xcb, 0xef, 0x5a, 0x89, 0xb5, 0x22, 0x1e, 0x52, 0x9d, 0xba, 0x0e, 0x3a, 0x10, 0x34, 0x32, 0x51, 0x40, 0x7f, 0xbd, 0xfb, 0x7b, 0x6b, 0x73, 0x04, 0xd1, 0xc2, 0xa3, 0x02, 0x30, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x41, 0x00, 0x5b, 0xa7, 0x06, 0x79, 0x86, 0x28, 0x94, 0x97, 0x9e, 0x4c, 0x77, 0x41, 0x00, 0x01, 0x78, 0xaa, 0xbc, 0xbd, 0x20, 0xc3, 0x8a, 0x5d, 0x0a, 0x28, 0xce, 0x85, 0x21, 0xd9, 0x81, 0x30, 0xf5, 0x9a, 0x25, 0x49, 0x19, 0x3c, 0xff, 0x6f, 0xf1, 0xea, 0x61, 0x66, 0x40, 0xb1, 0xa7, 0xaf, 0xfd, 0xe9, 0x52, 0xc7, 0x0f, 0x8d, 0x26, 0xd5, 0xfc, 0x0f, 0x3b, 0xcf, 0x98, 0x82, 0x84, 0x61, 0xbc, 0x0d}));
+internal static ref readonly @string badCertDataᶜ => ref badCertDataᶜᵇ;
+private static readonly @string badCertDataᶜᵇ = ((@string)(new byte[]{0x30, 0x82, 0x01, 0x55, 0x30, 0x82, 0x01, 0x07, 0xa0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x01, 0x02, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x30, 0x52, 0x31, 0x50, 0x30, 0x4e, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x47, 0x64, 0x65, 0x72, 0x70, 0x6b, 0x65, 0x79, 0x38, 0x64, 0x63, 0x35, 0x38, 0x31, 0x30, 0x30, 0x62, 0x32, 0x34, 0x39, 0x33, 0x36, 0x31, 0x34, 0x65, 0x65, 0x31, 0x36, 0x39, 0x32, 0x38, 0x33, 0x31, 0x61, 0x34, 0x36, 0x31, 0x66, 0x33, 0x66, 0x34, 0x64, 0x64, 0x33, 0x66, 0x39, 0x62, 0x33, 0x62, 0x30, 0x38, 0x38, 0x65, 0x32, 0x34, 0x34, 0x66, 0x38, 0x38, 0x37, 0x66, 0x38, 0x31, 0x62, 0x34, 0x39, 0x30, 0x36, 0x61, 0x63, 0x32, 0x36, 0x30, 0x1e, 0x17, 0x0d, 0x32, 0x32, 0x30, 0x31, 0x31, 0x32, 0x32, 0x33, 0x35, 0x37, 0x35, 0x35, 0x5a, 0x17, 0x0d, 0x32, 0x32, 0x30, 0x33, 0x31, 0x33, 0x32, 0x33, 0x35, 0x37, 0x35, 0x35, 0x5a, 0x30, 0x52, 0x31, 0x50, 0x30, 0x4e, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x47, 0x64, 0x65, 0x72, 0x70, 0x6b, 0x65, 0x79, 0x38, 0x64, 0x63, 0x35, 0x38, 0x31, 0x30, 0x30, 0x62, 0x32, 0x34, 0x39, 0x33, 0x36, 0x31, 0x34, 0x65, 0x65, 0x31, 0x36, 0x39, 0x32, 0x38, 0x33, 0x31, 0x61, 0x34, 0x36, 0x31, 0x66, 0x33, 0x66, 0x34, 0x64, 0x64, 0x33, 0x66, 0x39, 0x62, 0x33, 0x62, 0x30, 0x38, 0x38, 0x65, 0x32, 0x34, 0x34, 0x66, 0x38, 0x38, 0x37, 0x66, 0x38, 0x31, 0x62, 0x34, 0x39, 0x30, 0x36, 0x61, 0x63, 0x32, 0x36, 0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x21, 0x00, 0x62, 0x41, 0xd8, 0x65, 0xad, 0x57, 0xcb, 0xef, 0x5a, 0x89, 0xb5, 0x22, 0x1e, 0x52, 0x9d, 0xba, 0x0e, 0x3a, 0x10, 0x34, 0x32, 0x51, 0x40, 0x7f, 0xbd, 0xfb, 0x7b, 0x6b, 0x73, 0x04, 0xd1, 0xc2, 0xa3, 0x02, 0x30, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x41, 0x00, 0x5b, 0xa7, 0x06, 0x79, 0x86, 0x28, 0x94, 0x97, 0x9e, 0x4c, 0x77, 0x41, 0x00, 0x01, 0x78, 0xaa, 0xbc, 0xbd, 0x20, 0xc3, 0x8a, 0x5d, 0x0a, 0x28, 0xce, 0x85, 0x21, 0xd9, 0x81, 0x30, 0xf5, 0x9a, 0x25, 0x49, 0x19, 0x3c, 0xff, 0x6f, 0xf1, 0xea, 0x61, 0x66, 0x40, 0xb1, 0xa7, 0xaf, 0xfd, 0xe9, 0x52, 0xc7, 0x0f, 0x8d, 0x26, 0xd5, 0xfc, 0x0f, 0x3b, 0xcf, 0x98, 0x82, 0x84, 0x61, 0xbc, 0x0d}));
 
-public static void TestIssue51759(ж<testing.T> Ꮡt) {
+public static void TestIssue51759(ж<testing.T> t) {
     if (runtime.GOOS != "darwin"u8) {
-        Ꮡt.Skip(onlyAffectsDarwinˢ);
+        t.Skip(onlyAffectsDarwinˢ);
     }
 
-    testenv.MustHaveExecPath(new x509_test_package.testing_TжTB(Ꮡt), swVersˢ);
+    testenv.MustHaveExecPath(new x509_test_package.testing_TжTB(t), swVersˢ);
     {
-        var (vers, errΔ1) = macosMajorVersion(Ꮡt); if (errΔ1 != default!){
+        var (vers, errΔ1) = macosMajorVersion(t); if (errΔ1 != nil) {
             {
-                @string builder = testenv.Builder(); if (builder != ""u8){
-                    Ꮡt.Fatalf("unable to determine macOS version: %s"u8, errΔ1);
+                @string builder = testenv.Builder(); if (builder != ""u8) {
+                    t.Fatalf("unable to determine macOS version: %s", errΔ1);
                 } else {
-                    Ꮡt.Skip(unableToDetermineMacOSˢ);
+                    t.Skip(unableToDetermineMacOSˢ);
                 }
             }
-        } else 
-        if (vers < 11) {
-            Ꮡt.Skip(behaviorOnlyEnforcedInˢ);
+        } else if (vers < 11) {
+            t.Skip(behaviorOnlyEnforcedInˢ);
         }
     }
 
@@ -1910,36 +1948,36 @@ public static void TestIssue51759(ж<testing.T> Ꮡt) {
     @string badCertData = badCertDataᶜ;
     ref var err = ref heap<error>(out var Ꮡerr);
     (var badCert, err) = ParseCertificate(slice<byte>(badCertData));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var badCertʗ1 = badCert;
-    Ꮡt.Run(leafˢ2, (ж<testing.T> tΔ1) => {
-        var opts = new VerifyOptions(nil);
+    t.Run(leafˢ2, (ж<testing.T> tΔ1) => {
+        var opts = new VerifyOptions();
         @string expectedErr = invalidLeafCertificateˢ;
         (_, Ꮡerr.ValueSlot) = badCertʗ1.Verify(opts);
-        if (Ꮡerr.ValueSlot == default! || Ꮡerr.ValueSlot.Error() != expectedErr) {
-            tΔ1.Fatalf("unexpected error: want %q, got %q"u8, expectedErr, Ꮡerr.ValueSlot);
+        if (Ꮡerr.ValueSlot == nil || Ꮡerr.ValueSlot.Error() != expectedErr) {
+            tΔ1.Fatalf("unexpected error: want %q, got %q", expectedErr, Ꮡerr.ValueSlot);
         }
     });
 
     (var goodCert, err) = certificateFromPEM(googleLeaf);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var badCertʗ2 = badCert;
     var goodCertʗ1 = goodCert;
-    Ꮡt.Run(intermediateˢ, (ж<testing.T> tΔ2) => {
+    t.Run(intermediateˢ, (ж<testing.T> tΔ2) => {
         var opts = new VerifyOptions(
             Intermediates: NewCertPool()
         );
         opts.Intermediates.AddCert(badCertʗ2);
-        @string expectedErr = "SecCertificateCreateWithData: invalid certificate"u8;
+        @string expectedErr = "SecCertificateCreateWithData: invalid certificate";
         (_, Ꮡerr.ValueSlot) = goodCertʗ1.Verify(opts);
-        if (Ꮡerr.ValueSlot == default! || Ꮡerr.ValueSlot.Error() != expectedErr) {
-            tΔ2.Fatalf("unexpected error: want %q, got %q"u8, expectedErr, Ꮡerr.ValueSlot);
+        if (Ꮡerr.ValueSlot == nil || Ꮡerr.ValueSlot.Error() != expectedErr) {
+            tΔ2.Fatalf("unexpected error: want %q, got %q", expectedErr, Ꮡerr.ValueSlot);
         }
     });
 }
@@ -1964,14 +2002,14 @@ internal partial struct trustGraphDescription {
     public slice<trustGraphEdge> Graph;
 }
 
-internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<testing.T> Ꮡt, @string subject, crypto.Signer key, Action<ж<global::go.crypto.x509_package.Certificate>> mutateTmpl, nint certType, ж<global::go.crypto.x509_package.Certificate> Ꮡissuer, crypto.Signer signer) {
+internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<testing.T> t, @string subject, crypto.Signer key, Action<ж<global::go.crypto.x509_package.Certificate>> mutateTmpl, nint certType, ж<global::go.crypto.x509_package.Certificate> Ꮡissuer, crypto.Signer signer) {
     ref var issuer = ref Ꮡissuer.DerefOrNull();
 
-    Ꮡt.Helper();
+    t.Helper();
 
     var (serial, err) = rand.Int(rand.Reader, big.NewInt(100));
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test serial: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test serial: %s", err);
     }
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: serial,
@@ -1979,14 +2017,13 @@ internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<te
         NotBefore: time.Now().Add(-time.ΔHour),
         NotAfter: time.Now().Add(time.ΔHour)
     ));
-    if (certType == rootCertificate || certType == intermediateCertificate){
-        (tmpl.Value.IsCA, tmpl.Value.BasicConstraintsValid) = (true, true);
-        tmpl.Value.KeyUsage = KeyUsageCertSign;
-    } else 
-    if (certType == leafCertificate) {
-        tmpl.Value.DNSNames = new @string[]{"localhost"u8}.slice();
+    if (certType == rootCertificate || certType == intermediateCertificate) {
+        (tmpl.IsCA, tmpl.BasicConstraintsValid) = (true, true);
+        tmpl.KeyUsage = KeyUsageCertSign;
+    } else if (certType == leafCertificate) {
+        tmpl.DNSNames = slice<@string>(["localhost"]);
     }
-    if (mutateTmpl != default!) {
+    if (mutateTmpl != nil) {
         mutateTmpl(tmpl);
     }
 
@@ -1996,29 +2033,29 @@ internal static ж<global::go.crypto.x509_package.Certificate> genCertEdge(ж<te
     }
 
     (var d, err) = CreateCertificate(rand.Reader, tmpl, Ꮡissuer, key.Public(), signer);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test cert: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test cert: %s", err);
     }
     (var c, err) = ParseCertificate(d);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse test cert: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse test cert: %s", err);
     }
     return c;
 }
 
-internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.crypto.x509_package.CertPool>, ж<global::go.crypto.x509_package.Certificate>) buildTrustGraph(ж<testing.T> Ꮡt, trustGraphDescription d) {
-    Ꮡt.Helper();
+internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.crypto.x509_package.CertPool>, ж<global::go.crypto.x509_package.Certificate>) buildTrustGraph(ж<testing.T> t, trustGraphDescription d) {
+    t.Helper();
 
     var certs = new map<@string, ж<global::go.crypto.x509_package.Certificate>>{};
     var keys = new map<@string, crypto.Signer>{};
     var rootPool = NewCertPool();
     foreach (var (_, r) in d.Roots) {
         var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to generate test key: %s", err);
         }
-        var root = genCertEdge(Ꮡt, r.Subject, new x509_test_package.ecdsa_PrivateKeyжSigner(k), r.MutateTemplate, rootCertificate, nil, default!);
-        if (r.Constraint != default!){
+        var root = genCertEdge(t, r.Subject, new x509_test_package.ecdsa_PrivateKeyжSigner(k), r.MutateTemplate, rootCertificate, nil, default);
+        if (r.Constraint != nil) {
             rootPool.AddCertWithConstraint(root, r.Constraint);
         } else {
             rootPool.AddCert(root);
@@ -2028,33 +2065,33 @@ internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.cryp
     }
 
     var intermediatePool = NewCertPool();
-    ж<global::go.crypto.x509_package.Certificate> leaf = default!;
+    ж<global::go.crypto.x509_package.Certificate> leaf = default;
     foreach (var (_, e) in d.Graph) {
         var (issuerCert, ok) = certs[e.Issuer, ꟷ];
         if (!ok) {
-            Ꮡt.Fatalf("unknown issuer %s"u8, e.Issuer);
+            t.Fatalf("unknown issuer %s", e.Issuer);
         }
         (var issuerKey, ok) = keys[e.Issuer, ꟷ];
         if (!ok) {
-            Ꮡt.Fatalf("unknown issuer %s"u8, e.Issuer);
+            t.Fatalf("unknown issuer %s", e.Issuer);
         }
 
         (var k, ok) = keys[e.Subject, ꟷ];
         if (!ok) {
-            error err = default!;
+            error err = default;
             var (ᴛ1, ᴛ2) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
             (k, err) = (new x509_test_package.ecdsa_PrivateKeyжSigner(ᴛ1), ᴛ2);
-            if (err != default!) {
-                Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
+            if (err != nil) {
+                t.Fatalf("failed to generate test key: %s", err);
             }
             keys[e.Subject] = k;
         }
-        var cert = genCertEdge(Ꮡt, e.Subject, k, e.MutateTemplate, e.Type, issuerCert, issuerKey);
+        var cert = genCertEdge(t, e.Subject, k, e.MutateTemplate, e.Type, issuerCert, issuerKey);
         certs[e.Subject] = cert;
-        if (e.Subject == d.Leaf){
+        if (e.Subject == d.Leaf) {
             leaf = cert;
         } else {
-            if (e.Constraint != default!){
+            if (e.Constraint != nil) {
                 intermediatePool.AddCertWithConstraint(cert, e.Constraint);
             } else {
                 intermediatePool.AddCert(cert);
@@ -2068,20 +2105,21 @@ internal static (ж<global::go.crypto.x509_package.CertPool>, ж<global::go.cryp
 internal static slice<@string> chainsToStrings(slice<slice<ж<global::go.crypto.x509_package.Certificate>>> chains) {
     var namesᴷ = new stackAppend<@string>();
 
-    var chainStrings = new @string[]{}.slice();
+    var chainStrings = slice<@string>([]);
     foreach (var (_, chain) in chains) {
-        var names = new @string[]{}.slice();
+        var names = slice<@string>([]);
         foreach (var (_, c) in chain) {
-            names = append(namesᴷ, names, (~c).Subject.String());
+            names = append(namesᴷ, names, c.Subject.String());
         }
-        chainStrings = append(chainStrings, strings.Join(names, " -> "u8));
+        chainStrings = append(chainStrings, strings.Join(names, " -> "));
     }
     slices.Sort<slice<@string>, @string>(chainStrings);
     return chainStrings;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badˢ = "bad"u8;
+internal static ref readonly @string badˢ => ref badˢᵇ;
+private static readonly @string badˢᵇ = "bad"u8;
 
 internal partial struct TestPathBuilding_tests /*dyn*/ {
     internal @string name;
@@ -2090,10 +2128,8 @@ internal partial struct TestPathBuilding_tests /*dyn*/ {
     internal @string expectedErr;
 }
 
-public static void TestPathBuilding(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var tests = new TestPathBuilding_tests[]{
+public static void TestPathBuilding(ж<testing.T> t) {
+    var tests = slice<TestPathBuilding_tests>([
         new(
             // Build the following graph from RFC 4158, figure 7 (note that in this graph edges represent
             // certificates where the parent is the issuer and the child is the subject.) For the certificate
@@ -2120,55 +2156,55 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             //       +----+
             //       | EE |
             //       +----+
-            name: "bad EKU"u8,
+            name: "bad EKU",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "root",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "root",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "inter c",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter a",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter c",
+                        Subject: "inter b",
                         Type: intermediateCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ1) => {
-                            tΔ1.Value.ExtKeyUsage = new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageCodeSigning}.slice();
+                            tΔ1.ExtKeyUsage = slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageCodeSigning]);
                         }
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter a",
+                        Subject: "inter b",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter b"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter b",
+                        Subject: "leaf",
                         Type: leafCertificate
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=inter c -> CN=root"u8,
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"u8
-            }.slice()
+            expectedChains: slice<@string>([
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=inter c -> CN=root",
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"
+            ])
         ),
         new(
             // Build the following graph from RFC 4158, figure 7 (note that in this graph edges represent
@@ -2196,56 +2232,56 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             //       +----+
             //       | EE |
             //       +----+
-            name: "bad EKU"u8,
+            name: "bad EKU",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "root",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "root",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "inter c",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter a",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter c",
+                        Subject: "inter b",
                         Type: intermediateCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ2) => {
-                            tΔ2.Value.PermittedDNSDomains = new @string[]{"good"u8}.slice();
-                            tΔ2.Value.DNSNames = new @string[]{"bad"u8}.slice();
+                            tΔ2.PermittedDNSDomains = slice<@string>(["good"]);
+                            tΔ2.DNSNames = slice<@string>(["bad"]);
                         }
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter a",
+                        Subject: "inter b",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter b"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter b",
+                        Subject: "leaf",
                         Type: leafCertificate
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=inter c -> CN=root"u8,
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"u8
-            }.slice()
+            expectedChains: slice<@string>([
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=inter c -> CN=root",
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"
+            ])
         ),
         new(
             // Build the following graph, we should find both paths:
@@ -2278,42 +2314,42 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             //            +----+
             //            | EE |
             //            +----+
-            name: "all paths"u8,
+            name: "all paths",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "root",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter a",
+                        Subject: "inter b",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter a",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter b"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter b",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter c",
+                        Subject: "leaf",
                         Type: leafCertificate
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{
-                "CN=leaf -> CN=inter c -> CN=inter a -> CN=root"u8,
-                "CN=leaf -> CN=inter c -> CN=inter b -> CN=inter a -> CN=root"u8
-            }.slice()
+            expectedChains: slice<@string>([
+                "CN=leaf -> CN=inter c -> CN=inter a -> CN=root",
+                "CN=leaf -> CN=inter c -> CN=inter b -> CN=inter a -> CN=root"
+            ])
         ),
         new(
             // Build the following graph, which contains a cross-signature loop
@@ -2342,293 +2378,294 @@ public static void TestPathBuilding(ж<testing.T> Ꮡt) {
             //       +----+
             //       | EE |
             //       +----+
-            name: "ignore cross-sig loops"u8,
+            name: "ignore cross-sig loops",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "root",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "root",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "inter c",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter a",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter c",
+                        Subject: "inter b",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter a",
+                        Subject: "inter b",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter b"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter b",
+                        Subject: "leaf",
                         Type: leafCertificate
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=inter c -> CN=root"u8,
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"u8,
-                "CN=leaf -> CN=inter b -> CN=inter c -> CN=inter a -> CN=root"u8,
-                "CN=leaf -> CN=inter b -> CN=inter c -> CN=root"u8
-            }.slice()
+            expectedChains: slice<@string>([
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=inter c -> CN=root",
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root",
+                "CN=leaf -> CN=inter b -> CN=inter c -> CN=inter a -> CN=root",
+                "CN=leaf -> CN=inter b -> CN=inter c -> CN=root"
+            ])
         ),
         new(
             // Build a simple two node graph, where the leaf is directly issued from
             // the root and both certificates have matching subject and public key, but
             // the leaf has SANs.
-            name: "leaf with same subject, key, as parent but with SAN"u8,
+            name: "leaf with same subject, key, as parent but with SAN",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "root"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "root",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "root"u8,
+                        Issuer: "root",
+                        Subject: "root",
                         Type: leafCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> c) => {
-                            c.Value.DNSNames = new @string[]{"localhost"u8}.slice();
+                            c.DNSNames = slice<@string>(["localhost"]);
                         }
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{
-                "CN=root -> CN=root"u8
-            }.slice()
+            expectedChains: slice<@string>([
+                "CN=root -> CN=root"
+            ])
         ),
         new(
             // Build a basic graph with two paths from leaf to root, but the path passing
             // through C should be ignored, because it has invalid EKU nesting.
-            name: "ignore invalid EKU path"u8,
+            name: "ignore invalid EKU path",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "root",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "root",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter c",
+                        Subject: "inter b",
                         Type: intermediateCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ3) => {
-                            tΔ3.Value.ExtKeyUsage = new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageCodeSigning}.slice();
+                            tΔ3.ExtKeyUsage = slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageCodeSigning]);
                         }
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "inter a",
+                        Subject: "inter b",
                         Type: intermediateCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ4) => {
-                            tΔ4.Value.ExtKeyUsage = new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice();
+                            tΔ4.ExtKeyUsage = slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]);
                         }
                     ),
                     new(
-                        Issuer: "inter b"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter b",
+                        Subject: "leaf",
                         Type: leafCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ5) => {
-                            tΔ5.Value.ExtKeyUsage = new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice();
+                            tΔ5.ExtKeyUsage = slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]);
                         }
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{
-                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"u8
-            }.slice()
+            expectedChains: slice<@string>([
+                "CN=leaf -> CN=inter b -> CN=inter a -> CN=root"
+            ])
         ),
         new(
             // A name constraint on the root should apply to any names that appear
             // on the intermediate, meaning there is no valid chain.
-            name: "constrained root, invalid intermediate"u8,
+            name: "constrained root, invalid intermediate",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{
+                Roots: slice<rootDescription>([
                     new(
-                        Subject: "root"u8,
+                        Subject: "root",
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ6) => {
-                            tΔ6.Value.PermittedDNSDomains = new @string[]{"example.com"u8}.slice();
+                            tΔ6.PermittedDNSDomains = slice<@string>(["example.com"]);
                         }
                     )
-                }.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                ]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter"u8,
+                        Issuer: "root",
+                        Subject: "inter",
                         Type: intermediateCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ7) => {
-                            tΔ7.Value.DNSNames = new @string[]{"beep.com"u8}.slice();
+                            tΔ7.DNSNames = slice<@string>(["beep.com"]);
                         }
                     ),
                     new(
-                        Issuer: "inter"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter",
+                        Subject: "leaf",
                         Type: leafCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ8) => {
-                            tΔ8.Value.DNSNames = new @string[]{"www.example.com"u8}.slice();
+                            tΔ8.DNSNames = slice<@string>(["www.example.com"]);
                         }
                     )
-                }.slice()
+                ])
             ),
-            expectedErr: "x509: a root or intermediate certificate is not authorized to sign for this name: DNS name \"beep.com\" is not permitted by any constraint"u8
+            expectedErr: "x509: a root or intermediate certificate is not authorized to sign for this name: DNS name \"beep.com\" is not permitted by any constraint"
         ),
         new(
             // A name constraint on the intermediate does not apply to the intermediate
             // itself, so this is a valid chain.
-            name: "constrained intermediate, non-matching SAN"u8,
+            name: "constrained intermediate, non-matching SAN",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8)}.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                Roots: slice<rootDescription>([new(Subject: "root")]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter"u8,
+                        Issuer: "root",
+                        Subject: "inter",
                         Type: intermediateCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ9) => {
-                            tΔ9.Value.DNSNames = new @string[]{"beep.com"u8}.slice();
-                            tΔ9.Value.PermittedDNSDomains = new @string[]{"example.com"u8}.slice();
+                            tΔ9.DNSNames = slice<@string>(["beep.com"]);
+                            tΔ9.PermittedDNSDomains = slice<@string>(["example.com"]);
                         }
                     ),
                     new(
-                        Issuer: "inter"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter",
+                        Subject: "leaf",
                         Type: leafCertificate,
                         MutateTemplate: (ж<global::go.crypto.x509_package.Certificate> tΔ10) => {
-                            tΔ10.Value.DNSNames = new @string[]{"www.example.com"u8}.slice();
+                            tΔ10.DNSNames = slice<@string>(["www.example.com"]);
                         }
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{"CN=leaf -> CN=inter -> CN=root"u8}.slice()
+            expectedChains: slice<@string>(["CN=leaf -> CN=inter -> CN=root"])
         ),
         new(
             // A code constraint on the root, applying to one of two intermediates in the graph, should
             // result in only one valid chain.
-            name: "code constrained root, two paths, one valid"u8,
+            name: "code constrained root, two paths, one valid",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8, Constraint: error (slice<ж<global::go.crypto.x509_package.Certificate>> chain) => {
+                Roots: slice<rootDescription>([new(Subject: "root", Constraint: error (slice<ж<global::go.crypto.x509_package.Certificate>> chain) => {
                     foreach (var (_, c) in chain) {
-                        if ((~c).Subject.CommonName == "inter a"u8) {
+                        if (c.Subject.CommonName == "inter a"u8) {
                             return errors.New(badˢ);
                         }
                     }
-                    return default!;
+                    return default;
                 })
-                }.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                ]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter a"u8,
+                        Issuer: "root",
+                        Subject: "inter a",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter b"u8,
+                        Issuer: "root",
+                        Subject: "inter b",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter a"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter a",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter b"u8,
-                        Subject: "inter c"u8,
+                        Issuer: "inter b",
+                        Subject: "inter c",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter c"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter c",
+                        Subject: "leaf",
                         Type: leafCertificate
                     )
-                }.slice()
+                ])
             ),
-            expectedChains: new @string[]{"CN=leaf -> CN=inter c -> CN=inter b -> CN=root"u8}.slice()
+            expectedChains: slice<@string>(["CN=leaf -> CN=inter c -> CN=inter b -> CN=root"])
         ),
         new(
             // A code constraint on the root, applying to the only path, should result in an error.
-            name: "code constrained root, one invalid path"u8,
+            name: "code constrained root, one invalid path",
             graph: new trustGraphDescription(
-                Roots: new rootDescription[]{new(Subject: "root"u8, Constraint: error (slice<ж<global::go.crypto.x509_package.Certificate>> chain) => {
+                Roots: slice<rootDescription>([new(Subject: "root", Constraint: error (slice<ж<global::go.crypto.x509_package.Certificate>> chain) => {
                     foreach (var (_, c) in chain) {
-                        if ((~c).Subject.CommonName == "leaf"u8) {
+                        if (c.Subject.CommonName == "leaf"u8) {
                             return errors.New(badˢ);
                         }
                     }
-                    return default!;
+                    return default;
                 })
-                }.slice(),
-                Leaf: "leaf"u8,
-                Graph: new trustGraphEdge[]{
+                ]),
+                Leaf: "leaf",
+                Graph: slice<trustGraphEdge>([
                     new(
-                        Issuer: "root"u8,
-                        Subject: "inter"u8,
+                        Issuer: "root",
+                        Subject: "inter",
                         Type: intermediateCertificate
                     ),
                     new(
-                        Issuer: "inter"u8,
-                        Subject: "leaf"u8,
+                        Issuer: "inter",
+                        Subject: "leaf",
                         Type: leafCertificate
                     )
-                }.slice()
+                ])
             ),
-            expectedErr: "x509: certificate signed by unknown authority (possibly because of \"bad\" while trying to verify candidate authority certificate \"root\")"u8
+            expectedErr: "x509: certificate signed by unknown authority (possibly because of \"bad\" while trying to verify candidate authority certificate \"root\")"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestPathBuilding_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ11) => {
+        t.Run(tc.name, (ж<testing.T> tΔ11) => {
             var (roots, intermediates, leaf) = buildTrustGraph(tΔ11, tcʗ1.graph);
             var (chains, err) = leaf.Verify(new VerifyOptions(
                 Roots: roots,
                 Intermediates: intermediates
             ));
-            if (err != default! && err.Error() != tcʗ1.expectedErr) {
-                tΔ11.Fatalf("unexpected error: got %q, want %q"u8, err, tcʗ1.expectedErr);
+            if (err != nil && err.Error() != tcʗ1.expectedErr) {
+                tΔ11.Fatalf("unexpected error: got %q, want %q", err, tcʗ1.expectedErr);
             }
             if (builtin.len(tcʗ1.expectedChains) == 0) {
                 return;
             }
             var gotChains = chainsToStrings(chains);
             if (!slices.Equal<slice<@string>, @string>(gotChains, tcʗ1.expectedChains)) {
-                tΔ11.Errorf("unexpected chains returned:\ngot:\n\t%s\nwant:\n\t%s"u8, strings.Join(gotChains, "\n\t"u8), strings.Join(tcʗ1.expectedChains, "\n\t"u8));
+                tΔ11.Errorf("unexpected chains returned:\ngot:\n\t%s\nwant:\n\t%s", strings.Join(gotChains, "\n\t"), strings.Join(tcʗ1.expectedChains, "\n\t"));
             }
         });
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rootˢ = "root"u8;
+internal static ref readonly @string rootˢ => ref rootˢᵇ;
+private static readonly @string rootˢᵇ = "root"u8;
 
 internal partial struct TestEKUEnforcement_ekuDescs /*dyn*/ {
     public slice<global::go.crypto.x509_package.ExtKeyUsage> EKUs;
@@ -2644,78 +2681,78 @@ internal partial struct TestEKUEnforcement_tests /*dyn*/ {
     internal @string err;
 }
 
-public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
-    var tests = new TestEKUEnforcement_tests[]{
+public static void TestEKUEnforcement(ж<testing.T> t) {
+    var tests = slice<TestEKUEnforcement_tests>([
         new(
-            name: "valid, full chain"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice())}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+            name: "valid, full chain",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]))]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
         ),
         new(
-            name: "valid, only leaf has EKU"u8,
-            root: new TestEKUEnforcement_ekuDescs(nil),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(nil)}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+            name: "valid, only leaf has EKU",
+            root: new TestEKUEnforcement_ekuDescs(),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs()]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
         ),
         new(
-            name: "invalid, serverAuth not nested"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice())}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
-            err: "x509: certificate specifies an incompatible key usage"u8
+            name: "invalid, serverAuth not nested",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth]))]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
+            err: "x509: certificate specifies an incompatible key usage"
         ),
         new(
-            name: "valid, two EKUs, one path"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice())}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice()
+            name: "valid, two EKUs, one path",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth]))]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth])
         ),
         new(
-            name: "invalid, ladder"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{
-                new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice()),
-                new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth}.slice()),
-                new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice()),
-                new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice())
-            }.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice(),
-            err: "x509: certificate specifies an incompatible key usage"u8
+            name: "invalid, ladder",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([
+                new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth])),
+                new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth])),
+                new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth])),
+                new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]))
+            ]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth]),
+            err: "x509: certificate specifies an incompatible key usage"
         ),
         new(
-            name: "valid, intermediate has no EKU"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(nil)}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+            name: "valid, intermediate has no EKU",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs()]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
         ),
         new(
-            name: "invalid, intermediate has no EKU and no nested path"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(nil)}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth, ExtKeyUsageClientAuth}.slice(),
-            err: "x509: certificate specifies an incompatible key usage"u8
+            name: "invalid, intermediate has no EKU and no nested path",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs()]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth, ExtKeyUsageClientAuth]),
+            err: "x509: certificate specifies an incompatible key usage"
         ),
         new(
-            name: "invalid, intermediate has unknown EKU"u8,
-            root: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            inters: new TestEKUEnforcement_ekuDescs[]{new TestEKUEnforcement_ekuDescs(Unknown: new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice()}.slice())}.slice(),
-            leaf: new TestEKUEnforcement_ekuDescs(EKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
-            err: "x509: certificate specifies an incompatible key usage"u8
+            name: "invalid, intermediate has unknown EKU",
+            root: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            inters: slice<TestEKUEnforcement_ekuDescs>([new TestEKUEnforcement_ekuDescs(Unknown: slice<asn1.ObjectIdentifier>([slice<nint>([1, 2, 3])]))]),
+            leaf: new TestEKUEnforcement_ekuDescs(EKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
+            err: "x509: certificate specifies an incompatible key usage"
         )
-    }.slice();
+    ]);
 
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate test key: %s", err);
     }
 
     foreach (var (_, vᴛ1) in tests) {
@@ -2724,12 +2761,12 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
 
         var kʗ1 = k;
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var rootPool = NewCertPool();
             var tcʗ2 = tcʗ1;
             var root = genCertEdge(tΔ1, rootˢ, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1), (ж<global::go.crypto.x509_package.Certificate> c) => {
-                c.Value.ExtKeyUsage = tcʗ2.root.EKUs;
-                c.Value.UnknownExtKeyUsage = tcʗ2.root.Unknown;
+                c.ExtKeyUsage = tcʗ2.root.EKUs;
+                c.UnknownExtKeyUsage = tcʗ2.root.Unknown;
             }, rootCertificate, nil, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1));
             rootPool.AddCert(root);
 
@@ -2741,8 +2778,8 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
 
                 var interEKUsʗ1 = interEKUs;
                 var inter = genCertEdge(tΔ1, fmt.Sprintf("inter %d"u8, i), new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1), (ж<global::go.crypto.x509_package.Certificate> c) => {
-                    c.Value.ExtKeyUsage = interEKUsʗ1.EKUs;
-                    c.Value.UnknownExtKeyUsage = interEKUsʗ1.Unknown;
+                    c.ExtKeyUsage = interEKUsʗ1.EKUs;
+                    c.UnknownExtKeyUsage = interEKUsʗ1.Unknown;
                 }, intermediateCertificate, parent, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1));
                 interPool.AddCert(inter);
                 parent = inter;
@@ -2750,16 +2787,15 @@ public static void TestEKUEnforcement(ж<testing.T> Ꮡt) {
 
             var tcʗ3 = tcʗ1;
             var leaf = genCertEdge(tΔ1, leafˢ2, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1), (ж<global::go.crypto.x509_package.Certificate> c) => {
-                c.Value.ExtKeyUsage = tcʗ3.leaf.EKUs;
-                c.Value.UnknownExtKeyUsage = tcʗ3.leaf.Unknown;
+                c.ExtKeyUsage = tcʗ3.leaf.EKUs;
+                c.UnknownExtKeyUsage = tcʗ3.leaf.Unknown;
             }, intermediateCertificate, parent, new x509_test_package.ecdsa_PrivateKeyжSigner(kʗ1));
 
             var (_, errΔ1) = leaf.Verify(new VerifyOptions(Roots: rootPool, Intermediates: interPool, KeyUsages: tcʗ1.verifyEKUs));
-            if (errΔ1 == default! && tcʗ1.err != ""u8){
-                tΔ1.Errorf("expected error"u8);
-            } else 
-            if (errΔ1 != default! && errΔ1.Error() != tcʗ1.err) {
-                tΔ1.Errorf("unexpected error: got %q, want %q"u8, errΔ1.Error(), tcʗ1.err);
+            if (errΔ1 == nil && tcʗ1.err != ""u8) {
+                tΔ1.Errorf("expected error");
+            } else if (errΔ1 != nil && errΔ1.Error() != tcʗ1.err) {
+                tΔ1.Errorf("unexpected error: got %q, want %q", errΔ1.Error(), tcʗ1.err);
             }
         });
     }
@@ -2774,153 +2810,175 @@ internal partial struct TestVerifyEKURootAsLeaf_type /*dyn*/ {
     internal bool succeed;
 }
 
-public static void TestVerifyEKURootAsLeaf(ж<testing.T> Ꮡt) {
+public static void TestVerifyEKURootAsLeaf(ж<testing.T> t) {
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate key: %s", err);
     }
 
-    foreach (var (_, vᴛ1) in new TestVerifyEKURootAsLeaf_type[]{
+    foreach (var (_, vᴛ1) in slice<TestVerifyEKURootAsLeaf_type>([
         new(
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
             succeed: true
         ),
         new(
-            rootEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+            rootEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
             succeed: true
         ),
         new(
-            rootEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+            rootEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
             succeed: true
         ),
         new(
-            rootEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageAny}.slice(),
+            rootEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageAny]),
             succeed: true
         ),
         new(
-            rootEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageAny}.slice(),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+            rootEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageAny]),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
             succeed: true
         ),
         new(
-            rootEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth}.slice(),
-            verifyEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+            rootEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth]),
+            verifyEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
             succeed: false
         )
-    }.slice()) {
+    ])) {
         ref var tc = ref heap(new TestVerifyEKURootAsLeaf_type(), out var Ꮡtc);
         tc = vᴛ1;
 
         var kʗ1 = k;
         var tcʗ1 = tc;
-        Ꮡt.Run(fmt.Sprintf("root EKUs %#v, verify EKUs %#v"u8, tc.rootEKUs, tc.verifyEKUs), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("root EKUs %#v, verify EKUs %#v"u8, tc.rootEKUs, tc.verifyEKUs), (ж<testing.T> tΔ1) => {
             var tmpl = Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                Subject: new pkix.Name(CommonName: "root"u8),
+                Subject: new pkix.Name(CommonName: "root"),
                 NotBefore: time.Now().Add(-time.ΔHour),
                 NotAfter: time.Now().Add(time.ΔHour),
-                DNSNames: new @string[]{"localhost"u8}.slice(),
+                DNSNames: slice<@string>(["localhost"]),
                 ExtKeyUsage: tcʗ1.rootEKUs
             ));
             var (rootDER, errΔ1) = CreateCertificate(rand.Reader, tmpl, tmpl, kʗ1.Public(), kʗ1.OrTypedNil());
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("failed to create certificate: %s"u8, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to create certificate: %s", errΔ1);
             }
             (var root, errΔ1) = ParseCertificate(rootDER);
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("failed to parse certificate: %s"u8, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to parse certificate: %s", errΔ1);
             }
             var roots = NewCertPool();
             roots.AddCert(root);
 
             (_, errΔ1) = root.Verify(new VerifyOptions(Roots: roots, KeyUsages: tcʗ1.verifyEKUs));
-            if (errΔ1 == default! && !tcʗ1.succeed){
+            if (errΔ1 == nil && !tcʗ1.succeed) {
                 tΔ1.Error(verificationSucceedˢ);
-            } else 
-            if (errΔ1 != default! && tcʗ1.succeed) {
-                tΔ1.Errorf("verification failed: %q"u8, errΔ1);
+            } else if (errΔ1 != nil && tcʗ1.succeed) {
+                tΔ1.Errorf("verification failed: %q", errΔ1);
             }
         });
     }
 }
 
-public static void TestVerifyNilPubKey(ж<testing.T> Ꮡt) {
+public static void TestVerifyNilPubKey(ж<testing.T> t) {
     var c = Ꮡ(new Certificate(
-        RawIssuer: new byte[]{1, 2, 3}.slice(),
-        AuthorityKeyId: new byte[]{1, 2, 3}.slice()
+        RawIssuer: slice<byte>([1, 2, 3]),
+        AuthorityKeyId: slice<byte>([1, 2, 3])
     ));
-    var opts = Ꮡ(new VerifyOptions(nil));
-    opts.Value.Roots = NewCertPool();
+    var opts = Ꮡ(new VerifyOptions());
+    opts.Roots = NewCertPool();
     var r = Ꮡ(new Certificate(
-        RawSubject: new byte[]{1, 2, 3}.slice(),
-        SubjectKeyId: new byte[]{1, 2, 3}.slice()
+        RawSubject: slice<byte>([1, 2, 3]),
+        SubjectKeyId: slice<byte>([1, 2, 3])
     ));
-    (~opts).Roots.AddCert(r);
+    opts.Roots.AddCert(r);
 
-    var (_, err) = c.buildChains(new ж<global::go.crypto.x509_package.Certificate>[]{r}.slice(), nil, opts);
+    var (_, err) = c.buildChains(slice<ж<global::go.crypto.x509_package.Certificate>>([r]), nil, opts);
     {
         var (_, ok) = err._<UnknownAuthorityError>(ᐧ); if (!ok) {
-            Ꮡt.Fatalf("buildChains returned unexpected error, got: %v, want %v"u8, err, new UnknownAuthorityError(nil));
+            t.Fatalf("buildChains returned unexpected error, got: %v, want %v", err, new UnknownAuthorityError());
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string labelˢ = "label"u8;
+internal static ref readonly @string labelˢ => ref labelˢᵇ;
+private static readonly @string labelˢᵇ = "label"u8;
 
-public static void TestVerifyBareWildcard(ж<testing.T> Ꮡt) {
+public static void TestVerifyBareWildcard(ж<testing.T> t) {
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to generate key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to generate key: %s", err);
     }
     var tmpl = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "test"u8),
+        Subject: new pkix.Name(CommonName: "test"),
         NotBefore: time.Now().Add(-time.ΔHour),
         NotAfter: time.Now().Add(time.ΔHour),
-        DNSNames: new @string[]{"*"u8}.slice()
+        DNSNames: slice<@string>(["*"])
     ));
     (var cDER, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.Public(), k.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create certificate: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create certificate: %s", err);
     }
     (var c, err) = ParseCertificate(cDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse certificate: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse certificate: %s", err);
     }
 
     {
-        var errΔ1 = c.VerifyHostname(labelˢ); if (errΔ1 == default!) {
-            Ꮡt.Fatalf("VerifyHostname unexpected success with bare wildcard SAN"u8);
+        var errΔ1 = c.VerifyHostname(labelˢ); if (errΔ1 == nil) {
+            t.Fatalf("VerifyHostname unexpected success with bare wildcard SAN");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataPolicyRootPemˢ = "testdata/policy_root.pem"u8;
-internal static readonly @string testdataPolicyRootCrossˢ = "testdata/policy_root_cross_inhibit_mapping.pem"u8;
-internal static readonly @string testdataPolicyRoot2Pemˢ = "testdata/policy_root2.pem"u8;
-internal static readonly @string testdataPolicyˢ = "testdata/policy_intermediate.pem"u8;
-internal static readonly @string testdataPolicyˢ2 = "testdata/policy_intermediate_any.pem"u8;
-internal static readonly @string testdataPolicyˢ3 = "testdata/policy_intermediate_mapped.pem"u8;
-internal static readonly @string testdataPolicyˢ4 = "testdata/policy_intermediate_mapped_any.pem"u8;
-internal static readonly @string testdataPolicyˢ5 = "testdata/policy_intermediate_mapped_oid3.pem"u8;
-internal static readonly @string testdataPolicyˢ6 = "testdata/policy_intermediate_require.pem"u8;
-internal static readonly @string testdataPolicyˢ7 = "testdata/policy_intermediate_require1.pem"u8;
-internal static readonly @string testdataPolicyˢ8 = "testdata/policy_intermediate_require2.pem"u8;
-internal static readonly @string testdataPolicyˢ9 = "testdata/policy_intermediate_require_no_policies.pem"u8;
-internal static readonly @string testdataPolicyLeafPemˢ = "testdata/policy_leaf.pem"u8;
-internal static readonly @string testdataPolicyLeafAnyPemˢ = "testdata/policy_leaf_any.pem"u8;
-internal static readonly @string testdataPolicyLeafNoneˢ = "testdata/policy_leaf_none.pem"u8;
-internal static readonly @string testdataPolicyLeafOid1ˢ = "testdata/policy_leaf_oid1.pem"u8;
-internal static readonly @string testdataPolicyLeafOid2ˢ = "testdata/policy_leaf_oid2.pem"u8;
-internal static readonly @string testdataPolicyLeafOid3ˢ = "testdata/policy_leaf_oid3.pem"u8;
-internal static readonly @string testdataPolicyLeafOid4ˢ = "testdata/policy_leaf_oid4.pem"u8;
-internal static readonly @string testdataPolicyLeafOid5ˢ = "testdata/policy_leaf_oid5.pem"u8;
-internal static readonly @string testdataPolicyLeafˢ = "testdata/policy_leaf_require.pem"u8;
-internal static readonly @string testdataPolicyLeafˢ2 = "testdata/policy_leaf_require1.pem"u8;
+internal static ref readonly @string testdataPolicyRootPemˢ => ref testdataPolicyRootPemˢᵇ;
+private static readonly @string testdataPolicyRootPemˢᵇ = "testdata/policy_root.pem"u8;
+internal static ref readonly @string testdataPolicyRootCrossˢ => ref testdataPolicyRootCrossˢᵇ;
+private static readonly @string testdataPolicyRootCrossˢᵇ = "testdata/policy_root_cross_inhibit_mapping.pem"u8;
+internal static ref readonly @string testdataPolicyRoot2Pemˢ => ref testdataPolicyRoot2Pemˢᵇ;
+private static readonly @string testdataPolicyRoot2Pemˢᵇ = "testdata/policy_root2.pem"u8;
+internal static ref readonly @string testdataPolicyˢ => ref testdataPolicyˢᵇ;
+private static readonly @string testdataPolicyˢᵇ = "testdata/policy_intermediate.pem"u8;
+internal static ref readonly @string testdataPolicyˢ2 => ref testdataPolicyˢ2ᵇ;
+private static readonly @string testdataPolicyˢ2ᵇ = "testdata/policy_intermediate_any.pem"u8;
+internal static ref readonly @string testdataPolicyˢ3 => ref testdataPolicyˢ3ᵇ;
+private static readonly @string testdataPolicyˢ3ᵇ = "testdata/policy_intermediate_mapped.pem"u8;
+internal static ref readonly @string testdataPolicyˢ4 => ref testdataPolicyˢ4ᵇ;
+private static readonly @string testdataPolicyˢ4ᵇ = "testdata/policy_intermediate_mapped_any.pem"u8;
+internal static ref readonly @string testdataPolicyˢ5 => ref testdataPolicyˢ5ᵇ;
+private static readonly @string testdataPolicyˢ5ᵇ = "testdata/policy_intermediate_mapped_oid3.pem"u8;
+internal static ref readonly @string testdataPolicyˢ6 => ref testdataPolicyˢ6ᵇ;
+private static readonly @string testdataPolicyˢ6ᵇ = "testdata/policy_intermediate_require.pem"u8;
+internal static ref readonly @string testdataPolicyˢ7 => ref testdataPolicyˢ7ᵇ;
+private static readonly @string testdataPolicyˢ7ᵇ = "testdata/policy_intermediate_require1.pem"u8;
+internal static ref readonly @string testdataPolicyˢ8 => ref testdataPolicyˢ8ᵇ;
+private static readonly @string testdataPolicyˢ8ᵇ = "testdata/policy_intermediate_require2.pem"u8;
+internal static ref readonly @string testdataPolicyˢ9 => ref testdataPolicyˢ9ᵇ;
+private static readonly @string testdataPolicyˢ9ᵇ = "testdata/policy_intermediate_require_no_policies.pem"u8;
+internal static ref readonly @string testdataPolicyLeafPemˢ => ref testdataPolicyLeafPemˢᵇ;
+private static readonly @string testdataPolicyLeafPemˢᵇ = "testdata/policy_leaf.pem"u8;
+internal static ref readonly @string testdataPolicyLeafAnyPemˢ => ref testdataPolicyLeafAnyPemˢᵇ;
+private static readonly @string testdataPolicyLeafAnyPemˢᵇ = "testdata/policy_leaf_any.pem"u8;
+internal static ref readonly @string testdataPolicyLeafNoneˢ => ref testdataPolicyLeafNoneˢᵇ;
+private static readonly @string testdataPolicyLeafNoneˢᵇ = "testdata/policy_leaf_none.pem"u8;
+internal static ref readonly @string testdataPolicyLeafOid1ˢ => ref testdataPolicyLeafOid1ˢᵇ;
+private static readonly @string testdataPolicyLeafOid1ˢᵇ = "testdata/policy_leaf_oid1.pem"u8;
+internal static ref readonly @string testdataPolicyLeafOid2ˢ => ref testdataPolicyLeafOid2ˢᵇ;
+private static readonly @string testdataPolicyLeafOid2ˢᵇ = "testdata/policy_leaf_oid2.pem"u8;
+internal static ref readonly @string testdataPolicyLeafOid3ˢ => ref testdataPolicyLeafOid3ˢᵇ;
+private static readonly @string testdataPolicyLeafOid3ˢᵇ = "testdata/policy_leaf_oid3.pem"u8;
+internal static ref readonly @string testdataPolicyLeafOid4ˢ => ref testdataPolicyLeafOid4ˢᵇ;
+private static readonly @string testdataPolicyLeafOid4ˢᵇ = "testdata/policy_leaf_oid4.pem"u8;
+internal static ref readonly @string testdataPolicyLeafOid5ˢ => ref testdataPolicyLeafOid5ˢᵇ;
+private static readonly @string testdataPolicyLeafOid5ˢᵇ = "testdata/policy_leaf_oid5.pem"u8;
+internal static ref readonly @string testdataPolicyLeafˢ => ref testdataPolicyLeafˢᵇ;
+private static readonly @string testdataPolicyLeafˢᵇ = "testdata/policy_leaf_require.pem"u8;
+internal static ref readonly @string testdataPolicyLeafˢ2 => ref testdataPolicyLeafˢ2ᵇ;
+private static readonly @string testdataPolicyLeafˢ2ᵇ = "testdata/policy_leaf_require1.pem"u8;
 
 internal partial struct TestPoliciesValid_testCase /*dyn*/ {
     internal slice<ж<global::go.crypto.x509_package.Certificate>> chain;
@@ -2931,9 +2989,7 @@ internal partial struct TestPoliciesValid_testCase /*dyn*/ {
     internal bool valid;
 }
 
-public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestPoliciesValid(ж<testing.T> t) {
     // These test cases, the comments, and the certificates they rely on, are
     // stolen from BoringSSL [0]. We skip the tests which involve certificate
     // parsing as part of the verification process. Those tests are in
@@ -2941,82 +2997,82 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
     //
     // [0] https://boringssl.googlesource.com/boringssl/+/264f4f7a958af6c4ccb04662e302a99dfa7c5b85/crypto/x509/x509_test.cc#5913
 
-    var testOID1 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 1}.slice());
-    var testOID2 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 2}.slice());
-    var testOID3 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 3}.slice());
-    var testOID4 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 4}.slice());
-    var testOID5 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 5}.slice());
+    var testOID1 = mustNewOIDFromInts(slice<uint64>([1, 2, 840, 113554, 4, 1, 72585, 2, 1]));
+    var testOID2 = mustNewOIDFromInts(slice<uint64>([1, 2, 840, 113554, 4, 1, 72585, 2, 2]));
+    var testOID3 = mustNewOIDFromInts(slice<uint64>([1, 2, 840, 113554, 4, 1, 72585, 2, 3]));
+    var testOID4 = mustNewOIDFromInts(slice<uint64>([1, 2, 840, 113554, 4, 1, 72585, 2, 4]));
+    var testOID5 = mustNewOIDFromInts(slice<uint64>([1, 2, 840, 113554, 4, 1, 72585, 2, 5]));
 
     ж<global::go.crypto.x509_package.Certificate> loadTestCert(ж<testing.T> tΔ1, @string path) {
         var (b, err) = os.ReadFile(path);
-        if (err != default!) {
+        if (err != nil) {
             tΔ1.Fatal(err);
         }
         var (p, _) = pem.Decode(b);
-        (var c, err) = ParseCertificate((~p).Bytes);
-        if (err != default!) {
+        (var c, err) = ParseCertificate(p.Bytes);
+        if (err != nil) {
             tΔ1.Fatal(err);
         }
         return c;
     }
 
-    var root = loadTestCert(Ꮡt, testdataPolicyRootPemˢ);
-    var root_cross_inhibit_mapping = loadTestCert(Ꮡt, testdataPolicyRootCrossˢ);
-    var root2 = loadTestCert(Ꮡt, testdataPolicyRoot2Pemˢ);
-    var intermediate = loadTestCert(Ꮡt, testdataPolicyˢ);
-    var intermediate_any = loadTestCert(Ꮡt, testdataPolicyˢ2);
-    var intermediate_mapped = loadTestCert(Ꮡt, testdataPolicyˢ3);
-    var intermediate_mapped_any = loadTestCert(Ꮡt, testdataPolicyˢ4);
-    var intermediate_mapped_oid3 = loadTestCert(Ꮡt, testdataPolicyˢ5);
-    var intermediate_require = loadTestCert(Ꮡt, testdataPolicyˢ6);
-    var intermediate_require1 = loadTestCert(Ꮡt, testdataPolicyˢ7);
-    var intermediate_require2 = loadTestCert(Ꮡt, testdataPolicyˢ8);
-    var intermediate_require_no_policies = loadTestCert(Ꮡt, testdataPolicyˢ9);
-    var leaf = loadTestCert(Ꮡt, testdataPolicyLeafPemˢ);
-    var leaf_any = loadTestCert(Ꮡt, testdataPolicyLeafAnyPemˢ);
-    var leaf_none = loadTestCert(Ꮡt, testdataPolicyLeafNoneˢ);
-    var leaf_oid1 = loadTestCert(Ꮡt, testdataPolicyLeafOid1ˢ);
-    var leaf_oid2 = loadTestCert(Ꮡt, testdataPolicyLeafOid2ˢ);
-    var leaf_oid3 = loadTestCert(Ꮡt, testdataPolicyLeafOid3ˢ);
-    var leaf_oid4 = loadTestCert(Ꮡt, testdataPolicyLeafOid4ˢ);
-    var leaf_oid5 = loadTestCert(Ꮡt, testdataPolicyLeafOid5ˢ);
-    var leaf_require = loadTestCert(Ꮡt, testdataPolicyLeafˢ);
-    var leaf_require1 = loadTestCert(Ꮡt, testdataPolicyLeafˢ2);
+    var root = loadTestCert(t, testdataPolicyRootPemˢ);
+    var root_cross_inhibit_mapping = loadTestCert(t, testdataPolicyRootCrossˢ);
+    var root2 = loadTestCert(t, testdataPolicyRoot2Pemˢ);
+    var intermediate = loadTestCert(t, testdataPolicyˢ);
+    var intermediate_any = loadTestCert(t, testdataPolicyˢ2);
+    var intermediate_mapped = loadTestCert(t, testdataPolicyˢ3);
+    var intermediate_mapped_any = loadTestCert(t, testdataPolicyˢ4);
+    var intermediate_mapped_oid3 = loadTestCert(t, testdataPolicyˢ5);
+    var intermediate_require = loadTestCert(t, testdataPolicyˢ6);
+    var intermediate_require1 = loadTestCert(t, testdataPolicyˢ7);
+    var intermediate_require2 = loadTestCert(t, testdataPolicyˢ8);
+    var intermediate_require_no_policies = loadTestCert(t, testdataPolicyˢ9);
+    var leaf = loadTestCert(t, testdataPolicyLeafPemˢ);
+    var leaf_any = loadTestCert(t, testdataPolicyLeafAnyPemˢ);
+    var leaf_none = loadTestCert(t, testdataPolicyLeafNoneˢ);
+    var leaf_oid1 = loadTestCert(t, testdataPolicyLeafOid1ˢ);
+    var leaf_oid2 = loadTestCert(t, testdataPolicyLeafOid2ˢ);
+    var leaf_oid3 = loadTestCert(t, testdataPolicyLeafOid3ˢ);
+    var leaf_oid4 = loadTestCert(t, testdataPolicyLeafOid4ˢ);
+    var leaf_oid5 = loadTestCert(t, testdataPolicyLeafOid5ˢ);
+    var leaf_require = loadTestCert(t, testdataPolicyLeafˢ);
+    var leaf_require1 = loadTestCert(t, testdataPolicyLeafˢ2);
 
-    var tests = new TestPoliciesValid_testCase[]{
+    var tests = slice<TestPoliciesValid_testCase>([
         // The chain is good for |oid1| and |oid2|, but not |oid3|.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID2}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID2]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             valid: false
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1, testOID2}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1, testOID2]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1, testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1, testOID3]),
             requireExplicitPolicy: true,
             valid: true
         ),
@@ -3024,83 +3080,83 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // intersected with user-specified policies, but it is not required to result
         // in any valid policies.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: true
         ),
         // However, a CA with policy constraints can require an explicit policy.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_require, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_require, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: false
         ),
         // requireExplicitPolicy applies even if the application does not configure a
         // user-initial-policy-set. If the validation results in no policies, the
         // chain is invalid.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_none, intermediate_require, root}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_none, intermediate_require, root]),
             requireExplicitPolicy: true,
             valid: false
         ),
         // A leaf can also set requireExplicitPolicy.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_require, intermediate, root]),
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_require, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_require, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: false
         ),
         // requireExplicitPolicy is a count of certificates to skip. If the value is
         // not zero by the end of the chain, it doesn't count.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require1, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_require1, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: false
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require2, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_require2, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require1, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_require1, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: true
         ),
         // If multiple certificates specify the constraint, the more constrained value
         // wins.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require1, intermediate_require1, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_require1, intermediate_require1, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: false
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_require, intermediate_require2, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_require, intermediate_require2, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             valid: false
         ),
         // An intermediate that requires an explicit policy, but then specifies no
         // policies should fail verification as a result.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_require_no_policies, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_require_no_policies, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             valid: false
         ),
         // A constrained intermediate's policy extension has a duplicate policy, which
@@ -3113,62 +3169,62 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // The leaf asserts anyPolicy, but the intermediate does not. The resulting
         // valid policies are the intersection.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_any, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_any, intermediate, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             valid: false
         ),
         // The intermediate asserts anyPolicy, but the leaf does not. The resulting
         // valid policies are the intersection.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_any, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediate_any, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             valid: false
         ),
         // Both assert anyPolicy. All policies are valid.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_any, intermediate_any, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_any, intermediate_any, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_any, intermediate_any, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             valid: true
         ),
         // With just a trust anchor, policy checking silently succeeds.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
             requireExplicitPolicy: true,
             valid: true
         ),
         // Although |intermediate_mapped_oid3| contains many mappings, it only accepts
         // OID3. Nodes should not be created for the other mappings.
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid1, intermediate_mapped_oid3, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             valid: true
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediate_mapped_oid3, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID4}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid4, intermediate_mapped_oid3, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID4]),
             requireExplicitPolicy: true,
             valid: false
         ),
@@ -3176,45 +3232,45 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         // the chain, in which case mapped policies are unassertable (apart from some
         // anyPolicy edge cases).
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid1, intermediate_mapped_oid3, root]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             inhibitPolicyMapping: true,
             valid: false
         ),
         new(
-            chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediate_mapped_oid3, root_cross_inhibit_mapping, root2}.slice(),
-            policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+            chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid1, intermediate_mapped_oid3, root_cross_inhibit_mapping, root2]),
+            policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
             requireExplicitPolicy: true,
             valid: false
         )
-    }.slice();
+    ]);
 
-    foreach (var (_, useAny) in new bool[]{false, true}.slice()) {
-        ж<global::go.crypto.x509_package.Certificate> intermediateΔ1 = default!;
-        if (useAny){
+    foreach (var (_, useAny) in slice<bool>([false, true])) {
+        ж<global::go.crypto.x509_package.Certificate> intermediateΔ1 = default;
+        if (useAny) {
             intermediateΔ1 = intermediate_mapped_any;
         } else {
             intermediateΔ1 = intermediate_mapped;
         }
-        var extraTests = new TestPoliciesValid_testCase[]{
+        var extraTests = slice<TestPoliciesValid_testCase>([
             // OID3 is mapped to {OID1, OID2}, which means OID1 and OID2 (or both) are
             // acceptable for OID3.
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid1, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid2, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid2, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
@@ -3227,8 +3283,8 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             // is not acceptable as OID3 at the root. OID3 has expected_polciy_set =
             // {OID1, OID2} and no other node allows OID3.
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid3, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid3, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID3]),
                 requireExplicitPolicy: true,
                 valid: useAny
             ),
@@ -3240,44 +3296,44 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
             // is acceptable as OID1 at the root because it will match both OID1 and
             // OID3 (mapped) policies.
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid1, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID1}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid1, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID1]),
                 requireExplicitPolicy: true,
                 valid: !useAny
             ),
             // All pairs of OID4 and OID5 are mapped together, so either can stand for
             // the other.
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID4}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid4, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID4]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID5}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid4, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID5]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid5, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID4}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid5, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID4]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid5, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID5}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid5, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID5]),
                 requireExplicitPolicy: true,
                 valid: true
             ),
             new(
-                chain: new ж<global::go.crypto.x509_package.Certificate>[]{leaf_oid4, intermediateΔ1, root}.slice(),
-                policies: new global::go.crypto.x509_package.ΔOID[]{testOID4, testOID5}.slice(),
+                chain: slice<ж<global::go.crypto.x509_package.Certificate>>([leaf_oid4, intermediateΔ1, root]),
+                policies: slice<global::go.crypto.x509_package.ΔOID>([testOID4, testOID5]),
                 requireExplicitPolicy: true,
                 valid: true
             )
-        }.slice();
+        ]);
         tests = appendꓸꓸꓸ(tests, extraTests);
     }
 
@@ -3286,7 +3342,7 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(fmt.Sprint(i), (ж<testing.T> tΔ2) => {
+        t.Run(fmt.Sprint(i), (ж<testing.T> tΔ2) => {
             var valid = policiesValid(tcʗ1.chain, new VerifyOptions(
                 CertificatePolicies: tcʗ1.policies,
                 requireExplicitPolicy: tcʗ1.requireExplicitPolicy,
@@ -3294,32 +3350,33 @@ public static void TestPoliciesValid(ж<testing.T> Ꮡt) {
                 inhibitAnyPolicy: tcʗ1.inhibitAnyPolicy
             ));
             if (valid != tcʗ1.valid) {
-                tΔ2.Errorf("policiesValid: got %t, want %t"u8, valid, tcʗ1.valid);
+                tΔ2.Errorf("policiesValid: got %t, want %t", valid, tcʗ1.valid);
             }
         });
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x509NoValidChainsBuilt1ˢ = "x509: no valid chains built: 1 candidate chains with invalid policies"u8;
+internal static ref readonly @string x509NoValidChainsBuilt1ˢ => ref x509NoValidChainsBuilt1ˢᵇ;
+private static readonly @string x509NoValidChainsBuilt1ˢᵇ = "x509: no valid chains built: 1 candidate chains with invalid policies"u8;
 internal static readonly object unexpectedSuccessInvalidˢ = (@string)"unexpected success, invalid policy shouldn't be bypassed by passing VerifyOptions.KeyUsages with ExtKeyUsageAny"u8;
 
-public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> Ꮡt) {
+public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> t) {
     ж<global::go.crypto.x509_package.Certificate> loadTestCert(ж<testing.T> tΔ1, @string path) {
         var (b, errΔ1) = os.ReadFile(path);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             tΔ1.Fatal(errΔ1);
         }
         var (p, _) = pem.Decode(b);
-        (var c, errΔ1) = ParseCertificate((~p).Bytes);
-        if (errΔ1 != default!) {
+        (var c, errΔ1) = ParseCertificate(p.Bytes);
+        if (errΔ1 != nil) {
             tΔ1.Fatal(errΔ1);
         }
         return c;
     }
 
-    var testOID3 = mustNewOIDFromInts(new uint64[]{1, 2, 840, 113554, 4, 1, 72585, 2, 3}.slice());
-    var (root, intermediate, leaf) = (loadTestCert(Ꮡt, testdataPolicyRootPemˢ), loadTestCert(Ꮡt, testdataPolicyˢ6), loadTestCert(Ꮡt, testdataPolicyLeafPemˢ));
+    var testOID3 = mustNewOIDFromInts(slice<uint64>([1, 2, 840, 113554, 4, 1, 72585, 2, 3]));
+    var (root, intermediate, leaf) = (loadTestCert(t, testdataPolicyRootPemˢ), loadTestCert(t, testdataPolicyˢ6), loadTestCert(t, testdataPolicyLeafPemˢ));
 
     @string expectedErr = x509NoValidChainsBuilt1ˢ;
 
@@ -3330,65 +3387,65 @@ public static void TestInvalidPolicyWithAnyKeyUsage(ж<testing.T> Ꮡt) {
     var (_, err) = leaf.Verify(new VerifyOptions(
         Roots: roots,
         Intermediates: intermediates,
-        KeyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageAny}.slice(),
-        CertificatePolicies: new global::go.crypto.x509_package.ΔOID[]{testOID3}.slice()
+        KeyUsages: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageAny]),
+        CertificatePolicies: slice<global::go.crypto.x509_package.ΔOID>([testOID3])
     ));
-    if (err == default!){
-        Ꮡt.Fatal(unexpectedSuccessInvalidˢ);
-    } else 
-    if (err.Error() != expectedErr) {
-        Ꮡt.Fatalf("unexpected error, got %q, want %q"u8, err, expectedErr);
+    if (err == nil) {
+        t.Fatal(unexpectedSuccessInvalidˢ);
+    } else if (err.Error() != expectedErr) {
+        t.Fatalf("unexpected error, got %q, want %q", err, expectedErr);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string certificateSignedByˢ = "certificate signed by unknown authority"u8;
+internal static ref readonly @string certificateSignedByˢ => ref certificateSignedByˢᵇ;
+private static readonly @string certificateSignedByˢᵇ = "certificate signed by unknown authority"u8;
 
-public static void TestCertificateChainSignedByECDSA(ж<testing.T> Ꮡt) {
+public static void TestCertificateChainSignedByECDSA(ж<testing.T> t) {
     var (caKey, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var root = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(1),
-        Subject: new pkix.Name(CommonName: "X"u8),
+        Subject: new pkix.Name(CommonName: "X"),
         NotBefore: time.Now().Add(-time.ΔHour),
         NotAfter: time.Now().Add((time.Duration)(31536000000000000L)),
         IsCA: true,
         KeyUsage: (global::go.crypto.x509_package.KeyUsage)(KeyUsageCertSign | KeyUsageCRLSign),
         BasicConstraintsValid: true
     ));
-    (var caDER, err) = CreateCertificate(rand.Reader, root, root, caKey.of(ecdsa.PrivateKey.ᏑPublicKey), caKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var caDER, err) = CreateCertificate(rand.Reader, root, root, caKey.ᏑPublicKey, caKey.OrTypedNil());
+    if (err != nil) {
+        t.Fatal(err);
     }
     (root, err) = ParseCertificate(caDER);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var (leafKey, _) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     var leaf = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(42),
-        Subject: new pkix.Name(CommonName: "leaf"u8),
+        Subject: new pkix.Name(CommonName: "leaf"),
         NotBefore: time.Now().Add((time.Duration)(-600000000000L)),
         NotAfter: time.Now().Add((time.Duration)(86400000000000L)),
         KeyUsage: KeyUsageDigitalSignature,
-        ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
+        ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
         BasicConstraintsValid: true
     ));
-    (var leafDER, err) = CreateCertificate(rand.Reader, leaf, root, leafKey.of(ecdsa.PrivateKey.ᏑPublicKey), caKey.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var leafDER, err) = CreateCertificate(rand.Reader, leaf, root, leafKey.ᏑPublicKey, caKey.OrTypedNil());
+    if (err != nil) {
+        t.Fatal(err);
     }
     (leaf, err) = ParseCertificate(leafDER);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    (var inter, err) = ParseCertificate(dsaSelfSignedCNX(Ꮡt));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var inter, err) = ParseCertificate(dsaSelfSignedCNX(t));
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var inters = NewCertPool();
@@ -3398,7 +3455,7 @@ public static void TestCertificateChainSignedByECDSA(ж<testing.T> Ꮡt) {
     @string wantErr = certificateSignedByˢ;
     (_, err) = leaf.Verify(new VerifyOptions(Intermediates: inters, Roots: NewCertPool()));
     if (!strings.Contains(err.Error(), wantErr)) {
-        Ꮡt.Errorf("got %v, want %q"u8, err, wantErr);
+        t.Errorf("got %v, want %q", err, wantErr);
     }
 }
 
@@ -3413,30 +3470,30 @@ internal partial struct dsaSelfSignedCNX_dsaParams /*dyn*/ {
 //	DSA SPKI
 //	Matching inner/outer signature OIDs
 //	Dummy ECDSA signature
-internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> Ꮡt) {
-    Ꮡt.Helper();
+internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> t) {
+    t.Helper();
     ref var @params = ref heap(new dsa.Parameters(), out var Ꮡparams);
     {
-        var errΔ1 = dsa.GenerateParameters(Ꮡparams, rand.Reader, dsa.L1024N160); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = dsa.GenerateParameters(Ꮡparams, rand.Reader, dsa.L1024N160); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 
     ref var dsaPriv = ref heap(new dsa.PrivateKey(), out var ᏑdsaPriv);
     dsaPriv.Parameters = @params;
     {
-        var errΔ2 = dsa.GenerateKey(ᏑdsaPriv, rand.Reader); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = dsa.GenerateKey(ᏑdsaPriv, rand.Reader); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
-    var dsaPub = ᏑdsaPriv.of(dsa.PrivateKey.ᏑPublicKey);
-    var (paramDER, err) = asn1.Marshal(new dsaSelfSignedCNX_dsaParams((~dsaPub).P, (~dsaPub).Q, (~dsaPub).G));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var dsaPub = ᏑdsaPriv.ᏑPublicKey;
+    var (paramDER, err) = asn1.Marshal(new dsaSelfSignedCNX_dsaParams(dsaPub.P, dsaPub.Q, dsaPub.G));
+    if (err != nil) {
+        t.Fatal(err);
     }
-    (var yDER, err) = asn1.Marshal((~dsaPub).Y.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var yDER, err) = asn1.Marshal(dsaPub.Y.OrTypedNil());
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var spki = new publicKeyInfo(
@@ -3447,10 +3504,10 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> Ꮡt) {
         PublicKey: new asn1.BitString(Bytes: yDER, BitLength: 8 * builtin.len(yDER))
     );
 
-    var rdn = new pkix.Name(CommonName: "X"u8).ToRDNSequence();
+    var rdn = new pkix.Name(CommonName: "X").ToRDNSequence();
     (var b, err) = asn1.Marshal(rdn);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var rawName = new asn1.RawValue(FullBytes: b);
 
@@ -3467,11 +3524,11 @@ internal static slice<byte> dsaSelfSignedCNX(ж<testing.T> Ꮡt) {
     var c = new certificate(
         TBSCertificate: tbs,
         SignatureAlgorithm: algoIdent,
-        SignatureValue: new asn1.BitString(Bytes: new byte[]{0}.slice(), BitLength: 8)
+        SignatureValue: new asn1.BitString(Bytes: slice<byte>([0]), BitLength: 8)
     );
     (var dsaDER, err) = asn1.Marshal(c);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     return dsaDER;
 }

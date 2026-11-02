@@ -28,7 +28,7 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
         // and then fchmodat the FD in /proc/self/fd.
         // See: https://lwn.net/Articles/939217/
         var (fd, err) = Openat(dirfd, path, (nint)((nint)(UntypedInt)(O_PATH | syscall.O_NOFOLLOW) | (nint)syscall.O_CLOEXEC), 0);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         defer(syscall.Close, fd, ref ᒐ);
@@ -38,7 +38,7 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
         // (We passed O_NOFOLLOW above, but O_PATH|O_NOFOLLOW will open a symlink.)
         ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
         {
-            var errΔ2 = syscall.Stat(procPath, Ꮡst); if (errΔ2 != default!) {
+            var errΔ2 = syscall.Stat(procPath, Ꮡst); if (errΔ2 != nil) {
                 if (AreEqual(errΔ2, syscall.ENOENT)) {
                     // /proc has probably not been mounted. Give up.
                     return syscall.EOPNOTSUPP;
@@ -54,7 +54,7 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
 
         return syscall.Fchmodat(AT_FDCWD, procPath, mode, (nint)(flags & ~(nint)(nint)AT_SYMLINK_NOFOLLOW));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

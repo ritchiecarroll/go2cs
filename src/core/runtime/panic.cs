@@ -81,7 +81,8 @@ internal static void panicCheck2(@string err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string indexOutOfRangeˢ = "index out of range"u8;
+internal static ref readonly @string indexOutOfRangeˢ => ref indexOutOfRangeˢᵇ;
+private static readonly @string indexOutOfRangeˢᵇ = "index out of range"u8;
 
 // Many of the following panic entry-points turn into throws when they
 // happen in various runtime contexts. These should never happen in
@@ -124,7 +125,8 @@ internal static void goPanicIndexU(nuint x, nint y) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sliceBoundsOutOfRangeˢ = "slice bounds out of range"u8;
+internal static ref readonly @string sliceBoundsOutOfRangeˢ => ref sliceBoundsOutOfRangeˢᵇ;
+private static readonly @string sliceBoundsOutOfRangeˢᵇ = "slice bounds out of range"u8;
 
 // failures in the comparisons for s[:x], 0 <= x <= y (y == len(s) or cap(s))
 //
@@ -210,7 +212,8 @@ internal static void goPanicSlice3CU(nuint x, nint y) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sliceLengthTooShortToˢ = "slice length too short to convert to array or pointer to array"u8;
+internal static ref readonly @string sliceLengthTooShortToˢ => ref sliceLengthTooShortToˢᵇ;
+private static readonly @string sliceLengthTooShortToˢᵇ = "slice length too short to convert to array or pointer to array"u8;
 
 // failures in the conversion ([x]T)(s) or (*[x]T)(s), 0 <= x <= y, y == len(s)
 internal static void goPanicSliceConvert(nint x, nint y) {
@@ -232,21 +235,21 @@ internal static void panicBounds64(uintptr pc, ref array<int64> regs) {
 
     var (code, signed, xIsReg, yIsReg, xVal, yVal) = abi.BoundsDecode((nint)v);
 
-    if (code == abi.BoundsIndex){
+    if (code == abi.BoundsIndex) {
         panicCheck1(pc, indexOutOfRangeˢ);
     } else {
         panicCheck1(pc, sliceBoundsOutOfRangeˢ);
     }
 
-    boundsError e = default!;
+    boundsError e = default;
     e.code = code;
     e.signed = signed;
-    if (xIsReg){
+    if (xIsReg) {
         e.x = regs[xVal];
     } else {
         e.x = (int64)xVal;
     }
-    if (yIsReg){
+    if (yIsReg) {
         e.y = (nint)regs[yVal];
     } else {
         e.y = yVal;
@@ -261,17 +264,17 @@ internal static void panicBounds32(uintptr pc, ref array<int32> regs) {
 
     var (code, signed, xIsReg, yIsReg, xVal, yVal) = abi.BoundsDecode((nint)v);
 
-    if (code == abi.BoundsIndex){
+    if (code == abi.BoundsIndex) {
         panicCheck1(pc, indexOutOfRangeˢ);
     } else {
         panicCheck1(pc, sliceBoundsOutOfRangeˢ);
     }
 
-    boundsError e = default!;
+    boundsError e = default;
     e.code = code;
     e.signed = signed;
-    if (xIsReg){
-        if (signed){
+    if (xIsReg) {
+        if (signed) {
             e.x = (int64)regs[xVal];
         } else {
             e.x = (int64)(uint32)regs[xVal];
@@ -279,7 +282,7 @@ internal static void panicBounds32(uintptr pc, ref array<int32> regs) {
     } else {
         e.x = (int64)xVal;
     }
-    if (yIsReg){
+    if (yIsReg) {
         e.y = (nint)regs[yVal];
     } else {
         e.y = yVal;
@@ -294,16 +297,16 @@ internal static void panicBounds32X(uintptr pc, ref array<int32> regs) {
 
     var (code, signed, xIsReg, yIsReg, xVal, yVal) = abi.BoundsDecode((nint)v);
 
-    if (code == abi.BoundsIndex){
+    if (code == abi.BoundsIndex) {
         panicCheck1(pc, indexOutOfRangeˢ);
     } else {
         panicCheck1(pc, sliceBoundsOutOfRangeˢ);
     }
 
-    boundsError e = default!;
+    boundsError e = default;
     e.code = code;
     e.signed = signed;
-    if (xIsReg){
+    if (xIsReg) {
         // Our 4-bit register numbers are actually 2 2-bit register numbers.
         nint lo = xVal & 3;
         nint hi = xVal >> 2;
@@ -311,7 +314,7 @@ internal static void panicBounds32X(uintptr pc, ref array<int32> regs) {
     } else {
         e.x = (int64)xVal;
     }
-    if (yIsReg){
+    if (yIsReg) {
         e.y = (nint)regs[yVal];
     } else {
         e.y = yVal;
@@ -319,10 +322,11 @@ internal static void panicBounds32X(uintptr pc, ref array<int32> regs) {
     throw panic(e);
 }
 
-internal static error shiftError = ((error)((errorString)(@string)"negative shift amount"u8));
+internal static error shiftError = ((error)((errorString)(@string)"negative shift amount"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string negativeShiftAmountˢ = "negative shift amount"u8;
+internal static ref readonly @string negativeShiftAmountˢ => ref negativeShiftAmountˢᵇ;
+private static readonly @string negativeShiftAmountˢᵇ = "negative shift amount"u8;
 
 //go:yeswritebarrierrec
 internal static void panicshift() {
@@ -330,10 +334,11 @@ internal static void panicshift() {
     throw panic(shiftError);
 }
 
-public static error divideError = ((error)((errorString)(@string)"integer divide by zero"u8));
+public static error divideError = ((error)((errorString)(@string)"integer divide by zero"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string integerDivideByZeroˢ = "integer divide by zero"u8;
+internal static ref readonly @string integerDivideByZeroˢ => ref integerDivideByZeroˢᵇ;
+private static readonly @string integerDivideByZeroˢᵇ = "integer divide by zero"u8;
 
 //go:yeswritebarrierrec
 internal static void panicdivide() {
@@ -341,30 +346,33 @@ internal static void panicdivide() {
     throw panic(divideError);
 }
 
-public static error overflowError = ((error)((errorString)(@string)"integer overflow"u8));
+public static error overflowError = ((error)((errorString)(@string)"integer overflow"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string integerOverflowˢ = "integer overflow"u8;
+internal static ref readonly @string integerOverflowˢ => ref integerOverflowˢᵇ;
+private static readonly @string integerOverflowˢᵇ = "integer overflow"u8;
 
 internal static void panicoverflow() {
     panicCheck2(integerOverflowˢ);
     throw panic(overflowError);
 }
 
-internal static error floatError = ((error)((errorString)(@string)"floating point error"u8));
+internal static error floatError = ((error)((errorString)(@string)"floating point error"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string floatingPointErrorˢ = "floating point error"u8;
+internal static ref readonly @string floatingPointErrorˢ => ref floatingPointErrorˢᵇ;
+private static readonly @string floatingPointErrorˢᵇ = "floating point error"u8;
 
 internal static void panicfloat() {
     panicCheck2(floatingPointErrorˢ);
     throw panic(floatError);
 }
 
-internal static error memoryError = ((error)((errorString)(@string)"invalid memory address or nil pointer dereference"u8));
+internal static error memoryError = ((error)((errorString)(@string)"invalid memory address or nil pointer dereference"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidMemoryAddressOrˢ = "invalid memory address or nil pointer dereference"u8;
+internal static ref readonly @string invalidMemoryAddressOrˢ => ref invalidMemoryAddressOrˢᵇ;
+private static readonly @string invalidMemoryAddressOrˢᵇ = "invalid memory address or nil pointer dereference"u8;
 
 internal static void panicmem() {
     panicCheck2(invalidMemoryAddressOrˢ);
@@ -373,13 +381,14 @@ internal static void panicmem() {
 
 internal static void panicmemAddr(uintptr addr) {
     panicCheck2(invalidMemoryAddressOrˢ);
-    throw panic(new errorAddressString(msg: "invalid memory address or nil pointer dereference"u8, addr: addr));
+    throw panic(new errorAddressString(msg: "invalid memory address or nil pointer dereference", addr: addr));
 }
 
-internal static error simdImmError = ((error)((errorString)(@string)"out-of-range immediate for simd intrinsic"u8));
+internal static error simdImmError = ((error)((errorString)(@string)"out-of-range immediate for simd intrinsic"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string simdImmediateErrorˢ = "simd immediate error"u8;
+internal static ref readonly @string simdImmediateErrorˢ => ref simdImmediateErrorˢᵇ;
+private static readonly @string simdImmediateErrorˢᵇ = "simd immediate error"u8;
 
 internal static void panicSimdImm() {
     panicCheck2(simdImmediateErrorˢ);
@@ -387,7 +396,8 @@ internal static void panicSimdImm() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string deferOnSystemStackˢ = "defer on system stack"u8;
+internal static ref readonly @string deferOnSystemStackˢ => ref deferOnSystemStackˢᵇ;
+private static readonly @string deferOnSystemStackˢᵇ = "defer on system stack"u8;
 
 // Create a new deferred function fn, which has no arguments and results.
 // The compiler turns a defer statement into a call to this.
@@ -409,32 +419,37 @@ internal static void deferproc(Action fn) {
     d.Value.sp = sys.GetCallerSP();
 }
 
-internal static error rangeDoneError = ((error)((errorString)(@string)"range function continued iteration after function for loop body returned false"u8));
+internal static error rangeDoneError = ((error)((errorString)(@string)"range function continued iteration after function for loop body returned false"));
 
-internal static error rangePanicError = ((error)((errorString)(@string)"range function continued iteration after loop body panic"u8));
+internal static error rangePanicError = ((error)((errorString)(@string)"range function continued iteration after loop body panic"));
 
-internal static error rangeExhaustedError = ((error)((errorString)(@string)"range function continued iteration after whole loop exit"u8));
+internal static error rangeExhaustedError = ((error)((errorString)(@string)"range function continued iteration after whole loop exit"));
 
-internal static error rangeMissingPanicError = ((error)((errorString)(@string)"range function recovered a loop body panic and did not resume panicking"u8));
+internal static error rangeMissingPanicError = ((error)((errorString)(@string)"range function recovered a loop body panic and did not resume panicking"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedStatePassedToˢ = "unexpected state passed to panicrangestate"u8;
+internal static ref readonly @string unexpectedStatePassedToˢ => ref unexpectedStatePassedToˢᵇ;
+private static readonly @string unexpectedStatePassedToˢᵇ = "unexpected state passed to panicrangestate"u8;
 
 //go:noinline
 internal static partial void panicrangestate(nint state) {
-    var exprᴛ1 = ((abi.RF_State)state);
-    if (exprᴛ1 == abi.RF_DONE) {
+    switch (((abi.RF_State)state)) {
+    case var ᴛ when ᴛ == abi.RF_DONE: {
         throw panic(rangeDoneError);
+        break;
     }
-    else if (exprᴛ1 == abi.RF_PANIC) {
+    case var ᴛ when ᴛ == abi.RF_PANIC: {
         throw panic(rangePanicError);
+        break;
     }
-    else if (exprᴛ1 == abi.RF_EXHAUSTED) {
+    case var ᴛ when ᴛ == abi.RF_EXHAUSTED: {
         throw panic(rangeExhaustedError);
+        break;
     }
-    else if (exprᴛ1 == abi.RF_MISSING_PANIC) {
+    case var ᴛ when ᴛ == abi.RF_MISSING_PANIC: {
         throw panic(rangeMissingPanicError);
-    }
+        break;
+    }}
     @throw(unexpectedStatePassedToˢ);
 }
 
@@ -533,7 +548,8 @@ internal static ж<_defer> badDefer() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string deferAfterRangeFuncˢ = "defer after range func returned"u8;
+internal static ref readonly @string deferAfterRangeFuncˢ => ref deferAfterRangeFuncˢᵇ;
+private static readonly @string deferAfterRangeFuncˢᵇ = "defer after range func returned"u8;
 
 // deferprocat is like deferproc but adds to the atomic list represented by frame.
 // See the doc comment for deferrangefunc for details.
@@ -544,7 +560,7 @@ internal static void deferprocat(Action fn, any frame) {
     }
     var d1 = newdefer();
     d1.Value.fn = fn;
-    while (ᐧ) {
+    for (;;) {
         d1.Value.link = head.Load();
         if ((~d1).link == badDefer()) {
             @throw(deferAfterRangeFuncˢ);
@@ -568,8 +584,8 @@ internal static void deferconvert(ж<_defer> Ꮡd0) {
     var tail = d0.link;
     d0.rangefunc = false;
 
-    ж<_defer> d = default!;
-    while (ᐧ) {
+    ж<_defer> d = default;
+    for (;;) {
         d = head.Load();
         if (head.CompareAndSwap(d, badDefer())) {
             break;
@@ -578,7 +594,7 @@ internal static void deferconvert(ж<_defer> Ꮡd0) {
     if (d == nil) {
         return;
     }
-    for (var d1 = d; ᐧ ; d1 = d1.Value.link) {
+    for (var d1 = d; ; d1 = d1.Value.link) {
         d1.Value.sp = d0.sp;
         d1.Value.pc = d0.pc;
         if ((~d1).link == nil) {
@@ -633,7 +649,7 @@ internal static void deferprocStack(ж<_defer> Ꮡd) {
 // Each defer must be released with freedefer.  The defer is not
 // added to any defer chain yet.
 internal static ж<_defer> newdefer() {
-    ж<_defer> d = default!;
+    ж<_defer> d = default;
     var mp = acquirem();
     var pp = (~mp).p.ptr();
     if (len((~pp).deferpool) == 0 && sched.deferpool != nil) {
@@ -641,7 +657,7 @@ internal static ж<_defer> newdefer() {
         while (len((~pp).deferpool) < cap((~pp).deferpool) / 2 && sched.deferpool != nil) {
             var dΔ1 = sched.deferpool;
             sched.deferpool = dΔ1.Value.link;
-            dΔ1.Value.link = default!;
+            dΔ1.Value.link = default;
             pp.Value.deferpool = append((~pp).deferpool, dΔ1);
         }
         unlock(Ꮡsched.of(schedt.Ꮡdeferlock));
@@ -649,12 +665,12 @@ internal static ж<_defer> newdefer() {
     {
         nint n = len((~pp).deferpool); if (n > 0) {
             d = (~pp).deferpool[n - 1];
-            pp.Value.deferpool[n - 1] = default!;
+            pp.Value.deferpool[n - 1] = default;
             pp.Value.deferpool = (~pp).deferpool.slice(0, n - 1);
         }
     }
     releasem(ref (mp).DerefOrNull());
-    (mp, pp) = (default!, default!);
+    (mp, pp) = (default, default);
 
     if (d == nil) {
         // Allocate new defer.
@@ -667,13 +683,13 @@ internal static ж<_defer> newdefer() {
 // popDefer pops the head of gp's defer list and frees it.
 internal static void popDefer(ref g gp) {
     var d = gp._defer;
-    d.Value.fn = default!; // Can in theory point to the stack
+    d.Value.fn = default; // Can in theory point to the stack
     // We must not copy the stack between the updating gp._defer and setting
     // d.link to nil. Between these two steps, d is not on any defer list, so
     // stack copying won't adjust stack pointers in it (namely, d.link). Hence,
     // if we were to copy the stack, d could then contain a stale pointer.
     gp._defer = d.Value.link;
-    d.Value.link = default!;
+    d.Value.link = default;
     // After this point we can copy the stack.
 
     if (!(~d).heap) {
@@ -684,14 +700,14 @@ internal static void popDefer(ref g gp) {
     var pp = (~mp).p.ptr();
     if (len((~pp).deferpool) == cap((~pp).deferpool)) {
         // Transfer half of local cache to the central cache.
-        ж<_defer> first = default!;
-        ж<_defer> last = default!;
+        ж<_defer> first = default;
+        ж<_defer> last = default;
         while (len((~pp).deferpool) > cap((~pp).deferpool) / 2) {
             nint n = len((~pp).deferpool);
             var dΔ1 = (~pp).deferpool[n - 1];
-            pp.Value.deferpool[n - 1] = default!;
+            pp.Value.deferpool[n - 1] = default;
             pp.Value.deferpool = (~pp).deferpool.slice(0, n - 1);
-            if (first == nil){
+            if (first == nil) {
                 first = dΔ1;
             } else {
                 last.Value.link = dΔ1;
@@ -704,12 +720,12 @@ internal static void popDefer(ref g gp) {
         unlock(Ꮡsched.of(schedt.Ꮡdeferlock));
     }
 
-    d.Value = new _defer(nil);
+    d.Value = new _defer();
 
     pp.Value.deferpool = append((~pp).deferpool, d);
 
     releasem(ref (mp).DerefOrNull());
-    (mp, pp) = (default!, default!);
+    (mp, pp) = (default, default);
 }
 
 // deferreturn runs deferred functions for the caller's frame.
@@ -720,7 +736,7 @@ internal static void deferreturn() {
     Δp.deferreturn = true;
 
     Ꮡp.start(sys.GetCallerPC(), (@unsafe.Pointer)sys.GetCallerSP());
-    while (ᐧ) {
+    for (;;) {
         var (fn, ok) = Ꮡp.nextDefer();
         if (!ok) {
             break;
@@ -732,7 +748,8 @@ internal static void deferreturn() {
 // go2cs generated this placeholder — func Goexit is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicWhilePrintingPanicˢ = "panic while printing panic value"u8;
+internal static ref readonly @string panicWhilePrintingPanicˢ => ref panicWhilePrintingPanicˢᵇ;
+private static readonly @string panicWhilePrintingPanicˢᵇ = "panic while printing panic value"u8;
 
 // Call all Error and String methods before freezing the world.
 // Used when crashing with panicking.
@@ -792,21 +809,20 @@ internal static void printpanics(ref _panic Δp) {
             return;
         }
         if (!(~Δp.link).goexit) {
-            print((@string)"\t"u8);
+            print((@string)"\t");
         }
     }
     if (Δp.goexit) {
         return;
     }
-    print((@string)"panic: "u8);
+    print((@string)"panic: ");
     printpanicval(Δp.arg);
-    if (Δp.recovered && Δp.repanicked){
-        print((@string)" [recovered, repanicked]"u8);
-    } else 
-    if (Δp.recovered) {
-        print((@string)" [recovered]"u8);
+    if (Δp.recovered && Δp.repanicked) {
+        print((@string)" [recovered, repanicked]");
+    } else if (Δp.recovered) {
+        print((@string)" [recovered]");
     }
-    print((@string)"\n"u8);
+    print((@string)"\n");
 }
 
 // readvarintUnsafe reads the uint32 in varint format starting at fd, and returns the
@@ -815,9 +831,9 @@ internal static void printpanics(ref _panic Δp) {
 // The implementation is the same with runtime.readvarint, except that this function
 // uses unsafe.Pointer for speed.
 internal static (uint32, @unsafe.Pointer) readvarintUnsafe(@unsafe.Pointer fd) {
-    uint32 r = default!;
-    nint shift = default!;
-    while (ᐧ) {
+    uint32 r = default;
+    nint shift = default;
+    for (;;) {
         var b = ~(ж<uint8>)(uintptr)(fd);
         fd = (uintptr)add(fd, /* unsafe.Sizeof(b) */ (uintptr)1);
         if (b < 128) {
@@ -847,7 +863,8 @@ partial struct PanicNilError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicCalledWithNilˢ = "panic called with nil argument"u8;
+internal static ref readonly @string panicCalledWithNilˢ => ref panicCalledWithNilˢᵇ;
+private static readonly @string panicCalledWithNilˢᵇ = "panic called with nil argument"u8;
 
 public static @string Error(this ref PanicNilError _) {
     return panicCalledWithNilˢ;
@@ -856,13 +873,17 @@ public static @string Error(this ref PanicNilError _) {
 public static void RuntimeError(this ref PanicNilError _) {
 }
 
-internal static ж<godebugInc> panicnil = Ꮡ(new godebugInc(name: "panicnil"u8));
+internal static ж<godebugInc> panicnil = Ꮡ(new godebugInc(name: "panicnil"));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string panicOnSystemStackˢ = "panic on system stack"u8;
-internal static readonly @string panicDuringMallocˢ = "panic during malloc"u8;
-internal static readonly @string panicDuringPreemptoffˢ = "panic during preemptoff"u8;
-internal static readonly @string panicHoldingLocksˢ = "panic holding locks"u8;
+internal static ref readonly @string panicOnSystemStackˢ => ref panicOnSystemStackˢᵇ;
+private static readonly @string panicOnSystemStackˢᵇ = "panic on system stack"u8;
+internal static ref readonly @string panicDuringMallocˢ => ref panicDuringMallocˢᵇ;
+private static readonly @string panicDuringMallocˢᵇ = "panic during malloc"u8;
+internal static ref readonly @string panicDuringPreemptoffˢ => ref panicDuringPreemptoffˢᵇ;
+private static readonly @string panicDuringPreemptoffˢᵇ = "panic during preemptoff"u8;
+internal static ref readonly @string panicHoldingLocksˢ => ref panicHoldingLocksˢᵇ;
+private static readonly @string panicHoldingLocksˢᵇ = "panic holding locks"u8;
 
 // The implementation of the predeclared function panic.
 // The compiler emits calls to this function.
@@ -875,8 +896,8 @@ internal static readonly @string panicHoldingLocksˢ = "panic holding locks"u8;
 //
 //go:linkname gopanic
 internal static void gopanic(any e) {
-    if (e == default!) {
-        if (Ꮡdebug.of(debugᴛ1.Ꮡpanicnil).Load() != 1){
+    if (e == nil) {
+        if (Ꮡdebug.of(debugᴛ1.Ꮡpanicnil).Load() != 1) {
             e = @new<PanicNilError>();
         } else {
             panicnil.IncNonDefault();
@@ -885,31 +906,31 @@ internal static void gopanic(any e) {
 
     var gp = getg();
     if ((~(~gp).m).curg != gp) {
-        print((@string)"panic: "u8);
+        print((@string)"panic: ");
         printpanicval(e);
-        print((@string)"\n"u8);
+        print((@string)"\n");
         @throw(panicOnSystemStackˢ);
     }
 
     if ((~(~gp).m).mallocing != 0) {
-        print((@string)"panic: "u8);
+        print((@string)"panic: ");
         printpanicval(e);
-        print((@string)"\n"u8);
+        print((@string)"\n");
         @throw(panicDuringMallocˢ);
     }
     if ((~(~gp).m).preemptoff != ""u8) {
-        print((@string)"panic: "u8);
+        print((@string)"panic: ");
         printpanicval(e);
-        print((@string)"\n"u8);
-        print((@string)"preempt off reason: "u8);
+        print((@string)"\n");
+        print((@string)"preempt off reason: ");
         print((~(~gp).m).preemptoff);
-        print((@string)"\n"u8);
+        print((@string)"\n");
         @throw(panicDuringPreemptoffˢ);
     }
     if ((~(~gp).m).locks != 0) {
-        print((@string)"panic: "u8);
+        print((@string)"panic: ");
         printpanicval(e);
-        print((@string)"\n"u8);
+        print((@string)"\n");
         @throw(panicHoldingLocksˢ);
     }
 
@@ -920,7 +941,7 @@ internal static void gopanic(any e) {
     ᏑrunningPanicDefers.Add(1);
 
     Ꮡp.start(sys.GetCallerPC(), (@unsafe.Pointer)sys.GetCallerSP());
-    while (ᐧ) {
+    for (;;) {
         var (fn, ok) = Ꮡp.nextDefer();
         if (!ok) {
             break;
@@ -944,7 +965,7 @@ internal static void gopanic(any e) {
     // and String methods to prepare the panic strings before startpanic.
     preprintpanics(Ꮡp);
 
-    fatalpanic(Ꮡp); // should not return
+    fatalpanic(Ꮡp);             // should not return
     (((ж<nint>)nil)).Value = 0; // not reached
 }
 
@@ -971,7 +992,7 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
                 // recovery saved some state for us, so that we can resume
                 // calling open-coded defers without unwinding the stack.
 
-                gp.Value.param = default!;
+                gp.Value.param = default;
 
                 Δp.retpc = s.Value.retpc;
                 Δp.deferBitsPtr = (ж<byte>)(uintptr)(add(sp, (~s).deferBitsOffset));
@@ -997,8 +1018,10 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badPanicStackˢ = "bad panic stack"u8;
-internal static readonly @string recoveryFailedˢ = "recovery failed"u8;
+internal static ref readonly @string badPanicStackˢ => ref badPanicStackˢᵇ;
+private static readonly @string badPanicStackˢᵇ = "bad panic stack"u8;
+internal static ref readonly @string recoveryFailedˢ => ref recoveryFailedˢᵇ;
+private static readonly @string recoveryFailedˢᵇ = "recovery failed"u8;
 
 // nextDefer returns the next deferred function to invoke, if any.
 //
@@ -1020,7 +1043,7 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
         }
     }
 
-    while (ᐧ) {
+    for (;;) {
         while (Δp.deferBitsPtr != nil) {
             var bits = Δp.deferBitsPtr.Value;
 
@@ -1033,7 +1056,7 @@ internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) {
             // panic and invoked the remaining defers in the frame, before
             // recovering and restarting the Goexit loop.
             if (bits == 0) {
-                Δp.deferBitsPtr = default!;
+                Δp.deferBitsPtr = default;
                 break;
             }
 
@@ -1068,14 +1091,14 @@ Recheck:
         }
 
         if (!Ꮡp.nextFrame()) {
-            return (default!, false);
+            return (default, false);
         }
     }
 }
 
 // nextFrame finds the next frame that contains deferred calls, if any.
 internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
-    bool ok = default!;
+    bool ok = default;
     ref var Δp = ref Ꮡp.DerefOrNull();
 
     if (Δp.lr == 0) {
@@ -1085,7 +1108,7 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
     var gp = getg();
     var gpʗ1 = gp;
     systemstack(() => {
-        uintptr limit = default!;
+        uintptr limit = default;
         {
             var d = gpʗ1.Value._defer; if (d != nil) {
                 limit = d.Value.sp;
@@ -1094,7 +1117,7 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
 
         ref var u = ref heap(new unwinder(), out var Ꮡu);
         Ꮡu.initAt(Ꮡp.Value.lr, (uintptr)Ꮡp.Value.fp, 0, gpʗ1, 0);
-        while (ᐧ) {
+        for (;;) {
             if (!u.valid()) {
                 Ꮡp.Value.lr = 0;
                 return; // ok == false
@@ -1127,7 +1150,8 @@ internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingDeferreturnˢ = "missing deferreturn"u8;
+internal static ref readonly @string missingDeferreturnˢ => ref missingDeferreturnˢᵇ;
+private static readonly @string missingDeferreturnˢᵇ = "missing deferreturn"u8;
 
 internal static bool initOpenCodedDefers(this ref _panic Δp, ΔfuncInfo fn, @unsafe.Pointer varp) {
     @unsafe.Pointer fd = (uintptr)funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
@@ -1159,7 +1183,7 @@ internal static any gorecover() {
     var gp = getg();
     var Δp = gp.Value._panic;
     if (Δp == nil || (~Δp).goexit || (~Δp).recovered) {
-        return default!;
+        return default;
     }
 
     // Check to see if the function that called recover() was
@@ -1218,29 +1242,32 @@ loop:
         for (; u.valid(); Ꮡu.next()) {
             for (var (iu, f) = newInlineUnwinder(u.frame.fn, u.symPC()); f.valid(); f = iu.next(f)) {
                 var sf = iu.srcFunc(f);
-                var exprᴛ1 = sf.funcID;
-                if (exprᴛ1 == abi.FuncIDWrapper) {
+                switch (sf.funcID) {
+                case var ᴛ when ᴛ == abi.FuncIDWrapper: {
                     continue;
+                    break;
                 }
-                else if (exprᴛ1 == abi.FuncID_gopanic) {
+                case var ᴛ when ᴛ == abi.FuncID_gopanic: {
                     if (u.frame.fp == (uintptr)(~pʗ1).gopanicFP && nonWrapperFrames > 0) {
                         canRecover = true;
                     }
                     goto break_loop;
+                    break;
                 }
-                else { /* default: */
+                default: {
                     nonWrapperFrames++;
                     if (nonWrapperFrames > 1) {
                         goto break_loop;
                     }
-                }
+                    break;
+                }}
             }
 continue_loop:;
         }
 break_loop:;
     });
     if (!canRecover) {
-        return default!;
+        return default;
     }
     Δp.Value.recovered = true;
     return (~Δp).arg;
@@ -1297,22 +1324,22 @@ internal static void cgroup_throw(@string s) {
 
 // printPreFatalDeferPanic prints the panic
 // when fatal occurs in panics while running defer.
-internal static void printPreFatalDeferPanic(ж<_panic> Ꮡp) {
+internal static void printPreFatalDeferPanic(ж<_panic> Δp) {
     // Don`t call preprintpanics, because
     // don't want to call String/Error on the panicked values.
     // When we fatal we really want to just print and exit,
     // no more executing user Go code.
-    for (var x = Ꮡp; x != nil; x = x.Value.link) {
+    for (var x = Δp; x != nil; x = x.Value.link) {
         if ((~x).link != nil && efaceOf((~x).link.of(_panic.Ꮡarg)).Value == efaceOf(x.of(_panic.Ꮡarg)).Value) {
             // This panic contains the same value as the next one in the chain.
             // Mark it as repanicked. We will skip printing it twice in a row.
             x.Value.link.Value.repanicked = true;
         }
     }
-    if (Ꮡp != nil) {
-        printpanics(ref (Ꮡp).DerefOrNull());
+    if (Δp != nil) {
+        printpanics(ref (Δp).DerefOrNull());
         // make fatal have the same indentation as non-first panics.
-        print((@string)"\t"u8);
+        print((@string)"\t");
     }
 }
 
@@ -1331,9 +1358,12 @@ internal static readonly ж<mutex> Ꮡpaniclk = new StaticBox<mutex>(new mutex(n
 internal static ref mutex paniclk => ref ((StaticBox<mutex>)Ꮡpaniclk).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noDeferreturnˢ = "no deferreturn"u8;
-internal static readonly @string unexpectedGpParamˢ = "unexpected gp.param"u8;
-internal static readonly @string badRecoveryˢ = "bad recovery"u8;
+internal static ref readonly @string noDeferreturnˢ => ref noDeferreturnˢᵇ;
+private static readonly @string noDeferreturnˢᵇ = "no deferreturn"u8;
+internal static ref readonly @string unexpectedGpParamˢ => ref unexpectedGpParamˢᵇ;
+private static readonly @string unexpectedGpParamˢᵇ = "unexpected gp.param"u8;
+internal static ref readonly @string badRecoveryˢ => ref badRecoveryˢᵇ;
+private static readonly @string badRecoveryˢᵇ = "bad recovery"u8;
 
 // Unwind the stack after a deferred function calls recover
 // after a panic. Then arrange to continue running as though
@@ -1437,7 +1467,7 @@ internal static void recovery(ж<g> Ꮡgp) {
 
     // Ensure we're recovering within the appropriate stack.
     if (sp != 0 && (sp < gp.stack.lo || gp.stack.hi < sp)) {
-        print((@string)"recover: "u8, (Δhex)(uint64)sp, (@string)" not in ["u8, (Δhex)(uint64)gp.stack.lo, (@string)", "u8, (Δhex)(uint64)gp.stack.hi, (@string)"]\n"u8);
+        print((@string)"recover: ", (Δhex)(uint64)sp, (@string)" not in [", (Δhex)(uint64)gp.stack.lo, (@string)", ", (Δhex)(uint64)gp.stack.hi, (@string)"]\n");
         @throw(badRecoveryˢ);
     }
 
@@ -1508,16 +1538,16 @@ internal static void fatalthrow(throwType t) {
 // runningPanicDefers once main is blocked from exiting.
 //
 //go:nosplit
-internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
+internal static void fatalpanic(ж<_panic> msgs) {
     var pc = sys.GetCallerPC();
     var sp = sys.GetCallerSP();
     var gp = getg();
-    bool docrash = default!;
+    bool docrash = default;
     // Switch to the system stack to avoid any stack growth, which
     // may make things worse if the runtime is in a bad state.
     var gpʗ1 = gp;
     systemstack(() => {
-        if (startpanic_m() && Ꮡmsgs != nil) {
+        if (startpanic_m() && msgs != nil) {
             // There were panic messages and startpanic_m
             // says it's okay to try to print them.
 
@@ -1526,14 +1556,14 @@ internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
             // decrement runningPanicDefers.
             ᏑrunningPanicDefers.Add(-1);
 
-            printpanics(ref (Ꮡmsgs).DerefOrNull());
+            printpanics(ref (msgs).DerefOrNull());
         }
 
         // If this panic is the result of a synctest bubble deadlock,
         // print stacks for the goroutines in the bubble.
-        ж<synctestBubble> bubble = default!;
+        ж<synctestBubble> bubble = default;
         {
-            var (de, ok) = Ꮡmsgs.Value.arg._<synctestDeadlockError>(ᐧ); if (ok) {
+            var (de, ok) = msgs.Value.arg._<synctestDeadlockError>(ᐧ); if (ok) {
                 bubble = de.bubble;
             }
         }
@@ -1570,7 +1600,7 @@ internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
 internal static bool startpanic_m() {
     var gp = getg();
     if (mheap_.cachealloc.size == 0) { // very early
-        print((@string)"runtime: panic before malloc heap initialized\n"u8);
+        print((@string)"runtime: panic before malloc heap initialized\n");
     }
     // Disallow malloc during an unrecoverable panic. A panic
     // could happen in a signal handler, or in a throw, or inside
@@ -1601,14 +1631,14 @@ internal static bool startpanic_m() {
         // Something failed while panicking.
         // Just print a stack trace and exit.
         gp.Value.m.Value.dying = 2;
-        print((@string)"panic during panic\n"u8);
+        print((@string)"panic during panic\n");
         return false;
     }
     if (exprᴛ1 is 2) { matchᴛ1 = true;
         // This is a genuine bug in the runtime, we couldn't even
         // print the stack trace successfully.
         gp.Value.m.Value.dying = 3;
-        print((@string)"stack trace unavailable\n"u8);
+        print((@string)"stack trace unavailable\n");
         exit(4);
         fallthrough = true;
     }
@@ -1617,7 +1647,7 @@ internal static bool startpanic_m() {
         exit(5);
         return false; // Need to return something.
     }
-    return default!;
+    return default;
 }
 
 internal static bool didothers;
@@ -1634,12 +1664,12 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp, ж<synctestB
 
     if (gp.sig != 0) {
         @string signameΔ1 = signame(gp.sig);
-        if (signameΔ1 != ""u8){
-            print((@string)"[signal "u8, signameΔ1);
+        if (signameΔ1 != ""u8) {
+            print((@string)"[signal ", signameΔ1);
         } else {
-            print((@string)"[signal "u8, (Δhex)(uint64)gp.sig);
+            print((@string)"[signal ", (Δhex)(uint64)gp.sig);
         }
-        print((@string)" code="u8, (Δhex)(uint64)gp.sigcode0, (@string)" addr="u8, (Δhex)(uint64)gp.sigcode1, (@string)" pc="u8, (Δhex)(uint64)gp.sigpc, (@string)"]\n"u8);
+        print((@string)" code=", (Δhex)(uint64)gp.sigcode0, (@string)" addr=", (Δhex)(uint64)gp.sigcode1, (@string)" pc=", (Δhex)(uint64)gp.sigpc, (@string)"]\n");
     }
 
     var (level, all, docrash) = gotraceback();
@@ -1647,21 +1677,19 @@ internal static bool dopanic_m(ж<g> Ꮡgp, uintptr pc, uintptr sp, ж<synctestB
         if (Ꮡgp != (~gp.m).curg) {
             all = true;
         }
-        if (Ꮡgp != (~gp.m).g0){
-            print((@string)"\n"u8);
+        if (Ꮡgp != (~gp.m).g0) {
+            print((@string)"\n");
             goroutineheader(Ꮡgp);
             traceback(pc, sp, 0, Ꮡgp);
-        } else 
-        if (level >= 2 || (~gp.m).throwing >= throwTypeRuntime) {
-            print((@string)"\nruntime stack:\n"u8);
+        } else if (level >= 2 || (~gp.m).throwing >= throwTypeRuntime) {
+            print((@string)"\nruntime stack:\n");
             traceback(pc, sp, 0, Ꮡgp);
         }
         if (!didothers) {
-            if (all){
+            if (all) {
                 didothers = true;
                 tracebackothers(Ꮡgp);
-            } else 
-            if (Ꮡbubble != nil) {
+            } else if (Ꮡbubble != nil) {
                 // This panic is caused by a synctest bubble deadlock.
                 // Print stacks for goroutines in the deadlocked bubble.
                 tracebacksomeothers(Ꮡgp, (ж<g> other) => Ꮡbubble == (~other).bubble);

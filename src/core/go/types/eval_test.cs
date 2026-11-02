@@ -20,84 +20,86 @@ using static global::go.go.types_internal_test_package;
 
 partial class types_test_package {
 
-internal static void testEval(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset, ж<types.Package> Ꮡpkg, tokenꓸPos pos, @string expr, typesꓸType typ, @string typStr, @string valStr) {
-    var (gotTv, err) = Eval(Ꮡfset, Ꮡpkg, pos, expr);
-    if (err != default!) {
-        Ꮡt.Errorf("Eval(%q) failed: %s"u8, expr, err);
+internal static void testEval(ж<testing.T> t, ж<token.FileSet> fset, ж<types.Package> pkg, tokenꓸPos pos, @string expr, typesꓸType typ, @string typStr, @string valStr) {
+    var (gotTv, err) = Eval(fset, pkg, pos, expr);
+    if (err != nil) {
+        t.Errorf("Eval(%q) failed: %s", expr, err);
         return;
     }
-    if (gotTv.Type == default!) {
-        Ꮡt.Errorf("Eval(%q) got nil type but no error"u8, expr);
+    if (gotTv.Type == nil) {
+        t.Errorf("Eval(%q) got nil type but no error", expr);
         return;
     }
 
     // compare types
-    if (typ != default!){
+    if (typ != nil) {
         // we have a type, check identity
         if (!Identical(gotTv.Type, typ)) {
-            Ꮡt.Errorf("Eval(%q) got type %s, want %s"u8, expr, gotTv.Type, typ);
+            t.Errorf("Eval(%q) got type %s, want %s", expr, gotTv.Type, typ);
             return;
         }
     } else {
         // we have a string, compare type string
         @string gotStrΔ1 = gotTv.Type.String();
         if (gotStrΔ1 != typStr) {
-            Ꮡt.Errorf("Eval(%q) got type %s, want %s"u8, expr, gotStrΔ1, typStr);
+            t.Errorf("Eval(%q) got type %s, want %s", expr, gotStrΔ1, typStr);
             return;
         }
     }
 
     // compare values
     @string gotStr = ""u8;
-    if (gotTv.Value != default!) {
+    if (gotTv.Value != nil) {
         gotStr = gotTv.Value.ExactString();
     }
     if (gotStr != valStr) {
-        Ꮡt.Errorf("Eval(%q) got value %s, want %s"u8, expr, gotStr, valStr);
+        t.Errorf("Eval(%q) got value %s, want %s", expr, gotStr, valStr);
     }
 }
 
-public static void TestEvalBasic(ж<testing.T> Ꮡt) {
+public static void TestEvalBasic(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    foreach (var (_, typ) in Typ[(int)(nint)(Bool)..(int)(nint)(ΔString + 1)]) {
-        testEval(Ꮡt, fset, nil, nopos, typ.Name(), new types.BasicжΔType(typ), ""u8, ""u8);
+    foreach (var (_, typ) in Typ[(int)(Bool)..(int)(ΔString + 1)]) {
+        testEval(t, fset, nil, nopos, typ.Name(), new types.BasicжΔType(typ), ""u8, ""u8);
     }
 }
 
-public static void TestEvalComposite(ж<testing.T> Ꮡt) {
+public static void TestEvalComposite(ж<testing.T> t) {
     var fset = token.NewFileSet();
     foreach (var (_, test) in independentTestTypes) {
-        testEval(Ꮡt, fset, nil, nopos, test.src, default!, test.str, ""u8);
+        testEval(t, fset, nil, nopos, test.src, default, test.str, ""u8);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string trueˢ = "true"u8;
+internal static ref readonly @string trueˢ => ref trueˢᵇ;
+private static readonly @string trueˢᵇ = "true"u8;
 
-public static void TestEvalArith(ж<testing.T> Ꮡt) {
-    slice<@string> tests = new @string[]{
-        @"true"u8,
-        @"false == false"u8,
-        @"12345678 + 87654321 == 99999999"u8,
-        @"10 * 20 == 200"u8,
-        @"(1<<500)*2 >> 100 == 2<<400"u8,
-        @"""foo"" + ""bar"" == ""foobar"""u8,
-        @"""abc"" <= ""bcd"""u8,
-        @"len([10]struct{}{}) == 2*5"u8
-    }.slice();
+public static void TestEvalArith(ж<testing.T> t) {
+    slice<@string> tests = slice<@string>([
+        @"true",
+        @"false == false",
+        @"12345678 + 87654321 == 99999999",
+        @"10 * 20 == 200",
+        @"(1<<500)*2 >> 100 == 2<<400",
+        @"""foo"" + ""bar"" == ""foobar""",
+        @"""abc"" <= ""bcd""",
+        @"len([10]struct{}{}) == 2*5"
+    ]);
     var fset = token.NewFileSet();
     foreach (var (_, test) in tests) {
-        testEval(Ꮡt, fset, nil, nopos, test, new types.BasicжΔType(Typ[UntypedBool]), ""u8, trueˢ);
+        testEval(t, fset, nil, nopos, test, new types.BasicжΔType(Typ[UntypedBool]), ""u8, trueˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string interfaceRReadˢ = "interface{R}.Read"u8;
+internal static ref readonly @string interfaceRReadˢ => ref interfaceRReadˢᵇ;
+private static readonly @string interfaceRReadˢᵇ = "interface{R}.Read"u8;
 
-public static void TestEvalPos(ж<testing.T> Ꮡt) {
+public static void TestEvalPos(ж<testing.T> t) {
     var filesᴷ = new stackAppend<ж<ast.File>>();
 
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     // The contents of /*-style comments are of the form
     //	expr => value, type
@@ -105,7 +107,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
     // Each expr is evaluated at the position of the comment
     // and the result is compared with the expected value
     // and type.
-    slice<@string> sources = new @string[]{
+    slice<@string> sources = slice<@string>([
         """
 
 		package p
@@ -180,44 +182,45 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 		}
 		
 """u8.Raw()
-    }.slice();
+    ]);
 
     var fset = token.NewFileSet();
-    slice<ж<ast.File>> files = default!;
+    slice<ж<ast.File>> files = default;
     foreach (var (i, src) in sources) {
-        var (@file, errΔ1) = parser.ParseFile(fset, "p"u8, src, parser.ParseComments);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("could not parse file %d: %s"u8, i, errΔ1);
+        var (@file, errΔ1) = parser.ParseFile(fset, "p", src, parser.ParseComments);
+        if (errΔ1 != nil) {
+            t.Fatalf("could not parse file %d: %s", i, errΔ1);
         }
 
         // Materialized aliases give a different (better)
         // result for the final test, so skip it for now.
         // TODO(adonovan): reenable when gotypesalias=1 is the default.
         var exprᴛ1 = gotypesalias.Value();
-        if (exprᴛ1 == ""u8 || exprᴛ1 == "1"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == ""u8 || exprᴛ1 == "1"u8: {
             if (strings.Contains(src, interfaceRReadˢ)) {
                 continue;
             }
-        }
+            break;
+        }}
 
         files = append(filesᴷ, files, @file);
     }
 
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Importer: defaultImporter(fset));
-    var (pkg, err) = Ꮡconf.Check("p"u8, fset, files, nil);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    ref var conf = ref heap<types.Config>(new Config(Importer: defaultImporter(fset)), out var Ꮡconf);
+    var (pkg, err) = Ꮡconf.Check("p", fset, files, nil);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (_, @file) in files) {
-        foreach (var (_, group) in (~@file).Comments) {
-            foreach (var (_, comment) in (~group).List) {
-                @string s = comment.Value.Text;
+        foreach (var (_, group) in @file.Comments) {
+            foreach (var (_, comment) in group.List) {
+                @string s = comment.Text;
                 if (len(s) >= 4 && s[..2] == "/*" && s.slice(len(s) - 2) == "*/") {
-                    var (str, typ) = split(s.slice(2, len(s) - 2), ", "u8);
-                    (str, var val) = split(str, "=>"u8);
-                    testEval(Ꮡt, fset, pkg, comment.Pos(), str, default!, typ, val);
+                    var (str, typ) = split(s.slice(2, len(s) - 2), ", ");
+                    (str, var val) = split(str, "=>");
+                    testEval(t, fset, pkg, comment.Pos(), str, default, typ, val);
                 }
             }
         }
@@ -225,7 +228,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 }
 
 // gotypesalias controls the use of Alias types.
-internal static ж<godebug.Setting> gotypesalias = godebug.New("gotypesalias"u8);
+internal static ж<godebug.Setting> gotypesalias = godebug.New("gotypesalias");
 
 // split splits string s at the first occurrence of s, trimming spaces.
 internal static (@string, @string) split(@string s, @string sep) {
@@ -234,10 +237,12 @@ internal static (@string, @string) split(@string s, @string sep) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string evalˢ = "eval"u8;
+internal static ref readonly @string evalˢ => ref evalˢᵇ;
+private static readonly @string evalˢᵇ = "eval"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ16 = """
+internal static ref readonly @string srcᶜ16 => ref srcᶜ16ᵇ;
+private static readonly @string srcᶜ16ᵇ = """
 
 package p
 
@@ -266,8 +271,8 @@ func f(a int, s string) S {
 }
 """u8.Raw();
 
-public static void TestCheckExpr(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+public static void TestCheckExpr(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     // Each comment has the form /* expr => object */:
     // expr is an identifier or selector expression that is passed
@@ -276,24 +281,23 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
     @string src = srcᶜ16;
 
     var fset = token.NewFileSet();
-    var (f, err) = parser.ParseFile(fset, "p"u8, src, parser.ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (f, err) = parser.ParseFile(fset, "p", src, parser.ParseComments);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Importer: defaultImporter(fset));
-    (var pkg, err) = Ꮡconf.Check("p"u8, fset, new ж<ast.File>[]{f}.slice(), nil);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    ref var conf = ref heap<types.Config>(new Config(Importer: defaultImporter(fset)), out var Ꮡconf);
+    (var pkg, err) = Ꮡconf.Check("p", fset, slice<ж<ast.File>>([f]), nil);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var fsetʗ1 = fset;
     var pkgʗ1 = pkg;
     (types.Object, error) checkExpr(tokenꓸPos pos, @string str) {
         var (expr, errΔ1) = parser.ParseExprFrom(fsetʗ1, evalˢ, str, 0);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
 
         var info = Ꮡ(new typesꓸInfo(
@@ -301,48 +305,48 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
             Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>()
         ));
         {
-            var errΔ2 = CheckExpr(fsetʗ1, pkgʗ1, pos, expr, info); if (errΔ2 != default!) {
-                return (default!, fmt.Errorf("CheckExpr(%q) failed: %s"u8, str, errΔ2));
+            var errΔ2 = CheckExpr(fsetʗ1, pkgʗ1, pos, expr, info); if (errΔ2 != nil) {
+                return (default, fmt.Errorf("CheckExpr(%q) failed: %s"u8, str, errΔ2));
             }
         }
         switch (expr.type()) {
         case ж<ast.Ident> exprΔ1: {
             {
-                var (obj, ok) = (~info).Uses[exprΔ1, ꟷ]; if (ok) {
-                    return (obj, default!);
+                var (obj, ok) = info.Uses[exprΔ1, ꟷ]; if (ok) {
+                    return (obj, default);
                 }
             }
             break;
         }
         case ж<ast.SelectorExpr> exprΔ1: {
             {
-                var (sel, ok) = (~info).Selections[exprΔ1, ꟷ]; if (ok) {
-                    return (sel.Obj(), default!);
+                var (sel, ok) = info.Selections[exprΔ1, ꟷ]; if (ok) {
+                    return (sel.Obj(), default);
                 }
             }
             {
-                var (obj, ok) = (~info).Uses[(~exprΔ1).Sel, ꟷ]; if (ok) {
-                    return (obj, default!); // qualified identifier
+                var (obj, ok) = info.Uses[exprΔ1.Sel, ꟷ]; if (ok) {
+                    return (obj, default); // qualified identifier
                 }
             }
             break;
         }}
-        return (default!, fmt.Errorf("no object for %s"u8, str));
+        return (default, fmt.Errorf("no object for %s"u8, str));
     }
 
-    foreach (var (_, group) in (~f).Comments) {
-        foreach (var (_, comment) in (~group).List) {
-            @string s = comment.Value.Text;
-            if (len(s) >= 4 && strings.HasPrefix(s, "/*"u8) && strings.HasSuffix(s, "*/"u8)) {
+    foreach (var (_, group) in f.Comments) {
+        foreach (var (_, comment) in group.List) {
+            @string s = comment.Text;
+            if (len(s) >= 4 && strings.HasPrefix(s, "/*") && strings.HasSuffix(s, "*/")) {
                 tokenꓸPos pos = comment.Pos();
-                var (expr, wantObj) = split(s.slice(2, len(s) - 2), "=>"u8);
+                var (expr, wantObj) = split(s.slice(2, len(s) - 2), "=>");
                 var (obj, errΔ3) = checkExpr(pos, expr);
-                if (errΔ3 != default!) {
-                    Ꮡt.Errorf("%s: %s"u8, fset.Position(pos), errΔ3);
+                if (errΔ3 != nil) {
+                    t.Errorf("%s: %s", fset.Position(pos), errΔ3);
                     continue;
                 }
                 if (obj.String() != wantObj) {
-                    Ꮡt.Errorf("%s: checkExpr(%s) = %s, want %v"u8,
+                    t.Errorf("%s: checkExpr(%s) = %s, want %v",
                         fset.Position(pos), expr, obj, wantObj);
                 }
             }
@@ -351,41 +355,43 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string undefinedˢ = "undefined"u8;
+internal static ref readonly @string undefinedˢ => ref undefinedˢᵇ;
+private static readonly @string undefinedˢᵇ = "undefined"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ17 = """
+internal static ref readonly @string srcᶜ17 => ref srcᶜ17ᵇ;
+private static readonly @string srcᶜ17ᵇ = """
 
 package p
 func _[A any](A) {}
 
 """u8.Raw();
 
-public static void TestIssue65898(ж<testing.T> Ꮡt) {
+public static void TestIssue65898(ж<testing.T> t) {
     @string src = srcᶜ17;
 
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    var (pkg, err) = Ꮡconf.Check(pkgName(src), fset, new ж<ast.File>[]{f}.slice(), nil);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (pkg, err) = Ꮡconf.Check(pkgName(src), fset, slice<ж<ast.File>>([f]), nil);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    foreach (var (_, d) in (~f).Decls) {
+    foreach (var (_, d) in f.Decls) {
         {
             var (fun, _) = d._<ж<ast.FuncDecl>>(ᐧ); if (fun != nil) {
                 // type parameter A is not found at the start of the function type
                 {
-                    var errΔ1 = types.CheckExpr(fset, pkg, (~fun).Type.Pos(), new ast.FuncTypeжExpr((~fun).Type), nil); if (errΔ1 == default! || !strings.Contains(errΔ1.Error(), undefinedˢ)) {
-                        Ꮡt.Fatalf("got %s, want undefined error"u8, errΔ1);
+                    var errΔ1 = types.CheckExpr(fset, pkg, fun.Type.Pos(), new ast.FuncTypeжExpr(fun.Type), nil); if (errΔ1 == nil || !strings.Contains(errΔ1.Error(), undefinedˢ)) {
+                        t.Fatalf("got %s, want undefined error", errΔ1);
                     }
                 }
                 // type parameter A must be found at the end of the function type
                 {
-                    var errΔ2 = types.CheckExpr(fset, pkg, (~fun).Type.End(), new ast.FuncTypeжExpr((~fun).Type), nil); if (errΔ2 != default!) {
-                        Ꮡt.Fatal(errΔ2);
+                    var errΔ2 = types.CheckExpr(fset, pkg, fun.Type.End(), new ast.FuncTypeжExpr(fun.Type), nil); if (errΔ2 != nil) {
+                        t.Fatal(errΔ2);
                     }
                 }
             }

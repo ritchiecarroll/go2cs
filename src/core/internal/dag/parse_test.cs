@@ -10,25 +10,26 @@ using static go.@internal.dag_package;
 
 partial class dag_internal_test_package {
 
-internal static readonly @string diamond = """
+internal static ref readonly @string diamond => ref diamondᵇ;
+private static readonly @string diamondᵇ = """
 
 NONE < a < b, c < d;
 
 """u8.Raw();
 
-internal static ж<global::go.@internal.dag_package.Graph> mustParse(ж<testing.T> Ꮡt, @string dag) {
-    Ꮡt.Helper();
+internal static ж<global::go.@internal.dag_package.Graph> mustParse(ж<testing.T> t, @string dag) {
+    t.Helper();
     var (g, err) = Parse(dag);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     return g;
 }
 
-internal static void wantEdges(ж<testing.T> Ꮡt, ж<global::go.@internal.dag_package.Graph> Ꮡg, @string edges) {
+internal static void wantEdges(ж<testing.T> t, ж<global::go.@internal.dag_package.Graph> Ꮡg, @string edges) {
     ref var g = ref Ꮡg.DerefOrNull();
 
-    Ꮡt.Helper();
+    t.Helper();
 
     var wantEdges = strings.Fields(edges);
     var wantEdgeMap = new map<@string, bool>();
@@ -40,34 +41,34 @@ internal static void wantEdges(ж<testing.T> Ꮡt, ж<global::go.@internal.dag_p
         foreach (var (_, n2) in g.Nodes) {
             var got = g.HasEdge(n1, n2);
             var want = wantEdgeMap[n1 + "->"u8 + n2];
-            if (got && want){
-                Ꮡt.Logf("%s->%s"u8, n1, n2);
-            } else 
-            if (got && !want){
-                Ꮡt.Errorf("%s->%s present but not expected"u8, n1, n2);
-            } else 
-            if (want && !got) {
-                Ꮡt.Errorf("%s->%s missing but expected"u8, n1, n2);
+            if (got && want) {
+                t.Logf("%s->%s", n1, n2);
+            } else if (got && !want) {
+                t.Errorf("%s->%s present but not expected", n1, n2);
+            } else if (want && !got) {
+                t.Errorf("%s->%s missing but expected", n1, n2);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aBCDˢ = "a b c d"u8;
-internal static readonly @string bACADADBDCˢ = "b->a c->a d->a d->b d->c"u8;
+internal static ref readonly @string aBCDˢ => ref aBCDˢᵇ;
+private static readonly @string aBCDˢᵇ = "a b c d"u8;
+internal static ref readonly @string bACADADBDCˢ => ref bACADADBDCˢᵇ;
+private static readonly @string bACADADBDCˢᵇ = "b->a c->a d->a d->b d->c"u8;
 
-public static void TestParse(ж<testing.T> Ꮡt) {
+public static void TestParse(ж<testing.T> t) {
     // Basic smoke test for graph parsing.
-    var g = mustParse(Ꮡt, diamond);
+    var g = mustParse(t, diamond);
 
     var wantNodes = strings.Fields(aBCDˢ);
-    if (!slices.Equal<slice<@string>, @string>(wantNodes, (~g).Nodes)) {
-        Ꮡt.Fatalf("want nodes %v, got %v"u8, wantNodes, (~g).Nodes);
+    if (!slices.Equal<slice<@string>, @string>(wantNodes, g.Nodes)) {
+        t.Fatalf("want nodes %v, got %v", wantNodes, g.Nodes);
     }
 
     // Parse returns the transitive closure, so it adds d->a.
-    wantEdges(Ꮡt, g, bACADADBDCˢ);
+    wantEdges(t, g, bACADADBDCˢ);
 }
 
 } // end dag_internal_test_package

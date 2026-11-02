@@ -20,14 +20,14 @@ internal static @unsafe.Pointer sysAllocOS(uintptr n, @string vmaName) {
     var (Δp, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
         if (err == _EACCES) {
-            print((@string)"runtime: mmap: access denied\n"u8);
+            print((@string)"runtime: mmap: access denied\n");
             exit(2);
         }
         if (err == _EAGAIN) {
-            print((@string)"runtime: mmap: too much locked memory (check 'ulimit -l').\n"u8);
+            print((@string)"runtime: mmap: too much locked memory (check 'ulimit -l').\n");
             exit(2);
         }
-        return default!;
+        return default;
     }
     setVMAName(Δp, n, vmaName);
     return Δp;
@@ -39,9 +39,12 @@ internal static ref uint32 adviseUnused => ref ((StaticBox<uint32>)ᏑadviseUnus
 internal static UntypedInt madviseUnsupported => 0;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unalignedSysUnusedˢ = "unaligned sysUnused"u8;
-internal static readonly @string unusedˢ = "unused"u8;
-internal static readonly @string runtimeCannotDisableˢ = "runtime: cannot disable permissions in address space"u8;
+internal static ref readonly @string unalignedSysUnusedˢ => ref unalignedSysUnusedˢᵇ;
+private static readonly @string unalignedSysUnusedˢᵇ = "unaligned sysUnused"u8;
+internal static ref readonly @string unusedˢ => ref unusedˢᵇ;
+private static readonly @string unusedˢᵇ = "unused"u8;
+internal static ref readonly @string runtimeCannotDisableˢ => ref runtimeCannotDisableˢᵇ;
+private static readonly @string runtimeCannotDisableˢᵇ = "runtime: cannot disable permissions in address space"u8;
 
 internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
     if ((uintptr)((uintptr)v & (physPageSize - 1)) != 0 || (uintptr)(n & (physPageSize - 1)) != 0) {
@@ -98,9 +101,12 @@ internal static void sysUnusedOS(@unsafe.Pointer v, uintptr n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeOutOfMemoryˢ = "runtime: out of memory"u8;
-internal static readonly @string runtimeCannotRemapPagesˢ = "runtime: cannot remap pages in address space"u8;
-internal static readonly @string usedˢ = "used"u8;
+internal static ref readonly @string runtimeOutOfMemoryˢ => ref runtimeOutOfMemoryˢᵇ;
+private static readonly @string runtimeOutOfMemoryˢᵇ = "runtime: out of memory"u8;
+internal static ref readonly @string runtimeCannotRemapPagesˢ => ref runtimeCannotRemapPagesˢᵇ;
+private static readonly @string runtimeCannotRemapPagesˢᵇ = "runtime: cannot remap pages in address space"u8;
+internal static ref readonly @string usedˢ => ref usedˢᵇ;
+private static readonly @string usedˢᵇ = "used"u8;
 
 internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
     if (debug.harddecommit > 0) {
@@ -130,7 +136,8 @@ internal static void sysHugePageOS(@unsafe.Pointer v, uintptr n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unalignedSysNoHugePageOSˢ = "unaligned sysNoHugePageOS"u8;
+internal static ref readonly @string unalignedSysNoHugePageOSˢ => ref unalignedSysNoHugePageOSˢᵇ;
+private static readonly @string unalignedSysNoHugePageOSˢᵇ = "unaligned sysNoHugePageOS"u8;
 
 internal static void sysNoHugePageOS(@unsafe.Pointer v, uintptr n) {
     if ((uintptr)((uintptr)v & (physPageSize - 1)) != 0) {
@@ -142,7 +149,8 @@ internal static void sysNoHugePageOS(@unsafe.Pointer v, uintptr n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unalignedˢ = "unaligned sysHugePageCollapseOS"u8;
+internal static ref readonly @string unalignedˢ => ref unalignedˢᵇ;
+private static readonly @string unalignedˢᵇ = "unaligned sysHugePageCollapseOS"u8;
 
 internal static void sysHugePageCollapseOS(@unsafe.Pointer v, uintptr n) {
     if ((uintptr)((uintptr)v & (physPageSize - 1)) != 0) {
@@ -185,14 +193,15 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
     var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
-        return default!;
+        return default;
     }
     setVMAName(Δp, n, vmaName);
     return Δp;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeCannotMapPagesInˢ = "runtime: cannot map pages in arena address space"u8;
+internal static ref readonly @string runtimeCannotMapPagesInˢ => ref runtimeCannotMapPagesInˢᵇ;
+private static readonly @string runtimeCannotMapPagesInˢᵇ = "runtime: cannot map pages in arena address space"u8;
 
 internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
     var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
@@ -200,7 +209,7 @@ internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string vmaName) {
         @throw(runtimeOutOfMemoryˢ);
     }
     if (Δp != v || err != 0) {
-        print((@string)"runtime: mmap("u8, @unsafe.Pointer.OrTypedNil(v), (@string)", "u8, n, (@string)") returned "u8, @unsafe.Pointer.OrTypedNil(Δp), (@string)", "u8, err, (@string)"\n"u8);
+        print((@string)"runtime: mmap(", @unsafe.Pointer.OrTypedNil(v), (@string)", ", n, (@string)") returned ", @unsafe.Pointer.OrTypedNil(Δp), (@string)", ", err, (@string)"\n");
         @throw(runtimeCannotMapPagesInˢ);
     }
     setVMAName(Δp, n, vmaName);

@@ -32,7 +32,8 @@ public static @string Path(this ref CgroupV2 c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cpuMaxˢ = "cpu.max"u8;
+internal static ref readonly @string cpuMaxˢ => ref cpuMaxˢᵇ;
+private static readonly @string cpuMaxˢᵇ = "cpu.max"u8;
 
 // Path to cpu.max.
 public static @string CPUMaxPath(this ref CgroupV2 c) {
@@ -40,7 +41,8 @@ public static @string CPUMaxPath(this ref CgroupV2 c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string maxˢ = "max"u8;
+internal static ref readonly @string maxˢ => ref maxˢᵇ;
+private static readonly @string maxˢᵇ = "max"u8;
 
 // Set cpu.max. Pass -1 for quota to disable the limit.
 public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) {
@@ -53,9 +55,12 @@ public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cgroupSubtreeControlˢ = "cgroup.subtree_control"u8;
-internal static readonly @string cpuˢ = "cpu"u8;
-internal static readonly @string goCgrouptestˢ = "go-cgrouptest"u8;
+internal static ref readonly @string cgroupSubtreeControlˢ => ref cgroupSubtreeControlˢᵇ;
+private static readonly @string cgroupSubtreeControlˢᵇ = "cgroup.subtree_control"u8;
+internal static ref readonly @string cpuˢ => ref cpuˢᵇ;
+private static readonly @string cpuˢᵇ = "cpu"u8;
+internal static ref readonly @string goCgrouptestˢ => ref goCgrouptestˢᵇ;
+private static readonly @string goCgrouptestˢᵇ = "go-cgrouptest"u8;
 
 // InCgroupV2 creates a new v2 cgroup, migrates the current process into it,
 // and then calls fn. When fn returns, the current process is migrated back to
@@ -64,30 +69,29 @@ internal static readonly @string goCgrouptestˢ = "go-cgrouptest"u8;
 // If a new cgroup cannot be created, the test is skipped.
 //
 // This must not be used in parallel tests, as it affects the entire process.
-public static void InCgroupV2(ж<testing.T> Ꮡt, Action<ж<CgroupV2>> fn) {
+public static void InCgroupV2(ж<testing.T> t, Action<ж<CgroupV2>> fn) {
     GoFrame ᒐ = default;
     try {
-        ref var orig = ref heap<@string>(out var Ꮡorig);
-        orig = findCurrent(Ꮡt);
-        @string parent = findOwnedParent(Ꮡt, orig);
+        ref var orig = ref heap<@string>(findCurrent(t), out var Ꮡorig);
+        @string parent = findOwnedParent(t, orig);
 
         // Make sure the parent allows children to control cpu.
         var (b, err) = os.ReadFile(filepath.Join(parent, cgroupSubtreeControlˢ));
-        if (err != default!) {
-            Ꮡt.Skipf("unable to read cgroup.subtree_control: %v"u8, err);
+        if (err != nil) {
+            t.Skipf("unable to read cgroup.subtree_control: %v", err);
         }
         if (!slices.Contains(strings.Fields((@string)b), cpuˢ)) {
             // N.B. We should have permission to add cpu to
             // subtree_control, but it seems like a bad idea to change this
             // on a high-level cgroup that probably has lots of existing
             // children.
-            Ꮡt.Skipf("Parent cgroup %s does not allow children to control cpu, only %q"u8, parent, (@string)b);
+            t.Skipf("Parent cgroup %s does not allow children to control cpu, only %q", parent, (@string)b);
         }
 
         ref var path = ref heap<@string>(out var Ꮡpath);
         (path, err) = os.MkdirTemp(parent, goCgrouptestˢ);
-        if (err != default!) {
-            Ꮡt.Skipf("unable to create cgroup directory: %v"u8, err);
+        if (err != nil) {
+            t.Skipf("unable to create cgroup directory: %v", err);
         }
         // Important: defer cleanups so they run even in the event of panic.
         //
@@ -96,16 +100,16 @@ public static void InCgroupV2(ж<testing.T> Ꮡt, Action<ж<CgroupV2>> fn) {
         var pathʗ1 = path;
         defer(() => {
             {
-                var errΔ1 = os.Remove(pathʗ1); if (errΔ1 != default!) {
+                var errΔ1 = os.Remove(pathʗ1); if (errΔ1 != nil) {
                     // Not much we can do, but at least inform of the
                     // problem.
-                    Ꮡt.Errorf("Error removing cgroup directory: %v"u8, errΔ1);
+                    t.Errorf("Error removing cgroup directory: %v", errΔ1);
                 }
             }
         }, ref ᒐ);
 
-        migrateTo(Ꮡt, path);
-        defer(migrateTo, Ꮡt, orig, ref ᒐ);
+        migrateTo(t, path);
+        defer(migrateTo, t, orig, ref ᒐ);
 
         var c = Ꮡ(new CgroupV2(
             orig: orig,
@@ -118,24 +122,24 @@ public static void InCgroupV2(ж<testing.T> Ꮡt, Action<ж<CgroupV2>> fn) {
 }
 
 // Returns the filesystem path to the current cgroup the process is in.
-internal static @string findCurrent(ж<testing.T> Ꮡt) {
+internal static @string findCurrent(ж<testing.T> t) {
     // Find the path to our current CPU cgroup. Currently this package is
     // only used for CPU cgroup testing, so the distinction of different
     // controllers doesn't matter.
     array<byte> scratch = new(65536); /* cgroup.ParseSize */
     var buf = new slice<byte>(cgroup.PathSize);
     var (n, ver, err) = cgroup.FindCPU(buf, scratch[..]);
-    if (err != default!) {
-        Ꮡt.Skipf("cgroup: unable to find current cgroup mount: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("cgroup: unable to find current cgroup mount: %v", err);
     }
     if (ver != cgroup.V2) {
-        Ꮡt.Skipf("cgroup: running on cgroup v%d want v2"u8, ver);
+        t.Skipf("cgroup: running on cgroup v%d want v2", ver);
     }
     return (@string)(buf.slice(0, n));
 }
 
 // Returns a parent directory in which we can create our own cgroup subdirectory.
-internal static @string findOwnedParent(ж<testing.T> Ꮡt, @string orig) {
+internal static @string findOwnedParent(ж<testing.T> t, @string orig) {
     // There are many ways cgroups may be set up on a system. We don't try
     // to cover all of them, just common ones.
     //
@@ -183,18 +187,18 @@ internal static @string findOwnedParent(ж<testing.T> Ꮡt, @string orig) {
     // adding controllers once done.
     ref var stat = ref heap(new Δsyscall.Stat_t(), out var Ꮡstat);
     var err = Δsyscall.Stat(orig, Ꮡstat);
-    if (err != default!) {
-        Ꮡt.Fatalf("error stating orig cgroup: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("error stating orig cgroup: %v", err);
     }
 
     nint uid = os.Getuid();
-    @string prev = default!;
+    @string prev = default;
     @string cur = filepath.Dir(orig);
     while (cur != "/"u8) {
         ref var curStat = ref heap(new Δsyscall.Stat_t(), out var ᏑcurStat);
         err = Δsyscall.Stat(cur, ᏑcurStat);
-        if (err != default!) {
-            Ꮡt.Fatalf("error stating cgroup path: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("error stating cgroup path: %v", err);
         }
 
         if ((nint)curStat.Uid != uid || curStat.Dev != stat.Dev) {
@@ -207,7 +211,7 @@ internal static @string findOwnedParent(ж<testing.T> Ꮡt, @string orig) {
     }
 
     if (prev == ""u8) {
-        Ꮡt.Skipf("No parent cgroup owned by UID %d"u8, uid);
+        t.Skipf("No parent cgroup owned by UID %d", uid);
     }
 
     // We actually want the last directory where we were the owner.
@@ -215,14 +219,15 @@ internal static @string findOwnedParent(ж<testing.T> Ꮡt, @string orig) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cgroupProcsˢ = "cgroup.procs"u8;
+internal static ref readonly @string cgroupProcsˢ => ref cgroupProcsˢᵇ;
+private static readonly @string cgroupProcsˢᵇ = "cgroup.procs"u8;
 
 // Migrate the current process to the cgroup directory dst.
-internal static void migrateTo(ж<testing.T> Ꮡt, @string dst) {
+internal static void migrateTo(ж<testing.T> t, @string dst) {
     var pid = slice<byte>(strconv.FormatInt((int64)os.Getpid(), 10));
     {
-        var err = os.WriteFile(filepath.Join(dst, cgroupProcsˢ), pid, 0); if (err != default!) {
-            Ꮡt.Skipf("Unable to migrate into %s: %v"u8, dst, err);
+        var err = os.WriteFile(filepath.Join(dst, cgroupProcsˢ), pid, 0); if (err != nil) {
+            t.Skipf("Unable to migrate into %s: %v", dst, err);
         }
     }
 }

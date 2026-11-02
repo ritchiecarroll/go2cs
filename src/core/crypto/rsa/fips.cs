@@ -56,10 +56,14 @@ internal static nint saltLength(this ж<PSSOptions> Ꮡopts) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoRsaUseOfHashˢ = "crypto/rsa: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaOnlyCryptoRandˢ = "crypto/rsa: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaUseOfPssSaltˢ = "crypto/rsa: use of PSS salt longer than the hash is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaInvalidPssSaltˢ = "crypto/rsa: invalid PSS salt length"u8;
+internal static ref readonly @string cryptoRsaUseOfHashˢ => ref cryptoRsaUseOfHashˢᵇ;
+private static readonly @string cryptoRsaUseOfHashˢᵇ = "crypto/rsa: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaOnlyCryptoRandˢ => ref cryptoRsaOnlyCryptoRandˢᵇ;
+private static readonly @string cryptoRsaOnlyCryptoRandˢᵇ = "crypto/rsa: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfPssSaltˢ => ref cryptoRsaUseOfPssSaltˢᵇ;
+private static readonly @string cryptoRsaUseOfPssSaltˢᵇ = "crypto/rsa: use of PSS salt longer than the hash is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaInvalidPssSaltˢ => ref cryptoRsaInvalidPssSaltˢᵇ;
+private static readonly @string cryptoRsaInvalidPssSaltˢᵇ = "crypto/rsa: invalid PSS salt length"u8;
 
 // SignPSS calculates the signature of digest using PSS.
 //
@@ -75,8 +79,8 @@ public static (slice<byte>, error) SignPSS(io.Reader random, ж<PrivateKey> Ꮡp
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
@@ -86,8 +90,8 @@ public static (slice<byte>, error) SignPSS(io.Reader random, ж<PrivateKey> Ꮡp
 
     if (boring.Enabled && rand.IsDefaultReader(random)) {
         var (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         return boring.SignRSAPSS(bkey, hash, digest, Ꮡopts.saltLength());
     }
@@ -96,43 +100,46 @@ public static (slice<byte>, error) SignPSS(io.Reader random, ж<PrivateKey> Ꮡp
     var h = fips140hash.Unwrap(hash.New());
 
     {
-        var errΔ3 = checkFIPS140OnlyPrivateKey(ref (Ꮡpriv).DerefOrNull()); if (errΔ3 != default!) {
-            return (default!, errΔ3);
+        var errΔ3 = checkFIPS140OnlyPrivateKey(ref (Ꮡpriv).DerefOrNull()); if (errΔ3 != nil) {
+            return (default, errΔ3);
         }
     }
     if (fips140only.Enforced() && !fips140only.ApprovedHash(h)) {
-        return (default!, errors.New(cryptoRsaUseOfHashˢ));
+        return (default, errors.New(cryptoRsaUseOfHashˢ));
     }
     if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(random)) {
-        return (default!, errors.New(cryptoRsaOnlyCryptoRandˢ));
+        return (default, errors.New(cryptoRsaOnlyCryptoRandˢ));
     }
 
     var (k, err) = fipsPrivateKey(Ꮡpriv);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     nint saltLength = Ꮡopts.saltLength();
     if (fips140only.Enforced() && saltLength > h.Size()) {
-        return (default!, errors.New(cryptoRsaUseOfPssSaltˢ));
+        return (default, errors.New(cryptoRsaUseOfPssSaltˢ));
     }
-    var exprᴛ1 = saltLength;
-    if (exprᴛ1 == PSSSaltLengthAuto) {
+    switch (saltLength) {
+    case var ᴛ when ᴛ == PSSSaltLengthAuto: {
         (saltLength, err) = rsa.PSSMaxSaltLength(k.PublicKey(), h);
-        if (err != default!) {
-            return (default!, fipsError(err));
+        if (err != nil) {
+            return (default, fipsError(err));
         }
+        break;
     }
-    else if (exprᴛ1 == PSSSaltLengthEqualsHash) {
+    case var ᴛ when ᴛ == PSSSaltLengthEqualsHash: {
         saltLength = h.Size();
+        break;
     }
-    else { /* default: */
+    default: {
         // If we get here saltLength is either > 0 or < -1, in the
         // latter case we fail out.
         if (saltLength <= 0) {
-            return (default!, errors.New(cryptoRsaInvalidPssSaltˢ));
+            return (default, errors.New(cryptoRsaInvalidPssSaltˢ));
         }
-    }
+        break;
+    }}
 
     var (ᴛ1, ᴛ2) = rsa.SignPSS(random, k, h, digest, saltLength);
     return fipsError2(ᴛ1, ᴛ2);
@@ -147,30 +154,30 @@ public static (slice<byte>, error) SignPSS(io.Reader random, ж<PrivateKey> Ꮡp
 //
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
-public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte> digest, slice<byte> sig, ж<PSSOptions> Ꮡopts) {
+public static error VerifyPSS(ж<PublicKey> pub, crypto.Hash hash, slice<byte> digest, slice<byte> sig, ж<PSSOptions> opts) {
     {
-        var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != default!) {
+        var errΔ1 = checkPublicKeySize(ref (pub).DerefOrNull()); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
 
     if (boring.Enabled) {
-        var (bkey, errΔ2) = boringPublicKey(Ꮡpub);
-        if (errΔ2 != default!) {
+        var (bkey, errΔ2) = boringPublicKey(pub);
+        if (errΔ2 != nil) {
             return errΔ2;
         }
         {
-            var errΔ3 = boring.VerifyRSAPSS(bkey, hash, digest, sig, Ꮡopts.saltLength()); if (errΔ3 != default!) {
+            var errΔ3 = boring.VerifyRSAPSS(bkey, hash, digest, sig, opts.saltLength()); if (errΔ3 != nil) {
                 return ErrVerification;
             }
         }
-        return default!;
+        return default;
     }
 
     var h = fips140hash.Unwrap(hash.New());
 
     {
-        var errΔ4 = checkFIPS140OnlyPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ4 != default!) {
+        var errΔ4 = checkFIPS140OnlyPublicKey(ref (pub).DerefOrNull()); if (errΔ4 != nil) {
             return errΔ4;
         }
     }
@@ -178,25 +185,25 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
         return errors.New(cryptoRsaUseOfHashˢ);
     }
 
-    var (k, err) = fipsPublicKey(ref (Ꮡpub).DerefOrNull());
-    if (err != default!) {
+    var (k, err) = fipsPublicKey(ref (pub).DerefOrNull());
+    if (err != nil) {
         return err;
     }
 
-    nint saltLength = Ꮡopts.saltLength();
+    nint saltLength = opts.saltLength();
     if (fips140only.Enforced() && saltLength > h.Size()) {
         return errors.New(cryptoRsaUseOfPssSaltˢ);
     }
-    var exprᴛ1 = saltLength;
-    if (exprᴛ1 == PSSSaltLengthAuto) {
+    switch (saltLength) {
+    case var ᴛ when ᴛ == PSSSaltLengthAuto: {
         return fipsError(rsa.VerifyPSS(k, h, digest, sig));
     }
-    if (exprᴛ1 == PSSSaltLengthEqualsHash) {
+    case var ᴛ when ᴛ == PSSSaltLengthEqualsHash: {
         return fipsError(rsa.VerifyPSSWithSaltLength(k, h, digest, sig, h.Size()));
     }
-    { /* default: */
+    default: {
         return fipsError(rsa.VerifyPSSWithSaltLength(k, h, digest, sig, saltLength));
-    }
+    }}
 }
 
 // EncryptOAEP encrypts the given message with RSA-OAEP.
@@ -217,8 +224,8 @@ public static error VerifyPSS(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte
 //
 // The message must be no longer than the length of the public modulus minus
 // twice the hash length, minus a further 2.
-public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
-    return encryptOAEP(hashΔ1, hashΔ1, random, Ꮡpub, msg, label);
+public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader random, ж<PublicKey> pub, slice<byte> msg, slice<byte> label) {
+    return encryptOAEP(hashΔ1, hashΔ1, random, pub, msg, label);
 }
 
 // EncryptOAEPWithOptions encrypts the given message with RSA-OAEP using the
@@ -228,13 +235,13 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hashΔ1, io.Reader rand
 // specify the OAEP and MGF1 hashes separately.
 //
 // See [EncryptOAEP] for additional details.
-public static (slice<byte>, error) EncryptOAEPWithOptions(io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, ж<OAEPOptions> Ꮡopts) {
+public static (slice<byte>, error) EncryptOAEPWithOptions(io.Reader random, ж<PublicKey> pub, slice<byte> msg, ж<OAEPOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (opts.MGFHash == 0) {
-        return encryptOAEP(opts.Hash.New(), opts.Hash.New(), random, Ꮡpub, msg, opts.Label);
+        return encryptOAEP(opts.Hash.New(), opts.Hash.New(), random, pub, msg, opts.Label);
     }
-    return encryptOAEP(opts.Hash.New(), opts.MGFHash.New(), random, Ꮡpub, msg, opts.Label);
+    return encryptOAEP(opts.Hash.New(), opts.MGFHash.New(), random, pub, msg, opts.Label);
 }
 
 internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mgfHash, io.Reader random, ж<PublicKey> Ꮡpub, slice<byte> msg, slice<byte> label) {
@@ -243,8 +250,8 @@ internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mg
         ref var pub = ref Ꮡpub.DerefOrNull();
 
         {
-            var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
 
@@ -254,11 +261,11 @@ internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mg
         if (boring.Enabled && rand.IsDefaultReader(random)) {
             nint kΔ1 = pub.Size();
             if (len(msg) > kΔ1 - 2 * hashΔ1.Size() - 2) {
-                return (default!, ErrMessageTooLong);
+                return (default, ErrMessageTooLong);
             }
             var (bkey, errΔ2) = boringPublicKey(Ꮡpub);
-            if (errΔ2 != default!) {
-                return (default!, errΔ2);
+            if (errΔ2 != nil) {
+                return (default, errΔ2);
             }
             return boring.EncryptRSAOAEP(hashΔ1, mgfHash, bkey, msg, label);
         }
@@ -267,25 +274,25 @@ internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mg
         hashΔ1 = fips140hash.Unwrap(hashΔ1);
 
         {
-            var errΔ3 = checkFIPS140OnlyPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ3 != default!) {
-                return (default!, errΔ3);
+            var errΔ3 = checkFIPS140OnlyPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ3 != nil) {
+                return (default, errΔ3);
             }
         }
         if (fips140only.Enforced() && !fips140only.ApprovedHash(hashΔ1)) {
-            return (default!, errors.New(cryptoRsaUseOfHashˢ));
+            return (default, errors.New(cryptoRsaUseOfHashˢ));
         }
         if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(random)) {
-            return (default!, errors.New(cryptoRsaOnlyCryptoRandˢ));
+            return (default, errors.New(cryptoRsaOnlyCryptoRandˢ));
         }
 
         var (k, err) = fipsPublicKey(ref (Ꮡpub).DerefOrNull());
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var (ᴛ3, ᴛ4) = rsa.EncryptOAEP(hashΔ1, mgfHash, random, k, msg, label);
         return fipsError2(ᴛ3, ᴛ4);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -299,13 +306,13 @@ internal static (slice<byte>, error) encryptOAEP(hash.Hash hashΔ1, hash.Hash mg
 //
 // The label parameter must match the value given when encrypting. See
 // [EncryptOAEP] for details.
-public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
+public static (slice<byte>, error) DecryptOAEP(hash.Hash hashΔ1, io.Reader random, ж<PrivateKey> priv, slice<byte> ciphertext, slice<byte> label) {
     GoFrame ᒐ = default;
     try {
         defer(hashΔ1.Reset, ref ᒐ);
-        return decryptOAEP(hashΔ1, hashΔ1, Ꮡpriv, ciphertext, label);
+        return decryptOAEP(hashΔ1, hashΔ1, priv, ciphertext, label);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -313,44 +320,44 @@ internal static (slice<byte>, error) decryptOAEP(hash.Hash hashΔ1, hash.Hash mg
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
     if (boring.Enabled) {
         nint kΔ1 = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size();
         if (len(ciphertext) > kΔ1 || kΔ1 < hashΔ1.Size() * 2 + 2) {
-            return (default!, ErrDecryption);
+            return (default, ErrDecryption);
         }
         var (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         (var @out, errΔ2) = boring.DecryptRSAOAEP(hashΔ1, mgfHash, bkey, ciphertext, label);
-        if (errΔ2 != default!) {
-            return (default!, ErrDecryption);
+        if (errΔ2 != nil) {
+            return (default, ErrDecryption);
         }
-        return (@out, default!);
+        return (@out, default);
     }
 
     hashΔ1 = fips140hash.Unwrap(hashΔ1);
     mgfHash = fips140hash.Unwrap(mgfHash);
 
     {
-        var errΔ3 = checkFIPS140OnlyPrivateKey(ref (Ꮡpriv).DerefOrNull()); if (errΔ3 != default!) {
-            return (default!, errΔ3);
+        var errΔ3 = checkFIPS140OnlyPrivateKey(ref (Ꮡpriv).DerefOrNull()); if (errΔ3 != nil) {
+            return (default, errΔ3);
         }
     }
     if (fips140only.Enforced()) {
         if (!fips140only.ApprovedHash(hashΔ1) || !fips140only.ApprovedHash(mgfHash)) {
-            return (default!, errors.New(cryptoRsaUseOfHashˢ));
+            return (default, errors.New(cryptoRsaUseOfHashˢ));
         }
     }
 
     var (k, err) = fipsPrivateKey(Ꮡpriv);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var (ᴛ5, ᴛ6) = rsa.DecryptOAEP(hashΔ1, mgfHash, k, ciphertext, label);
@@ -358,7 +365,8 @@ internal static (slice<byte>, error) decryptOAEP(hash.Hash hashΔ1, hash.Hash mg
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoRsaInputMustBeˢ = "crypto/rsa: input must be hashed message"u8;
+internal static ref readonly @string cryptoRsaInputMustBeˢ => ref cryptoRsaInputMustBeˢᵇ;
+private static readonly @string cryptoRsaInputMustBeˢᵇ = "crypto/rsa: input must be hashed message"u8;
 
 // SignPKCS1v15 calculates the signature of hashed using
 // RSASSA-PKCS1-V1_5-SIGN from RSA PKCS #1 v1.5.  Note that hashed must
@@ -375,40 +383,40 @@ internal static readonly @string cryptoRsaInputMustBeˢ = "crypto/rsa: input mus
 public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, crypto.Hash hash, slice<byte> hashed) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    @string hashName = default!;
+    @string hashName = default;
     if (hash != ((crypto.Hash)0)) {
         if (len(hashed) != hash.Size()) {
-            return (default!, errors.New(cryptoRsaInputMustBeˢ));
+            return (default, errors.New(cryptoRsaInputMustBeˢ));
         }
         hashName = hash.String();
     }
 
     {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
     if (boring.Enabled) {
         var (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         return boring.SignRSAPKCS1v15(bkey, hash, hashed);
     }
 
     {
-        var errΔ3 = checkFIPS140OnlyPrivateKey(ref (Ꮡpriv).DerefOrNull()); if (errΔ3 != default!) {
-            return (default!, errΔ3);
+        var errΔ3 = checkFIPS140OnlyPrivateKey(ref (Ꮡpriv).DerefOrNull()); if (errΔ3 != nil) {
+            return (default, errΔ3);
         }
     }
     if (fips140only.Enforced() && !fips140only.ApprovedHash(fips140hash.Unwrap(hash.New()))) {
-        return (default!, errors.New(cryptoRsaUseOfHashˢ));
+        return (default, errors.New(cryptoRsaUseOfHashˢ));
     }
 
     var (k, err) = fipsPrivateKey(Ꮡpriv);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var (ᴛ7, ᴛ8) = rsa.SignPKCS1v15(k, hashName, hashed);
     return fipsError2(ᴛ7, ᴛ8);
@@ -422,8 +430,8 @@ public static (slice<byte>, error) SignPKCS1v15(io.Reader random, ж<PrivateKey>
 //
 // The inputs are not considered confidential, and may leak through timing side
 // channels, or if an attacker has control of part of the inputs.
-public static error VerifyPKCS1v15(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice<byte> hashed, slice<byte> sig) {
-    @string hashName = default!;
+public static error VerifyPKCS1v15(ж<PublicKey> pub, crypto.Hash hash, slice<byte> hashed, slice<byte> sig) {
+    @string hashName = default;
     if (hash != ((crypto.Hash)0)) {
         if (len(hashed) != hash.Size()) {
             return errors.New(cryptoRsaInputMustBeˢ);
@@ -432,26 +440,26 @@ public static error VerifyPKCS1v15(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice
     }
 
     {
-        var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != default!) {
+        var errΔ1 = checkPublicKeySize(ref (pub).DerefOrNull()); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
 
     if (boring.Enabled) {
-        var (bkey, errΔ2) = boringPublicKey(Ꮡpub);
-        if (errΔ2 != default!) {
+        var (bkey, errΔ2) = boringPublicKey(pub);
+        if (errΔ2 != nil) {
             return errΔ2;
         }
         {
-            var errΔ3 = boring.VerifyRSAPKCS1v15(bkey, hash, hashed, sig); if (errΔ3 != default!) {
+            var errΔ3 = boring.VerifyRSAPKCS1v15(bkey, hash, hashed, sig); if (errΔ3 != nil) {
                 return ErrVerification;
             }
         }
-        return default!;
+        return default;
     }
 
     {
-        var errΔ4 = checkFIPS140OnlyPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ4 != default!) {
+        var errΔ4 = checkFIPS140OnlyPublicKey(ref (pub).DerefOrNull()); if (errΔ4 != nil) {
             return errΔ4;
         }
     }
@@ -459,24 +467,24 @@ public static error VerifyPKCS1v15(ж<PublicKey> Ꮡpub, crypto.Hash hash, slice
         return errors.New(cryptoRsaUseOfHashˢ);
     }
 
-    var (k, err) = fipsPublicKey(ref (Ꮡpub).DerefOrNull());
-    if (err != default!) {
+    var (k, err) = fipsPublicKey(ref (pub).DerefOrNull());
+    if (err != nil) {
         return err;
     }
     return fipsError(rsa.VerifyPKCS1v15(k, hashName, hashed, sig));
 }
 
 internal static error fipsError(error err) {
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, rsa.ErrDecryption)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, rsa.ErrDecryption): {
         return ErrDecryption;
     }
-    if (AreEqual(exprᴛ1, rsa.ErrVerification)) {
+    case var ᴛ when AreEqual(ᴛ, rsa.ErrVerification): {
         return ErrVerification;
     }
-    if (AreEqual(exprᴛ1, rsa.ErrMessageTooLong)) {
+    case var ᴛ when AreEqual(ᴛ, rsa.ErrMessageTooLong): {
         return ErrMessageTooLong;
-    }
+    }}
     return err;
 }
 
@@ -485,15 +493,20 @@ internal static (T, error) fipsError2<T>(T x, error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoRsaPublicKeyˢ = "crypto/rsa: public key missing N"u8;
-internal static readonly @string cryptoRsaUseOfKeysˢ = "crypto/rsa: use of keys smaller than 2048 bits is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaUseOfKeysWithˢ = "crypto/rsa: use of keys with odd size is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaUseOfPublicˢ = "crypto/rsa: use of public exponent <= 2¹⁶ is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaUseOfEvenPublicˢ = "crypto/rsa: use of even public exponent is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaPublicKeyˢ => ref cryptoRsaPublicKeyˢᵇ;
+private static readonly @string cryptoRsaPublicKeyˢᵇ = "crypto/rsa: public key missing N"u8;
+internal static ref readonly @string cryptoRsaUseOfKeysˢ => ref cryptoRsaUseOfKeysˢᵇ;
+private static readonly @string cryptoRsaUseOfKeysˢᵇ = "crypto/rsa: use of keys smaller than 2048 bits is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfKeysWithˢ => ref cryptoRsaUseOfKeysWithˢᵇ;
+private static readonly @string cryptoRsaUseOfKeysWithˢᵇ = "crypto/rsa: use of keys with odd size is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfPublicˢ => ref cryptoRsaUseOfPublicˢᵇ;
+private static readonly @string cryptoRsaUseOfPublicˢᵇ = "crypto/rsa: use of public exponent <= 2¹⁶ is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfEvenPublicˢ => ref cryptoRsaUseOfEvenPublicˢᵇ;
+private static readonly @string cryptoRsaUseOfEvenPublicˢᵇ = "crypto/rsa: use of even public exponent is not allowed in FIPS 140-only mode"u8;
 
 internal static error checkFIPS140OnlyPublicKey(ref PublicKey pub) {
     if (!fips140only.Enforced()) {
-        return default!;
+        return default;
     }
     if (pub.N == nil) {
         return errors.New(cryptoRsaPublicKeyˢ);
@@ -510,19 +523,21 @@ internal static error checkFIPS140OnlyPublicKey(ref PublicKey pub) {
     if ((pub.E & 1) == 0) {
         return errors.New(cryptoRsaUseOfEvenPublicˢ);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoRsaUseOfMultiPrimeˢ = "crypto/rsa: use of multi-prime keys is not allowed in FIPS 140-only mode"u8;
-internal static readonly @string cryptoRsaUseOfPrimesOfˢ = "crypto/rsa: use of primes of different sizes is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfMultiPrimeˢ => ref cryptoRsaUseOfMultiPrimeˢᵇ;
+private static readonly @string cryptoRsaUseOfMultiPrimeˢᵇ = "crypto/rsa: use of multi-prime keys is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfPrimesOfˢ => ref cryptoRsaUseOfPrimesOfˢᵇ;
+private static readonly @string cryptoRsaUseOfPrimesOfˢᵇ = "crypto/rsa: use of primes of different sizes is not allowed in FIPS 140-only mode"u8;
 
 internal static error checkFIPS140OnlyPrivateKey(ref PrivateKey priv) {
     if (!fips140only.Enforced()) {
-        return default!;
+        return default;
     }
     {
-        var err = checkFIPS140OnlyPublicKey(ref nonnil(ref priv).PublicKey); if (err != default!) {
+        var err = checkFIPS140OnlyPublicKey(ref nonnil(ref priv).PublicKey); if (err != nil) {
             return err;
         }
     }
@@ -532,7 +547,7 @@ internal static error checkFIPS140OnlyPrivateKey(ref PrivateKey priv) {
     if (priv.Primes[0] == nil || priv.Primes[1] == nil || priv.Primes[0].BitLen() != priv.Primes[1].BitLen()) {
         return errors.New(cryptoRsaUseOfPrimesOfˢ);
     }
-    return default!;
+    return default;
 }
 
 } // end rsa_package

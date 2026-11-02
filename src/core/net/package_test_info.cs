@@ -10,47 +10,14 @@ global using static global::go.net_internal_test_package;
 // <ImportedTypeAliases>
 global using dnsmessageꓸAAAAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAAAAResource;
 global using dnsmessageꓸAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔAResource;
-global using dnsmessageꓸCNAMEResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔCNAMEResource;
-global using dnsmessageꓸHTTPSResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔHTTPSResource;
-global using dnsmessageꓸMXResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔMXResource;
-global using dnsmessageꓸNSResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔNSResource;
-global using dnsmessageꓸOPTResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔOPTResource;
-global using dnsmessageꓸPTRResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔPTRResource;
 global using dnsmessageꓸQuestion = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔQuestion;
-global using dnsmessageꓸSOAResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSOAResource;
 global using dnsmessageꓸSRVResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSRVResource;
-global using dnsmessageꓸSVCBResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔSVCBResource;
-global using dnsmessageꓸTXTResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔTXTResource;
-global using dnsmessageꓸUnknownResource = go.vendor.golang.org.x.net.dns.dnsmessage_package.ΔUnknownResource;
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
 global using netipꓸAddr = go.net.netip_package.ΔAddr;
-global using netipꓸPrefix = go.net.netip_package.ΔPrefix;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using socktestꓸSockets = go.net.@internal.socktest_package.ΔSockets;
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -118,11 +85,32 @@ using static global::go.net_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.net_package.AddrError))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.DNSError))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.IPAddr))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.IPNet))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.Interface))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.MX))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.NS))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.OpError))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.SRV))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.TCPAddr))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.TCPConn))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.TCPListener))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.UDPAddr))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.UDPConn))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.conf))]
+[assembly: GoFieldAccess(typeof(global::go.net_package.netFD))]
+[assembly: GoFieldAccess(typeof(go.io.fs_package.PathError))]
+[assembly: GoFieldAccess(typeof(go.net.@internal.socktest_package.Status))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(os_package.LinkError))]
+[assembly: GoFieldAccess(typeof(os_package.SyscallError))]
+[assembly: GoFieldAccess(typeof(syscall_package.SysProcAttr))]
+[assembly: GoFieldAccess(typeof(time_package.Ticker))]
+[assembly: GoFieldAccess(typeof(time_package.Timer))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -132,7 +120,7 @@ using static global::go.net_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/pipe_test.go", "pipe_test.cs", "AA8ggsKCgoKUuIKClICCpICCpICCpICCpICCpICC", "17-24:1;19-22:1.1")]
+[assembly: GoPositionMap("net/pipe_test.go", "pipe_test.cs", "AA8ggsKCgoKUuIKClICCpICCpICCpICCpICCpICC", "17-24:1;19-22:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go;

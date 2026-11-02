@@ -7,7 +7,6 @@
 global using static global::go.crypto.mlkem_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,7 +29,7 @@ using static global::go.crypto.mlkem_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -40,8 +39,8 @@ using static global::go.crypto.mlkem_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAsYlIKClLimgoK4prSCgpSmpg==")]
-[assembly: go.GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "ACE8goKUgri4goKUgoKCgpSCpoKClIKUgoKUgpSCgoKUgqaCgpSClIKmgoKUgriCgpSCuLiCgoKUgoKUgoCCtoKCgoCCyIKAgraCgoKAgsiCgIK2goKCgILamKKCgoKClIKCpoKCgoKUgoKCgpSClIKCgpSClIKClIKmgoKClKaCgtyikoKCgoKCuKKCgoKClIKCgoKClIK4ooKClIKCgoKC+IKCgpSCgoKClKKCgoKUgpSCgpSmkoKCgpSCgpTMkoKmgqaCpoKmgqaC", "31-33:1;34-36:2;101-103:1;104-106:2;280-295:1;296-308:2")]
+[assembly: GoPositionMap("crypto/mlkem/example_test.go", "example_test.cs", "AAsYlIKClLimgoK4prSCgpSmpg==")]
+[assembly: GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "ACE8goKUgri4goKUgoKCgpSCpoKClIKUgoKUgpSCgoKUgqaCgpSClIKmgoKUgriCgpSCuLiCgoKUgoKUgoCCtoKCgoCCyIKAgraCgoKAgsiCgIK2goKCgILamKKCgoKClIKCpoKCgoKUgoKCgpSClIKCgpSClIKClIKmgoKClKaCgtyikoKCgoKCuKKCgoKClIKCgoKClIK4ooKClIKCgoKCAAkIgoKClIKCgoKUooKCgpSClIKClKaSgoKClIKClMySgqaCpoKmgqaCpoI=", "31-33:1;34-36:2;101-103:1;104-106:2;280-295:1;296-308:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -13,10 +13,10 @@ using static global::go.go.token_package;
 partial class token_internal_test_package {
 
 // TestTree provides basic coverage of the AVL tree operations.
-public static void TestTree(ж<testing.T> Ꮡt) {
+public static void TestTree(ж<testing.T> t) {
     // Use a reproducible PRNG.
     var (seed1, seed2) = (rand.Uint64(), rand.Uint64());
-    Ꮡt.Logf("random seeds: %d, %d"u8, seed1, seed2);
+    t.Logf("random seeds: %d, %d", seed1, seed2);
     var rng = rand.New(new rand.PCGжSource(rand.NewPCG(seed1, seed2)));
 
     // Create a number of Files of arbitrary size.
@@ -24,8 +24,7 @@ public static void TestTree(ж<testing.T> Ꮡt) {
     ref var @base = ref heap(new nint(), out var Ꮡbase);
     foreach (var i in range(files)) {
         @base++;
-        ref var size = ref heap<nint>(out var Ꮡsize);
-        size = 1000;
+        ref var size = ref heap<nint>(1000, out var Ꮡsize);
         files[i] = Ꮡ(new ΔFile(@base: @base, size: size));
         @base += size;
     }
@@ -47,11 +46,11 @@ public static void TestTree(ж<testing.T> Ꮡt) {
         if (@file == nil) {
             continue; // already deleted
         }
-        files[i] = default!;
+        files[i] = default;
 
         var (pn, _) = Ꮡtr.locate(@file.key());
-        if ((~(pn.ValueSlot)).@file != @file) {
-            Ꮡt.Fatalf("locate returned wrong file"u8);
+        if ((pn.ValueSlot).@file != @file) {
+            t.Fatalf("locate returned wrong file");
         }
         tr.delete(pn);
     }
@@ -61,16 +60,16 @@ public static void TestTree(ж<testing.T> Ꮡt) {
         if (@file == nil) {
             continue; // deleted
         }
-        foreach (var (_, pos) in new nint[]{
-            (~@file).@base, // start
-            (~@file).@base + (~@file).size / 2, // midpoint
-            (~@file).@base + (~@file).size // end
-        }.slice()) {
+        foreach (var (_, pos) in slice<nint>([
+            @file.@base,                  // start
+            @file.@base + @file.size / 2, // midpoint
+            @file.@base + @file.size      // end
+        ])) {
             var (pn, _) = Ꮡtr.locate(new Δkey(pos, pos));
-            if ((~(pn.ValueSlot)).@file != @file) {
-                Ꮡt.Fatalf("lookup %s@%d returned wrong file %s"u8,
-                    (~@file).name, pos,
-                    (~(~(pn.ValueSlot)).@file).name);
+            if ((pn.ValueSlot).@file != @file) {
+                t.Fatalf("lookup %s@%d returned wrong file %s",
+                    @file.name, pos,
+                    (pn.ValueSlot).@file.name);
             }
         }
     }
@@ -78,7 +77,7 @@ public static void TestTree(ж<testing.T> Ꮡt) {
     // Check that the sequence is the same.
     files = slices.DeleteFunc(files, (ж<global::go.go.token_package.ΔFile> f) => f == nil);
     if (!slices.Equal<slice<ж<global::go.go.token_package.ΔFile>>, ж<global::go.go.token_package.ΔFile>>(slices.Collect(Ꮡtr.all()), files)) {
-        Ꮡt.Fatalf("incorrect tree.all sequence"u8);
+        t.Fatalf("incorrect tree.all sequence");
     }
 }
 

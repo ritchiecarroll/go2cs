@@ -260,7 +260,7 @@ public static Tag TagImportedModule => 0x3A;
 public static Tag TagUnspecifiedType => 0x3B;
 public static Tag TagPartialUnit => 0x3C;
 public static Tag TagImportedUnit => 0x3D;
-public static Tag TagMutableType => 0x3E;      // Later removed from DWARF.
+public static Tag TagMutableType => 0x3E; // Later removed from DWARF.
 public static Tag TagCondition => 0x3F;
 public static Tag TagSharedType => 0x40;
 // The following are new in DWARF 4.

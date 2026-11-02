@@ -61,7 +61,7 @@ public static void Swap(this ref multiSorter ms, nint i, nint j) {
 public static bool Less(this ref multiSorter ms, nint i, nint j) {
     var (p, q) = (Ꮡ(ms.changes, i), Ꮡ(ms.changes, j));
     // Try all but the last comparison.
-    nint k = default!;
+    nint k = default;
     for (k = 0; k < len(ms.less) - 1; k++) {
         var less = ms.less[k];
         switch (ᐧ) {
@@ -80,17 +80,17 @@ public static bool Less(this ref multiSorter ms, nint i, nint j) {
     return ms.less[k](p, q);
 }
 
-internal static slice<Change> changes = new Change[]{
-    new("gri"u8, "Go"u8, 100),
-    new("ken"u8, "C"u8, 150),
-    new("glenda"u8, "Go"u8, 200),
-    new("rsc"u8, "Go"u8, 200),
-    new("r"u8, "Go"u8, 100),
-    new("ken"u8, "Go"u8, 200),
-    new("dmr"u8, "C"u8, 100),
-    new("r"u8, "C"u8, 150),
-    new("gri"u8, "Smalltalk"u8, 80)
-}.slice();
+internal static slice<Change> changes = slice<Change>([
+    new("gri", "Go", 100),
+    new("ken", "C", 150),
+    new("glenda", "Go", 200),
+    new("rsc", "Go", 200),
+    new("r", "Go", 100),
+    new("ken", "Go", 200),
+    new("dmr", "C", 100),
+    new("r", "C", 150),
+    new("gri", "Smalltalk", 80)
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object byUserˢ = (@string)"By user:"u8;
@@ -104,11 +104,11 @@ internal static readonly object byLanguageLinesUserˢ = (@string)"By language,<l
 // which compares a single field.
 public static void Example_sortMultiKeys() {
     // Closures that order the Change structure.
-    var user = (ж<Change> c1, ж<Change> c2) => (~c1).user < (~c2).user;
-    var language = (ж<Change> c1, ж<Change> c2) => (~c1).language < (~c2).language;
-    var increasingLines = (ж<Change> c1, ж<Change> c2) => (~c1).lines < (~c2).lines;
+    var user = (ж<Change> c1, ж<Change> c2) => c1.user < c2.user;
+    var language = (ж<Change> c1, ж<Change> c2) => c1.language < c2.language;
+    var increasingLines = (ж<Change> c1, ж<Change> c2) => c1.lines < c2.lines;
     var decreasingLines = (ж<Change> c1, ж<Change> c2) => {
-        return (~c1).lines > (~c2).lines; // Note: > orders downwards.
+        return c1.lines > c2.lines; // Note: > orders downwards.
     };
 
     // Simple use: Sort by user.

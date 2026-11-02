@@ -15,9 +15,9 @@ using static go.image.jpeg_package;
 
 partial class jpeg_internal_test_package {
 
-internal static void benchmarkDCT(ж<testing.B> Ꮡb, Action<ж<global::go.image.jpeg_package.block>> f) {
-    ref var blk = ref heap(new global::go.image.jpeg_package.block(), out var Ꮡblk);                                       // avoid potential allocation in loop
-    while (Ꮡb.Loop()) {
+internal static void benchmarkDCT(ж<testing.B> b, Action<ж<global::go.image.jpeg_package.block>> f) {
+    ref var blk = ref heap(new global::go.image.jpeg_package.block(), out var Ꮡblk); // avoid potential allocation in loop
+    while (b.Loop()) {
         foreach (var (_, vᴛ1) in testBlocks.ΔRangeSnapshot()) {
             blk = vᴛ1.Clone();
 
@@ -26,24 +26,29 @@ internal static void benchmarkDCT(ж<testing.B> Ꮡb, Action<ж<global::go.image
     }
 }
 
-public static void BenchmarkFDCT(ж<testing.B> Ꮡb) {
-    benchmarkDCT(Ꮡb, fdct);
+public static void BenchmarkFDCT(ж<testing.B> b) {
+    benchmarkDCT(b, fdct);
 }
 
-public static void BenchmarkIDCT(ж<testing.B> Ꮡb) {
-    benchmarkDCT(Ꮡb, idct);
+public static void BenchmarkIDCT(ж<testing.B> b) {
+    benchmarkDCT(b, idct);
 }
 
 internal const bool testSlowVsBig = true;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string idctFdctˢ = "IDCT(FDCT)"u8;
-internal static readonly @string slowFDCTˢ = "slowFDCT"u8;
-internal static readonly @string slowIDCTˢ = "slowIDCT"u8;
-internal static readonly @string fdctˢ = "FDCT"u8;
-internal static readonly @string idctˢ = "IDCT"u8;
+internal static ref readonly @string idctFdctˢ => ref idctFdctˢᵇ;
+private static readonly @string idctFdctˢᵇ = "IDCT(FDCT)"u8;
+internal static ref readonly @string slowFDCTˢ => ref slowFDCTˢᵇ;
+private static readonly @string slowFDCTˢᵇ = "slowFDCT"u8;
+internal static ref readonly @string slowIDCTˢ => ref slowIDCTˢᵇ;
+private static readonly @string slowIDCTˢᵇ = "slowIDCT"u8;
+internal static ref readonly @string fdctˢ => ref fdctˢᵇ;
+private static readonly @string fdctˢᵇ = "FDCT"u8;
+internal static ref readonly @string idctˢ => ref idctˢᵇ;
+private static readonly @string idctˢᵇ = "IDCT"u8;
 
-public static void TestDCT(ж<testing.T> Ꮡt) {
+public static void TestDCT(ж<testing.T> t) {
     var blocks = GoReflect.WithElemDims(new slice<global::go.image.jpeg_package.block>(len(testBlocks)), 64);
     copy(blocks, GoReflect.WithElemDims(testBlocks[..], 64));
 
@@ -52,13 +57,13 @@ public static void TestDCT(ж<testing.T> Ꮡt) {
 
     // Every possible unit impulse.
     foreach (var i in range(blockSize)) {
-        global::go.image.jpeg_package.block b = default!;
+        global::go.image.jpeg_package.block b = default;
         b[i] = 255;
         blocks = append(blocks, b.Clone());
     }
 
     // All ones.
-    global::go.image.jpeg_package.block ones = default!;
+    global::go.image.jpeg_package.block ones = default;
     foreach (var i in range(ones)) {
         ones[i] = 255;
     }
@@ -96,21 +101,21 @@ public static void TestDCT(ж<testing.T> Ꮡt) {
     };
     var nop = (ж<global::go.image.jpeg_package.block> _) => {
     };
-    testDCT(Ꮡt, idctFdctˢ, blocks, slowRoundTrip, nop, 1, 8);
+    testDCT(t, idctFdctˢ, blocks, slowRoundTrip, nop, 1, 8);
 
     if (testSlowVsBig) {
-        testDCT(Ꮡt, slowFDCTˢ, blocks, slowFDCT, slowerFDCT, 0, 64);
-        testDCT(Ꮡt, slowIDCTˢ, blocks, slowIDCT, slowerIDCT, 0, 64);
+        testDCT(t, slowFDCTˢ, blocks, slowFDCT, slowerFDCT, 0, 64);
+        testDCT(t, slowIDCTˢ, blocks, slowIDCT, slowerIDCT, 0, 64);
     }
 
     // Check that the optimized and slow FDCT implementations agree.
-    testDCT(Ꮡt, fdctˢ, blocks, fdct, slowFDCT, 1, 8);
-    testDCT(Ꮡt, idctˢ, blocks, idct, slowIDCT, 1, 8);
+    testDCT(t, fdctˢ, blocks, fdct, slowFDCT, 1, 8);
+    testDCT(t, idctˢ, blocks, idct, slowIDCT, 1, 8);
 }
 
-internal static void testDCT(ж<testing.T> Ꮡt, @string name, slice<global::go.image.jpeg_package.block> blocks, Action<ж<global::go.image.jpeg_package.block>> fhave, Action<ж<global::go.image.jpeg_package.block>> fwant, int32 tolerance, nint maxCloseCalls) {
+internal static void testDCT(ж<testing.T> t, @string name, slice<global::go.image.jpeg_package.block> blocks, Action<ж<global::go.image.jpeg_package.block>> fhave, Action<ж<global::go.image.jpeg_package.block>> fwant, int32 tolerance, nint maxCloseCalls) {
     var blocksʗ1 = blocks;
-    Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+    t.Run(name, (ж<testing.T> tΔ1) => {
         nint totalClose = 0;
         foreach (var (i, vᴛ1) in blocksʗ1) {
             ref var b = ref heap(new global::go.image.jpeg_package.block(), out var Ꮡb);
@@ -134,13 +139,13 @@ internal static void testDCT(ж<testing.T> Ꮡt, @string name, slice<global::go.
                     }
                     fail += fmt.Sprintf("%d close calls"u8, n);
                 }
-                tΔ1.Errorf("i=%d: %s (%s)\nsrc\n%s\nhave\n%s\nwant\n%s\n"u8,
+                tΔ1.Errorf("i=%d: %s (%s)\nsrc\n%s\nhave\n%s\nwant\n%s\n",
                     i, name, fail, Ꮡb, Ꮡhave, Ꮡwant);
             }
             totalClose += n;
         }
         if (tolerance > 0) {
-            tΔ1.Logf("%d/%d total close calls"u8, totalClose, len(blocksʗ1) * (nint)blockSize);
+            tΔ1.Logf("%d/%d total close calls", totalClose, len(blocksʗ1) * (nint)blockSize);
         }
     });
 }
@@ -155,8 +160,8 @@ internal static void testDCT(ж<testing.T> Ꮡt, @string name, slice<global::go.
 //
 // If there are no differences, differ returns -1, 0.
 internal static (nint index, nint closeCalls) differ(ж<global::go.image.jpeg_package.block> Ꮡb0, ж<global::go.image.jpeg_package.block> Ꮡb1, int32 ok) {
-    nint index = default!;
-    nint closeCalls = default!;
+    nint index = default;
+    nint closeCalls = default;
     ref var b0 = ref Ꮡb0.DerefOrNull();
     ref var b1 = ref Ꮡb1.DerefOrNull();
 
@@ -226,7 +231,7 @@ internal static array<float64> cosines = new float64[]{
     +0.7071067811865475244008443621048490392848359376884740365883398689D, // cos(π/16 * 28)
     +0.8314696123025452370787883776179057567385608119872499634461245902D, // cos(π/16 * 29)
     +0.9238795325112867561281831893967882868224166258636424861150977312D, // cos(π/16 * 30)
-    +0.9807852804032304491261822361342390369739337308933360950029160885D // cos(π/16 * 31)
+    +0.9807852804032304491261822361342390369739337308933360950029160885D  // cos(π/16 * 31)
 }.array();
 
 internal static ж<big.Float> bigFloat(@string s) {
@@ -238,44 +243,44 @@ internal static ж<big.Float> bigFloat(@string s) {
 }
 
 internal static ж<big.Float> bigFloat1 = big.NewFloat(1D);
-internal static ж<big.Float> bigFloatSqrt2 = bigFloat("1.41421356237309504880168872420969807856967187537694807317667974"u8);
+internal static ж<big.Float> bigFloatSqrt2 = bigFloat("1.41421356237309504880168872420969807856967187537694807317667974");
 
 internal static array<ж<big.Float>> bigCosines = new ж<big.Float>[]{
-    bigFloat("+1.0000000000000000000000000000000000000000000000000000000000000000"u8), // cos(π/16 *  0)
-    bigFloat("+0.9807852804032304491261822361342390369739337308933360950029160885"u8), // cos(π/16 *  1)
-    bigFloat("+0.9238795325112867561281831893967882868224166258636424861150977312"u8), // cos(π/16 *  2)
-    bigFloat("+0.8314696123025452370787883776179057567385608119872499634461245902"u8), // cos(π/16 *  3)
-    bigFloat("+0.7071067811865475244008443621048490392848359376884740365883398689"u8), // cos(π/16 *  4)
-    bigFloat("+0.5555702330196022247428308139485328743749371907548040459241535282"u8), // cos(π/16 *  5)
-    bigFloat("+0.3826834323650897717284599840303988667613445624856270414338006356"u8), // cos(π/16 *  6)
-    bigFloat("+0.1950903220161282678482848684770222409276916177519548077545020894"u8), // cos(π/16 *  7)
+    bigFloat("+1.0000000000000000000000000000000000000000000000000000000000000000"), // cos(π/16 *  0)
+    bigFloat("+0.9807852804032304491261822361342390369739337308933360950029160885"), // cos(π/16 *  1)
+    bigFloat("+0.9238795325112867561281831893967882868224166258636424861150977312"), // cos(π/16 *  2)
+    bigFloat("+0.8314696123025452370787883776179057567385608119872499634461245902"), // cos(π/16 *  3)
+    bigFloat("+0.7071067811865475244008443621048490392848359376884740365883398689"), // cos(π/16 *  4)
+    bigFloat("+0.5555702330196022247428308139485328743749371907548040459241535282"), // cos(π/16 *  5)
+    bigFloat("+0.3826834323650897717284599840303988667613445624856270414338006356"), // cos(π/16 *  6)
+    bigFloat("+0.1950903220161282678482848684770222409276916177519548077545020894"), // cos(π/16 *  7)
 
-    bigFloat("-0.0000000000000000000000000000000000000000000000000000000000000000"u8), // cos(π/16 *  8)
-    bigFloat("-0.1950903220161282678482848684770222409276916177519548077545020894"u8), // cos(π/16 *  9)
-    bigFloat("-0.3826834323650897717284599840303988667613445624856270414338006356"u8), // cos(π/16 * 10)
-    bigFloat("-0.5555702330196022247428308139485328743749371907548040459241535282"u8), // cos(π/16 * 11)
-    bigFloat("-0.7071067811865475244008443621048490392848359376884740365883398689"u8), // cos(π/16 * 12)
-    bigFloat("-0.8314696123025452370787883776179057567385608119872499634461245902"u8), // cos(π/16 * 13)
-    bigFloat("-0.9238795325112867561281831893967882868224166258636424861150977312"u8), // cos(π/16 * 14)
-    bigFloat("-0.9807852804032304491261822361342390369739337308933360950029160885"u8), // cos(π/16 * 15)
+    bigFloat("-0.0000000000000000000000000000000000000000000000000000000000000000"), // cos(π/16 *  8)
+    bigFloat("-0.1950903220161282678482848684770222409276916177519548077545020894"), // cos(π/16 *  9)
+    bigFloat("-0.3826834323650897717284599840303988667613445624856270414338006356"), // cos(π/16 * 10)
+    bigFloat("-0.5555702330196022247428308139485328743749371907548040459241535282"), // cos(π/16 * 11)
+    bigFloat("-0.7071067811865475244008443621048490392848359376884740365883398689"), // cos(π/16 * 12)
+    bigFloat("-0.8314696123025452370787883776179057567385608119872499634461245902"), // cos(π/16 * 13)
+    bigFloat("-0.9238795325112867561281831893967882868224166258636424861150977312"), // cos(π/16 * 14)
+    bigFloat("-0.9807852804032304491261822361342390369739337308933360950029160885"), // cos(π/16 * 15)
 
-    bigFloat("-1.0000000000000000000000000000000000000000000000000000000000000000"u8), // cos(π/16 * 16)
-    bigFloat("-0.9807852804032304491261822361342390369739337308933360950029160885"u8), // cos(π/16 * 17)
-    bigFloat("-0.9238795325112867561281831893967882868224166258636424861150977312"u8), // cos(π/16 * 18)
-    bigFloat("-0.8314696123025452370787883776179057567385608119872499634461245902"u8), // cos(π/16 * 19)
-    bigFloat("-0.7071067811865475244008443621048490392848359376884740365883398689"u8), // cos(π/16 * 20)
-    bigFloat("-0.5555702330196022247428308139485328743749371907548040459241535282"u8), // cos(π/16 * 21)
-    bigFloat("-0.3826834323650897717284599840303988667613445624856270414338006356"u8), // cos(π/16 * 22)
-    bigFloat("-0.1950903220161282678482848684770222409276916177519548077545020894"u8), // cos(π/16 * 23)
+    bigFloat("-1.0000000000000000000000000000000000000000000000000000000000000000"), // cos(π/16 * 16)
+    bigFloat("-0.9807852804032304491261822361342390369739337308933360950029160885"), // cos(π/16 * 17)
+    bigFloat("-0.9238795325112867561281831893967882868224166258636424861150977312"), // cos(π/16 * 18)
+    bigFloat("-0.8314696123025452370787883776179057567385608119872499634461245902"), // cos(π/16 * 19)
+    bigFloat("-0.7071067811865475244008443621048490392848359376884740365883398689"), // cos(π/16 * 20)
+    bigFloat("-0.5555702330196022247428308139485328743749371907548040459241535282"), // cos(π/16 * 21)
+    bigFloat("-0.3826834323650897717284599840303988667613445624856270414338006356"), // cos(π/16 * 22)
+    bigFloat("-0.1950903220161282678482848684770222409276916177519548077545020894"), // cos(π/16 * 23)
 
-    bigFloat("+0.0000000000000000000000000000000000000000000000000000000000000000"u8), // cos(π/16 * 24)
-    bigFloat("+0.1950903220161282678482848684770222409276916177519548077545020894"u8), // cos(π/16 * 25)
-    bigFloat("+0.3826834323650897717284599840303988667613445624856270414338006356"u8), // cos(π/16 * 26)
-    bigFloat("+0.5555702330196022247428308139485328743749371907548040459241535282"u8), // cos(π/16 * 27)
-    bigFloat("+0.7071067811865475244008443621048490392848359376884740365883398689"u8), // cos(π/16 * 28)
-    bigFloat("+0.8314696123025452370787883776179057567385608119872499634461245902"u8), // cos(π/16 * 29)
-    bigFloat("+0.9238795325112867561281831893967882868224166258636424861150977312"u8), // cos(π/16 * 30)
-    bigFloat("+0.9807852804032304491261822361342390369739337308933360950029160885"u8) // cos(π/16 * 31)
+    bigFloat("+0.0000000000000000000000000000000000000000000000000000000000000000"), // cos(π/16 * 24)
+    bigFloat("+0.1950903220161282678482848684770222409276916177519548077545020894"), // cos(π/16 * 25)
+    bigFloat("+0.3826834323650897717284599840303988667613445624856270414338006356"), // cos(π/16 * 26)
+    bigFloat("+0.5555702330196022247428308139485328743749371907548040459241535282"), // cos(π/16 * 27)
+    bigFloat("+0.7071067811865475244008443621048490392848359376884740365883398689"), // cos(π/16 * 28)
+    bigFloat("+0.8314696123025452370787883776179057567385608119872499634461245902"), // cos(π/16 * 29)
+    bigFloat("+0.9238795325112867561281831893967882868224166258636424861150977312"), // cos(π/16 * 30)
+    bigFloat("+0.9807852804032304491261822361342390369739337308933360950029160885")  // cos(π/16 * 31)
 }.array();
 
 // slowFDCT performs the 8*8 2-dimensional forward discrete cosine transform:
@@ -290,7 +295,7 @@ internal static array<ж<big.Float>> bigCosines = new ж<big.Float>[]{
 internal static void slowFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    global::go.image.jpeg_package.block dst = default!;
+    global::go.image.jpeg_package.block dst = default;
     for (nint v = 0; v < 8; v++) {
         for (nint u = 0; u < 8; u++) {
             var sum = 0.0D;
@@ -309,7 +314,7 @@ internal static void slowFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
 internal static void slowerFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    global::go.image.jpeg_package.block dst = default!;
+    global::go.image.jpeg_package.block dst = default;
     for (nint v = 0; v < 8; v++) {
         for (nint u = 0; u < 8; u++) {
             var sum = big.NewFloat(0D);
@@ -325,7 +330,7 @@ internal static void slowerFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
             }
             // Int64 truncates toward zero, so add ±0.5
             // as needed to round
-            if (sum.Sign() > 0){
+            if (sum.Sign() > 0) {
                 sum = @new<big.Float>().Add(sum, big.NewFloat(+0.5D));
             } else {
                 sum = @new<big.Float>().Add(sum, big.NewFloat(-0.5D));
@@ -349,7 +354,7 @@ internal static void slowerFDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
 internal static void slowIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    global::go.image.jpeg_package.block dst = default!;
+    global::go.image.jpeg_package.block dst = default;
     for (nint y = 0; y < 8; y++) {
         for (nint x = 0; x < 8; x++) {
             var sum = 0.0D;
@@ -368,7 +373,7 @@ internal static void slowIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
 internal static void slowerIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    global::go.image.jpeg_package.block dst = default!;
+    global::go.image.jpeg_package.block dst = default;
     for (nint y = 0; y < 8; y++) {
         for (nint x = 0; x < 8; x++) {
             var sum = big.NewFloat(0D);
@@ -385,7 +390,7 @@ internal static void slowerIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
             }
             // Int64 truncates toward zero, so add ±0.5
             // as needed to round
-            if (sum.Sign() > 0){
+            if (sum.Sign() > 0) {
                 sum = @new<big.Float>().Add(sum, big.NewFloat(+0.5D));
             } else {
                 sum = @new<big.Float>().Add(sum, big.NewFloat(-0.5D));
@@ -398,7 +403,7 @@ internal static void slowerIDCT(ж<global::go.image.jpeg_package.block> Ꮡb) {
 }
 
 internal static @string String(this ref global::go.image.jpeg_package.block b) {
-    var s = Ꮡ(new strings.Builder(nil));
+    var s = Ꮡ(new strings.Builder());
     fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(s), "{\n"u8);
     for (nint y = 0; y < 8; y++) {
         fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(s), "\t"u8);

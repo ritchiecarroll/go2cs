@@ -15,16 +15,18 @@ partial class time_package {
 // Many systems use /usr/share/zoneinfo, Solaris 2 has
 // /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ,
 // NixOS has /etc/zoneinfo.
-internal static slice<@string> platformZoneSources = new @string[]{
-    "/usr/share/zoneinfo/"u8,
-    "/usr/share/lib/zoneinfo/"u8,
-    "/usr/lib/locale/TZ/"u8,
-    "/etc/zoneinfo"u8
-}.slice();
+internal static slice<@string> platformZoneSources = slice<@string>([
+    "/usr/share/zoneinfo/",
+    "/usr/share/lib/zoneinfo/",
+    "/usr/lib/locale/TZ/",
+    "/etc/zoneinfo"
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string localtimeˢ = "localtime"u8;
-internal static readonly @string localˢ = "Local"u8;
+internal static ref readonly @string localtimeˢ => ref localtimeˢᵇ;
+private static readonly @string localtimeˢᵇ = "localtime"u8;
+internal static ref readonly @string localˢ => ref localˢᵇ;
+private static readonly @string localˢᵇ = "Local"u8;
 
 internal static void initLocal() {
     // consult $TZ to find the time zone to use.
@@ -34,11 +36,11 @@ internal static void initLocal() {
     // by foo will be used to initialize timezone; otherwise, file
     // /usr/share/zoneinfo/foo will be used.
 
-    var (tz, ok) = syscall.Getenv("TZ"u8);
+    var (tz, ok) = syscall.Getenv("TZ");
     switch (ᐧ) {
     case {} when !ok: {
-        var (z, err) = loadLocation(localtimeˢ, new @string[]{"/etc"u8}.slice());
-        if (err == default!) {
+        var (z, err) = loadLocation(localtimeˢ, slice<@string>(["/etc"]));
+        if (err == nil) {
             localLoc = z.Value;
             localLoc.name = localˢ;
             return;
@@ -46,14 +48,14 @@ internal static void initLocal() {
         break;
     }
     case {} when tz != ""u8: {
-        if (tz[0] == (rune)':') {
+        if (tz[0] == ':') {
             tz = tz[1..];
         }
-        if (tz != ""u8 && tz[0] == (rune)'/'){
+        if (tz != ""u8 && tz[0] == '/') {
             {
-                var (z, err) = loadLocation(tz, new @string[]{""u8}.slice()); if (err == default!) {
+                var (z, err) = loadLocation(tz, slice<@string>([""])); if (err == nil) {
                     localLoc = z.Value;
-                    if (tz == "/etc/localtime"u8){
+                    if (tz == "/etc/localtime"u8) {
                         localLoc.name = localˢ;
                     } else {
                         localLoc.name = tz;
@@ -61,10 +63,9 @@ internal static void initLocal() {
                     return;
                 }
             }
-        } else 
-        if (tz != ""u8 && tz != "UTC"u8) {
+        } else if (tz != ""u8 && tz != "UTC"u8) {
             {
-                var (z, err) = loadLocation(tz, platformZoneSources); if (err == default!) {
+                var (z, err) = loadLocation(tz, platformZoneSources); if (err == nil) {
                     localLoc = z.Value;
                     return;
                 }

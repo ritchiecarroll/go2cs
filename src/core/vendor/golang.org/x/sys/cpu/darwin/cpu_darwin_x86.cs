@@ -32,7 +32,7 @@ internal static bool darwinSupportsAVX512() {
 internal static bool darwinKernelVersionCheck(nint major, nint minor, nint patch) {
     ref var release = ref heap(new array<byte>(256), out var Ꮡrelease);
     var err = darwinOSRelease(Ꮡrelease);
-    if (err != default!) {
+    if (err != nil) {
         return false;
     }
 
@@ -41,11 +41,11 @@ internal static bool darwinKernelVersionCheck(nint major, nint minor, nint patch
 Loop:
     foreach (var (_, b) in release[..]) {
         switch (ᐧ) {
-        case {} when b >= (rune)'0' && b <= (rune)'9': {
-            mmp[c] = 10 * mmp[c] + (nint)((byte)(b - (rune)'0'));
+        case {} when b >= (byte)'0' && b <= (byte)'9': {
+            mmp[c] = 10 * mmp[c] + (nint)((byte)(b - '0'));
             break;
         }
-        case {} when b is (rune)'.': {
+        case {} when b is (byte)'.': {
             c++;
             if (c > 2) {
                 return false;

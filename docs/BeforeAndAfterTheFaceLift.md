@@ -36,7 +36,7 @@ Before, `src/core/strings/builder.cs`:
 
 After, the same file:
 
-<!-- source: src/core/strings/builder.cs:54 -->
+<!-- source: src/core/strings/builder.cs:53 -->
 ```csharp
 public static nint Len(this ref Builder b) {
 ```
@@ -74,7 +74,7 @@ After, the same file:
 ```csharp
 partial struct List {
     internal Element root; // sentinel list element, only &root, root.prev, and root.next are used
-    internal nint len;    // current list length excluding (this) sentinel element
+    internal nint len;     // current list length excluding (this) sentinel element
 }
 ```
 
@@ -268,7 +268,7 @@ Before, `src/core/unicode/utf8/utf8.cs`:
 
 After, the same file:
 
-<!-- source: src/core/unicode/utf8/utf8.cs:218 -->
+<!-- source: src/core/unicode/utf8/utf8.cs:216 -->
 ```csharp
 public static (rune r, nint size) DecodeRuneInString(sstring s) {
 ```

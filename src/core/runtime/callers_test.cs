@@ -35,12 +35,12 @@ internal partial struct testCallers_want /*dyn*/ {
     internal nint line;
 }
 
-internal static void testCallers(ж<testing.T> Ꮡt, slice<uintptr> pcs, bool pan) {
+internal static void testCallers(ж<testing.T> t, slice<uintptr> pcs, bool pan) {
     var seenᴷ = new stackAppend<@string>();
 
     var m = new map<@string, nint>(len(pcs));
     var frames = Δruntime.CallersFrames(pcs);
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         if (frame.Function != ""u8) {
             m[frame.Function] = frame.Line;
@@ -50,39 +50,39 @@ internal static void testCallers(ж<testing.T> Ꮡt, slice<uintptr> pcs, bool pa
         }
     }
 
-    slice<@string> seen = default!;
+    slice<@string> seen = default;
     foreach (var (k, _) in m) {
         seen = append(seenᴷ, seen, k);
     }
-    Ꮡt.Logf("functions seen: %s"u8, strings.Join(seen, " "u8));
+    t.Logf("functions seen: %s", strings.Join(seen, " "));
 
-    nint f3Line = default!;
-    if (pan){
+    nint f3Line = default;
+    if (pan) {
         f3Line = 24;
     } else {
         f3Line = 27;
     }
-    var want = new testCallers_want[]{
-        new("f1"u8, 15),
-        new("f2"u8, 19),
-        new("f3"u8, f3Line)
-    }.slice();
+    var want = slice<testCallers_want>([
+        new("f1", 15),
+        new("f2", 19),
+        new("f3", f3Line)
+    ]);
     foreach (var (_, w) in want) {
         {
             nint got = m["runtime_test."u8 + w.name]; if (got != w.line) {
-                Ꮡt.Errorf("%s is line %d, want %d"u8, w.name, got, w.line);
+                t.Errorf("%s is line %d, want %d", w.name, got, w.line);
             }
         }
     }
 }
 
-internal static void testCallersEqual(ж<testing.T> Ꮡt, slice<uintptr> pcs, slice<@string> want) {
-    Ꮡt.Helper();
+internal static void testCallersEqual(ж<testing.T> t, slice<uintptr> pcs, slice<@string> want) {
+    t.Helper();
 
     var got = new slice<@string>(0, len(want));
 
     var frames = Δruntime.CallersFrames(pcs);
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         if (!more || len(got) >= len(want)) {
             break;
@@ -90,37 +90,37 @@ internal static void testCallersEqual(ж<testing.T> Ꮡt, slice<uintptr> pcs, sl
         got = append(got, frame.Function);
     }
     if (!slices.Equal<slice<@string>, @string>(want, got)) {
-        Ꮡt.Fatalf("wanted %v, got %v"u8, want, got);
+        t.Fatalf("wanted %v, got %v", want, got);
     }
 }
 
-public static void TestCallers(ж<testing.T> Ꮡt) {
-    testCallers(Ꮡt, f1(false), false);
+public static void TestCallers(ж<testing.T> t) {
+    testCallers(t, f1(false), false);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object didNotPanicˢ = (@string)"did not panic"u8;
 
-public static partial void TestCallersPanic(ж<testing.T> Ꮡt) {
+public static partial void TestCallersPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Make sure we don't have any extra frames on the stack (due to
         // open-coded defer processing)
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersPanic.func1"u8,
-            "runtime.gopanic"u8, "runtime_test.f3"u8, "runtime_test.f2"u8, "runtime_test.f1"u8,
-            "runtime_test.TestCallersPanic"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersPanic.func1",
+            "runtime.gopanic", "runtime_test.f3", "runtime_test.f2", "runtime_test.f1",
+            "runtime_test.TestCallersPanic"]);
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallers(Ꮡt, pcs, true);
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallers(t, pcs, true);
+            testCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
         f1(true);
     }
@@ -128,13 +128,13 @@ public static partial void TestCallersPanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestCallersDoublePanic(ж<testing.T> Ꮡt) {
+public static partial void TestCallersDoublePanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Make sure we don't have any extra frames on the stack (due to
         // open-coded defer processing)
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersDoublePanic.func1.1"u8,
-            "runtime.gopanic"u8, "runtime_test.TestCallersDoublePanic.func1"u8, "runtime.gopanic"u8, "runtime_test.TestCallersDoublePanic"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersDoublePanic.func1.1",
+            "runtime.gopanic", "runtime_test.TestCallersDoublePanic.func1", "runtime.gopanic", "runtime_test.TestCallersDoublePanic"]);
 
         var wantʗ1 = want;
         defer(() => {
@@ -144,13 +144,13 @@ public static partial void TestCallersDoublePanic(ж<testing.T> Ꮡt) {
                 defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
                     var pcs = new slice<uintptr>(20);
                     pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-                    if (recover() == default!) {
-                        Ꮡt.Fatal(didNotPanicˢ);
+                    if (recover() == nil) {
+                        t.Fatal(didNotPanicˢ);
                     }
-                    testCallersEqual(Ꮡt, pcs, wantʗ2);
+                    testCallersEqual(t, pcs, wantʗ2);
                 }, ref ᒐ);
-                if (recover() == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                if (recover() == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
                 throw panic((nint)2);
             }
@@ -168,20 +168,20 @@ internal static readonly object didNotRecoverFromPanicˢ = (@string)"did not rec
 
 // Test that a defer after a successful recovery looks like it is called directly
 // from the function with the defers.
-public static partial void TestCallersAfterRecovery(ж<testing.T> Ꮡt) {
+public static partial void TestCallersAfterRecovery(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersAfterRecovery.func1"u8, "runtime_test.TestCallersAfterRecovery"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersAfterRecovery.func1", "runtime_test.TestCallersAfterRecovery"]);
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
         defer(() => {
-            if (recover() == default!) {
-                Ꮡt.Fatal(didNotRecoverFromPanicˢ);
+            if (recover() == nil) {
+                t.Fatal(didNotRecoverFromPanicˢ);
             }
         }, ref ᒐ);
         throw panic((nint)1);
@@ -193,15 +193,15 @@ public static partial void TestCallersAfterRecovery(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object panic2ˢ = (@string)"panic2"u8;
 
-public static partial void TestCallersAbortedPanic(ж<testing.T> Ꮡt) {
+public static partial void TestCallersAbortedPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersAbortedPanic.func2"u8, "runtime_test.TestCallersAbortedPanic"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersAbortedPanic.func2", "runtime_test.TestCallersAbortedPanic"]);
 
         defer(() => {
             var r = recover();
-            if (r != default!) {
-                Ꮡt.Fatalf("should be no panic remaining to recover"u8);
+            if (r != nil) {
+                t.Fatalf("should be no panic remaining to recover");
             }
         }, ref ᒐ);
 
@@ -211,12 +211,12 @@ public static partial void TestCallersAbortedPanic(ж<testing.T> Ꮡt) {
             // recovered, there is no remaining panic on the stack.
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
         defer(() => {
             var r = recover();
             if (!AreEqual(r, (@string)("panic2"))) {
-                Ꮡt.Fatalf("got %v, wanted %v"u8, r, panic2ˢ);
+                t.Fatalf("got %v, wanted %v", r, panic2ˢ);
             }
         }, ref ᒐ);
         defer(() => {
@@ -231,32 +231,32 @@ public static partial void TestCallersAbortedPanic(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestCallersAbortedPanic2(ж<testing.T> Ꮡt) {
+public static partial void TestCallersAbortedPanic2(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersAbortedPanic2.func2"u8, "runtime_test.TestCallersAbortedPanic2"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersAbortedPanic2.func2", "runtime_test.TestCallersAbortedPanic2"]);
         defer(() => {
             var r = recover();
-            if (r != default!) {
-                Ꮡt.Fatalf("should be no panic remaining to recover"u8);
+            if (r != nil) {
+                t.Fatalf("should be no panic remaining to recover");
             }
         }, ref ᒐ);
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
                     var r = recover();
                     if (!AreEqual(r, (@string)("panic2"))) {
-                        Ꮡt.Fatalf("got %v, wanted %v"u8, r, panic2ˢ);
+                        t.Fatalf("got %v, wanted %v", r, panic2ˢ);
                     }
                 }, ref ᒐ);
-                ((Action)(() => {
+                func(() => {
                     GoFrame ᒐ = default;
                     try {
                         defer(() => {
@@ -267,11 +267,11 @@ public static partial void TestCallersAbortedPanic2(ж<testing.T> Ꮡt) {
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
-                }))();
+                })();
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -280,29 +280,29 @@ public static partial void TestCallersAbortedPanic2(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object didNotSeeNilPointerPanicˢ = (@string)"did not see nil pointer panic"u8;
 
-public static partial void TestCallersNilPointerPanic(ж<testing.T> Ꮡt) {
+public static partial void TestCallersNilPointerPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Make sure we don't have any extra frames on the stack (due to
         // open-coded defer processing)
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersNilPointerPanic.func1"u8,
-            "runtime.gopanic"u8, "runtime.panicmem"u8, "runtime.sigpanic"u8,
-            "runtime_test.TestCallersNilPointerPanic"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersNilPointerPanic.func1",
+            "runtime.gopanic", "runtime.panicmem", "runtime.sigpanic",
+            "runtime_test.TestCallersNilPointerPanic"]);
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
-        ж<nint> p = default!;
+        ж<nint> p = default;
         if (p.Value == 3) {
-            Ꮡt.Fatal(didNotSeeNilPointerPanicˢ);
+            t.Fatal(didNotSeeNilPointerPanicˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -312,29 +312,29 @@ public static partial void TestCallersNilPointerPanic(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object didNotSeeDivideBySizerˢ = (@string)"did not see divide-by-sizer panic"u8;
 
-public static partial void TestCallersDivZeroPanic(ж<testing.T> Ꮡt) {
+public static partial void TestCallersDivZeroPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Make sure we don't have any extra frames on the stack (due to
         // open-coded defer processing)
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersDivZeroPanic.func1"u8,
-            "runtime.gopanic"u8, "runtime.panicdivide"u8,
-            "runtime_test.TestCallersDivZeroPanic"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersDivZeroPanic.func1",
+            "runtime.gopanic", "runtime.panicdivide",
+            "runtime_test.TestCallersDivZeroPanic"]);
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
         }, ref ᒐ);
-        nint n = default!;
+        nint n = default;
         if (5 / n == 1) {
-            Ꮡt.Fatal(didNotSeeDivideBySizerˢ);
+            t.Fatal(didNotSeeDivideBySizerˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -344,7 +344,7 @@ public static partial void TestCallersDivZeroPanic(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object nilDeferFuncPanickedAtˢ = (@string)"nil defer func panicked at defer time rather than function exit time"u8;
 
-public static partial void TestCallersDeferNilFuncPanic(ж<testing.T> Ꮡt) {
+public static partial void TestCallersDeferNilFuncPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Make sure we don't have any extra frames on the stack. We cut off the check
@@ -352,24 +352,24 @@ public static partial void TestCallersDeferNilFuncPanic(ж<testing.T> Ꮡt) {
         // non-opt or race checker mode) include an extra 'deferreturn' frame (which is
         // where the nil pointer deref happens).
         nint state = 1;
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersDeferNilFuncPanic.func1"u8,
-            "runtime.gopanic"u8, "runtime.panicmem"u8, "runtime.sigpanic"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersDeferNilFuncPanic.func1",
+            "runtime.gopanic", "runtime.panicmem", "runtime.sigpanic"]);
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
             if (state == 1) {
-                Ꮡt.Fatal(nilDeferFuncPanickedAtˢ);
+                t.Fatal(nilDeferFuncPanickedAtˢ);
             }
         }, ref ᒐ);
-        Action f = default!;
+        Action f = default;
         var fʗ1 = f;
         defer(fʗ1, ref ᒐ);
         // Use the value of 'state' to make sure nil defer func f causes panic at
@@ -382,30 +382,30 @@ public static partial void TestCallersDeferNilFuncPanic(ж<testing.T> Ꮡt) {
 
 // Same test, but forcing non-open-coded defer by putting the defer in a loop.  See
 // issue #36050
-public static partial void TestCallersDeferNilFuncPanicWithLoop(ж<testing.T> Ꮡt) {
+public static partial void TestCallersDeferNilFuncPanicWithLoop(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         nint state = 1;
-        var want = new @string[]{"runtime.Callers"u8, "runtime_test.TestCallersDeferNilFuncPanicWithLoop.func1"u8,
-            "runtime.gopanic"u8, "runtime.panicmem"u8, "runtime.sigpanic"u8, "runtime.deferreturn"u8, "runtime_test.TestCallersDeferNilFuncPanicWithLoop"u8}.slice();
+        var want = slice<@string>(["runtime.Callers", "runtime_test.TestCallersDeferNilFuncPanicWithLoop.func1",
+            "runtime.gopanic", "runtime.panicmem", "runtime.sigpanic", "runtime.deferreturn", "runtime_test.TestCallersDeferNilFuncPanicWithLoop"]);
 
         var wantʗ1 = want;
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
-                var r = recover(); if (r == default!) {
-                    Ꮡt.Fatal(didNotPanicˢ);
+                var r = recover(); if (r == nil) {
+                    t.Fatal(didNotPanicˢ);
                 }
             }
             var pcs = new slice<uintptr>(20);
             pcs = pcs.slice(0, Δruntime.Callers(0, pcs));
-            testCallersEqual(Ꮡt, pcs, wantʗ1);
+            testCallersEqual(t, pcs, wantʗ1);
             if (state == 1) {
-                Ꮡt.Fatal(nilDeferFuncPanickedAtˢ);
+                t.Fatal(nilDeferFuncPanickedAtˢ);
             }
         }, ref ᒐ);
 
         for (nint i = 0; i < 1; i++) {
-            Action f = default!;
+            Action f = default;
             var fʗ1 = f;
             defer(fʗ1, ref ᒐ);
         }
@@ -420,60 +420,63 @@ public static partial void TestCallersDeferNilFuncPanicWithLoop(ж<testing.T> �
 // issue #51988
 // Func.Endlineno was lost when instantiating generic functions, leading to incorrect
 // stack trace positions.
-public static void TestCallersEndlineno(ж<testing.T> Ꮡt) {
-    testNormalEndlineno(Ꮡt);
-    testGenericEndlineno<nint>(Ꮡt);
+public static void TestCallersEndlineno(ж<testing.T> t) {
+    testNormalEndlineno(t);
+    testGenericEndlineno<nint>(t);
 }
 
-internal static void testNormalEndlineno(ж<testing.T> Ꮡt) {
+internal static void testNormalEndlineno(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(testCallerLine, Ꮡt, callerLine(Ꮡt, 0) + 1, ref ᒐ);
+        defer(testCallerLine, t, callerLine(t, 0) + 1, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-internal static void testGenericEndlineno<_>(ж<testing.T> Ꮡt) {
+internal static void testGenericEndlineno<_>(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(testCallerLine, Ꮡt, callerLine(Ꮡt, 0) + 1, ref ᒐ);
+        defer(testCallerLine, t, callerLine(t, 0) + 1, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-internal static partial void testCallerLine(ж<testing.T> Ꮡt, nint want) {
+internal static partial void testCallerLine(ж<testing.T> t, nint want) {
     {
-        nint have = callerLine(Ꮡt, 1); if (have != want) {
-            Ꮡt.Errorf("callerLine(1) returned %d, but want %d\n"u8, have, want);
+        nint have = callerLine(t, 1); if (have != want) {
+            t.Errorf("callerLine(1) returned %d, but want %d\n", have, want);
         }
     }
 }
 
-internal static partial nint callerLine(ж<testing.T> Ꮡt, nint skip) {
+internal static partial nint callerLine(ж<testing.T> t, nint skip) {
     var (_, _, line, ok) = Δruntime.Caller(skip + 1);
     if (!ok) {
-        Ꮡt.Fatalf("runtime.Caller(%d) failed"u8, skip + 1);
+        t.Fatalf("runtime.Caller(%d) failed", skip + 1);
     }
     return line;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cachedˢ = "cached"u8;
-internal static readonly @string inlinedˢ = "inlined"u8;
-internal static readonly @string noCacheˢ = "no-cache"u8;
+internal static ref readonly @string cachedˢ => ref cachedˢᵇ;
+private static readonly @string cachedˢᵇ = "cached"u8;
+internal static ref readonly @string inlinedˢ => ref inlinedˢᵇ;
+private static readonly @string inlinedˢᵇ = "inlined"u8;
+internal static ref readonly @string noCacheˢ => ref noCacheˢᵇ;
+private static readonly @string noCacheˢᵇ = "no-cache"u8;
 
-public static void BenchmarkCallers(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(cachedˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
+public static void BenchmarkCallers(ж<testing.B> b) {
+    b.Run(cachedˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
         // Very pcvalueCache-friendly, no inlining.
         callersCached(bΔ1, 100);
     });
-    Ꮡb.Run(inlinedˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
+    b.Run(inlinedˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
         // Some inlining, still pretty cache-friendly.
         callersInlined(bΔ2, 100);
     });
-    Ꮡb.Run(noCacheˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ3) => {
+    b.Run(noCacheˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ3) => {
         // Cache-hostile
         callersNoCache(bΔ3, 100);
     });
@@ -509,20 +512,20 @@ internal static partial nint callersInlined(ж<testing.B> Ꮡb, nint n) {
     return 1 + callersInlined1(Ꮡb, n - 1);
 }
 
-internal static partial nint callersInlined1(ж<testing.B> Ꮡb, nint n) {
-    return callersInlined2(Ꮡb, n);
+internal static partial nint callersInlined1(ж<testing.B> b, nint n) {
+    return callersInlined2(b, n);
 }
 
-internal static partial nint callersInlined2(ж<testing.B> Ꮡb, nint n) {
-    return callersInlined3(Ꮡb, n);
+internal static partial nint callersInlined2(ж<testing.B> b, nint n) {
+    return callersInlined3(b, n);
 }
 
-internal static partial nint callersInlined3(ж<testing.B> Ꮡb, nint n) {
-    return callersInlined4(Ꮡb, n);
+internal static partial nint callersInlined3(ж<testing.B> b, nint n) {
+    return callersInlined4(b, n);
 }
 
-internal static partial nint callersInlined4(ж<testing.B> Ꮡb, nint n) {
-    return callersInlined(Ꮡb, n);
+internal static partial nint callersInlined4(ж<testing.B> b, nint n) {
+    return callersInlined(b, n);
 }
 
 internal static partial nint callersNoCache(ж<testing.B> Ꮡb, nint n) {
@@ -588,8 +591,8 @@ internal static partial nint callersNoCache(ж<testing.B> Ꮡb, nint n) {
     }}
 }
 
-public static void BenchmarkFPCallers(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(cachedˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkFPCallers(ж<testing.B> b) {
+    b.Run(cachedˢ, (ж<testing.B> bΔ1) => {
         // Very pcvalueCache-friendly, no inlining.
         fpCallersCached(bΔ1, 100);
     });
@@ -613,11 +616,11 @@ internal static nint fpCallersCached(ж<testing.B> Ꮡb, nint n) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object framePointersNotˢ = (@string)"frame pointers not supported for this architecture"u8;
 
-public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
+public static void TestFPUnwindAfterRecovery(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (!runtime_internal_test_package.FramePointerEnabled) {
-            Ꮡt.Skip(framePointersNotˢ);
+            t.Skip(framePointersNotˢ);
         }
         // Make sure that frame pointer unwinding succeeds from a deferred
         // function run after recovering from a panic. It can fail if the
@@ -642,11 +645,11 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
                 pcs[i] = 10;
             }
             runtime_internal_test_package.FPCallers(pcs);
-            Ꮡt.Logf("%v"u8, pcs);
+            t.Logf("%v", pcs);
         }, ref ᒐ);
         defer(() => {
-            if (recover() == default!) {
-                Ꮡt.Fatal(didNotRecoverFromPanicˢ);
+            if (recover() == nil) {
+                t.Fatal(didNotRecoverFromPanicˢ);
             }
         }, ref ᒐ);
         throw panic((nint)1);
@@ -662,17 +665,17 @@ internal static partial nint deref() {
     return i.Value;
 }
 
-public static void TestFPUnwindStackGrowthAfterRecovery(ж<testing.T> Ꮡt) {
+public static void TestFPUnwindStackGrowthAfterRecovery(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (!runtime_internal_test_package.FramePointerEnabled) {
-            Ꮡt.Skip(framePointersNotˢ);
+            t.Skip(framePointersNotˢ);
         }
         global::go.runtime_internal_test_package.StackPoisonCopyRestore state = runtime_internal_test_package.StackPoisonCopy();
         defer(ᴛ0 => ᴛ0.Restore(), state, ref ᒐ);
         defer(() => {
-            if (recover() == default!) {
-                Ꮡt.Fatal(didNotRecoverFromPanicˢ);
+            if (recover() == nil) {
+                t.Fatal(didNotRecoverFromPanicˢ);
             }
             growStack(nil);
             ref var pcs = ref heap(new array<uintptr>(32), out var Ꮡpcs);

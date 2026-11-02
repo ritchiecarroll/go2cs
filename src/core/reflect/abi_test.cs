@@ -31,13 +31,18 @@ partial struct MagicLastTypeNameForTestingRegisterABI {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string allRegsCallˢ = "AllRegsCall"u8;
-internal static readonly @string regsAndStackCallˢ = "RegsAndStackCall"u8;
-internal static readonly @string spillStructCallˢ = "SpillStructCall"u8;
-internal static readonly @string valueRegMethodSpillIntˢ = "ValueRegMethodSpillInt"u8;
-internal static readonly @string valueRegMethodSpillPtrˢ = "ValueRegMethodSpillPtr"u8;
+internal static ref readonly @string allRegsCallˢ => ref allRegsCallˢᵇ;
+private static readonly @string allRegsCallˢᵇ = "AllRegsCall"u8;
+internal static ref readonly @string regsAndStackCallˢ => ref regsAndStackCallˢᵇ;
+private static readonly @string regsAndStackCallˢᵇ = "RegsAndStackCall"u8;
+internal static ref readonly @string spillStructCallˢ => ref spillStructCallˢᵇ;
+private static readonly @string spillStructCallˢᵇ = "SpillStructCall"u8;
+internal static ref readonly @string valueRegMethodSpillIntˢ => ref valueRegMethodSpillIntˢᵇ;
+private static readonly @string valueRegMethodSpillIntˢᵇ = "ValueRegMethodSpillInt"u8;
+internal static ref readonly @string valueRegMethodSpillPtrˢ => ref valueRegMethodSpillPtrˢᵇ;
+private static readonly @string valueRegMethodSpillPtrˢᵇ = "ValueRegMethodSpillPtr"u8;
 
-public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
+public static void TestMethodValueCallABI(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // Enable register-based reflect.Call and ensure we don't
@@ -69,63 +74,62 @@ public static void TestMethodValueCallABI(ж<Δtesting.T> Ꮡt) {
 
         var (s, i) = makeMethodValue(allRegsCallˢ);
         var f0 = i._<Func<StructFewRegs, MagicLastTypeNameForTestingRegisterABI, StructFewRegs>>();
-        var r0 = f0(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+        var r0 = f0(a0, new MagicLastTypeNameForTestingRegisterABI());
         if (r0 != a0) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r0, a0);
+            t.Errorf("bad method value call: got %#v, want %#v", r0, a0);
         }
         if ((~s).Value != 1) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)1);
+            t.Errorf("bad method value call: failed to set s.Value: got %d, want %d", (~s).Value, (nint)1);
         }
 
         (s, i) = makeMethodValue(regsAndStackCallˢ);
         var f1 = i._<Func<StructFewRegs, array<uint64>, MagicLastTypeNameForTestingRegisterABI, (StructFewRegs, array<uint64>)>>();
-        (r0, var r1) = f1(a0, a1, new MagicLastTypeNameForTestingRegisterABI(nil));
+        (r0, var r1) = f1(a0, a1, new MagicLastTypeNameForTestingRegisterABI());
         if (r0 != a0) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r0, a0);
+            t.Errorf("bad method value call: got %#v, want %#v", r0, a0);
         }
         if (r1 != a1) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r1, a1);
+            t.Errorf("bad method value call: got %#v, want %#v", r1, a1);
         }
         if ((~s).Value != 2) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)2);
+            t.Errorf("bad method value call: failed to set s.Value: got %d, want %d", (~s).Value, (nint)2);
         }
 
         (s, i) = makeMethodValue(spillStructCallˢ);
         var f2 = i._<Func<StructFillRegs, MagicLastTypeNameForTestingRegisterABI, StructFillRegs>>();
-        var r2 = f2(a2, new MagicLastTypeNameForTestingRegisterABI(nil));
+        var r2 = f2(a2, new MagicLastTypeNameForTestingRegisterABI());
         if (r2 != a2) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r2, a2);
+            t.Errorf("bad method value call: got %#v, want %#v", r2, a2);
         }
         if ((~s).Value != 3) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)3);
+            t.Errorf("bad method value call: failed to set s.Value: got %d, want %d", (~s).Value, (nint)3);
         }
 
         (s, i) = makeMethodValue(valueRegMethodSpillIntˢ);
         var f3 = i._<Func<StructFillRegs, nint, MagicLastTypeNameForTestingRegisterABI, (StructFillRegs, nint)>>();
-        var (r3a, r3b) = f3(a2, 42, new MagicLastTypeNameForTestingRegisterABI(nil));
+        var (r3a, r3b) = f3(a2, 42, new MagicLastTypeNameForTestingRegisterABI());
         if (r3a != a2) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3a, a2);
+            t.Errorf("bad method value call: got %#v, want %#v", r3a, a2);
         }
         if (r3b != 42) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r3b, (nint)42);
+            t.Errorf("bad method value call: got %#v, want %#v", r3b, (nint)42);
         }
         if ((~s).Value != 4) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)4);
+            t.Errorf("bad method value call: failed to set s.Value: got %d, want %d", (~s).Value, (nint)4);
         }
 
         (s, i) = makeMethodValue(valueRegMethodSpillPtrˢ);
         var f4 = i._<Func<StructFillRegs, ж<byte>, MagicLastTypeNameForTestingRegisterABI, (StructFillRegs, ж<byte>)>>();
-        ref var vb = ref heap<byte>(out var Ꮡvb);
-        vb = (byte)10;
-        var (r4a, r4b) = f4(a2, Ꮡvb, new MagicLastTypeNameForTestingRegisterABI(nil));
+        ref var vb = ref heap<byte>((byte)10, out var Ꮡvb);
+        var (r4a, r4b) = f4(a2, Ꮡvb, new MagicLastTypeNameForTestingRegisterABI());
         if (r4a != a2) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r4a, a2);
+            t.Errorf("bad method value call: got %#v, want %#v", r4a, a2);
         }
         if (r4b != Ꮡvb) {
-            Ꮡt.Errorf("bad method value call: got %#v, want %#v"u8, r4b.OrTypedNil(), Ꮡvb);
+            t.Errorf("bad method value call: got %#v, want %#v", r4b.OrTypedNil(), Ꮡvb);
         }
         if ((~s).Value != 5) {
-            Ꮡt.Errorf("bad method value call: failed to set s.Value: got %d, want %d"u8, (~s).Value, (nint)5);
+            t.Errorf("bad method value call: failed to set s.Value: got %d, want %d", (~s).Value, (nint)5);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -172,12 +176,12 @@ public static (StructFillRegs, nint) ValueRegMethodSpillInt(this ref StructWithM
 
 // When called as a method value, i is passed on the stack.
 // When called as a method, i is passed in a register.
-public static (StructFillRegs, ж<byte>) ValueRegMethodSpillPtr(this ref StructWithMethods m, StructFillRegs s, ж<byte> Ꮡi, MagicLastTypeNameForTestingRegisterABI _) {
+public static (StructFillRegs, ж<byte>) ValueRegMethodSpillPtr(this ref StructWithMethods m, StructFillRegs s, ж<byte> i, MagicLastTypeNameForTestingRegisterABI _) {
     m.Value = 5;
-    return (s, Ꮡi);
+    return (s, i);
 }
 
-public static void TestReflectCallABI(ж<Δtesting.T> Ꮡt) {
+public static void TestReflectCallABI(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // Enable register-based reflect.Call and ensure we don't
@@ -191,19 +195,18 @@ public static void TestReflectCallABI(ж<Δtesting.T> Ꮡt) {
         // and make sure it works.
         var r = rand.New(rand.NewSource(genValueRandSeed));
         foreach (var (_, fn) in abiCallTestCases) {
-            ref var fnΔ1 = ref heap<reflectꓸValue>(out var ᏑfnΔ1);
-            fnΔ1 = Δreflect.ValueOf(fn);
+            ref var fnΔ1 = ref heap<reflectꓸValue>(Δreflect.ValueOf(fn), out var ᏑfnΔ1);
             var fnʗ1 = fnΔ1;
             var rʗ1 = r;
-            Ꮡt.Run(Δruntime.FuncForPC(fnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
+            t.Run(Δruntime.FuncForPC(fnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
                 var typ = fnʗ1.Type();
                 if (typ.Kind() != Δreflect.Func) {
-                    tΔ1.Fatalf("test case is not a function, has type: %s"u8, typ.String());
+                    tΔ1.Fatalf("test case is not a function, has type: %s", typ.String());
                 }
                 if (typ.NumIn() != typ.NumOut()) {
-                    tΔ1.Fatalf("test case has different number of inputs and outputs: %d in, %d out"u8, typ.NumIn(), typ.NumOut());
+                    tΔ1.Fatalf("test case has different number of inputs and outputs: %d in, %d out", typ.NumIn(), typ.NumOut());
                 }
-                slice<reflectꓸValue> args = default!;
+                slice<reflectꓸValue> args = default;
                 foreach (var arg in range<reflectꓸType>(typ.Ins().Invoke)) {
                     args = append(args, genValue(tΔ1, arg, rʗ1));
                 }
@@ -213,7 +216,7 @@ public static void TestReflectCallABI(ж<Δtesting.T> Ꮡt) {
                     if (Δreflect.DeepEqual(x, y)) {
                         continue;
                     }
-                    tΔ1.Errorf("arg and result %d differ: got %+v, want %+v"u8, i, y, x);
+                    tΔ1.Errorf("arg and result %d differ: got %+v, want %+v", i, y, x);
                 }
             });
         }
@@ -223,9 +226,10 @@ public static void TestReflectCallABI(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string onlyPointerInRegisterGCˢ = "OnlyPointerInRegisterGC"u8;
+internal static ref readonly @string onlyPointerInRegisterGCˢ => ref onlyPointerInRegisterGCˢᵇ;
+private static readonly @string onlyPointerInRegisterGCˢᵇ = "OnlyPointerInRegisterGC"u8;
 
-public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
+public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // Enable register-based reflect.MakeFunc and ensure we don't
@@ -240,23 +244,21 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
         var r = rand.New(rand.NewSource(genValueRandSeed));
         var makeFuncHandler = (slice<reflectꓸValue> args) => {
             if (len(args) == 0) {
-                return new reflectꓸValue[]{}.slice();
+                return slice<reflectꓸValue>([]);
             }
             return args.slice(0, len(args) - 1); // The last Value is an empty magic value.
         };
         foreach (var (_, callFn) in abiMakeFuncTestCases) {
             var fnTyp = Δreflect.TypeOf(callFn).In(0);
-            ref var fn = ref heap<reflectꓸValue>(out var Ꮡfn);
-            fn = Δreflect.MakeFunc(fnTyp, makeFuncHandler);
-            ref var callFnΔ1 = ref heap<reflectꓸValue>(out var ᏑcallFnΔ1);
-            callFnΔ1 = Δreflect.ValueOf(callFn);
+            ref var fn = ref heap<reflectꓸValue>(Δreflect.MakeFunc(fnTyp, makeFuncHandler), out var Ꮡfn);
+            ref var callFnΔ1 = ref heap<reflectꓸValue>(Δreflect.ValueOf(callFn), out var ᏑcallFnΔ1);
             var callFnʗ1 = callFnΔ1;
             var fnʗ1 = fn;
             var fnTypʗ1 = fnTyp;
             var rʗ1 = r;
-            Ꮡt.Run(Δruntime.FuncForPC(callFnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
+            t.Run(Δruntime.FuncForPC(callFnΔ1.Pointer()).Name(), (ж<Δtesting.T> tΔ1) => {
                 var argsᴷ = new stackAppend<reflectꓸValue>();
-                var args = new reflectꓸValue[]{fnʗ1}.slice();
+                var args = slice<reflectꓸValue>([fnʗ1]);
                 for (nint i = 0; i < fnTypʗ1.NumIn() - 1; i++) {
                     /* last one is magic type */
                     args = append(argsᴷ, args, genValue(tΔ1, fnTypʗ1.In(i), rʗ1));
@@ -267,18 +269,18 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
                     if (Δreflect.DeepEqual(x, y)) {
                         continue;
                     }
-                    tΔ1.Errorf("arg and result %d differ: got %+v, want %+v"u8, i, y, x);
+                    tΔ1.Errorf("arg and result %d differ: got %+v, want %+v", i, y, x);
                 }
             });
         }
-        Ꮡt.Run(onlyPointerInRegisterGCˢ, (ж<Δtesting.T> tΔ2) => {
+        t.Run(onlyPointerInRegisterGCˢ, (ж<Δtesting.T> tΔ2) => {
             // This test attempts to induce a failure wherein
             // the last pointer to an object is passed via registers.
             // If makeFuncStub doesn't successfully store the pointer
             // to a location visible to the GC, the object should be
             // freed and then the next GC should notice that an object
             // was inexplicably revived.
-            Func<ж<uint64>, MagicLastTypeNameForTestingRegisterABI, ж<uint64>> f = default!;
+            Func<ж<uint64>, MagicLastTypeNameForTestingRegisterABI, ж<uint64>> f = default;
             var mkfn = Δreflect.MakeFunc(Δreflect.TypeOf((f).OrTypedNilFunc()), (slice<reflectꓸValue> args) => {
                 (args[0].Interface()._<ж<uint64>>()).Value = 5;
                 return args[..1];
@@ -288,7 +290,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
             // Call the MakeFunc'd function while trying pass the only pointer
             // to a new heap-allocated uint64.
             reflect_internal_test_package.CallGC.Value = true;
-            var x = fn(@new<uint64>(), new MagicLastTypeNameForTestingRegisterABI(nil));
+            var x = fn(@new<uint64>(), new MagicLastTypeNameForTestingRegisterABI());
             reflect_internal_test_package.CallGC.Value = false;
 
             // Check for bad pointers (which should be x if things went wrong).
@@ -296,7 +298,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
 
             // Sanity check x.
             if (x.Value != 5) {
-                tΔ2.Fatalf("failed to set value in object"u8);
+                tΔ2.Fatalf("failed to set value in object");
             }
         });
     }
@@ -304,7 +306,7 @@ public static void TestReflectMakeFuncCallABI(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static slice<any> abiCallTestCases = new any[]{
+internal static slice<any> abiCallTestCases = slice<any>([
     passNone,
     passInt,
     passInt8,
@@ -349,7 +351,7 @@ internal static slice<any> abiCallTestCases = new any[]{
     pass2Struct1,
     passEmptyStruct,
     passStruct10AndSmall
-}.slice();
+]);
 
 // Functions for testing reflect function call functionality.
 
@@ -480,8 +482,8 @@ internal static partial slice<byte> passSlice(slice<byte> a) {
 
 //go:registerparams
 //go:noinline
-internal static partial ж<byte> passPointer(ж<byte> Ꮡa) {
-    return Ꮡa;
+internal static partial ж<byte> passPointer(ж<byte> a) {
+    return a;
 }
 
 //go:registerparams
@@ -615,7 +617,7 @@ internal static partial (Struct10, byte, nuint) passStruct10AndSmall(Struct10 a,
     return (a, b, c);
 }
 
-internal static slice<any> abiMakeFuncTestCases = new any[]{
+internal static slice<any> abiMakeFuncTestCases = slice<any>([
     callArgsNone,
     callArgsInt,
     callArgsInt8,
@@ -659,96 +661,96 @@ internal static slice<any> abiMakeFuncTestCases = new any[]{
     callArgsStruct15,
     callArgs2Struct1,
     callArgsEmptyStruct
-}.slice();
+]);
 
 //go:registerparams
 //go:noinline
 internal static partial void callArgsNone(Action<MagicLastTypeNameForTestingRegisterABI> f) {
-    f(new MagicLastTypeNameForTestingRegisterABI(nil));
+    f(new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial nint callArgsInt(Func<nint, MagicLastTypeNameForTestingRegisterABI, nint> f, nint a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial int8 callArgsInt8(Func<int8, MagicLastTypeNameForTestingRegisterABI, int8> f, int8 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial int16 callArgsInt16(Func<int16, MagicLastTypeNameForTestingRegisterABI, int16> f, int16 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial int32 callArgsInt32(Func<int32, MagicLastTypeNameForTestingRegisterABI, int32> f, int32 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial int64 callArgsInt64(Func<int64, MagicLastTypeNameForTestingRegisterABI, int64> f, int64 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial nuint callArgsUint(Func<nuint, MagicLastTypeNameForTestingRegisterABI, nuint> f, nuint a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial uint8 callArgsUint8(Func<uint8, MagicLastTypeNameForTestingRegisterABI, uint8> f, uint8 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial uint16 callArgsUint16(Func<uint16, MagicLastTypeNameForTestingRegisterABI, uint16> f, uint16 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial uint32 callArgsUint32(Func<uint32, MagicLastTypeNameForTestingRegisterABI, uint32> f, uint32 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial uint64 callArgsUint64(Func<uint64, MagicLastTypeNameForTestingRegisterABI, uint64> f, uint64 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial float32 callArgsFloat32(Func<float32, MagicLastTypeNameForTestingRegisterABI, float32> f, float32 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial float64 callArgsFloat64(Func<float64, MagicLastTypeNameForTestingRegisterABI, float64> f, float64 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial complex64 callArgsComplex64(Func<complex64, MagicLastTypeNameForTestingRegisterABI, complex64> f, complex64 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial complex128 callArgsComplex128(Func<complex128, MagicLastTypeNameForTestingRegisterABI, complex128> f, complex128 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -756,7 +758,7 @@ internal static partial complex128 callArgsComplex128(Func<complex128, MagicLast
 internal static partial array<uint32> callArgsArray1(Func<array<uint32>, MagicLastTypeNameForTestingRegisterABI, array<uint32>> f, /*[1]*/ array<uint32> a0) {
     a0 = a0.Clone();
 
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -764,7 +766,7 @@ internal static partial array<uint32> callArgsArray1(Func<array<uint32>, MagicLa
 internal static partial array<uintptr> callArgsArray(Func<array<uintptr>, MagicLastTypeNameForTestingRegisterABI, array<uintptr>> f, /*[2]*/ array<uintptr> a0) {
     a0 = a0.Clone();
 
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -772,43 +774,43 @@ internal static partial array<uintptr> callArgsArray(Func<array<uintptr>, MagicL
 internal static partial (nint, array<uint32>, float64) callArgsArray1Mix(Func<nint, array<uint32>, float64, MagicLastTypeNameForTestingRegisterABI, (nint, array<uint32>, float64)> f, nint a0, /*[1]*/ array<uint32> a1, float64 a2) {
     a1 = a1.Clone();
 
-    return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial @string callArgsString(Func<@string, MagicLastTypeNameForTestingRegisterABI, @string> f, @string a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial slice<byte> callArgsSlice(Func<slice<byte>, MagicLastTypeNameForTestingRegisterABI, slice<byte>> f, slice<byte> a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
-internal static partial ж<byte> callArgsPointer(Func<ж<byte>, MagicLastTypeNameForTestingRegisterABI, ж<byte>> f, ж<byte> Ꮡa0) {
-    return f(Ꮡa0, new MagicLastTypeNameForTestingRegisterABI(nil));
+internal static partial ж<byte> callArgsPointer(Func<ж<byte>, MagicLastTypeNameForTestingRegisterABI, ж<byte>> f, ж<byte> a0) {
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint) callArgsManyInt(Func<nint, nint, nint, nint, nint, nint, nint, nint, nint, nint, MagicLastTypeNameForTestingRegisterABI, (nint, nint, nint, nint, nint, nint, nint, nint, nint, nint)> f, nint a0, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8, nint a9) {
-    return f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial (float64 r0, float64 r1, float64 r2, float64 r3, float64 r4, float64 r5, float64 r6, float64 r7, float64 r8, float64 r9, float64 r10, float64 r11, float64 r12, float64 r13, float64 r14, float64 r15, float64 r16, float64 r17, float64 r18) callArgsManyFloat64(Func<float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, MagicLastTypeNameForTestingRegisterABI, (float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64, float64)> f, float64 a0, float64 a1, float64 a2, float64 a3, float64 a4, float64 a5, float64 a6, float64 a7, float64 a8, float64 a9, float64 a10, float64 a11, float64 a12, float64 a13, float64 a14, float64 a15, float64 a16, float64 a17, float64 a18) {
-    return f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct1 callArgsStruct1(Func<Struct1, MagicLastTypeNameForTestingRegisterABI, Struct1> f, Struct1 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -816,7 +818,7 @@ internal static partial Struct1 callArgsStruct1(Func<Struct1, MagicLastTypeNameF
 internal static partial Struct2 callArgsStruct2(Func<Struct2, MagicLastTypeNameForTestingRegisterABI, Struct2> f, Struct2 a0) {
     a0 = a0.ΔClone();
 
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -824,67 +826,67 @@ internal static partial Struct2 callArgsStruct2(Func<Struct2, MagicLastTypeNameF
 internal static partial Struct3 callArgsStruct3(Func<Struct3, MagicLastTypeNameForTestingRegisterABI, Struct3> f, Struct3 a0) {
     a0 = a0.ΔClone();
 
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct4 callArgsStruct4(Func<Struct4, MagicLastTypeNameForTestingRegisterABI, Struct4> f, Struct4 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct5 callArgsStruct5(Func<Struct5, MagicLastTypeNameForTestingRegisterABI, Struct5> f, Struct5 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct6 callArgsStruct6(Func<Struct6, MagicLastTypeNameForTestingRegisterABI, Struct6> f, Struct6 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct7 callArgsStruct7(Func<Struct7, MagicLastTypeNameForTestingRegisterABI, Struct7> f, Struct7 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct8 callArgsStruct8(Func<Struct8, MagicLastTypeNameForTestingRegisterABI, Struct8> f, Struct8 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct9 callArgsStruct9(Func<Struct9, MagicLastTypeNameForTestingRegisterABI, Struct9> f, Struct9 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct10 callArgsStruct10(Func<Struct10, MagicLastTypeNameForTestingRegisterABI, Struct10> f, Struct10 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct11 callArgsStruct11(Func<Struct11, MagicLastTypeNameForTestingRegisterABI, Struct11> f, Struct11 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct12 callArgsStruct12(Func<Struct12, MagicLastTypeNameForTestingRegisterABI, Struct12> f, Struct12 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial Struct13 callArgsStruct13(Func<Struct13, MagicLastTypeNameForTestingRegisterABI, Struct13> f, Struct13 a0) {
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -892,7 +894,7 @@ internal static partial Struct13 callArgsStruct13(Func<Struct13, MagicLastTypeNa
 internal static partial Struct14 callArgsStruct14(Func<Struct14, MagicLastTypeNameForTestingRegisterABI, Struct14> f, Struct14 a0) {
     a0 = a0.ΔClone();
 
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
@@ -900,19 +902,19 @@ internal static partial Struct14 callArgsStruct14(Func<Struct14, MagicLastTypeNa
 internal static partial Struct15 callArgsStruct15(Func<Struct15, MagicLastTypeNameForTestingRegisterABI, Struct15> f, Struct15 a0) {
     a0 = a0.ΔClone();
 
-    return f(a0, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial (Struct1 r0, Struct1 r1) callArgs2Struct1(Func<Struct1, Struct1, MagicLastTypeNameForTestingRegisterABI, (Struct1, Struct1)> f, Struct1 a0, Struct1 a1) {
-    return f(a0, a1, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, a1, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 //go:registerparams
 //go:noinline
 internal static partial (nint, EmptyStruct, float64) callArgsEmptyStruct(Func<nint, EmptyStruct, float64, MagicLastTypeNameForTestingRegisterABI, (nint, EmptyStruct, float64)> f, nint a0, EmptyStruct a1, float64 a2) {
-    return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI(nil));
+    return f(a0, a1, a2, new MagicLastTypeNameForTestingRegisterABI());
 }
 
 // Struct1 is a simple integer-only aggregate struct.
@@ -1035,36 +1037,36 @@ internal static readonly object failedToGenerateValueˢ = (@string)"failed to ge
 // genValue generates a pseudorandom reflect.Value with type t.
 // The reflect.Value produced by this function is always the same
 // for the same type.
-internal static reflectꓸValue genValue(ж<Δtesting.T> Ꮡt, reflectꓸType typ, ж<rand.Rand> Ꮡr) {
+internal static reflectꓸValue genValue(ж<Δtesting.T> t, reflectꓸType typ, ж<rand.Rand> r) {
     // Re-seed and reset the PRNG because we want each value with the
     // same type to be the same random value.
-    Ꮡr.Seed(genValueRandSeed);
-    var (v, ok) = quick.Value(typ, Ꮡr);
+    r.Seed(genValueRandSeed);
+    var (v, ok) = quick.Value(typ, r);
     if (!ok) {
-        Ꮡt.Fatal(failedToGenerateValueˢ);
+        t.Fatal(failedToGenerateValueˢ);
     }
     return v;
 }
 
-public static void TestSignalingNaNArgument(ж<Δtesting.T> Ꮡt) {
+public static void TestSignalingNaNArgument(ж<Δtesting.T> t) {
     var v = Δreflect.ValueOf((float32 x) => {
         // make sure x is a signaling NaN.
         var u = Δmath.Float32bits(x);
         if (u != snan) {
-            Ꮡt.Fatalf("signaling NaN not correct: %x\n"u8, u);
+            t.Fatalf("signaling NaN not correct: %x\n", u);
         }
     });
-    v.Call(new reflectꓸValue[]{Δreflect.ValueOf(Δmath.Float32frombits(snan))}.slice());
+    v.Call(slice<reflectꓸValue>([Δreflect.ValueOf(Δmath.Float32frombits(snan))]));
 }
 
-public static void TestSignalingNaNReturn(ж<Δtesting.T> Ꮡt) {
+public static void TestSignalingNaNReturn(ж<Δtesting.T> t) {
     var v = Δreflect.ValueOf(float32 () => Δmath.Float32frombits(snan));
     ref var x = ref heap(new float32(), out var Ꮡx);
-    Δreflect.ValueOf(Ꮡx).Elem().Set(v.Call(default!)[0]);
+    Δreflect.ValueOf(Ꮡx).Elem().Set(v.Call(default)[0]);
     // make sure x is a signaling NaN.
     var u = Δmath.Float32bits(x);
     if (u != snan) {
-        Ꮡt.Fatalf("signaling NaN not correct: %x\n"u8, u);
+        t.Fatalf("signaling NaN not correct: %x\n", u);
     }
 }
 

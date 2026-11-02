@@ -33,16 +33,16 @@ internal static iter.Seq2<nint, int64> squares(nint n) {
     };
 }
 
-public static void TestPull(ж<testing.T> Ꮡt) {
+public static void TestPull(ж<testing.T> t) {
     for (nint endᴛ1 = 0; endᴛ1 <= 3; endᴛ1++) {
         var end = endᴛ1;
-        Ꮡt.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
                 {
                     nint xg = Δruntime.NumGoroutine() - ng; if (xg != want) {
                         tΔ1.Helper();
-                        tΔ1.Errorf("have %d extra goroutines, want %d"u8, xg, want);
+                        tΔ1.Errorf("have %d extra goroutines, want %d", xg, want);
                     }
                 }
             }
@@ -52,7 +52,7 @@ public static void TestPull(ж<testing.T> Ꮡt) {
             foreach (var i in range(end)) {
                 var (v, ok) = next();
                 if (v != i || ok != true) {
-                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, i, true);
+                    tΔ1.Fatalf("next() = %d, %v, want %d, %v", v, ok, i, true);
                 }
                 wantNG(1);
             }
@@ -64,7 +64,7 @@ public static void TestPull(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)0, false);
+                    tΔ1.Fatalf("next() = %d, %v, want %d, %v", v, ok, (nint)0, false);
                 }
                 wantNG(0);
             }
@@ -78,16 +78,16 @@ public static void TestPull(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestPull2(ж<testing.T> Ꮡt) {
+public static void TestPull2(ж<testing.T> t) {
     for (nint endᴛ1 = 0; endᴛ1 <= 3; endᴛ1++) {
         var end = endᴛ1;
-        Ꮡt.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint(end), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint ng = stableNumGoroutine();
             void wantNG(nint want) {
                 {
                     nint xg = Δruntime.NumGoroutine() - ng; if (xg != want) {
                         tΔ1.Helper();
-                        tΔ1.Errorf("have %d extra goroutines, want %d"u8, xg, want);
+                        tΔ1.Errorf("have %d extra goroutines, want %d", xg, want);
                     }
                 }
             }
@@ -97,7 +97,7 @@ public static void TestPull2(ж<testing.T> Ꮡt) {
             foreach (var i in range(end)) {
                 var (k, v, ok) = next();
                 if (k != i || v != (int64)(i * i) || ok != true) {
-                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, i, i * i, true);
+                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v", k, v, ok, i, i * i, true);
                 }
                 wantNG(1);
             }
@@ -109,7 +109,7 @@ public static void TestPull2(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (k, v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)0, (nint)0, false);
+                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v", k, v, ok, (nint)0, (nint)0, false);
                 }
                 wantNG(0);
             }
@@ -143,7 +143,7 @@ internal static nint stableNumGoroutine() {
         nint ng = Δruntime.NumGoroutine();
         for (nint i = 0; i < 1000; i++) {
             nint nng = Δruntime.NumGoroutine();
-            if (nng == ng){
+            if (nng == ng) {
                 c++;
             } else {
                 c = 0;
@@ -157,19 +157,19 @@ internal static nint stableNumGoroutine() {
         }
         throw panic("failed to stabilize NumGoroutine after 1000 iterations");
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object doubleNextDidNotFailˢ = (@string)"double next did not fail"u8;
 
-public static void TestPullDoubleNext(ж<testing.T> Ꮡt) {
+public static void TestPullDoubleNext(ж<testing.T> t) {
     var (next, _) = Pull(doDoubleNext());
     nextSlot = next;
     next();
-    if (nextSlot != default!) {
-        Ꮡt.Fatal(doubleNextDidNotFailˢ);
+    if (nextSlot != nil) {
+        t.Fatal(doubleNextDidNotFailˢ);
     }
 }
 
@@ -180,8 +180,8 @@ internal static iter.Seq<nint> doDoubleNext() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                if (recover() != default!) {
-                    nextSlot = default!;
+                if (recover() != nil) {
+                    nextSlot = default;
                 }
             }, ref ᒐ);
             nextSlot();
@@ -191,12 +191,12 @@ internal static iter.Seq<nint> doDoubleNext() {
     };
 }
 
-public static void TestPullDoubleNext2(ж<testing.T> Ꮡt) {
+public static void TestPullDoubleNext2(ж<testing.T> t) {
     var (next, _) = Pull2(doDoubleNext2());
     nextSlot2 = next;
     next();
-    if (nextSlot2 != default!) {
-        Ꮡt.Fatal(doubleNextDidNotFailˢ);
+    if (nextSlot2 != nil) {
+        t.Fatal(doubleNextDidNotFailˢ);
     }
 }
 
@@ -207,8 +207,8 @@ internal static iter.Seq2<nint, nint> doDoubleNext2() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                if (recover() != default!) {
-                    nextSlot2 = default!;
+                if (recover() != nil) {
+                    nextSlot2 = default;
                 }
             }, ref ᒐ);
             nextSlot2();
@@ -222,24 +222,24 @@ internal static iter.Seq2<nint, nint> doDoubleNext2() {
 private static readonly object yieldFailedˢ = (@string)"yield failed"u8;
 private static readonly object doubleYieldDidNotFailˢ = (@string)"double yield did not fail"u8;
 
-public static void TestPullDoubleYield(ж<testing.T> Ꮡt) {
+public static void TestPullDoubleYield(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (next, stop) = Pull(storeYield());
         next();
-        if (yieldSlot == default!) {
-            Ꮡt.Fatal(yieldFailedˢ);
+        if (yieldSlot == nil) {
+            t.Fatal(yieldFailedˢ);
         }
         var stopʗ1 = stop;
         defer(() => {
-            if (recover() != default!) {
-                yieldSlot = default!;
+            if (recover() != nil) {
+                yieldSlot = default;
             }
             stopʗ1();
         }, ref ᒐ);
         yieldSlot(5);
-        if (yieldSlot != default!) {
-            Ꮡt.Fatal(doubleYieldDidNotFailˢ);
+        if (yieldSlot != nil) {
+            t.Fatal(doubleYieldDidNotFailˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -257,24 +257,24 @@ internal static iter.Seq<nint> storeYield() {
 
 internal static Func<nint, bool> yieldSlot;
 
-public static void TestPullDoubleYield2(ж<testing.T> Ꮡt) {
+public static void TestPullDoubleYield2(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (next, stop) = Pull2(storeYield2());
         next();
-        if (yieldSlot2 == default!) {
-            Ꮡt.Fatal(yieldFailedˢ);
+        if (yieldSlot2 == nil) {
+            t.Fatal(yieldFailedˢ);
         }
         var stopʗ1 = stop;
         defer(() => {
-            if (recover() != default!) {
-                yieldSlot2 = default!;
+            if (recover() != nil) {
+                yieldSlot2 = default;
             }
             stopʗ1();
         }, ref ᒐ);
         yieldSlot2(23, 77);
-        if (yieldSlot2 != default!) {
-            Ꮡt.Fatal(doubleYieldDidNotFailˢ);
+        if (yieldSlot2 != nil) {
+            t.Fatal(doubleYieldDidNotFailˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -293,17 +293,17 @@ internal static iter.Seq2<nint, nint> storeYield2() {
 internal static Func<nint, nint, bool> yieldSlot2;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nextˢ = "next"u8;
+private static ref readonly @string nextˢ => ref nextˢᵇ;
+private static readonly @string nextˢᵇ = "next"u8;
 private static readonly object boomˢ = (@string)"boom"u8;
 private static readonly object failedToPropagatePanicOnˢ = (@string)"failed to propagate panic on first next"u8;
 private static readonly object nextReturnedTrueAfterˢ = (@string)"next returned true after iterator panicked"u8;
-private static readonly @string stopˢ = "stop"u8;
+private static ref readonly @string stopˢ => ref stopˢᵇ;
+private static readonly @string stopˢᵇ = "stop"u8;
 private static readonly object failedToPropagatePanicOnˢ2 = (@string)"failed to propagate panic on stop"u8;
 
-public static void TestPullPanic(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    Ꮡt.Run(nextˢ, (ж<testing.T> tΔ1) => {
+public static void TestPullPanic(ж<testing.T> t) {
+    t.Run(nextˢ, (ж<testing.T> tΔ1) => {
         var (next, stop) = Pull(panicSeq());
         var nextʗ1 = next;
         if (!panicsWith(boomˢ, () => {
@@ -320,11 +320,11 @@ public static void TestPullPanic(ж<testing.T> Ꮡt) {
         // Calling stop again should be a no-op.
         stop();
     });
-    Ꮡt.Run(stopˢ, (ж<testing.T> tΔ2) => {
+    t.Run(stopˢ, (ж<testing.T> tΔ2) => {
         var (next, stop) = Pull(panicCleanupSeq());
         var (x, ok) = next();
         if (!ok || x != 55) {
-            tΔ2.Fatalf("expected (55, true) from next, got (%d, %t)"u8, x, ok);
+            tΔ2.Fatalf("expected (55, true) from next, got (%d, %t)", x, ok);
         }
         var stopʗ1 = stop;
         if (!panicsWith(boomˢ, () => {
@@ -351,7 +351,7 @@ internal static iter.Seq<nint> panicSeq() {
 
 internal static iter.Seq<nint> panicCleanupSeq() {
     return (Func<nint, bool> yield) => {
-        while (ᐧ) {
+        for (;;) {
             if (!yield(55)) {
                 throw panic("boom");
             }
@@ -359,10 +359,8 @@ internal static iter.Seq<nint> panicCleanupSeq() {
     };
 }
 
-public static void TestPull2Panic(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    Ꮡt.Run(nextˢ, (ж<testing.T> tΔ1) => {
+public static void TestPull2Panic(ж<testing.T> t) {
+    t.Run(nextˢ, (ж<testing.T> tΔ1) => {
         var (next, stop) = Pull2(panicSeq2());
         var nextʗ1 = next;
         if (!panicsWith(boomˢ, () => {
@@ -379,11 +377,11 @@ public static void TestPull2Panic(ж<testing.T> Ꮡt) {
         // Calling stop again should be a no-op.
         stop();
     });
-    Ꮡt.Run(stopˢ, (ж<testing.T> tΔ2) => {
+    t.Run(stopˢ, (ж<testing.T> tΔ2) => {
         var (next, stop) = Pull2(panicCleanupSeq2());
         var (x, y, ok) = next();
         if (!ok || x != 55 || y != 100) {
-            tΔ2.Fatalf("expected (55, 100, true) from next, got (%d, %d, %t)"u8, x, y, ok);
+            tΔ2.Fatalf("expected (55, 100, true) from next, got (%d, %d, %t)", x, y, ok);
         }
         var stopʗ1 = stop;
         if (!panicsWith(boomˢ, () => {
@@ -410,7 +408,7 @@ internal static iter.Seq2<nint, nint> panicSeq2() {
 
 internal static iter.Seq2<nint, nint> panicCleanupSeq2() {
     return (Func<nint, nint, bool> yield) => {
-        while (ᐧ) {
+        for (;;) {
             if (!yield(55, 100)) {
                 throw panic("boom");
             }
@@ -419,12 +417,12 @@ internal static iter.Seq2<nint, nint> panicCleanupSeq2() {
 }
 
 internal static bool /*panicked*/ panicsWith(any v, Action f) {
-    bool panicked = default!;
+    bool panicked = default;
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
+                var r = recover(); if (r != nil) {
                     if (!AreEqual(r, v)) {
                         throw panic(r);
                     }
@@ -445,10 +443,8 @@ private static readonly object iteratorReturnedValidˢ = (@string)"iterator retu
 private static readonly object failedToGoexitFromStopˢ = (@string)"failed to Goexit from stop"u8;
 private static readonly object nextReturnedTrueOrNonˢ = (@string)"next returned true or non-zero value after iterator Goexited"u8;
 
-public static void TestPullGoexit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    Ꮡt.Run(nextˢ, (ж<testing.T> tΔ1) => {
+public static void TestPullGoexit(ж<testing.T> t) {
+    t.Run(nextˢ, (ж<testing.T> tΔ1) => {
         ref var next = ref heap<Func<(nint, bool)>>(out var Ꮡnext);
         ref var stop = ref heap<Action>(out var Ꮡstop);
         if (!goexits(tΔ1, () => {
@@ -464,11 +460,11 @@ public static void TestPullGoexit(ж<testing.T> Ꮡt) {
         }
         Ꮡstop.ValueSlot();
     });
-    Ꮡt.Run(stopˢ, (ж<testing.T> tΔ2) => {
+    t.Run(stopˢ, (ж<testing.T> tΔ2) => {
         var (next, stop) = Pull(goexitCleanupSeq());
         var (x, ok) = next();
         if (!ok || x != 55) {
-            tΔ2.Fatalf("expected (55, true) from next, got (%d, %t)"u8, x, ok);
+            tΔ2.Fatalf("expected (55, true) from next, got (%d, %t)", x, ok);
         }
         var stopʗ1 = stop;
         if (!goexits(tΔ2, () => {
@@ -495,7 +491,7 @@ internal static iter.Seq<nint> goexitSeq() {
 
 internal static iter.Seq<nint> goexitCleanupSeq() {
     return (Func<nint, bool> yield) => {
-        while (ᐧ) {
+        for (;;) {
             if (!yield(55)) {
                 Δruntime.Goexit();
             }
@@ -506,10 +502,8 @@ internal static iter.Seq<nint> goexitCleanupSeq() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object nextReturnedTrueOrNonˢ2 = (@string)"next returned true or non-zero after iterator Goexited"u8;
 
-public static void TestPull2Goexit(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    Ꮡt.Run(nextˢ, (ж<testing.T> tΔ1) => {
+public static void TestPull2Goexit(ж<testing.T> t) {
+    t.Run(nextˢ, (ж<testing.T> tΔ1) => {
         ref var next = ref heap<Func<(nint, nint, bool)>>(out var Ꮡnext);
         ref var stop = ref heap<Action>(out var Ꮡstop);
         if (!goexits(tΔ1, () => {
@@ -525,11 +519,11 @@ public static void TestPull2Goexit(ж<testing.T> Ꮡt) {
         }
         Ꮡstop.ValueSlot();
     });
-    Ꮡt.Run(stopˢ, (ж<testing.T> tΔ2) => {
+    t.Run(stopˢ, (ж<testing.T> tΔ2) => {
         var (next, stop) = Pull2(goexitCleanupSeq2());
         var (x, y, ok) = next();
         if (!ok || x != 55 || y != 100) {
-            tΔ2.Fatalf("expected (55, 100, true) from next, got (%d, %d, %t)"u8, x, y, ok);
+            tΔ2.Fatalf("expected (55, 100, true) from next, got (%d, %d, %t)", x, y, ok);
         }
         var stopʗ1 = stop;
         if (!goexits(tΔ2, () => {
@@ -556,7 +550,7 @@ internal static iter.Seq2<nint, nint> goexitSeq2() {
 
 internal static iter.Seq2<nint, nint> goexitCleanupSeq2() {
     return (Func<nint, nint, bool> yield) => {
-        while (ᐧ) {
+        for (;;) {
             if (!yield(55, 100)) {
                 Δruntime.Goexit();
             }
@@ -564,8 +558,8 @@ internal static iter.Seq2<nint, nint> goexitCleanupSeq2() {
     };
 }
 
-internal static partial bool goexits(ж<testing.T> Ꮡt, Action f) {
-    Ꮡt.Helper();
+internal static partial bool goexits(ж<testing.T> t, Action f) {
+    t.Helper();
 
     var exit = new channel<bool>(0);
     var exitʗ1 = exit;
@@ -575,7 +569,7 @@ internal static partial bool goexits(ж<testing.T> Ꮡt, Action f) {
             var cleanExit = false;
             var exitʗ2 = exitʗ1;
             defer(() => {
-                exitʗ2.ᐸꟷ(recover() == default! && !cleanExit);
+                exitʗ2.ᐸꟷ(recover() == nil && !cleanExit);
             }, ref ᒐ);
             f();
             cleanExit = true;
@@ -589,24 +583,24 @@ internal static partial bool goexits(ж<testing.T> Ꮡt, Action f) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object nextReturnedTrueAfterˢ2 = (@string)"next returned true after iterator was stopped"u8;
 
-public static void TestPullImmediateStop(ж<testing.T> Ꮡt) {
+public static void TestPullImmediateStop(ж<testing.T> t) {
     var (next, stop) = Pull(panicSeq());
     stop();
     // Make sure we don't panic if we try to call next or stop.
     {
         var (_, ok) = next(); if (ok) {
-            Ꮡt.Fatal(nextReturnedTrueAfterˢ2);
+            t.Fatal(nextReturnedTrueAfterˢ2);
         }
     }
 }
 
-public static void TestPull2ImmediateStop(ж<testing.T> Ꮡt) {
+public static void TestPull2ImmediateStop(ж<testing.T> t) {
     var (next, stop) = Pull2(panicSeq2());
     stop();
     // Make sure we don't panic if we try to call next or stop.
     {
         var (_, _, ok) = next(); if (ok) {
-            Ꮡt.Fatal(nextReturnedTrueAfterˢ2);
+            t.Fatal(nextReturnedTrueAfterˢ2);
         }
     }
 }

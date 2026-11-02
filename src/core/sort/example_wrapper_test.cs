@@ -37,7 +37,7 @@ partial struct ByName {
 }
 
 public static bool Less(this ByName s, nint i, nint j) {
-    return (~s.Organs[i]).Name < (~s.Organs[j]).Name;
+    return s.Organs[i].Name < s.Organs[j].Name;
 }
 
 // ByWeight implements sort.Interface by providing Less and using the Len and
@@ -47,7 +47,7 @@ partial struct ByWeight {
 }
 
 public static bool Less(this ByWeight s, nint i, nint j) {
-    return (~s.Organs[i]).Weight < (~s.Organs[j]).Weight;
+    return s.Organs[i].Weight < s.Organs[j].Weight;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -55,14 +55,14 @@ internal static readonly object organsByWeightˢ = (@string)"Organs by weight:"u
 internal static readonly object organsByNameˢ = (@string)"Organs by name:"u8;
 
 public static void Example_sortWrapper() {
-    var s = new ж<Organ>[]{
-        Ꮡ(new Organ("brain"u8, 1340)),
-        Ꮡ(new Organ("heart"u8, 290)),
-        Ꮡ(new Organ("liver"u8, 1494)),
-        Ꮡ(new Organ("pancreas"u8, 131)),
-        Ꮡ(new Organ("prostate"u8, 62)),
-        Ꮡ(new Organ("spleen"u8, 162))
-    }.slice();
+    var s = slice<ж<Organ>>([
+        Ꮡ(new Organ("brain", 1340)),
+        Ꮡ(new Organ("heart", 290)),
+        Ꮡ(new Organ("liver", 1494)),
+        Ꮡ(new Organ("pancreas", 131)),
+        Ꮡ(new Organ("prostate", 62)),
+        Ꮡ(new Organ("spleen", 162))
+    ]);
 
     sort.Sort(new ByWeight(s));
     fmt.Println(organsByWeightˢ);
@@ -91,7 +91,7 @@ public static void Example_sortWrapper() {
 
 internal static void printOrgans(slice<ж<Organ>> s) {
     foreach (var (_, o) in s) {
-        fmt.Printf("%-8s (%v)\n"u8, (~o).Name, (~o).Weight);
+        fmt.Printf("%-8s (%v)\n"u8, o.Name, o.Weight);
     }
 }
 

@@ -327,10 +327,10 @@ public static nint Len8(uint8 x) {
 
 // Len16 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
 public static nint /*n*/ Len16(uint16 x) {
-    nint n = default!;
+    nint n = default;
 
     if (x >= (uint16)(1 << 8)) {
-        x >>= (int)(8);
+        x >>= 8;
         n = 8;
     }
     return n + (nint)len8tab[(uint8)x];
@@ -338,14 +338,14 @@ public static nint /*n*/ Len16(uint16 x) {
 
 // Len32 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
 public static nint /*n*/ Len32(uint32 x) {
-    nint n = default!;
+    nint n = default;
 
     if (x >= (uint32)1 << 16) {
-        x >>= (int)(16);
+        x >>= 16;
         n = 16;
     }
     if (x >= (uint32)1 << 8) {
-        x >>= (int)(8);
+        x >>= 8;
         n += 8;
     }
     return n + (nint)len8tab[(uint8)x];
@@ -353,18 +353,18 @@ public static nint /*n*/ Len32(uint32 x) {
 
 // Len64 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
 public static nint /*n*/ Len64(uint64 x) {
-    nint n = default!;
+    nint n = default;
 
     if (x >= (uint64)1 << 32) {
-        x >>= (int)(32);
+        x >>= 32;
         n = 32;
     }
     if (x >= (uint64)1 << 16) {
-        x >>= (int)(16);
+        x >>= 16;
         n += 16;
     }
     if (x >= (uint64)1 << 8) {
-        x >>= (int)(8);
+        x >>= 8;
         n += 8;
     }
     return n + (nint)len8tab[(uint8)x];
@@ -379,8 +379,8 @@ public static nint /*n*/ Len64(uint64 x) {
 //
 // This function's execution time does not depend on the inputs.
 public static (uint32 sum, uint32 carryOut) Add32(uint32 x, uint32 y, uint32 carry) {
-    uint32 sum = default!;
-    uint32 carryOut = default!;
+    uint32 sum = default;
+    uint32 carryOut = default;
 
     var sum64 = (uint64)x + (uint64)y + (uint64)carry;
     sum = (uint32)sum64;
@@ -399,8 +399,8 @@ public static (uint32 sum, uint32 carryOut) Add32(uint32 x, uint32 y, uint32 car
 //
 // This function's execution time does not depend on the inputs.
 public static (uint32 diff, uint32 borrowOut) Sub32(uint32 x, uint32 y, uint32 borrow) {
-    uint32 diff = default!;
-    uint32 borrowOut = default!;
+    uint32 diff = default;
+    uint32 borrowOut = default;
 
     diff = x - y - borrow;
     // The difference will underflow if the top bit of x is not set and the top
@@ -422,8 +422,8 @@ public static (uint32 diff, uint32 borrowOut) Sub32(uint32 x, uint32 y, uint32 b
 //
 // This function's execution time does not depend on the inputs.
 public static (uint32 hi, uint32 lo) Mul32(uint32 x, uint32 y) {
-    uint32 hi = default!;
-    uint32 lo = default!;
+    uint32 hi = default;
+    uint32 lo = default;
 
     var tmp = (uint64)x * (uint64)y;
     (hi, lo) = ((uint32)(tmp >> 32), (uint32)tmp);
@@ -452,8 +452,8 @@ public static (nuint quo, nuint rem) Div(nuint hi, nuint lo, nuint y) {
 // half in parameter hi and the lower half in parameter lo.
 // Div32 panics for y == 0 (division by zero) or y <= hi (quotient overflow).
 public static (uint32 quo, uint32 rem) Div32(uint32 hi, uint32 lo, uint32 y) {
-    uint32 quo = default!;
-    uint32 rem = default!;
+    uint32 quo = default;
+    uint32 rem = default;
 
     if (y != 0 && y <= hi) {
         throw panic(overflowError);

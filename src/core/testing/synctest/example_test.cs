@@ -21,34 +21,33 @@ using go.testing;
 partial class synctest_test_package {
 
 // Keep the following tests in sync with the package documentation.
-public static void TestTime(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
-        ref var start = ref heap<time.Time>(out var Ꮡstart);
-        start = time.Now(); // always midnight UTC 2000-01-01
+public static void TestTime(ж<testing.T> t) {
+    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        ref var start = ref heap<time.Time>(time.Now(), out var Ꮡstart); // always midnight UTC 2000-01-01
         var startʗ1 = start;
         goǃ(() => {
             time.Sleep(1 * time.ΔNanosecond);
             tΔ1.Log(time.Since(startʗ1)); // always logs "1ns"
         });
         time.Sleep(2 * time.ΔNanosecond); // the AfterFunc will run before this Sleep returns
-        tΔ1.Log(time.Since(start)); // always logs "2ns"
+        tΔ1.Log(time.Since(start));       // always logs "2ns"
     });
 }
 
-public static void TestWait(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+public static void TestWait(ж<testing.T> t) {
+    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         var done = false;
         goǃ(() => {
             done = true;
-        });
+        }, GoStack.Bounded);
         // Wait will block until the goroutine above has finished.
         synctest.Wait();
         tΔ1.Log(done); // always logs "true"
     });
 }
 
-public static void TestContextAfterFunc(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestContextAfterFunc(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
         // Create a context.Context which can be canceled.
         var (ctx, cancel) = context.WithCancel(tΔ1.Context());
 
@@ -62,7 +61,7 @@ public static void TestContextAfterFunc(ж<testing.T> Ꮡt) {
         // The context has not been canceled, so the AfterFunc is not called.
         synctest.Wait();
         if (afterFuncCalled) {
-            tΔ1.Fatalf("before context is canceled: AfterFunc called"u8);
+            tΔ1.Fatalf("before context is canceled: AfterFunc called");
         }
 
         // Cancel the context and wait for the AfterFunc to finish executing.
@@ -70,13 +69,13 @@ public static void TestContextAfterFunc(ж<testing.T> Ꮡt) {
         cancel();
         synctest.Wait();
         if (!afterFuncCalled) {
-            tΔ1.Fatalf("after context is canceled: AfterFunc not called"u8);
+            tΔ1.Fatalf("after context is canceled: AfterFunc not called");
         }
     });
 }
 
-public static void TestContextWithTimeout(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+public static void TestContextWithTimeout(ж<testing.T> t) {
+    synctest.Test(t, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             // Create a context.Context which is canceled after a timeout.
@@ -89,8 +88,8 @@ public static void TestContextWithTimeout(ж<testing.T> Ꮡt) {
             time.Sleep((time.Duration)(4999999999L));
             synctest.Wait();
             {
-                var err = ctx.Err(); if (err != default!) {
-                    tΔ1.Fatalf("before timeout: ctx.Err() = %v, want nil\n"u8, err);
+                var err = ctx.Err(); if (err != nil) {
+                    tΔ1.Fatalf("before timeout: ctx.Err() = %v, want nil\n", err);
                 }
             }
 
@@ -99,7 +98,7 @@ public static void TestContextWithTimeout(ж<testing.T> Ꮡt) {
             synctest.Wait();
             {
                 var err = ctx.Err(); if (!AreEqual(err, context.DeadlineExceeded)) {
-                    tΔ1.Fatalf("after timeout: ctx.Err() = %v, want DeadlineExceeded\n"u8, err);
+                    tΔ1.Fatalf("after timeout: ctx.Err() = %v, want DeadlineExceeded\n", err);
                 }
             }
         }
@@ -109,14 +108,19 @@ public static void TestContextWithTimeout(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string requestBodyˢ = "request body"u8;
-private static readonly @string putˢ = "PUT"u8;
-private static readonly @string httpTestTldˢ = "http://test.tld/"u8;
-private static readonly @string expectˢ = "Expect"u8;
-private static readonly @string continueˢ = "100-continue"u8;
+private static ref readonly @string requestBodyˢ => ref requestBodyˢᵇ;
+private static readonly @string requestBodyˢᵇ = "request body"u8;
+private static ref readonly @string putˢ => ref putˢᵇ;
+private static readonly @string putˢᵇ = "PUT"u8;
+private static ref readonly @string httpTestTldˢ => ref httpTestTldˢᵇ;
+private static readonly @string httpTestTldˢᵇ = "http://test.tld/"u8;
+private static ref readonly @string expectˢ => ref expectˢᵇ;
+private static readonly @string expectˢᵇ = "Expect"u8;
+private static ref readonly @string continueˢ => ref continueˢᵇ;
+private static readonly @string continueˢᵇ = "100-continue"u8;
 
-public static void TestHTTPTransport100Continue(ж<testing.T> Ꮡt) {
-    synctest.Test(Ꮡt, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> _Δp0) => {
+public static void TestHTTPTransport100Continue(ж<testing.T> t) {
+    synctest.Test(t, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> _Δp0) => {
         GoFrame ᒐ = default;
         try {
             // Create an in-process fake network connection.
@@ -132,7 +136,7 @@ public static void TestHTTPTransport100Continue(ж<testing.T> Ꮡt) {
                 var cliConnʗ2 = cliConn;
             var tr = Ꮡ(new http.Transport(
                 // Use the fake network connection created above.
-                DialContext: (context.Context ctx, @string network, @string address) => (cliConnʗ2, default!),
+                DialContext: (context.Context ctx, @string network, @string address) => (cliConnʗ2, default),
                 // Enable "Expect: 100-continue" handling.
                 ExpectContinueTimeout: (time.Duration)(5000000000L)
             ));
@@ -143,31 +147,31 @@ public static void TestHTTPTransport100Continue(ж<testing.T> Ꮡt) {
             var trʗ1 = tr;
             goǃ(() => {
                 var (reqΔ1, _) = http.NewRequest(putˢ, httpTestTldˢ, new strings_ReaderжReader(strings.NewReader(body)));
-                (~reqΔ1).Header.Set(expectˢ, continueˢ);
+                reqΔ1.Header.Set(expectˢ, continueˢ);
                 var (resp, errΔ1) = trʗ1.RoundTrip(reqΔ1);
-                if (errΔ1 != default!){
-                    Ꮡt.Errorf("RoundTrip: unexpected error %v\n"u8, errΔ1);
+                if (errΔ1 != nil) {
+                    t.Errorf("RoundTrip: unexpected error %v\n", errΔ1);
                 } else {
-                    (~resp).Body.Close();
+                    resp.Body.Close();
                 }
             });
 
             // Read the request headers sent by the client.
             var (req, err) = http.ReadRequest(bufio.NewReader(new net_ConnᴠReader(srvConn)));
-            if (err != default!) {
-                Ꮡt.Fatalf("ReadRequest: %v\n"u8, err);
+            if (err != nil) {
+                t.Fatalf("ReadRequest: %v\n", err);
             }
 
             // Start a new goroutine copying the body sent by the client into a buffer.
             // Wait for all goroutines in the bubble to block and verify that we haven't
             // read anything from the client yet.
             ref var gotBody = ref heap(new bytes.Buffer(), out var ᏑgotBody);
-            goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), new bytes_BufferжWriter(ᏑgotBody), new io_ReadCloserᴠReader((~req).Body));
+            goǃ((ᴛ1, ᴛ2) => io.Copy(ᴛ1, ᴛ2), new bytes_BufferжWriter(ᏑgotBody), new io_ReadCloserᴠReader(req.Body));
             synctest.Wait();
             {
                 @string got = ᏑgotBody.String();
                 @string want = ""u8; if (got != want) {
-                    Ꮡt.Fatalf("before sending 100 Continue, read body: %q, want %q\n"u8, got, want);
+                    t.Fatalf("before sending 100 Continue, read body: %q, want %q\n", got, want);
                 }
             }
 
@@ -178,7 +182,7 @@ public static void TestHTTPTransport100Continue(ж<testing.T> Ꮡt) {
             {
                 @string got = ᏑgotBody.String();
                 @string want = body; if (got != want) {
-                    Ꮡt.Fatalf("after sending 100 Continue, read body: %q, want %q\n"u8, got, want);
+                    t.Fatalf("after sending 100 Continue, read body: %q, want %q\n", got, want);
                 }
             }
 

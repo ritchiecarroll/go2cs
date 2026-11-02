@@ -46,7 +46,12 @@ using static go.crypto.@internal.fips140.bigmod_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Modulus))]
+[assembly: GoFieldAccess(typeof(ΔNat))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,8 +61,8 @@ using static go.crypto.@internal.fips140.bigmod_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/bigmod/nat.go", "nat.cs", "ACFGgOyQqLSCggATLLKCqLKClIKCgoKUgoKCqLKCgqaCggACEPKCgIKkqNaCgpSUqMKCgqyyruKCgqKCgoKClJSCpgAFEgAJAoKAgqSClAAFEAAIAoKAgtqClIKqooKUpoKSgoKClIKClIKUrNKCggACEAAIBIKClIKClKzEgpSCgpSsxIKUgqaCgpQAAhIACAKCgqiSgpSokoKCgoKClIKUAAIQAAgEgoKUgoK4AAIQAAkEgoKUgoKUAAIQAAkEgoKUgpQAAhAACQSCgpSClAACEAAIBIKUgpSCgqaCgoKmgoK4rtSClIKCpqyypoKClAASKrKCgoK4lIIACha4goKUgsqCgoKCuK4ACg6CgpQAAhDSgq7CgoKCgpTWgoKClIKCgpSokqiSqLaCggACEAAIAqaCgoIACBKCgoKCgoKCgsqUAAIUAAsC3KaCgpSCgqaCgpSs0qzSAAIcAA0CgqaCAAISAAkClIKCgqyygqYAAhIACAKCggACFAALBq74goIAAhQACwKCgoKUAAWGAYKCgoKCgoKClIKmgoKCgoKCgoKUgqaCgoKCgoKCgpSCAAPNAYKClJzCggASJoLK3IIACxiCAAJiAAIQ8oKCgqaCgoKClAACEgAKAqaCpoKClAADKIKCgpSkgoKClKSCgoKUAANHgoKUpoK4AANIAAsCggAHENyCgqaCgoKCgqaCgoKmgoK4grgAAhIACAKCyoKCgoKAgrYAAhYACgKCgpSClK7CgoKUAAYQACIygpSCpoKClIKCgoKCAA4epoKCgoKUgoLKgriCgoKClIKmgoKClIK4gsySgpSCgoKUAAQU0oKmgoKU", "", "", "1094=NewNat/1/15/2,NewNat/2/15/2,NewNat/3/15/2,NewNat/4/15/2,NewNat/5/15/2,NewNat/6/15/3,NewNat/7/15/3,NewNat/8/15/3,NewNat/9/15/3,NewNat/10/15/3,NewNat/11/15/4,NewNat/12/15/4,NewNat/13/15/4,NewNat/14/15/4,NewNat/15/15/4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/bigmod/nat_noasm.go", "nat_noasm.cs", "AAoWgqaCpoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat.go", "nat.cs", "ACFGgOyQqLSCggATLLKCqLKClIKCgoKUgoKCqLKCgqaCggACEPKCgIKkqNaCgpSUqMKCgqyyruKCgqKCgoKClJSCpgAGEgAJAoKAgqSClAAGEAAIAoKAgtqClIKqooKUpoKSgoKClIKClIKUrNKCggACEAAIBIKClIKClKzEgpSCgpSsxIKUgqaCgpQAAhIACAKCgqiSgpSokoKCgoKClIKUAAIQAAgEgoKUgoK4AAIQAAkEgoKUgoKUAAIQAAkEgoKUgpQAAhAACQSCgpSClAACEAAIBIKUgpSCgqaCgoKmgoK4rtSClIKCpqyypoKClAASKrKCgoK4lIIACha4goKUgsqCgoKCuK4ACg6CgpQAAhDSgq7CgoKCgpTmgoKClIKCgpSokqiSqLaCggACEAAIAqaCgoIACBKCgoKCgoKCgsqUAAIUAAsC3KaCgpSCgqaCgpSs0qzSAAIcAA0CgqaCAAISAAkClIKCgqyygqYAAhIACAKCggACFAALBq74goIAAhQACwKCgoKUpoKClJzCggASJoLK3IIACxiC/oKCgoKCgoKClIK2goKCgoKCgoKUgraCgoKCgoKCgpSCtgACEPKCgoKmgoKCgpQAAhIACgKmgqaCgpSmgoKUpoK4yoKCgpSkgoKClKSCgoKUAAMYAAsCggAHENyCgqaCgoKCgqaCgoKmgoK4grgAAhIACAKCyoKCgoKAgrYAAhYACgKCgpSClK7CgoKUAAgQACIygpSCpoKClIKCgoKCAA4epoKCgoKUgoLKgriCgoKClIKmgoKClIK4gsySgpSCgoKUAAQU0oKmgoKU", "", "", "1101=NewNat/1/15/2,NewNat/2/15/2,NewNat/3/15/2,NewNat/4/15/2,NewNat/5/15/2,NewNat/6/15/3,NewNat/7/15/3,NewNat/8/15/3,NewNat/9/15/3,NewNat/10/15/3,NewNat/11/15/4,NewNat/12/15/4,NewNat/13/15/4,NewNat/14/15/4,NewNat/15/15/4")]
+[assembly: GoPositionMap("crypto/internal/fips140/bigmod/nat_noasm.go", "nat_noasm.cs", "AAoWgqaCpoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

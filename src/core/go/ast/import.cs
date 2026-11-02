@@ -13,43 +13,43 @@ partial class ast_package {
 
 // SortImports sorts runs of consecutive import lines in import blocks in f.
 // It also removes duplicate imports when it is possible to do so without data loss.
-public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
+public static void SortImports(ж<token.FileSet> fset, ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     foreach (var (_, d) in f.Decls) {
         var (dΔ1, ok) = d._<ж<GenDecl>>(ᐧ);
-        if (!ok || (~dΔ1).Tok != token.IMPORT) {
+        if (!ok || dΔ1.Tok != token.IMPORT) {
             // Not an import declaration, so we're done.
             // Imports are always first.
             break;
         }
 
-        if (!(~dΔ1).Lparen.IsValid()) {
+        if (!dΔ1.Lparen.IsValid()) {
             // Not a block: sorted by default.
             continue;
         }
 
         // Identify and sort runs of specs on successive lines.
         nint i = 0;
-        var specs = (~dΔ1).Specs[..0];
-        foreach (var (j, s) in (~dΔ1).Specs) {
-            if (j > i && lineAt(Ꮡfset, s.Pos()) > 1 + lineAt(Ꮡfset, (~dΔ1).Specs[j - 1].End())) {
+        var specs = dΔ1.Specs[..0];
+        foreach (var (j, s) in dΔ1.Specs) {
+            if (j > i && lineAt(fset, s.Pos()) > 1 + lineAt(fset, dΔ1.Specs[j - 1].End())) {
                 // j begins a new run. End this one.
-                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), (~dΔ1).Specs.slice(i, j)));
+                specs = appendꓸꓸꓸ(specs, sortSpecs(fset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), dΔ1.Specs.slice(i, j)));
                 i = j;
             }
         }
-        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), (~dΔ1).Specs.slice(i)));
-        dΔ1.Value.Specs = specs;
+        specs = appendꓸꓸꓸ(specs, sortSpecs(fset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), dΔ1.Specs.slice(i)));
+        dΔ1.Specs = specs;
 
         // Deduping can leave a blank line before the rparen; clean that up.
-        if (len((~dΔ1).Specs) > 0) {
-            var lastSpec = (~dΔ1).Specs[len((~dΔ1).Specs) - 1];
-            nint lastLine = lineAt(Ꮡfset, lastSpec.Pos());
-            nint rParenLine = lineAt(Ꮡfset, (~dΔ1).Rparen);
+        if (len(dΔ1.Specs) > 0) {
+            var lastSpec = dΔ1.Specs[len(dΔ1.Specs) - 1];
+            nint lastLine = lineAt(fset, lastSpec.Pos());
+            nint rParenLine = lineAt(fset, dΔ1.Rparen);
             while (rParenLine > lastLine + 1) {
                 rParenLine--;
-                Ꮡfset.File((~dΔ1).Rparen).MergeLine(rParenLine);
+                fset.File(dΔ1.Rparen).MergeLine(rParenLine);
             }
         }
     }
@@ -58,8 +58,8 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
     f.Imports = f.Imports[..0];
     foreach (var (_, decl) in f.Decls) {
         {
-            var (declΔ1, ok) = decl._<ж<GenDecl>>(ᐧ); if (ok && (~declΔ1).Tok == token.IMPORT) {
-                foreach (var (_, spec) in (~declΔ1).Specs) {
+            var (declΔ1, ok) = decl._<ж<GenDecl>>(ᐧ); if (ok && declΔ1.Tok == token.IMPORT) {
+                foreach (var (_, spec) in declΔ1.Specs) {
                     f.Imports = append(f.Imports, spec._<ж<ImportSpec>>());
                 }
             }
@@ -67,28 +67,28 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
     }
 }
 
-internal static nint lineAt(ж<token.FileSet> Ꮡfset, tokenꓸPos pos) {
-    return Ꮡfset.PositionFor(pos, false).Line;
+internal static nint lineAt(ж<token.FileSet> fset, tokenꓸPos pos) {
+    return fset.PositionFor(pos, false).Line;
 }
 
 internal static @string importPath(Spec s) {
-    var (t, err) = strconv.Unquote((~(~s._<ж<ImportSpec>>()).Path).Value);
-    if (err == default!) {
+    var (t, err) = strconv.Unquote((~s._<ж<ImportSpec>>().Path).Value);
+    if (err == nil) {
         return t;
     }
     return ""u8;
 }
 
 internal static @string importName(Spec s) {
-    var n = s._<ж<ImportSpec>>().Value.Name;
+    var n = s._<ж<ImportSpec>>().Name;
     if (n == nil) {
         return ""u8;
     }
-    return (~n).Name;
+    return n.Name;
 }
 
 internal static @string importComment(Spec s) {
-    var c = s._<ж<ImportSpec>>().Value.Comment;
+    var c = s._<ж<ImportSpec>>().Comment;
     if (c == nil) {
         return ""u8;
     }
@@ -100,7 +100,7 @@ internal static bool collapse(Spec prev, Spec next) {
     if (importPath(next) != importPath(prev) || importName(next) != importName(prev)) {
         return false;
     }
-    return (~prev._<ж<ImportSpec>>()).Comment == nil;
+    return prev._<ж<ImportSpec>>().Comment == nil;
 }
 
 partial struct posSpan {
@@ -113,7 +113,7 @@ partial struct cgPos {
     internal ж<CommentGroup> cg;
 }
 
-internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref GenDecl d, slice<Spec> specs) {
+internal static slice<Spec> sortSpecs(ж<token.FileSet> fset, ref File f, ref GenDecl d, slice<Spec> specs) {
     // Can't short-circuit here even if specs are already sorted,
     // since they might yet need deduplication.
     // A lone import, however, may be safely ignored.
@@ -130,11 +130,11 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref
     // Identify comments in this range.
     tokenꓸPos begSpecs = pos[0].Start;
     tokenꓸPos endSpecs = pos[len(pos) - 1].End;
-    tokenꓸPos beg = Ꮡfset.File(begSpecs).LineStart(lineAt(Ꮡfset, begSpecs));
-    nint endLine = lineAt(Ꮡfset, endSpecs);
-    var endFile = Ꮡfset.File(endSpecs);
-    tokenꓸPos end = default!;
-    if (endLine == endFile.LineCount()){
+    tokenꓸPos beg = fset.File(begSpecs).LineStart(lineAt(fset, begSpecs));
+    nint endLine = lineAt(fset, endSpecs);
+    var endFile = fset.File(endSpecs);
+    tokenꓸPos end = default;
+    if (endLine == endFile.LineCount()) {
         end = endSpecs;
     } else {
         end = endFile.LineStart(endLine + 1); // beginning of next line
@@ -157,7 +157,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref
         }
     }
 
-    slice<ж<CommentGroup>> comments = default!;
+    slice<ж<CommentGroup>> comments = default;
     if (last >= 0) {
         comments = f.Comments.slice(first, last + 1);
     }
@@ -169,13 +169,12 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref
         while (specIndex + 1 < len(specs) && pos[specIndex + 1].Start <= g.Pos()) {
             specIndex++;
         }
-        bool left = default!;
+        bool left = default;
         // A block comment can appear before the first import spec.
-        if (specIndex == 0 && pos[specIndex].Start > g.Pos()){
+        if (specIndex == 0 && pos[specIndex].Start > g.Pos()) {
             left = true;
-        } else 
-        if (specIndex + 1 < len(specs) && // Or it can appear on the left of an import spec.
-            lineAt(Ꮡfset, pos[specIndex].Start) + 1 == lineAt(Ꮡfset, g.Pos())) {
+        } else if (specIndex + 1 < len(specs) && // Or it can appear on the left of an import spec.
+            lineAt(fset, pos[specIndex].Start) + 1 == lineAt(fset, g.Pos())) {
             specIndex++;
             left = true;
         }
@@ -208,15 +207,15 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref
     // adjacent pairs of imports.
     var deduped = specs[..0];
     foreach (var (i, s) in specs) {
-        if (i == len(specs) - 1 || !collapse(s, specs[i + 1])){
+        if (i == len(specs) - 1 || !collapse(s, specs[i + 1])) {
             deduped = append(deduped, s);
         } else {
             tokenꓸPos p = s.Pos();
             // This function is exited early when len(specs) <= 1,
             // so d.Rparen must be populated (d.Rparen.IsValid() == true).
             {
-                nint l = lineAt(Ꮡfset, p); if (l != lineAt(Ꮡfset, d.Rparen)) {
-                    Ꮡfset.File(p).MergeLine(l);
+                nint l = lineAt(fset, p); if (l != lineAt(fset, d.Rparen)) {
+                    fset.File(p).MergeLine(l);
                 }
             }
         }
@@ -226,21 +225,21 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref
     // Fix up comment positions
     foreach (var (i, s) in specs) {
         var sΔ1 = s._<ж<ImportSpec>>();
-        if ((~sΔ1).Name != nil) {
-            sΔ1.Value.Name.Value.NamePos = pos[i].Start;
+        if (sΔ1.Name != nil) {
+            sΔ1.Name.NamePos = pos[i].Start;
         }
-        updateBasicLitPos((~sΔ1).Path, pos[i].Start);
-        sΔ1.Value.EndPos = pos[i].End;
+        updateBasicLitPos(sΔ1.Path, pos[i].Start);
+        sΔ1.EndPos = pos[i].End;
         foreach (var (_, g) in importComments[sΔ1]) {
-            foreach (var (_, c) in (~g.cg).List) {
-                if (g.left){
-                    c.Value.Slash = pos[i].Start - 1;
+            foreach (var (_, c) in g.cg.List) {
+                if (g.left) {
+                    c.Slash = pos[i].Start - 1;
                 } else {
                     // An import spec can have both block comment and a line comment
                     // to its right. In that case, both of them will have the same pos.
                     // But while formatting the AST, the line comment gets moved to
                     // after the block comment.
-                    c.Value.Slash = pos[i].End;
+                    c.Slash = pos[i].End;
                 }
             }
         }

@@ -28,7 +28,7 @@ internal static void clear(this ref buffer b) {
 internal static (nint written, error err) Write(this ref buffer b, slice<byte> buf) {
     nint n = len(b.a);
     nint m = len(buf);
-    if (n + m <= cap(b.a)){
+    if (n + m <= cap(b.a)) {
         b.a = b.a.slice(0, n + m);
         for (nint i = 0; i < m; i++) {
             b.a[n + i] = buf[i];
@@ -36,38 +36,38 @@ internal static (nint written, error err) Write(this ref buffer b, slice<byte> b
     } else {
         throw panic("buffer.Write: buffer too small");
     }
-    return (len(buf), default!);
+    return (len(buf), default);
 }
 
 internal static @string String(this ref buffer b) {
     return (@string)b.a;
 }
 
-internal static void write(ж<testing.T> Ꮡt, @string testname, ж<tabwriter.Writer> Ꮡw, @string src) {
-    var (written, err) = io.WriteString(new tabwriter.WriterжWriter(Ꮡw), src);
-    if (err != default!) {
-        Ꮡt.Errorf("--- test: %s\n--- src:\n%q\n--- write error: %v\n"u8, testname, src, err);
+internal static void write(ж<testing.T> t, @string testname, ж<tabwriter.Writer> w, @string src) {
+    var (written, err) = io.WriteString(new tabwriter.WriterжWriter(w), src);
+    if (err != nil) {
+        t.Errorf("--- test: %s\n--- src:\n%q\n--- write error: %v\n", testname, src, err);
     }
     if (written != len(src)) {
-        Ꮡt.Errorf("--- test: %s\n--- src:\n%q\n--- written = %d, len(src) = %d\n"u8, testname, src, written, len(src));
+        t.Errorf("--- test: %s\n--- src:\n%q\n--- written = %d, len(src) = %d\n", testname, src, written, len(src));
     }
 }
 
-internal static void verify(ж<testing.T> Ꮡt, @string testname, ж<tabwriter.Writer> Ꮡw, ж<buffer> Ꮡb, @string src, @string expected) {
+internal static void verify(ж<testing.T> t, @string testname, ж<tabwriter.Writer> w, ж<buffer> Ꮡb, @string src, @string expected) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var err = Ꮡw.Flush();
-    if (err != default!) {
-        Ꮡt.Errorf("--- test: %s\n--- src:\n%q\n--- flush error: %v\n"u8, testname, src, err);
+    var err = w.Flush();
+    if (err != nil) {
+        t.Errorf("--- test: %s\n--- src:\n%q\n--- flush error: %v\n", testname, src, err);
     }
 
     @string res = b.String();
     if (res != expected) {
-        Ꮡt.Errorf("--- test: %s\n--- src:\n%q\n--- found:\n%q\n--- expected:\n%q\n"u8, testname, src, res, expected);
+        t.Errorf("--- test: %s\n--- src:\n%q\n--- found:\n%q\n--- expected:\n%q\n", testname, src, res, expected);
     }
 }
 
-internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags, @string src, @string expected) {
+internal static void check(ж<testing.T> t, @string testname, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags, @string src, @string expected) {
     ref var b = ref heap(new buffer(), out var Ꮡb);
     b.init(1000);
 
@@ -77,28 +77,28 @@ internal static void check(ж<testing.T> Ꮡt, @string testname, nint minwidth, 
     // write all at once
     @string title = testname + " (written all at once)"u8;
     b.clear();
-    write(Ꮡt, title, Ꮡw, src);
-    verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
+    write(t, title, Ꮡw, src);
+    verify(t, title, Ꮡw, Ꮡb, src, expected);
 
     // write byte-by-byte
     title = testname + " (written byte-by-byte)"u8;
     b.clear();
     for (nint i = 0; i < len(src); i++) {
-        write(Ꮡt, title, Ꮡw, src.slice(i, i + 1));
+        write(t, title, Ꮡw, src.slice(i, i + 1));
     }
-    verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
+    verify(t, title, Ꮡw, Ꮡb, src, expected);
 
     // write using Fibonacci slice sizes
     title = testname + " (written in fibonacci slices)"u8;
     b.clear();
     for ((nint i, nint d) = (0, 0); i < len(src); ) {
-        write(Ꮡt, title, Ꮡw, src.slice(i, i + d));
+        write(t, title, Ꮡw, src.slice(i, i + d));
         (i, d) = (i + d, d + 1);
         if (i + d > len(src)) {
             d = len(src) - i;
         }
     }
-    verify(Ꮡt, title, Ꮡw, Ꮡb, src, expected);
+    verify(t, title, Ꮡw, Ꮡb, src, expected);
 }
 
 partial struct testsᴛ1 /*dyn*/ {
@@ -108,221 +108,221 @@ partial struct testsᴛ1 /*dyn*/ {
     internal nuint flags;
     internal @string src, expected;
 }
-internal static slice<testsᴛ1> tests = new testsᴛ1[]{
+internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
     new(
-        "1a"u8,
-        8, 0, 1, (rune)'.', 0,
-        ""u8,
-        ""u8
+        "1a",
+        8, 0, 1, (byte)'.', 0,
+        "",
+        ""
     ),
 
     new(
-        "1a debug"u8,
-        8, 0, 1, (rune)'.', Debug,
-        ""u8,
-        ""u8
+        "1a debug",
+        8, 0, 1, (byte)'.', Debug,
+        "",
+        ""
     ),
 
     new(
-        "1b esc stripped"u8,
-        8, 0, 1, (rune)'.', StripEscape,
+        "1b esc stripped",
+        8, 0, 1, (byte)'.', StripEscape,
         ((@string)(new byte[]{0xff, 0xff})),
-        ""u8
+        ""
     ),
 
     new(
-        "1b esc"u8,
-        8, 0, 1, (rune)'.', 0,
+        "1b esc",
+        8, 0, 1, (byte)'.', 0,
         ((@string)(new byte[]{0xff, 0xff})),
         ((@string)(new byte[]{0xff, 0xff}))
     ),
 
     new(
-        "1c esc stripped"u8,
-        8, 0, 1, (rune)'.', StripEscape,
+        "1c esc stripped",
+        8, 0, 1, (byte)'.', StripEscape,
         ((@string)(new byte[]{0xff, 0x09, 0xff})),
-        "\t"u8
+        "\t"
     ),
 
     new(
-        "1c esc"u8,
-        8, 0, 1, (rune)'.', 0,
+        "1c esc",
+        8, 0, 1, (byte)'.', 0,
         ((@string)(new byte[]{0xff, 0x09, 0xff})),
         ((@string)(new byte[]{0xff, 0x09, 0xff}))
     ),
 
     new(
-        "1d esc stripped"u8,
-        8, 0, 1, (rune)'.', StripEscape,
+        "1d esc stripped",
+        8, 0, 1, (byte)'.', StripEscape,
         ((@string)(new byte[]{0xff, 0x22, 0x66, 0x6f, 0x6f, 0x09, 0x0a, 0x09, 0x62, 0x61, 0x72, 0x22, 0xff})),
-        "\"foo\t\n\tbar\""u8
+        "\"foo\t\n\tbar\""
     ),
 
     new(
-        "1d esc"u8,
-        8, 0, 1, (rune)'.', 0,
+        "1d esc",
+        8, 0, 1, (byte)'.', 0,
         ((@string)(new byte[]{0xff, 0x22, 0x66, 0x6f, 0x6f, 0x09, 0x0a, 0x09, 0x62, 0x61, 0x72, 0x22, 0xff})),
         ((@string)(new byte[]{0xff, 0x22, 0x66, 0x6f, 0x6f, 0x09, 0x0a, 0x09, 0x62, 0x61, 0x72, 0x22, 0xff}))
     ),
 
     new(
-        "1e esc stripped"u8,
-        8, 0, 1, (rune)'.', StripEscape,
+        "1e esc stripped",
+        8, 0, 1, (byte)'.', StripEscape,
         ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66})), // unterminated escape
-        "abc\tdef"u8
+        "abc\tdef"
     ),
 
     new(
-        "1e esc"u8,
-        8, 0, 1, (rune)'.', 0,
+        "1e esc",
+        8, 0, 1, (byte)'.', 0,
         ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66})), // unterminated escape
         ((@string)(new byte[]{0x61, 0x62, 0x63, 0xff, 0x09, 0x64, 0x65, 0x66}))
     ),
 
     new(
-        "2"u8,
-        8, 0, 1, (rune)'.', 0,
-        "\n\n\n"u8,
-        "\n\n\n"u8
+        "2",
+        8, 0, 1, (byte)'.', 0,
+        "\n\n\n",
+        "\n\n\n"
     ),
 
     new(
-        "3"u8,
-        8, 0, 1, (rune)'.', 0,
-        "a\nb\nc"u8,
-        "a\nb\nc"u8
+        "3",
+        8, 0, 1, (byte)'.', 0,
+        "a\nb\nc",
+        "a\nb\nc"
     ),
 
     new(
-        "4a"u8,
-        8, 0, 1, (rune)'.', 0,
-        "\t"u8, // '\t' terminates an empty cell on last line - nothing to print
-        ""u8
+        "4a",
+        8, 0, 1, (byte)'.', 0,
+        "\t", // '\t' terminates an empty cell on last line - nothing to print
+        ""
     ),
 
     new(
-        "4b"u8,
-        8, 0, 1, (rune)'.', AlignRight,
-        "\t"u8, // '\t' terminates an empty cell on last line - nothing to print
-        ""u8
+        "4b",
+        8, 0, 1, (byte)'.', AlignRight,
+        "\t", // '\t' terminates an empty cell on last line - nothing to print
+        ""
     ),
 
     new(
-        "5"u8,
-        8, 0, 1, (rune)'.', 0,
-        "*\t*"u8,
-        "*.......*"u8
+        "5",
+        8, 0, 1, (byte)'.', 0,
+        "*\t*",
+        "*.......*"
     ),
 
     new(
-        "5b"u8,
-        8, 0, 1, (rune)'.', 0,
-        "*\t*\n"u8,
-        "*.......*\n"u8
+        "5b",
+        8, 0, 1, (byte)'.', 0,
+        "*\t*\n",
+        "*.......*\n"
     ),
 
     new(
-        "5c"u8,
-        8, 0, 1, (rune)'.', 0,
-        "*\t*\t"u8,
-        "*.......*"u8
+        "5c",
+        8, 0, 1, (byte)'.', 0,
+        "*\t*\t",
+        "*.......*"
     ),
 
     new(
-        "5c debug"u8,
-        8, 0, 1, (rune)'.', Debug,
-        "*\t*\t"u8,
-        "*.......|*"u8
+        "5c debug",
+        8, 0, 1, (byte)'.', Debug,
+        "*\t*\t",
+        "*.......|*"
     ),
 
     new(
-        "5d"u8,
-        8, 0, 1, (rune)'.', AlignRight,
-        "*\t*\t"u8,
-        ".......**"u8
+        "5d",
+        8, 0, 1, (byte)'.', AlignRight,
+        "*\t*\t",
+        ".......**"
     ),
 
     new(
-        "6"u8,
-        8, 0, 1, (rune)'.', 0,
-        "\t\n"u8,
-        "........\n"u8
+        "6",
+        8, 0, 1, (byte)'.', 0,
+        "\t\n",
+        "........\n"
     ),
 
     new(
-        "7a"u8,
-        8, 0, 1, (rune)'.', 0,
-        "a) foo"u8,
-        "a) foo"u8
+        "7a",
+        8, 0, 1, (byte)'.', 0,
+        "a) foo",
+        "a) foo"
     ),
 
     new(
-        "7b"u8,
-        8, 0, 1, (rune)' ', 0,
-        "b) foo\tbar"u8,
-        "b) foo  bar"u8
+        "7b",
+        8, 0, 1, (byte)' ', 0,
+        "b) foo\tbar",
+        "b) foo  bar"
     ),
 
     new(
-        "7c"u8,
-        8, 0, 1, (rune)'.', 0,
-        "c) foo\tbar\t"u8,
-        "c) foo..bar"u8
+        "7c",
+        8, 0, 1, (byte)'.', 0,
+        "c) foo\tbar\t",
+        "c) foo..bar"
     ),
 
     new(
-        "7d"u8,
-        8, 0, 1, (rune)'.', 0,
-        "d) foo\tbar\n"u8,
-        "d) foo..bar\n"u8
+        "7d",
+        8, 0, 1, (byte)'.', 0,
+        "d) foo\tbar\n",
+        "d) foo..bar\n"
     ),
 
     new(
-        "7e"u8,
-        8, 0, 1, (rune)'.', 0,
-        "e) foo\tbar\t\n"u8,
-        "e) foo..bar.....\n"u8
+        "7e",
+        8, 0, 1, (byte)'.', 0,
+        "e) foo\tbar\t\n",
+        "e) foo..bar.....\n"
     ),
 
     new(
-        "7f"u8,
-        8, 0, 1, (rune)'.', FilterHTML,
-        "f) f&lt;o\t<b>bar</b>\t\n"u8,
-        "f) f&lt;o..<b>bar</b>.....\n"u8
+        "7f",
+        8, 0, 1, (byte)'.', FilterHTML,
+        "f) f&lt;o\t<b>bar</b>\t\n",
+        "f) f&lt;o..<b>bar</b>.....\n"
     ),
 
     new(
-        "7g"u8,
-        8, 0, 1, (rune)'.', FilterHTML,
-        "g) f&lt;o\t<b>bar</b>\t non-terminated entity &amp"u8,
-        "g) f&lt;o..<b>bar</b>..... non-terminated entity &amp"u8
+        "7g",
+        8, 0, 1, (byte)'.', FilterHTML,
+        "g) f&lt;o\t<b>bar</b>\t non-terminated entity &amp",
+        "g) f&lt;o..<b>bar</b>..... non-terminated entity &amp"
     ),
 
     new(
-        "7g debug"u8,
-        8, 0, 1, (rune)'.', (nuint)(FilterHTML | Debug),
-        "g) f&lt;o\t<b>bar</b>\t non-terminated entity &amp"u8,
-        "g) f&lt;o..|<b>bar</b>.....| non-terminated entity &amp"u8
+        "7g debug",
+        8, 0, 1, (byte)'.', (nuint)(FilterHTML | Debug),
+        "g) f&lt;o\t<b>bar</b>\t non-terminated entity &amp",
+        "g) f&lt;o..|<b>bar</b>.....| non-terminated entity &amp"
     ),
 
     new(
-        "8"u8,
-        8, 0, 1, (rune)'*', 0,
-        "Hello, world!\n"u8,
-        "Hello, world!\n"u8
+        "8",
+        8, 0, 1, (byte)'*', 0,
+        "Hello, world!\n",
+        "Hello, world!\n"
     ),
 
     new(
-        "9a"u8,
-        1, 0, 0, (rune)'.', 0,
+        "9a",
+        1, 0, 0, (byte)'.', 0,
         "1\t2\t3\t4\n"u8 + "11\t222\t3333\t44444\n"u8,
 
         "1.2..3...4\n"u8 + "11222333344444\n"u8
     ),
 
     new(
-        "9b"u8,
-        1, 0, 0, (rune)'.', FilterHTML,
+        "9b",
+        1, 0, 0, (byte)'.', FilterHTML,
         "1\t2<!---\f--->\t3\t4\n"u8 + // \f inside HTML is ignored
             "11\t222\t3333\t44444\n"u8,
 
@@ -330,8 +330,8 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     ),
 
     new(
-        "9c"u8,
-        1, 0, 0, (rune)'.', 0,
+        "9c",
+        1, 0, 0, (byte)'.', 0,
         "1\t2\t3\t4\f"u8 + // \f causes a newline and flush
             "11\t222\t3333\t44444\n"u8,
 
@@ -339,8 +339,8 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     ),
 
     new(
-        "9c debug"u8,
-        1, 0, 0, (rune)'.', Debug,
+        "9c debug",
+        1, 0, 0, (byte)'.', Debug,
         "1\t2\t3\t4\f"u8 + // \f causes a newline and flush
             "11\t222\t3333\t44444\n"u8,
 
@@ -348,146 +348,146 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     ),
 
     new(
-        "10a"u8,
-        5, 0, 0, (rune)'.', 0,
-        "1\t2\t3\t4\n"u8,
-        "1....2....3....4\n"u8
+        "10a",
+        5, 0, 0, (byte)'.', 0,
+        "1\t2\t3\t4\n",
+        "1....2....3....4\n"
     ),
 
     new(
-        "10b"u8,
-        5, 0, 0, (rune)'.', 0,
-        "1\t2\t3\t4\t\n"u8,
-        "1....2....3....4....\n"u8
+        "10b",
+        5, 0, 0, (byte)'.', 0,
+        "1\t2\t3\t4\t\n",
+        "1....2....3....4....\n"
     ),
 
     new(
-        "11"u8,
-        8, 0, 1, (rune)'.', 0,
+        "11",
+        8, 0, 1, (byte)'.', 0,
         "本\tb\tc\n"u8 + "aa\t\u672c\u672c\u672c\tcccc\tddddd\n"u8 + "aaa\tbbbb\n"u8,
 
         "本.......b.......c\n"u8 + "aa......本本本.....cccc....ddddd\n"u8 + "aaa.....bbbb\n"u8
     ),
 
     new(
-        "12a"u8,
-        8, 0, 1, (rune)' ', AlignRight,
+        "12a",
+        8, 0, 1, (byte)' ', AlignRight,
         "a\tè\tc\t\n"u8 + "aa\tèèè\tcccc\tddddd\t\n"u8 + "aaa\tèèèè\t\n"u8,
 
         "       a       è       c\n"u8 + "      aa     èèè    cccc   ddddd\n"u8 + "     aaa    èèèè\n"u8
     ),
 
     new(
-        "12b"u8,
-        2, 0, 0, (rune)' ', 0,
+        "12b",
+        2, 0, 0, (byte)' ', 0,
         "a\tb\tc\n"u8 + "aa\tbbb\tcccc\n"u8 + "aaa\tbbbb\n"u8,
 
         "a  b  c\n"u8 + "aa bbbcccc\n"u8 + "aaabbbb\n"u8
     ),
 
     new(
-        "12c"u8,
-        8, 0, 1, (rune)'_', 0,
+        "12c",
+        8, 0, 1, (byte)'_', 0,
         "a\tb\tc\n"u8 + "aa\tbbb\tcccc\n"u8 + "aaa\tbbbb\n"u8,
 
         "a_______b_______c\n"u8 + "aa______bbb_____cccc\n"u8 + "aaa_____bbbb\n"u8
     ),
 
     new(
-        "13a"u8,
-        4, 0, 1, (rune)'-', 0,
+        "13a",
+        4, 0, 1, (byte)'-', 0,
         "4444\t日本語\t22\t1\t333\n"u8 + "999999999\t22\n"u8 + "7\t22\n"u8 + "\t\t\t88888888\n"u8 + "\n"u8 + "666666\t666666\t666666\t4444\n"u8 + "1\t1\t999999999\t0000000000\n"u8,
 
         "4444------日本語-22--1---333\n"u8 + "999999999-22\n"u8 + "7---------22\n"u8 + "------------------88888888\n"u8 + "\n"u8 + "666666-666666-666666----4444\n"u8 + "1------1------999999999-0000000000\n"u8
     ),
 
     new(
-        "13b"u8,
-        4, 0, 3, (rune)'.', 0,
+        "13b",
+        4, 0, 3, (byte)'.', 0,
         "4444\t333\t22\t1\t333\n"u8 + "999999999\t22\n"u8 + "7\t22\n"u8 + "\t\t\t88888888\n"u8 + "\n"u8 + "666666\t666666\t666666\t4444\n"u8 + "1\t1\t999999999\t0000000000\n"u8,
 
         "4444........333...22...1...333\n"u8 + "999999999...22\n"u8 + "7...........22\n"u8 + "....................88888888\n"u8 + "\n"u8 + "666666...666666...666666......4444\n"u8 + "1........1........999999999...0000000000\n"u8
     ),
 
     new(
-        "13c"u8,
-        8, 8, 1, (rune)'\t', FilterHTML,
+        "13c",
+        8, 8, 1, (byte)'\t', FilterHTML,
         "4444\t333\t22\t1\t333\n"u8 + "999999999\t22\n"u8 + "7\t22\n"u8 + "\t\t\t88888888\n"u8 + "\n"u8 + "666666\t666666\t666666\t4444\n"u8 + "1\t1\t<font color=red attr=日本語>999999999</font>\t0000000000\n"u8,
 
         "4444\t\t333\t22\t1\t333\n"u8 + "999999999\t22\n"u8 + "7\t\t22\n"u8 + "\t\t\t\t88888888\n"u8 + "\n"u8 + "666666\t666666\t666666\t\t4444\n"u8 + "1\t1\t<font color=red attr=日本語>999999999</font>\t0000000000\n"u8
     ),
 
     new(
-        "14"u8,
-        1, 0, 2, (rune)' ', AlignRight,
+        "14",
+        1, 0, 2, (byte)' ', AlignRight,
         ".0\t.3\t2.4\t-5.1\t\n"u8 + "23.0\t12345678.9\t2.4\t-989.4\t\n"u8 + "5.1\t12.0\t2.4\t-7.0\t\n"u8 + ".0\t0.0\t332.0\t8908.0\t\n"u8 + ".0\t-.3\t456.4\t22.1\t\n"u8 + ".0\t1.2\t44.4\t-13.3\t\t"u8,
 
         "    .0          .3    2.4    -5.1\n"u8 + "  23.0  12345678.9    2.4  -989.4\n"u8 + "   5.1        12.0    2.4    -7.0\n"u8 + "    .0         0.0  332.0  8908.0\n"u8 + "    .0         -.3  456.4    22.1\n"u8 + "    .0         1.2   44.4   -13.3"u8
     ),
 
     new(
-        "14 debug"u8,
-        1, 0, 2, (rune)' ', (nuint)(AlignRight | Debug),
+        "14 debug",
+        1, 0, 2, (byte)' ', (nuint)(AlignRight | Debug),
         ".0\t.3\t2.4\t-5.1\t\n"u8 + "23.0\t12345678.9\t2.4\t-989.4\t\n"u8 + "5.1\t12.0\t2.4\t-7.0\t\n"u8 + ".0\t0.0\t332.0\t8908.0\t\n"u8 + ".0\t-.3\t456.4\t22.1\t\n"u8 + ".0\t1.2\t44.4\t-13.3\t\t"u8,
 
         "    .0|          .3|    2.4|    -5.1|\n"u8 + "  23.0|  12345678.9|    2.4|  -989.4|\n"u8 + "   5.1|        12.0|    2.4|    -7.0|\n"u8 + "    .0|         0.0|  332.0|  8908.0|\n"u8 + "    .0|         -.3|  456.4|    22.1|\n"u8 + "    .0|         1.2|   44.4|   -13.3|"u8
     ),
 
     new(
-        "15a"u8,
-        4, 0, 0, (rune)'.', 0,
-        "a\t\tb"u8,
-        "a.......b"u8
+        "15a",
+        4, 0, 0, (byte)'.', 0,
+        "a\t\tb",
+        "a.......b"
     ),
 
     new(
-        "15b"u8,
-        4, 0, 0, (rune)'.', DiscardEmptyColumns,
-        "a\t\tb"u8, // htabs - do not discard column
-        "a.......b"u8
+        "15b",
+        4, 0, 0, (byte)'.', DiscardEmptyColumns,
+        "a\t\tb", // htabs - do not discard column
+        "a.......b"
     ),
 
     new(
-        "15c"u8,
-        4, 0, 0, (rune)'.', DiscardEmptyColumns,
-        "a\v\vb"u8,
-        "a...b"u8
+        "15c",
+        4, 0, 0, (byte)'.', DiscardEmptyColumns,
+        "a\v\vb",
+        "a...b"
     ),
 
     new(
-        "15d"u8,
-        4, 0, 0, (rune)'.', (nuint)(AlignRight | DiscardEmptyColumns),
-        "a\v\vb"u8,
-        "...ab"u8
+        "15d",
+        4, 0, 0, (byte)'.', (nuint)(AlignRight | DiscardEmptyColumns),
+        "a\v\vb",
+        "...ab"
     ),
 
     new(
-        "16a"u8,
-        100, 100, 0, (rune)'\t', 0,
+        "16a",
+        100, 100, 0, (byte)'\t', 0,
         "a\tb\t\td\n"u8 + "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
 
         "a\tb\t\td\n"u8 + "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8
     ),
 
     new(
-        "16b"u8,
-        100, 100, 0, (rune)'\t', DiscardEmptyColumns,
+        "16b",
+        100, 100, 0, (byte)'\t', DiscardEmptyColumns,
         "a\vb\v\vd\n"u8 + "a\vb\v\vd\ve\n"u8 + "a\n"u8 + "a\vb\vc\vd\n"u8 + "a\vb\vc\vd\ve\n"u8,
 
         "a\tb\td\n"u8 + "a\tb\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8
     ),
 
     new(
-        "16b debug"u8,
-        100, 100, 0, (rune)'\t', (nuint)(DiscardEmptyColumns | Debug),
+        "16b debug",
+        100, 100, 0, (byte)'\t', (nuint)(DiscardEmptyColumns | Debug),
         "a\vb\v\vd\n"u8 + "a\vb\v\vd\ve\n"u8 + "a\n"u8 + "a\vb\vc\vd\n"u8 + "a\vb\vc\vd\ve\n"u8,
 
         "a\t|b\t||d\n"u8 + "a\t|b\t||d\t|e\n"u8 + "a\n"u8 + "a\t|b\t|c\t|d\n"u8 + "a\t|b\t|c\t|d\t|e\n"u8
     ),
 
     new(
-        "16c"u8,
-        100, 100, 0, (rune)'\t', DiscardEmptyColumns,
+        "16c",
+        100, 100, 0, (byte)'\t', DiscardEmptyColumns,
         "a\tb\t\td\n"u8 + // hard tabs - do not discard column
             "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
 
@@ -495,18 +495,18 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     ),
 
     new(
-        "16c debug"u8,
-        100, 100, 0, (rune)'\t', (nuint)(DiscardEmptyColumns | Debug),
+        "16c debug",
+        100, 100, 0, (byte)'\t', (nuint)(DiscardEmptyColumns | Debug),
         "a\tb\t\td\n"u8 + // hard tabs - do not discard column
             "a\tb\t\td\te\n"u8 + "a\n"u8 + "a\tb\tc\td\n"u8 + "a\tb\tc\td\te\n"u8,
 
         "a\t|b\t|\t|d\n"u8 + "a\t|b\t|\t|d\t|e\n"u8 + "a\n"u8 + "a\t|b\t|c\t|d\n"u8 + "a\t|b\t|c\t|d\t|e\n"u8
     )
-}.slice();
+]);
 
-public static void Test(ж<testing.T> Ꮡt) {
+public static void Test(ж<testing.T> t) {
     foreach (var (_, e) in tests) {
-        check(Ꮡt, e.testname, e.minwidth, e.tabwidth, e.padding, e.padchar, e.flags, e.src, e.expected);
+        check(t, e.testname, e.minwidth, e.tabwidth, e.padding, e.padchar, e.flags, e.src, e.expected);
     }
 }
 
@@ -517,21 +517,21 @@ internal static (nint, error) Write(this panicWriter _Δp0, slice<byte> _Δp1) {
     throw panic("cannot write");
 }
 
-internal static void wantPanicString(ж<testing.T> Ꮡt, @string want) {
+internal static void wantPanicString(ж<testing.T> t, @string want) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
         {
-            var e = recover(calledByDefer); if (e != default!) {
+            var e = recover(calledByDefer); if (e != nil) {
                 var (got, ok) = e._<@string>(ᐧ);
                 switch (ᐧ) {
                 case {} when !ok: {
-                    Ꮡt.Errorf("got %v (%T), want panic string"u8, e, e);
+                    t.Errorf("got %v (%T), want panic string", e, e);
                     break;
                 }
                 case {} when got != want: {
-                    Ꮡt.Errorf("wrong panic message: got %q, want %q"u8, got, want);
+                    t.Errorf("wrong panic message: got %q, want %q", got, want);
                     break;
                 }}
             }
@@ -542,56 +542,59 @@ internal static void wantPanicString(ж<testing.T> Ꮡt, @string want) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tabwriterPanicDuringˢ = "tabwriter: panic during Flush (cannot write)"u8;
+private static ref readonly @string tabwriterPanicDuringˢ => ref tabwriterPanicDuringˢᵇ;
+private static readonly @string tabwriterPanicDuringˢᵇ = "tabwriter: panic during Flush (cannot write)"u8;
 
-public static void TestPanicDuringFlush(ж<testing.T> Ꮡt) {
+public static void TestPanicDuringFlush(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanicString, Ꮡt, tabwriterPanicDuringˢ, ref ᒐ, recovers: true);
-        panicWriter p = default!;
+        defer(wantPanicString, t, tabwriterPanicDuringˢ, ref ᒐ, recovers: true);
+        panicWriter p = default;
         var w = @new<tabwriter.Writer>();
-        w.Init(p, 0, 0, 5, (rune)' ', 0);
-        io.WriteString(new tabwriter.WriterжWriter(w), "a"u8);
+        w.Init(p, 0, 0, 5, (byte)' ', 0);
+        io.WriteString(new tabwriter.WriterжWriter(w), "a");
         w.Flush();
-        Ꮡt.Errorf("failed to panic during Flush"u8);
+        t.Errorf("failed to panic during Flush");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tabwriterPanicDuringˢ2 = "tabwriter: panic during Write (cannot write)"u8;
+private static ref readonly @string tabwriterPanicDuringˢ2 => ref tabwriterPanicDuringˢ2ᵇ;
+private static readonly @string tabwriterPanicDuringˢ2ᵇ = "tabwriter: panic during Write (cannot write)"u8;
 
-public static void TestPanicDuringWrite(ж<testing.T> Ꮡt) {
+public static void TestPanicDuringWrite(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanicString, Ꮡt, tabwriterPanicDuringˢ2, ref ᒐ, recovers: true);
-        panicWriter p = default!;
+        defer(wantPanicString, t, tabwriterPanicDuringˢ2, ref ᒐ, recovers: true);
+        panicWriter p = default;
         var w = @new<tabwriter.Writer>();
-        w.Init(p, 0, 0, 5, (rune)' ', 0);
-        io.WriteString(new tabwriter.WriterжWriter(w), "a\n\n"u8); // the second \n triggers a call to w.Write and thus a panic
-        Ꮡt.Errorf("failed to panic during Write"u8);
+        w.Init(p, 0, 0, 5, (byte)' ', 0);
+        io.WriteString(new tabwriter.WriterжWriter(w), "a\n\n"); // the second \n triggers a call to w.Write and thus a panic
+        t.Errorf("failed to panic during Write");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string newˢ = "new"u8;
-private static readonly @string reuseˢ = "reuse"u8;
+private static ref readonly @string newˢ => ref newˢᵇ;
+private static readonly @string newˢᵇ = "new"u8;
+private static ref readonly @string reuseˢ => ref reuseˢᵇ;
+private static readonly @string reuseˢᵇ = "reuse"u8;
 
-public static void BenchmarkTable(ж<testing.B> Ꮡb) {
+public static void BenchmarkTable(ж<testing.B> b) {
     foreach (var (_, w) in new nint[]{1, 10, 100}.array()) {
         // Build a line with w cells.
-        ref var line = ref heap<slice<byte>>(out var Ꮡline);
-        line = bytes.Repeat(slice<byte>("a\t"u8), w);
-        line = append(line, (byte)((rune)'\n'));
+        ref var line = ref heap<slice<byte>>(bytes.Repeat(slice<byte>("a\t"u8), w), out var Ꮡline);
+        line = append(line, (byte)'\n');
         foreach (var (_, h) in new nint[]{10, 1000, 100000}.array()) {
-            Ꮡb.Run(fmt.Sprintf("%dx%d"u8, w, h), (ж<testing.B> bΔ1) => {
+            b.Run(fmt.Sprintf("%dx%d"u8, w, h), (ж<testing.B> bΔ1) => {
                 bΔ1.Run(newˢ, (ж<testing.B> bΔ2) => {
                     bΔ2.ReportAllocs();
                     for (nint i = 0; i < (~bΔ2).N; i++) {
-                        var wΔ1 = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
+                        var wΔ1 = NewWriter(io.Discard, 4, 4, 1, (byte)' ', 0); // no particular reason for these settings
                         // Write the line h times.
                         for (nint j = 0; j < h; j++) {
                             wΔ1.Write(Ꮡline.ValueSlot);
@@ -602,7 +605,7 @@ public static void BenchmarkTable(ж<testing.B> Ꮡb) {
 
                 bΔ1.Run(reuseˢ, (ж<testing.B> bΔ3) => {
                     bΔ3.ReportAllocs();
-                    var wΔ2 = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
+                    var wΔ2 = NewWriter(io.Discard, 4, 4, 1, (byte)' ', 0); // no particular reason for these settings
                     for (nint i = 0; i < (~bΔ3).N; i++) {
                         // Write the line h times.
                         for (nint j = 0; j < h; j++) {
@@ -616,19 +619,19 @@ public static void BenchmarkTable(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkPyramid(ж<testing.B> Ꮡb) {
+public static void BenchmarkPyramid(ж<testing.B> b) {
     foreach (var (_, x) in new nint[]{10, 100, 1000}.array()) {
         // Build a line with x cells.
         var line = bytes.Repeat(slice<byte>("a\t"u8), x);
         var lineʗ1 = line;
-        Ꮡb.Run(fmt.Sprintf("%d"u8, x), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%d"u8, x), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                var w = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
+                var w = NewWriter(io.Discard, 4, 4, 1, (byte)' ', 0); // no particular reason for these settings
                 // Write increasing prefixes of that line.
                 for (nint j = 0; j < x; j++) {
                     w.Write(lineʗ1.slice(0, j * 2));
-                    w.Write(new byte[]{(rune)'\n'}.slice());
+                    w.Write(slice<byte>([(byte)'\n']));
                 }
                 w.Flush();
             }
@@ -636,7 +639,7 @@ public static void BenchmarkPyramid(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkRagged(ж<testing.B> Ꮡb) {
+public static void BenchmarkRagged(ж<testing.B> b) {
     ref var lines = ref heap(new array<slice<byte>>(8), out var Ꮡlines);
     foreach (var (i, w) in new nint[]{6, 2, 9, 5, 5, 7, 3, 8}.array()) {
         // Build a line with w cells.
@@ -644,14 +647,14 @@ public static void BenchmarkRagged(ж<testing.B> Ꮡb) {
     }
     foreach (var (_, h) in new nint[]{10, 100, 1000}.array()) {
         var linesʗ1 = lines;
-        Ꮡb.Run(fmt.Sprintf("%d"u8, h), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%d"u8, h), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                var w = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
+                var w = NewWriter(io.Discard, 4, 4, 1, (byte)' ', 0); // no particular reason for these settings
                 // Write the lines in turn h times.
                 for (nint j = 0; j < h; j++) {
                     w.Write(linesʗ1[j % len(linesʗ1)]);
-                    w.Write(new byte[]{(rune)'\n'}.slice());
+                    w.Write(slice<byte>([(byte)'\n']));
                 }
                 w.Flush();
             }
@@ -659,7 +662,8 @@ public static void BenchmarkRagged(ж<testing.B> Ꮡb) {
     }
 }
 
-internal static readonly @string codeSnippet = """
+internal static ref readonly @string codeSnippet => ref codeSnippetᵇ;
+private static readonly @string codeSnippetᵇ = """
 
 some command
 
@@ -679,7 +683,7 @@ public static void BenchmarkCode(ж<testing.B> Ꮡb) {
 
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
-        var w = NewWriter(io.Discard, 4, 4, 1, (rune)' ', 0); // no particular reason for these settings
+        var w = NewWriter(io.Discard, 4, 4, 1, (byte)' ', 0); // no particular reason for these settings
         // The code is small, so it's reasonable for the tabwriter user
         // to write it all at once, or buffer the writes.
         w.Write(slice<byte>(codeSnippet));

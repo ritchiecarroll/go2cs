@@ -83,16 +83,17 @@ internal static void close(this ref hexdumper h) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidAddrBytesˢ = "invalid addrBytes"u8;
-internal static readonly @string invalidWordBytesˢ = "invalid wordBytes"u8;
+internal static ref readonly @string invalidAddrBytesˢ => ref invalidAddrBytesˢᵇ;
+private static readonly @string invalidAddrBytesˢᵇ = "invalid addrBytes"u8;
+internal static ref readonly @string invalidWordBytesˢ => ref invalidWordBytesˢᵇ;
+private static readonly @string invalidWordBytesˢᵇ = "invalid wordBytes"u8;
 
 internal static void init(this ref hexdumper h) {
     const nint bytesPerLine = /* len(h.dataBuf) */ 16;
 
-    if (h.addrBytes == 0){
+    if (h.addrBytes == 0) {
         h.addrBytes = goarch.PtrSize;
-    } else 
-    if (h.addrBytes < 0 || h.addrBytes > goarch.PtrSize) {
+    } else if (h.addrBytes < 0 || h.addrBytes > goarch.PtrSize) {
         @throw(invalidAddrBytesˢ);
     }
 
@@ -108,7 +109,7 @@ internal static void init(this ref hexdumper h) {
     foreach (var i in range(h.toPos)) {
         // First, calculate the "field" within the line, applying byte swizzling.
         nint field = 0;
-        if (goarch.BigEndian){
+        if (goarch.BigEndian) {
             field = i;
         } else {
             field = i ^ (nint)(wb - 1);
@@ -131,10 +132,12 @@ internal static void init(this ref hexdumper h) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string addrSepᶜ = ": "u8;
+internal static ref readonly @string addrSepᶜ => ref addrSepᶜᵇ;
+private static readonly @string addrSepᶜᵇ = ": "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string asciiSepᶜ = "  "u8;
+internal static ref readonly @string asciiSepᶜ => ref asciiSepᶜᵇ;
+private static readonly @string asciiSepᶜᵇ = "  "u8;
 
 internal static void flushLine(this ref hexdumper h, slice<byte> data) {
     const nint bytesPerLine = /* len(h.dataBuf) */ 16;
@@ -153,7 +156,7 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
     ref var lineBuf = ref heap(new array<byte>(73), out var ᏑlineBuf);
     void clear() {
         foreach (var i in range(ᏑlineBuf.Value)) {
-            ᏑlineBuf.Value[i] = (rune)' ';
+            ᏑlineBuf.Value[i] = (byte)' ';
         }
     }
     clear();
@@ -167,7 +170,7 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
         foreach (var offset in range(asciiChars)) {
             h.fmtHex(lineBuf.slice(asciiStart + offset)[..1], (uint64)offset);
         }
-        lineBuf[nlPos] = (rune)'\n';
+        lineBuf[nlPos] = (byte)'\n';
         gwrite(lineBuf.slice(0, nlPos + 1));
         clear();
         h.ready = 2;
@@ -186,22 +189,22 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
         h.fmtHex(lineBuf.slice(dataStart + (nint)pos)[..2], (uint64)b);
 
         copy(lineBuf.slice(dataStart + dataChars), asciiSep);
-        var ascii = (uint8)(rune)'.';
-        if (b >= (rune)' ' && b <= (rune)'~') {
+        var ascii = (uint8)'.';
+        if (b >= ' ' && b <= '~') {
             ascii = b;
         }
         lineBuf[asciiStart + offset] = ascii;
     }
     // Trim buffer.
     nint end = asciiStart + len(data);
-    lineBuf[end] = (rune)'\n';
+    lineBuf[end] = (byte)'\n';
     var buf = lineBuf.slice(0, end + 1);
 
     // Print.
     gwrite(buf);
 
     // Print marks.
-    if (h.mark != default!) {
+    if (h.mark != nil) {
         clear();
         for (nint offset = 0; offset + (nint)h.wordBytes <= len(data); offset += (nint)h.wordBytes) {
             if (offset < (nint)h.dataSkip) {
@@ -220,7 +223,8 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string digᶜ = "0123456789abcdef"u8;
+internal static ref readonly @string digᶜ => ref digᶜᵇ;
+private static readonly @string digᶜᵇ = "0123456789abcdef"u8;
 
 // fmtHex formats v in base 16 into buf. It fills all of buf. If buf is too
 // small to represent v, it the output will start with '*'.
@@ -233,21 +237,21 @@ internal static void fmtHex(this ref hexdumper h, slice<byte> buf, uint64 v) {
     }
     if (v != 0) {
         // Indicate that we couldn't fit the whole number.
-        buf[0] = (rune)'*';
+        buf[0] = (byte)'*';
     }
 }
 
 internal static void start(this hexdumpMarker m) {
     array<byte> spaces = new(64);
     foreach (var i in range(spaces)) {
-        spaces[i] = (rune)' ';
+        spaces[i] = (byte)' ';
     }
     while (m.chars > len(spaces)) {
         gwrite(spaces[..]);
         m.chars -= len(spaces);
     }
     gwrite(spaces.slice(0, m.chars));
-    print((@string)"^ "u8);
+    print((@string)"^ ");
 }
 
 } // end runtime_package

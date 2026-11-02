@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +51,12 @@ using static go.crypto.sha3_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(SHA3))]
+[assembly: GoFieldAccess(typeof(SHAKE))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,8 +66,8 @@ using static go.crypto.sha3_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIACBSSqJKokqiSqJKmgoK6soKokoKokoKokoKokoKokoKokoKokoKokpIACBKCgrqSqJIAAhDSAAIQ0qzSgqzSgqiygqiSgqiSgqiSgqiSgg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
-[assembly: go.GoPositionMap("crypto/sha3/sha3_test.go", "sha3_test.cs", "ABswAA4UAAsagoKCkgAGEKKmgoKCgoKCgoKmgqKAgqSCpoKCyoKCgpSCgoKCpoKigIKkgqaCgsySpoKUpoKCgoKCgILckqaCgoKCgoKAgsyipoKCgoKClIKCgoKCgoKUggAEFuKCgoKUpoLmgoKUlIKCpoKClIIADA6CgoKAgoKCgoKClLaCgIKCgoKCgpS2goCCgoKUtoKAgoKClAAJCgArWIKCpoLcgoKCgoKCgoKUgoKUgoKUgoKmgoKAgsiC1oKCqJKCgoKCgoIAChaCgIIADAiCgoCSgJKAkoCSgJKAkoCSgMqygoKCgoKCgoKClIKAgqSCgoK6soKCgoKCgoKCgoKUgoCCpIKCgoK6soKCgoKUgoKClJSCqsKCgoKUgpSCgoKUuICigKKAooCkgKKAooCigKSA", "48-54:1;50-52:1.1;51-51:1.1.1;228-239:1;229-236:1.1;240-251:2;241-248:2.1;252-260:3;253-257:3.1;261-269:4;262-266:4.1;316-325:1;317-320:1.1;321-324:1.2;393-402:1;394-394:1.1;395-395:1.2;396-396:1.3;397-397:1.4;398-398:1.5;399-399:1.6;400-400:1.7;401-401:1.8")]
+[assembly: GoPositionMap("crypto/sha3/sha3.go", "sha3.cs", "ABAggoKCgqiSgoKCgqiSgoKCgqiSgoKCgqiSgoKCgqq0gqaCgpSUgoKCqrSCpoKClJSCgoIACBSSqJKokqiSqJKmgoK6soKokoKokoKokoKokoKokoKokoKokoKokoIACBKCgrqSqJIAAhDSAAIQ0qzSgqzSgqiygqiSgqiSgqiSgqiSgg==", "17-17:1;18-18:2;19-19:3;20-20:4")]
+[assembly: GoPositionMap("crypto/sha3/sha3_test.go", "sha3_test.cs", "ABwwAA4UAAwagoKCkgAGEKKmgoKCgoKCgoKmgqKAgqSCpoKCyoKCgpSCgoKCpoKigIKkgqaCgsySpoKUpoKCgoKCgILckqaCgoKCgoKAgsyipoKCgoKClIKCgoKCgoKUggAEFuKCgoKUpoLmgoKUlIKCpoKClIIAEA6CgoKAgoKCgoKClLaCgIKCgoKCgpS2goCCgoKUtoKAgoKClAALCgArWIKCpoLcgoKCgoKCgoKUgoKUgoKUgoKmgoKAgsiC1oKCqJKCgoKCgoIAChaCgIIAEgiCgoCSgJKAkoCSgJKAkoCSgMqygoKCgoKCgoKClIKAgqSCgoK6soKCgoKCgoKCgoKUgoCCpIKCgoK6soKCgoKUgoKClJSCqsKCgoKUgpSCgoKUuICigKKAooCkgKKAooCigKSA", "48-54:1;50-52:1.1;51-51:1.1.1;228-239:1;229-236:1.1;240-251:2;241-248:2.1;252-260:3;253-257:3.1;261-269:4;262-266:4.1;316-325:1;317-320:1.1;321-324:1.2;393-402:1;394-394:1.1;395-395:1.2;396-396:1.3;397-397:1.4;398-398:1.5;399-399:1.6;400-400:1.7;401-401:1.8")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

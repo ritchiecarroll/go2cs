@@ -31,44 +31,46 @@ partial struct prohibitionaryDialArgTestsᴛ1 /*dyn*/ {
     internal @string network;
     internal @string address;
 }
-internal static slice<prohibitionaryDialArgTestsᴛ1> prohibitionaryDialArgTests = new prohibitionaryDialArgTestsᴛ1[]{
-    new("tcp6"u8, "127.0.0.1"u8),
-    new("tcp6"u8, "::ffff:127.0.0.1"u8)
-}.slice();
+internal static slice<prohibitionaryDialArgTestsᴛ1> prohibitionaryDialArgTests = slice<prohibitionaryDialArgTestsᴛ1>([
+    new("tcp6", "127.0.0.1"),
+    new("tcp6", "::ffff:127.0.0.1")
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object mappingIpv4AddressInsideˢ = (@string)"mapping ipv4 address inside ipv6 address not supported"u8;
 
-public static void TestProhibitionaryDialArg(ж<testing.T> Ꮡt) {
+public static void TestProhibitionaryDialArg(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "plan9"u8) {
-            Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-        }
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8: {
+            t.Skipf("not supported on %s", Δruntime.GOOS);
+            break;
+        }}
         if (!supportsIPv4map()) {
-            Ꮡt.Skip(mappingIpv4AddressInsideˢ);
+            t.Skip(mappingIpv4AddressInsideˢ);
         }
 
-        var (ln, err) = Listen(tcpˢ, "[::]:0"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (ln, err) = Listen(tcpˢ, "[::]:0");
+        if (err != nil) {
+            t.Fatal(err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
         (_, var port, err) = SplitHostPort(ln.Addr().String());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         foreach (var (i, tt) in prohibitionaryDialArgTests) {
             var (c, errΔ1) = Dial(tt.network, JoinHostPort(tt.address, port));
-            if (errΔ1 == default!) {
+            if (errΔ1 == nil) {
                 c.Close();
-                Ꮡt.Errorf("#%d: %v"u8, i, errΔ1);
+                t.Errorf("#%d: %v", i, errΔ1);
             }
         }
     }
@@ -76,19 +78,19 @@ public static void TestProhibitionaryDialArg(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestDialLocal(ж<testing.T> Ꮡt) {
+public static void TestDialLocal(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
         var (_, port, err) = SplitHostPort(ln.Addr().String());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         (var c, err) = Dial(tcpˢ, JoinHostPort(""u8, port));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         c.Close();
     }
@@ -99,21 +101,25 @@ public static void TestDialLocal(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object bothIPv4AndIPv6Areˢ = (@string)"both IPv4 and IPv6 are required"u8;
 
-public static partial void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
+public static partial void TestDialerDualStackFDLeak(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "plan9"u8) {
-            Ꮡt.Skipf("%s does not have full support of socktest"u8, Δruntime.GOOS);
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8: {
+            t.Skipf("%s does not have full support of socktest", Δruntime.GOOS);
+            break;
         }
-        else if (exprᴛ1 == "windows"u8) {
-            Ꮡt.Skipf("not implemented a way to cancel dial racers in TCP SYN-SENT state on %s"u8, Δruntime.GOOS);
+        case {} when exprᴛ1 == "windows"u8: {
+            t.Skipf("not implemented a way to cancel dial racers in TCP SYN-SENT state on %s", Δruntime.GOOS);
+            break;
         }
-        else if (exprᴛ1 == "openbsd"u8) {
-            testenv.SkipFlaky(new net_test_package.testing_TжTB(Ꮡt), 15157);
-        }
+        case {} when exprᴛ1 == "openbsd"u8: {
+            testenv.SkipFlaky(new net_test_package.testing_TжTB(t), 15157);
+            break;
+        }}
         if (!supportsIPv4() || !supportsIPv6()) {
-            Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
+            t.Skip(bothIPv4AndIPv6Areˢ);
         }
 
         var before = Ꮡsw.Sockets();
@@ -124,22 +130,22 @@ public static partial void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
         var handler = (ж<dualStackServer> dssΔ1, global::go.net_package.Listener ln) => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, errΔ1) = ln.Accept();
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return;
                 }
                 c.Close();
             }
         };
         var (dss, err) = newDualStackServer();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         {
-            var errΔ2 = dss.buildup(handler); if (errΔ2 != default!) {
+            var errΔ2 = dss.buildup(handler); if (errΔ2 != nil) {
                 dss.teardown();
-                Ꮡt.Fatal(errΔ2);
+                t.Fatal(errΔ2);
             }
         }
 
@@ -154,9 +160,9 @@ public static partial void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
-                    var (c, errΔ3) = dʗ1.Dial(tcpˢ, JoinHostPort(localhostˢ, (~dssʗ1).port));
-                    if (errΔ3 != default!) {
-                        Ꮡt.Error(errΔ3);
+                    var (c, errΔ3) = dʗ1.Dial(tcpˢ, JoinHostPort(localhostˢ, dssʗ1.port));
+                    if (errΔ3 != nil) {
+                        t.Error(errΔ3);
                         return;
                     }
                     c.Close();
@@ -169,7 +175,7 @@ public static partial void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
         dss.teardown();
         var after = Ꮡsw.Sockets();
         if (len(after) != len(before)) {
-            Ꮡt.Errorf("got %d; want %d"u8, len(after), len(before));
+            t.Errorf("got %d; want %d", len(after), len(before));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -179,17 +185,19 @@ public static partial void TestDialerDualStackFDLeak(ж<testing.T> Ꮡt) {
 // Define a pair of blackholed (IPv4, IPv6) addresses, for which dialTCP is
 // expected to hang until the timeout elapses. These addresses are reserved
 // for benchmarking by RFC 6890.
-internal static readonly @string slowDst4 = "198.18.0.254"u8;
-internal static readonly @string slowDst6 = "2001:2::254"u8;
+internal static ref readonly @string slowDst4 => ref slowDst4ᵇ;
+private static readonly @string slowDst4ᵇ = "198.18.0.254"u8;
+internal static ref readonly @string slowDst6 => ref slowDst6ᵇ;
+private static readonly @string slowDst6ᵇ = "2001:2::254"u8;
 
 // In some environments, the slow IPs may be explicitly unreachable, and fail
 // more quickly than expected. This test hook prevents dialTCP from returning
 // before the deadline.
-internal static (ж<global::go.net_package.TCPConn>, error) slowDialTCP(context.Context ctx, @string network, ж<global::go.net_package.TCPAddr> Ꮡladdr, ж<global::go.net_package.TCPAddr> Ꮡraddr) {
+internal static (ж<global::go.net_package.TCPConn>, error) slowDialTCP(context.Context ctx, @string network, ж<global::go.net_package.TCPAddr> laddr, ж<global::go.net_package.TCPAddr> Ꮡraddr) {
     ref var raddr = ref Ꮡraddr.DerefOrNull();
 
     var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
-    var (c, err) = sd.doDialTCP(ctx, Ꮡladdr, Ꮡraddr);
+    var (c, err) = sd.doDialTCP(ctx, laddr, Ꮡraddr);
     if (ParseIP(slowDst4).Equal(raddr.IP) || ParseIP(slowDst6).Equal(raddr.IP)) {
         // Wait for the deadline, or indefinitely if none exists.
         ᐸꟷ(ctx.Done());
@@ -197,33 +205,36 @@ internal static (ж<global::go.net_package.TCPConn>, error) slowDialTCP(context.
     return (c, err);
 }
 
-internal static time.Duration /*dialLatency*/ dialClosedPort(ж<testing.T> Ꮡt) {
+internal static time.Duration /*dialLatency*/ dialClosedPort(ж<testing.T> t) {
     // On most platforms, dialing a closed port should be nearly instantaneous —
     // less than a few hundred milliseconds. However, on some platforms it may be
     // much slower: on Windows and OpenBSD, it has been observed to take up to a
     // few seconds.
 
-    var (l, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("dialClosedPort: Listen failed: %v"u8, err);
+    var (l, err) = Listen(tcpˢ, "127.0.0.1:0");
+    if (err != nil) {
+        t.Fatalf("dialClosedPort: Listen failed: %v", err);
     }
     @string addr = l.Addr().String();
     l.Close();
 
     var startTime = time.Now();
     (var c, err) = Dial(tcpˢ, addr);
-    if (err == default!) {
+    if (err == nil) {
         c.Close();
     }
     var elapsed = time.Since(startTime);
-    Ꮡt.Logf("dialClosedPort: measured delay %v"u8, elapsed);
+    t.Logf("dialClosedPort: measured delay %v", elapsed);
     return elapsed;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tcp6ˢ = "tcp6"u8;
-internal static readonly @string tcp4ˢ = "tcp4"u8;
-internal static readonly @string unreachableˢ = "unreachable"u8;
+internal static ref readonly @string tcp6ˢ => ref tcp6ˢᵇ;
+private static readonly @string tcp6ˢᵇ = "tcp6"u8;
+internal static ref readonly @string tcp4ˢ => ref tcp4ˢᵇ;
+private static readonly @string tcp4ˢᵇ = "tcp4"u8;
+internal static ref readonly @string unreachableˢ => ref unreachableˢᵇ;
+private static readonly @string unreachableˢᵇ = "unreachable"u8;
 
 internal partial struct TestDialParallel_type /*dyn*/ {
     internal slice<@string> primaries;
@@ -233,7 +244,7 @@ internal partial struct TestDialParallel_type /*dyn*/ {
     internal time.Duration expectElapsed;
 }
 
-public static void TestDialParallel(ж<testing.T> Ꮡt) {
+public static void TestDialParallel(ж<testing.T> t) {
     time.Duration instant = 0;
     time.Duration fallbackDelay = /* 200 * time.Millisecond */ 200000000;
 
@@ -245,38 +256,38 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
         return @out;
     }
 
-    slice<TestDialParallel_type> testCases = new TestDialParallel_type[]{
+    slice<TestDialParallel_type> testCases = slice<TestDialParallel_type>([
         // These should just work on the first try.
-        new(new @string[]{"127.0.0.1"u8}.slice(), new @string[]{}.slice(), ""u8, true, instant),
-        new(new @string[]{"::1"u8}.slice(), new @string[]{}.slice(), ""u8, true, instant),
-        new(new @string[]{"127.0.0.1"u8, "::1"u8}.slice(), new @string[]{slowDst6}.slice(), "tcp6"u8, true, instant),
-        new(new @string[]{"::1"u8, "127.0.0.1"u8}.slice(), new @string[]{slowDst4}.slice(), "tcp4"u8, true, instant),
+        new(slice<@string>(["127.0.0.1"]), slice<@string>([]), "", true, instant),
+        new(slice<@string>(["::1"]), slice<@string>([]), "", true, instant),
+        new(slice<@string>(["127.0.0.1", "::1"]), slice<@string>([slowDst6]), "tcp6", true, instant),
+        new(slice<@string>(["::1", "127.0.0.1"]), slice<@string>([slowDst4]), "tcp4", true, instant),
         // Primary is slow; fallback should kick in.
-        new(new @string[]{slowDst4}.slice(), new @string[]{"::1"u8}.slice(), ""u8, true, fallbackDelay),
+        new(slice<@string>([slowDst4]), slice<@string>(["::1"]), "", true, fallbackDelay),
         // Skip a "connection refused" in the primary thread.
-        new(new @string[]{"127.0.0.1"u8, "::1"u8}.slice(), new @string[]{}.slice(), "tcp4"u8, true, instant),
-        new(new @string[]{"::1"u8, "127.0.0.1"u8}.slice(), new @string[]{}.slice(), "tcp6"u8, true, instant),
+        new(slice<@string>(["127.0.0.1", "::1"]), slice<@string>([]), "tcp4", true, instant),
+        new(slice<@string>(["::1", "127.0.0.1"]), slice<@string>([]), "tcp6", true, instant),
         // Skip a "connection refused" in the fallback thread.
-        new(new @string[]{slowDst4, slowDst6}.slice(), new @string[]{"::1"u8, "127.0.0.1"u8}.slice(), "tcp6"u8, true, fallbackDelay),
+        new(slice<@string>([slowDst4, slowDst6]), slice<@string>(["::1", "127.0.0.1"]), "tcp6", true, fallbackDelay),
         // Primary refused, fallback without delay.
-        new(new @string[]{"127.0.0.1"u8}.slice(), new @string[]{"::1"u8}.slice(), "tcp4"u8, true, instant),
-        new(new @string[]{"::1"u8}.slice(), new @string[]{"127.0.0.1"u8}.slice(), "tcp6"u8, true, instant),
+        new(slice<@string>(["127.0.0.1"]), slice<@string>(["::1"]), "tcp4", true, instant),
+        new(slice<@string>(["::1"]), slice<@string>(["127.0.0.1"]), "tcp6", true, instant),
         // Everything is refused.
-        new(new @string[]{"127.0.0.1"u8}.slice(), new @string[]{}.slice(), "tcp4"u8, false, instant),
+        new(slice<@string>(["127.0.0.1"]), slice<@string>([]), "tcp4", false, instant),
         // Nothing to do; fail instantly.
-        new(new @string[]{}.slice(), new @string[]{}.slice(), ""u8, false, instant),
+        new(slice<@string>([]), slice<@string>([]), "", false, instant),
         // Connecting to tons of addresses should not trip the deadline.
-        new(nCopies("::1"u8, 1000), new @string[]{}.slice(), ""u8, true, instant)
-    }.slice();
+        new(nCopies("::1", 1000), slice<@string>([]), "", true, instant)
+    ]);
 
     // Convert a list of IP strings into TCPAddrs.
     global::go.net_package.addrList makeAddrs(slice<@string> ips, @string port) {
         var outᴷ = new stackAppend<global::go.net_package.ΔAddr>(moves: true);
-        global::go.net_package.addrList @out = default!;
+        global::go.net_package.addrList @out = default;
         foreach (var (_, ip) in ips) {
             var (addr, err) = ResolveTCPAddr(tcpˢ, JoinHostPort(ip, port));
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             @out = append(outᴷ, @out, (global::go.net_package.ΔAddr)(new global::go.net_package.TCPAddrжΔAddr(addr)));
         }
@@ -290,31 +301,30 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
 
         var makeAddrsʗ1 = makeAddrs;
         var ttʗ1 = tt;
-        Ꮡt.Run(fmt.Sprint(i), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint(i), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var ttʗ2 = ttʗ1;
             var dialTCP = (ж<global::go.net_package.TCPConn>, error) (context.Context ctxΔ1, @string network, ж<global::go.net_package.TCPAddr> laddr, ж<global::go.net_package.TCPAddr> raddr) => {
                 @string n = tcp6ˢ;
-                if ((~raddr).IP.To4() != default!) {
+                if (raddr.IP.To4() != nil) {
                     n = tcp4ˢ;
                 }
                 if (n == ttʗ2.teardownNetwork) {
-                    return (default!, errors.New(unreachableˢ));
+                    return (default, errors.New(unreachableˢ));
                 }
                 {
-                    @string r = (~raddr).IP.String(); if (r == slowDst4 || r == slowDst6) {
+                    @string r = raddr.IP.String(); if (r == slowDst4 || r == slowDst6) {
                         ᐸꟷ(ctxΔ1.Done());
-                        return (default!, ctxΔ1.Err());
+                        return (default, ctxΔ1.Err());
                     }
                 }
-                return (Ꮡ(new TCPConn(nil)), default!);
+                return (Ꮡ(new TCPConn()), default);
             };
 
-            var primaries = makeAddrsʗ1(ttʗ1.primaries, "80"u8);
-            var fallbacks = makeAddrsʗ1(ttʗ1.fallbacks, "80"u8);
-            ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-            d = new Dialer(
+            var primaries = makeAddrsʗ1(ttʗ1.primaries, "80");
+            var fallbacks = makeAddrsʗ1(ttʗ1.fallbacks, "80");
+            ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(
                 FallbackDelay: fallbackDelay
-            );
+            ), out var Ꮡd);
             time.Duration forever = /* 60 * time.Minute */ 3600000000000;
             if (ttʗ1.expectElapsed == instant) {
                 d.FallbackDelay = forever;
@@ -322,26 +332,25 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
             var startTime = time.Now();
             var sd = Ꮡ(new sysDialer(
                 Dialer: d,
-                network: "tcp"u8,
-                address: "?"u8,
+                network: "tcp",
+                address: "?",
                 testHookDialTCP: dialTCP
             ));
             var (c, err) = sd.dialParallel(context.Background(), primaries, fallbacks);
             var elapsed = time.Since(startTime);
 
-            if (c != default!) {
+            if (c != nil) {
                 c.Close();
             }
 
-            if (ttʗ1.expectOk && err != default!){
-                tΔ1.Errorf("#%d: got %v; want nil"u8, i, err);
-            } else 
-            if (!ttʗ1.expectOk && err == default!) {
-                tΔ1.Errorf("#%d: got nil; want non-nil"u8, i);
+            if (ttʗ1.expectOk && err != nil) {
+                tΔ1.Errorf("#%d: got %v; want nil", i, err);
+            } else if (!ttʗ1.expectOk && err == nil) {
+                tΔ1.Errorf("#%d: got nil; want non-nil", i);
             }
 
             if (elapsed < ttʗ1.expectElapsed || elapsed >= forever) {
-                tΔ1.Errorf("#%d: got %v; want >= %v, < forever"u8, i, elapsed, ttʗ1.expectElapsed);
+                tΔ1.Errorf("#%d: got %v; want >= %v, < forever", i, elapsed, ttʗ1.expectElapsed);
             }
 
             // Repeat each case, ensuring that it can be canceled.
@@ -357,7 +366,7 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
             // Ignore errors, since all we care about is that the
             // call can be canceled.
             (c, _) = sd.dialParallel(ctx, primaries, fallbacks);
-            if (c != default!) {
+            if (c != nil) {
                 c.Close();
             }
             Ꮡwg.Wait();
@@ -367,20 +376,22 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
 
 internal static (slice<global::go.net_package.IPAddr>, error) lookupSlowFast(context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) {
     var exprᴛ1 = host;
-    if (exprᴛ1 == "slow6loopback4"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "slow6loopback4"u8: {
         // Returns a slow IPv6 address, and a local IPv4 address.
-        return (new global::go.net_package.IPAddr[]{
+        return (slice<global::go.net_package.IPAddr>([
             new(IP: ParseIP(slowDst6)),
-            new(IP: ParseIP("127.0.0.1"u8))
-        }.slice(), default!);
+            new(IP: ParseIP("127.0.0.1"))
+        ]), default);
     }
-    { /* default: */
+    default: {
         return fn(ctx, network, host);
-    }
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string slow6loopback4ˢ = "slow6loopback4"u8;
+internal static ref readonly @string slow6loopback4ˢ => ref slow6loopback4ˢᵇ;
+private static readonly @string slow6loopback4ˢᵇ = "slow6loopback4"u8;
 
 internal partial struct TestDialerFallbackDelay_type /*dyn*/ {
     internal bool dualstack;
@@ -388,13 +399,13 @@ internal partial struct TestDialerFallbackDelay_type /*dyn*/ {
     internal time.Duration expectElapsed;
 }
 
-public static void TestDialerFallbackDelay(ж<testing.T> Ꮡt) {
+public static void TestDialerFallbackDelay(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
         if (!supportsIPv4() || !supportsIPv6()) {
-            Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
+            t.Skip(bothIPv4AndIPv6Areˢ);
         }
 
         var origTestHookLookupIP = testHookLookupIP;
@@ -411,33 +422,33 @@ public static void TestDialerFallbackDelay(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
         testHookDialTCP = slowDialTCP;
 
-        slice<TestDialerFallbackDelay_type> testCases = new TestDialerFallbackDelay_type[]{
+        slice<TestDialerFallbackDelay_type> testCases = slice<TestDialerFallbackDelay_type>([
             // Use a very brief delay, which should fallback immediately.
             new(true, 1 * time.ΔNanosecond, 0),
             // Use a 200ms explicit timeout.
             new(true, 200 * time.Millisecond, 200 * time.Millisecond),
             // The default is 300ms.
             new(true, 0, 300 * time.Millisecond)
-        }.slice();
+        ]);
 
         var handler = (ж<dualStackServer> dssΔ1, global::go.net_package.Listener ln) => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, errΔ1) = ln.Accept();
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return;
                 }
                 c.Close();
             }
         };
         var (dss, err) = newDualStackServer();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var dssʗ1 = dss;
         defer(() => dssʗ1.teardown(), ref ᒐ);
         {
-            var errΔ2 = dss.buildup(handler); if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            var errΔ2 = dss.buildup(handler); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
 
@@ -445,21 +456,20 @@ public static void TestDialerFallbackDelay(ж<testing.T> Ꮡt) {
             var d = Ꮡ(new Dialer(DualStack: tt.dualstack, FallbackDelay: tt.delay));
 
             var startTime = time.Now();
-            var (c, errΔ3) = d.Dial(tcpˢ, JoinHostPort(slow6loopback4ˢ, (~dss).port));
+            var (c, errΔ3) = d.Dial(tcpˢ, JoinHostPort(slow6loopback4ˢ, dss.port));
             var elapsed = time.Since(startTime);
-            if (errΔ3 == default!){
+            if (errΔ3 == nil) {
                 c.Close();
-            } else 
-            if (tt.dualstack) {
-                Ꮡt.Error(errΔ3);
+            } else if (tt.dualstack) {
+                t.Error(errΔ3);
             }
             var expectMin = tt.expectElapsed - 1 * time.Millisecond;
             var expectMax = tt.expectElapsed + 95 * time.Millisecond;
             if (elapsed < expectMin) {
-                Ꮡt.Errorf("#%d: got %v; want >= %v"u8, i, elapsed, expectMin);
+                t.Errorf("#%d: got %v; want >= %v", i, elapsed, expectMin);
             }
             if (elapsed > expectMax) {
-                Ꮡt.Errorf("#%d: got %v; want <= %v"u8, i, elapsed, expectMax);
+                t.Errorf("#%d: got %v; want <= %v", i, elapsed, expectMax);
             }
         }
     }
@@ -478,7 +488,7 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
 
         ref var readDeadline = ref heap(new time.Time(), out var ᏑreadDeadline);
         {
-            var (td, ok) = t.Deadline(); if (ok){
+            var (td, ok) = t.Deadline(); if (ok) {
                 time.Duration arbitraryCleanupMargin = /* 1 * time.Second */ 1000000000;
                 readDeadline = td.Add(-arbitraryCleanupMargin);
             } else {
@@ -492,7 +502,7 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
         var handler = (ж<dualStackServer> dssΔ1, global::go.net_package.Listener ln) => {
             // Accept one connection per address.
             var (cΔ1, errΔ1) = ln.Accept();
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 Ꮡt.Fatal(errΔ1);
             }
 
@@ -511,20 +521,20 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
             array<byte> b = new(1);
             {
                 var (_, errΔ2) = cΔ1.Read(b[..]); if (!AreEqual(errΔ2, Δio.EOF)) {
-                    Ꮡt.Errorf("got %v; want %v"u8, errΔ2, Δio.EOF);
+                    Ꮡt.Errorf("got %v; want %v", errΔ2, Δio.EOF);
                 }
             }
             cΔ1.Close();
             Ꮡclosed.Done();
         };
         var (dss, err) = newDualStackServer();
-        if (err != default!) {
+        if (err != nil) {
             Ꮡt.Fatal(err);
         }
         var dssʗ1 = dss;
         defer(() => dssʗ1.teardown(), ref ᒐ);
         {
-            var errΔ3 = dss.buildup(handler); if (errΔ3 != default!) {
+            var errΔ3 = dss.buildup(handler); if (errΔ3 != nil) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
@@ -552,28 +562,27 @@ public static void TestDialParallelSpuriousConnection(ж<testing.T> Ꮡt) {
             return sdΔ1.doDialTCP(context.Background(), laddr, raddr);
         };
 
-        ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-        d = new Dialer(
+        ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(
             FallbackDelay: fallbackDelay
-        );
+        ), out var Ꮡd);
         var sd = Ꮡ(new sysDialer(
             Dialer: d,
-            network: "tcp"u8,
-            address: "?"u8
+            network: "tcp",
+            address: "?"
         ));
 
         var dssʗ2 = dss;
         global::go.net_package.addrList makeAddr(@string ip) {
-            var (addr, errΔ4) = ResolveTCPAddr(tcpˢ, JoinHostPort(ip, (~dssʗ2).port));
-            if (errΔ4 != default!) {
+            var (addr, errΔ4) = ResolveTCPAddr(tcpˢ, JoinHostPort(ip, dssʗ2.port));
+            if (errΔ4 != nil) {
                 Ꮡt.Fatal(errΔ4);
             }
             return new addrList(new global::go.net_package.ΔAddr[]{new global::go.net_package.TCPAddrжΔAddr(addr)}.slice());
         }
 
         // dialParallel returns one connection (and closes the other.)
-        (var c, err) = sd.dialParallel(context.Background(), makeAddr("127.0.0.1"u8), makeAddr("::1"u8));
-        if (err != default!) {
+        (var c, err) = sd.dialParallel(context.Background(), makeAddr("127.0.0.1"), makeAddr("::1"));
+        if (err != nil) {
             Ꮡt.Fatal(err);
         }
         c.Close();
@@ -593,31 +602,31 @@ internal partial struct TestDialerPartialDeadline_type /*dyn*/ {
     internal error expectErr;
 }
 
-public static void TestDialerPartialDeadline(ж<testing.T> Ꮡt) {
+public static void TestDialerPartialDeadline(ж<testing.T> t) {
     var now = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.ΔUTC);
-    slice<TestDialerPartialDeadline_type> testCases = new TestDialerPartialDeadline_type[]{
+    slice<TestDialerPartialDeadline_type> testCases = slice<TestDialerPartialDeadline_type>([
         // Regular division.
-        new(now, now.Add((time.Duration)(12000000000L)), 1, now.Add((time.Duration)(12000000000L)), default!),
-        new(now, now.Add((time.Duration)(12000000000L)), 2, now.Add((time.Duration)(6000000000L)), default!),
-        new(now, now.Add((time.Duration)(12000000000L)), 3, now.Add((time.Duration)(4000000000L)), default!),
+        new(now, now.Add((time.Duration)(12000000000L)), 1, now.Add((time.Duration)(12000000000L)), default),
+        new(now, now.Add((time.Duration)(12000000000L)), 2, now.Add((time.Duration)(6000000000L)), default),
+        new(now, now.Add((time.Duration)(12000000000L)), 3, now.Add((time.Duration)(4000000000L)), default),
         // Bump against the 2-second sane minimum.
-        new(now, now.Add((time.Duration)(12000000000L)), 999, now.Add(2 * time.ΔSecond), default!),
+        new(now, now.Add((time.Duration)(12000000000L)), 999, now.Add(2 * time.ΔSecond), default),
         // Total available is now below the sane minimum.
-        new(now, now.Add(1900 * time.Millisecond), 999, now.Add(1900 * time.Millisecond), default!),
+        new(now, now.Add(1900 * time.Millisecond), 999, now.Add(1900 * time.Millisecond), default),
         // Null deadline.
-        new(now, noDeadline, 1, noDeadline, default!),
+        new(now, noDeadline, 1, noDeadline, default),
         // Step the clock forward and cross the deadline.
-        new(now.Add(-1 * time.Millisecond), now, 1, now, default!),
+        new(now.Add(-1 * time.Millisecond), now, 1, now, default),
         new(now.Add(0 * time.Millisecond), now, 1, noDeadline, errTimeout),
         new(now.Add(1 * time.Millisecond), now, 1, noDeadline, errTimeout)
-    }.slice();
+    ]);
     foreach (var (i, tt) in testCases) {
         var (deadline, err) = partialDeadline(tt.now, tt.deadline, tt.addrs);
         if (!AreEqual(err, tt.expectErr)) {
-            Ꮡt.Errorf("#%d: got %v; want %v"u8, i, err, tt.expectErr);
+            t.Errorf("#%d: got %v; want %v", i, err, tt.expectErr);
         }
         if (!deadline.Equal(tt.expectDeadline)) {
-            Ꮡt.Errorf("#%d: got %v; want %v"u8, i, deadline, tt.expectDeadline);
+            t.Errorf("#%d: got %v; want %v", i, deadline, tt.expectDeadline);
         }
     }
 }
@@ -631,66 +640,66 @@ internal partial struct TestDialerLocalAddr_test /*dyn*/ {
     /*embed*/ internal error error;
 }
 
-public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
+public static void TestDialerLocalAddr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (!supportsIPv4() || !supportsIPv6()) {
-            Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
+            t.Skip(bothIPv4AndIPv6Areˢ);
         }
-        slice<TestDialerLocalAddr_test> tests = new TestDialerLocalAddr_test[]{
-            new("tcp4"u8, "127.0.0.1"u8, default!, default!),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8).To4()))), default!),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::"u8)))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To4()))), default!),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To16()))), default!),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
-            new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
+        slice<TestDialerLocalAddr_test> tests = slice<TestDialerLocalAddr_test>([
+            new("tcp4", "127.0.0.1", default, default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), default),
+            new("tcp4", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
+            new("tcp4", "127.0.0.1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp4", "127.0.0.1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
 
-            new("tcp6"u8, "::1"u8, default!, default!),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8).To4()))), default!),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::"u8)))), default!),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To4()))), errNoSuitableAddress),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To16()))), errNoSuitableAddress),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default!),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
-            new("tcp6"u8, "::1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
+            new("tcp6", "::1", default, default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), errNoSuitableAddress),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), errNoSuitableAddress),
+            new("tcp6", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default),
+            new("tcp6", "::1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp6", "::1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
 
-            new("tcp"u8, "127.0.0.1"u8, default!, default!),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8).To4()))), default!),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To4()))), default!),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To16()))), default!),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
-            new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
+            new("tcp", "127.0.0.1", default, default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), default),
+            new("tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
+            new("tcp", "127.0.0.1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp", "127.0.0.1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
 
-            new("tcp"u8, "::1"u8, default!, default!),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8).To4()))), default!),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::"u8)))), default!),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To4()))), errNoSuitableAddress),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8).To16()))), errNoSuitableAddress),
-            new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default!),
-            new("tcp"u8, "::1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
-            new("tcp"u8, "::1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8))))
-        }.slice();
+            new("tcp", "::1", default, default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr())), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0")))), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0").To4()))), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To4()))), errNoSuitableAddress),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1").To16()))), errNoSuitableAddress),
+            new("tcp", "::1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default),
+            new("tcp", "::1", new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))),
+            new("tcp", "::1", new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr())), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"))))
+        ]);
 
         nint issue34264Index = -1;
-        if (supportsIPv4map()){
+        if (supportsIPv4map()) {
             issue34264Index = len(tests);
             tests = append(tests, new TestDialerLocalAddr_test(
-                "tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::"u8)))), default!
+                "tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), default
             ));
         } else {
             tests = append(tests, new TestDialerLocalAddr_test(
-                "tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::"u8)))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))
+                "tcp", "127.0.0.1", new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("::")))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error")))
             ));
         }
 
@@ -701,52 +710,52 @@ public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
         var handler = (ж<localServer> ls, global::go.net_package.Listener ln) => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, err) = ln.Accept();
-                if (err != default!) {
+                if (err != nil) {
                     return;
                 }
                 c.Close();
             }
         };
         ref var lss = ref heap(new array<ж<localServer>>(2), out var Ꮡlss);
-        foreach (var (i, network) in new @string[]{"tcp4"u8, "tcp6"u8}.slice()) {
-            lss[i] = newLocalServer(new net_test_package.testing_TжTB(Ꮡt), network);
+        foreach (var (i, network) in slice<@string>(["tcp4", "tcp6"])) {
+            lss[i] = newLocalServer(new net_test_package.testing_TжTB(t), network);
             var lssʗ1 = lss;
-            defer(() => lssʗ1[i].teardown(), ref ᒐ);
+            defer(ᴛ0 => ᴛ0.teardown(), lssʗ1[i], ref ᒐ);
             {
-                var err = lss[i].buildup(handler); if (err != default!) {
-                    Ꮡt.Fatal(err);
+                var err = lss[i].buildup(handler); if (err != nil) {
+                    t.Fatal(err);
                 }
             }
         }
 
         foreach (var (i, tt) in tests) {
             var d = Ꮡ(new Dialer(LocalAddr: tt.laddr));
-            @string addr = default!;
+            @string addr = default;
             var ip = ParseIP(tt.raddr);
-            if (ip.To4() != default!) {
-                addr = (~lss[0]).Listener.Addr().String();
+            if (ip.To4() != nil) {
+                addr = lss[0].Listener.Addr().String();
             }
-            if (ip.To16() != default! && ip.To4() == default!) {
-                addr = (~lss[1]).Listener.Addr().String();
+            if (ip.To16() != nil && ip.To4() == nil) {
+                addr = lss[1].Listener.Addr().String();
             }
             var (c, err) = d.Dial(tt.network, addr);
-            if (err == default! && tt.error != default! || err != default! && tt.error == default!) {
-                if (i == issue34264Index && Δruntime.GOOS == "freebsd"u8 && isEADDRINUSE(err)){
+            if (err == nil && tt.error != nil || err != nil && tt.error == nil) {
+                if (i == issue34264Index && Δruntime.GOOS == "freebsd"u8 && isEADDRINUSE(err)) {
                     // https://golang.org/issue/34264: FreeBSD through at least version 12.2
                     // has been observed to fail with EADDRINUSE when dialing from an IPv6
                     // local address to an IPv4 remote address.
-                    Ꮡt.Logf("%s %v->%s: got %v; want %v"u8, tt.network, tt.laddr, tt.raddr, err, tt.error);
-                    Ꮡt.Logf("(spurious EADDRINUSE ignored on freebsd: see https://golang.org/issue/34264)"u8);
+                    t.Logf("%s %v->%s: got %v; want %v", tt.network, tt.laddr, tt.raddr, err, tt.error);
+                    t.Logf("(spurious EADDRINUSE ignored on freebsd: see https://golang.org/issue/34264)");
                 } else {
-                    Ꮡt.Errorf("%s %v->%s: got %v; want %v"u8, tt.network, tt.laddr, tt.raddr, err, tt.error);
+                    t.Errorf("%s %v->%s: got %v; want %v", tt.network, tt.laddr, tt.raddr, err, tt.error);
                 }
             }
-            if (err != default!) {
+            if (err != nil) {
                 {
-                    var perr = parseDialError(err); if (perr != default!) {
-                        Ꮡt.Error(perr);
+                    var perr = parseDialError(err); if (perr != nil) {
+                        t.Error(perr);
                     }
                 }
                 continue;
@@ -758,16 +767,16 @@ public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestDialerDualStack(ж<testing.T> Ꮡt) {
+public static void TestDialerDualStack(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.SkipFlaky(new net_test_package.testing_TжTB(Ꮡt), 13324);
+        testenv.SkipFlaky(new net_test_package.testing_TжTB(t), 13324);
 
         if (!supportsIPv4() || !supportsIPv6()) {
-            Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
+            t.Skip(bothIPv4AndIPv6Areˢ);
         }
 
-        var closedPortDelay = dialClosedPort(Ꮡt);
+        var closedPortDelay = dialClosedPort(t);
 
         var origTestHookLookupIP = testHookLookupIP;
         var origTestHookLookupIPʗ1 = origTestHookLookupIP;
@@ -776,9 +785,9 @@ public static void TestDialerDualStack(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
         testHookLookupIP = lookupLocalhost;
         var handler = (ж<dualStackServer> dss, global::go.net_package.Listener ln) => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, err) = ln.Accept();
-                if (err != default!) {
+                if (err != nil) {
                     return;
                 }
                 c.Close();
@@ -788,37 +797,37 @@ public static void TestDialerDualStack(ж<testing.T> Ꮡt) {
         ref var timeout = ref heap(new time.Duration(), out var Ꮡtimeout);
 
         timeout = 150 * time.Millisecond + closedPortDelay;
-        foreach (var (_, vᴛ1) in new bool[]{false, true}.slice()) {
+        foreach (var (_, vᴛ1) in slice<bool>([false, true])) {
             ref var dualstack = ref heap(new bool(), out var Ꮡdualstack);
             dualstack = vᴛ1;
 
             var (dss, err) = newDualStackServer();
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             var dssʗ1 = dss;
             defer(() => dssʗ1.teardown(), ref ᒐ);
             {
-                var errΔ1 = dss.buildup(handler); if (errΔ1 != default!) {
-                    Ꮡt.Fatal(errΔ1);
+                var errΔ1 = dss.buildup(handler); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
 
             var d = Ꮡ(new Dialer(DualStack: dualstack, Timeout: timeout));
-            foreach (var _ᴛ1 in range((~dss).lns)) {
-                var (c, errΔ2) = d.Dial(tcpˢ, JoinHostPort(localhostˢ, (~dss).port));
-                if (errΔ2 != default!) {
-                    Ꮡt.Error(errΔ2);
+            foreach (var _ᴛ1 in range(dss.lns)) {
+                var (c, errΔ2) = d.Dial(tcpˢ, JoinHostPort(localhostˢ, dss.port));
+                if (errΔ2 != nil) {
+                    t.Error(errΔ2);
                     continue;
                 }
                 {
                     var addr = c.LocalAddr()._<ж<global::go.net_package.TCPAddr>>();
                     switch (ᐧ) {
-                    case {} when (~addr).IP.To4() != default!: {
+                    case {} when addr.IP.To4() != nil: {
                         dss.teardownNetwork(tcp4ˢ);
                         break;
                     }
-                    case {} when (~addr).IP.To16() != default! && (~addr).IP.To4() == default!: {
+                    case {} when addr.IP.To16() != nil && addr.IP.To4() == nil: {
                         dss.teardownNetwork(tcp6ˢ);
                         break;
                     }}
@@ -836,41 +845,41 @@ internal partial struct TestDialerKeepAlive_tests /*dyn*/ {
     internal time.Duration expected;
 }
 
-public static void TestDialerKeepAlive(ж<testing.T> Ꮡt) {
+public static void TestDialerKeepAlive(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Cleanup(() => {
+        t.Cleanup(() => {
             testHookSetKeepAlive = (global::go.net_package.KeepAliveConfig _) => {
             };
         });
 
         var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener lnΔ1) => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, err) = lnΔ1.Accept();
-                if (err != default!) {
+                if (err != nil) {
                     return;
                 }
                 c.Close();
             }
         };
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ, Ꮡ(new ListenConfig(
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ, Ꮡ(new ListenConfig(
             KeepAlive: -1 // prevent calling hook from accepting
         )));
         var ls = (Ꮡ(new streamListener(Listener: ln))).newLocalServer();
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
         {
-            var err = ls.buildup(handler); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = ls.buildup(handler); if (err != nil) {
+                t.Fatal(err);
             }
         }
 
-        var tests = new TestDialerKeepAlive_tests[]{
+        var tests = slice<TestDialerKeepAlive_tests>([
             new(-1, -1),
             new(0, 0),
             new((time.Duration)(5000000000L), (time.Duration)(5000000000L)),
             new((time.Duration)(30000000000L), (time.Duration)(30000000000L))
-        }.slice();
+        ]);
 
         time.Duration got = -1;
         testHookSetKeepAlive = (global::go.net_package.KeepAliveConfig cfg) => {
@@ -879,15 +888,14 @@ public static void TestDialerKeepAlive(ж<testing.T> Ꮡt) {
 
         foreach (var (_, test) in tests) {
             got = -1;
-            ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-            d = new Dialer(KeepAlive: test.ka);
-            var (c, err) = Ꮡd.Dial(tcpˢ, (~ls).Listener.Addr().String());
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(KeepAlive: test.ka), out var Ꮡd);
+            var (c, err) = Ꮡd.Dial(tcpˢ, ls.Listener.Addr().String());
+            if (err != nil) {
+                t.Fatal(err);
             }
             c.Close();
             if (got != test.expected) {
-                Ꮡt.Errorf("Dialer.KeepAlive = %v: SetKeepAlive set to %v, want %v"u8, d.KeepAlive, got, test.expected);
+                t.Errorf("Dialer.KeepAlive = %v: SetKeepAlive set to %v, want %v", d.KeepAlive, got, test.expected);
             }
         }
     }
@@ -899,14 +907,14 @@ public static void TestDialerKeepAlive(ж<testing.T> Ꮡt) {
 internal static readonly object timeoutWaitingForDialToˢ = (@string)"timeout waiting for dial to fail"u8;
 internal static readonly object unexpectedSuccessfulˢ = (@string)"unexpected successful connection"u8;
 
-public static partial void TestDialCancel(ж<testing.T> Ꮡt) {
+public static partial void TestDialCancel(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        mustHaveExternalNetwork(Ꮡt);
+        mustHaveExternalNetwork(t);
 
-        @string blackholeIPPort = JoinHostPort(slowDst4, "1234"u8);
+        @string blackholeIPPort = JoinHostPort(slowDst4, "1234");
         if (!supportsIPv4()) {
-            blackholeIPPort = JoinHostPort(slowDst6, "1234"u8);
+            blackholeIPPort = JoinHostPort(slowDst6, "1234");
         }
 
         var ticker = time.NewTicker(10 * time.Millisecond);
@@ -918,14 +926,14 @@ public static partial void TestDialCancel(ж<testing.T> Ꮡt) {
 
         ref var d = ref heap(new global::go.net_package.Dialer(), out var Ꮡd);
         var cancel = new channel<EmptyStruct>(0);
-        d.Cancel = cancel.WithDirection(GoChanDir.Recv);
+        d.Cancel = cancel.AsRecvOnly();
         var errc = new channel<error>(1);
         var connc = new channel<global::go.net_package.Conn>(1);
         var conncʗ1 = connc;
         var errcʗ1 = errc;
         goǃ(() => {
             {
-                var (c, err) = Ꮡd.Dial(tcpˢ, blackholeIPPort); if (err != default!){
+                var (c, err) = Ꮡd.Dial(tcpˢ, blackholeIPPort); if (err != nil) {
                     errcʗ1.ᐸꟷ(err);
                 } else {
                     conncʗ1.ᐸꟷ(c);
@@ -933,8 +941,8 @@ public static partial void TestDialCancel(ж<testing.T> Ꮡt) {
             }
         });
         nint ticks = 0;
-        while (ᐧ) {
-            var selᴛ1 = (~ticker).C;
+        for (;;) {
+            var selᴛ1 = ticker.C;
             var selᴛ2 = connc;
             var selᴛ3 = errc;
             switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -944,43 +952,43 @@ public static partial void TestDialCancel(ж<testing.T> Ꮡt) {
                     builtin.close(cancel);
                 }
                 if (ticks == timeoutTick) {
-                    Ꮡt.Fatal(timeoutWaitingForDialToˢ);
+                    t.Fatal(timeoutWaitingForDialToˢ);
                 }
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out var c): {
                 c.Close();
-                Ꮡt.Fatal(unexpectedSuccessfulˢ);
+                t.Fatal(unexpectedSuccessfulˢ);
                 break;
             }
             case 2 when selᴛ3.ꟷᐳ(out var err): {
                 {
-                    var perr = parseDialError(err); if (perr != default!) {
-                        Ꮡt.Error(perr);
+                    var perr = parseDialError(err); if (perr != nil) {
+                        t.Error(perr);
                     }
                 }
                 if (ticks < cancelTick) {
                     // Using strings.Contains is ugly but
                     // may work on plan9 and windows.
-                    var ignorable = new @string[]{
-                        "connection refused"u8,
-                        "unreachable"u8,
-                        "no route to host"u8,
-                        "invalid argument"u8
-                    }.slice();
+                    var ignorable = slice<@string>([
+                        "connection refused",
+                        "unreachable",
+                        "no route to host",
+                        "invalid argument"
+                    ]);
                     @string e = err.Error();
                     foreach (var (_, ignore) in ignorable) {
                         if (strings.Contains(e, ignore)) {
-                            Ꮡt.Skipf("connection to %v failed fast with %v"u8, blackholeIPPort, err);
+                            t.Skipf("connection to %v failed fast with %v", blackholeIPPort, err);
                         }
                     }
 
-                    Ꮡt.Fatalf("dial error after %d ticks (%d before cancel sent): %v"u8,
+                    t.Fatalf("dial error after %d ticks (%d before cancel sent): %v",
                         ticks, cancelTick - ticks, err);
                 }
                 {
-                    var (oe, ok) = err._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual((~oe).Err, errCanceled)) {
-                        Ꮡt.Fatalf("dial error = %v (%T); want OpError with Err == errCanceled"u8, err, err);
+                    var (oe, ok) = err._<ж<global::go.net_package.OpError>>(ᐧ); if (!ok || !AreEqual(oe.Err, errCanceled)) {
+                        t.Fatalf("dial error = %v (%T); want OpError with Err == errCanceled", err, err);
                     }
                 }
                 return; // success.
@@ -995,16 +1003,17 @@ public static partial void TestDialCancel(ж<testing.T> Ꮡt) {
 internal static readonly object avoidingTimeSleepˢ = (@string)"avoiding time.Sleep"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string messageᶜ = "echo!\n"u8;
+internal static ref readonly @string messageᶜ => ref messageᶜᵇ;
+private static readonly @string messageᶜᵇ = "echo!\n"u8;
 
-public static partial void TestCancelAfterDial(ж<testing.T> Ꮡt) {
+public static partial void TestCancelAfterDial(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
-            Ꮡt.Skip(avoidingTimeSleepˢ);
+            t.Skip(avoidingTimeSleepˢ);
         }
 
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
 
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
@@ -1017,21 +1026,21 @@ public static partial void TestCancelAfterDial(ж<testing.T> Ꮡt) {
         // Echo back the first line of each incoming connection.
         var lnʗ2 = ln;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, err) = lnʗ2.Accept();
-                if (err != default!) {
+                if (err != nil) {
                     break;
                 }
                 var rb = bufio.NewReader(new net_test_package.net_ConnᴠReader(c));
-                (var line, err) = rb.ReadString((rune)'\n');
-                if (err != default!) {
-                    Ꮡt.Error(err);
+                (var line, err) = rb.ReadString((byte)'\n');
+                if (err != nil) {
+                    t.Error(err);
                     c.Close();
                     continue;
                 }
                 {
-                    var (_, errΔ1) = c.Write(slice<byte>(line)); if (errΔ1 != default!) {
-                        Ꮡt.Error(errΔ1);
+                    var (_, errΔ1) = c.Write(slice<byte>(line)); if (errΔ1 != nil) {
+                        t.Error(errΔ1);
                     }
                 }
                 c.Close();
@@ -1053,8 +1062,8 @@ public static partial void TestCancelAfterDial(ж<testing.T> Ꮡt) {
                 builtin.close(cancel);
                 time.Sleep(10 * time.Millisecond);
 
-                if (err != default!) {
-                    Ꮡt.Fatal(err);
+                if (err != nil) {
+                    t.Fatal(err);
                 }
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
@@ -1062,23 +1071,23 @@ public static partial void TestCancelAfterDial(ж<testing.T> Ꮡt) {
                 // Send some data to confirm that the connection is still alive.
                 @string message = messageᶜ;
                 {
-                    var (_, errΔ1) = c.Write(slice<byte>(message)); if (errΔ1 != default!) {
-                        Ꮡt.Fatal(errΔ1);
+                    var (_, errΔ1) = c.Write(slice<byte>(message)); if (errΔ1 != nil) {
+                        t.Fatal(errΔ1);
                     }
                 }
 
                 // The server should echo the line, and close the connection.
                 var rb = bufio.NewReader(new net_test_package.net_ConnᴠReader(c));
-                (var line, err) = rb.ReadString((rune)'\n');
-                if (err != default!) {
-                    Ꮡt.Fatal(err);
+                (var line, err) = rb.ReadString((byte)'\n');
+                if (err != nil) {
+                    t.Fatal(err);
                 }
                 if (line != message) {
-                    Ꮡt.Errorf("got %q; want %q"u8, line, message);
+                    t.Errorf("got %q; want %q", line, message);
                 }
                 {
                     var (_, errΔ2) = rb.ReadByte(); if (!AreEqual(errΔ2, Δio.EOF)) {
-                        Ꮡt.Errorf("got %v; want %v"u8, errΔ2, Δio.EOF);
+                        t.Errorf("got %v; want %v", errΔ2, Δio.EOF);
                     }
                 }
             }
@@ -1099,19 +1108,17 @@ public static partial void TestCancelAfterDial(ж<testing.T> Ꮡt) {
 internal static readonly object skippingWindowsOnlyTestˢ = (@string)"skipping windows only test"u8;
 internal static readonly object errorExpectedˢ = (@string)"error expected"u8;
 
-public static void TestDialClosedPortFailFast(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestDialClosedPortFailFast(ж<testing.T> t) {
     if (Δruntime.GOOS != "windows"u8) {
         // Reported by go.dev/issues/23366.
-        Ꮡt.Skip(skippingWindowsOnlyTestˢ);
+        t.Skip(skippingWindowsOnlyTestˢ);
     }
-    foreach (var (_, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8}.slice()) {
-        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
+    foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6"])) {
+        t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableNetwork(network)) {
-                    tΔ1.Skipf("skipping: can't listen on %s"u8, network);
+                    tΔ1.Skipf("skipping: can't listen on %s", network);
                 }
                 // Reserve a local port till the end of the
                 // test by opening a listener and connecting to
@@ -1119,7 +1126,7 @@ public static void TestDialClosedPortFailFast(ж<testing.T> Ꮡt) {
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
                 @string addr = ln.Addr().String();
                 var (conn1, err) = Dial(network, addr);
-                if (err != default!) {
+                if (err != nil) {
                     ln.Close();
                     tΔ1.Fatal(err);
                 }
@@ -1135,10 +1142,10 @@ public static void TestDialClosedPortFailFast(ж<testing.T> Ꮡt) {
                 // longer than configured. Retry until
                 // Dial takes less than maxElapsed or
                 // the test times out.
-                while (ᐧ) {
+                for (;;) {
                     var startTime = time.Now();
                     var (conn2, errΔ1) = Dial(network, addr);
-                    if (errΔ1 == default!) {
+                    if (errΔ1 == nil) {
                         conn2.Close();
                         tΔ1.Fatal(errorExpectedˢ);
                     }
@@ -1146,7 +1153,7 @@ public static void TestDialClosedPortFailFast(ж<testing.T> Ꮡt) {
                     if (elapsed < maxElapsed) {
                         break;
                     }
-                    tΔ1.Logf("got %v; want < %v"u8, elapsed, maxElapsed);
+                    tΔ1.Logf("got %v; want < %v", elapsed, maxElapsed);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1156,19 +1163,18 @@ public static void TestDialClosedPortFailFast(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string localhost0ˢ = "localhost:0"u8;
+internal static ref readonly @string localhost0ˢ => ref localhost0ˢᵇ;
+private static readonly @string localhost0ˢᵇ = "localhost:0"u8;
 
 // Issue 18806: it should always be possible to net.Dial a
 // net.Listener().Addr().String when the listen address was ":n", even
 // if the machine has halfway configured IPv6 such that it can bind on
 // "::" not connect back to that same address.
-public static void TestDialListenerAddr(ж<testing.T> Ꮡt) {
+public static void TestDialListenerAddr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (!testableNetwork(tcp4ˢ)) {
-            Ꮡt.Skipf("skipping: can't listen on tcp4"u8);
+            t.Skipf("skipping: can't listen on tcp4");
         }
 
         // The original issue report was for listening on just ":0" on a system that
@@ -1182,16 +1188,16 @@ public static void TestDialListenerAddr(ж<testing.T> Ꮡt) {
         // then dial the address string that the listener would have reported for a
         // dual-stack port.
         var (ln, err) = Listen(tcp4ˢ, localhost0ˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
-        Ꮡt.Logf("listening on %q"u8, ln.Addr());
+        t.Logf("listening on %q", ln.Addr());
         (_, var port, err) = SplitHostPort(ln.Addr().String());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         // If we had opened a dual-stack port without an explicit "localhost" address,
@@ -1205,43 +1211,47 @@ public static void TestDialListenerAddr(ж<testing.T> Ꮡt) {
         // even if the string is in the tcp6 format.
         @string dialAddr = "[::]:"u8 + port;
         (var c, err) = Dial(tcp4ˢ, dialAddr);
-        if (err != default!) {
-            Ꮡt.Fatalf(@"Dial(""tcp4"", %q): %v"u8, dialAddr, err);
+        if (err != nil) {
+            t.Fatalf(@"Dial(""tcp4"", %q): %v", dialAddr, err);
         }
         c.Close();
-        Ꮡt.Logf(@"Dial(""tcp4"", %q) succeeded"u8, dialAddr);
+        t.Logf(@"Dial(""tcp4"", %q) succeeded", dialAddr);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string streamDialˢ = "StreamDial"u8;
-internal static readonly @string packetDialˢ = "PacketDial"u8;
+internal static ref readonly @string streamDialˢ => ref streamDialˢᵇ;
+private static readonly @string streamDialˢᵇ = "StreamDial"u8;
+internal static ref readonly @string packetDialˢ => ref packetDialˢᵇ;
+private static readonly @string packetDialˢᵇ = "PacketDial"u8;
 
-public static void TestDialerControl(ж<testing.T> Ꮡt) {
+public static void TestDialerControl(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "plan9"u8: {
+        t.Skipf("not supported on %s", Δruntime.GOOS);
+        break;
     }
-    else if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("skipping: fake net does not support Dialer.Control"u8);
-    }
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("skipping: fake net does not support Dialer.Control");
+        break;
+    }}
 
-    Ꮡt.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
+    t.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
-            foreach (var (_, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8, "unix"u8, "unixpacket"u8}.slice()) {
+            foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
                 var lnʗ1 = ln;
                 defer(() => lnʗ1.Close(), ref ᒐ);
-                ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-                d = new Dialer(Control: controlOnConnSetup);
+                ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Control: controlOnConnSetup), out var Ꮡd);
                 var (c, err) = Ꮡd.Dial(network, ln.Addr().String());
-                if (err != default!) {
+                if (err != nil) {
                     tΔ1.Error(err);
                     continue;
                 }
@@ -1251,10 +1261,10 @@ public static void TestDialerControl(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    Ꮡt.Run(packetDialˢ, (ж<testing.T> tΔ2) => {
+    t.Run(packetDialˢ, (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
-            foreach (var (_, network) in new @string[]{"udp"u8, "udp4"u8, "udp6"u8, "unixgram"u8}.slice()) {
+            foreach (var (_, network) in slice<@string>(["udp", "udp4", "udp6", "unixgram"])) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
@@ -1264,10 +1274,9 @@ public static void TestDialerControl(ж<testing.T> Ꮡt) {
                 }
                 var c1ʗ1 = c1;
                 defer(() => c1ʗ1.Close(), ref ᒐ);
-                ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-                d = new Dialer(Control: controlOnConnSetup);
+                ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(Control: controlOnConnSetup), out var Ꮡd);
                 var (c2, err) = Ꮡd.Dial(network, c1.LocalAddr().String());
-                if (err != default!) {
+                if (err != nil) {
                     tΔ2.Error(err);
                     continue;
                 }
@@ -1279,39 +1288,41 @@ public static void TestDialerControl(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestDialerControlContext(ж<testing.T> Ꮡt) {
+public static void TestDialerControlContext(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skipf("%s does not have full support of socktest"u8, Δruntime.GOOS);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "plan9"u8: {
+        t.Skipf("%s does not have full support of socktest", Δruntime.GOOS);
+        break;
     }
-    else if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("skipping: fake net does not support Dialer.ControlContext"u8);
-    }
-    Ꮡt.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (i, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8, "unix"u8, "unixpacket"u8}.slice()) {
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("skipping: fake net does not support Dialer.ControlContext");
+        break;
+    }}
+    t.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
+        foreach (var (i, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
             tΔ1.Run(network, (ж<testing.T> tΔ2) => {
                 GoFrame ᒐ = default;
                 try {
                     if (!testableNetwork(network)) {
-                        tΔ2.Skipf("skipping: %s not available"u8, network);
+                        tΔ2.Skipf("skipping: %s not available", network);
                     }
 
                     var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ2), network);
                     var lnʗ1 = ln;
                     defer(() => lnʗ1.Close(), ref ᒐ);
-                    nint id = default!;
-                    ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-                    d = new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn cΔ1) => {
-                        id = ctx.Value((@string)"id"u8)._<nint>();
+                    nint id = default;
+                    ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn cΔ1) => {
+                        id = ctx.Value("id")._<nint>();
                         return controlOnConnSetup(networkΔ1, address, cΔ1);
                     }
-                    );
-                    var (c, err) = Ꮡd.DialContext(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, ln.Addr().String());
-                    if (err != default!) {
+                    ), out var Ꮡd);
+                    var (c, err) = Ꮡd.DialContext(context.WithValue(context.Background(), "id", i + 1), network, ln.Addr().String());
+                    if (err != nil) {
                         tΔ2.Fatal(err);
                     }
                     if (id != i + 1) {
-                        tΔ2.Errorf("got id %d, want %d"u8, id, i + 1);
+                        tΔ2.Errorf("got id %d, want %d", id, i + 1);
                     }
                     c.Close();
                 }
@@ -1322,59 +1333,64 @@ public static void TestDialerControlContext(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestDialContext(ж<testing.T> Ꮡt) {
+public static void TestDialContext(ж<testing.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "plan9"u8: {
+        t.Skipf("not supported on %s", Δruntime.GOOS);
+        break;
     }
-    else if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("skipping: fake net does not support Dialer.ControlContext"u8);
-    }
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("skipping: fake net does not support Dialer.ControlContext");
+        break;
+    }}
 
-    Ꮡt.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
+    t.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
-            error err = default!;
-            foreach (var (i, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8, "unix"u8, "unixpacket"u8}.slice()) {
+            error err = default;
+            foreach (var (i, network) in slice<@string>(["tcp", "tcp4", "tcp6", "unix", "unixpacket"])) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
                 var lnʗ1 = ln;
                 defer(() => lnʗ1.Close(), ref ᒐ);
-                nint id = default!;
-                ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-                d = new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn cΔ1) => {
-                    id = ctx.Value((@string)"id"u8)._<nint>();
+                nint id = default;
+                ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn cΔ1) => {
+                    id = ctx.Value("id")._<nint>();
                     return controlOnConnSetup(networkΔ1, address, cΔ1);
                 }
-                );
-                global::go.net_package.Conn c = default!;
+                ), out var Ꮡd);
+                global::go.net_package.Conn c = default;
                 var exprᴛ2 = network;
-                if (exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8: {
                     var (raddr, errΔ2) = netip.ParseAddrPort(ln.Addr().String());
-                    if (errΔ2 != default!) {
+                    if (errΔ2 != nil) {
                         tΔ1.Error(errΔ2);
                         continue;
                     }
-                    var (ᴛ1, ᴛ2) = Ꮡd.DialTCP(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, (((ж<global::go.net_package.TCPAddr>)nil)).AddrPort(), raddr);
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialTCP(context.WithValue(context.Background(), "id", i + 1), network, (((ж<global::go.net_package.TCPAddr>)nil)).AddrPort(), raddr);
                     (c, errΔ2) = (new global::go.net_package.TCPConnжConn(ᴛ1), ᴛ2);
+                    break;
                 }
-                else if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
+                case {} when exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8: {
                     var (raddr, errΔ3) = ResolveUnixAddr(network, ln.Addr().String());
-                    if (errΔ3 != default!) {
+                    if (errΔ3 != nil) {
                         tΔ1.Error(errΔ3);
                         continue;
                     }
-                    var (ᴛ1, ᴛ2) = Ꮡd.DialUnix(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, nil, raddr);
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialUnix(context.WithValue(context.Background(), "id", i + 1), network, nil, raddr);
                     (c, errΔ3) = (new global::go.net_package.UnixConnжConn(ᴛ1), ᴛ2);
-                }
-                if (err != default!) {
+                    break;
+                }}
+                if (err != nil) {
                     tΔ1.Error(err);
                     continue;
                 }
                 if (id != i + 1) {
-                    tΔ1.Errorf("%s: got id %d, want %d"u8, network, id, i + 1);
+                    tΔ1.Errorf("%s: got id %d, want %d", network, id, i + 1);
                 }
                 c.Close();
             }
@@ -1382,11 +1398,11 @@ public static void TestDialContext(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    Ꮡt.Run(packetDialˢ, (ж<testing.T> tΔ2) => {
+    t.Run(packetDialˢ, (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
-            error err = default!;
-            foreach (var (i, network) in new @string[]{"udp"u8, "udp4"u8, "udp6"u8, "unixgram"u8}.slice()) {
+            error err = default;
+            foreach (var (i, network) in slice<@string>(["udp", "udp4", "udp6", "unixgram"])) {
                 if (!testableNetwork(network)) {
                     continue;
                 }
@@ -1396,39 +1412,41 @@ public static void TestDialContext(ж<testing.T> Ꮡt) {
                 }
                 var c1ʗ1 = c1;
                 defer(() => c1ʗ1.Close(), ref ᒐ);
-                nint id = default!;
-                ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
-                d = new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn c) => {
-                    id = ctx.Value((@string)"id"u8)._<nint>();
+                nint id = default;
+                ref var d = ref heap<global::go.net_package.Dialer>(new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn c) => {
+                    id = ctx.Value("id")._<nint>();
                     return controlOnConnSetup(networkΔ1, address, c);
                 }
-                );
-                global::go.net_package.Conn c2 = default!;
+                ), out var Ꮡd);
+                global::go.net_package.Conn c2 = default;
                 var exprᴛ3 = network;
-                if (exprᴛ3 == "udp"u8 || exprᴛ3 == "udp4"u8 || exprᴛ3 == "udp6"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ3 == "udp"u8 || exprᴛ3 == "udp4"u8 || exprᴛ3 == "udp6"u8: {
                     var (raddr, errΔ2) = netip.ParseAddrPort(c1.LocalAddr().String());
-                    if (errΔ2 != default!) {
+                    if (errΔ2 != nil) {
                         tΔ2.Error(errΔ2);
                         continue;
                     }
-                    var (ᴛ1, ᴛ2) = Ꮡd.DialUDP(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, (((ж<global::go.net_package.UDPAddr>)nil)).AddrPort(), raddr);
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialUDP(context.WithValue(context.Background(), "id", i + 1), network, (((ж<global::go.net_package.UDPAddr>)nil)).AddrPort(), raddr);
                     (c2, errΔ2) = (new global::go.net_package.UDPConnжConn(ᴛ1), ᴛ2);
+                    break;
                 }
-                else if (exprᴛ3 == "unixgram"u8) {
+                case {} when exprᴛ3 == "unixgram"u8: {
                     var (raddr, errΔ3) = ResolveUnixAddr(network, c1.LocalAddr().String());
-                    if (errΔ3 != default!) {
+                    if (errΔ3 != nil) {
                         tΔ2.Error(errΔ3);
                         continue;
                     }
-                    var (ᴛ1, ᴛ2) = Ꮡd.DialUnix(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, nil, raddr);
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialUnix(context.WithValue(context.Background(), "id", i + 1), network, nil, raddr);
                     (c2, errΔ3) = (new global::go.net_package.UnixConnжConn(ᴛ1), ᴛ2);
-                }
-                if (err != default!) {
+                    break;
+                }}
+                if (err != nil) {
                     tΔ2.Error(err);
                     continue;
                 }
                 if (id != i + 1) {
-                    tΔ2.Errorf("%s: got id %d, want %d"u8, network, id, i + 1);
+                    tΔ2.Errorf("%s: got id %d, want %d", network, id, i + 1);
                 }
                 c2.Close();
             }
@@ -1441,8 +1459,8 @@ public static void TestDialContext(ж<testing.T> Ꮡt) {
 // mustHaveExternalNetwork is like testenv.MustHaveExternalNetwork
 // except on non-Linux, non-mobile builders it permits the test to
 // run in -short mode.
-internal static void mustHaveExternalNetwork(ж<testing.T> Ꮡt) {
-    Ꮡt.Helper();
+internal static void mustHaveExternalNetwork(ж<testing.T> t) {
+    t.Helper();
     var definitelyHasLongtestBuilder = Δruntime.GOOS == "linux"u8;
     var mobile = Δruntime.GOOS == "android"u8 || Δruntime.GOOS == "ios"u8;
     var fake = Δruntime.GOOS == "js"u8 || Δruntime.GOOS == "wasip1"u8;
@@ -1453,7 +1471,7 @@ internal static void mustHaveExternalNetwork(ж<testing.T> Ꮡt) {
         // any builder if this port doesn't also have a -longtest builder.
         return;
     }
-    testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 }
 
 internal partial struct contextWithNonZeroDeadline {
@@ -1465,22 +1483,22 @@ internal static (time.Time, bool) Deadline(this contextWithNonZeroDeadline _) {
     return (time.Unix(0, 0), false);
 }
 
-public static void TestDialWithNonZeroDeadline(ж<testing.T> Ꮡt) {
+public static void TestDialWithNonZeroDeadline(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
         var (_, port, err) = SplitHostPort(ln.Addr().String());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         var ctx = new contextWithNonZeroDeadline(Context: context.Background());
         ref var dialer = ref heap(new global::go.net_package.Dialer(), out var Ꮡdialer);
         (var c, err) = Ꮡdialer.DialContext(ctx, tcpˢ, JoinHostPort(""u8, port));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         c.Close();
     }

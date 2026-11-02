@@ -19,7 +19,7 @@ public static error /*err*/ Tcsetpgrp(nint fd, int32 pgidʗp) {
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 } // end unix_package

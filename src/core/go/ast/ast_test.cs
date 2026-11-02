@@ -12,34 +12,34 @@ partial struct commentsᴛ1 /*dyn*/ {
     internal slice<@string> list;
     internal @string text;
 }
-internal static slice<commentsᴛ1> comments = new commentsᴛ1[]{
-    new(new @string[]{"//"u8}.slice(), ""u8),
-    new(new @string[]{"//   "u8}.slice(), ""u8),
-    new(new @string[]{"//"u8, "//"u8, "//   "u8}.slice(), ""u8),
-    new(new @string[]{"// foo   "u8}.slice(), "foo\n"u8),
-    new(new @string[]{"//"u8, "//"u8, "// foo"u8}.slice(), "foo\n"u8),
-    new(new @string[]{"// foo  bar  "u8}.slice(), "foo  bar\n"u8),
-    new(new @string[]{"// foo"u8, "// bar"u8}.slice(), "foo\nbar\n"u8),
-    new(new @string[]{"// foo"u8, "//"u8, "//"u8, "//"u8, "// bar"u8}.slice(), "foo\n\nbar\n"u8),
-    new(new @string[]{"// foo"u8, "/* bar */"u8}.slice(), "foo\n bar\n"u8),
-    new(new @string[]{"//"u8, "//"u8, "//"u8, "// foo"u8, "//"u8, "//"u8, "//"u8}.slice(), "foo\n"u8),
+internal static slice<commentsᴛ1> comments = slice<commentsᴛ1>([
+    new(slice<@string>(["//"]), ""),
+    new(slice<@string>(["//   "]), ""),
+    new(slice<@string>(["//", "//", "//   "]), ""),
+    new(slice<@string>(["// foo   "]), "foo\n"),
+    new(slice<@string>(["//", "//", "// foo"]), "foo\n"),
+    new(slice<@string>(["// foo  bar  "]), "foo  bar\n"),
+    new(slice<@string>(["// foo", "// bar"]), "foo\nbar\n"),
+    new(slice<@string>(["// foo", "//", "//", "//", "// bar"]), "foo\n\nbar\n"),
+    new(slice<@string>(["// foo", "/* bar */"]), "foo\n bar\n"),
+    new(slice<@string>(["//", "//", "//", "// foo", "//", "//", "//"]), "foo\n"),
 
-    new(new @string[]{"/**/"u8}.slice(), ""u8),
-    new(new @string[]{"/*   */"u8}.slice(), ""u8),
-    new(new @string[]{"/**/"u8, "/**/"u8, "/*   */"u8}.slice(), ""u8),
-    new(new @string[]{"/* Foo   */"u8}.slice(), " Foo\n"u8),
-    new(new @string[]{"/* Foo  Bar  */"u8}.slice(), " Foo  Bar\n"u8),
-    new(new @string[]{"/* Foo*/"u8, "/* Bar*/"u8}.slice(), " Foo\n Bar\n"u8),
-    new(new @string[]{"/* Foo*/"u8, "/**/"u8, "/**/"u8, "/**/"u8, "// Bar"u8}.slice(), " Foo\n\nBar\n"u8),
-    new(new @string[]{"/* Foo*/"u8, "/*\n*/"u8, "//"u8, "/*\n*/"u8, "// Bar"u8}.slice(), " Foo\n\nBar\n"u8),
-    new(new @string[]{"/* Foo*/"u8, "// Bar"u8}.slice(), " Foo\nBar\n"u8),
-    new(new @string[]{"/* Foo\n Bar*/"u8}.slice(), " Foo\n Bar\n"u8),
+    new(slice<@string>(["/**/"]), ""),
+    new(slice<@string>(["/*   */"]), ""),
+    new(slice<@string>(["/**/", "/**/", "/*   */"]), ""),
+    new(slice<@string>(["/* Foo   */"]), " Foo\n"),
+    new(slice<@string>(["/* Foo  Bar  */"]), " Foo  Bar\n"),
+    new(slice<@string>(["/* Foo*/", "/* Bar*/"]), " Foo\n Bar\n"),
+    new(slice<@string>(["/* Foo*/", "/**/", "/**/", "/**/", "// Bar"]), " Foo\n\nBar\n"),
+    new(slice<@string>(["/* Foo*/", "/*\n*/", "//", "/*\n*/", "// Bar"]), " Foo\n\nBar\n"),
+    new(slice<@string>(["/* Foo*/", "// Bar"]), " Foo\nBar\n"),
+    new(slice<@string>(["/* Foo\n Bar*/"]), " Foo\n Bar\n"),
 
-    new(new @string[]{"// foo"u8, "//go:noinline"u8, "// bar"u8, "//:baz"u8}.slice(), "foo\nbar\n:baz\n"u8),
-    new(new @string[]{"// foo"u8, "//lint123:ignore"u8, "// bar"u8}.slice(), "foo\nbar\n"u8)
-}.slice();
+    new(slice<@string>(["// foo", "//go:noinline", "// bar", "//:baz"]), "foo\nbar\n:baz\n"),
+    new(slice<@string>(["// foo", "//lint123:ignore", "// bar"]), "foo\nbar\n")
+]);
 
-public static void TestCommentText(ж<testing.T> Ꮡt) {
+public static void TestCommentText(ж<testing.T> t) {
     foreach (var (i, c) in comments) {
         var list = new slice<ж<global::go.go.ast_package.Comment>>(len(c.list));
         foreach (var (iΔ1, vᴛ1) in c.list) {
@@ -51,7 +51,7 @@ public static void TestCommentText(ж<testing.T> Ꮡt) {
 
         @string text = (Ꮡ(new CommentGroup(list))).Text();
         if (text != c.text) {
-            Ꮡt.Errorf("case %d: got %q; expected %q"u8, i, text, c.text);
+            t.Errorf("case %d: got %q; expected %q", i, text, c.text);
         }
     }
 }
@@ -60,29 +60,29 @@ partial struct isDirectiveTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal bool ok;
 }
-internal static slice<isDirectiveTestsᴛ1> isDirectiveTests = new isDirectiveTestsᴛ1[]{
-    new("abc"u8, false),
-    new("go:inline"u8, true),
-    new("Go:inline"u8, false),
-    new("go:Inline"u8, false),
-    new(":inline"u8, false),
-    new("lint:ignore"u8, true),
-    new("lint:1234"u8, true),
-    new("1234:lint"u8, true),
-    new("go: inline"u8, false),
-    new("go:"u8, false),
-    new("go:*"u8, false),
-    new("go:x*"u8, true),
-    new("export foo"u8, true),
-    new("extern foo"u8, true),
-    new("expert foo"u8, false)
-}.slice();
+internal static slice<isDirectiveTestsᴛ1> isDirectiveTests = slice<isDirectiveTestsᴛ1>([
+    new("abc", false),
+    new("go:inline", true),
+    new("Go:inline", false),
+    new("go:Inline", false),
+    new(":inline", false),
+    new("lint:ignore", true),
+    new("lint:1234", true),
+    new("1234:lint", true),
+    new("go: inline", false),
+    new("go:", false),
+    new("go:*", false),
+    new("go:x*", true),
+    new("export foo", true),
+    new("extern foo", true),
+    new("expert foo", false)
+]);
 
-public static void TestIsDirective(ж<testing.T> Ꮡt) {
+public static void TestIsDirective(ж<testing.T> t) {
     foreach (var (_, tt) in isDirectiveTests) {
         {
             var ok = isDirective(tt.@in); if (ok != tt.ok) {
-                Ꮡt.Errorf("isDirective(%q) = %v, want %v"u8, tt.@in, ok, tt.ok);
+                t.Errorf("isDirective(%q) = %v, want %v", tt.@in, ok, tt.ok);
             }
         }
     }

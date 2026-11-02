@@ -9,21 +9,6 @@ global using static global::go.html.template_internal_test_package;
 
 // <ImportedTypeAliases>
 global using FuncMap = go.text.template_package.FuncMap;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using templateꓸError = go.html.template_package.ΔError;
-global using templateꓸFuncMap = go.text.template_package.FuncMap;
 // </ImportedTypeAliases>
 
 using go;
@@ -45,11 +30,15 @@ using static global::go.html.template_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.html.template_package.Template))]
+[assembly: GoFieldAccess(typeof(go.html.template_package.Template))]
+[assembly: GoFieldAccess(typeof(go.text.template.parse_package.ActionNode))]
+[assembly: GoFieldAccess(typeof(go.text.template.parse_package.ListNode))]
+[assembly: GoFieldAccess(typeof(go.text.template.parse_package.Tree))]
+[assembly: GoFieldAccess(typeof(go.text.template_package.Template))]
+[assembly: GoFieldAccess(typeof(testCase))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,8 +48,8 @@ using static global::go.html.template_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABoqooKClIKCgpSSgoKmAAgMAAgIAAgSpsqkgoLY5ujK3JKC3LikgoLYAAoOAAoI7qa4pIKCpoKCuIKClIKC6gAMDAAJCO6muOyCgqaCgsqCgqaCgsqCgpSCgvw=", "90-94:1", "", "126=Join/1/2/1,Join/2/2/2")]
-[assembly: go.GoPositionMap("html/template/template_test.go", "template_test.cs", "ABwgtIKCgpSCpoKSgoKClICCAAkIgoKCgqaCgoKCgvaCgoKCgtaCgoKCgtaCgoKCgqaCgoKCgvaCgoK4guaCgoKCgvaCgoKCgIKkgIKkgIL4goKCABIGtAALGKqSsqKCgIKkgoKAgqSCAAkMgoKCgoKClIKClAAHEILcgqaigoK4ooKCuKKCgoKUgg==", "147-160:1", "", "272=New/1/1/2")]
+[assembly: GoPositionMap("html/template/examplefiles_test.go", "examplefiles_test.cs", "ABsqooKClIKCgpSSgoKmAAkMAAgIAAgSpsqkgoLYAAgG6MrckoLcuKSCgtgADg4ACgjuprikgoKmgoK4goKUgoLqAA8MAAkI7qa47IKCpoKCyoKCpoKCyoKClIKC/A==", "90-94:1", "", "130=Join/1/2/1,Join/2/2/2", "41:25,121:27")]
+[assembly: GoPositionMap("html/template/template_test.go", "template_test.cs", "AB4glIKCgpSCpoKSgoKClICCAAwIgoKCgqaCgoKCggAKBoKCgoKC5oKCgoKC5oKCgoKCpoKCgoKCAAoGgoKCuIIACAaCgoKCggAKBoKCgoKAgqSAgqSAggAICIKCggAWBpQACxiqkrKigoCCpIKCgIKkggALDIKCgoKCgpSCgpQABxCC3IKmooKCuKKCgriigoKClII=", "147-160:1", "", "293=New/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.html;

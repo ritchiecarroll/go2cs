@@ -47,10 +47,9 @@ internal static void dboxFtoa64(ref decimalSlice d, uint64 mant, nint exp, bool 
             return;
         }
         var yruΔ1 = dboxRoundUp64(φΔ1, βΔ1);
-        if (exp == -77 && yruΔ1 % 2 != 0){
+        if (exp == -77 && yruΔ1 % 2 != 0) {
             yruΔ1--;
-        } else 
-        if (yruΔ1 < xi) {
+        } else if (yruΔ1 < xi) {
             yruΔ1++;
         }
         dboxDigits(ref d, yruΔ1, -k0Δ1);
@@ -59,7 +58,7 @@ internal static void dboxFtoa64(ref decimalSlice d, uint64 mant, nint exp, bool 
 
     // κ = 2 for float64 (section 5.1.3)
     const nint κ = 2;
-    UntypedInt p10κ = 100; // 10**κ
+    UntypedInt p10κ = 100;                     // 10**κ
     const uint64 p10κ1 = /* p10κ * 10 */ 1000; // 10**(κ+1)
 
     // Algorithm 5.2 (page 15).
@@ -69,7 +68,7 @@ internal static void dboxFtoa64(ref decimalSlice d, uint64 mant, nint exp, bool 
     var (s, r) = (zi / p10κ1, (uint32)(zi % p10κ1));
     var δi = dboxDelta64(φ, β);
 
-    if (r < δi){
+    if (r < δi) {
         if (r != 0 || !exact || mant % 2 == 0) {
             var (sΔ1, zeros) = trimZeros(s);
             dboxDigits(ref d, sΔ1, -k0 + 1 + zeros);
@@ -77,8 +76,7 @@ internal static void dboxFtoa64(ref decimalSlice d, uint64 mant, nint exp, bool 
         }
         s--;
         r = p10κ * 10;
-    } else 
-    if (r == δi) {
+    } else if (r == δi) {
         var (parity, exactΔ1) = dboxParity64((uint64)(mant * 2 - 1), φ, β);
         if (parity || (exactΔ1 && mant % 2 == 0)) {
             var (sΔ2, zeros) = trimZeros(s);
@@ -118,10 +116,9 @@ internal static void dboxFtoa32(ref decimalSlice d, uint32 mant, nint exp, bool 
             return;
         }
         var yruΔ1 = dboxRoundUp32(φΔ1, βΔ1);
-        if (exp == -77 && yruΔ1 % 2 != 0){
+        if (exp == -77 && yruΔ1 % 2 != 0) {
             yruΔ1--;
-        } else 
-        if (yruΔ1 < xi) {
+        } else if (yruΔ1 < xi) {
             yruΔ1++;
         }
         dboxDigits(ref d, (uint64)yruΔ1, -k0Δ1);
@@ -140,7 +137,7 @@ internal static void dboxFtoa32(ref decimalSlice d, uint32 mant, nint exp, bool 
     var (s, r) = (zi / p10κ1, (uint32)(zi % p10κ1));
     var δi = dboxDelta32(φ, β);
 
-    if (r < δi){
+    if (r < δi) {
         if (r != 0 || !exact || mant % 2 == 0) {
             var (sΔ1, zeros) = trimZeros((uint64)s);
             dboxDigits(ref d, sΔ1, -k0 + 1 + zeros);
@@ -148,8 +145,7 @@ internal static void dboxFtoa32(ref decimalSlice d, uint32 mant, nint exp, bool 
         }
         s--;
         r = p10κ * 10;
-    } else 
-    if (r == δi) {
+    } else if (r == δi) {
         var (parity, exactΔ1) = dboxParity32((uint32)(mant * 2 - 1), φ, β);
         if (parity || (exactΔ1 && mant % 2 == 0)) {
             var (sΔ2, zeros) = trimZeros((uint64)s);
@@ -247,8 +243,8 @@ internal static uint128 umul192Lower128(uint64 x, uint128 y) {
 // from the precomputed value of φ̃k for float64
 // and also checks if x^(f), y^(f), z^(f) == 0 (section 5.2.1).
 internal static (uint64 intPart, bool isInt) dboxMulPow64(uint64 u, uint128 phi) {
-    uint64 intPart = default!;
-    bool isInt = default!;
+    uint64 intPart = default;
+    bool isInt = default;
 
     var r = umul192Upper128(u, phi);
     intPart = r.Hi;
@@ -260,8 +256,8 @@ internal static (uint64 intPart, bool isInt) dboxMulPow64(uint64 u, uint128 phi)
 // from the precomputed value of φ̃k for float32
 // and also checks if x^(f), y^(f), z^(f) == 0 (section 5.2.1).
 internal static (uint32 intPart, bool isInt) dboxMulPow32(uint32 u, uint64 phi) {
-    uint32 intPart = default!;
-    bool isInt = default!;
+    uint32 intPart = default;
+    bool isInt = default;
 
     var r = umul96Upper64(u, phi);
     intPart = (uint32)(r >> 32);
@@ -273,8 +269,8 @@ internal static (uint32 intPart, bool isInt) dboxMulPow32(uint32 u, uint64 phi) 
 // from the precomputed value of φ̃k for float64
 // and also checks if x^(f), y^(f), z^(f) = 0 (section 5.2.1).
 internal static (bool parity, bool isInt) dboxParity64(uint64 mant2, uint128 phi, nint beta) {
-    bool parity = default!;
-    bool isInt = default!;
+    bool parity = default;
+    bool isInt = default;
 
     var r = umul192Lower128(mant2, phi);
     parity = ((r.Hi.Rsh((int64)(64 - beta))) & 1) != 0;
@@ -286,8 +282,8 @@ internal static (bool parity, bool isInt) dboxParity64(uint64 mant2, uint128 phi
 // from the precomputed value of φ̃k for float32
 // and also checks if x^(f), y^(f), z^(f) = 0 (section 5.2.1).
 internal static (bool parity, bool isInt) dboxParity32(uint32 mant2, uint64 phi, nint beta) {
-    bool parity = default!;
-    bool isInt = default!;
+    bool parity = default;
+    bool isInt = default;
 
     var r = umul96Lower64(mant2, phi);
     parity = ((r.Rsh((int64)(64 - beta))) & 1) != 0;
@@ -317,8 +313,8 @@ internal static UntypedInt floatMantBits32 => 23; // p = 23 for float32.
 
 // dboxRange64 returns the left and right float64 endpoints.
 internal static (uint64 left, uint64 right) dboxRange64(uint128 φ, nint β) {
-    uint64 left = default!;
-    uint64 right = default!;
+    uint64 left = default;
+    uint64 right = default;
 
     left = (φ.Hi - (φ.Hi >> (int)(float64MantBits + 2))).Rsh((int64)((nint)(64 - float64MantBits - 1) - β));
     right = (φ.Hi + (φ.Hi >> (int)(float64MantBits + 1))).Rsh((int64)((nint)(64 - float64MantBits - 1) - β));
@@ -327,8 +323,8 @@ internal static (uint64 left, uint64 right) dboxRange64(uint128 φ, nint β) {
 
 // dboxRange32 returns the left and right float32 endpoints.
 internal static (uint32 left, uint32 right) dboxRange32(uint64 φ, nint β) {
-    uint32 left = default!;
-    uint32 right = default!;
+    uint32 left = default;
+    uint32 right = default;
 
     left = (uint32)((φ - (φ >> (int)(floatMantBits32 + 2))).Rsh((int64)((nint)(64 - floatMantBits32 - 1) - β)));
     right = (uint32)((φ + (φ >> (int)(floatMantBits32 + 1))).Rsh((int64)((nint)(64 - floatMantBits32 - 1) - β)));
@@ -347,8 +343,8 @@ internal static uint32 dboxRoundUp32(uint64 phi, nint beta) {
 
 // dboxPow64 gets the precomputed value of φ̃̃k for float64.
 internal static (uint128 φ, nint β) dboxPow64(nint k, nint e) {
-    uint128 φ = default!;
-    nint β = default!;
+    uint128 φ = default;
+    nint β = default;
 
     (φ, var e1, _) = pow10(k);
     if (k < 0 || k > 55) {
@@ -360,7 +356,7 @@ internal static (uint128 φ, nint β) dboxPow64(nint k, nint e) {
 
 // dboxPow32 gets the precomputed value of φ̃̃k for float32.
 internal static (uint64 mant, nint exp) dboxPow32(nint k, nint e) {
-    nint exp = default!;
+    nint exp = default;
 
     var (m, e1, _) = pow10(k);
     if (k < 0 || k > 27) {

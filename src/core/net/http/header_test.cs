@@ -21,96 +21,96 @@ partial struct headerWriteTestsᴛ1 /*dyn*/ {
     internal map<@string, bool> exclude;
     internal @string expected;
 }
-internal static slice<headerWriteTestsᴛ1> headerWriteTests = new headerWriteTestsᴛ1[]{
-    new(new ΔHeader(new map<@string, slice<@string>>{}), default!, ""u8),
+internal static slice<headerWriteTestsᴛ1> headerWriteTests = slice<headerWriteTestsᴛ1>([
+    new(new ΔHeader(new map<@string, slice<@string>>{}), default, ""),
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Content-Type"u8] = new @string[]{"text/html; charset=UTF-8"u8}.slice(),
-            ["Content-Length"u8] = new @string[]{"0"u8}.slice()
+            ["Content-Type"] = slice<@string>(["text/html; charset=UTF-8"]),
+            ["Content-Length"] = slice<@string>(["0"])
         }),
-        default!,
-        "Content-Length: 0\r\nContent-Type: text/html; charset=UTF-8\r\n"u8
+        default,
+        "Content-Length: 0\r\nContent-Type: text/html; charset=UTF-8\r\n"
     ),
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Content-Length"u8] = new @string[]{"0"u8, "1"u8, "2"u8}.slice()
+            ["Content-Length"] = slice<@string>(["0", "1", "2"])
         }),
-        default!,
-        "Content-Length: 0\r\nContent-Length: 1\r\nContent-Length: 2\r\n"u8
+        default,
+        "Content-Length: 0\r\nContent-Length: 1\r\nContent-Length: 2\r\n"
     ),
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Expires"u8] = new @string[]{"-1"u8}.slice(),
-            ["Content-Length"u8] = new @string[]{"0"u8}.slice(),
-            ["Content-Encoding"u8] = new @string[]{"gzip"u8}.slice()
+            ["Expires"] = slice<@string>(["-1"]),
+            ["Content-Length"] = slice<@string>(["0"]),
+            ["Content-Encoding"] = slice<@string>(["gzip"])
         }),
-        new map<@string, bool>{["Content-Length"u8] = true},
-        "Content-Encoding: gzip\r\nExpires: -1\r\n"u8
+        new map<@string, bool>{["Content-Length"] = true},
+        "Content-Encoding: gzip\r\nExpires: -1\r\n"
     ),
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Expires"u8] = new @string[]{"-1"u8}.slice(),
-            ["Content-Length"u8] = new @string[]{"0"u8, "1"u8, "2"u8}.slice(),
-            ["Content-Encoding"u8] = new @string[]{"gzip"u8}.slice()
+            ["Expires"] = slice<@string>(["-1"]),
+            ["Content-Length"] = slice<@string>(["0", "1", "2"]),
+            ["Content-Encoding"] = slice<@string>(["gzip"])
         }),
-        new map<@string, bool>{["Content-Length"u8] = true},
-        "Content-Encoding: gzip\r\nExpires: -1\r\n"u8
+        new map<@string, bool>{["Content-Length"] = true},
+        "Content-Encoding: gzip\r\nExpires: -1\r\n"
     ),
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Expires"u8] = new @string[]{"-1"u8}.slice(),
-            ["Content-Length"u8] = new @string[]{"0"u8}.slice(),
-            ["Content-Encoding"u8] = new @string[]{"gzip"u8}.slice()
+            ["Expires"] = slice<@string>(["-1"]),
+            ["Content-Length"] = slice<@string>(["0"]),
+            ["Content-Encoding"] = slice<@string>(["gzip"])
         }),
-        new map<@string, bool>{["Content-Length"u8] = true, ["Expires"u8] = true, ["Content-Encoding"u8] = true},
-        ""u8
+        new map<@string, bool>{["Content-Length"] = true, ["Expires"] = true, ["Content-Encoding"] = true},
+        ""
     ),
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Nil"u8] = default!,
-            ["Empty"u8] = new @string[]{}.slice(),
-            ["Blank"u8] = new @string[]{""u8}.slice(),
-            ["Double-Blank"u8] = new @string[]{""u8, ""u8}.slice()
+            ["Nil"] = default,
+            ["Empty"] = slice<@string>([]),
+            ["Blank"] = slice<@string>([""]),
+            ["Double-Blank"] = slice<@string>(["", ""])
         }),
-        default!,
-        "Blank: \r\nDouble-Blank: \r\nDouble-Blank: \r\n"u8
+        default,
+        "Blank: \r\nDouble-Blank: \r\nDouble-Blank: \r\n"
     ),
     // Tests header sorting when over the insertion sort threshold side:
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["k1"u8] = new @string[]{"1a"u8, "1b"u8}.slice(),
-            ["k2"u8] = new @string[]{"2a"u8, "2b"u8}.slice(),
-            ["k3"u8] = new @string[]{"3a"u8, "3b"u8}.slice(),
-            ["k4"u8] = new @string[]{"4a"u8, "4b"u8}.slice(),
-            ["k5"u8] = new @string[]{"5a"u8, "5b"u8}.slice(),
-            ["k6"u8] = new @string[]{"6a"u8, "6b"u8}.slice(),
-            ["k7"u8] = new @string[]{"7a"u8, "7b"u8}.slice(),
-            ["k8"u8] = new @string[]{"8a"u8, "8b"u8}.slice(),
-            ["k9"u8] = new @string[]{"9a"u8, "9b"u8}.slice()
+            ["k1"] = slice<@string>(["1a", "1b"]),
+            ["k2"] = slice<@string>(["2a", "2b"]),
+            ["k3"] = slice<@string>(["3a", "3b"]),
+            ["k4"] = slice<@string>(["4a", "4b"]),
+            ["k5"] = slice<@string>(["5a", "5b"]),
+            ["k6"] = slice<@string>(["6a", "6b"]),
+            ["k7"] = slice<@string>(["7a", "7b"]),
+            ["k8"] = slice<@string>(["8a", "8b"]),
+            ["k9"] = slice<@string>(["9a", "9b"])
         }),
-        new map<@string, bool>{["k5"u8] = true},
+        new map<@string, bool>{["k5"] = true},
         "k1: 1a\r\nk1: 1b\r\nk2: 2a\r\nk2: 2b\r\nk3: 3a\r\nk3: 3b\r\n"u8 + "k4: 4a\r\nk4: 4b\r\nk6: 6a\r\nk6: 6b\r\n"u8 + "k7: 7a\r\nk7: 7b\r\nk8: 8a\r\nk8: 8b\r\nk9: 9a\r\nk9: 9b\r\n"u8
     ),
     // Tests invalid characters in headers.
     new(
         new ΔHeader(new map<@string, slice<@string>>{
-            ["Content-Type"u8] = new @string[]{"text/html; charset=UTF-8"u8}.slice(),
-            ["NewlineInValue"u8] = new @string[]{"1\r\nBar: 2"u8}.slice(),
-            ["NewlineInKey\r\n"u8] = new @string[]{"1"u8}.slice(),
-            ["Colon:InKey"u8] = new @string[]{"1"u8}.slice(),
-            ["Evil: 1\r\nSmuggledValue"u8] = new @string[]{"1"u8}.slice()
+            ["Content-Type"] = slice<@string>(["text/html; charset=UTF-8"]),
+            ["NewlineInValue"] = slice<@string>(["1\r\nBar: 2"]),
+            ["NewlineInKey\r\n"] = slice<@string>(["1"]),
+            ["Colon:InKey"] = slice<@string>(["1"]),
+            ["Evil: 1\r\nSmuggledValue"] = slice<@string>(["1"])
         }),
-        default!,
+        default,
         "Content-Type: text/html; charset=UTF-8\r\n"u8 + "NewlineInValue: 1  Bar: 2\r\n"u8
     )
-}.slice();
+]);
 
-public static void TestHeaderWrite(ж<testing.T> Ꮡt) {
+public static void TestHeaderWrite(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (i, test) in headerWriteTests) {
         test.h.WriteSubset(new http_test_package.strings_BuilderжWriter(Ꮡbuf), test.exclude);
         if (buf.String() != test.expected) {
-            Ꮡt.Errorf("#%d:\n got: %q\nwant: %q"u8, i, buf.String(), test.expected);
+            t.Errorf("#%d:\n got: %q\nwant: %q", i, buf.String(), test.expected);
         }
         buf.Reset();
     }
@@ -120,31 +120,31 @@ partial struct parseTimeTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader h;
     internal bool err;
 }
-internal static slice<parseTimeTestsᴛ1> parseTimeTests = new parseTimeTestsᴛ1[]{
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"u8] = new @string[]{""u8}.slice()}), true),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"u8] = new @string[]{"invalid"u8}.slice()}), true),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"u8] = new @string[]{"1994-11-06T08:49:37Z00:00"u8}.slice()}), true),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"u8] = new @string[]{"Sun, 06 Nov 1994 08:49:37 GMT"u8}.slice()}), false),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"u8] = new @string[]{"Sunday, 06-Nov-94 08:49:37 GMT"u8}.slice()}), false),
-    new(new ΔHeader(new map<@string, slice<@string>>{["Date"u8] = new @string[]{"Sun Nov  6 08:49:37 1994"u8}.slice()}), false)
-}.slice();
+internal static slice<parseTimeTestsᴛ1> parseTimeTests = slice<parseTimeTestsᴛ1>([
+    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = slice<@string>([""])}), true),
+    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = slice<@string>(["invalid"])}), true),
+    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = slice<@string>(["1994-11-06T08:49:37Z00:00"])}), true),
+    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = slice<@string>(["Sun, 06 Nov 1994 08:49:37 GMT"])}), false),
+    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = slice<@string>(["Sunday, 06-Nov-94 08:49:37 GMT"])}), false),
+    new(new ΔHeader(new map<@string, slice<@string>>{["Date"] = slice<@string>(["Sun Nov  6 08:49:37 1994"])}), false)
+]);
 
-public static void TestParseTime(ж<testing.T> Ꮡt) {
+public static void TestParseTime(ж<testing.T> t) {
     var expect = time.Date(1994, 11, 6, 8, 49, 37, 0, time.ΔUTC);
     foreach (var (i, test) in parseTimeTests) {
         var (d, err) = ParseTime(test.h.Get(dateˢ));
-        if (err != default!) {
+        if (err != nil) {
             if (!test.err) {
-                Ꮡt.Errorf("#%d:\n got err: %v"u8, i, err);
+                t.Errorf("#%d:\n got err: %v", i, err);
             }
             continue;
         }
         if (test.err) {
-            Ꮡt.Errorf("#%d:\n  should err"u8, i);
+            t.Errorf("#%d:\n  should err", i);
             continue;
         }
         if (!expect.Equal(d)) {
-            Ꮡt.Errorf("#%d:\n got: %v\nwant: %v"u8, i, d, expect);
+            t.Errorf("#%d:\n got: %v\nwant: %v", i, d, expect);
         }
     }
 }
@@ -155,57 +155,57 @@ internal partial struct hasTokenTest {
     internal bool want;
 }
 
-internal static slice<hasTokenTest> hasTokenTests = new hasTokenTest[]{
-    new(""u8, ""u8, false),
-    new(""u8, "foo"u8, false),
-    new("foo"u8, "foo"u8, true),
-    new("foo "u8, "foo"u8, true),
-    new(" foo"u8, "foo"u8, true),
-    new(" foo "u8, "foo"u8, true),
-    new("foo,bar"u8, "foo"u8, true),
-    new("bar,foo"u8, "foo"u8, true),
-    new("bar, foo"u8, "foo"u8, true),
-    new("bar,foo, baz"u8, "foo"u8, true),
-    new("bar, foo,baz"u8, "foo"u8, true),
-    new("bar,foo, baz"u8, "foo"u8, true),
-    new("bar, foo, baz"u8, "foo"u8, true),
-    new("FOO"u8, "foo"u8, true),
-    new("FOO "u8, "foo"u8, true),
-    new(" FOO"u8, "foo"u8, true),
-    new(" FOO "u8, "foo"u8, true),
-    new("FOO,BAR"u8, "foo"u8, true),
-    new("BAR,FOO"u8, "foo"u8, true),
-    new("BAR, FOO"u8, "foo"u8, true),
-    new("BAR,FOO, baz"u8, "foo"u8, true),
-    new("BAR, FOO,BAZ"u8, "foo"u8, true),
-    new("BAR,FOO, BAZ"u8, "foo"u8, true),
-    new("BAR, FOO, BAZ"u8, "foo"u8, true),
-    new("foobar"u8, "foo"u8, false),
-    new("barfoo "u8, "foo"u8, false)
-}.slice();
+internal static slice<hasTokenTest> hasTokenTests = slice<hasTokenTest>([
+    new("", "", false),
+    new("", "foo", false),
+    new("foo", "foo", true),
+    new("foo ", "foo", true),
+    new(" foo", "foo", true),
+    new(" foo ", "foo", true),
+    new("foo,bar", "foo", true),
+    new("bar,foo", "foo", true),
+    new("bar, foo", "foo", true),
+    new("bar,foo, baz", "foo", true),
+    new("bar, foo,baz", "foo", true),
+    new("bar,foo, baz", "foo", true),
+    new("bar, foo, baz", "foo", true),
+    new("FOO", "foo", true),
+    new("FOO ", "foo", true),
+    new(" FOO", "foo", true),
+    new(" FOO ", "foo", true),
+    new("FOO,BAR", "foo", true),
+    new("BAR,FOO", "foo", true),
+    new("BAR, FOO", "foo", true),
+    new("BAR,FOO, baz", "foo", true),
+    new("BAR, FOO,BAZ", "foo", true),
+    new("BAR,FOO, BAZ", "foo", true),
+    new("BAR, FOO, BAZ", "foo", true),
+    new("foobar", "foo", false),
+    new("barfoo ", "foo", false)
+]);
 
-public static void TestHasToken(ж<testing.T> Ꮡt) {
+public static void TestHasToken(ж<testing.T> t) {
     foreach (var (_, tt) in hasTokenTests) {
         if (hasToken(tt.header, tt.token) != tt.want) {
-            Ꮡt.Errorf("hasToken(%q, %q) = %v; want %v"u8, tt.header, tt.token, !tt.want, tt.want);
+            t.Errorf("hasToken(%q, %q) = %v; want %v", tt.header, tt.token, !tt.want, tt.want);
         }
     }
 }
 
-public static void TestNilHeaderClone(ж<testing.T> Ꮡt) {
-    var t1 = (global::go.net.http_package.ΔHeader)default!;
+public static void TestNilHeaderClone(ж<testing.T> t) {
+    var t1 = (global::go.net.http_package.ΔHeader)default;
     var t2 = t1.Clone();
-    if (t2 != default!) {
-        Ꮡt.Errorf("cloned header does not match original: got: %+v; want: %+v"u8, t2, (any)(default!));
+    if (t2 != nil) {
+        t.Errorf("cloned header does not match original: got: %+v; want: %+v", t2, (any)(default));
     }
 }
 
 internal static global::go.net.http_package.ΔHeader testHeader;
 internal static void initᴛtestHeader() { testHeader = new ΔHeader(new map<@string, slice<@string>>{
-    ["Content-Length"u8] = new @string[]{"123"u8}.slice(),
-    ["Content-Type"u8] = new @string[]{"text/plain"u8}.slice(),
-    ["Date"u8] = new @string[]{"some date at some time Z"u8}.slice(),
-    ["Server"u8] = new @string[]{DefaultUserAgent}.slice()
+    ["Content-Length"] = slice<@string>(["123"]),
+    ["Content-Type"] = slice<@string>(["text/plain"]),
+    ["Date"] = slice<@string>(["some date at some time Z"]),
+    ["Server"] = slice<@string>([DefaultUserAgent])
 }); }
 
 internal static readonly ж<bytes.Buffer> Ꮡbuf = new StaticBox<bytes.Buffer>(default(bytes.Buffer));
@@ -217,7 +217,7 @@ public static void BenchmarkHeaderWriteSubset(ж<testing.B> Ꮡb) {
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
         buf.Reset();
-        testHeader.WriteSubset(new http_test_package.bytes_BufferжWriter(Ꮡbuf), default!);
+        testHeader.WriteSubset(new http_test_package.bytes_BufferжWriter(Ꮡbuf), default);
     }
 }
 
@@ -226,22 +226,22 @@ internal static readonly object skippingAllocTestInShortˢ = (@string)"skipping 
 internal static readonly object skippingTestUnderRaceˢ = (@string)"skipping test under race detector"u8;
 internal static readonly object skippingGomaxprocs1ˢ = (@string)"skipping; GOMAXPROCS>1"u8;
 
-public static void TestHeaderWriteSubsetAllocs(ж<testing.T> Ꮡt) {
+public static void TestHeaderWriteSubsetAllocs(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingAllocTestInShortˢ);
+        t.Skip(skippingAllocTestInShortˢ);
     }
     if (race.Enabled) {
-        Ꮡt.Skip(skippingTestUnderRaceˢ);
+        t.Skip(skippingTestUnderRaceˢ);
     }
     if (runtime.GOMAXPROCS(0) > 1) {
-        Ꮡt.Skip(skippingGomaxprocs1ˢ);
+        t.Skip(skippingGomaxprocs1ˢ);
     }
     var n = testing.AllocsPerRun(100, () => {
         buf.Reset();
-        testHeader.WriteSubset(new http_test_package.bytes_BufferжWriter(Ꮡbuf), default!);
+        testHeader.WriteSubset(new http_test_package.bytes_BufferжWriter(Ꮡbuf), default);
     });
     if (n > 0D) {
-        Ꮡt.Errorf("allocs = %g; want 0"u8, n);
+        t.Errorf("allocs = %g; want 0", n);
     }
 }
 
@@ -255,37 +255,37 @@ internal partial struct TestCloneOrMakeHeader_tests /*dyn*/ {
 
 // Issue 34878: test that every call to
 // cloneOrMakeHeader never returns a nil Header.
-public static void TestCloneOrMakeHeader(ж<testing.T> Ꮡt) {
-    var tests = new TestCloneOrMakeHeader_tests[]{
-        new("nil"u8, default!, new ΔHeader(new map<@string, slice<@string>>{})),
-        new("empty"u8, new ΔHeader(new map<@string, slice<@string>>{}), new ΔHeader(new map<@string, slice<@string>>{})),
+public static void TestCloneOrMakeHeader(ж<testing.T> t) {
+    var tests = slice<TestCloneOrMakeHeader_tests>([
+        new("nil", default, new ΔHeader(new map<@string, slice<@string>>{})),
+        new("empty", new ΔHeader(new map<@string, slice<@string>>{}), new ΔHeader(new map<@string, slice<@string>>{})),
         new(
-            name: "non-empty"u8,
-            @in: new ΔHeader(new map<@string, slice<@string>>{["foo"u8] = new @string[]{"bar"u8}.slice()}),
-            want: new ΔHeader(new map<@string, slice<@string>>{["foo"u8] = new @string[]{"bar"u8}.slice()})
+            name: "non-empty",
+            @in: new ΔHeader(new map<@string, slice<@string>>{["foo"] = slice<@string>(["bar"])}),
+            want: new ΔHeader(new map<@string, slice<@string>>{["foo"] = slice<@string>(["bar"])})
         ),
         new(
-            name: "nil value"u8,
-            @in: new ΔHeader(new map<@string, slice<@string>>{["foo"u8] = default!}),
-            want: new ΔHeader(new map<@string, slice<@string>>{["foo"u8] = default!})
+            name: "nil value",
+            @in: new ΔHeader(new map<@string, slice<@string>>{["foo"] = default}),
+            want: new ΔHeader(new map<@string, slice<@string>>{["foo"] = default})
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestCloneOrMakeHeader_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
             var got = cloneOrMakeHeader(ttʗ1.@in);
-            if (got == default!) {
+            if (got == nil) {
                 tΔ1.Fatal(unexpectedNilHeaderˢ);
             }
             if (!reflect.DeepEqual(got, ttʗ1.want)) {
-                tΔ1.Fatalf("Got:  %#v\nWant: %#v"u8, got, ttʗ1.want);
+                tΔ1.Fatalf("Got:  %#v\nWant: %#v", got, ttʗ1.want);
             }
-            got.Add("A"u8, "B"u8);
-            got.Get("A"u8);
+            got.Add("A", "B");
+            got.Get("A");
         });
     }
 }

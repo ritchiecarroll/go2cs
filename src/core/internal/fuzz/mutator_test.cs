@@ -13,7 +13,7 @@ using static global::go.@internal.fuzz_package;
 
 partial class fuzz_internal_test_package {
 
-public static void BenchmarkMutatorBytes(ж<testing.B> Ꮡb) {
+public static void BenchmarkMutatorBytes(ж<testing.B> b) {
     GoFrame ᒐ = default;
     try {
         @string origEnv = os.Getenv(godebugˢ);
@@ -23,24 +23,24 @@ public static void BenchmarkMutatorBytes(ж<testing.B> Ꮡb) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
 
-        foreach (var (_, size) in new nint[]{
+        foreach (var (_, size) in slice<nint>([
             1,
             10,
             100,
             1000,
             10000,
             100000
-        }.slice()) {
+        ])) {
             var mʗ1 = m;
-            Ꮡb.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
+            b.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
                 var buf = new slice<byte>(size);
                 bΔ1.ResetTimer();
 
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
-                    mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(new any[]{buf}.slice(), workerSharedMemSize);
+                    mʗ1.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
+                    mʗ1.mutate(slice<any>([buf]), workerSharedMemSize);
                 }
             });
         }
@@ -49,7 +49,7 @@ public static void BenchmarkMutatorBytes(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
+public static void BenchmarkMutatorString(ж<testing.B> b) {
     GoFrame ᒐ = default;
     try {
         @string origEnv = os.Getenv(godebugˢ);
@@ -59,24 +59,24 @@ public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
 
-        foreach (var (_, size) in new nint[]{
+        foreach (var (_, size) in slice<nint>([
             1,
             10,
             100,
             1000,
             10000,
             100000
-        }.slice()) {
+        ])) {
             var mʗ1 = m;
-            Ꮡb.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
+            b.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
                 var buf = new slice<byte>(size);
                 bΔ1.ResetTimer();
 
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
-                    mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(new any[]{(@string)buf}.slice(), workerSharedMemSize);
+                    mʗ1.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
+                    mʗ1.mutate(slice<any>([(@string)buf]), workerSharedMemSize);
                 }
             });
         }
@@ -85,7 +85,7 @@ public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
+public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> b) {
     GoFrame ᒐ = default;
     try {
         @string origEnv = os.Getenv(godebugˢ);
@@ -95,7 +95,7 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
 
-        var types = new any[]{
+        var types = slice<any>([
             slice<byte>(""u8),
             (@string)""u8,
             false,
@@ -110,15 +110,15 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
             (uint16)0,
             (uint32)0,
             (uint64)0
-        }.slice();
+        ]);
 
         foreach (var (_, t) in types) {
             var mʗ1 = m;
             var tʗ1 = t;
-            Ꮡb.Run(fmt.Sprintf("%T"u8, t), (ж<testing.B> bΔ1) => {
+            b.Run(fmt.Sprintf("%T"u8, t), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
-                    mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(new any[]{tʗ1}.slice(), workerSharedMemSize);
+                    mʗ1.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
+                    mʗ1.mutate(slice<any>([tʗ1]), workerSharedMemSize);
                 }
             });
         }
@@ -127,8 +127,11 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestStringImmutability(ж<testing.T> Ꮡt) {
-    var v = new any[]{(@string)"hello"u8}.slice();
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object helloˢ = (@string)"hello"u8;
+
+public static void TestStringImmutability(ж<testing.T> t) {
+    var v = slice<any>([helloˢ]);
     var m = newMutator();
     m.mutate(v, 1024);
     @string original = v[0]._<@string>();
@@ -138,7 +141,7 @@ public static void TestStringImmutability(ж<testing.T> Ꮡt) {
         m.mutate(v, 1024);
     }
     if (!bytes.Equal(slice<byte>(original), originalCopy)) {
-        Ꮡt.Fatalf("string was mutated: got %x, want %x"u8, slice<byte>(original), originalCopy);
+        t.Fatalf("string was mutated: got %x, want %x", slice<byte>(original), originalCopy);
     }
 }
 

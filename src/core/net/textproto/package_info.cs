@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +54,13 @@ using static go.net.textproto_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Pipeline))]
+[assembly: GoFieldAccess(typeof(Reader))]
+[assembly: GoFieldAccess(typeof(Writer))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,11 +70,11 @@ using static go.net.textproto_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/textproto/header.go", "header.cs", "AAsaooKssgACENKClIKClAACENKClKiS")]
-[assembly: go.GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
-[assembly: go.GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKClKqigoKUAAIQ0oK4goKUgqaAgv6CgoTclIKUpoKCgpSCgpSUqJKCgoKUlIKClJSm0oKClKbSgoKUgoKCgpSChpQAAigAFQKCgpQAAjoAHgKCgoKCgoKCpoKCgoKCgoKUgpSClJQAAiYAEgKCggAHEtgACBCCgoKCgoKUlJSCgpSCgpSmgoKUgoKUpoKCuIKCtoKCpoKCtoKClIKmgpSClIKUqqKClIKmvrKu6LKCgoKCgoKUuIKClJSUtgABKgATAgACEPKCrLKCgoKUpqaAgoKCgpS2goKCuIKClIKClIKCuIKCuJSChrSClIKClMqCgpSmgs6gqrKClKaY1IKCgpSCgoKClJSUlJQAAhYACQSCgoKClIKClIKClJQABxoACAoAFyYABSAADAwACwgAAhwACgKCuIKCgqa4gpSUgqaC6oKSgpSClLiAgqQACBCCggAoUg==")]
-[assembly: go.GoPositionMap("net/textproto/textproto.go", "textproto.cs", "ACtWgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "70=NewReader/1/1/1,NewWriter/1/1/2")]
-[assembly: go.GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goKmgIKklKaigpSCtIKkgqSU")]
+[assembly: GoPositionMap("net/textproto/header.go", "header.cs", "AAsaooKssgACENKClIKClAACENKClKiS")]
+[assembly: GoPositionMap("net/textproto/pipeline.go", "pipeline.cs", "ACFIsoKCgoKqoqqiqqKqogAMINKCgoKUgoKUgoKs0oKCgpSCgoKUgoKUgoI=")]
+[assembly: GoPositionMap("net/textproto/reader.go", "reader.cs", "ABQsAAke0qqigqiSgoKUrLKCgoKCgpSCpoKUgoKmAAIqABICgqqigoKUgoKClKqigoKUAAIQ0oK4goKUgqaAgv6CgoTclIKUpoKCgpSCgpSUqJKCgoKUlIKClJSm0oKClKbSgoKUgoKCgpSChpQAAigAFQKCgpQAAjoAHgKCgoKCgoKCpoKCgoKCgoKUgpSClJQAAiYAEgKCggAHEtgACBCCgoKCgoKUlJSCgpSCgpS2goKUgoKUtoKCuIKCtoKCpoKCtoKClIK2gpSClIKUqqKClIKmvrKu6LKCgoKCgoKUuIKClJSUtgABKgATAgACEPKCrLKCgoKUpqaAgoKCgpS2goKCuIKClIKClIKCuIKCuJSChrSClIKClMqCgpSmgs6gqrKClKaY1IKCgpSCgoKClJSUlJQAAhYACQSCgoKClIKClIKClJQACBoACAoAFyYABiAADAwACwgAAhwACgKCuIKCgqa4gpSUgqaC6oKCgpSClLiAgqQACBCCggAoUg==")]
+[assembly: GoPositionMap("net/textproto/textproto.go", "textproto.cs", "ACtWgu6CAA4gkgAGEJKqooKClAACNgAcAoKCgoKClKiSgpSClKiSgpSClKaCpoKC", "", "", "70=NewReader/1/1/1,NewWriter/1/1/2")]
+[assembly: GoPositionMap("net/textproto/writer.go", "writer.cs", "ABMqkqaSlrKCgoIAAhQACQKCgqaCggANILKCgoKkgpSUpoKUgoK4goKmgIKklKaigpSCtIKkgqSU")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

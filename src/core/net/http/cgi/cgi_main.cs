@@ -19,37 +19,43 @@ using url = go.net.url_package;
 partial class cgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string scriptNameˢ = "SCRIPT_NAME"u8;
-internal static readonly @string pathInfoˢ = "PATH_INFO"u8;
+internal static ref readonly @string scriptNameˢ => ref scriptNameˢᵇ;
+private static readonly @string scriptNameˢᵇ = "SCRIPT_NAME"u8;
+internal static ref readonly @string pathInfoˢ => ref pathInfoˢᵇ;
+private static readonly @string pathInfoˢᵇ = "PATH_INFO"u8;
 
 internal static void cgiMain() {
     var exprᴛ1 = path.Join(os.Getenv(scriptNameˢ), os.Getenv(pathInfoˢ));
-    if (exprᴛ1 == "/bar"u8 || exprᴛ1 == "/test.cgi"u8 || exprᴛ1 == "/myscript/bar"u8 || exprᴛ1 == "/test.cgi/extrapath"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "/bar"u8 || exprᴛ1 == "/test.cgi"u8 || exprᴛ1 == "/myscript/bar"u8 || exprᴛ1 == "/test.cgi/extrapath"u8: {
         testCGI();
         return;
-    }
+    }}
     childCGIProcess();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string locˢ = "loc"u8;
-internal static readonly @string writestderrˢ = "writestderr"u8;
-internal static readonly @string bigresponseˢ = "bigresponse"u8;
+internal static ref readonly @string locˢ => ref locˢᵇ;
+private static readonly @string locˢᵇ = "loc"u8;
+internal static ref readonly @string writestderrˢ => ref writestderrˢᵇ;
+private static readonly @string writestderrˢᵇ = "writestderr"u8;
+internal static ref readonly @string bigresponseˢ => ref bigresponseˢᵇ;
+private static readonly @string bigresponseˢᵇ = "bigresponse"u8;
 
 // testCGI is a CGI program translated from a Perl program to complete host_test.
 // test cases in host_test should be provided by testCGI.
 internal static void testCGI() {
     var (req, err) = Request();
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
     err = req.ParseForm();
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
-    var @params = req.Value.Form;
+    var @params = req.Form;
     if (@params.Get(locˢ) != ""u8) {
         fmt.Printf("Location: %s\r\n\r\n"u8, @params.Get(locˢ));
         return;
@@ -66,7 +72,7 @@ internal static void testCGI() {
 
     if (@params.Get(bigresponseˢ) != ""u8) {
         // 17 MB, for OS X: golang.org/issue/4958
-        @string line = strings.Repeat("A"u8, 1024);
+        @string line = strings.Repeat("A", 1024);
         for (nint i = 0; i < 17 * 1024; i++) {
             fmt.Printf("%s\r\n"u8, line);
         }
@@ -94,18 +100,26 @@ internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) {
     foreach (var i in range(p)) {
         p[i] = (byte)b;
     }
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string requestMethodˢ = "REQUEST_METHOD"u8;
-internal static readonly @string requestUriˢ = "REQUEST_URI"u8;
-internal static readonly @string nilRequestBodyˢ = "nil-request-body"u8;
-internal static readonly @string xTestHeaderˢ = "X-Test-Header"u8;
-internal static readonly @string xTestValueˢ = "X-Test-Value"u8;
-internal static readonly @string noBodyˢ = "no-body"u8;
-internal static readonly @string exactBodyˢ = "exact-body"u8;
-internal static readonly @string writeForeverˢ = "write-forever"u8;
+internal static ref readonly @string requestMethodˢ => ref requestMethodˢᵇ;
+private static readonly @string requestMethodˢᵇ = "REQUEST_METHOD"u8;
+internal static ref readonly @string requestUriˢ => ref requestUriˢᵇ;
+private static readonly @string requestUriˢᵇ = "REQUEST_URI"u8;
+internal static ref readonly @string nilRequestBodyˢ => ref nilRequestBodyˢᵇ;
+private static readonly @string nilRequestBodyˢᵇ = "nil-request-body"u8;
+internal static ref readonly @string xTestHeaderˢ => ref xTestHeaderˢᵇ;
+private static readonly @string xTestHeaderˢᵇ = "X-Test-Header"u8;
+internal static ref readonly @string xTestValueˢ => ref xTestValueˢᵇ;
+private static readonly @string xTestValueˢᵇ = "X-Test-Value"u8;
+internal static ref readonly @string noBodyˢ => ref noBodyˢᵇ;
+private static readonly @string noBodyˢᵇ = "no-body"u8;
+internal static ref readonly @string exactBodyˢ => ref exactBodyˢᵇ;
+private static readonly @string exactBodyˢᵇ = "exact-body"u8;
+internal static ref readonly @string writeForeverˢ => ref writeForeverˢᵇ;
+private static readonly @string writeForeverˢᵇ = "write-forever"u8;
 
 // childCGIProcess is used by integration_test to complete unit tests.
 internal static void childCGIProcess() {
@@ -114,20 +128,24 @@ internal static void childCGIProcess() {
         return;
     }
     var exprᴛ1 = os.Getenv(requestUriˢ);
-    if (exprᴛ1 == "/immediate-disconnect"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "/immediate-disconnect"u8: {
         os.Exit(0);
+        break;
     }
-    else if (exprᴛ1 == "/no-content-type"u8) {
+    case {} when exprᴛ1 == "/no-content-type"u8: {
         fmt.Printf("Content-Length: 6\n\nHello\n"u8);
         os.Exit(0);
+        break;
     }
-    else if (exprᴛ1 == "/empty-headers"u8) {
+    case {} when exprᴛ1 == "/empty-headers"u8: {
         fmt.Printf("\nHello"u8);
         os.Exit(0);
-    }
+        break;
+    }}
     Serve(new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter rw, ж<http.Request> req) => {
         if (req.FormValue(nilRequestBodyˢ) == "1"u8) {
-            fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "nil-request-body=%v\n"u8, (~req).Body == default!);
+            fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "nil-request-body=%v\n"u8, req.Body == nil);
             return;
         }
         rw.Header().Set(xTestHeaderˢ, xTestValueˢ);
@@ -136,19 +154,19 @@ internal static void childCGIProcess() {
             return;
         }
         {
-            var (eb, ok) = (~req).Form[exactBodyˢ, ꟷ]; if (ok) {
+            var (eb, ok) = req.Form[exactBodyˢ, ꟷ]; if (ok) {
                 io.WriteString(new http_ResponseWriterᴠWriter(rw), eb[0]);
                 return;
             }
         }
         if (req.FormValue(writeForeverˢ) == "1"u8) {
             io.Copy(new http_ResponseWriterᴠWriter(rw), (neverEnding)(rune)'a');
-            while (ᐧ) {
+            for (;;) {
                 time.Sleep((time.Duration)(5000000000L)); // hang forever, until killed
             }
         }
         fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "test=Hello CGI-in-CGI\n"u8);
-        foreach (var (k, vv) in (~req).Form) {
+        foreach (var (k, vv) in req.Form) {
             foreach (var (_, v) in vv) {
                 fmt.Fprintf(new http_ResponseWriterᴠWriter(rw), "param-%s=%s\n"u8, k, v);
             }

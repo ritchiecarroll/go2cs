@@ -20,59 +20,59 @@ internal partial struct TestParseV1Number_tests /*dyn*/ {
     internal bool wantErr;
 }
 
-public static void TestParseV1Number(ж<testing.T> Ꮡt) {
-    var tests = new TestParseV1Number_tests[]{
+public static void TestParseV1Number(ж<testing.T> t) {
+    var tests = slice<TestParseV1Number_tests>([
         new(
-            name: "disabled"u8,
-            contents: "-1\n"u8,
+            name: "disabled",
+            contents: "-1\n",
             want: -1
         ),
         new(
-            name: "500000"u8,
-            contents: "500000\n"u8,
+            name: "500000",
+            contents: "500000\n",
             want: 500000
         ),
         new(
-            name: "MaxInt64"u8,
-            contents: "9223372036854775807\n"u8,
+            name: "MaxInt64",
+            contents: "9223372036854775807\n",
             want: 9223372036854775807L
         ),
         new(
-            name: "missing-newline"u8,
-            contents: "500000"u8,
+            name: "missing-newline",
+            contents: "500000",
             wantErr: true
         ),
         new(
-            name: "not-a-number"u8,
-            contents: "123max\n"u8,
+            name: "not-a-number",
+            contents: "123max\n",
             wantErr: true
         ),
         new(
-            name: "v2"u8,
-            contents: "1000 5000\n"u8,
+            name: "v2",
+            contents: "1000 5000\n",
             wantErr: true
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestParseV1Number_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (got, err) = cgroup_internal_test_package.ParseV1Number(slice<byte>(tcʗ1.contents));
             if (tcʗ1.wantErr) {
-                if (err == default!) {
-                    tΔ1.Fatalf("parseV1Number got err nil want non-nil"u8);
+                if (err == nil) {
+                    tΔ1.Fatalf("parseV1Number got err nil want non-nil");
                 }
                 return;
             }
-            if (err != default!) {
-                tΔ1.Fatalf("parseV1Number got err %v want nil"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("parseV1Number got err %v want nil", err);
             }
 
             if (got != tcʗ1.want) {
-                tΔ1.Errorf("parseV1Number got %d want %d"u8, got, tcʗ1.want);
+                tΔ1.Errorf("parseV1Number got %d want %d", got, tcʗ1.want);
             }
         });
     }
@@ -86,82 +86,82 @@ internal partial struct TestParseV2Limit_tests /*dyn*/ {
     internal bool wantErr;
 }
 
-public static void TestParseV2Limit(ж<testing.T> Ꮡt) {
-    var tests = new TestParseV2Limit_tests[]{
+public static void TestParseV2Limit(ж<testing.T> t) {
+    var tests = slice<TestParseV2Limit_tests>([
         new(
-            name: "disabled"u8,
-            contents: "max 100000\n"u8,
+            name: "disabled",
+            contents: "max 100000\n",
             wantOK: false
         ),
         new(
-            name: "5"u8,
-            contents: "500000 100000\n"u8,
+            name: "5",
+            contents: "500000 100000\n",
             want: 5D,
             wantOK: true
         ),
         new(
-            name: "0.5"u8,
-            contents: "50000 100000\n"u8,
+            name: "0.5",
+            contents: "50000 100000\n",
             want: 0.5D,
             wantOK: true
         ),
         new(
-            name: "2.5"u8,
-            contents: "250000 100000\n"u8,
+            name: "2.5",
+            contents: "250000 100000\n",
             want: 2.5D,
             wantOK: true
         ),
         new(
-            name: "MaxInt64"u8,
-            contents: "9223372036854775807 9223372036854775807\n"u8,
+            name: "MaxInt64",
+            contents: "9223372036854775807 9223372036854775807\n",
             want: 1D,
             wantOK: true
         ),
         new(
-            name: "missing-newline"u8,
-            contents: "500000 100000"u8,
+            name: "missing-newline",
+            contents: "500000 100000",
             wantErr: true
         ),
         new(
-            name: "v1"u8,
-            contents: "500000\n"u8,
+            name: "v1",
+            contents: "500000\n",
             wantErr: true
         ),
         new(
-            name: "quota-not-a-number"u8,
-            contents: "500000us 100000\n"u8,
+            name: "quota-not-a-number",
+            contents: "500000us 100000\n",
             wantErr: true
         ),
         new(
-            name: "period-not-a-number"u8,
-            contents: "500000 100000us\n"u8,
+            name: "period-not-a-number",
+            contents: "500000 100000us\n",
             wantErr: true
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestParseV2Limit_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (got, gotOK, err) = cgroup_internal_test_package.ParseV2Limit(slice<byte>(tcʗ1.contents));
             if (tcʗ1.wantErr) {
-                if (err == default!) {
-                    tΔ1.Fatalf("parseV1Limit got err nil want non-nil"u8);
+                if (err == nil) {
+                    tΔ1.Fatalf("parseV1Limit got err nil want non-nil");
                 }
                 return;
             }
-            if (err != default!) {
-                tΔ1.Fatalf("parseV2Limit got err %v want nil"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("parseV2Limit got err %v want nil", err);
             }
 
             if (gotOK != tcʗ1.wantOK) {
-                tΔ1.Errorf("parseV2Limit got ok %v want %v"u8, gotOK, tcʗ1.wantOK);
+                tΔ1.Errorf("parseV2Limit got ok %v want %v", gotOK, tcʗ1.wantOK);
             }
 
             if (tcʗ1.wantOK && got != tcʗ1.want) {
-                tΔ1.Errorf("parseV2Limit got %f want %f"u8, got, tcʗ1.want);
+                tΔ1.Errorf("parseV2Limit got %f want %f", got, tcʗ1.want);
             }
         });
     }
@@ -172,7 +172,7 @@ internal static Func<nint, slice<byte>, (nint, uintptr)> readString(@string cont
     var rʗ1 = r;
     return (nint fd, slice<byte> b) => {
         var (n, err) = rʗ1.Read(b);
-        if (err != default! && !AreEqual(err, io.EOF)) {
+        if (err != nil && !AreEqual(err, io.EOF)) {
             uintptr dummyErrno = 42;
             return (n, dummyErrno);
         }
@@ -188,93 +188,93 @@ internal partial struct TestParseCPUCgroup_tests /*dyn*/ {
     internal bool wantErr;
 }
 
-public static void TestParseCPUCgroup(ж<testing.T> Ꮡt) {
-    @string veryLongPathName = strings.Repeat("a"u8, cgroup.PathSize + 10);
-    @string evenLongerPathName = strings.Repeat("a"u8, cgroup.ParseSize + 10);
+public static void TestParseCPUCgroup(ж<testing.T> t) {
+    @string veryLongPathName = strings.Repeat("a", cgroup.PathSize + 10);
+    @string evenLongerPathName = strings.Repeat("a", cgroup.ParseSize + 10);
 
-    var tests = new TestParseCPUCgroup_tests[]{
+    var tests = slice<TestParseCPUCgroup_tests>([
         new(
-            name: "empty"u8,
-            contents: ""u8,
+            name: "empty",
+            contents: "",
             wantErr: true
         ),
         new(
-            name: "too-long"u8,
+            name: "too-long",
             contents: "0::/"u8 + veryLongPathName + "\n"u8,
             wantErr: true
         ),
         new(
-            name: "too-long-line"u8,
+            name: "too-long-line",
             contents: "0::/"u8 + evenLongerPathName + "\n"u8,
             wantErr: true
         ),
         new(
-            name: "v1"u8,
+            name: "v1",
             contents: """
 2:cpu,cpuacct:/a/b/cpu
 1:blkio:/a/b/blkio
 
 """u8.Raw(),
-            want: "/a/b/cpu"u8,
+            want: "/a/b/cpu",
             wantVer: cgroup.V1
         ),
         new(
-            name: "v2"u8,
-            contents: "0::/a/b/c\n"u8,
-            want: "/a/b/c"u8,
+            name: "v2",
+            contents: "0::/a/b/c\n",
+            want: "/a/b/c",
             wantVer: cgroup.V2
         ),
         new(
-            name: "mixed"u8,
+            name: "mixed",
             contents: """
 2:cpu,cpuacct:/a/b/cpu
 1:blkio:/a/b/blkio
 0::/a/b/v2
 
 """u8.Raw(),
-            want: "/a/b/cpu"u8,
+            want: "/a/b/cpu",
             wantVer: cgroup.V1
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestParseCPUCgroup_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             array<byte> got = new(4096); /* cgroup.PathSize */
             array<byte> scratch = new(65536); /* cgroup.ParseSize */
             var (n, gotVer, err) = cgroup_internal_test_package.ParseCPUCgroup(0, readString(tcʗ1.contents), got[..], scratch[..]);
-            if ((err != default!) != tcʗ1.wantErr) {
-                tΔ1.Fatalf("parseCPURelativePath got err %v want %v"u8, err, tcʗ1.wantErr);
+            if ((err != nil) != tcʗ1.wantErr) {
+                tΔ1.Fatalf("parseCPURelativePath got err %v want %v", err, tcʗ1.wantErr);
             }
 
             if (gotVer != tcʗ1.wantVer) {
-                tΔ1.Errorf("parseCPURelativePath got cgroup version %d want %d"u8, gotVer, tcʗ1.wantVer);
+                tΔ1.Errorf("parseCPURelativePath got cgroup version %d want %d", gotVer, tcʗ1.wantVer);
             }
 
             if (((sstring)(got.slice(0, n))) != tcʗ1.want) {
-                tΔ1.Errorf("parseCPURelativePath got %q want %q"u8, (@string)(got.slice(0, n)), tcʗ1.want);
+                tΔ1.Errorf("parseCPURelativePath got %q want %q", (@string)(got.slice(0, n)), tcʗ1.want);
             }
         });
     }
 }
 
-public static void TestParseCPUCgroupMalformed(ж<testing.T> Ꮡt) {
-    foreach (var (_, contents) in new @string[]{
-        "\n"u8,
-        "0\n"u8,
-        "0:\n"u8,
-        "0::\n"u8,
-        "0::a\n"u8
-    }.slice()) {
-        Ꮡt.Run(""u8, (ж<testing.T> tΔ1) => {
+public static void TestParseCPUCgroupMalformed(ж<testing.T> t) {
+    foreach (var (_, contents) in slice<@string>([
+        "\n",
+        "0\n",
+        "0:\n",
+        "0::\n",
+        "0::a\n"
+    ])) {
+        t.Run(""u8, (ж<testing.T> tΔ1) => {
             array<byte> got = new(4096); /* cgroup.PathSize */
             array<byte> scratch = new(65536); /* cgroup.ParseSize */
             var (n, v, err) = cgroup_internal_test_package.ParseCPUCgroup(0, readString(contents), got[..], scratch[..]);
             if (!AreEqual(err, cgroup_internal_test_package.ErrMalformedFile)) {
-                tΔ1.Errorf("ParseCPUCgroup got %q (v%d), %v, want ErrMalformedFile"u8, (@string)(got.slice(0, n)), v, err);
+                tΔ1.Errorf("ParseCPUCgroup got %q (v%d), %v, want ErrMalformedFile", (@string)(got.slice(0, n)), v, err);
             }
         });
     }
@@ -285,54 +285,55 @@ internal partial struct TestContainsCPU_tests /*dyn*/ {
     internal bool want;
 }
 
-public static void TestContainsCPU(ж<testing.T> Ꮡt) {
-    var tests = new TestContainsCPU_tests[]{
+public static void TestContainsCPU(ж<testing.T> t) {
+    var tests = slice<TestContainsCPU_tests>([
         new(
-            @in: ""u8,
+            @in: "",
             want: false
         ),
         new(
-            @in: ","u8,
+            @in: ",",
             want: false
         ),
         new(
-            @in: "cpu"u8,
+            @in: "cpu",
             want: true
         ),
         new(
-            @in: "memory,cpu"u8,
+            @in: "memory,cpu",
             want: true
         ),
         new(
-            @in: "cpu,memory"u8,
+            @in: "cpu,memory",
             want: true
         ),
         new(
-            @in: "memory,cpu,block"u8,
+            @in: "memory,cpu,block",
             want: true
         ),
         new(
-            @in: "memory,cpuacct,block"u8,
+            @in: "memory,cpuacct,block",
             want: false
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestContainsCPU_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.@in, (ж<testing.T> tΔ1) => {
+        t.Run(tc.@in, (ж<testing.T> tΔ1) => {
             var got = cgroup_internal_test_package.ContainsCPU(slice<byte>(tcʗ1.@in));
             if (got != tcʗ1.want) {
-                tΔ1.Errorf("containsCPU(%q) got %v want %v"u8, tcʗ1.@in, got, tcʗ1.want);
+                tΔ1.Errorf("containsCPU(%q) got %v want %v", tcʗ1.@in, got, tcʗ1.want);
             }
         });
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string lowerPathᶜ = "/so/many/overlay/layers"u8;
+internal static ref readonly @string lowerPathᶜ => ref lowerPathᶜᵇ;
+private static readonly @string lowerPathᶜᵇ = "/so/many/overlay/layers"u8;
 
 internal partial struct TestParseCPUMount_tests /*dyn*/ {
     internal @string name;
@@ -343,7 +344,7 @@ internal partial struct TestParseCPUMount_tests /*dyn*/ {
     internal bool wantErr;
 }
 
-public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
+public static void TestParseCPUMount(ж<testing.T> t) {
     // Used for v2-longline. We want an overlayfs mount to have an option
     // so long that the entire line can't possibly fit in the scratch
     // buffer.
@@ -360,31 +361,31 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
     @string escapedLongPath = escapePath((@string)(longPath[..]));
     if (len(escapedLongPath) <= cgroup.PathSize) {
         // ensure we actually support over PathSize long escaped path
-        Ꮡt.Fatalf("escapedLongPath is too short to test"u8);
+        t.Fatalf("escapedLongPath is too short to test");
     }
 
-    var tests = new TestParseCPUMount_tests[]{
+    var tests = slice<TestParseCPUMount_tests>([
         new(
-            name: "empty"u8,
-            contents: ""u8,
+            name: "empty",
+            contents: "",
             wantErr: true
         ),
         new(
-            name: "invalid-root"u8,
-            contents: "56 22 0:40 /\\1 /sys/fs/cgroup/cpu rw - cgroup cgroup rw,cpu,cpuacct\n"u8,
-            cgroup: "/"u8,
+            name: "invalid-root",
+            contents: "56 22 0:40 /\\1 /sys/fs/cgroup/cpu rw - cgroup cgroup rw,cpu,cpuacct\n",
+            cgroup: "/",
             version: cgroup.V1,
             wantErr: true
         ),
         new(
-            name: "invalid-mount"u8,
-            contents: "56 22 0:40 / /sys/fs/cgroup/\\1 rw - cgroup cgroup rw,cpu,cpuacct\n"u8,
-            cgroup: "/"u8,
+            name: "invalid-mount",
+            contents: "56 22 0:40 / /sys/fs/cgroup/\\1 rw - cgroup cgroup rw,cpu,cpuacct\n",
+            cgroup: "/",
             version: cgroup.V1,
             wantErr: true
         ),
         new(
-            name: "v1"u8,
+            name: "v1",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -396,12 +397,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 59 22 0:43 / /sys/fs/cgroup/cpuset rw - cgroup cgroup rw,cpuset
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V1,
-            want: "/sys/fs/cgroup/cpu"u8
+            want: "/sys/fs/cgroup/cpu"
         ),
         new(
-            name: "v2"u8,
+            name: "v2",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -409,12 +410,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 25 21 0:22 / /sys/fs/cgroup rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup"u8
+            want: "/sys/fs/cgroup"
         ),
         new(
-            name: "mixed"u8,
+            name: "mixed",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -427,12 +428,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 59 22 0:43 / /sys/fs/cgroup/cpuset rw - cgroup cgroup rw,cpuset
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V1,
-            want: "/sys/fs/cgroup/cpu"u8
+            want: "/sys/fs/cgroup/cpu"
         ),
         new(
-            name: "mixed-choose-v2"u8,
+            name: "mixed-choose-v2",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -445,12 +446,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 59 22 0:43 / /sys/fs/cgroup/cpuset rw - cgroup cgroup rw,cpuset
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup"u8
+            want: "/sys/fs/cgroup"
         ),
         new(
-            name: "v2-escaped"u8,
+            name: "v2-escaped",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -458,13 +459,13 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 25 21 0:22 / /sys/fs/cgroup/tab\011tab rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V2,
-            want: @"/sys/fs/cgroup/tab	tab"u8
+            want: @"/sys/fs/cgroup/tab	tab"
         ),
         new(
             // Overly long line on a different mount doesn't matter.
-            name: "v2-longline"u8,
+            name: "v2-longline",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -475,12 +476,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 25 21 0:22 / /sys/fs/cgroup rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup"u8
+            want: "/sys/fs/cgroup"
         ),
         new(
-            name: "long-escaped-path"u8,
+            name: "long-escaped-path",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -490,12 +491,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
  rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/"u8,
+            cgroup: "/",
             version: cgroup.V2,
             want: "/sys/"u8 + ((sstring)(longPath[..]))
         ),
         new(
-            name: "too-long-escaped-path"u8,
+            name: "too-long-escaped-path",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -505,12 +506,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
  rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/container"u8, // compared to above, this makes the path too long
+            cgroup: "/container", // compared to above, this makes the path too long
             version: cgroup.V2,
             wantErr: true
         ),
         new(
-            name: "non-root_mount"u8,
+            name: "non-root_mount",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -522,12 +523,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 25 21 0:22 / /ignored/second/match rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/sandbox/container"u8,
+            cgroup: "/sandbox/container",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup/container"u8
+            want: "/sys/fs/cgroup/container"
         ),
         new(
-            name: "v2-escaped-root"u8,
+            name: "v2-escaped-root",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -535,12 +536,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 25 21 0:22 /tab\011tab /sys/fs/cgroup rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/tab	tab/container"u8,
+            cgroup: "/tab	tab/container",
             version: cgroup.V2,
-            want: @"/sys/fs/cgroup/container"u8
+            want: @"/sys/fs/cgroup/container"
         ),
         new(
-            name: "non-root_cgroup"u8,
+            name: "non-root_cgroup",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -548,12 +549,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 25 21 0:22 / /sys/fs/cgroup rw,nosuid,nodev,noexec - cgroup2 cgroup2 rw
 
 """u8.Raw(),
-            cgroup: "/sandbox/container"u8,
+            cgroup: "/sandbox/container",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup/sandbox/container"u8
+            want: "/sys/fs/cgroup/sandbox/container"
         ),
         new(
-            name: "mixed_non-root"u8,
+            name: "mixed_non-root",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -570,9 +571,9 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 59 22 0:43 /sandbox /sys/fs/cgroup/cpuset rw - cgroup cgroup rw,cpuset
 
 """u8.Raw(),
-            cgroup: "/sandbox/container"u8,
+            cgroup: "/sandbox/container",
             version: cgroup.V1,
-            want: "/sys/fs/cgroup/cpu/container"u8
+            want: "/sys/fs/cgroup/cpu/container"
         ),
         new(
             // to see an example of this, for a PID in a cgroup namespace, run:
@@ -580,7 +581,7 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
             // nsenter -t <PID> -C -- grep cgroup /proc/self/mountinfo
             // /mnt can be generated with `mount --bind /sys/fs/cgroup/kubepods.slice /mnt`,
             // assuming PID is in cgroup /kubepods.slice
-            name: "out_of_namespace"u8,
+            name: "out_of_namespace",
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -588,12 +589,12 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 1243 61 0:26 /../../.. /mnt rw,nosuid,nodev,noexec,relatime shared:4 - cgroup2 cgroup2 rw
 29 22 0:26 /../../../.. /sys/fs/cgroup rw,nosuid,nodev,noexec,relatime shared:4 - cgroup2 cgroup2 rw
 """u8.Raw(),
-            cgroup: "/../../../../init.scope"u8,
+            cgroup: "/../../../../init.scope",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup/init.scope"u8
+            want: "/sys/fs/cgroup/init.scope"
         ),
         new(
-            name: "out_of_namespace-root"u8, // the process is directly in the root cgroup
+            name: "out_of_namespace-root", // the process is directly in the root cgroup
             contents: """
 22 1 8:1 / / rw,relatime - ext4 /dev/root rw
 20 22 0:19 / /proc rw,nosuid,nodev,noexec - proc proc rw
@@ -601,54 +602,54 @@ public static void TestParseCPUMount(ж<testing.T> Ꮡt) {
 1243 61 0:26 /../../.. /mnt rw,nosuid,nodev,noexec,relatime shared:4 - cgroup2 cgroup2 rw
 29 22 0:26 /../../../.. /sys/fs/cgroup rw,nosuid,nodev,noexec,relatime shared:4 - cgroup2 cgroup2 rw
 """u8.Raw(),
-            cgroup: "/../../../.."u8,
+            cgroup: "/../../../..",
             version: cgroup.V2,
-            want: "/sys/fs/cgroup"u8
+            want: "/sys/fs/cgroup"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestParseCPUMount_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             array<byte> got = new(4096); /* cgroup.PathSize */
             array<byte> scratch = new(65536); /* cgroup.ParseSize */
             nint n = copy(got[..], tcʗ1.cgroup);
             (n, var err) = cgroup_internal_test_package.ParseCPUMount(0, readString(tcʗ1.contents), got[..],
                 got.slice(0, n), tcʗ1.version, scratch[..]);
-            if ((err != default!) != tcʗ1.wantErr) {
-                tΔ1.Fatalf("parseCPUMount got err %v want %v"u8, err, tcʗ1.wantErr);
+            if ((err != nil) != tcʗ1.wantErr) {
+                tΔ1.Fatalf("parseCPUMount got err %v want %v", err, tcʗ1.wantErr);
             }
 
             if (((sstring)(got.slice(0, n))) != tcʗ1.want) {
-                tΔ1.Errorf("parseCPUMount got %q want %q"u8, (@string)(got.slice(0, n)), tcʗ1.want);
+                tΔ1.Errorf("parseCPUMount got %q want %q", (@string)(got.slice(0, n)), tcʗ1.want);
             }
         });
     }
 }
 
-public static void TestParseCPUMountMalformed(ж<testing.T> Ꮡt) {
-    foreach (var (_, contents) in new @string[]{
-        "\n"u8,
-        "22\n"u8,
-        "22 1 8:1\n"u8,
-        "22 1 8:1 /\n"u8,
-        "22 1 8:1 / /cgroup\n"u8,
-        "22 1 8:1 / /cgroup rw\n"u8,
-        "22 1 8:1 / /cgroup rw -\n"u8,
-        "22 1 8:1 / /cgroup rw - \n"u8,
-        "22 1 8:1 / /cgroup rw - cgroup\n"u8,
-        "22 1 8:1 / /cgroup rw - cgroup cgroup\n"u8,
-        "22 1 8:1 a /cgroup rw - cgroup cgroup cpu\n"u8
-    }.slice()) {
-        Ꮡt.Run(""u8, (ж<testing.T> tΔ1) => {
+public static void TestParseCPUMountMalformed(ж<testing.T> t) {
+    foreach (var (_, contents) in slice<@string>([
+        "\n",
+        "22\n",
+        "22 1 8:1\n",
+        "22 1 8:1 /\n",
+        "22 1 8:1 / /cgroup\n",
+        "22 1 8:1 / /cgroup rw\n",
+        "22 1 8:1 / /cgroup rw -\n",
+        "22 1 8:1 / /cgroup rw - \n",
+        "22 1 8:1 / /cgroup rw - cgroup\n",
+        "22 1 8:1 / /cgroup rw - cgroup cgroup\n",
+        "22 1 8:1 a /cgroup rw - cgroup cgroup cpu\n"
+    ])) {
+        t.Run(""u8, (ж<testing.T> tΔ1) => {
             array<byte> got = new(4096); /* cgroup.PathSize */
             array<byte> scratch = new(65536); /* cgroup.ParseSize */
             var (n, err) = cgroup_internal_test_package.ParseCPUMount(0, readString(contents), got[..], slice<byte>("/"u8), cgroup.V1, scratch[..]);
             if (!AreEqual(err, cgroup_internal_test_package.ErrMalformedFile)) {
-                tΔ1.Errorf("parseCPUMount got %q, %v, want ErrMalformedFile"u8, (@string)(got.slice(0, n)), err);
+                tΔ1.Errorf("parseCPUMount got %q, %v, want ErrMalformedFile", (@string)(got.slice(0, n)), err);
             }
         });
     }
@@ -664,7 +665,7 @@ internal static @string escapePath(@string s) {
     var @out = new slice<byte>(0, len(s));
     foreach (var (_, c) in slice<byte>(s)) {
         switch (c) {
-        case (rune)'\\' or (rune)' ' or (rune)'\t' or (rune)'\n': {
+        case (byte)'\\' or (byte)' ' or (byte)'\t' or (byte)'\n': {
             @out = fmt.Appendf(@out, "\\%03o"u8, c);
             break;
         }
@@ -677,8 +678,10 @@ internal static @string escapePath(@string s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string escapePathˢ = "escapePath"u8;
-internal static readonly @string unescapePathˢ = "unescapePath"u8;
+internal static ref readonly @string escapePathˢ => ref escapePathˢᵇ;
+private static readonly @string escapePathˢᵇ = "escapePath"u8;
+internal static ref readonly @string unescapePathˢ => ref unescapePathˢᵇ;
+private static readonly @string unescapePathˢᵇ = "unescapePath"u8;
 
 internal partial struct TestEscapePath_tests /*dyn*/ {
     internal @string name;
@@ -686,55 +689,55 @@ internal partial struct TestEscapePath_tests /*dyn*/ {
     internal @string escaped;
 }
 
-public static void TestEscapePath(ж<testing.T> Ꮡt) {
-    var tests = new TestEscapePath_tests[]{
+public static void TestEscapePath(ж<testing.T> t) {
+    var tests = slice<TestEscapePath_tests>([
         new(
-            name: "boring"u8,
-            unescaped: @"/a/b/c"u8,
-            escaped: @"/a/b/c"u8
+            name: "boring",
+            unescaped: @"/a/b/c",
+            escaped: @"/a/b/c"
         ),
         new(
-            name: "space"u8,
-            unescaped: @"/a/b b/c"u8,
-            escaped: @"/a/b\040b/c"u8
+            name: "space",
+            unescaped: @"/a/b b/c",
+            escaped: @"/a/b\040b/c"
         ),
         new(
-            name: "tab"u8,
-            unescaped: @"/a/b	b/c"u8,
-            escaped: @"/a/b\011b/c"u8
+            name: "tab",
+            unescaped: @"/a/b	b/c",
+            escaped: @"/a/b\011b/c"
         ),
         new(
-            name: "newline"u8,
+            name: "newline",
             unescaped: """
 /a/b
 b/c
 """u8.Raw(),
-            escaped: @"/a/b\012b/c"u8
+            escaped: @"/a/b\012b/c"
         ),
         new(
-            name: "slash"u8,
-            unescaped: @"/a/b\b/c"u8,
-            escaped: @"/a/b\134b/c"u8
+            name: "slash",
+            unescaped: @"/a/b\b/c",
+            escaped: @"/a/b\134b/c"
         ),
         new(
-            name: "beginning"u8,
-            unescaped: @"\b/c"u8,
-            escaped: @"\134b/c"u8
+            name: "beginning",
+            unescaped: @"\b/c",
+            escaped: @"\134b/c"
         ),
         new(
-            name: "ending"u8,
-            unescaped: @"/a/\"u8,
-            escaped: @"/a/\134"u8
+            name: "ending",
+            unescaped: @"/a/\",
+            escaped: @"/a/\134"
         ),
         new(
-            name: "non-utf8"u8,
+            name: "non-utf8",
             unescaped: ((@string)(new byte[]{0x2f, 0x61, 0x2f, 0x62, 0xff, 0x20, 0x2f, 0x63})),
             escaped: ((@string)(new byte[]{0x2f, 0x61, 0x2f, 0x62, 0xff, 0x5c, 0x30, 0x34, 0x30, 0x2f, 0x63}))
         )
-    }.slice();
+    ]);
 
     var testsʗ1 = tests;
-    Ꮡt.Run(escapePathˢ, (ж<testing.T> tΔ1) => {
+    t.Run(escapePathˢ, (ж<testing.T> tΔ1) => {
         foreach (var (_, vᴛ1) in testsʗ1) {
             ref var tc = ref heap(new TestEscapePath_tests(), out var Ꮡtc);
             tc = vᴛ1;
@@ -743,14 +746,14 @@ b/c
             tΔ1.Run(tc.name, (ж<testing.T> tΔ2) => {
                 @string got = escapePath(tcʗ1.unescaped);
                 if (got != tcʗ1.escaped) {
-                    tΔ2.Errorf("escapePath got %q want %q"u8, got, tcʗ1.escaped);
+                    tΔ2.Errorf("escapePath got %q want %q", got, tcʗ1.escaped);
                 }
             });
         }
     });
 
     var testsʗ2 = tests;
-    Ꮡt.Run(unescapePathˢ, (ж<testing.T> tΔ3) => {
+    t.Run(unescapePathˢ, (ж<testing.T> tΔ3) => {
         foreach (var (_, vᴛ2) in testsʗ2) {
             ref var tc = ref heap(new TestEscapePath_tests(), out var Ꮡtc);
             tc = vᴛ2;
@@ -758,12 +761,12 @@ b/c
             var tcʗ2 = tc;
             void runTest(slice<byte> @in, slice<byte> @out) {
                 var (n, err) = cgroup_internal_test_package.UnescapePath(@out, @in);
-                if (err != default!) {
-                    tΔ3.Errorf("unescapePath got err %v want nil"u8, err);
+                if (err != nil) {
+                    tΔ3.Errorf("unescapePath got err %v want nil", err);
                 }
                 @string got = (@string)(@out.slice(0, n));
                 if (got != tcʗ2.unescaped) {
-                    tΔ3.Errorf("unescapePath got %q want %q"u8, got, tcʗ2.escaped);
+                    tΔ3.Errorf("unescapePath got %q want %q", got, tcʗ2.escaped);
                 }
             }
             var runTestʗ1 = runTest;
@@ -783,22 +786,22 @@ b/c
     });
 }
 
-public static void TestUnescapeInvalidPath(ж<testing.T> Ꮡt) {
-    foreach (var (_, @in) in new @string[]{
-        @"/a/b\c"u8,
-        @"/a/b\01"u8,
-        @"/a/b\018"u8,
-        @"/a/b\01c"u8,
-        @"/a/b\777"u8,
-        @"01234567890123456789"u8, // too long
-        @"\001\002\003\004\005\006\007\010\011"u8 // too long
-    }.slice()) {
+public static void TestUnescapeInvalidPath(ж<testing.T> t) {
+    foreach (var (_, @in) in slice<@string>([
+        @"/a/b\c",
+        @"/a/b\01",
+        @"/a/b\018",
+        @"/a/b\01c",
+        @"/a/b\777",
+        @"01234567890123456789",                // too long
+        @"\001\002\003\004\005\006\007\010\011" // too long
+    ])) {
         var @out = new slice<byte>(8);
         var outʗ1 = @out;
-        Ꮡt.Run(@in, (ж<testing.T> tΔ1) => {
+        t.Run(@in, (ж<testing.T> tΔ1) => {
             var (_, err) = cgroup_internal_test_package.UnescapePath(outʗ1, slice<byte>(@in));
-            if (err == default!) {
-                tΔ1.Errorf("unescapePath got nil err, want non-nil"u8);
+            if (err == nil) {
+                tΔ1.Errorf("unescapePath got nil err, want non-nil");
             }
         });
     }

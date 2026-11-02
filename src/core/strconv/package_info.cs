@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +46,7 @@ using static go.strconv_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,10 +56,10 @@ using static go.strconv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
-[assembly: go.GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
-[assembly: go.GoPositionMap("strconv/number.go", "number.cs", "ABImsoKClKiSqqIABS4AFAKCgpQABTwAGwKCgpTcsoKClAAFOAAbAoKClNiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmgAACFPKmgqaCpoI=")]
-[assembly: go.GoPositionMap("strconv/quote.go", "quote.cs", "AA4mkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgqSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSApIKkgqTIgoKUgpSUtLS0tLS0tIKUtLSkgoKClIKCgoKUlIKUgpSCgpSCtIKCgpSCgoKClJSCgoKUtLSCgpS0gpSCqqKCAAIS4oKClK4ACQSClIKCgpSUlJS02IKCgqb+toKClLSCpIKCgpS6koKCgpSmgoKUpoKClMqCyoKUlIKUpLzSgpKCgoKUpgACGAAKBIKUlJSUAAgSgoKCgpSCpoKCgpSClIKCrLKClKzEgpSC")]
+[assembly: GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
+[assembly: GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
+[assembly: GoPositionMap("strconv/number.go", "number.cs", "ABMmsoKClKiSqqIABi4AFAKCgpQABjwAGwKCgpTssoKClAAGOAAbAoKClOiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmgAACFPKmgqaCpoI=")]
+[assembly: GoPositionMap("strconv/quote.go", "quote.cs", "ABAmkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgpSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSApIKkgqTIgoKUgpSUtLS0tLS0tIKUtLSkgoKClIKCgoKUlIKUgpSCgpSCtIKCgpSCgoKClJSCgoKUtLSCgpS0gpSCqqKCAAIS4oKClK4ACQSClIKCgpSUlJS02IKCgqb+toKClLSCpIKCgpS6koKCgpSmgoKUpoKClMqCyoKUlIKUpLzSgpKCgoKUpgACGAAKBIKUlJSUAAgSgoKCgpSCpoKCgpSClIKCrLKClKzEgpSC")]
 // </GoSourcePositionMaps>
 
 namespace go;

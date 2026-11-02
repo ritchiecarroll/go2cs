@@ -9,7 +9,7 @@ partial class fiat_package {
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡx) {
+public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 15 multiplications and 383 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.
@@ -39,10 +39,10 @@ public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> 
     ж<P384Element> t2 = @new<P384Element>();
     ж<P384Element> t3 = @new<P384Element>();
 
-    z.Square(Ꮡx);
-    z.Mul(Ꮡx, z);
+    z.Square(x);
+    z.Mul(x, z);
     z.Square(z);
-    t1.Mul(Ꮡx, z);
+    t1.Mul(x, z);
     z.Square(t1);
     for (nint s = 1; s < 3; s++) {
         z.Square(z);
@@ -63,9 +63,9 @@ public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> 
     }
     z.Mul(z, t0);
     t0.Square(z);
-    t2.Mul(Ꮡx, t0);
+    t2.Mul(x, t0);
     t0.Square(t2);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     t3.Square(t0);
     for (nint s = 1; s < 31; s++) {
         t3.Square(t3);
@@ -96,7 +96,7 @@ public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> 
     for (nint s = 0; s < 2; s++) {
         z.Square(z);
     }
-    z.Mul(Ꮡx, z);
+    z.Mul(x, z);
 
     return Ꮡe.Set(z);
 }

@@ -7,16 +7,10 @@
 global using static global::go.crypto.ecdh_package;
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,7 +38,12 @@ using static global::go.crypto.ecdh_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(countingReader))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,7 +53,7 @@ using static global::go.crypto.ecdh_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACc65uqCgoKClIKCpoKClIKUgqaCgpSClIKmgoKUgoKmggAJFIKCgqaCgoKCggAHEICSAAoKACJUgoKCgoKUgpSCgpSCgpSCAAgMgoKClKaCgoKCAAgKgoKCgpSgkqDmgoKClIKClIKClIK4ADVsgoKCgoKSgpKC3AAzaIKCgoKCkoKSggALDIKAkoCSgJKAtoKCgoKUuIKClIKClJSCgoKUgoKClIKClMqCgJKAkoCSgOySgqYAJTCygqaCgoKCppKCgoKClKaCgIK6ooKCgoKUgqaCAAsIggAGFIKCgqaygpSigoKUgoKC", "38-82:1;97-112:1;158-179:1;191-196:1;205-205:1;206-206:2;282-293:1;349-360:1;364-364:1;365-365:2;366-366:3;367-367:4;371-406:1;410-410:1;411-411:2;412-412:3;413-413:4;460-468:1;514-524:1", "", "140=P256/1/1/6,P384/1/1/14,P521/1/1/25,X25519/1/1/34;194=hexDecode/1/1/1,Sum256/2/2/1;263=P256/1/1/1,Repeat/1/4/7,P384/1/1/15,Repeat/2/4/21,P521/1/1/29,Repeat/3/4/35,X25519/1/1/44,Repeat/4/4/50;334=P256/1/1/1,Repeat/1/3/5,P384/1/1/17,Repeat/2/3/21,P521/1/1/33,Repeat/3/3/37,X25519/1/1/49;585=P256/1/1/4,P384/1/1/5,P521/1/1/6,X25519/1/1/7")]
+[assembly: GoPositionMap("crypto/ecdh/ecdh_test.go", "ecdh_test.cs", "ACc65uqCgoKClIKCpoKClIKUgqaCgpSClIKmgoKUgoKmggAJFIKCgqaCgoKCggAHEICSAAoKACJUgoKCgoKUgpSCgpSCgpSCAAgMgoKClKaCgoKCAAoKgoKCgpSgkqDmgoKClIKClIKClIK4ADZsgoKCgoKCgoKC3AAzaIKCgoKCgoKCggAPDIKAkoCSgJKAtoKCgoKUuIKClIKClJSCgoKUgoKClIKClMqCgJKAkoCSgOySgqYAMDCygqaCgoKCppKCgoKClKaCgIK6ooKCgoKUgqaCAAwIggAGFIKCgqaygpSigoKUgoKC", "38-82:1;97-112:1;158-179:1;191-196:1;205-205:1;206-206:2;282-293:1;349-360:1;364-364:1;365-365:2;366-366:3;367-367:4;371-406:1;410-410:1;411-411:2;412-412:3;413-413:4;460-468:1;514-524:1", "", "140=P256/1/1/6,P384/1/1/14,P521/1/1/25,X25519/1/1/34;194=hexDecode/1/1/1,Sum256/2/2/1;265=P256/1/1/1,Repeat/1/4/7,P384/1/1/15,Repeat/2/4/21,P521/1/1/29,Repeat/3/4/35,X25519/1/1/44,Repeat/4/4/50;335=P256/1/1/1,Repeat/1/3/5,P384/1/1/17,Repeat/2/3/21,P521/1/1/33,Repeat/3/3/37,X25519/1/1/49;600=P256/1/1/4,P384/1/1/5,P521/1/1/6,X25519/1/1/7")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

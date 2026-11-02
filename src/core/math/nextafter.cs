@@ -13,7 +13,7 @@ partial class math_package {
 //	Nextafter32(NaN, y) = NaN
 //	Nextafter32(x, NaN) = NaN
 public static float32 /*r*/ Nextafter32(float32 x, float32 y) {
-    float32 r = default!;
+    float32 r = default;
 
     switch (ᐧ) {
     case {} when IsNaN((float64)x) || IsNaN((float64)y): { // special case
@@ -47,7 +47,7 @@ public static float32 /*r*/ Nextafter32(float32 x, float32 y) {
 //	Nextafter(NaN, y) = NaN
 //	Nextafter(x, NaN) = NaN
 public static float64 /*r*/ Nextafter(float64 x, float64 y) {
-    float64 r = default!;
+    float64 r = default;
 
     switch (ᐧ) {
     case {} when IsNaN(x) || IsNaN(y): { // special case

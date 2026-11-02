@@ -18,38 +18,39 @@ internal partial struct TestTypeFor_testcases /*dyn*/ {
     internal reflectꓸType got;
 }
 
-public static void TestTypeFor(ж<Δtesting.T> Ꮡt) {
-    var testcases = new TestTypeFor_testcases[]{
+public static void TestTypeFor(ж<Δtesting.T> t) {
+    var testcases = slice<TestTypeFor_testcases>([
         new(@new<nint>(), Δreflect.TypeFor<nint>()),
         new(@new<int64>(), Δreflect.TypeFor<int64>()),
         new(@new<@string>(), Δreflect.TypeFor<@string>()),
         new(@new<TestTypeFor_mystring>(), Δreflect.TypeFor<TestTypeFor_mystring>()),
         new(@new<any>(), Δreflect.TypeFor<any>()),
         new(@new<TestTypeFor_myiface>(), Δreflect.TypeFor<TestTypeFor_myiface>())
-    }.slice();
+    ]);
     foreach (var (_, tc) in testcases) {
         var want = Δreflect.ValueOf(tc.wantFrom).Elem().Type();
         if (!AreEqual(want, tc.got)) {
-            Ꮡt.Errorf("unexpected reflect.Type: got %v; want %v"u8, tc.got, want);
+            t.Errorf("unexpected reflect.Type: got %v; want %v", tc.got, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string structOfDoesNotSupportˢ = "StructOf does not support methods of embedded interfaces"u8;
+internal static ref readonly @string structOfDoesNotSupportˢ => ref structOfDoesNotSupportˢᵇ;
+private static readonly @string structOfDoesNotSupportˢᵇ = "StructOf does not support methods of embedded interfaces"u8;
 
 internal partial interface TestStructOfEmbeddedIfaceMethodCall_Named /*dyn*/ {
     @string Name();
 }
 
-public static void TestStructOfEmbeddedIfaceMethodCall(ж<Δtesting.T> Ꮡt) {
-    var typ = Δreflect.StructOf(new Δreflect.StructField[]{
+public static void TestStructOfEmbeddedIfaceMethodCall(ж<Δtesting.T> t) {
+    var typ = Δreflect.StructOf(slice<Δreflect.StructField>([
         new(
             Anonymous: true,
-            Name: "Named"u8,
+            Name: "Named",
             Type: Δreflect.TypeFor<TestStructOfEmbeddedIfaceMethodCall_Named>()
         )
-    }.slice());
+    ]));
 
     var v = Δreflect.New(typ).Elem();
     v.Field(0).Set(
@@ -107,23 +108,23 @@ internal partial struct TestIsRegularMemory_iᴛ5 /*dyn*/ {
 public static void TestIsRegularMemory(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    var tests = new TestIsRegularMemory_tests[]{
-        new("struct{i int}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestCanIntUintFloatComplex_typeᴛ1())), true),
-        new("struct{}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new EmptyStruct())), true),
-        new("struct{i int; s S}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_i())
+    var tests = slice<TestIsRegularMemory_tests>([
+        new("struct{i int}", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestCanIntUintFloatComplex_typeᴛ1())), true),
+        new("struct{}", new TestIsRegularMemory_args(Δreflect.TypeOf(new EmptyStruct())), true),
+        new("struct{i int; s S}", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_i())
         ), true),
-        new("map[int][int]"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new map<nint, nint>{})), false),
-        new("[4]chan int"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new channel<nint>[]{}.array(4))), true),
-        new("[0]struct{_ S}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ1[]{}.array())
+        new("map[int][int]", new TestIsRegularMemory_args(Δreflect.TypeOf(new map<nint, nint>{})), false),
+        new("[4]chan int", new TestIsRegularMemory_args(Δreflect.TypeOf(new channel<nint>[]{}.array(4))), true),
+        new("[0]struct{_ S}", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ1[]{}.array())
         ), true),
-        new("struct{i int; _ S}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ2())
+        new("struct{i int; _ S}", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ2())
         ), false),
-        new("struct{a int16; b int32}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ3())
+        new("struct{a int16; b int32}", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ3())
         ), false),
-        new("struct {x int32; y int16}"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ4())
+        new("struct {x int32; y int16}", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ4())
         ), false),
-        new("struct {_ int32 }"u8, new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ5())), false)
-    }.slice();
+        new("struct {_ int32 }", new TestIsRegularMemory_args(Δreflect.TypeOf(new TestIsRegularMemory_iᴛ5())), false)
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestIsRegularMemory_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -132,7 +133,7 @@ public static void TestIsRegularMemory(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
             {
                 var got = reflect_internal_test_package.IsRegularMemory(ttʗ1.args.t); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("isRegularMemory() = %v, want %v"u8, got, ttʗ1.want);
+                    tΔ1.Errorf("isRegularMemory() = %v, want %v", got, ttʗ1.want);
                 }
             }
         });
@@ -158,7 +159,8 @@ public static void BenchmarkTypeForError(ж<Δtesting.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nonSeqˢ = "NonSeq"u8;
+internal static ref readonly @string nonSeqˢ => ref nonSeqˢᵇ;
+private static readonly @string nonSeqˢᵇ = "NonSeq"u8;
 
 internal partial struct TestType_CanSeq_tests /*dyn*/ {
     internal @string name;
@@ -166,31 +168,31 @@ internal partial struct TestType_CanSeq_tests /*dyn*/ {
     internal bool want;
 }
 
-public static void TestType_CanSeq(ж<Δtesting.T> Ꮡt) {
-    var tests = new TestType_CanSeq_tests[]{
-        new("func(func(int) bool)"u8, Δreflect.TypeOf((Func<nint, bool> _) => {
+public static void TestType_CanSeq(ж<Δtesting.T> t) {
+    var tests = slice<TestType_CanSeq_tests>([
+        new("func(func(int) bool)", Δreflect.TypeOf((Func<nint, bool> _) => {
         }), true),
-        new("func(func(int))"u8, Δreflect.TypeOf((Action<nint> _) => {
+        new("func(func(int))", Δreflect.TypeOf((Action<nint> _) => {
         }), false),
-        new("methodIter.Seq"u8, Δreflect.ValueOf(new methodIter(nil)).MethodByName(seqˢ).Type(), true),
-        new("methodIter.NonSeq"u8, Δreflect.ValueOf(new methodIter(nil)).MethodByName(nonSeqˢ).Type(), false),
-        new("int64"u8, Δreflect.TypeOf((int64)1), true),
-        new("uint64"u8, Δreflect.TypeOf((uint64)1), true),
-        new("*[4]int"u8, Δreflect.TypeOf(Ꮡ(new nint[]{}.array(4))), true),
-        new("chan int64"u8, Δreflect.TypeOf(new channel<int64>(0)), true),
-        new("map[int]int"u8, Δreflect.TypeOf(new map<nint, nint>()), true),
-        new("string"u8, Δreflect.TypeOf((@string)""u8), true),
-        new("[]int"u8, Δreflect.TypeOf(new nint[]{}.slice()), true)
-    }.slice();
+        new("methodIter.Seq", Δreflect.ValueOf(new methodIter()).MethodByName(seqˢ).Type(), true),
+        new("methodIter.NonSeq", Δreflect.ValueOf(new methodIter()).MethodByName(nonSeqˢ).Type(), false),
+        new("int64", Δreflect.TypeOf((int64)1), true),
+        new("uint64", Δreflect.TypeOf((uint64)1), true),
+        new("*[4]int", Δreflect.TypeOf(Ꮡ(new nint[]{}.array(4))), true),
+        new("chan int64", Δreflect.TypeOf(new channel<int64>(0)), true),
+        new("map[int]int", Δreflect.TypeOf(new map<nint, nint>()), true),
+        new("string", Δreflect.TypeOf((@string)""u8), true),
+        new("[]int", Δreflect.TypeOf(slice<nint>([])), true)
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestType_CanSeq_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
+        t.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
             {
                 var got = ttʗ1.tr.CanSeq(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("Type.CanSeq() = %v, want %v"u8, got, ttʗ1.want);
+                    tΔ1.Errorf("Type.CanSeq() = %v, want %v", got, ttʗ1.want);
                 }
             }
         });
@@ -198,7 +200,8 @@ public static void TestType_CanSeq(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nonSeq2ˢ = "NonSeq2"u8;
+internal static ref readonly @string nonSeq2ˢ => ref nonSeq2ˢᵇ;
+private static readonly @string nonSeq2ˢᵇ = "NonSeq2"u8;
 
 internal partial struct TestType_CanSeq2_tests /*dyn*/ {
     internal @string name;
@@ -206,31 +209,31 @@ internal partial struct TestType_CanSeq2_tests /*dyn*/ {
     internal bool want;
 }
 
-public static void TestType_CanSeq2(ж<Δtesting.T> Ꮡt) {
-    var tests = new TestType_CanSeq2_tests[]{
-        new("func(func(int, int) bool)"u8, Δreflect.TypeOf((Func<nint, nint, bool> _) => {
+public static void TestType_CanSeq2(ж<Δtesting.T> t) {
+    var tests = slice<TestType_CanSeq2_tests>([
+        new("func(func(int, int) bool)", Δreflect.TypeOf((Func<nint, nint, bool> _) => {
         }), true),
-        new("func(func(int, int))"u8, Δreflect.TypeOf((Action<nint, nint> _) => {
+        new("func(func(int, int))", Δreflect.TypeOf((Action<nint, nint> _) => {
         }), false),
-        new("methodIter2.Seq2"u8, Δreflect.ValueOf(new methodIter2(nil)).MethodByName(seq2ˢ).Type(), true),
-        new("methodIter2.NonSeq2"u8, Δreflect.ValueOf(new methodIter2(nil)).MethodByName(nonSeq2ˢ).Type(), false),
-        new("int64"u8, Δreflect.TypeOf((int64)1), false),
-        new("uint64"u8, Δreflect.TypeOf((uint64)1), false),
-        new("*[4]int"u8, Δreflect.TypeOf(Ꮡ(new nint[]{}.array(4))), true),
-        new("chan int64"u8, Δreflect.TypeOf(new channel<int64>(0)), false),
-        new("map[int]int"u8, Δreflect.TypeOf(new map<nint, nint>()), true),
-        new("string"u8, Δreflect.TypeOf((@string)""u8), true),
-        new("[]int"u8, Δreflect.TypeOf(new nint[]{}.slice()), true)
-    }.slice();
+        new("methodIter2.Seq2", Δreflect.ValueOf(new methodIter2()).MethodByName(seq2ˢ).Type(), true),
+        new("methodIter2.NonSeq2", Δreflect.ValueOf(new methodIter2()).MethodByName(nonSeq2ˢ).Type(), false),
+        new("int64", Δreflect.TypeOf((int64)1), false),
+        new("uint64", Δreflect.TypeOf((uint64)1), false),
+        new("*[4]int", Δreflect.TypeOf(Ꮡ(new nint[]{}.array(4))), true),
+        new("chan int64", Δreflect.TypeOf(new channel<int64>(0)), false),
+        new("map[int]int", Δreflect.TypeOf(new map<nint, nint>()), true),
+        new("string", Δreflect.TypeOf((@string)""u8), true),
+        new("[]int", Δreflect.TypeOf(slice<nint>([])), true)
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestType_CanSeq2_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
+        t.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
             {
                 var got = ttʗ1.tr.CanSeq2(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("Type.CanSeq2() = %v, want %v"u8, got, ttʗ1.want);
+                    tΔ1.Errorf("Type.CanSeq2() = %v, want %v", got, ttʗ1.want);
                 }
             }
         });

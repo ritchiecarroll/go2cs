@@ -23,9 +23,9 @@ internal static uint128 umul128(uint64 x, uint64 y) {
 
 // umul192 returns the 192-bit product x*y in three uint64s.
 internal static (uint64 hi, uint64 mid, uint64 lo) umul192(uint64 x, uint128 y) {
-    uint64 hi = default!;
-    uint64 mid = default!;
-    uint64 lo = default!;
+    uint64 hi = default;
+    uint64 mid = default;
+    uint64 lo = default;
 
     (var mid1, lo) = bits.Mul64(x, y.Lo);
     (hi, var mid2) = bits.Mul64(x, y.Hi);
@@ -37,9 +37,9 @@ internal static (uint64 hi, uint64 mid, uint64 lo) umul192(uint64 x, uint128 y) 
 // That is, 10^e = mant/2^128 * 2**exp.
 // If e is out of range, pow10 returns ok=false.
 internal static (uint128 mant, nint exp, bool ok) pow10(nint e) {
-    uint128 mant = default!;
-    nint exp = default!;
-    bool ok = default!;
+    uint128 mant = default;
+    nint exp = default;
+    bool ok = default;
 
     if (e < pow10Min || e > pow10Max) {
         return (mant, exp, ok);

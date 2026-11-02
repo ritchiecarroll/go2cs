@@ -18,12 +18,12 @@ partial class bytes_package {
 public static iter.Seq<slice<byte>> Lines(slice<byte> s) {
     return (Func<slice<byte>, bool> yield) => {
         while (len(s) > 0) {
-            slice<byte> line = default!;
+            slice<byte> line = default;
             {
-                nint i = IndexByte(s, (rune)'\n'); if (i >= 0){
+                nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
                     (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
                 } else {
-                    (line, s) = (s, default!);
+                    (line, s) = (s, default);
                 }
             }
             if (!yield(line.slice(0, len(line), len(line)))) {
@@ -48,7 +48,7 @@ internal static iter.Seq<slice<byte>> splitSeq(slice<byte> s, slice<byte> sep, n
             }
             return;
         }
-        while (ᐧ) {
+        for (;;) {
             nint i = Index(s, sepʗ1);
             if (i < 0) {
                 break;
@@ -95,15 +95,14 @@ public static iter.Seq<slice<byte>> FieldsSeq(slice<byte> s) {
                 (r, size) = utf8.DecodeRune(sʗ1.slice(i));
                 isSpace = Δunicode.IsSpace(r);
             }
-            if (isSpace){
+            if (isSpace) {
                 if (start >= 0) {
                     if (!yield(sʗ1.slice(start, i, i))) {
                         return;
                     }
                     start = -1;
                 }
-            } else 
-            if (start < 0) {
+            } else if (start < 0) {
                 start = i;
             }
             i += size;
@@ -124,15 +123,14 @@ public static iter.Seq<slice<byte>> FieldsFuncSeq(slice<byte> s, Func<rune, bool
         nint start = -1;
         for (nint i = 0; i < len(sʗ1); ) {
             var (r, size) = utf8.DecodeRune(sʗ1.slice(i));
-            if (f(r)){
+            if (f(r)) {
                 if (start >= 0) {
                     if (!yield(sʗ1.slice(start, i, i))) {
                         return;
                     }
                     start = -1;
                 }
-            } else 
-            if (start < 0) {
+            } else if (start < 0) {
                 start = i;
             }
             i += size;

@@ -27,7 +27,8 @@ internal static error destroy(this ref SysFile s, nint fd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dupˢ = "dup"u8;
+internal static ref readonly @string dupˢ => ref dupˢᵇ;
+private static readonly @string dupˢᵇ = "dup"u8;
 
 // dupCloseOnExecOld is the traditional way to dup an fd and
 // set its O_CLOEXEC bit, using two system calls.
@@ -37,13 +38,13 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
         Δsyscall.ᏑForkLock.RLock();
         defer(Δsyscall.ᏑForkLock.RUnlock, ref ᒐ);
         var (newfd, err) = Δsyscall.Dup(fd);
-        if (err != default!) {
+        if (err != nil) {
             return (-1, dupˢ, err);
         }
         Δsyscall.CloseOnExec(newfd);
-        return (newfd, "", default!);
+        return (newfd, "", default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -55,14 +56,14 @@ public static error Fchdir(this ж<FD> Ꮡfd) {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
         return Δsyscall.Fchdir(fd.Sysfd);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
@@ -76,18 +77,18 @@ public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return (0, err);
             }
         }
         ᒐd1 = true;
-        while (ᐧ) {
+        for (;;) {
             var (n, err) = ignoringEINTRIO(Δsyscall.ReadDirent, fd.Sysfd, buf);
-            if (err != default!) {
+            if (err != nil) {
                 n = 0;
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
                     {
-                        err = fd.pd.waitRead(fd.isFile); if (err == default!) {
+                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
                             continue;
                         }
                     }
@@ -97,7 +98,7 @@ public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
             return (n, err);
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
@@ -109,14 +110,14 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return (0, err);
             }
         }
         ᒐd1 = true;
         return Δsyscall.Seek(fd.Sysfd, offset, whence);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 

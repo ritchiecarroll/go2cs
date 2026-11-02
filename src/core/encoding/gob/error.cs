@@ -41,7 +41,7 @@ internal static void catchError(ref error err) {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
         {
-            var e = recover(calledByDefer); if (e != default!) {
+            var e = recover(calledByDefer); if (e != nil) {
                 var (ge, ok) = e._<gobError>(ᐧ);
                 if (!ok) {
                     throw panic(e);

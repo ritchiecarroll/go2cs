@@ -49,7 +49,7 @@ using static go.crypto.@internal.fips140.tls13_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,8 +59,8 @@ using static go.crypto.@internal.fips140.tls13_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "ABAegoK43IKCgoKCgIKk", "16-36:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAARKKLcgqqiAAoQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACAyCgoKCpqI=", "76-76:1", "", "84=extract/1/1/1;110=extract/1/1/1;135=extract/1/1/1;167=deriveSecret/1/1/1;176=deriveSecret/1/1/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls13/cast.go", "cast.cs", "ABAegoK43IKCgoKCgIKk", "16-36:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls13/tls13.go", "tls13.cs", "ABAoAAkCAAgSlIKCgoKCgoKmooKUpqKClAAaKKLcgqqiAAsQgoIABRCiqqIABxCCggAFEKKqoqqiAAcUogAFEKIACQyCgoKCpqI=", "76-76:1", "", "93=extract/1/1/1;120=extract/1/1/1;145=extract/1/1/1;177=deriveSecret/1/1/1;186=deriveSecret/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

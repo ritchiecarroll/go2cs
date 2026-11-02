@@ -15,7 +15,7 @@ partial struct tagOptions /*@string*/;
 // parseTag splits a struct field's json tag into its name and
 // comma-separated options.
 internal static (@string, tagOptions) parseTag(@string tag) {
-    (tag, var opt, _) = strings.Cut(tag, ","u8);
+    (tag, var opt, _) = strings.Cut(tag, ",");
     return (tag, (tagOptions)opt);
 }
 
@@ -28,8 +28,8 @@ internal static bool Contains(this tagOptions o, @string optionName) {
     }
     @string s = (@string)o;
     while (s != ""u8) {
-        @string name = default!;
-        (name, s, _) = strings.Cut(s, ","u8);
+        @string name = default;
+        (name, s, _) = strings.Cut(s, ",");
         if (name == optionName) {
             return true;
         }

@@ -11,10 +11,10 @@ partial class os_package {
 
 // isNoFollowErr reports whether err may result from O_NOFOLLOW blocking an open operation.
 internal static bool isNoFollowErr(error err) {
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, syscall.ELOOP) || AreEqual(exprᴛ1, syscall.EMLINK)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, syscall.ELOOP) || AreEqual(ᴛ, syscall.EMLINK): {
         return true;
-    }
+    }}
     if (runtime.GOOS == "dragonfly"u8) {
         // Dragonfly appears to return EINVAL from openat in this case.
         if (AreEqual(err, syscall.EINVAL)) {

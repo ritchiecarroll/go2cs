@@ -50,17 +50,21 @@ partial struct largePointer /*[524289]ж<smallPointer>*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object triggersSegvWithGodebugˢ = (@string)"triggers SEGV with GODEBUG=clobberfree=1"u8;
-internal static readonly @string allocˢ = "Alloc"u8;
-internal static readonly @string structˢ = "struct{}"u8;
-internal static readonly @string structˢ2 = "[]struct{}"u8;
-internal static readonly @string intCap0ˢ = "[]int (cap 0)"u8;
+internal static ref readonly @string allocˢ => ref allocˢᵇ;
+private static readonly @string allocˢᵇ = "Alloc"u8;
+internal static ref readonly @string structˢ => ref structˢᵇ;
+private static readonly @string structˢᵇ = "struct{}"u8;
+internal static ref readonly @string structˢ2 => ref structˢ2ᵇ;
+private static readonly @string structˢ2ᵇ = "[]struct{}"u8;
+internal static ref readonly @string intCap0ˢ => ref intCap0ˢᵇ;
+private static readonly @string intCap0ˢᵇ = "[]int (cap 0)"u8;
 
-public static void TestUserArena(ж<testing.T> Ꮡt) {
+public static void TestUserArena(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (runtime_internal_test_package.Clobberfree()) {
             // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
-            Ꮡt.Skip(triggersSegvWithGodebugˢ);
+            t.Skip(triggersSegvWithGodebugˢ);
         }
 
         // Set GOMAXPROCS to 2 so we don't run too many of these
@@ -68,7 +72,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
         defer(GOMAXPROCS, GOMAXPROCS(2), ref ᒐ);
 
         // Start a subtest so that we can clean up after any parallel tests within.
-        Ꮡt.Run(allocˢ, (ж<testing.T> tΔ1) => {
+        t.Run(allocˢ, (ж<testing.T> tΔ1) => {
             var ss = Ꮡ(new smallScalar(5));
             runSubTestUserArenaNew(tΔ1, ss, true);
 
@@ -143,7 +147,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
                 arena.New(Ꮡx);
                 {
                     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(x._<ж<EmptyStruct>>()); if (v != runtime_internal_test_package.ZeroBase) {
-                        tΔ2.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x"u8, @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
+                        tΔ2.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x", @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
                     }
                 }
                 arena.Free();
@@ -154,7 +158,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
                 arena.Slice(Ꮡsl, 10);
                 {
                     @unsafe.Pointer v = @unsafe.Pointer.FromPinnedBox(Ꮡ(sl, 0)); if (v != runtime_internal_test_package.ZeroBase) {
-                        tΔ3.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x"u8, @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
+                        tΔ3.Errorf("expected zero-sized type to be allocated as zerobase: got %x, want %x", @unsafe.Pointer.OrTypedNil(v), @unsafe.Pointer.OrTypedNil(runtime_internal_test_package.ZeroBase));
                     }
                 }
                 arena.Free();
@@ -164,7 +168,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
                 ref var sl = ref heap<slice<nint>>(out var Ꮡsl);
                 arena.Slice(Ꮡsl, 0);
                 if (len(sl) != 0) {
-                    tΔ4.Errorf("expected requested zero-sized slice to still have zero length: got %x, want 0"u8, len(sl));
+                    tΔ4.Errorf("expected requested zero-sized slice to still have zero length: got %x, want 0", len(sl));
                 }
                 arena.Free();
             });
@@ -175,7 +179,7 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
 
         {
             nint n = runtime_internal_test_package.GlobalWaitingArenaChunks(); if (n != 0) {
-                Ꮡt.Errorf("expected zero waiting arena chunks, found %d"u8, n);
+                t.Errorf("expected zero waiting arena chunks, found %d", n);
             }
         }
     }
@@ -183,8 +187,8 @@ public static void TestUserArena(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalue, bool parallel) {
-    Ꮡt.Run(reflect.TypeOf(Ꮡvalue.OrTypedNil()).Elem().Name(), (ж<testing.T> tΔ1) => {
+internal static void runSubTestUserArenaNew<S>(ж<testing.T> t, ж<S> value, bool parallel) {
+    t.Run(reflect.TypeOf(value.OrTypedNil()).Elem().Name(), (ж<testing.T> tΔ1) => {
         var arenaValuesᴷ = new stackAppend<ж<S>>();
         if (parallel) {
             tΔ1.Parallel();
@@ -194,7 +198,7 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
         //
         // This is an underestimate, likely leaving some space in the arena. That's a good thing,
         // because it gives us coverage of boundary cases.
-        nint n = (nint)(runtime_internal_test_package.UserArenaChunkBytes / @unsafe.Sizeof(Ꮡvalue.ValueSlot));
+        nint n = (nint)(runtime_internal_test_package.UserArenaChunkBytes / @unsafe.Sizeof(value.ValueSlot));
         if (n == 0) {
             n = 1;
         }
@@ -208,13 +212,13 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
             x = (ж<S>)nil;
             arena.New(Ꮡx);
             var s = x._<ж<S>>();
-            s.ValueSlot = Ꮡvalue.ValueSlot;
+            s.ValueSlot = value.ValueSlot;
             arenaValues = append(arenaValuesᴷ, arenaValues, s);
         }
         // Check integrity of allocated data.
         foreach (var (_, s) in arenaValues) {
-            if (!AreEqual(s.ValueSlot, Ꮡvalue.ValueSlot)) {
-                tΔ1.Errorf("failed integrity check: got %#v, want %#v"u8, (s.ValueSlot).OrTypedNilOf(), (Ꮡvalue.ValueSlot).OrTypedNilOf());
+            if (!AreEqual(s.ValueSlot, value.ValueSlot)) {
+                tΔ1.Errorf("failed integrity check: got %#v, want %#v", (s.ValueSlot).OrTypedNilOf(), (value.ValueSlot).OrTypedNilOf());
             }
         }
 
@@ -223,9 +227,9 @@ internal static void runSubTestUserArenaNew<S>(ж<testing.T> Ꮡt, ж<S> Ꮡvalu
     });
 }
 
-internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> value, bool parallel) {
+internal static void runSubTestUserArenaSlice<S>(ж<testing.T> t, slice<S> value, bool parallel) {
     var valueʗ1 = value;
-    Ꮡt.Run("[]"u8 + reflect.TypeOf(value).Elem().Name(), (ж<testing.T> tΔ1) => {
+    t.Run("[]"u8 + reflect.TypeOf(value).Elem().Name(), (ж<testing.T> tΔ1) => {
         var arenaValuesᴷ = new stackAppend<slice<S>>();
         if (parallel) {
             tΔ1.Parallel();
@@ -256,7 +260,7 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> va
                 var got = sl[i];
                 var want = valueʗ1[i];
                 if (!AreEqual(got, want)) {
-                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d"u8, (got).OrTypedNilOf(), (want).OrTypedNilOf(), i);
+                    tΔ1.Errorf("failed integrity check: got %#v, want %#v at index %d", (got).OrTypedNilOf(), (want).OrTypedNilOf(), i);
                 }
             }
         }
@@ -267,19 +271,21 @@ internal static void runSubTestUserArenaSlice<S>(ж<testing.T> Ꮡt, slice<S> va
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string freeˢ = "Free"u8;
-internal static readonly @string finalizerˢ = "Finalizer"u8;
+internal static ref readonly @string freeˢ => ref freeˢᵇ;
+private static readonly @string freeˢᵇ = "Free"u8;
+internal static ref readonly @string finalizerˢ => ref finalizerˢᵇ;
+private static readonly @string finalizerˢᵇ = "Finalizer"u8;
 
-public static void TestUserArenaLiveness(ж<testing.T> Ꮡt) {
+public static void TestUserArenaLiveness(ж<testing.T> t) {
     if (runtime_internal_test_package.Clobberfree()) {
         // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
-        Ꮡt.Skip(triggersSegvWithGodebugˢ);
+        t.Skip(triggersSegvWithGodebugˢ);
     }
 
-    Ꮡt.Run(freeˢ, (ж<testing.T> tΔ1) => {
+    t.Run(freeˢ, (ж<testing.T> tΔ1) => {
         testUserArenaLiveness(tΔ1, false);
     });
-    Ꮡt.Run(finalizerˢ, (ж<testing.T> tΔ2) => {
+    t.Run(finalizerˢ, (ж<testing.T> tΔ2) => {
         testUserArenaLiveness(tΔ2, true);
     });
 }
@@ -289,7 +295,7 @@ internal static readonly object finalizedArenaReferencedˢ = (@string)"finalized
 internal static readonly object finalizerQueueWasNeverˢ = (@string)"finalizer queue was never emptied"u8;
 internal static readonly object expectedArenaReferencedˢ = (@string)"expected arena-referenced object to be finalized"u8;
 
-internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFinalizer) {
+internal static void testUserArenaLiveness(ж<testing.T> t, bool useArenaFinalizer) {
     GoFrame ᒐ = default;
     try {
         // Disable the GC so that there's zero chance we try doing anything arena related *during*
@@ -317,10 +323,10 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
 
         ref var safeToFinalize = ref heap(new atomic.Bool(), out var ᏑsafeToFinalize);
         ref var finalized = ref heap(new atomic.Bool(), out var Ꮡfinalized);
-        v.Value.C = @new<smallPointer>();
-        SetFinalizer((~v).C.OrTypedNil(), (ж<smallPointer> _) => {
+        v.C = @new<smallPointer>();
+        SetFinalizer(v.C.OrTypedNil(), (ж<smallPointer> _) => {
             if (!ᏑsafeToFinalize.Load()) {
-                Ꮡt.Error(finalizedArenaReferencedˢ);
+                t.Error(finalizedArenaReferencedˢ);
             }
             Ꮡfinalized.Store(true);
         });
@@ -342,11 +348,11 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
         GC();
         GC();
 
-        v = default!;
+        v = default;
 
         ᏑsafeToFinalize.Store(true);
-        if (useArenaFinalizer){
-            arena = default!;
+        if (useArenaFinalizer) {
+            arena = default;
 
             // Try to queue the arena finalizer.
             GC();
@@ -355,7 +361,7 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
             // In order for the finalizer we actually want to run to execute,
             // we need to make sure this one runs first.
             if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.ΔSecond))) {
-                Ꮡt.Fatal(finalizerQueueWasNeverˢ);
+                t.Fatal(finalizerQueueWasNeverˢ);
             }
         } else {
             // Free the arena explicitly.
@@ -367,10 +373,10 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
         GC();
 
         if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.ΔSecond))) {
-            Ꮡt.Fatal(finalizerQueueWasNeverˢ);
+            t.Fatal(finalizerQueueWasNeverˢ);
         }
         if (!Ꮡfinalized.Load()) {
-            Ꮡt.Error(expectedArenaReferencedˢ);
+            t.Error(expectedArenaReferencedˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -380,10 +386,10 @@ internal static void testUserArenaLiveness(ж<testing.T> Ꮡt, bool useArenaFina
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object heapAllocationKeptAliveˢ = (@string)"heap allocation kept alive through non-pointer reference"u8;
 
-public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
+public static void TestUserArenaClearsPointerBits(ж<testing.T> t) {
     if (runtime_internal_test_package.Clobberfree()) {
         // This test crashes with SEGV in clobberfree in mgcsweep.go with GODEBUG=clobberfree=1.
-        Ꮡt.Skip(triggersSegvWithGodebugˢ);
+        t.Skip(triggersSegvWithGodebugˢ);
     }
 
     // This is a regression test for a serious issue wherein if pointer bits
@@ -430,10 +436,10 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
     GC();
 
     if (!runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(2 * time.ΔSecond))) {
-        Ꮡt.Fatal(finalizerQueueWasNeverˢ);
+        t.Fatal(finalizerQueueWasNeverˢ);
     }
     if (!Ꮡfinalized.Load()) {
-        Ꮡt.Fatal(heapAllocationKeptAliveˢ);
+        t.Fatal(heapAllocationKeptAliveˢ);
     }
 
     // Clean up the arena.
@@ -443,11 +449,12 @@ public static void TestUserArenaClearsPointerBits(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string abcdefghijˢ = "abcdefghij"u8;
+internal static ref readonly @string abcdefghijˢ => ref abcdefghijˢᵇ;
+private static readonly @string abcdefghijˢᵇ = "abcdefghij"u8;
 internal static readonly object cloneDidNotMakeACopyˢ = (@string)"Clone did not make a copy"u8;
 internal static readonly object cloneShouldNotHaveMadeAˢ = (@string)"Clone should not have made a copy"u8;
 
-public static void TestUserArenaCloneString(ж<testing.T> Ꮡt) {
+public static void TestUserArenaCloneString(ж<testing.T> t) {
     var a = runtime_internal_test_package.NewUserArena();
 
     // A static string (not on heap or arena)
@@ -466,21 +473,21 @@ public static void TestUserArenaCloneString(ж<testing.T> Ꮡt) {
     // Clone should make a copy of as, since it is in the arena.
     @string asCopy = runtime_internal_test_package.UserArenaClone(@as);
     if (@unsafe.StringData(@as) == @unsafe.StringData(asCopy)) {
-        Ꮡt.Error(cloneDidNotMakeACopyˢ);
+        t.Error(cloneDidNotMakeACopyˢ);
     }
 
     // Clone should make a copy of subAs, since subAs is just part of as and so is in the arena.
     @string subAs = @as[1..3];
     @string subAsCopy = runtime_internal_test_package.UserArenaClone(subAs);
     if (@unsafe.StringData(subAs) == @unsafe.StringData(subAsCopy)) {
-        Ꮡt.Error(cloneDidNotMakeACopyˢ);
+        t.Error(cloneDidNotMakeACopyˢ);
     }
-    if (len(subAs) != len(subAsCopy)){
-        Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(subAs), len(subAsCopy));
+    if (len(subAs) != len(subAsCopy)) {
+        t.Errorf("Clone made an incorrect copy (bad length): %d -> %d", len(subAs), len(subAsCopy));
     } else {
         foreach (var (i, _) in subAs) {
             if (subAs[i] != subAsCopy[i]) {
-                Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, subAs[i], subAs[i]);
+                t.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d", i, subAs[i], subAs[i]);
             }
         }
     }
@@ -489,26 +496,26 @@ public static void TestUserArenaCloneString(ж<testing.T> Ꮡt) {
     @string doubleAs = @as + @as;
     @string doubleAsCopy = runtime_internal_test_package.UserArenaClone(doubleAs);
     if (@unsafe.StringData(doubleAs) != @unsafe.StringData(doubleAsCopy)) {
-        Ꮡt.Error(cloneShouldNotHaveMadeAˢ);
+        t.Error(cloneShouldNotHaveMadeAˢ);
     }
 
     // Clone should not make a copy of s, since s is a static string.
     @string sCopy = runtime_internal_test_package.UserArenaClone(s);
     if (@unsafe.StringData(s) != @unsafe.StringData(sCopy)) {
-        Ꮡt.Error(cloneShouldNotHaveMadeAˢ);
+        t.Error(cloneShouldNotHaveMadeAˢ);
     }
 
     a.Free();
 }
 
-public static void TestUserArenaClonePointer(ж<testing.T> Ꮡt) {
+public static void TestUserArenaClonePointer(ж<testing.T> t) {
     var a = runtime_internal_test_package.NewUserArena();
 
     // Clone should not make a copy of a heap-allocated smallScalar.
     var x = runtime_internal_test_package.Escape(@new<smallScalar>());
     var xCopy = runtime_internal_test_package.UserArenaClone(x);
     if (@unsafe.Pointer.FromPinnedBox(x) != @unsafe.Pointer.FromPinnedBox(xCopy)) {
-        Ꮡt.Errorf("Clone should not have made a copy: %#v -> %#v"u8, x.OrTypedNil(), xCopy.OrTypedNil());
+        t.Errorf("Clone should not have made a copy: %#v -> %#v", x.OrTypedNil(), xCopy.OrTypedNil());
     }
 
     // Clone should make a copy of an arena-allocated smallScalar.
@@ -518,19 +525,20 @@ public static void TestUserArenaClonePointer(ж<testing.T> Ꮡt) {
     var xArena = i._<ж<smallScalar>>();
     var xArenaCopy = runtime_internal_test_package.UserArenaClone(xArena);
     if (@unsafe.Pointer.FromPinnedBox(xArena) == @unsafe.Pointer.FromPinnedBox(xArenaCopy)) {
-        Ꮡt.Errorf("Clone should have made a copy: %#v -> %#v"u8, xArena.OrTypedNil(), xArenaCopy.OrTypedNil());
+        t.Errorf("Clone should have made a copy: %#v -> %#v", xArena.OrTypedNil(), xArenaCopy.OrTypedNil());
     }
     if (xArena.Value != xArenaCopy.Value) {
-        Ꮡt.Errorf("Clone made an incorrect copy copy: %#v -> %#v"u8, xArena.Value, xArenaCopy.Value);
+        t.Errorf("Clone made an incorrect copy copy: %#v -> %#v", xArena.Value, xArenaCopy.Value);
     }
 
     a.Free();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string klmnopqrstuvˢ = "klmnopqrstuv"u8;
+internal static ref readonly @string klmnopqrstuvˢ => ref klmnopqrstuvˢᵇ;
+private static readonly @string klmnopqrstuvˢᵇ = "klmnopqrstuv"u8;
 
-public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
+public static void TestUserArenaCloneSlice(ж<testing.T> t) {
     var a = runtime_internal_test_package.NewUserArena();
 
     // A static string (not on heap or arena)
@@ -544,14 +552,14 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     // Clone should make a copy of b, since it is in the arena.
     var bCopy = runtime_internal_test_package.UserArenaClone(b);
     if (@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)) == @unsafe.Pointer.FromPinnedBox(Ꮡ(bCopy, 0))) {
-        Ꮡt.Errorf("Clone did not make a copy: %#v -> %#v"u8, b, bCopy);
+        t.Errorf("Clone did not make a copy: %#v -> %#v", b, bCopy);
     }
-    if (len(b) != len(bCopy)){
-        Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(b), len(bCopy));
+    if (len(b) != len(bCopy)) {
+        t.Errorf("Clone made an incorrect copy (bad length): %d -> %d", len(b), len(bCopy));
     } else {
         foreach (var i in range(b)) {
             if (b[i] != bCopy[i]) {
-                Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, b[i], bCopy[i]);
+                t.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d", i, b[i], bCopy[i]);
             }
         }
     }
@@ -560,14 +568,14 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     var bSub = b[1..3];
     var bSubCopy = runtime_internal_test_package.UserArenaClone(bSub);
     if (@unsafe.Pointer.FromPinnedBox(Ꮡ(bSub, 0)) == @unsafe.Pointer.FromPinnedBox(Ꮡ(bSubCopy, 0))) {
-        Ꮡt.Errorf("Clone did not make a copy: %#v -> %#v"u8, bSub, bSubCopy);
+        t.Errorf("Clone did not make a copy: %#v -> %#v", bSub, bSubCopy);
     }
-    if (len(bSub) != len(bSubCopy)){
-        Ꮡt.Errorf("Clone made an incorrect copy (bad length): %d -> %d"u8, len(bSub), len(bSubCopy));
+    if (len(bSub) != len(bSubCopy)) {
+        t.Errorf("Clone made an incorrect copy (bad length): %d -> %d", len(bSub), len(bSubCopy));
     } else {
         foreach (var i in range(bSub)) {
             if (bSub[i] != bSubCopy[i]) {
-                Ꮡt.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d"u8, i, bSub[i], bSubCopy[i]);
+                t.Errorf("Clone made an incorrect copy (data at index %d): %d -> %d", i, bSub[i], bSubCopy[i]);
             }
         }
     }
@@ -577,21 +585,21 @@ public static void TestUserArenaCloneSlice(ж<testing.T> Ꮡt) {
     copy(bNotArena, s);
     var bNotArenaCopy = runtime_internal_test_package.UserArenaClone(bNotArena);
     if (@unsafe.Pointer.FromPinnedBox(Ꮡ(bNotArena, 0)) != @unsafe.Pointer.FromPinnedBox(Ꮡ(bNotArenaCopy, 0))) {
-        Ꮡt.Error(cloneShouldNotHaveMadeAˢ);
+        t.Error(cloneShouldNotHaveMadeAˢ);
     }
 
     a.Free();
 }
 
-public static void TestUserArenaClonePanic(ж<testing.T> Ꮡt) {
-    @string s = default!;
-    ((Action)(() => {
+public static void TestUserArenaClonePanic(ж<testing.T> t) {
+    @string s = default;
+    func(() => {
         GoFrame ᒐ = default;
         try {
             var x = new smallScalar(2);
             defer(() => {
                 {
-                    var v = recover(); if (v != default!) {
+                    var v = recover(); if (v != nil) {
                         s = v._<@string>();
                     }
                 }
@@ -600,9 +608,9 @@ public static void TestUserArenaClonePanic(ж<testing.T> Ꮡt) {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     if (s == ""u8) {
-        Ꮡt.Errorf("expected panic from Clone"u8);
+        t.Errorf("expected panic from Clone");
     }
 }
 

@@ -23,7 +23,7 @@ internal static readonly object directHandoff23ˢ = (@string)"direct handoff < 2
 // requested, the G that releases the semaphore yields its
 // P directly to the first waiter in line.
 // See issue 33747 for discussion.
-public static void TestSemaHandoff(ж<testing.T> Ꮡt) {
+public static void TestSemaHandoff(ж<testing.T> t) {
     UntypedInt iter = 10000;
     nint ok = 0;
     for (nint i = 0; i < iter; i++) {
@@ -40,22 +40,22 @@ public static void TestSemaHandoff(ж<testing.T> Ꮡt) {
     // chances that unrelated changes in the runtime will
     // cause the test to fail or become flaky.
     if (ok < (nint)(iter * 2 / 3)) {
-        Ꮡt.Fatal(directHandoff23ˢ, ok, (nint)(iter));
+        t.Fatal(directHandoff23ˢ, ok, (nint)(iter));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gomaxprocs1ˢ2 = (@string)"GOMAXPROCS <= 1"u8;
 
-public static void TestSemaHandoff1(ж<testing.T> Ꮡt) {
+public static void TestSemaHandoff1(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (GOMAXPROCS(-1) <= 1) {
-            Ꮡt.Skip(gomaxprocs1ˢ2);
+            t.Skip(gomaxprocs1ˢ2);
         }
         defer(GOMAXPROCS, GOMAXPROCS(-1), ref ᒐ);
         GOMAXPROCS(1);
-        TestSemaHandoff(Ꮡt);
+        TestSemaHandoff(t);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -64,15 +64,15 @@ public static void TestSemaHandoff1(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gomaxprocs2ˢ = (@string)"GOMAXPROCS <= 2"u8;
 
-public static void TestSemaHandoff2(ж<testing.T> Ꮡt) {
+public static void TestSemaHandoff2(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (GOMAXPROCS(-1) <= 2) {
-            Ꮡt.Skip(gomaxprocs2ˢ);
+            t.Skip(gomaxprocs2ˢ);
         }
         defer(GOMAXPROCS, GOMAXPROCS(-1), ref ᒐ);
         GOMAXPROCS(2);
-        TestSemaHandoff(Ꮡt);
+        TestSemaHandoff(t);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -95,7 +95,7 @@ internal static partial bool testSemaHandoff() {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                while (ᐧ) {
+                for (;;) {
                     var selᴛ96 = doneʗ1;
                     switch (trySelect(ᐸꟷ(selᴛ96, ꓸꓸꓸ))) {
                     case 0 when selᴛ96.ꟷᐳ(out _): {
@@ -145,9 +145,9 @@ internal static partial bool testSemaHandoff() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object failedToDequeueˢ = (@string)"failed to dequeue"u8;
 
-public static void BenchmarkSemTable(ж<testing.B> Ꮡb) {
-    foreach (var (_, n) in new nint[]{1000, 2000, 4000, 8000}.slice()) {
-        Ꮡb.Run(fmt.Sprintf("OneAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ1) => {
+public static void BenchmarkSemTable(ж<testing.B> b) {
+    foreach (var (_, n) in slice<nint>([1000, 2000, 4000, 8000])) {
+        b.Run(fmt.Sprintf("OneAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ1) => {
             var tab = runtime_internal_test_package.Escape(@new<global::go.runtime_internal_test_package.SemTable>());
             var u = new slice<uint32>(runtime_internal_test_package.SemTableSize + 1);
 
@@ -167,15 +167,15 @@ public static void BenchmarkSemTable(ж<testing.B> Ꮡb) {
                 // the waiters for both locks are on the same list, as it
                 // once was.
                 for (nint i = 0; i < n; i++) {
-                    if (i < n / 2){
+                    if (i < n / 2) {
                         tab.Enqueue(Ꮡ(u, 0));
                     } else {
                         tab.Enqueue(Ꮡ(u, runtime_internal_test_package.SemTableSize));
                     }
                 }
                 for (nint i = 0; i < n; i++) {
-                    bool ok = default!;
-                    if (i < n / 2){
+                    bool ok = default;
+                    if (i < n / 2) {
                         ok = tab.Dequeue(Ꮡ(u, 0));
                     } else {
                         ok = tab.Dequeue(Ꮡ(u, runtime_internal_test_package.SemTableSize));
@@ -186,7 +186,7 @@ public static void BenchmarkSemTable(ж<testing.B> Ꮡb) {
                 }
             }
         });
-        Ꮡb.Run(fmt.Sprintf("ManyAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ2) => {
+        b.Run(fmt.Sprintf("ManyAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ2) => {
             var tab = runtime_internal_test_package.Escape(@new<global::go.runtime_internal_test_package.SemTable>());
             var u = new slice<uint32>(n * (nint)runtime_internal_test_package.SemTableSize);
 

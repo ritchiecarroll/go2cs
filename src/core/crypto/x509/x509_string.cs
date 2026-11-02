@@ -20,14 +20,22 @@ internal static void _ᴛ2() {
     _ = x[KeyUsageDecipherOnly - 256];
 }
 
-internal static readonly @string _KeyUsage_name_0 = "digitalSignaturecontentCommitment"u8;
-internal static readonly @string _KeyUsage_name_1 = "keyEncipherment"u8;
-internal static readonly @string _KeyUsage_name_2 = "dataEncipherment"u8;
-internal static readonly @string _KeyUsage_name_3 = "keyAgreement"u8;
-internal static readonly @string _KeyUsage_name_4 = "keyCertSign"u8;
-internal static readonly @string _KeyUsage_name_5 = "cRLSign"u8;
-internal static readonly @string _KeyUsage_name_6 = "encipherOnly"u8;
-internal static readonly @string _KeyUsage_name_7 = "decipherOnly"u8;
+internal static ref readonly @string _KeyUsage_name_0 => ref _KeyUsage_name_0ᵇ;
+private static readonly @string _KeyUsage_name_0ᵇ = "digitalSignaturecontentCommitment"u8;
+internal static ref readonly @string _KeyUsage_name_1 => ref _KeyUsage_name_1ᵇ;
+private static readonly @string _KeyUsage_name_1ᵇ = "keyEncipherment"u8;
+internal static ref readonly @string _KeyUsage_name_2 => ref _KeyUsage_name_2ᵇ;
+private static readonly @string _KeyUsage_name_2ᵇ = "dataEncipherment"u8;
+internal static ref readonly @string _KeyUsage_name_3 => ref _KeyUsage_name_3ᵇ;
+private static readonly @string _KeyUsage_name_3ᵇ = "keyAgreement"u8;
+internal static ref readonly @string _KeyUsage_name_4 => ref _KeyUsage_name_4ᵇ;
+private static readonly @string _KeyUsage_name_4ᵇ = "keyCertSign"u8;
+internal static ref readonly @string _KeyUsage_name_5 => ref _KeyUsage_name_5ᵇ;
+private static readonly @string _KeyUsage_name_5ᵇ = "cRLSign"u8;
+internal static ref readonly @string _KeyUsage_name_6 => ref _KeyUsage_name_6ᵇ;
+private static readonly @string _KeyUsage_name_6ᵇ = "encipherOnly"u8;
+internal static ref readonly @string _KeyUsage_name_7 => ref _KeyUsage_name_7ᵇ;
+private static readonly @string _KeyUsage_name_7ᵇ = "decipherOnly"u8;
 
 internal static array<uint8> _KeyUsage_index_0 = new uint8[]{0, 16, 33}.array();
 
@@ -59,7 +67,7 @@ public static @string String(this KeyUsage i) {
         return _KeyUsage_name_7;
     }
     default: {
-        return "KeyUsage("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "KeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }}
 }
 
@@ -83,14 +91,15 @@ internal static void _ᴛ3() {
     _ = x[ExtKeyUsageMicrosoftKernelCodeSigning - 13];
 }
 
-internal static readonly @string _ExtKeyUsage_name = "anyExtendedKeyUsageserverAuthclientAuthcodeSigningemailProtectionipsecEndSystemipsecTunnelipsecUsertimeStampingOCSPSigningmsSGCnsSGCmsCodeCommsKernelCode"u8;
+internal static ref readonly @string _ExtKeyUsage_name => ref _ExtKeyUsage_nameᵇ;
+private static readonly @string _ExtKeyUsage_nameᵇ = "anyExtendedKeyUsageserverAuthclientAuthcodeSigningemailProtectionipsecEndSystemipsecTunnelipsecUsertimeStampingOCSPSigningmsSGCnsSGCmsCodeCommsKernelCode"u8;
 
 internal static array<uint8> _ExtKeyUsage_index = new uint8[]{0, 19, 29, 39, 50, 65, 79, 90, 99, 111, 122, 127, 132, 141, 153}.array();
 
 public static @string String(this ExtKeyUsage i) {
     nint idx = (nint)i - 0;
     if (i < 0 || idx >= builtin.len(_ExtKeyUsage_index) - 1) {
-        return "ExtKeyUsage("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "ExtKeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _ExtKeyUsage_name.slice(_ExtKeyUsage_index[idx], _ExtKeyUsage_index[idx + 1]);
 }

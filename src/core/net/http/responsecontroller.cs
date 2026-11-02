@@ -49,14 +49,14 @@ internal partial interface Flush_type /*dyn*/ {
 // Flush flushes buffered data to the client.
 public static error Flush(this ref ResponseController c) {
     var rw = c.rw;
-    while (ᐧ) {
+    for (;;) {
         switch (rw.type()) {
         case {} Δt when Δt._<Flush_type>(out var t): {
             return t.FlushError();
         }
         case {} Δt when Δt._<Flusher>(out var t): {
             t.Flush();
-            return default!;
+            return default;
         }
         case {} Δt when Δt._<rwUnwrapper>(out var t): {
             rw = t.Unwrap();
@@ -73,7 +73,7 @@ public static error Flush(this ref ResponseController c) {
 // See the [Hijacker] interface for details.
 public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseController c) {
     var rw = c.rw;
-    while (ᐧ) {
+    for (;;) {
         switch (rw.type()) {
         case {} Δt when Δt._<Hijacker>(out var t): {
             return t.Hijack();
@@ -84,7 +84,7 @@ public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseCo
         }
         default: {
             var t = rw;
-            return (default!, default!, errNotSupported());
+            return (default, default, errNotSupported());
         }}
     }
 }
@@ -100,7 +100,7 @@ internal partial interface SetReadDeadline_type /*dyn*/ {
 // Setting the read deadline after it has been exceeded will not extend it.
 public static error SetReadDeadline(this ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
-    while (ᐧ) {
+    for (;;) {
         switch (rw.type()) {
         case {} Δt when Δt._<SetReadDeadline_type>(out var t): {
             return t.SetReadDeadline(deadline);
@@ -128,7 +128,7 @@ internal partial interface SetWriteDeadline_type /*dyn*/ {
 // Setting the write deadline after it has been exceeded will not extend it.
 public static error SetWriteDeadline(this ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
-    while (ᐧ) {
+    for (;;) {
         switch (rw.type()) {
         case {} Δt when Δt._<SetWriteDeadline_type>(out var t): {
             return t.SetWriteDeadline(deadline);
@@ -160,7 +160,7 @@ internal partial interface EnableFullDuplex_type /*dyn*/ {
 // For HTTP/2 requests, the Go HTTP server always permits concurrent reads and responses.
 public static error EnableFullDuplex(this ref ResponseController c) {
     var rw = c.rw;
-    while (ᐧ) {
+    for (;;) {
         switch (rw.type()) {
         case {} Δt when Δt._<EnableFullDuplex_type>(out var t): {
             return t.EnableFullDuplex();

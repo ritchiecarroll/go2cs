@@ -23,9 +23,9 @@ public static bool Valid(slice<byte> data) {
     try {
         var scan = newScanner();
         defer(freeScanner, scan, ref ᒐ);
-        return checkValid(data, scan) == default!;
+        return checkValid(data, scan) == nil;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -45,7 +45,7 @@ internal static error checkValid(slice<byte> data, ж<scanner> Ꮡscan) {
     if (Ꮡscan.eof() == scanError) {
         return scan.err;
     }
-    return default!;
+    return default;
 }
 
 // A SyntaxError is a description of a JSON syntax error.
@@ -89,14 +89,14 @@ partial struct scanner {
 }
 
 internal static readonly ж<sync.Pool> ᏑscannerPool = new StaticBox<sync.Pool>(new sync.Pool(
-    New: () => Ꮡ(new scanner(nil))
+    New: () => Ꮡ(new scanner())
 ));
 internal static ref sync.Pool scannerPool => ref ((StaticBox<sync.Pool>)ᏑscannerPool).ValueSlot;
 
 internal static ж<scanner> newScanner() {
     var scan = ᏑscannerPool.Get()._<ж<scanner>>();
     // scan.reset by design doesn't set bytes to zero
-    scan.Value.bytes = 0;
+    scan.bytes = 0;
     scan.reset();
     return scan;
 }
@@ -106,7 +106,7 @@ internal static void freeScanner(ж<scanner> Ꮡscan) {
 
     // Avoid hanging on to too much memory in extreme cases.
     if (len(scan.parseState) > 1024) {
-        scan.parseState = default!;
+        scan.parseState = default;
     }
     ᏑscannerPool.Put(Ꮡscan.OrTypedNil());
 }
@@ -119,19 +119,19 @@ internal static void freeScanner(ж<scanner> Ꮡscan) {
 // call to scanner.state: if one call returns scanError,
 // every subsequent call will return scanError too.
 // Continue.
-internal static UntypedInt scanContinue => iota; // uninteresting byte
+internal static UntypedInt scanContinue => iota;  // uninteresting byte
 internal static UntypedInt scanBeginLiteral => 1; // end implied by next result != scanContinue
-internal static UntypedInt scanBeginObject => 2; // begin object
-internal static UntypedInt scanObjectKey => 3; // just finished object key (string)
-internal static UntypedInt scanObjectValue => 4; // just finished non-last object value
-internal static UntypedInt scanEndObject => 5; // end object (implies scanObjectValue if possible)
-internal static UntypedInt scanBeginArray => 6; // begin array
-internal static UntypedInt scanArrayValue => 7; // just finished array value
-internal static UntypedInt scanEndArray => 8; // end array (implies scanArrayValue if possible)
-internal static UntypedInt scanSkipSpace => 9; // space byte; can skip; known to be last "continue" result
+internal static UntypedInt scanBeginObject => 2;  // begin object
+internal static UntypedInt scanObjectKey => 3;    // just finished object key (string)
+internal static UntypedInt scanObjectValue => 4;  // just finished non-last object value
+internal static UntypedInt scanEndObject => 5;    // end object (implies scanObjectValue if possible)
+internal static UntypedInt scanBeginArray => 6;   // begin array
+internal static UntypedInt scanArrayValue => 7;   // just finished array value
+internal static UntypedInt scanEndArray => 8;     // end array (implies scanArrayValue if possible)
+internal static UntypedInt scanSkipSpace => 9;    // space byte; can skip; known to be last "continue" result
 
 // Stop.
-internal static UntypedInt scanEnd => 10; // top-level value ended *before* this byte; known to be first "stop" result
+internal static UntypedInt scanEnd => 10;   // top-level value ended *before* this byte; known to be first "stop" result
 internal static UntypedInt scanError => 11; // hit an error, scanner.err.
 
 // These values are stored in the parseState stack.
@@ -139,8 +139,8 @@ internal static UntypedInt scanError => 11; // hit an error, scanner.err.
 // being scanned. If the parser is inside a nested value
 // the parseState describes the nested state, outermost at entry 0.
 internal static UntypedInt parseObjectKey => iota; // parsing object key (before colon)
-internal static UntypedInt parseObjectValue => 1; // parsing object value (after colon)
-internal static UntypedInt parseArrayValue => 2; // parsing array value
+internal static UntypedInt parseObjectValue => 1;  // parsing object value (after colon)
+internal static UntypedInt parseArrayValue => 2;   // parsing array value
 
 // This limits the max nesting depth to prevent stack overflow.
 // This is permitted by https://tools.ietf.org/html/rfc7159#section-9
@@ -151,7 +151,7 @@ internal static UntypedInt maxNestingDepth => 10000;
 internal static void reset(this ref scanner s) {
     s.step = stateBeginValue;
     s.parseState = s.parseState[0..0];
-    s.err = default!;
+    s.err = default;
     s.endTop = false;
 }
 
@@ -160,24 +160,25 @@ internal static void reset(this ref scanner s) {
 internal static nint eof(this ж<scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (s.err != default!) {
+    if (s.err != nil) {
         return scanError;
     }
     if (s.endTop) {
         return scanEnd;
     }
-    s.step(Ꮡs, (rune)' ');
+    s.step(Ꮡs, (byte)' ');
     if (s.endTop) {
         return scanEnd;
     }
-    if (s.err == default!) {
-        s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("unexpected end of JSON input"u8, s.bytes)));
+    if (s.err == nil) {
+        s.err = new SyntaxErrorжerror(Ꮡ(new SyntaxError("unexpected end of JSON input", s.bytes)));
     }
     return scanError;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string exceededMaxDepthˢ = "exceeded max depth"u8;
+internal static ref readonly @string exceededMaxDepthˢ => ref exceededMaxDepthˢᵇ;
+private static readonly @string exceededMaxDepthˢᵇ = "exceeded max depth"u8;
 
 // pushParseState pushes a new parse state newParseState onto the parse stack.
 // an error state is returned if maxNestingDepth was exceeded, otherwise successState is returned.
@@ -194,7 +195,7 @@ internal static nint pushParseState(this ref scanner s, byte c, nint newParseSta
 internal static void popParseState(this ref scanner s) {
     nint n = len(s.parseState) - 1;
     s.parseState = s.parseState.slice(0, n);
-    if (n == 0){
+    if (n == 0) {
         s.step = stateEndTop;
         s.endTop = true;
     } else {
@@ -203,22 +204,23 @@ internal static void popParseState(this ref scanner s) {
 }
 
 internal static bool isSpace(byte c) {
-    return c <= (rune)' ' && (c == (rune)' ' || c == (rune)'\t' || c == (rune)'\r' || c == (rune)'\n');
+    return c <= ' ' && (c == ' ' || c == '\t' || c == '\r' || c == '\n');
 }
 
 // stateBeginValueOrEmpty is the state after reading `[`.
-internal static nint stateBeginValueOrEmpty(ж<scanner> Ꮡs, byte c) {
+internal static nint stateBeginValueOrEmpty(ж<scanner> s, byte c) {
     if (isSpace(c)) {
         return scanSkipSpace;
     }
-    if (c == (rune)']') {
-        return stateEndValue(Ꮡs, c);
+    if (c == ']') {
+        return stateEndValue(s, c);
     }
-    return stateBeginValue(Ꮡs, c);
+    return stateBeginValue(s, c);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lookingForBeginningOfˢ = "looking for beginning of value"u8;
+internal static ref readonly @string lookingForBeginningOfˢ => ref lookingForBeginningOfˢᵇ;
+private static readonly @string lookingForBeginningOfˢᵇ = "looking for beginning of value"u8;
 
 // stateBeginValue is the state at the beginning of the input.
 internal static nint stateBeginValue(ж<scanner> Ꮡs, byte c) {
@@ -228,39 +230,39 @@ internal static nint stateBeginValue(ж<scanner> Ꮡs, byte c) {
         return scanSkipSpace;
     }
     switch (c) {
-    case (rune)'{': {
+    case (byte)'{': {
         s.step = stateBeginStringOrEmpty;
         return s.pushParseState(c, parseObjectKey, scanBeginObject);
     }
-    case (rune)'[': {
+    case (byte)'[': {
         s.step = stateBeginValueOrEmpty;
         return s.pushParseState(c, parseArrayValue, scanBeginArray);
     }
-    case (rune)'"': {
+    case (byte)'"': {
         s.step = stateInString;
         return scanBeginLiteral;
     }
-    case (rune)'-': {
+    case (byte)'-': {
         s.step = stateNeg;
         return scanBeginLiteral;
     }
-    case (rune)'0': { // beginning of 0.123
+    case (byte)'0': { // beginning of 0.123
         s.step = state0;
         return scanBeginLiteral;
     }
-    case (rune)'t': { // beginning of true
+    case (byte)'t': { // beginning of true
         s.step = stateT;
         return scanBeginLiteral;
     }
-    case (rune)'f': { // beginning of false
+    case (byte)'f': { // beginning of false
         s.step = stateF;
         return scanBeginLiteral;
     }
-    case (rune)'n': { // beginning of null
+    case (byte)'n': { // beginning of null
         s.step = stateN;
         return scanBeginLiteral;
     }}
-    if ((rune)'1' <= c && c <= (rune)'9') { // beginning of 1234.5
+    if ('1' <= c && c <= '9') { // beginning of 1234.5
         s.step = state1;
         return scanBeginLiteral;
     }
@@ -274,7 +276,7 @@ internal static nint stateBeginStringOrEmpty(ж<scanner> Ꮡs, byte c) {
     if (isSpace(c)) {
         return scanSkipSpace;
     }
-    if (c == (rune)'}') {
+    if (c == '}') {
         nint n = len(s.parseState);
         s.parseState[n - 1] = parseObjectValue;
         return stateEndValue(Ꮡs, c);
@@ -283,7 +285,8 @@ internal static nint stateBeginStringOrEmpty(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lookingForBeginningOfˢ2 = "looking for beginning of object key string"u8;
+internal static ref readonly @string lookingForBeginningOfˢ2 => ref lookingForBeginningOfˢ2ᵇ;
+private static readonly @string lookingForBeginningOfˢ2ᵇ = "looking for beginning of object key string"u8;
 
 // stateBeginString is the state after reading `{"key": value,`.
 internal static nint stateBeginString(ж<scanner> Ꮡs, byte c) {
@@ -292,7 +295,7 @@ internal static nint stateBeginString(ж<scanner> Ꮡs, byte c) {
     if (isSpace(c)) {
         return scanSkipSpace;
     }
-    if (c == (rune)'"') {
+    if (c == '"') {
         s.step = stateInString;
         return scanBeginLiteral;
     }
@@ -300,9 +303,12 @@ internal static nint stateBeginString(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string afterObjectKeyˢ = "after object key"u8;
-internal static readonly @string afterObjectKeyValuePairˢ = "after object key:value pair"u8;
-internal static readonly @string afterArrayElementˢ = "after array element"u8;
+internal static ref readonly @string afterObjectKeyˢ => ref afterObjectKeyˢᵇ;
+private static readonly @string afterObjectKeyˢᵇ = "after object key"u8;
+internal static ref readonly @string afterObjectKeyValuePairˢ => ref afterObjectKeyValuePairˢᵇ;
+private static readonly @string afterObjectKeyValuePairˢᵇ = "after object key:value pair"u8;
+internal static ref readonly @string afterArrayElementˢ => ref afterArrayElementˢᵇ;
+private static readonly @string afterArrayElementˢᵇ = "after array element"u8;
 
 // stateEndValue is the state after completing a value,
 // such as after reading `{}` or `true` or `["x"`.
@@ -321,43 +327,44 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
         return scanSkipSpace;
     }
     nint ps = s.parseState[n - 1];
-    var exprᴛ1 = ps;
-    if (exprᴛ1 == parseObjectKey) {
-        if (c == (rune)':') {
+    switch (ps) {
+    case var ᴛ when ᴛ == parseObjectKey: {
+        if (c == ':') {
             s.parseState[n - 1] = parseObjectValue;
             s.step = stateBeginValue;
             return scanObjectKey;
         }
         return s.error(c, afterObjectKeyˢ);
     }
-    if (exprᴛ1 == parseObjectValue) {
-        if (c == (rune)',') {
+    case var ᴛ when ᴛ == parseObjectValue: {
+        if (c == ',') {
             s.parseState[n - 1] = parseObjectKey;
             s.step = stateBeginString;
             return scanObjectValue;
         }
-        if (c == (rune)'}') {
+        if (c == '}') {
             s.popParseState();
             return scanEndObject;
         }
         return s.error(c, afterObjectKeyValuePairˢ);
     }
-    if (exprᴛ1 == parseArrayValue) {
-        if (c == (rune)',') {
+    case var ᴛ when ᴛ == parseArrayValue: {
+        if (c == ',') {
             s.step = stateBeginValue;
             return scanArrayValue;
         }
-        if (c == (rune)']') {
+        if (c == ']') {
             s.popParseState();
             return scanEndArray;
         }
         return s.error(c, afterArrayElementˢ);
-    }
+    }}
     return s.error(c, ""u8);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string afterTopLevelValueˢ = "after top-level value"u8;
+internal static ref readonly @string afterTopLevelValueˢ => ref afterTopLevelValueˢᵇ;
+private static readonly @string afterTopLevelValueˢᵇ = "after top-level value"u8;
 
 // stateEndTop is the state after finishing the top-level value,
 // such as after reading `{}` or `[1,2,3]`.
@@ -373,17 +380,18 @@ internal static nint stateEndTop(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inStringLiteralˢ = "in string literal"u8;
+internal static ref readonly @string inStringLiteralˢ => ref inStringLiteralˢᵇ;
+private static readonly @string inStringLiteralˢᵇ = "in string literal"u8;
 
 // stateInString is the state after reading `"`.
 internal static nint stateInString(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'"') {
+    if (c == '"') {
         s.step = stateEndValue;
         return scanContinue;
     }
-    if (c == (rune)'\\') {
+    if (c == '\\') {
         s.step = stateInStringEsc;
         return scanContinue;
     }
@@ -394,18 +402,19 @@ internal static nint stateInString(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inStringEscapeCodeˢ = "in string escape code"u8;
+internal static ref readonly @string inStringEscapeCodeˢ => ref inStringEscapeCodeˢᵇ;
+private static readonly @string inStringEscapeCodeˢᵇ = "in string escape code"u8;
 
 // stateInStringEsc is the state after reading `"\` during a quoted string.
 internal static nint stateInStringEsc(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     switch (c) {
-    case (rune)'b' or (rune)'f' or (rune)'n' or (rune)'r' or (rune)'t' or (rune)'\\' or (rune)'/' or (rune)'"': {
+    case (byte)'b' or (byte)'f' or (byte)'n' or (byte)'r' or (byte)'t' or (byte)'\\' or (byte)'/' or (byte)'"': {
         s.step = stateInString;
         return scanContinue;
     }
-    case (rune)'u': {
+    case (byte)'u': {
         s.step = stateInStringEscU;
         return scanContinue;
     }}
@@ -413,13 +422,14 @@ internal static nint stateInStringEsc(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inUHexadecimalCharacterˢ = "in \\u hexadecimal character escape"u8;
+internal static ref readonly @string inUHexadecimalCharacterˢ => ref inUHexadecimalCharacterˢᵇ;
+private static readonly @string inUHexadecimalCharacterˢᵇ = "in \\u hexadecimal character escape"u8;
 
 // stateInStringEscU is the state after reading `"\u` during a quoted string.
 internal static nint stateInStringEscU(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
+    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F') {
         s.step = stateInStringEscU1;
         return scanContinue;
     }
@@ -431,7 +441,7 @@ internal static nint stateInStringEscU(ж<scanner> Ꮡs, byte c) {
 internal static nint stateInStringEscU1(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
+    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F') {
         s.step = stateInStringEscU12;
         return scanContinue;
     }
@@ -443,7 +453,7 @@ internal static nint stateInStringEscU1(ж<scanner> Ꮡs, byte c) {
 internal static nint stateInStringEscU12(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
+    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F') {
         s.step = stateInStringEscU123;
         return scanContinue;
     }
@@ -455,7 +465,7 @@ internal static nint stateInStringEscU12(ж<scanner> Ꮡs, byte c) {
 internal static nint stateInStringEscU123(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9' || (rune)'a' <= c && c <= (rune)'f' || (rune)'A' <= c && c <= (rune)'F') {
+    if ('0' <= c && c <= '9' || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F') {
         s.step = stateInString;
         return scanContinue;
     }
@@ -464,17 +474,18 @@ internal static nint stateInStringEscU123(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inNumericLiteralˢ = "in numeric literal"u8;
+internal static ref readonly @string inNumericLiteralˢ => ref inNumericLiteralˢᵇ;
+private static readonly @string inNumericLiteralˢᵇ = "in numeric literal"u8;
 
 // stateNeg is the state after reading `-` during a number.
 internal static nint stateNeg(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'0') {
+    if (c == '0') {
         s.step = state0;
         return scanContinue;
     }
-    if ((rune)'1' <= c && c <= (rune)'9') {
+    if ('1' <= c && c <= '9') {
         s.step = state1;
         return scanContinue;
     }
@@ -486,7 +497,7 @@ internal static nint stateNeg(ж<scanner> Ꮡs, byte c) {
 internal static nint state1(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9') {
+    if ('0' <= c && c <= '9') {
         s.step = state1;
         return scanContinue;
     }
@@ -497,11 +508,11 @@ internal static nint state1(ж<scanner> Ꮡs, byte c) {
 internal static nint state0(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'.') {
+    if (c == '.') {
         s.step = stateDot;
         return scanContinue;
     }
-    if (c == (rune)'e' || c == (rune)'E') {
+    if (c == 'e' || c == 'E') {
         s.step = stateE;
         return scanContinue;
     }
@@ -509,14 +520,15 @@ internal static nint state0(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string afterDecimalPointInˢ = "after decimal point in numeric literal"u8;
+internal static ref readonly @string afterDecimalPointInˢ => ref afterDecimalPointInˢᵇ;
+private static readonly @string afterDecimalPointInˢᵇ = "after decimal point in numeric literal"u8;
 
 // stateDot is the state after reading the integer and decimal point in a number,
 // such as after reading `1.`.
 internal static nint stateDot(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9') {
+    if ('0' <= c && c <= '9') {
         s.step = stateDot0;
         return scanContinue;
     }
@@ -528,10 +540,10 @@ internal static nint stateDot(ж<scanner> Ꮡs, byte c) {
 internal static nint stateDot0(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9') {
+    if ('0' <= c && c <= '9') {
         return scanContinue;
     }
-    if (c == (rune)'e' || c == (rune)'E') {
+    if (c == 'e' || c == 'E') {
         s.step = stateE;
         return scanContinue;
     }
@@ -543,7 +555,7 @@ internal static nint stateDot0(ж<scanner> Ꮡs, byte c) {
 internal static nint stateE(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'+' || c == (rune)'-') {
+    if (c == '+' || c == '-') {
         s.step = stateESign;
         return scanContinue;
     }
@@ -551,14 +563,15 @@ internal static nint stateE(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inExponentOfNumericˢ = "in exponent of numeric literal"u8;
+internal static ref readonly @string inExponentOfNumericˢ => ref inExponentOfNumericˢᵇ;
+private static readonly @string inExponentOfNumericˢᵇ = "in exponent of numeric literal"u8;
 
 // stateESign is the state after reading the mantissa, e, and sign in a number,
 // such as after reading `314e-` or `0.314e+`.
 internal static nint stateESign(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if ((rune)'0' <= c && c <= (rune)'9') {
+    if ('0' <= c && c <= '9') {
         s.step = stateE0;
         return scanContinue;
     }
@@ -568,21 +581,22 @@ internal static nint stateESign(ж<scanner> Ꮡs, byte c) {
 // stateE0 is the state after reading the mantissa, e, optional sign,
 // and at least one digit of the exponent in a number,
 // such as after reading `314e-2` or `0.314e+1` or `3.14e0`.
-internal static nint stateE0(ж<scanner> Ꮡs, byte c) {
-    if ((rune)'0' <= c && c <= (rune)'9') {
+internal static nint stateE0(ж<scanner> s, byte c) {
+    if ('0' <= c && c <= '9') {
         return scanContinue;
     }
-    return stateEndValue(Ꮡs, c);
+    return stateEndValue(s, c);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralTrueExpectingRˢ = "in literal true (expecting 'r')"u8;
+internal static ref readonly @string inLiteralTrueExpectingRˢ => ref inLiteralTrueExpectingRˢᵇ;
+private static readonly @string inLiteralTrueExpectingRˢᵇ = "in literal true (expecting 'r')"u8;
 
 // stateT is the state after reading `t`.
 internal static nint stateT(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'r') {
+    if (c == 'r') {
         s.step = stateTr;
         return scanContinue;
     }
@@ -590,13 +604,14 @@ internal static nint stateT(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralTrueExpectingUˢ = "in literal true (expecting 'u')"u8;
+internal static ref readonly @string inLiteralTrueExpectingUˢ => ref inLiteralTrueExpectingUˢᵇ;
+private static readonly @string inLiteralTrueExpectingUˢᵇ = "in literal true (expecting 'u')"u8;
 
 // stateTr is the state after reading `tr`.
 internal static nint stateTr(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'u') {
+    if (c == 'u') {
         s.step = stateTru;
         return scanContinue;
     }
@@ -604,13 +619,14 @@ internal static nint stateTr(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralTrueExpectingEˢ = "in literal true (expecting 'e')"u8;
+internal static ref readonly @string inLiteralTrueExpectingEˢ => ref inLiteralTrueExpectingEˢᵇ;
+private static readonly @string inLiteralTrueExpectingEˢᵇ = "in literal true (expecting 'e')"u8;
 
 // stateTru is the state after reading `tru`.
 internal static nint stateTru(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'e') {
+    if (c == 'e') {
         s.step = stateEndValue;
         return scanContinue;
     }
@@ -618,13 +634,14 @@ internal static nint stateTru(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralFalseExpectingAˢ = "in literal false (expecting 'a')"u8;
+internal static ref readonly @string inLiteralFalseExpectingAˢ => ref inLiteralFalseExpectingAˢᵇ;
+private static readonly @string inLiteralFalseExpectingAˢᵇ = "in literal false (expecting 'a')"u8;
 
 // stateF is the state after reading `f`.
 internal static nint stateF(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'a') {
+    if (c == 'a') {
         s.step = stateFa;
         return scanContinue;
     }
@@ -632,13 +649,14 @@ internal static nint stateF(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralFalseExpectingLˢ = "in literal false (expecting 'l')"u8;
+internal static ref readonly @string inLiteralFalseExpectingLˢ => ref inLiteralFalseExpectingLˢᵇ;
+private static readonly @string inLiteralFalseExpectingLˢᵇ = "in literal false (expecting 'l')"u8;
 
 // stateFa is the state after reading `fa`.
 internal static nint stateFa(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'l') {
+    if (c == 'l') {
         s.step = stateFal;
         return scanContinue;
     }
@@ -646,13 +664,14 @@ internal static nint stateFa(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralFalseExpectingSˢ = "in literal false (expecting 's')"u8;
+internal static ref readonly @string inLiteralFalseExpectingSˢ => ref inLiteralFalseExpectingSˢᵇ;
+private static readonly @string inLiteralFalseExpectingSˢᵇ = "in literal false (expecting 's')"u8;
 
 // stateFal is the state after reading `fal`.
 internal static nint stateFal(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'s') {
+    if (c == 's') {
         s.step = stateFals;
         return scanContinue;
     }
@@ -660,13 +679,14 @@ internal static nint stateFal(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralFalseExpectingEˢ = "in literal false (expecting 'e')"u8;
+internal static ref readonly @string inLiteralFalseExpectingEˢ => ref inLiteralFalseExpectingEˢᵇ;
+private static readonly @string inLiteralFalseExpectingEˢᵇ = "in literal false (expecting 'e')"u8;
 
 // stateFals is the state after reading `fals`.
 internal static nint stateFals(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'e') {
+    if (c == 'e') {
         s.step = stateEndValue;
         return scanContinue;
     }
@@ -674,13 +694,14 @@ internal static nint stateFals(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralNullExpectingUˢ = "in literal null (expecting 'u')"u8;
+internal static ref readonly @string inLiteralNullExpectingUˢ => ref inLiteralNullExpectingUˢᵇ;
+private static readonly @string inLiteralNullExpectingUˢᵇ = "in literal null (expecting 'u')"u8;
 
 // stateN is the state after reading `n`.
 internal static nint stateN(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'u') {
+    if (c == 'u') {
         s.step = stateNu;
         return scanContinue;
     }
@@ -688,13 +709,14 @@ internal static nint stateN(ж<scanner> Ꮡs, byte c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inLiteralNullExpectingLˢ = "in literal null (expecting 'l')"u8;
+internal static ref readonly @string inLiteralNullExpectingLˢ => ref inLiteralNullExpectingLˢᵇ;
+private static readonly @string inLiteralNullExpectingLˢᵇ = "in literal null (expecting 'l')"u8;
 
 // stateNu is the state after reading `nu`.
 internal static nint stateNu(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'l') {
+    if (c == 'l') {
         s.step = stateNul;
         return scanContinue;
     }
@@ -705,7 +727,7 @@ internal static nint stateNu(ж<scanner> Ꮡs, byte c) {
 internal static nint stateNul(ж<scanner> Ꮡs, byte c) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (c == (rune)'l') {
+    if (c == 'l') {
         s.step = stateEndValue;
         return scanContinue;
     }
@@ -714,7 +736,7 @@ internal static nint stateNul(ж<scanner> Ꮡs, byte c) {
 
 // stateError is the state after reaching a syntax error,
 // such as after reading `[1}` or `5.1.2`.
-internal static nint stateError(ж<scanner> Ꮡs, byte c) {
+internal static nint stateError(ж<scanner> s, byte c) {
     return scanError;
 }
 
@@ -728,11 +750,11 @@ internal static nint error(this ref scanner s, byte c, @string context) {
 // quoteChar formats c as a quoted character literal.
 internal static @string quoteChar(byte c) {
     // special cases - different from quoted strings
-    if (c == (rune)'\'') {
-        return @"'\''"u8;
+    if (c == '\'') {
+        return @"'\''";
     }
-    if (c == (rune)'"') {
-        return @"'""'"u8;
+    if (c == '"') {
+        return @"'""'";
     }
 
     // use quoted string with different quotation marks

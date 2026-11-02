@@ -35,8 +35,8 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     nint x1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint y0 = r.Min.Y - dst.Rect.Min.Y;
     nint y1 = r.Max.Y - dst.Rect.Min.Y;
-    var exprᴛ1 = src.SubsampleRatio;
-    if (exprᴛ1 == image.YCbCrSubsampleRatio444) {
+    switch (src.SubsampleRatio) {
+    case var ᴛ when ᴛ == image.YCbCrSubsampleRatio444: {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
@@ -62,22 +62,22 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ5 = yy1 + 91881 * cr1;
-                if (((uint32)rΔ5 & 0xff000000U) == 0){
-                    rΔ5 >>= (int)(16);
+                if (((uint32)rΔ5 & 0xff000000U) == 0) {
+                    rΔ5 >>= 16;
                 } else {
                     rΔ5 = ~(rΔ5 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if (((uint32)g & 0xff000000U) == 0){
-                    g >>= (int)(16);
+                if (((uint32)g & 0xff000000U) == 0) {
+                    g >>= 16;
                 } else {
                     g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if (((uint32)b & 0xff000000U) == 0){
-                    b >>= (int)(16);
+                if (((uint32)b & 0xff000000U) == 0) {
+                    b >>= 16;
                 } else {
                     b = ~(b >> 31);
                 }
@@ -90,8 +90,9 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 rgba[3] = 255;
             }
         }
+        break;
     }
-    else if (exprᴛ1 == image.YCbCrSubsampleRatio422) {
+    case var ᴛ when ᴛ == image.YCbCrSubsampleRatio422: {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
@@ -119,22 +120,22 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ6 = yy1 + 91881 * cr1;
-                if (((uint32)rΔ6 & 0xff000000U) == 0){
-                    rΔ6 >>= (int)(16);
+                if (((uint32)rΔ6 & 0xff000000U) == 0) {
+                    rΔ6 >>= 16;
                 } else {
                     rΔ6 = ~(rΔ6 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if (((uint32)g & 0xff000000U) == 0){
-                    g >>= (int)(16);
+                if (((uint32)g & 0xff000000U) == 0) {
+                    g >>= 16;
                 } else {
                     g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if (((uint32)b & 0xff000000U) == 0){
-                    b >>= (int)(16);
+                if (((uint32)b & 0xff000000U) == 0) {
+                    b >>= 16;
                 } else {
                     b = ~(b >> 31);
                 }
@@ -147,8 +148,9 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 rgba[3] = 255;
             }
         }
+        break;
     }
-    else if (exprᴛ1 == image.YCbCrSubsampleRatio420) {
+    case var ᴛ when ᴛ == image.YCbCrSubsampleRatio420: {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
@@ -176,22 +178,22 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ7 = yy1 + 91881 * cr1;
-                if (((uint32)rΔ7 & 0xff000000U) == 0){
-                    rΔ7 >>= (int)(16);
+                if (((uint32)rΔ7 & 0xff000000U) == 0) {
+                    rΔ7 >>= 16;
                 } else {
                     rΔ7 = ~(rΔ7 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if (((uint32)g & 0xff000000U) == 0){
-                    g >>= (int)(16);
+                if (((uint32)g & 0xff000000U) == 0) {
+                    g >>= 16;
                 } else {
                     g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if (((uint32)b & 0xff000000U) == 0){
-                    b >>= (int)(16);
+                if (((uint32)b & 0xff000000U) == 0) {
+                    b >>= 16;
                 } else {
                     b = ~(b >> 31);
                 }
@@ -204,8 +206,9 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 rgba[3] = 255;
             }
         }
+        break;
     }
-    else if (exprᴛ1 == image.YCbCrSubsampleRatio440) {
+    case var ᴛ when ᴛ == image.YCbCrSubsampleRatio440: {
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
@@ -231,22 +234,22 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ8 = yy1 + 91881 * cr1;
-                if (((uint32)rΔ8 & 0xff000000U) == 0){
-                    rΔ8 >>= (int)(16);
+                if (((uint32)rΔ8 & 0xff000000U) == 0) {
+                    rΔ8 >>= 16;
                 } else {
                     rΔ8 = ~(rΔ8 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if (((uint32)g & 0xff000000U) == 0){
-                    g >>= (int)(16);
+                if (((uint32)g & 0xff000000U) == 0) {
+                    g >>= 16;
                 } else {
                     g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if (((uint32)b & 0xff000000U) == 0){
-                    b >>= (int)(16);
+                if (((uint32)b & 0xff000000U) == 0) {
+                    b >>= 16;
                 } else {
                     b = ~(b >> 31);
                 }
@@ -259,10 +262,11 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 rgba[3] = 255;
             }
         }
+        break;
     }
-    else { /* default: */
+    default: {
         return false;
-    }
+    }}
     return true;
 }
 

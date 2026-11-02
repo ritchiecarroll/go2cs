@@ -38,9 +38,10 @@ using Δos = os_package;
 partial class os_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goOsTestDrainStdinˢ = "GO_OS_TEST_DRAIN_STDIN"u8;
+internal static ref readonly @string goOsTestDrainStdinˢ => ref goOsTestDrainStdinˢᵇ;
+private static readonly @string goOsTestDrainStdinˢᵇ = "GO_OS_TEST_DRAIN_STDIN"u8;
 
-public static void TestMain(ж<Δtesting.M> Ꮡm) {
+public static void TestMain(ж<Δtesting.M> m) {
     if (Getenv(goOsTestDrainStdinˢ) == "1"u8) {
         Stdout.Close();
         Δio.Copy(Δio.Discard, new os_test_package.os_FileжReader(Stdin));
@@ -49,53 +50,54 @@ public static void TestMain(ж<Δtesting.M> Ꮡm) {
 
     Δlog.SetFlags((nint)((nint)Δlog.LstdFlags | (nint)Δlog.Lshortfile));
 
-    Exit(Ꮡm.Run());
+    Exit(m.Run());
 }
 
-internal static slice<@string> dot = new @string[]{
-    "dir_unix.go"u8,
-    "env.go"u8,
-    "error.go"u8,
-    "file.go"u8,
-    "os_test.go"u8,
-    "types.go"u8,
-    "stat_darwin.go"u8,
-    "stat_linux.go"u8
-}.slice();
+internal static slice<@string> dot = slice<@string>([
+    "dir_unix.go",
+    "env.go",
+    "error.go",
+    "file.go",
+    "os_test.go",
+    "types.go",
+    "stat_darwin.go",
+    "stat_linux.go"
+]);
 
 partial struct sysDir {
     internal @string name;
     internal slice<@string> files;
 }
 
-internal static ж<sysDir> sysdir = ((Func<ж<sysDir>>)(() => {
+internal static ж<sysDir> sysdir = func(ж<sysDir> () => {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "android"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8: {
         return Ꮡ(new sysDir(
-            "/system/lib"u8,
-            new @string[]{
-                "libmedia.so"u8,
-                "libpowermanager.so"u8
-            }.slice()
+            "/system/lib",
+            slice<@string>([
+                "libmedia.so",
+                "libpowermanager.so"
+            ])
         ));
     }
-    if (exprᴛ1 == "ios"u8) {
+    case {} when exprᴛ1 == "ios"u8: {
         var (wd, err) = syscall.Getwd();
-        if (err != default!) {
+        if (err != nil) {
             wd = err.Error();
         }
         var sd = Ꮡ(new sysDir(
             filepath.Join(wd, "..", ".."),
-            new @string[]{
-                "ResourceRules.plist"u8,
-                "Info.plist"u8
-            }.slice()
+            slice<@string>([
+                "ResourceRules.plist",
+                "Info.plist"
+            ])
         ));
         var found = true;
-        foreach (var (_, f) in (~sd).files) {
-            @string path = filepath.Join((~sd).name, f);
+        foreach (var (_, f) in sd.files) {
+            @string path = filepath.Join(sd.name, f);
             {
-                var (_, errΔ1) = Stat(path); if (errΔ1 != default!) {
+                var (_, errΔ1) = Stat(path); if (errΔ1 != nil) {
                     found = false;
                     break;
                 }
@@ -106,207 +108,213 @@ internal static ж<sysDir> sysdir = ((Func<ж<sysDir>>)(() => {
         }
         // In a self-hosted iOS build the above files might
         // not exist. Look for system files instead below.
+        break;
     }
-    else if (exprᴛ1 == "windows"u8) {
+    case {} when exprᴛ1 == "windows"u8: {
         return Ꮡ(new sysDir(
-            Getenv("SystemRoot"u8) + "\\system32\\drivers\\etc"u8,
-            new @string[]{
-                "networks"u8,
-                "protocol"u8,
-                "services"u8
-            }.slice()
+            Getenv("SystemRoot") + "\\system32\\drivers\\etc"u8,
+            slice<@string>([
+                "networks",
+                "protocol",
+                "services"
+            ])
         ));
     }
-    else if (exprᴛ1 == "plan9"u8) {
+    case {} when exprᴛ1 == "plan9"u8: {
         return Ꮡ(new sysDir(
-            "/lib/ndb"u8,
-            new @string[]{
-                "common"u8,
-                "local"u8
-            }.slice()
+            "/lib/ndb",
+            slice<@string>([
+                "common",
+                "local"
+            ])
         ));
     }
-    else if (exprᴛ1 == "wasip1"u8) {
+    case {} when exprᴛ1 == "wasip1"u8: {
         // wasmtime has issues resolving symbolic links that are often present
         // in directories like /etc/group below (e.g. private/etc/group on OSX).
         // For this reason we use files in the Go source tree instead.
         return Ꮡ(new sysDir(
             Δruntime.GOROOT(),
-            new @string[]{
-                "go.env"u8,
-                "LICENSE"u8,
-                "CONTRIBUTING.md"u8
-            }.slice()
+            slice<@string>([
+                "go.env",
+                "LICENSE",
+                "CONTRIBUTING.md"
+            ])
         ));
-    }
+    }}
     return Ꮡ(new sysDir(
-        "/etc"u8,
-        new @string[]{
-            "group"u8,
-            "hosts"u8,
-            "passwd"u8
-        }.slice()
+        "/etc",
+        slice<@string>([
+            "group",
+            "hosts",
+            "passwd"
+        ])
     ));
-}))();
+})();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object openFailedˢ = (@string)"open failed:"u8;
 
-internal static int64 size(@string name, ж<Δtesting.T> Ꮡt) {
+internal static int64 size(@string name, ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         var (@file, err) = Open(name);
-        if (err != default!) {
-            Ꮡt.Fatal(openFailedˢ, err);
+        if (err != nil) {
+            t.Fatal(openFailedˢ, err);
         }
         var fileʗ1 = @file;
         defer(() => {
             {
-                var errΔ1 = fileʗ1.Close(); if (errΔ1 != default!) {
-                    Ꮡt.Error(errΔ1);
+                var errΔ1 = fileʗ1.Close(); if (errΔ1 != nil) {
+                    t.Error(errΔ1);
                 }
             }
         }, ref ᒐ);
         (var n, err) = Δio.Copy(Δio.Discard, new os_test_package.os_FileжReader(@file));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         return n;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static bool /*r*/ equal(@string name1, @string name2) {
-    bool r = default!;
+    bool r = default;
 
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "windows"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8: {
         r = strings.EqualFold(name1, name2);
+        break;
     }
-    else { /* default: */
+    default: {
         r = name1 == name2;
-    }
+        break;
+    }}
     return r;
 }
 
-internal static ж<Δos.File> /*f*/ newFile(ж<Δtesting.T> Ꮡt) {
-    ж<Δos.File> f = default!;
+internal static ж<Δos.File> /*f*/ newFile(ж<Δtesting.T> t) {
+    ж<Δos.File> f = default;
 
-    Ꮡt.Helper();
-    (f, var err) = CreateTemp(""u8, "_Go_"u8 + Ꮡt.Name());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    t.Helper();
+    (f, var err) = CreateTemp(""u8, "_Go_"u8 + t.Name());
+    if (err != nil) {
+        t.Fatal(err);
     }
     var fʗ1 = f;
-    Ꮡt.Cleanup(() => {
+    t.Cleanup(() => {
         {
-            var errΔ1 = fʗ1.Close(); if (errΔ1 != default! && !errors.Is(errΔ1, ErrClosed)) {
-                Ꮡt.Fatal(errΔ1);
+            var errΔ1 = fʗ1.Close(); if (errΔ1 != nil && !errors.Is(errΔ1, ErrClosed)) {
+                t.Fatal(errΔ1);
             }
         }
         {
-            var errΔ2 = Remove(fʗ1.Name()); if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            var errΔ2 = Remove(fʗ1.Name()); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
     });
     return f;
 }
 
-internal static @string sfdir = (~sysdir).name;
+internal static @string sfdir = sysdir.name;
 
-internal static @string sfname = (~sysdir).files[0];
+internal static @string sfname = sysdir.files[0];
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object statFailedˢ = (@string)"stat failed:"u8;
 internal static readonly object nameShouldBeˢ = (@string)"name should be "u8;
 internal static readonly object sizeShouldBeˢ = (@string)"size should be"u8;
 
-public static void TestStat(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestStat(ж<Δtesting.T> t) {
+    t.Parallel();
 
     @string path = sfdir + "/"u8 + sfname;
     var (dir, err) = Stat(path);
-    if (err != default!) {
-        Ꮡt.Fatal(statFailedˢ, err);
+    if (err != nil) {
+        t.Fatal(statFailedˢ, err);
     }
     if (!equal(sfname, dir.Name())) {
-        Ꮡt.Error(nameShouldBeˢ, sfname, (@string)"; is"u8, dir.Name());
+        t.Error(nameShouldBeˢ, sfname, (@string)"; is", dir.Name());
     }
-    var filesize = size(path, Ꮡt);
+    var filesize = size(path, t);
     if (dir.Size() != filesize) {
-        Ꮡt.Error(sizeShouldBeˢ, filesize, (@string)"; is"u8, dir.Size());
+        t.Error(sizeShouldBeˢ, filesize, (@string)"; is", dir.Size());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noSuchFileˢ = "no-such-file"u8;
+internal static ref readonly @string noSuchFileˢ => ref noSuchFileˢᵇ;
+private static readonly @string noSuchFileˢᵇ = "no-such-file"u8;
 internal static readonly object gotNilWantErrorˢ = (@string)"got nil, want error"u8;
-internal static readonly @string symlinkˢ = "symlink"u8;
+internal static ref readonly @string symlinkˢ => ref symlinkˢᵇ;
+private static readonly @string symlinkˢᵇ = "symlink"u8;
 
-public static void TestStatError(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestStatError(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
 
     @string path = noSuchFileˢ;
 
     var (fi, err) = Stat(path);
-    if (err == default!) {
-        Ꮡt.Fatal(gotNilWantErrorˢ);
+    if (err == nil) {
+        t.Fatal(gotNilWantErrorˢ);
     }
-    if (fi != default!) {
-        Ꮡt.Errorf("got %v, want nil"u8, fi);
+    if (fi != nil) {
+        t.Errorf("got %v, want nil", fi);
     }
     {
         var (perr, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("got %T, want %T"u8, err, perr.OrTypedNil());
+            t.Errorf("got %T, want %T", err, perr.OrTypedNil());
         }
     }
 
-    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
 
     @string link = symlinkˢ;
     err = Symlink(path, link);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     (fi, err) = Stat(link);
-    if (err == default!) {
-        Ꮡt.Fatal(gotNilWantErrorˢ);
+    if (err == nil) {
+        t.Fatal(gotNilWantErrorˢ);
     }
-    if (fi != default!) {
-        Ꮡt.Errorf("got %v, want nil"u8, fi);
+    if (fi != nil) {
+        t.Errorf("got %v, want nil", fi);
     }
     {
         var (perr, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("got %T, want %T"u8, err, perr.OrTypedNil());
+            t.Errorf("got %T, want %T", err, perr.OrTypedNil());
         }
     }
 }
 
-public static void TestStatSymlinkLoop(ж<Δtesting.T> Ꮡt) {
+public static void TestStatSymlinkLoop(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
-        Ꮡt.Chdir(Ꮡt.TempDir());
+        testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
+        t.Chdir(t.TempDir());
 
-        var err = Symlink("x"u8, "y"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = Symlink("x", "y");
+        if (err != nil) {
+            t.Fatal(err);
         }
         defer(Remove, (@string)"y", ref ᒐ);
 
-        err = Symlink("y"u8, "x"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        err = Symlink("y", "x");
+        if (err != nil) {
+            t.Fatal(err);
         }
         defer(Remove, (@string)"x", ref ᒐ);
 
-        (_, err) = Stat("x"u8);
+        (_, err) = Stat("x");
         {
             var (_, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok) {
-                Ꮡt.Errorf("expected *PathError, got %T: %v\n"u8, err, err);
+                t.Errorf("expected *PathError, got %T: %v\n", err, err);
             }
         }
     }
@@ -317,28 +325,28 @@ public static void TestStatSymlinkLoop(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object fstatFailedˢ = (@string)"fstat failed:"u8;
 
-public static void TestFstat(ж<Δtesting.T> Ꮡt) {
+public static void TestFstat(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
 
         @string path = sfdir + "/"u8 + sfname;
         var (@file, err1) = Open(path);
-        if (err1 != default!) {
-            Ꮡt.Fatal(openFailedˢ, err1);
+        if (err1 != nil) {
+            t.Fatal(openFailedˢ, err1);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
         var (dir, err2) = @file.Stat();
-        if (err2 != default!) {
-            Ꮡt.Fatal(fstatFailedˢ, err2);
+        if (err2 != nil) {
+            t.Fatal(fstatFailedˢ, err2);
         }
         if (!equal(sfname, dir.Name())) {
-            Ꮡt.Error(nameShouldBeˢ, sfname, (@string)"; is"u8, dir.Name());
+            t.Error(nameShouldBeˢ, sfname, (@string)"; is", dir.Name());
         }
-        var filesize = size(path, Ꮡt);
+        var filesize = size(path, t);
         if (dir.Size() != filesize) {
-            Ꮡt.Error(sizeShouldBeˢ, filesize, (@string)"; is"u8, dir.Size());
+            t.Error(sizeShouldBeˢ, filesize, (@string)"; is", dir.Size());
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -348,48 +356,48 @@ public static void TestFstat(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object lstatFailedˢ = (@string)"lstat failed:"u8;
 
-public static void TestLstat(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestLstat(ж<Δtesting.T> t) {
+    t.Parallel();
 
     @string path = sfdir + "/"u8 + sfname;
     var (dir, err) = Lstat(path);
-    if (err != default!) {
-        Ꮡt.Fatal(lstatFailedˢ, err);
+    if (err != nil) {
+        t.Fatal(lstatFailedˢ, err);
     }
     if (!equal(sfname, dir.Name())) {
-        Ꮡt.Error(nameShouldBeˢ, sfname, (@string)"; is"u8, dir.Name());
+        t.Error(nameShouldBeˢ, sfname, (@string)"; is", dir.Name());
     }
     if ((fs.FileMode)(dir.Mode() & ModeSymlink) == 0) {
-        var filesize = size(path, Ꮡt);
+        var filesize = size(path, t);
         if (dir.Size() != filesize) {
-            Ꮡt.Error(sizeShouldBeˢ, filesize, (@string)"; is"u8, dir.Size());
+            t.Error(sizeShouldBeˢ, filesize, (@string)"; is", dir.Size());
         }
     }
 }
 
 // Read with length 0 should not return EOF.
-public static void TestRead0(ж<Δtesting.T> Ꮡt) {
+public static void TestRead0(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
 
         @string path = sfdir + "/"u8 + sfname;
         var (f, err) = Open(path);
-        if (err != default!) {
-            Ꮡt.Fatal(openFailedˢ, err);
+        if (err != nil) {
+            t.Fatal(openFailedˢ, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         var b = new slice<byte>(0);
         (var n, err) = f.Read(b);
-        if (n != 0 || err != default!) {
-            Ꮡt.Errorf("Read(0) = %d, %v, want 0, nil"u8, n, err);
+        if (n != 0 || err != nil) {
+            t.Errorf("Read(0) = %d, %v, want 0, nil", n, err);
         }
         b = new slice<byte>(100);
         (n, err) = f.Read(b);
-        if (n <= 0 || err != default!) {
-            Ꮡt.Errorf("Read(100) = %d, %v, want >0, nil"u8, n, err);
+        if (n <= 0 || err != nil) {
+            t.Errorf("Read(100) = %d, %v, want >0, nil", n, err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -397,13 +405,13 @@ public static void TestRead0(ж<Δtesting.T> Ꮡt) {
 }
 
 // Reading a closed file should return ErrClosed error
-public static void TestReadClosed(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestReadClosed(ж<Δtesting.T> t) {
+    t.Parallel();
 
     @string path = sfdir + "/"u8 + sfname;
     var (@file, err) = Open(path);
-    if (err != default!) {
-        Ꮡt.Fatal(openFailedˢ, err);
+    if (err != nil) {
+        t.Fatal(openFailedˢ, err);
     }
     @file.Close(); // close immediately
 
@@ -411,8 +419,8 @@ public static void TestReadClosed(ж<Δtesting.T> Ꮡt) {
     (_, err) = @file.Read(b);
 
     var (e, ok) = err._<ж<fs.PathError>>(ᐧ);
-    if (!ok || !AreEqual((~e).Err, ErrClosed)) {
-        Ꮡt.Fatalf("Read: got %T(%v), want %T(%v)"u8, err, err, e.OrTypedNil(), ErrClosed);
+    if (!ok || !AreEqual(e.Err, ErrClosed)) {
+        t.Fatalf("Read: got %T(%v), want %T(%v)", err, err, e.OrTypedNil(), ErrClosed);
     }
 }
 
@@ -429,20 +437,20 @@ internal static Action<ж<Δtesting.T>> testReaddirnames(@string dir, slice<@str
             t.Parallel();
 
             var (@file, err) = Open(dir);
-            if (err != default!) {
-                t.Fatalf("open %q failed: %v"u8, dir, err);
+            if (err != nil) {
+                t.Fatalf("open %q failed: %v", dir, err);
             }
             var fileʗ1 = @file;
             defer(() => fileʗ1.Close(), ref ᒐ);
             var (s, err2) = @file.Readdirnames(-1);
-            if (err2 != default!) {
-                t.Fatalf("Readdirnames %q failed: %v"u8, dir, err2);
+            if (err2 != nil) {
+                t.Fatalf("Readdirnames %q failed: %v", dir, err2);
             }
             foreach (var (_, m) in contentsʗ1) {
                 var found = false;
                 foreach (var (_, n) in s) {
                     if (n == "."u8 || n == ".."u8) {
-                        t.Errorf("got %q in directory"u8, n);
+                        t.Errorf("got %q in directory", n);
                     }
                     if (!equal(m, n)) {
                         continue;
@@ -456,7 +464,7 @@ internal static Action<ж<Δtesting.T>> testReaddirnames(@string dir, slice<@str
                     t.Error(couldNotFindˢ, m);
                 }
             }
-            if (s == default!) {
+            if (s == nil) {
                 t.Error(readdirnamesReturnedNilˢ);
             }
         }
@@ -476,20 +484,20 @@ internal static Action<ж<Δtesting.T>> testReaddir(@string dir, slice<@string> 
             t.Parallel();
 
             var (@file, err) = Open(dir);
-            if (err != default!) {
-                t.Fatalf("open %q failed: %v"u8, dir, err);
+            if (err != nil) {
+                t.Fatalf("open %q failed: %v", dir, err);
             }
             var fileʗ1 = @file;
             defer(() => fileʗ1.Close(), ref ᒐ);
             var (s, err2) = @file.Readdir(-1);
-            if (err2 != default!) {
-                t.Fatalf("Readdir %q failed: %v"u8, dir, err2);
+            if (err2 != nil) {
+                t.Fatalf("Readdir %q failed: %v", dir, err2);
             }
             foreach (var (_, m) in contentsʗ1) {
                 var found = false;
                 foreach (var (_, n) in s) {
                     if (n.Name() == "."u8 || n.Name() == ".."u8) {
-                        t.Errorf("got %q in directory"u8, n.Name());
+                        t.Errorf("got %q in directory", n.Name());
                     }
                     if (!equal(m, n.Name())) {
                         continue;
@@ -503,7 +511,7 @@ internal static Action<ж<Δtesting.T>> testReaddir(@string dir, slice<@string> 
                     t.Error(couldNotFindˢ, m);
                 }
             }
-            if (s == default!) {
+            if (s == nil) {
                 t.Error(readdirReturnedNilˢ);
             }
         }
@@ -523,20 +531,20 @@ internal static Action<ж<Δtesting.T>> testReadDir(@string dir, slice<@string> 
             t.Parallel();
 
             var (@file, err) = Open(dir);
-            if (err != default!) {
-                t.Fatalf("open %q failed: %v"u8, dir, err);
+            if (err != nil) {
+                t.Fatalf("open %q failed: %v", dir, err);
             }
             var fileʗ1 = @file;
             defer(() => fileʗ1.Close(), ref ᒐ);
             var (s, err2) = @file.ReadDir(-1);
-            if (err2 != default!) {
-                t.Fatalf("ReadDir %q failed: %v"u8, dir, err2);
+            if (err2 != nil) {
+                t.Fatalf("ReadDir %q failed: %v", dir, err2);
             }
             foreach (var (_, m) in contentsʗ1) {
                 var found = false;
                 foreach (var (_, n) in s) {
                     if (n.Name() == "."u8 || n.Name() == ".."u8) {
-                        t.Errorf("got %q in directory"u8, n);
+                        t.Errorf("got %q in directory", n);
                     }
                     if (!equal(m, n.Name())) {
                         continue;
@@ -546,29 +554,29 @@ internal static Action<ж<Δtesting.T>> testReadDir(@string dir, slice<@string> 
                     }
                     found = true;
                     var (lstat, errΔ1) = Lstat(dir + "/"u8 + m);
-                    if (errΔ1 != default!) {
+                    if (errΔ1 != nil) {
                         t.Fatal(errΔ1);
                     }
                     if (n.IsDir() != lstat.IsDir()) {
-                        t.Errorf("%s: IsDir=%v, want %v"u8, m, n.IsDir(), lstat.IsDir());
+                        t.Errorf("%s: IsDir=%v, want %v", m, n.IsDir(), lstat.IsDir());
                     }
                     if (n.Type() != lstat.Mode().Type()) {
-                        t.Errorf("%s: IsDir=%v, want %v"u8, m, n.Type(), lstat.Mode().Type());
+                        t.Errorf("%s: IsDir=%v, want %v", m, n.Type(), lstat.Mode().Type());
                     }
                     (var info, errΔ1) = n.Info();
-                    if (errΔ1 != default!) {
-                        t.Errorf("%s: Info: %v"u8, m, errΔ1);
+                    if (errΔ1 != nil) {
+                        t.Errorf("%s: Info: %v", m, errΔ1);
                         continue;
                     }
                     if (!SameFile(info, lstat)) {
-                        t.Errorf("%s: Info: SameFile(info, lstat) = false"u8, m);
+                        t.Errorf("%s: Info: SameFile(info, lstat) = false", m);
                     }
                 }
                 if (!found) {
                     t.Error(couldNotFindˢ, m);
                 }
             }
-            if (s == default!) {
+            if (s == nil) {
                 t.Error(readDirReturnedNilˢ);
             }
         }
@@ -578,100 +586,102 @@ internal static Action<ж<Δtesting.T>> testReadDir(@string dir, slice<@string> 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sysdirˢ = "sysdir"u8;
-internal static readonly @string tempDirˢ = "TempDir"u8;
+internal static ref readonly @string sysdirˢ => ref sysdirˢᵇ;
+private static readonly @string sysdirˢᵇ = "sysdir"u8;
+internal static ref readonly @string tempDirˢ => ref tempDirˢᵇ;
+private static readonly @string tempDirˢᵇ = "TempDir"u8;
 
-public static void TestFileReaddirnames(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestFileReaddirnames(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    Ꮡt.Run("."u8, testReaddirnames("."u8, dot));
-    Ꮡt.Run(sysdirˢ, testReaddirnames((~sysdir).name, (~sysdir).files));
-    Ꮡt.Run(tempDirˢ, testReaddirnames(Ꮡt.TempDir(), default!));
+    t.Run(".", testReaddirnames(".", dot));
+    t.Run(sysdirˢ, testReaddirnames(sysdir.name, sysdir.files));
+    t.Run(tempDirˢ, testReaddirnames(t.TempDir(), default));
 }
 
-public static void TestFileReaddir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestFileReaddir(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    Ꮡt.Run("."u8, testReaddir("."u8, dot));
-    Ꮡt.Run(sysdirˢ, testReaddir((~sysdir).name, (~sysdir).files));
-    Ꮡt.Run(tempDirˢ, testReaddir(Ꮡt.TempDir(), default!));
+    t.Run(".", testReaddir(".", dot));
+    t.Run(sysdirˢ, testReaddir(sysdir.name, sysdir.files));
+    t.Run(tempDirˢ, testReaddir(t.TempDir(), default));
 }
 
-public static void TestFileReadDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestFileReadDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    Ꮡt.Run("."u8, testReadDir("."u8, dot));
-    Ꮡt.Run(sysdirˢ, testReadDir((~sysdir).name, (~sysdir).files));
-    Ꮡt.Run(tempDirˢ, testReadDir(Ꮡt.TempDir(), default!));
+    t.Run(".", testReadDir(".", dot));
+    t.Run(sysdirˢ, testReadDir(sysdir.name, sysdir.files));
+    t.Run(tempDirˢ, testReadDir(t.TempDir(), default));
 }
 
 internal static void benchmarkReaddirname(@string path, ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    nint nentries = default!;
+    nint nentries = default;
     for (nint i = 0; i < b.N; i++) {
         var (f, err) = Open(path);
-        if (err != default!) {
-            Ꮡb.Fatalf("open %q failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("open %q failed: %v", path, err);
         }
         (var ns, err) = f.Readdirnames(-1);
         f.Close();
-        if (err != default!) {
-            Ꮡb.Fatalf("readdirnames %q failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("readdirnames %q failed: %v", path, err);
         }
         nentries = len(ns);
     }
-    Ꮡb.Logf("benchmarkReaddirname %q: %d entries"u8, path, nentries);
+    Ꮡb.Logf("benchmarkReaddirname %q: %d entries", path, nentries);
 }
 
 internal static void benchmarkReaddir(@string path, ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    nint nentries = default!;
+    nint nentries = default;
     for (nint i = 0; i < b.N; i++) {
         var (f, err) = Open(path);
-        if (err != default!) {
-            Ꮡb.Fatalf("open %q failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("open %q failed: %v", path, err);
         }
         (var fs, err) = f.Readdir(-1);
         f.Close();
-        if (err != default!) {
-            Ꮡb.Fatalf("readdir %q failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("readdir %q failed: %v", path, err);
         }
         nentries = len(fs);
     }
-    Ꮡb.Logf("benchmarkReaddir %q: %d entries"u8, path, nentries);
+    Ꮡb.Logf("benchmarkReaddir %q: %d entries", path, nentries);
 }
 
 internal static void benchmarkReadDir(@string path, ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    nint nentries = default!;
+    nint nentries = default;
     for (nint i = 0; i < b.N; i++) {
         var (f, err) = Open(path);
-        if (err != default!) {
-            Ꮡb.Fatalf("open %q failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("open %q failed: %v", path, err);
         }
         (var fs, err) = f.ReadDir(-1);
         f.Close();
-        if (err != default!) {
-            Ꮡb.Fatalf("readdir %q failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("readdir %q failed: %v", path, err);
         }
         nentries = len(fs);
     }
-    Ꮡb.Logf("benchmarkReadDir %q: %d entries"u8, path, nentries);
+    Ꮡb.Logf("benchmarkReadDir %q: %d entries", path, nentries);
 }
 
-public static void BenchmarkReaddirname(ж<Δtesting.B> Ꮡb) {
-    benchmarkReaddirname("."u8, Ꮡb);
+public static void BenchmarkReaddirname(ж<Δtesting.B> b) {
+    benchmarkReaddirname(".", b);
 }
 
-public static void BenchmarkReaddir(ж<Δtesting.B> Ꮡb) {
-    benchmarkReaddir("."u8, Ꮡb);
+public static void BenchmarkReaddir(ж<Δtesting.B> b) {
+    benchmarkReaddir(".", b);
 }
 
-public static void BenchmarkReadDir(ж<Δtesting.B> Ꮡb) {
-    benchmarkReadDir("."u8, Ꮡb);
+public static void BenchmarkReadDir(ж<Δtesting.B> b) {
+    benchmarkReadDir(".", b);
 }
 
 internal static void benchmarkStat(ж<Δtesting.B> Ꮡb, @string path) {
@@ -680,8 +690,8 @@ internal static void benchmarkStat(ж<Δtesting.B> Ꮡb, @string path) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         var (_, err) = Stat(path);
-        if (err != default!) {
-            Ꮡb.Fatalf("Stat(%q) failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("Stat(%q) failed: %v", path, err);
         }
     }
 }
@@ -692,58 +702,60 @@ internal static void benchmarkLstat(ж<Δtesting.B> Ꮡb, @string path) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         var (_, err) = Lstat(path);
-        if (err != default!) {
-            Ꮡb.Fatalf("Lstat(%q) failed: %v"u8, path, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("Lstat(%q) failed: %v", path, err);
         }
     }
 }
 
-public static void BenchmarkStatDot(ж<Δtesting.B> Ꮡb) {
-    benchmarkStat(Ꮡb, "."u8);
+public static void BenchmarkStatDot(ж<Δtesting.B> b) {
+    benchmarkStat(b, ".");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string srcOsOsTestGoˢ = "src/os/os_test.go"u8;
+internal static ref readonly @string srcOsOsTestGoˢ => ref srcOsOsTestGoˢᵇ;
+private static readonly @string srcOsOsTestGoˢᵇ = "src/os/os_test.go"u8;
 
-public static void BenchmarkStatFile(ж<Δtesting.B> Ꮡb) {
-    benchmarkStat(Ꮡb, filepath.Join(Δruntime.GOROOT(), srcOsOsTestGoˢ));
+public static void BenchmarkStatFile(ж<Δtesting.B> b) {
+    benchmarkStat(b, filepath.Join(Δruntime.GOROOT(), srcOsOsTestGoˢ));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string srcOsˢ = "src/os"u8;
+internal static ref readonly @string srcOsˢ => ref srcOsˢᵇ;
+private static readonly @string srcOsˢᵇ = "src/os"u8;
 
-public static void BenchmarkStatDir(ж<Δtesting.B> Ꮡb) {
-    benchmarkStat(Ꮡb, filepath.Join(Δruntime.GOROOT(), srcOsˢ));
+public static void BenchmarkStatDir(ж<Δtesting.B> b) {
+    benchmarkStat(b, filepath.Join(Δruntime.GOROOT(), srcOsˢ));
 }
 
-public static void BenchmarkLstatDot(ж<Δtesting.B> Ꮡb) {
-    benchmarkLstat(Ꮡb, "."u8);
+public static void BenchmarkLstatDot(ж<Δtesting.B> b) {
+    benchmarkLstat(b, ".");
 }
 
-public static void BenchmarkLstatFile(ж<Δtesting.B> Ꮡb) {
-    benchmarkLstat(Ꮡb, filepath.Join(Δruntime.GOROOT(), srcOsOsTestGoˢ));
+public static void BenchmarkLstatFile(ж<Δtesting.B> b) {
+    benchmarkLstat(b, filepath.Join(Δruntime.GOROOT(), srcOsOsTestGoˢ));
 }
 
-public static void BenchmarkLstatDir(ж<Δtesting.B> Ꮡb) {
-    benchmarkLstat(Ꮡb, filepath.Join(Δruntime.GOROOT(), srcOsˢ));
+public static void BenchmarkLstatDir(ж<Δtesting.B> b) {
+    benchmarkLstat(b, filepath.Join(Δruntime.GOROOT(), srcOsˢ));
 }
 
 // Read the directory one entry at a time.
-internal static slice<@string> smallReaddirnames(ж<Δos.File> Ꮡfile, nint length, ж<Δtesting.T> Ꮡt) {
+internal static slice<@string> smallReaddirnames(ж<Δos.File> Ꮡfile, nint length, ж<Δtesting.T> t) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     var names = new slice<@string>(length);
     nint count = 0;
-    while (ᐧ) {
+    for (;;) {
         var (d, err) = Ꮡfile.Readdirnames(1);
         if (AreEqual(err, Δio.EOF)) {
             break;
         }
-        if (err != default!) {
-            Ꮡt.Fatalf("readdirnames %q failed: %v"u8, @file.Name(), err);
+        if (err != nil) {
+            t.Fatalf("readdirnames %q failed: %v", @file.Name(), err);
         }
         if (len(d) == 0) {
-            Ꮡt.Fatalf("readdirnames %q returned empty slice and no error"u8, @file.Name());
+            t.Fatalf("readdirnames %q returned empty slice and no error", @file.Name());
         }
         names[count] = d[0];
         count++;
@@ -752,60 +764,69 @@ internal static slice<@string> smallReaddirnames(ж<Δos.File> Ꮡfile, nint len
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string usrBinˢ = "/usr/bin"u8;
-internal static readonly @string systemBinˢ = "/system/bin"u8;
-internal static readonly @string binˢ = "/bin"u8;
-internal static readonly @string systemRootˢ = "SystemRoot"u8;
+internal static ref readonly @string usrBinˢ => ref usrBinˢᵇ;
+private static readonly @string usrBinˢᵇ = "/usr/bin"u8;
+internal static ref readonly @string systemBinˢ => ref systemBinˢᵇ;
+private static readonly @string systemBinˢᵇ = "/system/bin"u8;
+internal static ref readonly @string binˢ => ref binˢᵇ;
+private static readonly @string binˢᵇ = "/bin"u8;
+internal static ref readonly @string systemRootˢ => ref systemRootˢᵇ;
+private static readonly @string systemRootˢᵇ = "SystemRoot"u8;
 
 // Check that reading a directory one entry at a time gives the same result
 // as reading it all at once.
-public static void TestReaddirnamesOneAtATime(ж<Δtesting.T> Ꮡt) {
+public static void TestReaddirnamesOneAtATime(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
 
         // big directory that doesn't change often.
         @string dir = usrBinˢ;
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "android"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "android"u8: {
             dir = systemBinˢ;
+            break;
         }
-        else if (exprᴛ1 == "ios"u8 || exprᴛ1 == "wasip1"u8) {
+        case {} when exprᴛ1 == "ios"u8 || exprᴛ1 == "wasip1"u8: {
             var (wd, errΔ2) = Getwd();
-            if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
             dir = wd;
+            break;
         }
-        else if (exprᴛ1 == "plan9"u8) {
+        case {} when exprᴛ1 == "plan9"u8: {
             dir = binˢ;
+            break;
         }
-        else if (exprᴛ1 == "windows"u8) {
+        case {} when exprᴛ1 == "windows"u8: {
             dir = Getenv(systemRootˢ) + "\\system32"u8;
-        }
+            break;
+        }}
         var (@file, err) = Open(dir);
-        if (err != default!) {
-            Ꮡt.Fatalf("open %q failed: %v"u8, dir, err);
+        if (err != nil) {
+            t.Fatalf("open %q failed: %v", dir, err);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
         var (all, err1) = @file.Readdirnames(-1);
-        if (err1 != default!) {
-            Ꮡt.Fatalf("readdirnames %q failed: %v"u8, dir, err1);
+        if (err1 != nil) {
+            t.Fatalf("readdirnames %q failed: %v", dir, err1);
         }
         var (file1, err2) = Open(dir);
-        if (err2 != default!) {
-            Ꮡt.Fatalf("open %q failed: %v"u8, dir, err2);
+        if (err2 != nil) {
+            t.Fatalf("open %q failed: %v", dir, err2);
         }
         var file1ʗ1 = file1;
         defer(() => file1ʗ1.Close(), ref ᒐ);
-        var small = smallReaddirnames(file1, len(all) + 100, Ꮡt); // +100 in case we screw up
+        var small = smallReaddirnames(file1, len(all) + 100, t); // +100 in case we screw up
         if (len(small) < len(all)) {
-            Ꮡt.Fatalf("len(small) is %d, less than %d"u8, len(small), len(all));
+            t.Fatalf("len(small) is %d, less than %d", len(small), len(all));
         }
         foreach (var (i, n) in all) {
             if (small[i] != n) {
-                Ꮡt.Errorf("small read %q mismatch: %v"u8, small[i], n);
+                t.Errorf("small read %q mismatch: %v", small[i], n);
             }
         }
     }
@@ -816,157 +837,164 @@ public static void TestReaddirnamesOneAtATime(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testShortSkippingˢ = (@string)"test.short; skipping"u8;
 
-public static void TestReaddirNValues(ж<Δtesting.T> Ꮡt) {
+public static void TestReaddirNValues(ж<Δtesting.T> t) {
     if (Δtesting.Short()) {
-        Ꮡt.Skip(testShortSkippingˢ);
+        t.Skip(testShortSkippingˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
     for (nint i = 1; i <= 105; i++) {
         var (f, err) = Create(filepath.Join(dir, fmt.Sprintf("%d"u8, i)));
-        if (err != default!) {
-            Ꮡt.Fatalf("Create: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Create: %v", err);
         }
-        f.Write(slice<byte>(strings.Repeat("X"u8, i)));
+        f.Write(slice<byte>(strings.Repeat("X", i)));
         f.Close();
     }
 
     ref var d = ref heap<ж<Δos.File>>(out var Ꮡd);
     void openDir() {
-        error err = default!;
+        error err = default;
         (Ꮡd.ValueSlot, err) = Open(dir);
-        if (err != default!) {
-            Ꮡt.Fatalf("Open directory: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Open directory: %v", err);
         }
     }
 
     var readdirExpect = (nint n, nint want, error wantErr) => {
-        Ꮡt.Helper();
+        t.Helper();
         var (fi, err) = Ꮡd.ValueSlot.Readdir(n);
         if (!AreEqual(err, wantErr)) {
-            Ꮡt.Fatalf("Readdir of %d got error %v, want %v"u8, n, err, wantErr);
+            t.Fatalf("Readdir of %d got error %v, want %v", n, err, wantErr);
         }
         {
             nint g = len(fi);
             nint e = want; if (g != e) {
-                Ꮡt.Errorf("Readdir of %d got %d files, want %d"u8, n, g, e);
+                t.Errorf("Readdir of %d got %d files, want %d", n, g, e);
             }
         }
     };
 
     var readDirExpect = (nint n, nint want, error wantErr) => {
-        Ꮡt.Helper();
+        t.Helper();
         var (de, err) = Ꮡd.ValueSlot.ReadDir(n);
         if (!AreEqual(err, wantErr)) {
-            Ꮡt.Fatalf("ReadDir of %d got error %v, want %v"u8, n, err, wantErr);
+            t.Fatalf("ReadDir of %d got error %v, want %v", n, err, wantErr);
         }
         {
             nint g = len(de);
             nint e = want; if (g != e) {
-                Ꮡt.Errorf("ReadDir of %d got %d files, want %d"u8, n, g, e);
+                t.Errorf("ReadDir of %d got %d files, want %d", n, g, e);
             }
         }
     };
 
     var readdirnamesExpect = (nint n, nint want, error wantErr) => {
-        Ꮡt.Helper();
+        t.Helper();
         var (fi, err) = Ꮡd.ValueSlot.Readdirnames(n);
         if (!AreEqual(err, wantErr)) {
-            Ꮡt.Fatalf("Readdirnames of %d got error %v, want %v"u8, n, err, wantErr);
+            t.Fatalf("Readdirnames of %d got error %v, want %v", n, err, wantErr);
         }
         {
             nint g = len(fi);
             nint e = want; if (g != e) {
-                Ꮡt.Errorf("Readdirnames of %d got %d files, want %d"u8, n, g, e);
+                t.Errorf("Readdirnames of %d got %d files, want %d", n, g, e);
             }
         }
     };
 
-    foreach (var (_, fn) in new Action<nint, nint, error>[]{readdirExpect, readdirnamesExpect, readDirExpect}.slice()) {
+    foreach (var (_, fn) in slice<Action<nint, nint, error>>([readdirExpect, readdirnamesExpect, readDirExpect])) {
         // Test the slurp case
         openDir();
-        fn(0, 105, default!);
-        fn(0, 0, default!);
+        fn(0, 105, default);
+        fn(0, 0, default);
         d.Close();
 
         // Slurp with -1 instead
         openDir();
-        fn(-1, 105, default!);
-        fn(-2, 0, default!);
-        fn(0, 0, default!);
+        fn(-1, 105, default);
+        fn(-2, 0, default);
+        fn(0, 0, default);
         d.Close();
 
         // Test the bounded case
         openDir();
-        fn(1, 1, default!);
-        fn(2, 2, default!);
-        fn(105, 102, default!); // and tests buffer >100 case
+        fn(1, 1, default);
+        fn(2, 2, default);
+        fn(105, 102, default); // and tests buffer >100 case
         fn(3, 0, Δio.EOF);
         d.Close();
     }
 }
 
-internal static void touch(ж<Δtesting.T> Ꮡt, @string name) {
+internal static void touch(ж<Δtesting.T> t, @string name) {
     var (f, err) = Create(name);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        var errΔ1 = f.Close(); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = f.Close(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string good1ˢ = "good1"u8;
-internal static readonly @string good2ˢ = "good2"u8;
-internal static readonly @string initialReaddirˢ = "initial readdir"u8;
-internal static readonly @string withXDisappearingˢ = "with x disappearing"u8;
-internal static readonly @string someRealErrorˢ = "some real error"u8;
+internal static ref readonly @string good1ˢ => ref good1ˢᵇ;
+private static readonly @string good1ˢᵇ = "good1"u8;
+internal static ref readonly @string good2ˢ => ref good2ˢᵇ;
+private static readonly @string good2ˢᵇ = "good2"u8;
+internal static ref readonly @string initialReaddirˢ => ref initialReaddirˢᵇ;
+private static readonly @string initialReaddirˢᵇ = "initial readdir"u8;
+internal static ref readonly @string withXDisappearingˢ => ref withXDisappearingˢᵇ;
+private static readonly @string withXDisappearingˢᵇ = "with x disappearing"u8;
+internal static ref readonly @string someRealErrorˢ => ref someRealErrorˢᵇ;
+private static readonly @string someRealErrorˢᵇ = "some real error"u8;
 
-public static void TestReaddirStatFailures(ж<Δtesting.T> Ꮡt) {
+public static void TestReaddirStatFailures(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8: {
         // Windows and Plan 9 already do this correctly,
         // but are structured with different syscalls such
         // that they don't use Lstat, so the hook below for
         // testing it wouldn't work.
-        Ꮡt.Skipf("skipping test on %v"u8, Δruntime.GOOS);
-    }
+        t.Skipf("skipping test on %v", Δruntime.GOOS);
+        break;
+    }}
 
-    ref var xerr = ref heap<error>(out var Ꮡxerr);        // error to return for x
-    os_internal_test_package.SetStatHook(new os_test_package.testing_Tжcleanuper(Ꮡt), (ж<Δos.File> f, @string path) => {
-        if (Ꮡxerr.ValueSlot != default! && strings.HasSuffix(path, "x"u8)) {
-            return (default!, Ꮡxerr.ValueSlot);
+    ref var xerr = ref heap<error>(out var Ꮡxerr); // error to return for x
+    os_internal_test_package.SetStatHook(new os_test_package.testing_Tжcleanuper(t), (ж<Δos.File> f, @string path) => {
+        if (Ꮡxerr.ValueSlot != nil && strings.HasSuffix(path, "x")) {
+            return (default, Ꮡxerr.ValueSlot);
         }
-        return (default!, default!);
+        return (default, default);
     });
 
-    @string dir = Ꮡt.TempDir();
-    touch(Ꮡt, filepath.Join(dir, good1ˢ));
-    touch(Ꮡt, filepath.Join(dir, "x")); // will disappear or have an error
-    touch(Ꮡt, filepath.Join(dir, good2ˢ));
+    @string dir = t.TempDir();
+    touch(t, filepath.Join(dir, good1ˢ));
+    touch(t, filepath.Join(dir, "x")); // will disappear or have an error
+    touch(t, filepath.Join(dir, good2ˢ));
     (slice<fs.FileInfo>, error) readDir() {
         GoFrame ᒐ = default;
         try {
             var (d, err) = Open(dir);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             var dʗ1 = d;
             defer(() => dʗ1.Close(), ref ᒐ);
             return d.Readdir(-1);
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     }
     var readDirʗ1 = readDir;
     slice<fs.FileInfo> mustReadDir(@string testName) {
         var (fis, err) = readDirʗ1();
-        if (err != default!) {
-            Ꮡt.Fatalf("%s: Readdir: %v"u8, testName, err);
+        if (err != nil) {
+            t.Fatalf("%s: Readdir: %v", testName, err);
         }
         return fis;
     }
@@ -980,105 +1008,110 @@ public static void TestReaddirStatFailures(ж<Δtesting.T> Ꮡt) {
     }
 
     {
-        var (got, want) = (names(mustReadDir(initialReaddirˢ)), new @string[]{"good1"u8, "good2"u8, "x"u8}.slice()); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-            Ꮡt.Errorf("initial readdir got %q; want %q"u8, got, want);
+        var (got, want) = (names(mustReadDir(initialReaddirˢ)), slice<@string>(["good1", "good2", "x"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
+            t.Errorf("initial readdir got %q; want %q", got, want);
         }
     }
 
     xerr = ErrNotExist;
     {
-        var (got, want) = (names(mustReadDir(withXDisappearingˢ)), new @string[]{"good1"u8, "good2"u8}.slice()); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-            Ꮡt.Errorf("with x disappearing, got %q; want %q"u8, got, want);
+        var (got, want) = (names(mustReadDir(withXDisappearingˢ)), slice<@string>(["good1", "good2"])); if (!slices.Equal<slice<@string>, @string>(got, want)) {
+            t.Errorf("with x disappearing, got %q; want %q", got, want);
         }
     }
 
     xerr = errors.New(someRealErrorˢ);
     {
         var (_, err) = readDir(); if (!AreEqual(err, xerr)) {
-            Ꮡt.Errorf("with a non-ErrNotExist error, got error %v; want %v"u8, err, xerr);
+            t.Errorf("with a non-ErrNotExist error, got error %v; want %v", err, xerr);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goReaddirOfFileˢ = "_Go_ReaddirOfFile"u8;
+internal static ref readonly @string goReaddirOfFileˢ => ref goReaddirOfFileˢᵇ;
+private static readonly @string goReaddirOfFileˢᵇ = "_Go_ReaddirOfFile"u8;
 internal static readonly object readdirnamesSucceededˢ = (@string)"Readdirnames succeeded; want non-nil error"u8;
 
 // Readdir on a regular file should fail.
-public static void TestReaddirOfFile(ж<Δtesting.T> Ꮡt) {
+public static void TestReaddirOfFile(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
 
-        var (f, err) = CreateTemp(Ꮡt.TempDir(), goReaddirOfFileˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (f, err) = CreateTemp(t.TempDir(), goReaddirOfFileˢ);
+        if (err != nil) {
+            t.Fatal(err);
         }
         f.Write(slice<byte>("foo"u8));
         f.Close();
         (var reg, err) = Open(f.Name());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var regʗ1 = reg;
         defer(() => regʗ1.Close(), ref ᒐ);
 
         (var names, err) = reg.Readdirnames(-1);
-        if (err == default!) {
-            Ꮡt.Error(readdirnamesSucceededˢ);
+        if (err == nil) {
+            t.Error(readdirnamesSucceededˢ);
         }
         {
-            var (pe, ok) = errors.AsType<ж<fs.PathError>>(err); if (!ok || (~pe).Path != f.Name()) {
-                Ꮡt.Errorf("Readdirnames returned %q; want a PathError with path %q"u8, err, f.Name());
+            var (pe, ok) = errors.AsType<ж<fs.PathError>>(err); if (!ok || pe.Path != f.Name()) {
+                t.Errorf("Readdirnames returned %q; want a PathError with path %q", err, f.Name());
             }
         }
         if (len(names) > 0) {
-            Ꮡt.Errorf("unexpected dir names in regular file: %q"u8, names);
+            t.Errorf("unexpected dir names in regular file: %q", names);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestHardLink(ж<Δtesting.T> Ꮡt) {
-    testMaybeRooted(Ꮡt, testHardLink);
+public static void TestHardLink(ж<Δtesting.T> t) {
+    testMaybeRooted(t, testHardLink);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string linkatˢ = "linkat"u8;
-internal static readonly @string hardlinktestfromˢ = "hardlinktestfrom"u8;
-internal static readonly @string hardlinktesttoˢ = "hardlinktestto"u8;
-internal static readonly @string hardlinktestnoneˢ = "hardlinktestnone"u8;
+internal static ref readonly @string linkatˢ => ref linkatˢᵇ;
+private static readonly @string linkatˢᵇ = "linkat"u8;
+internal static ref readonly @string hardlinktestfromˢ => ref hardlinktestfromˢᵇ;
+private static readonly @string hardlinktestfromˢᵇ = "hardlinktestfrom"u8;
+internal static ref readonly @string hardlinktesttoˢ => ref hardlinktesttoˢᵇ;
+private static readonly @string hardlinktesttoˢᵇ = "hardlinktestto"u8;
+internal static ref readonly @string hardlinktestnoneˢ => ref hardlinktestnoneˢᵇ;
+private static readonly @string hardlinktestnoneˢᵇ = "hardlinktestnone"u8;
 internal static readonly object fileExistsErrorˢ = (@string)"file exists error"u8;
 
-internal static void testHardLink(ж<Δtesting.T> Ꮡt, ж<Δos.Root> Ꮡroot) {
-    testenv.MustHaveLink(new os_test_package.testing_TжTB(Ꮡt));
+internal static void testHardLink(ж<Δtesting.T> t, ж<Δos.Root> root) {
+    testenv.MustHaveLink(new os_test_package.testing_TжTB(t));
 
     Func<@string, (ж<Δos.File>, error)> create = Create;
     Func<@string, @string, error> link = Link;
     Func<@string, (fs.FileInfo, error)> stat = Stat;
     @string op = linkˢ;
-    if (Ꮡroot != nil) {
-        create = (@string p1) => Ꮡroot.Create(p1);
-        link = (@string p1, @string p2) => Ꮡroot.Link(p1, p2);
-        stat = (@string p1) => Ꮡroot.Stat(p1);
+    if (root != nil) {
+        create = (@string p1) => root.Create(p1);
+        link = (@string p1, @string p2) => root.Link(p1, p2);
+        stat = (@string p1) => root.Stat(p1);
         op = linkatˢ;
     }
 
     @string from = hardlinktestfromˢ;
     @string to = hardlinktesttoˢ;
     var (@file, err) = create(to);
-    if (err != default!) {
-        Ꮡt.Fatalf("open %q failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Fatalf("open %q failed: %v", to, err);
     }
     {
-        err = @file.Close(); if (err != default!) {
-            Ꮡt.Errorf("close %q failed: %v"u8, to, err);
+        err = @file.Close(); if (err != nil) {
+            t.Errorf("close %q failed: %v", to, err);
         }
     }
     err = link(to, from);
-    if (err != default!) {
-        Ꮡt.Fatalf("link %q, %q failed: %v"u8, to, from, err);
+    if (err != nil) {
+        t.Fatalf("link %q, %q failed: %v", to, from, err);
     }
 
     @string none = hardlinktestnoneˢ;
@@ -1086,60 +1119,62 @@ internal static void testHardLink(ж<Δtesting.T> Ꮡt, ж<Δos.Root> Ꮡroot) {
     // Check the returned error is well-formed.
     {
         var (lerr, ok) = err._<ж<Δos.LinkError>>(ᐧ); if (!ok || lerr.Error() == ""u8) {
-            Ꮡt.Errorf("link %q, %q failed to return a valid error"u8, none, none);
+            t.Errorf("link %q, %q failed to return a valid error", none, none);
         }
     }
 
     (var tostat, err) = stat(to);
-    if (err != default!) {
-        Ꮡt.Fatalf("stat %q failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Fatalf("stat %q failed: %v", to, err);
     }
     (var fromstat, err) = stat(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("stat %q failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("stat %q failed: %v", from, err);
     }
     if (!SameFile(tostat, fromstat)) {
-        Ꮡt.Errorf("link %q, %q did not create hard link"u8, to, from);
+        t.Errorf("link %q, %q did not create hard link", to, from);
     }
     // We should not be able to perform the same Link() a second time
     err = link(to, from);
     switch (err.type()) {
     case ж<Δos.LinkError> errΔ1: {
-        if ((~errΔ1).Op != op) {
-            Ꮡt.Errorf("Link(%q, %q) err.Op = %q; want %q"u8, to, from, (~errΔ1).Op, op);
+        if (errΔ1.Op != op) {
+            t.Errorf("Link(%q, %q) err.Op = %q; want %q", to, from, errΔ1.Op, op);
         }
-        if ((~errΔ1).Old != to) {
-            Ꮡt.Errorf("Link(%q, %q) err.Old = %q; want %q"u8, to, from, (~errΔ1).Old, to);
+        if (errΔ1.Old != to) {
+            t.Errorf("Link(%q, %q) err.Old = %q; want %q", to, from, errΔ1.Old, to);
         }
-        if ((~errΔ1).New != from) {
-            Ꮡt.Errorf("Link(%q, %q) err.New = %q; want %q"u8, to, from, (~errΔ1).New, from);
+        if (errΔ1.New != from) {
+            t.Errorf("Link(%q, %q) err.New = %q; want %q", to, from, errΔ1.New, from);
         }
-        if (!IsExist((~errΔ1).Err)) {
-            Ꮡt.Errorf("Link(%q, %q) err.Err = %q; want %q"u8, to, from, (~errΔ1).Err, fileExistsErrorˢ);
+        if (!IsExist(errΔ1.Err)) {
+            t.Errorf("Link(%q, %q) err.Err = %q; want %q", to, from, errΔ1.Err, fileExistsErrorˢ);
         }
         break;
     }
     case null: {
-        Ꮡt.Errorf("link %q, %q: expected error, got nil"u8, from, to);
+        t.Errorf("link %q, %q: expected error, got nil", from, to);
         break;
     }
     default: {
         var errΔ1 = err;
-        Ꮡt.Errorf("link %q, %q: expected %T, got %T %v"u8, from, to, @new<Δos.LinkError>(), errΔ1, errΔ1);
+        t.Errorf("link %q, %q: expected %T, got %T %v", from, to, @new<Δos.LinkError>(), errΔ1, errΔ1);
         break;
     }}
 }
 
-public static void TestSymlink(ж<Δtesting.T> Ꮡt) {
-    testMaybeRooted(Ꮡt, testSymlink);
+public static void TestSymlink(ж<Δtesting.T> t) {
+    testMaybeRooted(t, testSymlink);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string symlinktestfromˢ = "symlinktestfrom"u8;
-internal static readonly @string symlinktesttoˢ = "symlinktestto"u8;
+internal static ref readonly @string symlinktestfromˢ => ref symlinktestfromˢᵇ;
+private static readonly @string symlinktestfromˢᵇ = "symlinktestfrom"u8;
+internal static ref readonly @string symlinktesttoˢ => ref symlinktesttoˢᵇ;
+private static readonly @string symlinktesttoˢᵇ = "symlinktestto"u8;
 
-internal static void testSymlink(ж<Δtesting.T> Ꮡt, ж<Δos.Root> Ꮡroot) {
-    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
+internal static void testSymlink(ж<Δtesting.T> t, ж<Δos.Root> root) {
+    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
 
     Func<@string, (ж<Δos.File>, error)> create = Create;
     Func<@string, (ж<Δos.File>, error)> open = Open;
@@ -1147,129 +1182,132 @@ internal static void testSymlink(ж<Δtesting.T> Ꮡt, ж<Δos.Root> Ꮡroot) {
     Func<@string, (fs.FileInfo, error)> stat = Stat;
     Func<@string, (fs.FileInfo, error)> lstat = Lstat;
     Func<@string, (@string, error)> readlink = Readlink;
-    if (Ꮡroot != nil) {
-        create = (@string p1) => Ꮡroot.Create(p1);
-        open = (@string p1) => Ꮡroot.Open(p1);
-        symlink = (@string p1, @string p2) => Ꮡroot.Symlink(p1, p2);
-        stat = (@string p1) => Ꮡroot.Stat(p1);
-        lstat = (@string p1) => Ꮡroot.Lstat(p1);
-        readlink = (@string p1) => Ꮡroot.Readlink(p1);
+    if (root != nil) {
+        create = (@string p1) => root.Create(p1);
+        open = (@string p1) => root.Open(p1);
+        symlink = (@string p1, @string p2) => root.Symlink(p1, p2);
+        stat = (@string p1) => root.Stat(p1);
+        lstat = (@string p1) => root.Lstat(p1);
+        readlink = (@string p1) => root.Readlink(p1);
     }
 
     @string from = symlinktestfromˢ;
     @string to = symlinktesttoˢ;
     var (@file, err) = create(to);
-    if (err != default!) {
-        Ꮡt.Fatalf("Create(%q) failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Fatalf("Create(%q) failed: %v", to, err);
     }
     {
-        err = @file.Close(); if (err != default!) {
-            Ꮡt.Errorf("Close(%q) failed: %v"u8, to, err);
+        err = @file.Close(); if (err != nil) {
+            t.Errorf("Close(%q) failed: %v", to, err);
         }
     }
     err = symlink(to, from);
-    if (err != default!) {
-        Ꮡt.Fatalf("Symlink(%q, %q) failed: %v"u8, to, from, err);
+    if (err != nil) {
+        t.Fatalf("Symlink(%q, %q) failed: %v", to, from, err);
     }
     (var tostat, err) = lstat(to);
-    if (err != default!) {
-        Ꮡt.Fatalf("Lstat(%q) failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Fatalf("Lstat(%q) failed: %v", to, err);
     }
     if ((fs.FileMode)(tostat.Mode() & ModeSymlink) != 0) {
-        Ꮡt.Fatalf("Lstat(%q).Mode()&ModeSymlink = %v, want 0"u8, to, (fs.FileMode)(tostat.Mode() & ModeSymlink));
+        t.Fatalf("Lstat(%q).Mode()&ModeSymlink = %v, want 0", to, (fs.FileMode)(tostat.Mode() & ModeSymlink));
     }
     (var fromstat, err) = stat(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat(%q) failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("Stat(%q) failed: %v", from, err);
     }
     if (!SameFile(tostat, fromstat)) {
-        Ꮡt.Errorf("Symlink(%q, %q) did not create symlink"u8, to, from);
+        t.Errorf("Symlink(%q, %q) did not create symlink", to, from);
     }
     (fromstat, err) = lstat(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("Lstat(%q) failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("Lstat(%q) failed: %v", from, err);
     }
     if ((fs.FileMode)(fromstat.Mode() & ModeSymlink) == 0) {
-        Ꮡt.Fatalf("Lstat(%q).Mode()&ModeSymlink = 0, want %v"u8, from, ModeSymlink);
+        t.Fatalf("Lstat(%q).Mode()&ModeSymlink = 0, want %v", from, ModeSymlink);
     }
     (fromstat, err) = stat(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat(%q) failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("Stat(%q) failed: %v", from, err);
     }
     if (fromstat.Name() != from) {
-        Ꮡt.Errorf("Stat(%q).Name() = %q, want %q"u8, from, fromstat.Name(), from);
+        t.Errorf("Stat(%q).Name() = %q, want %q", from, fromstat.Name(), from);
     }
     if ((fs.FileMode)(fromstat.Mode() & ModeSymlink) != 0) {
-        Ꮡt.Fatalf("Stat(%q).Mode()&ModeSymlink = %v, want 0"u8, from, (fs.FileMode)(fromstat.Mode() & ModeSymlink));
+        t.Fatalf("Stat(%q).Mode()&ModeSymlink = %v, want 0", from, (fs.FileMode)(fromstat.Mode() & ModeSymlink));
     }
     (var s, err) = readlink(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("Readlink(%q) failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("Readlink(%q) failed: %v", from, err);
     }
     if (s != to) {
-        Ꮡt.Fatalf("Readlink(%q) = %q, want %q"u8, from, s, to);
+        t.Fatalf("Readlink(%q) = %q, want %q", from, s, to);
     }
     (@file, err) = open(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("Open(%q) failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("Open(%q) failed: %v", from, err);
     }
     @file.Close();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string longsymlinktestfromˢ = "longsymlinktestfrom"u8;
+internal static ref readonly @string longsymlinktestfromˢ => ref longsymlinktestfromˢᵇ;
+private static readonly @string longsymlinktestfromˢᵇ = "longsymlinktestfrom"u8;
 
-public static void TestLongSymlink(ж<Δtesting.T> Ꮡt) {
-    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestLongSymlink(ж<Δtesting.T> t) {
+    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
+    t.Chdir(t.TempDir());
 
-    @string s = "0123456789abcdef"u8;
+    @string s = "0123456789abcdef";
     // Long, but not too long: a common limit is 255.
     s = s + s + s + s + s + s + s + s + s + s + s + s + s + s + s;
     @string from = longsymlinktestfromˢ;
     var err = Symlink(s, from);
-    if (err != default!) {
-        Ꮡt.Fatalf("symlink %q, %q failed: %v"u8, s, from, err);
+    if (err != nil) {
+        t.Fatalf("symlink %q, %q failed: %v", s, from, err);
     }
     (var r, err) = Readlink(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("readlink %q failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("readlink %q failed: %v", from, err);
     }
     if (r != s) {
-        Ꮡt.Fatalf("after symlink %q != %q"u8, r, s);
+        t.Fatalf("after symlink %q != %q", r, s);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string renamefromˢ = "renamefrom"u8;
-internal static readonly @string renametoˢ = "renameto"u8;
+internal static ref readonly @string renamefromˢ => ref renamefromˢᵇ;
+private static readonly @string renamefromˢᵇ = "renamefrom"u8;
+internal static ref readonly @string renametoˢ => ref renametoˢᵇ;
+private static readonly @string renametoˢᵇ = "renameto"u8;
 
-public static void TestRename(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestRename(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
     @string from = renamefromˢ;
     @string to = renametoˢ;
 
     var (@file, err) = Create(from);
-    if (err != default!) {
-        Ꮡt.Fatalf("open %q failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("open %q failed: %v", from, err);
     }
     {
-        err = @file.Close(); if (err != default!) {
-            Ꮡt.Errorf("close %q failed: %v"u8, from, err);
+        err = @file.Close(); if (err != nil) {
+            t.Errorf("close %q failed: %v", from, err);
         }
     }
     err = Rename(from, to);
-    if (err != default!) {
-        Ꮡt.Fatalf("rename %q, %q failed: %v"u8, to, from, err);
+    if (err != nil) {
+        t.Fatalf("rename %q, %q failed: %v", to, from, err);
     }
     (_, err) = Stat(to);
-    if (err != default!) {
-        Ꮡt.Errorf("stat %q failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Errorf("stat %q failed: %v", to, err);
     }
 }
 
-public static void TestRenameOverwriteDest(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestRenameOverwriteDest(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
     @string from = renamefromˢ;
     @string to = renametoˢ;
 
@@ -1277,74 +1315,76 @@ public static void TestRenameOverwriteDest(ж<Δtesting.T> Ꮡt) {
     var fromData = slice<byte>("from"u8);
 
     var err = WriteFile(to, toData, 511);
-    if (err != default!) {
-        Ꮡt.Fatalf("write file %q failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Fatalf("write file %q failed: %v", to, err);
     }
 
     err = WriteFile(from, fromData, 511);
-    if (err != default!) {
-        Ꮡt.Fatalf("write file %q failed: %v"u8, from, err);
+    if (err != nil) {
+        t.Fatalf("write file %q failed: %v", from, err);
     }
     err = Rename(from, to);
-    if (err != default!) {
-        Ꮡt.Fatalf("rename %q, %q failed: %v"u8, to, from, err);
+    if (err != nil) {
+        t.Fatalf("rename %q, %q failed: %v", to, from, err);
     }
 
     (_, err) = Stat(from);
-    if (err == default!) {
-        Ꮡt.Errorf("from file %q still exists"u8, from);
+    if (err == nil) {
+        t.Errorf("from file %q still exists", from);
     }
-    if (err != default! && !IsNotExist(err)) {
-        Ꮡt.Fatalf("stat from: %v"u8, err);
+    if (err != nil && !IsNotExist(err)) {
+        t.Fatalf("stat from: %v", err);
     }
     (var toFi, err) = Stat(to);
-    if (err != default!) {
-        Ꮡt.Fatalf("stat %q failed: %v"u8, to, err);
+    if (err != nil) {
+        t.Fatalf("stat %q failed: %v", to, err);
     }
     if (toFi.Size() != (int64)len(fromData)) {
-        Ꮡt.Errorf(@"""to"" size = %d; want %d (old ""from"" size)"u8, toFi.Size(), len(fromData));
+        t.Errorf(@"""to"" size = %d; want %d (old ""from"" size)", toFi.Size(), len(fromData));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object renameˢ = (@string)"rename"u8;
 
-public static void TestRenameFailed(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestRenameFailed(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
     @string from = renamefromˢ;
     @string to = renametoˢ;
 
     var err = Rename(from, to);
     switch (err.type()) {
     case ж<Δos.LinkError> errΔ1: {
-        if ((~errΔ1).Op != "rename"u8) {
-            Ꮡt.Errorf("rename %q, %q: err.Op: want %q, got %q"u8, from, to, renameˢ, (~errΔ1).Op);
+        if (errΔ1.Op != "rename"u8) {
+            t.Errorf("rename %q, %q: err.Op: want %q, got %q", from, to, renameˢ, errΔ1.Op);
         }
-        if ((~errΔ1).Old != from) {
-            Ꮡt.Errorf("rename %q, %q: err.Old: want %q, got %q"u8, from, to, from, (~errΔ1).Old);
+        if (errΔ1.Old != from) {
+            t.Errorf("rename %q, %q: err.Old: want %q, got %q", from, to, from, errΔ1.Old);
         }
-        if ((~errΔ1).New != to) {
-            Ꮡt.Errorf("rename %q, %q: err.New: want %q, got %q"u8, from, to, to, (~errΔ1).New);
+        if (errΔ1.New != to) {
+            t.Errorf("rename %q, %q: err.New: want %q, got %q", from, to, to, errΔ1.New);
         }
         break;
     }
     case null: {
-        Ꮡt.Errorf("rename %q, %q: expected error, got nil"u8, from, to);
+        t.Errorf("rename %q, %q: expected error, got nil", from, to);
         break;
     }
     default: {
         var errΔ1 = err;
-        Ꮡt.Errorf("rename %q, %q: expected %T, got %T %v"u8, from, to, @new<Δos.LinkError>(), errΔ1, errΔ1);
+        t.Errorf("rename %q, %q: expected %T, got %T %v", from, to, @new<Δos.LinkError>(), errΔ1, errΔ1);
         break;
     }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string doesntExistˢ = "doesnt-exist"u8;
-internal static readonly @string destˢ = "dest"u8;
+internal static ref readonly @string doesntExistˢ => ref doesntExistˢᵇ;
+private static readonly @string doesntExistˢᵇ = "doesnt-exist"u8;
+internal static ref readonly @string destˢ => ref destˢᵇ;
+private static readonly @string destˢᵇ = "dest"u8;
 
-public static void TestRenameNotExisting(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestRenameNotExisting(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
     @string from = doesntExistˢ;
     @string to = destˢ;
 
@@ -1352,13 +1392,13 @@ public static void TestRenameNotExisting(ж<Δtesting.T> Ꮡt) {
 
     {
         var err = Rename(from, to); if (!IsNotExist(err)) {
-            Ꮡt.Errorf("Rename(%q, %q) = %v; want an IsNotExist error"u8, from, to, err);
+            t.Errorf("Rename(%q, %q) = %v; want an IsNotExist error", from, to, err);
         }
     }
 }
 
-public static void TestRenameToDirFailed(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestRenameToDirFailed(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
     @string from = renamefromˢ;
     @string to = renametoˢ;
 
@@ -1368,102 +1408,104 @@ public static void TestRenameToDirFailed(ж<Δtesting.T> Ꮡt) {
     var err = Rename(from, to);
     switch (err.type()) {
     case ж<Δos.LinkError> errΔ1: {
-        if ((~errΔ1).Op != "rename"u8) {
-            Ꮡt.Errorf("rename %q, %q: err.Op: want %q, got %q"u8, from, to, renameˢ, (~errΔ1).Op);
+        if (errΔ1.Op != "rename"u8) {
+            t.Errorf("rename %q, %q: err.Op: want %q, got %q", from, to, renameˢ, errΔ1.Op);
         }
-        if ((~errΔ1).Old != from) {
-            Ꮡt.Errorf("rename %q, %q: err.Old: want %q, got %q"u8, from, to, from, (~errΔ1).Old);
+        if (errΔ1.Old != from) {
+            t.Errorf("rename %q, %q: err.Old: want %q, got %q", from, to, from, errΔ1.Old);
         }
-        if ((~errΔ1).New != to) {
-            Ꮡt.Errorf("rename %q, %q: err.New: want %q, got %q"u8, from, to, to, (~errΔ1).New);
+        if (errΔ1.New != to) {
+            t.Errorf("rename %q, %q: err.New: want %q, got %q", from, to, to, errΔ1.New);
         }
         break;
     }
     case null: {
-        Ꮡt.Errorf("rename %q, %q: expected error, got nil"u8, from, to);
+        t.Errorf("rename %q, %q: expected error, got nil", from, to);
         break;
     }
     default: {
         var errΔ1 = err;
-        Ꮡt.Errorf("rename %q, %q: expected %T, got %T %v"u8, from, to, @new<Δos.LinkError>(), errΔ1, errΔ1);
+        t.Errorf("rename %q, %q: expected %T, got %T %v", from, to, @new<Δos.LinkError>(), errΔ1, errΔ1);
         break;
     }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string renameFROMˢ = "renameFROM"u8;
-internal static readonly @string renamEfromˢ = "RENAMEfrom"u8;
+internal static ref readonly @string renameFROMˢ => ref renameFROMˢᵇ;
+private static readonly @string renameFROMˢᵇ = "renameFROM"u8;
+internal static ref readonly @string renamEfromˢ => ref renamEfromˢᵇ;
+private static readonly @string renamEfromˢᵇ = "RENAMEfrom"u8;
 
 internal partial struct TestRenameCaseDifference_tests /*dyn*/ {
     internal @string name;
     internal Func<error> create;
 }
 
-public static void TestRenameCaseDifference(ж<Δtesting.T> Ꮡpt) {
+public static void TestRenameCaseDifference(ж<Δtesting.T> pt) {
     @string from = renameFROMˢ;
     @string to = renamEfromˢ;
-    var tests = new TestRenameCaseDifference_tests[]{
-        new("dir"u8, () => Mkdir(from, 511)),
-        new("file"u8, () => {
+    var tests = slice<TestRenameCaseDifference_tests>([
+        new("dir", () => Mkdir(from, 511)),
+        new("file", () => {
             var (fd, err) = Create(from);
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             return fd.Close();
         })
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestRenameCaseDifference_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡpt.Run(test.name, (ж<Δtesting.T> t) => {
+        pt.Run(test.name, (ж<Δtesting.T> t) => {
             t.Chdir(t.TempDir());
 
             {
-                var errΔ1 = testʗ1.create(); if (errΔ1 != default!) {
-                    t.Fatalf("failed to create test file: %s"u8, errΔ1);
+                var errΔ1 = testʗ1.create(); if (errΔ1 != nil) {
+                    t.Fatalf("failed to create test file: %s", errΔ1);
                 }
             }
 
             {
-                var (_, errΔ2) = Stat(to); if (errΔ2 != default!) {
+                var (_, errΔ2) = Stat(to); if (errΔ2 != nil) {
                     // Sanity check that the underlying filesystem is not case sensitive.
                     if (IsNotExist(errΔ2)) {
-                        t.Skipf("case sensitive filesystem"u8);
+                        t.Skipf("case sensitive filesystem");
                     }
-                    t.Fatalf("stat %q, got: %q"u8, to, errΔ2);
+                    t.Fatalf("stat %q, got: %q", to, errΔ2);
                 }
             }
 
             {
-                var errΔ3 = Rename(from, to); if (errΔ3 != default!) {
-                    t.Fatalf("unexpected error when renaming from %q to %q: %s"u8, from, to, errΔ3);
+                var errΔ3 = Rename(from, to); if (errΔ3 != nil) {
+                    t.Fatalf("unexpected error when renaming from %q to %q: %s", from, to, errΔ3);
                 }
             }
 
-            var (fd, err) = Open("."u8);
-            if (err != default!) {
-                t.Fatalf("Open .: %s"u8, err);
+            var (fd, err) = Open(".");
+            if (err != nil) {
+                t.Fatalf("Open .: %s", err);
             }
 
             // Stat does not return the real case of the file (it returns what the called asked for)
             // So we have to use readdir to get the real name of the file.
             (var dirNames, err) = fd.Readdirnames(-1);
             fd.Close();
-            if (err != default!) {
-                t.Fatalf("readdirnames: %s"u8, err);
+            if (err != nil) {
+                t.Fatalf("readdirnames: %s", err);
             }
 
             {
                 nint dirNamesLen = len(dirNames); if (dirNamesLen != 1) {
-                    t.Fatalf("unexpected dirNames len, got %d, want %d"u8, dirNamesLen, (nint)1);
+                    t.Fatalf("unexpected dirNames len, got %d, want %d", dirNamesLen, (nint)1);
                 }
             }
 
             if (dirNames[0] != to) {
-                t.Errorf("unexpected name, got %q, want %q"u8, dirNames[0], to);
+                t.Errorf("unexpected name, got %q, want %q", dirNames[0], to);
             }
         });
     }
@@ -1477,15 +1519,15 @@ internal static Action<ж<Δtesting.T>> testStartProcess(@string dir, @string cm
             t.Parallel();
 
             var (r, w, err) = Pipe();
-            if (err != default!) {
-                t.Fatalf("Pipe: %v"u8, err);
+            if (err != nil) {
+                t.Fatalf("Pipe: %v", err);
             }
             var rʗ1 = r;
             defer(() => rʗ1.Close(), ref ᒐ);
-            var attr = Ꮡ(new ProcAttr(Dir: dir, Files: new ж<Δos.File>[]{default!, w, Stderr}.slice()));
+            var attr = Ꮡ(new ProcAttr(Dir: dir, Files: slice<ж<Δos.File>>([default, w, Stderr])));
             (var p, err) = StartProcess(cmd, argsʗ1, attr);
-            if (err != default!) {
-                t.Fatalf("StartProcess: %v"u8, err);
+            if (err != nil) {
+                t.Fatalf("StartProcess: %v", err);
             }
             w.Close();
 
@@ -1496,8 +1538,8 @@ internal static Action<ж<Δtesting.T>> testStartProcess(@string dir, @string cm
             var (fi1, _) = Stat(strings.TrimSpace(output));
             var (fi2, _) = Stat(expect);
             if (!SameFile(fi1, fi2)) {
-                t.Errorf("exec %q returned %q wanted %q"u8,
-                    strings.Join(appendꓸꓸꓸ(new @string[]{cmd}.slice(), argsʗ1), " "u8), output, expect);
+                t.Errorf("exec %q returned %q wanted %q",
+                    strings.Join(appendꓸꓸꓸ(slice<@string>([cmd]), argsʗ1), " "), output, expect);
             }
             p.Wait();
         }
@@ -1508,63 +1550,69 @@ internal static Action<ж<Δtesting.T>> testStartProcess(@string dir, @string cm
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object androidDoesnTHaveBinPwdˢ = (@string)"android doesn't have /bin/pwd"u8;
-internal static readonly @string comspecˢ = "COMSPEC"u8;
-internal static readonly @string pwdˢ = "pwd"u8;
-internal static readonly @string absoluteˢ = "absolute"u8;
-internal static readonly @string relativeˢ = "relative"u8;
+internal static ref readonly @string comspecˢ => ref comspecˢᵇ;
+private static readonly @string comspecˢᵇ = "COMSPEC"u8;
+internal static ref readonly @string pwdˢ => ref pwdˢᵇ;
+private static readonly @string pwdˢᵇ = "pwd"u8;
+internal static ref readonly @string absoluteˢ => ref absoluteˢᵇ;
+private static readonly @string absoluteˢᵇ = "absolute"u8;
+internal static ref readonly @string relativeˢ => ref relativeˢᵇ;
+private static readonly @string relativeˢᵇ = "relative"u8;
 
-public static void TestStartProcess(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestStartProcess(ж<Δtesting.T> t) {
+    testenv.MustHaveExec(new os_test_package.testing_TжTB(t));
+    t.Parallel();
 
-    testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
-    Ꮡt.Parallel();
-
-    @string dir = default!;
-    @string cmd = default!;
-    slice<@string> args = default!;
+    @string dir = default;
+    @string cmd = default;
+    slice<@string> args = default;
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "android"u8) {
-        Ꮡt.Skip(androidDoesnTHaveBinPwdˢ);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8: {
+        t.Skip(androidDoesnTHaveBinPwdˢ);
+        break;
     }
-    else if (exprᴛ1 == "windows"u8) {
+    case {} when exprᴛ1 == "windows"u8: {
         cmd = Getenv(comspecˢ);
         dir = Getenv(systemRootˢ);
-        args = new @string[]{"/c"u8, "cd"u8}.slice();
+        args = slice<@string>(["/c", "cd"]);
+        break;
     }
-    else { /* default: */
-        error err = default!;
+    default: {
+        error err = default;
         (cmd, err) = exec.LookPath(pwdˢ);
-        if (err != default!) {
-            Ꮡt.Fatalf("Can't find pwd: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Can't find pwd: %v", err);
         }
-        dir = "/"u8;
-        args = new @string[]{}.slice();
-        Ꮡt.Logf("Testing with %v"u8, cmd);
-    }
+        dir = "/";
+        args = slice<@string>([]);
+        t.Logf("Testing with %v", cmd);
+        break;
+    }}
     var (cmddir, cmdbase) = filepath.Split(cmd);
-    args = appendꓸꓸꓸ(new @string[]{cmdbase}.slice(), args);
-    Ꮡt.Run(absoluteˢ, testStartProcess(dir, cmd, args, dir));
-    Ꮡt.Run(relativeˢ, testStartProcess(cmddir, cmdbase, args, cmddir));
+    args = appendꓸꓸꓸ(slice<@string>([cmdbase]), args);
+    t.Run(absoluteˢ, testStartProcess(dir, cmd, args, dir));
+    t.Run(relativeˢ, testStartProcess(cmddir, cmdbase, args, cmddir));
 }
 
-internal static void checkMode(ж<Δtesting.T> Ꮡt, @string path, fs.FileMode mode) {
+internal static void checkMode(ж<Δtesting.T> t, @string path, fs.FileMode mode) {
     var (dir, err) = Stat(path);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat %q (looking for mode %#o): %s"u8, path, mode, err);
+    if (err != nil) {
+        t.Fatalf("Stat %q (looking for mode %#o): %s", path, mode, err);
     }
     if ((fs.FileMode)(dir.Mode() & ModePerm) != mode) {
-        Ꮡt.Errorf("Stat %q: mode %#o want %#o"u8, path, dir.Mode(), mode);
+        t.Errorf("Stat %q: mode %#o want %#o", path, dir.Mode(), mode);
     }
 }
 
-public static void TestChmod(ж<Δtesting.T> Ꮡt) {
+public static void TestChmod(ж<Δtesting.T> t) {
     // Chmod is not supported on wasip1.
     if (Δruntime.GOOS == "wasip1"u8) {
-        Ꮡt.Skip("Chmod is not supported on " + Δruntime.GOOS);
+        t.Skip("Chmod is not supported on " + Δruntime.GOOS);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
     // Creation mode is read write
 
     var fm = (fs.FileMode)302;
@@ -1572,100 +1620,101 @@ public static void TestChmod(ж<Δtesting.T> Ꮡt) {
         fm = (fs.FileMode)292; // read-only file
     }
     {
-        var err = Chmod(f.Name(), fm); if (err != default!) {
-            Ꮡt.Fatalf("chmod %s %#o: %s"u8, f.Name(), fm, err);
+        var err = Chmod(f.Name(), fm); if (err != nil) {
+            t.Fatalf("chmod %s %#o: %s", f.Name(), fm, err);
         }
     }
-    checkMode(Ꮡt, f.Name(), fm);
+    checkMode(t, f.Name(), fm);
 
     fm = (fs.FileMode)83;
     if (Δruntime.GOOS == "windows"u8) {
         fm = (fs.FileMode)438; // read-write file
     }
     {
-        var err = f.Chmod(fm); if (err != default!) {
-            Ꮡt.Fatalf("chmod %s %#o: %s"u8, f.Name(), fm, err);
+        var err = f.Chmod(fm); if (err != nil) {
+            t.Fatalf("chmod %s %#o: %s", f.Name(), fm, err);
         }
     }
-    checkMode(Ꮡt, f.Name(), fm);
+    checkMode(t, f.Name(), fm);
 }
 
-internal static void checkSize(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡf, int64 size) {
+internal static void checkSize(ж<Δtesting.T> t, ж<Δos.File> Ꮡf, int64 size) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    Ꮡt.Helper();
+    t.Helper();
     var (dir, err) = Ꮡf.Stat();
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat %q (looking for size %d): %s"u8, f.Name(), size, err);
+    if (err != nil) {
+        t.Fatalf("Stat %q (looking for size %d): %s", f.Name(), size, err);
     }
     if (dir.Size() != size) {
-        Ꮡt.Errorf("Stat %q: size %d want %d"u8, f.Name(), dir.Size(), size);
+        t.Errorf("Stat %q: size %d want %d", f.Name(), dir.Size(), size);
     }
 }
 
-public static void TestFTruncate(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestFTruncate(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
-    checkSize(Ꮡt, f, 0);
+    checkSize(t, f, 0);
     f.Write(slice<byte>("hello, world\n"u8));
-    checkSize(Ꮡt, f, 13);
+    checkSize(t, f, 13);
     f.Truncate(10);
-    checkSize(Ꮡt, f, 10);
+    checkSize(t, f, 10);
     f.Truncate(1024);
-    checkSize(Ꮡt, f, 1024);
+    checkSize(t, f, 1024);
     f.Truncate(0);
-    checkSize(Ꮡt, f, 0);
+    checkSize(t, f, 0);
     var (_, err) = f.Write(slice<byte>("surprise!"u8));
-    if (err == default!) {
-        checkSize(Ꮡt, f, 13 + 9); // wrote at offset past where hello, world was.
+    if (err == nil) {
+        checkSize(t, f, 13 + 9); // wrote at offset past where hello, world was.
     }
 }
 
-public static void TestTruncate(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestTruncate(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
-    checkSize(Ꮡt, f, 0);
+    checkSize(t, f, 0);
     f.Write(slice<byte>("hello, world\n"u8));
-    checkSize(Ꮡt, f, 13);
+    checkSize(t, f, 13);
     Truncate(f.Name(), 10);
-    checkSize(Ꮡt, f, 10);
+    checkSize(t, f, 10);
     Truncate(f.Name(), 1024);
-    checkSize(Ꮡt, f, 1024);
+    checkSize(t, f, 1024);
     Truncate(f.Name(), 0);
-    checkSize(Ꮡt, f, 0);
+    checkSize(t, f, 0);
     var (_, err) = f.Write(slice<byte>("surprise!"u8));
-    if (err == default!) {
-        checkSize(Ꮡt, f, 13 + 9); // wrote at offset past where hello, world was.
+    if (err == nil) {
+        checkSize(t, f, 13 + 9); // wrote at offset past where hello, world was.
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nonexistentˢ = "nonexistent"u8;
+internal static ref readonly @string nonexistentˢ => ref nonexistentˢᵇ;
+private static readonly @string nonexistentˢᵇ = "nonexistent"u8;
 
-public static partial void TestTruncateNonexistentFile(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static partial void TestTruncateNonexistentFile(ж<Δtesting.T> t) {
+    t.Parallel();
 
     void assertPathError(Δtesting.TB tΔ1, @string pathΔ1, error errΔ1) {
         tΔ1.Helper();
         {
-            var (pe, ok) = errΔ1._<ж<fs.PathError>>(ᐧ); if (!ok || !IsNotExist(errΔ1) || (~pe).Path != pathΔ1) {
-                tΔ1.Errorf("got error: %v\nwant an ErrNotExist PathError with path %q"u8, errΔ1, pathΔ1);
+            var (pe, ok) = errΔ1._<ж<fs.PathError>>(ᐧ); if (!ok || !IsNotExist(errΔ1) || pe.Path != pathΔ1) {
+                tΔ1.Errorf("got error: %v\nwant an ErrNotExist PathError with path %q", errΔ1, pathΔ1);
             }
         }
     }
 
-    @string path = filepath.Join(Ꮡt.TempDir(), nonexistentˢ);
+    @string path = filepath.Join(t.TempDir(), nonexistentˢ);
 
     var err = Truncate(path, 1);
-    assertPathError(new os_test_package.testing_TжTB(Ꮡt), path, err);
+    assertPathError(new os_test_package.testing_TжTB(t), path, err);
 
     // Truncate shouldn't create any new file.
     (_, err) = Stat(path);
-    assertPathError(new os_test_package.testing_TжTB(Ꮡt), path, err);
+    assertPathError(new os_test_package.testing_TжTB(t), path, err);
 }
 
 internal static Func<bool> hasNoatime = Δsync.OnceValue(bool () => {
@@ -1678,27 +1727,27 @@ internal static Func<bool> hasNoatime = Δsync.OnceValue(bool () => {
     if (Δruntime.GOOS != "netbsd"u8) {
         return false;
     }
-    var (mounts, _) = ReadFile("/proc/mounts"u8);
+    var (mounts, _) = ReadFile("/proc/mounts");
     return bytes.Contains(mounts, slice<byte>("noatime"u8));
 });
 
-public static void TestChtimes(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestChtimes(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
     // This should be an empty file (see #68687, #68663).
     f.Close();
 
-    testChtimes(Ꮡt, f.Name());
+    testChtimes(t, f.Name());
 }
 
-public static void TestChtimesOmit(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestChtimesOmit(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    testChtimesOmit(Ꮡt, true, false);
-    testChtimesOmit(Ꮡt, false, true);
-    testChtimesOmit(Ꮡt, true, true);
-    testChtimesOmit(Ꮡt, false, false); // Same as TestChtimes.
+    testChtimesOmit(t, true, false);
+    testChtimesOmit(t, false, true);
+    testChtimesOmit(t, true, true);
+    testChtimesOmit(t, false, false); // Same as TestChtimes.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1706,30 +1755,32 @@ internal static readonly object knownDragonFlyBsdIssueˢ = (@string)"Known Drago
 internal static readonly object knownDragonFlyBsdIssueˢ2 = (@string)"Known DragonFly BSD issue (atime not supported on hammer2); ignoring."u8;
 internal static readonly object knownNetBSDIssueAtimeNotˢ = (@string)"Known NetBSD issue (atime not changed on fs mounted with noatime); ignoring."u8;
 
-internal static void testChtimesOmit(ж<Δtesting.T> Ꮡt, bool omitAt, bool omitMt) {
-    Ꮡt.Logf("omit atime: %v, mtime: %v"u8, omitAt, omitMt);
-    var @file = newFile(Ꮡt);
+internal static void testChtimesOmit(ж<Δtesting.T> t, bool omitAt, bool omitMt) {
+    t.Logf("omit atime: %v, mtime: %v", omitAt, omitMt);
+    var @file = newFile(t);
     // This should be an empty file (see #68687, #68663).
     @string name = @file.Name();
     var err = @file.Close();
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     (var fs, err) = Stat(name);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     var wantAtime = os_internal_test_package.Atime(fs);
     var wantMtime = fs.ModTime();
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "js"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "js"u8: {
         wantAtime = wantAtime.Truncate(time.ΔSecond);
         wantMtime = wantMtime.Truncate(time.ΔSecond);
-    }
+        break;
+    }}
 
-    time.Time setAtime = default!;                      // Zero value means omit.
-    time.Time setMtime = default!;
+    time.Time setAtime = default; // Zero value means omit.
+    time.Time setMtime = default;
     if (!omitAt) {
         wantAtime = wantAtime.Add(-1 * time.ΔSecond);
         setAtime = wantAtime;
@@ -1741,15 +1792,15 @@ internal static void testChtimesOmit(ж<Δtesting.T> Ꮡt, bool omitAt, bool omi
 
     // Change the times accordingly.
     {
-        var errΔ1 = Chtimes(name, setAtime, setMtime); if (errΔ1 != default!) {
-            Ꮡt.Error(errΔ1);
+        var errΔ1 = Chtimes(name, setAtime, setMtime); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
     }
 
     // Verify the expectations.
     (fs, err) = Stat(name);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     var gotAtime = os_internal_test_package.Atime(fs);
     var gotMtime = fs.ModTime();
@@ -1760,15 +1811,17 @@ internal static void testChtimesOmit(ж<Δtesting.T> Ꮡt, bool omitAt, bool omi
     if (!gotAtime.Equal(wantAtime)) {
         @string errormsg = fmt.Sprintf("atime mismatch, got: %q, want: %q"u8, gotAtime, wantAtime);
         var exprᴛ2 = Δruntime.GOOS;
-        if (exprᴛ2 == "plan9"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ2 == "plan9"u8: {
             // Mtime is the time of the last change of content.
             // Similarly, atime is set whenever the contents are
             // accessed; also, it is set whenever mtime is set.
+            break;
         }
-        else if (exprᴛ2 == "dragonfly"u8) {
-            if (omitAt && omitMt){
-                Ꮡt.Log(errormsg);
-                Ꮡt.Log(knownDragonFlyBsdIssueˢ);
+        case {} when exprᴛ2 == "dragonfly"u8: {
+            if (omitAt && omitMt) {
+                t.Log(errormsg);
+                t.Log(knownDragonFlyBsdIssueˢ);
             } else {
                 // Assume hammer2 fs; https://www.dragonflybsd.org/hammer/ says:
                 // > Because HAMMER2 is a block copy-on-write filesystem,
@@ -1777,51 +1830,55 @@ internal static void testChtimesOmit(ж<Δtesting.T> Ꮡt, bool omitAt, bool omi
                 //
                 // TODO: if only can CI define TMPDIR to point to a tmpfs
                 // (e.g. /var/run/shm), this exception can be removed.
-                Ꮡt.Log(errormsg);
-                Ꮡt.Log(knownDragonFlyBsdIssueˢ2);
+                t.Log(errormsg);
+                t.Log(knownDragonFlyBsdIssueˢ2);
             }
+            break;
         }
-        else if (exprᴛ2 == "netbsd"u8) {
-            if (!omitAt && hasNoatime()){
-                Ꮡt.Log(errormsg);
-                Ꮡt.Log(knownNetBSDIssueAtimeNotˢ);
+        case {} when exprᴛ2 == "netbsd"u8: {
+            if (!omitAt && hasNoatime()) {
+                t.Log(errormsg);
+                t.Log(knownNetBSDIssueAtimeNotˢ);
             } else {
-                Ꮡt.Error(errormsg);
+                t.Error(errormsg);
             }
+            break;
         }
-        else { /* default: */
-            Ꮡt.Error(errormsg);
-        }
+        default: {
+            t.Error(errormsg);
+            break;
+        }}
     }
     if (!gotMtime.Equal(wantMtime)) {
         @string errormsg = fmt.Sprintf("mtime mismatch, got: %q, want: %q"u8, gotMtime, wantMtime);
         var exprᴛ3 = Δruntime.GOOS;
-        if (exprᴛ3 == "dragonfly"u8) {
-            if (omitAt && omitMt){
-                Ꮡt.Log(errormsg);
-                Ꮡt.Log(knownDragonFlyBsdIssueˢ);
+        switch (ᐧ) {
+        case {} when exprᴛ3 == "dragonfly"u8: {
+            if (omitAt && omitMt) {
+                t.Log(errormsg);
+                t.Log(knownDragonFlyBsdIssueˢ);
             } else {
-                Ꮡt.Error(errormsg);
+                t.Error(errormsg);
             }
+            break;
         }
-        else { /* default: */
-            Ꮡt.Error(errormsg);
-        }
+        default: {
+            t.Error(errormsg);
+            break;
+        }}
     }
 }
 
-public static void TestChtimesDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestChtimesDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    testChtimes(Ꮡt, Ꮡt.TempDir());
+    testChtimes(t, t.TempDir());
 }
 
-internal static void testChtimes(ж<Δtesting.T> Ꮡt, @string name) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+internal static void testChtimes(ж<Δtesting.T> t, @string name) {
     var (st, err) = Stat(name);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat %s: %s"u8, name, err);
+    if (err != nil) {
+        t.Fatalf("Stat %s: %s", name, err);
     }
     var preStat = st;
 
@@ -1829,13 +1886,13 @@ internal static void testChtimes(ж<Δtesting.T> Ꮡt, @string name) {
     var at = os_internal_test_package.Atime(preStat);
     var mt = preStat.ModTime();
     err = Chtimes(name, at.Add(-time.ΔSecond), mt.Add(-time.ΔSecond));
-    if (err != default!) {
-        Ꮡt.Fatalf("Chtimes %s: %s"u8, name, err);
+    if (err != nil) {
+        t.Fatalf("Chtimes %s: %s", name, err);
     }
 
     (st, err) = Stat(name);
-    if (err != default!) {
-        Ꮡt.Fatalf("second Stat %s: %s"u8, name, err);
+    if (err != nil) {
+        t.Fatalf("second Stat %s: %s", name, err);
     }
     var postStat = st;
 
@@ -1844,106 +1901,110 @@ internal static void testChtimes(ж<Δtesting.T> Ꮡt, @string name) {
     if (!pat.Before(at)) {
         @string errormsg = fmt.Sprintf("AccessTime didn't go backwards; was=%v, after=%v"u8, at, pat);
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "plan9"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8: {
             // Mtime is the time of the last change of
             // content.  Similarly, atime is set whenever
             // the contents are accessed; also, it is set
             // whenever mtime is set.
+            break;
         }
-        else if (exprᴛ1 == "netbsd"u8) {
-            if (hasNoatime()){
-                Ꮡt.Log(errormsg);
-                Ꮡt.Log(knownNetBSDIssueAtimeNotˢ);
+        case {} when exprᴛ1 == "netbsd"u8: {
+            if (hasNoatime()) {
+                t.Log(errormsg);
+                t.Log(knownNetBSDIssueAtimeNotˢ);
             } else {
-                Ꮡt.Error(errormsg);
+                t.Error(errormsg);
             }
+            break;
         }
-        else { /* default: */
-            Ꮡt.Error(errormsg);
-        }
+        default: {
+            t.Error(errormsg);
+            break;
+        }}
     }
 
     if (!pmt.Before(mt)) {
-        Ꮡt.Errorf("ModTime didn't go backwards; was=%v, after=%v"u8, mt, pmt);
+        t.Errorf("ModTime didn't go backwards; was=%v, after=%v", mt, pmt);
     }
 }
 
-public static void TestChtimesToUnixZero(ж<Δtesting.T> Ꮡt) {
-    var @file = newFile(Ꮡt);
+public static void TestChtimesToUnixZero(ж<Δtesting.T> t) {
+    var @file = newFile(t);
     @string fn = @file.Name();
     {
-        var (_, errΔ1) = @file.Write(slice<byte>("hi"u8)); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var (_, errΔ1) = @file.Write(slice<byte>("hi"u8)); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        var errΔ2 = @file.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = @file.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 
     var unixZero = time.Unix(0, 0);
     {
-        var errΔ3 = Chtimes(fn, unixZero, unixZero); if (errΔ3 != default!) {
-            Ꮡt.Fatalf("Chtimes failed: %v"u8, errΔ3);
+        var errΔ3 = Chtimes(fn, unixZero, unixZero); if (errΔ3 != nil) {
+            t.Fatalf("Chtimes failed: %v", errΔ3);
         }
     }
 
     var (st, err) = Stat(fn);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     {
         var mt = st.ModTime(); if (mt != unixZero) {
-            Ꮡt.Errorf("mtime is %v, want %v"u8, mt, unixZero);
+            t.Errorf("mtime is %v, want %v", mt, unixZero);
         }
     }
 }
 
-public static void TestFileChdir(ж<Δtesting.T> Ꮡt) {
+public static void TestFileChdir(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         var (wd, err) = Getwd();
-        if (err != default!) {
-            Ꮡt.Fatalf("Getwd: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("Getwd: %s", err);
         }
-        Ꮡt.Chdir("."u8); // Ensure wd is restored after the test.
+        t.Chdir("."); // Ensure wd is restored after the test.
 
-        (var fd, err) = Open("."u8);
-        if (err != default!) {
-            Ꮡt.Fatalf("Open .: %s"u8, err);
+        (var fd, err) = Open(".");
+        if (err != nil) {
+            t.Fatalf("Open .: %s", err);
         }
         var fdʗ1 = fd;
         defer(() => fdʗ1.Close(), ref ᒐ);
 
         {
-            var errΔ1 = Chdir("/"u8); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("Chdir /: %s"u8, errΔ1);
+            var errΔ1 = Chdir("/"); if (errΔ1 != nil) {
+                t.Fatalf("Chdir /: %s", errΔ1);
             }
         }
 
         {
-            var errΔ2 = fd.Chdir(); if (errΔ2 != default!) {
-                Ꮡt.Fatalf("fd.Chdir: %s"u8, errΔ2);
+            var errΔ2 = fd.Chdir(); if (errΔ2 != nil) {
+                t.Fatalf("fd.Chdir: %s", errΔ2);
             }
         }
 
         (var wdNew, err) = Getwd();
-        if (err != default!) {
-            Ꮡt.Fatalf("Getwd: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("Getwd: %s", err);
         }
 
         (var wdInfo, err) = fd.Stat();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         (var newInfo, err) = Stat(wdNew);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         if (!SameFile(wdInfo, newInfo)) {
-            Ꮡt.Fatalf("fd.Chdir failed: got %s, want %s"u8, wdNew, wd);
+            t.Fatalf("fd.Chdir failed: got %s, want %s", wdNew, wd);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1951,64 +2012,68 @@ public static void TestFileChdir(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goTestFileChdirTestlogˢ = "GO_TEST_FILE_CHDIR_TESTLOG"u8;
-internal static readonly @string testlogTxtˢ = "testlog.txt"u8;
-internal static readonly @string testRunˢ2 = "-test.run=^TestFileChdirTestlog$"u8;
-internal static readonly @string chdirˢ = "chdir "u8;
+internal static ref readonly @string goTestFileChdirTestlogˢ => ref goTestFileChdirTestlogˢᵇ;
+private static readonly @string goTestFileChdirTestlogˢᵇ = "GO_TEST_FILE_CHDIR_TESTLOG"u8;
+internal static ref readonly @string testlogTxtˢ => ref testlogTxtˢᵇ;
+private static readonly @string testlogTxtˢᵇ = "testlog.txt"u8;
+internal static ref readonly @string testRunˢ2 => ref testRunˢ2ᵇ;
+private static readonly @string testRunˢ2ᵇ = "-test.run=^TestFileChdirTestlog$"u8;
+internal static ref readonly @string chdirˢ => ref chdirˢᵇ;
+private static readonly @string chdirˢᵇ = "chdir "u8;
 
 // TestFileChdirTestlog verifies that (*File).Chdir notifies the testlog,
 // just like os.Chdir does. cmd/go's test cache relies on every working
 // directory change being recorded so that relative paths logged by later
 // Open/Stat calls can be resolved against the correct directory.
-public static void TestFileChdirTestlog(ж<Δtesting.T> Ꮡt) {
+public static void TestFileChdirTestlog(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Getenv(goTestFileChdirTestlogˢ) == "1"u8) {
-            var (fd, errΔ1) = Open("."u8);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatalf("Open .: %s"u8, errΔ1);
+            var (fd, errΔ1) = Open(".");
+            if (errΔ1 != nil) {
+                t.Fatalf("Open .: %s", errΔ1);
             }
             var fdʗ1 = fd;
             defer(() => fdʗ1.Close(), ref ᒐ);
             {
-                var errΔ2 = Chdir(TempDir()); if (errΔ2 != default!) {
-                    Ꮡt.Fatalf("Chdir: %s"u8, errΔ2);
+                var errΔ2 = Chdir(TempDir()); if (errΔ2 != nil) {
+                    t.Fatalf("Chdir: %s", errΔ2);
                 }
             }
             {
-                var errΔ3 = fd.Chdir(); if (errΔ3 != default!) {
-                    Ꮡt.Fatalf("fd.Chdir: %s"u8, errΔ3);
+                var errΔ3 = fd.Chdir(); if (errΔ3 != nil) {
+                    t.Fatalf("fd.Chdir: %s", errΔ3);
                 }
             }
             return;
         }
 
-        testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
-        @string exe = testenv.Executable(new os_test_package.testing_TжTB(Ꮡt));
-        @string logfile = filepath.Join(Ꮡt.TempDir(), testlogTxtˢ);
-        var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), exe,
+        testenv.MustHaveExec(new os_test_package.testing_TжTB(t));
+        @string exe = testenv.Executable(new os_test_package.testing_TжTB(t));
+        @string logfile = filepath.Join(t.TempDir(), testlogTxtˢ);
+        var cmd = testenv.Command(new os_test_package.testing_TжTB(t), exe,
             testRunˢ2,
             "-test.testlogfile=" + logfile);
         cmd = testenv.CleanCmdEnv(cmd);
-        cmd.Value.Env = append((~cmd).Env, "GO_TEST_FILE_CHDIR_TESTLOG=1"u8);
+        cmd.Env = append(cmd.Env, (@string)"GO_TEST_FILE_CHDIR_TESTLOG=1");
         {
-            var (@out, errΔ4) = cmd.CombinedOutput(); if (errΔ4 != default!) {
-                Ꮡt.Fatalf("helper failed: %v\n%s"u8, errΔ4, @out);
+            var (@out, errΔ4) = cmd.CombinedOutput(); if (errΔ4 != nil) {
+                t.Fatalf("helper failed: %v\n%s", errΔ4, @out);
             }
         }
 
         var (data, err) = ReadFile(logfile);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         nint chdirs = 0;
-        foreach (var (_, line) in strings.Split((@string)data, "\n"u8)) {
+        foreach (var (_, line) in strings.Split((@string)data, "\n")) {
             if (strings.HasPrefix(line, chdirˢ)) {
                 chdirs++;
             }
         }
         if (chdirs < 2) {
-            Ꮡt.Fatalf("got %d chdir testlog entries, want at least 2; testlog:\n%s"u8, chdirs, data);
+            t.Fatalf("got %d chdir testlog entries, want at least 2; testlog:\n%s", chdirs, data);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2016,45 +2081,51 @@ public static void TestFileChdirTestlog(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pwdˢ2 = "PWD"u8;
-internal static readonly @string tmpˢ = "/tmp"u8;
+internal static ref readonly @string pwdˢ2 => ref pwdˢ2ᵇ;
+private static readonly @string pwdˢ2ᵇ = "PWD"u8;
+internal static ref readonly @string tmpˢ => ref tmpˢᵇ;
+private static readonly @string tmpˢᵇ = "/tmp"u8;
 
-public static void TestChdirAndGetwd(ж<Δtesting.T> Ꮡt) {
+public static void TestChdirAndGetwd(ж<Δtesting.T> t) {
     var dirsᴷ = new stackAppend<@string>();
 
-    Ꮡt.Chdir(Ꮡt.TempDir()); // Ensure wd is restored after the test.
+    t.Chdir(t.TempDir()); // Ensure wd is restored after the test.
 
     // These are chosen carefully not to be symlinks on a Mac
     // (unlike, say, /var, /etc), except /tmp, which we handle below.
-    var dirs = new @string[]{"/"u8, "/usr/bin"u8, "/tmp"u8}.slice();
+    var dirs = slice<@string>(["/", "/usr/bin", "/tmp"]);
     // /usr/bin does not usually exist on Plan 9 or Android.
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "android"u8) {
-        dirs = new @string[]{"/system/bin"u8}.slice();
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8: {
+        dirs = slice<@string>(["/system/bin"]);
+        break;
     }
-    else if (exprᴛ1 == "plan9"u8) {
-        dirs = new @string[]{"/"u8, "/usr"u8}.slice();
+    case {} when exprᴛ1 == "plan9"u8: {
+        dirs = slice<@string>(["/", "/usr"]);
+        break;
     }
-    else if (exprᴛ1 == "ios"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "wasip1"u8) {
-        dirs = default!;
-        foreach (var (_, dir) in new @string[]{Ꮡt.TempDir(), Ꮡt.TempDir()}.slice()) {
+    case {} when exprᴛ1 == "ios"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "wasip1"u8: {
+        dirs = default;
+        foreach (var (_, dir) in slice<@string>([t.TempDir(), t.TempDir()])) {
             // Expand symlinks so path equality tests work.
             var (dirΔ1, err) = filepath.EvalSymlinks(dir);
-            if (err != default!) {
-                Ꮡt.Fatalf("EvalSymlinks: %v"u8, err);
+            if (err != nil) {
+                t.Fatalf("EvalSymlinks: %v", err);
             }
             dirs = append(dirsᴷ, dirs, dirΔ1);
         }
-    }
+        break;
+    }}
     for (nint mode = 0; mode < 2; mode++) {
         foreach (var (_, d) in dirs) {
-            error err = default!;
-            if (mode == 0){
+            error err = default;
+            if (mode == 0) {
                 err = Chdir(d);
             } else {
                 var (fd1, err1Δ1) = Open(d);
-                if (err1Δ1 != default!) {
-                    Ꮡt.Errorf("Open %s: %s"u8, d, err1Δ1);
+                if (err1Δ1 != nil) {
+                    t.Errorf("Open %s: %s", d, err1Δ1);
                     continue;
                 }
                 err = fd1.Chdir();
@@ -2064,21 +2135,21 @@ public static void TestChdirAndGetwd(ж<Δtesting.T> Ꮡt) {
                 Setenv(pwdˢ2, tmpˢ);
             }
             var (pwd, err1) = Getwd();
-            if (err != default!) {
-                Ꮡt.Fatalf("Chdir %s: %s"u8, d, err);
+            if (err != nil) {
+                t.Fatalf("Chdir %s: %s", d, err);
             }
-            if (err1 != default!) {
-                Ꮡt.Fatalf("Getwd in %s: %s"u8, d, err1);
+            if (err1 != nil) {
+                t.Fatalf("Getwd in %s: %s", d, err1);
             }
             if (!equal(pwd, d)) {
-                Ꮡt.Fatalf("Getwd returned %q want %q"u8, pwd, d);
+                t.Fatalf("Getwd returned %q want %q", pwd, d);
             }
         }
     }
 }
 
 // Test that Chdir+Getwd is program-wide.
-public static partial void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
+public static partial void TestProgWideChdir(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         const nint N = 10;
@@ -2086,8 +2157,8 @@ public static partial void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
         var hold = new channel<EmptyStruct>(0);
         var done = new channel<EmptyStruct>(0);
 
-        @string d = Ꮡt.TempDir();
-        Ꮡt.Chdir(d);
+        @string d = t.TempDir();
+        t.Chdir(d);
 
         // Note the deferred Wait must be called after the deferred close(done),
         // to ensure the N goroutines have been released even if the main goroutine
@@ -2125,27 +2196,27 @@ public static partial void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
                         break;
                     }}
                     // Getwd might be wrong
-                    var (f0, errΔ1) = Stat("."u8);
-                    if (errΔ1 != default!) {
-                        Ꮡt.Error(errΔ1);
+                    var (f0, errΔ1) = Stat(".");
+                    if (errΔ1 != nil) {
+                        t.Error(errΔ1);
                         return;
                     }
                     (var pwd, errΔ1) = Getwd();
-                    if (errΔ1 != default!) {
-                        Ꮡt.Errorf("Getwd: %v"u8, errΔ1);
+                    if (errΔ1 != nil) {
+                        t.Errorf("Getwd: %v", errΔ1);
                         return;
                     }
                     if (pwd != d) {
-                        Ꮡt.Errorf("Getwd() = %q, want %q"u8, pwd, d);
+                        t.Errorf("Getwd() = %q, want %q", pwd, d);
                         return;
                     }
                     (var f1, errΔ1) = Stat(pwd);
-                    if (errΔ1 != default!) {
-                        Ꮡt.Error(errΔ1);
+                    if (errΔ1 != nil) {
+                        t.Error(errΔ1);
                         return;
                     }
                     if (!SameFile(f0, f1)) {
-                        Ꮡt.Errorf(@"Samefile(Stat("".""), Getwd()) reports false (%s != %s)"u8, f0.Name(), f1.Name());
+                        t.Errorf(@"Samefile(Stat("".""), Getwd()) reports false (%s != %s)", f0.Name(), f1.Name());
                         return;
                     }
                 }
@@ -2153,17 +2224,17 @@ public static partial void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
                 finally { ᒐ.Run(); }
             }, i);
         }
-        error err = default!;
+        error err = default;
         {
-            err = Chdir(d); if (err != default!) {
-                Ꮡt.Fatalf("Chdir: %v"u8, err);
+            err = Chdir(d); if (err != nil) {
+                t.Fatalf("Chdir: %v", err);
             }
         }
         // OS X sets TMPDIR to a symbolic link.
         // So we resolve our working directory again before the test.
         (d, err) = Getwd();
-        if (err != default!) {
-            Ꮡt.Fatalf("Getwd: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Getwd: %v", err);
         }
         close(hold);
         Ꮡwg.Wait();
@@ -2173,7 +2244,8 @@ public static partial void TestProgWideChdir(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dataᶜ = "hello, world\n"u8;
+internal static ref readonly @string dataᶜ => ref dataᶜᵇ;
+private static readonly @string dataᶜᵇ = "hello, world\n"u8;
 
 internal partial struct TestSeek_test /*dyn*/ {
     internal int64 @in;
@@ -2181,14 +2253,14 @@ internal partial struct TestSeek_test /*dyn*/ {
     internal int64 @out;
 }
 
-public static void TestSeek(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestSeek(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     @string data = dataᶜ;
     Δio.WriteString(new Δos.FileжWriter(f), data);
-    slice<TestSeek_test> tests = new TestSeek_test[]{
+    slice<TestSeek_test> tests = slice<TestSeek_test>([
         new(0, Δio.SeekCurrent, (int64)len(data)),
         new(0, Δio.SeekStart, 0),
         new(5, Δio.SeekStart, 5),
@@ -2203,11 +2275,11 @@ public static void TestSeek(ж<Δtesting.T> Ꮡt) {
         new(0, Δio.SeekCurrent, 4294967295L),
         new(8589934591L, Δio.SeekStart, 8589934591L),
         new(0, Δio.SeekCurrent, 8589934591L)
-    }.slice();
+    ]);
     foreach (var (i, tt) in tests) {
         var (off, err) = f.Seek(tt.@in, tt.whence);
-        if (off != tt.@out || err != default!) {
-            Ꮡt.Errorf("#%d: Seek(%v, %v) = %v, %v want %v, nil"u8, i, tt.@in, tt.whence, off, err, tt.@out);
+        if (off != tt.@out || err != nil) {
+            t.Errorf("#%d: Seek(%v, %v) = %v, %v want %v, nil", i, tt.@in, tt.whence, off, err, tt.@out);
         }
     }
 }
@@ -2215,57 +2287,62 @@ public static void TestSeek(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object seekOnPipeShouldFailˢ = (@string)"Seek on pipe should fail"u8;
 
-public static void TestSeekError(ж<Δtesting.T> Ꮡt) {
+public static void TestSeekError(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "js"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "wasip1"u8) {
-        Ꮡt.Skipf("skipping test on %v"u8, Δruntime.GOOS);
-    }
-    Ꮡt.Parallel();
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "wasip1"u8: {
+        t.Skipf("skipping test on %v", Δruntime.GOOS);
+        break;
+    }}
+    t.Parallel();
 
     var (r, w, err) = Pipe();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (_, err) = r.Seek(0, 0);
-    if (err == default!) {
-        Ꮡt.Fatal(seekOnPipeShouldFailˢ);
+    if (err == nil) {
+        t.Fatal(seekOnPipeShouldFailˢ);
     }
     {
-        var (perr, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !AreEqual((~perr).Err, syscall.ESPIPE)) {
-            Ꮡt.Errorf("Seek returned error %v, want &PathError{Err: syscall.ESPIPE}"u8, err);
+        var (perr, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !AreEqual(perr.Err, syscall.ESPIPE)) {
+            t.Errorf("Seek returned error %v, want &PathError{Err: syscall.ESPIPE}", err);
         }
     }
     (_, err) = w.Seek(0, 0);
-    if (err == default!) {
-        Ꮡt.Fatal(seekOnPipeShouldFailˢ);
+    if (err == nil) {
+        t.Fatal(seekOnPipeShouldFailˢ);
     }
     {
-        var (perr, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !AreEqual((~perr).Err, syscall.ESPIPE)) {
-            Ꮡt.Errorf("Seek returned error %v, want &PathError{Err: syscall.ESPIPE}"u8, err);
+        var (perr, ok) = err._<ж<fs.PathError>>(ᐧ); if (!ok || !AreEqual(perr.Err, syscall.ESPIPE)) {
+            t.Errorf("Seek returned error %v, want &PathError{Err: syscall.ESPIPE}", err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noRootˢ = "NoRoot"u8;
-internal static readonly @string inRootˢ = "InRoot"u8;
+internal static ref readonly @string noRootˢ => ref noRootˢᵇ;
+private static readonly @string noRootˢᵇ = "NoRoot"u8;
+internal static ref readonly @string inRootˢ => ref inRootˢᵇ;
+private static readonly @string inRootˢᵇ = "InRoot"u8;
 
-public static void TestOpenError(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string dir = makefs(Ꮡt, new @string[]{
-        "is-a-file"u8,
-        "is-a-dir/"u8
-    }.slice());
-    Ꮡt.Run(noRootˢ, (ж<Δtesting.T> tΔ1) => {
+public static void TestOpenError(ж<Δtesting.T> t) {
+    t.Parallel();
+    @string dir = makefs(t, slice<@string>([
+        "is-a-file",
+        "is-a-dir/"
+    ]));
+    t.Run(noRootˢ, (ж<Δtesting.T> tΔ1) => {
         testOpenError(tΔ1, dir, false);
     });
-    Ꮡt.Run(inRootˢ, (ж<Δtesting.T> tΔ2) => {
+    t.Run(inRootˢ, (ж<Δtesting.T> tΔ2) => {
         testOpenError(tΔ2, dir, true);
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fileˢ = "file "u8;
+internal static ref readonly @string fileˢ => ref fileˢᵇ;
+private static readonly @string fileˢᵇ = "file "u8;
 
 internal partial struct testOpenError_type /*dyn*/ {
     internal @string path;
@@ -2273,38 +2350,38 @@ internal partial struct testOpenError_type /*dyn*/ {
     internal error error;
 }
 
-internal static void testOpenError(ж<Δtesting.T> Ꮡt, @string dir, bool rooted) {
+internal static void testOpenError(ж<Δtesting.T> t, @string dir, bool rooted) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
-        ж<Δos.Root> r = default!;
+        t.Parallel();
+        ж<Δos.Root> r = default;
         if (rooted) {
-            error err = default!;
+            error err = default;
             (r, err) = OpenRoot(dir);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             var rʗ1 = r;
             defer(() => rʗ1.Close(), ref ᒐ);
         }
-        foreach (var (_, tt) in new testOpenError_type[]{new(
-            "no-such-file"u8,
+        foreach (var (_, tt) in slice<testOpenError_type>([new(
+            "no-such-file",
             O_RDONLY,
             syscall.ENOENT
         ), new(
-            "is-a-dir"u8,
+            "is-a-dir",
             O_WRONLY,
             syscall.EISDIR
         ), new(
-            "is-a-file/no-such-file"u8,
+            "is-a-file/no-such-file",
             O_WRONLY,
             syscall.ENOTDIR
         )
-        }.slice()) {
-            ж<Δos.File> f = default!;
-            error err = default!;
-            @string name = default!;
-            if (rooted){
+        ])) {
+            ж<Δos.File> f = default;
+            error err = default;
+            @string name = default;
+            if (rooted) {
                 name = fmt.Sprintf("Root(%q).OpenFile(%q, %d)"u8, dir, tt.path, tt.mode);
                 (f, err) = r.OpenFile(tt.path, tt.mode, 0);
             } else {
@@ -2312,18 +2389,18 @@ internal static void testOpenError(ж<Δtesting.T> Ꮡt, @string dir, bool roote
                 name = fmt.Sprintf("OpenFile(%q, %d)"u8, path, tt.mode);
                 (f, err) = OpenFile(path, tt.mode, 0);
             }
-            if (err == default!) {
-                Ꮡt.Errorf("%v succeeded"u8, name);
+            if (err == nil) {
+                t.Errorf("%v succeeded", name);
                 f.Close();
                 continue;
             }
             var (perr, ok) = err._<ж<fs.PathError>>(ᐧ);
             if (!ok) {
-                Ꮡt.Errorf("%v returns error of %T type; want *PathError"u8, name, err);
+                t.Errorf("%v returns error of %T type; want *PathError", name, err);
             }
-            if (!AreEqual((~perr).Err, tt.error)) {
+            if (!AreEqual(perr.Err, tt.error)) {
                 if (Δruntime.GOOS == "plan9"u8) {
-                    @string syscallErrStr = (~perr).Err.Error();
+                    @string syscallErrStr = perr.Err.Error();
                     @string expectedErrStr = strings.Replace(tt.error.Error(), fileˢ, ""u8, 1);
                     if (!strings.HasSuffix(syscallErrStr, expectedErrStr)) {
                         // Some Plan 9 file servers incorrectly return
@@ -2332,18 +2409,18 @@ internal static void testOpenError(ж<Δtesting.T> Ꮡt, @string dir, bool roote
                         if (AreEqual(tt.error, syscall.EISDIR) && (strings.HasSuffix(syscallErrStr, syscall.EPERM.Error()) || strings.HasSuffix(syscallErrStr, syscall.EACCES.Error()))) {
                             continue;
                         }
-                        Ꮡt.Errorf("%v = _, %q; want suffix %q"u8, name, syscallErrStr, expectedErrStr);
+                        t.Errorf("%v = _, %q; want suffix %q", name, syscallErrStr, expectedErrStr);
                     }
                     continue;
                 }
                 if (Δruntime.GOOS == "dragonfly"u8) {
                     // DragonFly incorrectly returns EACCES rather
                     // EISDIR when a directory is opened for write.
-                    if (AreEqual(tt.error, syscall.EISDIR) && AreEqual((~perr).Err, syscall.EACCES)) {
+                    if (AreEqual(tt.error, syscall.EISDIR) && AreEqual(perr.Err, syscall.EACCES)) {
                         continue;
                     }
                 }
-                Ꮡt.Errorf("%v = _, %q; want %q"u8, name, (~perr).Err.Error(), tt.error.Error());
+                t.Errorf("%v = _, %q; want %q", name, perr.Err.Error(), tt.error.Error());
             }
         }
     }
@@ -2354,124 +2431,126 @@ internal static void testOpenError(ж<Δtesting.T> Ꮡt, @string dir, bool roote
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object openSucceededˢ = (@string)@"Open("""") succeeded"u8;
 
-public static void TestOpenNoName(ж<Δtesting.T> Ꮡt) {
+public static void TestOpenNoName(ж<Δtesting.T> t) {
     var (f, err) = Open(""u8);
-    if (err == default!) {
+    if (err == nil) {
         f.Close();
-        Ꮡt.Fatal(openSucceededˢ);
+        t.Fatal(openSucceededˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hostnameˢ = "hostname"u8;
+internal static ref readonly @string hostnameˢ => ref hostnameˢᵇ;
+private static readonly @string hostnameˢᵇ = "hostname"u8;
 internal static readonly object skippingTestTestRequiresˢ = (@string)"skipping test; test requires hostname but it does not exist"u8;
 
-internal static @string runBinHostname(ж<Δtesting.T> Ꮡt) {
+internal static @string runBinHostname(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // Run /bin/hostname and collect output.
         var (r, w, err) = Pipe();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
 
         (var path, err) = exec.LookPath(hostnameˢ);
-        if (err != default!) {
+        if (err != nil) {
             if (errors.Is(err, exec.ErrNotFound)) {
-                Ꮡt.Skip(skippingTestTestRequiresˢ);
+                t.Skip(skippingTestTestRequiresˢ);
             }
-            Ꮡt.Fatal(err);
+            t.Fatal(err);
         }
 
-        var argv = new @string[]{"hostname"u8}.slice();
+        var argv = slice<@string>(["hostname"]);
         if (Δruntime.GOOS == "aix"u8) {
-            argv = new @string[]{"hostname"u8, "-s"u8}.slice();
+            argv = slice<@string>(["hostname", "-s"]);
         }
-        (var p, err) = StartProcess(path, argv, Ꮡ(new ProcAttr(Files: new ж<Δos.File>[]{default!, w, Stderr}.slice())));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        (var p, err) = StartProcess(path, argv, Ꮡ(new ProcAttr(Files: slice<ж<Δos.File>>([default, w, Stderr]))));
+        if (err != nil) {
+            t.Fatal(err);
         }
         w.Close();
 
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         Δio.Copy(new os_test_package.strings_BuilderжWriter(Ꮡb), new os_test_package.os_FileжReader(r));
         (_, err) = p.Wait();
-        if (err != default!) {
-            Ꮡt.Fatalf("run hostname Wait: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("run hostname Wait: %v", err);
         }
         err = p.Kill();
-        if (err == default!) {
-            Ꮡt.Errorf("expected an error from Kill running 'hostname'"u8);
+        if (err == nil) {
+            t.Errorf("expected an error from Kill running 'hostname'");
         }
         @string output = b.String();
         {
-            nint n = len(output); if (n > 0 && output[n - 1] == (rune)'\n') {
+            nint n = len(output); if (n > 0 && output[n - 1] == '\n') {
                 output = output.slice(0, n - 1);
             }
         }
         if (output == ""u8) {
-            Ꮡt.Fatalf("/bin/hostname produced no output"u8);
+            t.Fatalf("/bin/hostname produced no output");
         }
 
         return output;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
-internal static void testWindowsHostname(ж<Δtesting.T> Ꮡt, @string hostname) {
-    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), hostnameˢ);
+internal static void testWindowsHostname(ж<Δtesting.T> t, @string hostname) {
+    var cmd = testenv.Command(new os_test_package.testing_TжTB(t), hostnameˢ);
     var (@out, err) = cmd.Output();
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to execute hostname command: %v %s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("Failed to execute hostname command: %v %s", err, @out);
     }
-    @string want = strings.Trim((@string)@out, "\r\n"u8);
+    @string want = strings.Trim((@string)@out, "\r\n");
     if (hostname != want) {
-        Ꮡt.Fatalf("Hostname() = %q != system hostname of %q"u8, hostname, want);
+        t.Fatalf("Hostname() = %q != system hostname of %q", hostname, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object hostnameReturnedEmptyˢ = (@string)"Hostname returned empty string and no error"u8;
 
-public static void TestHostname(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestHostname(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var (hostname, err) = Hostname();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (hostname == ""u8) {
-        Ꮡt.Fatal(hostnameReturnedEmptyˢ);
+        t.Fatal(hostnameReturnedEmptyˢ);
     }
-    if (strings.Contains(hostname, "\x00"u8)) {
-        Ꮡt.Fatalf("unexpected zero byte in hostname: %q"u8, hostname);
+    if (strings.Contains(hostname, "\x00")) {
+        t.Fatalf("unexpected zero byte in hostname: %q", hostname);
     }
 
     // There is no other way to fetch hostname on windows, but via winapi.
     // On Plan 9 it can be taken from #c/sysname as Hostname() does.
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "android"u8 || exprᴛ1 == "plan9"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8 || exprᴛ1 == "plan9"u8: {
         // No /bin/hostname to verify against.
         return;
     }
-    if (exprᴛ1 == "windows"u8) {
-        testWindowsHostname(Ꮡt, hostname);
+    case {} when exprᴛ1 == "windows"u8: {
+        testWindowsHostname(t, hostname);
         return;
-    }
+    }}
 
-    testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveExec(new os_test_package.testing_TжTB(t));
 
     // Check internal Hostname() against the output of /bin/hostname.
     // Allow that the internal Hostname returns a Fully Qualified Domain Name
     // and the /bin/hostname only returns the first component
-    @string want = runBinHostname(Ꮡt);
+    @string want = runBinHostname(t);
     if (hostname != want) {
-        var (host, _, ok) = strings.Cut(hostname, "."u8);
+        var (host, _, ok) = strings.Cut(hostname, ".");
         if (!ok || host != want) {
-            Ꮡt.Errorf("Hostname() = %q, want %q"u8, hostname, want);
+            t.Errorf("Hostname() = %q, want %q", hostname, want);
         }
     }
 }
@@ -2480,40 +2559,43 @@ public static void TestHostname(ж<Δtesting.T> Ꮡt) {
 internal static readonly object worldˢ = (@string)"world"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dataᶜ1 = "hello, world\n"u8;
+internal static ref readonly @string dataᶜ1 => ref dataᶜ1ᵇ;
+private static readonly @string dataᶜ1ᵇ = "hello, world\n"u8;
 
-public static void TestReadAt(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestReadAt(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     @string data = dataᶜ1;
     Δio.WriteString(new Δos.FileжWriter(f), data);
 
     var b = new slice<byte>(5);
     var (n, err) = f.ReadAt(b, 7);
-    if (err != default! || n != len(b)) {
-        Ꮡt.Fatalf("ReadAt 7: %d, %v"u8, n, err);
+    if (err != nil || n != len(b)) {
+        t.Fatalf("ReadAt 7: %d, %v", n, err);
     }
     if (((sstring)b) != "world"u8) {
-        Ꮡt.Fatalf("ReadAt 7: have %q want %q"u8, (@string)b, worldˢ);
+        t.Fatalf("ReadAt 7: have %q want %q", (@string)b, worldˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloˢ = "hello"u8;
+internal static ref readonly @string helloˢ => ref helloˢᵇ;
+private static readonly @string helloˢᵇ = "hello"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dataᶜ2 = "hello, world\n"u8;
+internal static ref readonly @string dataᶜ2 => ref dataᶜ2ᵇ;
+private static readonly @string dataᶜ2ᵇ = "hello, world\n"u8;
 
 // Verify that ReadAt doesn't affect seek offset.
 // In the Plan 9 kernel, there used to be a bug in the implementation of
 // the pread syscall, where the channel offset was erroneously updated after
 // calling pread on a file.
-public static void TestReadAtOffset(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestReadAtOffset(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     @string data = dataᶜ2;
     Δio.WriteString(new Δos.FileжWriter(f), data);
@@ -2522,33 +2604,35 @@ public static void TestReadAtOffset(ж<Δtesting.T> Ꮡt) {
     var b = new slice<byte>(5);
 
     var (n, err) = f.ReadAt(b, 7);
-    if (err != default! || n != len(b)) {
-        Ꮡt.Fatalf("ReadAt 7: %d, %v"u8, n, err);
+    if (err != nil || n != len(b)) {
+        t.Fatalf("ReadAt 7: %d, %v", n, err);
     }
     if (((sstring)b) != "world"u8) {
-        Ꮡt.Fatalf("ReadAt 7: have %q want %q"u8, (@string)b, worldˢ);
+        t.Fatalf("ReadAt 7: have %q want %q", (@string)b, worldˢ);
     }
 
     (n, err) = f.Read(b);
-    if (err != default! || n != len(b)) {
-        Ꮡt.Fatalf("Read: %d, %v"u8, n, err);
+    if (err != nil || n != len(b)) {
+        t.Fatalf("Read: %d, %v", n, err);
     }
     if (((sstring)b) != "hello"u8) {
-        Ꮡt.Fatalf("Read: have %q want %q"u8, (@string)b, helloˢ);
+        t.Fatalf("Read: have %q want %q", (@string)b, helloˢ);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dataᶜ3 = "hello, world\n"u8;
+internal static ref readonly @string dataᶜ3 => ref dataᶜ3ᵇ;
+private static readonly @string dataᶜ3ᵇ = "hello, world\n"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantsubᶜ = "negative offset"u8;
+internal static ref readonly @string wantsubᶜ => ref wantsubᶜᵇ;
+private static readonly @string wantsubᶜᵇ = "negative offset"u8;
 
 // Verify that ReadAt doesn't allow negative offset.
-public static void TestReadAtNegativeOffset(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestReadAtNegativeOffset(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     @string data = dataᶜ3;
     Δio.WriteString(new Δos.FileжWriter(f), data);
@@ -2560,48 +2644,50 @@ public static void TestReadAtNegativeOffset(ж<Δtesting.T> Ꮡt) {
 
     @string wantsub = wantsubᶜ;
     if (!strings.Contains(fmt.Sprint(err), wantsub) || n != 0) {
-        Ꮡt.Errorf("ReadAt(-10) = %v, %v; want 0, ...%q..."u8, n, err, wantsub);
+        t.Errorf("ReadAt(-10) = %v, %v; want 0, ...%q...", n, err, wantsub);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloWORldˢ = "hello, WORld!"u8;
+internal static ref readonly @string helloWORldˢ => ref helloWORldˢᵇ;
+private static readonly @string helloWORldˢᵇ = "hello, WORld!"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dataᶜ4 = "hello, world"u8;
+internal static ref readonly @string dataᶜ4 => ref dataᶜ4ᵇ;
+private static readonly @string dataᶜ4ᵇ = "hello, world"u8;
 
-public static void TestWriteAt(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestWriteAt(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     @string data = dataᶜ4;
     Δio.WriteString(new Δos.FileжWriter(f), data);
 
     var (n, err) = f.WriteAt(slice<byte>("WOR"u8), 7);
-    if (err != default! || n != 3) {
-        Ꮡt.Fatalf("WriteAt 7: %d, %v"u8, n, err);
+    if (err != nil || n != 3) {
+        t.Fatalf("WriteAt 7: %d, %v", n, err);
     }
-    (n, err) = Δio.WriteString(new Δos.FileжWriter(f), "!"u8); // test that WriteAt doesn't change the file offset
-    if (err != default! || n != 1) {
-        Ꮡt.Fatal(err);
+    (n, err) = Δio.WriteString(new Δos.FileжWriter(f), "!"); // test that WriteAt doesn't change the file offset
+    if (err != nil || n != 1) {
+        t.Fatal(err);
     }
 
     (var got, err) = ReadFile(f.Name());
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile %s: %v"u8, f.Name(), err);
+    if (err != nil) {
+        t.Fatalf("ReadFile %s: %v", f.Name(), err);
     }
     @string want = helloWORldˢ;
     if (((sstring)got) != want) {
-        Ꮡt.Fatalf("after write: have %q want %q"u8, (@string)got, want);
+        t.Fatalf("after write: have %q want %q", (@string)got, want);
     }
 }
 
-public static partial void TestWriteAtConcurrent(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static partial void TestWriteAtConcurrent(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
-    Δio.WriteString(new Δos.FileжWriter(f), "0000000000"u8);
+    var f = newFile(t);
+    Δio.WriteString(new Δos.FileжWriter(f), "0000000000");
 
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     foreach (var i in range(10)) {
@@ -2612,12 +2698,12 @@ public static partial void TestWriteAtConcurrent(ж<Δtesting.T> Ꮡt) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 var (n, errΔ1) = fʗ1.WriteAt(slice<byte>(strconv.Itoa(i)), (int64)i);
-                if (errΔ1 != default! || n != 1) {
-                    Ꮡt.Errorf("WriteAt %d: %d, %v"u8, i, n, errΔ1);
+                if (errΔ1 != nil || n != 1) {
+                    t.Errorf("WriteAt %d: %d, %v", i, n, errΔ1);
                 }
-                (n, errΔ1) = Δio.WriteString(new Δos.FileжWriter(fʗ1), "!"u8); // test that WriteAt doesn't change the file offset
-                if (errΔ1 != default! || n != 1) {
-                    Ꮡt.Error(errΔ1);
+                (n, errΔ1) = Δio.WriteString(new Δos.FileжWriter(fʗ1), "!"); // test that WriteAt doesn't change the file offset
+                if (errΔ1 != nil || n != 1) {
+                    t.Error(errΔ1);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2627,122 +2713,129 @@ public static partial void TestWriteAtConcurrent(ж<Δtesting.T> Ꮡt) {
     Ꮡwg.Wait();
 
     var (got, err) = ReadFile(f.Name());
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile %s: %v"u8, f.Name(), err);
+    if (err != nil) {
+        t.Fatalf("ReadFile %s: %v", f.Name(), err);
     }
-    @string want = "0123456789!!!!!!!!!!"u8;
+    @string want = "0123456789!!!!!!!!!!";
     if (((sstring)got) != want) {
-        Ꮡt.Fatalf("after write: have %q want %q"u8, (@string)got, want);
+        t.Fatalf("after write: have %q want %q", (@string)got, want);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantsubᶜ1 = "negative offset"u8;
+internal static ref readonly @string wantsubᶜ1 => ref wantsubᶜ1ᵇ;
+private static readonly @string wantsubᶜ1ᵇ = "negative offset"u8;
 
 // Verify that WriteAt doesn't allow negative offset.
-public static void TestWriteAtNegativeOffset(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestWriteAtNegativeOffset(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     var (n, err) = f.WriteAt(slice<byte>("WORLD"u8), -10);
 
     @string wantsub = wantsubᶜ1;
     if (!strings.Contains(fmt.Sprint(err), wantsub) || n != 0) {
-        Ꮡt.Errorf("WriteAt(-10) = %v, %v; want 0, ...%q..."u8, n, err, wantsub);
+        t.Errorf("WriteAt(-10) = %v, %v; want 0, ...%q...", n, err, wantsub);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writeAtInAppendModeTxtˢ = "write_at_in_append_mode.txt"u8;
+internal static ref readonly @string writeAtInAppendModeTxtˢ => ref writeAtInAppendModeTxtˢᵇ;
+private static readonly @string writeAtInAppendModeTxtˢᵇ = "write_at_in_append_mode.txt"u8;
 
 // Verify that WriteAt doesn't work in append mode.
-public static void TestWriteAtInAppendMode(ж<Δtesting.T> Ꮡt) {
+public static void TestWriteAtInAppendMode(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Chdir(Ꮡt.TempDir());
+        t.Chdir(t.TempDir());
         var (f, err) = OpenFile(writeAtInAppendModeTxtˢ, (nint)(O_APPEND | O_CREATE), 438);
-        if (err != default!) {
-            Ꮡt.Fatalf("OpenFile: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("OpenFile: %v", err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (_, err) = f.WriteAt(slice<byte>(""u8), 1);
         if (!AreEqual(err, os_internal_test_package.ErrWriteAtInAppendMode)) {
-            Ꮡt.Fatalf("f.WriteAt returned %v, expected %v"u8, err, os_internal_test_package.ErrWriteAtInAppendMode);
+            t.Fatalf("f.WriteAt returned %v, expected %v", err, os_internal_test_package.ErrWriteAtInAppendMode);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-internal static @string writeFile(ж<Δtesting.T> Ꮡt, ж<Δos.Root> Ꮡr, @string fname, nint flag, @string text) {
-    Ꮡt.Helper();
-    ж<Δos.File> f = default!;
-    error err = default!;
-    if (Ꮡr == nil){
+internal static @string writeFile(ж<Δtesting.T> t, ж<Δos.Root> r, @string fname, nint flag, @string text) {
+    t.Helper();
+    ж<Δos.File> f = default;
+    error err = default;
+    if (r == nil) {
         (f, err) = OpenFile(fname, flag, 438);
     } else {
-        (f, err) = Ꮡr.OpenFile(fname, flag, 438);
+        (f, err) = r.OpenFile(fname, flag, 438);
     }
-    if (err != default!) {
-        Ꮡt.Fatalf("Open: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Open: %v", err);
     }
     (var n, err) = Δio.WriteString(new Δos.FileжWriter(f), text);
-    if (err != default!) {
-        Ꮡt.Fatalf("WriteString: %d, %v"u8, n, err);
+    if (err != nil) {
+        t.Fatalf("WriteString: %d, %v", n, err);
     }
     f.Close();
     (var data, err) = ReadFile(fname);
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("ReadFile: %v", err);
     }
     return (@string)data;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string newˢ = "new"u8;
-internal static readonly @string appendˢ = "|append"u8;
+internal static ref readonly @string newˢ => ref newˢᵇ;
+private static readonly @string newˢᵇ = "new"u8;
+internal static ref readonly @string appendˢ => ref appendˢᵇ;
+private static readonly @string appendˢᵇ = "|append"u8;
 internal static readonly object newAppendˢ = (@string)"new|append"u8;
 internal static readonly object newAppendAppendˢ = (@string)"new|append|append"u8;
-internal static readonly @string newAppendˢ2 = "new&append"u8;
-internal static readonly @string oldˢ = "old"u8;
+internal static ref readonly @string newAppendˢ2 => ref newAppendˢ2ᵇ;
+private static readonly @string newAppendˢ2ᵇ = "new&append"u8;
+internal static ref readonly @string oldˢ => ref oldˢᵇ;
+private static readonly @string oldˢᵇ = "old"u8;
 internal static readonly object oldAppendˢ = (@string)"old&append"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string fᶜ = "append.txt"u8;
+internal static ref readonly @string fᶜ => ref fᶜᵇ;
+private static readonly @string fᶜᵇ = "append.txt"u8;
 
-public static void TestAppend(ж<Δtesting.T> Ꮡt) {
-    testMaybeRooted(Ꮡt, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
+public static void TestAppend(ж<Δtesting.T> t) {
+    testMaybeRooted(t, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
         @string f = fᶜ;
         @string s = writeFile(tΔ1, r, f, (nint)((nint)(nint)(O_CREATE | O_TRUNC) | O_RDWR), newˢ);
         if (s != "new"u8) {
-            tΔ1.Fatalf("writeFile: have %q want %q"u8, s, newˢ);
+            tΔ1.Fatalf("writeFile: have %q want %q", s, newˢ);
         }
         s = writeFile(tΔ1, r, f, (nint)(O_APPEND | O_RDWR), appendˢ);
         if (s != "new|append"u8) {
-            tΔ1.Fatalf("writeFile: have %q want %q"u8, s, newAppendˢ);
+            tΔ1.Fatalf("writeFile: have %q want %q", s, newAppendˢ);
         }
         s = writeFile(tΔ1, r, f, (nint)((nint)(nint)(O_CREATE | O_APPEND) | O_RDWR), appendˢ);
         if (s != "new|append|append"u8) {
-            tΔ1.Fatalf("writeFile: have %q want %q"u8, s, newAppendAppendˢ);
+            tΔ1.Fatalf("writeFile: have %q want %q", s, newAppendAppendˢ);
         }
         var err = Remove(f);
-        if (err != default!) {
-            tΔ1.Fatalf("Remove: %v"u8, err);
+        if (err != nil) {
+            tΔ1.Fatalf("Remove: %v", err);
         }
         s = writeFile(tΔ1, r, f, (nint)((nint)(nint)(O_CREATE | O_APPEND) | O_RDWR), newAppendˢ2);
         if (s != "new&append"u8) {
-            tΔ1.Fatalf("writeFile: after append have %q want %q"u8, s, newAppendˢ2);
+            tΔ1.Fatalf("writeFile: after append have %q want %q", s, newAppendˢ2);
         }
         s = writeFile(tΔ1, r, f, (nint)(O_CREATE | O_RDWR), oldˢ);
         if (s != "old&append"u8) {
-            tΔ1.Fatalf("writeFile: after create have %q want %q"u8, s, oldAppendˢ);
+            tΔ1.Fatalf("writeFile: after create have %q want %q", s, oldAppendˢ);
         }
         s = writeFile(tΔ1, r, f, (nint)((nint)(nint)(O_CREATE | O_TRUNC) | O_RDWR), newˢ);
         if (s != "new"u8) {
-            tΔ1.Fatalf("writeFile: after truncate have %q want %q"u8, s, newˢ);
+            tΔ1.Fatalf("writeFile: after truncate have %q want %q", s, newˢ);
         }
     });
 }
@@ -2756,78 +2849,82 @@ internal partial struct TestFilePermissions_type /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string filenameᶜ = "f"u8;
+internal static ref readonly @string filenameᶜ => ref filenameᶜᵇ;
+private static readonly @string filenameᶜᵇ = "f"u8;
 
 // TestFilePermissions tests setting Unix permission bits on file creation.
-public static void TestFilePermissions(ж<Δtesting.T> Ꮡt) {
+public static void TestFilePermissions(ж<Δtesting.T> t) {
     if (Getuid() == 0) {
-        Ꮡt.Skip(skippingTestWhenRunningˢ);
+        t.Skip(skippingTestWhenRunningˢ);
     }
-    foreach (var (_, vᴛ1) in new TestFilePermissions_type[]{
-        new("r"u8, 292),
-        new("w"u8, 146),
-        new("rw"u8, 438)
-    }.slice()) {
+    foreach (var (_, vᴛ1) in slice<TestFilePermissions_type>([
+        new("r", 292),
+        new("w", 146),
+        new("rw", 438)
+    ])) {
         ref var test = ref heap(new TestFilePermissions_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<Δtesting.T> tΔ1) => {
+        t.Run(test.name, (ж<Δtesting.T> tΔ1) => {
             var exprᴛ1 = Δruntime.GOOS;
-            if (exprᴛ1 == "windows"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "windows"u8: {
                 if ((fs.FileMode)(testʗ1.mode & 292) == 0) {
                     tΔ1.Skip("write-only files not supported on " + Δruntime.GOOS);
                 }
+                break;
             }
-            else if (exprᴛ1 == "wasip1"u8) {
+            case {} when exprᴛ1 == "wasip1"u8: {
                 tΔ1.Skip("file permissions not supported on " + Δruntime.GOOS);
-            }
+                break;
+            }}
             var testʗ2 = testʗ1;
             testMaybeRooted(tΔ1, (ж<Δtesting.T> tΔ2, ж<Δos.Root> r) => {
                 @string filename = filenameᶜ;
-                ж<Δos.File> f = default!;
-                error err = default!;
-                if (r == nil){
+                ж<Δos.File> f = default;
+                error err = default;
+                if (r == nil) {
                     (f, err) = OpenFile(filename, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_EXCL), testʗ2.mode);
                 } else {
                     (f, err) = r.OpenFile(filename, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_EXCL), testʗ2.mode);
                 }
-                if (err != default!) {
+                if (err != nil) {
                     tΔ2.Fatal(err);
                 }
                 f.Close();
                 (var b, err) = ReadFile(filename);
-                if ((fs.FileMode)(testʗ2.mode & 292) != 0){
-                    if (err != default!) {
-                        tΔ2.Errorf("ReadFile = %v; want success"u8, err);
+                if ((fs.FileMode)(testʗ2.mode & 292) != 0) {
+                    if (err != nil) {
+                        tΔ2.Errorf("ReadFile = %v; want success", err);
                     }
                 } else {
-                    if (err == default!) {
-                        tΔ2.Errorf("ReadFile = %q, <nil>; want failure"u8, (@string)b);
+                    if (err == nil) {
+                        tΔ2.Errorf("ReadFile = %q, <nil>; want failure", (@string)b);
                     }
                 }
                 (_, err) = Stat(filename);
-                if (err != default!) {
-                    tΔ2.Errorf("Stat = %v; want success"u8, err);
+                if (err != nil) {
+                    tΔ2.Errorf("Stat = %v; want success", err);
                 }
-                err = WriteFile(filename, default!, 438);
-                if ((fs.FileMode)(testʗ2.mode & 146) != 0){
-                    if (err != default!) {
-                        tΔ2.Errorf("WriteFile = %v; want success"u8, err);
+                err = WriteFile(filename, default, 438);
+                if ((fs.FileMode)(testʗ2.mode & 146) != 0) {
+                    if (err != nil) {
+                        tΔ2.Errorf("WriteFile = %v; want success", err);
                         var (bΔ1, errΔ1) = ReadFile(filename);
-                        tΔ2.Errorf("ReadFile: %v"u8, errΔ1);
-                        tΔ2.Errorf("file contents: %q"u8, bΔ1);
+                        tΔ2.Errorf("ReadFile: %v", errΔ1);
+                        tΔ2.Errorf("file contents: %q", bΔ1);
                     }
                 } else {
-                    if (err == default!) {
-                        tΔ2.Errorf("WriteFile(%q) = <nil>; want failure"u8, filename);
+                    if (err == nil) {
+                        tΔ2.Errorf("WriteFile(%q) = <nil>; want failure", filename);
                         var (st, errΔ2) = Stat(filename);
-                        if (errΔ2 == default!) {
-                            tΔ2.Errorf("mode: %s"u8, st.Mode());
+                        if (errΔ2 == nil) {
+                            tΔ2.Errorf("mode: %s", st.Mode());
                         }
                         (var bΔ2, errΔ2) = ReadFile(filename);
-                        tΔ2.Errorf("ReadFile: %v"u8, errΔ2);
-                        tΔ2.Errorf("file contents: %q"u8, bΔ2);
+                        tΔ2.Errorf("ReadFile: %v", errΔ2);
+                        tΔ2.Errorf("file contents: %q", bΔ2);
                     }
                 }
             });
@@ -2836,36 +2933,38 @@ public static void TestFilePermissions(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string doesNotExistˢ = "does_not_exist"u8;
+internal static ref readonly @string doesNotExistˢ => ref doesNotExistˢᵇ;
+private static readonly @string doesNotExistˢᵇ = "does_not_exist"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string linkᶜ = "link"u8;
+internal static ref readonly @string linkᶜ => ref linkᶜᵇ;
+private static readonly @string linkᶜᵇ = "link"u8;
 
-public static void TestOpenFileCreateExclDanglingSymlink(ж<Δtesting.T> Ꮡt) {
-    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
-    testMaybeRooted(Ꮡt, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
+public static void TestOpenFileCreateExclDanglingSymlink(ж<Δtesting.T> t) {
+    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
+    testMaybeRooted(t, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
         @string link = linkᶜ;
         {
-            var errΔ1 = Symlink(doesNotExistˢ, link); if (errΔ1 != default!) {
+            var errΔ1 = Symlink(doesNotExistˢ, link); if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
         }
-        ж<Δos.File> f = default!;
-        error err = default!;
-        if (r == nil){
+        ж<Δos.File> f = default;
+        error err = default;
+        if (r == nil) {
             (f, err) = OpenFile(link, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_EXCL), 292);
         } else {
             (f, err) = r.OpenFile(link, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_EXCL), 292);
         }
-        if (err == default!) {
+        if (err == nil) {
             f.Close();
         }
         if (!errors.Is(err, ErrExist)) {
-            tΔ1.Errorf("OpenFile of a dangling symlink with O_CREATE|O_EXCL = %v, want ErrExist"u8, err);
+            tΔ1.Errorf("OpenFile of a dangling symlink with O_CREATE|O_EXCL = %v, want ErrExist", err);
         }
         {
-            var (_, errΔ1) = Stat(link); if (errΔ1 == default!) {
-                tΔ1.Errorf("OpenFile of a dangling symlink with O_CREATE|O_EXCL created a file"u8);
+            var (_, errΔ1) = Stat(link); if (errΔ1 == nil) {
+                tΔ1.Errorf("OpenFile of a dangling symlink with O_CREATE|O_EXCL created a file");
             }
         }
     });
@@ -2877,20 +2976,21 @@ internal partial struct TestFileRDWRFlags_type /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string filenameᶜ1 = "f"u8;
+internal static ref readonly @string filenameᶜ1 => ref filenameᶜ1ᵇ;
+private static readonly @string filenameᶜ1ᵇ = "f"u8;
 
 // TestFileRDWRFlags tests the O_RDONLY, O_WRONLY, and O_RDWR flags.
-public static void TestFileRDWRFlags(ж<Δtesting.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestFileRDWRFlags_type[]{
-        new("O_RDONLY"u8, O_RDONLY),
-        new("O_WRONLY"u8, O_WRONLY),
-        new("O_RDWR"u8, O_RDWR)
-    }.slice()) {
+public static void TestFileRDWRFlags(ж<Δtesting.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestFileRDWRFlags_type>([
+        new("O_RDONLY", O_RDONLY),
+        new("O_WRONLY", O_WRONLY),
+        new("O_RDWR", O_RDWR)
+    ])) {
         ref var test = ref heap(new TestFileRDWRFlags_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<Δtesting.T> tΔ1) => {
+        t.Run(test.name, (ж<Δtesting.T> tΔ1) => {
             var testʗ2 = testʗ1;
             testMaybeRooted(tΔ1, (ж<Δtesting.T> tΔ2, ж<Δos.Root> r) => {
                 GoFrame ᒐ = default;
@@ -2898,51 +2998,51 @@ public static void TestFileRDWRFlags(ж<Δtesting.T> Ꮡt) {
                     @string filename = filenameᶜ1;
                     var content = slice<byte>("content"u8);
                     {
-                        var errΔ1 = WriteFile(filename, content, 438); if (errΔ1 != default!) {
+                        var errΔ1 = WriteFile(filename, content, 438); if (errΔ1 != nil) {
                             tΔ2.Fatal(errΔ1);
                         }
                     }
-                    ж<Δos.File> f = default!;
-                    error err = default!;
-                    if (r == nil){
+                    ж<Δos.File> f = default;
+                    error err = default;
+                    if (r == nil) {
                         (f, err) = OpenFile(filename, testʗ2.flag, 0);
                     } else {
                         (f, err) = r.OpenFile(filename, testʗ2.flag, 0);
                     }
-                    if (err != default!) {
+                    if (err != nil) {
                         tΔ2.Fatal(err);
                     }
                     var fʗ1 = f;
                     defer(() => fʗ1.Close(), ref ᒐ);
                     (var got, err) = Δio.ReadAll(new os_test_package.os_FileжReader(f));
-                    if (testʗ2.flag == O_WRONLY){
-                        if (err == default!) {
-                            tΔ2.Errorf("read file: %q, %v; want error"u8, got, err);
+                    if (testʗ2.flag == O_WRONLY) {
+                        if (err == nil) {
+                            tΔ2.Errorf("read file: %q, %v; want error", got, err);
                         }
                     } else {
-                        if (err != default! || !bytes.Equal(got, content)) {
-                            tΔ2.Errorf("read file: %q, %v; want %q, <nil>"u8, got, err, content);
+                        if (err != nil || !bytes.Equal(got, content)) {
+                            tΔ2.Errorf("read file: %q, %v; want %q, <nil>", got, err, content);
                         }
                     }
                     {
-                        var (_, errΔ1) = f.Seek(0, 0); if (errΔ1 != default!) {
-                            tΔ2.Fatalf("f.Seek: %v"u8, errΔ1);
+                        var (_, errΔ1) = f.Seek(0, 0); if (errΔ1 != nil) {
+                            tΔ2.Fatalf("f.Seek: %v", errΔ1);
                         }
                     }
                     var newcontent = slice<byte>("CONTENT"u8);
                     (_, err) = f.Write(newcontent);
-                    if (testʗ2.flag == O_RDONLY){
-                        if (err == default!) {
-                            tΔ2.Errorf("write file: succeeded, want error"u8);
+                    if (testʗ2.flag == O_RDONLY) {
+                        if (err == nil) {
+                            tΔ2.Errorf("write file: succeeded, want error");
                         }
                     } else {
-                        if (err != default!) {
-                            tΔ2.Errorf("write file: %v, want success"u8, err);
+                        if (err != nil) {
+                            tΔ2.Errorf("write file: %v, want success", err);
                         }
                     }
                     f.Close();
                     (got, err) = ReadFile(filename);
-                    if (err != default!) {
+                    if (err != nil) {
                         tΔ2.Fatal(err);
                     }
                     var want = content;
@@ -2950,7 +3050,7 @@ public static void TestFileRDWRFlags(ж<Δtesting.T> Ꮡt) {
                         want = newcontent;
                     }
                     if (!bytes.Equal(got, want)) {
-                        tΔ2.Fatalf("after write, file contains %q, want %q"u8, got, want);
+                        tΔ2.Fatalf("after write, file contains %q, want %q", got, want);
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -2960,24 +3060,24 @@ public static void TestFileRDWRFlags(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestStatDirWithTrailingSlash(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestStatDirWithTrailingSlash(ж<Δtesting.T> t) {
+    t.Parallel();
 
     // Create new temporary directory and arrange to clean it up.
-    @string path = Ꮡt.TempDir();
+    @string path = t.TempDir();
 
     // Stat of path should succeed.
     {
-        var (_, err) = Stat(path); if (err != default!) {
-            Ꮡt.Fatalf("stat %s failed: %s"u8, path, err);
+        var (_, err) = Stat(path); if (err != nil) {
+            t.Fatalf("stat %s failed: %s", path, err);
         }
     }
 
     // Stat of path+"/" should succeed too.
     path += "/"u8;
     {
-        var (_, err) = Stat(path); if (err != default!) {
-            Ꮡt.Fatalf("stat %s failed: %s"u8, path, err);
+        var (_, err) = Stat(path); if (err != nil) {
+            t.Fatalf("stat %s failed: %s", path, err);
         }
     }
 }
@@ -2985,190 +3085,197 @@ public static void TestStatDirWithTrailingSlash(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object nilˢ = (@string)"<nil>"u8;
 
-public static void TestNilProcessStateString(ж<Δtesting.T> Ꮡt) {
-    ж<Δos.ProcessState> ps = default!;
+public static void TestNilProcessStateString(ж<Δtesting.T> t) {
+    ж<Δos.ProcessState> ps = default;
     @string s = ps.String();
     if (s != "<nil>"u8) {
-        Ꮡt.Errorf("(*ProcessState)(nil).String() = %q, want %q"u8, s, nilˢ);
+        t.Errorf("(*ProcessState)(nil).String() = %q, want %q", s, nilˢ);
     }
 }
 
-public static void TestSameFile(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
-    var (fa, err) = Create("a"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("Create(a): %v"u8, err);
+public static void TestSameFile(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
+    var (fa, err) = Create("a");
+    if (err != nil) {
+        t.Fatalf("Create(a): %v", err);
     }
     fa.Close();
-    (var fb, err) = Create("b"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("Create(b): %v"u8, err);
+    (var fb, err) = Create("b");
+    if (err != nil) {
+        t.Fatalf("Create(b): %v", err);
     }
     fb.Close();
 
-    (var ia1, err) = Stat("a"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat(a): %v"u8, err);
+    (var ia1, err) = Stat("a");
+    if (err != nil) {
+        t.Fatalf("Stat(a): %v", err);
     }
-    (var ia2, err) = Stat("a"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat(a): %v"u8, err);
+    (var ia2, err) = Stat("a");
+    if (err != nil) {
+        t.Fatalf("Stat(a): %v", err);
     }
     if (!SameFile(ia1, ia2)) {
-        Ꮡt.Errorf("files should be same"u8);
+        t.Errorf("files should be same");
     }
 
-    (var ib, err) = Stat("b"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat(b): %v"u8, err);
+    (var ib, err) = Stat("b");
+    if (err != nil) {
+        t.Fatalf("Stat(b): %v", err);
     }
     if (SameFile(ia1, ib)) {
-        Ꮡt.Errorf("files should be different"u8);
+        t.Errorf("files should be different");
     }
 }
 
-internal static void testDevNullFileInfo(ж<Δtesting.T> Ꮡt, @string statname, @string devNullName, fs.FileInfo fi) {
+internal static void testDevNullFileInfo(ж<Δtesting.T> t, @string statname, @string devNullName, fs.FileInfo fi) {
     @string pre = fmt.Sprintf("%s(%q): "u8, statname, devNullName);
     if (fi.Size() != 0) {
-        Ꮡt.Errorf(pre + "wrong file size have %d want 0"u8, fi.Size());
+        t.Errorf(pre + "wrong file size have %d want 0"u8, fi.Size());
     }
     if ((fs.FileMode)(fi.Mode() & ModeDevice) == 0) {
-        Ꮡt.Errorf(pre + "wrong file mode %q: ModeDevice is not set"u8, fi.Mode());
+        t.Errorf(pre + "wrong file mode %q: ModeDevice is not set"u8, fi.Mode());
     }
     if ((fs.FileMode)(fi.Mode() & ModeCharDevice) == 0) {
-        Ꮡt.Errorf(pre + "wrong file mode %q: ModeCharDevice is not set"u8, fi.Mode());
+        t.Errorf(pre + "wrong file mode %q: ModeCharDevice is not set"u8, fi.Mode());
     }
     if (fi.Mode().IsRegular()) {
-        Ꮡt.Errorf(pre + "wrong file mode %q: IsRegular returns true"u8, fi.Mode());
+        t.Errorf(pre + "wrong file mode %q: IsRegular returns true"u8, fi.Mode());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fStatˢ = "f.Stat"u8;
-internal static readonly @string statˢ = "Stat"u8;
+internal static ref readonly @string fStatˢ => ref fStatˢᵇ;
+private static readonly @string fStatˢᵇ = "f.Stat"u8;
+internal static ref readonly @string statˢ => ref statˢᵇ;
+private static readonly @string statˢᵇ = "Stat"u8;
 
-internal static void testDevNullFile(ж<Δtesting.T> Ꮡt, @string devNullName) {
+internal static void testDevNullFile(ж<Δtesting.T> t, @string devNullName) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Open(devNullName);
-        if (err != default!) {
-            Ꮡt.Fatalf("Open(%s): %v"u8, devNullName, err);
+        if (err != nil) {
+            t.Fatalf("Open(%s): %v", devNullName, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (var fi, err) = f.Stat();
-        if (err != default!) {
-            Ꮡt.Fatalf("Stat(%s): %v"u8, devNullName, err);
+        if (err != nil) {
+            t.Fatalf("Stat(%s): %v", devNullName, err);
         }
-        testDevNullFileInfo(Ꮡt, fStatˢ, devNullName, fi);
+        testDevNullFileInfo(t, fStatˢ, devNullName, fi);
 
         (fi, err) = Stat(devNullName);
-        if (err != default!) {
-            Ꮡt.Fatalf("Stat(%s): %v"u8, devNullName, err);
+        if (err != nil) {
+            t.Fatalf("Stat(%s): %v", devNullName, err);
         }
-        testDevNullFileInfo(Ꮡt, statˢ, devNullName, fi);
+        testDevNullFileInfo(t, statˢ, devNullName, fi);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nulˢ = "./nul"u8;
-internal static readonly @string nulˢ2 = "//./nul"u8;
+internal static ref readonly @string nulˢ => ref nulˢᵇ;
+private static readonly @string nulˢᵇ = "./nul"u8;
+internal static ref readonly @string nulˢ2 => ref nulˢ2ᵇ;
+private static readonly @string nulˢ2ᵇ = "//./nul"u8;
 
-public static void TestDevNullFile(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestDevNullFile(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    testDevNullFile(Ꮡt, DevNull);
+    testDevNullFile(t, DevNull);
     if (Δruntime.GOOS == "windows"u8) {
-        testDevNullFile(Ꮡt, nulˢ);
-        testDevNullFile(Ꮡt, nulˢ2);
+        testDevNullFile(t, nulˢ);
+        testDevNullFile(t, nulˢ2);
     }
 }
 
-internal static ж<bool> testLargeWrite = flag.Bool("large_write"u8, false, "run TestLargeWriteToConsole test that floods console with output"u8);
+internal static ж<bool> testLargeWrite = flag.Bool("large_write", false, "run TestLargeWriteToConsole test that floods console with output");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingConsoleFloodingˢ = (@string)"skipping console-flooding test; enable with -large_write"u8;
 
-public static void TestLargeWriteToConsole(ж<Δtesting.T> Ꮡt) {
+public static void TestLargeWriteToConsole(ж<Δtesting.T> t) {
     if (!testLargeWrite.Value) {
-        Ꮡt.Skip(skippingConsoleFloodingˢ);
+        t.Skip(skippingConsoleFloodingˢ);
     }
     var b = new slice<byte>(32000);
     foreach (var i in range(b)) {
-        b[i] = (rune)'.';
+        b[i] = (byte)'.';
     }
-    b[len(b) - 1] = (rune)'\n';
+    b[len(b) - 1] = (byte)'\n';
     var (n, err) = Stdout.Write(b);
-    if (err != default!) {
-        Ꮡt.Fatalf("Write to os.Stdout failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Write to os.Stdout failed: %v", err);
     }
     if (n != len(b)) {
-        Ꮡt.Errorf("Write to os.Stdout should return %d; got %d"u8, len(b), n);
+        t.Errorf("Write to os.Stdout should return %d; got %d", len(b), n);
     }
     (n, err) = Stderr.Write(b);
-    if (err != default!) {
-        Ꮡt.Fatalf("Write to os.Stderr failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Write to os.Stderr failed: %v", err);
     }
     if (n != len(b)) {
-        Ꮡt.Errorf("Write to os.Stderr should return %d; got %d"u8, len(b), n);
+        t.Errorf("Write to os.Stderr should return %d; got %d", len(b), n);
     }
 }
 
-public static void TestStatDirModeExec(ж<Δtesting.T> Ꮡt) {
+public static void TestStatDirModeExec(ж<Δtesting.T> t) {
     if (Δruntime.GOOS == "wasip1"u8) {
-        Ꮡt.Skip("Chmod is not supported on " + Δruntime.GOOS);
+        t.Skip("Chmod is not supported on " + Δruntime.GOOS);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
     UntypedInt mode = /* 0111 */ 73;
 
-    @string path = Ꮡt.TempDir();
+    @string path = t.TempDir();
     {
-        var errΔ1 = Chmod(path, 511); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Chmod %q 0777: %v"u8, path, errΔ1);
+        var errΔ1 = Chmod(path, 511); if (errΔ1 != nil) {
+            t.Fatalf("Chmod %q 0777: %v", path, errΔ1);
         }
     }
 
     var (dir, err) = Stat(path);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat %q (looking for mode %#o): %s"u8, path, (nint)(mode), err);
+    if (err != nil) {
+        t.Fatalf("Stat %q (looking for mode %#o): %s", path, (nint)(mode), err);
     }
     if ((fs.FileMode)(dir.Mode() & (uint32)mode) != mode) {
-        Ꮡt.Errorf("Stat %q: mode %#o want %#o"u8, path, (fs.FileMode)(dir.Mode() & (uint32)mode), (nint)(mode));
+        t.Errorf("Stat %q: mode %#o want %#o", path, (fs.FileMode)(dir.Mode() & (uint32)mode), (nint)(mode));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
-internal static readonly @string testRunTestStatStdinˢ = "-test.run=^TestStatStdin$"u8;
-internal static readonly @string outputˢ = "output"u8;
+internal static ref readonly @string goWantHelperProcessˢ => ref goWantHelperProcessˢᵇ;
+private static readonly @string goWantHelperProcessˢᵇ = "GO_WANT_HELPER_PROCESS"u8;
+internal static ref readonly @string testRunTestStatStdinˢ => ref testRunTestStatStdinˢᵇ;
+private static readonly @string testRunTestStatStdinˢᵇ = "-test.run=^TestStatStdin$"u8;
+internal static ref readonly @string outputˢ => ref outputˢᵇ;
+private static readonly @string outputˢᵇ = "output"u8;
 
-public static void TestStatStdin(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestStatStdin(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "android"u8 || exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skipf("%s doesn't have /bin/sh"u8, Δruntime.GOOS);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8 || exprᴛ1 == "plan9"u8: {
+        t.Skipf("%s doesn't have /bin/sh", Δruntime.GOOS);
+        break;
+    }}
 
     if (Getenv(goWantHelperProcessˢ) == "1"u8) {
         var (st, errΔ1) = Stdin.Stat();
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Stat failed: %v"u8, errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatalf("Stat failed: %v", errΔ1);
         }
         fmt.Println((fs.FileMode)(st.Mode() & ModeNamedPipe));
         Exit(0);
     }
 
-    Ꮡt.Parallel();
-    @string exe = testenv.Executable(new os_test_package.testing_TжTB(Ꮡt));
+    t.Parallel();
+    @string exe = testenv.Executable(new os_test_package.testing_TжTB(t));
 
     var (fi, err) = Stdin.Stat();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
         var mode = fi.Mode();
@@ -3180,81 +3287,82 @@ public static void TestStatStdin(ж<Δtesting.T> Ꮡt) {
             break;
         }
         default: {
-            Ꮡt.Fatalf("unexpected Stdin mode (%v), want ModeCharDevice or ModeNamedPipe"u8, mode);
+            t.Fatalf("unexpected Stdin mode (%v), want ModeCharDevice or ModeNamedPipe", mode);
             break;
         }}
     }
 
-    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), exe, testRunTestStatStdinˢ);
+    var cmd = testenv.Command(new os_test_package.testing_TжTB(t), exe, testRunTestStatStdinˢ);
     cmd = testenv.CleanCmdEnv(cmd);
-    cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Env = append(cmd.Env, (@string)"GO_WANT_HELPER_PROCESS=1");
     // This will make standard input a pipe.
-    cmd.Value.Stdin = new os_test_package.strings_ReaderжReader(strings.NewReader(outputˢ));
+    cmd.Stdin = new os_test_package.strings_ReaderжReader(strings.NewReader(outputˢ));
 
     (var output, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to spawn child process: %v %q"u8, err, (@string)output);
+    if (err != nil) {
+        t.Fatalf("Failed to spawn child process: %v %q", err, (@string)output);
     }
 
     // result will be like "prw-rw-rw"
-    if (len(output) < 1 || output[0] != (rune)'p') {
-        Ꮡt.Fatalf("Child process reports stdin is not pipe '%v'"u8, (@string)output);
+    if (len(output) < 1 || output[0] != 'p') {
+        t.Fatalf("Child process reports stdin is not pipe '%v'", (@string)output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string targetˢ = "target"u8;
+internal static ref readonly @string targetˢ => ref targetˢᵇ;
+private static readonly @string targetˢᵇ = "target"u8;
 internal static readonly object statDoesnTFollowRelativeˢ = (@string)"Stat doesn't follow relative symlink"u8;
 
-public static void TestStatRelativeSymlink(ж<Δtesting.T> Ꮡt) {
+public static void TestStatRelativeSymlink(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
-        Ꮡt.Parallel();
+        testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
+        t.Parallel();
 
-        @string tmpdir = Ꮡt.TempDir();
+        @string tmpdir = t.TempDir();
         @string target = filepath.Join(tmpdir, targetˢ);
         var (f, err) = Create(target);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         (var st, err) = f.Stat();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         @string link = filepath.Join(tmpdir, linkˢ);
         err = Symlink(filepath.Base(target), link);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         (var st1, err) = Stat(link);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         if (!SameFile(st, st1)) {
-            Ꮡt.Error(statDoesnTFollowRelativeˢ);
+            t.Error(statDoesnTFollowRelativeˢ);
         }
 
         if (Δruntime.GOOS == "windows"u8) {
             Remove(link);
             err = Symlink(target.slice(len(filepath.VolumeName(target))), link);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
 
             var (st1Δ1, errΔ1) = Stat(link);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
 
             if (!SameFile(st, st1Δ1)) {
-                Ꮡt.Error(statDoesnTFollowRelativeˢ);
+                t.Error(statDoesnTFollowRelativeˢ);
             }
         }
     }
@@ -3262,101 +3370,104 @@ public static void TestStatRelativeSymlink(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestReadAtEOF(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestReadAtEOF(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var f = newFile(Ꮡt);
+    var f = newFile(t);
 
     var (_, err) = f.ReadAt(new slice<byte>(10), 0);
-    var exprᴛ1 = err;
-    if (AreEqual(exprᴛ1, Δio.EOF)) {
+    switch (err) {
+    case var ᴛ when AreEqual(ᴛ, Δio.EOF): {
         // all good
+        break;
     }
-    else if (AreEqual(exprᴛ1, default!)) {
-        Ꮡt.Fatalf("ReadAt succeeded"u8);
+    case var ᴛ when AreEqual(ᴛ, default): {
+        t.Fatalf("ReadAt succeeded");
+        break;
     }
-    else { /* default: */
-        Ꮡt.Fatalf("ReadAt failed: %s"u8, err);
-    }
+    default: {
+        t.Fatalf("ReadAt failed: %s", err);
+        break;
+    }}
 }
 
-public static void TestLongPath(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestLongPath(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    @string tmpdir = Ꮡt.TempDir();
+    @string tmpdir = t.TempDir();
 
     // Test the boundary of 247 and fewer bytes (normal) and 248 and more bytes (adjusted).
-    var sizes = new nint[]{247, 248, 249, 400}.slice();
+    var sizes = slice<nint>([247, 248, 249, 400]);
     while (len(tmpdir) < 400) {
         tmpdir += "/dir3456789"u8;
     }
     foreach (var (_, sz) in sizes) {
-        Ꮡt.Run(fmt.Sprintf("length=%d"u8, sz), (ж<Δtesting.T> tΔ1) => {
+        t.Run(fmt.Sprintf("length=%d"u8, sz), (ж<Δtesting.T> tΔ1) => {
             var namesᴷ = new stackAppend<@string>();
             @string sizedTempDir = tmpdir.slice(0, sz - 1) + "x"; // Ensure it does not end with a slash.
 
             // The various sized runs are for this call to trigger the boundary
             // condition.
             {
-                var err = MkdirAll(sizedTempDir, 493); if (err != default!) {
-                    tΔ1.Fatalf("MkdirAll failed: %v"u8, err);
+                var err = MkdirAll(sizedTempDir, 493); if (err != nil) {
+                    tΔ1.Fatalf("MkdirAll failed: %v", err);
                 }
             }
             var data = slice<byte>("hello world\n"u8);
             {
-                var err = WriteFile(sizedTempDir + "/foo.txt"u8, data, 420); if (err != default!) {
-                    tΔ1.Fatalf("os.WriteFile() failed: %v"u8, err);
+                var err = WriteFile(sizedTempDir + "/foo.txt"u8, data, 420); if (err != nil) {
+                    tΔ1.Fatalf("os.WriteFile() failed: %v", err);
                 }
             }
             {
-                var err = Rename(sizedTempDir + "/foo.txt"u8, sizedTempDir + "/bar.txt"u8); if (err != default!) {
-                    tΔ1.Fatalf("Rename failed: %v"u8, err);
+                var err = Rename(sizedTempDir + "/foo.txt"u8, sizedTempDir + "/bar.txt"u8); if (err != nil) {
+                    tΔ1.Fatalf("Rename failed: %v", err);
                 }
             }
             var mtime = time.Now().Truncate(time.ΔMinute);
             {
-                var err = Chtimes(sizedTempDir + "/bar.txt"u8, mtime, mtime); if (err != default!) {
-                    tΔ1.Fatalf("Chtimes failed: %v"u8, err);
+                var err = Chtimes(sizedTempDir + "/bar.txt"u8, mtime, mtime); if (err != nil) {
+                    tΔ1.Fatalf("Chtimes failed: %v", err);
                 }
             }
-            var names = new @string[]{"bar.txt"u8}.slice();
+            var names = slice<@string>(["bar.txt"]);
             if (testenv.HasSymlink()) {
                 {
-                    var err = Symlink(sizedTempDir + "/bar.txt"u8, sizedTempDir + "/symlink.txt"u8); if (err != default!) {
-                        tΔ1.Fatalf("Symlink failed: %v"u8, err);
+                    var err = Symlink(sizedTempDir + "/bar.txt"u8, sizedTempDir + "/symlink.txt"u8); if (err != nil) {
+                        tΔ1.Fatalf("Symlink failed: %v", err);
                     }
                 }
-                names = append(namesᴷ, names, "symlink.txt"u8);
+                names = append(namesᴷ, names, (@string)"symlink.txt");
             }
             if (testenv.HasLink()) {
                 {
-                    var err = Link(sizedTempDir + "/bar.txt"u8, sizedTempDir + "/link.txt"u8); if (err != default!) {
-                        tΔ1.Fatalf("Link failed: %v"u8, err);
+                    var err = Link(sizedTempDir + "/bar.txt"u8, sizedTempDir + "/link.txt"u8); if (err != nil) {
+                        tΔ1.Fatalf("Link failed: %v", err);
                     }
                 }
-                names = append(names, "link.txt"u8);
+                names = append(names, (@string)"link.txt");
             }
-            foreach (var (_, wantSize) in new int64[]{(int64)len(data), 0}.slice()) {
+            foreach (var (_, wantSize) in slice<int64>([(int64)len(data), 0])) {
                 foreach (var (_, name) in names) {
                     @string path = sizedTempDir + "/"u8 + name;
                     var (dir, err) = Stat(path);
-                    if (err != default!) {
-                        tΔ1.Fatalf("Stat(%q) failed: %v"u8, path, err);
+                    if (err != nil) {
+                        tΔ1.Fatalf("Stat(%q) failed: %v", path, err);
                     }
                     var filesize = size(path, tΔ1);
                     if (dir.Size() != filesize || filesize != wantSize) {
-                        tΔ1.Errorf("Size(%q) is %d, len(ReadFile()) is %d, want %d"u8, path, dir.Size(), filesize, wantSize);
+                        tΔ1.Errorf("Size(%q) is %d, len(ReadFile()) is %d, want %d", path, dir.Size(), filesize, wantSize);
                     }
                     if (Δruntime.GOOS != "wasip1"u8) { // Chmod is not supported on wasip1
                         err = Chmod(path, dir.Mode());
-                        if (err != default!) {
-                            tΔ1.Fatalf("Chmod(%q) failed: %v"u8, path, err);
+                        if (err != nil) {
+                            tΔ1.Fatalf("Chmod(%q) failed: %v", path, err);
                         }
                     }
                 }
                 {
-                    var err = Truncate(sizedTempDir + "/bar.txt"u8, 0); if (err != default!) {
-                        tΔ1.Fatalf("Truncate failed: %v"u8, err);
+                    var err = Truncate(sizedTempDir + "/bar.txt"u8, 0); if (err != nil) {
+                        tΔ1.Fatalf("Truncate failed: %v", err);
                     }
                 }
             }
@@ -3364,33 +3475,33 @@ public static void TestLongPath(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-internal static void testKillProcess(ж<Δtesting.T> Ꮡt, Action<ж<Δos.Process>> processKiller) {
+internal static void testKillProcess(ж<Δtesting.T> t, Action<ж<Δos.Process>> processKiller) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
 
         // Re-exec the test binary to start a process that hangs until stdin is closed.
-        var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)));
-        cmd.Value.Env = append(cmd.Environ(), "GO_OS_TEST_DRAIN_STDIN=1"u8);
+        var cmd = testenv.Command(new os_test_package.testing_TжTB(t), testenv.Executable(new os_test_package.testing_TжTB(t)));
+        cmd.Env = append(cmd.Environ(), (@string)"GO_OS_TEST_DRAIN_STDIN=1");
         var (stdout, err) = cmd.StdoutPipe();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         (var stdin, err) = cmd.StdinPipe();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         err = cmd.Start();
-        if (err != default!) {
-            Ꮡt.Fatalf("Failed to start test process: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Failed to start test process: %v", err);
         }
 
         var cmdʗ1 = cmd;
         var stdinʗ1 = stdin;
         defer(() => {
             {
-                var errΔ1 = cmdʗ1.Wait(); if (errΔ1 == default!) {
-                    Ꮡt.Errorf("Test process succeeded, but expected to fail"u8);
+                var errΔ1 = cmdʗ1.Wait(); if (errΔ1 == nil) {
+                    t.Errorf("Test process succeeded, but expected to fail");
                 }
             }
             stdinʗ1.Close(); // Keep stdin alive until the process has finished dying.
@@ -3400,28 +3511,29 @@ internal static void testKillProcess(ж<Δtesting.T> Ꮡt, Action<ж<Δos.Proces
         // (It will close its stdout when it reaches TestMain.)
         Δio.Copy(Δio.Discard, stdout);
 
-        processKiller((~cmd).Process);
+        processKiller(cmd.Process);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestKillStartProcess(ж<Δtesting.T> Ꮡt) {
-    testKillProcess(Ꮡt, (ж<Δos.Process> p) => {
+public static void TestKillStartProcess(ж<Δtesting.T> t) {
+    testKillProcess(t, (ж<Δos.Process> p) => {
         var err = p.Kill();
-        if (err != default!) {
-            Ꮡt.Fatalf("Failed to kill test process: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Failed to kill test process: %v", err);
         }
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunTestGetppidˢ = "-test.run=^TestGetppid$"u8;
+internal static ref readonly @string testRunTestGetppidˢ => ref testRunTestGetppidˢᵇ;
+private static readonly @string testRunTestGetppidˢᵇ = "-test.run=^TestGetppid$"u8;
 
-public static void TestGetppid(ж<Δtesting.T> Ꮡt) {
+public static void TestGetppid(ж<Δtesting.T> t) {
     if (Δruntime.GOOS == "plan9"u8) {
         // TODO: golang.org/issue/8206
-        Ꮡt.Skipf("skipping test on plan9; see issue 8206"u8);
+        t.Skipf("skipping test on plan9; see issue 8206");
     }
 
     if (Getenv(goWantHelperProcessˢ) == "1"u8) {
@@ -3429,33 +3541,33 @@ public static void TestGetppid(ж<Δtesting.T> Ꮡt) {
         Exit(0);
     }
 
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), testRunTestGetppidˢ);
-    cmd.Value.Env = append(Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
+    var cmd = testenv.Command(new os_test_package.testing_TжTB(t), testenv.Executable(new os_test_package.testing_TжTB(t)), testRunTestGetppidˢ);
+    cmd.Env = append(Environ(), (@string)"GO_WANT_HELPER_PROCESS=1");
 
     // verify that Getppid() from the forked process reports our process id
     var (output, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("Failed to spawn child process: %v %q"u8, err, (@string)output);
+    if (err != nil) {
+        t.Fatalf("Failed to spawn child process: %v %q", err, (@string)output);
     }
 
     @string childPpid = (@string)output;
     @string ourPid = fmt.Sprintf("%d"u8, Getpid());
     if (childPpid != ourPid) {
-        Ꮡt.Fatalf("Child process reports parent process id '%v', expected '%v'"u8, childPpid, ourPid);
+        t.Fatalf("Child process reports parent process id '%v', expected '%v'", childPpid, ourPid);
     }
 }
 
-public static void TestKillFindProcess(ж<Δtesting.T> Ꮡt) {
-    testKillProcess(Ꮡt, (ж<Δos.Process> p) => {
-        var (p2, err) = FindProcess((~p).Pid);
-        if (err != default!) {
-            Ꮡt.Fatalf("Failed to find test process: %v"u8, err);
+public static void TestKillFindProcess(ж<Δtesting.T> t) {
+    testKillProcess(t, (ж<Δos.Process> p) => {
+        var (p2, err) = FindProcess(p.Pid);
+        if (err != nil) {
+            t.Fatalf("Failed to find test process: %v", err);
         }
         err = p2.Kill();
-        if (err != default!) {
-            Ꮡt.Fatalf("Failed to kill test process: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Failed to kill test process: %v", err);
         }
     });
 }
@@ -3464,77 +3576,77 @@ partial struct nilFileMethodTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<ж<Δos.File>, error> f;
 }
-internal static slice<nilFileMethodTestsᴛ1> nilFileMethodTests = new nilFileMethodTestsᴛ1[]{
-    new("Chdir"u8, (ж<Δos.File> f) => f.Chdir()),
-    new("Close"u8, (ж<Δos.File> f) => f.Close()),
-    new("Chmod"u8, (ж<Δos.File> f) => f.Chmod(0)),
-    new("Chown"u8, (ж<Δos.File> f) => f.Chown(0, 0)),
-    new("Read"u8, (ж<Δos.File> f) => {
+internal static slice<nilFileMethodTestsᴛ1> nilFileMethodTests = slice<nilFileMethodTestsᴛ1>([
+    new("Chdir", (ж<Δos.File> f) => f.Chdir()),
+    new("Close", (ж<Δos.File> f) => f.Close()),
+    new("Chmod", (ж<Δos.File> f) => f.Chmod(0)),
+    new("Chown", (ж<Δos.File> f) => f.Chown(0, 0)),
+    new("Read", (ж<Δos.File> f) => {
         var (_, err) = f.Read(new slice<byte>(0));
         return err;
     }),
-    new("ReadAt"u8, (ж<Δos.File> f) => {
+    new("ReadAt", (ж<Δos.File> f) => {
         var (_, err) = f.ReadAt(new slice<byte>(0), 0);
         return err;
     }),
-    new("Readdir"u8, (ж<Δos.File> f) => {
+    new("Readdir", (ж<Δos.File> f) => {
         var (_, err) = f.Readdir(1);
         return err;
     }),
-    new("Readdirnames"u8, (ж<Δos.File> f) => {
+    new("Readdirnames", (ж<Δos.File> f) => {
         var (_, err) = f.Readdirnames(1);
         return err;
     }),
-    new("Seek"u8, (ж<Δos.File> f) => {
+    new("Seek", (ж<Δos.File> f) => {
         var (_, err) = f.Seek(0, Δio.SeekStart);
         return err;
     }),
-    new("Stat"u8, (ж<Δos.File> f) => {
+    new("Stat", (ж<Δos.File> f) => {
         var (_, err) = f.Stat();
         return err;
     }),
-    new("Sync"u8, (ж<Δos.File> f) => f.Sync()),
-    new("Truncate"u8, (ж<Δos.File> f) => f.Truncate(0)),
-    new("Write"u8, (ж<Δos.File> f) => {
+    new("Sync", (ж<Δos.File> f) => f.Sync()),
+    new("Truncate", (ж<Δos.File> f) => f.Truncate(0)),
+    new("Write", (ж<Δos.File> f) => {
         var (_, err) = f.Write(new slice<byte>(0));
         return err;
     }),
-    new("WriteAt"u8, (ж<Δos.File> f) => {
+    new("WriteAt", (ж<Δos.File> f) => {
         var (_, err) = f.WriteAt(new slice<byte>(0), 0);
         return err;
     }),
-    new("WriteString"u8, (ж<Δos.File> f) => {
-        var (_, err) = f.WriteString(""u8);
+    new("WriteString", (ж<Δos.File> f) => {
+        var (_, err) = f.WriteString("");
         return err;
     })
-}.slice();
+]);
 
 // Test that all File methods give ErrInvalid if the receiver is nil.
-public static void TestNilFileMethods(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestNilFileMethods(ж<Δtesting.T> t) {
+    t.Parallel();
 
     foreach (var (_, tt) in nilFileMethodTests) {
-        ж<Δos.File> @file = default!;
+        ж<Δos.File> @file = default;
         var got = tt.f(@file);
         if (!AreEqual(got, ErrInvalid)) {
-            Ꮡt.Errorf("%v should fail when f is nil; got %v"u8, tt.name, got);
+            t.Errorf("%v should fail when f is nil; got %v", tt.name, got);
         }
     }
 }
 
-internal static void mkdirTree(ж<Δtesting.T> Ꮡt, @string root, nint level, nint max) {
+internal static void mkdirTree(ж<Δtesting.T> t, @string root, nint level, nint max) {
     if (level >= max) {
         return;
     }
     level++;
-    for (var i = (rune)'a'; i < (rune)'c'; i++) {
+    for (var i = (rune)'a'; i < 'c'; i++) {
         @string dir = filepath.Join(root, (@string)i);
         {
-            var err = Mkdir(dir, 448); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = Mkdir(dir, 448); if (err != nil) {
+                t.Fatal(err);
             }
         }
-        mkdirTree(Ꮡt, dir, level, max);
+        mkdirTree(t, dir, level, max);
     }
 }
 
@@ -3543,7 +3655,7 @@ internal static readonly object skippingOnWindowsˢ = (@string)"skipping on wind
 
 // Test that simultaneous RemoveAll do not report an error.
 // As long as it gets removed, we should be happy.
-public static partial void TestRemoveAllRace(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRemoveAllRace(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOOS == "windows"u8) {
@@ -3551,16 +3663,16 @@ public static partial void TestRemoveAllRace(ж<Δtesting.T> Ꮡt) {
             // removing directories while someone else has
             // them open. The racing doesn't work out nicely
             // like it does on Unix.
-            Ꮡt.Skip(skippingOnWindowsˢ);
+            t.Skip(skippingOnWindowsˢ);
         }
         if (Δruntime.GOOS == "dragonfly"u8) {
-            testenv.SkipFlaky(new os_test_package.testing_TжTB(Ꮡt), 52301);
+            testenv.SkipFlaky(new os_test_package.testing_TжTB(t), 52301);
         }
 
         nint n = Δruntime.GOMAXPROCS(16);
         defer(Δruntime.GOMAXPROCS, n, ref ᒐ);
-        @string root = Ꮡt.TempDir();
-        mkdirTree(Ꮡt, root, 1, 6);
+        @string root = t.TempDir();
+        mkdirTree(t, root, 1, 6);
         var hold = new channel<EmptyStruct>(0);
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         for (nint i = 0; i < 4; i++) {
@@ -3572,8 +3684,8 @@ public static partial void TestRemoveAllRace(ж<Δtesting.T> Ꮡt) {
                     defer(Ꮡwg.Done, ref ᒐ);
                     ᐸꟷ(holdʗ1);
                     var err = RemoveAll(root);
-                    if (err != default!) {
-                        Ꮡt.Errorf("unexpected error: %T, %q"u8, err, err);
+                    if (err != nil) {
+                        t.Errorf("unexpected error: %T, %q", err, err);
                     }
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -3596,28 +3708,35 @@ internal static readonly object skippingOnJsNoSupportForˢ = (@string)"skipping 
 internal static readonly object skippingOnWasip1Noˢ = (@string)"skipping on wasip1; no support for os.Pipe"u8;
 
 // Test that reading from a pipe doesn't use up a thread.
-public static partial void TestPipeThreads(ж<Δtesting.T> Ꮡt) {
+public static partial void TestPipeThreads(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "aix"u8) {
-            Ꮡt.Skip(skippingOnAixIssue70131ˢ);
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "aix"u8: {
+            t.Skip(skippingOnAixIssue70131ˢ);
+            break;
         }
-        else if (exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8) {
-            Ꮡt.Skip(skippingOnSolarisAndˢ);
+        case {} when exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8: {
+            t.Skip(skippingOnSolarisAndˢ);
+            break;
         }
-        else if (exprᴛ1 == "windows"u8) {
-            Ꮡt.Skip(skippingOnWindowsIssueˢ);
+        case {} when exprᴛ1 == "windows"u8: {
+            t.Skip(skippingOnWindowsIssueˢ);
+            break;
         }
-        else if (exprᴛ1 == "plan9"u8) {
-            Ꮡt.Skip(skippingOnPlan9DoesNotˢ);
+        case {} when exprᴛ1 == "plan9"u8: {
+            t.Skip(skippingOnPlan9DoesNotˢ);
+            break;
         }
-        else if (exprᴛ1 == "js"u8) {
-            Ꮡt.Skip(skippingOnJsNoSupportForˢ);
+        case {} when exprᴛ1 == "js"u8: {
+            t.Skip(skippingOnJsNoSupportForˢ);
+            break;
         }
-        else if (exprᴛ1 == "wasip1"u8) {
-            Ꮡt.Skip(skippingOnWasip1Noˢ);
-        }
+        case {} when exprᴛ1 == "wasip1"u8: {
+            t.Skip(skippingOnWasip1Noˢ);
+            break;
+        }}
 
         nint threads = 100;
 
@@ -3625,12 +3744,12 @@ public static partial void TestPipeThreads(ж<Δtesting.T> Ꮡt) {
         var w = new slice<ж<Δos.File>>(threads);
         for (nint i = 0; i < threads; i++) {
             var (rp, wp, err) = Pipe();
-            if (err != default!) {
+            if (err != nil) {
                 for (nint j = 0; j < i; j++) {
                     r[j].Close();
                     w[j].Close();
                 }
-                Ꮡt.Fatal(err);
+                t.Fatal(err);
             }
             r[i] = rp;
             w[i] = wp;
@@ -3648,13 +3767,13 @@ public static partial void TestPipeThreads(ж<Δtesting.T> Ꮡt) {
                 ref var b = ref heap(new array<byte>(1), out var Ꮡb);
                 creadingʗ1.ᐸꟷ(true);
                 {
-                    var (_, err) = rʗ1[iΔ1].Read(b[..]); if (err != default!) {
-                        Ꮡt.Error(err);
+                    var (_, err) = rʗ1[iΔ1].Read(b[..]); if (err != nil) {
+                        t.Error(err);
                     }
                 }
                 {
-                    var err = rʗ1[iΔ1].Close(); if (err != default!) {
-                        Ꮡt.Error(err);
+                    var err = rʗ1[iΔ1].Close(); if (err != nil) {
+                        t.Error(err);
                     }
                 }
                 cdoneʗ1.ᐸꟷ(true);
@@ -3670,13 +3789,13 @@ public static partial void TestPipeThreads(ж<Δtesting.T> Ꮡt) {
 
         for (nint i = 0; i < threads; i++) {
             {
-                var (_, err) = w[i].Write(new byte[]{0}.slice()); if (err != default!) {
-                    Ꮡt.Error(err);
+                var (_, err) = w[i].Write(slice<byte>([0])); if (err != nil) {
+                    t.Error(err);
                 }
             }
             {
-                var err = w[i].Close(); if (err != default!) {
-                    Ꮡt.Error(err);
+                var err = w[i].Close(); if (err != nil) {
+                    t.Error(err);
                 }
             }
             ᐸꟷ(cdone);
@@ -3694,26 +3813,24 @@ internal static Action<ж<Δtesting.T>> testDoubleCloseError(@string path) {
         t.Parallel();
 
         var (@file, err) = Open(path);
-        if (err != default!) {
+        if (err != nil) {
             t.Fatal(err);
         }
         {
-            var errΔ1 = @file.Close(); if (errΔ1 != default!) {
-                t.Fatalf("unexpected error from Close: %v"u8, errΔ1);
+            var errΔ1 = @file.Close(); if (errΔ1 != nil) {
+                t.Fatalf("unexpected error from Close: %v", errΔ1);
             }
         }
         {
-            var errΔ2 = @file.Close(); if (errΔ2 == default!){
+            var errΔ2 = @file.Close(); if (errΔ2 == nil) {
                 t.Error(secondCloseDidNotFailˢ);
-            } else 
-            {
-                var (pe, ok) = errΔ2._<ж<fs.PathError>>(ᐧ); if (!ok){
-                    t.Errorf("second Close: got %T, want %T"u8, errΔ2, pe.OrTypedNil());
-                } else 
-                if (!AreEqual((~pe).Err, ErrClosed)){
-                    t.Errorf("second Close: got %q, want %q"u8, (~pe).Err, ErrClosed);
+            } else {
+                var (pe, ok) = errΔ2._<ж<fs.PathError>>(ᐧ); if (!ok) {
+                    t.Errorf("second Close: got %T, want %T", errΔ2, pe.OrTypedNil());
+                } else if (!AreEqual(pe.Err, ErrClosed)) {
+                    t.Errorf("second Close: got %q, want %q", pe.Err, ErrClosed);
                 } else {
-                    t.Logf("second close returned expected error %q"u8, errΔ2);
+                    t.Logf("second close returned expected error %q", errΔ2);
                 }
             }
         }
@@ -3721,232 +3838,242 @@ internal static Action<ж<Δtesting.T>> testDoubleCloseError(@string path) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fileˢ2 = "file"u8;
+internal static ref readonly @string fileˢ2 => ref fileˢ2ᵇ;
+private static readonly @string fileˢ2ᵇ = "file"u8;
 
-public static partial void TestDoubleCloseError(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
-    Ꮡt.Run(fileˢ2, testDoubleCloseError(filepath.Join(sfdir, sfname)));
-    Ꮡt.Run(dirˢ, testDoubleCloseError(sfdir));
+public static partial void TestDoubleCloseError(ж<Δtesting.T> t) {
+    t.Parallel();
+    t.Run(fileˢ2, testDoubleCloseError(filepath.Join(sfdir, sfname)));
+    t.Run(dirˢ, testDoubleCloseError(sfdir));
 }
 
-public static void TestUserCacheDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestUserCacheDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var (dir, err) = UserCacheDir();
-    if (err != default!) {
-        Ꮡt.Skipf("skipping: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("skipping: %v", err);
     }
     if (dir == ""u8) {
-        Ꮡt.Fatalf("UserCacheDir returned %q; want non-empty path or error"u8, dir);
+        t.Fatalf("UserCacheDir returned %q; want non-empty path or error", dir);
     }
 
     (var fi, err) = Stat(dir);
-    if (err != default!) {
+    if (err != nil) {
         if (IsNotExist(err)) {
-            Ꮡt.Log(err);
+            t.Log(err);
             return;
         }
-        Ꮡt.Fatal(err);
+        t.Fatal(err);
     }
     if (!fi.IsDir()) {
-        Ꮡt.Fatalf("dir %s is not directory; type = %v"u8, dir, fi.Mode());
+        t.Fatalf("dir %s is not directory; type = %v", dir, fi.Mode());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object xdgCacheHomeIsEffectiveˢ = (@string)"$XDG_CACHE_HOME is effective only on Unix systems"u8;
-internal static readonly @string xdgCacheHomeˢ = "XDG_CACHE_HOME"u8;
-internal static readonly @string someDirˢ = "some-dir"u8;
+internal static ref readonly @string xdgCacheHomeˢ => ref xdgCacheHomeˢᵇ;
+private static readonly @string xdgCacheHomeˢᵇ = "XDG_CACHE_HOME"u8;
+internal static ref readonly @string someDirˢ => ref someDirˢᵇ;
+private static readonly @string someDirˢᵇ = "some-dir"u8;
 internal static readonly object userCacheDirSucceededˢ = (@string)"UserCacheDir succeeded though $XDG_CACHE_HOME contains a relative path"u8;
 
-public static void TestUserCacheDirXDGConfigDirEnvVar(ж<Δtesting.T> Ꮡt) {
+public static void TestUserCacheDirXDGConfigDirEnvVar(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skip(xdgCacheHomeIsEffectiveˢ);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "plan9"u8: {
+        t.Skip(xdgCacheHomeIsEffectiveˢ);
+        break;
+    }}
 
     var (wd, err) = Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    Ꮡt.Setenv(xdgCacheHomeˢ, wd);
+    t.Setenv(xdgCacheHomeˢ, wd);
 
     (var dir, err) = UserCacheDir();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (dir != wd) {
-        Ꮡt.Fatalf("UserCacheDir returned %q; want the value of $XDG_CACHE_HOME %q"u8, dir, wd);
+        t.Fatalf("UserCacheDir returned %q; want the value of $XDG_CACHE_HOME %q", dir, wd);
     }
 
-    Ꮡt.Setenv(xdgCacheHomeˢ, someDirˢ);
+    t.Setenv(xdgCacheHomeˢ, someDirˢ);
     (_, err) = UserCacheDir();
-    if (err == default!) {
-        Ꮡt.Fatal(userCacheDirSucceededˢ);
+    if (err == nil) {
+        t.Fatal(userCacheDirSucceededˢ);
     }
 }
 
-public static void TestUserConfigDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestUserConfigDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var (dir, err) = UserConfigDir();
-    if (err != default!) {
-        Ꮡt.Skipf("skipping: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("skipping: %v", err);
     }
     if (dir == ""u8) {
-        Ꮡt.Fatalf("UserConfigDir returned %q; want non-empty path or error"u8, dir);
+        t.Fatalf("UserConfigDir returned %q; want non-empty path or error", dir);
     }
 
     (var fi, err) = Stat(dir);
-    if (err != default!) {
+    if (err != nil) {
         if (IsNotExist(err)) {
-            Ꮡt.Log(err);
+            t.Log(err);
             return;
         }
-        Ꮡt.Fatal(err);
+        t.Fatal(err);
     }
     if (!fi.IsDir()) {
-        Ꮡt.Fatalf("dir %s is not directory; type = %v"u8, dir, fi.Mode());
+        t.Fatalf("dir %s is not directory; type = %v", dir, fi.Mode());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object xdgConfigHomeIsEffectiveˢ = (@string)"$XDG_CONFIG_HOME is effective only on Unix systems"u8;
-internal static readonly @string xdgConfigHomeˢ = "XDG_CONFIG_HOME"u8;
+internal static ref readonly @string xdgConfigHomeˢ => ref xdgConfigHomeˢᵇ;
+private static readonly @string xdgConfigHomeˢᵇ = "XDG_CONFIG_HOME"u8;
 internal static readonly object userConfigDirSucceededˢ = (@string)"UserConfigDir succeeded though $XDG_CONFIG_HOME contains a relative path"u8;
 
-public static void TestUserConfigDirXDGConfigDirEnvVar(ж<Δtesting.T> Ꮡt) {
+public static void TestUserConfigDirXDGConfigDirEnvVar(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "plan9"u8) {
-        Ꮡt.Skip(xdgConfigHomeIsEffectiveˢ);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "plan9"u8: {
+        t.Skip(xdgConfigHomeIsEffectiveˢ);
+        break;
+    }}
 
     var (wd, err) = Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    Ꮡt.Setenv(xdgConfigHomeˢ, wd);
+    t.Setenv(xdgConfigHomeˢ, wd);
 
     (var dir, err) = UserConfigDir();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (dir != wd) {
-        Ꮡt.Fatalf("UserConfigDir returned %q; want the value of $XDG_CONFIG_HOME %q"u8, dir, wd);
+        t.Fatalf("UserConfigDir returned %q; want the value of $XDG_CONFIG_HOME %q", dir, wd);
     }
 
-    Ꮡt.Setenv(xdgConfigHomeˢ, someDirˢ);
+    t.Setenv(xdgConfigHomeˢ, someDirˢ);
     (_, err) = UserConfigDir();
-    if (err == default!) {
-        Ꮡt.Fatal(userConfigDirSucceededˢ);
+    if (err == nil) {
+        t.Fatal(userConfigDirSucceededˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userHomeDirReturnedAnˢ = (@string)"UserHomeDir returned an empty string but no error"u8;
 
-public static void TestUserHomeDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestUserHomeDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var (dir, err) = UserHomeDir();
-    if (dir == ""u8 && err == default!) {
-        Ꮡt.Fatal(userHomeDirReturnedAnˢ);
+    if (dir == ""u8 && err == nil) {
+        t.Fatal(userHomeDirReturnedAnˢ);
     }
-    if (err != default!) {
+    if (err != nil) {
         // UserHomeDir may return a non-nil error if the environment variable
         // for the home directory is empty or unset in the environment.
-        Ꮡt.Skipf("skipping: %v"u8, err);
+        t.Skipf("skipping: %v", err);
     }
 
     (var fi, err) = Stat(dir);
-    if (err != default!) {
+    if (err != nil) {
         if (IsNotExist(err)) {
             // The user's home directory has a well-defined location, but does not
             // exist. (Maybe nothing has written to it yet? That could happen, for
             // example, on minimal VM images used for CI testing.)
-            Ꮡt.Log(err);
+            t.Log(err);
             return;
         }
-        Ꮡt.Fatal(err);
+        t.Fatal(err);
     }
     if (!fi.IsDir()) {
-        Ꮡt.Fatalf("dir %s is not directory; type = %v"u8, dir, fi.Mode());
+        t.Fatalf("dir %s is not directory; type = %v", dir, fi.Mode());
     }
 }
 
-public static void TestDirSeek(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestDirSeek(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var (wd, err) = Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var f, err) = Open(wd);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var dirnames1, err) = f.Readdirnames(0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     (var ret, err) = f.Seek(0, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (ret != 0) {
-        Ꮡt.Fatalf("seek result not zero: %d"u8, ret);
+        t.Fatalf("seek result not zero: %d", ret);
     }
 
     (var dirnames2, err) = f.Readdirnames(0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     if (len(dirnames1) != len(dirnames2)) {
-        Ꮡt.Fatalf("listings have different lengths: %d and %d\n"u8, len(dirnames1), len(dirnames2));
+        t.Fatalf("listings have different lengths: %d and %d\n", len(dirnames1), len(dirnames2));
     }
     foreach (var (i, n1) in dirnames1) {
         @string n2 = dirnames2[i];
         if (n1 != n2) {
-            Ꮡt.Fatalf("different name i=%d n1=%s n2=%s\n"u8, i, n1, n2);
+            t.Fatalf("different name i=%d n1=%s n2=%s\n", i, n1, n2);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataˢ = "testdata"u8;
-internal static readonly @string issue37161ˢ = "issue37161"u8;
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
+internal static ref readonly @string issue37161ˢ => ref issue37161ˢᵇ;
+private static readonly @string issue37161ˢᵇ = "issue37161"u8;
 
-public static void TestReaddirSmallSeek(ж<Δtesting.T> Ꮡt) {
+public static void TestReaddirSmallSeek(ж<Δtesting.T> t) {
     // See issue 37161. Read only one entry from a directory,
     // seek to the beginning, and read again. We should not see
     // duplicate entries.
-    Ꮡt.Parallel();
+    t.Parallel();
 
     var (wd, err) = Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var df, err) = Open(filepath.Join(wd, testdataˢ, issue37161ˢ));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var names1, err) = df.Readdirnames(1);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        (_, err) = df.Seek(0, 0); if (err != default!) {
-            Ꮡt.Fatal(err);
+        (_, err) = df.Seek(0, 0); if (err != nil) {
+            t.Fatal(err);
         }
     }
     (var names2, err) = df.Readdirnames(0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (len(names2) != 3) {
-        Ꮡt.Fatalf("first names: %v, second names: %v"u8, names1, names2);
+        t.Fatalf("first names: %v, second names: %v", names1, names2);
     }
 }
 
@@ -3963,76 +4090,76 @@ internal static bool isDeadlineExceeded(error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string openFileˢ = "OpenFile"u8;
-internal static readonly @string rootOpenFileˢ = "RootOpenFile"u8;
+internal static ref readonly @string openFileˢ => ref openFileˢᵇ;
+private static readonly @string openFileˢᵇ = "OpenFile"u8;
+internal static ref readonly @string rootOpenFileˢ => ref rootOpenFileˢᵇ;
+private static readonly @string rootOpenFileˢᵇ = "RootOpenFile"u8;
 
 // Test that opening a file does not change its permissions.  Issue 38225.
-public static void TestOpenFileKeepsPermissions(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Run(openFileˢ, (ж<Δtesting.T> tΔ1) => {
+public static void TestOpenFileKeepsPermissions(ж<Δtesting.T> t) {
+    t.Run(openFileˢ, (ж<Δtesting.T> tΔ1) => {
         testOpenFileKeepsPermissions(tΔ1, OpenFile);
     });
-    Ꮡt.Run(rootOpenFileˢ, (ж<Δtesting.T> tΔ2) => {
+    t.Run(rootOpenFileˢ, (ж<Δtesting.T> tΔ2) => {
         testOpenFileKeepsPermissions(tΔ2, (@string name, nint flag, fs.FileMode perm) => {
             GoFrame ᒐ = default;
             try {
                 var (dir, @file) = filepath.Split(name);
                 var (r, err) = OpenRoot(dir);
-                if (err != default!) {
-                    return (default!, err);
+                if (err != nil) {
+                    return (default, err);
                 }
                 var rʗ1 = r;
                 defer(() => rʗ1.Close(), ref ᒐ);
                 return r.OpenFile(@file, flag, perm);
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         });
     });
 }
 
-internal static void testOpenFileKeepsPermissions(ж<Δtesting.T> Ꮡt, Func<@string, nint, fs.FileMode, (ж<Δos.File>, error)> openf) {
-    Ꮡt.Parallel();
+internal static void testOpenFileKeepsPermissions(ж<Δtesting.T> t, Func<@string, nint, fs.FileMode, (ж<Δos.File>, error)> openf) {
+    t.Parallel();
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
     @string name = filepath.Join(dir, "x");
     var (f, err) = Create(name);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        var errΔ1 = f.Close(); if (errΔ1 != default!) {
-            Ꮡt.Error(errΔ1);
+        var errΔ1 = f.Close(); if (errΔ1 != nil) {
+            t.Error(errΔ1);
         }
     }
     (f, err) = openf(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        var (fi, errΔ2) = f.Stat(); if (errΔ2 != default!){
-            Ꮡt.Error(errΔ2);
-        } else 
-        if ((fs.FileMode)(fi.Mode() & 146) == 0) {
-            Ꮡt.Errorf("f.Stat.Mode after OpenFile is %v, should be writable"u8, fi.Mode());
+        var (fi, errΔ2) = f.Stat(); if (errΔ2 != nil) {
+            t.Error(errΔ2);
+        } else if ((fs.FileMode)(fi.Mode() & 146) == 0) {
+            t.Errorf("f.Stat.Mode after OpenFile is %v, should be writable", fi.Mode());
         }
     }
     {
-        var errΔ3 = f.Close(); if (errΔ3 != default!) {
-            Ꮡt.Error(errΔ3);
+        var errΔ3 = f.Close(); if (errΔ3 != nil) {
+            t.Error(errΔ3);
         }
     }
     {
-        var (fi, errΔ4) = Stat(name); if (errΔ4 != default!){
-            Ꮡt.Error(errΔ4);
-        } else 
-        if ((fs.FileMode)(fi.Mode() & 146) == 0) {
-            Ꮡt.Errorf("Stat after OpenFile is %v, should be writable"u8, fi.Mode());
+        var (fi, errΔ4) = Stat(name); if (errΔ4 != nil) {
+            t.Error(errΔ4);
+        } else if ((fs.FileMode)(fi.Mode() & 146) == 0) {
+            t.Errorf("Stat after OpenFile is %v, should be writable", fi.Mode());
         }
     }
 }
 
-internal static void forceMFTUpdateOnWindows(ж<Δtesting.T> Ꮡt, @string path) {
-    Ꮡt.Helper();
+internal static void forceMFTUpdateOnWindows(ж<Δtesting.T> t, @string path) {
+    t.Helper();
 
     if (Δruntime.GOOS != "windows"u8) {
         return;
@@ -4042,83 +4169,88 @@ internal static void forceMFTUpdateOnWindows(ж<Δtesting.T> Ꮡt, @string path)
     // explicitly setting that. Otherwise it might get out of sync with FindFirstFile. See golang.org/issues/42637.
     {
         var err = filepath.WalkDir(path, (@string pathΔ1, fs.DirEntry d, error errΔ1) => {
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             (var info, errΔ1) = d.Info();
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             (var stat, errΔ1) = Stat(pathΔ1); // This uses GetFileInformationByHandle internally.
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             if (stat.ModTime() == info.ModTime()) {
-                return default!;
+                return default;
             }
             {
-                var errΔ2 = Chtimes(pathΔ1, stat.ModTime(), stat.ModTime()); if (errΔ2 != default!) {
-                    Ꮡt.Log(errΔ2); // We only log, not die, in case the test directory is not writable.
+                var errΔ2 = Chtimes(pathΔ1, stat.ModTime(), stat.ModTime()); if (errΔ2 != nil) {
+                    t.Log(errΔ2); // We only log, not die, in case the test directory is not writable.
                 }
             }
-            return default!;
-        }); if (err != default!) {
-            Ꮡt.Fatal(err);
+            return default;
+        }); if (err != nil) {
+            t.Fatal(err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataDirfsˢ = "./testdata/dirfs"u8;
+internal static ref readonly @string testdataDirfsˢ => ref testdataDirfsˢᵇ;
+private static readonly @string testdataDirfsˢᵇ = "./testdata/dirfs"u8;
 
-public static void TestDirFS(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
-    testDirFS(Ꮡt, DirFS(testdataDirfsˢ));
+public static void TestDirFS(ж<Δtesting.T> t) {
+    t.Parallel();
+    testDirFS(t, DirFS(testdataDirfsˢ));
 }
 
-public static void TestRootDirFS(ж<Δtesting.T> Ꮡt) {
+public static void TestRootDirFS(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
         var (r, err) = OpenRoot(testdataDirfsˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
-        testDirFS(Ꮡt, r.FS());
+        testDirFS(t, r.FS());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dirXˢ = "dir/x"u8;
+internal static ref readonly @string dirXˢ => ref dirXˢᵇ;
+private static readonly @string dirXˢᵇ = "dir/x"u8;
 internal static readonly object expectedDirFSResultToˢ = (@string)"expected DirFS result to implement fs.ReadDirFS"u8;
 internal static readonly object fsReadDirOfNonexistentˢ = (@string)"fs.ReadDir of nonexistent directory succeeded"u8;
 internal static readonly object fsOpenOfNonexistentFileˢ = (@string)"fs.Open of nonexistent file succeeded"u8;
-internal static readonly @string testdataDirfsˢ2 = @"testdata\dirfs"u8;
-internal static readonly @string nulˢ3 = @"NUL"u8;
+internal static ref readonly @string testdataDirfsˢ2 => ref testdataDirfsˢ2ᵇ;
+private static readonly @string testdataDirfsˢ2ᵇ = @"testdata\dirfs"u8;
+internal static ref readonly @string nulˢ3 => ref nulˢ3ᵇ;
+private static readonly @string nulˢ3ᵇ = @"NUL"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string nonesuchᶜ = "dir/nonesuch"u8;
+internal static ref readonly @string nonesuchᶜ => ref nonesuchᶜᵇ;
+private static readonly @string nonesuchᶜᵇ = "dir/nonesuch"u8;
 
-internal static void testDirFS(ж<Δtesting.T> Ꮡt, fs.FS fsys) {
-    forceMFTUpdateOnWindows(Ꮡt, testdataDirfsˢ);
+internal static void testDirFS(ж<Δtesting.T> t, fs.FS fsys) {
+    forceMFTUpdateOnWindows(t, testdataDirfsˢ);
 
     {
-        var errΔ1 = fstest.TestFS(fsys, "a"u8, "b", dirXˢ); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = fstest.TestFS(fsys, "a", "b", dirXˢ); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 
     var (rdfs, ok) = fsys._<fs.ReadDirFS>(ᐧ);
     if (!ok) {
-        Ꮡt.Error(expectedDirFSResultToˢ);
+        t.Error(expectedDirFSResultToˢ);
     }
     {
-        var (_, errΔ2) = rdfs.ReadDir(nonexistentˢ); if (errΔ2 == default!) {
-            Ꮡt.Error(fsReadDirOfNonexistentˢ);
+        var (_, errΔ2) = rdfs.ReadDir(nonexistentˢ); if (errΔ2 == nil) {
+            t.Error(fsReadDirOfNonexistentˢ);
         }
     }
 
@@ -4126,108 +4258,111 @@ internal static void testDirFS(ж<Δtesting.T> Ꮡt, fs.FS fsys) {
     // and does not contain the DirFS argument.
     @string nonesuch = nonesuchᶜ;
     var (_, err) = fsys.Open(nonesuch);
-    if (err == default!){
-        Ꮡt.Error(fsOpenOfNonexistentFileˢ);
+    if (err == nil) {
+        t.Error(fsOpenOfNonexistentFileˢ);
     } else {
         if (!strings.Contains(err.Error(), nonesuch)) {
-            Ꮡt.Errorf("error %q does not contain %q"u8, err, nonesuch);
+            t.Errorf("error %q does not contain %q", err, nonesuch);
         }
-        if (strings.Contains((~err._<ж<fs.PathError>>()).Path, testdataˢ)) {
-            Ꮡt.Errorf("error %q contains %q"u8, err, testdataˢ);
+        if (strings.Contains(err._<ж<fs.PathError>>().Path, testdataˢ)) {
+            t.Errorf("error %q contains %q", err, testdataˢ);
         }
     }
 
     // Test that Open does not accept backslash as separator.
-    var d = DirFS("."u8);
+    var d = DirFS(".");
     (_, err) = d.Open(testdataDirfsˢ2);
-    if (err == default!) {
-        Ꮡt.Fatalf(@"Open testdata\dirfs succeeded"u8);
+    if (err == nil) {
+        t.Fatalf(@"Open testdata\dirfs succeeded");
     }
 
     // Test that Open does not open Windows device files.
     (_, err) = d.Open(nulˢ3);
-    if (err == default!) {
-        Ꮡt.Errorf(@"Open NUL succeeded"u8);
+    if (err == nil) {
+        t.Errorf(@"Open NUL succeeded");
     }
 }
 
-public static void TestDirFSRootDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestDirFSRootDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var (cwd, err) = Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     cwd = cwd.slice(len(filepath.VolumeName(cwd))); // trim volume prefix (C:) on Windows
-    cwd = filepath.ToSlash(cwd); // convert \ to /
-    cwd = strings.TrimPrefix(cwd, "/"u8); // trim leading /
+    cwd = filepath.ToSlash(cwd);                    // convert \ to /
+    cwd = strings.TrimPrefix(cwd, "/");             // trim leading /
 
     // Test that Open can open a path starting at /.
-    var d = DirFS("/"u8);
+    var d = DirFS("/");
     (var f, err) = d.Open(cwd + "/testdata/dirfs/a"u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     f.Close();
 }
 
-public static void TestDirFSEmptyDir(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestDirFSEmptyDir(ж<Δtesting.T> t) {
+    t.Parallel();
 
     var d = DirFS(""u8);
     var (cwd, _) = Getwd();
-    foreach (var (_, path) in new @string[]{
-        "testdata/dirfs/a"u8, // not DirFS(".")
+    foreach (var (_, path) in slice<@string>([
+        "testdata/dirfs/a",                           // not DirFS(".")
         filepath.ToSlash(cwd) + "/testdata/dirfs/a"u8 // not DirFS("/")
-    }.slice()) {
+    ])) {
         var (_, err) = d.Open(path);
-        if (err == default!) {
-            Ꮡt.Fatalf(@"DirFS("""").Open(%q) succeeded"u8, path);
+        if (err == nil) {
+            t.Fatalf(@"DirFS("""").Open(%q) succeeded", path);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string controlTxtˢ = "control.txt"u8;
-internal static readonly @string eXperiMentTxtˢ = @"e:xperi\ment.txt"u8;
+internal static ref readonly @string controlTxtˢ => ref controlTxtˢᵇ;
+private static readonly @string controlTxtˢᵇ = "control.txt"u8;
+internal static ref readonly @string eXperiMentTxtˢ => ref eXperiMentTxtˢᵇ;
+private static readonly @string eXperiMentTxtˢᵇ = @"e:xperi\ment.txt"u8;
 
-public static void TestDirFSPathsValid(ж<Δtesting.T> Ꮡt) {
+public static void TestDirFSPathsValid(ж<Δtesting.T> t) {
     if (Δruntime.GOOS == "windows"u8) {
-        Ꮡt.Skipf("skipping on Windows"u8);
+        t.Skipf("skipping on Windows");
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    @string d = Ꮡt.TempDir();
+    @string d = t.TempDir();
     {
-        var errΔ1 = WriteFile(filepath.Join(d, controlTxtˢ), slice<byte>((@string)"Hello, world!"u8), 420); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = WriteFile(filepath.Join(d, controlTxtˢ), slice<byte>((@string)"Hello, world!"u8), 420); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        var errΔ2 = WriteFile(filepath.Join(d, eXperiMentTxtˢ), slice<byte>((@string)"Hello, colon and backslash!"u8), 420); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = WriteFile(filepath.Join(d, eXperiMentTxtˢ), slice<byte>((@string)"Hello, colon and backslash!"u8), 420); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 
     var fsys = DirFS(d);
-    var err = fs.WalkDir(fsys, "."u8, (@string path, fs.DirEntry e, error errΔ3) => {
-        if (fs.ValidPath(e.Name())){
-            Ꮡt.Logf("%q ok"u8, e.Name());
+    var err = fs.WalkDir(fsys, ".", (@string path, fs.DirEntry e, error errΔ3) => {
+        if (fs.ValidPath(e.Name())) {
+            t.Logf("%q ok", e.Name());
         } else {
-            Ꮡt.Errorf("%q INVALID"u8, e.Name());
+            t.Errorf("%q INVALID", e.Name());
         }
-        return default!;
+        return default;
     });
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string procSysFsPipeMaxSizeˢ = "/proc/sys/fs/pipe-max-size"u8;
+internal static ref readonly @string procSysFsPipeMaxSizeˢ => ref procSysFsPipeMaxSizeˢᵇ;
+private static readonly @string procSysFsPipeMaxSizeˢᵇ = "/proc/sys/fs/pipe-max-size"u8;
 
-public static void TestReadFileProc(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestReadFileProc(ж<Δtesting.T> t) {
+    t.Parallel();
 
     // Linux files in /proc report 0 size,
     // but then if ReadFile reads just a single byte at offset 0,
@@ -4236,56 +4371,59 @@ public static void TestReadFileProc(ж<Δtesting.T> Ꮡt) {
     // but test explicitly that it's working.
     @string name = procSysFsPipeMaxSizeˢ;
     {
-        var (_, errΔ1) = Stat(name); if (errΔ1 != default!) {
-            Ꮡt.Skip(errΔ1);
+        var (_, errΔ1) = Stat(name); if (errΔ1 != nil) {
+            t.Skip(errΔ1);
         }
     }
     var (data, err) = ReadFile(name);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if (len(data) == 0 || data[len(data) - 1] != (rune)'\n') {
-        Ꮡt.Fatalf("read %s: not newline-terminated: %q"u8, name, data);
+    if (len(data) == 0 || data[len(data) - 1] != '\n') {
+        t.Fatalf("read %s: not newline-terminated: %q", name, data);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string procSysFsPipeMaxSizeˢ2 = "proc/sys/fs/pipe-max-size"u8;
+internal static ref readonly @string procSysFsPipeMaxSizeˢ2 => ref procSysFsPipeMaxSizeˢ2ᵇ;
+private static readonly @string procSysFsPipeMaxSizeˢ2ᵇ = "proc/sys/fs/pipe-max-size"u8;
 
-public static void TestDirFSReadFileProc(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestDirFSReadFileProc(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    var fsys = DirFS("/"u8);
+    var fsys = DirFS("/");
     @string name = procSysFsPipeMaxSizeˢ2;
     {
-        var (_, errΔ1) = fs.Stat(fsys, name); if (errΔ1 != default!) {
-            Ꮡt.Skip();
+        var (_, errΔ1) = fs.Stat(fsys, name); if (errΔ1 != nil) {
+            t.Skip();
         }
     }
     var (data, err) = fs.ReadFile(fsys, name);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if (len(data) == 0 || data[len(data) - 1] != (rune)'\n') {
-        Ꮡt.Fatalf("read %s: not newline-terminated: %q"u8, name, data);
+    if (len(data) == 0 || data[len(data) - 1] != '\n') {
+        t.Fatalf("read %s: not newline-terminated: %q", name, data);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object jsAllocatesALotDuringˢ = (@string)"js allocates a lot during File.WriteString"u8;
-internal static readonly @string whiteboardTxtˢ = "whiteboard.txt"u8;
-internal static readonly @string iWillNotAllocateWhenˢ = "I will not allocate when passed a string longer than 32 bytes.\n"u8;
+internal static ref readonly @string whiteboardTxtˢ => ref whiteboardTxtˢᵇ;
+private static readonly @string whiteboardTxtˢᵇ = "whiteboard.txt"u8;
+internal static ref readonly @string iWillNotAllocateWhenˢ => ref iWillNotAllocateWhenˢᵇ;
+private static readonly @string iWillNotAllocateWhenˢᵇ = "I will not allocate when passed a string longer than 32 bytes.\n"u8;
 
-public static void TestWriteStringAlloc(ж<Δtesting.T> Ꮡt) {
+public static void TestWriteStringAlloc(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOOS == "js"u8) {
-            Ꮡt.Skip(jsAllocatesALotDuringˢ);
+            t.Skip(jsAllocatesALotDuringˢ);
         }
-        @string d = Ꮡt.TempDir();
+        @string d = t.TempDir();
         var (f, err) = Create(filepath.Join(d, whiteboardTxtˢ));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
@@ -4294,7 +4432,7 @@ public static void TestWriteStringAlloc(ж<Δtesting.T> Ꮡt) {
             fʗ2.WriteString(iWillNotAllocateWhenˢ);
         });
         if (allocs != 0D) {
-            Ꮡt.Errorf("expected 0 allocs for File.WriteString, got %v"u8, allocs);
+            t.Errorf("expected 0 allocs for File.WriteString, got %v", allocs);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -4302,22 +4440,23 @@ public static void TestWriteStringAlloc(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testTxtˢ = "test.txt"u8;
+internal static ref readonly @string testTxtˢ => ref testTxtˢᵇ;
+private static readonly @string testTxtˢᵇ = "test.txt"u8;
 
 // Test that it's OK to have parallel I/O and Close on a file.
-public static void TestFileIOCloseRace(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
-    var (@file, err) = Create(filepath.Join(Ꮡt.TempDir(), testTxtˢ));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+public static void TestFileIOCloseRace(ж<Δtesting.T> t) {
+    t.Parallel();
+    var (@file, err) = Create(filepath.Join(t.TempDir(), testTxtˢ));
+    if (err != nil) {
+        t.Fatal(err);
     }
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var fileʗ1 = @file;
     Ꮡwg.Go(() => {
         array<byte> tmp = new(100);
         {
-            var (_, errΔ1) = fileʗ1.Write(tmp[..]); if (errΔ1 != default! && !errors.Is(errΔ1, ErrClosed)) {
-                Ꮡt.Error(errΔ1);
+            var (_, errΔ1) = fileʗ1.Write(tmp[..]); if (errΔ1 != nil && !errors.Is(errΔ1, ErrClosed)) {
+                t.Error(errΔ1);
             }
         }
     });
@@ -4325,16 +4464,16 @@ public static void TestFileIOCloseRace(ж<Δtesting.T> Ꮡt) {
     Ꮡwg.Go(() => {
         array<byte> tmp = new(100);
         {
-            var (_, errΔ2) = fileʗ2.Read(tmp[..]); if (errΔ2 != default! && !AreEqual(errΔ2, Δio.EOF) && !errors.Is(errΔ2, ErrClosed)) {
-                Ꮡt.Error(errΔ2);
+            var (_, errΔ2) = fileʗ2.Read(tmp[..]); if (errΔ2 != nil && !AreEqual(errΔ2, Δio.EOF) && !errors.Is(errΔ2, ErrClosed)) {
+                t.Error(errΔ2);
             }
         }
     });
     var fileʗ3 = @file;
     Ꮡwg.Go(() => {
         {
-            var errΔ3 = fileʗ3.Close(); if (errΔ3 != default!) {
-                Ꮡt.Error(errΔ3);
+            var errΔ3 = fileʗ3.Close(); if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
         }
     });
@@ -4342,21 +4481,24 @@ public static void TestFileIOCloseRace(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string brokenPipeˢ = "broken pipe"u8;
-internal static readonly @string pipeIsBeingClosedˢ = "pipe is being closed"u8;
-internal static readonly @string hungupChannelˢ = "hungup channel"u8;
+internal static ref readonly @string brokenPipeˢ => ref brokenPipeˢᵇ;
+private static readonly @string brokenPipeˢᵇ = "broken pipe"u8;
+internal static ref readonly @string pipeIsBeingClosedˢ => ref pipeIsBeingClosedˢᵇ;
+private static readonly @string pipeIsBeingClosedˢᵇ = "pipe is being closed"u8;
+internal static ref readonly @string hungupChannelˢ => ref hungupChannelˢᵇ;
+private static readonly @string hungupChannelˢᵇ = "hungup channel"u8;
 
 // Test that it's OK to have parallel I/O and Close on a pipe.
-public static partial void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
+public static partial void TestPipeIOCloseRace(ж<Δtesting.T> t) {
     // Skip on wasm, which doesn't have pipes.
     if (Δruntime.GOOS == "js"u8 || Δruntime.GOOS == "wasip1"u8) {
-        Ꮡt.Skipf("skipping on %s: no pipes"u8, Δruntime.GOOS);
+        t.Skipf("skipping on %s: no pipes", Δruntime.GOOS);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
     var (r, w, err) = Pipe();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -4367,9 +4509,9 @@ public static partial void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            while (ᐧ) {
+            for (;;) {
                 var (n, errΔ1) = wʗ1.Write(slice<byte>("hi"u8));
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     // We look at error strings as the
                     // expected errors are OS-specific.
                     switch (ᐧ) {
@@ -4379,13 +4521,13 @@ public static partial void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
                     }
                     default: {
                         // Unexpected error.
-                        Ꮡt.Error(errΔ1);
+                        t.Error(errΔ1);
                         break;
                     }}
                     return;
                 }
                 if (n != 2) {
-                    Ꮡt.Errorf("wrote %d bytes, expected 2"u8, n);
+                    t.Errorf("wrote %d bytes, expected 2", n);
                     return;
                 }
             }
@@ -4399,17 +4541,17 @@ public static partial void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            while (ᐧ) {
+            for (;;) {
                 ref var buf = ref heap(new array<byte>(2), out var Ꮡbuf);
                 var (n, errΔ2) = rʗ1.Read(buf[..]);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     if (!AreEqual(errΔ2, Δio.EOF) && !errors.Is(errΔ2, ErrClosed)) {
-                        Ꮡt.Error(errΔ2);
+                        t.Error(errΔ2);
                     }
                     return;
                 }
                 if (n != 2) {
-                    Ꮡt.Errorf("read %d bytes, want 2"u8, n);
+                    t.Errorf("read %d bytes, want 2", n);
                 }
             }
         }
@@ -4430,13 +4572,13 @@ public static partial void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
             time.Sleep(time.Millisecond);
 
             {
-                var errΔ3 = rʗ2.Close(); if (errΔ3 != default!) {
-                    Ꮡt.Error(errΔ3);
+                var errΔ3 = rʗ2.Close(); if (errΔ3 != nil) {
+                    t.Error(errΔ3);
                 }
             }
             {
-                var errΔ4 = wʗ2.Close(); if (errΔ4 != default!) {
-                    Ꮡt.Error(errΔ4);
+                var errΔ4 = wʗ2.Close(); if (errΔ4 != nil) {
+                    t.Error(errΔ4);
                 }
             }
         }
@@ -4448,16 +4590,16 @@ public static partial void TestPipeIOCloseRace(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that it's OK to call Close concurrently on a pipe.
-public static partial void TestPipeCloseRace(ж<Δtesting.T> Ꮡt) {
+public static partial void TestPipeCloseRace(ж<Δtesting.T> t) {
     // Skip on wasm, which doesn't have pipes.
     if (Δruntime.GOOS == "js"u8 || Δruntime.GOOS == "wasip1"u8) {
-        Ꮡt.Skipf("skipping on %s: no pipes"u8, Δruntime.GOOS);
+        t.Skipf("skipping on %s: no pipes", Δruntime.GOOS);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
     var (r, w, err) = Pipe();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     var c = new channel<error>(4);
@@ -4483,37 +4625,37 @@ public static partial void TestPipeCloseRace(ж<Δtesting.T> Ꮡt) {
     nint errs = 0;
     for (nint i = 0; i < 4; i++) {
         var errΔ1 = ᐸꟷ(c);
-        if (errΔ1 == default!){
+        if (errΔ1 == nil) {
             nils++;
         } else {
             errs++;
         }
     }
     if (nils != 2 || errs != 2) {
-        Ꮡt.Errorf("got nils %d errs %d, want 2 2"u8, nils, errs);
+        t.Errorf("got nils %d errs %d, want 2 2", nils, errs);
     }
 }
 
-public static void TestRandomLen(ж<Δtesting.T> Ꮡt) {
+public static void TestRandomLen(ж<Δtesting.T> t) {
     foreach (var _ᴛ1 in range(5)) {
-        var (dir, err) = MkdirTemp(Ꮡt.TempDir(), "*"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (dir, err) = MkdirTemp(t.TempDir(), "*");
+        if (err != nil) {
+            t.Fatal(err);
         }
         @string @base = filepath.Base(dir);
         if (len(@base) > 10) {
-            Ꮡt.Errorf("MkdirTemp returned len %d: %s"u8, len(@base), @base);
+            t.Errorf("MkdirTemp returned len %d: %s", len(@base), @base);
         }
     }
     foreach (var _ᴛ2 in range(5)) {
-        var (f, err) = CreateTemp(Ꮡt.TempDir(), "*"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (f, err) = CreateTemp(t.TempDir(), "*");
+        if (err != nil) {
+            t.Fatal(err);
         }
         @string @base = filepath.Base(f.Name());
         f.Close();
         if (len(@base) > 10) {
-            Ꮡt.Errorf("CreateTemp returned len %d: %s"u8, len(@base), @base);
+            t.Errorf("CreateTemp returned len %d: %s", len(@base), @base);
         }
     }
 }
@@ -4522,34 +4664,39 @@ public static void TestRandomLen(ж<Δtesting.T> Ꮡt) {
 internal static readonly object copyFSˢ = (@string)"CopyFS:"u8;
 internal static readonly object testFSˢ = (@string)"TestFS:"u8;
 internal static readonly object comparingTwoDirectoriesˢ = (@string)"comparing two directories:"u8;
-internal static readonly @string williamˢ = "william"u8;
-internal static readonly @string carlˢ = "carl"u8;
-internal static readonly @string daVinciˢ = "daVinci"u8;
-internal static readonly @string einsteinˢ = "einstein"u8;
-internal static readonly @string dirNewtonˢ = "dir/newton"u8;
+internal static ref readonly @string williamˢ => ref williamˢᵇ;
+private static readonly @string williamˢᵇ = "william"u8;
+internal static ref readonly @string carlˢ => ref carlˢᵇ;
+private static readonly @string carlˢᵇ = "carl"u8;
+internal static ref readonly @string daVinciˢ => ref daVinciˢᵇ;
+private static readonly @string daVinciˢᵇ = "daVinci"u8;
+internal static ref readonly @string einsteinˢ => ref einsteinˢᵇ;
+private static readonly @string einsteinˢᵇ = "einstein"u8;
+internal static ref readonly @string dirNewtonˢ => ref dirNewtonˢᵇ;
+private static readonly @string dirNewtonˢᵇ = "dir/newton"u8;
 
-public static void TestCopyFS(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestCopyFS(ж<Δtesting.T> t) {
+    t.Parallel();
 
     // Test with disk filesystem.
-    forceMFTUpdateOnWindows(Ꮡt, testdataDirfsˢ);
+    forceMFTUpdateOnWindows(t, testdataDirfsˢ);
     var fsys = DirFS(testdataDirfsˢ);
-    @string tmpDir = Ꮡt.TempDir();
+    @string tmpDir = t.TempDir();
     {
-        var err = CopyFS(tmpDir, fsys); if (err != default!) {
-            Ꮡt.Fatal(copyFSˢ, err);
+        var err = CopyFS(tmpDir, fsys); if (err != nil) {
+            t.Fatal(copyFSˢ, err);
         }
     }
-    forceMFTUpdateOnWindows(Ꮡt, tmpDir);
+    forceMFTUpdateOnWindows(t, tmpDir);
     var tmpFsys = DirFS(tmpDir);
     {
-        var err = fstest.TestFS(tmpFsys, "a"u8, "b", dirXˢ); if (err != default!) {
-            Ꮡt.Fatal(testFSˢ, err);
+        var err = fstest.TestFS(tmpFsys, "a", "b", dirXˢ); if (err != nil) {
+            t.Fatal(testFSˢ, err);
         }
     }
     {
-        var err = verifyCopyFS(Ꮡt, fsys, tmpFsys); if (err != default!) {
-            Ꮡt.Fatal(comparingTwoDirectoriesˢ, err);
+        var err = verifyCopyFS(t, fsys, tmpFsys); if (err != nil) {
+            t.Fatal(comparingTwoDirectoriesˢ, err);
         }
     }
 
@@ -4557,34 +4704,34 @@ public static void TestCopyFS(ж<Δtesting.T> Ꮡt) {
     // existing file in the destination directory.
     {
         var err = CopyFS(tmpDir, fsys); if (!errors.Is(err, fs.ErrExist)) {
-            Ꮡt.Errorf("CopyFS should have failed and returned error when there is"u8 + "any existing file in the destination directory (in disk filesystem), "u8 + "got: %v, expected any error that indicates <file exists>"u8, err);
+            t.Errorf("CopyFS should have failed and returned error when there is"u8 + "any existing file in the destination directory (in disk filesystem), "u8 + "got: %v, expected any error that indicates <file exists>"u8, err);
         }
     }
 
     // Test with memory filesystem.
     fsys = new os_test_package.fstest_MapFSᴠFS(new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["william"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Shakespeare\n"u8))),
-        ["carl"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Gauss\n"u8))),
-        ["daVinci"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Leonardo\n"u8))),
-        ["einstein"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Albert\n"u8))),
-        ["dir/newton"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Sir Isaac\n"u8)))
+        ["william"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Shakespeare\n"u8))),
+        ["carl"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Gauss\n"u8))),
+        ["daVinci"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Leonardo\n"u8))),
+        ["einstein"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Albert\n"u8))),
+        ["dir/newton"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("Sir Isaac\n"u8)))
     }));
-    tmpDir = Ꮡt.TempDir();
+    tmpDir = t.TempDir();
     {
-        var err = CopyFS(tmpDir, fsys); if (err != default!) {
-            Ꮡt.Fatal(copyFSˢ, err);
+        var err = CopyFS(tmpDir, fsys); if (err != nil) {
+            t.Fatal(copyFSˢ, err);
         }
     }
-    forceMFTUpdateOnWindows(Ꮡt, tmpDir);
+    forceMFTUpdateOnWindows(t, tmpDir);
     tmpFsys = DirFS(tmpDir);
     {
-        var err = fstest.TestFS(tmpFsys, williamˢ, carlˢ, daVinciˢ, einsteinˢ, dirNewtonˢ); if (err != default!) {
-            Ꮡt.Fatal(testFSˢ, err);
+        var err = fstest.TestFS(tmpFsys, williamˢ, carlˢ, daVinciˢ, einsteinˢ, dirNewtonˢ); if (err != nil) {
+            t.Fatal(testFSˢ, err);
         }
     }
     {
-        var err = verifyCopyFS(Ꮡt, fsys, tmpFsys); if (err != default!) {
-            Ꮡt.Fatal(comparingTwoDirectoriesˢ, err);
+        var err = verifyCopyFS(t, fsys, tmpFsys); if (err != nil) {
+            t.Fatal(comparingTwoDirectoriesˢ, err);
         }
     }
 
@@ -4592,58 +4739,60 @@ public static void TestCopyFS(ж<Δtesting.T> Ꮡt) {
     // existing file in the destination directory.
     {
         var err = CopyFS(tmpDir, fsys); if (!errors.Is(err, fs.ErrExist)) {
-            Ꮡt.Errorf("CopyFS should have failed and returned error when there is"u8 + "any existing file in the destination directory (in memory filesystem), "u8 + "got: %v, expected any error that indicates <file exists>"u8, err);
+            t.Errorf("CopyFS should have failed and returned error when there is"u8 + "any existing file in the destination directory (in memory filesystem), "u8 + "got: %v, expected any error that indicates <file exists>"u8, err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testˢ = "test"u8;
-internal static readonly @string tmpˢ2 = "tmp"u8;
+internal static ref readonly @string testˢ => ref testˢᵇ;
+private static readonly @string testˢᵇ = "test"u8;
+internal static ref readonly @string tmpˢ2 => ref tmpˢ2ᵇ;
+private static readonly @string tmpˢ2ᵇ = "tmp"u8;
 
 // verifyCopyFS checks the content and permission of each file inside copied FS to ensure
 // the copied files satisfy the convention stipulated in CopyFS.
-internal static error verifyCopyFS(ж<Δtesting.T> Ꮡt, fs.FS originFS, fs.FS copiedFS) {
+internal static error verifyCopyFS(ж<Δtesting.T> t, fs.FS originFS, fs.FS copiedFS) {
     GoFrame ᒐ = default;
     try {
-        @string testDir = filepath.Join(Ꮡt.TempDir(), testˢ);
+        @string testDir = filepath.Join(t.TempDir(), testˢ);
         // umask doesn't apply to the wasip and windows and there is no general way to get masked perm,
         // so create a dir and a file to compare the permission after umask if any
         {
-            var errΔ1 = Mkdir(testDir, ModePerm); if (errΔ1 != default!) {
+            var errΔ1 = Mkdir(testDir, ModePerm); if (errΔ1 != nil) {
                 return fmt.Errorf("mkdir %q failed: %v"u8, testDir, errΔ1);
             }
         }
         var (dirStat, err) = Stat(testDir);
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("stat dir %q failed: %v"u8, testDir, err);
         }
         var wantDirMode = dirStat.Mode();
 
         (var f, err) = Create(filepath.Join(testDir, tmpˢ2));
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("open %q failed: %v"u8, filepath.Join(testDir, tmpˢ2), err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         (var wantFileRWStat, err) = f.Stat();
-        if (err != default!) {
+        if (err != nil) {
             return fmt.Errorf("stat file %q failed: %v"u8, f.Name(), err);
         }
         var wantFileRWMode = wantFileRWStat.Mode();
 
         var wantFileRWStatʗ1 = wantFileRWStat;
-        return fs.WalkDir(originFS, "."u8, error (@string path, fs.DirEntry d, error errΔ2) => {
+        return fs.WalkDir(originFS, ".", error (@string path, fs.DirEntry d, error errΔ2) => {
             GoFrame ᒐ = default;
             try {
                 if (d.IsDir()) {
                     // the dir . is not the dir created by CopyFS so skip checking its permission
                     if (d.Name() == "."u8) {
-                        return default!;
+                        return default;
                     }
 
                     var (dinfo, errΔ3) = fs.Stat(copiedFS, path);
-                    if (errΔ3 != default!) {
+                    if (errΔ3 != nil) {
                         return errΔ3;
                     }
 
@@ -4651,17 +4800,17 @@ internal static error verifyCopyFS(ж<Δtesting.T> Ꮡt, fs.FS originFS, fs.FS c
                         return fmt.Errorf("dir %q mode is %v, want %v"u8,
                             d.Name(), dinfo.Mode(), wantDirMode);
                     }
-                    return default!;
+                    return default;
                 }
 
                 (var fInfo, errΔ2) = originFS.Open(path);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 var fInfoʗ1 = fInfo;
                 defer(() => fInfoʗ1.Close(), ref ᒐ);
                 (var copiedInfo, errΔ2) = copiedFS.Open(path);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 var copiedInfoʗ1 = copiedInfo;
@@ -4669,11 +4818,11 @@ internal static error verifyCopyFS(ж<Δtesting.T> Ꮡt, fs.FS originFS, fs.FS c
 
                 // verify the file contents are the same
                 (var data, errΔ2) = Δio.ReadAll(new os_test_package.fs_FileᴠReader(fInfo));
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 (var newData, errΔ2) = Δio.ReadAll(new os_test_package.fs_FileᴠReader(copiedInfo));
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 if (!bytes.Equal(data, newData)) {
@@ -4681,11 +4830,11 @@ internal static error verifyCopyFS(ж<Δtesting.T> Ꮡt, fs.FS originFS, fs.FS c
                 }
 
                 (var fStat, errΔ2) = fInfo.Stat();
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 (var copiedStat, errΔ2) = copiedInfo.Stat();
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
 
@@ -4701,144 +4850,157 @@ internal static error verifyCopyFS(ж<Δtesting.T> Ꮡt, fs.FS originFS, fs.FS c
                     return fmt.Errorf("file %q rw mode is %v, want %v"u8,
                         path, rwMode, wantFileRWStatʗ1.Mode());
                 }
-                return default!;
+                return default;
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         });
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string copyfsOutˢ = "copyfs_out"u8;
-internal static readonly @string fileOutTxtˢ = "file.out.txt"u8;
-internal static readonly @string copyfsInˢ = "copyfs_in"u8;
-internal static readonly @string fileInTxtˢ = "file.in.txt"u8;
-internal static readonly @string inSymlinksˢ = "in_symlinks"u8;
-internal static readonly @string outSymlinksˢ = "out_symlinks"u8;
-internal static readonly @string fileAbsOutLinkˢ = "file.abs.out.link"u8;
-internal static readonly @string fileRelOutLinkˢ = "file.rel.out.link"u8;
-internal static readonly @string fileRelInLinkˢ = "file.rel.in.link"u8;
-internal static readonly @string copyfsDupˢ = "copyfs_dup"u8;
-internal static readonly @string outSymlinksFileAbsOutˢ = "out_symlinks/file.abs.out.link"u8;
-internal static readonly @string outSymlinksFileRelOutˢ = "out_symlinks/file.rel.out.link"u8;
-internal static readonly @string inSymlinksFileRelInLinkˢ = "in_symlinks/file.rel.in.link"u8;
+internal static ref readonly @string copyfsOutˢ => ref copyfsOutˢᵇ;
+private static readonly @string copyfsOutˢᵇ = "copyfs_out"u8;
+internal static ref readonly @string fileOutTxtˢ => ref fileOutTxtˢᵇ;
+private static readonly @string fileOutTxtˢᵇ = "file.out.txt"u8;
+internal static ref readonly @string copyfsInˢ => ref copyfsInˢᵇ;
+private static readonly @string copyfsInˢᵇ = "copyfs_in"u8;
+internal static ref readonly @string fileInTxtˢ => ref fileInTxtˢᵇ;
+private static readonly @string fileInTxtˢᵇ = "file.in.txt"u8;
+internal static ref readonly @string inSymlinksˢ => ref inSymlinksˢᵇ;
+private static readonly @string inSymlinksˢᵇ = "in_symlinks"u8;
+internal static ref readonly @string outSymlinksˢ => ref outSymlinksˢᵇ;
+private static readonly @string outSymlinksˢᵇ = "out_symlinks"u8;
+internal static ref readonly @string fileAbsOutLinkˢ => ref fileAbsOutLinkˢᵇ;
+private static readonly @string fileAbsOutLinkˢᵇ = "file.abs.out.link"u8;
+internal static ref readonly @string fileRelOutLinkˢ => ref fileRelOutLinkˢᵇ;
+private static readonly @string fileRelOutLinkˢᵇ = "file.rel.out.link"u8;
+internal static ref readonly @string fileRelInLinkˢ => ref fileRelInLinkˢᵇ;
+private static readonly @string fileRelInLinkˢᵇ = "file.rel.in.link"u8;
+internal static ref readonly @string copyfsDupˢ => ref copyfsDupˢᵇ;
+private static readonly @string copyfsDupˢᵇ = "copyfs_dup"u8;
+internal static ref readonly @string outSymlinksFileAbsOutˢ => ref outSymlinksFileAbsOutˢᵇ;
+private static readonly @string outSymlinksFileAbsOutˢᵇ = "out_symlinks/file.abs.out.link"u8;
+internal static ref readonly @string outSymlinksFileRelOutˢ => ref outSymlinksFileRelOutˢᵇ;
+private static readonly @string outSymlinksFileRelOutˢᵇ = "out_symlinks/file.rel.out.link"u8;
+internal static ref readonly @string inSymlinksFileRelInLinkˢ => ref inSymlinksFileRelInLinkˢᵇ;
+private static readonly @string inSymlinksFileRelInLinkˢᵇ = "in_symlinks/file.rel.in.link"u8;
 
-public static void TestCopyFSWithSymlinks(ж<Δtesting.T> Ꮡt) {
+public static void TestCopyFSWithSymlinks(ж<Δtesting.T> t) {
     // Test it with absolute and relative symlinks that point inside and outside the tree.
-    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveSymlink(new os_test_package.testing_TжTB(t));
 
     // Create a directory and file outside.
-    @string tmpDir = Ꮡt.TempDir();
+    @string tmpDir = t.TempDir();
     @string outsideDir = filepath.Join(tmpDir, copyfsOutˢ);
     {
-        var errΔ1 = Mkdir(outsideDir, 493); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Mkdir: %v"u8, errΔ1);
+        var errΔ1 = Mkdir(outsideDir, 493); if (errΔ1 != nil) {
+            t.Fatalf("Mkdir: %v", errΔ1);
         }
     }
     @string outsideFile = filepath.Join(outsideDir, fileOutTxtˢ);
 
     {
-        var errΔ2 = WriteFile(outsideFile, slice<byte>("Testing CopyFS outside"u8), 420); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("WriteFile: %v"u8, errΔ2);
+        var errΔ2 = WriteFile(outsideFile, slice<byte>("Testing CopyFS outside"u8), 420); if (errΔ2 != nil) {
+            t.Fatalf("WriteFile: %v", errΔ2);
         }
     }
 
     // Create a directory and file inside.
     @string insideDir = filepath.Join(tmpDir, copyfsInˢ);
     {
-        var errΔ3 = Mkdir(insideDir, 493); if (errΔ3 != default!) {
-            Ꮡt.Fatalf("Mkdir: %v"u8, errΔ3);
+        var errΔ3 = Mkdir(insideDir, 493); if (errΔ3 != nil) {
+            t.Fatalf("Mkdir: %v", errΔ3);
         }
     }
     @string insideFile = filepath.Join(insideDir, fileInTxtˢ);
     {
-        var errΔ4 = WriteFile(insideFile, slice<byte>("Testing CopyFS inside"u8), 420); if (errΔ4 != default!) {
-            Ꮡt.Fatalf("WriteFile: %v"u8, errΔ4);
+        var errΔ4 = WriteFile(insideFile, slice<byte>("Testing CopyFS inside"u8), 420); if (errΔ4 != nil) {
+            t.Fatalf("WriteFile: %v", errΔ4);
         }
     }
 
     // Create directories for symlinks.
     @string linkInDir = filepath.Join(insideDir, inSymlinksˢ);
     {
-        var errΔ5 = Mkdir(linkInDir, 493); if (errΔ5 != default!) {
-            Ꮡt.Fatalf("Mkdir: %v"u8, errΔ5);
+        var errΔ5 = Mkdir(linkInDir, 493); if (errΔ5 != nil) {
+            t.Fatalf("Mkdir: %v", errΔ5);
         }
     }
     @string linkOutDir = filepath.Join(insideDir, outSymlinksˢ);
     {
-        var errΔ6 = Mkdir(linkOutDir, 493); if (errΔ6 != default!) {
-            Ꮡt.Fatalf("Mkdir: %v"u8, errΔ6);
+        var errΔ6 = Mkdir(linkOutDir, 493); if (errΔ6 != nil) {
+            t.Fatalf("Mkdir: %v", errΔ6);
         }
     }
 
     // First, we create the absolute symlink pointing outside.
     @string outLinkFile = filepath.Join(linkOutDir, fileAbsOutLinkˢ);
     {
-        var errΔ7 = Symlink(outsideFile, outLinkFile); if (errΔ7 != default!) {
-            Ꮡt.Fatalf("Symlink: %v"u8, errΔ7);
+        var errΔ7 = Symlink(outsideFile, outLinkFile); if (errΔ7 != nil) {
+            t.Fatalf("Symlink: %v", errΔ7);
         }
     }
 
     // Then, we create the relative symlink pointing outside.
     var (relOutsideFile, err) = filepath.Rel(filepath.Join(linkOutDir, "."), outsideFile);
-    if (err != default!) {
-        Ꮡt.Fatalf("filepath.Rel: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("filepath.Rel: %v", err);
     }
     @string relOutLinkFile = filepath.Join(linkOutDir, fileRelOutLinkˢ);
     {
-        var errΔ8 = Symlink(relOutsideFile, relOutLinkFile); if (errΔ8 != default!) {
-            Ꮡt.Fatalf("Symlink: %v"u8, errΔ8);
+        var errΔ8 = Symlink(relOutsideFile, relOutLinkFile); if (errΔ8 != nil) {
+            t.Fatalf("Symlink: %v", errΔ8);
         }
     }
 
     // Last, we create the relative symlink pointing inside.
     (var relInsideFile, err) = filepath.Rel(filepath.Join(linkInDir, "."), insideFile);
-    if (err != default!) {
-        Ꮡt.Fatalf("filepath.Rel: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("filepath.Rel: %v", err);
     }
     @string relInLinkFile = filepath.Join(linkInDir, fileRelInLinkˢ);
     {
-        var errΔ9 = Symlink(relInsideFile, relInLinkFile); if (errΔ9 != default!) {
-            Ꮡt.Fatalf("Symlink: %v"u8, errΔ9);
+        var errΔ9 = Symlink(relInsideFile, relInLinkFile); if (errΔ9 != nil) {
+            t.Fatalf("Symlink: %v", errΔ9);
         }
     }
 
     // Copy the directory tree and verify.
-    forceMFTUpdateOnWindows(Ꮡt, insideDir);
+    forceMFTUpdateOnWindows(t, insideDir);
     var fsys = DirFS(insideDir);
     @string tmpDupDir = filepath.Join(tmpDir, copyfsDupˢ);
     {
-        var errΔ10 = Mkdir(tmpDupDir, 493); if (errΔ10 != default!) {
-            Ꮡt.Fatalf("Mkdir: %v"u8, errΔ10);
+        var errΔ10 = Mkdir(tmpDupDir, 493); if (errΔ10 != nil) {
+            t.Fatalf("Mkdir: %v", errΔ10);
         }
     }
 
     {
-        var errΔ11 = CopyFS(tmpDupDir, fsys); if (errΔ11 != default!) {
-            Ꮡt.Fatalf("CopyFS: %v"u8, errΔ11);
+        var errΔ11 = CopyFS(tmpDupDir, fsys); if (errΔ11 != nil) {
+            t.Fatalf("CopyFS: %v", errΔ11);
         }
     }
 
-    forceMFTUpdateOnWindows(Ꮡt, tmpDupDir);
+    forceMFTUpdateOnWindows(t, tmpDupDir);
     var tmpFsys = DirFS(tmpDupDir);
     {
-        var errΔ12 = fstest.TestFS(tmpFsys, fileInTxtˢ, outSymlinksFileAbsOutˢ, outSymlinksFileRelOutˢ, inSymlinksFileRelInLinkˢ); if (errΔ12 != default!) {
-            Ꮡt.Fatal(testFSˢ, errΔ12);
+        var errΔ12 = fstest.TestFS(tmpFsys, fileInTxtˢ, outSymlinksFileAbsOutˢ, outSymlinksFileRelOutˢ, inSymlinksFileRelInLinkˢ); if (errΔ12 != nil) {
+            t.Fatal(testFSˢ, errΔ12);
         }
     }
     {
         var fsysʗ1 = fsys;
         var tmpFsysʗ1 = tmpFsys;
-        var errΔ13 = fs.WalkDir(fsys, "."u8, error (@string path, fs.DirEntry d, error errΔ14) => {
+        var errΔ13 = fs.WalkDir(fsys, ".", error (@string path, fs.DirEntry d, error errΔ14) => {
             if (d.IsDir()) {
-                return default!;
+                return default;
             }
 
             (var fi, errΔ14) = d.Info();
-            if (errΔ14 != default!) {
+            if (errΔ14 != nil) {
                 return errΔ14;
             }
             if (filepath.Ext(path) == ".link"u8) {
@@ -4846,7 +5008,7 @@ public static void TestCopyFSWithSymlinks(ж<Δtesting.T> Ꮡt) {
                     return errors.New("original file "u8 + path + " should be a symlink"u8);
                 }
                 var (tmpfi, errΔ15) = fs.Stat(tmpFsysʗ1, path);
-                if (errΔ15 != default!) {
+                if (errΔ15 != nil) {
                     return errΔ15;
                 }
                 if ((fs.FileMode)(tmpfi.Mode() & ModeSymlink) != 0) {
@@ -4855,31 +5017,34 @@ public static void TestCopyFSWithSymlinks(ж<Δtesting.T> Ꮡt) {
             }
 
             (var data, errΔ14) = fs.ReadFile(fsysʗ1, path);
-            if (errΔ14 != default!) {
+            if (errΔ14 != nil) {
                 return errΔ14;
             }
             (var newData, errΔ14) = fs.ReadFile(tmpFsysʗ1, path);
-            if (errΔ14 != default!) {
+            if (errΔ14 != nil) {
                 return errΔ14;
             }
             if (!bytes.Equal(data, newData)) {
                 return errors.New("file "u8 + path + " contents differ"u8);
             }
 
-            @string target = default!;
+            @string target = default;
             {
                 @string fileName = filepath.Base(path);
                 var exprᴛ1 = fileName;
-                if (exprᴛ1 == "file.abs.out.link"u8 || exprᴛ1 == "file.rel.out.link"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ1 == "file.abs.out.link"u8 || exprᴛ1 == "file.rel.out.link"u8: {
                     target = outsideFile;
+                    break;
                 }
-                else if (exprᴛ1 == "file.rel.in.link"u8) {
+                case {} when exprᴛ1 == "file.rel.in.link"u8: {
                     target = insideFile;
-                }
+                    break;
+                }}
             }
             if (len(target) > 0) {
                 var (targetData, errΔ16) = ReadFile(target);
-                if (errΔ16 != default!) {
+                if (errΔ16 != nil) {
                     return errΔ16;
                 }
                 if (!bytes.Equal(targetData, newData)) {
@@ -4887,94 +5052,95 @@ public static void TestCopyFSWithSymlinks(ж<Δtesting.T> Ꮡt) {
                 }
             }
 
-            return default!;
-        }); if (errΔ13 != default!) {
-            Ꮡt.Fatal(comparingTwoDirectoriesˢ, errΔ13);
+            return default;
+        }); if (errΔ13 != nil) {
+            t.Fatal(comparingTwoDirectoriesˢ, errΔ13);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloWorldˢ = "hello world"u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "hello world"u8;
 
-public static void TestAppendDoesntOverwrite(ж<Δtesting.T> Ꮡt) {
-    testMaybeRooted(Ꮡt, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
+public static void TestAppendDoesntOverwrite(ж<Δtesting.T> t) {
+    testMaybeRooted(t, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
         @string name = fileˢ2;
         {
-            var errΔ1 = WriteFile(name, slice<byte>("hello"u8), 438); if (errΔ1 != default!) {
+            var errΔ1 = WriteFile(name, slice<byte>("hello"u8), 438); if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
         }
-        ж<Δos.File> f = default!;
-        error err = default!;
-        if (r == nil){
+        ж<Δos.File> f = default;
+        error err = default;
+        if (r == nil) {
             (f, err) = OpenFile(name, (nint)(O_APPEND | O_WRONLY), 0);
         } else {
             (f, err) = r.OpenFile(name, (nint)(O_APPEND | O_WRONLY), 0);
         }
-        if (err != default!) {
+        if (err != nil) {
             tΔ1.Fatal(err);
         }
         {
-            var (_, errΔ1) = f.Write(slice<byte>(" world"u8)); if (errΔ1 != default!) {
+            var (_, errΔ1) = f.Write(slice<byte>(" world"u8)); if (errΔ1 != nil) {
                 f.Close();
                 tΔ1.Fatal(errΔ1);
             }
         }
         {
-            var errΔ2 = f.Close(); if (errΔ2 != default!) {
+            var errΔ2 = f.Close(); if (errΔ2 != nil) {
                 tΔ1.Fatal(errΔ2);
             }
         }
         (var got, err) = ReadFile(name);
-        if (err != default!) {
+        if (err != nil) {
             tΔ1.Fatal(err);
         }
         @string want = helloWorldˢ;
         if (((sstring)got) != want) {
-            tΔ1.Fatalf("got %q, want %q"u8, got, want);
+            tΔ1.Fatalf("got %q, want %q", got, want);
         }
     });
 }
 
-public static void TestRemoveReadOnlyFile(ж<Δtesting.T> Ꮡt) {
-    testMaybeRooted(Ꮡt, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
+public static void TestRemoveReadOnlyFile(ж<Δtesting.T> t) {
+    testMaybeRooted(t, (ж<Δtesting.T> tΔ1, ж<Δos.Root> r) => {
         {
-            var errΔ1 = WriteFile(fileˢ2, slice<byte>("1"u8), 0); if (errΔ1 != default!) {
+            var errΔ1 = WriteFile(fileˢ2, slice<byte>("1"u8), 0); if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
         }
-        error err = default!;
-        if (r == nil){
+        error err = default;
+        if (r == nil) {
             err = Remove(fileˢ2);
         } else {
             err = r.Remove(fileˢ2);
         }
-        if (err != default!) {
-            tΔ1.Fatalf("Remove read-only file: %v"u8, err);
+        if (err != nil) {
+            tΔ1.Fatalf("Remove read-only file: %v", err);
         }
         {
             var (_, errΔ1) = Stat(fileˢ2); if (!IsNotExist(errΔ1)) {
-                tΔ1.Fatalf("Stat read-only file after removal: %v (want IsNotExist)"u8, errΔ1);
+                tΔ1.Fatalf("Stat read-only file after removal: %v (want IsNotExist)", errΔ1);
             }
         }
     });
 }
 
-public static void TestOpenFileDevNull(ж<Δtesting.T> Ꮡt) {
+public static void TestOpenFileDevNull(ж<Δtesting.T> t) {
     // See https://go.dev/issue/71752.
-    Ꮡt.Parallel();
+    t.Parallel();
 
     var (f, err) = OpenFile(DevNull, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("OpenFile(DevNull): %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("OpenFile(DevNull): %v", err);
     }
     f.Close();
 }
 
 internal partial struct TestReadFileContents_readStep /*dyn*/ {
-    internal nint bufSize;  // non-zero to check length of buf to Read
-    internal nint retN;  // result of Read call
+    internal nint bufSize; // non-zero to check length of buf to Read
+    internal nint retN;    // result of Read call
     internal error retErr; // error result of Read call
 }
 
@@ -4982,96 +5148,95 @@ internal partial struct TestReadFileContents_tests /*dyn*/ {
     internal @string name;
     internal int64 statSize; // size of file to read, per stat (may be 0 for /proc files)
     internal nint wantSize;  // wanted length of []byte from readFileContents
-    internal error wantErr; // wanted error from readFileContents
+    internal error wantErr;  // wanted error from readFileContents
     internal slice<TestReadFileContents_readStep> reads;
 }
 
-public static void TestReadFileContents(ж<Δtesting.T> Ꮡt) {
+public static void TestReadFileContents(ж<Δtesting.T> t) {
     var errFoo = errors.New(fooˢ);
-    var tests = new TestReadFileContents_tests[]{
+    var tests = slice<TestReadFileContents_tests>([
         new(
-            name: "big-file"u8,
+            name: "big-file",
             statSize: 2000,
             wantSize: 2000,
-            reads: new TestReadFileContents_readStep[]{
-                new(bufSize: 2001, retN: 21, retErr: default!),
+            reads: slice<TestReadFileContents_readStep>([
+                new(bufSize: 2001, retN: 21, retErr: default),
                 new(bufSize: 1980, retN: 1979, retErr: Δio.EOF)
-            }.slice()
+            ])
         ),
         new(
-            name: "small-file"u8,
+            name: "small-file",
             statSize: 100,
             wantSize: 100,
-            reads: new TestReadFileContents_readStep[]{
+            reads: slice<TestReadFileContents_readStep>([
                 new(bufSize: 512, retN: 100, retErr: Δio.EOF)
-            }.slice()
+            ])
         ),
         new(
-            name: "returning-error"u8,
+            name: "returning-error",
             statSize: 1000,
             wantSize: 50,
             wantErr: errFoo,
-            reads: new TestReadFileContents_readStep[]{
-                new(bufSize: 1001, retN: 25, retErr: default!),
+            reads: slice<TestReadFileContents_readStep>([
+                new(bufSize: 1001, retN: 25, retErr: default),
                 new(retN: 25, retErr: errFoo)
-            }.slice()
+            ])
         ),
         new(
-            name: "proc-file"u8,
+            name: "proc-file",
             statSize: 0,
             wantSize: 1023,
-            reads: new TestReadFileContents_readStep[]{
-                new(bufSize: 512, retN: 512, retErr: default!),
+            reads: slice<TestReadFileContents_readStep>([
+                new(bufSize: 512, retN: 512, retErr: default),
                 new(retN: 511, retErr: Δio.EOF)
-            }.slice()
+            ])
         ),
         new(
-            name: "plan9-iproute-file"u8, // Issue 72080
+            name: "plan9-iproute-file", // Issue 72080
             statSize: 0,
             wantSize: 1032,
-            reads: new TestReadFileContents_readStep[]{
-                new(bufSize: 512, retN: 511, retErr: default!),
-                new(retN: 511, retErr: default!),
+            reads: slice<TestReadFileContents_readStep>([
+                new(bufSize: 512, retN: 511, retErr: default),
+                new(retN: 511, retErr: default),
                 new(retN: 10, retErr: Δio.EOF)
-            }.slice()
+            ])
         )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestReadFileContents_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
-            ref var remain = ref heap<slice<TestReadFileContents_readStep>>(out var Ꮡremain);
-            Ꮡremain.ValueSlot = ttʗ1.reads;
+        t.Run(tt.name, (ж<Δtesting.T> tΔ1) => {
+            ref var remain = ref heap<slice<TestReadFileContents_readStep>>(ttʗ1.reads, out var Ꮡremain);
             nint i = -1;
             var ttʗ2 = ttʗ1;
             var (got, err) = os_internal_test_package.ExportReadFileContents(ttʗ1.statSize, (slice<byte> buf) => {
                 i++;
-                tΔ1.Logf("read[%d] with buf size %d"u8, i, len(buf));
+                tΔ1.Logf("read[%d] with buf size %d", i, len(buf));
                 if (len(Ꮡremain.ValueSlot) == 0) {
-                    tΔ1.Fatalf("unexpected read of length %d after %d expected reads"u8, len(buf), len(ttʗ2.reads));
+                    tΔ1.Fatalf("unexpected read of length %d after %d expected reads", len(buf), len(ttʗ2.reads));
                 }
                 if (ttʗ2.statSize == 0 && len(buf) < 512) {
                     // Issue 72080: readFileContents should not do /proc reads with buffers
                     // smaller than 512.
-                    tΔ1.Fatalf("read[%d] with buf size %d; want at least 512 for 0-sized file"u8, i, len(buf));
+                    tΔ1.Fatalf("read[%d] with buf size %d; want at least 512 for 0-sized file", i, len(buf));
                 }
                 var step = Ꮡremain.ValueSlot[0];
                 Ꮡremain.ValueSlot = Ꮡremain.ValueSlot[1..];
                 if (step.bufSize != 0 && len(buf) != step.bufSize) {
-                    tΔ1.Fatalf("read[%d] has buffer size %d; want %d"u8, i, len(buf), step.bufSize);
+                    tΔ1.Fatalf("read[%d] has buffer size %d; want %d", i, len(buf), step.bufSize);
                 }
                 return (step.retN, step.retErr);
             });
             if (len(Ꮡremain.ValueSlot) > 0) {
-                tΔ1.Fatalf("expected %d reads, got %d"u8, len(ttʗ1.reads), i + 1);
+                tΔ1.Fatalf("expected %d reads, got %d", len(ttʗ1.reads), i + 1);
             }
             if (fmt.Sprint(err) != fmt.Sprint(ttʗ1.wantErr)) {
-                tΔ1.Errorf("got error %v; want %v"u8, err, ttʗ1.wantErr);
+                tΔ1.Errorf("got error %v; want %v", err, ttʗ1.wantErr);
             }
             if (len(got) != ttʗ1.wantSize) {
-                tΔ1.Errorf("got size %d; want %d"u8, len(got), ttʗ1.wantSize);
+                tΔ1.Errorf("got size %d; want %d", len(got), ttʗ1.wantSize);
             }
         });
     }

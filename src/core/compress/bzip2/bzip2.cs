@@ -30,15 +30,15 @@ partial struct reader {
     internal uint32 wantBlockCRC;
     internal bool setupDone; // true if we have parsed the bzip2 header.
     internal bool eof;
-    internal nint blockSize;      // blockSize in bytes, i.e. 900 * 1000.
+    internal nint blockSize;            // blockSize in bytes, i.e. 900 * 1000.
     internal array<nuint> c = new(256); // the ``C'' array for the inverse BWT.
-    internal slice<uint32> tt; // mirrors the ``tt'' array in the bzip2 source and contains the P array in the upper 24 bits.
-    internal uint32 tPos;    // Index of the next output byte in tt.
+    internal slice<uint32> tt;          // mirrors the ``tt'' array in the bzip2 source and contains the P array in the upper 24 bits.
+    internal uint32 tPos;               // Index of the next output byte in tt.
     internal slice<uint32> preRLE; // contains the RLE data still to be processed.
-    internal nint preRLEUsed;     // number of entries of preRLE used.
-    internal nint lastByte;     // the last byte value seen.
+    internal nint preRLEUsed;      // number of entries of preRLE used.
+    internal nint lastByte;        // the last byte value seen.
     internal nuint byteRepeats;    // the number of repeats of lastByte seen.
-    internal nuint repeats;    // the number of copies of lastByte to output.
+    internal nuint repeats;        // the number of copies of lastByte to output.
 }
 
 // NewReader returns an [io.Reader] which decompresses bzip2 data from r.
@@ -46,7 +46,7 @@ partial struct reader {
 // the decompressor may read more data than necessary from r.
 public static io.Reader NewReader(io.Reader r) {
     var bz2 = @new<reader>();
-    bz2.Value.br = newBitReader(r);
+    bz2.br = newBitReader(r);
     return new readerжReader(bz2);
 }
 
@@ -57,15 +57,18 @@ internal static UntypedInt bzip2BlockMagic => 0x314159265359;
 internal static UntypedInt bzip2FinalMagic => 0x177245385090;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badMagicValueˢ = "bad magic value"u8;
-internal static readonly @string nonHuffmanEntropyˢ = "non-Huffman entropy encoding"u8;
-internal static readonly @string invalidCompressionLevelˢ = "invalid compression level"u8;
+internal static ref readonly @string badMagicValueˢ => ref badMagicValueˢᵇ;
+private static readonly @string badMagicValueˢᵇ = "bad magic value"u8;
+internal static ref readonly @string nonHuffmanEntropyˢ => ref nonHuffmanEntropyˢᵇ;
+private static readonly @string nonHuffmanEntropyˢᵇ = "non-Huffman entropy encoding"u8;
+internal static ref readonly @string invalidCompressionLevelˢ => ref invalidCompressionLevelˢᵇ;
+private static readonly @string invalidCompressionLevelˢᵇ = "invalid compression level"u8;
 
 // setup parses the bzip2 header.
 internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
-    var br = Ꮡbz2.of(reader.Ꮡbr);
+    var br = Ꮡbz2.Ꮡbr;
 
     if (needMagic) {
         nint magic = br.ReadBits(16);
@@ -75,26 +78,26 @@ internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) {
     }
 
     nint t = br.ReadBits(8);
-    if (t != (rune)'h') {
+    if (t != 'h') {
         return ((StructuralError)(@string)nonHuffmanEntropyˢ);
     }
 
     nint level = br.ReadBits(8);
-    if (level < (rune)'1' || level > (rune)'9') {
+    if (level < '1' || level > '9') {
         return ((StructuralError)(@string)invalidCompressionLevelˢ);
     }
 
     bz2.fileCRC = 0;
-    bz2.blockSize = 100 * 1000 * (level - (rune)'0');
+    bz2.blockSize = 100 * 1000 * (level - '0');
     if (bz2.blockSize > len(bz2.tt)) {
         bz2.tt = new slice<uint32>(bz2.blockSize);
     }
-    return default!;
+    return default;
 }
 
 internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
     if (bz2.eof) {
@@ -104,10 +107,10 @@ internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf
     if (!bz2.setupDone) {
         err = Ꮡbz2.setup(true);
         var brErrΔ1 = bz2.br.Err();
-        if (brErrΔ1 != default!) {
+        if (brErrΔ1 != nil) {
             err = brErrΔ1;
         }
-        if (err != default!) {
+        if (err != nil) {
             return (0, err);
         }
         bz2.setupDone = true;
@@ -115,7 +118,7 @@ internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf
 
     (n, err) = Ꮡbz2.read(buf);
     var brErr = bz2.br.Err();
-    if (brErr != default!) {
+    if (brErr != nil) {
         err = brErr;
     }
     return (n, err);
@@ -151,7 +154,7 @@ internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
 
         bz2.tPos = bz2.preRLE[bz2.tPos];
         var b = (byte)bz2.tPos;
-        bz2.tPos >>= (int)(8);
+        bz2.tPos >>= 8;
         bz2.preRLEUsed++;
 
         if (bz2.byteRepeats == 3) {
@@ -160,7 +163,7 @@ internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
             continue;
         }
 
-        if (bz2.lastByte == (nint)b){
+        if (bz2.lastByte == (nint)b) {
             bz2.byteRepeats++;
         } else {
             bz2.byteRepeats = 0;
@@ -175,19 +178,23 @@ internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string blockChecksumMismatchˢ = "block checksum mismatch"u8;
-internal static readonly @string badMagicValueFoundˢ = "bad magic value found"u8;
-internal static readonly @string fileChecksumMismatchˢ = "file checksum mismatch"u8;
-internal static readonly @string badMagicValueInˢ = "bad magic value in continuation file"u8;
+internal static ref readonly @string blockChecksumMismatchˢ => ref blockChecksumMismatchˢᵇ;
+private static readonly @string blockChecksumMismatchˢᵇ = "block checksum mismatch"u8;
+internal static ref readonly @string badMagicValueFoundˢ => ref badMagicValueFoundˢᵇ;
+private static readonly @string badMagicValueFoundˢᵇ = "bad magic value found"u8;
+internal static ref readonly @string fileChecksumMismatchˢ => ref fileChecksumMismatchˢᵇ;
+private static readonly @string fileChecksumMismatchˢᵇ = "file checksum mismatch"u8;
+internal static ref readonly @string badMagicValueInˢ => ref badMagicValueInˢᵇ;
+private static readonly @string badMagicValueInˢᵇ = "bad magic value in continuation file"u8;
 
 internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         nint n = bz2.readFromBlock(buf);
         if (n > 0 || len(buf) == 0) {
             bz2.blockCRC = updateCRC(bz2.blockCRC, buf.slice(0, n));
-            return (n, default!);
+            return (n, default);
         }
 
         // End of block. Check CRC.
@@ -197,85 +204,99 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
         }
 
         // Find next block.
-        var br = Ꮡbz2.of(reader.Ꮡbr);
-        var exprᴛ1 = br.ReadBits64(48);
-        if (exprᴛ1 == bzip2BlockMagic) {
+        var br = Ꮡbz2.Ꮡbr;
+        switch (br.ReadBits64(48)) {
+        default: {
+            return (0, ((StructuralError)(@string)badMagicValueFoundˢ));
+        }
+        case var ᴛ when ᴛ == bzip2BlockMagic: {
             // Start of block.
             var err = Ꮡbz2.readBlock();
-            if (err != default!) {
+            if (err != nil) {
                 return (0, err);
             }
+            break;
         }
-        else if (exprᴛ1 == bzip2FinalMagic) {
+        case var ᴛ when ᴛ == bzip2FinalMagic: {
             // Check end-of-file CRC.
             var wantFileCRC = (uint32)br.ReadBits64(32);
-            if ((~br).err != default!) {
-                return (0, (~br).err);
+            if (br.err != nil) {
+                return (0, br.err);
             }
             if (bz2.fileCRC != wantFileCRC) {
-                br.Value.err = ((StructuralError)(@string)fileChecksumMismatchˢ);
-                return (0, (~br).err);
+                br.err = ((StructuralError)(@string)fileChecksumMismatchˢ);
+                return (0, br.err);
             }
 
             // Skip ahead to byte boundary.
             // Is there a file concatenated to this one?
             // It would start with BZ.
-            if ((~br).bits % 8 != 0) {
-                br.ReadBits((~br).bits % 8);
+            if (br.bits % 8 != 0) {
+                br.ReadBits(br.bits % 8);
             }
-            var (b, err) = (~br).r.ReadByte();
+            var (b, err) = br.r.ReadByte();
             if (AreEqual(err, io.EOF)) {
-                br.Value.err = io.EOF;
+                br.err = io.EOF;
                 bz2.eof = true;
                 return (0, io.EOF);
             }
-            if (err != default!) {
-                br.Value.err = err;
+            if (err != nil) {
+                br.err = err;
                 return (0, err);
             }
-            (var z, err) = (~br).r.ReadByte();
-            if (err != default!) {
+            (var z, err) = br.r.ReadByte();
+            if (err != nil) {
                 if (AreEqual(err, io.EOF)) {
                     err = io.ErrUnexpectedEOF;
                 }
-                br.Value.err = err;
+                br.err = err;
                 return (0, err);
             }
-            if (b != (rune)'B' || z != (rune)'Z') {
+            if (b != 'B' || z != 'Z') {
                 return (0, ((StructuralError)(@string)badMagicValueInˢ));
             }
             {
-                var errΔ1 = Ꮡbz2.setup(false); if (errΔ1 != default!) {
+                var errΔ1 = Ꮡbz2.setup(false); if (errΔ1 != nil) {
                     return (0, errΔ1);
                 }
             }
-        }
-        else { /* default: */
-            return (0, ((StructuralError)(@string)badMagicValueFoundˢ));
-        }
+            break;
+        }}
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string deprecatedRandomizedˢ = "deprecated randomized files"u8;
-internal static readonly @string noSymbolsInInputˢ = "no symbols in input"u8;
-internal static readonly @string invalidNumberOfHuffmanˢ = "invalid number of Huffman trees"u8;
-internal static readonly @string treeIndexTooLargeˢ = "tree index too large"u8;
-internal static readonly @string huffmanLengthOutOfRangeˢ = "Huffman length out of range"u8;
-internal static readonly @string noTreeSelectorsGivenˢ = "no tree selectors given"u8;
-internal static readonly @string treeSelectorOutOfRangeˢ = "tree selector out of range"u8;
-internal static readonly @string insufficientSelectorˢ = "insufficient selector indices for number of symbols"u8;
-internal static readonly @string repeatCountTooLargeˢ = "repeat count too large"u8;
-internal static readonly @string repeatsPastEndOfBlockˢ = "repeats past end of block"u8;
-internal static readonly @string dataExceedsBlockSizeˢ = "data exceeds block size"u8;
-internal static readonly @string origPtrOutOfBoundsˢ = "origPtr out of bounds"u8;
+internal static ref readonly @string deprecatedRandomizedˢ => ref deprecatedRandomizedˢᵇ;
+private static readonly @string deprecatedRandomizedˢᵇ = "deprecated randomized files"u8;
+internal static ref readonly @string noSymbolsInInputˢ => ref noSymbolsInInputˢᵇ;
+private static readonly @string noSymbolsInInputˢᵇ = "no symbols in input"u8;
+internal static ref readonly @string invalidNumberOfHuffmanˢ => ref invalidNumberOfHuffmanˢᵇ;
+private static readonly @string invalidNumberOfHuffmanˢᵇ = "invalid number of Huffman trees"u8;
+internal static ref readonly @string treeIndexTooLargeˢ => ref treeIndexTooLargeˢᵇ;
+private static readonly @string treeIndexTooLargeˢᵇ = "tree index too large"u8;
+internal static ref readonly @string huffmanLengthOutOfRangeˢ => ref huffmanLengthOutOfRangeˢᵇ;
+private static readonly @string huffmanLengthOutOfRangeˢᵇ = "Huffman length out of range"u8;
+internal static ref readonly @string noTreeSelectorsGivenˢ => ref noTreeSelectorsGivenˢᵇ;
+private static readonly @string noTreeSelectorsGivenˢᵇ = "no tree selectors given"u8;
+internal static ref readonly @string treeSelectorOutOfRangeˢ => ref treeSelectorOutOfRangeˢᵇ;
+private static readonly @string treeSelectorOutOfRangeˢᵇ = "tree selector out of range"u8;
+internal static ref readonly @string insufficientSelectorˢ => ref insufficientSelectorˢᵇ;
+private static readonly @string insufficientSelectorˢᵇ = "insufficient selector indices for number of symbols"u8;
+internal static ref readonly @string repeatCountTooLargeˢ => ref repeatCountTooLargeˢᵇ;
+private static readonly @string repeatCountTooLargeˢᵇ = "repeat count too large"u8;
+internal static ref readonly @string repeatsPastEndOfBlockˢ => ref repeatsPastEndOfBlockˢᵇ;
+private static readonly @string repeatsPastEndOfBlockˢᵇ = "repeats past end of block"u8;
+internal static ref readonly @string dataExceedsBlockSizeˢ => ref dataExceedsBlockSizeˢᵇ;
+private static readonly @string dataExceedsBlockSizeˢᵇ = "data exceeds block size"u8;
+internal static ref readonly @string origPtrOutOfBoundsˢ => ref origPtrOutOfBoundsˢᵇ;
+private static readonly @string origPtrOutOfBoundsˢᵇ = "origPtr out of bounds"u8;
 
 // readBlock reads a bzip2 block. The magic number should already have been consumed.
 internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
-    error err = default!;
+    error err = default;
     ref var bz2 = ref Ꮡbz2.DerefOrNull();
 
-    var br = Ꮡbz2.of(reader.Ꮡbr);
+    var br = Ꮡbz2.Ꮡbr;
     bz2.wantBlockCRC = (uint32)br.ReadBits64(32); // skip checksum. TODO: check it if we can figure out what it is.
     bz2.blockCRC = 0;
     bz2.fileCRC = (bz2.fileCRC << 1 | bz2.fileCRC >> 31) ^ bz2.wantBlockCRC;
@@ -324,7 +345,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     var mtfTreeDecoder = newMTFDecoderWithRange(numHuffmanTrees);
     foreach (var i in range(treeIndexes)) {
         nint c = 0;
-        while (ᐧ) {
+        for (;;) {
             nint inc = br.ReadBits(1);
             if (inc == 0) {
                 break;
@@ -358,14 +379,14 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
         // The code lengths are delta encoded from a 5-bit base value.
         nint length = br.ReadBits(5);
         foreach (var j in range(lengths)) {
-            while (ᐧ) {
+            for (;;) {
                 if (length < 1 || length > 20) {
                     return ((StructuralError)(@string)huffmanLengthOutOfRangeˢ);
                 }
                 if (!br.ReadBit()) {
                     break;
                 }
-                if (br.ReadBit()){
+                if (br.ReadBit()) {
                     length--;
                 } else {
                     length++;
@@ -374,7 +395,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
             lengths[j] = (uint8)length;
         }
         (huffmanTrees[i], err) = newHuffmanTree(lengths);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
     }
@@ -399,7 +420,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     clear(bz2.c[..]);
 
     nint decoded = 0; // counts the number of symbols decoded by the current tree.
-    while (ᐧ) {
+    for (;;) {
         if (decoded == 50) {
             if (selectorIndex >= numSelectors) {
                 return ((StructuralError)(@string)insufficientSelectorˢ);
@@ -421,7 +442,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
                 repeatPower = 1;
             }
             repeat += repeatPower.Lsh((uint64)(v));
-            repeatPower <<= (int)(1);
+            repeatPower <<= 1;
 
             // This limit of 2 million comes from the bzip2 source
             // code. It prevents repeat from overflowing.
@@ -481,7 +502,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     bz2.byteRepeats = 0;
     bz2.repeats = 0;
 
-    return default!;
+    return default;
 }
 
 // inverseBWT implements the inverse Burrows-Wheeler transform as described in
@@ -519,10 +540,10 @@ internal static array<uint32> crctab = new(256);
     foreach (var i in range(crctab)) {
         var crc = (uint32)i << 24;
         for (nint j = 0; j < 8; j++) {
-            if ((crc & 0x80000000U) != 0){
+            if ((crc & 0x80000000U) != 0) {
                 crc = (uint32)((crc << 1) ^ poly);
             } else {
-                crc <<= (int)(1);
+                crc <<= 1;
             }
         }
         crctab[i] = crc;

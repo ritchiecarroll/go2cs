@@ -26,16 +26,16 @@ internal static (bool, error) blockUntilWaitable(this ж<Process> Ꮡp) {
     ref var info = ref heap(new unix.SiginfoChild(), out var Ꮡinfo);
     var err = ignoringEINTR(() => unix.Waitid(unix.P_PID, Ꮡp.Value.Pid, Ꮡinfo, (nint)((nint)syscall.WEXITED | (nint)syscall.WNOWAIT), nil));
     runtime.KeepAlive(Ꮡp.OrTypedNil());
-    if (err != default!) {
+    if (err != nil) {
         // waitid has been available since Linux 2.6.9, but
         // reportedly is not available in Ubuntu on Windows.
         // See issue 16610.
         if (AreEqual(err, syscall.ENOSYS)) {
-            return (false, default!);
+            return (false, default);
         }
         return (false, NewSyscallError("waitid"u8, err));
     }
-    return (true, default!);
+    return (true, default);
 }
 
 } // end os_package

@@ -6,7 +6,7 @@
 //go:build !faketime && !windows && !(linux && amd64) && !plan9
 namespace go;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 
 partial class runtime_package {
 
@@ -23,8 +23,8 @@ partial class runtime_package {
 //
 //go:linkname time_now time.now
 internal static (int64 sec, int32 nsec, int64 mono) time_now() {
-    int64 sec = default!;
-    int32 nsec = default!;
+    int64 sec = default;
+    int32 nsec = default;
 
     (sec, nsec) = walltime();
     return (sec, nsec, nanotime());

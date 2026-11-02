@@ -10,13 +10,13 @@ partial class idna_package {
 // appendMapping appends the mapping for the respective rune. isMapped must be
 // true. A mapping is a categorization of a rune as defined in UTS #46.
 internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s) {
-    nint index = (nint)(uint16)((c >> (int)(indexShift)));
+    nint index = (nint)(c >> (int)(indexShift));
     if ((info)(c & (uint16)xorBit) == 0) {
         nint p = index;
         return append(b, mappings.slice(mappingIndex[p], mappingIndex[p + 1]).ꓸꓸꓸ);
     }
     b = append(b, s.ꓸꓸꓸ);
-    if ((info)(c & (uint16)inlineXOR) == inlineXOR){
+    if ((info)(c & (uint16)inlineXOR) == inlineXOR) {
         // TODO: support and handle two-byte inline masks
         b[len(b) - 1] ^= (byte)((byte)index);
     } else {

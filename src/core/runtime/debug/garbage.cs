@@ -11,11 +11,11 @@ partial class debug_package {
 
 // GCStats collect information about recent garbage collections.
 partial struct GCStats {
-    public time.Time LastGC;       // time of last collection
-    public int64 NumGC;           // number of garbage collections
+    public time.Time LastGC;           // time of last collection
+    public int64 NumGC;                // number of garbage collections
     public time.Duration PauseTotal;   // total pause for all collections
     public slice<time.Duration> Pause; // pause history, most recent first
-    public slice<time.Time> PauseEnd; // pause end times history, most recent first
+    public slice<time.Time> PauseEnd;  // pause end times history, most recent first
     public slice<time.Duration> PauseQuantiles;
 }
 
@@ -46,7 +46,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     // depend on the fact that time.Duration's native unit is
     // nanoseconds, so the pauses and the total pause time do not need
     // any conversion.
-    readGCStats(Ꮡstats.of(GCStats.ᏑPause));
+    readGCStats(Ꮡstats.ᏑPause);
     nint n = len(stats.Pause) - 3;
     stats.LastGC = time.Unix(0, (int64)stats.Pause[n]);
     stats.NumGC = (int64)stats.Pause[n + 1];
@@ -63,7 +63,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     }
 
     if (len(stats.PauseQuantiles) > 0) {
-        if (n == 0){
+        if (n == 0) {
             clear(stats.PauseQuantiles);
         } else {
             // There's room for a second copy of the data in stats.Pause.

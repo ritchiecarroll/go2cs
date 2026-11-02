@@ -7,21 +7,8 @@
 global using static global::go.@internal.types.errors_package;
 
 // <ImportedTypeAliases>
-global using constantꓸKind = go.go.constant_package.ΔKind;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 global using typesꓸError = go.go.types_package.ΔError;
 global using typesꓸInfo = go.go.types_package.ΔInfo;
-global using typesꓸScope = go.go.types_package.ΔScope;
-global using typesꓸSignature = go.go.types_package.ΔSignature;
-global using typesꓸTerm = go.go.types_package.ΔTerm;
-global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,7 +28,14 @@ using static global::go.@internal.types.errors_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.GenDecl))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Ident))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.ValueSpec))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -51,7 +45,7 @@ using static global::go.@internal.types.errors_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABksgpSCgoKCgoKCgpSCgpSAggALDoKCgoKClJLKgoKUgoKClIKCgpSCgIKClIKCAAkMgoL2goKCgpSCgpTIgqamABk0AAcQgoKUsoKUgoKUgpSClIKCgqaCgpKClIKCgsqCkoKClIKCgoI=", "25-44:1;26-43:1.1;151-183:1", "", "123=Default/1/1/2")]
+[assembly: GoPositionMap("internal/types/errors/codes_test.go", "codes_test.cs", "ABosgpSCgoKCgoKCgpSCgpSAggANDoKCgoKClILKgoKUgoKClIKCgpSCgIKClIKCAAoMgoIACgaCgoKClIKClLiCpqYAGTQABxCCgpSygpSCgpSClIKUgoKCpoKCgoKUgoKCyoKSgoKUgoKCgg==", "25-44:1;26-43:1.1;151-183:1", "", "129=Default/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.types;

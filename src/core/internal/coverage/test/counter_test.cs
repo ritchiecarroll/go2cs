@@ -25,12 +25,12 @@ internal partial struct ctrVis {
 internal static error VisitFuncs(this ref ctrVis v, Func<uint32, uint32, slice<uint32>, error> f) {
     foreach (var (_, fn) in v.funcs) {
         {
-            var err = f(fn.PkgIdx, fn.FuncIdx, fn.Counters); if (err != default!) {
+            var err = f(fn.PkgIdx, fn.FuncIdx, fn.Counters); if (err != nil) {
                 return err;
             }
         }
     }
-    return default!;
+    return default;
 }
 
 internal static decodecounter.FuncPayload mkfunc(uint32 p, uint32 f, slice<uint32> c) {
@@ -42,15 +42,16 @@ internal static decodecounter.FuncPayload mkfunc(uint32 p, uint32 f, slice<uint3
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string arg0Arg1Arg2ˢ = "[arg0 arg1 arg_________2]"u8;
+internal static ref readonly @string arg0Arg1Arg2ˢ => ref arg0Arg1Arg2ˢᵇ;
+private static readonly @string arg0Arg1Arg2ˢᵇ = "[arg0 arg1 arg_________2]"u8;
 
-public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
+public static void TestCounterDataWriterReader(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var flavors = new coverage.CounterFlavor[]{
+        var flavors = slice<coverage.CounterFlavor>([
             coverage.CtrRaw,
             coverage.CtrULeb128
-        }.slice();
+        ]);
 
         bool isDead(decodecounter.FuncPayload fp) {
             foreach (var (_, v) in fp.Counters) {
@@ -61,68 +62,68 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
             return true;
         }
 
-        var funcs = new decodecounter.FuncPayload[]{
-            mkfunc(0, 0, new uint32[]{13, 14, 15}.slice()),
-            mkfunc(0, 1, new uint32[]{16, 17}.slice()),
-            mkfunc(1, 0, new uint32[]{18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 976543, 7}.slice())
-        }.slice();
+        var funcs = slice<decodecounter.FuncPayload>([
+            mkfunc(0, 0, slice<uint32>([13, 14, 15])),
+            mkfunc(0, 1, slice<uint32>([16, 17])),
+            mkfunc(1, 0, slice<uint32>([18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 976543, 7]))
+        ]);
         var writeVisitor = Ꮡ(new ctrVis(funcs: funcs));
 
         foreach (var (kf, flav) in flavors) {
-            Ꮡt.Logf("testing flavor %d\n"u8, flav);
+            t.Logf("testing flavor %d\n", flav);
 
             // Open a counter data file in preparation for emitting data.
-            @string d = Ꮡt.TempDir();
+            @string d = t.TempDir();
             @string cfpath = filepath.Join(d, fmt.Sprintf("covcounters.hash.0.%d"u8, kf));
             var (of, err) = os.OpenFile(cfpath, (nint)((nint)(nint)(os.O_WRONLY | os.O_CREATE) | os.O_TRUNC), 438);
-            if (err != default!) {
-                Ꮡt.Fatalf("opening covcounters: %v"u8, err);
+            if (err != nil) {
+                t.Fatalf("opening covcounters: %v", err);
             }
 
             // Perform the encode and write.
             var cdfw = encodecounter.NewCoverageDataWriter(new os.FileжWriter(of), flav);
             if (cdfw == nil) {
-                Ꮡt.Fatalf("NewCoverageDataWriter failed"u8);
+                t.Fatalf("NewCoverageDataWriter failed");
             }
             var finalHash = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0}.array();
-            var args = new map<@string, @string>{["argc"u8] = "3"u8, ["argv0"u8] = "arg0"u8, ["argv1"u8] = "arg1"u8, ["argv2"u8] = "arg_________2"u8};
+            var args = new map<@string, @string>{["argc"] = "3", ["argv0"] = "arg0", ["argv1"] = "arg1", ["argv2"] = "arg_________2"};
             {
-                var errΔ1 = cdfw.Write(finalHash, args, new test_internal_test_package.ctrVisжCounterVisitor(writeVisitor)); if (errΔ1 != default!) {
-                    Ꮡt.Fatalf("counter file Write failed: %v"u8, errΔ1);
+                var errΔ1 = cdfw.Write(finalHash, args, new test_internal_test_package.ctrVisжCounterVisitor(writeVisitor)); if (errΔ1 != nil) {
+                    t.Fatalf("counter file Write failed: %v", errΔ1);
                 }
             }
             {
-                var errΔ2 = of.Close(); if (errΔ2 != default!) {
-                    Ꮡt.Fatalf("closing covcounters: %v"u8, errΔ2);
+                var errΔ2 = of.Close(); if (errΔ2 != nil) {
+                    t.Fatalf("closing covcounters: %v", errΔ2);
                 }
             }
-            cdfw = default!;
+            cdfw = default;
 
             // Decode the same file.
-            ж<decodecounter.CounterDataReader> cdr = default!;
+            ж<decodecounter.CounterDataReader> cdr = default;
             (var inf, err) = os.Open(cfpath);
             var infʗ1 = inf;
             defer(() => {
                 {
-                    var errΔ3 = infʗ1.Close(); if (errΔ3 != default!) {
-                        Ꮡt.Fatalf("close failed with: %v"u8, errΔ3);
+                    var errΔ3 = infʗ1.Close(); if (errΔ3 != nil) {
+                        t.Fatalf("close failed with: %v", errΔ3);
                     }
                 }
             }, ref ᒐ);
 
-            if (err != default!) {
-                Ꮡt.Fatalf("reopening covcounters file: %v"u8, err);
+            if (err != nil) {
+                t.Fatalf("reopening covcounters file: %v", err);
             }
             {
-                (cdr, err) = decodecounter.NewCounterDataReader(cfpath, new test_internal_test_package.os_FileжReadSeeker(inf)); if (err != default!) {
-                    Ꮡt.Fatalf("opening covcounters for read: %v"u8, err);
+                (cdr, err) = decodecounter.NewCounterDataReader(cfpath, new test_internal_test_package.os_FileжReadSeeker(inf)); if (err != nil) {
+                    t.Fatalf("opening covcounters for read: %v", err);
                 }
             }
             var decodedArgs = cdr.OsArgs();
             @string aWant = arg0Arg1Arg2ˢ;
             @string aGot = fmt.Sprintf("%+v"u8, decodedArgs);
             if (aWant != aGot) {
-                Ꮡt.Errorf("reading decoded args, got %s want %s"u8, aGot, aWant);
+                t.Errorf("reading decoded args, got %s want %s", aGot, aWant);
             }
             foreach (var i in range(funcs)) {
                 if (isDead(funcs[i])) {
@@ -130,26 +131,24 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
                 }
                 ref var fp = ref heap(new decodecounter.FuncPayload(), out var Ꮡfp);
                 {
-                    var (ok, errΔ4) = cdr.NextFunc(Ꮡfp); if (errΔ4 != default!){
-                        Ꮡt.Fatalf("reading func %d: %v"u8, i, errΔ4);
-                    } else 
-                    if (!ok) {
-                        Ꮡt.Fatalf("reading func %d: bad return"u8, i);
+                    var (ok, errΔ4) = cdr.NextFunc(Ꮡfp); if (errΔ4 != nil) {
+                        t.Fatalf("reading func %d: %v", i, errΔ4);
+                    } else if (!ok) {
+                        t.Fatalf("reading func %d: bad return", i);
                     }
                 }
                 @string got = fmt.Sprintf("%+v"u8, fp);
                 @string want = fmt.Sprintf("%+v"u8, funcs[i]);
                 if (got != want) {
-                    Ꮡt.Errorf("cdr.NextFunc iter %d\ngot  %+v\nwant %+v"u8, i, got, want);
+                    t.Errorf("cdr.NextFunc iter %d\ngot  %+v\nwant %+v", i, got, want);
                 }
             }
             ref var dummy = ref heap(new decodecounter.FuncPayload(), out var Ꮡdummy);
             {
-                var (ok, errΔ5) = cdr.NextFunc(Ꮡdummy); if (errΔ5 != default!){
-                    Ꮡt.Fatalf("reading func after loop: %v"u8, errΔ5);
-                } else 
-                if (ok) {
-                    Ꮡt.Fatalf("reading func after loop: expected EOF"u8);
+                var (ok, errΔ5) = cdr.NextFunc(Ꮡdummy); if (errΔ5 != nil) {
+                    t.Fatalf("reading func after loop: %v", errΔ5);
+                } else if (ok) {
+                    t.Fatalf("reading func after loop: expected EOF");
                 }
             }
         }
@@ -159,34 +158,35 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string covcountersHash20ˢ = "covcounters.hash2.0"u8;
+internal static ref readonly @string covcountersHash20ˢ => ref covcountersHash20ˢᵇ;
+private static readonly @string covcountersHash20ˢᵇ = "covcounters.hash2.0"u8;
 
-public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
+public static void TestCounterDataAppendSegment(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var ctrsᴷ = new stackAppend<uint32>();
         var allfuncsᴷ = new stackAppend<slice<decodecounter.FuncPayload>>();
 
-        @string d = Ꮡt.TempDir();
+        @string d = t.TempDir();
         @string cfpath = filepath.Join(d, covcountersHash20ˢ);
         var (of, err) = os.OpenFile(cfpath, (nint)((nint)(nint)(os.O_WRONLY | os.O_CREATE) | os.O_TRUNC), 438);
-        if (err != default!) {
-            Ꮡt.Fatalf("opening covcounters: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("opening covcounters: %v", err);
         }
 
         UntypedInt numSegments = 2;
 
         // Write a counter with multiple segments.
-        var args = new map<@string, @string>{["argc"u8] = "1"u8, ["argv0"u8] = "prog.exe"u8};
-        var allfuncs = new slice<decodecounter.FuncPayload>[]{}.slice();
-        var ctrs = new uint32[]{}.slice();
+        var args = new map<@string, @string>{["argc"] = "1", ["argv0"] = "prog.exe"};
+        var allfuncs = slice<slice<decodecounter.FuncPayload>>([]);
+        var ctrs = slice<uint32>([]);
         var q = (uint32)0;
-        ж<encodecounter.CoverageDataWriter> cdfw = default!;
+        ж<encodecounter.CoverageDataWriter> cdfw = default;
         for (nint idx = 0; idx < numSegments; idx++) {
-            args[fmt.Sprintf("seg%d"u8, idx)] = "x"u8;
+            args[fmt.Sprintf("seg%d"u8, idx)] = "x";
             q += 7;
             ctrs = append(ctrsᴷ, ctrs, q);
-            var funcs = new decodecounter.FuncPayload[]{}.slice();
+            var funcs = slice<decodecounter.FuncPayload>([]);
             for (nint k = 0; k < idx + 1; k++) {
                 var c = new slice<uint32>(len(ctrs));
                 copy(c, ctrs);
@@ -196,76 +196,75 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
 
             var writeVisitor = Ꮡ(new ctrVis(funcs: funcs));
 
-            if (idx == 0){
+            if (idx == 0) {
                 // Perform the encode and write.
                 cdfw = encodecounter.NewCoverageDataWriter(new os.FileжWriter(of), coverage.CtrRaw);
                 if (cdfw == nil) {
-                    Ꮡt.Fatalf("NewCoverageDataWriter failed"u8);
+                    t.Fatalf("NewCoverageDataWriter failed");
                 }
                 var finalHash = new byte[]{1, 2}.array(16);
                 {
-                    var errΔ1 = cdfw.Write(finalHash, args, new test_internal_test_package.ctrVisжCounterVisitor(writeVisitor)); if (errΔ1 != default!) {
-                        Ꮡt.Fatalf("counter file Write failed: %v"u8, errΔ1);
+                    var errΔ1 = cdfw.Write(finalHash, args, new test_internal_test_package.ctrVisжCounterVisitor(writeVisitor)); if (errΔ1 != nil) {
+                        t.Fatalf("counter file Write failed: %v", errΔ1);
                     }
                 }
             } else {
                 {
-                    var errΔ2 = cdfw.AppendSegment(args, new test_internal_test_package.ctrVisжCounterVisitor(writeVisitor)); if (errΔ2 != default!) {
-                        Ꮡt.Fatalf("counter file AppendSegment failed: %v"u8, errΔ2);
+                    var errΔ2 = cdfw.AppendSegment(args, new test_internal_test_package.ctrVisжCounterVisitor(writeVisitor)); if (errΔ2 != nil) {
+                        t.Fatalf("counter file AppendSegment failed: %v", errΔ2);
                     }
                 }
             }
         }
         {
-            var errΔ3 = of.Close(); if (errΔ3 != default!) {
-                Ꮡt.Fatalf("closing covcounters: %v"u8, errΔ3);
+            var errΔ3 = of.Close(); if (errΔ3 != nil) {
+                t.Fatalf("closing covcounters: %v", errΔ3);
             }
         }
 
         // Read the result file.
-        ж<decodecounter.CounterDataReader> cdr = default!;
+        ж<decodecounter.CounterDataReader> cdr = default;
         (var inf, err) = os.Open(cfpath);
         var infʗ1 = inf;
         defer(() => {
             {
-                var errΔ4 = infʗ1.Close(); if (errΔ4 != default!) {
-                    Ꮡt.Fatalf("close failed with: %v"u8, errΔ4);
+                var errΔ4 = infʗ1.Close(); if (errΔ4 != nil) {
+                    t.Fatalf("close failed with: %v", errΔ4);
                 }
             }
         }, ref ᒐ);
 
-        if (err != default!) {
-            Ꮡt.Fatalf("reopening covcounters file: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("reopening covcounters file: %v", err);
         }
         {
-            (cdr, err) = decodecounter.NewCounterDataReader(cfpath, new test_internal_test_package.os_FileжReadSeeker(inf)); if (err != default!) {
-                Ꮡt.Fatalf("opening covcounters for read: %v"u8, err);
+            (cdr, err) = decodecounter.NewCounterDataReader(cfpath, new test_internal_test_package.os_FileжReadSeeker(inf)); if (err != nil) {
+                t.Fatalf("opening covcounters for read: %v", err);
             }
         }
         var ns = cdr.NumSegments();
         if (ns != numSegments) {
-            Ꮡt.Fatalf("got %d segments want %d"u8, ns, (nint)(numSegments));
+            t.Fatalf("got %d segments want %d", ns, (nint)(numSegments));
         }
         if (len(allfuncs) != numSegments) {
-            Ꮡt.Fatalf("expected %d got %d"u8, (nint)(numSegments), len(allfuncs));
+            t.Fatalf("expected %d got %d", (nint)(numSegments), len(allfuncs));
         }
 
         for (nint sidx = 0; sidx < (nint)ns; sidx++) {
             {
-                var (off, errΔ5) = inf.Seek(0, io.SeekCurrent); if (errΔ5 != default!){
-                    Ꮡt.Fatalf("Seek failed: %v"u8, errΔ5);
+                var (off, errΔ5) = inf.Seek(0, io.SeekCurrent); if (errΔ5 != nil) {
+                    t.Fatalf("Seek failed: %v", errΔ5);
                 } else {
-                    Ꮡt.Logf("sidx=%d off=%d\n"u8, sidx, off);
+                    t.Logf("sidx=%d off=%d\n", sidx, off);
                 }
             }
 
             if (sidx != 0) {
                 {
-                    var (ok, errΔ6) = cdr.BeginNextSegment(); if (errΔ6 != default!){
-                        Ꮡt.Fatalf("BeginNextSegment failed: %v"u8, errΔ6);
-                    } else 
-                    if (!ok) {
-                        Ꮡt.Fatalf("BeginNextSegment return %v on iter %d"u8,
+                    var (ok, errΔ6) = cdr.BeginNextSegment(); if (errΔ6 != nil) {
+                        t.Fatalf("BeginNextSegment failed: %v", errΔ6);
+                    } else if (!ok) {
+                        t.Fatalf("BeginNextSegment return %v on iter %d",
                             ok, sidx);
                     }
                 }
@@ -274,17 +273,16 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
             foreach (var i in range(funcs)) {
                 ref var fp = ref heap(new decodecounter.FuncPayload(), out var Ꮡfp);
                 {
-                    var (ok, errΔ7) = cdr.NextFunc(Ꮡfp); if (errΔ7 != default!){
-                        Ꮡt.Fatalf("reading func %d: %v"u8, i, errΔ7);
-                    } else 
-                    if (!ok) {
-                        Ꮡt.Fatalf("reading func %d: bad return"u8, i);
+                    var (ok, errΔ7) = cdr.NextFunc(Ꮡfp); if (errΔ7 != nil) {
+                        t.Fatalf("reading func %d: %v", i, errΔ7);
+                    } else if (!ok) {
+                        t.Fatalf("reading func %d: bad return", i);
                     }
                 }
                 @string got = fmt.Sprintf("%+v"u8, fp);
                 @string want = fmt.Sprintf("%+v"u8, funcs[i]);
                 if (got != want) {
-                    Ꮡt.Errorf("cdr.NextFunc iter %d\ngot  %+v\nwant %+v"u8, i, got, want);
+                    t.Errorf("cdr.NextFunc iter %d\ngot  %+v\nwant %+v", i, got, want);
                 }
             }
         }

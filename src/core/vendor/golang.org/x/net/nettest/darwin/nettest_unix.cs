@@ -9,9 +9,9 @@ using syscall = syscall_package;
 partial class nettest_package {
 
 internal static bool supportsRawSocket() {
-    foreach (var (_, af) in new nint[]{syscall.AF_INET, syscall.AF_INET6}.slice()) {
+    foreach (var (_, af) in slice<nint>([syscall.AF_INET, syscall.AF_INET6])) {
         var (s, err) = syscall.Socket(af, syscall.SOCK_RAW, 0);
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         syscall.Close(s);

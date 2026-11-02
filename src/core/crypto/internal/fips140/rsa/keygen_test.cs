@@ -20,47 +20,55 @@ using static go.crypto.@internal.fips140.rsa_package;
 partial class rsa_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataMillerRabinTestsˢ = "testdata/miller_rabin_tests.txt"u8;
+internal static ref readonly @string testdataMillerRabinTestsˢ => ref testdataMillerRabinTestsˢᵇ;
+private static readonly @string testdataMillerRabinTestsˢᵇ = "testdata/miller_rabin_tests.txt"u8;
 
-public static void TestMillerRabin(ж<testing.T> Ꮡt) {
+public static void TestMillerRabin(ж<testing.T> t) {
     var (f, err) = os.Open(testdataMillerRabinTestsˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    bool expected = default!;
-    @string W = default!;
-    @string B = default!;
-    nint lineNum = default!;
+    bool expected = default;
+    @string W = default;
+    @string B = default;
+    nint lineNum = default;
     var scanner = bufio.NewScanner(new rsa_internal_test_package.os_FileжReader(f));
     while (scanner.Scan()) {
         lineNum++;
         @string line = scanner.Text();
-        if (len(line) == 0 || line[0] == (rune)'#') {
+        if (len(line) == 0 || line[0] == '#') {
             continue;
         }
 
-        var (k, v, _) = strings.Cut(line, " = "u8);
+        var (k, v, _) = strings.Cut(line, " = ");
         var exprᴛ1 = k;
-        if (exprᴛ1 == "Result"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "Result"u8: {
             var exprᴛ2 = v;
-            if (exprᴛ2 == "Composite"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ2 == "Composite"u8: {
                 expected = millerRabinCOMPOSITE;
+                break;
             }
-            else if (exprᴛ2 == "PossiblyPrime"u8) {
+            case {} when exprᴛ2 == "PossiblyPrime"u8: {
                 expected = millerRabinPOSSIBLYPRIME;
+                break;
             }
-            else { /* default: */
-                Ꮡt.Fatalf("unknown result %q on line %d"u8, v, lineNum);
-            }
+            default: {
+                t.Fatalf("unknown result %q on line %d", v, lineNum);
+                break;
+            }}
+            break;
         }
-        else if (exprᴛ1 == "W"u8) {
+        case {} when exprᴛ1 == "W"u8: {
             W = v;
+            break;
         }
-        else if (exprᴛ1 == "B"u8) {
+        case {} when exprᴛ1 == "B"u8: {
             B = v;
 
-            Ꮡt.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
+            t.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
                 if (len(W) % 2 != 0) {
                     W = "0"u8 + W;
                 }
@@ -69,77 +77,84 @@ public static void TestMillerRabin(ж<testing.T> Ꮡt) {
                 }
 
                 var (mr, errΔ2) = millerRabinSetup(decodeHex(tΔ2, W));
-                if (errΔ2 != default!) {
-                    tΔ2.Logf("W = %s"u8, W);
-                    tΔ2.Logf("B = %s"u8, B);
-                    tΔ2.Fatalf("failed to set up Miller-Rabin test: %v"u8, errΔ2);
+                if (errΔ2 != nil) {
+                    tΔ2.Logf("W = %s", W);
+                    tΔ2.Logf("B = %s", B);
+                    tΔ2.Fatalf("failed to set up Miller-Rabin test: %v", errΔ2);
                 }
 
                 (var result, errΔ2) = millerRabinIteration(ref (mr).DerefOrNull(), decodeHex(tΔ2, B));
-                if (errΔ2 != default!) {
-                    tΔ2.Logf("W = %s"u8, W);
-                    tΔ2.Logf("B = %s"u8, B);
-                    tΔ2.Fatalf("failed to run Miller-Rabin test: %v"u8, errΔ2);
+                if (errΔ2 != nil) {
+                    tΔ2.Logf("W = %s", W);
+                    tΔ2.Logf("B = %s", B);
+                    tΔ2.Fatalf("failed to run Miller-Rabin test: %v", errΔ2);
                 }
 
                 if (result != expected) {
-                    tΔ2.Logf("W = %s"u8, W);
-                    tΔ2.Logf("B = %s"u8, B);
-                    tΔ2.Fatalf("unexpected result: got %v, want %v"u8, result, expected);
+                    tΔ2.Logf("W = %s", W);
+                    tΔ2.Logf("B = %s", B);
+                    tΔ2.Fatalf("unexpected result: got %v, want %v", result, expected);
                 }
             });
+            break;
         }
-        else { /* default: */
-            Ꮡt.Fatalf("unknown key %q on line %d"u8, k, lineNum);
-        }
+        default: {
+            t.Fatalf("unknown key %q on line %d", k, lineNum);
+            break;
+        }}
     }
     {
-        var errΔ3 = scanner.Err(); if (errΔ3 != default!) {
-            Ꮡt.Fatal(errΔ3);
+        var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataGcdLcmTestsTxtˢ = "testdata/gcd_lcm_tests.txt"u8;
+internal static ref readonly @string testdataGcdLcmTestsTxtˢ => ref testdataGcdLcmTestsTxtˢᵇ;
+private static readonly @string testdataGcdLcmTestsTxtˢᵇ = "testdata/gcd_lcm_tests.txt"u8;
 internal static readonly object skippingTestWithZeroˢ = (@string)"skipping test with zero input"u8;
 internal static readonly object skippingTestWithLcm1ˢ = (@string)"skipping test with LCM=1"u8;
 internal static readonly object gcdTooLargeˢ = (@string)"GCD too large"u8;
 
-public static void TestTotient(ж<testing.T> Ꮡt) {
+public static void TestTotient(ж<testing.T> t) {
     var (f, err) = os.Open(testdataGcdLcmTestsTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    @string GCD = default!;
-    @string A = default!;
-    @string B = default!;
-    @string LCM = default!;
-    nint lineNum = default!;
+    @string GCD = default;
+    @string A = default;
+    @string B = default;
+    @string LCM = default;
+    nint lineNum = default;
     var scanner = bufio.NewScanner(new rsa_internal_test_package.os_FileжReader(f));
     while (scanner.Scan()) {
         lineNum++;
         @string line = scanner.Text();
-        if (len(line) == 0 || line[0] == (rune)'#') {
+        if (len(line) == 0 || line[0] == '#') {
             continue;
         }
 
-        var (k, v, _) = strings.Cut(line, " = "u8);
+        var (k, v, _) = strings.Cut(line, " = ");
         var exprᴛ1 = k;
-        if (exprᴛ1 == "GCD"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "GCD"u8: {
             GCD = v;
+            break;
         }
-        else if (exprᴛ1 == "A"u8) {
+        case {} when exprᴛ1 == "A"u8: {
             A = v;
+            break;
         }
-        else if (exprᴛ1 == "B"u8) {
+        case {} when exprᴛ1 == "B"u8: {
             B = v;
+            break;
         }
-        else if (exprᴛ1 == "LCM"u8) {
+        case {} when exprᴛ1 == "LCM"u8: {
             LCM = v;
 
-            Ꮡt.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
+            t.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
                 if (A == "0"u8 || B == "0"u8) {
                     tΔ2.Skip(skippingTestWithZeroˢ);
                 }
@@ -154,10 +169,10 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
 
                 var (gcd, errΔ2) = bigmod.NewNat().GCDVarTime(a, b);
                 // GCD doesn't work if a and b are both even, but LCM handles it.
-                if (errΔ2 == default!) {
+                if (errΔ2 == nil) {
                     {
-                        @string got = strings.TrimLeft(hex.EncodeToString(gcd.Bytes(p)), "0"u8); if (got != GCD) {
-                            tΔ2.Fatalf("unexpected GCD: got %s, want %s"u8, got, GCD);
+                        @string got = strings.TrimLeft(hex.EncodeToString(gcd.Bytes(p)), "0"); if (got != GCD) {
+                            tΔ2.Fatalf("unexpected GCD: got %s, want %s", got, GCD);
                         }
                     }
                 }
@@ -165,27 +180,29 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
                 (var lcm, errΔ2) = totient(p, q);
                 if (oddDivisorLargerThan32Bits(decodeHex(tΔ2, GCD))) {
                     if (!AreEqual(errΔ2, errDivisorTooLarge)) {
-                        tΔ2.Fatalf("expected divisor too large error, got %v"u8, errΔ2);
+                        tΔ2.Fatalf("expected divisor too large error, got %v", errΔ2);
                     }
                     tΔ2.Skip(gcdTooLargeˢ);
                 }
-                if (errΔ2 != default!) {
-                    tΔ2.Fatalf("failed to calculate totient: %v"u8, errΔ2);
+                if (errΔ2 != nil) {
+                    tΔ2.Fatalf("failed to calculate totient: %v", errΔ2);
                 }
                 {
-                    @string got = strings.TrimLeft(hex.EncodeToString(lcm.Nat().Bytes(lcm)), "0"u8); if (got != LCM) {
-                        tΔ2.Fatalf("unexpected LCM: got %s, want %s"u8, got, LCM);
+                    @string got = strings.TrimLeft(hex.EncodeToString(lcm.Nat().Bytes(lcm)), "0"); if (got != LCM) {
+                        tΔ2.Fatalf("unexpected LCM: got %s, want %s", got, LCM);
                     }
                 }
             });
+            break;
         }
-        else { /* default: */
-            Ꮡt.Fatalf("unknown key %q on line %d"u8, k, lineNum);
-        }
+        default: {
+            t.Fatalf("unknown key %q on line %d", k, lineNum);
+            break;
+        }}
     }
     {
-        var errΔ3 = scanner.Err(); if (errΔ3 != default!) {
-            Ꮡt.Fatal(errΔ3);
+        var errΔ3 = scanner.Err(); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
     }
 }
@@ -202,14 +219,14 @@ internal static slice<byte> addOne(slice<byte> b) {
     return x.Bytes();
 }
 
-internal static slice<byte> decodeHex(ж<testing.T> Ꮡt, @string s) {
-    Ꮡt.Helper();
+internal static slice<byte> decodeHex(ж<testing.T> t, @string s) {
+    t.Helper();
     if (len(s) % 2 != 0) {
         s = "0"u8 + s;
     }
     var (b, err) = hex.DecodeString(s);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to decode hex %q: %v"u8, s, err);
+    if (err != nil) {
+        t.Fatalf("failed to decode hex %q: %v", s, err);
     }
     return b;
 }

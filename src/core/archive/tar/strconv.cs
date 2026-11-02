@@ -13,7 +13,7 @@ partial class tar_package {
 
 // hasNUL reports whether the NUL character exists within s.
 internal static bool hasNUL(@string s) {
-    return strings.Contains(s, "\x00"u8);
+    return strings.Contains(s, "\x00");
 }
 
 // isASCII reports whether the input is an ASCII C-style string.
@@ -75,8 +75,8 @@ internal static void formatString(this ref formatter f, slice<byte> b, @string s
     // Some buggy readers treat regular files with a trailing slash
     // in the V7 path field as a directory even though the full path
     // recorded elsewhere (e.g., via PAX record) contains no trailing slash.
-    if (len(s) > len(b) && b[len(b) - 1] == (rune)'/') {
-        nint n = len(strings.TrimRight(s.slice(0, len(b) - 1), "/"u8));
+    if (len(s) > len(b) && b[len(b) - 1] == '/') {
+        nint n = len(strings.TrimRight(s.slice(0, len(b) - 1), "/"));
         b[n] = 0; // Replace trailing slash with NUL terminator
     }
 }
@@ -106,12 +106,12 @@ internal static int64 parseNumeric(this ref parser p, slice<byte> b) {
         //
         // If the number is negative, we use an inversion mask to invert the
         // data bytes and treat the value as an unsigned number.
-        byte inv = default!;       // 0x00 if positive or zero, 0xff if negative
+        byte inv = default; // 0x00 if positive or zero, 0xff if negative
         if ((byte)(b[0] & 0x40) != 0) {
             inv = 0xff;
         }
 
-        uint64 x = default!;
+        uint64 x = default;
         foreach (var (i, vᴛ1) in b) {
             var c = vᴛ1;
 
@@ -150,7 +150,7 @@ internal static void formatNumeric(this ref formatter f, slice<byte> b, int64 x)
     if (fitsInBase256(len(b), x)) {
         for (nint i = len(b) - 1; i >= 0; i--) {
             b[i] = (byte)x;
-            x >>= (int)(8);
+            x >>= 8;
         }
         b[0] |= (byte)(0x80); // Highest bit indicates binary format
         return;
@@ -166,13 +166,13 @@ internal static int64 parseOctal(this ref parser p, slice<byte> b) {
     // spaces or NULs.
     // So we remove leading and trailing NULs and spaces to
     // be sure.
-    b = bytes.Trim(b, " \x00"u8);
+    b = bytes.Trim(b, " \x00");
 
     if (len(b) == 0) {
         return 0;
     }
     var (x, perr) = strconv.ParseUint(p.parseString(b), 8, 64);
-    if (perr != default!) {
+    if (perr != nil) {
         p.err = ErrHeader;
     }
     return (int64)x;
@@ -188,7 +188,7 @@ internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
     // Add leading zeros, but leave room for a NUL.
     {
         nint n = len(b) - len(s) - 1; if (n > 0) {
-            s = strings.Repeat("0"u8, n) + s;
+            s = strings.Repeat("0", n) + s;
         }
     }
     f.formatString(b, s);
@@ -208,26 +208,26 @@ internal static (time.Time, error) parsePAXTime(@string s) {
     UntypedInt maxNanoSecondDigits = 9;
 
     // Split string into seconds and sub-seconds parts.
-    var (ss, sn, _) = strings.Cut(s, "."u8);
+    var (ss, sn, _) = strings.Cut(s, ".");
 
     // Parse the seconds.
     var (secs, err) = strconv.ParseInt(ss, 10, 64);
-    if (err != default!) {
-        return (new time.Time(nil), ErrHeader);
+    if (err != nil) {
+        return (new time.Time(), ErrHeader);
     }
     if (len(sn) == 0) {
-        return (time.Unix(secs, 0), default!); // No sub-second values
+        return (time.Unix(secs, 0), default); // No sub-second values
     }
 
     // Parse the nanoseconds.
     // Initialize an array with '0's to handle right padding automatically.
-    var nanoDigits = new byte[]{(rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0', (rune)'0'}.array();
+    var nanoDigits = new byte[]{(byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0'}.array();
     foreach (var i in range(len(sn))) {
         {
             var c = sn[i];
             switch (ᐧ) {
-            case {} when c < (rune)'0' || c > (rune)'9': {
-                return (new time.Time(nil), ErrHeader);
+            case {} when c < (byte)'0' || c > (byte)'9': {
+                return (new time.Time(), ErrHeader);
             }
             case {} when i < len(nanoDigits): {
                 nanoDigits[i] = c;
@@ -236,10 +236,10 @@ internal static (time.Time, error) parsePAXTime(@string s) {
         }
     }
     var (nsecs, _) = strconv.ParseInt((@string)(nanoDigits[..]), 10, 64); // Must succeed after validation
-    if (len(ss) > 0 && ss[0] == (rune)'-') {
-        return (time.Unix(secs, -1 * nsecs), default!); // Negative correction
+    if (len(ss) > 0 && ss[0] == '-') {
+        return (time.Unix(secs, -1 * nsecs), default); // Negative correction
     }
-    return (time.Unix(secs, nsecs), default!);
+    return (time.Unix(secs, nsecs), default);
 }
 
 // formatPAXTime converts ts into a time of the form %d.%d as described in the
@@ -254,29 +254,29 @@ internal static @string /*s*/ formatPAXTime(time.Time ts) {
     // If seconds is negative, then perform correction.
     @string sign = ""u8;
     if (secs < 0) {
-        sign = "-"u8; // Remember sign
-        secs = -(secs + 1); // Add a second to secs
+        sign = "-";                    // Remember sign
+        secs = -(secs + 1);            // Add a second to secs
         nsecs = -(nsecs - 1000000000); // Take that second away from nsecs
     }
-    return strings.TrimRight(fmt.Sprintf("%s%d.%09d"u8, sign, secs, nsecs), "0"u8);
+    return strings.TrimRight(fmt.Sprintf("%s%d.%09d"u8, sign, secs, nsecs), "0");
 }
 
 // parsePAXRecord parses the input PAX record string into a key-value pair.
 // If parsing is successful, it will slice off the currently read record and
 // return the remainder as r.
 internal static (@string k, @string v, @string r, error err) parsePAXRecord(@string s) {
-    @string k = default!;
-    @string v = default!;
+    @string k = default;
+    @string v = default;
 
     // The size field ends at the first space.
-    var (nStr, rest, ok) = strings.Cut(s, " "u8);
+    var (nStr, rest, ok) = strings.Cut(s, " ");
     if (!ok) {
         return ("", "", s, ErrHeader);
     }
 
     // Parse the first token as a decimal integer.
     var (n, perr) = strconv.ParseInt(nStr, 10, 0); // Intentionally parse as native int
-    if (perr != default! || n < 5 || n > (int64)len(s)) {
+    if (perr != nil || n < 5 || n > (int64)len(s)) {
         return ("", "", s, ErrHeader);
     }
     n -= (int64)(len(nStr) + 1); // convert from index in s to index in rest
@@ -293,7 +293,7 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
     }
 
     // The first equals separates the key from the value.
-    (k, v, ok) = strings.Cut(rec, "="u8);
+    (k, v, ok) = strings.Cut(rec, "=");
     if (!ok) {
         return ("", "", s, ErrHeader);
     }
@@ -301,7 +301,7 @@ internal static (@string k, @string v, @string r, error err) parsePAXRecord(@str
     if (!validPAXRecord(k, v)) {
         return ("", "", s, ErrHeader);
     }
-    return (k, v, rem, default!);
+    return (k, v, rem, default);
 }
 
 // formatPAXRecord formats a single PAX record, prefixing it with the
@@ -321,7 +321,7 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
         size = len(record);
         record = strconv.Itoa(size) + " "u8 + k + "="u8 + v + "\n"u8;
     }
-    return (record, default!);
+    return (record, default);
 }
 
 // validPAXRecord reports whether the key-value pair is valid where each
@@ -335,16 +335,17 @@ internal static (@string, error) formatPAXRecord(@string k, @string v) {
 // for the PAX version of the USTAR string fields.
 // The key must not contain an '=' character.
 internal static bool validPAXRecord(@string k, @string v) {
-    if (k == ""u8 || strings.Contains(k, "="u8)) {
+    if (k == ""u8 || strings.Contains(k, "=")) {
         return false;
     }
     var exprᴛ1 = k;
-    if (exprᴛ1 == paxPath || exprᴛ1 == paxLinkpath || exprᴛ1 == paxUname || exprᴛ1 == paxGname) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == paxPath || exprᴛ1 == paxLinkpath || exprᴛ1 == paxUname || exprᴛ1 == paxGname: {
         return !hasNUL(v);
     }
-    { /* default: */
+    default: {
         return !hasNUL(k);
-    }
+    }}
 }
 
 } // end tar_package

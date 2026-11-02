@@ -22,26 +22,31 @@ public static ΔError ErrBase => 3;
 public static ΔError ErrBitSize => 4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string valueOutOfRangeˢ = "value out of range"u8;
-internal static readonly @string invalidSyntaxˢ = "invalid syntax"u8;
-internal static readonly @string invalidBaseˢ = "invalid base"u8;
-internal static readonly @string invalidBitSizeˢ = "invalid bit size"u8;
-internal static readonly @string unknownErrorˢ = "unknown error"u8;
+internal static ref readonly @string valueOutOfRangeˢ => ref valueOutOfRangeˢᵇ;
+private static readonly @string valueOutOfRangeˢᵇ = "value out of range"u8;
+internal static ref readonly @string invalidSyntaxˢ => ref invalidSyntaxˢᵇ;
+private static readonly @string invalidSyntaxˢᵇ = "invalid syntax"u8;
+internal static ref readonly @string invalidBaseˢ => ref invalidBaseˢᵇ;
+private static readonly @string invalidBaseˢᵇ = "invalid base"u8;
+internal static ref readonly @string invalidBitSizeˢ => ref invalidBitSizeˢᵇ;
+private static readonly @string invalidBitSizeˢᵇ = "invalid bit size"u8;
+internal static ref readonly @string unknownErrorˢ => ref unknownErrorˢᵇ;
+private static readonly @string unknownErrorˢᵇ = "unknown error"u8;
 
 public static @string Error(this ΔError e) {
-    var exprᴛ1 = e;
-    if (exprᴛ1 == ErrRange) {
+    switch (e) {
+    case var ᴛ when ᴛ == ErrRange: {
         return valueOutOfRangeˢ;
     }
-    if (exprᴛ1 == ErrSyntax) {
+    case var ᴛ when ᴛ == ErrSyntax: {
         return invalidSyntaxˢ;
     }
-    if (exprᴛ1 == ErrBase) {
+    case var ᴛ when ᴛ == ErrBase: {
         return invalidBaseˢ;
     }
-    if (exprᴛ1 == ErrBitSize) {
+    case var ᴛ when ᴛ == ErrBitSize: {
         return invalidBitSizeˢ;
-    }
+    }}
     return unknownErrorˢ;
 }
 
@@ -51,7 +56,8 @@ internal static UntypedInt intSize => /* 32 << (^uint(0) >> 63) */ 64;
 public static UntypedInt IntSize => /* intSize */ 64;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string fnParseUintᶜ = "ParseUint"u8;
+internal static ref readonly @string fnParseUintᶜ => ref fnParseUintᶜᵇ;
+private static readonly @string fnParseUintᶜᵇ = "ParseUint"u8;
 
 // ParseUint is like [ParseInt] but for unsigned numbers.
 //
@@ -74,19 +80,19 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     case {} when @base is 0: {
         // Look for octal, hex prefix.
         @base = 10;
-        if (s[0] == (rune)'0') {
+        if (s[0] == '0') {
             switch (ᐧ) {
-            case {} when len(s) >= 3 && lower(s[1]) == (rune)'b': {
+            case {} when len(s) >= 3 && lower(s[1]) == (byte)'b': {
                 @base = 2;
                 s = s[2..];
                 break;
             }
-            case {} when len(s) >= 3 && lower(s[1]) == (rune)'o': {
+            case {} when len(s) >= 3 && lower(s[1]) == (byte)'o': {
                 @base = 8;
                 s = s[2..];
                 break;
             }
-            case {} when len(s) >= 3 && lower(s[1]) == (rune)'x': {
+            case {} when len(s) >= 3 && lower(s[1]) == (byte)'x': {
                 @base = 16;
                 s = s[2..];
                 break;
@@ -103,16 +109,15 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
         return (0, ErrBase);
     }}
 
-    if (bitSize == 0){
+    if (bitSize == 0) {
         bitSize = IntSize;
-    } else 
-    if (bitSize < 0 || bitSize > 64) {
+    } else if (bitSize < 0 || bitSize > 64) {
         return (0, ErrBitSize);
     }
 
     // Cutoff is the smallest number such that cutoff*base > maxUint64.
     // Use compile-time constants for common cases.
-    uint64 cutoff = default!;
+    uint64 cutoff = default;
     switch (@base) {
     case 10: {
         cutoff = /* maxUint64/10 + 1 */ 1844674407370955162UL;
@@ -130,21 +135,21 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
     var maxVal = ((uint64)1).Lsh((nuint)bitSize) - 1;
 
     var underscores = false;
-    uint64 n = default!;
+    uint64 n = default;
     foreach (var (_, c) in slice<byte>(s)) {
-        byte d = default!;
+        byte d = default;
         switch (ᐧ) {
-        case {} when c == (rune)'_' && base0: {
+        case {} when c == (byte)'_' && base0: {
             underscores = true;
             continue;
             break;
         }
-        case {} when (rune)'0' <= c && c <= (rune)'9': {
-            d = (byte)(c - (rune)'0');
+        case {} when (byte)'0' <= c && c <= (byte)'9': {
+            d = (byte)(c - '0');
             break;
         }
-        case {} when (rune)'a' <= lower(c) && lower(c) <= (rune)'z': {
-            d = (byte)(lower(c) - (rune)'a' + 10);
+        case {} when (byte)'a' <= lower(c) && lower(c) <= (byte)'z': {
+            d = (byte)(lower(c) - 'a' + 10);
             break;
         }
         default: {
@@ -173,11 +178,12 @@ public static (uint64, error) ParseUint(@string s, nint @base, nint bitSize) {
         return (0, ErrSyntax);
     }
 
-    return (n, default!);
+    return (n, default);
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string fnParseIntᶜ = "ParseInt"u8;
+internal static ref readonly @string fnParseIntᶜ => ref fnParseIntᶜᵇ;
+private static readonly @string fnParseIntᶜᵇ = "ParseInt"u8;
 
 // ParseInt interprets a string s in the given base (0, 2 to 36) and
 // bit size (0 to 64) and returns the corresponding value i.
@@ -205,7 +211,7 @@ internal static readonly @string fnParseIntᶜ = "ParseInt"u8;
 //
 // [integer literals]: https://go.dev/ref/spec#Integer_literals
 public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize) {
-    error err = default!;
+    error err = default;
 
     @string fnParseInt = fnParseIntᶜ;
 
@@ -216,20 +222,20 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
     // Pick off leading sign.
     var neg = false;
     switch (s[0]) {
-    case (rune)'+': {
+    case (byte)'+': {
         s = s[1..];
         break;
     }
-    case (rune)'-': {
+    case (byte)'-': {
         s = s[1..];
         neg = true;
         break;
     }}
 
     // Convert unsigned and check range.
-    uint64 un = default!;
+    uint64 un = default;
     (un, err) = ParseUint(s, @base, bitSize);
-    if (err != default! && !AreEqual(err, ErrRange)) {
+    if (err != nil && !AreEqual(err, ErrRange)) {
         return (0, err);
     }
 
@@ -248,11 +254,12 @@ public static (int64 i, error err) ParseInt(@string s, nint @base, nint bitSize)
     if (neg) {
         n = -n;
     }
-    return (n, default!);
+    return (n, default);
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string fnAtoiᶜ = "Atoi"u8;
+internal static ref readonly @string fnAtoiᶜ => ref fnAtoiᶜᵇ;
+private static readonly @string fnAtoiᶜᵇ = "Atoi"u8;
 
 // Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
 public static (nint, error) Atoi(@string s) {
@@ -262,7 +269,7 @@ public static (nint, error) Atoi(@string s) {
     if (intSize == 32 && (0 < sLen && sLen < 10) || intSize == 64 && (0 < sLen && sLen < 19)) {
         // Fast path for small integers that fit int type.
         @string s0 = s;
-        if (s[0] == (rune)'-' || s[0] == (rune)'+') {
+        if (s[0] == '-' || s[0] == '+') {
             s = s[1..];
             if (len(s) < 1) {
                 return (0, ErrSyntax);
@@ -273,16 +280,16 @@ public static (nint, error) Atoi(@string s) {
         foreach (var (_, vᴛ1) in slice<byte>(s)) {
             var ch = vᴛ1;
 
-            ch -= (rune)'0';
+            ch -= (byte)'0';
             if (ch > 9) {
                 return (0, ErrSyntax);
             }
             n = n * 10 + (nint)ch;
         }
-        if (s0[0] == (rune)'-') {
+        if (s0[0] == '-') {
             n = -n;
         }
-        return (n, default!);
+        return (n, default);
     }
 
     // Slow path for invalid, big, or underscored integers.
@@ -303,41 +310,41 @@ internal static bool underscoreOK(@string s) {
     nint i = 0;
 
     // Optional sign.
-    if (len(s) >= 1 && (s[0] == (rune)'-' || s[0] == (rune)'+')) {
+    if (len(s) >= 1 && (s[0] == '-' || s[0] == '+')) {
         s = s[1..];
     }
 
     // Optional base prefix.
     var hex = false;
-    if (len(s) >= 2 && s[0] == (rune)'0' && (lower(s[1]) == (rune)'b' || lower(s[1]) == (rune)'o' || lower(s[1]) == (rune)'x')) {
+    if (len(s) >= 2 && s[0] == '0' && (lower(s[1]) == 'b' || lower(s[1]) == 'o' || lower(s[1]) == 'x')) {
         i = 2;
-        saw = (rune)'0'; // base prefix counts as a digit for "underscore as digit separator"
-        hex = lower(s[1]) == (rune)'x';
+        saw = '0'; // base prefix counts as a digit for "underscore as digit separator"
+        hex = lower(s[1]) == 'x';
     }
 
     // Number proper.
     for (; i < len(s); i++) {
         // Digits are always okay.
-        if ((rune)'0' <= s[i] && s[i] <= (rune)'9' || hex && (rune)'a' <= lower(s[i]) && lower(s[i]) <= (rune)'f') {
-            saw = (rune)'0';
+        if ('0' <= s[i] && s[i] <= '9' || hex && 'a' <= lower(s[i]) && lower(s[i]) <= 'f') {
+            saw = '0';
             continue;
         }
         // Underscore must follow digit.
-        if (s[i] == (rune)'_') {
-            if (saw != (rune)'0') {
+        if (s[i] == '_') {
+            if (saw != '0') {
                 return false;
             }
-            saw = (rune)'_';
+            saw = '_';
             continue;
         }
         // Underscore must also be followed by digit.
-        if (saw == (rune)'_') {
+        if (saw == '_') {
             return false;
         }
         // Saw non-digit, non-underscore.
-        saw = (rune)'!';
+        saw = '!';
     }
-    return saw != (rune)'_';
+    return saw != '_';
 }
 
 } // end strconv_package

@@ -29,13 +29,13 @@ partial struct mstats {
     // Protected by mheap or worldsema during GC.
     internal uint64 last_gc_unix; // last gc (in unix time)
     internal uint64 pause_total_ns;
-    internal array<uint64> pause_ns = new(256); // circular buffer of recent gc pause lengths
+    internal array<uint64> pause_ns = new(256);  // circular buffer of recent gc pause lengths
     internal array<uint64> pause_end = new(256); // circular buffer of recent gc end times (nanoseconds since 1970)
     internal uint32 numgc;
-    internal uint32 numforcedgc;  // number of user-forced GCs
+    internal uint32 numforcedgc;      // number of user-forced GCs
     internal float64 gc_cpu_fraction; // fraction of CPU time used by GC
     internal uint64 last_gc_nanotime; // last gc (monotonic time)
-    internal uint64 lastHeapInUse; // heapInUse at mark termination of the previous GC
+    internal uint64 lastHeapInUse;    // heapInUse at mark termination of the previous GC
     internal array<sizeClassScanStats> lastScanStats = new(gc.NumSizeClasses);
     internal bool enablegc;
 }
@@ -299,7 +299,7 @@ partial struct MemStats {
     {
         var offset = /* unsafe.Offsetof(memstats.heapStats) */ (uintptr)0; if (offset % 8 != 0) {
             println(offset);
-            @throw("memstats.heapStats not aligned to 8 bytes"u8);
+            @throw("memstats.heapStats not aligned to 8 bytes");
         }
     }
     // Ensure the size of heapStatsDelta causes adjacent fields/slots (e.g.
@@ -307,7 +307,7 @@ partial struct MemStats {
     {
         var size = /* unsafe.Sizeof(heapStatsDelta{}) */ (uintptr)1168; if (size % 8 != 0) {
             println(size);
-            @throw("heapStatsDelta not a multiple of 8 bytes in size"u8);
+            @throw("heapStatsDelta not a multiple of 8 bytes in size");
         }
     }
 }
@@ -321,12 +321,18 @@ internal static readonly ж<bool> ᏑdoubleCheckReadMemStats = new StaticBox<boo
 internal static ref bool doubleCheckReadMemStats => ref ((StaticBox<bool>)ᏑdoubleCheckReadMemStats).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string heapInUseAndConsistentˢ = "heapInUse and consistent stats are not equal"u8;
-internal static readonly @string heapReleasedAndˢ = "heapReleased and consistent stats are not equal"u8;
-internal static readonly @string measuresOfTheRetainedˢ = "measures of the retained heap are not equal"u8;
-internal static readonly @string totalAllocAndConsistentˢ = "totalAlloc and consistent stats are not equal"u8;
-internal static readonly @string totalFreeAndConsistentˢ = "totalFree and consistent stats are not equal"u8;
-internal static readonly @string mappedReadyAndOtherˢ = "mappedReady and other memstats are not equal"u8;
+internal static ref readonly @string heapInUseAndConsistentˢ => ref heapInUseAndConsistentˢᵇ;
+private static readonly @string heapInUseAndConsistentˢᵇ = "heapInUse and consistent stats are not equal"u8;
+internal static ref readonly @string heapReleasedAndˢ => ref heapReleasedAndˢᵇ;
+private static readonly @string heapReleasedAndˢᵇ = "heapReleased and consistent stats are not equal"u8;
+internal static ref readonly @string measuresOfTheRetainedˢ => ref measuresOfTheRetainedˢᵇ;
+private static readonly @string measuresOfTheRetainedˢᵇ = "measures of the retained heap are not equal"u8;
+internal static ref readonly @string totalAllocAndConsistentˢ => ref totalAllocAndConsistentˢᵇ;
+private static readonly @string totalAllocAndConsistentˢᵇ = "totalAlloc and consistent stats are not equal"u8;
+internal static ref readonly @string totalFreeAndConsistentˢ => ref totalFreeAndConsistentˢᵇ;
+private static readonly @string totalFreeAndConsistentˢᵇ = "totalFree and consistent stats are not equal"u8;
+internal static ref readonly @string mappedReadyAndOtherˢ => ref mappedReadyAndOtherˢᵇ;
+private static readonly @string mappedReadyAndOtherˢᵇ = "mappedReady and other memstats are not equal"u8;
 
 // readmemstats_m populates stats for internal runtime values.
 //
@@ -350,7 +356,7 @@ internal static void readmemstats_m(ref MemStats stats) {
 
     // Collect consistent stats, which are the source-of-truth in some cases.
     ref var consStats = ref heap(new heapStatsDelta(), out var ᏑconsStats);
-    Ꮡmemstats.of(mstats.ᏑheapStats).unsafeRead(ᏑconsStats);
+    Ꮡmemstats.ᏑheapStats.unsafeRead(ᏑconsStats);
 
     // Collect large allocation stats.
     var totalAlloc = consStats.largeAlloc;
@@ -390,7 +396,7 @@ internal static void readmemstats_m(ref MemStats stats) {
     var stackInUse = (uint64)consStats.inStacks;
     var gcWorkBufInUse = (uint64)consStats.inWorkBufs;
 
-    var totalMapped = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load() + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load() + Ꮡmemstats.of(mstats.Ꮡmspan_sys).load() + Ꮡmemstats.of(mstats.Ꮡmcache_sys).load() + Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load() + Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + Ꮡmemstats.of(mstats.Ꮡother_sys).load() + stackInUse + gcWorkBufInUse;
+    var totalMapped = ᏑgcController.ᏑheapInUse.load() + ᏑgcController.ᏑheapFree.load() + ᏑgcController.ᏑheapReleased.load() + Ꮡmemstats.Ꮡstacks_sys.load() + Ꮡmemstats.Ꮡmspan_sys.load() + Ꮡmemstats.Ꮡmcache_sys.load() + Ꮡmemstats.Ꮡbuckhash_sys.load() + Ꮡmemstats.ᏑgcMiscSys.load() + Ꮡmemstats.Ꮡother_sys.load() + stackInUse + gcWorkBufInUse;
 
     var heapGoal = ᏑgcController.heapGoal();
 
@@ -414,41 +420,41 @@ internal static void readmemstats_m(ref MemStats stats) {
         // act without synchronizing with a STW. See #64401.
         @lock(Ꮡsched.of(schedt.Ꮡsysmonlock));
         @lock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
-        if (ᏑgcController.of(gcControllerState.ᏑheapInUse).load() != (uint64)consStats.inHeap) {
-            print((@string)"runtime: heapInUse="u8, ᏑgcController.of(gcControllerState.ᏑheapInUse).load(), (@string)"\n"u8);
-            print((@string)"runtime: consistent value="u8, consStats.inHeap, (@string)"\n"u8);
+        if (ᏑgcController.ᏑheapInUse.load() != (uint64)consStats.inHeap) {
+            print((@string)"runtime: heapInUse=", ᏑgcController.ᏑheapInUse.load(), (@string)"\n");
+            print((@string)"runtime: consistent value=", consStats.inHeap, (@string)"\n");
             @throw(heapInUseAndConsistentˢ);
         }
-        if (ᏑgcController.of(gcControllerState.ᏑheapReleased).load() != (uint64)consStats.released) {
-            print((@string)"runtime: heapReleased="u8, ᏑgcController.of(gcControllerState.ᏑheapReleased).load(), (@string)"\n"u8);
-            print((@string)"runtime: consistent value="u8, consStats.released, (@string)"\n"u8);
+        if (ᏑgcController.ᏑheapReleased.load() != (uint64)consStats.released) {
+            print((@string)"runtime: heapReleased=", ᏑgcController.ᏑheapReleased.load(), (@string)"\n");
+            print((@string)"runtime: consistent value=", consStats.released, (@string)"\n");
             @throw(heapReleasedAndˢ);
         }
-        var heapRetained = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load();
+        var heapRetained = ᏑgcController.ᏑheapInUse.load() + ᏑgcController.ᏑheapFree.load();
         var consRetained = (uint64)(consStats.committed - consStats.inStacks - consStats.inWorkBufs);
         if (heapRetained != consRetained) {
-            print((@string)"runtime: global value="u8, heapRetained, (@string)"\n"u8);
-            print((@string)"runtime: consistent value="u8, consRetained, (@string)"\n"u8);
+            print((@string)"runtime: global value=", heapRetained, (@string)"\n");
+            print((@string)"runtime: consistent value=", consRetained, (@string)"\n");
             @throw(measuresOfTheRetainedˢ);
         }
-        if (ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Load() != totalAlloc) {
-            print((@string)"runtime: totalAlloc="u8, ᏑgcController.of(gcControllerState.ᏑtotalAlloc).Load(), (@string)"\n"u8);
-            print((@string)"runtime: consistent value="u8, totalAlloc, (@string)"\n"u8);
+        if (ᏑgcController.ᏑtotalAlloc.Load() != totalAlloc) {
+            print((@string)"runtime: totalAlloc=", ᏑgcController.ᏑtotalAlloc.Load(), (@string)"\n");
+            print((@string)"runtime: consistent value=", totalAlloc, (@string)"\n");
             @throw(totalAllocAndConsistentˢ);
         }
-        if (ᏑgcController.of(gcControllerState.ᏑtotalFree).Load() != totalFree) {
-            print((@string)"runtime: totalFree="u8, ᏑgcController.of(gcControllerState.ᏑtotalFree).Load(), (@string)"\n"u8);
-            print((@string)"runtime: consistent value="u8, totalFree, (@string)"\n"u8);
+        if (ᏑgcController.ᏑtotalFree.Load() != totalFree) {
+            print((@string)"runtime: totalFree=", ᏑgcController.ᏑtotalFree.Load(), (@string)"\n");
+            print((@string)"runtime: consistent value=", totalFree, (@string)"\n");
             @throw(totalFreeAndConsistentˢ);
         }
         // Also check that mappedReady lines up with totalMapped - released.
         // This isn't really the same type of "make sure consistent stats line up" situation,
         // but this is an opportune time to check.
-        if (ᏑgcController.of(gcControllerState.ᏑmappedReady).Load() != totalMapped - (uint64)consStats.released) {
-            print((@string)"runtime: mappedReady="u8, ᏑgcController.of(gcControllerState.ᏑmappedReady).Load(), (@string)"\n"u8);
-            print((@string)"runtime: totalMapped="u8, totalMapped, (@string)"\n"u8);
-            print((@string)"runtime: released="u8, (uint64)consStats.released, (@string)"\n"u8);
-            print((@string)"runtime: totalMapped-released="u8, totalMapped - (uint64)consStats.released, (@string)"\n"u8);
+        if (ᏑgcController.ᏑmappedReady.Load() != totalMapped - (uint64)consStats.released) {
+            print((@string)"runtime: mappedReady=", ᏑgcController.ᏑmappedReady.Load(), (@string)"\n");
+            print((@string)"runtime: totalMapped=", totalMapped, (@string)"\n");
+            print((@string)"runtime: released=", (uint64)consStats.released, (@string)"\n");
+            print((@string)"runtime: totalMapped-released=", totalMapped - (uint64)consStats.released, (@string)"\n");
             @throw(mappedReadyAndOtherˢ);
         }
         unlock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
@@ -463,7 +469,7 @@ internal static void readmemstats_m(ref MemStats stats) {
     stats.Mallocs = nMalloc;
     stats.Frees = nFree;
     stats.HeapAlloc = totalAlloc - totalFree;
-    stats.HeapSys = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
+    stats.HeapSys = ᏑgcController.ᏑheapInUse.load() + ᏑgcController.ᏑheapFree.load() + ᏑgcController.ᏑheapReleased.load();
     // By definition, HeapIdle is memory that was mapped
     // for the heap but is not currently used to hold heap
     // objects. It also specifically is memory that can be
@@ -480,24 +486,24 @@ internal static void readmemstats_m(ref MemStats stats) {
     // HeapIdle = sys - stacks_inuse - gcWorkBufInUse - heapInUse
     //
     // => HeapIdle = HeapSys - heapInUse = heapFree + heapReleased
-    stats.HeapIdle = ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
-    stats.HeapInuse = ᏑgcController.of(gcControllerState.ᏑheapInUse).load();
-    stats.HeapReleased = ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
+    stats.HeapIdle = ᏑgcController.ᏑheapFree.load() + ᏑgcController.ᏑheapReleased.load();
+    stats.HeapInuse = ᏑgcController.ᏑheapInUse.load();
+    stats.HeapReleased = ᏑgcController.ᏑheapReleased.load();
     stats.HeapObjects = nMalloc - nFree;
     stats.StackInuse = stackInUse;
     // memstats.stacks_sys is only memory mapped directly for OS stacks.
     // Add in heap-allocated stack memory for user consumption.
-    stats.StackSys = stackInUse + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load();
+    stats.StackSys = stackInUse + Ꮡmemstats.Ꮡstacks_sys.load();
     stats.MSpanInuse = (uint64)mheap_.spanalloc.inuse;
-    stats.MSpanSys = Ꮡmemstats.of(mstats.Ꮡmspan_sys).load();
+    stats.MSpanSys = Ꮡmemstats.Ꮡmspan_sys.load();
     stats.MCacheInuse = (uint64)mheap_.cachealloc.inuse;
-    stats.MCacheSys = Ꮡmemstats.of(mstats.Ꮡmcache_sys).load();
-    stats.BuckHashSys = Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load();
+    stats.MCacheSys = Ꮡmemstats.Ꮡmcache_sys.load();
+    stats.BuckHashSys = Ꮡmemstats.Ꮡbuckhash_sys.load();
     // MemStats defines GCSys as an aggregate of all memory related
     // to the memory management system, but we track this memory
     // at a more granular level in the runtime.
-    stats.GCSys = Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + gcWorkBufInUse;
-    stats.OtherSys = Ꮡmemstats.of(mstats.Ꮡother_sys).load();
+    stats.GCSys = Ꮡmemstats.ᏑgcMiscSys.load() + gcWorkBufInUse;
+    stats.OtherSys = Ꮡmemstats.Ꮡother_sys.load();
     stats.NextGC = heapGoal;
     stats.LastGC = memstats.last_gc_unix;
     stats.PauseTotalNs = memstats.pause_total_ns;
@@ -516,14 +522,15 @@ internal static void readmemstats_m(ref MemStats stats) {
 }
 
 //go:linkname readGCStats runtime/debug.readGCStats
-internal static void readGCStats(ж<slice<uint64>> Ꮡpauses) {
+internal static void readGCStats(ж<slice<uint64>> pauses) {
     systemstack(() => {
-        readGCStats_m(ref (Ꮡpauses).DerefOrNull());
+        readGCStats_m(ref (pauses).DerefOrNull());
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string shortSlicePassedToˢ = "short slice passed to readGCStats"u8;
+internal static ref readonly @string shortSlicePassedToˢ => ref shortSlicePassedToˢᵇ;
+private static readonly @string shortSlicePassedToˢᵇ = "short slice passed to readGCStats"u8;
 
 // readGCStats_m must be called on the system stack because it acquires the heap
 // lock. See mheap for details.
@@ -537,7 +544,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     }
 
     // Pass back: pauses, pause ends, last gc (absolute time), number of gc, total pause ns.
-    @lock(Ꮡmheap_.of(mheap.Ꮡlock));
+    @lock(Ꮡmheap_.Ꮡlock);
 
     var n = memstats.numgc;
     if (n > (uint32)len(memstats.pause_ns)) {
@@ -558,7 +565,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     Δp[n + n] = memstats.last_gc_unix;
     Δp[n + n + 1] = (uint64)memstats.numgc;
     Δp[n + n + 2] = memstats.pause_total_ns;
-    unlock(Ꮡmheap_.of(mheap.Ꮡlock));
+    unlock(Ꮡmheap_.Ꮡlock);
     pauses = Δp.slice(0, (nint)(n + n + 3));
 }
 
@@ -596,7 +603,8 @@ internal static uint64 load(this ж<sysMemStat> Ꮡs) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sysMemStatOverflowˢ = "sysMemStat overflow"u8;
+internal static ref readonly @string sysMemStatOverflowˢ => ref sysMemStatOverflowˢᵇ;
+private static readonly @string sysMemStatOverflowˢᵇ = "sysMemStat overflow"u8;
 
 // add atomically adds the sysMemStat by n.
 //
@@ -606,7 +614,7 @@ internal static readonly @string sysMemStatOverflowˢ = "sysMemStat overflow"u8;
 internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
     var val = atomic.Xadd64(Ꮡs.Reinterpret<sysMemStat, uint64>(), n);
     if ((n > 0 && (int64)val < n) || (n < 0 && (int64)val + n < n)) {
-        print((@string)"runtime: val="u8, val, (@string)" n="u8, n, (@string)"\n"u8);
+        print((@string)"runtime: val=", val, (@string)" n=", n, (@string)"\n");
         @throw(sysMemStatOverflowˢ);
     }
 }
@@ -616,22 +624,22 @@ internal static void add(this ж<sysMemStat> Ꮡs, int64 n) {
 // consistent with one another.
 partial struct heapStatsDelta {
     // Memory stats.
-    internal int64 committed; // byte delta of memory committed
-    internal int64 released; // byte delta of released memory generated
-    internal int64 inHeap; // byte delta of memory placed in the heap
-    internal int64 inStacks; // byte delta of memory reserved for stacks
+    internal int64 committed;  // byte delta of memory committed
+    internal int64 released;   // byte delta of released memory generated
+    internal int64 inHeap;     // byte delta of memory placed in the heap
+    internal int64 inStacks;   // byte delta of memory reserved for stacks
     internal int64 inWorkBufs; // byte delta of memory reserved for work bufs
     // Allocator stats.
     //
     // These are all uint64 because they're cumulative, and could quickly wrap
     // around otherwise.
-    internal uint64 tinyAllocCount;                    // number of tiny allocations
-    internal uint64 largeAlloc;                    // bytes allocated for large objects
-    internal uint64 largeAllocCount;                    // number of large object allocations
+    internal uint64 tinyAllocCount;                                  // number of tiny allocations
+    internal uint64 largeAlloc;                                      // bytes allocated for large objects
+    internal uint64 largeAllocCount;                                 // number of large object allocations
     internal array<uint64> smallAllocCount = new(gc.NumSizeClasses); // number of allocs for small objects
-    internal uint64 largeFree;                    // bytes freed for large objects (>maxSmallSize)
-    internal uint64 largeFreeCount;                    // number of frees for large objects (>maxSmallSize)
-    internal array<uint64> smallFreeCount = new(gc.NumSizeClasses); // number of frees for small objects (<=maxSmallSize)
+    internal uint64 largeFree;                                       // bytes freed for large objects (>maxSmallSize)
+    internal uint64 largeFreeCount;                                  // number of frees for large objects (>maxSmallSize)
+    internal array<uint64> smallFreeCount = new(gc.NumSizeClasses);  // number of frees for small objects (<=maxSmallSize)
 }
 
 // NOTE: This struct must be a multiple of 8 bytes in size because it
@@ -703,7 +711,8 @@ partial struct consistentHeapStats {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badSequenceNumberˢ = "bad sequence number"u8;
+internal static ref readonly @string badSequenceNumberˢ => ref badSequenceNumberˢᵇ;
+private static readonly @string badSequenceNumberˢᵇ = "bad sequence number"u8;
 
 // acquire returns a heapStatsDelta to be updated. In effect,
 // it acquires the shard for writing. release must be called
@@ -726,18 +735,18 @@ internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     {
-        var pp = (~(~getg()).m).p.ptr(); if (pp != nil){
+        var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
             var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
             if (seq % 2 == 0) {
                 // Should have been incremented to odd.
-                print((@string)"runtime: seq="u8, seq, (@string)"\n"u8);
+                print((@string)"runtime: seq=", seq, (@string)"\n");
                 @throw(badSequenceNumberˢ);
             }
         } else {
-            @lock(Ꮡm.of(consistentHeapStats.ᏑnoPLock));
+            @lock(Ꮡm.ᏑnoPLock);
         }
     }
-    var gen = Ꮡm.of(consistentHeapStats.Ꮡgen).Load() % 3;
+    var gen = Ꮡm.Ꮡgen.Load() % 3;
     return Ꮡ(m.stats, gen);
 }
 
@@ -759,15 +768,15 @@ internal static void release(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     {
-        var pp = (~(~getg()).m).p.ptr(); if (pp != nil){
+        var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
             var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
             if (seq % 2 != 0) {
                 // Should have been incremented to even.
-                print((@string)"runtime: seq="u8, seq, (@string)"\n"u8);
+                print((@string)"runtime: seq=", seq, (@string)"\n");
                 @throw(badSequenceNumberˢ);
             }
         } else {
-            unlock(Ꮡm.of(consistentHeapStats.ᏑnoPLock));
+            unlock(Ꮡm.ᏑnoPLock);
         }
     }
 }
@@ -803,13 +812,13 @@ partial struct cpuStats {
 // calls of nanotime. This means they're all overestimates, because
 // they don't accurately compute on-CPU time (so some of the time
 // could be spent scheduled away by the OS).
-    public int64 GCAssistTime; // GC assists
+    public int64 GCAssistTime;    // GC assists
     public int64 GCDedicatedTime; // GC dedicated mark workers + pauses
-    public int64 GCIdleTime; // GC idle mark workers
-    public int64 GCPauseTime; // GC pauses (all GOMAXPROCS, even if just 1 is running)
+    public int64 GCIdleTime;      // GC idle mark workers
+    public int64 GCPauseTime;     // GC pauses (all GOMAXPROCS, even if just 1 is running)
     public int64 GCTotalTime;
     public int64 ScavengeAssistTime; // background scavenger
-    public int64 ScavengeBgTime; // scavenge assists
+    public int64 ScavengeBgTime;     // scavenge assists
     public int64 ScavengeTotalTime;
     public int64 IdleTime; // Time Ps spent in _Pidle.
     public int64 UserTime; // Time Ps spent in _Prunning that's not any of the above.
@@ -834,17 +843,17 @@ internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 
 internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase) {
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
-    int64 markAssistCpu = default!;
-    int64 markDedicatedCpu = default!;
-    int64 markFractionalCpu = default!;
-    int64 markIdleCpu = default!;
+    int64 markAssistCpu = default;
+    int64 markDedicatedCpu = default;
+    int64 markFractionalCpu = default;
+    int64 markIdleCpu = default;
     if (gcMarkPhase) {
         // N.B. These stats may have stale values if the GC is not
         // currently in the mark phase.
-        markAssistCpu = ᏑgcController.of(gcControllerState.ᏑassistTime).Load();
-        markDedicatedCpu = ᏑgcController.of(gcControllerState.ᏑdedicatedMarkTime).Load();
-        markFractionalCpu = ᏑgcController.of(gcControllerState.ᏑfractionalMarkTime).Load();
-        markIdleCpu = ᏑgcController.of(gcControllerState.ᏑidleMarkTime).Load();
+        markAssistCpu = ᏑgcController.ᏑassistTime.Load();
+        markDedicatedCpu = ᏑgcController.ᏑdedicatedMarkTime.Load();
+        markFractionalCpu = ᏑgcController.ᏑfractionalMarkTime.Load();
+        markIdleCpu = ᏑgcController.ᏑidleMarkTime.Load();
     }
 
     // The rest of the stats below are either derived from the above or

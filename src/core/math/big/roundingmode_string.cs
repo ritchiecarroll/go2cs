@@ -17,13 +17,14 @@ internal static void _ᴛ7() {
     _ = x[ToPositiveInf - 5];
 }
 
-internal static readonly @string _RoundingMode_name = "ToNearestEvenToNearestAwayToZeroAwayFromZeroToNegativeInfToPositiveInf"u8;
+internal static ref readonly @string _RoundingMode_name => ref _RoundingMode_nameᵇ;
+private static readonly @string _RoundingMode_nameᵇ = "ToNearestEvenToNearestAwayToZeroAwayFromZeroToNegativeInfToPositiveInf"u8;
 
 internal static array<uint8> _RoundingMode_index = new uint8[]{0, 13, 26, 32, 44, 57, 70}.array();
 
 public static @string String(this RoundingMode i) {
     if (i >= ((RoundingMode)(byte)(len(_RoundingMode_index) - 1))) {
-        return "RoundingMode("u8 + strconv.FormatInt((int64)(byte)i, 10) + ")"u8;
+        return "RoundingMode("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RoundingMode_name.slice(_RoundingMode_index[i], _RoundingMode_index[i + 1]);
 }

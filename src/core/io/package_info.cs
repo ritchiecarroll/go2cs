@@ -74,7 +74,16 @@ using static go.io_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(LimitedReader))]
+[assembly: GoFieldAccess(typeof(PipeReader))]
+[assembly: GoFieldAccess(typeof(PipeWriter))]
+[assembly: GoFieldAccess(typeof(multiReader))]
+[assembly: GoFieldAccess(typeof(multiWriter))]
+[assembly: GoFieldAccess(typeof(pipe))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -84,9 +93,9 @@ using static go.io_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoCCpAACFgALAoKUgoKClIKSgpQAAhTyAAISAAkCgoKUlJQAAh4ADAIAAhTygpSq9oCCtoCCpIKCgIKClLaUgoKCgoKCgqaCgoKUgoKmgoKUpqywAAsWsoKUgpSCgqqigoKCuJQADBqygpSAgqSCgqaSlIKYpKSrAAEQgpSCprKClIKAgoKCgpSkqJCswgAJGKKmsoKCpoKCpoKmgpikp5yClIIAAhDSAAcQsoKCgIK2yuyUgqaCppSCyLKCgoKCgoKCgpQABBLCgIKk7oDsgKSCrgAIBsqChJKCgoKCgpSCuIKCgpSCppSCgoI=")]
-[assembly: go.GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKAgoK2gqaClIKUlKamgqaygoKAgpSkgoKClJSCppzigoLusoKCgpSCgqamlLKCgoCClIKUpIKUgoKmAAISAAgCgoKAgpS2")]
-[assembly: go.GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiotKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKAgqSokoKAgqQABxbSqqIAAhDSAAcW0qqiAAIS4gACJAAPAuo=", "72-72:1;103-103:1")]
+[assembly: GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoCCpAACFgALAoKUgoKClIKCgpQAAhTyAAISAAkCgoKUlJQAAh4ADAIAAhTygpSq9oCCtoCCpIKCgIKClLaUgoKCgoKCgqaCgoKUgoKmgoKUpqywAAsWsoKUgpSCgqqigoKCuJQADBqygpSAgqSCgqaSlIKUpLS0pIKUgqaygpSCgIKCgoKUpKiQrMIACRiiprKCgqaCgqaCpoKUpLSkgpSCAAIQ0gAHELKCgoCCtsrslIKmgqaUgsiygoKCgoKCgoKUAAQSwoCCpO6A7ICkgq4ACAbKgoSSgoKCgoKUgriCgoKUgqaUgoKC")]
+[assembly: GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKAgoK2gqaClIKUlKamgqaygoKAgpSkgoKClJSCppzigoLusoKCgpSCgqamlLKCgoCClIKUpIKUgoKmAAISAAgCgoKAgpS2")]
+[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiotKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKAgqSokoKAgqQABxbSqqIAAhDSAAcW0qqiAAIS4gACJAAPAuo=", "72-72:1;103-103:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

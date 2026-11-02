@@ -10,11 +10,11 @@ partial class syscall_package {
 
 public static (@string value, bool found) Getenv(@string key) {
     var (keyp, err) = UTF16PtrFromString(key);
-    if (err != default!) {
+    if (err != nil) {
         return ("", false);
     }
     var n = (uint32)100;
-    while (ᐧ) {
+    for (;;) {
         var b = new slice<uint16>((nint)(n));
         (n, err) = GetEnvironmentVariable(keyp, Ꮡ(b, 0), (uint32)len(b));
         if (n == 0 && AreEqual(err, ERROR_ENVVAR_NOT_FOUND)) {
@@ -28,32 +28,32 @@ public static (@string value, bool found) Getenv(@string key) {
 
 public static error Setenv(@string key, @string value) {
     var (v, err) = UTF16PtrFromString(value);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (var keyp, err) = UTF16PtrFromString(key);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var e = SetEnvironmentVariable(keyp, v);
-    if (e != default!) {
+    if (e != nil) {
         return e;
     }
     runtimeSetenv(key, value);
-    return default!;
+    return default;
 }
 
 public static error Unsetenv(@string key) {
     var (keyp, err) = UTF16PtrFromString(key);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var e = SetEnvironmentVariable(keyp, nil);
-    if (e != default!) {
+    if (e != nil) {
         return e;
     }
     runtimeUnsetenv(key);
-    return default!;
+    return default;
 }
 
 public static void Clearenv() {
@@ -62,7 +62,7 @@ public static void Clearenv() {
         // so start looking for the separator = at j=1.
         // https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133
         for (nint j = 1; j < len(s); j++) {
-            if (s[j] == (rune)'=') {
+            if (s[j] == '=') {
                 Unsetenv(s.slice(0, j));
                 break;
             }
@@ -74,8 +74,8 @@ public static slice<@string> Environ() {
     GoFrame ᒐ = default;
     try {
         var (envp, e) = GetEnvironmentStrings();
-        if (e != default!) {
-            return default!;
+        if (e != nil) {
+            return default;
         }
         defer(FreeEnvironmentStrings, envp, ref ᒐ);
 
@@ -94,7 +94,7 @@ public static slice<@string> Environ() {
         }
         return r;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

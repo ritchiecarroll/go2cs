@@ -13,12 +13,14 @@ using static global::go.@internal.fuzz_package;
 partial class fuzz_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goTestFuzzV1Int1Uintˢ = """
+internal static ref readonly @string goTestFuzzV1Int1Uintˢ => ref goTestFuzzV1Int1Uintˢᵇ;
+private static readonly @string goTestFuzzV1Int1Uintˢᵇ = """
 go test fuzz v1
 int(-1)
 uint(4294967295)
 """u8.Raw();
-internal static readonly @string goTestFuzzV1Intˢ = """
+internal static ref readonly @string goTestFuzzV1Intˢ => ref goTestFuzzV1Intˢᵇ;
+private static readonly @string goTestFuzzV1Intˢᵇ = """
 go test fuzz v1
 int(9223372036854775807)
 uint(18446744073709551615)
@@ -32,15 +34,15 @@ internal partial struct TestUnmarshalMarshal_type /*dyn*/ {
     internal @string want; // if different from in
 }
 
-public static void TestUnmarshalMarshal(ж<testing.T> Ꮡt) {
-    slice<TestUnmarshalMarshal_type> tests = new TestUnmarshalMarshal_type[]{
+public static void TestUnmarshalMarshal(ж<testing.T> t) {
+    slice<TestUnmarshalMarshal_type> tests = slice<TestUnmarshalMarshal_type>([
         new(
-            desc: "missing version"u8,
-            @in: "int(1234)"u8,
+            desc: "missing version",
+            @in: "int(1234)",
             reject: true
         ),
         new(
-            desc: "malformed string"u8,
+            desc: "malformed string",
             @in: """
 go test fuzz v1
 string("a"bcad")
@@ -48,7 +50,7 @@ string("a"bcad")
             reject: true
         ),
         new(
-            desc: "empty value"u8,
+            desc: "empty value",
             @in: """
 go test fuzz v1
 int()
@@ -56,7 +58,7 @@ int()
             reject: true
         ),
         new(
-            desc: "negative uint"u8,
+            desc: "negative uint",
             @in: """
 go test fuzz v1
 uint(-32)
@@ -64,7 +66,7 @@ uint(-32)
             reject: true
         ),
         new(
-            desc: "int8 too large"u8,
+            desc: "int8 too large",
             @in: """
 go test fuzz v1
 int8(1234456)
@@ -72,7 +74,7 @@ int8(1234456)
             reject: true
         ),
         new(
-            desc: "multiplication in int value"u8,
+            desc: "multiplication in int value",
             @in: """
 go test fuzz v1
 int(20*5)
@@ -80,7 +82,7 @@ int(20*5)
             reject: true
         ),
         new(
-            desc: "double negation"u8,
+            desc: "double negation",
             @in: """
 go test fuzz v1
 int(--5)
@@ -88,7 +90,7 @@ int(--5)
             reject: true
         ),
         new(
-            desc: "malformed bool"u8,
+            desc: "malformed bool",
             @in: """
 go test fuzz v1
 bool(0)
@@ -96,7 +98,7 @@ bool(0)
             reject: true
         ),
         new(
-            desc: "malformed byte"u8,
+            desc: "malformed byte",
             @in: """
 go test fuzz v1
 byte('aa)
@@ -104,7 +106,7 @@ byte('aa)
             reject: true
         ),
         new(
-            desc: "byte out of range"u8,
+            desc: "byte out of range",
             @in: """
 go test fuzz v1
 byte('☃')
@@ -112,7 +114,7 @@ byte('☃')
             reject: true
         ),
         new(
-            desc: "extra newline"u8,
+            desc: "extra newline",
             @in: """
 go test fuzz v1
 string("has extra newline")
@@ -124,7 +126,7 @@ string("has extra newline")
 """u8.Raw()
         ),
         new(
-            desc: "trailing spaces"u8,
+            desc: "trailing spaces",
             @in: """
 go test fuzz v1
 string("extra")
@@ -138,7 +140,7 @@ string("extra")
 """u8.Raw()
         ),
         new(
-            desc: "float types"u8,
+            desc: "float types",
             @in: """
 go test fuzz v1
 float64(0)
@@ -146,7 +148,7 @@ float32(0)
 """u8.Raw()
         ),
         new(
-            desc: "various types"u8,
+            desc: "various types",
             @in: """
 go test fuzz v1
 int(-23)
@@ -168,7 +170,7 @@ float32(2.5)
 """u8.Raw()
         ),
         new(
-            desc: "float edge cases"u8,
+            desc: "float edge cases",
             // The two IEEE 754 bit patterns used for the math.Float{64,32}frombits
             // encodings are non-math.NAN quiet-NaN values. Since they are not equal
             // to math.NaN(), they should be re-encoded to their bit patterns. They
@@ -190,7 +192,7 @@ math.Float32frombits(0x7fc00001)
 """u8.Raw()
         ),
         new(
-            desc: "int variations"u8,
+            desc: "int variations",
             // Although we arbitrarily choose default integer bases (0 or 16), we may
             // want to change those arbitrary choices in the future and should not
             // break the parser. Verify that integers in the opposite bases still
@@ -227,7 +229,7 @@ math.Float32frombits(0x7fc00001)
 """u8.Raw()
         ),
         new(
-            desc: "rune validation"u8,
+            desc: "rune validation",
             @in: """
 go test fuzz v1
 rune(0)
@@ -251,49 +253,50 @@ int32(1114112)
 """u8.Raw()
         ),
         new(
-            desc: "int overflow"u8,
+            desc: "int overflow",
             @in: """
 go test fuzz v1
 int(0x7fffffffffffffff)
 uint(0xffffffffffffffff)
 """u8.Raw(),
-            want: ((Func<@string>)(() => {
-                var exprᴛ1 = strconv.IntSize;
-                if (exprᴛ1 == 32) {
+            want: func(@string () => {
+                switch (strconv.IntSize) {
+                case var ᴛ when ᴛ == 32: {
                     return goTestFuzzV1Int1Uintˢ;
                 }
-                if (exprᴛ1 == 64) {
+                case var ᴛ when ᴛ == 64: {
                     return goTestFuzzV1Intˢ;
                 }
-                { /* default: */
+                default: {
                     throw panic("unreachable");
-                }
-            }))()
+                    break;
+                }}
+            })()
         ),
         new(
-            desc: "windows new line"u8,
-            @in: "go test fuzz v1\r\nint(0)\r\n"u8,
-            want: "go test fuzz v1\nint(0)"u8
+            desc: "windows new line",
+            @in: "go test fuzz v1\r\nint(0)\r\n",
+            want: "go test fuzz v1\nint(0)"
         )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestUnmarshalMarshal_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.desc, (ж<testing.T> tΔ1) => {
+        t.Run(test.desc, (ж<testing.T> tΔ1) => {
             var (vals, err) = unmarshalCorpusFile(slice<byte>(testʗ1.@in));
             if (testʗ1.reject) {
-                if (err == default!) {
-                    tΔ1.Fatalf("unmarshal unexpected success"u8);
+                if (err == nil) {
+                    tΔ1.Fatalf("unmarshal unexpected success");
                 }
                 return;
             }
-            if (err != default!) {
-                tΔ1.Fatalf("unmarshal unexpected error: %v"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("unmarshal unexpected error: %v", err);
             }
             var newB = marshalCorpusFile(vals.ꓸꓸꓸ);
-            if (newB[len(newB) - 1] != (rune)'\n') {
+            if (newB[len(newB) - 1] != '\n') {
                 tΔ1.Error(didnTWriteFinalNewlineToˢ);
             }
 
@@ -304,7 +307,7 @@ uint(0xffffffffffffffff)
             want += "\n"u8;
             @string got = (@string)newB;
             if (got != want) {
-                tΔ1.Errorf("unexpected marshaled value\ngot:\n%s\nwant:\n%s"u8, got, want);
+                tΔ1.Errorf("unexpected marshaled value\ngot:\n%s\nwant:\n%s", got, want);
             }
         });
     }
@@ -313,16 +316,16 @@ uint(0xffffffffffffffff)
 // BenchmarkMarshalCorpusFile measures the time it takes to serialize byte
 // slices of various sizes to a corpus file. The slice contains a repeating
 // sequence of bytes 0-255 to mix escaped and non-escaped characters.
-public static void BenchmarkMarshalCorpusFile(ж<testing.B> Ꮡb) {
+public static void BenchmarkMarshalCorpusFile(ж<testing.B> b) {
     var buf = new slice<byte>(1024 * 1024);
     for (nint i = 0; i < len(buf); i++) {
         buf[i] = (byte)i;
     }
 
-    for (nint szᴛ1 = 1; szᴛ1 <= len(buf); szᴛ1 <<= (int)(1)) {
+    for (nint szᴛ1 = 1; szᴛ1 <= len(buf); szᴛ1 <<= 1) {
         var sz = szᴛ1;
         var bufʗ1 = buf;
-        Ꮡb.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
+        b.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 bΔ1.SetBytes((int64)sz);
                 marshalCorpusFile(bufʗ1.slice(0, sz));
@@ -334,17 +337,17 @@ public static void BenchmarkMarshalCorpusFile(ж<testing.B> Ꮡb) {
 // BenchmarkUnmarshalCorpusfile measures the time it takes to deserialize
 // files encoding byte slices of various sizes. The slice contains a repeating
 // sequence of bytes 0-255 to mix escaped and non-escaped characters.
-public static void BenchmarkUnmarshalCorpusFile(ж<testing.B> Ꮡb) {
+public static void BenchmarkUnmarshalCorpusFile(ж<testing.B> b) {
     var buf = new slice<byte>(1024 * 1024);
     for (nint i = 0; i < len(buf); i++) {
         buf[i] = (byte)i;
     }
 
-    for (nint szᴛ1 = 1; szᴛ1 <= len(buf); szᴛ1 <<= (int)(1)) {
+    for (nint szᴛ1 = 1; szᴛ1 <= len(buf); szᴛ1 <<= 1) {
         var sz = szᴛ1;
         var data = marshalCorpusFile(buf.slice(0, sz));
         var dataʗ1 = data;
-        Ꮡb.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
+        b.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 bΔ1.SetBytes((int64)sz);
                 unmarshalCorpusFile(dataʗ1);
@@ -353,32 +356,32 @@ public static void BenchmarkUnmarshalCorpusFile(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestByteRoundTrip(ж<testing.T> Ꮡt) {
+public static void TestByteRoundTrip(ж<testing.T> t) {
     for (nint x = 0; x < 256; x++) {
         var b1 = (byte)x;
         var buf = marshalCorpusFile(b1);
         var (vs, err) = unmarshalCorpusFile(buf);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var b2 = vs[0]._<byte>();
         if (b2 != b1) {
-            Ꮡt.Fatalf("unmarshaled %v, want %v:\n%s"u8, b2, b1, buf);
+            t.Fatalf("unmarshaled %v, want %v:\n%s", b2, b1, buf);
         }
     }
 }
 
-public static void TestInt8RoundTrip(ж<testing.T> Ꮡt) {
+public static void TestInt8RoundTrip(ж<testing.T> t) {
     for (nint x = -128; x < 128; x++) {
         var i1 = (int8)x;
         var buf = marshalCorpusFile(i1);
         var (vs, err) = unmarshalCorpusFile(buf);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var i2 = vs[0]._<int8>();
         if (i2 != i1) {
-            Ꮡt.Fatalf("unmarshaled %v, want %v:\n%s"u8, i2, i1, buf);
+            t.Fatalf("unmarshaled %v, want %v:\n%s", i2, i1, buf);
         }
     }
 }
@@ -399,19 +402,19 @@ public static void FuzzFloat64RoundTrip(ж<testing.F> Ꮡf) {
         var x1 = math.Float64frombits(u1);
 
         var b = marshalCorpusFile(x1);
-        t.Logf("marshaled math.Float64frombits(0x%x):\n%s"u8, u1, b);
+        t.Logf("marshaled math.Float64frombits(0x%x):\n%s", u1, b);
 
         var (xs, err) = unmarshalCorpusFile(b);
-        if (err != default!) {
+        if (err != nil) {
             t.Fatal(err);
         }
         if (len(xs) != 1) {
-            t.Fatalf("unmarshaled %d values"u8, len(xs));
+            t.Fatalf("unmarshaled %d values", len(xs));
         }
         var x2 = xs[0]._<float64>();
         var u2 = math.Float64bits(x2);
         if (u2 != u1) {
-            t.Errorf("unmarshaled %v (bits 0x%x)"u8, x2, u2);
+            t.Errorf("unmarshaled %v (bits 0x%x)", x2, u2);
         }
     });
 }
@@ -432,18 +435,18 @@ public static void FuzzRuneRoundTrip(ж<testing.F> Ꮡf) {
 
     Ꮡf.Fuzz((ж<testing.T> t, rune r1) => {
         var b = marshalCorpusFile(r1);
-        t.Logf("marshaled rune(0x%x):\n%s"u8, r1, b);
+        t.Logf("marshaled rune(0x%x):\n%s", r1, b);
 
         var (rs, err) = unmarshalCorpusFile(b);
-        if (err != default!) {
+        if (err != nil) {
             t.Fatal(err);
         }
         if (len(rs) != 1) {
-            t.Fatalf("unmarshaled %d values"u8, len(rs));
+            t.Fatalf("unmarshaled %d values", len(rs));
         }
         var r2 = rs[0]._<rune>();
         if (r2 != r1) {
-            t.Errorf("unmarshaled rune(0x%x)"u8, r2);
+            t.Errorf("unmarshaled rune(0x%x)", r2);
         }
     });
 }
@@ -452,23 +455,23 @@ public static void FuzzStringRoundTrip(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.Add((@string)""u8);
-    f.Add((@string)"\x00"u8);
-    f.Add((@string)new rune[]{unicode.ReplacementChar}.slice());
+    f.Add("\x00");
+    f.Add((@string)slice<rune>([unicode.ReplacementChar]));
 
     Ꮡf.Fuzz((ж<testing.T> t, @string s1) => {
         var b = marshalCorpusFile(s1);
-        t.Logf("marshaled %q:\n%s"u8, s1, b);
+        t.Logf("marshaled %q:\n%s", s1, b);
 
         var (rs, err) = unmarshalCorpusFile(b);
-        if (err != default!) {
+        if (err != nil) {
             t.Fatal(err);
         }
         if (len(rs) != 1) {
-            t.Fatalf("unmarshaled %d values"u8, len(rs));
+            t.Fatalf("unmarshaled %d values", len(rs));
         }
         @string s2 = rs[0]._<@string>();
         if (s2 != s1) {
-            t.Errorf("unmarshaled %q"u8, s2);
+            t.Errorf("unmarshaled %q", s2);
         }
     });
 }

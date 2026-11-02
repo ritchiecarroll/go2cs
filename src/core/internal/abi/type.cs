@@ -18,12 +18,12 @@ partial class abi_package {
 // Put it in some shared location?)
 partial struct Type {
     public uintptr Size_;
-    public uintptr PtrBytes; // number of (prefix) bytes in the type that can contain pointers
-    public uint32 Hash;  // hash of type; avoids computation in hash tables
-    public TFlag TFlag;   // extra type information flags
-    public uint8 Align_;   // alignment of variable with this type
-    public uint8 FieldAlign_;   // alignment of struct field with this type
-    public ΔKind Kind_;    // what kind of type this is (string, int, ...)
+    public uintptr PtrBytes;  // number of (prefix) bytes in the type that can contain pointers
+    public uint32 Hash;       // hash of type; avoids computation in hash tables
+    public TFlag TFlag;       // extra type information flags
+    public uint8 Align_;      // alignment of variable with this type
+    public uint8 FieldAlign_; // alignment of struct field with this type
+    public ΔKind Kind_;       // what kind of type this is (string, int, ...)
     // function for comparing objects of this type
     // (ptr to object A, ptr to object B) -> ==?
     public Func<@unsafe.Pointer, @unsafe.Pointer, bool> Equal;
@@ -39,7 +39,7 @@ partial struct Type {
     // including when TFlagGCMaskOnDemand is set. The types will, of course,
     // have the same pointer layout (but not necessarily the same size).
     public ж<byte> GCData;
-    public NameOff Str; // string form
+    public NameOff Str;       // string form
     public TypeOff PtrToThis; // type for pointer to this type, may be zero
 }
 
@@ -136,40 +136,40 @@ partial struct TextOff /*num:int32*/;
 
 // String returns the name of k.
 public static @string String(this ΔKind k) {
-    if ((nint)(uint8)k < len(kindNames)) {
+    if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
 }
 
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
-    [Invalid] = "invalid"u8,
-    [Bool] = "bool"u8,
-    [Int] = "int"u8,
-    [Int8] = "int8"u8,
-    [Int16] = "int16"u8,
-    [Int32] = "int32"u8,
-    [Int64] = "int64"u8,
-    [Uint] = "uint"u8,
-    [Uint8] = "uint8"u8,
-    [Uint16] = "uint16"u8,
-    [Uint32] = "uint32"u8,
-    [Uint64] = "uint64"u8,
-    [Uintptr] = "uintptr"u8,
-    [Float32] = "float32"u8,
-    [Float64] = "float64"u8,
-    [Complex64] = "complex64"u8,
-    [Complex128] = "complex128"u8,
-    [Array] = "array"u8,
-    [Chan] = "chan"u8,
-    [Func] = "func"u8,
-    [Interface] = "interface"u8,
-    [Map] = "map"u8,
-    [Pointer] = "ptr"u8,
-    [Slice] = "slice"u8,
-    [ΔString] = "string"u8,
-    [Struct] = "struct"u8,
-    [UnsafePointer] = "unsafe.Pointer"u8
+    [Invalid] = "invalid",
+    [Bool] = "bool",
+    [Int] = "int",
+    [Int8] = "int8",
+    [Int16] = "int16",
+    [Int32] = "int32",
+    [Int64] = "int64",
+    [Uint] = "uint",
+    [Uint8] = "uint8",
+    [Uint16] = "uint16",
+    [Uint32] = "uint32",
+    [Uint64] = "uint64",
+    [Uintptr] = "uintptr",
+    [Float32] = "float32",
+    [Float64] = "float64",
+    [Complex64] = "complex64",
+    [Complex128] = "complex128",
+    [Array] = "array",
+    [Chan] = "chan",
+    [Func] = "func",
+    [Interface] = "interface",
+    [Map] = "map",
+    [Pointer] = "ptr",
+    [Slice] = "slice",
+    [ΔString] = "string",
+    [Struct] = "struct",
+    [UnsafePointer] = "unsafe.Pointer"
 }.slice(); }
 
 // go2cs generated this placeholder — func TypeOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -205,8 +205,8 @@ public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
 partial struct Method {
     public NameOff Name; // name of method
     public TypeOff Mtyp; // method type (without receiver)
-    public TextOff Ifn; // fn used in interface call (one-word receiver)
-    public TextOff Tfn; // fn used for normal method call
+    public TextOff Ifn;  // fn used in interface call (one-word receiver)
+    public TextOff Tfn;  // fn used for normal method call
 }
 
 // UncommonType is present only for defined types or types with methods
@@ -215,32 +215,34 @@ partial struct Method {
 // to describe a non-defined type with no methods.
 partial struct UncommonType {
     public NameOff PkgPath; // import path; empty for built-in types like int, string
-    public uint16 Mcount;  // number of methods
-    public uint16 Xcount;  // number of exported methods
-    public uint32 Moff;  // offset from this uncommontype to [mcount]Method
-    internal uint32 _;  // unused
+    public uint16 Mcount;   // number of methods
+    public uint16 Xcount;   // number of exported methods
+    public uint32 Moff;     // offset from this uncommontype to [mcount]Method
+    internal uint32 _;      // unused
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tMcount0ˢ = "t.mcount > 0"u8;
+internal static ref readonly @string tMcount0ˢ => ref tMcount0ˢᵇ;
+private static readonly @string tMcount0ˢᵇ = "t.mcount > 0"u8;
 
 public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Mcount == 0) {
-        return default!;
+        return default;
     }
     return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tMcount0ˢ)), (int)(t.Mcount)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tXcount0ˢ = "t.xcount > 0"u8;
+internal static ref readonly @string tXcount0ˢ => ref tXcount0ˢᵇ;
+private static readonly @string tXcount0ˢᵇ = "t.xcount > 0"u8;
 
 public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Xcount == 0) {
-        return default!;
+        return default;
     }
     return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢ)), (int)(t.Xcount)));
 }
@@ -259,13 +261,13 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 // Imethod represents a method on an interface type
 partial struct Imethod {
     public NameOff Name; // name of method
-    public TypeOff Typ; // .(*FuncType) underneath
+    public TypeOff Typ;  // .(*FuncType) underneath
 }
 
 // ArrayType represents a fixed array type.
 partial struct ΔArrayType {
     /*embed*/ public Type Type;
-    public ж<Type> Elem; // array element type
+    public ж<Type> Elem;  // array element type
     public ж<Type> Slice; // slice type
     public uintptr Len;
 }
@@ -278,8 +280,8 @@ public static ж<Type> Common(this ж<Type> Ꮡt) {
 
 partial struct ΔChanDir /*num:nint*/;
 
-public static ΔChanDir RecvDir => /* 1 << iota */ 1;                // <-chan
-public static ΔChanDir SendDir => 2;                // chan<-
+public static ΔChanDir RecvDir => /* 1 << iota */ 1;         // <-chan
+public static ΔChanDir SendDir => 2;                         // chan<-
 public static ΔChanDir BothDir => /* RecvDir | SendDir */ 3; // chan
 public static ΔChanDir InvalidDir => 0;
 
@@ -342,36 +344,36 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
-        return default!;
+        return default;
     }
-    var exprᴛ1 = t.Kind();
-    if (exprᴛ1 == Struct) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == Struct: {
         return Ꮡ((Ꮡt.Reinterpret<Type, structTypeUncommon>()).Value.u);
     }
-    if (exprᴛ1 == Pointer) {
+    case var ᴛ when ᴛ == Pointer: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_u>()).Value.u);
     }
-    if (exprᴛ1 == Func) {
+    case var ᴛ when ᴛ == Func: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ1>()).Value.u);
     }
-    if (exprᴛ1 == Slice) {
+    case var ᴛ when ᴛ == Slice: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ2>()).Value.u);
     }
-    if (exprᴛ1 == Array) {
+    case var ᴛ when ᴛ == Array: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ3>()).Value.u);
     }
-    if (exprᴛ1 == Chan) {
+    case var ᴛ when ᴛ == Chan: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ4>()).Value.u);
     }
-    if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ5>()).Value.u);
     }
-    if (exprᴛ1 == Interface) {
+    case var ᴛ when ᴛ == Interface: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ6>()).Value.u);
     }
-    { /* default: */
+    default: {
         return Ꮡ((Ꮡt.Reinterpret<Type, Uncommon_uᴛ7>()).Value.u);
-    }
+    }}
 }
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -399,14 +401,14 @@ public static nint FieldAlign(this ref Type t) {
 
 partial struct ΔInterfaceType {
     /*embed*/ public Type Type;
-    public ΔName PkgPath;      // import path
+    public ΔName PkgPath;          // import path
     public slice<Imethod> Methods; // sorted by hash
 }
 
 public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
-        return default!;
+        return default;
     }
     return ut.ExportedMethods();
 }
@@ -480,8 +482,8 @@ partial struct PtrType {
 }
 
 partial struct StructField {
-    public ΔName Name;    // name is always non-empty
-    public ж<Type> Typ; // type of field
+    public ΔName Name;     // name is always non-empty
+    public ж<Type> Typ;    // type of field
     public uintptr Offset; // byte offset of field
 }
 
@@ -531,7 +533,8 @@ public static ж<byte> DataChecked(this ΔName n, nint off, @string whySafe) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string theRuntimeDoesnTNeedToˢ = "the runtime doesn't need to give you a reason"u8;
+internal static ref readonly @string theRuntimeDoesnTNeedToˢ => ref theRuntimeDoesnTNeedToˢᵇ;
+private static readonly @string theRuntimeDoesnTNeedToˢᵇ = "the runtime doesn't need to give you a reason"u8;
 
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
@@ -555,13 +558,14 @@ public static bool IsEmbedded(this ΔName n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string readVarintˢ = "read varint"u8;
+internal static ref readonly @string readVarintˢ => ref readVarintˢᵇ;
+private static readonly @string readVarintˢᵇ = "read varint"u8;
 
 // ReadVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         var x = n.DataChecked(off + i, readVarintˢ).Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
@@ -576,16 +580,16 @@ public static bool IsBlank(this ΔName n) {
         return false;
     }
     var (_, l) = n.ReadVarint(1);
-    return l == 1 && n.Data(2).Value == (rune)'_';
+    return l == 1 && n.Data(2).Value == '_';
 }
 
 // writeVarint writes n to buf in varint form. Returns the
 // number of bytes written. n must be nonnegative.
 // Writes at most 10 bytes.
 internal static nint writeVarint(slice<byte> buf, nint n) {
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         var b = (byte)(n & 0x7f);
-        n >>= (int)(7);
+        n >>= 7;
         if (n == 0) {
             buf[i] = b;
             return i + 1;
@@ -595,7 +599,8 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nonEmptyStringˢ = "non-empty string"u8;
+internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
+private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
 
 // Name returns the name of n, or empty if it does not actually have a name.
 public static @string Name(this ΔName n) {
@@ -628,7 +633,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     nint nameLenLen = writeVarint(nameLen[..], len(n));
     nint tagLenLen = writeVarint(tagLen[..], len(tag));
 
-    byte bits = default!;
+    byte bits = default;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
         bits |= (byte)((byte)(1 << 0));
@@ -654,7 +659,7 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     return new ΔName(Bytes: Ꮡ(b, 0));
 }
 
-public static UntypedInt TraceArgsLimit => 10; // print no more than 10 args/components
+public static UntypedInt TraceArgsLimit => 10;   // print no more than 10 args/components
 public static UntypedInt TraceArgsMaxDepth => 5; // no more than 5 layers of nesting
 
 // maxLen is a (conservative) upper bound of the byte stream length. For

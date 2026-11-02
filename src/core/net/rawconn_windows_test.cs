@@ -12,7 +12,7 @@ partial class net_internal_test_package {
 
 internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
-    nint n = default!;
+    nint n = default;
     var bʗ1 = b;
     var err = c.Read((uintptr s) => {
         ref var read = ref heap(new uint32(), out var Ꮡread);
@@ -24,7 +24,7 @@ internal static (nint, error) readRawConn(syscall.RawConn c, slice<byte> b) {
         n = (nint)read;
         return true;
     });
-    if (err != default!) {
+    if (err != nil) {
         return (n, err);
     }
     return (n, operr);
@@ -41,7 +41,7 @@ internal static error writeRawConn(syscall.RawConn c, slice<byte> b) {
         Ꮡoperr.ValueSlot = syscall.WSASend((syscallꓸHandle)s, Ꮡbuf, 1, Ꮡwritten, 0, nil, nil);
         return true;
     });
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return operr;
@@ -54,7 +54,7 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.�
         ref var l = ref heap(new int32(), out var Ꮡl);
         l = (int32)/* unsafe.Sizeof(v) */ (uintptr)4;
         Ꮡoperr.ValueSlot = syscall.Getsockopt((syscallꓸHandle)s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, Ꮡv.Reinterpret<int32, byte>(), Ꮡl);
-        if (Ꮡoperr.ValueSlot != default!) {
+        if (Ꮡoperr.ValueSlot != nil) {
             return;
         }
         switch (addr.type()) {
@@ -79,17 +79,16 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.�
             //   stack socket, an IPv6 socket using IPv6
             //   addresses including IPv4-mapped or
             //   IPv4-embedded IPv6 addresses.
-            if ((~addrΔ1).IP.To16() != default! && (~addrΔ1).IP.To4() == default!){
+            if (addrΔ1.IP.To16() != nil && addrΔ1.IP.To4() == nil) {
                 Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
-            } else 
-            if ((~addrΔ1).IP.To16() == default! && (~addrΔ1).IP.To4() != default!) {
+            } else if (addrΔ1.IP.To16() == nil && addrΔ1.IP.To4() != nil) {
                 Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IP, syscall.IP_TTL, 1);
             }
             break;
         }}
     };
     {
-        var err = c.Control(fn); if (err != default!) {
+        var err = c.Control(fn); if (err != nil) {
             return err;
         }
     }
@@ -98,26 +97,28 @@ internal static error controlRawConn(syscall.RawConn c, global::go.net_package.�
 
 internal static error controlOnConnSetup(@string network, @string address, syscall.RawConn c) {
     ref var operr = ref heap<error>(out var Ꮡoperr);
-    Action<uintptr> fn = default!;
+    Action<uintptr> fn = default;
     var exprᴛ1 = network;
-    if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "ip"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "ip"u8: {
         return errors.New("ambiguous network: "u8 + network);
     }
-    if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8 || exprᴛ1 == "unixgram"u8) {
+    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8 || exprᴛ1 == "unixgram"u8: {
         fn = (uintptr s) => {
             const nint SO_ERROR = 0x1007;
             (_, Ꮡoperr.ValueSlot) = syscall.GetsockoptInt((syscallꓸHandle)s, syscall.SOL_SOCKET, SO_ERROR);
         };
+        break;
     }
-    else { /* default: */
+    default: {
         switch (network[len(network) - 1]) {
-        case (rune)'4': {
+        case (byte)'4': {
             fn = (uintptr s) => {
                 Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IP, syscall.IP_TTL, 1);
             };
             break;
         }
-        case (rune)'6': {
+        case (byte)'6': {
             fn = (uintptr s) => {
                 Ꮡoperr.ValueSlot = syscall.SetsockoptInt((syscallꓸHandle)s, syscall.IPPROTO_IPV6, syscall.IPV6_UNICAST_HOPS, 1);
             };
@@ -126,9 +127,10 @@ internal static error controlOnConnSetup(@string network, @string address, sysca
         default: {
             return errors.New("unknown network: "u8 + network);
         }}
-    }
+        break;
+    }}
     {
-        var err = c.Control(fn); if (err != default!) {
+        var err = c.Control(fn); if (err != nil) {
             return err;
         }
     }

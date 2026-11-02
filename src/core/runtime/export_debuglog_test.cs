@@ -61,18 +61,18 @@ public static @string DumpDebugLog() {
     gp.Value.writebuf = new slice<byte>(0, (1 << 20));
     printDebugLogImpl();
     var buf = gp.Value.writebuf;
-    gp.Value.writebuf = default!;
+    gp.Value.writebuf = default;
 
     return (@string)buf;
 }
 
 public static void ResetDebugLog() {
     var stw = stopTheWorld(stwForTestResetDebugLog);
-    for (var l = allDloggers; l != nil; l = l.Value.allLink) {
-        l.Value.w.write = 0;
-        (l.Value.w.tick, l.Value.w.nano) = (0, 0);
-        (l.Value.w.r.begin, l.Value.w.r.end) = (0, 0);
-        (l.Value.w.r.tick, l.Value.w.r.nano) = (0, 0);
+    for (var l = allDloggers; l != nil; l = l.allLink) {
+        l.w.write = 0;
+        (l.w.tick, l.w.nano) = (0, 0);
+        (l.w.r.begin, l.w.r.end) = (0, 0);
+        (l.w.r.tick, l.w.r.nano) = (0, 0);
     }
     startTheWorld(stw);
 }
@@ -80,7 +80,7 @@ public static void ResetDebugLog() {
 public static nint CountDebugLog() {
     var stw = stopTheWorld(stwForTestResetDebugLog);
     nint i = 0;
-    for (var l = allDloggers; l != nil; l = l.Value.allLink) {
+    for (var l = allDloggers; l != nil; l = l.allLink) {
         i++;
     }
     startTheWorld(stw);

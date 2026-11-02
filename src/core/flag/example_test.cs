@@ -15,7 +15,7 @@ using static go.flag_internal_test_package;
 partial class flag_test_package {
 
 // Example 1: A single string flag called "species" with default value "gopher".
-internal static ж<@string> species = flag.String("species"u8, "gopher"u8, "the species we are studying"u8);
+internal static ж<@string> species = flag.String("species", "gopher", "the species we are studying");
 
 // Example 2: Two flags sharing a variable, so we can have a shorthand.
 // The order of initialization is undefined, so make sure both use the
@@ -24,10 +24,10 @@ internal static readonly ж<@string> ᏑgopherType = new StaticBox<@string>(defa
 internal static ref @string gopherType => ref ((StaticBox<@string>)ᏑgopherType).ValueSlot;
 
 [GoInit] internal static void init() {
-    @string defaultGopher = "pocket"u8;
-    @string usage = "the variety of gopher"u8;
-    flag.StringVar(ᏑgopherType, "gopher_type"u8, defaultGopher, usage);
-    flag.StringVar(ᏑgopherType, "g"u8, defaultGopher, usage + " (shorthand)");
+    @string defaultGopher = "pocket";
+    @string usage = "the variety of gopher";
+    flag.StringVar(ᏑgopherType, "gopher_type", defaultGopher, usage);
+    flag.StringVar(ᏑgopherType, "g", defaultGopher, usage + " (shorthand)");
 }
 
 // Example 3: A user-defined flag type, a slice of durations.
@@ -40,7 +40,8 @@ internal static @string ΔString(this ref interval i) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string intervalFlagAlreadySetˢ = "interval flag already set"u8;
+internal static ref readonly @string intervalFlagAlreadySetˢ => ref intervalFlagAlreadySetˢᵇ;
+private static readonly @string intervalFlagAlreadySetˢᵇ = "interval flag already set"u8;
 
 // Set is the method to set the flag value, part of the flag.Value interface.
 // Set's argument is a string to be parsed to set the flag.
@@ -54,14 +55,14 @@ internal static error ΔSet(this ref interval i, @string value) {
     if (len(i) > 0) {
         return errors.New(intervalFlagAlreadySetˢ);
     }
-    foreach (var (_, dt) in strings.Split(value, ","u8)) {
+    foreach (var (_, dt) in strings.Split(value, ",")) {
         var (duration, err) = time.ParseDuration(dt);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         i = append(i, duration);
     }
-    return default!;
+    return default;
 }
 
 // Define a flag to accumulate durations. Because it has a special type,
@@ -73,7 +74,7 @@ internal static ref interval intervalFlag => ref ((StaticBox<interval>)Ꮡinterv
 [GoInit] internal static void initΔ1() {
     // Tie the command-line flag to the intervalFlag variable and
     // set a usage message.
-    flag.Var(new flag_test_package.intervalжValue(ᏑintervalFlag), "deltaT"u8, "comma-separated list of intervals to use between events"u8);
+    flag.Var(new flag_test_package.intervalжValue(ᏑintervalFlag), "deltaT", "comma-separated list of intervals to use between events");
 }
 
 public static void Example() {

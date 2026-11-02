@@ -45,7 +45,7 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +55,8 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/entropy/v1.0.0/entropy.go", "entropy.cs", "ABMmwgAHHPiygIIAHDgABRDSgpSClJSClICCpICCpAAIEoIABhbCgoKCpqaCgpSClIKUlIKCygAFHgAMAoKCgoKCgqaCpgAFJgAQAoKCgoKUgqY=", "", "", "119=HighPrecisionNow/1/2/2,HighPrecisionNow/2/2/3")]
-[assembly: go.GoPositionMap("crypto/internal/entropy/v1.0.0/sha384.go", "sha384.cs", "AA4cAAoWopSCgoKCgoKClIKCgpSmgoKmgqaCgqiSgoKCgpSClKaCgoKCgoKCgqYAUqYBooKCgpSCgoKUuJSChJaCgoKCgoKCpoKCgoKCgoKmgoKogoKCgoKCgoKC", "", "", "190=RotateLeft64/3/3/1;191=RotateLeft64/3/3/1")]
+[assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/entropy.go", "entropy.cs", "ABQmwgAHHPiygIIAHDgABhDSgpSClJSClICCpICCpAAIEoIABhbCgoKCpqaCgpSClIKUlIKCygAGHgAMAoKCgoKCgqaCpgAGJgAQAoKCgoKUgqY=", "", "", "121=HighPrecisionNow/1/2/2,HighPrecisionNow/2/2/3")]
+[assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/sha384.go", "sha384.cs", "AA4cAAoWopSCgoKCgoKClIKCgpSmgoKmgqaCgqiSgoKCgpSClKaCgoKCgoKCgqYAUqYBooKCgpSCgoKUuJSChJaCgoKCgoKCpoKCgoKCgoKmgoKogoKCgoKCgoKC", "", "", "190=RotateLeft64/3/3/1;191=RotateLeft64/3/3/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.entropy.v1_0_0;

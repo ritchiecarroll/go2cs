@@ -26,8 +26,8 @@ internal static uint32 float32bits(float32 f) {
 }
 
 internal static float64 inf(nint sign) {
-    uint64 v = default!;
-    if (sign >= 0){
+    uint64 v = default;
+    if (sign >= 0) {
         v = 0x7FF0000000000000UL;
     } else {
         v = 0xFFF0000000000000UL;

@@ -4,7 +4,7 @@
 namespace go.mime;
 
 using textproto = net.textproto_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using net;
 
 partial class multipart_package {

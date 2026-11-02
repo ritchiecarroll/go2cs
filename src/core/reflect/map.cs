@@ -34,48 +34,48 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
         etyp = PointerTo(etyp);
     }
 
-    var fields = new StructField[]{
+    var fields = slice<StructField>([
         new(
-            Name: "Key"u8,
+            Name: "Key",
             Type: ktyp
         ),
         new(
-            Name: "Elem"u8,
+            Name: "Elem",
             Type: etyp
         )
-    }.slice();
+    ]);
     var slot = StructOf(fields);
 
-    fields = new StructField[]{
+    fields = slice<StructField>([
         new(
-            Name: "Ctrl"u8,
+            Name: "Ctrl",
             Type: TypeFor<uint64>()
         ),
         new(
-            Name: "Slots"u8,
+            Name: "Slots",
             Type: ArrayOf(abi.MapGroupSlots, slot)
         )
-    }.slice();
+    ]);
     var group = StructOf(fields);
     return (group, slot);
 }
 
-internal static ж<abi.Type> stringType = rtypeOf((@string)""u8);
+internal static ж<abi.Type> stringType = rtypeOf("");
 
 // go2cs generated this placeholder — func MapIndex is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Equivalent to runtime.mapIterStart.
 //
 //go:noinline
-internal static partial void mapIterStart(ж<abiꓸMapType> Ꮡt, ж<mapsꓸMap> Ꮡm, ж<maps.Iter> Ꮡit) {
+internal static partial void mapIterStart(ж<abiꓸMapType> t, ж<mapsꓸMap> m, ж<maps.Iter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
-    if (race.Enabled && Ꮡm != nil) {
+    if (race.Enabled && m != nil) {
         var callerpc = sys.GetCallerPC();
-        race.ReadPC(@unsafe.Pointer.FromPinnedBox(Ꮡm), callerpc, abi.FuncPCABIInternal(mapIterStart));
+        race.ReadPC(@unsafe.Pointer.FromPinnedBox(m), callerpc, abi.FuncPCABIInternal(mapIterStart));
     }
 
-    it.Init(Ꮡt, Ꮡm);
+    it.Init(t, m);
     it.Next();
 }
 

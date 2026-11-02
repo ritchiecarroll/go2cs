@@ -15,14 +15,15 @@ using static go.@internal.poll_internal_test_package;
 partial class poll_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errNotPollableˢ = "ErrNotPollable"u8;
+internal static ref readonly @string errNotPollableˢ => ref errNotPollableˢᵇ;
+private static readonly @string errNotPollableˢᵇ = "ErrNotPollable"u8;
 
-public static void TestReadError(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(errNotPollableˢ, (ж<testing.T> tΔ1) => {
+public static void TestReadError(ж<testing.T> t) {
+    t.Run(errNotPollableˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             var (f, err) = badStateFile();
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Skip(err);
             }
             var fʗ1 = f;
@@ -35,7 +36,7 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
             array<byte> b = new(1);
             (_, err) = f.Read(b[..]);
             {
-                var perr = parseReadError(err, isBadStateFileError); if (perr != default!) {
+                var perr = parseReadError(err, isBadStateFileError); if (perr != nil) {
                     tΔ1.Fatal(perr);
                 }
             }
@@ -49,17 +50,17 @@ internal static error parseReadError(error nestedErr, Func<error, (@string, bool
     var err = nestedErr;
     {
         var (nerr, ok) = err._<ж<net.OpError>>(ᐧ); if (ok) {
-            err = nerr.Value.Err;
+            err = nerr.Err;
         }
     }
     {
         var (nerr, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
-            err = nerr.Value.Err;
+            err = nerr.Err;
         }
     }
     {
         var (nerr, ok) = err._<ж<os.SyscallError>>(ᐧ); if (ok) {
-            err = nerr.Value.Err;
+            err = nerr.Err;
         }
     }
     {
@@ -67,7 +68,7 @@ internal static error parseReadError(error nestedErr, Func<error, (@string, bool
             return fmt.Errorf("got %v; want %s"u8, nestedErr, s);
         }
     }
-    return default!;
+    return default;
 }
 
 } // end poll_test_package

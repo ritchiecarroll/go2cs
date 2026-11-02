@@ -10,47 +10,47 @@ using static global::go.go.types_package;
 partial class types_internal_test_package {
 
 internal partial struct TestSizeof_type /*dyn*/ {
-    internal any val;     // type as a value
+    internal any val;        // type as a value
     internal uintptr _32bit; // size on 32bit platforms
     internal uintptr _64bit; // size on 64bit platforms
 }
 
 // Signal size changes of important structures.
-public static void TestSizeof(ж<testing.T> Ꮡt) {
+public static void TestSizeof(ж<testing.T> t) {
     const bool _64bit = /* ^uint(0)>>32 != 0 */ true;
 
-    slice<TestSizeof_type> tests = new TestSizeof_type[]{
+    slice<TestSizeof_type> tests = slice<TestSizeof_type>([
         // Types
-        new(new Basic(nil), 16, 32),
-        new(new Array(nil), 16, 24),
-        new(new Slice(nil), 8, 16),
-        new(new Struct(nil), 24, 48),
-        new(new Pointer(nil), 8, 16),
-        new(new Tuple(nil), 12, 24),
-        new(new ΔSignature(nil), 28, 56),
-        new(new Union(nil), 12, 24),
-        new(new Interface(nil), 40, 80),
-        new(new Map(nil), 16, 32),
-        new(new Chan(nil), 12, 24),
-        new(new Named(nil), 68, 128),
-        new(new TypeParam(nil), 28, 48),
-        new(new Δterm(nil), 12, 24),
+        new(new Basic(), 16, 32),
+        new(new Array(), 16, 24),
+        new(new Slice(), 8, 16),
+        new(new Struct(), 24, 48),
+        new(new Pointer(), 8, 16),
+        new(new Tuple(), 12, 24),
+        new(new ΔSignature(), 28, 56),
+        new(new Union(), 12, 24),
+        new(new Interface(), 40, 80),
+        new(new Map(), 16, 32),
+        new(new Chan(), 12, 24),
+        new(new Named(), 68, 128),
+        new(new TypeParam(), 28, 48),
+        new(new Δterm(), 12, 24),
 
         // Objects
-        new(new PkgName(nil), 40, 80),
-        new(new Const(nil), 44, 88),
-        new(new TypeName(nil), 36, 72),
-        new(new Var(nil), 44, 88),
-        new(new Func(nil), 44, 88),
-        new(new Label(nil), 40, 80),
-        new(new Builtin(nil), 40, 80),
-        new(new Nil(nil), 36, 72),
+        new(new PkgName(), 40, 80),
+        new(new Const(), 44, 88),
+        new(new TypeName(), 36, 72),
+        new(new Var(), 44, 88),
+        new(new Func(), 44, 88),
+        new(new Label(), 40, 80),
+        new(new Builtin(), 40, 80),
+        new(new Nil(), 36, 72),
 
         // Misc
-        new(new ΔScope(nil), 44, 88),
-        new(new Package(nil), 44, 88),
-        new(new _TypeSet(nil), 28, 56)
-    }.slice();
+        new(new ΔScope(), 44, 88),
+        new(new Package(), 44, 88),
+        new(new _TypeSet(), 28, 56)
+    ]);
     foreach (var (_, test) in tests) {
         var got = reflect.TypeOf(test.val).Size();
         var want = test._32bit;
@@ -58,7 +58,7 @@ public static void TestSizeof(ж<testing.T> Ꮡt) {
             want = test._64bit;
         }
         if (got != want) {
-            Ꮡt.Errorf("unsafe.Sizeof(%T) = %d, want %d"u8, test.val, got, want);
+            t.Errorf("unsafe.Sizeof(%T) = %d, want %d", test.val, got, want);
         }
     }
 }

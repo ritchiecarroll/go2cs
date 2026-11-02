@@ -8,7 +8,6 @@ using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
 using @internal;
 
-[GoFieldAccess(typeof(specialSecret))]
 partial class runtime_package {
 
 //go:linkname secret_count runtime/secret.count
@@ -63,12 +62,12 @@ internal static void addSecret(@unsafe.Pointer Δp, uintptr size) {
     // that the user has no control over and not big buffers that user
     // code is allocating. The cost should be relatively low,
     // but we have run into a wall with other special allocations before.
-    @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    var s = (ж<specialSecret>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialSecretAlloc).alloc());
+    @lock(Ꮡmheap_.Ꮡspeciallock);
+    var s = (ж<specialSecret>)(uintptr)(Ꮡmheap_.ᏑspecialSecretAlloc.alloc());
     s.special.kind = _KindSpecialSecret;
     s.size = size;
-    unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-    addspecial(Δp, s.of(specialSecret.Ꮡspecial), false);
+    unlock(Ꮡmheap_.Ꮡspeciallock);
+    addspecial(Δp, s.Ꮡspecial, false);
 }
 
 // send a no-op signal to an M for the purposes of

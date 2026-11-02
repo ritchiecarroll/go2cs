@@ -62,8 +62,8 @@ internal static traceWriter writer(this traceLocker tl) {
 // This does not have the same stack growth restrictions as traceLocker.writer.
 //
 // buf may be nil.
-internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> Ꮡbuf) {
-    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf);
+internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
+    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: buf);
 }
 
 // event writes out the bytes of an event into the event stream.
@@ -83,11 +83,11 @@ internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, par
 
     // Compute the timestamp diff that we'll put in the trace.
     var ts = traceClockNow();
-    if (ts <= (~w.traceBuf).lastTime) {
-        ts = (~w.traceBuf).lastTime + 1;
+    if (ts <= w.traceBuf.lastTime) {
+        ts = w.traceBuf.lastTime + 1;
     }
-    var tsDiff = (uint64)(ts - (~w.traceBuf).lastTime);
-    w.traceBuf.Value.lastTime = ts;
+    var tsDiff = (uint64)(ts - w.traceBuf.lastTime);
+    w.traceBuf.lastTime = ts;
 
     // Write out event.
     w.@byte((byte)ev);
@@ -151,13 +151,15 @@ internal static traceWriter flush(this traceWriter w) {
         }
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
     });
-    w.traceBuf = default!;
+    w.traceBuf = default;
     return w;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string traceBufferˢ = "trace buffer"u8;
-internal static readonly @string traceOutOfMemoryˢ = "trace: out of memory"u8;
+internal static ref readonly @string traceBufferˢ => ref traceBufferˢᵇ;
+private static readonly @string traceBufferˢᵇ = "trace buffer"u8;
+internal static ref readonly @string traceOutOfMemoryˢ => ref traceOutOfMemoryˢᵇ;
+private static readonly @string traceOutOfMemoryˢᵇ = "trace: out of memory"u8;
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
 internal static traceWriter refill(this traceWriter w) {
@@ -166,13 +168,13 @@ internal static traceWriter refill(this traceWriter w) {
         if (w.traceBuf != nil) {
             traceBufFlush(w.traceBuf, w.gen);
         }
-        if (Δtrace.empty != nil){
+        if (Δtrace.empty != nil) {
             w.traceBuf = Δtrace.empty;
-            Δtrace.empty = w.traceBuf.Value.link;
+            Δtrace.empty = w.traceBuf.link;
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
         } else {
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.of(mstats.Ꮡother_sys), traceBufferˢ));
+            w.traceBuf = (ж<traceBuf>)(uintptr)(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢ));
             if (w.traceBuf == nil) {
                 @throw(traceOutOfMemoryˢ);
             }
@@ -180,12 +182,12 @@ internal static traceWriter refill(this traceWriter w) {
     });
     // Initialize the buffer.
     var ts = traceClockNow();
-    if (ts <= (~w.traceBuf).lastTime) {
-        ts = (~w.traceBuf).lastTime + 1;
+    if (ts <= w.traceBuf.lastTime) {
+        ts = w.traceBuf.lastTime + 1;
     }
-    w.traceBuf.Value.lastTime = ts;
-    w.traceBuf.Value.link = default!;
-    w.traceBuf.Value.pos = 0;
+    w.traceBuf.lastTime = ts;
+    w.traceBuf.link = default;
+    w.traceBuf.pos = 0;
 
     // Tolerate a nil mp.
     var mID = ~(uint64)0;
@@ -194,16 +196,16 @@ internal static traceWriter refill(this traceWriter w) {
     }
 
     // Write the buffer's header.
-    if (w.exp == tracev2.NoExperiment){
+    if (w.exp == tracev2.NoExperiment) {
         w.@byte((byte)tracev2.EvEventBatch);
     } else {
         w.@byte((byte)tracev2.EvExperimentalBatch);
-        w.@byte((byte)(nuint)w.exp);
+        w.@byte((byte)w.exp);
     }
     w.varint((uint64)w.gen);
     w.varint(mID);
     w.varint((uint64)ts);
-    w.traceBuf.Value.lenPos = w.varintReserve();
+    w.traceBuf.lenPos = w.varintReserve();
     return w;
 }
 
@@ -224,8 +226,8 @@ internal static traceWriter expWriter(this traceLocker tl, tracev2.Experiment ex
 // This does not have the same stack growth restrictions as traceLocker.writer.
 //
 // buf may be nil.
-internal static traceWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> Ꮡbuf, tracev2.Experiment exp) {
-    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: Ꮡbuf, exp: exp);
+internal static traceWriter unsafeTraceExpWriter(uintptr gen, ж<traceBuf> buf, tracev2.Experiment exp) {
+    return new traceWriter(traceLocker: new traceLocker(gen: gen), traceBuf: buf, exp: exp);
 }
 
 // traceBufQueue is a FIFO of traceBufs.
@@ -237,11 +239,11 @@ partial struct traceBufQueue {
 internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    buf.link = default!;
-    if (q.head == nil){
+    buf.link = default;
+    if (q.head == nil) {
         q.head = Ꮡbuf;
     } else {
-        q.tail.Value.link = Ꮡbuf;
+        q.tail.link = Ꮡbuf;
     }
     q.tail = Ꮡbuf;
 }
@@ -250,13 +252,13 @@ internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
 internal static ж<traceBuf> pop(this ref traceBufQueue q) {
     var buf = q.head;
     if (buf == nil) {
-        return default!;
+        return default;
     }
-    q.head = buf.Value.link;
+    q.head = buf.link;
     if (q.head == nil) {
-        q.tail = default!;
+        q.tail = default;
     }
-    buf.Value.link = default!;
+    buf.link = default;
     return buf;
 }
 
@@ -266,10 +268,10 @@ internal static bool empty(this ref traceBufQueue q) {
 
 // traceBufHeader is per-P tracing buffer.
 partial struct traceBufHeader {
-    internal ж<traceBuf> link; // in trace.empty/full
+    internal ж<traceBuf> link;   // in trace.empty/full
     internal traceTime lastTime; // when we wrote the last event
-    internal nint pos;      // next write offset in arr
-    internal nint lenPos;      // position of batch length value
+    internal nint pos;           // next write offset in arr
+    internal nint lenPos;        // position of batch length value
 }
 
 // traceBuf is per-M tracing buffer.
@@ -308,7 +310,7 @@ internal static void varint(this ref traceBuf buf, uint64 v) {
             break;
         }
         arr[i] = (byte)(0x80 | (byte)v);
-        v >>= (int)(7);
+        v >>= 7;
     }
     buf.pos = pos;
 }
@@ -346,7 +348,8 @@ internal static bool available(this ref traceBuf buf, nint size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string vCouldNotFitInˢ = "v could not fit in traceBytesPerNumber"u8;
+internal static ref readonly @string vCouldNotFitInˢ => ref vCouldNotFitInˢᵇ;
+private static readonly @string vCouldNotFitInˢᵇ = "v could not fit in traceBytesPerNumber"u8;
 
 // varintAt writes varint v at byte position pos in buf. This always
 // consumes traceBytesPerNumber bytes. This is intended for when the caller
@@ -359,12 +362,12 @@ internal static readonly @string vCouldNotFitInˢ = "v could not fit in traceByt
 //go:nosplit
 internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
-        if (i < (nint)(traceBytesPerNumber - 1)){
+        if (i < (nint)(traceBytesPerNumber - 1)) {
             buf.arr[pos] = (byte)(0x80 | (byte)v);
         } else {
             buf.arr[pos] = (byte)v;
         }
-        v >>= (int)(7);
+        v >>= 7;
         pos++;
     }
     if (v != 0) {

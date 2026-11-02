@@ -19,15 +19,15 @@ partial struct bench {
     internal Action<ж<Δtesting.B>, ж<Δtesting.PB>, nint, mapInterface> perG;
 }
 
-internal static void benchMap(ж<Δtesting.B> Ꮡb, bench bench) {
-    foreach (var (_, vᴛ1) in new mapInterface[]{new sync_test_package.DeepCopyMapжmapInterface(Ꮡ(new DeepCopyMap(nil))), new sync_test_package.RWMutexMapжmapInterface(Ꮡ(new RWMutexMap(nil))), new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>(nil))), new sync_test_package.sync_MapжmapInterface(Ꮡ(new Δsync.Map(nil)))}.array()) {
+internal static void benchMap(ж<Δtesting.B> b, bench bench) {
+    foreach (var (_, vᴛ1) in new mapInterface[]{new sync_test_package.DeepCopyMapжmapInterface(Ꮡ(new DeepCopyMap())), new sync_test_package.RWMutexMapжmapInterface(Ꮡ(new RWMutexMap())), new sync_test_package.sync_HashTrieMapжmapInterface(Ꮡ(new isync.HashTrieMap<any, any>())), new sync_test_package.sync_MapжmapInterface(Ꮡ(new Δsync.Map()))}.array()) {
         var m = vᴛ1;
 
         var benchʗ1 = bench;
         var mʗ1 = m;
-        Ꮡb.Run(fmt.Sprintf("%T"u8, m), (ж<Δtesting.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%T"u8, m), (ж<Δtesting.B> bΔ1) => {
             mʗ1 = reflect.New(reflect.TypeOf(mʗ1).Elem()).Interface()._<mapInterface>();
-            if (benchʗ1.setup != default!) {
+            if (benchʗ1.setup != nil) {
                 benchʗ1.setup(bΔ1, mʗ1);
             }
 
@@ -45,11 +45,11 @@ internal static void benchMap(ж<Δtesting.B> Ꮡb, bench bench) {
     }
 }
 
-public static void BenchmarkMapLoadMostlyHits(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapLoadMostlyHits(ж<Δtesting.B> b) {
     UntypedInt hits = 1023;
     UntypedInt misses = 1;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -68,11 +68,11 @@ public static void BenchmarkMapLoadMostlyHits(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapLoadMostlyMisses(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapLoadMostlyMisses(ж<Δtesting.B> b) {
     UntypedInt hits = 1;
     UntypedInt misses = 1023;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -94,11 +94,11 @@ public static void BenchmarkMapLoadMostlyMisses(ж<Δtesting.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object deepCopyMapHasQuadraticˢ = (@string)"DeepCopyMap has quadratic running time."u8;
 
-public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> b) {
     UntypedInt hits = 128;
     UntypedInt misses = 128;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
             {
                 var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
@@ -117,16 +117,16 @@ public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> Ꮡb) {
         perG: (ж<Δtesting.B> bΔ2, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
                 nint j = i % (nint)(hits + misses);
-                if (j < hits){
+                if (j < hits) {
                     {
                         var (_, ok) = m.LoadOrStore(j, i); if (!ok) {
-                            bΔ2.Fatalf("unexpected miss for %v"u8, j);
+                            bΔ2.Fatalf("unexpected miss for %v", j);
                         }
                     }
                 } else {
                     {
                         var (v, loaded) = m.LoadOrStore(i, i); if (loaded) {
-                            bΔ2.Fatalf("failed to store %v: existing value %v"u8, i, v);
+                            bΔ2.Fatalf("failed to store %v: existing value %v", i, v);
                         }
                     }
                 }
@@ -135,8 +135,8 @@ public static void BenchmarkMapLoadOrStoreBalanced(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapLoadOrStoreUnique(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapLoadOrStoreUnique(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
             {
                 var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
@@ -153,8 +153,8 @@ public static void BenchmarkMapLoadOrStoreUnique(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapLoadOrStoreCollision(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapLoadOrStoreCollision(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             m.LoadOrStore((nint)0, (nint)0);
         },
@@ -167,11 +167,11 @@ public static void BenchmarkMapLoadOrStoreCollision(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapLoadAndDeleteBalanced(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapLoadAndDeleteBalanced(ж<Δtesting.B> b) {
     UntypedInt hits = 128;
     UntypedInt misses = 128;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
             {
                 var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
@@ -190,7 +190,7 @@ public static void BenchmarkMapLoadAndDeleteBalanced(ж<Δtesting.B> Ꮡb) {
         perG: (ж<Δtesting.B> bΔ2, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
                 nint j = i % (nint)(hits + misses);
-                if (j < hits){
+                if (j < hits) {
                     m.LoadAndDelete(j);
                 } else {
                     m.LoadAndDelete(i);
@@ -200,8 +200,8 @@ public static void BenchmarkMapLoadAndDeleteBalanced(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapLoadAndDeleteUnique(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapLoadAndDeleteUnique(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
             {
                 var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
@@ -218,8 +218,8 @@ public static void BenchmarkMapLoadAndDeleteUnique(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapLoadAndDeleteCollision(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapLoadAndDeleteCollision(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _Δp0, mapInterface m) => {
             m.LoadOrStore((nint)0, (nint)0);
         },
@@ -236,10 +236,10 @@ public static void BenchmarkMapLoadAndDeleteCollision(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapRange(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapRange(ж<Δtesting.B> b) {
     const nint mapSize = /* 1 << 10 */ 1024;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < mapSize; i++) {
                 m.Store(i, i);
@@ -259,11 +259,11 @@ public static void BenchmarkMapRange(ж<Δtesting.B> Ꮡb) {
 // unique, missing key.
 //
 // This forces the Load calls to always acquire the map's mutex.
-public static void BenchmarkMapAdversarialAlloc(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapAdversarialAlloc(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
-            int64 stores = default!;
-            int64 loadsSinceStore = default!;
+            int64 stores = default;
+            int64 loadsSinceStore = default;
             for (; pb.Next(); i++) {
                 m.Load(i);
                 {
@@ -283,10 +283,10 @@ public static void BenchmarkMapAdversarialAlloc(ж<Δtesting.B> Ꮡb) {
 //
 // This forces the Load calls to always acquire the map's mutex and periodically
 // makes a full copy of the map despite changing only one entry.
-public static void BenchmarkMapAdversarialDelete(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapAdversarialDelete(ж<Δtesting.B> b) {
     const nint mapSize = /* 1 << 10 */ 1024;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < mapSize; i++) {
                 m.Store(i, i);
@@ -309,8 +309,8 @@ public static void BenchmarkMapAdversarialDelete(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapDeleteCollision(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapDeleteCollision(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             m.LoadOrStore((nint)0, (nint)0);
         },
@@ -323,8 +323,8 @@ public static void BenchmarkMapDeleteCollision(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapSwapCollision(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapSwapCollision(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             m.LoadOrStore((nint)0, (nint)0);
         },
@@ -337,11 +337,11 @@ public static void BenchmarkMapSwapCollision(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapSwapMostlyHits(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapSwapMostlyHits(ж<Δtesting.B> b) {
     UntypedInt hits = 1023;
     UntypedInt misses = 1;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -354,7 +354,7 @@ public static void BenchmarkMapSwapMostlyHits(ж<Δtesting.B> Ꮡb) {
 
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                if (i % (nint)(hits + misses) < hits){
+                if (i % (nint)(hits + misses) < hits) {
                     nint v = i % (nint)(hits + misses);
                     m.Swap(v, v);
                 } else {
@@ -366,11 +366,11 @@ public static void BenchmarkMapSwapMostlyHits(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapSwapMostlyMisses(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapSwapMostlyMisses(ж<Δtesting.B> b) {
     UntypedInt hits = 1;
     UntypedInt misses = 1023;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -383,7 +383,7 @@ public static void BenchmarkMapSwapMostlyMisses(ж<Δtesting.B> Ꮡb) {
 
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
-                if (i % (nint)(hits + misses) < hits){
+                if (i % (nint)(hits + misses) < hits) {
                     nint v = i % (nint)(hits + misses);
                     m.Swap(v, v);
                 } else {
@@ -395,8 +395,8 @@ public static void BenchmarkMapSwapMostlyMisses(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapCompareAndSwapCollision(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapCompareAndSwapCollision(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             m.LoadOrStore((nint)0, (nint)0);
         },
@@ -411,8 +411,8 @@ public static void BenchmarkMapCompareAndSwapCollision(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapCompareAndSwapNoExistingKey(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapCompareAndSwapNoExistingKey(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
                 if (m.CompareAndSwap(i, (nint)0, (nint)0)) {
@@ -423,8 +423,8 @@ public static void BenchmarkMapCompareAndSwapNoExistingKey(ж<Δtesting.B> Ꮡb)
     ));
 }
 
-public static void BenchmarkMapCompareAndSwapValueNotEqual(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapCompareAndSwapValueNotEqual(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             m.Store((nint)0, (nint)0);
         },
@@ -437,11 +437,11 @@ public static void BenchmarkMapCompareAndSwapValueNotEqual(ж<Δtesting.B> Ꮡb)
     ));
 }
 
-public static void BenchmarkMapCompareAndSwapMostlyHits(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapCompareAndSwapMostlyHits(ж<Δtesting.B> b) {
     UntypedInt hits = 1023;
     UntypedInt misses = 1;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
             {
                 var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
@@ -470,11 +470,11 @@ public static void BenchmarkMapCompareAndSwapMostlyHits(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapCompareAndSwapMostlyMisses(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapCompareAndSwapMostlyMisses(ж<Δtesting.B> b) {
     UntypedInt hits = 1;
     UntypedInt misses = 1023;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -497,8 +497,8 @@ public static void BenchmarkMapCompareAndSwapMostlyMisses(ж<Δtesting.B> Ꮡb) 
     ));
 }
 
-public static void BenchmarkMapCompareAndDeleteCollision(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapCompareAndDeleteCollision(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             m.LoadOrStore((nint)0, (nint)0);
         },
@@ -513,11 +513,11 @@ public static void BenchmarkMapCompareAndDeleteCollision(ж<Δtesting.B> Ꮡb) {
     ));
 }
 
-public static void BenchmarkMapCompareAndDeleteMostlyHits(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapCompareAndDeleteMostlyHits(ж<Δtesting.B> b) {
     UntypedInt hits = 1023;
     UntypedInt misses = 1;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> bΔ1, mapInterface m) => {
             {
                 var (_, ok) = m._<ж<DeepCopyMap>>(ᐧ); if (ok) {
@@ -548,11 +548,11 @@ public static void BenchmarkMapCompareAndDeleteMostlyHits(ж<Δtesting.B> Ꮡb) 
     ));
 }
 
-public static void BenchmarkMapCompareAndDeleteMostlyMisses(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMapCompareAndDeleteMostlyMisses(ж<Δtesting.B> b) {
     UntypedInt hits = 1;
     UntypedInt misses = 1023;
 
-    benchMap(Ꮡb, new bench(
+    benchMap(b, new bench(
         setup: (ж<Δtesting.B> _, mapInterface m) => {
             for (nint i = 0; i < hits; i++) {
                 m.LoadOrStore(i, i);
@@ -577,8 +577,8 @@ public static void BenchmarkMapCompareAndDeleteMostlyMisses(ж<Δtesting.B> Ꮡb
     ));
 }
 
-public static void BenchmarkMapClear(ж<Δtesting.B> Ꮡb) {
-    benchMap(Ꮡb, new bench(
+public static void BenchmarkMapClear(ж<Δtesting.B> b) {
+    benchMap(b, new bench(
         perG: (ж<Δtesting.B> bΔ1, ж<Δtesting.PB> pb, nint i, mapInterface m) => {
             for (; pb.Next(); i++) {
                 nint k = i % 256;

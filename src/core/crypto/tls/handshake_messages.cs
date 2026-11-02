@@ -17,20 +17,20 @@ partial class tls_package {
 // functions as cryptobyte.MarshalingValue.
 internal delegate error marshalingFunction(ж<cryptobyte.Builder> b);
 
-internal static error Marshal(this marshalingFunction f, ж<cryptobyte.Builder> Ꮡb) {
-    return f(Ꮡb);
+internal static error Marshal(this marshalingFunction f, ж<cryptobyte.Builder> b) {
+    return f(b);
 }
 
 // addBytesWithLength appends a sequence of bytes to the cryptobyte.Builder. If
 // the length of the sequence is not the value specified, it produces an error.
-internal static void addBytesWithLength(ж<cryptobyte.Builder> Ꮡb, slice<byte> v, nint n) {
+internal static void addBytesWithLength(ж<cryptobyte.Builder> b, slice<byte> v, nint n) {
     var vʗ1 = v;
-    Ꮡb.AddValue(new marshalingFunctionᴠMarshalingValue(new marshalingFunction(error (ж<cryptobyte.Builder> bΔ1) => {
+    b.AddValue(new marshalingFunctionᴠMarshalingValue(new marshalingFunction(error (ж<cryptobyte.Builder> bΔ1) => {
         if (len(vʗ1) != n) {
             return fmt.Errorf("invalid value length: expected %d, got %d"u8, n, len(vʗ1));
         }
         bΔ1.AddBytes(vʗ1);
-        return default!;
+        return default;
     })));
 }
 
@@ -58,26 +58,26 @@ internal static bool readUint64(ж<cryptobyte.String> Ꮡs, ref uint64 @out) {
 
 // readUint8LengthPrefixed acts like s.ReadUint8LengthPrefixed, but targets a
 // []byte instead of a cryptobyte.String.
-internal static bool readUint8LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<slice<byte>> Ꮡout) {
+internal static bool readUint8LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<slice<byte>> @out) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return s.ReadUint8LengthPrefixed(Ꮡout.Reinterpret<slice<byte>, cryptobyte.String>());
+    return s.ReadUint8LengthPrefixed(@out.Reinterpret<slice<byte>, cryptobyte.String>());
 }
 
 // readUint16LengthPrefixed acts like s.ReadUint16LengthPrefixed, but targets a
 // []byte instead of a cryptobyte.String.
-internal static bool readUint16LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<slice<byte>> Ꮡout) {
+internal static bool readUint16LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<slice<byte>> @out) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return s.ReadUint16LengthPrefixed(Ꮡout.Reinterpret<slice<byte>, cryptobyte.String>());
+    return s.ReadUint16LengthPrefixed(@out.Reinterpret<slice<byte>, cryptobyte.String>());
 }
 
 // readUint24LengthPrefixed acts like s.ReadUint24LengthPrefixed, but targets a
 // []byte instead of a cryptobyte.String.
-internal static bool readUint24LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<slice<byte>> Ꮡout) {
+internal static bool readUint24LengthPrefixed(ж<cryptobyte.String> Ꮡs, ж<slice<byte>> @out) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return s.ReadUint24LengthPrefixed(Ꮡout.Reinterpret<slice<byte>, cryptobyte.String>());
+    return s.ReadUint24LengthPrefixed(@out.Reinterpret<slice<byte>, cryptobyte.String>());
 }
 
 partial struct clientHelloMsg {
@@ -170,7 +170,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
         exts.AddUint16(extensionEarlyData);
         exts.AddUint16(0); // empty extension_data
     }
-    if (m.quicTransportParameters != default!) { // marshal zero-length parameters when present
+    if (m.quicTransportParameters != nil) { // marshal zero-length parameters when present
         // RFC 9001, Section 8.2
         exts.AddUint16(extensionQUICTransportParameters);
         Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ9) => {
@@ -187,15 +187,15 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     // contiguous. If any additional extensions are to be compressed they must
     // be added to the following block, so that they can be properly
     // decompressed on the other side.
-    slice<uint16> echOuterExts = default!;
+    slice<uint16> echOuterExts = default;
     if (m.ocspStapling) {
         // RFC 4366, Section 3.6
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExtsᴷ, echOuterExts, extensionStatusRequest);
         } else {
             exts.AddUint16(extensionStatusRequest);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ11) => {
-                extsΔ11.AddUint8(1); // status_type = ocsp
+                extsΔ11.AddUint8(1);  // status_type = ocsp
                 extsΔ11.AddUint16(0); // empty responder_id_list
                 extsΔ11.AddUint16(0); // empty request_extensions
             });
@@ -203,7 +203,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.supportedCurves) > 0) {
         // RFC 4492, sections 5.1.1 and RFC 8446, Section 4.2.7
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionSupportedCurves);
         } else {
             exts.AddUint16(extensionSupportedCurves);
@@ -218,7 +218,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.supportedSignatureAlgorithms) > 0) {
         // RFC 5246, Section 7.4.1.4.1
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionSignatureAlgorithms);
         } else {
             exts.AddUint16(extensionSignatureAlgorithms);
@@ -233,7 +233,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.supportedSignatureAlgorithmsCert) > 0) {
         // RFC 8446, Section 4.2.3
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionSignatureAlgorithmsCert);
         } else {
             exts.AddUint16(extensionSignatureAlgorithmsCert);
@@ -248,7 +248,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.alpnProtocols) > 0) {
         // RFC 7301, Section 3.1
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionALPN);
         } else {
             exts.AddUint16(extensionALPN);
@@ -265,7 +265,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.supportedVersions) > 0) {
         // RFC 8446, Section 4.2.1
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionSupportedVersions);
         } else {
             exts.AddUint16(extensionSupportedVersions);
@@ -280,7 +280,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.cookie) > 0) {
         // RFC 8446, Section 4.2.2
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionCookie);
         } else {
             exts.AddUint16(extensionCookie);
@@ -293,7 +293,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.keyShares) > 0) {
         // RFC 8446, Section 4.2.8
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionKeyShare);
         } else {
             exts.AddUint16(extensionKeyShare);
@@ -315,7 +315,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     }
     if (len(m.pskModes) > 0) {
         // RFC 8446, Section 4.2.9
-        if (echInner){
+        if (echInner) {
             echOuterExts = append(echOuterExts, extensionPSKModes);
         } else {
             exts.AddUint16(extensionPSKModes);
@@ -339,7 +339,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
         });
     }
     // pre_shared_key must be the last extension
-    if (len(m.pskIdentities) > 0 && (echInner || len(m.encryptedClientHello) == 0 || bytes.Equal(m.encryptedClientHello, new byte[]{(byte)innerECHExt}.slice()))) {
+    if (len(m.pskIdentities) > 0 && (echInner || len(m.encryptedClientHello) == 0 || bytes.Equal(m.encryptedClientHello, slice<byte>([(byte)innerECHExt])))) {
         // RFC 8446, Section 4.2.11
         exts.AddUint16(extensionPreSharedKey);
         Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ32) => {
@@ -366,8 +366,8 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
         });
     }
     var (extBytes, err) = exts.Bytes();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -417,21 +417,22 @@ internal static (slice<byte>, error) marshalWithoutBinders(this ж<clientHelloMs
         bindersLen += len(binder);
     }
 
-    slice<byte> fullMessage = default!;
-    if (m.original != default!){
+    slice<byte> fullMessage = default;
+    if (m.original != nil) {
         fullMessage = m.original;
     } else {
-        error err = default!;
+        error err = default;
         (fullMessage, err) = Ꮡm.marshal();
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
     }
-    return (fullMessage.slice(0, len(fullMessage) - bindersLen), default!);
+    return (fullMessage.slice(0, len(fullMessage) - bindersLen), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tlsInternalErrorˢ5 = "tls: internal error: pskBinders length mismatch"u8;
+internal static ref readonly @string tlsInternalErrorˢ5 => ref tlsInternalErrorˢ5ᵇ;
+private static readonly @string tlsInternalErrorˢ5ᵇ = "tls: internal error: pskBinders length mismatch"u8;
 
 // updateBinders updates the m.pskBinders field. The supplied binders must have
 // the same length as the current m.pskBinders.
@@ -446,18 +447,17 @@ internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>
     }
     m.pskBinders = pskBinders;
 
-    return default!;
+    return default;
 }
 
 internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m = new clientHelloMsg(original: data);
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
 
     if (!s.Skip(4) || // message type and uint24 length field
-        !s.ReadUint16(Ꮡm.of(clientHelloMsg.Ꮡvers)) || !s.ReadBytes(Ꮡm.of(clientHelloMsg.Ꮡrandom), 32) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.of(clientHelloMsg.ᏑsessionId))) {
+        !s.ReadUint16(Ꮡm.Ꮡvers) || !s.ReadBytes(Ꮡm.Ꮡrandom, 32) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.ᏑsessionId)) {
         return false;
     }
 
@@ -465,7 +465,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
     if (!s.ReadUint16LengthPrefixed(ᏑcipherSuites)) {
         return false;
     }
-    m.cipherSuites = new uint16[]{}.slice();
+    m.cipherSuites = slice<uint16>([]);
     m.secureRenegotiationSupported = false;
     while (!ΔcipherSuites.Empty()) {
         ref var suite = ref heap(new uint16(), out var Ꮡsuite);
@@ -478,7 +478,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         m.cipherSuites = append(m.cipherSuites, suite);
     }
 
-    if (!readUint8LengthPrefixed(Ꮡs, Ꮡm.of(clientHelloMsg.ᏑcompressionMethods))) {
+    if (!readUint8LengthPrefixed(Ꮡs, Ꮡm.ᏑcompressionMethods)) {
         return false;
     }
 
@@ -528,7 +528,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
                 }
                 m.serverName = (@string)(slice<byte>)serverName;
                 // An SNI value may not include a trailing dot.
-                if (strings.HasSuffix(m.serverName, "."u8)) {
+                if (strings.HasSuffix(m.serverName, ".")) {
                     return false;
                 }
             }
@@ -561,7 +561,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         }
         case extensionSupportedPoints: {
             // RFC 4492, Section 5.1.2
-            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.of(clientHelloMsg.ᏑsupportedPoints)) || len(m.supportedPoints) == 0) {
+            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.ᏑsupportedPoints) || len(m.supportedPoints) == 0) {
                 return false;
             }
             break;
@@ -569,7 +569,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         case extensionSessionTicket: {
             // RFC 5077, Section 3.2
             m.ticketSupported = true;
-            extData.ReadBytes(Ꮡm.of(clientHelloMsg.ᏑsessionTicket), len(extData));
+            extData.ReadBytes(Ꮡm.ᏑsessionTicket, len(extData));
             break;
         }
         case extensionSignatureAlgorithms: {
@@ -606,7 +606,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         }
         case extensionRenegotiationInfo: {
             // RFC 5746, Section 3.2
-            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.of(clientHelloMsg.ᏑsecureRenegotiation))) {
+            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.ᏑsecureRenegotiation)) {
                 return false;
             }
             m.secureRenegotiationSupported = true;
@@ -654,7 +654,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         }
         case extensionCookie: {
             // RFC 8446, Section 4.2.2
-            if (!readUint16LengthPrefixed(ᏑextData, Ꮡm.of(clientHelloMsg.Ꮡcookie)) || len(m.cookie) == 0) {
+            if (!readUint16LengthPrefixed(ᏑextData, Ꮡm.Ꮡcookie) || len(m.cookie) == 0) {
                 return false;
             }
             break;
@@ -667,7 +667,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
             }
             while (!clientShares.Empty()) {
                 ref var ks = ref heap(new keyShare(), out var Ꮡks);
-                if (!clientShares.ReadUint16(Ꮡks.of(keyShare.Ꮡgroup).Reinterpret<CurveID, uint16>()) || !readUint16LengthPrefixed(ᏑclientShares, Ꮡks.of(keyShare.Ꮡdata)) || len(ks.data) == 0) {
+                if (!clientShares.ReadUint16(Ꮡks.Ꮡgroup.Reinterpret<CurveID, uint16>()) || !readUint16LengthPrefixed(ᏑclientShares, Ꮡks.Ꮡdata) || len(ks.data) == 0) {
                     return false;
                 }
                 m.keyShares = append(m.keyShares, ks);
@@ -681,7 +681,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
         }
         case extensionPSKModes: {
             // RFC 8446, Section 4.2.9
-            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.of(clientHelloMsg.ᏑpskModes))) {
+            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.ᏑpskModes)) {
                 return false;
             }
             break;
@@ -704,7 +704,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
             }
             while (!identities.Empty()) {
                 ref var psk = ref heap(new pskIdentity(), out var Ꮡpsk);
-                if (!readUint16LengthPrefixed(Ꮡidentities, Ꮡpsk.of(pskIdentity.Ꮡlabel)) || !identities.ReadUint32(Ꮡpsk.of(pskIdentity.ᏑobfuscatedTicketAge)) || len(psk.label) == 0) {
+                if (!readUint16LengthPrefixed(Ꮡidentities, Ꮡpsk.Ꮡlabel) || !identities.ReadUint32(Ꮡpsk.ᏑobfuscatedTicketAge) || len(psk.label) == 0) {
                     return false;
                 }
                 m.pskIdentities = append(m.pskIdentities, psk);
@@ -723,7 +723,7 @@ internal static bool unmarshal(this ж<clientHelloMsg> Ꮡm, slice<byte> data) {
             break;
         }
         case extensionEncryptedClientHello: {
-            if (!extData.ReadBytes(Ꮡm.of(clientHelloMsg.ᏑencryptedClientHello), len(extData))) {
+            if (!extData.ReadBytes(Ꮡm.ᏑencryptedClientHello, len(extData))) {
                 return false;
             }
             break;
@@ -908,8 +908,8 @@ internal static (slice<byte>, error) marshal(this ж<serverHelloMsg> Ꮡm) {
     }
 
     var (extBytes, err) = exts.Bytes();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -939,11 +939,10 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m = new serverHelloMsg(original: data);
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
 
     if (!s.Skip(4) || // message type and uint24 length field
-        !s.ReadUint16(Ꮡm.of(serverHelloMsg.Ꮡvers)) || !s.ReadBytes(Ꮡm.of(serverHelloMsg.Ꮡrandom), 32) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.of(serverHelloMsg.ᏑsessionId)) || !s.ReadUint16(Ꮡm.of(serverHelloMsg.ᏑcipherSuite)) || !s.ReadUint8(Ꮡm.of(serverHelloMsg.ᏑcompressionMethod))) {
+        !s.ReadUint16(Ꮡm.Ꮡvers) || !s.ReadBytes(Ꮡm.Ꮡrandom, 32) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.ᏑsessionId) || !s.ReadUint16(Ꮡm.ᏑcipherSuite) || !s.ReadUint8(Ꮡm.ᏑcompressionMethod)) {
         return false;
     }
 
@@ -980,7 +979,7 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
             break;
         }
         case extensionRenegotiationInfo: {
-            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.of(serverHelloMsg.ᏑsecureRenegotiation))) {
+            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.ᏑsecureRenegotiation)) {
                 return false;
             }
             m.secureRenegotiationSupported = true;
@@ -1017,13 +1016,13 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
             break;
         }
         case extensionSupportedVersions: {
-            if (!extData.ReadUint16(Ꮡm.of(serverHelloMsg.ᏑsupportedVersion))) {
+            if (!extData.ReadUint16(Ꮡm.ᏑsupportedVersion)) {
                 return false;
             }
             break;
         }
         case extensionCookie: {
-            if (!readUint16LengthPrefixed(ᏑextData, Ꮡm.of(serverHelloMsg.Ꮡcookie)) || len(m.cookie) == 0) {
+            if (!readUint16LengthPrefixed(ᏑextData, Ꮡm.Ꮡcookie) || len(m.cookie) == 0) {
                 return false;
             }
             break;
@@ -1031,12 +1030,12 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
         case extensionKeyShare: {
             // This extension has different formats in SH and HRR, accept either
             // and let the handshake logic decide. See RFC 8446, Section 4.2.8.
-            if (len(extData) == 2){
-                if (!extData.ReadUint16(Ꮡm.of(serverHelloMsg.ᏑselectedGroup).Reinterpret<CurveID, uint16>())) {
+            if (len(extData) == 2) {
+                if (!extData.ReadUint16(Ꮡm.ᏑselectedGroup.Reinterpret<CurveID, uint16>())) {
                     return false;
                 }
             } else {
-                if (!extData.ReadUint16(Ꮡm.of(serverHelloMsg.ᏑserverShare).of(keyShare.Ꮡgroup).Reinterpret<CurveID, uint16>()) || !readUint16LengthPrefixed(ᏑextData, Ꮡm.of(serverHelloMsg.ᏑserverShare).of(keyShare.Ꮡdata))) {
+                if (!extData.ReadUint16(Ꮡm.ᏑserverShare.Ꮡgroup.Reinterpret<CurveID, uint16>()) || !readUint16LengthPrefixed(ᏑextData, Ꮡm.ᏑserverShare.Ꮡdata)) {
                     return false;
                 }
             }
@@ -1044,14 +1043,14 @@ internal static bool unmarshal(this ж<serverHelloMsg> Ꮡm, slice<byte> data) {
         }
         case extensionPreSharedKey: {
             m.selectedIdentityPresent = true;
-            if (!extData.ReadUint16(Ꮡm.of(serverHelloMsg.ᏑselectedIdentity))) {
+            if (!extData.ReadUint16(Ꮡm.ᏑselectedIdentity)) {
                 return false;
             }
             break;
         }
         case extensionSupportedPoints: {
             // RFC 4492, Section 5.1.2
-            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.of(serverHelloMsg.ᏑsupportedPoints)) || len(m.supportedPoints) == 0) {
+            if (!readUint8LengthPrefixed(ᏑextData, Ꮡm.ᏑsupportedPoints) || len(m.supportedPoints) == 0) {
                 return false;
             }
             break;
@@ -1111,7 +1110,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
                     });
                 });
             }
-            if (Ꮡm.Value.quicTransportParameters != default!) { // marshal zero-length parameters when present
+            if (Ꮡm.Value.quicTransportParameters != nil) { // marshal zero-length parameters when present
                 // draft-ietf-quic-tls-32, Section 8.2
                 bΔ2.AddUint16(extensionQUICTransportParameters);
                 bΔ2.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
@@ -1140,7 +1139,7 @@ internal static (slice<byte>, error) marshal(this ж<encryptedExtensionsMsg> Ꮡ
 }
 
 internal static bool unmarshal(this ref encryptedExtensionsMsg m, slice<byte> data) {
-    m = new encryptedExtensionsMsg(nil);
+    m = new encryptedExtensionsMsg();
     var s = (cryptobyte.String)data;
 
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
@@ -1221,7 +1220,7 @@ partial struct endOfEarlyDataMsg {
 internal static (slice<byte>, error) marshal(this ref endOfEarlyDataMsg m) {
     var x = new slice<byte>(4);
     x[0] = typeEndOfEarlyData;
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref endOfEarlyDataMsg m, slice<byte> data) {
@@ -1236,7 +1235,7 @@ internal static (slice<byte>, error) marshal(this ж<keyUpdateMsg> Ꮡm) {
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
     b.AddUint8(typeKeyUpdate);
     Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
-        if (Ꮡm.Value.updateRequested){
+        if (Ꮡm.Value.updateRequested) {
             bΔ1.AddUint8(1);
         } else {
             bΔ1.AddUint8(0);
@@ -1306,13 +1305,12 @@ internal static (slice<byte>, error) marshal(this ж<newSessionTicketMsgTLS13> �
 internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    m = new newSessionTicketMsgTLS13(nil);
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    m = new newSessionTicketMsgTLS13();
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
 
     ref var extensions = ref heap<cryptobyte.String>(out var Ꮡextensions);
     if (!s.Skip(4) || // message type and uint24 length field
-        !s.ReadUint32(Ꮡm.of(newSessionTicketMsgTLS13.Ꮡlifetime)) || !s.ReadUint32(Ꮡm.of(newSessionTicketMsgTLS13.ᏑageAdd)) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.of(newSessionTicketMsgTLS13.Ꮡnonce)) || !readUint16LengthPrefixed(Ꮡs, Ꮡm.of(newSessionTicketMsgTLS13.Ꮡlabel)) || !s.ReadUint16LengthPrefixed(Ꮡextensions) || !s.Empty()) {
+        !s.ReadUint32(Ꮡm.Ꮡlifetime) || !s.ReadUint32(Ꮡm.ᏑageAdd) || !readUint8LengthPrefixed(Ꮡs, Ꮡm.Ꮡnonce) || !readUint16LengthPrefixed(Ꮡs, Ꮡm.Ꮡlabel) || !s.ReadUint16LengthPrefixed(Ꮡextensions) || !s.Empty()) {
         return false;
     }
 
@@ -1325,7 +1323,7 @@ internal static bool unmarshal(this ж<newSessionTicketMsgTLS13> Ꮡm, slice<byt
 
         switch (extension) {
         case extensionEarlyData: {
-            if (!extData.ReadUint32(Ꮡm.of(newSessionTicketMsgTLS13.ᏑmaxEarlyData))) {
+            if (!extData.ReadUint32(Ꮡm.ᏑmaxEarlyData)) {
                 return false;
             }
             break;
@@ -1414,7 +1412,7 @@ internal static (slice<byte>, error) marshal(this ж<certificateRequestMsgTLS13>
 }
 
 internal static bool unmarshal(this ref certificateRequestMsgTLS13 m, slice<byte> data) {
-    m = new certificateRequestMsgTLS13(nil);
+    m = new certificateRequestMsgTLS13();
     var s = (cryptobyte.String)data;
 
     ref var context = ref heap<cryptobyte.String>(out var Ꮡcontext);
@@ -1503,7 +1501,7 @@ partial struct certificateMsg {
 }
 
 internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
-    nint i = default!;
+    nint i = default;
     foreach (var (_, Δslice) in m.certificates) {
         i += len(Δslice);
     }
@@ -1529,7 +1527,7 @@ internal static (slice<byte>, error) marshal(this ref certificateMsg m) {
         y = y.slice(3 + len(Δslice));
     }
 
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref certificateMsg m, slice<byte> data) {
@@ -1582,10 +1580,10 @@ internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) 
 
         var certificate = Ꮡm.Value.certificate;
         if (!Ꮡm.Value.ocspStapling) {
-            certificate.OCSPStaple = default!;
+            certificate.OCSPStaple = default;
         }
         if (!Ꮡm.Value.scts) {
-            certificate.SignedCertificateTimestamps = default!;
+            certificate.SignedCertificateTimestamps = default;
         }
         marshalCertificate(bΔ1, certificate);
     });
@@ -1593,9 +1591,9 @@ internal static (slice<byte>, error) marshal(this ж<certificateMsgTLS13> Ꮡm) 
     return b.Bytes();
 }
 
-internal static void marshalCertificate(ж<cryptobyte.Builder> Ꮡb, Certificate certificate) {
+internal static void marshalCertificate(ж<cryptobyte.Builder> b, Certificate certificate) {
     var certificateʗ1 = certificate;
-    Ꮡb.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
+    b.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ1) => {
         foreach (var (i, cert) in certificateʗ1.ΔCertificate) {
             var certʗ1 = cert;
             bΔ1.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ2) => {
@@ -1607,7 +1605,7 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> Ꮡb, Certificate
                     // This library only supports OCSP and SCT for leaf certificates.
                     return;
                 }
-                if (certificateʗ2.OCSPStaple != default!) {
+                if (certificateʗ2.OCSPStaple != nil) {
                     bΔ3.AddUint16(extensionStatusRequest);
                     var certificateʗ3 = certificateʗ2;
                     bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ4) => {
@@ -1618,7 +1616,7 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> Ꮡb, Certificate
                         });
                     });
                 }
-                if (certificateʗ2.SignedCertificateTimestamps != default!) {
+                if (certificateʗ2.SignedCertificateTimestamps != nil) {
                     bΔ3.AddUint16(extensionSCT);
                     var certificateʗ5 = certificateʗ2;
                     bΔ3.AddUint16LengthPrefixed((ж<cryptobyte.Builder> bΔ6) => {
@@ -1641,18 +1639,17 @@ internal static void marshalCertificate(ж<cryptobyte.Builder> Ꮡb, Certificate
 internal static bool unmarshal(this ж<certificateMsgTLS13> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    m = new certificateMsgTLS13(nil);
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    m = new certificateMsgTLS13();
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
 
     ref var context = ref heap<cryptobyte.String>(out var Ꮡcontext);
     if (!s.Skip(4) || // message type and uint24 length field
-        !s.ReadUint8LengthPrefixed(Ꮡcontext) || !context.Empty() || !unmarshalCertificate(Ꮡs, Ꮡm.of(certificateMsgTLS13.Ꮡcertificate)) || !s.Empty()) {
+        !s.ReadUint8LengthPrefixed(Ꮡcontext) || !context.Empty() || !unmarshalCertificate(Ꮡs, Ꮡm.Ꮡcertificate) || !s.Empty()) {
         return false;
     }
 
-    m.scts = m.certificate.SignedCertificateTimestamps != default!;
-    m.ocspStapling = m.certificate.OCSPStaple != default!;
+    m.scts = m.certificate.SignedCertificateTimestamps != nil;
+    m.ocspStapling = m.certificate.OCSPStaple != nil;
 
     return true;
 }
@@ -1686,7 +1683,7 @@ internal static bool unmarshalCertificate(ж<cryptobyte.String> Ꮡs, ж<Certifi
             switch (extension) {
             case extensionStatusRequest: {
                 ref var statusType = ref heap(new uint8(), out var ᏑstatusType);
-                if (!extData.ReadUint8(ᏑstatusType) || statusType != statusTypeOCSP || !readUint24LengthPrefixed(ᏑextData, Ꮡcertificate.of(Certificate.ᏑOCSPStaple)) || len(certificate.OCSPStaple) == 0) {
+                if (!extData.ReadUint8(ᏑstatusType) || statusType != statusTypeOCSP || !readUint24LengthPrefixed(ᏑextData, Ꮡcertificate.ᏑOCSPStaple) || len(certificate.OCSPStaple) == 0) {
                     return false;
                 }
                 break;
@@ -1733,7 +1730,7 @@ internal static (slice<byte>, error) marshal(this ref serverKeyExchangeMsg m) {
     x[3] = (uint8)length;
     copy(x[4..], m.key);
 
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref serverKeyExchangeMsg m, slice<byte> data) {
@@ -1764,12 +1761,11 @@ internal static (slice<byte>, error) marshal(this ж<certificateStatusMsg> Ꮡm)
 internal static bool unmarshal(this ж<certificateStatusMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
 
     ref var statusType = ref heap(new uint8(), out var ᏑstatusType);
     if (!s.Skip(4) || // message type and uint24 length field
-        !s.ReadUint8(ᏑstatusType) || statusType != statusTypeOCSP || !readUint24LengthPrefixed(Ꮡs, Ꮡm.of(certificateStatusMsg.Ꮡresponse)) || len(m.response) == 0 || !s.Empty()) {
+        !s.ReadUint8(ᏑstatusType) || statusType != statusTypeOCSP || !readUint24LengthPrefixed(Ꮡs, Ꮡm.Ꮡresponse) || len(m.response) == 0 || !s.Empty()) {
         return false;
     }
     return true;
@@ -1781,7 +1777,7 @@ partial struct serverHelloDoneMsg {
 internal static (slice<byte>, error) marshal(this ref serverHelloDoneMsg m) {
     var x = new slice<byte>(4);
     x[0] = typeServerHelloDone;
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref serverHelloDoneMsg m, slice<byte> data) {
@@ -1801,7 +1797,7 @@ internal static (slice<byte>, error) marshal(this ref clientKeyExchangeMsg m) {
     x[3] = (uint8)length;
     copy(x[4..], m.ciphertext);
 
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref clientKeyExchangeMsg m, slice<byte> data) {
@@ -1831,9 +1827,8 @@ internal static (slice<byte>, error) marshal(this ж<finishedMsg> Ꮡm) {
 }
 
 internal static bool unmarshal(this ж<finishedMsg> Ꮡm, slice<byte> data) {
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
-    return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.of(finishedMsg.ᏑverifyData)) && s.Empty();
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
+    return s.Skip(1) && readUint24LengthPrefixed(Ꮡs, Ꮡm.ᏑverifyData) && s.Empty();
 }
 
 partial struct certificateRequestMsg {
@@ -1875,8 +1870,8 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
         y[1] = (uint8)n;
         y = y[2..];
         foreach (var (_, sigAlgo) in m.supportedSignatureAlgorithms) {
-            y[0] = (uint8)(uint16)((sigAlgo >> 8));
-            y[1] = (uint8)(uint16)sigAlgo;
+            y[0] = (uint8)(sigAlgo >> 8);
+            y[1] = (uint8)sigAlgo;
             y = y[2..];
         }
     }
@@ -1892,7 +1887,7 @@ internal static (slice<byte>, error) marshal(this ref certificateRequestMsg m) {
         y = y.slice(len(ca));
     }
 
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> data) {
@@ -1950,7 +1945,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
     copy(cas, data);
     data = data.slice(casLength);
 
-    m.certificateAuthorities = default!;
+    m.certificateAuthorities = default;
     while (len(cas) > 0) {
         if (len(cas) < 2) {
             return false;
@@ -1993,18 +1988,17 @@ internal static (slice<byte>, error) marshal(this ж<certificateVerifyMsg> Ꮡm)
 internal static bool unmarshal(this ж<certificateVerifyMsg> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
-    s = (cryptobyte.String)data;
+    ref var s = ref heap<cryptobyte.String>((cryptobyte.String)data, out var Ꮡs);
 
     if (!s.Skip(4)) { // message type and uint24 length field
         return false;
     }
     if (m.hasSignatureAlgorithm) {
-        if (!s.ReadUint16(Ꮡm.of(certificateVerifyMsg.ᏑsignatureAlgorithm).Reinterpret<SignatureScheme, uint16>())) {
+        if (!s.ReadUint16(Ꮡm.ᏑsignatureAlgorithm.Reinterpret<SignatureScheme, uint16>())) {
             return false;
         }
     }
-    return readUint16LengthPrefixed(Ꮡs, Ꮡm.of(certificateVerifyMsg.Ꮡsignature)) && s.Empty();
+    return readUint16LengthPrefixed(Ꮡs, Ꮡm.Ꮡsignature) && s.Empty();
 }
 
 partial struct newSessionTicketMsg {
@@ -2024,7 +2018,7 @@ internal static (slice<byte>, error) marshal(this ref newSessionTicketMsg m) {
     x[9] = (uint8)ticketLen;
     copy(x[10..], m.ticket);
 
-    return (x, default!);
+    return (x, default);
 }
 
 internal static bool unmarshal(this ref newSessionTicketMsg m, slice<byte> data) {
@@ -2051,7 +2045,7 @@ partial struct helloRequestMsg {
 }
 
 internal static (slice<byte>, error) marshal(this ref helloRequestMsg _) {
-    return (new byte[]{typeHelloRequest, 0, 0, 0}.slice(), default!);
+    return (slice<byte>([typeHelloRequest, 0, 0, 0]), default);
 }
 
 internal static bool unmarshal(this ref helloRequestMsg _, slice<byte> data) {
@@ -2077,20 +2071,20 @@ internal static error transcriptMsg(handshakeMessage msg, transcriptHash h) {
     {
         var (msgWithOrig, ok) = msg._<handshakeMessageWithOriginalBytes>(ᐧ); if (ok) {
             {
-                var orig = msgWithOrig.originalBytes(); if (orig != default!) {
+                var orig = msgWithOrig.originalBytes(); if (orig != nil) {
                     h.Write(msgWithOrig.originalBytes());
-                    return default!;
+                    return default;
                 }
             }
         }
     }
 
     var (data, err) = msg.marshal();
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     h.Write(data);
-    return default!;
+    return default;
 }
 
 } // end tls_package

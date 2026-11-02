@@ -24,7 +24,7 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
     seed = seed.Clone();
 
     var c = @new<ChaCha8>();
-    c.of(ChaCha8.Ꮡstate).Init(seed);
+    c.Ꮡstate.Init(seed);
     return c;
 }
 
@@ -33,7 +33,7 @@ public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
     ref var c = ref Ꮡc.DerefOrNull();
 
-    Ꮡc.of(ChaCha8.Ꮡstate).Init(seed);
+    Ꮡc.Ꮡstate.Init(seed);
     c.readLen = 0;
     c.readBuf = new byte[]{}.array(8);
 }
@@ -42,12 +42,12 @@ public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
 public static uint64 Uint64(this ж<ChaCha8> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var (x, ok) = c.state.Next();
         if (ok) {
             return x;
         }
-        Ꮡc.of(ChaCha8.Ꮡstate).Refill();
+        Ꮡc.Ꮡstate.Refill();
     }
 }
 
@@ -58,8 +58,8 @@ public static uint64 Uint64(this ж<ChaCha8> Ꮡc) {
 // returned by the two is undefined, and Read may return bits generated before
 // the last call to Uint64.
 public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.readLen > 0) {
@@ -81,7 +81,8 @@ public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidChaCha8ReadBufferˢ = "invalid ChaCha8 Read buffer encoding"u8;
+internal static ref readonly @string invalidChaCha8ReadBufferˢ => ref invalidChaCha8ReadBufferˢᵇ;
+private static readonly @string invalidChaCha8ReadBufferˢᵇ = "invalid ChaCha8 Read buffer encoding"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) {
@@ -89,14 +90,14 @@ public static error UnmarshalBinary(this ж<ChaCha8> Ꮡc, slice<byte> data) {
 
     (data, var ok) = cutPrefix(data, slice<byte>("readbuf:"u8));
     if (ok) {
-        slice<byte> buf = default!;
+        slice<byte> buf = default;
         (buf, data, ok) = readUint8LengthPrefixed(data);
         if (!ok) {
             return errors.New(invalidChaCha8ReadBufferˢ);
         }
         c.readLen = copy(c.readBuf.slice(len(c.readBuf) - len(buf)), buf);
     }
-    return chacha8rand.Unmarshal(Ꮡc.of(ChaCha8.Ꮡstate), data);
+    return chacha8rand.Unmarshal(Ꮡc.Ꮡstate, data);
 }
 
 internal static (slice<byte> after, bool found) cutPrefix(slice<byte> s, slice<byte> prefix) {
@@ -108,7 +109,7 @@ internal static (slice<byte> after, bool found) cutPrefix(slice<byte> s, slice<b
 
 internal static (slice<byte> buf, slice<byte> rest, bool ok) readUint8LengthPrefixed(slice<byte> b) {
     if (len(b) == 0 || len(b) < (nint)((byte)(1 + b[0]))) {
-        return (default!, default!, false);
+        return (default, default, false);
     }
     return (b.slice(1, (byte)(1 + b[0])), b.slice((byte)(1 + b[0])), true);
 }
@@ -118,11 +119,11 @@ public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byt
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.readLen > 0) {
-        b = append(b, ((@string)"readbuf:"u8).ꓸꓸꓸ);
+        b = append(b, ((@string)"readbuf:").ꓸꓸꓸ);
         b = append(b, (uint8)c.readLen);
         b = appendꓸꓸꓸ(b, c.readBuf.slice(len(c.readBuf) - c.readLen));
     }
-    return (appendꓸꓸꓸ(b, chacha8rand.Marshal(Ꮡc.of(ChaCha8.Ꮡstate))), default!);
+    return (appendꓸꓸꓸ(b, chacha8rand.Marshal(Ꮡc.Ꮡstate)), default);
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.

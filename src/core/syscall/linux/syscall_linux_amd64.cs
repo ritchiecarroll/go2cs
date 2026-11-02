@@ -55,16 +55,16 @@ internal static UntypedInt _SYS_fchmodat2 => 452;
 //sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error)
 //sys	mmap(addr uintptr, length uintptr, prot int, flags int, fd int, offset int64) (xaddr uintptr, err error)
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
-public static error /*err*/ Stat(@string path, ж<Stat_t> Ꮡstat) {
-    return fstatat(_AT_FDCWD, path, Ꮡstat, 0);
+public static error /*err*/ Stat(@string path, ж<Stat_t> stat) {
+    return fstatat(_AT_FDCWD, path, stat, 0);
 }
 
 public static error /*err*/ Lchown(@string path, nint uid, nint gid) {
     return Fchownat(_AT_FDCWD, path, uid, gid, _AT_SYMLINK_NOFOLLOW);
 }
 
-public static error /*err*/ Lstat(@string path, ж<Stat_t> Ꮡstat) {
-    return fstatat(_AT_FDCWD, path, Ꮡstat, _AT_SYMLINK_NOFOLLOW);
+public static error /*err*/ Lstat(@string path, ж<Stat_t> stat) {
+    return fstatat(_AT_FDCWD, path, stat, _AT_SYMLINK_NOFOLLOW);
 }
 
 //sys	futimesat(dirfd int, path string, times *[2]Timeval) (err error)
@@ -72,12 +72,12 @@ public static error /*err*/ Lstat(@string path, ж<Stat_t> Ꮡstat) {
 //go:noescape
 public static partial Errno /*err*/ gettimeofday(ж<Timeval> tv);
 
-public static error /*err*/ Gettimeofday(ж<Timeval> Ꮡtv) {
-    var errno = gettimeofday(Ꮡtv);
+public static error /*err*/ Gettimeofday(ж<Timeval> tv) {
+    var errno = gettimeofday(tv);
     if (errno != 0) {
         return errno;
     }
-    return default!;
+    return default;
 }
 
 public static (Time_t tt, error err) Time(ж<Time_t> Ꮡt) {
@@ -91,7 +91,7 @@ public static (Time_t tt, error err) Time(ж<Time_t> Ꮡt) {
     if (Ꮡt != nil) {
         t = (Time_t)tv.Sec;
     }
-    return ((Time_t)tv.Sec, default!);
+    return ((Time_t)tv.Sec, default);
 }
 
 //sys	Utime(path string, buf *Utimbuf) (err error)

@@ -83,10 +83,10 @@ public static error Close(this ref Conn c) {
 // and then returns a new [Conn] for the connection.
 public static (ж<Conn>, error) Dial(@string network, @string addr) {
     var (c, err) = net.Dial(network, addr);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (NewConn(new net_ConnᴠReadWriteCloser(c)), default!);
+    return (NewConn(new net_ConnᴠReadWriteCloser(c)), default);
 }
 
 // Cmd is a convenience method that sends a command after
@@ -114,18 +114,18 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 //	}
 //	return c.ReadCodeLine(250)
 public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
-    nuint id = default!;
-    error err = default!;
+    nuint id = default;
+    error err = default;
     var args = argsʗp.sslice();
 
     id = Ꮡc.of(Conn.ᏑPipeline).Next();
     Ꮡc.of(Conn.ᏑPipeline).StartRequest(id);
     err = Ꮡc.of(Conn.ᏑWriter).PrintfLine(format, args.ꓸꓸꓸ);
     Ꮡc.of(Conn.ᏑPipeline).EndRequest(id);
-    if (err != default!) {
+    if (err != nil) {
         return (0, err);
     }
-    return (id, default!);
+    return (id, default);
 }
 
 // TrimString returns s without leading and trailing ASCII space.
@@ -151,12 +151,12 @@ public static slice<byte> TrimBytes(slice<byte> b) {
 }
 
 internal static bool isASCIISpace(byte b) {
-    return b == (rune)' ' || b == (rune)'\t' || b == (rune)'\n' || b == (rune)'\r';
+    return b == ' ' || b == '\t' || b == '\n' || b == '\r';
 }
 
 internal static bool isASCIILetter(byte b) {
     b |= (byte)(0x20); // make lower case
-    return (rune)'a' <= b && b <= (rune)'z';
+    return 'a' <= b && b <= 'z';
 }
 
 } // end textproto_package

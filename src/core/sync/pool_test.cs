@@ -25,34 +25,34 @@ partial class sync_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedEmptyˢ = (@string)"expected empty"u8;
 
-public static void TestPool(ж<Δtesting.T> Ꮡt) {
+public static void TestPool(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // disable GC so we can control when it happens.
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
         ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
-        if (Ꮡp.Get() != default!) {
-            Ꮡt.Fatal(expectedEmptyˢ);
+        if (Ꮡp.Get() != nil) {
+            t.Fatal(expectedEmptyˢ);
         }
 
         // Make sure that the goroutine doesn't migrate to another P
         // between Put and Get calls.
         sync_internal_test_package.Runtime_procPin();
-        Ꮡp.Put((@string)"a"u8);
-        Ꮡp.Put((@string)"b"u8);
+        Ꮡp.Put("a");
+        Ꮡp.Put("b");
         {
             var g = Ꮡp.Get(); if (!AreEqual(g, (@string)("a"))) {
-                Ꮡt.Fatalf("got %#v; want a"u8, g);
+                t.Fatalf("got %#v; want a", g);
             }
         }
         {
             var g = Ꮡp.Get(); if (!AreEqual(g, (@string)("b"))) {
-                Ꮡt.Fatalf("got %#v; want b"u8, g);
+                t.Fatalf("got %#v; want b", g);
             }
         }
         {
-            var g = Ꮡp.Get(); if (g != default!) {
-                Ꮡt.Fatalf("got %#v; want nil"u8, g);
+            var g = Ꮡp.Get(); if (g != nil) {
+                t.Fatalf("got %#v; want nil", g);
             }
         }
         sync_internal_test_package.Runtime_procUnpin();
@@ -60,20 +60,20 @@ public static void TestPool(ж<Δtesting.T> Ꮡt) {
         // Put in a large number of objects so they spill into
         // stealable space.
         for (nint i = 0; i < 100; i++) {
-            Ꮡp.Put((@string)"c"u8);
+            Ꮡp.Put("c");
         }
         // After one GC, the victim cache should keep them alive.
         Δruntime.GC();
         {
             var g = Ꮡp.Get(); if (!AreEqual(g, (@string)("c"))) {
-                Ꮡt.Fatalf("got %#v; want c after GC"u8, g);
+                t.Fatalf("got %#v; want c after GC", g);
             }
         }
         // A second GC should drop the victim cache.
         Δruntime.GC();
         {
-            var g = Ꮡp.Get(); if (g != default!) {
-                Ꮡt.Fatalf("got %#v; want nil after second GC"u8, g);
+            var g = Ꮡp.Get(); if (g != nil) {
+                t.Fatalf("got %#v; want nil after second GC", g);
             }
         }
     }
@@ -81,28 +81,27 @@ public static void TestPool(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPoolNew(ж<Δtesting.T> Ꮡt) {
+public static void TestPoolNew(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         // disable GC so we can control when it happens.
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
 
         nint i = 0;
-        ref var p = ref heap<Δsync.Pool>(out var Ꮡp);
-        p = new Pool(
+        ref var p = ref heap<Δsync.Pool>(new Pool(
             New: () => {
                 i++;
                 return i;
             }
-        );
+        ), out var Ꮡp);
         {
             var v = Ꮡp.Get(); if (!AreEqual(v, (nint)1)) {
-                Ꮡt.Fatalf("got %v; want 1"u8, v);
+                t.Fatalf("got %v; want 1", v);
             }
         }
         {
             var v = Ꮡp.Get(); if (!AreEqual(v, (nint)2)) {
-                Ꮡt.Fatalf("got %v; want 2"u8, v);
+                t.Fatalf("got %v; want 2", v);
             }
         }
 
@@ -112,14 +111,14 @@ public static void TestPoolNew(ж<Δtesting.T> Ꮡt) {
         Ꮡp.Put((nint)42);
         {
             var v = Ꮡp.Get(); if (!AreEqual(v, (nint)42)) {
-                Ꮡt.Fatalf("got %v; want 42"u8, v);
+                t.Fatalf("got %v; want 42", v);
             }
         }
         sync_internal_test_package.Runtime_procUnpin();
 
         {
             var v = Ꮡp.Get(); if (!AreEqual(v, (nint)3)) {
-                Ꮡt.Fatalf("got %v; want 3"u8, v);
+                t.Fatalf("got %v; want 3", v);
             }
         }
     }
@@ -128,16 +127,16 @@ public static void TestPoolNew(ж<Δtesting.T> Ꮡt) {
 }
 
 // Test that Pool does not hold pointers to previously cached resources.
-public static void TestPoolGC(ж<Δtesting.T> Ꮡt) {
-    testPool(Ꮡt, true);
+public static void TestPoolGC(ж<Δtesting.T> t) {
+    testPool(t, true);
 }
 
 // Test that Pool releases resources on GC.
-public static void TestPoolRelease(ж<Δtesting.T> Ꮡt) {
-    testPool(Ꮡt, false);
+public static void TestPoolRelease(ж<Δtesting.T> t) {
+    testPool(t, false);
 }
 
-internal static void testPool(ж<Δtesting.T> Ꮡt, bool drain) {
+internal static void testPool(ж<Δtesting.T> t, bool drain) {
     GoFrame ᒐ = default;
     try {
         if (drain) {
@@ -159,7 +158,7 @@ internal static void testPool(ж<Δtesting.T> Ꮡt, bool drain) {
                 break;
             }
             ref var cln = ref heap(new uint32(), out var Ꮡcln);
-            uint32 cln1 = default!;
+            uint32 cln1 = default;
             for (nint i = 0; i < N; i++) {
                 var v = @new<@string>();
                 Δruntime.AddCleanup(v, (ж<uint32> f) => {
@@ -167,7 +166,7 @@ internal static void testPool(ж<Δtesting.T> Ꮡt, bool drain) {
                 }, Ꮡcln);
                 Ꮡp.Put(v.OrTypedNil());
             }
-            if (drain){
+            if (drain) {
                 for (nint i = 0; i < N; i++) {
                     Ꮡp.Get();
                 }
@@ -183,7 +182,7 @@ internal static void testPool(ж<Δtesting.T> Ꮡt, bool drain) {
             // 1 pointer can remain on stack or elsewhere
             {
                 cln1 = atomic.LoadUint32(Ꮡcln); if (cln1 < (uint32)(N - 1)) {
-                    Ꮡt.Fatalf("only %v out of %v resources are cleaned up on try %v"u8, cln1, (nint)(N), @try);
+                    t.Fatalf("only %v out of %v resources are cleaned up on try %v", cln1, (nint)(N), @try);
                 }
             }
         }
@@ -192,7 +191,7 @@ internal static void testPool(ж<Δtesting.T> Ꮡt, bool drain) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestPoolStress(ж<Δtesting.T> Ꮡt) {
+public static partial void TestPoolStress(ж<Δtesting.T> t) {
     const nint P = 10;
     nint N = (nint)1000000;
     if (Δtesting.Short()) {
@@ -205,13 +204,13 @@ public static partial void TestPoolStress(ж<Δtesting.T> Ꮡt) {
         goǃ(() => {
             any v = (nint)0;
             for (nint j = 0; j < N; j++) {
-                if (v == default!) {
+                if (v == nil) {
                     v = (nint)0;
                 }
                 Ꮡp.Put(v);
                 v = Ꮡp.Get();
-                if (v != default! && v._<nint>() != 0) {
-                    Ꮡt.Errorf("expect 0, got %v"u8, v);
+                if (v != nil && v._<nint>() != 0) {
+                    t.Errorf("expect 0, got %v", v);
                     break;
                 }
             }
@@ -223,15 +222,15 @@ public static partial void TestPoolStress(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestPoolDequeue(ж<Δtesting.T> Ꮡt) {
-    testPoolDequeue(Ꮡt, sync_internal_test_package.NewPoolDequeue(16));
+public static void TestPoolDequeue(ж<Δtesting.T> t) {
+    testPoolDequeue(t, sync_internal_test_package.NewPoolDequeue(16));
 }
 
-public static void TestPoolChain(ж<Δtesting.T> Ꮡt) {
-    testPoolDequeue(Ꮡt, sync_internal_test_package.NewPoolChain());
+public static void TestPoolChain(ж<Δtesting.T> t) {
+    testPoolDequeue(t, sync_internal_test_package.NewPoolChain());
 }
 
-internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sync_internal_test_package.PoolDequeue d) {
+internal static partial void testPoolDequeue(ж<Δtesting.T> t, global::go.sync_internal_test_package.PoolDequeue d) {
     const nint P = 10;
     nint N = 2000000;
     if (Δtesting.Short()) {
@@ -256,7 +255,7 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sy
             nint fail = 0;
             while (atomic.LoadInt32(Ꮡstop) == 0) {
                 var (val, ok) = d.PopTail();
-                if (ok){
+                if (ok) {
                     fail = 0;
                     recordʗ1(val._<nint>());
                 } else {
@@ -298,7 +297,7 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sy
     // Check results.
     foreach (var (i, count) in have) {
         if (count != 1) {
-            Ꮡt.Errorf("expected have[%d] = 1, got %d"u8, i, count);
+            t.Errorf("expected have[%d] = 1, got %d", i, count);
         }
     }
     // Check that at least some PopHeads succeeded. We skip this
@@ -307,37 +306,39 @@ internal static partial void testPoolDequeue(ж<Δtesting.T> Ꮡt, global::go.sy
     // will happen during the window between every PushHead and
     // PopHead.
     if (!Δtesting.Short() && nPopHead == 0) {
-        Ꮡt.Errorf("popHead never succeeded"u8);
+        t.Errorf("popHead never succeeded");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedPanicˢ = (@string)"expected panic"u8;
-internal static readonly @string getˢ = "Get"u8;
+internal static ref readonly @string getˢ => ref getˢᵇ;
+private static readonly @string getˢᵇ = "Get"u8;
 internal static readonly object shouldHavePanickedˢ = (@string)"should have panicked already"u8;
-internal static readonly @string putˢ = "Put"u8;
+internal static ref readonly @string putˢ => ref putˢᵇ;
+private static readonly @string putˢᵇ = "Put"u8;
 
-public static void TestNilPool(ж<Δtesting.T> Ꮡt) {
+public static void TestNilPool(ж<Δtesting.T> t) {
     void @catch() {
         GoFrame ᒐ = default;
         try {
-            if (recoverChecked() == default!) {
-                Ꮡt.Error(expectedPanicˢ);
+            if (recoverChecked() == nil) {
+                t.Error(expectedPanicˢ);
             }
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
 
-    ж<Δsync.Pool> p = default!;
+    ж<Δsync.Pool> p = default;
     var catchʗ1 = @catch;
     var pʗ1 = p;
-    Ꮡt.Run(getˢ, (ж<Δtesting.T> tΔ1) => {
+    t.Run(getˢ, (ж<Δtesting.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             var catchʗ2 = catchʗ1;
             defer(catchʗ2, ref ᒐ);
-            if (pʗ1.Get() != default!) {
+            if (pʗ1.Get() != nil) {
                 tΔ1.Error(expectedEmptyˢ);
             }
             tΔ1.Error(shouldHavePanickedˢ);
@@ -347,12 +348,12 @@ public static void TestNilPool(ж<Δtesting.T> Ꮡt) {
     });
     var catchʗ3 = @catch;
     var pʗ2 = p;
-    Ꮡt.Run(putˢ, (ж<Δtesting.T> tΔ2) => {
+    t.Run(putˢ, (ж<Δtesting.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
             var catchʗ4 = catchʗ3;
             defer(catchʗ4, ref ᒐ);
-            pʗ2.Put((@string)"a"u8);
+            pʗ2.Put("a");
             tΔ2.Error(shouldHavePanickedˢ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -360,9 +361,9 @@ public static void TestNilPool(ж<Δtesting.T> Ꮡt) {
     });
 }
 
-public static void BenchmarkPool(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkPool(ж<Δtesting.B> b) {
     ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             Ꮡp.Put((nint)1);
             Ꮡp.Get();
@@ -370,9 +371,9 @@ public static void BenchmarkPool(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkPoolOverflow(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkPoolOverflow(ж<Δtesting.B> b) {
     ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             for (nint bΔ1 = 0; bΔ1 < 100; bΔ1++) {
                 Ꮡp.Put((nint)1);
@@ -386,13 +387,13 @@ public static void BenchmarkPoolOverflow(ж<Δtesting.B> Ꮡb) {
 
 // Simulate object starvation in order to force Ps to steal objects
 // from other Ps.
-public static void BenchmarkPoolStarvation(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkPoolStarvation(ж<Δtesting.B> b) {
     ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
     nint count = 100;
     // Reduce number of putted objects by 33 %. It creates objects starvation
     // that force P-local storage to steal objects from other Ps.
     nint countStarved = count - (nint)((float32)count * 0.33F);
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             for (nint bΔ1 = 0; bΔ1 < countStarved; bΔ1++) {
                 Ꮡp.Put((nint)1);
@@ -407,9 +408,12 @@ public static void BenchmarkPoolStarvation(ж<Δtesting.B> Ꮡb) {
 internal static any globalSink;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nsOpˢ = "ns/op"u8;
-internal static readonly @string p95NsStwˢ = "p95-ns/STW"u8;
-internal static readonly @string p50NsStwˢ = "p50-ns/STW"u8;
+internal static ref readonly @string nsOpˢ => ref nsOpˢᵇ;
+private static readonly @string nsOpˢᵇ = "ns/op"u8;
+internal static ref readonly @string p95NsStwˢ => ref p95NsStwˢᵇ;
+private static readonly @string p95NsStwˢᵇ = "p95-ns/STW"u8;
+internal static ref readonly @string p50NsStwˢ => ref p50NsStwˢᵇ;
+private static readonly @string p50NsStwˢᵇ = "p50-ns/STW"u8;
 
 public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
     GoFrame ᒐ = default;
@@ -421,7 +425,7 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
         defer(debug.SetGCPercent, debug.SetGCPercent(-1), ref ᒐ);
 
         ref var mstats = ref heap(new Δruntime.MemStats(), out var Ꮡmstats);
-        slice<uint64> pauses = default!;
+        slice<uint64> pauses = default;
 
         ref var p = ref heap(new Δsync.Pool(), out var Ꮡp);
         for (nint i = 0; i < b.N; i++) {
@@ -440,7 +444,7 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
 
         // Get pause time stats.
         slices.Sort<slice<uint64>, uint64>(pauses);
-        uint64 total = default!;
+        uint64 total = default;
         foreach (var (_, ns) in pauses) {
             total += ns;
         }
@@ -454,8 +458,10 @@ public static void BenchmarkPoolSTW(ж<Δtesting.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gCsOpˢ = "GCs/op"u8;
-internal static readonly @string newOpˢ = "New/op"u8;
+internal static ref readonly @string gCsOpˢ => ref gCsOpˢᵇ;
+private static readonly @string gCsOpˢᵇ = "GCs/op"u8;
+internal static ref readonly @string newOpˢ => ref newOpˢᵇ;
+private static readonly @string newOpˢᵇ = "New/op"u8;
 
 public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
     GoFrame ᒐ = default;
@@ -469,7 +475,7 @@ public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
         // runs at reasonable times.
         globalSink = new slice<byte>((8 << 20));
         defer(() => {
-            globalSink = default!;
+            globalSink = default;
         }, ref ᒐ);
 
         // Create a pool that's "expensive" to fill.
@@ -487,7 +493,7 @@ public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
             // Simulate 100X the number of goroutines having items
             // checked out from the Pool simultaneously.
             var items = new slice<any>(100);
-            slice<byte> sink = default!;
+            slice<byte> sink = default;
             while (pb.Next()) {
                 // Stress the pool.
                 foreach (var i in range(items)) {
@@ -498,7 +504,7 @@ public static void BenchmarkPoolExpensiveNew(ж<Δtesting.B> Ꮡb) {
                 }
                 foreach (var (i, v) in items) {
                     Ꮡp.Put(v);
-                    items[i] = default!;
+                    items[i] = default;
                 }
             }
             _ = sink;

@@ -54,7 +54,8 @@ public static Linkinfoᴛ1 Linkinfo = new();
 // "\xff"+fipsMagic is the expected linkinfo.Magic.
 // We avoid writing that explicitly so that the string does not appear
 // elsewhere in normal binaries, just as a precaution.
-internal static readonly @string fipsMagic = ((@string)(new byte[]{0x20, 0x47, 0x6f, 0x20, 0x66, 0x69, 0x70, 0x73, 0x69, 0x6e, 0x66, 0x6f, 0x20, 0xff, 0x00}));
+internal static ref readonly @string fipsMagic => ref fipsMagicᵇ;
+private static readonly @string fipsMagicᵇ = ((@string)(new byte[]{0x20, 0x47, 0x6f, 0x20, 0x66, 0x69, 0x70, 0x73, 0x69, 0x6e, 0x66, 0x6f, 0x20, 0xff, 0x00}));
 
 internal static array<byte> zeroSum = new(32);
 

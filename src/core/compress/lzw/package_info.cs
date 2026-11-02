@@ -49,7 +49,7 @@ using static go.compress.lzw_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,8 +59,8 @@ using static go.compress.lzw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/lzw/reader.go", "reader.cs", "AFC0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClO7kgoKCgoKUgpSmgoKUgsaCgoKCtIK0kriCgpSCgqaCgoKUgoKUgsaCpIKCgpSCuJSCpoLYgqaYooKqooIAAh4ADAKmgoKC1oKUpKSClIKCpoKClIKCgoKCgg==")]
-[assembly: go.GoPositionMap("compress/lzw/writer.go", "writer.cs", "AD2CAZKCgoKAgqSClKiSgoKCgIKkgpTKmtKCgoKUgoKAgqSCgoKClJTYwoKUgpSAgoKCgsiCggAHEIKAgsiUgoKCpoKCgoKUgriAgqSmgIKClIK2goKClMaCqsKCgpSmlIKAgqSAgsiCgILIgoCCtoKClICCtqqiggACGAAJAqaCgoKmgpSkpIKUgoKUgoKUgoKCgoKCgg==")]
+[assembly: GoPositionMap("compress/lzw/reader.go", "reader.cs", "AFC0AZKCgoKUgpSCgoKokoKCgpSClIKCgqiygoKCgpSClP7kgoKCgoKUgpSmgoKUgsaCgoKCtIK0kriCgpSCgqaCgoKUgoKUgsaCpIKCgpSCuJSCpoLYgqaYooKqooIAAh4ADAKmgoKC5oKUtLSClIKCpoKClIKCgoKCgg==")]
+[assembly: GoPositionMap("compress/lzw/writer.go", "writer.cs", "AD2CAZKCgoKAgqSClKiSgoKCgIKkgpTKmtKCgoKUgoKAgqSCgoKClJTowoKUgpSAgoKCgsiCggAHEIKAgsiUgoKCpoKCgoKUgriAgqSmgIKClIK2goKClMaCqsKCgpSmlIKAgqSAgsiCgILIgoCCtoKClICCtqqiggACGAAJAqaCgoKmgpS0tIKUgoKUgoKUgoKCgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

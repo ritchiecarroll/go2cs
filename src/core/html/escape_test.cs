@@ -18,111 +18,111 @@ internal partial struct unescapeTest {
     internal @string unescaped;
 }
 
-internal static slice<unescapeTest> unescapeTests = new unescapeTest[]{
+internal static slice<unescapeTest> unescapeTests = slice<unescapeTest>([
     // Handle no entities.
     new(
-        "copy"u8,
-        "A\ttext\nstring"u8,
-        "A\ttext\nstring"u8
+        "copy",
+        "A\ttext\nstring",
+        "A\ttext\nstring"
     ),
     // Handle simple named entities.
     new(
-        "simple"u8,
-        "&amp; &gt; &lt;"u8,
-        "& > <"u8
+        "simple",
+        "&amp; &gt; &lt;",
+        "& > <"
     ),
     // Handle hitting the end of the string.
     new(
-        "stringEnd"u8,
-        "&amp &amp"u8,
-        "& &"u8
+        "stringEnd",
+        "&amp &amp",
+        "& &"
     ),
     // Handle entities with two codepoints.
     new(
-        "multiCodepoint"u8,
-        "text &gesl; blah"u8,
-        "text \u22db\ufe00 blah"u8
+        "multiCodepoint",
+        "text &gesl; blah",
+        "text \u22db\ufe00 blah"
     ),
     // Handle decimal numeric entities.
     new(
-        "decimalEntity"u8,
-        "Delta = &#916; "u8,
-        "Delta = Δ "u8
+        "decimalEntity",
+        "Delta = &#916; ",
+        "Delta = Δ "
     ),
     // Handle hexadecimal numeric entities.
     new(
-        "hexadecimalEntity"u8,
-        "Lambda = &#x3bb; = &#X3Bb "u8,
-        "Lambda = λ = λ "u8
+        "hexadecimalEntity",
+        "Lambda = &#x3bb; = &#X3Bb ",
+        "Lambda = λ = λ "
     ),
     // Handle numeric early termination.
     new(
-        "numericEnds"u8,
-        "&# &#x &#128;43 &copy = &#169f = &#xa9"u8,
-        "&# &#x €43 © = ©f = ©"u8
+        "numericEnds",
+        "&# &#x &#128;43 &copy = &#169f = &#xa9",
+        "&# &#x €43 © = ©f = ©"
     ),
     // Handle numeric ISO-8859-1 entity replacements.
     new(
-        "numericReplacements"u8,
-        "Footnote&#x87;"u8,
-        "Footnote‡"u8
+        "numericReplacements",
+        "Footnote&#x87;",
+        "Footnote‡"
     ),
     // Handle single ampersand.
     new(
-        "copySingleAmpersand"u8,
-        "&"u8,
-        "&"u8
+        "copySingleAmpersand",
+        "&",
+        "&"
     ),
     // Handle ampersand followed by non-entity.
     new(
-        "copyAmpersandNonEntity"u8,
-        "text &test"u8,
-        "text &test"u8
+        "copyAmpersandNonEntity",
+        "text &test",
+        "text &test"
     ),
     // Handle "&#".
     new(
-        "copyAmpersandHash"u8,
-        "text &#"u8,
-        "text &#"u8
+        "copyAmpersandHash",
+        "text &#",
+        "text &#"
     )
-}.slice();
+]);
 
-public static void TestUnescape(ж<testing.T> Ꮡt) {
+public static void TestUnescape(ж<testing.T> t) {
     foreach (var (_, tt) in unescapeTests) {
         @string unescaped = UnescapeString(tt.html);
         if (unescaped != tt.unescaped) {
-            Ꮡt.Errorf("TestUnescape %s: want %q, got %q"u8, tt.desc, tt.unescaped, unescaped);
+            t.Errorf("TestUnescape %s: want %q, got %q", tt.desc, tt.unescaped, unescaped);
         }
     }
 }
 
-public static void TestUnescapeEscape(ж<testing.T> Ꮡt) {
-    var ss = new @string[]{
-        @""u8,
-        @"abc def"u8,
-        @"a & b"u8,
-        @"a&amp;b"u8,
-        @"a &amp b"u8,
-        @"&quot;"u8,
-        @""""u8,
-        @"""<&>"""u8,
-        @"&quot;&lt;&amp;&gt;&quot;"u8,
-        @"3&5==1 && 0<1, ""0&lt;1"", a+acute=&aacute;"u8,
-        @"The special characters are: <, >, &, ' and """u8
-    }.slice();
+public static void TestUnescapeEscape(ж<testing.T> t) {
+    var ss = slice<@string>([
+        @"",
+        @"abc def",
+        @"a & b",
+        @"a&amp;b",
+        @"a &amp b",
+        @"&quot;",
+        @"""",
+        @"""<&>""",
+        @"&quot;&lt;&amp;&gt;&quot;",
+        @"3&5==1 && 0<1, ""0&lt;1"", a+acute=&aacute;",
+        @"The special characters are: <, >, &, ' and """
+    ]);
     foreach (var (_, s) in ss) {
         {
             @string got = UnescapeString(EscapeString(s)); if (got != s) {
-                Ꮡt.Errorf("got %q want %q"u8, got, s);
+                t.Errorf("got %q want %q", got, s);
             }
         }
     }
 }
 
-internal static @string benchEscapeData = strings.Repeat("AAAAA < BBBBB > CCCCC & DDDDD ' EEEEE \" "u8, 100);
-internal static @string benchEscapeNone = strings.Repeat("AAAAA x BBBBB x CCCCC x DDDDD x EEEEE x "u8, 100);
-internal static @string benchUnescapeSparse = strings.Repeat(strings.Repeat("AAAAA x BBBBB x CCCCC x DDDDD x EEEEE x "u8, 10) + "&amp;"u8, 10);
-internal static @string benchUnescapeDense = strings.Repeat("&amp;&lt; &amp; &lt;"u8, 100);
+internal static @string benchEscapeData = strings.Repeat("AAAAA < BBBBB > CCCCC & DDDDD ' EEEEE \" ", 100);
+internal static @string benchEscapeNone = strings.Repeat("AAAAA x BBBBB x CCCCC x DDDDD x EEEEE x ", 100);
+internal static @string benchUnescapeSparse = strings.Repeat(strings.Repeat("AAAAA x BBBBB x CCCCC x DDDDD x EEEEE x ", 10) + "&amp;"u8, 10);
+internal static @string benchUnescapeDense = strings.Repeat("&amp;&lt; &amp; &lt;", 100);
 
 public static void BenchmarkEscape(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();

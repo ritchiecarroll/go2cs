@@ -24,19 +24,19 @@ internal static @string normVolumeName(@string path) {
 // normBase returns the last element of path with correct case.
 internal static (@string, error) normBase(@string path) {
     var (p, err) = syscall.UTF16PtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
 
     ref var data = ref heap(new syscall.Win32finddata(), out var Ꮡdata);
 
     (var h, err) = syscall.FindFirstFile(p, Ꮡdata);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     syscall.FindClose(h);
 
-    return (syscall.UTF16ToString(data.FileName[..]), default!);
+    return (syscall.UTF16ToString(data.FileName[..]), default);
 }
 
 // baseIsDotDot reports whether the last element of path is "..".
@@ -59,7 +59,7 @@ internal static bool baseIsDotDot(@string path) {
 // The normBase parameter should be equal to the normBase func, except for in tests.  See docs on the normBase func.
 internal static (@string, error) toNorm(@string path, Func<@string, (@string, error)> normBase) {
     if (path == ""u8) {
-        return (path, default!);
+        return (path, default);
     }
 
     @string volume = normVolumeName(path);
@@ -67,12 +67,12 @@ internal static (@string, error) toNorm(@string path, Func<@string, (@string, er
 
     // skip special cases
     if (path == ""u8 || path == "."u8 || path == @"\"u8) {
-        return (volume + path, default!);
+        return (volume + path, default);
     }
 
-    @string normPath = default!;
+    @string normPath = default;
 
-    while (ᐧ) {
+    for (;;) {
         if (baseIsDotDot(path)) {
             normPath = path + @"\"u8 + normPath;
 
@@ -80,7 +80,7 @@ internal static (@string, error) toNorm(@string path, Func<@string, (@string, er
         }
 
         var (name, err) = normBase(volume + path);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
 
@@ -101,19 +101,19 @@ internal static (@string, error) toNorm(@string path, Func<@string, (@string, er
 
     normPath = normPath.slice(0, len(normPath) - 1); // remove trailing '\'
 
-    return (volume + normPath, default!);
+    return (volume + normPath, default);
 }
 
 internal static (@string, error) evalSymlinks(@string path) {
     var (newpath, err) = walkSymlinks(path);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     (newpath, err) = toNorm(newpath, normBase);
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
-    return (newpath, default!);
+    return (newpath, default);
 }
 
 } // end filepath_package

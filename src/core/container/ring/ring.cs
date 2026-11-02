@@ -72,16 +72,16 @@ public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
 // New creates a ring of n elements.
 public static ж<Ring> New(nint n) {
     if (n <= 0) {
-        return default!;
+        return default;
     }
     var r = @new<Ring>();
     var p = r;
     for (nint i = 1; i < n; i++) {
-        p.Value.next = Ꮡ(new Ring(prev: p));
-        p = p.Value.next;
+        p.next = Ꮡ(new Ring(prev: p));
+        p = p.next;
     }
-    p.Value.next = r;
-    r.Value.prev = p;
+    p.next = r;
+    r.prev = p;
     return r;
 }
 
@@ -111,8 +111,8 @@ public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
         // evaluation order of LHS is not specified.
         r.next = Ꮡs;
         s.prev = Ꮡr;
-        n.Value.prev = p;
-        p.Value.next = n;
+        n.prev = p;
+        p.next = n;
     }
     return n;
 }
@@ -122,7 +122,7 @@ public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
 // The result is the removed subring. r must not be empty.
 public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) {
     if (n <= 0) {
-        return default!;
+        return default;
     }
     return Ꮡr.Link(Ꮡr.Move(n + 1));
 }
@@ -133,7 +133,7 @@ public static nint Len(this ж<Ring> Ꮡr) {
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;
-        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
+        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.next) {
             n++;
         }
     }
@@ -147,7 +147,7 @@ public static void Do(this ж<Ring> Ꮡr, Action<any> f) {
 
     if (Ꮡr != nil) {
         f(r.Value);
-        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
+        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.next) {
             f((~p).Value);
         }
     }

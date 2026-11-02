@@ -18,12 +18,12 @@ partial class mldsa_package {
 
 public partial struct parameters {
     internal nint k, l; // dimensions of A
-    internal nint η; // bound for secret coefficients
-    internal nint γ1; // log₂(γ₁), where [-γ₁+1, γ₁] is the bound of y
-    internal nint γ2; // denominator of γ₂ = (q - 1) / γ2
-    internal nint λ; // collison strength
-    internal nint τ; // number of non-zero coefficients in challenge
-    internal nint ω; // max number of hints in MakeHint
+    internal nint η;    // bound for secret coefficients
+    internal nint γ1;   // log₂(γ₁), where [-γ₁+1, γ₁] is the bound of y
+    internal nint γ2;   // denominator of γ₂ = (q - 1) / γ2
+    internal nint λ;    // collison strength
+    internal nint τ;    // number of non-zero coefficients in challenge
+    internal nint ω;    // max number of hints in MakeHint
 }
 
 [GoLazy] partial class lazyᴛparams44 { internal static parameters params44 = new parameters(k: 4, l: 4, η: 2, γ1: 17, γ2: 88, λ: 128, τ: 39, ω: 80); }
@@ -80,7 +80,7 @@ public static slice<byte> Bytes(this ref PrivateKey priv) {
 public static ж<ΔPublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) {
     // Note that this is likely to keep the entire PrivateKey reachable for
     // the lifetime of the PublicKey, which may be undesirable.
-    return Ꮡpriv.of(PrivateKey.Ꮡpub);
+    return Ꮡpriv.Ꮡpub;
 }
 
 partial struct ΔPublicKey {
@@ -88,7 +88,7 @@ partial struct ΔPublicKey {
     internal parameters p;
     internal array<nttElement> a = new(maxK * maxL);
     internal array<nttElement> t1 = new(maxK); // NTT(t₁ ⋅ 2ᵈ)
-    internal array<byte> tr = new(64);      // public key hash
+    internal array<byte> tr = new(64);         // public key hash
 }
 
 public static bool Equal(this ref ΔPublicKey pub, ж<ΔPublicKey> Ꮡx) {
@@ -104,24 +104,28 @@ public static slice<byte> Bytes(this ref ΔPublicKey pub) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mlDsa44ˢ = "ML-DSA-44"u8;
-internal static readonly @string mlDsa65ˢ = "ML-DSA-65"u8;
-internal static readonly @string mlDsa87ˢ = "ML-DSA-87"u8;
+internal static ref readonly @string mlDsa44ˢ => ref mlDsa44ˢᵇ;
+private static readonly @string mlDsa44ˢᵇ = "ML-DSA-44"u8;
+internal static ref readonly @string mlDsa65ˢ => ref mlDsa65ˢᵇ;
+private static readonly @string mlDsa65ˢᵇ = "ML-DSA-65"u8;
+internal static ref readonly @string mlDsa87ˢ => ref mlDsa87ˢᵇ;
+private static readonly @string mlDsa87ˢᵇ = "ML-DSA-87"u8;
 
 public static @string Parameters(this ref ΔPublicKey pub) {
-    var exprᴛ1 = pub.p;
-    if (exprᴛ1 == params44) {
+    switch (pub.p) {
+    case var ᴛ when ᴛ == params44: {
         return mlDsa44ˢ;
     }
-    if (exprᴛ1 == params65) {
+    case var ᴛ when ᴛ == params65: {
         return mlDsa65ˢ;
     }
-    if (exprᴛ1 == params87) {
+    case var ᴛ when ᴛ == params87: {
         return mlDsa87ˢ;
     }
-    { /* default: */
+    default: {
         throw panic("mldsa: internal error: unknown parameters");
-    }
+        break;
+    }}
 }
 
 public static ж<PrivateKey> GenerateKey44() {
@@ -154,33 +158,33 @@ public static ж<PrivateKey> GenerateKey87() {
     return priv;
 }
 
-internal static error errInvalidSeedLength = errors.New("mldsa: invalid seed length"u8);
+internal static error errInvalidSeedLength = errors.New("mldsa: invalid seed length");
 
 public static (ж<PrivateKey>, error) NewPrivateKey44(slice<byte> seed) {
     fipsSelfTest();
     fips140.RecordApproved();
     if (len(seed) != 32) {
-        return (default!, errInvalidSeedLength);
+        return (default, errInvalidSeedLength);
     }
-    return (newPrivateKey(Ꮡ(array<byte>.Alias(seed, 32)), params44), default!);
+    return (newPrivateKey(Ꮡ(array<byte>.Alias(seed, 32)), params44), default);
 }
 
 public static (ж<PrivateKey>, error) NewPrivateKey65(slice<byte> seed) {
     fipsSelfTest();
     fips140.RecordApproved();
     if (len(seed) != 32) {
-        return (default!, errInvalidSeedLength);
+        return (default, errInvalidSeedLength);
     }
-    return (newPrivateKey(Ꮡ(array<byte>.Alias(seed, 32)), params65), default!);
+    return (newPrivateKey(Ꮡ(array<byte>.Alias(seed, 32)), params65), default);
 }
 
 public static (ж<PrivateKey>, error) NewPrivateKey87(slice<byte> seed) {
     fipsSelfTest();
     fips140.RecordApproved();
     if (len(seed) != 32) {
-        return (default!, errInvalidSeedLength);
+        return (default, errInvalidSeedLength);
     }
-    return (newPrivateKey(Ꮡ(array<byte>.Alias(seed, 32)), params87), default!);
+    return (newPrivateKey(Ꮡ(array<byte>.Alias(seed, 32)), params87), default);
 }
 
 internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, parameters p) {
@@ -190,24 +194,24 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     nint l = p.l;
 
     var priv = Ꮡ(new PrivateKey(pub: new ΔPublicKey(p: p)));
-    priv.Value.seed = seed.Clone();
+    priv.seed = seed.Clone();
 
     var ξ = sha3.NewShake256();
     ξ.Write(seed[..]);
-    ξ.Write(new byte[]{(byte)k, (byte)l}.slice());
+    ξ.Write(slice<byte>([(byte)k, (byte)l]));
     var (ρ, ρs) = (new slice<byte>(32), new slice<byte>(64));
     ξ.Read(ρ);
     ξ.Read(ρs);
-    ξ.Read((~priv).k[..]);
+    ξ.Read(priv.k[..]);
 
-    var A = GoReflect.WithElemDims((~priv).pub.a.slice(0, k * l), 256);
+    var A = GoReflect.WithElemDims(priv.pub.a.slice(0, k * l), 256);
     computeMatrixA(A, ρ, p);
 
-    var s1 = GoReflect.WithElemDims((~priv).s1.slice(0, l), 256);
+    var s1 = GoReflect.WithElemDims(priv.s1.slice(0, l), 256);
     foreach (var r in range(l)) {
         s1[r] = ntt(sampleBoundedPoly(ρs, (byte)r, p));
     }
-    var s2 = GoReflect.WithElemDims((~priv).s2.slice(0, k), 256);
+    var s2 = GoReflect.WithElemDims(priv.s2.slice(0, k), 256);
     foreach (var r in range(k)) {
         s2[r] = ntt(sampleBoundedPoly(ρs, (byte)(l + r), p));
     }
@@ -227,9 +231,9 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     }
     // (t₁, _) = Power2Round(t)
     // (_, ˆt₀) = NTT(Power2Round(t))
-    var (t1, t0) = (GoReflect.WithElemDims(new slice<array<uint16>>(k, () => new(256), maxK), 256), GoReflect.WithElemDims((~priv).t0.slice(0, k), 256));
+    var (t1, t0) = (GoReflect.WithElemDims(new slice<array<uint16>>(k, () => new(256), maxK), 256), GoReflect.WithElemDims(priv.t0.slice(0, k), 256));
     foreach (var i in range(t)) {
-        ringElement w = default!;
+        ringElement w = default;
         foreach (var j in range(t[i])) {
             (t1[i][j], w[j]) = power2Round(t[i][j]);
         }
@@ -240,9 +244,9 @@ internal static ж<PrivateKey> newPrivateKey(/*[32]*/ ж<array<byte>> Ꮡseed, p
     // not strictly necessary and could be deferred to PrivateKey.PublicKey().
     // That would require keeping or re-deriving ρ and t/t1, though.
 
-    var pk = pkEncode((~priv).pub.raw[..0], ρ, t1, p);
-    priv.Value.pub.tr = computePublicKeyHash(pk);
-    computeT1Hat(GoReflect.WithElemDims((~priv).pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
+    var pk = pkEncode(priv.pub.raw[..0], ρ, t1, p);
+    priv.pub.tr = computePublicKeyHash(pk);
+    computeT1Hat(GoReflect.WithElemDims(priv.pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
 
     return priv;
 }
@@ -267,7 +271,7 @@ internal static array<byte> computePublicKeyHash(slice<byte> pk) {
 
 internal static void computeT1Hat(slice<nttElement> t1Hat, slice<array<uint16>> t1) {
     foreach (var i in range(t1)) {
-        ringElement w = default!;
+        ringElement w = default;
         foreach (var j in range(t1[i])) {
             // t₁ <= 2¹⁰ - 1
             // t₁ ⋅ 2ᵈ <= 2ᵈ(2¹⁰ - 1) = 2²³ - 2¹³ < q = 2²³ - 2¹³ + 1
@@ -301,10 +305,10 @@ internal static slice<byte> pkEncode(slice<byte> buf, slice<byte> ρ, slice<arra
 }
 
 internal static (slice<byte> ρ, error err) pkDecode(slice<byte> pk, slice<array<uint16>> t1, parameters p) {
-    slice<byte> ρ = default!;
+    slice<byte> ρ = default;
 
     if (len(pk) != pubKeySize(p)) {
-        return (default!, errInvalidPublicKeyLength);
+        return (default, errInvalidPublicKeyLength);
     }
     (ρ, pk) = (pk[..32], pk[32..]);
     foreach (var r in range(t1)) {
@@ -318,10 +322,10 @@ internal static (slice<byte> ρ, error err) pkDecode(slice<byte> pk, slice<array
             pk = pk[5..];
         }
     }
-    return (ρ, default!);
+    return (ρ, default);
 }
 
-internal static error errInvalidPublicKeyLength = errors.New("mldsa: invalid public key length"u8);
+internal static error errInvalidPublicKeyLength = errors.New("mldsa: invalid public key length");
 
 public static (ж<ΔPublicKey>, error) NewPublicKey44(slice<byte> pk) {
     return newPublicKey(pk, params44);
@@ -341,22 +345,22 @@ internal static (ж<ΔPublicKey>, error) newPublicKey(slice<byte> pk, parameters
 
     var t1 = GoReflect.WithElemDims(new slice<array<uint16>>(k, () => new(256), maxK), 256);
     var (ρ, err) = pkDecode(pk, t1, p);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var pub = Ꮡ(new ΔPublicKey(p: p));
-    copy((~pub).raw[..], pk);
-    computeMatrixA(GoReflect.WithElemDims((~pub).a.slice(0, k * l), 256), ρ, p);
-    pub.Value.tr = computePublicKeyHash(pk);
-    computeT1Hat(GoReflect.WithElemDims((~pub).t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
+    copy(pub.raw[..], pk);
+    computeMatrixA(GoReflect.WithElemDims(pub.a.slice(0, k * l), 256), ρ, p);
+    pub.tr = computePublicKeyHash(pk);
+    computeT1Hat(GoReflect.WithElemDims(pub.t1.slice(0, k), 256), t1); // NTT(t₁ ⋅ 2ᵈ)
 
-    return (pub, default!);
+    return (pub, default);
 }
 
-internal static error errContextTooLong = errors.New("mldsa: context too long"u8);
-internal static error errMessageHashLength = errors.New("mldsa: invalid message hash length"u8);
-internal static error errRandomLength = errors.New("mldsa: invalid random length"u8);
+internal static error errContextTooLong = errors.New("mldsa: context too long");
+internal static error errMessageHashLength = errors.New("mldsa: invalid message hash length");
+internal static error errRandomLength = errors.New("mldsa: invalid random length");
 
 public static (slice<byte>, error) Sign(ж<PrivateKey> Ꮡpriv, slice<byte> msg, @string context) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
@@ -367,10 +371,10 @@ public static (slice<byte>, error) Sign(ж<PrivateKey> Ꮡpriv, slice<byte> msg,
     drbg.Read(random[..]);
     ref var μ = ref heap<array<byte>>(out var Ꮡμ);
     (μ, var err) = computeMessageHash(priv.pub.tr[..], msg, context);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡμ, Ꮡrandom), default!);
+    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡμ, Ꮡrandom), default);
 }
 
 public static (slice<byte>, error) SignDeterministic(ж<PrivateKey> Ꮡpriv, slice<byte> msg, @string context) {
@@ -381,10 +385,10 @@ public static (slice<byte>, error) SignDeterministic(ж<PrivateKey> Ꮡpriv, sli
     ref var random = ref heap(new array<byte>(32), out var Ꮡrandom);
     ref var μ = ref heap<array<byte>>(out var Ꮡμ);
     (μ, var err) = computeMessageHash(priv.pub.tr[..], msg, context);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡμ, Ꮡrandom), default!);
+    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡμ, Ꮡrandom), default);
 }
 
 public static (slice<byte>, error) TestingOnlySignWithRandom(ж<PrivateKey> Ꮡpriv, slice<byte> msg, @string context, slice<byte> random) {
@@ -394,46 +398,46 @@ public static (slice<byte>, error) TestingOnlySignWithRandom(ж<PrivateKey> Ꮡp
     fips140.RecordApproved();
     ref var μ = ref heap<array<byte>>(out var Ꮡμ);
     (μ, var err) = computeMessageHash(priv.pub.tr[..], msg, context);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (len(random) != 32) {
-        return (default!, errRandomLength);
+        return (default, errRandomLength);
     }
-    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡμ, Ꮡ(array<byte>.Alias(random, 32))), default!);
+    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡμ, Ꮡ(array<byte>.Alias(random, 32))), default);
 }
 
-public static (slice<byte>, error) SignExternalMu(ж<PrivateKey> Ꮡpriv, slice<byte> μ) {
+public static (slice<byte>, error) SignExternalMu(ж<PrivateKey> priv, slice<byte> μ) {
     fipsSelfTest();
     fips140.RecordApproved();
     ref var random = ref heap(new array<byte>(32), out var Ꮡrandom);
     drbg.Read(random[..]);
     if (len(μ) != 64) {
-        return (default!, errMessageHashLength);
+        return (default, errMessageHashLength);
     }
-    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), Ꮡrandom), default!);
+    return (signInternal(ref (priv).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), Ꮡrandom), default);
 }
 
-public static (slice<byte>, error) SignExternalMuDeterministic(ж<PrivateKey> Ꮡpriv, slice<byte> μ) {
+public static (slice<byte>, error) SignExternalMuDeterministic(ж<PrivateKey> priv, slice<byte> μ) {
     fipsSelfTest();
     fips140.RecordApproved();
     ref var random = ref heap(new array<byte>(32), out var Ꮡrandom);
     if (len(μ) != 64) {
-        return (default!, errMessageHashLength);
+        return (default, errMessageHashLength);
     }
-    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), Ꮡrandom), default!);
+    return (signInternal(ref (priv).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), Ꮡrandom), default);
 }
 
-public static (slice<byte>, error) TestingOnlySignExternalMuWithRandom(ж<PrivateKey> Ꮡpriv, slice<byte> μ, slice<byte> random) {
+public static (slice<byte>, error) TestingOnlySignExternalMuWithRandom(ж<PrivateKey> priv, slice<byte> μ, slice<byte> random) {
     fipsSelfTest();
     fips140.RecordApproved();
     if (len(μ) != 64) {
-        return (default!, errMessageHashLength);
+        return (default, errMessageHashLength);
     }
     if (len(random) != 32) {
-        return (default!, errRandomLength);
+        return (default, errRandomLength);
     }
-    return (signInternal(ref (Ꮡpriv).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), Ꮡ(array<byte>.Alias(random, 32))), default!);
+    return (signInternal(ref (priv).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), Ꮡ(array<byte>.Alias(random, 32))), default);
 }
 
 internal static (array<byte>, error) computeMessageHash(slice<byte> tr, slice<byte> msg, @string context) {
@@ -442,17 +446,18 @@ internal static (array<byte>, error) computeMessageHash(slice<byte> tr, slice<by
     }
     var H = sha3.NewShake256();
     H.Write(tr);
-    H.Write(new byte[]{0}.slice()); // ML-DSA / HashML-DSA domain separator
-    H.Write(new byte[]{(byte)len(context)}.slice());
+    H.Write(slice<byte>([0])); // ML-DSA / HashML-DSA domain separator
+    H.Write(slice<byte>([(byte)len(context)]));
     H.Write(slice<byte>(context));
     H.Write(msg);
     array<byte> μ = new(64);
     H.Read(μ[..]);
-    return (μ.Clone(), default!);
+    return (μ.Clone(), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ct0ˢ = "ct0"u8;
+internal static ref readonly @string ct0ˢ => ref ct0ˢᵇ;
+private static readonly @string ct0ˢᵇ = "ct0"u8;
 
 internal static slice<byte> signInternal(ref PrivateKey priv, /*[64]*/ ж<array<byte>> Ꮡμ, /*[32]*/ ж<array<byte>> Ꮡrandom) {
     ref var μ = ref Ꮡμ.DerefOrNull();
@@ -478,7 +483,7 @@ internal static slice<byte> signInternal(ref PrivateKey priv, /*[64]*/ ж<array<
 
     nint κ = 0;
 sign:
-    while (ᐧ) {
+    for (;;) {
         // Main rejection sampling loop. Note that leaking rejected signatures
         // leaks information about the private key. However, as explained in
         // https://pq-crystals.org/dilithium/data/dilithium-specification-round3.pdf
@@ -508,7 +513,7 @@ sign:
         }
         var w = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
         foreach (var i in range(w)) {
-            nttElement wHat = default!;
+            nttElement wHat = default;
             foreach (var j in range(l)) {
                 wHat = polyAdd(wHat, nttMul(A[i * l + j], yHat[j]));
             }
@@ -542,8 +547,8 @@ sign:
 
             // Reject if ||z||∞ ≥ γ1 − β
             if (coefficientsExceedBound(z[i], γ1β)) {
-                if (testingOnlyRejectionReason != default!) {
-                    testingOnlyRejectionReason("z"u8);
+                if (testingOnlyRejectionReason != nil) {
+                    testingOnlyRejectionReason("z");
                 }
                 goto continue_sign;
             }
@@ -554,8 +559,8 @@ sign:
 
             // Reject if ||LowBits(r0)||∞ ≥ γ2 − β
             if (lowBitsExceedBound(r0, γ2β, p)) {
-                if (testingOnlyRejectionReason != default!) {
-                    testingOnlyRejectionReason("r0"u8);
+                if (testingOnlyRejectionReason != nil) {
+                    testingOnlyRejectionReason("r0");
                 }
                 goto continue_sign;
             }
@@ -567,7 +572,7 @@ sign:
 
             // Reject if ||ct0||∞ ≥ γ2
             if (coefficientsExceedBound(ct0[i], γ2)) {
-                if (testingOnlyRejectionReason != default!) {
+                if (testingOnlyRejectionReason != nil) {
                     testingOnlyRejectionReason(ct0ˢ);
                 }
                 goto continue_sign;
@@ -577,14 +582,14 @@ sign:
         nint count1s = 0;
         var h = GoReflect.WithElemDims(new slice<array<byte>>(k, () => new(256), maxK), 256);
         foreach (var i in range(w)) {
-            nint count = default!;
+            nint count = default;
             (h[i], count) = makeHint(ct0[i], w[i], cs2[i], p);
             count1s += count;
         }
         // Reject if number of hints > ω
         if (count1s > p.ω) {
-            if (testingOnlyRejectionReason != default!) {
-                testingOnlyRejectionReason("h"u8);
+            if (testingOnlyRejectionReason != nil) {
+                testingOnlyRejectionReason("h");
             }
             goto continue_sign;
         }
@@ -601,7 +606,7 @@ break_sign:;
 internal static Action<@string> testingOnlyRejectionReason;
 
 // w1Encode implements w1Encode from FIPS 204, writing directly into H.
-internal static void w1Encode(ж<sha3.SHAKE> ᏑH, /*[256]*/ array<byte> w, parameters p) {
+internal static void w1Encode(ж<sha3.SHAKE> H, /*[256]*/ array<byte> w, parameters p) {
     w = w.Clone();
 
     switch (p.γ2) {
@@ -613,7 +618,7 @@ internal static void w1Encode(ж<sha3.SHAKE> ᏑH, /*[256]*/ array<byte> w, para
             var b1 = w[i + 1];
             buf[i / 2] = (byte)(b0 | (byte)(b1 << 4));
         }
-        ᏑH.Write(buf);
+        H.Write(buf);
         break;
     }
     case 88: {
@@ -628,7 +633,7 @@ internal static void w1Encode(ж<sha3.SHAKE> ᏑH, /*[256]*/ array<byte> w, para
             buf[3 * i / 4 + 1] = (byte)((b1 >> 2) | ((byte)(b2 << 4)));
             buf[3 * i / 4 + 2] = (byte)((b2 >> 4) | ((byte)(b3 << 2)));
         }
-        ᏑH.Write(buf);
+        H.Write(buf);
         break;
     }
     default: {
@@ -680,12 +685,12 @@ internal static bool lowBitsExceedBound(ringElement w, uint32 bound, parameters 
     return false;
 }
 
-internal static error errInvalidSignatureLength = errors.New("mldsa: invalid signature length"u8);
-internal static error errInvalidSignatureCoeffBounds = errors.New("mldsa: invalid signature"u8);
-internal static error errInvalidSignatureChallenge = errors.New("mldsa: invalid signature"u8);
-internal static error errInvalidSignatureHintLimits = errors.New("mldsa: invalid signature encoding"u8);
-internal static error errInvalidSignatureHintIndexOrder = errors.New("mldsa: invalid signature encoding"u8);
-internal static error errInvalidSignatureHintExtraIndices = errors.New("mldsa: invalid signature encoding"u8);
+internal static error errInvalidSignatureLength = errors.New("mldsa: invalid signature length");
+internal static error errInvalidSignatureCoeffBounds = errors.New("mldsa: invalid signature");
+internal static error errInvalidSignatureChallenge = errors.New("mldsa: invalid signature");
+internal static error errInvalidSignatureHintLimits = errors.New("mldsa: invalid signature encoding");
+internal static error errInvalidSignatureHintIndexOrder = errors.New("mldsa: invalid signature encoding");
+internal static error errInvalidSignatureHintExtraIndices = errors.New("mldsa: invalid signature encoding");
 
 public static error Verify(ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> sig, @string context) {
     ref var pub = ref Ꮡpub.DerefOrNull();
@@ -694,19 +699,19 @@ public static error Verify(ж<ΔPublicKey> Ꮡpub, slice<byte> msg, slice<byte> 
     fips140.RecordApproved();
     ref var μ = ref heap<array<byte>>(out var Ꮡμ);
     (μ, var err) = computeMessageHash(pub.tr[..], msg, context);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return verifyInternal(ref (Ꮡpub).DerefOrNull(), Ꮡμ, sig);
 }
 
-public static error VerifyExternalMu(ж<ΔPublicKey> Ꮡpub, slice<byte> μ, slice<byte> sig) {
+public static error VerifyExternalMu(ж<ΔPublicKey> pub, slice<byte> μ, slice<byte> sig) {
     fipsSelfTest();
     fips140.RecordApproved();
     if (len(μ) != 64) {
         return errMessageHashLength;
     }
-    return verifyInternal(ref (Ꮡpub).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), sig);
+    return verifyInternal(ref (pub).DerefOrNull(), Ꮡ(array<byte>.Alias(μ, 64)), sig);
 }
 
 internal static error verifyInternal(ref ΔPublicKey pub, /*[64]*/ ж<array<byte>> Ꮡμ, slice<byte> sig) {
@@ -724,7 +729,7 @@ internal static error verifyInternal(ref ΔPublicKey pub, /*[64]*/ ж<array<byte
     var z = GoReflect.WithElemDims(new slice<ringElement>(l, maxL), 256);
     var h = GoReflect.WithElemDims(new slice<array<byte>>(k, () => new(256), maxK), 256);
     var (ch, err) = sigDecode(sig, z, h, p);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -737,7 +742,7 @@ internal static error verifyInternal(ref ΔPublicKey pub, /*[64]*/ ж<array<byte
     }
     var w = GoReflect.WithElemDims(new slice<ringElement>(k, maxK), 256);
     foreach (var i in range(w)) {
-        nttElement wHat = default!;
+        nttElement wHat = default;
         foreach (var j in range(l)) {
             wHat = polyAdd(wHat, nttMul(A[i * l + j], zHat[j]));
         }
@@ -769,7 +774,7 @@ internal static error verifyInternal(ref ΔPublicKey pub, /*[64]*/ ж<array<byte
         return errInvalidSignatureChallenge;
     }
 
-    return default!;
+    return default;
 }
 
 internal static slice<byte> sigEncode(slice<byte> ch, slice<ringElement> z, slice<array<byte>> h, parameters p) {
@@ -783,10 +788,10 @@ internal static slice<byte> sigEncode(slice<byte> ch, slice<ringElement> z, slic
 }
 
 internal static (slice<byte> ch, error err) sigDecode(slice<byte> sig, slice<ringElement> z, slice<array<byte>> h, parameters p) {
-    slice<byte> ch = default!;
+    slice<byte> ch = default;
 
     if (len(sig) != sigSize(p)) {
-        return (default!, errInvalidSignatureLength);
+        return (default, errInvalidSignatureLength);
     }
     (ch, sig) = (sig.slice(0, p.λ / 4), sig.slice(p.λ / 4));
     foreach (var i in range(z)) {
@@ -795,18 +800,18 @@ internal static (slice<byte> ch, error err) sigDecode(slice<byte> sig, slice<rin
         sig = sig.slice(length);
     }
     {
-        var errΔ1 = hintDecode(sig, h, p); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = hintDecode(sig, h, p); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
-    return (ch, default!);
+    return (ch, default);
 }
 
 internal static slice<byte> hintEncode(slice<byte> buf, slice<array<byte>> h, parameters p) {
     nint ω = p.ω;
     nint k = p.k;
     var (@out, y) = sliceForAppend(buf, ω + k);
-    byte idx = default!;
+    byte idx = default;
     foreach (var i in range(k)) {
         foreach (var j in range(n)) {
             if (h[i][j] != 0) {
@@ -820,7 +825,8 @@ internal static slice<byte> hintEncode(slice<byte> buf, slice<array<byte>> h, pa
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mldsaInternalErrorˢ = "mldsa: internal error: invalid signature hint length"u8;
+internal static ref readonly @string mldsaInternalErrorˢ => ref mldsaInternalErrorˢᵇ;
+private static readonly @string mldsaInternalErrorˢᵇ = "mldsa: internal error: invalid signature hint length"u8;
 
 internal static error hintDecode(slice<byte> y, slice<array<byte>> h, parameters p) {
     nint ω = p.ω;
@@ -828,7 +834,7 @@ internal static error hintDecode(slice<byte> y, slice<array<byte>> h, parameters
     if (len(y) != ω + k) {
         return errors.New(mldsaInternalErrorˢ);
     }
-    byte idx = default!;
+    byte idx = default;
     foreach (var i in range(k)) {
         var limit = y[ω + i];
         if (limit < idx || limit > (byte)ω) {
@@ -848,7 +854,7 @@ internal static error hintDecode(slice<byte> y, slice<array<byte>> h, parameters
             return errInvalidSignatureHintExtraIndices;
         }
     }
-    return default!;
+    return default;
 }
 
 } // end mldsa_package

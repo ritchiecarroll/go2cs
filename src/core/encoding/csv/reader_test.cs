@@ -37,20 +37,20 @@ internal partial struct readTest {
 // They are removed before parsing and are used to verify the position
 // information reported by FieldPos.
 internal static slice<readTest> readTests;
-internal static void initᴛreadTests() { readTests = new readTest[]{new(
-    Name: "Simple"u8,
-    Input: "§a,§b,§c\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice()
+internal static void initᴛreadTests() { readTests = slice<readTest>([new(
+    Name: "Simple",
+    Input: "§a,§b,§c\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"])])
 ), new(
-    Name: "CRLF"u8,
-    Input: "§a,§b\r\n¶§c,§d\r\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8}.slice(), new @string[]{"c"u8, "d"u8}.slice()}.slice()
+    Name: "CRLF",
+    Input: "§a,§b\r\n¶§c,§d\r\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b"]), slice<@string>(["c", "d"])])
 ), new(
-    Name: "BareCR"u8,
-    Input: "§a,§b\rc,§d\r\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b\rc"u8, "d"u8}.slice()}.slice()
+    Name: "BareCR",
+    Input: "§a,§b\rc,§d\r\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b\rc", "d"])])
 ), new(
-    Name: "RFC4180test"u8,
+    Name: "RFC4180test",
     Input: """
 §#field1,§field2,§field3
 ¶§"aaa",§"bb
@@ -59,156 +59,156 @@ b",§"ccc"
 ¶§zzz,§yyy,§xxx
 
 """u8.Raw(),
-    Output: new slice<@string>[]{
-        new @string[]{"#field1"u8, "field2"u8, "field3"u8}.slice(),
-        new @string[]{"aaa"u8, "bb\nb"u8, "ccc"u8}.slice(),
-        new @string[]{"a,a"u8, @"b""bb"u8, "ccc"u8}.slice(),
-        new @string[]{"zzz"u8, "yyy"u8, "xxx"u8}.slice()
-    }.slice(),
+    Output: slice<slice<@string>>([
+        slice<@string>(["#field1", "field2", "field3"]),
+        slice<@string>(["aaa", "bb\nb", "ccc"]),
+        slice<@string>(["a,a", @"b""bb", "ccc"]),
+        slice<@string>(["zzz", "yyy", "xxx"])
+    ]),
     UseFieldsPerRecord: true,
     FieldsPerRecord: 0
 ), new(
-    Name: "NoEOLTest"u8,
-    Input: "§a,§b,§c"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice()
+    Name: "NoEOLTest",
+    Input: "§a,§b,§c",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"])])
 ), new(
-    Name: "Semicolon"u8,
-    Input: "§a;§b;§c\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice(),
-    Comma: (rune)';'
+    Name: "Semicolon",
+    Input: "§a;§b;§c\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"])]),
+    Comma: ';'
 ), new(
-    Name: "MultiLine"u8,
+    Name: "MultiLine",
     Input: """
 §"two
 line",§"one line",§"three
 line
 field"
 """u8.Raw(),
-    Output: new slice<@string>[]{new @string[]{"two\nline"u8, "one line"u8, "three\nline\nfield"u8}.slice()}.slice()
+    Output: slice<slice<@string>>([slice<@string>(["two\nline", "one line", "three\nline\nfield"])])
 ), new(
-    Name: "BlankLine"u8,
-    Input: "§a,§b,§c\n\n¶§d,§e,§f\n\n"u8,
-    Output: new slice<@string>[]{
-        new @string[]{"a"u8, "b"u8, "c"u8}.slice(),
-        new @string[]{"d"u8, "e"u8, "f"u8}.slice()
-    }.slice()
+    Name: "BlankLine",
+    Input: "§a,§b,§c\n\n¶§d,§e,§f\n\n",
+    Output: slice<slice<@string>>([
+        slice<@string>(["a", "b", "c"]),
+        slice<@string>(["d", "e", "f"])
+    ])
 ), new(
-    Name: "BlankLineFieldCount"u8,
-    Input: "§a,§b,§c\n\n¶§d,§e,§f\n\n"u8,
-    Output: new slice<@string>[]{
-        new @string[]{"a"u8, "b"u8, "c"u8}.slice(),
-        new @string[]{"d"u8, "e"u8, "f"u8}.slice()
-    }.slice(),
+    Name: "BlankLineFieldCount",
+    Input: "§a,§b,§c\n\n¶§d,§e,§f\n\n",
+    Output: slice<slice<@string>>([
+        slice<@string>(["a", "b", "c"]),
+        slice<@string>(["d", "e", "f"])
+    ]),
     UseFieldsPerRecord: true,
     FieldsPerRecord: 0
 ), new(
-    Name: "TrimSpace"u8,
-    Input: " §a,  §b,   §c\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice(),
+    Name: "TrimSpace",
+    Input: " §a,  §b,   §c\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"])]),
     TrimLeadingSpace: true
 ), new(
-    Name: "LeadingSpace"u8,
-    Input: "§ a,§  b,§   c\n"u8,
-    Output: new slice<@string>[]{new @string[]{" a"u8, "  b"u8, "   c"u8}.slice()}.slice()
+    Name: "LeadingSpace",
+    Input: "§ a,§  b,§   c\n",
+    Output: slice<slice<@string>>([slice<@string>([" a", "  b", "   c"])])
 ), new(
-    Name: "Comment"u8,
-    Input: "#1,2,3\n§a,§b,§c\n#comment"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice(),
-    Comment: (rune)'#'
+    Name: "Comment",
+    Input: "#1,2,3\n§a,§b,§c\n#comment",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"])]),
+    Comment: '#'
 ), new(
-    Name: "NoComment"u8,
-    Input: "§#1,§2,§3\n¶§a,§b,§c"u8,
-    Output: new slice<@string>[]{new @string[]{"#1"u8, "2"u8, "3"u8}.slice(), new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice()
+    Name: "NoComment",
+    Input: "§#1,§2,§3\n¶§a,§b,§c",
+    Output: slice<slice<@string>>([slice<@string>(["#1", "2", "3"]), slice<@string>(["a", "b", "c"])])
 ), new(
-    Name: "LazyQuotes"u8,
-    Input: @"§a ""word"",§""1""2"",§a"",§""b"u8,
-    Output: new slice<@string>[]{new @string[]{@"a ""word"""u8, @"1""2"u8, @"a"""u8, @"b"u8}.slice()}.slice(),
+    Name: "LazyQuotes",
+    Input: @"§a ""word"",§""1""2"",§a"",§""b",
+    Output: slice<slice<@string>>([slice<@string>([@"a ""word""", @"1""2", @"a""", @"b"])]),
     LazyQuotes: true
 ), new(
-    Name: "BareQuotes"u8,
-    Input: @"§a ""word"",§""1""2"",§a"""u8,
-    Output: new slice<@string>[]{new @string[]{@"a ""word"""u8, @"1""2"u8, @"a"""u8}.slice()}.slice(),
+    Name: "BareQuotes",
+    Input: @"§a ""word"",§""1""2"",§a""",
+    Output: slice<slice<@string>>([slice<@string>([@"a ""word""", @"1""2", @"a"""])]),
     LazyQuotes: true
 ), new(
-    Name: "BareDoubleQuotes"u8,
-    Input: @"§a""""b,§c"u8,
-    Output: new slice<@string>[]{new @string[]{@"a""""b"u8, @"c"u8}.slice()}.slice(),
+    Name: "BareDoubleQuotes",
+    Input: @"§a""""b,§c",
+    Output: slice<slice<@string>>([slice<@string>([@"a""""b", @"c"])]),
     LazyQuotes: true
 ), new(
-    Name: "BadDoubleQuotes"u8,
-    Input: @"§a∑""""b,c"u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrBareQuote)))}.slice()
+    Name: "BadDoubleQuotes",
+    Input: @"§a∑""""b,c",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrBareQuote)))])
 ), new(
-    Name: "TrimQuote"u8,
-    Input: @" §""a"",§"" b"",§c"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, " b"u8, "c"u8}.slice()}.slice(),
+    Name: "TrimQuote",
+    Input: @" §""a"",§"" b"",§c",
+    Output: slice<slice<@string>>([slice<@string>(["a", " b", "c"])]),
     TrimLeadingSpace: true
 ), new(
-    Name: "BadBareQuote"u8,
-    Input: @"§a ∑""word"",""b"""u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrBareQuote)))}.slice()
+    Name: "BadBareQuote",
+    Input: @"§a ∑""word"",""b""",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrBareQuote)))])
 ), new(
-    Name: "BadTrailingQuote"u8,
-    Input: @"§""a word"",b∑"""u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrBareQuote)))}.slice()
+    Name: "BadTrailingQuote",
+    Input: @"§""a word"",b∑""",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrBareQuote)))])
 ), new(
-    Name: "ExtraneousQuote"u8,
-    Input: @"§""a ∑""word"",""b"""u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice()
+    Name: "ExtraneousQuote",
+    Input: @"§""a ∑""word"",""b""",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))])
 ), new(
-    Name: "BadFieldCount"u8,
-    Input: "§a,§b,§c\n¶∑§d,§e"u8,
-    Errors: new error[]{default!, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount)))}.slice(),
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice(), new @string[]{"d"u8, "e"u8}.slice()}.slice(),
+    Name: "BadFieldCount",
+    Input: "§a,§b,§c\n¶∑§d,§e",
+    Errors: slice<error>([default, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount)))]),
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"]), slice<@string>(["d", "e"])]),
     UseFieldsPerRecord: true,
     FieldsPerRecord: 0
 ), new(
-    Name: "BadFieldCountMultiple"u8,
-    Input: "§a,§b,§c\n¶∑§d,§e\n¶∑§f"u8,
-    Errors: new error[]{default!, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount))), new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount)))}.slice(),
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice(), new @string[]{"d"u8, "e"u8}.slice(), new @string[]{"f"u8}.slice()}.slice(),
+    Name: "BadFieldCountMultiple",
+    Input: "§a,§b,§c\n¶∑§d,§e\n¶∑§f",
+    Errors: slice<error>([default, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount))), new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount)))]),
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"]), slice<@string>(["d", "e"]), slice<@string>(["f"])]),
     UseFieldsPerRecord: true,
     FieldsPerRecord: 0
 ), new(
-    Name: "BadFieldCount1"u8,
-    Input: @"§∑a,§b,§c"u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount)))}.slice(),
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice()}.slice(),
+    Name: "BadFieldCount1",
+    Input: @"§∑a,§b,§c",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrFieldCount)))]),
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"])]),
     UseFieldsPerRecord: true,
     FieldsPerRecord: 2
 ), new(
-    Name: "FieldCount"u8,
-    Input: "§a,§b,§c\n¶§d,§e"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice(), new @string[]{"d"u8, "e"u8}.slice()}.slice()
+    Name: "FieldCount",
+    Input: "§a,§b,§c\n¶§d,§e",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"]), slice<@string>(["d", "e"])])
 ), new(
-    Name: "TrailingCommaEOF"u8,
-    Input: "§a,§b,§c,§"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8, ""u8}.slice()}.slice()
+    Name: "TrailingCommaEOF",
+    Input: "§a,§b,§c,§",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c", ""])])
 ), new(
-    Name: "TrailingCommaEOL"u8,
-    Input: "§a,§b,§c,§\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8, ""u8}.slice()}.slice()
+    Name: "TrailingCommaEOL",
+    Input: "§a,§b,§c,§\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c", ""])])
 ), new(
-    Name: "TrailingCommaSpaceEOF"u8,
-    Input: "§a,§b,§c, §"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8, ""u8}.slice()}.slice(),
+    Name: "TrailingCommaSpaceEOF",
+    Input: "§a,§b,§c, §",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c", ""])]),
     TrimLeadingSpace: true
 ), new(
-    Name: "TrailingCommaSpaceEOL"u8,
-    Input: "§a,§b,§c, §\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8, ""u8}.slice()}.slice(),
+    Name: "TrailingCommaSpaceEOL",
+    Input: "§a,§b,§c, §\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c", ""])]),
     TrimLeadingSpace: true
 ), new(
-    Name: "TrailingCommaLine3"u8,
-    Input: "§a,§b,§c\n¶§d,§e,§f\n¶§g,§hi,§"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8}.slice(), new @string[]{"d"u8, "e"u8, "f"u8}.slice(), new @string[]{"g"u8, "hi"u8, ""u8}.slice()}.slice(),
+    Name: "TrailingCommaLine3",
+    Input: "§a,§b,§c\n¶§d,§e,§f\n¶§g,§hi,§",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c"]), slice<@string>(["d", "e", "f"]), slice<@string>(["g", "hi", ""])]),
     TrimLeadingSpace: true
 ), new(
-    Name: "NotTrailingComma3"u8,
-    Input: "§a,§b,§c,§ \n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8, "c"u8, " "u8}.slice()}.slice()
+    Name: "NotTrailingComma3",
+    Input: "§a,§b,§c,§ \n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b", "c", " "])])
 ), new(
-    Name: "CommaFieldTest"u8,
+    Name: "CommaFieldTest",
     Input: """
 §x,§y,§z,§w
 ¶§x,§y,§z,§
@@ -222,212 +222,212 @@ field"
 ¶§"",§"",§"",§""
 
 """u8.Raw(),
-    Output: new slice<@string>[]{
-        new @string[]{"x"u8, "y"u8, "z"u8, "w"u8}.slice(),
-        new @string[]{"x"u8, "y"u8, "z"u8, ""u8}.slice(),
-        new @string[]{"x"u8, "y"u8, ""u8, ""u8}.slice(),
-        new @string[]{"x"u8, ""u8, ""u8, ""u8}.slice(),
-        new @string[]{""u8, ""u8, ""u8, ""u8}.slice(),
-        new @string[]{"x"u8, "y"u8, "z"u8, "w"u8}.slice(),
-        new @string[]{"x"u8, "y"u8, "z"u8, ""u8}.slice(),
-        new @string[]{"x"u8, "y"u8, ""u8, ""u8}.slice(),
-        new @string[]{"x"u8, ""u8, ""u8, ""u8}.slice(),
-        new @string[]{""u8, ""u8, ""u8, ""u8}.slice()
-    }.slice()
+    Output: slice<slice<@string>>([
+        slice<@string>(["x", "y", "z", "w"]),
+        slice<@string>(["x", "y", "z", ""]),
+        slice<@string>(["x", "y", "", ""]),
+        slice<@string>(["x", "", "", ""]),
+        slice<@string>(["", "", "", ""]),
+        slice<@string>(["x", "y", "z", "w"]),
+        slice<@string>(["x", "y", "z", ""]),
+        slice<@string>(["x", "y", "", ""]),
+        slice<@string>(["x", "", "", ""]),
+        slice<@string>(["", "", "", ""])
+    ])
 ), new(
-    Name: "TrailingCommaIneffective1"u8,
-    Input: "§a,§b,§\n¶§c,§d,§e"u8,
-    Output: new slice<@string>[]{
-        new @string[]{"a"u8, "b"u8, ""u8}.slice(),
-        new @string[]{"c"u8, "d"u8, "e"u8}.slice()
-    }.slice(),
+    Name: "TrailingCommaIneffective1",
+    Input: "§a,§b,§\n¶§c,§d,§e",
+    Output: slice<slice<@string>>([
+        slice<@string>(["a", "b", ""]),
+        slice<@string>(["c", "d", "e"])
+    ]),
     TrimLeadingSpace: true
 ), new(
-    Name: "ReadAllReuseRecord"u8,
-    Input: "§a,§b\n¶§c,§d"u8,
-    Output: new slice<@string>[]{
-        new @string[]{"a"u8, "b"u8}.slice(),
-        new @string[]{"c"u8, "d"u8}.slice()
-    }.slice(),
+    Name: "ReadAllReuseRecord",
+    Input: "§a,§b\n¶§c,§d",
+    Output: slice<slice<@string>>([
+        slice<@string>(["a", "b"]),
+        slice<@string>(["c", "d"])
+    ]),
     ReuseRecord: true
 ), new(
-    Name: "StartLine1"u8, // Issue 19019
-    Input: "§a,\"b\nc∑\"d,e"u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice()
+    Name: "StartLine1", // Issue 19019
+    Input: "§a,\"b\nc∑\"d,e",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))])
 ), new(
-    Name: "StartLine2"u8,
-    Input: "§a,§b\n¶§\"d\n\n,e∑"u8,
-    Errors: new error[]{default!, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice(),
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8}.slice()}.slice()
+    Name: "StartLine2",
+    Input: "§a,§b\n¶§\"d\n\n,e∑",
+    Errors: slice<error>([default, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))]),
+    Output: slice<slice<@string>>([slice<@string>(["a", "b"])])
 ), new(
-    Name: "CRLFInQuotedField"u8, // Issue 21201
-    Input: "§A,§\"Hello\r\nHi\",§B\r\n"u8,
-    Output: new slice<@string>[]{
-        new @string[]{"A"u8, "Hello\nHi"u8, "B"u8}.slice()
-    }.slice()
+    Name: "CRLFInQuotedField", // Issue 21201
+    Input: "§A,§\"Hello\r\nHi\",§B\r\n",
+    Output: slice<slice<@string>>([
+        slice<@string>(["A", "Hello\nHi", "B"])
+    ])
 ), new(
-    Name: "BinaryBlobField"u8, // Issue 19410
+    Name: "BinaryBlobField", // Issue 19410
     Input: ((@string)(new byte[]{0xc2, 0xa7, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x2c, 0xc2, 0xa7, 0x61, 0x6b, 0x74, 0x61, 0x75})),
-    Output: new slice<@string>[]{new @string[]{((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"u8}.slice()}.slice()
+    Output: slice<slice<@string>>([slice<@string>([((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"])])
 ), new(
-    Name: "TrailingCR"u8,
-    Input: "§field1,§field2\r"u8,
-    Output: new slice<@string>[]{new @string[]{"field1"u8, "field2"u8}.slice()}.slice()
+    Name: "TrailingCR",
+    Input: "§field1,§field2\r",
+    Output: slice<slice<@string>>([slice<@string>(["field1", "field2"])])
 ), new(
-    Name: "QuotedTrailingCR"u8,
-    Input: "§\"field\"\r"u8,
-    Output: new slice<@string>[]{new @string[]{"field"u8}.slice()}.slice()
+    Name: "QuotedTrailingCR",
+    Input: "§\"field\"\r",
+    Output: slice<slice<@string>>([slice<@string>(["field"])])
 ), new(
-    Name: "QuotedTrailingCRCR"u8,
-    Input: "§\"field∑\"\r\r"u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice()
+    Name: "QuotedTrailingCRCR",
+    Input: "§\"field∑\"\r\r",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))])
 ), new(
-    Name: "FieldCR"u8,
-    Input: "§field\rfield\r"u8,
-    Output: new slice<@string>[]{new @string[]{"field\rfield"u8}.slice()}.slice()
+    Name: "FieldCR",
+    Input: "§field\rfield\r",
+    Output: slice<slice<@string>>([slice<@string>(["field\rfield"])])
 ), new(
-    Name: "FieldCRCR"u8,
-    Input: "§field\r\rfield\r\r"u8,
-    Output: new slice<@string>[]{new @string[]{"field\r\rfield\r"u8}.slice()}.slice()
+    Name: "FieldCRCR",
+    Input: "§field\r\rfield\r\r",
+    Output: slice<slice<@string>>([slice<@string>(["field\r\rfield\r"])])
 ), new(
-    Name: "FieldCRCRLF"u8,
-    Input: "§field\r\r\n¶§field\r\r\n"u8,
-    Output: new slice<@string>[]{new @string[]{"field\r"u8}.slice(), new @string[]{"field\r"u8}.slice()}.slice()
+    Name: "FieldCRCRLF",
+    Input: "§field\r\r\n¶§field\r\r\n",
+    Output: slice<slice<@string>>([slice<@string>(["field\r"]), slice<@string>(["field\r"])])
 ), new(
-    Name: "FieldCRCRLFCR"u8,
-    Input: "§field\r\r\n¶§\rfield\r\r\n\r"u8,
-    Output: new slice<@string>[]{new @string[]{"field\r"u8}.slice(), new @string[]{"\rfield\r"u8}.slice()}.slice()
+    Name: "FieldCRCRLFCR",
+    Input: "§field\r\r\n¶§\rfield\r\r\n\r",
+    Output: slice<slice<@string>>([slice<@string>(["field\r"]), slice<@string>(["\rfield\r"])])
 ), new(
-    Name: "FieldCRCRLFCRCR"u8,
-    Input: "§field\r\r\n¶§\r\rfield\r\r\n¶§\r\r"u8,
-    Output: new slice<@string>[]{new @string[]{"field\r"u8}.slice(), new @string[]{"\r\rfield\r"u8}.slice(), new @string[]{"\r"u8}.slice()}.slice()
+    Name: "FieldCRCRLFCRCR",
+    Input: "§field\r\r\n¶§\r\rfield\r\r\n¶§\r\r",
+    Output: slice<slice<@string>>([slice<@string>(["field\r"]), slice<@string>(["\r\rfield\r"]), slice<@string>(["\r"])])
 ), new(
-    Name: "MultiFieldCRCRLFCRCR"u8,
-    Input: "§field1,§field2\r\r\n¶§\r\rfield1,§field2\r\r\n¶§\r\r,§"u8,
-    Output: new slice<@string>[]{
-        new @string[]{"field1"u8, "field2\r"u8}.slice(),
-        new @string[]{"\r\rfield1"u8, "field2\r"u8}.slice(),
-        new @string[]{"\r\r"u8, ""u8}.slice()
-    }.slice()
+    Name: "MultiFieldCRCRLFCRCR",
+    Input: "§field1,§field2\r\r\n¶§\r\rfield1,§field2\r\r\n¶§\r\r,§",
+    Output: slice<slice<@string>>([
+        slice<@string>(["field1", "field2\r"]),
+        slice<@string>(["\r\rfield1", "field2\r"]),
+        slice<@string>(["\r\r", ""])
+    ])
 ), new(
-    Name: "NonASCIICommaAndComment"u8,
-    Input: "§a£§b,c£ \t§d,e\n€ comment\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "b,c"u8, "d,e"u8}.slice()}.slice(),
+    Name: "NonASCIICommaAndComment",
+    Input: "§a£§b,c£ \t§d,e\n€ comment\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "b,c", "d,e"])]),
     TrimLeadingSpace: true,
-    Comma: (rune)'£',
-    Comment: (rune)'€'
+    Comma: '£',
+    Comment: '€'
 ), new(
-    Name: "NonASCIICommaAndCommentWithQuotes"u8,
-    Input: "§a€§\"  b,\"€§ c\nλ comment\n"u8,
-    Output: new slice<@string>[]{new @string[]{"a"u8, "  b,"u8, " c"u8}.slice()}.slice(),
-    Comma: (rune)'€',
-    Comment: (rune)'λ'
+    Name: "NonASCIICommaAndCommentWithQuotes",
+    Input: "§a€§\"  b,\"€§ c\nλ comment\n",
+    Output: slice<slice<@string>>([slice<@string>(["a", "  b,", " c"])]),
+    Comma: '€',
+    Comment: 'λ'
 ), new(
     // λ and θ start with the same byte.
     // This tests that the parser doesn't confuse such characters.
-    Name: "NonASCIICommaConfusion"u8,
-    Input: "§\"abθcd\"λ§efθgh"u8,
-    Output: new slice<@string>[]{new @string[]{"abθcd"u8, "efθgh"u8}.slice()}.slice(),
-    Comma: (rune)'λ',
-    Comment: (rune)'€'
+    Name: "NonASCIICommaConfusion",
+    Input: "§\"abθcd\"λ§efθgh",
+    Output: slice<slice<@string>>([slice<@string>(["abθcd", "efθgh"])]),
+    Comma: 'λ',
+    Comment: '€'
 ), new(
-    Name: "NonASCIICommentConfusion"u8,
-    Input: "§λ\n¶§λ\nθ\n¶§λ\n"u8,
-    Output: new slice<@string>[]{new @string[]{"λ"u8}.slice(), new @string[]{"λ"u8}.slice(), new @string[]{"λ"u8}.slice()}.slice(),
-    Comment: (rune)'θ'
+    Name: "NonASCIICommentConfusion",
+    Input: "§λ\n¶§λ\nθ\n¶§λ\n",
+    Output: slice<slice<@string>>([slice<@string>(["λ"]), slice<@string>(["λ"]), slice<@string>(["λ"])]),
+    Comment: 'θ'
 ), new(
-    Name: "QuotedFieldMultipleLF"u8,
-    Input: "§\"\n\n\n\n\""u8,
-    Output: new slice<@string>[]{new @string[]{"\n\n\n\n"u8}.slice()}.slice()
+    Name: "QuotedFieldMultipleLF",
+    Input: "§\"\n\n\n\n\"",
+    Output: slice<slice<@string>>([slice<@string>(["\n\n\n\n"])])
 ), new(
-    Name: "MultipleCRLF"u8,
-    Input: "\r\n\r\n\r\n\r\n"u8
+    Name: "MultipleCRLF",
+    Input: "\r\n\r\n\r\n\r\n"
 ), new(
     // The implementation may read each line in several chunks if it doesn't fit entirely
     // in the read buffer, so we should test the code to handle that condition.
-    Name: "HugeLines"u8,
-    Input: strings.Repeat("#ignore\n"u8, 10000) + "§"u8 + strings.Repeat("@"u8, 5000) + ",§"u8 + strings.Repeat("*"u8, 5000),
-    Output: new slice<@string>[]{new @string[]{strings.Repeat("@"u8, 5000), strings.Repeat("*"u8, 5000)}.slice()}.slice(),
-    Comment: (rune)'#'
+    Name: "HugeLines",
+    Input: strings.Repeat("#ignore\n", 10000) + "§"u8 + strings.Repeat("@", 5000) + ",§"u8 + strings.Repeat("*", 5000),
+    Output: slice<slice<@string>>([slice<@string>([strings.Repeat("@", 5000), strings.Repeat("*", 5000)])]),
+    Comment: '#'
 ), new(
-    Name: "QuoteWithTrailingCRLF"u8,
-    Input: "§\"foo∑\"bar\"\r\n"u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice()
+    Name: "QuoteWithTrailingCRLF",
+    Input: "§\"foo∑\"bar\"\r\n",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))])
 ), new(
-    Name: "LazyQuoteWithTrailingCRLF"u8,
-    Input: "§\"foo\"bar\"\r\n"u8,
-    Output: new slice<@string>[]{new @string[]{@"foo""bar"u8}.slice()}.slice(),
+    Name: "LazyQuoteWithTrailingCRLF",
+    Input: "§\"foo\"bar\"\r\n",
+    Output: slice<slice<@string>>([slice<@string>([@"foo""bar"])]),
     LazyQuotes: true
 ), new(
-    Name: "DoubleQuoteWithTrailingCRLF"u8,
-    Input: "§\"foo\"\"bar\"\r\n"u8,
-    Output: new slice<@string>[]{new @string[]{@"foo""bar"u8}.slice()}.slice()
+    Name: "DoubleQuoteWithTrailingCRLF",
+    Input: "§\"foo\"\"bar\"\r\n",
+    Output: slice<slice<@string>>([slice<@string>([@"foo""bar"])])
 ), new(
-    Name: "EvenQuotes"u8,
-    Input: @"§"""""""""""""""""u8,
-    Output: new slice<@string>[]{new @string[]{@""""""""u8}.slice()}.slice()
+    Name: "EvenQuotes",
+    Input: @"§""""""""""""""""",
+    Output: slice<slice<@string>>([slice<@string>([@""""""""])])
 ), new(
-    Name: "OddQuotes"u8,
-    Input: @"§""""""""""""""∑"u8,
-    Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice()
+    Name: "OddQuotes",
+    Input: @"§""""""""""""""∑",
+    Errors: slice<error>([new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))])
 ), new(
-    Name: "LazyOddQuotes"u8,
-    Input: @"§"""""""""""""""u8,
-    Output: new slice<@string>[]{new @string[]{@""""""""u8}.slice()}.slice(),
+    Name: "LazyOddQuotes",
+    Input: @"§""""""""""""""",
+    Output: slice<slice<@string>>([slice<@string>([@""""""""])]),
     LazyQuotes: true
 ), new(
-    Name: "BadComma1"u8,
-    Comma: (rune)'\n',
-    Errors: new error[]{errInvalidDelim}.slice()
+    Name: "BadComma1",
+    Comma: '\n',
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadComma2"u8,
-    Comma: (rune)'\r',
-    Errors: new error[]{errInvalidDelim}.slice()
+    Name: "BadComma2",
+    Comma: '\r',
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadComma3"u8,
-    Comma: (rune)'"',
-    Errors: new error[]{errInvalidDelim}.slice()
+    Name: "BadComma3",
+    Comma: '"',
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadComma4"u8,
+    Name: "BadComma4",
     Comma: utf8.RuneError,
-    Errors: new error[]{errInvalidDelim}.slice()
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadComment1"u8,
-    Comment: (rune)'\n',
-    Errors: new error[]{errInvalidDelim}.slice()
+    Name: "BadComment1",
+    Comment: '\n',
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadComment2"u8,
-    Comment: (rune)'\r',
-    Errors: new error[]{errInvalidDelim}.slice()
+    Name: "BadComment2",
+    Comment: '\r',
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadComment3"u8,
+    Name: "BadComment3",
     Comment: utf8.RuneError,
-    Errors: new error[]{errInvalidDelim}.slice()
+    Errors: slice<error>([errInvalidDelim])
 ), new(
-    Name: "BadCommaComment"u8,
-    Comma: (rune)'X',
-    Comment: (rune)'X',
-    Errors: new error[]{errInvalidDelim}.slice()
+    Name: "BadCommaComment",
+    Comma: 'X',
+    Comment: 'X',
+    Errors: slice<error>([errInvalidDelim])
 )
-}.slice(); }
+]); }
 
-public static void TestRead(ж<testing.T> Ꮡt) {
+public static void TestRead(ж<testing.T> t) {
     (ж<global::go.encoding.csv_package.Reader>, slice<slice<array<nint>>>, map<nint, array<nint>>, @string) newReader(readTest tt) {
         var (positions, errPositions, input) = makePositions(tt.Input);
         var r = NewReader(new csv_test_package.strings_ReaderжReader(strings.NewReader(input)));
 
         if (tt.Comma != 0) {
-            r.Value.Comma = tt.Comma;
+            r.Comma = tt.Comma;
         }
-        r.Value.Comment = tt.Comment;
-        if (tt.UseFieldsPerRecord){
-            r.Value.FieldsPerRecord = tt.FieldsPerRecord;
+        r.Comment = tt.Comment;
+        if (tt.UseFieldsPerRecord) {
+            r.FieldsPerRecord = tt.FieldsPerRecord;
         } else {
-            r.Value.FieldsPerRecord = -1;
+            r.FieldsPerRecord = -1;
         }
-        r.Value.LazyQuotes = tt.LazyQuotes;
-        r.Value.TrimLeadingSpace = tt.TrimLeadingSpace;
-        r.Value.ReuseRecord = tt.ReuseRecord;
+        r.LazyQuotes = tt.LazyQuotes;
+        r.TrimLeadingSpace = tt.TrimLeadingSpace;
+        r.ReuseRecord = tt.ReuseRecord;
         return (r, positions, errPositions, input);
     }
 
@@ -437,23 +437,23 @@ public static void TestRead(ж<testing.T> Ꮡt) {
 
         var newReaderʗ1 = newReader;
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.Name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var (r, positions, errPositions, input) = newReaderʗ1(ttʗ1);
             var (@out, err) = r.ReadAll();
             {
-                var wantErr = firstError(ttʗ1.Errors, positions, errPositions); if (wantErr != default!){
+                var wantErr = firstError(ttʗ1.Errors, positions, errPositions); if (wantErr != nil) {
                     if (!reflect.DeepEqual(err, wantErr)) {
-                        tΔ1.Fatalf("ReadAll() error mismatch:\ngot  %v (%#v)\nwant %v (%#v)"u8, err, err, wantErr, wantErr);
+                        tΔ1.Fatalf("ReadAll() error mismatch:\ngot  %v (%#v)\nwant %v (%#v)", err, err, wantErr, wantErr);
                     }
-                    if (@out != default!) {
-                        tΔ1.Fatalf("ReadAll() output:\ngot  %q\nwant nil"u8, @out);
+                    if (@out != nil) {
+                        tΔ1.Fatalf("ReadAll() output:\ngot  %q\nwant nil", @out);
                     }
                 } else {
-                    if (err != default!) {
-                        tΔ1.Fatalf("unexpected Readall() error: %v"u8, err);
+                    if (err != nil) {
+                        tΔ1.Fatalf("unexpected Readall() error: %v", err);
                     }
                     if (!reflect.DeepEqual(@out, ttʗ1.Output)) {
-                        tΔ1.Fatalf("ReadAll() output:\ngot  %q\nwant %q"u8, @out, ttʗ1.Output);
+                        tΔ1.Fatalf("ReadAll() output:\ngot  %q\nwant %q", @out, ttʗ1.Output);
                     }
                 }
             }
@@ -461,45 +461,44 @@ public static void TestRead(ж<testing.T> Ꮡt) {
             // Check input offset after call ReadAll()
             nint inputByteSize = len(input);
             var inputOffset = r.InputOffset();
-            if (err == default! && (int64)inputByteSize != inputOffset) {
-                tΔ1.Errorf("wrong input offset after call ReadAll():\ngot:  %d\nwant: %d\ninput: %s"u8, inputOffset, inputByteSize, input);
+            if (err == nil && (int64)inputByteSize != inputOffset) {
+                tΔ1.Errorf("wrong input offset after call ReadAll():\ngot:  %d\nwant: %d\ninput: %s", inputOffset, inputByteSize, input);
             }
 
             // Check field and error positions.
             (r, _, _, _) = newReaderʗ1(ttʗ1);
-            for (nint recNum = 0; ᐧ ; recNum++) {
+            for (nint recNum = 0; ; recNum++) {
                 var (rec, errΔ1) = r.Read();
-                error wantErr = default!;
-                if (recNum < len(ttʗ1.Errors) && ttʗ1.Errors[recNum] != default!){
+                error wantErr = default;
+                if (recNum < len(ttʗ1.Errors) && ttʗ1.Errors[recNum] != nil) {
                     wantErr = errorWithPosition(ttʗ1.Errors[recNum], recNum, positions, errPositions);
-                } else 
-                if (recNum >= len(ttʗ1.Output)) {
+                } else if (recNum >= len(ttʗ1.Output)) {
                     wantErr = io.EOF;
                 }
                 if (!reflect.DeepEqual(errΔ1, wantErr)) {
-                    tΔ1.Fatalf("Read() error at record %d:\ngot %v (%#v)\nwant %v (%#v)"u8, recNum, errΔ1, errΔ1, wantErr, wantErr);
+                    tΔ1.Fatalf("Read() error at record %d:\ngot %v (%#v)\nwant %v (%#v)", recNum, errΔ1, errΔ1, wantErr, wantErr);
                 }
                 // ErrFieldCount is explicitly non-fatal.
-                if (errΔ1 != default! && !errors.Is(errΔ1, ErrFieldCount)) {
+                if (errΔ1 != nil && !errors.Is(errΔ1, ErrFieldCount)) {
                     if (recNum < len(ttʗ1.Output)) {
-                        tΔ1.Fatalf("need more records; got %d want %d"u8, recNum, len(ttʗ1.Output));
+                        tΔ1.Fatalf("need more records; got %d want %d", recNum, len(ttʗ1.Output));
                     }
                     break;
                 }
                 {
                     var (got, want) = (rec, ttʗ1.Output[recNum]); if (!slices.Equal<slice<@string>, @string>(got, want)) {
-                        tΔ1.Errorf("Read vs ReadAll mismatch;\ngot %q\nwant %q"u8, got, want);
+                        tΔ1.Errorf("Read vs ReadAll mismatch;\ngot %q\nwant %q", got, want);
                     }
                 }
                 var pos = positions[recNum];
                 if (len(pos) != len(rec)) {
-                    tΔ1.Fatalf("mismatched position length at record %d"u8, recNum);
+                    tΔ1.Fatalf("mismatched position length at record %d", recNum);
                 }
                 foreach (var i in range(rec)) {
                     var (line, col) = r.FieldPos(i);
                     {
                         var (got, want) = (new nint[]{line, col}.array(), pos[i].Clone()); if (got != want) {
-                            tΔ1.Errorf("position mismatch at record %d, field %d;\ngot %v\nwant %v"u8, recNum, i, got, want);
+                            tΔ1.Errorf("position mismatch at record %d, field %d;\ngot %v\nwant %v", recNum, i, got, want);
                         }
                     }
                 }
@@ -513,11 +512,11 @@ public static void TestRead(ж<testing.T> Ꮡt) {
 // index inside positions.
 internal static error firstError(slice<error> errs, slice<slice<array<nint>>> positions, map<nint, array<nint>> errPositions) {
     foreach (var (i, err) in errs) {
-        if (err != default!) {
+        if (err != nil) {
             return errorWithPosition(err, i, positions, errPositions);
         }
     }
-    return default!;
+    return default;
 }
 
 internal static error errorWithPosition(error err, nint recNum, slice<slice<array<nint>>> positions, map<nint, array<nint>> errPositions) {
@@ -532,8 +531,7 @@ internal static error errorWithPosition(error err, nint recNum, slice<slice<arra
     if (!ok) {
         throw panic(fmt.Errorf("no error position found for error at record %d"u8, recNum));
     }
-    ref var parseErr1 = ref heap<global::go.encoding.csv_package.ParseError>(out var ᏑparseErr1);
-    parseErr1 = parseErr.Value;
+    ref var parseErr1 = ref heap<global::go.encoding.csv_package.ParseError>(parseErr.Value, out var ᏑparseErr1);
     parseErr1.StartLine = positions[recNum][0][0];
     parseErr1.Line = errPos[0];
     parseErr1.Column = errPos[1];
@@ -551,7 +549,7 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
     var bufᴷ = new stackAppend<byte>();
 
     var buf = new slice<byte>(0, len(text));
-    slice<slice<array<nint>>> positions = default!;
+    slice<slice<array<nint>>> positions = default;
     var errPositions = new map<nint, array<nint>>();
     nint line = 1;
     nint col = 1;
@@ -560,25 +558,25 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
     while (len(text) > 0) {
         var (r, size) = utf8.DecodeRuneInString(text);
         switch (r) {
-        case (rune)'\n': {
+        case '\n': {
             line++;
             col = 1;
-            buf = append(bufᴷ, buf, (byte)((rune)'\n'));
+            buf = append(bufᴷ, buf, (byte)'\n');
             break;
         }
-        case (rune)'§': {
+        case '§': {
             if (len(positions) == 0) {
                 positions = append(positions, GoReflect.WithElemDims(new array<nint>[]{}.slice(), 2));
             }
             positions[len(positions) - 1] = append(positions[len(positions) - 1], new nint[]{line, col}.array());
             break;
         }
-        case (rune)'¶': {
+        case '¶': {
             positions = append(positions, GoReflect.WithElemDims(new array<nint>[]{}.slice(), 2));
             recNum++;
             break;
         }
-        case (rune)'∑': {
+        case '∑': {
             errPositions[recNum] = new nint[]{line, col}.array();
             break;
         }
@@ -600,10 +598,10 @@ internal partial struct nTimes {
 }
 
 internal static (nint n, error err) Read(this ref nTimes r, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    while (ᐧ) {
+    for (;;) {
         if (r.n <= 0 || r.s == ""u8) {
             return (n, io.EOF);
         }
@@ -628,21 +626,22 @@ internal static void benchmarkRead(ж<testing.B> Ꮡb, Action<ж<global::go.enco
 
     b.ReportAllocs();
     var r = NewReader(new csv_internal_test_package.nTimesжReader(Ꮡ(new nTimes(s: rows, n: b.N))));
-    if (initReader != default!) {
+    if (initReader != nil) {
         initReader(r);
     }
-    while (ᐧ) {
+    for (;;) {
         var (_, err) = r.Read();
         if (AreEqual(err, io.EOF)) {
             break;
         }
-        if (err != default!) {
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
     }
 }
 
-internal static readonly @string benchmarkCSVData = """
+internal static ref readonly @string benchmarkCSVData => ref benchmarkCSVDataᵇ;
+private static readonly @string benchmarkCSVDataᵇ = """
 x,y,z,w
 x,y,z,
 x,y,,
@@ -656,24 +655,25 @@ x,,,
 
 """u8.Raw();
 
-public static void BenchmarkRead(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, default!, benchmarkCSVData);
+public static void BenchmarkRead(ж<testing.B> b) {
+    benchmarkRead(b, default, benchmarkCSVData);
 }
 
-public static void BenchmarkReadWithFieldsPerRecord(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, (ж<global::go.encoding.csv_package.Reader> r) => {
-        r.Value.FieldsPerRecord = 4;
+public static void BenchmarkReadWithFieldsPerRecord(ж<testing.B> b) {
+    benchmarkRead(b, (ж<global::go.encoding.csv_package.Reader> r) => {
+        r.FieldsPerRecord = 4;
     }, benchmarkCSVData);
 }
 
-public static void BenchmarkReadWithoutFieldsPerRecord(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, (ж<global::go.encoding.csv_package.Reader> r) => {
-        r.Value.FieldsPerRecord = -1;
+public static void BenchmarkReadWithoutFieldsPerRecord(ж<testing.B> b) {
+    benchmarkRead(b, (ж<global::go.encoding.csv_package.Reader> r) => {
+        r.FieldsPerRecord = -1;
     }, benchmarkCSVData);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xxxxxxxxxxxxxxxxˢ = """
+internal static ref readonly @string xxxxxxxxxxxxxxxxˢ => ref xxxxxxxxxxxxxxxxˢᵇ;
+private static readonly @string xxxxxxxxxxxxxxxxˢᵇ = """
 xxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyy,zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 xxxxxxxxxxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvv
 ,,zzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -681,33 +681,33 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,zzzzzzzzzzzzzz
 
 """u8.Raw();
 
-public static void BenchmarkReadLargeFields(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, default!, strings.Repeat(xxxxxxxxxxxxxxxxˢ, 3));
+public static void BenchmarkReadLargeFields(ж<testing.B> b) {
+    benchmarkRead(b, default, strings.Repeat(xxxxxxxxxxxxxxxxˢ, 3));
 }
 
-public static void BenchmarkReadReuseRecord(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, (ж<global::go.encoding.csv_package.Reader> r) => {
-        r.Value.ReuseRecord = true;
+public static void BenchmarkReadReuseRecord(ж<testing.B> b) {
+    benchmarkRead(b, (ж<global::go.encoding.csv_package.Reader> r) => {
+        r.ReuseRecord = true;
     }, benchmarkCSVData);
 }
 
-public static void BenchmarkReadReuseRecordWithFieldsPerRecord(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, (ж<global::go.encoding.csv_package.Reader> r) => {
-        r.Value.ReuseRecord = true;
-        r.Value.FieldsPerRecord = 4;
+public static void BenchmarkReadReuseRecordWithFieldsPerRecord(ж<testing.B> b) {
+    benchmarkRead(b, (ж<global::go.encoding.csv_package.Reader> r) => {
+        r.ReuseRecord = true;
+        r.FieldsPerRecord = 4;
     }, benchmarkCSVData);
 }
 
-public static void BenchmarkReadReuseRecordWithoutFieldsPerRecord(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, (ж<global::go.encoding.csv_package.Reader> r) => {
-        r.Value.ReuseRecord = true;
-        r.Value.FieldsPerRecord = -1;
+public static void BenchmarkReadReuseRecordWithoutFieldsPerRecord(ж<testing.B> b) {
+    benchmarkRead(b, (ж<global::go.encoding.csv_package.Reader> r) => {
+        r.ReuseRecord = true;
+        r.FieldsPerRecord = -1;
     }, benchmarkCSVData);
 }
 
-public static void BenchmarkReadReuseRecordLargeFields(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, (ж<global::go.encoding.csv_package.Reader> r) => {
-        r.Value.ReuseRecord = true;
+public static void BenchmarkReadReuseRecordLargeFields(ж<testing.B> b) {
+    benchmarkRead(b, (ж<global::go.encoding.csv_package.Reader> r) => {
+        r.ReuseRecord = true;
     }, strings.Repeat(xxxxxxxxxxxxxxxxˢ, 3));
 }
 

@@ -101,7 +101,7 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
         var (a, b, c, d, e, f, g, h) = (h0, h1, h2, h3, h4, h5, h6, h7);
 
         foreach (var i in range(80)) {
-            if (i < 16){
+            if (i < 16) {
                 nint j = i * 8;
                 w[i] = (uint64)p[j] << 56 | (uint64)p[j + 1] << 48 | (uint64)p[j + 2] << 40 | (uint64)p[j + 3] << 32 | (uint64)p[j + 4] << 24 | (uint64)p[j + 5] << 16 | (uint64)p[j + 6] << 8 | (uint64)p[j + 7];
             } else {

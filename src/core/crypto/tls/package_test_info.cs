@@ -9,40 +9,13 @@ global using static global::go.crypto.tls_internal_test_package;
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using hpkeꓸKEM = go.crypto.hpke_package.ΔKEM;
-global using hpkeꓸPublicKey = go.crypto.hpke_package.ΔPublicKey;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
 global using netꓸAddr = go.net_package.ΔAddr;
 global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using templateꓸError = go.html.template_package.ΔError;
-global using templateꓸFuncMap = go.text.template_package.FuncMap;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tls13ꓸExporterMasterSecret = go.crypto.@internal.fips140.tls13_package.ΔExporterMasterSecret;
-global using tls13ꓸHandshakeSecret = go.crypto.@internal.fips140.tls13_package.ΔHandshakeSecret;
-global using tls13ꓸMasterSecret = go.crypto.@internal.fips140.tls13_package.ΔMasterSecret;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -78,11 +51,49 @@ using static global::go.crypto.tls_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.CertificateRequestInfo))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.CipherSuite))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ClientHelloInfo))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ClientSessionState))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.Config))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.Conn))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ECHRejectionError))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.QUICConfig))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.QUICConn))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.SessionState))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.certificateMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.certificateMsgTLS13))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.certificateRequestMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.certificateRequestMsgTLS13))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.certificateStatusMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.certificateVerifyMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.cipherSuite))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.cipherSuiteTLS13))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.clientHelloMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.clientKeyExchangeMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.encryptedExtensionsMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.finishedMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.keyUpdateMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.lruSessionCache))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.lruSessionCacheEntry))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.newSessionTicketMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.newSessionTicketMsgTLS13))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.quicState))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.serverHandshakeState))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.serverHandshakeStateTLS13))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.serverHelloMsg))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.tls_package.ΔConnectionState))]
+[assembly: GoFieldAccess(typeof(go.crypto.ecdsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.elliptic_package.CurveParams))]
+[assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.crypto.x509_package.Certificate))]
+[assembly: GoFieldAccess(typeof(go.encoding.pem_package.Block))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(net_package.OpError))]
+[assembly: GoFieldAccess(typeof(net_package.TCPAddr))]
+[assembly: GoFieldAccess(typeof(time_package.Timer))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

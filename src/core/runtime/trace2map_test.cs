@@ -14,43 +14,43 @@ using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
-public static void TestTraceMap(ж<testing.T> Ꮡt) {
+public static void TestTraceMap(ж<testing.T> t) {
     ref var m = ref heap(new global::go.runtime_internal_test_package.TraceMap(), out var Ꮡm);
 
     // Try all these operations multiple times between resets, to make sure
     // we're resetting properly.
     foreach (var _ᴛ1 in range(3)) {
         array<@string> d = new @string[]{
-            "a"u8,
-            "b"u8,
-            "aa"u8,
-            "ab"u8,
-            "ba"u8,
-            "bb"u8
+            "a",
+            "b",
+            "aa",
+            "ab",
+            "ba",
+            "bb"
         }.array();
         foreach (var (i, s) in d.ΔRangeSnapshot()) {
             var (id, inserted) = Ꮡm.PutString(s);
             if (!inserted) {
-                Ꮡt.Errorf("expected to have inserted string %q, but did not"u8, s);
+                t.Errorf("expected to have inserted string %q, but did not", s);
             }
             if (id != (uint64)(i + 1)) {
-                Ꮡt.Errorf("expected string %q to have ID %d, but got %d instead"u8, s, i + 1, id);
+                t.Errorf("expected string %q to have ID %d, but got %d instead", s, i + 1, id);
             }
         }
         foreach (var (i, s) in d.ΔRangeSnapshot()) {
             var (id, inserted) = Ꮡm.PutString(s);
             if (inserted) {
-                Ꮡt.Errorf("inserted string %q, but expected to have not done so"u8, s);
+                t.Errorf("inserted string %q, but expected to have not done so", s);
             }
             if (id != (uint64)(i + 1)) {
-                Ꮡt.Errorf("expected string %q to have ID %d, but got %d instead"u8, s, i + 1, id);
+                t.Errorf("expected string %q to have ID %d, but got %d instead", s, i + 1, id);
             }
         }
         Ꮡm.Reset();
     }
 }
 
-public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
+public static partial void TestTraceMapConcurrent(ж<testing.T> t) {
     ref var m = ref heap(new global::go.runtime_internal_test_package.TraceMap(), out var Ꮡm);
 
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -77,17 +77,17 @@ public static partial void TestTraceMapConcurrent(ж<testing.T> Ꮡt) {
                 foreach (var (_, s) in d.ΔRangeSnapshot()) {
                     var (id, inserted) = Ꮡm.PutString(s);
                     if (!inserted) {
-                        Ꮡt.Errorf("expected to have inserted string %q, but did not"u8, s);
+                        t.Errorf("expected to have inserted string %q, but did not", s);
                     }
                     ids = append(idsᴷ, ids, id);
                 }
                 foreach (var (iΔ2, s) in d.ΔRangeSnapshot()) {
                     var (id, inserted) = Ꮡm.PutString(s);
                     if (inserted) {
-                        Ꮡt.Errorf("inserted string %q, but expected to have not done so"u8, s);
+                        t.Errorf("inserted string %q, but expected to have not done so", s);
                     }
                     if (id != ids[iΔ2]) {
-                        Ꮡt.Errorf("expected string %q to have ID %d, but got %d instead"u8, s, ids[iΔ2], id);
+                        t.Errorf("expected string %q to have ID %d, but got %d instead", s, ids[iΔ2], id);
                     }
                 }
             }

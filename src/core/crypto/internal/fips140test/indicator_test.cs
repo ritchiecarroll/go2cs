@@ -21,57 +21,56 @@ internal static readonly object indicatorShouldBeFalseIfˢ4 = (@string)"indicato
 internal static readonly object indicatorShouldBeFalseIfˢ5 = (@string)"indicator should be false if RecordApproved is called in a different goroutine"u8;
 internal static readonly object indicatorShouldBeTrueIfˢ3 = (@string)"indicator should be true if RecordNonApproved is called in a different goroutine"u8;
 
-public static partial void TestIndicator(ж<testing.T> Ꮡt) {
+public static partial void TestIndicator(ж<testing.T> t) {
     fips140.ResetServiceIndicator();
     if (fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeFalseIfˢ);
+        t.Error(indicatorShouldBeFalseIfˢ);
     }
 
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     if (!fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeTrueIfˢ);
+        t.Error(indicatorShouldBeTrueIfˢ);
     }
 
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     fips140.RecordApproved();
     if (!fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeTrueIfˢ2);
+        t.Error(indicatorShouldBeTrueIfˢ2);
     }
 
     fips140.ResetServiceIndicator();
     fips140.RecordNonApproved();
     if (fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeFalseIfˢ2);
+        t.Error(indicatorShouldBeFalseIfˢ2);
     }
 
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     fips140.RecordNonApproved();
     if (fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeFalseIfˢ3);
+        t.Error(indicatorShouldBeFalseIfˢ3);
     }
 
     fips140.ResetServiceIndicator();
     fips140.RecordNonApproved();
     fips140.RecordApproved();
     if (fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeFalseIfˢ4);
+        t.Error(indicatorShouldBeFalseIfˢ4);
     }
 
     fips140.ResetServiceIndicator();
     fips140.RecordNonApproved();
-    ref var done = ref heap<channel<EmptyStruct>>(out var Ꮡdone);
-    done = new channel<EmptyStruct>(0);
+    ref var done = ref heap<channel<EmptyStruct>>(new channel<EmptyStruct>(0), out var Ꮡdone);
     goǃ(() => {
         fips140.ResetServiceIndicator();
         fips140.RecordApproved();
         close(Ꮡdone.ValueSlot);
-    });
+    }, GoStack.Bounded);
     ᐸꟷ(done);
     if (fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeFalseIfˢ5);
+        t.Error(indicatorShouldBeFalseIfˢ5);
     }
 
     fips140.ResetServiceIndicator();
@@ -81,10 +80,10 @@ public static partial void TestIndicator(ж<testing.T> Ꮡt) {
         fips140.ResetServiceIndicator();
         fips140.RecordNonApproved();
         close(Ꮡdone.ValueSlot);
-    });
+    }, GoStack.Bounded);
     ᐸꟷ(done);
     if (!fips140.ServiceIndicator()) {
-        Ꮡt.Error(indicatorShouldBeTrueIfˢ3);
+        t.Error(indicatorShouldBeTrueIfˢ3);
     }
 }
 

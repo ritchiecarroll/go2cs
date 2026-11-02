@@ -16,22 +16,26 @@ using Δnistec = go.crypto.@internal.fips140.nistec_package;
 partial class ecdsa_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string p224ˢ = "P-224"u8;
-internal static readonly @string p256ˢ = "P-256"u8;
-internal static readonly @string p384ˢ = "P-384"u8;
-internal static readonly @string p521ˢ = "P-521"u8;
+internal static ref readonly @string p224ˢ => ref p224ˢᵇ;
+private static readonly @string p224ˢᵇ = "P-224"u8;
+internal static ref readonly @string p256ˢ => ref p256ˢᵇ;
+private static readonly @string p256ˢᵇ = "P-256"u8;
+internal static ref readonly @string p384ˢ => ref p384ˢᵇ;
+private static readonly @string p384ˢᵇ = "P-384"u8;
+internal static ref readonly @string p521ˢ => ref p521ˢᵇ;
+private static readonly @string p521ˢᵇ = "P-521"u8;
 
-public static void TestRandomPoint(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(p224ˢ, (ж<testing.T> tΔ1) => {
+public static void TestRandomPoint(ж<testing.T> t) {
+    t.Run(p224ˢ, (ж<testing.T> tΔ1) => {
         testRandomPoint<P224PointжPoint>(tΔ1, P224());
     });
-    Ꮡt.Run(p256ˢ, (ж<testing.T> tΔ2) => {
+    t.Run(p256ˢ, (ж<testing.T> tΔ2) => {
         testRandomPoint<P256PointжPoint>(tΔ2, P256());
     });
-    Ꮡt.Run(p384ˢ, (ж<testing.T> tΔ3) => {
+    t.Run(p384ˢ, (ж<testing.T> tΔ3) => {
         testRandomPoint<P384PointжPoint>(tΔ3, P384());
     });
-    Ꮡt.Run(p521ˢ, (ж<testing.T> tΔ4) => {
+    t.Run(p521ˢ, (ж<testing.T> tΔ4) => {
         testRandomPoint<P521PointжPoint>(tΔ4, P521());
     });
 }
@@ -43,60 +47,55 @@ internal static readonly object overflowWasNotRejectedˢ = (@string)"overflow wa
 internal static readonly object zeroWasNotRejectedˢ = (@string)"zero was not rejected"u8;
 internal static readonly object unexpectedRejectionˢ = (@string)"unexpected rejection"u8;
 
-internal static void testRandomPoint<P>(ж<testing.T> Ꮡt, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P>> Ꮡc)
+internal static void testRandomPoint<P>(ж<testing.T> t, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P>> Ꮡc)
     where P : global::go.crypto.@internal.fips140.ecdsa_package.Point<P>
 {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    Ꮡt.Cleanup(() => {
-        testingOnlyRejectionSamplingLooped = default!;
+    t.Cleanup(() => {
+        testingOnlyRejectionSamplingLooped = default;
     });
-    nint loopCount = default!;
+    nint loopCount = default;
     testingOnlyRejectionSamplingLooped = () => {
         loopCount++;
     };
 
     // A sequence of all ones will generate 2^N-1, which should be rejected.
     // (Unless, for example, we are masking too many bits.)
-    ref var r = ref heap<io.Reader>(out var Ꮡr);
-    r = io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(new byte[]{0xff}.slice(), 100))), rand.Reader);
+    ref var r = ref heap<io.Reader>(io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(slice<byte>([0xff]), 100))), rand.Reader), out var Ꮡr);
     {
         var (k, p, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => {
             var (_, errΔ1) = Ꮡr.ValueSlot.Read(b);
             return errΔ1;
-        }); if (err != default!){
-            Ꮡt.Fatal(err);
-        } else 
-        if (k.IsZero() == 1){
-            Ꮡt.Error(kIsZeroˢ);
-        } else 
-        if (p.Bytes()[0] != 4) {
-            Ꮡt.Error(pIsInfinityˢ);
+        }); if (err != nil) {
+            t.Fatal(err);
+        } else if (k.IsZero() == 1) {
+            t.Error(kIsZeroˢ);
+        } else if (p.Bytes()[0] != 4) {
+            t.Error(pIsInfinityˢ);
         }
     }
     if (loopCount == 0) {
-        Ꮡt.Error(overflowWasNotRejectedˢ);
+        t.Error(overflowWasNotRejectedˢ);
     }
     loopCount = 0;
 
     // A sequence of all zeroes will generate zero, which should be rejected.
-    r = io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(new byte[]{0}.slice(), 100))), rand.Reader);
+    r = io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(slice<byte>([0]), 100))), rand.Reader);
     {
         var (k, p, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => {
             var (_, errΔ1) = Ꮡr.ValueSlot.Read(b);
             return errΔ1;
-        }); if (err != default!){
-            Ꮡt.Fatal(err);
-        } else 
-        if (k.IsZero() == 1){
-            Ꮡt.Error(kIsZeroˢ);
-        } else 
-        if (p.Bytes()[0] != 4) {
-            Ꮡt.Error(pIsInfinityˢ);
+        }); if (err != nil) {
+            t.Fatal(err);
+        } else if (k.IsZero() == 1) {
+            t.Error(kIsZeroˢ);
+        } else if (p.Bytes()[0] != 4) {
+            t.Error(pIsInfinityˢ);
         }
     }
     if (loopCount == 0) {
-        Ꮡt.Error(zeroWasNotRejectedˢ);
+        t.Error(zeroWasNotRejectedˢ);
     }
     loopCount = 0;
 
@@ -111,42 +110,40 @@ internal static void testRandomPoint<P>(ж<testing.T> Ꮡt, ж<global::go.crypto
         var (k, p, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => {
             var (_, errΔ1) = rand.Reader.Read(b);
             return errΔ1;
-        }); if (err != default!){
-            Ꮡt.Fatal(err);
-        } else 
-        if (k.IsZero() == 1){
-            Ꮡt.Error(kIsZeroˢ);
-        } else 
-        if (p.Bytes()[0] != 4) {
-            Ꮡt.Error(pIsInfinityˢ);
+        }); if (err != nil) {
+            t.Fatal(err);
+        } else if (k.IsZero() == 1) {
+            t.Error(kIsZeroˢ);
+        } else if (p.Bytes()[0] != 4) {
+            t.Error(pIsInfinityˢ);
         }
     }
     if (loopCount > 0) {
-        Ꮡt.Error(unexpectedRejectionˢ);
+        t.Error(unexpectedRejectionˢ);
     }
 }
 
-public static void TestHashToNat(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(p224ˢ, (ж<testing.T> tΔ1) => {
+public static void TestHashToNat(ж<testing.T> t) {
+    t.Run(p224ˢ, (ж<testing.T> tΔ1) => {
         testHashToNat<P224PointжPoint>(tΔ1, P224());
     });
-    Ꮡt.Run(p256ˢ, (ж<testing.T> tΔ2) => {
+    t.Run(p256ˢ, (ж<testing.T> tΔ2) => {
         testHashToNat<P256PointжPoint>(tΔ2, P256());
     });
-    Ꮡt.Run(p384ˢ, (ж<testing.T> tΔ3) => {
+    t.Run(p384ˢ, (ж<testing.T> tΔ3) => {
         testHashToNat<P384PointжPoint>(tΔ3, P384());
     });
-    Ꮡt.Run(p521ˢ, (ж<testing.T> tΔ4) => {
+    t.Run(p521ˢ, (ж<testing.T> tΔ4) => {
         testHashToNat<P521PointжPoint>(tΔ4, P521());
     });
 }
 
-internal static void testHashToNat<P>(ж<testing.T> Ꮡt, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P>> Ꮡc)
+internal static void testHashToNat<P>(ж<testing.T> t, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P>> c)
     where P : global::go.crypto.@internal.fips140.ecdsa_package.Point<P>
 {
     for (nint l = 0; l < 600; l++) {
-        var h = bytes.Repeat(new byte[]{0xff}.slice(), l);
-        hashToNat(ref (Ꮡc).DerefOrNull(), bigmod.NewNat(), h);
+        var h = bytes.Repeat(slice<byte>([0xff]), l);
+        hashToNat(ref (c).DerefOrNull(), bigmod.NewNat(), h);
     }
 }
 

@@ -322,11 +322,11 @@ public partial struct MyMarshalerTest {
 
 internal static global::go.encoding.xml_package.Marshaler _ᴛ1ʗ = new xml_internal_test_package.MyMarshalerTestжMarshaler(((ж<MyMarshalerTest>)nil));
 
-public static error MarshalXML(this ref MyMarshalerTest m, ж<global::go.encoding.xml_package.Encoder> Ꮡe, global::go.encoding.xml_package.StartElement start) {
-    Ꮡe.EncodeToken(start);
-    Ꮡe.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8));
-    Ꮡe.EncodeToken(new EndElement(start.Name));
-    return default!;
+public static error MarshalXML(this ref MyMarshalerTest m, ж<global::go.encoding.xml_package.Encoder> e, global::go.encoding.xml_package.StartElement start) {
+    e.EncodeToken(start);
+    e.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8));
+    e.EncodeToken(new EndElement(start.Name));
+    return default;
 }
 
 public partial struct MyMarshalerAttrTest {
@@ -335,11 +335,11 @@ public partial struct MyMarshalerAttrTest {
 internal static global::go.encoding.xml_package.MarshalerAttr _ᴛ2ʗ = new xml_internal_test_package.MyMarshalerAttrTestжMarshalerAttr(((ж<MyMarshalerAttrTest>)nil));
 
 public static (global::go.encoding.xml_package.Attr, error) MarshalXMLAttr(this ref MyMarshalerAttrTest m, global::go.encoding.xml_package.Name name) {
-    return (new Attr(name, "hello world"u8), default!);
+    return (new Attr(name, "hello world"), default);
 }
 
 public static error UnmarshalXMLAttr(this ref MyMarshalerAttrTest m, global::go.encoding.xml_package.Attr attr) {
-    return default!;
+    return default;
 }
 
 public partial struct MarshalerStruct {
@@ -538,13 +538,13 @@ public partial struct Generic<T> {
     public T X;
 }
 
-internal static readonly ж<@string> ᏑnameAttr = new StaticBox<@string>("Sarah"u8);
+internal static readonly ж<@string> ᏑnameAttr = new StaticBox<@string>("Sarah");
 internal static ref @string nameAttr => ref ((StaticBox<@string>)ᏑnameAttr).ValueSlot;
 internal static readonly ж<nuint> ᏑageAttr = new StaticBox<nuint>((nuint)12);
 internal static ref nuint ageAttr => ref ((StaticBox<nuint>)ᏑageAttr).ValueSlot;
-internal static readonly ж<@string> ᏑcontentsAttr = new StaticBox<@string>("lorem ipsum"u8);
+internal static readonly ж<@string> ᏑcontentsAttr = new StaticBox<@string>("lorem ipsum");
 internal static ref @string contentsAttr => ref ((StaticBox<@string>)ᏑcontentsAttr).ValueSlot;
-internal static readonly ж<@string> Ꮡempty = new StaticBox<@string>(""u8);
+internal static readonly ж<@string> Ꮡempty = new StaticBox<@string>("");
 internal static ref @string empty => ref ((StaticBox<@string>)Ꮡempty).ValueSlot;
 
 // Unless explicitly stated as such (or *Plain), all of the
@@ -581,212 +581,212 @@ partial struct marshalTestsᴛ1 /*dyn*/ {
             public @string B1; /*`xml:"space1 x>b"`*/
         }
 internal static slice<marshalTestsᴛ1> marshalTests;
-internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1[]{
+internal static void initᴛmarshalTests() { marshalTests = slice<marshalTestsᴛ1>([
     // Test nil marshals to nothing
-    new(Value: default!, ExpectXML: @""u8, MarshalOnly: true),
-    new(Value: nilStruct.OrTypedNil(), ExpectXML: @""u8, MarshalOnly: true),
+    new(Value: default, ExpectXML: @"", MarshalOnly: true),
+    new(Value: nilStruct.OrTypedNil(), ExpectXML: @"", MarshalOnly: true),
 
     // Test value types
-    new(Value: Ꮡ(new Plain(true)), ExpectXML: @"<Plain><V>true</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(false)), ExpectXML: @"<Plain><V>false</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((nint)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((int8)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((int16)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((int32)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((nuint)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((uint8)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((uint16)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((uint32)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((float32)1.25F)), ExpectXML: @"<Plain><V>1.25</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((float64)1.25D)), ExpectXML: @"<Plain><V>1.25</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((uintptr)0xFFDD)), ExpectXML: @"<Plain><V>65501</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((@string)"gopher"u8)), ExpectXML: @"<Plain><V>gopher</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(slice<byte>("gopher"u8))), ExpectXML: @"<Plain><V>gopher</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((@string)"</>"u8)), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(slice<byte>("</>"u8))), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(new byte[]{(rune)'<', (rune)'/', (rune)'>'}.array())), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain((NamedType)(@string)"potato"u8)), ExpectXML: @"<Plain><V>potato</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.slice())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.array())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"u8),
-    new(Value: ifaceptr(true), MarshalOnly: true, ExpectXML: @"<bool>true</bool>"u8),
+    new(Value: Ꮡ(new Plain(true)), ExpectXML: @"<Plain><V>true</V></Plain>"),
+    new(Value: Ꮡ(new Plain(false)), ExpectXML: @"<Plain><V>false</V></Plain>"),
+    new(Value: Ꮡ(new Plain((nint)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((int8)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((int16)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((int32)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((nuint)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((uint8)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((uint16)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((uint32)42)), ExpectXML: @"<Plain><V>42</V></Plain>"),
+    new(Value: Ꮡ(new Plain((float32)1.25F)), ExpectXML: @"<Plain><V>1.25</V></Plain>"),
+    new(Value: Ꮡ(new Plain((float64)1.25D)), ExpectXML: @"<Plain><V>1.25</V></Plain>"),
+    new(Value: Ꮡ(new Plain((uintptr)0xFFDD)), ExpectXML: @"<Plain><V>65501</V></Plain>"),
+    new(Value: Ꮡ(new Plain((@string)"gopher")), ExpectXML: @"<Plain><V>gopher</V></Plain>"),
+    new(Value: Ꮡ(new Plain(slice<byte>("gopher"u8))), ExpectXML: @"<Plain><V>gopher</V></Plain>"),
+    new(Value: Ꮡ(new Plain((@string)"</>")), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"),
+    new(Value: Ꮡ(new Plain(slice<byte>("</>"u8))), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"),
+    new(Value: Ꮡ(new Plain(new byte[]{(byte)'<', (byte)'/', (byte)'>'}.array())), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"),
+    new(Value: Ꮡ(new Plain((NamedType)(@string)"potato")), ExpectXML: @"<Plain><V>potato</V></Plain>"),
+    new(Value: Ꮡ(new Plain(slice<nint>([1, 2, 3]))), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"),
+    new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.array())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"),
+    new(Value: ifaceptr(true), MarshalOnly: true, ExpectXML: @"<bool>true</bool>"),
 
     // Test time.
     new(
         Value: Ꮡ(new Plain(time.Unix(1000000000, 123456789).UTC())),
-        ExpectXML: @"<Plain><V>2001-09-09T01:46:40.123456789Z</V></Plain>"u8
+        ExpectXML: @"<Plain><V>2001-09-09T01:46:40.123456789Z</V></Plain>"
     ),
 
     // A pointer to struct{} may be used to test for an element's presence.
     new(
         Value: Ꮡ(new PresenceTest(@new<EmptyStruct>())),
-        ExpectXML: @"<PresenceTest><Exists></Exists></PresenceTest>"u8
+        ExpectXML: @"<PresenceTest><Exists></Exists></PresenceTest>"
     ),
     new(
-        Value: Ꮡ(new PresenceTest(nil)),
-        ExpectXML: @"<PresenceTest></PresenceTest>"u8
+        Value: Ꮡ(new PresenceTest()),
+        ExpectXML: @"<PresenceTest></PresenceTest>"
     ),
 
     // A []byte field is only nil if the element was not found.
     new(
-        Value: Ꮡ(new Data(nil)),
-        ExpectXML: @"<Data></Data>"u8,
+        Value: Ꮡ(new Data()),
+        ExpectXML: @"<Data></Data>",
         UnmarshalOnly: true
     ),
     new(
-        Value: Ꮡ(new Data(Bytes: new byte[]{}.slice(), Custom: new MyBytes(new byte[]{}.slice()), Attr: new byte[]{}.slice())),
-        ExpectXML: @"<Data Attr=""""><Bytes></Bytes><Custom></Custom></Data>"u8,
+        Value: Ꮡ(new Data(Bytes: slice<byte>([]), Custom: new MyBytes(new byte[]{}.slice()), Attr: slice<byte>([]))),
+        ExpectXML: @"<Data Attr=""""><Bytes></Bytes><Custom></Custom></Data>",
         UnmarshalOnly: true
     ),
 
     // Check that []byte works, including named []byte types.
     new(
-        Value: Ꮡ(new Data(Bytes: slice<byte>("ab"u8), Custom: ((MyBytes)slice<byte>((@string)"cd"u8)), Attr: new byte[]{(rune)'v'}.slice())),
-        ExpectXML: @"<Data Attr=""v""><Bytes>ab</Bytes><Custom>cd</Custom></Data>"u8
+        Value: Ꮡ(new Data(Bytes: slice<byte>("ab"u8), Custom: ((MyBytes)slice<byte>((@string)"cd"u8)), Attr: slice<byte>([(byte)'v']))),
+        ExpectXML: @"<Data Attr=""v""><Bytes>ab</Bytes><Custom>cd</Custom></Data>"
     ),
 
     // Test innerxml
     new(
         Value: Ꮡ(new SecretAgent(
-            Handle: "007"u8,
-            Identity: "James Bond"u8,
-            Obfuscate: "<redacted/>"u8
+            Handle: "007",
+            Identity: "James Bond",
+            Obfuscate: "<redacted/>"
         )),
-        ExpectXML: @"<agent handle=""007""><Identity>James Bond</Identity><redacted/></agent>"u8,
+        ExpectXML: @"<agent handle=""007""><Identity>James Bond</Identity><redacted/></agent>",
         MarshalOnly: true
     ),
     new(
         Value: Ꮡ(new SecretAgent(
-            Handle: "007"u8,
-            Identity: "James Bond"u8,
-            Obfuscate: "<Identity>James Bond</Identity><redacted/>"u8
+            Handle: "007",
+            Identity: "James Bond",
+            Obfuscate: "<Identity>James Bond</Identity><redacted/>"
         )),
-        ExpectXML: @"<agent handle=""007""><Identity>James Bond</Identity><redacted/></agent>"u8,
+        ExpectXML: @"<agent handle=""007""><Identity>James Bond</Identity><redacted/></agent>",
         UnmarshalOnly: true
     ),
 
     // Test structs
-    new(Value: Ꮡ(new Port(Type: "ssl"u8, Number: "443"u8)), ExpectXML: @"<port type=""ssl"">443</port>"u8),
-    new(Value: Ꮡ(new Port(Number: "443"u8)), ExpectXML: @"<port>443</port>"u8),
-    new(Value: Ꮡ(new Port(Type: "<unix>"u8)), ExpectXML: @"<port type=""&lt;unix&gt;""></port>"u8),
-    new(Value: Ꮡ(new Port(Number: "443"u8, Comment: "https"u8)), ExpectXML: @"<port><!--https-->443</port>"u8),
-    new(Value: Ꮡ(new Port(Number: "443"u8, Comment: "add space-"u8)), ExpectXML: @"<port><!--add space- -->443</port>"u8, MarshalOnly: true),
-    new(Value: Ꮡ(new Domain(Name: slice<byte>("google.com&friends"u8))), ExpectXML: @"<domain>google.com&amp;friends</domain>"u8),
-    new(Value: Ꮡ(new Domain(Name: slice<byte>("google.com"u8), Comment: slice<byte>(" &friends "u8))), ExpectXML: @"<domain>google.com<!-- &friends --></domain>"u8),
-    new(Value: Ꮡ(new Book(Title: "Pride & Prejudice"u8)), ExpectXML: @"<book>Pride &amp; Prejudice</book>"u8),
-    new(Value: Ꮡ(new Event(Year: -3114)), ExpectXML: @"<event>-3114</event>"u8),
-    new(Value: Ꮡ(new Movie(Length: 13440)), ExpectXML: @"<movie>13440</movie>"u8),
-    new(Value: Ꮡ(new Pi(Approximation: 3.14159265F)), ExpectXML: @"<pi>3.1415927</pi>"u8),
-    new(Value: Ꮡ(new Universe(Visible: 9.3e13D)), ExpectXML: @"<universe>9.3e+13</universe>"u8),
-    new(Value: Ꮡ(new Particle(HasMass: true)), ExpectXML: @"<particle>true</particle>"u8),
-    new(Value: Ꮡ(new Departure(When: ParseTime("2013-01-09T00:15:00-09:00"u8))), ExpectXML: @"<departure>2013-01-09T00:15:00-09:00</departure>"u8),
+    new(Value: Ꮡ(new Port(Type: "ssl", Number: "443")), ExpectXML: @"<port type=""ssl"">443</port>"),
+    new(Value: Ꮡ(new Port(Number: "443")), ExpectXML: @"<port>443</port>"),
+    new(Value: Ꮡ(new Port(Type: "<unix>")), ExpectXML: @"<port type=""&lt;unix&gt;""></port>"),
+    new(Value: Ꮡ(new Port(Number: "443", Comment: "https")), ExpectXML: @"<port><!--https-->443</port>"),
+    new(Value: Ꮡ(new Port(Number: "443", Comment: "add space-")), ExpectXML: @"<port><!--add space- -->443</port>", MarshalOnly: true),
+    new(Value: Ꮡ(new Domain(Name: slice<byte>("google.com&friends"u8))), ExpectXML: @"<domain>google.com&amp;friends</domain>"),
+    new(Value: Ꮡ(new Domain(Name: slice<byte>("google.com"u8), Comment: slice<byte>(" &friends "u8))), ExpectXML: @"<domain>google.com<!-- &friends --></domain>"),
+    new(Value: Ꮡ(new Book(Title: "Pride & Prejudice")), ExpectXML: @"<book>Pride &amp; Prejudice</book>"),
+    new(Value: Ꮡ(new Event(Year: -3114)), ExpectXML: @"<event>-3114</event>"),
+    new(Value: Ꮡ(new Movie(Length: 13440)), ExpectXML: @"<movie>13440</movie>"),
+    new(Value: Ꮡ(new Pi(Approximation: 3.14159265F)), ExpectXML: @"<pi>3.1415927</pi>"),
+    new(Value: Ꮡ(new Universe(Visible: 9.3e13D)), ExpectXML: @"<universe>9.3e+13</universe>"),
+    new(Value: Ꮡ(new Particle(HasMass: true)), ExpectXML: @"<particle>true</particle>"),
+    new(Value: Ꮡ(new Departure(When: ParseTime("2013-01-09T00:15:00-09:00"))), ExpectXML: @"<departure>2013-01-09T00:15:00-09:00</departure>"),
     new(Value: atomValue.OrTypedNil(), ExpectXML: atomXML),
-    new(Value: Ꮡ(new Generic<nint>(1)), ExpectXML: @"<Generic><X>1</X></Generic>"u8),
+    new(Value: Ꮡ(new Generic<nint>(1)), ExpectXML: @"<Generic><X>1</X></Generic>"),
     new(
         Value: Ꮡ(new Ship(
-            Name: "Heart of Gold"u8,
-            Pilot: "Computer"u8,
+            Name: "Heart of Gold",
+            Pilot: "Computer",
             Age: 1,
             Drive: ImprobabilityDrive,
-            Passenger: new ж<Passenger>[]{
+            Passenger: slice<ж<Passenger>>([
                 Ꮡ(new Passenger(
-                    Name: new @string[]{"Zaphod"u8, "Beeblebrox"u8}.slice(),
+                    Name: slice<@string>(["Zaphod", "Beeblebrox"]),
                     Weight: 7.25F)),
                 Ꮡ(new Passenger(
-                    Name: new @string[]{"Trisha"u8, "McMillen"u8}.slice(),
+                    Name: slice<@string>(["Trisha", "McMillen"]),
                     Weight: 5.5F)),
                 Ꮡ(new Passenger(
-                    Name: new @string[]{"Ford"u8, "Prefect"u8}.slice(),
+                    Name: slice<@string>(["Ford", "Prefect"]),
                     Weight: 7F)),
                 Ꮡ(new Passenger(
-                    Name: new @string[]{"Arthur"u8, "Dent"u8}.slice(),
+                    Name: slice<@string>(["Arthur", "Dent"]),
                     Weight: 6.75F))
-            }.slice()
+            ])
         )),
         ExpectXML: @"<spaceship name=""Heart of Gold"" pilot=""Computer"">"u8 + @"<drive>"u8 + strconv.Itoa((nint)ImprobabilityDrive) + @"</drive>"u8 + @"<age>1</age>"u8 + @"<passenger>"u8 + @"<name>Zaphod</name>"u8 + @"<name>Beeblebrox</name>"u8 + @"<weight>7.25</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Trisha</name>"u8 + @"<name>McMillen</name>"u8 + @"<weight>5.5</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Ford</name>"u8 + @"<name>Prefect</name>"u8 + @"<weight>7</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Arthur</name>"u8 + @"<name>Dent</name>"u8 + @"<weight>6.75</weight>"u8 + @"</passenger>"u8 + @"</spaceship>"u8
     ),
 
     // Test a>b
     new(
-        Value: Ꮡ(new NestedItems(Items: default!, Item1: default!)),
+        Value: Ꮡ(new NestedItems(Items: default, Item1: default)),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: new @string[]{}.slice(), Item1: new @string[]{}.slice())),
+        Value: Ꮡ(new NestedItems(Items: slice<@string>([]), Item1: slice<@string>([]))),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"</Items>"u8 + @"</result>"u8,
         MarshalOnly: true
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: default!, Item1: new @string[]{"A"u8}.slice())),
+        Value: Ꮡ(new NestedItems(Items: default, Item1: slice<@string>(["A"]))),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"<item1>A</item1>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: new @string[]{"A"u8, "B"u8}.slice(), Item1: default!)),
+        Value: Ꮡ(new NestedItems(Items: slice<@string>(["A", "B"]), Item1: default)),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"<item>A</item>"u8 + @"<item>B</item>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedItems(Items: new @string[]{"A"u8, "B"u8}.slice(), Item1: new @string[]{"C"u8}.slice())),
+        Value: Ꮡ(new NestedItems(Items: slice<@string>(["A", "B"]), Item1: slice<@string>(["C"]))),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"<item>A</item>"u8 + @"<item>B</item>"u8 + @"<item1>C</item1>"u8 + @"</Items>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NestedOrder(Field1: "C"u8, Field2: "B"u8, Field3: "A"u8)),
+        Value: Ꮡ(new NestedOrder(Field1: "C", Field2: "B", Field3: "A")),
         ExpectXML: @"<result>"u8 + @"<parent>"u8 + @"<c>C</c>"u8 + @"<b>B</b>"u8 + @"<a>A</a>"u8 + @"</parent>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new NilTest(A: (@string)"A"u8, B: default!, C: (@string)"C"u8)),
+        Value: Ꮡ(new NilTest(A: (@string)"A", B: default, C: (@string)"C")),
         ExpectXML: @"<NilTest>"u8 + @"<parent1>"u8 + @"<parent2><a>A</a></parent2>"u8 + @"<parent2><c>C</c></parent2>"u8 + @"</parent1>"u8 + @"</NilTest>"u8,
         MarshalOnly: true // Uses interface{}
 
     ),
     new(
-        Value: Ꮡ(new MixedNested(A: "A"u8, B: "B"u8, C: "C"u8, D: "D"u8)),
+        Value: Ꮡ(new MixedNested(A: "A", B: "B", C: "C", D: "D")),
         ExpectXML: @"<result>"u8 + @"<parent1><a>A</a></parent1>"u8 + @"<b>B</b>"u8 + @"<parent1>"u8 + @"<parent2><c>C</c></parent2>"u8 + @"<d>D</d>"u8 + @"</parent1>"u8 + @"</result>"u8
     ),
     new(
-        Value: Ꮡ(new Service(Port: Ꮡ(new Port(Number: "80"u8)))),
-        ExpectXML: @"<service><host><port>80</port></host></service>"u8
+        Value: Ꮡ(new Service(Port: Ꮡ(new Port(Number: "80")))),
+        ExpectXML: @"<service><host><port>80</port></host></service>"
     ),
     new(
-        Value: Ꮡ(new Service(nil)),
-        ExpectXML: @"<service></service>"u8
+        Value: Ꮡ(new Service()),
+        ExpectXML: @"<service></service>"
     ),
     new(
-        Value: Ꮡ(new Service(Port: Ꮡ(new Port(Number: "80"u8)), Extra1: (@string)"A"u8, Extra2: (@string)"B"u8)),
+        Value: Ꮡ(new Service(Port: Ꮡ(new Port(Number: "80")), Extra1: (@string)"A", Extra2: (@string)"B")),
         ExpectXML: @"<service>"u8 + @"<host><port>80</port></host>"u8 + @"<Extra1>A</Extra1>"u8 + @"<host><extra2>B</extra2></host>"u8 + @"</service>"u8,
         MarshalOnly: true
     ),
     new(
-        Value: Ꮡ(new Service(Port: Ꮡ(new Port(Number: "80"u8)), Extra2: (@string)"example"u8)),
+        Value: Ꮡ(new Service(Port: Ꮡ(new Port(Number: "80")), Extra2: (@string)"example")),
         ExpectXML: @"<service>"u8 + @"<host><port>80</port></host>"u8 + @"<host><extra2>example</extra2></host>"u8 + @"</service>"u8,
         MarshalOnly: true
     ),
     new(
         Value: Ꮡ(new Δtype(
-            A: "a"u8,
-            B: "b"u8,
-            C: "c"u8,
-            C1: "c1"u8,
-            D1: "d1"u8
+            A: "a",
+            B: "b",
+            C: "c",
+            C1: "c1",
+            D1: "d1"
         )),
         ExpectXML: @"<top xmlns=""space"">"u8 + @"<x><a>a</a><b>b</b><c xmlns=""space"">c</c>"u8 + @"<c xmlns=""space1"">c1</c>"u8 + @"<d xmlns=""space1"">d1</d>"u8 + @"</x>"u8 + @"</top>"u8
     ),
     new(
         Value: Ꮡ(new Δtypeᴛ1(
             XMLName: new Name(
-                Space: "space0"u8,
-                Local: "top"u8
+                Space: "space0",
+                Local: "top"
             ),
-            A: "a"u8,
-            B: "b"u8,
-            C: "c"u8,
-            C1: "c1"u8,
-            D1: "d1"u8
+            A: "a",
+            B: "b",
+            C: "c",
+            C1: "c1",
+            D1: "d1"
         )),
         ExpectXML: @"<top xmlns=""space0"">"u8 + @"<x><a>a</a><b>b</b>"u8 + @"<c xmlns=""space"">c</c>"u8 + @"<c xmlns=""space1"">c1</c>"u8 + @"<d xmlns=""space1"">d1</d>"u8 + @"</x>"u8 + @"</top>"u8
     ),
     new(
         Value: Ꮡ(new Δtypeᴛ2(
-            B: "b"u8,
-            B1: "b1"u8
+            B: "b",
+            B1: "b1"
         )),
         ExpectXML: @"<top>"u8 + @"<x><b xmlns=""space"">b</b>"u8 + @"<b xmlns=""space1"">b1</b></x>"u8 + @"</top>"u8
     ),
@@ -795,23 +795,23 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         Value: Ꮡ(new EmbedA(
             EmbedC: new EmbedC(
-                FieldA1: ""u8, // Shadowed by A.A
-                FieldA2: ""u8, // Shadowed by A.A
-                FieldB: "A.C.B"u8,
-                FieldC: "A.C.C"u8
+                FieldA1: "", // Shadowed by A.A
+                FieldA2: "", // Shadowed by A.A
+                FieldB: "A.C.B",
+                FieldC: "A.C.C"
             ),
             EmbedB: new EmbedB(
-                FieldB: "A.B.B"u8,
+                FieldB: "A.B.B",
                 EmbedC: Ꮡ(new EmbedC(
-                    FieldA1: "A.B.C.A1"u8,
-                    FieldA2: "A.B.C.A2"u8,
-                    FieldB: ""u8, // Shadowed by A.B.B
-                    FieldC: "A.B.C.C"u8
+                    FieldA1: "A.B.C.A1",
+                    FieldA2: "A.B.C.A2",
+                    FieldB: "", // Shadowed by A.B.B
+                    FieldC: "A.B.C.C"
                 ))
             ),
-            FieldA: "A.A"u8,
+            FieldA: "A.A",
             embedD: new embedD(
-                FieldE: "A.D.E"u8
+                FieldE: "A.D.E"
             )
         )),
         ExpectXML: @"<EmbedA>"u8 + @"<FieldB>A.C.B</FieldB>"u8 + @"<FieldC>A.C.C</FieldC>"u8 + @"<EmbedB>"u8 + @"<FieldB>A.B.B</FieldB>"u8 + @"<FieldA>"u8 + @"<A1>A.B.C.A1</A1>"u8 + @"<A2>A.B.C.A2</A2>"u8 + @"</FieldA>"u8 + @"<FieldC>A.B.C.C</FieldC>"u8 + @"</EmbedB>"u8 + @"<FieldA>A.A</FieldA>"u8 + @"<FieldE>A.D.E</FieldE>"u8 + @"</EmbedA>"u8
@@ -819,40 +819,40 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
 
     // Anonymous struct pointer field which is nil
     new(
-        Value: Ꮡ(new EmbedB(nil)),
-        ExpectXML: @"<EmbedB><FieldB></FieldB></EmbedB>"u8
+        Value: Ꮡ(new EmbedB()),
+        ExpectXML: @"<EmbedB><FieldB></FieldB></EmbedB>"
     ),
 
     // Other kinds of nil anonymous fields
     new(
-        Value: Ꮡ(new PointerAnonFields(nil)),
-        ExpectXML: @"<PointerAnonFields></PointerAnonFields>"u8
+        Value: Ꮡ(new PointerAnonFields()),
+        ExpectXML: @"<PointerAnonFields></PointerAnonFields>"
     ),
 
     // Test that name casing matters
     new(
-        Value: Ꮡ(new NameCasing(Xy: "mixed"u8, XY: "upper"u8, XyA: "mixedA"u8, XYA: "upperA"u8)),
-        ExpectXML: @"<casing Xy=""mixedA"" XY=""upperA""><Xy>mixed</Xy><XY>upper</XY></casing>"u8
+        Value: Ꮡ(new NameCasing(Xy: "mixed", XY: "upper", XyA: "mixedA", XYA: "upperA")),
+        ExpectXML: @"<casing Xy=""mixedA"" XY=""upperA""><Xy>mixed</Xy><XY>upper</XY></casing>"
     ),
 
     // Test the order in which the XML element name is chosen
     new(
         Value: Ꮡ(new NamePrecedence(
-            FromTag: new XMLNameWithoutTag(Value: "A"u8),
-            FromNameVal: new XMLNameWithoutTag(XMLName: new Name(Local: "InXMLName"u8), Value: "B"u8),
-            FromNameTag: new XMLNameWithTag(Value: "C"u8),
-            InFieldName: "D"u8
+            FromTag: new XMLNameWithoutTag(Value: "A"),
+            FromNameVal: new XMLNameWithoutTag(XMLName: new Name(Local: "InXMLName"), Value: "B"),
+            FromNameTag: new XMLNameWithTag(Value: "C"),
+            InFieldName: "D"
         )),
         ExpectXML: @"<Parent>"u8 + @"<InTag>A</InTag>"u8 + @"<InXMLName>B</InXMLName>"u8 + @"<InXMLNameTag>C</InXMLNameTag>"u8 + @"<InFieldName>D</InFieldName>"u8 + @"</Parent>"u8,
         MarshalOnly: true
     ),
     new(
         Value: Ꮡ(new NamePrecedence(
-            XMLName: new Name(Local: "Parent"u8),
-            FromTag: new XMLNameWithoutTag(XMLName: new Name(Local: "InTag"u8), Value: "A"u8),
-            FromNameVal: new XMLNameWithoutTag(XMLName: new Name(Local: "FromNameVal"u8), Value: "B"u8),
-            FromNameTag: new XMLNameWithTag(XMLName: new Name(Local: "InXMLNameTag"u8), Value: "C"u8),
-            InFieldName: "D"u8
+            XMLName: new Name(Local: "Parent"),
+            FromTag: new XMLNameWithoutTag(XMLName: new Name(Local: "InTag"), Value: "A"),
+            FromNameVal: new XMLNameWithoutTag(XMLName: new Name(Local: "FromNameVal"), Value: "B"),
+            FromNameTag: new XMLNameWithTag(XMLName: new Name(Local: "InXMLNameTag"), Value: "C"),
+            InFieldName: "D"
         )),
         ExpectXML: @"<Parent>"u8 + @"<InTag>A</InTag>"u8 + @"<FromNameVal>B</FromNameVal>"u8 + @"<InXMLNameTag>C</InXMLNameTag>"u8 + @"<InFieldName>D</InFieldName>"u8 + @"</Parent>"u8,
         UnmarshalOnly: true
@@ -860,19 +860,19 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
 
     // xml.Name works in a plain field as well.
     new(
-        Value: Ꮡ(new NameInField(new Name(Space: "ns"u8, Local: "foo"u8))),
-        ExpectXML: @"<NameInField><foo xmlns=""ns""></foo></NameInField>"u8
+        Value: Ꮡ(new NameInField(new Name(Space: "ns", Local: "foo"))),
+        ExpectXML: @"<NameInField><foo xmlns=""ns""></foo></NameInField>"
     ),
     new(
-        Value: Ꮡ(new NameInField(new Name(Space: "ns"u8, Local: "foo"u8))),
-        ExpectXML: @"<NameInField><foo xmlns=""ns""><ignore></ignore></foo></NameInField>"u8,
+        Value: Ꮡ(new NameInField(new Name(Space: "ns", Local: "foo"))),
+        ExpectXML: @"<NameInField><foo xmlns=""ns""><ignore></ignore></foo></NameInField>",
         UnmarshalOnly: true
     ),
 
     // Marshaling zero xml.Name uses the tag or field name.
     new(
-        Value: Ꮡ(new NameInField(nil)),
-        ExpectXML: @"<NameInField><foo xmlns=""ns""></foo></NameInField>"u8,
+        Value: Ꮡ(new NameInField()),
+        ExpectXML: @"<NameInField><foo xmlns=""ns""></foo></NameInField>",
         MarshalOnly: true
     ),
 
@@ -884,60 +884,60 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
             Float: 23.5D,
             Uint8: 255,
             Bool: true,
-            Str: "str"u8,
+            Str: "str",
             Bytes: slice<byte>("byt"u8)
         )),
         ExpectXML: @"<AttrTest Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"""u8 + @" Bool=""true"" Str=""str"" Bytes=""byt""></AttrTest>"u8
     ),
     new(
-        Value: Ꮡ(new AttrTest(Bytes: new byte[]{}.slice())),
+        Value: Ꮡ(new AttrTest(Bytes: slice<byte>([]))),
         ExpectXML: @"<AttrTest Int=""0"" int=""0"" Float=""0"" Uint8=""0"""u8 + @" Bool=""false"" Str="""" Bytes=""""></AttrTest>"u8
     ),
     new(
         Value: Ꮡ(new AttrsTest(
-            Attrs: new global::go.encoding.xml_package.Attr[]{
-                new(Name: new Name(Local: "Answer"u8), Value: "42"u8),
-                new(Name: new Name(Local: "Int"u8), Value: "8"u8),
-                new(Name: new Name(Local: "int"u8), Value: "9"u8),
-                new(Name: new Name(Local: "Float"u8), Value: "23.5"u8),
-                new(Name: new Name(Local: "Uint8"u8), Value: "255"u8),
-                new(Name: new Name(Local: "Bool"u8), Value: "true"u8),
-                new(Name: new Name(Local: "Str"u8), Value: "str"u8),
-                new(Name: new Name(Local: "Bytes"u8), Value: "byt"u8)
-            }.slice()
+            Attrs: slice<global::go.encoding.xml_package.Attr>([
+                new(Name: new Name(Local: "Answer"), Value: "42"),
+                new(Name: new Name(Local: "Int"), Value: "8"),
+                new(Name: new Name(Local: "int"), Value: "9"),
+                new(Name: new Name(Local: "Float"), Value: "23.5"),
+                new(Name: new Name(Local: "Uint8"), Value: "255"),
+                new(Name: new Name(Local: "Bool"), Value: "true"),
+                new(Name: new Name(Local: "Str"), Value: "str"),
+                new(Name: new Name(Local: "Bytes"), Value: "byt")
+            ])
         )),
-        ExpectXML: @"<AttrsTest Answer=""42"" Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"" Bool=""true"" Str=""str"" Bytes=""byt"" Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes=""""></AttrsTest>"u8,
+        ExpectXML: @"<AttrsTest Answer=""42"" Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"" Bool=""true"" Str=""str"" Bytes=""byt"" Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes=""""></AttrsTest>",
         MarshalOnly: true
     ),
     new(
         Value: Ꮡ(new AttrsTest(
-            Attrs: new global::go.encoding.xml_package.Attr[]{
-                new(Name: new Name(Local: "Answer"u8), Value: "42"u8)
-            }.slice(),
+            Attrs: slice<global::go.encoding.xml_package.Attr>([
+                new(Name: new Name(Local: "Answer"), Value: "42")
+            ]),
             Int: 8,
             Named: 9,
             Float: 23.5D,
             Uint8: 255,
             Bool: true,
-            Str: "str"u8,
+            Str: "str",
             Bytes: slice<byte>("byt"u8)
         )),
-        ExpectXML: @"<AttrsTest Answer=""42"" Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"" Bool=""true"" Str=""str"" Bytes=""byt""></AttrsTest>"u8
+        ExpectXML: @"<AttrsTest Answer=""42"" Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"" Bool=""true"" Str=""str"" Bytes=""byt""></AttrsTest>"
     ),
     new(
         Value: Ꮡ(new AttrsTest(
-            Attrs: new global::go.encoding.xml_package.Attr[]{
-                new(Name: new Name(Local: "Int"u8), Value: "0"u8),
-                new(Name: new Name(Local: "int"u8), Value: "0"u8),
-                new(Name: new Name(Local: "Float"u8), Value: "0"u8),
-                new(Name: new Name(Local: "Uint8"u8), Value: "0"u8),
-                new(Name: new Name(Local: "Bool"u8), Value: "false"u8),
-                new(Name: new Name(Local: "Str"u8)),
-                new(Name: new Name(Local: "Bytes"u8))
-            }.slice(),
-            Bytes: new byte[]{}.slice()
+            Attrs: slice<global::go.encoding.xml_package.Attr>([
+                new(Name: new Name(Local: "Int"), Value: "0"),
+                new(Name: new Name(Local: "int"), Value: "0"),
+                new(Name: new Name(Local: "Float"), Value: "0"),
+                new(Name: new Name(Local: "Uint8"), Value: "0"),
+                new(Name: new Name(Local: "Bool"), Value: "false"),
+                new(Name: new Name(Local: "Str")),
+                new(Name: new Name(Local: "Bytes"))
+            ]),
+            Bytes: slice<byte>([])
         )),
-        ExpectXML: @"<AttrsTest Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes="""" Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes=""""></AttrsTest>"u8,
+        ExpectXML: @"<AttrsTest Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes="""" Int=""0"" int=""0"" Float=""0"" Uint8=""0"" Bool=""false"" Str="""" Bytes=""""></AttrsTest>",
         MarshalOnly: true
     ),
     new(
@@ -947,28 +947,28 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
             Float: 23.5D,
             Uint8: 255,
             Bool: true,
-            Str: "str"u8,
+            Str: "str",
             Bytes: slice<byte>("byt"u8),
             PStr: Ꮡempty
         )),
         ExpectXML: @"<OmitAttrTest Int=""8"" int=""9"" Float=""23.5"" Uint8=""255"""u8 + @" Bool=""true"" Str=""str"" Bytes=""byt"" PStr=""""></OmitAttrTest>"u8
     ),
     new(
-        Value: Ꮡ(new OmitAttrTest(nil)),
-        ExpectXML: @"<OmitAttrTest></OmitAttrTest>"u8
+        Value: Ꮡ(new OmitAttrTest()),
+        ExpectXML: @"<OmitAttrTest></OmitAttrTest>"
     ),
 
     // pointer fields
     new(
         Value: Ꮡ(new PointerFieldsTest(Name: ᏑnameAttr, Age: ᏑageAttr, Contents: ᏑcontentsAttr)),
-        ExpectXML: @"<dummy name=""Sarah"" age=""12"">lorem ipsum</dummy>"u8,
+        ExpectXML: @"<dummy name=""Sarah"" age=""12"">lorem ipsum</dummy>",
         MarshalOnly: true
     ),
 
     // empty chardata pointer field
     new(
-        Value: Ꮡ(new ChardataEmptyTest(nil)),
-        ExpectXML: @"<test></test>"u8,
+        Value: Ꮡ(new ChardataEmptyTest()),
+        ExpectXML: @"<test></test>",
         MarshalOnly: true
     ),
 
@@ -980,586 +980,586 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
             Float: 23.5D,
             Uint8: 255,
             Bool: true,
-            Str: "str"u8,
+            Str: "str",
             Bytes: slice<byte>("byt"u8),
             PStr: Ꮡempty,
-            Ptr: Ꮡ(new PresenceTest(nil))
+            Ptr: Ꮡ(new PresenceTest())
         )),
         ExpectXML: @"<OmitFieldTest>"u8 + @"<Int>8</Int>"u8 + @"<int>9</int>"u8 + @"<Float>23.5</Float>"u8 + @"<Uint8>255</Uint8>"u8 + @"<Bool>true</Bool>"u8 + @"<Str>str</Str>"u8 + @"<Bytes>byt</Bytes>"u8 + @"<PStr></PStr>"u8 + @"<Ptr></Ptr>"u8 + @"</OmitFieldTest>"u8
     ),
     new(
-        Value: Ꮡ(new OmitFieldTest(nil)),
-        ExpectXML: @"<OmitFieldTest></OmitFieldTest>"u8
+        Value: Ꮡ(new OmitFieldTest()),
+        ExpectXML: @"<OmitFieldTest></OmitFieldTest>"
     ),
 
     // Test ",any"
     new(
-        ExpectXML: @"<a><nested><value>known</value></nested><other><sub>unknown</sub></other></a>"u8,
+        ExpectXML: @"<a><nested><value>known</value></nested><other><sub>unknown</sub></other></a>",
         Value: Ꮡ(new AnyTest(
-            Nested: "known"u8,
+            Nested: "known",
             AnyField: new AnyHolder(
-                XMLName: new Name(Local: "other"u8),
-                XML: "<sub>unknown</sub>"u8
+                XMLName: new Name(Local: "other"),
+                XML: "<sub>unknown</sub>"
             )
         ))
     ),
     new(
-        Value: Ꮡ(new AnyTest(Nested: "known"u8,
+        Value: Ꮡ(new AnyTest(Nested: "known",
             AnyField: new AnyHolder(
-                XML: "<unknown/>"u8,
-                XMLName: new Name(Local: "AnyField"u8)
+                XML: "<unknown/>",
+                XMLName: new Name(Local: "AnyField")
             )
         )),
-        ExpectXML: @"<a><nested><value>known</value></nested><AnyField><unknown/></AnyField></a>"u8
+        ExpectXML: @"<a><nested><value>known</value></nested><AnyField><unknown/></AnyField></a>"
     ),
     new(
-        ExpectXML: @"<a><nested><value>b</value></nested></a>"u8,
+        ExpectXML: @"<a><nested><value>b</value></nested></a>",
         Value: Ꮡ(new AnyOmitTest(
-            Nested: "b"u8
+            Nested: "b"
         ))
     ),
     new(
-        ExpectXML: @"<a><nested><value>b</value></nested><c><d>e</d></c><g xmlns=""f""><h>i</h></g></a>"u8,
+        ExpectXML: @"<a><nested><value>b</value></nested><c><d>e</d></c><g xmlns=""f""><h>i</h></g></a>",
         Value: Ꮡ(new AnySliceTest(
-            Nested: "b"u8,
-            AnyField: new AnyHolder[]{
+            Nested: "b",
+            AnyField: slice<AnyHolder>([
                 new(
-                    XMLName: new Name(Local: "c"u8),
-                    XML: "<d>e</d>"u8
+                    XMLName: new Name(Local: "c"),
+                    XML: "<d>e</d>"
                 ),
                 new(
-                    XMLName: new Name(Space: "f"u8, Local: "g"u8),
-                    XML: "<h>i</h>"u8
+                    XMLName: new Name(Space: "f", Local: "g"),
+                    XML: "<h>i</h>"
                 )
-            }.slice()
+            ])
         ))
     ),
     new(
-        ExpectXML: @"<a><nested><value>b</value></nested></a>"u8,
+        ExpectXML: @"<a><nested><value>b</value></nested></a>",
         Value: Ꮡ(new AnySliceTest(
-            Nested: "b"u8
+            Nested: "b"
         ))
     ),
 
     // Test recursive types.
     new(
         Value: Ꮡ(new RecurseA(
-            A: "a1"u8,
+            A: "a1",
             B: Ꮡ(new RecurseB(
-                A: Ꮡ(new RecurseA("a2"u8, nil)),
-                B: "b1"u8
+                A: Ꮡ(new RecurseA("a2", nil)),
+                B: "b1"
             ))
         )),
-        ExpectXML: @"<RecurseA><A>a1</A><B><A><A>a2</A></A><B>b1</B></B></RecurseA>"u8
+        ExpectXML: @"<RecurseA><A>a1</A><B><A><A>a2</A></A><B>b1</B></B></RecurseA>"
     ),
 
     // Test ignoring fields via "-" tag
     new(
-        ExpectXML: @"<IgnoreTest></IgnoreTest>"u8,
-        Value: Ꮡ(new IgnoreTest(nil))
+        ExpectXML: @"<IgnoreTest></IgnoreTest>",
+        Value: Ꮡ(new IgnoreTest())
     ),
     new(
-        ExpectXML: @"<IgnoreTest></IgnoreTest>"u8,
-        Value: Ꮡ(new IgnoreTest(PublicSecret: "can't tell"u8)),
+        ExpectXML: @"<IgnoreTest></IgnoreTest>",
+        Value: Ꮡ(new IgnoreTest(PublicSecret: "can't tell")),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IgnoreTest><PublicSecret>ignore me</PublicSecret></IgnoreTest>"u8,
-        Value: Ꮡ(new IgnoreTest(nil)),
+        ExpectXML: @"<IgnoreTest><PublicSecret>ignore me</PublicSecret></IgnoreTest>",
+        Value: Ꮡ(new IgnoreTest()),
         UnmarshalOnly: true
     ),
 
     // Test escaping.
     new(
-        ExpectXML: @"<a><nested><value>dquote: &#34;; squote: &#39;; ampersand: &amp;; less: &lt;; greater: &gt;;</value></nested><empty></empty></a>"u8,
+        ExpectXML: @"<a><nested><value>dquote: &#34;; squote: &#39;; ampersand: &amp;; less: &lt;; greater: &gt;;</value></nested><empty></empty></a>",
         Value: Ꮡ(new AnyTest(
-            Nested: @"dquote: ""; squote: '; ampersand: &; less: <; greater: >;"u8,
-            AnyField: new AnyHolder(XMLName: new Name(Local: "empty"u8))
+            Nested: @"dquote: ""; squote: '; ampersand: &; less: <; greater: >;",
+            AnyField: new AnyHolder(XMLName: new Name(Local: "empty"))
         ))
     ),
     new(
-        ExpectXML: @"<a><nested><value>newline: &#xA;; cr: &#xD;; tab: &#x9;;</value></nested><AnyField></AnyField></a>"u8,
+        ExpectXML: @"<a><nested><value>newline: &#xA;; cr: &#xD;; tab: &#x9;;</value></nested><AnyField></AnyField></a>",
         Value: Ꮡ(new AnyTest(
-            Nested: "newline: \n; cr: \r; tab: \t;"u8,
-            AnyField: new AnyHolder(XMLName: new Name(Local: "AnyField"u8))
+            Nested: "newline: \n; cr: \r; tab: \t;",
+            AnyField: new AnyHolder(XMLName: new Name(Local: "AnyField"))
         ))
     ),
     new(
-        ExpectXML: "<a><nested><value>1\r2\r\n3\n\r4\n5</value></nested></a>"u8,
+        ExpectXML: "<a><nested><value>1\r2\r\n3\n\r4\n5</value></nested></a>",
         Value: Ꮡ(new AnyTest(
-            Nested: "1\n2\n3\n\n4\n5"u8
+            Nested: "1\n2\n3\n\n4\n5"
         )),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<EmbedInt><MyInt>42</MyInt></EmbedInt>"u8,
+        ExpectXML: @"<EmbedInt><MyInt>42</MyInt></EmbedInt>",
         Value: Ꮡ(new EmbedInt(
             MyInt: 42
         ))
     ),
     // Test outputting CDATA-wrapped text.
     new(
-        ExpectXML: @"<CDataTest></CDataTest>"u8,
-        Value: Ꮡ(new CDataTest(nil))
+        ExpectXML: @"<CDataTest></CDataTest>",
+        Value: Ꮡ(new CDataTest())
     ),
     new(
-        ExpectXML: @"<CDataTest><![CDATA[http://example.com/tests/1?foo=1&bar=baz]]></CDataTest>"u8,
+        ExpectXML: @"<CDataTest><![CDATA[http://example.com/tests/1?foo=1&bar=baz]]></CDataTest>",
         Value: Ꮡ(new CDataTest(
-            Chardata: "http://example.com/tests/1?foo=1&bar=baz"u8
+            Chardata: "http://example.com/tests/1?foo=1&bar=baz"
         ))
     ),
     new(
-        ExpectXML: @"<CDataTest><![CDATA[Literal <![CDATA[Nested]]]]><![CDATA[>!]]></CDataTest>"u8,
+        ExpectXML: @"<CDataTest><![CDATA[Literal <![CDATA[Nested]]]]><![CDATA[>!]]></CDataTest>",
         Value: Ꮡ(new CDataTest(
-            Chardata: "Literal <![CDATA[Nested]]>!"u8
+            Chardata: "Literal <![CDATA[Nested]]>!"
         ))
     ),
     new(
-        ExpectXML: @"<CDataTest><![CDATA[<![CDATA[Nested]]]]><![CDATA[> Literal!]]></CDataTest>"u8,
+        ExpectXML: @"<CDataTest><![CDATA[<![CDATA[Nested]]]]><![CDATA[> Literal!]]></CDataTest>",
         Value: Ꮡ(new CDataTest(
-            Chardata: "<![CDATA[Nested]]> Literal!"u8
+            Chardata: "<![CDATA[Nested]]> Literal!"
         ))
     ),
     new(
-        ExpectXML: @"<CDataTest><![CDATA[<![CDATA[Nested]]]]><![CDATA[> Literal! <![CDATA[Nested]]]]><![CDATA[> Literal!]]></CDataTest>"u8,
+        ExpectXML: @"<CDataTest><![CDATA[<![CDATA[Nested]]]]><![CDATA[> Literal! <![CDATA[Nested]]]]><![CDATA[> Literal!]]></CDataTest>",
         Value: Ꮡ(new CDataTest(
-            Chardata: "<![CDATA[Nested]]> Literal! <![CDATA[Nested]]> Literal!"u8
+            Chardata: "<![CDATA[Nested]]> Literal! <![CDATA[Nested]]> Literal!"
         ))
     ),
     new(
-        ExpectXML: @"<CDataTest><![CDATA[<![CDATA[<![CDATA[Nested]]]]><![CDATA[>]]]]><![CDATA[>]]></CDataTest>"u8,
+        ExpectXML: @"<CDataTest><![CDATA[<![CDATA[<![CDATA[Nested]]]]><![CDATA[>]]]]><![CDATA[>]]></CDataTest>",
         Value: Ꮡ(new CDataTest(
-            Chardata: "<![CDATA[<![CDATA[Nested]]>]]>"u8
+            Chardata: "<![CDATA[<![CDATA[Nested]]>]]>"
         ))
     ),
 
     // Test omitempty with parent chain; see golang.org/issue/4168.
     new(
-        ExpectXML: @"<Strings><A></A></Strings>"u8,
-        Value: Ꮡ(new Strings(nil))
+        ExpectXML: @"<Strings><A></A></Strings>",
+        Value: Ꮡ(new Strings())
     ),
     // Custom marshalers.
     new(
-        ExpectXML: @"<MyMarshalerTest>hello world</MyMarshalerTest>"u8,
-        Value: Ꮡ(new MyMarshalerTest(nil))
+        ExpectXML: @"<MyMarshalerTest>hello world</MyMarshalerTest>",
+        Value: Ꮡ(new MyMarshalerTest())
     ),
     new(
-        ExpectXML: @"<MarshalerStruct Foo=""hello world""></MarshalerStruct>"u8,
-        Value: Ꮡ(new MarshalerStruct(nil))
+        ExpectXML: @"<MarshalerStruct Foo=""hello world""></MarshalerStruct>",
+        Value: Ꮡ(new MarshalerStruct())
     ),
     new(
-        ExpectXML: @"<outer xmlns=""testns"" int=""10""></outer>"u8,
+        ExpectXML: @"<outer xmlns=""testns"" int=""10""></outer>",
         Value: Ꮡ(new OuterStruct(IntAttr: 10))
     ),
     new(
-        ExpectXML: @"<test xmlns=""outerns"" int=""10""></test>"u8,
-        Value: Ꮡ(new OuterNamedStruct(XMLName: new Name(Space: "outerns"u8, Local: "test"u8), IntAttr: 10))
+        ExpectXML: @"<test xmlns=""outerns"" int=""10""></test>",
+        Value: Ꮡ(new OuterNamedStruct(XMLName: new Name(Space: "outerns", Local: "test"), IntAttr: 10))
     ),
     new(
-        ExpectXML: @"<test xmlns=""outerns"" int=""10""></test>"u8,
-        Value: Ꮡ(new OuterNamedOrderedStruct(XMLName: new Name(Space: "outerns"u8, Local: "test"u8), IntAttr: 10))
+        ExpectXML: @"<test xmlns=""outerns"" int=""10""></test>",
+        Value: Ꮡ(new OuterNamedOrderedStruct(XMLName: new Name(Space: "outerns", Local: "test"), IntAttr: 10))
     ),
     new(
-        ExpectXML: @"<outer xmlns=""testns"" int=""10""></outer>"u8,
+        ExpectXML: @"<outer xmlns=""testns"" int=""10""></outer>",
         Value: Ꮡ(new OuterOuterStruct(new OuterStruct(IntAttr: 10)))
     ),
     new(
-        ExpectXML: @"<NestedAndChardata><A><B></B><B></B></A>test</NestedAndChardata>"u8,
-        Value: Ꮡ(new NestedAndChardata(AB: new slice<@string>(2), Chardata: "test"u8))
+        ExpectXML: @"<NestedAndChardata><A><B></B><B></B></A>test</NestedAndChardata>",
+        Value: Ꮡ(new NestedAndChardata(AB: new slice<@string>(2), Chardata: "test"))
     ),
     new(
-        ExpectXML: @"<NestedAndComment><A><B></B><B></B></A><!--test--></NestedAndComment>"u8,
-        Value: Ꮡ(new NestedAndComment(AB: new slice<@string>(2), Comment: "test"u8))
+        ExpectXML: @"<NestedAndComment><A><B></B><B></B></A><!--test--></NestedAndComment>",
+        Value: Ꮡ(new NestedAndComment(AB: new slice<@string>(2), Comment: "test"))
     ),
     new(
-        ExpectXML: @"<NestedAndCData><A><B></B><B></B></A><![CDATA[test]]></NestedAndCData>"u8,
-        Value: Ꮡ(new NestedAndCData(AB: new slice<@string>(2), CDATA: "test"u8))
+        ExpectXML: @"<NestedAndCData><A><B></B><B></B></A><![CDATA[test]]></NestedAndCData>",
+        Value: Ꮡ(new NestedAndCData(AB: new slice<@string>(2), CDATA: "test"))
     ),
     // Test pointer indirection in various kinds of fields.
     // https://golang.org/issue/19063
     new(
-        ExpectXML: @"<IndirComment><T1></T1><!--hi--><T2></T2></IndirComment>"u8,
-        Value: Ꮡ(new IndirComment(Comment: stringptr("hi"u8))),
+        ExpectXML: @"<IndirComment><T1></T1><!--hi--><T2></T2></IndirComment>",
+        Value: Ꮡ(new IndirComment(Comment: stringptr("hi"))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirComment><T1></T1><T2></T2></IndirComment>"u8,
-        Value: Ꮡ(new IndirComment(Comment: stringptr(""u8))),
+        ExpectXML: @"<IndirComment><T1></T1><T2></T2></IndirComment>",
+        Value: Ꮡ(new IndirComment(Comment: stringptr(""))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirComment><T1></T1><T2></T2></IndirComment>"u8,
+        ExpectXML: @"<IndirComment><T1></T1><T2></T2></IndirComment>",
         Value: Ꮡ(new IndirComment(Comment: nil)),
-        MarshalError: "xml: bad type for comment field of xml.IndirComment"u8
+        MarshalError: "xml: bad type for comment field of xml.IndirComment"
     ),
     new(
-        ExpectXML: @"<IndirComment><T1></T1><!--hi--><T2></T2></IndirComment>"u8,
+        ExpectXML: @"<IndirComment><T1></T1><!--hi--><T2></T2></IndirComment>",
         Value: Ꮡ(new IndirComment(Comment: nil)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceComment><T1></T1><!--hi--><T2></T2></IfaceComment>"u8,
-        Value: Ꮡ(new IfaceComment(Comment: (@string)"hi"u8)),
+        ExpectXML: @"<IfaceComment><T1></T1><!--hi--><T2></T2></IfaceComment>",
+        Value: Ꮡ(new IfaceComment(Comment: (@string)"hi")),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceComment><T1></T1><!--hi--><T2></T2></IfaceComment>"u8,
-        Value: Ꮡ(new IfaceComment(Comment: default!)),
+        ExpectXML: @"<IfaceComment><T1></T1><!--hi--><T2></T2></IfaceComment>",
+        Value: Ꮡ(new IfaceComment(Comment: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceComment><T1></T1><T2></T2></IfaceComment>"u8,
-        Value: Ꮡ(new IfaceComment(Comment: default!)),
-        MarshalError: "xml: bad type for comment field of xml.IfaceComment"u8
+        ExpectXML: @"<IfaceComment><T1></T1><T2></T2></IfaceComment>",
+        Value: Ꮡ(new IfaceComment(Comment: default)),
+        MarshalError: "xml: bad type for comment field of xml.IfaceComment"
     ),
     new(
-        ExpectXML: @"<IfaceComment><T1></T1><T2></T2></IfaceComment>"u8,
-        Value: Ꮡ(new IfaceComment(Comment: default!)),
+        ExpectXML: @"<IfaceComment><T1></T1><T2></T2></IfaceComment>",
+        Value: Ꮡ(new IfaceComment(Comment: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectComment><T1></T1><!--hi--><T2></T2></DirectComment>"u8,
+        ExpectXML: @"<DirectComment><T1></T1><!--hi--><T2></T2></DirectComment>",
         Value: Ꮡ(new DirectComment(Comment: ((@string)"hi"u8)))
     ),
     new(
-        ExpectXML: @"<DirectComment><T1></T1><T2></T2></DirectComment>"u8,
+        ExpectXML: @"<DirectComment><T1></T1><T2></T2></DirectComment>",
         Value: Ꮡ(new DirectComment(Comment: ((@string)""u8)))
     ),
     new(
-        ExpectXML: @"<IndirChardata><T1></T1>hi<T2></T2></IndirChardata>"u8,
-        Value: Ꮡ(new IndirChardata(Chardata: stringptr("hi"u8)))
+        ExpectXML: @"<IndirChardata><T1></T1>hi<T2></T2></IndirChardata>",
+        Value: Ꮡ(new IndirChardata(Chardata: stringptr("hi")))
     ),
     new(
-        ExpectXML: @"<IndirChardata><T1></T1><![CDATA[hi]]><T2></T2></IndirChardata>"u8,
-        Value: Ꮡ(new IndirChardata(Chardata: stringptr("hi"u8))),
+        ExpectXML: @"<IndirChardata><T1></T1><![CDATA[hi]]><T2></T2></IndirChardata>",
+        Value: Ꮡ(new IndirChardata(Chardata: stringptr("hi"))),
         UnmarshalOnly: true // marshals without CDATA
 
     ),
     new(
-        ExpectXML: @"<IndirChardata><T1></T1><T2></T2></IndirChardata>"u8,
-        Value: Ꮡ(new IndirChardata(Chardata: stringptr(""u8)))
+        ExpectXML: @"<IndirChardata><T1></T1><T2></T2></IndirChardata>",
+        Value: Ꮡ(new IndirChardata(Chardata: stringptr("")))
     ),
     new(
-        ExpectXML: @"<IndirChardata><T1></T1><T2></T2></IndirChardata>"u8,
+        ExpectXML: @"<IndirChardata><T1></T1><T2></T2></IndirChardata>",
         Value: Ꮡ(new IndirChardata(Chardata: nil)),
         MarshalOnly: true // unmarshal leaves Chardata=stringptr("")
 
     ),
     new(
-        ExpectXML: @"<IfaceChardata><T1></T1>hi<T2></T2></IfaceChardata>"u8,
+        ExpectXML: @"<IfaceChardata><T1></T1>hi<T2></T2></IfaceChardata>",
         Value: Ꮡ(new IfaceChardata(Chardata: ((@string)"hi"u8))),
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<IfaceChardata><T1></T1><![CDATA[hi]]><T2></T2></IfaceChardata>"u8,
+        ExpectXML: @"<IfaceChardata><T1></T1><![CDATA[hi]]><T2></T2></IfaceChardata>",
         Value: Ꮡ(new IfaceChardata(Chardata: ((@string)"hi"u8))),
         UnmarshalOnly: true, // marshals without CDATA
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<IfaceChardata><T1></T1><T2></T2></IfaceChardata>"u8,
+        ExpectXML: @"<IfaceChardata><T1></T1><T2></T2></IfaceChardata>",
         Value: Ꮡ(new IfaceChardata(Chardata: ((@string)""u8))),
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<IfaceChardata><T1></T1><T2></T2></IfaceChardata>"u8,
-        Value: Ꮡ(new IfaceChardata(Chardata: default!)),
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        ExpectXML: @"<IfaceChardata><T1></T1><T2></T2></IfaceChardata>",
+        Value: Ꮡ(new IfaceChardata(Chardata: default)),
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<DirectChardata><T1></T1>hi<T2></T2></DirectChardata>"u8,
+        ExpectXML: @"<DirectChardata><T1></T1>hi<T2></T2></DirectChardata>",
         Value: Ꮡ(new DirectChardata(Chardata: ((@string)"hi"u8)))
     ),
     new(
-        ExpectXML: @"<DirectChardata><T1></T1><![CDATA[hi]]><T2></T2></DirectChardata>"u8,
+        ExpectXML: @"<DirectChardata><T1></T1><![CDATA[hi]]><T2></T2></DirectChardata>",
         Value: Ꮡ(new DirectChardata(Chardata: ((@string)"hi"u8))),
         UnmarshalOnly: true // marshals without CDATA
 
     ),
     new(
-        ExpectXML: @"<DirectChardata><T1></T1><T2></T2></DirectChardata>"u8,
+        ExpectXML: @"<DirectChardata><T1></T1><T2></T2></DirectChardata>",
         Value: Ꮡ(new DirectChardata(Chardata: ((@string)""u8)))
     ),
     new(
-        ExpectXML: @"<IndirCDATA><T1></T1><![CDATA[hi]]><T2></T2></IndirCDATA>"u8,
-        Value: Ꮡ(new IndirCDATA(CDATA: stringptr("hi"u8)))
+        ExpectXML: @"<IndirCDATA><T1></T1><![CDATA[hi]]><T2></T2></IndirCDATA>",
+        Value: Ꮡ(new IndirCDATA(CDATA: stringptr("hi")))
     ),
     new(
-        ExpectXML: @"<IndirCDATA><T1></T1>hi<T2></T2></IndirCDATA>"u8,
-        Value: Ꮡ(new IndirCDATA(CDATA: stringptr("hi"u8))),
+        ExpectXML: @"<IndirCDATA><T1></T1>hi<T2></T2></IndirCDATA>",
+        Value: Ꮡ(new IndirCDATA(CDATA: stringptr("hi"))),
         UnmarshalOnly: true // marshals with CDATA
 
     ),
     new(
-        ExpectXML: @"<IndirCDATA><T1></T1><T2></T2></IndirCDATA>"u8,
-        Value: Ꮡ(new IndirCDATA(CDATA: stringptr(""u8)))
+        ExpectXML: @"<IndirCDATA><T1></T1><T2></T2></IndirCDATA>",
+        Value: Ꮡ(new IndirCDATA(CDATA: stringptr("")))
     ),
     new(
-        ExpectXML: @"<IndirCDATA><T1></T1><T2></T2></IndirCDATA>"u8,
+        ExpectXML: @"<IndirCDATA><T1></T1><T2></T2></IndirCDATA>",
         Value: Ꮡ(new IndirCDATA(CDATA: nil)),
         MarshalOnly: true // unmarshal leaves CDATA=stringptr("")
 
     ),
     new(
-        ExpectXML: @"<IfaceCDATA><T1></T1><![CDATA[hi]]><T2></T2></IfaceCDATA>"u8,
+        ExpectXML: @"<IfaceCDATA><T1></T1><![CDATA[hi]]><T2></T2></IfaceCDATA>",
         Value: Ꮡ(new IfaceCDATA(CDATA: ((@string)"hi"u8))),
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<IfaceCDATA><T1></T1>hi<T2></T2></IfaceCDATA>"u8,
+        ExpectXML: @"<IfaceCDATA><T1></T1>hi<T2></T2></IfaceCDATA>",
         Value: Ꮡ(new IfaceCDATA(CDATA: ((@string)"hi"u8))),
         UnmarshalOnly: true, // marshals with CDATA
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<IfaceCDATA><T1></T1><T2></T2></IfaceCDATA>"u8,
+        ExpectXML: @"<IfaceCDATA><T1></T1><T2></T2></IfaceCDATA>",
         Value: Ꮡ(new IfaceCDATA(CDATA: ((@string)""u8))),
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<IfaceCDATA><T1></T1><T2></T2></IfaceCDATA>"u8,
-        Value: Ꮡ(new IfaceCDATA(CDATA: default!)),
-        UnmarshalError: "cannot unmarshal into interface {}"u8
+        ExpectXML: @"<IfaceCDATA><T1></T1><T2></T2></IfaceCDATA>",
+        Value: Ꮡ(new IfaceCDATA(CDATA: default)),
+        UnmarshalError: "cannot unmarshal into interface {}"
     ),
     new(
-        ExpectXML: @"<DirectCDATA><T1></T1><![CDATA[hi]]><T2></T2></DirectCDATA>"u8,
+        ExpectXML: @"<DirectCDATA><T1></T1><![CDATA[hi]]><T2></T2></DirectCDATA>",
         Value: Ꮡ(new DirectCDATA(CDATA: ((@string)"hi"u8)))
     ),
     new(
-        ExpectXML: @"<DirectCDATA><T1></T1>hi<T2></T2></DirectCDATA>"u8,
+        ExpectXML: @"<DirectCDATA><T1></T1>hi<T2></T2></DirectCDATA>",
         Value: Ꮡ(new DirectCDATA(CDATA: ((@string)"hi"u8))),
         UnmarshalOnly: true // marshals with CDATA
 
     ),
     new(
-        ExpectXML: @"<DirectCDATA><T1></T1><T2></T2></DirectCDATA>"u8,
+        ExpectXML: @"<DirectCDATA><T1></T1><T2></T2></DirectCDATA>",
         Value: Ꮡ(new DirectCDATA(CDATA: ((@string)""u8)))
     ),
     new(
-        ExpectXML: @"<IndirInnerXML><T1></T1><hi/><T2></T2></IndirInnerXML>"u8,
-        Value: Ꮡ(new IndirInnerXML(InnerXML: stringptr("<hi/>"u8))),
+        ExpectXML: @"<IndirInnerXML><T1></T1><hi/><T2></T2></IndirInnerXML>",
+        Value: Ꮡ(new IndirInnerXML(InnerXML: stringptr("<hi/>"))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirInnerXML><T1></T1><T2></T2></IndirInnerXML>"u8,
-        Value: Ꮡ(new IndirInnerXML(InnerXML: stringptr(""u8))),
+        ExpectXML: @"<IndirInnerXML><T1></T1><T2></T2></IndirInnerXML>",
+        Value: Ꮡ(new IndirInnerXML(InnerXML: stringptr(""))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirInnerXML><T1></T1><T2></T2></IndirInnerXML>"u8,
+        ExpectXML: @"<IndirInnerXML><T1></T1><T2></T2></IndirInnerXML>",
         Value: Ꮡ(new IndirInnerXML(InnerXML: nil))
     ),
     new(
-        ExpectXML: @"<IndirInnerXML><T1></T1><hi/><T2></T2></IndirInnerXML>"u8,
+        ExpectXML: @"<IndirInnerXML><T1></T1><hi/><T2></T2></IndirInnerXML>",
         Value: Ꮡ(new IndirInnerXML(InnerXML: nil)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceInnerXML><T1></T1><hi/><T2></T2></IfaceInnerXML>"u8,
-        Value: Ꮡ(new IfaceInnerXML(InnerXML: (@string)"<hi/>"u8)),
+        ExpectXML: @"<IfaceInnerXML><T1></T1><hi/><T2></T2></IfaceInnerXML>",
+        Value: Ꮡ(new IfaceInnerXML(InnerXML: (@string)"<hi/>")),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceInnerXML><T1></T1><hi/><T2></T2></IfaceInnerXML>"u8,
-        Value: Ꮡ(new IfaceInnerXML(InnerXML: default!)),
+        ExpectXML: @"<IfaceInnerXML><T1></T1><hi/><T2></T2></IfaceInnerXML>",
+        Value: Ꮡ(new IfaceInnerXML(InnerXML: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceInnerXML><T1></T1><T2></T2></IfaceInnerXML>"u8,
-        Value: Ꮡ(new IfaceInnerXML(InnerXML: default!))
+        ExpectXML: @"<IfaceInnerXML><T1></T1><T2></T2></IfaceInnerXML>",
+        Value: Ꮡ(new IfaceInnerXML(InnerXML: default))
     ),
     new(
-        ExpectXML: @"<IfaceInnerXML><T1></T1><T2></T2></IfaceInnerXML>"u8,
-        Value: Ꮡ(new IfaceInnerXML(InnerXML: default!)),
+        ExpectXML: @"<IfaceInnerXML><T1></T1><T2></T2></IfaceInnerXML>",
+        Value: Ꮡ(new IfaceInnerXML(InnerXML: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectInnerXML><T1></T1><hi/><T2></T2></DirectInnerXML>"u8,
+        ExpectXML: @"<DirectInnerXML><T1></T1><hi/><T2></T2></DirectInnerXML>",
         Value: Ꮡ(new DirectInnerXML(InnerXML: ((@string)"<hi/>"u8))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectInnerXML><T1></T1><hi/><T2></T2></DirectInnerXML>"u8,
+        ExpectXML: @"<DirectInnerXML><T1></T1><hi/><T2></T2></DirectInnerXML>",
         Value: Ꮡ(new DirectInnerXML(InnerXML: ((@string)"<T1></T1><hi/><T2></T2>"u8))),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectInnerXML><T1></T1><T2></T2></DirectInnerXML>"u8,
+        ExpectXML: @"<DirectInnerXML><T1></T1><T2></T2></DirectInnerXML>",
         Value: Ꮡ(new DirectInnerXML(InnerXML: ((@string)""u8))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectInnerXML><T1></T1><T2></T2></DirectInnerXML>"u8,
+        ExpectXML: @"<DirectInnerXML><T1></T1><T2></T2></DirectInnerXML>",
         Value: Ꮡ(new DirectInnerXML(InnerXML: ((@string)"<T1></T1><T2></T2>"u8))),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirElement><T1></T1><Element>hi</Element><T2></T2></IndirElement>"u8,
-        Value: Ꮡ(new IndirElement(Element: stringptr("hi"u8)))
+        ExpectXML: @"<IndirElement><T1></T1><Element>hi</Element><T2></T2></IndirElement>",
+        Value: Ꮡ(new IndirElement(Element: stringptr("hi")))
     ),
     new(
-        ExpectXML: @"<IndirElement><T1></T1><Element></Element><T2></T2></IndirElement>"u8,
-        Value: Ꮡ(new IndirElement(Element: stringptr(""u8)))
+        ExpectXML: @"<IndirElement><T1></T1><Element></Element><T2></T2></IndirElement>",
+        Value: Ꮡ(new IndirElement(Element: stringptr("")))
     ),
     new(
-        ExpectXML: @"<IndirElement><T1></T1><T2></T2></IndirElement>"u8,
+        ExpectXML: @"<IndirElement><T1></T1><T2></T2></IndirElement>",
         Value: Ꮡ(new IndirElement(Element: nil))
     ),
     new(
-        ExpectXML: @"<IfaceElement><T1></T1><Element>hi</Element><T2></T2></IfaceElement>"u8,
-        Value: Ꮡ(new IfaceElement(Element: (@string)"hi"u8)),
+        ExpectXML: @"<IfaceElement><T1></T1><Element>hi</Element><T2></T2></IfaceElement>",
+        Value: Ꮡ(new IfaceElement(Element: (@string)"hi")),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceElement><T1></T1><Element>hi</Element><T2></T2></IfaceElement>"u8,
-        Value: Ꮡ(new IfaceElement(Element: default!)),
+        ExpectXML: @"<IfaceElement><T1></T1><Element>hi</Element><T2></T2></IfaceElement>",
+        Value: Ꮡ(new IfaceElement(Element: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceElement><T1></T1><T2></T2></IfaceElement>"u8,
-        Value: Ꮡ(new IfaceElement(Element: default!))
+        ExpectXML: @"<IfaceElement><T1></T1><T2></T2></IfaceElement>",
+        Value: Ꮡ(new IfaceElement(Element: default))
     ),
     new(
-        ExpectXML: @"<IfaceElement><T1></T1><T2></T2></IfaceElement>"u8,
-        Value: Ꮡ(new IfaceElement(Element: default!)),
+        ExpectXML: @"<IfaceElement><T1></T1><T2></T2></IfaceElement>",
+        Value: Ꮡ(new IfaceElement(Element: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectElement><T1></T1><Element>hi</Element><T2></T2></DirectElement>"u8,
+        ExpectXML: @"<DirectElement><T1></T1><Element>hi</Element><T2></T2></DirectElement>",
         Value: Ꮡ(new DirectElement(Element: ((@string)"hi"u8)))
     ),
     new(
-        ExpectXML: @"<DirectElement><T1></T1><Element></Element><T2></T2></DirectElement>"u8,
+        ExpectXML: @"<DirectElement><T1></T1><Element></Element><T2></T2></DirectElement>",
         Value: Ꮡ(new DirectElement(Element: ((@string)""u8)))
     ),
     new(
-        ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></IndirOmitEmpty>"u8,
-        Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr("hi"u8)))
+        ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></IndirOmitEmpty>",
+        Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr("hi")))
     ),
     new(
         // Note: Changed in Go 1.8 to include <OmitEmpty> element (because x.OmitEmpty != nil).
-        ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty></OmitEmpty><T2></T2></IndirOmitEmpty>"u8,
-        Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr(""u8))),
+        ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty></OmitEmpty><T2></T2></IndirOmitEmpty>",
+        Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr(""))),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty></OmitEmpty><T2></T2></IndirOmitEmpty>"u8,
-        Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr(""u8))),
+        ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty></OmitEmpty><T2></T2></IndirOmitEmpty>",
+        Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr(""))),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirOmitEmpty><T1></T1><T2></T2></IndirOmitEmpty>"u8,
+        ExpectXML: @"<IndirOmitEmpty><T1></T1><T2></T2></IndirOmitEmpty>",
         Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: nil))
     ),
     new(
-        ExpectXML: @"<IfaceOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></IfaceOmitEmpty>"u8,
-        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: (@string)"hi"u8)),
+        ExpectXML: @"<IfaceOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></IfaceOmitEmpty>",
+        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: (@string)"hi")),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></IfaceOmitEmpty>"u8,
-        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: default!)),
+        ExpectXML: @"<IfaceOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></IfaceOmitEmpty>",
+        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceOmitEmpty><T1></T1><T2></T2></IfaceOmitEmpty>"u8,
-        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: default!))
+        ExpectXML: @"<IfaceOmitEmpty><T1></T1><T2></T2></IfaceOmitEmpty>",
+        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: default))
     ),
     new(
-        ExpectXML: @"<IfaceOmitEmpty><T1></T1><T2></T2></IfaceOmitEmpty>"u8,
-        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: default!)),
+        ExpectXML: @"<IfaceOmitEmpty><T1></T1><T2></T2></IfaceOmitEmpty>",
+        Value: Ꮡ(new IfaceOmitEmpty(OmitEmpty: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></DirectOmitEmpty>"u8,
+        ExpectXML: @"<DirectOmitEmpty><T1></T1><OmitEmpty>hi</OmitEmpty><T2></T2></DirectOmitEmpty>",
         Value: Ꮡ(new DirectOmitEmpty(OmitEmpty: ((@string)"hi"u8)))
     ),
     new(
-        ExpectXML: @"<DirectOmitEmpty><T1></T1><T2></T2></DirectOmitEmpty>"u8,
+        ExpectXML: @"<DirectOmitEmpty><T1></T1><T2></T2></DirectOmitEmpty>",
         Value: Ꮡ(new DirectOmitEmpty(OmitEmpty: ((@string)""u8)))
     ),
     new(
-        ExpectXML: @"<IndirAny><T1></T1><Any>hi</Any><T2></T2></IndirAny>"u8,
-        Value: Ꮡ(new IndirAny(Any: stringptr("hi"u8)))
+        ExpectXML: @"<IndirAny><T1></T1><Any>hi</Any><T2></T2></IndirAny>",
+        Value: Ꮡ(new IndirAny(Any: stringptr("hi")))
     ),
     new(
-        ExpectXML: @"<IndirAny><T1></T1><Any></Any><T2></T2></IndirAny>"u8,
-        Value: Ꮡ(new IndirAny(Any: stringptr(""u8)))
+        ExpectXML: @"<IndirAny><T1></T1><Any></Any><T2></T2></IndirAny>",
+        Value: Ꮡ(new IndirAny(Any: stringptr("")))
     ),
     new(
-        ExpectXML: @"<IndirAny><T1></T1><T2></T2></IndirAny>"u8,
+        ExpectXML: @"<IndirAny><T1></T1><T2></T2></IndirAny>",
         Value: Ꮡ(new IndirAny(Any: nil))
     ),
     new(
-        ExpectXML: @"<IfaceAny><T1></T1><Any>hi</Any><T2></T2></IfaceAny>"u8,
-        Value: Ꮡ(new IfaceAny(Any: (@string)"hi"u8)),
+        ExpectXML: @"<IfaceAny><T1></T1><Any>hi</Any><T2></T2></IfaceAny>",
+        Value: Ꮡ(new IfaceAny(Any: (@string)"hi")),
         MarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceAny><T1></T1><Any>hi</Any><T2></T2></IfaceAny>"u8,
-        Value: Ꮡ(new IfaceAny(Any: default!)),
+        ExpectXML: @"<IfaceAny><T1></T1><Any>hi</Any><T2></T2></IfaceAny>",
+        Value: Ꮡ(new IfaceAny(Any: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceAny><T1></T1><T2></T2></IfaceAny>"u8,
-        Value: Ꮡ(new IfaceAny(Any: default!))
+        ExpectXML: @"<IfaceAny><T1></T1><T2></T2></IfaceAny>",
+        Value: Ꮡ(new IfaceAny(Any: default))
     ),
     new(
-        ExpectXML: @"<IfaceAny><T1></T1><T2></T2></IfaceAny>"u8,
-        Value: Ꮡ(new IfaceAny(Any: default!)),
+        ExpectXML: @"<IfaceAny><T1></T1><T2></T2></IfaceAny>",
+        Value: Ꮡ(new IfaceAny(Any: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectAny><T1></T1><Any>hi</Any><T2></T2></DirectAny>"u8,
+        ExpectXML: @"<DirectAny><T1></T1><Any>hi</Any><T2></T2></DirectAny>",
         Value: Ꮡ(new DirectAny(Any: ((@string)"hi"u8)))
     ),
     new(
-        ExpectXML: @"<DirectAny><T1></T1><Any></Any><T2></T2></DirectAny>"u8,
+        ExpectXML: @"<DirectAny><T1></T1><Any></Any><T2></T2></DirectAny>",
         Value: Ꮡ(new DirectAny(Any: ((@string)""u8)))
     ),
     new(
-        ExpectXML: @"<IndirFoo><T1></T1><Foo>hi</Foo><T2></T2></IndirFoo>"u8,
-        Value: Ꮡ(new IndirAny(Any: stringptr("hi"u8))),
+        ExpectXML: @"<IndirFoo><T1></T1><Foo>hi</Foo><T2></T2></IndirFoo>",
+        Value: Ꮡ(new IndirAny(Any: stringptr("hi"))),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirFoo><T1></T1><Foo></Foo><T2></T2></IndirFoo>"u8,
-        Value: Ꮡ(new IndirAny(Any: stringptr(""u8))),
+        ExpectXML: @"<IndirFoo><T1></T1><Foo></Foo><T2></T2></IndirFoo>",
+        Value: Ꮡ(new IndirAny(Any: stringptr(""))),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IndirFoo><T1></T1><T2></T2></IndirFoo>"u8,
+        ExpectXML: @"<IndirFoo><T1></T1><T2></T2></IndirFoo>",
         Value: Ꮡ(new IndirAny(Any: nil)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceFoo><T1></T1><Foo>hi</Foo><T2></T2></IfaceFoo>"u8,
-        Value: Ꮡ(new IfaceAny(Any: default!)),
+        ExpectXML: @"<IfaceFoo><T1></T1><Foo>hi</Foo><T2></T2></IfaceFoo>",
+        Value: Ꮡ(new IfaceAny(Any: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceFoo><T1></T1><T2></T2></IfaceFoo>"u8,
-        Value: Ꮡ(new IfaceAny(Any: default!)),
+        ExpectXML: @"<IfaceFoo><T1></T1><T2></T2></IfaceFoo>",
+        Value: Ꮡ(new IfaceAny(Any: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<IfaceFoo><T1></T1><T2></T2></IfaceFoo>"u8,
-        Value: Ꮡ(new IfaceAny(Any: default!)),
+        ExpectXML: @"<IfaceFoo><T1></T1><T2></T2></IfaceFoo>",
+        Value: Ꮡ(new IfaceAny(Any: default)),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectFoo><T1></T1><Foo>hi</Foo><T2></T2></DirectFoo>"u8,
+        ExpectXML: @"<DirectFoo><T1></T1><Foo>hi</Foo><T2></T2></DirectFoo>",
         Value: Ꮡ(new DirectAny(Any: ((@string)"hi"u8))),
         UnmarshalOnly: true
     ),
     new(
-        ExpectXML: @"<DirectFoo><T1></T1><Foo></Foo><T2></T2></DirectFoo>"u8,
+        ExpectXML: @"<DirectFoo><T1></T1><Foo></Foo><T2></T2></DirectFoo>",
         Value: Ꮡ(new DirectAny(Any: ((@string)""u8))),
         UnmarshalOnly: true
     )
-}.slice(); }
+]); }
 
-public static void TestMarshal(ж<testing.T> Ꮡt) {
+public static void TestMarshal(ж<testing.T> t) {
     foreach (var (idx, vᴛ1) in marshalTests) {
         ref var test = ref heap(new marshalTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
@@ -1569,29 +1569,29 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
         }
 
         var testʗ1 = test;
-        Ꮡt.Run(fmt.Sprintf("%d"u8, idx), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("%d"u8, idx), (ж<testing.T> tΔ1) => {
             var (data, err) = Marshal(testʗ1.Value);
-            if (err != default!) {
+            if (err != nil) {
                 if (testʗ1.MarshalError == ""u8) {
-                    tΔ1.Errorf("marshal(%#v): %s"u8, testʗ1.Value, err);
+                    tΔ1.Errorf("marshal(%#v): %s", testʗ1.Value, err);
                     return;
                 }
                 if (!strings.Contains(err.Error(), testʗ1.MarshalError)) {
-                    tΔ1.Errorf("marshal(%#v): %s, want %q"u8, testʗ1.Value, err, testʗ1.MarshalError);
+                    tΔ1.Errorf("marshal(%#v): %s, want %q", testʗ1.Value, err, testʗ1.MarshalError);
                 }
                 return;
             }
             if (testʗ1.MarshalError != ""u8) {
-                tΔ1.Errorf("Marshal succeeded, want error %q"u8, testʗ1.MarshalError);
+                tΔ1.Errorf("Marshal succeeded, want error %q", testʗ1.MarshalError);
                 return;
             }
             {
                 @string got = (@string)data;
                 @string want = testʗ1.ExpectXML; if (got != want) {
-                    if (strings.Contains(want, "\n"u8)){
-                        tΔ1.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s"u8, testʗ1.Value, got, want);
+                    if (strings.Contains(want, "\n")) {
+                        tΔ1.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s", testʗ1.Value, got, want);
                     } else {
-                        tΔ1.Errorf("marshal(%#v):\nhave %#q\nwant %#q"u8, testʗ1.Value, got, want);
+                        tΔ1.Errorf("marshal(%#v):\nhave %#q\nwant %#q", testʗ1.Value, got, want);
                     }
                 }
             }
@@ -1612,39 +1612,39 @@ partial struct marshalErrorTestsᴛ1 /*dyn*/ {
     public @string Err;
     public reflectꓸKind Kind;
 }
-internal static slice<marshalErrorTestsᴛ1> marshalErrorTests = new marshalErrorTestsᴛ1[]{
+internal static slice<marshalErrorTestsᴛ1> marshalErrorTests = slice<marshalErrorTestsᴛ1>([
     new(
         Value: new channel<bool>(0),
-        Err: "xml: unsupported type: chan bool"u8,
+        Err: "xml: unsupported type: chan bool",
         Kind: reflect.Chan
     ),
     new(
         Value: new map<@string, @string>{
-            ["question"u8] = "What do you get when you multiply six by nine?"u8,
-            ["answer"u8] = "42"u8
+            ["question"] = "What do you get when you multiply six by nine?",
+            ["answer"] = "42"
         },
-        Err: "xml: unsupported type: map[string]string"u8,
+        Err: "xml: unsupported type: map[string]string",
         Kind: reflect.Map
     ),
     new(
-        Value: new map<ж<Ship>, bool>{[default!] = false},
-        Err: "xml: unsupported type: map[*xml.Ship]bool"u8,
+        Value: new map<ж<Ship>, bool>{[default] = false},
+        Err: "xml: unsupported type: map[*xml.Ship]bool",
         Kind: reflect.Map
     ),
     new(
         Value: Ꮡ(new Domain(Comment: slice<byte>("f--bar"u8))),
-        Err: @"xml: comments must not contain ""--"""u8
+        Err: @"xml: comments must not contain ""--"""
     ),
     // Reject parent chain with attr, never worked; see golang.org/issue/5033.
     new(
-        Value: Ꮡ(new AttrParent(nil)),
-        Err: @"xml: X>Y chain not valid with attr flag"u8
+        Value: Ꮡ(new AttrParent()),
+        Err: @"xml: X>Y chain not valid with attr flag"
     ),
     new(
-        Value: new BadAttr(new map<@string, @string>{["X"u8] = "Y"u8}),
-        Err: @"xml: unsupported type: map[string]string"u8
+        Value: new BadAttr(new map<@string, @string>{["X"] = "Y"}),
+        Err: @"xml: unsupported type: map[string]string"
     )
-}.slice();
+]);
 
 partial struct marshalIndentTestsᴛ1 /*dyn*/ {
     public any Value;
@@ -1652,33 +1652,33 @@ partial struct marshalIndentTestsᴛ1 /*dyn*/ {
     public @string Indent;
     public @string ExpectXML;
 }
-internal static slice<marshalIndentTestsᴛ1> marshalIndentTests = new marshalIndentTestsᴛ1[]{
+internal static slice<marshalIndentTestsᴛ1> marshalIndentTests = slice<marshalIndentTestsᴛ1>([
     new(
         Value: Ꮡ(new SecretAgent(
-            Handle: "007"u8,
-            Identity: "James Bond"u8,
-            Obfuscate: "<redacted/>"u8
+            Handle: "007",
+            Identity: "James Bond",
+            Obfuscate: "<redacted/>"
         )),
-        Prefix: ""u8,
-        Indent: "\t"u8,
-        ExpectXML: "<agent handle=\"007\">\n\t<Identity>James Bond</Identity><redacted/>\n</agent>"u8
+        Prefix: "",
+        Indent: "\t",
+        ExpectXML: "<agent handle=\"007\">\n\t<Identity>James Bond</Identity><redacted/>\n</agent>"
     )
-}.slice();
+]);
 
-public static void TestMarshalErrors(ж<testing.T> Ꮡt) {
+public static void TestMarshalErrors(ж<testing.T> t) {
     foreach (var (idx, test) in marshalErrorTests) {
         var (data, err) = Marshal(test.Value);
-        if (err == default!) {
-            Ꮡt.Errorf("#%d: marshal(%#v) = [success] %q, want error %v"u8, idx, test.Value, data, test.Err);
+        if (err == nil) {
+            t.Errorf("#%d: marshal(%#v) = [success] %q, want error %v", idx, test.Value, data, test.Err);
             continue;
         }
         if (err.Error() != test.Err) {
-            Ꮡt.Errorf("#%d: marshal(%#v) = [error] %v, want %v"u8, idx, test.Value, err, test.Err);
+            t.Errorf("#%d: marshal(%#v) = [error] %v, want %v", idx, test.Value, err, test.Err);
         }
         if (test.Kind != reflect.Invalid) {
             {
-                reflectꓸKind kind = (~err._<ж<global::go.encoding.xml_package.UnsupportedTypeError>>()).Type.Kind(); if (kind != test.Kind) {
-                    Ꮡt.Errorf("#%d: marshal(%#v) = [error kind] %s, want %s"u8, idx, test.Value, kind, test.Kind);
+                reflectꓸKind kind = err._<ж<global::go.encoding.xml_package.UnsupportedTypeError>>().Type.Kind(); if (kind != test.Kind) {
+                    t.Errorf("#%d: marshal(%#v) = [error kind] %s, want %s", idx, test.Value, kind, test.Kind);
                 }
             }
         }
@@ -1686,7 +1686,7 @@ public static void TestMarshalErrors(ж<testing.T> Ꮡt) {
 }
 
 // Do invertibility testing on the various structures that we test
-public static void TestUnmarshal(ж<testing.T> Ꮡt) {
+public static void TestUnmarshal(ж<testing.T> t) {
     foreach (var (i, vᴛ1) in marshalTests) {
         ref var test = ref heap(new marshalTestsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
@@ -1712,46 +1712,46 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
         var destʗ1 = dest;
         var errʗ1 = err;
         var testʗ1 = test;
-        Ꮡt.Run(fmt.Sprintf("%d"u8, i), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("%d"u8, i), (ж<testing.T> tΔ1) => {
             switch (destʗ1.type()) {
             case ж<Feed> fix: {
-                fix.Value.Author.InnerXML = ""u8;
-                foreach (var iΔ1 in range((~fix).Entry)) {
-                    (~fix).Entry[iΔ1].Author.InnerXML = ""u8;
+                fix.Author.InnerXML = ""u8;
+                foreach (var iΔ1 in range(fix.Entry)) {
+                    fix.Entry[iΔ1].Author.InnerXML = ""u8;
                 }
                 break;
             }}
 
-            if (errʗ1 != default!) {
+            if (errʗ1 != nil) {
                 if (testʗ1.UnmarshalError == ""u8) {
-                    tΔ1.Errorf("unmarshal(%#v): %s"u8, testʗ1.ExpectXML, errʗ1);
+                    tΔ1.Errorf("unmarshal(%#v): %s", testʗ1.ExpectXML, errʗ1);
                     return;
                 }
                 if (!strings.Contains(errʗ1.Error(), testʗ1.UnmarshalError)) {
-                    tΔ1.Errorf("unmarshal(%#v): %s, want %q"u8, testʗ1.ExpectXML, errʗ1, testʗ1.UnmarshalError);
+                    tΔ1.Errorf("unmarshal(%#v): %s, want %q", testʗ1.ExpectXML, errʗ1, testʗ1.UnmarshalError);
                 }
                 return;
             }
             {
                 var (got, want) = (destʗ1, testʗ1.Value); if (!reflect.DeepEqual(got, want)) {
-                    tΔ1.Errorf("unmarshal(%q):\nhave %#v\nwant %#v"u8, testʗ1.ExpectXML, got, want);
+                    tΔ1.Errorf("unmarshal(%q):\nhave %#v\nwant %#v", testʗ1.ExpectXML, got, want);
                 }
             }
         });
     }
 }
 
-public static void TestMarshalIndent(ж<testing.T> Ꮡt) {
+public static void TestMarshalIndent(ж<testing.T> t) {
     foreach (var (i, test) in marshalIndentTests) {
         var (data, err) = MarshalIndent(test.Value, test.Prefix, test.Indent);
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: Error: %s"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: Error: %s", i, err);
             continue;
         }
         {
             @string got = (@string)data;
             @string want = test.ExpectXML; if (got != want) {
-                Ꮡt.Errorf("#%d: MarshalIndent:\nGot:%s\nWant:\n%s"u8, i, got, want);
+                t.Errorf("#%d: MarshalIndent:\nGot:%s\nWant:\n%s", i, got, want);
             }
         }
     }
@@ -1763,14 +1763,15 @@ internal partial struct limitedBytesWriter {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writeLimitHitˢ = "write limit hit"u8;
+internal static ref readonly @string writeLimitHitˢ => ref writeLimitHitˢᵇ;
+private static readonly @string writeLimitHitˢᵇ = "write limit hit"u8;
 
 internal static (nint n, error err) Write(this ref limitedBytesWriter lw, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (lw.remain <= 0) {
-        println((@string)"error"u8);
+        println((@string)"error");
         return (0, errors.New(writeLimitHitˢ));
     }
     if (len(p) > lw.remain) {
@@ -1787,68 +1788,69 @@ internal static (nint n, error err) Write(this ref limitedBytesWriter lw, slice<
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedAnErrorˢ = (@string)"expected an error"u8;
 
-public static void TestMarshalWriteErrors(ж<testing.T> Ꮡt) {
+public static void TestMarshalWriteErrors(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     const nint writeCap = 1024;
     var w = Ꮡ(new limitedBytesWriter(new xml_test_package.bytes_BufferжWriter(Ꮡbuf), writeCap));
     var enc = NewEncoder(new xml_internal_test_package.limitedBytesWriterжWriter(w));
-    error err = default!;
-    nint i = default!;
+    error err = default;
+    nint i = default;
     const nint n = 4000;
     for (i = 1; i <= n; i++) {
         err = enc.Encode(Ꮡ(new Passenger(
-            Name: new @string[]{"Alice"u8, "Bob"u8}.slice(),
+            Name: slice<@string>(["Alice", "Bob"]),
             Weight: 5F
         )));
-        if (err != default!) {
+        if (err != nil) {
             break;
         }
     }
-    if (err == default!) {
-        Ꮡt.Error(expectedAnErrorˢ);
+    if (err == nil) {
+        t.Error(expectedAnErrorˢ);
     }
     if (i == n) {
-        Ꮡt.Errorf("expected to fail before the end"u8);
+        t.Errorf("expected to fail before the end");
     }
     if (buf.Len() != writeCap) {
-        Ꮡt.Errorf("buf.Len() = %d; want %d"u8, buf.Len(), (nint)(writeCap));
+        t.Errorf("buf.Len() = %d; want %d", buf.Len(), (nint)(writeCap));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unwritableˢ = "unwritable"u8;
+internal static ref readonly @string unwritableˢ => ref unwritableˢᵇ;
+private static readonly @string unwritableˢᵇ = "unwritable"u8;
 
-public static void TestMarshalWriteIOErrors(ж<testing.T> Ꮡt) {
-    var enc = NewEncoder(new errWriter(nil));
+public static void TestMarshalWriteIOErrors(ж<testing.T> t) {
+    var enc = NewEncoder(new errWriter());
 
     @string expectErr = unwritableˢ;
-    var err = enc.Encode(Ꮡ(new Passenger(nil)));
-    if (err == default! || err.Error() != expectErr) {
-        Ꮡt.Errorf("EscapeTest = [error] %v, want %v"u8, err, expectErr);
+    var err = enc.Encode(Ꮡ(new Passenger()));
+    if (err == nil || err.Error() != expectErr) {
+        t.Errorf("EscapeTest = [error] %v, want %v", err, expectErr);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloWorldˢ = (@string)"hello world"u8;
 
-public static void TestMarshalFlush(ж<testing.T> Ꮡt) {
+public static void TestMarshalFlush(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡbuf));
     {
-        var err = enc.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>((@string)"hello world"u8)); if (err != default!) {
-            Ꮡt.Fatalf("enc.EncodeToken: %v"u8, err);
+        var err = enc.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>((@string)"hello world"u8)); if (err != nil) {
+            t.Fatalf("enc.EncodeToken: %v", err);
         }
     }
     if (buf.Len() > 0) {
-        Ꮡt.Fatalf("enc.EncodeToken caused actual write: %q"u8, buf.String());
+        t.Fatalf("enc.EncodeToken caused actual write: %q", buf.String());
     }
     {
-        var err = enc.Flush(); if (err != default!) {
-            Ꮡt.Fatalf("enc.Flush: %v"u8, err);
+        var err = enc.Flush(); if (err != nil) {
+            t.Fatalf("enc.Flush: %v", err);
         }
     }
     if (buf.String() != "hello world"u8) {
-        Ꮡt.Fatalf("after enc.Flush, buf.String() = %q, want %q"u8, buf.String(), helloWorldˢ);
+        t.Fatalf("after enc.Flush, buf.String() = %q, want %q", buf.String(), helloWorldˢ);
     }
 }
 
@@ -1871,7 +1873,7 @@ public static void BenchmarkUnmarshal(ж<testing.B> Ꮡb) {
     var xmlʗ1 = xml;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
-            Unmarshal(xmlʗ1, Ꮡ(new Feed(nil)));
+            Unmarshal(xmlʗ1, Ꮡ(new Feed()));
         }
     });
 }
@@ -1887,26 +1889,26 @@ internal partial struct TestStructPointerMarshal_C /*dyn*/ {
 }
 
 // golang.org/issue/6556
-public static void TestStructPointerMarshal(ж<testing.T> Ꮡt) {
+public static void TestStructPointerMarshal(ж<testing.T> t) {
     var a = @new<TestStructPointerMarshal_A>();
-    a.Value.B = append((~a).B, (any)(Ꮡ(new TestStructPointerMarshal_C(
-        XMLName: new Name(Local: "c"u8),
-        Value: "x"u8
+    a.B = append(a.B, (any)(Ꮡ(new TestStructPointerMarshal_C(
+        XMLName: new Name(Local: "c"),
+        Value: "x"
     ))));
 
     var (b, err) = Marshal(a.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
         @string x = (@string)b; if (x != "<a><c><value>x</value></c></a>"u8) {
-            Ꮡt.Fatal(x);
+            t.Fatal(x);
         }
     }
     ref var v = ref heap(new TestStructPointerMarshal_A(), out var Ꮡv);
     err = Unmarshal(b, Ꮡv);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 }
 
@@ -1917,391 +1919,391 @@ partial struct encodeTokenTestsᴛ1 /*dyn*/ {
     internal @string err;
 }
 internal static slice<encodeTokenTestsᴛ1> encodeTokenTests;
-internal static void initᴛencodeTokenTests() { encodeTokenTests = new encodeTokenTestsᴛ1[]{new(
-    desc: "start element with name space"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "local"u8), default!)
-    }.slice(),
-    want: @"<local xmlns=""space"">"u8
+internal static void initᴛencodeTokenTests() { encodeTokenTests = slice<encodeTokenTestsᴛ1>([new(
+    desc: "start element with name space",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "local"), default)
+    ]),
+    want: @"<local xmlns=""space"">"
 ), new(
-    desc: "start element with no name"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, ""u8), default!)
-    }.slice(),
-    err: "xml: start tag with no name"u8
+    desc: "start element with no name",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", ""), default)
+    ]),
+    err: "xml: start tag with no name"
 ), new(
-    desc: "end element with no name"u8,
-    toks: new ΔToken[]{
-        new EndElement(new Name("space"u8, ""u8))
-    }.slice(),
-    err: "xml: end tag with no name"u8
+    desc: "end element with no name",
+    toks: slice<ΔToken>([
+        new EndElement(new Name("space", ""))
+    ]),
+    err: "xml: end tag with no name"
 ), new(
-    desc: "char data"u8,
-    toks: new ΔToken[]{
+    desc: "char data",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.CharData)slice<byte>((@string)"foo"u8)
-    }.slice(),
-    want: @"foo"u8
+    ]),
+    want: @"foo"
 ), new(
-    desc: "char data with escaped chars"u8,
-    toks: new ΔToken[]{
+    desc: "char data with escaped chars",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.CharData)slice<byte>((@string)" \t\n"u8)
-    }.slice(),
-    want: " &#x9;\n"u8
+    ]),
+    want: " &#x9;\n"
 ), new(
-    desc: "comment"u8,
-    toks: new ΔToken[]{
+    desc: "comment",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo"u8)
-    }.slice(),
-    want: @"<!--foo-->"u8
+    ]),
+    want: @"<!--foo-->"
 ), new(
-    desc: "comment with invalid content"u8,
-    toks: new ΔToken[]{
+    desc: "comment with invalid content",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo-->"u8)
-    }.slice(),
-    err: "xml: EncodeToken of Comment containing --> marker"u8
+    ]),
+    err: "xml: EncodeToken of Comment containing --> marker"
 ), new(
-    desc: "proc instruction"u8,
-    toks: new ΔToken[]{
-        new ProcInst("Target"u8, slice<byte>("Instruction"u8))
-    }.slice(),
-    want: @"<?Target Instruction?>"u8
+    desc: "proc instruction",
+    toks: slice<ΔToken>([
+        new ProcInst("Target", slice<byte>("Instruction"u8))
+    ]),
+    want: @"<?Target Instruction?>"
 ), new(
-    desc: "proc instruction with empty target"u8,
-    toks: new ΔToken[]{
-        new ProcInst(""u8, slice<byte>("Instruction"u8))
-    }.slice(),
-    err: "xml: EncodeToken of ProcInst with invalid Target"u8
+    desc: "proc instruction with empty target",
+    toks: slice<ΔToken>([
+        new ProcInst("", slice<byte>("Instruction"u8))
+    ]),
+    err: "xml: EncodeToken of ProcInst with invalid Target"
 ), new(
-    desc: "proc instruction with bad content"u8,
-    toks: new ΔToken[]{
-        new ProcInst(""u8, slice<byte>("Instruction?>"u8))
-    }.slice(),
-    err: "xml: EncodeToken of ProcInst with invalid Target"u8
+    desc: "proc instruction with bad content",
+    toks: slice<ΔToken>([
+        new ProcInst("", slice<byte>("Instruction?>"u8))
+    ]),
+    err: "xml: EncodeToken of ProcInst with invalid Target"
 ), new(
-    desc: "directive"u8,
-    toks: new ΔToken[]{
+    desc: "directive",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
-    }.slice(),
-    want: @"<!foo>"u8
+    ]),
+    want: @"<!foo>"
 ), new(
-    desc: "more complex directive"u8,
-    toks: new ΔToken[]{
+    desc: "more complex directive",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]"u8)
-    }.slice(),
-    want: @"<!DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]>"u8
+    ]),
+    want: @"<!DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]>"
 ), new(
-    desc: "directive instruction with bad name"u8,
-    toks: new ΔToken[]{
+    desc: "directive instruction with bad name",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo>"u8)
-    }.slice(),
-    err: "xml: EncodeToken of Directive containing wrong < or > markers"u8
+    ]),
+    err: "xml: EncodeToken of Directive containing wrong < or > markers"
 ), new(
-    desc: "end tag without start tag"u8,
-    toks: new ΔToken[]{
-        new EndElement(new Name("foo"u8, "bar"u8))
-    }.slice(),
-    err: "xml: end tag </bar> without start tag"u8
+    desc: "end tag without start tag",
+    toks: slice<ΔToken>([
+        new EndElement(new Name("foo", "bar"))
+    ]),
+    err: "xml: end tag </bar> without start tag"
 ), new(
-    desc: "mismatching end tag local name"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), default!),
-        new EndElement(new Name(""u8, "bar"u8))
-    }.slice(),
-    err: "xml: end tag </bar> does not match start tag <foo>"u8,
-    want: @"<foo>"u8
+    desc: "mismatching end tag local name",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), default),
+        new EndElement(new Name("", "bar"))
+    ]),
+    err: "xml: end tag </bar> does not match start tag <foo>",
+    want: @"<foo>"
 ), new(
-    desc: "mismatching end tag namespace"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), default!),
-        new EndElement(new Name("another"u8, "foo"u8))
-    }.slice(),
-    err: "xml: end tag </foo> in namespace another does not match start tag <foo> in namespace space"u8,
-    want: @"<foo xmlns=""space"">"u8
+    desc: "mismatching end tag namespace",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), default),
+        new EndElement(new Name("another", "foo"))
+    ]),
+    err: "xml: end tag </foo> in namespace another does not match start tag <foo> in namespace space",
+    want: @"<foo xmlns=""space"">"
 ), new(
-    desc: "start element with explicit namespace"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "local"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space"u8),
-            new(new Name("space"u8, "foo"u8), "value"u8)
-        }.slice()
+    desc: "start element with explicit namespace",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "local"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space"),
+            new(new Name("space", "foo"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<local xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:x=""space"" xmlns:space=""space"" space:foo=""value"">"u8
+    ]),
+    want: @"<local xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:x=""space"" xmlns:space=""space"" space:foo=""value"">"
 ), new(
-    desc: "start element with explicit namespace and colliding prefix"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "local"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space"u8),
-            new(new Name("space"u8, "foo"u8), "value"u8),
-            new(new Name("x"u8, "bar"u8), "other"u8)
-        }.slice()
+    desc: "start element with explicit namespace and colliding prefix",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "local"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space"),
+            new(new Name("space", "foo"), "value"),
+            new(new Name("x", "bar"), "other")
+        ])
         )
-    }.slice(),
-    want: @"<local xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:x=""space"" xmlns:space=""space"" space:foo=""value"" xmlns:x=""x"" x:bar=""other"">"u8
+    ]),
+    want: @"<local xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:x=""space"" xmlns:space=""space"" space:foo=""value"" xmlns:x=""x"" x:bar=""other"">"
 ), new(
-    desc: "start element using previously defined namespace"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "local"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space"u8)
-        }.slice()
+    desc: "start element using previously defined namespace",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "local"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space")
+        ])
         ),
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("space"u8, "x"u8), "y"u8)
-        }.slice()
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("space", "x"), "y")
+        ])
         )
-    }.slice(),
-    want: @"<local xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" xmlns:space=""space"" space:x=""y"">"u8
+    ]),
+    want: @"<local xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" xmlns:space=""space"" space:x=""y"">"
 ), new(
-    desc: "nested name space with same prefix"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space1"u8)
-        }.slice()
+    desc: "nested name space with same prefix",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space1")
+        ])
         ),
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space2"u8)
-        }.slice()
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space2")
+        ])
         ),
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("space1"u8, "a"u8), "space1 value"u8),
-            new(new Name("space2"u8, "b"u8), "space2 value"u8)
-        }.slice()
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("space1", "a"), "space1 value"),
+            new(new Name("space2", "b"), "space2 value")
+        ])
         ),
-        new EndElement(new Name(""u8, "foo"u8)),
-        new EndElement(new Name(""u8, "foo"u8)),
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("space1"u8, "a"u8), "space1 value"u8),
-            new(new Name("space2"u8, "b"u8), "space2 value"u8)
-        }.slice()
+        new EndElement(new Name("", "foo")),
+        new EndElement(new Name("", "foo")),
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("space1", "a"), "space1 value"),
+            new(new Name("space2", "b"), "space2 value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space1""><foo _xmlns:x=""space2""><foo xmlns:space1=""space1"" space1:a=""space1 value"" xmlns:space2=""space2"" space2:b=""space2 value""></foo></foo><foo xmlns:space1=""space1"" space1:a=""space1 value"" xmlns:space2=""space2"" space2:b=""space2 value"">"u8
+    ]),
+    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space1""><foo _xmlns:x=""space2""><foo xmlns:space1=""space1"" space1:a=""space1 value"" xmlns:space2=""space2"" space2:b=""space2 value""></foo></foo><foo xmlns:space1=""space1"" space1:a=""space1 value"" xmlns:space2=""space2"" space2:b=""space2 value"">"
 ), new(
-    desc: "start element defining several prefixes for the same name space"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "a"u8), "space"u8),
-            new(new Name("xmlns"u8, "b"u8), "space"u8),
-            new(new Name("space"u8, "x"u8), "value"u8)
-        }.slice()
+    desc: "start element defining several prefixes for the same name space",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "a"), "space"),
+            new(new Name("xmlns", "b"), "space"),
+            new(new Name("space", "x"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:a=""space"" _xmlns:b=""space"" xmlns:space=""space"" space:x=""value"">"u8
+    ]),
+    want: @"<foo xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:a=""space"" _xmlns:b=""space"" xmlns:space=""space"" space:x=""value"">"
 ), new(
-    desc: "nested element redefines name space"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space"u8)
-        }.slice()
+    desc: "nested element redefines name space",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space")
+        ])
         ),
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "y"u8), "space"u8),
-            new(new Name("space"u8, "a"u8), "value"u8)
-        }.slice()
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "y"), "space"),
+            new(new Name("space", "a"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" _xmlns:y=""space"" xmlns:space=""space"" space:a=""value"">"u8
+    ]),
+    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" _xmlns:y=""space"" xmlns:space=""space"" space:a=""value"">"
 ), new(
-    desc: "nested element creates alias for default name space"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "nested element creates alias for default name space",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space")
+        ])
         ),
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "y"u8), "space"u8),
-            new(new Name("space"u8, "a"u8), "value"u8)
-        }.slice()
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "y"), "space"),
+            new(new Name("space", "a"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:y=""space"" xmlns:space=""space"" space:a=""value"">"u8
+    ]),
+    want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:y=""space"" xmlns:space=""space"" space:a=""value"">"
 ), new(
-    desc: "nested element defines default name space with existing prefix"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "x"u8), "space"u8)
-        }.slice()
+    desc: "nested element defines default name space with existing prefix",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "x"), "space")
+        ])
         ),
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8),
-            new(new Name("space"u8, "a"u8), "value"u8)
-        }.slice()
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space"),
+            new(new Name("space", "a"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" xmlns=""space"" xmlns:space=""space"" space:a=""value"">"u8
+    ]),
+    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:x=""space""><foo xmlns=""space"" xmlns=""space"" xmlns:space=""space"" space:a=""value"">"
 ), new(
-    desc: "nested element uses empty attribute name space when default ns defined"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "nested element uses empty attribute name space when default ns defined",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space")
+        ])
         ),
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "attr"u8), "value"u8)
-        }.slice()
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "attr"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns=""space"" attr=""value"">"u8
+    ]),
+    want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns=""space"" attr=""value"">"
 ), new(
-    desc: "redefine xmlns"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("foo"u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "redefine xmlns",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("foo", "xmlns"), "space")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:foo=""foo"" foo:xmlns=""space"">"u8
+    ]),
+    want: @"<foo xmlns:foo=""foo"" foo:xmlns=""space"">"
 ), new(
-    desc: "xmlns with explicit name space #1"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xml"u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "xmlns with explicit name space #1",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xml", "xmlns"), "space")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns:_xml=""xml"" _xml:xmlns=""space"">"u8
+    ]),
+    want: @"<foo xmlns=""space"" xmlns:_xml=""xml"" _xml:xmlns=""space"">"
 ), new(
-    desc: "xmlns with explicit name space #2"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(xmlURL, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "xmlns with explicit name space #2",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name(xmlURL, "xmlns"), "space")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space"" xml:xmlns=""space"">"u8
+    ]),
+    want: @"<foo xmlns=""space"" xml:xmlns=""space"">"
 ), new(
-    desc: "empty name space declaration is ignored"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("xmlns"u8, "foo"u8), ""u8)
-        }.slice()
+    desc: "empty name space declaration is ignored",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("xmlns", "foo"), "")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:foo="""">"u8
+    ]),
+    want: @"<foo xmlns:_xmlns=""xmlns"" _xmlns:foo="""">"
 ), new(
-    desc: "attribute with no name is ignored"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, ""u8), "value"u8)
-        }.slice()
+    desc: "attribute with no name is ignored",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", ""), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo>"u8
+    ]),
+    want: @"<foo>"
 ), new(
-    desc: "namespace URL with non-valid name"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("/34"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("/34"u8, "x"u8), "value"u8)
-        }.slice()
+    desc: "namespace URL with non-valid name",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("/34", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("/34", "x"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""/34"" xmlns:_=""/34"" _:x=""value"">"u8
+    ]),
+    want: @"<foo xmlns=""/34"" xmlns:_=""/34"" _:x=""value"">"
 ), new(
-    desc: "nested element resets default namespace to empty"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "nested element resets default namespace to empty",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space")
+        ])
         ),
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), ""u8),
-            new(new Name(""u8, "x"u8), "value"u8),
-            new(new Name("space"u8, "x"u8), "value"u8)
-        }.slice()
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), ""),
+            new(new Name("", "x"), "value"),
+            new(new Name("space", "x"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns="""" x=""value"" xmlns:space=""space"" space:x=""value"">"u8
+    ]),
+    want: @"<foo xmlns=""space"" xmlns=""space""><foo xmlns="""" x=""value"" xmlns:space=""space"" space:x=""value"">"
 ), new(
-    desc: "nested element requires empty default name space"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "nested element requires empty default name space",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space")
+        ])
         ),
-        new StartElement(new Name(""u8, "foo"u8), default!)
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns=""space""><foo>"u8
+        new StartElement(new Name("", "foo"), default)
+    ]),
+    want: @"<foo xmlns=""space"" xmlns=""space""><foo>"
 ), new(
-    desc: "attribute uses name space from xmlns"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("some/space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "attr"u8), "value"u8),
-            new(new Name("some/space"u8, "other"u8), "other value"u8)
-        }.slice()
+    desc: "attribute uses name space from xmlns",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("some/space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "attr"), "value"),
+            new(new Name("some/space", "other"), "other value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""some/space"" attr=""value"" xmlns:space=""some/space"" space:other=""other value"">"u8
+    ]),
+    want: @"<foo xmlns=""some/space"" attr=""value"" xmlns:space=""some/space"" space:other=""other value"">"
 ), new(
-    desc: "default name space should not be used by attributes"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8),
-            new(new Name("xmlns"u8, "bar"u8), "space"u8),
-            new(new Name("space"u8, "baz"u8), "foo"u8)
-        }.slice()
+    desc: "default name space should not be used by attributes",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space"),
+            new(new Name("xmlns", "bar"), "space"),
+            new(new Name("space", "baz"), "foo")
+        ])
         ),
-        new StartElement(new Name("space"u8, "baz"u8), default!),
-        new EndElement(new Name("space"u8, "baz"u8)),
-        new EndElement(new Name("space"u8, "foo"u8))
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:bar=""space"" xmlns:space=""space"" space:baz=""foo""><baz xmlns=""space""></baz></foo>"u8
+        new StartElement(new Name("space", "baz"), default),
+        new EndElement(new Name("space", "baz")),
+        new EndElement(new Name("space", "foo"))
+    ]),
+    want: @"<foo xmlns=""space"" xmlns=""space"" xmlns:_xmlns=""xmlns"" _xmlns:bar=""space"" xmlns:space=""space"" space:baz=""foo""><baz xmlns=""space""></baz></foo>"
 ), new(
-    desc: "default name space not used by attributes, not explicitly defined"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name("space"u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8),
-            new(new Name("space"u8, "baz"u8), "foo"u8)
-        }.slice()
+    desc: "default name space not used by attributes, not explicitly defined",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("space", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space"),
+            new(new Name("space", "baz"), "foo")
+        ])
         ),
-        new StartElement(new Name("space"u8, "baz"u8), default!),
-        new EndElement(new Name("space"u8, "baz"u8)),
-        new EndElement(new Name("space"u8, "foo"u8))
-    }.slice(),
-    want: @"<foo xmlns=""space"" xmlns=""space"" xmlns:space=""space"" space:baz=""foo""><baz xmlns=""space""></baz></foo>"u8
+        new StartElement(new Name("space", "baz"), default),
+        new EndElement(new Name("space", "baz")),
+        new EndElement(new Name("space", "foo"))
+    ]),
+    want: @"<foo xmlns=""space"" xmlns=""space"" xmlns:space=""space"" space:baz=""foo""><baz xmlns=""space""></baz></foo>"
 ), new(
-    desc: "impossible xmlns declaration"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name(""u8, "xmlns"u8), "space"u8)
-        }.slice()
+    desc: "impossible xmlns declaration",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("", "xmlns"), "space")
+        ])
         ),
-        new StartElement(new Name("space"u8, "bar"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("space"u8, "attr"u8), "value"u8)
-        }.slice()
+        new StartElement(new Name("space", "bar"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("space", "attr"), "value")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns=""space""><bar xmlns=""space"" xmlns:space=""space"" space:attr=""value"">"u8
+    ]),
+    want: @"<foo xmlns=""space""><bar xmlns=""space"" xmlns:space=""space"" space:attr=""value"">"
 ), new(
-    desc: "reserved namespace prefix -- all lower case"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("http://www.w3.org/2001/xmlSchema-instance"u8, "nil"u8), "true"u8)
-        }.slice()
+    desc: "reserved namespace prefix -- all lower case",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("http://www.w3.org/2001/xmlSchema-instance", "nil"), "true")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_xmlSchema-instance=""http://www.w3.org/2001/xmlSchema-instance"" _xmlSchema-instance:nil=""true"">"u8
+    ]),
+    want: @"<foo xmlns:_xmlSchema-instance=""http://www.w3.org/2001/xmlSchema-instance"" _xmlSchema-instance:nil=""true"">"
 ), new(
-    desc: "reserved namespace prefix -- all upper case"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("http://www.w3.org/2001/XMLSchema-instance"u8, "nil"u8), "true"u8)
-        }.slice()
+    desc: "reserved namespace prefix -- all upper case",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("http://www.w3.org/2001/XMLSchema-instance", "nil"), "true")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_XMLSchema-instance=""http://www.w3.org/2001/XMLSchema-instance"" _XMLSchema-instance:nil=""true"">"u8
+    ]),
+    want: @"<foo xmlns:_XMLSchema-instance=""http://www.w3.org/2001/XMLSchema-instance"" _XMLSchema-instance:nil=""true"">"
 ), new(
-    desc: "reserved namespace prefix -- all mixed case"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), new global::go.encoding.xml_package.Attr[]{
-            new(new Name("http://www.w3.org/2001/XmLSchema-instance"u8, "nil"u8), "true"u8)
-        }.slice()
+    desc: "reserved namespace prefix -- all mixed case",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), slice<global::go.encoding.xml_package.Attr>([
+            new(new Name("http://www.w3.org/2001/XmLSchema-instance", "nil"), "true")
+        ])
         )
-    }.slice(),
-    want: @"<foo xmlns:_XmLSchema-instance=""http://www.w3.org/2001/XmLSchema-instance"" _XmLSchema-instance:nil=""true"">"u8
+    ]),
+    want: @"<foo xmlns:_XmLSchema-instance=""http://www.w3.org/2001/XmLSchema-instance"" _XmLSchema-instance:nil=""true"">"
 )
-}.slice(); }
+]); }
 
-public static void TestEncodeToken(ж<testing.T> Ꮡt) {
+public static void TestEncodeToken(ж<testing.T> t) {
 loop:
     foreach (var (i, vᴛ1) in encodeTokenTests) {
         ref var tt = ref heap(new encodeTokenTestsᴛ1(), out var Ꮡtt);
@@ -2309,44 +2311,44 @@ loop:
 
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡbuf));
-        error err = default!;
+        error err = default;
         foreach (var (j, tok) in tt.toks) {
             err = enc.EncodeToken(tok);
-            if (err != default! && j < len(tt.toks) - 1) {
-                Ꮡt.Errorf("#%d %s token #%d: %v"u8, i, tt.desc, j, err);
+            if (err != nil && j < len(tt.toks) - 1) {
+                t.Errorf("#%d %s token #%d: %v", i, tt.desc, j, err);
                 goto continue_loop;
             }
         }
         var ttʗ1 = tt;
         void errorf(@string f, params ꓸꓸꓸany aʗp) {
             var a = aʗp.sslice();
-            Ꮡt.Errorf("#%d %s token #%d:%s"u8, i, ttʗ1.desc, len(ttʗ1.toks) - 1, fmt.Sprintf(f, a.ꓸꓸꓸ));
+            t.Errorf("#%d %s token #%d:%s", i, ttʗ1.desc, len(ttʗ1.toks) - 1, fmt.Sprintf(f, a.ꓸꓸꓸ));
         }
         switch (ᐧ) {
-        case {} when tt.err != ""u8 && err == default!: {
-            errorf(" expected error; got none"u8);
+        case {} when tt.err != ""u8 && err == nil: {
+            errorf(" expected error; got none");
             continue;
             break;
         }
-        case {} when tt.err == ""u8 && err != default!: {
-            errorf(" got error: %v"u8, err);
+        case {} when tt.err == ""u8 && err != nil: {
+            errorf(" got error: %v", err);
             continue;
             break;
         }
-        case {} when tt.err != ""u8 && err != default! && tt.err != err.Error(): {
-            errorf(" error mismatch; got %v, want %v"u8, err, tt.err);
+        case {} when tt.err != ""u8 && err != nil && tt.err != err.Error(): {
+            errorf(" error mismatch; got %v, want %v", err, tt.err);
             continue;
             break;
         }}
         {
-            var errΔ1 = enc.Flush(); if (errΔ1 != default!) {
-                errorf(" %v"u8, errΔ1);
+            var errΔ1 = enc.Flush(); if (errΔ1 != nil) {
+                errorf(" %v", errΔ1);
                 continue;
             }
         }
         {
             @string got = buf.String(); if (got != tt.want) {
-                errorf("\ngot  %v\nwant %v"u8, got, tt.want);
+                errorf("\ngot  %v\nwant %v", got, tt.want);
                 continue;
             }
         }
@@ -2355,31 +2357,32 @@ continue_loop:;
 break_loop:;
 }
 
-public static void TestProcInstEncodeToken(ж<testing.T> Ꮡt) {
+public static void TestProcInstEncodeToken(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.bytes_BufferжWriter(Ꮡbuf));
 
     {
-        var err = enc.EncodeToken(new ProcInst("xml"u8, slice<byte>("Instruction"u8))); if (err != default!) {
-            Ꮡt.Fatalf("enc.EncodeToken: expected to be able to encode xml target ProcInst as first token, %s"u8, err);
+        var err = enc.EncodeToken(new ProcInst("xml", slice<byte>("Instruction"u8))); if (err != nil) {
+            t.Fatalf("enc.EncodeToken: expected to be able to encode xml target ProcInst as first token, %s", err);
         }
     }
 
     {
-        var err = enc.EncodeToken(new ProcInst("Target"u8, slice<byte>("Instruction"u8))); if (err != default!) {
-            Ꮡt.Fatalf("enc.EncodeToken: expected to be able to add non-xml target ProcInst"u8);
+        var err = enc.EncodeToken(new ProcInst("Target", slice<byte>("Instruction"u8))); if (err != nil) {
+            t.Fatalf("enc.EncodeToken: expected to be able to add non-xml target ProcInst");
         }
     }
 
     {
-        var err = enc.EncodeToken(new ProcInst("xml"u8, slice<byte>("Instruction"u8))); if (err == default!) {
-            Ꮡt.Fatalf("enc.EncodeToken: expected to not be allowed to encode xml target ProcInst when not first token"u8);
+        var err = enc.EncodeToken(new ProcInst("xml", slice<byte>("Instruction"u8))); if (err == nil) {
+            t.Fatalf("enc.EncodeToken: expected to not be allowed to encode xml target ProcInst when not first token");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xmlVersion10EncodingUtf8ˢ = """
+internal static ref readonly @string xmlVersion10EncodingUtf8ˢ => ref xmlVersion10EncodingUtf8ˢᵇ;
+private static readonly @string xmlVersion10EncodingUtf8ˢᵇ = """
 <?xml version="1.0" encoding="UTF-8"?>
 <?Target Instruction?>
 <root>
@@ -2387,16 +2390,16 @@ internal static readonly @string xmlVersion10EncodingUtf8ˢ = """
 
 """u8.Raw();
 
-public static void TestDecodeEncode(ж<testing.T> Ꮡt) {
+public static void TestDecodeEncode(ж<testing.T> t) {
     ref var @in = ref heap(new bytes.Buffer(), out var Ꮡin);
     ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
     @in.WriteString(xmlVersion10EncodingUtf8ˢ);
     var dec = NewDecoder(new xml_test_package.bytes_BufferжReader(Ꮡin));
     var enc = NewEncoder(new xml_test_package.bytes_BufferжWriter(Ꮡout));
-    for (var (tok, err) = dec.Token(); err == default!; (tok, err) = dec.Token()) {
+    for (var (tok, err) = dec.Token(); err == nil; (tok, err) = dec.Token()) {
         err = enc.EncodeToken(tok);
-        if (err != default!) {
-            Ꮡt.Fatalf("enc.EncodeToken: Unable to encode token (%#v), %v"u8, tok, err);
+        if (err != nil) {
+            t.Fatalf("enc.EncodeToken: Unable to encode token (%#v), %v", tok, err);
         }
     }
 }
@@ -2409,109 +2412,111 @@ internal partial struct TestRace9796_B /*dyn*/ {
 }
 
 // Issue 9796. Used to fail with GORACE="halt_on_error=1" -race.
-public static partial void TestRace9796(ж<testing.T> Ꮡt) {
+public static partial void TestRace9796(ж<testing.T> t) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     for (nint i = 0; i < 2; i++) {
         Ꮡwg.Add(1);
         goǃ(() => {
-            Marshal(new TestRace9796_B(new TestRace9796_A[]{new()}.slice()));
+            Marshal(new TestRace9796_B(slice<TestRace9796_A>([new()])));
             Ꮡwg.Done();
         });
     }
     Ꮡwg.Wait();
 }
 
-public static void TestIsValidDirective(ж<testing.T> Ꮡt) {
-    var testOK = new @string[]{
-        "<>"u8,
-        "< < > >"u8,
-        "<!DOCTYPE '<' '>' '>' <!--nothing-->>"u8,
-        "<!DOCTYPE doc [ <!ELEMENT doc ANY> <!ELEMENT doc ANY> ]>"u8,
-        "<!DOCTYPE doc [ <!ELEMENT doc \"ANY> '<' <!E\" LEMENT '>' doc ANY> ]>"u8,
-        "<!DOCTYPE doc <!-- just>>>> a < comment --> [ <!ITEM anything> ] >"u8
-    }.slice();
-    var testKO = new @string[]{
-        "<"u8,
-        ">"u8,
-        "<!--"u8,
-        "-->"u8,
-        "< > > < < >"u8,
-        "<!dummy <!-- > -->"u8,
-        "<!DOCTYPE doc '>"u8,
-        "<!DOCTYPE doc '>'"u8,
-        "<!DOCTYPE doc <!--comment>"u8
-    }.slice();
+public static void TestIsValidDirective(ж<testing.T> t) {
+    var testOK = slice<@string>([
+        "<>",
+        "< < > >",
+        "<!DOCTYPE '<' '>' '>' <!--nothing-->>",
+        "<!DOCTYPE doc [ <!ELEMENT doc ANY> <!ELEMENT doc ANY> ]>",
+        "<!DOCTYPE doc [ <!ELEMENT doc \"ANY> '<' <!E\" LEMENT '>' doc ANY> ]>",
+        "<!DOCTYPE doc <!-- just>>>> a < comment --> [ <!ITEM anything> ] >"
+    ]);
+    var testKO = slice<@string>([
+        "<",
+        ">",
+        "<!--",
+        "-->",
+        "< > > < < >",
+        "<!dummy <!-- > -->",
+        "<!DOCTYPE doc '>",
+        "<!DOCTYPE doc '>'",
+        "<!DOCTYPE doc <!--comment>"
+    ]);
     foreach (var (_, s) in testOK) {
         if (!isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
-            Ꮡt.Errorf("Directive %q is expected to be valid"u8, s);
+            t.Errorf("Directive %q is expected to be valid", s);
         }
     }
     foreach (var (_, s) in testKO) {
         if (isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
-            Ꮡt.Errorf("Directive %q is expected to be invalid"u8, s);
+            t.Errorf("Directive %q is expected to be invalid", s);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string object2Object2ˢ = "<object2></object2>"u8;
+internal static ref readonly @string object2Object2ˢ => ref object2Object2ˢᵇ;
+private static readonly @string object2Object2ˢᵇ = "<object2></object2>"u8;
 
 // Issue 11719. EncodeToken used to silently eat tokens with an invalid type.
-public static void TestSimpleUseOfEncodeToken(ж<testing.T> Ꮡt) {
+public static void TestSimpleUseOfEncodeToken(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡbuf));
     {
-        var err = enc.EncodeToken(Ꮡ(new StartElement(Name: new Name(""u8, "object1"u8)))); if (err == default!) {
-            Ꮡt.Errorf("enc.EncodeToken: pointer type should be rejected"u8);
+        var err = enc.EncodeToken(Ꮡ(new StartElement(Name: new Name("", "object1")))); if (err == nil) {
+            t.Errorf("enc.EncodeToken: pointer type should be rejected");
         }
     }
     {
-        var err = enc.EncodeToken(Ꮡ(new EndElement(Name: new Name(""u8, "object1"u8)))); if (err == default!) {
-            Ꮡt.Errorf("enc.EncodeToken: pointer type should be rejected"u8);
+        var err = enc.EncodeToken(Ꮡ(new EndElement(Name: new Name("", "object1")))); if (err == nil) {
+            t.Errorf("enc.EncodeToken: pointer type should be rejected");
         }
     }
     {
-        var err = enc.EncodeToken(new StartElement(Name: new Name(""u8, "object2"u8))); if (err != default!) {
-            Ꮡt.Errorf("enc.EncodeToken: StartElement %s"u8, err);
+        var err = enc.EncodeToken(new StartElement(Name: new Name("", "object2"))); if (err != nil) {
+            t.Errorf("enc.EncodeToken: StartElement %s", err);
         }
     }
     {
-        var err = enc.EncodeToken(new EndElement(Name: new Name(""u8, "object2"u8))); if (err != default!) {
-            Ꮡt.Errorf("enc.EncodeToken: EndElement %s"u8, err);
+        var err = enc.EncodeToken(new EndElement(Name: new Name("", "object2"))); if (err != nil) {
+            t.Errorf("enc.EncodeToken: EndElement %s", err);
         }
     }
     {
-        var err = enc.EncodeToken(new Universe(nil)); if (err == default!) {
-            Ꮡt.Errorf("enc.EncodeToken: invalid type not caught"u8);
+        var err = enc.EncodeToken(new Universe()); if (err == nil) {
+            t.Errorf("enc.EncodeToken: invalid type not caught");
         }
     }
     {
-        var err = enc.Flush(); if (err != default!) {
-            Ꮡt.Errorf("enc.Flush: %s"u8, err);
+        var err = enc.Flush(); if (err != nil) {
+            t.Errorf("enc.Flush: %s", err);
         }
     }
     if (buf.Len() == 0) {
-        Ꮡt.Errorf("enc.EncodeToken: empty buffer"u8);
+        t.Errorf("enc.EncodeToken: empty buffer");
     }
     @string want = object2Object2ˢ;
     if (buf.String() != want) {
-        Ꮡt.Errorf("enc.EncodeToken: expected %q; got %q"u8, want, buf.String());
+        t.Errorf("enc.EncodeToken: expected %q; got %q", want, buf.String());
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string dataᶜ = @"<foo b=""HELLOWORLD""></foo>"u8;
+internal static ref readonly @string dataᶜ => ref dataᶜᵇ;
+private static readonly @string dataᶜᵇ = @"<foo b=""HELLOWORLD""></foo>"u8;
 
 internal partial struct TestIssue16158_type /*dyn*/ {
     public byte B; /*`xml:"b,attr,omitempty"`*/
 }
 
 // Issue 16158. Decoder.unmarshalAttr ignores the return value of copyValue.
-public static void TestIssue16158(ж<testing.T> Ꮡt) {
+public static void TestIssue16158(ж<testing.T> t) {
     @string data = dataᶜ;
     var err = Unmarshal(slice<byte>(data), Ꮡ(new TestIssue16158_type()));
-    if (err == default!) {
-        Ꮡt.Errorf("Unmarshal: expected error, got nil"u8);
+    if (err == nil) {
+        t.Errorf("Unmarshal: expected error, got nil");
     }
 }
 
@@ -2527,18 +2532,18 @@ public partial struct InvalidXMLName {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedSuccessˢ = (@string)"unexpected success"u8;
-internal static readonly @string invalidTagˢ = "invalid tag"u8;
+internal static ref readonly @string invalidTagˢ => ref invalidTagˢᵇ;
+private static readonly @string invalidTagˢᵇ = "invalid tag"u8;
 
-public static void TestInvalidXMLName(ж<testing.T> Ꮡt) {
+public static void TestInvalidXMLName(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var err = enc.Encode(new InvalidXMLName(nil)); if (err == default!){
-            Ꮡt.Error(unexpectedSuccessˢ);
-        } else 
-        {
+        var err = enc.Encode(new InvalidXMLName()); if (err == nil) {
+            t.Error(unexpectedSuccessˢ);
+        } else {
             @string want = invalidTagˢ; if (!strings.Contains(err.Error(), want)) {
-                Ꮡt.Errorf("error %q does not contain %q"u8, err, want);
+                t.Errorf("error %q does not contain %q", err, want);
             }
         }
     }
@@ -2556,97 +2561,98 @@ public partial struct LayerTwo {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string l1Value12345ValueL1ˢ = @"<l1><value>1.2345</value></l1>"u8;
+internal static ref readonly @string l1Value12345ValueL1ˢ => ref l1Value12345ValueL1ˢᵇ;
+private static readonly @string l1Value12345ValueL1ˢᵇ = @"<l1><value>1.2345</value></l1>"u8;
 
-public static void TestMarshalZeroValue(ж<testing.T> Ꮡt) {
+public static void TestMarshalZeroValue(ж<testing.T> t) {
     @string proofXml = l1Value12345ValueL1ˢ;
     ref var l1 = ref heap(new LayerOne(), out var Ꮡl1);
     var err = Unmarshal(slice<byte>(proofXml), Ꮡl1);
-    if (err != default!) {
-        Ꮡt.Fatalf("unmarshal XML error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("unmarshal XML error: %v", err);
     }
     var want = (float64)1.2345D;
     var got = l1.Value.Value;
     if (got != want) {
-        Ꮡt.Fatalf("unexpected unmarshal result, want %f but got %f"u8, want, got);
+        t.Fatalf("unexpected unmarshal result, want %f but got %f", want, got);
     }
 
     // Marshal again (or Encode again)
     // In issue 50164, here `Marshal(l1)` will panic because of the zero value of xml attribute ValueTwo `value_two`.
     (var anotherXML, err) = Marshal(l1);
-    if (err != default!) {
-        Ꮡt.Fatalf("marshal XML error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("marshal XML error: %v", err);
     }
     if (((sstring)anotherXML) != proofXml) {
-        Ꮡt.Fatalf("unexpected unmarshal result, want %q but got %q"u8, proofXml, anotherXML);
+        t.Fatalf("unexpected unmarshal result, want %q but got %q", proofXml, anotherXML);
     }
 }
 
-internal static slice<encodeTokenTestsᴛ1> closeTests = new encodeTokenTestsᴛ1[]{new(
-    desc: "unclosed start element"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), default!)
-    }.slice(),
-    want: @"<foo>"u8,
-    err: "unclosed tag <foo>"u8
+internal static slice<encodeTokenTestsᴛ1> closeTests = slice<encodeTokenTestsᴛ1>([new(
+    desc: "unclosed start element",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), default)
+    ]),
+    want: @"<foo>",
+    err: "unclosed tag <foo>"
 ), new(
-    desc: "closed element"u8,
-    toks: new ΔToken[]{
-        new StartElement(new Name(""u8, "foo"u8), default!),
-        new EndElement(new Name(""u8, "foo"u8))
-    }.slice(),
-    want: @"<foo></foo>"u8
+    desc: "closed element",
+    toks: slice<ΔToken>([
+        new StartElement(new Name("", "foo"), default),
+        new EndElement(new Name("", "foo"))
+    ]),
+    want: @"<foo></foo>"
 ), new(
-    desc: "directive"u8,
-    toks: new ΔToken[]{
+    desc: "directive",
+    toks: slice<ΔToken>([
         (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
-    }.slice(),
-    want: @"<!foo>"u8
+    ]),
+    want: @"<!foo>"
 )
-}.slice();
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorGotNoneˢ = (@string)" expected error; got none"u8;
 
-public static void TestClose(ж<testing.T> Ꮡt) {
+public static void TestClose(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in closeTests) {
         ref var tt = ref heap(new encodeTokenTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.desc, (ж<testing.T> tΔ1) => {
+        t.Run(tt.desc, (ж<testing.T> tΔ1) => {
             ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
             var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡout));
             foreach (var (j, tok) in ttʗ1.toks) {
                 {
-                    var errΔ1 = enc.EncodeToken(tok); if (errΔ1 != default!) {
-                        tΔ1.Fatalf("token #%d: %v"u8, j, errΔ1);
+                    var errΔ1 = enc.EncodeToken(tok); if (errΔ1 != nil) {
+                        tΔ1.Fatalf("token #%d: %v", j, errΔ1);
                     }
                 }
             }
             var err = enc.Close();
             switch (ᐧ) {
-            case {} when ttʗ1.err != ""u8 && err == default!: {
+            case {} when ttʗ1.err != ""u8 && err == nil: {
                 tΔ1.Error(expectedErrorGotNoneˢ);
                 break;
             }
-            case {} when ttʗ1.err == ""u8 && err != default!: {
-                tΔ1.Errorf(" got error: %v"u8, err);
+            case {} when ttʗ1.err == ""u8 && err != nil: {
+                tΔ1.Errorf(" got error: %v", err);
                 break;
             }
-            case {} when ttʗ1.err != ""u8 && err != default! && ttʗ1.err != err.Error(): {
-                tΔ1.Errorf(" error mismatch; got %v, want %v"u8, err, ttʗ1.err);
+            case {} when ttʗ1.err != ""u8 && err != nil && ttʗ1.err != err.Error(): {
+                tΔ1.Errorf(" error mismatch; got %v, want %v", err, ttʗ1.err);
                 break;
             }}
             {
                 @string got = @out.String(); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("\ngot  %v\nwant %v"u8, got, ttʗ1.want);
+                    tΔ1.Errorf("\ngot  %v\nwant %v", got, ttʗ1.want);
                 }
             }
-            tΔ1.Log((~enc).p.closed);
+            tΔ1.Log(enc.p.closed);
             {
-                var errΔ1 = enc.EncodeToken((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)); if (errΔ1 == default!) {
-                    tΔ1.Errorf("unexpected success when encoding after Close"u8);
+                var errΔ1 = enc.EncodeToken((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)); if (errΔ1 == nil) {
+                    tΔ1.Errorf("unexpected success when encoding after Close");
                 }
             }
         });

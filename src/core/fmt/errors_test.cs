@@ -12,7 +12,8 @@ using static go.fmt_internal_test_package;
 partial class fmt_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string innerErrorˢ = "inner error"u8;
+internal static ref readonly @string innerErrorˢ => ref innerErrorˢᵇ;
+private static readonly @string innerErrorˢᵇ = "inner error"u8;
 internal static readonly object prefixˢ = (@string)"prefix"u8;
 internal static readonly object suffixˢ = (@string)"suffix"u8;
 internal static readonly object positionalVerbˢ = (@string)"positional verb"u8;
@@ -26,98 +27,98 @@ internal partial struct TestErrorf_type /*dyn*/ {
     internal slice<error> wantSplit;
 }
 
-public static void TestErrorf(ж<Δtesting.T> Ꮡt) {
+public static void TestErrorf(ж<Δtesting.T> t) {
     // noVetErrorf is an alias for fmt.Errorf that does not trigger vet warnings for
     // %w format strings.
     Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
     var wrapped = errors.New(innerErrorˢ);
-    foreach (var (_, test) in new TestErrorf_type[]{new(
+    foreach (var (_, test) in slice<TestErrorf_type>([new(
         err: fmt.Errorf("%w"u8, wrapped),
-        wantText: "inner error"u8,
+        wantText: "inner error",
         wantUnwrap: wrapped
     ), new(
         err: fmt.Errorf("added context: %w"u8, wrapped),
-        wantText: "added context: inner error"u8,
+        wantText: "added context: inner error",
         wantUnwrap: wrapped
     ), new(
         err: fmt.Errorf("%w with added context"u8, wrapped),
-        wantText: "inner error with added context"u8,
+        wantText: "inner error with added context",
         wantUnwrap: wrapped
     ), new(
         err: fmt.Errorf("%s %w %v"u8, prefixˢ, wrapped, suffixˢ),
-        wantText: "prefix inner error suffix"u8,
+        wantText: "prefix inner error suffix",
         wantUnwrap: wrapped
     ), new(
         err: fmt.Errorf("%[2]s: %[1]w"u8, wrapped, positionalVerbˢ),
-        wantText: "positional verb: inner error"u8,
+        wantText: "positional verb: inner error",
         wantUnwrap: wrapped
     ), new(
         err: fmt.Errorf("%v"u8, wrapped),
-        wantText: "inner error"u8
+        wantText: "inner error"
     ), new(
         err: fmt.Errorf("added context: %v"u8, wrapped),
-        wantText: "added context: inner error"u8
+        wantText: "added context: inner error"
     ), new(
         err: fmt.Errorf("%v with added context"u8, wrapped),
-        wantText: "inner error with added context"u8
+        wantText: "inner error with added context"
     ), new(
-        err: noVetErrorf("%w is not an error"u8, notAnErrorˢ),
-        wantText: "%!w(string=not-an-error) is not an error"u8
+        err: noVetErrorf("%w is not an error", notAnErrorˢ),
+        wantText: "%!w(string=not-an-error) is not an error"
     ), new(
         err: fmt.Errorf("no verbs"u8),
-        wantText: "no verbs"u8
+        wantText: "no verbs"
     ), new(
-        err: noVetErrorf("no verbs with extra arg"u8, extraˢ),
-        wantText: "no verbs with extra arg%!(EXTRA string=extra)"u8
+        err: noVetErrorf("no verbs with extra arg", extraˢ),
+        wantText: "no verbs with extra arg%!(EXTRA string=extra)"
     ), new(
-        err: noVetErrorf("too many verbs: %w %v"u8),
-        wantText: "too many verbs: %!w(MISSING) %!v(MISSING)"u8
+        err: noVetErrorf("too many verbs: %w %v"),
+        wantText: "too many verbs: %!w(MISSING) %!v(MISSING)"
     ), new(
-        err: noVetErrorf("wrapped two errors: %w %w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8),
-        wantText: "wrapped two errors: 1 2"u8,
-        wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8)}.slice()
+        err: noVetErrorf("wrapped two errors: %w %w", (errString)(@string)"1", (errString)(@string)"2"),
+        wantText: "wrapped two errors: 1 2",
+        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2")])
     ), new(
-        err: noVetErrorf("wrapped three errors: %w %w %w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8, (errString)(@string)"3"u8),
-        wantText: "wrapped three errors: 1 2 3"u8,
-        wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8), ((errString)(@string)"3"u8)}.slice()
+        err: noVetErrorf("wrapped three errors: %w %w %w", (errString)(@string)"1", (errString)(@string)"2", (errString)(@string)"3"),
+        wantText: "wrapped three errors: 1 2 3",
+        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2"), ((errString)(@string)"3")])
     ), new(
-        err: noVetErrorf("wrapped nil error: %w %w %w"u8, (errString)(@string)"1"u8, (any)(default!), (errString)(@string)"2"u8),
-        wantText: "wrapped nil error: 1 %!w(<nil>) 2"u8,
-        wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8)}.slice()
+        err: noVetErrorf("wrapped nil error: %w %w %w", (errString)(@string)"1", (any)(default), (errString)(@string)"2"),
+        wantText: "wrapped nil error: 1 %!w(<nil>) 2",
+        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2")])
     ), new(
-        err: noVetErrorf("wrapped one non-error: %w %w %w"u8, (errString)(@string)"1"u8, notAnErrorˢ, (errString)(@string)"3"u8),
-        wantText: "wrapped one non-error: 1 %!w(string=not-an-error) 3"u8,
-        wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"3"u8)}.slice()
+        err: noVetErrorf("wrapped one non-error: %w %w %w", (errString)(@string)"1", notAnErrorˢ, (errString)(@string)"3"),
+        wantText: "wrapped one non-error: 1 %!w(string=not-an-error) 3",
+        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"3")])
     ), new(
-        err: fmt.Errorf("wrapped errors out of order: %[3]w %[2]w %[1]w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8, (errString)(@string)"3"u8),
-        wantText: "wrapped errors out of order: 3 2 1"u8,
-        wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8), ((errString)(@string)"3"u8)}.slice()
+        err: fmt.Errorf("wrapped errors out of order: %[3]w %[2]w %[1]w"u8, (errString)(@string)"1", (errString)(@string)"2", (errString)(@string)"3"),
+        wantText: "wrapped errors out of order: 3 2 1",
+        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2"), ((errString)(@string)"3")])
     ), new(
-        err: fmt.Errorf("wrapped several times: %[1]w %[1]w %[2]w %[1]w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8),
-        wantText: "wrapped several times: 1 1 2 1"u8,
-        wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8)}.slice()
+        err: fmt.Errorf("wrapped several times: %[1]w %[1]w %[2]w %[1]w"u8, (errString)(@string)"1", (errString)(@string)"2"),
+        wantText: "wrapped several times: 1 1 2 1",
+        wantSplit: slice<error>([((errString)(@string)"1"), ((errString)(@string)"2")])
     ), new(
-        err: fmt.Errorf("%w"u8, (any)(default!)),
-        wantText: "%!w(<nil>)"u8,
-        wantUnwrap: default! // still nil
+        err: fmt.Errorf("%w"u8, (any)(default)),
+        wantText: "%!w(<nil>)",
+        wantUnwrap: default // still nil
 
     )
-    }.slice()) {
+    ])) {
         {
             var (got, want) = (errors.Unwrap(test.err), test.wantUnwrap); if (!AreEqual(got, want)) {
-                Ꮡt.Errorf("Formatted error: %v\nerrors.Unwrap() = %v, want %v"u8, test.err, got, want);
+                t.Errorf("Formatted error: %v\nerrors.Unwrap() = %v, want %v", test.err, got, want);
             }
         }
         {
             var (got, want) = (splitErr(test.err), test.wantSplit); if (!reflect.DeepEqual(got, want)) {
-                Ꮡt.Errorf("Formatted error: %v\nUnwrap() []error = %v, want %v"u8, test.err, got, want);
+                t.Errorf("Formatted error: %v\nUnwrap() []error = %v, want %v", test.err, got, want);
             }
         }
         {
             @string got = test.err.Error();
             @string want = test.wantText; if (got != want) {
-                Ꮡt.Errorf("err.Error() = %q, want %q"u8, got, want);
+                t.Errorf("err.Error() = %q, want %q", got, want);
             }
         }
     }
@@ -133,7 +134,7 @@ internal static slice<error> splitErr(error err) {
             return e.Unwrap();
         }
     }
-    return default!;
+    return default;
 }
 
 partial struct errString /*@string*/;

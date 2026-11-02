@@ -33,6 +33,15 @@ using static go.runtime_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(GCCPULimiter))]
+[assembly: GoFieldAccess(typeof(GCController))]
+[assembly: GoFieldAccess(typeof(RWMutex))]
+[assembly: GoFieldAccess(typeof(ScavengeIndex))]
+[assembly: GoFieldAccess(typeof(Scavenger))]
+[assembly: GoFieldAccess(typeof(TraceMap))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -41,13 +50,13 @@ using static go.runtime_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("runtime/align_runtime_test.go", "align_runtime_test.cs", "AA8eABow")]
-[assembly: global::go.GoPositionMap("runtime/export_debuglog_test.go", "export_debuglog_test.cs", "ABIigqaAooCigKKAooCigKKAooCigKSCgoKCgpSmgoKCgoKClKaCgoKClII=")]
-[assembly: global::go.GoPositionMap("runtime/export_test.go", "export_test.cs", "AB8moqKioqKioqLEspKitLSUpKLCsrK0srSUosQACQ68ggAJFIKmgqSCpoKCuKKClPaCgoKCgoCCpIKUgoCCgraAggAICoKCgoKCgoKClIKCgoKUgoKClIKUgoKClJSCgoKmgoL6yoKCgoKCgoKCgoKylIKClJSUgoKCupKSkpKSkrKippSigsyykpTGsrKylICigOyCtpqygqaipLKUlIKCuJSmgKKAooDIgqaCAAUQgqaCqoKmgriClKbu3MqmlJS22NKmlJS4goKCgoKCqoKClIKUgIKClIKCypKWkoKCgoKUgpSUgoKmgoKClIKUlIKmpoKs0oKAkpSCkriiyICkgoKCrLKmgoKC7oKmgqaCpoKmgqaCgoKCpoKmAAZGAAoCgoKCgpSUgoKmlKaCgpQAAhKCpoKmoraWkqiSAAQkgoKm7oKCgqbclIKCyoKCupKokoKClKjsAA4igKKAooCigNqCpICigKKAooCoorSCgpSClIKCgpSUlKiQqKKClIKSgoKClJSClKaClKyygoKClKbcgqSAooKkgqSCqJD+gqSAooCigKKAooKkgoKUxoKCAAoWgpSStoKClKSClIK2goKUpIKUtoKCtoKkooKSlKSCgoKUqJKCAAcSkqiSqJKokqiS/gAHIgAJApKCAAIQAAwMgoKCgpQABhKigoKUqqLe4oKUqJIABywADgKmgoKCppKCgriCpsqCpoKAgqaC/qaCpsqSgoK4rLKmgsqmgoKm7oLcpoKAgpQACxaCgoKUlIKClLqiAAcQsqaSppSCgoKClILcgoKCgoKUytiUpgAOHoKCgqaClILKpqKmgqaCuIKmwriylKSCgsayAAoekoKCgoKssoKCgpTekoKCgoKClKiSgoKCuIKCgoKCggAKIsKCgpSCgpSmgqakgoKCgpSCpoLcqMIAAhLiAA4iyoKCgqaigoKUgoKCgqaCpoKmgqaCpoIAChaCgoKCgoKmgoKCgqaCpoKmgqaC7IKClKiSpoIAAhDS7oIACRKCAAkYyoKCgqaCpoKmgqaCpoKmgqaCpoKmgqaCAA8iooK4goKCpoKCgoK0goKCpILGgoKClIKmggADFAANDIKCgoKCgpSUqJKokqrCgoKCgpSCgu6CAAsYgoKCgoKmgoKmgpKklKaCgpS4gpKklKaCgpS4ooKCgpSUpoKmgqaC3IKC6gAHEIIABBqCpoKmgoKCgoKUlKaCpqSCpoKmoqqizqLsopaCpILKgoK4goKClKTIpIIABxCCpoKmgqaUgoKClIKCpoKCgoKClILugqaCpIIACBaCpoK2pJSA7ILugqaCpoLugu6CpoKmgqaigoKCgoK2gpSCgoKClKaCgoKCgoKClKqigoKCgpSokoKCgoKU", "90-92:1;96-98:1;184-192:1;225-227:1;317-342:1;356-429:1;440-440:1;444-446:2;629-632:1;817-823:1;837-843:1;850-856:1;862-868:1;875-877:1;1036-1040:1;1081-1085:2;1173-1211:1;1320-1325:1;1331-1335:1;1647-1666:1;1850-1856:1;1909-1911:1;2061-2063:1", "2062=runtime.hexdumpMarker.start")]
-[assembly: global::go.GoPositionMap("runtime/export_windows_test.go", "export_windows_test.cs", "AA8ekgADEoI=")]
-[assembly: global::go.GoPositionMap("runtime/proc_runtime_test.go", "proc_runtime_test.cs", "AAoSgoKCgoKUgoKCgoKCgpSClILcgoKmgoKCgoKU")]
-[assembly: global::go.GoPositionMap("runtime/symtabinl_test.go", "symtabinl_test.cs", "ABgagoKmgoKCptzugoKCgoAABxCkgoKCgqaUgoKClIKmgoKUgqaClKaClJSAguyCgsqCgsrEkqSigqSigoI=")]
-[assembly: global::go.GoPositionMap("runtime/tracebackx_test.go", "tracebackx_test.cs", "AAsOyoKSgpQ=", "13-16:1")]
+[assembly: GoPositionMap("runtime/align_runtime_test.go", "align_runtime_test.cs", "AA8eABow")]
+[assembly: GoPositionMap("runtime/export_debuglog_test.go", "export_debuglog_test.cs", "ABIigqaAooCigKKAooCigKKAooCigKSCgoKCgpSmgoKCgoKClKaCgoKClII=")]
+[assembly: GoPositionMap("runtime/export_test.go", "export_test.cs", "AB4moqKioqKioqLEspKitLSUpKLCsrK0srSUosQACQ68ggAJFIKmgqSCpoKCuKKClAAKBoKCgoKCgIKkgpSCgIKCtoCCAAkKgoKCgoKCgoKUgoKCgpSCgoKUgpSCgoKUlIKCgqaCggAICsqCgoKCgoKCgoKCspSCgpSUlIKCgrqSkpKSkpKyoqaUooLMspKUxrKyspSAooDsgraasoKmoqSylJSCgriUpoCigKKAyIKmggAFEIKmgqqCpoK4gpSm7tzKppSUttjSppSUuIKCgoKCgqqCgpSClICCgpSCgsqSlpKCgoKClIKUlIKCpoKCgpSClJSCpqaCrNKCgJKUgpK4osiApIKCgqyypoKCgu6CpoKmgqaCpoKmgoKCgqaCpgAGRgAKAoKCgoKUlIKCppSmgoKUAAISgqaCpqK2lpKokgAEJIKCpu6CgoKm3JSCgsqCgrqSqJKCgpSo7AAOIoCigKKAooDagqSAooCigKKAqKK0goKUgpSCgoKUlJSokKiigpSCkoKCgpSUgpSmgpSssoKCgpSm3IKkgKKCpIKkgqiQ/oKkgKKAooCigKKCpIKClMaCggAKFoKUkraCgpSkgpSCtoKClKSClLaCgraCpKKCkpSkgoKClKiSggAHEpKokqiSqJKokv4AByIACQKCggACEAAMDIKCgoKUAAYSooKClKqi7uKClKiSAAcsAA4CpoKCgqaSgoK4gqbKgqaCgIKmgv6mgqbKkoKCuKyypoLKpoKCpu6C3KaCgIKUAAsWgoKClJSCgpS6ogAHELKmkqaUgoKCgpSC3IKCgoKClMrYlKYADh6CgoKmgpSCyqaipoKmgriCpsK4spSkgoLGsgAKHpKCgoKCrLKCgoKU3pKCgoKCgpSokoKCgriCgoKCgoIACiLCgoKUgoKUpoKmpIKCgoKUgqaC3KjCAAIS4gAOIsqCgoKmooKClIKCgoKmgqaCpoKmgqaCAAoWgoKCgoKCpoKCgoKmgqaCpoKmguyCgpSokqaCAAIQ0u6CAAkSggAJGMqCgoKmgqaCpoKmgqaCpoKmgqaCpoKmggAPIqKCuIKCgqaCgoKCtIKCgqSCxoKCgpSCpoIAAxQADQyCgoKCgoKUlKiSqJKqwoKCgoKUgoLuggALGIKCgoKCpoKCpoKSpJSmgoKUuIKSpJSmgoKUuKKCgoKUlKaCpoKmgtyCguoABxCCAAQagqaCpoKCgoKClJSmgqakgqaCpqKqos6i7KKWgqSCyoKCuIKCgpSkyKSCAAgQgqaCpoKmlIKCgpSCgqaCgoKCgpSC7oKmgqSCAAgWgqaCtqSUgOyC7oKmgqaC7oLugqaCpoKmooKCgoKCtoKUgoKCgpSmgoKCgoKCgpSqooKCgoKUqJKCgoKClA==", "90-92:1;96-98:1;184-192:1;225-227:1;317-342:1;356-429:1;440-440:1;444-446:2;629-632:1;817-823:1;837-843:1;850-856:1;862-868:1;875-877:1;1036-1040:1;1081-1085:2;1173-1211:1;1320-1325:1;1331-1335:1;1647-1666:1;1850-1856:1;1909-1911:1;2061-2063:1", "2062=runtime.hexdumpMarker.start")]
+[assembly: GoPositionMap("runtime/export_windows_test.go", "export_windows_test.cs", "AA8ekgADEoI=")]
+[assembly: GoPositionMap("runtime/proc_runtime_test.go", "proc_runtime_test.cs", "AAoSgoKCgoKUgoKCgoKCgpSClILcgoKmgoKCgoKU")]
+[assembly: GoPositionMap("runtime/symtabinl_test.go", "symtabinl_test.cs", "ABsagoKmgoKCptzugoKCgoAABxCkgoKCgqaUgoKClIKmgoKUgqaClKaClJSAguyCgsqCgsrEkqSigqSigoI=")]
+[assembly: GoPositionMap("runtime/tracebackx_test.go", "tracebackx_test.cs", "AAsOyoKSgpQ=", "13-16:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

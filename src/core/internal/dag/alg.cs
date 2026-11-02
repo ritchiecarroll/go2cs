@@ -25,8 +25,7 @@ public static void Transpose(this ref Graph g) {
 public static slice<@string> Topo(this ж<Graph> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
-    ref var topo = ref heap<slice<@string>>(out var Ꮡtopo);
-    topo = new slice<@string>(0, len(g.Nodes));
+    ref var topo = ref heap<slice<@string>>(new slice<@string>(0, len(g.Nodes)), out var Ꮡtopo);
     var marks = new map<@string, bool>();
 
     ref var visit = ref heap<Action<@string>>(out var Ꮡvisit);

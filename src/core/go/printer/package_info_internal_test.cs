@@ -22,6 +22,10 @@ using static go.go.printer_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(limitWriter))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -30,8 +34,8 @@ using static go.go.printer_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/printer/performance_test.go", "performance_test.cs", "ABo6goCC+pKUgoKmgoKmgoKCpoKUuICCgoLcooKUgoKCuKKClIKCgg==")]
-[assembly: global::go.GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "AB84lAAJHsSCgriCgriSgpSCqJKAgsiCgIK2qJKCgpSokoKUpoKCgoKmgoKCuIKAgqS4goKCuICCgra4goKClICC2pSCkoK4xgAOGAAYMoKCgoKCgoKCAA8UspyCgoKmgoKUgoKCuIKCgrqSgoKAgsiAggANCpKCgoKClIKCgrzSgoKCpoCCpICCyAAaDrKCAAEigoKmgpKCpoKCgsqCgIKkqJKCkoKUqJKCgpQAFgyyAAIcgoKokoKCyoKC7oKCgpSCuIKClIK4goKCuIIAJAyiAAEWAAIcgoKokoKClKaCuNyCgoKCpoKCgqaCgsrcgoKCgqaCgoKmgoL6ooiygoKmgoKmoqKCgpSCgoKUgoKUgqaCAA8SogAIFIKAgqSUmoLusgAJFIKAgqSAkgAJErKCgoKClIIACQiSgoKCgpSCgpSigoKCpoIADQ6iiIKCACIIggAFKoKCgqaUgoKmgqaUgoKmggAJCIKCgoKCpoKCgoKCuIKC7KSSgoKCqJKCgpSmgpSCgoKUlIIADwyijoKCgriCgpSCgIKkgoCCAAgI7oKCgoKCpriCgIKkgr7CsoKCgoKC", "151-154:1;203-208:1;347-350:1;551-573:1")]
+[assembly: GoPositionMap("go/printer/performance_test.go", "performance_test.cs", "ABo6goCCAAgKkpSCgqaCgqaCgoKmgpS4gIKCgtyigpSCgoK4ooKUgoKC")]
+[assembly: GoPositionMap("go/printer/printer_test.go", "printer_test.cs", "ACA4lAAJHsSCgriCgriCgpSCqJKAgsiCgIK2qJKCgpSokoKUpoKCgoKmgoKCuIKAgqS4goKCuICCgra4goKClICC2pSCkoK4xgAOGAAYMoKCgoKCgoKCABAUspyCgoKmgoKUgoKCuIKCgrqSgoKAgsiAggAPCpKCgoKClIKCgrzSgoKCpoCCpICCyAAbDrKCAAEigoKmgoKCpoKCgsqCgIKkqJKCkoKUqJKCgpQAGAyyAAIcgoKokoKCyoKC7oKCgpSCuIKClIK4goKCuIIAJwyiAAEWAAIcgoKokoKClKaCuNyCgoKCpoKCgqaCgsrcgoKCgqaCgoKmgoIACAqCiLKCgqaCgqaiooKClIKCgpSCgpSCpoIAEBKiAAgUgoCCpJSagv6yAAkUgoCCpICSAAkSsoKCgoKUggAKCJKCgoKClIKClKKCgoKmggAODqKIgoIAJgiCAAUqgoKCppSCgqaCppSCgqaCAAsIgoKCgoKmgoKCgoK4goL8pJKCgoKokoKClKaClIKCgpSUggARDKKOgoKCuIKClIKAgqSCgIIACgjugoKCgoKmuIKAgqSCvsKygoKCgoI=", "151-154:1;203-208:1;347-350:1;551-573:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

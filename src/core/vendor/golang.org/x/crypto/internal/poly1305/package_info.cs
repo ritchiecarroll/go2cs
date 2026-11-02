@@ -45,7 +45,11 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(MAC))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +59,8 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4ikKzigpSqooKCgqqigoKC")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CkoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSkAAHGNLugoKmggAHEIKUgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/poly1305.go", "poly1305.cs", "ABs40oKCqLKCggACGAAJAoKCAA4ikKzigpSqooKCgqqigoKC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/internal/poly1305/sum_generic.go", "sum_generic.cs", "AA4+AA8CgoKmgoKCABQwwoKCgoKClIKClICCgqSClKyygoKUAAgYsoKCggAIEoKCpoKCgoKUpoKCggACFPKClIIACBKCgoKUlIKClIKClAAYMoKCgoKC7oKUgqaCgoKUgoKCABAigriCgpSUgoLuAAUSkAAHGNLugoKmggAHEIKUgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto.@internal;

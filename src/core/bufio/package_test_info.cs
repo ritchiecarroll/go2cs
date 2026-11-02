@@ -8,14 +8,6 @@ global using static global::go.bufio_package;
 global using static global::go.bufio_internal_test_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -71,7 +63,14 @@ using static global::go.bufio_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(eofReader))]
+[assembly: GoFieldAccess(typeof(errorThenGoodReader))]
+[assembly: GoFieldAccess(typeof(readFromWriter))]
+[assembly: GoFieldAccess(typeof(rot13Reader))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -81,8 +80,8 @@ using static global::go.bufio_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("bufio/bufio_test.go", "bufio_test.cs", "ACI4goKCpoKCgoKCkoKmqLKCgoKCgpSCgpKCptaCgoKAgraCgIIACRIABxTCgoKCgpSClJSosoKCgoKCgqYABxAADBq4goKCgoKCgpSUgoKCgoKCgoKCgoKCAAsWgvaCgpSCooKmtIKSgsYAChSygoKClJSmgoKCgoKCgoKUlJSCuAAKFoKCAAgIgoKCgpSCgoKClJSUgIKkgoKUgqaC+IKCgoKAgviCgoKCgIL4goKCgoCC+IKCgoKAgviCgoKAgviCgoKAggAICIKCgoKUgoKCgpSUlICCpIKClIKmgriCgoKClIKCgpSCuIKAgsiAggAKCoTIggAJFISSgoKmgqKCgpSAgtqCgoKAgqSUuIKCABYMkoKCgpSCgpSAgqSCpoKClIKClIKmgoKUgoKCpoKmgoKUgoKUgoKUgqaCgpSCgpSC+JSCgoKCgoKSgriCgoKUgoKCgoKUgqaUlIKCgoLKpoKCgoKCgIIACQqCgpSCgqKClIKCpoK4gpSClIKCgoLcgoKCgoKClICCtoKClIKCgoLugoKCgoKUgoLKgriCgoKUlIIAChiCpgAIEoKCgoKCgqaCgoIACQyCgpSCgqaCgviCgpSCgqaCguiCgoKCgoKCgoKAgqSCgviCgoKCgoKCgoKClIKCgoKUgoKCgoKClIKCgoKCggAIEoKCpoKCpoKCgpSC6IKCgoKClIKCAAkIgpSCgIKkgIKkgIKkgIKkgIKkgIKkgIKkgIKkgIKkgIKkgIKkgILIgoCCpICCpICCpICC7IKmlIKCgoKmkpIABxCygoKUgpSCgoKUpqKCgpKCgoKClIKUgoKUlICCpJSCyoKCpoKCgpSCgoKClIKCgpSCgoKUgoL4goKCgoKCgoKClIKClIK4ooKCgriigoKCgqaCguiCgoKCggAPGAAPJoKCuIKCgoKCgpSCgpSCgsqCgriCgqamgoKCgoCCtoKCAAoWgqaCpu6CgoKAgtqCysqCgoKCgoKAgoKkgIKCpICSAAwYgqaCpgAHEIKCgoCCAAUSwoKCgoKUgoKUgoKUgoKmgoKCgoKUgoKUgoKUgoKUgoIABxCCgsqA5MaCgqS0gta2oqTugoKCgpSmgoKCgoCCpICCpICCpICCpILqkoKmgoK4goIACBKCgpSCqJKCpoKCuIKCgpSCgJLIgoKmgoK4goKCAAkUgoKCpoKCgoKqopSCgpSCgIKkgoCCpICCtoCSpICSyIKCgoKCkoKCgpSUgoKCAAoKgoKCgoKUgriCgoKCpoKUgoKmgoKCgoLmgsKClIKCgoKUgqaCgoKCgpSCuIKCgoKClIKCgoKCABEIggAkYoKUAAkUgpQACRSClAAYMoKCgoKCgpSCgqaCgJKCpICC3IKAkqSAksiCgJKkgJIAESKCgpSCgqaikgAHEIKClMqmpoKCgqaCgoKUgILIgIK2gILIgoKUggAJDIKmgvaCgoCCpICCAAoMgvqigoKCgIKkgIKkgIKkgILItIKCgoKCgoKCuLSCgoKCgoKCgriigoKCgoKCgoKC6KKCgoKCgIKkgoKCgoKUgsqigoKCgoKUgoLKtIKCgoKCgoKCuKKCgoKCgoKCgriigoKCgoKCgoKC6KKCgoKCgoKUgsqigoKCgoKCgoKCgoKCgriigoKCgoI=", "188-191:1;407-410:1;428-436:2;594-602:1;1167-1167:1;1168-1168:2;1173-1173:3;1294-1305:1;1468-1483:1;1471-1478:1.1;1488-1497:1;1614-1619:1;1627-1632:2;1640-1645:3", "", "1864=NewReader/1/4/15,NewReader/2/4/23,NewReader/3/4/30,NewReader/4/4/37,newScriptedReader/1/5/48,newScriptedReader/2/5/61,newScriptedReader/3/5/74,New/1/1/82,newScriptedReader/4/5/88,newScriptedReader/5/5/96")]
-[assembly: go.GoPositionMap("bufio/scan_test.go", "scan_test.cs", "ABUqsoKCygALGIKCgoKCgoKAgraClIKCzJKCgoKCkpSygpSCgoKmgpSCgpSCgsoAChiSgoKCgoKCgoKUgoKmgpSClIKCAAsYgoKUrNKCgoKUgoKClJSCgpS6pIKCgoKCgoKUlIKUgoKCgoKCgpSUgoKmgoK6kpSCgoKCgoKCgpSCgoKCgoKClJSCgqaCgrqSgoKCgoKCpoKC6pKCuNiSgrjYkoLK2JKCyqbGxIKCgoKUgpSClpKCgoKCgoK4gpSCgvqSlMKCgoKUlJSClIL+gtaCgoKUgoL+gqaCgoKUgoLogoKCgoKCgpSAgs6igoKmpoKCgoKCgpSCpoKUgILIgqaCpoKClAAIBqKClIKCgpSAgraCgqaCtKSCgoKCpoLcgoKClKiSkoKClIKUgrqSgoKCgoKCpoIABxCCgoKClIKUgoKU2qKSgoKCgoKCpoCCAAkQgqqigpSAgg==", "315-324:1;350-359:1;469-477:1")]
+[assembly: GoPositionMap("bufio/bufio_test.go", "bufio_test.cs", "ACI4goKCpoKCgoKCgoKmqLKCgoKCgpSCgoKCpuaCgoKAgraCgIIACRIABxTCgoKCgpSClJSosoKCgoKCgqYABxAADBq4goKCgoKCgpSUgoKCgoKCgoKCgoKCAAsWgvaCgpSCooKmtIKCgsYAChSygoKClJSmgoKCgoKCgoKUlJSCuAAKFoKCAAgIgoKCgpSCgoKClJSUgIKkgoKUgqaCAAgIgoKCgoCC+IKCgoKAgviCgoKCgIL4goKCgoCC+IKCgoCC+IKCgoCCAAgIgoKCgpSCgoKClJSUgIKkgoKUgqaCuIKCgoKUgoKClIK4goCCyICCAA0KhMiCAAkUhJKCgqaCooKClICC2oKCgoCCpJS4goIAFgySgoKClIKClICCpIKmgoKUgoKUgqaCgpSCgoKmgqaCgpSCgpSCgpSCpoKClIKClIL4lIKCgoKCgoKCuIKCgpSCgoKCgpSCppSUgoKCgsqmgoKCgoKAggAKCoKClIKCooKUgoKmgriClIKUgoKCgtyCgoKCgoKUgIK2goKUgoKCgu6CgoKCgpSCgsqCuIKCgpSUggAKGIKmAAgSgoKCgoKCpoKCggAJDIKClIKCpoKC+IKClIKCpoKC6IKCgoKCgoKCgoCCpIKCAAkIgoKCgoKCgoKCgpSCgoKClIKCgoKCgpSCgoKCgoIACBKCgqaCgqaCgoKUgviCgoKCgpSCggALCIKUgoCCpICCpICCpICCpICCpICCpICCpICCpICCpICCpICCpICCyIKAgqSAgqSAgqSAguyCppSCgoKCppKSAAcQsoKClIKUgoKClKaCgoKCgoKCgpSClIKClJSAgqSUgsqCgqaCgoKUgoKCgpSCgoKUgoKClIKCAAkIgoKCgoKCgoKClIKClIK4goKCgriCgoKCgqaCgviCgoKCggAPGAAPJoKCuIKCgoKCgpSCgpSCgsqCgriCgqamgoKCgoCCtoKCAAoWgqaCpu6CgoKAgtqCysqCgoKCgoKAgoKkgIKCpICSAAwYgqaCpgAHEIKCgoCCAAUSwoKCgoKUgoKUgoKUgoKmgoKCgoKUgoKUgoKUgoKUgoIABxCCgsqA9MaCgqS0gta2oqTugoKCgpSmgoKCgoCCpICCpICCpICCpIL6koKmgoK4goIACBKCgpSCqJKCpoKCuIKCgpSCgJLIgoKmgoK4goKCAAkUgoKCpoKCgoKqopSCgpSCgIKkgoCCpICCtoCSpICSyIKCgoKCkoKCgpSUgoKCAA4KgoKCgoKUgriCgoKCpoKUgoKmgoKCgoIACAaCwoKUgoKCgpSCpoKCgoKClIK4goKCgoKUgoKCgoIAEgiCACRigpQACRSClAAJFIKUABgygoKCgoKClIKCpoKAkoKkgILcgoCSpICSyIKAkqSAkgARIoKClIKCpqKCAAcQgoKUyqamgoKCpoKCgpSAgsiAgraAgsiCgpSCAAoMgqaCAAgGgoKAgqSAggALDIIACAqigoKCgIKkgIKkgIKkgILItIKCgoKCgoKCuLSCgoKCgoKCgriigoKCgoKCgoKC6KKCgoKCgIKkgoKCgoKUgsqigoKCgoKUgoLKtIKCgoKCgoKCuKKCgoKCgoKCgriigoKCgoKCgoKC6KKCgoKCgoKUgsqigoKCgoKCgoKCgoKCgriigoKCgoI=", "188-191:1;407-410:1;428-436:2;594-602:1;1167-1167:1;1168-1168:2;1173-1173:3;1294-1305:1;1468-1483:1;1471-1478:1.1;1488-1497:1;1614-1619:1;1627-1632:2;1640-1645:3", "", "1876=NewReader/1/4/15,NewReader/2/4/23,NewReader/3/4/30,NewReader/4/4/37,newScriptedReader/1/5/48,newScriptedReader/2/5/61,newScriptedReader/3/5/74,New/1/1/82,newScriptedReader/4/5/88,newScriptedReader/5/5/96")]
+[assembly: GoPositionMap("bufio/scan_test.go", "scan_test.cs", "ABUqkoKCygALGIKCgoKCgoKAgraClIKCzJKCgoKCkpSygpSCgoKmgpSCgpSCgsoAChiSgoKCgoKCgoKUgoKmgpSClIKCAAsYgoKUrNKCgoKUgoKClJSCgpS6pIKCgoKCgoKUlIKUgoKCgoKCgpSUgoKmgoK6kpSCgoKCgoKCgpSCgoKCgoKClJSCgqaCgrqSgoKCgoKCpoKC+pKCuOiSgrjokoLK6JKCyqbWpIKCgoKUgpSClpKCgoKCgoK4gpSCgvqSlMKCgoKUlJSClIL+gtaCgoKUgoL+gqaCgoKUgoL4goKCgoKCgpSAgs6igoKmpoKCgoKCgpSCpoKUgILIgqaCpoKClAAJBqKClIKCgpSAgraCgqaCtKSCgoKCpoLcgoKClKiSgoKClIKUgrqSgoKCgoKCpoIABxCCgoKClIKUgoKU2qKCgoKCgoKCpoCCAAkQgqqigpSAgg==", "315-324:1;350-359:1;469-477:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

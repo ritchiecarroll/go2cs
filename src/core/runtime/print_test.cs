@@ -20,7 +20,7 @@ public static void FuzzPrintFloat64(ж<testing.F> Ꮡf) {
     Ꮡf.Fuzz((ж<testing.T> t, float64 v) => {
         @string s = runtime_internal_test_package.DumpPrint(v);
         if (len(s) > runtime_internal_test_package.Float64Bytes) {
-            t.Errorf("print(%f) got %s (len %d) want len <= %d"u8, v, s, len(s), runtime_internal_test_package.Float64Bytes);
+            t.Errorf("print(%f) got %s (len %d) want len <= %d", v, s, len(s), runtime_internal_test_package.Float64Bytes);
         }
     });
 }
@@ -35,7 +35,7 @@ public static void FuzzPrintFloat32(ж<testing.F> Ꮡf) {
     Ꮡf.Fuzz((ж<testing.T> t, float32 v) => {
         @string s = runtime_internal_test_package.DumpPrint(v);
         if (len(s) > runtime_internal_test_package.Float32Bytes) {
-            t.Errorf("print(%f) got %s (len %d) want len <= %d"u8, v, s, len(s), runtime_internal_test_package.Float32Bytes);
+            t.Errorf("print(%f) got %s (len %d) want len <= %d", v, s, len(s), runtime_internal_test_package.Float32Bytes);
         }
     });
 }
@@ -51,7 +51,7 @@ public static void FuzzPrintComplex128(ж<testing.F> Ꮡf) {
         var v = complex(r, i);
         @string s = runtime_internal_test_package.DumpPrint(v);
         if (len(s) > runtime_internal_test_package.Complex128Bytes) {
-            t.Errorf("print(%f) got %s (len %d) want len <= %d"u8, v, s, len(s), runtime_internal_test_package.Complex128Bytes);
+            t.Errorf("print(%f) got %s (len %d) want len <= %d", v, s, len(s), runtime_internal_test_package.Complex128Bytes);
         }
     });
 }
@@ -67,7 +67,7 @@ public static void FuzzPrintComplex64(ж<testing.F> Ꮡf) {
         var v = complex(r, i);
         @string s = runtime_internal_test_package.DumpPrint(v);
         if (len(s) > runtime_internal_test_package.Complex64Bytes) {
-            t.Errorf("print(%f) got %s (len %d) want len <= %d"u8, v, s, len(s), runtime_internal_test_package.Complex64Bytes);
+            t.Errorf("print(%f) got %s (len %d) want len <= %d", v, s, len(s), runtime_internal_test_package.Complex64Bytes);
         }
     });
 }

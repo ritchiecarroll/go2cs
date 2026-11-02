@@ -55,7 +55,7 @@ public static Op Src => 1;
 // Draw implements the [Drawer] interface by calling the Draw function with this
 // [Op].
 public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
-    DrawMask(dst, r, src, sp, default!, new image.Point(nil), op);
+    DrawMask(dst, r, src, sp, default, new image.Point(), op);
 }
 
 // Drawer contains the [Draw] method.
@@ -67,7 +67,7 @@ partial interface Drawer {
 
 // FloydSteinberg is a [Drawer] that is the [Src] [Op] with Floyd-Steinberg error
 // diffusion.
-public static Drawer FloydSteinberg = new floydSteinberg(nil);
+public static Drawer FloydSteinberg = new floydSteinberg();
 
 partial struct floydSteinberg {
 }
@@ -75,7 +75,7 @@ partial struct floydSteinberg {
 internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
-    clip(dst, Ꮡr, src, ref sp, default!, nil);
+    clip(dst, Ꮡr, src, ref sp, default, nil);
     if (r.Empty()) {
         return;
     }
@@ -92,7 +92,7 @@ internal static void clip(Image dst, ж<image.Rectangle> Ꮡr, image.Image src, 
     var orig = r.Min;
     r = r.Intersect(dst.Bounds());
     r = r.Intersect(src.Bounds().Add(orig.Sub(sp)));
-    if (mask != default!) {
+    if (mask != nil) {
         r = r.Intersect(mask.Bounds().Add(orig.Sub(mp)));
     }
     nint dx = r.Min.X - orig.X;
@@ -114,7 +114,7 @@ internal static bool processBackward(image.Image dst, image.Rectangle r, image.I
 
 // Draw calls [DrawMask] with a nil mask.
 public static void Draw(Image dst, image.Rectangle r, image.Image src, image.Point sp, Op op) {
-    DrawMask(dst, r, src, sp, default!, new image.Point(nil), op);
+    DrawMask(dst, r, src, sp, default, new image.Point(), op);
 }
 
 // DrawMask aligns r.Min in dst with sp in src and mp in mask and then replaces the rectangle r
@@ -137,12 +137,12 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
     // color. See TestDrawSrcNonpremultiplied.
     switch (dst.type()) {
     case ж<imageꓸRGBA> dst0: {
-        if (op == Over){
-            if (mask == default!){
+        if (op == Over) {
+            if (mask == nil) {
                 switch (src.type()) {
                 case ж<image.Uniform> src0: {
                     var (sr, sg, sb, sa) = src0.RGBA();
-                    if (sa == 0xffff){
+                    if (sa == 0xffff) {
                         drawFillSrc(dst0, r, sr, sg, sb, sa);
                     } else {
                         drawFillOver(dst0, r, sr, sg, sb, sa);
@@ -175,8 +175,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     drawCMYK(ref (dst0).DerefOrNull(), r, ref (src0).DerefOrNull(), sp);
                     return;
                 }}
-            } else 
-            {
+            } else {
                 var (mask0, ok) = mask._<ж<image.Alpha>>(ᐧ); if (ok) {
                     switch (src.type()) {
                     case ж<image.Uniform> src0: {
@@ -200,7 +199,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                 }
             }
         } else {
-            if (mask == default!) {
+            if (mask == nil) {
                 switch (src.type()) {
                 case ж<image.Uniform> src0: {
                     var (sr, sg, sb, sa) = src0.RGBA();
@@ -211,7 +210,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
-                        (~dst0).Pix.slice(d0), (~dst0).Stride, r, (~src0).Pix.slice(s0), (~src0).Stride, sp, 4 * r.Dx());
+                        dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 4 * r.Dx());
                     return;
                 }
                 case ж<image.NRGBA> src0: {
@@ -238,24 +237,23 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
         return;
     }
     case ж<image.Paletted> dst0: {
-        if (op == Src && mask == default!) {
+        if (op == Src && mask == nil) {
             {
-                var (src0, ok) = src._<ж<image.Uniform>>(ᐧ); if (ok){
-                    var colorIndex = (uint8)(~dst0).Palette.Index((~src0).C);
+                var (src0, ok) = src._<ж<image.Uniform>>(ᐧ); if (ok) {
+                    var colorIndex = (uint8)dst0.Palette.Index(src0.C);
                     nint i0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint i1 = i0 + r.Dx();
                     for (nint i = i0; i < i1; i++) {
-                        dst0.Value.Pix[i] = colorIndex;
+                        dst0.Pix[i] = colorIndex;
                     }
-                    var firstRow = (~dst0).Pix.slice(i0, i1);
+                    var firstRow = dst0.Pix.slice(i0, i1);
                     for (nint y = r.Min.Y + 1; y < r.Max.Y; y++) {
-                        i0 += dst0.Value.Stride;
-                        i1 += dst0.Value.Stride;
-                        copy((~dst0).Pix.slice(i0, i1), firstRow);
+                        i0 += dst0.Stride;
+                        i1 += dst0.Stride;
+                        copy(dst0.Pix.slice(i0, i1), firstRow);
                     }
                     return;
-                } else 
-                if (!processBackward(dst, r, src, sp)) {
+                } else if (!processBackward(dst, r, src, sp)) {
                     drawPaletted(new image_PalettedжImage(dst0), r, src, sp, false);
                     return;
                 }
@@ -264,13 +262,13 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
         break;
     }
     case ж<image.NRGBA> dst0: {
-        if (op == Src && mask == default!) {
+        if (op == Src && mask == nil) {
             {
                 var (src0, ok) = src._<ж<image.NRGBA>>(ᐧ); if (ok) {
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
-                        (~dst0).Pix.slice(d0), (~dst0).Stride, r, (~src0).Pix.slice(s0), (~src0).Stride, sp, 4 * r.Dx());
+                        dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 4 * r.Dx());
                     return;
                 }
             }
@@ -278,13 +276,13 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
         break;
     }
     case ж<image.NRGBA64> dst0: {
-        if (op == Src && mask == default!) {
+        if (op == Src && mask == nil) {
             {
                 var (src0, ok) = src._<ж<image.NRGBA64>>(ᐧ); if (ok) {
                     nint d0 = dst0.PixOffset(r.Min.X, r.Min.Y);
                     nint s0 = src0.PixOffset(sp.X, sp.Y);
                     drawCopySrc(
-                        (~dst0).Pix.slice(d0), (~dst0).Stride, r, (~src0).Pix.slice(s0), (~src0).Stride, sp, 8 * r.Dx());
+                        dst0.Pix.slice(d0), dst0.Stride, r, src0.Pix.slice(s0), src0.Stride, sp, 8 * r.Dx());
                     return;
                 }
             }
@@ -311,17 +309,17 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
     // concrete color types to the color.Color interface type.
 
     {
-        var (dst0, _) = dst._<RGBA64Image>(ᐧ); if (dst0 != default!) {
+        var (dst0, _) = dst._<RGBA64Image>(ᐧ); if (dst0 != nil) {
             {
-                var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != default!) {
-                    if (mask == default!){
+                var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != nil) {
+                    if (mask == nil) {
                         nint syΔ1 = sp.Y + y0 - r.Min.Y;
                         nint myΔ1 = mp.Y + y0 - r.Min.Y;
                         for (nint y = y0; y != y1; (y, syΔ1, myΔ1) = (y + dy, syΔ1 + dy, myΔ1 + dy)) {
                             nint sx = sp.X + x0 - r.Min.X;
                             nint mx = mp.X + x0 - r.Min.X;
                             for (nint x = x0; x != x1; (x, sx, mx) = (x + dx, sx + dx, mx + dx)) {
-                                if (op == Src){
+                                if (op == Src) {
                                     dst0.SetRGBA64(x, y, src0.RGBA64At(sx, syΔ1));
                                 } else {
                                     var srgba = src0.RGBA64At(sx, syΔ1);
@@ -337,9 +335,8 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                             }
                         }
                         return;
-                    } else 
-                    {
-                        var (mask0, _) = mask._<image.RGBA64Image>(ᐧ); if (mask0 != default!) {
+                    } else {
+                        var (mask0, _) = mask._<image.RGBA64Image>(ᐧ); if (mask0 != nil) {
                             nint syΔ2 = sp.Y + y0 - r.Min.Y;
                             nint myΔ2 = mp.Y + y0 - r.Min.Y;
                             for (nint y = y0; y != y1; (y, syΔ2, myΔ2) = (y + dy, syΔ2 + dy, myΔ2 + dy)) {
@@ -349,10 +346,10 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                                     var ma = (uint32)mask0.RGBA64At(mx, myΔ2).A;
                                     switch (ᐧ) {
                                     case {} when ma is 0: {
-                                        if (op == Over){
+                                        if (op == Over) {
                                             // No-op.
                                         } else {
-                                            dst0.SetRGBA64(x, y, new color.RGBA64(nil));
+                                            dst0.SetRGBA64(x, y, new color.RGBA64());
                                         }
                                         break;
                                     }
@@ -362,7 +359,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
                                     }
                                     default: {
                                         var srgba = src0.RGBA64At(sx, syΔ2);
-                                        if (op == Over){
+                                        if (op == Over) {
                                             var drgba = dst0.RGBA64At(x, y);
                                             var a = (uint32)m - ((uint32)srgba.A * ma / (uint32)m);
                                             dst0.SetRGBA64(x, y, new color.RGBA64(
@@ -404,12 +401,12 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
         nint mx = mp.X + x0 - r.Min.X;
         for (nint x = x0; x != x1; (x, sx, mx) = (x + dx, sx + dx, mx + dx)) {
             var ma = (uint32)m;
-            if (mask != default!) {
+            if (mask != nil) {
                 (_, _, _, ma) = mask.At(mx, my).RGBA();
             }
             switch (ᐧ) {
             case {} when ma is 0: {
-                if (op == Over){
+                if (op == Over) {
                     // No-op.
                 } else {
                     dst.Set(x, y, color.Transparent);
@@ -422,7 +419,7 @@ public static void DrawMask(Image dst, image.Rectangle rʗp, image.Image src, im
             }
             default: {
                 var (sr, sg, sb, sa) = src.At(sx, sy).RGBA();
-                if (op == Over){
+                if (op == Over) {
                     var (dr, dg, db, da) = dst.At(x, y).RGBA();
                     var a = (uint32)m - (sa * ma / (uint32)m);
                     @out.R = (uint16)((dr * a + sr * ma) / (uint32)m);
@@ -504,12 +501,12 @@ internal static void drawCopyOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж
     nint dy = r.Dy();
     nint d0 = dst.PixOffset(r.Min.X, r.Min.Y);
     nint s0 = src.PixOffset(sp.X, sp.Y);
-    nint ddelta = default!;
-    nint sdelta = default!;
-    nint i0 = default!;
-    nint i1 = default!;
-    nint idelta = default!;
-    if (r.Min.Y < sp.Y || r.Min.Y == sp.Y && r.Min.X <= sp.X){
+    nint ddelta = default;
+    nint sdelta = default;
+    nint i0 = default;
+    nint i1 = default;
+    nint idelta = default;
+    if (r.Min.Y < sp.Y || r.Min.Y == sp.Y && r.Min.X <= sp.X) {
         ddelta = dst.Stride;
         sdelta = src.Stride;
         (i0, i1, idelta) = (0, dx * 4, +4);
@@ -919,9 +916,9 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
     // in DrawMask, except here the concrete type of dst is known to be
     // *image.RGBA.
     {
-        var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != default!) {
-            if (mask == default!){
-                if (op == Over){
+        var (src0, _) = src._<image.RGBA64Image>(ᐧ); if (src0 != nil) {
+            if (mask == nil) {
+                if (op == Over) {
                     for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
                         for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
                             var srgba = src0.RGBA64At(sx, sy);
@@ -952,10 +949,9 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                     }
                 }
                 return;
-            } else 
-            {
-                var (mask0, _) = mask._<image.RGBA64Image>(ᐧ); if (mask0 != default!) {
-                    if (op == Over){
+            } else {
+                var (mask0, _) = mask._<image.RGBA64Image>(ᐧ); if (mask0 != nil) {
+                    if (op == Over) {
                         for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
                             for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
                                 var ma = (uint32)mask0.RGBA64At(mx, my).A;
@@ -1001,12 +997,12 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
     for (nint y = y0; y != y1; (y, sy, my) = (y + dy, sy + dy, my + dy)) {
         for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
             var ma = (uint32)m;
-            if (mask != default!) {
+            if (mask != nil) {
                 (_, _, _, ma) = mask.At(mx, my).RGBA();
             }
             var (sr, sg, sb, sa) = src.At(sx, sy).RGBA();
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-            if (op == Over){
+            if (op == Over) {
                 var dr = (uint32)d[0];
                 var dg = (uint32)d[1];
                 var db = (uint32)d[2];
@@ -1067,28 +1063,28 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
     // dst.At. The dst.Set equivalent is a batch version of the algorithm
     // used by color.Palette's Index method in image/color/color.go, plus
     // optional Floyd-Steinberg error diffusion.
-    var palette = slice<array<int32>>(default!);
-    var pix = slice<byte>(default!);
+    var palette = slice<array<int32>>(default);
+    var pix = slice<byte>(default);
     nint stride = 0;
     {
         var (p, ok) = dst._<ж<image.Paletted>>(ᐧ); if (ok) {
-            palette = GoReflect.WithElemDims(new slice<array<int32>>(len((~p).Palette), () => new(4)), 4);
-            foreach (var (i, col) in (~p).Palette) {
+            palette = GoReflect.WithElemDims(new slice<array<int32>>(len(p.Palette), () => new(4)), 4);
+            foreach (var (i, col) in p.Palette) {
                 var (rΔ1, g, b, a) = col.RGBA();
                 palette[i][0] = (int32)rΔ1;
                 palette[i][1] = (int32)g;
                 palette[i][2] = (int32)b;
                 palette[i][3] = (int32)a;
             }
-            (pix, stride) = ((~p).Pix.slice(p.PixOffset(r.Min.X, r.Min.Y)), p.Value.Stride);
+            (pix, stride) = (p.Pix.slice(p.PixOffset(r.Min.X, r.Min.Y)), p.Stride);
         }
     }
 
     // quantErrorCurr and quantErrorNext are the Floyd-Steinberg quantization
     // errors that have been propagated to the pixels in the current and next
     // rows. The +2 simplifies calculation near the edges.
-    slice<array<int32>> quantErrorCurr = default!;
-    slice<array<int32>> quantErrorNext = default!;
+    slice<array<int32>> quantErrorCurr = default;
+    slice<array<int32>> quantErrorNext = default;
     if (floydSteinberg) {
         quantErrorCurr = GoReflect.WithElemDims(new slice<array<int32>>(r.Dx() + 2, () => new(4)), 4);
         quantErrorNext = GoReflect.WithElemDims(new slice<array<int32>>(r.Dx() + 2, () => new(4)), 4);
@@ -1120,8 +1116,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
     }}
 
     // Loop over each source pixel.
-    ref var @out = ref heap<color.RGBA64>(out var Ꮡout);
-    @out = new color.RGBA64(A: 0xffff);
+    ref var @out = ref heap<color.RGBA64>(new color.RGBA64(A: 0xffff), out var Ꮡout);
     for (nint y = 0; y != r.Dy(); y++) {
         for (nint x = 0; x != r.Dx(); x++) {
             // er, eg and eb are the pixel's R,G,B values plus the
@@ -1135,7 +1130,7 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
                 ea = clamp(ea + quantErrorCurr[x + 1][3] / 16);
             }
 
-            if (palette != default!){
+            if (palette != nil) {
                 // Find the closest palette color in Euclidean R,G,B,A space:
                 // the one that minimizes sum-squared-difference.
                 // TODO(nigeltao): consider smarter algorithms.

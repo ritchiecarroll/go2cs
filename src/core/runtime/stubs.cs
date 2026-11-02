@@ -67,7 +67,8 @@ internal static partial void mcall(Action<ж<g>> fn);
 internal static partial void systemstack(Action fn);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fatalSystemstackCalledˢ = "fatal: systemstack called from unexpected goroutine"u8;
+internal static ref readonly @string fatalSystemstackCalledˢ => ref fatalSystemstackCalledˢᵇ;
+private static readonly @string fatalSystemstackCalledˢᵇ = "fatal: systemstack called from unexpected goroutine"u8;
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -198,8 +199,8 @@ internal static @unsafe.Pointer noescape(@unsafe.Pointer Δp) {
 // USE CAREFULLY!
 //
 //go:nosplit
-internal static ж<T> noEscapePtr<T>(ж<T> Ꮡp) {
-    var x = (uintptr)Ꮡp;
+internal static ж<T> noEscapePtr<T>(ж<T> Δp) {
+    var x = (uintptr)Δp;
     return (ж<T>)(uintptr)((@unsafe.Pointer)((uintptr)(x ^ 0)));
 }
 

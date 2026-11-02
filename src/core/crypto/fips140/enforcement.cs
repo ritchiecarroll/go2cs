@@ -4,7 +4,7 @@
 namespace go.crypto;
 
 using godebug = go.@internal.godebug_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using go.@internal;
 
 partial class fips140_package {
@@ -33,7 +33,7 @@ public static void WithoutEnforcement(Action f) {
     finally { ᒐ.Run(); }
 }
 
-internal static bool enabled = godebug.New("fips140"u8).Value() == "only"u8;
+internal static bool enabled = godebug.New("fips140").Value() == "only"u8;
 
 // Enforced indicates if strict FIPS 140-3 enforcement is enabled. Strict
 // enforcement is enabled when a program is run with GODEBUG=fips140=only and

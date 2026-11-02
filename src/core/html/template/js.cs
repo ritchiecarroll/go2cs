@@ -19,7 +19,8 @@ partial class template_package {
 // jsWhitespace contains all of the JS whitespace characters, as defined
 // by the \s character class.
 // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Character_classes.
-internal static readonly @string jsWhitespace = "\f\n\r\t\v\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"u8;
+internal static ref readonly @string jsWhitespace => ref jsWhitespaceᵇ;
+private static readonly @string jsWhitespaceᵇ = "\f\n\r\t\v\u0020\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"u8;
 
 // nextJSCtx returns the context that determines whether a slash after the
 // given run of tokens starts a regular expression instead of a division
@@ -45,7 +46,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
         var c = s[len(s) - 1];
         nint n = len(s);
         switch (c) {
-        case (rune)'+' or (rune)'-': {
+        case (byte)'+' or (byte)'-': {
             // ++ and -- are not regexp preceders, but + and - are whether
             // they are used as infix or prefix operators.
             nint start = n - 1;
@@ -60,31 +61,31 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
             }
             return jsCtxDivOp;
         }
-        case (rune)'.': {
+        case (byte)'.': {
             // Handle "42."
-            if (n != 1 && (rune)'0' <= s[n - 2] && s[n - 2] <= (rune)'9') {
+            if (n != 1 && '0' <= s[n - 2] && s[n - 2] <= '9') {
                 return jsCtxDivOp;
             }
             return jsCtxRegexp;
         }
         // Suffixes for all punctuators from section 7.7 of the language spec
         // that only end binary operators not handled above.
-        case (rune)',' or (rune)'<' or (rune)'>' or (rune)'=' or (rune)'*' or (rune)'%' or (rune)'&' or (rune)'|' or (rune)'^' or (rune)'?': {
+        case (byte)',' or (byte)'<' or (byte)'>' or (byte)'=' or (byte)'*' or (byte)'%' or (byte)'&' or (byte)'|' or (byte)'^' or (byte)'?': {
             return jsCtxRegexp;
         }
         // Suffixes for all punctuators from section 7.7 of the language spec
         // that are prefix operators not handled above.
-        case (rune)'!' or (rune)'~': {
+        case (byte)'!' or (byte)'~': {
             return jsCtxRegexp;
         }
         // Matches all the punctuators from section 7.7 of the language spec
         // that are open brackets not handled above.
-        case (rune)'(' or (rune)'[': {
+        case (byte)'(' or (byte)'[': {
             return jsCtxRegexp;
         }
         // Matches all the punctuators from section 7.7 of the language spec
         // that precede expression starts.
-        case (rune)':' or (rune)';' or (rune)'{': {
+        case (byte)':' or (byte)';' or (byte)'{': {
             return jsCtxRegexp;
         }
         // CAVEAT: the close punctuators ('}', ']', ')') precede div ops and
@@ -98,7 +99,7 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
         //     if (b) /foo/.test(x) && ...
         // but this is much less likely than
         //     (a + b) / c
-        case (rune)'}': {
+        case (byte)'}': {
             return jsCtxRegexp;
         }
         default: {
@@ -126,21 +127,21 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
 // expression in JS source. It deliberately treats the context-sensitive
 // keyword yield as a keyword.
 [GoLazy] partial class lazyᴛregexpPrecederKeywords { internal static map<@string, bool> regexpPrecederKeywords = new map<@string, bool>{
-    ["break"u8] = true,
-    ["case"u8] = true,
-    ["continue"u8] = true,
-    ["delete"u8] = true,
-    ["do"u8] = true,
-    ["else"u8] = true,
-    ["finally"u8] = true,
-    ["in"u8] = true,
-    ["instanceof"u8] = true,
-    ["return"u8] = true,
-    ["throw"u8] = true,
-    ["try"u8] = true,
-    ["typeof"u8] = true,
-    ["void"u8] = true,
-    ["yield"u8] = true
+    ["break"] = true,
+    ["case"] = true,
+    ["continue"] = true,
+    ["delete"] = true,
+    ["do"] = true,
+    ["else"] = true,
+    ["finally"] = true,
+    ["in"] = true,
+    ["instanceof"] = true,
+    ["return"] = true,
+    ["throw"] = true,
+    ["try"] = true,
+    ["typeof"] = true,
+    ["void"] = true,
+    ["yield"] = true
 }; }
 
 internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
@@ -152,8 +153,8 @@ internal static any indirectToJSONMarshaler(any a) {
     // argument, so we must support it. Otherwise we'd panic below, as one
     // cannot call the Type or Interface methods on an invalid
     // reflect.Value. See golang.org/issue/18716.
-    if (a == default!) {
-        return default!;
+    if (a == nil) {
+        return default;
     }
 
     var v = reflect.ValueOf(a);
@@ -163,21 +164,25 @@ internal static any indirectToJSONMarshaler(any a) {
     return v.Interface();
 }
 
-internal static ж<regexp.Regexp> scriptTagRe = regexp.MustCompile("(?i)<(/?)script"u8);
+internal static ж<regexp.Regexp> scriptTagRe = regexp.MustCompile("(?i)<(/?)script");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x3Cˢ = @"\x3C!--"u8;
-internal static readonly @string nullˢ = " null "u8;
-internal static readonly @string u2028ˢ = @"\u2028"u8;
-internal static readonly @string u2029ˢ = @"\u2029"u8;
+internal static ref readonly @string x3Cˢ => ref x3Cˢᵇ;
+private static readonly @string x3Cˢᵇ = @"\x3C!--"u8;
+internal static ref readonly @string nullˢ => ref nullˢᵇ;
+private static readonly @string nullˢᵇ = " null "u8;
+internal static ref readonly @string u2028ˢ => ref u2028ˢᵇ;
+private static readonly @string u2028ˢᵇ = @"\u2028"u8;
+internal static ref readonly @string u2029ˢ => ref u2029ˢᵇ;
+private static readonly @string u2029ˢᵇ = @"\u2029"u8;
 
 // jsValEscaper escapes its inputs to a JS Expression (section 11.14) that has
 // neither side-effects nor free variables outside (NaN, Infinity).
 internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    any a = default!;
-    if (len(args) == 1){
+    any a = default;
+    if (len(args) == 1) {
         a = indirectToJSONMarshaler(args[0]);
         switch (a.type()) {
         case JS t: {
@@ -204,7 +209,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     // TODO: detect cycles before calling Marshal which loops infinitely on
     // cyclic data. This may be an unacceptable DoS risk.
     var (b, err) = json.Marshal(a);
-    if (err != default!) {
+    if (err != nil) {
         // While the standard JSON marshaler does not include user controlled
         // information in the error message, if a type has a MarshalJSON method,
         // the content of the error message is not guaranteed. Since we insert
@@ -227,8 +232,8 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         //          second line of error message */null
         @string errStr = err.Error();
         errStr = (@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8));
-        errStr = strings.ReplaceAll(errStr, "*/"u8, "* /"u8);
-        errStr = strings.ReplaceAll(errStr, "<!--"u8, x3Cˢ);
+        errStr = strings.ReplaceAll(errStr, "*/", "* /");
+        errStr = strings.ReplaceAll(errStr, "<!--", x3Cˢ);
         return fmt.Sprintf(" /* %s */null "u8, errStr);
     }
 
@@ -249,7 +254,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     // keywords: in, instanceof, typeof, void
     var pad = isJSIdentPart(first) || isJSIdentPart(last);
     if (pad) {
-        Ꮡbuf.WriteByte((rune)' ');
+        Ꮡbuf.WriteByte((byte)' ');
     }
     nint written = 0;
     // Make sure that json.Marshal escapes codepoints U+2028 & U+2029
@@ -257,10 +262,9 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     for (nint i = 0; i < len(b); ) {
         var (rune, n) = utf8.DecodeRune(b.slice(i));
         @string repl = ""u8;
-        if (rune == 0x2028){
+        if (rune == 0x2028) {
             repl = u2028ˢ;
-        } else 
-        if (rune == 0x2029) {
+        } else if (rune == 0x2029) {
             repl = u2029ˢ;
         }
         if (repl != ""u8) {
@@ -273,7 +277,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
     if (buf.Len() != 0) {
         Ꮡbuf.Write(b.slice(written));
         if (pad) {
-            Ꮡbuf.WriteByte((rune)' ');
+            Ꮡbuf.WriteByte((byte)' ');
         }
         return buf.String();
     }
@@ -311,7 +315,7 @@ internal static @string jsRegexpEscaper(params ꓸꓸꓸany argsʗp) {
     s = replace(s, jsRegexpReplacementTable);
     if (s == ""u8) {
         // /{{.X}}/ should not produce a line comment when .X == "".
-        return "(?:)"u8;
+        return "(?:)";
     }
     return s;
 }
@@ -329,7 +333,7 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
     for (nint i = 0; i < len(s); i += w) {
         // See comment in htmlEscaper.
         (r, w) = utf8.DecodeRuneInString(s.slice(i));
-        @string repl = default!;
+        @string repl = default;
         switch (ᐧ) {
         case {} when (nint)r < len(lowUnicodeReplacementTable): {
             repl = lowUnicodeReplacementTable[r];
@@ -339,11 +343,11 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
             repl = replacementTable[r];
             break;
         }
-        case {} when r is (rune)'\u2028': {
+        case {} when r is '\u2028': {
             repl = u2028ˢ;
             break;
         }
-        case {} when r is (rune)'\u2029': {
+        case {} when r is '\u2029': {
             repl = u2029ˢ;
             break;
         }
@@ -366,115 +370,115 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
 }
 
 [GoLazy] partial class lazyᴛlowUnicodeReplacementTable { internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(32){
-    [0] = @"\u0000"u8, [1] = @"\u0001"u8, [2] = @"\u0002"u8, [3] = @"\u0003"u8, [4] = @"\u0004"u8, [5] = @"\u0005"u8, [6] = @"\u0006"u8,
-    [(rune)'\a'] = @"\u0007"u8,
-    [(rune)'\b'] = @"\u0008"u8,
-    [(rune)'\t'] = @"\t"u8,
-    [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
-    [(rune)'\f'] = @"\f"u8,
-    [(rune)'\r'] = @"\r"u8,
-    [0xe] = @"\u000e"u8, [0xf] = @"\u000f"u8, [0x10] = @"\u0010"u8, [0x11] = @"\u0011"u8, [0x12] = @"\u0012"u8, [0x13] = @"\u0013"u8,
-    [0x14] = @"\u0014"u8, [0x15] = @"\u0015"u8, [0x16] = @"\u0016"u8, [0x17] = @"\u0017"u8, [0x18] = @"\u0018"u8, [0x19] = @"\u0019"u8,
-    [0x1a] = @"\u001a"u8, [0x1b] = @"\u001b"u8, [0x1c] = @"\u001c"u8, [0x1d] = @"\u001d"u8, [0x1e] = @"\u001e"u8, [0x1f] = @"\u001f"u8
+    [0] = @"\u0000", [1] = @"\u0001", [2] = @"\u0002", [3] = @"\u0003", [4] = @"\u0004", [5] = @"\u0005", [6] = @"\u0006",
+    ['\a'] = @"\u0007",
+    ['\b'] = @"\u0008",
+    ['\t'] = @"\t",
+    ['\n'] = @"\n",
+    ['\v'] = @"\u000b", // "\v" == "v" on IE 6.
+    ['\f'] = @"\f",
+    ['\r'] = @"\r",
+    [0xe] = @"\u000e", [0xf] = @"\u000f", [0x10] = @"\u0010", [0x11] = @"\u0011", [0x12] = @"\u0012", [0x13] = @"\u0013",
+    [0x14] = @"\u0014", [0x15] = @"\u0015", [0x16] = @"\u0016", [0x17] = @"\u0017", [0x18] = @"\u0018", [0x19] = @"\u0019",
+    [0x1a] = @"\u001a", [0x1b] = @"\u001b", [0x1c] = @"\u001c", [0x1d] = @"\u001d", [0x1e] = @"\u001e", [0x1f] = @"\u001f"
 }; }
 
 [GoLazy] partial class lazyᴛjsStrReplacementTable { internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
-    [0] = @"\u0000"u8,
-    [(rune)'\t'] = @"\t"u8,
-    [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
-    [(rune)'\f'] = @"\f"u8,
-    [(rune)'\r'] = @"\r"u8,
+    [0] = @"\u0000",
+    ['\t'] = @"\t",
+    ['\n'] = @"\n",
+    ['\v'] = @"\u000b", // "\v" == "v" on IE 6.
+    ['\f'] = @"\f",
+    ['\r'] = @"\r",
     // Encode HTML specials as hex so the output can be embedded
     // in HTML attributes without further encoding.
-    [(rune)'"'] = @"\u0022"u8,
-    [(rune)'`'] = @"\u0060"u8,
-    [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\''] = @"\u0027"u8,
-    [(rune)'+'] = @"\u002b"u8,
-    [(rune)'/'] = @"\/"u8,
-    [(rune)'<'] = @"\u003c"u8,
-    [(rune)'>'] = @"\u003e"u8,
-    [(rune)'\\'] = @"\\"u8
+    ['"'] = @"\u0022",
+    ['`'] = @"\u0060",
+    ['&'] = @"\u0026",
+    ['\''] = @"\u0027",
+    ['+'] = @"\u002b",
+    ['/'] = @"\/",
+    ['<'] = @"\u003c",
+    ['>'] = @"\u003e",
+    ['\\'] = @"\\"
 }; }
 
 // jsBqStrReplacementTable is like jsStrReplacementTable except it also contains
 // the special characters for JS template literals: $, {, and }.
 [GoLazy] partial class lazyᴛjsBqStrReplacementTable { internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126){
-    [0] = @"\u0000"u8,
-    [(rune)'\t'] = @"\t"u8,
-    [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
-    [(rune)'\f'] = @"\f"u8,
-    [(rune)'\r'] = @"\r"u8,
+    [0] = @"\u0000",
+    ['\t'] = @"\t",
+    ['\n'] = @"\n",
+    ['\v'] = @"\u000b", // "\v" == "v" on IE 6.
+    ['\f'] = @"\f",
+    ['\r'] = @"\r",
     // Encode HTML specials as hex so the output can be embedded
     // in HTML attributes without further encoding.
-    [(rune)'"'] = @"\u0022"u8,
-    [(rune)'`'] = @"\u0060"u8,
-    [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\''] = @"\u0027"u8,
-    [(rune)'+'] = @"\u002b"u8,
-    [(rune)'/'] = @"\/"u8,
-    [(rune)'<'] = @"\u003c"u8,
-    [(rune)'>'] = @"\u003e"u8,
-    [(rune)'\\'] = @"\\"u8,
-    [(rune)'$'] = @"\u0024"u8,
-    [(rune)'{'] = @"\u007b"u8,
-    [(rune)'}'] = @"\u007d"u8
+    ['"'] = @"\u0022",
+    ['`'] = @"\u0060",
+    ['&'] = @"\u0026",
+    ['\''] = @"\u0027",
+    ['+'] = @"\u002b",
+    ['/'] = @"\/",
+    ['<'] = @"\u003c",
+    ['>'] = @"\u003e",
+    ['\\'] = @"\\",
+    ['$'] = @"\u0024",
+    ['{'] = @"\u007b",
+    ['}'] = @"\u007d"
 }; }
 
 // jsStrNormReplacementTable is like jsStrReplacementTable but does not
 // overencode existing escapes since this table has no entry for `\`.
 [GoLazy] partial class lazyᴛjsStrNormReplacementTable { internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97){
-    [0] = @"\u0000"u8,
-    [(rune)'\t'] = @"\t"u8,
-    [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
-    [(rune)'\f'] = @"\f"u8,
-    [(rune)'\r'] = @"\r"u8,
+    [0] = @"\u0000",
+    ['\t'] = @"\t",
+    ['\n'] = @"\n",
+    ['\v'] = @"\u000b", // "\v" == "v" on IE 6.
+    ['\f'] = @"\f",
+    ['\r'] = @"\r",
     // Encode HTML specials as hex so the output can be embedded
     // in HTML attributes without further encoding.
-    [(rune)'"'] = @"\u0022"u8,
-    [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\''] = @"\u0027"u8,
-    [(rune)'`'] = @"\u0060"u8,
-    [(rune)'+'] = @"\u002b"u8,
-    [(rune)'/'] = @"\/"u8,
-    [(rune)'<'] = @"\u003c"u8,
-    [(rune)'>'] = @"\u003e"u8
+    ['"'] = @"\u0022",
+    ['&'] = @"\u0026",
+    ['\''] = @"\u0027",
+    ['`'] = @"\u0060",
+    ['+'] = @"\u002b",
+    ['/'] = @"\/",
+    ['<'] = @"\u003c",
+    ['>'] = @"\u003e"
 }; }
 
 [GoLazy] partial class lazyᴛjsRegexpReplacementTable { internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126){
-    [0] = @"\u0000"u8,
-    [(rune)'\t'] = @"\t"u8,
-    [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
-    [(rune)'\f'] = @"\f"u8,
-    [(rune)'\r'] = @"\r"u8,
+    [0] = @"\u0000",
+    ['\t'] = @"\t",
+    ['\n'] = @"\n",
+    ['\v'] = @"\u000b", // "\v" == "v" on IE 6.
+    ['\f'] = @"\f",
+    ['\r'] = @"\r",
     // Encode HTML specials as hex so the output can be embedded
     // in HTML attributes without further encoding.
-    [(rune)'"'] = @"\u0022"u8,
-    [(rune)'$'] = @"\$"u8,
-    [(rune)'&'] = @"\u0026"u8,
-    [(rune)'\''] = @"\u0027"u8,
-    [(rune)'('] = @"\("u8,
-    [(rune)')'] = @"\)"u8,
-    [(rune)'*'] = @"\*"u8,
-    [(rune)'+'] = @"\u002b"u8,
-    [(rune)'-'] = @"\-"u8,
-    [(rune)'.'] = @"\."u8,
-    [(rune)'/'] = @"\/"u8,
-    [(rune)'<'] = @"\u003c"u8,
-    [(rune)'>'] = @"\u003e"u8,
-    [(rune)'?'] = @"\?"u8,
-    [(rune)'['] = @"\["u8,
-    [(rune)'\\'] = @"\\"u8,
-    [(rune)']'] = @"\]"u8,
-    [(rune)'^'] = @"\^"u8,
-    [(rune)'{'] = @"\{"u8,
-    [(rune)'|'] = @"\|"u8,
-    [(rune)'}'] = @"\}"u8
+    ['"'] = @"\u0022",
+    ['$'] = @"\$",
+    ['&'] = @"\u0026",
+    ['\''] = @"\u0027",
+    ['('] = @"\(",
+    [')'] = @"\)",
+    ['*'] = @"\*",
+    ['+'] = @"\u002b",
+    ['-'] = @"\-",
+    ['.'] = @"\.",
+    ['/'] = @"\/",
+    ['<'] = @"\u003c",
+    ['>'] = @"\u003e",
+    ['?'] = @"\?",
+    ['['] = @"\[",
+    ['\\'] = @"\\",
+    [']'] = @"\]",
+    ['^'] = @"\^",
+    ['{'] = @"\{",
+    ['|'] = @"\|",
+    ['}'] = @"\}"
 }; }
 
 // isJSIdentPart reports whether the given rune is a JS identifier part.
@@ -483,19 +487,19 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
 // a keyword.
 internal static bool isJSIdentPart(rune r) {
     switch (ᐧ) {
-    case {} when r is (rune)'$': {
+    case {} when r is '$': {
         return true;
     }
-    case {} when (rune)'0' <= r && r <= (rune)'9': {
+    case {} when '0' <= r && r <= '9': {
         return true;
     }
-    case {} when (rune)'A' <= r && r <= (rune)'Z': {
+    case {} when 'A' <= r && r <= 'Z': {
         return true;
     }
-    case {} when r is (rune)'_': {
+    case {} when r is '_': {
         return true;
     }
-    case {} when (rune)'a' <= r && r <= (rune)'z': {
+    case {} when 'a' <= r && r <= 'z': {
         return true;
     }}
     return false;
@@ -511,16 +515,17 @@ internal static bool isJSType(@string mimeType) {
     //   https://tools.ietf.org/html/rfc4329#section-3
     //   https://www.ietf.org/rfc/rfc4627.txt
     // discard parameters
-    (mimeType, _, _) = strings.Cut(mimeType, ";"u8);
+    (mimeType, _, _) = strings.Cut(mimeType, ";");
     mimeType = strings.ToLower(mimeType);
     mimeType = strings.TrimSpace(mimeType);
     var exprᴛ1 = mimeType;
-    if (exprᴛ1 == ""u8 || exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 } // end template_package

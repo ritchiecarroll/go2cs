@@ -19,53 +19,53 @@ partial struct globTestsᴛ1 /*dyn*/ {
     internal fs.FS fs;
     internal @string pattern, result;
 }
-internal static slice<globTestsᴛ1> globTests = new globTestsᴛ1[]{
-    new(os.DirFS("."u8), "glob.go"u8, "glob.go"u8),
-    new(os.DirFS("."u8), "gl?b.go"u8, "glob.go"u8),
-    new(os.DirFS("."u8), @"gl\ob.go"u8, "glob.go"u8),
-    new(os.DirFS("."u8), "*"u8, "glob.go"u8),
-    new(os.DirFS(".."u8), "*/glob.go"u8, "fs/glob.go"u8)
-}.slice();
+internal static slice<globTestsᴛ1> globTests = slice<globTestsᴛ1>([
+    new(os.DirFS("."), "glob.go", "glob.go"),
+    new(os.DirFS("."), "gl?b.go", "glob.go"),
+    new(os.DirFS("."), @"gl\ob.go", "glob.go"),
+    new(os.DirFS("."), "*", "glob.go"),
+    new(os.DirFS(".."), "*/glob.go", "fs/glob.go")
+]);
 
-public static void TestGlob(ж<testing.T> Ꮡt) {
+public static void TestGlob(ж<testing.T> t) {
     foreach (var (_, tt) in globTests) {
         var (matches, err) = Glob(tt.fs, tt.pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Glob error for %q: %s"u8, tt.pattern, err);
+        if (err != nil) {
+            t.Errorf("Glob error for %q: %s", tt.pattern, err);
             continue;
         }
         if (!slices.Contains(matches, tt.result)) {
-            Ꮡt.Errorf("Glob(%#q) = %#v want %v"u8, tt.pattern, matches, tt.result);
+            t.Errorf("Glob(%#q) = %#v want %v", tt.pattern, matches, tt.result);
         }
     }
-    foreach (var (_, pattern) in new @string[]{"no_match"u8, "../*/no_match"u8, @"\*"u8}.slice()) {
-        var (matches, err) = Glob(os.DirFS("."u8), pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Glob error for %q: %s"u8, pattern, err);
+    foreach (var (_, pattern) in slice<@string>(["no_match", "../*/no_match", @"\*"])) {
+        var (matches, err) = Glob(os.DirFS("."), pattern);
+        if (err != nil) {
+            t.Errorf("Glob error for %q: %s", pattern, err);
             continue;
         }
         if (len(matches) != 0) {
-            Ꮡt.Errorf("Glob(%#q) = %#v want []"u8, pattern, matches);
+            t.Errorf("Glob(%#q) = %#v want []", pattern, matches);
         }
     }
 }
 
-public static void TestGlobError(ж<testing.T> Ꮡt) {
-    var bad = new @string[]{@"[]"u8, @"nonexist/[]"u8}.slice();
+public static void TestGlobError(ж<testing.T> t) {
+    var bad = slice<@string>([@"[]", @"nonexist/[]"]);
     foreach (var (_, pattern) in bad) {
-        var (_, err) = Glob(os.DirFS("."u8), pattern);
+        var (_, err) = Glob(os.DirFS("."), pattern);
         if (!AreEqual(err, path.ErrBadPattern)) {
-            Ꮡt.Errorf("Glob(fs, %#q) returned err=%v, want path.ErrBadPattern"u8, pattern, err);
+            t.Errorf("Glob(fs, %#q) returned err=%v, want path.ErrBadPattern", pattern, err);
         }
     }
 }
 
-public static partial void TestCVE202230630(ж<testing.T> Ꮡt) {
+public static partial void TestCVE202230630(ж<testing.T> t) {
     // Prior to CVE-2022-30630, a stack exhaustion would occur given a large
     // number of separators. There is now a limit of 10,000.
-    var (_, err) = Glob(os.DirFS("."u8), "/*"u8 + strings.Repeat("/"u8, 10001));
+    var (_, err) = Glob(os.DirFS("."), "/*"u8 + strings.Repeat("/", 10001));
     if (!AreEqual(err, path.ErrBadPattern)) {
-        Ꮡt.Fatalf("Glob returned err=%v, want %v"u8, err, path.ErrBadPattern);
+        t.Fatalf("Glob returned err=%v, want %v", err, path.ErrBadPattern);
     }
 }
 
@@ -74,19 +74,22 @@ partial struct globOnly {
 }
 
 internal static (fs.File, error) Open(this globOnly _, @string name) {
-    return (default!, ErrNotExist);
+    return (default, ErrNotExist);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string txtˢ = "*.txt"u8;
-private static readonly @string readDirOnlyˢ = "readDirOnly"u8;
-private static readonly @string openOnlyˢ = "openOnly"u8;
+private static ref readonly @string txtˢ => ref txtˢᵇ;
+private static readonly @string txtˢᵇ = "*.txt"u8;
+private static ref readonly @string readDirOnlyˢ => ref readDirOnlyˢᵇ;
+private static readonly @string readDirOnlyˢᵇ = "readDirOnly"u8;
+private static ref readonly @string openOnlyˢ => ref openOnlyˢᵇ;
+private static readonly @string openOnlyˢᵇ = "openOnly"u8;
 
-public static partial void TestGlobMethod(ж<testing.T> Ꮡt) {
+public static partial void TestGlobMethod(ж<testing.T> t) {
     void check(@string desc, slice<@string> namesΔ1, error errΔ1) {
-        Ꮡt.Helper();
-        if (errΔ1 != default! || len(namesΔ1) != 1 || namesΔ1[0] != "hello.txt") {
-            Ꮡt.Errorf("Glob(%s) = %v, %v, want %v, nil"u8, desc, namesΔ1, errΔ1, new @string[]{"hello.txt"u8}.slice());
+        t.Helper();
+        if (errΔ1 != nil || len(namesΔ1) != 1 || namesΔ1[0] != "hello.txt") {
+            t.Errorf("Glob(%s) = %v, %v, want %v, nil", desc, namesΔ1, errΔ1, slice<@string>(["hello.txt"]));
         }
     }
 

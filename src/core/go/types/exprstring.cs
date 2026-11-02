@@ -22,14 +22,22 @@ public static @string ExprString(ast.Expr x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string literalˢ = " literal)"u8;
-internal static readonly @string structˢ = "struct{"u8;
-internal static readonly @string funcˢ = "func"u8;
-internal static readonly @string interfaceˢ = "interface{"u8;
-internal static readonly @string mapˢ = "map["u8;
-internal static readonly @string chanˢ = "chan<- "u8;
-internal static readonly @string chanˢ2 = "<-chan "u8;
-internal static readonly @string chanˢ3 = "chan "u8;
+internal static ref readonly @string literalˢ => ref literalˢᵇ;
+private static readonly @string literalˢᵇ = " literal)"u8;
+internal static ref readonly @string structˢ => ref structˢᵇ;
+private static readonly @string structˢᵇ = "struct{"u8;
+internal static ref readonly @string funcˢ => ref funcˢᵇ;
+private static readonly @string funcˢᵇ = "func"u8;
+internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
+private static readonly @string interfaceˢᵇ = "interface{"u8;
+internal static ref readonly @string mapˢ => ref mapˢᵇ;
+private static readonly @string mapˢᵇ = "map["u8;
+internal static ref readonly @string chanˢ => ref chanˢᵇ;
+private static readonly @string chanˢᵇ = "chan<- "u8;
+internal static ref readonly @string chanˢ2 => ref chanˢ2ᵇ;
+private static readonly @string chanˢ2ᵇ = "<-chan "u8;
+internal static ref readonly @string chanˢ3 => ref chanˢ3ᵇ;
+private static readonly @string chanˢ3ᵇ = "chan "u8;
 
 // WriteExpr writes the (possibly shortened) string representation for x to buf.
 // Shortened representations are suitable for user interfaces but may not
@@ -49,13 +57,13 @@ public static void WriteExpr(ж<bytes.Buffer> Ꮡbuf, ast.Expr x) {
         break;
     }
     case ж<ast.Ident> xΔ1: {
-        buf.WriteString((~xΔ1).Name);
+        buf.WriteString(xΔ1.Name);
         break;
     }
     case ж<ast.Ellipsis> xΔ1: {
-        buf.WriteString("..."u8);
-        if ((~xΔ1).Elt != default!) {
-            WriteExpr(Ꮡbuf, (~xΔ1).Elt);
+        buf.WriteString("...");
+        if (xΔ1.Elt != nil) {
+            WriteExpr(Ꮡbuf, xΔ1.Elt);
         }
         break;
     }
@@ -64,109 +72,109 @@ public static void WriteExpr(ж<bytes.Buffer> Ꮡbuf, ast.Expr x) {
         break;
     }
     case ж<ast.FuncLit> xΔ1: {
-        buf.WriteByte((rune)'(');
-        WriteExpr(Ꮡbuf, new ast.FuncTypeжExpr((~xΔ1).Type));
+        buf.WriteByte((byte)'(');
+        WriteExpr(Ꮡbuf, new ast.FuncTypeжExpr(xΔ1.Type));
         buf.WriteString(literalˢ); // shortened
         break;
     }
     case ж<ast.CompositeLit> xΔ1: {
-        WriteExpr(Ꮡbuf, (~xΔ1).Type);
-        buf.WriteByte((rune)'{');
-        if (len((~xΔ1).Elts) > 0) {
-            buf.WriteString("…"u8);
+        WriteExpr(Ꮡbuf, xΔ1.Type);
+        buf.WriteByte((byte)'{');
+        if (len(xΔ1.Elts) > 0) {
+            buf.WriteString("…");
         }
-        buf.WriteByte((rune)'}');
+        buf.WriteByte((byte)'}');
         break;
     }
     case ж<ast.ParenExpr> xΔ1: {
-        buf.WriteByte((rune)'(');
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
-        buf.WriteByte((rune)')');
+        buf.WriteByte((byte)'(');
+        WriteExpr(Ꮡbuf, xΔ1.X);
+        buf.WriteByte((byte)')');
         break;
     }
     case ж<ast.SelectorExpr> xΔ1: {
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
-        buf.WriteByte((rune)'.');
-        buf.WriteString((~(~xΔ1).Sel).Name);
+        WriteExpr(Ꮡbuf, xΔ1.X);
+        buf.WriteByte((byte)'.');
+        buf.WriteString(xΔ1.Sel.Name);
         break;
     }
     case ж<ast.IndexExpr> _:
     case ж<ast.IndexListExpr> _: {
         var xΔ1 = x;
         var ix = unpackIndexedExpr(xΔ1);
-        WriteExpr(Ꮡbuf, (~ix).x);
-        buf.WriteByte((rune)'[');
-        writeExprList(Ꮡbuf, (~ix).indices);
-        buf.WriteByte((rune)']');
+        WriteExpr(Ꮡbuf, ix.x);
+        buf.WriteByte((byte)'[');
+        writeExprList(Ꮡbuf, ix.indices);
+        buf.WriteByte((byte)']');
         break;
     }
     case ж<ast.SliceExpr> xΔ1: {
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
-        buf.WriteByte((rune)'[');
-        if ((~xΔ1).Low != default!) {
-            WriteExpr(Ꮡbuf, (~xΔ1).Low);
+        WriteExpr(Ꮡbuf, xΔ1.X);
+        buf.WriteByte((byte)'[');
+        if (xΔ1.Low != nil) {
+            WriteExpr(Ꮡbuf, xΔ1.Low);
         }
-        buf.WriteByte((rune)':');
-        if ((~xΔ1).High != default!) {
-            WriteExpr(Ꮡbuf, (~xΔ1).High);
+        buf.WriteByte((byte)':');
+        if (xΔ1.High != nil) {
+            WriteExpr(Ꮡbuf, xΔ1.High);
         }
-        if ((~xΔ1).Slice3) {
-            buf.WriteByte((rune)':');
-            if ((~xΔ1).Max != default!) {
-                WriteExpr(Ꮡbuf, (~xΔ1).Max);
+        if (xΔ1.Slice3) {
+            buf.WriteByte((byte)':');
+            if (xΔ1.Max != nil) {
+                WriteExpr(Ꮡbuf, xΔ1.Max);
             }
         }
-        buf.WriteByte((rune)']');
+        buf.WriteByte((byte)']');
         break;
     }
     case ж<ast.TypeAssertExpr> xΔ1: {
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
-        buf.WriteString(".("u8);
-        WriteExpr(Ꮡbuf, (~xΔ1).Type);
-        buf.WriteByte((rune)')');
+        WriteExpr(Ꮡbuf, xΔ1.X);
+        buf.WriteString(".(");
+        WriteExpr(Ꮡbuf, xΔ1.Type);
+        buf.WriteByte((byte)')');
         break;
     }
     case ж<ast.CallExpr> xΔ1: {
-        WriteExpr(Ꮡbuf, (~xΔ1).Fun);
-        buf.WriteByte((rune)'(');
-        writeExprList(Ꮡbuf, (~xΔ1).Args);
+        WriteExpr(Ꮡbuf, xΔ1.Fun);
+        buf.WriteByte((byte)'(');
+        writeExprList(Ꮡbuf, xΔ1.Args);
         if (hasDots(ref (xΔ1).DerefOrNull())) {
-            buf.WriteString("..."u8);
+            buf.WriteString("...");
         }
-        buf.WriteByte((rune)')');
+        buf.WriteByte((byte)')');
         break;
     }
     case ж<ast.StarExpr> xΔ1: {
-        buf.WriteByte((rune)'*');
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
+        buf.WriteByte((byte)'*');
+        WriteExpr(Ꮡbuf, xΔ1.X);
         break;
     }
     case ж<ast.UnaryExpr> xΔ1: {
-        buf.WriteString((~xΔ1).Op.String());
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
+        buf.WriteString(xΔ1.Op.String());
+        WriteExpr(Ꮡbuf, xΔ1.X);
         break;
     }
     case ж<ast.BinaryExpr> xΔ1: {
-        WriteExpr(Ꮡbuf, (~xΔ1).X);
-        buf.WriteByte((rune)' ');
-        buf.WriteString((~xΔ1).Op.String());
-        buf.WriteByte((rune)' ');
-        WriteExpr(Ꮡbuf, (~xΔ1).Y);
+        WriteExpr(Ꮡbuf, xΔ1.X);
+        buf.WriteByte((byte)' ');
+        buf.WriteString(xΔ1.Op.String());
+        buf.WriteByte((byte)' ');
+        WriteExpr(Ꮡbuf, xΔ1.Y);
         break;
     }
     case ж<ast.ArrayType> xΔ1: {
-        buf.WriteByte((rune)'[');
-        if ((~xΔ1).Len != default!) {
-            WriteExpr(Ꮡbuf, (~xΔ1).Len);
+        buf.WriteByte((byte)'[');
+        if (xΔ1.Len != nil) {
+            WriteExpr(Ꮡbuf, xΔ1.Len);
         }
-        buf.WriteByte((rune)']');
-        WriteExpr(Ꮡbuf, (~xΔ1).Elt);
+        buf.WriteByte((byte)']');
+        WriteExpr(Ꮡbuf, xΔ1.Elt);
         break;
     }
     case ж<ast.StructType> xΔ1: {
         buf.WriteString(structˢ);
-        writeFieldList(Ꮡbuf, (~(~xΔ1).Fields).List, "; "u8, false);
-        buf.WriteByte((rune)'}');
+        writeFieldList(Ꮡbuf, xΔ1.Fields.List, "; ", false);
+        buf.WriteByte((byte)'}');
         break;
     }
     case ж<ast.FuncType> xΔ1: {
@@ -176,29 +184,32 @@ public static void WriteExpr(ж<bytes.Buffer> Ꮡbuf, ast.Expr x) {
     }
     case ж<ast.InterfaceType> xΔ1: {
         buf.WriteString(interfaceˢ);
-        writeFieldList(Ꮡbuf, (~(~xΔ1).Methods).List, "; "u8, true);
-        buf.WriteByte((rune)'}');
+        writeFieldList(Ꮡbuf, xΔ1.Methods.List, "; ", true);
+        buf.WriteByte((byte)'}');
         break;
     }
     case ж<ast.MapType> xΔ1: {
         buf.WriteString(mapˢ);
-        WriteExpr(Ꮡbuf, (~xΔ1).Key);
-        buf.WriteByte((rune)']');
+        WriteExpr(Ꮡbuf, xΔ1.Key);
+        buf.WriteByte((byte)']');
         WriteExpr(Ꮡbuf, (~xΔ1).Value);
         break;
     }
     case ж<ast.ChanType> xΔ1: {
-        @string s = default!;
-        var exprᴛ1 = (~xΔ1).Dir;
-        if (exprᴛ1 == ast.SEND) {
+        @string s = default;
+        switch (xΔ1.Dir) {
+        case var ᴛ when ᴛ == ast.SEND: {
             s = chanˢ;
+            break;
         }
-        else if (exprᴛ1 == ast.RECV) {
+        case var ᴛ when ᴛ == ast.RECV: {
             s = chanˢ2;
+            break;
         }
-        else { /* default: */
+        default: {
             s = chanˢ3;
-        }
+            break;
+        }}
         buf.WriteString(s);
         WriteExpr(Ꮡbuf, (~xΔ1).Value);
         break;
@@ -208,9 +219,9 @@ public static void WriteExpr(ж<bytes.Buffer> Ꮡbuf, ast.Expr x) {
 internal static void writeSigExpr(ж<bytes.Buffer> Ꮡbuf, ref ast.FuncType sig) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
-    buf.WriteByte((rune)'(');
-    writeFieldList(Ꮡbuf, (~sig.Params).List, ", "u8, false);
-    buf.WriteByte((rune)')');
+    buf.WriteByte((byte)'(');
+    writeFieldList(Ꮡbuf, sig.Params.List, ", ", false);
+    buf.WriteByte((byte)')');
 
     var res = sig.Results;
     nint n = res.NumFields();
@@ -219,17 +230,17 @@ internal static void writeSigExpr(ж<bytes.Buffer> Ꮡbuf, ref ast.FuncType sig)
         return;
     }
 
-    buf.WriteByte((rune)' ');
-    if (n == 1 && len((~(~res).List[0]).Names) == 0) {
+    buf.WriteByte((byte)' ');
+    if (n == 1 && len(res.List[0].Names) == 0) {
         // single unnamed result
-        WriteExpr(Ꮡbuf, (~(~res).List[0]).Type);
+        WriteExpr(Ꮡbuf, res.List[0].Type);
         return;
     }
 
     // multiple or named result(s)
-    buf.WriteByte((rune)'(');
-    writeFieldList(Ꮡbuf, (~res).List, ", "u8, false);
-    buf.WriteByte((rune)')');
+    buf.WriteByte((byte)'(');
+    writeFieldList(Ꮡbuf, res.List, ", ", false);
+    buf.WriteByte((byte)')');
 }
 
 internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>> list, @string sep, bool iface) {
@@ -241,22 +252,22 @@ internal static void writeFieldList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Field>
         }
 
         // field list names
-        writeIdentList(Ꮡbuf, (~f).Names);
+        writeIdentList(Ꮡbuf, f.Names);
 
         // types of interface methods consist of signatures only
         {
-            var (sig, _) = (~f).Type._<ж<ast.FuncType>>(ᐧ); if (sig != nil && iface) {
+            var (sig, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (sig != nil && iface) {
                 writeSigExpr(Ꮡbuf, ref (sig).DerefOrNull());
                 continue;
             }
         }
 
         // named fields are separated with a blank from the field type
-        if (len((~f).Names) > 0) {
-            buf.WriteByte((rune)' ');
+        if (len(f.Names) > 0) {
+            buf.WriteByte((byte)' ');
         }
 
-        WriteExpr(Ꮡbuf, (~f).Type);
+        WriteExpr(Ꮡbuf, f.Type);
 
         // ignore tag
     }
@@ -267,9 +278,9 @@ internal static void writeIdentList(ж<bytes.Buffer> Ꮡbuf, slice<ж<ast.Ident>
 
     foreach (var (i, x) in list) {
         if (i > 0) {
-            buf.WriteString(", "u8);
+            buf.WriteString(", ");
         }
-        buf.WriteString((~x).Name);
+        buf.WriteString(x.Name);
     }
 }
 
@@ -278,7 +289,7 @@ internal static void writeExprList(ж<bytes.Buffer> Ꮡbuf, slice<ast.Expr> list
 
     foreach (var (i, x) in list) {
         if (i > 0) {
-            buf.WriteString(", "u8);
+            buf.WriteString(", ");
         }
         WriteExpr(Ꮡbuf, x);
     }

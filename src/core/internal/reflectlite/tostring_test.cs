@@ -22,44 +22,48 @@ internal static @string valueToString(reflectlite.Value v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zeroValueˢ = "<zero Value>"u8;
-internal static readonly @string trueˢ = "true"u8;
-internal static readonly @string falseˢ = "false"u8;
+internal static ref readonly @string zeroValueˢ => ref zeroValueˢᵇ;
+private static readonly @string zeroValueˢᵇ = "<zero Value>"u8;
+internal static ref readonly @string trueˢ => ref trueˢᵇ;
+private static readonly @string trueˢᵇ = "true"u8;
+internal static ref readonly @string falseˢ => ref falseˢᵇ;
+private static readonly @string falseˢᵇ = "false"u8;
 
 internal static @string valueToStringImpl(reflectꓸValue val) {
-    @string str = default!;
+    @string str = default;
     if (!val.IsValid()) {
         return zeroValueˢ;
     }
     var typ = val.Type();
-    var exprᴛ1 = val.Kind();
-    if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+    switch (val.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return strconv.FormatInt(val.Int(), 10);
     }
-    if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
         return strconv.FormatUint(val.Uint(), 10);
     }
-    if (exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64) {
-        return strconv.FormatFloat(val.Float(), (rune)'g', -1, 64);
+    case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+        return strconv.FormatFloat(val.Float(), (byte)'g', -1, 64);
     }
-    if (exprᴛ1 == reflect.Complex64 || exprᴛ1 == reflect.Complex128) {
+    case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
         var c = val.Complex();
-        return strconv.FormatFloat(real(c), (rune)'g', -1, 64) + "+"u8 + strconv.FormatFloat(imag(c), (rune)'g', -1, 64) + "i"u8;
+        return strconv.FormatFloat(real(c), (byte)'g', -1, 64) + "+"u8 + strconv.FormatFloat(imag(c), (byte)'g', -1, 64) + "i"u8;
     }
-    if (exprᴛ1 == reflect.ΔString) {
+    case var ᴛ when ᴛ == reflect.ΔString: {
         return val.String();
     }
-    if (exprᴛ1 == reflect.ΔBool) {
-        if (val.Bool()){
+    case var ᴛ when ᴛ == reflect.ΔBool: {
+        if (val.Bool()) {
             return trueˢ;
         } else {
             return falseˢ;
         }
+        break;
     }
-    if (exprᴛ1 == reflect.ΔPointer) {
+    case var ᴛ when ᴛ == reflect.ΔPointer: {
         var v = val;
         str = typ.String() + "("u8;
-        if (v.IsNil()){
+        if (v.IsNil()) {
             str += "0"u8;
         } else {
             str += "&"u8 + valueToStringImpl(v.Elem());
@@ -67,7 +71,7 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         str += ")"u8;
         return str;
     }
-    if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) {
+    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice: {
         var v = val;
         str += typ.String();
         str += "{"u8;
@@ -80,18 +84,18 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    if (exprᴛ1 == reflect.Map) {
+    case var ᴛ when ᴛ == reflect.Map: {
         str += typ.String();
         str += "{"u8;
         str += "<can't iterate on maps>"u8;
         str += "}"u8;
         return str;
     }
-    if (exprᴛ1 == reflect.Chan) {
+    case var ᴛ when ᴛ == reflect.Chan: {
         str = typ.String();
         return str;
     }
-    if (exprᴛ1 == reflect.Struct) {
+    case var ᴛ when ᴛ == reflect.Struct: {
         var t = typ;
         var v = val;
         str += t.String();
@@ -105,15 +109,16 @@ internal static @string valueToStringImpl(reflectꓸValue val) {
         str += "}"u8;
         return str;
     }
-    if (exprᴛ1 == reflect.ΔInterface) {
+    case var ᴛ when ᴛ == reflect.ΔInterface: {
         return typ.String() + "("u8 + valueToStringImpl(val.Elem()) + ")"u8;
     }
-    if (exprᴛ1 == reflect.Func) {
+    case var ᴛ when ᴛ == reflect.Func: {
         return typ.String() + "(arg)"u8;
     }
-    { /* default: */
+    default: {
         throw panic("valueToString: can't print type " + typ.String());
-    }
+        break;
+    }}
 }
 
 } // end reflectlite_test_package

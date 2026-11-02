@@ -7,10 +7,6 @@
 global using static global::go.crypto.@internal.fips140cache_package;
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +25,11 @@ using static global::go.crypto.@internal.fips140cache_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.crypto.@internal.fips140cache_package.Cache<,>))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -39,7 +39,7 @@ using static global::go.crypto.@internal.fips140cache_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140cache/cache_test.go", "cache_test.cs", "ABYggoKCgoKCgqaSlJKmgqaCkoKCgqaCppKCkoKUppKCooKUgoKmkpKCgoKCuIKCgoKCgoLigpKClOKCkoKUgoKCkpSClAAKHLKmooKClIKCpqaCgpSCgoKClIKUlKbCgpKQkoKClIK0", "18-18:1;19-19:2;20-24:3;29-29:4;38-38:5;51-51:6;58-58:7;60-60:8;70-70:9;86-91:10;88-88:10.1;92-97:11;94-94:11.1;101-101:12;144-147:1;159-159:1")]
+[assembly: GoPositionMap("crypto/internal/fips140cache/cache_test.go", "cache_test.cs", "ABcggoKCgoKCgqaClJKmgqaCkoKCgqaCpoKCkoKUppKCooKUgoKmgpKCgoKCuIKCgoKCgoLigpKClOKCkoKUgoKCkpSClAAKHLKmooKClIKCpqaCgpSCgoKClIKUlKbCgpKQkoKClIK0", "18-18:1;19-19:2;20-24:3;29-29:4;38-38:5;51-51:6;58-58:7;60-60:8;70-70:9;86-91:10;88-88:10.1;92-97:11;94-94:11.1;101-101:12;144-147:1;159-159:1", "", "", "195:21")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

@@ -16,7 +16,7 @@ partial class os_package {
 // a call to Process.Signal can in an extremely unlikely case send a
 // signal to the wrong process, see issue #13987.
 internal static (bool, error) blockUntilWaitable(this ref Process p) {
-    return (false, default!);
+    return (false, default);
 }
 
 } // end os_package

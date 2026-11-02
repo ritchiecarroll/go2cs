@@ -47,12 +47,12 @@ partial class gob_package {
     [reflect.Uintptr] = decUintptrSlice
 }; }
 
-internal static bool decBoolArray(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decBoolArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decBoolSlice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decBoolSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -66,7 +66,7 @@ internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding bool array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding bool array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -77,12 +77,12 @@ internal static bool decBoolSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     return true;
 }
 
-internal static bool decComplex64Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decComplex64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decComplex64Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decComplex64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -96,7 +96,7 @@ internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflectꓸValu
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding complex64 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding complex64 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -109,12 +109,12 @@ internal static bool decComplex64Slice(ж<decoderState> Ꮡstate, reflectꓸValu
     return true;
 }
 
-internal static bool decComplex128Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decComplex128Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decComplex128Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decComplex128Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -128,7 +128,7 @@ internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflectꓸVal
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding complex128 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding complex128 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -141,12 +141,12 @@ internal static bool decComplex128Slice(ж<decoderState> Ꮡstate, reflectꓸVal
     return true;
 }
 
-internal static bool decFloat32Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decFloat32Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decFloat32Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decFloat32Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -160,7 +160,7 @@ internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding float32 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding float32 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -171,12 +171,12 @@ internal static bool decFloat32Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     return true;
 }
 
-internal static bool decFloat64Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decFloat64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decFloat64Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decFloat64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -190,7 +190,7 @@ internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding float64 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding float64 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -201,12 +201,12 @@ internal static bool decFloat64Slice(ж<decoderState> Ꮡstate, reflectꓸValue 
     return true;
 }
 
-internal static bool decIntArray(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decIntArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decIntSlice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decIntSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -220,7 +220,7 @@ internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, n
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding int array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding int array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -236,12 +236,12 @@ internal static bool decIntSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, n
     return true;
 }
 
-internal static bool decInt16Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt16Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decInt16Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decInt16Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -255,7 +255,7 @@ internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding int16 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding int16 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -270,12 +270,12 @@ internal static bool decInt16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     return true;
 }
 
-internal static bool decInt32Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt32Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decInt32Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decInt32Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -289,7 +289,7 @@ internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding int32 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding int32 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -304,12 +304,12 @@ internal static bool decInt32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     return true;
 }
 
-internal static bool decInt64Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decInt64Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decInt64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -323,7 +323,7 @@ internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding int64 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding int64 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -334,12 +334,12 @@ internal static bool decInt64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v,
     return true;
 }
 
-internal static bool decInt8Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decInt8Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decInt8Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decInt8Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -353,7 +353,7 @@ internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding int8 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding int8 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -368,12 +368,12 @@ internal static bool decInt8Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     return true;
 }
 
-internal static bool decStringArray(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decStringArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decStringSlice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decStringSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -387,7 +387,7 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding string array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding string array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -396,15 +396,15 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
         var u = state.decodeUint();
         nint n = (nint)u;
         if (n < 0 || (uint64)n != u || n > state.b.Len()) {
-            errorf("length of string exceeds input size (%d bytes)"u8, u);
+            errorf("length of string exceeds input size (%d bytes)", u);
         }
         if (n > state.b.Len()) {
-            errorf("string data too long for buffer: %d"u8, n);
+            errorf("string data too long for buffer: %d", n);
         }
         // Read the data.
         var data = state.b.Bytes();
         if (len(data) < n) {
-            errorf("invalid string length %d: exceeds input size %d"u8, n, len(data));
+            errorf("invalid string length %d: exceeds input size %d", n, len(data));
         }
         Δslice[i] = (@string)(data.slice(0, n));
         state.b.Drop(n);
@@ -412,12 +412,12 @@ internal static bool decStringSlice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUintArray(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUintArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decUintSlice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decUintSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -431,7 +431,7 @@ internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding uint array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding uint array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -446,12 +446,12 @@ internal static bool decUintSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, 
     return true;
 }
 
-internal static bool decUint16Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint16Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decUint16Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decUint16Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -465,7 +465,7 @@ internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding uint16 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding uint16 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -480,12 +480,12 @@ internal static bool decUint16Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUint32Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint32Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decUint32Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decUint32Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -499,7 +499,7 @@ internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding uint32 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding uint32 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -514,12 +514,12 @@ internal static bool decUint32Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUint64Array(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUint64Array(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decUint64Slice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decUint64Slice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -533,7 +533,7 @@ internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding uint64 array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding uint64 array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.
@@ -544,12 +544,12 @@ internal static bool decUint64Slice(ж<decoderState> Ꮡstate, reflectꓸValue v
     return true;
 }
 
-internal static bool decUintptrArray(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
+internal static bool decUintptrArray(ж<decoderState> state, reflectꓸValue v, nint length, error ovfl) {
     // Can only slice if it is addressable.
     if (!v.CanAddr()) {
         return false;
     }
-    return decUintptrSlice(Ꮡstate, v.Slice(0, v.Len()), length, ovfl);
+    return decUintptrSlice(state, v.Slice(0, v.Len()), length, ovfl);
 }
 
 internal static bool decUintptrSlice(ж<decoderState> Ꮡstate, reflectꓸValue v, nint length, error ovfl) {
@@ -563,7 +563,7 @@ internal static bool decUintptrSlice(ж<decoderState> Ꮡstate, reflectꓸValue 
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
-            errorf("decoding uintptr array or slice: length exceeds input size (%d elements)"u8, length);
+            errorf("decoding uintptr array or slice: length exceeds input size (%d elements)", length);
         }
         if (i >= len(Δslice)) {
             // This is a slice that we only partially allocated.

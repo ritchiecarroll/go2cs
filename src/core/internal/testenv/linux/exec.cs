@@ -38,9 +38,9 @@ private static readonly object skippingTestˢ = (@string)"skipping test:"u8;
 // for the resulting error.
 public static void MustHaveExec(testing.TB t) {
     {
-        var err = tryExec(); if (err != default!) {
+        var err = tryExec(); if (err != nil) {
             @string msg = fmt.Sprintf("cannot exec subprocess on %s/%s: %v"u8, Δruntime.GOOS, Δruntime.GOARCH, err);
-            if (t == default!) {
+            if (t == nil) {
                 throw panic(msg);
             }
             t.Helper();
@@ -52,12 +52,14 @@ public static void MustHaveExec(testing.TB t) {
 internal static Func<error> tryExec;
 internal static void initᴛtryExec() { tryExec = sync.OnceValue(error () => {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "wasip1"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "ios"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "wasip1"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "ios"u8: {
+        break;
     }
-    else { /* default: */
+    default: {
         // Assume that exec always works on non-mobile platforms and Android.
-        return default!;
-    }
+        return default;
+    }}
 
     // ios has an exec syscall but on real iOS devices it might return a
     // permission error. In an emulated environment (such as a Corellium host)
@@ -72,17 +74,17 @@ internal static void initᴛtryExec() { tryExec = sync.OnceValue(error () => {
         // This isn't a standard 'go test' binary, so we don't know how to
         // self-exec in a way that should succeed without side effects.
         // Just forget it.
-        return errors.New("can't probe for exec support with a non-test executable"u8);
+        return errors.New("can't probe for exec support with a non-test executable");
     }
 
     // We know that this is a test executable. We should be able to run it with a
     // no-op flag to check for overall exec support.
     var (exe, err) = exePath();
-    if (err != default!) {
+    if (err != nil) {
         return fmt.Errorf("can't probe for exec support: %w"u8, err);
     }
-    var cmd = exec.Command(exe, "-test.list=^$"u8);
-    cmd.Value.Env = origEnv;
+    var cmd = exec.Command(exe, "-test.list=^$");
+    cmd.Env = origEnv;
     return cmd.Run();
 }); }
 
@@ -94,9 +96,9 @@ public static @string Executable(testing.TB t) {
     MustHaveExec(t);
 
     var (exe, err) = exePath();
-    if (err != default!) {
+    if (err != nil) {
         @string msg = fmt.Sprintf("os.Executable error: %v"u8, err);
-        if (t == default!) {
+        if (t == nil) {
             throw panic(msg);
         }
         t.Fatal(msg);
@@ -120,15 +122,17 @@ public static void MustHaveExecPath(testing.TB t, @string path) {
         (_, err) = exec.LookPath(path);
         (err, _) = ᏑexecPaths.LoadOrStore(path, err);
     }
-    if (err != default!) {
+    if (err != nil) {
         t.Helper();
-        t.Skipf("skipping test: %s: %s"u8, path, err);
+        t.Skipf("skipping test: %s: %s", path, err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string godebugˢ = "GODEBUG="u8;
-private static readonly @string gotracebackˢ = "GOTRACEBACK="u8;
+private static ref readonly @string godebugˢ => ref godebugˢᵇ;
+private static readonly @string godebugˢᵇ = "GODEBUG="u8;
+private static ref readonly @string gotracebackˢ => ref gotracebackˢᵇ;
+private static readonly @string gotracebackˢᵇ = "GOTRACEBACK="u8;
 
 // CleanCmdEnv will fill cmd.Env with the environment, excluding certain
 // variables that could modify the behavior of the Go tools such as
@@ -139,7 +143,7 @@ private static readonly @string gotracebackˢ = "GOTRACEBACK="u8;
 public static ж<exec.Cmd> CleanCmdEnv(ж<exec.Cmd> Ꮡcmd) {
     ref var cmd = ref Ꮡcmd.DerefOrNull();
 
-    if (cmd.Env != default!) {
+    if (cmd.Env != nil) {
         throw panic("environment already set");
     }
     foreach (var (_, env) in cmd.Environ()) {
@@ -158,7 +162,8 @@ public static ж<exec.Cmd> CleanCmdEnv(ж<exec.Cmd> Ꮡcmd) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goTestTimeoutScaleˢ = "GO_TEST_TIMEOUT_SCALE"u8;
+private static ref readonly @string goTestTimeoutScaleˢ => ref goTestTimeoutScaleˢᵇ;
+private static readonly @string goTestTimeoutScaleˢᵇ = "GO_TEST_TIMEOUT_SCALE"u8;
 
 internal partial interface CommandContext_type /*dyn*/ :
     testing.TB
@@ -180,8 +185,8 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
     t.Helper();
     MustHaveExec(t);
 
-    Action cancelCtx = default!;
-    time.Duration gracePeriod = default!;                 // unlimited unless the test has a deadline (to allow for interactive debugging)
+    Action cancelCtx = default;
+    time.Duration gracePeriod = default; // unlimited unless the test has a deadline (to allow for interactive debugging)
 
     {
         var (tΔ1, ok) = t._<CommandContext_type>(ᐧ); if (ok) {
@@ -193,8 +198,8 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
                     {
                         @string s = os.Getenv(goTestTimeoutScaleˢ); if (s != ""u8) {
                             var (scale, err) = strconv.Atoi(s);
-                            if (err != default!) {
-                                tΔ1.Fatalf("invalid GO_TEST_TIMEOUT_SCALE: %v"u8, err);
+                            if (err != nil) {
+                                tΔ1.Fatalf("invalid GO_TEST_TIMEOUT_SCALE: %v", err);
                             }
                             gracePeriod *= ((time.Duration)(int64)scale);
                         }
@@ -236,33 +241,33 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
     var cmd = exec.CommandContext(ctx, name, args.ꓸꓸꓸ);
     var cancelCtxʗ1 = cancelCtx;
     var cmdʗ1 = cmd;
-    cmd.Value.Cancel = () => {
-        if (cancelCtxʗ1 != default! && AreEqual(ctx.Err(), context.DeadlineExceeded)){
+    cmd.Cancel = () => {
+        if (cancelCtxʗ1 != nil && AreEqual(ctx.Err(), context.DeadlineExceeded)) {
             // The command timed out due to running too close to the test's deadline.
             // There is no way the test did that intentionally — it's too close to the
             // wire! — so mark it as a test failure. That way, if the test expects the
             // command to fail for some other reason, it doesn't have to distinguish
             // between that reason and a timeout.
-            t.Errorf("test timed out while running command: %v"u8, cmdʗ1.OrTypedNil());
+            t.Errorf("test timed out while running command: %v", cmdʗ1.OrTypedNil());
         } else {
             // The command is being terminated due to ctx being canceled, but
             // apparently not due to an explicit test deadline that we added.
             // Log that information in case it is useful for diagnosing a failure,
             // but don't actually fail the test because of it.
-            t.Logf("%v: terminating command: %v"u8, ctx.Err(), cmdʗ1.OrTypedNil());
+            t.Logf("%v: terminating command: %v", ctx.Err(), cmdʗ1.OrTypedNil());
         }
-        return (~cmdʗ1).Process.Signal(new syscall_ΔSignalᴠΔSignal(Sigquit));
+        return cmdʗ1.Process.Signal(new syscall_ΔSignalᴠΔSignal(Sigquit));
     };
-    cmd.Value.WaitDelay = gracePeriod;
+    cmd.WaitDelay = gracePeriod;
 
     var cancelCtxʗ2 = cancelCtx;
     var cmdʗ2 = cmd;
     t.Cleanup(() => {
-        if (cancelCtxʗ2 != default!) {
+        if (cancelCtxʗ2 != nil) {
             cancelCtxʗ2();
         }
-        if ((~cmdʗ2).Process != nil && (~cmdʗ2).ProcessState == nil) {
-            t.Errorf("command was started, but test did not wait for it to complete: %v"u8, cmdʗ2.OrTypedNil());
+        if (cmdʗ2.Process != nil && cmdʗ2.ProcessState == nil) {
+            t.Errorf("command was started, but test did not wait for it to complete: %v", cmdʗ2.OrTypedNil());
         }
     });
 

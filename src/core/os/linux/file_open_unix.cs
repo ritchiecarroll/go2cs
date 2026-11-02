@@ -12,7 +12,7 @@ partial class os_package {
 
 internal static (nint, poll.SysFile, error) open(@string path, nint flag, uint32 perm) {
     var (fd, err) = syscall.Open(path, flag, perm);
-    return (fd, new poll.SysFile(nil), err);
+    return (fd, new poll.SysFile(), err);
 }
 
 } // end os_package
