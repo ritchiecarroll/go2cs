@@ -132,6 +132,27 @@ public class HeapInitRootingTests
             "its initial value into a local, so heap's initializing parameter is taking an address (`in`)");
     }
 
+    [TestMethod]
+    public void HeapClearsItsParameterOnceTheBoxHoldsTheValue()
+    {
+        // The SECOND root, measured with a dump of the hung converted TestCache at the by-value fix: heap was
+        // INLINED there, so its parameter became a slot of TestCache's frame (rsp+0x1D8), and Ꮡ(in T) -- not
+        // inlined, a shared generic -- took that slot's address. The slot was address-exposed, reported live for
+        // the whole frame, and rooted the key. heap must clear its parameter once the box holds the value.
+        // `target = default!` over a generic T compiles to `ldarga.s 0; initobj !!T` (0F 00 FE 15).
+        MethodInfo heapInit = typeof(builtin).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(method => method.Name == "heap" && method.GetParameters().Length == 2);
+        byte[] il = heapInit.GetMethodBody()!.GetILAsByteArray()!;
+
+        bool clearsTarget = Enumerable.Range(0, il.Length - 3)
+            .Any(i => il[i] == 0x0F && il[i + 1] == 0x00 && il[i + 2] == 0xFE && il[i + 3] == 0x15);
+
+        Assert.IsTrue(clearsTarget,
+            $"heap<T>(T, out ж<T>) leaves its parameter holding the initial value ({il.Length} IL bytes, no " +
+            "`ldarga.s 0; initobj`): inlined into a large frame, that parameter is an address-taken caller slot that " +
+            "roots the value for the whole frame");
+    }
+
     private static void RequireNoInlining()
     {
         if (Environment.GetEnvironmentVariable("DOTNET_JitNoInline") != "1")

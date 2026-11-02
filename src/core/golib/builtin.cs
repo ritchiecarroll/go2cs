@@ -2956,13 +2956,23 @@ public static partial class builtin
     /// address. That local is never cleared, and when this method is not inlined the JIT reports it live for the
     /// caller's whole frame, so the initial value outlives a later <c>x = nil</c>. Go collects it and C# did
     /// not: crypto/internal/fips140cache's TestCache waited on exactly that and hung (1.26.10.2 freeze; guarded
-    /// by GolibTests' HeapInitRootingTests). By value, the value travels as an argument and dies with the call.
-    /// The copy into the box below happens either way.
+    /// by GolibTests' HeapInitRootingTests). The copy into the box below happens either way.
+    /// </para>
+    /// <para>
+    /// By value is not enough on its own, so the parameter is CLEARED once the box holds the value. When this
+    /// method is inlined, <paramref name="target"/> becomes a slot of the caller's frame, and <c>Ꮡ(in T)</c>
+    /// below takes that slot's address. When <c>Ꮡ</c> is not inlined in turn (a shared generic in a large frame,
+    /// as in TestCache), the slot is address-exposed and reported live for the caller's whole frame: measured with
+    /// a dump of the hung test, the key was rooted by exactly that slot (an untracked <c>rsp+0x1D8</c>, written by
+    /// the inlined parameter and passed by <c>lea</c> to <c>Ꮡ</c>). Clearing it leaves that slot holding nothing.
     /// </para>
     /// </remarks>
     public static ref T heap<T>(T target, out ж<T> pointer)
     {
         pointer = Ꮡ(target);
+        // The box holds the value now; drop the parameter's own copy, which an inlined call leaves in the caller's
+        // frame as an address-taken slot (see remarks).
+        target = default!;
         // ValueSlot, not Value: a freshly allocated box is structurally non-nil, so the Value getter's
         // nil-pointer-dereference check is spurious here (identical to Value for a value-type T; avoids a
         // spurious panic for a reference-type T whose target value is null).
