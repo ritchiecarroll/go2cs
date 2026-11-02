@@ -778,6 +778,34 @@ function Test-GoPinContract {
     return $ok
 }
 
+# ⚠ THE WORD OF A ROW THAT PRODUCED A COMPARISON, as one function so -SelfTest can drive it. It is
+# reached only after the thrown, CONVERT, BUILD, TIMEOUT and stale arms, so $Rc is an int here.
+# An unreadable artifact is NOVERDICT (the comment at the call says why), a net divergence is DIVERGED.
+function Get-ComparisonWord($Diverged, $Rc) {
+    if     ($Diverged -isnot [int]) { return 'NOVERDICT' }
+    elseif ($Diverged -gt 0)        { return 'DIVERGED' }
+    else                            { return 'PASS' }
+}
+
+function Test-ComparisonWordContract {
+    Write-Host '  comparison word contract (a non-zero exit never reads PASS):'
+    $ok = $true
+    $cases = @(
+        @('UNREAD', 0, 'NOVERDICT', 'an unreadable artifact'),
+        @(3,        0, 'DIVERGED',  'a net divergence'),
+        @(3,        1, 'DIVERGED',  'a net divergence with a non-zero exit'),
+        @(0,        0, 'PASS',      'no divergence, exit 0'),
+        @(0,        1, 'PASS?rc',   'no divergence, but the row exited non-zero')
+    )
+    foreach ($c in $cases) {
+        $got  = Get-ComparisonWord $c[0] $c[1]
+        $pass = ($got -ceq $c[2])
+        if (-not $pass) { $ok = $false }
+        Write-Host ("    diverged {0,-7} rc {1} -> {2,-9} {3,-6} {4}" -f $c[0], $c[1], $got, $(if ($pass) { 'ok' } else { 'FAILED' }), $c[3])
+    }
+    return $ok
+}
+
 # ⚠⚠ THE ARM, AND ITS FIRST CASE OF EACH HALF IS THE ONE THAT WAS RED. Measured against the base's
 # behaviour (the blob this commit replaces, 158ce37f6c): the floor-replaces-ask rule returns 30m for
 # the first deadline case and 60m for the second, and the empty-extra call returns `-test-config
@@ -921,11 +949,13 @@ if ($SelfTest) {
     # The deadline and the pin, captured before the canary for the same order reason.
     $okR = Test-RowInvocationContract
     $okP = Test-GoPinContract
+    $okW = Test-ComparisonWordContract
     Assert-OrdinalJsonReader
-    if ($ok -and $okX -and $okR -and $okP) { Write-Host '  SELF-TEST PASSED -- the summary-line contract, the verdict cross-check contract, the row invocation contract, the go pin contract AND the ordinal-reader canary'; exit 0 }
+    if ($ok -and $okX -and $okR -and $okP -and $okW) { Write-Host '  SELF-TEST PASSED -- the summary-line contract, the verdict cross-check contract, the row invocation contract, the go pin contract, the comparison word contract AND the ordinal-reader canary'; exit 0 }
     if (-not $ok)  { Deny 'the summary-line contract FAILED its self-test -- the parse and its controls disagree' }
     if (-not $okX) { Deny 'the verdict cross-check contract FAILED its self-test -- see the case list above' }
     if (-not $okP) { Deny 'the go pin contract FAILED its self-test -- a release matched other than whole; see the case list above' }
+    if (-not $okW) { Deny 'the comparison word contract FAILED its self-test -- a row that exited non-zero read PASS; see the case list above' }
     Deny 'the row invocation contract FAILED its self-test -- a deadline that is not the LONGER of the floor and the ask, or a row run without its roster execution pin; see the case list above'
 }
 
@@ -1417,9 +1447,7 @@ foreach ($row in $rows) {
         # is the only record of WHICH verdict a cost was measured under, and a reader filtering on it
         # would have seen a pass over an artifact that was never read. NOVERDICT is the honest class:
         # the row ran, and this instrument cannot say what it did.
-        if     ($diverged -isnot [int]) { $word = 'NOVERDICT' }
-        elseif ($diverged -gt 0)        { $word = 'DIVERGED' }
-        else                            { $word = 'PASS' }
+        $word = Get-ComparisonWord $diverged $rc
     }
 
     # ---- verdicts: cross-checked, and NEVER 0 on a failure to read.
