@@ -164,3 +164,29 @@ func containsReferenceTo(references []string, fragment string) bool {
 
 	return false
 }
+
+// The record reader's shapes, as the corpus spells them: rooted, `global::`-rooted, bare single-segment (emitted from
+// inside `namespace go`) and a generic open definition. Any other line, a record of another kind included, is no
+// target: the production package_info.cs is read for field-access receivers only.
+func TestFieldAccessRecordTargetsReadsTheReceiverQualifier(t *testing.T) {
+	cases := []struct {
+		line string
+		want []string
+	}{
+		{"[assembly: GoFieldAccess(typeof(go.@internal.routebsd_package.InetAddr))]", []string{"go.@internal.routebsd_package"}},
+		{"[assembly: GoFieldAccess(typeof(global::go.net_package.TCPConn))]", []string{"go.net_package"}},
+		{"[assembly: GoFieldAccess(typeof(syscall_package.Stat_t))]", []string{"syscall_package"}},
+		{"[assembly: GoFieldAccess(typeof(go.container.list_package.Pair<,>))]", []string{"go.container.list_package"}},
+		{"global using routebsdꓸInetAddr = go.@internal.routebsd_package.InetAddr;", nil},
+		{"[assembly: GoImplement<go.io.fs_package.PathError, error>(Pointer = true)]", nil},
+		{"[assembly: GoFieldAccess(typeof(Local))]", nil},
+	}
+
+	for _, c := range cases {
+		got := fieldAccessRecordTargets(c.line)
+
+		if strings.Join(got, "|") != strings.Join(c.want, "|") {
+			t.Errorf("fieldAccessRecordTargets(%q) = %v, want %v", c.line, got, c.want)
+		}
+	}
+}
