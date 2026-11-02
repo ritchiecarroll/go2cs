@@ -1045,6 +1045,15 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		testProjectAliasScanFiles(model, outputPath, testInfoPath, outputFiles, productionFiles),
 		production.PkgPath, dependencies)...)
 
+	// The white-box model is the one whose production project grants this assembly InternalsVisibleTo (see
+	// testVariantOptions), so production's GoFieldAccess extension blocks are visible here and their receivers' packages
+	// are references (fieldAccessReceiverImports). The TARGET GOOS's file, because the records differ by GOOS: only
+	// darwin's net records internal/routebsd structs.
+	if model == testProjectWhiteboxReference {
+		referenceImports = append(referenceImports, fieldAccessReceiverImports(
+			platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform)), production.PkgPath, referenceImports)...)
+	}
+
 	// Close the reference set under the C# DECLARATION edges the converter emits
 	// (declarationClosureImports): binding a type the compilation NAMES needs the assemblies its
 	// own declaration names — an interface's base interfaces (hash's `Hash : io.Writer` reached by
@@ -5029,6 +5038,29 @@ func testProjectAliasScanFiles(model testProjectModel, outputPath, testInfoPath 
 }
 
 func aliasReferenceImports(infoFiles []string, productionPkgPath string, directDependencies []string) []string {
+	return scanReferenceImports(infoFiles, referenceScanTargets, productionPkgPath, directDependencies)
+}
+
+// fieldAccessReceiverImports returns the import paths of the packages that declare the struct types a PRODUCTION
+// package_info.cs records with `[assembly: GoFieldAccess(typeof(T))]`, less the ones already referenced. A white-box
+// test project needs every one of them, and nothing else supplies them.
+//
+// go2cs-gen turns each record into an extension block on ж<T> in the production assembly's internal GoFieldAccess
+// class (FieldAccessGenerator), and the white-box test assembly sees that class through InternalsVisibleTo. Every
+// `p.f` a test reads through a pointer binds by extension lookup, so the compiler examines each visible block that
+// declares a member named f — including production's block on a FOREIGN struct — and that needs T's assembly.
+// DisableTransitiveProjectReferences (B2b) hides it, and no test import names it: net's darwin package_info.cs
+// records five internal/routebsd structs, and net.tests failed CS0012 on `ifi.Name` and `x.IP` (run 41477450611).
+//
+// Only the record lines are read. The file's aliases serve the production sources, which compile in their own
+// project under the reference models (testProjectAliasScanFiles), so they are not this project's references.
+func fieldAccessReceiverImports(productionInfoFile, productionPkgPath string, referenced []string) []string {
+	return scanReferenceImports([]string{productionInfoFile}, fieldAccessRecordTargets, productionPkgPath, referenced)
+}
+
+// scanReferenceImports maps the qualifier TARGETS that targetsOf reads from each line of the files to import paths
+// in the package's transitive closure, less the package itself, testing and the already-referenced set.
+func scanReferenceImports(infoFiles []string, targetsOf func(line string) []string, productionPkgPath string, directDependencies []string) []string {
 	direct := hashset.NewHashSet(directDependencies)
 	tokens := make(map[string][]string)
 	bareTokens := make(map[string][]string)
@@ -5068,7 +5100,7 @@ func aliasReferenceImports(infoFiles []string, productionPkgPath string, directD
 		for _, line := range strings.Split(string(data), "\n") {
 			trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\r"))
 
-			for _, target := range referenceScanTargets(trimmed) {
+			for _, target := range targetsOf(trimmed) {
 				for token, paths := range tokens {
 					// Three match shapes for a multi-segment package's alias target:
 					//   Contains(target, token+".")  — token is a leading/middle namespace segment.
@@ -5223,6 +5255,30 @@ func recordTypeGoName(recorded string) string {
 	recorded = strings.TrimSuffix(strings.TrimPrefix(recorded, ShadowVarMarker), TempVarMarker)
 
 	return recorded
+}
+
+// fieldAccessRecordPrefix opens a `[assembly: GoFieldAccess(typeof(T))]` record (packageInfoWriter, parity seat #31).
+const fieldAccessRecordPrefix = "[assembly: GoFieldAccess(typeof("
+
+// fieldAccessRecordTargets returns the package-class qualifier of a field-access record's struct type, the one
+// reference target the line carries (`go.@internal.routebsd_package` for
+// `[assembly: GoFieldAccess(typeof(go.@internal.routebsd_package.InetAddr))]`). Every other line yields nothing. A
+// generic record names its open definition, `typeof(go.p_package.Pair<,>)`, so the type ends at the first `)`.
+func fieldAccessRecordTargets(line string) []string {
+	rest, ok := strings.CutPrefix(line, fieldAccessRecordPrefix)
+	if !ok {
+		return nil
+	}
+
+	typeName, _, _ := strings.Cut(rest, ")")
+
+	var targets []string
+
+	for _, match := range packageQualifierPattern.FindAllStringSubmatch(typeName, -1) {
+		targets = append(targets, match[1])
+	}
+
+	return targets
 }
 
 // conversionRecordPrefixes are the emitted assembly-attribute line prefixes whose GENERIC ARGUMENT

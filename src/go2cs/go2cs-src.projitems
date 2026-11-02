@@ -193,6 +193,7 @@
     <None Include="$(MSBuildThisFileDirectory)fieldAccess.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessCollisions.txt" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)fieldAccessReceiverReferences_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessReferenceModel_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessReturn_test.go" />
     <None Include="$(MSBuildThisFileDirectory)fieldAccessTestRecords_test.go" />
