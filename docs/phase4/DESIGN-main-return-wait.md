@@ -214,3 +214,43 @@ tree.
 - BehavioralRunner (full): rc 0 at `971f018d7e`, and again at `438c43dbab` with the new test shape. The two changed
   tests pass at the tip.
 - The first use of the wait in a JIT process costs about 21 ms, the JIT of its slow path. Later uses take 1.2 ms.
+
+**The linux and macOS legs (2026-11-01).** Both ran the briefs in `data/main-return-wait/leg-briefs.md`, at tip
+`bbf1725aa7` and base `c5a4637bba`.
+
+Linux, on R-WSL:
+- Box: linux-x64 under WSL 2, 10 vCPUs, .NET 10.0.11, go1.26.10; Native AOT linked by clang 14.
+- Every build targets the linux flavor of the corpus (`-p:GoTargetOS=linux`).
+- Every run goes through `taskset -c 0-3` with GOMAXPROCS=4. The load is 32 busy loops pinned to the same CPUs, and
+  the spinner was alive at the end of every loaded run.
+- Logs: `data/main-return-wait/linux-r/`.
+
+| linux: runs that lost the panic report | idle | loaded |
+|:--|:--|:--|
+| R0, base, JIT | 0/100 | 1/400 |
+| R0, base, AOT | 0/100 | 0/100 |
+| R1, tip, JIT | 0/100 | 0/400 |
+| R1, tip, AOT | 0/100 | 0/100 |
+
+- The recovering test printed late in 0/100 runs in every arm (JIT, AOT and Go, idle and loaded).
+- GolibTests `MainExit*` all passed. The two `ThreadCpuTime` failures were a race in the test itself, fixed in
+  `d3a05a0162`.
+- R0's one loss came from a stated extension to N=400. The first 100 loaded runs read 0, so at this load the base
+  defect shows, but at about a quarter of the i9's rate.
+
+macOS, on C1's GitHub runners:
+- Run 41351205394, recorded on `claude/c1-mrw-macos` at `9e703e720b` under `data/main-return-wait/c1-macos/`.
+- osx-arm64 (Apple M1, 3 CPUs) and osx-x64 (Intel i7-8700B, 4 CPUs), .NET 10.0.14, N=50 per arm. The load is 32
+  unpinned busy loops, because macOS has no affinity call.
+
+| macOS JIT: runs that lost the panic report | arm64 idle | arm64 loaded | x64 idle | x64 loaded |
+|:--|:--|:--|:--|:--|
+| R0, base | 0/50 | 0/50 | 0/50 | 0/50 |
+| R1, tip | 0/50 | 0/50 | 0/50 | 0/50 |
+
+- The recovering test printed late in 0/50 runs in every macOS arm.
+- **The darwin Native AOT arms are OPEN.** They wait on G's frozen-object holder seat (ledger `0c2c770db6`). The
+  macOS leg found that ILC's frozen-object symbol names collide for darwin `syscall`'s `IfmaMsghdr` and `IfmaMsghdr2`,
+  so every darwin Native AOT publish that reaches `syscall` fails.
+
+P2 on linux: hit, JIT and AOT, idle and loaded. On macOS: hit for JIT; AOT pending.
