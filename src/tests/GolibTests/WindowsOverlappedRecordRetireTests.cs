@@ -240,11 +240,11 @@ public class WindowsOverlappedRecordRetireTests
 
             foreach (MethodInfo method in typeof(builtin).GetMethods(BindingFlags.Public | BindingFlags.Static))
             {
-                if (method.Name == "Ꮡ" && method.IsGenericMethodDefinition && method.GetParameters() is [{ ParameterType.IsByRef: true }])
+                if (method.Name == "Ꮡ" && method.IsGenericMethodDefinition && method.GetParameters() is [{ ParameterType.IsGenericParameter: true }])
                     return method.MakeGenericMethod(overlapped).Invoke(null, [Activator.CreateInstance(overlapped)])!;
             }
 
-            throw new AssertFailedException("builtin.Ꮡ<T>(in T) is not in this build");
+            throw new AssertFailedException("builtin.Ꮡ<T>(T) is not in this build");
         }
 
         private static Type nested(string name) =>
