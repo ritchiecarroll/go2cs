@@ -1,0 +1,5 @@
+panic: panic after deferred Done
+
+goroutine 1 [running]:
+main.main.func1()
+	<tmp>/tip/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/main.go:40
