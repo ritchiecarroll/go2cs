@@ -254,3 +254,21 @@ macOS, on C1's GitHub runners:
   so every darwin Native AOT publish that reaches `syscall` fails.
 
 P2 on linux: hit, JIT and AOT, idle and loaded. On macOS: hit for JIT; AOT pending.
+
+**The darwin Native AOT arms (2026-11-02): CLOSED.** G's frozen-object holder seat landed at batch 129
+(`56039a371d`). Each struct's field accessor tokens now live in a nested holder class, so ILC's frozen-object names
+can no longer collide. C1 then ran the open arms on the same two macOS runners in run 41420753631, recorded under
+`data/main-return-wait/c1-macos-aot/` (fix commit `7f4279bd15`, .NET 10.0.14, N=50 per arm, 32 unpinned busy loops).
+
+| macOS Native AOT | arm64 | x64 |
+|:--|:--|:--|
+| control at `64d145b2c4`: ILC fails on the `IfmaMsghdr23` key | fails | fails |
+| fix: the amplifier and the recovering test both publish | rc 0 | rc 0 |
+| R1, tip, idle: runs that lost the panic report | 0/50 | 0/50 |
+| R1, tip, loaded: runs that lost the panic report | 0/50 | 0/50 |
+| recovering test printed late, idle and loaded | 0/50 | 0/50 |
+
+- Every amplifier run exited 2 with the report, and every recovering run exited 0. No run was invalid, and all 32
+  spinners were alive at the end of every loaded run. The counts are recomputed from the per-run TSVs.
+
+P2 on macOS: hit for JIT and AOT, idle and loaded. The macOS leg is complete.
