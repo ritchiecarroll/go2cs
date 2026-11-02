@@ -1002,6 +1002,10 @@ across boxes, so "once" holds and the wall shrinks. The data file is
 It is cut deterministically by [`sweep_shards.py`](phase4/data/rebank-go1.26.10/sweep_shards.py) from the roster's
 238 banked rows, `$longTimeouts` and this hop's pass-1 windows walls.
 
+*(Amended 2026-11-02: the 1.26.10.2 re-bank runs this deal, read-only, at the freeze tip `f6666d98a2`. It is re-cut
+there byte-identical (sha256 `358130df30f8…`). That pass's brief, which reads `<TIP44>` as the freeze tip and adds
+three guard lines, is in [`PLAN-release-1-26-10-2.md`](PLAN-release-1-26-10-2.md) "The re-bank legs".)*
+
 | Box | Rows | Projected | What it holds |
 |---|---|---|---|
 | i9 | 79 | 1.66 h | the reserved rows (net and the off-i9 rows aside), then its share of the rest |
