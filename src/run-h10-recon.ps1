@@ -263,8 +263,6 @@ if (-not $SelfTest) {
     # ⚠ The wrapper NEVER repairs the tree itself: no `git checkout --`, no `git clean`. A tool that cleans
     # up after itself inside a work tree is one bad path away from discarding someone's work, and the
     # discard is the caller's act on a tree it created for this.
-    # The ONE ruled exception is the shard-end `git clean -fdXq -- src` after the last row (see "shard end"
-    # below): gitignored output only, never a tracked or an untracked-unignored file.
     $gd  = GitTry @('-C', $Tree, 'rev-parse', '--git-dir')
     $gcd = GitTry @('-C', $Tree, 'rev-parse', '--git-common-dir')
     if ($gd.Code -ne 0 -or $gcd.Code -ne 0) { Deny "'$Tree' is not a git work tree" }
@@ -1158,6 +1156,38 @@ if (-not $plat) {
 }
 if (-not $plat) { Deny "cannot determine the platform -- `go env GOOS/GOARCH` produced nothing, and a row's reading is not comparable without it" }
 
+# ---------------------------------------------------------------- the per-row deletion census (ruled)
+# ⚠ A TRACKED FILE A ROW DELETED IS NAMED ON THAT ROW. That glob class has removed tracked sources
+# three times, and the next commit is the wrong place to find it. After every row, `git status
+# --porcelain` is read and each ` D` path not seen before is charged to the row that just ran; the
+# run refuses after its TSV is written, so the readings survive. A deletion already present before
+# row 1 is printed, not charged: no row of this run made it.
+#
+# ⚠ READ ONLY, so it runs under -DryRun too. The CLEAN is the dispatcher's, once, at shard end: a
+# clean here would run after every dispatched row (the dispatcher calls this script once per row),
+# make every row cold, and change sweep_s against the rows already banked.
+#
+# ⚠ NOT GitTry. GitTry trims its output, and the trim eats the leading space of the first line, so
+# a ` D` deletion listed first would read `D ` and pass. The lines are read raw.
+function Get-TrackedDeletions {
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $lines = @(& git -C $Tree status --porcelain)
+        $code = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $old }
+    if ($code -ne 0) { return $null }
+    return ,@($lines | Where-Object { $_ -like ' D *' } | ForEach-Object { $_.Substring(3) })
+}
+$deletionsSeen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+$deletionFindings = New-Object System.Collections.Generic.List[string]
+$deletedBefore = Get-TrackedDeletions
+if ($null -eq $deletedBefore) { Deny "git status failed in '$Tree' before row 1 -- the per-row deletion census has no baseline" }
+foreach ($p in $deletedBefore) { [void] $deletionsSeen.Add($p) }
+if ($deletedBefore.Count -gt 0) {
+    Write-Host "  !! $($deletedBefore.Count) tracked file(s) already deleted before row 1, charged to no row: $($deletedBefore -join ', ')" -ForegroundColor Yellow
+}
+
 $i = 0
 foreach ($row in $rows) {
     $i++
@@ -1655,52 +1685,30 @@ foreach ($row in $rows) {
     $postS = [int] ((Get-Date) - $postStarted).TotalSeconds
     $emit.Add("$row`t$word`t$verdicts`t$sweepS`t$first`t$rcCell`t$diverged`t$plat`t$treeSha`t$wallS`t$postS")
 
+    # The deletion census for THIS row (see "the per-row deletion census" above the loop).
+    $deletedNow = Get-TrackedDeletions
+    if ($null -eq $deletedNow) {
+        $deletionFindings.Add("$($row): git status failed after the row, so no deletion census")
+        Write-Host '     !! git status failed after this row -- no deletion census' -ForegroundColor Red
+    } else {
+        $newlyDeleted = @($deletedNow | Where-Object { $deletionsSeen.Add($_) })
+        if ($newlyDeleted.Count -gt 0) {
+            $deletionFindings.Add("$($row) deleted $($newlyDeleted.Count) tracked file(s): $($newlyDeleted -join ', ')")
+            Write-Host "     !! tracked file(s) DELETED during this row: $($newlyDeleted -join ', ')" -ForegroundColor Red
+        }
+    }
+
     if ($DryRun) { break }
 }
 
-# ---------------------------------------------------------------- shard end: clean, then census deletions (ruled)
-# ⚠ THE ONE CLEAN THIS WRAPPER DOES, AND ITS SCOPE IS THE RULING'S. After the last row, every
-# gitignored path under src is removed (`git clean -fdXq -- src`: build output, the results records,
-# the generated test projects), and then `git status --porcelain` must show no ` D` line. A tracked
-# file a run deleted is the glob class that has removed tracked sources three times; it fails the
-# shard here, by name, instead of surfacing at someone's next commit.
-#
-# ⚠ THE DISPATCHER CALLS THIS WRAPPER ONCE PER ROW (run-h10-dispatch.ps1, one name per list), so in a
-# dispatched shard "after the last row" is after EVERY row. The converter binary is gitignored
-# (/src/go2cs/go2cs.exe), and the next row's preflight refuses without it, so the clean EXCLUDES the
-# binary this run used. An exclude holds only for a file whose directory is not itself ignored (git
-# removes an ignored directory whole, excludes inside it notwithstanding; measured), so the binary's
-# survival is checked after the clean rather than assumed. -Scratch needs no exclude: the preflight
-# refuses one inside any work tree. -Out needs none either: it is written after this block.
-#
-# ⚠ THE CENSUS IS NOT GitTry. GitTry trims its output, and the trim eats the leading space of the
-# first line, so a ` D` deletion listed first would read `D ` and pass. The lines are read raw.
-#
-# The TSV is still written below; the refusal comes after it, so the row's readings survive.
-$shardEndDenial = $null
-$treeFull = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Tree).TrimEnd('\', '/')
-$convFull = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($converter)
-$keepSpec = ':(exclude)' + ($convFull.Substring($treeFull.Length + 1) -replace '\\', '/')
-Write-Host ''
-Write-Host "  shard end         : git clean -fdXq -- src $keepSpec"
-$oldPref = $ErrorActionPreference
-$ErrorActionPreference = 'Continue'
-try {
-    & git -C $Tree clean -fdXq -- src $keepSpec
-    $cleanRc = $LASTEXITCODE
-    $porcelain = @(& git -C $Tree status --porcelain)
-    $statusRc = $LASTEXITCODE
-} finally { $ErrorActionPreference = $oldPref }
-if ($cleanRc -ne 0) { Write-Host "  !! git clean exited $cleanRc -- ignored residue may remain under src" -ForegroundColor Yellow }
-$deletedTracked = @($porcelain | Where-Object { $_ -like ' D *' } | ForEach-Object { $_.Substring(3) })
-if ($statusRc -ne 0) {
-    $shardEndDenial = "git status exited $statusRc after the shard-end clean -- no census of deleted tracked files, so the tree cannot be called intact"
-} elseif ($deletedTracked.Count -gt 0) {
-    $shardEndDenial = "$($deletedTracked.Count) tracked file(s) DELETED in '$Tree' after the shard: " + ($deletedTracked -join ', ')
-} elseif (-not (Test-Path -LiteralPath $converter)) {
-    $shardEndDenial = "the shard-end clean removed the converter '$converter' (it sits in an ignored directory); the next row cannot run -- rebuild it with go build in src/go2cs"
+# ---------------------------------------------------------------- the deletion census's verdict
+# Refused below, after the TSV is written, so the readings survive the refusal.
+$deletionDenial = $null
+if ($deletionFindings.Count -gt 0) {
+    $deletionDenial = "tracked file(s) DELETED in '$Tree': " + ($deletionFindings -join '; ')
 } else {
-    Write-Host '  shard end census  : no tracked file deleted; the converter is kept'
+    Write-Host ''
+    Write-Host '  deletion census   : no row deleted a tracked file'
 }
 
 # ---------------------------------------------------------------- write, LF only
@@ -1716,7 +1724,7 @@ if ($DryRun) {
     Write-Host "    $($emit[$emit.Count - 1])"
     Write-Host ''
     Write-Host '  nothing written.'
-    if ($shardEndDenial) { Deny $shardEndDenial }
+    if ($deletionDenial) { Deny $deletionDenial }
     exit 0
 }
 
@@ -1731,5 +1739,5 @@ if ($hasNet -eq 0) {
     Write-Host '  !! NOTE: no `net` row in this emission. shardmap.py refuses a basis in which the' -ForegroundColor Yellow
     Write-Host '     hand-stopped drop never fired, so the COMBINED basis must carry it from some worker.' -ForegroundColor Yellow
 }
-if ($shardEndDenial) { Deny $shardEndDenial }
+if ($deletionDenial) { Deny $deletionDenial }
 exit 0

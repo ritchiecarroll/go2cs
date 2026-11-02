@@ -643,6 +643,58 @@ if ($DryRun) {
     exit 0
 }
 
+# ---------------------------------------------------------------- shard end: ONE clean, then the census (ruled)
+# ⚠ THE CLEAN IS HERE, ONCE, AFTER THE LOOP, AND NEVER IN THE WRAPPER. The wrapper runs once per row,
+# so a clean there makes every row cold: each one rebuilds its whole src/core dependency closure,
+# which multiplies shard time and changes sweep_s against the rows already banked. Rows keep their
+# build reuse; the shard ends clean. It runs whatever the rows' outcomes, after the timings above are
+# written, and is skipped by -DryRun above, which must have no side effect. Rebank mode only: it is
+# the mode that knows its tree and its converter.
+#
+# Gitignored output only (`git clean -fdXq -- src`), minus the converter: it is gitignored, and the
+# next dispatch's preflight needs it. An exclude does not hold inside an ignored DIRECTORY (git removes
+# the directory whole; measured), so the converter's survival is checked, not assumed. Each row's own
+# census already charged a deletion to the row that made it; this one sees the shard's end state.
+#
+# ⚠ NOT GitQuiet for the census: a trimmed output eats the first line's leading space, so a ` D`
+# listed first would read `D ` and pass. The lines are read raw.
+$shardEndDenial = $null
+if ($Mode -eq 'rebank') {
+    $treeFull = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Tree).TrimEnd('\', '/')
+    $convFull = $conv.FullName
+    if (-not $convFull.StartsWith($treeFull + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Deny "the converter '$convFull' is not under the tree '$treeFull', so the shard-end clean cannot exclude it -- no clean was run"
+    }
+    $keepSpec = ':(exclude)' + ($convFull.Substring($treeFull.Length + 1) -replace '\\', '/')
+    Write-Host ''
+    Write-Host "  shard end       : git clean -fdXq -- src $keepSpec"
+    $oldPref = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & git -C $Tree clean -fdXq -- src $keepSpec
+        $cleanRc = $LASTEXITCODE
+        $porcelain = @(& git -C $Tree status --porcelain)
+        $statusRc = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $oldPref }
+    if ($cleanRc -ne 0) { Write-Host "  !! git clean exited $cleanRc -- ignored residue may remain under src" -ForegroundColor Yellow }
+    $deletedTracked = @($porcelain | Where-Object { $_ -like ' D *' } | ForEach-Object { $_.Substring(3) })
+    if ($statusRc -ne 0) {
+        $shardEndDenial = "git status exited $statusRc after the shard-end clean -- no census of deleted tracked files, so the tree cannot be called intact"
+    } elseif ($deletedTracked.Count -gt 0) {
+        $shardEndDenial = "$($deletedTracked.Count) tracked file(s) DELETED in '$Tree' at shard end: " + ($deletedTracked -join ', ')
+    } elseif (-not (Test-Path -LiteralPath $convFull)) {
+        $shardEndDenial = "the shard-end clean removed the converter '$convFull' (it sits in an ignored directory) -- rebuild it with go build in src/go2cs"
+    } else {
+        Write-Host '  shard end       : no tracked file deleted; the converter is kept'
+    }
+}
+if ($shardEndDenial) {
+    Write-Host ''
+    Write-Host "DISPATCH FAILED AT SHARD END: $shardEndDenial" -ForegroundColor Red
+    foreach ($f in $failures) { Write-Host "  row failure: $f" }
+    exit 2
+}
+
 # Derived from the count and exited on -- never a hardcoded verdict line. A confident parenthetical
 # over a count that falsifies it is a check that cannot go red, and this repository has written one.
 if ($failures.Count -gt 0) {
