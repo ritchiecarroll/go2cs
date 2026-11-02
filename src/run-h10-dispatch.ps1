@@ -559,8 +559,13 @@ foreach ($sliceNumber in $sliceNumbers) {
             # `debt` is NOT derived here: a row whose artifacts exist but whose format gate refuses is
             # a classification made at BANKING, by the gate, not by the dispatcher -- and deriving it
             # from a word this script never checks would be a guess wearing a column.
+            #
+            # ⚠ AND ONLY A ROW THE WRAPPER PASSED BANKS (COORD's ruling). A non-zero wrapper exit is a
+            # refusal -- a tracked file deleted during the row, say -- that the word cannot carry: the
+            # word comes from the comparison, which can be clean while the tree is not. Such a row reads
+            # banked=no and is kept OUT of the ledger below, so a resume re-runs it.
             $banked = 'no'
-            if ($word -eq 'PASS' -or $word -eq 'DIVERGED') { $banked = 'yes' }
+            if (($word -eq 'PASS' -or $word -eq 'DIVERGED') -and $rowExit -eq 0) { $banked = 'yes' }
 
             # ⚠ THE PIN COUNT IS READ FROM THE MANIFEST THE ROW JUST RE-SIGNED, not from the word.
             # An absent manifest is 0 and an unreadable one is `n/a` -- never 0, because "no pins" and
@@ -577,14 +582,19 @@ foreach ($sliceNumber in $sliceNumbers) {
 
             $timings.Add("$($row.W)`t$($row.Worker)`t$($row.Slice)`t$($row.Seq)`t$($row.Package)`t$word`t$($w['verdicts'])`t$($w['sweep_s'])`t$($w['first_in_list'])`t$($w['rc'])`t$($w['diverged'])`t$($w['platform'])`t$($w['tree'])`t$wall`t$($w['post_s'])`t$banked`t$pins`t$($row.Cost)`t$reservedFlag")
 
-            if ($Ledger) {
+            # ⚠ A ROW THE WRAPPER REFUSED IS NOT RECORDED. The ledger's read above skips EVERY recorded
+            # row on a resume, whatever its `banked` value, so a line written here would let the row's
+            # readings stand without it ever re-running. The timings row above is still written: the
+            # readings are evidence, and banked=no says what they are not.
+            if ($Ledger -and $rowExit -eq 0) {
                 # APPEND ONLY. The ledger is a record of what was done, so it is never rewritten and
                 # never pruned by this script.
                 $stamp = (Get-Date).ToUniversalTime().ToString('o')
                 [System.IO.File]::AppendAllText($Ledger, "$stamp`t$($row.Package)`t$corpusCommit`t$converterStamp`t$word`t$banked`n")
             }
-            Write-Host ("     {0}  verdicts={1}  banked={2}  pins={3}  {4}s  rc={5}" -f `
-                $word, $(if ($w['verdicts']) { $w['verdicts'] } else { '-' }), $banked, $pins, $wall, $rowExit)
+            Write-Host ("     {0}  verdicts={1}  banked={2}  pins={3}  {4}s  rc={5}  wrapper exit {6}" -f `
+                $word, $(if ($w['verdicts']) { $w['verdicts'] } else { '-' }), $banked, $pins, $wall,
+                $(if ($w['rc']) { $w['rc'] } else { '-' }), $rowExit)
         }
         else {
             $started = Get-Date
@@ -641,6 +651,58 @@ if ($DryRun) {
     Write-Host ''
     Write-Host "DRY RUN COMPLETE -- $plannedCount row(s) would run over $($sliceNumbers.Count) slice(s) with $gapCount gap(s). Nothing was executed."
     exit 0
+}
+
+# ---------------------------------------------------------------- shard end: ONE clean, then the census (ruled)
+# ⚠ THE CLEAN IS HERE, ONCE, AFTER THE LOOP, AND NEVER IN THE WRAPPER. The wrapper runs once per row,
+# so a clean there makes every row cold: each one rebuilds its whole src/core dependency closure,
+# which multiplies shard time and changes sweep_s against the rows already banked. Rows keep their
+# build reuse; the shard ends clean. It runs whatever the rows' outcomes, after the timings above are
+# written, and is skipped by -DryRun above, which must have no side effect. Rebank mode only: it is
+# the mode that knows its tree and its converter.
+#
+# Gitignored output only (`git clean -fdXq -- src`), minus the converter: it is gitignored, and the
+# next dispatch's preflight needs it. An exclude does not hold inside an ignored DIRECTORY (git removes
+# the directory whole; measured), so the converter's survival is checked, not assumed. Each row's own
+# census already charged a deletion to the row that made it; this one sees the shard's end state.
+#
+# ⚠ NOT GitQuiet for the census: a trimmed output eats the first line's leading space, so a ` D`
+# listed first would read `D ` and pass. The lines are read raw.
+$shardEndDenial = $null
+if ($Mode -eq 'rebank') {
+    $treeFull = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Tree).TrimEnd('\', '/')
+    $convFull = $conv.FullName
+    if (-not $convFull.StartsWith($treeFull + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Deny "the converter '$convFull' is not under the tree '$treeFull', so the shard-end clean cannot exclude it -- no clean was run"
+    }
+    $keepSpec = ':(exclude)' + ($convFull.Substring($treeFull.Length + 1) -replace '\\', '/')
+    Write-Host ''
+    Write-Host "  shard end       : git clean -fdXq -- src $keepSpec"
+    $oldPref = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & git -C $Tree clean -fdXq -- src $keepSpec
+        $cleanRc = $LASTEXITCODE
+        $porcelain = @(& git -C $Tree status --porcelain)
+        $statusRc = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $oldPref }
+    if ($cleanRc -ne 0) { Write-Host "  !! git clean exited $cleanRc -- ignored residue may remain under src" -ForegroundColor Yellow }
+    $deletedTracked = @($porcelain | Where-Object { $_ -like ' D *' } | ForEach-Object { $_.Substring(3) })
+    if ($statusRc -ne 0) {
+        $shardEndDenial = "git status exited $statusRc after the shard-end clean -- no census of deleted tracked files, so the tree cannot be called intact"
+    } elseif ($deletedTracked.Count -gt 0) {
+        $shardEndDenial = "$($deletedTracked.Count) tracked file(s) DELETED in '$Tree' at shard end: " + ($deletedTracked -join ', ')
+    } elseif (-not (Test-Path -LiteralPath $convFull)) {
+        $shardEndDenial = "the shard-end clean removed the converter '$convFull' (it sits in an ignored directory) -- rebuild it with go build in src/go2cs"
+    } else {
+        Write-Host '  shard end       : no tracked file deleted; the converter is kept'
+    }
+}
+if ($shardEndDenial) {
+    Write-Host ''
+    Write-Host "DISPATCH FAILED AT SHARD END: $shardEndDenial" -ForegroundColor Red
+    foreach ($f in $failures) { Write-Host "  row failure: $f" }
+    exit 2
 }
 
 # Derived from the count and exited on -- never a hardcoded verdict line. A confident parenthetical
