@@ -1,0 +1,5 @@
+2026-11-01 21:14:09Z ARM r0-jit idle N=100 66s exit0=0 exit2=100 empty_stderr=0 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 21:14:50Z ARM r0-aot idle N=100 41s exit0=0 exit2=100 empty_stderr=0 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 21:15:56Z ARM r1-jit idle N=100 66s exit0=0 exit2=100 empty_stderr=0 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 21:16:31Z ARM r1-aot idle N=100 35s exit0=0 exit2=100 empty_stderr=0 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 21:16:55Z STOPPED by hand: every binary ran the WINDOWS corpus flavor (no -p:GoTargetOS=linux) and died in module init (kernel32.dll); rebuilding

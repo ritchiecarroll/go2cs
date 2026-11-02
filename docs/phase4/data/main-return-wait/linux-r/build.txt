@@ -1,0 +1,26 @@
+2026-11-01 21:18:11Z PRE base=c5a4637bbafa625e5d1d33a2b18e4e0b036ac341 tip=bbf1725aa75c64eb9a0d749cc0ca81a3327b6c32 go1.26.10 dotnet=10.0.400 runtime=10.0.11 
+2026-11-01 21:18:11Z golib MainExit.cs differs base..tip: yes
+2026-11-01 21:24:54Z BUILD jit-base-pad rc=0 403s errors=0
+2026-11-01 21:24:55Z COPY jit-base-pad jit=f9f9fcbeeb314b96 golib=8c94d02dbef5d379 go=3ff48ae0d5f18470
+2026-11-01 21:31:23Z BUILD jit-tip-pad rc=0 388s errors=0
+2026-11-01 21:31:23Z COPY jit-tip-pad jit=34fd4232ecbda101 golib=0d56e50a59a1e8af go=604c9e698f7ccea4
+2026-11-01 21:31:43Z BUILD jit-tip-rec rc=0 20s errors=0
+2026-11-01 21:31:43Z COPY jit-tip-rec jit=d3ed0318db832481 golib=0d56e50a59a1e8af go=4b1cdfd4a6db109a
+2026-11-01 21:31:44Z SMOKE jit-base-pad ok rc=2
+2026-11-01 21:31:45Z SMOKE jit-tip-pad ok rc=2
+2026-11-01 21:31:46Z SMOKE jit-tip-rec ok rc=0
+2026-11-01 21:31:46Z SMOKE go-tip-pad ok rc=2
+2026-11-01 21:34:17Z GOLIBTESTS rc=1 151s; Total tests: 21  Passed: 19  Failed: 2 
+MRW-BUILD-DONE rc=0
+2026-11-01 21:34:17Z AOT start: Ubuntu clang version 14.0.0-1ubuntu1.1
+2026-11-01 22:08:12Z PUBLISH aot-base-pad rc=0 2035s errors=0
+2026-11-01 22:08:13Z AOT aot-base-pad exe sha=1b80ce9521b8b8b4 size=146720904
+2026-11-01 22:08:14Z SMOKE aot-base-pad ok rc=2
+2026-11-01 22:43:05Z PUBLISH aot-tip-pad rc=0 2091s errors=0
+2026-11-01 22:43:06Z AOT aot-tip-pad exe sha=50c96eb704ade895 size=146763000
+2026-11-01 22:43:07Z SMOKE aot-tip-pad ok rc=2
+2026-11-01 23:12:20Z PUBLISH aot-tip-rec rc=0 1753s errors=0
+2026-11-01 23:12:21Z AOT aot-tip-rec exe sha=727c0997be3fe642 size=146763008
+2026-11-01 23:12:22Z SMOKE aot-tip-rec ok rc=0
+MRW-AOT-DONE rc=0
+MRW-CHAIN-DONE

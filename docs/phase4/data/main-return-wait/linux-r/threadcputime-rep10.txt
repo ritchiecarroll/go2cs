@@ -1,0 +1,10 @@
+rep 1: pass
+rep 2: FAIL ASleepingThreadsCpuTimeStaysFlat 
+rep 3: FAIL ASleepingThreadsCpuTimeStaysFlat 
+rep 4: pass
+rep 5: pass
+rep 6: FAIL ASpinningThreadsCpuTimeAdvancesWithItsWallTime 
+rep 7: pass
+rep 8: pass
+rep 9: pass
+rep 10: FAIL ASpinningThreadsCpuTimeAdvancesWithItsWallTime 
