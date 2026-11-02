@@ -45,7 +45,7 @@ using static go.path_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +55,8 @@ using static go.path_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("path/match.go", "match.cs", "AA4cAAEuABUCgoKCgoKUpriCgpSClKaCgpSClIKUgtyCgoCCtrSqwoKClIKCpoLGtLSCyKwACAiCgoKmkoKCgpSUgoKCpoKCgoKClJKAgqSCgoCCtoKUpoKCgpSmgoKUpoKClKaClKjSgoKUgoKCgqaCgpSCgpQ=")]
-[assembly: go.GoPositionMap("path/path.go", "path.cs", "AB00goKUpoKCgoKUgpSCpoKClAACLAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgIK2gpSokgACFPKC")]
+[assembly: GoPositionMap("path/match.go", "match.cs", "AA4cAAEuABUCgoKCgoKUpriCgpSClKaCgpSClIKUgtyCgoCCtrSqwoKClIKCpoLGtLSCyKwACAiCgoKmkoKCgpSUgoKCpoKCgoKClJKAgqSCgoCCtoKUpoKCgpSmgoKUpoKClKaClKjSgoKUgoKCgqaCgpSCgpQ=")]
+[assembly: GoPositionMap("path/path.go", "path.cs", "AB00goKUpoKCgoKUgpSCpoKClAACLAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgIK2gpSokgACFPKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

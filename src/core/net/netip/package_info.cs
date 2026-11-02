@@ -49,7 +49,12 @@ using static go.net.netip_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(uint128))]
+[assembly: GoFieldAccess(typeof(ΔAddr))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,8 +64,8 @@ using static go.net.netip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/netip/netip.go", "netip.cs", "AEOKAYKaoKigppCmkKaQprIABRLSAAgYsoKUpMimqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKCpLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgpKCkoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4gpKClKaCgpSCgoLcgriCgpSCgpSSlJSsspSklKqiqqKqogACEPassK7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrLCqsqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAUQ0oKUgpSkgpSkgqaCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKkgpSCAAUeAAwClKSkgpS+spSkpIKUAAcSyIKUgpSoyIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgILIgoKCgoKkgqamgoKUrNKUpoKCgoKmpqaClKqirLKCtoK0goKClIKkAAIQ0oKClIKCqJK2pIKClKaClKSkAAMQwtqigpSCpIKkgqSClAAIFqCmkKaQAAgOAAkCgoKmgoKUgpSCgpSCpq7CgoKClIKClIKCgpSCkoKUqqKCgpSqoKqygIKk1qKClKSCgqSCgoKClIKCgpSUgoKsspSkpIKClJSUgoKqoqyygraCpIKUrLKCgpSCgqyygoKUrLKqooKUgoKClIIADS4ACAKCgpTekKqwqrCkgKaQrgAICICCtoCCtgAHEIIAAhTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUrsKCAAIU8oKUgJKkAAgSygADEtKClIKUgpSCgJKUpIKcwoCCpICCpKyygpSCuIKUgoKUuIKCqqKssoK2gqSClKyygoKUgoKssoKClKzEqqKClIKCgpSC2JKClA==", "", "", "114=BEUint64/1/2/2,BEUint64/2/2/3;660=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;676=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1402=withoutZone/1/1/1")]
-[assembly: go.GoPositionMap("net/netip/uint128.go", "uint128.cs", "ABMoogACENCmkqiSqJKokqiSgqiSgq7CqqKqog==")]
+[assembly: GoPositionMap("net/netip/netip.go", "netip.cs", "AEOKAYKaoKigppCmkKaQprIABRLSAAgYsoKUpMimqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKClLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgoKCgoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4goKClKaCgpSCgoLcgriCgpSCgpSClJSsspSklKqiqqKqogACEPassK7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrLCqsqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAYQ0oKUgpSkgpS0graCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKUgpSCAAYeAAwClKSkgpS+spSkpIKUAAgSyIKUgpSoyIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgILIgoKCgoKUgqamgoKUrNKUpoKCgoKmpqaClKqirLKCxoK0goKClIKkAAIQ0oKClIKCqJLGtIKCpKaClKSkAAMQwuqigpSCpIKkgqSClAAIFqCmkKaQAAwOAAkCgoKmgoKUgpSCgpSCpq7CgoKClIKClIKCgpSCgoKUqqKCgpSqoKqygIKk5qKClKSCgrSCgoKClIKCgpSkgoKsspSktIKClJSkgoKqoqyygsaCtIKkrLKCgpSCgqyygoKUrLKqooKUgoKClIIADS4ACAKCgpTekKqwqrCkgKaQrgAICICCtoCCtgAHEIIAAhTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUrsKCAAIU8oKUgJKkAAgSygADEtKClIKUgpSCgJKUpIKcwoCCpICCpKyygpSCuIKUgoKUuIKCqqKssoLGgrSCpKyygoKUgoKssoKClKzEqqKClIKCgpSC6JKClA==", "", "", "114=BEUint64/1/2/2,BEUint64/2/2/3;655=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;671=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1416=withoutZone/1/1/1")]
+[assembly: GoPositionMap("net/netip/uint128.go", "uint128.cs", "ABMoogACENCmkqiSqJKokqiSgqiSgq7CqqKqog==")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

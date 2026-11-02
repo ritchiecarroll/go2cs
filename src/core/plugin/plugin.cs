@@ -106,7 +106,7 @@ partial class plugin_package {
 // Plugin is a loaded Go plugin.
 partial struct Plugin {
     internal @string pluginpath;
-    internal @string err;       // set if plugin failed to load
+    internal @string err;                 // set if plugin failed to load
     internal channel<EmptyStruct> loaded; // closed when loaded
     internal map<@string, any> syms;
 }

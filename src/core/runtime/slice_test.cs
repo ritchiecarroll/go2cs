@@ -21,11 +21,14 @@ partial class runtime_test_package {
 public static UntypedInt N => 20;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mallocmoveˢ = "mallocmove"u8;
-internal static readonly @string makecopyˢ = "makecopy"u8;
-internal static readonly @string nilappendˢ = "nilappend"u8;
+internal static ref readonly @string mallocmoveˢ => ref mallocmoveˢᵇ;
+private static readonly @string mallocmoveˢᵇ = "mallocmove"u8;
+internal static ref readonly @string makecopyˢ => ref makecopyˢᵇ;
+private static readonly @string makecopyˢᵇ = "makecopy"u8;
+internal static ref readonly @string nilappendˢ => ref nilappendˢᵇ;
+private static readonly @string nilappendˢᵇ = "nilappend"u8;
 
-public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
+public static void BenchmarkMakeSliceCopy(ж<testing.B> b) {
     UntypedInt length = 32;
     slice<byte> bytes = new slice<byte>(8 * length);
     slice<nint> ints = new slice<nint>(length);
@@ -33,10 +36,10 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
     var bytesʗ1 = bytes;
     var intsʗ1 = ints;
     var ptrsʗ1 = ptrs;
-    Ꮡb.Run(mallocmoveˢ, (ж<testing.B> bΔ1) => {
+    b.Run(mallocmoveˢ, (ж<testing.B> bΔ1) => {
         var bytesʗ2 = bytesʗ1;
         bΔ1.Run(byteˢ, (ж<testing.B> bΔ2) => {
-            slice<byte> x = default!;
+            slice<byte> x = default;
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 x = new slice<byte>(len(bytesʗ2));
                 copy(x, bytesʗ2);
@@ -44,7 +47,7 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
         });
         var intsʗ2 = intsʗ1;
         bΔ1.Run(intˢ, (ж<testing.B> bΔ3) => {
-            slice<nint> x = default!;
+            slice<nint> x = default;
             for (nint i = 0; i < (~bΔ3).N; i++) {
                 x = new slice<nint>(len(intsʗ2));
                 copy(x, intsʗ2);
@@ -52,7 +55,7 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
         });
         var ptrsʗ2 = ptrsʗ1;
         bΔ1.Run(ptrˢ, (ж<testing.B> bΔ4) => {
-            slice<ж<byte>> x = default!;
+            slice<ж<byte>> x = default;
             for (nint i = 0; i < (~bΔ4).N; i++) {
                 x = new slice<ж<byte>>(len(ptrsʗ2));
                 copy(x, ptrsʗ2);
@@ -62,10 +65,10 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
     var bytesʗ3 = bytes;
     var intsʗ3 = ints;
     var ptrsʗ3 = ptrs;
-    Ꮡb.Run(makecopyˢ, (ж<testing.B> bΔ5) => {
+    b.Run(makecopyˢ, (ж<testing.B> bΔ5) => {
         var bytesʗ4 = bytesʗ3;
         bΔ5.Run(byteˢ, (ж<testing.B> bΔ6) => {
-            slice<byte> x = default!;
+            slice<byte> x = default;
             for (nint i = 0; i < (~bΔ6).N; i++) {
                 x = new slice<byte>(8 * length);
                 copy(x, bytesʗ4);
@@ -73,7 +76,7 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
         });
         var intsʗ4 = intsʗ3;
         bΔ5.Run(intˢ, (ж<testing.B> bΔ7) => {
-            slice<nint> x = default!;
+            slice<nint> x = default;
             for (nint i = 0; i < (~bΔ7).N; i++) {
                 x = new slice<nint>(length);
                 copy(x, intsʗ4);
@@ -81,7 +84,7 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
         });
         var ptrsʗ4 = ptrsʗ3;
         bΔ5.Run(ptrˢ, (ж<testing.B> bΔ8) => {
-            slice<ж<byte>> x = default!;
+            slice<ж<byte>> x = default;
             for (nint i = 0; i < (~bΔ8).N; i++) {
                 x = new slice<ж<byte>>(length);
                 copy(x, ptrsʗ4);
@@ -91,28 +94,28 @@ public static void BenchmarkMakeSliceCopy(ж<testing.B> Ꮡb) {
     var bytesʗ5 = bytes;
     var intsʗ5 = ints;
     var ptrsʗ5 = ptrs;
-    Ꮡb.Run(nilappendˢ, (ж<testing.B> bΔ9) => {
+    b.Run(nilappendˢ, (ж<testing.B> bΔ9) => {
         var bytesʗ6 = bytesʗ5;
         bΔ9.Run(byteˢ, (ж<testing.B> bΔ10) => {
-            slice<byte> x = default!;
+            slice<byte> x = default;
             for (nint i = 0; i < (~bΔ10).N; i++) {
-                x = appendꓸꓸꓸ(slice<byte>(default!), bytesʗ6);
+                x = appendꓸꓸꓸ(slice<byte>(default), bytesʗ6);
                 _ = x;
             }
         });
         var intsʗ6 = intsʗ5;
         bΔ9.Run(intˢ, (ж<testing.B> bΔ11) => {
-            slice<nint> x = default!;
+            slice<nint> x = default;
             for (nint i = 0; i < (~bΔ11).N; i++) {
-                x = appendꓸꓸꓸ(slice<nint>(default!), intsʗ6);
+                x = appendꓸꓸꓸ(slice<nint>(default), intsʗ6);
                 _ = x;
             }
         });
         var ptrsʗ6 = ptrsʗ5;
         bΔ9.Run(ptrˢ, (ж<testing.B> bΔ12) => {
-            slice<ж<byte>> x = default!;
+            slice<ж<byte>> x = default;
             for (nint i = 0; i < (~bΔ12).N; i++) {
-                x = appendꓸꓸꓸ(slice<ж<byte>>(default!), ptrsʗ6);
+                x = appendꓸꓸꓸ(slice<ж<byte>>(default), ptrsʗ6);
                 _ = x;
             }
         });
@@ -132,55 +135,56 @@ partial struct struct40 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string int16ˢ = "Int16"u8;
+internal static ref readonly @string int16ˢ => ref int16ˢᵇ;
+private static readonly @string int16ˢᵇ = "Int16"u8;
 
-public static void BenchmarkMakeSlice(ж<testing.B> Ꮡb) {
+public static void BenchmarkMakeSlice(ж<testing.B> b) {
     UntypedInt length = 2;
-    Ꮡb.Run(byteˢ, (ж<testing.B> bΔ1) => {
-        slice<byte> x = default!;
+    b.Run(byteˢ, (ж<testing.B> bΔ1) => {
+        slice<byte> x = default;
         for (nint i = 0; i < (~bΔ1).N; i++) {
             x = new slice<byte>(length, 2 * length);
             _ = x;
         }
     });
-    Ꮡb.Run(int16ˢ, (ж<testing.B> bΔ2) => {
-        slice<int16> x = default!;
+    b.Run(int16ˢ, (ж<testing.B> bΔ2) => {
+        slice<int16> x = default;
         for (nint i = 0; i < (~bΔ2).N; i++) {
             x = new slice<int16>(length, 2 * length);
             _ = x;
         }
     });
-    Ꮡb.Run(intˢ, (ж<testing.B> bΔ3) => {
-        slice<nint> x = default!;
+    b.Run(intˢ, (ж<testing.B> bΔ3) => {
+        slice<nint> x = default;
         for (nint i = 0; i < (~bΔ3).N; i++) {
             x = new slice<nint>(length, 2 * length);
             _ = x;
         }
     });
-    Ꮡb.Run(ptrˢ, (ж<testing.B> bΔ4) => {
-        slice<ж<byte>> x = default!;
+    b.Run(ptrˢ, (ж<testing.B> bΔ4) => {
+        slice<ж<byte>> x = default;
         for (nint i = 0; i < (~bΔ4).N; i++) {
             x = new slice<ж<byte>>(length, 2 * length);
             _ = x;
         }
     });
-    Ꮡb.Run(structˢ3, (ж<testing.B> bΔ5) => {
-        bΔ5.Run("24"u8, (ж<testing.B> bΔ6) => {
-            slice<struct24> x = default!;
+    b.Run(structˢ3, (ж<testing.B> bΔ5) => {
+        bΔ5.Run("24", (ж<testing.B> bΔ6) => {
+            slice<struct24> x = default;
             for (nint i = 0; i < (~bΔ6).N; i++) {
                 x = new slice<struct24>(length, 2 * length);
                 _ = x;
             }
         });
-        bΔ5.Run("32"u8, (ж<testing.B> bΔ7) => {
-            slice<struct32> x = default!;
+        bΔ5.Run("32", (ж<testing.B> bΔ7) => {
+            slice<struct32> x = default;
             for (nint i = 0; i < (~bΔ7).N; i++) {
                 x = new slice<struct32>(length, 2 * length);
                 _ = x;
             }
         });
-        bΔ5.Run("40"u8, (ж<testing.B> bΔ8) => {
-            slice<struct40> x = default!;
+        bΔ5.Run("40", (ж<testing.B> bΔ8) => {
+            slice<struct40> x = default;
             for (nint i = 0; i < (~bΔ8).N; i++) {
                 x = new slice<struct40>(length, 2 * length);
                 _ = x;
@@ -189,48 +193,48 @@ public static void BenchmarkMakeSlice(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkGrowSlice(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(byteˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkGrowSlice(ж<testing.B> b) {
+    b.Run(byteˢ, (ж<testing.B> bΔ1) => {
         var x = new slice<byte>(9);
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            _ = appendꓸꓸꓸ(slice<byte>(default!), x);
+            _ = appendꓸꓸꓸ(slice<byte>(default), x);
         }
     });
-    Ꮡb.Run(int16ˢ, (ж<testing.B> bΔ2) => {
+    b.Run(int16ˢ, (ж<testing.B> bΔ2) => {
         var x = new slice<int16>(9);
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            _ = appendꓸꓸꓸ(slice<int16>(default!), x);
+            _ = appendꓸꓸꓸ(slice<int16>(default), x);
         }
     });
-    Ꮡb.Run(intˢ, (ж<testing.B> bΔ3) => {
+    b.Run(intˢ, (ж<testing.B> bΔ3) => {
         var x = new slice<nint>(9);
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            _ = appendꓸꓸꓸ(slice<nint>(default!), x);
+            _ = appendꓸꓸꓸ(slice<nint>(default), x);
         }
     });
-    Ꮡb.Run(ptrˢ, (ж<testing.B> bΔ4) => {
+    b.Run(ptrˢ, (ж<testing.B> bΔ4) => {
         var x = new slice<ж<byte>>(9);
         for (nint i = 0; i < (~bΔ4).N; i++) {
-            _ = appendꓸꓸꓸ(slice<ж<byte>>(default!), x);
+            _ = appendꓸꓸꓸ(slice<ж<byte>>(default), x);
         }
     });
-    Ꮡb.Run(structˢ3, (ж<testing.B> bΔ5) => {
-        bΔ5.Run("24"u8, (ж<testing.B> bΔ6) => {
+    b.Run(structˢ3, (ж<testing.B> bΔ5) => {
+        bΔ5.Run("24", (ж<testing.B> bΔ6) => {
             var x = new slice<struct24>(9);
             for (nint i = 0; i < (~bΔ6).N; i++) {
-                _ = appendꓸꓸꓸ(slice<struct24>(default!), x);
+                _ = appendꓸꓸꓸ(slice<struct24>(default), x);
             }
         });
-        bΔ5.Run("32"u8, (ж<testing.B> bΔ7) => {
+        bΔ5.Run("32", (ж<testing.B> bΔ7) => {
             var x = new slice<struct32>(9);
             for (nint i = 0; i < (~bΔ7).N; i++) {
-                _ = appendꓸꓸꓸ(slice<struct32>(default!), x);
+                _ = appendꓸꓸꓸ(slice<struct32>(default), x);
             }
         });
-        bΔ5.Run("40"u8, (ж<testing.B> bΔ8) => {
+        bΔ5.Run("40", (ж<testing.B> bΔ8) => {
             var x = new slice<struct40>(9);
             for (nint i = 0; i < (~bΔ8).N; i++) {
-                _ = appendꓸꓸꓸ(slice<struct40>(default!), x);
+                _ = appendꓸꓸꓸ(slice<struct40>(default), x);
             }
         });
     });
@@ -242,27 +246,30 @@ public static readonly ж<slice<ж<nint>>> ᏑSinkIntPointerSlice = new StaticBo
 public static ref slice<ж<nint>> SinkIntPointerSlice => ref ((StaticBox<slice<ж<nint>>>)ᏑSinkIntPointerSlice).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string intSliceˢ = "IntSlice"u8;
-internal static readonly @string pointerSliceˢ = "PointerSlice"u8;
-internal static readonly @string noGrowˢ = "NoGrow"u8;
+internal static ref readonly @string intSliceˢ => ref intSliceˢᵇ;
+private static readonly @string intSliceˢᵇ = "IntSlice"u8;
+internal static ref readonly @string pointerSliceˢ => ref pointerSliceˢᵇ;
+private static readonly @string pointerSliceˢᵇ = "PointerSlice"u8;
+internal static ref readonly @string noGrowˢ => ref noGrowˢᵇ;
+private static readonly @string noGrowˢᵇ = "NoGrow"u8;
 
-public static void BenchmarkExtendSlice(ж<testing.B> Ꮡb) {
+public static void BenchmarkExtendSlice(ж<testing.B> b) {
     nint length = 4; // Use a variable to prevent stack allocation of slices.
-    Ꮡb.Run(intSliceˢ, (ж<testing.B> bΔ1) => {
+    b.Run(intSliceˢ, (ж<testing.B> bΔ1) => {
         var s = new slice<nint>(0, length);
         for (nint i = 0; i < (~bΔ1).N; i++) {
             s = appendꓸꓸꓸ(s.slice(0, 0, length / 2), makeꓸꓸꓸ<nint>(length));
         }
         SinkIntSlice = s;
     });
-    Ꮡb.Run(pointerSliceˢ, (ж<testing.B> bΔ2) => {
+    b.Run(pointerSliceˢ, (ж<testing.B> bΔ2) => {
         var s = new slice<ж<nint>>(0, length);
         for (nint i = 0; i < (~bΔ2).N; i++) {
             s = appendꓸꓸꓸ(s.slice(0, 0, length / 2), makeꓸꓸꓸ<ж<nint>>(length));
         }
         SinkIntPointerSlice = s;
     });
-    Ꮡb.Run(noGrowˢ, (ж<testing.B> bΔ3) => {
+    b.Run(noGrowˢ, (ж<testing.B> bΔ3) => {
         var s = new slice<nint>(0, length);
         for (nint i = 0; i < (~bΔ3).N; i++) {
             s = appendꓸꓸꓸ(s.slice(0, 0, length), makeꓸꓸꓸ<nint>(length));
@@ -291,7 +298,7 @@ public static void BenchmarkAppendGrowByte(ж<testing.B> Ꮡb) {
     var xᴷ = new stackAppend<byte>();
 
     for (nint i = 0; i < b.N; i++) {
-        slice<byte> x = default!;
+        slice<byte> x = default;
         for (nint j = 0; j < 1 << 20; j++) {
             x = append(xᴷ, x, (byte)j);
         }
@@ -302,9 +309,9 @@ public static void BenchmarkAppendGrowString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
     var xᴷ = new stackAppend<@string>();
 
-    @string s = default!;
+    @string s = default;
     for (nint i = 0; i < b.N; i++) {
-        slice<@string> x = default!;
+        slice<@string> x = default;
         for (nint j = 0; j < 1 << 20; j++) {
             x = append(xᴷ, x, s);
         }
@@ -314,9 +321,9 @@ public static void BenchmarkAppendGrowString(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object bytesˢ = (@string)"Bytes"u8;
 
-public static void BenchmarkAppendSlice(ж<testing.B> Ꮡb) {
-    foreach (var (_, length) in new nint[]{1, 4, 7, 8, 15, 16, 32}.slice()) {
-        Ꮡb.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
+public static void BenchmarkAppendSlice(ж<testing.B> b) {
+    foreach (var (_, length) in slice<nint>([1, 4, 7, 8, 15, 16, 32])) {
+        b.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
             var x = new slice<byte>(0, N);
             var y = new slice<byte>(length);
             for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -329,28 +336,28 @@ public static void BenchmarkAppendSlice(ж<testing.B> Ꮡb) {
 
 internal static slice<byte> blackhole;
 
-public static void BenchmarkAppendSliceLarge(ж<testing.B> Ꮡb) {
-    foreach (var (_, length) in new nint[]{1 << 10, 4 << 10, 16 << 10, 64 << 10, 256 << 10, 1024 << 10}.slice()) {
+public static void BenchmarkAppendSliceLarge(ж<testing.B> b) {
+    foreach (var (_, length) in slice<nint>([1 << 10, 4 << 10, 16 << 10, 64 << 10, 256 << 10, 1024 << 10])) {
         var y = new slice<byte>(length);
         var yʗ1 = y;
-        Ꮡb.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprint(length, bytesˢ), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                blackhole = default!;
+                blackhole = default;
                 blackhole = appendꓸꓸꓸ(blackhole, yʗ1);
             }
         });
     }
 }
 
-public static void BenchmarkAppendStr(ж<testing.B> Ꮡb) {
-    foreach (var (_, str) in new @string[]{
-        "1"u8,
-        "1234"u8,
-        "12345678"u8,
-        "1234567890123456"u8,
-        "12345678901234567890123456789012"u8
-    }.slice()) {
-        Ꮡb.Run(fmt.Sprint(len(str), bytesˢ), (ж<testing.B> bΔ1) => {
+public static void BenchmarkAppendStr(ж<testing.B> b) {
+    foreach (var (_, str) in slice<@string>([
+        "1",
+        "1234",
+        "12345678",
+        "1234567890123456",
+        "12345678901234567890123456789012"
+    ])) {
+        b.Run(fmt.Sprint(len(str), bytesˢ), (ж<testing.B> bΔ1) => {
             var x = new slice<byte>(0, N);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 x = x[0..0];
@@ -370,7 +377,7 @@ public static void BenchmarkAppendSpecialCase(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         x = x[0..0];
         for (nint j = 0; j < N; j++) {
-            if (len(x) < cap(x)){
+            if (len(x) < cap(x)) {
                 x = x.slice(0, len(x) + 1);
                 x[len(x) - 1] = j;
             } else {
@@ -390,43 +397,43 @@ internal static nint f() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object appendFailedˢ = (@string)"append failed: "u8;
 
-public static void TestSideEffectOrder(ж<testing.T> Ꮡt) {
+public static void TestSideEffectOrder(ж<testing.T> t) {
     x = new slice<nint>(0, 10);
     x = append(x, (nint)1, f());
     if (x[0] != 1 || x[1] != 2) {
-        Ꮡt.Error(appendFailedˢ, x[0], x[1]);
+        t.Error(appendFailedˢ, x[0], x[1]);
     }
 }
 
-public static void TestAppendOverlap(ж<testing.T> Ꮡt) {
+public static void TestAppendOverlap(ж<testing.T> t) {
     var x = slice<byte>("1234"u8);
     x = appendꓸꓸꓸ(x[1..], x); // p > q in runtime·appendslice.
     @string got = (@string)x;
-    @string want = "2341234"u8;
+    @string want = "2341234";
     if (got != want) {
-        Ꮡt.Errorf("overlap failed: got %q want %q"u8, got, want);
+        t.Errorf("overlap failed: got %q want %q", got, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object stringˢ = (@string)"String"u8;
 
-public static void BenchmarkCopy(ж<testing.B> Ꮡb) {
-    foreach (var (_, l) in new nint[]{1, 2, 4, 8, 12, 16, 32, 128, 1024}.slice()) {
+public static void BenchmarkCopy(ж<testing.B> b) {
+    foreach (var (_, l) in slice<nint>([1, 2, 4, 8, 12, 16, 32, 128, 1024])) {
         var buf = new slice<byte>(4096);
         var bufʗ1 = buf;
-        Ꮡb.Run(fmt.Sprint(l, byteˢ), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprint(l, byteˢ), (ж<testing.B> bΔ1) => {
             var s = new slice<byte>(l);
-            nint n = default!;
+            nint n = default;
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 n = copy(bufʗ1, s);
             }
             bΔ1.SetBytes((int64)n);
         });
         var bufʗ2 = buf;
-        Ꮡb.Run(fmt.Sprint(l, stringˢ), (ж<testing.B> bΔ2) => {
+        b.Run(fmt.Sprint(l, stringˢ), (ж<testing.B> bΔ2) => {
             @string s = (@string)new slice<byte>(l);
-            nint n = default!;
+            nint n = default;
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 n = copy(bufʗ2, s);
             }
@@ -442,7 +449,8 @@ internal static slice<array<uintptr>> s3Ptr;
 internal static slice<array<uintptr>> s4Ptr;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string growˢ = "Grow"u8;
+internal static ref readonly @string growˢ => ref growˢᵇ;
+private static readonly @string growˢᵇ = "Grow"u8;
 
 // BenchmarkAppendInPlace tests the performance of append
 // when the result is being written back to the same slice.
@@ -458,8 +466,8 @@ internal static readonly @string growˢ = "Grow"u8;
 // to avoid benchmarking the write barriers.
 // We benchmark four common sizes (byte, pointer, string/interface, slice),
 // and one larger size.
-public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(noGrowˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkAppendInPlace(ж<testing.B> b) {
+    b.Run(noGrowˢ, (ж<testing.B> bΔ1) => {
         const nint C = 128;
 
         bΔ1.Run(byteˢ, (ж<testing.B> bΔ2) => {
@@ -471,7 +479,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ1.Run("1Ptr"u8, (ж<testing.B> bΔ3) => {
+        bΔ1.Run("1Ptr", (ж<testing.B> bΔ3) => {
             for (nint i = 0; i < (~bΔ3).N; i++) {
                 s1Ptr = new slice<uintptr>(C);
                 for (nint j = 0; j < C; j++) {
@@ -480,7 +488,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ1.Run("2Ptr"u8, (ж<testing.B> bΔ4) => {
+        bΔ1.Run("2Ptr", (ж<testing.B> bΔ4) => {
             for (nint i = 0; i < (~bΔ4).N; i++) {
                 s2Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(C, () => new(2)), 2);
                 for (nint j = 0; j < C; j++) {
@@ -489,7 +497,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ1.Run("3Ptr"u8, (ж<testing.B> bΔ5) => {
+        bΔ1.Run("3Ptr", (ж<testing.B> bΔ5) => {
             for (nint i = 0; i < (~bΔ5).N; i++) {
                 s3Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(C, () => new(3)), 3);
                 for (nint j = 0; j < C; j++) {
@@ -498,7 +506,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ1.Run("4Ptr"u8, (ж<testing.B> bΔ6) => {
+        bΔ1.Run("4Ptr", (ж<testing.B> bΔ6) => {
             for (nint i = 0; i < (~bΔ6).N; i++) {
                 s4Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(C, () => new(4)), 4);
                 for (nint j = 0; j < C; j++) {
@@ -508,7 +516,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
         });
     });
 
-    Ꮡb.Run(growˢ, (ж<testing.B> bΔ7) => {
+    b.Run(growˢ, (ж<testing.B> bΔ7) => {
         const nint C = 5;
 
         bΔ7.Run(byteˢ, (ж<testing.B> bΔ8) => {
@@ -521,7 +529,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ7.Run("1Ptr"u8, (ж<testing.B> bΔ9) => {
+        bΔ7.Run("1Ptr", (ж<testing.B> bΔ9) => {
             for (nint i = 0; i < (~bΔ9).N; i++) {
                 s1Ptr = new slice<uintptr>(0);
                 for (nint j = 0; j < C; j++) {
@@ -531,7 +539,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ7.Run("2Ptr"u8, (ж<testing.B> bΔ10) => {
+        bΔ7.Run("2Ptr", (ж<testing.B> bΔ10) => {
             for (nint i = 0; i < (~bΔ10).N; i++) {
                 s2Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(2)), 2);
                 for (nint j = 0; j < C; j++) {
@@ -541,7 +549,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ7.Run("3Ptr"u8, (ж<testing.B> bΔ11) => {
+        bΔ7.Run("3Ptr", (ж<testing.B> bΔ11) => {
             for (nint i = 0; i < (~bΔ11).N; i++) {
                 s3Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(3)), 3);
                 for (nint j = 0; j < C; j++) {
@@ -551,7 +559,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
             }
         });
 
-        bΔ7.Run("4Ptr"u8, (ж<testing.B> bΔ12) => {
+        bΔ7.Run("4Ptr", (ж<testing.B> bΔ12) => {
             for (nint i = 0; i < (~bΔ12).N; i++) {
                 s4Ptr = GoReflect.WithElemDims(new slice<array<uintptr>>(0, () => new(4)), 4);
                 for (nint j = 0; j < C; j++) {
@@ -567,7 +575,7 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
 internal static partial slice<byte> byteSlice(nint n) {
     var rᴷ = new stackAppend<byte>(moves: true);
 
-    slice<byte> r = default!;
+    slice<byte> r = default;
     foreach (var i in range(n)) {
         r = append(rᴷ, r, (byte)i);
     }
@@ -578,13 +586,13 @@ internal static partial slice<byte> byteSlice(nint n) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInSanitizerModeˢ = (@string)"skipping in sanitizer mode"u8;
 
-public static void TestAppendByteInLoop(ж<testing.T> Ꮡt) {
-    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestAppendByteInLoop(ж<testing.T> t) {
+    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(t));
     if (race.Enabled) {
-        Ꮡt.Skip(skippingInRaceModeˢ);
+        t.Skip(skippingInRaceModeˢ);
     }
     if (asan.Enabled || msan.Enabled) {
-        Ꮡt.Skip(skippingInSanitizerModeˢ);
+        t.Skip(skippingInSanitizerModeˢ);
     }
     foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<nint>[]{
         new nint[]{0, 0, 0}.array(),
@@ -625,10 +633,10 @@ public static void TestAppendByteInLoop(ж<testing.T> Ꮡt) {
             Ꮡr.ValueSlot = byteSlice(n);
         });
         if (got != (float64)want) {
-            Ꮡt.Errorf("for size %d, got %f allocs want %d"u8, n, got, want);
+            t.Errorf("for size %d, got %f allocs want %d", n, got, want);
         }
         if (cap(r) != wantCap) {
-            Ꮡt.Errorf("for size %d, got capacity %d want %d"u8, n, cap(r), wantCap);
+            t.Errorf("for size %d, got capacity %d want %d", n, cap(r), wantCap);
         }
     }
 }
@@ -638,7 +646,7 @@ internal static partial void ptrSlice(nint n, ж<slice<ж<byte>>> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var rᴷ = new stackAppend<ж<byte>>(moves: true);
 
-    slice<ж<byte>> r = default!;
+    slice<ж<byte>> r = default;
     foreach (var _ᴛ1 in range(n)) {
         r = append(rᴷ, r, (ж<byte>)(nil));
     }
@@ -646,16 +654,16 @@ internal static partial void ptrSlice(nint n, ж<slice<ж<byte>>> Ꮡp) {
     p = r;
 }
 
-public static void TestAppendPtrInLoop(ж<testing.T> Ꮡt) {
-    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestAppendPtrInLoop(ж<testing.T> t) {
+    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(t));
     if (race.Enabled) {
-        Ꮡt.Skip(skippingInRaceModeˢ);
+        t.Skip(skippingInRaceModeˢ);
     }
     if (asan.Enabled || msan.Enabled) {
-        Ꮡt.Skip(skippingInSanitizerModeˢ);
+        t.Skip(skippingInSanitizerModeˢ);
     }
-    slice<array<nint>> tests = default!;
-    if (runtime_internal_test_package.PtrSize == 8){
+    slice<array<nint>> tests = default;
+    if (runtime_internal_test_package.PtrSize == 8) {
         tests = GoReflect.WithElemDims(new array<nint>[]{
             new nint[]{0, 0, 0}.array(),
             new nint[]{1, 1, 1}.array(),
@@ -701,10 +709,10 @@ public static void TestAppendPtrInLoop(ж<testing.T> Ꮡt) {
             ptrSlice(n, Ꮡr);
         });
         if (got != (float64)want) {
-            Ꮡt.Errorf("for size %d, got %f allocs want %d"u8, n, got, want);
+            t.Errorf("for size %d, got %f allocs want %d", n, got, want);
         }
         if (cap(r) != wantCap) {
-            Ꮡt.Errorf("for size %d, got capacity %d want %d"u8, n, cap(r), wantCap);
+            t.Errorf("for size %d, got capacity %d want %d", n, cap(r), wantCap);
         }
     }
 }
@@ -713,7 +721,7 @@ public static void TestAppendPtrInLoop(ж<testing.T> Ꮡt) {
 internal static partial (slice<byte>, nint) byteCapSlice(nint n) {
     var rᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);
 
-    slice<byte> r = default!;
+    slice<byte> r = default;
     foreach (var i in range(n)) {
         r = append(rᴷ, r, (byte)i);
     }
@@ -721,13 +729,13 @@ internal static partial (slice<byte>, nint) byteCapSlice(nint n) {
     return (r, cap(r));
 }
 
-public static void TestAppendByteCapInLoop(ж<testing.T> Ꮡt) {
-    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestAppendByteCapInLoop(ж<testing.T> t) {
+    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(t));
     if (race.Enabled) {
-        Ꮡt.Skip(skippingInRaceModeˢ);
+        t.Skip(skippingInRaceModeˢ);
     }
     if (asan.Enabled || msan.Enabled) {
-        Ꮡt.Skip(skippingInSanitizerModeˢ);
+        t.Skip(skippingInSanitizerModeˢ);
     }
     foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<nint>[]{
         new nint[]{0, 0, 0}.array(),
@@ -762,26 +770,26 @@ public static void TestAppendByteCapInLoop(ж<testing.T> Ꮡt) {
             (Ꮡr.ValueSlot, _) = byteCapSlice(n);
         });
         if (got != (float64)want) {
-            Ꮡt.Errorf("for size %d, got %f allocs want %d"u8, n, got, want);
+            t.Errorf("for size %d, got %f allocs want %d", n, got, want);
         }
         if (cap(r) != wantCap) {
-            Ꮡt.Errorf("for size %d, got capacity %d want %d"u8, n, cap(r), wantCap);
+            t.Errorf("for size %d, got capacity %d want %d", n, cap(r), wantCap);
         }
     }
 }
 
 internal partial class TestAppendGeneric_I /*ж<nint>*/;
 
-public static void TestAppendGeneric(ж<testing.T> Ꮡt) {
+public static void TestAppendGeneric(ж<testing.T> t) {
     var r = testAppendGeneric<TestAppendGeneric_I>(100);
     if (len(r) != 100) {
-        Ꮡt.Errorf("bad length"u8);
+        t.Errorf("bad length");
     }
 }
 
 //go:noinline
 internal static partial slice<E> testAppendGeneric<E>(nint n) {
-    slice<E> r = default!;
+    slice<E> r = default;
     E z = GoZero<E>();
     foreach (var _ᴛ1 in range(n)) {
         r = append(r, z);
@@ -799,30 +807,30 @@ internal static slice<byte> appendSomeBytes(slice<byte> r, slice<byte> s) {
     return r;
 }
 
-public static void TestAppendOfArg(ж<testing.T> Ꮡt) {
+public static void TestAppendOfArg(ж<testing.T> t) {
     var r = new slice<byte>(24);
     for (nint i = 0; i < 24; i++) {
         r[i] = (byte)i;
     }
-    appendSomeBytes(r, new byte[]{25, 26, 27}.slice());
+    appendSomeBytes(r, slice<byte>([25, 26, 27]));
     // Do the same thing, trying to overwrite any
     // stack-allocated buffers used above.
     var s = new slice<byte>(24);
     for (nint i = 0; i < 24; i++) {
         s[i] = 99;
     }
-    appendSomeBytes(s, new byte[]{99, 99, 99}.slice());
+    appendSomeBytes(s, slice<byte>([99, 99, 99]));
     // Check that we still have the right data.
     foreach (var (i, b) in r) {
         if (b != (byte)i) {
-            Ꮡt.Errorf("r[%d]=%d, want %d"u8, i, b, (byte)i);
+            t.Errorf("r[%d]=%d, want %d", i, b, (byte)i);
         }
     }
 }
 
-public static void BenchmarkAppendInLoop(ж<testing.B> Ꮡb) {
-    foreach (var (_, size) in new nint[]{0, 1, 8, 16, 32, 64, 128}.slice()) {
-        Ꮡb.Run(fmt.Sprintf("%d"u8, size),
+public static void BenchmarkAppendInLoop(ж<testing.B> b) {
+    foreach (var (_, size) in slice<nint>([0, 1, 8, 16, 32, 64, 128])) {
+        b.Run(fmt.Sprintf("%d"u8, size),
             (ж<testing.B> bΔ1) => {
                 bΔ1.ReportAllocs();
                 while (bΔ1.Loop()) {
@@ -832,11 +840,11 @@ public static void BenchmarkAppendInLoop(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestMoveToHeapEarly(ж<testing.T> Ꮡt) {
+public static void TestMoveToHeapEarly(ж<testing.T> t) {
     var xᴷ = new stackAppend<nint>(moves: true);
 
     // Just checking that this compiles.
-    slice<nint> x = default!;
+    slice<nint> x = default;
     x = move2heap(xᴷ, x);
     var y = x; // causes a move2heap in the entry block
     foreach (var _ᴛ1 in range(5)) {
@@ -845,18 +853,18 @@ public static void TestMoveToHeapEarly(ж<testing.T> Ꮡt) {
     _ = y;
 }
 
-public static void TestMoveToHeapCap(ж<testing.T> Ꮡt) {
-    nint c = default!;
-    var r = ((Func<slice<byte>>)(() => {
-        slice<byte> s = default!;
+public static void TestMoveToHeapCap(ж<testing.T> t) {
+    nint c = default;
+    var r = func(slice<byte> () => {
+        slice<byte> s = default;
         foreach (var i in range(10)) {
             s = append(s, (byte)i);
         }
         c = cap(s);
         return s;
-    }))();
+    })();
     if (c != cap(r)) {
-        Ꮡt.Errorf("got cap=%d, want %d"u8, c, cap(r));
+        t.Errorf("got cap=%d, want %d", c, cap(r));
     }
     sinkSlice = r;
 }
@@ -866,9 +874,9 @@ internal static partial void runit(Action f) {
     f();
 }
 
-public static void TestMoveToHeapClosure1(ж<testing.T> Ꮡt) {
-    nint c = default!;
-    var r = ((Func<slice<byte>>)(() => {
+public static void TestMoveToHeapClosure1(ж<testing.T> t) {
+    nint c = default;
+    var r = func(slice<byte> () => {
         ref var s = ref heap<slice<byte>>(out var Ꮡs);
         foreach (var i in range(10)) {
             Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (byte)i);
@@ -877,34 +885,34 @@ public static void TestMoveToHeapClosure1(ж<testing.T> Ꮡt) {
             c = cap(Ꮡs.ValueSlot);
         });
         return Ꮡs.ValueSlot;
-    }))();
+    })();
     if (c != cap(r)) {
-        Ꮡt.Errorf("got cap=%d, want %d"u8, c, cap(r));
+        t.Errorf("got cap=%d, want %d", c, cap(r));
     }
     sinkSlice = r;
 }
 
-public static void TestMoveToHeapClosure2(ж<testing.T> Ꮡt) {
-    nint c = default!;
-    var r = ((Func<slice<byte>>)(() => {
+public static void TestMoveToHeapClosure2(ж<testing.T> t) {
+    nint c = default;
+    var r = func(slice<byte> () => {
         ref var s = ref heap<slice<byte>>(out var Ꮡs);
         foreach (var i in range(10)) {
             Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (byte)i);
         }
-        c = ((Func<nint>)(() => {
+        c = func(nint () => {
             return cap(Ꮡs.ValueSlot);
-        }))();
+        })();
         return Ꮡs.ValueSlot;
-    }))();
+    })();
     if (c != cap(r)) {
-        Ꮡt.Errorf("got cap=%d, want %d"u8, c, cap(r));
+        t.Errorf("got cap=%d, want %d", c, cap(r));
     }
     sinkSlice = r;
 }
 
 //go:noinline
-internal static partial (slice<byte>, Action) buildClosure(ж<testing.T> Ꮡt) {
-    slice<byte> s = default!;
+internal static partial (slice<byte>, Action) buildClosure(ж<testing.T> t) {
+    slice<byte> s = default;
     foreach (var i in range(20)) {
         s = append(s, (byte)i);
     }
@@ -912,15 +920,15 @@ internal static partial (slice<byte>, Action) buildClosure(ж<testing.T> Ꮡt) {
     var c = () => {
         foreach (var (i, b) in sʗ1) {
             if (b != (byte)i) {
-                Ꮡt.Errorf("s[%d]=%d, want %d"u8, i, b, i);
+                t.Errorf("s[%d]=%d, want %d", i, b, i);
             }
         }
     };
     return (s, c);
 }
 
-public static void TestMoveToHeapClosure3(ж<testing.T> Ꮡt) {
-    var (_, f) = buildClosure(Ꮡt);
+public static void TestMoveToHeapClosure3(ж<testing.T> t) {
+    var (_, f) = buildClosure(t);
     overwriteStack(0);
     f();
 }

@@ -10,50 +10,62 @@ using syscall = syscall_package;
 partial class socktest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string inet4ˢ = "inet4"u8;
-private static readonly @string inet6ˢ = "inet6"u8;
-private static readonly @string localˢ = "local"u8;
+private static ref readonly @string inet4ˢ => ref inet4ˢᵇ;
+private static readonly @string inet4ˢᵇ = "inet4"u8;
+private static ref readonly @string inet6ˢ => ref inet6ˢᵇ;
+private static readonly @string inet6ˢᵇ = "inet6"u8;
+private static ref readonly @string localˢ => ref localˢᵇ;
+private static readonly @string localˢᵇ = "local"u8;
 
 internal static @string familyString(nint family) {
-    var exprᴛ1 = family;
-    if (exprᴛ1 == syscall.AF_INET) {
+    switch (family) {
+    case var ᴛ when ᴛ == syscall.AF_INET: {
         return inet4ˢ;
     }
-    if (exprᴛ1 == syscall.AF_INET6) {
+    case var ᴛ when ᴛ == syscall.AF_INET6: {
         return inet6ˢ;
     }
-    if (exprᴛ1 == syscall.AF_UNIX) {
+    case var ᴛ when ᴛ == syscall.AF_UNIX: {
         return localˢ;
     }
-    { /* default: */
+    default: {
         return fmt.Sprintf("%d"u8, family);
-    }
+    }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string streamˢ = "stream"u8;
-private static readonly @string datagramˢ = "datagram"u8;
-private static readonly @string rawˢ = "raw"u8;
-private static readonly @string seqpacketˢ = "seqpacket"u8;
+private static ref readonly @string streamˢ => ref streamˢᵇ;
+private static readonly @string streamˢᵇ = "stream"u8;
+private static ref readonly @string datagramˢ => ref datagramˢᵇ;
+private static readonly @string datagramˢᵇ = "datagram"u8;
+private static ref readonly @string rawˢ => ref rawˢᵇ;
+private static readonly @string rawˢᵇ = "raw"u8;
+private static ref readonly @string seqpacketˢ => ref seqpacketˢᵇ;
+private static readonly @string seqpacketˢᵇ = "seqpacket"u8;
 
 internal static @string typeString(nint sotype) {
-    @string s = default!;
-    var exprᴛ1 = (sotype & 0xff);
-    if (exprᴛ1 == syscall.SOCK_STREAM) {
+    @string s = default;
+    switch ((sotype & 0xff)) {
+    case var ᴛ when ᴛ == syscall.SOCK_STREAM: {
         s = streamˢ;
+        break;
     }
-    else if (exprᴛ1 == syscall.SOCK_DGRAM) {
+    case var ᴛ when ᴛ == syscall.SOCK_DGRAM: {
         s = datagramˢ;
+        break;
     }
-    else if (exprᴛ1 == syscall.SOCK_RAW) {
+    case var ᴛ when ᴛ == syscall.SOCK_RAW: {
         s = rawˢ;
+        break;
     }
-    else if (exprᴛ1 == syscall.SOCK_SEQPACKET) {
+    case var ᴛ when ᴛ == syscall.SOCK_SEQPACKET: {
         s = seqpacketˢ;
+        break;
     }
-    else { /* default: */
+    default: {
         s = fmt.Sprintf("%d"u8, sotype & 0xff);
-    }
+        break;
+    }}
     {
         nuint flags = (nuint)((nuint)sotype & (nuint)~(nuint)0xff); if (flags != 0) {
             s += fmt.Sprintf("|%#x"u8, flags);
@@ -63,24 +75,27 @@ internal static @string typeString(nint sotype) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string defaultˢ = "default"u8;
-private static readonly @string tcpˢ = "tcp"u8;
-private static readonly @string udpˢ = "udp"u8;
+private static ref readonly @string defaultˢ => ref defaultˢᵇ;
+private static readonly @string defaultˢᵇ = "default"u8;
+private static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+private static ref readonly @string udpˢ => ref udpˢᵇ;
+private static readonly @string udpˢᵇ = "udp"u8;
 
 internal static @string protocolString(nint proto) {
-    var exprᴛ1 = proto;
-    if (exprᴛ1 is 0) {
+    switch (proto) {
+    case 0: {
         return defaultˢ;
     }
-    if (exprᴛ1 == syscall.IPPROTO_TCP) {
+    case var ᴛ when ᴛ == syscall.IPPROTO_TCP: {
         return tcpˢ;
     }
-    if (exprᴛ1 == syscall.IPPROTO_UDP) {
+    case var ᴛ when ᴛ == syscall.IPPROTO_UDP: {
         return udpˢ;
     }
-    { /* default: */
+    default: {
         return fmt.Sprintf("%d"u8, proto);
-    }
+    }}
 }
 
 } // end socktest_package

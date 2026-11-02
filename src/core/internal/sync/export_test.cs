@@ -27,9 +27,9 @@ public static ж<global::go.@internal.sync_package.HashTrieMap<K, V>> NewTruncHa
     // Stub out the good hash function with a terrible one.
     // Everything should still work as expected.
     ref var m = ref heap(new global::go.@internal.sync_package.HashTrieMap<K, V>(), out var Ꮡm);
-    map<@string, nint> mx = default!;
+    map<@string, nint> mx = default;
     var mapType = abi.TypeOf(mx).MapType();
-    var hasher = mapType.Value.Hasher;
+    var hasher = mapType.Hasher;
     var hasherʗ1 = hasher;
     m.keyHash = (@unsafe.Pointer p, uintptr n) => (uintptr)(hasherʗ1(p, n) & (uintptr)(((uintptr)1 << 4) - 1));
     return Ꮡm;

@@ -17,15 +17,15 @@ using static go.@internal.chacha8rand_internal_test_package;
 
 partial class chacha8rand_test_package {
 
-public static void TestOutput(ж<testing.T> Ꮡt) {
+public static void TestOutput(ж<testing.T> t) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
     foreach (var i in range(output)) {
-        while (ᐧ) {
+        for (;;) {
             var (x, ok) = s.Next();
             if (ok) {
                 if (x != output[i]) {
-                    Ꮡt.Errorf("#%d: have %#x want %#x"u8, i, x, output[i]);
+                    t.Errorf("#%d: have %#x want %#x", i, x, output[i]);
                 }
                 break;
             }
@@ -34,21 +34,21 @@ public static void TestOutput(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestMarshal(ж<testing.T> Ꮡt) {
+public static void TestMarshal(ж<testing.T> t) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
     foreach (var i in range(output)) {
-        while (ᐧ) {
+        for (;;) {
             var b = Marshal(Ꮡs);
-            s = new State(nil);
+            s = new State();
             var err = Unmarshal(Ꮡs, b);
-            if (err != default!) {
-                Ꮡt.Fatalf("#%d: Unmarshal: %v"u8, i, err);
+            if (err != nil) {
+                t.Fatalf("#%d: Unmarshal: %v", i, err);
             }
             var (x, ok) = s.Next();
             if (ok) {
                 if (x != output[i]) {
-                    Ꮡt.Fatalf("#%d: have %#x want %#x"u8, i, x, output[i]);
+                    t.Fatalf("#%d: have %#x want %#x", i, x, output[i]);
                 }
                 break;
             }
@@ -57,13 +57,13 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestReseed(ж<testing.T> Ꮡt) {
+public static void TestReseed(ж<testing.T> t) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
     var old = chacha8rand_internal_test_package.Seed(Ꮡs);
     Ꮡs.Reseed();
     if (chacha8rand_internal_test_package.Seed(Ꮡs) == old) {
-        Ꮡt.Errorf("Reseed did not change seed"u8);
+        t.Errorf("Reseed did not change seed");
     }
 }
 
@@ -82,19 +82,19 @@ public static void BenchmarkBlock(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object blockˢ = (@string)"block"u8;
 internal static readonly object blockGenericˢ = (@string)"block_generic"u8;
-internal static readonly @string mismatchˢ = " mismatch!"u8;
+internal static ref readonly @string mismatchˢ => ref mismatchˢᵇ;
+private static readonly @string mismatchˢᵇ = " mismatch!"u8;
 
-public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
+public static void TestBlockGeneric(ж<testing.T> t) {
     ref var b1 = ref heap(new array<uint64>(32), out var Ꮡb1);
     ref var b2 = ref heap(new array<uint64>(32), out var Ꮡb2);
     var s = chacha8rand_test_package.seed.Clone(); // byte seed
-    ref var seedΔ1 = ref heap<array<uint64>>(out var ᏑseedΔ1);
-    seedΔ1 = new uint64[]{
+    ref var seedΔ1 = ref heap<array<uint64>>(new uint64[]{
         binary.LittleEndian.Uint64(s[(int)(0 * 8)..]),
         binary.LittleEndian.Uint64(s[(int)(1 * 8)..]),
         binary.LittleEndian.Uint64(s[(int)(2 * 8)..]),
         binary.LittleEndian.Uint64(s[(int)(3 * 8)..])
-    }.array();
+    }.array(), out var ᏑseedΔ1);
 
     chacha8rand_internal_test_package.Block(ᏑseedΔ1, Ꮡb1, 4);
     chacha8rand_internal_test_package.Block_generic(ᏑseedΔ1, Ꮡb2, 4);
@@ -108,7 +108,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
             }
             fmt.Fprintf(new chacha8rand_test_package.bytes_BufferжWriter(Ꮡout), "%#016x %#016x%s\n"u8, b1[i], b2[i], suffix);
         }
-        Ꮡt.Errorf("block and block_generic disagree:\n%s"u8, Ꮡout.String());
+        t.Errorf("block and block_generic disagree:\n%s", Ꮡout.String());
     }
 }
 
@@ -117,7 +117,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
 // See https://c2sp.org/chacha8rand.
 internal static array<byte> seed = new array<byte>(slice<byte>("ABCDEFGHIJKLMNOPQRSTUVWXYZ123456"u8), 32);
 
-internal static slice<uint64> output = new uint64[]{
+internal static slice<uint64> output = slice<uint64>([
     0xb773b6063d4616a5UL, 0x1160af22a66abc3cUL, 0x8c2599d9418d287cUL, 0x7ee07e037edc5cd6UL,
     0xcfaa9ee02d1c16adUL, 0x0e090eef8febea79UL, 0x3c82d271128b5b3eUL, 0x9c5addc11252a34fUL,
     0xdf79bb617d6ceea6UL, 0x36d553591f9d736aUL, 0xeef0d14e181ee01fUL, 0x089bfc760ae58436UL,
@@ -211,6 +211,6 @@ internal static slice<uint64> output = new uint64[]{
     0xf68901edaf00c46cUL, 0x8c630871b590de80UL, 0x05209c308991e091UL, 0x1f809f99b4788177UL,
     0x11170c2eb6c19fd8UL, 0x44433c779062ba58UL, 0xc0acb51af1874c45UL, 0x9f2e134284809fa1UL,
     0xedb523bd15c619faUL, 0x02d97fd53ecc23c0UL, 0xacaf05a34462374cUL, 0xddd9c6d34bffa11fUL
-}.slice();
+]);
 
 } // end chacha8rand_test_package

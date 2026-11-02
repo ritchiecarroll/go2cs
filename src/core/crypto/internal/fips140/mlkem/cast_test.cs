@@ -14,33 +14,33 @@ internal static readonly object rejectionPathHitˢ = (@string)"rejection path hi
 internal static readonly object rejectionPathNotHitˢ = (@string)"rejection path not hit"u8;
 internal static readonly object nonRejectionPathNotHitˢ = (@string)"non-rejection path not hit"u8;
 
-public static void TestCASTRejectionPaths(ж<testing.T> Ꮡt) {
-    bool rejected = default!;
-    bool notRejected = default!;
+public static void TestCASTRejectionPaths(ж<testing.T> t) {
+    bool rejected = default;
+    bool notRejected = default;
     testingOnlyRejectionOutcome = (nint compare) => {
-        if (compare == 1){
-            Ꮡt.Log(nonRejectionPathHitˢ);
+        if (compare == 1) {
+            t.Log(nonRejectionPathHitˢ);
             notRejected = true;
         } else {
-            Ꮡt.Log(rejectionPathHitˢ);
+            t.Log(rejectionPathHitˢ);
             rejected = true;
         }
     };
-    Ꮡt.Cleanup(() => {
-        testingOnlyRejectionOutcome = default!;
+    t.Cleanup(() => {
+        testingOnlyRejectionOutcome = default;
     });
 
     {
-        var err = fips140CAST(); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = fips140CAST(); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     if (!rejected) {
-        Ꮡt.Error(rejectionPathNotHitˢ);
+        t.Error(rejectionPathNotHitˢ);
     }
     if (!notRejected) {
-        Ꮡt.Error(nonRejectionPathNotHitˢ);
+        t.Error(nonRejectionPathNotHitˢ);
     }
 }
 

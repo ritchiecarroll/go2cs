@@ -458,13 +458,13 @@ check = func(pc uint32, m []bool) (ok bool) {
 
 The assignment statement's position is that of `check` on its left, which precedes the literal on its right — yet the RHS is evaluated *first*, so the store to `check` unambiguously happens after the literal exists. Scored as read-only-after-capture, the capture would take the snapshot path (`var checkʗ1 = check;` hoisted **above** the assignment) and every recursive call would invoke the still-**null** delegate: a `NullReferenceException` on the first recursion. In regexp's `makeOnePass` that is the entire ambiguity check, so `^.$` — and most of the package — would fail to compile. So the scan also counts a write whose syntactic extent *contains* a referencing literal (`w.pos < lit.pos < w.end`), which routes the capture to shared storage; `check` escapes, so it takes the by-box form and the recursion resolves against the box the assignment fills:
 
-<!-- source: src/core/regexp/onepass.cs:329, 337, 348, 481 -->
+<!-- source: src/core/regexp/onepass.cs:332, 340, 350, 482 -->
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
 check = (uint32 pc, slice<bool> mΔ1) => {
     …
-    ok = Ꮡcheck.ValueSlot((~inst).Out, mΔ1) && Ꮡcheck.ValueSlot((~inst).Arg, mΔ1);
+ok = Ꮡcheck.ValueSlot(inst.Out, mΔ1) && Ꮡcheck.ValueSlot(inst.Arg, mΔ1);
 …
 };
 ```
@@ -520,12 +520,12 @@ A **MAP** composite literal whose value or key type is a pointer boxes its eleme
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:786-789 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:795-798 -->
 ```csharp
-if (ᏑsigChecks == nil) {
-    ᏑsigChecks = @new<nint>();
+if (sigChecks == nil) {
+    sigChecks = @new<nint>();
 }
-ᏑsigChecks.Value++;
+sigChecks.Value++;
 ```
 Outside a lambda the assignment is followed by `sigChecks = ref ᏑsigChecks.DerefOrNull();`; inside one that line is CS8175, so it is not emitted.
 Every in-lambda and post-lambda dereference of a repointed captured pointer routes through the box `Ꮡp.Value`, so the now-stale value alias is never read — an accepted modeling gap (like the nil-terminated walk's), not a miscompile. The suppression is sound because no LEGITIMATE re-alias ever occurs inside a lambda: a lambda's OWN pointer parameter is passed as the box `ж<T>` (never deref-aliased), and a heap-boxed value local is written THROUGH its box (`Ꮡb.Value = …`, never box-repointed). Guarded by `ClosureReassignsPtrParam` (a closure that reassigns a captured `*int` parameter; a non-nil runtime argument keeps the reassignment branch unreached so output stays deterministic).
@@ -772,11 +772,11 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:355, 361 -->
+<!-- source: src/core/debug/elf/file.cs:362, 368 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
-f.Value.Type = (Type)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Type) */ (uintptr)16)..]);
+f.Type = (Type)bo.Uint16(data[(int)(/* unsafe.Offsetof(hdr.Type) */ (uintptr)16)..]);
 ```
 
 The value comes from `go/types`, which folds against the `types.Sizes` for the **loaded target
@@ -880,7 +880,7 @@ func (u *UnsafePointer) Load() unsafe.Pointer { return Loadp(unsafe.Pointer(&u.v
 <!-- source: src/core/internal/runtime/atomic/types.cs:467-469 -->
 ```csharp
 public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
-    return (uintptr)Loadp(@unsafe.Pointer.FromBox(Ꮡu.of(UnsafePointer.Ꮡvalue)));
+    return (uintptr)Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 ```
 > `FromBox` carries the transient numeric address (**not GC-stable** — the caveat of every `unsafe.Pointer`-as-`uintptr` use) **and the source box itself** (`Pointer.RetainedSource`, the `NativeBox` §4 retention pattern). The retained referent is what makes the bare-`unsafe.Pointer` atomic primitives real: `*(*unsafe.Pointer)(ptr) = val` must write the memory the pointer names, not the argument box's own `uintptr` slot, so `StorepNoWB`/`Loadp` recover the referent (`StoreThrough`/`LoadThrough`, dispatching through golib's internal `IUntypedSlotAccess` seam on `ж<T>`) and reach the very slot the pointer names. <!-- Without the retained source they were silently non-functional: internal/runtime/atomic's TestStorepNoWB, the 14/15. --> A pointer with no recoverable referent panics **by name** instead of losing the write. A nil box mints the 0 address, never a nil-deref panic — Go's `unsafe.Pointer(nil)`, matching the pointer-parameter emission. The `*unsafe.Pointer` siblings (`Casp1`/`storePointer`/`casPointer`) were always correct by signature — they carry an aliasing `ж<unsafe.Pointer>`. A pointer **receiver** keeps `FromRef` (a `this ref T` receiver has no box to retain) — the one non-retaining mint, a recorded residual, loud at the primitives if ever reached. (The reinterpret pattern `*(*U)(unsafe.Pointer(&x))` is handled separately and is not affected. Guarded by `GolibTests`' `UnsafePointerRetentionTests`, failing-first against the `FromRef` emission, plus `internal/runtime/atomic`'s own test suite.)
@@ -1011,8 +1011,8 @@ r1, _, e1 := SyscallN(procCopySid.Addr(), uintptr(destSidLen), uintptr(unsafe.Po
 ```
 <!-- source: src/core/syscall/windows/zsyscall_windows.cs:204-208 -->
 ```csharp
-var ᴋ0 = ᏑdestSid;
-var ᴋ1 = ᏑsrcSid;
+var ᴋ0 = destSid;
+var ᴋ1 = srcSid;
     var (r1, _, e1) = SyscallN(procCopySid.Addr(), (uintptr)destSidLen, (uintptr)ᴋ0, (uintptr)ᴋ1);
 System.GC.KeepAlive(ᴋ0);
 System.GC.KeepAlive(ᴋ1);
@@ -1066,19 +1066,19 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 
 <!-- source: src/core/syscall/darwin/zsyscall_darwin_amd64.cs:236-258 -->
 ```csharp
-internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> Ꮡfrom, ж<_Socklen> Ꮡfromlen) {
-    nint n = default!;
-    error err = default!;
+internal static (nint n, error err) recvfrom(nint fd, slice<byte> p, nint flags, ж<RawSockaddrAny> from, ж<_Socklen> fromlen) {
+    nint n = default;
+    error err = default;
 
-    @unsafe.Pointer _p0 = default!;
-    if (len(p) > 0){
+    @unsafe.Pointer _p0 = default;
+    if (len(p) > 0) {
         _p0 = @unsafe.Pointer.FromPinnedBox(Ꮡ(p, 0));
     } else {
         _p0 = @unsafe.Pointer.FromBox(Ꮡ_zero);
     }
     var ᴋ16 = _p0;
-    var ᴋ17 = Ꮡfrom;
-    var ᴋ18 = Ꮡfromlen;
+    var ᴋ17 = from;
+    var ᴋ18 = fromlen;
         var (r0, _, e1) = syscall6(abi.FuncPCABI0(libc_recvfrom_trampoline), (uintptr)fd, (uintptr)ᴋ16, (uintptr)len(p), (uintptr)flags, (uintptr)ᴋ17, (uintptr)ᴋ18);
     System.GC.KeepAlive(ᴋ16);
     System.GC.KeepAlive(ᴋ17);
@@ -1231,10 +1231,10 @@ func boolFieldAddr(conf *Config, name string) *bool {
 
 which converts to
 
-<!-- source: src/core/go/types/check_test.cs:397-400 -->
+<!-- source: src/core/go/types/check_test.cs:404-407 -->
 ```csharp
-internal static ж<bool> boolFieldAddr(ж<types.Config> Ꮡconf, @string name) {
-    var v = reflect.Indirect(reflect.ValueOf(Ꮡconf.OrTypedNil()));
+internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
+    var v = reflect.Indirect(reflect.ValueOf(conf.OrTypedNil()));
     return (ж<bool>)(uintptr)(v.FieldByName(name).Addr().UnsafePointer());
 }
 ```
@@ -1389,7 +1389,7 @@ change, and the decoder would return 0 for 23. So all three arms route through g
 reinterpret — `reinterpretManagedEmission`, the same emission this file produces for the identical
 conversion in a deref or raw-address context:
 
-<!-- source: src/core/encoding/gob/gobencdec_test.cs:115-118 -->
+<!-- source: src/core/encoding/gob/gobencdec_test.cs:118-121 -->
 ```csharp
 public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
     var (_, err) = fmt.Sscanf((@string)data, "VALUE=%d"u8, Ꮡg.Reinterpret<Gobber, nint>().OrTypedNil());
@@ -1784,7 +1784,7 @@ mergeCancel := func(ctx, cancelCtx Context) (Context, CancelFunc) {
     return ctx, func() { stop(); cancel(Canceled) }
 }
 ```
-<!-- source: src/core/context/example_test.cs:325, 333-337 -->
+<!-- source: src/core/context/example_test.cs:331, 339-343 -->
 ```csharp
 (context.Context, Action) mergeCancel(context.Context ctx, context.Context cancelCtx) {
     …
@@ -2798,7 +2798,7 @@ call-argument pointer arm). The routing mirrors the struct-field pointer arm: th
 is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
 <!-- source: src/core/go/ast/commentmap.cs:30 -->
 ```csharp
-list = new ж<CommentGroup>[]{Ꮡc}.slice();
+list = slice<ж<CommentGroup>>([c]);
 ```
 Gated to bare idents of pointer type — keyed elements (maps) and address-of/composite elements
 manage their own pointer rendering. Guarded by the `PointerParamWalk` extension `collect` (the

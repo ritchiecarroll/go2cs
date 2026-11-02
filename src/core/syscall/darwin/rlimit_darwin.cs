@@ -7,14 +7,15 @@ namespace go;
 partial class syscall_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string kernMaxfilesperprocˢ = "kern.maxfilesperproc"u8;
+internal static ref readonly @string kernMaxfilesperprocˢ => ref kernMaxfilesperprocˢᵇ;
+private static readonly @string kernMaxfilesperprocˢᵇ = "kern.maxfilesperproc"u8;
 
 // adjustFileLimit adds per-OS limitations on the Rlimit used for RLIMIT_NOFILE. See rlimit.go.
 internal static void adjustFileLimit(ref Rlimit lim) {
     // On older macOS, setrlimit(RLIMIT_NOFILE, lim) with lim.Cur = infinity fails.
     // Set to the value of kern.maxfilesperproc instead.
     var (n, err) = SysctlUint32(kernMaxfilesperprocˢ);
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
     if (lim.Cur > (uint64)n) {

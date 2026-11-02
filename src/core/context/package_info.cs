@@ -10,11 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectliteꓸKind = go.@internal.abi_package.ΔKind;
-global using reflectliteꓸType = go.@internal.reflectlite_package.ΔType;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -63,7 +58,14 @@ using static go.context_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(afterFuncCtx))]
+[assembly: GoFieldAccess(typeof(cancelCtx))]
+[assembly: GoFieldAccess(typeof(timerCtx))]
+[assembly: GoFieldAccess(typeof(valueCtx))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -73,7 +75,7 @@ using static go.context_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("context/context.go", "context.cs", "AKYBzgK4+ICigKKA/LKmgqaCpoIACQqCAAkKgq7CrsIACCDygpAADzQACwKCkLaCgpSCggACEuKCgpSAgoKCgoL+AAIoABECpoKSgoKUgpQADRyigoKUggATMOKCgpSCgpSCgpSokoCCgqSCgpSCgpQAChaUggARHqKClKbSgoKUgoKCgoKU1pSAlIKkqsKUgoKmtoLYgJSCgJSUgpSkgraAlIKClLiCtoKCtAAMFIKAgqSmgqzSgpSClIKCgpSCgoKClJSUlIKUggADEMKClO6ypoKmgqaCpoIAAhgACQKs0oKUgJSkpoKCgoKQpIKSgpKmkAAPGoKmgqqigpSUgoKClAACGgAKAqyyAAIgAA0CgpSClIKUABgaspSkpJSmgqqCgpSmgoKUgpS0gpS0ppS0gpTUtA==", "242-242:1;270-270:1;330-339:1;332-334:1.1;357-359:1;510-512:1;522-528:2;647-647:1;652-654:2;656-656:3", "", "767=String/1/2/1,Until/1/1/2,String/2/2/2;873=stringify/1/2/1,stringify/2/2/2")]
+[assembly: GoPositionMap("context/context.go", "context.cs", "AKYBzgK4AAgIgKKAooD8sqaCpoKmggAKCoIACgqCrsKuwgAIIPKCkAAPNAALAoKQtoKClIKCAAIS4oKClICCgoKCgv4AAigAEQKmgpKCgpSClAANHKKCgpSCABMw4oKClIKClIKClKiSgIKCpIKClIKClAAKFpSCABEeooKUptKCgpSCgoKCgpTWlICUgqSqwpSCgqa2gtiAlIKAlJSClKSCtoCUgoKUuIK2goK0AAwUgoCCpKaCrNKClIKUgoKClIKCgoKUlJSUgpSCAAMQwoKU7rKmgqaCpoKmggACGAAJAqzSgpSAlKSmgoKCgpCkgpKCkqaQAA8agqaCqqKClJSCgoKUAAIaAAoCrLIAAiAADQKClIKUgpQAGRqylKSklKaCqoKClKaCgpSClLSClLSmlLSClNS0", "242-242:1;270-270:1;330-339:1;332-334:1.1;357-359:1;510-512:1;522-528:2;647-647:1;652-654:2;656-656:3", "", "770=String/1/2/1,Until/1/1/2,String/2/2/2;877=stringify/1/2/1,stringify/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;

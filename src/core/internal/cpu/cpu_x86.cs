@@ -68,46 +68,46 @@ internal static UntypedInt cpuid_RDTSCP => /* 1 << 27 */ 134217728;
 internal static uint32 maxExtendedFunctionInformation;
 
 internal static void doinit() {
-    options = new option[]{
-        new(Name: "adx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
-        new(Name: "aes"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
-        new(Name: "erms"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
-        new(Name: "fsrm"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFSRM)),
-        new(Name: "pclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
-        new(Name: "rdtscp"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
-        new(Name: "sha"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA)),
-        new(Name: "vpclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ))
-    }.slice();
+    options = slice<option>([
+        new(Name: "adx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
+        new(Name: "aes", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
+        new(Name: "erms", Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
+        new(Name: "fsrm", Feature: ᏑX86.of(X86ᴛ1.ᏑHasFSRM)),
+        new(Name: "pclmulqdq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
+        new(Name: "rdtscp", Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDTSCP)),
+        new(Name: "sha", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSHA)),
+        new(Name: "vpclmulqdq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ))
+    ]);
     var level = getGOAMD64level();
     if (level < 2) {
         // These options are required at level 2. At lower levels
         // they can be turned off.
         options = append(options,
-            new option(Name: "popcnt"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPOPCNT)),
-            new option(Name: "sse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE3)),
-            new option(Name: "sse41"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
-            new option(Name: "sse42"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
-            new option(Name: "ssse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)));
+            new option(Name: "popcnt", Feature: ᏑX86.of(X86ᴛ1.ᏑHasPOPCNT)),
+            new option(Name: "sse3", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE3)),
+            new option(Name: "sse41", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
+            new option(Name: "sse42", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
+            new option(Name: "ssse3", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)));
     }
     if (level < 3) {
         // These options are required at level 3. At lower levels
         // they can be turned off.
         options = append(options,
-            new option(Name: "avx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
-            new option(Name: "avx2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX2)),
-            new option(Name: "bmi1"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI1)),
-            new option(Name: "bmi2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI2)),
-            new option(Name: "fma"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFMA)));
+            new option(Name: "avx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
+            new option(Name: "avx2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX2)),
+            new option(Name: "bmi1", Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI1)),
+            new option(Name: "bmi2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI2)),
+            new option(Name: "fma", Feature: ᏑX86.of(X86ᴛ1.ᏑHasFMA)));
     }
     if (level < 4) {
         // These options are required at level 4. At lower levels
         // they can be turned off.
         options = append(options,
-            new option(Name: "avx512f"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
-            new option(Name: "avx512cd"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512CD)),
-            new option(Name: "avx512bw"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
-            new option(Name: "avx512dq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512DQ)),
-            new option(Name: "avx512vl"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)));
+            new option(Name: "avx512f", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
+            new option(Name: "avx512cd", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512CD)),
+            new option(Name: "avx512bw", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
+            new option(Name: "avx512dq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512DQ)),
+            new option(Name: "avx512vl", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)));
     }
 
     var (maxID, _, _, _) = cpuid(0, 0);
@@ -195,7 +195,7 @@ internal static void doinit() {
 
     X86.HasFSRM = isSet(edx7, cpuid_FSRM);
 
-    uint32 maxExtendedInformation = default!;
+    uint32 maxExtendedInformation = default;
     (maxExtendedInformation, _, _, _) = cpuid(0x80000000U, 0);
 
     if (maxExtendedInformation < 0x80000001U) {
@@ -241,10 +241,10 @@ public static @string Name() {
 
     var data = new slice<byte>(0, 3 * 4 * 4);
 
-    uint32 eax = default!;
-    uint32 ebx = default!;
-    uint32 ecx = default!;
-    uint32 edx = default!;
+    uint32 eax = default;
+    uint32 ebx = default;
+    uint32 ecx = default;
+    uint32 edx = default;
     (eax, ebx, ecx, edx) = cpuid(0x80000002U, 0);
     data = appendBytes(data, eax, ebx, ecx, edx);
     (eax, ebx, ecx, edx) = cpuid(0x80000003U, 0);
@@ -253,13 +253,13 @@ public static @string Name() {
     data = appendBytes(data, eax, ebx, ecx, edx);
 
     // Trim leading spaces.
-    while (len(data) > 0 && data[0] == (rune)' ') {
+    while (len(data) > 0 && data[0] == ' ') {
         data = data[1..];
     }
 
     // Trim tail after and including the first null byte.
     foreach (var (i, c) in data) {
-        if (c == (rune)'\x00') {
+        if (c == '\x00') {
             data = data.slice(0, i);
             break;
         }

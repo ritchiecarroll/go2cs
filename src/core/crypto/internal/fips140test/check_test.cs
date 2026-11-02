@@ -29,118 +29,135 @@ using ꓸꓸꓸnint = Span<nint>;
 partial class fipstest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fips140ˢ = "fips140"u8;
-internal static readonly @string testRunˢ = "-test.run=^TestIntegrityCheck$"u8;
+internal static ref readonly @string fips140ˢ => ref fips140ˢᵇ;
+private static readonly @string fips140ˢᵇ = "fips140"u8;
+internal static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestIntegrityCheck$"u8;
 
-public static void TestIntegrityCheck(ж<testing.T> Ꮡt) {
+public static void TestIntegrityCheck(ж<testing.T> t) {
     if (Verified) {
-        Ꮡt.Logf("verified"u8);
+        t.Logf("verified");
         return;
     }
 
     if (godebug.New(fips140ˢ).Value() == "on"u8) {
-        Ꮡt.Fatalf("GODEBUG=fips140=on but verification did not run"u8);
+        t.Fatalf("GODEBUG=fips140=on but verification did not run");
     }
 
-    cryptotest.MustSupportFIPS140(Ꮡt);
+    cryptotest.MustSupportFIPS140(t);
 
-    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)), testVˢ, testRunˢ);
-    cmd.Value.Env = append(cmd.Environ(), "GODEBUG=fips140=on"u8);
+    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t), testenv.Executable(new fipstest_internal_test_package.testing_TжTB(t)), testVˢ, testRunˢ);
+    cmd.Env = append(cmd.Environ(), (@string)"GODEBUG=fips140=on");
     var (@out, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("GODEBUG=fips140=on %v failed: %v\n%s"u8, (~cmd).Args, err, @out);
+    if (err != nil) {
+        t.Fatalf("GODEBUG=fips140=on %v failed: %v\n%s", cmd.Args, err, @out);
     }
-    Ꮡt.Logf("exec'ed GODEBUG=fips140=on and succeeded:\n%s"u8, @out);
+    t.Logf("exec'ed GODEBUG=fips140=on and succeeded:\n%s", @out);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fips140testExeˢ = "fips140test.exe"u8;
-internal static readonly @string codesignˢ = "codesign"u8;
+internal static ref readonly @string fips140testExeˢ => ref fips140testExeˢᵇ;
+private static readonly @string fips140testExeˢᵇ = "fips140test.exe"u8;
+internal static ref readonly @string codesignˢ => ref codesignˢᵇ;
+private static readonly @string codesignˢᵇ = "codesign"u8;
 
-public static void TestIntegrityCheckFailure(ж<testing.T> Ꮡt) {
-    moduleStatus(Ꮡt);
-    cryptotest.MustSupportFIPS140(Ꮡt);
+public static void TestIntegrityCheckFailure(ж<testing.T> t) {
+    moduleStatus(t);
+    cryptotest.MustSupportFIPS140(t);
 
-    var (bin, err) = os.ReadFile(testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (bin, err) = os.ReadFile(testenv.Executable(new fipstest_internal_test_package.testing_TжTB(t)));
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // Replace the expected module checksum with a different value.
     bin = bytes.ReplaceAll(bin, Linkinfo.Sum[..], bytes.Repeat(slice<byte>("X"u8), len(Linkinfo.Sum)));
 
-    @string binPath = filepath.Join(Ꮡt.TempDir(), fips140testExeˢ);
+    @string binPath = filepath.Join(t.TempDir(), fips140testExeˢ);
     {
-        var errΔ1 = os.WriteFile(binPath, bin, 493); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = os.WriteFile(binPath, bin, 493); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 
     if (runtime.GOOS == "darwin"u8) {
         // Regenerate the macOS ad-hoc code signature.
-        var cmdΔ1 = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), codesignˢ, "-s"u8, "-", "-f", binPath);
+        var cmdΔ1 = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t), codesignˢ, "-s", "-", "-f", binPath);
         var (outΔ1, errΔ2) = cmdΔ1.CombinedOutput();
-        if (errΔ2 != default!) {
-            Ꮡt.Fatalf("codesign failed: %v\n%s"u8, errΔ2, outΔ1);
+        if (errΔ2 != nil) {
+            t.Fatalf("codesign failed: %v\n%s", errΔ2, outΔ1);
         }
     }
 
-    Ꮡt.Logf("running modified binary..."u8);
-    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), binPath, testVˢ, testRunˢ);
-    cmd.Value.Env = append(cmd.Environ(), "GODEBUG=fips140=on"u8);
+    t.Logf("running modified binary...");
+    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t), binPath, testVˢ, testRunˢ);
+    cmd.Env = append(cmd.Environ(), (@string)"GODEBUG=fips140=on");
     (var @out, err) = cmd.CombinedOutput();
-    Ꮡt.Logf("running with GODEBUG=fips140=on:\n%s"u8, @out);
-    if (err == default!) {
-        Ꮡt.Errorf("modified binary did not fail as expected"u8);
+    t.Logf("running with GODEBUG=fips140=on:\n%s", @out);
+    if (err == nil) {
+        t.Errorf("modified binary did not fail as expected");
     }
     if (!bytes.Contains(@out, slice<byte>("fips140: verification mismatch"u8))) {
-        Ꮡt.Errorf("modified binary did not fail with expected message"u8);
+        t.Errorf("modified binary did not fail with expected message");
     }
     if (bytes.Contains(@out, slice<byte>("verified"u8))) {
-        Ꮡt.Errorf("modified binary did not exit"u8);
+        t.Errorf("modified binary did not exit");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string textˢ = "TEXT"u8;
-internal static readonly @string staticTextˢ = "StaticText"u8;
-internal static readonly @string rodataˢ = "RODATA"u8;
-internal static readonly @string noptrdataˢ = "NOPTRDATA"u8;
-internal static readonly @string staticDataˢ = "StaticData"u8;
-internal static readonly @string dataˢ = "DATA"u8;
-internal static readonly @string checktestTextˢ = "checktest.TEXT"u8;
-internal static readonly @string checktestRodataˢ = "checktest.RODATA"u8;
-internal static readonly @string checktestNoptrdataˢ = "checktest.NOPTRDATA"u8;
-internal static readonly @string checktestDataˢ = "checktest.DATA"u8;
-internal static readonly @string fmtPrintfˢ = "fmt.Printf"u8;
-internal static readonly @string unicodeCategoriesˢ = "unicode.Categories"u8;
-internal static readonly @string unicodeAsciiHexDigitˢ = "unicode.ASCII_Hex_Digit"u8;
+internal static ref readonly @string textˢ => ref textˢᵇ;
+private static readonly @string textˢᵇ = "TEXT"u8;
+internal static ref readonly @string staticTextˢ => ref staticTextˢᵇ;
+private static readonly @string staticTextˢᵇ = "StaticText"u8;
+internal static ref readonly @string rodataˢ => ref rodataˢᵇ;
+private static readonly @string rodataˢᵇ = "RODATA"u8;
+internal static ref readonly @string noptrdataˢ => ref noptrdataˢᵇ;
+private static readonly @string noptrdataˢᵇ = "NOPTRDATA"u8;
+internal static ref readonly @string staticDataˢ => ref staticDataˢᵇ;
+private static readonly @string staticDataˢᵇ = "StaticData"u8;
+internal static ref readonly @string dataˢ => ref dataˢᵇ;
+private static readonly @string dataˢᵇ = "DATA"u8;
+internal static ref readonly @string checktestTextˢ => ref checktestTextˢᵇ;
+private static readonly @string checktestTextˢᵇ = "checktest.TEXT"u8;
+internal static ref readonly @string checktestRodataˢ => ref checktestRodataˢᵇ;
+private static readonly @string checktestRodataˢᵇ = "checktest.RODATA"u8;
+internal static ref readonly @string checktestNoptrdataˢ => ref checktestNoptrdataˢᵇ;
+private static readonly @string checktestNoptrdataˢᵇ = "checktest.NOPTRDATA"u8;
+internal static ref readonly @string checktestDataˢ => ref checktestDataˢᵇ;
+private static readonly @string checktestDataˢᵇ = "checktest.DATA"u8;
+internal static ref readonly @string fmtPrintfˢ => ref fmtPrintfˢᵇ;
+private static readonly @string fmtPrintfˢᵇ = "fmt.Printf"u8;
+internal static ref readonly @string unicodeCategoriesˢ => ref unicodeCategoriesˢᵇ;
+private static readonly @string unicodeCategoriesˢᵇ = "unicode.Categories"u8;
+internal static ref readonly @string unicodeAsciiHexDigitˢ => ref unicodeAsciiHexDigitˢᵇ;
+private static readonly @string unicodeAsciiHexDigitˢᵇ = "unicode.ASCII_Hex_Digit"u8;
 
-public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
-    cryptotest.MustSupportFIPS140(Ꮡt);
+public static void TestIntegrityCheckInfo(ж<testing.T> t) {
+    cryptotest.MustSupportFIPS140(t);
 
     // Check that the checktest symbols are initialized properly.
     if (checktest.NOPTRDATA != 1) {
-        Ꮡt.Errorf("checktest.NOPTRDATA = %d, want 1"u8, checktest.NOPTRDATA);
+        t.Errorf("checktest.NOPTRDATA = %d, want 1", checktest.NOPTRDATA);
     }
     if (checktest.RODATA != 2) {
-        Ꮡt.Errorf("checktest.RODATA = %d, want 2"u8, checktest.RODATA);
+        t.Errorf("checktest.RODATA = %d, want 2", checktest.RODATA);
     }
     if (checktest.DATA.P != checktest.ᏑNOPTRDATA) {
-        Ꮡt.Errorf("checktest.DATA.P = %p, want &checktest.NOPTRDATA (%p)"u8, checktest.DATA.P.OrTypedNil(), checktest.ᏑNOPTRDATA);
+        t.Errorf("checktest.DATA.P = %p, want &checktest.NOPTRDATA (%p)", checktest.DATA.P.OrTypedNil(), checktest.ᏑNOPTRDATA);
     }
     if (checktest.DATA.X != 3) {
-        Ꮡt.Errorf("checktest.DATA.X = %d, want 3"u8, checktest.DATA.X);
+        t.Errorf("checktest.DATA.X = %d, want 3", checktest.DATA.X);
     }
     if (checktest.NOPTRBSS != 0) {
-        Ꮡt.Errorf("checktest.NOPTRBSS = %d, want 0"u8, checktest.NOPTRBSS);
+        t.Errorf("checktest.NOPTRBSS = %d, want 0", checktest.NOPTRBSS);
     }
     if (checktest.BSS != nil) {
-        Ꮡt.Errorf("checktest.BSS = %p, want nil"u8, checktest.BSS.OrTypedNil());
+        t.Errorf("checktest.BSS = %p, want nil", checktest.BSS.OrTypedNil());
     }
     {
         var p = checktest.PtrStaticData(); if (p != nil && p.Value != 10) {
-            Ꮡt.Errorf("*checktest.PtrStaticData() = %d, want 10"u8, p.Value);
+            t.Errorf("*checktest.PtrStaticData() = %d, want 10", p.Value);
         }
     }
 
@@ -148,7 +165,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
     void sect(nint i, @string name, @unsafe.Pointer p) {
         var s = Linkinfo.Sects[i];
         if (!((uintptr)s.Start <= (uintptr)p && (uintptr)p < (uintptr)s.End)) {
-            Ꮡt.Errorf("checktest.%s (%#x) not in section #%d (%#x..%#x)"u8, name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
+            t.Errorf("checktest.%s (%#x) not in section #%d (%#x..%#x)", name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
         }
     }
     sect(0, textˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(checktest.TEXT));
@@ -172,7 +189,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
         foreach (var (_, i) in ix) {
             var s = Linkinfo.Sects[i];
             if ((uintptr)s.Start <= (uintptr)p && (uintptr)p < (uintptr)s.End) {
-                Ꮡt.Errorf("%s (%#x) unexpectedly in section #%d (%#x..%#x)"u8, name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
+                t.Errorf("%s (%#x) unexpectedly in section #%d (%#x..%#x)", name, @unsafe.Pointer.OrTypedNil(p), i, @unsafe.Pointer.OrTypedNil(s.Start), @unsafe.Pointer.OrTypedNil(s.End));
             }
         }
     }
@@ -184,8 +201,8 @@ public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
     no(checktestDataˢ, @unsafe.Pointer.FromPinnedBox(checktest.ᏑDATA), 0, 1, 2);
 
     // Check that non-FIPS symbols are not in any of the sections.
-    no(fmtPrintfˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(fmt.Printfᶠ), 0, 1, 2, 3); // TEXT
-    no(unicodeCategoriesˢ, @unsafe.Pointer.FromPinnedBox(unicode.ᏑCategories), 0, 1, 2, 3); // BSS
+    no(fmtPrintfˢ, (@unsafe.Pointer)abi.FuncPCABIInternal(fmt.Printfᶠ), 0, 1, 2, 3);            // TEXT
+    no(unicodeCategoriesˢ, @unsafe.Pointer.FromPinnedBox(unicode.ᏑCategories), 0, 1, 2, 3);     // BSS
     no(unicodeAsciiHexDigitˢ, @unsafe.Pointer.FromBox(Ꮡ(unicode.ASCII_Hex_Digit)), 0, 1, 2, 3); // DATA
 
     // Check that we have enough data in total.
@@ -195,7 +212,7 @@ public static void TestIntegrityCheckInfo(ж<testing.T> Ꮡt) {
         n += (uintptr)s.End - (uintptr)s.Start;
     }
     if (n < 16 * 1024) {
-        Ꮡt.Fatalf("fips sections not big enough: %d, want at least 16 kB"u8, n);
+        t.Fatalf("fips sections not big enough: %d, want at least 16 kB", n);
     }
 }
 

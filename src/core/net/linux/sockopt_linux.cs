@@ -9,7 +9,8 @@ using syscall = syscall_package;
 partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string setsockoptˢ = "setsockopt"u8;
+internal static ref readonly @string setsockoptˢ => ref setsockoptˢᵇ;
+private static readonly @string setsockoptˢᵇ = "setsockopt"u8;
 
 internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool ipv6only) {
     if (family == syscall.AF_INET6 && sotype != syscall.SOCK_RAW) {
@@ -22,7 +23,7 @@ internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool 
         // Allow broadcast.
         return os.NewSyscallError(setsockoptˢ, syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1));
     }
-    return default!;
+    return default;
 }
 
 internal static error setDefaultListenerSockopts(nint s) {

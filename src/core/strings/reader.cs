@@ -16,8 +16,8 @@ partial class strings_package {
 // The zero value for Reader operates like a Reader of an empty string.
 partial struct Reader {
     internal @string s;
-    internal int64 i; // current reading index
-    internal nint prevRune;  // index of previous rune; or < 0
+    internal int64 i;       // current reading index
+    internal nint prevRune; // index of previous rune; or < 0
 }
 
 // Len returns the number of bytes of the unread portion of the
@@ -39,8 +39,8 @@ public static int64 Size(this ref Reader r) {
 
 // Read implements the [io.Reader] interface.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -52,12 +52,13 @@ public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stringsReaderReadAtˢ = "strings.Reader.ReadAt: negative offset"u8;
+internal static ref readonly @string stringsReaderReadAtˢ => ref stringsReaderReadAtˢᵇ;
+private static readonly @string stringsReaderReadAtˢᵇ = "strings.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
 public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     // cannot modify state - see io.ReaderAt
     if (off < 0) {
@@ -81,11 +82,12 @@ public static (byte, error) ReadByte(this ref Reader r) {
     }
     var b = r.s[(nint)(r.i)];
     r.i++;
-    return (b, default!);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stringsReaderUnreadByteˢ = "strings.Reader.UnreadByte: at beginning of string"u8;
+internal static ref readonly @string stringsReaderUnreadByteˢ => ref stringsReaderUnreadByteˢᵇ;
+private static readonly @string stringsReaderUnreadByteˢᵇ = "strings.Reader.UnreadByte: at beginning of string"u8;
 
 // UnreadByte implements the [io.ByteScanner] interface.
 public static error UnreadByte(this ref Reader r) {
@@ -94,14 +96,14 @@ public static error UnreadByte(this ref Reader r) {
     }
     r.prevRune = -1;
     r.i--;
-    return default!;
+    return default;
 }
 
 // ReadRune implements the [io.RuneReader] interface.
 public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
-    rune ch = default!;
-    nint size = default!;
-    error err = default!;
+    rune ch = default;
+    nint size = default;
+    error err = default;
 
     if (r.i >= (int64)len(r.s)) {
         r.prevRune = -1;
@@ -114,8 +116,10 @@ public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stringsReaderUnreadRuneˢ = "strings.Reader.UnreadRune: at beginning of string"u8;
-internal static readonly @string stringsReaderUnreadRuneˢ2 = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
+internal static ref readonly @string stringsReaderUnreadRuneˢ => ref stringsReaderUnreadRuneˢᵇ;
+private static readonly @string stringsReaderUnreadRuneˢᵇ = "strings.Reader.UnreadRune: at beginning of string"u8;
+internal static ref readonly @string stringsReaderUnreadRuneˢ2 => ref stringsReaderUnreadRuneˢ2ᵇ;
+private static readonly @string stringsReaderUnreadRuneˢ2ᵇ = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune implements the [io.RuneScanner] interface.
 public static error UnreadRune(this ref Reader r) {
@@ -127,45 +131,50 @@ public static error UnreadRune(this ref Reader r) {
     }
     r.i = (int64)r.prevRune;
     r.prevRune = -1;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stringsReaderSeekInvalidˢ = "strings.Reader.Seek: invalid whence"u8;
-internal static readonly @string stringsReaderSeekˢ = "strings.Reader.Seek: negative position"u8;
+internal static ref readonly @string stringsReaderSeekInvalidˢ => ref stringsReaderSeekInvalidˢᵇ;
+private static readonly @string stringsReaderSeekInvalidˢᵇ = "strings.Reader.Seek: invalid whence"u8;
+internal static ref readonly @string stringsReaderSeekˢ => ref stringsReaderSeekˢᵇ;
+private static readonly @string stringsReaderSeekˢᵇ = "strings.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
 public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
-    int64 abs = default!;
-    var exprᴛ1 = whence;
-    if (exprᴛ1 == io.SeekStart) {
+    int64 abs = default;
+    switch (whence) {
+    case var ᴛ when ᴛ == io.SeekStart: {
         abs = offset;
+        break;
     }
-    else if (exprᴛ1 == io.SeekCurrent) {
+    case var ᴛ when ᴛ == io.SeekCurrent: {
         abs = r.i + offset;
+        break;
     }
-    else if (exprᴛ1 == io.SeekEnd) {
+    case var ᴛ when ᴛ == io.SeekEnd: {
         abs = (int64)len(r.s) + offset;
+        break;
     }
-    else { /* default: */
+    default: {
         return (0, errors.New(stringsReaderSeekInvalidˢ));
-    }
+    }}
     if (abs < 0) {
         return (0, errors.New(stringsReaderSeekˢ));
     }
     r.i = abs;
-    return (abs, default!);
+    return (abs, default);
 }
 
 // WriteTo implements the [io.WriterTo] interface.
 public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
-    int64 n = default!;
-    error err = default!;
+    int64 n = default;
+    error err = default;
 
     r.prevRune = -1;
     if (r.i >= (int64)len(r.s)) {
-        return (0, default!);
+        return (0, default);
     }
     @string s = r.s.slice((nint)(r.i));
     (var m, err) = io.WriteString(w, s);
@@ -174,7 +183,7 @@ public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) {
     }
     r.i += (int64)m;
     n = (int64)m;
-    if (m != len(s) && err == default!) {
+    if (m != len(s) && err == nil) {
         err = io.ErrShortWrite;
     }
     return (n, err);

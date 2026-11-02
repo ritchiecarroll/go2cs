@@ -23,22 +23,26 @@ partial interface nistPoint<T> {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string p224ˢ = "P224"u8;
-internal static readonly @string p256ˢ = "P256"u8;
-internal static readonly @string p384ˢ = "P384"u8;
-internal static readonly @string p521ˢ = "P521"u8;
+internal static ref readonly @string p224ˢ => ref p224ˢᵇ;
+private static readonly @string p224ˢᵇ = "P224"u8;
+internal static ref readonly @string p256ˢ => ref p256ˢᵇ;
+private static readonly @string p256ˢᵇ = "P256"u8;
+internal static ref readonly @string p384ˢ => ref p384ˢᵇ;
+private static readonly @string p384ˢᵇ = "P384"u8;
+internal static ref readonly @string p521ˢ => ref p521ˢᵇ;
+private static readonly @string p521ˢᵇ = "P521"u8;
 
-public static void BenchmarkScalarMult(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(p224ˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkScalarMult(ж<testing.B> b) {
+    b.Run(p224ˢ, (ж<testing.B> bΔ1) => {
         benchmarkScalarMult<P224PointжnistPoint>(bΔ1, Δnistec.NewP224Point().SetGenerator(), 28);
     });
-    Ꮡb.Run(p256ˢ, (ж<testing.B> bΔ2) => {
+    b.Run(p256ˢ, (ж<testing.B> bΔ2) => {
         benchmarkScalarMult<P256PointжnistPoint>(bΔ2, Δnistec.NewP256Point().SetGenerator(), 32);
     });
-    Ꮡb.Run(p384ˢ, (ж<testing.B> bΔ3) => {
+    b.Run(p384ˢ, (ж<testing.B> bΔ3) => {
         benchmarkScalarMult<P384PointжnistPoint>(bΔ3, Δnistec.NewP384Point().SetGenerator(), 48);
     });
-    Ꮡb.Run(p521ˢ, (ж<testing.B> bΔ4) => {
+    b.Run(p521ˢ, (ж<testing.B> bΔ4) => {
         benchmarkScalarMult<P521PointжnistPoint>(bΔ4, Δnistec.NewP521Point().SetGenerator(), 66);
     });
 }
@@ -57,17 +61,17 @@ internal static void benchmarkScalarMult<P>(ж<testing.B> Ꮡb, P p, nint scalar
     }
 }
 
-public static void BenchmarkScalarBaseMult(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(p224ˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkScalarBaseMult(ж<testing.B> b) {
+    b.Run(p224ˢ, (ж<testing.B> bΔ1) => {
         benchmarkScalarBaseMult<P224PointжnistPoint>(bΔ1, Δnistec.NewP224Point().SetGenerator(), 28);
     });
-    Ꮡb.Run(p256ˢ, (ж<testing.B> bΔ2) => {
+    b.Run(p256ˢ, (ж<testing.B> bΔ2) => {
         benchmarkScalarBaseMult<P256PointжnistPoint>(bΔ2, Δnistec.NewP256Point().SetGenerator(), 32);
     });
-    Ꮡb.Run(p384ˢ, (ж<testing.B> bΔ3) => {
+    b.Run(p384ˢ, (ж<testing.B> bΔ3) => {
         benchmarkScalarBaseMult<P384PointжnistPoint>(bΔ3, Δnistec.NewP384Point().SetGenerator(), 48);
     });
-    Ꮡb.Run(p521ˢ, (ж<testing.B> bΔ4) => {
+    b.Run(p521ˢ, (ж<testing.B> bΔ4) => {
         benchmarkScalarBaseMult<P521PointжnistPoint>(bΔ4, Δnistec.NewP521Point().SetGenerator(), 66);
     });
 }

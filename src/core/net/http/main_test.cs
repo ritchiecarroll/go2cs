@@ -21,11 +21,11 @@ using static global::go.net.http_internal_test_package;
 
 partial class http_test_package {
 
-internal static ж<log.Logger> quietLog = log.New(io.Discard, ""u8, 0);
+internal static ж<log.Logger> quietLog = log.New(io.Discard, "", 0);
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     http_internal_test_package.MaxWriteWaitBeforeConnReuse.Value = (time.Duration)(3600000000000L);
-    nint v = Ꮡm.Run();
+    nint v = m.Run();
     if (v == 0 && goroutineLeaked()) {
         os.Exit(1);
     }
@@ -33,24 +33,34 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testingMBeforeFunc1ˢ = "testing.(*M).before.func1"u8;
-internal static readonly @string osSignalSignalRecvˢ = "os/signal.signal_recv"u8;
-internal static readonly @string createdByNetStartServerˢ = "created by net.startServer"u8;
-internal static readonly @string createdByTestingRunTestsˢ = "created by testing.RunTests"u8;
-internal static readonly @string closeWriteAndWaitˢ = "closeWriteAndWait"u8;
-internal static readonly @string testingMainˢ = "testing.Main("u8;
-internal static readonly @string runtimeGoexitˢ = "runtime.goexit"u8;
-internal static readonly @string createdByRuntimeGcˢ = "created by runtime.gc"u8;
-internal static readonly @string interestingGoroutinesˢ = "interestingGoroutines"u8;
-internal static readonly @string runtimeMHeapScavengerˢ = "runtime.MHeap_Scavenger"u8;
+internal static ref readonly @string testingMBeforeFunc1ˢ => ref testingMBeforeFunc1ˢᵇ;
+private static readonly @string testingMBeforeFunc1ˢᵇ = "testing.(*M).before.func1"u8;
+internal static ref readonly @string osSignalSignalRecvˢ => ref osSignalSignalRecvˢᵇ;
+private static readonly @string osSignalSignalRecvˢᵇ = "os/signal.signal_recv"u8;
+internal static ref readonly @string createdByNetStartServerˢ => ref createdByNetStartServerˢᵇ;
+private static readonly @string createdByNetStartServerˢᵇ = "created by net.startServer"u8;
+internal static ref readonly @string createdByTestingRunTestsˢ => ref createdByTestingRunTestsˢᵇ;
+private static readonly @string createdByTestingRunTestsˢᵇ = "created by testing.RunTests"u8;
+internal static ref readonly @string closeWriteAndWaitˢ => ref closeWriteAndWaitˢᵇ;
+private static readonly @string closeWriteAndWaitˢᵇ = "closeWriteAndWait"u8;
+internal static ref readonly @string testingMainˢ => ref testingMainˢᵇ;
+private static readonly @string testingMainˢᵇ = "testing.Main("u8;
+internal static ref readonly @string runtimeGoexitˢ => ref runtimeGoexitˢᵇ;
+private static readonly @string runtimeGoexitˢᵇ = "runtime.goexit"u8;
+internal static ref readonly @string createdByRuntimeGcˢ => ref createdByRuntimeGcˢᵇ;
+private static readonly @string createdByRuntimeGcˢᵇ = "created by runtime.gc"u8;
+internal static ref readonly @string interestingGoroutinesˢ => ref interestingGoroutinesˢᵇ;
+private static readonly @string interestingGoroutinesˢᵇ = "interestingGoroutines"u8;
+internal static ref readonly @string runtimeMHeapScavengerˢ => ref runtimeMHeapScavengerˢᵇ;
+private static readonly @string runtimeMHeapScavengerˢᵇ = "runtime.MHeap_Scavenger"u8;
 
 internal static partial slice<@string> /*gs*/ interestingGoroutines() {
-    slice<@string> gs = default!;
+    slice<@string> gs = default;
 
     var buf = new slice<byte>((2 << 20));
     buf = buf.slice(0, runtime.Stack(buf, true));
-    foreach (var g in range<@string>(strings.SplitSeq((@string)buf, "\n\n"u8).Invoke)) {
-        var (_, stack, _) = strings.Cut(g, "\n"u8);
+    foreach (var g in range<@string>(strings.SplitSeq((@string)buf, "\n\n").Invoke)) {
+        var (_, stack, _) = strings.Cut(g, "\n");
         stack = strings.TrimSpace(stack);
         if (stack == ""u8 || strings.Contains(stack, testingMBeforeFunc1ˢ) || strings.Contains(stack, osSignalSignalRecvˢ) || strings.Contains(stack, createdByNetStartServerˢ) || strings.Contains(stack, createdByTestingRunTestsˢ) || strings.Contains(stack, closeWriteAndWaitˢ) || strings.Contains(stack, testingMainˢ) ||
             // These only show up with GOTRACEBACK=2; Issue 5005 (comment 28)
@@ -71,7 +81,7 @@ internal static bool goroutineLeaked() {
         return false;
     }
 
-    map<@string, nint> stackCount = default!;
+    map<@string, nint> stackCount = default;
     for (nint i = 0; i < 5; i++) {
         nint n = 0;
         stackCount = new map<@string, nint>();
@@ -94,26 +104,28 @@ internal static bool goroutineLeaked() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string http2ˢ = "HTTP2"u8;
+internal static ref readonly @string http2ˢ => ref http2ˢᵇ;
+private static readonly @string http2ˢᵇ = "HTTP2"u8;
 
 // setParallel marks t as a parallel test if we're in short mode
 // (all.bash), but as a serial test otherwise. Using t.Parallel isn't
 // compatible with the afterTest func in non-short mode.
-internal static void setParallel(ж<testing.T> Ꮡt) {
-    if (strings.Contains(Ꮡt.Name(), http2ˢ)) {
-        http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(Ꮡt));
+internal static void setParallel(ж<testing.T> t) {
+    if (strings.Contains(t.Name(), http2ˢ)) {
+        http_internal_test_package.CondSkipHTTP2(new http_test_package.testing_TжTB(t));
     }
     if (testing.Short()) {
-        Ꮡt.Parallel();
+        t.Parallel();
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testBenchˢ = "-test.bench="u8;
+internal static ref readonly @string testBenchˢ => ref testBenchˢᵇ;
+private static readonly @string testBenchˢᵇ = "-test.bench="u8;
 
 internal static bool runningBenchmarks() {
     foreach (var (i, arg) in os.Args) {
-        if (strings.HasPrefix(arg, testBenchˢ) && !strings.HasSuffix(arg, "="u8)) {
+        if (strings.HasPrefix(arg, testBenchˢ) && !strings.HasSuffix(arg, "=")) {
             return true;
         }
         if (arg == "-test.bench"u8 && i < len(os.Args) - 1 && os.Args[i + 1] != "") {
@@ -147,19 +159,19 @@ internal static void afterTest(testing.TB t) {
     // race even if we don't detect any leaks.
     leakReported = true;
 
-    @string bad = default!;
+    @string bad = default;
     var badSubstring = new map<@string, @string>{
-        [").readLoop("u8] = "a Transport"u8,
-        [").writeLoop("u8] = "a Transport"u8,
-        ["created by net/http/httptest.(*Server).Start"u8] = "an httptest.Server"u8,
-        ["timeoutHandler"u8] = "a TimeoutHandler"u8,
-        ["net.(*netFD).connect("u8] = "a timing out dial"u8,
-        [").noteClientGone("u8] = "a closenotifier sender"u8
+        [").readLoop("] = "a Transport",
+        [").writeLoop("] = "a Transport",
+        ["created by net/http/httptest.(*Server).Start"] = "an httptest.Server",
+        ["timeoutHandler"] = "a TimeoutHandler",
+        ["net.(*netFD).connect("] = "a timing out dial",
+        [").noteClientGone("] = "a closenotifier sender"
     };
-    @string stacks = default!;
+    @string stacks = default;
     for (nint i = 0; i < 2500; i++) {
         bad = ""u8;
-        stacks = strings.Join(interestingGoroutines(), "\n\n"u8);
+        stacks = strings.Join(interestingGoroutines(), "\n\n");
         foreach (var (substr, what) in badSubstring) {
             if (strings.Contains(stacks, substr)) {
                 bad = what;
@@ -173,7 +185,7 @@ internal static void afterTest(testing.TB t) {
         // shutting down, so give it some time.
         time.Sleep(1 * time.Millisecond);
     }
-    t.Errorf("Test appears to have leaked %s:\n%s"u8, bad, stacks);
+    t.Errorf("Test appears to have leaked %s:\n%s", bad, stacks);
 }
 
 // waitCondition waits for fn to return true,
@@ -181,7 +193,7 @@ internal static void afterTest(testing.TB t) {
 internal static void waitCondition(testing.TB t, time.Duration delay, Func<time.Duration, bool> fn) {
     t.Helper();
     var start = time.Now();
-    time.Duration since = default!;
+    time.Duration since = default;
     while (!fn(since)) {
         time.Sleep(delay);
         delay = 2 * delay - (delay / 2); // 1.5x, rounded up

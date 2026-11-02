@@ -15,9 +15,9 @@ partial class types_internal_test_package {
 internal static readonly object hashCollisionsAreˢ = (@string)"hash collisions are expected, and would fail debug assertions"u8;
 internal static readonly object badˢ = (@string)"bad"u8;
 
-public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
+public static void TestContextHashCollisions(ж<testing.T> t) {
     if (debug) {
-        Ꮡt.Skip(hashCollisionsAreˢ);
+        t.Skip(hashCollisionsAreˢ);
     }
     // Unit test the de-duplication fall-back logic in Context.
     //
@@ -31,56 +31,56 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
     // Create some distinct origin types. nullaryP and nullaryQ have no
     // parameters and are identical (but have different type parameter names).
     // unaryP has a parameter.
-    global::go.go.types_package.ΔType nullaryP = default!;
-    global::go.go.types_package.ΔType nullaryQ = default!;
-    global::go.go.types_package.ΔType unaryP = default!;
+    global::go.go.types_package.ΔType nullaryP = default;
+    global::go.go.types_package.ΔType nullaryQ = default;
+    global::go.go.types_package.ΔType unaryP = default;
     {
         // type nullaryP = func[P any]()
-        var tparam = NewTypeParam(NewTypeName(nopos, nil, "P"u8, default!), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
-        nullaryP = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default!, new ж<global::go.go.types_package.TypeParam>[]{tparam}.slice(), nil, nil, false));
+        var tparam = NewTypeParam(NewTypeName(nopos, nil, "P", default), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
+        nullaryP = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default, slice<ж<global::go.go.types_package.TypeParam>>([tparam]), nil, nil, false));
     }
     {
         // type nullaryQ = func[Q any]()
-        var tparam = NewTypeParam(NewTypeName(nopos, nil, "Q"u8, default!), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
-        nullaryQ = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default!, new ж<global::go.go.types_package.TypeParam>[]{tparam}.slice(), nil, nil, false));
+        var tparam = NewTypeParam(NewTypeName(nopos, nil, "Q", default), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
+        nullaryQ = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default, slice<ж<global::go.go.types_package.TypeParam>>([tparam]), nil, nil, false));
     }
     {
         // type unaryP = func[P any](_ P)
-        var tparam = NewTypeParam(NewTypeName(nopos, nil, "P"u8, default!), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
-        var @params = NewTuple(NewParam(nopos, nil, "_"u8, new global::go.go.types_package.TypeParamжΔType(tparam)));
-        unaryP = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default!, new ж<global::go.go.types_package.TypeParam>[]{tparam}.slice(), @params, nil, false));
+        var tparam = NewTypeParam(NewTypeName(nopos, nil, "P", default), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
+        var @params = NewTuple(NewParam(nopos, nil, "_", new global::go.go.types_package.TypeParamжΔType(tparam)));
+        unaryP = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default, slice<ж<global::go.go.types_package.TypeParam>>([tparam]), @params, nil, false));
     }
 
     var ctxt = NewContext();
 
     // Update the context with an instantiation of nullaryP.
-    var inst = NewSignatureType(nil, default!, default!, nil, nil, false);
+    var inst = NewSignatureType(nil, default, default, nil, nil, false);
     {
-        var got = ctxt.update(""u8, nullaryP, new global::go.go.types_package.ΔType[]{new global::go.go.types_package.BasicжΔType(Typ[Int])}.slice(), new types_test_package.types_ΔSignatureжΔType(inst)); if (!AreEqual(got, inst)) {
-            Ꮡt.Error(badˢ);
+        var got = ctxt.update(""u8, nullaryP, slice<global::go.go.types_package.ΔType>([new global::go.go.types_package.BasicжΔType(Typ[Int])]), new types_test_package.types_ΔSignatureжΔType(inst)); if (!AreEqual(got, inst)) {
+            t.Error(badˢ);
         }
     }
 
     // unaryP is not identical to nullaryP, so we should not get inst when
     // instantiated with identical type arguments.
     {
-        var got = ctxt.lookup(""u8, unaryP, new global::go.go.types_package.ΔType[]{new global::go.go.types_package.BasicжΔType(Typ[Int])}.slice()); if (got != default!) {
-            Ꮡt.Error(badˢ);
+        var got = ctxt.lookup(""u8, unaryP, slice<global::go.go.types_package.ΔType>([new global::go.go.types_package.BasicжΔType(Typ[Int])])); if (got != nil) {
+            t.Error(badˢ);
         }
     }
 
     // nullaryQ is identical to nullaryP, so we *should* get inst when
     // instantiated with identical type arguments.
     {
-        var got = ctxt.lookup(""u8, nullaryQ, new global::go.go.types_package.ΔType[]{new global::go.go.types_package.BasicжΔType(Typ[Int])}.slice()); if (!AreEqual(got, inst)) {
-            Ꮡt.Error(badˢ);
+        var got = ctxt.lookup(""u8, nullaryQ, slice<global::go.go.types_package.ΔType>([new global::go.go.types_package.BasicжΔType(Typ[Int])])); if (!AreEqual(got, inst)) {
+            t.Error(badˢ);
         }
     }
 
     // ...but verify we don't get inst with different type arguments.
     {
-        var got = ctxt.lookup(""u8, nullaryQ, new global::go.go.types_package.ΔType[]{new global::go.go.types_package.BasicжΔType(Typ[ΔString])}.slice()); if (got != default!) {
-            Ꮡt.Error(badˢ);
+        var got = ctxt.lookup(""u8, nullaryQ, slice<global::go.go.types_package.ΔType>([new global::go.go.types_package.BasicжΔType(Typ[ΔString])])); if (got != nil) {
+            t.Error(badˢ);
         }
     }
 }

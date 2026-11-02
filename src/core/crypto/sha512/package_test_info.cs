@@ -7,9 +7,6 @@
 global using static global::go.crypto.sha512_package;
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +26,7 @@ using static global::go.crypto.sha512_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -39,7 +36,7 @@ using static global::go.crypto.sha512_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha512/sha512_test.go", "sha512_test.cs", "ABo0AJ0BvAIAnQG8AgCdAbwCAJ0BvAKCgIKCtoKClIKCpoCCpOiCggAKCIIAAxCA/ID8gPyA2oKCgsqCggAJCIIABhaykoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSAgv6C7oKCgqaClIKCgqaAguyCgoCCpIKAgqSCgIKkgoCCyIKCgIIAESIACxjCgoCCyOaChIKAgoK2goKCpoLKgoKAgoKUgoKCgpSCgoKClIKCgoKUgoKCgqaCgoKUAAoIgoKCpoKCpoKCpoKCAAkKgoKCgqaCgoKmgoKCpoKCgsqigJKkppLkgoKSgoKCgoKmgoKCgqaCgoKCyoKmgqaC", "681-683:1;695-695:1;701-701:2;707-707:3;713-713:4;727-729:1;745-787:1;873-877:1;905-938:1;944-948:1;945-947:1.1;949-953:2;950-952:2.1;954-958:3;955-957:3.1;959-963:4;960-962:4.1;967-972:1;968-971:1.1;973-978:2;974-977:2.1;979-984:3;980-983:3.1;985-990:4;986-989:4.1;1005-1013:1;1014-1020:2;1021-1027:3", "", "702=New512_224/1/1/9,New512_256/1/1/15,New384/1/1/21,New/1/1/27")]
+[assembly: GoPositionMap("crypto/sha512/sha512_test.go", "sha512_test.cs", "ABo0AJ0BvAIAnQG8AgCdAbwCAJ0BvAKCgIKCtoKClIKCpoCCpPiCggAKCIIAAxCA/ID8gPyA2oKCgsqCggAJCIIABhaykoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSAgv6C7oKCgqaClIKCgqaAguyCgoCCpIKAgqSCgIKkgoCCyIKCgIIAESIACxjCgoCCyOaChIKAgoK2goKCpoLKgoKAgoKUgoKCgpSCgoKClIKCgoKUgoKCgqaCgoKUAA4IgoKCpoKCpoKCpoKCAAwKgoKCgqaCgoKmgoKCpoKCgsqigJKkppIACQSCgpKCgoKCgqaCgoKCpoKCgoLKgqaCpoI=", "681-683:1;695-695:1;701-701:2;707-707:3;713-713:4;727-729:1;745-787:1;873-877:1;905-938:1;944-948:1;945-947:1.1;949-953:2;950-952:2.1;954-958:3;955-957:3.1;959-963:4;960-962:4.1;967-972:1;968-971:1.1;973-978:2;974-977:2.1;979-984:3;980-983:3.1;985-990:4;986-989:4.1;1005-1013:1;1014-1020:2;1021-1027:3", "", "703=New512_224/1/1/9,New512_256/1/1/15,New384/1/1/21,New/1/1/27")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -28,7 +28,7 @@ using static go.@internal.sync_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/sync/export_test.go", "export_test.cs", "AAwcpqKChqqmooKCgpY=", "19-21:1;34-36:1")]
+[assembly: GoPositionMap("internal/sync/export_test.go", "export_test.cs", "AAwcpqKChqqmooKCgpY=", "19-21:1;34-36:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

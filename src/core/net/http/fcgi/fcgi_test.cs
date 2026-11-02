@@ -21,27 +21,27 @@ partial struct sizeTestsᴛ1 /*dyn*/ {
     internal uint32 size;
     internal slice<byte> bytes;
 }
-internal static slice<sizeTestsᴛ1> sizeTests = new sizeTestsᴛ1[]{
-    new(0, new byte[]{0x00}.slice()),
-    new(127, new byte[]{0x7F}.slice()),
-    new(128, new byte[]{0x80, 0x00, 0x00, 0x80}.slice()),
-    new(1000, new byte[]{0x80, 0x00, 0x03, 0xE8}.slice()),
-    new(33554431, new byte[]{0x81, 0xFF, 0xFF, 0xFF}.slice())
-}.slice();
+internal static slice<sizeTestsᴛ1> sizeTests = slice<sizeTestsᴛ1>([
+    new(0, slice<byte>([0x00])),
+    new(127, slice<byte>([0x7F])),
+    new(128, slice<byte>([0x80, 0x00, 0x00, 0x80])),
+    new(1000, slice<byte>([0x80, 0x00, 0x03, 0xE8])),
+    new(33554431, slice<byte>([0x81, 0xFF, 0xFF, 0xFF]))
+]);
 
-public static void TestSize(ж<testing.T> Ꮡt) {
+public static void TestSize(ж<testing.T> t) {
     var b = new slice<byte>(4);
     foreach (var (i, test) in sizeTests) {
         nint n = encodeSize(b, test.size);
         if (!bytes.Equal(b.slice(0, n), test.bytes)) {
-            Ꮡt.Errorf("%d expected %x, encoded %x"u8, i, test.bytes, b);
+            t.Errorf("%d expected %x, encoded %x", i, test.bytes, b);
         }
         (var size, n) = readSize(test.bytes);
         if (size != test.size) {
-            Ꮡt.Errorf("%d expected %d, read %d"u8, i, test.size, size);
+            t.Errorf("%d expected %d, read %d", i, test.size, size);
         }
         if (len(test.bytes) != n) {
-            Ꮡt.Errorf("%d did not consume all the bytes"u8, i);
+            t.Errorf("%d did not consume all the bytes", i);
         }
     }
 }
@@ -53,78 +53,78 @@ partial struct streamTestsᴛ1 /*dyn*/ {
     internal slice<byte> content;
     internal slice<byte> raw;
 }
-internal static slice<streamTestsᴛ1> streamTests = new streamTestsᴛ1[]{
-    new("single record"u8, typeStdout, 1, default!,
-        new byte[]{1, (byte)typeStdout, 0, 1, 0, 0, 0, 0}.slice()
+internal static slice<streamTestsᴛ1> streamTests = slice<streamTestsᴛ1>([
+    new("single record", typeStdout, 1, default,
+        slice<byte>([1, (byte)typeStdout, 0, 1, 0, 0, 0, 0])
     ),
     // this data will have to be split into two records
-    new("two records"u8, typeStdin, 300, new slice<byte>(66000),
-        bytes.Join(new slice<byte>[]{
+    new("two records", typeStdin, 300, new slice<byte>(66000),
+        bytes.Join(slice<slice<byte>>([
             // header for the first record
-            new byte[]{1, (byte)typeStdin, 0x01, 0x2C, 0xFF, 0xFF, 1, 0}.slice(),
+            slice<byte>([1, (byte)typeStdin, 0x01, 0x2C, 0xFF, 0xFF, 1, 0]),
             new slice<byte>(65536),
             // header for the second
-            new byte[]{1, (byte)typeStdin, 0x01, 0x2C, 0x01, 0xD1, 7, 0}.slice(),
+            slice<byte>([1, (byte)typeStdin, 0x01, 0x2C, 0x01, 0xD1, 7, 0]),
             new slice<byte>(472),
             // header for the empty record
-            new byte[]{1, (byte)typeStdin, 0x01, 0x2C, 0, 0, 0, 0}.slice()
-        }.slice(),
-            default!)
+            slice<byte>([1, (byte)typeStdin, 0x01, 0x2C, 0, 0, 0, 0])
+        ]),
+            default)
     )
-}.slice();
+]);
 
 internal partial struct nilCloser {
     /*embed*/ public io_package.ReadWriter ReadWriter;
 }
 
 internal static error Close(this ref nilCloser c) {
-    return default!;
+    return default;
 }
 
-public static void TestStreams(ж<testing.T> Ꮡt) {
+public static void TestStreams(ж<testing.T> t) {
     ref var rec = ref heap(new global::go.net.http.fcgi_package.record(), out var Ꮡrec);
 outer:
     foreach (var (_, test) in streamTests) {
         var buf = bytes.NewBuffer(test.raw);
-        slice<byte> content = default!;
+        slice<byte> content = default;
         while (buf.Len() > 0) {
             {
-                var err = Ꮡrec.read(new fcgi_internal_test_package.bytes_BufferжReader(buf)); if (err != default!) {
-                    Ꮡt.Errorf("%s: error reading record: %v"u8, test.desc, err);
+                var err = Ꮡrec.read(new fcgi_internal_test_package.bytes_BufferжReader(buf)); if (err != nil) {
+                    t.Errorf("%s: error reading record: %v", test.desc, err);
                     goto continue_outer;
                 }
             }
             content = appendꓸꓸꓸ(content, rec.content());
         }
         if (rec.h.Type != test.recType) {
-            Ꮡt.Errorf("%s: got type %d expected %d"u8, test.desc, rec.h.Type, test.recType);
+            t.Errorf("%s: got type %d expected %d", test.desc, rec.h.Type, test.recType);
             continue;
         }
         if (rec.h.Id != test.reqId) {
-            Ꮡt.Errorf("%s: got request ID %d expected %d"u8, test.desc, rec.h.Id, test.reqId);
+            t.Errorf("%s: got request ID %d expected %d", test.desc, rec.h.Id, test.reqId);
             continue;
         }
         if (!bytes.Equal(content, test.content)) {
-            Ꮡt.Errorf("%s: read wrong content"u8, test.desc);
+            t.Errorf("%s: read wrong content", test.desc);
             continue;
         }
         buf.Reset();
         var c = newConn(new fcgi_internal_test_package.nilCloserжReadWriteCloser(Ꮡ(new nilCloser(new fcgi_internal_test_package.bytes_BufferжReadWriter(buf)))));
         var w = newWriter(c, test.recType, test.reqId);
         {
-            var (_, err) = w.Value.Writer.Value.Write(test.content); if (err != default!) {
-                Ꮡt.Errorf("%s: error writing record: %v"u8, test.desc, err);
+            var (_, err) = w.Value.Writer.Value.Write(test.content); if (err != nil) {
+                t.Errorf("%s: error writing record: %v", test.desc, err);
                 continue;
             }
         }
         {
-            var err = w.Close(); if (err != default!) {
-                Ꮡt.Errorf("%s: error closing stream: %v"u8, test.desc, err);
+            var err = w.Close(); if (err != nil) {
+                t.Errorf("%s: error closing stream: %v", test.desc, err);
                 continue;
             }
         }
         if (!bytes.Equal(buf.Bytes(), test.raw)) {
-            Ꮡt.Errorf("%s: wrote wrong content"u8, test.desc);
+            t.Errorf("%s: wrote wrong content", test.desc);
         }
 continue_outer:;
     }
@@ -137,50 +137,52 @@ internal partial struct writeOnlyConn {
 
 internal static (nint, error) Write(this ref writeOnlyConn c, slice<byte> p) {
     c.buf = appendꓸꓸꓸ(c.buf, p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string connIsWriteOnlyˢ = "conn is write-only"u8;
+internal static ref readonly @string connIsWriteOnlyˢ => ref connIsWriteOnlyˢᵇ;
+private static readonly @string connIsWriteOnlyˢᵇ = "conn is write-only"u8;
 
 internal static (nint, error) Read(this ref writeOnlyConn c, slice<byte> p) {
     return (0, errors.New(connIsWriteOnlyˢ));
 }
 
 internal static error Close(this ref writeOnlyConn c) {
-    return default!;
+    return default;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ = ((@string)(new byte[]{0x01, 0x0a, 0x00, 0x00, 0x00, 0x12, 0x06, 0x00, 0x0f, 0x01, 0x46, 0x43, 0x47, 0x49, 0x5f, 0x4d, 0x50, 0x58, 0x53, 0x5f, 0x43, 0x4f, 0x4e, 0x4e, 0x53, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}));
+internal static ref readonly @string wantᶜ => ref wantᶜᵇ;
+private static readonly @string wantᶜᵇ = ((@string)(new byte[]{0x01, 0x0a, 0x00, 0x00, 0x00, 0x12, 0x06, 0x00, 0x0f, 0x01, 0x46, 0x43, 0x47, 0x49, 0x5f, 0x4d, 0x50, 0x58, 0x53, 0x5f, 0x43, 0x4f, 0x4e, 0x4e, 0x53, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}));
 
-public static void TestGetValues(ж<testing.T> Ꮡt) {
+public static void TestGetValues(ж<testing.T> t) {
     ref var rec = ref heap(new global::go.net.http.fcgi_package.record(), out var Ꮡrec);
     rec.h.Type = typeGetValues;
 
     var wc = @new<writeOnlyConn>();
-    var c = newChild(new fcgi_internal_test_package.writeOnlyConnжReadWriteCloser(wc), default!);
+    var c = newChild(new fcgi_internal_test_package.writeOnlyConnжReadWriteCloser(wc), default);
     var err = c.handleRecord(Ꮡrec);
-    if (err != default!) {
-        Ꮡt.Fatalf("handleRecord: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("handleRecord: %v", err);
     }
 
     @string want = wantᶜ;
     {
-        @string got = (@string)(~wc).buf; if (got != want) {
-            Ꮡt.Errorf(" got: %q\nwant: %q\n"u8, got, want);
+        @string got = (@string)wc.buf; if (got != want) {
+            t.Errorf(" got: %q\nwant: %q\n", got, want);
         }
     }
 }
 
 internal static slice<byte> nameValuePair11(@string nameData, @string valueData) {
     return bytes.Join(
-        new slice<byte>[]{
-            new byte[]{(byte)len(nameData), (byte)len(valueData)}.slice(),
+        slice<slice<byte>>([
+            slice<byte>([(byte)len(nameData), (byte)len(valueData)]),
             slice<byte>(nameData),
             slice<byte>(valueData)
-        }.slice(),
-        default!);
+        ]),
+        default);
 }
 
 internal static slice<byte> makeRecord(global::go.net.http.fcgi_package.recType recordType, uint16 requestId, slice<byte> contentData) {
@@ -190,71 +192,71 @@ internal static slice<byte> makeRecord(global::go.net.http.fcgi_package.recType 
     nint contentLength = len(contentData);
     var contentLengthB1 = (byte)(contentLength >> 8);
     var contentLengthB0 = (byte)contentLength;
-    return bytes.Join(new slice<byte>[]{
-        new byte[]{1, (byte)recordType, requestIdB1, requestIdB0, contentLengthB1,
-            contentLengthB0, 0, 0}.slice(),
+    return bytes.Join(slice<slice<byte>>([
+        slice<byte>([1, (byte)recordType, requestIdB1, requestIdB0, contentLengthB1,
+            contentLengthB0, 0, 0]),
         contentData
-    }.slice(),
-        default!);
+    ]),
+        default);
 }
 
 // a series of FastCGI records that start a request and begin sending the
 // request body
-internal static slice<byte> streamBeginTypeStdin = bytes.Join(new slice<byte>[]{
+internal static slice<byte> streamBeginTypeStdin = bytes.Join(slice<slice<byte>>([
     // set up request 1
     makeRecord(typeBeginRequest, 1,
-        new byte[]{0, (byte)roleResponder, 0, 0, 0, 0, 0, 0}.slice()),
+        slice<byte>([0, (byte)roleResponder, 0, 0, 0, 0, 0, 0])),
     // add required parameters to request 1
-    makeRecord(typeParams, 1, nameValuePair11("REQUEST_METHOD"u8, "GET"u8)),
-    makeRecord(typeParams, 1, nameValuePair11("SERVER_PROTOCOL"u8, "HTTP/1.1"u8)),
-    makeRecord(typeParams, 1, default!),
+    makeRecord(typeParams, 1, nameValuePair11("REQUEST_METHOD", "GET")),
+    makeRecord(typeParams, 1, nameValuePair11("SERVER_PROTOCOL", "HTTP/1.1")),
+    makeRecord(typeParams, 1, default),
     // begin sending body of request 1
     makeRecord(typeStdin, 1, slice<byte>("0123456789abcdef"u8))
-}.slice(),
-    default!);
+]),
+    default);
 
 partial struct cleanUpTestsᴛ1 /*dyn*/ {
     internal slice<byte> input;
     internal error err;
 }
 internal static slice<cleanUpTestsᴛ1> cleanUpTests;
-internal static void initᴛcleanUpTests() { cleanUpTests = new cleanUpTestsᴛ1[]{
+internal static void initᴛcleanUpTests() { cleanUpTests = slice<cleanUpTestsᴛ1>([
     // confirm that child.handleRecord closes req.pw after aborting req
     new(
-        bytes.Join(new slice<byte>[]{
+        bytes.Join(slice<slice<byte>>([
             streamBeginTypeStdin,
-            makeRecord(typeAbortRequest, 1, default!)
-        }.slice(),
-            default!),
+            makeRecord(typeAbortRequest, 1, default)
+        ]),
+            default),
         ErrRequestAborted
     ),
     // confirm that child.serve closes all pipes after error reading record
     new(
-        bytes.Join(new slice<byte>[]{
+        bytes.Join(slice<slice<byte>>([
             streamBeginTypeStdin,
-            default!
-        }.slice(),
-            default!),
+            default
+        ]),
+            default),
         ErrConnClosed
     )
-}.slice(); }
+]); }
 
 internal partial struct nopWriteCloser {
     /*embed*/ public io_package.Reader Reader;
 }
 
 internal static (nint, error) Write(this nopWriteCloser _, slice<byte> buf) {
-    return (len(buf), default!);
+    return (len(buf), default);
 }
 
 internal static error Close(this nopWriteCloser _) {
-    return default!;
+    return default;
 }
 
 // Test that child.serve closes the bodies of aborted requests and closes the
 // bodies of all requests before returning. Causes deadlock if either condition
 // isn't met. See issue 6934.
-public static void TestChildServeCleansUp(ж<testing.T> Ꮡt) {
+public static void TestChildServeCleansUp(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in cleanUpTests) {
         ref var tt = ref heap(new cleanUpTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -267,9 +269,9 @@ public static void TestChildServeCleansUp(ж<testing.T> Ꮡt) {
         var ttʗ1 = tt;
         var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             // block on reading body of request
-            var (_, err) = io.Copy(io.Discard, new fcgi_internal_test_package.io_ReadCloserᴠReader((~r).Body));
+            var (_, err) = io.Copy(io.Discard, new fcgi_internal_test_package.io_ReadCloserᴠReader(r.Body));
             if (!AreEqual(err, ttʗ1.err)) {
-                Ꮡt.Errorf("Expected %#v, got %#v"u8, ttʗ1.err, err);
+                t.Errorf("Expected %#v, got %#v", ttʗ1.err, err);
             }
             // not reached if body of request isn't closed
             close(doneʗ1);
@@ -286,42 +288,42 @@ internal partial struct rwNopCloser {
 }
 
 internal static error Close(this rwNopCloser _) {
-    return default!;
+    return default;
 }
 
 // Verifies it doesn't crash. 	Issue 11824.
-public static void TestMalformedParams(ж<testing.T> Ꮡt) {
-    var input = new byte[]{
+public static void TestMalformedParams(ж<testing.T> t) {
+    var input = slice<byte>([
         // beginRequest, requestId=1, contentLength=8, role=1, keepConn=1
         1, 1, 0, 1, 0, 8, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
         // params, requestId=1, contentLength=10, k1Len=50, v1Len=50 (malformed, wrong length)
         1, 4, 0, 1, 0, 10, 0, 0, 50, 50, 3, 4, 5, 6, 7, 8, 9, 10,
         // end of params
         1, 4, 0, 1, 0, 0, 0, 0
-    }.slice();
+    ]);
     var rw = new rwNopCloser(new fcgi_internal_test_package.bytes_ReaderжReader(bytes.NewReader(input)), io.Discard);
     var c = newChild(rw, new http.ServeMuxжΔHandler(http.DefaultServeMux));
     c.serve();
 }
 
 // a series of FastCGI records that start and end a request
-internal static slice<byte> streamFullRequestStdin = bytes.Join(new slice<byte>[]{
+internal static slice<byte> streamFullRequestStdin = bytes.Join(slice<slice<byte>>([
     // set up request
     makeRecord(typeBeginRequest, 1,
-        new byte[]{0, (byte)roleResponder, 0, 0, 0, 0, 0, 0}.slice()),
+        slice<byte>([0, (byte)roleResponder, 0, 0, 0, 0, 0, 0])),
     // add required parameters
-    makeRecord(typeParams, 1, nameValuePair11("REQUEST_METHOD"u8, "GET"u8)),
-    makeRecord(typeParams, 1, nameValuePair11("SERVER_PROTOCOL"u8, "HTTP/1.1"u8)),
+    makeRecord(typeParams, 1, nameValuePair11("REQUEST_METHOD", "GET")),
+    makeRecord(typeParams, 1, nameValuePair11("SERVER_PROTOCOL", "HTTP/1.1")),
     // set optional parameters
-    makeRecord(typeParams, 1, nameValuePair11("REMOTE_USER"u8, "jane.doe"u8)),
-    makeRecord(typeParams, 1, nameValuePair11("QUERY_STRING"u8, "/foo/bar"u8)),
-    makeRecord(typeParams, 1, default!),
+    makeRecord(typeParams, 1, nameValuePair11("REMOTE_USER", "jane.doe")),
+    makeRecord(typeParams, 1, nameValuePair11("QUERY_STRING", "/foo/bar")),
+    makeRecord(typeParams, 1, default),
     // begin sending body of request
     makeRecord(typeStdin, 1, slice<byte>("0123456789abcdef"u8)),
     // end request
-    makeRecord(typeEndRequest, 1, default!)
-}.slice(),
-    default!);
+    makeRecord(typeEndRequest, 1, default)
+]),
+    default);
 
 partial struct envVarTestsᴛ1 /*dyn*/ {
     internal slice<byte> input;
@@ -329,25 +331,25 @@ partial struct envVarTestsᴛ1 /*dyn*/ {
     internal @string expectedVal;
     internal bool expectedFilteredOut;
 }
-internal static slice<envVarTestsᴛ1> envVarTests = new envVarTestsᴛ1[]{
+internal static slice<envVarTestsᴛ1> envVarTests = slice<envVarTestsᴛ1>([
     new(
         streamFullRequestStdin,
-        "REMOTE_USER"u8,
-        "jane.doe"u8,
+        "REMOTE_USER",
+        "jane.doe",
         false
     ),
     new(
         streamFullRequestStdin,
-        "QUERY_STRING"u8,
-        ""u8,
+        "QUERY_STRING",
+        "",
         true
     )
-}.slice();
+]);
 
 // Test that environment variables set for a request can be
 // read by a handler. Ensures that variables not set will not
 // be exposed to a handler.
-public static void TestChildServeReadsEnvVars(ж<testing.T> Ꮡt) {
+public static void TestChildServeReadsEnvVars(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in envVarTests) {
         ref var tt = ref heap(new envVarTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -361,12 +363,11 @@ public static void TestChildServeReadsEnvVars(ж<testing.T> Ꮡt) {
         var c = newChild(rc, new fcgi_internal_test_package.http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
             var env = ProcessEnv(r);
             {
-                var (_, ok) = env[ttʗ1.envVar, ꟷ]; if (ok && ttʗ1.expectedFilteredOut){
-                    Ꮡt.Errorf("Expected environment variable %s to not be set, but set to %s"u8,
+                var (_, ok) = env[ttʗ1.envVar, ꟷ]; if (ok && ttʗ1.expectedFilteredOut) {
+                    t.Errorf("Expected environment variable %s to not be set, but set to %s",
                         ttʗ1.envVar, env[ttʗ1.envVar]);
-                } else 
-                if (env[ttʗ1.envVar] != ttʗ1.expectedVal) {
-                    Ꮡt.Errorf("Expected %s, got %s"u8, ttʗ1.expectedVal, env[ttʗ1.envVar]);
+                } else if (env[ttʗ1.envVar] != ttʗ1.expectedVal) {
+                    t.Errorf("Expected %s, got %s", ttʗ1.expectedVal, env[ttʗ1.envVar]);
                 }
             }
             close(doneʗ1);
@@ -377,7 +378,8 @@ public static void TestChildServeReadsEnvVars(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gopherˢ = "gopher"u8;
+internal static ref readonly @string gopherˢ => ref gopherˢᵇ;
+private static readonly @string gopherˢᵇ = "gopher"u8;
 
 internal partial struct TestResponseWriterSniffsContentType_type /*dyn*/ {
     internal @string name;
@@ -385,34 +387,34 @@ internal partial struct TestResponseWriterSniffsContentType_type /*dyn*/ {
     internal @string wantCT;
 }
 
-public static void TestResponseWriterSniffsContentType(ж<testing.T> Ꮡt) {
-    slice<TestResponseWriterSniffsContentType_type> tests = new TestResponseWriterSniffsContentType_type[]{
+public static void TestResponseWriterSniffsContentType(ж<testing.T> t) {
+    slice<TestResponseWriterSniffsContentType_type> tests = slice<TestResponseWriterSniffsContentType_type>([
         new(
-            name: "no body"u8,
-            wantCT: "text/plain; charset=utf-8"u8
+            name: "no body",
+            wantCT: "text/plain; charset=utf-8"
         ),
         new(
-            name: "html"u8,
-            body: "<html><head><title>test page</title></head><body>This is a body</body></html>"u8,
-            wantCT: "text/html; charset=utf-8"u8
+            name: "html",
+            body: "<html><head><title>test page</title></head><body>This is a body</body></html>",
+            wantCT: "text/html; charset=utf-8"
         ),
         new(
-            name: "text"u8,
+            name: "text",
             body: strings.Repeat(gopherˢ, 86),
-            wantCT: "text/plain; charset=utf-8"u8
+            wantCT: "text/plain; charset=utf-8"
         ),
         new(
-            name: "jpg"u8,
-            body: ((@string)(new byte[]{0xff, 0xd8, 0xff})) + strings.Repeat("B"u8, 1024),
-            wantCT: "image/jpeg"u8
+            name: "jpg",
+            body: ((@string)(new byte[]{0xff, 0xd8, 0xff})) + strings.Repeat("B", 1024),
+            wantCT: "image/jpeg"
         )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestResponseWriterSniffsContentType_type(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
             var input = new slice<byte>(len(streamFullRequestStdin));
             copy(input, streamFullRequestStdin);
             var rc = new nopWriteCloser(new fcgi_internal_test_package.bytes_ReaderжReader(bytes.NewReader(input)));
@@ -429,7 +431,7 @@ public static void TestResponseWriterSniffsContentType(ж<testing.T> Ꮡt) {
             ᐸꟷ(done);
             {
                 @string got = Ꮡresp.ValueSlot.Header().Get(contentTypeˢ); if (got != ttʗ1.wantCT) {
-                    tΔ1.Errorf("got a Content-Type of %q; expected it to start with %q"u8, got, ttʗ1.wantCT);
+                    tΔ1.Errorf("got a Content-Type of %q; expected it to start with %q", got, ttʗ1.wantCT);
                 }
             }
         });
@@ -446,7 +448,7 @@ internal partial struct signalingNopWriteCloser {
 internal static (nint, error) Read(this signalingNopWriteCloser recvᴛ, slice<byte> p) => recvᴛ.ReadCloser.Read(p);
 
 internal static (nint, error) Write(this ref signalingNopWriteCloser _, slice<byte> buf) {
-    return (len(buf), default!);
+    return (len(buf), default);
 }
 
 internal static error Close(this ref signalingNopWriteCloser rc) {
@@ -459,7 +461,7 @@ internal static readonly object fastCGIChildClosedˢ = (@string)"FastCGI child c
 
 // Test whether server properly closes connection when processing slow
 // requests
-public static partial void TestSlowRequest(ж<testing.T> Ꮡt) {
+public static partial void TestSlowRequest(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (pr, pw) = io.Pipe();
@@ -468,15 +470,15 @@ public static partial void TestSlowRequest(ж<testing.T> Ꮡt) {
         var pwʗ1 = pw;
         var writerDoneʗ1 = writerDone;
         goǃ(() => {
-            foreach (var (_, buf) in new slice<byte>[]{
+            foreach (var (_, buf) in slice<slice<byte>>([
                 streamBeginTypeStdin,
-                makeRecord(typeStdin, 1, default!)
-            }.slice()) {
+                makeRecord(typeStdin, 1, default)
+            ])) {
                 pwʗ1.Write(buf);
                 time.Sleep(100 * time.Millisecond);
             }
             close(writerDoneʗ1);
-        });
+        }, GoStack.Bounded);
         var pwʗ2 = pw;
         var writerDoneʗ2 = writerDone;
         defer(() => {
@@ -495,8 +497,8 @@ public static partial void TestSlowRequest(ж<testing.T> Ꮡt) {
         c.serve();
 
         ᐸꟷ(handlerDone);
-        ᐸꟷ((~rc).closed);
-        Ꮡt.Log(fastCGIChildClosedˢ);
+        ᐸꟷ(rc.closed);
+        t.Log(fastCGIChildClosedˢ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

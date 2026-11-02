@@ -14,30 +14,31 @@ using static go.net_package;
 partial class net_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wwwGoogleComHttpˢ = "www.google.com:http"u8;
+internal static ref readonly @string wwwGoogleComHttpˢ => ref wwwGoogleComHttpˢᵇ;
+private static readonly @string wwwGoogleComHttpˢᵇ = "www.google.com:http"u8;
 
-public static void TestResolveGoogle(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+public static void TestResolveGoogle(ж<testing.T> t) {
+    testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
     if (!supportsIPv4() || !supportsIPv6() || !testIPv4.Value || !testIPv6.Value) {
-        Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
+        t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    foreach (var (_, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8}.slice()) {
+    foreach (var (_, network) in slice<@string>(["tcp", "tcp4", "tcp6"])) {
         var (addr, err) = ResolveTCPAddr(network, wwwGoogleComHttpˢ);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        if (err != nil) {
+            t.Error(err);
             continue;
         }
         var matchᴛ1 = false;
-        if (network == "tcp"u8 && (~addr).IP.To4() == default!) { matchᴛ1 = true;
+        if (network == "tcp"u8 && addr.IP.To4() == nil) { matchᴛ1 = true;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (network == "tcp4"u8 && (~addr).IP.To4() == default!)) {
-            Ꮡt.Errorf("got %v; want an IPv4 address on %s"u8, addr.OrTypedNil(), network);
+        if (fallthrough || !matchᴛ1 && (network == "tcp4"u8 && addr.IP.To4() == nil)) {
+            t.Errorf("got %v; want an IPv4 address on %s", addr.OrTypedNil(), network);
         }
-        else if (network == "tcp6"u8 && ((~addr).IP.To16() == default! || (~addr).IP.To4() != default!)) { matchᴛ1 = true;
-            Ꮡt.Errorf("got %v; want an IPv6 address on %s"u8, addr.OrTypedNil(), network);
+        else if (network == "tcp6"u8 && (addr.IP.To16() == nil || addr.IP.To4() != nil)) { matchᴛ1 = true;
+            t.Errorf("got %v; want an IPv6 address on %s", addr.OrTypedNil(), network);
         }
     }
 }
@@ -49,43 +50,43 @@ partial struct dialGoogleTestsᴛ1 /*dyn*/ {
     internal slice<@string> addrs;
 }
 internal static slice<dialGoogleTestsᴛ1> dialGoogleTests;
-internal static void initᴛdialGoogleTests() { dialGoogleTests = new dialGoogleTestsᴛ1[]{
+internal static void initᴛdialGoogleTests() { dialGoogleTests = slice<dialGoogleTestsᴛ1>([
     new(
         dial: (Ꮡ(new Dialer(DualStack: true))).Dial,
-        networks: new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8}.slice(),
-        addrs: new @string[]{"www.google.com:http"u8}.slice()
+        networks: slice<@string>(["tcp", "tcp4", "tcp6"]),
+        addrs: slice<@string>(["www.google.com:http"])
     ),
     new(
         dial: Dial,
-        unreachableNetwork: "tcp6"u8,
-        networks: new @string[]{"tcp"u8, "tcp4"u8}.slice()
+        unreachableNetwork: "tcp6",
+        networks: slice<@string>(["tcp", "tcp4"])
     ),
     new(
         dial: Dial,
-        unreachableNetwork: "tcp4"u8,
-        networks: new @string[]{"tcp"u8, "tcp6"u8}.slice()
+        unreachableNetwork: "tcp4",
+        networks: slice<@string>(["tcp", "tcp6"])
     )
-}.slice(); }
+]); }
 
-public static void TestDialGoogle(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+public static void TestDialGoogle(ж<testing.T> t) {
+    testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
     if (!supportsIPv4() || !supportsIPv6() || !testIPv4.Value || !testIPv6.Value) {
-        Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
+        t.Skip(bothIPv4AndIPv6Areˢ);
     }
 
-    error err = default!;
+    error err = default;
     (dialGoogleTests[1].addrs, dialGoogleTests[2].addrs, err) = googleLiteralAddrs();
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
     }
     foreach (var (_, tt) in dialGoogleTests) {
         foreach (var (_, network) in tt.networks) {
             disableSocketConnect(tt.unreachableNetwork);
             foreach (var (_, addr) in tt.addrs) {
                 {
-                    var errΔ1 = fetchGoogle(tt.dial, network, addr); if (errΔ1 != default!) {
-                        Ꮡt.Error(errΔ1);
+                    var errΔ1 = fetchGoogle(tt.dial, network, addr); if (errΔ1 != nil) {
+                        t.Error(errΔ1);
                     }
                 }
             }
@@ -95,62 +96,63 @@ public static void TestDialGoogle(ж<testing.T> Ꮡt) {
 }
 
 internal static array<@string> literalAddrs4 = new @string[]{
-    "%d.%d.%d.%d:80"u8,
-    "www.google.com:80"u8,
-    "%d.%d.%d.%d:http"u8,
-    "www.google.com:http"u8,
-    "[::ffff:%d.%d.%d.%d]:80"u8,
-    "[::ffff:%02x%02x:%02x%02x]:80"u8,
-    "[0:0:0:0:0000:ffff:%d.%d.%d.%d]:80"u8,
-    "[0:0:0:0:000000:ffff:%d.%d.%d.%d]:80"u8,
-    "[0:0:0:0::ffff:%d.%d.%d.%d]:80"u8
+    "%d.%d.%d.%d:80",
+    "www.google.com:80",
+    "%d.%d.%d.%d:http",
+    "www.google.com:http",
+    "[::ffff:%d.%d.%d.%d]:80",
+    "[::ffff:%02x%02x:%02x%02x]:80",
+    "[0:0:0:0:0000:ffff:%d.%d.%d.%d]:80",
+    "[0:0:0:0:000000:ffff:%d.%d.%d.%d]:80",
+    "[0:0:0:0::ffff:%d.%d.%d.%d]:80"
 }.array();
 internal static array<@string> literalAddrs6 = new @string[]{
-    "[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:80"u8,
-    "ipv6.google.com:80"u8,
-    "[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:http"u8,
-    "ipv6.google.com:http"u8
+    "[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:80",
+    "ipv6.google.com:80",
+    "[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:http",
+    "ipv6.google.com:http"
 }.array();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wwwGoogleComˢ = "www.google.com"u8;
+internal static ref readonly @string wwwGoogleComˢ => ref wwwGoogleComˢᵇ;
+private static readonly @string wwwGoogleComˢᵇ = "www.google.com"u8;
 
 internal static (slice<@string> lits4, slice<@string> lits6, error err) googleLiteralAddrs() {
-    slice<@string> lits4 = default!;
-    slice<@string> lits6 = default!;
-    error err = default!;
+    slice<@string> lits4 = default;
+    slice<@string> lits6 = default;
+    error err = default;
 
     (var ips, err) = LookupIP(wwwGoogleComˢ);
-    if (err != default!) {
-        return (default!, default!, err);
+    if (err != nil) {
+        return (default, default, err);
     }
     if (len(ips) == 0) {
-        return (default!, default!, default!);
+        return (default, default, default);
     }
-    global::go.net_package.IP ip4 = default!;
-    global::go.net_package.IP ip6 = default!;
+    global::go.net_package.IP ip4 = default;
+    global::go.net_package.IP ip6 = default;
     foreach (var (_, ip) in ips) {
-        if (ip4 == default! && ip.To4() != default!) {
+        if (ip4 == nil && ip.To4() != nil) {
             ip4 = ip.To4();
         }
-        if (ip6 == default! && ip.To16() != default! && ip.To4() == default!) {
+        if (ip6 == nil && ip.To16() != nil && ip.To4() == nil) {
             ip6 = ip.To16();
         }
-        if (ip4 != default! && ip6 != default!) {
+        if (ip4 != nil && ip6 != nil) {
             break;
         }
     }
-    if (ip4 != default!) {
+    if (ip4 != nil) {
         foreach (var (i, lit4) in literalAddrs4.ΔRangeSnapshot()) {
-            if (strings.Contains(lit4, "%"u8)) {
+            if (strings.Contains(lit4, "%")) {
                 literalAddrs4[i] = fmt.Sprintf(lit4, ip4[0], ip4[1], ip4[2], ip4[3]);
             }
         }
         lits4 = literalAddrs4[..];
     }
-    if (ip6 != default!) {
+    if (ip6 != nil) {
         foreach (var (i, lit6) in literalAddrs6.ΔRangeSnapshot()) {
-            if (strings.Contains(lit6, "%"u8)) {
+            if (strings.Contains(lit6, "%")) {
                 literalAddrs6[i] = fmt.Sprintf(lit6, ip6[0], ip6[1], ip6[2], ip6[3], ip6[4], ip6[5], ip6[6], ip6[7], ip6[8], ip6[9], ip6[10], ip6[11], ip6[12], ip6[13], ip6[14], ip6[15]);
             }
         }
@@ -163,28 +165,28 @@ internal static error fetchGoogle(Func<@string, @string, (global::go.net_package
     GoFrame ᒐ = default;
     try {
         var (c, err) = dial(network, address);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
         var req = slice<byte>("GET /robots.txt HTTP/1.0\r\nHost: www.google.com\r\n\r\n"u8);
         {
-            var (_, errΔ1) = c.Write(req); if (errΔ1 != default!) {
+            var (_, errΔ1) = c.Write(req); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
         var b = new slice<byte>(1000);
         (var n, err) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(c), b);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (n < 1000) {
             return fmt.Errorf("short read from %s:%s->%s"u8, network, c.RemoteAddr(), c.LocalAddr());
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

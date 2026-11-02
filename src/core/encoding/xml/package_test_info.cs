@@ -8,22 +8,8 @@ global using static global::go.encoding.xml_package;
 global using static global::go.encoding.xml_internal_test_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
 global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using xmlꓸToken = object;
-global using xmlꓸΔToken = object;
 global using ΔToken = object;
 // </ImportedTypeAliases>
 
@@ -63,7 +49,14 @@ using static global::go.encoding.xml_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.encoding.xml_package.Decoder))]
+[assembly: GoFieldAccess(typeof(global::go.encoding.xml_package.Encoder))]
+[assembly: GoFieldAccess(typeof(global::go.encoding.xml_package.SyntaxError))]
+[assembly: GoFieldAccess(typeof(global::go.encoding.xml_package.UnsupportedTypeError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -73,8 +66,8 @@ using static global::go.encoding.xml_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSYpKeu9oKCmKSnnAAVBoIAABaGgIK2goKm")]
-[assembly: go.GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgpikp5z2goKYpKecABUGggAAFoaAgraCgqY=")]
+[assembly: GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSktLS2AAoGgoKUtLSkABYGggAAFoaAgraCgqY=")]
+[assembly: GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgqS0tKQACgaCgpS0tKQAFgaCAAAWhoCCtoKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

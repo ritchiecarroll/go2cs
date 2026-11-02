@@ -9,7 +9,7 @@ namespace go.runtime;
 using poll = @internal.poll_package;
 using os = os_package;
 using runtime = runtime_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
 using System.Runtime.CompilerServices;
 
@@ -24,7 +24,7 @@ public static partial void PrintStack() {
 // It calls [runtime.Stack] with a large enough buffer to capture the entire trace.
 public static partial slice<byte> Stack() {
     var buf = new slice<byte>(1024);
-    while (ᐧ) {
+    for (;;) {
         nint n = runtime.Stack(buf, false);
         if (n < len(buf)) {
             return buf.slice(0, n);
@@ -49,9 +49,9 @@ partial struct CrashOptions {
 // To disable this additional crash output, call SetCrashOutput(nil).
 // If called concurrently with a crash, some in-progress output may be written
 // to the old file even after an overriding SetCrashOutput returns.
-public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
+public static error SetCrashOutput(ж<os.File> f, CrashOptions opts) {
     var fd = ~(uintptr)0;
-    if (Ꮡf != nil) {
+    if (f != nil) {
         // The runtime will write to this file descriptor from
         // low-level routines during a panic, possibly without
         // a G, so we must call f.Fd() eagerly. This creates a
@@ -77,11 +77,11 @@ public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
         // A side effect of Fd() is that it calls SetBlocking,
         // which is important so that writes of a crash report
         // to a full pipe buffer don't get lost.
-        var (fd2, _, err) = poll.DupCloseOnExec((nint)Ꮡf.Fd());
-        if (err != default!) {
+        var (fd2, _, err) = poll.DupCloseOnExec((nint)f.Fd());
+        if (err != nil) {
             return err;
         }
-        runtime.KeepAlive(Ꮡf.OrTypedNil()); // prevent finalization before dup
+        runtime.KeepAlive(f.OrTypedNil()); // prevent finalization before dup
         fd = (uintptr)fd2;
     }
     {
@@ -91,7 +91,7 @@ public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
             os.NewFile(prev, ""u8).Close(); // ignore error
         }
     }
-    return default!;
+    return default;
 }
 
 //go:linkname runtime_setCrashFD runtime.setCrashFD

@@ -29,19 +29,19 @@ public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
     if ((int64)n < 0 || n != (uint64)(nint)n) {
         // n is too large to fit in int, so we can't allocate
         // a buffer large enough. Treat this as a read failure.
-        return (default!, io.ErrUnexpectedEOF);
+        return (default, io.ErrUnexpectedEOF);
     }
 
     if (n < chunk) {
         var bufΔ1 = new slice<byte>((nint)(n));
         var (_, err) = io.ReadFull(r, bufΔ1);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (bufΔ1, default!);
+        return (bufΔ1, default);
     }
 
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     var buf1 = new slice<byte>(chunk);
     while (n > 0) {
         var next = n;
@@ -49,16 +49,16 @@ public static (slice<byte>, error) ReadData(io.Reader r, uint64 n) {
             next = chunk;
         }
         var (_, err) = io.ReadFull(r, buf1.slice(0, (nint)(next)));
-        if (err != default!) {
+        if (err != nil) {
             if (len(buf) > 0 && AreEqual(err, io.EOF)) {
                 err = io.ErrUnexpectedEOF;
             }
-            return (default!, err);
+            return (default, err);
         }
         buf = appendꓸꓸꓸ(buf, buf1.slice(0, (nint)(next)));
         n -= next;
     }
-    return (buf, default!);
+    return (buf, default);
 }
 
 // ReadDataAt reads n bytes from the input stream at off, but avoids
@@ -68,23 +68,23 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
     if ((int64)n < 0 || n != (uint64)(nint)n) {
         // n is too large to fit in int, so we can't allocate
         // a buffer large enough. Treat this as a read failure.
-        return (default!, io.ErrUnexpectedEOF);
+        return (default, io.ErrUnexpectedEOF);
     }
 
     if (n < chunk) {
         var bufΔ1 = new slice<byte>((nint)(n));
         var (_, err) = r.ReadAt(bufΔ1, off);
-        if (err != default!) {
+        if (err != nil) {
             // io.SectionReader can return EOF for n == 0,
             // but for our purposes that is a success.
             if (!AreEqual(err, io.EOF) || n > 0) {
-                return (default!, err);
+                return (default, err);
             }
         }
-        return (bufΔ1, default!);
+        return (bufΔ1, default);
     }
 
-    slice<byte> buf = default!;
+    slice<byte> buf = default;
     var buf1 = new slice<byte>(chunk);
     while (n > 0) {
         var next = n;
@@ -92,14 +92,14 @@ public static (slice<byte>, error) ReadDataAt(io.ReaderAt r, uint64 n, int64 off
             next = chunk;
         }
         var (_, err) = r.ReadAt(buf1.slice(0, (nint)(next)), off);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         buf = appendꓸꓸꓸ(buf, buf1.slice(0, (nint)(next)));
         n -= next;
         off += (int64)next;
     }
-    return (buf, default!);
+    return (buf, default);
 }
 
 // SliceCapWithSize returns the capacity to use when allocating a slice.

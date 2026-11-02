@@ -39,12 +39,12 @@ internal static slice<byte> toWireFormat(this ref NetlinkRouteRequest rr) {
 }
 
 internal static slice<byte> newNetlinkRouteRequest(nint proto, nint seq, nint family) {
-    var rr = Ꮡ(new NetlinkRouteRequest(nil));
-    rr.Value.Header.Len = (uint32)(NLMSG_HDRLEN + SizeofRtGenmsg);
-    rr.Value.Header.Type = (uint16)proto;
-    rr.Value.Header.Flags = (uint16)((uint16)NLM_F_DUMP | (uint16)NLM_F_REQUEST);
-    rr.Value.Header.Seq = (uint32)seq;
-    rr.Value.Data.Family = (uint8)family;
+    var rr = Ꮡ(new NetlinkRouteRequest());
+    rr.Header.Len = (uint32)(NLMSG_HDRLEN + SizeofRtGenmsg);
+    rr.Header.Type = (uint16)proto;
+    rr.Header.Flags = (uint16)((uint16)NLM_F_DUMP | (uint16)NLM_F_REQUEST);
+    rr.Header.Seq = (uint32)seq;
+    rr.Data.Family = (uint8)family;
     return rr.toWireFormat();
 }
 
@@ -60,67 +60,67 @@ public static (slice<byte>, error) NetlinkRIB(nint proto, nint family) {
     GoFrame ᒐ = default;
     try {
         var (s, err) = Socket(AF_NETLINK, (nint)((nint)SOCK_RAW | (nint)SOCK_CLOEXEC), NETLINK_ROUTE);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         defer(Close, s, ref ᒐ);
         var sa = Ꮡ(new SockaddrNetlink(Family: AF_NETLINK));
         {
-            var errΔ1 = Bind(s, new SockaddrNetlinkжSockaddr(sa)); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = Bind(s, new SockaddrNetlinkжSockaddr(sa)); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
         var wb = newNetlinkRouteRequest(proto, 1, family);
         {
-            var errΔ2 = Sendto(s, wb, 0, new SockaddrNetlinkжSockaddr(sa)); if (errΔ2 != default!) {
-                return (default!, errΔ2);
+            var errΔ2 = Sendto(s, wb, 0, new SockaddrNetlinkжSockaddr(sa)); if (errΔ2 != nil) {
+                return (default, errΔ2);
             }
         }
         (var lsa, err) = Getsockname(s);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var (lsanl, ok) = lsa._<ж<SockaddrNetlink>>(ᐧ);
         if (!ok) {
-            return (default!, EINVAL);
+            return (default, EINVAL);
         }
-        slice<byte> tab = default!;
+        slice<byte> tab = default;
 
         var rbNew = pageBufPool.Get()._<ж<slice<byte>>>();
         defer(pageBufPool.Put, rbNew.OrTypedNil(), ref ᒐ);
 done:
-        while (ᐧ) {
+        for (;;) {
             var rb = rbNew.ValueSlot;
             var (nr, _, errΔ3) = Recvfrom(s, rb, 0);
-            if (errΔ3 != default!) {
-                return (default!, errΔ3);
+            if (errΔ3 != nil) {
+                return (default, errΔ3);
             }
             if (nr < NLMSG_HDRLEN) {
-                return (default!, EINVAL);
+                return (default, EINVAL);
             }
             rb = rb.slice(0, nr);
             tab = appendꓸꓸꓸ(tab, rb);
             (var msgs, errΔ3) = ParseNetlinkMessage(rb);
-            if (errΔ3 != default!) {
-                return (default!, errΔ3);
+            if (errΔ3 != nil) {
+                return (default, errΔ3);
             }
             foreach (var (_, m) in msgs) {
-                if (m.Header.Seq != 1 || m.Header.Pid != (~lsanl).Pid) {
-                    return (default!, EINVAL);
+                if (m.Header.Seq != 1 || m.Header.Pid != lsanl.Pid) {
+                    return (default, EINVAL);
                 }
                 if (m.Header.Type == NLMSG_DONE) {
                     goto break_done;
                 }
                 if (m.Header.Type == NLMSG_ERROR) {
-                    return (default!, EINVAL);
+                    return (default, EINVAL);
                 }
             }
 continue_done:;
         }
 break_done:;
-        return (tab, default!);
+        return (tab, default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -133,26 +133,26 @@ partial struct NetlinkMessage {
 // ParseNetlinkMessage parses b as an array of netlink messages and
 // returns the slice containing the NetlinkMessage structures.
 public static (slice<NetlinkMessage>, error) ParseNetlinkMessage(slice<byte> b) {
-    slice<NetlinkMessage> msgs = default!;
+    slice<NetlinkMessage> msgs = default;
     while (len(b) >= NLMSG_HDRLEN) {
         var (h, dbuf, dlen, err) = netlinkMessageHeaderAndData(b);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        var m = new NetlinkMessage(Header: h.Value, Data: dbuf.slice(0, (nint)(~h).Len - (nint)NLMSG_HDRLEN));
+        var m = new NetlinkMessage(Header: h.Value, Data: dbuf.slice(0, (nint)h.Len - (nint)NLMSG_HDRLEN));
         msgs = append(msgs, m);
         b = b.slice(dlen);
     }
-    return (msgs, default!);
+    return (msgs, default);
 }
 
 internal static (ж<NlMsghdr>, slice<byte>, nint, error) netlinkMessageHeaderAndData(slice<byte> b) {
     var h = Ꮡ(b, 0).Reinterpret<byte, NlMsghdr>();
-    nint l = nlmAlignOf((nint)(~h).Len);
-    if ((nint)(~h).Len < NLMSG_HDRLEN || l > len(b)) {
-        return (default!, default!, 0, EINVAL);
+    nint l = nlmAlignOf((nint)h.Len);
+    if ((nint)h.Len < NLMSG_HDRLEN || l > len(b)) {
+        return (default, default, 0, EINVAL);
     }
-    return (h, b[(int)(NLMSG_HDRLEN)..], l, default!);
+    return (h, b[(int)(NLMSG_HDRLEN)..], l, default);
 }
 
 // NetlinkRouteAttr represents a netlink route attribute.
@@ -168,40 +168,43 @@ public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ж<NetlinkM
     ref var m = ref Ꮡm.DerefOrNull();
     var attrsᴷ = new stackAppend<NetlinkRouteAttr>(moves: true);
 
-    slice<byte> b = default!;
-    var exprᴛ1 = m.Header.Type;
-    if (exprᴛ1 == RTM_NEWLINK || exprᴛ1 == RTM_DELLINK) {
+    slice<byte> b = default;
+    switch (m.Header.Type) {
+    case var ᴛ when ᴛ == RTM_NEWLINK || ᴛ == RTM_DELLINK: {
         b = m.Data[(int)(SizeofIfInfomsg)..];
+        break;
     }
-    else if (exprᴛ1 == RTM_NEWADDR || exprᴛ1 == RTM_DELADDR) {
+    case var ᴛ when ᴛ == RTM_NEWADDR || ᴛ == RTM_DELADDR: {
         b = m.Data[(int)(SizeofIfAddrmsg)..];
+        break;
     }
-    else if (exprᴛ1 == RTM_NEWROUTE || exprᴛ1 == RTM_DELROUTE) {
+    case var ᴛ when ᴛ == RTM_NEWROUTE || ᴛ == RTM_DELROUTE: {
         b = m.Data[(int)(SizeofRtMsg)..];
+        break;
     }
-    else { /* default: */
-        return (default!, EINVAL);
-    }
-    slice<NetlinkRouteAttr> attrs = default!;
+    default: {
+        return (default, EINVAL);
+    }}
+    slice<NetlinkRouteAttr> attrs = default;
     while (len(b) >= SizeofRtAttr) {
         var (a, vbuf, alen, err) = netlinkRouteAttrAndValue(b);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        var ra = new NetlinkRouteAttr(Attr: a.Value, Value: vbuf.slice(0, (nint)(~a).Len - (nint)SizeofRtAttr));
+        var ra = new NetlinkRouteAttr(Attr: a.Value, Value: vbuf.slice(0, (nint)a.Len - (nint)SizeofRtAttr));
         attrs = append(attrsᴷ, attrs, ra);
         b = b.slice(alen);
     }
     attrs = move2heap(attrsᴷ, attrs);
-    return (attrs, default!);
+    return (attrs, default);
 }
 
 internal static (ж<RtAttr>, slice<byte>, nint, error) netlinkRouteAttrAndValue(slice<byte> b) {
     var a = Ꮡ(b, 0).Reinterpret<byte, RtAttr>();
-    if ((nint)(~a).Len < SizeofRtAttr || (nint)(~a).Len > len(b)) {
-        return (default!, default!, 0, EINVAL);
+    if ((nint)a.Len < SizeofRtAttr || (nint)a.Len > len(b)) {
+        return (default, default, 0, EINVAL);
     }
-    return (a, b[(int)(SizeofRtAttr)..], rtaAlignOf((nint)(~a).Len), default!);
+    return (a, b[(int)(SizeofRtAttr)..], rtaAlignOf((nint)a.Len), default);
 }
 
 } // end syscall_package

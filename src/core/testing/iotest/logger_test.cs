@@ -23,10 +23,12 @@ internal static (nint, error) Write(this errWriter w, slice<byte> _) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writeˢ = "write:"u8;
-internal static readonly @string helloWorldˢ = "Hello, World!"u8;
+internal static ref readonly @string writeˢ => ref writeˢᵇ;
+private static readonly @string writeˢᵇ = "write:"u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "Hello, World!"u8;
 
-public static void TestWriteLogger(ж<testing.T> Ꮡt) {
+public static void TestWriteLogger(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var olw = log.Writer();
@@ -42,29 +44,29 @@ public static void TestWriteLogger(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var lOut = @new<strings.Builder>();
-        log.SetPrefix("lw: "u8);
+        log.SetPrefix("lw: ");
         log.SetOutput(new iotest_test_package.strings_BuilderжWriter(lOut));
         log.SetFlags(0);
 
         var lw = @new<strings.Builder>();
         var wl = NewWriteLogger(writeˢ, new iotest_test_package.strings_BuilderжWriter(lw));
         {
-            var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err != default!) {
-                Ꮡt.Fatalf("Unexpectedly failed to write: %v"u8, err);
+            var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err != nil) {
+                t.Fatalf("Unexpectedly failed to write: %v", err);
             }
         }
 
         {
             @string g = lw.String();
             @string w = helloWorldˢ; if (g != w) {
-                Ꮡt.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
+                t.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
             }
         }
         @string wantLogWithHex = fmt.Sprintf("lw: write: %x\n"u8, helloWorldˢ);
         {
             @string g = lOut.String();
             @string w = wantLogWithHex; if (g != w) {
-                Ꮡt.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
+                t.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
             }
         }
     }
@@ -73,9 +75,10 @@ public static void TestWriteLogger(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writeErrorˢ = "Write Error!"u8;
+internal static ref readonly @string writeErrorˢ => ref writeErrorˢᵇ;
+private static readonly @string writeErrorˢᵇ = "Write Error!"u8;
 
-public static void TestWriteLogger_errorOnWrite(ж<testing.T> Ꮡt) {
+public static void TestWriteLogger_errorOnWrite(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var olw = log.Writer();
@@ -91,15 +94,15 @@ public static void TestWriteLogger_errorOnWrite(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var lOut = @new<strings.Builder>();
-        log.SetPrefix("lw: "u8);
+        log.SetPrefix("lw: ");
         log.SetOutput(new iotest_test_package.strings_BuilderжWriter(lOut));
         log.SetFlags(0);
 
         var lw = new errWriter(err: errors.New(writeErrorˢ));
         var wl = NewWriteLogger(writeˢ, lw);
         {
-            var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err == default!) {
-                Ꮡt.Fatalf("Unexpectedly succeeded to write: %v"u8, err);
+            var (_, err) = wl.Write(slice<byte>("Hello, World!"u8)); if (err == nil) {
+                t.Fatalf("Unexpectedly succeeded to write: %v", err);
             }
         }
 
@@ -107,7 +110,7 @@ public static void TestWriteLogger_errorOnWrite(ж<testing.T> Ꮡt) {
         {
             @string g = lOut.String();
             @string w = wantLogWithHex; if (g != w) {
-                Ꮡt.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
+                t.Errorf("WriteLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
             }
         }
     }
@@ -116,9 +119,10 @@ public static void TestWriteLogger_errorOnWrite(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string readˢ = "read:"u8;
+internal static ref readonly @string readˢ => ref readˢᵇ;
+private static readonly @string readˢᵇ = "read:"u8;
 
-public static void TestReadLogger(ж<testing.T> Ꮡt) {
+public static void TestReadLogger(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var olw = log.Writer();
@@ -134,7 +138,7 @@ public static void TestReadLogger(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var lOut = @new<strings.Builder>();
-        log.SetPrefix("lr: "u8);
+        log.SetPrefix("lr: ");
         log.SetOutput(new iotest_test_package.strings_BuilderжWriter(lOut));
         log.SetFlags(0);
 
@@ -144,13 +148,13 @@ public static void TestReadLogger(ж<testing.T> Ꮡt) {
         var rl = NewReadLogger(readˢ, new iotest_test_package.bytes_ReaderжReader(lr));
 
         var (n, err) = rl.Read(p);
-        if (err != default!) {
-            Ꮡt.Fatalf("Unexpectedly failed to read: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Unexpectedly failed to read: %v", err);
         }
 
         {
             var (g, w) = (p.slice(0, n), data); if (!bytes.Equal(g, w)) {
-                Ꮡt.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
+                t.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
             }
         }
 
@@ -158,7 +162,7 @@ public static void TestReadLogger(ж<testing.T> Ꮡt) {
         {
             @string g = lOut.String();
             @string w = wantLogWithHex; if (g != w) {
-                Ꮡt.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
+                t.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
             }
         }
     }
@@ -167,10 +171,12 @@ public static void TestReadLogger(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ioFailureˢ = "io failure"u8;
-internal static readonly @string readˢ2 = "read"u8;
+internal static ref readonly @string ioFailureˢ => ref ioFailureˢᵇ;
+private static readonly @string ioFailureˢᵇ = "io failure"u8;
+internal static ref readonly @string readˢ2 => ref readˢ2ᵇ;
+private static readonly @string readˢ2ᵇ = "read"u8;
 
-public static void TestReadLogger_errorOnRead(ж<testing.T> Ꮡt) {
+public static void TestReadLogger_errorOnRead(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var olw = log.Writer();
@@ -186,7 +192,7 @@ public static void TestReadLogger_errorOnRead(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var lOut = @new<strings.Builder>();
-        log.SetPrefix("lr: "u8);
+        log.SetPrefix("lr: ");
         log.SetOutput(new iotest_test_package.strings_BuilderжWriter(lOut));
         log.SetFlags(0);
 
@@ -196,15 +202,15 @@ public static void TestReadLogger_errorOnRead(ж<testing.T> Ꮡt) {
         var lr = ErrReader(errors.New(ioFailureˢ));
         var rl = NewReadLogger(readˢ2, lr);
         var (n, err) = rl.Read(p);
-        if (err == default!) {
-            Ꮡt.Fatalf("Unexpectedly succeeded to read: %v"u8, err);
+        if (err == nil) {
+            t.Fatalf("Unexpectedly succeeded to read: %v", err);
         }
 
         @string wantLogWithHex = fmt.Sprintf("lr: read %x: io failure\n"u8, p.slice(0, n));
         {
             @string g = lOut.String();
             @string w = wantLogWithHex; if (g != w) {
-                Ꮡt.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q"u8, g, w);
+                t.Errorf("ReadLogger mismatch\n\tgot:  %q\n\twant: %q", g, w);
             }
         }
     }

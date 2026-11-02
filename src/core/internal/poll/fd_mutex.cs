@@ -34,7 +34,8 @@ internal static UntypedInt mutexRMask => /* (1<<20 - 1) << 23 */ 8796084633600;
 internal static UntypedInt mutexWWait => /* 1 << 43 */ 8796093022208;
 internal static UntypedInt mutexWMask => /* (1<<20 - 1) << 43 */ 9223363240761753600;
 
-internal static readonly @string overflowMsg = "too many concurrent operations on a single file or socket (max 1048575)"u8;
+internal static ref readonly @string overflowMsg => ref overflowMsgᵇ;
+private static readonly @string overflowMsgᵇ = "too many concurrent operations on a single file or socket (max 1048575)"u8;
 
 // Read operations must do rwlock(true)/rwunlock(true).
 //
@@ -51,8 +52,8 @@ internal static readonly @string overflowMsg = "too many concurrent operations o
 // incref adds a reference to mu.
 // It reports whether mu is available for reading or writing.
 internal static bool incref(this ж<fdMutex> Ꮡmu) {
-    while (ᐧ) {
-        var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
+    for (;;) {
+        var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexClosed) != 0) {
             return false;
         }
@@ -60,7 +61,7 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
         if ((@new & (uint64)mutexRefMask) == 0) {
             throw panic(overflowMsg);
         }
-        if (atomic.CompareAndSwapUint64(Ꮡmu.of(fdMutex.Ꮡstate), old, @new)) {
+        if (atomic.CompareAndSwapUint64(Ꮡmu.Ꮡstate, old, @new)) {
             return true;
         }
     }
@@ -71,13 +72,13 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
 // decref removes a reference from mu.
 // It reports whether there is no remaining reference.
 internal static bool decref(this ж<fdMutex> Ꮡmu) {
-    while (ᐧ) {
-        var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
+    for (;;) {
+        var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexRefMask) == 0) {
             throw panic("inconsistent poll.fdMutex");
         }
         var @new = old - (uint64)mutexRef;
-        if (atomic.CompareAndSwapUint64(Ꮡmu.of(fdMutex.Ꮡstate), old, @new)) {
+        if (atomic.CompareAndSwapUint64(Ꮡmu.Ꮡstate, old, @new)) {
             return (uint64)(@new & ((uint64)((uint64)mutexClosed | (uint64)mutexRefMask))) == mutexClosed;
         }
     }
@@ -97,20 +98,20 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 internal static error incref(this ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
-    if (!Ꮡfd.of(FD.Ꮡfdmu).incref()) {
+    if (!Ꮡfd.Ꮡfdmu.incref()) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // decref removes a reference from fd.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
 internal static error decref(this ж<FD> Ꮡfd) {
-    if (Ꮡfd.of(FD.Ꮡfdmu).decref()) {
+    if (Ꮡfd.Ꮡfdmu.decref()) {
         return Ꮡfd.destroy();
     }
-    return default!;
+    return default;
 }
 
 // readLock adds a reference to fd and locks fd for reading.
@@ -121,7 +122,7 @@ internal static error readLock(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.rwlock(true)) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // readUnlock removes a reference from fd and unlocks fd for reading.
@@ -143,7 +144,7 @@ internal static error writeLock(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.rwlock(false)) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // writeUnlock removes a reference from fd and unlocks fd for writing.
@@ -165,7 +166,7 @@ internal static error readWriteLock(this ж<FD> Ꮡfd) {
     if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
         return errClosing(fd.isFile);
     }
-    return default!;
+    return default;
 }
 
 // readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.
@@ -182,7 +183,7 @@ internal static void readWriteUnlock(this ж<FD> Ꮡfd) {
 
 // closing returns true if fd is closing.
 internal static bool closing(this ж<FD> Ꮡfd) {
-    return (atomic.LoadUint64(Ꮡfd.of(FD.Ꮡfdmu).of(fdMutex.Ꮡstate)) & (uint64)mutexClosed) != 0;
+    return (atomic.LoadUint64(Ꮡfd.Ꮡfdmu.Ꮡstate) & (uint64)mutexClosed) != 0;
 }
 
 } // end poll_package

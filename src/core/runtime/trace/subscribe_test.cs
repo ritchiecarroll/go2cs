@@ -19,15 +19,21 @@ partial class trace_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object validatingˢ = (@string)"validating"u8;
-private static readonly @string tracerˢ = "tracer"u8;
-private static readonly @string flightRecorderˢ = "flightRecorder"u8;
-private static readonly @string startFlightStartTraceˢ = "start(flight)_start(trace)_stop(trace)_stop(flight)"u8;
+private static ref readonly @string tracerˢ => ref tracerˢᵇ;
+private static readonly @string tracerˢᵇ = "tracer"u8;
+private static ref readonly @string flightRecorderˢ => ref flightRecorderˢᵇ;
+private static readonly @string flightRecorderˢᵇ = "flightRecorder"u8;
+private static ref readonly @string startFlightStartTraceˢ => ref startFlightStartTraceˢᵇ;
+private static readonly @string startFlightStartTraceˢᵇ = "start(flight)_start(trace)_stop(trace)_stop(flight)"u8;
 private static readonly object skippingBecauseTraceIsˢ = (@string)"skipping because trace is already enabled"u8;
-private static readonly @string startTraceStartFlightˢ = "start(trace)_start(flight)_stop(trace)_stop(flight)"u8;
-private static readonly @string startFlightStopFlightˢ = "start(flight)_stop(flight)_start(trace)_stop(trace)"u8;
-private static readonly @string startFlightStartTraceˢ2 = "start(flight)_start(trace)_stop(flight)_stop(trace)"u8;
+private static ref readonly @string startTraceStartFlightˢ => ref startTraceStartFlightˢᵇ;
+private static readonly @string startTraceStartFlightˢᵇ = "start(trace)_start(flight)_stop(trace)_stop(flight)"u8;
+private static ref readonly @string startFlightStopFlightˢ => ref startFlightStopFlightˢᵇ;
+private static readonly @string startFlightStopFlightˢᵇ = "start(flight)_stop(flight)_start(trace)_stop(trace)"u8;
+private static ref readonly @string startFlightStartTraceˢ2 => ref startFlightStartTraceˢ2ᵇ;
+private static readonly @string startFlightStartTraceˢ2ᵇ = "start(flight)_start(trace)_stop(flight)_stop(trace)"u8;
 
-public static void TestSubscribers(ж<testing.T> Ꮡt) {
+public static void TestSubscribers(ж<testing.T> t) {
     void validate(ж<testing.T> tΔ1, @string source, slice<byte> tr) {
         GoFrame ᒐ = default;
         try {
@@ -42,8 +48,8 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
 
             // Prepare to read the trace snapshot.
             var (r, err) = inttrace.NewReader(new bytes_ReaderжReader(bytes.NewReader(tr)));
-            if (err != default!) {
-                tΔ1.Errorf("unexpected error creating trace reader for %s: %v"u8, source, err);
+            if (err != nil) {
+                tΔ1.Errorf("unexpected error creating trace reader for %s: %v", source, err);
                 return;
             }
 
@@ -53,20 +59,20 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
                 v.SkipClockSnapshotChecks();
             }
             // Make sure there are Sync events: at the start and end.
-            slice<nint> syncs = default!;
+            slice<nint> syncs = default;
             nint evs = 0;
-            while (ᐧ) {
+            for (;;) {
                 var (ev, errΔ1) = r.ReadEvent();
                 if (AreEqual(errΔ1, io.EOF)) {
                     break;
                 }
-                if (errΔ1 != default!) {
-                    tΔ1.Errorf("unexpected error reading trace for %s: %v"u8, source, errΔ1);
+                if (errΔ1 != nil) {
+                    tΔ1.Errorf("unexpected error reading trace for %s: %v", source, errΔ1);
                     break;
                 }
                 {
-                    var errΔ2 = v.Event(ev); if (errΔ2 != default!) {
-                        tΔ1.Errorf("event validation failed: %s"u8, errΔ2);
+                    var errΔ2 = v.Event(ev); if (errΔ2 != nil) {
+                        tΔ1.Errorf("event validation failed: %s", errΔ2);
                         break;
                     }
                 }
@@ -76,10 +82,10 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
                 evs++;
             }
             if (!tΔ1.Failed()) {
-                var ends = new nint[]{syncs[0], syncs[len(syncs) - 1]}.slice();
+                var ends = slice<nint>([syncs[0], syncs[len(syncs) - 1]]);
                 {
-                    var wantEnds = new nint[]{0, evs - 1}.slice(); if (!slices.Equal<slice<nint>, nint>(wantEnds, ends)) {
-                        tΔ1.Errorf("expected a sync event at each end of the trace, found sync events at %d instead of %d for %s"u8,
+                    var wantEnds = slice<nint>([0, evs - 1]); if (!slices.Equal<slice<nint>, nint>(wantEnds, ends)) {
+                        tΔ1.Errorf("expected a sync event at each end of the trace, found sync events at %d instead of %d for %s",
                             ends, wantEnds, source);
                     }
                 }
@@ -95,25 +101,25 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
         validateʗ1(tΔ2, flightRecorderˢ, frTrace.Bytes());
     }
     ж<trace.FlightRecorder> startFlightRecorder(ж<testing.T> tΔ3) {
-        var fr = trace.NewFlightRecorder(new trace.FlightRecorderConfig(nil));
+        var fr = trace.NewFlightRecorder(new trace.FlightRecorderConfig());
         {
-            var err = fr.Start(); if (err != default!) {
-                tΔ3.Fatalf("unexpected error creating flight recorder: %v"u8, err);
+            var err = fr.Start(); if (err != nil) {
+                tΔ3.Fatalf("unexpected error creating flight recorder: %v", err);
             }
         }
         return fr;
     }
     void startTrace(ж<testing.T> tΔ4, io.Writer w) {
         {
-            var err = trace.Start(w); if (err != default!) {
-                tΔ4.Fatalf("unexpected error starting flight recorder: %v"u8, err);
+            var err = trace.Start(w); if (err != nil) {
+                tΔ4.Fatalf("unexpected error starting flight recorder: %v", err);
             }
         }
     }
     void stopFlightRecorder(ж<testing.T> tΔ5, ж<trace.FlightRecorder> fr, io.Writer w) {
         {
-            var (_, err) = fr.WriteTo(w); if (err != default!) {
-                tΔ5.Fatalf("unexpected error writing trace from flight recorder: %v"u8, err);
+            var (_, err) = fr.WriteTo(w); if (err != nil) {
+                tΔ5.Fatalf("unexpected error writing trace from flight recorder: %v", err);
             }
         }
         fr.Stop();
@@ -126,7 +132,7 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
     var stopFlightRecorderʗ1 = stopFlightRecorder;
     var stopTraceʗ1 = stopTrace;
     var validateTracesʗ1 = validateTraces;
-    Ꮡt.Run(startFlightStartTraceˢ, (ж<testing.T> tΔ6) => {
+    t.Run(startFlightStartTraceˢ, (ж<testing.T> tΔ6) => {
         GoFrame ᒐ = default;
         try {
             if (trace.IsEnabled()) {
@@ -151,7 +157,7 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
     var stopFlightRecorderʗ2 = stopFlightRecorder;
     var stopTraceʗ2 = stopTrace;
     var validateTracesʗ2 = validateTraces;
-    Ꮡt.Run(startTraceStartFlightˢ, (ж<testing.T> tΔ7) => {
+    t.Run(startTraceStartFlightˢ, (ж<testing.T> tΔ7) => {
         GoFrame ᒐ = default;
         try {
             if (trace.IsEnabled()) {
@@ -176,7 +182,7 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
     var stopFlightRecorderʗ3 = stopFlightRecorder;
     var stopTraceʗ3 = stopTrace;
     var validateTracesʗ3 = validateTraces;
-    Ꮡt.Run(startFlightStopFlightˢ, (ж<testing.T> tΔ8) => {
+    t.Run(startFlightStopFlightˢ, (ж<testing.T> tΔ8) => {
         GoFrame ᒐ = default;
         try {
             if (trace.IsEnabled()) {
@@ -201,7 +207,7 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
     var stopFlightRecorderʗ4 = stopFlightRecorder;
     var stopTraceʗ4 = stopTrace;
     var validateTracesʗ4 = validateTraces;
-    Ꮡt.Run(startFlightStopFlightˢ, (ж<testing.T> tΔ9) => {
+    t.Run(startFlightStopFlightˢ, (ж<testing.T> tΔ9) => {
         GoFrame ᒐ = default;
         try {
             if (trace.IsEnabled()) {
@@ -226,7 +232,7 @@ public static void TestSubscribers(ж<testing.T> Ꮡt) {
     var stopFlightRecorderʗ5 = stopFlightRecorder;
     var stopTraceʗ5 = stopTrace;
     var validateTracesʗ5 = validateTraces;
-    Ꮡt.Run(startFlightStartTraceˢ2, (ж<testing.T> tΔ10) => {
+    t.Run(startFlightStartTraceˢ2, (ж<testing.T> tΔ10) => {
         GoFrame ᒐ = default;
         try {
             if (trace.IsEnabled()) {

@@ -13,20 +13,20 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 // Syscall tests split stack between Entersyscall and Exitsyscall under race detector.
-public static void BenchmarkSyscall(ж<testing.B> Ꮡb) {
-    benchmarkSyscall(Ꮡb, 0, 1);
+public static void BenchmarkSyscall(ж<testing.B> b) {
+    benchmarkSyscall(b, 0, 1);
 }
 
-public static void BenchmarkSyscallWork(ж<testing.B> Ꮡb) {
-    benchmarkSyscall(Ꮡb, 100, 1);
+public static void BenchmarkSyscallWork(ж<testing.B> b) {
+    benchmarkSyscall(b, 100, 1);
 }
 
-public static void BenchmarkSyscallExcess(ж<testing.B> Ꮡb) {
-    benchmarkSyscall(Ꮡb, 0, 4);
+public static void BenchmarkSyscallExcess(ж<testing.B> b) {
+    benchmarkSyscall(b, 0, 4);
 }
 
-public static void BenchmarkSyscallExcessWork(ж<testing.B> Ꮡb) {
-    benchmarkSyscall(Ꮡb, 100, 4);
+public static void BenchmarkSyscallExcessWork(ж<testing.B> b) {
+    benchmarkSyscall(b, 100, 4);
 }
 
 internal static void benchmarkSyscall(ж<testing.B> Ꮡb, nint work, nint excess) {

@@ -21,89 +21,93 @@ using static go.mime.quotedprintable_package;
 
 partial class quotedprintable_internal_test_package {
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object quotedprintableInvalidˢ = (@string)"quotedprintable: invalid unescaped byte 0x00 in body"u8;
+internal static readonly object quotedprintableInvalidˢ2 = (@string)"quotedprintable: invalid hex byte 0x0d"u8;
+internal static readonly object quotedprintableInvalidˢ3 = (@string)@"quotedprintable: invalid bytes after =: ""\r\r\r \n"""u8;
+internal static readonly object quotedprintableInvalidˢ4 = (@string)@"quotedprintable: invalid bytes after =: """""u8;
+
 internal partial struct TestReader_tests /*dyn*/ {
     internal @string @in, want;
     internal any err;
 }
 
-public static void TestReader(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var tests = new TestReader_tests[]{
-        new(@in: ""u8, want: ""u8),
-        new(@in: "foo bar"u8, want: "foo bar"u8),
-        new(@in: "foo bar=3D"u8, want: "foo bar="u8),
-        new(@in: "foo bar=3d"u8, want: "foo bar="u8), // lax.
-        new(@in: "foo bar=\n"u8, want: "foo bar"u8),
-        new(@in: "foo bar\n"u8, want: "foo bar\n"u8), // somewhat lax.
-        new(@in: "foo bar=0"u8, want: "foo bar=0"u8), // lax
-        new(@in: "foo bar=0D=0A"u8, want: "foo bar\r\n"u8),
-        new(@in: " A B        \r\n C "u8, want: " A B\r\n C"u8),
-        new(@in: " A B =\r\n C "u8, want: " A B  C"u8),
-        new(@in: " A B =\n C "u8, want: " A B  C"u8), // lax. treating LF as CRLF
-        new(@in: "foo=\nbar"u8, want: "foobar"u8),
-        new(@in: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72})), want: "foo"u8, err: (@string)"quotedprintable: invalid unescaped byte 0x00 in body"u8),
+public static void TestReader(ж<testing.T> t) {
+    var tests = slice<TestReader_tests>([
+        new(@in: "", want: ""),
+        new(@in: "foo bar", want: "foo bar"),
+        new(@in: "foo bar=3D", want: "foo bar="),
+        new(@in: "foo bar=3d", want: "foo bar="), // lax.
+        new(@in: "foo bar=\n", want: "foo bar"),
+        new(@in: "foo bar\n", want: "foo bar\n"), // somewhat lax.
+        new(@in: "foo bar=0", want: "foo bar=0"), // lax
+        new(@in: "foo bar=0D=0A", want: "foo bar\r\n"),
+        new(@in: " A B        \r\n C ", want: " A B\r\n C"),
+        new(@in: " A B =\r\n C ", want: " A B  C"),
+        new(@in: " A B =\n C ", want: " A B  C"), // lax. treating LF as CRLF
+        new(@in: "foo=\nbar", want: "foobar"),
+        new(@in: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72})), want: "foo", err: quotedprintableInvalidˢ),
         new(@in: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xff})), want: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xff}))),
 
         // Equal sign.
-        new(@in: "=3D30\n"u8, want: "=30\n"u8),
-        new(@in: "=00=FF0=\n"u8, want: ((@string)(new byte[]{0x00, 0xff, 0x30}))),
+        new(@in: "=3D30\n", want: "=30\n"),
+        new(@in: "=00=FF0=\n", want: ((@string)(new byte[]{0x00, 0xff, 0x30}))),
 
         // Trailing whitespace
-        new(@in: "foo  \n"u8, want: "foo\n"u8),
-        new(@in: "foo  \n\nfoo =\n\nfoo=20\n\n"u8, want: "foo\n\nfoo \nfoo \n\n"u8),
+        new(@in: "foo  \n", want: "foo\n"),
+        new(@in: "foo  \n\nfoo =\n\nfoo=20\n\n", want: "foo\n\nfoo \nfoo \n\n"),
 
         // Tests that we allow bare \n and \r through, despite it being strictly
         // not permitted per RFC 2045, Section 6.7 Page 22 bullet (4).
-        new(@in: "foo\nbar"u8, want: "foo\nbar"u8),
-        new(@in: "foo\rbar"u8, want: "foo\rbar"u8),
-        new(@in: "foo\r\nbar"u8, want: "foo\r\nbar"u8),
+        new(@in: "foo\nbar", want: "foo\nbar"),
+        new(@in: "foo\rbar", want: "foo\rbar"),
+        new(@in: "foo\r\nbar", want: "foo\r\nbar"),
 
         // Different types of soft line-breaks.
-        new(@in: "foo=\r\nbar"u8, want: "foobar"u8),
-        new(@in: "foo=\nbar"u8, want: "foobar"u8),
-        new(@in: "foo=\rbar"u8, want: "foo"u8, err: (@string)"quotedprintable: invalid hex byte 0x0d"u8),
-        new(@in: "foo=\r\r\r \nbar"u8, want: "foo"u8, err: (@string)@"quotedprintable: invalid bytes after =: ""\r\r\r \n"""u8),
+        new(@in: "foo=\r\nbar", want: "foobar"),
+        new(@in: "foo=\nbar", want: "foobar"),
+        new(@in: "foo=\rbar", want: "foo", err: quotedprintableInvalidˢ2),
+        new(@in: "foo=\r\r\r \nbar", want: "foo", err: quotedprintableInvalidˢ3),
         // Issue 15486, accept trailing soft line-break at end of input.
-        new(@in: "foo="u8, want: "foo"u8),
-        new(@in: "="u8, want: ""u8, err: (@string)@"quotedprintable: invalid bytes after =: """""u8),
+        new(@in: "foo=", want: "foo"),
+        new(@in: "=", want: "", err: quotedprintableInvalidˢ4),
 
         // Example from RFC 2045:
         new(@in: "Now's the time =\n"u8 + "for all folk to come=\n"u8 + " to the aid of their country."u8,
-            want: "Now's the time for all folk to come to the aid of their country."u8),
-        new(@in: "accept UTF-8 right quotation mark: ’"u8,
-            want: "accept UTF-8 right quotation mark: ’"u8),
+            want: "Now's the time for all folk to come to the aid of their country."),
+        new(@in: "accept UTF-8 right quotation mark: ’",
+            want: "accept UTF-8 right quotation mark: ’"),
 
         // Transport padding
-        new(@in: "foo= \r\nbar"u8, want: "foobar"u8),
-        new(@in: "foo=\t \r\nbar"u8, want: "foobar"u8)
-    }.slice();
+        new(@in: "foo= \r\nbar", want: "foobar"),
+        new(@in: "foo=\t \r\nbar", want: "foobar")
+    ]);
     foreach (var (_, tt) in tests) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var (_, err) = io.Copy(new quotedprintable_test_package.strings_BuilderжWriter(Ꮡbuf), new quotedprintable_test_package.quotedprintable_ReaderжReader(NewReader(new quotedprintable_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)))));
         {
             @string got = buf.String(); if (got != tt.want) {
-                Ꮡt.Errorf("for %q, got %q; want %q"u8, tt.@in, got, tt.want);
+                t.Errorf("for %q, got %q; want %q", tt.@in, got, tt.want);
             }
         }
         switch (tt.err.type()) {
         case null: {
-            if (err != default!) {
-                Ꮡt.Errorf("for %q, got unexpected error: %v"u8, tt.@in, err);
+            if (err != nil) {
+                t.Errorf("for %q, got unexpected error: %v", tt.@in, err);
             }
             break;
         }
         case @string verr: {
             {
                 @string got = fmt.Sprint(err); if (got != verr) {
-                    Ꮡt.Errorf("for %q, got error %q; want %q"u8, tt.@in, got, verr);
+                    t.Errorf("for %q, got error %q; want %q", tt.@in, got, verr);
                 }
             }
             break;
         }
         case {} Δverr when Δverr._<error>(out var verr): {
             if (!AreEqual(err, verr)) {
-                Ꮡt.Errorf("for %q, got error %q; want %q"u8, tt.@in, err, verr);
+                t.Errorf("for %q, got error %q; want %q", tt.@in, err, verr);
             }
             break;
         }}
@@ -120,36 +124,43 @@ internal static void everySequence(@string @base, @string alpha, nint length, Ac
     }
 }
 
-internal static ж<bool> useQprint = flag.Bool("qprint"u8, false, "Compare against the 'qprint' program."u8);
+internal static ж<bool> useQprint = flag.Bool("qprint", false, "Compare against the 'qprint' program.");
 
-internal static ж<regexp.Regexp> badSoftRx = regexp.MustCompile(@"=([^\r\n]+?\n)|([^\r\n]+$)|(\r$)|(\r[^\n]+\n)|( \r\n)"u8);
+internal static ж<regexp.Regexp> badSoftRx = regexp.MustCompile(@"=([^\r\n]+?\n)|([^\r\n]+$)|(\r$)|(\r[^\n]+\n)|( \r\n)");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string qprintˢ = "qprint"u8;
-internal static readonly @string invalidBytesAfterˢ = "invalid bytes after =:"u8;
-internal static readonly @string invalidBytesAfterˢ2 = "invalid bytes after ="u8;
-internal static readonly @string invalidHexByteˢ = "invalid hex byte "u8;
-internal static readonly @string unexpectedEofˢ = "unexpected EOF"u8;
-internal static readonly @string ok30638InvalidBytesAfterˢ = """
+internal static ref readonly @string qprintˢ => ref qprintˢᵇ;
+private static readonly @string qprintˢᵇ = "qprint"u8;
+internal static ref readonly @string invalidBytesAfterˢ => ref invalidBytesAfterˢᵇ;
+private static readonly @string invalidBytesAfterˢᵇ = "invalid bytes after =:"u8;
+internal static ref readonly @string invalidBytesAfterˢ2 => ref invalidBytesAfterˢ2ᵇ;
+private static readonly @string invalidBytesAfterˢ2ᵇ = "invalid bytes after ="u8;
+internal static ref readonly @string invalidHexByteˢ => ref invalidHexByteˢᵇ;
+private static readonly @string invalidHexByteˢᵇ = "invalid hex byte "u8;
+internal static ref readonly @string unexpectedEofˢ => ref unexpectedEofˢᵇ;
+private static readonly @string unexpectedEofˢᵇ = "unexpected EOF"u8;
+internal static ref readonly @string ok30638InvalidBytesAfterˢ => ref ok30638InvalidBytesAfterˢᵇ;
+private static readonly @string ok30638InvalidBytesAfterˢᵇ = """
 OK: 30638
 invalid bytes after =: 2243
 quotedprintable: invalid hex byte 0x0d: 2050
 unexpected EOF: 194
 """u8.Raw();
-internal static readonly @string ok935InvalidBytesAfter61ˢ = """
+internal static ref readonly @string ok935InvalidBytesAfter61ˢ => ref ok935InvalidBytesAfter61ˢᵇ;
+private static readonly @string ok935InvalidBytesAfter61ˢᵇ = """
 OK: 935
 invalid bytes after =: 61
 quotedprintable: invalid hex byte 0x0d: 26
 unexpected EOF: 3
 """u8.Raw();
 
-public static void TestExhaustive(ж<testing.T> Ꮡt) {
+public static void TestExhaustive(ж<testing.T> t) {
     var outcomesᴷ = new stackAppend<@string>();
 
     if (useQprint.Value) {
         var (_, err) = exec.LookPath(qprintˢ);
-        if (err != default!) {
-            Ꮡt.Fatalf("Error looking for qprint: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Error looking for qprint: %v", err);
         }
     }
 
@@ -160,26 +171,26 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
         n = 4;
     }
     var resʗ1 = res;
-    everySequence(""u8, "0A \r\n="u8, n, [MethodImpl(MethodImplOptions.NoInlining)] (@string s) => {
-        if (strings.HasSuffix(s, "="u8) || strings.Contains(s, "=="u8)) {
+    everySequence(""u8, "0A \r\n=", n, [MethodImpl(MethodImplOptions.NoInlining)] (@string s) => {
+        if (strings.HasSuffix(s, "=") || strings.Contains(s, "==")) {
             return;
         }
         Ꮡbuf.Value.Reset();
         var (_, err) = io.Copy(new quotedprintable_test_package.strings_BuilderжWriter(Ꮡbuf), new quotedprintable_test_package.quotedprintable_ReaderжReader(NewReader(new quotedprintable_test_package.strings_ReaderжReader(strings.NewReader(s)))));
-        if (err != default!) {
+        if (err != nil) {
             @string errStr = err.Error();
             if (strings.Contains(errStr, invalidBytesAfterˢ)) {
                 errStr = invalidBytesAfterˢ2;
             }
             resʗ1[errStr]++;
             if (strings.Contains(errStr, invalidHexByteˢ)) {
-                if (strings.HasSuffix(errStr, "0x20"u8) && (strings.Contains(s, "=0 "u8) || strings.Contains(s, "=A "u8) || strings.Contains(s, "= "u8))) {
+                if (strings.HasSuffix(errStr, "0x20") && (strings.Contains(s, "=0 ") || strings.Contains(s, "=A ") || strings.Contains(s, "= "))) {
                     return;
                 }
-                if (strings.HasSuffix(errStr, "0x3d"u8) && (strings.Contains(s, "=0="u8) || strings.Contains(s, "=A="u8))) {
+                if (strings.HasSuffix(errStr, "0x3d") && (strings.Contains(s, "=0=") || strings.Contains(s, "=A="))) {
                     return;
                 }
-                if (strings.HasSuffix(errStr, "0x0a"u8) || strings.HasSuffix(errStr, "0x0d"u8)) {
+                if (strings.HasSuffix(errStr, "0x0a") || strings.HasSuffix(errStr, "0x0d")) {
                     // bunch of cases; since whitespace at the end of a line before \n is removed.
                     return;
                 }
@@ -190,14 +201,14 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
             if (errStr == "invalid bytes after ="u8 && badSoftRx.MatchString(s)) {
                 return;
             }
-            Ꮡt.Errorf("decode(%q) = %v"u8, s, err);
+            t.Errorf("decode(%q) = %v", s, err);
             return;
         }
         if (useQprint.Value) {
-            var cmd = exec.Command(qprintˢ, "-d"u8);
-            cmd.Value.Stdin = new quotedprintable_test_package.strings_ReaderжReader(strings.NewReader(s));
+            var cmd = exec.Command(qprintˢ, "-d");
+            cmd.Stdin = new quotedprintable_test_package.strings_ReaderжReader(strings.NewReader(s));
             var (stderr, errΔ1) = cmd.StderrPipe();
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 throw panic(errΔ1);
             }
             var qpres = new channel<any>(2);
@@ -206,13 +217,13 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
             var stderrʗ1 = stderr;
             goǃ(() => {
                 var br = bufio.NewReader(stderrʗ1);
-                var (sΔ1, _) = br.ReadString((rune)'\n');
+                var (sΔ1, _) = br.ReadString((byte)'\n');
                 if (sΔ1 != ""u8) {
                     qpresʗ1.ᐸꟷ(errors.New(sΔ1));
-                    if ((~cmdʗ1).Process != nil) {
+                    if (cmdʗ1.Process != nil) {
                         // It can get stuck on invalid input, like:
                         // echo -n "0000= " | qprint -d
-                        (~cmdʗ1).Process.Kill();
+                        cmdʗ1.Process.Kill();
                     }
                 }
             });
@@ -220,7 +231,7 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
             var qpresʗ2 = qpres;
             goǃ(() => {
                 var (wantΔ1, errΔ2) = cmdʗ2.Output();
-                if (errΔ2 == default!) {
+                if (errΔ2 == nil) {
                     qpresʗ2.ᐸꟷ(wantΔ1);
                 }
             });
@@ -229,36 +240,36 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
             switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out var gotΔ1): {
                 {
-                    var (wantΔ2, ok) = gotΔ1._<slice<byte>>(ᐧ); if (ok){
+                    var (wantΔ2, ok) = gotΔ1._<slice<byte>>(ᐧ); if (ok) {
                         if (((@string)wantΔ2) != Ꮡbuf.Value.String()) {
-                            Ꮡt.Errorf("go decode(%q) = %q; qprint = %q"u8, s, wantΔ2, Ꮡbuf.Value.String());
+                            t.Errorf("go decode(%q) = %q; qprint = %q", s, wantΔ2, Ꮡbuf.Value.String());
                         }
                     } else {
-                        Ꮡt.Logf("qprint -d(%q) = %v"u8, s, gotΔ1);
+                        t.Logf("qprint -d(%q) = %v", s, gotΔ1);
                     }
                 }
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {
-                Ꮡt.Logf("qprint timeout on %q"u8, s);
+                t.Logf("qprint timeout on %q", s);
                 break;
             }}
         }
-        resʗ1["OK"u8]++;
+        resʗ1["OK"]++;
     });
-    slice<@string> outcomes = default!;
+    slice<@string> outcomes = default;
     foreach (var (k, v) in res) {
         outcomes = append(outcomesᴷ, outcomes, fmt.Sprintf("%v: %d"u8, k, v));
     }
     slices.Sort<slice<@string>, @string>(outcomes);
-    @string got = strings.Join(outcomes, "\n"u8);
+    @string got = strings.Join(outcomes, "\n");
     @string want = ok30638InvalidBytesAfterˢ;
     if (testing.Short()) {
         want = ok935InvalidBytesAfter61ˢ;
     }
 
     if (got != want) {
-        Ꮡt.Errorf("Got:\n%s\nWant:\n%s"u8, got, want);
+        t.Errorf("Got:\n%s\nWant:\n%s", got, want);
     }
 }
 

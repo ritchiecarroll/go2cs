@@ -71,7 +71,7 @@ call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift nam
 (mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
 argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
 `liftedTypeMap`:
-<!-- source: src/core/go/internal/gccgoimporter/parser.cs:522-525, 545 -->
+<!-- source: src/core/go/internal/gccgoimporter/parser.cs:537-540, 560 -->
 ```csharp
 partial struct reservedᴛ1 /*dyn*/ {
     /*embed*/ public global::go.go.types_package.ΔType Type;
@@ -239,10 +239,10 @@ The converter scans the build-selected in-package `_test.go` files for the ident
 the address of and folds them into the addressed-global set, so the production declaration carries
 the box:
 
-<!-- source: src/core/path/filepath/linux/path.cs:315-316 -->
+<!-- source: src/core/path/filepath/linux/path.cs:314-315 -->
 ```csharp
 internal static readonly ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
-internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot;                   // for testing
+internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox<Func<@string, (fs.FileInfo, error)>>)Ꮡlstat).ValueSlot; // for testing
 ```
 
 Three properties make this the right shape rather than a `-tests`-only patch:
@@ -518,7 +518,7 @@ records an interface pair from a type's *use*, and that use can be entirely impl
 os/signal's test does `cmd.Stdout = &buf`, whose os/exec field type is `io.Writer`, so
 `package_test_info.cs` carries
 
-<!-- source: src/core/flag/package_test_info.cs:45 -->
+<!-- source: src/core/flag/package_test_info.cs:27 -->
 ```csharp
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 ```
@@ -1100,7 +1100,7 @@ type Config struct {
     Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
 }
 ```
-<!-- source: src/core/testing/quick/quick.cs:230 -->
+<!-- source: src/core/testing/quick/quick.cs:251 -->
 ```csharp
 public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
 ```

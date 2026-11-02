@@ -15,30 +15,30 @@ internal partial struct TestFinderNext_testCases /*dyn*/ {
     internal nint index;
 }
 
-public static void TestFinderNext(ж<testing.T> Ꮡt) {
-    var testCases = new TestFinderNext_testCases[]{
-        new(""u8, ""u8, 0),
-        new(""u8, "abc"u8, 0),
-        new("abc"u8, ""u8, -1),
-        new("abc"u8, "abc"u8, 0),
-        new("d"u8, "abcdefg"u8, 3),
-        new("nan"u8, "banana"u8, 2),
-        new("pan"u8, "anpanman"u8, 2),
-        new("nnaaman"u8, "anpanmanam"u8, -1),
-        new("abcd"u8, "abc"u8, -1),
-        new("abcd"u8, "bcd"u8, -1),
-        new("bcd"u8, "abcd"u8, 1),
-        new("abc"u8, "acca"u8, -1),
-        new("aa"u8, "aaa"u8, 0),
-        new("baa"u8, "aaaaa"u8, -1),
-        new("at that"u8, "which finally halts.  at that point"u8, 22)
-    }.slice();
+public static void TestFinderNext(ж<testing.T> t) {
+    var testCases = slice<TestFinderNext_testCases>([
+        new("", "", 0),
+        new("", "abc", 0),
+        new("abc", "", -1),
+        new("abc", "abc", 0),
+        new("d", "abcdefg", 3),
+        new("nan", "banana", 2),
+        new("pan", "anpanman", 2),
+        new("nnaaman", "anpanmanam", -1),
+        new("abcd", "abc", -1),
+        new("abcd", "bcd", -1),
+        new("bcd", "abcd", 1),
+        new("abc", "acca", -1),
+        new("aa", "aaa", 0),
+        new("baa", "aaaaa", -1),
+        new("at that", "which finally halts.  at that point", 22)
+    ]);
 
     foreach (var (_, tc) in testCases) {
         nint got = strings_internal_test_package.StringFind(tc.pat, tc.text);
         nint want = tc.index;
         if (got != want) {
-            Ꮡt.Errorf("stringFind(%q, %q) got %d, want %d\n"u8, tc.pat, tc.text, got, want);
+            t.Errorf("stringFind(%q, %q) got %d, want %d\n", tc.pat, tc.text, got, want);
         }
     }
 }
@@ -49,30 +49,30 @@ internal partial struct TestFinderCreation_testCases /*dyn*/ {
     internal slice<nint> suf;
 }
 
-public static void TestFinderCreation(ж<testing.T> Ꮡt) {
-    var testCases = new TestFinderCreation_testCases[]{
+public static void TestFinderCreation(ж<testing.T> t) {
+    var testCases = slice<TestFinderCreation_testCases>([
         new(
-            "abc"u8,
-            new array<nint>(256){[(rune)'a'] = 2, [(rune)'b'] = 1, [(rune)'c'] = 3},
-            new nint[]{5, 4, 1}.slice()
+            "abc",
+            new array<nint>(256){['a'] = 2, ['b'] = 1, ['c'] = 3},
+            slice<nint>([5, 4, 1])
         ),
         new(
-            "mississi"u8,
-            new array<nint>(256){[(rune)'i'] = 3, [(rune)'m'] = 7, [(rune)'s'] = 1},
-            new nint[]{15, 14, 13, 7, 11, 10, 7, 1}.slice()
+            "mississi",
+            new array<nint>(256){['i'] = 3, ['m'] = 7, ['s'] = 1},
+            slice<nint>([15, 14, 13, 7, 11, 10, 7, 1])
         ),
         // From https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf
         new(
-            "abcxxxabc"u8,
-            new array<nint>(256){[(rune)'a'] = 2, [(rune)'b'] = 1, [(rune)'c'] = 6, [(rune)'x'] = 3},
-            new nint[]{14, 13, 12, 11, 10, 9, 11, 10, 1}.slice()
+            "abcxxxabc",
+            new array<nint>(256){['a'] = 2, ['b'] = 1, ['c'] = 6, ['x'] = 3},
+            slice<nint>([14, 13, 12, 11, 10, 9, 11, 10, 1])
         ),
         new(
-            "abyxcdeyx"u8,
-            new array<nint>(256){[(rune)'a'] = 8, [(rune)'b'] = 7, [(rune)'c'] = 4, [(rune)'d'] = 3, [(rune)'e'] = 2, [(rune)'y'] = 1, [(rune)'x'] = 5},
-            new nint[]{17, 16, 15, 14, 13, 12, 7, 10, 1}.slice()
+            "abyxcdeyx",
+            new array<nint>(256){['a'] = 8, ['b'] = 7, ['c'] = 4, ['d'] = 3, ['e'] = 2, ['y'] = 1, ['x'] = 5},
+            slice<nint>([17, 16, 15, 14, 13, 12, 7, 10, 1])
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in testCases) {
         var tc = vᴛ1.ΔClone();
@@ -85,12 +85,12 @@ public static void TestFinderCreation(ж<testing.T> Ꮡt) {
                 want = len(tc.pattern);
             }
             if (got != want) {
-                Ꮡt.Errorf("boyerMoore(%q) bad['%c']: got %d want %d"u8, tc.pattern, i, got, want);
+                t.Errorf("boyerMoore(%q) bad['%c']: got %d want %d", tc.pattern, i, got, want);
             }
         }
 
         if (!slices.Equal<slice<nint>, nint>(good, tc.suf)) {
-            Ꮡt.Errorf("boyerMoore(%q) got %v want %v"u8, tc.pattern, good, tc.suf);
+            t.Errorf("boyerMoore(%q) got %v want %v", tc.pattern, good, tc.suf);
         }
     }
 }

@@ -71,7 +71,32 @@
     <!-- Opt-in for Ubuntu's packaged .NET 10, where on-stack replacement can end a program early (0x80131506 or a silent
          exit 0); costs about 90 ms of startup; becomes the default if a converted program reproduces it. https://github.com/ritchiecarroll/go2cs/blob/master/docs/KnownIssues.md -->
     <!-- <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops> -->
+    <!-- Count calls from the start: .NET otherwise waits until about 100 ms pass with no new method compiled, so a short
+         busy phase runs the standard library's small functions unoptimized. Another value is a delay in milliseconds;
+         `runtime` keeps .NET's own default. https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md -->
+    <GoCallCountingDelayMs Condition="'$(GoCallCountingDelayMs)'==''">0</GoCallCountingDelayMs>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(OutputType)'!='Library' AND '$(GoCallCountingDelayMs)'!='runtime'">
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.CallCountingDelayMs" Value="$(GoCallCountingDelayMs)" />
+  </ItemGroup>
+
+  <!-- ReadyToRun compiles each assembly on its own: code in one cannot inline a call into another, and a loop entered
+       once never leaves its ReadyToRun code. So golib and the standard library keep ReadyToRun, where start time is
+       won, and the program's own code (this project and every project it references from outside $(go2csPath)core)
+       is compiled as it runs, so a hot loop is optimized across its calls into the standard library.
+       GoReadyToRunUserCode=true compiles it ahead of time too. https://github.com/ritchiecarroll/go2cs/blob/master/docs/Tuning.md -->
+  <Target Name="GoKeepOwnCodeOutOfReadyToRun" BeforeTargets="_PrepareForReadyToRunCompilation" DependsOnTargets="_ComputeAssembliesToPostprocessOnPublish"
+          Condition="'$(OutputType)'!='Library' AND '$(GoReadyToRunUserCode)'!='true'">
+    <PropertyGroup>
+      <_GoCoreRoot>$([System.IO.Path]::GetFullPath('$(go2csPath)core/').ToLowerInvariant())</_GoCoreRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <PublishReadyToRunExclude Include="$(AssemblyName).dll" />
+      <PublishReadyToRunExclude Include="%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)"
+                                Condition="'%(ResolvedFileToPublish.ReferenceSourceTarget)'=='ProjectReference' AND '%(ResolvedFileToPublish.Extension)'=='.dll' AND !$([System.String]::Copy('%(ResolvedFileToPublish.MSBuildSourceProjectFile)').ToLowerInvariant().StartsWith('$(_GoCoreRoot)'))" />
+    </ItemGroup>
+  </Target>
 
   <PropertyGroup>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>

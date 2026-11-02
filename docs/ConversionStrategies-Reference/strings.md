@@ -176,7 +176,7 @@ But neither is more specific than the other.
 %[2]s matches %[5]q, but %[1]s doesn't.`,
 	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
 ```
-<!-- source: src/core/net/http/pattern.cs:453-459 -->
+<!-- source: src/core/net/http/pattern.cs:472-478 -->
 ```csharp
         return fmt.Sprintf("""
 %[1]s and %[2]s both match some paths, like %[3]q.
@@ -184,7 +184,7 @@ But neither is more specific than the other.
 %[1]s matches %[4]q, but %[2]s doesn't.
 %[2]s matches %[5]q, but %[1]s doesn't.
 """u8.Raw(),
-            Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
+            Ꮡp1.OrTypedNil(), p2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (p2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (p2).DerefOrNull()), differencePath(ref (p2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
 ```
 
 `Raw()` exists because of line endings. A Go raw string never holds a carriage return: the Go compiler drops every CR between the backquotes. C# instead takes a raw literal's line breaks from the source file, and `.gitattributes` pins every `*.cs` to `eol=crlf`, so every checkout gives the literal CRLF. Without `Raw()`, a build of the checked-out file holds `\r\n` where Go holds `\n`, and its length, bytes, comparisons and hashes all differ. A published package and a plain `dotnet build` both compile that checked-out form. `Raw()` (golib `string.cs`) removes every CR, which is exactly Go's rule, so the value is the same on any checkout.
@@ -238,11 +238,13 @@ func FormatBool(b bool) string {
 	return "false"
 }
 ```
-<!-- source: src/core/internal/strconv/atob.cs:22-32 -->
+<!-- source: src/core/internal/strconv/atob.cs:23-35 -->
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string trueˢ = "true"u8;
-internal static readonly @string falseˢ = "false"u8;
+internal static ref readonly @string trueˢ => ref trueˢᵇ;
+private static readonly @string trueˢᵇ = "true"u8;
+internal static ref readonly @string falseˢ => ref falseˢᵇ;
+private static readonly @string falseˢᵇ = "false"u8;
 
 // FormatBool returns "true" or "false" according to the value of b.
 public static @string FormatBool(bool b) {
@@ -311,10 +313,11 @@ func Atoi(s string) (int, error) {
 	…
 }
 ```
-<!-- source: src/core/internal/strconv/atoi.cs:254-259, 269 -->
+<!-- source: src/core/internal/strconv/atoi.cs:260-266, 276 -->
 ```csharp
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string fnAtoiᶜ = "Atoi"u8;
+internal static ref readonly @string fnAtoiᶜ => ref fnAtoiᶜᵇ;
+private static readonly @string fnAtoiᶜᵇ = "Atoi"u8;
 
 // Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
 public static (nint, error) Atoi(@string s) {
@@ -411,7 +414,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 - **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
-  <!-- source: src/core/fmt/print.cs:256-264 -->
+  <!-- source: src/core/fmt/print.cs:272-280 -->
   ```csharp
   public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
       …
@@ -451,7 +454,7 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 
-<!-- source: src/core/fmt/package_info.cs:61-69 -->
+<!-- source: src/core/fmt/package_info.cs:53-61 -->
 ```csharp
 // <SStringTwins>
 …

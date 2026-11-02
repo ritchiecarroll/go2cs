@@ -27,7 +27,8 @@ internal static void directCycles(this ж<Checker> Ꮡcheck) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkDirectCycleForSˢ = "-- check direct cycle for %s"u8;
+internal static ref readonly @string checkDirectCycleForSˢ => ref checkDirectCycleForSˢᵇ;
+private static readonly @string checkDirectCycleForSˢᵇ = "-- check direct cycle for %s"u8;
 
 // directCycle checks if the declaration of the type given by tname contains a direct cycle.
 // A direct cycle exists if the path from tname's declaration's RHS leads from type name to
@@ -54,12 +55,12 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
     var cycleᴷ = new stackAppend<Object>();
     var pathᴷ = new stackAppend<ж<TypeName>>();
 
-    if (debug && (~check.conf)._Trace) {
+    if (debug && check.conf._Trace) {
         Ꮡcheck.trace(Ꮡtname.of(TypeName.Ꮡobject).Pos(), checkDirectCycleForSˢ, Ꮡtname.OrTypedNil());
     }
 
-    slice<ж<TypeName>> path = default!;
-    while (ᐧ) {
+    slice<ж<TypeName>> path = default;
+    for (;;) {
         var (start, found) = pathIdx[Ꮡtname, ꟷ];
         if (start < 0) {
             // tname is marked black - do not traverse it again.
@@ -73,7 +74,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
             Ꮡtname.of(TypeName.Ꮡobject).setType(new BasicжΔType(Typ[Invalid]));
 
             // collect type names on cycle
-            slice<Object> cycle = default!;
+            slice<Object> cycle = default;
             foreach (var (_, tnameΔ1) in path.slice(start)) {
                 cycle = append(cycleᴷ, cycle, (Object)(new TypeNameжObject(tnameΔ1)));
             }
@@ -88,7 +89,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
 
         // For direct cycle detection, we don't care about whether we have an alias or not.
         // If the associated type is not a name, we're at the end of the path and we're done.
-        var (rhs, ok) = (~(~check.objMap[new TypeNameжObject(Ꮡtname)]).tdecl).Type._<ж<ast.Ident>>(ᐧ);
+        var (rhs, ok) = check.objMap[new TypeNameжObject(Ꮡtname)].tdecl.Type._<ж<ast.Ident>>(ᐧ);
         if (!ok) {
             break;
         }
@@ -98,7 +99,7 @@ internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtnam
         // (universe scope, file scope via dot-import) and a cycle is not possible in
         // the first place. If it is not a type name, we cannot have a direct cycle
         // either. In all these cases we can stop.
-        (var tname1, ok) = (~check.pkg).scope.Lookup((~rhs).Name)._<ж<TypeName>>(ᐧ);
+        (var tname1, ok) = check.pkg.scope.Lookup(rhs.Name)._<ж<TypeName>>(ᐧ);
         if (!ok) {
             break;
         }
@@ -131,28 +132,28 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
         switch (Unalias(t).type()) {
         case ж<Named> tΔ1: {
             if (tΔ1.stateHas(hasFinite)) {
-                return (~tΔ1).finite;
+                return tΔ1.finite;
             }
 
             {
-                var (i, ok) = check.objPathIdx[new TypeNameжObject((~tΔ1).obj), ꟷ]; if (ok) {
+                var (i, ok) = check.objPathIdx[new TypeNameжObject(tΔ1.obj), ꟷ]; if (ok) {
                     var cycle = check.objPath.slice(i);
                     Ꮡcheck.cycleError(cycle, firstInSrc(cycle));
                     return false;
                 }
             }
-            check.push(new TypeNameжObject((~tΔ1).obj));
+            check.push(new TypeNameжObject(tΔ1.obj));
             defer(Ꮡcheck.pop, ref ᒐ);
 
-            var isFinite = Ꮡcheck.finiteSize((~tΔ1).fromRHS);
+            var isFinite = Ꮡcheck.finiteSize(tΔ1.fromRHS);
 
-            tΔ1.of(Named.Ꮡmu).Lock();
-            defer(tΔ1.of(Named.Ꮡmu).Unlock, ref ᒐ);
+            tΔ1.Ꮡmu.Lock();
+            defer(tΔ1.Ꮡmu.Unlock, ref ᒐ);
             // Careful, t.finite has lock-free readers. Since we might be racing
             // another call to finiteSize, we have to avoid overwriting t.finite.
             // Otherwise, the race detector will be tripped.
             if (!tΔ1.stateHas(hasFinite)) {
-                tΔ1.Value.finite = isFinite;
+                tΔ1.finite = isFinite;
                 tΔ1.setState(hasFinite);
             }
 
@@ -161,11 +162,11 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
         case ж<Array> tΔ1: {
             // The array length is already computed. If it was a valid length, it
             // is finite; else, an error was reported in the computation.
-            return Ꮡcheck.finiteSize((~tΔ1).elem);
+            return Ꮡcheck.finiteSize(tΔ1.elem);
         }
         case ж<Struct> tΔ1: {
-            foreach (var (_, f) in (~tΔ1).fields) {
-                if (!Ꮡcheck.finiteSize((~f).typ)) {
+            foreach (var (_, f) in tΔ1.fields) {
+                if (!Ꮡcheck.finiteSize(f.typ)) {
                     return false;
                 }
             }
@@ -174,7 +175,7 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
 
         return true;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

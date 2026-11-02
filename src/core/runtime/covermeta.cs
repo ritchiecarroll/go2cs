@@ -10,7 +10,8 @@ using @internal.coverage;
 partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeAddCovMetaˢ = "runtime.addCovMeta: coverage package map collision"u8;
+internal static ref readonly @string runtimeAddCovMetaˢ => ref runtimeAddCovMetaˢᵇ;
+private static readonly @string runtimeAddCovMetaˢᵇ = "runtime.addCovMeta: coverage package map collision"u8;
 
 // The compiler emits calls to runtime.addCovMeta
 // but this code has moved to rtcov.AddMeta.

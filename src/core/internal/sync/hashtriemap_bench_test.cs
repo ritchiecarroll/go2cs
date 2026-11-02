@@ -11,16 +11,16 @@ using sync = go.@internal.sync_package;
 
 partial class sync_test_package {
 
-public static void BenchmarkHashTrieMapLoadSmall(ж<testing.B> Ꮡb) {
-    benchmarkHashTrieMapLoad(Ꮡb, testDataSmall[..]);
+public static void BenchmarkHashTrieMapLoadSmall(ж<testing.B> b) {
+    benchmarkHashTrieMapLoad(b, testDataSmall[..]);
 }
 
-public static void BenchmarkHashTrieMapLoad(ж<testing.B> Ꮡb) {
-    benchmarkHashTrieMapLoad(Ꮡb, testData[..]);
+public static void BenchmarkHashTrieMapLoad(ж<testing.B> b) {
+    benchmarkHashTrieMapLoad(b, testData[..]);
 }
 
-public static void BenchmarkHashTrieMapLoadLarge(ж<testing.B> Ꮡb) {
-    benchmarkHashTrieMapLoad(Ꮡb, testDataLarge[..]);
+public static void BenchmarkHashTrieMapLoadLarge(ж<testing.B> b) {
+    benchmarkHashTrieMapLoad(b, testDataLarge[..]);
 }
 
 internal static void benchmarkHashTrieMapLoad(ж<testing.B> Ꮡb, slice<@string> data) {
@@ -45,12 +45,12 @@ internal static void benchmarkHashTrieMapLoad(ж<testing.B> Ꮡb, slice<@string>
     });
 }
 
-public static void BenchmarkHashTrieMapLoadOrStore(ж<testing.B> Ꮡb) {
-    benchmarkHashTrieMapLoadOrStore(Ꮡb, testData[..]);
+public static void BenchmarkHashTrieMapLoadOrStore(ж<testing.B> b) {
+    benchmarkHashTrieMapLoadOrStore(b, testData[..]);
 }
 
-public static void BenchmarkHashTrieMapLoadOrStoreLarge(ж<testing.B> Ꮡb) {
-    benchmarkHashTrieMapLoadOrStore(Ꮡb, testDataLarge[..]);
+public static void BenchmarkHashTrieMapLoadOrStoreLarge(ж<testing.B> b) {
+    benchmarkHashTrieMapLoadOrStore(b, testDataLarge[..]);
 }
 
 internal static void benchmarkHashTrieMapLoadOrStore(ж<testing.B> Ꮡb, slice<@string> data) {

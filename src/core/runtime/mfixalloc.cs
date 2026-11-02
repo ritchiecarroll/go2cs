@@ -10,7 +10,6 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(mlink))]
 partial class runtime_package {
 
 // fixalloc is a simple free-list allocator for fixed size objects.
@@ -30,12 +29,12 @@ partial class runtime_package {
 // internal/runtime/sys.NotInHeap.
 partial struct fixalloc {
     internal uintptr size;
-    internal Action<@unsafe.Pointer, @unsafe.Pointer> first;   // called first time p is returned
+    internal Action<@unsafe.Pointer, @unsafe.Pointer> first; // called first time p is returned
     internal @unsafe.Pointer arg;
     internal ж<mlink> list;
     internal uintptr chunk; // use uintptr instead of unsafe.Pointer to avoid write barriers
-    internal uint32 nchunk;  // bytes remaining in current chunk
-    internal uint32 nalloc;  // size of new chunks in bytes
+    internal uint32 nchunk; // bytes remaining in current chunk
+    internal uint32 nalloc; // size of new chunks in bytes
     internal uintptr inuse; // in-use bytes now
     internal ж<sysMemStat> stat;
     internal bool zero; // zero allocations
@@ -52,7 +51,8 @@ partial struct mlink {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeFixallocSizeTooˢ = "runtime: fixalloc size too large"u8;
+internal static ref readonly @string runtimeFixallocSizeTooˢ => ref runtimeFixallocSizeTooˢᵇ;
+private static readonly @string runtimeFixallocSizeTooˢᵇ = "runtime: fixalloc size too large"u8;
 
 // Initialize f to allocate objects of the given size,
 // using the allocator to obtain chunks of memory.
@@ -67,7 +67,7 @@ internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Poin
     f.size = size;
     f.first = first;
     f.arg = arg;
-    f.list = default!;
+    f.list = default;
     f.chunk = 0;
     f.nchunk = 0;
     f.nalloc = (uint32)((uintptr)_FixAllocChunk / size * size); // Round _FixAllocChunk down to an exact multiple of size to eliminate tail waste
@@ -77,17 +77,18 @@ internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Poin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeInternalErrorˢ = "runtime: internal error"u8;
+internal static ref readonly @string runtimeInternalErrorˢ => ref runtimeInternalErrorˢᵇ;
+private static readonly @string runtimeInternalErrorˢᵇ = "runtime: internal error"u8;
 
 internal static @unsafe.Pointer alloc(this ref fixalloc f) {
     if (f.size == 0) {
-        print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n"u8);
+        print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n");
         @throw(runtimeInternalErrorˢ);
     }
 
     if (f.list != nil) {
         @unsafe.Pointer vΔ1 = @unsafe.Pointer.FromPinnedBox(f.list);
-        f.list = f.list.Value.next;
+        f.list = f.list.next;
         f.inuse += f.size;
         if (f.zero) {
             memclrNoHeapPointers(vΔ1, f.size);
@@ -100,7 +101,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
     }
 
     @unsafe.Pointer v = (@unsafe.Pointer)f.chunk;
-    if (f.first != default!) {
+    if (f.first != nil) {
         f.first(f.arg, v);
     }
     f.chunk = f.chunk + f.size;

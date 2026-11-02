@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +46,7 @@ using static go.@internal.testhash_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,7 +56,7 @@ using static go.@internal.testhash_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/testhash/hash.go", "hash.cs", "ABUooqaCgoKUgoKUgoKCgpSCgpSCgoKCgpSClIKClIIACwqUgoKUgoKCpqaClKaCuICCyICS7IKClIKCgqaUgriCgpSmgoKCgpSCyoKCgpSCgoKUpoKkgoKUgpSCyoKClIKCpoKClKaCpoLMkpSClIKCpoK6kpSClIKmgqamgoKC", "24-60:1;65-98:1;101-116:2;118-134:3;137-163:4;166-189:5")]
+[assembly: GoPositionMap("internal/testhash/hash.go", "hash.cs", "ABYooqaCgoKUgoKUgoKCgpSCgpSCgoKCgpSClIKClIIAEAqUgoKUgoKCpqaClKaCuICCyICS7IKClIKCgqaUgriCgpSmgoKCgpSCyoKCgpSCgoKUpoKkgoKUgpSCyoKClIKCpoKClKaCpoLMkpSClIKCpoK6kpSClIKmgqamgoKC", "24-60:1;65-98:1;101-116:2;118-134:3;137-163:4;166-189:5")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

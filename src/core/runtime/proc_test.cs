@@ -41,7 +41,7 @@ internal static partial void perpetuumMobile() {
         break;
     }
     default: {
-        goǃ(perpetuumMobile);
+        goǃ(perpetuumMobile, GoStack.Bounded);
         break;
     }}
 }
@@ -50,12 +50,12 @@ internal static partial void perpetuumMobile() {
 internal static readonly object noPreemptionOnWasmYetˢ = (@string)"no preemption on wasm yet"u8;
 internal static readonly object skippingDuringShortTestˢ = (@string)"skipping during short test"u8;
 
-public static partial void TestStopTheWorldDeadlock(ж<testing.T> Ꮡt) {
+public static partial void TestStopTheWorldDeadlock(ж<testing.T> t) {
     if (Δruntime.GOARCH == "wasm"u8) {
-        Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+        t.Skip(noPreemptionOnWasmYetˢ);
     }
     if (testing.Short()) {
-        Ꮡt.Skip(skippingDuringShortTestˢ);
+        t.Skip(skippingDuringShortTestˢ);
     }
     nint maxprocs = Δruntime.GOMAXPROCS(3);
     var compl = new channel<bool>(2);
@@ -73,18 +73,18 @@ public static partial void TestStopTheWorldDeadlock(ж<testing.T> Ꮡt) {
         }
         complʗ2.ᐸꟷ(true);
     });
-    goǃ(perpetuumMobile);
+    goǃ(perpetuumMobile, GoStack.Bounded);
     ᐸꟷ(compl);
     ᐸꟷ(compl);
     stop.ᐸꟷ(true);
     Δruntime.GOMAXPROCS(maxprocs);
 }
 
-public static void TestYieldProgress(ж<testing.T> Ꮡt) {
+public static void TestYieldProgress(ж<testing.T> t) {
     testYieldProgress(false);
 }
 
-public static void TestYieldLockedProgress(ж<testing.T> Ꮡt) {
+public static void TestYieldLockedProgress(ж<testing.T> t) {
     testYieldProgress(true);
 }
 
@@ -97,7 +97,7 @@ internal static partial void testYieldProgress(bool locked) {
         if (locked) {
             Δruntime.LockOSThread();
         }
-        while (ᐧ) {
+        for (;;) {
             var selᴛ82 = cʗ1;
             switch (trySelect(ᐸꟷ(selᴛ82, ꓸꓸꓸ))) {
             case 0 when selᴛ82.ꟷᐳ(out _): {
@@ -115,7 +115,7 @@ internal static partial void testYieldProgress(bool locked) {
     ᐸꟷ(cack);
 }
 
-public static partial void TestYieldLocked(ж<testing.T> Ꮡt) {
+public static partial void TestYieldLocked(ж<testing.T> t) {
     const nint N = 10;
     var c = new channel<bool>(0);
     var cʗ1 = c;
@@ -134,12 +134,12 @@ public static partial void TestYieldLocked(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnUniprocessorˢ = (@string)"skipping on uniprocessor"u8;
 
-public static partial void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
+public static partial void TestGoroutineParallelism(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.NumCPU() == 1) {
             // Takes too long, too easy to deadlock, etc.
-            Ꮡt.Skip(skippingOnUniprocessorˢ);
+            t.Skip(skippingOnUniprocessorˢ);
         }
         nint P = 4;
         nint N = 10;
@@ -158,8 +158,7 @@ public static partial void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
         Δruntime.GC();
         for (nint @try = 0; @try < N; @try++) {
             var done = new channel<bool>(0);
-            ref var x = ref heap<uint32>(out var Ꮡx);
-            x = (uint32)0;
+            ref var x = ref heap<uint32>((uint32)0, out var Ꮡx);
             for (nint p = 0; p < P; p++) {
                 // Test that all P goroutines are scheduled at the same time
                 var doneʗ1 = done;
@@ -171,7 +170,7 @@ public static partial void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
                         atomic.StoreUint32(Ꮡx, expected + 1);
                     }
                     doneʗ1.ᐸꟷ(true);
-                }, p);
+                }, p, GoStack.Bounded);
             }
             for (nint p = 0; p < P; p++) {
                 ᐸꟷ(done);
@@ -183,23 +182,25 @@ public static partial void TestGoroutineParallelism(ж<testing.T> Ꮡt) {
 }
 
 // Test that all runnable goroutines are scheduled at the same time.
-public static void TestGoroutineParallelism2(ж<testing.T> Ꮡt) {
+public static void TestGoroutineParallelism2(ж<testing.T> t) {
     //testGoroutineParallelism2(t, false, false)
-    testGoroutineParallelism2(Ꮡt, true, false);
-    testGoroutineParallelism2(Ꮡt, false, true);
-    testGoroutineParallelism2(Ꮡt, true, true);
+    testGoroutineParallelism2(t, true, false);
+    testGoroutineParallelism2(t, false, true);
+    testGoroutineParallelism2(t, true, true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string localhost0ˢ = "localhost:0"u8;
-internal static readonly @string tcpˢ = "tcp"u8;
+internal static ref readonly @string localhost0ˢ => ref localhost0ˢᵇ;
+private static readonly @string localhost0ˢᵇ = "localhost:0"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
-internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool load, bool netpoll) {
+internal static partial void testGoroutineParallelism2(ж<testing.T> t, bool load, bool netpoll) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.NumCPU() == 1) {
             // Takes too long, too easy to deadlock, etc.
-            Ꮡt.Skip(skippingOnUniprocessorˢ);
+            t.Skip(skippingOnUniprocessorˢ);
         }
         nint P = 4;
         nint N = 10;
@@ -221,8 +222,7 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool 
                 // When we run the actual test below, worker threads
                 // running the goroutines will start parking.
                 var doneΔ1 = new channel<bool>(0);
-                ref var xΔ1 = ref heap<uint32>(out var ᏑxΔ1);
-                xΔ1 = (uint32)0;
+                ref var xΔ1 = ref heap<uint32>((uint32)0, out var ᏑxΔ1);
                 for (nint p = 0; p < P; p++) {
                     var doneʗ1 = doneΔ1;
                     goǃ(() => {
@@ -232,7 +232,7 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool 
                         }
                         while (atomic.LoadUint32(ᏑxΔ1) != (uint32)P) {
                         }
-                    });
+                    }, GoStack.Bounded);
                 }
                 ᐸꟷ(doneΔ1);
             }
@@ -243,17 +243,16 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool 
                     // On some Android devices, there are no records for localhost,
                     // see https://golang.org/issues/14486.
                     // Don't use 127.0.0.1 for every case, it won't work on IPv6-only systems.
-                    laddr = "127.0.0.1:0"u8;
+                    laddr = "127.0.0.1:0";
                 }
                 var (ln, err) = Δnet.Listen(tcpˢ, laddr);
-                if (err == default!) {
+                if (err == nil) {
                     var lnʗ1 = ln;
                     defer(() => lnʗ1.Close(), ref ᒐ); // yup, defer in a loop
                 }
             }
             var done = new channel<bool>(0);
-            ref var x = ref heap<uint32>(out var Ꮡx);
-            x = (uint32)0;
+            ref var x = ref heap<uint32>((uint32)0, out var Ꮡx);
             // Spawn P goroutines in a nested fashion just to differ from TestGoroutineParallelism.
             for (nint p = 0; p < P / 2; p++) {
                 var doneʗ2 = done;
@@ -268,9 +267,9 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool 
                                 atomic.StoreUint32(Ꮡx, expected + 1);
                             }
                             doneʗ3.ᐸꟷ(true);
-                        }, p2);
+                        }, p2, GoStack.Bounded);
                     }
-                }, p);
+                }, p, GoStack.Bounded);
             }
             for (nint p = 0; p < P; p++) {
                 ᐸꟷ(done);
@@ -281,7 +280,7 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> Ꮡt, bool 
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestBlockLocked(ж<testing.T> Ꮡt) {
+public static partial void TestBlockLocked(ж<testing.T> t) {
     const nint N = 10;
     var c = new channel<bool>(0);
     var cʗ1 = c;
@@ -297,9 +296,9 @@ public static partial void TestBlockLocked(ж<testing.T> Ꮡt) {
     }
 }
 
-public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
+public static partial void TestTimerFairness(ж<testing.T> t) {
     if (Δruntime.GOARCH == "wasm"u8) {
-        Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+        t.Skip(noPreemptionOnWasmYetˢ);
     }
 
     var done = new channel<bool>(0);
@@ -308,7 +307,7 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
         var cʗ1 = c;
         var doneʗ1 = done;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 var selᴛ83 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
                 var selᴛ84 = doneʗ1;
                 switch (select(selᴛ83, ᐸꟷ(selᴛ84, ꓸꓸꓸ))) {
@@ -319,11 +318,11 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
                     return;
                 }}
             }
-        });
+        }, GoStack.Bounded);
     }
 
     var timer = time.After(20 * time.Millisecond);
-    while (ᐧ) {
+    for (;;) {
         var selᴛ85 = c;
         var selᴛ86 = timer;
         switch (select(ᐸꟷ(selᴛ85, ꓸꓸꓸ), ᐸꟷ(selᴛ86, ꓸꓸꓸ))) {
@@ -337,9 +336,9 @@ public static partial void TestTimerFairness(ж<testing.T> Ꮡt) {
     }
 }
 
-public static partial void TestTimerFairness2(ж<testing.T> Ꮡt) {
+public static partial void TestTimerFairness2(ж<testing.T> t) {
     if (Δruntime.GOARCH == "wasm"u8) {
-        Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+        t.Skip(noPreemptionOnWasmYetˢ);
     }
 
     var done = new channel<bool>(0);
@@ -350,7 +349,7 @@ public static partial void TestTimerFairness2(ж<testing.T> Ꮡt) {
         goǃ(() => {
             var timer = time.After(20 * time.Millisecond);
             ref var buf = ref heap(new array<byte>(1), out var Ꮡbuf);
-            while (ᐧ) {
+            for (;;) {
                 syscall.Read(0, buf[0..0]);
                 var selᴛ87 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
                 var selᴛ88 = cʗ1;
@@ -384,9 +383,9 @@ internal static Func<nint> preempt = () => {
     return sum;
 };
 
-public static partial void TestPreemption(ж<testing.T> Ꮡt) {
+public static partial void TestPreemption(ж<testing.T> t) {
     if (Δruntime.GOARCH == "wasm"u8) {
-        Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+        t.Skip(noPreemptionOnWasmYetˢ);
     }
 
     // Test that goroutines are preempted at function calls.
@@ -412,11 +411,11 @@ public static partial void TestPreemption(ж<testing.T> Ꮡt) {
     ᐸꟷ(c);
 }
 
-public static partial void TestPreemptionGC(ж<testing.T> Ꮡt) {
+public static partial void TestPreemptionGC(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH == "wasm"u8) {
-            Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+            t.Skip(noPreemptionOnWasmYetˢ);
         }
 
         // Test that pending GC preempts running goroutines.
@@ -447,51 +446,57 @@ public static partial void TestPreemptionGC(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object asynchronousPreemptionˢ = (@string)"asynchronous preemption not supported on this platform"u8;
-internal static readonly @string asyncPreemptˢ = "AsyncPreempt"u8;
+internal static ref readonly @string asyncPreemptˢ => ref asyncPreemptˢᵇ;
+private static readonly @string asyncPreemptˢᵇ = "AsyncPreempt"u8;
 
-public static void TestAsyncPreempt(ж<testing.T> Ꮡt) {
+public static void TestAsyncPreempt(ж<testing.T> t) {
     if (!runtime_internal_test_package.PreemptMSupported) {
-        Ꮡt.Skip(asynchronousPreemptionˢ);
+        t.Skip(asynchronousPreemptionˢ);
     }
-    @string output = runTestProg(Ꮡt, testprogˢ, asyncPreemptˢ);
-    @string want = "OK\n"u8;
+    @string output = runTestProg(t, testprogˢ, asyncPreemptˢ);
+    @string want = "OK\n";
     if (output != want) {
-        Ꮡt.Fatalf("want %s, got %s\n"u8, want, output);
-    }
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gcFairnessˢ = "GCFairness"u8;
-
-public static void TestGCFairness(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, gcFairnessˢ);
-    @string want = "OK\n"u8;
-    if (output != want) {
-        Ꮡt.Fatalf("want %s, got %s\n"u8, want, output);
+        t.Fatalf("want %s, got %s\n", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gcFairness2ˢ = "GCFairness2"u8;
+internal static ref readonly @string gcFairnessˢ => ref gcFairnessˢᵇ;
+private static readonly @string gcFairnessˢᵇ = "GCFairness"u8;
 
-public static void TestGCFairness2(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, gcFairness2ˢ);
-    @string want = "OK\n"u8;
+public static void TestGCFairness(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, gcFairnessˢ);
+    @string want = "OK\n";
     if (output != want) {
-        Ꮡt.Fatalf("want %s, got %s\n"u8, want, output);
+        t.Fatalf("want %s, got %s\n", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string numGoroutineˢ = "NumGoroutine"u8;
-internal static readonly @string inGoroutineˢ = "in goroutine"u8;
-internal static readonly @string goroutineˢ2 = "goroutine "u8;
+internal static ref readonly @string gcFairness2ˢ => ref gcFairness2ˢᵇ;
+private static readonly @string gcFairness2ˢᵇ = "GCFairness2"u8;
 
-public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testprogˢ, numGoroutineˢ);
-    @string want = "1\n"u8;
+public static void TestGCFairness2(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, gcFairness2ˢ);
+    @string want = "OK\n";
     if (output != want) {
-        Ꮡt.Fatalf("want %q, got %q"u8, want, output);
+        t.Fatalf("want %s, got %s\n", want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string numGoroutineˢ => ref numGoroutineˢᵇ;
+private static readonly @string numGoroutineˢᵇ = "NumGoroutine"u8;
+internal static ref readonly @string inGoroutineˢ => ref inGoroutineˢᵇ;
+private static readonly @string inGoroutineˢᵇ = "in goroutine"u8;
+internal static ref readonly @string goroutineˢ2 => ref goroutineˢ2ᵇ;
+private static readonly @string goroutineˢ2ᵇ = "goroutine "u8;
+
+public static partial void TestNumGoroutine(ж<testing.T> t) {
+    @string output = runTestProg(t, testprogˢ, numGoroutineˢ);
+    @string want = "1\n";
+    if (output != want) {
+        t.Fatalf("want %q, got %q", want, output);
     }
 
     var buf = new slice<byte>((1 << 20));
@@ -499,7 +504,7 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
     // Try up to 10 times for a match before giving up.
     // This is a fundamentally racy check but it's important
     // to notice if NumGoroutine and Stack are _always_ out of sync.
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         // Give goroutines about to exit a chance to exit.
         // The NumGoroutine and Stack below need to see
         // the same state of the world, so anything we can do
@@ -517,7 +522,7 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
             break;
         }
         if (i >= 10) {
-            Ꮡt.Fatalf("NumGoroutine=%d, but found %d goroutines in stack dump: %s"u8, n, nstk, buf);
+            t.Fatalf("NumGoroutine=%d, but found %d goroutines in stack dump: %s", n, nstk, buf);
         }
     }
 }
@@ -526,19 +531,19 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
 internal static readonly object skippingInShortModeˢ2 = (@string)"skipping in -short mode"u8;
 internal static readonly object skippingInRaceModeˢ = (@string)"skipping in -race mode"u8;
 
-public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
+public static partial void TestPingPongHog(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH == "wasm"u8) {
-            Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+            t.Skip(noPreemptionOnWasmYetˢ);
         }
         if (testing.Short()) {
-            Ꮡt.Skip(skippingInShortModeˢ2);
+            t.Skip(skippingInShortModeˢ2);
         }
         if (race.Enabled) {
             // The race detector randomizes the scheduler,
             // which causes this test to fail (#38266).
-            Ꮡt.Skip(skippingInRaceModeˢ);
+            t.Skip(skippingInRaceModeˢ);
         }
 
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(1), ref ᒐ);
@@ -551,7 +556,7 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
 
         var doneʗ1 = done;
         void run(nint limit, ж<nint> counter, channel<bool> wake) {
-            while (ᐧ) {
+            for (;;) {
                 var selᴛ90 = doneʗ1;
                 var selᴛ91 = wake;
                 switch (select(ᐸꟷ(selᴛ90, ꓸꓸꓸ), ᐸꟷ(selᴛ91, ꓸꓸꓸ))) {
@@ -596,7 +601,7 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
         // (was 5, increased to 20, see issue 52207).
         UntypedInt factor = 20;
         if (hogCount / (nint)factor > lightCount || lightCount / (nint)factor > hogCount) {
-            Ꮡt.Fatalf("want hogCount/lightCount in [%v, %v]; got %d/%d = %g"u8, (float64)(/* 1.0 / factor */ 0.05D), (nint)(factor), hogCount, lightCount, (float64)hogCount / (float64)lightCount);
+            t.Fatalf("want hogCount/lightCount in [%v, %v]; got %d/%d = %g", (float64)(/* 1.0 / factor */ 0.05D), (nint)(factor), hogCount, lightCount, (float64)hogCount / (float64)lightCount);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -618,7 +623,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
         var doneʗ1 = done;
         var stopʗ1 = stop;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 var selᴛ92 = stopʗ1;
                 switch (trySelect(ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
                 case 0 when selᴛ92.ꟷᐳ(out _): {
@@ -629,7 +634,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
                     break;
                 }}
             }
-        });
+        }, GoStack.Bounded);
 
         // Ping-pong b.N times
         var (ping, pong) = (new channel<bool>(0), new channel<bool>(0));
@@ -643,7 +648,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
             }
             close(stopʗ2);
             doneʗ2.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
         var doneʗ3 = done;
         var pingʗ2 = ping;
         var pongʗ2 = pong;
@@ -652,7 +657,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
                 pingʗ2.ᐸꟷ(ᐸꟷ(pongʗ2));
             }
             doneʗ3.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
         b.ResetTimer();
         ping.ᐸꟷ(true); // Start ping-pong
         ᐸꟷ(stop);
@@ -681,15 +686,15 @@ internal static void stackGrowthRecursive(nint i) {
     }
 }
 
-public static partial void TestPreemptSplitBig(ж<testing.T> Ꮡt) {
+public static partial void TestPreemptSplitBig(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short()) {
-            Ꮡt.Skip(skippingInShortModeˢ2);
+            t.Skip(skippingInShortModeˢ2);
         }
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
         var stop = new channel<nint>(0);
-        goǃ(ᴛ1 => big(ᴛ1), stop);
+        goǃ(ᴛ1 => big(ᴛ1), stop, GoStack.Bounded);
         for (nint i = 0; i < 3; i++) {
             time.Sleep(10 * time.Microsecond); // let big start running
             Δruntime.GC();
@@ -702,7 +707,7 @@ public static partial void TestPreemptSplitBig(ж<testing.T> Ꮡt) {
 
 internal static nint big(channel<nint> stop) {
     nint n = 0;
-    while (ᐧ) {
+    for (;;) {
         // delay so that gc is sure to have asked for a preemption
         for (nint i = 0; i < 1000000000; i++) {
             n++;
@@ -717,7 +722,7 @@ internal static nint big(channel<nint> stop) {
         case 0 when selᴛ93.ꟷᐳ(out _): {
             return n;
         }}
-        return default!;
+        return default;
     }
 }
 
@@ -759,20 +764,20 @@ internal static bool nonleaf(channel<nint> stop) {
     }}
 }
 
-public static void TestSchedLocalQueue(ж<testing.T> Ꮡt) {
+public static void TestSchedLocalQueue(ж<testing.T> t) {
     runtime_internal_test_package.RunSchedLocalQueueTest();
 }
 
-public static void TestSchedLocalQueueSteal(ж<testing.T> Ꮡt) {
+public static void TestSchedLocalQueueSteal(ж<testing.T> t) {
     runtime_internal_test_package.RunSchedLocalQueueStealTest();
 }
 
-public static void TestSchedLocalQueueEmpty(ж<testing.T> Ꮡt) {
+public static void TestSchedLocalQueueEmpty(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.NumCPU() == 1) {
             // Takes too long and does not trigger the race.
-            Ꮡt.Skip(skippingOnUniprocessorˢ);
+            t.Skip(skippingOnUniprocessorˢ);
         }
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
 
@@ -794,28 +799,28 @@ public static void TestSchedLocalQueueEmpty(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void benchmarkStackGrowth(ж<testing.B> Ꮡb, nint rec) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+internal static void benchmarkStackGrowth(ж<testing.B> b, nint rec) {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             stackGrowthRecursive(rec);
         }
     });
 }
 
-public static void BenchmarkStackGrowth(ж<testing.B> Ꮡb) {
-    benchmarkStackGrowth(Ꮡb, 10);
+public static void BenchmarkStackGrowth(ж<testing.B> b) {
+    benchmarkStackGrowth(b, 10);
 }
 
-public static void BenchmarkStackGrowthDeep(ж<testing.B> Ꮡb) {
-    benchmarkStackGrowth(Ꮡb, 1024);
+public static void BenchmarkStackGrowthDeep(ж<testing.B> b) {
+    benchmarkStackGrowth(b, 1024);
 }
 
-public static void BenchmarkCreateGoroutines(ж<testing.B> Ꮡb) {
-    benchmarkCreateGoroutines(Ꮡb, 1);
+public static void BenchmarkCreateGoroutines(ж<testing.B> b) {
+    benchmarkCreateGoroutines(b, 1);
 }
 
-public static void BenchmarkCreateGoroutinesParallel(ж<testing.B> Ꮡb) {
-    benchmarkCreateGoroutines(Ꮡb, Δruntime.GOMAXPROCS(-1));
+public static void BenchmarkCreateGoroutinesParallel(ж<testing.B> b) {
+    benchmarkCreateGoroutines(b, Δruntime.GOMAXPROCS(-1));
 }
 
 internal static partial void benchmarkCreateGoroutines(ж<testing.B> Ꮡb, nint procs) {
@@ -851,7 +856,7 @@ public static partial void BenchmarkCreateGoroutinesCapture(ж<testing.B> Ꮡb) 
             var iΔ1 = iΔ1ᴛ1;
             goǃ(() => {
                 if (iΔ1 >= N) {
-                    Ꮡb.Logf("bad"u8); // just to capture b
+                    Ꮡb.Logf("bad"); // just to capture b
                 }
                 Ꮡwg.Done();
             });
@@ -876,7 +881,7 @@ internal static partial void warmupScheduler(nint targetThreadCount) {
             // spin a bit more to ensure they are all running on separate CPUs.
             doWork(time.Millisecond);
             Ꮡwg.Done();
-        });
+        }, GoStack.Bounded);
     }
     Ꮡwg.Wait();
 }
@@ -906,7 +911,7 @@ public static partial void BenchmarkCreateGoroutinesSingle(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         goǃ(() => {
             Ꮡwg.Done();
-        });
+        }, GoStack.Bounded);
     }
     Ꮡwg.Wait();
 }
@@ -919,9 +924,9 @@ public static void BenchmarkClosureCall(ж<testing.B> Ꮡb) {
     for (nint iᴛ1 = 0; iᴛ1 < b.N; iᴛ1++) {
         var i = iᴛ1;
         nint off2 = 2;
-        ((Action)(() => {
+        func(() => {
             sum += i + off1 + off2;
-        }))();
+        })();
     }
     _ = sum;
 }
@@ -929,13 +934,13 @@ public static void BenchmarkClosureCall(ж<testing.B> Ꮡb) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingGomaxprocs1ˢ = (@string)"skipping: GOMAXPROCS=1"u8;
 
-internal static void benchmarkWakeupParallel(ж<testing.B> Ꮡb, Action<time.Duration> spin) {
+internal static void benchmarkWakeupParallel(ж<testing.B> b, Action<time.Duration> spin) {
     if (Δruntime.GOMAXPROCS(0) == 1) {
-        Ꮡb.Skip(skippingGomaxprocs1ˢ);
+        b.Skip(skippingGomaxprocs1ˢ);
     }
 
     var wakeDelay = 5 * time.Microsecond;
-    foreach (var (_, delay) in new time.Duration[]{
+    foreach (var (_, delay) in slice<time.Duration>([
         0,
         1 * time.Microsecond,
         2 * time.Microsecond,
@@ -944,8 +949,8 @@ internal static void benchmarkWakeupParallel(ж<testing.B> Ꮡb, Action<time.Dur
         20 * time.Microsecond,
         50 * time.Microsecond,
         100 * time.Microsecond
-    }.slice()) {
-        Ꮡb.Run(delay.String(), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
+    ])) {
+        b.Run(delay.String(), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             if ((~bΔ1).N == 0) {
                 return;
             }
@@ -1022,8 +1027,8 @@ internal static void benchmarkWakeupParallel(ж<testing.B> Ꮡb, Action<time.Dur
     }
 }
 
-public static void BenchmarkWakeupParallelSpinning(ж<testing.B> Ꮡb) {
-    benchmarkWakeupParallel(Ꮡb, (time.Duration d) => {
+public static void BenchmarkWakeupParallelSpinning(ж<testing.B> b) {
+    benchmarkWakeupParallel(b, (time.Duration d) => {
         var end = time.Now().Add(d);
         while (time.Now().Before(end)) {
             // do nothing
@@ -1037,11 +1042,11 @@ public static void BenchmarkWakeupParallelSpinning(ж<testing.B> Ꮡb) {
 // call time.Sleep, which would deschedule the goroutine.
 internal static Action<time.Duration> sysNanosleep;
 
-public static void BenchmarkWakeupParallelSyscall(ж<testing.B> Ꮡb) {
-    if (sysNanosleep == default!) {
-        Ꮡb.Skipf("skipping on %v; sysNanosleep not defined"u8, Δruntime.GOOS);
+public static void BenchmarkWakeupParallelSyscall(ж<testing.B> b) {
+    if (sysNanosleep == nil) {
+        b.Skipf("skipping on %v; sysNanosleep not defined", Δruntime.GOOS);
     }
-    benchmarkWakeupParallel(Ꮡb, (time.Duration d) => {
+    benchmarkWakeupParallel(b, (time.Duration d) => {
         sysNanosleep(d);
     });
 }
@@ -1059,7 +1064,7 @@ public static void BenchmarkMatmult(ж<testing.B> Ꮡb) {
     var B = makeMatrix(n);
     var C = makeMatrix(n);
     b.StartTimer();
-    matmult(default!, A, B, C, 0, n, 0, n, 0, n, 8);
+    matmult(default, A, B, C, 0, n, 0, n, 0, n, 8);
 }
 
 internal static Matrix makeMatrix(nint n) {
@@ -1077,28 +1082,26 @@ internal static partial void matmult(channel/*<-*/<EmptyStruct> done, Matrix A, 
     nint di = i1 - i0;
     nint dj = j1 - j0;
     nint dk = k1 - k0;
-    if (di >= dj && di >= dk && di >= threshold){
+    if (di >= dj && di >= dk && di >= threshold) {
         // divide in two by y axis
         nint mi = i0 + di / 2;
         var done1 = new channel<EmptyStruct>(1);
-        goǃ(matmult, done1.WithDirection(GoChanDir.Send), A, B, C, i0, mi, j0, j1, k0, k1, threshold);
-        matmult(default!, A, B, C, mi, i1, j0, j1, k0, k1, threshold);
+        goǃ(matmult, done1.AsSendOnly(), A, B, C, i0, mi, j0, j1, k0, k1, threshold);
+        matmult(default, A, B, C, mi, i1, j0, j1, k0, k1, threshold);
         ᐸꟷ(done1);
-    } else 
-    if (dj >= dk && dj >= threshold){
+    } else if (dj >= dk && dj >= threshold) {
         // divide in two by x axis
         nint mj = j0 + dj / 2;
         var done1 = new channel<EmptyStruct>(1);
-        goǃ(matmult, done1.WithDirection(GoChanDir.Send), A, B, C, i0, i1, j0, mj, k0, k1, threshold);
-        matmult(default!, A, B, C, i0, i1, mj, j1, k0, k1, threshold);
+        goǃ(matmult, done1.AsSendOnly(), A, B, C, i0, i1, j0, mj, k0, k1, threshold);
+        matmult(default, A, B, C, i0, i1, mj, j1, k0, k1, threshold);
         ᐸꟷ(done1);
-    } else 
-    if (dk >= threshold){
+    } else if (dk >= threshold) {
         // divide in two by "k" axis
         // deliberately not parallel because of data races
         nint mk = k0 + dk / 2;
-        matmult(default!, A, B, C, i0, i1, j0, j1, k0, mk, threshold);
-        matmult(default!, A, B, C, i0, i1, j0, j1, mk, k1, threshold);
+        matmult(default, A, B, C, i0, i1, j0, j1, k0, mk, threshold);
+        matmult(default, A, B, C, i0, i1, j0, j1, mk, k1, threshold);
     } else {
         // the matrices are small enough, compute directly
         for (nint i = i0; i < i1; i++) {
@@ -1109,27 +1112,27 @@ internal static partial void matmult(channel/*<-*/<EmptyStruct> done, Matrix A, 
             }
         }
     }
-    if (done != default!) {
+    if (done != nil) {
         done.ᐸꟷ(new EmptyStruct());
     }
 }
 
-public static void TestStealOrder(ж<testing.T> Ꮡt) {
+public static void TestStealOrder(ж<testing.T> t) {
     runtime_internal_test_package.RunStealOrderTest();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noThreadsOnWasmYetˢ = (@string)"no threads on wasm yet"u8;
 
-public static partial void TestLockOSThreadNesting(ж<testing.T> Ꮡt) {
+public static partial void TestLockOSThreadNesting(ж<testing.T> t) {
     if (Δruntime.GOARCH == "wasm"u8) {
-        Ꮡt.Skip(noThreadsOnWasmYetˢ);
+        t.Skip(noThreadsOnWasmYetˢ);
     }
 
     goǃ(() => {
         var (e, i) = runtime_internal_test_package.LockOSCounts();
         if (e != 0 || i != 0) {
-            Ꮡt.Errorf("want locked counts 0, 0; got %d, %d"u8, e, i);
+            t.Errorf("want locked counts 0, 0; got %d, %d", e, i);
             return;
         }
         Δruntime.LockOSThread();
@@ -1137,62 +1140,65 @@ public static partial void TestLockOSThreadNesting(ж<testing.T> Ꮡt) {
         Δruntime.UnlockOSThread();
         (e, i) = runtime_internal_test_package.LockOSCounts();
         if (e != 1 || i != 0) {
-            Ꮡt.Errorf("want locked counts 1, 0; got %d, %d"u8, e, i);
+            t.Errorf("want locked counts 1, 0; got %d, %d", e, i);
             return;
         }
         Δruntime.UnlockOSThread();
         (e, i) = runtime_internal_test_package.LockOSCounts();
         if (e != 0 || i != 0) {
-            Ꮡt.Errorf("want locked counts 0, 0; got %d, %d"u8, e, i);
+            t.Errorf("want locked counts 0, 0; got %d, %d", e, i);
             return;
         }
     });
 }
 
-public static void TestLockOSThreadExit(ж<testing.T> Ꮡt) {
-    testLockOSThreadExit(Ꮡt, testprogˢ);
+public static void TestLockOSThreadExit(ж<testing.T> t) {
+    testLockOSThreadExit(t, testprogˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lockOSThreadMainˢ = "LockOSThreadMain"u8;
-internal static readonly @string gomaxprocs1ˢ = "GOMAXPROCS=1"u8;
-internal static readonly @string lockOSThreadAltˢ = "LockOSThreadAlt"u8;
+internal static ref readonly @string lockOSThreadMainˢ => ref lockOSThreadMainˢᵇ;
+private static readonly @string lockOSThreadMainˢᵇ = "LockOSThreadMain"u8;
+internal static ref readonly @string gomaxprocs1ˢ => ref gomaxprocs1ˢᵇ;
+private static readonly @string gomaxprocs1ˢᵇ = "GOMAXPROCS=1"u8;
+internal static ref readonly @string lockOSThreadAltˢ => ref lockOSThreadAltˢᵇ;
+private static readonly @string lockOSThreadAltˢᵇ = "LockOSThreadAlt"u8;
 
-internal static void testLockOSThreadExit(ж<testing.T> Ꮡt, @string prog) {
-    @string output = runTestProg(Ꮡt, prog, lockOSThreadMainˢ, gomaxprocs1ˢ);
-    @string want = "OK\n"u8;
+internal static void testLockOSThreadExit(ж<testing.T> t, @string prog) {
+    @string output = runTestProg(t, prog, lockOSThreadMainˢ, gomaxprocs1ˢ);
+    @string want = "OK\n";
     if (output != want) {
-        Ꮡt.Errorf("want %q, got %q"u8, want, output);
+        t.Errorf("want %q, got %q", want, output);
     }
 
-    output = runTestProg(Ꮡt, prog, lockOSThreadAltˢ);
+    output = runTestProg(t, prog, lockOSThreadAltˢ);
     if (output != want) {
-        Ꮡt.Errorf("want %q, got %q"u8, want, output);
+        t.Errorf("want %q, got %q", want, output);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unshareNotPermittedˢ = "unshare not permitted\n"u8;
+internal static ref readonly @string unshareNotPermittedˢ => ref unshareNotPermittedˢᵇ;
+private static readonly @string unshareNotPermittedˢᵇ = "unshare not permitted\n"u8;
 internal static readonly object unshareSyscallNotˢ = (@string)"unshare syscall not permitted on this system"u8;
 
-public static void TestLockOSThreadAvoidsStatePropagation(ж<testing.T> Ꮡt) {
-    @string want = "OK\n"u8;
+public static void TestLockOSThreadAvoidsStatePropagation(ж<testing.T> t) {
+    @string want = "OK\n";
     @string skip = unshareNotPermittedˢ;
-    @string output = runTestProg(Ꮡt, testprogˢ, "LockOSThreadAvoidsStatePropagation"u8, gomaxprocs1ˢ);
-    if (output == skip){
-        Ꮡt.Skip(unshareSyscallNotˢ);
-    } else 
-    if (output != want) {
-        Ꮡt.Errorf("want %q, got %q"u8, want, output);
+    @string output = runTestProg(t, testprogˢ, "LockOSThreadAvoidsStatePropagation", gomaxprocs1ˢ);
+    if (output == skip) {
+        t.Skip(unshareSyscallNotˢ);
+    } else if (output != want) {
+        t.Errorf("want %q, got %q", want, output);
     }
 }
 
-public static void TestLockOSThreadTemplateThreadRace(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(Ꮡt));
+public static void TestLockOSThreadTemplateThreadRace(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new runtime_test_package.testing_TжTB(t));
 
-    var (exe, err) = buildTestProg(Ꮡt, testprogˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (exe, err) = buildTestProg(t, testprogˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     nint iterations = 100;
@@ -1202,25 +1208,26 @@ public static void TestLockOSThreadTemplateThreadRace(ж<testing.T> Ꮡt) {
         iterations = 5;
     }
     for (nint i = 0; i < iterations; i++) {
-        @string want = "OK\n"u8;
-        @string output = runBuiltTestProg(Ꮡt, exe, "LockOSThreadTemplateThreadRace"u8);
+        @string want = "OK\n";
+        @string output = runBuiltTestProg(t, exe, "LockOSThreadTemplateThreadRace");
         if (output != want) {
-            Ꮡt.Fatalf("run %d: want %q, got %q"u8, i, want, output);
+            t.Fatalf("run %d: want %q, got %q", i, want, output);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lockOSThreadVgetrandomˢ = "LockOSThreadVgetrandom"u8;
+internal static ref readonly @string lockOSThreadVgetrandomˢ => ref lockOSThreadVgetrandomˢᵇ;
+private static readonly @string lockOSThreadVgetrandomˢᵇ = "LockOSThreadVgetrandom"u8;
 
-public static void TestLockOSThreadVgetrandom(ж<testing.T> Ꮡt) {
+public static void TestLockOSThreadVgetrandom(ж<testing.T> t) {
     if (Δruntime.GOOS != "linux"u8) {
-        Ꮡt.Skipf("vgetrandom only relevant on Linux"u8);
+        t.Skipf("vgetrandom only relevant on Linux");
     }
-    @string output = runTestProg(Ꮡt, testprogˢ, lockOSThreadVgetrandomˢ);
-    @string want = "OK\n"u8;
+    @string output = runTestProg(t, testprogˢ, lockOSThreadVgetrandomˢ);
+    @string want = "OK\n";
     if (output != want) {
-        Ꮡt.Errorf("want %q, got %q"u8, want, output);
+        t.Errorf("want %q, got %q", want, output);
     }
 }
 
@@ -1235,11 +1242,11 @@ internal static void fakeSyscall(time.Duration duration) {
 }
 
 // Check that a goroutine will be preempted if it is calling short system calls.
-internal static partial void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time.Duration syscallDuration) {
+internal static partial void testPreemptionAfterSyscall(ж<testing.T> t, time.Duration syscallDuration) {
     GoFrame ᒐ = default;
     try {
         if (Δruntime.GOARCH == "wasm"u8) {
-            Ꮡt.Skip(noPreemptionOnWasmYetˢ);
+            t.Skip(noPreemptionOnWasmYetˢ);
         }
 
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
@@ -1253,8 +1260,7 @@ internal static partial void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time
 
         for (nint i = 0; i < iterations; i++) {
             var c = new channel<bool>(nroutines);
-            ref var stop = ref heap<uint32>(out var Ꮡstop);
-            stop = (uint32)0;
+            ref var stop = ref heap<uint32>((uint32)0, out var Ꮡstop);
 
             var start = time.Now();
             for (nint g = 0; g < nroutines; g++) {
@@ -1279,7 +1285,7 @@ internal static partial void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time
             var duration = time.Since(start);
 
             if (duration > maxDuration) {
-                Ꮡt.Errorf("timeout exceeded: %v (%v)"u8, duration, maxDuration);
+                t.Errorf("timeout exceeded: %v (%v)", duration, maxDuration);
             }
         }
     }
@@ -1287,20 +1293,20 @@ internal static partial void testPreemptionAfterSyscall(ж<testing.T> Ꮡt, time
     finally { ᒐ.Run(); }
 }
 
-public static void TestPreemptionAfterSyscall(ж<testing.T> Ꮡt) {
+public static void TestPreemptionAfterSyscall(ж<testing.T> t) {
     if (Δruntime.GOOS == "plan9"u8) {
-        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 41015);
+        testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 41015);
     }
 
-    foreach (var (_, i) in new time.Duration[]{10, 100, 1000}.slice()) {
+    foreach (var (_, i) in slice<time.Duration>([10, 100, 1000])) {
         var d = i * time.Microsecond;
-        Ꮡt.Run(fmt.Sprint(d), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint(d), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             testPreemptionAfterSyscall(tΔ1, d);
         });
     }
 }
 
-public static void TestGetgThreadSwitch(ж<testing.T> Ꮡt) {
+public static void TestGetgThreadSwitch(ж<testing.T> t) {
     runtime_internal_test_package.RunGetgThreadSwitchTest();
 }
 
@@ -1308,9 +1314,9 @@ public static void TestGetgThreadSwitch(ж<testing.T> Ꮡt) {
 // This test is not particularly safe since the call to netpoll
 // will pick up any stray files that are ready, but it should work
 // OK as long it is not run in parallel.
-public static partial void TestNetpollBreak(ж<testing.T> Ꮡt) {
+public static partial void TestNetpollBreak(ж<testing.T> t) {
     if (Δruntime.GOMAXPROCS(0) == 1) {
-        Ꮡt.Skip(skippingGomaxprocs1ˢ);
+        t.Skip(skippingGomaxprocs1ˢ);
     }
 
     // Make sure that netpoll is initialized.
@@ -1329,7 +1335,7 @@ public static partial void TestNetpollBreak(ж<testing.T> Ꮡt) {
     // Break twice to break both the netpoll we started and the
     // scheduler netpoll.
 loop:
-    while (ᐧ) {
+    for (;;) {
         runtime_internal_test_package.Usleep(100);
         runtime_internal_test_package.NetpollBreak();
         runtime_internal_test_package.NetpollBreak();
@@ -1347,32 +1353,35 @@ continue_loop:;
 break_loop:;
     {
         var dur = time.Since(start); if (dur > (time.Duration)(5000000000L)) {
-            Ꮡt.Errorf("netpollBreak did not interrupt netpoll: slept for: %v"u8, dur);
+            t.Errorf("netpollBreak did not interrupt netpoll: slept for: %v", dur);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nonexistentTestˢ = "NonexistentTest"u8;
-internal static readonly @string gomaxprocs1024ˢ = "GOMAXPROCS=1024"u8;
-internal static readonly @string unknownFunctionˢ = "unknown function: NonexistentTest"u8;
+internal static ref readonly @string nonexistentTestˢ => ref nonexistentTestˢᵇ;
+private static readonly @string nonexistentTestˢᵇ = "NonexistentTest"u8;
+internal static ref readonly @string gomaxprocs1024ˢ => ref gomaxprocs1024ˢᵇ;
+private static readonly @string gomaxprocs1024ˢᵇ = "GOMAXPROCS=1024"u8;
+internal static ref readonly @string unknownFunctionˢ => ref unknownFunctionˢᵇ;
+private static readonly @string unknownFunctionˢᵇ = "unknown function: NonexistentTest"u8;
 
 // TestBigGOMAXPROCS tests that setting GOMAXPROCS to a large value
 // doesn't cause a crash at startup. See issue 38474.
-public static void TestBigGOMAXPROCS(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprogˢ, nonexistentTestˢ, gomaxprocs1024ˢ);
+public static void TestBigGOMAXPROCS(ж<testing.T> t) {
+    t.Parallel();
+    @string output = runTestProg(t, testprogˢ, nonexistentTestˢ, gomaxprocs1024ˢ);
     // Ignore error conditions on small machines.
-    foreach (var (_, errstr) in new @string[]{
-        "failed to create new OS thread"u8,
-        "cannot allocate memory"u8
-    }.slice()) {
+    foreach (var (_, errstr) in slice<@string>([
+        "failed to create new OS thread",
+        "cannot allocate memory"
+    ])) {
         if (strings.Contains(output, errstr)) {
-            Ꮡt.Skipf("failed to create 1024 threads"u8);
+            t.Skipf("failed to create 1024 threads");
         }
     }
     if (!strings.Contains(output, unknownFunctionˢ)) {
-        Ꮡt.Errorf("output:\n%s\nwanted:\nunknown function: NonexistentTest"u8, output);
+        t.Errorf("output:\n%s\nwanted:\nunknown function: NonexistentTest", output);
     }
 }
 
@@ -1392,12 +1401,14 @@ internal static partial ж<goroutineState> newGoroutineState(trace.GoID g) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object thisTestSetsGomaxprocs4ˢ = (@string)"This test sets GOMAXPROCS=4 and wants to avoid thread descheduling as much as possible. Skip on machines with less than 4 CPUs"u8;
-internal static readonly @string traceSTWˢ = "TraceSTW"u8;
-internal static readonly @string stopTheWorldReadMemStatsˢ = "stop-the-world (read mem stats)"u8;
+internal static ref readonly @string traceSTWˢ => ref traceSTWˢᵇ;
+private static readonly @string traceSTWˢᵇ = "TraceSTW"u8;
+internal static ref readonly @string stopTheWorldReadMemStatsˢ => ref stopTheWorldReadMemStatsˢᵇ;
+private static readonly @string stopTheWorldReadMemStatsˢᵇ = "stop-the-world (read mem stats)"u8;
 
 // TestTraceSTW verifies that goroutines continue running on the same M and P
 // after a STW.
-public static void TestTraceSTW(ж<testing.T> Ꮡt) {
+public static void TestTraceSTW(ж<testing.T> t) {
     // Across STW, the runtime attempts to keep goroutines running on the
     // same P and the P running on the same M. It does this by keeping
     // goroutines in the P's local runq, and remembering which M the P ran
@@ -1417,39 +1428,41 @@ public static void TestTraceSTW(ж<testing.T> Ꮡt) {
     // slow to start.
 
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ2);
+        t.Skip(skippingInShortModeˢ2);
     }
 
     if (Δruntime.NumCPU() < 4) {
-        Ꮡt.Skip(thisTestSetsGomaxprocs4ˢ);
+        t.Skip(thisTestSetsGomaxprocs4ˢ);
     }
 
     UntypedInt runs = 50;
 
-    nint errors = default!;
+    nint errors = default;
     foreach (var i in range(runs)) {
-        var err = runTestTracesSTW(Ꮡt, i, traceSTWˢ, stopTheWorldReadMemStatsˢ);
-        if (err != default!) {
-            Ꮡt.Logf("Run %d failed: %v"u8, i, err);
+        var err = runTestTracesSTW(t, i, traceSTWˢ, stopTheWorldReadMemStatsˢ);
+        if (err != nil) {
+            t.Logf("Run %d failed: %v", i, err);
             errors++;
         }
     }
 
     var pct = (float64)errors / (float64)runs;
-    Ꮡt.Logf("Errors: %d/%d = %f%%"u8, errors, (nint)(runs), 100D * pct);
+    t.Logf("Errors: %d/%d = %f%%", errors, (nint)(runs), 100D * pct);
     if (pct > 0.25D) {
-        Ꮡt.Errorf("Error rate too high"u8);
+        t.Errorf("Error rate too high");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object thisTestSetsGomaxprocs8ˢ = (@string)"This test sets GOMAXPROCS=8 and wants to avoid thread descheduling as much as possible. Skip on machines with less than 8 CPUs"u8;
-internal static readonly @string traceGCSTWˢ = "TraceGCSTW"u8;
-internal static readonly @string stopTheWorldGcSweepˢ = "stop-the-world (GC sweep termination)"u8;
+internal static ref readonly @string traceGCSTWˢ => ref traceGCSTWˢᵇ;
+private static readonly @string traceGCSTWˢᵇ = "TraceGCSTW"u8;
+internal static ref readonly @string stopTheWorldGcSweepˢ => ref stopTheWorldGcSweepˢᵇ;
+private static readonly @string stopTheWorldGcSweepˢᵇ = "stop-the-world (GC sweep termination)"u8;
 
 // TestTraceGCSTW verifies that goroutines continue running on the same M and P
 // after a GC STW.
-public static void TestTraceGCSTW(ж<testing.T> Ꮡt) {
+public static void TestTraceGCSTW(ж<testing.T> t) {
     // Very similar to TestTraceSTW, but using a STW that starts the GC.
     // When the GC starts, the background GC mark workers start running,
     // which provide an additional source of disturbance to the scheduler.
@@ -1458,37 +1471,38 @@ public static void TestTraceGCSTW(ж<testing.T> Ꮡt) {
     // changing what the previously-running Ps are doing.
 
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ2);
+        t.Skip(skippingInShortModeˢ2);
     }
 
     if (Δruntime.NumCPU() < 8) {
-        Ꮡt.Skip(thisTestSetsGomaxprocs8ˢ);
+        t.Skip(thisTestSetsGomaxprocs8ˢ);
     }
 
     UntypedInt runs = 50;
 
-    nint errors = default!;
+    nint errors = default;
     foreach (var i in range(runs)) {
-        var err = runTestTracesSTW(Ꮡt, i, traceGCSTWˢ, stopTheWorldGcSweepˢ);
-        if (err != default!) {
-            Ꮡt.Logf("Run %d failed: %v"u8, i, err);
+        var err = runTestTracesSTW(t, i, traceGCSTWˢ, stopTheWorldGcSweepˢ);
+        if (err != nil) {
+            t.Logf("Run %d failed: %v", i, err);
             errors++;
         }
     }
 
     var pct = (float64)errors / (float64)runs;
-    Ꮡt.Logf("Errors: %d/%d = %f%%"u8, errors, (nint)(runs), 100D * pct);
+    t.Logf("Errors: %d/%d = %f%%", errors, (nint)(runs), 100D * pct);
     if (pct > 0.25D) {
-        Ꮡt.Errorf("Error rate too high"u8);
+        t.Errorf("Error rate too high");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goraceAtexitSleepMs0ˢ = "GORACE=atexit_sleep_ms=0"u8;
+internal static ref readonly @string goraceAtexitSleepMs0ˢ => ref goraceAtexitSleepMs0ˢᵇ;
+private static readonly @string goraceAtexitSleepMs0ˢᵇ = "GORACE=atexit_sleep_ms=0"u8;
 internal static readonly object canTFindStwInTheTestˢ = (@string)"Can't find STW in the test trace"u8;
 internal static readonly object targetGoroutinesˢ = (@string)"Target goroutines:"u8;
 
-internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @string name, @string stwType) {
+internal static error /*err*/ runTestTracesSTW(ж<testing.T> t, nint run, @string name, @string stwType) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -1496,14 +1510,14 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @st
         var pRunningᴷ = new stackAppend<trace.ProcID>();
         var gRunningᴷ = new stackAppend<trace.GoID>();
 
-        Ꮡt.Logf("Run %d"u8, run);
+        t.Logf("Run %d", run);
 
         // By default, TSAN sleeps for 1s at exit to allow background
         // goroutines to race. This slows down execution for this test far too
         // much, since we are running 50 iterations, so disable the sleep.
         //
         // Outside of race mode, GORACE does nothing.
-        var buf = slice<byte>(runTestProg(Ꮡt, testprogˢ, name, goraceAtexitSleepMs0ˢ));
+        var buf = slice<byte>(runTestProg(t, testprogˢ, name, goraceAtexitSleepMs0ˢ));
 
         // We locally "fail" the run (return an error) if the trace exhibits
         // unwanted scheduling. i.e., the target goroutines did not remain on
@@ -1513,32 +1527,32 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @st
         // occur, such as a trace parse error.
         var bufʗ1 = buf;
         defer(() => {
-            if (Ꮡerr.ValueSlot != default! || Ꮡt.Failed()) {
-                testtrace.Dump(Ꮡt, fmt.Sprintf("Test%s-run%d"u8, name, run), (slice<byte>)bufʗ1, false);
+            if (Ꮡerr.ValueSlot != nil || t.Failed()) {
+                testtrace.Dump(t, fmt.Sprintf("Test%s-run%d"u8, name, run), (slice<byte>)bufʗ1, false);
             }
         }, ref ᒐ);
 
         (var br, err) = trace.NewReader(new runtime_test_package.bytes_ReaderжReader(bytes.NewReader(buf)));
-        if (err != default!) {
-            Ꮡt.Fatalf("NewReader got err %v want nil"u8, err);
+        if (err != nil) {
+            t.Fatalf("NewReader got err %v want nil", err);
         }
 
         ref var targetGoroutines = ref heap<slice<ж<goroutineState>>>(out var ᏑtargetGoroutines);
         ж<goroutineState> findGoroutine(trace.GoID goid) {
             foreach (var (_, gs) in ᏑtargetGoroutines.ValueSlot) {
-                if ((~gs).G == goid) {
+                if (gs.G == goid) {
                     return gs;
                 }
             }
-            return default!;
+            return default;
         }
         ж<goroutineState> findProc(trace.ProcID pid) {
             foreach (var (_, gs) in ᏑtargetGoroutines.ValueSlot) {
-                if ((~gs).P == pid) {
+                if (gs.P == pid) {
                     return gs;
                 }
             }
-            return default!;
+            return default;
         }
 
         // 1. Find the goroutine IDs for the target goroutines. This will be in
@@ -1551,22 +1565,22 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @st
         //
         // N.B. We must do (1) and (2) together because the first target
         // goroutine may start running before the second is created.
-        bool startLogSeen = default!;
-        bool stwSeen = default!;
+        bool startLogSeen = default;
+        bool stwSeen = default;
 findStart:
-        while (ᐧ) {
+        for (;;) {
             var (ev, errΔ1) = br.ReadEvent();
             if (AreEqual(errΔ1, Δio.EOF)) {
                 // Reached the end of the trace without finding case (3).
-                Ꮡt.Fatalf("Trace missing start log message"u8);
+                t.Fatalf("Trace missing start log message");
             }
-            if (errΔ1 != default!) {
-                Ꮡt.Fatalf("ReadEvent got err %v want nil"u8, errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatalf("ReadEvent got err %v want nil", errΔ1);
             }
-            Ꮡt.Logf("Event: %s"u8, ev.String());
+            t.Logf("Event: %s", ev.String());
 
-            var exprᴛ1 = ev.Kind();
-            if (exprᴛ1 == trace.EventStateTransition) {
+            switch (ev.Kind()) {
+            case var ᴛ when ᴛ == trace.EventStateTransition: {
                 var st = ev.StateTransition();
                 if (st.Resource.Kind != trace.ResourceGoroutine) {
                     continue;
@@ -1580,7 +1594,7 @@ findStart:
                     foreach (var sf in range<trace.StackFrame>(st.Stack.Frames().Invoke)) {
                         if (sf.Func == "main.traceSTWTarget"u8) {
                             targetGoroutines = append(targetGoroutines, newGoroutineState(goid));
-                            Ꮡt.Logf("Identified target goroutine id %d"u8, goid);
+                            t.Logf("Identified target goroutine id %d", goid);
                         }
 
                         // Always break, the goroutine entrypoint is always the
@@ -1595,26 +1609,28 @@ findStart:
                     if (gs == nil) {
                         continue;
                     }
-                    gs.Value.P = ev.Proc();
-                    gs.Value.M = ev.Thread();
-                    Ꮡt.Logf("G %d running on P %d M %d"u8, (~gs).G, (~gs).P, (~gs).M);
+                    gs.P = ev.Proc();
+                    gs.M = ev.Thread();
+                    t.Logf("G %d running on P %d M %d", gs.G, gs.P, gs.M);
                 }
+                break;
             }
-            else if (exprᴛ1 == trace.EventLog) {
+            case var ᴛ when ᴛ == trace.EventLog: {
                 // Potentially case (3): Start log event.
                 var log = ev.Log();
                 if (log.Category != "TraceSTW"u8) {
                     continue;
                 }
                 if (log.Message != "start"u8) {
-                    Ꮡt.Fatalf("Log message got %s want start"u8, log.Message);
+                    t.Fatalf("Log message got %s want start", log.Message);
                 }
 
                 // Found start point, move on to next stage.
-                Ꮡt.Logf("Found start message"u8);
+                t.Logf("Found start message");
                 startLogSeen = true;
+                break;
             }
-            else if (exprᴛ1 == trace.EventRangeBegin) {
+            case var ᴛ when ᴛ == trace.EventRangeBegin: {
                 if (!startLogSeen) {
                     // Ignore spurious STW before we expect.
                     continue;
@@ -1622,34 +1638,35 @@ findStart:
 
                 var r = ev.Range();
                 if (r.Name == stwType) {
-                    Ꮡt.Logf("Found STW"u8);
+                    t.Logf("Found STW");
                     stwSeen = true;
                     goto break_findStart;
                 }
-            }
+                break;
+            }}
 continue_findStart:;
         }
 break_findStart:;
 
         if (!stwSeen) {
-            Ꮡt.Fatal(canTFindStwInTheTestˢ);
+            t.Fatal(canTFindStwInTheTestˢ);
         }
 
-        Ꮡt.Log(targetGoroutinesˢ);
+        t.Log(targetGoroutinesˢ);
         foreach (var (_, gs) in targetGoroutines) {
-            Ꮡt.Logf("%+v"u8, gs.OrTypedNil());
+            t.Logf("%+v", gs.OrTypedNil());
         }
 
         if (len(targetGoroutines) != 2) {
-            Ꮡt.Fatalf("len(targetGoroutines) got %d want 2"u8, len(targetGoroutines));
+            t.Fatalf("len(targetGoroutines) got %d want 2", len(targetGoroutines));
         }
 
         foreach (var (_, gs) in targetGoroutines) {
-            if ((~gs).P == trace.NoProc) {
-                Ꮡt.Fatalf("Goroutine %+v not running on a P"u8, gs.OrTypedNil());
+            if (gs.P == trace.NoProc) {
+                t.Fatalf("Goroutine %+v not running on a P", gs.OrTypedNil());
             }
-            if ((~gs).M == trace.NoThread) {
-                Ꮡt.Fatalf("Goroutine %+v not running on an M"u8, gs.OrTypedNil());
+            if (gs.M == trace.NoThread) {
+                t.Fatalf("Goroutine %+v not running on an M", gs.OrTypedNil());
             }
         }
 
@@ -1687,24 +1704,24 @@ break_findStart:;
         // [1] This is slightly fragile because there is a small window between
         // the "start" log and actual STW during which the target goroutines
         // could legitimately migrate.
-        slice<trace.ProcID> pRunning = default!;
-        slice<trace.GoID> gRunning = default!;
+        slice<trace.ProcID> pRunning = default;
+        slice<trace.GoID> gRunning = default;
 findEnd:
-        while (ᐧ) {
+        for (;;) {
             var (ev, errΔ2) = br.ReadEvent();
             if (AreEqual(errΔ2, Δio.EOF)) {
                 break;
             }
-            if (errΔ2 != default!) {
-                Ꮡt.Fatalf("ReadEvent got err %v want nil"u8, errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatalf("ReadEvent got err %v want nil", errΔ2);
             }
-            Ꮡt.Logf("Event: %s"u8, ev.String());
+            t.Logf("Event: %s", ev.String());
 
-            var exprᴛ2 = ev.Kind();
-            if (exprᴛ2 == trace.EventStateTransition) {
+            switch (ev.Kind()) {
+            case var ᴛ when ᴛ == trace.EventStateTransition: {
                 var st = ev.StateTransition();
-                var exprᴛ3 = st.Resource.Kind;
-                if (exprᴛ3 == trace.ResourceProc) {
+                switch (st.Resource.Kind) {
+                case var ᴛ2 when ᴛ2 == trace.ResourceProc: {
                     var p = st.Resource.Proc();
                     var (_, to) = st.Proc();
 
@@ -1725,13 +1742,14 @@ findEnd:
                         pRunning = append(pRunningᴷ, pRunning, p);
 
                         var m = ev.Thread();
-                        if (m != (~gs).M) {
-                            Ꮡt.Logf("Proc %d running on M %d want M %d"u8, p, m, (~gs).M);
+                        if (m != gs.M) {
+                            t.Logf("Proc %d running on M %d want M %d", p, m, gs.M);
                             err = fmt.Errorf("P did not remain on M"u8); goto ᒐdone;
                         }
                     }
+                    break;
                 }
-                else if (exprᴛ3 == trace.ResourceGoroutine) {
+                case var ᴛ2 when ᴛ2 == trace.ResourceGoroutine: {
                     var goid = st.Resource.Goroutine();
                     var (_, to) = st.Goroutine();
 
@@ -1751,7 +1769,7 @@ findEnd:
                                 continue;
                             }
 
-                            if (slices.Contains(gRunning, (~gs).G)) {
+                            if (slices.Contains(gRunning, gs.G)) {
                                 // This P's target G ran elsewhere. This probably
                                 // means that this P was slow to start, so
                                 // another P stole it. That isn't ideal, but
@@ -1759,7 +1777,7 @@ findEnd:
                                 continue;
                             }
 
-                            Ꮡt.Logf("Goroutine %d running on P %d M %d want this P to run G %d"u8, goid, p, m, (~gs).G);
+                            t.Logf("Goroutine %d running on P %d M %d want this P to run G %d", goid, p, m, gs.G);
                             err = fmt.Errorf("P ran incorrect goroutine"u8); goto ᒐdone;
                         }
 
@@ -1767,8 +1785,8 @@ findEnd:
                             gRunning = append(gRunningᴷ, gRunning, goid);
                         }
 
-                        if (p != (~gs).P || m != (~gs).M) {
-                            Ꮡt.Logf("Goroutine %d running on P %d M %d want P %d M %d"u8, goid, p, m, (~gs).P, (~gs).M);
+                        if (p != gs.P || m != gs.M) {
+                            t.Logf("Goroutine %d running on P %d M %d want P %d M %d", goid, p, m, gs.P, gs.M);
                             // We don't want this to occur,
                             // but allow it for cases of
                             // bad kernel scheduling. See
@@ -1776,27 +1794,30 @@ findEnd:
                             // above.
                         }
                     }
-                }
+                    break;
+                }}
+                break;
             }
-            else if (exprᴛ2 == trace.EventLog) {
+            case var ᴛ when ᴛ == trace.EventLog: {
                 // Potentially end log event.
                 var log = ev.Log();
                 if (log.Category != "TraceSTW"u8) {
                     continue;
                 }
                 if (log.Message != "end"u8) {
-                    Ꮡt.Fatalf("Log message got %s want end"u8, log.Message);
+                    t.Fatalf("Log message got %s want end", log.Message);
                 }
 
                 // Found end point.
-                Ꮡt.Logf("Found end message"u8);
+                t.Logf("Found end message");
                 goto break_findEnd;
-            }
+                break;
+            }}
 continue_findEnd:;
         }
 break_findEnd:;
 
-        err = default!;
+        err = default;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -1804,13 +1825,14 @@ break_findEnd:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mexitSTWˢ = "mexitSTW"u8;
+internal static ref readonly @string mexitSTWˢ => ref mexitSTWˢᵇ;
+private static readonly @string mexitSTWˢᵇ = "mexitSTW"u8;
 
-public static void TestMexitSTW(ж<testing.T> Ꮡt) {
-    @string got = runTestProg(Ꮡt, testprogˢ, mexitSTWˢ);
-    @string want = "OK\n"u8;
+public static void TestMexitSTW(ж<testing.T> t) {
+    @string got = runTestProg(t, testprogˢ, mexitSTWˢ);
+    @string want = "OK\n";
     if (got != want) {
-        Ꮡt.Fatalf("expected %q, but got:\n%s"u8, want, got);
+        t.Fatalf("expected %q, but got:\n%s", want, got);
     }
 }
 

@@ -15,9 +15,12 @@ using go.os;
 partial class testing_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
-private static readonly @string testRunTestTBHelperˢ = "-test.run=^TestTBHelper$"u8;
-private static readonly @string failTestTBHelperˢ = """
+private static ref readonly @string goWantHelperProcessˢ => ref goWantHelperProcessˢᵇ;
+private static readonly @string goWantHelperProcessˢᵇ = "GO_WANT_HELPER_PROCESS"u8;
+private static ref readonly @string testRunTestTBHelperˢ => ref testRunTestTBHelperˢᵇ;
+private static readonly @string testRunTestTBHelperˢᵇ = "-test.run=^TestTBHelper$"u8;
+private static ref readonly @string failTestTBHelperˢ => ref failTestTBHelperˢᵇ;
+private static readonly @string failTestTBHelperˢᵇ = """
 --- FAIL: TestTBHelper \([^)]+\)
     helperfuncs_test.go:15: 0
     helperfuncs_test.go:47: 1
@@ -39,50 +42,52 @@ private static readonly @string failTestTBHelperˢ = """
 
 """u8.Raw();
 
-public static void TestTBHelper(ж<testing.T> Ꮡt) {
+public static void TestTBHelper(ж<testing.T> t) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
-        testTestHelper(Ꮡt);
+        testTestHelper(t);
 
         // Check that calling Helper from inside a top-level test function
         // has no effect.
-        Ꮡt.Helper();
-        Ꮡt.Error((@string)"8"u8);
+        t.Helper();
+        t.Error((@string)"8");
         return;
     }
 
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), testRunTestTBHelperˢ);
+    var cmd = testenv.Command(new testing_TжTB(t), testenv.Executable(new testing_TжTB(t)), testRunTestTBHelperˢ);
     cmd = testenv.CleanCmdEnv(cmd);
-    cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Env = append(cmd.Env, (@string)"GO_WANT_HELPER_PROCESS=1");
     var (@out, _) = cmd.CombinedOutput();
 
     @string want = failTestTBHelperˢ;
     if (!Δregexp.MustCompile(want).Match(@out)) {
-        Ꮡt.Errorf("got output:\n\n%s\nwant matching:\n\n%s"u8, @out, want);
+        t.Errorf("got output:\n\n%s\nwant matching:\n\n%s", @out, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testRunˢ = "-test.run=^TestTBHelperParallel$"u8;
-private static readonly @string helperfuncsTestGo24ˢ = "helperfuncs_test.go:24: parallel"u8;
+private static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestTBHelperParallel$"u8;
+private static ref readonly @string helperfuncsTestGo24ˢ => ref helperfuncsTestGo24ˢᵇ;
+private static readonly @string helperfuncsTestGo24ˢᵇ = "helperfuncs_test.go:24: parallel"u8;
 
-public static void TestTBHelperParallel(ж<testing.T> Ꮡt) {
+public static void TestTBHelperParallel(ж<testing.T> t) {
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
-        parallelTestHelper(Ꮡt);
+        parallelTestHelper(t);
         return;
     }
 
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), testRunˢ);
+    var cmd = testenv.Command(new testing_TжTB(t), testenv.Executable(new testing_TжTB(t)), testRunˢ);
     cmd = testenv.CleanCmdEnv(cmd);
-    cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
+    cmd.Env = append(cmd.Env, (@string)"GO_WANT_HELPER_PROCESS=1");
     var (@out, _) = cmd.CombinedOutput();
 
-    Ꮡt.Logf("output:\n%s"u8, @out);
+    t.Logf("output:\n%s", @out);
 
-    var lines = strings.Split(strings.TrimSpace((@string)@out), "\n"u8);
+    var lines = strings.Split(strings.TrimSpace((@string)@out), "\n");
 
     // We expect to see one "--- FAIL" line at the start
     // of the log, five lines of "parallel" logging,
@@ -90,12 +95,12 @@ public static void TestTBHelperParallel(ж<testing.T> Ꮡt) {
     const nint wantLines = 7;
 
     if (len(lines) != wantLines) {
-        Ꮡt.Fatalf("parallelTestHelper gave %d lines of output; want %d"u8, len(lines), (nint)(wantLines));
+        t.Fatalf("parallelTestHelper gave %d lines of output; want %d", len(lines), (nint)(wantLines));
     }
     @string want = helperfuncsTestGo24ˢ;
     {
         @string got = strings.TrimSpace(lines[1]); if (got != want) {
-            Ꮡt.Errorf("got second output line %q; want %q"u8, got, want);
+            t.Errorf("got second output line %q; want %q", got, want);
         }
     }
 }
@@ -112,7 +117,7 @@ public static void BenchmarkTBHelper(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
-        if ((i & 1) == 0){
+        if ((i & 1) == 0) {
             f1();
         } else {
             f2();

@@ -11,31 +11,33 @@ using static global::go.go.types_package;
 partial class types_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string foo42ˢ = "foo 42"u8;
-internal static readonly @string foo42Bar43ˢ = "foo 42\n\tbar 43"u8;
+internal static ref readonly @string foo42ˢ => ref foo42ˢᵇ;
+private static readonly @string foo42ˢᵇ = "foo 42"u8;
+internal static ref readonly @string foo42Bar43ˢ => ref foo42Bar43ˢᵇ;
+private static readonly @string foo42Bar43ˢᵇ = "foo 42\n\tbar 43"u8;
 
-public static void TestError(ж<testing.T> Ꮡt) {
-    global::go.go.types_package.error_ err = default!;
+public static void TestError(ж<testing.T> t) {
+    global::go.go.types_package.error_ err = default;
     @string want = noErrorˢ;
     {
         @string got = err.msg(); if (got != want) {
-            Ꮡt.Errorf("empty error: got %q, want %q"u8, got, want);
+            t.Errorf("empty error: got %q, want %q", got, want);
         }
     }
 
     want = foo42ˢ;
-    err.addf(noposn, "foo %d"u8, (nint)42);
+    err.addf(noposn, "foo %d", (nint)42);
     {
         @string got = err.msg(); if (got != want) {
-            Ꮡt.Errorf("simple error: got %q, want %q"u8, got, want);
+            t.Errorf("simple error: got %q, want %q", got, want);
         }
     }
 
     want = foo42Bar43ˢ;
-    err.addf(noposn, "bar %d"u8, (nint)43);
+    err.addf(noposn, "bar %d", (nint)43);
     {
         @string got = err.msg(); if (got != want) {
-            Ꮡt.Errorf("simple error: got %q, want %q"u8, got, want);
+            t.Errorf("simple error: got %q, want %q", got, want);
         }
     }
 }
@@ -44,17 +46,17 @@ internal partial struct TestStripAnnotations_type /*dyn*/ {
     internal @string @in, want;
 }
 
-public static void TestStripAnnotations(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestStripAnnotations_type[]{
-        new(""u8, ""u8),
-        new("   "u8, "   "u8),
-        new("foo"u8, "foo"u8),
-        new("foo₀"u8, "foo"u8),
-        new("foo(T₀)"u8, "foo(T)"u8)
-    }.slice()) {
+public static void TestStripAnnotations(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestStripAnnotations_type>([
+        new("", ""),
+        new("   ", "   "),
+        new("foo", "foo"),
+        new("foo₀", "foo"),
+        new("foo(T₀)", "foo(T)")
+    ])) {
         @string got = stripAnnotations(test.@in);
         if (got != test.want) {
-            Ꮡt.Errorf("%q: got %q; want %q"u8, test.@in, got, test.want);
+            t.Errorf("%q: got %q; want %q", test.@in, got, test.want);
         }
     }
 }

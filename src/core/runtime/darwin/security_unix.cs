@@ -26,11 +26,13 @@ internal static void secure() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gotracebackˢ2 = "GOTRACEBACK="u8;
-internal static readonly @string gotracebackNoneˢ = "GOTRACEBACK=none"u8;
+internal static ref readonly @string gotracebackˢ2 => ref gotracebackˢ2ᵇ;
+private static readonly @string gotracebackˢ2ᵇ = "GOTRACEBACK="u8;
+internal static ref readonly @string gotracebackNoneˢ => ref gotracebackNoneˢᵇ;
+private static readonly @string gotracebackNoneˢᵇ = "GOTRACEBACK=none"u8;
 
 internal static void secureEnv() {
-    bool hasTraceback = default!;
+    bool hasTraceback = default;
     for (nint i = 0; i < len(envs); i++) {
         if (stringslite.HasPrefix(envs[i], gotracebackˢ2)) {
             hasTraceback = true;
@@ -38,7 +40,7 @@ internal static void secureEnv() {
         }
     }
     if (!hasTraceback) {
-        envs = append(envs, "GOTRACEBACK=none"u8);
+        envs = append(envs, (@string)"GOTRACEBACK=none");
     }
 }
 

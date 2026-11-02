@@ -7,23 +7,6 @@
 global using static global::go.unique_package;
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,7 +26,12 @@ using static global::go.unique_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.unique_package.canonMap<>))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,10 +41,10 @@ using static global::go.unique_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unique/canonmap_test.go", "canonmap_test.cs", "ABIggqqCqoLKAAkIgoKUgqaCkpSCgoKCgpSCgoKUgoKCgoKmgryCgoKCgoLSlIKCgoKUgoKUgoKCgIIACAykABMopqaChoKC7oKCgpSCyoKCgpSClIKUvMaChqrGgoKCgpY=", "17-19:1;23-25:1;29-35:1;39-45:1;46-144:2;47-69:2.1;70-143:2.2;71-73:2.2.1;83-106:2.2.2;135-137:2.2.3;149-155:1;160-170:1;179-181:1;194-196:1")]
-[assembly: go.GoPositionMap("unique/clone_test.go", "clone_test.cs", "AA8cgoKCgoKCgqaipoKCgqKCgg==", "31-36:1")]
-[assembly: go.GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmsoKCpoKUkoKCgoKCypSCAAUQgoKUgg==", "34-43:1")]
-[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "AD9cgoKCgoKCgoKmgoLmgoKCgpSClIKUgqaCupKUgpSmgpSCppSCgoKUgoKC6IKCgoKUppS01taygoKUgoKCgpSCgpSCgoLKotyCgoKClICCpICCpICC2oIAAhAACAaCggAPEIKCgqacuLi4uIKCuLi4uLi4uLiCgri4goKCzJKCgoKUqJI=", "64-80:1;117-119:1;214-216:1;218-220:2;222-224:3;226-228:4;230-234:5;236-238:6;240-242:7;244-246:8;248-250:9;252-254:10;256-258:11;260-262:12;264-268:13;270-272:14", "", "195=Make/1/1/1")]
+[assembly: GoPositionMap("unique/canonmap_test.go", "canonmap_test.cs", "ABIggqqCqoLKAA0IgoKUgqaCkpSCgoKCgpSCgoKUgoKCgoKmgryCgoKCgoLSlIKCgoKUgoKUgoKCgIIACAykABMopqaChoKC7oKCgpSCyoKCgpSClIKUvMaChqrGgoKCgpY=", "17-19:1;23-25:1;29-35:1;39-45:1;46-144:2;47-69:2.1;70-143:2.2;71-73:2.2.1;83-106:2.2.2;135-137:2.2.3;149-155:1;160-170:1;179-181:1;194-196:1")]
+[assembly: GoPositionMap("unique/clone_test.go", "clone_test.cs", "AA8cgoKCgoKCgqaipoKCgqKCgg==", "31-36:1")]
+[assembly: GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmsoKCpoKUkoKCgoKCypSCAAUQgoKUgg==", "34-43:1")]
+[assembly: GoPositionMap("unique/handle_test.go", "handle_test.cs", "AEFcgoKCgoKCgoKmgoLmgoKCgpSClIKUgqaCupKUgpSmgpSCppSCgoKUgoKC6IKCgoKUppS01taygoKUgoKCgpSCgpSCgoLKotyCgoKClICCpICCpICC2oIAAhAACAaCggAQEIKCgqacuLi4uIKCuLi4uLi4uLiCgri4goKCzJKCgoKUqJI=", "64-80:1;117-119:1;214-216:1;218-220:2;222-224:3;226-228:4;230-234:5;236-238:6;240-242:7;244-246:8;248-250:9;252-254:10;256-258:11;260-262:12;264-268:13;270-272:14", "", "197=Make/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -31,11 +31,11 @@ internal static partial (ж<response>, error) doRequest(bool useSelect) {
     var ch = new channel<ж<doRequest_async>>(0);
     var done = new channel<EmptyStruct>(0);
 
-    if (useSelect){
+    if (useSelect) {
         var chʗ1 = ch;
         var doneʗ1 = done;
         goǃ(() => {
-            var selᴛ66 = chʗ1.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError(nil))), ꓸꓸꓸ);
+            var selᴛ66 = chʗ1.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError())), ꓸꓸꓸ);
             var selᴛ67 = doneʗ1;
             switch (select(selᴛ66, ᐸꟷ(selᴛ67, ꓸꓸꓸ))) {
             case 0: {
@@ -44,26 +44,26 @@ internal static partial (ж<response>, error) doRequest(bool useSelect) {
             case 1 when selᴛ67.ꟷᐳ(out _): {
                 break;
             }}
-        });
+        }, GoStack.Bounded);
     } else {
         var chʗ2 = ch;
         goǃ(() => {
-            chʗ2.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError(nil))));
-        });
+            chʗ2.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError())));
+        }, GoStack.Bounded);
     }
 
     var r = ᐸꟷ(ch);
     Δruntime.Gosched();
-    return ((~r).resp, (~r).err);
+    return (r.resp, r.err);
 }
 
-public static void TestChanSendSelectBarrier(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestChanSendSelectBarrier(ж<testing.T> t) {
+    t.Parallel();
     testChanSendBarrier(true);
 }
 
-public static void TestChanSendBarrier(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestChanSendBarrier(ж<testing.T> t) {
+    t.Parallel();
     testChanSendBarrier(false);
 }
 
@@ -81,7 +81,7 @@ internal static partial void testChanSendBarrier(bool useSelect) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                slice<byte> garbage = default!;
+                slice<byte> garbage = default;
                 for (nint j = 0; j < inner; j++) {
                     var (_, err) = doRequest(useSelect);
                     var (_, ok) = err._<myError>(ᐧ);

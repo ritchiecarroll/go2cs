@@ -76,16 +76,16 @@ public static error WriteFile(@string filename, slice<byte> data, fs.FileMode pe
 //	}
 public static (slice<fs.FileInfo>, error) ReadDir(@string dirname) {
     var (f, err) = os.Open(dirname);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var list, err) = f.Readdir(-1);
     f.Close();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     slices.SortFunc(list, (fs.FileInfo a, fs.FileInfo b) => strings.Compare(a.Name(), b.Name()));
-    return (list, default!);
+    return (list, default);
 }
 
 // NopCloser returns a ReadCloser with a no-op Close method wrapping

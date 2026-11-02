@@ -143,7 +143,6 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />

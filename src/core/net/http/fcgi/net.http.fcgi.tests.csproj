@@ -127,11 +127,8 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/http/net.http.csproj" />
-    <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
-    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />

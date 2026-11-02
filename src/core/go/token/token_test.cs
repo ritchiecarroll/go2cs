@@ -14,30 +14,28 @@ internal partial struct TestIsIdentifier_tests /*dyn*/ {
     internal bool want;
 }
 
-public static void TestIsIdentifier(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestIsIdentifier(ж<testing.T> t) {
+    var tests = slice<TestIsIdentifier_tests>([
+        new("Empty", "", false),
+        new("Space", " ", false),
+        new("SpaceSuffix", "foo ", false),
+        new("Number", "123", false),
+        new("Keyword", "func", false),
 
-    var tests = new TestIsIdentifier_tests[]{
-        new("Empty"u8, ""u8, false),
-        new("Space"u8, " "u8, false),
-        new("SpaceSuffix"u8, "foo "u8, false),
-        new("Number"u8, "123"u8, false),
-        new("Keyword"u8, "func"u8, false),
-
-        new("LettersASCII"u8, "foo"u8, true),
-        new("MixedASCII"u8, "_bar123"u8, true),
-        new("UppercaseKeyword"u8, "Func"u8, true),
-        new("LettersUnicode"u8, "fóö"u8, true)
-    }.slice();
+        new("LettersASCII", "foo", true),
+        new("MixedASCII", "_bar123", true),
+        new("UppercaseKeyword", "Func", true),
+        new("LettersUnicode", "fóö", true)
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestIsIdentifier_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             {
                 var got = IsIdentifier(testʗ1.@in); if (got != testʗ1.want) {
-                    tΔ1.Fatalf("IsIdentifier(%q) = %t, want %v"u8, testʗ1.@in, got, testʗ1.want);
+                    tΔ1.Fatalf("IsIdentifier(%q) = %t, want %v", testʗ1.@in, got, testʗ1.want);
                 }
             }
         });

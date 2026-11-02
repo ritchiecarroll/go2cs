@@ -30,7 +30,12 @@ using static global::go.crypto.@internal.fips140.nistec_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.crypto.@internal.fips140.nistec_package.P256Point))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -40,7 +45,7 @@ using static global::go.crypto.@internal.fips140.nistec_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/nistec/benchmark_test.go", "benchmark_test.cs", "AB4ugoKUgpSClIK4woKCgoKCuIKClIKUgpSCuMKCgoKCgg==", "24-26:1;27-29:2;30-32:3;33-35:4;49-51:1;52-54:2;55-57:3;58-60:4")]
+[assembly: GoPositionMap("crypto/internal/fips140/nistec/benchmark_test.go", "benchmark_test.cs", "ACIugoKUgpSClIK4woKCgoKCuIKClIKUgpSCuMKCgoKCgg==", "24-26:1;27-29:2;30-32:3;33-35:4;49-51:1;52-54:2;55-57:3;58-60:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

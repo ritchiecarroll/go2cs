@@ -135,7 +135,6 @@
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
-    <ProjectReference Include="$(go2csPath)core/net/netip/net.netip.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />

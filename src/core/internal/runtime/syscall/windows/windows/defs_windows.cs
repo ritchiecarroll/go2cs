@@ -8,7 +8,7 @@ partial class windows_package {
 
 // Pseudo handles.
 public static uintptr CurrentProcess => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615); // -1 = current process
-public static uintptr CurrentThread => /* ^uintptr(1) */ unchecked((uintptr)18446744073709551614); // -2 = current thread
+public static uintptr CurrentThread => /* ^uintptr(1) */ unchecked((uintptr)18446744073709551614);  // -2 = current thread
 
 public static uintptr INVALID_HANDLE_VALUE => /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 

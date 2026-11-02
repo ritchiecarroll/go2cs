@@ -44,11 +44,11 @@ partial class sync_package {
 //
 // [the Go memory model]: https://go.dev/ref/mem
 partial struct RWMutex {
-    internal Mutex w;        // held if there are pending writers
-    internal uint32 writerSem;       // semaphore for writers to wait for completing readers
-    internal uint32 readerSem;       // semaphore for readers to wait for completing writers
+    internal Mutex w;                  // held if there are pending writers
+    internal uint32 writerSem;         // semaphore for writers to wait for completing readers
+    internal uint32 readerSem;         // semaphore for readers to wait for completing writers
     internal atomic.Int32 readerCount; // number of pending readers
-    internal atomic.Int32 readerWait; // number of departing readers
+    internal atomic.Int32 readerWait;  // number of departing readers
 }
 
 internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
@@ -96,7 +96,7 @@ public static bool TryRLock(this ж<RWMutex> Ꮡrw) {
         race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.of(RWMutex.Ꮡw)));
         race.Disable();
     }
-    while (ᐧ) {
+    for (;;) {
         var c = Ꮡrw.of(RWMutex.ᏑreaderCount).Load();
         if (c < 0) {
             if (race.Enabled) {
@@ -245,8 +245,8 @@ public static void Unlock(this ж<RWMutex> Ꮡrw) {
 // For more details see the syscall package.
 //
 //go:linkname syscall_hasWaitingReaders syscall.hasWaitingReaders
-public static bool syscall_hasWaitingReaders(ж<RWMutex> Ꮡrw) {
-    var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Load();
+public static bool syscall_hasWaitingReaders(ж<RWMutex> rw) {
+    var r = rw.of(RWMutex.ᏑreaderCount).Load();
     return r < 0 && r + (int32)rwmutexMaxReaders > 0;
 }
 

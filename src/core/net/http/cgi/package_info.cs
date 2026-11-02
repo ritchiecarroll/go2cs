@@ -10,24 +10,9 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -70,7 +55,14 @@ using static go.net.http.cgi_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.net.http_package.Request))]
+[assembly: GoFieldAccess(typeof(go.net.url_package.URL))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(response))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -80,9 +72,9 @@ using static go.net.http.cgi_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABgmgpSClPqigoKmgoKmgoKCpoKCgpSCppSCgpSmlIKmgoKmgsqCgpQADAiSlJSUpIKkgpSCgoKUgoKClICCgqSCgoKmgoKCpoKm", "105-134:1")]
-[assembly: go.GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAQCqKCgoKmgoKmkoCCtoKClJSAgoKClLaAgsiCgpSAgsiClIKCgtyAgraUgoKUlIKClLiCgoKUyoKUrsKCgpSClIKUyoKCgIKkAAsYgqaCpoKClIKUpoKUgpSCrsKClIKCgIKkgoI=", "", "", "186=NewWriter/1/1/3")]
-[assembly: go.GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKUpKSkpKSUABs+goKUAAIUAAoCgoKAgoKCgoLIgqYACAbSgoKCpoKUgoKUgIK2AA0cgIKmtoCClLaCpqKClJSCgpSmgpSAgraCgpSUgoCCyIKAgsiCppSSgoKUlIKmgoKm7oKUgoKCpoKCgpSAgqSSpIKCgoKCgoKCgoKUgpSCgoKUgoKUgoKCgpSCgpSClIKClIKCgoKUtLaCgoKmgIKCgpSCyIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "159=RequestURI/1/1/7;263=stderr/1/1/5")]
+[assembly: GoPositionMap("net/http/cgi/cgi_main.go", "cgi_main.cs", "ABomgqSClAAKCqKCgqaCgqaCgoKmgoKClIKmlIKClKaUgqaCgqaCyoKClAAUCJKUlKS0grSCpIKCgpSCgoKUgIKCpIKCgqaCgoKmgqY=", "105-134:1")]
+[assembly: GoPositionMap("net/http/cgi/child.go", "child.cs", "ABc4woKClIKUpoKCgoCCtgAcCqKCgoKmgoKmgoCCtoKClJSAgoKClLaAgsiCgpSAgsiClIKCgtyAgraUgoKUlIKClLiCgoKUyoKUrsKCgpSClIKUyoKCgIKkAAsYgqaCpoKClIKUpoKUgpSCrsKClIKCgIKkgoI=", "", "", "197=NewWriter/1/1/3")]
+[assembly: GoPositionMap("net/http/cgi/host.go", "host.cs", "ACdIlIKkpKSkpKSUABs+goKUAAIUAAoCgoKAgoKCgoLIgqYACwbSgoKCpoKUgoKUgIK2AA0cgIKmtoCClLaCpqKClJSCgpSmgpSAgraCgpSUgoCCyIKAgsiCppSSgoKUlIKmgoKm7oKUgoKCpoKCgpSAgqSSpIKCgoKCgoKCgoKUgpSCgoKUgoKUgoKCgpSCgpSClIKClIKCgoKUtLaCgoKmgIKCgpSCyIKCgqaC3IKCuJSCgu60pKKClLiigoKCggAKFgAKFqaClKTapg==", "221-224:1", "", "163=RequestURI/1/1/7;267=stderr/1/1/5", "294:21,296:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

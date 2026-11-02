@@ -132,19 +132,19 @@ public static float64 Expm1(float64 x) {
 }
 
 internal static float64 expm1(float64 x) {
-    const float64 Othreshold = 7.09782712893383973096e+02; // 0x40862E42FEFA39EF
-    const float64 Ln2X56 = 3.88162421113569373274e+01; // 0x4043687a9f1af2b1
-    const float64 Ln2HalfX3 = 1.03972077083991796413e+00; // 0x3ff0a2b23f3bab73
-    const float64 Ln2Half = 3.46573590279972654709e-01; // 0x3fd62e42fefa39ef
-    const float64 Ln2Hi = 6.93147180369123816490e-01; // 0x3fe62e42fee00000
-    UntypedFloat Ln2Lo = 1.90821492927058770002e-10; // 0x3dea39ef35793c76
-    const float64 InvLn2 = 1.44269504088896338700e+00; // 0x3ff71547652b82fe
+    const float64 Othreshold = 7.09782712893383973096e+02;            // 0x40862E42FEFA39EF
+    const float64 Ln2X56 = 3.88162421113569373274e+01;                // 0x4043687a9f1af2b1
+    const float64 Ln2HalfX3 = 1.03972077083991796413e+00;             // 0x3ff0a2b23f3bab73
+    const float64 Ln2Half = 3.46573590279972654709e-01;               // 0x3fd62e42fefa39ef
+    const float64 Ln2Hi = 6.93147180369123816490e-01;                 // 0x3fe62e42fee00000
+    UntypedFloat Ln2Lo = 1.90821492927058770002e-10;                  // 0x3dea39ef35793c76
+    const float64 InvLn2 = 1.44269504088896338700e+00;                // 0x3ff71547652b82fe
     const float64 Tiny = /* 1.0 / (1 << 54) */ 5.551115123125783e-17; // 2**-54 = 0x3c90000000000000
     // scaled coefficients related to expm1
     const float64 Q1 = -3.33333333333331316428e-02; // 0xBFA11111111110F4
-    const float64 Q2 = 1.58730158725481460165e-03; // 0x3F5A01A019FE5585
+    const float64 Q2 = 1.58730158725481460165e-03;  // 0x3F5A01A019FE5585
     const float64 Q3 = -7.93650757867487942473e-05; // 0xBF14CE199EAADBB7
-    const float64 Q4 = 4.00821782732936239552e-06; // 0x3ED0CFCA86E65239
+    const float64 Q4 = 4.00821782732936239552e-06;  // 0x3ED0CFCA86E65239
     const float64 Q5 = -2.01099218183624371326e-07; // 0xBE8AFDB76E09C32D
 
     // special cases
@@ -174,13 +174,13 @@ internal static float64 expm1(float64 x) {
     }
 
     // argument reduction
-    float64 c = default!;
-    nint k = default!;
-    if (absx > Ln2Half){ // if  |x| > 0.5 * ln2
-        float64 hi = default!;
-        float64 lo = default!;
-        if (absx < Ln2HalfX3){ // and |x| < 1.5 * ln2
-            if (!sign){
+    float64 c = default;
+    nint k = default;
+    if (absx > Ln2Half) { // if  |x| > 0.5 * ln2
+        float64 hi = default;
+        float64 lo = default;
+        if (absx < Ln2HalfX3) { // and |x| < 1.5 * ln2
+            if (!sign) {
                 hi = x - Ln2Hi;
                 lo = Ln2Lo;
                 k = 1;
@@ -190,7 +190,7 @@ internal static float64 expm1(float64 x) {
                 k = -1;
             }
         } else {
-            if (!sign){
+            if (!sign) {
                 k = (nint)(InvLn2 * x + 0.5D);
             } else {
                 k = (nint)(InvLn2 * x - 0.5D);
@@ -201,8 +201,7 @@ internal static float64 expm1(float64 x) {
         }
         x = hi - lo;
         c = (hi - x) - lo;
-    } else 
-    if (absx < Tiny){ // when |x| < 2**-54, return x
+    } else if (absx < Tiny) { // when |x| < 2**-54, return x
         return x;
     } else {
         k = 0;

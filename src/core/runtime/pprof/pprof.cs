@@ -192,49 +192,49 @@ internal static ref profilesᴛ1 profiles => ref ((StaticBox<profilesᴛ1>)Ꮡpr
 
 internal static ж<Profile> goroutineProfile;
 internal static void initᴛgoroutineProfile() { goroutineProfile = Ꮡ(new Profile(
-    name: "goroutine"u8,
+    name: "goroutine",
     count: countGoroutine,
     write: writeGoroutine
 )); }
 
 internal static ж<Profile> goroutineLeakProfile;
 internal static void initᴛgoroutineLeakProfile() { goroutineLeakProfile = Ꮡ(new Profile(
-    name: "goroutineleak"u8,
+    name: "goroutineleak",
     count: runtime_goroutineleakcount,
     write: writeGoroutineLeak
 )); }
 
 internal static ж<Profile> threadcreateProfile;
 internal static void initᴛthreadcreateProfile() { threadcreateProfile = Ꮡ(new Profile(
-    name: "threadcreate"u8,
+    name: "threadcreate",
     count: countThreadCreate,
     write: writeThreadCreate
 )); }
 
 internal static ж<Profile> heapProfile;
 internal static void initᴛheapProfile() { heapProfile = Ꮡ(new Profile(
-    name: "heap"u8,
+    name: "heap",
     count: countHeap,
     write: writeHeap
 )); }
 
 internal static ж<Profile> allocsProfile;
 internal static void initᴛallocsProfile() { allocsProfile = Ꮡ(new Profile(
-    name: "allocs"u8,
+    name: "allocs",
     count: countHeap, // identical to heap profile
     write: writeAlloc
 )); }
 
 internal static ж<Profile> blockProfile;
 internal static void initᴛblockProfile() { blockProfile = Ꮡ(new Profile(
-    name: "block"u8,
+    name: "block",
     count: countBlock,
     write: writeBlock
 )); }
 
 internal static ж<Profile> mutexProfile;
 internal static void initᴛmutexProfile() { mutexProfile = Ꮡ(new Profile(
-    name: "mutex"u8,
+    name: "mutex",
     count: countMutex,
     write: writeMutex
 )); }
@@ -266,19 +266,20 @@ internal static readonly ж<sync.Mutex> ᏑgoroutineLeakProfileLock = new Static
 internal static ref sync.Mutex goroutineLeakProfileLock => ref ((StaticBox<sync.Mutex>)ᏑgoroutineLeakProfileLock).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goroutineleakˢ = "goroutineleak"u8;
+internal static ref readonly @string goroutineleakˢ => ref goroutineleakˢᵇ;
+private static readonly @string goroutineleakˢᵇ = "goroutineleak"u8;
 
 internal static void lockProfiles() {
     Ꮡprofiles.of(profilesᴛ1.Ꮡmu).Lock();
-    if (profiles.m == default!) {
+    if (profiles.m == nil) {
         // Initial built-in profiles.
         profiles.m = new map<@string, ж<Profile>>{
-            ["goroutine"u8] = goroutineProfile,
-            ["threadcreate"u8] = threadcreateProfile,
-            ["heap"u8] = heapProfile,
-            ["allocs"u8] = allocsProfile,
-            ["block"u8] = blockProfile,
-            ["mutex"u8] = mutexProfile
+            ["goroutine"] = goroutineProfile,
+            ["threadcreate"] = threadcreateProfile,
+            ["heap"] = heapProfile,
+            ["allocs"] = allocsProfile,
+            ["block"] = blockProfile,
+            ["mutex"] = mutexProfile
         };
         if (goexperiment.GoroutineLeakProfile) {
             profiles.m[goroutineleakˢ] = goroutineLeakProfile;
@@ -314,7 +315,7 @@ public static ж<Profile> NewProfile(@string name) {
         profiles.m[name] = p;
         return p;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -326,7 +327,7 @@ public static ж<Profile> Lookup(@string name) {
         defer(unlockProfiles, ref ᒐ);
         return profiles.m[name];
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -342,10 +343,10 @@ public static slice<ж<Profile>> Profiles() {
             all = append(all, p);
         }
 
-        slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings_package.Compare((~a).name, (~b).name));
+        slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings_package.Compare(a.name, b.name));
         return all;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -363,12 +364,12 @@ public static nint Count(this ж<Profile> Ꮡp) {
 
         p.mu.Lock();
         ᒐd1 = true;
-        if (p.count != default!) {
+        if (p.count != nil) {
             return p.count();
         }
         return len(p.m);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡp.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
@@ -398,7 +399,7 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
         if (p.name == ""u8) {
             throw panic("pprof: use of uninitialized Profile");
         }
-        if (p.write != default!) {
+        if (p.write != nil) {
             throw panic("pprof: Add called on built-in Profile " + p.name);
         }
 
@@ -407,12 +408,12 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
         stk = stk.slice(0, n);
         if (len(stk) == 0) {
             // The value for skip is too large, and there's no stack trace to record.
-            stk = new uintptr[]{abi.FuncPCABIInternal(lostProfileEvent)}.slice();
+            stk = slice<uintptr>([abi.FuncPCABIInternal(lostProfileEvent)]);
         }
 
         p.mu.Lock();
         ᒐd1 = true;
-        if (p.m[value] != default!) {
+        if (p.m[value] != nil) {
             throw panic("pprof: Profile.Add of duplicate value");
         }
         p.m[value] = stk;
@@ -458,7 +459,7 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     if (p.name == ""u8) {
         throw panic("pprof: use of zero Profile");
     }
-    if (p.write != default!) {
+    if (p.write != nil) {
         return p.write(w, debug);
     }
 
@@ -487,7 +488,7 @@ internal static slice<uintptr> Stack(this stackProfile x, nint i) {
 }
 
 internal static ж<labelMap> Label(this stackProfile x, nint i) {
-    return default!;
+    return default;
 }
 
 // A countProfile is a set of stack traces to be printed as counts
@@ -505,7 +506,7 @@ partial interface countProfile {
 // functions. Returns the number of frames copied to dst.
 internal static nint expandInlinedFrames(slice<uintptr> dst, slice<uintptr> pcs) {
     var cf = runtime.CallersFrames(pcs);
-    nint n = default!;
+    nint n = default;
     while (n < len(dst)) {
         var (f, more) = cf.Next();
         // f.PC is a "call PC", but later consumers will expect
@@ -520,8 +521,10 @@ internal static nint expandInlinedFrames(slice<uintptr> dst, slice<uintptr> pcs)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string countˢ = "count"u8;
-internal static readonly @string nanosecondsˢ = "nanoseconds"u8;
+internal static ref readonly @string countˢ => ref countˢᵇ;
+private static readonly @string countˢᵇ = "count"u8;
+internal static ref readonly @string nanosecondsˢ => ref nanosecondsˢᵇ;
+private static readonly @string nanosecondsˢᵇ = "nanoseconds"u8;
 
 // printCountCycleProfile outputs block profile records (for block or mutex profiles)
 // as the pprof-proto format output. Translations from cycle count to time duration
@@ -531,14 +534,14 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
     // Output profile in protobuf form.
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, countName, countˢ);
-    b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
+    b.Ꮡpb.int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, countName, countˢ);
     b.pbValueType(tagProfile_SampleType, cycleName, nanosecondsˢ);
 
     var cpuGHz = (float64)pprof_cyclesPerSecond() / 1e9D;
 
-    var values = new int64[]{0, 0}.slice();
-    slice<uint64> locs = default!;
+    var values = slice<int64>([0, 0]);
+    slice<uint64> locs = default;
     var expandedStack = pprof_makeProfStack();
     foreach (var (_, r) in records) {
         values[0] = r.Count;
@@ -547,13 +550,14 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
         // return PCs, which is what appendLocsForStack expects.
         nint n = expandInlinedFrames(expandedStack, r.Stack);
         locs = b.appendLocsForStack(locs[..0], expandedStack.slice(0, n));
-        b.pbSample(values, locs, default!);
+        b.pbSample(values, locs, default);
     }
     return b.build();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string labelsˢ = "\n# labels: "u8;
+internal static ref readonly @string labelsˢ => ref labelsˢᵇ;
+private static readonly @string labelsˢᵇ = "\n# labels: "u8;
 
 // printCountProfile prints a countProfile at the specified debug level.
 // The profile will be in compressed proto format unless debug is nonzero.
@@ -574,7 +578,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
     }
     var count = new map<@string, nint>{};
     var index = new map<@string, nint>{};
-    slice<@string> keys = default!;
+    slice<@string> keys = default;
     nint n = p.Len();
     for (nint i = 0; i < n; i++) {
         @string k = key(p.Stack(i), p.Label(i));
@@ -589,7 +593,7 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
 
     if (debug > 0) {
         // Print debug profile in legacy format
-        var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
+        var tw = tabwriter.NewWriter(w, 1, 8, 1, (byte)'\t', 0);
         fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%s profile: total %d\n"u8, name, p.Len());
         foreach (var (_, k) in keys) {
             fmt.Fprintf(new tabwriter_WriterжWriter(tw), "%d %s\n"u8, count[k], k);
@@ -601,22 +605,22 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
     // Output profile in protobuf form.
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, name, countˢ);
-    b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
+    b.Ꮡpb.int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, name, countˢ);
 
-    var values = new int64[]{0}.slice();
-    slice<uint64> locs = default!;
+    var values = slice<int64>([0]);
+    slice<uint64> locs = default;
     foreach (var (_, k) in keys) {
         values[0] = (int64)count[k];
         // For count profiles, all stack addresses are
         // return PCs, which is what appendLocsForStack expects.
         locs = b.appendLocsForStack(locs[..0], p.Stack(index[k]));
         nint idx = index[k];
-        Action labels = default!;
+        Action labels = default;
         if (p.Label(idx) != nil) {
             var bʗ1 = b;
             labels = () => {
-                foreach (var (_, lbl) in (~p.Label(idx)).Set.List) {
+                foreach (var (_, lbl) in p.Label(idx).Set.List) {
                     bʗ1.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
@@ -652,22 +656,23 @@ internal static bool Less(this ref keysByCount x, nint i, nint j) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeˢ = "runtime."u8;
-internal static readonly @string internalRuntimeˢ = "internal/runtime/"u8;
+internal static ref readonly @string runtimeˢ => ref runtimeˢᵇ;
+private static readonly @string runtimeˢᵇ = "runtime."u8;
+internal static ref readonly @string internalRuntimeˢ => ref internalRuntimeˢᵇ;
+private static readonly @string internalRuntimeˢᵇ = "internal/runtime/"u8;
 
 // printStackRecord prints the function + source line information
 // for a single stack trace.
 internal static void printStackRecord(io.Writer w, slice<uintptr> stk, bool allFrames) {
     var show = allFrames;
     var frames = runtime.CallersFrames(stk);
-    while (ᐧ) {
+    for (;;) {
         var (frame, more) = frames.Next();
         @string name = frame.Function;
-        if (name == ""u8){
+        if (name == ""u8) {
             show = true;
             fmt.Fprintf(w, "#\t%#x\n"u8, frame.PC);
-        } else 
-        if (name != "runtime.goexit"u8 && (show || !(strings_package.HasPrefix(name, runtimeˢ) || strings_package.HasPrefix(name, internalRuntimeˢ)))) {
+        } else if (name != "runtime.goexit"u8 && (show || !(strings_package.HasPrefix(name, runtimeˢ) || strings_package.HasPrefix(name, internalRuntimeˢ)))) {
             // Hide runtime.goexit and any runtime functions at the beginning.
             // This is useful mainly for allocation traces.
             show = true;
@@ -696,7 +701,7 @@ public static error WriteHeapProfile(io.Writer w) {
 
 // countHeap returns the number of records in the heap profile.
 internal static nint countHeap() {
-    var (n, _) = runtime.MemProfile(default!, true);
+    var (n, _) = runtime.MemProfile(default, true);
     return n;
 }
 
@@ -706,7 +711,8 @@ internal static error writeHeap(io.Writer w, nint debug) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string allocSpaceˢ = "alloc_space"u8;
+internal static ref readonly @string allocSpaceˢ => ref allocSpaceˢᵇ;
+private static readonly @string allocSpaceˢᵇ = "alloc_space"u8;
 
 // writeAlloc writes the current runtime heap profile to w
 // with the total allocation space as the default sample type.
@@ -715,7 +721,7 @@ internal static error writeAlloc(io.Writer w, nint debug) {
 }
 
 internal static error writeHeapInternal(io.Writer w, nint debug, @string defaultSampleType) {
-    ж<runtime.MemStats> memStats = default!;
+    ж<runtime.MemStats> memStats = default;
     if (debug != 0) {
         // Read mem stats first, so that our other allocations
         // do not appear in the statistics.
@@ -730,9 +736,9 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     // the two calls—so allocate a few extra records for safety
     // and also try again if we're very unlucky.
     // The loop should only execute one iteration in the common case.
-    slice<profilerecord.MemProfileRecord> p = default!;
-    var (n, ok) = pprof_memProfileInternal(default!, true);
-    while (ᐧ) {
+    slice<profilerecord.MemProfileRecord> p = default;
+    var (n, ok) = pprof_memProfileInternal(default, true);
+    for (;;) {
         // Allocate room for a slightly bigger profile,
         // in case a few more entries have been added
         // since the call to MemProfile.
@@ -752,16 +758,16 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
 
     var b = bufio.NewWriter(w);
-    var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (rune)'\t', 0);
+    var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (byte)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
 
     runtime.MemProfileRecord total = new();
     foreach (var i in range(p)) {
         var r = Ꮡ(p, i);
-        total.AllocBytes += r.Value.AllocBytes;
-        total.AllocObjects += r.Value.AllocObjects;
-        total.FreeBytes += r.Value.FreeBytes;
-        total.FreeObjects += r.Value.FreeObjects;
+        total.AllocBytes += r.AllocBytes;
+        total.AllocObjects += r.AllocObjects;
+        total.FreeBytes += r.FreeBytes;
+        total.FreeObjects += r.FreeObjects;
     }
 
     // Technically the rate is MemProfileRate not 2*MemProfileRate,
@@ -790,47 +796,47 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%d: %d [%d: %d] @"u8,
             r.InUseObjects(), r.InUseBytes(),
-            (~r).AllocObjects, (~r).AllocBytes);
-        foreach (var (_, pc) in (~r).Stack) {
+            r.AllocObjects, r.AllocBytes);
+        foreach (var (_, pc) in r.Stack) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }
         fmt.Fprintf(w, "\n"u8);
-        printStackRecord(w, (~r).Stack, false);
+        printStackRecord(w, r.Stack, false);
     }
 
     // Print memstats information too.
     // Pprof will ignore, but useful for people
     var s = memStats;
     fmt.Fprintf(w, "\n# runtime.MemStats\n"u8);
-    fmt.Fprintf(w, "# Alloc = %d\n"u8, (~s).Alloc);
-    fmt.Fprintf(w, "# TotalAlloc = %d\n"u8, (~s).TotalAlloc);
-    fmt.Fprintf(w, "# Sys = %d\n"u8, (~s).Sys);
-    fmt.Fprintf(w, "# Lookups = %d\n"u8, (~s).Lookups);
-    fmt.Fprintf(w, "# Mallocs = %d\n"u8, (~s).Mallocs);
-    fmt.Fprintf(w, "# Frees = %d\n"u8, (~s).Frees);
+    fmt.Fprintf(w, "# Alloc = %d\n"u8, s.Alloc);
+    fmt.Fprintf(w, "# TotalAlloc = %d\n"u8, s.TotalAlloc);
+    fmt.Fprintf(w, "# Sys = %d\n"u8, s.Sys);
+    fmt.Fprintf(w, "# Lookups = %d\n"u8, s.Lookups);
+    fmt.Fprintf(w, "# Mallocs = %d\n"u8, s.Mallocs);
+    fmt.Fprintf(w, "# Frees = %d\n"u8, s.Frees);
 
-    fmt.Fprintf(w, "# HeapAlloc = %d\n"u8, (~s).HeapAlloc);
-    fmt.Fprintf(w, "# HeapSys = %d\n"u8, (~s).HeapSys);
-    fmt.Fprintf(w, "# HeapIdle = %d\n"u8, (~s).HeapIdle);
-    fmt.Fprintf(w, "# HeapInuse = %d\n"u8, (~s).HeapInuse);
-    fmt.Fprintf(w, "# HeapReleased = %d\n"u8, (~s).HeapReleased);
-    fmt.Fprintf(w, "# HeapObjects = %d\n"u8, (~s).HeapObjects);
+    fmt.Fprintf(w, "# HeapAlloc = %d\n"u8, s.HeapAlloc);
+    fmt.Fprintf(w, "# HeapSys = %d\n"u8, s.HeapSys);
+    fmt.Fprintf(w, "# HeapIdle = %d\n"u8, s.HeapIdle);
+    fmt.Fprintf(w, "# HeapInuse = %d\n"u8, s.HeapInuse);
+    fmt.Fprintf(w, "# HeapReleased = %d\n"u8, s.HeapReleased);
+    fmt.Fprintf(w, "# HeapObjects = %d\n"u8, s.HeapObjects);
 
-    fmt.Fprintf(w, "# Stack = %d / %d\n"u8, (~s).StackInuse, (~s).StackSys);
-    fmt.Fprintf(w, "# MSpan = %d / %d\n"u8, (~s).MSpanInuse, (~s).MSpanSys);
-    fmt.Fprintf(w, "# MCache = %d / %d\n"u8, (~s).MCacheInuse, (~s).MCacheSys);
-    fmt.Fprintf(w, "# BuckHashSys = %d\n"u8, (~s).BuckHashSys);
-    fmt.Fprintf(w, "# GCSys = %d\n"u8, (~s).GCSys);
-    fmt.Fprintf(w, "# OtherSys = %d\n"u8, (~s).OtherSys);
+    fmt.Fprintf(w, "# Stack = %d / %d\n"u8, s.StackInuse, s.StackSys);
+    fmt.Fprintf(w, "# MSpan = %d / %d\n"u8, s.MSpanInuse, s.MSpanSys);
+    fmt.Fprintf(w, "# MCache = %d / %d\n"u8, s.MCacheInuse, s.MCacheSys);
+    fmt.Fprintf(w, "# BuckHashSys = %d\n"u8, s.BuckHashSys);
+    fmt.Fprintf(w, "# GCSys = %d\n"u8, s.GCSys);
+    fmt.Fprintf(w, "# OtherSys = %d\n"u8, s.OtherSys);
 
-    fmt.Fprintf(w, "# NextGC = %d\n"u8, (~s).NextGC);
-    fmt.Fprintf(w, "# LastGC = %d\n"u8, (~s).LastGC);
-    fmt.Fprintf(w, "# PauseNs = %d\n"u8, (~s).PauseNs);
-    fmt.Fprintf(w, "# PauseEnd = %d\n"u8, (~s).PauseEnd);
-    fmt.Fprintf(w, "# NumGC = %d\n"u8, (~s).NumGC);
-    fmt.Fprintf(w, "# NumForcedGC = %d\n"u8, (~s).NumForcedGC);
-    fmt.Fprintf(w, "# GCCPUFraction = %v\n"u8, (~s).GCCPUFraction);
-    fmt.Fprintf(w, "# DebugGC = %v\n"u8, (~s).DebugGC);
+    fmt.Fprintf(w, "# NextGC = %d\n"u8, s.NextGC);
+    fmt.Fprintf(w, "# LastGC = %d\n"u8, s.LastGC);
+    fmt.Fprintf(w, "# PauseNs = %d\n"u8, s.PauseNs);
+    fmt.Fprintf(w, "# PauseEnd = %d\n"u8, s.PauseEnd);
+    fmt.Fprintf(w, "# NumGC = %d\n"u8, s.NumGC);
+    fmt.Fprintf(w, "# NumForcedGC = %d\n"u8, s.NumForcedGC);
+    fmt.Fprintf(w, "# GCCPUFraction = %v\n"u8, s.GCCPUFraction);
+    fmt.Fprintf(w, "# DebugGC = %v\n"u8, s.DebugGC);
 
     // Also flush out MaxRSS on supported platforms.
     addMaxRSS(w);
@@ -841,12 +847,13 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
 
 // countThreadCreate returns the size of the current ThreadCreateProfile.
 internal static nint countThreadCreate() {
-    var (n, _) = runtime.ThreadCreateProfile(default!);
+    var (n, _) = runtime.ThreadCreateProfile(default);
     return n;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string threadcreateˢ = "threadcreate"u8;
+internal static ref readonly @string threadcreateˢ => ref threadcreateˢᵇ;
+private static readonly @string threadcreateˢᵇ = "threadcreate"u8;
 
 // writeThreadCreate writes the current runtime ThreadCreateProfile to w.
 internal static error writeThreadCreate(io.Writer w, nint debug) {
@@ -864,7 +871,8 @@ internal static nint countGoroutine() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goroutineˢ = "goroutine"u8;
+internal static ref readonly @string goroutineˢ => ref goroutineˢᵇ;
+private static readonly @string goroutineˢᵇ = "goroutine"u8;
 
 // writeGoroutine writes the current runtime GoroutineProfile to w.
 internal static error writeGoroutine(io.Writer w, nint debug) {
@@ -901,7 +909,7 @@ internal static error writeGoroutineLeak(io.Writer w, nint debug) {
         // Otherwise, write the goroutine leak profile.
         return writeRuntimeProfile(w, debug, goroutineleakˢ, pprof_goroutineLeakProfileWithLabels);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -910,7 +918,7 @@ internal static partial error writeGoroutineStacks(io.Writer w) {
     // all the goroutines. Start with 1 MB and try a few times, doubling each time.
     // Give up and use a truncated trace if 64 MB is not enough.
     var buf = new slice<byte>((1 << 20));
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
             buf = buf.slice(0, n);
@@ -933,11 +941,11 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
     // the two calls—so allocate a few extra records for safety
     // and also try again if we're very unlucky.
     // The loop should only execute one iteration in the common case.
-    slice<profilerecord.StackRecord> p = default!;
-    slice<@unsafe.Pointer> labels = default!;
-    var (n, ok) = fetch(default!, default!);
+    slice<profilerecord.StackRecord> p = default;
+    slice<@unsafe.Pointer> labels = default;
+    var (n, ok) = fetch(default, default);
 
-    while (ᐧ) {
+    for (;;) {
         // Allocate room for a slightly bigger profile,
         // in case a few more entries have been added
         // since the call to ThreadProfile.
@@ -1006,7 +1014,7 @@ public static partial error StartCPUProfile(io.Writer w) {
 
         Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
         defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock, ref ᒐ);
-        if (cpu.done == default!) {
+        if (cpu.done == nil) {
             cpu.done = new channel<bool>(0);
         }
         // Double-check.
@@ -1016,9 +1024,9 @@ public static partial error StartCPUProfile(io.Writer w) {
         cpu.profiling = true;
         runtime.SetCPUProfileRate(hz);
         goǃ(profileWriter, w);
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -1034,15 +1042,15 @@ public static partial error StartCPUProfile(io.Writer w) {
 
 internal static void profileWriter(io.Writer w) {
     var b = newProfileBuilder(w);
-    error err = default!;
-    while (ᐧ) {
+    error err = default;
+    for (;;) {
         if (runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
             // see runtime_pprof_readProfile
             time.Sleep(100 * time.Millisecond);
         }
         var (data, tags, eof) = readProfile();
         {
-            var e = b.addCPUData(data, tags); if (e != default! && err == default!) {
+            var e = b.addCPUData(data, tags); if (e != nil && err == nil) {
                 err = e;
             }
         }
@@ -1050,7 +1058,7 @@ internal static void profileWriter(io.Writer w) {
             break;
         }
     }
-    if (err != default!) {
+    if (err != nil) {
         // The runtime should never produce an invalid or truncated profile.
         // It drops records that can't fit into its log buffers.
         throw panic("runtime/pprof: converting profile: " + err.Error());
@@ -1081,18 +1089,19 @@ public static void StopCPUProfile() {
 
 // countBlock returns the number of records in the blocking profile.
 internal static nint countBlock() {
-    var (n, _) = runtime.BlockProfile(default!);
+    var (n, _) = runtime.BlockProfile(default);
     return n;
 }
 
 // countMutex returns the number of records in the mutex profile.
 internal static nint countMutex() {
-    var (n, _) = runtime.MutexProfile(default!);
+    var (n, _) = runtime.MutexProfile(default);
     return n;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string contentionˢ = "contention"u8;
+internal static ref readonly @string contentionˢ => ref contentionˢᵇ;
+private static readonly @string contentionˢᵇ = "contention"u8;
 
 // writeBlock writes the current blocking profile to w.
 internal static error writeBlock(io.Writer w, nint debug) {
@@ -1100,7 +1109,8 @@ internal static error writeBlock(io.Writer w, nint debug) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mutexˢ = "mutex"u8;
+internal static ref readonly @string mutexˢ => ref mutexˢᵇ;
+private static readonly @string mutexˢᵇ = "mutex"u8;
 
 // writeMutex writes the current mutex profile to w.
 internal static error writeMutex(io.Writer w, nint debug) {
@@ -1108,14 +1118,16 @@ internal static error writeMutex(io.Writer w, nint debug) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string contentionsˢ = "contentions"u8;
-internal static readonly @string delayˢ = "delay"u8;
+internal static ref readonly @string contentionsˢ => ref contentionsˢᵇ;
+private static readonly @string contentionsˢᵇ = "contentions"u8;
+internal static ref readonly @string delayˢ => ref delayˢᵇ;
+private static readonly @string delayˢᵇ = "delay"u8;
 
 // writeProfileInternal writes the current blocking or mutex profile depending on the passed parameters.
 internal static error writeProfileInternal(io.Writer w, nint debug, @string name, Func<slice<profilerecord.BlockProfileRecord>, (nint, bool)> runtimeProfile) {
-    slice<profilerecord.BlockProfileRecord> p = default!;
-    var (n, ok) = runtimeProfile(default!);
-    while (ᐧ) {
+    slice<profilerecord.BlockProfileRecord> p = default;
+    var (n, ok) = runtimeProfile(default);
+    for (;;) {
         p = new slice<profilerecord.BlockProfileRecord>(n + 50);
         (n, ok) = runtimeProfile(p);
         if (ok) {
@@ -1131,7 +1143,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
     }
 
     var b = bufio.NewWriter(w);
-    var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
+    var tw = tabwriter.NewWriter(w, 1, 8, 1, (byte)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
 
     fmt.Fprintf(w, "--- %v:\n"u8, name);
@@ -1142,13 +1154,13 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
     var expandedStack = pprof_makeProfStack();
     foreach (var i in range(p)) {
         var r = Ꮡ(p, i);
-        fmt.Fprintf(w, "%v %v @"u8, (~r).Cycles, (~r).Count);
-        nint nΔ1 = expandInlinedFrames(expandedStack, (~r).Stack);
+        fmt.Fprintf(w, "%v %v @"u8, r.Cycles, r.Count);
+        nint nΔ1 = expandInlinedFrames(expandedStack, r.Stack);
         var stack = expandedStack.slice(0, nΔ1);
         foreach (var (_, pc) in stack) {
             fmt.Fprintf(w, " %#x"u8, pc);
         }
-        fmt.Fprint(w, (@string)"\n"u8);
+        fmt.Fprint(w, "\n");
         if (debug > 0) {
             printStackRecord(w, stack, true);
         }

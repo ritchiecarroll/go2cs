@@ -25,41 +25,45 @@ using static global::go.go.doc_internal_test_package;
 partial class doc_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataˢ = "testdata"u8;
-internal static readonly @string examplesˢ = "examples"u8;
-internal static readonly @string wantˢ = "want"u8;
-internal static readonly @string gotˢ = "got"u8;
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
+internal static ref readonly @string examplesˢ => ref examplesˢᵇ;
+private static readonly @string examplesˢᵇ = "examples"u8;
+internal static ref readonly @string wantˢ => ref wantˢᵇ;
+private static readonly @string wantˢᵇ = "want"u8;
+internal static ref readonly @string gotˢ => ref gotˢᵇ;
+private static readonly @string gotˢᵇ = "got"u8;
 
-public static void TestExamples(ж<testing.T> Ꮡt) {
+public static void TestExamples(ж<testing.T> t) {
     @string dir = filepath.Join(testdataˢ, examplesˢ);
     var (filenames, err) = filepath.Glob(filepath.Join(dir, "*.go"));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     foreach (var (_, filename) in filenames) {
-        Ꮡt.Run(strings.TrimSuffix(filepath.Base(filename), ".go"u8), (ж<testing.T> tΔ1) => {
+        t.Run(strings.TrimSuffix(filepath.Base(filename), ".go"), (ж<testing.T> tΔ1) => {
             var fset = token.NewFileSet();
-            var (astFile, errΔ1) = parser.ParseFile(fset, filename, default!, parser.ParseComments);
-            if (errΔ1 != default!) {
+            var (astFile, errΔ1) = parser.ParseFile(fset, filename, default, parser.ParseComments);
+            if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
-            @string goldenFilename = strings.TrimSuffix(filename, ".go"u8) + ".golden"u8;
+            @string goldenFilename = strings.TrimSuffix(filename, ".go") + ".golden"u8;
             (var archive, errΔ1) = txtar.ParseFile(goldenFilename);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 tΔ1.Fatal(errΔ1);
             }
             var golden = new map<@string, @string>{};
-            foreach (var (_, f) in (~archive).Files) {
+            foreach (var (_, f) in archive.Files) {
                 golden[f.Name] = strings.TrimSpace((@string)f.Data);
             }
 
             // Collect the results of doc.Examples in a map keyed by example name.
             var examples = new map<@string, ж<Δdoc.Example>>{};
             foreach (var (_, e) in Δdoc.Examples(astFile)) {
-                examples[(~e).Name] = e;
+                examples[e.Name] = e;
                 // Treat missing sections in the golden as empty.
-                foreach (var (_, kind) in new @string[]{"Play"u8, "Output"u8}.slice()) {
-                    @string key = (~e).Name + "."u8 + kind;
+                foreach (var (_, kind) in slice<@string>(["Play", "Output"])) {
+                    @string key = e.Name + "."u8 + kind;
                     {
                         var (_, ok) = golden[key, ꟷ]; if (!ok) {
                             golden[key] = ""u8;
@@ -71,29 +75,33 @@ public static void TestExamples(ж<testing.T> Ꮡt) {
             // Each section in the golden file corresponds to an example we expect
             // to see.
             foreach (var (sectionName, want) in golden) {
-                var (name, kind, found) = strings.Cut(sectionName, "."u8);
+                var (name, kind, found) = strings.Cut(sectionName, ".");
                 if (!found) {
-                    tΔ1.Fatalf("bad section name %q, want EXAMPLE_NAME.KIND"u8, sectionName);
+                    tΔ1.Fatalf("bad section name %q, want EXAMPLE_NAME.KIND", sectionName);
                 }
                 var ex = examples[name];
                 if (ex == nil) {
-                    tΔ1.Fatalf("no example named %q"u8, name);
+                    tΔ1.Fatalf("no example named %q", name);
                 }
 
-                @string got = default!;
+                @string got = default;
                 var exprᴛ1 = kind;
-                if (exprᴛ1 == "Play"u8) {
-                    got = strings.TrimSpace(formatFile(tΔ1, fset, (~ex).Play));
+                switch (ᐧ) {
+                case {} when exprᴛ1 == "Play"u8: {
+                    got = strings.TrimSpace(formatFile(tΔ1, fset, ex.Play));
+                    break;
                 }
-                else if (exprᴛ1 == "Output"u8) {
-                    got = strings.TrimSpace((~ex).Output);
+                case {} when exprᴛ1 == "Output"u8: {
+                    got = strings.TrimSpace(ex.Output);
+                    break;
                 }
-                else { /* default: */
-                    tΔ1.Fatalf("bad section kind %q"u8, kind);
-                }
+                default: {
+                    tΔ1.Fatalf("bad section kind %q", kind);
+                    break;
+                }}
 
                 if (got != want) {
-                    tΔ1.Errorf("%s mismatch:\n%s"u8, sectionName,
+                    tΔ1.Errorf("%s mismatch:\n%s", sectionName,
                         diff.Diff(wantˢ, slice<byte>(want), gotˢ, slice<byte>(got)));
                 }
             }
@@ -102,29 +110,34 @@ public static void TestExamples(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nilˢ = "<nil>"u8;
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
-internal static @string formatFile(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset, ж<ast.File> Ꮡn) {
-    Ꮡt.Helper();
-    if (Ꮡn == nil) {
+internal static @string formatFile(ж<testing.T> t, ж<token.FileSet> fset, ж<ast.File> n) {
+    t.Helper();
+    if (n == nil) {
         return nilˢ;
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var err = format.Node(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡfset, Ꮡn.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = format.Node(new doc_test_package.bytes_BufferжWriter(Ꮡbuf), fset, n.OrTypedNil()); if (err != nil) {
+            t.Fatal(err);
         }
     }
     return Ꮡbuf.String();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string srcGoˢ = "src.go"u8;
-internal static readonly @string srcTestGoˢ = "src_test.go"u8;
-internal static readonly @string exampleComPˢ = "example.com/p"u8;
+internal static ref readonly @string srcGoˢ => ref srcGoˢᵇ;
+private static readonly @string srcGoˢᵇ = "src.go"u8;
+internal static ref readonly @string srcTestGoˢ => ref srcTestGoˢᵇ;
+private static readonly @string srcTestGoˢᵇ = "src_test.go"u8;
+internal static ref readonly @string exampleComPˢ => ref exampleComPˢᵇ;
+private static readonly @string exampleComPˢᵇ = "example.com/p"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ = """
+internal static ref readonly @string srcᶜ => ref srcᶜᵇ;
+private static readonly @string srcᶜᵇ = """
 
 // This is the package comment.
 package p
@@ -139,7 +152,8 @@ func Greet(who string) {
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string testᶜ = """
+internal static ref readonly @string testᶜ => ref testᶜᵇ;
+private static readonly @string testᶜᵇ = """
 
 package p_test
 
@@ -160,20 +174,20 @@ public static void ExampleNewFromFiles() {
 
     // Create the AST by parsing src and test.
     var fset = token.NewFileSet();
-    var files = new ж<ast.File>[]{
+    var files = slice<ж<ast.File>>([
         mustParse(fset, srcGoˢ, src),
         mustParse(fset, srcTestGoˢ, test)
-    }.slice();
+    ]);
 
     // Compute package documentation with examples.
     var (p, err) = Δdoc.NewFromFiles(fset, files, exampleComPˢ);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
-    fmt.Printf("package %s - %s"u8, (~p).Name, (~p).Doc);
-    fmt.Printf("func %s - %s"u8, (~(~p).Funcs[0]).Name, (~(~p).Funcs[0]).Doc);
-    fmt.Printf(" ⤷ example with suffix %q - %s"u8, (~(~(~p).Funcs[0]).Examples[0]).Suffix, (~(~(~p).Funcs[0]).Examples[0]).Doc);
+    fmt.Printf("package %s - %s"u8, p.Name, p.Doc);
+    fmt.Printf("func %s - %s"u8, p.Funcs[0].Name, p.Funcs[0].Doc);
+    fmt.Printf(" ⤷ example with suffix %q - %s"u8, p.Funcs[0].Examples[0].Suffix, p.Funcs[0].Examples[0].Doc);
 
     // Output:
     // package p - This is the package comment.
@@ -182,7 +196,8 @@ public static void ExampleNewFromFiles() {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ1 = """
+internal static ref readonly @string srcᶜ1 => ref srcᶜ1ᵇ;
+private static readonly @string srcᶜ1ᵇ = """
 
 package p
 
@@ -228,7 +243,8 @@ func (GType[T]) M() {}
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string testᶜ1 = """
+internal static ref readonly @string testᶜ1 => ref testᶜ1ᵇ;
+private static readonly @string testᶜ1ᵇ = """
 
 package p_test
 
@@ -298,85 +314,85 @@ func ExampleGType_M_suffix() {}
 
 """u8.Raw();
 
-public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
+public static void TestClassifyExamples(ж<testing.T> t) {
     @string src = srcᶜ1;
     @string test = testᶜ1;
 
     // Parse literal source code as a *doc.Package.
     var fset = token.NewFileSet();
-    var files = new ж<ast.File>[]{
+    var files = slice<ж<ast.File>>([
         mustParse(fset, srcGoˢ, src),
         mustParse(fset, srcTestGoˢ, test)
-    }.slice();
+    ]);
     var (p, err) = Δdoc.NewFromFiles(fset, files, exampleComPˢ);
-    if (err != default!) {
-        Ꮡt.Fatalf("doc.NewFromFiles: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("doc.NewFromFiles: %v", err);
     }
 
     // Collect the association of examples to top-level identifiers.
     var got = new map<@string, slice<@string>>{};
-    got[""u8] = exampleNames((~p).Examples);
-    foreach (var (_, f) in (~p).Funcs) {
-        got[(~f).Name] = exampleNames((~f).Examples);
+    got[""u8] = exampleNames(p.Examples);
+    foreach (var (_, f) in p.Funcs) {
+        got[f.Name] = exampleNames(f.Examples);
     }
-    foreach (var (_, tΔ1) in (~p).Types) {
-        got[(~tΔ1).Name] = exampleNames((~tΔ1).Examples);
-        foreach (var (_, f) in (~tΔ1).Funcs) {
-            got[(~f).Name] = exampleNames((~f).Examples);
+    foreach (var (_, tΔ1) in p.Types) {
+        got[tΔ1.Name] = exampleNames(tΔ1.Examples);
+        foreach (var (_, f) in tΔ1.Funcs) {
+            got[f.Name] = exampleNames(f.Examples);
         }
-        foreach (var (_, m) in (~tΔ1).Methods) {
-            got[(~tΔ1).Name + "."u8 + (~m).Name] = exampleNames((~m).Examples);
+        foreach (var (_, m) in tΔ1.Methods) {
+            got[tΔ1.Name + "."u8 + m.Name] = exampleNames(m.Examples);
         }
     }
 
     var want = new map<@string, slice<@string>>{
-        [""u8] = new @string[]{""u8, "suffix"u8, "suffix_xX_X_x"u8}.slice(), // Package-level examples.
+        [""] = slice<@string>(["", "suffix", "suffix_xX_X_x"]), // Package-level examples.
 
-        ["Type1"u8] = new @string[]{""u8, "foo_Suffix"u8, "func2"u8, "suffix"u8}.slice(),
-        ["Type1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
-        ["Type1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+        ["Type1"] = slice<@string>(["", "foo_Suffix", "func2", "suffix"]),
+        ["Type1_Foo"] = slice<@string>(["", "suffix"]),
+        ["Type1_foo"] = slice<@string>(["", "suffix"]),
 
-        ["Func1"u8] = new @string[]{""u8, "foo_Suffix"u8, "suffix"u8}.slice(),
-        ["Func1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
-        ["Func1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+        ["Func1"] = slice<@string>(["", "foo_Suffix", "suffix"]),
+        ["Func1_Foo"] = slice<@string>(["", "suffix"]),
+        ["Func1_foo"] = slice<@string>(["", "suffix"]),
 
-        ["Type1.Func1"u8] = new @string[]{""u8, "foo_Suffix"u8, "suffix"u8}.slice(),
-        ["Type1.Func1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
-        ["Type1.Func1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+        ["Type1.Func1"] = slice<@string>(["", "foo_Suffix", "suffix"]),
+        ["Type1.Func1_Foo"] = slice<@string>(["", "suffix"]),
+        ["Type1.Func1_foo"] = slice<@string>(["", "suffix"]),
 
-        ["Uembed.Func1"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+        ["Uembed.Func1"] = slice<@string>(["", "suffix"]),
 
         // These are implementation dependent due to the ambiguous parsing.
-        ["Conflict_Conflict"u8] = new @string[]{""u8, "suffix"u8}.slice(),
-        ["Conflict_conflict"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+        ["Conflict_Conflict"] = slice<@string>(["", "suffix"]),
+        ["Conflict_conflict"] = slice<@string>(["", "suffix"]),
 
-        ["GFunc"u8] = new @string[]{""u8, "suffix"u8}.slice(),
-        ["GType.M"u8] = new @string[]{""u8, "suffix"u8}.slice()
+        ["GFunc"] = slice<@string>(["", "suffix"]),
+        ["GType.M"] = slice<@string>(["", "suffix"])
     };
 
     foreach (var (id, _) in got) {
         if (!reflect.DeepEqual(got[id], want[id])) {
-            Ꮡt.Errorf("classification mismatch for %q:\ngot  %q\nwant %q"u8, id, got[id], want[id]);
+            t.Errorf("classification mismatch for %q:\ngot  %q\nwant %q", id, got[id], want[id]);
         }
         delete(want, id);
     }
     if (len(want) > 0) {
-        Ꮡt.Errorf("did not find:\n%q"u8, want);
+        t.Errorf("did not find:\n%q", want);
     }
 }
 
 internal static slice<@string> /*out*/ exampleNames(slice<ж<Δdoc.Example>> exs) {
-    slice<@string> @out = default!;
+    slice<@string> @out = default;
 
     foreach (var (_, ex) in exs) {
-        @out = append(@out, (~ex).Suffix);
+        @out = append(@out, ex.Suffix);
     }
     return @out;
 }
 
-internal static ж<ast.File> mustParse(ж<token.FileSet> Ꮡfset, @string filename, @string src) {
-    var (f, err) = parser.ParseFile(Ꮡfset, filename, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
-    if (err != default!) {
+internal static ж<ast.File> mustParse(ж<token.FileSet> fset, @string filename, @string src) {
+    var (f, err) = parser.ParseFile(fset, filename, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
+    if (err != nil) {
         throw panic(err);
     }
     return f;

@@ -27,7 +27,7 @@ public static ΔType Underlying(this ж<Slice> Ꮡs) {
 }
 
 public static @string String(this ж<Slice> Ꮡs) {
-    return TypeString(new SliceжΔType(Ꮡs), default!);
+    return TypeString(new SliceжΔType(Ꮡs), default);
 }
 
 } // end types_package

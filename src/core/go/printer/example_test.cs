@@ -17,15 +17,15 @@ using static global::go.go.printer_internal_test_package;
 partial class printer_test_package {
 
 internal static (ж<ast.FuncDecl> fun, ж<token.FileSet> fset) parseFunc(@string filename, @string functionname) {
-    ж<ast.FuncDecl> fun = default!;
-    ж<token.FileSet> fset = default!;
+    ж<ast.FuncDecl> fun = default;
+    ж<token.FileSet> fset = default;
 
     fset = token.NewFileSet();
     {
-        var (@file, err) = parser.ParseFile(fset, filename, default!, 0); if (err == default!) {
-            foreach (var (_, d) in (~@file).Decls) {
+        var (@file, err) = parser.ParseFile(fset, filename, default, 0); if (err == nil) {
+            foreach (var (_, d) in @file.Decls) {
                 {
-                    var (f, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && (~(~f).Name).Name == functionname) {
+                    var (f, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && f.Name.Name == functionname) {
                         fun = f;
                         return (fun, fset);
                     }
@@ -37,8 +37,10 @@ internal static (ж<ast.FuncDecl> fun, ж<token.FileSet> fset) parseFunc(@string
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string exampleTestGoˢ = "example_test.go"u8;
-internal static readonly @string printSelfˢ = "printSelf"u8;
+internal static ref readonly @string exampleTestGoˢ => ref exampleTestGoˢᵇ;
+private static readonly @string exampleTestGoˢᵇ = "example_test.go"u8;
+internal static ref readonly @string printSelfˢ => ref printSelfˢᵇ;
+private static readonly @string printSelfˢᵇ = "printSelf"u8;
 
 internal static void printSelf() {
     // Parse source file and extract the AST without comments for
@@ -51,13 +53,13 @@ internal static void printSelf() {
     // about the original source formatting and can add additional
     // line breaks where they were present in the source.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-    printer.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, (~funcAST).Body.OrTypedNil());
+    printer.Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, funcAST.Body.OrTypedNil());
 
     // Remove braces {} enclosing the function body, unindent,
     // and trim leading and trailing white space.
     @string s = Ꮡbuf.String();
     s = s.slice(1, len(s) - 1);
-    s = strings.TrimSpace(strings.ReplaceAll(s, "\n\t"u8, "\n"u8));
+    s = strings.TrimSpace(strings.ReplaceAll(s, "\n\t", "\n"));
 
     // Print the cleaned-up body text to stdout.
     fmt.Println(s);

@@ -21,19 +21,24 @@ partial class sql_test_package {
 internal static ж<Δsql.DB> pool; // Database connection pool.
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string personIdToFindˢ = "person ID to find"u8;
-internal static readonly @string dsnˢ = "dsn"u8;
-internal static readonly @string dsnˢ2 = "DSN"u8;
-internal static readonly @string connectionDataSourceNameˢ = "connection data source name"u8;
+internal static ref readonly @string personIdToFindˢ => ref personIdToFindˢᵇ;
+private static readonly @string personIdToFindˢᵇ = "person ID to find"u8;
+internal static ref readonly @string dsnˢ => ref dsnˢᵇ;
+private static readonly @string dsnˢᵇ = "dsn"u8;
+internal static ref readonly @string dsnˢ2 => ref dsnˢ2ᵇ;
+private static readonly @string dsnˢ2ᵇ = "DSN"u8;
+internal static ref readonly @string connectionDataSourceNameˢ => ref connectionDataSourceNameˢᵇ;
+private static readonly @string connectionDataSourceNameˢᵇ = "connection data source name"u8;
 internal static readonly object missingDsnFlagˢ = (@string)"missing dsn flag"u8;
 internal static readonly object missingPersonIdˢ = (@string)"missing person ID"u8;
-internal static readonly @string driverNameˢ = "driver-name"u8;
+internal static ref readonly @string driverNameˢ => ref driverNameˢᵇ;
+private static readonly @string driverNameˢᵇ = "driver-name"u8;
 internal static readonly object unableToUseDataSourceˢ = (@string)"unable to use data source name"u8;
 
 public static partial void Example_openDBCLI() {
     GoFrame ᒐ = default;
     try {
-        var id = flag.Int64("id"u8, 0, personIdToFindˢ);
+        var id = flag.Int64("id", 0, personIdToFindˢ);
         var dsn = flag.String(dsnˢ, os.Getenv(dsnˢ2), connectionDataSourceNameˢ);
         flag.Parse();
 
@@ -43,11 +48,11 @@ public static partial void Example_openDBCLI() {
         if (id.Value == 0) {
             log.Fatal(missingPersonIdˢ);
         }
-        error err = default!;
+        error err = default;
 
         // Opening a driver typically will not attempt to connect to the database.
         (pool, err) = Δsql.Open(driverNameˢ, dsn.Value);
-        if (err != default!) {
+        if (err != nil) {
             // This will not be a connection error, but a DSN parse error or
             // another initialization error.
             log.Fatal(unableToUseDataSourceˢ, err);
@@ -63,7 +68,7 @@ public static partial void Example_openDBCLI() {
         defer(() => stopʗ1(), ref ᒐ);
 
         var appSignal = new channel<osꓸSignal>(3);
-        signal.Notify(appSignal.WithDirection(GoChanDir.Send), os.Interrupt);
+        signal.Notify(appSignal.AsSendOnly(), os.Interrupt);
 
         var appSignalʗ1 = appSignal;
         var stopʗ2 = stop;
@@ -90,8 +95,8 @@ public static void Ping(context.Context ctx) {
         defer(() => cancelʗ1(), ref ᒐ);
 
         {
-            var err = pool.PingContext(ctx); if (err != default!) {
-                log.Fatalf("unable to connect to database: %v"u8, err);
+            var err = pool.PingContext(ctx); if (err != nil) {
+                log.Fatalf("unable to connect to database: %v", err);
             }
         }
     }
@@ -100,7 +105,8 @@ public static void Ping(context.Context ctx) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string selectPNameFromPeopleAsPˢ = "select p.name from people as p where p.id = :id;"u8;
+internal static ref readonly @string selectPNameFromPeopleAsPˢ => ref selectPNameFromPeopleAsPˢᵇ;
+private static readonly @string selectPNameFromPeopleAsPˢᵇ = "select p.name from people as p where p.id = :id;"u8;
 internal static readonly object unableToExecuteSearchˢ = (@string)"unable to execute search query"u8;
 internal static readonly object nameˢ = (@string)"name="u8;
 
@@ -114,8 +120,8 @@ public static void Query(context.Context ctx, int64 id) {
         defer(() => cancelʗ1(), ref ᒐ);
 
         ref var name = ref heap(new @string(), out var Ꮡname);
-        var err = pool.QueryRowContext(ctx, selectPNameFromPeopleAsPˢ, Δsql.Named("id"u8, id)).Scan(Ꮡname);
-        if (err != default!) {
+        var err = pool.QueryRowContext(ctx, selectPNameFromPeopleAsPˢ, Δsql.Named("id", id)).Scan(Ꮡname);
+        if (err != nil) {
             log.Fatal(unableToExecuteSearchˢ, err);
         }
         log.Println(nameˢ, name);

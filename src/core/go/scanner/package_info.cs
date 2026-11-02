@@ -52,7 +52,13 @@ using static go.go.scanner_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Scanner))]
+[assembly: GoFieldAccess(typeof(go.go.token_package.ΔPosition))]
+[assembly: GoFieldAccess(typeof(ΔError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,8 +68,8 @@ using static go.go.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/scanner/errors.go", "errors.cs", "ABYwkqaUAAYQkqiQppCigKSCgriClIKUgpSssqiygoKCgoKCgqbYkpSklKqigpSssoCCgqSC")]
-[assembly: global::go.GoPositionMap("go/scanner/scanner.go", "scanner.cs", "ADVokgALHtKCgoKClJKUxoKCgqqClKSCtoKUgoKClLyigpQACTQAEQSClIKCgoKUgoKCgoKUgoK4goKUpqLcxIKCgpSmgoKClKaCgpS4goKCgpKClIKCgoK4lILugoLKgqaCpqaaxIKUgpSCgriUgqyykoKUgoKCgpSmpoKCyoKCkriCgrimgoKCpoKmgqaCAAIQ0gAIEoKUlILugoKCyoKClJSCgpSCpoKUpJSmgKKAooAAAhAACQKCgoKCgpKClIKmgoKClIKm9oKClIKCgraCgoKClIK0grSCtIK2uIKCgpSCpoK4gIKUtKSCgoKUgoKCpILIgoKmgoKUgoCCyAAIBoKUpKSUqJKCgqaCgoKCyoKCgpSCxrSClLaCpv7ClIKSlIKkpIKkgqSCpIKClIKmgoKCgoKClIKUgoKmgoKm5pSUgoKCgpSCgpSUgoKUgoKC3IKm1pSUgoKCgpSCgpSCuKaCgoLcgoKm1pSUgoKCgoKUgoKUgriCgoKmpoKCAAMU0oKClKaCgoKUgoKUpoKCgpSCgoKClJQAAkIAIgKCpoKCpqamgoCkgpSClKaCxoK0gpSCgpTagqSCgoKkgoKkgoKCgqS2goKCgrakgqSkgqSkgqSkgqSCgraCgraklIKmgpSUlJSCprakpIKClLakpKSCgpS2pLamgpSmgoLGgqY=", "53-55:1")]
+[assembly: GoPositionMap("go/scanner/errors.go", "errors.cs", "ABYwkqaUAAYQkqiQppCigKSCgriClIKUgpSssqiygoKCgoKCgqbokpSklKqigpSssoCCgpSC")]
+[assembly: GoPositionMap("go/scanner/scanner.go", "scanner.cs", "ADVokgAPHtKCgoKClJKUxoKCgqqClJSCtoKUgoKClLyigpQACTQAEQSClIKCgoKUgoKCgoKUgoK4goKUpqLsxIKCgpSmgoKClKaCgpS4goKCgoKClIKCgoK4lILugoLKgqaCpqaaxIKUgpSCgriUgqyykoKUgoKCgpSmpoKCyoKCgriCgrimgoKCpoKmgqaCAAIQ0gAIEoKUlILugoKCyoKClJSCgpSCpoKUpJSmgKKAooAAAhAACQKCgoKCgoKClIKmgoKClIKmAAoGgoKUgoKCpoKCgoKUgrSCtIK0gra4goKClIKmgriAgpS0pIKCgpSCgoKUgsiCgqaCgpSCgILIAAwGgpSkpJSokoKCpoKCgoLKgoKClILGtIKUtoKmAAoOwpSCkpSCpLSCtIK0grSCgpSCpoKCgoKCgpSClIKCpoKCpgAIBpSUgoKCgpSCgpSUgoKUgoKC3IKm5pSUgoKCgpSCgpSCuKaCgoLcgoKm5pSUgoKCgoKUgoKUgriCgoKmpoKCAAMU0oKClKaCgoKUgoKUpoKCgpSCgoKClJQAAkIAIgKCpoKCpqamgoCkgpSClLaCxoK0gpSCgpTqgqSCgoK0goK0goKCgrTGgoKCgsa0grS0grS0grS0grSCgsaCgsa0lIKmgpSUlJSCpsa0tIKClMa0tLSCgpTGtMamgpSmgoLWgqY=", "53-55:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

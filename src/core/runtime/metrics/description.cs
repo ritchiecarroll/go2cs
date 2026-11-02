@@ -51,373 +51,373 @@ partial struct Description {
 
 // The English language descriptions below must be kept in sync with the
 // descriptions of each metric in doc.go by running 'go generate'.
-[GoLazy] partial class lazyᴛallDesc { internal static slice<Description> allDesc = new Description[]{
+[GoLazy] partial class lazyᴛallDesc { internal static slice<Description> allDesc = slice<Description>([
     new(
-        Name: "/cgo/go-to-c-calls:calls"u8,
-        ΔDescription: "Count of calls made from Go to C by the current process."u8,
+        Name: "/cgo/go-to-c-calls:calls",
+        ΔDescription: "Count of calls made from Go to C by the current process.",
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/gc/mark/assist:cpu-seconds"u8,
+        Name: "/cpu/classes/gc/mark/assist:cpu-seconds",
         ΔDescription: "Estimated total CPU time goroutines spent performing GC tasks "u8 + "to assist the GC and prevent it from falling behind the application. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/gc/mark/dedicated:cpu-seconds"u8,
+        Name: "/cpu/classes/gc/mark/dedicated:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent performing GC tasks on "u8 + "processors (as defined by GOMAXPROCS) dedicated to those tasks. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/gc/mark/idle:cpu-seconds"u8,
+        Name: "/cpu/classes/gc/mark/idle:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent performing GC tasks on "u8 + "spare CPU resources that the Go scheduler could not otherwise find "u8 + "a use for. This should be subtracted from the total GC CPU time to "u8 + "obtain a measure of compulsory GC CPU time. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/gc/pause:cpu-seconds"u8,
+        Name: "/cpu/classes/gc/pause:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent with the application paused by "u8 + "the GC. Even if only one thread is running during the pause, this is "u8 + "computed as GOMAXPROCS times the pause latency because nothing else "u8 + "can be executing. This is the exact sum of samples in "u8 + "/sched/pauses/total/gc:seconds if each sample is multiplied by "u8 + "GOMAXPROCS at the time it is taken. This metric is an overestimate, "u8 + "and not directly comparable to system CPU time measurements. Compare "u8 + "only with other /cpu/classes metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/gc/total:cpu-seconds"u8,
+        Name: "/cpu/classes/gc/total:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent performing GC tasks. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics. Sum of all metrics in /cpu/classes/gc."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/idle:cpu-seconds"u8,
+        Name: "/cpu/classes/idle:cpu-seconds",
         ΔDescription: "Estimated total available CPU time not spent executing any Go or Go runtime code. "u8 + "In other words, the part of /cpu/classes/total:cpu-seconds that was unused. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/scavenge/assist:cpu-seconds"u8,
+        Name: "/cpu/classes/scavenge/assist:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent returning unused memory to the "u8 + "underlying platform in response eagerly to memory pressure. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/scavenge/background:cpu-seconds"u8,
+        Name: "/cpu/classes/scavenge/background:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent performing background tasks "u8 + "to return unused memory to the underlying platform. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/scavenge/total:cpu-seconds"u8,
+        Name: "/cpu/classes/scavenge/total:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent performing tasks that return "u8 + "unused memory to the underlying platform. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics. Sum of all metrics in /cpu/classes/scavenge."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/total:cpu-seconds"u8,
+        Name: "/cpu/classes/total:cpu-seconds",
         ΔDescription: "Estimated total available CPU time for user Go code "u8 + "or the Go runtime, as defined by GOMAXPROCS. In other words, GOMAXPROCS "u8 + "integrated over the wall-clock duration this process has been executing for. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics. Sum of all metrics in /cpu/classes."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/cpu/classes/user:cpu-seconds"u8,
+        Name: "/cpu/classes/user:cpu-seconds",
         ΔDescription: "Estimated total CPU time spent running user Go code. This may "u8 + "also include some small amount of time spent in the Go runtime. "u8 + "This metric is an overestimate, and not directly comparable to "u8 + "system CPU time measurements. Compare only with other /cpu/classes "u8 + "metrics."u8,
         Kind: KindFloat64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/cleanups/executed:cleanups"u8,
+        Name: "/gc/cleanups/executed:cleanups",
         ΔDescription: "Approximate total count of cleanup functions (created by runtime.AddCleanup) "u8 + "executed by the runtime. Subtract /gc/cleanups/queued:cleanups to approximate "u8 + "cleanup queue length. Useful for detecting slow cleanups holding up the queue."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/cleanups/queued:cleanups"u8,
+        Name: "/gc/cleanups/queued:cleanups",
         ΔDescription: "Approximate total count of cleanup functions (created by runtime.AddCleanup) "u8 + "queued by the runtime for execution. Subtract from /gc/cleanups/executed:cleanups "u8 + "to approximate cleanup queue length. Useful for detecting slow cleanups holding up the queue."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/cycles/automatic:gc-cycles"u8,
-        ΔDescription: "Count of completed GC cycles generated by the Go runtime."u8,
+        Name: "/gc/cycles/automatic:gc-cycles",
+        ΔDescription: "Count of completed GC cycles generated by the Go runtime.",
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/cycles/forced:gc-cycles"u8,
-        ΔDescription: "Count of completed GC cycles forced by the application."u8,
+        Name: "/gc/cycles/forced:gc-cycles",
+        ΔDescription: "Count of completed GC cycles forced by the application.",
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/cycles/total:gc-cycles"u8,
-        ΔDescription: "Count of all completed GC cycles."u8,
+        Name: "/gc/cycles/total:gc-cycles",
+        ΔDescription: "Count of all completed GC cycles.",
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/finalizers/executed:finalizers"u8,
+        Name: "/gc/finalizers/executed:finalizers",
         ΔDescription: "Total count of finalizer functions (created by runtime.SetFinalizer) "u8 + "executed by the runtime. Subtract /gc/finalizers/queued:finalizers to approximate "u8 + "finalizer queue length. Useful for detecting finalizers overwhelming the queue, "u8 + "either by being too slow, or by there being too many of them."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/finalizers/queued:finalizers"u8,
+        Name: "/gc/finalizers/queued:finalizers",
         ΔDescription: "Total count of finalizer functions (created by runtime.SetFinalizer) and "u8 + "queued by the runtime for execution. Subtract from /gc/finalizers/executed:finalizers "u8 + "to approximate finalizer queue length. Useful for detecting slow finalizers holding up the queue."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/gogc:percent"u8,
+        Name: "/gc/gogc:percent",
         ΔDescription: "Heap size target percentage configured by the user, otherwise 100. This "u8 + "value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent "u8 + "function."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/gomemlimit:bytes"u8,
+        Name: "/gc/gomemlimit:bytes",
         ΔDescription: "Go runtime memory limit configured by the user, otherwise "u8 + "math.MaxInt64. This value is set by the GOMEMLIMIT environment variable, and "u8 + "the runtime/debug.SetMemoryLimit function."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/heap/allocs-by-size:bytes"u8,
+        Name: "/gc/heap/allocs-by-size:bytes",
         ΔDescription: "Distribution of heap allocations by approximate size. "u8 + "Bucket counts increase monotonically. "u8 + "Note that this does not include tiny objects as defined by "u8 + "/gc/heap/tiny/allocs:objects, only tiny blocks."u8,
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/gc/heap/allocs:bytes"u8,
-        ΔDescription: "Cumulative sum of memory allocated to the heap by the application."u8,
+        Name: "/gc/heap/allocs:bytes",
+        ΔDescription: "Cumulative sum of memory allocated to the heap by the application.",
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/heap/allocs:objects"u8,
+        Name: "/gc/heap/allocs:objects",
         ΔDescription: "Cumulative count of heap allocations triggered by the application. "u8 + "Note that this does not include tiny objects as defined by "u8 + "/gc/heap/tiny/allocs:objects, only tiny blocks."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/heap/frees-by-size:bytes"u8,
+        Name: "/gc/heap/frees-by-size:bytes",
         ΔDescription: "Distribution of freed heap allocations by approximate size. "u8 + "Bucket counts increase monotonically. "u8 + "Note that this does not include tiny objects as defined by "u8 + "/gc/heap/tiny/allocs:objects, only tiny blocks."u8,
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/gc/heap/frees:bytes"u8,
-        ΔDescription: "Cumulative sum of heap memory freed by the garbage collector."u8,
+        Name: "/gc/heap/frees:bytes",
+        ΔDescription: "Cumulative sum of heap memory freed by the garbage collector.",
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/heap/frees:objects"u8,
+        Name: "/gc/heap/frees:objects",
         ΔDescription: "Cumulative count of heap allocations whose storage was freed "u8 + "by the garbage collector. "u8 + "Note that this does not include tiny objects as defined by "u8 + "/gc/heap/tiny/allocs:objects, only tiny blocks."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/heap/goal:bytes"u8,
-        ΔDescription: "Heap size target for the end of the GC cycle."u8,
+        Name: "/gc/heap/goal:bytes",
+        ΔDescription: "Heap size target for the end of the GC cycle.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/heap/live:bytes"u8,
-        ΔDescription: "Heap memory occupied by live objects that were marked by the previous GC."u8,
+        Name: "/gc/heap/live:bytes",
+        ΔDescription: "Heap memory occupied by live objects that were marked by the previous GC.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/heap/objects:objects"u8,
-        ΔDescription: "Number of objects, live or unswept, occupying heap memory."u8,
+        Name: "/gc/heap/objects:objects",
+        ΔDescription: "Number of objects, live or unswept, occupying heap memory.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/heap/tiny/allocs:objects"u8,
+        Name: "/gc/heap/tiny/allocs:objects",
         ΔDescription: "Count of small allocations that are packed together into blocks. "u8 + "These allocations are counted separately from other allocations "u8 + "because each individual allocation is not tracked by the runtime, "u8 + "only their block. Each block is already accounted for in "u8 + "allocs-by-size and frees-by-size."u8,
         Kind: KindUint64,
         Cumulative: true
     ),
     new(
-        Name: "/gc/limiter/last-enabled:gc-cycle"u8,
+        Name: "/gc/limiter/last-enabled:gc-cycle",
         ΔDescription: "GC cycle the last time the GC CPU limiter was enabled. "u8 + "This metric is useful for diagnosing the root cause of an out-of-memory "u8 + "error, because the limiter trades memory for CPU time when the GC's CPU "u8 + "time gets too high. This is most likely to occur with use of SetMemoryLimit. "u8 + "The first GC cycle is cycle 1, so a value of 0 indicates that it was never enabled."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/pauses:seconds"u8,
-        ΔDescription: "Deprecated. Prefer the identical /sched/pauses/total/gc:seconds."u8,
+        Name: "/gc/pauses:seconds",
+        ΔDescription: "Deprecated. Prefer the identical /sched/pauses/total/gc:seconds.",
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/gc/scan/globals:bytes"u8,
-        ΔDescription: "The total amount of global variable space that is scannable."u8,
+        Name: "/gc/scan/globals:bytes",
+        ΔDescription: "The total amount of global variable space that is scannable.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/scan/heap:bytes"u8,
-        ΔDescription: "The total amount of heap space that is scannable."u8,
+        Name: "/gc/scan/heap:bytes",
+        ΔDescription: "The total amount of heap space that is scannable.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/scan/stack:bytes"u8,
-        ΔDescription: "The number of bytes of stack that were scanned last GC cycle."u8,
+        Name: "/gc/scan/stack:bytes",
+        ΔDescription: "The number of bytes of stack that were scanned last GC cycle.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/scan/total:bytes"u8,
-        ΔDescription: "The total amount space that is scannable. Sum of all metrics in /gc/scan."u8,
+        Name: "/gc/scan/total:bytes",
+        ΔDescription: "The total amount space that is scannable. Sum of all metrics in /gc/scan.",
         Kind: KindUint64
     ),
     new(
-        Name: "/gc/stack/starting-size:bytes"u8,
-        ΔDescription: "The stack size of new goroutines."u8,
+        Name: "/gc/stack/starting-size:bytes",
+        ΔDescription: "The stack size of new goroutines.",
         Kind: KindUint64,
         Cumulative: false
     ),
     new(
-        Name: "/memory/classes/heap/free:bytes"u8,
+        Name: "/memory/classes/heap/free:bytes",
         ΔDescription: "Memory that is completely free and eligible to be returned to the underlying system, "u8 + "but has not been. This metric is the runtime's estimate of free address space that is backed by "u8 + "physical memory."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/heap/objects:bytes"u8,
-        ΔDescription: "Memory occupied by live objects and dead objects that have not yet been marked free by the garbage collector."u8,
+        Name: "/memory/classes/heap/objects:bytes",
+        ΔDescription: "Memory occupied by live objects and dead objects that have not yet been marked free by the garbage collector.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/heap/released:bytes"u8,
+        Name: "/memory/classes/heap/released:bytes",
         ΔDescription: "Memory that is completely free and has been returned to the underlying system. This "u8 + "metric is the runtime's estimate of free address space that is still mapped into the process, "u8 + "but is not backed by physical memory."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/heap/stacks:bytes"u8,
+        Name: "/memory/classes/heap/stacks:bytes",
         ΔDescription: "Memory allocated from the heap that is reserved for stack space, whether or not it is currently in-use. "u8 + "Currently, this represents all stack memory for goroutines. It also includes all OS thread stacks in non-cgo programs. "u8 + "Note that stacks may be allocated differently in the future, and this may change."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/heap/unused:bytes"u8,
-        ΔDescription: "Memory that is reserved for heap objects but is not currently used to hold heap objects."u8,
+        Name: "/memory/classes/heap/unused:bytes",
+        ΔDescription: "Memory that is reserved for heap objects but is not currently used to hold heap objects.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/metadata/mcache/free:bytes"u8,
-        ΔDescription: "Memory that is reserved for runtime mcache structures, but not in-use."u8,
+        Name: "/memory/classes/metadata/mcache/free:bytes",
+        ΔDescription: "Memory that is reserved for runtime mcache structures, but not in-use.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/metadata/mcache/inuse:bytes"u8,
-        ΔDescription: "Memory that is occupied by runtime mcache structures that are currently being used."u8,
+        Name: "/memory/classes/metadata/mcache/inuse:bytes",
+        ΔDescription: "Memory that is occupied by runtime mcache structures that are currently being used.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/metadata/mspan/free:bytes"u8,
-        ΔDescription: "Memory that is reserved for runtime mspan structures, but not in-use."u8,
+        Name: "/memory/classes/metadata/mspan/free:bytes",
+        ΔDescription: "Memory that is reserved for runtime mspan structures, but not in-use.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/metadata/mspan/inuse:bytes"u8,
-        ΔDescription: "Memory that is occupied by runtime mspan structures that are currently being used."u8,
+        Name: "/memory/classes/metadata/mspan/inuse:bytes",
+        ΔDescription: "Memory that is occupied by runtime mspan structures that are currently being used.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/metadata/other:bytes"u8,
-        ΔDescription: "Memory that is reserved for or used to hold runtime metadata."u8,
+        Name: "/memory/classes/metadata/other:bytes",
+        ΔDescription: "Memory that is reserved for or used to hold runtime metadata.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/os-stacks:bytes"u8,
+        Name: "/memory/classes/os-stacks:bytes",
         ΔDescription: "Stack memory allocated by the underlying operating system. "u8 + "In non-cgo programs this metric is currently zero. This may change in the future."u8 + "In cgo programs this metric includes OS thread stacks allocated directly from the OS. "u8 + "Currently, this only accounts for one stack in c-shared and c-archive build modes, "u8 + "and other sources of stacks from the OS are not measured. This too may change in the future."u8,
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/other:bytes"u8,
-        ΔDescription: "Memory used by execution trace buffers, structures for debugging the runtime, finalizer and profiler specials, and more."u8,
+        Name: "/memory/classes/other:bytes",
+        ΔDescription: "Memory used by execution trace buffers, structures for debugging the runtime, finalizer and profiler specials, and more.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/profiling/buckets:bytes"u8,
-        ΔDescription: "Memory that is used by the stack trace hash map used for profiling."u8,
+        Name: "/memory/classes/profiling/buckets:bytes",
+        ΔDescription: "Memory that is used by the stack trace hash map used for profiling.",
         Kind: KindUint64
     ),
     new(
-        Name: "/memory/classes/total:bytes"u8,
-        ΔDescription: "All memory mapped by the Go runtime into the current process as read-write. Note that this does not include memory mapped by code called via cgo or via the syscall package. Sum of all metrics in /memory/classes."u8,
+        Name: "/memory/classes/total:bytes",
+        ΔDescription: "All memory mapped by the Go runtime into the current process as read-write. Note that this does not include memory mapped by code called via cgo or via the syscall package. Sum of all metrics in /memory/classes.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/gomaxprocs:threads"u8,
-        ΔDescription: "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously."u8,
+        Name: "/sched/gomaxprocs:threads",
+        ΔDescription: "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/goroutines-created:goroutines"u8,
-        ΔDescription: "Count of goroutines created since program start."u8,
+        Name: "/sched/goroutines-created:goroutines",
+        ΔDescription: "Count of goroutines created since program start.",
         Cumulative: true,
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/goroutines/not-in-go:goroutines"u8,
-        ΔDescription: "Approximate count of goroutines running or blocked in a system call or cgo call. Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics."u8,
+        Name: "/sched/goroutines/not-in-go:goroutines",
+        ΔDescription: "Approximate count of goroutines running or blocked in a system call or cgo call. Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/goroutines/runnable:goroutines"u8,
-        ΔDescription: "Approximate count of goroutines ready to execute, but not executing. Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics."u8,
+        Name: "/sched/goroutines/runnable:goroutines",
+        ΔDescription: "Approximate count of goroutines ready to execute, but not executing. Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/goroutines/running:goroutines"u8,
-        ΔDescription: "Approximate count of goroutines executing. Always less than or equal to /sched/gomaxprocs:threads. Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics."u8,
+        Name: "/sched/goroutines/running:goroutines",
+        ΔDescription: "Approximate count of goroutines executing. Always less than or equal to /sched/gomaxprocs:threads. Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/goroutines/waiting:goroutines"u8,
-        ΔDescription: "Approximate count of goroutines waiting on a resource (I/O or sync primitives). Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics."u8,
+        Name: "/sched/goroutines/waiting:goroutines",
+        ΔDescription: "Approximate count of goroutines waiting on a resource (I/O or sync primitives). Not guaranteed to add up to /sched/goroutines:goroutines with other goroutine metrics.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/goroutines:goroutines"u8,
-        ΔDescription: "Count of live goroutines."u8,
+        Name: "/sched/goroutines:goroutines",
+        ΔDescription: "Count of live goroutines.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sched/latencies:seconds"u8,
-        ΔDescription: "Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running. Bucket counts increase monotonically."u8,
+        Name: "/sched/latencies:seconds",
+        ΔDescription: "Distribution of the time goroutines have spent in the scheduler in a runnable state before actually running. Bucket counts increase monotonically.",
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/sched/pauses/stopping/gc:seconds"u8,
-        ΔDescription: "Distribution of individual GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total GC-related stop-the-world time (/sched/pauses/total/gc:seconds). During this time, some threads may be executing. Bucket counts increase monotonically."u8,
+        Name: "/sched/pauses/stopping/gc:seconds",
+        ΔDescription: "Distribution of individual GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total GC-related stop-the-world time (/sched/pauses/total/gc:seconds). During this time, some threads may be executing. Bucket counts increase monotonically.",
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/sched/pauses/stopping/other:seconds"u8,
-        ΔDescription: "Distribution of individual non-GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total non-GC-related stop-the-world time (/sched/pauses/total/other:seconds). During this time, some threads may be executing. Bucket counts increase monotonically."u8,
+        Name: "/sched/pauses/stopping/other:seconds",
+        ΔDescription: "Distribution of individual non-GC-related stop-the-world stopping latencies. This is the time it takes from deciding to stop the world until all Ps are stopped. This is a subset of the total non-GC-related stop-the-world time (/sched/pauses/total/other:seconds). During this time, some threads may be executing. Bucket counts increase monotonically.",
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/sched/pauses/total/gc:seconds"u8,
-        ΔDescription: "Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (this is measured directly in /sched/pauses/stopping/gc:seconds), during which some threads may still be running. Bucket counts increase monotonically."u8,
+        Name: "/sched/pauses/total/gc:seconds",
+        ΔDescription: "Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (this is measured directly in /sched/pauses/stopping/gc:seconds), during which some threads may still be running. Bucket counts increase monotonically.",
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/sched/pauses/total/other:seconds"u8,
-        ΔDescription: "Distribution of individual non-GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (measured directly in /sched/pauses/stopping/other:seconds). Bucket counts increase monotonically."u8,
+        Name: "/sched/pauses/total/other:seconds",
+        ΔDescription: "Distribution of individual non-GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again. Some of this time is spent getting all threads to stop (measured directly in /sched/pauses/stopping/other:seconds). Bucket counts increase monotonically.",
         Kind: KindFloat64Histogram,
         Cumulative: true
     ),
     new(
-        Name: "/sched/threads/total:threads"u8,
-        ΔDescription: "The current count of live threads that are owned by the Go runtime."u8,
+        Name: "/sched/threads/total:threads",
+        ΔDescription: "The current count of live threads that are owned by the Go runtime.",
         Kind: KindUint64
     ),
     new(
-        Name: "/sync/mutex/wait/total:seconds"u8,
-        ΔDescription: "Approximate cumulative time goroutines have spent blocked on a sync.Mutex, sync.RWMutex, or runtime-internal lock. This metric is useful for identifying global changes in lock contention. Collect a mutex or block profile using the runtime/pprof package for more detailed contention data."u8,
+        Name: "/sync/mutex/wait/total:seconds",
+        ΔDescription: "Approximate cumulative time goroutines have spent blocked on a sync.Mutex, sync.RWMutex, or runtime-internal lock. This metric is useful for identifying global changes in lock contention. Collect a mutex or block profile using the runtime/pprof package for more detailed contention data.",
         Kind: KindFloat64,
         Cumulative: true
     )
-}.slice(); }
+]); }
 
 [GoInit] internal static void init() {
     // Insert all the non-default-reporting GODEBUGs into the table,

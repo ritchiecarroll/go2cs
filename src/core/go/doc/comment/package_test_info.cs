@@ -7,12 +7,6 @@
 global using static global::go.go.doc.comment_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -32,11 +26,19 @@ using static global::go.go.doc.comment_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: global::go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.Code))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.Doc))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.DocLink))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.Heading))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.Link))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.LinkDef))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.List))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.ListItem))]
+[assembly: GoFieldAccess(typeof(global::go.go.doc.comment_package.Paragraph))]
+[assembly: GoFieldAccess(typeof(go.@internal.txtar_package.Archive))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -46,11 +48,11 @@ using static global::go.go.doc.comment_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/doc/comment/old_test.go", "old_test.cs", "AA8WABMugoKC+gAcPoKCgoI=")]
-[assembly: global::go.GoPositionMap("go/doc/comment/parse_test.go", "parse_test.cs", "AAoUkg==")]
-[assembly: global::go.GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABceooKCgoKmgoKCppSCgoI=")]
-[assembly: global::go.GoPositionMap("go/doc/comment/testdata_test.go", "testdata_test.cs", "ABskgoKClIK4goKUlIKGlKbKlIKSgoKClIKCgqaClIKCgoKUgpikpKSkAAITAAEYgu6CgoKmgqS2goKCgoKUtoKCyLaCgsiCtoK2goLIgraCtoK2goLIgpSCyIKUgsiCgoLagraCyKKCgg==", "28-33:1;34-41:2;43-49:3;51-91:4")]
-[assembly: global::go.GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg1IKClIKmgoKCgoKClIKUppKSgoKSkqaCgoKUgpSCgpSClIKClKSCkoKUlIK4goIABxgACgqCgoKClIKUgoKCgoKClIKClIKCgtyCgpSCgoKU", "41-88:1;45-86:1.1")]
+[assembly: GoPositionMap("go/doc/comment/old_test.go", "old_test.cs", "AA8WABMugoKC+gAcPoKCgoI=")]
+[assembly: GoPositionMap("go/doc/comment/parse_test.go", "parse_test.cs", "AAoUkg==")]
+[assembly: GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABseooKCgoKmgoKCppSCgoI=")]
+[assembly: GoPositionMap("go/doc/comment/testdata_test.go", "testdata_test.cs", "AB4kgoKClIK4goKUlIKGlKbKlIKSgoKClIKCgqaClIKCgoKUgqS0tLS0tKSC7oKCgqaCpLaCgoKCgpS2goLItoKCyIK2graCgsiCtoK2graCgsiClILIgpSCyIKCgtqCtoLIooKC", "28-33:1;34-41:2;43-49:3;51-91:4")]
+[assembly: GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg5IKClIKmgoKCgoKClIKUppKSgoKSkqaCgoKUgpSCgpSClIKClJSCgoKUlIK4goIABxgACgqCgoKClIKUgoKCgoKClIKClIKCgtyCgpSCgoKU", "41-88:1;45-86:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.doc;

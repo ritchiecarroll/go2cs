@@ -23,17 +23,17 @@ using path;
 
 partial class buildcfg_package {
 
-public static readonly ж<@string> ᏑGOROOT = new StaticBox<@string>(os.Getenv("GOROOT"u8));
+public static readonly ж<@string> ᏑGOROOT = new StaticBox<@string>(os.Getenv("GOROOT"));
 public static ref @string GOROOT => ref ((StaticBox<@string>)ᏑGOROOT).ValueSlot; // cached for efficiency
 public static readonly ж<@string> ᏑGOARCH = new StaticBox<@string>(default(@string));
 public static ref @string GOARCH => ref ((StaticBox<@string>)ᏑGOARCH).ValueSlot;
-internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH"u8, defaultGOARCH); }
+internal static void initᴛGOARCH() { GOARCH = envOr("GOARCH", defaultGOARCH); }
 public static readonly ж<@string> ᏑGOOS = new StaticBox<@string>(default(@string));
 public static ref @string GOOS => ref ((StaticBox<@string>)ᏑGOOS).ValueSlot;
-internal static void initᴛGOOS() { GOOS = envOr("GOOS"u8, defaultGOOS); }
+internal static void initᴛGOOS() { GOOS = envOr("GOOS", defaultGOOS); }
 public static readonly ж<@string> ᏑGO386 = new StaticBox<@string>(default(@string));
 public static ref @string GO386 => ref ((StaticBox<@string>)ᏑGO386).ValueSlot;
-internal static void initᴛGO386() { GO386 = envOr("GO386"u8, DefaultGO386); }
+internal static void initᴛGO386() { GO386 = envOr("GO386", DefaultGO386); }
 public static readonly ж<nint> ᏑGOAMD64 = new StaticBox<nint>(default(nint));
 public static ref nint GOAMD64 => ref ((StaticBox<nint>)ᏑGOAMD64).ValueSlot;
 internal static void initᴛGOAMD64() { GOAMD64 = goamd64(); }
@@ -76,7 +76,7 @@ public static error Error;
 
 // Check exits the program with a fatal error if Error is non-nil.
 public static void Check() {
-    if (Error != default!) {
+    if (Error != nil) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %v\n"u8, filepath.Base(os.Args[0]), Error);
         os.Exit(2);
     }
@@ -92,38 +92,42 @@ internal static @string envOr(@string key, @string value) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goamd64ˢ = "GOAMD64"u8;
+internal static ref readonly @string goamd64ˢ => ref goamd64ˢᵇ;
+private static readonly @string goamd64ˢᵇ = "GOAMD64"u8;
 
 internal static nint goamd64() {
     {
         @string v = envOr(goamd64ˢ, DefaultGOAMD64);
         var exprᴛ1 = v;
-        if (exprᴛ1 == "v1"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "v1"u8: {
             return 1;
         }
-        if (exprᴛ1 == "v2"u8) {
+        case {} when exprᴛ1 == "v2"u8: {
             return 2;
         }
-        if (exprᴛ1 == "v3"u8) {
+        case {} when exprᴛ1 == "v3"u8: {
             return 3;
         }
-        if (exprᴛ1 == "v4"u8) {
+        case {} when exprᴛ1 == "v4"u8: {
             return 4;
-        }
+        }}
     }
     Error = fmt.Errorf("invalid GOAMD64: must be v1, v2, v3, v4"u8);
-    return (nint)((byte)(DefaultGOAMD64[len("v")] - (rune)'0'));
+    return (nint)((byte)(DefaultGOAMD64[len("v")] - '0'));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gofips140ˢ = "GOFIPS140"u8;
+internal static ref readonly @string gofips140ˢ => ref gofips140ˢᵇ;
+private static readonly @string gofips140ˢᵇ = "GOFIPS140"u8;
 
 internal static @string gofips140() {
     @string v = envOr(gofips140ˢ, DefaultGOFIPS140);
     var exprᴛ1 = v;
-    if (exprᴛ1 == "off"u8 || exprᴛ1 == "latest"u8 || exprᴛ1 == "inprocess"u8 || exprᴛ1 == "certified"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "off"u8 || exprᴛ1 == "latest"u8 || exprᴛ1 == "inprocess"u8 || exprᴛ1 == "certified"u8: {
         return v;
-    }
+    }}
     if (isFIPSVersion(v)) {
         return v;
     }
@@ -134,7 +138,7 @@ internal static @string gofips140() {
 // isFIPSVersion reports whether v is a valid FIPS version,
 // of the form v1.Y.Z or v1.Y.Z-hhhhhhhh or v1.Y.Z-rcN.
 internal static bool isFIPSVersion(@string v) {
-    (v, var ok) = strings.CutPrefix(v, "v1."u8);
+    (v, var ok) = strings.CutPrefix(v, "v1.");
     if (!ok) {
         return false;
     }
@@ -144,7 +148,7 @@ internal static bool isFIPSVersion(@string v) {
         }
     }
     {
-        (v, ok) = strings.CutPrefix(v, "."u8); if (!ok) {
+        (v, ok) = strings.CutPrefix(v, "."); if (!ok) {
             return false;
         }
     }
@@ -157,13 +161,13 @@ internal static bool isFIPSVersion(@string v) {
         return true;
     }
     {
-        (v, ok) = strings.CutPrefix(v, "-rc"u8); if (ok) {
+        (v, ok) = strings.CutPrefix(v, "-rc"); if (ok) {
             (v, ok) = cutNum(v);
             return ok && v == ""u8;
         }
     }
     {
-        (v, ok) = strings.CutPrefix(v, "-"u8); if (ok) {
+        (v, ok) = strings.CutPrefix(v, "-"); if (ok) {
             return len(v) == 8;
         }
     }
@@ -174,7 +178,7 @@ internal static bool isFIPSVersion(@string v) {
 // in s, returning the rest and whether such text was found.
 internal static (@string rest, bool ok) cutNum(@string s) {
     nint i = 0;
-    while (i < len(s) && (rune)'0' <= s[i] && s[i] <= (rune)'9') {
+    while (i < len(s) && '0' <= s[i] && s[i] <= '9') {
         i++;
     }
     return (s.slice(i), i > 0);
@@ -187,7 +191,7 @@ partial struct GoarmFeatures {
 
 public static @string String(this GoarmFeatures g) {
     @string armStr = strconv.Itoa(g.Version);
-    if (g.SoftFloat){
+    if (g.SoftFloat) {
         armStr += ",softfloat"u8;
     } else {
         armStr += ",hardfloat"u8;
@@ -196,23 +200,26 @@ public static @string String(this GoarmFeatures g) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goarmˢ = "GOARM"u8;
+internal static ref readonly @string goarmˢ => ref goarmˢᵇ;
+private static readonly @string goarmˢᵇ = "GOARM"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string softFloatOptᶜ = ",softfloat"u8;
+internal static ref readonly @string softFloatOptᶜ => ref softFloatOptᶜᵇ;
+private static readonly @string softFloatOptᶜᵇ = ",softfloat"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string hardFloatOptᶜ = ",hardfloat"u8;
+internal static ref readonly @string hardFloatOptᶜ => ref hardFloatOptᶜᵇ;
+private static readonly @string hardFloatOptᶜᵇ = ",hardfloat"u8;
 
 internal static GoarmFeatures /*g*/ goarm() {
-    GoarmFeatures g = default!;
+    GoarmFeatures g = default;
 
     @string softFloatOpt = softFloatOptᶜ;
     @string hardFloatOpt = hardFloatOptᶜ;
     @string def = DefaultGOARM;
     if (GOOS == "android"u8 && GOARCH == "arm"u8) {
         // Android arm devices always support GOARM=7.
-        def = "7"u8;
+        def = "7";
     }
     @string v = envOr(goarmˢ, def);
 
@@ -228,19 +235,24 @@ internal static GoarmFeatures /*g*/ goarm() {
     }
 
     var exprᴛ1 = v;
-    if (exprᴛ1 == "5"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "5"u8: {
         g.Version = 5;
+        break;
     }
-    else if (exprᴛ1 == "6"u8) {
+    case {} when exprᴛ1 == "6"u8: {
         g.Version = 6;
+        break;
     }
-    else if (exprᴛ1 == "7"u8) {
+    case {} when exprᴛ1 == "7"u8: {
         g.Version = 7;
+        break;
     }
-    else { /* default: */
+    default: {
         Error = fmt.Errorf("invalid GOARM: must start with 5, 6, or 7, and may optionally end in either %q or %q"u8, hardFloatOpt, softFloatOpt);
-        g.Version = (nint)((byte)(def[0] - (rune)'0'));
-    }
+        g.Version = (nint)((byte)(def[0] - '0'));
+        break;
+    }}
 
     // 5 defaults to softfloat. 6 and 7 default to hardfloat.
     if (!floatSpecified && g.Version == 5) {
@@ -273,14 +285,16 @@ public static @string String(this Goarm64Features g) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string lseOptᶜ = ",lse"u8;
+internal static ref readonly @string lseOptᶜ => ref lseOptᶜᵇ;
+private static readonly @string lseOptᶜᵇ = ",lse"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string cryptoOptᶜ = ",crypto"u8;
+internal static ref readonly @string cryptoOptᶜ => ref cryptoOptᶜᵇ;
+private static readonly @string cryptoOptᶜᵇ = ",crypto"u8;
 
 public static (Goarm64Features g, error e) ParseGoarm64(@string v) {
-    Goarm64Features g = default!;
-    error e = default!;
+    Goarm64Features g = default;
+    error e = default;
 
     @string lseOpt = lseOptᶜ;
     @string cryptoOpt = cryptoOptᶜ;
@@ -288,7 +302,7 @@ public static (Goarm64Features g, error e) ParseGoarm64(@string v) {
     g.LSE = false;
     g.Crypto = false;
     // We allow any combination of suffixes, in any order
-    while (ᐧ) {
+    for (;;) {
         if (strings.HasSuffix(v, lseOpt)) {
             g.LSE = true;
             v = v.slice(0, len(v) - len(lseOpt));
@@ -305,28 +319,33 @@ public static (Goarm64Features g, error e) ParseGoarm64(@string v) {
     }
 
     var exprᴛ1 = v;
-    if (exprᴛ1 == "v8.0"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "v8.0"u8: {
         g.Version = v;
+        break;
     }
-    else if (exprᴛ1 == "v8.1"u8 || exprᴛ1 == "v8.2"u8 || exprᴛ1 == "v8.3"u8 || exprᴛ1 == "v8.4"u8 || exprᴛ1 == "v8.5"u8 || exprᴛ1 == "v8.6"u8 || exprᴛ1 == "v8.7"u8 || exprᴛ1 == "v8.8"u8 || exprᴛ1 == "v8.9"u8 || exprᴛ1 == "v9.0"u8 || exprᴛ1 == "v9.1"u8 || exprᴛ1 == "v9.2"u8 || exprᴛ1 == "v9.3"u8 || exprᴛ1 == "v9.4"u8 || exprᴛ1 == "v9.5"u8) {
+    case {} when exprᴛ1 == "v8.1"u8 || exprᴛ1 == "v8.2"u8 || exprᴛ1 == "v8.3"u8 || exprᴛ1 == "v8.4"u8 || exprᴛ1 == "v8.5"u8 || exprᴛ1 == "v8.6"u8 || exprᴛ1 == "v8.7"u8 || exprᴛ1 == "v8.8"u8 || exprᴛ1 == "v8.9"u8 || exprᴛ1 == "v9.0"u8 || exprᴛ1 == "v9.1"u8 || exprᴛ1 == "v9.2"u8 || exprᴛ1 == "v9.3"u8 || exprᴛ1 == "v9.4"u8 || exprᴛ1 == "v9.5"u8: {
         g.Version = v;
         // LSE extension is mandatory starting from 8.1
         g.LSE = true;
+        break;
     }
-    else { /* default: */
+    default: {
         e = fmt.Errorf("invalid GOARM64: must start with v8.{0-9} or v9.{0-5} and may optionally end in %q and/or %q"u8,
             lseOpt, cryptoOpt);
         g.Version = DefaultGOARM64;
-    }
+        break;
+    }}
 
     return (g, e);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goarm64ˢ = "GOARM64"u8;
+internal static ref readonly @string goarm64ˢ => ref goarm64ˢᵇ;
+private static readonly @string goarm64ˢᵇ = "GOARM64"u8;
 
 internal static Goarm64Features /*g*/ goarm64() {
-    Goarm64Features g = default!;
+    Goarm64Features g = default;
 
     (g, Error) = ParseGoarm64(envOr(goarm64ˢ, DefaultGOARM64));
     return g;
@@ -344,17 +363,16 @@ public static bool Supports(this Goarm64Features g, @string s) {
     var minor = s[3];
 
     // We only accept "v{8-9}.{0-9}. Everything else is malformed.
-    if (major < (rune)'8' || major > (rune)'9' || minor < (rune)'0' || minor > (rune)'9' || s[0] != (rune)'v' || s[2] != (rune)'.') {
+    if (major < '8' || major > '9' || minor < '0' || minor > '9' || s[0] != 'v' || s[2] != '.') {
         return false;
     }
 
     var g_major = g.Version[1];
     var g_minor = g.Version[3];
 
-    if (major == g_major){
+    if (major == g_major) {
         return minor <= g_minor;
-    } else 
-    if (g_major == (rune)'9'){
+    } else if (g_major == '9') {
         // v9.0 diverged from v8.5. This means we should compare with g_minor increased by five.
         return minor <= (byte)(g_minor + 5);
     } else {
@@ -363,76 +381,84 @@ public static bool Supports(this Goarm64Features g, @string s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gomipsˢ = "GOMIPS"u8;
+internal static ref readonly @string gomipsˢ => ref gomipsˢᵇ;
+private static readonly @string gomipsˢᵇ = "GOMIPS"u8;
 
 internal static @string gomips() {
     {
         @string v = envOr(gomipsˢ, DefaultGOMIPS);
         var exprᴛ1 = v;
-        if (exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8: {
             return v;
-        }
+        }}
     }
     Error = fmt.Errorf("invalid GOMIPS: must be hardfloat, softfloat"u8);
     return DefaultGOMIPS;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gomips64ˢ = "GOMIPS64"u8;
+internal static ref readonly @string gomips64ˢ => ref gomips64ˢᵇ;
+private static readonly @string gomips64ˢᵇ = "GOMIPS64"u8;
 
 internal static @string gomips64() {
     {
         @string v = envOr(gomips64ˢ, DefaultGOMIPS64);
         var exprᴛ1 = v;
-        if (exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "hardfloat"u8 || exprᴛ1 == "softfloat"u8: {
             return v;
-        }
+        }}
     }
     Error = fmt.Errorf("invalid GOMIPS64: must be hardfloat, softfloat"u8);
     return DefaultGOMIPS64;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goppc64ˢ = "GOPPC64"u8;
+internal static ref readonly @string goppc64ˢ => ref goppc64ˢᵇ;
+private static readonly @string goppc64ˢᵇ = "GOPPC64"u8;
 
 internal static nint goppc64() {
     {
         @string v = envOr(goppc64ˢ, DefaultGOPPC64);
         var exprᴛ1 = v;
-        if (exprᴛ1 == "power8"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "power8"u8: {
             return 8;
         }
-        if (exprᴛ1 == "power9"u8) {
+        case {} when exprᴛ1 == "power9"u8: {
             return 9;
         }
-        if (exprᴛ1 == "power10"u8) {
+        case {} when exprᴛ1 == "power10"u8: {
             return 10;
-        }
+        }}
     }
     Error = fmt.Errorf("invalid GOPPC64: must be power8, power9, power10"u8);
-    return (nint)((byte)(DefaultGOPPC64[len("power")] - (rune)'0'));
+    return (nint)((byte)(DefaultGOPPC64[len("power")] - '0'));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goriscv64ˢ = "GORISCV64"u8;
+internal static ref readonly @string goriscv64ˢ => ref goriscv64ˢᵇ;
+private static readonly @string goriscv64ˢᵇ = "GORISCV64"u8;
 
 internal static nint goriscv64() {
     {
         @string vΔ1 = envOr(goriscv64ˢ, DefaultGORISCV64);
         var exprᴛ1 = vΔ1;
-        if (exprᴛ1 == "rva20u64"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "rva20u64"u8: {
             return 20;
         }
-        if (exprᴛ1 == "rva22u64"u8) {
+        case {} when exprᴛ1 == "rva22u64"u8: {
             return 22;
         }
-        if (exprᴛ1 == "rva23u64"u8) {
+        case {} when exprᴛ1 == "rva23u64"u8: {
             return 23;
-        }
+        }}
     }
     Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64, rva23u64"u8);
     @string v = DefaultGORISCV64[(int)(len("rva"))..];
-    nint i = strings.IndexFunc(v, (rune r) => r < (rune)'0' || r > (rune)'9');
+    nint i = strings.IndexFunc(v, (rune r) => r < '0' || r > '9');
     var (year, _) = strconv.Atoi(v.slice(0, i));
     return year;
 }
@@ -444,36 +470,43 @@ public partial struct gowasmFeatures {
 //SatConv bool
 //SignExt bool
 public static @string String(this gowasmFeatures f) {
-    slice<@string> flags = default!;
-    return strings.Join(flags, ","u8);
+    slice<@string> flags = default;
+    return strings.Join(flags, ",");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gowasmˢ = "GOWASM"u8;
+internal static ref readonly @string gowasmˢ => ref gowasmˢᵇ;
+private static readonly @string gowasmˢᵇ = "GOWASM"u8;
 
 internal static gowasmFeatures /*f*/ gowasm() {
-    gowasmFeatures f = default!;
+    gowasmFeatures f = default;
 
-    foreach (var opt in range<@string>(strings.SplitSeq(envOr(gowasmˢ, ""u8), ","u8).Invoke)) {
+    foreach (var opt in range<@string>(strings.SplitSeq(envOr(gowasmˢ, ""u8), ",").Invoke)) {
         var exprᴛ1 = opt;
-        if (exprᴛ1 == "satconv"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "satconv"u8: {
             // ignore, always enabled
+            break;
         }
-        else if (exprᴛ1 == "signext"u8) {
+        case {} when exprᴛ1 == "signext"u8: {
             // ignore, always enabled
+            break;
         }
-        else if (exprᴛ1 == ""u8) {
+        case {} when exprᴛ1 == ""u8: {
             // ignore
+            break;
         }
-        else { /* default: */
+        default: {
             Error = fmt.Errorf("invalid GOWASM: no such feature %q"u8, opt);
-        }
+            break;
+        }}
     }
     return f;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goExtlinkEnabledˢ = "GO_EXTLINK_ENABLED"u8;
+internal static ref readonly @string goExtlinkEnabledˢ => ref goExtlinkEnabledˢᵇ;
+private static readonly @string goExtlinkEnabledˢᵇ = "GO_EXTLINK_ENABLED"u8;
 
 public static @string Getgoextlinkenabled() {
     return envOr(goExtlinkEnabledˢ, defaultGO_EXTLINK_ENABLED);
@@ -488,7 +521,7 @@ internal static slice<@string> toolTags() {
 internal static slice<@string> experimentTags() {
     var listᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> list = default!;
+    slice<@string> list = default;
     // For each experiment that has been enabled in the toolchain, define a
     // build tag with the same name but prefixed by "goexperiment." which can be
     // used for compiling alternative files for the experiment. This allows
@@ -502,39 +535,41 @@ internal static slice<@string> experimentTags() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string go386ˢ = "GO386"u8;
+internal static ref readonly @string go386ˢ => ref go386ˢᵇ;
+private static readonly @string go386ˢᵇ = "GO386"u8;
 
 // GOGOARCH returns the name and value of the GO$GOARCH setting.
 // For example, if GOARCH is "amd64" it might return "GOAMD64", "v2".
 public static (@string name, @string value) GOGOARCH() {
     var exprᴛ1 = GOARCH;
-    if (exprᴛ1 == "386"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8: {
         return (go386ˢ, GO386);
     }
-    if (exprᴛ1 == "amd64"u8) {
+    case {} when exprᴛ1 == "amd64"u8: {
         return (goamd64ˢ, fmt.Sprintf("v%d"u8, GOAMD64));
     }
-    if (exprᴛ1 == "arm"u8) {
+    case {} when exprᴛ1 == "arm"u8: {
         return (goarmˢ, GOARM.String());
     }
-    if (exprᴛ1 == "arm64"u8) {
+    case {} when exprᴛ1 == "arm64"u8: {
         return (goarm64ˢ, GOARM64.String());
     }
-    if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8) {
+    case {} when exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8: {
         return (gomipsˢ, GOMIPS);
     }
-    if (exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
+    case {} when exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8: {
         return (gomips64ˢ, GOMIPS64);
     }
-    if (exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8) {
+    case {} when exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8: {
         return (goppc64ˢ, fmt.Sprintf("power%d"u8, GOPPC64));
     }
-    if (exprᴛ1 == "riscv64"u8) {
+    case {} when exprᴛ1 == "riscv64"u8: {
         return (goriscv64ˢ, fmt.Sprintf("rva%du64"u8, GORISCV64));
     }
-    if (exprᴛ1 == "wasm"u8) {
+    case {} when exprᴛ1 == "wasm"u8: {
         return (gowasmˢ, GOWASM.String());
-    }
+    }}
     return ("", "");
 }
 
@@ -544,29 +579,30 @@ internal static slice<@string> gogoarchTags() {
     var listᴷΔ2 = new stackAppend<@string>(moves: true);
 
     var exprᴛ1 = GOARCH;
-    if (exprᴛ1 == "386"u8) {
-        return new @string[]{GOARCH + "."u8 + GO386}.slice();
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8: {
+        return slice<@string>([GOARCH + "."u8 + GO386]);
     }
-    if (exprᴛ1 == "amd64"u8) {
-        slice<@string> list = default!;
+    case {} when exprᴛ1 == "amd64"u8: {
+        slice<@string> list = default;
         for (nint i = 1; i <= GOAMD64; i++) {
             list = append(listᴷ, list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
         }
         list = move2heap(listᴷ, list);
         return list;
     }
-    if (exprᴛ1 == "arm"u8) {
-        slice<@string> list = default!;
+    case {} when exprᴛ1 == "arm"u8: {
+        slice<@string> list = default;
         for (nint i = 5; i <= GOARM.Version; i++) {
             list = append(listᴷΔ1, list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
         }
         list = move2heap(listᴷΔ1, list);
         return list;
     }
-    if (exprᴛ1 == "arm64"u8) {
-        slice<@string> list = default!;
-        nint major = (nint)((byte)(GOARM64.Version[1] - (rune)'0'));
-        nint minor = (nint)((byte)(GOARM64.Version[3] - (rune)'0'));
+    case {} when exprᴛ1 == "arm64"u8: {
+        slice<@string> list = default;
+        nint major = (nint)((byte)(GOARM64.Version[1] - '0'));
+        nint minor = (nint)((byte)(GOARM64.Version[3] - '0'));
         for (nint i = 0; i <= minor; i++) {
             list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, major, i));
         }
@@ -578,22 +614,22 @@ internal static slice<@string> gogoarchTags() {
         }
         return list;
     }
-    if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8) {
-        return new @string[]{GOARCH + "."u8 + GOMIPS}.slice();
+    case {} when exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8: {
+        return slice<@string>([GOARCH + "."u8 + GOMIPS]);
     }
-    if (exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
-        return new @string[]{GOARCH + "."u8 + GOMIPS64}.slice();
+    case {} when exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8: {
+        return slice<@string>([GOARCH + "."u8 + GOMIPS64]);
     }
-    if (exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8) {
-        slice<@string> list = default!;
+    case {} when exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8: {
+        slice<@string> list = default;
         for (nint i = 8; i <= GOPPC64; i++) {
             list = append(listᴷΔ2, list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
         }
         list = move2heap(listᴷΔ2, list);
         return list;
     }
-    if (exprᴛ1 == "riscv64"u8) {
-        var list = new @string[]{GOARCH + "."u8 + "rva20u64"u8}.slice();
+    case {} when exprᴛ1 == "riscv64"u8: {
+        var list = slice<@string>([GOARCH + "."u8 + "rva20u64"u8]);
         if (GORISCV64 >= 22) {
             list = append(list, GOARCH + "."u8 + "rva22u64"u8);
         }
@@ -602,15 +638,15 @@ internal static slice<@string> gogoarchTags() {
         }
         return list;
     }
-    if (exprᴛ1 == "wasm"u8) {
-        slice<@string> list = default!;
+    case {} when exprᴛ1 == "wasm"u8: {
+        slice<@string> list = default;
         // SatConv is always enabled
         list = append(list, GOARCH + ".satconv"u8);
         // SignExt is always enabled
         list = append(list, GOARCH + ".signext"u8);
         return list;
-    }
-    return default!;
+    }}
+    return default;
 }
 
 } // end buildcfg_package

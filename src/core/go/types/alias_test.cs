@@ -14,9 +14,12 @@ using static global::go.go.types_internal_test_package;
 partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string godebugˢ = "GODEBUG"u8;
-internal static readonly @string gotypesalias1ˢ = "gotypesalias=1"u8;
-internal static readonly @string packagePTypeAbABTypeˢ = """
+internal static ref readonly @string godebugˢ => ref godebugˢᵇ;
+private static readonly @string godebugˢᵇ = "GODEBUG"u8;
+internal static ref readonly @string gotypesalias1ˢ => ref gotypesalias1ˢᵇ;
+private static readonly @string gotypesalias1ˢᵇ = "gotypesalias=1"u8;
+internal static ref readonly @string packagePTypeAbABTypeˢ => ref packagePTypeAbABTypeˢᵇ;
+private static readonly @string packagePTypeAbABTypeˢᵇ = """
 package p
 
 type AB = A[B]
@@ -31,66 +34,66 @@ type B struct {
 
 type A[T any] struct{}
 """u8.Raw();
-internal static readonly @string pGoˢ = "p.go"u8;
+internal static ref readonly @string pGoˢ => ref pGoˢᵇ;
+private static readonly @string pGoˢᵇ = "p.go"u8;
 
-public static void TestIssue74181(ж<testing.T> Ꮡt) {
-    Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
+public static void TestIssue74181(ж<testing.T> t) {
+    t.Setenv(godebugˢ, gotypesalias1ˢ);
 
     @string src = packagePTypeAbABTypeˢ;
 
     var fset = token.NewFileSet();
     var (@file, err) = parser.ParseFile(fset, pGoˢ, src, parser.ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatalf("could not parse: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("could not parse: %v", err);
     }
 
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new types.Config(nil);
-    (var pkg, err) = Ꮡconf.Check((~(~@file).Name).Name, fset, new ж<ast.File>[]{@file}.slice(), Ꮡ(new typesꓸInfo(nil)));
-    if (err != default!) {
-        Ꮡt.Fatalf("could not type check: %v"u8, err);
+    ref var conf = ref heap<types.Config>(new types.Config(), out var Ꮡconf);
+    (var pkg, err) = Ꮡconf.Check(@file.Name.Name, fset, slice<ж<ast.File>>([@file]), Ꮡ(new typesꓸInfo()));
+    if (err != nil) {
+        t.Fatalf("could not type check: %v", err);
     }
 
-    var b = pkg.Scope().Lookup("B"u8).Type();
+    var b = pkg.Scope().Lookup("B").Type();
     {
         var (n, ok) = b._<ж<types.Named>>(ᐧ); if (ok) {
             {
                 var (s, okΔ1) = n.Underlying()._<ж<types.Struct>>(ᐧ); if (okΔ1) {
                     var got = s.Field(0).Type();
-                    var want = types.NewPointer(pkg.Scope().Lookup("AB"u8).Type());
+                    var want = types.NewPointer(pkg.Scope().Lookup("AB").Type());
                     if (!types.Identical(got, new types.PointerжΔType(want))) {
-                        Ꮡt.Errorf("wrong type for f: got %v, want %v"u8, got, want.OrTypedNil());
+                        t.Errorf("wrong type for f: got %v, want %v", got, want.OrTypedNil());
                     }
                     return;
                 }
             }
         }
     }
-    Ꮡt.Errorf("unexpected type for B: %v"u8, b);
+    t.Errorf("unexpected type for B: %v", b);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePTypeABUndeclaredˢ = """
+internal static ref readonly @string packagePTypeABUndeclaredˢ => ref packagePTypeABUndeclaredˢᵇ;
+private static readonly @string packagePTypeABUndeclaredˢᵇ = """
 package p
 
 type A = B // undeclared
 """u8.Raw();
 
-public static void TestPartialTypeCheckUndeclaredAliasPanic(ж<testing.T> Ꮡt) {
-    Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
+public static void TestPartialTypeCheckUndeclaredAliasPanic(ж<testing.T> t) {
+    t.Setenv(godebugˢ, gotypesalias1ˢ);
 
     @string src = packagePTypeABUndeclaredˢ;
 
     var fset = token.NewFileSet();
     var (@file, err) = parser.ParseFile(fset, pGoˢ, src, parser.ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatalf("could not parse: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("could not parse: %v", err);
     }
 
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new types.Config(nil); // no error handler, panic
-    var (pkg, _) = Ꮡconf.Check((~(~@file).Name).Name, fset, new ж<ast.File>[]{@file}.slice(), Ꮡ(new typesꓸInfo(nil)));
-    var a = pkg.Scope().Lookup("A"u8).Type();
+    ref var conf = ref heap<types.Config>(new types.Config(), out var Ꮡconf); // no error handler, panic
+    var (pkg, _) = Ꮡconf.Check(@file.Name.Name, fset, slice<ж<ast.File>>([@file]), Ꮡ(new typesꓸInfo()));
+    var a = pkg.Scope().Lookup("A").Type();
 
     {
         var (alias, ok) = a._<ж<types.Alias>>(ᐧ); if (ok) {
@@ -98,12 +101,12 @@ public static void TestPartialTypeCheckUndeclaredAliasPanic(ж<testing.T> Ꮡt) 
             var want = types.Typ[types.Invalid];
 
             if (!types.Identical(got, new types.BasicжΔType(want))) {
-                Ꮡt.Errorf("wrong type for B: got %v, want %v"u8, got, want.OrTypedNil());
+                t.Errorf("wrong type for B: got %v, want %v", got, want.OrTypedNil());
             }
             return;
         }
     }
-    Ꮡt.Errorf("unexpected type for A: %v"u8, a);
+    t.Errorf("unexpected type for A: %v", a);
 }
 
 } // end types_test_package

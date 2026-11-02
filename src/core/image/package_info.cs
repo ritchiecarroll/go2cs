@@ -79,7 +79,7 @@ using static go.image_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -89,11 +89,11 @@ using static go.image_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/format.go", "format.cs", "AA8gAA4q4oKCggAJFJKAgqSokoKUgoKmqJKCgoKCpq7CgoKClIKuwoKCgpSC")]
-[assembly: go.GoPositionMap("image/geom.go", "geom.cs", "ABImkqiSqJKokqiSqJKsopKCgoKUgoKUqJIACBKSAA4gkqiSqJKokt6S3pIABRKygoKUgpSCgpSClKqigpSClIKUgtyClKiSgpSClIKUgpSClIKUqJKqoqiSrJKCuKyigpSClKiSgpSokoKUqJKokgAIFrKClIKUqqKClIKClIKClIKClKqigpSCgpQ=")]
-[assembly: go.GoPositionMap("image/image.go", "image.cs", "AFq+AfKCgpQADRyApICkgqaCgpSCgoKCgoIABxCCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgqaCgpSCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKClIKCAAcUoqaCgpSCgoKCgoKCgoKCpoKClIKCgoKCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCpoKClIKCqqKmgoKUgoKCgoKCpoKClIKCgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgqaCgpSCggAHFKKmgoKUgoKCgoKCgoKCgqaCgpSCgoKClIKCgoKCgoKCgqaCgpSCgoKCgoKCgoKqoriClIIABhCSgpSSgoKCpoKU2JIAESSApICkgqaCgoKmgoKUgqqipoKClIKmgoKUgqaCgpSCqqK4gpSCAAYQkoKUkoKCgqaClNiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgpSCgqaCgpSCgqqiuIKUggAGEJKClJKCgoKmgpTYkgARJICkgKSCpoKCgqaCgpSCqqKmgoKUgqaCgqaCgqaCgpSCqqK4gpSCAAYQktiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgqaCgoKmgoKUgoKqoriClIIABhCS2JIAESSApICkgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgoKmgoKUgoKCgoKqoriClIIABhCS2JIAEyiApICkgoKUgpSCpoKClIKClIKUggAHFKKmgoKUgqaCgpSCpoKClIKmgoKUgqqiuIK4ggAHEpKCkoKClIKUgoKUgoKm2qI=", "", "", "241=pixelBufferLength/1/1/1,Dx/1/1/2;366=pixelBufferLength/1/1/1,Dx/1/1/2;501=pixelBufferLength/1/1/1,Dx/1/1/2;653=pixelBufferLength/1/1/1,Dx/1/1/2;769=pixelBufferLength/1/1/1,Dx/1/1/2;888=pixelBufferLength/1/1/1,Dx/1/1/2;992=pixelBufferLength/1/1/1,Dx/1/1/2;1099=pixelBufferLength/1/1/1,Dx/1/1/2;1215=pixelBufferLength/1/1/1,Dx/1/1/2;1325=Intersect/1/1/3;1363=pixelBufferLength/1/1/1,Dx/1/1/2")]
-[assembly: go.GoPositionMap("image/names.go", "names.cs", "AAsalJSUAAcSgqaCpoKmgKSApIKCqJKCqJI=")]
-[assembly: go.GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ABwugpSkpKSkpJQAGDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSkpqqiuIK4goIAChaCptKClIKkgqSCpIKkgraClKqixqiCpoKCgoIAEyiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClKqitqiCpoKCgoKC", "", "", "206=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2;331=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2")]
+[assembly: GoPositionMap("image/format.go", "format.cs", "AA8gAA4q4oKCggAJFJKAgqSokoKUgoKmqJKCgoKCpq7CgoKClIKuwoKCgpSC")]
+[assembly: GoPositionMap("image/geom.go", "geom.cs", "ABImkqiSqJKokqiSqJKsopKCgoKUgoKUqJIACBKSAA4gkqiSqJKokt6S3pIABRKygoKUgpSCgpSClKqigpSClIKUgtyClKiSgpSClIKUgpSClIKUqJKqoqiSrJKCuKyigpSClKiSgpSokoKUqJKokgAIFrKClIKUqqKClIKClIKClIKClKqigpSCgpQ=")]
+[assembly: GoPositionMap("image/image.go", "image.cs", "AFq+AfKCgpQADRyApICkgqaCgpSCgoKCgoIABxCCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgqaCgpSCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTokgARJICkgKSCpoKClIKCAAcUoqaCgpSCgoKCgoKCgoKCpoKClIKCgoKCgoKCgqqiuIKUggAGEJKClJKCgoKmgpTokgARJICkgKSCpoKCpoKClIKCqqKmgoKUgoKCgoKCpoKClIKCgoKUgoKCgoKmgoKUgoKCgoKqoriClIIABhCSgpSSgoKCpoKU6JIAESSApICkgqaCgqaCgpSCggAHFKKmgoKUgoKCgoKCgoKCgqaCgpSCgoKClIKCgoKCgoKCgqaCgpSCgoKCgoKCgoKqoriClIIABhCSgpSSgoKCpoKU6JIAESSApICkgqaCgoKmgoKUgqqipoKClIKmgoKUgqaCgpSCqqK4gpSCAAYQkoKUkoKCgqaClOiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgpSCgqaCgpSCgqqiuIKUggAGEJKClJKCgoKmgpTokgARJICkgKSCpoKCgqaCgpSCqqKmgoKUgqaCgqaCgqaCgpSCqqK4gpSCAAYQkuiSABEkgKSApIKmgoKmgoKUgqqipoKClIKCgqaCgqaCgoKmgoKUgoKqoriClIIABhCS6JIAESSApICkgqaCgqaCgpSCgqqipoKClIKCgoKCgqaCgpSCgoKCgoKmgoKUgoKCgoKqoriClIIABhCS6JIAEyiApICkgoKUgpSCpoKClIKClIKUggAHFKKmgoKUgqaCgpSCpoKClIKmgoKUgqqiuIK4ggAHEpKCkoKClIKUgoKUgoKm6qI=", "", "", "242=pixelBufferLength/1/1/1,Dx/1/1/2;368=pixelBufferLength/1/1/1,Dx/1/1/2;504=pixelBufferLength/1/1/1,Dx/1/1/2;657=pixelBufferLength/1/1/1,Dx/1/1/2;774=pixelBufferLength/1/1/1,Dx/1/1/2;894=pixelBufferLength/1/1/1,Dx/1/1/2;999=pixelBufferLength/1/1/1,Dx/1/1/2;1107=pixelBufferLength/1/1/1,Dx/1/1/2;1224=pixelBufferLength/1/1/1,Dx/1/1/2;1334=Intersect/1/1/3;1373=pixelBufferLength/1/1/1,Dx/1/1/2")]
+[assembly: GoPositionMap("image/names.go", "names.cs", "AAsalJSUAAcSgqaCpoKmgKSApIKCqJKCqJI=")]
+[assembly: GoPositionMap("image/ycbcr.go", "ycbcr.cs", "ACIugpSkpKSkpJQAGDKCpoKmgqaCgqaCgpSCggAGEqKqopSkpKSkpqqiuIK4goIAChaCptKClIK0grSCtIK0gsaCpKqixqiCpoKCgoIAEyiCpoKmgoKmgoKUgoKCAAkYoqqiuILcgoKCAA4gkoKUkoKCgqaClKqitqiCpoKCgoKC", "", "", "218=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2;343=mul3NonNeg/1/2/1,mul3NonNeg/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go;

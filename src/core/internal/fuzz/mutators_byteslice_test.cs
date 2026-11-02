@@ -56,131 +56,131 @@ internal partial struct TestByteSliceMutators_type /*dyn*/ {
     internal slice<byte> expected;
 }
 
-public static void TestByteSliceMutators(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestByteSliceMutators_type[]{
+public static void TestByteSliceMutators(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestByteSliceMutators_type>([
         new(
-            name: "byteSliceRemoveBytes"u8,
+            name: "byteSliceRemoveBytes",
             mutator: byteSliceRemoveBytes,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([4])
         ),
         new(
-            name: "byteSliceInsertRandomBytes"u8,
+            name: "byteSliceInsertRandomBytes",
             mutator: byteSliceInsertRandomBytes,
             input: new slice<byte>(4, 8),
-            expected: new byte[]{3, 4, 5, 0, 0, 0, 0}.slice()
+            expected: slice<byte>([3, 4, 5, 0, 0, 0, 0])
         ),
         new(
-            name: "byteSliceDuplicateBytes"u8,
+            name: "byteSliceDuplicateBytes",
             mutator: byteSliceDuplicateBytes,
-            input: appendꓸꓸꓸ(new slice<byte>(0, 13), new byte[]{1, 2, 3, 4}.slice()),
-            expected: new byte[]{1, 1, 2, 3, 4, 2, 3, 4}.slice()
+            input: appendꓸꓸꓸ(new slice<byte>(0, 13), slice<byte>([1, 2, 3, 4])),
+            expected: slice<byte>([1, 1, 2, 3, 4, 2, 3, 4])
         ),
         new(
-            name: "byteSliceOverwriteBytes"u8,
+            name: "byteSliceOverwriteBytes",
             mutator: byteSliceOverwriteBytes,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{1, 1, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([1, 1, 3, 4])
         ),
         new(
-            name: "byteSliceBitFlip"u8,
+            name: "byteSliceBitFlip",
             mutator: byteSliceBitFlip,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{3, 2, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([3, 2, 3, 4])
         ),
         new(
-            name: "byteSliceXORByte"u8,
+            name: "byteSliceXORByte",
             mutator: byteSliceXORByte,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{3, 2, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([3, 2, 3, 4])
         ),
         new(
-            name: "byteSliceSwapByte"u8,
+            name: "byteSliceSwapByte",
             mutator: byteSliceSwapByte,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{2, 1, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([2, 1, 3, 4])
         ),
         new(
-            name: "byteSliceArithmeticUint8"u8,
+            name: "byteSliceArithmeticUint8",
             mutator: byteSliceArithmeticUint8,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{255, 2, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([255, 2, 3, 4])
         ),
         new(
-            name: "byteSliceArithmeticUint16"u8,
+            name: "byteSliceArithmeticUint16",
             mutator: byteSliceArithmeticUint16,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{1, 3, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([1, 3, 3, 4])
         ),
         new(
-            name: "byteSliceArithmeticUint32"u8,
+            name: "byteSliceArithmeticUint32",
             mutator: byteSliceArithmeticUint32,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{2, 2, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([2, 2, 3, 4])
         ),
         new(
-            name: "byteSliceArithmeticUint64"u8,
+            name: "byteSliceArithmeticUint64",
             mutator: byteSliceArithmeticUint64,
-            input: new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.slice(),
-            expected: new byte[]{2, 2, 3, 4, 5, 6, 7, 8}.slice()
+            input: slice<byte>([1, 2, 3, 4, 5, 6, 7, 8]),
+            expected: slice<byte>([2, 2, 3, 4, 5, 6, 7, 8])
         ),
         new(
-            name: "byteSliceOverwriteInterestingUint8"u8,
+            name: "byteSliceOverwriteInterestingUint8",
             mutator: byteSliceOverwriteInterestingUint8,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{255, 2, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([255, 2, 3, 4])
         ),
         new(
-            name: "byteSliceOverwriteInterestingUint16"u8,
+            name: "byteSliceOverwriteInterestingUint16",
             mutator: byteSliceOverwriteInterestingUint16,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{255, 127, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([255, 127, 3, 4])
         ),
         new(
-            name: "byteSliceOverwriteInterestingUint32"u8,
+            name: "byteSliceOverwriteInterestingUint32",
             mutator: byteSliceOverwriteInterestingUint32,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{250, 0, 0, 250}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([250, 0, 0, 250])
         ),
         new(
-            name: "byteSliceInsertConstantBytes"u8,
+            name: "byteSliceInsertConstantBytes",
             mutator: byteSliceInsertConstantBytes,
-            input: appendꓸꓸꓸ(new slice<byte>(0, 8), new byte[]{1, 2, 3, 4}.slice()),
-            expected: new byte[]{3, 3, 3, 1, 2, 3, 4}.slice()
+            input: appendꓸꓸꓸ(new slice<byte>(0, 8), slice<byte>([1, 2, 3, 4])),
+            expected: slice<byte>([3, 3, 3, 1, 2, 3, 4])
         ),
         new(
-            name: "byteSliceOverwriteConstantBytes"u8,
+            name: "byteSliceOverwriteConstantBytes",
             mutator: byteSliceOverwriteConstantBytes,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{3, 3, 3, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([3, 3, 3, 4])
         ),
         new(
-            name: "byteSliceShuffleBytes"u8,
+            name: "byteSliceShuffleBytes",
             mutator: byteSliceShuffleBytes,
-            input: new byte[]{1, 2, 3, 4}.slice(),
-            expected: new byte[]{2, 3, 1, 4}.slice()
+            input: slice<byte>([1, 2, 3, 4]),
+            expected: slice<byte>([2, 3, 1, 4])
         ),
         new(
-            name: "byteSliceSwapBytes"u8,
+            name: "byteSliceSwapBytes",
             mutator: byteSliceSwapBytes,
-            randVals: new nint[]{0, 2, 0, 2}.slice(),
-            input: appendꓸꓸꓸ(new slice<byte>(0, 9), new byte[]{1, 2, 3, 4}.slice()),
-            expected: new byte[]{3, 2, 1, 4}.slice()
+            randVals: slice<nint>([0, 2, 0, 2]),
+            input: appendꓸꓸꓸ(new slice<byte>(0, 9), slice<byte>([1, 2, 3, 4])),
+            expected: slice<byte>([3, 2, 1, 4])
         )
-    }.slice()) {
+    ])) {
         ref var tc = ref heap(new TestByteSliceMutators_type(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
-            var r = Ꮡ(new mockRand(values: new nint[]{0, 1, 2, 3, 4, 5}.slice()));
-            if (tcʗ1.randVals != default!) {
-                r.Value.values = tcʗ1.randVals;
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
+            var r = Ꮡ(new mockRand(values: slice<nint>([0, 1, 2, 3, 4, 5])));
+            if (tcʗ1.randVals != nil) {
+                r.values = tcʗ1.randVals;
             }
             var m = Ꮡ(new mutator(r: new fuzz_internal_test_package.mockRandжmutatorRand(r)));
             var b = tcʗ1.mutator(m, tcʗ1.input);
             if (!bytes.Equal(b, tcʗ1.expected)) {
-                tΔ1.Errorf("got %x, want %x"u8, b, tcʗ1.expected);
+                tΔ1.Errorf("got %x, want %x", b, tcʗ1.expected);
             }
         });
     }
@@ -191,26 +191,26 @@ internal partial struct BenchmarkByteSliceMutators_tests /*dyn*/ {
     internal Func<ж<global::go.@internal.fuzz_package.mutator>, slice<byte>, slice<byte>> mutator;
 }
 
-public static void BenchmarkByteSliceMutators(ж<testing.B> Ꮡb) {
+public static void BenchmarkByteSliceMutators(ж<testing.B> b) {
     var tests = new BenchmarkByteSliceMutators_tests[]{
-        new("RemoveBytes"u8, byteSliceRemoveBytes),
-        new("InsertRandomBytes"u8, byteSliceInsertRandomBytes),
-        new("DuplicateBytes"u8, byteSliceDuplicateBytes),
-        new("OverwriteBytes"u8, byteSliceOverwriteBytes),
-        new("BitFlip"u8, byteSliceBitFlip),
-        new("XORByte"u8, byteSliceXORByte),
-        new("SwapByte"u8, byteSliceSwapByte),
-        new("ArithmeticUint8"u8, byteSliceArithmeticUint8),
-        new("ArithmeticUint16"u8, byteSliceArithmeticUint16),
-        new("ArithmeticUint32"u8, byteSliceArithmeticUint32),
-        new("ArithmeticUint64"u8, byteSliceArithmeticUint64),
-        new("OverwriteInterestingUint8"u8, byteSliceOverwriteInterestingUint8),
-        new("OverwriteInterestingUint16"u8, byteSliceOverwriteInterestingUint16),
-        new("OverwriteInterestingUint32"u8, byteSliceOverwriteInterestingUint32),
-        new("InsertConstantBytes"u8, byteSliceInsertConstantBytes),
-        new("OverwriteConstantBytes"u8, byteSliceOverwriteConstantBytes),
-        new("ShuffleBytes"u8, byteSliceShuffleBytes),
-        new("SwapBytes"u8, byteSliceSwapBytes)
+        new("RemoveBytes", byteSliceRemoveBytes),
+        new("InsertRandomBytes", byteSliceInsertRandomBytes),
+        new("DuplicateBytes", byteSliceDuplicateBytes),
+        new("OverwriteBytes", byteSliceOverwriteBytes),
+        new("BitFlip", byteSliceBitFlip),
+        new("XORByte", byteSliceXORByte),
+        new("SwapByte", byteSliceSwapByte),
+        new("ArithmeticUint8", byteSliceArithmeticUint8),
+        new("ArithmeticUint16", byteSliceArithmeticUint16),
+        new("ArithmeticUint32", byteSliceArithmeticUint32),
+        new("ArithmeticUint64", byteSliceArithmeticUint64),
+        new("OverwriteInterestingUint8", byteSliceOverwriteInterestingUint8),
+        new("OverwriteInterestingUint16", byteSliceOverwriteInterestingUint16),
+        new("OverwriteInterestingUint32", byteSliceOverwriteInterestingUint32),
+        new("InsertConstantBytes", byteSliceInsertConstantBytes),
+        new("OverwriteConstantBytes", byteSliceOverwriteConstantBytes),
+        new("ShuffleBytes", byteSliceShuffleBytes),
+        new("SwapBytes", byteSliceSwapBytes)
     }.array();
 
     foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
@@ -218,7 +218,7 @@ public static void BenchmarkByteSliceMutators(ж<testing.B> Ꮡb) {
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡb.Run(tc.name, (ж<testing.B> bΔ1) => {
+        b.Run(tc.name, (ж<testing.B> bΔ1) => {
             for (nint sizeᴛ1 = 64; sizeᴛ1 <= 1024; sizeᴛ1 *= 2) {
                 var size = sizeᴛ1;
                 var tcʗ2 = tcʗ1;

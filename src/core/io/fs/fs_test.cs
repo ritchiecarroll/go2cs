@@ -12,38 +12,38 @@ partial struct isValidPathTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal bool ok;
 }
-internal static slice<isValidPathTestsᴛ1> isValidPathTests = new isValidPathTestsᴛ1[]{
-    new("."u8, true),
-    new("x"u8, true),
-    new("x/y"u8, true),
+internal static slice<isValidPathTestsᴛ1> isValidPathTests = slice<isValidPathTestsᴛ1>([
+    new(".", true),
+    new("x", true),
+    new("x/y", true),
 
-    new(""u8, false),
-    new(".."u8, false),
-    new("/"u8, false),
-    new("x/"u8, false),
-    new("/x"u8, false),
-    new("x/y/"u8, false),
-    new("/x/y"u8, false),
-    new("./"u8, false),
-    new("./x"u8, false),
-    new("x/."u8, false),
-    new("x/./y"u8, false),
-    new("../"u8, false),
-    new("../x"u8, false),
-    new("x/.."u8, false),
-    new("x/../y"u8, false),
-    new("x//y"u8, false),
-    new(@"x\"u8, true),
-    new(@"x\y"u8, true),
-    new(@"x:y"u8, true),
-    new(@"\x"u8, true)
-}.slice();
+    new("", false),
+    new("..", false),
+    new("/", false),
+    new("x/", false),
+    new("/x", false),
+    new("x/y/", false),
+    new("/x/y", false),
+    new("./", false),
+    new("./x", false),
+    new("x/.", false),
+    new("x/./y", false),
+    new("../", false),
+    new("../x", false),
+    new("x/..", false),
+    new("x/../y", false),
+    new("x//y", false),
+    new(@"x\", true),
+    new(@"x\y", true),
+    new(@"x:y", true),
+    new(@"\x", true)
+]);
 
-public static void TestValidPath(ж<testing.T> Ꮡt) {
+public static void TestValidPath(ж<testing.T> t) {
     foreach (var (_, tt) in isValidPathTests) {
         var ok = ValidPath(tt.name);
         if (ok != tt.ok) {
-            Ꮡt.Errorf("ValidPath(%q) = %v, want %v"u8, tt.name, ok, tt.ok);
+            t.Errorf("ValidPath(%q) = %v, want %v", tt.name, ok, tt.ok);
         }
     }
 }

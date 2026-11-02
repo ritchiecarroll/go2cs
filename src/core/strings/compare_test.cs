@@ -18,51 +18,52 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal @string a, b;
     internal nint i;
 }
-internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
-    new(""u8, ""u8, 0),
-    new("a"u8, ""u8, 1),
-    new(""u8, "a"u8, -1),
-    new("abc"u8, "abc"u8, 0),
-    new("ab"u8, "abc"u8, -1),
-    new("abc"u8, "ab"u8, 1),
-    new("x"u8, "ab"u8, 1),
-    new("ab"u8, "x"u8, -1),
-    new("x"u8, "a"u8, 1),
-    new("b"u8, "x"u8, -1),
+internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
+    new("", "", 0),
+    new("a", "", 1),
+    new("", "a", -1),
+    new("abc", "abc", 0),
+    new("ab", "abc", -1),
+    new("abc", "ab", 1),
+    new("x", "ab", 1),
+    new("ab", "x", -1),
+    new("x", "a", 1),
+    new("b", "x", -1),
     // test runtime·memeq's chunked implementation
-    new("abcdefgh"u8, "abcdefgh"u8, 0),
-    new("abcdefghi"u8, "abcdefghi"u8, 0),
-    new("abcdefghi"u8, "abcdefghj"u8, -1)
-}.slice();
+    new("abcdefgh", "abcdefgh", 0),
+    new("abcdefghi", "abcdefghi", 0),
+    new("abcdefghi", "abcdefghj", -1)
+]);
 
-public static void TestCompare(ж<testing.T> Ꮡt) {
+public static void TestCompare(ж<testing.T> t) {
     foreach (var (_, tt) in compareTests) {
         nint numShifts = 16;
         for (nint offset = 0; offset <= numShifts; offset++) {
-            @string shiftedB = (Repeat("*"u8, offset) + tt.b).slice(offset);
+            @string shiftedB = (Repeat("*", offset) + tt.b).slice(offset);
             nint cmp = Compare(tt.a, shiftedB);
             if (cmp != tt.i) {
-                Ꮡt.Errorf(@"Compare(%q, %q), offset %d = %v; want %v"u8, tt.a, tt.b, offset, cmp, tt.i);
+                t.Errorf(@"Compare(%q, %q), offset %d = %v; want %v", tt.a, tt.b, offset, cmp, tt.i);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloGophersˢ = "Hello Gophers!"u8;
+internal static ref readonly @string helloGophersˢ => ref helloGophersˢᵇ;
+private static readonly @string helloGophersˢᵇ = "Hello Gophers!"u8;
 internal static readonly object sS1Failedˢ = (@string)"s > s[:1] failed"u8;
 
-public static void TestCompareIdenticalString(ж<testing.T> Ꮡt) {
+public static void TestCompareIdenticalString(ж<testing.T> t) {
     @string s = helloGophersˢ;
     if (Compare(s, s) != 0) {
-        Ꮡt.Error((@string)"s != s"u8);
+        t.Error((@string)"s != s");
     }
     if (Compare(s, s[..1]) != 1) {
-        Ꮡt.Error(sS1Failedˢ);
+        t.Error(sS1Failedˢ);
     }
 }
 
-public static void TestCompareStrings(ж<testing.T> Ꮡt) {
+public static void TestCompareStrings(ж<testing.T> t) {
     var lengthsᴷ = new stackAppend<nint>();
 
     // unsafeString converts a []byte to a string with no allocation.
@@ -99,28 +100,28 @@ public static void TestCompareStrings(ж<testing.T> Ꮡt) {
         @string sb = unsafeString(b);
         nint cmp = Compare(sa.slice(0, lenΔ1), sb.slice(0, lenΔ1));
         if (cmp != 0) {
-            Ꮡt.Errorf(@"CompareIdentical(%d) = %d"u8, lenΔ1, cmp);
+            t.Errorf(@"CompareIdentical(%d) = %d", lenΔ1, cmp);
         }
         if (lenΔ1 > 0) {
             cmp = Compare(sa.slice(0, lenΔ1 - 1), sb.slice(0, lenΔ1));
             if (cmp != -1) {
-                Ꮡt.Errorf(@"CompareAshorter(%d) = %d"u8, lenΔ1, cmp);
+                t.Errorf(@"CompareAshorter(%d) = %d", lenΔ1, cmp);
             }
             cmp = Compare(sa.slice(0, lenΔ1), sb.slice(0, lenΔ1 - 1));
             if (cmp != 1) {
-                Ꮡt.Errorf(@"CompareBshorter(%d) = %d"u8, lenΔ1, cmp);
+                t.Errorf(@"CompareBshorter(%d) = %d", lenΔ1, cmp);
             }
         }
         for (nint k = lastLen; k < lenΔ1; k++) {
             b[k] = (byte)(a[k] - 1);
             cmp = Compare(unsafeString(a.slice(0, lenΔ1)), unsafeString(b.slice(0, lenΔ1)));
             if (cmp != 1) {
-                Ꮡt.Errorf(@"CompareAbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
+                t.Errorf(@"CompareAbigger(%d,%d) = %d", lenΔ1, k, cmp);
             }
             b[k] = (byte)(a[k] + 1);
             cmp = Compare(unsafeString(a.slice(0, lenΔ1)), unsafeString(b.slice(0, lenΔ1)));
             if (cmp != -1) {
-                Ꮡt.Errorf(@"CompareBbigger(%d,%d) = %d"u8, lenΔ1, k, cmp);
+                t.Errorf(@"CompareBbigger(%d,%d) = %d", lenΔ1, k, cmp);
             }
             b[k] = a[k];
         }

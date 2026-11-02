@@ -8,27 +8,11 @@ global using static global::go.os.exec_package;
 global using static global::go.os.exec_internal_test_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
 global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,7 +42,17 @@ using static global::go.os.exec_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.os.exec_package.ΔError))]
+[assembly: GoFieldAccess(typeof(go.net.http.httptest_package.Server))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Server))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.ExitError))]
+[assembly: GoFieldAccess(typeof(os_package.Process))]
+[assembly: GoFieldAccess(typeof(time_package.Ticker))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,10 +62,10 @@ using static global::go.os.exec_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/exec/dot_test.go", "dot_test.cs", "ABYkgoKUAA0GoqaCgIK2goKUgIKkgpS4goKCgoKCgoCCpIKCgILIgoKCkoKmgriCgoKSgpSUgtyAgpKCABcugoKCgIK2gIK2goK4yoKCgIKSggAKFIKCgpSAgqSUgoKCgqaCgsoADB6SgoKCuLaCgoKCuLaCgoKC", "49-101:1;52-99:1.1;120-135:2;137-179:3;181-193:4;182-192:4.1;196-201:5;204-212:6;215-223:7")]
-[assembly: go.GoPositionMap("os/exec/exec_test.go", "exec_test.cs", "ADRWgoKClIKUgpSClIKCpoKCAAoSwpSCgpQACximgoKCgIKC2qaCpqaCgoKmkoKCgpSCAAIQ0oKUrLKosoKq0pSCgoKClJTqAAwasoKClKaigrjCgoKUgoKCgoKUkqaipIKCgoKCkoKUgoKSgoKUyoKCgoKUgIKCyKKCpqKCgoKCuIKCpqKClIKCgoIACgqClIKClICSAAkIgpS4goKClIKCgqaClIKClICSAAgIgqaCgoKCgpSCguiClIKCgpSAgqSCwoKikoCCpAAIBoKmgoCCpIKClIKUgviCpoKC+IKmgoKClJSAgoCCtsiCpoKCgoKUgoKmgoKCgpSCgqaCgoKClIKCpoKCgoKCuIKCgoIAFAiClIKCuIKCgoKCgpSCgoKCgpSmgpSCgoCStoKCgJK2goKAkraCggANDLKUgoKmgoKUgIaklIKCgsKUgqaAgsSkogAFEAAIApSCgoKUgIK4goKUsu6ipLLcgoCCxKSAgsT2koK4koKCgqa2goKmgoKCgoKAggAJEoKCAA4KwoKmAA0cpoLulILKgoKUtoKClJKCgpTIpIKCkoKCpoKClIKkgoKClIKCpoKUpoKAgoLIgoCmlIKCxoKSgoKCAAkUlIKClIK05IKCgpSUgoKClJSCgoKUlIKCgpS4goKUgoKCgoKCgoKSkoCSpICSpIKCgpSC/oKCgpTYkpQAEiCC2oLWgpSCgoKC+IKUgoKCgpSCgoLogpSCgoKClIKClICCtoCCpIKCgpSkgIIACAiigoLKlIKSlIKClKSAgsiAgra4goKCgIK2poLKgoKUpoCClMT2kpSCgoKClICSAAgIgoKUgoKCggAJCIKUgoKUAAQSgoKAggALCoKUgoKmgoKAgviCgoKCAAkOspSCgoKUgoKmgIKkkoCCyICCtoKigoKUppSCgpSUgoK4ooKCpoKCgoKClJSCgoKCgoKClJSCgIKCgoKkgraCgoKSgoKmuJSCgpSCgoKUlIKCyoKCkoKAguyCggALGIKmooKAgqSCpoKCpqKUgoKCgoKUqIKCgqaCgILIgoCCgoKCpIKmAA8GgprogoKCgoKUgpSAgpKAgvyCgpSUgoKUuICCtoKC7oKUgIKSgIIACRCClIKCgoKC7oCCAAkSgpSCgoLcgu6CgpSUgoKCgoK4gIIACBCCgpSUgoKCgoKUgpSAgpKAggAIDoKClJSCgoKCgpSAgraAgpKAlMaCAAwKgriilIKkgoKCpoKigoKUgIKklIKCgrTsopSCpIKCgqaCgtyCgqKCgoKmgIK2goKCgpSCgoK02qKUgqSCgoKUpIKCkoKClIKAgqSUgriC3ICCxNqilIKkgoKClKSCgoKClIKAgqSUgriC3ICCxNqilIKkgoKCpoKCooKUgIKkgoKUgpSAgsS+wgABEgAKCoKcwpSCspSCgoKCgpSSlIKAgoKUtqK2grKUgpSCgILEtoKCqqKUgqKCgqaCAAkGgoK4koKClIKCpoKCgqaCgoLKgriUgoKCgoKCggAIDJKUgoCCpIKCgoI=", "356-359:1;473-477:1;489-495:2;529-533:1;548-558:2;586-595:1;597-608:2;622-630:1;717-717:1;801-807:1;808-814:2;815-822:3;869-884:1;870-883:1.1;1110-1114:1;1121-1127:2;1183-1187:1;1215-1221:2;1266-1268:1;1306-1321:1;1325-1360:2;1366-1384:3;1391-1406:4;1411-1429:5;1435-1456:6;1461-1488:7;1496-1524:1;1509-1513:1.1;1530-1574:2;1552-1557:2.1;1579-1620:3;1594-1598:3.1;1625-1665:4;1639-1643:4.1;1670-1701:5;1684-1687:5.1;1734-1756:1;1760-1770:2;1784-1788:1;1824-1840:1")]
-[assembly: go.GoPositionMap("os/exec/exec_windows_test.go", "exec_windows_test.cs", "ABYsqIKmooKCgoKClAAIBoKUgoKUgoKCgoKUgoKClIKClIKC+IKUgoKCgoKUgv7SgpaSgoKCpqSCgpSC")]
-[assembly: go.GoPositionMap("os/exec/lp_windows_test.go", "lp_windows_test.cs", "ABswgqaCAAIQ8oKClLS0ttqigpSCgIK2gpSClAAEFPKCgpSkgoKUkoCCyIKCtKjCgoKUkoCCyICCxAANGgCPAZgC3MqCgqayooKmgpSCgqaCgoKCgoKmlJSClJSmgoKCgoKClJSkgoCCpLiCgoKCpoKUggARJACfAcAC3JSykoKmgpSCgpSUgoKCgpS4goKAgpSkgpSmgoKCgqaCpoKCgoKSgpSmggAIDIIACRSCgpSCgoKCpoKC", "90-94:1;109-113:1;288-355:1;540-602:1")]
+[assembly: GoPositionMap("os/exec/dot_test.go", "dot_test.cs", "ABYkgoKUABYGgqaCgIK2goKUgIKkgpS4goKCgoKCgoCCpIKCgILIgoKCgoKmgriCgoKCgpSUgtyAgoKCABcugoKCgIK2gIK2goK4yoKCgIKCggAKFIKCgpSAgqSUgoKCgqaCgsoADB6SgoKCuLaCgoKCuLaCgoKC", "49-101:1;52-99:1.1;120-135:2;137-179:3;181-193:4;182-192:4.1;196-201:5;204-212:6;215-223:7")]
+[assembly: GoPositionMap("os/exec/exec_test.go", "exec_test.cs", "ADRWgoKClIKUgpSClIKCpoKCAA4SwpSCgpQACximgoKCgIKC2qaCpqaCgoKmkoKCgpSCAAIQ0oKUrLKosoKq0pSCgoKClJTqAAwasoKClKaigrjCgoKUgoKCgoKUkqaipIKCgoKCgoKUgoKCgoKUyoKCgoKUgIKCyKKCpqKCgoKCuIKCpqKClIKCgoIADgqClIKClICSAAsIgpS4goKClIKCgqaClIKClICSAAoIgqaCgoKCgpSCguiClIKCgpSAgqSCwoKikoCCpAAMBoKmgoCCpIKClIKUggAICIKmgoIACQiCpoKCgqSkgIKAgrbIgqaCgoKClIKCpoKCgoKUgoKmgoKCgpSCgqaCgoKCgriCgoKCACMIgpSCgriCgoKCgoKUgoKCgoKUpoKUgoKAkraCgoCStoKCgJK2goIAEAyylIKCpoKClICGpJSCgoLClIKmgILEpKIABhAACAKUgoKClICCuIKClLLuoqSy3IKAgsSkgILEAAgGkoK4koKCgqa2goKmgoKCgoKAggAJEoKCABMKwoKmAA0cpoLulILKgoKUtoKClJKCgpTIpIKCkoKCpoKClIKkgoKClIKCpoKUpoKAgoLIgoCmlIKCxoKSgoKCAAkUlIKClIK09IKCgpSUgoKClJSCgoKUlIKCgpS4goKUgoKCgoKCgoKSkoCSpICSpIKCgpSC/oKCgpTokpQAEiCC2oLmgpSCgoKCAAkIgpSCgoKClIKCguiClIKCgoKUgoKUgIK2gIKkgoKClKSAggAJCKKCgsqUgpKUgoKUpICCyICCtriCgoKAgramgsqCgpSmgIKUxAAKBpKUgoKCgpSAkgAJCIKClIKCgoIACQiClIKClAAEEoKCgIIADgqClIKCpoKCgIIACAiCgoKCAAsOspSCgoKUgoKmgIKkkoCCyICCtoKigoKUppSCgpSUgoK4ooKCpoKCgoKClJSCgoKCgoKClJSCgIKCgoKkgraCgoKSgoKmuJSCgpSCgoKUlIKCyoKCkoKAguyCggALGIKmooKAgqSCpoKCpqKUgoKCgoKUqIKCgqaCgILIgoCCgoKCpIKmABoGgprogoKCgoKUgpSAgoKAgvyCgpSUgoKUuICCtoKC7oKUgIKCgIIACRCClIKCgoKC7oCCAAkSgpSCgoLcgu6CgpSUgoKCgoK4gIIACBCCgpSUgoKCgoKUgpSAgoKAggAIDoKClJSCgoKCgpSAgraAgoKAlMaCABIKgriilIKkgoKCpoKigoKUgIKklIKCgrTsopSCpIKCgqaCgtyCgqKCgoKmgIK2goKCgpSCgoK02qKUgqSCgoKUpIKCkoKClIKAgqSUgriC3ICCxNqilIKkgoKClKSCgoKClIKAgqSUgriC3ICCxNqilIKkgoKCpoKCooKUgIKkgoKUgpSAgsS+wgABEgAKCoKcwpSCspSCgoKCgpSSlIKAgoKUtqK2grKUgpSCgILEtoKCqqKUgqKCgqaCAAwGgoK4goKClIKCpoKCgqaCgoLKgriUgoKCgoKCggAKDJKUgoCCpIKCgoI=", "356-359:1;473-477:1;489-495:2;529-533:1;548-558:2;586-595:1;597-608:2;622-630:1;717-717:1;801-807:1;808-814:2;815-822:3;869-884:1;870-883:1.1;1110-1114:1;1121-1127:2;1183-1187:1;1215-1221:2;1266-1268:1;1306-1321:1;1325-1360:2;1366-1384:3;1391-1406:4;1411-1429:5;1435-1456:6;1461-1488:7;1496-1524:1;1509-1513:1.1;1530-1574:2;1552-1557:2.1;1579-1620:3;1594-1598:3.1;1625-1665:4;1639-1643:4.1;1670-1701:5;1684-1687:5.1;1734-1756:1;1760-1770:2;1784-1788:1;1824-1840:1", "", "", "253:29,446:25,947:21,955:21,961:21,983:21,1020:29,1247:15,1275:21,1283:21,1556:19,1957:25,2001:25,2060:25,2068:25,2118:25,2126:25,2174:25")]
+[assembly: GoPositionMap("os/exec/exec_windows_test.go", "exec_windows_test.cs", "ABYsqIKmooKCgoKClAAKBoKUgoKUgoKCgoKUgoKClIKClIKCAAkIgpSCgoKCgpSCAAgO0oKWkoKCgqakgoKUgg==")]
+[assembly: GoPositionMap("os/exec/lp_windows_test.go", "lp_windows_test.cs", "ABswgqaCAAIQ8oKClLS0tuqigpSCgIK2gpSClAAEFPKCgpSkgoKUkoCCyIKCtKjCgoKUkoCCyICCxAANGgCRAZgC3MqCgqayooKmgpSCgqaCgoKCgoKmlJSClJSmgoKCgoKClJSUgoCCpLiCgoKCpoKUggARJACfAcAC3JSykoKmgpSCgpSUgoKCgpS4goKAgpSkgpSmgoKCgqaCpoKCgoKCgpSmggAJDIIACRSCgpSCgoKCpoKC", "90-94:1;109-113:1;288-355:1;540-602:1", "", "", "104:21")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

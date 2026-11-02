@@ -9,15 +9,15 @@ partial class abi_package {
 // kinds of bounds check failures.
 partial struct BoundsErrorCode /*num:uint8*/;
 
-public static BoundsErrorCode BoundsIndex => /* iota */ 0;       // s[x], 0 <= x < len(s) failed
-public static BoundsErrorCode BoundsSliceAlen => 1;   // s[?:x], 0 <= x <= len(s) failed
-public static BoundsErrorCode BoundsSliceAcap => 2;   // s[?:x], 0 <= x <= cap(s) failed
-public static BoundsErrorCode BoundsSliceB => 3;      // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
-public static BoundsErrorCode BoundsSlice3Alen => 4;  // s[?:?:x], 0 <= x <= len(s) failed
-public static BoundsErrorCode BoundsSlice3Acap => 5;  // s[?:?:x], 0 <= x <= cap(s) failed
-public static BoundsErrorCode BoundsSlice3B => 6;     // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
-public static BoundsErrorCode BoundsSlice3C => 7;     // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
-public static BoundsErrorCode BoundsConvert => 8;     // (*[x]T)(s), 0 <= x <= len(s) failed
+public static BoundsErrorCode BoundsIndex => /* iota */ 0; // s[x], 0 <= x < len(s) failed
+public static BoundsErrorCode BoundsSliceAlen => 1;        // s[?:x], 0 <= x <= len(s) failed
+public static BoundsErrorCode BoundsSliceAcap => 2;        // s[?:x], 0 <= x <= cap(s) failed
+public static BoundsErrorCode BoundsSliceB => 3;           // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
+public static BoundsErrorCode BoundsSlice3Alen => 4;       // s[?:?:x], 0 <= x <= len(s) failed
+public static BoundsErrorCode BoundsSlice3Acap => 5;       // s[?:?:x], 0 <= x <= cap(s) failed
+public static BoundsErrorCode BoundsSlice3B => 6;          // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
+public static BoundsErrorCode BoundsSlice3C => 7;          // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
+public static BoundsErrorCode BoundsConvert => 8;          // (*[x]T)(s), 0 <= x <= len(s) failed
 internal static BoundsErrorCode numBoundsCodes => 9;
 
 public static UntypedInt BoundsMaxReg => 15;
@@ -49,7 +49,7 @@ public static UntypedInt BoundsMaxConst => 31;
 // Register numbers must be in 0-15. Constants must be in 0-31.
 public static nint BoundsEncode(BoundsErrorCode code, bool signed, bool xIsReg, bool yIsReg, nint xVal, nint yVal) {
     nint c = (nint)0;
-    if (xIsReg){
+    if (xIsReg) {
         c |= (nint)((1 << 0));
         if (signed) {
             c |= (nint)((1 << 2));
@@ -64,7 +64,7 @@ public static nint BoundsEncode(BoundsErrorCode code, bool signed, bool xIsReg, 
         }
         c |= (nint)((xVal << 2));
     }
-    if (yIsReg){
+    if (yIsReg) {
         c |= (nint)((1 << 1));
         if (yVal < 0 || yVal > BoundsMaxReg) {
             throw panic("bad yReg");
@@ -76,38 +76,38 @@ public static nint BoundsEncode(BoundsErrorCode code, bool signed, bool xIsReg, 
         }
         c |= (nint)((yVal << 7));
     }
-    return c * (nint)(uint8)numBoundsCodes + (nint)(uint8)code;
+    return c * (nint)numBoundsCodes + (nint)code;
 }
 
 public static (BoundsErrorCode code, bool signed, bool xIsReg, bool yIsReg, nint xVal, nint yVal) BoundsDecode(nint v) {
-    BoundsErrorCode code = default!;
-    bool signed = default!;
-    bool xIsReg = default!;
-    bool yIsReg = default!;
-    nint xVal = default!;
-    nint yVal = default!;
+    BoundsErrorCode code = default;
+    bool signed = default;
+    bool xIsReg = default;
+    bool yIsReg = default;
+    nint xVal = default;
+    nint yVal = default;
 
-    code = (BoundsErrorCode)(uint8)(v % (nint)(uint8)numBoundsCodes);
-    nint c = v / (nint)(uint8)numBoundsCodes;
+    code = (BoundsErrorCode)(uint8)(v % (nint)numBoundsCodes);
+    nint c = v / (nint)numBoundsCodes;
     xIsReg = (c & 1) != 0;
-    c >>= (int)(1);
+    c >>= 1;
     yIsReg = (c & 1) != 0;
-    c >>= (int)(1);
-    if (xIsReg){
+    c >>= 1;
+    if (xIsReg) {
         signed = (c & 1) != 0;
-        c >>= (int)(1);
+        c >>= 1;
         xVal = c & 0xf;
-        c >>= (int)(4);
+        c >>= 4;
     } else {
         xVal = c & 0x1f;
-        c >>= (int)(5);
+        c >>= 5;
     }
-    if (yIsReg){
+    if (yIsReg) {
         yVal = c & 0xf;
-        c >>= (int)(4);
+        c >>= 4;
     } else {
         yVal = c & 0x1f;
-        c >>= (int)(5);
+        c >>= 5;
     }
     if (c != 0) {
         throw panic("BoundsDecode decoding error");

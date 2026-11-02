@@ -34,8 +34,8 @@ partial struct ΔMapType {
     // function for hashing keys (ptr to key, seed) -> hash
     public Func<@unsafe.Pointer, uintptr, uintptr> Hasher;
     public uintptr GroupSize; // == Group.Size_
-    public uintptr SlotSize; // size of key/elem slot
-    public uintptr ElemOff; // offset of elem in key/elem slot
+    public uintptr SlotSize;  // size of key/elem slot
+    public uintptr ElemOff;   // offset of elem in key/elem slot
     public uint32 Flags;
 }
 

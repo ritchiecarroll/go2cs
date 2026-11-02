@@ -12,7 +12,7 @@ using static global::go.go.ast_package;
 
 partial class ast_internal_test_package {
 
-public static void TestParseDirectiveMatchesIsDirective(ж<testing.T> Ꮡt) {
+public static void TestParseDirectiveMatchesIsDirective(ж<testing.T> t) {
     foreach (var (_, tt) in isDirectiveTests) {
         var want = tt.ok;
         if (strings.HasPrefix(tt.@in, externˢ) || strings.HasPrefix(tt.@in, exportˢ)) {
@@ -23,7 +23,7 @@ public static void TestParseDirectiveMatchesIsDirective(ж<testing.T> Ꮡt) {
 
         {
             var (_, ok) = ParseDirective(0, "//"u8 + tt.@in); if (ok != want) {
-                Ꮡt.Errorf("ParseDirective(0, %q) = %v, want %v"u8, "// " + tt.@in, ok, want);
+                t.Errorf("ParseDirective(0, %q) = %v, want %v", "// " + tt.@in, ok, want);
             }
         }
     }
@@ -37,108 +37,108 @@ internal partial struct TestParseDirective_type /*dyn*/ {
     internal bool wantOK;
 }
 
-public static void TestParseDirective(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestParseDirective_type[]{
+public static void TestParseDirective(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestParseDirective_type>([
         new(
-            name: "valid"u8,
-            @in: "//go:generate stringer -type Op -trimprefix Op"u8,
+            name: "valid",
+            @in: "//go:generate stringer -type Op -trimprefix Op",
             pos: 10,
             want: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: "stringer -type Op -trimprefix Op"u8,
+                Tool: "go",
+                Name: "generate",
+                Args: "stringer -type Op -trimprefix Op",
                 Slash: 10,
                 ArgsPos: ((tokenꓸPos)(10 + len("//go:generate ")))
             ),
             wantOK: true
         ),
         new(
-            name: "no args"u8,
-            @in: "//go:build ignore"u8,
+            name: "no args",
+            @in: "//go:build ignore",
             pos: 20,
             want: new Directive(
-                Tool: "go"u8,
-                Name: "build"u8,
-                Args: "ignore"u8,
+                Tool: "go",
+                Name: "build",
+                Args: "ignore",
                 Slash: 20,
                 ArgsPos: ((tokenꓸPos)(20 + len("//go:build ")))
             ),
             wantOK: true
         ),
         new(
-            name: "not a directive"u8,
-            @in: "// not a directive"u8,
+            name: "not a directive",
+            @in: "// not a directive",
             pos: 30,
             wantOK: false
         ),
         new(
-            name: "not a comment"u8,
-            @in: "go:generate"u8,
+            name: "not a comment",
+            @in: "go:generate",
             pos: 40,
             wantOK: false
         ),
         new(
-            name: "empty"u8,
-            @in: ""u8,
+            name: "empty",
+            @in: "",
             pos: 50,
             wantOK: false
         ),
         new(
-            name: "just slashes"u8,
-            @in: "//"u8,
+            name: "just slashes",
+            @in: "//",
             pos: 60,
             wantOK: false
         ),
         new(
-            name: "no name"u8,
-            @in: "//go:"u8,
+            name: "no name",
+            @in: "//go:",
             pos: 70,
             wantOK: false
         ),
         new(
-            name: "no tool"u8,
-            @in: "//:generate"u8,
+            name: "no tool",
+            @in: "//:generate",
             pos: 80,
             wantOK: false
         ),
         new(
-            name: "multiple spaces"u8,
-            @in: "//go:build  foo bar"u8,
+            name: "multiple spaces",
+            @in: "//go:build  foo bar",
             pos: 90,
             want: new Directive(
-                Tool: "go"u8,
-                Name: "build"u8,
-                Args: "foo bar"u8,
+                Tool: "go",
+                Name: "build",
+                Args: "foo bar",
                 Slash: 90,
                 ArgsPos: ((tokenꓸPos)(90 + len("//go:build  ")))
             ),
             wantOK: true
         ),
         new(
-            name: "trailing space"u8,
-            @in: "//go:build foo "u8,
+            name: "trailing space",
+            @in: "//go:build foo ",
             pos: 100,
             want: new Directive(
-                Tool: "go"u8,
-                Name: "build"u8,
-                Args: "foo"u8,
+                Tool: "go",
+                Name: "build",
+                Args: "foo",
                 Slash: 100,
                 ArgsPos: ((tokenꓸPos)(100 + len("//go:build ")))
             ),
             wantOK: true
         )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestParseDirective_type(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             var (got, gotOK) = ParseDirective(testʗ1.pos, testʗ1.@in);
             if (gotOK != testʗ1.wantOK) {
-                tΔ1.Fatalf("ParseDirective(%q) ok = %v, want %v"u8, testʗ1.@in, gotOK, testʗ1.wantOK);
+                tΔ1.Fatalf("ParseDirective(%q) ok = %v, want %v", testʗ1.@in, gotOK, testʗ1.wantOK);
             }
             if (!reflect.DeepEqual(got, testʗ1.want)) {
-                tΔ1.Errorf("ParseDirective(%q) = %+v, want %+v"u8, testʗ1.@in, got, testʗ1.want);
+                tΔ1.Errorf("ParseDirective(%q) = %+v, want %+v", testʗ1.@in, got, testʗ1.want);
             }
         });
     }
@@ -151,116 +151,114 @@ internal partial struct TestParseArgs_type /*dyn*/ {
     internal bool wantErr;
 }
 
-public static void TestParseArgs(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestParseArgs_type[]{
+public static void TestParseArgs(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestParseArgs_type>([
         new(
-            name: "simple"u8,
+            name: "simple",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: "stringer -type Op"u8,
+                Tool: "go",
+                Name: "generate",
+                Args: "stringer -type Op",
                 ArgsPos: 10
             ),
-            want: new global::go.go.ast_package.DirectiveArg[]{
-                new("stringer"u8, 10),
-                new("-type"u8, (tokenꓸPos)(10 + len("stringer "))),
-                new("Op"u8, (tokenꓸPos)(10 + len("stringer -type ")))
-            }.slice()
+            want: slice<global::go.go.ast_package.DirectiveArg>([
+                new("stringer", 10),
+                new("-type", (tokenꓸPos)(10 + len("stringer "))),
+                new("Op", (tokenꓸPos)(10 + len("stringer -type ")))
+            ])
         ),
         new(
-            name: "quoted"u8,
+            name: "quoted",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: "\"foo bar\" baz"u8,
+                Tool: "go",
+                Name: "generate",
+                Args: "\"foo bar\" baz",
                 ArgsPos: 10
             ),
-            want: new global::go.go.ast_package.DirectiveArg[]{
-                new("foo bar"u8, 10),
-                new("baz"u8, (tokenꓸPos)(10 + len("\"foo bar\" ")))
-            }.slice()
+            want: slice<global::go.go.ast_package.DirectiveArg>([
+                new("foo bar", 10),
+                new("baz", (tokenꓸPos)(10 + len("\"foo bar\" ")))
+            ])
         ),
         new(
-            name: "raw quoted"u8,
+            name: "raw quoted",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: "`foo bar` baz"u8,
+                Tool: "go",
+                Name: "generate",
+                Args: "`foo bar` baz",
                 ArgsPos: 10
             ),
-            want: new global::go.go.ast_package.DirectiveArg[]{
-                new("foo bar"u8, 10),
-                new("baz"u8, (tokenꓸPos)(10 + len("`foo bar` ")))
-            }.slice()
+            want: slice<global::go.go.ast_package.DirectiveArg>([
+                new("foo bar", 10),
+                new("baz", (tokenꓸPos)(10 + len("`foo bar` ")))
+            ])
         ),
         new(
-            name: "escapes"u8,
+            name: "escapes",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: "\"foo\\U0001F60Abar\" `a\\tb`"u8,
+                Tool: "go",
+                Name: "generate",
+                Args: "\"foo\\U0001F60Abar\" `a\\tb`",
                 ArgsPos: 10
             ),
-            want: new global::go.go.ast_package.DirectiveArg[]{
-                new("foo😊bar"u8, 10),
-                new("a\\tb"u8, (tokenꓸPos)(10 + len("\"foo\\U0001F60Abar\" ")))
-            }.slice()
+            want: slice<global::go.go.ast_package.DirectiveArg>([
+                new("foo😊bar", 10),
+                new("a\\tb", (tokenꓸPos)(10 + len("\"foo\\U0001F60Abar\" ")))
+            ])
         ),
         new(
-            name: "empty args"u8,
+            name: "empty args",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "build"u8,
-                Args: ""u8,
+                Tool: "go",
+                Name: "build",
+                Args: "",
                 ArgsPos: 10
             ),
-            want: new global::go.go.ast_package.DirectiveArg[]{}.slice()
+            want: slice<global::go.go.ast_package.DirectiveArg>([])
         ),
         new(
-            name: "spaces"u8,
+            name: "spaces",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "build"u8,
-                Args: "  foo   bar  "u8,
+                Tool: "go",
+                Name: "build",
+                Args: "  foo   bar  ",
                 ArgsPos: 10
             ),
-            want: new global::go.go.ast_package.DirectiveArg[]{
-                new("foo"u8, (tokenꓸPos)(10 + len("  "))),
-                new("bar"u8, (tokenꓸPos)(10 + len("  foo   ")))
-            }.slice()
+            want: slice<global::go.go.ast_package.DirectiveArg>([
+                new("foo", (tokenꓸPos)(10 + len("  "))),
+                new("bar", (tokenꓸPos)(10 + len("  foo   ")))
+            ])
         ),
         new(
-            name: "unterminated quote"u8,
+            name: "unterminated quote",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: "`foo"u8
+                Tool: "go",
+                Name: "generate",
+                Args: "`foo"
             ),
             wantErr: true
         ),
         new(
-            name: "no space after quote"u8,
+            name: "no space after quote",
             @in: new Directive(
-                Tool: "go"u8,
-                Name: "generate"u8,
-                Args: @"""foo""bar"u8
+                Tool: "go",
+                Name: "generate",
+                Args: @"""foo""bar"
             ),
             wantErr: true
         )
-    }.slice()) {
+    ])) {
         ref var test = ref heap(new TestParseArgs_type(), out var Ꮡtest);
         test = vᴛ1;
 
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             var (got, err) = Ꮡtest.Value.@in.ParseArgs();
-            if (err != default! && !Ꮡtest.Value.wantErr){
-                tΔ1.Errorf("got ParseArgs(%+v) = error %s; want %+v"u8, Ꮡtest.Value.@in, err, Ꮡtest.Value.want);
-            } else 
-            if (err == default! && Ꮡtest.Value.wantErr){
-                tΔ1.Errorf("got ParseArgs(%+v) = %+v; want error"u8, Ꮡtest.Value.@in, got);
-            } else 
-            if (err == default! && !reflect.DeepEqual(got, Ꮡtest.Value.want)) {
-                tΔ1.Errorf("got ParseArgs(%+v) = %+v; want %+v"u8, Ꮡtest.Value.@in, got, Ꮡtest.Value.want);
+            if (err != nil && !Ꮡtest.Value.wantErr) {
+                tΔ1.Errorf("got ParseArgs(%+v) = error %s; want %+v", Ꮡtest.Value.@in, err, Ꮡtest.Value.want);
+            } else if (err == nil && Ꮡtest.Value.wantErr) {
+                tΔ1.Errorf("got ParseArgs(%+v) = %+v; want error", Ꮡtest.Value.@in, got);
+            } else if (err == nil && !reflect.DeepEqual(got, Ꮡtest.Value.want)) {
+                tΔ1.Errorf("got ParseArgs(%+v) = %+v; want %+v", Ꮡtest.Value.@in, got, Ꮡtest.Value.want);
             }
         });
     }

@@ -45,7 +45,7 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,9 +55,9 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABRYACgKCuIKUgpSClIKmgpSolqKmopIACBKCgoKUgoKClKiygqiQptKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqaowoKCgqiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoK4AAIQ0qaCgoKUlIKCgpSUlII=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_amd64_noasm.go", "fe_amd64_noasm.cs", "AAgSgKSA")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCgoKCgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe.go", "fe.cs", "AChMlrKCppaygqiy7oKCgoK4lIKCgoKCgoKUlKjSgoKCgoKo9oKCgoKCqJKstgALBIKCgoKCgpSCgpSUgoKUlIKClJSCgpSUgoKUlIKClJSCgpSUgoKCgpSowoIABhYACgKCuIKUgpSClIKmgpSolqKmooIACBKCgoKUgoKClKiygqiQptKCgoKCgoKosoKCgoKCgoKCgoKCgoKCgqiSqLKokoKokoKowoKCgoKCgoKCgqaowoKCgqiStIKCgoKCgoKCgpSCgoKUgoKClIKCgpSCgoKUgoKClIKCgpSCgoK4AAIQ0qaCgoKUlIKCgpSUlII=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_amd64_noasm.go", "fe_amd64_noasm.cs", "AAgSgKSA")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_generic.go", "fe_generic.cs", "ABAgkoKokoKCgqikqJKCgoKokoKCgqiSpoKCgoKClIKCgoIAIkaCgoKCpoKCgoKmgoKCgqaCgoKCpoKCgoIAHDqCgoKClIKCgoLcgoKCgqaCgoKCggAYMoKCpoKCpoKCpoKCpoKClIKCgoKUgoKCgpSCgoKCquaCgoKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;

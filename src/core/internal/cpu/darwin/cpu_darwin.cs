@@ -4,7 +4,7 @@
 //go:build darwin && !ios
 namespace go.@internal;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class cpu_package {
 
@@ -52,11 +52,11 @@ internal static bool darwinKernelVersionCheck(nint major, nint minor, nint patch
 Loop:
     foreach (var (_, b) in release[..]) {
         switch (ᐧ) {
-        case {} when b >= (rune)'0' && b <= (rune)'9': {
-            mmp[c] = 10 * mmp[c] + (nint)((byte)(b - (rune)'0'));
+        case {} when b >= (byte)'0' && b <= (byte)'9': {
+            mmp[c] = 10 * mmp[c] + (nint)((byte)(b - '0'));
             break;
         }
-        case {} when b is (rune)'.': {
+        case {} when b is (byte)'.': {
             c++;
             if (c > 2) {
                 return false;

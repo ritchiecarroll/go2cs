@@ -72,16 +72,16 @@ partial struct EventSpec {
 //
 // See the documentation of Args for more details.
 public static readonly ж<array<@string>> ᏑEventArgTypes = new StaticBox<array<@string>>(new @string[]{
-    "seq"u8, // sequence number
-    "pstatus"u8, // P status
-    "gstatus"u8, // G status
-    "g"u8, // trace.GoID
-    "m"u8, // trace.ThreadID
-    "p"u8, // trace.ProcID
-    "string"u8, // string ID
-    "stack"u8, // stack ID
-    "value"u8, // uint64
-    "task"u8 // trace.TaskID
+    "seq",     // sequence number
+    "pstatus", // P status
+    "gstatus", // G status
+    "g",       // trace.GoID
+    "m",       // trace.ThreadID
+    "p",       // trace.ProcID
+    "string",  // string ID
+    "stack",   // stack ID
+    "value",   // uint64
+    "task"     // trace.TaskID
 }.array());
 public static ref array<@string> EventArgTypes => ref ((StaticBox<array<@string>>)ᏑEventArgTypes).ValueSlot;
 

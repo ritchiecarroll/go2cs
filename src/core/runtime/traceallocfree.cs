@@ -16,10 +16,11 @@ partial class runtime_package {
 
 // Batch type values for the alloc/free experiment.
 internal static UntypedInt traceAllocFreeTypesBatch => iota; // Contains types. [{id, address, size, ptrspan, name length, name string} ...]
-internal static UntypedInt traceAllocFreeInfoBatch => 1; // Contains info for interpreting events. [min heap addr, page size, min heap align, min stack align]
+internal static UntypedInt traceAllocFreeInfoBatch => 1;     // Contains info for interpreting events. [min heap addr, page size, min heap align, min stack align]
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string traceSnapshotMemoryˢ = "traceSnapshotMemory: tracing is not enabled"u8;
+internal static ref readonly @string traceSnapshotMemoryˢ => ref traceSnapshotMemoryˢᵇ;
+private static readonly @string traceSnapshotMemoryˢᵇ = "traceSnapshotMemory: tracing is not enabled"u8;
 
 // traceSnapshotMemory takes a snapshot of all runtime memory that there are events for
 // (heap spans, heap objects, goroutine stacks, etc.) and writes out events for them.
@@ -30,7 +31,7 @@ internal static void traceSnapshotMemory(uintptr gen) {
 
     // Write a batch containing information that'll be necessary to
     // interpret the events.
-    bool flushed = default!;
+    bool flushed = default;
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
     (w, flushed) = w.ensure(1 + 4 * traceBytesPerNumber);
     if (flushed) {
@@ -48,30 +49,29 @@ internal static void traceSnapshotMemory(uintptr gen) {
     w.flush().end();
 
     // Start tracing.
-    ref var traceΔ1 = ref heap<traceLocker>(out var ᏑtraceΔ1);
-    traceΔ1 = traceAcquire();
+    ref var traceΔ1 = ref heap<traceLocker>(traceAcquire(), out var ᏑtraceΔ1);
     if (!traceΔ1.ok()) {
         @throw(traceSnapshotMemoryˢ);
     }
 
     // Write out all the heap spans and heap objects.
     foreach (var (_, s) in mheap_.allspans) {
-        if (s.of(mspan.Ꮡstate).get() == mSpanDead) {
+        if (s.Ꮡstate.get() == mSpanDead) {
             continue;
         }
         // It's some kind of span, so trace that it exists.
         traceΔ1.SpanExists(s);
 
         // Write out allocated objects if it's a heap span.
-        if (s.of(mspan.Ꮡstate).get() != mSpanInUse) {
+        if (s.Ꮡstate.get() != mSpanInUse) {
             continue;
         }
 
         // Find all allocated objects.
         var abits = s.allocBitsForIndex(0);
-        for (var i = (uintptr)0; i < (uintptr)(~s).nelems; i++) {
-            if (abits.index < (uintptr)(~s).freeindex || abits.isMarked()) {
-                var x = s.@base() + i * (~s).elemsize;
+        for (var i = (uintptr)0; i < (uintptr)s.nelems; i++) {
+            if (abits.index < (uintptr)s.freeindex || abits.isMarked()) {
+                var x = s.@base() + i * s.elemsize;
                 traceΔ1.HeapObjectExists(x, s.typePointersOfUnchecked(x).typ);
             }
             abits.advance();
@@ -89,8 +89,8 @@ internal static void traceSnapshotMemory(uintptr gen) {
 internal static traceArg traceSpanTypeAndClass(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (Ꮡs.of(mspan.Ꮡstate).get() == mSpanInUse) {
-        return ((traceArg)(uint64)(uint8)s.spanclass) << 1;
+    if (Ꮡs.Ꮡstate.get() == mSpanInUse) {
+        return ((traceArg)(uint64)s.spanclass) << 1;
     }
     return (traceArg)1;
 }
@@ -110,8 +110,8 @@ internal static void SpanAlloc(this traceLocker tl, ж<mspan> Ꮡs) {
 }
 
 // SpanFree records an event indicating that the span is about to be freed.
-internal static void SpanFree(this traceLocker tl, ж<mspan> Ꮡs) {
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanFree, traceSpanID(Ꮡs));
+internal static void SpanFree(this traceLocker tl, ж<mspan> s) {
+    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSpanFree, traceSpanID(s));
 }
 
 // traceSpanID creates a trace ID for the span s for the trace.
@@ -124,15 +124,15 @@ internal static traceArg traceSpanID(ж<mspan> Ꮡs) {
 // HeapObjectExists records that an object already exists at addr with the provided type.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
-internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.Type> Ꮡtyp) {
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObject, traceHeapObjectID(addr), tl.rtype(Ꮡtyp));
+internal static void HeapObjectExists(this traceLocker tl, uintptr addr, ж<abi.Type> typ) {
+    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObject, traceHeapObjectID(addr), tl.rtype(typ));
 }
 
 // HeapObjectAlloc records that an object was newly allocated at addr with the provided type.
 // The type is optional, and the size of the slot occupied the object is inferred from the
 // span containing it.
-internal static void HeapObjectAlloc(this traceLocker tl, uintptr addr, ж<abi.Type> Ꮡtyp) {
-    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObjectAlloc, traceHeapObjectID(addr), tl.rtype(Ꮡtyp));
+internal static void HeapObjectAlloc(this traceLocker tl, uintptr addr, ж<abi.Type> typ) {
+    tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapObjectAlloc, traceHeapObjectID(addr), tl.rtype(typ));
 }
 
 // HeapObjectFree records that an object at addr is about to be freed.
@@ -168,7 +168,8 @@ internal static traceArg traceGoroutineStackID(uintptr @base) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goroutineStackSizeIsNotAˢ = "goroutine stack size is not a power of 2"u8;
+internal static ref readonly @string goroutineStackSizeIsNotAˢ => ref goroutineStackSizeIsNotAˢᵇ;
+private static readonly @string goroutineStackSizeIsNotAˢᵇ = "goroutine stack size is not a power of 2"u8;
 
 // traceCompressStackSize assumes size is a power of 2 and returns log2(size).
 internal static traceArg traceCompressStackSize(uintptr size) {

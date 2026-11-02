@@ -64,7 +64,7 @@ internal static slice<uint16> encodeWTF16(@string s, slice<uint16> buf) {
 // the potentially ill-formed UTF-16 s.
 internal static slice<byte> decodeWTF16(slice<uint16> s, slice<byte> buf) {
     for (nint i = 0; i < len(s); i++) {
-        rune ar = default!;
+        rune ar = default;
         {
             var r = s[i];
             switch (ᐧ) {

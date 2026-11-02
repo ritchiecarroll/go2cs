@@ -6,7 +6,8 @@ namespace go;
 partial class mime_package {
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ = GoBigConst.Parse("17331160586600743265244282880");
+private static ref readonly GoBigConst maskᶜ => ref maskᶜᵇ;
+private static readonly GoBigConst maskᶜᵇ = GoBigConst.Parse("17331160586600743265244282880");
 
 // isTSpecial reports whether c is in 'tspecials' as defined by RFC
 // 1521 and RFC 2045.
@@ -40,7 +41,8 @@ internal static bool isTSpecial(byte c) {
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
-private static readonly GoBigConst maskᶜ1 = GoBigConst.Parse("170141183443138071145086560442049888256");
+private static ref readonly GoBigConst maskᶜ1 => ref maskᶜ1ᵇ;
+private static readonly GoBigConst maskᶜ1ᵇ = GoBigConst.Parse("170141183443138071145086560442049888256");
 
 // isTokenChar reports whether c is in 'token' as defined by RFC
 // 1521 and RFC 2045.

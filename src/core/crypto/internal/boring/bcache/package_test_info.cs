@@ -7,7 +7,6 @@
 global using static global::go.crypto.@internal.boring.bcache_package;
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -26,7 +25,7 @@ using static global::go.crypto.@internal.boring.bcache_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -36,7 +35,7 @@ using static global::go.crypto.@internal.boring.bcache_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/boring/bcache/cache_test.go", "cache_test.cs", "ABQigtqigoLWwoKUpqamgoKCgoK4goKCgoKAgtqCgILIgoKAgtqCgpSCgoCCAAgQgpKCgoKCgrKUgoKCgpSClIKAgoLWpIKC", "98-116:1")]
+[assembly: GoPositionMap("crypto/internal/boring/bcache/cache_test.go", "cache_test.cs", "ABQigtqigoLmwoKUpqamgoKCgoK4goKCgoKAgtqCgILIgoKAgtqCgpSCgoCCAAgQgpKCgoKCgrKUgoKCgpSClIKAgoLWpIKC", "98-116:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.boring;

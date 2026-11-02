@@ -18,7 +18,7 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Which type of Process do we have?
-    if (p.handle != nil){
+    if (p.handle != nil) {
         // pidfd
         return Ꮡp.pidfdWait();
     } else {
@@ -28,7 +28,8 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string waitˢ = "wait"u8;
+internal static ref readonly @string waitˢ => ref waitˢᵇ;
+private static readonly @string waitˢᵇ = "wait"u8;
 
 internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
     // TODO(go.dev/issue/67642): When there are concurrent Wait calls, one
@@ -37,15 +38,15 @@ internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
     //
     // Checking for statusDone here would not be a complete fix, as the PID
     // could still be waited on and reused prior to blockUntilWaitable.
-    var exprᴛ1 = Ꮡp.pidStatus();
-    if (exprᴛ1 == statusReleased) {
-        return (default!, syscall.EINVAL);
-    }
+    switch (Ꮡp.pidStatus()) {
+    case var ᴛ when ᴛ == statusReleased: {
+        return (default, syscall.EINVAL);
+    }}
 
     // If we can block until Wait4 will succeed immediately, do so.
     var (ready, err) = Ꮡp.blockUntilWaitable();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (ready) {
         // Mark the process done now, before the call to Wait4,
@@ -53,27 +54,28 @@ internal static (ж<ProcessState>, error) pidWait(this ж<Process> Ꮡp) {
         Ꮡp.doRelease(statusDone);
         // Acquire a write lock on sigMu to wait for any
         // active call to the signal method to complete.
-        Ꮡp.of(Process.ᏑsigMu).Lock();
-        Ꮡp.of(Process.ᏑsigMu).Unlock();
+        Ꮡp.ᏑsigMu.Lock();
+        Ꮡp.ᏑsigMu.Unlock();
     }
 
     ref var status = ref heap(new syscall.WaitStatus(), out var Ꮡstatus);
     ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
     ref var pid1 = ref heap<nint>(out var Ꮡpid1);
     (pid1, err) = ignoringEINTR2((nint, error) () => syscall.Wait4(Ꮡp.Value.Pid, Ꮡstatus, 0, Ꮡrusage));
-    if (err != default!) {
-        return (default!, NewSyscallError(waitˢ, err));
+    if (err != nil) {
+        return (default, NewSyscallError(waitˢ, err));
     }
     Ꮡp.doRelease(statusDone);
     return (Ꮡ(new ProcessState(
         pid: pid1,
         status: status,
         rusage: Ꮡrusage
-    )), default!);
+    )), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string osUnsupportedSignalTypeˢ = "os: unsupported signal type"u8;
+internal static ref readonly @string osUnsupportedSignalTypeˢ => ref osUnsupportedSignalTypeˢᵇ;
+private static readonly @string osUnsupportedSignalTypeˢᵇ = "os: unsupported signal type"u8;
 
 internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
     ref var p = ref Ꮡp.DerefOrNull();
@@ -84,7 +86,7 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
     }
 
     // Which type of Process do we have?
-    if (p.handle != nil){
+    if (p.handle != nil) {
         // pidfd
         return Ꮡp.pidfdSendSignal(s);
     } else {
@@ -94,7 +96,8 @@ internal static error signal(this ж<Process> Ꮡp, ΔSignal sig) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string osProcessNotInitializedˢ = "os: process not initialized"u8;
+internal static ref readonly @string osProcessNotInitializedˢ => ref osProcessNotInitializedˢᵇ;
+private static readonly @string osProcessNotInitializedˢᵇ = "os: process not initialized"u8;
 
 internal static error pidSignal(this ж<Process> Ꮡp, syscallꓸSignal s) {
     GoFrame ᒐ = default;
@@ -109,21 +112,21 @@ internal static error pidSignal(this ж<Process> Ꮡp, syscallꓸSignal s) {
             return errors.New(osProcessNotInitializedˢ);
         }
 
-        Ꮡp.of(Process.ᏑsigMu).RLock();
+        Ꮡp.ᏑsigMu.RLock();
         ᒐd1 = true;
 
-        var exprᴛ1 = Ꮡp.pidStatus();
-        if (exprᴛ1 == statusDone) {
+        switch (Ꮡp.pidStatus()) {
+        case var ᴛ when ᴛ == statusDone: {
             return ErrProcessDone;
         }
-        if (exprᴛ1 == statusReleased) {
+        case var ᴛ when ᴛ == statusReleased: {
             return errProcessReleased;
-        }
+        }}
 
         return convertESRCH(syscall.Kill(p.Pid, s));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡp.of(Process.ᏑsigMu).RUnlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd1) Ꮡp.ᏑsigMu.RUnlock(); ᒐ.Run(); }
 }
 
 internal static error convertESRCH(error err) {
@@ -134,30 +137,29 @@ internal static error convertESRCH(error err) {
 }
 
 internal static (ж<Process> p, error err) findProcess(nint pid) {
-    error err = default!;
+    error err = default;
 
     (var h, err) = pidfdFind(pid);
-    if (AreEqual(err, ErrProcessDone)){
+    if (AreEqual(err, ErrProcessDone)) {
         // We can't return an error here since users are not expecting
         // it. Instead, return a process with a "done" state already
         // and let a subsequent Signal or Wait call catch that.
-        return (newDoneProcess(pid), default!);
-    } else 
-    if (err != default!) {
+        return (newDoneProcess(pid), default);
+    } else if (err != nil) {
         // Ignore other errors from pidfdFind, as the callers
         // do not expect them. Fall back to using the PID.
-        return (newPIDProcess(pid), default!);
+        return (newPIDProcess(pid), default);
     }
     // Use the handle.
-    return (newHandleProcess(pid, h), default!);
+    return (newHandleProcess(pid, h), default);
 }
 
 internal static time.Duration userTime(this ref ProcessState p) {
-    return ((time.Duration)p.rusage.of(syscall.Rusage.ᏑUtime).Nano()) * time.ΔNanosecond;
+    return ((time.Duration)p.rusage.ᏑUtime.Nano()) * time.ΔNanosecond;
 }
 
 internal static time.Duration systemTime(this ref ProcessState p) {
-    return ((time.Duration)p.rusage.of(syscall.Rusage.ᏑStime).Nano()) * time.ΔNanosecond;
+    return ((time.Duration)p.rusage.ᏑStime.Nano()) * time.ΔNanosecond;
 }
 
 } // end os_package

@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 // </ImportedTypeAliases>
@@ -68,7 +65,11 @@ using static go.crypto.hpke_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(hybridKEM))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -78,12 +79,12 @@ using static go.crypto.hpke_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABc4wpSkpKSkupCmkKaQrMAACRLu7u6C1oKClKaCpoLagqaCpoKmgg==")]
-[assembly: go.GoPositionMap("crypto/hpke/aead_fips140v1.26.go", "aead_fips140v1.26.cs", "AA8egoKClA==")]
-[assembly: go.GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADNWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQABRDSgpSCgqyygoKUgoKU2qKClAACENKClIKClILcsoKClJKCgpSqooKUpoKCgoKUpoKCgoKCgg==", "71-73:1;114-116:2", "", "67=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
-[assembly: go.GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB1CwpSkpKSkpLqQppCmkAAIEJKSlIKmgqaC1oKmgoKCgoKCpoKCgoKCgoKokqiSAAgSkpSCpoKmgqaCgoKCgoKCgoKCgtaC1oI=")]
-[assembly: go.GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACpcwpSkpKSkpKSkpKQAMGSCgoKClKaCpoK2oqKiAAEUAAgClKSkpNrsgtSCpIKkgqSCpIIAByoADwKCgpTcgoKClKaCpoLusoKClIKUgoKUlIKCgoKUAAcsAA4CgoKU3IKCgpSmgoKClOa0goKClIKCgpSUgoKCgpSClIKCgpSUpoLWAAkUgoKUgoKCgoKUpoLcgoKClIKClII=", "", "", "409=PublicKey/1/1/2")]
-[assembly: go.GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABcoAAwYtsyipgAKFrbKkqYACha2ypIADiKCpoKmgoKCgoKCggANLAAPApSAgqSkgIKkpICCpKToooKUkoKUgpKUgpSmgqaCyrKCgpSClIKUgoKUgpSUgoKmgoIACTIADwKmgoKC1qKCpoKUgoKSgqaCgoKCkqSClLiClICCpKSAgqSkgIKkpOiigoKClKaC1oKClKaCAAkOooKUgpKClIKSlIKUgoKUgpSCpri2tsqSpri2tsqSAAoWgqaCAAomAAsClKSkuIKCgpSmgqaCpoKCgpQAByYACwKUpKS4goKClKaCgoKUpoKCgoKUpoLmgoaClKaC3II=", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "24=X25519/1/1/4;52=P256/1/1/3;77=P384/1/1/3;386=PublicKey/1/1/2,Encapsulator/1/1/3;614=Encapsulator/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/aead.go", "aead.cs", "ABc4wpSkpKSkupCmkKaQrMAACRLu7u6C5oKClKaCpoLagqaCpoKmgg==")]
+[assembly: GoPositionMap("crypto/hpke/aead_fips140v1.26.go", "aead_fips140v1.26.cs", "AA8egoKClA==")]
+[assembly: GoPositionMap("crypto/hpke/hpke.go", "hpke.cs", "ADpWgpSCgoKClIKCgoKUlIKUgoKUgoKUuAAHEIKClIKClIKUgoKUgoKUgoKUgoKUgoKUuAAHIgALAoKClIKClAACFPKCgpSCgpQABhDSgpSCgqyygoKUgoKU6qKClAACENKClIKClILssoKClJKCgpSqooKUpoKCgoKUpoKCgoKCgg==", "71-73:1;114-116:2", "", "74=keySize/1/1/1,nonceSize/1/1/1,size/1/1/1")]
+[assembly: GoPositionMap("crypto/hpke/kdf.go", "kdf.cs", "AB1CwpSkpKSkpLqQppCmkAAIEJKSlIKmgqaC5oKmgoKCgoKCpoKCgoKCgoKokqiSAAgSkpSCpoKmgqaCgoKCgoKCgoKCguaC5oI=")]
+[assembly: GoPositionMap("crypto/hpke/kem.go", "kem.cs", "ACtcwpSkpKSkpKSkpKQAMmSCgoKClKaCpoK2oqKiAAEUAAgClKSkpNrsguSCpIKkgqSCpIIAByoADwKCgpTcgoKClKaCpoLusoKClIKUgoKUlIKCgoKUAAcsAA4CgoKU3IKCgpSmgoKClAAIBrSCgoKUgoKClJSCgoKClIKUgoKClJSmguYACRSCgpSCgoKCgpSmgtyCgoKUgoKUgg==", "", "", "416=PublicKey/1/1/2")]
+[assembly: GoPositionMap("crypto/hpke/pq.go", "pq.cs", "ABcoAAwYtsyipgAKFrbKkqYACha2ypIADiKCpoKmgoKCgoKCggAQLAAPApSAgqSkgIKkpICCpKT4ooKUkoKUgpKUgpSmgqaCyrKCgpSClIKUgoKUgpSUgoKmgoIACTIADwKmgoKC5qKCpoKUgoKSgqaCgoKCkqSClLiClICCpKSAgqSkgIKkpPiigoKClKaC5oKClKaCAAoOooKUgpKClIKSlIKUgoKUgpSCpri2tsqSpri2tsqSAAoWgqaCAAsmAAsClKSkuIKCgpSmgqaCpoKCgpQAByYACwKUpKS4goKClKaCgoKUpoKCgoKUpoLmgoaClKaC3II=", "173-175:1;194-196:1;204-206:2;273-275:1;343-345:1;350-352:2", "", "24=X25519/1/1/4;52=P256/1/1/3;77=P384/1/1/3;393=PublicKey/1/1/2,Encapsulator/1/1/3;623=Encapsulator/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

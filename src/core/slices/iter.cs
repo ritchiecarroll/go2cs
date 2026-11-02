@@ -64,7 +64,7 @@ public static Slice AppendSeq<Slice, E>(Slice s, iter.Seq<E> seq)
 // Collect collects values from seq into a new slice and returns it.
 // If seq is empty, the result is nil.
 public static slice<E> Collect<E>(iter.Seq<E> seq) {
-    return AppendSeq(slice<E>(default!), seq);
+    return AppendSeq(slice<E>(default), seq);
 }
 
 // Sorted collects values from seq into a new slice, sorts the slice,

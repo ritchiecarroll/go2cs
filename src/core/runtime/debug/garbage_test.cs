@@ -14,15 +14,15 @@ using debug = go.runtime.debug_package;
 
 partial class debug_test_package {
 
-public static void TestReadGCStats(ж<testing.T> Ꮡt) {
+public static void TestReadGCStats(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(SetGCPercent, SetGCPercent(-1), ref ᒐ);
 
         ref var stats = ref heap(new debug.GCStats(), out var Ꮡstats);
         ref var mstats = ref heap(new runtime.MemStats(), out var Ꮡmstats);
-        time.Duration minimum = default!;
-        time.Duration maximum = default!;
+        time.Duration minimum = default;
+        time.Duration maximum = default;
 
         // First ReadGCStats will allocate, second should not,
         // especially if we follow up with an explicit garbage collection.
@@ -35,29 +35,29 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
         runtime.ReadMemStats(Ꮡmstats);
 
         if (stats.NumGC != (int64)mstats.NumGC) {
-            Ꮡt.Errorf("stats.NumGC = %d, but mstats.NumGC = %d"u8, stats.NumGC, mstats.NumGC);
+            t.Errorf("stats.NumGC = %d, but mstats.NumGC = %d", stats.NumGC, mstats.NumGC);
         }
         if (stats.PauseTotal != ((time.Duration)(int64)mstats.PauseTotalNs)) {
-            Ꮡt.Errorf("stats.PauseTotal = %d, but mstats.PauseTotalNs = %d"u8, stats.PauseTotal, mstats.PauseTotalNs);
+            t.Errorf("stats.PauseTotal = %d, but mstats.PauseTotalNs = %d", stats.PauseTotal, mstats.PauseTotalNs);
         }
         if (stats.LastGC.UnixNano() != (int64)mstats.LastGC) {
-            Ꮡt.Errorf("stats.LastGC.UnixNano = %d, but mstats.LastGC = %d"u8, stats.LastGC.UnixNano(), mstats.LastGC);
+            t.Errorf("stats.LastGC.UnixNano = %d, but mstats.LastGC = %d", stats.LastGC.UnixNano(), mstats.LastGC);
         }
         nint n = (nint)mstats.NumGC;
         if (n > len(mstats.PauseNs)) {
             n = len(mstats.PauseNs);
         }
-        if (len(stats.Pause) != n){
-            Ꮡt.Errorf("len(stats.Pause) = %d, want %d"u8, len(stats.Pause), n);
+        if (len(stats.Pause) != n) {
+            t.Errorf("len(stats.Pause) = %d, want %d", len(stats.Pause), n);
         } else {
             nint offΔ1 = ((nint)mstats.NumGC + len(mstats.PauseNs) - 1) % len(mstats.PauseNs);
             for (nint i = 0; i < n; i++) {
                 var dt = stats.Pause[i];
                 if (dt != ((time.Duration)(int64)mstats.PauseNs[offΔ1])) {
-                    Ꮡt.Errorf("stats.Pause[%d] = %d, want %d"u8, i, dt, mstats.PauseNs[offΔ1]);
+                    t.Errorf("stats.Pause[%d] = %d, want %d", i, dt, mstats.PauseNs[offΔ1]);
                 }
                 maximum = max(maximum, dt);
-                if (i == 0){
+                if (i == 0) {
                     minimum = dt;
                 } else {
                     minimum = min(minimum, dt);
@@ -69,24 +69,24 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
         var q = stats.PauseQuantiles;
         nint nq = len(q);
         if (q[0] != minimum || q[nq - 1] != maximum) {
-            Ꮡt.Errorf("stats.PauseQuantiles = [%d, ..., %d], want [%d, ..., %d]"u8, q[0], q[nq - 1], minimum, maximum);
+            t.Errorf("stats.PauseQuantiles = [%d, ..., %d], want [%d, ..., %d]", q[0], q[nq - 1], minimum, maximum);
         }
 
         for (nint i = 0; i < nq - 1; i++) {
             if (q[i] > q[i + 1]) {
-                Ꮡt.Errorf("stats.PauseQuantiles[%d]=%d > stats.PauseQuantiles[%d]=%d"u8, i, q[i], i + 1, q[i + 1]);
+                t.Errorf("stats.PauseQuantiles[%d]=%d > stats.PauseQuantiles[%d]=%d", i, q[i], i + 1, q[i + 1]);
             }
         }
 
         // compare memory stats with gc stats:
         if (len(stats.PauseEnd) != n) {
-            Ꮡt.Fatalf("len(stats.PauseEnd) = %d, want %d"u8, len(stats.PauseEnd), n);
+            t.Fatalf("len(stats.PauseEnd) = %d, want %d", len(stats.PauseEnd), n);
         }
         nint off = ((nint)mstats.NumGC + len(mstats.PauseEnd) - 1) % len(mstats.PauseEnd);
         for (nint i = 0; i < n; i++) {
             var dt = stats.PauseEnd[i];
             if (dt.UnixNano() != (int64)mstats.PauseEnd[off]) {
-                Ꮡt.Errorf("stats.PauseEnd[%d] = %d, want %d"u8, i, dt.UnixNano(), mstats.PauseEnd[off]);
+                t.Errorf("stats.PauseEnd[%d] = %d, want %d", i, dt.UnixNano(), mstats.PauseEnd[off]);
             }
             off = (off + len(mstats.PauseEnd) - 1) % len(mstats.PauseEnd);
         }
@@ -97,7 +97,7 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
 
 internal static slice<byte> big;
 
-public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
+public static void TestFreeOSMemory(ж<testing.T> t) {
     // Tests FreeOSMemory by making big susceptible to collection
     // and checking that at least that much memory is returned to
     // the OS after.
@@ -113,7 +113,7 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
 
     // Clear the last reference to the big allocation, making it
     // susceptible to collection.
-    big = default!;
+    big = default;
 
     // FreeOSMemory runs a GC cycle before releasing memory,
     // so it's fine to skip a GC here.
@@ -132,7 +132,7 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
     // had its memory shift into HeapReleased as a result of that
     // FreeOSMemory.
     if (after.HeapReleased <= before.HeapReleased) {
-        Ꮡt.Fatalf("no memory released: %d -> %d"u8, before.HeapReleased, after.HeapReleased);
+        t.Fatalf("no memory released: %d -> %d", before.HeapReleased, after.HeapReleased);
     }
 
     // Check to make sure bigBytes was released, plus some slack. Pages may get
@@ -153,29 +153,29 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
         return;
     }
     if (after.HeapReleased - before.HeapReleased < (uint64)bigBytes - slack) {
-        Ꮡt.Fatalf("less than %d released: %d -> %d"u8, (uint64)bigBytes - slack, before.HeapReleased, after.HeapReleased);
+        t.Fatalf("less than %d released: %d -> %d", (uint64)bigBytes - slack, before.HeapReleased, after.HeapReleased);
     }
 }
 
 internal static any setGCPercentBallast;
 internal static any setGCPercentSink;
 
-public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
+public static void TestSetGCPercent(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.SkipFlaky(new testing_TжTB(Ꮡt), 20076);
+        testenv.SkipFlaky(new testing_TжTB(t), 20076);
 
         // Test that the variable is being set and returned correctly.
         nint old = SetGCPercent(123);
         nint @new = SetGCPercent(old);
         if (@new != 123) {
-            Ꮡt.Errorf("SetGCPercent(123); SetGCPercent(x) = %d, want 123"u8, @new);
+            t.Errorf("SetGCPercent(123); SetGCPercent(x) = %d, want 123", @new);
         }
 
         // Test that the percentage is implemented correctly.
         defer(() => {
             SetGCPercent(old);
-            (setGCPercentBallast, setGCPercentSink) = (default!, default!);
+            (setGCPercentBallast, setGCPercentSink) = (default, default);
         }, ref ᒐ);
         SetGCPercent(100);
         runtime.GC();
@@ -187,26 +187,26 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         runtime.GC();
         runtime.ReadMemStats(Ꮡms);
         if (abs64((int64)baseline - (int64)ms.Alloc) > (int64)10 << 20) {
-            Ꮡt.Fatalf("failed to set up baseline live heap; got %d MB, want %d MB"u8, ms.Alloc >> 20, (nint)(baseline >> 20));
+            t.Fatalf("failed to set up baseline live heap; got %d MB, want %d MB", ms.Alloc >> 20, (nint)(baseline >> 20));
         }
         // NextGC should be ~200 MB.
         UntypedInt thresh = /* 20 << 20 */ 20971520; // TODO: Figure out why this is so noisy on some builders
         {
             var want = (int64)(2 * baseline); if (abs64(want - (int64)ms.NextGC) > thresh) {
-                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)(thresh >> 20));
+                t.Errorf("NextGC = %d MB, want %d±%d MB", ms.NextGC >> 20, want >> 20, (nint)(thresh >> 20));
             }
         }
         // Create some garbage, but not enough to trigger another GC.
         for (nint i = 0; i < (nint)((nint)(/* 1.2 * baseline */ 125829120L)); i += (1 << 10)) {
             setGCPercentSink = new slice<byte>((1 << 10));
         }
-        setGCPercentSink = default!;
+        setGCPercentSink = default;
         // Adjust GOGC to 50. NextGC should be ~150 MB.
         SetGCPercent(50);
         runtime.ReadMemStats(Ꮡms);
         {
             var want = (int64)(/* 1.5 * baseline */ 157286400L); if (abs64(want - (int64)ms.NextGC) > thresh) {
-                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)(thresh >> 20));
+                t.Errorf("NextGC = %d MB, want %d±%d MB", ms.NextGC >> 20, want >> 20, (nint)(thresh >> 20));
             }
         }
 
@@ -224,7 +224,7 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         runtime.ReadMemStats(Ꮡms);
         var ngc2 = ms.NumGC;
         if (ngc1 == ngc2) {
-            Ꮡt.Errorf("expected GC to run but it did not"u8);
+            t.Errorf("expected GC to run but it did not");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -238,7 +238,7 @@ internal static int64 abs64(int64 a) {
     return a;
 }
 
-public static void TestSetMaxThreadsOvf(ж<testing.T> Ꮡt) {
+public static void TestSetMaxThreadsOvf(ж<testing.T> t) {
     // Verify that a big threads count will not overflow the int32
     // maxmcount variable, causing a panic (see Issue 16076).
     //

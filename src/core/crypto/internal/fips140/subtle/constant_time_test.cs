@@ -14,7 +14,7 @@ using static go.crypto.@internal.fips140.subtle_package;
 
 partial class subtle_internal_test_package {
 
-public static void TestConstantTimeLessOrEqBytes(ж<testing.T> Ꮡt) {
+public static void TestConstantTimeLessOrEqBytes(ж<testing.T> t) {
     var seed = new slice<byte>(32);
     byteorder.BEPutUint64(seed, (uint64)time.Now().UnixNano());
     var r = rand.NewChaCha8(new array<byte>(seed, 32));
@@ -30,7 +30,7 @@ public static void TestConstantTimeLessOrEqBytes(ж<testing.T> Ꮡt) {
         }
         {
             nint got = ConstantTimeLessOrEqBytes(a, b); if (got != exp) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want %d"u8, a, b, got, exp);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want %d", a, b, got, exp);
             }
         }
         exp = 0;
@@ -39,32 +39,32 @@ public static void TestConstantTimeLessOrEqBytes(ж<testing.T> Ꮡt) {
         }
         {
             nint got = ConstantTimeLessOrEqBytes(b, a); if (got != exp) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want %d"u8, b, a, got, exp);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want %d", b, a, got, exp);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(empty, a); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, empty, a, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", empty, a, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(empty, b); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, empty, b, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", empty, b, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(a, a); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, a, a, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", a, a, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(b, b); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, b, b, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", b, b, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(empty, empty); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, empty, empty, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", empty, empty, got);
             }
         }
         if (l == 0) {
@@ -76,22 +76,22 @@ public static void TestConstantTimeLessOrEqBytes(ж<testing.T> Ꮡt) {
         }
         {
             nint got = ConstantTimeLessOrEqBytes(a, max); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, a, max, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", a, max, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(b, max); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, b, max, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", b, max, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(empty, max); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, empty, max, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", empty, max, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(max, max); if (got != 1) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, max, max, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", max, max, got);
             }
         }
         var aPlusOne = new slice<byte>(l);
@@ -104,12 +104,12 @@ public static void TestConstantTimeLessOrEqBytes(ж<testing.T> Ꮡt) {
             aPlusOne[i]++;
             {
                 nint got = ConstantTimeLessOrEqBytes(a, aPlusOne); if (got != 1) {
-                    Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1"u8, a, aPlusOne, got);
+                    t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 1", a, aPlusOne, got);
                 }
             }
             {
                 nint got = ConstantTimeLessOrEqBytes(aPlusOne, a); if (got != 0) {
-                    Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0"u8, aPlusOne, a, got);
+                    t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0", aPlusOne, a, got);
                 }
             }
             break;
@@ -118,22 +118,22 @@ public static void TestConstantTimeLessOrEqBytes(ж<testing.T> Ꮡt) {
         copy(shorter, a);
         {
             nint got = ConstantTimeLessOrEqBytes(a, shorter); if (got != 0) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0"u8, a, shorter, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0", a, shorter, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(shorter, a); if (got != 0) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0"u8, shorter, a, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0", shorter, a, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(b, shorter); if (got != 0) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0"u8, b, shorter, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0", b, shorter, got);
             }
         }
         {
             nint got = ConstantTimeLessOrEqBytes(shorter, b); if (got != 0) {
-                Ꮡt.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0"u8, shorter, b, got);
+                t.Errorf("ConstantTimeLessOrEqBytes(%x, %x) = %d, want 0", shorter, b, got);
             }
         }
     }

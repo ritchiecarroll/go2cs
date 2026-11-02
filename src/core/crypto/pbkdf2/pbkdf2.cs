@@ -21,9 +21,12 @@ using go.crypto.@internal.fips140;
 partial class pbkdf2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cryptoPbkdf2UseOfKeysˢ = "crypto/pbkdf2: use of keys shorter than 112 bits is not allowed in FIPS 140-only mode"u8;
-private static readonly @string cryptoPbkdf2UseOfSaltsˢ = "crypto/pbkdf2: use of salts shorter than 128 bits is not allowed in FIPS 140-only mode"u8;
-private static readonly @string cryptoPbkdf2UseOfHashˢ = "crypto/pbkdf2: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
+private static ref readonly @string cryptoPbkdf2UseOfKeysˢ => ref cryptoPbkdf2UseOfKeysˢᵇ;
+private static readonly @string cryptoPbkdf2UseOfKeysˢᵇ = "crypto/pbkdf2: use of keys shorter than 112 bits is not allowed in FIPS 140-only mode"u8;
+private static ref readonly @string cryptoPbkdf2UseOfSaltsˢ => ref cryptoPbkdf2UseOfSaltsˢᵇ;
+private static readonly @string cryptoPbkdf2UseOfSaltsˢᵇ = "crypto/pbkdf2: use of salts shorter than 128 bits is not allowed in FIPS 140-only mode"u8;
+private static ref readonly @string cryptoPbkdf2UseOfHashˢ => ref cryptoPbkdf2UseOfHashˢᵇ;
+private static readonly @string cryptoPbkdf2UseOfHashˢᵇ = "crypto/pbkdf2: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode"u8;
 
 // Key derives a key from the password, salt and iteration count, returning a
 // []byte of length keyLength that can be used as cryptographic key. The key is
@@ -50,13 +53,13 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     var fh = fips140hash.UnwrapNew(h);
     if (fips140only.Enforced()) {
         if (keyLength < 112 / 8) {
-            return (default!, errors.New(cryptoPbkdf2UseOfKeysˢ));
+            return (default, errors.New(cryptoPbkdf2UseOfKeysˢ));
         }
         if (len(salt) < 128 / 8) {
-            return (default!, errors.New(cryptoPbkdf2UseOfSaltsˢ));
+            return (default, errors.New(cryptoPbkdf2UseOfSaltsˢ));
         }
         if (!fips140only.ApprovedHash(fh())) {
-            return (default!, errors.New(cryptoPbkdf2UseOfHashˢ));
+            return (default, errors.New(cryptoPbkdf2UseOfHashˢ));
         }
     }
     return pbkdf2.Key(fh, password, salt, iter, keyLength);

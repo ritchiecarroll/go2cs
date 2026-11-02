@@ -32,7 +32,7 @@ public static ΔType Underlying(this ж<Map> Ꮡt) {
 }
 
 public static @string String(this ж<Map> Ꮡt) {
-    return TypeString(new MapжΔType(Ꮡt), default!);
+    return TypeString(new MapжΔType(Ꮡt), default);
 }
 
 } // end types_package

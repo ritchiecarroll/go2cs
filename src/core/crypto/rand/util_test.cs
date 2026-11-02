@@ -20,28 +20,26 @@ using static go.crypto.rand_internal_test_package;
 partial class rand_test_package {
 
 // https://golang.org/issue/6849.
-public static void TestPrimeSmall(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestPrimeSmall(ж<testing.T> t) {
     for (nint n = 2; n < 10; n++) {
         var (p, err) = rand.Prime(rand.Reader, n);
-        if (err != default!) {
-            Ꮡt.Fatalf("Can't generate %d-bit prime: %v"u8, n, err);
+        if (err != nil) {
+            t.Fatalf("Can't generate %d-bit prime: %v", n, err);
         }
         if (p.BitLen() != n) {
-            Ꮡt.Fatalf("%v is not %d-bit"u8, p.OrTypedNil(), n);
+            t.Fatalf("%v is not %d-bit", p.OrTypedNil(), n);
         }
         if (!p.ProbablyPrime(32)) {
-            Ꮡt.Fatalf("%v is not prime"u8, p.OrTypedNil());
+            t.Fatalf("%v is not prime", p.OrTypedNil());
         }
     }
 }
 
 // Test that passing bits < 2 causes Prime to return nil, error
-public static partial void TestPrimeBitsLt2(ж<testing.T> Ꮡt) {
+public static partial void TestPrimeBitsLt2(ж<testing.T> t) {
     {
-        var (p, err) = rand.Prime(rand.Reader, 1); if (p != nil || err == default!) {
-            Ꮡt.Errorf("Prime should return nil, error when called with bits < 2"u8);
+        var (p, err) = rand.Prime(rand.Reader, 1); if (p != nil || err == nil) {
+            t.Errorf("Prime should return nil, error when called with bits < 2");
         }
     }
 }
@@ -49,34 +47,32 @@ public static partial void TestPrimeBitsLt2(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object primeAlwaysGeneratedTheˢ = (@string)"Prime always generated the same prime given the same input"u8;
 
-public static void TestPrimeNondeterministic(ж<testing.T> Ꮡt) {
+public static void TestPrimeNondeterministic(ж<testing.T> t) {
     var r = mathrand.New(mathrand.NewSource(42));
     var (p0, err) = rand.Prime(new rand_test_package.rand_RandжReader(r), 32);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     for (nint i = 0; i < 128; i++) {
         r.Seed(42);
         var (p, errΔ1) = rand.Prime(new rand_test_package.rand_RandжReader(r), 32);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         if (p.Cmp(p0) != 0) {
             return;
         }
     }
-    Ꮡt.Error(primeAlwaysGeneratedTheˢ);
+    t.Error(primeAlwaysGeneratedTheˢ);
 }
 
-public static void TestInt(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestInt(ж<testing.T> t) {
     // start at 128 so the case of (max.BitLen() % 8) == 0 is covered
     for (nint n = 128; n < 140; n++) {
         var b = @new<bigꓸInt>().SetInt64((int64)n);
         {
-            var (i, err) = rand.Int(rand.Reader, b); if (err != default!) {
-                Ꮡt.Fatalf("Can't generate random value: %v, %v"u8, i.OrTypedNil(), err);
+            var (i, err) = rand.Int(rand.Reader, b); if (err != nil) {
+                t.Fatalf("Can't generate random value: %v, %v", i.OrTypedNil(), err);
             }
         }
     }
@@ -88,8 +84,8 @@ partial struct countingReader {
 }
 
 internal static (nint n, error err) Read(this ref countingReader r, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = r.r.Read(p);
     r.n += n;
@@ -98,34 +94,30 @@ internal static (nint n, error err) Read(this ref countingReader r, slice<byte> 
 
 // Test that Int reads only the necessary number of bytes from the reader for
 // max at each bit length
-public static void TestIntReads(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIntReads(ж<testing.T> t) {
     for (nint iᴛ1 = 0; iᴛ1 < 32; iᴛ1++) {
         var i = iᴛ1;
         var max = (int64)(((int64)1).Lsh((uint64)i));
-        Ꮡt.Run(fmt.Sprintf("max=%d"u8, max), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("max=%d"u8, max), (ж<testing.T> tΔ1) => {
             var reader = Ꮡ(new countingReader(r: rand.Reader));
 
             var (_, err) = rand.Int(new rand_test_package.countingReaderжReader(reader), big.NewInt(max));
-            if (err != default!) {
-                tΔ1.Fatalf("Can't generate random value: %d, %v"u8, max, err);
+            if (err != nil) {
+                tΔ1.Fatalf("Can't generate random value: %d, %v", max, err);
             }
             nint expected = (i + 7) / 8;
-            if ((~reader).n != expected) {
-                tΔ1.Errorf("Int(reader, %d) should read %d bytes, but it read: %d"u8, max, expected, (~reader).n);
+            if (reader.n != expected) {
+                tΔ1.Errorf("Int(reader, %d) should read %d bytes, but it read: %d", max, expected, reader.n);
             }
         });
     }
 }
 
 // Test that Int does not mask out valid return values
-public static void TestIntMask(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIntMask(ж<testing.T> t) {
     for (nint maxᴛ1 = 1; maxᴛ1 <= 256; maxᴛ1++) {
         var max = maxᴛ1;
-        Ꮡt.Run(fmt.Sprintf("max=%d"u8, max), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("max=%d"u8, max), (ж<testing.T> tΔ1) => {
             for (nint i = 0; i < max; i++) {
                 if (testing.Short() && i == 0) {
                     i = max - 1;
@@ -133,43 +125,43 @@ public static void TestIntMask(ж<testing.T> Ꮡt) {
                 ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
                 b.WriteByte((byte)i);
                 var (n, err) = rand.Int(new rand_test_package.bytes_BufferжReader(Ꮡb), big.NewInt((int64)max));
-                if (err != default!) {
-                    tΔ1.Fatalf("Can't generate random value: %d, %v"u8, max, err);
+                if (err != nil) {
+                    tΔ1.Fatalf("Can't generate random value: %d, %v", max, err);
                 }
                 if (n.Int64() != (int64)i) {
-                    tΔ1.Errorf("Int(reader, %d) should have returned value of %d, but it returned: %v"u8, max, i, n.OrTypedNil());
+                    tΔ1.Errorf("Int(reader, %d) should have returned value of %d, but it returned: %v", max, i, n.OrTypedNil());
                 }
             }
         });
     }
 }
 
-internal static void testIntPanics(ж<testing.T> Ꮡt, ж<bigꓸInt> Ꮡb) {
+internal static void testIntPanics(ж<testing.T> t, ж<bigꓸInt> b) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var err = recover(); if (err == default!) {
-                    Ꮡt.Errorf("Int should panic when called with max <= 0: %v"u8, Ꮡb.OrTypedNil());
+                var err = recover(); if (err == nil) {
+                    t.Errorf("Int should panic when called with max <= 0: %v", b.OrTypedNil());
                 }
             }
         }, ref ᒐ);
-        rand.Int(rand.Reader, Ꮡb);
+        rand.Int(rand.Reader, b);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Test that passing a new big.Int as max causes Int to panic
-public static void TestIntEmptyMaxPanics(ж<testing.T> Ꮡt) {
+public static void TestIntEmptyMaxPanics(ж<testing.T> t) {
     var b = @new<bigꓸInt>();
-    testIntPanics(Ꮡt, b);
+    testIntPanics(t, b);
 }
 
 // Test that passing a negative value as max causes Int to panic
-public static void TestIntNegativeMaxPanics(ж<testing.T> Ꮡt) {
+public static void TestIntNegativeMaxPanics(ж<testing.T> t) {
     var b = @new<bigꓸInt>().SetInt64((int64)(-1));
-    testIntPanics(Ꮡt, b);
+    testIntPanics(t, b);
 }
 
 public static void BenchmarkPrime(ж<testing.B> Ꮡb) {

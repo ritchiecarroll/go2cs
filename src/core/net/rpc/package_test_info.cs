@@ -7,25 +7,7 @@
 global using static global::go.net.rpc_package;
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using templateꓸError = go.html.template_package.ΔError;
-global using templateꓸFuncMap = go.text.template_package.FuncMap;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,11 +32,14 @@ using static global::go.net.rpc_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: global::go.GoHoistedLiterals]
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Args))]
+[assembly: GoFieldAccess(typeof(Reply))]
+[assembly: GoFieldAccess(typeof(global::go.net.rpc_package.ΔCall))]
+[assembly: GoFieldAccess(typeof(go.net.http.httptest_package.Server))]
+[assembly: GoFieldAccess(typeof(shutdownCodec))]
+[assembly: GoFieldAccess(typeof(writeCrasher))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,8 +49,8 @@ using static global::go.net.rpc_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("net/rpc/client_test.go", "client_test.cs", "ABUogKKA0oKCpIKC1oKCgoKCggALGKKCAAkGooKCgpSCppSCgpSUgoKmgoKCpoKUog==", "55-63:1")]
-[assembly: global::go.GoPositionMap("net/rpc/server_test.go", "server_test.cs", "ADJcsoKmsoLWooKUgqaygqaigqaCpqKCyqKCAAkSsoKmsoKmsoKCpoKCgpTmgoKCgpSCgoKUgvaCgoKCgpSCgoKUgtaCgoKmgoKCgoIAGAbCgoKUtoKCgoKUgriCgoKClIK4goKUgpKCuIKCgoKSgriCgoKClIKClIKmgoKUgriCgpSCkoK4goKCkoKokpKCgoKSgriCgoKClIKCpoKCgoKUgriCgoKClIK01KKCgpS2goKCgpSCtKSCgoKCpqKCgoKUlIKUtoKCgoKUgrT0opSCgpS2gpKCgpSCuIKSgoKUgILIgpKCgpSAgsQADBjCgoKCgoKClJSClKaigoKmgoKUgqaigpSUpoKmgoKCgqaikpSCgoKClIKmgoK0AA0QgqaCpoKmggAKCJKCgpSCgpSCgpSCgpKCAAgMlKaCtoK2gtaigqSCooKClLSkxKSigpSCgqKkgqaC1qKCgoKUpIKCsoKClIIACwqCgpSClKaCgpSClO6CpoKC1oL2ooKCpJKCgpSClKLUopSCgpSkgoKCgpSCgrTUgpSCgpSCgpSCgrqSgoKClIKCgtaCgoKCwpKCgpSikoKClIKCpoKCpIKCgoKC7oKCgoKCgujCgoKClLaClKKCgoKClILYpMKClIKCgoKUtoKCkpKCgoKClILCgoKCpqKCgoKCgoKUgoKmpqKkgqaCpoKmgg==", "546-550:1;560-562:1;586-594:1;705-712:1;760-771:1;798-804:1;805-820:2")]
+[assembly: GoPositionMap("net/rpc/client_test.go", "client_test.cs", "ABUogKKA4oKCpIKC1oKCgoKCggALGKKCAAwGooKCgpSCppSCgpSUgoKmgoKCpoKUog==", "55-63:1")]
+[assembly: GoPositionMap("net/rpc/server_test.go", "server_test.cs", "ADNcsoKmsoLmooKUgqaygqaigqaCpqKCyqKCAAkSsoKmsoKmsoKCpoKCgpT2goKCgpSCgoKUggAJBoKCgoKClIKCgpSC1oKCgqaCgoKCggAkBqKCgpS2goKCgpSCuIKCgoKUgriCgpSCgoK4goKCgoKCuIKCgoKUgoKUgqaCgpSCuIKClIKCgriCgoKCgqiSgoKCgoKCuIKCgoKUgoKmgoKCgpSCuIKCgoKUgrTkooKClLaCgoKClIK0pIKCgoKmooKCgpSUgpS2goKCgpSCtAAKBKKUgoKUtoKCgoKUgriCgoKClICCyIKCgoKUgILEAAwYwoKCgoKCgpSUgpSmooKCpoKClIKmooKUlKaCpoKCgoKmooKUgoKCgpSCpoKCtAANEIKmgqaCpoIACwiSgoKUgoKUgoKUgoKCggAJDJSmgraCtoLWooKkgqKCgpS0pMSkooKUgoKipIKmgtaigoKClKSCgrKCgpSCAAsKgoKUgpSmgoKUgpTugqaCguaCAAgGooKCpIKCgpSClKLUopSCgpSkgoKCgpSCgrTUgpSCgpSCgpSCgrqSgoKClIKCguaCgoKCwpKCgpSikoKClIKCpoKCpIKCgoKC7oKCgoKCgujCgoKClLaClKKCgoKClILYpMKClIKCgoKUtoKCgoKCgoKClILCgoKCpqKCgoKCgoKUgoKmpqKkgqaCpoKmgg==", "546-550:1;560-562:1;586-594:1;705-712:1;760-771:1;798-804:1;805-820:2", "", "", "259:21,407:21,445:21,480:21,596:21,708:21,767:21,845:21,874:21,938:25,998:21,1038:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

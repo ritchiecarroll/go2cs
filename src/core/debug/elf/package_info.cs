@@ -10,14 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using dwarfꓸLineReader = go.debug.dwarf_package.ΔLineReader;
-global using dwarfꓸReader = go.debug.dwarf_package.ΔReader;
-global using dwarfꓸType = go.debug.dwarf_package.ΔType;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -67,7 +59,16 @@ using static go.debug.elf_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(File))]
+[assembly: GoFieldAccess(typeof(ImportedSymbol))]
+[assembly: GoFieldAccess(typeof(Prog))]
+[assembly: GoFieldAccess(typeof(Section32))]
+[assembly: GoFieldAccess(typeof(Section64))]
+[assembly: GoFieldAccess(typeof(ΔSection))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -77,9 +78,9 @@ using static go.debug.elf_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/elf/elf.go", "elf.cs", "AEeWAcqAooAACRbcgKKAAAkW3ICigAAaOAAWLoCigAAPIgALGICigADDAYoDAL8BgAOAooAAECQACBKAooAAJU4AIUSAooAAEyoADRyAooAADBwACBKAooAANnAAGTSAooAACxrcgKKAAJYBsAIAT6ABgKKAABIoAAcQgKKAAFGmAQAhRICigAAJFtyAooAADR4ACRSAooAAFjAADyCAooAAChjugKKAADVuAC1cgKKAAIgBlAIAhAGKAoCigAAiSAAePoCigACWAbACAJIBpgKAooAAMGQALFqAooAAOXYAM2iAooAAe/oBAHfwAYCigABYtAEAT6ABgKKAAKwB3AIAowHIAoCigAA8fAA4coCigABDigEAP4ABgKKAAD6AAQA6doCigABPngGAooCigAAOHICigKKCpIAAUaIBgKKAooAAGjiCgoKClNyCgoKCgpS4poKCgoKClIKUgqaClIKU")]
-[assembly: go.GoPositionMap("debug/elf/file.go", "file.cs", "AGjcAfLaooKUAAUSAAgCgqaChIKmgoKCpoKCgpSCyJSkqoKmpIIAHkKQAB1CgoKClIKokoKClIKCgpSCrLKCgoKUqqKCgqaqwoSSgIKkgqaCguqmgoKUpKSUlIKCpoKWkpKCopSCgoCCpIKCgoCSpIKCgoKCgqSCgoCCpIKCgoCSpIKCgoKCgqaClIKmgqaCppKUgqSClIK4goKClIKCgpSCAAsWggAKFoKUgpSCgu6CkoKUgoCCpIKCpIKAgqSCgpSCpoIABxCCgoLKgriCgpSClIKCgoKUgoKClIKCAAwYgoIACxiClIKUlIKCppSCgoCCpIKCgqSCgoCCpIKCgrimgrimlIKClIKClIKCgoK42qKUpqbKxIKCgqaCgpSClIKmgoK4lJSCgoKCgoKCgoKCgoKCgoKCgqbWgoKCpoKClIKUgqaCgriUlIKCgoKCgoKCgoKCgoKCgoKCpqiSgqaCgqaqooKCptqilKSkpKSkpKSkpKSkpAADFOLWlIKmgoKmgpSCgoKUgpSCgu6UpLjWlIKmgoKmgpSCgoKUgpSUgrimlIKmgoKmgpSCgoKUgpSUlLimlIKmgoKmgpSCgoKUgpSCgu6UpLjWlIKmgoKmgpSCgoKUgpSCgqaUuKaUgqaCgqaClIKCgpSClIKCppSkuKaUgqaCgqaClIKCgpSClJSUuKaUgqaCgqaClIKCgoKCgpSCpoKUgoKmlKS4ppSCpoKCpoKUgoKCgoKUgpSCgqaUpLimlIKmgoKmgpSCgoKUgpSCgqaUpLimlIKmgoKmgpSCgoKUgpSCgqaUpLimlIKmgoKmgpSCgoKUgpSCgqaUprgACwaigpSkpMyCgoKmuKaCgpSClIKClIKCpqqigoKClICCpIKClKaCgriCgoKUgJS2goKmgoCCtoCC2gACEuKCAAIYAAkCgoKUgoKUgoKmAAgawoKClICCpIKCgoKCpgAFEKIAAiAADQIAHkCSlLiCgpSUgoKCgpSSgpSCgoKClIKmgoKCgoKClIKClIKUpqbugpSmlNiSgoKClIKClIK4qJKUuIKClJSCgoKClJKClIKCgoKUgoKCgpSCgoKClNyClKbKgpSmlNiSgoKClIKClIK4rMSCgpSUgoCCpICCpKq0goKUgoKUgpSCpoKCgsqCgrissgAFEPK2lIKUlIKCpoKClIKmgoKUgoKCgpSCgqSCgpSCgoK4usKCgpSCgqaCgpSCqJKCgoKUgoKkgoKUgqYACQqCAAIU8oKUgqaUlIKClLSCgpS0", "161-163:1;171-174:2;1258-1268:1;1271-1301:2", "", "446=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;459=Uint32/1/2/1,Uint32/2/2/2,Uint64/1/6/3,Uint64/2/6/4,Uint64/3/6/5,Uint64/4/6/6,Uint64/5/6/7,Uint64/6/6/8;558=Uint32/1/9/1,Uint32/2/9/2,Uint32/3/9/3,Uint32/4/9/4,Uint32/5/9/5,Uint32/6/9/6,Uint32/7/9/7,Uint32/8/9/8,Uint32/9/9/9;573=Uint32/1/3/1,Uint64/1/6/2,Uint64/2/6/3,Uint64/3/6/4,Uint64/4/6/5,Uint32/2/3/6,Uint32/3/3/7,Uint64/5/6/8,Uint64/6/6/9")]
-[assembly: go.GoPositionMap("debug/elf/reader.go", "reader.cs", "AA8igqaCpoKmggANHIKCgpSUprKClIKCpoKClKSkpKaUpqa2tpSWkoKCgpSAgtiC")]
+[assembly: GoPositionMap("debug/elf/elf.go", "elf.cs", "AEiWAcqAooAACRbcgKKAAAkW3ICigAAaOAAWLoCigAAPIgALGICigADDAYoDAL8BgAOAooAAECQACBKAooAAJU4AIUSAooAAEyoADRyAooAADBwACBKAooAANnAAGTSAooAACxrcgKKAAJYBsAIAT6ABgKKAABIoAAcQgKKAAFGmAQAhRICigAAJFtyAooAADR4ACRSAooAAFjAADyCAooAAChjugKKAADVuAC1cgKKAAIgBlAIAhAGKAoCigAAiSAAePoCigACWAbACAJIBpgKAooAAMGQALFqAooAAOXYAM2iAooAAe/oBAHfwAYCigABYtAEAT6ABgKKAAKwB3AIAowHIAoCigAA8fAA4coCigABDigEAP4ABgKKAAD6AAQA6doCigABPngGAooCigAAOHICigKKCpIAAUaIBgKKAooAAGjiCgoKClNyCgoKCgpS4poKCgoKClIKUgqaClIKU")]
+[assembly: GoPositionMap("debug/elf/file.go", "file.cs", "AGjcAfLqooKUAAYSAAgCgqaChIKmgoKCpoKCgoSCyJS0uoKmpIIAHkKQAB1CgoKClIKokoKClIKCgpSCrLKCgoKUqqKCgqaqwoSSgIKkgqaCggAICqaCgpS0tJSUgoKmgpaSkoKilIKCgIKkgoKCgIKkgoKCgoKCtIKCgIKkgoKCgIKkgoKCgoKCtoKUgqaCpoKmkpSCtIKkgriCgoKUgoKClIIADBaCAAsWgpSClIKC7oKSgpSCgIKkgoK0goCCpIKCpIKmggAHEIKCgsqCuIKClIKUgoKCgpSCgoKUgoIADRiCggAMGIKUgpSUgoKmlIKCgIKkgoKCtIKCgIKkgoKCyKaCuKaUgoKUgoKUgoKCgrjqopSmpsrUgoKCpoKClIKUgqaCgriUlIKCgoKCgoKCgoKCgoKCgoKCpuaCgoKmgoKUgpSCpoKCuJSUgoKCgoKCgoKCgoKCgoKCgoKmqJKCpoKCpqqigoKm6qKUpKSkpKSkpKSkpKSkAAMU4uaUgqaCgqaClIKCgpSClIKC7pS0yOaUgqaCgqaClIKCgpSClJSCuKaUgqaCgqaClIKCgpSClJSUyKaUgqaCgqaClIKCgpSClIKC7pS0yOaUgqaCgqaClIKCgpSClIKCppTIppSCpoKCpoKUgoKClIKUgoKmlLTIppSCpoKCpoKUgoKClIKUlJTIppSCpoKCpoKUgoKCgoKClIKmgpSCgqaUtMimlIKmgoKmgpSCgoKCgpSClIKCppS0yKaUgqaCgqaClIKCgpSClIKCppS0yKaUgqaCgqaClIKCgpSClIKCppS0yKaUgqaCgqaClIKCgpSClIKCppS2yAASBqKClKSkzIKCgqa4poKClIKUgoKUgoKmqqKCgoKUgIKkgoKUpoKCuIKCgpSAlLaCgqaCgIK2gILaAAIS4oIAAhgACQKCgpSCgpSCgqYACBrCgoKUgIKkgoKCgoKmAAUQogACIAANAgAeQJKUuIKClJSCgoKClIKClIKCgoKUgqaCgoKCgoKUgoKUgpSmpu6ClKaU6JKCgoKUgoKUgriokpS4goKUlIKCgoKUgoKUgoKCgpSCgoKClIKCgoKU3IKUpsqClKaU6JKCgoKUgoKUgrisxIKClJSCgIKkgIKkqrSCgpSCgpSClIKmgoKCyoKCuKyyAAYQ8saUgpSUgoKmgoKUgqaCgpSCgoKClIKCtIKCpIKCgri6woKClIKCpoKClIKokoKCgpSCgrSCgqSCpgAKCoIAAhTygpSCppSUgoKUtIKClLQ=", "161-163:1;171-174:2;1258-1268:1;1271-1301:2", "", "455=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;469=Uint32/1/2/1,Uint32/2/2/2,Uint64/1/6/3,Uint64/2/6/4,Uint64/3/6/5,Uint64/4/6/6,Uint64/5/6/7,Uint64/6/6/8;571=Uint32/1/9/1,Uint32/2/9/2,Uint32/3/9/3,Uint32/4/9/4,Uint32/5/9/5,Uint32/6/9/6,Uint32/7/9/7,Uint32/8/9/8,Uint32/9/9/9;587=Uint32/1/3/1,Uint64/1/6/2,Uint64/2/6/3,Uint64/3/6/4,Uint64/4/6/5,Uint32/2/3/6,Uint32/3/3/7,Uint64/5/6/8,Uint64/6/6/9")]
+[assembly: GoPositionMap("debug/elf/reader.go", "reader.cs", "AA8igqaCpoKmggANHIKCgpSUprKClIKCpoKClLS0tKaUpqa2tpSWkoKCgpSAgtiC")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

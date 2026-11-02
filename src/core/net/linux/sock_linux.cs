@@ -31,13 +31,14 @@ internal static nint maxAckBacklog(nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string procSysNetCoreSomaxconnˢ = "/proc/sys/net/core/somaxconn"u8;
+internal static ref readonly @string procSysNetCoreSomaxconnˢ => ref procSysNetCoreSomaxconnˢᵇ;
+private static readonly @string procSysNetCoreSomaxconnˢᵇ = "/proc/sys/net/core/somaxconn"u8;
 
 internal static nint maxListenerBacklog() {
     GoFrame ᒐ = default;
     try {
         var (fd, err) = open(procSysNetCoreSomaxconnˢ);
-        if (err != default!) {
+        if (err != nil) {
             return syscall.SOMAXCONN;
         }
         var fdʗ1 = fd;
@@ -57,7 +58,7 @@ internal static nint maxListenerBacklog() {
         }
         return n;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

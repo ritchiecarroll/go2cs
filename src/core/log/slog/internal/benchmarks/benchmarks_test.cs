@@ -19,17 +19,23 @@ using time = time_package;
 partial class benchmarks_internal_test_package {
 
 [GoInit] internal static void init() {
-    flag.BoolVar(@internal.ᏑIgnorePC, "nopc"u8, false, "do not invoke runtime.Callers"u8);
+    flag.BoolVar(@internal.ᏑIgnorePC, "nopc", false, "do not invoke runtime.Callers");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingBenchmarkInRaceˢ = (@string)"skipping benchmark in race mode"u8;
-internal static readonly @string stringˢ = "string"u8;
-internal static readonly @string statusˢ = "status"u8;
-internal static readonly @string durationˢ = "duration"u8;
-internal static readonly @string timeˢ2 = "time"u8;
-internal static readonly @string errorˢ = "error"u8;
-internal static readonly @string eventˢ = "event"u8;
+internal static ref readonly @string stringˢ => ref stringˢᵇ;
+private static readonly @string stringˢᵇ = "string"u8;
+internal static ref readonly @string statusˢ => ref statusˢᵇ;
+private static readonly @string statusˢᵇ = "status"u8;
+internal static ref readonly @string durationˢ => ref durationˢᵇ;
+private static readonly @string durationˢᵇ = "duration"u8;
+internal static ref readonly @string timeˢ2 => ref timeˢ2ᵇ;
+private static readonly @string timeˢ2ᵇ = "time"u8;
+internal static ref readonly @string errorˢ => ref errorˢᵇ;
+private static readonly @string errorˢᵇ = "error"u8;
+internal static ref readonly @string eventˢ => ref eventˢᵇ;
+private static readonly @string eventˢᵇ = "event"u8;
 
 internal partial struct BenchmarkAttrs_type /*dyn*/ {
     internal @string name;
@@ -45,15 +51,15 @@ internal partial struct BenchmarkAttrs_typeᴛ1 /*dyn*/ {
 // We pass Attrs inline because it affects allocations: building
 // up a list outside of the benchmarked code and passing it in with "..."
 // reduces measured allocations.
-public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
+public static void BenchmarkAttrs(ж<testing.B> b) {
     var ctx = context.Background();
-    foreach (var (_, vᴛ1) in new BenchmarkAttrs_type[]{
-        new("disabled"u8, new benchmarks_internal_test_package.benchmarks_disabledHandlerᴠΔHandler(new disabledHandler(nil)), false),
-        new("async discard"u8, new benchmarks_internal_test_package.benchmarks_asyncHandlerжΔHandler(newAsyncHandler()), true),
-        new("fastText discard"u8, newFastTextHandler(io.Discard), false),
-        new("Text discard"u8, new slog.TextHandlerжΔHandler(slog.NewTextHandler(io.Discard, nil)), false),
-        new("JSON discard"u8, new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(io.Discard, nil)), false)
-    }.slice()) {
+    foreach (var (_, vᴛ1) in slice<BenchmarkAttrs_type>([
+        new("disabled", new benchmarks_internal_test_package.benchmarks_disabledHandlerᴠΔHandler(new disabledHandler()), false),
+        new("async discard", new benchmarks_internal_test_package.benchmarks_asyncHandlerжΔHandler(newAsyncHandler()), true),
+        new("fastText discard", newFastTextHandler(io.Discard), false),
+        new("Text discard", new slog.TextHandlerжΔHandler(slog.NewTextHandler(io.Discard, nil)), false),
+        new("JSON discard", new slog.JSONHandlerжΔHandler(slog.NewJSONHandler(io.Discard, nil)), false)
+    ])) {
         ref var handler = ref heap(new BenchmarkAttrs_type(), out var Ꮡhandler);
         handler = vᴛ1;
 
@@ -61,7 +67,7 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
         var ctxʗ1 = ctx;
         var handlerʗ1 = handler;
         var loggerʗ1 = logger;
-        Ꮡb.Run(handler.name, (ж<testing.B> bΔ1) => {
+        b.Run(handler.name, (ж<testing.B> bΔ1) => {
             if (handlerʗ1.skipRace && race.Enabled) {
                 bΔ1.Skip(skippingBenchmarkInRaceˢ);
             }
@@ -73,15 +79,15 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                     var loggerʗ4 = loggerʗ1;
 
                     var loggerʗ5 = loggerʗ1;
-            foreach (var (_, vᴛ2) in new BenchmarkAttrs_typeᴛ1[]{
+            foreach (var (_, vᴛ2) in slice<BenchmarkAttrs_typeᴛ1>([
                 new(
                     // The number should match nAttrsInline in slog/record.go.
                     // This should exercise the code path where no allocations
                     // happen in Record or Attr. If there are allocations, they
                     // should only be from Duration.String and Time.String.
-                    "5 args"u8,
+                    "5 args",
                     () => {
-                        loggerʗ2.LogAttrs(default!, slog.LevelInfo, testMessage,
+                        loggerʗ2.LogAttrs(default, slog.LevelInfo, testMessage,
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
@@ -90,7 +96,7 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                     }
                 ),
                 new(
-                    "5 args ctx"u8,
+                    "5 args ctx",
                     () => {
                         loggerʗ3.LogAttrs(ctxʗ2, slog.LevelInfo, testMessage,
                             slog.String(stringˢ, testString),
@@ -101,9 +107,9 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                     }
                 ),
                 new(
-                    "10 args"u8,
+                    "10 args",
                     () => {
-                        loggerʗ4.LogAttrs(default!, slog.LevelInfo, testMessage,
+                        loggerʗ4.LogAttrs(default, slog.LevelInfo, testMessage,
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
@@ -118,9 +124,9 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                 ),
                 new(
                     // Try an extreme value to see if the results are reasonable.
-                    "40 args"u8,
+                    "40 args",
                     () => {
-                        loggerʗ5.LogAttrs(default!, slog.LevelInfo, testMessage,
+                        loggerʗ5.LogAttrs(default, slog.LevelInfo, testMessage,
                             slog.String(stringˢ, testString),
                             slog.Int(statusˢ, testInt),
                             slog.Duration(durationˢ, testDuration),
@@ -163,7 +169,7 @@ public static void BenchmarkAttrs(ж<testing.B> Ꮡb) {
                             slog.Any(eventˢ, testEvent));
                     }
                 )
-            }.slice()) {
+            ])) {
                 ref var call = ref heap(new BenchmarkAttrs_typeᴛ1(), out var Ꮡcall);
                 call = vᴛ2;
 

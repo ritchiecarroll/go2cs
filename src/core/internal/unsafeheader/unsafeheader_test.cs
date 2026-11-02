@@ -10,27 +10,28 @@ using testing = testing_package;
 using @unsafe = unsafe_package;
 using go.@internal;
 
-[GoFieldAccess(typeof(unsafeheader.Slice), typeof(unsafeheader.String))]
 partial class unsafeheader_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sliceˢ = "Slice"u8;
-private static readonly @string stringˢ = "String"u8;
+private static ref readonly @string sliceˢ => ref sliceˢᵇ;
+private static readonly @string sliceˢᵇ = "Slice"u8;
+private static ref readonly @string stringˢ => ref stringˢᵇ;
+private static readonly @string stringˢᵇ = "String"u8;
 
 // TestTypeMatchesReflectType ensures that the name and layout of the
 // unsafeheader types matches the corresponding Header types in the reflect
 // package.
-public static void TestTypeMatchesReflectType(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(sliceˢ, (ж<testing.T> tΔ1) => {
-        testHeaderMatchesReflect(tΔ1, new unsafeheader.Slice(nil), new reflect.SliceHeader(nil));
+public static void TestTypeMatchesReflectType(ж<testing.T> t) {
+    t.Run(sliceˢ, (ж<testing.T> tΔ1) => {
+        testHeaderMatchesReflect(tΔ1, new unsafeheader.Slice(), new reflect.SliceHeader());
     });
 
-    Ꮡt.Run(stringˢ, (ж<testing.T> tΔ2) => {
-        testHeaderMatchesReflect(tΔ2, new unsafeheader.String(nil), new reflect.StringHeader(nil));
+    t.Run(stringˢ, (ж<testing.T> tΔ2) => {
+        testHeaderMatchesReflect(tΔ2, new unsafeheader.String(), new reflect.StringHeader());
     });
 }
 
-internal static void testHeaderMatchesReflect(ж<testing.T> Ꮡt, any header, any reflectHeader) {
+internal static void testHeaderMatchesReflect(ж<testing.T> t, any header, any reflectHeader) {
     var h = reflect.TypeOf(header);
     var rh = reflect.TypeOf(reflectHeader);
 
@@ -38,26 +39,26 @@ internal static void testHeaderMatchesReflect(ж<testing.T> Ꮡt, any header, an
         var f = h.Field(i);
         var (rf, ok) = rh.FieldByName(f.Name);
         if (!ok) {
-            Ꮡt.Errorf("Field %d of %v is named %s, but no such field exists in %v"u8, i, h, f.Name, rh);
+            t.Errorf("Field %d of %v is named %s, but no such field exists in %v", i, h, f.Name, rh);
             continue;
         }
         if (!typeCompatible(f.Type, rf.Type)) {
-            Ꮡt.Errorf("%v.%s has type %v, but %v.%s has type %v"u8, h, f.Name, f.Type, rh, rf.Name, rf.Type);
+            t.Errorf("%v.%s has type %v, but %v.%s has type %v", h, f.Name, f.Type, rh, rf.Name, rf.Type);
         }
         if (f.Offset != rf.Offset) {
-            Ꮡt.Errorf("%v.%s has offset %d, but %v.%s has offset %d"u8, h, f.Name, f.Offset, rh, rf.Name, rf.Offset);
+            t.Errorf("%v.%s has offset %d, but %v.%s has offset %d", h, f.Name, f.Offset, rh, rf.Name, rf.Offset);
         }
     }
 
     if (h.NumField() != rh.NumField()) {
-        Ꮡt.Errorf("%v has %d fields, but %v has %d"u8, h, h.NumField(), rh, rh.NumField());
+        t.Errorf("%v has %d fields, but %v has %d", h, h.NumField(), rh, rh.NumField());
     }
     if (h.Align() != rh.Align()) {
-        Ꮡt.Errorf("%v has alignment %d, but %v has alignment %d"u8, h, h.Align(), rh, rh.Align());
+        t.Errorf("%v has alignment %d, but %v has alignment %d", h, h.Align(), rh, rh.Align());
     }
 }
 
-internal static reflectꓸType unsafePointerType = reflect.TypeOf(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default!));
+internal static reflectꓸType unsafePointerType = reflect.TypeOf(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default));
 internal static reflectꓸType uintptrType = reflect.TypeOf((uintptr)0);
 
 internal static bool typeCompatible(reflectꓸType t, reflectꓸType rt) {
@@ -65,7 +66,8 @@ internal static bool typeCompatible(reflectꓸType t, reflectꓸType rt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloCheckptrˢ = "Hello, checkptr!"u8;
+private static ref readonly @string helloCheckptrˢ => ref helloCheckptrˢᵇ;
+private static readonly @string helloCheckptrˢᵇ = "Hello, checkptr!"u8;
 
 // TestWriteThroughHeader ensures that the headers in the unsafeheader package
 // can successfully mutate variables of the corresponding built-in types.
@@ -73,8 +75,8 @@ private static readonly @string helloCheckptrˢ = "Hello, checkptr!"u8;
 // This test is expected to fail under -race (which implicitly enables
 // -d=checkptr) if the runtime views the header types as incompatible with the
 // underlying built-in types.
-public static void TestWriteThroughHeader(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(sliceˢ, (ж<testing.T> tΔ1) => {
+public static void TestWriteThroughHeader(ж<testing.T> t) {
+    t.Run(sliceˢ, (ж<testing.T> tΔ1) => {
         var s = slice<byte>("Hello, checkptr!"u8)[..5];
 
         ref var alias = ref heap<slice<byte>>(out var Ꮡalias);
@@ -84,16 +86,15 @@ public static void TestWriteThroughHeader(ж<testing.T> Ꮡt) {
         hdr.Len = len(s);
 
         if (!bytes.Equal(alias, s)) {
-            tΔ1.Errorf("alias of %T(%q) constructed via Slice = %T(%q)"u8, s, s, alias, alias);
+            tΔ1.Errorf("alias of %T(%q) constructed via Slice = %T(%q)", s, s, alias, alias);
         }
         if (cap(alias) != cap(s)) {
-            tΔ1.Errorf("alias of %T with cap %d has cap %d"u8, s, cap(s), cap(alias));
+            tΔ1.Errorf("alias of %T with cap %d has cap %d", s, cap(s), cap(alias));
         }
     });
 
-    Ꮡt.Run(stringˢ, (ж<testing.T> tΔ2) => {
-        ref var s = ref heap<@string>(out var Ꮡs);
-        s = helloCheckptrˢ;
+    t.Run(stringˢ, (ж<testing.T> tΔ2) => {
+        ref var s = ref heap<@string>(helloCheckptrˢ, out var Ꮡs);
 
         ref var alias = ref heap(new @string(), out var Ꮡalias);
         var hdr = Ꮡalias.Reinterpret<@string, unsafeheader.String>();
@@ -101,7 +102,7 @@ public static void TestWriteThroughHeader(ж<testing.T> Ꮡt) {
         hdr.Len = len(s);
 
         if (alias != s) {
-            tΔ2.Errorf("alias of %q constructed via String = %q"u8, s, alias);
+            tΔ2.Errorf("alias of %q constructed via String = %q", s, alias);
         }
     });
 }

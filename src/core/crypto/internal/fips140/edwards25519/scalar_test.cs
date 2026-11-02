@@ -25,7 +25,7 @@ partial class edwards25519_internal_test_package {
 internal static ж<quick.Config> quickCheckConfig(nint slowScale) {
     var cfg = @new<quick.Config>();
     if (!testing.Short()) {
-        cfg.Value.MaxCountScale = (float64)slowScale;
+        cfg.MaxCountScale = (float64)slowScale;
     }
     return cfg;
 }
@@ -80,8 +80,7 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
         break;
     }}
 
-    ref var val = ref heap<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(out var Ꮡval);
-    val = new Scalar(nil);
+    ref var val = ref heap<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(new Scalar(), out var Ꮡval);
     var ᴛ1 = val.s.Value;
     fiatScalarFromBytes(ref ᴛ1, Ꮡs);
     var ᴛ2 = (global::go.crypto.@internal.fips140.edwards25519_package.fiatScalarNonMontgomeryDomainFieldElement)((val.s).Value);
@@ -90,26 +89,26 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
     return reflect.ValueOf(val);
 }
 
-public static void TestScalarGenerate(ж<testing.T> Ꮡt) {
+public static void TestScalarGenerate(ж<testing.T> t) {
     var f = (global::go.crypto.@internal.fips140.edwards25519_package.Scalar scʗp) => {
         ref var sc = ref heap(scʗp.ΔClone(), out var Ꮡsc);
         return isReduced(Ꮡsc.Bytes());
     };
     {
-        var err = quick.Check((f).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Errorf("generated unreduced scalar: %v"u8, err);
+        var err = quick.Check((f).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+            t.Errorf("generated unreduced scalar: %v", err);
         }
     }
 }
 
-public static partial void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
+public static partial void TestScalarSetCanonicalBytes(ж<testing.T> t) {
     var f1 = ([GoArrayDims(32)] array<byte> @in, global::go.crypto.@internal.fips140.edwards25519_package.Scalar scʗp) => {
         @in = @in.Clone();
         ref var sc = ref heap(scʗp.ΔClone(), out var Ꮡsc);
         // Mask out top 4 bits to guarantee value falls in [0, l).
         @in[len(@in) - 1] &= (byte)((1 << 4) - 1);
         {
-            var (_, err) = Ꮡsc.SetCanonicalBytes(@in[..]); if (err != default!) {
+            var (_, err) = Ꮡsc.SetCanonicalBytes(@in[..]); if (err != nil) {
                 return false;
             }
         }
@@ -117,8 +116,8 @@ public static partial void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
         return bytes_package.Equal(@in[..], repr) && isReduced(repr);
     };
     {
-        var err = quick.Check((f1).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Errorf("failed bytes->scalar->bytes round-trip: %v"u8, err);
+        var err = quick.Check((f1).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+            t.Errorf("failed bytes->scalar->bytes round-trip: %v", err);
         }
     }
 
@@ -126,30 +125,28 @@ public static partial void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
         ref var sc1 = ref heap(sc1ʗp.ΔClone(), out var Ꮡsc1);
         ref var sc2 = ref heap(sc2ʗp.ΔClone(), out var Ꮡsc2);
         {
-            var (_, err) = Ꮡsc2.SetCanonicalBytes(Ꮡsc1.Bytes()); if (err != default!) {
+            var (_, err) = Ꮡsc2.SetCanonicalBytes(Ꮡsc1.Bytes()); if (err != nil) {
                 return false;
             }
         }
         return sc1 == sc2;
     };
     {
-        var err = quick.Check((f2).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Errorf("failed scalar->bytes->scalar round-trip: %v"u8, err);
+        var err = quick.Check((f2).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+            t.Errorf("failed scalar->bytes->scalar round-trip: %v", err);
         }
     }
 
     void expectReject(slice<byte> bΔ1) {
-        Ꮡt.Helper();
+        t.Helper();
         var s = scOne;
         {
-            var (@out, err) = s.SetCanonicalBytes(bΔ1[..]); if (err == default!){
-                Ꮡt.Errorf("SetCanonicalBytes worked on a non-canonical value"u8);
-            } else 
-            if (s != scOne){
-                Ꮡt.Errorf("SetCanonicalBytes modified its receiver"u8);
-            } else 
-            if (@out != nil) {
-                Ꮡt.Errorf("SetCanonicalBytes did not return nil with an error"u8);
+            var (@out, err) = s.SetCanonicalBytes(bΔ1[..]); if (err == nil) {
+                t.Errorf("SetCanonicalBytes worked on a non-canonical value");
+            } else if (s != scOne) {
+                t.Errorf("SetCanonicalBytes modified its receiver");
+            } else if (@out != nil) {
+                t.Errorf("SetCanonicalBytes did not return nil with an error");
             }
         }
     }
@@ -167,8 +164,8 @@ public static partial void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
     expectReject(b);
 }
 
-public static void TestScalarSetUniformBytes(ж<testing.T> Ꮡt) {
-    var (mod, _) = @new<bigꓸInt>().SetString("27742317777372353535851937790883648493"u8, 10);
+public static void TestScalarSetUniformBytes(ж<testing.T> t) {
+    var (mod, _) = @new<bigꓸInt>().SetString("27742317777372353535851937790883648493", 10);
     mod.Add(mod, @new<bigꓸInt>().Lsh(big.NewInt(1), 252));
     var modʗ1 = mod;
     var f = ([GoArrayDims(64)] array<byte> @in, global::go.crypto.@internal.fips140.edwards25519_package.Scalar scʗp) => {
@@ -184,42 +181,42 @@ public static void TestScalarSetUniformBytes(ж<testing.T> Ꮡt) {
         return inBig.Mod(inBig, modʗ1).Cmp(scBig) == 0;
     };
     {
-        var err = quick.Check((f).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = quick.Check((f).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
-public static void TestScalarSetBytesWithClamping(ж<testing.T> Ꮡt) {
+public static void TestScalarSetBytesWithClamping(ж<testing.T> t) {
     // Generated with libsodium.js 1.0.18 crypto_scalarmult_ed25519_base.
 
-    @string random = "633d368491364dc9cd4c1bf891b1d59460face1644813240a313e61f2c88216e"u8;
+    @string random = "633d368491364dc9cd4c1bf891b1d59460face1644813240a313e61f2c88216e";
     var (s, _) = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetBytesWithClamping(decodeHex(random));
     var p = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().ScalarBaseMult(s);
-    @string want = "1d87a9026fd0126a5736fe1628c95dd419172b5b618457e041c9c861b2494a94"u8;
+    @string want = "1d87a9026fd0126a5736fe1628c95dd419172b5b618457e041c9c861b2494a94";
     {
         @string got = hex.EncodeToString(p.Bytes()); if (got != want) {
-            Ꮡt.Errorf("random: got %q, want %q"u8, got, want);
+            t.Errorf("random: got %q, want %q", got, want);
         }
     }
 
-    @string zero = "0000000000000000000000000000000000000000000000000000000000000000"u8;
+    @string zero = "0000000000000000000000000000000000000000000000000000000000000000";
     (s, _) = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetBytesWithClamping(decodeHex(zero));
     p = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().ScalarBaseMult(s);
-    want = "693e47972caf527c7883ad1b39822f026f47db2ab0e1919955b8993aa04411d1"u8;
+    want = "693e47972caf527c7883ad1b39822f026f47db2ab0e1919955b8993aa04411d1";
     {
         @string got = hex.EncodeToString(p.Bytes()); if (got != want) {
-            Ꮡt.Errorf("zero: got %q, want %q"u8, got, want);
+            t.Errorf("zero: got %q, want %q", got, want);
         }
     }
 
-    @string one = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8;
+    @string one = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
     (s, _) = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetBytesWithClamping(decodeHex(one));
     p = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().ScalarBaseMult(s);
-    want = "12e9a68b73fd5aacdbcaf3e88c46fea6ebedb1aa84eed1842f07f8edab65e3a7"u8;
+    want = "12e9a68b73fd5aacdbcaf3e88c46fea6ebedb1aa84eed1842f07f8edab65e3a7";
     {
         @string got = hex.EncodeToString(p.Bytes()); if (got != want) {
-            Ꮡt.Errorf("one: got %q, want %q"u8, got, want);
+            t.Errorf("one: got %q, want %q", got, want);
         }
     }
 }
@@ -232,7 +229,7 @@ internal static ж<bigꓸInt> bigIntFromLittleEndianBytes(slice<byte> b) {
     return @new<bigꓸInt>().SetBytes(bb);
 }
 
-public static void TestScalarMultiplyDistributesOverAdd(ж<testing.T> Ꮡt) {
+public static void TestScalarMultiplyDistributesOverAdd(ж<testing.T> t) {
     var multiplyDistributesOverAdd = (global::go.crypto.@internal.fips140.edwards25519_package.Scalar xʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar yʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar zʗp) => {
         ref var x = ref heap(xʗp.ΔClone(), out var Ꮡx);
         ref var y = ref heap(yʗp.ΔClone(), out var Ꮡy);
@@ -255,13 +252,13 @@ public static void TestScalarMultiplyDistributesOverAdd(ж<testing.T> Ꮡt) {
     };
 
     {
-        var err = quick.Check((multiplyDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = quick.Check((multiplyDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
-public static void TestScalarAddLikeSubNeg(ж<testing.T> Ꮡt) {
+public static void TestScalarAddLikeSubNeg(ж<testing.T> t) {
     var addLikeSubNeg = (global::go.crypto.@internal.fips140.edwards25519_package.Scalar xʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar yʗp) => {
         ref var x = ref heap(xʗp.ΔClone(), out var Ꮡx);
         ref var y = ref heap(yʗp.ΔClone(), out var Ꮡy);
@@ -278,19 +275,19 @@ public static void TestScalarAddLikeSubNeg(ж<testing.T> Ꮡt) {
     };
 
     {
-        var err = quick.Check((addLikeSubNeg).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = quick.Check((addLikeSubNeg).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
-public static void TestScalarNonAdjacentForm(ж<testing.T> Ꮡt) {
-    var (s, _) = (Ꮡ(new Scalar(nil))).SetCanonicalBytes(new byte[]{
+public static void TestScalarNonAdjacentForm(ж<testing.T> t) {
+    var (s, _) = (Ꮡ(new Scalar())).SetCanonicalBytes(slice<byte>([
         0x1a, 0x0e, 0x97, 0x8a, 0x90, 0xf6, 0x62, 0x2d,
         0x37, 0x47, 0x02, 0x3f, 0x8a, 0xd8, 0x26, 0x4d,
         0xa7, 0x58, 0xaa, 0x1b, 0x88, 0xe0, 0x40, 0xd1,
         0x58, 0x9e, 0x7b, 0x7f, 0x23, 0x76, 0xef, 0x09
-    }.slice());
+    ]));
 
     var expectedNaf = new int8[]{
         0, 13, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, (int8)(-9), 0, 0, 0, 0, (int8)(-11), 0, 0, 0, 0, 3, 0, 0, 0, 0, 1,
@@ -307,30 +304,30 @@ public static void TestScalarNonAdjacentForm(ж<testing.T> Ꮡt) {
 
     for (nint i = 0; i < 256; i++) {
         if (expectedNaf[i] != sNaf[i]) {
-            Ꮡt.Errorf("Wrong digit at position %d, got %d, expected %d"u8, i, sNaf[i], expectedNaf[i]);
+            t.Errorf("Wrong digit at position %d, got %d, expected %d", i, sNaf[i], expectedNaf[i]);
         }
     }
 }
 
 internal partial struct notZeroScalar /*global::go.crypto.@internal.fips140.edwards25519_package.Scalar*/;
 
-internal static reflectꓸValue Generate(this notZeroScalar _, ж<mathrand.Rand> Ꮡrand, nint size) {
+internal static reflectꓸValue Generate(this notZeroScalar _, ж<mathrand.Rand> rand, nint size) {
     ref var s = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Scalar(), out var Ꮡs);
     ref var isNonZero = ref heap(new uint64(), out var ᏑisNonZero);
     while (isNonZero == 0) {
-        s = new Scalar(nil).Generate(Ꮡrand, size).Interface()._<Scalar>();
+        s = new Scalar().Generate(rand, size).Interface()._<Scalar>();
         var ᴛ3 = s.s.Value;
         fiatScalarNonzero(ref isNonZero, ref ᴛ3);
     }
     return reflect.ValueOf((notZeroScalar)s);
 }
 
-public static void TestScalarEqual(ж<testing.T> Ꮡt) {
+public static void TestScalarEqual(ж<testing.T> t) {
     if (scOne.Equal(scMinusOne) == 1) {
-        Ꮡt.Errorf("scOne.Equal(&scMinusOne) is true"u8);
+        t.Errorf("scOne.Equal(&scMinusOne) is true");
     }
     if (scMinusOne.Equal(scMinusOne) == 0) {
-        Ꮡt.Errorf("scMinusOne.Equal(&scMinusOne) is false"u8);
+        t.Errorf("scMinusOne.Equal(&scMinusOne) is false");
     }
 }
 

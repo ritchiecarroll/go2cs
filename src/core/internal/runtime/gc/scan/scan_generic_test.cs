@@ -11,8 +11,8 @@ using go.@internal.runtime.gc;
 
 partial class scan_test_package {
 
-public static void TestScanSpanPackedGo(ж<testing.T> Ꮡt) {
-    testScanSpanPacked(Ꮡt, new Func<@unsafe.Pointer, ж<uintptr>, ж<gc.ObjMask>, uintptr, ж<gc.PtrMask>, int32>(scan.ScanSpanPackedGo));
+public static void TestScanSpanPackedGo(ж<testing.T> t) {
+    testScanSpanPacked(t, new Func<@unsafe.Pointer, ж<uintptr>, ж<gc.ObjMask>, uintptr, ж<gc.PtrMask>, int32>(scan.ScanSpanPackedGo));
 }
 
 } // end scan_test_package

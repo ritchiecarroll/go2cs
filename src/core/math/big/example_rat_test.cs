@@ -20,7 +20,7 @@ partial class big_test_package {
 //	(n-1)/3 * 2   if   n mod 3 == 1
 internal static ж<bigꓸRat> recur(int64 n, int64 lim) {
     var term = @new<bigꓸRat>();
-    if (n % 3 != 1){
+    if (n % 3 != 1) {
         term.SetInt64(1);
     } else {
         term.SetInt64((n - 1) / 3 * 2);

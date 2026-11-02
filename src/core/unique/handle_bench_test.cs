@@ -10,16 +10,16 @@ using static go.unique_package;
 
 partial class unique_internal_test_package {
 
-public static void BenchmarkMake(ж<testing.B> Ꮡb) {
-    benchmarkMake(Ꮡb, new @string[]{"foo"u8}.slice());
+public static void BenchmarkMake(ж<testing.B> b) {
+    benchmarkMake(b, slice<@string>(["foo"]));
 }
 
-public static void BenchmarkMakeMany(ж<testing.B> Ꮡb) {
-    benchmarkMake(Ꮡb, testData[..]);
+public static void BenchmarkMakeMany(ж<testing.B> b) {
+    benchmarkMake(b, testData[..]);
 }
 
-public static void BenchmarkMakeManyMany(ж<testing.B> Ꮡb) {
-    benchmarkMake(Ꮡb, testDataLarge[..]);
+public static void BenchmarkMakeManyMany(ж<testing.B> b) {
+    benchmarkMake(b, testDataLarge[..]);
 }
 
 internal static void benchmarkMake(ж<testing.B> Ꮡb, slice<@string> testData) {

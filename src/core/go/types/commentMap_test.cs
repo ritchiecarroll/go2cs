@@ -15,8 +15,8 @@ using static global::go.go.types_internal_test_package;
 partial class types_test_package {
 
 partial struct comment {
-    internal nint line, col;   // comment position
-    internal @string text; // comment text, excluding "//", "/*", or "*/"
+    internal nint line, col; // comment position
+    internal @string text;   // comment text, excluding "//", "/*", or "*/"
 }
 
 // commentMap collects all comments in the given src with comment text
@@ -29,17 +29,17 @@ partial struct comment {
 // (the matching comment appears at the beginning of the file), then the
 // recorded position is unknown (line, col = 0, 0).
 // If there are no matching comments, the result is nil.
-internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж<regexp.Regexp> Ꮡrx) {
-    map<nint, slice<comment>> res = default!;
+internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж<regexp.Regexp> rx) {
+    map<nint, slice<comment>> res = default;
 
     var fset = token.NewFileSet();
     var @file = fset.AddFile(""u8, -1, len(src));
 
-    scanner.Scanner s = default!;
-    s.Init(@file, src, default!, scanner.ScanComments);
-    tokenꓸPos prev = default!;                // position of last non-comment, non-semicolon token
+    scanner.Scanner s = default;
+    s.Init(@file, src, default, scanner.ScanComments);
+    tokenꓸPos prev = default; // position of last non-comment, non-semicolon token
 
-    while (ᐧ) {
+    for (;;) {
         var (pos, tok, lit) = s.Scan();
         var exprᴛ1 = tok;
         var matchᴛ1 = false;
@@ -47,14 +47,14 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
             return res;
         }
         if (exprᴛ1 == token.COMMENT) { matchᴛ1 = true;
-            if (lit[1] == (rune)'*') {
+            if (lit[1] == '*') {
                 lit = lit.slice(0, len(lit) - 2); // strip trailing */
             }
             lit = lit[2..]; // strip leading // or /*
-            if (Ꮡrx.MatchString(lit)) {
+            if (rx.MatchString(lit)) {
                 var p = fset.Position(prev);
                 var err = new comment(p.Line, p.Column, lit);
-                if (res == default!) {
+                if (res == nil) {
                     res = new map<nint, slice<comment>>();
                 }
                 res[p.Line] = append(res[p.Line], err);
@@ -74,10 +74,12 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errorˢ2 = "^ ERROR "u8;
+internal static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
+private static readonly @string errorˢ2ᵇ = "^ ERROR "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ15 = """
+internal static ref readonly @string srcᶜ15 => ref srcᶜ15ᵇ;
+private static readonly @string srcᶜ15ᵇ = """
 /* ERROR "0:0" */ /* ERROR "0:0" */ // ERROR "0:0"
 // ERROR "0:0"
 x /* ERROR "3:1" */                // ignore automatically inserted semicolon here
@@ -89,14 +91,14 @@ x /* ERROR "3:1" */                // ignore automatically inserted semicolon he
 
 """u8.Raw();
 
-public static void TestCommentMap(ж<testing.T> Ꮡt) {
+public static void TestCommentMap(ж<testing.T> t) {
     @string src = srcᶜ15;
     var m = commentMap(slice<byte>(src), regexp.MustCompile(errorˢ2));
     nint found = 0; // number of errors found
     foreach (var (line, errlist) in m) {
         foreach (var (_, err) in errlist) {
             if (err.line != line) {
-                Ꮡt.Errorf("%v: got map line %d; want %d"u8, err, err.line, line);
+                t.Errorf("%v: got map line %d; want %d", err, err.line, line);
                 continue;
             }
             // err.line == line
@@ -104,7 +106,7 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
             @string got = strings.TrimSpace(err.text[(int)(len(" ERROR "))..]);
             @string wantΔ1 = fmt.Sprintf(@"""%d:%d"""u8, line, err.col);
             if (got != wantΔ1) {
-                Ꮡt.Errorf("%v: got msg %q; want %q"u8, err, got, wantΔ1);
+                t.Errorf("%v: got msg %q; want %q", err, got, wantΔ1);
                 continue;
             }
             found++;
@@ -113,7 +115,7 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
 
     nint want = strings.Count(src, errorˢ);
     if (found != want) {
-        Ꮡt.Errorf("commentMap got %d errors; want %d"u8, found, want);
+        t.Errorf("commentMap got %d errors; want %d", found, want);
     }
 }
 

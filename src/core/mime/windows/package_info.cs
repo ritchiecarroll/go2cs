@@ -47,7 +47,7 @@ using static go.mime_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,11 +57,11 @@ using static go.mime_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABo6nLKClKaCgoKmqJK4lIKClJSUAAkYlpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClIK6koKApLS0goLskoKCgoKokqiSgoLWggAPIraClKaCgpSCgqaCgqaCgIKkqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgIK2gqaCpqaClKSkAAgIgpS0gsaCgpTYgpSCgpSAgsaqooLqpqiSgoKCgKS0gpSCgpSCtLSkpqiSkoKAgqSAgqSmgpSktpQ=")]
-[assembly: go.GoPositionMap("mime/grammar.go", "grammar.cs", "AAoSAAISABgg3AACEAAcKqyigpSCgqY=")]
-[assembly: go.GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABIq0oKAgoKUlIKUgoK2goKCgoKUlIKUlJSClIKCpoiClIKCpoKmgoKmgoKCgoKCgqaClKaCgoKUgpSCgIKkgoKUgpSogoKCzAABGAAOAoKUgoKmmsSCgoKClIKCpqamgoCCgpSAgoLGgJSkgqqigoKAgoCCpLaCgoKCgIKCgqSCgoKUgoKAgraCpoK4ppSCgoLKgoKUgsiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgIK2goKCgqaCgIKkgoKClIKmlIKCgoKUgoKUlIKmgoKClIKCtIKCtqaClKSklKaClKSklA==", "", "", "66=isTSpecial/1/1/2")]
-[assembly: go.GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgIKktAANGgBIjgGCgIKUggAEMAAWAqaAgryygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSC5qKCgpSCgpSUgpSCgoKAgqSCgqaC")]
-[assembly: go.GoPositionMap("mime/type_windows.go", "type_windows.cs", "AAoWgtaCgoKUgoKUgoKUgoKCAAgSgqa4gg==")]
+[assembly: GoPositionMap("mime/encodedword.go", "encodedword.cs", "ABo6nLKClKaCgoKmqJK4lIKClJSUAAkYlpKmgoKCpqKmlIKUgoKCgqaCqrSCgqaSgoaigpSCpoKClIK6koKApLS0goLskoKCgoKokqiSgoLmggAQIraClKaCgpSCgqaCgqaCgIKkqrSCgqaUgpSCgoKClJSCgpSClIKUgpSClJSCgpSClIKCgoKCyoKmgIK2gqaCpqaClKSkAAsIgpS0gsaCgpTYgpSCgpSAgsaqooLqpqiSgoKCgKS0gpSCgpSCtLSkpqiSkoKAgqSAgqSmgpSktpQ=")]
+[assembly: GoPositionMap("mime/grammar.go", "grammar.cs", "AAsSAAISABgg7AACEAAcKqyigpSCgqY=")]
+[assembly: GoPositionMap("mime/mediatype.go", "mediatype.cs", "ABMq0oKAgoKUlIKUgoK2goKCgoKUlIKUlJSClIKCpoiClIKCpoKmgoKmgoKCgoKCgqaClKaCgoKUgpSCgIKkgoKUgpSogoKCzAABGAAOAoKUgoKmmsSCgoKClIKCpqamgoCCgpSAgoLGgJSkgqqigoKAgoCCpLaCgoKCgIKCgqSCgoKUgoKAgraCpoK4ppSCgoLKgoKUguiUrsKCgqYAAhAACAKClIK4goKCggALGIKCgpSClKamwoKCgIK2goKCgqaCgIKkgoKClIKmlIKCgoKUgoKUlIKmgoKClIKCtIKCtqaClKSklKaClKSklA==", "", "", "67=isTSpecial/1/1/2")]
+[assembly: GoPositionMap("mime/type.go", "type.cs", "ABo0soKClIKUgqaCgoKCgpSCgIKktAANGgBIjgGCgIKUggAEMAAWAqaAgryygoKCgpSCgpSClKaCggACKAARAoKCpoKCgpSCgqyygpSCAAgGooKClIKClJSClIKCgoCCpIKCpoI=")]
+[assembly: GoPositionMap("mime/type_windows.go", "type_windows.cs", "AAoWguaCgoKUgoKUgoKUgoKCAAgSgqa4gg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

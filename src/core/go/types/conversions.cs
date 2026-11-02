@@ -50,17 +50,17 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         return false;
     }
 
-    bool ok = default!;
+    bool ok = default;
     ref var cause = ref heap(new @string(), out var Ꮡcause);
     switch (ᐧ) {
     case {} when constArg && isConstType(T): {
         // constant conversion
-        ok = constConvertibleTo(T, Ꮡx.of(operand.Ꮡval));
+        ok = constConvertibleTo(T, Ꮡx.Ꮡval);
         // A conversion from an integer constant to an integer type
         // can only fail if there's overflow. Give a concise error.
         // (go.dev/issue/63563)
         if (!ok && isInteger(x.typ) && isInteger(T)) {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "constant %s overflows %s"u8, x.val, T);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "constant %s overflows %s", x.val, T);
             x.mode = invalid;
             return;
         }
@@ -75,19 +75,19 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         var constConvertibleToʗ1 = constConvertibleTo;
         ok = underIs(T, (ΔType u) => {
             // u is nil if there are no specific type terms
-            if (u == default!) {
-                Ꮡcause.Value = Ꮡcheck.sprintf("%s does not contain specific types"u8, T);
+            if (u == nil) {
+                Ꮡcause.Value = Ꮡcheck.sprintf("%s does not contain specific types", T);
                 return false;
             }
             if (isString(Ꮡx.Value.typ) && isBytesOrRunes(u)) {
                 return true;
             }
             if (!constConvertibleToʗ1(u, nil)) {
-                if (isInteger(Ꮡx.Value.typ) && isInteger(u)){
+                if (isInteger(Ꮡx.Value.typ) && isInteger(u)) {
                     // see comment above on constant conversion
-                    Ꮡcause.Value = Ꮡcheck.sprintf("constant %s overflows %s (in %s)"u8, Ꮡx.Value.val, u, T);
+                    Ꮡcause.Value = Ꮡcheck.sprintf("constant %s overflows %s (in %s)", Ꮡx.Value.val, u, T);
                 } else {
-                    Ꮡcause.Value = Ꮡcheck.sprintf("cannot convert %s to type %s (in %s)"u8, Ꮡx.OrTypedNil(), u, T);
+                    Ꮡcause.Value = Ꮡcheck.sprintf("cannot convert %s to type %s (in %s)", Ꮡx.OrTypedNil(), u, T);
                 }
                 return false;
             }
@@ -104,10 +104,10 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
     }}
 
     if (!ok) {
-        if (cause != ""u8){
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s: %s"u8, Ꮡx.OrTypedNil(), T, cause);
+        if (cause != ""u8) {
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s: %s", Ꮡx.OrTypedNil(), T, cause);
         } else {
-            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s"u8, Ꮡx.OrTypedNil(), T);
+            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidConversion, "cannot convert %s to type %s", Ꮡx.OrTypedNil(), T);
         }
         x.mode = invalid;
         return;
@@ -126,13 +126,11 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
         // - If !isTypes2, keep untyped nil for untyped nil arguments.
         // - For constant integer to string conversions, keep the argument type.
         //   (See also the TODO below.)
-        if (isTypes2 && AreEqual(x.typ, Typ[UntypedNil])){
+        if (isTypes2 && AreEqual(x.typ, Typ[UntypedNil])) {
             // ok
-        } else 
-        if (isNonTypeParamInterface(T) || constArg && !isConstType(T) || !isTypes2 && x.isNil()){
+        } else if (isNonTypeParamInterface(T) || constArg && !isConstType(T) || !isTypes2 && x.isNil()) {
             final = Default(x.typ); // default type of untyped nil is untyped nil
-        } else 
-        if (x.mode == constant_ && isInteger(x.typ) && allString(T)) {
+        } else if (x.mode == constant_ && isInteger(x.typ) && allString(T)) {
             final = x.typ;
         }
         Ꮡcheck.updateExprType(x.expr, final, true);
@@ -142,8 +140,10 @@ internal static void conversion(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ΔT
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string conversionOfSliceToArrayˢ = "conversion of slice to array requires go1.20 or later"u8;
-internal static readonly @string conversionOfSliceToArrayˢ2 = "conversion of slice to array pointer requires go1.17 or later"u8;
+internal static ref readonly @string conversionOfSliceToArrayˢ => ref conversionOfSliceToArrayˢᵇ;
+private static readonly @string conversionOfSliceToArrayˢᵇ = "conversion of slice to array requires go1.20 or later"u8;
+internal static ref readonly @string conversionOfSliceToArrayˢ2 => ref conversionOfSliceToArrayˢ2ᵇ;
+private static readonly @string conversionOfSliceToArrayˢ2ᵇ = "conversion of slice to array pointer requires go1.17 or later"u8;
 
 // TODO(gri) convertibleTo checks if T(x) is valid. It assumes that the type
 // of x is fully known, but that's not the case for say string(1<<s + 1.0):
@@ -192,7 +192,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
         var (VΔ1, ok) = V._<ж<Pointer>>(ᐧ); if (ok) {
             {
                 var (TΔ1, okΔ1) = T._<ж<Pointer>>(ᐧ); if (okΔ1) {
-                    if (IdenticalIgnoreTags((~VΔ1).@base.Underlying(), (~TΔ1).@base.Underlying()) && !isTypeParam((~VΔ1).@base) && !isTypeParam((~TΔ1).@base)) {
+                    if (IdenticalIgnoreTags(VΔ1.@base.Underlying(), TΔ1.@base.Underlying()) && !isTypeParam(VΔ1.@base) && !isTypeParam(TΔ1.@base)) {
                         return true;
                     }
                 }
@@ -289,8 +289,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
     // (generic operands cannot be constants, so we can ignore x.val)
     switch (ᐧ) {
     case {} when Vp != nil && Tp != nil: {
-        ref var xΔ2 = ref heap<operand>(out var ᏑxΔ2);
-        xΔ2 = x; // don't clobber outer x
+        ref var xΔ2 = ref heap<operand>(x, out var ᏑxΔ2); // don't clobber outer x
         var Tpʗ1 = Tp;
         var Vpʗ1 = Vp;
         var errorfʗ1 = errorf;
@@ -298,7 +297,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             if (VΔ4 == nil) {
                 return false; // no specific types
             }
-            ᏑxΔ2.Value.typ = VΔ4.Value.typ;
+            ᏑxΔ2.Value.typ = VΔ4.typ;
             var Tpʗ2 = Tpʗ1;
             var Vpʗ2 = Vpʗ1;
             var errorfʗ2 = errorfʗ1;
@@ -306,8 +305,8 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
                 if (TΔ4 == nil) {
                     return false; // no specific types
                 }
-                if (!ᏑxΔ2.convertibleTo(Ꮡcheck, (~TΔ4).typ, Ꮡcause)) {
-                    errorfʗ2("cannot convert %s (in %s) to type %s (in %s)"u8, (~VΔ4).typ, Vpʗ2.OrTypedNil(), (~TΔ4).typ, Tpʗ2.OrTypedNil());
+                if (!ᏑxΔ2.convertibleTo(Ꮡcheck, TΔ4.typ, Ꮡcause)) {
+                    errorfʗ2("cannot convert %s (in %s) to type %s (in %s)", VΔ4.typ, Vpʗ2.OrTypedNil(), TΔ4.typ, Tpʗ2.OrTypedNil());
                     return false;
                 }
                 return true;
@@ -315,8 +314,7 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
         });
     }
     case {} when Vp != nil: {
-        ref var xΔ3 = ref heap<operand>(out var ᏑxΔ3);
-        xΔ3 = x; // don't clobber outer x
+        ref var xΔ3 = ref heap<operand>(x, out var ᏑxΔ3); // don't clobber outer x
         var Vpʗ3 = Vp;
         var errorfʗ3 = errorf;
         var origTʗ1 = origT;
@@ -324,9 +322,9 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             if (VΔ5 == nil) {
                 return false; // no specific types
             }
-            ᏑxΔ3.Value.typ = VΔ5.Value.typ;
+            ᏑxΔ3.Value.typ = VΔ5.typ;
             if (!ᏑxΔ3.convertibleTo(Ꮡcheck, T, Ꮡcause)) {
-                errorfʗ3("cannot convert %s (in %s) to type %s"u8, (~VΔ5).typ, Vpʗ3.OrTypedNil(), origTʗ1);
+                errorfʗ3("cannot convert %s (in %s) to type %s", VΔ5.typ, Vpʗ3.OrTypedNil(), origTʗ1);
                 return false;
             }
             return true;
@@ -339,8 +337,8 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
             if (TΔ5 == nil) {
                 return false; // no specific types
             }
-            if (!Ꮡx.convertibleTo(Ꮡcheck, (~TΔ5).typ, Ꮡcause)) {
-                errorfʗ4("cannot convert %s to type %s (in %s)"u8, Ꮡx.Value.typ, (~TΔ5).typ, Tpʗ3.OrTypedNil());
+            if (!Ꮡx.convertibleTo(Ꮡcheck, TΔ5.typ, Ꮡcause)) {
+                errorfʗ4("cannot convert %s to type %s (in %s)", Ꮡx.Value.typ, TΔ5.typ, Tpʗ3.OrTypedNil());
                 return false;
             }
             return true;
@@ -352,12 +350,12 @@ internal static bool convertibleTo(this ж<operand> Ꮡx, ж<Checker> Ꮡcheck, 
 
 internal static bool isUintptr(ΔType typ) {
     var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ);
-    return t != nil && (~t).kind == Uintptr;
+    return t != nil && t.kind == Uintptr;
 }
 
 internal static bool isUnsafePointer(ΔType typ) {
     var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ);
-    return t != nil && (~t).kind == UnsafePointer;
+    return t != nil && t.kind == UnsafePointer;
 }
 
 internal static bool isPointer(ΔType typ) {
@@ -368,8 +366,8 @@ internal static bool isPointer(ΔType typ) {
 internal static bool isBytesOrRunes(ΔType typ) {
     {
         var (s, _) = typ.Underlying()._<ж<Slice>>(ᐧ); if (s != nil) {
-            var (t, _) = (~s).elem.Underlying()._<ж<Basic>>(ᐧ);
-            return t != nil && ((~t).kind == Byte || (~t).kind == Rune);
+            var (t, _) = s.elem.Underlying()._<ж<Basic>>(ᐧ);
+            return t != nil && (t.kind == Byte || t.kind == Rune);
         }
     }
     return false;

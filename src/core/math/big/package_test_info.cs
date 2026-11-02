@@ -10,26 +10,7 @@ global using static global::go.math.big_internal_test_package;
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using xmlꓸToken = object;
-global using xmlꓸΔToken = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -87,7 +68,15 @@ using static global::go.math.big_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.math.big_package.Float))]
+[assembly: GoFieldAccess(typeof(global::go.math.big_package.ΔInt))]
+[assembly: GoFieldAccess(typeof(global::go.math.big_package.ΔRat))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
+[assembly: GoFieldAccess(typeof(strconv_package.NumError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -97,8 +86,8 @@ using static global::go.math.big_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAwCpoCCyICCgsgAAhwADwKmgKaSgsiCgIKCtoKAgoLsgoKAgpKCyICCgraCgIKCyPaCABsiuroABBSCooK4gqKCuAAQTAAEEAAHHJKSlKSkpJSAptqCgoKCgqaCgoKCgqaCgoKCgg==", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29;313-319:30;321-327:31;329-335:32")]
-[assembly: go.GoPositionMap("math/big/example_rat_test.go", "example_rat_test.cs", "AAwoAAgCgoKUpoLKlKyygso=")]
+[assembly: GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAkCpoCCyICCgsgAAhwACwKmgKaCgsiCgIKCtoKAgoLsgoKAgoKCyICCgraCgIKCyAAKBoIAGyK6ugAEFIKigriCooK4ABBMAAQQAAcckoKktLS0pICm2oKCgoKCpoKCgoKCpoKCgoKC", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29;313-319:30;321-327:31;329-335:32")]
+[assembly: GoPositionMap("math/big/example_rat_test.go", "example_rat_test.cs", "AAwoAAgCgoKUpoLKlKyygso=")]
 // </GoSourcePositionMaps>
 
 namespace go.math;

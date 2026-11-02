@@ -21,7 +21,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(traceMapNode))]
 partial class runtime_package {
 
 // traceMap is a map of a variable-sized array of bytes to a unique ID.
@@ -62,7 +61,7 @@ partial struct traceMapNode {
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
 internal static uint64 stealID(this ж<traceMap> Ꮡtab) {
-    return Ꮡtab.of(traceMap.Ꮡseq).Add(1);
+    return Ꮡtab.Ꮡseq.Add(1);
 }
 
 // put inserts the data into the table.
@@ -77,10 +76,10 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
     }
     var hash = memhash(data, 0, size);
 
-    ж<traceMapNode> newNode = default!;
-    var m = Ꮡtab.of(traceMap.Ꮡroot);
+    ж<traceMapNode> newNode = default;
+    var m = Ꮡtab.Ꮡroot;
     var hashIter = hash;
-    while (ᐧ) {
+    for (;;) {
         var n = (ж<traceMapNode>)(uintptr)(m.Load());
         if (n == nil) {
             // Try to insert a new map node. We may end up discarding
@@ -99,10 +98,10 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
             // much activity, or the map gets big and races to insert on
             // the same node are much less likely.
             if (newNode == nil) {
-                newNode = Ꮡtab.newTraceMapNode(data, size, hash, Ꮡtab.of(traceMap.Ꮡseq).Add(1));
+                newNode = Ꮡtab.newTraceMapNode(data, size, hash, Ꮡtab.Ꮡseq.Add(1));
             }
             if (m.CompareAndSwapNoWB(nil, @unsafe.Pointer.FromPinnedBox(newNode))) {
-                return ((~newNode).id, true);
+                return (newNode.id, true);
             }
             // Reload n. Because pointers are only stored once,
             // we must have lost the race, and therefore n is not nil
@@ -115,7 +114,7 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
             }
         }
         m = n.at(traceMapNode.Ꮡchildren, (ulong)((hashIter >> (int)(8 * goarch.PtrSize - 2))));
-        hashIter <<= (int)(2);
+        hashIter <<= 2;
     }
 }
 
@@ -126,9 +125,9 @@ internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer dat
 // The caller must ensure that there are no put operations executing concurrently
 // with this function.
 internal static void reset(this ж<traceMap> Ꮡtab) {
-    Ꮡtab.of(traceMap.Ꮡroot).Store(nil);
-    Ꮡtab.of(traceMap.Ꮡseq).Store(0);
-    Ꮡtab.of(traceMap.Ꮡmem).drop();
+    Ꮡtab.Ꮡroot.Store(nil);
+    Ꮡtab.Ꮡseq.Store(0);
+    Ꮡtab.Ꮡmem.drop();
 }
 
 } // end runtime_package

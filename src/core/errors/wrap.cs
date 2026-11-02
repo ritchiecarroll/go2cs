@@ -22,7 +22,7 @@ internal partial interface Unwrap_type /*dyn*/ {
 public static error Unwrap(error err) {
     var (u, ok) = err._<Unwrap_type>(ᐧ);
     if (!ok) {
-        return default!;
+        return default;
     }
     return u.Unwrap();
 }
@@ -46,7 +46,7 @@ public static error Unwrap(error err) {
 // an example in the standard library. An Is method should only shallowly
 // compare err and the target and not call [Unwrap] on either.
 public static bool Is(error err, error target) {
-    if (err == default! || target == default!) {
+    if (err == nil || target == nil) {
         return AreEqual(err, target);
     }
 
@@ -63,7 +63,7 @@ internal partial interface is_typeᴛ1 /*dyn*/ {
 }
 
 internal static bool @is(error err, error target, bool targetComparable) {
-    while (ᐧ) {
+    for (;;) {
         if (targetComparable && AreEqual(err, target)) {
             return true;
         }
@@ -75,7 +75,7 @@ internal static bool @is(error err, error target, bool targetComparable) {
         switch (err.type()) {
         case {} Δx when Δx._<Unwrap_type>(out var x): {
             err = x.Unwrap();
-            if (err == default!) {
+            if (err == nil) {
                 return false;
             }
             break;
@@ -117,10 +117,10 @@ internal static bool @is(error err, error target, bool targetComparable) {
 // As panics if target is not a non-nil pointer to either a type that implements
 // error, or to any interface type.
 public static bool As(error err, any target) {
-    if (err == default!) {
+    if (err == nil) {
         return false;
     }
-    if (target == default!) {
+    if (target == nil) {
         throw panic("errors: target cannot be nil");
     }
     var val = reflectlite.ValueOf(target);
@@ -140,7 +140,7 @@ internal partial interface as_type /*dyn*/ {
 }
 
 internal static bool @as(error err, any target, reflectlite.Value targetVal, reflectliteꓸType targetType) {
-    while (ᐧ) {
+    for (;;) {
         if (reflectlite.TypeOf(err).AssignableTo(targetType)) {
             targetVal.Elem().Set(reflectlite.ValueOf(err));
             return true;
@@ -153,14 +153,14 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
         switch (err.type()) {
         case {} Δx when Δx._<Unwrap_type>(out var x): {
             err = x.Unwrap();
-            if (err == default!) {
+            if (err == nil) {
                 return false;
             }
             break;
         }
         case {} Δx when Δx._<is_typeᴛ1>(out var x): {
             foreach (var (_, errΔ1) in x.Unwrap()) {
-                if (errΔ1 == default!) {
+                if (errΔ1 == nil) {
                     continue;
                 }
                 if (@as(errΔ1, target, targetVal, targetType)) {
@@ -192,16 +192,16 @@ internal static reflectliteꓸType errorType = reflectlite.TypeOf((ж<error>)nil
 // returns true when target is a non-nil *E. In the latter case, the As
 // method is responsible for setting target.
 public static (E, bool) AsType<E>(error err) {
-    if (err == default!) {
+    if (err == nil) {
         E zero = GoZero<E>();
         return (zero, false);
     }
-    ref var pe = ref heap<ж<E>>(out var Ꮡpe);    // lazily initialized
+    ref var pe = ref heap<ж<E>>(out var Ꮡpe); // lazily initialized
     return asType(err, ref pe);
 }
 
 internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
-    while (ᐧ) {
+    for (;;) {
         {
             var (e, ok) = err._<E>(ᐧ); if (ok) {
                 return (e, true);
@@ -220,14 +220,14 @@ internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
         switch (err.type()) {
         case {} Δx when Δx._<Unwrap_type>(out var x): {
             err = x.Unwrap();
-            if (err == default!) {
-                return (default!, default!);
+            if (err == nil) {
+                return (default, default);
             }
             break;
         }
         case {} Δx when Δx._<is_typeᴛ1>(out var x): {
             foreach (var (_, errΔ1) in x.Unwrap()) {
-                if (errΔ1 == default!) {
+                if (errΔ1 == nil) {
                     continue;
                 }
                 {
@@ -236,11 +236,11 @@ internal static (E, bool) asType<E>(error err, ref ж<E> ppe) {
                     }
                 }
             }
-            return (default!, default!);
+            return (default, default);
         }
         default: {
             var x = err;
-            return (default!, default!);
+            return (default, default);
         }}
     }
 }

@@ -24,7 +24,7 @@ internal static UntypedFloat re => 7.69711747013104972;
 //
 //	sample = ExpFloat64() / desiredRateParameter
 public static float64 ExpFloat64(this ref Rand r) {
-    while (ᐧ) {
+    for (;;) {
         var u = r.Uint64();
         var j = (uint32)u;
         var i = (uint8)(u >> 32);

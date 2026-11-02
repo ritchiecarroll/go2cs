@@ -52,12 +52,12 @@ public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st)
             return st.String(offset);
         }
     }
-    return (cstring(sym.Name[..]), default!);
+    return (cstring(sym.Name[..]), default);
 }
 
 internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> allsyms, StringTable st) {
     if (len(allsyms) == 0) {
-        return (default!, default!);
+        return (default, default);
     }
     var syms = new slice<ж<Symbol>>(0);
     var aux = (uint8)0;
@@ -70,8 +70,8 @@ internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> al
         }
         ref var name = ref heap<@string>(out var Ꮡname);
         (name, var err) = sym.FullName(st);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         aux = sym.NumberOfAuxSymbols;
         var s = Ꮡ(new Symbol(
@@ -83,7 +83,7 @@ internal static (slice<ж<Symbol>>, error) removeAuxSymbols(slice<COFFSymbol> al
         ));
         syms = append(syms, s);
     }
-    return (syms, default!);
+    return (syms, default);
 }
 
 // Symbol is similar to [COFFSymbol] with Name field replaced

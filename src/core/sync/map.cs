@@ -45,49 +45,49 @@ partial struct Map {
 // value is present.
 // The ok result indicates whether value was found in the map.
 public static (any value, bool ok) Load(this ж<Map> Ꮡm, any key) {
-    return Ꮡm.of(Map.Ꮡm).Load(key);
+    return Ꮡm.Ꮡm.Load(key);
 }
 
 // Store sets the value for a key.
 public static void Store(this ж<Map> Ꮡm, any key, any value) {
-    Ꮡm.of(Map.Ꮡm).Store(key, value);
+    Ꮡm.Ꮡm.Store(key, value);
 }
 
 // Clear deletes all the entries, resulting in an empty Map.
 public static void Clear(this ж<Map> Ꮡm) {
-    Ꮡm.of(Map.Ꮡm).Clear();
+    Ꮡm.Ꮡm.Clear();
 }
 
 // LoadOrStore returns the existing value for the key if present.
 // Otherwise, it stores and returns the given value.
 // The loaded result is true if the value was loaded, false if stored.
 public static (any actual, bool loaded) LoadOrStore(this ж<Map> Ꮡm, any key, any value) {
-    return Ꮡm.of(Map.Ꮡm).LoadOrStore(key, value);
+    return Ꮡm.Ꮡm.LoadOrStore(key, value);
 }
 
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
 // The loaded result reports whether the key was present.
 public static (any value, bool loaded) LoadAndDelete(this ж<Map> Ꮡm, any key) {
-    return Ꮡm.of(Map.Ꮡm).LoadAndDelete(key);
+    return Ꮡm.Ꮡm.LoadAndDelete(key);
 }
 
 // Delete deletes the value for a key.
 // If the key is not in the map, Delete does nothing.
 public static void Delete(this ж<Map> Ꮡm, any key) {
-    Ꮡm.of(Map.Ꮡm).Delete(key);
+    Ꮡm.Ꮡm.Delete(key);
 }
 
 // Swap swaps the value for a key and returns the previous value if any.
 // The loaded result reports whether the key was present.
 public static (any previous, bool loaded) Swap(this ж<Map> Ꮡm, any key, any value) {
-    return Ꮡm.of(Map.Ꮡm).Swap(key, value);
+    return Ꮡm.Ꮡm.Swap(key, value);
 }
 
 // CompareAndSwap swaps the old and new values for key
 // if the value stored in the map is equal to old.
 // The old value must be of a comparable type.
 public static bool /*swapped*/ CompareAndSwap(this ж<Map> Ꮡm, any key, any old, any @new) {
-    return Ꮡm.of(Map.Ꮡm).CompareAndSwap(key, old, @new);
+    return Ꮡm.Ꮡm.CompareAndSwap(key, old, @new);
 }
 
 // CompareAndDelete deletes the entry for key if its value is equal to old.
@@ -96,7 +96,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Map> Ꮡm, any key, any ol
 // If there is no current value for key in the map, CompareAndDelete
 // returns false (even if the old value is the nil interface value).
 public static bool /*deleted*/ CompareAndDelete(this ж<Map> Ꮡm, any key, any old) {
-    return Ꮡm.of(Map.Ꮡm).CompareAndDelete(key, old);
+    return Ꮡm.Ꮡm.CompareAndDelete(key, old);
 }
 
 // Range calls f sequentially for each key and value present in the map.
@@ -111,7 +111,7 @@ public static bool /*deleted*/ CompareAndDelete(this ж<Map> Ꮡm, any key, any 
 // Range may be O(N) with the number of elements in the map even if f returns
 // false after a constant number of calls.
 public static void Range(this ж<Map> Ꮡm, Func<any, any, bool> f) {
-    Ꮡm.of(Map.Ꮡm).Range(f);
+    Ꮡm.Ꮡm.Range(f);
 }
 
 } // end sync_package

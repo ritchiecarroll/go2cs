@@ -45,7 +45,13 @@ using static go.unicode_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(CaseRange))]
+[assembly: GoFieldAccess(typeof(Range16))]
+[assembly: GoFieldAccess(typeof(Range32))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,11 +61,11 @@ using static go.unicode_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/casetables.go", "casetables.cs", "AAsYou4=")]
-[assembly: go.GoPositionMap("unicode/digit.go", "digit.cs", "AAcQkoKU")]
-[assembly: go.GoPositionMap("unicode/graphic.go", "graphic.cs", "ABcu7M7WgpQAAhDSgpSqooKCpqiygoKmrLKCpqiSgpSopKiSgpSqooKUAAIWAAkEgpSUlKiSgpQ=")]
-[assembly: go.GoPositionMap("unicode/letter.go", "letter.cs", "AFa2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgIKkgoKUqKSClKikgpSokoKUqrSCgoKCgoKUgpSmqJKCAAoWlKqigpSAgqSokoKokoKClJSokoKClJSokoKClJSokoKClKiSgoKUqJKCgpQACzwAEgKCpoK4goKCgoKUpoLcgIKAgqSk")]
-[assembly: go.GoPositionMap("unicode/tables.go", "tables.cs", "AAkSACpUAC1aAOgE0gkABxAAGDIA4gTGCQAJFNwA9gTuCQCOAZ4CAKoB1gIAPHoA6wPYBwALGACcAboCALEC5AQApAHKAgAJFAC6AvYEAI4BngIAR5ABABEkAE6eAQCuAd4CAAkUABImABw6AAkUAAoWAKsB2AIAH0AA0AGiAwAWLgAhRAA4cgCtAdwCAAsY3NwACxqCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKoAKYBzAIACBIACBLuADdwAAgSAAcQ7gAIEgAHEO4AEiYACRQABxAACBLc7twACRTuAAcQAAcQAAgSAAcQ7gCrAdgCAAcQAAkUAAoW7gAPIO4ACxgADRzuAAoW7u7uACpWAAwaAAwa7gATKAAmTgASJgALGAAUKgAaNgASJgAHENwACBIADRwADBoABxAAIUQABxAABxAABxAABxAAESQAFCoACBLuAA0cAAcQAAgSAAcQAAcQAA8gACtYAAcQAAkUAAgSAAwaAAgS7gAHEO7uAAsY7gAHEAAIEgAMGu4ABxAABxAACBLuAAgSAAcQAAwaAAgSAAoWAAcQAAcQ7gAIEgAIEgAHEO4ABxAACRTc3AAIEgAHEO7uAAcQ7u7u7gASJgAHEAAHEAAKFu7u3AAHEAAIEu7u7u7u7gAHEAAIEgATKO4ABxDu7twACBLuAAcQ7gAJFO4ABxAAFzAABxAACRQAESTc7gALGAAHEAAHEO4ABxDcAA0cAAcQAAcQAAgS7gAHEoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgqgAJkwACBIACBIAFCoADBoAqgHWAgAdPAALGAALGO7cABo23AAKFgAYMgDsAdoDAA8gABYuAAcQAAcQACBCAHz6AQALGAAdPAAJFAALGAAPIAAHEO4ASJIBACBCAGPIAQAVLAAKFgANHoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK6ogDKApQFAIIChgQAggGGAgBevgEACRLcAH38AQANHAB+/gHuAAwW3Nzc")]
+[assembly: GoPositionMap("unicode/casetables.go", "casetables.cs", "AAsYou4=")]
+[assembly: GoPositionMap("unicode/digit.go", "digit.cs", "AAcQkoKU")]
+[assembly: GoPositionMap("unicode/graphic.go", "graphic.cs", "ABcu7M7WgpQAAhDSgpSqooKCpqiygoKmrLKCpqiSgpSopKiSgpSqooKUAAIWAAkEgpSUlKiSgpQ=")]
+[assembly: GoPositionMap("unicode/letter.go", "letter.cs", "AFa2AZKCgoKClIKmuIKCgoKCgpSClKaokoKCgoKUgqa4goKCgoKClIKUpqiylIKUgoKUpoKUgIKkgoKUqKSClKikgpSokoKUqrSCgoKCgoKUgpSmqJKCAAoWlKqigpSAgqSokoKokoKClJSokoKClJSokoKClJSokoKClKiSgoKUqJKCgpQACzwAEgKCpoK4goKCgoKUpoLcgIKAgqSk")]
+[assembly: GoPositionMap("unicode/tables.go", "tables.cs", "AAoSACpUAC1aAOgE0gkABxAAGDIA4gTGCQAJFNwA9gTuCQCOAZ4CAKoB1gIAPHoA6wPYBwALGACcAboCALEC5AQApAHKAgAJFAC6AvYEAI4BngIAR5ABABEkAE6eAQCuAd4CAAkUABImABw6AAkUAAoWAKsB2AIAH0AA0AGiAwAWLgAhRAA4cgCtAdwCAAsY3NwACxqCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKoAKYBzAIACBIACBLuADdwAAgSAAcQ7gAIEgAHEO4AEiYACRQABxAACBLc7twACRTuAAcQAAcQAAgSAAcQ7gCrAdgCAAcQAAkUAAoW7gAPIO4ACxgADRzuAAoW7u7uACpWAAwaAAwa7gATKAAmTgASJgALGAAUKgAaNgASJgAHENwACBIADRwADBoABxAAIUQABxAABxAABxAABxAAESQAFCoACBLuAA0cAAcQAAgSAAcQAAcQAA8gACtYAAcQAAkUAAgSAAwaAAgS7gAHEO7uAAsY7gAHEAAIEgAMGu4ABxAABxAACBLuAAgSAAcQAAwaAAgSAAoWAAcQAAcQ7gAIEgAIEgAHEO4ABxAACRTc3AAIEgAHEO7uAAcQ7u7u7gASJgAHEAAHEAAKFu7u3AAHEAAIEu7u7u7u7gAHEAAIEgATKO4ABxDu7twACBLuAAcQ7gAJFO4ABxAAFzAABxAACRQAESTc7gALGAAHEAAHEO4ABxDcAA0cAAcQAAcQAAgS7gAHEoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgqgAJkwACBIACBIAFCoADBoAqgHWAgAdPAALGAALGO7cABo23AAKFgAYMgDsAdoDAA8gABYuAAcQAAcQACBCAHz6AQALGAAdPAAJFAALGAAPIAAHEO4ASJIBACBCAGPIAQAVLAAKFgANHoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK6ogDKApQFAIIChgQAggGGAgBevgEACRLcAH38AQANHAB+/gHuAAwW3Nzc")]
 // </GoSourcePositionMaps>
 
 namespace go;

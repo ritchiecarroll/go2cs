@@ -14,13 +14,14 @@ internal static void _ᴛ4() {
     _ = x[jsCtxUnknown - 2];
 }
 
-internal static readonly @string _jsCtx_name = "jsCtxRegexpjsCtxDivOpjsCtxUnknown"u8;
+internal static ref readonly @string _jsCtx_name => ref _jsCtx_nameᵇ;
+private static readonly @string _jsCtx_nameᵇ = "jsCtxRegexpjsCtxDivOpjsCtxUnknown"u8;
 
 internal static array<uint8> _jsCtx_index = new uint8[]{0, 11, 21, 33}.array();
 
 internal static @string String(this jsCtx i) {
     if (i >= ((jsCtx)(uint8)(len(_jsCtx_index) - 1))) {
-        return "jsCtx("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "jsCtx("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _jsCtx_name.slice(_jsCtx_index[i], _jsCtx_index[i + 1]);
 }

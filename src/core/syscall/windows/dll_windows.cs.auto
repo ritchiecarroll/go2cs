@@ -121,9 +121,9 @@ internal static partial (uintptr r1, uintptr r2, Errno err) syscalln(uintptr fn,
 // golang.org/x/sys/windows linknames these functions.
 
 //go:linkname loadlibrary
-public static (uintptr, Errno) loadlibrary(ж<uint16> Ꮡfilename) {
+public static (uintptr, Errno) loadlibrary(ж<uint16> filename) {
     var ᴋ0 = __LoadLibraryExW;
-    var ᴋ1 = Ꮡfilename;
+    var ᴋ1 = filename;
         var (handle, _, err) = SyscallN((uintptr)ᴋ0, (uintptr)ᴋ1, 0, 0);
     System.GC.KeepAlive(ᴋ0);
     System.GC.KeepAlive(ᴋ1);
@@ -134,10 +134,10 @@ public static (uintptr, Errno) loadlibrary(ж<uint16> Ꮡfilename) {
 }
 
 //go:linkname loadsystemlibrary
-public static (uintptr, Errno) loadsystemlibrary(ж<uint16> Ꮡfilename) {
+public static (uintptr, Errno) loadsystemlibrary(ж<uint16> filename) {
     uintptr _LOAD_LIBRARY_SEARCH_SYSTEM32 = 0x00000800;
     var ᴋ2 = __LoadLibraryExW;
-    var ᴋ3 = Ꮡfilename;
+    var ᴋ3 = filename;
         var (handle, _, err) = SyscallN((uintptr)ᴋ2, (uintptr)ᴋ3, 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
     System.GC.KeepAlive(ᴋ2);
     System.GC.KeepAlive(ᴋ3);
@@ -148,9 +148,9 @@ public static (uintptr, Errno) loadsystemlibrary(ж<uint16> Ꮡfilename) {
 }
 
 //go:linkname getprocaddress
-public static (uintptr, Errno) getprocaddress(uintptr handle, ж<uint8> Ꮡprocname) {
+public static (uintptr, Errno) getprocaddress(uintptr handle, ж<uint8> procname) {
     var ᴋ4 = __GetProcAddress;
-    var ᴋ5 = Ꮡprocname;
+    var ᴋ5 = procname;
         var (proc, _, err) = SyscallN((uintptr)ᴋ4, handle, (uintptr)ᴋ5);
     System.GC.KeepAlive(ᴋ4);
     System.GC.KeepAlive(ᴋ5);
@@ -176,18 +176,18 @@ partial struct DLL {
 // load system DLLs.
 public static (ж<DLL>, error) LoadDLL(@string name) {
     var (namep, err) = UTF16PtrFromString(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    uintptr h = default!;
+    uintptr h = default;
     ref var e = ref heap(new Errno(), out var Ꮡe);
-    if (sysdll.IsSystemDLL[name]){
+    if (sysdll.IsSystemDLL[name]) {
         (h, e) = loadsystemlibrary(namep);
     } else {
         (h, e) = loadlibrary(namep);
     }
     if (e != 0) {
-        return (default!, new DLLErrorжerror(Ꮡ(new DLLError(
+        return (default, new DLLErrorжerror(Ꮡ(new DLLError(
             Err: e,
             ObjName: name,
             Msg: "Failed to load "u8 + name + ": "u8 + e.Error()
@@ -197,13 +197,13 @@ public static (ж<DLL>, error) LoadDLL(@string name) {
         Name: name,
         Handle: ((ΔHandle)h)
     ));
-    return (d, default!);
+    return (d, default);
 }
 
 // MustLoadDLL is like [LoadDLL] but panics if load operation fails.
 public static ж<DLL> MustLoadDLL(@string name) {
     var (d, e) = LoadDLL(name);
-    if (e != default!) {
+    if (e != nil) {
         throw panic(e);
     }
     return d;
@@ -212,18 +212,18 @@ public static ж<DLL> MustLoadDLL(@string name) {
 // FindProc searches [DLL] d for procedure named name and returns [*Proc]
 // if found. It returns an error if search fails.
 public static (ж<Proc> proc, error err) FindProc(this ж<DLL> Ꮡd, @string name) {
-    error err = default!;
+    error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     (var namep, err) = BytePtrFromString(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     ref var a = ref heap<uintptr>(out var Ꮡa);
     ref var e = ref heap<Errno>(out var Ꮡe);
     (a, e) = getprocaddress((uintptr)d.Handle, namep);
     if (e != 0) {
-        return (default!, new DLLErrorжerror(Ꮡ(new DLLError(
+        return (default, new DLLErrorжerror(Ꮡ(new DLLError(
             Err: e,
             ObjName: name,
             Msg: "Failed to find "u8 + name + " procedure in "u8 + d.Name + ": "u8 + e.Error()
@@ -234,13 +234,13 @@ public static (ж<Proc> proc, error err) FindProc(this ж<DLL> Ꮡd, @string nam
         Name: name,
         addr: a
     ));
-    return (p, default!);
+    return (p, default);
 }
 
 // MustFindProc is like [DLL.FindProc] but panics if search fails.
 public static ж<Proc> MustFindProc(this ж<DLL> Ꮡd, @string name) {
     var (p, e) = Ꮡd.FindProc(name);
-    if (e != default!) {
+    if (e != nil) {
         throw panic(e);
     }
     return p;
@@ -318,7 +318,7 @@ public static error Load(this ж<LazyDLL> Ꮡd) {
             ᒐd1 = true;
             if (d.dll == nil) {
                 var (dll, e) = LoadDLL(d.Name);
-                if (e != default!) {
+                if (e != nil) {
                     return e;
                 }
                 // Non-racy version of:
@@ -326,16 +326,16 @@ public static error Load(this ж<LazyDLL> Ꮡd) {
                 atomic.StorePointer(Ꮡd.of(LazyDLL.Ꮡdll), dll);
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡd.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 // mustLoad is like Load but panics if search fails.
 internal static void mustLoad(this ж<LazyDLL> Ꮡd) {
     var e = Ꮡd.Load();
-    if (e != default!) {
+    if (e != nil) {
         throw panic(e);
     }
 }
@@ -383,11 +383,11 @@ public static error Find(this ж<LazyProc> Ꮡp) {
             ᒐd1 = true;
             if (p.proc == nil) {
                 var e = p.l.Load();
-                if (e != default!) {
+                if (e != nil) {
                     return e;
                 }
                 (var proc, e) = (~p.l).dll.FindProc(p.Name);
-                if (e != default!) {
+                if (e != nil) {
                     return e;
                 }
                 // Non-racy version of:
@@ -395,16 +395,16 @@ public static error Find(this ж<LazyProc> Ꮡp) {
                 atomic.StorePointer(Ꮡp.of(LazyProc.Ꮡproc), proc);
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡp.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
 // mustFind is like Find but panics if search fails.
 internal static void mustFind(this ж<LazyProc> Ꮡp) {
     var e = Ꮡp.Find();
-    if (e != default!) {
+    if (e != nil) {
         throw panic(e);
     }
 }

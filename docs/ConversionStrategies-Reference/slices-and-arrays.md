@@ -121,9 +121,9 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:250 -->
+<!-- source: src/core/net/windows/fd_windows.cs:262 -->
 ```csharp
-    var (n, err) = Ꮡfd.of(netFD.Ꮡpfd).Writev(Ꮡbuf.of(Buffers.Ꮡm_value));
+    var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```
 
 Two generator pieces make the view real aliasing: a named-slice wrapper's `m_value` is **mutable** (`ReadOnlyValue = false` — a readonly field would force a defensive copy and lose header writes), and `ISliceTypeTemplate` emits the field-ref accessor `internal static ref slice<T> Ꮡm_value(ref Buffers instance)` that `ж<T>.of()` projects through. Claimed narrowly: pointer→pointer, source pointee a NAMED type whose underlying is a slice identical to the (unnamed) target pointee. (Guarded by the `SortArrayType` extension `consumeOne` — a `(*[]Person)(&crew)` reinterpret whose reslice through the view shrinks the original `Roster`, runtime-verified against Go.)
@@ -704,7 +704,7 @@ return, channel send, `append` element, range key/value, function/func-literal p
 receiver) clones a struct too. The struct declaration is stamped with the fields that need it, and
 go2cs-gen turns the stamp into the deep copy:
 
-<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 210, 213-215 -->
+<!-- source: src/core/crypto/internal/fips140/sha256/sha256.cs:52-58, 213, 216-217 -->
 ```csharp
 partial struct Digest {
     internal array<uint32> h = new(8);
@@ -716,8 +716,7 @@ partial struct Digest {
 …
 public static slice<byte> Sum(this ref Digest d, slice<byte> @in) {
 …
-    ref var d0 = ref heap<Digest>(out var Ꮡd0);
-    d0 = d.ΔClone();
+    ref var d0 = ref heap<Digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
 ```
 
@@ -1801,7 +1800,7 @@ keep the emission unchanged where it is already right — a NAMED array element 
 its backing lazily from its own known size, the same exclusion `arrayElemFactory` documents), and an
 assignment TARGET, which carries a value and needs no zero. In the converted standard library the one
 such read is the `entity2` read in `html/escape.cs`.<!-- measured at the
-landing: one line, the read now at html/escape.cs:160 (`entity2[tmpstring(entityName), () => new array<rune>(2)]`) -->
+landing: one line, the read now at html/escape.cs:153 (`entity2[tmpstring(entityName), () => new array<rune>(2)]`) -->
 
 (Guarded by the `MapArrayValueZero` behavioral test: plain and comma-ok reads, hit and miss, a
 nested element, a named map type read both nil and empty, an unnamed map read both nil and empty,

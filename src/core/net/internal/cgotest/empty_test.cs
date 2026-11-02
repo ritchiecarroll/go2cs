@@ -10,7 +10,7 @@ partial class cgotest_internal_test_package {
 // Nothing to test here.
 // The test is that the package compiles at all.
 // See resstate.go.
-public static void Test(ж<testing.T> Ꮡt) {
+public static void Test(ж<testing.T> t) {
 }
 
 } // end cgotest_internal_test_package

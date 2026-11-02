@@ -24,69 +24,71 @@ internal static readonly object invalidPrivateKeyˢ = (@string)"invalid private 
 internal static readonly object cannotDecodeTestDerDataˢ = (@string)"cannot decode test DER data: "u8;
 internal static readonly object dataMismatchˢ = (@string)"data mismatch"u8;
 
-public static void TestDecrypt(ж<testing.T> Ꮡt) {
+public static void TestDecrypt(ж<testing.T> t) {
     foreach (var (i, data) in testData) {
-        Ꮡt.Logf("test %v. %v"u8, i, data.kind);
+        t.Logf("test %v. %v", i, data.kind);
         var (block, rest) = pem.Decode(data.pemData);
         if (builtin.len(rest) > 0) {
-            Ꮡt.Error(extraDataˢ);
+            t.Error(extraDataˢ);
         }
         var (der, err) = DecryptPEMBlock(block, data.password);
-        if (err != default!) {
-            Ꮡt.Error(decryptFailedˢ, err);
+        if (err != nil) {
+            t.Error(decryptFailedˢ, err);
             continue;
         }
         {
-            var (_, errΔ1) = ParsePKCS1PrivateKey(der); if (errΔ1 != default!) {
-                Ꮡt.Error(invalidPrivateKeyˢ, errΔ1);
+            var (_, errΔ1) = ParsePKCS1PrivateKey(der); if (errΔ1 != nil) {
+                t.Error(invalidPrivateKeyˢ, errΔ1);
             }
         }
         (var plainDER, err) = base64.StdEncoding.DecodeString(data.plainDER);
-        if (err != default!) {
-            Ꮡt.Fatal(cannotDecodeTestDerDataˢ, err);
+        if (err != nil) {
+            t.Fatal(cannotDecodeTestDerDataˢ, err);
         }
         if (!bytes.Equal(der, plainDER)) {
-            Ꮡt.Error(dataMismatchˢ);
+            t.Error(dataMismatchˢ);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rsaPrivateKeyˢ = "RSA PRIVATE KEY"u8;
+internal static ref readonly @string rsaPrivateKeyˢ => ref rsaPrivateKeyˢᵇ;
+private static readonly @string rsaPrivateKeyˢᵇ = "RSA PRIVATE KEY"u8;
 internal static readonly object encryptˢ = (@string)"encrypt: "u8;
 internal static readonly object pemBlockDoesNotAppearToˢ = (@string)"PEM block does not appear to be encrypted"u8;
-internal static readonly @string procTypeˢ = "Proc-Type"u8;
+internal static ref readonly @string procTypeˢ => ref procTypeˢᵇ;
+private static readonly @string procTypeˢᵇ = "Proc-Type"u8;
 internal static readonly object decryptˢ = (@string)"decrypt: "u8;
 
-public static void TestEncrypt(ж<testing.T> Ꮡt) {
+public static void TestEncrypt(ж<testing.T> t) {
     foreach (var (i, data) in testData) {
-        Ꮡt.Logf("test %v. %v"u8, i, data.kind);
+        t.Logf("test %v. %v", i, data.kind);
         var (plainDER, err) = base64.StdEncoding.DecodeString(data.plainDER);
-        if (err != default!) {
-            Ꮡt.Fatal(cannotDecodeTestDerDataˢ, err);
+        if (err != nil) {
+            t.Fatal(cannotDecodeTestDerDataˢ, err);
         }
         var password = slice<byte>("kremvax1"u8);
         (var block, err) = EncryptPEMBlock(rand.Reader, rsaPrivateKeyˢ, plainDER, password, data.kind);
-        if (err != default!) {
-            Ꮡt.Error(encryptˢ, err);
+        if (err != nil) {
+            t.Error(encryptˢ, err);
             continue;
         }
         if (!IsEncryptedPEMBlock(block)) {
-            Ꮡt.Error(pemBlockDoesNotAppearToˢ);
+            t.Error(pemBlockDoesNotAppearToˢ);
         }
-        if ((~block).Type != "RSA PRIVATE KEY"u8) {
-            Ꮡt.Errorf("unexpected block type; got %q want %q"u8, (~block).Type, rsaPrivateKeyˢ);
+        if (block.Type != "RSA PRIVATE KEY"u8) {
+            t.Errorf("unexpected block type; got %q want %q", block.Type, rsaPrivateKeyˢ);
         }
-        if ((~block).Headers[procTypeˢ] != "4,ENCRYPTED") {
-            Ꮡt.Errorf("block does not have correct Proc-Type header"u8);
+        if (block.Headers[procTypeˢ] != "4,ENCRYPTED") {
+            t.Errorf("block does not have correct Proc-Type header");
         }
         (var der, err) = DecryptPEMBlock(block, password);
-        if (err != default!) {
-            Ꮡt.Error(decryptˢ, err);
+        if (err != nil) {
+            t.Error(decryptˢ, err);
             continue;
         }
         if (!bytes.Equal(der, plainDER)) {
-            Ꮡt.Errorf("data mismatch"u8);
+            t.Errorf("data mismatch");
         }
     }
 }
@@ -97,7 +99,7 @@ partial struct testDataᴛ1 /*dyn*/ {
     internal slice<byte> pemData;
     internal @string plainDER;
 }
-internal static slice<testDataᴛ1> testData = new testDataᴛ1[]{
+internal static slice<testDataᴛ1> testData = slice<testDataᴛ1>([
     new(
         kind: PEMCipherDES,
         password: slice<byte>("asdf"u8),
@@ -266,7 +268,7 @@ AgkA8SEfu/2i3g0CCQDGNlXbBHX7kQIIK3Ww5o0cYbECCQDCimPb0dYGsQIIeQ7A
 jryIst8=
 """u8.Raw()
     )
-}.slice();
+]);
 
 internal static @string incompleteBlockPEM = testingKey("""
 
@@ -283,26 +285,27 @@ ai+OP1BZUetfK6AW4MiqB2FDyIdOAJ8XeWuZy21Wtsh8wPD6yYOFM/w7WZL8weX3Y0TSeG/T
 internal static readonly object badPemDataDecryptedˢ = (@string)"Bad PEM data decrypted successfully"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string expectedSubstrᶜ = "block size"u8;
+internal static ref readonly @string expectedSubstrᶜ => ref expectedSubstrᶜᵇ;
+private static readonly @string expectedSubstrᶜᵇ = "block size"u8;
 
-public static void TestIncompleteBlock(ж<testing.T> Ꮡt) {
+public static void TestIncompleteBlock(ж<testing.T> t) {
     // incompleteBlockPEM contains ciphertext that is not a multiple of the
     // block size. This previously panicked. See #11215.
     var (block, _) = pem.Decode(slice<byte>(incompleteBlockPEM));
     var (_, err) = DecryptPEMBlock(block, slice<byte>("foo"u8));
-    if (err == default!) {
-        Ꮡt.Fatal(badPemDataDecryptedˢ);
+    if (err == nil) {
+        t.Fatal(badPemDataDecryptedˢ);
     }
     @string expectedSubstr = expectedSubstrᶜ;
     {
         @string e = err.Error(); if (!strings.Contains(e, expectedSubstr)) {
-            Ꮡt.Fatalf("Expected error containing %q but got: %q"u8, expectedSubstr, e);
+            t.Fatalf("Expected error containing %q but got: %q", expectedSubstr, e);
         }
     }
 }
 
 internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, "TESTING KEY"u8, "PRIVATE KEY"u8);
+    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
 }
 
 } // end x509_internal_test_package

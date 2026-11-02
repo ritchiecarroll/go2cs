@@ -113,11 +113,11 @@ public static (ж<PublicKeyECDSA>, error) NewPublicKeyECDSA(@string curve, BigIn
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) SignMarshalECDSA(ж<PrivateKeyECDSA> Ꮡpriv, slice<byte> hash) {
+public static (slice<byte>, error) SignMarshalECDSA(ж<PrivateKeyECDSA> priv, slice<byte> hash) {
     throw panic("boringcrypto: not available");
 }
 
-public static bool VerifyECDSA(ж<PublicKeyECDSA> Ꮡpub, slice<byte> hash, slice<byte> sig) {
+public static bool VerifyECDSA(ж<PublicKeyECDSA> pub, slice<byte> hash, slice<byte> sig) {
     throw panic("boringcrypto: not available");
 }
 
@@ -129,27 +129,27 @@ partial struct PrivateKeyRSA {
     internal nint _;
 }
 
-public static (slice<byte>, error) DecryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext, slice<byte> label) {
+public static (slice<byte>, error) DecryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PrivateKeyRSA> priv, slice<byte> ciphertext, slice<byte> label) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) DecryptRSAPKCS1(ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext) {
+public static (slice<byte>, error) DecryptRSAPKCS1(ж<PrivateKeyRSA> priv, slice<byte> ciphertext) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) DecryptRSANoPadding(ж<PrivateKeyRSA> Ꮡpriv, slice<byte> ciphertext) {
+public static (slice<byte>, error) DecryptRSANoPadding(ж<PrivateKeyRSA> priv, slice<byte> ciphertext) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) EncryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PublicKeyRSA> Ꮡpub, slice<byte> msg, slice<byte> label) {
+public static (slice<byte>, error) EncryptRSAOAEP(hash.Hash h, hash.Hash mgfHash, ж<PublicKeyRSA> pub, slice<byte> msg, slice<byte> label) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) EncryptRSAPKCS1(ж<PublicKeyRSA> Ꮡpub, slice<byte> msg) {
+public static (slice<byte>, error) EncryptRSAPKCS1(ж<PublicKeyRSA> pub, slice<byte> msg) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) EncryptRSANoPadding(ж<PublicKeyRSA> Ꮡpub, slice<byte> msg) {
+public static (slice<byte>, error) EncryptRSANoPadding(ж<PublicKeyRSA> pub, slice<byte> msg) {
     throw panic("boringcrypto: not available");
 }
 
@@ -165,19 +165,19 @@ public static (ж<PublicKeyRSA>, error) NewPublicKeyRSA(BigInt N, BigInt E) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) SignRSAPKCS1v15(ж<PrivateKeyRSA> Ꮡpriv, crypto.Hash h, slice<byte> hashed) {
+public static (slice<byte>, error) SignRSAPKCS1v15(ж<PrivateKeyRSA> priv, crypto.Hash h, slice<byte> hashed) {
     throw panic("boringcrypto: not available");
 }
 
-public static (slice<byte>, error) SignRSAPSS(ж<PrivateKeyRSA> Ꮡpriv, crypto.Hash h, slice<byte> hashed, nint saltLen) {
+public static (slice<byte>, error) SignRSAPSS(ж<PrivateKeyRSA> priv, crypto.Hash h, slice<byte> hashed, nint saltLen) {
     throw panic("boringcrypto: not available");
 }
 
-public static error VerifyRSAPKCS1v15(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<byte> hashed, slice<byte> sig) {
+public static error VerifyRSAPKCS1v15(ж<PublicKeyRSA> pub, crypto.Hash h, slice<byte> hashed, slice<byte> sig) {
     throw panic("boringcrypto: not available");
 }
 
-public static error VerifyRSAPSS(ж<PublicKeyRSA> Ꮡpub, crypto.Hash h, slice<byte> hashed, slice<byte> sig, nint saltLen) {
+public static error VerifyRSAPSS(ж<PublicKeyRSA> pub, crypto.Hash h, slice<byte> hashed, slice<byte> sig, nint saltLen) {
     throw panic("boringcrypto: not available");
 }
 

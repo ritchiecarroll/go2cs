@@ -15,7 +15,7 @@ partial class netip_test_package {
 // zeros is a slice of eight stringified zeros. It's used in
 // parseIPSlow to construct slices of specific amounts of zero fields,
 // from 1 to 8.
-internal static slice<@string> zeros = new @string[]{"0"u8, "0"u8, "0"u8, "0"u8, "0"u8, "0"u8, "0"u8, "0"u8}.slice();
+internal static slice<@string> zeros = slice<@string>(["0", "0", "0", "0", "0", "0", "0", "0"]);
 
 // parseIPSlow is like ParseIP, but aims for readability above
 // speed. It's the reference implementation for correctness checking
@@ -41,8 +41,8 @@ internal static slice<@string> zeros = new @string[]{"0"u8, "0"u8, "0"u8, "0"u8,
 internal static (netipꓸAddr, error) parseIPSlow(@string s) {
     // Identify and strip out the zone, if any. There should be 0 or 1
     // '%' in the string.
-    @string zone = default!;
-    var fs = strings.Split(s, "%"u8);
+    @string zone = default;
+    var fs = strings.Split(s, "%");
     switch (len(fs)) {
     case 1: {
         // No zone, that's fine.
@@ -51,44 +51,44 @@ internal static (netipꓸAddr, error) parseIPSlow(@string s) {
     case 2: {
         (s, zone) = (fs[0], fs[1]);
         if (zone == ""u8) {
-            return (new netipꓸAddr(nil), fmt.Errorf("netaddr.ParseIP(%q): no zone after zone specifier"u8, s));
+            return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): no zone after zone specifier"u8, s));
         }
         break;
     }
     default: {
-        return (new netipꓸAddr(nil), fmt.Errorf("netaddr.ParseIP(%q): too many zone specifiers"u8, s)); // TODO: less specific?
+        return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): too many zone specifiers"u8, s)); // TODO: less specific?
     }}
 
     // IPv4 by itself is easy to do in a helper.
-    if (strings.Count(s, ":"u8) == 0) {
+    if (strings.Count(s, ":") == 0) {
         if (zone != ""u8) {
-            return (new netipꓸAddr(nil), fmt.Errorf("netaddr.ParseIP(%q): IPv4 addresses cannot have a zone"u8, s));
+            return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): IPv4 addresses cannot have a zone"u8, s));
         }
         return parseIPv4Slow(s);
     }
 
     var (normal, err) = normalizeIPv6Slow(s);
-    if (err != default!) {
-        return (new netipꓸAddr(nil), err);
+    if (err != nil) {
+        return (new netipꓸAddr(), err);
     }
 
     // At this point, we've normalized the address back into 8 hex
     // fields of 16 bits each. Parse that.
-    fs = strings.Split(normal, ":"u8);
+    fs = strings.Split(normal, ":");
     if (len(fs) != 8) {
-        return (new netipꓸAddr(nil), fmt.Errorf("netaddr.ParseIP(%q): wrong size address"u8, s));
+        return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): wrong size address"u8, s));
     }
     array<byte> ret = new(16);
     foreach (var (i, f) in fs) {
         var (a, b, errΔ1) = parseWord(f);
-        if (errΔ1 != default!) {
-            return (new netipꓸAddr(nil), errΔ1);
+        if (errΔ1 != nil) {
+            return (new netipꓸAddr(), errΔ1);
         }
         ret[i * 2] = a;
         ret[i * 2 + 1] = b;
     }
 
-    return (AddrFrom16(ret).WithZone(zone), default!);
+    return (AddrFrom16(ret).WithZone(zone), default);
 }
 
 // normalizeIPv6Slow expands s, which is assumed to be an IPv6
@@ -115,13 +115,13 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
     @string s = orig;
 
     // Find and convert an IPv4 address in the final field, if any.
-    nint i = strings.LastIndex(s, ":"u8);
+    nint i = strings.LastIndex(s, ":");
     if (i == -1) {
         return ("", fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, orig));
     }
-    if (strings.Contains(s.slice(i + 1), "."u8)) {
+    if (strings.Contains(s.slice(i + 1), ".")) {
         var (ip, err) = parseIPv4Slow(s.slice(i + 1));
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         var a4 = ip.As4();
@@ -129,7 +129,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
     }
 
     // Find and expand a ::, if any.
-    var fs = strings.Split(s, "::"u8);
+    var fs = strings.Split(s, "::");
     switch (len(fs)) {
     case 1: {
         // No ::, nothing to do.
@@ -140,7 +140,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
         @string rhs = fs[1];
         // Found a ::, figure out how many zero blocks need to be
         // inserted.
-        nint nblocks = strings.Count(lhs, ":"u8) + strings.Count(rhs, ":"u8);
+        nint nblocks = strings.Count(lhs, ":") + strings.Count(rhs, ":");
         if (lhs != ""u8) {
             nblocks++;
         }
@@ -150,7 +150,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
         if (nblocks > 7) {
             return ("", fmt.Errorf("netaddr.ParseIP(%q): address too long"u8, orig));
         }
-        fs = default!;
+        fs = default;
         // Either side of the :: can be empty. We don't want empty
         // fields to feature in the final normalized address.
         if (lhs != ""u8) {
@@ -160,7 +160,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
         if (rhs != ""u8) {
             fs = append(fs, rhs);
         }
-        s = strings.Join(fs, ":"u8);
+        s = strings.Join(fs, ":");
         break;
     }
     default: {
@@ -168,7 +168,7 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
         return ("", fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, orig));
     }}
 
-    return (s, default!);
+    return (s, default);
 }
 
 // parseIPv4Slow parses and returns an IPv4 address in dotted quad
@@ -176,19 +176,19 @@ internal static (@string, error) normalizeIPv6Slow(@string orig) {
 // reference implementation against which we compare faster
 // implementations for correctness.
 internal static (netipꓸAddr, error) parseIPv4Slow(@string s) {
-    var fs = strings.Split(s, "."u8);
+    var fs = strings.Split(s, ".");
     if (len(fs) != 4) {
-        return (new netipꓸAddr(nil), fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, s));
+        return (new netipꓸAddr(), fmt.Errorf("netaddr.ParseIP(%q): invalid IP address"u8, s));
     }
     array<byte> ret = new(4);
     foreach (var i in range(ret)) {
         var (val, err) = strconv.ParseUint(fs[i], 10, 8);
-        if (err != default!) {
-            return (new netipꓸAddr(nil), err);
+        if (err != nil) {
+            return (new netipꓸAddr(), err);
         }
         ret[i] = (uint8)val;
     }
-    return (AddrFrom4(new byte[]{ret[0], ret[1], ret[2], ret[3]}.array()), default!);
+    return (AddrFrom4(new byte[]{ret[0], ret[1], ret[2], ret[3]}.array()), default);
 }
 
 // parseWord converts a 16-bit hex string into its corresponding
@@ -198,10 +198,10 @@ internal static (byte, byte, error) parseWord(@string s) {
         return (0, 0, fmt.Errorf("parseWord(%q): invalid word"u8, s));
     }
     var (ret, err) = strconv.ParseUint(s, 16, 16);
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0, err);
     }
-    return ((uint8)(ret >> 8), (uint8)ret, default!);
+    return ((uint8)(ret >> 8), (uint8)ret, default);
 }
 
 } // end netip_test_package

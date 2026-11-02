@@ -7,23 +7,6 @@
 global using static global::go.debug.gosym_package;
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
-global using elfꓸData = go.debug.elf_package.ΔData;
-global using elfꓸSection = go.debug.elf_package.ΔSection;
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +29,16 @@ using static global::go.debug.gosym_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.Func))]
+[assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.LineTable))]
+[assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.Obj))]
+[assembly: GoFieldAccess(typeof(global::go.debug.gosym_package.Table))]
+[assembly: GoFieldAccess(typeof(go.debug.elf_package.ΔSection))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,8 +48,8 @@ using static global::go.debug.gosym_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/gosym/pclntab_test.go", "pclntab_test.cs", "ACE0gpSCpoKUgoKClIKCgoKCgoCCyIKCgoK8osi4goKCppSCgpQACAaigoKUgoKClIKCgqaCgoKCpuaClIKUuIKCyoKCgpSCgpSSgqaCgqaCgpKClJSCuIKUgpSmuIKCgoK4gqaAgpS2lIKCkoIACgyigpSCkoKCgriCgoKCgpSCgoKCkoLKgoKCgoKCgoKUgoKCgpSClIKClIKkgpKCprTUgpSCgpSCggAHHAAJAoKClIKCgpSCgoKU6JKCgoKCgpSCgoKClIKUgpSCAAwSgoKUkoKCuIKSgoKCgoLKkoKmooKCgoKCgpSClIKUgsqSgoKCgpSClII=", "347-352:1;355-364:2;371-390:3;392-406:4")]
-[assembly: go.GoPositionMap("debug/gosym/symtab_test.go", "symtab_test.cs", "AA0YgoLogoKCgoKC5oKCgoKCggAKBoKCgoKCgoKCgoKCgoKCgoLmgoKCgoKC9oIADyai")]
+[assembly: GoPositionMap("debug/gosym/pclntab_test.go", "pclntab_test.cs", "ACQ0gpSCpoKUgoKClIKCgoKCgoCCyIKCgoK8oujIgoKCppSCgpQACwaigoKUgoKClIKCgqaCgoKCpvaClIKUuIKCyoKCgpSCgpSCgqaCgqaCgoKClJSCuIKUgpSmuIKCgoK4gqaAgpS2lIKCgoIADQyigpSCkoKCgriCgoKCgpSCgoKCgoLKgoKCgoKCgoKUgoKCgpSClIKClIKUgoKCprTUgpSCgpSCggAIHAAJAoKClIKCgpSCgoKU+JKCgoKCgpSCgoKClIKUgpSCABASgoKUkoKCuIKSgoKCgoLKkoKmooKCgoKCgpSClIKUgsqSgoKCgpSClII=", "347-352:1;355-364:2;371-390:3;392-406:4", "", "", "255:21")]
+[assembly: GoPositionMap("debug/gosym/symtab_test.go", "symtab_test.cs", "AA0YgoL4goKCgoKCAAgGgoKCgoKCABAGgoKCgoKCgoKCgoKCgoKCggAIBoKCgoKCgvaCAA8mog==")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

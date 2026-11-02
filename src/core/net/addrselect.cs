@@ -38,23 +38,23 @@ internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netipꓸAd
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string udpˢ = "udp"u8;
+internal static ref readonly @string udpˢ => ref udpˢᵇ;
+private static readonly @string udpˢᵇ = "udp"u8;
 
 // srcAddrs tries to UDP-connect to each address to see if it has a
 // route. (This doesn't send any packets). The destination port
 // number is irrelevant.
 internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
     var srcs = new slice<netipꓸAddr>(len(addrs));
-    ref var dst = ref heap<UDPAddr>(out var Ꮡdst);
-    dst = new UDPAddr(Port: 53);
+    ref var dst = ref heap<UDPAddr>(new UDPAddr(Port: 53), out var Ꮡdst);
     foreach (var i in range(addrs)) {
         dst.IP = addrs[i].IP;
         dst.Zone = addrs[i].Zone;
         var (c, err) = DialUDP(udpˢ, nil, Ꮡdst);
-        if (err == default!) {
+        if (err == nil) {
             {
                 var (src, ok) = c.of(UDPConn.Ꮡconn).LocalAddr()._<ж<UDPAddr>>(ᐧ); if (ok) {
-                    (srcs[i], _) = netip.AddrFromSlice((~src).IP);
+                    (srcs[i], _) = netip.AddrFromSlice(src.IP);
                 }
             }
             c.of(UDPConn.Ꮡconn).Close();
@@ -71,7 +71,7 @@ partial struct ipAttr {
 
 internal static ipAttr ipAttrOf(netipꓸAddr ip) {
     if (!ip.IsValid()) {
-        return new ipAttr(nil);
+        return new ipAttr();
     }
     var match = rfc6724policyTable.Classify(ip);
     return new ipAttr(
@@ -100,10 +100,10 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     var DB = b.addr.IP;
     var SourceDA = a.src;
     var SourceDB = b.src;
-    var attrDA = Ꮡa.of(byRFC6724Info.ᏑaddrAttr);
-    var attrDB = Ꮡb.of(byRFC6724Info.ᏑaddrAttr);
-    var attrSourceDA = Ꮡa.of(byRFC6724Info.ᏑsrcAttr);
-    var attrSourceDB = Ꮡb.of(byRFC6724Info.ᏑsrcAttr);
+    var attrDA = Ꮡa.ᏑaddrAttr;
+    var attrDB = Ꮡb.ᏑaddrAttr;
+    var attrSourceDA = Ꮡa.ᏑsrcAttr;
+    var attrSourceDB = Ꮡb.ᏑsrcAttr;
 
     const nint preferDA = -1;
     const nint preferDB = 1;
@@ -126,10 +126,10 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     // If Scope(DA) = Scope(Source(DA)) and Scope(DB) <> Scope(Source(DB)),
     // then prefer DA.  Similarly, if Scope(DA) <> Scope(Source(DA)) and
     // Scope(DB) = Scope(Source(DB)), then prefer DB.
-    if ((~attrDA).Scope == (~attrSourceDA).Scope && (~attrDB).Scope != (~attrSourceDB).Scope) {
+    if (attrDA.Scope == attrSourceDA.Scope && attrDB.Scope != attrSourceDB.Scope) {
         return preferDA;
     }
-    if ((~attrDA).Scope != (~attrSourceDA).Scope && (~attrDB).Scope == (~attrSourceDB).Scope) {
+    if (attrDA.Scope != attrSourceDA.Scope && attrDB.Scope == attrSourceDB.Scope) {
         return preferDB;
     }
 
@@ -152,20 +152,20 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     // If Label(Source(DA)) = Label(DA) and Label(Source(DB)) <> Label(DB),
     // then prefer DA.  Similarly, if Label(Source(DA)) <> Label(DA) and
     // Label(Source(DB)) = Label(DB), then prefer DB.
-    if ((~attrSourceDA).Label == (~attrDA).Label && (~attrSourceDB).Label != (~attrDB).Label) {
+    if (attrSourceDA.Label == attrDA.Label && attrSourceDB.Label != attrDB.Label) {
         return preferDA;
     }
-    if ((~attrSourceDA).Label != (~attrDA).Label && (~attrSourceDB).Label == (~attrDB).Label) {
+    if (attrSourceDA.Label != attrDA.Label && attrSourceDB.Label == attrDB.Label) {
         return preferDB;
     }
 
     // Rule 6: Prefer higher precedence.
     // If Precedence(DA) > Precedence(DB), then prefer DA.  Similarly, if
     // Precedence(DA) < Precedence(DB), then prefer DB.
-    if ((~attrDA).Precedence > (~attrDB).Precedence) {
+    if (attrDA.Precedence > attrDB.Precedence) {
         return preferDA;
     }
-    if ((~attrDA).Precedence < (~attrDB).Precedence) {
+    if (attrDA.Precedence < attrDB.Precedence) {
         return preferDB;
     }
 
@@ -179,10 +179,10 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     // Rule 8: Prefer smaller scope.
     // If Scope(DA) < Scope(DB), then prefer DA.  Similarly, if Scope(DA) >
     // Scope(DB), then prefer DB.
-    if ((~attrDA).Scope < (~attrDB).Scope) {
+    if (attrDA.Scope < attrDB.Scope) {
         return preferDA;
     }
-    if ((~attrDA).Scope > (~attrDB).Scope) {
+    if (attrDA.Scope > attrDB.Scope) {
         return preferDB;
     }
 
@@ -195,7 +195,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     //
     // However, applying this rule to IPv4 addresses causes
     // problems (see issues 13283 and 18518), so limit to IPv6.
-    if (DA.To4() == default! && DB.To4() == default!) {
+    if (DA.To4() == nil && DB.To4() == nil) {
         nint commonA = commonPrefixLen(SourceDA, DA);
         nint commonB = commonPrefixLen(SourceDB, DB);
 
@@ -296,7 +296,7 @@ internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
             return ent;
         }
     }
-    return new policyTableEntry(nil);
+    return new policyTableEntry();
 }
 
 // RFC 6724 section 3.1.
@@ -337,10 +337,10 @@ internal static scope classifyScope(netipꓸAddr ip) {
 //
 // See https://tools.ietf.org/html/rfc6724#section-2.2
 internal static nint /*cpl*/ commonPrefixLen(netipꓸAddr a, IP b) {
-    nint cpl = default!;
+    nint cpl = default;
 
     {
-        var b4 = b.To4(); if (b4 != default!) {
+        var b4 = b.To4(); if (b4 != nil) {
             b = b4;
         }
     }
@@ -362,9 +362,9 @@ internal static nint /*cpl*/ commonPrefixLen(netipꓸAddr a, IP b) {
         }
         nint bits = 8;
         var (ab, bb) = (aAsSlice[0], b[0]);
-        while (ᐧ) {
-            ab >>= (int)(1);
-            bb >>= (int)(1);
+        for (;;) {
+            ab >>= 1;
+            bb >>= 1;
             bits--;
             if (ab == bb) {
                 cpl += bits;

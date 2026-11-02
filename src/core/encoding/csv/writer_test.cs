@@ -20,53 +20,53 @@ partial struct writeTestsᴛ1 /*dyn*/ {
     public rune Comma;
 }
 internal static slice<writeTestsᴛ1> writeTests;
-internal static void initᴛwriteTests() { writeTests = new writeTestsᴛ1[]{
-    new(Input: new slice<@string>[]{new @string[]{"abc"u8}.slice()}.slice(), Output: "abc\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"abc"u8}.slice()}.slice(), Output: "abc\r\n"u8, UseCRLF: true),
-    new(Input: new slice<@string>[]{new @string[]{@"""abc"""u8}.slice()}.slice(), Output: @"""""""abc"""""""u8 + "\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{@"a""b"u8}.slice()}.slice(), Output: @"""a""""b"""u8 + "\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{@"""a""b"""u8}.slice()}.slice(), Output: @"""""""a""""b"""""""u8 + "\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{" abc"u8}.slice()}.slice(), Output: @""" abc"""u8 + "\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"abc,def"u8}.slice()}.slice(), Output: @"""abc,def"""u8 + "\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"abc"u8, "def"u8}.slice()}.slice(), Output: "abc,def\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"abc"u8}.slice(), new @string[]{"def"u8}.slice()}.slice(), Output: "abc\ndef\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"abc\ndef"u8}.slice()}.slice(), Output: "\"abc\ndef\"\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"abc\ndef"u8}.slice()}.slice(), Output: "\"abc\r\ndef\"\r\n"u8, UseCRLF: true),
-    new(Input: new slice<@string>[]{new @string[]{"abc\rdef"u8}.slice()}.slice(), Output: "\"abcdef\"\r\n"u8, UseCRLF: true),
-    new(Input: new slice<@string>[]{new @string[]{"abc\rdef"u8}.slice()}.slice(), Output: "\"abc\rdef\"\n"u8, UseCRLF: false),
-    new(Input: new slice<@string>[]{new @string[]{""u8}.slice()}.slice(), Output: "\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{""u8, ""u8}.slice()}.slice(), Output: ",\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{""u8, ""u8, ""u8}.slice()}.slice(), Output: ",,\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{""u8, ""u8, "a"u8}.slice()}.slice(), Output: ",,a\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{""u8, "a"u8, ""u8}.slice()}.slice(), Output: ",a,\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{""u8, "a"u8, "a"u8}.slice()}.slice(), Output: ",a,a\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"a"u8, ""u8, ""u8}.slice()}.slice(), Output: "a,,\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"a"u8, ""u8, "a"u8}.slice()}.slice(), Output: "a,,a\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"a"u8, "a"u8, ""u8}.slice()}.slice(), Output: "a,a,\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{"a"u8, "a"u8, "a"u8}.slice()}.slice(), Output: "a,a,a\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{@"\."u8}.slice()}.slice(), Output: "\"\\.\"\n"u8),
-    new(Input: new slice<@string>[]{new @string[]{((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"u8}.slice()}.slice(), Output: ((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
-    new(Input: new slice<@string>[]{new @string[]{((@string)(new byte[]{0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"u8}.slice()}.slice(), Output: ((@string)(new byte[]{0x22, 0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x22, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
-    new(Input: new slice<@string>[]{new @string[]{"a"u8, "a"u8, ""u8}.slice()}.slice(), Output: "a|a|\n"u8, Comma: (rune)'|'),
-    new(Input: new slice<@string>[]{new @string[]{","u8, ","u8, ""u8}.slice()}.slice(), Output: ",|,|\n"u8, Comma: (rune)'|'),
-    new(Input: new slice<@string>[]{new @string[]{"foo"u8}.slice()}.slice(), Comma: (rune)'"', Error: errInvalidDelim)
-}.slice(); }
+internal static void initᴛwriteTests() { writeTests = slice<writeTestsᴛ1>([
+    new(Input: slice<slice<@string>>([slice<@string>(["abc"])]), Output: "abc\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc"])]), Output: "abc\r\n", UseCRLF: true),
+    new(Input: slice<slice<@string>>([slice<@string>([@"""abc"""])]), Output: @"""""""abc"""""""u8 + "\n"u8),
+    new(Input: slice<slice<@string>>([slice<@string>([@"a""b"])]), Output: @"""a""""b"""u8 + "\n"u8),
+    new(Input: slice<slice<@string>>([slice<@string>([@"""a""b"""])]), Output: @"""""""a""""b"""""""u8 + "\n"u8),
+    new(Input: slice<slice<@string>>([slice<@string>([" abc"])]), Output: @""" abc"""u8 + "\n"u8),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc,def"])]), Output: @"""abc,def"""u8 + "\n"u8),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc", "def"])]), Output: "abc,def\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc"]), slice<@string>(["def"])]), Output: "abc\ndef\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc\ndef"])]), Output: "\"abc\ndef\"\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc\ndef"])]), Output: "\"abc\r\ndef\"\r\n", UseCRLF: true),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc\rdef"])]), Output: "\"abcdef\"\r\n", UseCRLF: true),
+    new(Input: slice<slice<@string>>([slice<@string>(["abc\rdef"])]), Output: "\"abc\rdef\"\n", UseCRLF: false),
+    new(Input: slice<slice<@string>>([slice<@string>([""])]), Output: "\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["", ""])]), Output: ",\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["", "", ""])]), Output: ",,\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["", "", "a"])]), Output: ",,a\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["", "a", ""])]), Output: ",a,\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["", "a", "a"])]), Output: ",a,a\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["a", "", ""])]), Output: "a,,\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["a", "", "a"])]), Output: "a,,a\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["a", "a", ""])]), Output: "a,a,\n"),
+    new(Input: slice<slice<@string>>([slice<@string>(["a", "a", "a"])]), Output: "a,a,a\n"),
+    new(Input: slice<slice<@string>>([slice<@string>([@"\."])]), Output: "\"\\.\"\n"),
+    new(Input: slice<slice<@string>>([slice<@string>([((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"])]), Output: ((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
+    new(Input: slice<slice<@string>>([slice<@string>([((@string)(new byte[]{0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"])]), Output: ((@string)(new byte[]{0x22, 0x2c, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x22, 0x2c, 0x61, 0x6b, 0x74, 0x61, 0x75, 0x0a}))),
+    new(Input: slice<slice<@string>>([slice<@string>(["a", "a", ""])]), Output: "a|a|\n", Comma: '|'),
+    new(Input: slice<slice<@string>>([slice<@string>([",", ",", ""])]), Output: ",|,|\n", Comma: '|'),
+    new(Input: slice<slice<@string>>([slice<@string>(["foo"])]), Comma: '"', Error: errInvalidDelim)
+]); }
 
-public static void TestWrite(ж<testing.T> Ꮡt) {
+public static void TestWrite(ж<testing.T> t) {
     foreach (var (n, tt) in writeTests) {
-        var b = Ꮡ(new strings.Builder(nil));
+        var b = Ꮡ(new strings.Builder());
         var f = NewWriter(new csv_test_package.strings_BuilderжWriter(b));
-        f.Value.UseCRLF = tt.UseCRLF;
+        f.UseCRLF = tt.UseCRLF;
         if (tt.Comma != 0) {
-            f.Value.Comma = tt.Comma;
+            f.Comma = tt.Comma;
         }
         var err = f.WriteAll(tt.Input);
         if (!AreEqual(err, tt.Error)) {
-            Ꮡt.Errorf("Unexpected error:\ngot  %v\nwant %v"u8, err, tt.Error);
+            t.Errorf("Unexpected error:\ngot  %v\nwant %v", err, tt.Error);
         }
         @string @out = b.String();
         if (@out != tt.Output) {
-            Ꮡt.Errorf("#%d: out=%q want %q"u8, n, @out, tt.Output);
+            t.Errorf("#%d: out=%q want %q", n, @out, tt.Output);
         }
     }
 }
@@ -75,7 +75,8 @@ internal partial struct errorWriter {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testˢ = "Test"u8;
+internal static ref readonly @string testˢ => ref testˢᵇ;
+private static readonly @string testˢᵇ = "Test"u8;
 
 internal static (nint, error) Write(this errorWriter e, slice<byte> b) {
     return (0, errors.New(testˢ));
@@ -84,40 +85,40 @@ internal static (nint, error) Write(this errorWriter e, slice<byte> b) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object errorShouldNotBeNilˢ = (@string)"Error should not be nil"u8;
 
-public static void TestError(ж<testing.T> Ꮡt) {
-    var b = Ꮡ(new bytes.Buffer(nil));
+public static void TestError(ж<testing.T> t) {
+    var b = Ꮡ(new bytes.Buffer());
     var f = NewWriter(new csv_test_package.bytes_BufferжWriter(b));
-    f.Write(new @string[]{"abc"u8}.slice());
+    f.Write(slice<@string>(["abc"]));
     f.Flush();
     var err = f.Error();
 
-    if (err != default!) {
-        Ꮡt.Errorf("Unexpected error: %s\n"u8, err);
+    if (err != nil) {
+        t.Errorf("Unexpected error: %s\n", err);
     }
 
-    f = NewWriter(new errorWriter(nil));
-    f.Write(new @string[]{"abc"u8}.slice());
+    f = NewWriter(new errorWriter());
+    f.Write(slice<@string>(["abc"]));
     f.Flush();
     err = f.Error();
 
-    if (err == default!) {
-        Ꮡt.Error(errorShouldNotBeNilˢ);
+    if (err == nil) {
+        t.Error(errorShouldNotBeNilˢ);
     }
 }
 
-internal static slice<slice<@string>> benchmarkWriteData = new slice<@string>[]{
-    new @string[]{"abc"u8, "def"u8, "12356"u8, "1234567890987654311234432141542132"u8}.slice(),
-    new @string[]{"abc"u8, "def"u8, "12356"u8, "1234567890987654311234432141542132"u8}.slice(),
-    new @string[]{"abc"u8, "def"u8, "12356"u8, "1234567890987654311234432141542132"u8}.slice()
-}.slice();
+internal static slice<slice<@string>> benchmarkWriteData = slice<slice<@string>>([
+    slice<@string>(["abc", "def", "12356", "1234567890987654311234432141542132"]),
+    slice<@string>(["abc", "def", "12356", "1234567890987654311234432141542132"]),
+    slice<@string>(["abc", "def", "12356", "1234567890987654311234432141542132"])
+]);
 
 public static void BenchmarkWrite(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        var w = NewWriter(new csv_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer(nil))));
+        var w = NewWriter(new csv_test_package.bytes_BufferжWriter(Ꮡ(new bytes.Buffer())));
         var err = w.WriteAll(benchmarkWriteData);
-        if (err != default!) {
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
         w.Flush();

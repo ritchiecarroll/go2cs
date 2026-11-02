@@ -7,19 +7,8 @@
 global using static global::go.testing.synctest_package;
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -43,7 +32,13 @@ using static global::go.testing.synctest_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.net.http_package.Request))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Response))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,9 +48,9 @@ using static global::go.testing.synctest_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/synctest/example_test.go", "example_test.cs", "ABYskoKSkoKUgriCgoKCpoK4gpS4goK4goLKgoKCyoKkkoK2goKAgsiCgoCCxAAKBoLqgpKkAAkWgpKCgoKClMqCgqyygoKAktqCgoCSyNg=", "23-31:1;25-28:1.1;35-43:1;37-39:1.1;47-71:1;54-56:1.1;75-94:1;98-159:1;109-111:1.1;119-128:1.2")]
-[assembly: go.GoPositionMap("testing/synctest/helper_test.go", "helper_test.cs", "AAsYsoI=")]
-[assembly: go.GoPositionMap("testing/synctest/synctest_test.go", "synctest_test.cs", "ABYoogAMCIKCggANEIKCggANEIKCggALEoKCggANDIKCggAEEoKCgoK2uJKCpoIACAiCgoKCgoKmgoCS2oCS+IKigqLmgqKCovaCooK0AA0GgoKCAAQSwoCCgIK2xOSCgoKUgoKCgoKCgoKCuIKCgII=", "21-22:1;26-30:1;27-29:1.1;37-41:1;38-40:1.1;48-52:1;49-51:1.1;60-64:1;61-63:1.1;69-73:1;70-72:1.1;82-95:1;84-88:1.1;91-94:1.2;103-114:1;104-108:1.1;123-126:1;130-133:1;137-141:1;139-140:1.1;145-149:1;146-148:1.1;185-189:1")]
+[assembly: GoPositionMap("testing/synctest/example_test.go", "example_test.cs", "ABYskoKCkoKUgriCgoKCpoK4gpS4goK4goLKgoKCyoKkkoK2goKAgsiCgoCCxAAPBoLqgpKkAAkWgpKCgoKClMqCgqyygoKAktqCgoCSyNg=", "23-31:1;25-28:1.1;35-43:1;37-39:1.1;47-71:1;54-56:1.1;75-94:1;98-159:1;109-111:1.1;119-128:1.2", "", "", "85:25,132:25,134:25,169:29")]
+[assembly: GoPositionMap("testing/synctest/helper_test.go", "helper_test.cs", "AAsYsoI=")]
+[assembly: GoPositionMap("testing/synctest/synctest_test.go", "synctest_test.cs", "ABYoogANCIKCggAOEIKCggAOEIKCggAMEoKCggAODIKCggAEEoKCgoK2uJKCpoIACwiCgoKCgoKmgoCS2oCSAAgIgqKCovaCooKiAAkGgqKCtAAPBoKCggAEEsKAgoCCtsQACASCgoKUgoKCgoKCgoKCuIKCgII=", "21-22:1;26-30:1;27-29:1.1;37-41:1;38-40:1.1;48-52:1;49-51:1.1;60-64:1;61-63:1.1;69-73:1;70-72:1.1;82-95:1;84-88:1.1;91-94:1.2;103-114:1;104-108:1.1;123-126:1;130-133:1;137-141:1;139-140:1.1;145-149:1;146-148:1.1;185-189:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

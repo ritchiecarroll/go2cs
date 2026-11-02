@@ -11,10 +11,12 @@ using static go.net.http.httptrace_package;
 partial class httptrace_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string netˢ = "net"u8;
-internal static readonly @string addrˢ = "addr"u8;
+internal static ref readonly @string netˢ => ref netˢᵇ;
+private static readonly @string netˢᵇ = "net"u8;
+internal static ref readonly @string addrˢ => ref addrˢᵇ;
+private static readonly @string addrˢᵇ = "addr"u8;
 
-public static void TestWithClientTrace(ж<testing.T> Ꮡt) {
+public static void TestWithClientTrace(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Action<@string, @string> connectStart(byte b) => (@string network, @string addr) => {
             Ꮡbuf.WriteByte(b);
@@ -22,21 +24,21 @@ public static void TestWithClientTrace(ж<testing.T> Ꮡt) {
 
     var ctx = context.Background();
     var oldtrace = Ꮡ(new ClientTrace(
-        ConnectStart: connectStart((rune)'O')
+        ConnectStart: connectStart((byte)'O')
     ));
     ctx = WithClientTrace(ctx, oldtrace);
     var newtrace = Ꮡ(new ClientTrace(
-        ConnectStart: connectStart((rune)'N')
+        ConnectStart: connectStart((byte)'N')
     ));
     ctx = WithClientTrace(ctx, newtrace);
     var trace = ContextClientTrace(ctx);
 
     buf.Reset();
-    (~trace).ConnectStart(netˢ, addrˢ);
+    trace.ConnectStart(netˢ, addrˢ);
     {
         @string got = buf.String();
-        @string want = "NO"u8; if (got != want) {
-            Ꮡt.Errorf("got %q; want %q"u8, got, want);
+        @string want = "NO"; if (got != want) {
+            t.Errorf("got %q; want %q", got, want);
         }
     }
 }
@@ -46,50 +48,49 @@ internal partial struct TestCompose_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestCompose(ж<testing.T> Ꮡt) {
+public static void TestCompose(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    nint testNum = default!;
+    nint testNum = default;
 
     Action<@string, @string> connectStart(byte b) => (@string network, @string addr) => {
             if (addr != "addr"u8) {
-                Ꮡt.Errorf(@"%d. args for %q case = %q, %q; want addr of ""addr"""u8, testNum, b, network, addr);
+                t.Errorf(@"%d. args for %q case = %q, %q; want addr of ""addr""", testNum, b, network, addr);
             }
             Ꮡbuf.WriteByte(b);
         };
 
     var tests = new array<TestCompose_tests>(3){
         [0] = new(
-            want: "T"u8,
+            want: "T",
             trace: Ꮡ(new ClientTrace(
-                ConnectStart: connectStart((rune)'T')
+                ConnectStart: connectStart((byte)'T')
             ))
         ),
         [1] = new(
-            want: "TO"u8,
+            want: "TO",
             trace: Ꮡ(new ClientTrace(
-                ConnectStart: connectStart((rune)'T')
+                ConnectStart: connectStart((byte)'T')
             )),
-            old: Ꮡ(new ClientTrace(ConnectStart: connectStart((rune)'O')))
+            old: Ꮡ(new ClientTrace(ConnectStart: connectStart((byte)'O')))
         ),
         [2] = new(
-            want: "O"u8,
-            trace: Ꮡ(new ClientTrace(nil)),
-            old: Ꮡ(new ClientTrace(ConnectStart: connectStart((rune)'O')))
+            want: "O",
+            trace: Ꮡ(new ClientTrace()),
+            old: Ꮡ(new ClientTrace(ConnectStart: connectStart((byte)'O')))
         )
     };
     foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
         testNum = i;
         buf.Reset();
 
-        ref var tr = ref heap<global::go.net.http.httptrace_package.ClientTrace>(out var Ꮡtr);
-        tr = tt.trace.Value;
+        ref var tr = ref heap<global::go.net.http.httptrace_package.ClientTrace>(tt.trace.Value, out var Ꮡtr);
         Ꮡtr.compose(tt.old);
-        if (tr.ConnectStart != default!) {
+        if (tr.ConnectStart != nil) {
             tr.ConnectStart(netˢ, addrˢ);
         }
         {
             @string got = buf.String(); if (got != tt.want) {
-                Ꮡt.Errorf("%d. got = %q; want %q"u8, i, got, tt.want);
+                t.Errorf("%d. got = %q; want %q", i, got, tt.want);
             }
         }
     }

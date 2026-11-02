@@ -19,11 +19,11 @@ partial struct truncateWriter {
 }
 
 internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (t.n <= 0) {
-        return (len(p), default!);
+        return (len(p), default);
     }
     // real write
     n = len(p);
@@ -32,7 +32,7 @@ internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte>
     }
     (n, err) = t.w.Write(p.slice(0, n));
     t.n -= (int64)n;
-    if (err == default!) {
+    if (err == nil) {
         n = len(p);
     }
     return (n, err);

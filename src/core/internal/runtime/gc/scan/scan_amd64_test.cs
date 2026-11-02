@@ -14,11 +14,11 @@ using go.@internal.runtime.gc;
 
 partial class scan_test_package {
 
-public static partial void TestScanSpanPackedAVX512(ж<testing.T> Ꮡt) {
+public static partial void TestScanSpanPackedAVX512(ж<testing.T> t) {
     if (!scan.CanAVX512()) {
-        Ꮡt.Skip(noAvx512ˢ);
+        t.Skip(noAvx512ˢ);
     }
-    testScanSpanPacked(Ꮡt, new Func<@unsafe.Pointer, ж<uintptr>, ж<gc.ObjMask>, uintptr, ж<gc.PtrMask>, int32>(scan.ScanSpanPackedAVX512));
+    testScanSpanPacked(t, new Func<@unsafe.Pointer, ж<uintptr>, ж<gc.ObjMask>, uintptr, ж<gc.PtrMask>, int32>(scan.ScanSpanPackedAVX512));
 }
 
 } // end scan_test_package

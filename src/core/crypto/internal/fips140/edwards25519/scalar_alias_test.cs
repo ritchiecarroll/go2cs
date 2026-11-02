@@ -10,7 +10,7 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 
 partial class edwards25519_internal_test_package {
 
-public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
+public static void TestScalarAliasing(ж<testing.T> t) {
     bool checkAliasingOneArg(Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>> f, global::go.crypto.@internal.fips140.edwards25519_package.Scalar vʗp, global::go.crypto.@internal.fips140.edwards25519_package.Scalar xʗp) {
         ref var v = ref heap(vʗp.ΔClone(), out var Ꮡv);
         ref var x = ref heap(xʗp.ΔClone(), out var Ꮡx);
@@ -43,7 +43,7 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
         var x1 = x.ΔClone();
         var y1 = y.ΔClone();
         ref var v1 = ref heap<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(out var Ꮡv1);
-        v1 = new Scalar(nil);
+        v1 = new Scalar();
 
         // Calculate a reference f(x, y) without aliasing.
         {
@@ -114,44 +114,44 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
 
         var checkAliasingTwoArgsʗ6 = checkAliasingTwoArgs;
     foreach (var (name, f) in new map<@string, any>{
-        ["Negate"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x) => {
+        ["Negate"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x) => {
             v = v.ΔClone();
             x = x.ΔClone();
             return checkAliasingOneArgʗ1(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Negate)), v, x);
         },
-        ["Multiply"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
+        ["Multiply"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
             return checkAliasingTwoArgsʗ1(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Multiply)), v, x, y);
         },
-        ["Add"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
+        ["Add"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
             return checkAliasingTwoArgsʗ2(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Add)), v, x, y);
         },
-        ["Subtract"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
+        ["Subtract"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
             return checkAliasingTwoArgsʗ3(((Func<ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>>)(global::go.crypto.@internal.fips140.edwards25519_package.Subtract)), v, x, y);
         },
-        ["MultiplyAdd1"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
+        ["MultiplyAdd1"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
             ref var @fixed = ref heap(@fixedʗp.ΔClone(), out var Ꮡfixed);
             return checkAliasingTwoArgsʗ4((ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> vΔ1, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> xΔ1, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> yΔ1) => vΔ1.MultiplyAdd(Ꮡfixed, xΔ1, yΔ1), v, x, y);
         },
-        ["MultiplyAdd2"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
+        ["MultiplyAdd2"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
             ref var @fixed = ref heap(@fixedʗp.ΔClone(), out var Ꮡfixed);
             return checkAliasingTwoArgsʗ5((ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> vΔ1, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> xΔ1, ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> yΔ1) => vΔ1.MultiplyAdd(xΔ1, Ꮡfixed, yΔ1), v, x, y);
         },
-        ["MultiplyAdd3"u8] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
+        ["MultiplyAdd3"] = bool (global::go.crypto.@internal.fips140.edwards25519_package.Scalar v, global::go.crypto.@internal.fips140.edwards25519_package.Scalar x, global::go.crypto.@internal.fips140.edwards25519_package.Scalar y, global::go.crypto.@internal.fips140.edwards25519_package.Scalar @fixedʗp) => {
             v = v.ΔClone();
             x = x.ΔClone();
             y = y.ΔClone();
@@ -160,8 +160,8 @@ public static void TestScalarAliasing(ж<testing.T> Ꮡt) {
         }
     }) {
         var err = quick.Check(f, quickCheckConfig(32));
-        if (err != default!) {
-            Ꮡt.Errorf("%v: %v"u8, name, err);
+        if (err != nil) {
+            t.Errorf("%v: %v", name, err);
         }
     }
 }

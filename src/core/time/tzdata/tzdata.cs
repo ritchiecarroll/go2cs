@@ -21,7 +21,7 @@ namespace go.time;
 // The test for this package is time/tzdata_test.go.
 using errors = errors_package;
 using syscall = syscall_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 
 partial class tzdata_package {
 
@@ -53,7 +53,8 @@ internal static nint get2s(@string s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string corruptEmbeddedTzdataˢ = "corrupt embedded tzdata"u8;
+private static ref readonly @string corruptEmbeddedTzdataˢ => ref corruptEmbeddedTzdataˢᵇ;
+private static readonly @string corruptEmbeddedTzdataˢᵇ = "corrupt embedded tzdata"u8;
 
 // loadFromEmbeddedTZData returns the contents of the file with the given
 // name in an uncompressed zip file, where the contents of the file can
@@ -102,7 +103,7 @@ internal static (@string, error) loadFromEmbeddedTZData(@string name) {
         }
         xlen = get2s(z.slice(idx + 28));
         idx += 30 + namelen + xlen;
-        return (z.slice(idx, idx + size), default!);
+        return (z.slice(idx, idx + size), default);
     }
 
     return ("", syscall.ENOENT);

@@ -11,38 +11,40 @@ partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestLongSleepsˢ = (@string)"skipping test: long sleeps"u8;
-internal static readonly @string windowsUpdateGOMAXPROCSˢ = "WindowsUpdateGOMAXPROCS"u8;
-internal static readonly @string skipˢ = "SKIP"u8;
+internal static ref readonly @string windowsUpdateGOMAXPROCSˢ => ref windowsUpdateGOMAXPROCSˢᵇ;
+private static readonly @string windowsUpdateGOMAXPROCSˢᵇ = "WindowsUpdateGOMAXPROCS"u8;
+internal static ref readonly @string skipˢ => ref skipˢᵇ;
+private static readonly @string skipˢᵇ = "SKIP"u8;
 
-public static void TestGOMAXPROCSUpdate(ж<testing.T> Ꮡt) {
+public static void TestGOMAXPROCSUpdate(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingTestLongSleepsˢ);
+        t.Skip(skippingTestLongSleepsˢ);
     }
 
-    @string got = runTestProg(Ꮡt, testprogˢ, windowsUpdateGOMAXPROCSˢ);
+    @string got = runTestProg(t, testprogˢ, windowsUpdateGOMAXPROCSˢ);
     if (strings.Contains(got, skipˢ)) {
-        Ꮡt.Skip(got);
+        t.Skip(got);
     }
-    if (!strings.Contains(got, "OK"u8)) {
-        Ꮡt.Fatalf("output got %q want OK"u8, got);
+    if (!strings.Contains(got, "OK")) {
+        t.Fatalf("output got %q want OK", got);
     }
 }
 
-public static void TestCgroupGOMAXPROCSDontUpdate(ж<testing.T> Ꮡt) {
+public static void TestCgroupGOMAXPROCSDontUpdate(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingTestLongSleepsˢ);
+        t.Skip(skippingTestLongSleepsˢ);
     }
 
     // Two ways to disable updates: explicit GOMAXPROCS or GODEBUG for
     // update feature.
-    foreach (var (_, v) in new @string[]{"GOMAXPROCS=4"u8, "GODEBUG=updatemaxprocs=0"u8}.slice()) {
-        Ꮡt.Run(v, (ж<testing.T> tΔ1) => {
-            @string got = runTestProg(tΔ1, testprogˢ, "WindowsDontUpdateGOMAXPROCS"u8, v);
+    foreach (var (_, v) in slice<@string>(["GOMAXPROCS=4", "GODEBUG=updatemaxprocs=0"])) {
+        t.Run(v, (ж<testing.T> tΔ1) => {
+            @string got = runTestProg(tΔ1, testprogˢ, "WindowsDontUpdateGOMAXPROCS", v);
             if (strings.Contains(got, skipˢ)) {
                 tΔ1.Skip(got);
             }
-            if (!strings.Contains(got, "OK"u8)) {
-                tΔ1.Fatalf("output got %q want OK"u8, got);
+            if (!strings.Contains(got, "OK")) {
+                tΔ1.Fatalf("output got %q want OK", got);
             }
         });
     }

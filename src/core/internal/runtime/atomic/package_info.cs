@@ -45,7 +45,20 @@ using static go.@internal.runtime.atomic_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Bool))]
+[assembly: GoFieldAccess(typeof(Float64))]
+[assembly: GoFieldAccess(typeof(Pointer<>))]
+[assembly: GoFieldAccess(typeof(Uint32))]
+[assembly: GoFieldAccess(typeof(Uint64))]
+[assembly: GoFieldAccess(typeof(Uint8))]
+[assembly: GoFieldAccess(typeof(Uintptr))]
+[assembly: GoFieldAccess(typeof(UnsafePointer))]
+[assembly: GoFieldAccess(typeof(go.@internal.runtime.atomic_package.Int32))]
+[assembly: GoFieldAccess(typeof(go.@internal.runtime.atomic_package.Int64))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,12 +68,12 @@ using static go.@internal.runtime.atomic_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/atomic/atomic_amd64.go", "atomic_amd64.cs", "ABpopqampqamAAQSpqampqampqamqsampqampqas")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/stubs.go", "stubs.cs", "AAoYpqampqampqamqsampqam")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABIosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFrI=")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAgkAAkCAAIYAAkC")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/unaligned.go", "unaligned.cs", "/oI=")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/xchg8.go", "xchg8.cs", "AAsapIKCgpSCgpSClJQ=")]
+[assembly: GoPositionMap("internal/runtime/atomic/atomic_amd64.go", "atomic_amd64.cs", "ABpopqampqamAAQSpqampqampqamqsampqampqas")]
+[assembly: GoPositionMap("internal/runtime/atomic/stubs.go", "stubs.cs", "AAoYpqampqampqamqsampqam")]
+[assembly: GoPositionMap("internal/runtime/atomic/types.go", "types.cs", "ABIosqyyAAIQ0q7CAAIU8gANIrKssgACENKuwgACFPIAChyyrLIAAhTyAAIU8gAKHLKssoKClAAKHLIAAhgACQKssgACGAAJAgACENIAAhoACgKuwgACFPIAAhTyAAIU8gANIrKssgACENKuwgACFPIAChyyAAIYAAkCrLIAAhgACQIAAhDSrsIAAhTyAAwgsoKssgAQKLIAAhgACQKokqwABBwADAKssqYABhSyAAIYAAkCrLIAAh4ADAKuwgAKFrI=")]
+[assembly: GoPositionMap("internal/runtime/atomic/types_64bit.go", "types_64bit.cs", "AAgkAAkCAAIYAAkC")]
+[assembly: GoPositionMap("internal/runtime/atomic/unaligned.go", "unaligned.cs", "/oI=")]
+[assembly: GoPositionMap("internal/runtime/atomic/xchg8.go", "xchg8.cs", "AAsapIKCgpSCgpSClJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

@@ -23,30 +23,28 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
         var (entry, ok) = Ꮡwcc.of(weakCertCache.ᏑMap).Load((@string)der); if (ok) {
             {
                 var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
-                    return (v, default!);
+                    return (v, default);
                 }
             }
         }
     }
 
     var (cert, err) = Δx509.ParseCertificate(der);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    ref var wp = ref heap<weak.Pointer<Δx509.Certificate>>(out var Ꮡwp);
-    wp = weak.Make<Δx509.Certificate>(cert);
+    ref var wp = ref heap<weak.Pointer<Δx509.Certificate>>(weak.Make<Δx509.Certificate>(cert), out var Ꮡwp);
     {
-        var (entry, loaded) = Ꮡwcc.of(weakCertCache.ᏑMap).LoadOrStore((@string)der, wp); if (!loaded){
+        var (entry, loaded) = Ꮡwcc.of(weakCertCache.ᏑMap).LoadOrStore((@string)der, wp); if (!loaded) {
             var derʗ1 = der;
             var entryʗ1 = entry;
             runtime.AddCleanup(cert, (any _) => {
                 Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ1, entryʗ1);
             }, (any)((@string)der), new object?[] { Ꮡwcc, entry });
-        } else 
-        {
-            var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil){
-                return (v, default!);
+        } else {
+            var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {
+                return (v, default);
             } else {
                 if (Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndSwap((@string)der, entry, wp)) {
                     var derʗ2 = der;
@@ -58,7 +56,7 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
             }
         }
     }
-    return (cert, default!);
+    return (cert, default);
 }
 
 internal static ж<weakCertCache> globalCertCache = @new<weakCertCache>();

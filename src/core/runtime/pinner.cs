@@ -9,7 +9,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(specialPinCounter))]
 partial class runtime_package {
 
 // A Pinner is a set of Go objects each pinned to a fixed location in memory. The
@@ -52,7 +51,7 @@ partial struct pinner {
 internal static void unpin(this ж<pinner> Ꮡp) {
     ref var Δp = ref Ꮡp.DerefOrNull();
 
-    if (Ꮡp == nil || Δp.refs == default!) {
+    if (Ꮡp == nil || Δp.refs == nil) {
         return;
     }
     foreach (var i in range(Δp.refs)) {
@@ -66,11 +65,13 @@ internal static void unpin(this ж<pinner> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimePinnerArgumentIsˢ = "runtime.Pinner: argument is nil"u8;
-internal static readonly @string runtimePinnerObjectWasˢ = "runtime.Pinner: object was allocated into an arena"u8;
+internal static ref readonly @string runtimePinnerArgumentIsˢ => ref runtimePinnerArgumentIsˢᵇ;
+private static readonly @string runtimePinnerArgumentIsˢᵇ = "runtime.Pinner: argument is nil"u8;
+internal static ref readonly @string runtimePinnerObjectWasˢ => ref runtimePinnerObjectWasˢᵇ;
+private static readonly @string runtimePinnerObjectWasˢᵇ = "runtime.Pinner: object was allocated into an arena"u8;
 
-internal static @unsafe.Pointer pinnerGetPtr(ж<any> Ꮡi) {
-    var e = efaceOf(Ꮡi);
+internal static @unsafe.Pointer pinnerGetPtr(ж<any> i) {
+    var e = efaceOf(i);
     var etyp = e.Value._type;
     if (etyp == nil) {
         throw panic(((errorString)(@string)runtimePinnerArgumentIsˢ));
@@ -90,8 +91,10 @@ internal static @unsafe.Pointer pinnerGetPtr(ж<any> Ꮡi) {
 // go2cs generated this placeholder — func isPinned is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string triedToUnpinNonGoPointerˢ = "tried to unpin non-Go pointer"u8;
-internal static readonly @string runtimePinnerObjectˢ = "runtime.Pinner: object already unpinned"u8;
+internal static ref readonly @string triedToUnpinNonGoPointerˢ => ref triedToUnpinNonGoPointerˢᵇ;
+private static readonly @string triedToUnpinNonGoPointerˢᵇ = "tried to unpin non-Go pointer"u8;
+internal static ref readonly @string runtimePinnerObjectˢ => ref runtimePinnerObjectˢᵇ;
+private static readonly @string runtimePinnerObjectˢᵇ = "runtime.Pinner: object already unpinned"u8;
 
 // setPinned marks or unmarks a Go pointer as pinned, when the ptr is a Go pointer.
 // It will be ignored while trying to pin a non-Go pointer.
@@ -116,7 +119,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
 
     var objIndex = span.objIndex((uintptr)ptr);
 
-    @lock(span.of(mspan.Ꮡspeciallock)); // guard against concurrent calls of setPinned on same span
+    @lock(span.Ꮡspeciallock); // guard against concurrent calls of setPinned on same span
 
     var pinnerBits = span.getPinnerBits();
     if (pinnerBits == nil) {
@@ -124,15 +127,15 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
         span.setPinnerBits(pinnerBits);
     }
     var pinState = pinnerBits.ofObject(objIndex);
-    if (pin){
-        if (pinState.isPinned()){
+    if (pin) {
+        if (pinState.isPinned()) {
             // multiple pins on same object, set multipin bit
             pinState.setMultiPinned(true);
             // and increase the pin counter
             // TODO(mknyszek): investigate if systemstack is necessary here
             var spanʗ1 = span;
             systemstack(() => {
-                var offset = objIndex * (~spanʗ1).elemsize;
+                var offset = objIndex * spanʗ1.elemsize;
                 spanʗ1.incPinCounter(offset);
             });
         } else {
@@ -141,13 +144,13 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
         }
     } else {
         // unpin
-        if (pinState.isPinned()){
-            if (pinState.isMultiPinned()){
-                bool exists = default!;
+        if (pinState.isPinned()) {
+            if (pinState.isMultiPinned()) {
+                bool exists = default;
                 // TODO(mknyszek): investigate if systemstack is necessary here
                 var spanʗ2 = span;
                 systemstack(() => {
-                    var offset = objIndex * (~spanʗ2).elemsize;
+                    var offset = objIndex * spanʗ2.elemsize;
                     exists = spanʗ2.decPinCounter(offset);
                 });
                 if (!exists) {
@@ -163,7 +166,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
             @throw(runtimePinnerObjectˢ);
         }
     }
-    unlock(span.of(mspan.Ꮡspeciallock));
+    unlock(span.Ꮡspeciallock);
     releasem(ref (mp).DerefOrNull());
     return true;
 }
@@ -198,9 +201,9 @@ internal static void setMultiPinned(this ref pinState v, bool val) {
 internal static void set(this ref pinState v, bool val, bool multipin) {
     var mask = v.mask;
     if (multipin) {
-        mask <<= (int)(1);
+        mask <<= 1;
     }
-    if (val){
+    if (val) {
         atomic.Or8(v.bytep, mask);
     } else {
         atomic.And8(v.bytep, (uint8)((uint8)(~mask)));
@@ -235,11 +238,11 @@ internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
 //
 //go:nosplit
 internal static ж<pinnerBits> getPinnerBits(this ж<mspan> Ꮡs) {
-    return (ж<pinnerBits>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.of(mspan.ᏑpinnerBits))));
+    return (ж<pinnerBits>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits)));
 }
 
-internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Ꮡp) {
-    atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.of(mspan.ᏑpinnerBits)), @unsafe.Pointer.FromPinnedBox(Ꮡp));
+internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> Δp) {
+    atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits), @unsafe.Pointer.FromPinnedBox(Δp));
 }
 
 // refreshPinnerBits replaces pinnerBits with a fresh copy in the arenas for the
@@ -267,7 +270,7 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
         }
     }
 
-    if (hasPins){
+    if (hasPins) {
         var newPinnerBits = s.newPinnerBits();
         memmove(@unsafe.Pointer.FromPinnedBox(newPinnerBits.of(pinnerBits.Ꮡx)), @unsafe.Pointer.FromPinnedBox(Δp.of(pinnerBits.Ꮡx)), bytes);
         Ꮡs.setPinnerBits(newPinnerBits);
@@ -279,12 +282,12 @@ internal static void refreshPinnerBits(this ж<mspan> Ꮡs) {
 // incPinCounter is only called for multiple pins of the same object and records
 // the _additional_ pins.
 internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
-    ж<specialPinCounter> rec = default!;
+    ж<specialPinCounter> rec = default;
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
-    if (!exists){
-        @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        rec = (ж<specialPinCounter>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialPinCounterAlloc).alloc());
-        unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
+    if (!exists) {
+        @lock(Ꮡmheap_.Ꮡspeciallock);
+        rec = (ж<specialPinCounter>)(uintptr)(Ꮡmheap_.ᏑspecialPinCounterAlloc.alloc());
+        unlock(Ꮡmheap_.Ꮡspeciallock);
         // splice in record, fill in offset.
         rec.special.offset = offset;
         rec.special.kind = _KindSpecialPinCounter;
@@ -298,7 +301,8 @@ internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimePinnerDecreasedˢ = "runtime.Pinner: decreased non-existing pin counter"u8;
+internal static ref readonly @string runtimePinnerDecreasedˢ => ref runtimePinnerDecreasedˢᵇ;
+private static readonly @string runtimePinnerDecreasedˢᵇ = "runtime.Pinner: decreased non-existing pin counter"u8;
 
 // decPinCounter decreases the counter. If the counter reaches 0, the counter
 // special is deleted and false is returned. Otherwise true is returned.
@@ -316,9 +320,9 @@ internal static bool decPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
         if (span.specials == nil) {
             spanHasNoSpecials(Ꮡspan);
         }
-        @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        Ꮡmheap_.of(mheap.ᏑspecialPinCounterAlloc).free(@unsafe.Pointer.FromPinnedBox(counter));
-        unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
+        @lock(Ꮡmheap_.Ꮡspeciallock);
+        Ꮡmheap_.ᏑspecialPinCounterAlloc.free(@unsafe.Pointer.FromPinnedBox(counter));
+        unlock(Ꮡmheap_.Ꮡspeciallock);
         return false;
     }
     return true;
@@ -329,7 +333,7 @@ internal static bool decPinCounter(this ж<mspan> Ꮡspan, uintptr offset) {
 // to be able to test that the GC panics when a pinned pointer is leaking, this
 // panic function is a variable, that can be overwritten by a test.
 internal static Action pinnerLeakPanic = () => {
-    throw panic(((errorString)(@string)"runtime.Pinner: found leaking pinned pointer; forgot to call Unpin()?"u8));
+    throw panic(((errorString)(@string)"runtime.Pinner: found leaking pinned pointer; forgot to call Unpin()?"));
 };
 
 } // end runtime_package

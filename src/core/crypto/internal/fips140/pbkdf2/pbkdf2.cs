@@ -22,8 +22,10 @@ internal static nint divRoundUp(nint x, nint y) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pkbdf2KeyLengthMustBeˢ = "pkbdf2: keyLength must be larger than 0"u8;
-private static readonly @string pbkdf2KeyLengthTooLongˢ = "pbkdf2: keyLength too long"u8;
+private static ref readonly @string pkbdf2KeyLengthMustBeˢ => ref pkbdf2KeyLengthMustBeˢᵇ;
+private static readonly @string pkbdf2KeyLengthMustBeˢᵇ = "pkbdf2: keyLength must be larger than 0"u8;
+private static ref readonly @string pbkdf2KeyLengthTooLongˢ => ref pbkdf2KeyLengthTooLongˢᵇ;
+private static readonly @string pbkdf2KeyLengthTooLongˢᵇ = "pbkdf2: keyLength too long"u8;
 
 public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, slice<byte> salt, nint iter, nint keyLength)
     where Hash : hash.Hash
@@ -31,7 +33,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     setServiceIndicator(salt, keyLength);
 
     if (keyLength <= 0) {
-        return (default!, errors.New(pkbdf2KeyLengthMustBeˢ));
+        return (default, errors.New(pkbdf2KeyLengthMustBeˢ));
     }
 
     var prf = hmac.New(h, slice<byte>(password));
@@ -40,7 +42,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     nint numBlocks = divRoundUp(keyLength, hashLen);
     const int64 maxBlocks = /* int64(1<<32 - 1) */ 4294967295;
     if (keyLength + hashLen < keyLength || (int64)numBlocks > maxBlocks) {
-        return (default!, errors.New(pbkdf2KeyLengthTooLongˢ));
+        return (default, errors.New(pbkdf2KeyLengthTooLongˢ));
     }
 
     array<byte> buf = new(4);
@@ -72,7 +74,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
             }
         }
     }
-    return (dk.slice(0, keyLength), default!);
+    return (dk.slice(0, keyLength), default);
 }
 
 internal static void setServiceIndicator(slice<byte> salt, nint keyLength) {

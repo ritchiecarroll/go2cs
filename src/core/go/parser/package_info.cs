@@ -10,12 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
@@ -56,7 +50,55 @@ using static go.go.parser_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(field))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.AssignStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.BinaryExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.BlockStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.BranchStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.CallExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.CaseClause))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.ChanType))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.CommClause))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.CompositeLit))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Ellipsis))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.ExprStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Field))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.FieldList))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.File))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.ForStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.FuncDecl))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.FuncLit))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.FuncType))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.GenDecl))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Ident))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.IfStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.IndexExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.IndexListExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.InterfaceType))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.KeyValueExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.LabeledStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Object))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Package))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.ParenExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.RangeStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.Scope))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.SelectStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.SelectorExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.StarExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.StructType))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.SwitchStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.TypeAssertExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.TypeSpec))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.TypeSwitchStmt))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.UnaryExpr))]
+[assembly: GoFieldAccess(typeof(go.go.ast_package.ValueSpec))]
+[assembly: GoFieldAccess(typeof(go.go.scanner_package.ΔError))]
+[assembly: GoFieldAccess(typeof(parser))]
+[assembly: GoFieldAccess(typeof(resolver))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,9 +108,9 @@ using static go.go.parser_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/parser/interface.go", "interface.cs", "ABgwsoKUpLaCxpSUABBWAB8CgriCgqaUgpKAlJKCkoLauAAHEIKUgriChAAFKAAUAoKCpoKCgpSCgoKUgqaCgIKSgoK4lJKCyAACGgARAoK4goKmgoKAlJKCkoK2griCgriClIQABRTy", "98-127:1;215-227:1", "", "132=NewScope/1/1/2")]
-[assembly: global::go.GoPositionMap("go/parser/parser.go", "parser.cs", "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", "81-81:1;1044-1049:1;1731-1731:1;1887-1887:1", "", "3239=Pos/1/1/6;3252=makeExpr/1/1/3")]
-[assembly: global::go.GoPositionMap("go/parser/resolver.go", "resolver.cs", "ABsq0oIABxCCpoKCpoKUgoKCgpKCgqaCABIqoqaigpS21oKCgpSClNaCgoKUpoKCppSCgoKCgriC1rKCgpSmgqaAgqSCgpSAgoKAgqQACgzYgoKAgoKUgoKCgpSAgpTqgu7c4oK4gpSCgIKClKaAgqT+goK4goK4goKCgILagoLowoKmqLaCgoK22oKCtoKCtoKUgoC4gIKUpJTqgoLIgraCgpTagoLIgoK2goKClIKCgsiCgoK2goKClMqCgpSUgsiCgoKUgoKmgsiCgoKU2oLIgoKClIKUgpS2goKCgoKUgpSCygAIEoKUpsiUgoKCgpSCgpS2griCgoKClOyClLiC3IKCgoKUgoLYptbEgoKCpqKClIKCyqKClIK4+IKUgoCCtoKClIK0gsSkgoCCuLaCgriCgsqigpSCrNKCpuKClIKCog==")]
+[assembly: GoPositionMap("go/parser/interface.go", "interface.cs", "ABkwsoKUpLaCxpSUABBWAB4CgriCgqaUgpKAlJKCgoLauAAHEIKUgriChAAFKAAUAoKCpoKCgpSCgoKUgqaCgIKCgoK4lIKCyAACGgAQAoK4goKmgoKAlJKCgoK2griCgriClIQABRTy", "98-127:1;215-227:1", "", "131=NewScope/1/1/2")]
+[assembly: GoPositionMap("go/parser/parser.go", "parser.cs", "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", "81-81:1;1044-1049:1;1731-1731:1;1887-1887:1", "", "3279=Pos/1/1/6;3292=makeExpr/1/1/3", "1791:21,2279:21,2426:21,2930:21,3316:21")]
+[assembly: GoPositionMap("go/parser/resolver.go", "resolver.cs", "AB8q0oIABxCCpoKCpoKUgoKCgoKCgqaCABIqoqaigpS25oKCgpSClOaCgoKUpoKCppSCgoKCgriC5rKCgpSmgqaAgqSCgpSAgoKAgqQADAzYgoKAgoKUgoKCgpSAgpTqgu784oK4gpSCgIKClKaAgqT+goK4goK4goKCgILagoL4woKmqLaCgoK22oKCtoKCtoKUgoC4gIKUpJTqgoLIgraCgpTagoLIgoK2goKClIKCgsiCgoK2goKClMqCgpSUgsiCgoKUgoKmgsiCgoKU2oLIgoKClIKUgpS2goKCgoKUgpSCygAIEoKUpsiUgoKCgpSCgpTGgriCgoKClPyClLiC3IKCgoKUgoLYptbEgoKCpqKClIKCyqKClIK4+IKUgoCCtoKClIK0gsSkgoCCuLaCgriCgsqigpSCrNKCpuKClIKCog==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

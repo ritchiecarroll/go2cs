@@ -13,24 +13,25 @@ partial class mime_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string contentTypeˢ = "Content Type"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content Type"u8;
 
 internal static void initMimeWindows() {
     var (names, err) = registry.CLASSES_ROOT.ReadSubKeyNames();
-    if (err != default!) {
+    if (err != nil) {
         return;
     }
     foreach (var (_, name) in names) {
-        if (len(name) < 2 || name[0] != (rune)'.') { // looking for extensions only
+        if (len(name) < 2 || name[0] != '.') { // looking for extensions only
             continue;
         }
         var (k, errΔ1) = registry.OpenKey(registry.CLASSES_ROOT, name, registry.READ);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             continue;
         }
         (var v, _, errΔ1) = k.GetStringValue(contentTypeˢ);
         k.Close();
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             continue;
         }
 
@@ -50,7 +51,7 @@ internal static void initMimeWindows() {
 
 internal static map<@string, @string> initMimeForTests() {
     return new map<@string, @string>{
-        [".PnG"u8] = "image/png"u8
+        [".PnG"] = "image/png"
     };
 }
 

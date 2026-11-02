@@ -33,6 +33,14 @@ using static go.compress.flate_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(deflateInflateTest))]
+[assembly: GoFieldAccess(typeof(deflateTest))]
+[assembly: GoFieldAccess(typeof(failWriter))]
+[assembly: GoFieldAccess(typeof(reverseBitsTest))]
+[assembly: GoFieldAccess(typeof(syncBuffer))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -41,13 +49,13 @@ using static go.compress.flate_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/flate/deflate_test.go", "deflate_test.cs", "AClKABMqAAgSAAoWgoKClKaCgoKClIKCgoKClIKCgoKSgu6CgoKCgoKUgoKCyoKCgoKmgIK2gIK2lICCtoCCtoCCtoIAChaygpSCgoKClIKClKaC1oKClIKCgpSAgoIACxaCpsKCgoKCgpS4ggAJDLKCgqaCpqKCpoKCgqaCgqaCgoKCgoKClKaCkoKUlIKAgoKkgoCCgraAgraCgoKCgoKUgoIACxiUgoKAgqSClKaCgoKClIKCuIKCgoKClIKCgoKUgpSCgoKClIKCgpSmooKmpoKCgoKUuIKCgIIADBgADxqCgoKUooKClIKCAAoKgpiCgoKUgoKCgpSCgoKUggAJCIKYgoKClIKCgoKUgoKClIK6koKClIKClIKCgIK21oKCgoKUgoKUgoKClIKUlIKCuIKCgpSCgqamgoK4goKCuJKCggAIDIKCgoKUgoKmgqaCgoKClJSCpoKClIKCgoKUgoKUgoKCgpSCgriu4oKCgpSClAASJoKClIKCgoKClIKCgpSCgoCCgqSClICCgraAgoK2goKCgpSUgoIACA7qgoKClNaCgoKClJSCgu6igpSCgoKClIKUgpSm2IKCgpSCgoKmlIKClIKCgpiigoKClIKCpoKCpqKCgoIACQqiggBn1AGCgoKCABAKooKSgoKSgrgACRSCgoKUlIKCgoKUgIKCpICCgraCgoKCgqaCgu6mpoKCgsqClIKmpoKCuIK4goK4griCpoKCuMaClIKUgpSCsoKCgpSAgqSAgqSixA==", "553-555:1;558-564:2;560-562:2.1;568-580:1;932-935:1;1055-1068:1", "", "62=largeDataChunk/1/1/6")]
-[assembly: go.GoPositionMap("compress/flate/dict_decoder_test.go", "dict_decoder_test.cs", "ABoaggADPAAXNpKClIKCgoKmgoK4goKCgoKCyoKUgoKClJSUlIKUgoKUgoKUgoKUgoKUgpSCgg==", "75-87:1;88-97:2")]
-[assembly: go.GoPositionMap("compress/flate/flate_test.go", "flate_test.cs", "ABIokqaCgrqSlIKCupKCgoKClIL4hJKCqJKUgoL4goKCgoKUggAJCAAHEAByrAKCgoKUgoKCpoKClICCAAkOgpSCgoKCAAQY8oIACRSCgoK4goKCpoKClIKUgoKCuIKUlIKCgsqCpoKUgpSUgg==")]
-[assembly: go.GoPositionMap("compress/flate/huffman_bit_writer_test.go", "huffman_bit_writer_test.cs", "ABMizNSCgqaCgoKUAAgIgoKCgpSCgoKClIKCgqaCgoKCgoCCpKamgoCCpJSmgoKCgoKCgoCCpJSCAAsYADh2ooLsooLswoKUgoKCgoKCgqaCgoKUkoKmgoKCgpSSgoKmgoKCgoKUgoKClIKClIKCgoCCtqaCgoKCgoKCgIKklIKUgoKCgpSCgpSCgoKAgrSCgqamgoKCgoKCgoCCpJSCoqSilKSkpoKCpoKCgvqSgpSCgoKCgoKmgoKUpKSklIKCpoKCgpSCgoKUgoKU")]
-[assembly: go.GoPositionMap("compress/flate/inflate_test.go", "inflate_test.cs", "AA4egsqCgoKCppSCgoKClIKCAAgKggAMGoKCgoKClILKgoLKgoKCgqaUgoKClJSCggALCoKCpJKCgoKUgoKmooKAgqSCgqaigoKClIKAgg==", "104-114:1;115-124:2;125-136:3")]
-[assembly: go.GoPositionMap("compress/flate/reader_test.go", "reader_test.cs", "AA8gpuwACBKCgoKClIKCgpSCgpSUgoKCgoKCAAgKAAoUAAUSgoKCgpSClLKysg==", "35-59:1;92-94:1")]
-[assembly: go.GoPositionMap("compress/flate/writer_test.go", "writer_test.cs", "ABAggoKClIKCgpSUgoKClIKCgoKCAAkUgoKUggAPCJKCgoKClIKUlIKCtIKCgpSCgpSCgpSClIKClIKCpoKCgpSClIIACRCigpKApIC2goSSgriCgoKokoKCgqaCgoKUmKKCgoKClIKClJSClIK+soKUgpaSgoKCqJKCgriCgoKUgoKCypSUgqaCgoKmgoKUgg==", "17-40:1;118-118:1;120-120:2")]
+[assembly: GoPositionMap("compress/flate/deflate_test.go", "deflate_test.cs", "AClKABMqAAgSAAoWgoKClKaCgoKClIKCgoKClIKCgoKCgu6CgoKCgoKUgoKCyoKCgoKmgIK2gIK2lICCtoCCtoCCtoIAChaygpSCgoKClIKClKaC1oKClIKCgpSAgoIACxaCpsKCgoKCgpS4ggAJDLKCgqaCpqKCpoKCgqaCgqaCgoKCgoKClKaCkoKUlIKAgoKkgoCCgraAgraCgoKCgoKUgoIACxiUgoKAgqSClKaCgoKClIKCuIKCgoKClIKCgoKUgpSCgoKClIKCgpSmooKmpoKCgoKUuIKCgIIADBgADxqCgoKUooKClIKCAAwKgpiCgoKUgoKCgpSCgoKUggALCIKYgoKClIKCgoKUgoKClIK6koKClIKClIKCgIK25oKCgoKUgoKUgoKClIKUlIKCuIKCgpSCgqamgoK4goKCuJKCggAIDIKCgoKUgoKmgqaCgoKClJSCpoKClIKCgoKUgoKUgoKCgpSCgriuwoKCgpSClAASJoKClIKCgoKClIKCgpSCgoCCgqSClICCgraAgoK2goKCgpSUgoIACA7qgoKClOaCgoKClJSCgu6igpSCgoKClIKUgpSm2IKCgpSCgoKmlIKClIKCgpiigoKClIKCpoKCpoKCgoIACQqiggBn1AGCgoKCABYKgoKSgoKSgrgACRSCgoKUlIKCgoKUgIKCpICCgraCgoKCgqaCgu6mpoKCgsqClIKmpoKCuIK4goK4griCpoKCuMaClIKUgpSCsoKCgpSAgqSAgqSixA==", "553-555:1;558-564:2;560-562:2.1;568-580:1;932-935:1;1055-1068:1", "", "62=largeDataChunk/1/1/6")]
+[assembly: GoPositionMap("compress/flate/dict_decoder_test.go", "dict_decoder_test.cs", "AB0aggADPAAXNpKClIKCgoKmgoK4goKCgoKCyoKUgoKClJSUlIKUgoKUgoKUgoKUgoKUgpSCgg==", "75-87:1;88-97:2")]
+[assembly: GoPositionMap("compress/flate/flate_test.go", "flate_test.cs", "ABIokqaCgrqSlIKCupKCgoKClIL4hJKCqJKUgoL4goKCgoKUggAJCAAHEAByrAKCgoKUgoKCpoKClICCAAoOgpSCgoKCAAQY8oIACRSCgoK4goKCpoKClIKUgoKCuIKUlIKCgsqCpoKUgpSUgg==")]
+[assembly: GoPositionMap("compress/flate/huffman_bit_writer_test.go", "huffman_bit_writer_test.cs", "ABMi3NSCgqaCgoKUAAkIgoKCgpSCgoKClIKCgqaCgoKCgoCCpKamgoCCpJSmgoKCgoKCgoCCpJSCAAsYADh2ooL8ooLswoKUgoKCgoKCgqaCgoKUkoKmgoKCgpSSgoKmgoKCgoKUgoKClIKClIKCgoCCtqaCgoKCgoKCgIKklIKUgoKCgpSCgpSCgoKAgqSCgqamgoKCgoKCgoCCpJSCoqSipLS0toKCpoKCgvqSgpSCgoKCgoKmgoKktLS0pIKCpoKCgpSCgoKUgoKU", "", "", "", "228:29,240:25")]
+[assembly: GoPositionMap("compress/flate/inflate_test.go", "inflate_test.cs", "AA4egsqCgoKCppSCgoKClIKCAAgKggAMGoKCgoKClILKgoLKgoKCgqaUgoKClJSCggAMCoKClJKCgoKUgoKmooKAgqSCgqaigoKClIKAgg==", "104-114:1;115-124:2;125-136:3")]
+[assembly: GoPositionMap("compress/flate/reader_test.go", "reader_test.cs", "AA8gpuwACBKCgoKClIKCgpSCgpSUgoKCgoKCAAgKAAoUAAUSgoKCgpSClLKysg==", "35-59:1;92-94:1")]
+[assembly: GoPositionMap("compress/flate/writer_test.go", "writer_test.cs", "ABAggoKClIKCgpSUgoKClIKCgoKCAAkUgoKUggAPCJKCgoKClIKUlIKCtIKCgpSCgpSCgpSClIKClIKCpoKCgpSClIIAChCigpKApIC2goSSgriCgoKokoKCgqaCgoKUmKKCgoKClIKClJSClIK+soKUgpaSgoKCqJKCgriCgoKUgoKCypSUgqaCgoKmgoKUgg==", "17-40:1;118-118:1;120-120:2")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

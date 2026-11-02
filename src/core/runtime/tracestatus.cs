@@ -12,7 +12,8 @@ using @internal.trace;
 partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string attemptedToTraceABadˢ = "attempted to trace a bad status for a goroutine"u8;
+internal static ref readonly @string attemptedToTraceABadˢ => ref attemptedToTraceABadˢᵇ;
+private static readonly @string attemptedToTraceABadˢᵇ = "attempted to trace a bad status for a goroutine"u8;
 
 // writeGoStatus emits a GoStatus event as well as any active ranges on the goroutine.
 //
@@ -23,15 +24,15 @@ internal static readonly @string attemptedToTraceABadˢ = "attempted to trace a 
 internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64 mid, tracev2.GoStatus status, bool markAssist, uint64 stackID) {
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.GoBad) {
-        print((@string)"runtime: goid="u8, goid, (@string)"\n"u8);
+        print((@string)"runtime: goid=", goid, (@string)"\n");
         @throw(attemptedToTraceABadˢ);
     }
 
     // Trace the status.
-    if (stackID == 0){
-        w = w.@event(tracev2.EvGoStatus, (traceArg)goid, (traceArg)(uint64)mid, (traceArg)(uint64)(uint8)status);
+    if (stackID == 0) {
+        w = w.@event(tracev2.EvGoStatus, (traceArg)goid, (traceArg)(uint64)mid, (traceArg)(uint64)status);
     } else {
-        w = w.@event(tracev2.EvGoStatusStack, (traceArg)goid, (traceArg)(uint64)mid, (traceArg)(uint64)(uint8)status, (traceArg)stackID);
+        w = w.@event(tracev2.EvGoStatusStack, (traceArg)goid, (traceArg)(uint64)mid, (traceArg)(uint64)status, (traceArg)stackID);
     }
 
     // Trace any special ranges that are in-progress.
@@ -42,7 +43,8 @@ internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string attemptToTraceInvalidOrˢ = "attempt to trace invalid or unsupported P status"u8;
+internal static ref readonly @string attemptToTraceInvalidOrˢ => ref attemptToTraceInvalidOrˢᵇ;
+private static readonly @string attemptToTraceInvalidOrˢᵇ = "attempt to trace invalid or unsupported P status"u8;
 
 // writeProcStatusForP emits a ProcStatus event for the provided p based on its status.
 //
@@ -59,17 +61,18 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
     if (!Ꮡpp.of(runtime_package.Δp.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(w.gen)) {
         return w;
     }
-    tracev2.ProcStatus status = default!;
-    var exprᴛ1 = pp.status;
-    if (exprᴛ1 == _Pidle || exprᴛ1 == _Pgcstop) {
+    tracev2.ProcStatus status = default;
+    switch (pp.status) {
+    case var ᴛ when ᴛ == _Pidle || ᴛ == _Pgcstop: {
         status = tracev2.ProcIdle;
         if (pp.status == _Pgcstop && inSTW) {
             // N.B. a P that is running and currently has the world stopped will be
             // in _Pgcstop, but we model it as running in the tracer.
             status = tracev2.ProcRunning;
         }
+        break;
     }
-    else if (exprᴛ1 == _Prunning) {
+    case var ᴛ when ᴛ == _Prunning: {
         status = tracev2.ProcRunning;
         // A P is considered to be in a syscall if its attached G is. Since we fully
         // own P, then the goroutine isn't going to transition and we can trivially
@@ -79,16 +82,19 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
         if ((~w.mp).p.ptr() == Ꮡpp && (~w.mp).curg != nil && (readgstatus((~w.mp).curg) & ~(uint32)_Gscan) == _Gsyscall) {
             status = tracev2.ProcSyscall;
         }
+        break;
     }
-    else { /* default: */
+    default: {
         @throw(attemptToTraceInvalidOrˢ);
-    }
+        break;
+    }}
     w = w.writeProcStatus((uint64)pp.id, status, pp.trace.inSweep);
     return w;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string attemptedToTraceABadˢ2 = "attempted to trace a bad status for a proc"u8;
+internal static ref readonly @string attemptedToTraceABadˢ2 => ref attemptedToTraceABadˢ2ᵇ;
+private static readonly @string attemptedToTraceABadˢ2ᵇ = "attempted to trace a bad status for a proc"u8;
 
 // writeProcStatus emits a ProcStatus event with all the provided information.
 //
@@ -102,12 +108,12 @@ internal static readonly @string attemptedToTraceABadˢ2 = "attempted to trace a
 internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, tracev2.ProcStatus status, bool inSweep) {
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.ProcBad) {
-        print((@string)"runtime: pid="u8, pid, (@string)"\n"u8);
+        print((@string)"runtime: pid=", pid, (@string)"\n");
         @throw(attemptedToTraceABadˢ2);
     }
 
     // Trace the status.
-    w = w.@event(tracev2.EvProcStatus, (traceArg)pid, (traceArg)(uint64)(uint8)status);
+    w = w.@event(tracev2.EvProcStatus, (traceArg)pid, (traceArg)(uint64)status);
 
     // Trace any special ranges that are in-progress.
     if (inSweep) {
@@ -117,8 +123,10 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string triedToTraceDeadˢ = "tried to trace dead goroutine"u8;
-internal static readonly @string triedToTraceGoroutineˢ = "tried to trace goroutine with invalid or unsupported status"u8;
+internal static ref readonly @string triedToTraceDeadˢ => ref triedToTraceDeadˢᵇ;
+private static readonly @string triedToTraceDeadˢᵇ = "tried to trace dead goroutine"u8;
+internal static ref readonly @string triedToTraceGoroutineˢ => ref triedToTraceGoroutineˢᵇ;
+private static readonly @string triedToTraceGoroutineˢᵇ = "tried to trace goroutine with invalid or unsupported status"u8;
 
 // goStatusToTraceGoStatus translates the internal status to tracGoStatus.
 //
@@ -130,18 +138,21 @@ internal static readonly @string triedToTraceGoroutineˢ = "tried to trace gorou
 //go:nosplit
 internal static tracev2.GoStatus goStatusToTraceGoStatus(uint32 status, waitReason wr) {
     // N.B. Ignore the _Gscan bit. We don't model it in the tracer.
-    tracev2.GoStatus tgs = default!;
-    var exprᴛ1 = (status & ~(uint32)_Gscan);
-    if (exprᴛ1 == _Grunnable) {
+    tracev2.GoStatus tgs = default;
+    switch ((status & ~(uint32)_Gscan)) {
+    case var ᴛ when ᴛ == _Grunnable: {
         tgs = tracev2.GoRunnable;
+        break;
     }
-    else if (exprᴛ1 == _Grunning || exprᴛ1 == _Gcopystack) {
+    case var ᴛ when ᴛ == _Grunning || ᴛ == _Gcopystack: {
         tgs = tracev2.GoRunning;
+        break;
     }
-    else if (exprᴛ1 == _Gsyscall) {
+    case var ᴛ when ᴛ == _Gsyscall: {
         tgs = tracev2.GoSyscall;
+        break;
     }
-    else if (exprᴛ1 == _Gwaiting || exprᴛ1 == _Gpreempted || exprᴛ1 == _Gleaked) {
+    case var ᴛ when ᴛ == _Gwaiting || ᴛ == _Gpreempted || ᴛ == _Gleaked: {
         // There are a number of cases where a G might end up in
         // _Gwaiting but it's actually running in a non-preemptive
         // state but needs to present itself as preempted to the
@@ -153,13 +164,16 @@ internal static tracev2.GoStatus goStatusToTraceGoStatus(uint32 status, waitReas
         if (status == _Gwaiting && wr.isWaitingForSuspendG()) {
             tgs = tracev2.GoRunning;
         }
+        break;
     }
-    else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
+    case var ᴛ when ᴛ == _Gdead || ᴛ == _Gdeadextra: {
         @throw(triedToTraceDeadˢ);
+        break;
     }
-    else { /* default: */
+    default: {
         @throw(triedToTraceGoroutineˢ);
-    }
+        break;
+    }}
     return tgs;
 }
 

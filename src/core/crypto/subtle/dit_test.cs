@@ -21,31 +21,31 @@ internal static readonly object ditNotEnabledWithinˢ2 = (@string)"dit not enabl
 internal static readonly object ditNotEnabledAfterReturnˢ = (@string)"dit not enabled after return from nested WithDataIndependentTiming closure"u8;
 internal static readonly object ditNotUnsetAfterˢ = (@string)"dit not unset after returning from WithDataIndependentTiming closure"u8;
 
-public static void TestWithDataIndependentTiming(ж<testing.T> Ꮡt) {
+public static void TestWithDataIndependentTiming(ж<testing.T> t) {
     if (!cpu.ARM64.HasDIT) {
-        Ꮡt.Skip(cpuDoesNotSupportDitˢ);
+        t.Skip(cpuDoesNotSupportDitˢ);
     }
 
     var ditAlreadyEnabled = sys.DITEnabled();
 
     WithDataIndependentTiming(() => {
         if (!sys.DITEnabled()) {
-            Ꮡt.Fatal(ditNotEnabledWithinˢ);
+            t.Fatal(ditNotEnabledWithinˢ);
         }
 
         WithDataIndependentTiming(() => {
             if (!sys.DITEnabled()) {
-                Ꮡt.Fatal(ditNotEnabledWithinˢ2);
+                t.Fatal(ditNotEnabledWithinˢ2);
             }
         });
 
         if (!sys.DITEnabled()) {
-            Ꮡt.Fatal(ditNotEnabledAfterReturnˢ);
+            t.Fatal(ditNotEnabledAfterReturnˢ);
         }
     });
 
     if (!ditAlreadyEnabled && sys.DITEnabled()) {
-        Ꮡt.Fatal(ditNotUnsetAfterˢ);
+        t.Fatal(ditNotUnsetAfterˢ);
     }
 }
 
@@ -53,28 +53,28 @@ public static void TestWithDataIndependentTiming(ж<testing.T> Ꮡt) {
 internal static readonly object didnTPanicˢ = (@string)"didn't panic"u8;
 internal static readonly object ditStillEnabledAfterˢ = (@string)"DIT still enabled after panic inside of WithDataIndependentTiming closure"u8;
 
-public static void TestDITPanic(ж<testing.T> Ꮡt) {
+public static void TestDITPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (!cpu.ARM64.HasDIT) {
-            Ꮡt.Skip(cpuDoesNotSupportDitˢ);
+            t.Skip(cpuDoesNotSupportDitˢ);
         }
 
         var ditAlreadyEnabled = sys.DITEnabled();
 
         defer(() => {
             var e = recover();
-            if (e == default!) {
-                Ꮡt.Fatal(didnTPanicˢ);
+            if (e == nil) {
+                t.Fatal(didnTPanicˢ);
             }
             if (!ditAlreadyEnabled && sys.DITEnabled()) {
-                Ꮡt.Error(ditStillEnabledAfterˢ);
+                t.Error(ditStillEnabledAfterˢ);
             }
         }, ref ᒐ);
 
         WithDataIndependentTiming(() => {
             if (!sys.DITEnabled()) {
-                Ꮡt.Fatal(ditNotEnabledWithinˢ);
+                t.Fatal(ditNotEnabledWithinˢ);
             }
 
             throw panic("bad");
@@ -88,9 +88,9 @@ public static void TestDITPanic(ж<testing.T> Ꮡt) {
 internal static readonly object ditNotEnabledInNewˢ = (@string)"DIT not enabled in new goroutine"u8;
 internal static readonly object ditUnsetAfterReturningˢ = (@string)"dit unset after returning from goroutine started in WithDataIndependentTiming closure"u8;
 
-public static void TestDITGoroutineInheritance(ж<testing.T> Ꮡt) {
+public static void TestDITGoroutineInheritance(ж<testing.T> t) {
     if (!cpu.ARM64.HasDIT) {
-        Ꮡt.Skip(cpuDoesNotSupportDitˢ);
+        t.Skip(cpuDoesNotSupportDitˢ);
     }
 
     var ditAlreadyEnabled = sys.DITEnabled();
@@ -100,13 +100,13 @@ public static void TestDITGoroutineInheritance(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         goǃ(() => {
             if (!sys.DITEnabled()) {
-                Ꮡt.Error(ditNotEnabledInNewˢ);
+                t.Error(ditNotEnabledInNewˢ);
             }
             close(doneʗ1);
         });
         ᐸꟷ(done);
         if (!ditAlreadyEnabled && !sys.DITEnabled()) {
-            Ꮡt.Fatal(ditUnsetAfterReturningˢ);
+            t.Fatal(ditUnsetAfterReturningˢ);
         }
     });
 }

@@ -14,13 +14,13 @@ partial class rand_test_package {
 // This test is first, in its own file with an alphabetically early name,
 // to try to make sure that it runs early. It has the best chance of
 // detecting deterministic seeding if it's the first test that runs.
-public static void TestAuto(ж<testing.T> Ꮡt) {
+public static void TestAuto(ж<testing.T> t) {
     var outᴷ = new stackAppend<int64>();
 
     // Pull out 10 int64s from the global source
     // and then check that they don't appear in that
     // order in the deterministic seeded result.
-    slice<int64> @out = default!;
+    slice<int64> @out = default;
     for (nint i = 0; i < 10; i++) {
         @out = append(outᴷ, @out, Int64());
     }
@@ -36,7 +36,7 @@ public static void TestAuto(ж<testing.T> Ꮡt) {
         if (x == @out[found]) {
             found++;
             if (found == len(@out)) {
-                Ꮡt.Fatalf("found unseeded output in Seed(1) output"u8);
+                t.Fatalf("found unseeded output in Seed(1) output");
             }
         }
     }

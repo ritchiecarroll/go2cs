@@ -16,33 +16,31 @@ partial struct truncateWriterTestsᴛ1 /*dyn*/ {
     internal int64 trunc;
     internal nint n;
 }
-internal static slice<truncateWriterTestsᴛ1> truncateWriterTests = new truncateWriterTestsᴛ1[]{
-    new("hello"u8, ""u8, -1, 5),
-    new("world"u8, ""u8, 0, 5),
-    new("abcde"u8, "abc"u8, 3, 5),
-    new("edcba"u8, "edcba"u8, 7, 5)
-}.slice();
+internal static slice<truncateWriterTestsᴛ1> truncateWriterTests = slice<truncateWriterTestsᴛ1>([
+    new("hello", "", -1, 5),
+    new("world", "", 0, 5),
+    new("abcde", "abc", 3, 5),
+    new("edcba", "edcba", 7, 5)
+]);
 
-public static void TestTruncateWriter(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestTruncateWriter(ж<testing.T> t) {
     foreach (var (_, tt) in truncateWriterTests) {
         var buf = @new<strings.Builder>();
         var tw = TruncateWriter(new iotest_test_package.strings_BuilderжWriter(buf), tt.trunc);
         var (n, err) = tw.Write(slice<byte>(tt.@in));
-        if (err != default!) {
-            Ꮡt.Errorf("Unexpected error %v for\n\t%+v"u8, err, tt);
+        if (err != nil) {
+            t.Errorf("Unexpected error %v for\n\t%+v", err, tt);
         }
         {
             @string g = buf.String();
             @string w = tt.want; if (g != w) {
-                Ꮡt.Errorf("got %q, expected %q"u8, g, w);
+                t.Errorf("got %q, expected %q", g, w);
             }
         }
         {
             nint g = n;
             nint w = tt.n; if (g != w) {
-                Ꮡt.Errorf("read %d bytes, but expected to have read %d bytes for\n\t%+v"u8, g, w, tt);
+                t.Errorf("read %d bytes, but expected to have read %d bytes for\n\t%+v", g, w, tt);
             }
         }
     }

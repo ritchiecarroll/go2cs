@@ -14,9 +14,9 @@ public static void BenchmarkCallClosure(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        s += ((Func<nint, nint>)(ii => {
+        s += func(nint (nint ii) => {
             return 2 * ii;
-        }))(i);
+        })(i);
     }
 }
 
@@ -25,9 +25,9 @@ public static void BenchmarkCallClosure1(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         nint j = i;
-        s += ((Func<nint, nint>)(ii => {
+        s += func(nint (nint ii) => {
             return 2 * ii + j;
-        }))(i);
+        })(i);
     }
 }
 
@@ -37,21 +37,20 @@ public static void BenchmarkCallClosure2(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        ref var j = ref heap<nint>(out var Ꮡj);
-        j = i;
-        s += ((Func<nint>)(() => {
+        ref var j = ref heap<nint>(i, out var Ꮡj);
+        s += func(nint () => {
             ss = Ꮡj;
             return 2;
-        }))();
+        })();
     }
 }
 
 internal static ж<nint> addr1(nint xʗp) {
     ref var x = ref heap(xʗp, out var Ꮡx);
 
-    return ((Func<ж<nint>>)(() => {
+    return func(ж<nint> () => {
         return Ꮡx;
-    }))();
+    })();
 }
 
 public static void BenchmarkCallClosure3(ж<testing.B> Ꮡb) {
@@ -65,9 +64,9 @@ public static void BenchmarkCallClosure3(ж<testing.B> Ꮡb) {
 internal static (nint x, ж<nint> p) addr2() {
     ref var x = ref heap(new nint(), out var Ꮡx);
 
-    return (0, ((Func<ж<nint>>)(() => {
+    return (0, func(ж<nint> () => {
         return Ꮡx;
-    }))());
+    })());
 }
 
 public static void BenchmarkCallClosure4(ж<testing.B> Ꮡb) {

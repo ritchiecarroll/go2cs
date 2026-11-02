@@ -21,56 +21,63 @@ partial class runtime_test_package {
 internal static @string lldbPath;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lldbˢ = "lldb"u8;
-internal static readonly @string usrBinPython27ˢ = "/usr/bin/python2.7"u8;
-internal static readonly @string importSysSysPathAppendˢ = "import sys;sys.path.append(sys.argv[1]);import lldb; print('go lldb python support')"u8;
-internal static readonly @string usrSbinDevToolsSecurityˢ = "/usr/sbin/DevToolsSecurity"u8;
-internal static readonly @string statusˢ = "-status"u8;
-internal static readonly @string enabledˢ = "enabled"u8;
-internal static readonly @string usrBinGroupsˢ = "/usr/bin/groups"u8;
-internal static readonly @string developerˢ = "_developer"u8;
+internal static ref readonly @string lldbˢ => ref lldbˢᵇ;
+private static readonly @string lldbˢᵇ = "lldb"u8;
+internal static ref readonly @string usrBinPython27ˢ => ref usrBinPython27ˢᵇ;
+private static readonly @string usrBinPython27ˢᵇ = "/usr/bin/python2.7"u8;
+internal static ref readonly @string importSysSysPathAppendˢ => ref importSysSysPathAppendˢᵇ;
+private static readonly @string importSysSysPathAppendˢᵇ = "import sys;sys.path.append(sys.argv[1]);import lldb; print('go lldb python support')"u8;
+internal static ref readonly @string usrSbinDevToolsSecurityˢ => ref usrSbinDevToolsSecurityˢᵇ;
+private static readonly @string usrSbinDevToolsSecurityˢᵇ = "/usr/sbin/DevToolsSecurity"u8;
+internal static ref readonly @string statusˢ => ref statusˢᵇ;
+private static readonly @string statusˢᵇ = "-status"u8;
+internal static ref readonly @string enabledˢ => ref enabledˢᵇ;
+private static readonly @string enabledˢᵇ = "enabled"u8;
+internal static ref readonly @string usrBinGroupsˢ => ref usrBinGroupsˢᵇ;
+private static readonly @string usrBinGroupsˢᵇ = "/usr/bin/groups"u8;
+internal static ref readonly @string developerˢ => ref developerˢᵇ;
+private static readonly @string developerˢᵇ = "_developer"u8;
 internal static readonly object notInDeveloperGroupˢ = (@string)"Not in _developer group"u8;
 
-internal static void checkLldbPython(ж<testing.T> Ꮡt) {
-    var cmd = exec.Command(lldbˢ, "-P"u8);
+internal static void checkLldbPython(ж<testing.T> t) {
+    var cmd = exec.Command(lldbˢ, "-P");
     var (@out, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Skipf("skipping due to issue running lldb: %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Skipf("skipping due to issue running lldb: %v\n%s", err, @out);
     }
     lldbPath = strings.TrimSpace((@string)@out);
 
-    cmd = exec.Command(usrBinPython27ˢ, "-c"u8, importSysSysPathAppendˢ, lldbPath);
+    cmd = exec.Command(usrBinPython27ˢ, "-c", importSysSysPathAppendˢ, lldbPath);
     (@out, err) = cmd.CombinedOutput();
 
-    if (err != default!) {
-        Ꮡt.Skipf("skipping due to issue running python: %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Skipf("skipping due to issue running python: %v\n%s", err, @out);
     }
     if (((sstring)@out) != "go lldb python support\n"u8) {
-        Ꮡt.Skipf("skipping due to lack of python lldb support: %s"u8, @out);
+        t.Skipf("skipping due to lack of python lldb support: %s", @out);
     }
 
     if (Δruntime.GOOS == "darwin"u8) {
         // Try to see if we have debugging permissions.
         cmd = exec.Command(usrSbinDevToolsSecurityˢ, statusˢ);
         (@out, err) = cmd.CombinedOutput();
-        if (err != default!){
-            Ꮡt.Skipf("DevToolsSecurity failed: %v"u8, err);
-        } else 
-        if (!strings.Contains((@string)@out, enabledˢ)) {
-            Ꮡt.Skip((@string)@out);
+        if (err != nil) {
+            t.Skipf("DevToolsSecurity failed: %v", err);
+        } else if (!strings.Contains((@string)@out, enabledˢ)) {
+            t.Skip((@string)@out);
         }
         cmd = exec.Command(usrBinGroupsˢ);
         (@out, err) = cmd.CombinedOutput();
-        if (err != default!){
-            Ꮡt.Skipf("groups failed: %v"u8, err);
-        } else 
-        if (!strings.Contains((@string)@out, developerˢ)) {
-            Ꮡt.Skip(notInDeveloperGroupˢ);
+        if (err != nil) {
+            t.Skipf("groups failed: %v", err);
+        } else if (!strings.Contains((@string)@out, developerˢ)) {
+            t.Skip(notInDeveloperGroupˢ);
         }
     }
 }
 
-internal static readonly @string lldbHelloSource = """
+internal static ref readonly @string lldbHelloSource => ref lldbHelloSourceᵇ;
+private static readonly @string lldbHelloSourceᵇ = """
 
 package main
 import "fmt"
@@ -86,7 +93,8 @@ func main() {
 
 """u8.Raw();
 
-internal static readonly @string lldbScriptSource = """
+internal static ref readonly @string lldbScriptSource => ref lldbScriptSourceᵇ;
+private static readonly @string lldbScriptSourceᵇ = """
 
 import sys
 sys.path.append(sys.argv[1])
@@ -145,7 +153,8 @@ sys.exit()
 
 """u8.Raw();
 
-internal static readonly @string expectedLldbOutput = """
+internal static ref readonly @string expectedLldbOutput => ref expectedLldbOutputᵇ;
+private static readonly @string expectedLldbOutputᵇ = """
 Created target
 Created breakpoint
 Process launched
@@ -157,56 +166,60 @@ intvar = 42
 """u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goModˢ = "go.mod"u8;
-internal static readonly @string ldflagsCompressdwarfˢ = "-ldflags=-compressdwarf=false"u8;
-internal static readonly @string scriptPyˢ = "script.py"u8;
-internal static readonly @string timeoutLaunchingˢ = "Timeout launching"u8;
+internal static ref readonly @string goModˢ => ref goModˢᵇ;
+private static readonly @string goModˢᵇ = "go.mod"u8;
+internal static ref readonly @string ldflagsCompressdwarfˢ => ref ldflagsCompressdwarfˢᵇ;
+private static readonly @string ldflagsCompressdwarfˢᵇ = "-ldflags=-compressdwarf=false"u8;
+internal static ref readonly @string scriptPyˢ => ref scriptPyˢᵇ;
+private static readonly @string scriptPyˢᵇ = "script.py"u8;
+internal static ref readonly @string timeoutLaunchingˢ => ref timeoutLaunchingˢᵇ;
+private static readonly @string timeoutLaunchingˢᵇ = "Timeout launching"u8;
 
-public static void TestLldbPython(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(Ꮡt));
-    testenv.SkipFlaky(new runtime_test_package.testing_TжTB(Ꮡt), 31188);
+public static void TestLldbPython(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new runtime_test_package.testing_TжTB(t));
+    testenv.SkipFlaky(new runtime_test_package.testing_TжTB(t), 31188);
 
-    checkLldbPython(Ꮡt);
+    checkLldbPython(t);
 
-    @string dir = Ꮡt.TempDir();
+    @string dir = t.TempDir();
 
     @string src = filepath.Join(dir, mainGoˢ);
     var err = Δos.WriteFile(src, slice<byte>(lldbHelloSource), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create src file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create src file: %v", err);
     }
 
     @string mod = filepath.Join(dir, goModˢ);
     err = Δos.WriteFile(mod, slice<byte>("module lldbtest"u8), 420);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create mod file: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create mod file: %v", err);
     }
 
     // As of 2018-07-17, lldb doesn't support compressed DWARF, so
     // disable it for this test.
-    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(Ꮡt)), buildˢ, gcflagsAllNLˢ, ldflagsCompressdwarfˢ, "-o", aExeˢ);
-    cmd.Value.Dir = dir;
-    cmd.Value.Env = append(Δos.Environ(), "GOPATH="u8); // issue 31100
+    var cmd = exec.Command(testenv.GoToolPath(new runtime_test_package.testing_TжTB(t)), buildˢ, gcflagsAllNLˢ, ldflagsCompressdwarfˢ, "-o", aExeˢ);
+    cmd.Dir = dir;
+    cmd.Env = append(Δos.Environ(), (@string)"GOPATH="); // issue 31100
     (var @out, err) = cmd.CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("building source %v\n%s"u8, err, @out);
+    if (err != nil) {
+        t.Fatalf("building source %v\n%s", err, @out);
     }
 
     src = filepath.Join(dir, scriptPyˢ);
     err = Δos.WriteFile(src, slice<byte>(lldbScriptSource), 493);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to create script: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to create script: %v", err);
     }
 
     cmd = exec.Command(usrBinPython27ˢ, scriptPyˢ, lldbPath);
-    cmd.Value.Dir = dir;
+    cmd.Dir = dir;
     var (got, _) = cmd.CombinedOutput();
 
     if (((sstring)got) != expectedLldbOutput) {
         if (strings.Contains((@string)got, timeoutLaunchingˢ)) {
-            Ꮡt.Skip(timeoutLaunchingˢ);
+            t.Skip(timeoutLaunchingˢ);
         }
-        Ꮡt.Fatalf("Unexpected lldb output:\n%s"u8, got);
+        t.Fatalf("Unexpected lldb output:\n%s", got);
     }
 }
 

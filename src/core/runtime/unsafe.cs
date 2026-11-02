@@ -33,7 +33,8 @@ internal static void unsafestring64(@unsafe.Pointer ptr, int64 len64) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkptrUnsafeStringˢ = "checkptr: unsafe.String result straddles multiple allocations"u8;
+internal static ref readonly @string checkptrUnsafeStringˢ => ref checkptrUnsafeStringˢᵇ;
+private static readonly @string checkptrUnsafeStringˢᵇ = "checkptr: unsafe.String result straddles multiple allocations"u8;
 
 internal static void unsafestringcheckptr(@unsafe.Pointer ptr, int64 len64) {
     unsafestring64(ptr, len64);
@@ -46,14 +47,16 @@ internal static void unsafestringcheckptr(@unsafe.Pointer ptr, int64 len64) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unsafeStringLenOutOfˢ = "unsafe.String: len out of range"u8;
+internal static ref readonly @string unsafeStringLenOutOfˢ => ref unsafeStringLenOutOfˢᵇ;
+private static readonly @string unsafeStringLenOutOfˢᵇ = "unsafe.String: len out of range"u8;
 
 internal static void panicunsafestringlen() {
     throw panic(((errorString)(@string)unsafeStringLenOutOfˢ));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unsafeStringPtrIsNilAndˢ = "unsafe.String: ptr is nil and len is not zero"u8;
+internal static ref readonly @string unsafeStringPtrIsNilAndˢ => ref unsafeStringPtrIsNilAndˢᵇ;
+private static readonly @string unsafeStringPtrIsNilAndˢᵇ = "unsafe.String: ptr is nil and len is not zero"u8;
 
 internal static void panicunsafestringnilptr() {
     throw panic(((errorString)(@string)unsafeStringPtrIsNilAndˢ));
@@ -90,7 +93,8 @@ internal static void unsafeslice64(ref _type et, @unsafe.Pointer ptr, int64 len6
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkptrUnsafeSliceˢ = "checkptr: unsafe.Slice result straddles multiple allocations"u8;
+internal static ref readonly @string checkptrUnsafeSliceˢ => ref checkptrUnsafeSliceˢᵇ;
+private static readonly @string checkptrUnsafeSliceˢᵇ = "checkptr: unsafe.Slice result straddles multiple allocations"u8;
 
 internal static void unsafeslicecheckptr(ref _type et, @unsafe.Pointer ptr, int64 len64) {
     unsafeslice64(ref et, ptr, len64);
@@ -109,7 +113,8 @@ internal static void panicunsafeslicelen() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unsafeSliceLenOutOfRangeˢ = "unsafe.Slice: len out of range"u8;
+internal static ref readonly @string unsafeSliceLenOutOfRangeˢ => ref unsafeSliceLenOutOfRangeˢᵇ;
+private static readonly @string unsafeSliceLenOutOfRangeˢᵇ = "unsafe.Slice: len out of range"u8;
 
 //go:yeswritebarrierrec
 internal static void panicunsafeslicelen1(uintptr pc) {
@@ -124,7 +129,8 @@ internal static void panicunsafeslicenilptr() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unsafeSlicePtrIsNilAndˢ = "unsafe.Slice: ptr is nil and len is not zero"u8;
+internal static ref readonly @string unsafeSlicePtrIsNilAndˢ => ref unsafeSlicePtrIsNilAndˢᵇ;
+private static readonly @string unsafeSlicePtrIsNilAndˢᵇ = "unsafe.Slice: ptr is nil and len is not zero"u8;
 
 //go:yeswritebarrierrec
 internal static void panicunsafeslicenilptr1(uintptr pc) {

@@ -17,18 +17,20 @@ internal static nint userBuffer = 0;
 internal static nint groupBuffer = 0;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string userˢ = "USER"u8;
-internal static readonly @string androidˢ = "android"u8;
-internal static readonly @string userˢ2 = "$USER"u8;
+internal static ref readonly @string userˢ => ref userˢᵇ;
+private static readonly @string userˢᵇ = "USER"u8;
+internal static ref readonly @string androidˢ => ref androidˢᵇ;
+private static readonly @string androidˢᵇ = "android"u8;
+internal static ref readonly @string userˢ2 => ref userˢ2ᵇ;
+private static readonly @string userˢ2ᵇ = "$USER"u8;
 
 internal static (ж<User>, error) current() {
-    ref var uid = ref heap<@string>(out var Ꮡuid);
-    uid = currentUID();
+    ref var uid = ref heap<@string>(currentUID(), out var Ꮡuid);
     // $USER and /etc/passwd may disagree; prefer the latter if we can get it.
     // See issue 27524 for more information.
     var (u, err) = lookupUserId(uid);
-    if (err == default!) {
-        return (u, default!);
+    if (err == nil) {
+        return (u, default);
     }
 
     ref var homeDir = ref heap<@string>(out var ᏑhomeDir);
@@ -37,29 +39,31 @@ internal static (ж<User>, error) current() {
         Uid: uid,
         Gid: currentGID(),
         Username: os.Getenv(userˢ),
-        Name: ""u8, // ignored
+        Name: "", // ignored
         HomeDir: homeDir
     ));
     // On Android, return a dummy user instead of failing.
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "android"u8) {
-        if ((~u).Uid == ""u8) {
-            u.Value.Uid = "1"u8;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "android"u8: {
+        if (u.Uid == ""u8) {
+            u.Uid = "1";
         }
-        if ((~u).Username == ""u8) {
-            u.Value.Username = androidˢ;
+        if (u.Username == ""u8) {
+            u.Username = androidˢ;
         }
-    }
+        break;
+    }}
     // cgo isn't available, but if we found the minimum information
     // without it, use it:
-    if ((~u).Uid != ""u8 && (~u).Username != ""u8 && (~u).HomeDir != ""u8) {
-        return (u, default!);
+    if (u.Uid != ""u8 && u.Username != ""u8 && u.HomeDir != ""u8) {
+        return (u, default);
     }
-    @string missing = default!;
-    if ((~u).Username == ""u8) {
+    @string missing = default;
+    if (u.Username == ""u8) {
         missing = userˢ2;
     }
-    if ((~u).HomeDir == ""u8) {
+    if (u.HomeDir == ""u8) {
         if (missing != ""u8) {
             missing += ", "u8;
         }

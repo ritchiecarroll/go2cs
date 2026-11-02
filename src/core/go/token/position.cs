@@ -27,9 +27,9 @@ internal const bool debug = false;
 // A Position is valid if the line number is > 0.
 partial struct ΔPosition {
     public @string Filename; // filename, if any
-    public nint Offset;   // offset, starting at 0
-    public nint Line;   // line number, starting at 1
-    public nint Column;   // column number, starting at 1 (byte count)
+    public nint Offset;      // offset, starting at 0
+    public nint Line;        // line number, starting at 1
+    public nint Column;      // column number, starting at 1 (byte count)
 }
 
 // IsValid reports whether the position is valid.
@@ -57,7 +57,7 @@ public static @string String(this ΔPosition pos) {
         }
     }
     if (s == ""u8) {
-        s = "-"u8;
+        s = "-";
     }
     return s;
 }
@@ -108,7 +108,7 @@ public static bool IsValid(this ΔPos p) {
 partial struct ΔFile {
     internal @string name; // file name as provided to AddFile
     internal nint @base;   // Pos value range for this file is [base...base+size]
-    internal nint size;   // file size as provided to AddFile
+    internal nint size;    // file size as provided to AddFile
     // lines and infos are protected by mutex
     internal sync.Mutex mutex;
     internal slice<nint> lines; // lines contains the offset of the first character for each line (the first entry is always 0)
@@ -233,14 +233,14 @@ public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content)
     ref var f = ref Ꮡf.DerefOrNull();
     var linesᴷ = new stackAppend<nint>(moves: true);
 
-    slice<nint> lines = default!;
+    slice<nint> lines = default;
     nint line = 0;
     foreach (var (offset, b) in content) {
         if (line >= 0) {
             lines = append(linesᴷ, lines, line);
         }
         line = -1;
-        if (b == (rune)'\n') {
+        if (b == '\n') {
             line = offset + 1;
         }
     }
@@ -271,7 +271,7 @@ public static ΔPos LineStart(this ж<ΔFile> Ꮡf, nint line) {
         }
         return (ΔPos)(f.@base + f.lines[line - 1]);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡf.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
@@ -385,9 +385,9 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // If adjusted is set, unpack will return the filename and line information
 // possibly adjusted by //line comments; otherwise those comments are ignored.
 internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile> Ꮡf, nint offset, bool adjusted) {
-    @string filename = default!;
-    nint line = default!;
-    nint column = default!;
+    @string filename = default;
+    nint line = default;
+    nint column = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -402,23 +402,22 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
         {
             nint i = searchLineInfos(f.infos, offset); if (i >= 0) {
                 var alt = Ꮡ(f.infos, i);
-                filename = alt.Value.Filename;
+                filename = alt.Filename;
                 {
-                    nint iΔ1 = searchInts(f.lines, (~alt).Offset); if (iΔ1 >= 0) {
+                    nint iΔ1 = searchInts(f.lines, alt.Offset); if (iΔ1 >= 0) {
                         // i+1 is the line at which the alternative position was recorded
                         nint d = line - (iΔ1 + 1); // line distance from alternative position base
-                        line = (~alt).Line + d;
-                        if ((~alt).Column == 0){
+                        line = alt.Line + d;
+                        if (alt.Column == 0) {
                             // alternative column is unknown => relative column is unknown
                             // (the current specification for line directives requires
                             // this to apply until the next PosBase/line directive,
                             // not just until the new newline)
                             column = 0;
-                        } else 
-                        if (d == 0) {
+                        } else if (d == 0) {
                             // the alternative position base is on the current line
                             // => column is relative to alternative column
-                            column = (~alt).Column + (offset - (~alt).Offset);
+                            column = alt.Column + (offset - alt.Offset);
                         }
                     }
                 }
@@ -432,7 +431,7 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
 }
 
 internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
-    ΔPosition pos = default!;
+    ΔPosition pos = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     nint offset = f.fixOffset((nint)p - f.@base);
@@ -447,7 +446,7 @@ internal static ΔPosition /*pos*/ position(this ж<ΔFile> Ꮡf, ΔPos p, bool 
 // //line comments; otherwise those comments are ignored.
 // p must be a Pos value in f or NoPos.
 public static ΔPosition /*pos*/ PositionFor(this ж<ΔFile> Ꮡf, ΔPos p, bool adjusted) {
-    ΔPosition pos = default!;
+    ΔPosition pos = default;
 
     if (p != NoPos) {
         pos = Ꮡf.position(p, adjusted);
@@ -490,7 +489,7 @@ public static ΔPosition /*pos*/ Position(this ж<ΔFile> Ꮡf, ΔPos p) {
 partial struct FileSet {
     internal sync.RWMutex mutex;         // protects the file set
     internal nint @base;                 // base offset for the next file
-    internal tree tree;                 // tree of files in ascending base order
+    internal tree tree;                  // tree of files in ascending base order
     internal atomic.Pointer<ΔFile> last; // cache of last file looked up
 }
 
@@ -506,9 +505,9 @@ public static ж<FileSet> NewFileSet() {
 public static nint Base(this ж<FileSet> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    Ꮡs.of(FileSet.Ꮡmutex).RLock();
+    Ꮡs.Ꮡmutex.RLock();
     nint b = s.@base;
-    Ꮡs.of(FileSet.Ꮡmutex).RUnlock();
+    Ꮡs.Ꮡmutex.RUnlock();
     return b;
 }
 
@@ -534,9 +533,9 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
         ref var s = ref Ꮡs.DerefOrNull();
 
         // Allocate f outside the critical section.
-        var f = Ꮡ(new ΔFile(name: filename, size: size, lines: new nint[]{0}.slice()));
+        var f = Ꮡ(new ΔFile(name: filename, size: size, lines: slice<nint>([0])));
 
-        Ꮡs.of(FileSet.Ꮡmutex).Lock();
+        Ꮡs.Ꮡmutex.Lock();
         ᒐd1 = true;
         if (@base < 0) {
             @base = s.@base;
@@ -544,7 +543,7 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
         if (@base < s.@base) {
             throw panic(fmt.Sprintf("invalid base %d (should be >= %d)"u8, @base, s.@base));
         }
-        f.Value.@base = @base;
+        f.@base = @base;
         if (size < 0) {
             throw panic(fmt.Sprintf("invalid size %d (should be >= 0)"u8, size));
         }
@@ -555,12 +554,12 @@ public static ж<ΔFile> AddFile(this ж<FileSet> Ꮡs, @string filename, nint @
         }
         // add the file to the file set
         s.@base = @base;
-        Ꮡs.of(FileSet.Ꮡtree).add(f);
-        Ꮡs.of(FileSet.Ꮡlast).Store(f);
+        Ꮡs.Ꮡtree.add(f);
+        Ꮡs.Ꮡlast.Store(f);
         return f;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).Unlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd1) Ꮡs.Ꮡmutex.Unlock(); ᒐ.Run(); }
 }
 
 // AddExistingFiles adds the specified files to the
@@ -592,16 +591,16 @@ public static void AddExistingFiles(this ж<FileSet> Ꮡs, params ꓸꓸꓸжFil
         // sequentially, so long as all sets of files have disjoint ranges.
         // This approach also does not preserve line directives.
 
-        Ꮡs.of(FileSet.Ꮡmutex).Lock();
+        Ꮡs.Ꮡmutex.Lock();
         ᒐd1 = true;
 
         foreach (var (_, f) in files) {
-            Ꮡs.of(FileSet.Ꮡtree).add(f);
+            Ꮡs.Ꮡtree.add(f);
             s.@base = max(s.@base, f.Base() + f.Size() + 1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).Unlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡs.Ꮡmutex.Unlock(); ᒐ.Run(); }
 }
 
 // RemoveFile removes a file from the [FileSet] so that subsequent
@@ -617,18 +616,18 @@ public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) {
         ref var s = ref Ꮡs.DerefOrNull();
         ref var @file = ref Ꮡfile.DerefOrNull();
 
-        Ꮡs.of(FileSet.Ꮡmutex).Lock();
+        Ꮡs.Ꮡmutex.Lock();
         ᒐd1 = true;
 
-        Ꮡs.of(FileSet.Ꮡlast).CompareAndSwap(Ꮡfile, nil); // clear last file cache
+        Ꮡs.Ꮡlast.CompareAndSwap(Ꮡfile, nil); // clear last file cache
 
-        var (pn, _) = Ꮡs.of(FileSet.Ꮡtree).locate(@file.key());
-        if (pn.ValueSlot != nil && (~(pn.ValueSlot)).@file == Ꮡfile) {
+        var (pn, _) = Ꮡs.Ꮡtree.locate(@file.key());
+        if (pn.ValueSlot != nil && (pn.ValueSlot).@file == Ꮡfile) {
             s.tree.delete(pn);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).Unlock(); ᒐ.Run(); }
+    finally { if (ᒐd1) Ꮡs.Ꮡmutex.Unlock(); ᒐ.Run(); }
 }
 
 // Iterate calls yield for the files in the file set in ascending Base
@@ -636,20 +635,20 @@ public static void RemoveFile(this ж<FileSet> Ꮡs, ж<ΔFile> Ꮡfile) {
 public static void Iterate(this ж<FileSet> Ꮡs, Func<ж<ΔFile>, bool> yield) {
     GoFrame ᒐ = default;
     try {
-        Ꮡs.of(FileSet.Ꮡmutex).RLock();
-        defer(Ꮡs.of(FileSet.Ꮡmutex).RUnlock, ref ᒐ);
+        Ꮡs.Ꮡmutex.RLock();
+        defer(Ꮡs.Ꮡmutex.RUnlock, ref ᒐ);
 
         // Unlock around user code.
         // The iterator is robust to modification by yield.
         // Avoid range here, so we can use defer.
-        Ꮡs.of(FileSet.Ꮡtree).all()((ж<ΔFile> f) => {
+        Ꮡs.Ꮡtree.all()((ж<ΔFile> f) => {
             GoFrame ᒐ = default;
             try {
-                Ꮡs.of(FileSet.Ꮡmutex).RUnlock();
-                defer(Ꮡs.of(FileSet.Ꮡmutex).RLock, ref ᒐ);
+                Ꮡs.Ꮡmutex.RUnlock();
+                defer(Ꮡs.Ꮡmutex.RLock, ref ᒐ);
                 return yield(f);
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         });
     }
@@ -663,34 +662,34 @@ internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
     try {
         // common case: p is in last file.
         {
-            var f = Ꮡs.of(FileSet.Ꮡlast).Load(); if (f != nil && (~f).@base <= (nint)p && (nint)p <= (~f).@base + (~f).size) {
+            var f = Ꮡs.Ꮡlast.Load(); if (f != nil && f.@base <= (nint)p && (nint)p <= f.@base + f.size) {
                 return f;
             }
         }
 
-        Ꮡs.of(FileSet.Ꮡmutex).RLock();
+        Ꮡs.Ꮡmutex.RLock();
         ᒐd1 = true;
 
-        var (pn, _) = Ꮡs.of(FileSet.Ꮡtree).locate(new Δkey((nint)p, (nint)p));
+        var (pn, _) = Ꮡs.Ꮡtree.locate(new Δkey((nint)p, (nint)p));
         {
             var n = pn.ValueSlot; if (n != nil) {
                 // Update cache of last file. A race is ok,
                 // but an exclusive lock causes heavy contention.
-                Ꮡs.of(FileSet.Ꮡlast).Store((~n).@file);
-                return (~n).@file;
+                Ꮡs.Ꮡlast.Store(n.@file);
+                return n.@file;
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡs.of(FileSet.Ꮡmutex).RUnlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd1) Ꮡs.Ꮡmutex.RUnlock(); ᒐ.Run(); }
 }
 
 // File returns the file that contains the position p.
 // If no such file is found (for instance for p == [NoPos]),
 // the result is nil.
 public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
-    ж<ΔFile> f = default!;
+    ж<ΔFile> f = default;
 
     if (p != NoPos) {
         f = Ꮡs.@file(p);
@@ -703,7 +702,7 @@ public static ж<ΔFile> /*f*/ File(this ж<FileSet> Ꮡs, ΔPos p) {
 // //line comments; otherwise those comments are ignored.
 // p must be a [Pos] value in s or [NoPos].
 public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, bool adjusted) {
-    ΔPosition pos = default!;
+    ΔPosition pos = default;
 
     if (p != NoPos) {
         {
@@ -738,7 +737,7 @@ internal static nint searchInts(slice<nint> a, nint x) {
     while (i < j) {
         nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
-        if (a[h] <= x){
+        if (a[h] <= x) {
             i = h + 1;
         } else {
             j = h;

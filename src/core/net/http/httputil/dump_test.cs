@@ -29,7 +29,7 @@ internal partial struct eofReader {
 }
 
 internal static error Close(this eofReader n) {
-    return default!;
+    return default;
 }
 
 internal static (nint, error) Read(this eofReader n, slice<byte> _) {
@@ -44,39 +44,39 @@ internal partial struct dumpTest {
     public @string WantDump;
     public @string WantDumpOut;
     public bool MustError; // if true, the test is expected to throw an error
-    public bool NoBody; // if true, set DumpRequest{,Out} body to false
+    public bool NoBody;    // if true, set DumpRequest{,Out} body to false
 }
 
-internal static slice<dumpTest> dumpTests = new dumpTest[]{
+internal static slice<dumpTest> dumpTests = slice<dumpTest>([
     // HTTP/1.1 => chunked coding; body; empty trailer
     new(
         Req: Ꮡ(new http.Request(
-            Method: "GET"u8,
+            Method: "GET",
             URL: Ꮡ(new url.URL(
-                Scheme: "http"u8,
-                Host: "www.google.com"u8,
-                Path: "/search"u8
+                Scheme: "http",
+                Host: "www.google.com",
+                Path: "/search"
             )),
             ProtoMajor: 1,
             ProtoMinor: 1,
-            TransferEncoding: new @string[]{"chunked"u8}.slice()
+            TransferEncoding: slice<@string>(["chunked"])
         )),
 
         Body: slice<byte>("abcdef"u8),
 
-        WantDump: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8)
+        WantDump: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef") + chunk("")
     ),
 
     // Verify that DumpRequest preserves the HTTP version number, doesn't add a Host,
     // and doesn't add a User-Agent.
     new(
         Req: Ꮡ(new http.Request(
-            Method: "GET"u8,
-            URL: mustParseURL("/foo"u8),
+            Method: "GET",
+            URL: mustParseURL("/foo"),
             ProtoMajor: 1,
             ProtoMinor: 0,
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                ["X-Foo"u8] = new @string[]{"X-Bar"u8}.slice()
+                ["X-Foo"] = slice<@string>(["X-Bar"])
             })
         )),
 
@@ -84,7 +84,7 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
     ),
 
     new(
-        Req: mustNewRequest("GET"u8, "http://example.com/foo"u8, default!),
+        Req: mustNewRequest("GET", "http://example.com/foo", default),
 
         WantDumpOut: "GET /foo HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8
     ),
@@ -93,18 +93,18 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
     // with a bytes.Buffer and hang with all goroutines not
     // runnable.
     new(
-        Req: mustNewRequest("GET"u8, "https://example.com/foo"u8, default!),
+        Req: mustNewRequest("GET", "https://example.com/foo", default),
         WantDumpOut: "GET /foo HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8
     ),
 
     // Request with Body, but Dump requested without it.
     new(
         Req: Ꮡ(new http.Request(
-            Method: "POST"u8,
+            Method: "POST",
             URL: Ꮡ(new url.URL(
-                Scheme: "http"u8,
-                Host: "post.tld"u8,
-                Path: "/"u8
+                Scheme: "http",
+                Host: "post.tld",
+                Path: "/"
             )),
             ContentLength: 6,
             ProtoMajor: 1,
@@ -121,14 +121,14 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
     // Request with Body > 8196 (default buffer size)
     new(
         Req: Ꮡ(new http.Request(
-            Method: "POST"u8,
+            Method: "POST",
             URL: Ꮡ(new url.URL(
-                Scheme: "http"u8,
-                Host: "post.tld"u8,
-                Path: "/"u8
+                Scheme: "http",
+                Host: "post.tld",
+                Path: "/"
             )),
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                ["Content-Length"u8] = new @string[]{"8193"u8}.slice()
+                ["Content-Length"] = slice<@string>(["8193"])
             }),
 
             ContentLength: 8193,
@@ -138,8 +138,8 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
 
         Body: bytes.Repeat(slice<byte>("a"u8), 8193),
 
-        WantDumpOut: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 8193\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8 + strings.Repeat("a"u8, 8193),
-        WantDump: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "Content-Length: 8193\r\n\r\n"u8 + strings.Repeat("a"u8, 8193)
+        WantDumpOut: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 8193\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8 + strings.Repeat("a", 8193),
+        WantDump: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "Content-Length: 8193\r\n\r\n"u8 + strings.Repeat("a", 8193)
     ),
 
     new(
@@ -168,24 +168,24 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
     // Issue 18506: make drainBody recognize NoBody. Otherwise
     // this was turning into a chunked request.
     new(
-        Req: mustNewRequest("POST"u8, "http://example.com/foo"u8, new httputil_test_package.http_noBodyᴠReader(http.NoBody)),
+        Req: mustNewRequest("POST", "http://example.com/foo", new httputil_test_package.http_noBodyᴠReader(http.NoBody)),
         WantDumpOut: "POST /foo HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8
     ),
 
     // Issue 34504: a non-nil Body without ContentLength set should be chunked
     new(
         Req: Ꮡ(new http.Request(
-            Method: "PUT"u8,
+            Method: "PUT",
             URL: Ꮡ(new url.URL(
-                Scheme: "http"u8,
-                Host: "post.tld"u8,
-                Path: "/test"u8
+                Scheme: "http",
+                Host: "post.tld",
+                Path: "/test"
             )),
             ContentLength: 0,
-            Proto: "HTTP/1.1"u8,
+            Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
-            Body: new httputil_internal_test_package.eofReaderжReadCloser(Ꮡ(new eofReader(nil)))
+            Body: new httputil_internal_test_package.eofReaderжReadCloser(Ꮡ(new eofReader()))
         )),
         NoBody: true,
         WantDumpOut: "PUT /test HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8
@@ -197,23 +197,23 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
         NoBody: true,
         WantDump: "GET / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "Connection: close\r\n\r\n"u8
     )
-}.slice();
+]);
 
-public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
+public static partial void TestDumpRequest(ж<testing.T> t) {
     // Make a copy of dumpTests and add 10 new cases with an empty URL
     // to test that no goroutines are leaked. See golang.org/issue/32571.
     // 10 seems to be a decent number which always triggers the failure.
     var dumpTestsΔ1 = httputil_internal_test_package.dumpTests[..];
     for (nint i = 0; i < 10; i++) {
         dumpTestsΔ1 = append(dumpTestsΔ1, new dumpTest(
-            Req: mustNewRequest(getˢ, ""u8, default!),
+            Req: mustNewRequest(getˢ, ""u8, default),
             MustError: true
         ));
     }
     nint numg0 = runtime.NumGoroutine();
     foreach (var (i, tt) in dumpTestsΔ1) {
-        if (tt.Req != nil && tt.GetReq != default! || tt.Req == nil && tt.GetReq == default!) {
-            Ꮡt.Errorf("#%d: either .Req(%p) or .GetReq(%p) can be set/nil but not both"u8, i, tt.Req.OrTypedNil(), (tt.GetReq).OrTypedNilFunc());
+        if (tt.Req != nil && tt.GetReq != nil || tt.Req == nil && tt.GetReq == nil) {
+            t.Errorf("#%d: either .Req(%p) or .GetReq(%p) can be set/nil but not both", i, tt.Req.OrTypedNil(), (tt.GetReq).OrTypedNilFunc());
             continue;
         }
 
@@ -223,25 +223,25 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
                 req = ti.GetReq();
             }
 
-            if ((~req).Header == default!) {
-                req.Value.Header = new httpꓸHeader(0);
+            if (req.Header == nil) {
+                req.Header = new httpꓸHeader(0);
             }
 
-            if (ti.Body == default!) {
+            if (ti.Body == nil) {
                 return req;
             }
             switch (ti.Body.type()) {
             case slice<byte> b: {
-                req.Value.Body = io.NopCloser(new httputil_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
+                req.Body = io.NopCloser(new httputil_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
                 break;
             }
             case Func<io.ReadCloser> b: {
-                req.Value.Body = b();
+                req.Body = b();
                 break;
             }
             default: {
                 var b = ti.Body;
-                Ꮡt.Fatalf("Test %d: unsupported Body of %T"u8, i, ti.Body);
+                t.Fatalf("Test %d: unsupported Body of %T", i, ti.Body);
                 break;
             }}
             return req;
@@ -250,12 +250,12 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
         if (tt.WantDump != ""u8) {
             var req = freshReq(tt);
             var (dump, err) = DumpRequest(req, !tt.NoBody);
-            if (err != default!) {
-                Ꮡt.Errorf("DumpRequest #%d: %s\nWantDump:\n%s"u8, i, err, tt.WantDump);
+            if (err != nil) {
+                t.Errorf("DumpRequest #%d: %s\nWantDump:\n%s", i, err, tt.WantDump);
                 continue;
             }
             if (((sstring)dump) != tt.WantDump) {
-                Ꮡt.Errorf("DumpRequest %d, expecting:\n%s\nGot:\n%s\n"u8, i, tt.WantDump, (@string)dump);
+                t.Errorf("DumpRequest %d, expecting:\n%s\nGot:\n%s\n", i, tt.WantDump, (@string)dump);
                 continue;
             }
         }
@@ -263,8 +263,8 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
         if (tt.MustError) {
             var req = freshReq(tt);
             var (_, err) = DumpRequestOut(req, !tt.NoBody);
-            if (err == default!) {
-                Ꮡt.Errorf("DumpRequestOut #%d: expected an error, got nil"u8, i);
+            if (err == nil) {
+                t.Errorf("DumpRequestOut #%d: expected an error, got nil", i);
             }
             continue;
         }
@@ -272,20 +272,20 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
         if (tt.WantDumpOut != ""u8) {
             var req = freshReq(tt);
             var (dump, err) = DumpRequestOut(req, !tt.NoBody);
-            if (err != default!) {
-                Ꮡt.Errorf("DumpRequestOut #%d: %s"u8, i, err);
+            if (err != nil) {
+                t.Errorf("DumpRequestOut #%d: %s", i, err);
                 continue;
             }
             if (((sstring)dump) != tt.WantDumpOut) {
-                Ꮡt.Errorf("DumpRequestOut %d, expecting:\n%s\nGot:\n%s\n"u8, i, tt.WantDumpOut, (@string)dump);
+                t.Errorf("DumpRequestOut %d, expecting:\n%s\nGot:\n%s\n", i, tt.WantDumpOut, (@string)dump);
                 continue;
             }
         }
     }
 
     // Validate we haven't leaked any goroutines.
-    nint dg = default!;
-    var dl = deadline(Ꮡt, (time.Duration)(5000000000L), time.ΔSecond);
+    nint dg = default;
+    var dl = deadline(t, (time.Duration)(5000000000L), time.ΔSecond);
     while (time.Now().Before(dl)) {
         {
             dg = runtime.NumGoroutine() - numg0; if (dg <= 4) {
@@ -300,7 +300,7 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
 
     var buf = new slice<byte>(4096);
     buf = buf.slice(0, runtime.Stack(buf, true));
-    Ꮡt.Errorf("Unexpectedly large number of new goroutines: %d new: %s"u8, dg, buf);
+    t.Errorf("Unexpectedly large number of new goroutines: %d new: %s", dg, buf);
 }
 
 // deadline returns the time which is needed before t.Deadline()
@@ -331,7 +331,7 @@ internal static @string chunk(@string s) {
 
 internal static ж<url.URL> mustParseURL(@string s) {
     var (u, err) = url.Parse(s);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("Error parsing URL %q: %v"u8, s, err));
     }
     return u;
@@ -339,7 +339,7 @@ internal static ж<url.URL> mustParseURL(@string s) {
 
 internal static ж<http.Request> mustNewRequest(@string method, @string url, io.Reader body) {
     var (req, err) = http.NewRequest(method, url, body);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(fmt.Sprintf("NewRequest(%q, %q, %p) err = %v"u8, method, url, body, err));
     }
     return req;
@@ -347,7 +347,7 @@ internal static ж<http.Request> mustNewRequest(@string method, @string url, io.
 
 internal static ж<http.Request> mustReadRequest(@string s) {
     var (req, err) = http.ReadRequest(bufio.NewReader(new httputil_test_package.strings_ReaderжReader(strings.NewReader(s))));
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return req;
@@ -358,19 +358,19 @@ partial struct dumpResTestsᴛ1 /*dyn*/ {
     internal bool body;
     internal @string want;
 }
-internal static slice<dumpResTestsᴛ1> dumpResTests = new dumpResTestsᴛ1[]{
+internal static slice<dumpResTestsᴛ1> dumpResTests = slice<dumpResTestsᴛ1>([
     new(
         res: Ꮡ(new http.Response(
-            Status: "200 OK"u8,
+            Status: "200 OK",
             StatusCode: 200,
-            Proto: "HTTP/1.1"u8,
+            Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
             ContentLength: 50,
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
-                ["Foo"u8] = new @string[]{"Bar"u8}.slice()
+                ["Foo"] = slice<@string>(["Bar"])
             }),
-            Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"u8))) // shouldn't be used
+            Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"))) // shouldn't be used
         )),
         body: false, // to verify we see 50, not empty or 3.
         want: """
@@ -382,13 +382,13 @@ Foo: Bar
 
     new(
         res: Ꮡ(new http.Response(
-            Status: "200 OK"u8,
+            Status: "200 OK",
             StatusCode: 200,
-            Proto: "HTTP/1.1"u8,
+            Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
             ContentLength: 3,
-            Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"u8)))
+            Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo")))
         )),
         body: true,
         want: """
@@ -401,14 +401,14 @@ foo
 
     new(
         res: Ꮡ(new http.Response(
-            Status: "200 OK"u8,
+            Status: "200 OK",
             StatusCode: 200,
-            Proto: "HTTP/1.1"u8,
+            Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
             ContentLength: -1,
-            Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"u8))),
-            TransferEncoding: new @string[]{"chunked"u8}.slice()
+            Body: io.NopCloser(new httputil_test_package.strings_ReaderжReader(strings.NewReader("foo"))),
+            TransferEncoding: slice<@string>(["chunked"])
         )),
         body: true,
         want: """
@@ -422,18 +422,18 @@ foo
     ),
     new(
         res: Ꮡ(new http.Response(
-            Status: "200 OK"u8,
+            Status: "200 OK",
             StatusCode: 200,
-            Proto: "HTTP/1.1"u8,
+            Proto: "HTTP/1.1",
             ProtoMajor: 1,
             ProtoMinor: 1,
             ContentLength: 0,
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
                 // To verify if headers are not filtered out.
-                ["Foo1"u8] = new @string[]{"Bar1"u8}.slice(),
-                ["Foo2"u8] = new @string[]{"Bar2"u8}.slice()
+                ["Foo1"] = slice<@string>(["Bar1"]),
+                ["Foo2"] = slice<@string>(["Bar2"])
             }),
-            Body: default!
+            Body: default
         )),
         body: false, // to verify we see 0, not empty.
         want: """
@@ -443,28 +443,30 @@ Foo2: Bar2
 Content-Length: 0
 """u8.Raw()
     )
-}.slice();
+]);
 
-public static void TestDumpResponse(ж<testing.T> Ꮡt) {
+public static void TestDumpResponse(ж<testing.T> t) {
     foreach (var (i, tt) in dumpResTests) {
         var (gotb, err) = DumpResponse(tt.res, tt.body);
-        if (err != default!) {
-            Ꮡt.Errorf("%d. DumpResponse = %v"u8, i, err);
+        if (err != nil) {
+            t.Errorf("%d. DumpResponse = %v", i, err);
             continue;
         }
         @string got = (@string)gotb;
         got = strings.TrimSpace(got);
-        got = strings.ReplaceAll(got, "\r"u8, ""u8);
+        got = strings.ReplaceAll(got, "\r", ""u8);
 
         if (got != tt.want) {
-            Ꮡt.Errorf("%d.\nDumpResponse got:\n%s\n\nWant:\n%s\n"u8, i, got, tt.want);
+            t.Errorf("%d.\nDumpResponse got:\n%s\n\nWant:\n%s\n", i, got, tt.want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string httpExampleComˢ = "http://example.com"u8;
-internal static readonly @string goroutineˢ = "goroutine"u8;
+internal static ref readonly @string httpExampleComˢ => ref httpExampleComˢᵇ;
+private static readonly @string httpExampleComˢᵇ = "http://example.com"u8;
+internal static ref readonly @string goroutineˢ => ref goroutineˢᵇ;
+private static readonly @string goroutineˢᵇ = "goroutine"u8;
 
 // Issue 38352: Check for deadlock on canceled requests.
 public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
@@ -493,7 +495,7 @@ public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
             var r = bytes.NewBuffer(new slice<byte>(10000));
             ref var err = ref heap<error>(out var Ꮡerr);
             (var req, err) = http.NewRequestWithContext(ctx, http.MethodPost, httpExampleComˢ, new httputil_test_package.bytes_BufferжReader(r));
-            if (err != default!) {
+            if (err != nil) {
                 Ꮡt.Fatal(err);
             }
 
@@ -512,7 +514,7 @@ public static partial void TestDumpRequestOutIssue38352(ж<testing.T> Ꮡt) {
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {
-                var b = Ꮡ(new strings.Builder(nil));
+                var b = Ꮡ(new strings.Builder());
                 fmt.Fprintf(new httputil_test_package.strings_BuilderжWriter(b), "deadlock detected on iteration %d after %s with delay: %v\n"u8, i, timeout, delay);
                 pprof.Lookup(goroutineˢ).WriteTo(new httputil_test_package.strings_BuilderжWriter(b), 1);
                 Ꮡt.Fatal(b.String());

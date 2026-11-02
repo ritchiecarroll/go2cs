@@ -68,1537 +68,1537 @@ internal partial struct leafSpec {
     internal @string cn;
 }
 
-internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstraintsTest[]{
+internal static slice<nameConstraintsTest> nameConstraintsTests = slice<nameConstraintsTest>([
     new(
-        name: "certificate generation process"u8,
+        name: "certificate generation process",
         roots: new slice<constraintsSpec>(1),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "single level of intermediate"u8,
+        name: "single level of intermediate",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "two levels of intermediates"u8,
+        name: "two levels of intermediates",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice(),
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()]),
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "matching DNS constraint in root"u8,
-        roots: new constraintsSpec[]{
+        name: "matching DNS constraint in root",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:example.com"u8}.slice()
+                ok: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "matching DNS constraint in intermediate"u8,
+        name: "matching DNS constraint in intermediate",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "leading period only matches subdomains"u8,
-        roots: new constraintsSpec[]{
+        name: "leading period only matches subdomains",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:.example.com"u8}.slice()
+                ok: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         ),
-        expectedError: "\"example.com\" is not permitted"u8
+        expectedError: "\"example.com\" is not permitted"
     ),
     new(
-        name: "leading period matches subdomains"u8,
+        name: "leading period matches subdomains",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:.example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:.example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.example.com"])
         )
     ),
     new(
-        name: "leading period matches multiple levels of subdomains"u8,
-        roots: new constraintsSpec[]{
+        name: "leading period matches multiple levels of subdomains",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:.example.com"u8}.slice()
+                ok: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.bar.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.bar.example.com"])
         )
     ),
     new(
-        name: "specifying a permitted list of names does not exclude other name types"u8,
-        roots: new constraintsSpec[]{
+        name: "specifying a permitted list of names does not exclude other name types",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:.example.com"u8}.slice()
+                ok: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:10.1.1.1"u8}.slice()
+            sans: slice<@string>(["ip:10.1.1.1"])
         )
     ),
     new(
-        name: "specifying a permitted list of names does not exclude other name types"u8,
-        roots: new constraintsSpec[]{
+        name: "specifying a permitted list of names does not exclude other name types",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:10.0.0.0/8"u8}.slice()
+                ok: slice<@string>(["ip:10.0.0.0/8"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "intermediates can try to permit other names, which isn't forbidden if the leaf doesn't mention them"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediates can try to permit other names, which isn't forbidden if the leaf doesn't mention them",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:example.com"u8}.slice()
+                ok: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:example.com"u8, "dns:foo.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:example.com", "dns:foo.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "intermediates cannot add permitted names that the root doesn't grant them"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediates cannot add permitted names that the root doesn't grant them",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:example.com"u8}.slice()
+                ok: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:foo.example.com"u8, "dns:foo.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:foo.example.com", "dns:foo.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.com"])
         ),
-        expectedError: "\"foo.com\" is not permitted"u8
+        expectedError: "\"foo.com\" is not permitted"
     ),
     new(
-        name: "intermediates can further limit their scope if they wish"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediates can further limit their scope if they wish",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:.example.com"u8}.slice()
+                ok: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:.bar.example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:.bar.example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.bar.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.bar.example.com"])
         )
     ),
     new(
-        name: "intermediates can further limit their scope and that limitation is effective"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediates can further limit their scope and that limitation is effective",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:.example.com"u8}.slice()
+                ok: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:.bar.example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:.bar.example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.notbar.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.notbar.example.com"])
         ),
-        expectedError: "\"foo.notbar.example.com\" is not permitted"u8
+        expectedError: "\"foo.notbar.example.com\" is not permitted"
     ),
     new(
-        name: "roots can exclude subtrees and that doesn't affect other names"u8,
-        roots: new constraintsSpec[]{
+        name: "roots can exclude subtrees and that doesn't affect other names",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:.example.com"u8}.slice()
+                bad: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.com"])
         )
     ),
     new(
-        name: "roots exclusions are effective"u8,
-        roots: new constraintsSpec[]{
+        name: "roots exclusions are effective",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:.example.com"u8}.slice()
+                bad: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.example.com"])
         ),
-        expectedError: "\"foo.example.com\" is excluded"u8
+        expectedError: "\"foo.example.com\" is excluded"
     ),
     new(
-        name: "intermediates can also exclude names and that doesn't affect other names"u8,
+        name: "intermediates can also exclude names and that doesn't affect other names",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    bad: new @string[]{"dns:.example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    bad: slice<@string>(["dns:.example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.com"])
         )
     ),
     new(
-        name: "intermediate exclusions are effective"u8,
+        name: "intermediate exclusions are effective",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    bad: new @string[]{"dns:.example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    bad: slice<@string>(["dns:.example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.example.com"])
         ),
-        expectedError: "\"foo.example.com\" is excluded"u8
+        expectedError: "\"foo.example.com\" is excluded"
     ),
     new(
-        name: "having an exclusion doesn't prohibit other types of names"u8,
-        roots: new constraintsSpec[]{
+        name: "having an exclusion doesn't prohibit other types of names",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:.example.com"u8}.slice()
+                bad: slice<@string>(["dns:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.com"u8, "ip:10.1.1.1"u8}.slice()
+            sans: slice<@string>(["dns:foo.com", "ip:10.1.1.1"])
         )
     ),
     new(
-        name: "IP-based exclusions are permitted and don't affect unrelated IP addresses"u8,
-        roots: new constraintsSpec[]{
+        name: "IP-based exclusions are permitted and don't affect unrelated IP addresses",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"ip:10.0.0.0/8"u8}.slice()
+                bad: slice<@string>(["ip:10.0.0.0/8"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:192.168.1.1"u8}.slice()
+            sans: slice<@string>(["ip:192.168.1.1"])
         )
     ),
     new(
-        name: "IP-based exclusions are effective"u8,
-        roots: new constraintsSpec[]{
+        name: "IP-based exclusions are effective",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"ip:10.0.0.0/8"u8}.slice()
+                bad: slice<@string>(["ip:10.0.0.0/8"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:10.0.0.1"u8}.slice()
+            sans: slice<@string>(["ip:10.0.0.1"])
         ),
-        expectedError: "\"10.0.0.1\" is excluded"u8
+        expectedError: "\"10.0.0.1\" is excluded"
     ),
     new(
-        name: "intermediates can further constrain IP ranges"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediates can further constrain IP ranges",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"ip:0.0.0.0/1"u8}.slice()
+                bad: slice<@string>(["ip:0.0.0.0/1"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    bad: new @string[]{"ip:11.0.0.0/8"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    bad: slice<@string>(["ip:11.0.0.0/8"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:11.0.0.1"u8}.slice()
+            sans: slice<@string>(["ip:11.0.0.1"])
         ),
-        expectedError: "\"11.0.0.1\" is excluded"u8
+        expectedError: "\"11.0.0.1\" is excluded"
     ),
     new(
-        name: "multiple intermediates with incompatible constraints"u8,
+        name: "multiple intermediates with incompatible constraints",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:.foo.com"u8}.slice()
+                    ok: slice<@string>(["dns:.foo.com"])
                 ),
                 new(
-                    ok: new @string[]{"dns:.example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:.example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.example.com"])
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
-        name: "multiple intermediates with incompatible constraints swapped"u8,
+        name: "multiple intermediates with incompatible constraints swapped",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:.example.com"u8}.slice()
+                    ok: slice<@string>(["dns:.example.com"])
                 ),
                 new(
-                    ok: new @string[]{"dns:.foo.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:.foo.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.example.com"u8}.slice()
+            sans: slice<@string>(["dns:foo.example.com"])
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
-        name: "multiple roots with incompatible constraints"u8,
-        roots: new constraintsSpec[]{
+        name: "multiple roots with incompatible constraints",
+        roots: slice<constraintsSpec>([
             new(),
             new(
-                ok: new @string[]{"dns:foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
-        name: "multiple roots with incompatible constraints swapped"u8,
-        roots: new constraintsSpec[]{
+        name: "multiple roots with incompatible constraints swapped",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com"])
             ),
             new()
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
-        name: "chain building with multiple intermediates and roots"u8,
-        roots: new constraintsSpec[]{
+        name: "chain building with multiple intermediates and roots",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com"])
             ),
             new(
-                ok: new @string[]{"dns:example.com"u8}.slice()
+                ok: slice<@string>(["dns:example.com"])
             ),
             new()
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(),
                 new(
-                    ok: new @string[]{"dns:foo.com"u8}.slice()
-                )}.slice(),
-            new constraintsSpec[]{
+                    ok: slice<@string>(["dns:foo.com"])
+                )]),
+            slice<constraintsSpec>([
                 new(),
                 new(
-                    ok: new @string[]{"dns:foo.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:foo.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:bar.com"u8}.slice()
+            sans: slice<@string>(["dns:bar.com"])
         ),
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
     new(
-        name: "chain building fails with no valid path"u8,
-        roots: new constraintsSpec[]{
+        name: "chain building fails with no valid path",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com"])
             ),
             new(
-                ok: new @string[]{"dns:example.com"u8}.slice()
+                ok: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(),
                 new(
-                    ok: new @string[]{"dns:foo.com"u8}.slice()
-                )}.slice(),
-            new constraintsSpec[]{
+                    ok: slice<@string>(["dns:foo.com"])
+                )]),
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:bar.com"u8}.slice()
+                    ok: slice<@string>(["dns:bar.com"])
                 ),
                 new(
-                    ok: new @string[]{"dns:foo.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:foo.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:bar.com"u8}.slice()
+            sans: slice<@string>(["dns:bar.com"])
         ),
-        expectedError: "\"bar.com\" is not permitted"u8
+        expectedError: "\"bar.com\" is not permitted"
     ),
     new(
-        name: "unknown name types are unconstrained"u8,
+        name: "unknown name types are unconstrained",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"unknown:"u8}.slice()
+            sans: slice<@string>(["unknown:"])
         )
     ),
     new(
-        name: "unknown name types allowed in constrained chain"u8,
-        roots: new constraintsSpec[]{
+        name: "unknown name types allowed in constrained chain",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"unknown:"u8}.slice()
+            sans: slice<@string>(["unknown:"])
         )
     ),
     new(
-        name: "CN is ignored in constrained chain"u8,
-        roots: new constraintsSpec[]{
+        name: "CN is ignored in constrained chain",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{}.slice(),
-            cn: "foo.com"u8
+            sans: slice<@string>([]),
+            cn: "foo.com"
         )
     ),
     new(
-        name: "IPv6 permitted constraint"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 permitted constraint",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
+                ok: slice<@string>(["ip:2000:abcd::/32"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:2000:abcd:1234::"u8}.slice()
+            sans: slice<@string>(["ip:2000:abcd:1234::"])
         )
     ),
     new(
-        name: "IPv6 permitted constraint is effective"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 permitted constraint is effective",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
+                ok: slice<@string>(["ip:2000:abcd::/32"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:2000:1234:abcd::"u8}.slice()
+            sans: slice<@string>(["ip:2000:1234:abcd::"])
         ),
-        expectedError: "\"2000:1234:abcd::\" is not permitted"u8
+        expectedError: "\"2000:1234:abcd::\" is not permitted"
     ),
     new(
-        name: "IPv6 permitted constraint does not affect DNS"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 permitted constraint does not affect DNS",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
+                ok: slice<@string>(["ip:2000:abcd::/32"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:2000:abcd::"u8, "dns:foo.com"u8}.slice()
+            sans: slice<@string>(["ip:2000:abcd::", "dns:foo.com"])
         )
     ),
     new(
-        name: "IPv6 excluded constraint"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 excluded constraint",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"ip:2000:abcd::/32"u8}.slice()
+                bad: slice<@string>(["ip:2000:abcd::/32"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:2000:1234::"u8}.slice()
+            sans: slice<@string>(["ip:2000:1234::"])
         )
     ),
     new(
-        name: "IPv6 excluded constraint is effective"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 excluded constraint is effective",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"ip:2000:abcd::/32"u8}.slice()
+                bad: slice<@string>(["ip:2000:abcd::/32"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:2000:abcd::"u8}.slice()
+            sans: slice<@string>(["ip:2000:abcd::"])
         ),
-        expectedError: "\"2000:abcd::\" is excluded"u8
+        expectedError: "\"2000:abcd::\" is excluded"
     ),
     new(
-        name: "IPv6 constraint does not permit IPv4"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 constraint does not permit IPv4",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
+                ok: slice<@string>(["ip:2000:abcd::/32"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:10.0.0.1"u8}.slice()
+            sans: slice<@string>(["ip:10.0.0.1"])
         ),
-        expectedError: "\"10.0.0.1\" is not permitted"u8
+        expectedError: "\"10.0.0.1\" is not permitted"
     ),
     new(
-        name: "IPv4 constraint does not permit IPv6"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv4 constraint does not permit IPv6",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:10.0.0.0/8"u8}.slice()
+                ok: slice<@string>(["ip:10.0.0.0/8"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:2000:abcd::"u8}.slice()
+            sans: slice<@string>(["ip:2000:abcd::"])
         ),
-        expectedError: "\"2000:abcd::\" is not permitted"u8
+        expectedError: "\"2000:abcd::\" is not permitted"
     ),
     new(
-        name: "unknown excluded constraint does not affect other names"u8,
-        roots: new constraintsSpec[]{
+        name: "unknown excluded constraint does not affect other names",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"unknown:"u8}.slice()
+                bad: slice<@string>(["unknown:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "unknown permitted constraint does not affect other names"u8,
-        roots: new constraintsSpec[]{
+        name: "unknown permitted constraint does not affect other names",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"unknown:"u8}.slice()
+                ok: slice<@string>(["unknown:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "exact email constraint"u8,
-        roots: new constraintsSpec[]{
+        name: "exact email constraint",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:foo@example.com"u8}.slice()
+                ok: slice<@string>(["email:foo@example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@example.com"])
         )
     ),
     new(
-        name: "exact email constraint is effective"u8,
-        roots: new constraintsSpec[]{
+        name: "exact email constraint is effective",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:foo@example.com"u8}.slice()
+                ok: slice<@string>(["email:foo@example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:bar@example.com"u8}.slice()
+            sans: slice<@string>(["email:bar@example.com"])
         ),
-        expectedError: "\"bar@example.com\" is not permitted"u8
+        expectedError: "\"bar@example.com\" is not permitted"
     ),
     new(
-        name: "email canonicalization"u8,
-        roots: new constraintsSpec[]{
+        name: "email canonicalization",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:foo@example.com"u8}.slice()
+                ok: slice<@string>(["email:foo@example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:\"\\f\\o\\o\"@example.com"u8}.slice()
+            sans: slice<@string>(["email:\"\\f\\o\\o\"@example.com"])
         ),
         noOpenSSL: true // OpenSSL doesn't canonicalise email addresses before matching
 
     ),
     new(
-        name: "email host constraint"u8,
-        roots: new constraintsSpec[]{
+        name: "email host constraint",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:example.com"u8}.slice()
+                ok: slice<@string>(["email:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@example.com"])
         )
     ),
     new(
-        name: "email subdomain constraint"u8,
-        roots: new constraintsSpec[]{
+        name: "email subdomain constraint",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:.example.com"u8}.slice()
+                ok: slice<@string>(["email:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@sub.example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@sub.example.com"])
         )
     ),
     new(
-        name: "email subdomain constraint does not match parent"u8,
-        roots: new constraintsSpec[]{
+        name: "email subdomain constraint does not match parent",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:.example.com"u8}.slice()
+                ok: slice<@string>(["email:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@example.com"])
         ),
-        expectedError: "\"foo@example.com\" is not permitted"u8
+        expectedError: "\"foo@example.com\" is not permitted"
     ),
     new(
-        name: "email subdomain constraint matches deeper subdomains"u8,
-        roots: new constraintsSpec[]{
+        name: "email subdomain constraint matches deeper subdomains",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:.example.com"u8}.slice()
+                ok: slice<@string>(["email:.example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@sub.sub.example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@sub.sub.example.com"])
         )
     ),
     new(
-        name: "email local part is case-sensitive"u8,
-        roots: new constraintsSpec[]{
+        name: "email local part is case-sensitive",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:foo@example.com"u8}.slice()
+                ok: slice<@string>(["email:foo@example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:Foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:Foo@example.com"])
         ),
-        expectedError: "\"Foo@example.com\" is not permitted"u8
+        expectedError: "\"Foo@example.com\" is not permitted"
     ),
     new(
-        name: "email domain part is case-insensitive"u8,
-        roots: new constraintsSpec[]{
+        name: "email domain part is case-insensitive",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:foo@EXAMPLE.com"u8}.slice()
+                ok: slice<@string>(["email:foo@EXAMPLE.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@example.com"])
         )
     ),
     new(
-        name: "DNS domain is case-insensitive"u8,
-        roots: new constraintsSpec[]{
+        name: "DNS domain is case-insensitive",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:EXAMPLE.com"u8}.slice()
+                ok: slice<@string>(["dns:EXAMPLE.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "URI constraint covers host"u8,
-        roots: new constraintsSpec[]{
+        name: "URI constraint covers host",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{
-                "uri:http://example.com/bar"u8,
-                "uri:http://example.com:8080/"u8,
-                "uri:https://example.com/wibble#bar"u8
-            }.slice()
+            sans: slice<@string>([
+                "uri:http://example.com/bar",
+                "uri:http://example.com:8080/",
+                "uri:https://example.com/wibble#bar"
+            ])
         )
     ),
     new(
-        name: "URI with IP is rejected"u8,
-        roots: new constraintsSpec[]{
+        name: "URI with IP is rejected",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://1.2.3.4/"u8}.slice()
+            sans: slice<@string>(["uri:http://1.2.3.4/"])
         ),
-        expectedError: "URI with IP"u8
+        expectedError: "URI with IP"
     ),
     new(
-        name: "URI with IP and port is rejected"u8,
-        roots: new constraintsSpec[]{
+        name: "URI with IP and port is rejected",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://1.2.3.4:43/"u8}.slice()
+            sans: slice<@string>(["uri:http://1.2.3.4:43/"])
         ),
-        expectedError: "URI with IP"u8
+        expectedError: "URI with IP"
     ),
     new(
-        name: "URI with IPv6 is rejected"u8,
-        roots: new constraintsSpec[]{
+        name: "URI with IPv6 is rejected",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://[2006:abcd::1]/"u8}.slice()
+            sans: slice<@string>(["uri:http://[2006:abcd::1]/"])
         ),
-        expectedError: "URI with IP"u8
+        expectedError: "URI with IP"
     ),
     new(
-        name: "URI with IPv6 and port is rejected"u8,
-        roots: new constraintsSpec[]{
+        name: "URI with IPv6 and port is rejected",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://[2006:abcd::1]:16/"u8}.slice()
+            sans: slice<@string>(["uri:http://[2006:abcd::1]:16/"])
         ),
-        expectedError: "URI with IP"u8
+        expectedError: "URI with IP"
     ),
     new(
-        name: "URI permitted constraint is effective"u8,
-        roots: new constraintsSpec[]{
+        name: "URI permitted constraint is effective",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://bar.com/"u8}.slice()
+            sans: slice<@string>(["uri:http://bar.com/"])
         ),
-        expectedError: "\"http://bar.com/\" is not permitted"u8
+        expectedError: "\"http://bar.com/\" is not permitted"
     ),
     new(
-        name: "URI excluded constraint is effective"u8,
-        roots: new constraintsSpec[]{
+        name: "URI excluded constraint is effective",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"uri:foo.com"u8}.slice()
+                bad: slice<@string>(["uri:foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://foo.com/"u8}.slice()
+            sans: slice<@string>(["uri:http://foo.com/"])
         ),
-        expectedError: "\"http://foo.com/\" is excluded"u8
+        expectedError: "\"http://foo.com/\" is excluded"
     ),
     new(
-        name: "URI subdomain constraint"u8,
-        roots: new constraintsSpec[]{
+        name: "URI subdomain constraint",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:.foo.com"u8}.slice()
+                ok: slice<@string>(["uri:.foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://www.foo.com/"u8}.slice()
+            sans: slice<@string>(["uri:http://www.foo.com/"])
         )
     ),
     new(
-        name: "IPv4-mapped-IPv6 exclusion does not affect IPv4"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv4-mapped-IPv6 exclusion does not affect IPv4",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"ip:::ffff:1.2.3.4/128"u8}.slice()
+                bad: slice<@string>(["ip:::ffff:1.2.3.4/128"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:1.2.3.4"u8}.slice()
+            sans: slice<@string>(["ip:1.2.3.4"])
         )
     ),
     new(
-        name: "URI constraint not matched by URN"u8,
-        roots: new constraintsSpec[]{
+        name: "URI constraint not matched by URN",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:urn:example"u8}.slice()
+            sans: slice<@string>(["uri:urn:example"])
         ),
-        expectedError: "URI with empty host"u8
+        expectedError: "URI with empty host"
     ),
     new(
-        name: "IPv6 exclusion does not exclude all IPv4"u8,
-        roots: new constraintsSpec[]{
+        name: "IPv6 exclusion does not exclude all IPv4",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"ip:1.2.3.0/24"u8}.slice(),
-                bad: new @string[]{"ip:::0/0"u8}.slice()
+                ok: slice<@string>(["ip:1.2.3.0/24"]),
+                bad: slice<@string>(["ip:::0/0"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"ip:1.2.3.4"u8}.slice()
+            sans: slice<@string>(["ip:1.2.3.4"])
         )
     ),
     new(
-        name: "empty EKU in CA means any is ok"u8,
+        name: "empty EKU in CA means any is ok",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8, "other"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth", "other"])
         )
     ),
     new(
-        name: "any EKU means any is ok"u8,
+        name: "any EKU means any is ok",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"any"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["any"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8, "other"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth", "other"])
         )
     ),
     // default.)
     new(
-        name: "intermediate with enumerated EKUs"u8,
+        name: "intermediate with enumerated EKUs",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"email"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["email"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth"])
         ),
-        expectedError: "incompatible key usage"u8
+        expectedError: "incompatible key usage"
     ),
     new(
-        name: "unknown EKU in leaf"u8,
+        name: "unknown EKU in leaf",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"email"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["email"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"other"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["other"])
         ),
-        requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageAny}.slice()
+        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageAny])
     ),
     // certificate doesn't use them.
     new(
-        name: "intermediate cannot add EKUs not in root if leaf uses them"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediate cannot add EKUs not in root if leaf uses them",
+        roots: slice<constraintsSpec>([
             new(
-                ekus: new @string[]{"serverAuth"u8}.slice()
+                ekus: slice<@string>(["serverAuth"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"serverAuth"u8, "email"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["serverAuth", "email"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth"])
         )
     ),
     new(
-        name: "EKUs in root are effective"u8,
-        roots: new constraintsSpec[]{
+        name: "EKUs in root are effective",
+        roots: slice<constraintsSpec>([
             new(
-                ekus: new @string[]{"email"u8}.slice()
+                ekus: slice<@string>(["email"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"serverAuth"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["serverAuth"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth"])
         ),
-        expectedError: "incompatible key usage"u8
+        expectedError: "incompatible key usage"
     ),
     new(
-        name: "netscapeSGC EKU does not permit server/client auth"u8,
-        roots: new constraintsSpec[]{
+        name: "netscapeSGC EKU does not permit server/client auth",
+        roots: slice<constraintsSpec>([
             new()
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"netscapeSGC"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["netscapeSGC"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8, "clientAuth"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth", "clientAuth"])
         ),
-        expectedError: "incompatible key usage"u8
+        expectedError: "incompatible key usage"
     ),
     new(
-        name: "msSGC EKU does not permit server/client auth"u8,
+        name: "msSGC EKU does not permit server/client auth",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"msSGC"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["msSGC"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8, "clientAuth"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth", "clientAuth"])
         ),
-        expectedError: "incompatible key usage"u8
+        expectedError: "incompatible key usage"
     ),
     new(
-        name: "empty DNS permitted constraint allows anything"u8,
-        roots: new constraintsSpec[]{
+        name: "empty DNS permitted constraint allows anything",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:"u8}.slice()
+                ok: slice<@string>(["dns:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         )
     ),
     new(
-        name: "empty DNS excluded constraint rejects everything"u8,
-        roots: new constraintsSpec[]{
+        name: "empty DNS excluded constraint rejects everything",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:"u8}.slice()
+                bad: slice<@string>(["dns:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice()
+            sans: slice<@string>(["dns:example.com"])
         ),
-        expectedError: "\"example.com\" is excluded"u8
+        expectedError: "\"example.com\" is excluded"
     ),
     new(
-        name: "empty email permitted constraint allows anything"u8,
-        roots: new constraintsSpec[]{
+        name: "empty email permitted constraint allows anything",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:"u8}.slice()
+                ok: slice<@string>(["email:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@example.com"])
         )
     ),
     new(
-        name: "empty email excluded constraint rejects everything"u8,
-        roots: new constraintsSpec[]{
+        name: "empty email excluded constraint rejects everything",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"email:"u8}.slice()
+                bad: slice<@string>(["email:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:foo@example.com"u8}.slice()
+            sans: slice<@string>(["email:foo@example.com"])
         ),
-        expectedError: "\"foo@example.com\" is excluded"u8
+        expectedError: "\"foo@example.com\" is excluded"
     ),
     new(
-        name: "empty URI permitted constraint allows anything"u8,
-        roots: new constraintsSpec[]{
+        name: "empty URI permitted constraint allows anything",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:"u8}.slice()
+                ok: slice<@string>(["uri:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:https://example.com/test"u8}.slice()
+            sans: slice<@string>(["uri:https://example.com/test"])
         )
     ),
     new(
-        name: "empty URI excluded constraint rejects everything"u8,
-        roots: new constraintsSpec[]{
+        name: "empty URI excluded constraint rejects everything",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"uri:"u8}.slice()
+                bad: slice<@string>(["uri:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:https://example.com/test"u8}.slice()
+            sans: slice<@string>(["uri:https://example.com/test"])
         ),
-        expectedError: "\"https://example.com/test\" is excluded"u8
+        expectedError: "\"https://example.com/test\" is excluded"
     ),
     new(
-        name: "serverAuth EKU does not permit clientAuth"u8,
+        name: "serverAuth EKU does not permit clientAuth",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"serverAuth"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["serverAuth"])
         ),
-        requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth}.slice(),
-        expectedError: "incompatible key usage"u8
+        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth]),
+        expectedError: "incompatible key usage"
     ),
     new(
-        name: "msSGC EKU does not permit serverAuth"u8,
+        name: "msSGC EKU does not permit serverAuth",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"msSGC"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["msSGC"])
         ),
-        requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
-        expectedError: "incompatible key usage"u8
+        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth]),
+        expectedError: "incompatible key usage"
     ),
     new(
         // An invalid DNS SAN should be detected only at validation time so
         // that we can process CA certificates in the wild that have invalid SANs.
         // See https://github.com/golang/go/issues/23995
-        name: "invalid SANs are ignored with no constraints"u8,
+        name: "invalid SANs are ignored with no constraints",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:this is invalid"u8, "email:this @ is invalid"u8}.slice()
+            sans: slice<@string>(["dns:this is invalid", "email:this @ is invalid"])
         )
     ),
     new(
-        name: "invalid DNS SAN detected with constraints"u8,
-        roots: new constraintsSpec[]{
+        name: "invalid DNS SAN detected with constraints",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"uri:"u8}.slice()
+                bad: slice<@string>(["uri:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:this is invalid"u8}.slice()
+            sans: slice<@string>(["dns:this is invalid"])
         ),
-        expectedError: "cannot parse dnsName"u8
+        expectedError: "cannot parse dnsName"
     ),
     new(
-        name: "invalid email SAN detected with constraints"u8,
-        roots: new constraintsSpec[]{
+        name: "invalid email SAN detected with constraints",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"uri:"u8}.slice()
+                bad: slice<@string>(["uri:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:this @ is invalid"u8}.slice()
+            sans: slice<@string>(["email:this @ is invalid"])
         ),
-        expectedError: "cannot parse rfc822Name"u8
+        expectedError: "cannot parse rfc822Name"
     ),
     new(
-        name: "any requested EKU is sufficient"u8,
+        name: "any requested EKU is sufficient",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
-            ekus: new @string[]{"email"u8}.slice()
+            sans: slice<@string>(["dns:example.com"]),
+            ekus: slice<@string>(["email"])
         ),
-        requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth, ExtKeyUsageEmailProtection}.slice()
+        requestedEKUs: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageClientAuth, ExtKeyUsageEmailProtection])
     ),
     new(
-        name: "unrequested EKUs not required to be nested"u8,
+        name: "unrequested EKUs not required to be nested",
         roots: new slice<constraintsSpec>(1),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ekus: new @string[]{"serverAuth"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ekus: slice<@string>(["serverAuth"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:example.com"u8}.slice(),
+            sans: slice<@string>(["dns:example.com"]),
             // There's no email EKU in the intermediate. This would be rejected if
             // full nesting was required.
-            ekus: new @string[]{"email"u8, "serverAuth"u8}.slice()
+            ekus: slice<@string>(["email", "serverAuth"])
         )
     ),
     new(
-        name: "empty leaf is accepted in constrained chain"u8,
-        roots: new constraintsSpec[]{
+        name: "empty leaf is accepted in constrained chain",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{}.slice()
+            sans: slice<@string>([])
         )
     ),
     new(
-        name: "no SANs and non-hostname CN is accepted in constrained chain"u8,
-        roots: new constraintsSpec[]{
+        name: "no SANs and non-hostname CN is accepted in constrained chain",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{}.slice(),
-            cn: "foo.bar"u8
+            sans: slice<@string>([]),
+            cn: "foo.bar"
         )
     ),
     new(
-        name: "constraints don't apply to CN"u8,
-        roots: new constraintsSpec[]{
+        name: "constraints don't apply to CN",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
+                ok: slice<@string>(["dns:foo.com", "dns:.foo.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:foo.com"u8}.slice(),
-            cn: "foo.bar"u8
+            sans: slice<@string>(["dns:foo.com"]),
+            cn: "foo.bar"
         )
     ),
     new(
-        name: "DNS SAN cannot use leading period form"u8,
-        roots: new constraintsSpec[]{new(ok: new @string[]{"dns:example.com"u8}.slice())}.slice(),
-        leaf: new leafSpec(sans: new @string[]{"dns:.example.com"u8}.slice()),
-        expectedError: "cannot parse dnsName \".example.com\""u8
+        name: "DNS SAN cannot use leading period form",
+        roots: slice<constraintsSpec>([new(ok: slice<@string>(["dns:example.com"]))]),
+        leaf: new leafSpec(sans: slice<@string>(["dns:.example.com"])),
+        expectedError: "cannot parse dnsName \".example.com\""
     ),
     new(
-        name: "URI with IPv6 and zone is rejected"u8,
-        roots: new constraintsSpec[]{
+        name: "URI with IPv6 and zone is rejected",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"uri:example.com"u8}.slice()
+                ok: slice<@string>(["uri:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"uri:http://[2006:abcd::1%25.example.com]:16/"u8}.slice()
+            sans: slice<@string>(["uri:http://[2006:abcd::1%25.example.com]:16/"])
         ),
-        expectedError: "URI with IP"u8
+        expectedError: "URI with IP"
     ),
     new(
-        name: "intermediate can narrow permitted dns scope"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediate can narrow permitted dns scope",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:"u8}.slice()
+                ok: slice<@string>(["dns:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    ok: new @string[]{"dns:example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    ok: slice<@string>(["dns:example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:test.com"u8}.slice()
+            sans: slice<@string>(["dns:test.com"])
         ),
-        expectedError: "\"test.com\" is not permitted"u8
+        expectedError: "\"test.com\" is not permitted"
     ),
     new(
-        name: "intermediate cannot narrow excluded dns scope"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediate cannot narrow excluded dns scope",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:"u8}.slice()
+                bad: slice<@string>(["dns:"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    bad: new @string[]{"dns:example.com"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    bad: slice<@string>(["dns:example.com"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:test.com"u8}.slice()
+            sans: slice<@string>(["dns:test.com"])
         ),
-        expectedError: "\"test.com\" is excluded by constraint \"\""u8
+        expectedError: "\"test.com\" is excluded by constraint \"\""
     ),
     new(
-        name: "intermediate can narrow excluded dns scope"u8,
-        roots: new constraintsSpec[]{
+        name: "intermediate can narrow excluded dns scope",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:example.com"u8}.slice()
+                bad: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
                 new(
-                    bad: new @string[]{"dns:"u8}.slice()
-                )}.slice()
-        }.slice(),
+                    bad: slice<@string>(["dns:"])
+                )])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:test.com"u8}.slice()
+            sans: slice<@string>(["dns:test.com"])
         ),
-        expectedError: "\"test.com\" is excluded by constraint \"\""u8
+        expectedError: "\"test.com\" is excluded by constraint \"\""
     ),
     new(
-        name: "permitted dns constraint is not a prefix match"u8,
-        roots: new constraintsSpec[]{
+        name: "permitted dns constraint is not a prefix match",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:example.com"u8}.slice()
+                ok: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:testexample.com"u8}.slice()
+            sans: slice<@string>(["dns:testexample.com"])
         ),
-        expectedError: "\"testexample.com\" is not permitted"u8
+        expectedError: "\"testexample.com\" is not permitted"
     ),
     new(
-        name: "subdomain constraint does not allow wildcard"u8,
-        roots: new constraintsSpec[]{
+        name: "subdomain constraint does not allow wildcard",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"dns:a.com"u8, "dns:foo.example.com"u8, "dns:z.com"u8}.slice()
+                ok: slice<@string>(["dns:a.com", "dns:foo.example.com", "dns:z.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:*.example.com"u8}.slice()
+            sans: slice<@string>(["dns:*.example.com"])
         ),
-        expectedError: "\"*.example.com\" is not permitted"u8
+        expectedError: "\"*.example.com\" is not permitted"
     ),
     new(
-        name: "excluded dns constraint is not a prefix match"u8,
-        roots: new constraintsSpec[]{
+        name: "excluded dns constraint is not a prefix match",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:example.com"u8}.slice()
+                bad: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:testexample.com"u8}.slice()
+            sans: slice<@string>(["dns:testexample.com"])
         )
     ),
     new(
-        name: "excluded email constraint, multiple email with matching local portion"u8,
-        roots: new constraintsSpec[]{
+        name: "excluded email constraint, multiple email with matching local portion",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"email:a@example.com"u8, "email:a@test.com"u8}.slice()
+                bad: slice<@string>(["email:a@example.com", "email:a@test.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:a@example.com"u8}.slice()
+            sans: slice<@string>(["email:a@example.com"])
         ),
-        expectedError: "\"a@example.com\" is excluded by constraint \"a@example.com\""u8
+        expectedError: "\"a@example.com\" is excluded by constraint \"a@example.com\""
     ),
     new(
-        name: "email_case_check"u8,
-        roots: new constraintsSpec[]{
+        name: "email_case_check",
+        roots: slice<constraintsSpec>([
             new(
-                ok: new @string[]{"email:a@example.com"u8}.slice()
+                ok: slice<@string>(["email:a@example.com"])
             )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{
-            new constraintsSpec[]{
-                new()}.slice()
-        }.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([
+            slice<constraintsSpec>([
+                new()])
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"email:a@ExAmple.com"u8}.slice()
+            sans: slice<@string>(["email:a@ExAmple.com"])
         )
     ),
     new(
-        name: "excluded constraint, empty DNS san"u8,
-        roots: new constraintsSpec[]{
+        name: "excluded constraint, empty DNS san",
+        roots: slice<constraintsSpec>([
             new(
-                bad: new @string[]{"dns:example.com"u8}.slice()
+                bad: slice<@string>(["dns:example.com"])
             )
-        }.slice(),
+        ]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:"u8}.slice()
+            sans: slice<@string>(["dns:"])
         )
     ),
     new(
-        name: "subdomain exclusion blocks uppercase wildcard"u8,
-        roots: new constraintsSpec[]{new(
-            bad: new @string[]{"dns:sub.example.com"u8}.slice()
+        name: "subdomain exclusion blocks uppercase wildcard",
+        roots: slice<constraintsSpec>([new(
+            bad: slice<@string>(["dns:sub.example.com"])
         )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{new constraintsSpec[]{new()}.slice()}.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([slice<constraintsSpec>([new()])]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:*.EXAMPLE.COM"u8}.slice()
+            sans: slice<@string>(["dns:*.EXAMPLE.COM"])
         ),
-        expectedError: "\"*.EXAMPLE.COM\" is excluded by constraint \"sub.example.com\""u8
+        expectedError: "\"*.EXAMPLE.COM\" is excluded by constraint \"sub.example.com\""
     ),
     new(
-        name: "uppercase subdomain exclusion blocks lowercase wildcard"u8,
-        roots: new constraintsSpec[]{new(
-            bad: new @string[]{"dns:SUB.EXAMPLE.COM"u8}.slice()
+        name: "uppercase subdomain exclusion blocks lowercase wildcard",
+        roots: slice<constraintsSpec>([new(
+            bad: slice<@string>(["dns:SUB.EXAMPLE.COM"])
         )
-        }.slice(),
-        intermediates: new slice<constraintsSpec>[]{new constraintsSpec[]{new()}.slice()}.slice(),
+        ]),
+        intermediates: slice<slice<constraintsSpec>>([slice<constraintsSpec>([new()])]),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:*.example.com"u8}.slice()
+            sans: slice<@string>(["dns:*.example.com"])
         ),
-        expectedError: "\"*.example.com\" is excluded by constraint \"sub.example.com\""u8
+        expectedError: "\"*.example.com\" is excluded by constraint \"sub.example.com\""
     )
-}.slice();
+]);
 
-internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeConstraintsCACert(constraintsSpec constraints, @string name, ж<ecdsa.PrivateKey> Ꮡkey, ж<global::go.crypto.x509_package.Certificate> Ꮡparent, ж<ecdsa.PrivateKey> ᏑparentKey) {
+internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeConstraintsCACert(constraintsSpec constraints, @string name, ж<ecdsa.PrivateKey> key, ж<global::go.crypto.x509_package.Certificate> Ꮡparent, ж<ecdsa.PrivateKey> parentKey) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     array<byte> serialBytes = new(16);
@@ -1617,35 +1617,40 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     ));
 
     {
-        var errΔ1 = addConstraintsToTemplate(constraints, template); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = addConstraintsToTemplate(constraints, template); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
     if (Ꮡparent == nil) {
         Ꮡparent = template; parent = ref Ꮡparent.DerefOrNull();
     }
-    var (derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡparent, Ꮡkey.of(ecdsa.PrivateKey.ᏑPublicKey), ᏑparentKey.OrTypedNil());
-    if (err != default!) {
-        return (default!, err);
+    var (derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡparent, key.ᏑPublicKey, parentKey.OrTypedNil());
+    if (err != nil) {
+        return (default, err);
     }
 
     (var caCert, err) = ParseCertificate(derBytes);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    return (caCert, default!);
+    return (caCert, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dnsˢ = "dns:"u8;
-internal static readonly @string invalidipˢ = "invalidip:"u8;
-internal static readonly @string emailˢ = "email:"u8;
-internal static readonly @string uriˢ = "uri:"u8;
-internal static readonly @string unknownˢ = "unknown:"u8;
+internal static ref readonly @string dnsˢ => ref dnsˢᵇ;
+private static readonly @string dnsˢᵇ = "dns:"u8;
+internal static ref readonly @string invalidipˢ => ref invalidipˢᵇ;
+private static readonly @string invalidipˢᵇ = "invalidip:"u8;
+internal static ref readonly @string emailˢ => ref emailˢᵇ;
+private static readonly @string emailˢᵇ = "email:"u8;
+internal static ref readonly @string uriˢ => ref uriˢᵇ;
+private static readonly @string uriˢᵇ = "uri:"u8;
+internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
+private static readonly @string unknownˢᵇ = "unknown:"u8;
 
-internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeConstraintsLeafCert(leafSpec leaf, ж<ecdsa.PrivateKey> Ꮡkey, ж<global::go.crypto.x509_package.Certificate> Ꮡparent, ж<ecdsa.PrivateKey> ᏑparentKey) {
+internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeConstraintsLeafCert(leafSpec leaf, ж<ecdsa.PrivateKey> key, ж<global::go.crypto.x509_package.Certificate> Ꮡparent, ж<ecdsa.PrivateKey> parentKey) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     array<byte> serialBytes = new(16);
@@ -1654,7 +1659,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     var template = Ꮡ(new Certificate(
         SerialNumber: @new<bigꓸInt>().SetBytes(serialBytes[..]),
         Subject: new pkix.Name(
-            OrganizationalUnit: new @string[]{"Leaf"u8}.slice(),
+            OrganizationalUnit: slice<@string>(["Leaf"]),
             CommonName: leaf.cn
         ),
         NotBefore: time.Unix(1000, 0),
@@ -1667,35 +1672,35 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
     foreach (var (_, name) in leaf.sans) {
         switch (ᐧ) {
         case {} when strings.HasPrefix(name, dnsˢ): {
-            template.Value.DNSNames = append((~template).DNSNames, name[4..]);
+            template.DNSNames = append(template.DNSNames, name[4..]);
             break;
         }
-        case {} when strings.HasPrefix(name, "ip:"u8): {
+        case {} when strings.HasPrefix(name, "ip:"): {
             var ip = net.ParseIP(name[3..]);
-            if (ip == default!) {
-                return (default!, fmt.Errorf("cannot parse IP %q"u8, name[3..]));
+            if (ip == nil) {
+                return (default, fmt.Errorf("cannot parse IP %q"u8, name[3..]));
             }
-            template.Value.IPAddresses = append((~template).IPAddresses, ip);
+            template.IPAddresses = append(template.IPAddresses, ip);
             break;
         }
         case {} when strings.HasPrefix(name, invalidipˢ): {
             var (ipBytes, errΔ2) = hex.DecodeString(name[10..]);
-            if (errΔ2 != default!) {
-                return (default!, fmt.Errorf("cannot parse invalid IP: %s"u8, errΔ2));
+            if (errΔ2 != nil) {
+                return (default, fmt.Errorf("cannot parse invalid IP: %s"u8, errΔ2));
             }
-            template.Value.IPAddresses = append((~template).IPAddresses, (net.IP)ipBytes);
+            template.IPAddresses = append(template.IPAddresses, (net.IP)ipBytes);
             break;
         }
         case {} when strings.HasPrefix(name, emailˢ): {
-            template.Value.EmailAddresses = append((~template).EmailAddresses, name[6..]);
+            template.EmailAddresses = append(template.EmailAddresses, name[6..]);
             break;
         }
         case {} when strings.HasPrefix(name, uriˢ): {
             var (uri, errΔ3) = url.Parse(name[4..]);
-            if (errΔ3 != default!) {
-                return (default!, fmt.Errorf("cannot parse URI %q: %s"u8, name[4..], errΔ3));
+            if (errΔ3 != nil) {
+                return (default, fmt.Errorf("cannot parse URI %q: %s"u8, name[4..], errΔ3));
             }
-            template.Value.URIs = append((~template).URIs, uri);
+            template.URIs = append(template.URIs, uri);
             break;
         }
         case {} when strings.HasPrefix(name, unknownˢ): {
@@ -1706,27 +1711,27 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
                 throw panic("when using unknown name types, it must be the sole name");
             }
 
-            template.Value.ExtraExtensions = append((~template).ExtraExtensions, new pkix.Extension(
-                Id: new nint[]{2, 5, 29, 17}.slice(),
-                Value: new byte[]{
+            template.ExtraExtensions = append(template.ExtraExtensions, new pkix.Extension(
+                Id: slice<nint>([2, 5, 29, 17]),
+                Value: slice<byte>([
                     0x30, // SEQUENCE
-                    3, // three bytes
-                    9, // undefined GeneralName type 9
+                    3,    // three bytes
+                    9,    // undefined GeneralName type 9
                     1,
                     1
-                }.slice()
+                ])
             ));
             break;
         }
         default: {
-            return (default!, fmt.Errorf("unknown name type %q"u8, name));
+            return (default, fmt.Errorf("unknown name type %q"u8, name));
         }}
     }
 
-    error err = default!;
+    error err = default;
     {
-        (template.Value.ExtKeyUsage, template.Value.UnknownExtKeyUsage, err) = parseEKUs(leaf.ekus); if (err != default!) {
-            return (default!, err);
+        (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(leaf.ekus); if (err != nil) {
+            return (default, err);
         }
     }
 
@@ -1734,9 +1739,9 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
         Ꮡparent = template; parent = ref Ꮡparent.DerefOrNull();
     }
 
-    (var derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡparent, Ꮡkey.of(ecdsa.PrivateKey.ᏑPublicKey), ᏑparentKey.OrTypedNil());
-    if (err != default!) {
-        return (default!, err);
+    (var derBytes, err) = CreateCertificate(rand.Reader, template, Ꮡparent, key.ᏑPublicKey, parentKey.OrTypedNil());
+    if (err != nil) {
+        return (default, err);
     }
 
     return ParseCertificate(derBytes);
@@ -1754,20 +1759,20 @@ internal static pkix.Extension customConstraintsExtension(nint typeNum, slice<by
         return appendꓸꓸꓸ(contentsΔ1, constraintʗ1);
     }
 
-    slice<byte> contents = default!;
-    if (!isExcluded){
+    slice<byte> contents = default;
+    if (!isExcluded) {
         contents = appendConstraint(contents, 0 /* tag 0 for permitted */);
     } else {
         contents = appendConstraint(contents, 1 /* tag 1 for excluded */);
     }
 
-    slice<byte> value = default!;
+    slice<byte> value = default;
     value = append(value, (byte)0x30 /* SEQUENCE */);
     value = append(value, (byte)builtin.len(contents));
     value = appendꓸꓸꓸ(value, contents);
 
     return new pkix.Extension(
-        Id: new nint[]{2, 5, 29, 30}.slice(),
+        Id: slice<nint>([2, 5, 29, 30]),
         Value: value
     );
 }
@@ -1776,21 +1781,21 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
     ref var template = ref Ꮡtemplate.DerefOrNull();
 
     (slice<@string> dnsNames, slice<ж<net.IPNet>> ips, slice<@string> emailAddrs, slice<@string> uriDomains, error err) parse(slice<@string> constraintsΔ1) {
-        slice<@string> dnsNames = default!;
-        slice<ж<net.IPNet>> ips = default!;
-        slice<@string> emailAddrs = default!;
-        slice<@string> uriDomains = default!;
-        error errΔ1 = default!;
+        slice<@string> dnsNames = default;
+        slice<ж<net.IPNet>> ips = default;
+        slice<@string> emailAddrs = default;
+        slice<@string> uriDomains = default;
+        error errΔ1 = default;
         foreach (var (_, constraint) in constraintsΔ1) {
             switch (ᐧ) {
             case {} when strings.HasPrefix(constraint, dnsˢ): {
                 dnsNames = append(dnsNames, constraint[4..]);
                 break;
             }
-            case {} when strings.HasPrefix(constraint, "ip:"u8): {
+            case {} when strings.HasPrefix(constraint, "ip:"): {
                 var (_, ipNet, errΔ3) = net.ParseCIDR(constraint[3..]);
-                if (errΔ3 != default!) {
-                    return (default!, default!, default!, default!, errΔ3);
+                if (errΔ3 != nil) {
+                    return (default, default, default, default, errΔ3);
                 }
                 ips = append(ips, ipNet);
                 break;
@@ -1804,7 +1809,7 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
                 break;
             }
             default: {
-                return (default!, default!, default!, default!, fmt.Errorf("unknown constraint %q"u8, constraint));
+                return (default, default, default, default, fmt.Errorf("unknown constraint %q"u8, constraint));
             }}
         }
 
@@ -1814,7 +1819,7 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
     bool handleSpecialConstraint(@string constraint, bool isExcluded) {
         switch (ᐧ) {
         case {} when constraint == "unknown:"u8: {
-            Ꮡtemplate.Value.ExtraExtensions = append(Ꮡtemplate.Value.ExtraExtensions, customConstraintsExtension(9, /* undefined GeneralName type */ new byte[]{1}.slice(), isExcluded));
+            Ꮡtemplate.Value.ExtraExtensions = append(Ꮡtemplate.Value.ExtraExtensions, customConstraintsExtension(9, /* undefined GeneralName type */ slice<byte>([1]), isExcluded));
             break;
         }
         default: {
@@ -1826,68 +1831,76 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
 
     if (builtin.len(constraints.ok) == 1 && builtin.len(constraints.bad) == 0) {
         if (handleSpecialConstraint(constraints.ok[0], false)) {
-            return default!;
+            return default;
         }
     }
 
     if (builtin.len(constraints.bad) == 1 && builtin.len(constraints.ok) == 0) {
         if (handleSpecialConstraint(constraints.bad[0], true)) {
-            return default!;
+            return default;
         }
     }
 
-    error err = default!;
+    error err = default;
     (template.PermittedDNSDomains, template.PermittedIPRanges, template.PermittedEmailAddresses, template.PermittedURIDomains, err) = parse(constraints.ok);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     (template.ExcludedDNSDomains, template.ExcludedIPRanges, template.ExcludedEmailAddresses, template.ExcludedURIDomains, err) = parse(constraints.bad);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     {
-        (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(constraints.ekus); if (err != default!) {
+        (template.ExtKeyUsage, template.UnknownExtKeyUsage, err) = parseEKUs(constraints.ekus); if (err != nil) {
             return err;
         }
     }
 
-    return default!;
+    return default;
 }
 
 internal static (slice<global::go.crypto.x509_package.ExtKeyUsage> ekus, slice<asn1.ObjectIdentifier> unknowns, error err) parseEKUs(slice<@string> ekuStrs) {
-    slice<global::go.crypto.x509_package.ExtKeyUsage> ekus = default!;
-    slice<asn1.ObjectIdentifier> unknowns = default!;
-    error err = default!;
+    slice<global::go.crypto.x509_package.ExtKeyUsage> ekus = default;
+    slice<asn1.ObjectIdentifier> unknowns = default;
+    error err = default;
     var unknownsᴷ = new stackAppend<asn1.ObjectIdentifier>(moves: true);
 
     foreach (var (_, s) in ekuStrs) {
         var exprᴛ1 = s;
-        if (exprᴛ1 == "serverAuth"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "serverAuth"u8: {
             ekus = append(ekus, ExtKeyUsageServerAuth);
+            break;
         }
-        else if (exprᴛ1 == "clientAuth"u8) {
+        case {} when exprᴛ1 == "clientAuth"u8: {
             ekus = append(ekus, ExtKeyUsageClientAuth);
+            break;
         }
-        else if (exprᴛ1 == "email"u8) {
+        case {} when exprᴛ1 == "email"u8: {
             ekus = append(ekus, ExtKeyUsageEmailProtection);
+            break;
         }
-        else if (exprᴛ1 == "netscapeSGC"u8) {
+        case {} when exprᴛ1 == "netscapeSGC"u8: {
             ekus = append(ekus, ExtKeyUsageNetscapeServerGatedCrypto);
+            break;
         }
-        else if (exprᴛ1 == "msSGC"u8) {
+        case {} when exprᴛ1 == "msSGC"u8: {
             ekus = append(ekus, ExtKeyUsageMicrosoftServerGatedCrypto);
+            break;
         }
-        else if (exprᴛ1 == "any"u8) {
+        case {} when exprᴛ1 == "any"u8: {
             ekus = append(ekus, ExtKeyUsageAny);
+            break;
         }
-        else if (exprᴛ1 == "other"u8) {
+        case {} when exprᴛ1 == "other"u8: {
             unknowns = append(unknownsᴷ, unknowns, new asn1.ObjectIdentifier(new nint[]{2, 4, 1, 2, 3}.slice()));
+            break;
         }
-        else { /* default: */
-            return (default!, default!, fmt.Errorf("unknown EKU %q"u8, s));
-        }
+        default: {
+            return (default, default, fmt.Errorf("unknown EKU %q"u8, s));
+        }}
     }
 
     unknowns = move2heap(unknownsᴷ, unknowns);
@@ -1898,24 +1911,23 @@ internal static (slice<global::go.crypto.x509_package.ExtKeyUsage> ekus, slice<a
 internal static readonly object unexpectedlySucceededˢ = (@string)"unexpectedly succeeded against OpenSSL"u8;
 internal static readonly object unexpectedSuccessˢ = (@string)"unexpected success"u8;
 
-public static void TestConstraintCases(ж<testing.T> Ꮡt) {
-    ref var privateKeys = ref heap<sync.Pool>(out var ᏑprivateKeys);
-    privateKeys = new sync.Pool(
+public static void TestConstraintCases(ж<testing.T> t) {
+    ref var privateKeys = ref heap<sync.Pool>(new sync.Pool(
         New: () => {
             var (priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-            if (err != default!) {
+            if (err != nil) {
                 throw panic(err);
             }
             return priv.OrTypedNil();
         }
-    );
+    ), out var ᏑprivateKeys);
 
     foreach (var (i, vᴛ1) in nameConstraintsTests) {
         ref var test = ref heap(new nameConstraintsTest(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             var keysᴷ = new stackAppend<ж<ecdsa.PrivateKey>>();
             var rootPool = NewCertPool();
             var rootKey = ᏑprivateKeys.Get()._<ж<ecdsa.PrivateKey>>();
@@ -1923,7 +1935,7 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
 
             // keys keeps track of all the private keys used in a given
             // test and puts them back in the privateKeys pool at the end.
-            var keys = new ж<ecdsa.PrivateKey>[]{rootKey}.slice();
+            var keys = slice<ж<ecdsa.PrivateKey>>([rootKey]);
 
             // At each level (root, intermediate(s), leaf), parent points to
             // an example parent certificate and parentKey the key for the
@@ -1931,13 +1943,13 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
             // the same name and public key, any parent certificate is
             // sufficient to get the correct issuer name and authority
             // key ID.
-            ж<global::go.crypto.x509_package.Certificate> parent = default!;
+            ж<global::go.crypto.x509_package.Certificate> parent = default;
             var parentKey = rootKey;
 
             foreach (var (_, root) in testʗ1.roots) {
                 var (rootCert, errΔ1) = makeConstraintsCACert(root, rootName, rootKey, nil, rootKey);
-                if (errΔ1 != default!) {
-                    tΔ1.Fatalf("failed to create root: %s"u8, errΔ1);
+                if (errΔ1 != nil) {
+                    tΔ1.Fatalf("failed to create root: %s", errΔ1);
                 }
 
                 parent = rootCert;
@@ -1950,12 +1962,12 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
                 var levelKey = ᏑprivateKeys.Get()._<ж<ecdsa.PrivateKey>>();
                 keys = append(keysᴷ, keys, levelKey);
                 @string levelName = "Intermediate level "u8 + strconv.Itoa(level);
-                ж<global::go.crypto.x509_package.Certificate> last = default!;
+                ж<global::go.crypto.x509_package.Certificate> last = default;
 
                 foreach (var (_, intermediate) in intermediates) {
                     var (caCert, errΔ2) = makeConstraintsCACert(intermediate, levelName, levelKey, parent, parentKey);
-                    if (errΔ2 != default!) {
-                        tΔ1.Fatalf("failed to create %q: %s"u8, levelName, errΔ2);
+                    if (errΔ2 != nil) {
+                        tΔ1.Fatalf("failed to create %q: %s", levelName, errΔ2);
                     }
 
                     last = caCert;
@@ -1970,28 +1982,27 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
             keys = append(keys, leafKey);
 
             var (leafCert, err) = makeConstraintsLeafCert(testʗ1.leaf, leafKey, parent, parentKey);
-            if (err != default!) {
-                tΔ1.Fatalf("cannot create leaf: %s"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("cannot create leaf: %s", err);
             }
 
             // Skip tests with CommonName set because OpenSSL will try to match it
             // against name constraints, while we ignore it when it's not hostname-looking.
             if (!testʗ1.noOpenSSL && testNameConstraintsAgainstOpenSSL && testʗ1.leaf.cn == ""u8) {
                 var (output, errΔ1) = testChainAgainstOpenSSL(tΔ1, leafCert, intermediatePool, rootPool);
-                if (errΔ1 == default! && builtin.len(testʗ1.expectedError) > 0) {
+                if (errΔ1 == nil && builtin.len(testʗ1.expectedError) > 0) {
                     tΔ1.Error(unexpectedlySucceededˢ);
                     if (debugOpenSSLFailure) {
                         return;
                     }
                 }
 
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     {
-                        var (_, ok) = errΔ1._<ж<exec.ExitError>>(ᐧ); if (!ok){
-                            tΔ1.Errorf("OpenSSL failed to run: %s"u8, errΔ1);
-                        } else 
-                        if (builtin.len(testʗ1.expectedError) == 0) {
-                            tΔ1.Errorf("OpenSSL unexpectedly failed: %v"u8, output);
+                        var (_, ok) = errΔ1._<ж<exec.ExitError>>(ᐧ); if (!ok) {
+                            tΔ1.Errorf("OpenSSL failed to run: %s", errΔ1);
+                        } else if (builtin.len(testʗ1.expectedError) == 0) {
+                            tΔ1.Errorf("OpenSSL unexpectedly failed: %v", output);
                             if (debugOpenSSLFailure) {
                                 return;
                             }
@@ -2009,18 +2020,17 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
             (_, err) = leafCert.Verify(verifyOpts);
 
             var logInfo = false;
-            if (builtin.len(testʗ1.expectedError) == 0){
-                if (err != default!){
-                    tΔ1.Errorf("unexpected failure: %s"u8, err);
+            if (builtin.len(testʗ1.expectedError) == 0) {
+                if (err != nil) {
+                    tΔ1.Errorf("unexpected failure: %s", err);
                 } else {
                     logInfo = false;
                 }
             } else {
-                if (err == default!){
+                if (err == nil) {
                     tΔ1.Error(unexpectedSuccessˢ);
-                } else 
-                if (!strings.Contains(err.Error(), testʗ1.expectedError)){
-                    tΔ1.Errorf("expected error containing %q, but got: %s"u8, testʗ1.expectedError, err);
+                } else if (!strings.Contains(err.Error(), testʗ1.expectedError)) {
+                    tΔ1.Errorf("expected error containing %q, but got: %s", testʗ1.expectedError, err);
                 } else {
                     logInfo = false;
                 }
@@ -2029,18 +2039,18 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
             if (logInfo) {
                 @string certAsPEM(ж<global::go.crypto.x509_package.Certificate> cert) {
                     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
-                    pem.Encode(new x509_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡ(new pem.Block(Type: "CERTIFICATE"u8, Bytes: (~cert).Raw)));
+                    pem.Encode(new x509_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡ(new pem.Block(Type: "CERTIFICATE", Bytes: cert.Raw)));
                     return Ꮡbuf.String();
                 }
-                tΔ1.Errorf("root:\n%s"u8, certAsPEM(rootPool.mustCert(tΔ1, 0)));
+                tΔ1.Errorf("root:\n%s", certAsPEM(rootPool.mustCert(tΔ1, 0)));
                 {
                     var intermediates = allCerts(tΔ1, intermediatePool); if (builtin.len(intermediates) > 0) {
                         foreach (var (ii, intermediate) in intermediates) {
-                            tΔ1.Errorf("intermediate %d:\n%s"u8, ii, certAsPEM(intermediate));
+                            tΔ1.Errorf("intermediate %d:\n%s", ii, certAsPEM(intermediate));
                         }
                     }
                 }
-                tΔ1.Errorf("leaf:\n%s"u8, certAsPEM(leafCert));
+                tΔ1.Errorf("leaf:\n%s", certAsPEM(leafCert));
             }
 
             foreach (var (_, key) in keys) {
@@ -2051,64 +2061,62 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nameConstraintsTestˢ = "name_constraints_test"u8;
+internal static ref readonly @string nameConstraintsTestˢ => ref nameConstraintsTestˢᵇ;
+private static readonly @string nameConstraintsTestˢᵇ = "name_constraints_test"u8;
 
 internal static ж<os.File> writePEMsToTempFile(slice<ж<global::go.crypto.x509_package.Certificate>> certs) {
     var (@file, err) = os.CreateTemp(""u8, nameConstraintsTestˢ);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("cannot create tempfile");
     }
 
-    var pemBlock = Ꮡ(new pem.Block(Type: "CERTIFICATE"u8));
+    var pemBlock = Ꮡ(new pem.Block(Type: "CERTIFICATE"));
     foreach (var (_, cert) in certs) {
-        pemBlock.Value.Bytes = cert.Value.Raw;
+        pemBlock.Bytes = cert.Raw;
         pem.Encode(new os.FileжWriter(@file), pemBlock);
     }
 
     return @file;
 }
 
-internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> Ꮡt, ж<global::go.crypto.x509_package.Certificate> Ꮡleaf, ж<global::go.crypto.x509_package.CertPool> Ꮡintermediates, ж<global::go.crypto.x509_package.CertPool> Ꮡroots) {
+internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> t, ж<global::go.crypto.x509_package.Certificate> leaf, ж<global::go.crypto.x509_package.CertPool> intermediates, ж<global::go.crypto.x509_package.CertPool> roots) {
     GoFrame ᒐ = default;
     try {
-        ref var leaf = ref Ꮡleaf.DerefOrNull();
-        ref var intermediates = ref Ꮡintermediates.DerefOrNull();
-        ref var roots = ref Ꮡroots.DerefOrNull();
         var argsᴷ = new stackAppend<@string>();
 
-        var args = new @string[]{"verify"u8, "-no_check_time"u8}.slice();
+        var args = slice<@string>(["verify", "-no_check_time"]);
 
-        var rootsFile = writePEMsToTempFile(allCerts(Ꮡt, Ꮡroots));
-        if (debugOpenSSLFailure){
-            println((@string)"roots file:"u8, rootsFile.Name());
+        var rootsFile = writePEMsToTempFile(allCerts(t, roots));
+        if (debugOpenSSLFailure) {
+            println((@string)"roots file:", rootsFile.Name());
         } else {
             defer(os.Remove, rootsFile.Name(), ref ᒐ);
         }
-        args = append(argsᴷ, args, "-CAfile"u8, rootsFile.Name());
+        args = append(argsᴷ, args, (@string)"-CAfile", rootsFile.Name());
 
-        if (Ꮡintermediates.len() > 0) {
-            var intermediatesFile = writePEMsToTempFile(allCerts(Ꮡt, Ꮡintermediates));
-            if (debugOpenSSLFailure){
-                println((@string)"intermediates file:"u8, intermediatesFile.Name());
+        if (intermediates.len() > 0) {
+            var intermediatesFile = writePEMsToTempFile(allCerts(t, intermediates));
+            if (debugOpenSSLFailure) {
+                println((@string)"intermediates file:", intermediatesFile.Name());
             } else {
                 defer(os.Remove, intermediatesFile.Name(), ref ᒐ);
             }
-            args = append(args, "-untrusted"u8, intermediatesFile.Name());
+            args = append(args, (@string)"-untrusted", intermediatesFile.Name());
         }
 
-        var leafFile = writePEMsToTempFile(new ж<global::go.crypto.x509_package.Certificate>[]{Ꮡleaf}.slice());
-        if (debugOpenSSLFailure){
-            println((@string)"leaf file:"u8, leafFile.Name());
+        var leafFile = writePEMsToTempFile(slice<ж<global::go.crypto.x509_package.Certificate>>([leaf]));
+        if (debugOpenSSLFailure) {
+            println((@string)"leaf file:", leafFile.Name());
         } else {
             defer(os.Remove, leafFile.Name(), ref ᒐ);
         }
         args = append(args, leafFile.Name());
 
-        var cmd = testenv.Command(new x509_test_package.testing_TжTB(Ꮡt), "openssl"u8, args.ꓸꓸꓸ);
+        var cmd = testenv.Command(new x509_test_package.testing_TжTB(t), "openssl"u8, args.ꓸꓸꓸ);
         var (@out, err) = cmd.CombinedOutput();
         return ((@string)@out, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -2116,43 +2124,43 @@ partial struct rfc2821Testsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string localPart, domain;
 }
-internal static slice<rfc2821Testsᴛ1> rfc2821Tests = new rfc2821Testsᴛ1[]{
-    new("foo@example.com"u8, "foo"u8, "example.com"u8),
-    new("@example.com"u8, ""u8, ""u8),
-    new("\"@example.com"u8, ""u8, ""u8),
-    new("\"\"@example.com"u8, ""u8, "example.com"u8),
-    new("\"a\"@example.com"u8, "a"u8, "example.com"u8),
-    new("\"\\a\"@example.com"u8, "a"u8, "example.com"u8),
-    new("a\"@example.com"u8, ""u8, ""u8),
-    new("foo..bar@example.com"u8, ""u8, ""u8),
-    new(".foo.bar@example.com"u8, ""u8, ""u8),
-    new("foo.bar.@example.com"u8, ""u8, ""u8),
-    new("|{}?'@example.com"u8, "|{}?'"u8, "example.com"u8),
+internal static slice<rfc2821Testsᴛ1> rfc2821Tests = slice<rfc2821Testsᴛ1>([
+    new("foo@example.com", "foo", "example.com"),
+    new("@example.com", "", ""),
+    new("\"@example.com", "", ""),
+    new("\"\"@example.com", "", "example.com"),
+    new("\"a\"@example.com", "a", "example.com"),
+    new("\"\\a\"@example.com", "a", "example.com"),
+    new("a\"@example.com", "", ""),
+    new("foo..bar@example.com", "", ""),
+    new(".foo.bar@example.com", "", ""),
+    new("foo.bar.@example.com", "", ""),
+    new("|{}?'@example.com", "|{}?'", "example.com"),
 
     // Examples from RFC 3696
-    new("Abc\\@def@example.com"u8, "Abc@def"u8, "example.com"u8),
-    new("Fred\\ Bloggs@example.com"u8, "Fred Bloggs"u8, "example.com"u8),
-    new("Joe.\\\\Blow@example.com"u8, "Joe.\\Blow"u8, "example.com"u8),
-    new("\"Abc@def\"@example.com"u8, "Abc@def"u8, "example.com"u8),
-    new("\"Fred Bloggs\"@example.com"u8, "Fred Bloggs"u8, "example.com"u8),
-    new("customer/department=shipping@example.com"u8, "customer/department=shipping"u8, "example.com"u8),
-    new("$A12345@example.com"u8, "$A12345"u8, "example.com"u8),
-    new("!def!xyz%abc@example.com"u8, "!def!xyz%abc"u8, "example.com"u8),
-    new("_somename@example.com"u8, "_somename"u8, "example.com"u8)
-}.slice();
+    new("Abc\\@def@example.com", "Abc@def", "example.com"),
+    new("Fred\\ Bloggs@example.com", "Fred Bloggs", "example.com"),
+    new("Joe.\\\\Blow@example.com", "Joe.\\Blow", "example.com"),
+    new("\"Abc@def\"@example.com", "Abc@def", "example.com"),
+    new("\"Fred Bloggs\"@example.com", "Fred Bloggs", "example.com"),
+    new("customer/department=shipping@example.com", "customer/department=shipping", "example.com"),
+    new("$A12345@example.com", "$A12345", "example.com"),
+    new("!def!xyz%abc@example.com", "!def!xyz%abc", "example.com"),
+    new("_somename@example.com", "_somename", "example.com")
+]);
 
-public static void TestRFC2821Parsing(ж<testing.T> Ꮡt) {
+public static void TestRFC2821Parsing(ж<testing.T> t) {
     foreach (var (i, test) in rfc2821Tests) {
         var (mailbox, ok) = parseRFC2821Mailbox(test.@in);
         var expectedFailure = builtin.len(test.localPart) == 0 && builtin.len(test.domain) == 0;
 
         if (ok && expectedFailure) {
-            Ꮡt.Errorf("#%d: %q unexpectedly parsed as (%q, %q)"u8, i, test.@in, mailbox.local, mailbox.domain);
+            t.Errorf("#%d: %q unexpectedly parsed as (%q, %q)", i, test.@in, mailbox.local, mailbox.domain);
             continue;
         }
 
         if (!ok && !expectedFailure) {
-            Ꮡt.Errorf("#%d: unexpected failure for %q"u8, i, test.@in);
+            t.Errorf("#%d: unexpected failure for %q", i, test.@in);
             continue;
         }
 
@@ -2161,22 +2169,25 @@ public static void TestRFC2821Parsing(ж<testing.T> Ꮡt) {
         }
 
         if (mailbox.local != test.localPart || mailbox.domain != test.domain) {
-            Ꮡt.Errorf("#%d: %q parsed as (%q, %q), but wanted (%q, %q)"u8, i, test.@in, mailbox.local, mailbox.domain, test.localPart, test.domain);
+            t.Errorf("#%d: %q parsed as (%q, %q), but wanted (%q, %q)", i, test.@in, mailbox.local, mailbox.domain, test.localPart, test.domain);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string failedToParseˢ = "failed to parse "u8;
-internal static readonly @string constraintˢ = "constraint"u8;
-internal static readonly @string cannotBeEncodedAsAnˢ = "cannot be encoded as an IA5String"u8;
+internal static ref readonly @string failedToParseˢ => ref failedToParseˢᵇ;
+private static readonly @string failedToParseˢᵇ = "failed to parse "u8;
+internal static ref readonly @string constraintˢ => ref constraintˢᵇ;
+private static readonly @string constraintˢᵇ = "constraint"u8;
+internal static ref readonly @string cannotBeEncodedAsAnˢ => ref cannotBeEncodedAsAnˢᵇ;
+private static readonly @string cannotBeEncodedAsAnˢᵇ = "cannot be encoded as an IA5String"u8;
 
 internal partial struct TestBadNamesInConstraints_badNames /*dyn*/ {
     internal @string name;
     internal Func<error, bool> matcher;
 }
 
-public static void TestBadNamesInConstraints(ж<testing.T> Ꮡt) {
+public static void TestBadNamesInConstraints(ж<testing.T> t) {
     var constraintParseError = (error errΔ1) => {
         @string str = errΔ1.Error();
         return strings.Contains(str, failedToParseˢ) && strings.Contains(str, constraintˢ);
@@ -2185,68 +2196,69 @@ public static void TestBadNamesInConstraints(ж<testing.T> Ꮡt) {
     var encodingError = (error errΔ2) => strings.Contains(errΔ2.Error(), cannotBeEncodedAsAnˢ);
 
     // Bad names in constraints should not parse.
-    var badNames = new TestBadNamesInConstraints_badNames[]{
-        new("dns:foo.com."u8, constraintParseError),
-        new("email:abc@foo.com."u8, constraintParseError),
-        new("email:foo.com."u8, constraintParseError),
-        new("uri:example.com."u8, constraintParseError),
-        new("uri:1.2.3.4"u8, constraintParseError),
-        new("uri:ffff::1"u8, constraintParseError),
-        new("dns:not–hyphen.com"u8, encodingError),
-        new("email:foo@not–hyphen.com"u8, encodingError),
-        new("uri:not–hyphen.com"u8, encodingError)
-    }.slice();
+    var badNames = slice<TestBadNamesInConstraints_badNames>([
+        new("dns:foo.com.", constraintParseError),
+        new("email:abc@foo.com.", constraintParseError),
+        new("email:foo.com.", constraintParseError),
+        new("uri:example.com.", constraintParseError),
+        new("uri:1.2.3.4", constraintParseError),
+        new("uri:ffff::1", constraintParseError),
+        new("dns:not–hyphen.com", encodingError),
+        new("email:foo@not–hyphen.com", encodingError),
+        new("uri:not–hyphen.com", encodingError)
+    ]);
 
     var (priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
     foreach (var (_, test) in badNames) {
         var (_, errΔ3) = makeConstraintsCACert(new constraintsSpec(
-            ok: new @string[]{test.name}.slice()
-        ), "TestAbsoluteNamesInConstraints"u8, priv, nil, priv);
+            ok: slice<@string>([test.name])
+        ), "TestAbsoluteNamesInConstraints", priv, nil, priv);
 
-        if (errΔ3 == default!){
-            Ꮡt.Errorf("bad name %q unexpectedly accepted in name constraint"u8, test.name);
+        if (errΔ3 == nil) {
+            t.Errorf("bad name %q unexpectedly accepted in name constraint", test.name);
             continue;
         } else {
             if (!test.matcher(errΔ3)) {
-                Ꮡt.Errorf("bad name %q triggered unrecognised error: %s"u8, test.name, errΔ3);
+                t.Errorf("bad name %q triggered unrecognised error: %s", test.name, errΔ3);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cannotParseˢ = "cannot parse "u8;
+internal static ref readonly @string cannotParseˢ => ref cannotParseˢᵇ;
+private static readonly @string cannotParseˢᵇ = "cannot parse "u8;
 
-public static void TestBadNamesInSANs(ж<testing.T> Ꮡt) {
+public static void TestBadNamesInSANs(ж<testing.T> t) {
     // Bad names in URI and IP SANs should not parse. Bad DNS and email SANs
     // will parse and are tested in name constraint tests at the top of this
     // file.
-    var badNames = new @string[]{
-        "uri:https://example.com./dsf"u8,
-        "invalidip:0102"u8,
-        "invalidip:0102030405"u8
-    }.slice();
+    var badNames = slice<@string>([
+        "uri:https://example.com./dsf",
+        "invalidip:0102",
+        "invalidip:0102030405"
+    ]);
 
     var (priv, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
     foreach (var (_, badName) in badNames) {
-        var (_, errΔ1) = makeConstraintsLeafCert(new leafSpec(sans: new @string[]{badName}.slice()), priv, nil, priv);
+        var (_, errΔ1) = makeConstraintsLeafCert(new leafSpec(sans: slice<@string>([badName])), priv, nil, priv);
 
-        if (errΔ1 == default!) {
-            Ꮡt.Errorf("bad name %q unexpectedly accepted in SAN"u8, badName);
+        if (errΔ1 == nil) {
+            t.Errorf("bad name %q unexpectedly accepted in SAN", badName);
             continue;
         }
 
         {
             @string str = errΔ1.Error(); if (!strings.Contains(str, cannotParseˢ)) {
-                Ꮡt.Errorf("bad name %q triggered unrecognised error: %s"u8, badName, str);
+                t.Errorf("bad name %q triggered unrecognised error: %s", badName, str);
             }
         }
     }

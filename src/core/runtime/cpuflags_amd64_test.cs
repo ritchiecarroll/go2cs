@@ -10,14 +10,15 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkAVXˢ = "CheckAVX"u8;
+internal static ref readonly @string checkAVXˢ => ref checkAVXˢᵇ;
+private static readonly @string checkAVXˢᵇ = "CheckAVX"u8;
 
-public static void TestHasAVX(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-    @string output = runTestProg(Ꮡt, testprogˢ, checkAVXˢ);
+public static void TestHasAVX(ж<testing.T> t) {
+    t.Parallel();
+    @string output = runTestProg(t, testprogˢ, checkAVXˢ);
     var ok = output == "OK\n"u8;
     if (runtime_internal_test_package.X86HasAVX.Value != ok) {
-        Ꮡt.Fatalf("x86HasAVX: %v, CheckAVX got:\n%s"u8, runtime_internal_test_package.X86HasAVX.Value, output);
+        t.Fatalf("x86HasAVX: %v, CheckAVX got:\n%s", runtime_internal_test_package.X86HasAVX.Value, output);
     }
 }
 

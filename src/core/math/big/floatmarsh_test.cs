@@ -14,35 +14,35 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-internal static slice<@string> floatVals = new @string[]{
-    "0"u8,
-    "1"u8,
-    "0.1"u8,
-    "2.71828"u8,
-    "1234567890"u8,
-    "3.14e1234"u8,
-    "3.14e-1234"u8,
-    "0.738957395793475734757349579759957975985497e100"u8,
-    "0.73895739579347546656564656573475734957975995797598589749859834759476745986795497e100"u8,
-    "inf"u8,
-    "Inf"u8
-}.slice();
+internal static slice<@string> floatVals = slice<@string>([
+    "0",
+    "1",
+    "0.1",
+    "2.71828",
+    "1234567890",
+    "3.14e1234",
+    "3.14e-1234",
+    "0.738957395793475734757349579759957975985497e100",
+    "0.73895739579347546656564656573475734957975995797598589749859834759476745986795497e100",
+    "inf",
+    "Inf"
+]);
 
-public static void TestFloatGobEncoding(ж<testing.T> Ꮡt) {
+public static void TestFloatGobEncoding(ж<testing.T> t) {
     ref var medium = ref heap(new bytes.Buffer(), out var Ꮡmedium);
     var enc = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(Ꮡmedium));
     var dec = gob.NewDecoder(new big_test_package.bytes_BufferжReader(Ꮡmedium));
     foreach (var (_, test) in floatVals) {
-        foreach (var (_, sign) in new @string[]{""u8, "+"u8, "-"u8}.slice()) {
-            foreach (var (_, prec) in new nuint[]{0, 1, 2, 10, 53, 64, 100, 1000}.slice()) {
-                foreach (var (_, mode) in new global::go.math.big_package.RoundingMode[]{ToNearestEven, ToNearestAway, ToZero, AwayFromZero, ToNegativeInf, ToPositiveInf}.slice()) {
+        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+            foreach (var (_, prec) in slice<nuint>([0, 1, 2, 10, 53, 64, 100, 1000])) {
+                foreach (var (_, mode) in slice<global::go.math.big_package.RoundingMode>([ToNearestEven, ToNearestAway, ToZero, AwayFromZero, ToNegativeInf, ToPositiveInf])) {
                     medium.Reset(); // empty buffer for each test case (in case of failures)
                     @string x = sign + test;
 
                     ref var tx = ref heap(new global::go.math.big_package.Float(), out var Ꮡtx);
                     var (_, _, err) = Ꮡtx.SetPrec(prec).SetMode(mode).Parse(x, 0);
-                    if (err != default!) {
-                        Ꮡt.Errorf("parsing of %s (%dbits, %v) failed (invalid test case): %v"u8, x, prec, mode, err);
+                    if (err != nil) {
+                        t.Errorf("parsing of %s (%dbits, %v) failed (invalid test case): %v", x, prec, mode, err);
                         continue;
                     }
 
@@ -52,35 +52,35 @@ public static void TestFloatGobEncoding(ж<testing.T> Ꮡt) {
                     }
 
                     {
-                        var errΔ1 = enc.Encode(Ꮡtx); if (errΔ1 != default!) {
-                            Ꮡt.Errorf("encoding of %v (%dbits, %v) failed: %v"u8, Ꮡtx, prec, mode, errΔ1);
+                        var errΔ1 = enc.Encode(Ꮡtx); if (errΔ1 != nil) {
+                            t.Errorf("encoding of %v (%dbits, %v) failed: %v", Ꮡtx, prec, mode, errΔ1);
                             continue;
                         }
                     }
 
                     ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
                     {
-                        var errΔ2 = dec.Decode(Ꮡrx); if (errΔ2 != default!) {
-                            Ꮡt.Errorf("decoding of %v (%dbits, %v) failed: %v"u8, Ꮡtx, prec, mode, errΔ2);
+                        var errΔ2 = dec.Decode(Ꮡrx); if (errΔ2 != nil) {
+                            t.Errorf("decoding of %v (%dbits, %v) failed: %v", Ꮡtx, prec, mode, errΔ2);
                             continue;
                         }
                     }
 
                     if (Ꮡrx.Cmp(Ꮡtx) != 0) {
-                        Ꮡt.Errorf("transmission of %s failed: got %s want %s"u8, x, Ꮡrx.String(), Ꮡtx.String());
+                        t.Errorf("transmission of %s failed: got %s want %s", x, Ꮡrx.String(), Ꮡtx.String());
                         continue;
                     }
 
                     if (rx.Prec() != prec) {
-                        Ꮡt.Errorf("transmission of %s's prec failed: got %d want %d"u8, x, rx.Prec(), prec);
+                        t.Errorf("transmission of %s's prec failed: got %d want %d", x, rx.Prec(), prec);
                     }
 
                     if (rx.Mode() != mode) {
-                        Ꮡt.Errorf("transmission of %s's mode failed: got %s want %s"u8, x, rx.Mode(), mode);
+                        t.Errorf("transmission of %s's mode failed: got %s want %s", x, rx.Mode(), mode);
                     }
 
                     if (rx.Acc() != tx.Acc()) {
-                        Ꮡt.Errorf("transmission of %s's accuracy failed: got %s want %s"u8, x, rx.Acc(), tx.Acc());
+                        t.Errorf("transmission of %s's accuracy failed: got %s want %s", x, rx.Acc(), tx.Acc());
                     }
                 }
             }
@@ -91,66 +91,66 @@ public static void TestFloatGobEncoding(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object gotNilWantVersionErrorˢ = (@string)"got nil want version error"u8;
 
-public static void TestFloatCorruptGob(ж<testing.T> Ꮡt) {
+public static void TestFloatCorruptGob(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tx = NewFloat(4 / 3).SetPrec(1000).SetMode(ToPositiveInf);
     {
-        var err = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(Ꮡbuf)).Encode(tx.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = gob.NewEncoder(new big_test_package.bytes_BufferжWriter(Ꮡbuf)).Encode(tx.OrTypedNil()); if (err != nil) {
+            t.Fatal(err);
         }
     }
     var b = buf.Bytes();
 
     ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
     {
-        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     {
         var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b[..10]))).Decode(Ꮡrx); if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-            Ꮡt.Errorf("got %v want EOF"u8, err);
+            t.Errorf("got %v want EOF", err);
         }
     }
 
     b[1] = 0;
     {
-        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err == default!) {
-            Ꮡt.Fatal(gotNilWantVersionErrorˢ);
+        var err = gob.NewDecoder(new big_test_package.bytes_ReaderжReader(bytes_package.NewReader(b))).Decode(Ꮡrx); if (err == nil) {
+            t.Fatal(gotNilWantVersionErrorˢ);
         }
     }
 }
 
-public static void TestFloatJSONEncoding(ж<testing.T> Ꮡt) {
+public static void TestFloatJSONEncoding(ж<testing.T> t) {
     foreach (var (_, test) in floatVals) {
-        foreach (var (_, sign) in new @string[]{""u8, "+"u8, "-"u8}.slice()) {
-            foreach (var (_, prec) in new nuint[]{0, 1, 2, 10, 53, 64, 100, 1000}.slice()) {
+        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+            foreach (var (_, prec) in slice<nuint>([0, 1, 2, 10, 53, 64, 100, 1000])) {
                 if (prec > 53 && testing.Short()) {
                     continue;
                 }
                 @string x = sign + test;
                 ref var tx = ref heap(new global::go.math.big_package.Float(), out var Ꮡtx);
                 var (_, _, err) = Ꮡtx.SetPrec(prec).Parse(x, 0);
-                if (err != default!) {
-                    Ꮡt.Errorf("parsing of %s (prec = %d) failed (invalid test case): %v"u8, x, prec, err);
+                if (err != nil) {
+                    t.Errorf("parsing of %s (prec = %d) failed (invalid test case): %v", x, prec, err);
                     continue;
                 }
                 (var b, err) = json.Marshal(Ꮡtx);
-                if (err != default!) {
-                    Ꮡt.Errorf("marshaling of %v (prec = %d) failed: %v"u8, Ꮡtx, prec, err);
+                if (err != nil) {
+                    t.Errorf("marshaling of %v (prec = %d) failed: %v", Ꮡtx, prec, err);
                     continue;
                 }
                 ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
                 Ꮡrx.SetPrec(prec);
                 {
-                    var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != default!) {
-                        Ꮡt.Errorf("unmarshaling of %v (prec = %d) failed: %v"u8, Ꮡtx, prec, errΔ1);
+                    var errΔ1 = json.Unmarshal(b, Ꮡrx); if (errΔ1 != nil) {
+                        t.Errorf("unmarshaling of %v (prec = %d) failed: %v", Ꮡtx, prec, errΔ1);
                         continue;
                     }
                 }
                 if (Ꮡrx.Cmp(Ꮡtx) != 0) {
-                    Ꮡt.Errorf("JSON encoding of %v (prec = %d) failed: got %v want %v"u8, Ꮡtx, prec, Ꮡrx, Ꮡtx);
+                    t.Errorf("JSON encoding of %v (prec = %d) failed: got %v want %v", Ꮡtx, prec, Ꮡrx, Ꮡtx);
                 }
             }
         }
@@ -160,14 +160,14 @@ public static void TestFloatJSONEncoding(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedGobDecodeToˢ = (@string)"expected GobDecode to return error for malformed input"u8;
 
-public static void TestFloatGobDecodeShortBuffer(ж<testing.T> Ꮡt) {
-    foreach (var (_, tc) in new slice<byte>[]{
-        new byte[]{0x1, 0x0, 0x0, 0x0}.slice(),
-        new byte[]{0x1, 0xfa, 0x0, 0x0, 0x0, 0x0}.slice()
-    }.slice()) {
+public static void TestFloatGobDecodeShortBuffer(ж<testing.T> t) {
+    foreach (var (_, tc) in slice<slice<byte>>([
+        slice<byte>([0x1, 0x0, 0x0, 0x0]),
+        slice<byte>([0x1, 0xfa, 0x0, 0x0, 0x0, 0x0])
+    ])) {
         var err = NewFloat(0D).GobDecode(tc);
-        if (err == default!) {
-            Ꮡt.Error(expectedGobDecodeToˢ);
+        if (err == nil) {
+            t.Error(expectedGobDecodeToˢ);
         }
     }
 }
@@ -177,66 +177,66 @@ internal partial struct TestFloatGobDecodeInvalid_type /*dyn*/ {
     internal @string msg;
 }
 
-public static void TestFloatGobDecodeInvalid(ж<testing.T> Ꮡt) {
-    foreach (var (_, tc) in new TestFloatGobDecodeInvalid_type[]{
+public static void TestFloatGobDecodeInvalid(ж<testing.T> t) {
+    foreach (var (_, tc) in slice<TestFloatGobDecodeInvalid_type>([
         new(
-            new byte[]{0x1, 0x2a, 0x20, 0x20, 0x20, 0x20, 0x0, 0x20, 0x20, 0x20, 0x0, 0x20, 0x20, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0xc}.slice(),
-            "Float.GobDecode: msb not set in last word"u8
+            slice<byte>([0x1, 0x2a, 0x20, 0x20, 0x20, 0x20, 0x0, 0x20, 0x20, 0x20, 0x0, 0x20, 0x20, 0x20, 0x20, 0x0, 0x0, 0x0, 0x0, 0xc]),
+            "Float.GobDecode: msb not set in last word"
         ),
         new(
-            new byte[]{1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice(),
-            "Float.GobDecode: nonzero finite number with empty mantissa"u8
+            slice<byte>([1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            "Float.GobDecode: nonzero finite number with empty mantissa"
         )
-    }.slice()) {
+    ])) {
         var err = NewFloat(0D).GobDecode(tc.buf);
-        if (err == default! || !strings.HasPrefix(err.Error(), tc.msg)) {
-            Ꮡt.Errorf("expected GobDecode error prefix: %s, got: %v"u8, tc.msg, err);
+        if (err == nil || !strings.HasPrefix(err.Error(), tc.msg)) {
+            t.Errorf("expected GobDecode error prefix: %s, got: %v", tc.msg, err);
         }
     }
 }
 
-public static void TestFloatAppendText(ж<testing.T> Ꮡt) {
+public static void TestFloatAppendText(ж<testing.T> t) {
     foreach (var (_, test) in floatVals) {
-        foreach (var (_, sign) in new @string[]{""u8, "+"u8, "-"u8}.slice()) {
-            foreach (var (_, prec) in new nuint[]{0, 1, 2, 10, 53, 64, 100, 1000}.slice()) {
+        foreach (var (_, sign) in slice<@string>(["", "+", "-"])) {
+            foreach (var (_, prec) in slice<nuint>([0, 1, 2, 10, 53, 64, 100, 1000])) {
                 if (prec > 53 && testing.Short()) {
                     continue;
                 }
                 @string x = sign + test;
                 ref var tx = ref heap(new global::go.math.big_package.Float(), out var Ꮡtx);
                 var (_, _, err) = Ꮡtx.SetPrec(prec).Parse(x, 0);
-                if (err != default!) {
-                    Ꮡt.Errorf("parsing of %s (prec = %d) failed (invalid test case): %v"u8, x, prec, err);
+                if (err != nil) {
+                    t.Errorf("parsing of %s (prec = %d) failed (invalid test case): %v", x, prec, err);
                     continue;
                 }
                 var buf = new slice<byte>(4, 32);
                 (var b, err) = Ꮡtx.AppendText(buf);
-                if (err != default!) {
-                    Ꮡt.Errorf("marshaling of %v (prec = %d) failed: %v"u8, Ꮡtx, prec, err);
+                if (err != nil) {
+                    t.Errorf("marshaling of %v (prec = %d) failed: %v", Ꮡtx, prec, err);
                     continue;
                 }
                 ref var rx = ref heap(new global::go.math.big_package.Float(), out var Ꮡrx);
                 Ꮡrx.SetPrec(prec);
                 {
-                    var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != default!) {
-                        Ꮡt.Errorf("unmarshaling of %v (prec = %d) failed: %v"u8, Ꮡtx, prec, errΔ1);
+                    var errΔ1 = Ꮡrx.UnmarshalText(b[4..]); if (errΔ1 != nil) {
+                        t.Errorf("unmarshaling of %v (prec = %d) failed: %v", Ꮡtx, prec, errΔ1);
                         continue;
                     }
                 }
                 if (Ꮡrx.Cmp(Ꮡtx) != 0) {
-                    Ꮡt.Errorf("AppendText of %v (prec = %d) failed: got %v want %v"u8, Ꮡtx, prec, Ꮡrx, Ꮡtx);
+                    t.Errorf("AppendText of %v (prec = %d) failed: got %v want %v", Ꮡtx, prec, Ꮡrx, Ꮡtx);
                 }
             }
         }
     }
 }
 
-public static void TestFloatAppendTextNil(ж<testing.T> Ꮡt) {
-    ж<global::go.math.big_package.Float> x = default!;
+public static void TestFloatAppendTextNil(ж<testing.T> t) {
+    ж<global::go.math.big_package.Float> x = default;
     var buf = new slice<byte>(4, 16);
     var (data, _) = x.AppendText(buf);
     if (((sstring)(data[4..])) != "<nil>"u8) {
-        Ꮡt.Errorf("got %q, want <nil>"u8, data[4..]);
+        t.Errorf("got %q, want <nil>", data[4..]);
     }
 }
 

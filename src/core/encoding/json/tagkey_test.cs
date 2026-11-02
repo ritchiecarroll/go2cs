@@ -80,49 +80,49 @@ internal partial struct TestStructTagObjectKey_tests /*dyn*/ {
     internal @string key;
 }
 
-public static void TestStructTagObjectKey(ж<testing.T> Ꮡt) {
-    var tests = new TestStructTagObjectKey_tests[]{
-        new(Name(""u8), new basicLatin2xTag("2x"u8), "2x"u8, "$%-/"u8),
-        new(Name(""u8), new basicLatin3xTag("3x"u8), "3x"u8, "0123456789"u8),
-        new(Name(""u8), new basicLatin4xTag("4x"u8), "4x"u8, "ABCDEFGHIJKLMO"u8),
-        new(Name(""u8), new basicLatin5xTag("5x"u8), "5x"u8, "PQRSTUVWXYZ_"u8),
-        new(Name(""u8), new basicLatin6xTag("6x"u8), "6x"u8, "abcdefghijklmno"u8),
-        new(Name(""u8), new basicLatin7xTag("7x"u8), "7x"u8, "pqrstuvwxyz"u8),
-        new(Name(""u8), new miscPlaneTag("いろはにほへと"u8), "いろはにほへと"u8, "色は匂へど"u8),
-        new(Name(""u8), new dashTag("foo"u8), "foo"u8, "-"u8),
-        new(Name(""u8), new emptyTag("Pour Moi"u8), "Pour Moi"u8, "W"u8),
-        new(Name(""u8), new misnamedTag("Animal Kingdom"u8), "Animal Kingdom"u8, "X"u8),
-        new(Name(""u8), new badFormatTag("Orfevre"u8), "Orfevre"u8, "Y"u8),
-        new(Name(""u8), new badCodeTag("Reliable Man"u8), "Reliable Man"u8, "Z"u8),
-        new(Name(""u8), new percentSlashTag("brut"u8), "brut"u8, "text/html%"u8),
-        new(Name(""u8), new punctuationTag("Union Rags"u8), "Union Rags"u8, "!#$%&()*+-./:;<=>?@[]^_{|}~ "u8),
-        new(Name(""u8), new spaceTag("Perreddu"u8), "Perreddu"u8, "With space"u8),
-        new(Name(""u8), new unicodeTag("Loukanikos"u8), "Loukanikos"u8, "Ελλάδα"u8)
-    }.slice();
+public static void TestStructTagObjectKey(ж<testing.T> t) {
+    var tests = slice<TestStructTagObjectKey_tests>([
+        new(Name(""u8), new basicLatin2xTag("2x"), "2x", "$%-/"),
+        new(Name(""u8), new basicLatin3xTag("3x"), "3x", "0123456789"),
+        new(Name(""u8), new basicLatin4xTag("4x"), "4x", "ABCDEFGHIJKLMO"),
+        new(Name(""u8), new basicLatin5xTag("5x"), "5x", "PQRSTUVWXYZ_"),
+        new(Name(""u8), new basicLatin6xTag("6x"), "6x", "abcdefghijklmno"),
+        new(Name(""u8), new basicLatin7xTag("7x"), "7x", "pqrstuvwxyz"),
+        new(Name(""u8), new miscPlaneTag("いろはにほへと"), "いろはにほへと", "色は匂へど"),
+        new(Name(""u8), new dashTag("foo"), "foo", "-"),
+        new(Name(""u8), new emptyTag("Pour Moi"), "Pour Moi", "W"),
+        new(Name(""u8), new misnamedTag("Animal Kingdom"), "Animal Kingdom", "X"),
+        new(Name(""u8), new badFormatTag("Orfevre"), "Orfevre", "Y"),
+        new(Name(""u8), new badCodeTag("Reliable Man"), "Reliable Man", "Z"),
+        new(Name(""u8), new percentSlashTag("brut"), "brut", "text/html%"),
+        new(Name(""u8), new punctuationTag("Union Rags"), "Union Rags", "!#$%&()*+-./:;<=>?@[]^_{|}~ "),
+        new(Name(""u8), new spaceTag("Perreddu"), "Perreddu", "With space"),
+        new(Name(""u8), new unicodeTag("Loukanikos"), "Loukanikos", "Ελλάδα")
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestStructTagObjectKey_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.Name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var (b, err) = Marshal(ttʗ1.raw);
-            if (err != default!) {
-                tΔ1.Fatalf("%s: Marshal error: %v"u8, ttʗ1.Where, err);
+            if (err != nil) {
+                tΔ1.Fatalf("%s: Marshal error: %v", ttʗ1.Where, err);
             }
             ref var f = ref heap<any>(out var Ꮡf);
             err = Unmarshal(b, Ꮡf);
-            if (err != default!) {
-                tΔ1.Fatalf("%s: Unmarshal error: %v"u8, ttʗ1.Where, err);
+            if (err != nil) {
+                tΔ1.Fatalf("%s: Unmarshal error: %v", ttʗ1.Where, err);
             }
             foreach (var (k, v) in f._<map<@string, any>>()) {
-                if (k == ttʗ1.key){
+                if (k == ttʗ1.key) {
                     {
                         var (s, ok) = v._<@string>(ᐧ); if (!ok || s != ttʗ1.value) {
-                            tΔ1.Fatalf("%s: Unmarshal(%#q) value:\n\tgot:  %q\n\twant: %q"u8, ttʗ1.Where, b, s, ttʗ1.value);
+                            tΔ1.Fatalf("%s: Unmarshal(%#q) value:\n\tgot:  %q\n\twant: %q", ttʗ1.Where, b, s, ttʗ1.value);
                         }
                     }
                 } else {
-                    tΔ1.Fatalf("%s: Unmarshal(%#q): unexpected key: %q"u8, ttʗ1.Where, b, k);
+                    tΔ1.Fatalf("%s: Unmarshal(%#q): unexpected key: %q", ttʗ1.Where, b, k);
                 }
             }
         });

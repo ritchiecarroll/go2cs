@@ -10,8 +10,8 @@ partial class cpu_package {
 internal static Func<slice<uintptr>> getAuxvFn;
 
 internal static slice<uintptr> getAuxv() {
-    if (getAuxvFn == default!) {
-        return default!;
+    if (getAuxvFn == nil) {
+        return default;
     }
     return getAuxvFn();
 }

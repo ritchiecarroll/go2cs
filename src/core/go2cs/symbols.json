@@ -183,6 +183,13 @@
       "note": "U+1D9C - hoisted function-local big-constant field-name suffix: a Go local const whose value fits neither int64 nor uint64 emits as GoBigConst (BigInteger), and the parse hoists to one static readonly field per package so the local costs a struct copy instead of a per-call BigInteger.Parse (L11). Converter-only, so no Symbols.cs projection."
     },
     {
+      "name": "StaticBackingFieldMarker",
+      "value": "ᵇ",
+      "goEscape": true,
+      "goTrailing": "Suffix of the private backing field behind a struct-typed static read through a same-named ref readonly accessor (trueˢᵇ, seat #53). Variants: ᵇ",
+      "note": "U+1D47 - seat #53: a struct-typed static is read through a same-named ref readonly accessor over a private backing field that carries this suffix, so the JIT inlines its readers (hoistedLiteralOperations.go). Converter-only, so no Symbols.cs projection."
+    },
+    {
       "name": "StackBufferMarker",
       "value": "\u1d37",
       "goEscape": true,

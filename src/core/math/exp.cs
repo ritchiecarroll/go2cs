@@ -121,7 +121,7 @@ internal static float64 exp(float64 x) {
     }}
 
     // reduce; computed as r = hi - lo for extra precision.
-    nint k = default!;
+    nint k = default;
     switch (ᐧ) {
     case {} when x is < 0D: {
         k = (nint)(Log2e * x - 0.5D);
@@ -169,7 +169,7 @@ internal static float64 exp2(float64 x) {
 
     // argument reduction; x = r×lg(e) + k with |r| ≤ ln(2)/2.
     // computed as r = hi - lo for extra precision.
-    nint k = default!;
+    nint k = default;
     switch (ᐧ) {
     case {} when x is > 0D: {
         k = (nint)(x + 0.5D);

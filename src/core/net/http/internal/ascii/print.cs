@@ -24,7 +24,7 @@ public static bool EqualFold(@string s, @string t) {
 
 // lower returns the ASCII lowercase version of b.
 internal static byte lower(byte b) {
-    if ((rune)'A' <= b && b <= (rune)'Z') {
+    if ('A' <= b && b <= 'Z') {
         return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
@@ -34,7 +34,7 @@ internal static byte lower(byte b) {
 // https://tools.ietf.org/html/rfc20#section-4.2.
 public static bool IsPrint(@string s) {
     for (nint i = 0; i < len(s); i++) {
-        if (s[i] < (rune)' ' || s[i] > (rune)'~') {
+        if (s[i] < ' ' || s[i] > '~') {
             return false;
         }
     }

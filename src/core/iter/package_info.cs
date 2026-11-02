@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +45,7 @@ using static go.iter_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,7 +55,7 @@ using static go.iter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOoB1AOmAAwwABkCAAASooKCgpSCgpSClIKCgoKCpoKAgpKCpIKUgoKCopKylIKUgpSCgoKmgpSUppSSlIKCgoKmgpSUygANMgAZAgAAFKKCgoKUgoKUgpSCgoKCgqaCgIKSgqSClIKCgoKiksKUgpSClIKCgqaClJSmlJKUgoKCgqaClJTKyg==", "271-305:1;277-290:1.1;292-300:1.2;306-330:2;331-350:3;387-422:1;393-406:1.1;408-416:1.2;423-447:2;448-467:3")]
+[assembly: GoPositionMap("iter/iter.go", "iter.cs", "AOoB1AOmAAwwABkCAAASooKCgpSCgpSClIKCgoKCpoKAgoKCpIKUgoKCopKylIKUgpSCgoKmgpSUppSSlIKCgoKmgpSUygANMgAZAgAAFKKCgoKUgoKUgpSCgoKCgqaCgIKCgqSClIKCgoKiksKUgpSClIKCgqaClJSmlJKUgoKCgqaClJTKyg==", "271-305:1;277-290:1.1;292-300:1.2;306-330:2;331-350:3;387-422:1;393-406:1.1;408-416:1.2;423-447:2;448-467:3")]
 // </GoSourcePositionMaps>
 
 namespace go;

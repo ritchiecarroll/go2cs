@@ -6,10 +6,10 @@ namespace go.crypto.@internal.fips140;
 
 partial class ecdsa_package {
 
-internal static (ж<Signature>, error) sign<P>(ref Curve<P> c, ref PrivateKey priv, ж<hmacDRBG> Ꮡdrbg, slice<byte> hash)
+internal static (ж<Signature>, error) sign<P>(ref Curve<P> c, ref PrivateKey priv, ж<hmacDRBG> drbg, slice<byte> hash)
     where P : Point<P>
 {
-    return signGeneric(ref c, ref priv, Ꮡdrbg, hash);
+    return signGeneric(ref c, ref priv, drbg, hash);
 }
 
 internal static error verify<P>(ref Curve<P> c, ref ΔPublicKey pub, slice<byte> hash, ref Signature sig)

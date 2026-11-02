@@ -12,22 +12,22 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 internal partial struct TestSizeof_type /*dyn*/ {
-    internal any val;     // type as a value
+    internal any val;        // type as a value
     internal uintptr _32bit; // size on 32bit platforms
     internal uintptr _64bit; // size on 64bit platforms
 }
 
 // Assert that the size of important structures do not change unexpectedly.
-public static void TestSizeof(ж<testing.T> Ꮡt) {
+public static void TestSizeof(ж<testing.T> t) {
     const bool _64bit = /* unsafe.Sizeof(uintptr(0)) == 8 */ true;
     uintptr xreg = /* unsafe.Sizeof(runtime.XRegPerG{}) */ 8; // Varies per architecture
-    slice<TestSizeof_type> tests = new TestSizeof_type[]{
+    slice<TestSizeof_type> tests = slice<TestSizeof_type>([
         new(new G(), 288 + xreg, 448 + xreg), // g, but exported for testing
-        new(new Sudog(), 64, 104) // sudog, but exported for testing
-    }.slice();
+        new(new Sudog(), 64, 104)             // sudog, but exported for testing
+    ]);
 
     if (xreg > runtime_internal_test_package.PtrSize) {
-        Ꮡt.Errorf("unsafe.Sizeof(xRegPerG) = %d, want <= %d"u8, xreg, (nint)(runtime_internal_test_package.PtrSize));
+        t.Errorf("unsafe.Sizeof(xRegPerG) = %d, want <= %d", xreg, (nint)(runtime_internal_test_package.PtrSize));
     }
 
     foreach (var (_, tt) in tests) {
@@ -37,7 +37,7 @@ public static void TestSizeof(ж<testing.T> Ꮡt) {
         }
         var got = reflect.TypeOf(tt.val).Size();
         if (want != got) {
-            Ꮡt.Errorf("unsafe.Sizeof(%T) = %d, want %d"u8, tt.val, got, want);
+            t.Errorf("unsafe.Sizeof(%T) = %d, want %d", tt.val, got, want);
         }
     }
 }

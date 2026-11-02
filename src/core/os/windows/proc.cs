@@ -58,7 +58,8 @@ public static nint Getegid() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getgroupsˢ = "getgroups"u8;
+internal static ref readonly @string getgroupsˢ => ref getgroupsˢᵇ;
+private static readonly @string getgroupsˢᵇ = "getgroups"u8;
 
 // Getgroups returns a list of the numeric ids of groups that the caller belongs to.
 //

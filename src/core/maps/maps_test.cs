@@ -12,34 +12,34 @@ partial class maps_internal_test_package {
 
 internal static map<nint, nint> m1 = new map<nint, nint>{[1] = 2, [2] = 4, [4] = 8, [8] = 16};
 
-internal static map<nint, @string> m2 = new map<nint, @string>{[1] = "2"u8, [2] = "4"u8, [4] = "8"u8, [8] = "16"u8};
+internal static map<nint, @string> m2 = new map<nint, @string>{[1] = "2", [2] = "4", [4] = "8", [8] = "16"};
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object equalNilNilFalseWantTrueˢ = (@string)"Equal(nil, nil) = false, want true"u8;
 
-public static void TestEqual(ж<testing.T> Ꮡt) {
+public static void TestEqual(ж<testing.T> t) {
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, m1)) {
-        Ꮡt.Errorf("Equal(%v, %v) = false, want true"u8, m1, m1);
+        t.Errorf("Equal(%v, %v) = false, want true", m1, m1);
     }
-    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, (map<nint, nint>)default!)) {
-        Ꮡt.Errorf("Equal(%v, nil) = true, want false"u8, m1);
+    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, (map<nint, nint>)default)) {
+        t.Errorf("Equal(%v, nil) = true, want false", m1);
     }
-    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>((map<nint, nint>)default!, m1)) {
-        Ꮡt.Errorf("Equal(nil, %v) = true, want false"u8, m1);
+    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>((map<nint, nint>)default, m1)) {
+        t.Errorf("Equal(nil, %v) = true, want false", m1);
     }
-    if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(default!, default!)) {
-        Ꮡt.Error(equalNilNilFalseWantTrueˢ);
+    if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(default, default)) {
+        t.Error(equalNilNilFalseWantTrueˢ);
     }
     {
         var ms = new map<nint, nint>{[1] = 2}; if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, ms)) {
-            Ꮡt.Errorf("Equal(%v, %v) = true, want false"u8, m1, ms);
+            t.Errorf("Equal(%v, %v) = true, want false", m1, ms);
         }
     }
 
     // Comparing NaN for equality is expected to fail.
     var mf = new map<nint, float64>{[1] = 0D, [2] = Δmath.NaN()};
     if (Equal<map<nint, float64>, map<nint, float64>, nint, float64>(mf, mf)) {
-        Ꮡt.Errorf("Equal(%v, %v) = true, want false"u8, mf, mf);
+        t.Errorf("Equal(%v, %v) = true, want false", mf, mf);
     }
 }
 
@@ -62,56 +62,56 @@ internal static bool equalIntStr(nint v1, @string v2) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object equalFuncNilNilEqualˢ = (@string)"EqualFunc(nil, nil, equal) = false, want true"u8;
 
-public static void TestEqualFunc(ж<testing.T> Ꮡt) {
+public static void TestEqualFunc(ж<testing.T> t) {
     if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, m1, equal<nint>)) {
-        Ꮡt.Errorf("EqualFunc(%v, %v, equal) = false, want true"u8, m1, m1);
+        t.Errorf("EqualFunc(%v, %v, equal) = false, want true", m1, m1);
     }
-    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, (map<nint, nint>)default!, equal<nint>)) {
-        Ꮡt.Errorf("EqualFunc(%v, nil, equal) = true, want false"u8, m1);
+    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, (map<nint, nint>)default, equal<nint>)) {
+        t.Errorf("EqualFunc(%v, nil, equal) = true, want false", m1);
     }
-    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>((map<nint, nint>)default!, m1, equal<nint>)) {
-        Ꮡt.Errorf("EqualFunc(nil, %v, equal) = true, want false"u8, m1);
+    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>((map<nint, nint>)default, m1, equal<nint>)) {
+        t.Errorf("EqualFunc(nil, %v, equal) = true, want false", m1);
     }
-    if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(default!, default!, equal<nint>)) {
-        Ꮡt.Error(equalFuncNilNilEqualˢ);
+    if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(default, default, equal<nint>)) {
+        t.Error(equalFuncNilNilEqualˢ);
     }
     {
         var ms = new map<nint, nint>{[1] = 2}; if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, ms, equal<nint>)) {
-            Ꮡt.Errorf("EqualFunc(%v, %v, equal) = true, want false"u8, m1, ms);
+            t.Errorf("EqualFunc(%v, %v, equal) = true, want false", m1, ms);
         }
     }
 
     // Comparing NaN for equality is expected to fail.
     var mf = new map<nint, float64>{[1] = 0D, [2] = Δmath.NaN()};
     if (EqualFunc<map<nint, float64>, map<nint, float64>, nint, float64, float64>(mf, mf, equal<float64>)) {
-        Ꮡt.Errorf("EqualFunc(%v, %v, equal) = true, want false"u8, mf, mf);
+        t.Errorf("EqualFunc(%v, %v, equal) = true, want false", mf, mf);
     }
     // But it should succeed using equalNaN.
     if (!EqualFunc<map<nint, float64>, map<nint, float64>, nint, float64, float64>(mf, mf, equalNaN<float64>)) {
-        Ꮡt.Errorf("EqualFunc(%v, %v, equalNaN) = false, want true"u8, mf, mf);
+        t.Errorf("EqualFunc(%v, %v, equalNaN) = false, want true", mf, mf);
     }
 
     if (!EqualFunc<map<nint, nint>, map<nint, @string>, nint, nint, @string>(m1, m2, equalIntStr)) {
-        Ꮡt.Errorf("EqualFunc(%v, %v, equalIntStr) = false, want true"u8, m1, m2);
+        t.Errorf("EqualFunc(%v, %v, equalIntStr) = false, want true", m1, m2);
     }
 }
 
-public static void TestClone(ж<testing.T> Ꮡt) {
+public static void TestClone(ж<testing.T> t) {
     var mc = Clone<map<nint, nint>, nint, nint>(m1);
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(mc, m1)) {
-        Ꮡt.Errorf("Clone(%v) = %v, want %v"u8, m1, mc, m1);
+        t.Errorf("Clone(%v) = %v, want %v", m1, mc, m1);
     }
     mc[16] = 32;
     if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(mc, m1)) {
-        Ꮡt.Errorf("Equal(%v, %v) = true, want false"u8, mc, m1);
+        t.Errorf("Equal(%v, %v) = true, want false", mc, m1);
     }
 }
 
-public static void TestCloneNil(ж<testing.T> Ꮡt) {
-    map<@string, nint> m1 = default!;
+public static void TestCloneNil(ж<testing.T> t) {
+    map<@string, nint> m1 = default;
     var mc = Clone<map<@string, nint>, @string, nint>(m1);
-    if (mc != default!) {
-        Ꮡt.Errorf("Clone(%v) = %v, want %v"u8, m1, mc, m1);
+    if (mc != nil) {
+        t.Errorf("Clone(%v) = %v, want %v", m1, mc, m1);
     }
 }
 
@@ -119,30 +119,30 @@ internal partial struct TestCopy_M1 /*map[nint, bool]*/;
 
 internal partial struct TestCopy_M2 /*map[nint, bool]*/;
 
-public static void TestCopy(ж<testing.T> Ꮡt) {
+public static void TestCopy(ж<testing.T> t) {
     var mc = Clone<map<nint, nint>, nint, nint>(m1);
     Copy<map<nint, nint>, map<nint, nint>, nint, nint>(mc, mc);
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(mc, m1)) {
-        Ꮡt.Errorf("Copy(%v, %v) = %v, want %v"u8, m1, m1, mc, m1);
+        t.Errorf("Copy(%v, %v) = %v, want %v", m1, m1, mc, m1);
     }
     Copy<map<nint, nint>, map<nint, nint>, nint, nint>(mc, new map<nint, nint>{[16] = 32});
     var want = new map<nint, nint>{[1] = 2, [2] = 4, [4] = 8, [8] = 16, [16] = 32};
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(mc, want)) {
-        Ꮡt.Errorf("Copy result = %v, want %v"u8, mc, want);
+        t.Errorf("Copy result = %v, want %v", mc, want);
     }
     Copy<TestCopy_M1, TestCopy_M2, nint, bool>(new TestCopy_M1(0), new TestCopy_M2(0));
 }
 
-public static void TestDeleteFunc(ж<testing.T> Ꮡt) {
+public static void TestDeleteFunc(ж<testing.T> t) {
     var mc = Clone<map<nint, nint>, nint, nint>(m1);
     DeleteFunc(mc, (nint _Δp0, nint _Δp1) => false);
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(mc, m1)) {
-        Ꮡt.Errorf("DeleteFunc(%v, true) = %v, want %v"u8, m1, mc, m1);
+        t.Errorf("DeleteFunc(%v, true) = %v, want %v", m1, mc, m1);
     }
     DeleteFunc(mc, (nint k, nint v) => k > 3);
     var want = new map<nint, nint>{[1] = 2, [2] = 4};
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(mc, want)) {
-        Ꮡt.Errorf("DeleteFunc result = %v, want %v"u8, mc, want);
+        t.Errorf("DeleteFunc result = %v, want %v", mc, want);
     }
 }
 
@@ -161,7 +161,7 @@ public static void BenchmarkMapClone(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestCloneWithDelete(ж<testing.T> Ꮡt) {
+public static void TestCloneWithDelete(ж<testing.T> t) {
     map<nint, nint> m = new map<nint, nint>();
     for (nint i = 0; i < 32; i++) {
         m[i] = i;
@@ -171,16 +171,16 @@ public static void TestCloneWithDelete(ж<testing.T> Ꮡt) {
     }
     var m2 = Clone<map<nint, nint>, nint, nint>(m);
     if (len(m2) != 8) {
-        Ꮡt.Errorf("len2(m2) = %d, want %d"u8, len(m2), (nint)8);
+        t.Errorf("len2(m2) = %d, want %d", len(m2), (nint)8);
     }
     for (nint i = 0; i < 8; i++) {
         if (m2[i] != m[i]) {
-            Ꮡt.Errorf("m2[%d] = %d, want %d"u8, i, m2[i], m[i]);
+            t.Errorf("m2[%d] = %d, want %d", i, m2[i], m[i]);
         }
     }
 }
 
-public static void TestCloneWithMapAssign(ж<testing.T> Ꮡt) {
+public static void TestCloneWithMapAssign(ж<testing.T> t) {
     map<nint, nint> m = new map<nint, nint>();
     const nint N = 25;
     for (nint i = 0; i < N; i++) {
@@ -188,11 +188,11 @@ public static void TestCloneWithMapAssign(ж<testing.T> Ꮡt) {
     }
     var m2 = Clone<map<nint, nint>, nint, nint>(m);
     if (len(m2) != N) {
-        Ꮡt.Errorf("len2(m2) = %d, want %d"u8, len(m2), (nint)(N));
+        t.Errorf("len2(m2) = %d, want %d", len(m2), (nint)(N));
     }
     for (nint i = 0; i < N; i++) {
         if (m2[i] != m[i]) {
-            Ꮡt.Errorf("m2[%d] = %d, want %d"u8, i, m2[i], m[i]);
+            t.Errorf("m2[%d] = %d, want %d", i, m2[i], m[i]);
         }
     }
 }
@@ -202,15 +202,15 @@ internal partial struct TestCloneLarge_K /*[17]float64*/; // > 128 bytes
 
 internal partial struct TestCloneLarge_V /*[17]float64*/;
 
-public static void TestCloneLarge(ж<testing.T> Ꮡt) {
-    float64 zero = default!;
+public static void TestCloneLarge(ж<testing.T> t) {
+    float64 zero = default;
     var negZero = -zero;
 
     for (nint tst = 0; tst < 3; tst++) {
         // Initialize m with a key and value.
         var m = new map<TestCloneLarge_K, TestCloneLarge_V>{};
-        TestCloneLarge_K k1 = default!;
-        TestCloneLarge_V v1 = default!;
+        TestCloneLarge_K k1 = default;
+        TestCloneLarge_V v1 = default;
         m[k1] = v1.Clone();
 
         switch (tst) {
@@ -255,10 +255,10 @@ public static void TestCloneLarge(ж<testing.T> Ꮡt) {
             var v = vᴛ1.Clone();
 
             if (Δmath.Signbit(k[0])) {
-                Ꮡt.Errorf("tst%d: sign bit of key changed; got %v want %v"u8, tst, k, k1);
+                t.Errorf("tst%d: sign bit of key changed; got %v want %v", tst, k, k1);
             }
             if (v != v1) {
-                Ꮡt.Errorf("tst%d: value changed; got %v want %v"u8, tst, v, v1);
+                t.Errorf("tst%d: value changed; got %v want %v", tst, v, v1);
             }
         }
     }

@@ -14,8 +14,8 @@ partial class execenv_package {
 //
 // Defaults to syscall.Environ() on all platforms
 // other than Windows.
-public static (slice<@string>, error) Default(ж<syscall.SysProcAttr> Ꮡsys) {
-    return (syscall.Environ(), default!);
+public static (slice<@string>, error) Default(ж<syscall.SysProcAttr> sys) {
+    return (syscall.Environ(), default);
 }
 
 } // end execenv_package

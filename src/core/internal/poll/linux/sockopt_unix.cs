@@ -16,14 +16,14 @@ public static error SetsockoptByte(this ж<FD> Ꮡfd, nint level, nint name, byt
         ref var fd = ref Ꮡfd.DerefOrNull();
 
         {
-            var err = Ꮡfd.incref(); if (err != default!) {
+            var err = Ꮡfd.incref(); if (err != nil) {
                 return err;
             }
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptByte(fd.Sysfd, level, name, arg);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 

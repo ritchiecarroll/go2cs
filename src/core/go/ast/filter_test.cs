@@ -16,7 +16,8 @@ using static global::go.go.ast_internal_test_package;
 
 partial class ast_test_package {
 
-internal static readonly @string input = """
+internal static ref readonly @string input => ref inputᵇ;
+private static readonly @string inputᵇ = """
 package p
 
 type t1 struct{}
@@ -41,7 +42,8 @@ func (x *t2) f2() {}
 // of one without, and it favors duplicate entries appearing
 // later in the source over ones appearing earlier. This is why
 // (*t2).f2 is kept and t2.f2 is eliminated in this test case.
-internal static readonly @string golden = """
+internal static ref readonly @string golden => ref goldenᵇ;
+private static readonly @string goldenᵇ = """
 package p
 
 type t1 struct{}
@@ -59,19 +61,19 @@ func (x *t2) f2() {}
 
 """u8.Raw();
 
-public static void TestFilterDuplicates(ж<testing.T> Ꮡt) {
+public static void TestFilterDuplicates(ж<testing.T> t) {
     // parse input
     var fset = token.NewFileSet();
     var (@file, err) = parser.ParseFile(fset, ""u8, input, 0);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // create package
-    var files = new map<@string, ж<ast.File>>{[""u8] = @file};
-    (var pkg, err) = ast.NewPackage(fset, files, default!, nil);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var files = new map<@string, ж<ast.File>>{[""] = @file};
+    (var pkg, err) = ast.NewPackage(fset, files, default, nil);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // filter
@@ -80,14 +82,14 @@ public static void TestFilterDuplicates(ж<testing.T> Ꮡt) {
     // pretty-print
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     {
-        var errΔ1 = format.Node(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), fset, merged.OrTypedNil()); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = format.Node(new ast_test_package.strings_BuilderжWriter(Ꮡbuf), fset, merged.OrTypedNil()); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     @string output = buf.String();
 
     if (output != golden) {
-        Ꮡt.Errorf("incorrect output:\n%s"u8, output);
+        t.Errorf("incorrect output:\n%s", output);
     }
 }
 

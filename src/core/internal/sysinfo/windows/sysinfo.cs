@@ -26,7 +26,7 @@ public static readonly ж<Func<@string>> ᏑCPUName = new StaticBox<Func<@string
         }
     }
 
-    return ""u8;
+    return "";
 }));
 public static ref Func<@string> CPUName => ref ((StaticBox<Func<@string>>)ᏑCPUName).ValueSlot;
 

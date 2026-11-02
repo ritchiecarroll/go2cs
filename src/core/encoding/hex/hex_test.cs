@@ -17,76 +17,74 @@ internal partial struct encDecTest {
     internal slice<byte> dec;
 }
 
-internal static slice<encDecTest> encDecTests = new encDecTest[]{
-    new(""u8, new byte[]{}.slice()),
-    new("0001020304050607"u8, new byte[]{0, 1, 2, 3, 4, 5, 6, 7}.slice()),
-    new("08090a0b0c0d0e0f"u8, new byte[]{8, 9, 10, 11, 12, 13, 14, 15}.slice()),
-    new("f0f1f2f3f4f5f6f7"u8, new byte[]{0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7}.slice()),
-    new("f8f9fafbfcfdfeff"u8, new byte[]{0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff}.slice()),
-    new("67"u8, new byte[]{(rune)'g'}.slice()),
-    new("e3a1"u8, new byte[]{0xe3, 0xa1}.slice())
-}.slice();
+internal static slice<encDecTest> encDecTests = slice<encDecTest>([
+    new("", slice<byte>([])),
+    new("0001020304050607", slice<byte>([0, 1, 2, 3, 4, 5, 6, 7])),
+    new("08090a0b0c0d0e0f", slice<byte>([8, 9, 10, 11, 12, 13, 14, 15])),
+    new("f0f1f2f3f4f5f6f7", slice<byte>([0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7])),
+    new("f8f9fafbfcfdfeff", slice<byte>([0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff])),
+    new("67", slice<byte>([(byte)'g'])),
+    new("e3a1", slice<byte>([0xe3, 0xa1]))
+]);
 
-public static void TestEncode(ж<testing.T> Ꮡt) {
+public static void TestEncode(ж<testing.T> t) {
     foreach (var (i, test) in encDecTests) {
         var dst = new slice<byte>(EncodedLen(len(test.dec)));
         nint n = Encode(dst, test.dec);
         if (n != len(dst)) {
-            Ꮡt.Errorf("#%d: bad return value: got: %d want: %d"u8, i, n, len(dst));
+            t.Errorf("#%d: bad return value: got: %d want: %d", i, n, len(dst));
         }
         if (((sstring)dst) != test.enc) {
-            Ꮡt.Errorf("#%d: got: %#v want: %#v"u8, i, dst, test.enc);
+            t.Errorf("#%d: got: %#v want: %#v", i, dst, test.enc);
         }
         dst = slice<byte>("lead"u8);
         dst = AppendEncode(dst, test.dec);
         if (((@string)dst) != "lead"u8 + test.enc) {
-            Ꮡt.Errorf("#%d: got: %#v want: %#v"u8, i, dst, "lead" + test.enc);
+            t.Errorf("#%d: got: %#v want: %#v", i, dst, "lead" + test.enc);
         }
     }
 }
 
-public static void TestDecode(ж<testing.T> Ꮡt) {
+public static void TestDecode(ж<testing.T> t) {
     // Case for decoding uppercase hex characters, since
     // Encode always uses lowercase.
-    var decTests = append(encDecTests, new encDecTest("F8F9FAFBFCFDFEFF"u8, new byte[]{0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff}.slice()));
+    var decTests = append(encDecTests, new encDecTest("F8F9FAFBFCFDFEFF", slice<byte>([0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff])));
     foreach (var (i, test) in decTests) {
         var dst = new slice<byte>(DecodedLen(len(test.enc)));
         var (n, err) = Decode(dst, slice<byte>(test.enc));
-        if (err != default!){
-            Ꮡt.Errorf("#%d: bad return value: got:%d want:%d"u8, i, n, len(dst));
-        } else 
-        if (!bytes.Equal(dst, test.dec)) {
-            Ꮡt.Errorf("#%d: got: %#v want: %#v"u8, i, dst, test.dec);
+        if (err != nil) {
+            t.Errorf("#%d: bad return value: got:%d want:%d", i, n, len(dst));
+        } else if (!bytes.Equal(dst, test.dec)) {
+            t.Errorf("#%d: got: %#v want: %#v", i, dst, test.dec);
         }
         dst = slice<byte>("lead"u8);
         (dst, err) = AppendDecode(dst, slice<byte>(test.enc));
-        if (err != default!){
-            Ꮡt.Errorf("#%d: AppendDecode error: %v"u8, i, err);
-        } else 
-        if (((@string)dst) != "lead"u8 + ((sstring)test.dec)) {
-            Ꮡt.Errorf("#%d: got: %#v want: %#v"u8, i, dst, "lead" + ((sstring)test.dec));
+        if (err != nil) {
+            t.Errorf("#%d: AppendDecode error: %v", i, err);
+        } else if (((@string)dst) != "lead"u8 + ((sstring)test.dec)) {
+            t.Errorf("#%d: got: %#v want: %#v", i, dst, "lead" + ((sstring)test.dec));
         }
     }
 }
 
-public static void TestEncodeToString(ж<testing.T> Ꮡt) {
+public static void TestEncodeToString(ж<testing.T> t) {
     foreach (var (i, test) in encDecTests) {
         @string s = EncodeToString(test.dec);
         if (s != test.enc) {
-            Ꮡt.Errorf("#%d got:%s want:%s"u8, i, s, test.enc);
+            t.Errorf("#%d got:%s want:%s", i, s, test.enc);
         }
     }
 }
 
-public static void TestDecodeString(ж<testing.T> Ꮡt) {
+public static void TestDecodeString(ж<testing.T> t) {
     foreach (var (i, test) in encDecTests) {
         var (dst, err) = DecodeString(test.enc);
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: unexpected err value: %s"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: unexpected err value: %s", i, err);
             continue;
         }
         if (!bytes.Equal(dst, test.dec)) {
-            Ꮡt.Errorf("#%d: got: %#v want: #%v"u8, i, dst, test.dec);
+            t.Errorf("#%d: got: %#v want: #%v", i, dst, test.dec);
         }
     }
 }
@@ -97,33 +95,33 @@ partial struct errTestsᴛ1 /*dyn*/ {
     internal error err;
 }
 internal static slice<errTestsᴛ1> errTests;
-internal static void initᴛerrTests() { errTests = new errTestsᴛ1[]{
-    new(""u8, ""u8, default!),
-    new("0"u8, ""u8, ErrLength),
-    new("zd4aa"u8, ""u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'z'),
-    new("d4aaz"u8, ((@string)(new byte[]{0xd4, 0xaa})), (global::go.encoding.hex_package.InvalidByteError)(rune)'z'),
-    new("30313"u8, "01"u8, ErrLength),
-    new("0g"u8, ""u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'g'),
-    new("00gg"u8, "\x00"u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'g'),
-    new("0\x01"u8, ""u8, (global::go.encoding.hex_package.InvalidByteError)(rune)'\x01'),
-    new("ffeed"u8, ((@string)(new byte[]{0xff, 0xee})), ErrLength)
-}.slice(); }
+internal static void initᴛerrTests() { errTests = slice<errTestsᴛ1>([
+    new("", "", default),
+    new("0", "", ErrLength),
+    new("zd4aa", "", (global::go.encoding.hex_package.InvalidByteError)(rune)'z'),
+    new("d4aaz", ((@string)(new byte[]{0xd4, 0xaa})), (global::go.encoding.hex_package.InvalidByteError)(rune)'z'),
+    new("30313", "01", ErrLength),
+    new("0g", "", (global::go.encoding.hex_package.InvalidByteError)(rune)'g'),
+    new("00gg", "\x00", (global::go.encoding.hex_package.InvalidByteError)(rune)'g'),
+    new("0\x01", "", (global::go.encoding.hex_package.InvalidByteError)(rune)'\x01'),
+    new("ffeed", ((@string)(new byte[]{0xff, 0xee})), ErrLength)
+]); }
 
-public static void TestDecodeErr(ж<testing.T> Ꮡt) {
+public static void TestDecodeErr(ж<testing.T> t) {
     foreach (var (_, tt) in errTests) {
         var @out = new slice<byte>(len(tt.@in) + 10);
         var (n, err) = Decode(@out, slice<byte>(tt.@in));
         if (((sstring)(@out.slice(0, n))) != tt.@out || !AreEqual(err, tt.err)) {
-            Ꮡt.Errorf("Decode(%q) = %q, %v, want %q, %v"u8, tt.@in, (@string)(@out.slice(0, n)), err, tt.@out, tt.err);
+            t.Errorf("Decode(%q) = %q, %v, want %q, %v", tt.@in, (@string)(@out.slice(0, n)), err, tt.@out, tt.err);
         }
     }
 }
 
-public static void TestDecodeStringErr(ж<testing.T> Ꮡt) {
+public static void TestDecodeStringErr(ж<testing.T> t) {
     foreach (var (_, tt) in errTests) {
         var (@out, err) = DecodeString(tt.@in);
         if (((sstring)@out) != tt.@out || !AreEqual(err, tt.err)) {
-            Ꮡt.Errorf("DecodeString(%q) = %q, %v, want %q, %v"u8, tt.@in, @out, err, tt.@out, tt.err);
+            t.Errorf("DecodeString(%q) = %q, %v, want %q, %v", tt.@in, @out, err, tt.@out, tt.err);
         }
     }
 }
@@ -136,8 +134,8 @@ internal partial struct TestEncoderDecoder_w /*dyn*/ {
     /*embed*/ public io_package.Writer Writer;
 }
 
-public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
-    foreach (var (_, multiplier) in new nint[]{1, 128, 192}.slice()) {
+public static void TestEncoderDecoder(ж<testing.T> t) {
+    foreach (var (_, multiplier) in slice<nint>([1, 128, 192])) {
         foreach (var (_, test) in encDecTests) {
             var input = bytes.Repeat(test.dec, multiplier);
             @string output = strings.Repeat(test.enc, multiplier);
@@ -146,15 +144,15 @@ public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
             var enc = NewEncoder(new hex_test_package.bytes_BufferжWriter(Ꮡbuf));
             var r = new TestEncoderDecoder_r(new hex_test_package.bytes_ReaderжReader(bytes.NewReader(input))); // io.Reader only; not io.WriterTo
             {
-                var (n, err) = io.CopyBuffer(enc, r, new slice<byte>(7)); if (n != (int64)len(input) || err != default!) {
-                    Ꮡt.Errorf("encoder.Write(%q*%d) = (%d, %v), want (%d, nil)"u8, test.dec, multiplier, n, err, len(input));
+                var (n, err) = io.CopyBuffer(enc, r, new slice<byte>(7)); if (n != (int64)len(input) || err != nil) {
+                    t.Errorf("encoder.Write(%q*%d) = (%d, %v), want (%d, nil)", test.dec, multiplier, n, err, len(input));
                     continue;
                 }
             }
 
             {
                 @string encDst = Ꮡbuf.String(); if (encDst != output) {
-                    Ꮡt.Errorf("buf(%q*%d) = %v, want %v"u8, test.dec, multiplier, encDst, output);
+                    t.Errorf("buf(%q*%d) = %v, want %v", test.dec, multiplier, encDst, output);
                     continue;
                 }
             }
@@ -163,20 +161,20 @@ public static void TestEncoderDecoder(ж<testing.T> Ꮡt) {
             ref var decBuf = ref heap(new bytes.Buffer(), out var ᏑdecBuf);
             var w = new TestEncoderDecoder_w(new hex_test_package.bytes_BufferжWriter(ᏑdecBuf)); // io.Writer only; not io.ReaderFrom
             {
-                var (_, err) = io.CopyBuffer(w, dec, new slice<byte>(7)); if (err != default! || decBuf.Len() != len(input)) {
-                    Ꮡt.Errorf("decoder.Read(%q*%d) = (%d, %v), want (%d, nil)"u8, test.enc, multiplier, decBuf.Len(), err, len(input));
+                var (_, err) = io.CopyBuffer(w, dec, new slice<byte>(7)); if (err != nil || decBuf.Len() != len(input)) {
+                    t.Errorf("decoder.Read(%q*%d) = (%d, %v), want (%d, nil)", test.enc, multiplier, decBuf.Len(), err, len(input));
                 }
             }
 
             if (!bytes.Equal(decBuf.Bytes(), input)) {
-                Ꮡt.Errorf("decBuf(%q*%d) = %v, want %v"u8, test.dec, multiplier, decBuf.Bytes(), input);
+                t.Errorf("decBuf(%q*%d) = %v, want %v", test.dec, multiplier, decBuf.Bytes(), input);
                 continue;
             }
         }
     }
 }
 
-public static void TestDecoderErr(ж<testing.T> Ꮡt) {
+public static void TestDecoderErr(ж<testing.T> t) {
     foreach (var (_, tt) in errTests) {
         var dec = NewDecoder(new hex_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
         var (@out, err) = io.ReadAll(dec);
@@ -186,12 +184,12 @@ public static void TestDecoderErr(ж<testing.T> Ꮡt) {
             wantErr = io.ErrUnexpectedEOF;
         }
         if (((sstring)@out) != tt.@out || !AreEqual(err, wantErr)) {
-            Ꮡt.Errorf("NewDecoder(%q) = %q, %v, want %q, %v"u8, tt.@in, @out, err, tt.@out, wantErr);
+            t.Errorf("NewDecoder(%q) = %q, %v, want %q, %v", tt.@in, @out, err, tt.@out, wantErr);
         }
     }
 }
 
-public static void TestDumper(ж<testing.T> Ꮡt) {
+public static void TestDumper(ж<testing.T> t) {
     array<byte> @in = new(40);
     foreach (var i in range(@in)) {
         @in[i] = (byte)(i + 30);
@@ -212,15 +210,16 @@ public static void TestDumper(ж<testing.T> Ꮡt) {
 
         dumper.Close();
         if (!bytes.Equal(@out.Bytes(), expectedHexDump)) {
-            Ꮡt.Errorf("stride: %d failed. got:\n%s\nwant:\n%s"u8, stride, @out.Bytes(), expectedHexDump);
+            t.Errorf("stride: %d failed. got:\n%s\nwant:\n%s", stride, @out.Bytes(), expectedHexDump);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gopherˢ = "00000000  67 6f 70 68 65 72                                 |gopher|\n"u8;
+internal static ref readonly @string gopherˢ => ref gopherˢᵇ;
+private static readonly @string gopherˢᵇ = "00000000  67 6f 70 68 65 72                                 |gopher|\n"u8;
 
-public static void TestDumper_doubleclose(ж<testing.T> Ꮡt) {
+public static void TestDumper_doubleclose(ж<testing.T> t) {
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
     var dumper = Dumper(new hex_test_package.strings_BuilderжWriter(Ꮡout));
 
@@ -232,11 +231,11 @@ public static void TestDumper_doubleclose(ж<testing.T> Ꮡt) {
 
     @string expected = gopherˢ;
     if (@out.String() != expected) {
-        Ꮡt.Fatalf("got:\n%#v\nwant:\n%#v"u8, @out.String(), expected);
+        t.Fatalf("got:\n%#v\nwant:\n%#v", @out.String(), expected);
     }
 }
 
-public static void TestDumper_earlyclose(ж<testing.T> Ꮡt) {
+public static void TestDumper_earlyclose(ж<testing.T> t) {
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
     var dumper = Dumper(new hex_test_package.strings_BuilderжWriter(Ꮡout));
 
@@ -245,11 +244,11 @@ public static void TestDumper_earlyclose(ж<testing.T> Ꮡt) {
 
     @string expected = ""u8;
     if (@out.String() != expected) {
-        Ꮡt.Fatalf("got:\n%#v\nwant:\n%#v"u8, @out.String(), expected);
+        t.Fatalf("got:\n%#v\nwant:\n%#v", @out.String(), expected);
     }
 }
 
-public static void TestDump(ж<testing.T> Ꮡt) {
+public static void TestDump(ж<testing.T> t) {
     array<byte> @in = new(40);
     foreach (var i in range(@in)) {
         @in[i] = (byte)(i + 30);
@@ -257,7 +256,7 @@ public static void TestDump(ж<testing.T> Ꮡt) {
 
     var @out = slice<byte>(Dump(@in[..]));
     if (!bytes.Equal(@out, expectedHexDump)) {
-        Ꮡt.Errorf("got:\n%s\nwant:\n%s"u8, @out, expectedHexDump);
+        t.Errorf("got:\n%s\nwant:\n%s", @out, expectedHexDump);
     }
 }
 
@@ -270,13 +269,13 @@ internal static slice<byte> expectedHexDump = slice<byte>("""
 
 internal static slice<byte> sink;
 
-public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
-    foreach (var (_, size) in new nint[]{256, 1024, 4096, 16384}.slice()) {
-        var src = bytes.Repeat(new byte[]{2, 3, 5, 7, 9, 11, 13, 17}.slice(), size / 8);
+public static void BenchmarkEncode(ж<testing.B> b) {
+    foreach (var (_, size) in slice<nint>([256, 1024, 4096, 16384])) {
+        var src = bytes.Repeat(slice<byte>([2, 3, 5, 7, 9, 11, 13, 17]), size / 8);
         sink = new slice<byte>(2 * size);
 
         var srcʗ1 = src;
-        Ꮡb.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)size);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Encode(sink, srcʗ1);
@@ -285,15 +284,13 @@ public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
-    foreach (var (_, size) in new nint[]{256, 1024, 4096, 16384}.slice()) {
-        var src = bytes.Repeat(new byte[]{(rune)'2', (rune)'b', (rune)'7', (rune)'4', (rune)'4', (rune)'f', (rune)'a', (rune)'a'}.slice(), size / 8);
+public static void BenchmarkDecode(ж<testing.B> b) {
+    foreach (var (_, size) in slice<nint>([256, 1024, 4096, 16384])) {
+        var src = bytes.Repeat(slice<byte>([(byte)'2', (byte)'b', (byte)'7', (byte)'4', (byte)'4', (byte)'f', (byte)'a', (byte)'a']), size / 8);
         sink = new slice<byte>(size / 2);
 
         var srcʗ1 = src;
-        Ꮡb.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)size);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Decode(sink, srcʗ1);
@@ -302,10 +299,10 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkDecodeString(ж<testing.B> Ꮡb) {
-    foreach (var (_, size) in new nint[]{256, 1024, 4096, 16384}.slice()) {
-        @string src = strings.Repeat("2b744faa"u8, size / 8);
-        Ꮡb.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
+public static void BenchmarkDecodeString(ж<testing.B> b) {
+    foreach (var (_, size) in slice<nint>([256, 1024, 4096, 16384])) {
+        @string src = strings.Repeat("2b744faa", size / 8);
+        b.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)size);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 (sink, _) = DecodeString(src);
@@ -314,12 +311,12 @@ public static void BenchmarkDecodeString(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkDump(ж<testing.B> Ꮡb) {
-    foreach (var (_, size) in new nint[]{256, 1024, 4096, 16384}.slice()) {
-        var src = bytes.Repeat(new byte[]{2, 3, 5, 7, 9, 11, 13, 17}.slice(), size / 8);
+public static void BenchmarkDump(ж<testing.B> b) {
+    foreach (var (_, size) in slice<nint>([256, 1024, 4096, 16384])) {
+        var src = bytes.Repeat(slice<byte>([2, 3, 5, 7, 9, 11, 13, 17]), size / 8);
 
         var srcʗ1 = src;
-        Ꮡb.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%v"u8, size), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)size);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Dump(srcʗ1);

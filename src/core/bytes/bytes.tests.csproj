@@ -143,12 +143,10 @@
     <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/rand/math.rand.csproj" />
-    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />

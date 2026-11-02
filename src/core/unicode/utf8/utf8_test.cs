@@ -12,12 +12,12 @@ using static go.unicode.utf8_package;
 partial class utf8_test_package {
 
 // Validate the constants redefined from unicode.
-public static void TestConstants(ж<testing.T> Ꮡt) {
+public static void TestConstants(ж<testing.T> t) {
     if (MaxRune != unicode.MaxRune) {
-        Ꮡt.Errorf("utf8.MaxRune is wrong: %x should be %x"u8, (int32)(MaxRune), (int32)(unicode.MaxRune));
+        t.Errorf("utf8.MaxRune is wrong: %x should be %x", (int32)(MaxRune), (int32)(unicode.MaxRune));
     }
     if (RuneError != unicode.ReplacementChar) {
-        Ꮡt.Errorf("utf8.RuneError is wrong: %x should be %x"u8, (int32)(RuneError), (int32)(unicode.ReplacementChar));
+        t.Errorf("utf8.RuneError is wrong: %x should be %x", (int32)(RuneError), (int32)(unicode.ReplacementChar));
     }
 }
 
@@ -26,11 +26,11 @@ partial struct Utf8Map {
     internal @string str;
 }
 
-internal static slice<Utf8Map> utf8map = new Utf8Map[]{
-    new(0x0000, "\x00"u8),
-    new(0x0001, "\x01"u8),
-    new(0x007e, "\x7e"u8),
-    new(0x007f, "\x7f"u8),
+internal static slice<Utf8Map> utf8map = slice<Utf8Map>([
+    new(0x0000, "\x00"),
+    new(0x0001, "\x01"),
+    new(0x007e, "\x7e"),
+    new(0x007f, "\x7f"),
     new(0x0080, ((@string)(new byte[]{0xc2, 0x80}))),
     new(0x0081, ((@string)(new byte[]{0xc2, 0x81}))),
     new(0x00bf, ((@string)(new byte[]{0xc2, 0xbf}))),
@@ -59,101 +59,101 @@ internal static slice<Utf8Map> utf8map = new Utf8Map[]{
     new(0x10fffe, ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbe}))),
     new(0x10ffff, ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf}))),
     new(0xFFFD, ((@string)(new byte[]{0xef, 0xbf, 0xbd})))
-}.slice();
+]);
 
-internal static slice<Utf8Map> surrogateMap = new Utf8Map[]{
+internal static slice<Utf8Map> surrogateMap = slice<Utf8Map>([
     new(0xd800, ((@string)(new byte[]{0xed, 0xa0, 0x80}))), // surrogate min decodes to (RuneError, 1)
-    new(0xdfff, ((@string)(new byte[]{0xed, 0xbf, 0xbf}))) // surrogate max decodes to (RuneError, 1)
-}.slice();
+    new(0xdfff, ((@string)(new byte[]{0xed, 0xbf, 0xbf})))  // surrogate max decodes to (RuneError, 1)
+]);
 
-internal static slice<@string> testStrings = new @string[]{
-    ""u8,
-    "abcd"u8,
-    "☺☻☹"u8,
-    "日a本b語ç日ð本Ê語þ日¥本¼語i日©"u8,
-    "日a本b語ç日ð本Ê語þ日¥本¼語i日©日a本b語ç日ð本Ê語þ日¥本¼語i日©日a本b語ç日ð本Ê語þ日¥本¼語i日©"u8,
+internal static slice<@string> testStrings = slice<@string>([
+    "",
+    "abcd",
+    "☺☻☹",
+    "日a本b語ç日ð本Ê語þ日¥本¼語i日©",
+    "日a本b語ç日ð本Ê語þ日¥本¼語i日©日a本b語ç日ð本Ê語þ日¥本¼語i日©日a本b語ç日ð本Ê語þ日¥本¼語i日©",
     ((@string)(new byte[]{0x80, 0x80, 0x80, 0x80}))
-}.slice();
+]);
 
-public static void TestFullRune(ж<testing.T> Ꮡt) {
+public static void TestFullRune(ж<testing.T> t) {
     foreach (var (_, m) in utf8map) {
         var b = slice<byte>(m.str);
         if (!FullRune(b)) {
-            Ꮡt.Errorf("FullRune(%q) (%U) = false, want true"u8, b, m.r);
+            t.Errorf("FullRune(%q) (%U) = false, want true", b, m.r);
         }
         @string s = m.str;
         if (!FullRuneInString(s)) {
-            Ꮡt.Errorf("FullRuneInString(%q) (%U) = false, want true"u8, s, m.r);
+            t.Errorf("FullRuneInString(%q) (%U) = false, want true", s, m.r);
         }
         var b1 = b.slice(0, len(b) - 1);
         if (FullRune(b1)) {
-            Ꮡt.Errorf("FullRune(%q) = true, want false"u8, b1);
+            t.Errorf("FullRune(%q) = true, want false", b1);
         }
         @string s1 = (@string)b1;
         if (FullRuneInString(s1)) {
-            Ꮡt.Errorf("FullRune(%q) = true, want false"u8, s1);
+            t.Errorf("FullRune(%q) = true, want false", s1);
         }
     }
-    foreach (var (_, s) in new @string[]{((@string)(new byte[]{0xc0})), ((@string)(new byte[]{0xc1}))}.slice()) {
+    foreach (var (_, s) in slice<@string>([((@string)(new byte[]{0xc0})), ((@string)(new byte[]{0xc1}))])) {
         var b = slice<byte>(s);
         if (!FullRune(b)) {
-            Ꮡt.Errorf("FullRune(%q) = false, want true"u8, s);
+            t.Errorf("FullRune(%q) = false, want true", s);
         }
         if (!FullRuneInString(s)) {
-            Ꮡt.Errorf("FullRuneInString(%q) = false, want true"u8, s);
+            t.Errorf("FullRuneInString(%q) = false, want true", s);
         }
     }
 }
 
-public static void TestEncodeRune(ж<testing.T> Ꮡt) {
+public static void TestEncodeRune(ж<testing.T> t) {
     foreach (var (_, m) in utf8map) {
         var b = slice<byte>(m.str);
         array<byte> buf = new(10);
         nint n = EncodeRune(buf[0..], m.r);
         var b1 = buf.slice(0, n);
         if (!bytes.Equal(b, b1)) {
-            Ꮡt.Errorf("EncodeRune(%#04x) = %q want %q"u8, m.r, b1, b);
+            t.Errorf("EncodeRune(%#04x) = %q want %q", m.r, b1, b);
         }
     }
 }
 
-public static void TestAppendRune(ж<testing.T> Ꮡt) {
+public static void TestAppendRune(ж<testing.T> t) {
     foreach (var (_, m) in utf8map) {
         {
-            var buf = AppendRune(default!, m.r); if (((sstring)buf) != m.str) {
-                Ꮡt.Errorf("AppendRune(nil, %#04x) = %s, want %s"u8, m.r, buf, m.str);
+            var buf = AppendRune(default, m.r); if (((sstring)buf) != m.str) {
+                t.Errorf("AppendRune(nil, %#04x) = %s, want %s", m.r, buf, m.str);
             }
         }
         {
             var buf = AppendRune(slice<byte>("init"u8), m.r); if (((@string)buf) != "init"u8 + m.str) {
-                Ꮡt.Errorf("AppendRune(init, %#04x) = %s, want %s"u8, m.r, buf, "init" + m.str);
+                t.Errorf("AppendRune(init, %#04x) = %s, want %s", m.r, buf, "init" + m.str);
             }
         }
     }
 }
 
-public static void TestDecodeRune(ж<testing.T> Ꮡt) {
+public static void TestDecodeRune(ж<testing.T> t) {
     foreach (var (_, m) in utf8map) {
         var b = slice<byte>(m.str);
         var (r, size) = DecodeRune(b);
         if (r != m.r || size != len(b)) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, m.r, len(b));
+            t.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d", b, r, size, m.r, len(b));
         }
         @string s = m.str;
         (r, size) = DecodeRuneInString(s);
         if (r != m.r || size != len(b)) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, m.r, len(b));
+            t.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d", s, r, size, m.r, len(b));
         }
 
         // there's an extra byte that bytes left behind - make sure trailing byte works
         (r, size) = DecodeRune(b.slice(0, cap(b)));
         if (r != m.r || size != len(b)) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, m.r, len(b));
+            t.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d", b, r, size, m.r, len(b));
         }
         s = m.str + "\x00"u8;
         (r, size) = DecodeRuneInString(s);
         if (r != m.r || size != len(b)) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, m.r, len(b));
+            t.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d", s, r, size, m.r, len(b));
         }
 
         // make sure missing bytes fail
@@ -163,54 +163,54 @@ public static void TestDecodeRune(ж<testing.T> Ꮡt) {
         }
         (r, size) = DecodeRune(b.slice(0, len(b) - 1));
         if (r != RuneError || size != wantsize) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b.slice(0, len(b) - 1), r, size, (int32)(RuneError), wantsize);
+            t.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d", b.slice(0, len(b) - 1), r, size, (int32)(RuneError), wantsize);
         }
         s = m.str.slice(0, len(m.str) - 1);
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != wantsize) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), wantsize);
+            t.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d", s, r, size, (int32)(RuneError), wantsize);
         }
 
         // make sure bad sequences fail
-        if (len(b) == 1){
+        if (len(b) == 1) {
             b[0] = 0x80;
         } else {
             b[len(b) - 1] = 0x7F;
         }
         (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
+            t.Errorf("DecodeRune(%q) = %#04x, %d want %#04x, %d", b, r, size, (int32)(RuneError), (nint)1);
         }
         s = (@string)b;
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d"u8, s, r, size, (int32)(RuneError), (nint)1);
+            t.Errorf("DecodeRuneInString(%q) = %#04x, %d want %#04x, %d", s, r, size, (int32)(RuneError), (nint)1);
         }
     }
 }
 
-public static void TestDecodeSurrogateRune(ж<testing.T> Ꮡt) {
+public static void TestDecodeSurrogateRune(ж<testing.T> t) {
     foreach (var (_, m) in surrogateMap) {
         var b = slice<byte>(m.str);
         var (r, size) = DecodeRune(b);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
+            t.Errorf("DecodeRune(%q) = %x, %d want %x, %d", b, r, size, (int32)(RuneError), (nint)1);
         }
         @string s = m.str;
         (r, size) = DecodeRuneInString(s);
         if (r != RuneError || size != 1) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %x, %d want %x, %d"u8, b, r, size, (int32)(RuneError), (nint)1);
+            t.Errorf("DecodeRuneInString(%q) = %x, %d want %x, %d", b, r, size, (int32)(RuneError), (nint)1);
         }
     }
 }
 
 // Check that DecodeRune and DecodeLastRune correspond to
 // the equivalent range loop.
-public static void TestSequencing(ж<testing.T> Ꮡt) {
+public static void TestSequencing(ж<testing.T> t) {
     foreach (var (_, ts) in testStrings) {
         foreach (var (_, m) in utf8map) {
-            foreach (var (_, s) in new @string[]{ts + m.str, m.str + ts, ts + m.str + ts}.slice()) {
-                testSequence(Ꮡt, s);
+            foreach (var (_, s) in slice<@string>([ts + m.str, m.str + ts, ts + m.str + ts])) {
+                testSequence(t, s);
             }
         }
     }
@@ -224,12 +224,12 @@ internal static nint runtimeRuneCount(@string s) {
 // []rune conversions visit the same runes.
 // Not really a test of this package, but the assumption is used here and
 // it's good to verify.
-public static void TestRuntimeConversion(ж<testing.T> Ꮡt) {
+public static void TestRuntimeConversion(ж<testing.T> t) {
     foreach (var (_, ts) in testStrings) {
         nint count = RuneCountInString(ts);
         {
             nint n = runtimeRuneCount(ts); if (n != count) {
-                Ꮡt.Errorf("%q: len([]rune()) counted %d runes; got %d from RuneCountInString"u8, ts, n, count);
+                t.Errorf("%q: len([]rune()) counted %d runes; got %d from RuneCountInString", ts, n, count);
                 break;
             }
         }
@@ -237,21 +237,21 @@ public static void TestRuntimeConversion(ж<testing.T> Ꮡt) {
         var runes = slice<rune>(ts);
         {
             nint n = len(runes); if (n != count) {
-                Ꮡt.Errorf("%q: []rune() has length %d; got %d from RuneCountInString"u8, ts, n, count);
+                t.Errorf("%q: []rune() has length %d; got %d from RuneCountInString", ts, n, count);
                 break;
             }
         }
         nint i = 0;
         foreach (var (_, r) in ts) {
             if (r != runes[i]) {
-                Ꮡt.Errorf("%q[%d]: expected %c (%U); got %c (%U)"u8, ts, i, runes[i], runes[i], r, r);
+                t.Errorf("%q[%d]: expected %c (%U); got %c (%U)", ts, i, runes[i], runes[i], r, r);
             }
             i++;
         }
     }
 }
 
-internal static slice<@string> invalidSequenceTests = new @string[]{
+internal static slice<@string> invalidSequenceTests = slice<@string>([
     ((@string)(new byte[]{0xed, 0xa0, 0x80, 0x80})), // surrogate min
     ((@string)(new byte[]{0xed, 0xbf, 0xbf, 0x80})), // surrogate max
 
@@ -305,7 +305,7 @@ internal static slice<@string> invalidSequenceTests = new @string[]{
     ((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xc0})),
     ((@string)(new byte[]{0xf4, 0x8f, 0xc0, 0x80})),
     ((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80}))
-}.slice();
+]);
 
 internal static rune runtimeDecodeRune(@string s) {
     foreach (var (_, r) in s) {
@@ -314,29 +314,29 @@ internal static rune runtimeDecodeRune(@string s) {
     return -1;
 }
 
-public static void TestDecodeInvalidSequence(ж<testing.T> Ꮡt) {
+public static void TestDecodeInvalidSequence(ж<testing.T> t) {
     foreach (var (_, s) in invalidSequenceTests) {
         var (r1, _) = DecodeRune(slice<byte>(s));
         {
             rune want = RuneError; if (r1 != want) {
-                Ꮡt.Errorf("DecodeRune(%#x) = %#04x, want %#04x"u8, s, r1, want);
+                t.Errorf("DecodeRune(%#x) = %#04x, want %#04x", s, r1, want);
                 return;
             }
         }
         var (r2, _) = DecodeRuneInString(s);
         {
             rune want = RuneError; if (r2 != want) {
-                Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, want %#04x"u8, s, r2, want);
+                t.Errorf("DecodeRuneInString(%q) = %#04x, want %#04x", s, r2, want);
                 return;
             }
         }
         if (r1 != r2) {
-            Ꮡt.Errorf("DecodeRune(%#x) = %#04x mismatch with DecodeRuneInString(%q) = %#04x"u8, s, r1, s, r2);
+            t.Errorf("DecodeRune(%#x) = %#04x mismatch with DecodeRuneInString(%q) = %#04x", s, r1, s, r2);
             return;
         }
         var r3 = runtimeDecodeRune(s);
         if (r2 != r3) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x mismatch with runtime.decoderune(%q) = %#04x"u8, s, r2, s, r3);
+            t.Errorf("DecodeRuneInString(%q) = %#04x mismatch with runtime.decoderune(%q) = %#04x", s, r2, s, r3);
             return;
         }
     }
@@ -347,30 +347,30 @@ internal partial struct testSequence_info /*dyn*/ {
     internal rune r;
 }
 
-internal static void testSequence(ж<testing.T> Ꮡt, @string s) {
+internal static void testSequence(ж<testing.T> t, @string s) {
     var index = new slice<testSequence_info>(len(s));
     var b = slice<byte>(s);
     nint si = 0;
     nint j = 0;
     foreach (var (i, r) in s) {
         if (si != i) {
-            Ꮡt.Errorf("Sequence(%q) mismatched index %d, want %d"u8, s, si, i);
+            t.Errorf("Sequence(%q) mismatched index %d, want %d", s, si, i);
             return;
         }
         index[j] = new testSequence_info(i, r);
         j++;
         var (r1, size1) = DecodeRune(b.slice(i));
         if (r != r1) {
-            Ꮡt.Errorf("DecodeRune(%q) = %#04x, want %#04x"u8, s.slice(i), r1, r);
+            t.Errorf("DecodeRune(%q) = %#04x, want %#04x", s.slice(i), r1, r);
             return;
         }
         var (r2, size2) = DecodeRuneInString(s.slice(i));
         if (r != r2) {
-            Ꮡt.Errorf("DecodeRuneInString(%q) = %#04x, want %#04x"u8, s.slice(i), r2, r);
+            t.Errorf("DecodeRuneInString(%q) = %#04x, want %#04x", s.slice(i), r2, r);
             return;
         }
         if (size1 != size2) {
-            Ꮡt.Errorf("DecodeRune/DecodeRuneInString(%q) size mismatch %d/%d"u8, s.slice(i), size1, size2);
+            t.Errorf("DecodeRune/DecodeRuneInString(%q) size mismatch %d/%d", s.slice(i), size1, size2);
             return;
         }
         si += size1;
@@ -380,37 +380,37 @@ internal static void testSequence(ж<testing.T> Ꮡt, @string s) {
         var (r1, size1) = DecodeLastRune(b.slice(0, si));
         var (r2, size2) = DecodeLastRuneInString(s.slice(0, si));
         if (size1 != size2) {
-            Ꮡt.Errorf("DecodeLastRune/DecodeLastRuneInString(%q, %d) size mismatch %d/%d"u8, s, si, size1, size2);
+            t.Errorf("DecodeLastRune/DecodeLastRuneInString(%q, %d) size mismatch %d/%d", s, si, size1, size2);
             return;
         }
         if (r1 != index[j].r) {
-            Ꮡt.Errorf("DecodeLastRune(%q, %d) = %#04x, want %#04x"u8, s, si, r1, index[j].r);
+            t.Errorf("DecodeLastRune(%q, %d) = %#04x, want %#04x", s, si, r1, index[j].r);
             return;
         }
         if (r2 != index[j].r) {
-            Ꮡt.Errorf("DecodeLastRuneInString(%q, %d) = %#04x, want %#04x"u8, s, si, r2, index[j].r);
+            t.Errorf("DecodeLastRuneInString(%q, %d) = %#04x, want %#04x", s, si, r2, index[j].r);
             return;
         }
         si -= size1;
         if (si != index[j].index) {
-            Ꮡt.Errorf("DecodeLastRune(%q) index mismatch at %d, want %d"u8, s, si, index[j].index);
+            t.Errorf("DecodeLastRune(%q) index mismatch at %d, want %d", s, si, index[j].index);
             return;
         }
         j--;
     }
     if (si != 0) {
-        Ꮡt.Errorf("DecodeLastRune(%q) finished at %d, not 0"u8, s, si);
+        t.Errorf("DecodeLastRune(%q) finished at %d, not 0", s, si);
     }
 }
 
 // Check that negative runes encode as U+FFFD.
-public static void TestNegativeRune(ж<testing.T> Ꮡt) {
+public static void TestNegativeRune(ж<testing.T> t) {
     var errorbuf = new slice<byte>(UTFMax);
     errorbuf = errorbuf.slice(0, EncodeRune(errorbuf, RuneError));
     var buf = new slice<byte>(UTFMax);
     buf = buf.slice(0, EncodeRune(buf, -1));
     if (!bytes.Equal(buf, errorbuf)) {
-        Ꮡt.Errorf("incorrect encoding [% x] for -1; expected [% x]"u8, buf, errorbuf);
+        t.Errorf("incorrect encoding [% x] for -1; expected [% x]", buf, errorbuf);
     }
 }
 
@@ -419,37 +419,37 @@ partial struct RuneCountTest {
     internal nint @out;
 }
 
-internal static slice<RuneCountTest> runecounttests = new RuneCountTest[]{
-    new("abcd"u8, 4),
-    new("☺☻☹"u8, 3),
-    new("1,2,3,4"u8, 7),
+internal static slice<RuneCountTest> runecounttests = slice<RuneCountTest>([
+    new("abcd", 4),
+    new("☺☻☹", 3),
+    new("1,2,3,4", 7),
     new(((@string)(new byte[]{0xe2, 0x00})), 2),
     new(((@string)(new byte[]{0xe2, 0x80})), 2),
     new(((@string)(new byte[]{0x61, 0xe2, 0x80})), 3)
-}.slice();
+]);
 
-public static void TestRuneCount(ж<testing.T> Ꮡt) {
+public static void TestRuneCount(ж<testing.T> t) {
     foreach (var (_, tt) in runecounttests) {
         {
             nint @out = RuneCountInString(tt.@in); if (@out != tt.@out) {
-                Ꮡt.Errorf("RuneCountInString(%q) = %d, want %d"u8, tt.@in, @out, tt.@out);
+                t.Errorf("RuneCountInString(%q) = %d, want %d", tt.@in, @out, tt.@out);
             }
         }
         {
             nint @out = RuneCount(slice<byte>(tt.@in)); if (@out != tt.@out) {
-                Ꮡt.Errorf("RuneCount(%q) = %d, want %d"u8, tt.@in, @out, tt.@out);
+                t.Errorf("RuneCount(%q) = %d, want %d", tt.@in, @out, tt.@out);
             }
         }
     }
 }
 
-public static void TestRuneCountNonASCIIAllocation(ж<testing.T> Ꮡt) {
+public static void TestRuneCountNonASCIIAllocation(ж<testing.T> t) {
     {
         var n = testing.AllocsPerRun(10, () => {
             var s = slice<byte>("日本語日本語日本語日"u8);
             _ = RuneCount(s);
         }); if (n > 0D) {
-            Ꮡt.Errorf("unexpected RuneCount allocation, got %v, want 0"u8, n);
+            t.Errorf("unexpected RuneCount allocation, got %v, want 0", n);
         }
     }
 }
@@ -459,24 +459,24 @@ partial struct RuneLenTest {
     internal nint size;
 }
 
-internal static slice<RuneLenTest> runelentests = new RuneLenTest[]{
+internal static slice<RuneLenTest> runelentests = slice<RuneLenTest>([
     new(0, 1),
-    new((rune)'e', 1),
-    new((rune)'é', 2),
-    new((rune)'☺', 3),
+    new('e', 1),
+    new('é', 2),
+    new('☺', 3),
     new(RuneError, 3),
     new(MaxRune, 4),
     new(0xD800, -1),
     new(0xDFFF, -1),
     new(MaxRune + 1, -1),
     new(-1, -1)
-}.slice();
+]);
 
-public static void TestRuneLen(ж<testing.T> Ꮡt) {
+public static void TestRuneLen(ж<testing.T> t) {
     foreach (var (_, tt) in runelentests) {
         {
             nint size = RuneLen(tt.r); if (size != tt.size) {
-                Ꮡt.Errorf("RuneLen(%#U) = %d, want %d"u8, tt.r, size, tt.size);
+                t.Errorf("RuneLen(%#U) = %d, want %d", tt.r, size, tt.size);
             }
         }
     }
@@ -487,44 +487,44 @@ partial struct ValidTest {
     internal bool @out;
 }
 
-internal static slice<ValidTest> validTests = new ValidTest[]{
-    new(""u8, true),
-    new("a"u8, true),
-    new("abc"u8, true),
-    new("Ж"u8, true),
-    new("ЖЖ"u8, true),
-    new("брэд-ЛГТМ"u8, true),
-    new("☺☻☹"u8, true),
+internal static slice<ValidTest> validTests = slice<ValidTest>([
+    new("", true),
+    new("a", true),
+    new("abc", true),
+    new("Ж", true),
+    new("ЖЖ", true),
+    new("брэд-ЛГТМ", true),
+    new("☺☻☹", true),
     new(((@string)(new byte[]{0x61, 0x61, 0xe2})), false),
-    new(((@string)new byte[]{66, 250}.slice()), false),
-    new(((@string)new byte[]{66, 250, 67}.slice()), false),
-    new("a\uFFFDb"u8, true),
-    new((@string)((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf})), true), // U+10FFFF
-    new((@string)((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80})), false), // U+10FFFF+1; out of range
-    new((@string)((@string)(new byte[]{0xf7, 0xbf, 0xbf, 0xbf})), false), // 0x1FFFFF; out of range
+    new((@string)slice<byte>([66, 250]), false),
+    new((@string)slice<byte>([66, 250, 67]), false),
+    new("a\uFFFDb", true),
+    new((@string)((@string)(new byte[]{0xf4, 0x8f, 0xbf, 0xbf})), true),        // U+10FFFF
+    new((@string)((@string)(new byte[]{0xf4, 0x90, 0x80, 0x80})), false),       // U+10FFFF+1; out of range
+    new((@string)((@string)(new byte[]{0xf7, 0xbf, 0xbf, 0xbf})), false),       // 0x1FFFFF; out of range
     new((@string)((@string)(new byte[]{0xfb, 0xbf, 0xbf, 0xbf, 0xbf})), false), // 0x3FFFFFF; out of range
-    new((@string)((@string)(new byte[]{0xc0, 0x80})), false), // U+0000 encoded in two bytes: incorrect
-    new((@string)((@string)(new byte[]{0xed, 0xa0, 0x80})), false), // U+D800 high surrogate (sic)
-    new((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf})), false) // U+DFFF low surrogate (sic)
-}.slice();
+    new((@string)((@string)(new byte[]{0xc0, 0x80})), false),                   // U+0000 encoded in two bytes: incorrect
+    new((@string)((@string)(new byte[]{0xed, 0xa0, 0x80})), false),             // U+D800 high surrogate (sic)
+    new((@string)((@string)(new byte[]{0xed, 0xbf, 0xbf})), false)              // U+DFFF low surrogate (sic)
+]);
 
 [GoInit] internal static void init() {
     foreach (var i in range(100)) {
-        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i), @out: true));
-        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + "Ж"u8, @out: true));
-        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + ((@string)(new byte[]{0xe2})), @out: false));
-        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + "Ж"u8 + strings.Repeat("b"u8, i), @out: true));
-        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a"u8, i) + ((@string)(new byte[]{0xe2})) + strings.Repeat("b"u8, i), @out: false));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a", i), @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a", i) + "Ж"u8, @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a", i) + ((@string)(new byte[]{0xe2})), @out: false));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a", i) + "Ж"u8 + strings.Repeat("b", i), @out: true));
+        validTests = append(validTests, new ValidTest(@in: strings.Repeat("a", i) + ((@string)(new byte[]{0xe2})) + strings.Repeat("b", i), @out: false));
     }
 }
 
-public static void TestValid(ж<testing.T> Ꮡt) {
+public static void TestValid(ж<testing.T> t) {
     foreach (var (_, tt) in validTests) {
         if (Valid(slice<byte>(tt.@in)) != tt.@out) {
-            Ꮡt.Errorf("Valid(%q) = %v; want %v"u8, tt.@in, !tt.@out, tt.@out);
+            t.Errorf("Valid(%q) = %v; want %v", tt.@in, !tt.@out, tt.@out);
         }
         if (ValidString(tt.@in) != tt.@out) {
-            Ꮡt.Errorf("ValidString(%q) = %v; want %v"u8, tt.@in, !tt.@out, tt.@out);
+            t.Errorf("ValidString(%q) = %v; want %v", tt.@in, !tt.@out, tt.@out);
         }
     }
 }
@@ -534,11 +534,11 @@ partial struct ValidRuneTest {
     internal bool ok;
 }
 
-internal static slice<ValidRuneTest> validrunetests = new ValidRuneTest[]{
+internal static slice<ValidRuneTest> validrunetests = slice<ValidRuneTest>([
     new(0, true),
-    new((rune)'e', true),
-    new((rune)'é', true),
-    new((rune)'☺', true),
+    new('e', true),
+    new('é', true),
+    new('☺', true),
     new(RuneError, true),
     new(MaxRune, true),
     new(0xD7FF, true),
@@ -547,15 +547,13 @@ internal static slice<ValidRuneTest> validrunetests = new ValidRuneTest[]{
     new(0xE000, true),
     new(MaxRune + 1, false),
     new(-1, false)
-}.slice();
+]);
 
-public static void TestValidRune(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestValidRune(ж<testing.T> t) {
     foreach (var (_, tt) in validrunetests) {
         {
             var ok = ValidRune(tt.r); if (ok != tt.ok) {
-                Ꮡt.Errorf("ValidRune(%#U) = %t, want %t"u8, tt.r, ok, tt.ok);
+                t.Errorf("ValidRune(%#U) = %t, want %t", tt.r, ok, tt.ok);
             }
         }
     }
@@ -595,7 +593,7 @@ public static void BenchmarkRuneCountInStringTenJapaneseChars(ж<testing.B> Ꮡb
     }
 }
 
-internal static @string ascii100000 = strings.Repeat("0123456789"u8, 10000);
+internal static @string ascii100000 = strings.Repeat("0123456789", 10000);
 
 public static void BenchmarkValidTenASCIIChars(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -646,7 +644,7 @@ public static void BenchmarkValidStringTenASCIIChars(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        ValidString("0123456789"u8);
+        ValidString("0123456789");
     }
 }
 
@@ -662,7 +660,7 @@ public static void BenchmarkValidStringTenJapaneseChars(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        ValidString("日本語日本語日本語日"u8);
+        ValidString("日本語日本語日本語日");
     }
 }
 
@@ -684,16 +682,16 @@ public static void BenchmarkValidStringLongJapanese(ж<testing.B> Ꮡb) {
 
 internal static @string longStringMostlyASCII; // ~100KB, ~97% ASCII
 
-internal static @string longStringJapanese; // ~100KB, non-ASCII
+internal static @string longStringJapanese;    // ~100KB, non-ASCII
 
 [GoInit] internal static void initΔ1() {
-    @string japanese = "日本語日本語日本語日"u8;
+    @string japanese = "日本語日本語日本語日";
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     for (nint i = 0; b.Len() < 100_000; i++) {
-        if (i % 100 == 0){
+        if (i % 100 == 0) {
             Ꮡb.WriteString(japanese);
         } else {
-            Ꮡb.WriteString("0123456789"u8);
+            Ꮡb.WriteString("0123456789");
         }
     }
     longStringMostlyASCII = b.String();
@@ -705,7 +703,7 @@ public static void BenchmarkEncodeASCIIRune(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(UTFMax);
     for (nint i = 0; i < b.N; i++) {
-        EncodeRune(buf, (rune)'a'); // 1 byte
+        EncodeRune(buf, 'a'); // 1 byte
     }
 }
 
@@ -714,7 +712,7 @@ public static void BenchmarkEncodeSpanishRune(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(UTFMax);
     for (nint i = 0; i < b.N; i++) {
-        EncodeRune(buf, (rune)'Ñ'); // 2 bytes
+        EncodeRune(buf, 'Ñ'); // 2 bytes
     }
 }
 
@@ -723,7 +721,7 @@ public static void BenchmarkEncodeJapaneseRune(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(UTFMax);
     for (nint i = 0; i < b.N; i++) {
-        EncodeRune(buf, (rune)'本'); // 3 bytes
+        EncodeRune(buf, '本'); // 3 bytes
     }
 }
 
@@ -768,7 +766,7 @@ public static void BenchmarkAppendASCIIRune(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(UTFMax);
     for (nint i = 0; i < b.N; i++) {
-        AppendRune(buf[..0], (rune)'a'); // 1 byte
+        AppendRune(buf[..0], 'a'); // 1 byte
     }
 }
 
@@ -777,7 +775,7 @@ public static void BenchmarkAppendSpanishRune(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(UTFMax);
     for (nint i = 0; i < b.N; i++) {
-        AppendRune(buf[..0], (rune)'Ñ'); // 2 bytes
+        AppendRune(buf[..0], 'Ñ'); // 2 bytes
     }
 }
 
@@ -786,7 +784,7 @@ public static void BenchmarkAppendJapaneseRune(ж<testing.B> Ꮡb) {
 
     var buf = new slice<byte>(UTFMax);
     for (nint i = 0; i < b.N; i++) {
-        AppendRune(buf[..0], (rune)'本'); // 3 bytes
+        AppendRune(buf[..0], '本'); // 3 bytes
     }
 }
 
@@ -829,7 +827,7 @@ public static void BenchmarkAppendInvalidRuneNegative(ж<testing.B> Ꮡb) {
 public static void BenchmarkDecodeASCIIRune(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var a = new byte[]{(rune)'a'}.slice();
+    var a = slice<byte>([(byte)'a']);
     foreach (var _ᴛ1 in range(b.N)) {
         (runeSink, sizeSink) = DecodeRune(a);
     }
@@ -847,7 +845,7 @@ public static void BenchmarkDecodeJapaneseRune(ж<testing.B> Ꮡb) {
 public static void BenchmarkDecodeASCIIRuneInString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string a = "a"u8;
+    @string a = "a";
     foreach (var _ᴛ1 in range(b.N)) {
         (runeSink, sizeSink) = DecodeRuneInString(a);
     }
@@ -856,7 +854,7 @@ public static void BenchmarkDecodeASCIIRuneInString(ж<testing.B> Ꮡb) {
 public static void BenchmarkDecodeJapaneseRuneInString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string nihon = "本"u8;
+    @string nihon = "本";
     foreach (var _ᴛ1 in range(b.N)) {
         (runeSink, sizeSink) = DecodeRuneInString(nihon);
     }
@@ -874,18 +872,18 @@ internal partial struct BenchmarkFullRune_benchmarks /*dyn*/ {
     internal slice<byte> data;
 }
 
-public static void BenchmarkFullRune(ж<testing.B> Ꮡb) {
-    var benchmarks = new BenchmarkFullRune_benchmarks[]{
-        new("ASCII"u8, slice<byte>("a"u8)),
-        new("Incomplete"u8, slice<byte>(((@string)(new byte[]{0xf0, 0x90, 0x80})))),
-        new("Japanese"u8, slice<byte>("本"u8))
-    }.slice();
+public static void BenchmarkFullRune(ж<testing.B> b) {
+    var benchmarks = slice<BenchmarkFullRune_benchmarks>([
+        new("ASCII", slice<byte>("a"u8)),
+        new("Incomplete", slice<byte>(((@string)(new byte[]{0xf0, 0x90, 0x80})))),
+        new("Japanese", slice<byte>("本"u8))
+    ]);
     foreach (var (_, vᴛ1) in benchmarks) {
         ref var bm = ref heap(new BenchmarkFullRune_benchmarks(), out var Ꮡbm);
         bm = vᴛ1;
 
         var bmʗ1 = bm;
-        Ꮡb.Run(bm.name, (ж<testing.B> bΔ1) => {
+        b.Run(bm.name, (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 boolSink = FullRune(bmʗ1.data);
             }

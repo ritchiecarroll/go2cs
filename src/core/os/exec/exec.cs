@@ -134,7 +134,7 @@ public static error Unwrap(this ref ΔError e) {
 // ErrWaitDelay is returned by [Cmd.Wait] if the process exits with a
 // successful status code but its output pipes are not closed before the
 // command's WaitDelay expires.
-public static error ErrWaitDelay = errors.New("exec: WaitDelay expired before I/O complete"u8);
+public static error ErrWaitDelay = errors.New("exec: WaitDelay expired before I/O complete");
 
 // wrappedError wraps an error without relying on fmt.Errorf.
 partial struct wrappedError {
@@ -366,13 +366,15 @@ partial struct ctxResult {
     internal ж<time.Timer> timer;
 }
 
-internal static ж<godebug.Setting> execwait = godebug.New("#execwait"u8);
+internal static ж<godebug.Setting> execwait = godebug.New("#execwait");
 
-internal static ж<godebug.Setting> execerrdot = godebug.New("execerrdot"u8);
+internal static ж<godebug.Setting> execerrdot = godebug.New("execerrdot");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string setGodebugExecwait2Toˢ = " (set GODEBUG=execwait=2 to capture stacks for debugging)"u8;
-internal static readonly @string godebugExecwait2Detectedˢ = "GODEBUG=execwait=2 detected a leaked exec.Cmd created by:\n"u8;
+internal static ref readonly @string setGodebugExecwait2Toˢ => ref setGodebugExecwait2Toˢᵇ;
+private static readonly @string setGodebugExecwait2Toˢᵇ = " (set GODEBUG=execwait=2 to capture stacks for debugging)"u8;
+internal static ref readonly @string godebugExecwait2Detectedˢ => ref godebugExecwait2Detectedˢᵇ;
+private static readonly @string godebugExecwait2Detectedˢᵇ = "GODEBUG=execwait=2 detected a leaked exec.Cmd created by:\n"u8;
 
 // Command returns the [Cmd] struct to execute the named program with
 // the given arguments.
@@ -401,7 +403,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
 
     var cmd = Ꮡ(new Cmd(
         Path: name,
-        Args: appendꓸꓸꓸ(new @string[]{name}.slice(), arg)
+        Args: appendꓸꓸꓸ(slice<@string>([name]), arg)
     ));
 
     {
@@ -410,7 +412,7 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
                 // Obtain the caller stack. (This is equivalent to runtime/debug.Stack,
                 // copied to avoid importing the whole package.)
                 var stack = new slice<byte>(1024);
-                while (ᐧ) {
+                for (;;) {
                     nint n = runtime.Stack(stack, false);
                     if (n < len(stack)) {
                         stack = stack.slice(0, n);
@@ -424,18 +426,18 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
                         stack = stack.slice(i + 1);
                     }
                 }
-                cmd.Value.createdByStack = stack;
+                cmd.createdByStack = stack;
             }
 
             runtime.SetFinalizer(cmd.OrTypedNil(), (ж<Cmd> c) => {
-                if ((~c).Process != nil && (~c).ProcessState == nil) {
+                if (c.Process != nil && c.ProcessState == nil) {
                     @string debugHint = ""u8;
-                    if ((~c).createdByStack == default!){
+                    if (c.createdByStack == nil) {
                         debugHint = setGodebugExecwait2Toˢ;
                     } else {
                         os.Stderr.WriteString(godebugExecwait2Detectedˢ);
-                        os.Stderr.Write((~c).createdByStack);
-                        os.Stderr.WriteString("\n"u8);
+                        os.Stderr.Write(c.createdByStack);
+                        os.Stderr.WriteString("\n");
                         debugHint = ""u8;
                     }
                     throw panic("exec: Cmd started a Process but leaked without a call to Wait" + debugHint);
@@ -444,19 +446,18 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
         }
     }
 
-    if (filepath.Base(name) == name){
+    if (filepath.Base(name) == name) {
         var (lp, err) = LookPath(name);
         if (lp != ""u8) {
             // Update cmd.Path even if err is non-nil.
             // If err is ErrDot (especially on Windows), lp may include a resolved
             // extension (like .exe or .bat) that should be preserved.
-            cmd.Value.Path = lp;
+            cmd.Path = lp;
         }
-        if (err != default!) {
-            cmd.Value.Err = err;
+        if (err != nil) {
+            cmd.Err = err;
         }
-    } else 
-    if (runtime.GOOS == "windows"u8 && filepath.IsAbs(name)) {
+    } else if (runtime.GOOS == "windows"u8 && filepath.IsAbs(name)) {
         // We may need to add a filename extension from PATHEXT
         // or verify an extension that is already present.
         // Since the path is absolute, its extension should be unambiguous
@@ -466,10 +467,10 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
         // cmd.Dir may be set after we return from this function and that may
         // cause the command to resolve to a different extension.
         {
-            var (lp, err) = lookExtensions(name, ""u8); if (err == default!){
-                (cmd.Value.cachedLookExtensions.@in, cmd.Value.cachedLookExtensions.@out) = (name, lp);
+            var (lp, err) = lookExtensions(name, ""u8); if (err == nil) {
+                (cmd.cachedLookExtensions.@in, cmd.cachedLookExtensions.@out) = (name, lp);
             } else {
-                cmd.Value.Err = err;
+                cmd.Err = err;
             }
         }
     }
@@ -488,13 +489,13 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
 public static ж<Cmd> CommandContext(context.Context ctx, @string name, params ꓸꓸꓸstring argʗp) {
     var arg = argʗp.sslice();
 
-    if (ctx == default!) {
+    if (ctx == nil) {
         throw panic("nil Context");
     }
     var cmd = Command(name, arg.ꓸꓸꓸ);
-    cmd.Value.ctx = ctx;
+    cmd.ctx = ctx;
     var cmdʗ1 = cmd;
-    cmd.Value.Cancel = () => (~cmdʗ1).Process.Kill();
+    cmd.Cancel = () => cmdʗ1.Process.Kill();
     return cmd;
 }
 
@@ -503,15 +504,15 @@ public static ж<Cmd> CommandContext(context.Context ctx, @string name, params �
 // In particular, it is not suitable for use as input to a shell.
 // The output of String may vary across Go releases.
 public static @string String(this ref Cmd c) {
-    if (c.Err != default! || c.lookPathErr != default!) {
+    if (c.Err != nil || c.lookPathErr != nil) {
         // failed to resolve path; report the original requested path (plus args)
-        return strings.Join(c.Args, " "u8);
+        return strings.Join(c.Args, " ");
     }
     // report the exact executable path (plus args)
     var b = @new<strings.Builder>();
     b.WriteString(c.Path);
     foreach (var (_, a) in c.Args[1..]) {
-        b.WriteByte((rune)' ');
+        b.WriteByte((byte)' ');
         b.WriteString(a);
     }
     return b.String();
@@ -527,7 +528,7 @@ internal static bool interfaceEqual(any a, any b) {
         }, ref ᒐ);
         return AreEqual(a, b);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -535,30 +536,30 @@ internal static slice<@string> argv(this ref Cmd c) {
     if (len(c.Args) > 0) {
         return c.Args;
     }
-    return new @string[]{c.Path}.slice();
+    return slice<@string>([c.Path]);
 }
 
 internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (c.Stdin == default!) {
+    if (c.Stdin == nil) {
         var (f, errΔ1) = os.Open(os.DevNull);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(f)));
-        return (f, default!);
+        return (f, default);
     }
 
     {
         var (f, ok) = c.Stdin._<ж<os.File>>(ᐧ); if (ok) {
-            return (f, default!);
+            return (f, default);
         }
     }
 
     var (pr, pw, err) = os.Pipe();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pr)));
@@ -567,25 +568,25 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
     c.goroutine = append(c.goroutine, () => {
         var (_, errΔ2) = io.Copy(new os.FileжWriter(pwʗ1), Ꮡc.Value.Stdin);
         if (skipStdinCopyError(errΔ2)) {
-            errΔ2 = default!;
+            errΔ2 = default;
         }
         {
-            var err1 = pwʗ1.Close(); if (errΔ2 == default!) {
+            var err1 = pwʗ1.Close(); if (errΔ2 == nil) {
                 errΔ2 = err1;
             }
         }
         return errΔ2;
     });
-    return (pr, default!);
+    return (pr, default);
 }
 
 internal static (ж<os.File>, error) childStdout(this ref Cmd c) {
     return c.writerDescriptor(c.Stdout);
 }
 
-internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> ᏑchildStdout) {
-    if (c.Stderr != default! && interfaceEqual(c.Stderr, c.Stdout)) {
-        return (ᏑchildStdout, default!);
+internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> childStdout) {
+    if (c.Stderr != nil && interfaceEqual(c.Stderr, c.Stdout)) {
+        return (childStdout, default);
     }
     return c.writerDescriptor(c.Stderr);
 }
@@ -595,24 +596,24 @@ internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> Ꮡ
 //
 // If w is nil, writerDescriptor returns a File that writes to os.DevNull.
 internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) {
-    if (w == default!) {
+    if (w == nil) {
         var (f, errΔ1) = os.OpenFile(os.DevNull, os.O_WRONLY, 0);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(f)));
-        return (f, default!);
+        return (f, default);
     }
 
     {
         var (f, ok) = w._<ж<os.File>>(ᐧ); if (ok) {
-            return (f, default!);
+            return (f, default);
         }
     }
 
     var (pr, pw, err) = os.Pipe();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
@@ -623,7 +624,7 @@ internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer 
         prʗ1.Close(); // in case io.Copy stopped due to write error
         return errΔ2;
     });
-    return (pw, default!);
+    return (pw, default);
 }
 
 internal static void closeDescriptors(slice<io.Closer> closers) {
@@ -647,7 +648,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // process will inherit the caller's thread state.
 public static error Run(this ж<Cmd> Ꮡc) {
     {
-        var err = Ꮡc.Start(); if (err != default!) {
+        var err = Ꮡc.Start(); if (err != nil) {
             return err;
         }
     }
@@ -655,9 +656,12 @@ public static error Run(this ж<Cmd> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execAlreadyStartedˢ = "exec: already started"u8;
-internal static readonly @string execNoCommandˢ = "exec: no command"u8;
-internal static readonly @string execCommandWithANonNilˢ = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
+internal static ref readonly @string execAlreadyStartedˢ => ref execAlreadyStartedˢᵇ;
+private static readonly @string execAlreadyStartedˢᵇ = "exec: already started"u8;
+internal static ref readonly @string execNoCommandˢ => ref execNoCommandˢᵇ;
+private static readonly @string execNoCommandˢᵇ = "exec: no command"u8;
+internal static ref readonly @string execCommandWithANonNilˢ => ref execCommandWithANonNilˢᵇ;
+private static readonly @string execCommandWithANonNilˢᵇ = "exec: command with a non-nil Cancel was not created with CommandContext"u8;
 
 internal partial struct Start_goroutineStatus /*dyn*/ {
     internal nint running;
@@ -678,34 +682,34 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
         // Check for doubled Start calls before we defer failure cleanup. If the prior
         // call to Start succeeded, we don't want to spuriously close its pipes.
         // It is an error to call Start twice even if the first call did not create a process.
-        if (atomic.SwapInt32(Ꮡc.of(Cmd.ᏑstartCalled), 1) != 0) {
+        if (atomic.SwapInt32(Ꮡc.ᏑstartCalled, 1) != 0) {
             return errors.New(execAlreadyStartedˢ);
         }
 
         var started = false;
         defer(() => {
             closeDescriptors(Ꮡc.Value.childIOFiles);
-            Ꮡc.Value.childIOFiles = default!;
+            Ꮡc.Value.childIOFiles = default;
 
             if (!started) {
                 closeDescriptors(Ꮡc.Value.parentIOPipes);
-                Ꮡc.Value.parentIOPipes = default!;
-                Ꮡc.Value.goroutine = default!; // aid GC, finalization of pipe fds
+                Ꮡc.Value.parentIOPipes = default;
+                Ꮡc.Value.goroutine = default; // aid GC, finalization of pipe fds
             }
         }, ref ᒐ);
 
-        if (c.Path == ""u8 && c.Err == default! && c.lookPathErr == default!) {
+        if (c.Path == ""u8 && c.Err == nil && c.lookPathErr == nil) {
             c.Err = errors.New(execNoCommandˢ);
         }
-        if (c.Err != default! || c.lookPathErr != default!) {
-            if (c.lookPathErr != default!) {
+        if (c.Err != nil || c.lookPathErr != nil) {
+            if (c.lookPathErr != nil) {
                 return c.lookPathErr;
             }
             return c.Err;
         }
         @string lp = c.Path;
         if (runtime.GOOS == "windows"u8) {
-            if (c.Path == c.cachedLookExtensions.@in){
+            if (c.Path == c.cachedLookExtensions.@in) {
                 // If Command was called with an absolute path, we already resolved
                 // its extension and shouldn't need to do so again (provided c.Path
                 // wasn't set to another value between the calls to Command and Start).
@@ -725,17 +729,17 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
                 // c.Path as is: missing a bit of logging information seems less harmful
                 // than triggering a surprising data race, and if the user really cares
                 // about that bit of logging they can always use LookPath to resolve it.
-                error errΔ1 = default!;
+                error errΔ1 = default;
                 (lp, errΔ1) = lookExtensions(c.Path, c.Dir);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
         }
-        if (c.Cancel != default! && c.ctx == default!) {
+        if (c.Cancel != nil && c.ctx == nil) {
             return errors.New(execCommandWithANonNilˢ);
         }
-        if (c.ctx != default!) {
+        if (c.ctx != nil) {
             var selᴛ1 = c.ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
@@ -748,24 +752,24 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 
         var childFiles = new slice<ж<os.File>>(0, 3 + len(c.ExtraFiles));
         var (stdin, err) = Ꮡc.childStdin();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         childFiles = append(childFiles, stdin);
         (var stdout, err) = c.childStdout();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         childFiles = append(childFiles, stdout);
         (var stderr, err) = c.childStderr(stdout);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         childFiles = append(childFiles, stderr);
         childFiles = appendꓸꓸꓸ(childFiles, c.ExtraFiles);
 
         (var env, err) = c.environ();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
 
@@ -775,7 +779,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
             Env: env,
             Sys: c.SysProcAttr
         )));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         started = true;
@@ -783,7 +787,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
         // Don't allocate the goroutineErr channel unless there are goroutines to start.
         if (len(c.goroutine) > 0) {
             var goroutineErr = new channel<error>(1);
-            c.goroutineErr = goroutineErr.WithDirection(GoChanDir.Recv);
+            c.goroutineErr = goroutineErr.AsRecvOnly();
             var statusc = new channel<Start_goroutineStatus>(1);
             statusc.ᐸꟷ(new Start_goroutineStatus(running: len(c.goroutine)));
             foreach (var (_, fn) in c.goroutine) {
@@ -792,20 +796,19 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
                 goǃ((Func<error> fnΔ1) => {
                     var errΔ2 = fnΔ1();
 
-                    ref var status = ref heap<Start_goroutineStatus>(out var Ꮡstatus);
-                    status = ᐸꟷ(statuscʗ1);
-                    if (status.firstErr == default!) {
+                    ref var status = ref heap<Start_goroutineStatus>(ᐸꟷ(statuscʗ1), out var Ꮡstatus);
+                    if (status.firstErr == nil) {
                         status.firstErr = errΔ2;
                     }
                     status.running--;
-                    if (status.running == 0){
+                    if (status.running == 0) {
                         goroutineErrʗ1.ᐸꟷ(status.firstErr);
                     } else {
                         statuscʗ1.ᐸꟷ(status);
                     }
                 }, fn);
             }
-            c.goroutine = default!; // Allow the goroutines' closures to be GC'd when they complete.
+            c.goroutine = default; // Allow the goroutines' closures to be GC'd when they complete.
         }
 
         // If we have anything to do when the command's Context expires,
@@ -814,15 +817,15 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
         // (Even if the command was created by CommandContext, a helper library may
         // have explicitly set its Cancel field back to nil, indicating that it should
         // be allowed to continue running after cancellation after all.)
-        if ((c.Cancel != default! || c.WaitDelay != 0) && c.ctx != default! && c.ctx.Done() != default!) {
+        if ((c.Cancel != nil || c.WaitDelay != 0) && c.ctx != nil && c.ctx.Done() != nil) {
             var resultc = new channel<ctxResult>(0);
-            c.ctxResult = resultc.WithDirection(GoChanDir.Recv);
-            goǃ(Ꮡc.watchCtx, resultc.WithDirection(GoChanDir.Send));
+            c.ctxResult = resultc.AsRecvOnly();
+            goǃ(Ꮡc.watchCtx, resultc.AsSendOnly());
         }
 
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -834,7 +837,7 @@ public static partial error Start(this ж<Cmd> Ꮡc) {
 // watchCtx manipulates c.goroutineErr, so its result must be received before
 // c.awaitGoroutines is called.
 internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) {
-    var selᴛ2 = resultc.ᐸꟷ(new ctxResult(nil), ꓸꓸꓸ);
+    var selᴛ2 = resultc.ᐸꟷ(new ctxResult(), ꓸꓸꓸ);
     var selᴛ3 = c.ctx.Done();
     switch (select(selᴛ2, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0: {
@@ -844,22 +847,21 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
         break;
     }}
 
-    error err = default!;
-    if (c.Cancel != default!) {
+    error err = default;
+    if (c.Cancel != nil) {
         {
-            var interruptErr = c.Cancel(); if (interruptErr == default!){
+            var interruptErr = c.Cancel(); if (interruptErr == nil) {
                 // We appear to have successfully interrupted the command, so any
                 // program behavior from this point may be due to ctx even if the
                 // command exits with code 0.
                 err = c.ctx.Err();
-            } else 
-            if (errors.Is(interruptErr, os.ErrProcessDone)){
+            } else if (errors.Is(interruptErr, os.ErrProcessDone)) {
                 // The process already finished: we just didn't notice it yet.
                 // (Perhaps c.Wait hadn't been called, or perhaps it happened to race with
                 // c.ctx being canceled.) Don't inject a needless error.
             } else {
                 err = new wrappedError(
-                    prefix: "exec: canceling Cmd"u8,
+                    prefix: "exec: canceling Cmd",
                     err: interruptErr
                 );
             }
@@ -872,7 +874,7 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
 
     var timer = time.NewTimer(c.WaitDelay);
     var selᴛ4 = resultc.ᐸꟷ(new ctxResult(err: err, timer: timer), ꓸꓸꓸ);
-    var selᴛ5 = (~timer).C;
+    var selᴛ5 = timer.C;
     switch (select(selᴛ4, ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
     case 0: {
         // c.Process.Wait returned and we've handed the timer off to c.Wait.
@@ -885,28 +887,27 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
 
     var killed = false;
     {
-        var killErr = c.Process.Kill(); if (killErr == default!){
+        var killErr = c.Process.Kill(); if (killErr == nil) {
             // We appear to have killed the process. c.Process.Wait should return a
             // non-nil error to c.Wait unless the Kill signal races with a successful
             // exit, and if that does happen we shouldn't report a spurious error,
             // so don't set err to anything here.
             killed = true;
-        } else 
-        if (!errors.Is(killErr, os.ErrProcessDone)) {
+        } else if (!errors.Is(killErr, os.ErrProcessDone)) {
             err = new wrappedError(
-                prefix: "exec: killing Cmd"u8,
+                prefix: "exec: killing Cmd",
                 err: killErr
             );
         }
     }
 
-    if (c.goroutineErr != default!) {
+    if (c.goroutineErr != nil) {
         var selᴛ6 = c.goroutineErr;
         switch (trySelect(ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
         case 0 when selᴛ6.ꟷᐳ(out var goroutineErr): {
             // Forward goroutineErr only if we don't have reason to believe it was
             // caused by a call to Cancel or Kill above.
-            if (err == default! && !killed) {
+            if (err == nil && !killed) {
                 err = goroutineErr;
             }
             break;
@@ -925,7 +926,7 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
             // Wait for the copying goroutines to finish, but report ErrWaitDelay for
             // the error: any other error here could result from closing the pipes.
             _ = ᐸꟷ(c.goroutineErr);
-            if (err == default!) {
+            if (err == nil) {
                 err = ErrWaitDelay;
             }
             break;
@@ -933,7 +934,7 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
 
         // Since we have already received the only result from c.goroutineErr,
         // set it to nil to prevent awaitGoroutines from blocking on it.
-        c.goroutineErr = default!;
+        c.goroutineErr = default;
     }
 
     resultc.ᐸꟷ(new ctxResult(err: err));
@@ -960,8 +961,10 @@ public static @string Error(this ref ExitError e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execNotStartedˢ = "exec: not started"u8;
-internal static readonly @string execWaitWasAlreadyCalledˢ = "exec: Wait was already called"u8;
+internal static ref readonly @string execNotStartedˢ => ref execNotStartedˢᵇ;
+private static readonly @string execNotStartedˢᵇ = "exec: not started"u8;
+internal static ref readonly @string execWaitWasAlreadyCalledˢ => ref execWaitWasAlreadyCalledˢᵇ;
+private static readonly @string execWaitWasAlreadyCalledˢᵇ = "exec: Wait was already called"u8;
 
 // Wait waits for the command to exit and waits for any copying to
 // stdin or copying from stdout or stderr to complete.
@@ -991,25 +994,25 @@ public static error Wait(this ж<Cmd> Ꮡc) {
     }
 
     var (state, err) = c.Process.Wait();
-    if (err == default! && !state.Success()) {
+    if (err == nil && !state.Success()) {
         err = new ExitErrorжerror(Ꮡ(new ExitError(ProcessState: state)));
     }
     c.ProcessState = state;
 
-    ж<time.Timer> timer = default!;
-    if (c.ctxResult != default!) {
+    ж<time.Timer> timer = default;
+    if (c.ctxResult != nil) {
         var watch = ᐸꟷ(c.ctxResult);
         timer = watch.timer;
         // If c.Process.Wait returned an error, prefer that.
         // Otherwise, report any error from the watchCtx goroutine,
         // such as a Context cancellation or a WaitDelay overrun.
-        if (err == default! && watch.err != default!) {
+        if (err == nil && watch.err != nil) {
             err = watch.err;
         }
     }
 
     {
-        var goroutineErr = Ꮡc.awaitGoroutines(timer); if (err == default!) {
+        var goroutineErr = Ꮡc.awaitGoroutines(timer); if (err == nil) {
             // Report an error from the copying goroutines only if the program otherwise
             // exited normally on its own. Otherwise, the copying error may be due to the
             // abnormal termination.
@@ -1017,7 +1020,7 @@ public static error Wait(this ж<Cmd> Ꮡc) {
         }
     }
     closeDescriptors(c.parentIOPipes);
-    c.parentIOPipes = default!;
+    c.parentIOPipes = default;
 
     return err;
 }
@@ -1039,11 +1042,11 @@ internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer
             if (Ꮡtimer != nil) {
                 Ꮡtimer.Stop();
             }
-            Ꮡc.Value.goroutineErr = default!;
+            Ꮡc.Value.goroutineErr = default;
         }, ref ᒐ);
 
-        if (c.goroutineErr == default!) {
-            return default!; // No running goroutines to await.
+        if (c.goroutineErr == nil) {
+            return default; // No running goroutines to await.
         }
 
         if (Ꮡtimer == nil) {
@@ -1079,14 +1082,15 @@ internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer
         case 1 when selᴛ9.ꟷᐳ(out var err): {
             return err;
         }}
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execStdoutAlreadySetˢ = "exec: Stdout already set"u8;
+internal static ref readonly @string execStdoutAlreadySetˢ => ref execStdoutAlreadySetˢᵇ;
+private static readonly @string execStdoutAlreadySetˢᵇ = "exec: Stdout already set"u8;
 
 // Output runs the command and returns its standard output.
 // Any returned error will usually be of type [*ExitError].
@@ -1096,22 +1100,22 @@ internal static readonly @string execStdoutAlreadySetˢ = "exec: Stdout already 
 public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (c.Stdout != default!) {
-        return (default!, errors.New(execStdoutAlreadySetˢ));
+    if (c.Stdout != nil) {
+        return (default, errors.New(execStdoutAlreadySetˢ));
     }
     ref var stdout = ref heap(new bytes.Buffer(), out var Ꮡstdout);
     c.Stdout = new bytes_BufferжWriter(Ꮡstdout);
 
-    var captureErr = c.Stderr == default!;
+    var captureErr = c.Stderr == nil;
     if (captureErr) {
         c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << 10))));
     }
 
     var err = Ꮡc.Run();
-    if (err != default! && captureErr) {
+    if (err != nil && captureErr) {
         {
             var (ee, ok) = err._<ж<ExitError>>(ᐧ); if (ok) {
-                ee.Value.Stderr = c.Stderr._<ж<prefixSuffixSaver>>().Bytes();
+                ee.Stderr = c.Stderr._<ж<prefixSuffixSaver>>().Bytes();
             }
         }
     }
@@ -1119,18 +1123,19 @@ public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execStderrAlreadySetˢ = "exec: Stderr already set"u8;
+internal static ref readonly @string execStderrAlreadySetˢ => ref execStderrAlreadySetˢᵇ;
+private static readonly @string execStderrAlreadySetˢᵇ = "exec: Stderr already set"u8;
 
 // CombinedOutput runs the command and returns its combined standard
 // output and standard error.
 public static (slice<byte>, error) CombinedOutput(this ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (c.Stdout != default!) {
-        return (default!, errors.New(execStdoutAlreadySetˢ));
+    if (c.Stdout != nil) {
+        return (default, errors.New(execStdoutAlreadySetˢ));
     }
-    if (c.Stderr != default!) {
-        return (default!, errors.New(execStderrAlreadySetˢ));
+    if (c.Stderr != nil) {
+        return (default, errors.New(execStderrAlreadySetˢ));
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     c.Stdout = new bytes_BufferжWriter(Ꮡb);
@@ -1140,8 +1145,10 @@ public static (slice<byte>, error) CombinedOutput(this ж<Cmd> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execStdinAlreadySetˢ = "exec: Stdin already set"u8;
-internal static readonly @string execStdinPipeAfterˢ = "exec: StdinPipe after process started"u8;
+internal static ref readonly @string execStdinAlreadySetˢ => ref execStdinAlreadySetˢᵇ;
+private static readonly @string execStdinAlreadySetˢᵇ = "exec: Stdin already set"u8;
+internal static ref readonly @string execStdinPipeAfterˢ => ref execStdinPipeAfterˢᵇ;
+private static readonly @string execStdinPipeAfterˢᵇ = "exec: StdinPipe after process started"u8;
 
 // StdinPipe returns a pipe that will be connected to the command's
 // standard input when the command starts.
@@ -1150,24 +1157,25 @@ internal static readonly @string execStdinPipeAfterˢ = "exec: StdinPipe after p
 // For example, if the command being run will not exit until standard input
 // is closed, the caller must close the pipe.
 public static (io.WriteCloser, error) StdinPipe(this ref Cmd c) {
-    if (c.Stdin != default!) {
-        return (default!, errors.New(execStdinAlreadySetˢ));
+    if (c.Stdin != nil) {
+        return (default, errors.New(execStdinAlreadySetˢ));
     }
     if (c.Process != nil) {
-        return (default!, errors.New(execStdinPipeAfterˢ));
+        return (default, errors.New(execStdinPipeAfterˢ));
     }
     var (pr, pw, err) = os.Pipe();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     c.Stdin = new os_FileжReader(pr);
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pr)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pw)));
-    return (new os_FileжWriteCloser(pw), default!);
+    return (new os_FileжWriteCloser(pw), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execStdoutPipeAfterˢ = "exec: StdoutPipe after process started"u8;
+internal static ref readonly @string execStdoutPipeAfterˢ => ref execStdoutPipeAfterˢᵇ;
+private static readonly @string execStdoutPipeAfterˢᵇ = "exec: StdoutPipe after process started"u8;
 
 // StdoutPipe returns a pipe that will be connected to the command's
 // standard output when the command starts.
@@ -1178,24 +1186,25 @@ internal static readonly @string execStdoutPipeAfterˢ = "exec: StdoutPipe after
 // For the same reason, it is incorrect to call [Cmd.Run] when using StdoutPipe.
 // See the example for idiomatic usage.
 public static (io.ReadCloser, error) StdoutPipe(this ref Cmd c) {
-    if (c.Stdout != default!) {
-        return (default!, errors.New(execStdoutAlreadySetˢ));
+    if (c.Stdout != nil) {
+        return (default, errors.New(execStdoutAlreadySetˢ));
     }
     if (c.Process != nil) {
-        return (default!, errors.New(execStdoutPipeAfterˢ));
+        return (default, errors.New(execStdoutPipeAfterˢ));
     }
     var (pr, pw, err) = os.Pipe();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     c.Stdout = new os.FileжWriter(pw);
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
-    return (new os_FileжReadCloser(pr), default!);
+    return (new os_FileжReadCloser(pr), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execStderrPipeAfterˢ = "exec: StderrPipe after process started"u8;
+internal static ref readonly @string execStderrPipeAfterˢ => ref execStderrPipeAfterˢᵇ;
+private static readonly @string execStderrPipeAfterˢᵇ = "exec: StderrPipe after process started"u8;
 
 // StderrPipe returns a pipe that will be connected to the command's
 // standard error when the command starts.
@@ -1206,20 +1215,20 @@ internal static readonly @string execStderrPipeAfterˢ = "exec: StderrPipe after
 // For the same reason, it is incorrect to use [Cmd.Run] when using StderrPipe.
 // See the StdoutPipe example for idiomatic usage.
 public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) {
-    if (c.Stderr != default!) {
-        return (default!, errors.New(execStderrAlreadySetˢ));
+    if (c.Stderr != nil) {
+        return (default, errors.New(execStderrAlreadySetˢ));
     }
     if (c.Process != nil) {
-        return (default!, errors.New(execStderrPipeAfterˢ));
+        return (default, errors.New(execStderrPipeAfterˢ));
     }
     var (pr, pw, err) = os.Pipe();
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     c.Stderr = new os.FileжWriter(pw);
     c.childIOFiles = append(c.childIOFiles, (io.Closer)(new os_FileжCloser(pw)));
     c.parentIOPipes = append(c.parentIOPipes, (io.Closer)(new os_FileжCloser(pr)));
-    return (new os_FileжReadCloser(pr), default!);
+    return (new os_FileжReadCloser(pr), default);
 }
 
 // prefixSuffixSaver is an io.Writer which retains the first N bytes
@@ -1229,7 +1238,7 @@ partial struct prefixSuffixSaver {
     public nint N; // max size of prefix or suffix
     internal slice<byte> prefix;
     internal slice<byte> suffix; // ring buffer once len(suffix) == N
-    internal nint suffixOff;   // offset to write into suffix
+    internal nint suffixOff;     // offset to write into suffix
     internal int64 skipped;
 }
 
@@ -1242,7 +1251,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
     ref var w = ref Ꮡw.DerefOrNull();
 
     nint lenp = len(p);
-    p = w.fill(Ꮡw.of(prefixSuffixSaver.Ꮡprefix), p);
+    p = w.fill(Ꮡw.Ꮡprefix, p);
 
     // Only keep the last w.N bytes of suffix data.
     {
@@ -1251,7 +1260,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
             w.skipped += (int64)overage;
         }
     }
-    p = w.fill(Ꮡw.of(prefixSuffixSaver.Ꮡsuffix), p);
+    p = w.fill(Ꮡw.Ꮡsuffix, p);
 
     // w.suffix is full now if p is non-empty. Overwrite it in a circle.
     while (len(p) > 0) { // 0, 1, or 2 iterations.
@@ -1263,7 +1272,7 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
             w.suffixOff = 0;
         }
     }
-    return (lenp, default!);
+    return (lenp, default);
 }
 
 // fill appends up to len(p) bytes of p to *dst, such that *dst does not
@@ -1282,17 +1291,19 @@ internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<sl
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string omittingˢ = "\n... omitting "u8;
-internal static readonly @string bytesˢ = " bytes ...\n"u8;
+internal static ref readonly @string omittingˢ => ref omittingˢᵇ;
+private static readonly @string omittingˢᵇ = "\n... omitting "u8;
+internal static ref readonly @string bytesˢ => ref bytesˢᵇ;
+private static readonly @string bytesˢᵇ = " bytes ...\n"u8;
 
 internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
-    if (w.suffix == default!) {
+    if (w.suffix == nil) {
         return w.prefix;
     }
     if (w.skipped == 0) {
         return appendꓸꓸꓸ(w.prefix, w.suffix);
     }
-    bytes.Buffer buf = default!;
+    bytes.Buffer buf = default;
     buf.Grow(len(w.prefix) + len(w.suffix) + 50);
     buf.Write(w.prefix);
     buf.WriteString(omittingˢ);
@@ -1307,23 +1318,25 @@ internal static slice<byte> Bytes(this ref prefixSuffixSaver w) {
 // would be run as it is currently configured. If an error occurs in computing
 // the environment, it is returned alongside the best-effort copy.
 internal static (slice<@string>, error) environ(this ref Cmd c) {
-    error err = default!;
+    error err = default;
 
     var env = c.Env;
-    if (env == default!) {
+    if (env == nil) {
         (env, err) = execenv.Default(c.SysProcAttr);
-        if (err != default!) {
+        if (err != nil) {
             env = os.Environ();
             // Note that the non-nil err is preserved despite env being overridden.
         }
 
         if (c.Dir != ""u8) {
             var exprᴛ1 = runtime.GOOS;
-            if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8: {
                 // Windows and Plan 9 do not use the PWD variable, so we don't need to
                 // keep it accurate.
+                break;
             }
-            else { /* default: */
+            default: {
                 // On POSIX platforms, PWD represents “an absolute pathname of the
                 // current working directory.” Since we are changing the working
                 // directory for the command, we should also update PWD to reflect that.
@@ -1333,19 +1346,19 @@ internal static (slice<@string>, error) environ(this ref Cmd c) {
                 // only implicitly update PWD when Env is nil. That way, we're much
                 // less likely to override an intentional change to the variable.
                 {
-                    var (pwd, absErr) = filepath.Abs(c.Dir); if (absErr == default!){
+                    var (pwd, absErr) = filepath.Abs(c.Dir); if (absErr == nil) {
                         env = append(env, "PWD="u8 + pwd);
-                    } else 
-                    if (err == default!) {
+                    } else if (err == nil) {
                         err = absErr;
                     }
                 }
-            }
+                break;
+            }}
         }
     }
 
     (env, var dedupErr) = dedupEnv(env);
-    if (err == default!) {
+    if (err == nil) {
         err = dedupErr;
     }
     return (addCriticalEnv(env), err);
@@ -1369,7 +1382,8 @@ internal static (slice<@string>, error) dedupEnv(slice<@string> env) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string execEnvironmentVariableˢ = "exec: environment variable contains NUL"u8;
+internal static ref readonly @string execEnvironmentVariableˢ => ref execEnvironmentVariableˢᵇ;
+private static readonly @string execEnvironmentVariableˢᵇ = "exec: environment variable contains NUL"u8;
 
 // dedupEnvCase is dedupEnv with a case option for testing.
 // If caseInsensitive is true, the case of keys is ignored.
@@ -1377,7 +1391,7 @@ internal static readonly @string execEnvironmentVariableˢ = "exec: environment 
 internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool nulOK, slice<@string> env) {
     // Construct the output in reverse order, to preserve the
     // last occurrence of each key.
-    error err = default!;
+    error err = default;
     var @out = new slice<@string>(0, len(env));
     var saw = new map<@string, bool>(len(env));
     for (nint n = len(env); n > 0; n--) {
@@ -1390,12 +1404,12 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
             continue;
         }
 
-        nint i = strings.Index(kv, "="u8);
+        nint i = strings.Index(kv, "=");
         if (i == 0) {
             // We observe in practice keys with a single leading "=" on Windows.
             // TODO(#49886): Should we consume only the first leading "=" as part
             // of the key, or parse through arbitrarily many of them until a non-"="?
-            i = strings.Index(kv[1..], "="u8) + 1;
+            i = strings.Index(kv[1..], "=") + 1;
         }
         if (i < 0) {
             if (kv != ""u8) {
@@ -1428,7 +1442,8 @@ internal static (slice<@string>, error) dedupEnvCase(bool caseInsensitive, bool 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string systemrootˢ = "SYSTEMROOT"u8;
+internal static ref readonly @string systemrootˢ => ref systemrootˢᵇ;
+private static readonly @string systemrootˢᵇ = "SYSTEMROOT"u8;
 
 // addCriticalEnv adds any critical environment variables that are required
 // (or at least almost always required) on the operating system.
@@ -1438,7 +1453,7 @@ internal static slice<@string> addCriticalEnv(slice<@string> env) {
         return env;
     }
     foreach (var (_, kv) in env) {
-        var (k, _, ok) = strings.Cut(kv, "="u8);
+        var (k, _, ok) = strings.Cut(kv, "=");
         if (!ok) {
             continue;
         }
@@ -1457,16 +1472,17 @@ internal static slice<@string> addCriticalEnv(slice<@string> env) {
 // Note that functions in this package do not return ErrDot directly.
 // Code should use errors.Is(err, ErrDot), not err == ErrDot,
 // to test whether a returned error err is due to this condition.
-public static error ErrDot = errors.New("cannot run executable found relative to current directory"u8);
+public static error ErrDot = errors.New("cannot run executable found relative to current directory");
 
 // validateLookPath excludes paths that can't be valid
 // executable names. See issue #74466 and CVE-2025-47906.
 internal static error validateLookPath(@string s) {
     var exprᴛ1 = s;
-    if (exprᴛ1 == ""u8 || exprᴛ1 == "."u8 || exprᴛ1 == ".."u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == ""u8 || exprᴛ1 == "."u8 || exprᴛ1 == ".."u8: {
         return ErrNotFound;
-    }
-    return default!;
+    }}
+    return default;
 }
 
 } // end exec_package

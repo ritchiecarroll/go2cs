@@ -74,7 +74,33 @@ using static go.debug.dwarf_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(ArrayType))]
+[assembly: GoFieldAccess(typeof(BasicType))]
+[assembly: GoFieldAccess(typeof(CommonType))]
+[assembly: GoFieldAccess(typeof(Data))]
+[assembly: GoFieldAccess(typeof(Entry))]
+[assembly: GoFieldAccess(typeof(EnumType))]
+[assembly: GoFieldAccess(typeof(EnumValue))]
+[assembly: GoFieldAccess(typeof(Field))]
+[assembly: GoFieldAccess(typeof(FuncType))]
+[assembly: GoFieldAccess(typeof(PtrType))]
+[assembly: GoFieldAccess(typeof(QualType))]
+[assembly: GoFieldAccess(typeof(StructField))]
+[assembly: GoFieldAccess(typeof(StructType))]
+[assembly: GoFieldAccess(typeof(TypedefType))]
+[assembly: GoFieldAccess(typeof(UnspecifiedType))]
+[assembly: GoFieldAccess(typeof(UnsupportedType))]
+[assembly: GoFieldAccess(typeof(buf))]
+[assembly: GoFieldAccess(typeof(typeUnit))]
+[assembly: GoFieldAccess(typeof(typeUnitReader))]
+[assembly: GoFieldAccess(typeof(unit))]
+[assembly: GoFieldAccess(typeof(unit5))]
+[assembly: GoFieldAccess(typeof(ΔLineReader))]
+[assembly: GoFieldAccess(typeof(ΔReader))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -84,17 +110,17 @@ using static go.debug.dwarf_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/dwarf/attr_string.go", "attr_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCygB7+AGCgIKk")]
-[assembly: go.GoPositionMap("debug/dwarf/buf.go", "buf.cs", "ACdUgqaCpoKmotaCgoKUgoKCpoKCgpSCgoKmgKSCgoKCpoKCgqaCgoKUpoKCgpSClLiCgoKUpoKCgpSq0oKCgoKCgoKmqJKCqJKCgoKU2JKUpKSklILWsoKCgpKClKaCgoIACRSC")]
-[assembly: go.GoPositionMap("debug/dwarf/class_string.go", "class_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgsqUgoKU")]
-[assembly: go.GoPositionMap("debug/dwarf/const.go", "const.cs", "AIoBmgKCgIKkAIYBlgKCgpQ=")]
-[assembly: go.GoPositionMap("debug/dwarf/entry.go", "entry.cs", "ACZOwoCCtoKClJTIgpSCgriCgoKCgoKCgpSClJSCqJKCgoKCgoKCgqaClJSClILcABgyABcw0pymAAgSgpQABxCAgqSmpqam3ICCpKampqamAAKDAYIAjgGoA5IAAhTygIKkqqKCgqYAGhLSopKCgpSCgoKU7oKCgqaCgoKClJSCgpSClIKCgoKUpoKCgpSUgoKmgoKClJSCgpSClKaCgoKCgoKUgqykgpSkpKSklIKUgqaCgoKCgpTKpKSkuKSkpKSkpKS42riCgpKClIKCkoKUyKSkpKS4pIKCgpKClJSClIKUgoKUgoKUlIKCgoK2gpSkpKSklIKUgoKUgpSClKaCpoKCkoKU7oKCkoKU3NykpLi4lIIAAq8DAAK2A5SClAASKqKCgqqiqJLqooKCgoKClIKCgoKCpoKCgpSClIKCgqiSgrqSgoKCgqaigpSCgIIABBDigpSCgpSCgoKClIKCgoKUgoKmlKzSgu6CgqaCgqaCgoKUgs6iqqIAAh4ADgKCgoKUgoKCgoKCgoKClIKUgoKUooKmlKzilJSCgoKClKSCgoLKgqaCgIK2lIKClJSCgpSCgpSmgoKUgoKUpsqCgoKClKYABRAACAKCgpSCgpSCkoKCuICCkoCCxtbCgpSCgoKUgqaClLi60oKUgoKmgoKCgpSClKaCgoKCuIKUgoKUgoKUpoKCgoKUpoKCpqaCgqaCgvyylIKmgoKCgpQ=", "429-457:1;459-486:2")]
-[assembly: go.GoPositionMap("debug/dwarf/line.go", "line.cs", "AHyeAvKUuIKUlIK4poKUAAgQgILIlKrCpoKCgoKUgtyUgoKUgpSCgpSUgoKUgoKUlJSCgqaClIKUgriCgoK4gpSCgILIlIKCgoKUgpSmlMqCgoCCkoLIgoKCgoKClJSCgoKCooKUuJQAChiSgoKCgpSo0oKCgoKUpIKClJSClIKClJSCgoLIgpTIpKSkpKSkpKSkpKSmlKSClKSk7IKmrLKSgpSClIKCgoKUlJL+goKUgqaCqqKClAADFOKCyoKClIKClILuAA8m0pSUgoKCgqamgoKUlIKCppS0tLS0yICCgpKCgqS4ppSCyqampoKmpqamprimpsqCppSCgoKCgoKqooKCAA4gkq7CgoKCgqq0gqamqLYADBqCAAIeAAwCygABHAAOAoCCpJSCgIKklILKgoKCgIKClKSClLiClAADFOKCqqKCyoKUpoKCpriCgoKUlKqigoCCtpSUgpSCgrg=")]
-[assembly: go.GoPositionMap("debug/dwarf/open.go", "open.cs", "ADNqAAEUAAgCABAigpSCgoKUpoKUpIK0grSmgoKUgq7CrsKClKSkpKY=")]
-[assembly: go.GoPositionMap("debug/dwarf/tag_string.go", "tag_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIACRqCgoKWgpSCpKSCpKSCpIKk")]
-[assembly: go.GoPositionMap("debug/dwarf/type.go", "type.cs", "AB46gKSAAA8egKSCgpQAOHKApIAAChSCpoKClAAKEIAACBCAAF68AYKClKaCgpSmgoKClIKClIKCgpSCgoKCpoIAFCSCgoKUgoKClJSCAAwUgoKCgpSUgoKUAAcQgAAIEICkgAAJEoKClAAOILIABxCigpSCgriCgpSCABIQAAkCgIKkgpKClIKCAAcQgoKClKzEppKC7oKCgoKUgoKUgoKClJSClIKU3JKCgpSAgtaAgviUpgAJFIKCgoCCpJaSppSClIKCkoKmpIKmlKaCggAOHoKCgoKUnKSkgriApLTopKSkpAACOYIAATyChoKCgoKCgoKCABImgoKClKSklIKCgoKCgoKClIKAgqS4goKClIKCgsa2goKCgoKCgoKUgpSmlIKClIKClAAHEIKCgoCCpJSkpAALGIKCgoKCgoKCgoKCgoKClIIACRKCgoKCgpQADBiCgoKAgqSCgoKYgILGqwABEAAHEIKCgoLcgoKC3IKCgoKmgqaCgoKCyrS2lJSIstaCgoKmkoI=", "428-430:1;442-476:2;480-497:3", "", "688=Basic/1/1/2")]
-[assembly: go.GoPositionMap("debug/dwarf/typeunit.go", "typeunit.cs", "ABs0soKCgoKCgpSCgoKClIKClJSCgpSClIKClIKCgpSmggAMGoKmqLKCgpSCppKCgoKmggAKGJKCgoKClKiSqLKClIKUgoKClKiSAAYQkg==", "", "", "72=bytes/1/1/4;160=makeBuf/1/1/3")]
-[assembly: go.GoPositionMap("debug/dwarf/unit.go", "unit.cs", "AB9IkqaCpoKmgoKUpoKClKaCgpSmgoKU1rSCgoKCgoKUgoKmgriCgoKCgoKClIKUgoKCgpSCgoKUgoKUlIKCgpSUgoKmlKSCgpS4gpSClKrUhoKUgoKUpqKClJKCuJSAgqSAgqSAgqSAgqQ=", "162-164:1")]
+[assembly: GoPositionMap("debug/dwarf/attr_string.go", "attr_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC2gB7+AGCgIKk")]
+[assembly: GoPositionMap("debug/dwarf/buf.go", "buf.cs", "ACdUgqaCpoKmouaCgoKUgoKCpoKCgpSCgoKmgKSCgoKCpoKCgqaCgoKUpoKCgpSClLiCgoKUpoKCgpSq0oKCgoKCgoKmqJKCqJKCgoKU6JKUpKSklILmsoKCgoKClKaCgoIACRSC")]
+[assembly: GoPositionMap("debug/dwarf/class_string.go", "class_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKU")]
+[assembly: GoPositionMap("debug/dwarf/const.go", "const.cs", "AIoBmgKCgIKkAIYBlgKCgpQ=")]
+[assembly: GoPositionMap("debug/dwarf/entry.go", "entry.cs", "ACdOwoCCtoKClJS4gpSCgriCgoKCgoKCgpSClJSCqJKCgoKCgoKCgqaClJSClILcABgyABgw0pSCpqYACBKClAAHEICCpKampqbcgIKkpqampqYAjgGmApIAAhTygIKkqqKCgqYALBLSooKCgpSCgoKU7oKCgqaCgoKClJSCgpSClIKCgoKUpoKCgpSUgoKmgoKClJSCgpSClKaCgoKCgoKUgpTItIKUtLS0tKSClIKmgoKCgoKU2rS0tMi0tLS0tLS0yOrIgoKCgpSCgoKClNi0tLS0yLSCgoKCgpSUgpSClIKClIKClJSCgoKCxoKUtLS0tKSClIKClIKUgpSmgraCgoKClP6CgoKClOzstLTIyJSCtpSClAASKqKCgqqiqJIACAqigoKCgoKUgoKCgoKmgoKClIKUgoKCqJKCupKCgoKCpqKClIKAggAEEOKClIKClIKCgoKUgoKCgpSCgqaUrNKC7oKCpoKCpoKCgpSCzqKqogACHgAOAoKCgpSCgoKCgoKCgoKUgpSCgpSigqaUrOKUlIKCgoKUtIKCgtqCpoKAgraUgoKUlIKClIKClKaCgpSCgpSmyoKCgoKUpgAGEAAIAoKClIKClIKCgoK4gIKCgILG5sKClIKCgpSCpoKUuLrSgpSCgqaCgoKClIKUpoKCgoLIgpSCgpSCgpS2goKCgpS2goK2toKCtoKCAAkMspSCpoKCgoKU", "429-457:1;459-486:2")]
+[assembly: GoPositionMap("debug/dwarf/line.go", "line.cs", "AH6eAvKUuIKUlIK4poKUAAcQgILIlKrCpoKCgoKUgtyUgoKUgpSCgpSUgoKUgoKUlJSCgqaClIKUgriCgoK4gpSCgILIlIKCgoKUgpSmlMqCgoCCgoLIgoKCgoKClJSCgoKCooKUuJQAChiSgoKCgpSo0oKCgoKUtIKClJSClIKClJSCgoLYgpTYtLS0tLS0tLS0tLS2lLSClLS0AAgMgqassoKClIKUgoKCgpSUgu6CgpSCpoKqooKUAAMU4oLKgoKUgoKUgu4ADybSlJSCgoKCpqaCgpSUgoK2lLS0tLTYgIKCgoKCpMi2lILatra2gra2tra2yLa22oK2lIKCgoKCgqqigoIADiCSrsKCgoKCqrSCpqaotgAMGoIAAh4ADALKAAEcAA4CgIKklIKAgqSUgsqCgoKAgoKUpIKUuIKUAAMU4oKqooLKgpSmgoKmuIKCgpSUqqKCgIK2lJSClIKCuA==")]
+[assembly: GoPositionMap("debug/dwarf/open.go", "open.cs", "ADNqAAEUAAgCABAigpSCgoKUpoKUpIK0grSmgoKUgq7CrsKCpLS0tLY=")]
+[assembly: GoPositionMap("debug/dwarf/tag_string.go", "tag_string.cs", "/oaigoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIADxqCgoKWgpSCpKSCpKSCpIKk")]
+[assembly: GoPositionMap("debug/dwarf/type.go", "type.cs", "AB46gKSAAA8egKSCgpQAOHKApIAAChSCpoKClAALEIAACBCAAF68AYKClKaCgpSmgoKClIKClIKCgpSCgoKCpoIAFSSCgoKUgoKClJSCAA0UgoKCgpSUgoKUAAcQgAAIEICkgAAJEoKClAAOILIABxCigpSCgriCgpSCABsQAAkCgIKkgpKClIKCAAcQgoKClKzEppKC7oKCgoKUgoKUgoKClJSClIKU3JKCgpSAgtaAgviUpgAJFIKCgoCCpJaSppSClIKCgoKmtIK2lKaCggAPHoKCgoKUlIK2tLSCuICktPi0tLS0pIKGgoKCgoKCgoIAEyaCgoKUtLSkgoKCgoKCgoKUgoCCpLiCgoKUgoKCxraCgoKCgoKCgpSClKaUgoKUgoKUAAgQgoKCgIKklLS0AA0YgoKCgoKCgoKCgoKCgoKUggAJEoKCgoKClAAMGIKCgoCCpIKCgpS0gILWpAAIEIKCgoLsgoKC7IKCgoK2gqaCgoKCyrS2lJSIstaCgoKmgoI=", "428-430:1;442-476:2;480-497:3", "", "711=Basic/1/1/2")]
+[assembly: GoPositionMap("debug/dwarf/typeunit.go", "typeunit.cs", "AB00soKCgoKCgpSCgoKClIKClJSCgpSClIKClIKCgpSmggAMGoKmqLKCgpSCpoKCgoKmggAKGJKCgoKClKiSqLKClIKUgoKClKiSAAYQkg==", "", "", "74=bytes/1/1/4;161=makeBuf/1/1/3")]
+[assembly: GoPositionMap("debug/dwarf/unit.go", "unit.cs", "AB9IkqaCpoKmgoKUpoKClKaCgpSmgoKU5rSCgoKCgoKUgoKmgriCgoKCgoKClIKUgoKCgpSCgoKUgoKUlIKCgpSUgoKmlLSCgpTIgpSClKrUhoKUgoKUpqKClIKCuJSAgqSAgqSAgqSAgqQ=", "162-164:1")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

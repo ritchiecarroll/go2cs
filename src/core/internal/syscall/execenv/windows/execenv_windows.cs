@@ -20,19 +20,19 @@ partial class execenv_package {
 // the defaults for that user token, otherwise they
 // will be sourced from syscall.Environ().
 public static (slice<@string> env, error err) Default(ж<syscall.SysProcAttr> Ꮡsys) {
-    slice<@string> env = default!;
-    error err = default!;
+    slice<@string> env = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var sys = ref Ꮡsys.DerefOrNull();
 
         if (Ꮡsys == nil || sys.Token == 0) {
-            (env, err) = (syscall.Environ(), default!); goto ᒐdone;
+            (env, err) = (syscall.Environ(), default); goto ᒐdone;
         }
         ref var blockp = ref heap<ж<uint16>>(out var Ꮡblockp);
         err = Δwindows.CreateEnvironmentBlock(Ꮡblockp, sys.Token, false);
-        if (err != default!) {
-            (env, err) = (default!, err); goto ᒐdone;
+        if (err != nil) {
+            (env, err) = (default, err); goto ᒐdone;
         }
         defer(Δwindows.DestroyEnvironmentBlock, blockp, ref ᒐ);
 

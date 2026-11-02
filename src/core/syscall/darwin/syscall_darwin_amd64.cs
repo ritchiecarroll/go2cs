@@ -46,8 +46,8 @@ public static void SetLen(this ref Cmsghdr cmsg, nint length) {
 }
 
 internal static (nint written, error err) sendfile(nint outfd, nint infd, ref int64 offset, nint count) {
-    nint written = default!;
-    error err = default!;
+    nint written = default;
+    error err = default;
 
     ref var length = ref heap(new uint64(), out var Ꮡlength);
 

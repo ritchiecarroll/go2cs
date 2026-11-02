@@ -10,16 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
-global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -55,7 +45,7 @@ using static go.@internal.syscall.unix_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -65,21 +55,21 @@ using static go.@internal.syscall.unix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/unix/arc4random_darwin.go", "arc4random_darwin.cs", "AAwcpqSClA==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/at_darwin.go", "at_darwin.cs", "AA0emJKCgpSCgpSU7oKUppiSgoKUuIKUppiSgoKU7oKUppiSgoKU7oKUppiSgoKUgoKU7oKUppiSgoKUgoKU7oKUppiSgoKUgoKU7oKU")]
-[assembly: go.GoPositionMap("internal/syscall/unix/at_libc2.go", "at_libc2.cs", "AAscgqaCpoKoxtY=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/eaccess.go", "eaccess.cs", "AAscgtyU")]
-[assembly: go.GoPositionMap("internal/syscall/unix/faccessat_darwin.go", "faccessat_darwin.cs", "AAwamJKCgpSCgpQ=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/fcntl_unix.go", "fcntl_unix.cs", "AAsi9IKCgpQ=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_ge.go", "kernel_version_ge.cs", "AAcSopQ=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_other.go", "kernel_version_other.cs", "AAgSgg==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/net.go", "net.cs", "AAsguLi4uLi4uA==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/net_darwin.go", "net_darwin.cs", "ACZYAAYkAAQSpIIACRSCgpSopIKmqKSCqKampqbupIKmgpSopILMpILugpQ=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/nonblocking_unix.go", "nonblocking_unix.cs", "AAoWgoKClKaC")]
-[assembly: go.GoPositionMap("internal/syscall/unix/pty_darwin.go", "pty_darwin.cs", "AAwapIKCgpSopIKCgpSopIKCyoKUgoKCpqikgoKClA==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/tcsetpgrp_bsd.go", "tcsetpgrp_bsd.cs", "AAseysI=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/user_darwin.go", "user_darwin.cs", "AAwcpIKmgpQAGToABB4ABB4ABB4ABB6kgpSClA==")]
-[assembly: go.GoPositionMap("internal/syscall/unix/utimes.go", "utimes.cs", "AAse")]
+[assembly: GoPositionMap("internal/syscall/unix/arc4random_darwin.go", "arc4random_darwin.cs", "AAwcpqSClA==")]
+[assembly: GoPositionMap("internal/syscall/unix/at_darwin.go", "at_darwin.cs", "AA0emJKCgpSCgpSU7oKUppiSgoKUuIKUppiSgoKU7oKUppiSgoKU7oKUppiSgoKUgoKU7oKUppiSgoKUgoKU7oKUppiSgoKUgoKU7oKU")]
+[assembly: GoPositionMap("internal/syscall/unix/at_libc2.go", "at_libc2.cs", "AAscgqaCpoKoxtY=")]
+[assembly: GoPositionMap("internal/syscall/unix/eaccess.go", "eaccess.cs", "AAscgtyU")]
+[assembly: GoPositionMap("internal/syscall/unix/faccessat_darwin.go", "faccessat_darwin.cs", "AAwamJKCgpSCgpQ=")]
+[assembly: GoPositionMap("internal/syscall/unix/fcntl_unix.go", "fcntl_unix.cs", "AAsi9IKCgpQ=")]
+[assembly: GoPositionMap("internal/syscall/unix/kernel_version_ge.go", "kernel_version_ge.cs", "AAcSopQ=")]
+[assembly: GoPositionMap("internal/syscall/unix/kernel_version_other.go", "kernel_version_other.cs", "AAgSgg==")]
+[assembly: GoPositionMap("internal/syscall/unix/net.go", "net.cs", "AAsguLi4uLi4uA==")]
+[assembly: GoPositionMap("internal/syscall/unix/net_darwin.go", "net_darwin.cs", "ACZYAAYkAAQSpIIACRSCgpSopIKmqKSCqKampqbupIKmgpSopILMpILugpQ=")]
+[assembly: GoPositionMap("internal/syscall/unix/nonblocking_unix.go", "nonblocking_unix.cs", "AAoWgoKClKaC")]
+[assembly: GoPositionMap("internal/syscall/unix/pty_darwin.go", "pty_darwin.cs", "AAwapIKCgpSopIKCgpSopIKCyoKUgoKCpqikgoKClA==")]
+[assembly: GoPositionMap("internal/syscall/unix/tcsetpgrp_bsd.go", "tcsetpgrp_bsd.cs", "AAseysI=")]
+[assembly: GoPositionMap("internal/syscall/unix/user_darwin.go", "user_darwin.cs", "AAwcpIKmgpQAGToABB4ABB4ABB4ABB6kgpSClA==")]
+[assembly: GoPositionMap("internal/syscall/unix/utimes.go", "utimes.cs", "AAse")]
 // </GoSourcePositionMaps>
 
 // Dynamically imported C entry points are recorded here, one `GoCgoImportDynamic` attribute
@@ -90,32 +80,32 @@ using static go.@internal.syscall.unix_package;
 // instead: an address that is merely plausible is fatal at the first call.
 
 // <CgoDynamicImports>
-[assembly: go.GoCgoImportDynamic("libc_arc4random_buf_trampoline", "arc4random_buf", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_faccessat_trampoline", "faccessat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_fchmodat_trampoline", "fchmodat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_fchownat_trampoline", "fchownat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_freeaddrinfo_trampoline", "freeaddrinfo", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_gai_strerror_trampoline", "gai_strerror", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getaddrinfo_trampoline", "getaddrinfo", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getgrgid_r_trampoline", "getgrgid_r", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getgrnam_r_trampoline", "getgrnam_r", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getgrouplist_trampoline", "getgrouplist", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getnameinfo_trampoline", "getnameinfo", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getpwnam_r_trampoline", "getpwnam_r", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_getpwuid_r_trampoline", "getpwuid_r", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_grantpt_trampoline", "grantpt", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_linkat_trampoline", "linkat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_mkdirat_trampoline", "mkdirat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_posix_openpt_trampoline", "posix_openpt", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_ptsname_r_trampoline", "ptsname_r", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_readlinkat_trampoline", "readlinkat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_renameat_trampoline", "renameat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_symlinkat_trampoline", "symlinkat", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_sysconf_trampoline", "sysconf", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libc_unlockpt_trampoline", "unlockpt", "/usr/lib/libSystem.B.dylib")]
-[assembly: go.GoCgoImportDynamic("libresolv_res_9_nclose_trampoline", "res_9_nclose", "/usr/lib/libresolv.9.dylib")]
-[assembly: go.GoCgoImportDynamic("libresolv_res_9_ninit_trampoline", "res_9_ninit", "/usr/lib/libresolv.9.dylib")]
-[assembly: go.GoCgoImportDynamic("libresolv_res_9_nsearch_trampoline", "res_9_nsearch", "/usr/lib/libresolv.9.dylib")]
+[assembly: GoCgoImportDynamic("libc_arc4random_buf_trampoline", "arc4random_buf", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_faccessat_trampoline", "faccessat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fchmodat_trampoline", "fchmodat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_fchownat_trampoline", "fchownat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_freeaddrinfo_trampoline", "freeaddrinfo", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_gai_strerror_trampoline", "gai_strerror", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getaddrinfo_trampoline", "getaddrinfo", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getgrgid_r_trampoline", "getgrgid_r", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getgrnam_r_trampoline", "getgrnam_r", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getgrouplist_trampoline", "getgrouplist", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getnameinfo_trampoline", "getnameinfo", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpwnam_r_trampoline", "getpwnam_r", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_getpwuid_r_trampoline", "getpwuid_r", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_grantpt_trampoline", "grantpt", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_linkat_trampoline", "linkat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_mkdirat_trampoline", "mkdirat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_posix_openpt_trampoline", "posix_openpt", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_ptsname_r_trampoline", "ptsname_r", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_readlinkat_trampoline", "readlinkat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_renameat_trampoline", "renameat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_symlinkat_trampoline", "symlinkat", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_sysconf_trampoline", "sysconf", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libc_unlockpt_trampoline", "unlockpt", "/usr/lib/libSystem.B.dylib")]
+[assembly: GoCgoImportDynamic("libresolv_res_9_nclose_trampoline", "res_9_nclose", "/usr/lib/libresolv.9.dylib")]
+[assembly: GoCgoImportDynamic("libresolv_res_9_ninit_trampoline", "res_9_ninit", "/usr/lib/libresolv.9.dylib")]
+[assembly: GoCgoImportDynamic("libresolv_res_9_nsearch_trampoline", "res_9_nsearch", "/usr/lib/libresolv.9.dylib")]
 // </CgoDynamicImports>
 
 namespace go.@internal.syscall;

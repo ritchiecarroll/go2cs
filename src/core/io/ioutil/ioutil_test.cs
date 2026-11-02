@@ -15,60 +15,63 @@ using path;
 
 partial class ioutil_test_package {
 
-internal static void checkSize(ж<testing.T> Ꮡt, @string path, int64 size) {
+internal static void checkSize(ж<testing.T> t, @string path, int64 size) {
     var (dir, err) = os.Stat(path);
-    if (err != default!) {
-        Ꮡt.Fatalf("Stat %q (looking for size %d): %s"u8, path, size, err);
+    if (err != nil) {
+        t.Fatalf("Stat %q (looking for size %d): %s", path, size, err);
     }
     if (dir.Size() != size) {
-        Ꮡt.Errorf("Stat %q: size %d want %d"u8, path, dir.Size(), size);
+        t.Errorf("Stat %q: size %d want %d", path, dir.Size(), size);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string rumpelstilzchenˢ = "rumpelstilzchen"u8;
-private static readonly @string ioutilTestGoˢ = "ioutil_test.go"u8;
+private static ref readonly @string rumpelstilzchenˢ => ref rumpelstilzchenˢᵇ;
+private static readonly @string rumpelstilzchenˢᵇ = "rumpelstilzchen"u8;
+private static ref readonly @string ioutilTestGoˢ => ref ioutilTestGoˢᵇ;
+private static readonly @string ioutilTestGoˢᵇ = "ioutil_test.go"u8;
 
-public static void TestReadFile(ж<testing.T> Ꮡt) {
+public static void TestReadFile(ж<testing.T> t) {
     @string filename = rumpelstilzchenˢ;
     var (contents, err) = ReadFile(filename);
-    if (err == default!) {
-        Ꮡt.Fatalf("ReadFile %s: error expected, none found"u8, filename);
+    if (err == nil) {
+        t.Fatalf("ReadFile %s: error expected, none found", filename);
     }
 
     filename = ioutilTestGoˢ;
     (contents, err) = ReadFile(filename);
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile %s: %v"u8, filename, err);
+    if (err != nil) {
+        t.Fatalf("ReadFile %s: %v", filename, err);
     }
 
-    checkSize(Ꮡt, filename, (int64)len(contents));
+    checkSize(t, filename, (int64)len(contents));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string ioutilTestˢ = "ioutil-test"u8;
+private static ref readonly @string ioutilTestˢ => ref ioutilTestˢᵇ;
+private static readonly @string ioutilTestˢᵇ = "ioutil-test"u8;
 
-public static void TestWriteFile(ж<testing.T> Ꮡt) {
+public static void TestWriteFile(ж<testing.T> t) {
     var (f, err) = TempFile(""u8, ioutilTestˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     @string filename = f.Name();
     @string data = "Programming today is a race between software engineers striving to "u8 + "build bigger and better idiot-proof programs, and the Universe trying "u8 + "to produce bigger and better idiots. So far, the Universe is winning."u8;
 
     {
-        var errΔ1 = WriteFile(filename, slice<byte>(data), 420); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("WriteFile %s: %v"u8, filename, errΔ1);
+        var errΔ1 = WriteFile(filename, slice<byte>(data), 420); if (errΔ1 != nil) {
+            t.Fatalf("WriteFile %s: %v", filename, errΔ1);
         }
     }
 
     (var contents, err) = ReadFile(filename);
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadFile %s: %v"u8, filename, err);
+    if (err != nil) {
+        t.Fatalf("ReadFile %s: %v", filename, err);
     }
 
     if (((sstring)contents) != data) {
-        Ꮡt.Fatalf("contents = %q\nexpected = %q"u8, (@string)contents, data);
+        t.Fatalf("contents = %q\nexpected = %q", (@string)contents, data);
     }
 
     // cleanup
@@ -78,22 +81,23 @@ public static void TestWriteFile(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object filePermissionsAreNotˢ = (@string)"file permissions are not supported by wasip1"u8;
-private static readonly @string blurpTxtˢ = "blurp.txt"u8;
+private static ref readonly @string blurpTxtˢ => ref blurpTxtˢᵇ;
+private static readonly @string blurpTxtˢᵇ = "blurp.txt"u8;
 
-public static void TestReadOnlyWriteFile(ж<testing.T> Ꮡt) {
+public static void TestReadOnlyWriteFile(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (os.Getuid() == 0) {
-            Ꮡt.Skipf("Root can write to read-only files anyway, so skip the read-only test."u8);
+            t.Skipf("Root can write to read-only files anyway, so skip the read-only test.");
         }
         if (runtime.GOOS == "wasip1"u8) {
-            Ꮡt.Skip(filePermissionsAreNotˢ);
+            t.Skip(filePermissionsAreNotˢ);
         }
 
         // We don't want to use TempFile directly, since that opens a file for us as 0600.
-        var (tempDir, err) = TempDir(""u8, Ꮡt.Name());
-        if (err != default!) {
-            Ꮡt.Fatalf("TempDir %s: %v"u8, Ꮡt.Name(), err);
+        var (tempDir, err) = TempDir(""u8, t.Name());
+        if (err != nil) {
+            t.Fatalf("TempDir %s: %v", t.Name(), err);
         }
         defer(os.RemoveAll, tempDir, ref ᒐ);
         @string filename = filepath.Join(tempDir, blurpTxtˢ);
@@ -101,36 +105,36 @@ public static void TestReadOnlyWriteFile(ж<testing.T> Ꮡt) {
         var shmorp = slice<byte>("shmorp"u8);
         var florp = slice<byte>("florp"u8);
         err = WriteFile(filename, shmorp, 292);
-        if (err != default!) {
-            Ꮡt.Fatalf("WriteFile %s: %v"u8, filename, err);
+        if (err != nil) {
+            t.Fatalf("WriteFile %s: %v", filename, err);
         }
         err = WriteFile(filename, florp, 292);
-        if (err == default!) {
-            Ꮡt.Fatalf("Expected an error when writing to read-only file %s"u8, filename);
+        if (err == nil) {
+            t.Fatalf("Expected an error when writing to read-only file %s", filename);
         }
         (var got, err) = ReadFile(filename);
-        if (err != default!) {
-            Ꮡt.Fatalf("ReadFile %s: %v"u8, filename, err);
+        if (err != nil) {
+            t.Fatalf("ReadFile %s: %v", filename, err);
         }
         if (!bytes.Equal(got, shmorp)) {
-            Ꮡt.Fatalf("want %s, got %s"u8, shmorp, got);
+            t.Fatalf("want %s, got %s", shmorp, got);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestReadDir(ж<testing.T> Ꮡt) {
+public static void TestReadDir(ж<testing.T> t) {
     @string dirname = rumpelstilzchenˢ;
     var (_, err) = ReadDir(dirname);
-    if (err == default!) {
-        Ꮡt.Fatalf("ReadDir %s: error expected, none found"u8, dirname);
+    if (err == nil) {
+        t.Fatalf("ReadDir %s: error expected, none found", dirname);
     }
 
-    dirname = ".."u8;
+    dirname = "..";
     (var list, err) = ReadDir(dirname);
-    if (err != default!) {
-        Ꮡt.Fatalf("ReadDir %s: %v"u8, dirname, err);
+    if (err != nil) {
+        t.Fatalf("ReadDir %s: %v", dirname, err);
     }
 
     var foundFile = false;
@@ -147,10 +151,10 @@ public static void TestReadDir(ж<testing.T> Ꮡt) {
         }}
     }
     if (!foundFile) {
-        Ꮡt.Fatalf("ReadDir %s: io_test.go file not found"u8, dirname);
+        t.Fatalf("ReadDir %s: io_test.go file not found", dirname);
     }
     if (!foundSubDir) {
-        Ꮡt.Fatalf("ReadDir %s: ioutil directory not found"u8, dirname);
+        t.Fatalf("ReadDir %s: ioutil directory not found", dirname);
     }
 }
 

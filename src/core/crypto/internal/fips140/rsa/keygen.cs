@@ -14,53 +14,59 @@ using go.crypto.@internal.fips140;
 partial class rsa_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rsaKeyTooSmallˢ = "rsa: key too small"u8;
-internal static readonly @string rsaGeneratedPQRandomˢ = "rsa: generated p == q, random source is broken"u8;
-internal static readonly @string rsaInternalErrorModulusˢ = "rsa: internal error: modulus size incorrect"u8;
-internal static readonly @string rsaInternalErrorED1ModNˢ = "rsa: internal error: e*d != 1 mod λ(N)"u8;
-internal static readonly @string rsaSignAndVerifyPctˢ = "RSA sign and verify PCT"u8;
-internal static readonly @string sha256ˢ = "SHA-256"u8;
+internal static ref readonly @string rsaKeyTooSmallˢ => ref rsaKeyTooSmallˢᵇ;
+private static readonly @string rsaKeyTooSmallˢᵇ = "rsa: key too small"u8;
+internal static ref readonly @string rsaGeneratedPQRandomˢ => ref rsaGeneratedPQRandomˢᵇ;
+private static readonly @string rsaGeneratedPQRandomˢᵇ = "rsa: generated p == q, random source is broken"u8;
+internal static ref readonly @string rsaInternalErrorModulusˢ => ref rsaInternalErrorModulusˢᵇ;
+private static readonly @string rsaInternalErrorModulusˢᵇ = "rsa: internal error: modulus size incorrect"u8;
+internal static ref readonly @string rsaInternalErrorED1ModNˢ => ref rsaInternalErrorED1ModNˢᵇ;
+private static readonly @string rsaInternalErrorED1ModNˢᵇ = "rsa: internal error: e*d != 1 mod λ(N)"u8;
+internal static ref readonly @string rsaSignAndVerifyPctˢ => ref rsaSignAndVerifyPctˢᵇ;
+private static readonly @string rsaSignAndVerifyPctˢᵇ = "RSA sign and verify PCT"u8;
+internal static ref readonly @string sha256ˢ => ref sha256ˢᵇ;
+private static readonly @string sha256ˢᵇ = "SHA-256"u8;
 
 // GenerateKey generates a new RSA key pair of the given bit size.
 // bits must be at least 32.
 public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
     if (bits < 32) {
-        return (default!, errors.New(rsaKeyTooSmallˢ));
+        return (default, errors.New(rsaKeyTooSmallˢ));
     }
     fips140.RecordApproved();
     if (bits < 2048 || bits % 2 == 1) {
         fips140.RecordNonApproved();
     }
 
-    while (ᐧ) {
+    for (;;) {
         var (p, err) = randomPrime(rand, (bits + 1) / 2);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         (var q, err) = randomPrime(rand, bits / 2);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         (var P, err) = bigmod.NewModulus(p);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         (var Q, err) = bigmod.NewModulus(q);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         if (Q.Nat().ExpandFor(P).Equal(P.Nat()) == 1) {
-            return (default!, errors.New(rsaGeneratedPQRandomˢ));
+            return (default, errors.New(rsaGeneratedPQRandomˢ));
         }
 
         (var N, err) = bigmod.NewModulusProduct(p, q);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         if (N.BitLen() != bits) {
-            return (default!, errors.New(rsaInternalErrorModulusˢ));
+            return (default, errors.New(rsaInternalErrorModulusˢ));
         }
 
         // d can be safely computed as e⁻¹ mod φ(N) where φ(N) = (p-1)(q-1), and
@@ -80,8 +86,8 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
             // The divisor is too large, try again with different primes.
             continue;
         }
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
         var e = bigmod.NewNat().SetUint(65537);
@@ -98,7 +104,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         }
 
         if (e.ExpandFor(λ).Mul(d, λ).IsOne() == 0) {
-            return (default!, errors.New(rsaInternalErrorED1ModNˢ));
+            return (default, errors.New(rsaInternalErrorED1ModNˢ));
         }
 
         // FIPS 186-5, A.1.1(3) requires checking that d > 2^(nlen / 2).
@@ -115,38 +121,41 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         // generation and return an error if it fails. See [checkPrivateKey].
 
         (var k, err) = newPrivateKey(N, 65537, d, P, Q);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
 
-        if ((~k).fipsApproved) {
+        if (k.fipsApproved) {
             var kʗ1 = k;
             fips140.PCT(rsaSignAndVerifyPctˢ, () => {
-                var hash = new byte[]{
+                var hash = slice<byte>([
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
                     0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                     0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
-                }.slice();
+                ]);
                 var (sig, errΔ1) = signPKCS1v15(kʗ1, sha256ˢ, hash);
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     return errΔ1;
                 }
                 return verifyPKCS1v15(kʗ1.PublicKey(), sha256ˢ, hash, sig);
             });
         }
 
-        return (k, default!);
+        return (k, default);
     }
 }
 
 // errDivisorTooLarge is returned by [totient] when gcd(p-1, q-1) is too large.
-internal static error errDivisorTooLarge = errors.New("divisor too large"u8);
+internal static error errDivisorTooLarge = errors.New("divisor too large");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rsaInternalErrorGcdABIsˢ = "rsa: internal error: gcd(a, b) is even"u8;
-internal static readonly @string rsaInternalErrorGcdABIsˢ2 = "rsa: internal error: gcd(a, b) is zero"u8;
-internal static readonly @string rsaInternalErrorBIsNotˢ = "rsa: internal error: b is not divisible by gcd(a, b)"u8;
+internal static ref readonly @string rsaInternalErrorGcdABIsˢ => ref rsaInternalErrorGcdABIsˢᵇ;
+private static readonly @string rsaInternalErrorGcdABIsˢᵇ = "rsa: internal error: gcd(a, b) is even"u8;
+internal static ref readonly @string rsaInternalErrorGcdABIsˢ2 => ref rsaInternalErrorGcdABIsˢ2ᵇ;
+private static readonly @string rsaInternalErrorGcdABIsˢ2ᵇ = "rsa: internal error: gcd(a, b) is zero"u8;
+internal static ref readonly @string rsaInternalErrorBIsNotˢ => ref rsaInternalErrorBIsNotˢᵇ;
+private static readonly @string rsaInternalErrorBIsNotˢᵇ = "rsa: internal error: b is not divisible by gcd(a, b)"u8;
 
 // totient computes the Carmichael totient function λ(N) = lcm(p-1, q-1).
 internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<bigmod.Modulus> Ꮡq) {
@@ -163,18 +172,18 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
     // For odd a, b and m >= n, lcm(a×2ᵐ, b×2ⁿ) = lcm(a×2ᵐ, b).
     nuint az = a.TrailingZeroBitsVarTime();
     nuint bz = b.TrailingZeroBitsVarTime();
-    if (az < bz){
+    if (az < bz) {
         a = a.ShiftRightVarTime(az);
     } else {
         b = b.ShiftRightVarTime(bz);
     }
 
     var (gcd, err) = bigmod.NewNat().GCDVarTime(a, b);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (gcd.IsOdd() == 0) {
-        return (default!, errors.New(rsaInternalErrorGcdABIsˢ));
+        return (default, errors.New(rsaInternalErrorGcdABIsˢ));
     }
 
     // To avoid implementing multiple-precision division, we just try again if
@@ -183,14 +192,14 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
     // edge cases is impractical, and we'd rather not behave differently on
     // different platforms, so we reject divisors above 2³²-1.
     if (gcd.BitLenVarTime() > 32) {
-        return (default!, errDivisorTooLarge);
+        return (default, errDivisorTooLarge);
     }
     if (gcd.IsZero() == 1 || gcd.Bits()[0] == 0) {
-        return (default!, errors.New(rsaInternalErrorGcdABIsˢ2));
+        return (default, errors.New(rsaInternalErrorGcdABIsˢ2));
     }
     {
         nuint rem = b.DivShortVarTime(gcd.Bits()[0]); if (rem != 0) {
-            return (default!, errors.New(rsaInternalErrorBIsNotˢ));
+            return (default, errors.New(rsaInternalErrorBIsNotˢ));
         }
     }
 
@@ -198,20 +207,21 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rsaPrimeSizeMustBeAtˢ = "rsa: prime size must be at least 16 bits"u8;
+internal static ref readonly @string rsaPrimeSizeMustBeAtˢ => ref rsaPrimeSizeMustBeAtˢᵇ;
+private static readonly @string rsaPrimeSizeMustBeAtˢᵇ = "rsa: prime size must be at least 16 bits"u8;
 
 // randomPrime returns a random prime number of the given bit size following
 // the process in FIPS 186-5, Appendix A.1.3.
 internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
     if (bits < 16) {
-        return (default!, errors.New(rsaPrimeSizeMustBeAtˢ));
+        return (default, errors.New(rsaPrimeSizeMustBeAtˢ));
     }
 
     var b = new slice<byte>((bits + 7) / 8);
-    while (ᐧ) {
+    for (;;) {
         {
-            var err = drbg.ReadWithReader(rand, b); if (err != default!) {
-                return (default!, err);
+            var err = drbg.ReadWithReader(rand, b); if (err != nil) {
+                return (default, err);
             }
         }
         // Clear the most significant bits to reach the desired size. We use a
@@ -224,7 +234,7 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
         // Setting the top two bits, rather than just the top bit, means that
         // when two of these values are multiplied together, the result isn't
         // ever one bit short.
-        if (excess < 7){
+        if (excess < 7) {
             b[0] |= (byte)(((byte)0b1100_0000).Rsh((int64)(excess)));
         } else {
             b[0] |= (byte)(0b0000_0001);
@@ -251,7 +261,7 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
         // generation and return an error if it fails. See [checkPrivateKey].
 
         if (isPrime(b)) {
-            return (b, default!);
+            return (b, default);
         }
     }
 }
@@ -265,7 +275,7 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
 // isPrime is not constant-time.
 internal static bool isPrime(slice<byte> w) {
     var (mr, err) = millerRabinSetup(w);
-    if (err != default!) {
+    if (err != nil) {
         // w is zero, one, or even.
         return false;
     }
@@ -275,7 +285,7 @@ internal static bool isPrime(slice<byte> w) {
         nuint p1 = primes[i];
         nuint p2 = primes[i + 1];
         nuint p3 = primes[i + 2];
-        nuint r = (~mr).w.Nat().DivShortVarTime(p1 * p2 * p3);
+        nuint r = mr.w.Nat().DivShortVarTime(p1 * p2 * p3);
         if (r % p1 == 0 || r % p2 == 0 || r % p3 == 0) {
             return false;
         }
@@ -294,8 +304,8 @@ internal static bool isPrime(slice<byte> w) {
     // The exact number depends on the size of the prime (and the implied
     // security level). See BoringSSL for the full formula.
     // https://cs.opensource.google/boringssl/boringssl/+/master:crypto/fipsmodule/bn/prime.c.inc;l=208-283;drc=3a138e43
-    nint bits = (~mr).w.BitLen();
-    nint iterations = default!;
+    nint bits = mr.w.BitLen();
+    nint iterations = default;
     switch (ᐧ) {
     case {} when bits is >= 3747: {
         iterations = 3;
@@ -331,12 +341,12 @@ internal static bool isPrime(slice<byte> w) {
     }}
 
     var b = new slice<byte>((bits + 7) / 8);
-    while (ᐧ) {
+    for (;;) {
         drbg.Read(b);
         nint excess = len(b) * 8 - bits;
         b[0] &= (byte)(((byte)0b1111_1111).Rsh((int64)(excess)));
         var (result, errΔ1) = millerRabinIteration(ref (mr).DerefOrNull(), b);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             // b was rejected.
             continue;
         }
@@ -359,7 +369,7 @@ internal static bool isPrime(slice<byte> w) {
 // Adding primes can still be marginally useful since they only compete with the
 // (much more expensive) first Miller-Rabin round for candidates that were not
 // rejected by the previous primes.
-[GoLazy] partial class lazyᴛprimes { internal static slice<nuint> primes = new nuint[]{
+[GoLazy] partial class lazyᴛprimes { internal static slice<nuint> primes = slice<nuint>([
     3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
     59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127,
     131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
@@ -378,7 +388,7 @@ internal static bool isPrime(slice<byte> w) {
     1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487,
     1489, 1493, 1499, 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583,
     1597, 1601, 1607, 1609, 1613, 1619
-}.slice(); }
+]); }
 
 partial struct millerRabin {
     internal ж<bigmod.Modulus> w;
@@ -387,40 +397,42 @@ partial struct millerRabin {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string candidateIsEvenˢ = "candidate is even"u8;
-internal static readonly @string candidateIsOneˢ = "candidate is one"u8;
+internal static ref readonly @string candidateIsEvenˢ => ref candidateIsEvenˢᵇ;
+private static readonly @string candidateIsEvenˢᵇ = "candidate is even"u8;
+internal static ref readonly @string candidateIsOneˢ => ref candidateIsOneˢᵇ;
+private static readonly @string candidateIsOneˢᵇ = "candidate is one"u8;
 
 // millerRabinSetup prepares state that's reused across multiple iterations of
 // the Miller-Rabin test.
 internal static (ж<millerRabin>, error) millerRabinSetup(slice<byte> w) {
-    var mr = Ꮡ(new millerRabin(nil));
+    var mr = Ꮡ(new millerRabin());
 
     // Check that w is odd, and precompute Montgomery parameters.
     var (wm, err) = bigmod.NewModulus(w);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (wm.Nat().IsOdd() == 0) {
-        return (default!, errors.New(candidateIsEvenˢ));
+        return (default, errors.New(candidateIsEvenˢ));
     }
-    mr.Value.w = wm;
+    mr.w = wm;
 
     // Compute m = (w-1)/2^a, where m is odd.
-    var wMinus1 = (~mr).w.Nat().SubOne((~mr).w);
+    var wMinus1 = mr.w.Nat().SubOne(mr.w);
     if (wMinus1.IsZero() == 1) {
-        return (default!, errors.New(candidateIsOneˢ));
+        return (default, errors.New(candidateIsOneˢ));
     }
-    mr.Value.a = wMinus1.TrailingZeroBitsVarTime();
+    mr.a = wMinus1.TrailingZeroBitsVarTime();
 
     // Store mr.m as a big-endian byte slice with leading zero bytes removed,
     // for use with [bigmod.Nat.Exp].
-    var m = wMinus1.ShiftRightVarTime((~mr).a);
-    mr.Value.m = m.Bytes((~mr).w);
-    while ((~mr).m[0] == 0) {
-        mr.Value.m = (~mr).m[1..];
+    var m = wMinus1.ShiftRightVarTime(mr.a);
+    mr.m = m.Bytes(mr.w);
+    while (mr.m[0] == 0) {
+        mr.m = mr.m[1..];
     }
 
-    return (mr, default!);
+    return (mr, default);
 }
 
 internal const bool millerRabinCOMPOSITE = false;
@@ -428,8 +440,10 @@ internal const bool millerRabinCOMPOSITE = false;
 internal const bool millerRabinPOSSIBLYPRIME = true;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string incorrectLengthˢ = "incorrect length"u8;
-internal static readonly @string outOfRangeCandidateˢ = "out-of-range candidate"u8;
+internal static ref readonly @string incorrectLengthˢ => ref incorrectLengthˢᵇ;
+private static readonly @string incorrectLengthˢᵇ = "incorrect length"u8;
+internal static ref readonly @string outOfRangeCandidateˢ => ref outOfRangeCandidateˢᵇ;
+private static readonly @string outOfRangeCandidateˢᵇ = "out-of-range candidate"u8;
 
 internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byte> bb) {
     // Reject b ≤ 1 or b ≥ w − 1.
@@ -438,7 +452,7 @@ internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byt
     }
     var b = bigmod.NewNat();
     {
-        var (_, err) = b.SetBytes(bb, mr.w); if (err != default!) {
+        var (_, err) = b.SetBytes(bb, mr.w); if (err != nil) {
             return (false, err);
         }
     }
@@ -454,14 +468,14 @@ internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byt
     // Start by computing and checking b^m mod w (also the i = 0 case).
     var z = bigmod.NewNat().Exp(b, mr.m, mr.w);
     if (z.IsOne() == 1 || z.IsMinusOne(mr.w) == 1) {
-        return (millerRabinPOSSIBLYPRIME, default!);
+        return (millerRabinPOSSIBLYPRIME, default);
     }
 
     // Check b^(m*2^i) mod w = -1 for 0 < i < a.
     foreach (var _ᴛ1 in range<nuint>(mr.a - 1)) {
         z.Mul(z, mr.w);
         if (z.IsMinusOne(mr.w) == 1) {
-            return (millerRabinPOSSIBLYPRIME, default!);
+            return (millerRabinPOSSIBLYPRIME, default);
         }
         if (z.IsOne() == 1) {
             // Future squaring will not turn z == 1 into -1.
@@ -469,7 +483,7 @@ internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byt
         }
     }
 
-    return (millerRabinCOMPOSITE, default!);
+    return (millerRabinCOMPOSITE, default);
 }
 
 } // end rsa_package

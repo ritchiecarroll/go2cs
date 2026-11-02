@@ -11,9 +11,9 @@ using go.@internal.runtime;
 
 partial class scan_package {
 
-public static int32 /*count*/ ScanSpanPacked(@unsafe.Pointer mem, ж<uintptr> Ꮡbufp, ж<gc.ObjMask> ᏑobjMarks, uintptr sizeClass, ж<gc.PtrMask> ᏑptrMask) {
+public static int32 /*count*/ ScanSpanPacked(@unsafe.Pointer mem, ж<uintptr> bufp, ж<gc.ObjMask> objMarks, uintptr sizeClass, ж<gc.PtrMask> ptrMask) {
     if (CanAVX512()) {
-        return ScanSpanPackedAVX512(mem, Ꮡbufp, ᏑobjMarks, sizeClass, ᏑptrMask);
+        return ScanSpanPackedAVX512(mem, bufp, objMarks, sizeClass, ptrMask);
     }
     throw panic("not implemented");
 }
@@ -27,8 +27,8 @@ public static bool CanAVX512() {
     return avx512ScanPackedReqsMet;
 }
 
-public static int32 /*count*/ ScanSpanPackedAVX512(@unsafe.Pointer mem, ж<uintptr> Ꮡbufp, ж<gc.ObjMask> ᏑobjMarks, uintptr sizeClass, ж<gc.PtrMask> ᏑptrMask) {
-    return FilterNilAVX512(Ꮡbufp, scanSpanPackedAVX512(mem, Ꮡbufp, ᏑobjMarks, sizeClass, ᏑptrMask));
+public static int32 /*count*/ ScanSpanPackedAVX512(@unsafe.Pointer mem, ж<uintptr> bufp, ж<gc.ObjMask> objMarks, uintptr sizeClass, ж<gc.PtrMask> ptrMask) {
+    return FilterNilAVX512(bufp, scanSpanPackedAVX512(mem, bufp, objMarks, sizeClass, ptrMask));
 }
 
 //go:noescape

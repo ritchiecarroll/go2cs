@@ -12,7 +12,7 @@ using static go.@internal.poll_internal_test_package;
 partial class poll_test_package {
 
 internal static (ж<os.File>, error) badStateFile() {
-    return (default!, errors.New("not supported on "u8 + Δruntime.GOOS));
+    return (default, errors.New("not supported on "u8 + Δruntime.GOOS));
 }
 
 internal static (@string, bool) isBadStateFileError(error err) {

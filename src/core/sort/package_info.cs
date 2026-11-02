@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using reflectliteꓸKind = go.@internal.abi_package.ΔKind;
-global using reflectliteꓸType = go.@internal.reflectlite_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +54,7 @@ using static go.sort_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,11 +64,11 @@ using static go.sort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("sort/search.go", "search.cs", "AAh0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsK4kKaQppA=", "124-124:1;132-132:1;140-140:1")]
-[assembly: go.GoPositionMap("sort/slice.go", "slice.cs", "AAwwAAwCgoKCggACGAAJAoKCAAIQ0oKCgoKm")]
-[assembly: go.GoPositionMap("sort/sort.go", "sort.cs", "AClk4oKClIIACxyCgoKCpoKCABAkkqiSrsKCgoKmAAcQgKKAooCmkOyAAAIQ4KKAppKokNqAooCigKaQrtCswKqwqrCswKqwAAJIACIC")]
-[assembly: go.GoPositionMap("sort/zsortfunc.go", "zsortfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgIKkAAMuABYIuIKCgoKClLiClNy4goKCgoKUuIKUpoKCkoKClIKUlIKCgpS4goKUgpSCAAMQwoKUgoKClIK4")]
-[assembly: go.GoPositionMap("sort/zsortinterface.go", "zsortinterface.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgIKkAAMuABYIuIKCgoKClLiClNy4goKCgoKUuIKUpoKCkoKClIKUlIKCgpS4goKUgpSCAAMQwoKUgoKClIK4")]
+[assembly: GoPositionMap("sort/search.go", "search.cs", "AAh0ADMGkoKUgpS4AAI2AB0IkoKUgpS4AAIS4r7CvsK4kKaQppA=", "124-124:1;132-132:1;140-140:1")]
+[assembly: GoPositionMap("sort/slice.go", "slice.cs", "AAwwAAwCgoKCggACGAAJAoKCAAIQ0oKCgoKm")]
+[assembly: GoPositionMap("sort/sort.go", "sort.cs", "AClk4oKClIIACxyCgoKCpoKCABAkkqiSrsKCgoKmAAcQgKKAooCmkOyAAAIQ4KKAppKokNqAooCigKaQrtCswKqwqrCswKqwAAJIACIC")]
+[assembly: GoPositionMap("sort/zsortfunc.go", "zsortfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgIKkAAMuABYIuIKCgoKClLiClNy4goKCgoKUuIKUpoKCkoKClIKUlIKCgpS4goKUgpSCAAMQwoKUgoKClIK4")]
+[assembly: GoPositionMap("sort/zsortinterface.go", "zsortinterface.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgIKkAAMuABYIuIKCgoKClLiClNy4goKCgoKUuIKUpoKCkoKClIKUlIKCgpS4goKUgpSCAAMQwoKUgoKClIK4")]
 // </GoSourcePositionMaps>
 
 namespace go;

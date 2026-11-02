@@ -13,27 +13,32 @@ using @internal;
 partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string spaceˢ = "space"u8;
-internal static readonly @string bytesˢ = "bytes"u8;
-internal static readonly @string allocObjectsˢ = "alloc_objects"u8;
-internal static readonly @string inuseObjectsˢ = "inuse_objects"u8;
-internal static readonly @string inuseSpaceˢ = "inuse_space"u8;
+internal static ref readonly @string spaceˢ => ref spaceˢᵇ;
+private static readonly @string spaceˢᵇ = "space"u8;
+internal static ref readonly @string bytesˢ => ref bytesˢᵇ;
+private static readonly @string bytesˢᵇ = "bytes"u8;
+internal static ref readonly @string allocObjectsˢ => ref allocObjectsˢᵇ;
+private static readonly @string allocObjectsˢᵇ = "alloc_objects"u8;
+internal static ref readonly @string inuseObjectsˢ => ref inuseObjectsˢᵇ;
+private static readonly @string inuseObjectsˢᵇ = "inuse_objects"u8;
+internal static ref readonly @string inuseSpaceˢ => ref inuseSpaceˢᵇ;
+private static readonly @string inuseSpaceˢᵇ = "inuse_space"u8;
 
 // writeHeapProto writes the current heap profile in protobuf format to w.
 internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfileRecord> p, int64 rate, @string defaultSampleType) {
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, spaceˢ, bytesˢ);
-    b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, rate);
+    b.Ꮡpb.int64Opt(tagProfile_Period, rate);
     b.pbValueType(tagProfile_SampleType, allocObjectsˢ, countˢ);
     b.pbValueType(tagProfile_SampleType, allocSpaceˢ, bytesˢ);
     b.pbValueType(tagProfile_SampleType, inuseObjectsˢ, countˢ);
     b.pbValueType(tagProfile_SampleType, inuseSpaceˢ, bytesˢ);
     if (defaultSampleType != ""u8) {
-        b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
+        b.Ꮡpb.int64Opt(tagProfile_DefaultSampleType, b.stringIndex(defaultSampleType));
     }
 
-    var values = new int64[]{0, 0, 0, 0}.slice();
-    slice<uint64> locs = default!;
+    var values = slice<int64>([0, 0, 0, 0]);
+    slice<uint64> locs = default;
     foreach (var (_, vᴛ1) in p) {
         var r = vᴛ1;
 
@@ -64,7 +69,7 @@ internal static error writeHeapProto(io.Writer w, slice<profilerecord.MemProfile
 
         (values[0], values[1]) = scaleHeapSample(r.AllocObjects, r.AllocBytes, rate);
         (values[2], values[3]) = scaleHeapSample(r.InUseObjects(), r.InUseBytes(), rate);
-        int64 blockSize = default!;
+        int64 blockSize = default;
         if (r.AllocObjects > 0) {
             blockSize = quo(r.AllocBytes, r.AllocObjects);
         }

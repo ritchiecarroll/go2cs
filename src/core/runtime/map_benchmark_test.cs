@@ -21,7 +21,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-internal static ж<bool> mapbench = flag.Bool("mapbench"u8, false, "enable the full set of map benchmark variants"u8);
+internal static ж<bool> mapbench = flag.Bool("mapbench", false, "enable the full set of map benchmark variants");
 
 internal static UntypedInt size => 10;
 
@@ -157,10 +157,10 @@ public static void BenchmarkMegMap(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<@string, bool>();
-    for (var suffix = (rune)'A'; suffix <= (rune)'G'; suffix++) {
-        m[strings.Repeat("X"u8, (1 << 20) - 1) + fmt.Sprint(suffix)] = true;
+    for (var suffix = (rune)'A'; suffix <= 'G'; suffix++) {
+        m[strings.Repeat("X", (1 << 20) - 1) + fmt.Sprint(suffix)] = true;
     }
-    @string key = strings.Repeat("X"u8, (1 << 20) - 1) + "k"u8;
+    @string key = strings.Repeat("X", (1 << 20) - 1) + "k"u8;
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         (_, _) = m[key, ꟷ];
@@ -171,8 +171,8 @@ public static void BenchmarkMegOneMap(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<@string, bool>();
-    m[strings.Repeat("X"u8, 1 << 20)] = true;
-    @string key = strings.Repeat("Y"u8, 1 << 20);
+    m[strings.Repeat("X", 1 << 20)] = true;
+    @string key = strings.Repeat("Y", 1 << 20);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         (_, _) = m[key, ꟷ];
@@ -183,8 +183,8 @@ public static void BenchmarkMegEqMap(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<@string, bool>();
-    @string key1 = strings.Repeat("X"u8, 1 << 20);
-    @string key2 = strings.Repeat("X"u8, 1 << 20); // equal but different instance
+    @string key1 = strings.Repeat("X", 1 << 20);
+    @string key2 = strings.Repeat("X", 1 << 20); // equal but different instance
     m[key1] = true;
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -196,7 +196,7 @@ public static void BenchmarkMegEmptyMap(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<@string, bool>();
-    @string key = strings.Repeat("X"u8, 1 << 20);
+    @string key = strings.Repeat("X", 1 << 20);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         (_, _) = m[key, ꟷ];
@@ -207,7 +207,7 @@ public static void BenchmarkMegEmptyMapWithInterfaceKey(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<any, bool>();
-    @string key = strings.Repeat("X"u8, 1 << 20);
+    @string key = strings.Repeat("X", 1 << 20);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         (_, _) = m[key, ꟷ];
@@ -218,38 +218,38 @@ public static void BenchmarkSmallStrMap(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<@string, bool>();
-    for (var suffix = (rune)'A'; suffix <= (rune)'G'; suffix++) {
+    for (var suffix = (rune)'A'; suffix <= 'G'; suffix++) {
         m[fmt.Sprint(suffix)] = true;
     }
-    @string key = "k"u8;
+    @string key = "k";
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         (_, _) = m[key, ꟷ];
     }
 }
 
-public static void BenchmarkMapStringKeysEight_16(ж<testing.B> Ꮡb) {
-    benchmarkMapStringKeysEight(Ꮡb, 16);
+public static void BenchmarkMapStringKeysEight_16(ж<testing.B> b) {
+    benchmarkMapStringKeysEight(b, 16);
 }
 
-public static void BenchmarkMapStringKeysEight_32(ж<testing.B> Ꮡb) {
-    benchmarkMapStringKeysEight(Ꮡb, 32);
+public static void BenchmarkMapStringKeysEight_32(ж<testing.B> b) {
+    benchmarkMapStringKeysEight(b, 32);
 }
 
-public static void BenchmarkMapStringKeysEight_64(ж<testing.B> Ꮡb) {
-    benchmarkMapStringKeysEight(Ꮡb, 64);
+public static void BenchmarkMapStringKeysEight_64(ж<testing.B> b) {
+    benchmarkMapStringKeysEight(b, 64);
 }
 
-public static void BenchmarkMapStringKeysEight_128(ж<testing.B> Ꮡb) {
-    benchmarkMapStringKeysEight(Ꮡb, 128);
+public static void BenchmarkMapStringKeysEight_128(ж<testing.B> b) {
+    benchmarkMapStringKeysEight(b, 128);
 }
 
-public static void BenchmarkMapStringKeysEight_256(ж<testing.B> Ꮡb) {
-    benchmarkMapStringKeysEight(Ꮡb, 256);
+public static void BenchmarkMapStringKeysEight_256(ж<testing.B> b) {
+    benchmarkMapStringKeysEight(b, 256);
 }
 
-public static void BenchmarkMapStringKeysEight_1M(ж<testing.B> Ꮡb) {
-    benchmarkMapStringKeysEight(Ꮡb, 1 << 20);
+public static void BenchmarkMapStringKeysEight_1M(ж<testing.B> b) {
+    benchmarkMapStringKeysEight(b, 1 << 20);
 }
 
 internal static void benchmarkMapStringKeysEight(ж<testing.B> Ꮡb, nint keySize) {
@@ -257,19 +257,19 @@ internal static void benchmarkMapStringKeysEight(ж<testing.B> Ꮡb, nint keySiz
 
     var m = new map<@string, bool>();
     for (nint i = 0; i < 8; i++) {
-        m[strings.Repeat("K"u8, i + 1)] = true;
+        m[strings.Repeat("K", i + 1)] = true;
     }
-    @string key = strings.Repeat("K"u8, keySize);
+    @string key = strings.Repeat("K", keySize);
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         _ = m[key];
     }
 }
 
-public static void BenchmarkMapFirst(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapFirst(ж<testing.B> b) {
     for (nint nᴛ1 = 1; nᴛ1 <= 16; nᴛ1++) {
         var n = nᴛ1;
-        Ꮡb.Run(fmt.Sprintf("%d"u8, n), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%d"u8, n), (ж<testing.B> bΔ1) => {
             var m = new map<nint, bool>();
             for (nint i = 0; i < n; i++) {
                 m[i] = true;
@@ -282,10 +282,10 @@ public static void BenchmarkMapFirst(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkMapMid(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapMid(ж<testing.B> b) {
     for (nint nᴛ1 = 1; nᴛ1 <= 16; nᴛ1++) {
         var n = nᴛ1;
-        Ꮡb.Run(fmt.Sprintf("%d"u8, n), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%d"u8, n), (ж<testing.B> bΔ1) => {
             var m = new map<nint, bool>();
             for (nint i = 0; i < n; i++) {
                 m[i] = true;
@@ -298,10 +298,10 @@ public static void BenchmarkMapMid(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkMapLast(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapLast(ж<testing.B> b) {
     for (nint nᴛ1 = 1; nᴛ1 <= 16; nᴛ1++) {
         var n = nᴛ1;
-        Ꮡb.Run(fmt.Sprintf("%d"u8, n), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%d"u8, n), (ж<testing.B> bΔ1) => {
             var m = new map<nint, bool>();
             for (nint i = 0; i < n; i++) {
                 m[i] = true;
@@ -372,7 +372,7 @@ internal static void benchmarkRepeatedLookup(ж<testing.B> Ꮡb, nint lookupKeyS
     for (nint i = 0; i < 64; i++) {
         m[fmt.Sprintf("some key %d"u8, i)] = true;
     }
-    @string @base = strings.Repeat("x"u8, lookupKeySize - 1);
+    @string @base = strings.Repeat("x", lookupKeySize - 1);
     @string key1 = @base + "1"u8;
     @string key2 = @base + "2"u8;
     b.ResetTimer();
@@ -384,28 +384,30 @@ internal static void benchmarkRepeatedLookup(ж<testing.B> Ꮡb, nint lookupKeyS
     }
 }
 
-public static void BenchmarkRepeatedLookupStrMapKey32(ж<testing.B> Ꮡb) {
-    benchmarkRepeatedLookup(Ꮡb, 32);
+public static void BenchmarkRepeatedLookupStrMapKey32(ж<testing.B> b) {
+    benchmarkRepeatedLookup(b, 32);
 }
 
-public static void BenchmarkRepeatedLookupStrMapKey1M(ж<testing.B> Ꮡb) {
-    benchmarkRepeatedLookup(Ꮡb, 1 << 20);
+public static void BenchmarkRepeatedLookupStrMapKey1M(ж<testing.B> b) {
+    benchmarkRepeatedLookup(b, 1 << 20);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string byteByteˢ = "[Byte]Byte"u8;
-internal static readonly @string intIntˢ = "[Int]Int"u8;
+internal static ref readonly @string byteByteˢ => ref byteByteˢᵇ;
+private static readonly @string byteByteˢᵇ = "[Byte]Byte"u8;
+internal static ref readonly @string intIntˢ => ref intIntˢᵇ;
+private static readonly @string intIntˢᵇ = "[Int]Int"u8;
 
-public static void BenchmarkMakeMap(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(byteByteˢ, (ж<testing.B> bΔ1) => {
-        map<byte, byte> m = default!;
+public static void BenchmarkMakeMap(ж<testing.B> b) {
+    b.Run(byteByteˢ, (ж<testing.B> bΔ1) => {
+        map<byte, byte> m = default;
         for (nint i = 0; i < (~bΔ1).N; i++) {
             m = new map<byte, byte>(10);
         }
         hugeSink = m;
     });
-    Ꮡb.Run(intIntˢ, (ж<testing.B> bΔ2) => {
-        map<nint, nint> m = default!;
+    b.Run(intIntˢ, (ж<testing.B> bΔ2) => {
+        map<nint, nint> m = default;
         for (nint i = 0; i < (~bΔ2).N; i++) {
             m = new map<nint, nint>(10);
         }
@@ -439,8 +441,8 @@ public static void BenchmarkSameLengthMap(ж<testing.B> Ꮡb) {
     // long strings, same length, differ in first few
     // and last few bytes.
     var m = new map<@string, bool>();
-    @string s1 = "foo"u8 + strings.Repeat("-"u8, 100) + "bar"u8;
-    @string s2 = "goo"u8 + strings.Repeat("-"u8, 100) + "ber"u8;
+    @string s1 = "foo"u8 + strings.Repeat("-", 100) + "bar"u8;
+    @string s2 = "goo"u8 + strings.Repeat("-", 100) + "ber"u8;
     m[s1] = true;
     m[s2] = true;
     b.ResetTimer();
@@ -459,10 +461,10 @@ public static void BenchmarkSmallKeyMap(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkMapPopulate(ж<testing.B> Ꮡb) {
+public static void BenchmarkMapPopulate(ж<testing.B> b) {
     for (nint sizeᴛ1 = 1; sizeᴛ1 < 1000000; sizeᴛ1 *= 10) {
         var size = sizeᴛ1;
-        Ꮡb.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
+        b.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var m = new map<nint, bool>();
@@ -488,7 +490,7 @@ public static void BenchmarkComplexAlgMap(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = new map<ComplexAlgKey, bool>();
-    ComplexAlgKey k = default!;
+    ComplexAlgKey k = default;
     m[k] = true;
     for (nint i = 0; i < b.N; i++) {
         _ = m[k];
@@ -496,11 +498,13 @@ public static void BenchmarkComplexAlgMap(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string reflexiveˢ = "Reflexive"u8;
-internal static readonly @string nonReflexiveˢ = "NonReflexive"u8;
+internal static ref readonly @string reflexiveˢ => ref reflexiveˢᵇ;
+private static readonly @string reflexiveˢᵇ = "Reflexive"u8;
+internal static ref readonly @string nonReflexiveˢ => ref nonReflexiveˢᵇ;
+private static readonly @string nonReflexiveˢᵇ = "NonReflexive"u8;
 
-public static void BenchmarkGoMapClear(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(reflexiveˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkGoMapClear(ж<testing.B> b) {
+    b.Run(reflexiveˢ, (ж<testing.B> bΔ1) => {
         for (nint sizeᴛ1 = 1; sizeᴛ1 < 100000; sizeᴛ1 *= 10) {
             var size = sizeᴛ1;
             bΔ1.Run(strconv.Itoa(size), (ж<testing.B> bΔ2) => {
@@ -512,7 +516,7 @@ public static void BenchmarkGoMapClear(ж<testing.B> Ꮡb) {
             });
         }
     });
-    Ꮡb.Run(nonReflexiveˢ, (ж<testing.B> bΔ3) => {
+    b.Run(nonReflexiveˢ, (ж<testing.B> bΔ3) => {
         for (nint sizeᴛ2 = 1; sizeᴛ2 < 100000; sizeᴛ2 *= 10) {
             var size = sizeᴛ2;
             bΔ3.Run(strconv.Itoa(size), (ж<testing.B> bΔ4) => {
@@ -527,9 +531,12 @@ public static void BenchmarkGoMapClear(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string simpleˢ = "simple"u8;
-internal static readonly @string structˢ4 = "struct"u8;
-internal static readonly @string arrayˢ = "array"u8;
+internal static ref readonly @string simpleˢ => ref simpleˢᵇ;
+private static readonly @string simpleˢᵇ = "simple"u8;
+internal static ref readonly @string structˢ4 => ref structˢ4ᵇ;
+private static readonly @string structˢ4ᵇ = "struct"u8;
+internal static ref readonly @string arrayˢ => ref arrayˢᵇ;
+private static readonly @string arrayˢᵇ = "array"u8;
 
 internal partial struct BenchmarkMapStringConversion_stringstruct /*dyn*/ {
     internal @string s;
@@ -537,9 +544,9 @@ internal partial struct BenchmarkMapStringConversion_stringstruct /*dyn*/ {
 
 internal partial struct BenchmarkMapStringConversion_stringarray /*[1]@string*/;
 
-public static void BenchmarkMapStringConversion(ж<testing.B> Ꮡb) {
-    foreach (var (_, length) in new nint[]{32, 64}.slice()) {
-        Ꮡb.Run(strconv.Itoa(length), (ж<testing.B> bΔ1) => {
+public static void BenchmarkMapStringConversion(ж<testing.B> b) {
+    foreach (var (_, length) in slice<nint>([32, 64])) {
+        b.Run(strconv.Itoa(length), (ж<testing.B> bΔ1) => {
             var bytes = new slice<byte>(length);
             var bytesʗ1 = bytes;
             bΔ1.Run(simpleˢ, (ж<testing.B> bΔ2) => {
@@ -635,7 +642,7 @@ public static void BenchmarkNewEmptyMapHintGreaterThan8(ж<testing.B> Ꮡb) {
 internal static readonly object skippedBecauseMapbenchˢ = (@string)"Skipped because -mapbench=false"u8;
 
 internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) {
-    slice<nint> cases = new nint[]{
+    slice<nint> cases = slice<nint>([
         0,
         6,
         12,
@@ -654,7 +661,7 @@ internal static Action<ж<testing.B>> benchSizes(Action<ж<testing.B>, nint> f) 
         1 << 18,
         1 << 20,
         1 << 22
-    }.slice();
+    ]);
 
     // Cases enabled by default. Set -mapbench for the remainder.
     //
@@ -736,7 +743,7 @@ internal static slice<@string> genStringValues(nint start, nint end) {
 internal static slice<smallType> genSmallValues(nint start, nint end) {
     var vals = GoReflect.WithElemDims(new slice<smallType>(0, end - start), 16);
     for (nint i = start; i < end; i++) {
-        smallType v = default!;
+        smallType v = default;
         binary.NativeEndian.PutUint64(v[..], (uint64)i);
         vals = append(vals, v.Clone());
     }
@@ -746,7 +753,7 @@ internal static slice<smallType> genSmallValues(nint start, nint end) {
 internal static slice<mediumType> genMediumValues(nint start, nint end) {
     var vals = GoReflect.WithElemDims(new slice<mediumType>(0, end - start), 512);
     for (nint i = start; i < end; i++) {
-        mediumType v = default!;
+        mediumType v = default;
         binary.NativeEndian.PutUint64(v[..], (uint64)i);
         vals = append(vals, v.Clone());
     }
@@ -756,7 +763,7 @@ internal static slice<mediumType> genMediumValues(nint start, nint end) {
 internal static slice<bigType> genBigValues(nint start, nint end) {
     var vals = GoReflect.WithElemDims(new slice<bigType>(0, end - start), 4096);
     for (nint i = start; i < end; i++) {
-        bigType v = default!;
+        bigType v = default;
         binary.NativeEndian.PutUint64(v[..], (uint64)i);
         vals = append(vals, v.Clone());
     }
@@ -779,7 +786,7 @@ internal static slice<slice<T>> genIntSliceValues<T>(nint start, nint end)
 {
     var vals = new slice<slice<T>>(0, end - start);
     for (nint i = start; i < end; i++) {
-        vals = append(vals, new T[]{ConvertToType<T>(i)}.slice());
+        vals = append(vals, slice<T>([ConvertToType<T>(i)]));
     }
     return vals;
 }
@@ -847,14 +854,14 @@ internal static nint iterCount(ж<testing.B> Ꮡb, nint n) {
     return quo(b.N, n);
 }
 
-internal static void checkAllocSize<K, E>(ж<testing.B> Ꮡb, nint n) {
+internal static void checkAllocSize<K, E>(ж<testing.B> b, nint n) {
     K k = GoZero<K>();
     var size = (uint64)n * (uint64)@unsafe.Sizeof(k);
     E e = GoZero<E>();
     size += (uint64)n * (uint64)@unsafe.Sizeof(e);
 
     if (size >= (uint64)1 << 30) {
-        Ꮡb.Skipf("Total key+elem size %d exceeds 1GiB"u8, size);
+        b.Skipf("Total key+elem size %d exceeds 1GiB", size);
     }
 }
 
@@ -879,28 +886,38 @@ internal static partial void benchmarkMapIter<K, E>(ж<testing.B> Ꮡb, nint n) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyInt32ElemInt32ˢ = "Key=int32/Elem=int32"u8;
-internal static readonly @string keyInt64ElemInt64ˢ = "Key=int64/Elem=int64"u8;
-internal static readonly @string keyStringElemStringˢ = "Key=string/Elem=string"u8;
-internal static readonly @string keySmallTypeElemInt32ˢ = "Key=smallType/Elem=int32"u8;
-internal static readonly @string keyMediumTypeElemInt32ˢ = "Key=mediumType/Elem=int32"u8;
-internal static readonly @string keyBigTypeElemInt32ˢ = "Key=bigType/Elem=int32"u8;
-internal static readonly @string keyBigTypeElemBigTypeˢ = "Key=bigType/Elem=bigType"u8;
-internal static readonly @string keyInt32ElemBigTypeˢ = "Key=int32/Elem=bigType"u8;
-internal static readonly @string keyInt32ElemInt32ˢ2 = "Key=*int32/Elem=int32"u8;
-internal static readonly @string keyInt32ElemInt32ˢ3 = "Key=int32/Elem=*int32"u8;
+internal static ref readonly @string keyInt32ElemInt32ˢ => ref keyInt32ElemInt32ˢᵇ;
+private static readonly @string keyInt32ElemInt32ˢᵇ = "Key=int32/Elem=int32"u8;
+internal static ref readonly @string keyInt64ElemInt64ˢ => ref keyInt64ElemInt64ˢᵇ;
+private static readonly @string keyInt64ElemInt64ˢᵇ = "Key=int64/Elem=int64"u8;
+internal static ref readonly @string keyStringElemStringˢ => ref keyStringElemStringˢᵇ;
+private static readonly @string keyStringElemStringˢᵇ = "Key=string/Elem=string"u8;
+internal static ref readonly @string keySmallTypeElemInt32ˢ => ref keySmallTypeElemInt32ˢᵇ;
+private static readonly @string keySmallTypeElemInt32ˢᵇ = "Key=smallType/Elem=int32"u8;
+internal static ref readonly @string keyMediumTypeElemInt32ˢ => ref keyMediumTypeElemInt32ˢᵇ;
+private static readonly @string keyMediumTypeElemInt32ˢᵇ = "Key=mediumType/Elem=int32"u8;
+internal static ref readonly @string keyBigTypeElemInt32ˢ => ref keyBigTypeElemInt32ˢᵇ;
+private static readonly @string keyBigTypeElemInt32ˢᵇ = "Key=bigType/Elem=int32"u8;
+internal static ref readonly @string keyBigTypeElemBigTypeˢ => ref keyBigTypeElemBigTypeˢᵇ;
+private static readonly @string keyBigTypeElemBigTypeˢᵇ = "Key=bigType/Elem=bigType"u8;
+internal static ref readonly @string keyInt32ElemBigTypeˢ => ref keyInt32ElemBigTypeˢᵇ;
+private static readonly @string keyInt32ElemBigTypeˢᵇ = "Key=int32/Elem=bigType"u8;
+internal static ref readonly @string keyInt32ElemInt32ˢ2 => ref keyInt32ElemInt32ˢ2ᵇ;
+private static readonly @string keyInt32ElemInt32ˢ2ᵇ = "Key=*int32/Elem=int32"u8;
+internal static ref readonly @string keyInt32ElemInt32ˢ3 => ref keyInt32ElemInt32ˢ3ᵇ;
+private static readonly @string keyInt32ElemInt32ˢ3ᵇ = "Key=int32/Elem=*int32"u8;
 
-public static void BenchmarkMapIter(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapIter<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapIter<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapIter<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapIter<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapIter<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapIter<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapIter<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapIter<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapIter<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapIter<int32, ж<int32>>));
+public static void BenchmarkMapIter(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapIter<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapIter<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapIter<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapIter<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapIter<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapIter<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapIter<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapIter<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapIter<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapIter<int32, ж<int32>>));
 }
 
 internal static partial void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, nint n) {
@@ -928,17 +945,17 @@ internal static partial void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, n
     }
 }
 
-public static void BenchmarkMapIterLowLoad(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapIterLowLoad<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapIterLowLoad<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapIterLowLoad<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapIterLowLoad<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapIterLowLoad<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapIterLowLoad<int32, ж<int32>>));
+public static void BenchmarkMapIterLowLoad(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapIterLowLoad<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapIterLowLoad<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapIterLowLoad<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapIterLowLoad<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapIterLowLoad<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapIterLowLoad<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapIterLowLoad<int32, ж<int32>>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -962,17 +979,17 @@ internal static partial void benchmarkMapAccessHit<K, E>(ж<testing.B> Ꮡb, nin
     }
 }
 
-public static void BenchmarkMapAccessHit(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAccessHit<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAccessHit<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAccessHit<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAccessHit<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAccessHit<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAccessHit<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAccessHit<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAccessHit<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAccessHit<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAccessHit<int32, ж<int32>>));
+public static void BenchmarkMapAccessHit(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAccessHit<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAccessHit<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAccessHit<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAccessHit<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAccessHit<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAccessHit<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAccessHit<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAccessHit<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAccessHit<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAccessHit<int32, ж<int32>>));
 }
 
 internal static bool sinkOK;
@@ -990,7 +1007,7 @@ internal static void benchmarkMapAccessMiss<K, E>(ж<testing.B> Ꮡb, nint n) {
     var w = genValues<K>(n, 2 * n);
     b.ResetTimer();
 
-    bool ok = default!;
+    bool ok = default;
     for (nint i = 0; i < b.N; i++) {
         (_, ok) = m[w[rem(i, n)], ꟷ];
     }
@@ -998,17 +1015,17 @@ internal static void benchmarkMapAccessMiss<K, E>(ж<testing.B> Ꮡb, nint n) {
     sinkOK = ok;
 }
 
-public static void BenchmarkMapAccessMiss(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAccessMiss<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAccessMiss<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAccessMiss<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAccessMiss<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAccessMiss<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAccessMiss<int32, ж<int32>>));
+public static void BenchmarkMapAccessMiss(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAccessMiss<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAccessMiss<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAccessMiss<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAccessMiss<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAccessMiss<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAccessMiss<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAccessMiss<int32, ж<int32>>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1032,17 +1049,17 @@ internal static void benchmarkMapAssignExists<K, E>(ж<testing.B> Ꮡb, nint n) 
     }
 }
 
-public static void BenchmarkMapAssignExists(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignExists<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignExists<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignExists<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignExists<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignExists<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignExists<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignExists<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignExists<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignExists<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignExists<int32, ж<int32>>));
+public static void BenchmarkMapAssignExists(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignExists<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignExists<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignExists<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignExists<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignExists<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignExists<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignExists<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignExists<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignExists<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignExists<int32, ж<int32>>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1065,7 +1082,7 @@ internal static void benchmarkMapAssignFillNoHint<K, E>(ж<testing.B> Ꮡb, nint
     var e = genValues<E>(0, n);
     b.ResetTimer();
 
-    map<K, E> m = default!;
+    map<K, E> m = default;
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
             m = new map<K, E>();
@@ -1074,25 +1091,30 @@ internal static void benchmarkMapAssignFillNoHint<K, E>(ж<testing.B> Ꮡb, nint
     }
 }
 
-public static void BenchmarkMapAssignFillNoHint(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignFillNoHint<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignFillNoHint<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignFillNoHint<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignFillNoHint<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignFillNoHint<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignFillNoHint<int32, ж<int32>>));
+public static void BenchmarkMapAssignFillNoHint(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignFillNoHint<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignFillNoHint<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillNoHint<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignFillNoHint<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignFillNoHint<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignFillNoHint<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignFillNoHint<int32, ж<int32>>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string p50NsOpˢ = "p50-ns/op"u8;
-internal static readonly @string p99NsOpˢ = "p99-ns/op"u8;
-internal static readonly @string p999NsOpˢ = "p99.9-ns/op"u8;
-internal static readonly @string p9999NsOpˢ = "p99.99-ns/op"u8;
-internal static readonly @string p100NsOpˢ = "p100-ns/op"u8;
+internal static ref readonly @string p50NsOpˢ => ref p50NsOpˢᵇ;
+private static readonly @string p50NsOpˢᵇ = "p50-ns/op"u8;
+internal static ref readonly @string p99NsOpˢ => ref p99NsOpˢᵇ;
+private static readonly @string p99NsOpˢᵇ = "p99-ns/op"u8;
+internal static ref readonly @string p999NsOpˢ => ref p999NsOpˢᵇ;
+private static readonly @string p999NsOpˢᵇ = "p99.9-ns/op"u8;
+internal static ref readonly @string p9999NsOpˢ => ref p9999NsOpˢᵇ;
+private static readonly @string p9999NsOpˢᵇ = "p99.99-ns/op"u8;
+internal static ref readonly @string p100NsOpˢ => ref p100NsOpˢᵇ;
+private static readonly @string p100NsOpˢᵇ = "p100-ns/op"u8;
 
 // Identical to benchmarkMapAssignFillNoHint, but additionally measures the
 // latency of each mapassign to report tail latency due to map grow.
@@ -1113,7 +1135,7 @@ internal static void benchmarkMapAssignGrowLatency<K, E>(ж<testing.B> Ꮡb, nin
 
     b.ResetTimer();
 
-    map<K, E> m = default!;
+    map<K, E> m = default;
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
             m = new map<K, E>();
@@ -1137,17 +1159,17 @@ internal static void benchmarkMapAssignGrowLatency<K, E>(ж<testing.B> Ꮡb, nin
     b.ReportMetric((float64)sample[len(sample) - 1], p100NsOpˢ);
 }
 
-public static void BenchmarkMapAssignGrowLatency(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignGrowLatency<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignGrowLatency<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignGrowLatency<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignGrowLatency<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignGrowLatency<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignGrowLatency<int32, ж<int32>>));
+public static void BenchmarkMapAssignGrowLatency(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignGrowLatency<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignGrowLatency<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignGrowLatency<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignGrowLatency<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignGrowLatency<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignGrowLatency<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignGrowLatency<int32, ж<int32>>));
 }
 
 // Fill a map of size n with size hint. Time is per-key. A new map is created
@@ -1165,7 +1187,7 @@ internal static void benchmarkMapAssignFillHint<K, E>(ж<testing.B> Ꮡb, nint n
     var e = genValues<E>(0, n);
     b.ResetTimer();
 
-    map<K, E> m = default!;
+    map<K, E> m = default;
     for (nint i = 0; i < b.N; i++) {
         if (rem(i, n) == 0) {
             m = new map<K, E>(n);
@@ -1174,17 +1196,17 @@ internal static void benchmarkMapAssignFillHint<K, E>(ж<testing.B> Ꮡb, nint n
     }
 }
 
-public static void BenchmarkMapAssignFillHint(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignFillHint<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignFillHint<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignFillHint<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignFillHint<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignFillHint<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignFillHint<int32, ж<int32>>));
+public static void BenchmarkMapAssignFillHint(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignFillHint<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignFillHint<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillHint<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignFillHint<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignFillHint<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignFillHint<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignFillHint<int32, ж<int32>>));
 }
 
 // Fill a map of size n, reusing the same map. Time is per-key. The map is
@@ -1211,17 +1233,17 @@ internal static void benchmarkMapAssignFillClear<K, E>(ж<testing.B> Ꮡb, nint 
     }
 }
 
-public static void BenchmarkMapAssignFillClear(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignFillClear<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignFillClear<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignFillClear<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignFillClear<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignFillClear<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignFillClear<int32, ж<int32>>));
+public static void BenchmarkMapAssignFillClear(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignFillClear<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignFillClear<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignFillClear<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapAssignFillClear<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapAssignFillClear<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapAssignFillClear<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapAssignFillClear<int32, ж<int32>>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1247,13 +1269,13 @@ internal static void benchmarkMapAssignAddition<K, E>(ж<testing.B> Ꮡb, nint n
     }
 }
 
-public static void BenchmarkMapAssignAddition(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignAddition<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignAddition<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<bigType, int32>));
+public static void BenchmarkMapAssignAddition(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapAssignAddition<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapAssignAddition<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapAssignAddition<bigType, int32>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1278,14 +1300,17 @@ internal static void benchmarkMapAssignAppend<K>(ж<testing.B> Ꮡb, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyInt32ElemInt32ˢ4 = "Key=int32/Elem=[]int32"u8;
-internal static readonly @string keyInt64ElemInt32ˢ = "Key=int64/Elem=[]int32"u8;
-internal static readonly @string keyStringElemInt32ˢ = "Key=string/Elem=[]int32"u8;
+internal static ref readonly @string keyInt32ElemInt32ˢ4 => ref keyInt32ElemInt32ˢ4ᵇ;
+private static readonly @string keyInt32ElemInt32ˢ4ᵇ = "Key=int32/Elem=[]int32"u8;
+internal static ref readonly @string keyInt64ElemInt32ˢ => ref keyInt64ElemInt32ˢᵇ;
+private static readonly @string keyInt64ElemInt32ˢᵇ = "Key=int64/Elem=[]int32"u8;
+internal static ref readonly @string keyStringElemInt32ˢ => ref keyStringElemInt32ˢᵇ;
+private static readonly @string keyStringElemInt32ˢᵇ = "Key=string/Elem=[]int32"u8;
 
-public static partial void BenchmarkMapAssignAppend(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ4, benchSizes(benchmarkMapAssignAppend<int32>));
-    Ꮡb.Run(keyInt64ElemInt32ˢ, benchSizes(benchmarkMapAssignAppend<int64>));
-    Ꮡb.Run(keyStringElemInt32ˢ, benchSizes(benchmarkMapAssignAppend<@string>));
+public static partial void BenchmarkMapAssignAppend(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ4, benchSizes(benchmarkMapAssignAppend<int32>));
+    b.Run(keyInt64ElemInt32ˢ, benchSizes(benchmarkMapAssignAppend<int64>));
+    b.Run(keyStringElemInt32ˢ, benchSizes(benchmarkMapAssignAppend<@string>));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1316,17 +1341,17 @@ internal static void benchmarkMapDelete<K, E>(ж<testing.B> Ꮡb, nint n) {
     }
 }
 
-public static void BenchmarkMapDelete(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapDelete<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapDelete<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapDelete<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapDelete<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapDelete<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapDelete<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapDelete<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapDelete<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapDelete<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapDelete<int32, ж<int32>>));
+public static void BenchmarkMapDelete(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapDelete<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapDelete<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapDelete<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapDelete<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapDelete<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapDelete<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapDelete<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapDelete<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapDelete<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapDelete<int32, ж<int32>>));
 }
 
 // Use iterator to pop an element. We want this to be fast, see
@@ -1359,17 +1384,17 @@ internal static void benchmarkMapPop<K, E>(ж<testing.B> Ꮡb, nint n) {
     }
 }
 
-public static void BenchmarkMapPop(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapPop<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapPop<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, benchSizes(benchmarkMapPop<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapPop<smallType, int32>));
-    Ꮡb.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapPop<mediumType, int32>));
-    Ꮡb.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapPop<bigType, int32>));
-    Ꮡb.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapPop<bigType, bigType>));
-    Ꮡb.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapPop<int32, bigType>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapPop<ж<int32>, int32>));
-    Ꮡb.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapPop<int32, ж<int32>>));
+public static void BenchmarkMapPop(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, benchSizes(benchmarkMapPop<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, benchSizes(benchmarkMapPop<int64, int64>));
+    b.Run(keyStringElemStringˢ, benchSizes(benchmarkMapPop<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, benchSizes(benchmarkMapPop<smallType, int32>));
+    b.Run(keyMediumTypeElemInt32ˢ, benchSizes(benchmarkMapPop<mediumType, int32>));
+    b.Run(keyBigTypeElemInt32ˢ, benchSizes(benchmarkMapPop<bigType, int32>));
+    b.Run(keyBigTypeElemBigTypeˢ, benchSizes(benchmarkMapPop<bigType, bigType>));
+    b.Run(keyInt32ElemBigTypeˢ, benchSizes(benchmarkMapPop<int32, bigType>));
+    b.Run(keyInt32ElemInt32ˢ2, benchSizes(benchmarkMapPop<ж<int32>, int32>));
+    b.Run(keyInt32ElemInt32ˢ3, benchSizes(benchmarkMapPop<int32, ж<int32>>));
 }
 
 public static void BenchmarkMapDeleteLargeKey(ж<testing.B> Ꮡb) {
@@ -1379,30 +1404,30 @@ public static void BenchmarkMapDeleteLargeKey(ж<testing.B> Ꮡb) {
     foreach (var i in range(9)) {
         m[fmt.Sprintf("%d"u8, i)] = i;
     }
-    @string key = strings.Repeat("*"u8, 10000);
+    @string key = strings.Repeat("*", 10000);
     foreach (var _ᴛ1 in range(b.N)) {
         delete(m, key);
     }
 }
 
-public static void BenchmarkMapSmallAccessHit(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, smallBenchSizes(benchmarkMapAccessHit<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, smallBenchSizes(benchmarkMapAccessHit<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, smallBenchSizes(benchmarkMapAccessHit<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, smallBenchSizes(benchmarkMapAccessHit<smallType, int32>));
+public static void BenchmarkMapSmallAccessHit(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, smallBenchSizes(benchmarkMapAccessHit<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, smallBenchSizes(benchmarkMapAccessHit<int64, int64>));
+    b.Run(keyStringElemStringˢ, smallBenchSizes(benchmarkMapAccessHit<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, smallBenchSizes(benchmarkMapAccessHit<smallType, int32>));
 }
 
-public static void BenchmarkMapSmallAccessMiss(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt32ElemInt32ˢ, smallBenchSizes(benchmarkMapAccessMiss<int32, int32>));
-    Ꮡb.Run(keyInt64ElemInt64ˢ, smallBenchSizes(benchmarkMapAccessMiss<int64, int64>));
-    Ꮡb.Run(keyStringElemStringˢ, smallBenchSizes(benchmarkMapAccessMiss<@string, @string>));
-    Ꮡb.Run(keySmallTypeElemInt32ˢ, smallBenchSizes(benchmarkMapAccessMiss<smallType, int32>));
+public static void BenchmarkMapSmallAccessMiss(ж<testing.B> b) {
+    b.Run(keyInt32ElemInt32ˢ, smallBenchSizes(benchmarkMapAccessMiss<int32, int32>));
+    b.Run(keyInt64ElemInt64ˢ, smallBenchSizes(benchmarkMapAccessMiss<int64, int64>));
+    b.Run(keyStringElemStringˢ, smallBenchSizes(benchmarkMapAccessMiss<@string, @string>));
+    b.Run(keySmallTypeElemInt32ˢ, smallBenchSizes(benchmarkMapAccessMiss<smallType, int32>));
 }
 
 internal static void mapAccessZeroBenchmark<K>(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    map<K, uint64> m = default!;
+    map<K, uint64> m = default;
     K key = GoZero<K>();
     for (nint i = 0; i < b.N; i++) {
         sink = m[key];
@@ -1410,18 +1435,23 @@ internal static void mapAccessZeroBenchmark<K>(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyInt64ˢ = "Key=int64"u8;
-internal static readonly @string keyInt32ˢ = "Key=int32"u8;
-internal static readonly @string keyStringˢ = "Key=string"u8;
-internal static readonly @string keyMediumTypeˢ = "Key=mediumType"u8;
-internal static readonly @string keyBigTypeˢ = "Key=bigType"u8;
+internal static ref readonly @string keyInt64ˢ => ref keyInt64ˢᵇ;
+private static readonly @string keyInt64ˢᵇ = "Key=int64"u8;
+internal static ref readonly @string keyInt32ˢ => ref keyInt32ˢᵇ;
+private static readonly @string keyInt32ˢᵇ = "Key=int32"u8;
+internal static ref readonly @string keyStringˢ => ref keyStringˢᵇ;
+private static readonly @string keyStringˢᵇ = "Key=string"u8;
+internal static ref readonly @string keyMediumTypeˢ => ref keyMediumTypeˢᵇ;
+private static readonly @string keyMediumTypeˢᵇ = "Key=mediumType"u8;
+internal static ref readonly @string keyBigTypeˢ => ref keyBigTypeˢᵇ;
+private static readonly @string keyBigTypeˢᵇ = "Key=bigType"u8;
 
-public static void BenchmarkMapAccessZero(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt64ˢ, mapAccessZeroBenchmark<int64>);
-    Ꮡb.Run(keyInt32ˢ, mapAccessZeroBenchmark<int32>);
-    Ꮡb.Run(keyStringˢ, mapAccessZeroBenchmark<@string>);
-    Ꮡb.Run(keyMediumTypeˢ, mapAccessZeroBenchmark<mediumType>);
-    Ꮡb.Run(keyBigTypeˢ, mapAccessZeroBenchmark<bigType>);
+public static void BenchmarkMapAccessZero(ж<testing.B> b) {
+    b.Run(keyInt64ˢ, mapAccessZeroBenchmark<int64>);
+    b.Run(keyInt32ˢ, mapAccessZeroBenchmark<int32>);
+    b.Run(keyStringˢ, mapAccessZeroBenchmark<@string>);
+    b.Run(keyMediumTypeˢ, mapAccessZeroBenchmark<mediumType>);
+    b.Run(keyBigTypeˢ, mapAccessZeroBenchmark<bigType>);
 }
 
 internal static void mapAccessEmptyBenchmark<K>(ж<testing.B> Ꮡb) {
@@ -1438,12 +1468,12 @@ internal static void mapAccessEmptyBenchmark<K>(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkMapAccessEmpty(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(keyInt64ˢ, mapAccessEmptyBenchmark<int64>);
-    Ꮡb.Run(keyInt32ˢ, mapAccessEmptyBenchmark<int32>);
-    Ꮡb.Run(keyStringˢ, mapAccessEmptyBenchmark<@string>);
-    Ꮡb.Run(keyMediumTypeˢ, mapAccessEmptyBenchmark<mediumType>);
-    Ꮡb.Run(keyBigTypeˢ, mapAccessEmptyBenchmark<bigType>);
+public static void BenchmarkMapAccessEmpty(ж<testing.B> b) {
+    b.Run(keyInt64ˢ, mapAccessEmptyBenchmark<int64>);
+    b.Run(keyInt32ˢ, mapAccessEmptyBenchmark<int32>);
+    b.Run(keyStringˢ, mapAccessEmptyBenchmark<@string>);
+    b.Run(keyMediumTypeˢ, mapAccessEmptyBenchmark<mediumType>);
+    b.Run(keyBigTypeˢ, mapAccessEmptyBenchmark<bigType>);
 }
 
 } // end runtime_test_package

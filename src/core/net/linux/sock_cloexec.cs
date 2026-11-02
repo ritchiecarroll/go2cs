@@ -12,16 +12,17 @@ using syscall = syscall_package;
 partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string socketˢ = "socket"u8;
+internal static ref readonly @string socketˢ => ref socketˢᵇ;
+private static readonly @string socketˢᵇ = "socket"u8;
 
 // Wrapper around the socket system call that marks the returned file
 // descriptor as nonblocking and close-on-exec.
 internal static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
     var (s, err) = socketFunc(family, sotype | (nint)syscall.SOCK_NONBLOCK | (nint)syscall.SOCK_CLOEXEC, proto);
-    if (err != default!) {
+    if (err != nil) {
         return (-1, os.NewSyscallError(socketˢ, err));
     }
-    return (s, default!);
+    return (s, default);
 }
 
 } // end net_package

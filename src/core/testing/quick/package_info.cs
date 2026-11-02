@@ -10,15 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,7 +50,7 @@ using static go.testing.quick_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -67,7 +60,7 @@ using static go.testing.quick_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/quick/quick.go", "quick.cs", "ABQoAAgUsoKClKiygoKUqLIABhSyrNKAgraCgKSkpKSkpKSkpKSkpKSkpKSkgoKCgoKClLaClIKClIK2goKCgoKClLaCgoKUtoKCgpSklIKCkoKUgoKClLa2ABk0koKUqsKCgoKUuO6AAAgQggAJFIIAByQAEQKCpoKCpoKUgqaCgpSCgoKmgrj+4oKmgoKUgoKmgqaCgpSCgoKmgpSCuKrCgoKmgoKCgoK4psKCgoKUgqaCgoKUpoKCgpQ=")]
+[assembly: GoPositionMap("testing/quick/quick.go", "quick.cs", "ABQoAAgUsoKClKiygoKUqLIABhSyrNKAgraCgKS0tLS0tLS0tLS0tLS0tLS0goKCgoKClMaClIKClILGgoKCgoKClMaCgoKUxoKCgpS0lIKCgoKUgoKClMa2ABk0koKUqsKCgoKUuO6AAAgQggAJFIIACiQAEQKCpoKCpoKUgqaCgpSCgoKmgrgACg7igqaCgpSCgqaCpoKClIKCgqaClIK4qsKCgqaCgoKCgrimwoKCgpSCpoKCgpSmgoKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

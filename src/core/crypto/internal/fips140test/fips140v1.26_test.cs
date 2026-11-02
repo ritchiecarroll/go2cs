@@ -18,17 +18,18 @@ internal static void fips140v126Conditionals() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mlDsaKeyGenSigGenSigVerˢ = "ML-DSA KeyGen, SigGen, SigVer"u8;
+internal static ref readonly @string mlDsaKeyGenSigGenSigVerˢ => ref mlDsaKeyGenSigGenSigVerˢᵇ;
+private static readonly @string mlDsaKeyGenSigGenSigVerˢᵇ = "ML-DSA KeyGen, SigGen, SigVer"u8;
 
-internal static void testFIPS140v126(ж<testing.T> Ꮡt, slice<byte> plaintext) {
+internal static void testFIPS140v126(ж<testing.T> t, slice<byte> plaintext) {
     var plaintextʗ1 = plaintext;
-    Ꮡt.Run(mlDsaKeyGenSigGenSigVerˢ, (ж<testing.T> tΔ1) => {
+    t.Run(mlDsaKeyGenSigGenSigVerˢ, (ж<testing.T> tΔ1) => {
         ensureServiceIndicator(tΔ1);
         var k = mldsa.GenerateKey44();
 
         var (sig, err) = mldsa.SignDeterministic(k, plaintextʗ1, ""u8);
         fatalIfErr(tΔ1, err);
-        tΔ1.Logf("ML-DSA signature: %x"u8, sig);
+        tΔ1.Logf("ML-DSA signature: %x", sig);
 
         err = mldsa.Verify(k.PublicKey(), plaintextʗ1, sig, ""u8);
         fatalIfErr(tΔ1, err);

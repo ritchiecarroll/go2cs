@@ -15,9 +15,9 @@ using static global::go.go.types_internal_test_package;
 
 partial class types_test_package {
 
-public static void TestMain(ж<testing.M> Ꮡm) {
-    Δbuild.Default.GOROOT = testenv.GOROOT(default!);
-    os.Exit(Ꮡm.Run());
+public static void TestMain(ж<testing.M> m) {
+    Δbuild.Default.GOROOT = testenv.GOROOT(default);
+    os.Exit(m.Run());
 }
 
 } // end types_test_package

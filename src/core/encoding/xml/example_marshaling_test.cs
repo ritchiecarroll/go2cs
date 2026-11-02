@@ -18,51 +18,62 @@ public static Animal Unknown => /* iota */ 0;
 public static Animal Gopher => 1;
 public static Animal Zebra => 2;
 
-public static error UnmarshalXML(this ref Animal a, ж<xml.Decoder> Ꮡd, xml.StartElement startʗp) {
+public static error UnmarshalXML(this ref Animal a, ж<xml.Decoder> d, xml.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     ref var s = ref heap(new @string(), out var Ꮡs);
     {
-        var err = Ꮡd.DecodeElement(Ꮡs, Ꮡstart); if (err != default!) {
+        var err = d.DecodeElement(Ꮡs, Ꮡstart); if (err != nil) {
             return err;
         }
     }
     var exprᴛ1 = strings.ToLower(s);
-    if (exprᴛ1 == "gopher"u8) {
-        a = Gopher;
-    }
-    else if (exprᴛ1 == "zebra"u8) {
-        a = Zebra;
-    }
-    else { /* default: */
+    switch (ᐧ) {
+    default: {
         a = Unknown;
+        break;
     }
+    case {} when exprᴛ1 == "gopher"u8: {
+        a = Gopher;
+        break;
+    }
+    case {} when exprᴛ1 == "zebra"u8: {
+        a = Zebra;
+        break;
+    }}
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unknownˢ = "unknown"u8;
-internal static readonly @string gopherˢ = "gopher"u8;
-internal static readonly @string zebraˢ = "zebra"u8;
+internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
+private static readonly @string unknownˢᵇ = "unknown"u8;
+internal static ref readonly @string gopherˢ => ref gopherˢᵇ;
+private static readonly @string gopherˢᵇ = "gopher"u8;
+internal static ref readonly @string zebraˢ => ref zebraˢᵇ;
+private static readonly @string zebraˢᵇ = "zebra"u8;
 
-public static error MarshalXML(this Animal a, ж<xml.Encoder> Ꮡe, xml.StartElement start) {
-    @string s = default!;
-    var exprᴛ1 = a;
-    if (exprᴛ1 == Gopher) {
-        s = gopherˢ;
-    }
-    else if (exprᴛ1 == Zebra) {
-        s = zebraˢ;
-    }
-    else { /* default: */
+public static error MarshalXML(this Animal a, ж<xml.Encoder> e, xml.StartElement start) {
+    @string s = default;
+    switch (a) {
+    default: {
         s = unknownˢ;
+        break;
     }
-    return Ꮡe.EncodeElement(s, start);
+    case var ᴛ when ᴛ == Gopher: {
+        s = gopherˢ;
+        break;
+    }
+    case var ᴛ when ᴛ == Zebra: {
+        s = zebraˢ;
+        break;
+    }}
+    return e.EncodeElement(s, start);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string animalsAnimalGopherˢ = """
+internal static ref readonly @string animalsAnimalGopherˢ => ref animalsAnimalGopherˢᵇ;
+private static readonly @string animalsAnimalGopherˢᵇ = """
 
 	<animals>
 		<animal>gopher</animal>
@@ -84,7 +95,7 @@ public static void Example_customMarshalXML() {
     @string blob = animalsAnimalGopherˢ;
     ref var zoo = ref heap(new Example_customMarshalXML_zoo(), out var Ꮡzoo);
     {
-        var err = xml.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != default!) {
+        var err = xml.Unmarshal(slice<byte>(blob), Ꮡzoo); if (err != nil) {
             log.Fatal(err);
         }
     }

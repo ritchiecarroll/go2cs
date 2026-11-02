@@ -861,7 +861,7 @@ local's form). A plain `out var result` in the comm-clause label would leave `�
 (`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
 entry-time box pattern proven by the escaping-parameter preamble:
 
-<!-- source: src/core/internal/fuzz/fuzz.cs:268-269 -->
+<!-- source: src/core/internal/fuzz/fuzz.cs:267-268 -->
 ```csharp
 case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
     ref var result = ref heap(resultᴛ1, out var Ꮡresult);

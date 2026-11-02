@@ -23,21 +23,24 @@ using types = global::go.go.types_package;
 partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePTypeSStructTˢ = @"package p; type S struct{T}"u8;
+internal static ref readonly @string packagePTypeSStructTˢ => ref packagePTypeSStructTˢᵇ;
+private static readonly @string packagePTypeSStructTˢᵇ = @"package p; type S struct{T}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ1 = "undefined: T"u8;
+internal static ref readonly @string wantᶜ1 => ref wantᶜ1ᵇ;
+private static readonly @string wantᶜ1ᵇ = "undefined: T"u8;
 
-public static void TestIssue5770(ж<testing.T> Ꮡt) {
+public static void TestIssue5770(ж<testing.T> t) {
     var (_, err) = typecheck(packagePTypeSStructTˢ, nil, nil);
     @string want = wantᶜ1;
-    if (err == default! || !strings.Contains(err.Error(), want)) {
-        Ꮡt.Errorf("got: %v; want: %s"u8, err, want);
+    if (err == nil || !strings.Contains(err.Error(), want)) {
+        t.Errorf("got: %v; want: %s", err, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePVarSUintUint88ˢ = """
+internal static ref readonly @string packagePVarSUintUint88ˢ => ref packagePVarSUintUint88ˢᵇ;
+private static readonly @string packagePVarSUintUint88ˢᵇ = """
 
 package p
 var (
@@ -51,47 +54,54 @@ var (
 )
 """u8.Raw();
 
-public static void TestIssue5849(ж<testing.T> Ꮡt) {
+public static void TestIssue5849(ж<testing.T> t) {
     @string src = packagePVarSUintUint88ˢ;
     var types = new map<ast.Expr, types.TypeAndValue>();
     mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
 
     foreach (var (x, tv) in types) {
-        typesꓸType want = default!;
+        typesꓸType want = default;
         switch (x.type()) {
         case ж<ast.BasicLit> xΔ1: {
             var exprᴛ1 = (~xΔ1).Value;
-            if (exprᴛ1 == @"8"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == @"8"u8: {
                 want = new types.BasicжΔType(Typ[Uint8]);
+                break;
             }
-            else if (exprᴛ1 == @"16"u8) {
+            case {} when exprᴛ1 == @"16"u8: {
                 want = new types.BasicжΔType(Typ[Uint16]);
+                break;
             }
-            else if (exprᴛ1 == @"32"u8) {
+            case {} when exprᴛ1 == @"32"u8: {
                 want = new types.BasicжΔType(Typ[Uint32]);
+                break;
             }
-            else if (exprᴛ1 == @"64"u8) {
+            case {} when exprᴛ1 == @"64"u8: {
                 want = new types.BasicжΔType(Typ[Uint]); // because of "+ s", s is of type uint
+                break;
             }
-            else if (exprᴛ1 == @"""foo"""u8) {
+            case {} when exprᴛ1 == @"""foo"""u8: {
                 want = new types.BasicжΔType(Typ[ΔString]);
-            }
+                break;
+            }}
             break;
         }
         case ж<ast.Ident> xΔ1: {
-            if ((~xΔ1).Name == "nil"u8) {
+            if (xΔ1.Name == "nil"u8) {
                 want = new types.BasicжΔType(Typ[UntypedNil]);
             }
             break;
         }}
-        if (want != default! && !Identical(tv.Type, want)) {
-            Ꮡt.Errorf("got %s; want %s"u8, tv.Type, want);
+        if (want != nil && !Identical(tv.Type, want)) {
+            t.Errorf("got %s; want %s", tv.Type, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePFuncFIntDeferFGoˢ = """
+internal static ref readonly @string packagePFuncFIntDeferFGoˢ => ref packagePFuncFIntDeferFGoˢᵇ;
+private static readonly @string packagePFuncFIntDeferFGoˢᵇ = """
 
 package p
 func f() int {
@@ -102,7 +112,7 @@ func f() int {
 
 """u8.Raw();
 
-public static void TestIssue6413(ж<testing.T> Ꮡt) {
+public static void TestIssue6413(ж<testing.T> t) {
     @string src = packagePFuncFIntDeferFGoˢ;
     var types = new map<ast.Expr, types.TypeAndValue>();
     mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
@@ -113,7 +123,7 @@ public static void TestIssue6413(ж<testing.T> Ꮡt) {
         {
             var (_, ok) = x._<ж<ast.CallExpr>>(ᐧ); if (ok) {
                 if (!AreEqual(tv.Type, want)) {
-                    Ꮡt.Errorf("%s: got %s; want %s"u8, fset.Position(x.Pos()), tv.Type, want.OrTypedNil());
+                    t.Errorf("%s: got %s; want %s", fset.Position(x.Pos()), tv.Type, want.OrTypedNil());
                 }
                 n++;
             }
@@ -121,12 +131,13 @@ public static void TestIssue6413(ж<testing.T> Ꮡt) {
     }
 
     if (n != 2) {
-        Ꮡt.Errorf("got %d CallExprs; want 2"u8, n);
+        t.Errorf("got %d CallExprs; want 2", n);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePFuncTMResBoolˢ = """
+internal static ref readonly @string packagePFuncTMResBoolˢ => ref packagePFuncTMResBoolˢᵇ;
+private static readonly @string packagePFuncTMResBoolˢᵇ = """
 
 package p
 func (T) m() (res bool) { return }
@@ -134,31 +145,33 @@ type T struct{} // receiver type after method declaration
 
 """u8.Raw();
 
-public static void TestIssue7245(ж<testing.T> Ꮡt) {
+public static void TestIssue7245(ж<testing.T> t) {
     @string src = packagePFuncTMResBoolˢ;
     var f = mustParse(fset, src);
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check((~(~f).Name).Name, fset, new ж<ast.File>[]{f}.slice(), Ꮡ(new typesꓸInfo(Defs: defs)));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), Ꮡ(new typesꓸInfo(Defs: defs)));
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    var m = (~f).Decls[0]._<ж<ast.FuncDecl>>();
-    var res1 = defs[(~m).Name]._<ж<types.Func>>().Signature().Results().At(0);
-    var res2 = defs[(~(~(~(~m).Type).Results).List[0]).Names[0]]._<ж<types.Var>>();
+    var m = f.Decls[0]._<ж<ast.FuncDecl>>();
+    var res1 = defs[m.Name]._<ж<types.Func>>().Signature().Results().At(0);
+    var res2 = defs[m.Type.Results.List[0].Names[0]]._<ж<types.Var>>();
 
     if (res1 != res2) {
-        Ꮡt.Errorf("got %s (%p) != %s (%p)"u8, res1.OrTypedNil(), res2.OrTypedNil(), res1.OrTypedNil(), res2.OrTypedNil());
+        t.Errorf("got %s (%p) != %s (%p)", res1.OrTypedNil(), res2.OrTypedNil(), res1.OrTypedNil(), res2.OrTypedNil());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cannotAssignToWˢ = "cannot assign to w"u8;
+internal static ref readonly @string cannotAssignToWˢ => ref cannotAssignToWˢᵇ;
+private static readonly @string cannotAssignToWˢᵇ = "cannot assign to w"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ20 = """
+internal static ref readonly @string srcᶜ20 => ref srcᶜ20ᵇ;
+private static readonly @string srcᶜ20ᵇ = """
 
 package p
 func _() {
@@ -171,7 +184,8 @@ func _() {
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ2 = """
+internal static ref readonly @string wantᶜ2 => ref wantᶜ2ᵇ;
+private static readonly @string wantᶜ2ᵇ = """
 L3 defs func p._()
 L4 defs const w untyped int
 L5 defs var x int
@@ -187,7 +201,7 @@ L7 uses var z int
 // This tests that uses of existing vars on the LHS of an assignment
 // are Uses, not Defs; and also that the (illegal) use of a non-var on
 // the LHS of an assignment is a Use nonetheless.
-public static void TestIssue7827(ж<testing.T> Ꮡt) {
+public static void TestIssue7827(ж<testing.T> t) {
     var factsᴷ = new stackAppend<@string>();
 
     @string src = srcᶜ20;
@@ -199,22 +213,21 @@ public static void TestIssue7827(ж<testing.T> Ꮡt) {
     @string want = wantᶜ2;
 
     // don't abort at the first error
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Error: (error errΔ1) => {
-        Ꮡt.Log(errΔ1);
-    });
+    ref var conf = ref heap<types.Config>(new Config(Error: (error errΔ1) => {
+        t.Log(errΔ1);
+    }), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
     var uses = new map<ж<ast.Ident>, types.Object>();
-    var (_, err) = Ꮡconf.Check((~(~f).Name).Name, fset, new ж<ast.File>[]{f}.slice(), Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
+    var (_, err) = Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
     {
         @string s = err.Error(); if (!strings.HasSuffix(s, cannotAssignToWˢ)) {
-            Ꮡt.Errorf("Check: unexpected error: %s"u8, s);
+            t.Errorf("Check: unexpected error: %s", s);
         }
     }
 
-    slice<@string> facts = default!;
+    slice<@string> facts = default;
     foreach (var (id, obj) in defs) {
-        if (obj != default!) {
+        if (obj != nil) {
             @string fact = fmt.Sprintf("L%d defs %s"u8, fset.Position(id.Pos()).Line, obj);
             facts = append(factsᴷ, facts, fact);
         }
@@ -225,19 +238,23 @@ public static void TestIssue7827(ж<testing.T> Ꮡt) {
     }
     slices.Sort<slice<@string>, @string>(facts);
 
-    @string got = strings.Join(facts, "\n"u8);
+    @string got = strings.Join(facts, "\n");
     if (got != want) {
-        Ꮡt.Errorf("Unexpected defs/uses\ngot:\n%s\nwant:\n%s"u8, got, want);
+        t.Errorf("Unexpected defs/uses\ngot:\n%s\nwant:\n%s", got, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string src0ˢ = "src0"u8;
-internal static readonly @string src1ˢ = "src1"u8;
-internal static readonly @string src2ˢ = "src2"u8;
+internal static ref readonly @string src0ˢ => ref src0ˢᵇ;
+private static readonly @string src0ˢᵇ = "src0"u8;
+internal static ref readonly @string src1ˢ => ref src1ˢᵇ;
+private static readonly @string src1ˢᵇ = "src1"u8;
+internal static ref readonly @string src2ˢ => ref src2ˢᵇ;
+private static readonly @string src2ˢᵇ = "src2"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string src0ᶜ = """
+internal static ref readonly @string src0ᶜ => ref src0ᶜᵇ;
+private static readonly @string src0ᶜᵇ = """
 
 package main
 
@@ -253,7 +270,8 @@ func main() {
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string src1ᶜ1 = """
+internal static ref readonly @string src1ᶜ1 => ref src1ᶜ1ᵇ;
+private static readonly @string src1ᶜ1ᵇ = """
 
 package main
 
@@ -272,7 +290,8 @@ func main() {
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string src2ᶜ1 = """
+internal static ref readonly @string src2ᶜ1 => ref src2ᶜ1ᵇ;
+private static readonly @string src2ᶜ1ᵇ = """
 
 package main
 
@@ -296,8 +315,8 @@ func main() {
 // The actual issue is in go/internal/gcimporter which has a corresponding
 // test; we leave this test here to verify correct behavior at the go/types
 // level.
-public static void TestIssue13898(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+public static void TestIssue13898(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     @string src0 = src0ᶜ;
     // like src0, but also imports go/importer
@@ -309,19 +328,19 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
         var info = Ꮡ(new typesꓸInfo(Uses: new map<ж<ast.Ident>, types.Object>()));
         mustTypecheck(src, nil, info);
 
-        ж<types.Package> pkg = default!;
+        ж<types.Package> pkg = default;
         nint count = 0;
-        foreach (var (id, obj) in (~info).Uses) {
-            if ((~id).Name == "Pkg"u8) {
+        foreach (var (id, obj) in info.Uses) {
+            if (id.Name == "Pkg"u8) {
                 pkg = obj.Pkg();
                 count++;
             }
         }
         if (count != 1) {
-            Ꮡt.Fatalf("%s: got %d entries named Pkg; want 1"u8, test, count);
+            t.Fatalf("%s: got %d entries named Pkg; want 1", test, count);
         }
         if (pkg.Name() != "types"u8) {
-            Ꮡt.Fatalf("%s: got %v; want package types"u8, test, pkg.OrTypedNil());
+            t.Fatalf("%s: got %v; want package types", test, pkg.OrTypedNil());
         }
     }
 
@@ -331,50 +350,50 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ21 = @"package p; func f() { var a, b, c, d, e int }"u8;
+internal static ref readonly @string srcᶜ21 => ref srcᶜ21ᵇ;
+private static readonly @string srcᶜ21ᵇ = @"package p; func f() { var a, b, c, d, e int }"u8;
 
-public static void TestIssue22525(ж<testing.T> Ꮡt) {
+public static void TestIssue22525(ж<testing.T> t) {
     @string src = srcᶜ21;
 
-    @string got = "\n"u8;
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Error: (error err) => {
+    @string got = "\n";
+    ref var conf = ref heap<types.Config>(new Config(Error: (error err) => {
         got += err.Error() + "\n"u8;
-    });
+    }), out var Ꮡconf);
     typecheck(src, Ꮡconf, nil); // do not crash
     @string want = "\n"u8 + "p:1:27: declared and not used: a\n"u8 + "p:1:30: declared and not used: b\n"u8 + "p:1:33: declared and not used: c\n"u8 + "p:1:36: declared and not used: d\n"u8 + "p:1:39: declared and not used: e\n"u8;
     if (got != want) {
-        Ꮡt.Errorf("got: %swant: %s"u8, got, want);
+        t.Errorf("got: %swant: %s", got, want);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string prefixᶜ2 = @"package p; import ""unsafe""; type P *struct{}; type I interface{}; type T "u8;
+internal static ref readonly @string prefixᶜ2 => ref prefixᶜ2ᵇ;
+private static readonly @string prefixᶜ2ᵇ = @"package p; import ""unsafe""; type P *struct{}; type I interface{}; type T "u8;
 
-public static void TestIssue25627(ж<testing.T> Ꮡt) {
+public static void TestIssue25627(ж<testing.T> t) {
     @string prefix = prefixᶜ2;
     // The src strings (without prefix) are constructed such that the number of semicolons
     // plus one corresponds to the number of fields expected in the respective struct.
-    foreach (var (_, src) in new @string[]{
-        @"struct { x Missing }"u8,
-        @"struct { Missing }"u8,
-        @"struct { *Missing }"u8,
-        @"struct { unsafe.Pointer }"u8,
-        @"struct { P }"u8,
-        @"struct { *I }"u8,
-        @"struct { a int; b Missing; *Missing }"u8
-    }.slice()) {
+    foreach (var (_, src) in slice<@string>([
+        @"struct { x Missing }",
+        @"struct { Missing }",
+        @"struct { *Missing }",
+        @"struct { unsafe.Pointer }",
+        @"struct { P }",
+        @"struct { *I }",
+        @"struct { a int; b Missing; *Missing }"
+    ])) {
         var f = mustParse(fset, prefix + src);
 
-        ref var cfg = ref heap<types.Config>(out var Ꮡcfg);
-        cfg = new Config(Importer: defaultImporter(fset), Error: (error errΔ1) => {
-        });
+        ref var cfg = ref heap<types.Config>(new Config(Importer: defaultImporter(fset), Error: (error errΔ1) => {
+        }), out var Ꮡcfg);
         var info = Ꮡ(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()));
-        var (_, err) = Ꮡcfg.Check((~(~f).Name).Name, fset, new ж<ast.File>[]{f}.slice(), info);
-        if (err != default!) {
+        var (_, err) = Ꮡcfg.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), info);
+        if (err != nil) {
             {
                 var (_, ok) = err._<typesꓸError>(ᐧ); if (!ok) {
-                    Ꮡt.Fatal(err);
+                    t.Fatal(err);
                 }
             }
         }
@@ -384,11 +403,11 @@ public static void TestIssue25627(ж<testing.T> Ꮡt) {
             {
                 var (spec, _) = n._<ж<ast.TypeSpec>>(ᐧ); if (spec != nil) {
                     {
-                        var (tv, ok) = (~infoʗ1).Types[(~spec).Type, ꟷ]; if (ok && (~(~spec).Name).Name == "T"u8) {
-                            nint want = strings.Count(src, ";"u8) + 1;
+                        var (tv, ok) = infoʗ1.Types[spec.Type, ꟷ]; if (ok && spec.Name.Name == "T"u8) {
+                            nint want = strings.Count(src, ";") + 1;
                             {
                                 nint got = tv.Type._<ж<types.Struct>>().NumFields(); if (got != want) {
-                                    Ꮡt.Errorf("%s: got %d fields; want %d"u8, src, got, want);
+                                    t.Errorf("%s: got %d fields; want %d", src, got, want);
                                 }
                             }
                         }
@@ -403,13 +422,13 @@ public static void TestIssue25627(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object objectXNotFoundˢ = (@string)"object X not found"u8;
 
-public static void TestIssue28005(ж<testing.T> Ꮡt) {
+public static void TestIssue28005(ж<testing.T> t) {
     // method names must match defining interface name for this test
     // (see last comment in this function)
     var sources = new @string[]{
-        "package p; type A interface{ A() }"u8,
-        "package p; type B interface{ B() }"u8,
-        "package p; type X interface{ A; B }"u8
+        "package p; type A interface{ A() }",
+        "package p; type B interface{ B() }",
+        "package p; type X interface{ A; B }"
     }.array();
 
     // compute original file ASTs
@@ -439,20 +458,20 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
         ref var conf = ref heap(new types.Config(), out var Ꮡconf);
         var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
         var (_, err) = Ꮡconf.Check(""u8, fset, files, info);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         // look for interface object X
-        types.Object obj = default!;
-        foreach (var (name, def) in (~info).Defs) {
-            if ((~name).Name == "X"u8) {
+        types.Object obj = default;
+        foreach (var (name, def) in info.Defs) {
+            if (name.Name == "X"u8) {
                 obj = def;
                 break;
             }
         }
-        if (obj == default!) {
-            Ꮡt.Fatal(objectXNotFoundˢ);
+        if (obj == nil) {
+            t.Fatal(objectXNotFoundˢ);
         }
         var iface = obj.Type().Underlying()._<ж<types.Interface>>(); // object X must be an interface
 
@@ -462,50 +481,54 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
             var m = iface.Method(i);
             @string recvName = m.Signature().Recv().Type()._<ж<types.Named>>().Obj().Name();
             if (recvName != m.Name()) {
-                Ꮡt.Errorf("perm %v: got recv %s; want %s"u8, perm, recvName, m.Name());
+                t.Errorf("perm %v: got recv %s; want %s", perm, recvName, m.Name());
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errorˢ3 = "error"u8;
-internal static readonly @string errorˢ4 = "Error"u8;
+internal static ref readonly @string errorˢ3 => ref errorˢ3ᵇ;
+private static readonly @string errorˢ3ᵇ = "error"u8;
+internal static ref readonly @string errorˢ4 => ref errorˢ4ᵇ;
+private static readonly @string errorˢ4ᵇ = "Error"u8;
 
-public static void TestIssue28282(ж<testing.T> Ꮡt) {
+public static void TestIssue28282(ж<testing.T> t) {
     // create type interface { error }
     var et = Universe.Lookup(errorˢ3).Type();
-    var it = NewInterfaceType(default!, new typesꓸType[]{et}.slice());
+    var it = NewInterfaceType(default, slice<typesꓸType>([et]));
     it.Complete();
     // verify that after completing the interface, the embedded method remains unchanged
     var want = et.Underlying()._<ж<types.Interface>>().Method(0);
     var got = it.Method(0);
     if (got != want) {
-        Ꮡt.Fatalf("%s.Method(0): got %q (%p); want %q (%p)"u8, it.OrTypedNil(), got.OrTypedNil(), got.OrTypedNil(), want.OrTypedNil(), want.OrTypedNil());
+        t.Fatalf("%s.Method(0): got %q (%p); want %q (%p)", it.OrTypedNil(), got.OrTypedNil(), got.OrTypedNil(), want.OrTypedNil(), want.OrTypedNil());
     }
     // verify that lookup finds the same method in both interfaces (redundant check)
     var (obj, _, _) = LookupFieldOrMethod(et, false, nil, errorˢ4);
     if (!AreEqual(obj, want)) {
-        Ꮡt.Fatalf("%s.Lookup: got %q (%p); want %q (%p)"u8, et, obj, obj, want.OrTypedNil(), want.OrTypedNil());
+        t.Fatalf("%s.Lookup: got %q (%p); want %q (%p)", et, obj, obj, want.OrTypedNil(), want.OrTypedNil());
     }
     (obj, _, _) = LookupFieldOrMethod(new types.InterfaceжΔType(it), false, nil, errorˢ4);
     if (!AreEqual(obj, want)) {
-        Ꮡt.Fatalf("%s.Lookup: got %q (%p); want %q (%p)"u8, it.OrTypedNil(), obj, obj, want.OrTypedNil(), want.OrTypedNil());
+        t.Fatalf("%s.Lookup: got %q (%p); want %q (%p)", it.OrTypedNil(), obj, obj, want.OrTypedNil(), want.OrTypedNil());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string packagePTypeAInterfaceMˢ = @"package p; type A interface { M() }"u8;
-internal static readonly @string packagePVarBInterfaceAˢ = @"package p; var B interface { A }"u8;
+internal static ref readonly @string packagePTypeAInterfaceMˢ => ref packagePTypeAInterfaceMˢᵇ;
+private static readonly @string packagePTypeAInterfaceMˢᵇ = @"package p; type A interface { M() }"u8;
+internal static ref readonly @string packagePVarBInterfaceAˢ => ref packagePVarBInterfaceAˢᵇ;
+private static readonly @string packagePVarBInterfaceAˢᵇ = @"package p; var B interface { A }"u8;
 
-public static void TestIssue29029(ж<testing.T> Ꮡt) {
+public static void TestIssue29029(ж<testing.T> t) {
     var f1 = mustParse(fset, packagePTypeAInterfaceMˢ);
     var f2 = mustParse(fset, packagePVarBInterfaceAˢ);
 
     // printInfo prints the *Func definitions recorded in info, one *Func per line.
     @string printInfo(ж<typesꓸInfo> infoΔ1) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-        foreach (var (_, obj) in (~infoΔ1).Defs) {
+        foreach (var (_, obj) in infoΔ1.Defs) {
             {
                 var (fn, ok) = obj._<ж<types.Func>>(ᐧ); if (ok) {
                     fmt.Fprintln(new types_test_package.strings_BuilderжWriter(Ꮡbuf), fn.OrTypedNil());
@@ -522,48 +545,49 @@ public static void TestIssue29029(ж<testing.T> Ꮡt) {
     // type-check together
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
-    var check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"u8), info);
+    var check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"), info);
     {
-        var err = check.Files(new ж<ast.File>[]{f1, f2}.slice()); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = check.Files(slice<ж<ast.File>>([f1, f2])); if (err != nil) {
+            t.Fatal(err);
         }
     }
     @string want = printInfo(info);
 
     // type-check incrementally
     info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
-    check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"u8), info);
+    check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"), info);
     {
-        var err = check.Files(new ж<ast.File>[]{f1}.slice()); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = check.Files(slice<ж<ast.File>>([f1])); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var err = check.Files(new ж<ast.File>[]{f2}.slice()); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = check.Files(slice<ж<ast.File>>([f2])); if (err != nil) {
+            t.Fatal(err);
         }
     }
     @string got = printInfo(info);
 
     if (got != want) {
-        Ꮡt.Errorf("\ngot : %swant: %s"u8, got, want);
+        t.Errorf("\ngot : %swant: %s", got, want);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string asrcᶜ = @"package a; type I interface{ M() }; type T struct { F interface { I } }"u8;
+internal static ref readonly @string asrcᶜ => ref asrcᶜᵇ;
+private static readonly @string asrcᶜᵇ = @"package a; type I interface{ M() }; type T struct { F interface { I } }"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bsrcᶜ = @"package b; import ""a""; type T struct { F interface { a.I } }; var _ = a.T(T{})"u8;
+internal static ref readonly @string bsrcᶜ => ref bsrcᶜᵇ;
+private static readonly @string bsrcᶜᵇ = @"package b; import ""a""; type T struct { F interface { a.I } }; var _ = a.T(T{})"u8;
 
-public static void TestIssue34151(ж<testing.T> Ꮡt) {
+public static void TestIssue34151(ж<testing.T> t) {
     @string asrc = asrcᶜ;
     @string bsrc = bsrcᶜ;
 
     var a = mustTypecheck(asrc, nil, nil);
 
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Importer: new importHelper(pkg: a));
+    ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: a)), out var Ꮡconf);
     mustTypecheck(bsrc, Ꮡconf, nil);
 }
 
@@ -574,10 +598,10 @@ partial struct importHelper {
 
 internal static (ж<types.Package>, error) Import(this importHelper h, @string path) {
     if (path == h.pkg.Path()) {
-        return (h.pkg, default!);
+        return (h.pkg, default);
     }
-    if (h.fallback == default!) {
-        return (default!, fmt.Errorf("got package path %q; want %q"u8, path, h.pkg.Path()));
+    if (h.fallback == nil) {
+        return (default, fmt.Errorf("got package path %q; want %q"u8, path, h.pkg.Path()));
     }
     return h.fallback.Import(path);
 }
@@ -588,26 +612,25 @@ internal static (ж<types.Package>, error) Import(this importHelper h, @string p
 // we must not set the underlying type of a.T again since that would lead to
 // a race condition if package b is imported elsewhere, in a package that is
 // concurrently type-checked.
-public static void TestIssue34921(ж<testing.T> Ꮡt) {
+public static void TestIssue34921(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             {
-                var r = recover(); if (r != default!) {
-                    Ꮡt.Error(r);
+                var r = recover(); if (r != nil) {
+                    t.Error(r);
                 }
             }
         }, ref ᒐ);
 
-        slice<@string> sources = new @string[]{
-            @"package a; type T int"u8,
-            @"package b; import ""a""; type T a.T"u8
-        }.slice();
+        slice<@string> sources = slice<@string>([
+            @"package a; type T int",
+            @"package b; import ""a""; type T a.T"
+        ]);
 
-        ж<types.Package> pkg = default!;
+        ж<types.Package> pkg = default;
         foreach (var (_, src) in sources) {
-            ref var conf = ref heap<types.Config>(out var Ꮡconf);
-            conf = new Config(Importer: new importHelper(pkg: pkg));
+            ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: pkg)), out var Ꮡconf);
             pkg = mustTypecheck(src, Ꮡconf, nil); // pkg imported by the next package in this test
         }
     }
@@ -615,7 +638,7 @@ public static void TestIssue34921(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestIssue43088(ж<testing.T> Ꮡt) {
+public static void TestIssue43088(ж<testing.T> t) {
     // type T1 struct {
     //         _ T2
     // }
@@ -625,14 +648,14 @@ public static void TestIssue43088(ж<testing.T> Ꮡt) {
     //                 _ T2
     //         }
     // }
-    var n1 = NewTypeName(nopos, nil, "T1"u8, default!);
-    var T1 = NewNamed(n1, default!, default!);
-    var n2 = NewTypeName(nopos, nil, "T2"u8, default!);
-    var T2 = NewNamed(n2, default!, default!);
-    var s1 = NewStruct(new ж<types.Var>[]{NewField(nopos, nil, "_"u8, new types.NamedжΔType(T2), false)}.slice(), default!);
+    var n1 = NewTypeName(nopos, nil, "T1", default);
+    var T1 = NewNamed(n1, default, default);
+    var n2 = NewTypeName(nopos, nil, "T2", default);
+    var T2 = NewNamed(n2, default, default);
+    var s1 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.NamedжΔType(T2), false)]), default);
     T1.SetUnderlying(new types.StructжΔType(s1));
-    var s2 = NewStruct(new ж<types.Var>[]{NewField(nopos, nil, "_"u8, new types.NamedжΔType(T2), false)}.slice(), default!);
-    var s3 = NewStruct(new ж<types.Var>[]{NewField(nopos, nil, "_"u8, new types.StructжΔType(s2), false)}.slice(), default!);
+    var s2 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.NamedжΔType(T2), false)]), default);
+    var s3 = NewStruct(slice<ж<types.Var>>([NewField(nopos, nil, "_", new types.StructжΔType(s2), false)]), default);
     T2.SetUnderlying(new types.StructжΔType(s3));
 
     // These calls must terminate (no endless recursion).
@@ -641,18 +664,22 @@ public static void TestIssue43088(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pointerˢ = "Pointer"u8;
-internal static readonly @string unsafePointerˢ = "unsafe.Pointer"u8;
-internal static readonly @string fooˢ = "foo"u8;
-internal static readonly @string fooPointerˢ = "foo.Pointer"u8;
+internal static ref readonly @string pointerˢ => ref pointerˢᵇ;
+private static readonly @string pointerˢᵇ = "Pointer"u8;
+internal static ref readonly @string unsafePointerˢ => ref unsafePointerˢᵇ;
+private static readonly @string unsafePointerˢᵇ = "unsafe.Pointer"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
+internal static ref readonly @string fooPointerˢ => ref fooPointerˢᵇ;
+private static readonly @string fooPointerˢᵇ = "foo.Pointer"u8;
 
-public static void TestIssue44515(ж<testing.T> Ꮡt) {
+public static void TestIssue44515(ж<testing.T> t) {
     var typ = Unsafe.Scope().Lookup(pointerˢ).Type();
 
-    @string got = TypeString(typ, default!);
+    @string got = TypeString(typ, default);
     @string want = unsafePointerˢ;
     if (got != want) {
-        Ꮡt.Errorf("got %q; want %q"u8, got, want);
+        t.Errorf("got %q; want %q", got, want);
     }
 
     var qf = @string (ж<types.Package> pkg) => {
@@ -664,15 +691,17 @@ public static void TestIssue44515(ж<testing.T> Ꮡt) {
     got = TypeString(typ, new Func<ж<types.Package>, @string>(qf));
     want = fooPointerˢ;
     if (got != want) {
-        Ꮡt.Errorf("got %q; want %q"u8, got, want);
+        t.Errorf("got %q; want %q", got, want);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string asrcᶜ1 = @"package a; import ""text/template""; func F(template.Template) {}; func G(int) {}"u8;
+internal static ref readonly @string asrcᶜ1 => ref asrcᶜ1ᵇ;
+private static readonly @string asrcᶜ1ᵇ = @"package a; import ""text/template""; func F(template.Template) {}; func G(int) {}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bsrcᶜ1 = """
+internal static ref readonly @string bsrcᶜ1 => ref bsrcᶜ1ᵇ;
+private static readonly @string bsrcᶜ1ᵇ = """
 
 package b
 
@@ -690,7 +719,8 @@ func _() {
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string csrcᶜ = """
+internal static ref readonly @string csrcᶜ => ref csrcᶜᵇ;
+private static readonly @string csrcᶜᵇ = """
 
 package c
 
@@ -711,7 +741,8 @@ func _() { a.G(template /* ERRORx "cannot use .*html/template.*Template" */ .Tem
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string tsrcᶜ = """
+internal static ref readonly @string tsrcᶜ => ref tsrcᶜᵇ;
+private static readonly @string tsrcᶜᵇ = """
 
 package template
 
@@ -724,12 +755,10 @@ var _ T = template /* ERRORx "cannot use.*text/template.* as T value" */.Templat
 
 """u8.Raw();
 
-public static void TestIssue43124(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIssue43124(ж<testing.T> t) {
     // TODO(rFindley) move this to testdata by enhancing support for importing.
 
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The go command is needed for the importer to determine the locations of stdlib .a files.
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t)); // The go command is needed for the importer to determine the locations of stdlib .a files.
 
     // All involved packages have the same name (template). Error messages should
     // disambiguate between text/template and html/template by printing the full
@@ -741,25 +770,25 @@ public static void TestIssue43124(ж<testing.T> Ꮡt) {
     @string tsrc = tsrcᶜ;
 
     var a = mustTypecheck(asrc, nil, nil);
-    ref var imp = ref heap<importHelper>(out var Ꮡimp);
-    imp = new importHelper(
+    ref var imp = ref heap<importHelper>(new importHelper(
         pkg: a,
         // TODO(adonovan): use same FileSet as mustTypecheck.
         fallback: defaultImporter(token.NewFileSet())
-    );
+    ), out var Ꮡimp);
 
     var impʗ1 = imp;
     var withImporter = (ж<types.Config> cfg) => {
-        cfg.Value.Importer = impʗ1;
+        cfg.Importer = impʗ1;
     };
 
-    testFiles(Ꮡt, new @string[]{"b.go"u8}.slice(), new slice<byte>[]{slice<byte>(bsrc)}.slice(), false, withImporter);
-    testFiles(Ꮡt, new @string[]{"c.go"u8}.slice(), new slice<byte>[]{slice<byte>(csrc)}.slice(), false, withImporter);
-    testFiles(Ꮡt, new @string[]{"t.go"u8}.slice(), new slice<byte>[]{slice<byte>(tsrc)}.slice(), false, withImporter);
+    testFiles(t, slice<@string>(["b.go"]), slice<slice<byte>>([slice<byte>(bsrc)]), false, withImporter);
+    testFiles(t, slice<@string>(["c.go"]), slice<slice<byte>>([slice<byte>(csrc)]), false, withImporter);
+    testFiles(t, slice<@string>(["t.go"]), slice<slice<byte>>([slice<byte>(tsrc)]), false, withImporter);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string comparableˢ = "comparable"u8;
+internal static ref readonly @string comparableˢ => ref comparableˢᵇ;
+private static readonly @string comparableˢᵇ = "comparable"u8;
 internal static readonly object anyIsNotAComparableTypeˢ = (@string)"any is not a comparable type"u8;
 internal static readonly object comparableIsNotAˢ = (@string)"comparable is not a comparable type"u8;
 internal static readonly object anyImplementsComparableˢ = (@string)"any implements comparable"u8;
@@ -767,33 +796,33 @@ internal static readonly object comparableDoesNotˢ = (@string)"comparable does 
 internal static readonly object anyAssignableToˢ = (@string)"any assignable to comparable"u8;
 internal static readonly object comparableNotAssignableˢ = (@string)"comparable not assignable to any"u8;
 
-public static void TestIssue50646(ж<testing.T> Ꮡt) {
+public static void TestIssue50646(ж<testing.T> t) {
     var anyType = Universe.Lookup(anyˢ).Type().Underlying();
     var comparableType = Universe.Lookup(comparableˢ).Type();
 
     if (!Comparable(anyType)) {
-        Ꮡt.Error(anyIsNotAComparableTypeˢ);
+        t.Error(anyIsNotAComparableTypeˢ);
     }
     if (!Comparable(comparableType)) {
-        Ꮡt.Error(comparableIsNotAˢ);
+        t.Error(comparableIsNotAˢ);
     }
 
     if (Implements(anyType, comparableType.Underlying()._<ж<types.Interface>>())) {
-        Ꮡt.Error(anyImplementsComparableˢ);
+        t.Error(anyImplementsComparableˢ);
     }
     if (!Implements(comparableType, anyType._<ж<types.Interface>>())) {
-        Ꮡt.Error(comparableDoesNotˢ);
+        t.Error(comparableDoesNotˢ);
     }
 
     if (AssignableTo(anyType, comparableType)) {
-        Ꮡt.Error(anyAssignableToˢ);
+        t.Error(anyAssignableToˢ);
     }
     if (!AssignableTo(comparableType, anyType)) {
-        Ꮡt.Error(comparableNotAssignableˢ);
+        t.Error(comparableNotAssignableˢ);
     }
 }
 
-public static void TestIssue55030(ж<testing.T> Ꮡt) {
+public static void TestIssue55030(ж<testing.T> t) {
     // makeSig makes the signature func(typ...)
     // If valid is not set, making that signature is expected to panic.
     void makeSig(typesꓸType typ, bool valid) {
@@ -802,7 +831,7 @@ public static void TestIssue55030(ж<testing.T> Ꮡt) {
             if (!valid) {
                 defer(() => {
                     var r = recover();
-                    if (r == default!) {
+                    if (r == nil) {
                         throw panic("NewSignatureType panic expected");
                     }
                     {
@@ -814,7 +843,7 @@ public static void TestIssue55030(ж<testing.T> Ꮡt) {
             }
             var par = NewParam(nopos, nil, ""u8, typ);
             var @params = NewTuple(par);
-            NewSignatureType(nil, default!, default!, @params, nil, true);
+            NewSignatureType(nil, default, default, @params, nil, true);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -829,23 +858,23 @@ public static void TestIssue55030(ж<testing.T> Ꮡt) {
 
     // P where P's common underlying type is string
     {
-        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P string]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.BasicжΔType(Typ[ΔString])}.slice())))), true);
+        var P = NewTypeName(nopos, nil, "P", default); // [P string]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.BasicжΔType(Typ[ΔString])]))))), true);
     }
 
     // P where P's common underlying type is an (unnamed) slice
     {
-        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P []int]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice())))), true);
+        var P = NewTypeName(nopos, nil, "P", default); // [P []int]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))]))))), true);
     }
 
     // P where P's type set contains strings and []byte
     {
-        var t1 = NewTerm(true, new types.BasicжΔType(Typ[ΔString])); // ~string
+        var t1 = NewTerm(true, new types.BasicжΔType(Typ[ΔString]));                                // ~string
         var t2 = NewTerm(false, new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Byte])))); // []byte
-        var u = NewUnion(new ж<typesꓸTerm>[]{t1, t2}.slice()); // ~string | []byte
-        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P ~string | []byte]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.UnionжΔType(u)}.slice())))), true);
+        var u = NewUnion(slice<ж<typesꓸTerm>>([t1, t2]));                                           // ~string | []byte
+        var P = NewTypeName(nopos, nil, "P", default);                                              // [P ~string | []byte]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.UnionжΔType(u)]))))), true);
     }
 
     // makeSig must panic for the following (example) types:
@@ -854,14 +883,14 @@ public static void TestIssue55030(ж<testing.T> Ꮡt) {
 
     // P where P's type set doesn't have any specific types
     {
-        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P any]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{Universe.Lookup(anyˢ).Type()}.slice())))), false);
+        var P = NewTypeName(nopos, nil, "P", default); // [P any]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([Universe.Lookup(anyˢ).Type()]))))), false);
     }
 
     // P where P's type set doesn't have any slice or string types
     {
-        var P = NewTypeName(nopos, nil, "P"u8, default!); // [P any]
-        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.BasicжΔType(Typ[Int])}.slice())))), false);
+        var P = NewTypeName(nopos, nil, "P", default); // [P any]
+        makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default, slice<typesꓸType>([new types.BasicжΔType(Typ[Int])]))))), false);
     }
 }
 
@@ -870,32 +899,32 @@ internal partial struct TestIssue51093_type /*dyn*/ {
     internal @string val;
 }
 
-public static void TestIssue51093(ж<testing.T> Ꮡt) {
+public static void TestIssue51093(ж<testing.T> t) {
     // Each test stands for a conversion of the form P(val)
     // where P is a type parameter with typ as constraint.
     // The test ensures that P(val) has the correct type P
     // and is not a constant.
-    slice<TestIssue51093_type> tests = new TestIssue51093_type[]{
-        new("bool"u8, "false"u8),
-        new("int"u8, "-1"u8),
-        new("uint"u8, "1.0"u8),
-        new("rune"u8, "'a'"u8),
-        new("float64"u8, "3.5"u8),
-        new("complex64"u8, "1.25"u8),
-        new("string"u8, "\"foo\""u8),
+    slice<TestIssue51093_type> tests = slice<TestIssue51093_type>([
+        new("bool", "false"),
+        new("int", "-1"),
+        new("uint", "1.0"),
+        new("rune", "'a'"),
+        new("float64", "3.5"),
+        new("complex64", "1.25"),
+        new("string", "\"foo\""),
 
         // some more complex constraints
-        new("~byte"u8, "1"u8),
-        new("~int | ~float64 | complex128"u8, "1"u8),
-        new("~uint64 | ~rune"u8, "'X'"u8)
-    }.slice();
+        new("~byte", "1"),
+        new("~int | ~float64 | complex128", "1"),
+        new("~uint64 | ~rune", "'X'")
+    ]);
 
     foreach (var (_, test) in tests) {
         @string src = fmt.Sprintf("package p; func _[P %s]() { _ = P(%s) }"u8, test.typ, test.val);
         var types = new map<ast.Expr, types.TypeAndValue>();
         mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
 
-        nint n = default!;
+        nint n = default;
         foreach (var (x, tv) in types) {
             {
                 var (xΔ1, _) = x._<ж<ast.CallExpr>>(ᐧ); if (xΔ1 != nil) {
@@ -903,23 +932,23 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
                     n++;
                     var (tpar, _) = tv.Type._<ж<types.TypeParam>>(ᐧ);
                     if (tpar == nil) {
-                        Ꮡt.Fatalf("%s: got type %s, want type parameter"u8, ExprString(new ast.CallExprжExpr(xΔ1)), tv.Type);
+                        t.Fatalf("%s: got type %s, want type parameter", ExprString(new ast.CallExprжExpr(xΔ1)), tv.Type);
                     }
                     {
                         @string name = tpar.Obj().Name(); if (name != "P"u8) {
-                            Ꮡt.Fatalf("%s: got type parameter name %s, want P"u8, ExprString(new ast.CallExprжExpr(xΔ1)), name);
+                            t.Fatalf("%s: got type parameter name %s, want P", ExprString(new ast.CallExprжExpr(xΔ1)), name);
                         }
                     }
                     // P(val) must not be constant
-                    if (tv.Value != default!) {
-                        Ꮡt.Errorf("%s: got constant value %s (%s), want no constant"u8, ExprString(new ast.CallExprжExpr(xΔ1)), tv.Value, tv.Value.String());
+                    if (tv.Value != nil) {
+                        t.Errorf("%s: got constant value %s (%s), want no constant", ExprString(new ast.CallExprжExpr(xΔ1)), tv.Value, tv.Value.String());
                     }
                 }
             }
         }
 
         if (n != 1) {
-            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)1);
+            t.Fatalf("%s: got %d CallExpr nodes; want 1", src, (nint)1);
         }
     }
 }
@@ -931,10 +960,8 @@ internal partial struct TestIssue54258_tests /*dyn*/ {
     internal @string main, b, want;
 }
 
-public static void TestIssue54258(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var tests = new TestIssue54258_tests[]{
+public static void TestIssue54258(ж<testing.T> t) {
+    var tests = slice<TestIssue54258_tests>([
         new( //---------------------------------------------------------------
             """
 package main
@@ -1068,7 +1095,7 @@ func (S) M5(struct {S;t}) {}
 .*have M5[(]struct{b[.]S; b[.]t}[)]
 .*want M5[(]struct{b[.]S; t}[)]
 """u8.Raw())
-    }.slice();
+    ]);
 
     var fset = token.NewFileSet();
     var fsetʗ1 = fset;
@@ -1076,18 +1103,15 @@ func (S) M5(struct {S;t}) {}
         var re = regexp.MustCompile(want);
         var bpkg = mustTypecheck(b, nil, nil);
         var mast = mustParse(fsetʗ1, main);
-        ref var conf = ref heap<types.Config>(out var Ꮡconf);
-        conf = new Config(Importer: new importHelper(pkg: bpkg));
-        var (_, err) = Ꮡconf.Check((~(~mast).Name).Name, fsetʗ1, new ж<ast.File>[]{mast}.slice(), nil);
-        if (err == default!){
-            Ꮡt.Error(expectedFailureButItDidˢ);
-        } else 
-        {
-            @string got = err.Error(); if (!re.MatchString(got)){
-                Ꮡt.Errorf("Wanted match for\n\t%s\n but got\n\t%s"u8, want, got);
-            } else 
-            if (testing.Verbose()) {
-                Ꮡt.Logf("Saw expected\n\t%s"u8, err.Error());
+        ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: bpkg)), out var Ꮡconf);
+        var (_, err) = Ꮡconf.Check(mast.Name.Name, fsetʗ1, slice<ж<ast.File>>([mast]), nil);
+        if (err == nil) {
+            t.Error(expectedFailureButItDidˢ);
+        } else {
+            @string got = err.Error(); if (!re.MatchString(got)) {
+                t.Errorf("Wanted match for\n\t%s\n but got\n\t%s", want, got);
+            } else if (testing.Verbose()) {
+                t.Logf("Saw expected\n\t%s", err.Error());
             }
         }
     }
@@ -1097,10 +1121,12 @@ func (S) M5(struct {S;t}) {}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string go115UsesCgoˢ = "go115UsesCgo"u8;
+internal static ref readonly @string go115UsesCgoˢ => ref go115UsesCgoˢᵇ;
+private static readonly @string go115UsesCgoˢᵇ = "go115UsesCgo"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ22 = """
+internal static ref readonly @string srcᶜ22 => ref srcᶜ22ᵇ;
+private static readonly @string srcᶜ22ᵇ = """
 // -gotypesalias=1
 
 package p
@@ -1117,7 +1143,8 @@ func (*Layout /* ERROR "cannot define new methods on non-local type Layout" */) 
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string cgoTypesᶜ = """
+internal static ref readonly @string cgoTypesᶜ => ref cgoTypesᶜᵇ;
+private static readonly @string cgoTypesᶜᵇ = """
 
 // Code generated by cmd/cgo; DO NOT EDIT.
 
@@ -1160,15 +1187,15 @@ func _cgoCheckResult(interface{})
 
 """u8.Raw();
 
-public static void TestIssue59944(ж<testing.T> Ꮡt) {
-    testenv.MustHaveCGO(new types_test_package.testing_TжTB(Ꮡt));
+public static void TestIssue59944(ж<testing.T> t) {
+    testenv.MustHaveCGO(new types_test_package.testing_TжTB(t));
 
     // Methods declared on aliases of cgo types are not permitted.
     @string src = srcᶜ22;
 
     // code generated by cmd/cgo for the above source.
     @string cgoTypes = cgoTypesᶜ;
-    testFiles(Ꮡt, new @string[]{"p.go"u8, "_cgo_gotypes.go"u8}.slice(), new slice<byte>[]{slice<byte>(src), slice<byte>(cgoTypes)}.slice(), false, (ж<types.Config> cfg) => {
+    testFiles(t, slice<@string>(["p.go", "_cgo_gotypes.go"]), slice<slice<byte>>([slice<byte>(src), slice<byte>(cgoTypes)]), false, (ж<types.Config> cfg) => {
         boolFieldAddr(cfg, go115UsesCgoˢ).Value = true;
     });
 }
@@ -1177,7 +1204,8 @@ public static void TestIssue59944(ж<testing.T> Ꮡt) {
 internal static readonly object expectedSyntaxErrorˢ = (@string)"expected syntax error"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ23 = """
+internal static ref readonly @string srcᶜ23 => ref srcᶜ23ᵇ;
+private static readonly @string srcᶜ23ᵇ = """
 
 package p
 
@@ -1190,20 +1218,21 @@ func _() {
 
 """u8.Raw();
 
-public static void TestIssue61931(ж<testing.T> Ꮡt) {
+public static void TestIssue61931(ж<testing.T> t) {
     @string src = srcᶜ23;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, pkgName(src), src, 0);
-    if (err == default!) {
-        Ꮡt.Fatal(expectedSyntaxErrorˢ);
+    if (err == nil) {
+        t.Fatal(expectedSyntaxErrorˢ);
     }
 
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    Ꮡconf.Check((~(~f).Name).Name, fset, new ж<ast.File>[]{f}.slice(), nil); // must not panic
+    Ꮡconf.Check(f.Name.Name, fset, slice<ж<ast.File>>([f]), nil); // must not panic
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ24 = """
+internal static ref readonly @string srcᶜ24 => ref srcᶜ24ᵇ;
+private static readonly @string srcᶜ24ᵇ = """
 
 package p
 
@@ -1212,7 +1241,7 @@ func _()        { f() }
 
 """u8.Raw();
 
-public static void TestIssue61938(ж<testing.T> Ꮡt) {
+public static void TestIssue61938(ж<testing.T> t) {
     @string src = srcᶜ24;
     // no error handler provided (this issue)
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
@@ -1228,7 +1257,8 @@ public static void TestIssue61938(ж<testing.T> Ꮡt) {
 internal static readonly object variableVNotFoundˢ = (@string)"variable v not found"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ25 = """
+internal static ref readonly @string srcᶜ25 => ref srcᶜ25ᵇ;
+private static readonly @string srcᶜ25ᵇ = """
 
 package p
 
@@ -1244,36 +1274,35 @@ func f[I *T, T any]() {
 }
 """u8.Raw();
 
-public static void TestIssue63260(ж<testing.T> Ꮡt) {
+public static void TestIssue63260(ж<testing.T> t) {
     @string src = srcᶜ25;
 
-    ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
-    info = new typesꓸInfo(
+    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
         Defs: new map<ж<ast.Ident>, types.Object>()
-    );
+    ), out var Ꮡinfo);
     var pkg = mustTypecheck(src, nil, Ꮡinfo);
 
     // get type parameter T in signature of f
-    var T = pkg.Scope().Lookup("f"u8).Type()._<ж<typesꓸSignature>>().TypeParams().At(1);
+    var T = pkg.Scope().Lookup("f").Type()._<ж<typesꓸSignature>>().TypeParams().At(1);
     if (T.Obj().Name() != "T"u8) {
-        Ꮡt.Fatalf("got type parameter %s, want T"u8, T.OrTypedNil());
+        t.Fatalf("got type parameter %s, want T", T.OrTypedNil());
     }
 
     // get type of variable v in body of f
-    types.Object v = default!;
+    types.Object v = default;
     foreach (var (name, obj) in info.Defs) {
-        if ((~name).Name == "v"u8) {
+        if (name.Name == "v"u8) {
             v = obj;
             break;
         }
     }
-    if (v == default!) {
-        Ꮡt.Fatal(variableVNotFoundˢ);
+    if (v == nil) {
+        t.Fatal(variableVNotFoundˢ);
     }
 
     // type of v and T must be pointer-identical
     if (!AreEqual(v.Type(), T)) {
-        Ꮡt.Fatalf("types of v and T are not pointer-identical: %p != %p"u8, v.Type()._<ж<types.TypeParam>>().OrTypedNil(), T.OrTypedNil());
+        t.Fatalf("types of v and T are not pointer-identical: %p != %p", v.Type()._<ж<types.TypeParam>>().OrTypedNil(), T.OrTypedNil());
     }
 }
 
@@ -1281,7 +1310,8 @@ public static void TestIssue63260(ж<testing.T> Ꮡt) {
 internal static readonly object objectSNotFoundˢ = (@string)"object S not found"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ26 = """
+internal static ref readonly @string srcᶜ26 => ref srcᶜ26ᵇ;
+private static readonly @string srcᶜ26ᵇ = """
 
 package p
 
@@ -1291,40 +1321,41 @@ type S struct{ A }
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ3 = "type p.S struct{p.A}"u8;
+internal static ref readonly @string wantᶜ3 => ref wantᶜ3ᵇ;
+private static readonly @string wantᶜ3ᵇ = "type p.S struct{p.A}"u8;
 
-public static void TestIssue44410(ж<testing.T> Ꮡt) {
+public static void TestIssue44410(ж<testing.T> t) {
     @string src = srcᶜ26;
 
-    Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
+    t.Setenv(godebugˢ, gotypesalias1ˢ);
     var pkg = mustTypecheck(src, nil, nil);
 
-    var S = pkg.Scope().Lookup("S"u8);
-    if (S == default!) {
-        Ꮡt.Fatal(objectSNotFoundˢ);
+    var S = pkg.Scope().Lookup("S");
+    if (S == nil) {
+        t.Fatal(objectSNotFoundˢ);
     }
 
     @string got = S.String();
     @string want = wantᶜ3;
     if (got != want) {
-        Ꮡt.Fatalf("got %q; want %q"u8, got, want);
+        t.Fatalf("got %q; want %q", got, want);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string asrcᶜ2 = @"package a; type S struct{}; func (S) m() {}"u8;
+internal static ref readonly @string asrcᶜ2 => ref asrcᶜ2ᵇ;
+private static readonly @string asrcᶜ2ᵇ = @"package a; type S struct{}; func (S) m() {}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bsrcᶜ2 = @"package b; type S struct{}; func (S) M() {}"u8;
+internal static ref readonly @string bsrcᶜ2 => ref bsrcᶜ2ᵇ;
+private static readonly @string bsrcᶜ2ᵇ = @"package b; type S struct{}; func (S) M() {}"u8;
 
 internal partial struct TestIssue59831_tests /*dyn*/ {
     internal ж<types.Package> imported;
     internal @string src, err;
 }
 
-public static void TestIssue59831(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIssue59831(ж<testing.T> t) {
     // Package a exports a type S with an unexported method m;
     // the tests check the error messages when m is not found.
     @string asrc = asrcᶜ2;
@@ -1335,68 +1366,68 @@ public static void TestIssue59831(ж<testing.T> Ꮡt) {
     @string bsrc = bsrcᶜ2;
     var bpkg = mustTypecheck(bsrc, nil, nil);
 
-    var tests = new TestIssue59831_tests[]{
+    var tests = slice<TestIssue59831_tests>([
         // tests importing a (or nothing)
-        new(apkg, @"package a1; import ""a""; var _ interface { M() } = a.S{}"u8,
-            "a.S does not implement interface{M()} (missing method M) have m() want M()"u8),
+        new(apkg, @"package a1; import ""a""; var _ interface { M() } = a.S{}",
+            "a.S does not implement interface{M()} (missing method M) have m() want M()"),
 
-        new(apkg, @"package a2; import ""a""; var _ interface { m() } = a.S{}"u8,
-            "a.S does not implement interface{m()} (unexported method m)"u8), // test for issue
+        new(apkg, @"package a2; import ""a""; var _ interface { m() } = a.S{}",
+            "a.S does not implement interface{m()} (unexported method m)"), // test for issue
 
-        new(nil, @"package a3; type S struct{}; func (S) m(); var _ interface { M() } = S{}"u8,
-            "S does not implement interface{M()} (missing method M) have m() want M()"u8),
+        new(nil, @"package a3; type S struct{}; func (S) m(); var _ interface { M() } = S{}",
+            "S does not implement interface{M()} (missing method M) have m() want M()"),
 
-        new(nil, @"package a4; type S struct{}; func (S) m(); var _ interface { m() } = S{}"u8,
-            ""u8), // no error expected
+        new(nil, @"package a4; type S struct{}; func (S) m(); var _ interface { m() } = S{}",
+            ""), // no error expected
 
-        new(nil, @"package a5; type S struct{}; func (S) m(); var _ interface { n() } = S{}"u8,
-            "S does not implement interface{n()} (missing method n)"u8),
+        new(nil, @"package a5; type S struct{}; func (S) m(); var _ interface { n() } = S{}",
+            "S does not implement interface{n()} (missing method n)"),
 
         // tests importing b (or nothing)
-        new(bpkg, @"package b1; import ""b""; var _ interface { m() } = b.S{}"u8,
-            "b.S does not implement interface{m()} (missing method m) have M() want m()"u8),
+        new(bpkg, @"package b1; import ""b""; var _ interface { m() } = b.S{}",
+            "b.S does not implement interface{m()} (missing method m) have M() want m()"),
 
-        new(bpkg, @"package b2; import ""b""; var _ interface { M() } = b.S{}"u8,
-            ""u8), // no error expected
+        new(bpkg, @"package b2; import ""b""; var _ interface { M() } = b.S{}",
+            ""), // no error expected
 
-        new(nil, @"package b3; type S struct{}; func (S) M(); var _ interface { M() } = S{}"u8,
-            ""u8), // no error expected
+        new(nil, @"package b3; type S struct{}; func (S) M(); var _ interface { M() } = S{}",
+            ""), // no error expected
 
-        new(nil, @"package b4; type S struct{}; func (S) M(); var _ interface { m() } = S{}"u8,
-            "S does not implement interface{m()} (missing method m) have M() want m()"u8),
+        new(nil, @"package b4; type S struct{}; func (S) M(); var _ interface { m() } = S{}",
+            "S does not implement interface{m()} (missing method m) have M() want m()"),
 
-        new(nil, @"package b5; type S struct{}; func (S) M(); var _ interface { n() } = S{}"u8,
-            "S does not implement interface{n()} (missing method n)"u8)
-    }.slice();
+        new(nil, @"package b5; type S struct{}; func (S) M(); var _ interface { n() } = S{}",
+            "S does not implement interface{n()} (missing method n)")
+    ]);
 
     foreach (var (_, test) in tests) {
         // typecheck test source
-        ref var conf = ref heap<types.Config>(out var Ꮡconf);
-        conf = new Config(Importer: new importHelper(pkg: test.imported));
+        ref var conf = ref heap<types.Config>(new Config(Importer: new importHelper(pkg: test.imported)), out var Ꮡconf);
         var (pkg, err) = typecheck(test.src, Ꮡconf, nil);
-        if (err == default!) {
+        if (err == nil) {
             if (test.err != ""u8) {
-                Ꮡt.Errorf("package %s: got no error, want %q"u8, pkg.Name(), test.err);
+                t.Errorf("package %s: got no error, want %q", pkg.Name(), test.err);
             }
             continue;
         }
         if (test.err == ""u8) {
-            Ꮡt.Errorf("package %s: got %q, want not error"u8, pkg.Name(), err.Error());
+            t.Errorf("package %s: got %q, want not error", pkg.Name(), err.Error());
         }
 
         // flatten reported error message
-        @string errmsg = strings.ReplaceAll(err.Error(), "\n"u8, " "u8);
-        errmsg = strings.ReplaceAll(errmsg, "\t"u8, ""u8);
+        @string errmsg = strings.ReplaceAll(err.Error(), "\n", " ");
+        errmsg = strings.ReplaceAll(errmsg, "\t", ""u8);
 
         // verify error message
         if (!strings.Contains(errmsg, test.err)) {
-            Ꮡt.Errorf("package %s: got %q, want %q"u8, pkg.Name(), errmsg, test.err);
+            t.Errorf("package %s: got %q, want %q", pkg.Name(), errmsg, test.err);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ27 = """
+internal static ref readonly @string srcᶜ27 => ref srcᶜ27ᵇ;
+private static readonly @string srcᶜ27ᵇ = """
 
 //go:build go1.18
 package p
@@ -1409,17 +1440,17 @@ func _() {
 
 """u8.Raw();
 
-public static void TestIssue64759(ж<testing.T> Ꮡt) {
+public static void TestIssue64759(ж<testing.T> t) {
     @string src = srcᶜ27;
     // Per the go:build directive, the source must typecheck
     // even though the (module) Go version is set to go1.17.
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(GoVersion: "go1.17"u8);
+    ref var conf = ref heap<types.Config>(new Config(GoVersion: "go1.17"), out var Ꮡconf);
     mustTypecheck(src, Ꮡconf, nil);
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ28 = """
+internal static ref readonly @string srcᶜ28 => ref srcᶜ28ᵇ;
+private static readonly @string srcᶜ28ᵇ = """
 
 package p
 
@@ -1435,27 +1466,27 @@ func f(x int) {
 
 """u8.Raw();
 
-public static void TestIssue68334(ж<testing.T> Ꮡt) {
+public static void TestIssue68334(ж<testing.T> t) {
     @string src = srcᶜ28;
 
     @string got = ""u8;
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(
-        GoVersion: "go1.21"u8, // #68334 requires GoVersion <= 1.21
+    ref var conf = ref heap<types.Config>(new Config(
+        GoVersion: "go1.21", // #68334 requires GoVersion <= 1.21
         Error: (error err) => {
             got += err.Error() + "\n"u8;
-        } // #68334 requires Error != nil
-    );
+        }                    // #68334 requires Error != nil
+    ), out var Ꮡconf);
     typecheck(src, Ꮡconf, nil); // do not crash
 
     @string want = "p:5:20: cannot range over x (variable of type int): requires go1.22 or later\n"u8 + "p:9:19: cannot range over x (variable of type int): requires go1.22 or later\n"u8;
     if (got != want) {
-        Ꮡt.Errorf("got: %s want: %s"u8, got, want);
+        t.Errorf("got: %s want: %s", got, want);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ29 = """
+internal static ref readonly @string srcᶜ29 => ref srcᶜ29ᵇ;
+private static readonly @string srcᶜ29ᵇ = """
 
 package p
 
@@ -1467,18 +1498,19 @@ type (
 """u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ4 = "type p.T struct{}"u8;
+internal static ref readonly @string wantᶜ4 => ref wantᶜ4ᵇ;
+private static readonly @string wantᶜ4ᵇ = "type p.T struct{}"u8;
 
-public static void TestIssue68877(ж<testing.T> Ꮡt) {
+public static void TestIssue68877(ж<testing.T> t) {
     @string src = srcᶜ29;
 
-    Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
+    t.Setenv(godebugˢ, gotypesalias1ˢ);
     var pkg = mustTypecheck(src, nil, nil);
-    var T = pkg.Scope().Lookup("T"u8)._<ж<types.TypeName>>();
+    var T = pkg.Scope().Lookup("T")._<ж<types.TypeName>>();
     @string got = T.String(); // this must not panic (was issue)
     @string want = wantᶜ4;
     if (got != want) {
-        Ꮡt.Errorf("got %s, want %s"u8, got, want);
+        t.Errorf("got %s, want %s", got, want);
     }
 }
 
@@ -1486,7 +1518,8 @@ public static void TestIssue68877(ж<testing.T> Ꮡt) {
 internal static readonly object noTypeFoundForXˢ = (@string)"no type found for {x}"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ30 = """
+internal static ref readonly @string srcᶜ30 => ref srcᶜ30ᵇ;
+private static readonly @string srcᶜ30ᵇ = """
 
 package p
 
@@ -1494,29 +1527,27 @@ var _ = T{{x}}
 
 """u8.Raw();
 
-public static void TestIssue69092(ж<testing.T> Ꮡt) {
+public static void TestIssue69092(ж<testing.T> t) {
     @string src = srcᶜ30;
 
     var fset = token.NewFileSet();
     var @file = mustParse(fset, src);
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Error: (error err) => {
-    }); // ignore errors
-    ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
-    info = new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>());
-    Ꮡconf.Check("p"u8, fset, new ж<ast.File>[]{@file}.slice(), Ꮡinfo);
+    ref var conf = ref heap<types.Config>(new Config(Error: (error err) => {
+    }), out var Ꮡconf); // ignore errors
+    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>()), out var Ꮡinfo);
+    Ꮡconf.Check("p", fset, slice<ж<ast.File>>([@file]), Ꮡinfo);
 
     // look for {x} expression
-    var outer = (~(~(~@file).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>()).Values[0]._<ж<ast.CompositeLit>>(); // T{{x}}
-    var inner = (~outer).Elts[0]; // {x}
+    var outer = @file.Decls[0]._<ж<ast.GenDecl>>().Specs[0]._<ж<ast.ValueSpec>>().Values[0]._<ж<ast.CompositeLit>>(); // T{{x}}
+    var inner = outer.Elts[0];                                                                                        // {x}
 
     // type of {x} must have been recorded
     var (tv, ok) = info.Types[inner, ꟷ];
     if (!ok) {
-        Ꮡt.Fatal(noTypeFoundForXˢ);
+        t.Fatal(noTypeFoundForXˢ);
     }
     if (!AreEqual(tv.Type, Typ[Invalid])) {
-        Ꮡt.Fatalf("unexpected type for {x}: %s"u8, tv.Type);
+        t.Fatalf("unexpected type for {x}: %s", tv.Type);
     }
 }
 

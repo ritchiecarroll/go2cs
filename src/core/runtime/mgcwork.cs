@@ -12,7 +12,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(workbuf))]
 partial class runtime_package {
 
 internal static UntypedInt _WorkbufSize => 2048; // in bytes; larger values result in less contention
@@ -27,7 +26,7 @@ internal static UntypedInt workbufAlloc => /* 32 << 10 */ 32768;
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ3() {
     if (workbufAlloc % pageSize != 0 || workbufAlloc % _WorkbufSize != 0) {
-        @throw("bad workbufAlloc"u8);
+        @throw("bad workbufAlloc");
     }
 }
 
@@ -152,17 +151,16 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
     // Record that this may acquire the wbufSpans or heap lock to
     // allocate a workbuf.
-    lockWithRankMayAcquire(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock), lockRankWbufSpans);
-    lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
-    if (wbuf == nil){
+    lockWithRankMayAcquire(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock), lockRankWbufSpans);
+    lockWithRankMayAcquire(Ꮡmheap_.Ꮡlock, lockRankMheap);
+    if (wbuf == nil) {
         w.init();
         wbuf = w.wbuf1;
         // wbuf is empty at this point.
-    } else 
-    if ((~wbuf).nobj == len((~wbuf).obj)) {
+    } else if (wbuf.nobj == len(wbuf.obj)) {
         (w.wbuf1, w.wbuf2) = (w.wbuf2, w.wbuf1);
         wbuf = w.wbuf1;
-        if ((~wbuf).nobj == len((~wbuf).obj)) {
+        if (wbuf.nobj == len(wbuf.obj)) {
             putfull(wbuf);
             w.flushedWork = true;
             wbuf = getempty();
@@ -171,15 +169,15 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
         }
     }
 
-    wbuf.Value.obj[(~wbuf).nobj] = obj;
-    wbuf.Value.nobj++;
+    wbuf.obj[wbuf.nobj] = obj;
+    wbuf.nobj++;
 
     // If we put a buffer on full, let the GC controller know so
     // it can encourage more workers to run. We delay this until
     // the end of put so that w is in a consistent state, since
     // enlistWorker may itself manipulate w.
     if (flushed && gcphase == _GCmark) {
-        if (goexperiment.GreenTeaGC){
+        if (goexperiment.GreenTeaGC) {
             w.mayNeedWorker = true;
         } else {
             ᏑgcController.enlistWorker();
@@ -193,12 +191,12 @@ internal static void putObj(this ref gcWork w, uintptr obj) {
 //go:nowritebarrierrec
 internal static bool putObjFast(this ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
-    if (wbuf == nil || (~wbuf).nobj == len((~wbuf).obj)) {
+    if (wbuf == nil || wbuf.nobj == len(wbuf.obj)) {
         return false;
     }
 
-    wbuf.Value.obj[(~wbuf).nobj] = obj;
-    wbuf.Value.nobj++;
+    wbuf.obj[wbuf.nobj] = obj;
+    wbuf.nobj++;
     return true;
 }
 
@@ -219,20 +217,20 @@ internal static void putObjBatch(this ref gcWork w, slice<uintptr> obj) {
     }
 
     while (len(obj) > 0) {
-        while ((~wbuf).nobj == len((~wbuf).obj)) {
+        while (wbuf.nobj == len(wbuf.obj)) {
             putfull(wbuf);
             w.flushedWork = true;
             (w.wbuf1, w.wbuf2) = (w.wbuf2, getempty());
             wbuf = w.wbuf1;
             flushed = true;
         }
-        nint n = copy((~wbuf).obj.slice((~wbuf).nobj), obj);
-        wbuf.Value.nobj += n;
+        nint n = copy(wbuf.obj.slice(wbuf.nobj), obj);
+        wbuf.nobj += n;
         obj = obj.slice(n);
     }
 
     if (flushed && gcphase == _GCmark) {
-        if (goexperiment.GreenTeaGC){
+        if (goexperiment.GreenTeaGC) {
             w.mayNeedWorker = true;
         } else {
             ᏑgcController.enlistWorker();
@@ -254,10 +252,10 @@ internal static uintptr tryGetObj(this ref gcWork w) {
         wbuf = w.wbuf1;
         // wbuf is empty at this point.
     }
-    if ((~wbuf).nobj == 0) {
+    if (wbuf.nobj == 0) {
         (w.wbuf1, w.wbuf2) = (w.wbuf2, w.wbuf1);
         wbuf = w.wbuf1;
-        if ((~wbuf).nobj == 0) {
+        if (wbuf.nobj == 0) {
             var owbuf = wbuf;
             wbuf = trygetfull();
             if (wbuf == nil) {
@@ -268,8 +266,8 @@ internal static uintptr tryGetObj(this ref gcWork w) {
         }
     }
 
-    wbuf.Value.nobj--;
-    return (~wbuf).obj[(~wbuf).nobj];
+    wbuf.nobj--;
+    return wbuf.obj[wbuf.nobj];
 }
 
 // tryGetObjFast dequeues a pointer for the garbage collector to trace
@@ -279,12 +277,12 @@ internal static uintptr tryGetObj(this ref gcWork w) {
 //go:nowritebarrierrec
 internal static uintptr tryGetObjFast(this ref gcWork w) {
     var wbuf = w.wbuf1;
-    if (wbuf == nil || (~wbuf).nobj == 0) {
+    if (wbuf == nil || wbuf.nobj == 0) {
         return 0;
     }
 
-    wbuf.Value.nobj--;
-    return (~wbuf).obj[(~wbuf).nobj];
+    wbuf.nobj--;
+    return wbuf.obj[wbuf.nobj];
 }
 
 // dispose returns any cached pointers to the global queue.
@@ -299,26 +297,26 @@ internal static void dispose(this ж<gcWork> Ꮡw) {
 
     {
         var wbuf = w.wbuf1; if (wbuf != nil) {
-            if ((~wbuf).nobj == 0){
+            if (wbuf.nobj == 0) {
                 putempty(wbuf);
             } else {
                 putfull(wbuf);
                 w.flushedWork = true;
             }
-            w.wbuf1 = default!;
+            w.wbuf1 = default;
 
             wbuf = w.wbuf2;
-            if ((~wbuf).nobj == 0){
+            if (wbuf.nobj == 0) {
                 putempty(wbuf);
             } else {
                 putfull(wbuf);
                 w.flushedWork = true;
             }
-            w.wbuf2 = default!;
+            w.wbuf2 = default;
         }
     }
-    if (!Ꮡw.of(gcWork.Ꮡspanq).empty()) {
-        Ꮡw.of(gcWork.Ꮡspanq).flush(); // Flush any local work.
+    if (!Ꮡw.Ꮡspanq.empty()) {
+        Ꮡw.Ꮡspanq.flush(); // Flush any local work.
 
         // There's globally-visible work now, so make everyone aware of it.
         //
@@ -336,11 +334,11 @@ internal static void dispose(this ж<gcWork> Ꮡw) {
         // atomic becomes a problem, we should first try to
         // dispose less and if necessary aggregate in a per-P
         // counter.
-        atomic.Xadd64(Ꮡwork.of(workType.ᏑbytesMarked), (int64)w.bytesMarked);
+        atomic.Xadd64(Ꮡwork.ᏑbytesMarked, (int64)w.bytesMarked);
         w.bytesMarked = 0;
     }
     if (w.heapScanWork != 0) {
-        ᏑgcController.of(gcControllerState.ᏑheapScanWork).Add(w.heapScanWork);
+        ᏑgcController.ᏑheapScanWork.Add(w.heapScanWork);
         w.heapScanWork = 0;
     }
 }
@@ -354,13 +352,12 @@ internal static void balance(this ref gcWork w) {
         return;
     }
     {
-        var wbuf = w.wbuf2; if ((~wbuf).nobj != 0){
+        var wbuf = w.wbuf2; if (wbuf.nobj != 0) {
             putfull(wbuf);
             w.flushedWork = true;
             w.wbuf2 = getempty();
-        } else 
-        {
-            var wbufΔ1 = w.wbuf1; if ((~wbufΔ1).nobj > 4){
+        } else {
+            var wbufΔ1 = w.wbuf1; if (wbufΔ1.nobj > 4) {
                 w.wbuf1 = handoff(wbufΔ1);
                 w.flushedWork = true; // handoff did putfull
             } else {
@@ -370,7 +367,7 @@ internal static void balance(this ref gcWork w) {
     }
     // We flushed a buffer to the full list, so wake a worker.
     if (gcphase == _GCmark) {
-        if (goexperiment.GreenTeaGC){
+        if (goexperiment.GreenTeaGC) {
             w.mayNeedWorker = true;
         } else {
             ᏑgcController.enlistWorker();
@@ -384,7 +381,7 @@ internal static void balance(this ref gcWork w) {
 internal static bool empty(this ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    return (w.wbuf1 == nil || ((~w.wbuf1).nobj == 0 && (~w.wbuf2).nobj == 0)) && Ꮡw.of(gcWork.Ꮡspanq).empty();
+    return (w.wbuf1 == nil || (w.wbuf1.nobj == 0 && w.wbuf2.nobj == 0)) && Ꮡw.Ꮡspanq.empty();
 }
 
 // Internally, the GC work pool is kept in arrays in work buffers.
@@ -403,7 +400,8 @@ partial struct workbuf {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string workbufIsEmptyˢ = "workbuf is empty"u8;
+internal static ref readonly @string workbufIsEmptyˢ => ref workbufIsEmptyˢᵇ;
+private static readonly @string workbufIsEmptyˢᵇ = "workbuf is empty"u8;
 
 // workbuf factory routines. These funcs are used to manage the
 // workbufs.
@@ -416,7 +414,8 @@ internal static void checknonempty(this ref workbuf b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string workbufIsNotEmptyˢ = "workbuf is not empty"u8;
+internal static ref readonly @string workbufIsNotEmptyˢ => ref workbufIsNotEmptyˢᵇ;
+private static readonly @string workbufIsNotEmptyˢᵇ = "workbuf is not empty"u8;
 
 internal static void checkempty(this ref workbuf b) {
     if (b.nobj != 0) {
@@ -429,28 +428,28 @@ internal static void checkempty(this ref workbuf b) {
 //
 //go:nowritebarrier
 internal static ж<workbuf> getempty() {
-    ж<workbuf> b = default!;
+    ж<workbuf> b = default;
     if (work.empty != 0) {
-        b = (ж<workbuf>)(uintptr)(Ꮡwork.of(workType.Ꮡempty).pop());
+        b = (ж<workbuf>)(uintptr)(Ꮡwork.Ꮡempty.pop());
         if (b != nil) {
             b.checkempty();
         }
     }
     // Record that this may acquire the wbufSpans or heap lock to
     // allocate a workbuf.
-    lockWithRankMayAcquire(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock), lockRankWbufSpans);
-    lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
+    lockWithRankMayAcquire(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock), lockRankWbufSpans);
+    lockWithRankMayAcquire(Ꮡmheap_.Ꮡlock, lockRankMheap);
     if (b == nil) {
         // Allocate more workbufs.
         ref var s = ref heap<ж<mspan>>(out var Ꮡs);
         if (work.wbufSpans.free.first != nil) {
-            @lock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+            @lock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
             s = work.wbufSpans.free.first;
             if (s != nil) {
-                Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡfree).remove(s);
-                Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡbusy).insert(s);
+                Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡfree).remove(s);
+                Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡbusy).insert(s);
             }
-            unlock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+            unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
         }
         if (s == nil) {
             systemstack(() => {
@@ -460,9 +459,9 @@ internal static ж<workbuf> getempty() {
                 @throw(outOfMemoryˢ);
             }
             // Record the new span in the busy list.
-            @lock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
-            Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡbusy).insert(s);
-            unlock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+            @lock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
+            Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡbusy).insert(s);
+            unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
         }
         // Slice up the span into new workbufs. Return one and
         // put the rest on the empty list.
@@ -470,7 +469,7 @@ internal static ж<workbuf> getempty() {
             var newb = (ж<workbuf>)(uintptr)((@unsafe.Pointer)(s.@base() + i));
             newb.workbufhdr.nobj = 0;
             lfnodeValidate(newb.of(workbuf.Ꮡnode));
-            if (i == 0){
+            if (i == 0) {
                 b = newb;
             } else {
                 putempty(newb);
@@ -488,7 +487,7 @@ internal static void putempty(ж<workbuf> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.checkempty();
-    Ꮡwork.of(workType.Ꮡempty).push(Ꮡb.of(workbuf.Ꮡnode));
+    Ꮡwork.Ꮡempty.push(Ꮡb.of(workbuf.Ꮡnode));
 }
 
 // putfull puts the workbuf on the work.full list for the GC.
@@ -500,7 +499,7 @@ internal static void putfull(ж<workbuf> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.checknonempty();
-    Ꮡwork.of(workType.Ꮡfull).push(Ꮡb.of(workbuf.Ꮡnode));
+    Ꮡwork.Ꮡfull.push(Ꮡb.of(workbuf.Ꮡnode));
 }
 
 // trygetfull tries to get a full or partially empty workbuffer.
@@ -508,7 +507,7 @@ internal static void putfull(ж<workbuf> Ꮡb) {
 //
 //go:nowritebarrier
 internal static ж<workbuf> trygetfull() {
-    var b = (ж<workbuf>)(uintptr)(Ꮡwork.of(workType.Ꮡfull).pop());
+    var b = (ж<workbuf>)(uintptr)(Ꮡwork.Ꮡfull.pop());
     if (b != nil) {
         b.checknonempty();
         return b;
@@ -524,7 +523,7 @@ internal static ж<workbuf> handoff(ж<workbuf> Ꮡb) {
     var b1 = getempty();
     nint n = b.nobj / 2;
     b.nobj -= n;
-    b1.Value.nobj = n;
+    b1.nobj = n;
     memmove(@unsafe.Pointer.FromBox(b1.at(workbuf.Ꮡobj, 0)), @unsafe.Pointer.FromBox(Ꮡb.at(workbuf.Ꮡobj, b.nobj)), (uintptr)n * /* unsafe.Sizeof(b1.obj[0]) */ (uintptr)8);
 
     // Put b on full list - let first half of b get stolen.
@@ -533,13 +532,14 @@ internal static ж<workbuf> handoff(ж<workbuf> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cannotFreeWorkbufsWhenˢ = "cannot free workbufs when work.full != 0"u8;
+internal static ref readonly @string cannotFreeWorkbufsWhenˢ => ref cannotFreeWorkbufsWhenˢᵇ;
+private static readonly @string cannotFreeWorkbufsWhenˢᵇ = "cannot free workbufs when work.full != 0"u8;
 
 // prepareFreeWorkbufs moves busy workbuf spans to free list so they
 // can be freed to the heap. This must only be called when all
 // workbufs are on the empty list.
 internal static void prepareFreeWorkbufs() {
-    @lock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+    @lock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
     if (work.full != 0) {
         @throw(cannotFreeWorkbufsWhenˢ);
     }
@@ -547,17 +547,17 @@ internal static void prepareFreeWorkbufs() {
     // which ones are in which spans. We can wipe the entire empty
     // list and move all workbuf spans to the free list.
     work.empty = 0;
-    Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡfree).takeAll(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡbusy));
-    unlock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+    Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡfree).takeAll(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡbusy));
+    unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
 }
 
 // freeSomeWbufs frees some workbufs back to the heap and returns
 // true if it should be called again to free more.
 internal static bool freeSomeWbufs(bool preemptible) {
     const nint batchSize = 64; // ~1–2 µs per span.
-    @lock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
-    if (gcphase != _GCoff || Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡfree).isEmpty()) {
-        unlock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+    @lock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
+    if (gcphase != _GCoff || Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡfree).isEmpty()) {
+        unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
         return false;
     }
     systemstack(() => {
@@ -567,12 +567,12 @@ internal static bool freeSomeWbufs(bool preemptible) {
             if (span == nil) {
                 break;
             }
-            Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡfree).remove(span);
+            Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡfree).remove(span);
             Ꮡmheap_.freeManual(span, spanAllocWorkBuf);
         }
     });
-    var more = !Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡfree).isEmpty();
-    unlock(Ꮡwork.of(workType.ᏑwbufSpans).of(workType_wbufSpans.Ꮡlock));
+    var more = !Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡfree).isEmpty();
+    unlock(Ꮡwork.ᏑwbufSpans.of(workType_wbufSpans.Ꮡlock));
     return more;
 }
 

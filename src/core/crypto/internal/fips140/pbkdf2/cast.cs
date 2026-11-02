@@ -22,25 +22,25 @@ partial class pbkdf2_package {
     //   "The Iteration Count parameter does not need to be among those
     //   supported by the module in the approved mode but shall be at least
     //   two."
-    fips140.CAST("PBKDF2"u8, error () => {
-        var salt = new byte[]{
+    fips140.CAST("PBKDF2", error () => {
+        var salt = slice<byte>([
             0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11,
             0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19
-        }.slice();
-        var want = new byte[]{
+        ]);
+        var want = slice<byte>([
             0xC7, 0x58, 0x76, 0xC0, 0x71, 0x1C, 0x29, 0x75,
             0x2D, 0x3A, 0xA6, 0xDF, 0x29, 0x96
-        }.slice();
+        ]);
 
-        var (mk, err) = Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), "password"u8, salt, 2, 14);
-        if (err != default!) {
+        var (mk, err) = Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), "password", salt, 2, 14);
+        if (err != nil) {
             return err;
         }
         if (!bytes.Equal(mk, want)) {
-            return errors.New("unexpected result"u8);
+            return errors.New("unexpected result");
         }
 
-        return default!;
+        return default;
     });
 }
 

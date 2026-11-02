@@ -30,7 +30,8 @@ using go.log;
 
 partial class benchmarks_package {
 
-internal static readonly @string testMessage = "Test logging, but use a somewhat realistic message length."u8;
+internal static ref readonly @string testMessage => ref testMessageᵇ;
+private static readonly @string testMessageᵇ = "Test logging, but use a somewhat realistic message length."u8;
 
 partial struct @event {
     public @string ID;
@@ -39,20 +40,21 @@ partial struct @event {
 }
 
 internal static time.Time testTime = time.Date(2022, time.May, 1, 0, 0, 0, 0, time.ΔUTC);
-internal static @string testString = "7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190"u8;
+internal static @string testString = "7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190";
 internal static nint testInt = 32768;
 internal static time.Duration testDuration = (time.Duration)(23000000000L);
-internal static error testError = errors.New("fail"u8);
-internal static @event testEvent = new @event("abcdefgh"u8, 65536, true);
+internal static error testError = errors.New("fail");
+internal static @event testEvent = new @event("abcdefgh", 65536, true);
 
-internal static slice<slog.Attr> testAttrs = new slog.Attr[]{
-    slog.String("string"u8, testString),
-    slog.Int("status"u8, testInt),
-    slog.Duration("duration"u8, testDuration),
-    slog.Time("time"u8, testTime),
-    slog.Any("error"u8, testError)
-}.slice();
+internal static slice<slog.Attr> testAttrs = slice<slog.Attr>([
+    slog.String("string", testString),
+    slog.Int("status", testInt),
+    slog.Duration("duration", testDuration),
+    slog.Time("time", testTime),
+    slog.Any("error", testError)
+]);
 
-internal static readonly @string wantText = "time=1651363200 level=0 msg=Test logging, but use a somewhat realistic message length. string=7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190 status=32768 duration=23000000000 time=1651363200 error=fail\n"u8;
+internal static ref readonly @string wantText => ref wantTextᵇ;
+private static readonly @string wantTextᵇ = "time=1651363200 level=0 msg=Test logging, but use a somewhat realistic message length. string=7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190 status=32768 duration=23000000000 time=1651363200 error=fail\n"u8;
 
 } // end benchmarks_package

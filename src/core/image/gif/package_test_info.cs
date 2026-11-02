@@ -9,17 +9,6 @@ global using static global::go.image.gif_package;
 // <ImportedTypeAliases>
 global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 global using imageꓸRGBA = go.image_package.ΔRGBA;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +38,14 @@ using static global::go.image.gif_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.image.gif_package.GIF))]
+[assembly: GoFieldAccess(typeof(global::go.image.gif_package.encoder))]
+[assembly: GoFieldAccess(typeof(image_package.Paletted))]
+[assembly: GoFieldAccess(typeof(runtime_package.MemStats))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,9 +55,9 @@ using static global::go.image.gif_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/gif/fuzz_test.go", "fuzz_test.cs", "ABggooKmgoKUgoKUgoKUpoKCgpSClIKClKKCgoKUgoKUgoKC", "36-64:1")]
-[assembly: go.GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "ACVClpKCgoCCpICCpAAPBojEABM4goKCyoKCgoKUuKa4ppSClIKUgoK4gpQABhKC3IKCgoKClIKCpoKCgpSCgpSUgoKUgoKCyoKUgoKC3AAPIIKCgoKUguiUgpSCgriCgoKmgoKUpoK4gqamgoKClJTWgoKmgqamgoKClKaCgpS4gqaCAAgSpqaCgoKUlAAMBoIAGkSykoKClIKCgpSCgpSClIIACQyCgoKClIKClIL8soKCyoKClIKAgqSCgoKCgIKkgoCCxNSigoKUgoKUgoKCgriCgoKUgoKUgoI=", "357-377:1", "", "141=Rect/1/1/3")]
-[assembly: go.GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABkqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmytQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gqTKgoKClIKCpu6CgpSCgoKUyqaCgIKkgoKClIKCpoKUgpSAkraClIKUgpSClIKmgoKClJKClIKClILKgKKAooDkgoKCpriAgrbKgpSAgviCgILIgsqCAAgSgoKCpoLcgu6CuIKAgoKkgoKClICC7IKCuIKCgoKClIKAgoKkgoKClICCgraSlMqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAPIIKAgqSCgpSClIKAgtqikoKCgoKCuAAMGoKCggAJDIKCgoCC2oKUgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoK4goKCgpSCgpSCgrgACRSCgoKClIKCpgAJFIKCuKKCgoKmgoKCgriigoKCgoIACBKCgoKC6KKCgpSCgpSCgoKCuKKCgpTKgpSCgoKC", "398-402:1", "", "211=Bounds/1/1/1;362=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;399=Add/1/1/2;426=Add/1/1/2;489=Rect/1/1/1,NewPaletted/1/1/1;528=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;580=Rect/1/1/2,NewPaletted/1/1/2;645=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;767=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
+[assembly: GoPositionMap("image/gif/fuzz_test.go", "fuzz_test.cs", "ABogooKmgoKUgoKUgoKUpoKCgpSClIKClKKCgoKUgoKUgoKC", "36-64:1")]
+[assembly: GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "AChClpKCgoCCpICCpAAQBojEABM4goKCyoKCgoKUuKa4ppSClIKUgoK4gpQABhKC3IKCgoKClIKCpoKCgpSCgpSUgoKUgoKCyoKUgoKC3AAPIIKCgoKUgviUgpSCgriCgoKmgoKUpoK4gqamgoKClJTmgoKmgqamgoKClKaCgpS4gqaCAAgSpqaCgoKUlAAMBoIAGkSykoKClIKCgpSCgpSClIIACwyCgoKClIKClIL8soKCyoKClIKAgqSCgoKCgIKkgoCCxOSigoKUgoKUgoKCgriCgoKUgoKUgoI=", "357-377:1", "", "145=Rect/1/1/3")]
+[assembly: GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABkqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmytQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gqTKgoKClIKCpu6CgpSCgoKUyqaCgIKkgoKClIKCpoKUgpSAkraClIKUgpSClIKmgoKClJKClIKClILKgKKAooDkgoKCpriAgrbKgpSAgviCgILIgsqCAAgSgoKCpoLcgu6CuIKAgoKkgoKClICC7IKCuIKCgoKClIKAgoKkgoKClICCgraSlMqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAPIIKAgqSCgpSClIKAgtqCkoKCgoKCuAAMGoKCggAJDIKCgoCC2oKUgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoK4goKCgpSCgpSCgrgACRSCgoKClIKCpgAJFIKCuKKCgoKmgoKCgriigoKCgoIACBKCgoKC+KKCgpSCgpSCgoKCuKKCgpTKgpSCgoKC", "398-402:1", "", "211=Bounds/1/1/1;362=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;399=Add/1/1/2;426=Add/1/1/2;489=Rect/1/1/1,NewPaletted/1/1/1;528=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;578=Rect/1/1/2,NewPaletted/1/1/2;643=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;765=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3", "34:21,50:21")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

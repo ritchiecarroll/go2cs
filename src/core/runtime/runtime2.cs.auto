@@ -119,12 +119,12 @@ internal static UntypedInt _Gdeadextra => 11; // 11
 // atomicstatus&~Gscan gives the state the goroutine will
 // return to when the scan completes.
 internal static UntypedInt _Gscan => 0x1000;
-internal static UntypedInt _Gscanrunnable => /* _Gscan + _Grunnable */ 4097; // 0x1001
-internal static UntypedInt _Gscanrunning => /* _Gscan + _Grunning */ 4098; // 0x1002
-internal static UntypedInt _Gscansyscall => /* _Gscan + _Gsyscall */ 4099; // 0x1003
-internal static UntypedInt _Gscanwaiting => /* _Gscan + _Gwaiting */ 4100; // 0x1004
+internal static UntypedInt _Gscanrunnable => /* _Gscan + _Grunnable */ 4097;   // 0x1001
+internal static UntypedInt _Gscanrunning => /* _Gscan + _Grunning */ 4098;     // 0x1002
+internal static UntypedInt _Gscansyscall => /* _Gscan + _Gsyscall */ 4099;     // 0x1003
+internal static UntypedInt _Gscanwaiting => /* _Gscan + _Gwaiting */ 4100;     // 0x1004
 internal static UntypedInt _Gscanpreempted => /* _Gscan + _Gpreempted */ 4105; // 0x1009
-internal static UntypedInt _Gscanleaked => /* _Gscan + _Gleaked */ 4106; // 0x100a
+internal static UntypedInt _Gscanleaked => /* _Gscan + _Gleaked */ 4106;       // 0x100a
 internal static UntypedInt _Gscandeadextra => /* _Gscan + _Gdeadextra */ 4107; // 0x100b
 
 // P status
@@ -197,8 +197,8 @@ partial struct eface {
     internal @unsafe.Pointer data;
 }
 
-internal static ж<eface> efaceOf(ж<any> Ꮡep) {
-    return Ꮡep.Reinterpret<any, eface>();
+internal static ж<eface> efaceOf(ж<any> ep) {
+    return ep.Reinterpret<any, eface>();
 }
 
 // The guintptr, muintptr, and puintptr are all used to bypass write barriers.
@@ -283,7 +283,7 @@ partial struct gobuf {
 // Extend this type with additional methods if needed.
 partial struct maybeTraceablePtr {
     internal @unsafe.Pointer vp; // For liveness only.
-    internal uintptr vu;        // Source of truth.
+    internal uintptr vu;         // Source of truth.
 }
 
 // untrack unsets the pointer but preserves the address.
@@ -291,7 +291,7 @@ partial struct maybeTraceablePtr {
 //
 //go:nosplit
 internal static void setUntraceable(this ref maybeTraceablePtr Δp) {
-    Δp.vp = default!;
+    Δp.vp = default;
 }
 
 // setTraceable resets the pointer to the stored address.
@@ -333,8 +333,8 @@ partial struct maybeTraceableChan {
 }
 
 //go:nosplit
-internal static void set(this ref maybeTraceableChan Δp, ж<Δhchan> Ꮡc) {
-    Δp.maybeTraceablePtr.set(@unsafe.Pointer.FromPinnedBox(Ꮡc));
+internal static void set(this ref maybeTraceableChan Δp, ж<Δhchan> c) {
+    Δp.maybeTraceablePtr.set(@unsafe.Pointer.FromPinnedBox(c));
 }
 
 //go:nosplit
@@ -381,17 +381,17 @@ partial struct sudog {
     // (If we wanted to be overly clever, we could store a high 16 bits
     // in the second entry in the list.)
     internal uint16 waiters;
-    internal ж<sudog> parent;          // semaRoot binary tree
-    internal ж<sudog> waitlink;          // g.waiting list or semaRoot
-    internal ж<sudog> waittail;          // semaRoot
+    internal ж<sudog> parent;      // semaRoot binary tree
+    internal ж<sudog> waitlink;    // g.waiting list or semaRoot
+    internal ж<sudog> waittail;    // semaRoot
     internal maybeTraceableChan c; // channel
 }
 
 partial struct libcall {
     internal uintptr fn;
-    internal uintptr n; // number of parameters
+    internal uintptr n;    // number of parameters
     internal uintptr args; // parameters
-    internal uintptr r1; // return values
+    internal uintptr r1;   // return values
     internal uintptr r2;
     internal uintptr err; // error number
 }
@@ -418,17 +418,17 @@ partial struct g {
     // stackguard1 is the stack pointer compared in the //go:systemstack stack growth prologue.
     // It is stack.lo+StackGuard on g0 and gsignal stacks.
     // It is ~0 on other goroutine stacks, to trigger a call to morestackc (and crash).
-    internal Δstack stack;   // offset known to runtime/cgo
+    internal Δstack stack;        // offset known to runtime/cgo
     internal uintptr stackguard0; // offset known to liblink
     internal uintptr stackguard1; // offset known to liblink
     internal ж<_panic> _panic; // innermost panic - offset known to liblink
     internal ж<_defer> _defer; // innermost defer
-    internal ж<m> m;   // current m; offset known to arm liblink
+    internal ж<m> m;           // current m; offset known to arm liblink
     internal gobuf sched;
     internal uintptr syscallsp; // if status==Gsyscall, syscallsp = sched.sp to use during gc
     internal uintptr syscallpc; // if status==Gsyscall, syscallpc = sched.pc to use during gc
     internal uintptr syscallbp; // if status==Gsyscall, syscallbp = sched.bp to use in fpTraceback
-    internal uintptr stktopsp; // expected sp at top of stack, to check in traceback
+    internal uintptr stktopsp;  // expected sp at top of stack, to check in traceback
     // param is a generic pointer parameter field used to pass
     // values in particular contexts where other storage for the
     // parameter would be difficult to find. It is currently used
@@ -447,18 +447,18 @@ partial struct g {
     internal uint32 stackLock; // sigprof/scang lock; TODO: fold in to atomicstatus
     internal uint64 goid;
     internal Δguintptr schedlink;
-    internal int64 waitsince;      // approx time when the g become blocked
+    internal int64 waitsince;       // approx time when the g become blocked
     internal waitReason waitreason; // if status==Gwaiting
-    internal bool preempt; // preemption signal, duplicates stackguard0 = stackpreempt
-    internal bool preemptStop; // transition to _Gpreempted on preemption; otherwise, just deschedule
+    internal bool preempt;       // preemption signal, duplicates stackguard0 = stackpreempt
+    internal bool preemptStop;   // transition to _Gpreempted on preemption; otherwise, just deschedule
     internal bool preemptShrink; // shrink stack at synchronous safe point
     // asyncSafePoint is set if g is stopped at an asynchronous
     // safe point. This means there are frames on the stack
     // without precise pointer information.
     internal bool asyncSafePoint;
     internal bool paniconfault; // panic (instead of crash) on unexpected fault address
-    internal bool gcscandone; // g has scanned stack; protected by _Gscan bit in status
-    internal bool throwsplit; // must not split stack
+    internal bool gcscandone;   // g has scanned stack; protected by _Gscan bit in status
+    internal bool throwsplit;   // must not split stack
     // activeStackChans indicates that there are unlocked channels
     // pointing into this goroutine's stack. If true, stack
     // copying needs to acquire channel locks to protect these
@@ -472,16 +472,16 @@ partial struct g {
     // Used by the execution tracer.
     internal bool inMarkAssist;
     internal bool coroexit; // argument to coroswitch_m
-    internal int8 raceignore;  // ignore race detection events
+    internal int8 raceignore;     // ignore race detection events
     internal bool nocgocallback;  // whether disable callback from C
-    internal bool tracking;  // whether we're tracking this G for sched latency statistics
-    internal uint8 trackingSeq; // used to decide whether to track this G
+    internal bool tracking;       // whether we're tracking this G for sched latency statistics
+    internal uint8 trackingSeq;   // used to decide whether to track this G
     internal int64 trackingStamp; // timestamp of when the G last started being tracked
-    internal int64 runnableTime; // the amount of time spent runnable, cleared when running, only used when tracking
+    internal int64 runnableTime;  // the amount of time spent runnable, cleared when running, only used when tracking
     internal muintptr lockedm;
     internal uint8 fipsIndicator;
     internal bool fipsOnlyBypass;
-    internal bool ditWanted; // set if g wants to be executed with DIT enabled
+    internal bool ditWanted;     // set if g wants to be executed with DIT enabled
     internal bool syncSafePoint; // set if g is stopped at a synchronous safe point.
     internal atomic.Bool runningCleanups;
     internal uint32 sig;
@@ -490,17 +490,17 @@ partial struct g {
     internal uintptr sigcode0;
     internal uintptr sigcode1;
     internal uintptr sigpc;
-    internal uint64 parentGoid;          // goid of goroutine that created this goroutine
-    internal uintptr gopc;         // pc of go statement that created this goroutine
+    internal uint64 parentGoid;                // goid of goroutine that created this goroutine
+    internal uintptr gopc;                     // pc of go statement that created this goroutine
     internal ж<slice<ancestorInfo>> ancestors; // ancestor information goroutine(s) that created this goroutine (only used if debug.tracebackancestors)
-    internal uintptr startpc;         // pc of goroutine function
+    internal uintptr startpc;                  // pc of goroutine function
     internal uintptr racectx;
-    internal ж<sudog> waiting;      // sudog structures this g is waiting on (that have a valid elem ptr); in lock order
-    internal slice<uintptr> cgoCtxt; // cgo traceback context
-    internal @unsafe.Pointer labels; // profiler labels
-    internal ж<timer> timer;      // cached timer for time.Sleep
+    internal ж<sudog> waiting;         // sudog structures this g is waiting on (that have a valid elem ptr); in lock order
+    internal slice<uintptr> cgoCtxt;   // cgo traceback context
+    internal @unsafe.Pointer labels;   // profiler labels
+    internal ж<timer> timer;           // cached timer for time.Sleep
     internal int64 sleepWhen;          // when to sleep until
-    internal atomic.Uint32 selectDone;  // are we participating in a select and did someone win the race?
+    internal atomic.Uint32 selectDone; // are we participating in a select and did someone win the race?
     // goroutineProfiled indicates the status of this goroutine's stack for the
     // current in-progress goroutine profile
     internal goroutineProfileStateHolder goroutineProfiled;
@@ -537,23 +537,23 @@ internal static UntypedInt tlsSize => /* tlsSlots * goarch.PtrSize */ 48;
 
 // Values for m.freeWait.
 internal static UntypedInt freeMStack => 0; // M done, free stack and reference.
-internal static UntypedInt freeMRef => 1; // M done, free reference.
-internal static UntypedInt freeMWait => 2; // M still in use.
+internal static UntypedInt freeMRef => 1;   // M done, free reference.
+internal static UntypedInt freeMWait => 2;  // M still in use.
 
 [GoValueClone("tls", "createstack", "trace", "pcvalueCache", "chacha8", "locksHeld")] partial struct m {
-    internal ж<g> g0;  // goroutine with scheduling stack
-    internal gobuf morebuf;  // gobuf arg to morestack
+    internal ж<g> g0;       // goroutine with scheduling stack
+    internal gobuf morebuf; // gobuf arg to morestack
     internal uint32 divmod; // div/mod denominator for arm - known to liblink (cmd/internal/obj/arm/obj5.go)
 // Fields whose offsets are not known to debuggers.
-    internal uint64 procid;            // for debuggers, but offset not hard-coded
-    internal ж<g> gsignal;             // signal-handling g
-    internal gsignalStack goSigStack;      // Go-allocated signal handling stack
-    internal sigset sigmask;            // storage for saved signal mask
+    internal uint64 procid;                      // for debuggers, but offset not hard-coded
+    internal ж<g> gsignal;                       // signal-handling g
+    internal gsignalStack goSigStack;            // Go-allocated signal handling stack
+    internal sigset sigmask;                     // storage for saved signal mask
     internal array<uintptr> tls = new(tlsSlots); // thread-local storage (for x86 extern register)
     internal Action mstartfn;
-    internal ж<g> curg;    // current running goroutine
+    internal ж<g> curg;           // current running goroutine
     internal Δguintptr caughtsig; // goroutine running during fatal signal
-    internal uint32 signalSecret;   // whether we have secret information in our signal stack
+    internal uint32 signalSecret; // whether we have secret information in our signal stack
     // p is the currently attached P for executing Go code, nil if not executing user Go code.
     //
     // A non-nil p implies exclusive ownership of the P, unless curg is in _Gsyscall.
@@ -562,7 +562,7 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     // from transitioning out of _Gsyscall if it intends to mutate p.
     internal puintptr p;
     internal puintptr nextp; // The next P to install before executing. Implies exclusive ownership of this P.
-    internal puintptr oldp; // The P that was attached before executing a syscall.
+    internal puintptr oldp;  // The P that was attached before executing a syscall.
     internal int64 id;
     internal int32 mallocing;
     internal throwType throwing;
@@ -570,35 +570,35 @@ internal static UntypedInt freeMWait => 2; // M still in use.
     internal int32 locks;
     internal int32 dying;
     internal int32 profilehz;
-    internal bool spinning; // m is out of work and is actively looking for work
-    internal bool blocked; // m is blocked on a note
+    internal bool spinning;    // m is out of work and is actively looking for work
+    internal bool blocked;     // m is blocked on a note
     internal bool newSigstack; // minit on C thread called sigaltstack
     internal int8 printlock;
-    internal bool incgo;          // m is executing a cgo call
-    internal bool isextra;          // m is an extra m
-    internal bool isExtraInC;          // m is an extra m that does not have any Go frames
-    internal bool isExtraInSig;          // m is an extra m in a signal handler
+    internal bool incgo;             // m is executing a cgo call
+    internal bool isextra;           // m is an extra m
+    internal bool isExtraInC;        // m is an extra m that does not have any Go frames
+    internal bool isExtraInSig;      // m is an extra m in a signal handler
     internal atomic.Uint32 freeWait; // Whether it is safe to free g0 and delete m (one of freeMRef, freeMStack, freeMWait)
     internal bool needextram;
     internal bool g0StackAccurate; // whether the g0 stack has accurate bounds
     internal uint8 traceback;
-    internal slice<ж<Δp>> allpSnapshot;  // Snapshot of allp for use after dropping P in findRunnable, nil otherwise.
-    internal uint64 ncgocall;        // number of cgo calls in total
-    internal int32 ncgo;         // number of cgo calls currently in progress
+    internal slice<ж<Δp>> allpSnapshot;   // Snapshot of allp for use after dropping P in findRunnable, nil otherwise.
+    internal uint64 ncgocall;             // number of cgo calls in total
+    internal int32 ncgo;                  // number of cgo calls currently in progress
     internal atomic.Uint32 cgoCallersUse; // if non-zero, cgoCallers in use temporarily
-    internal ж<ΔcgoCallers> cgoCallers; // cgo traceback if crashing in cgo call
+    internal ж<ΔcgoCallers> cgoCallers;   // cgo traceback if crashing in cgo call
     internal note park;
     internal ж<m> alllink; // on allm
     internal muintptr schedlink;
     internal listNodeManual idleNode;
     internal Δguintptr lockedg;
     internal array<uintptr> createstack = new(32); // stack that created this thread, it's used for StackRecord.Stack0, so it must align with it.
-    internal uint32 lockedExt;      // tracking for external LockOSThread
-    internal uint32 lockedInt;      // tracking for internal lockOSThread
-    internal mWaitList mWaitList;   // list of runtime lock waiters
-    internal bool ditEnabled;        // set if DIT is currently enabled on this M
+    internal uint32 lockedExt;                     // tracking for external LockOSThread
+    internal uint32 lockedInt;                     // tracking for internal lockOSThread
+    internal mWaitList mWaitList;                  // list of runtime lock waiters
+    internal bool ditEnabled;                      // set if DIT is currently enabled on this M
     internal mLockProfile mLockProfile; // fields relating to runtime.lock contention
-    internal slice<uintptr> profStack; // used for memory/block/mutex stack traces
+    internal slice<uintptr> profStack;  // used for memory/block/mutex stack traces
     // wait* are used to carry arguments from gopark into park_m, because
     // there's no stack to put them on. That is their sole purpose.
     internal Func<ж<g>, @unsafe.Pointer, bool> waitunlockf;
@@ -657,15 +657,15 @@ partial struct mWeakPointer {
     internal ж<atomic.Pointer<m>> m;
 }
 
-internal static mWeakPointer newMWeakPointer(ж<m> Ꮡmp) {
+internal static mWeakPointer newMWeakPointer(ж<m> mp) {
     var w = new mWeakPointer(m: @new<atomic.Pointer<m>>());
-    w.m.Store(Ꮡmp);
+    w.m.Store(mp);
     return w;
 }
 
 internal static ж<m> get(this mWeakPointer w) {
     if (w.m == nil) {
-        return default!;
+        return default;
     }
     return w.m.Load();
 }
@@ -690,10 +690,10 @@ internal static void clear(this mWeakPointer w) {
     internal int32 id;
     internal uint32 status; // one of pidle/prunning/...
     internal puintptr link;
-    internal uint32 schedtick;     // incremented on every scheduler call
-    internal uint32 syscalltick;     // incremented on every system call
+    internal uint32 schedtick;      // incremented on every scheduler call
+    internal uint32 syscalltick;    // incremented on every system call
     internal sysmontick sysmontick; // last tick observed by sysmon
-    internal muintptr m;   // back-link to associated m (nil if idle)
+    internal muintptr m;            // back-link to associated m (nil if idle)
     internal ж<mcache> mcache;
     internal pageCache pcache;
     internal uintptr raceprocctx;
@@ -741,7 +741,7 @@ internal static void clear(this mWeakPointer w) {
     internal pTraceState trace;
     internal persistentAlloc palloc; // per-P to avoid mutex
     // Per-P GC state
-    internal int64 gcAssistTime;        // Nanoseconds in assistAlloc
+    internal int64 gcAssistTime;                // Nanoseconds in assistAlloc
     internal atomic.Int64 gcFractionalMarkTime; // Nanoseconds in fractional mark worker
     // limiterEvent tracks events for the GC CPU limiter.
     internal limiterEvent limiterEvent;
@@ -793,7 +793,7 @@ internal static void clear(this mWeakPointer w) {
     // not an instantaneous measure of the total stack size that might need
     // to be scanned (hi - lo).
     internal uint64 scannedStackSize; // stack size of goroutines scanned by this P
-    internal uint64 scannedStacks; // number of goroutines scanned by this P
+    internal uint64 scannedStacks;    // number of goroutines scanned by this P
     // preempt is set to indicate that this P should be enter the
     // scheduler ASAP (regardless of what G is running on it).
     internal bool preempt;
@@ -815,7 +815,7 @@ partial struct schedt_disable /*dyn*/ {
 
 partial struct schedt_gFree /*dyn*/ {
     internal mutex @lock;
-    internal gList stack; // Gs with stacks
+    internal gList stack;   // Gs with stacks
     internal gList noStack; // Gs without stacks
 }
 
@@ -823,24 +823,24 @@ partial struct schedt_gFree /*dyn*/ {
 // that its size class is an integer multiple of the cache line size (for any of our architectures).
 [GoValueClone("timeToRun", "stwStoppingTimeGC", "stwStoppingTimeOther", "stwTotalTimeGC", "stwTotalTimeOther")] partial struct schedt {
     internal atomic.Uint64 goidgen;
-    internal atomic.Int64 lastpoll; // time of last network poll, 0 if currently polling
-    internal atomic.Int64 pollUntil; // time to which current poll is sleeping
+    internal atomic.Int64 lastpoll;   // time of last network poll, 0 if currently polling
+    internal atomic.Int64 pollUntil;  // time to which current poll is sleeping
     internal atomic.Int32 pollingNet; // 1 if some P doing non-blocking network poll
     internal mutex @lock;
 // When increasing nmidle, nmidlelocked, nmsys, or nmfreed, be
 // sure to call checkdead().
     internal listHeadManual midle; // idle m's waiting for work
-    internal int32 nmidle;          // number of idle m's waiting for work
-    internal int32 nmidlelocked;          // number of locked m's waiting for work
+    internal int32 nmidle;         // number of idle m's waiting for work
+    internal int32 nmidlelocked;   // number of locked m's waiting for work
     internal int64 mnext;          // number of m's that have been created and next M ID
-    internal int32 maxmcount;          // maximum number of m's allowed (or die)
+    internal int32 maxmcount;      // maximum number of m's allowed (or die)
     internal int32 nmsys;          // number of system m's not counted for deadlock
-    internal int64 nmfreed;          // cumulative number of freed m's
-    internal atomic.Int32 ngsys; // number of system goroutines
+    internal int64 nmfreed;        // cumulative number of freed m's
+    internal atomic.Int32 ngsys;        // number of system goroutines
     internal atomic.Int32 nGsyscallNoP; // number of goroutines in syscalls without a P but whose M is not isExtraInC
     internal puintptr pidle; // idle p's
     internal atomic.Int32 npidle;
-    internal atomic.Int32 nmspinning;  // See "Worker thread parking/unparking" comment in proc.go.
+    internal atomic.Int32 nmspinning;    // See "Worker thread parking/unparking" comment in proc.go.
     internal atomic.Uint32 needspinning; // See "Delicate dance" comment in proc.go. Boolean. Must hold sched.lock to set to 1.
     // Global runnable queue.
     internal gQueue runq;
@@ -873,7 +873,7 @@ partial struct schedt_gFree /*dyn*/ {
     internal note safePointNote;
     internal int32 profilehz; // cpu profiling rate
     internal int64 procresizetime; // nanotime() of last change to gomaxprocs
-    internal int64 totaltime; // ∫gomaxprocs dt up to procresizetime
+    internal int64 totaltime;      // ∫gomaxprocs dt up to procresizetime
     internal bool customGOMAXPROCS; // GOMAXPROCS was manually set from the environment or runtime.GOMAXPROCS
     // sysmonlock protects sysmon's actions on the runtime.
     //
@@ -916,14 +916,14 @@ partial struct schedt_gFree /*dyn*/ {
 
 // Values for the flags field of a sigTabT.
 internal static UntypedInt _SigNotify => /* 1 << iota */ 1; // let signal.Notify have signal, even if from kernel
-internal static UntypedInt _SigKill => 2; // if signal.Notify doesn't take it, exit quietly
-internal static UntypedInt _SigThrow => 4; // if signal.Notify doesn't take it, exit loudly
-internal static UntypedInt _SigPanic => 8; // if the signal is from the kernel, panic
-internal static UntypedInt _SigDefault => 16; // if the signal isn't explicitly requested, don't monitor it
-internal static UntypedInt _SigGoExit => 32; // cause all runtime procs to exit (only used on Plan 9).
-internal static UntypedInt _SigSetStack => 64; // Don't explicitly install handler, but add SA_ONSTACK to existing libc handler
-internal static UntypedInt _SigUnblock => 128; // always unblock; see blockableSig
-internal static UntypedInt _SigIgn => 256; // _SIG_DFL action is to ignore the signal
+internal static UntypedInt _SigKill => 2;                   // if signal.Notify doesn't take it, exit quietly
+internal static UntypedInt _SigThrow => 4;                  // if signal.Notify doesn't take it, exit loudly
+internal static UntypedInt _SigPanic => 8;                  // if the signal is from the kernel, panic
+internal static UntypedInt _SigDefault => 16;               // if the signal isn't explicitly requested, don't monitor it
+internal static UntypedInt _SigGoExit => 32;                // cause all runtime procs to exit (only used on Plan 9).
+internal static UntypedInt _SigSetStack => 64;              // Don't explicitly install handler, but add SA_ONSTACK to existing libc handler
+internal static UntypedInt _SigUnblock => 128;              // always unblock; see blockableSig
+internal static UntypedInt _SigIgn => 256;                  // _SIG_DFL action is to ignore the signal
 
 // Layout of in-memory per-function information prepared by linker
 // See https://golang.org/s/go12symtab.
@@ -932,19 +932,19 @@ internal static UntypedInt _SigIgn => 256; // _SIG_DFL action is to ignore the s
 partial struct _func {
     /*embed*/ public @internal.runtime.sys_package.NotInHeap NotInHeap; // Only in static data
     internal uint32 entryOff; // start pc, as offset from moduledata.text
-    internal int32 nameOff;  // function name, as index into moduledata.funcnametab.
-    internal int32 args;  // in/out args size
+    internal int32 nameOff;   // function name, as index into moduledata.funcnametab.
+    internal int32 args;         // in/out args size
     internal uint32 deferreturn; // offset of start of a deferreturn call instruction from entry, if any.
     internal uint32 pcsp;
     internal uint32 pcfile;
     internal uint32 pcln;
     internal uint32 npcdata;
-    internal uint32 cuOffset;     // runtime.cutab offset of this function's CU
-    internal int32 startLine;      // line number of start of function (func keyword/TEXT directive)
+    internal uint32 cuOffset;   // runtime.cutab offset of this function's CU
+    internal int32 startLine;   // line number of start of function (func keyword/TEXT directive)
     internal abi.FuncID funcID; // set for certain special runtime functions
     internal abi.FuncFlag flag;
     internal array<byte> _ = new(1); // pad
-    internal uint8 nfuncdata;   // must be last, must end on a uint32-aligned boundary
+    internal uint8 nfuncdata;        // must be last, must end on a uint32-aligned boundary
 }
 
 // The end of the struct is followed immediately by two variable-length
@@ -973,7 +973,7 @@ partial struct _func {
 //
 // TODO(austin): Can we merge this with inlinedCall?
 partial struct funcinl {
-    internal uint32 ones;  // set to ^0 to distinguish from _func
+    internal uint32 ones;   // set to ^0 to distinguish from _func
     internal uintptr entry; // entry of the real (the "outermost") frame
     internal @string name;
     internal @string @file;
@@ -1004,10 +1004,10 @@ partial struct forcegcstate {
 // and for heap defers, marked.
 partial struct _defer {
     internal bool heap;
-    internal bool rangefunc;    // true for rangefunc list
-    internal uintptr sp; // sp at time of defer
-    internal uintptr pc; // pc at time of defer
-    internal Action fn;  // can be nil for open-coded defers
+    internal bool rangefunc; // true for rangefunc list
+    internal uintptr sp;     // sp at time of defer
+    internal uintptr pc;     // pc at time of defer
+    internal Action fn;      // can be nil for open-coded defers
     internal ж<_defer> link; // next defer on G; can point to either heap or stack!
     // If rangefunc is true, *head is the head of the atomic linked list
     // during a range-over-func execution.
@@ -1023,7 +1023,7 @@ partial struct _defer {
 // _panic values only live on the stack, regular stack pointer
 // adjustment takes care of them.
 partial struct _panic {
-    internal any arg;     // argument to panic
+    internal any arg;        // argument to panic
     internal ж<_panic> link; // link to earlier panic
     // startPC and startSP track where _panic.start was called.
     internal uintptr startPC;
@@ -1038,7 +1038,7 @@ partial struct _panic {
     // Extra state for handling open-coded defers.
     internal ж<uint8> deferBitsPtr;
     internal @unsafe.Pointer slotsPtr;
-    internal bool recovered; // whether this panic has been recovered
+    internal bool recovered;  // whether this panic has been recovered
     internal bool repanicked; // whether this panic repanicked
     internal bool goexit;
     internal bool deferreturn;
@@ -1057,61 +1057,61 @@ partial struct savedOpenDeferState {
 // ancestorInfo records details of where a goroutine was started.
 partial struct ancestorInfo {
     internal slice<uintptr> pcs; // pcs from the stack of this goroutine
-    internal uint64 goid;    // goroutine id of this goroutine; original goroutine possibly dead
-    internal uintptr gopc;   // pc of go statement that created this goroutine
+    internal uint64 goid;        // goroutine id of this goroutine; original goroutine possibly dead
+    internal uintptr gopc;       // pc of go statement that created this goroutine
 }
 
 // A waitReason explains why a goroutine has been stopped.
 // See gopark. Do not re-use waitReasons, add new ones.
 partial struct waitReason /*num:uint8*/;
 
-internal static waitReason waitReasonZero => /* iota */ 0;                 // ""
-internal static waitReason waitReasonGCAssistMarking => 1;      // "GC assist marking"
-internal static waitReason waitReasonIOWait => 2;               // "IO wait"
-internal static waitReason waitReasonDumpingHeap => 3;          // "dumping heap"
-internal static waitReason waitReasonGarbageCollection => 4;    // "garbage collection"
-internal static waitReason waitReasonGarbageCollectionScan => 5; // "garbage collection scan"
-internal static waitReason waitReasonPanicWait => 6;            // "panicwait"
-internal static waitReason waitReasonGCAssistWait => 7;         // "GC assist wait"
-internal static waitReason waitReasonGCSweepWait => 8;          // "GC sweep wait"
-internal static waitReason waitReasonGCScavengeWait => 9;       // "GC scavenge wait"
-internal static waitReason waitReasonFinalizerWait => 10;        // "finalizer wait"
-internal static waitReason waitReasonForceGCIdle => 11;          // "force gc (idle)"
-internal static waitReason waitReasonUpdateGOMAXPROCSIdle => 12; // "GOMAXPROCS updater (idle)"
-internal static waitReason waitReasonSemacquire => 13;           // "semacquire"
-internal static waitReason waitReasonSleep => 14;                // "sleep"
-internal static waitReason waitReasonChanReceiveNilChan => 15;   // "chan receive (nil chan)"
-internal static waitReason waitReasonChanSendNilChan => 16;      // "chan send (nil chan)"
-internal static waitReason waitReasonSelectNoCases => 17;        // "select (no cases)"
-internal static waitReason waitReasonSelect => 18;               // "select"
-internal static waitReason waitReasonChanReceive => 19;          // "chan receive"
-internal static waitReason waitReasonChanSend => 20;             // "chan send"
-internal static waitReason waitReasonSyncCondWait => 21;         // "sync.Cond.Wait"
-internal static waitReason waitReasonSyncMutexLock => 22;        // "sync.Mutex.Lock"
-internal static waitReason waitReasonSyncRWMutexRLock => 23;     // "sync.RWMutex.RLock"
-internal static waitReason waitReasonSyncRWMutexLock => 24;      // "sync.RWMutex.Lock"
-internal static waitReason waitReasonSyncWaitGroupWait => 25;    // "sync.WaitGroup.Wait"
-internal static waitReason waitReasonTraceReaderBlocked => 26;   // "trace reader (blocked)"
-internal static waitReason waitReasonWaitForGCCycle => 27;       // "wait for GC cycle"
-internal static waitReason waitReasonGCWorkerIdle => 28;         // "GC worker (idle)"
-internal static waitReason waitReasonGCWorkerActive => 29;       // "GC worker (active)"
-internal static waitReason waitReasonPreempted => 30;            // "preempted"
-internal static waitReason waitReasonDebugCall => 31;            // "debug call"
-internal static waitReason waitReasonGCMarkTermination => 32;    // "GC mark termination"
-internal static waitReason waitReasonStoppingTheWorld => 33;     // "stopping the world"
-internal static waitReason waitReasonFlushProcCaches => 34;      // "flushing proc caches"
-internal static waitReason waitReasonTraceGoroutineStatus => 35; // "trace goroutine status"
-internal static waitReason waitReasonTraceProcStatus => 36;      // "trace proc status"
-internal static waitReason waitReasonPageTraceFlush => 37;       // "page trace flush"
-internal static waitReason waitReasonCoroutine => 38;            // "coroutine"
-internal static waitReason waitReasonGCWeakToStrongWait => 39;   // "GC weak to strong wait"
-internal static waitReason waitReasonSynctestRun => 40;          // "synctest.Run"
-internal static waitReason waitReasonSynctestWait => 41;         // "synctest.Wait"
-internal static waitReason waitReasonSynctestChanReceive => 42;  // "chan receive (durable)"
-internal static waitReason waitReasonSynctestChanSend => 43;     // "chan send (durable)"
-internal static waitReason waitReasonSynctestSelect => 44;       // "select (durable)"
+internal static waitReason waitReasonZero => /* iota */ 0;        // ""
+internal static waitReason waitReasonGCAssistMarking => 1;        // "GC assist marking"
+internal static waitReason waitReasonIOWait => 2;                 // "IO wait"
+internal static waitReason waitReasonDumpingHeap => 3;            // "dumping heap"
+internal static waitReason waitReasonGarbageCollection => 4;      // "garbage collection"
+internal static waitReason waitReasonGarbageCollectionScan => 5;  // "garbage collection scan"
+internal static waitReason waitReasonPanicWait => 6;              // "panicwait"
+internal static waitReason waitReasonGCAssistWait => 7;           // "GC assist wait"
+internal static waitReason waitReasonGCSweepWait => 8;            // "GC sweep wait"
+internal static waitReason waitReasonGCScavengeWait => 9;         // "GC scavenge wait"
+internal static waitReason waitReasonFinalizerWait => 10;         // "finalizer wait"
+internal static waitReason waitReasonForceGCIdle => 11;           // "force gc (idle)"
+internal static waitReason waitReasonUpdateGOMAXPROCSIdle => 12;  // "GOMAXPROCS updater (idle)"
+internal static waitReason waitReasonSemacquire => 13;            // "semacquire"
+internal static waitReason waitReasonSleep => 14;                 // "sleep"
+internal static waitReason waitReasonChanReceiveNilChan => 15;    // "chan receive (nil chan)"
+internal static waitReason waitReasonChanSendNilChan => 16;       // "chan send (nil chan)"
+internal static waitReason waitReasonSelectNoCases => 17;         // "select (no cases)"
+internal static waitReason waitReasonSelect => 18;                // "select"
+internal static waitReason waitReasonChanReceive => 19;           // "chan receive"
+internal static waitReason waitReasonChanSend => 20;              // "chan send"
+internal static waitReason waitReasonSyncCondWait => 21;          // "sync.Cond.Wait"
+internal static waitReason waitReasonSyncMutexLock => 22;         // "sync.Mutex.Lock"
+internal static waitReason waitReasonSyncRWMutexRLock => 23;      // "sync.RWMutex.RLock"
+internal static waitReason waitReasonSyncRWMutexLock => 24;       // "sync.RWMutex.Lock"
+internal static waitReason waitReasonSyncWaitGroupWait => 25;     // "sync.WaitGroup.Wait"
+internal static waitReason waitReasonTraceReaderBlocked => 26;    // "trace reader (blocked)"
+internal static waitReason waitReasonWaitForGCCycle => 27;        // "wait for GC cycle"
+internal static waitReason waitReasonGCWorkerIdle => 28;          // "GC worker (idle)"
+internal static waitReason waitReasonGCWorkerActive => 29;        // "GC worker (active)"
+internal static waitReason waitReasonPreempted => 30;             // "preempted"
+internal static waitReason waitReasonDebugCall => 31;             // "debug call"
+internal static waitReason waitReasonGCMarkTermination => 32;     // "GC mark termination"
+internal static waitReason waitReasonStoppingTheWorld => 33;      // "stopping the world"
+internal static waitReason waitReasonFlushProcCaches => 34;       // "flushing proc caches"
+internal static waitReason waitReasonTraceGoroutineStatus => 35;  // "trace goroutine status"
+internal static waitReason waitReasonTraceProcStatus => 36;       // "trace proc status"
+internal static waitReason waitReasonPageTraceFlush => 37;        // "page trace flush"
+internal static waitReason waitReasonCoroutine => 38;             // "coroutine"
+internal static waitReason waitReasonGCWeakToStrongWait => 39;    // "GC weak to strong wait"
+internal static waitReason waitReasonSynctestRun => 40;           // "synctest.Run"
+internal static waitReason waitReasonSynctestWait => 41;          // "synctest.Wait"
+internal static waitReason waitReasonSynctestChanReceive => 42;   // "chan receive (durable)"
+internal static waitReason waitReasonSynctestChanSend => 43;      // "chan send (durable)"
+internal static waitReason waitReasonSynctestSelect => 44;        // "select (durable)"
 internal static waitReason waitReasonSynctestWaitGroupWait => 45; // "sync.WaitGroup.Wait (durable)"
-internal static waitReason waitReasonCleanupWait => 46;          // "cleanup wait"
+internal static waitReason waitReasonCleanupWait => 46;           // "cleanup wait"
 
 internal static array<@string> waitReasonStrings = new golib.SparseArray<@string>{
     [waitReasonZero] = ""u8,

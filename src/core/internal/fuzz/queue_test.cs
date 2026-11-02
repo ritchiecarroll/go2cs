@@ -8,20 +8,19 @@ using static global::go.@internal.fuzz_package;
 
 partial class fuzz_internal_test_package {
 
-public static void TestQueue(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestQueue(ж<testing.T> t) {
     var sᴷ = new stackAppend<nint>();
 
     // Zero valued queue should have 0 length and capacity.
-    global::go.@internal.fuzz_package.queue q = default!;
+    global::go.@internal.fuzz_package.queue q = default;
     {
         nint n = q.len; if (n != 0) {
-            Ꮡt.Fatalf("empty queue has len %d; want 0"u8, n);
+            t.Fatalf("empty queue has len %d; want 0", n);
         }
     }
     {
         nint n = q.cap(); if (n != 0) {
-            Ꮡt.Fatalf("empty queue has cap %d; want 0"u8, n);
+            t.Fatalf("empty queue has cap %d; want 0", n);
         }
     }
 
@@ -31,15 +30,14 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
         q.enqueue(i);
         {
             nint n = q.len; if (n != i + 1) {
-                Ꮡt.Fatalf("after adding %d elements, queue has len %d"u8, i, n);
+                t.Fatalf("after adding %d elements, queue has len %d", i, n);
             }
         }
         {
-            var (v, ok) = q.peek(); if (!ok){
-                Ꮡt.Fatalf("couldn't peek after adding %d elements"u8, i);
-            } else 
-            if (v._<nint>() != 0) {
-                Ꮡt.Fatalf("after adding %d elements, peek is %d; want 0"u8, i, v);
+            var (v, ok) = q.peek(); if (!ok) {
+                t.Fatalf("couldn't peek after adding %d elements", i);
+            } else if (v._<nint>() != 0) {
+                t.Fatalf("after adding %d elements, peek is %d; want 0", i, v);
             }
         }
     }
@@ -47,15 +45,14 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
     // As we remove and add elements, len should shrink and grow.
     // We should also remove elements in the same order they were added.
     nint want = 0;
-    foreach (var (_, r) in new nint[]{1, 2, 3, 5, 8, 13, 21}.slice()) {
+    foreach (var (_, r) in slice<nint>([1, 2, 3, 5, 8, 13, 21])) {
         var s = new slice<nint>(0, r);
         for (nint i = 0; i < r; i++) {
             {
-                var (got, ok) = q.dequeue(); if (!ok){
-                    Ꮡt.Fatalf("after removing %d of %d elements, could not dequeue"u8, i + 1, r);
-                } else 
-                if (!AreEqual(got, want)){
-                    Ꮡt.Fatalf("after removing %d of %d elements, got %d; want %d"u8, i + 1, r, got, want);
+                var (got, ok) = q.dequeue(); if (!ok) {
+                    t.Fatalf("after removing %d of %d elements, could not dequeue", i + 1, r);
+                } else if (!AreEqual(got, want)) {
+                    t.Fatalf("after removing %d of %d elements, got %d; want %d", i + 1, r, got, want);
                 } else {
                     s = append(sᴷ, s, got._<nint>());
                 }
@@ -63,7 +60,7 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
             want = rem((want + 1), N);
             {
                 nint n = q.len; if (n != N - i - 1) {
-                    Ꮡt.Fatalf("after removing %d of %d elements, len is %d; want %d"u8, i + 1, r, n, N - i - 1);
+                    t.Fatalf("after removing %d of %d elements, len is %d; want %d", i + 1, r, n, N - i - 1);
                 }
             }
         }
@@ -71,7 +68,7 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
             q.enqueue(v);
             {
                 nint n = q.len; if (n != N - r + i + 1) {
-                    Ꮡt.Fatalf("after adding back %d of %d elements, len is %d; want %d"u8, i + 1, r, n, n - r + i + 1);
+                    t.Fatalf("after adding back %d of %d elements, len is %d; want %d", i + 1, r, n, n - r + i + 1);
                 }
             }
         }

@@ -130,10 +130,8 @@
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal.trace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/raw/internal.trace.raw.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/version/internal.trace.version.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
-    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="internal.trace.testtrace.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />

@@ -24,15 +24,24 @@ partial class sync_test_package {
 
 partial struct mapOp /*@string*/;
 
-internal static readonly mapOp opLoad = "Load"u8;
-internal static readonly mapOp opStore = "Store"u8;
-internal static readonly mapOp opLoadOrStore = "LoadOrStore"u8;
-internal static readonly mapOp opLoadAndDelete = "LoadAndDelete"u8;
-internal static readonly mapOp opDelete = "Delete"u8;
-internal static readonly mapOp opSwap = "Swap"u8;
-internal static readonly mapOp opCompareAndSwap = "CompareAndSwap"u8;
-internal static readonly mapOp opCompareAndDelete = "CompareAndDelete"u8;
-internal static readonly mapOp opClear = "Clear"u8;
+internal static ref readonly mapOp opLoad => ref opLoadᵇ;
+private static readonly mapOp opLoadᵇ = "Load"u8;
+internal static ref readonly mapOp opStore => ref opStoreᵇ;
+private static readonly mapOp opStoreᵇ = "Store"u8;
+internal static ref readonly mapOp opLoadOrStore => ref opLoadOrStoreᵇ;
+private static readonly mapOp opLoadOrStoreᵇ = "LoadOrStore"u8;
+internal static ref readonly mapOp opLoadAndDelete => ref opLoadAndDeleteᵇ;
+private static readonly mapOp opLoadAndDeleteᵇ = "LoadAndDelete"u8;
+internal static ref readonly mapOp opDelete => ref opDeleteᵇ;
+private static readonly mapOp opDeleteᵇ = "Delete"u8;
+internal static ref readonly mapOp opSwap => ref opSwapᵇ;
+private static readonly mapOp opSwapᵇ = "Swap"u8;
+internal static ref readonly mapOp opCompareAndSwap => ref opCompareAndSwapᵇ;
+private static readonly mapOp opCompareAndSwapᵇ = "CompareAndSwap"u8;
+internal static ref readonly mapOp opCompareAndDelete => ref opCompareAndDeleteᵇ;
+private static readonly mapOp opCompareAndDeleteᵇ = "CompareAndDelete"u8;
+internal static ref readonly mapOp opClear => ref opClearᵇ;
+private static readonly mapOp opClearᵇ = "Clear"u8;
 
 internal static array<mapOp> mapOps = new mapOp[]{
     opLoad,
@@ -54,50 +63,52 @@ partial struct mapCall {
 
 internal static (any, bool) apply(this mapCall c, mapInterface m) {
     var exprᴛ1 = c.op;
-    if (exprᴛ1 == opLoad) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == opLoad: {
         return m.Load(c.k);
     }
-    if (exprᴛ1 == opStore) {
+    case {} when exprᴛ1 == opStore: {
         m.Store(c.k, c.v);
-        return (default!, false);
+        return (default, false);
     }
-    if (exprᴛ1 == opLoadOrStore) {
+    case {} when exprᴛ1 == opLoadOrStore: {
         return m.LoadOrStore(c.k, c.v);
     }
-    if (exprᴛ1 == opLoadAndDelete) {
+    case {} when exprᴛ1 == opLoadAndDelete: {
         return m.LoadAndDelete(c.k);
     }
-    if (exprᴛ1 == opDelete) {
+    case {} when exprᴛ1 == opDelete: {
         m.Delete(c.k);
-        return (default!, false);
+        return (default, false);
     }
-    if (exprᴛ1 == opSwap) {
+    case {} when exprᴛ1 == opSwap: {
         return m.Swap(c.k, c.v);
     }
-    if (exprᴛ1 == opCompareAndSwap) {
+    case {} when exprᴛ1 == opCompareAndSwap: {
         if (m.CompareAndSwap(c.k, c.v, rand.Int())) {
             m.Delete(c.k);
             return (c.v, true);
         }
-        return (default!, false);
+        return (default, false);
     }
-    if (exprᴛ1 == opCompareAndDelete) {
+    case {} when exprᴛ1 == opCompareAndDelete: {
         if (m.CompareAndDelete(c.k, c.v)) {
             {
                 var (_, ok) = m.Load(c.k); if (!ok) {
-                    return (default!, true);
+                    return (default, true);
                 }
             }
         }
-        return (default!, false);
+        return (default, false);
     }
-    if (exprᴛ1 == opClear) {
+    case {} when exprᴛ1 == opClear: {
         m.Clear();
-        return (default!, false);
+        return (default, false);
     }
-    { /* default: */
+    default: {
         throw panic("invalid mapOp");
-    }
+        break;
+    }}
 }
 
 partial struct mapResult {
@@ -110,23 +121,25 @@ internal static any randValue(ж<rand.Rand> Ꮡr) {
 
     var b = new slice<byte>(r.Intn(4));
     foreach (var i in range(b)) {
-        b[i] = (byte)((rune)'a' + (byte)rand.Intn(26));
+        b[i] = (byte)('a' + (byte)rand.Intn(26));
     }
     return (@string)b;
 }
 
-internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> Ꮡr, nint size) {
-    var c = new mapCall(op: mapOps[rand.Intn(len(mapOps))], k: randValue(Ꮡr));
+internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> r, nint size) {
+    var c = new mapCall(op: mapOps[rand.Intn(len(mapOps))], k: randValue(r));
     var exprᴛ1 = c.op;
-    if (exprᴛ1 == opStore || exprᴛ1 == opLoadOrStore) {
-        c.v = randValue(Ꮡr);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == opStore || exprᴛ1 == opLoadOrStore: {
+        c.v = randValue(r);
+        break;
+    }}
     return reflect.ValueOf(c);
 }
 
 internal static (slice<mapResult> results, map<any, any> final) applyCalls(mapInterface m, slice<mapCall> calls) {
-    slice<mapResult> results = default!;
-    map<any, any> final = default!;
+    slice<mapResult> results = default;
+    map<any, any> final = default;
     var resultsᴷ = new stackAppend<mapResult>(moves: true);
 
     foreach (var (_, c) in calls) {
@@ -161,31 +174,31 @@ internal static (slice<mapResult>, map<any, any>) applyHashTrieMap(slice<mapCall
     return applyCalls(new sync_test_package.sync_HashTrieMapжmapInterface(@new<isync.HashTrieMap<any, any>>()), calls);
 }
 
-public static partial void TestMapMatchesRWMutex(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMapMatchesRWMutex(ж<Δtesting.T> t) {
     {
-        var err = quick.CheckEqual(applyMap, applyRWMutexMap, nil); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = quick.CheckEqual(applyMap, applyRWMutexMap, nil); if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
-public static partial void TestMapMatchesDeepCopy(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMapMatchesDeepCopy(ж<Δtesting.T> t) {
     {
-        var err = quick.CheckEqual(applyMap, applyDeepCopyMap, nil); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = quick.CheckEqual(applyMap, applyDeepCopyMap, nil); if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
-public static partial void TestMapMatchesHashTrieMap(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMapMatchesHashTrieMap(ж<Δtesting.T> t) {
     {
-        var err = quick.CheckEqual(applyMap, applyHashTrieMap, nil); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = quick.CheckEqual(applyMap, applyHashTrieMap, nil); if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
-public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
+public static partial void TestConcurrentRange(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         UntypedInt mapSize = /* 1 << 10 */ 1024;
@@ -212,7 +225,7 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
-                    for (var i = (int64)0; ᐧ ; i++) {
+                    for (var i = (int64)0; ; i++) {
                         var selᴛ5 = doneʗ2;
                         switch (trySelect(ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
                         case 0 when selᴛ5.ꟷᐳ(out _): {
@@ -222,7 +235,7 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
                             break;
                         }}
                         for (var n = (int64)1; n < mapSize; n++) {
-                            if (rʗ1.Int63n(mapSize) == 0){
+                            if (rʗ1.Int63n(mapSize) == 0) {
                                 mʗ1.Store(n, n * i * gΔ1);
                             } else {
                                 mʗ1.Load(n);
@@ -246,17 +259,17 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
             m.Range((any ki, any vi) => {
                 var (k, v) = (ki._<int64>(), vi._<int64>());
                 if (rem(v, k) != 0) {
-                    Ꮡt.Fatalf("while Storing multiples of %v, Range saw value %v"u8, k, v);
+                    t.Fatalf("while Storing multiples of %v, Range saw value %v", k, v);
                 }
                 if (seenʗ1[k]) {
-                    Ꮡt.Fatalf("Range visited key %v twice"u8, k);
+                    t.Fatalf("Range visited key %v twice", k);
                 }
                 seenʗ1[k] = true;
                 return true;
             });
 
             if (len(seen) != mapSize) {
-                Ꮡt.Fatalf("Range visited %v elements of %v-element Map"u8, len(seen), (nint)(mapSize));
+                t.Fatalf("Range visited %v elements of %v-element Map", len(seen), (nint)(mapSize));
             }
         }
     }
@@ -264,13 +277,13 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestIssue40999(ж<Δtesting.T> Ꮡt) {
+public static void TestIssue40999(ж<Δtesting.T> t) {
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
 
     // Since the miss-counting in missLocked (via Delete)
     // compares the miss count with len(m.dirty),
     // add an initial entry to bias len(m.dirty) above the miss count.
-    Ꮡm.Store(default!, new EmptyStruct());
+    Ꮡm.Store(default, new EmptyStruct());
 
     ref var cleanedUp = ref heap(new uint32(), out var ᏑcleanedUp);
 
@@ -289,12 +302,13 @@ public static void TestIssue40999(ж<Δtesting.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object dummyˢ = (@string)"dummy"u8;
-internal static readonly @string syncMapˢ = "sync.Map"u8;
+internal static ref readonly @string syncMapˢ => ref syncMapˢᵇ;
+private static readonly @string syncMapˢᵇ = "sync.Map"u8;
 
-public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
+public static void TestMapRangeNestedCall(ж<Δtesting.T> t) {
     // Issue 46399
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
-    foreach (var (i, v) in new @string[]{"hello"u8, "world"u8, "Go"u8}.array()) {
+    foreach (var (i, v) in new @string[]{"hello", "world", "Go"}.array()) {
         Ꮡm.Store(i, v);
     }
     Ꮡm.Range((any key, any value) => {
@@ -303,7 +317,7 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
             // because there are no concurrent Delete involved in this tested map.
             {
                 var (v, ok) = Ꮡm.Load(keyΔ1); if (!ok || !reflect.DeepEqual(v, valueΔ1)) {
-                    Ꮡt.Fatalf("Nested Range loads unexpected value, got %+v want %+v"u8, v, valueΔ1);
+                    t.Fatalf("Nested Range loads unexpected value, got %+v want %+v", v, valueΔ1);
                 }
             }
 
@@ -312,7 +326,7 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
             // nested range in the Map.
             {
                 var (_, loaded) = Ꮡm.LoadOrStore((nint)42, dummyˢ); if (loaded) {
-                    Ꮡt.Fatalf("Nested Range loads unexpected value, want store a new value"u8);
+                    t.Fatalf("Nested Range loads unexpected value, want store a new value");
                 }
             }
 
@@ -324,7 +338,7 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
             Ꮡm.Store((nint)42, val);
             {
                 var (v, loaded) = Ꮡm.LoadAndDelete((nint)42); if (!loaded || !reflect.DeepEqual(v, val)) {
-                    Ꮡt.Fatalf("Nested Range loads unexpected value, got %v, want %v"u8, v, val);
+                    t.Fatalf("Nested Range loads unexpected value, got %v, want %v", v, val);
                 }
             }
             return true;
@@ -344,37 +358,36 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
     });
 
     if (length != 0) {
-        Ꮡt.Fatalf("Unexpected sync.Map size, got %v want %v"u8, length, (nint)0);
+        t.Fatalf("Unexpected sync.Map size, got %v want %v", length, (nint)0);
     }
 }
 
-public static partial void TestCompareAndSwap_NonExistingKey(ж<Δtesting.T> Ꮡt) {
-    var m = Ꮡ(new Δsync.Map(nil));
-    if (m.CompareAndSwap(m.OrTypedNil(), default!, (nint)42)) {
+public static partial void TestCompareAndSwap_NonExistingKey(ж<Δtesting.T> t) {
+    var m = Ꮡ(new Δsync.Map());
+    if (m.CompareAndSwap(m.OrTypedNil(), default, (nint)42)) {
         // See https://go.dev/issue/51972#issuecomment-1126408637.
-        Ꮡt.Fatalf("CompareAndSwap on a non-existing key succeeded"u8);
+        t.Fatalf("CompareAndSwap on a non-existing key succeeded");
     }
 }
 
-public static void TestMapRangeNoAllocations(ж<Δtesting.T> Ꮡt) {
+public static void TestMapRangeNoAllocations(ж<Δtesting.T> t) {
     // Issue 62404
-    testenv.SkipIfOptimizationOff(new sync_test_package.testing_TжTB(Ꮡt));
+    testenv.SkipIfOptimizationOff(new sync_test_package.testing_TжTB(t));
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
     var allocs = Δtesting.AllocsPerRun(10, () => {
         Ꮡm.Range((any key, any value) => true);
     });
     if (allocs > 0D) {
-        Ꮡt.Errorf("AllocsPerRun of m.Range = %v; want 0"u8, allocs);
+        t.Errorf("AllocsPerRun of m.Range = %v; want 0", allocs);
     }
 }
 
 // TestConcurrentClear tests concurrent behavior of sync.Map properties to ensure no data races.
 // Checks for proper synchronization between Clear, Store, Load operations.
-public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
+public static partial void TestConcurrentClear(ж<Δtesting.T> t) {
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
 
-    ref var wg = ref heap<Δsync.WaitGroup>(out var Ꮡwg);
-    wg = new Δsync.WaitGroup(nil);
+    ref var wg = ref heap<Δsync.WaitGroup>(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(30); // 10 goroutines for writing, 10 goroutines for reading, 10 goroutines for waiting
 
     // Writing data to the map concurrently
@@ -397,10 +410,10 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 {
-                    var (value, ok) = Ꮡm.Load(k); if (ok){
-                        Ꮡt.Logf("Key: %v, Value: %v\n"u8, k, value);
+                    var (value, ok) = Ꮡm.Load(k); if (ok) {
+                        t.Logf("Key: %v, Value: %v\n", k, value);
                     } else {
-                        Ꮡt.Logf("Key: %v not found\n"u8, k);
+                        t.Logf("Key: %v not found\n", k);
                     }
                 }
             }
@@ -419,7 +432,7 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        });
+        }, GoStack.Bounded);
     }
 
     Ꮡwg.Wait();
@@ -427,20 +440,20 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> Ꮡt) {
     Ꮡm.Clear();
 
     Ꮡm.Range((any k, any v) => {
-        Ꮡt.Errorf("after Clear, Map contains (%v, %v); expected to be empty"u8, k, v);
+        t.Errorf("after Clear, Map contains (%v, %v); expected to be empty", k, v);
 
         return true;
     });
 }
 
-public static void TestMapClearOneAllocation(ж<Δtesting.T> Ꮡt) {
-    testenv.SkipIfOptimizationOff(new sync_test_package.testing_TжTB(Ꮡt));
+public static void TestMapClearOneAllocation(ж<Δtesting.T> t) {
+    testenv.SkipIfOptimizationOff(new sync_test_package.testing_TжTB(t));
     ref var m = ref heap(new Δsync.Map(), out var Ꮡm);
     var allocs = Δtesting.AllocsPerRun(10, () => {
         Ꮡm.Clear();
     });
     if (allocs > 1D) {
-        Ꮡt.Errorf("AllocsPerRun of m.Clear = %v; want 1"u8, allocs);
+        t.Errorf("AllocsPerRun of m.Clear = %v; want 1", allocs);
     }
 }
 

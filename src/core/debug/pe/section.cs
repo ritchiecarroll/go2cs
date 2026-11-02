@@ -31,11 +31,11 @@ partial struct SectionHeader32 {
 // in sh.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
 internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTable st) {
-    if (sh.Name[0] != (rune)'/') {
-        return (cstring(sh.Name[..]), default!);
+    if (sh.Name[0] != '/') {
+        return (cstring(sh.Name[..]), default);
     }
     var (i, err) = strconv.Atoi(cstring(sh.Name[1..]));
-    if (err != default!) {
+    if (err != nil) {
         return ("", err);
     }
     return st.String((uint32)i);
@@ -55,18 +55,18 @@ internal static (slice<Reloc>, error) readRelocs(ж<SectionHeader> Ꮡsh, io.Rea
     ref var sh = ref Ꮡsh.DerefOrNull();
 
     if (sh.NumberOfRelocations <= 0) {
-        return (default!, default!);
+        return (default, default);
     }
     var (_, err) = r.Seek((int64)sh.PointerToRelocations, io.SeekStart);
-    if (err != default!) {
-        return (default!, fmt.Errorf("fail to seek to %q section relocations: %v"u8, sh.Name, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("fail to seek to %q section relocations: %v"u8, sh.Name, err));
     }
     var relocs = new slice<Reloc>(sh.NumberOfRelocations);
     err = binary.Read(r, binary.LittleEndian, relocs);
-    if (err != default!) {
-        return (default!, fmt.Errorf("fail to read section relocations: %v"u8, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("fail to read section relocations: %v"u8, err));
     }
-    return (relocs, default!);
+    return (relocs, default);
 }
 
 // SectionHeader is similar to [SectionHeader32] with Name

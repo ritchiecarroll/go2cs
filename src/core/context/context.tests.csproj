@@ -133,9 +133,7 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/abi/internal.abi.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/reflectlite/internal.reflectlite.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/rand/math.rand.csproj" />

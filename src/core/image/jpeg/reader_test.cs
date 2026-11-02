@@ -26,37 +26,37 @@ partial class jpeg_internal_test_package {
 // TestDecodeProgressive tests that decoding the baseline and progressive
 // versions of the same image result in exactly the same pixel data, in YCbCr
 // space for color images, and Y space for grayscale images.
-public static void TestDecodeProgressive(ж<testing.T> Ꮡt) {
-    var testCases = new @string[]{
-        "../testdata/video-001"u8,
-        "../testdata/video-001.q50.410"u8,
-        "../testdata/video-001.q50.411"u8,
-        "../testdata/video-001.q50.420"u8,
-        "../testdata/video-001.q50.422"u8,
-        "../testdata/video-001.q50.440"u8,
-        "../testdata/video-001.q50.444"u8,
-        "../testdata/video-005.gray.q50"u8,
-        "../testdata/video-005.gray.q50.2x2"u8,
-        "../testdata/video-001.separate.dc.progression"u8
-    }.slice();
+public static void TestDecodeProgressive(ж<testing.T> t) {
+    var testCases = slice<@string>([
+        "../testdata/video-001",
+        "../testdata/video-001.q50.410",
+        "../testdata/video-001.q50.411",
+        "../testdata/video-001.q50.420",
+        "../testdata/video-001.q50.422",
+        "../testdata/video-001.q50.440",
+        "../testdata/video-001.q50.444",
+        "../testdata/video-005.gray.q50",
+        "../testdata/video-005.gray.q50.2x2",
+        "../testdata/video-001.separate.dc.progression"
+    ]);
     foreach (var (_, tc) in testCases) {
         var (m0, err) = decodeFile(tc + ".jpeg"u8);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: %v"u8, tc + ".jpeg", err);
+        if (err != nil) {
+            t.Errorf("%s: %v", tc + ".jpeg", err);
             continue;
         }
         (var m1, err) = decodeFile(tc + ".progressive.jpeg"u8);
-        if (err != default!) {
-            Ꮡt.Errorf("%s: %v"u8, tc + ".progressive.jpeg", err);
+        if (err != nil) {
+            t.Errorf("%s: %v", tc + ".progressive.jpeg", err);
             continue;
         }
         if (m0.Bounds() != m1.Bounds()) {
-            Ꮡt.Errorf("%s: bounds differ: %v and %v"u8, tc, m0.Bounds(), m1.Bounds());
+            t.Errorf("%s: bounds differ: %v and %v", tc, m0.Bounds(), m1.Bounds());
             continue;
         }
         // All of the video-*.jpeg files are 150x103.
         if (m0.Bounds() != image.Rect(0, 0, 150, 103)) {
-            Ꮡt.Errorf("%s: bad bounds: %v"u8, tc, m0.Bounds());
+            t.Errorf("%s: bad bounds: %v", tc, m0.Bounds());
             continue;
         }
 
@@ -64,20 +64,20 @@ public static void TestDecodeProgressive(ж<testing.T> Ꮡt) {
         case ж<image.YCbCr> m0Δ1: {
             var m1Δ1 = m1._<ж<image.YCbCr>>();
             {
-                var errΔ1 = check(m0Δ1.Bounds(), (~m0Δ1).Y, (~m1Δ1).Y, (~m0Δ1).YStride, (~m1Δ1).YStride); if (errΔ1 != default!) {
-                    Ꮡt.Errorf("%s (Y): %v"u8, tc, errΔ1);
+                var errΔ1 = check(m0Δ1.Bounds(), m0Δ1.Y, m1Δ1.Y, m0Δ1.YStride, m1Δ1.YStride); if (errΔ1 != nil) {
+                    t.Errorf("%s (Y): %v", tc, errΔ1);
                     continue;
                 }
             }
             {
-                var errΔ2 = check(m0Δ1.Bounds(), (~m0Δ1).Cb, (~m1Δ1).Cb, (~m0Δ1).CStride, (~m1Δ1).CStride); if (errΔ2 != default!) {
-                    Ꮡt.Errorf("%s (Cb): %v"u8, tc, errΔ2);
+                var errΔ2 = check(m0Δ1.Bounds(), m0Δ1.Cb, m1Δ1.Cb, m0Δ1.CStride, m1Δ1.CStride); if (errΔ2 != nil) {
+                    t.Errorf("%s (Cb): %v", tc, errΔ2);
                     continue;
                 }
             }
             {
-                var errΔ3 = check(m0Δ1.Bounds(), (~m0Δ1).Cr, (~m1Δ1).Cr, (~m0Δ1).CStride, (~m1Δ1).CStride); if (errΔ3 != default!) {
-                    Ꮡt.Errorf("%s (Cr): %v"u8, tc, errΔ3);
+                var errΔ3 = check(m0Δ1.Bounds(), m0Δ1.Cr, m1Δ1.Cr, m0Δ1.CStride, m1Δ1.CStride); if (errΔ3 != nil) {
+                    t.Errorf("%s (Cr): %v", tc, errΔ3);
                     continue;
                 }
             }
@@ -86,8 +86,8 @@ public static void TestDecodeProgressive(ж<testing.T> Ꮡt) {
         case ж<image.Gray> m0Δ1: {
             var m1Δ2 = m1._<ж<image.Gray>>();
             {
-                var errΔ4 = check(m0Δ1.Bounds(), (~m0Δ1).Pix, (~m1Δ2).Pix, (~m0Δ1).Stride, (~m1Δ2).Stride); if (errΔ4 != default!) {
-                    Ꮡt.Errorf("%s: %v"u8, tc, errΔ4);
+                var errΔ4 = check(m0Δ1.Bounds(), m0Δ1.Pix, m1Δ2.Pix, m0Δ1.Stride, m1Δ2.Stride); if (errΔ4 != nil) {
+                    t.Errorf("%s: %v", tc, errΔ4);
                     continue;
                 }
             }
@@ -95,7 +95,7 @@ public static void TestDecodeProgressive(ж<testing.T> Ꮡt) {
         }
         default: {
             var m0Δ1 = m0;
-            Ꮡt.Errorf("%s: unexpected image type %T"u8, tc, m0Δ1);
+            t.Errorf("%s: unexpected image type %T", tc, m0Δ1);
             continue;
             break;
         }}
@@ -106,28 +106,28 @@ internal static (image.Image, error) decodeFile(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return Decode(new jpeg_internal_test_package.os_FileжReader(f));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal partial struct eofReader {
-    internal slice<byte> data; // deliver from Read without EOF
+    internal slice<byte> data;    // deliver from Read without EOF
     internal slice<byte> dataEOF; // then deliver from Read with EOF on last chunk
     internal nint lenAtEOF;
 }
 
 internal static (nint n, error err) Read(this ref eofReader r, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    if (len(r.data) > 0){
+    if (len(r.data) > 0) {
         n = copy(b, r.data);
         r.data = r.data.slice(n);
     } else {
@@ -144,23 +144,24 @@ internal static (nint n, error err) Read(this ref eofReader r, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataVideo001Jpegˢ = "../testdata/video-001.jpeg"u8;
+internal static ref readonly @string testdataVideo001Jpegˢ => ref testdataVideo001Jpegˢᵇ;
+private static readonly @string testdataVideo001Jpegˢᵇ = "../testdata/video-001.jpeg"u8;
 
-public static void TestDecodeEOF(ж<testing.T> Ꮡt) {
+public static void TestDecodeEOF(ж<testing.T> t) {
     // Check that if reader returns final data and EOF at same time, jpeg handles it.
     var (data, err) = os.ReadFile(testdataVideo001Jpegˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     nint n = len(data);
     for (nint i = 0; i < n; ) {
         var r = Ꮡ(new eofReader(data.slice(0, n - i), data.slice(n - i), -1));
         var (_, errΔ1) = Decode(new jpeg_internal_test_package.eofReaderжReader(r));
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("Decode with Read() = %d, EOF: %v"u8, (~r).lenAtEOF, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("Decode with Read() = %d, EOF: %v", r.lenAtEOF, errΔ1);
         }
-        if (i == 0){
+        if (i == 0) {
             i = 1;
         } else {
             i *= 2;
@@ -202,11 +203,11 @@ internal static error check(image.Rectangle bounds, slice<byte> pix0, slice<byte
             }
         }
     }
-    return default!;
+    return default;
 }
 
 internal static @string pixString(slice<byte> pix, nint stride, nint x, nint y) {
-    var s = Ꮡ(new strings.Builder(nil));
+    var s = Ꮡ(new strings.Builder());
     for (nint j = 0; j < 8; j++) {
         fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(s), "\t"u8);
         for (nint i = 0; i < 8; i++) {
@@ -218,18 +219,19 @@ internal static @string pixString(slice<byte> pix, nint stride, nint x, nint y) 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataVideo005GrayQ50ˢ = "../testdata/video-005.gray.q50.jpeg"u8;
+internal static ref readonly @string testdataVideo005GrayQ50ˢ => ref testdataVideo005GrayQ50ˢᵇ;
+private static readonly @string testdataVideo005GrayQ50ˢᵇ = "../testdata/video-005.gray.q50.jpeg"u8;
 internal static readonly object sosMarkerNotFoundˢ = (@string)"SOS marker not found"u8;
 
-public static void TestTruncatedSOSDataDoesntPanic(ж<testing.T> Ꮡt) {
+public static void TestTruncatedSOSDataDoesntPanic(ж<testing.T> t) {
     var (b, err) = os.ReadFile(testdataVideo005GrayQ50ˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    var sosMarker = new byte[]{0xff, 0xda}.slice();
+    var sosMarker = slice<byte>([0xff, 0xda]);
     nint i = bytes.Index(b, sosMarker);
     if (i < 0) {
-        Ꮡt.Fatal(sosMarkerNotFoundˢ);
+        t.Fatal(sosMarkerNotFoundˢ);
     }
     i += len(sosMarker);
     nint j = i + 10;
@@ -242,12 +244,14 @@ public static void TestTruncatedSOSDataDoesntPanic(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string allˢ = "all"u8;
+internal static ref readonly @string allˢ => ref allˢᵇ;
+private static readonly @string allˢᵇ = "all"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string inputᶜ = ((@string)(new byte[]{0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x10, 0x0b, 0x0c, 0x0e, 0x0c, 0x0a, 0x10, 0x0e, 0x89, 0x0e, 0x12, 0x11, 0x10, 0x13, 0x18, 0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x10, 0x0b, 0x0c, 0x0e, 0x0c, 0x0a, 0x10, 0x0e, 0x0d, 0x0e, 0x12, 0x11, 0x10, 0x13, 0x18, 0x28, 0x1a, 0x18, 0x16, 0x16, 0x18, 0x31, 0x23, 0x25, 0x1d, 0x28, 0x3a, 0x33, 0x3d, 0x3c, 0x39, 0x33, 0x38, 0x37, 0x40, 0x48, 0x5c, 0x4e, 0x40, 0x44, 0x57, 0x45, 0x37, 0x38, 0x50, 0x6d, 0x51, 0x57, 0x5f, 0x62, 0x67, 0x68, 0x67, 0x3e, 0x4d, 0x71, 0x79, 0x70, 0x64, 0x78, 0x5c, 0x65, 0x67, 0x63, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x20, 0x00, 0x20, 0x00, 0x01, 0x01, 0x11, 0x00, 0xff, 0xc4, 0x00, 0x1f, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0xff, 0xc4, 0x00, 0xb5, 0x10, 0x00, 0x02, 0x01, 0x03, 0x03, 0x02, 0x04, 0x03, 0x05, 0x05, 0x04, 0x04, 0x00, 0x00, 0x01, 0x7d, 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x01, 0x06, 0x13, 0x51, 0x61, 0x07, 0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08, 0x23, 0xd8, 0xff, 0xdd, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0, 0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0a, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x00, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x10, 0x0b, 0x0c, 0x0e, 0x0c, 0x0a, 0x10, 0x0e, 0x0d, 0x0e, 0x12, 0x11, 0x10, 0x13, 0x18, 0x28, 0x1a, 0x18, 0x16, 0x16, 0x18, 0x31, 0x23, 0x25, 0x1d, 0xc8, 0xc9, 0xca, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00, 0xb9, 0xeb, 0x50, 0xb0, 0xdb, 0xc8, 0xa8, 0xe4, 0x63, 0x80, 0xdd, 0x31, 0xd6, 0x9d, 0xbb, 0xf2, 0xc5, 0x42, 0x1f, 0x6c, 0x6f, 0xf4, 0x34, 0xdd, 0x3c, 0xfc, 0xac, 0xe7, 0x3d, 0x80, 0xa9, 0xcc, 0x87, 0x34, 0xb3, 0x37, 0xfa, 0x2b, 0x9f, 0x6a, 0xad, 0x63, 0x20, 0x36, 0x9f, 0x78, 0x64, 0x75, 0xe6, 0xab, 0x7d, 0xb2, 0xde, 0x29, 0x70, 0xd3, 0x20, 0x27, 0xde, 0xaf, 0xa4, 0xf0, 0xca, 0x9f, 0x24, 0xa8, 0xdf, 0x46, 0xa8, 0x24, 0x84, 0x96, 0xe3, 0x77, 0xf9, 0x2e, 0xe0, 0x0a, 0x62, 0x7f, 0xdf, 0xd9}));
+internal static ref readonly @string inputᶜ => ref inputᶜᵇ;
+private static readonly @string inputᶜᵇ = ((@string)(new byte[]{0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x10, 0x0b, 0x0c, 0x0e, 0x0c, 0x0a, 0x10, 0x0e, 0x89, 0x0e, 0x12, 0x11, 0x10, 0x13, 0x18, 0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x10, 0x0b, 0x0c, 0x0e, 0x0c, 0x0a, 0x10, 0x0e, 0x0d, 0x0e, 0x12, 0x11, 0x10, 0x13, 0x18, 0x28, 0x1a, 0x18, 0x16, 0x16, 0x18, 0x31, 0x23, 0x25, 0x1d, 0x28, 0x3a, 0x33, 0x3d, 0x3c, 0x39, 0x33, 0x38, 0x37, 0x40, 0x48, 0x5c, 0x4e, 0x40, 0x44, 0x57, 0x45, 0x37, 0x38, 0x50, 0x6d, 0x51, 0x57, 0x5f, 0x62, 0x67, 0x68, 0x67, 0x3e, 0x4d, 0x71, 0x79, 0x70, 0x64, 0x78, 0x5c, 0x65, 0x67, 0x63, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x20, 0x00, 0x20, 0x00, 0x01, 0x01, 0x11, 0x00, 0xff, 0xc4, 0x00, 0x1f, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0xff, 0xc4, 0x00, 0xb5, 0x10, 0x00, 0x02, 0x01, 0x03, 0x03, 0x02, 0x04, 0x03, 0x05, 0x05, 0x04, 0x04, 0x00, 0x00, 0x01, 0x7d, 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x01, 0x06, 0x13, 0x51, 0x61, 0x07, 0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08, 0x23, 0xd8, 0xff, 0xdd, 0x42, 0xb1, 0xc1, 0x15, 0x52, 0xd1, 0xf0, 0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0a, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x00, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7, 0xb8, 0xb9, 0xba, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x10, 0x0b, 0x0c, 0x0e, 0x0c, 0x0a, 0x10, 0x0e, 0x0d, 0x0e, 0x12, 0x11, 0x10, 0x13, 0x18, 0x28, 0x1a, 0x18, 0x16, 0x16, 0x18, 0x31, 0x23, 0x25, 0x1d, 0xc8, 0xc9, 0xca, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7, 0xe8, 0xe9, 0xea, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f, 0x00, 0xb9, 0xeb, 0x50, 0xb0, 0xdb, 0xc8, 0xa8, 0xe4, 0x63, 0x80, 0xdd, 0x31, 0xd6, 0x9d, 0xbb, 0xf2, 0xc5, 0x42, 0x1f, 0x6c, 0x6f, 0xf4, 0x34, 0xdd, 0x3c, 0xfc, 0xac, 0xe7, 0x3d, 0x80, 0xa9, 0xcc, 0x87, 0x34, 0xb3, 0x37, 0xfa, 0x2b, 0x9f, 0x6a, 0xad, 0x63, 0x20, 0x36, 0x9f, 0x78, 0x64, 0x75, 0xe6, 0xab, 0x7d, 0xb2, 0xde, 0x29, 0x70, 0xd3, 0x20, 0x27, 0xde, 0xaf, 0xa4, 0xf0, 0xca, 0x9f, 0x24, 0xa8, 0xdf, 0x46, 0xa8, 0x24, 0x84, 0x96, 0xe3, 0x77, 0xf9, 0x2e, 0xe0, 0x0a, 0x62, 0x7f, 0xdf, 0xd9}));
 
-public static void TestLargeImageWithShortData(ж<testing.T> Ꮡt) {
+public static void TestLargeImageWithShortData(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // This input is an invalid JPEG image, based on the fuzzer-generated image
@@ -266,8 +270,8 @@ public static void TestLargeImageWithShortData(ж<testing.T> Ꮡt) {
         defer(() => timerʗ1.Stop(), ref ᒐ);
 
         var (_, err) = Decode(new jpeg_internal_test_package.strings_ReaderжReader(strings.NewReader(input)));
-        if (err == default!) {
-            Ꮡt.Fatalf("got nil error, want non-nil"u8);
+        if (err == nil) {
+            t.Fatalf("got nil error, want non-nil");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -275,7 +279,8 @@ public static void TestLargeImageWithShortData(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string base64EncodedImageᶜ = """
+internal static ref readonly @string base64EncodedImageᶜ => ref base64EncodedImageᶜᵇ;
+private static readonly @string base64EncodedImageᶜᵇ = """
 
 /9j/4AAhQVZJMQABAQEAeAB4AAAAAAAAAAAAAAAAAAAAAAAAAP/bAEMABAIDAwMCBAMDAwQEBAQGCgYG
 BQUGDAgJBwoODA8PDgwODxASFxMQERURDQ4UGhQVFxgZGhkPExweHBkeFxkZGP/bAEMBBAQEBgUGCwYG
@@ -435,29 +440,29 @@ Sqm7JH//2Q==
 
 """u8.Raw();
 
-public static void TestPaddedRSTMarker(ж<testing.T> Ꮡt) {
+public static void TestPaddedRSTMarker(ж<testing.T> t) {
     // This test image comes from golang.org/issue/28717
     @string base64EncodedImage = base64EncodedImageᶜ;
 
     var (data, err) = base64.StdEncoding.DecodeString(base64EncodedImage);
-    if (err != default!) {
-        Ꮡt.Fatalf("base64 DecodeString: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("base64 DecodeString: %v", err);
     }
     {
-        (_, err) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data))); if (err != default!) {
-            Ꮡt.Fatalf("Decode: %v"u8, err);
+        (_, err) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data))); if (err != nil) {
+            t.Fatalf("Decode: %v", err);
         }
     }
 }
 
-public static void TestExtraneousData(ж<testing.T> Ꮡt) {
+public static void TestExtraneousData(ж<testing.T> t) {
     // Encode a 1x1 red image.
     var src = image.NewRGBA(image.Rect(0, 0, 1, 1));
     src.Set(0, 0, new colorꓸRGBA(0xff, 0x00, 0x00, 0xff));
     var buf = @new<bytes.Buffer>();
     {
-        var err = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(buf), new image.ΔRGBAжImage(src), nil); if (err != default!) {
-            Ꮡt.Fatalf("encode: %v"u8, err);
+        var err = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(buf), new image.ΔRGBAжImage(src), nil); if (err != nil) {
+            t.Fatalf("encode: %v", err);
         }
     }
     @string enc = buf.String();
@@ -465,17 +470,17 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
     // "\xff\xd9" EOI marker, and that it contains a "\xff\xda" SOS marker
     // somewhere in the final 64 bytes.
     if (len(enc) < 64) {
-        Ꮡt.Fatalf("encoded JPEG is too short: %d bytes"u8, len(enc));
+        t.Fatalf("encoded JPEG is too short: %d bytes", len(enc));
     }
     {
         @string got = enc.slice(len(enc) - 2);
         @string want = ((@string)(new byte[]{0xff, 0xd9})); if (got != want) {
-            Ꮡt.Fatalf("encoded JPEG ends with %q, want %q"u8, got, want);
+            t.Fatalf("encoded JPEG ends with %q, want %q", got, want);
         }
     }
     {
         @string s = enc.slice(len(enc) - 64); if (!strings.Contains(s, ((@string)(new byte[]{0xff, 0xda})))) {
-            Ꮡt.Fatalf("encoded JPEG does not contain a SOS marker (ff da) near the end: % x"u8, s);
+            t.Fatalf("encoded JPEG does not contain a SOS marker (ff da) near the end: % x", s);
         }
     }
     // Test that adding some random junk between the SOS marker and the
@@ -488,7 +493,7 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
         // Write some random extraneous data.
         for (nint n = rnd.Intn(10); n > 0; n--) {
             {
-                var x = (byte)rnd.Intn(256); if (x != 0xff){
+                var x = (byte)rnd.Intn(256); if (x != 0xff) {
                     buf.WriteByte(x);
                 } else {
                     // The JPEG format escapes a SOS 0xff data byte as "\xff\x00".
@@ -501,60 +506,59 @@ public static void TestExtraneousData(ж<testing.T> Ꮡt) {
 
         // Check that we can still decode the resultant image.
         var (got, err) = Decode(new jpeg_internal_test_package.bytes_BufferжReader(buf));
-        if (err != default!) {
-            Ꮡt.Errorf("could not decode image #%d: %v"u8, i, err);
+        if (err != nil) {
+            t.Errorf("could not decode image #%d: %v", i, err);
             nerr++;
             continue;
         }
         if (got.Bounds() != src.Bounds()) {
-            Ꮡt.Errorf("image #%d, bounds differ: %v and %v"u8, i, got.Bounds(), src.Bounds());
+            t.Errorf("image #%d, bounds differ: %v and %v", i, got.Bounds(), src.Bounds());
             nerr++;
             continue;
         }
         if (averageDelta(got, new image.ΔRGBAжImage(src)) > (int64)2 << 8) {
-            Ꮡt.Errorf("image #%d changed too much after a round trip"u8, i);
+            t.Errorf("image #%d changed too much after a round trip", i);
             nerr++;
             continue;
         }
     }
 }
 
-public static void TestIssue56724(ж<testing.T> Ꮡt) {
+public static void TestIssue56724(ж<testing.T> t) {
     var (b, err) = os.ReadFile(testdataVideo001Jpegˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     b = b[..24]; // truncate image data
 
     (_, err) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
     if (!AreEqual(err, io.ErrUnexpectedEOF)) {
-        Ꮡt.Errorf("got: %v, want: %v"u8, err, io.ErrUnexpectedEOF);
+        t.Errorf("got: %v, want: %v", err, io.ErrUnexpectedEOF);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataVideo001Restart2ˢ = "../testdata/video-001.restart2.jpeg"u8;
+internal static ref readonly @string testdataVideo001Restart2ˢ => ref testdataVideo001Restart2ˢᵇ;
+private static readonly @string testdataVideo001Restart2ˢᵇ = "../testdata/video-001.restart2.jpeg"u8;
 internal static readonly object testImageHadUnexpectedˢ = (@string)"test image had unexpected length"u8;
 internal static readonly object testImageDidNotHaveFfD1ˢ = (@string)"test image did not have FF D1 restart marker at expected offset"u8;
 
-public static void TestBadRestartMarker(ж<testing.T> Ꮡt) {
+public static void TestBadRestartMarker(ж<testing.T> t) {
     var (b, err) = os.ReadFile(testdataVideo001Restart2ˢ);
-    if (err != default!){
-        Ꮡt.Fatal(err);
-    } else 
-    if (len(b) != 4855){
-        Ꮡt.Fatal(testImageHadUnexpectedˢ);
-    } else 
-    if ((b[2816] != 0xff) || (b[2817] != 0xd1)) {
-        Ꮡt.Fatal(testImageDidNotHaveFfD1ˢ);
+    if (err != nil) {
+        t.Fatal(err);
+    } else if (len(b) != 4855) {
+        t.Fatal(testImageHadUnexpectedˢ);
+    } else if ((b[2816] != 0xff) || (b[2817] != 0xd1)) {
+        t.Fatal(testImageDidNotHaveFfD1ˢ);
     }
     var (prefix, suffix) = (b[..2816], b[2816..]);
 
-    var testCases = new @string[]{
-        "PASS:"u8,
-        "PASS:\x00"u8,
-        "PASS:\x61"u8,
+    var testCases = slice<@string>([
+        "PASS:",
+        "PASS:\x00",
+        "PASS:\x61",
         ((@string)(new byte[]{0x50, 0x41, 0x53, 0x53, 0x3a, 0x61, 0x62, 0x63, 0xff, 0x00, 0x64})),
         ((@string)(new byte[]{0x50, 0x41, 0x53, 0x53, 0x3a, 0xff})),
         ((@string)(new byte[]{0x50, 0x41, 0x53, 0x53, 0x3a, 0xff, 0x00})),
@@ -563,21 +567,21 @@ public static void TestBadRestartMarker(ж<testing.T> Ꮡt) {
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0x03})),
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xd5})),
         ((@string)(new byte[]{0x46, 0x41, 0x49, 0x4c, 0x3a, 0xff, 0xff, 0xd5}))
-    }.slice();
+    ]);
 
     foreach (var (_, tc) in testCases) {
         var want = tc[..5] == "PASS:";
         @string infix = tc[5..];
 
-        var data = slice<byte>(default!);
+        var data = slice<byte>(default);
         data = appendꓸꓸꓸ(data, prefix);
         data = append(data, infix.ꓸꓸꓸ);
         data = appendꓸꓸꓸ(data, suffix);
         var (_, errΔ1) = Decode(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
-        var got = errΔ1 == default!;
+        var got = errΔ1 == nil;
 
         if (got != want) {
-            Ꮡt.Errorf("%q: got %v, want %v"u8, tc, got, want);
+            t.Errorf("%q: got %v, want %v", tc, got, want);
         }
     }
 }
@@ -586,11 +590,11 @@ internal static void benchmarkDecode(ж<testing.B> Ꮡb, @string filename) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var (data, err) = os.ReadFile(filename);
-    if (err != default!) {
+    if (err != nil) {
         Ꮡb.Fatal(err);
     }
     (var cfg, err) = DecodeConfig(new jpeg_internal_test_package.bytes_ReaderжReader(bytes.NewReader(data)));
-    if (err != default!) {
+    if (err != nil) {
         Ꮡb.Fatal(err);
     }
     b.SetBytes((int64)(cfg.Width * cfg.Height * 4));
@@ -601,15 +605,16 @@ internal static void benchmarkDecode(ж<testing.B> Ꮡb, @string filename) {
     }
 }
 
-public static void BenchmarkDecodeBaseline(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataVideo001Jpegˢ);
+public static void BenchmarkDecodeBaseline(ж<testing.B> b) {
+    benchmarkDecode(b, testdataVideo001Jpegˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataVideo001ˢ = "../testdata/video-001.progressive.jpeg"u8;
+internal static ref readonly @string testdataVideo001ˢ => ref testdataVideo001ˢᵇ;
+private static readonly @string testdataVideo001ˢᵇ = "../testdata/video-001.progressive.jpeg"u8;
 
-public static void BenchmarkDecodeProgressive(ж<testing.B> Ꮡb) {
-    benchmarkDecode(Ꮡb, testdataVideo001ˢ);
+public static void BenchmarkDecodeProgressive(ж<testing.B> b) {
+    benchmarkDecode(b, testdataVideo001ˢ);
 }
 
 } // end jpeg_internal_test_package

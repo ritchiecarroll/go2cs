@@ -31,7 +31,7 @@ internal static slice<implementation> allImplementations;
 public static void Register(@string pkg, @string name, ж<bool> Ꮡavailable) {
     ref var available = ref Ꮡavailable.DerefOrNull();
 
-    if (strings.Contains(pkg, "/"u8)) {
+    if (strings.Contains(pkg, "/")) {
         throw panic("impl: package name must not contain slashes");
     }
     allImplementations = append(allImplementations, new implementation(
@@ -47,7 +47,7 @@ public static void Register(@string pkg, @string name, ж<bool> Ꮡavailable) {
 public static slice<@string> Packages() {
     var pkgsᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> pkgs = default!;
+    slice<@string> pkgs = default;
     var seen = new map<@string, bool>();
     foreach (var (_, i) in allImplementations) {
         if (!seen[i.Package]) {
@@ -65,7 +65,7 @@ public static slice<@string> Packages() {
 public static slice<@string> List(@string pkg) {
     var namesᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> names = default!;
+    slice<@string> names = default;
     foreach (var (_, i) in allImplementations) {
         if (i.Package == pkg) {
             names = append(namesᴷ, names, i.Name);

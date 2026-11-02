@@ -11,7 +11,8 @@ using syscall = syscall_package;
 partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string setsockoptˢ = "setsockopt"u8;
+internal static ref readonly @string setsockoptˢ => ref setsockoptˢᵇ;
+private static readonly @string setsockoptˢᵇ = "setsockopt"u8;
 
 internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool ipv6only) {
     if (runtime.GOOS == "dragonfly"u8 && sotype != syscall.SOCK_RAW) {
@@ -19,13 +20,15 @@ internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool 
         // range because unlike other BSD systems its default
         // port range doesn't conform to IANA recommendation
         // as described in RFC 6056 and is pretty narrow.
-        var exprᴛ1 = family;
-        if (exprᴛ1 == syscall.AF_INET) {
+        switch (family) {
+        case var ᴛ when ᴛ == syscall.AF_INET: {
             syscall.SetsockoptInt(s, syscall.IPPROTO_IP, syscall.IP_PORTRANGE, syscall.IP_PORTRANGE_HIGH);
+            break;
         }
-        else if (exprᴛ1 == syscall.AF_INET6) {
+        case var ᴛ when ᴛ == syscall.AF_INET6: {
             syscall.SetsockoptInt(s, syscall.IPPROTO_IPV6, syscall.IPV6_PORTRANGE, syscall.IPV6_PORTRANGE_HIGH);
-        }
+            break;
+        }}
     }
     if (family == syscall.AF_INET6 && sotype != syscall.SOCK_RAW && supportsIPv4map()) {
         // Allow both IP versions even if the OS default
@@ -37,7 +40,7 @@ internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool 
         // Allow broadcast.
         return os.NewSyscallError(setsockoptˢ, syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_BROADCAST, 1));
     }
-    return default!;
+    return default;
 }
 
 internal static error setDefaultListenerSockopts(nint s) {
@@ -49,7 +52,7 @@ internal static error setDefaultMulticastSockopts(nint s) {
     // Allow multicast UDP and raw IP datagram sockets to listen
     // concurrently across multiple listeners.
     {
-        var err = syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1); if (err != default!) {
+        var err = syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1); if (err != nil) {
             return os.NewSyscallError(setsockoptˢ, err);
         }
     }

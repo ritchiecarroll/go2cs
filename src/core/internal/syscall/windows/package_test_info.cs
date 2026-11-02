@@ -7,17 +7,7 @@
 global using static global::go.@internal.syscall.windows_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -37,7 +27,12 @@ using static global::go.@internal.syscall.windows_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.@internal.syscall.windows_package.TOKEN_MANDATORY_LABEL))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -47,8 +42,8 @@ using static global::go.@internal.syscall.windows_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABkggpSCgoKClJQACh6CgoKCgpSCgoKClIIACQqCAAYSspKUgoKCgpS4poKClIKCgoK4gILsgoCCAAkIooKClIKClIKCpgAJGNySgMy2goAABxLE", "66-66:1;72-103:2;127-137:1", "", "161=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3")]
-[assembly: go.GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSmgoKClIKCtA==")]
+[assembly: GoPositionMap("internal/syscall/windows/at_windows_test.go", "at_windows_test.cs", "ABkggpSCgoKClJQACh6CgoKCgpSCgoKClIIACQqCAAYSspKUgoKCgpS4poKClIKCgoK4gILsgoCCAAwIooKClIKClIKCpgAJGNySgMy2goAABxLE", "66-66:1;72-103:2;127-137:1", "", "164=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3")]
+[assembly: GoPositionMap("internal/syscall/windows/version_windows_test.go", "version_windows_test.cs", "AA0cooKAgqSmgoKClIKCtA==", "", "", "", "23:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;

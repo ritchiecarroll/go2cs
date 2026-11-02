@@ -32,7 +32,7 @@ using static global::go.image.color_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -42,8 +42,8 @@ using static global::go.image.color_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/color/color_test.go", "color_test.cs", "AAwYlIKCgpSUlAANHIKCgILIgII=", "14-22:1")]
-[assembly: go.GoPositionMap("image/color/ycbcr_test.go", "ycbcr_test.cs", "AAsYgoKUpoKCgoKmqqKCgoKCgoKCAAcWsoKCgoKCgoKCAAcSkoKCgoCC3JKCgoKAgtySgoKCgILeooKCgoKCgoIABxaygoKCgoKCgoKCAAgUkoKAgtqCAAMUgoKCyoKCgv64goKmgoKmgoLKuIKCpoKCpoKCyriCgoKmgoKCpoKCgsq4goKCpoKCgqaCgoI=", "182-186:1;187-191:2;192-196:3;203-207:1;208-212:2;213-217:3;224-229:1;230-235:2;236-241:3;248-253:1;254-259:2;260-265:3")]
+[assembly: GoPositionMap("image/color/color_test.go", "color_test.cs", "AAwYlIKCgpSUlAANHIKCgILIgII=", "14-22:1")]
+[assembly: GoPositionMap("image/color/ycbcr_test.go", "ycbcr_test.cs", "AAsYgoKUpoKCgoKmqqKCgoKCgoKCAAcWsoKCgoKCgoKCAAcSkoKCgoCC3JKCgoKAgtySgoKCgILeooKCgoKCgoIABxaygoKCgoKCgoKCAAgUkoKAgtqCAAMUgoKCyoKCgv64goKmgoKmgoLKuIKCpoKCpoKCyriCgoKmgoKCpoKCgsq4goKCpoKCgqaCgoI=", "182-186:1;187-191:2;192-196:3;203-207:1;208-212:2;213-217:3;224-229:1;230-235:2;236-241:3;248-253:1;254-259:2;260-265:3")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

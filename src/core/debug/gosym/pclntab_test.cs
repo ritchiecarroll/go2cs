@@ -27,34 +27,37 @@ internal static @string pclineTempDir;
 internal static @string pclinetestBinary;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pclinetestˢ = "pclinetest"u8;
-internal static readonly @string buildˢ = "build"u8;
-internal static readonly @string testdataˢ = "testdata"u8;
+internal static ref readonly @string pclinetestˢ => ref pclinetestˢᵇ;
+private static readonly @string pclinetestˢᵇ = "pclinetest"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "build"u8;
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
 
-internal static void dotest(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new gosym_internal_test_package.testing_TжTB(Ꮡt));
+internal static void dotest(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new gosym_internal_test_package.testing_TжTB(t));
     // For now, only works on amd64 platforms.
     if (runtime.GOARCH != "amd64"u8) {
-        Ꮡt.Skipf("skipping on non-AMD64 system %s"u8, runtime.GOARCH);
+        t.Skipf("skipping on non-AMD64 system %s", runtime.GOARCH);
     }
     // This test builds a Linux/AMD64 binary. Skipping in short mode if cross compiling.
     if (runtime.GOOS != "linux"u8 && testing.Short()) {
-        Ꮡt.Skipf("skipping in short mode on non-Linux system %s"u8, runtime.GOARCH);
+        t.Skipf("skipping in short mode on non-Linux system %s", runtime.GOARCH);
     }
-    error err = default!;
+    error err = default;
     (pclineTempDir, err) = os.MkdirTemp(""u8, pclinetestˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     pclinetestBinary = filepath.Join(pclineTempDir, pclinetestˢ);
-    var cmd = exec.Command(testenv.GoToolPath(new gosym_internal_test_package.testing_TжTB(Ꮡt)), buildˢ, "-o", pclinetestBinary);
-    cmd.Value.Dir = testdataˢ;
-    cmd.Value.Env = append(os.Environ(), "GOOS=linux"u8);
-    cmd.Value.Stdout = new os.FileжWriter(os.Stdout);
-    cmd.Value.Stderr = new os.FileжWriter(os.Stderr);
+    var cmd = exec.Command(testenv.GoToolPath(new gosym_internal_test_package.testing_TжTB(t)), buildˢ, "-o", pclinetestBinary);
+    cmd.Dir = testdataˢ;
+    cmd.Env = append(os.Environ(), (@string)"GOOS=linux");
+    cmd.Stdout = new os.FileжWriter(os.Stdout);
+    cmd.Stderr = new os.FileжWriter(os.Stderr);
     {
-        var errΔ1 = cmd.Run(); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = cmd.Run(); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
 }
@@ -69,60 +72,66 @@ internal static void endtest() {
 
 // skipIfNotELF skips the test if we are not running on an ELF system.
 // These tests open and examine the test binary, and use elf.Open to do so.
-internal static void skipIfNotELF(ж<testing.T> Ꮡt) {
+internal static void skipIfNotELF(ж<testing.T> t) {
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "illumos"u8: {
         // OK.
+        break;
     }
-    else { /* default: */
-        Ꮡt.Skipf("skipping on non-ELF system %s"u8, runtime.GOOS);
-    }
+    default: {
+        t.Skipf("skipping on non-ELF system %s", runtime.GOOS);
+        break;
+    }}
 }
 
-internal static ж<global::go.debug.gosym_package.Table> getTable(ж<testing.T> Ꮡt) {
-    var (f, tab) = crack(os.Args[0], Ꮡt);
+internal static ж<global::go.debug.gosym_package.Table> getTable(ж<testing.T> t) {
+    var (f, tab) = crack(os.Args[0], t);
     f.Close();
     return tab;
 }
 
-internal static (ж<elf.File>, ж<global::go.debug.gosym_package.Table>) crack(@string @file, ж<testing.T> Ꮡt) {
+internal static (ж<elf.File>, ж<global::go.debug.gosym_package.Table>) crack(@string @file, ж<testing.T> t) {
     // Open self
     var (f, err) = elf.Open(@file);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    return parse(@file, f, Ꮡt);
+    return parse(@file, f, t);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gosymtabˢ = ".gosymtab"u8;
+internal static ref readonly @string gosymtabˢ => ref gosymtabˢᵇ;
+private static readonly @string gosymtabˢᵇ = ".gosymtab"u8;
 internal static readonly object noGosymtabSectionˢ = (@string)"no .gosymtab section"u8;
-internal static readonly @string gopclntabˢ = ".gopclntab"u8;
-internal static readonly @string textˢ = ".text"u8;
+internal static ref readonly @string gopclntabˢ => ref gopclntabˢᵇ;
+private static readonly @string gopclntabˢᵇ = ".gopclntab"u8;
+internal static ref readonly @string textˢ => ref textˢᵇ;
+private static readonly @string textˢᵇ = ".text"u8;
 
-internal static (ж<elf.File>, ж<global::go.debug.gosym_package.Table>) parse(@string @file, ж<elf.File> Ꮡf, ж<testing.T> Ꮡt) {
+internal static (ж<elf.File>, ж<global::go.debug.gosym_package.Table>) parse(@string @file, ж<elf.File> Ꮡf, ж<testing.T> t) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var s = f.Section(gosymtabˢ);
     if (s == nil) {
-        Ꮡt.Skip(noGosymtabSectionˢ);
+        t.Skip(noGosymtabSectionˢ);
     }
     var (symdat, err) = s.Data();
-    if (err != default!) {
+    if (err != nil) {
         f.Close();
-        Ꮡt.Fatalf("reading %s gosymtab: %v"u8, @file, err);
+        t.Fatalf("reading %s gosymtab: %v", @file, err);
     }
     (var pclndat, err) = f.Section(gopclntabˢ).Data();
-    if (err != default!) {
+    if (err != nil) {
         f.Close();
-        Ꮡt.Fatalf("reading %s gopclntab: %v"u8, @file, err);
+        t.Fatalf("reading %s gopclntab: %v", @file, err);
     }
 
-    var pcln = NewLineTable(pclndat, (~f.Section(textˢ)).Addr);
+    var pcln = NewLineTable(pclndat, f.Section(textˢ).Addr);
     (var tab, err) = NewTable(symdat, pcln);
-    if (err != default!) {
+    if (err != nil) {
         f.Close();
-        Ꮡt.Fatalf("parsing %s gosymtab: %v"u8, @file, err);
+        t.Fatalf("parsing %s gosymtab: %v", @file, err);
     }
 
     return (Ꮡf, tab);
@@ -130,21 +139,22 @@ internal static (ж<elf.File>, ж<global::go.debug.gosym_package.Table>) parse(@
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notRelevantToGo12Symbolˢ = (@string)"not relevant to Go 1.2 symbol table"u8;
-internal static readonly @string debugGosymˢ = "debug/gosym.TestLineFromAline"u8;
+internal static ref readonly @string debugGosymˢ => ref debugGosymˢᵇ;
+private static readonly @string debugGosymˢᵇ = "debug/gosym.TestLineFromAline"u8;
 
-public static void TestLineFromAline(ж<testing.T> Ꮡt) {
-    skipIfNotELF(Ꮡt);
+public static void TestLineFromAline(ж<testing.T> t) {
+    skipIfNotELF(t);
 
-    var tab = getTable(Ꮡt);
-    if ((~tab).go12line != nil) {
+    var tab = getTable(t);
+    if (tab.go12line != nil) {
         // aline's don't exist in the Go 1.2 table.
-        Ꮡt.Skip(notRelevantToGo12Symbolˢ);
+        t.Skip(notRelevantToGo12Symbolˢ);
     }
 
     // Find the sym package
-    var pkg = tab.LookupFunc(debugGosymˢ).Value.Obj;
+    var pkg = tab.LookupFunc(debugGosymˢ).Obj;
     if (pkg == nil) {
-        Ꮡt.Fatalf("nil pkg"u8);
+        t.Fatalf("nil pkg");
     }
 
     // Walk every absolute line and ensure that we hit every
@@ -154,14 +164,13 @@ public static void TestLineFromAline(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 10000; i++) {
         var (path, line) = pkg.lineFromAline(i);
         // Check for end of object
-        if (path == ""u8){
+        if (path == ""u8) {
             if (final == -1) {
                 final = i - 1;
             }
             continue;
-        } else 
-        if (final != -1) {
-            Ꮡt.Fatalf("reached end of package at absolute line %d, but absolute line %d mapped to %s:%d"u8, final, i, path, line);
+        } else if (final != -1) {
+            t.Fatalf("reached end of package at absolute line %d, but absolute line %d mapped to %s:%d", final, i, path, line);
         }
         // It's okay to see files multiple times (e.g., sys.a)
         if (line == 1) {
@@ -170,29 +179,28 @@ public static void TestLineFromAline(ж<testing.T> Ꮡt) {
         }
         // Check that the is the next line in path
         var (ll, ok) = lastline[path, ꟷ];
-        if (!ok){
-            Ꮡt.Errorf("file %s starts on line %d"u8, path, line);
-        } else 
-        if (line != ll + 1) {
-            Ꮡt.Fatalf("expected next line of file %s to be %d, got %d"u8, path, ll + 1, line);
+        if (!ok) {
+            t.Errorf("file %s starts on line %d", path, line);
+        } else if (line != ll + 1) {
+            t.Fatalf("expected next line of file %s to be %d, got %d", path, ll + 1, line);
         }
         lastline[path] = line;
     }
     if (final == -1) {
-        Ꮡt.Errorf("never reached end of object"u8);
+        t.Errorf("never reached end of object");
     }
 }
 
-public static void TestLineAline(ж<testing.T> Ꮡt) {
-    skipIfNotELF(Ꮡt);
+public static void TestLineAline(ж<testing.T> t) {
+    skipIfNotELF(t);
 
-    var tab = getTable(Ꮡt);
-    if ((~tab).go12line != nil) {
+    var tab = getTable(t);
+    if (tab.go12line != nil) {
         // aline's don't exist in the Go 1.2 table.
-        Ꮡt.Skip(notRelevantToGo12Symbolˢ);
+        t.Skip(notRelevantToGo12Symbolˢ);
     }
 
-    foreach (var (_, o) in (~tab).Files) {
+    foreach (var (_, o) in tab.Files) {
         // A source file can appear multiple times in a
         // object.  alineFromLine will always return alines in
         // the first file, so track which lines we've seen.
@@ -219,52 +227,53 @@ public static void TestLineAline(ж<testing.T> Ꮡt) {
             found[path] = line;
 
             var (a, err) = o.alineFromLine(path, line);
-            if (err != default!){
-                Ꮡt.Errorf("absolute line %d in object %s maps to %s:%d, but mapping that back gives error %s"u8, i, (~o).Paths[0].Name, path, line, err);
-            } else 
-            if (a != i) {
-                Ꮡt.Errorf("absolute line %d in object %s maps to %s:%d, which maps back to absolute line %d\n"u8, i, (~o).Paths[0].Name, path, line, a);
+            if (err != nil) {
+                t.Errorf("absolute line %d in object %s maps to %s:%d, but mapping that back gives error %s", i, o.Paths[0].Name, path, line, err);
+            } else if (a != i) {
+                t.Errorf("absolute line %d in object %s maps to %s:%d, which maps back to absolute line %d\n", i, o.Paths[0].Name, path, line, a);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mainLinefrompcˢ = "main.linefrompc"u8;
-internal static readonly @string pclinetestSˢ = "pclinetest.s"u8;
-internal static readonly @string mainPcfromlineˢ = "main.pcfromline"u8;
+internal static ref readonly @string mainLinefrompcˢ => ref mainLinefrompcˢᵇ;
+private static readonly @string mainLinefrompcˢᵇ = "main.linefrompc"u8;
+internal static ref readonly @string pclinetestSˢ => ref pclinetestSˢᵇ;
+private static readonly @string pclinetestSˢᵇ = "pclinetest.s"u8;
+internal static ref readonly @string mainPcfromlineˢ => ref mainPcfromlineˢᵇ;
+private static readonly @string mainPcfromlineˢᵇ = "main.pcfromline"u8;
 
-public static void TestPCLine(ж<testing.T> Ꮡt) {
+public static void TestPCLine(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        dotest(Ꮡt);
+        dotest(t);
         defer(endtest, ref ᒐ);
 
-        var (f, tab) = crack(pclinetestBinary, Ꮡt);
+        var (f, tab) = crack(pclinetestBinary, t);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         var text = f.Section(textˢ);
         var (textdat, err) = text.Data();
-        if (err != default!) {
-            Ꮡt.Fatalf("reading .text: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("reading .text: %v", err);
         }
 
         // Test PCToLine
         var sym = tab.LookupFunc(mainLinefrompcˢ);
         nint wantLine = 0;
-        for (var pc = sym.Value.Entry; pc < (~sym).End; pc++) {
-            var offΔ1 = pc - (~text).Addr; // TODO(rsc): should not need off; bug in 8g
+        for (var pc = sym.Entry; pc < sym.End; pc++) {
+            var offΔ1 = pc - text.Addr; // TODO(rsc): should not need off; bug in 8g
             if (textdat[offΔ1] == 255) {
                 break;
             }
             wantLine += (nint)textdat[offΔ1];
-            Ꮡt.Logf("off is %d %#x (max %d)"u8, offΔ1, textdat[offΔ1], (~sym).End - pc);
+            t.Logf("off is %d %#x (max %d)", offΔ1, textdat[offΔ1], sym.End - pc);
             var (@file, line, fn) = tab.PCToLine(pc);
-            if (fn == nil){
-                Ꮡt.Errorf("failed to get line of PC %#x"u8, pc);
-            } else 
-            if (!strings.HasSuffix(@file, pclinetestSˢ) || line != wantLine || fn != sym) {
-                Ꮡt.Errorf("PCToLine(%#x) = %s:%d (%s), want %s:%d (%s)"u8, pc, @file, line, (~fn).Name, pclinetestSˢ, wantLine, (~sym).Name);
+            if (fn == nil) {
+                t.Errorf("failed to get line of PC %#x", pc);
+            } else if (!strings.HasSuffix(@file, pclinetestSˢ) || line != wantLine || fn != sym) {
+                t.Errorf("PCToLine(%#x) = %s:%d (%s), want %s:%d (%s)", pc, @file, line, fn.Name, pclinetestSˢ, wantLine, sym.Name);
             }
         }
 
@@ -273,16 +282,16 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
         nint lookupline = -1;
         wantLine = 0;
         var off = (uint64)0; // TODO(rsc): should not need off; bug in 8g
-        for (var pc = sym.Value.Value; pc < (~sym).End; pc += 2 + (uint64)textdat[off]) {
+        for (var pc = sym.Value.Value; pc < sym.End; pc += 2 + (uint64)textdat[off]) {
             var (@file, line, fn) = tab.PCToLine(pc);
-            off = pc - (~text).Addr;
+            off = pc - text.Addr;
             if (textdat[off] == 255) {
                 break;
             }
             wantLine += (nint)textdat[off];
             if (line != wantLine) {
-                Ꮡt.Errorf("expected line %d at PC %#x in pcfromline, got %d"u8, wantLine, pc, line);
-                off = pc + 1 - (~text).Addr;
+                t.Errorf("expected line %d at PC %#x in pcfromline, got %d", wantLine, pc, line);
+                off = pc + 1 - text.Addr;
                 continue;
             }
             if (lookupline == -1) {
@@ -290,20 +299,18 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
             }
             for (; lookupline <= line; lookupline++) {
                 var (pc2, fn2, errΔ1) = tab.LineToPC(@file, lookupline);
-                if (lookupline != line){
+                if (lookupline != line) {
                     // Should be nothing on this line
-                    if (errΔ1 == default!) {
-                        Ꮡt.Errorf("expected no PC at line %d, got %#x (%s)"u8, lookupline, pc2, (~fn2).Name);
+                    if (errΔ1 == nil) {
+                        t.Errorf("expected no PC at line %d, got %#x (%s)", lookupline, pc2, fn2.Name);
                     }
-                } else 
-                if (errΔ1 != default!){
-                    Ꮡt.Errorf("failed to get PC of line %d: %s"u8, lookupline, errΔ1);
-                } else 
-                if (pc != pc2) {
-                    Ꮡt.Errorf("expected PC %#x (%s) at line %d, got PC %#x (%s)"u8, pc, (~fn).Name, line, pc2, (~fn2).Name);
+                } else if (errΔ1 != nil) {
+                    t.Errorf("failed to get PC of line %d: %s", lookupline, errΔ1);
+                } else if (pc != pc2) {
+                    t.Errorf("expected PC %#x (%s) at line %d, got PC %#x (%s)", pc, fn.Name, line, pc2, fn2.Name);
                 }
             }
-            off = pc + 1 - (~text).Addr;
+            off = pc + 1 - text.Addr;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -313,22 +320,23 @@ public static void TestPCLine(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object notRelevantToGo12Symbolˢ2 = (@string)"not relevant to Go 1.2+ symbol table"u8;
 
-public static void TestSymVersion(ж<testing.T> Ꮡt) {
-    skipIfNotELF(Ꮡt);
+public static void TestSymVersion(ж<testing.T> t) {
+    skipIfNotELF(t);
 
-    var table = getTable(Ꮡt);
-    if ((~table).go12line == nil) {
-        Ꮡt.Skip(notRelevantToGo12Symbolˢ2);
+    var table = getTable(t);
+    if (table.go12line == nil) {
+        t.Skip(notRelevantToGo12Symbolˢ2);
     }
-    foreach (var (_, fn) in (~table).Funcs) {
+    foreach (var (_, fn) in table.Funcs) {
         if (fn.goVersion == verUnknown) {
-            Ꮡt.Fatalf("unexpected symbol version: %v"u8, fn);
+            t.Fatalf("unexpected symbol version: %v", fn);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataPcln115Gzˢ = "testdata/pcln115.gz"u8;
+internal static ref readonly @string testdataPcln115Gzˢ => ref testdataPcln115Gzˢᵇ;
+private static readonly @string testdataPcln115Gzˢᵇ = "testdata/pcln115.gz"u8;
 
 // read115Executable returns a hello world executable compiled by Go 1.15.
 //
@@ -341,49 +349,50 @@ internal static readonly @string testdataPcln115Gzˢ = "testdata/pcln115.gz"u8;
 //	}
 internal static slice<byte> read115Executable(testing.TB tb) {
     var (zippedDat, err) = os.ReadFile(testdataPcln115Gzˢ);
-    if (err != default!) {
+    if (err != nil) {
         tb.Fatal(err);
     }
-    ж<gzip.Reader> gzReader = default!;
+    ж<gzip.Reader> gzReader = default;
     (gzReader, err) = gzip.NewReader(new gosym_internal_test_package.bytes_BufferжReader(bytes.NewBuffer(zippedDat)));
-    if (err != default!) {
+    if (err != nil) {
         tb.Fatal(err);
     }
-    slice<byte> dat = default!;
+    slice<byte> dat = default;
     (dat, err) = io.ReadAll(new gosym_internal_test_package.gzip_ReaderжReader(gzReader));
-    if (err != default!) {
+    if (err != nil) {
         tb.Fatal(err);
     }
     return dat;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmpHelloGoˢ = "/tmp/hello.go"u8;
+internal static ref readonly @string tmpHelloGoˢ => ref tmpHelloGoˢᵇ;
+private static readonly @string tmpHelloGoˢᵇ = "/tmp/hello.go"u8;
 internal static readonly object expectedPclnToParseAsAnˢ = (@string)"Expected pcln to parse as an older version"u8;
 
 // Test that we can parse a pclntab from 1.15.
-public static void Test115PclnParsing(ж<testing.T> Ꮡt) {
-    var dat = read115Executable(new gosym_internal_test_package.testing_TжTB(Ꮡt));
+public static void Test115PclnParsing(ж<testing.T> t) {
+    var dat = read115Executable(new gosym_internal_test_package.testing_TжTB(t));
     const uint64 textStart = 0x1001000;
     var pcln = NewLineTable(dat, textStart);
-    var (tab, err) = NewTable(default!, pcln);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (tab, err) = NewTable(default, pcln);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    ж<global::go.debug.gosym_package.Func> f = default!;
-    uint64 pc = default!;
+    ж<global::go.debug.gosym_package.Func> f = default;
+    uint64 pc = default;
     (pc, f, err) = tab.LineToPC(tmpHelloGoˢ, 3);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if ((~pcln).version != ver12) {
-        Ꮡt.Fatal(expectedPclnToParseAsAnˢ);
+    if (pcln.version != ver12) {
+        t.Fatal(expectedPclnToParseAsAnˢ);
     }
     if (pc != 0x105c280) {
-        Ꮡt.Fatalf("expect pc = 0x105c280, got 0x%x"u8, pc);
+        t.Fatalf("expect pc = 0x105c280, got 0x%x", pc);
     }
-    if ((~f).Name != "main.main"u8) {
-        Ꮡt.Fatalf("expected to parse name as main.main, got %v"u8, (~f).Name);
+    if (f.Name != "main.main"u8) {
+        t.Fatalf("expected to parse name as main.main, got %v", f.Name);
     }
 }
 
@@ -391,17 +400,21 @@ internal static ж<global::go.debug.gosym_package.LineTable> sinkLineTable;
 internal static ж<global::go.debug.gosym_package.Table> sinkTable;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string newLineTableˢ = "NewLineTable"u8;
-internal static readonly @string newTableˢ = "NewTable"u8;
-internal static readonly @string lineToPCˢ = "LineToPC"u8;
-internal static readonly @string pcToLineˢ = "PCToLine"u8;
+internal static ref readonly @string newLineTableˢ => ref newLineTableˢᵇ;
+private static readonly @string newLineTableˢᵇ = "NewLineTable"u8;
+internal static ref readonly @string newTableˢ => ref newTableˢᵇ;
+private static readonly @string newTableˢᵇ = "NewTable"u8;
+internal static ref readonly @string lineToPCˢ => ref lineToPCˢᵇ;
+private static readonly @string lineToPCˢᵇ = "LineToPC"u8;
+internal static ref readonly @string pcToLineˢ => ref pcToLineˢᵇ;
+private static readonly @string pcToLineˢᵇ = "PCToLine"u8;
 
-public static void Benchmark115(ж<testing.B> Ꮡb) {
-    var dat = read115Executable(new gosym_internal_test_package.testing_BжTB(Ꮡb));
+public static void Benchmark115(ж<testing.B> b) {
+    var dat = read115Executable(new gosym_internal_test_package.testing_BжTB(b));
     const uint64 textStart = 0x1001000;
 
     var datʗ1 = dat;
-    Ꮡb.Run(newLineTableˢ, (ж<testing.B> bΔ1) => {
+    b.Run(newLineTableˢ, (ж<testing.B> bΔ1) => {
         bΔ1.ReportAllocs();
         for (nint i = 0; i < (~bΔ1).N; i++) {
             sinkLineTable = NewLineTable(datʗ1, textStart);
@@ -410,59 +423,59 @@ public static void Benchmark115(ж<testing.B> Ꮡb) {
 
     var pcln = NewLineTable(dat, textStart);
     var pclnʗ1 = pcln;
-    Ꮡb.Run(newTableˢ, (ж<testing.B> bΔ2) => {
+    b.Run(newTableˢ, (ж<testing.B> bΔ2) => {
         bΔ2.ReportAllocs();
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            error errΔ1 = default!;
-            (sinkTable, errΔ1) = NewTable(default!, pclnʗ1);
-            if (errΔ1 != default!) {
+            error errΔ1 = default;
+            (sinkTable, errΔ1) = NewTable(default, pclnʗ1);
+            if (errΔ1 != nil) {
                 bΔ2.Fatal(errΔ1);
             }
         }
     });
 
     ref var err = ref heap<error>(out var Ꮡerr);
-    (var tab, err) = NewTable(default!, pcln);
-    if (err != default!) {
-        Ꮡb.Fatal(err);
+    (var tab, err) = NewTable(default, pcln);
+    if (err != nil) {
+        b.Fatal(err);
     }
 
     var pclnʗ2 = pcln;
     var tabʗ1 = tab;
-    Ꮡb.Run(lineToPCˢ, (ж<testing.B> bΔ3) => {
+    b.Run(lineToPCˢ, (ж<testing.B> bΔ3) => {
         bΔ3.ReportAllocs();
         for (nint i = 0; i < (~bΔ3).N; i++) {
-            ж<global::go.debug.gosym_package.Func> f = default!;
-            uint64 pc = default!;
+            ж<global::go.debug.gosym_package.Func> f = default;
+            uint64 pc = default;
             (pc, f, Ꮡerr.ValueSlot) = tabʗ1.LineToPC(tmpHelloGoˢ, 3);
-            if (Ꮡerr.ValueSlot != default!) {
+            if (Ꮡerr.ValueSlot != nil) {
                 bΔ3.Fatal(Ꮡerr.ValueSlot);
             }
-            if ((~pclnʗ2).version != ver12) {
-                bΔ3.Fatalf("want version=%d, got %d"u8, ver12, (~pclnʗ2).version);
+            if (pclnʗ2.version != ver12) {
+                bΔ3.Fatalf("want version=%d, got %d", ver12, pclnʗ2.version);
             }
             if (pc != 0x105c280) {
-                bΔ3.Fatalf("want pc=0x105c280, got 0x%x"u8, pc);
+                bΔ3.Fatalf("want pc=0x105c280, got 0x%x", pc);
             }
-            if ((~f).Name != "main.main"u8) {
-                bΔ3.Fatalf("want name=main.main, got %q"u8, (~f).Name);
+            if (f.Name != "main.main"u8) {
+                bΔ3.Fatalf("want name=main.main, got %q", f.Name);
             }
         }
     });
 
     var tabʗ2 = tab;
-    Ꮡb.Run(pcToLineˢ, (ж<testing.B> bΔ4) => {
+    b.Run(pcToLineˢ, (ж<testing.B> bΔ4) => {
         bΔ4.ReportAllocs();
         for (nint i = 0; i < (~bΔ4).N; i++) {
             var (@file, line, fn) = tabʗ2.PCToLine(0x105c280);
             if (@file != "/tmp/hello.go"u8) {
-                bΔ4.Fatalf("want name=/tmp/hello.go, got %q"u8, @file);
+                bΔ4.Fatalf("want name=/tmp/hello.go, got %q", @file);
             }
             if (line != 3) {
-                bΔ4.Fatalf("want line=3, got %d"u8, line);
+                bΔ4.Fatalf("want line=3, got %d", line);
             }
-            if ((~fn).Name != "main.main"u8) {
-                bΔ4.Fatalf("want name=main.main, got %q"u8, (~fn).Name);
+            if (fn.Name != "main.main"u8) {
+                bΔ4.Fatalf("want name=main.main, got %q", fn.Name);
             }
         }
     });

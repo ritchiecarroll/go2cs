@@ -23,13 +23,13 @@ internal const bool supportsUnaligned = /* runtime.GOARCH == "386" ||
 	runtime.GOARCH == "ppc64le" ||
 	runtime.GOARCH == "s390x" */ true;
 
-internal static void xorBytes(ж<byte> Ꮡdstb, ж<byte> Ꮡxb, ж<byte> Ꮡyb, nint n) {
+internal static void xorBytes(ж<byte> dstb, ж<byte> xb, ж<byte> yb, nint n) {
     // xorBytes assembly is written using pointers and n. Back to slices.
-    var dst = @unsafe.Slice(Ꮡdstb, n);
-    var x = @unsafe.Slice(Ꮡxb, n);
-    var y = @unsafe.Slice(Ꮡyb, n);
+    var dst = @unsafe.Slice(dstb, n);
+    var x = @unsafe.Slice(xb, n);
+    var y = @unsafe.Slice(yb, n);
 
-    if (supportsUnaligned || aligned(Ꮡdstb, Ꮡxb, Ꮡyb)) {
+    if (supportsUnaligned || aligned(dstb, xb, yb)) {
         xorLoop(words(dst), words(x), words(y));
         if ((uintptr)n % wordSize == 0) {
             return;
@@ -43,8 +43,8 @@ internal static void xorBytes(ж<byte> Ꮡdstb, ж<byte> Ꮡxb, ж<byte> Ꮡyb, 
 }
 
 // aligned reports whether dst, x, and y are all word-aligned pointers.
-internal static bool aligned(ж<byte> Ꮡdst, ж<byte> Ꮡx, ж<byte> Ꮡy) {
-    return (uintptr)(((uintptr)((uintptr)((uintptr)Ꮡdst | (uintptr)Ꮡx) | (uintptr)Ꮡy)) & (uintptr)(wordSize - 1)) == 0;
+internal static bool aligned(ж<byte> dst, ж<byte> x, ж<byte> y) {
+    return (uintptr)(((uintptr)((uintptr)((uintptr)dst | (uintptr)x) | (uintptr)y)) & (uintptr)(wordSize - 1)) == 0;
 }
 
 // words returns a []uintptr pointing at the same data as x,
@@ -54,7 +54,7 @@ internal static slice<uintptr> words(slice<byte> x) {
     if (n == 0) {
         // Avoid creating a *uintptr that refers to data smaller than a uintptr;
         // see issue 59334.
-        return default!;
+        return default;
     }
     return @unsafe.Slice(Ꮡ(x, 0).Reinterpret<byte, uintptr>(), n);
 }

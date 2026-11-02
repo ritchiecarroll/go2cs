@@ -9,10 +9,11 @@ using errors = errors_package;
 partial class nistec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unimplementedˢ = "unimplemented"u8;
+internal static ref readonly @string unimplementedˢ => ref unimplementedˢᵇ;
+private static readonly @string unimplementedˢᵇ = "unimplemented"u8;
 
 public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
-    return (default!, errors.New(unimplementedˢ));
+    return (default, errors.New(unimplementedˢ));
 }
 
 } // end nistec_package

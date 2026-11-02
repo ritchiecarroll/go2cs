@@ -13,7 +13,7 @@ using Δsync = sync_package;
 partial class mime_package {
 
 internal static readonly ж<Δsync.Map> ᏑmimeTypes = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map mimeTypes => ref ((StaticBox<Δsync.Map>)ᏑmimeTypes).ValueSlot;  // map[string]string; ".Z" => "application/x-compress"
+internal static ref Δsync.Map mimeTypes => ref ((StaticBox<Δsync.Map>)ᏑmimeTypes).ValueSlot;           // map[string]string; ".Z" => "application/x-compress"
 internal static readonly ж<Δsync.Map> ᏑmimeTypesLower = new StaticBox<Δsync.Map>(default(Δsync.Map));
 internal static ref Δsync.Map mimeTypesLower => ref ((StaticBox<Δsync.Map>)ᏑmimeTypesLower).ValueSlot; // map[string]string; ".z" => "application/x-compress"
 
@@ -22,7 +22,7 @@ internal static ref Δsync.Map mimeTypesLower => ref ((StaticBox<Δsync.Map>)Ꮡ
 internal static readonly ж<Δsync.Mutex> ᏑextensionsMu = new StaticBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex extensionsMu => ref ((StaticBox<Δsync.Mutex>)ᏑextensionsMu).ValueSlot; // Guards stores (but not loads) on extensions.
 internal static readonly ж<Δsync.Map> Ꮡextensions = new StaticBox<Δsync.Map>(default(Δsync.Map));
-internal static ref Δsync.Map extensions => ref ((StaticBox<Δsync.Map>)Ꮡextensions).ValueSlot; // map[string][]string; slice values are append-only.
+internal static ref Δsync.Map extensions => ref ((StaticBox<Δsync.Map>)Ꮡextensions).ValueSlot;         // map[string][]string; slice values are append-only.
 
 // setMimeTypes is used by initMime's non-test path, and by tests.
 internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @string> mixExt) {
@@ -43,10 +43,10 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
         foreach (var (k, v) in lowerExt) {
             var (justType, _, err) = ParseMediaType(v);
-            if (err != default!) {
+            if (err != nil) {
                 throw panic(err);
             }
-            slice<@string> exts = default!;
+            slice<@string> exts = default;
             {
                 var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
                     exts = ei._<slice<@string>>();
@@ -71,81 +71,81 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
 // and the mappings to file extensions at
 // https://github.com/mozilla-firefox/firefox/blob/main/uriloader/exthandler/nsExternalHelperAppService.cpp
 [GoLazy] partial class lazyᴛbuiltinTypesLower { internal static map<@string, @string> builtinTypesLower = new map<@string, @string>{
-    [".ai"u8] = "application/postscript"u8,
-    [".apk"u8] = "application/vnd.android.package-archive"u8,
-    [".apng"u8] = "image/apng"u8,
-    [".avif"u8] = "image/avif"u8,
-    [".bin"u8] = "application/octet-stream"u8,
-    [".bmp"u8] = "image/bmp"u8,
-    [".com"u8] = "application/octet-stream"u8,
-    [".css"u8] = "text/css; charset=utf-8"u8,
-    [".csv"u8] = "text/csv; charset=utf-8"u8,
-    [".doc"u8] = "application/msword"u8,
-    [".docx"u8] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"u8,
-    [".ehtml"u8] = "text/html; charset=utf-8"u8,
-    [".eml"u8] = "message/rfc822"u8,
-    [".eps"u8] = "application/postscript"u8,
-    [".exe"u8] = "application/octet-stream"u8,
-    [".flac"u8] = "audio/flac"u8,
-    [".gif"u8] = "image/gif"u8,
-    [".gz"u8] = "application/gzip"u8,
-    [".htm"u8] = "text/html; charset=utf-8"u8,
-    [".html"u8] = "text/html; charset=utf-8"u8,
-    [".ico"u8] = "image/vnd.microsoft.icon"u8,
-    [".ics"u8] = "text/calendar; charset=utf-8"u8,
-    [".jfif"u8] = "image/jpeg"u8,
-    [".jpeg"u8] = "image/jpeg"u8,
-    [".jpg"u8] = "image/jpeg"u8,
-    [".js"u8] = "text/javascript; charset=utf-8"u8,
-    [".json"u8] = "application/json"u8,
-    [".m4a"u8] = "audio/mp4"u8,
-    [".mjs"u8] = "text/javascript; charset=utf-8"u8,
-    [".mp3"u8] = "audio/mpeg"u8,
-    [".mp4"u8] = "video/mp4"u8,
-    [".oga"u8] = "audio/ogg"u8,
-    [".ogg"u8] = "audio/ogg"u8,
-    [".ogv"u8] = "video/ogg"u8,
-    [".opus"u8] = "audio/ogg"u8,
-    [".pdf"u8] = "application/pdf"u8,
-    [".pjp"u8] = "image/jpeg"u8,
-    [".pjpeg"u8] = "image/jpeg"u8,
-    [".png"u8] = "image/png"u8,
-    [".ppt"u8] = "application/vnd.ms-powerpoint"u8,
-    [".pptx"u8] = "application/vnd.openxmlformats-officedocument.presentationml.presentation"u8,
-    [".ps"u8] = "application/postscript"u8,
-    [".rdf"u8] = "application/rdf+xml"u8,
-    [".rtf"u8] = "application/rtf"u8,
-    [".shtml"u8] = "text/html; charset=utf-8"u8,
-    [".svg"u8] = "image/svg+xml"u8,
-    [".text"u8] = "text/plain; charset=utf-8"u8,
-    [".tif"u8] = "image/tiff"u8,
-    [".tiff"u8] = "image/tiff"u8,
-    [".txt"u8] = "text/plain; charset=utf-8"u8,
-    [".vtt"u8] = "text/vtt; charset=utf-8"u8,
-    [".wasm"u8] = "application/wasm"u8,
-    [".wav"u8] = "audio/wav"u8,
-    [".webm"u8] = "audio/webm"u8,
-    [".webp"u8] = "image/webp"u8,
-    [".xbl"u8] = "text/xml; charset=utf-8"u8,
-    [".xbm"u8] = "image/x-xbitmap"u8,
-    [".xht"u8] = "application/xhtml+xml"u8,
-    [".xhtml"u8] = "application/xhtml+xml"u8,
-    [".xls"u8] = "application/vnd.ms-excel"u8,
-    [".xlsx"u8] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"u8,
-    [".xml"u8] = "text/xml; charset=utf-8"u8,
-    [".xsl"u8] = "text/xml; charset=utf-8"u8,
-    [".zip"u8] = "application/zip"u8
+    [".ai"] = "application/postscript",
+    [".apk"] = "application/vnd.android.package-archive",
+    [".apng"] = "image/apng",
+    [".avif"] = "image/avif",
+    [".bin"] = "application/octet-stream",
+    [".bmp"] = "image/bmp",
+    [".com"] = "application/octet-stream",
+    [".css"] = "text/css; charset=utf-8",
+    [".csv"] = "text/csv; charset=utf-8",
+    [".doc"] = "application/msword",
+    [".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    [".ehtml"] = "text/html; charset=utf-8",
+    [".eml"] = "message/rfc822",
+    [".eps"] = "application/postscript",
+    [".exe"] = "application/octet-stream",
+    [".flac"] = "audio/flac",
+    [".gif"] = "image/gif",
+    [".gz"] = "application/gzip",
+    [".htm"] = "text/html; charset=utf-8",
+    [".html"] = "text/html; charset=utf-8",
+    [".ico"] = "image/vnd.microsoft.icon",
+    [".ics"] = "text/calendar; charset=utf-8",
+    [".jfif"] = "image/jpeg",
+    [".jpeg"] = "image/jpeg",
+    [".jpg"] = "image/jpeg",
+    [".js"] = "text/javascript; charset=utf-8",
+    [".json"] = "application/json",
+    [".m4a"] = "audio/mp4",
+    [".mjs"] = "text/javascript; charset=utf-8",
+    [".mp3"] = "audio/mpeg",
+    [".mp4"] = "video/mp4",
+    [".oga"] = "audio/ogg",
+    [".ogg"] = "audio/ogg",
+    [".ogv"] = "video/ogg",
+    [".opus"] = "audio/ogg",
+    [".pdf"] = "application/pdf",
+    [".pjp"] = "image/jpeg",
+    [".pjpeg"] = "image/jpeg",
+    [".png"] = "image/png",
+    [".ppt"] = "application/vnd.ms-powerpoint",
+    [".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    [".ps"] = "application/postscript",
+    [".rdf"] = "application/rdf+xml",
+    [".rtf"] = "application/rtf",
+    [".shtml"] = "text/html; charset=utf-8",
+    [".svg"] = "image/svg+xml",
+    [".text"] = "text/plain; charset=utf-8",
+    [".tif"] = "image/tiff",
+    [".tiff"] = "image/tiff",
+    [".txt"] = "text/plain; charset=utf-8",
+    [".vtt"] = "text/vtt; charset=utf-8",
+    [".wasm"] = "application/wasm",
+    [".wav"] = "audio/wav",
+    [".webm"] = "audio/webm",
+    [".webp"] = "image/webp",
+    [".xbl"] = "text/xml; charset=utf-8",
+    [".xbm"] = "image/x-xbitmap",
+    [".xht"] = "application/xhtml+xml",
+    [".xhtml"] = "application/xhtml+xml",
+    [".xls"] = "application/vnd.ms-excel",
+    [".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    [".xml"] = "text/xml; charset=utf-8",
+    [".xsl"] = "text/xml; charset=utf-8",
+    [".zip"] = "application/zip"
 }; }
 
 internal static readonly ж<Δsync.Once> Ꮡonce = new StaticBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once once => ref ((StaticBox<Δsync.Once>)Ꮡonce).ValueSlot;    // guards initMime
+internal static ref Δsync.Once once => ref ((StaticBox<Δsync.Once>)Ꮡonce).ValueSlot; // guards initMime
 
 internal static Action testInitMime;
 internal static Action osInitMime;
 
 internal static void initMime() {
     {
-        var fn = testInitMime; if (fn != default!){
+        var fn = testInitMime; if (fn != nil) {
             fn();
         } else {
             setMimeTypes(builtinTypesLower, builtinTypesLower);
@@ -200,7 +200,7 @@ public static @string TypeByExtension(@string ext) {
             var (sΔ1, _) = siΔ1._<@string>(ᐧ);
             return sΔ1;
         }
-        if ((rune)'A' <= c && c <= (rune)'Z'){
+        if ('A' <= c && c <= 'Z') {
             lower = append(lowerᴷ, lower, (byte)(c + ((rune)'a' - (rune)'A')));
         } else {
             lower = append(lower, c);
@@ -230,25 +230,25 @@ public static @string TypeByExtension(@string ext) {
 // On Windows, extensions are extracted from the registry.
 public static (slice<@string>, error) ExtensionsByType(@string typ) {
     var (justType, _, err) = ParseMediaType(typ);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     Ꮡonce.Do(initMime);
     var (s, ok) = Ꮡextensions.Load(justType);
     if (!ok) {
-        return (default!, default!);
+        return (default, default);
     }
-    var ret = appendꓸꓸꓸ(slice<@string>(default!), s._<slice<@string>>());
+    var ret = appendꓸꓸꓸ(slice<@string>(default), s._<slice<@string>>());
     slices.Sort<slice<@string>, @string>(ret);
-    return (ret, default!);
+    return (ret, default);
 }
 
 // AddExtensionType sets the MIME type associated with
 // the extension ext to typ. The extension should begin with
 // a leading dot, as in ".html".
 public static error AddExtensionType(@string ext, @string typ) {
-    if (!strings.HasPrefix(ext, "."u8)) {
+    if (!strings.HasPrefix(ext, ".")) {
         return fmt.Errorf("mime: extension %q missing leading dot"u8, ext);
     }
     Ꮡonce.Do(initMime);
@@ -256,14 +256,16 @@ public static error AddExtensionType(@string ext, @string typ) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string textˢ = "text/"u8;
-internal static readonly @string charsetˢ = "charset"u8;
+internal static ref readonly @string textˢ => ref textˢᵇ;
+private static readonly @string textˢᵇ = "text/"u8;
+internal static ref readonly @string charsetˢ => ref charsetˢᵇ;
+private static readonly @string charsetˢᵇ = "charset"u8;
 
 internal static error setExtensionType(@string extension, @string mimeType) {
     GoFrame ᒐ = default;
     try {
         var (justType, param, err) = ParseMediaType(mimeType);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         if (strings.HasPrefix(mimeType, textˢ) && param[charsetˢ] == "") {
@@ -277,7 +279,7 @@ internal static error setExtensionType(@string extension, @string mimeType) {
 
         ᏑextensionsMu.Lock();
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
-        slice<@string> exts = default!;
+        slice<@string> exts = default;
         {
             var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
                 exts = ei._<slice<@string>>();
@@ -285,13 +287,13 @@ internal static error setExtensionType(@string extension, @string mimeType) {
         }
         foreach (var (_, v) in exts) {
             if (v == extLower) {
-                return default!;
+                return default;
             }
         }
         Ꮡextensions.Store(justType, append(exts, extLower));
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 

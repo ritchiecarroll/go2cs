@@ -36,77 +36,83 @@ partial class runtime_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object debugLogTestsDisabledToˢ = (@string)"debug log tests disabled to avoid collisions with real debug logs"u8;
 
-internal static partial void skipDebugLog(ж<testing.T> Ꮡt) {
+internal static partial void skipDebugLog(ж<testing.T> t) {
     if (runtime_internal_test_package.DlogEnabled) {
-        Ꮡt.Skip(debugLogTestsDisabledToˢ);
+        t.Skip(debugLogTestsDisabledToˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mBeginLogDNˢ = @"(?m)^>> begin log \d+ <<\n"u8;
+internal static ref readonly @string mBeginLogDNˢ => ref mBeginLogDNˢᵇ;
+private static readonly @string mBeginLogDNˢᵇ = @"(?m)^>> begin log \d+ <<\n"u8;
 
 internal static @string dlogCanonicalize(@string x) {
     var begin = Δregexp.MustCompile(mBeginLogDNˢ);
     x = begin.ReplaceAllString(x, ""u8);
-    var prefix = Δregexp.MustCompile(@"(?m)^\[[^]]+\]"u8);
-    x = prefix.ReplaceAllString(x, "[]"u8);
+    var prefix = Δregexp.MustCompile(@"(?m)^\[[^]]+\]");
+    x = prefix.ReplaceAllString(x, "[]");
     return x;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testingˢ = "testing"u8;
-internal static readonly @string testingˢ2 = "[] testing\n"u8;
+internal static ref readonly @string testingˢ => ref testingˢᵇ;
+private static readonly @string testingˢᵇ = "testing"u8;
+internal static ref readonly @string testingˢ2 => ref testingˢ2ᵇ;
+private static readonly @string testingˢ2ᵇ = "[] testing\n"u8;
 
-public static void TestDebugLog(ж<testing.T> Ꮡt) {
-    skipDebugLog(Ꮡt);
+public static void TestDebugLog(ж<testing.T> t) {
+    skipDebugLog(t);
     runtime_internal_test_package.ResetDebugLog();
     runtime_internal_test_package.Dlog().S(testingˢ).End();
     @string got = dlogCanonicalize(runtime_internal_test_package.DumpDebugLog());
     {
         @string want = testingˢ2; if (got != want) {
-            Ꮡt.Fatalf("want %q, got %q"u8, want, got);
+            t.Fatalf("want %q, got %q", want, got);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string constStringˢ = "const string"u8;
-internal static readonly @string trueFalse4232767ˢ = "[] true false -42 32767 18446744073709551615 0xfff 0x0 aaaa const string\n"u8;
+internal static ref readonly @string constStringˢ => ref constStringˢᵇ;
+private static readonly @string constStringˢᵇ = "const string"u8;
+internal static ref readonly @string trueFalse4232767ˢ => ref trueFalse4232767ˢᵇ;
+private static readonly @string trueFalse4232767ˢᵇ = "[] true false -42 32767 18446744073709551615 0xfff 0x0 aaaa const string\n"u8;
 
-public static void TestDebugLogTypes(ж<testing.T> Ꮡt) {
-    skipDebugLog(Ꮡt);
+public static void TestDebugLogTypes(ж<testing.T> t) {
+    skipDebugLog(t);
     runtime_internal_test_package.ResetDebugLog();
-    @string varString = strings.Repeat("a"u8, 4);
-    runtime_internal_test_package.Dlog().B(true).B(false).I(-42).I16(0x7fff).U64(~(uint64)0).Hex(0xfff).P(default!).S(varString).S(constStringˢ).End();
+    @string varString = strings.Repeat("a", 4);
+    runtime_internal_test_package.Dlog().B(true).B(false).I(-42).I16(0x7fff).U64(~(uint64)0).Hex(0xfff).P(default).S(varString).S(constStringˢ).End();
     @string got = dlogCanonicalize(runtime_internal_test_package.DumpDebugLog());
     {
         @string want = trueFalse4232767ˢ; if (got != want) {
-            Ꮡt.Fatalf("want %q, got %q"u8, want, got);
+            t.Fatalf("want %q, got %q", want, got);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fRuntimeTestˢ = @"\[\] 0x[0-9a-f]+ \[runtime_test\.TestDebugLogSym\+0x[0-9a-f]+ .*/debuglog_test\.go:[0-9]+\]\n"u8;
+internal static ref readonly @string fRuntimeTestˢ => ref fRuntimeTestˢᵇ;
+private static readonly @string fRuntimeTestˢᵇ = @"\[\] 0x[0-9a-f]+ \[runtime_test\.TestDebugLogSym\+0x[0-9a-f]+ .*/debuglog_test\.go:[0-9]+\]\n"u8;
 
-public static partial void TestDebugLogSym(ж<testing.T> Ꮡt) {
-    skipDebugLog(Ꮡt);
+public static partial void TestDebugLogSym(ж<testing.T> t) {
+    skipDebugLog(t);
     runtime_internal_test_package.ResetDebugLog();
     var (pc, _, _, _) = Δruntime.Caller(0);
     runtime_internal_test_package.Dlog().PC(pc).End();
     @string got = dlogCanonicalize(runtime_internal_test_package.DumpDebugLog());
     var want = Δregexp.MustCompile(fRuntimeTestˢ);
     if (!want.MatchString(got)) {
-        Ꮡt.Fatalf("want matching %s, got %q"u8, want.OrTypedNil(), got);
+        t.Fatalf("want matching %s, got %q", want.OrTypedNil(), got);
     }
 }
 
-public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
-    skipDebugLog(Ꮡt);
+public static partial void TestDebugLogInterleaving(ж<testing.T> t) {
+    skipDebugLog(t);
     runtime_internal_test_package.ResetDebugLog();
 
     nint n1 = runtime_internal_test_package.CountDebugLog();
-    Ꮡt.Logf("number of log shards at start: %d"u8, n1);
+    t.Logf("number of log shards at start: %d", n1);
 
     const nint limit = 1000;
     const nint concurrency = 10;
@@ -123,8 +129,8 @@ public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                ж<Dlogger> log = default!;
-                while (ᐧ) {
+                ж<Dlogger> log = default;
+                for (;;) {
                     ᐸꟷ(chansʗ1[gid]);
                     if (log != nil) {
                         log.End();
@@ -156,9 +162,9 @@ public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
     @string got = dlogCanonicalize(gotFull);
 
     nint n2 = runtime_internal_test_package.CountDebugLog();
-    Ꮡt.Logf("number of log shards at end: %d"u8, n2);
+    t.Logf("number of log shards at end: %d", n2);
     if (n2 < concurrency) {
-        Ꮡt.Errorf("created %d log shards, expected >= %d"u8, n2, (nint)(concurrency));
+        t.Errorf("created %d log shards, expected >= %d", n2, (nint)(concurrency));
     }
 
     // Construct the desired output.
@@ -171,24 +177,25 @@ public static partial void TestDebugLogInterleaving(ж<testing.T> Ꮡt) {
         // Since the timestamps are useful in understand
         // failures of this test, we print the uncanonicalized
         // output.
-        Ꮡt.Fatalf("want %q, got (uncanonicalized) %q"u8, want.String(), gotFull);
+        t.Fatalf("want %q, got (uncanonicalized) %q", want.String(), gotFull);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string beginLogDLostFirstDKbNˢ = @"^>> begin log \d+; lost first \d+KB <<\n"u8;
+internal static ref readonly @string beginLogDLostFirstDKbNˢ => ref beginLogDLostFirstDKbNˢᵇ;
+private static readonly @string beginLogDLostFirstDKbNˢᵇ = @"^>> begin log \d+; lost first \d+KB <<\n"u8;
 
-public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
+public static void TestDebugLogWraparound(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        skipDebugLog(Ꮡt);
+        skipDebugLog(t);
 
         // Make sure we don't switch logs so it's easier to fill one up.
         Δruntime.LockOSThread();
         defer(Δruntime.UnlockOSThread, ref ᒐ);
 
         runtime_internal_test_package.ResetDebugLog();
-        @string longString = strings.Repeat("a"u8, 128);
+        @string longString = strings.Repeat("a", 128);
         ref var want = ref heap(new strings.Builder(), out var Ꮡwant);
         for ((nint i, nint j) = (0, 0); j < (nint)(2 * runtime_internal_test_package.DebugLogBytes); (i, j) = (i + 1, j + len(longString))) {
             runtime_internal_test_package.Dlog().I(i).S(longString).End();
@@ -199,7 +206,7 @@ public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
         // Check for "lost" message.
         var lost = Δregexp.MustCompile(beginLogDLostFirstDKbNˢ);
         if (!lost.MatchString(log)) {
-            Ꮡt.Fatalf("want matching %s, got %q"u8, lost.OrTypedNil(), log);
+            t.Fatalf("want matching %s, got %q", lost.OrTypedNil(), log);
         }
         var idx = lost.FindStringIndex(log);
         // Strip lost message.
@@ -207,23 +214,23 @@ public static void TestDebugLogWraparound(ж<testing.T> Ꮡt) {
 
         // Check log.
         if (!strings.HasSuffix(want.String(), log)) {
-            Ꮡt.Fatalf("wrong suffix:\n%s"u8, log);
+            t.Fatalf("wrong suffix:\n%s", log);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestDebugLogLongString(ж<testing.T> Ꮡt) {
-    skipDebugLog(Ꮡt);
+public static void TestDebugLogLongString(ж<testing.T> t) {
+    skipDebugLog(t);
 
     runtime_internal_test_package.ResetDebugLog();
-    @string longString = strings.Repeat("a"u8, runtime_internal_test_package.DebugLogStringLimit + 1);
+    @string longString = strings.Repeat("a", runtime_internal_test_package.DebugLogStringLimit + 1);
     runtime_internal_test_package.Dlog().S(longString).End();
     @string got = dlogCanonicalize(runtime_internal_test_package.DumpDebugLog());
-    @string want = "[] "u8 + strings.Repeat("a"u8, runtime_internal_test_package.DebugLogStringLimit) + " ..(1 more bytes)..\n"u8;
+    @string want = "[] "u8 + strings.Repeat("a", runtime_internal_test_package.DebugLogStringLimit) + " ..(1 more bytes)..\n"u8;
     if (got != want) {
-        Ꮡt.Fatalf("want %q, got %q"u8, want, got);
+        t.Fatalf("want %q, got %q", want, got);
     }
 }
 

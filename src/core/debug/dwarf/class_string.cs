@@ -31,13 +31,14 @@ internal static void _ᴛ2() {
     _ = x[ClassStrOffsetsPtr - 19];
 }
 
-internal static readonly @string _Class_name = "ClassUnknownClassAddressClassBlockClassConstantClassExprLocClassFlagClassLinePtrClassLocListPtrClassMacPtrClassRangeListPtrClassReferenceClassReferenceSigClassStringClassReferenceAltClassStringAltClassAddrPtrClassLocListClassRngListClassRngListsPtrClassStrOffsetsPtr"u8;
+internal static ref readonly @string _Class_name => ref _Class_nameᵇ;
+private static readonly @string _Class_nameᵇ = "ClassUnknownClassAddressClassBlockClassConstantClassExprLocClassFlagClassLinePtrClassLocListPtrClassMacPtrClassRangeListPtrClassReferenceClassReferenceSigClassStringClassReferenceAltClassStringAltClassAddrPtrClassLocListClassRngListClassRngListsPtrClassStrOffsetsPtr"u8;
 
 [GoLazy] partial class lazyᴛ_Class_index { internal static array<uint16> _Class_index = new uint16[]{0, 12, 24, 34, 47, 59, 68, 80, 95, 106, 123, 137, 154, 165, 182, 196, 208, 220, 232, 248, 266}.array(); }
 
 public static @string String(this Class i) {
     if (i < 0 || i >= ((Class)(len(_Class_index) - 1))) {
-        return "Class("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "Class("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _Class_name.slice(_Class_index[i], _Class_index[i + 1]);
 }

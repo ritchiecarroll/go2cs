@@ -30,10 +30,10 @@ partial struct ticksType {
 //
 // Must not run concurrently with ticksPerSecond.
 internal static void init(this ref ticksType t) {
-    @lock(Ꮡticks.of(ticksType.Ꮡlock));
+    @lock(Ꮡticks.Ꮡlock);
     t.startTime = nanotime();
     t.startTicks = cputicks();
-    unlock(Ꮡticks.of(ticksType.Ꮡlock));
+    unlock(Ꮡticks.Ꮡlock);
 }
 
 // minTimeForTicksPerSecond is the minimum elapsed time we require to consider our ticksPerSecond
@@ -77,17 +77,17 @@ internal static UntypedInt minTimeForTicksPerSecond => /* 5_000_000*(1-osHasLowR
 // a more sophisticated and general approach in the future.
 internal static int64 ticksPerSecond() {
     // Get the conversion rate if we've already computed it.
-    var r = Ꮡticks.of(ticksType.Ꮡval).Load();
+    var r = Ꮡticks.Ꮡval.Load();
     if (r != 0) {
         return r;
     }
 
     // Compute the conversion rate.
-    while (ᐧ) {
-        @lock(Ꮡticks.of(ticksType.Ꮡlock));
-        r = Ꮡticks.of(ticksType.Ꮡval).Load();
+    for (;;) {
+        @lock(Ꮡticks.Ꮡlock);
+        r = Ꮡticks.Ꮡval.Load();
         if (r != 0) {
-            unlock(Ꮡticks.of(ticksType.Ꮡlock));
+            unlock(Ꮡticks.Ꮡlock);
             return r;
         }
 
@@ -104,11 +104,11 @@ internal static int64 ticksPerSecond() {
                 // a divisor. We tried out best, so just make it 1.
                 r++;
             }
-            Ꮡticks.of(ticksType.Ꮡval).Store(r);
-            unlock(Ꮡticks.of(ticksType.Ꮡlock));
+            Ꮡticks.Ꮡval.Store(r);
+            unlock(Ꮡticks.Ꮡlock);
             break;
         }
-        unlock(Ꮡticks.of(ticksType.Ꮡlock));
+        unlock(Ꮡticks.Ꮡlock);
 
         // Sleep in one millisecond increments until we have a reliable time.
         timeSleep(1_000_000);
@@ -122,7 +122,7 @@ internal static slice<@string> argslice;
 
 //go:linkname syscall_runtime_envs syscall.runtime_envs
 public static slice<@string> syscall_runtime_envs() {
-    return appendꓸꓸꓸ(new @string[]{}.slice(), envs);
+    return appendꓸꓸꓸ(slice<@string>([]), envs);
 }
 
 //go:linkname syscall_Getpagesize syscall.Getpagesize
@@ -132,7 +132,7 @@ internal static nint syscall_Getpagesize() {
 
 //go:linkname os_runtime_args os.runtime_args
 public static slice<@string> os_runtime_args() {
-    return appendꓸꓸꓸ(new @string[]{}.slice(), argslice);
+    return appendꓸꓸꓸ(slice<@string>([]), argslice);
 }
 
 //go:linkname syscall_Exit syscall.Exit
@@ -147,7 +147,7 @@ internal static readonly ж<atomic.Pointer<Action<@string, @string>>> Ꮡgodebug
 internal static ref atomic.Pointer<Action<@string, @string>> godebugUpdate => ref ((StaticBox<atomic.Pointer<Action<@string, @string>>>)ᏑgodebugUpdate).ValueSlot;
 
 internal static readonly ж<atomic.Pointer<@string>> ᏑgodebugEnv = new StaticBox<atomic.Pointer<@string>>(default(atomic.Pointer<@string>));
-internal static ref atomic.Pointer<@string> godebugEnv => ref ((StaticBox<atomic.Pointer<@string>>)ᏑgodebugEnv).ValueSlot;                      // set by parsedebugvars
+internal static ref atomic.Pointer<@string> godebugEnv => ref ((StaticBox<atomic.Pointer<@string>>)ᏑgodebugEnv).ValueSlot; // set by parsedebugvars
 
 internal static readonly ж<atomic.Pointer<Func<@string, Action>>> ᏑgodebugNewIncNonDefault = new StaticBox<atomic.Pointer<Func<@string, Action>>>(default(atomic.Pointer<Func<@string, Action>>));
 internal static ref atomic.Pointer<Func<@string, Action>> godebugNewIncNonDefault => ref ((StaticBox<atomic.Pointer<Func<@string, Action>>>)ᏑgodebugNewIncNonDefault).ValueSlot;
@@ -179,7 +179,7 @@ partial struct godebugInc {
 internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
-    var inc = Ꮡg.of(godebugInc.Ꮡinc).Load();
+    var inc = Ꮡg.Ꮡinc.Load();
     if (inc == nil) {
         var newInc = ᏑgodebugNewIncNonDefault.Load();
         if (newInc == nil) {
@@ -188,21 +188,21 @@ internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
         inc = @new<Action>();
         inc.ValueSlot = newInc.ValueSlot(g.name);
         if (raceenabled) {
-            racereleasemerge(@unsafe.Pointer.FromPinnedBox(Ꮡg.of(godebugInc.Ꮡinc)));
+            racereleasemerge(@unsafe.Pointer.FromPinnedBox(Ꮡg.Ꮡinc));
         }
-        if (!Ꮡg.of(godebugInc.Ꮡinc).CompareAndSwap(nil, inc)) {
-            inc = Ꮡg.of(godebugInc.Ꮡinc).Load();
+        if (!Ꮡg.Ꮡinc.CompareAndSwap(nil, inc)) {
+            inc = Ꮡg.Ꮡinc.Load();
         }
     }
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡg.of(godebugInc.Ꮡinc)));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡg.Ꮡinc));
     }
     inc.ValueSlot();
 }
 
 internal static void godebugNotify(bool envChanged) {
     var update = ᏑgodebugUpdate.Load();
-    @string env = default!;
+    @string env = default;
     {
         var Δp = ᏑgodebugEnv.Load(); if (Δp != nil) {
             env = Δp.Value;

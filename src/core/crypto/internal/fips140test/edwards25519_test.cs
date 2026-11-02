@@ -14,8 +14,8 @@ partial class fipstest_internal_test_package {
 
 internal static byte testAllocationsSink;
 
-public static void TestEdwards25519Allocations(ж<testing.T> Ꮡt) {
-    cryptotest.SkipTestAllocations(Ꮡt);
+public static void TestEdwards25519Allocations(ж<testing.T> t) {
+    cryptotest.SkipTestAllocations(t);
     {
         var allocs = testing.AllocsPerRun(100, () => {
             var p = NewIdentityPoint();
@@ -24,7 +24,7 @@ public static void TestEdwards25519Allocations(ж<testing.T> Ꮡt) {
             testAllocationsSink ^= (byte)(s.Bytes()[0]);
             testAllocationsSink ^= (byte)(p.Bytes()[0]);
         }); if (allocs > 0D) {
-            Ꮡt.Errorf("expected zero allocations, got %0.1v"u8, allocs);
+            t.Errorf("expected zero allocations, got %0.1v", allocs);
         }
     }
 }

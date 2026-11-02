@@ -869,12 +869,12 @@ internal static (slice<@string>, error) listStdPkgs(@string goroot) {
 
     @string src = filepath.Join(goroot, srcˢ) + ((@string)(rune)filepath.Separator);
     var walkFn = error (@string path, fs.DirEntry d, error err) => {
-        if (err != default! || !d.IsDir() || path == src) {
-            return default!;
+        if (err != nil || !d.IsDir() || path == src) {
+            return default;
         }
 
         @string @base = filepath.Base(path);
-        if (strings.HasPrefix(@base, "."u8) || strings.HasPrefix(@base, "_"u8) || @base == "testdata"u8) {
+        if (strings.HasPrefix(@base, ".") || strings.HasPrefix(@base, "_") || @base == "testdata"u8) {
             return filepath.SkipDir;
         }
 
@@ -884,47 +884,47 @@ internal static (slice<@string>, error) listStdPkgs(@string goroot) {
         }
 
         Ꮡpkgs.ValueSlot = append(Ꮡpkgs.ValueSlot, strings.TrimPrefix(name, vendorˢ2));
-        return default!;
+        return default;
     };
     {
-        var err = filepath.WalkDir(src, new Func<@string, fs.DirEntry, error, error>(walkFn)); if (err != default!) {
-            return (default!, err);
+        var err = filepath.WalkDir(src, new Func<@string, fs.DirEntry, error, error>(walkFn)); if (err != nil) {
+            return (default, err);
         }
     }
-    return (pkgs, default!);
+    return (pkgs, default);
 }
 
-public static void TestDependencies(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestDependencies(ж<testing.T> t) {
+    testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(t));
 
     var ctxt = Default;
     var (all, err) = listStdPkgs(ctxt.GOROOT);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     slices.Sort<slice<@string>, @string>(all);
 
     var sawImport = new map<@string, map<@string, bool>>{}; // from package => to package => true
-    var policy = depsPolicy(Ꮡt);
+    var policy = depsPolicy(t);
 
     foreach (var (_, pkg) in all) {
         var (imports, errΔ1) = findImports(pkg);
-        if (errΔ1 != default!) {
-            Ꮡt.Error(errΔ1);
+        if (errΔ1 != nil) {
+            t.Error(errΔ1);
             continue;
         }
-        if (sawImport[pkg] == default!) {
+        if (sawImport[pkg] == nil) {
             sawImport[pkg] = new map<@string, bool>{};
         }
-        slice<@string> bad = default!;
+        slice<@string> bad = default;
         foreach (var (_, imp) in imports) {
             sawImport[pkg].Set(imp, true);
             if (!policy.HasEdge(pkg, imp)) {
                 bad = append(bad, imp);
             }
         }
-        if (bad != default!) {
-            Ꮡt.Errorf("unexpected dependency: %s imports %v"u8, pkg, bad);
+        if (bad != nil) {
+            t.Errorf("unexpected dependency: %s imports %v", pkg, bad);
         }
     }
 }
@@ -932,7 +932,8 @@ public static void TestDependencies(ж<testing.T> Ꮡt) {
 internal static slice<byte> buildIgnore = slice<byte>("\n//go:build ignore"u8);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string golangOrgˢ = "golang.org"u8;
+internal static ref readonly @string golangOrgˢ => ref golangOrgˢᵇ;
+private static readonly @string golangOrgˢᵇ = "golang.org"u8;
 
 internal static (slice<@string>, error) findImports(@string pkg) {
     @string vpkg = pkg;
@@ -941,13 +942,13 @@ internal static (slice<@string>, error) findImports(@string pkg) {
     }
     @string dir = filepath.Join(Default.GOROOT, srcˢ, vpkg);
     var (files, err) = os.ReadDir(dir);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    slice<@string> imports = default!;
+    slice<@string> imports = default;
     map<@string, bool> haveImport = new map<@string, bool>{};
     if (pkg == "crypto/internal/boring"u8) {
-        haveImport["C"u8] = true; // kludge: prevent C from appearing in crypto/internal/boring imports
+        haveImport["C"] = true; // kludge: prevent C from appearing in crypto/internal/boring imports
     }
     var fset = token.NewFileSet();
     foreach (var (_, @file) in files) {
@@ -956,24 +957,23 @@ internal static (slice<@string>, error) findImports(@string pkg) {
             // These files are for compiler bootstrap with older versions of Go and not built in the standard build.
             continue;
         }
-        if (!strings.HasSuffix(name, ".go"u8) || strings.HasSuffix(name, testGoˢ)) {
+        if (!strings.HasSuffix(name, ".go") || strings.HasSuffix(name, testGoˢ)) {
             continue;
         }
-        ref var info = ref heap<global::go.go.build_package.fileInfo>(out var Ꮡinfo);
-        info = new fileInfo(
+        ref var info = ref heap<global::go.go.build_package.fileInfo>(new fileInfo(
             name: filepath.Join(dir, name),
             fset: fset
-        );
+        ), out var Ꮡinfo);
         var (f, errΔ1) = os.Open(info.name);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         errΔ1 = readGoInfo(new build_internal_test_package.os_FileжReader(f), ref info);
         f.Close();
-        if (errΔ1 != default!) {
-            return (default!, fmt.Errorf("reading %v: %v"u8, name, errΔ1));
+        if (errΔ1 != nil) {
+            return (default, fmt.Errorf("reading %v: %v"u8, name, errΔ1));
         }
-        if ((~(~info.parsed).Name).Name == "main"u8) {
+        if (info.parsed.Name.Name == "main"u8) {
             continue;
         }
         if (bytes.Contains(info.header, buildIgnore)) {
@@ -988,44 +988,44 @@ internal static (slice<@string>, error) findImports(@string pkg) {
         }
     }
     slices.Sort<slice<@string>, @string>(imports);
-    return (imports, default!);
+    return (imports, default);
 }
 
 // depsPolicy returns a map m such that m[p][d] == true when p can import d.
-internal static ж<dag.Graph> depsPolicy(ж<testing.T> Ꮡt) {
+internal static ж<dag.Graph> depsPolicy(ж<testing.T> t) {
     var (g, err) = dag.Parse(depsRules);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     return g;
 }
 
 // TestStdlibLowercase tests that all standard library package names are
 // lowercase. See Issue 40065.
-public static void TestStdlibLowercase(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestStdlibLowercase(ж<testing.T> t) {
+    testenv.MustHaveSource(new build_internal_test_package.testing_TжTB(t));
 
     var ctxt = Default;
     var (all, err) = listStdPkgs(ctxt.GOROOT);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (_, pkgname) in all) {
         if (strings.ToLower(pkgname) != pkgname) {
-            Ꮡt.Errorf("package %q should not use upper-case path"u8, pkgname);
+            t.Errorf("package %q should not use upper-case path", pkgname);
         }
     }
 }
 
 // TestFindImports tests that findImports works.  See #43249.
-public static void TestFindImports(ж<testing.T> Ꮡt) {
+public static void TestFindImports(ж<testing.T> t) {
     var (imports, err) = findImports(goBuildˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    Ꮡt.Logf("go/build imports %q"u8, imports);
-    var want = new @string[]{"bytes"u8, "os"u8, "path/filepath"u8, "strings"u8}.slice();
+    t.Logf("go/build imports %q", imports);
+    var want = slice<@string>(["bytes", "os", "path/filepath", "strings"]);
 wantLoop:
     foreach (var (_, w) in want) {
         foreach (var (_, imp) in imports) {
@@ -1033,7 +1033,7 @@ wantLoop:
                 goto continue_wantLoop;
             }
         }
-        Ꮡt.Errorf("expected to find %q in import list"u8, w);
+        t.Errorf("expected to find %q in import list", w);
 continue_wantLoop:;
     }
 break_wantLoop:;

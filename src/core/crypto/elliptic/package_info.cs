@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;
@@ -60,7 +59,12 @@ using static go.crypto.elliptic_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(CurveParams))]
+[assembly: GoFieldAccess(typeof(nistCurve<>))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -70,9 +74,9 @@ using static go.crypto.elliptic_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKUgoKCuKamgqaUAAISAAkClJSClIKUrOKCgoKCggAMGgABEAAJAoCCtoKClIKUgoKCgpSClKzigIK2goKUgpSCgoKmgoKClIKUgpSm1oKmguyCgoKCAAIU8oIAAhYACAKCAAIU8oIAAhTygg==")]
-[assembly: go.GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIACxi4ggALGLiCAAsiuIIAJl6ipvaClILmAAgGgqaClIKmgoKCgoKm0oKmlIKCgqaigoKUgoKUpqKCgpSqwoKClIKClIKmooKClIKCgpSmooKCgpSm0oKmgoLKgoKCpqKClIKClKaCgoKUpoKCgpQ=", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;36=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;53=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;70=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
-[assembly: go.GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKUgpSCgpQAAhIADAaAgraEuIKUrOKCgpSq4oKmgpSCgoKCggACEgAKBoCCpIKUgoK65IKCgoKClIKCgoKmgoKClIKCgoKCgoKUgoKUgoKCgoKCgoKUgoKUgpSCgoKCgpSCgoKCgoKUgoKCgoKUAAISAAoGgIKklIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgIKklIKUooKCgpS4AAISAAoGgIK2poKCgqY=", "", "", "71=Sign/2/2/1,Cmp/2/2/1")]
+[assembly: GoPositionMap("crypto/elliptic/elliptic.go", "elliptic.cs", "AD+IAZ4ACgKCgoKUgoKCuKamgqaUAAISAAkClJSClIKUrOKCgoKCggAMGgABEAAJAoCCtoKClIKUgoKCgpSClKzigIK2goKUgpSCgoKmgoKClIKUgpSm1oKmguyCgoKCAAIU8oIAAhYACAKCAAIU8oIAAhTygg==")]
+[assembly: GoPositionMap("crypto/elliptic/nistec.go", "nistec.cs", "AA0auIIACxi4ggALGLiCAAsiuIIAJl6ipvaClIIACAYACAaCpoKUgqaCgoKCgqbSgqaUgoKCpqKCgpSCgpSmooKClKrCgoKUgoKUgqaigoKUgoKClKaigoKClKbSgqaCgsqCgoKmooKUgoKUpoKCgpSmgoKClA==", "", "", "19=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;36=bigFromDecimal/1/2/4,bigFromDecimal/2/2/5,bigFromHex/1/3/6,bigFromHex/2/3/7,bigFromHex/3/3/8;53=bigFromDecimal/1/2/4,bigFromDecimal/2/2/6,bigFromHex/1/3/8,bigFromHex/2/3/10,bigFromHex/3/3/12;70=bigFromDecimal/1/2/4,bigFromDecimal/2/2/7,bigFromHex/1/3/10,bigFromHex/2/3/13,bigFromHex/3/3/16")]
+[assembly: GoPositionMap("crypto/elliptic/params.go", "params.cs", "ABkwggACFgAIAoKUgpSCgpQAAhIADAaAgraEuIKUrOKCgpSq4oKmgpSCgoKCggACEgAKBoCCpIKUgoK65IKCgoKClIKCgoKmgoKClIKCgoKCgoKUgoKUgoKCgoKCgoKUgoKUgpSCgoKCgpSCgoKCgoKUgoKCgoKUAAISAAoGgIKklIK6tIKCgoKCgpSCgoKClJSCgoKCgpSUgoKCgpSCgpSUgoKClJSCgpSCgpSUAAISAAoGgIKklIKUooKCgpS4AAISAAoGgIK2poKCgqY=", "", "", "71=Sign/2/2/1,Cmp/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

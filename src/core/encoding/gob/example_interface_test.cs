@@ -30,12 +30,12 @@ partial interface Pythagoras {
 // distinction from regular types is to register the concrete type that
 // implements the interface.
 public static void Example_interface() {
-    ref var network = ref heap(new bytes.Buffer(), out var Ꮡnetwork);                   // Stand-in for the network.
+    ref var network = ref heap(new bytes.Buffer(), out var Ꮡnetwork); // Stand-in for the network.
 
     // We must register the concrete type for the encoder and decoder (which would
     // normally be on a separate machine from the encoder). On each end, this tells the
     // engine which concrete type is being sent that implements the interface.
-    gob.Register(new Point(nil));
+    gob.Register(new Point());
 
     // Create an encoder and send some values.
     var enc = gob.NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡnetwork));
@@ -60,7 +60,7 @@ public static void Example_interface() {
 internal static readonly object encodeˢ = (@string)"encode:"u8;
 
 // interfaceEncode encodes the interface value into the encoder.
-internal static void interfaceEncode(ж<gob.Encoder> Ꮡenc, Pythagoras pʗp) {
+internal static void interfaceEncode(ж<gob.Encoder> enc, Pythagoras pʗp) {
     ref var p = ref heap(pʗp, out var Ꮡp);
 
     // The encode will fail unless the concrete type has been
@@ -69,8 +69,8 @@ internal static void interfaceEncode(ж<gob.Encoder> Ꮡenc, Pythagoras pʗp) {
     // Pass pointer to interface so Encode sees (and hence sends) a value of
     // interface type. If we passed p directly it would see the concrete type instead.
     // See the blog post, "The Laws of Reflection" for background.
-    var err = Ꮡenc.Encode(Ꮡp);
-    if (err != default!) {
+    var err = enc.Encode(Ꮡp);
+    if (err != nil) {
         log.Fatal(encodeˢ, err);
     }
 }
@@ -79,12 +79,12 @@ internal static void interfaceEncode(ж<gob.Encoder> Ꮡenc, Pythagoras pʗp) {
 internal static readonly object decodeˢ = (@string)"decode:"u8;
 
 // interfaceDecode decodes the next interface value from the stream and returns it.
-internal static Pythagoras interfaceDecode(ж<gob.Decoder> Ꮡdec) {
+internal static Pythagoras interfaceDecode(ж<gob.Decoder> dec) {
     // The decode will fail unless the concrete type on the wire has been
     // registered. We registered it in the calling function.
     ref var p = ref heap<Pythagoras>(out var Ꮡp);
-    var err = Ꮡdec.Decode(Ꮡp);
-    if (err != default!) {
+    var err = dec.Decode(Ꮡp);
+    if (err != nil) {
         log.Fatal(decodeˢ, err);
     }
     return p;

@@ -28,7 +28,7 @@ using static global::go.hash.crc64_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -38,7 +38,7 @@ using static global::go.hash.crc64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/crc64/crc64_test.go", "crc64_test.cs", "AA8eggAKFgAiRoKCgoKCgoKCgpSCgoKCAAgKgoKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClIK4goKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgtyCgpSCgqaAgsiigoKClIKUgoKCggALCIKClIKUgpSClIKUgg==", "16-16:1;83-126:1;127-170:2;205-207:1;208-210:2;211-213:3;214-216:4;217-219:5;220-222:6")]
+[assembly: GoPositionMap("hash/crc64/crc64_test.go", "crc64_test.cs", "AA8eggAKFgAiRoKCgoKCgoKCgpSCgoKCAAoKgoKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClIK4goKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgtyCgpSCgqaAgsiigoKClIKUgoKCggARCIKClIKUgpSClIKUgg==", "16-16:1;83-126:1;127-170:2;205-207:1;208-210:2;211-213:3;214-216:4;217-219:5;220-222:6")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;

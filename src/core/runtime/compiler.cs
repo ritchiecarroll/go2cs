@@ -10,6 +10,7 @@ partial class runtime_package {
 //
 //	gc      Also known as cmd/compile.
 //	gccgo   The gccgo front end, part of the GCC compiler suite.
-public static readonly @string Compiler = "gc"u8;
+public static ref readonly @string Compiler => ref Compilerᵇ;
+private static readonly @string Compilerᵇ = "gc"u8;
 
 } // end runtime_package

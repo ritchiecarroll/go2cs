@@ -13,7 +13,8 @@ partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingDueToShortˢ = (@string)"skipping due to -short"u8;
-internal static readonly @string testexithooksˢ = "testexithooks"u8;
+internal static ref readonly @string testexithooksˢ => ref testexithooksˢᵇ;
+private static readonly @string testexithooksˢᵇ = "testexithooks"u8;
 
 internal partial struct TestExitHooks_scenarios /*dyn*/ {
     internal @string mode;
@@ -21,65 +22,65 @@ internal partial struct TestExitHooks_scenarios /*dyn*/ {
     internal slice<@string> musthave;
 }
 
-public static void TestExitHooks(ж<testing.T> Ꮡt) {
+public static void TestExitHooks(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingDueToShortˢ);
+        t.Skip(skippingDueToShortˢ);
     }
 
-    var scenarios = new TestExitHooks_scenarios[]{
+    var scenarios = slice<TestExitHooks_scenarios>([
         new(
-            mode: "simple"u8,
-            expected: "bar foo"u8
+            mode: "simple",
+            expected: "bar foo"
         ),
         new(
-            mode: "goodexit"u8,
-            expected: "orange apple"u8
+            mode: "goodexit",
+            expected: "orange apple"
         ),
         new(
-            mode: "badexit"u8,
-            expected: "blub blix"u8
+            mode: "badexit",
+            expected: "blub blix"
         ),
         new(
-            mode: "panics"u8,
-            musthave: new @string[]{
-                "fatal error: exit hook invoked panic"u8,
-                "main.testPanics"u8
-            }.slice()
+            mode: "panics",
+            musthave: slice<@string>([
+                "fatal error: exit hook invoked panic",
+                "main.testPanics"
+            ])
         ),
         new(
-            mode: "callsexit"u8,
-            musthave: new @string[]{
-                "fatal error: exit hook invoked exit"u8
-            }.slice()
+            mode: "callsexit",
+            musthave: slice<@string>([
+                "fatal error: exit hook invoked exit"
+            ])
         ),
         new(
-            mode: "exit2"u8,
-            expected: ""u8
+            mode: "exit2",
+            expected: ""
         )
-    }.slice();
+    ]);
 
-    var (exe, err) = buildTestProg(Ꮡt, testexithooksˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (exe, err) = buildTestProg(t, testexithooksˢ);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (_, s) in scenarios) {
-        var cmd = exec.Command(exe, new @string[]{"-mode"u8, s.mode}.slice().ꓸꓸꓸ);
+        var cmd = exec.Command(exe, slice<@string>(["-mode", s.mode]).ꓸꓸꓸ);
         var (@out, _) = cmd.CombinedOutput();
-        @string outs = strings.ReplaceAll((@string)@out, "\n"u8, " "u8);
+        @string outs = strings.ReplaceAll((@string)@out, "\n", " ");
         outs = strings.TrimSpace(outs);
         if (s.expected != ""u8 && s.expected != outs) {
-            Ꮡt.Fatalf("failed %s: wanted %q\noutput:\n%s"u8,
+            t.Fatalf("failed %s: wanted %q\noutput:\n%s",
                 s.mode, s.expected, outs);
         }
         foreach (var (_, need) in s.musthave) {
             if (!strings.Contains(outs, need)) {
-                Ꮡt.Fatalf("failed mode %s: output does not contain %q\noutput:\n%s"u8,
+                t.Fatalf("failed mode %s: output does not contain %q\noutput:\n%s",
                     s.mode, need, outs);
             }
         }
-        if (s.expected == ""u8 && s.musthave == default! && outs != ""u8) {
-            Ꮡt.Errorf("failed mode %s: wanted no output\noutput:\n%s"u8, s.mode, outs);
+        if (s.expected == ""u8 && s.musthave == nil && outs != ""u8) {
+            t.Errorf("failed mode %s: wanted no output\noutput:\n%s", s.mode, outs);
         }
     }
 }

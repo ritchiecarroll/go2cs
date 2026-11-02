@@ -22,38 +22,39 @@ partial struct readDirOnly {
 }
 
 internal static (fs.File, error) Open(this readDirOnly _, @string name) {
-    return (default!, ErrNotExist);
+    return (default, ErrNotExist);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string subˢ = "sub(.)"u8;
+private static ref readonly @string subˢ => ref subˢᵇ;
+private static readonly @string subˢᵇ = "sub(.)"u8;
 
-public static partial void TestReadDir(ж<testing.T> Ꮡt) {
+public static partial void TestReadDir(ж<testing.T> t) {
     void check(@string desc, slice<fs.DirEntry> dirsΔ1, error errΔ1) {
-        Ꮡt.Helper();
-        if (errΔ1 != default! || len(dirsΔ1) != 2 || dirsΔ1[0].Name() != "hello.txt"u8 || dirsΔ1[1].Name() != "sub"u8) {
-            slice<@string> names = default!;
+        t.Helper();
+        if (errΔ1 != nil || len(dirsΔ1) != 2 || dirsΔ1[0].Name() != "hello.txt"u8 || dirsΔ1[1].Name() != "sub"u8) {
+            slice<@string> names = default;
             foreach (var (_, d) in dirsΔ1) {
                 names = append(names, d.Name());
             }
-            Ꮡt.Errorf("ReadDir(%s) = %v, %v, want %v, nil"u8, desc, names, errΔ1, new @string[]{"hello.txt"u8, "sub"u8}.slice());
+            t.Errorf("ReadDir(%s) = %v, %v, want %v, nil", desc, names, errΔ1, slice<@string>(["hello.txt", "sub"]));
         }
     }
 
     // Test that ReadDir uses the method when present.
-    var (dirs, err) = ReadDir(new readDirOnly(new fstest_MapFSᴠReadDirFS(testFsys)), "."u8);
+    var (dirs, err) = ReadDir(new readDirOnly(new fstest_MapFSᴠReadDirFS(testFsys)), ".");
     check(readDirOnlyˢ, dirs, err);
 
     // Test that ReadDir uses Open when the method is not present.
-    (dirs, err) = ReadDir(new openOnly(new fstest_MapFSᴠFS(testFsys)), "."u8);
+    (dirs, err) = ReadDir(new openOnly(new fstest_MapFSᴠFS(testFsys)), ".");
     check(openOnlyˢ, dirs, err);
 
     // Test that ReadDir on Sub of . works (sub_test checks non-trivial subs).
-    (var sub, err) = Sub(new fstest_MapFSᴠFS(testFsys), "."u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var sub, err) = Sub(new fstest_MapFSᴠFS(testFsys), ".");
+    if (err != nil) {
+        t.Fatal(err);
     }
-    (dirs, err) = ReadDir(sub, "."u8);
+    (dirs, err) = ReadDir(sub, ".");
     check(subˢ, dirs, err);
 }
 
@@ -63,24 +64,24 @@ internal partial struct TestFileInfoToDirEntry_tests /*dyn*/ {
     internal bool wantDir;
 }
 
-public static void TestFileInfoToDirEntry(ж<testing.T> Ꮡt) {
+public static void TestFileInfoToDirEntry(ж<testing.T> t) {
     var testFs = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["notadir.txt"u8] = Ꮡ(new fstest.MapFile(
+        ["notadir.txt"] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("hello, world"u8),
             Mode: 0,
             ModTime: time.Now(),
             Sys: ᏑsysValue)),
-        ["adir"u8] = Ꮡ(new fstest.MapFile(
-            Data: default!,
+        ["adir"] = Ꮡ(new fstest.MapFile(
+            Data: default,
             Mode: os.ModeDir,
             ModTime: time.Now(),
             Sys: ᏑsysValue))
     });
 
-    var tests = new TestFileInfoToDirEntry_tests[]{
-        new(path: "notadir.txt"u8, wantMode: 0, wantDir: false),
-        new(path: "adir"u8, wantMode: os.ModeDir, wantDir: true)
-    }.slice();
+    var tests = slice<TestFileInfoToDirEntry_tests>([
+        new(path: "notadir.txt", wantMode: 0, wantDir: false),
+        new(path: "adir", wantMode: os.ModeDir, wantDir: true)
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestFileInfoToDirEntry_tests(), out var Ꮡtest);
@@ -88,27 +89,27 @@ public static void TestFileInfoToDirEntry(ж<testing.T> Ꮡt) {
 
         var testʗ1 = test;
         var testFsʗ1 = testFs;
-        Ꮡt.Run(test.path, (ж<testing.T> tΔ1) => {
+        t.Run(test.path, (ж<testing.T> tΔ1) => {
             var (fi, err) = Stat(new fstest_MapFSᴠFS(testFsʗ1), testʗ1.path);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
 
             var dirEntry = FileInfoToDirEntry(fi);
             {
                 var (g, w) = (dirEntry.Type(), testʗ1.wantMode); if (g != w) {
-                    tΔ1.Errorf("FileMode mismatch: got=%v, want=%v"u8, g, w);
+                    tΔ1.Errorf("FileMode mismatch: got=%v, want=%v", g, w);
                 }
             }
             {
                 @string g = dirEntry.Name();
                 @string w = testʗ1.path; if (g != w) {
-                    tΔ1.Errorf("Name mismatch: got=%v, want=%v"u8, g, w);
+                    tΔ1.Errorf("Name mismatch: got=%v, want=%v", g, w);
                 }
             }
             {
                 var (g, w) = (dirEntry.IsDir(), testʗ1.wantDir); if (g != w) {
-                    tΔ1.Errorf("IsDir mismatch: got=%v, want=%v"u8, g, w);
+                    tΔ1.Errorf("IsDir mismatch: got=%v, want=%v", g, w);
                 }
             }
         });
@@ -120,24 +121,25 @@ internal static @string errorPath(error err) {
     if (!ok) {
         return ""u8;
     }
-    return (~perr).Path;
+    return perr.Path;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nonExistentˢ = "non-existent"u8;
+private static ref readonly @string nonExistentˢ => ref nonExistentˢᵇ;
+private static readonly @string nonExistentˢᵇ = "non-existent"u8;
 
 internal partial struct TestReadDirPath_fsys /*dyn*/ {
     /*embed*/ public go.io.fs_package.FS FS;
 }
 
-public static void TestReadDirPath(ж<testing.T> Ꮡt) {
-    var fsys = os.DirFS(Ꮡt.TempDir());
+public static void TestReadDirPath(ж<testing.T> t) {
+    var fsys = os.DirFS(t.TempDir());
     var (_, err1) = ReadDir(fsys, nonExistentˢ);
     var (_, err2) = ReadDir(new TestReadDirPath_fsys(fsys), nonExistentˢ);
     {
         @string s1 = errorPath(err1);
         @string s2 = errorPath(err2); if (s1 != s2) {
-            Ꮡt.Fatalf("s1: %s != s2: %s"u8, s1, s2);
+            t.Fatalf("s1: %s != s2: %s", s1, s2);
         }
     }
 }

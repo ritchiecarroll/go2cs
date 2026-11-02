@@ -26,7 +26,7 @@ public static UntypedInt MaxAvgGroupLoad => /* maxAvgGroupLoad */ 7;
 internal static UntypedInt maxAllocTest => /* 1 << 30 */ 1073741824;
 
 internal static ж<abiꓸMapType> newTestMapType<K, V>() {
-    map<K, V> m = default!;
+    map<K, V> m = default;
     var mTyp = abi.TypeOf(m);
     var mt = mTyp.Reinterpret<abi.Type, abiꓸMapType>();
     return mt;
@@ -53,15 +53,15 @@ internal static uint64 GroupCount(this ref global::go.@internal.runtime.maps_pac
         return 1;
     }
 
-    uint64 n = default!;
-    ж<global::go.@internal.runtime.maps_package.table> lastTab = default!;
+    uint64 n = default;
+    ж<global::go.@internal.runtime.maps_package.table> lastTab = default;
     foreach (var i in range(m.dirLen)) {
         var t = m.directoryAt((uintptr)i);
         if (t == lastTab) {
             continue;
         }
         lastTab = t;
-        n += (~t).groups.lengthMask + 1;
+        n += t.groups.lengthMask + 1;
     }
     return n;
 }
@@ -75,10 +75,10 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
-        return default!;
+        return default;
     }
 
-    ж<global::go.@internal.runtime.maps_package.table> lastTab = default!;
+    ж<global::go.@internal.runtime.maps_package.table> lastTab = default;
     foreach (var i in range(m.dirLen)) {
         var t = m.directoryAt((uintptr)i);
         if (t == lastTab) {
@@ -86,8 +86,8 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
         }
         lastTab = t;
 
-        for (var iΔ1 = (uint64)0; iΔ1 <= (~t).groups.lengthMask; iΔ1++) {
-            var g = t.of(global::go.@internal.runtime.maps_package.table.Ꮡgroups).group(Ꮡtyp, iΔ1);
+        for (var iΔ1 = (uint64)0; iΔ1 <= t.groups.lengthMask; iΔ1++) {
+            var g = t.Ꮡgroups.group(Ꮡtyp, iΔ1);
             var match = (~g.ctrls()).matchEmpty();
             if (match != 0) {
                 continue;
@@ -107,7 +107,7 @@ internal static @unsafe.Pointer KeyFromFullGroup(this ref global::go.@internal.r
         }
     }
 
-    return default!;
+    return default;
 }
 
 // Returns nil if the map is small.
@@ -115,7 +115,7 @@ internal static ж<global::go.@internal.runtime.maps_package.table> TableFor(thi
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (m.dirLen <= 0) {
-        return default!;
+        return default;
     }
 
     var hash = typ.Hasher(key, m.seed);

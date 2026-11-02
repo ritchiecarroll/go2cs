@@ -18,41 +18,45 @@ using static go.@internal.singleflight_package;
 partial class singleflight_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyˢ = "key"u8;
-internal static readonly @string barˢ = "bar"u8;
-internal static readonly @string barStringˢ = "bar (string)"u8;
+internal static ref readonly @string keyˢ => ref keyˢᵇ;
+private static readonly @string keyˢᵇ = "key"u8;
+internal static ref readonly @string barˢ => ref barˢᵇ;
+private static readonly @string barˢᵇ = "bar"u8;
+internal static ref readonly @string barStringˢ => ref barStringˢᵇ;
+private static readonly @string barStringˢᵇ = "bar (string)"u8;
 
-public static void TestDo(ж<testing.T> Ꮡt) {
+public static void TestDo(ж<testing.T> t) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
-    var (v, err, _) = Ꮡg.Do(keyˢ, () => (barˢ, default!));
+    var (v, err, _) = Ꮡg.Do(keyˢ, () => (barˢ, default));
     {
         @string got = fmt.Sprintf("%v (%T)"u8, v, v);
         @string want = barStringˢ; if (got != want) {
-            Ꮡt.Errorf("Do = %v; want %v"u8, got, want);
+            t.Errorf("Do = %v; want %v", got, want);
         }
     }
-    if (err != default!) {
-        Ꮡt.Errorf("Do error = %v"u8, err);
+    if (err != nil) {
+        t.Errorf("Do error = %v", err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string someErrorˢ = "some error"u8;
+internal static ref readonly @string someErrorˢ => ref someErrorˢᵇ;
+private static readonly @string someErrorˢᵇ = "some error"u8;
 
-public static void TestDoErr(ж<testing.T> Ꮡt) {
+public static void TestDoErr(ж<testing.T> t) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     var someErr = errors.New(someErrorˢ);
     var someErrʗ1 = someErr;
-    var (v, err, _) = Ꮡg.Do(keyˢ, () => (default!, someErrʗ1));
+    var (v, err, _) = Ꮡg.Do(keyˢ, () => (default, someErrʗ1));
     if (!AreEqual(err, someErr)) {
-        Ꮡt.Errorf("Do error = %v; want someErr %v"u8, err, someErr);
+        t.Errorf("Do error = %v; want someErr %v", err, someErr);
     }
-    if (v != default!) {
-        Ꮡt.Errorf("unexpected non-nil value %#v"u8, v);
+    if (v != nil) {
+        t.Errorf("unexpected non-nil value %#v", v);
     }
 }
 
-public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
+public static partial void TestDoDupSuppress(ж<testing.T> t) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     ref var wg1 = ref heap(new sync.WaitGroup(), out var Ꮡwg1);
     ref var wg2 = ref heap(new sync.WaitGroup(), out var Ꮡwg2);
@@ -69,7 +73,7 @@ public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
 
         time.Sleep(10 * time.Millisecond); // let more goroutines enter Do
 
-        return (v, default!);
+        return (v, default);
     };
 
     UntypedInt n = 10;
@@ -84,13 +88,13 @@ public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
                 defer(Ꮡwg2.Done, ref ᒐ);
                 Ꮡwg1.Done();
                 var (v, err, _) = Ꮡg.Do(keyˢ, fnʗ1);
-                if (err != default!) {
-                    Ꮡt.Errorf("Do error: %v"u8, err);
+                if (err != nil) {
+                    t.Errorf("Do error: %v", err);
                     return;
                 }
                 {
                     var (s, _) = v._<@string>(ᐧ); if (s != "bar"u8) {
-                        Ꮡt.Errorf("Do = %T %v; want %q"u8, v, v, barˢ);
+                        t.Errorf("Do = %T %v; want %q", v, v, barˢ);
                     }
                 }
             }
@@ -105,12 +109,12 @@ public static partial void TestDoDupSuppress(ж<testing.T> Ꮡt) {
     Ꮡwg2.Wait();
     {
         var got = Ꮡcalls.Load(); if (got <= 0 || got >= n) {
-            Ꮡt.Errorf("number of calls = %d; want over 0 and less than %d"u8, got, (nint)(n));
+            t.Errorf("number of calls = %d; want over 0 and less than %d", got, (nint)(n));
         }
     }
 }
 
-public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
+public static partial void TestForgetUnshared(ж<testing.T> t) {
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
 
     ref var firstStarted = ref heap(new sync.WaitGroup(), out var ᏑfirstStarted);
@@ -125,8 +129,8 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
     goǃ(() => {
         var firstChʗ2 = firstChʗ1;
         Ꮡg.Do(key, () => {
-            any i = default!;
-            error e = default!;
+            any i = default;
+            error e = default;
             ᏑfirstStarted.Done();
             ᐸꟷ(firstChʗ2);
             return (i, e);
@@ -145,7 +149,7 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
             // Notify that we started
             secondChʗ2.ᐸꟷ(new EmptyStruct());
             ᐸꟷ(secondChʗ2);
-            return ((nint)2, default!);
+            return ((nint)2, default);
         });
     });
 
@@ -156,32 +160,32 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
     });
 
     if (Ꮡg.ForgetUnshared(key)) {
-        Ꮡt.Errorf("Before first goroutine finished, key %q is shared, should return false"u8, key);
+        t.Errorf("Before first goroutine finished, key %q is shared, should return false", key);
     }
 
     close(firstCh);
     ᏑfirstFinished.Wait();
 
     if (Ꮡg.ForgetUnshared(key)) {
-        Ꮡt.Errorf("After first goroutine finished, key %q is still shared, should return false"u8, key);
+        t.Errorf("After first goroutine finished, key %q is still shared, should return false", key);
     }
 
     secondCh.ᐸꟷ(new EmptyStruct());
 
     {
         var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)2)) {
-            Ꮡt.Errorf("We should receive result produced by second call, expected: 2, got %d"u8, result.Val);
+            t.Errorf("We should receive result produced by second call, expected: 2, got %d", result.Val);
         }
     }
 }
 
-public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> t) {
+    t.Parallel();
 
     ref var g = ref heap(new global::go.@internal.singleflight_package.Group(), out var Ꮡg);
     @string key = keyˢ;
     var d = time.Millisecond;
-    while (ᐧ) {
+    for (;;) {
         ref var calls = ref heap(new atomic.Int64(), out var Ꮡcalls);
         ref var shared = ref heap(new atomic.Int64(), out var Ꮡshared);
         const nint n = 1000;
@@ -191,7 +195,7 @@ public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
             goǃ(() => {
                 Ꮡg.Do(key, () => {
                     time.Sleep(d);
-                    return (Ꮡcalls.Add(1), default!);
+                    return (Ꮡcalls.Add(1), default);
                 });
                 if (!Ꮡg.ForgetUnshared(key)) {
                     Ꮡshared.Add(1);
@@ -213,7 +217,7 @@ public static partial void TestDoAndForgetUnsharedRace(ж<testing.T> Ꮡt) {
         // invocation, so the key should have been unused
         // (and therefore unshared) when they returned.
         if (Ꮡshared.Load() > 0) {
-            Ꮡt.Errorf("after a single shared Do, ForgetUnshared returned false %d times"u8, Ꮡshared.Load());
+            t.Errorf("after a single shared Do, ForgetUnshared returned false %d times", Ꮡshared.Load());
         }
         break;
     }

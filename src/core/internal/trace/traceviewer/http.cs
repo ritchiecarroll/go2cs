@@ -19,7 +19,7 @@ public static httpꓸHandler MainHandler(slice<View> views) {
     var viewsʗ1 = views;
     return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> _) => {
         {
-            var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != default!) {
+            var err = templMain.Execute(new http_ResponseWriterᴠWriter(w), viewsʗ1); if (err != nil) {
                 http.Error(w, err.Error(), http.StatusInternalServerError);
                 return;
             }
@@ -27,7 +27,8 @@ public static httpꓸHandler MainHandler(slice<View> views) {
     }));
 }
 
-public static readonly @string CommonStyle = """
+public static ref readonly @string CommonStyle => ref CommonStyleᵇ;
+private static readonly @string CommonStyleᵇ = """
 
 /* See https://github.com/golang/pkgsite/blob/master/static/shared/typography/typography.css */
 body {
@@ -67,7 +68,7 @@ textarea.code {
 
 """u8.Raw();
 
-internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New(""u8).Parse("""
+internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New("").Parse("""
 
 <html>
 <style>
@@ -264,8 +265,10 @@ partial struct View {
 
 partial struct ViewType /*@string*/;
 
-public static readonly ViewType ViewProc = "proc"u8;
-public static readonly ViewType ViewThread = "thread"u8;
+public static ref readonly ViewType ViewProc => ref ViewProcᵇ;
+private static readonly ViewType ViewProcᵇ = "proc"u8;
+public static ref readonly ViewType ViewThread => ref ViewThreadᵇ;
+private static readonly ViewType ViewThreadᵇ = "thread"u8;
 
 public static @string URL(this View v, nint rangeIdx) {
     if (rangeIdx < 0) {
@@ -287,17 +290,18 @@ public static @string URL(this Range r, ViewType viewType) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string paramsˢ = "{{PARAMS}}"u8;
+private static ref readonly @string paramsˢ => ref paramsˢᵇ;
+private static readonly @string paramsˢᵇ = "{{PARAMS}}"u8;
 
 public static httpꓸHandler TraceHandler() {
     return new http_HandlerFuncᴠΔHandler(new http.HandlerFunc((http.ResponseWriter w, ж<http.Request> r) => {
         {
-            var err = r.ParseForm(); if (err != default!) {
+            var err = r.ParseForm(); if (err != nil) {
                 http.Error(w, err.Error(), http.StatusInternalServerError);
                 return;
             }
         }
-        @string html = strings.ReplaceAll(templTrace, paramsˢ, (~r).Form.Encode());
+        @string html = strings.ReplaceAll(templTrace, paramsˢ, r.Form.Encode());
         w.Write(slice<byte>(html));
     }));
 }

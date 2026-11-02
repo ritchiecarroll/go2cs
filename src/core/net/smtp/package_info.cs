@@ -10,8 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
 global using textprotoꓸError = go.net.textproto_package.ΔError;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 // </ImportedTypeAliases>
@@ -54,7 +52,11 @@ using static go.net.smtp_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Client))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,8 +66,8 @@ using static go.net.smtp_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoL2/IKUgpSC1oKUlAAGFsLWgqaCgoKCgpQ=")]
-[assembly: go.GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADpqooKClIKqooKCgoKUgoKokqiygoKCgqYABRDygIKkgpSCqOKCgpSCgoIACArCgoLqwoKClIKCgoKCgqaAgqSC2sKAgqSCgpSCgoKs4oKClN7CgIKkgIKkgqzSgIKkgoKCgpSCgqKCgpTGtKSClJSCgpSClIKClAAGEPKAgqSAgqSCgoCCpICCtoLcsoCCpIIACxCCgoLe4oKClAAHMgAWAoCCpIKAgraCgpSSgIKkgIKCgpSAgsaCgIKkgIK2gIKkgoCCtoKClIKClIKClN7igIKkgpSCgtqigIKkgtqigIKkgtiygoKClNiSgpQ=")]
+[assembly: GoPositionMap("net/smtp/auth.go", "auth.cs", "ACxqAAgCpoIACgb8gpSClILmgpSUAAYWwuaCpoKCgoKClA==")]
+[assembly: GoPositionMap("net/smtp/smtp.go", "smtp.cs", "ADtqooKClIKqooKCgoKUgoKokqiygoKCgqYABhDygIKkgpSCqOKCgpSCgoIACQrCgoIACArCgoKUgoKCgoKCpoCCpILqwoCCpIKClIKCgqzigoKU7sKAgqSAgqSCrNKAgqSCgoKClIKCooKClMa0pIKUlIKClIKUgoKUAAgQ8oCCpICCpIKCgIKkgIK2guyygIKkggALEIKCgu7igoKUAAgyABYCgIKkgoCCtoKClJKAgqSAgoKClICCxoKAgqSAgraAgqSCgIK2goKUgoKUgoKU3uKAgqSClIKC6qKAgqSC6qKAgqSC6LKCgoKU6JKClA==", "", "", "", "450:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

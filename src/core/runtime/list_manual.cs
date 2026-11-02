@@ -58,7 +58,7 @@ internal static ж<listNodeManual> getNode(this ref listHeadManual head, @unsafe
     }
 
     if (Δp == nil) {
-        return default!;
+        return default;
     }
     return (ж<listNodeManual>)(uintptr)(@unsafe.Add(Δp, head.nodeOffset));
 }
@@ -79,12 +79,12 @@ internal static void push(this ref listHeadManual head, @unsafe.Pointer Δp) {
 
     // ... so p's next is the current head.
     var pNode = head.getNode(Δp);
-    pNode.Value.next = head.obj;
+    pNode.next = head.obj;
 
     // ... and the current head's prev is p.
     if (head.obj != 0) {
         var headNode = head.getNode((@unsafe.Pointer)head.obj);
-        headNode.Value.prev = (uintptr)Δp;
+        headNode.prev = (uintptr)Δp;
     }
 
     head.obj = (uintptr)Δp;
@@ -93,7 +93,7 @@ internal static void push(this ref listHeadManual head, @unsafe.Pointer Δp) {
 // Pop removes the head of the list.
 internal static @unsafe.Pointer pop(this ref listHeadManual head) {
     if (head.obj == 0) {
-        return default!;
+        return default;
     }
 
     // Return the head of the list.
@@ -101,15 +101,15 @@ internal static @unsafe.Pointer pop(this ref listHeadManual head) {
 
     // ... so the new head is p's next.
     var pNode = head.getNode(Δp);
-    head.obj = pNode.Value.next;
+    head.obj = pNode.next;
     // p is no longer on the list. Clear next to remove unused references.
     // N.B. as the head, prev must already be nil.
-    pNode.Value.next = 0;
+    pNode.next = 0;
 
     // ... and the new head no longer has a prev.
     if (head.obj != 0) {
         var headNode = head.getNode((@unsafe.Pointer)head.obj);
-        headNode.Value.prev = 0;
+        headNode.prev = 0;
     }
 
     return Δp;
@@ -124,20 +124,20 @@ internal static void remove(this ref listHeadManual head, @unsafe.Pointer Δp) {
     }
 
     var pNode = head.getNode(Δp);
-    var prevNode = head.getNode((@unsafe.Pointer)(~pNode).prev);
-    var nextNode = head.getNode((@unsafe.Pointer)(~pNode).next);
+    var prevNode = head.getNode((@unsafe.Pointer)pNode.prev);
+    var nextNode = head.getNode((@unsafe.Pointer)pNode.next);
 
     // Link prev to next.
     if (prevNode != nil) {
-        prevNode.Value.next = pNode.Value.next;
+        prevNode.next = pNode.next;
     }
     // Link next to prev.
     if (nextNode != nil) {
-        nextNode.Value.prev = pNode.Value.prev;
+        nextNode.prev = pNode.prev;
     }
 
-    pNode.Value.prev = 0;
-    pNode.Value.next = 0;
+    pNode.prev = 0;
+    pNode.next = 0;
 }
 
 } // end runtime_package

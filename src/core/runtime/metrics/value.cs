@@ -26,7 +26,7 @@ public static ValueKind KindFloat64Histogram => 3;
 // Value represents a metric value returned by the runtime.
 partial struct Value {
     internal ValueKind kind;
-    internal uint64 scalar;         // contains scalar values for scalar Kinds.
+    internal uint64 scalar;           // contains scalar values for scalar Kinds.
     internal @unsafe.Pointer pointer; // contains non-scalar values.
 }
 

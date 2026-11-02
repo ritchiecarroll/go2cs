@@ -45,27 +45,28 @@ partial class types_test_package {
 //
 // Use the same importer for all std lib tests to
 // avoid repeated importing of the same packages.
-internal static types.Importer stdLibImporter = importer.ForCompiler(token.NewFileSet(), "source"u8, default!);
+internal static types.Importer stdLibImporter = importer.ForCompiler(token.NewFileSet(), "source", default);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
-internal static readonly @string srcˢ = "src"u8;
+internal static ref readonly @string srcˢ => ref srcˢᵇ;
+private static readonly @string srcˢᵇ = "src"u8;
 internal static readonly object packagesTypecheckedInˢ = (@string)"packages typechecked in"u8;
 
-public static partial void TestStdlib(ж<testing.T> Ꮡt) {
+public static partial void TestStdlib(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
 
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     // Collect non-test files.
     var dirFiles = new map<@string, slice<@string>>();
-    @string root = filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), srcˢ);
+    @string root = filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), srcˢ);
     var dirFilesʗ1 = dirFiles;
     walkPkgDirs(root, (@string dir, slice<@string> filenames) => {
         dirFilesʗ1[dir] = filenames;
-    }, Ꮡt.Error);
+    }, t.Error);
 
     var c = Ꮡ(new stdlibChecker(
         dirFiles: dirFiles,
@@ -98,8 +99,8 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
                 }, ref ᒐ);
 
                 var (_, err) = cʗ1.getDirPackage(dir);
-                if (err != default!) {
-                    Ꮡt.Errorf("error checking %s: %v"u8, dir, err);
+                if (err != nil) {
+                    t.Errorf("error checking %s: %v", dir, err);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -136,21 +137,21 @@ internal static (ж<types.Package>, error) Import(this ref stdlibChecker c, @str
 internal static (ж<types.Package>, error) ImportFrom(this ж<stdlibChecker> Ꮡc, @string path, @string dir, types.ImportMode _) {
     if (path == "unsafe"u8) {
         // unsafe cannot be type checked normally.
-        return (Unsafe, default!);
+        return (Unsafe, default);
     }
 
     var (p, err) = Δbuild.ᏑDefault.Import(path, dir, Δbuild.FindOnly);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
-    (var pkg, err) = Ꮡc.getDirPackage((~p).Dir);
+    (var pkg, err) = Ꮡc.getDirPackage(p.Dir);
     if (pkg != nil) {
         // As long as pkg is non-nil, avoid redundant errors related to failed
         // imports. TestStdlib will collect errors once for each package.
-        return (pkg, default!);
+        return (pkg, default);
     }
-    return (default!, err);
+    return (default, err);
 }
 
 // getDirPackage gets the package defined in dir from the future cache.
@@ -162,7 +163,7 @@ internal static (ж<types.Package>, error) getDirPackage(this ж<stdlibChecker> 
 
     c.mu.Lock();
     var (fut, ok) = c.pkgs[dir, ꟷ];
-    if (!ok){
+    if (!ok) {
         // First request for this package dir; type check.
         fut = Ꮡ(new futurePackage(
             done: new channel<EmptyStruct>(0)
@@ -170,26 +171,28 @@ internal static (ж<types.Package>, error) getDirPackage(this ж<stdlibChecker> 
         c.pkgs[dir] = fut;
         var (files, okΔ1) = c.dirFiles[dir, ꟷ];
         c.mu.Unlock();
-        if (!okΔ1){
-            fut.Value.err = fmt.Errorf("no files for %s"u8, dir);
+        if (!okΔ1) {
+            fut.err = fmt.Errorf("no files for %s"u8, dir);
         } else {
             // Using dir as the package path here may be inconsistent with the behavior
             // of a normal importer, but is sufficient as dir is by construction unique
             // to this package.
-            (fut.Value.pkg, fut.Value.err) = typecheckFiles(dir, files, new types_test_package.stdlibCheckerжImporter(Ꮡc));
+            (fut.pkg, fut.err) = typecheckFiles(dir, files, new types_test_package.stdlibCheckerжImporter(Ꮡc));
         }
-        close((~fut).done);
+        close(fut.done);
     } else {
         // Otherwise, await the result.
         c.mu.Unlock();
-        ᐸꟷ((~fut).done);
+        ᐸꟷ(fut.done);
     }
-    return ((~fut).pkg, (~fut).err);
+    return (fut.pkg, fut.err);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goBuildˢ = "go:build "u8;
-internal static readonly @string skipˢ = "skip"u8;
+internal static ref readonly @string goBuildˢ => ref goBuildˢᵇ;
+private static readonly @string goBuildˢᵇ = "go:build "u8;
+internal static ref readonly @string skipˢ => ref skipˢᵇ;
+private static readonly @string skipˢᵇ = "skip"u8;
 
 // firstComment returns the contents of the first non-empty comment in
 // the given file, "skip", or the empty string. No matter the present
@@ -200,24 +203,24 @@ internal static @string firstComment(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
+        if (err != nil) {
             return ""u8;
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
-        array<byte> src = new(4096); /* (4 << 10) */                      // read at most 4KB
+        array<byte> src = new(4096); /* (4 << 10) */ // read at most 4KB
         var (n, _) = f.Read(src[..]);
 
-        @string first = default!;
-        scanner.Scanner s = default!;
-        s.Init(fset.AddFile(""u8, fset.Base(), n), src.slice(0, n), default!, /* ignore errors */ scanner.ScanComments);
-        while (ᐧ) {
+        @string first = default;
+        scanner.Scanner s = default;
+        s.Init(fset.AddFile(""u8, fset.Base(), n), src.slice(0, n), default, /* ignore errors */ scanner.ScanComments);
+        for (;;) {
             var (_, tok, lit) = s.Scan();
-            var exprᴛ1 = tok;
-            if (exprᴛ1 == token.COMMENT) {
+            switch (tok) {
+            case var ᴛ when ᴛ == token.COMMENT: {
                 // remove trailing */ of multi-line comment
-                if (lit[1] == (rune)'*') {
+                if (lit[1] == '*') {
                     lit = lit.slice(0, len(lit) - 2);
                 }
                 @string contents = strings.TrimSpace(lit[2..]);
@@ -228,41 +231,45 @@ internal static @string firstComment(@string filename) {
                     first = contents; // contents may be "" but that's ok
                 }
                 // continue as we may still see build tags
+                break;
             }
-            else if (exprᴛ1 == token.PACKAGE || exprᴛ1 == token.EOF) {
+            case var ᴛ when ᴛ == token.PACKAGE || ᴛ == token.EOF: {
                 return first;
-            }
+            }}
         }
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string versionˢ = "VERSION"u8;
-internal static readonly @string goexperimentˢ2 = "-goexperiment"u8;
+internal static ref readonly @string versionˢ => ref versionˢᵇ;
+private static readonly @string versionˢᵇ = "VERSION"u8;
+internal static ref readonly @string goexperimentˢ2 => ref goexperimentˢ2ᵇ;
+private static readonly @string goexperimentˢ2ᵇ = "-goexperiment"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string prefixᶜ3 = "-lang="u8;
+internal static ref readonly @string prefixᶜ3 => ref prefixᶜ3ᵇ;
+private static readonly @string prefixᶜ3ᵇ = "-lang="u8;
 
-internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸꓸstring ignoreʗp) {
+internal static void testTestDir(ж<testing.T> t, @string path, params ꓸꓸꓸstring ignoreʗp) {
     var ignore = ignoreʗp.sslice();
 
     var (files, err) = os.ReadDir(path);
-    if (err != default!) {
+    if (err != nil) {
         // cmd/distpack deletes GOROOT/test, so skip the test if it isn't present.
         // cmd/distpack also requires GOROOT/VERSION to exist, so use that to
         // suppress false-positive skips.
         {
-            var (_, errΔ1) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ)); if (os.IsNotExist(errΔ1)) {
+            var (_, errΔ1) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), testˢ)); if (os.IsNotExist(errΔ1)) {
                 {
-                    var (_, errΔ2) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), versionˢ)); if (errΔ2 == default!) {
-                        Ꮡt.Skipf("skipping: GOROOT/test not present"u8);
+                    var (_, errΔ2) = os.Stat(filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), versionˢ)); if (errΔ2 == nil) {
+                        t.Skipf("skipping: GOROOT/test not present");
                     }
                 }
             }
         }
-        Ꮡt.Fatal(err);
+        t.Fatal(err);
     }
 
     var excluded = new map<@string, bool>();
@@ -273,7 +280,7 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
     var fset = token.NewFileSet();
     foreach (var (_, f) in files) {
         // filter directory contents
-        if (f.IsDir() || !strings.HasSuffix(f.Name(), ".go"u8) || excluded[f.Name()]) {
+        if (f.IsDir() || !strings.HasSuffix(f.Name(), ".go") || excluded[f.Name()]) {
             continue;
         }
 
@@ -288,10 +295,12 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
                 }
                 var fields = strings.Fields(comment);
                 var exprᴛ1 = fields[0];
-                if (exprᴛ1 == "skip"u8 || exprᴛ1 == "compiledir"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ1 == "skip"u8 || exprᴛ1 == "compiledir"u8: {
                     continue; // ignore this file
+                    break;
                 }
-                else if (exprᴛ1 == "errorcheck"u8) {
+                case {} when exprᴛ1 == "errorcheck"u8: {
                     expectErrors = true;
                     foreach (var (_, arg) in fields[1..]) {
                         if (arg == "-0"u8 || arg == "-+"u8 || arg == "-std"u8) {
@@ -307,132 +316,176 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
                             goVersion = arg[(int)(len(prefix))..];
                         }
                     }
-                }
+                    break;
+                }}
             }
         }
 
         // parse and type-check file
-        var (@file, errΔ3) = parser.ParseFile(fset, filename, default!, 0);
-        if (errΔ3 == default!) {
-            ref var conf = ref heap<types.Config>(out var Ꮡconf);
-            conf = new Config(
+        var (@file, errΔ3) = parser.ParseFile(fset, filename, default, 0);
+        if (errΔ3 == nil) {
+            ref var conf = ref heap<types.Config>(new Config(
                 GoVersion: goVersion,
                 Importer: stdLibImporter
-            );
-            (_, errΔ3) = Ꮡconf.Check(filename, fset, new ж<ast.File>[]{@file}.slice(), nil);
+            ), out var Ꮡconf);
+            (_, errΔ3) = Ꮡconf.Check(filename, fset, slice<ж<ast.File>>([@file]), nil);
         }
 
-        if (expectErrors){
-            if (errΔ3 == default!) {
-                Ꮡt.Errorf("expected errors but found none in %s"u8, filename);
+        if (expectErrors) {
+            if (errΔ3 == nil) {
+                t.Errorf("expected errors but found none in %s", filename);
             }
         } else {
-            if (errΔ3 != default!) {
-                Ꮡt.Error(errΔ3);
+            if (errΔ3 != nil) {
+                t.Error(errΔ3);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cmplxdivideGoˢ = "cmplxdivide.go"u8;
-internal static readonly @string directiveGoˢ = "directive.go"u8;
-internal static readonly @string directive2Goˢ = "directive2.go"u8;
-internal static readonly @string embedfuncGoˢ = "embedfunc.go"u8;
-internal static readonly @string embedversGoˢ = "embedvers.go"u8;
-internal static readonly @string linkname2Goˢ = "linkname2.go"u8;
-internal static readonly @string linkname3Goˢ = "linkname3.go"u8;
+internal static ref readonly @string cmplxdivideGoˢ => ref cmplxdivideGoˢᵇ;
+private static readonly @string cmplxdivideGoˢᵇ = "cmplxdivide.go"u8;
+internal static ref readonly @string directiveGoˢ => ref directiveGoˢᵇ;
+private static readonly @string directiveGoˢᵇ = "directive.go"u8;
+internal static ref readonly @string directive2Goˢ => ref directive2Goˢᵇ;
+private static readonly @string directive2Goˢᵇ = "directive2.go"u8;
+internal static ref readonly @string embedfuncGoˢ => ref embedfuncGoˢᵇ;
+private static readonly @string embedfuncGoˢᵇ = "embedfunc.go"u8;
+internal static ref readonly @string embedversGoˢ => ref embedversGoˢᵇ;
+private static readonly @string embedversGoˢᵇ = "embedvers.go"u8;
+internal static ref readonly @string linkname2Goˢ => ref linkname2Goˢᵇ;
+private static readonly @string linkname2Goˢᵇ = "linkname2.go"u8;
+internal static ref readonly @string linkname3Goˢ => ref linkname3Goˢᵇ;
+private static readonly @string linkname3Goˢᵇ = "linkname3.go"u8;
 
-public static void TestStdTest(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+public static void TestStdTest(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     if (testing.Short() && testenv.Builder() == ""u8) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
 
-    testTestDir(Ꮡt, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ),
+    testTestDir(t, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), testˢ),
         cmplxdivideGoˢ, // also needs file cmplxdivide1.go - ignore
-        directiveGoˢ, // tests compiler rejection of bad directive placement - ignore
-        directive2Goˢ, // tests compiler rejection of bad directive placement - ignore
-        embedfuncGoˢ, // tests //go:embed
-        embedversGoˢ, // tests //go:embed
-        linkname2Goˢ, // go/types doesn't check validity of //go:xxx directives
-        linkname3Goˢ // go/types doesn't check validity of //go:xxx directives
+        directiveGoˢ,   // tests compiler rejection of bad directive placement - ignore
+        directive2Goˢ,  // tests compiler rejection of bad directive placement - ignore
+        embedfuncGoˢ,   // tests //go:embed
+        embedversGoˢ,   // tests //go:embed
+        linkname2Goˢ,   // go/types doesn't check validity of //go:xxx directives
+        linkname3Goˢ    // go/types doesn't check validity of //go:xxx directives
     );
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fixedbugsˢ = "fixedbugs"u8;
-internal static readonly @string bug248Goˢ = "bug248.go"u8;
-internal static readonly @string bug302Goˢ = "bug302.go"u8;
-internal static readonly @string bug369Goˢ = "bug369.go"u8;
-internal static readonly @string bug398Goˢ = "bug398.go"u8;
-internal static readonly @string issue6889Goˢ = "issue6889.go"u8;
-internal static readonly @string issue11362Goˢ = "issue11362.go"u8;
-internal static readonly @string issue16369Goˢ = "issue16369.go"u8;
-internal static readonly @string issue18459Goˢ = "issue18459.go"u8;
-internal static readonly @string issue18882Goˢ = "issue18882.go"u8;
-internal static readonly @string issue20027Goˢ = "issue20027.go"u8;
-internal static readonly @string issue20529Goˢ = "issue20529.go"u8;
-internal static readonly @string issue22200Goˢ = "issue22200.go"u8;
-internal static readonly @string issue22200bGoˢ = "issue22200b.go"u8;
-internal static readonly @string issue25507Goˢ = "issue25507.go"u8;
-internal static readonly @string issue20780Goˢ = "issue20780.go"u8;
-internal static readonly @string bug251Goˢ = "bug251.go"u8;
-internal static readonly @string issue42058aGoˢ = "issue42058a.go"u8;
-internal static readonly @string issue42058bGoˢ = "issue42058b.go"u8;
-internal static readonly @string issue48097Goˢ = "issue48097.go"u8;
-internal static readonly @string issue48230Goˢ = "issue48230.go"u8;
-internal static readonly @string issue49767Goˢ = "issue49767.go"u8;
-internal static readonly @string issue49814Goˢ = "issue49814.go"u8;
-internal static readonly @string issue56103Goˢ = "issue56103.go"u8;
-internal static readonly @string issue52697Goˢ = "issue52697.go"u8;
-internal static readonly @string issue68054Goˢ = "issue68054.go"u8;
-internal static readonly @string issue68580Goˢ = "issue68580.go"u8;
-internal static readonly @string issue73309Goˢ = "issue73309.go"u8;
-internal static readonly @string issue73309bGoˢ = "issue73309b.go"u8;
-internal static readonly @string bug514Goˢ = "bug514.go"u8;
-internal static readonly @string issue40954Goˢ = "issue40954.go"u8;
-internal static readonly @string issue42032Goˢ = "issue42032.go"u8;
-internal static readonly @string issue42076Goˢ = "issue42076.go"u8;
-internal static readonly @string issue46903Goˢ = "issue46903.go"u8;
-internal static readonly @string issue51733Goˢ = "issue51733.go"u8;
-internal static readonly @string notinheap2Goˢ = "notinheap2.go"u8;
-internal static readonly @string notinheap3Goˢ = "notinheap3.go"u8;
+internal static ref readonly @string fixedbugsˢ => ref fixedbugsˢᵇ;
+private static readonly @string fixedbugsˢᵇ = "fixedbugs"u8;
+internal static ref readonly @string bug248Goˢ => ref bug248Goˢᵇ;
+private static readonly @string bug248Goˢᵇ = "bug248.go"u8;
+internal static ref readonly @string bug302Goˢ => ref bug302Goˢᵇ;
+private static readonly @string bug302Goˢᵇ = "bug302.go"u8;
+internal static ref readonly @string bug369Goˢ => ref bug369Goˢᵇ;
+private static readonly @string bug369Goˢᵇ = "bug369.go"u8;
+internal static ref readonly @string bug398Goˢ => ref bug398Goˢᵇ;
+private static readonly @string bug398Goˢᵇ = "bug398.go"u8;
+internal static ref readonly @string issue6889Goˢ => ref issue6889Goˢᵇ;
+private static readonly @string issue6889Goˢᵇ = "issue6889.go"u8;
+internal static ref readonly @string issue11362Goˢ => ref issue11362Goˢᵇ;
+private static readonly @string issue11362Goˢᵇ = "issue11362.go"u8;
+internal static ref readonly @string issue16369Goˢ => ref issue16369Goˢᵇ;
+private static readonly @string issue16369Goˢᵇ = "issue16369.go"u8;
+internal static ref readonly @string issue18459Goˢ => ref issue18459Goˢᵇ;
+private static readonly @string issue18459Goˢᵇ = "issue18459.go"u8;
+internal static ref readonly @string issue18882Goˢ => ref issue18882Goˢᵇ;
+private static readonly @string issue18882Goˢᵇ = "issue18882.go"u8;
+internal static ref readonly @string issue20027Goˢ => ref issue20027Goˢᵇ;
+private static readonly @string issue20027Goˢᵇ = "issue20027.go"u8;
+internal static ref readonly @string issue20529Goˢ => ref issue20529Goˢᵇ;
+private static readonly @string issue20529Goˢᵇ = "issue20529.go"u8;
+internal static ref readonly @string issue22200Goˢ => ref issue22200Goˢᵇ;
+private static readonly @string issue22200Goˢᵇ = "issue22200.go"u8;
+internal static ref readonly @string issue22200bGoˢ => ref issue22200bGoˢᵇ;
+private static readonly @string issue22200bGoˢᵇ = "issue22200b.go"u8;
+internal static ref readonly @string issue25507Goˢ => ref issue25507Goˢᵇ;
+private static readonly @string issue25507Goˢᵇ = "issue25507.go"u8;
+internal static ref readonly @string issue20780Goˢ => ref issue20780Goˢᵇ;
+private static readonly @string issue20780Goˢᵇ = "issue20780.go"u8;
+internal static ref readonly @string bug251Goˢ => ref bug251Goˢᵇ;
+private static readonly @string bug251Goˢᵇ = "bug251.go"u8;
+internal static ref readonly @string issue42058aGoˢ => ref issue42058aGoˢᵇ;
+private static readonly @string issue42058aGoˢᵇ = "issue42058a.go"u8;
+internal static ref readonly @string issue42058bGoˢ => ref issue42058bGoˢᵇ;
+private static readonly @string issue42058bGoˢᵇ = "issue42058b.go"u8;
+internal static ref readonly @string issue48097Goˢ => ref issue48097Goˢᵇ;
+private static readonly @string issue48097Goˢᵇ = "issue48097.go"u8;
+internal static ref readonly @string issue48230Goˢ => ref issue48230Goˢᵇ;
+private static readonly @string issue48230Goˢᵇ = "issue48230.go"u8;
+internal static ref readonly @string issue49767Goˢ => ref issue49767Goˢᵇ;
+private static readonly @string issue49767Goˢᵇ = "issue49767.go"u8;
+internal static ref readonly @string issue49814Goˢ => ref issue49814Goˢᵇ;
+private static readonly @string issue49814Goˢᵇ = "issue49814.go"u8;
+internal static ref readonly @string issue56103Goˢ => ref issue56103Goˢᵇ;
+private static readonly @string issue56103Goˢᵇ = "issue56103.go"u8;
+internal static ref readonly @string issue52697Goˢ => ref issue52697Goˢᵇ;
+private static readonly @string issue52697Goˢᵇ = "issue52697.go"u8;
+internal static ref readonly @string issue68054Goˢ => ref issue68054Goˢᵇ;
+private static readonly @string issue68054Goˢᵇ = "issue68054.go"u8;
+internal static ref readonly @string issue68580Goˢ => ref issue68580Goˢᵇ;
+private static readonly @string issue68580Goˢᵇ = "issue68580.go"u8;
+internal static ref readonly @string issue73309Goˢ => ref issue73309Goˢᵇ;
+private static readonly @string issue73309Goˢᵇ = "issue73309.go"u8;
+internal static ref readonly @string issue73309bGoˢ => ref issue73309bGoˢᵇ;
+private static readonly @string issue73309bGoˢᵇ = "issue73309b.go"u8;
+internal static ref readonly @string bug514Goˢ => ref bug514Goˢᵇ;
+private static readonly @string bug514Goˢᵇ = "bug514.go"u8;
+internal static ref readonly @string issue40954Goˢ => ref issue40954Goˢᵇ;
+private static readonly @string issue40954Goˢᵇ = "issue40954.go"u8;
+internal static ref readonly @string issue42032Goˢ => ref issue42032Goˢᵇ;
+private static readonly @string issue42032Goˢᵇ = "issue42032.go"u8;
+internal static ref readonly @string issue42076Goˢ => ref issue42076Goˢᵇ;
+private static readonly @string issue42076Goˢᵇ = "issue42076.go"u8;
+internal static ref readonly @string issue46903Goˢ => ref issue46903Goˢᵇ;
+private static readonly @string issue46903Goˢᵇ = "issue46903.go"u8;
+internal static ref readonly @string issue51733Goˢ => ref issue51733Goˢᵇ;
+private static readonly @string issue51733Goˢᵇ = "issue51733.go"u8;
+internal static ref readonly @string notinheap2Goˢ => ref notinheap2Goˢᵇ;
+private static readonly @string notinheap2Goˢᵇ = "notinheap2.go"u8;
+internal static ref readonly @string notinheap3Goˢ => ref notinheap3Goˢᵇ;
+private static readonly @string notinheap3Goˢᵇ = "notinheap3.go"u8;
 
-public static void TestStdFixed(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+public static void TestStdFixed(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
     if (testing.Short() && testenv.Builder() == ""u8) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
 
-    testTestDir(Ꮡt, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ, fixedbugsˢ),
+    testTestDir(t, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), testˢ, fixedbugsˢ),
         bug248Goˢ, bug302Goˢ, bug369Goˢ, // complex test instructions - ignore
-        bug398Goˢ, // go/types doesn't check for anonymous interface cycles (go.dev/issue/56103)
-        issue6889Goˢ, // gc-specific test
-        issue11362Goˢ, // canonical import path check
-        issue16369Goˢ, // go/types handles this correctly - not an issue
-        issue18459Goˢ, // go/types doesn't check validity of //go:xxx directives
-        issue18882Goˢ, // go/types doesn't check validity of //go:xxx directives
-        issue20027Goˢ, // go/types does not have constraints on channel element size
-        issue20529Goˢ, // go/types does not have constraints on stack size
-        issue22200Goˢ, // go/types does not have constraints on stack size
+        bug398Goˢ,      // go/types doesn't check for anonymous interface cycles (go.dev/issue/56103)
+        issue6889Goˢ,   // gc-specific test
+        issue11362Goˢ,  // canonical import path check
+        issue16369Goˢ,  // go/types handles this correctly - not an issue
+        issue18459Goˢ,  // go/types doesn't check validity of //go:xxx directives
+        issue18882Goˢ,  // go/types doesn't check validity of //go:xxx directives
+        issue20027Goˢ,  // go/types does not have constraints on channel element size
+        issue20529Goˢ,  // go/types does not have constraints on stack size
+        issue22200Goˢ,  // go/types does not have constraints on stack size
         issue22200bGoˢ, // go/types does not have constraints on stack size
-        issue25507Goˢ, // go/types does not have constraints on stack size
-        issue20780Goˢ, // go/types does not have constraints on stack size
-        bug251Goˢ, // go.dev/issue/34333 which was exposed with fix for go.dev/issue/34151
+        issue25507Goˢ,  // go/types does not have constraints on stack size
+        issue20780Goˢ,  // go/types does not have constraints on stack size
+        bug251Goˢ,      // go.dev/issue/34333 which was exposed with fix for go.dev/issue/34151
         issue42058aGoˢ, // go/types does not have constraints on channel element size
         issue42058bGoˢ, // go/types does not have constraints on channel element size
-        issue48097Goˢ, // go/types doesn't check validity of //go:xxx directives, and non-init bodyless function
-        issue48230Goˢ, // go/types doesn't check validity of //go:xxx directives
-        issue49767Goˢ, // go/types does not have constraints on channel element size
-        issue49814Goˢ, // go/types does not have constraints on array size
-        issue56103Goˢ, // anonymous interface cycles; will be a type checker error in 1.22
-        issue52697Goˢ, // go/types does not have constraints on stack size
-        issue68054Goˢ, // this test requires GODEBUG=gotypesalias=1
-        issue68580Goˢ, // this test requires GODEBUG=gotypesalias=1
-        issue73309Goˢ, // this test requires GODEBUG=gotypesalias=1
+        issue48097Goˢ,  // go/types doesn't check validity of //go:xxx directives, and non-init bodyless function
+        issue48230Goˢ,  // go/types doesn't check validity of //go:xxx directives
+        issue49767Goˢ,  // go/types does not have constraints on channel element size
+        issue49814Goˢ,  // go/types does not have constraints on array size
+        issue56103Goˢ,  // anonymous interface cycles; will be a type checker error in 1.22
+        issue52697Goˢ,  // go/types does not have constraints on stack size
+        issue68054Goˢ,  // this test requires GODEBUG=gotypesalias=1
+        issue68580Goˢ,  // this test requires GODEBUG=gotypesalias=1
+        issue73309Goˢ,  // this test requires GODEBUG=gotypesalias=1
         issue73309bGoˢ, // this test requires GODEBUG=gotypesalias=1
 
         // These tests requires runtime/cgo.Incomplete, which is only available on some platforms.
@@ -448,21 +501,22 @@ public static void TestStdFixed(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string kenˢ = "ken"u8;
+internal static ref readonly @string kenˢ => ref kenˢᵇ;
+private static readonly @string kenˢᵇ = "ken"u8;
 
-public static void TestStdKen(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+public static void TestStdKen(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
-    testTestDir(Ꮡt, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ, kenˢ));
+    testTestDir(t, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(t)), testˢ, kenˢ));
 }
 
 // Package paths of excluded packages.
 internal static map<@string, bool> excluded = new map<@string, bool>{
-    ["builtin"u8] = true,
-    ["cmd/compile/internal/ssa/_gen"u8] = true,
-    ["runtime/_mkmalloc"u8] = true,
-    ["simd/archsimd/_gen/simdgen"u8] = true,
-    ["simd/archsimd/_gen/unify"u8] = true
+    ["builtin"] = true,
+    ["cmd/compile/internal/ssa/_gen"] = true,
+    ["runtime/_mkmalloc"] = true,
+    ["simd/archsimd/_gen/simdgen"] = true,
+    ["simd/archsimd/_gen/unify"] = true
 };
 
 // printPackageMu synchronizes the printing of type-checked package files in
@@ -483,11 +537,11 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
     var fset = token.NewFileSet();
 
     // Parse package files.
-    slice<ж<ast.File>> files = default!;
+    slice<ж<ast.File>> files = default;
     foreach (var (_, filename) in filenames) {
-        var (@file, errΔ1) = parser.ParseFile(fset, filename, default!, parser.AllErrors);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var (@file, errΔ1) = parser.ParseFile(fset, filename, default, parser.AllErrors);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
 
         files = append(filesᴷ, files, @file);
@@ -495,27 +549,25 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
 
     if (testing.Verbose()) {
         ᏑprintPackageMu.Lock();
-        fmt.Println(packageˢ, (~(~files[0]).Name).Name);
+        fmt.Println(packageˢ, files[0].Name.Name);
         foreach (var (_, filename) in filenames) {
-            fmt.Println((@string)"\t"u8, filename);
+            fmt.Println("\t", filename);
         }
         ᏑprintPackageMu.Unlock();
     }
 
     // Typecheck package files.
     ref var errs = ref heap<slice<error>>(out var Ꮡerrs);
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(
+    ref var conf = ref heap<types.Config>(new Config(
         Error: (error errΔ2) => {
             Ꮡerrs.ValueSlot = append(Ꮡerrs.ValueSlot, errΔ2);
         },
         Importer: importer
-    );
-    ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
-    info = new typesꓸInfo(Uses: new map<ж<ast.Ident>, types.Object>());
+    ), out var Ꮡconf);
+    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(Uses: new map<ж<ast.Ident>, types.Object>()), out var Ꮡinfo);
     var (pkg, _) = Ꮡconf.Check(path, fset, files, Ꮡinfo);
     var err = errors.Join(errs.ꓸꓸꓸ);
-    if (err != default!) {
+    if (err != nil) {
         return (pkg, err);
     }
 
@@ -527,52 +579,52 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
         var predeclared = AreEqual(obj, Universe.Lookup(obj.Name())) || AreEqual(obj, errorError);
         if (predeclared == (obj.Pkg() != nil)) {
             var posn = fset.Position(id.Pos());
-            if (predeclared){
-                return (default!, fmt.Errorf("%s: predeclared object with package: %s"u8, posn, obj));
+            if (predeclared) {
+                return (default, fmt.Errorf("%s: predeclared object with package: %s"u8, posn, obj));
             } else {
-                return (default!, fmt.Errorf("%s: user-defined object without package: %s"u8, posn, obj));
+                return (default, fmt.Errorf("%s: user-defined object without package: %s"u8, posn, obj));
             }
         }
     }
 
-    return (pkg, default!);
+    return (pkg, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string asmˢ = "_asm"u8;
+internal static ref readonly @string asmˢ => ref asmˢᵇ;
+private static readonly @string asmˢᵇ = "_asm"u8;
 
 // pkgFilenames returns the list of package filenames for the given directory.
 internal static (slice<@string>, error) pkgFilenames(@string dir, bool includeTest) {
-    ref var ctxt = ref heap<Δbuild.Context>(out var Ꮡctxt);
-    ctxt = Δbuild.Default;
+    ref var ctxt = ref heap<Δbuild.Context>(Δbuild.Default, out var Ꮡctxt);
     ctxt.CgoEnabled = false;
     var (pkg, err) = Ꮡctxt.ImportDir(dir, 0);
-    if (err != default!) {
+    if (err != nil) {
         {
             var (_, nogo) = err._<ж<Δbuild.NoGoError>>(ᐧ); if (nogo) {
-                return (default!, default!); // no *.go files, not an error
+                return (default, default); // no *.go files, not an error
             }
         }
-        return (default!, err);
+        return (default, err);
     }
-    if (excluded[(~pkg).ImportPath]) {
-        return (default!, default!);
+    if (excluded[pkg.ImportPath]) {
+        return (default, default);
     }
-    if (slices.Contains(strings.Split((~pkg).ImportPath, "/"u8), asmˢ)) {
+    if (slices.Contains(strings.Split(pkg.ImportPath, "/"), asmˢ)) {
         // Submodules where not all dependencies are available.
         // See go.dev/issue/46027.
-        return (default!, default!);
+        return (default, default);
     }
-    slice<@string> filenames = default!;
-    foreach (var (_, name) in (~pkg).GoFiles) {
-        filenames = append(filenames, filepath.Join((~pkg).Dir, name));
+    slice<@string> filenames = default;
+    foreach (var (_, name) in pkg.GoFiles) {
+        filenames = append(filenames, filepath.Join(pkg.Dir, name));
     }
     if (includeTest) {
-        foreach (var (_, name) in (~pkg).TestGoFiles) {
-            filenames = append(filenames, filepath.Join((~pkg).Dir, name));
+        foreach (var (_, name) in pkg.TestGoFiles) {
+            filenames = append(filenames, filepath.Join(pkg.Dir, name));
         }
     }
-    return (filenames, default!);
+    return (filenames, default);
 }
 
 internal static void walkPkgDirs(@string dir, Action<@string, slice<@string>> pkgh, Actionꓸꓸꓸ<any> errh) {
@@ -587,7 +639,7 @@ partial struct walker {
 
 internal static void walk(this ref walker w, @string dir) {
     var (files, err) = os.ReadDir(dir);
-    if (err != default!) {
+    if (err != nil) {
         w.errh(err);
         return;
     }
@@ -596,11 +648,11 @@ internal static void walk(this ref walker w, @string dir) {
 
     // Don't get test files as these packages are imported.
     (var pkgFiles, err) = pkgFilenames(dir, false);
-    if (err != default!) {
+    if (err != nil) {
         w.errh(err);
         return;
     }
-    if (pkgFiles != default!) {
+    if (pkgFiles != nil) {
         w.pkgh(dir, pkgFiles);
     }
 

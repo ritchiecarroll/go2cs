@@ -28,14 +28,14 @@ public static partial bool IsInBubble();
 partial struct Association /*num:nint*/;
 
 public static Association Unbubbled => /* Association(iota) */ 0; // not associated with any bubble
-public static Association CurrentBubble => 1;   // associated with the current bubble
-public static Association OtherBubble => 2;     // associated with a different bubble
+public static Association CurrentBubble => 1;                     // associated with the current bubble
+public static Association OtherBubble => 2;                       // associated with a different bubble
 
 // Associate attempts to associate p with the current bubble.
 // It returns the new association status of p.
-public static Association Associate<T>(ж<T> Ꮡp) {
+public static Association Associate<T>(ж<T> p) {
     // Ensure p escapes to permit us to attach a special to it.
-    var escapedP = abi.Escape(Ꮡp);
+    var escapedP = abi.Escape(p);
     return (Association)associate(@unsafe.Pointer.FromPinnedBox(escapedP));
 }
 
@@ -43,16 +43,16 @@ public static Association Associate<T>(ж<T> Ꮡp) {
 internal static partial nint associate(@unsafe.Pointer p);
 
 // Disassociate disassociates p from any bubble.
-public static void Disassociate<T>(ж<T> Ꮡp) {
-    disassociate(@unsafe.Pointer.FromPinnedBox(Ꮡp));
+public static void Disassociate<T>(ж<T> p) {
+    disassociate(@unsafe.Pointer.FromPinnedBox(p));
 }
 
 //go:linkname disassociate
 internal static partial void disassociate(@unsafe.Pointer b);
 
 // IsAssociated reports whether p is associated with the current bubble.
-public static bool IsAssociated<T>(ж<T> Ꮡp) {
-    return isAssociated(@unsafe.Pointer.FromPinnedBox(Ꮡp));
+public static bool IsAssociated<T>(ж<T> p) {
+    return isAssociated(@unsafe.Pointer.FromPinnedBox(p));
 }
 
 //go:linkname isAssociated
@@ -78,11 +78,11 @@ partial struct Bubble {
 // The bubble will not become idle until Release is called.
 public static ж<Bubble> Acquire() {
     {
-        var b = acquire(); if (b != default!) {
+        var b = acquire(); if (b != nil) {
             return Ꮡ(new Bubble(b));
         }
     }
-    return default!;
+    return default;
 }
 
 // Release releases the reference to the bubble,
@@ -94,7 +94,7 @@ public static void Release(this ж<Bubble> Ꮡb) {
         return;
     }
     release(b.b);
-    b.b = default!;
+    b.b = default;
 }
 
 // Run executes f in the bubble.
@@ -102,7 +102,7 @@ public static void Release(this ж<Bubble> Ꮡb) {
 public static void Run(this ж<Bubble> Ꮡb, Action f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    if (Ꮡb == nil){
+    if (Ꮡb == nil) {
         f();
     } else {
         inBubble(b.b, f);

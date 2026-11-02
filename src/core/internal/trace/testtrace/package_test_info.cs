@@ -7,24 +7,6 @@
 global using static global::go.@internal.trace.testtrace_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
-global using traceꓸLabel = go.@internal.trace_package.ΔLabel;
-global using traceꓸLog = go.@internal.trace_package.ΔLog;
-global using traceꓸMetric = go.@internal.trace_package.ΔMetric;
-global using traceꓸRange = go.@internal.trace_package.ΔRange;
-global using traceꓸRegion = go.@internal.trace_package.ΔRegion;
-global using traceꓸStack = go.@internal.trace_package.ΔStack;
-global using traceꓸStateTransition = go.@internal.trace_package.ΔStateTransition;
-global using traceꓸSync = go.@internal.trace_package.ΔSync;
-global using traceꓸTask = go.@internal.trace_package.ΔTask;
-global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,7 +26,7 @@ using static global::go.@internal.trace.testtrace_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,7 +36,7 @@ using static global::go.@internal.trace.testtrace_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/testtrace/helpers_test.go", "helpers_test.cs", "ABEiggAFGAAJAoKUgqaAgsiigoKUpIKClKSCgpSCgqaCgoKUgpSAgsg=")]
+[assembly: GoPositionMap("internal/trace/testtrace/helpers_test.go", "helpers_test.cs", "ABEiggAFGAAJAoKUgqaAgsiigoKUpIKClKSCgpSCgqaCgoKUgpSAgsg=", "", "", "", "57:21,64:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

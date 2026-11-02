@@ -60,11 +60,12 @@ internal static ref xRegAllocᴛ1 xRegAlloc => ref ((StaticBox<xRegAllocᴛ1>)�
 
 internal static void xRegInitAlloc() {
     lockInit(ref xRegAlloc.@lock, lockRankXRegAlloc);
-    ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).init(/* unsafe.Sizeof(xRegState{}) */ (uintptr)2112, default!, nil, Ꮡmemstats.of(mstats.Ꮡother_sys));
+    ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).init(/* unsafe.Sizeof(xRegState{}) */ (uintptr)2112, default, nil, Ꮡmemstats.Ꮡother_sys);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gpXRegStatePNilOnAsyncˢ = "gp.xRegState.p != nil on async preempt"u8;
+internal static ref readonly @string gpXRegStatePNilOnAsyncˢ => ref gpXRegStatePNilOnAsyncˢᵇ;
+private static readonly @string gpXRegStatePNilOnAsyncˢᵇ = "gp.xRegState.p != nil on async preempt"u8;
 
 // xRegSave saves the extended register state on this P to gp.
 //
@@ -78,12 +79,12 @@ internal static void xRegSave(ref g gp) {
     }
 
     // Get the place to save the register state.
-    ж<xRegState> dest = default!;
+    ж<xRegState> dest = default;
     var pp = (~gp.m).p.ptr();
-    if ((~pp).xRegs.cache != nil){
+    if ((~pp).xRegs.cache != nil) {
         // Use the cached allocation.
         dest = pp.Value.xRegs.cache;
-        pp.Value.xRegs.cache = default!;
+        pp.Value.xRegs.cache = default;
     } else {
         // Allocate a new save block.
         @lock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
@@ -96,14 +97,15 @@ internal static void xRegSave(ref g gp) {
     // If we ever need to save less state (e.g., avoid saving vector registers
     // that aren't in use), we could have multiple allocation pools for
     // different size states and copy only the registers we need.
-    dest.Value.regs = pp.Value.xRegs.scratch.ΔClone();
+    dest.regs = pp.Value.xRegs.scratch.ΔClone();
 
     // Save on the G.
     gp.xRegs.state = dest;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gpXRegStatePNilOnReturnˢ = "gp.xRegState.p == nil on return from async preempt"u8;
+internal static ref readonly @string gpXRegStatePNilOnReturnˢ => ref gpXRegStatePNilOnReturnˢᵇ;
+private static readonly @string gpXRegStatePNilOnReturnˢᵇ = "gp.xRegState.p == nil on return from async preempt"u8;
 
 // xRegRestore prepares the extended register state on gp to be restored.
 //
@@ -132,14 +134,14 @@ internal static void xRegRestore(ж<g> Ꮡgp) {
         });
     }
     pp.Value.xRegs.cache = gp.xRegs.state;
-    gp.xRegs.state = default!;
+    gp.xRegs.state = default;
 }
 
 internal static void free(this ref xRegPerP xRegs) {
     if (xRegs.cache != nil) {
         @lock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
         ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).free(@unsafe.Pointer.FromPinnedBox(xRegs.cache));
-        xRegs.cache = default!;
+        xRegs.cache = default;
         unlock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
     }
 }

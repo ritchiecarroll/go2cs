@@ -49,19 +49,20 @@ partial struct Client {
     // supported auth mechanisms
     internal slice<@string> auth;
     internal @string localName; // the name to use in HELO/EHLO
-    internal bool didHello;   // whether we've said HELO/EHLO
+    internal bool didHello;     // whether we've said HELO/EHLO
     internal error helloError;  // the error from the hello
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tcpˢ = "tcp"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
 // Dial returns a new [Client] connected to an SMTP server at addr.
 // The addr must include a port, as in "mail.example.com:smtp".
 public static (ж<Client>, error) Dial(@string addr) {
     var (conn, err) = net.Dial(tcpˢ, addr);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var (host, _, _) = net.SplitHostPort(addr);
     return NewClient(conn, host);
@@ -72,13 +73,13 @@ public static (ж<Client>, error) Dial(@string addr) {
 public static (ж<Client>, error) NewClient(net.Conn conn, @string host) {
     var text = textproto.NewConn(new net_ConnᴠReadWriteCloser(conn));
     var (_, _, err) = text.of(textproto.Conn.ᏑReader).ReadResponse(220);
-    if (err != default!) {
+    if (err != nil) {
         text.Close();
-        return (default!, err);
+        return (default, err);
     }
-    var c = Ꮡ(new Client(Text: text, conn: conn, serverName: host, localName: "localhost"u8));
-    (_, c.Value.tls) = conn._<ж<tls.Conn>>(ᐧ);
-    return (c, default!);
+    var c = Ꮡ(new Client(Text: text, conn: conn, serverName: host, localName: "localhost"));
+    (_, c.tls) = conn._<ж<tls.Conn>>(ᐧ);
+    return (c, default);
 }
 
 // Close closes the connection.
@@ -93,7 +94,7 @@ internal static error hello(this ж<Client> Ꮡc) {
     if (!c.didHello) {
         c.didHello = true;
         var err = Ꮡc.ehlo();
-        if (err != default!) {
+        if (err != nil) {
             c.helloError = Ꮡc.helo();
         }
     }
@@ -101,7 +102,8 @@ internal static error hello(this ж<Client> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string smtpHelloCalledAfterˢ = "smtp: Hello called after other methods"u8;
+internal static ref readonly @string smtpHelloCalledAfterˢ => ref smtpHelloCalledAfterˢᵇ;
+private static readonly @string smtpHelloCalledAfterˢᵇ = "smtp: Hello called after other methods"u8;
 
 // Hello sends a HELO or EHLO to the server as the given host name.
 // Calling this method is only necessary if the client needs control
@@ -112,7 +114,7 @@ public static error Hello(this ж<Client> Ꮡc, @string localName) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var err = validateLine(localName); if (err != default!) {
+        var err = validateLine(localName); if (err != nil) {
             return err;
         }
     }
@@ -131,7 +133,7 @@ internal static (nint, @string, error) cmd(this ж<Client> Ꮡc, nint expectCode
         ref var c = ref Ꮡc.DerefOrNull();
 
         var (id, err) = c.Text.Cmd(format, args.ꓸꓸꓸ);
-        if (err != default!) {
+        if (err != nil) {
             return (0, "", err);
         }
         c.Text.of(textproto.Conn.ᏑPipeline).StartResponse(id);
@@ -139,26 +141,29 @@ internal static (nint, @string, error) cmd(this ж<Client> Ꮡc, nint expectCode
         (var code, var msg, err) = c.Text.of(textproto.Conn.ᏑReader).ReadResponse(expectCode);
         return (code, msg, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string heloSˢ = "HELO %s"u8;
+internal static ref readonly @string heloSˢ => ref heloSˢᵇ;
+private static readonly @string heloSˢᵇ = "HELO %s"u8;
 
 // helo sends the HELO greeting to the server. It should be used only when the
 // server does not support ehlo.
 internal static error helo(this ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    c.ext = default!;
+    c.ext = default;
     var (_, _, err) = Ꮡc.cmd(250, heloSˢ, c.localName);
     return err;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ehloSˢ = "EHLO %s"u8;
-internal static readonly @string authˢ = "AUTH"u8;
+internal static ref readonly @string ehloSˢ => ref ehloSˢᵇ;
+private static readonly @string ehloSˢᵇ = "EHLO %s"u8;
+internal static ref readonly @string authˢ => ref authˢᵇ;
+private static readonly @string authˢᵇ = "AUTH"u8;
 
 // ehlo sends the EHLO (extended hello) greeting to the server. It
 // should be the preferred greeting for servers that support it.
@@ -166,21 +171,21 @@ internal static error ehlo(this ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (_, msg, err) = Ꮡc.cmd(250, ehloSˢ, c.localName);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var ext = new map<@string, @string>();
-    var extList = strings.Split(msg, "\n"u8);
+    var extList = strings.Split(msg, "\n");
     if (len(extList) > 1) {
         extList = extList[1..];
         foreach (var (_, line) in extList) {
-            var (k, v, _) = strings.Cut(line, " "u8);
+            var (k, v, _) = strings.Cut(line, " ");
             ext[k] = v;
         }
     }
     {
         var (mechs, ok) = ext[authˢ, ꟷ]; if (ok) {
-            c.auth = strings.Split(mechs, " "u8);
+            c.auth = strings.Split(mechs, " ");
         }
     }
     c.ext = ext;
@@ -188,23 +193,24 @@ internal static error ehlo(this ж<Client> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string starttlsˢ = "STARTTLS"u8;
+internal static ref readonly @string starttlsˢ => ref starttlsˢᵇ;
+private static readonly @string starttlsˢᵇ = "STARTTLS"u8;
 
 // StartTLS sends the STARTTLS command and encrypts all further communication.
 // Only servers that advertise the STARTTLS extension support this function.
-public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> Ꮡconfig) {
+public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     var (_, _, err) = Ꮡc.cmd(220, starttlsˢ);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
-    c.conn = new tls.ConnжConn(tls.Client(c.conn, Ꮡconfig));
+    c.conn = new tls.ConnжConn(tls.Client(c.conn, config));
     c.Text = textproto.NewConn(new net_ConnᴠReadWriteCloser(c.conn));
     c.tls = true;
     return Ꮡc.ehlo();
@@ -214,8 +220,8 @@ public static error StartTLS(this ж<Client> Ꮡc, ж<tls.Config> Ꮡconfig) {
 // The return values are their zero values if [Client.StartTLS] did
 // not succeed.
 public static (tlsꓸConnectionState state, bool ok) TLSConnectionState(this ref Client c) {
-    tlsꓸConnectionState state = default!;
-    bool ok = default!;
+    tlsꓸConnectionState state = default;
+    bool ok = default;
 
     (var tc, ok) = c.conn._<ж<tls.Conn>>(ᐧ);
     if (!ok) {
@@ -225,7 +231,8 @@ public static (tlsꓸConnectionState state, bool ok) TLSConnectionState(this ref
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string vrfySˢ = "VRFY %s"u8;
+internal static ref readonly @string vrfySˢ => ref vrfySˢᵇ;
+private static readonly @string vrfySˢᵇ = "VRFY %s"u8;
 
 // Verify checks the validity of an email address on the server.
 // If Verify returns nil, the address is valid. A non-nil return
@@ -233,12 +240,12 @@ internal static readonly @string vrfySˢ = "VRFY %s"u8;
 // will not verify addresses for security reasons.
 public static error Verify(this ж<Client> Ꮡc, @string addr) {
     {
-        var errΔ1 = validateLine(addr); if (errΔ1 != default!) {
+        var errΔ1 = validateLine(addr); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     {
-        var errΔ2 = Ꮡc.hello(); if (errΔ2 != default!) {
+        var errΔ2 = Ꮡc.hello(); if (errΔ2 != nil) {
             return errΔ2;
         }
     }
@@ -253,13 +260,13 @@ public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     var encoding = base64.StdEncoding;
     var (mech, resp, err) = a.Start(Ꮡ(new ServerInfo(c.serverName, c.tls, c.auth)));
-    if (err != default!) {
+    if (err != nil) {
         Ꮡc.Quit();
         return err;
     }
@@ -267,9 +274,9 @@ public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
     encoding.Encode(resp64, resp);
     ref var code = ref heap<nint>(out var Ꮡcode);
     ref var msg64 = ref heap<@string>(out var Ꮡmsg64);
-    (code, msg64, err) = Ꮡc.cmd(0, "%s"u8, strings.TrimSpace(fmt.Sprintf("AUTH %s %s"u8, mech, resp64)));
-    while (err == default!) {
-        slice<byte> msg = default!;
+    (code, msg64, err) = Ꮡc.cmd(0, "%s", strings.TrimSpace(fmt.Sprintf("AUTH %s %s"u8, mech, resp64)));
+    while (err == nil) {
+        slice<byte> msg = default;
         switch (code) {
         case 334: {
             (msg, err) = encoding.DecodeString(msg64);
@@ -284,28 +291,30 @@ public static error Auth(this ж<Client> Ꮡc, ΔAuth a) {
             err = new textproto.ΔErrorжerror(Ꮡ(new textprotoꓸError(Code: code, Msg: msg64)));
             break;
         }}
-        if (err == default!) {
+        if (err == nil) {
             (resp, err) = a.Next(msg, code == 334);
         }
-        if (err != default!) {
+        if (err != nil) {
             // abort the AUTH
-            Ꮡc.cmd(501, "*"u8);
+            Ꮡc.cmd(501, "*");
             Ꮡc.Quit();
             break;
         }
-        if (resp == default!) {
+        if (resp == nil) {
             break;
         }
         resp64 = new slice<byte>(encoding.EncodedLen(len(resp)));
         encoding.Encode(resp64, resp);
-        (code, msg64, err) = Ꮡc.cmd(0, "%s"u8, resp64);
+        (code, msg64, err) = Ꮡc.cmd(0, "%s", resp64);
     }
     return err;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mailFromSˢ = "MAIL FROM:<%s>"u8;
-internal static readonly @string smtputf8ˢ = "SMTPUTF8"u8;
+internal static ref readonly @string mailFromSˢ => ref mailFromSˢᵇ;
+private static readonly @string mailFromSˢᵇ = "MAIL FROM:<%s>"u8;
+internal static ref readonly @string smtputf8ˢ => ref smtputf8ˢᵇ;
+private static readonly @string smtputf8ˢᵇ = "SMTPUTF8"u8;
 
 // Mail issues a MAIL command to the server using the provided email address.
 // If the server supports the 8BITMIME extension, Mail adds the BODY=8BITMIME
@@ -316,19 +325,19 @@ public static error Mail(this ж<Client> Ꮡc, @string from) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var errΔ1 = validateLine(from); if (errΔ1 != default!) {
+        var errΔ1 = validateLine(from); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     {
-        var errΔ2 = Ꮡc.hello(); if (errΔ2 != default!) {
+        var errΔ2 = Ꮡc.hello(); if (errΔ2 != nil) {
             return errΔ2;
         }
     }
     @string cmdStr = mailFromSˢ;
-    if (c.ext != default!) {
+    if (c.ext != nil) {
         {
-            var (_, ok) = c.ext["8BITMIME"u8, ꟷ]; if (ok) {
+            var (_, ok) = c.ext["8BITMIME", ꟷ]; if (ok) {
                 cmdStr += " BODY=8BITMIME"u8;
             }
         }
@@ -343,14 +352,15 @@ public static error Mail(this ж<Client> Ꮡc, @string from) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rcptToSˢ = "RCPT TO:<%s>"u8;
+internal static ref readonly @string rcptToSˢ => ref rcptToSˢᵇ;
+private static readonly @string rcptToSˢᵇ = "RCPT TO:<%s>"u8;
 
 // Rcpt issues a RCPT command to the server using the provided email address.
 // A call to Rcpt must be preceded by a call to [Client.Mail] and may be followed by
 // a [Client.Data] call or another Rcpt call.
 public static error Rcpt(this ж<Client> Ꮡc, @string to) {
     {
-        var errΔ1 = validateLine(to); if (errΔ1 != default!) {
+        var errΔ1 = validateLine(to); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -369,12 +379,13 @@ internal static (nint, error) Write(this dataCloser recvᴛ, slice<byte> p) => r
 
 internal static error Close(this ref dataCloser d) {
     d.WriteCloser.Close();
-    var (_, _, err) = (~d.c).Text.of(textproto.Conn.ᏑReader).ReadResponse(250);
+    var (_, _, err) = d.c.Text.of(textproto.Conn.ᏑReader).ReadResponse(250);
     return err;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dataˢ = "DATA"u8;
+internal static ref readonly @string dataˢ => ref dataˢᵇ;
+private static readonly @string dataˢᵇ = "DATA"u8;
 
 // Data issues a DATA command to the server and returns a writer that
 // can be used to write the mail headers and body. The caller should
@@ -384,16 +395,17 @@ public static (io.WriteCloser, error) Data(this ж<Client> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (_, _, err) = Ꮡc.cmd(354, dataˢ);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new dataCloserжWriteCloser(Ꮡ(new dataCloser(Ꮡc, c.Text.of(textproto.Conn.ᏑWriter).DotWriter()))), default!);
+    return (new dataCloserжWriteCloser(Ꮡ(new dataCloser(Ꮡc, c.Text.of(textproto.Conn.ᏑWriter).DotWriter()))), default);
 }
 
-internal static Action<ж<tls.Config>> testHookStartTLS;      // nil, except for tests
+internal static Action<ж<tls.Config>> testHookStartTLS; // nil, except for tests
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string smtpServerDoesnTSupportˢ = "smtp: server doesn't support AUTH"u8;
+internal static ref readonly @string smtpServerDoesnTSupportˢ => ref smtpServerDoesnTSupportˢᵇ;
+private static readonly @string smtpServerDoesnTSupportˢᵇ = "smtp: server doesn't support AUTH"u8;
 
 // SendMail connects to the server at addr, switches to TLS if
 // possible, authenticates with the optional mechanism a if possible,
@@ -419,80 +431,80 @@ public static error SendMail(@string addr, ΔAuth a, @string from, slice<@string
     GoFrame ᒐ = default;
     try {
         {
-            var errΔ1 = validateLine(from); if (errΔ1 != default!) {
+            var errΔ1 = validateLine(from); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
         foreach (var (_, recp) in to) {
             {
-                var errΔ2 = validateLine(recp); if (errΔ2 != default!) {
+                var errΔ2 = validateLine(recp); if (errΔ2 != nil) {
                     return errΔ2;
                 }
             }
         }
         var (c, err) = Dial(addr);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
         {
-            err = c.hello(); if (err != default!) {
+            err = c.hello(); if (err != nil) {
                 return err;
             }
         }
         {
             var (ok, _) = c.Extension(starttlsˢ); if (ok) {
-                var config = Ꮡ(new tls.Config(ServerName: (~c).serverName));
-                if (testHookStartTLS != default!) {
+                var config = Ꮡ(new tls.Config(ServerName: c.serverName));
+                if (testHookStartTLS != nil) {
                     testHookStartTLS(config);
                 }
                 {
-                    err = c.StartTLS(config); if (err != default!) {
+                    err = c.StartTLS(config); if (err != nil) {
                         return err;
                     }
                 }
             }
         }
-        if (a != default! && (~c).ext != default!) {
+        if (a != nil && c.ext != nil) {
             {
-                var (_, ok) = (~c).ext[authˢ, ꟷ]; if (!ok) {
+                var (_, ok) = c.ext[authˢ, ꟷ]; if (!ok) {
                     return errors.New(smtpServerDoesnTSupportˢ);
                 }
             }
             {
-                err = c.Auth(a); if (err != default!) {
+                err = c.Auth(a); if (err != nil) {
                     return err;
                 }
             }
         }
         {
-            err = c.Mail(from); if (err != default!) {
+            err = c.Mail(from); if (err != nil) {
                 return err;
             }
         }
         foreach (var (_, addrΔ1) in to) {
             {
-                err = c.Rcpt(addrΔ1); if (err != default!) {
+                err = c.Rcpt(addrΔ1); if (err != nil) {
                     return err;
                 }
             }
         }
         (var w, err) = c.Data();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         (_, err) = w.Write(msg);
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         err = w.Close();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         return c.Quit();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -504,11 +516,11 @@ public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var err = Ꮡc.hello(); if (err != default!) {
+        var err = Ꮡc.hello(); if (err != nil) {
             return (false, "");
         }
     }
-    if (c.ext == default!) {
+    if (c.ext == nil) {
         return (false, "");
     }
     ext = strings.ToUpper(ext);
@@ -517,13 +529,14 @@ public static (bool, @string) Extension(this ж<Client> Ꮡc, @string ext) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rsetˢ = "RSET"u8;
+internal static ref readonly @string rsetˢ => ref rsetˢᵇ;
+private static readonly @string rsetˢᵇ = "RSET"u8;
 
 // Reset sends the RSET command to the server, aborting the current mail
 // transaction.
 public static error Reset(this ж<Client> Ꮡc) {
     {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -532,13 +545,14 @@ public static error Reset(this ж<Client> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noopˢ = "NOOP"u8;
+internal static ref readonly @string noopˢ => ref noopˢᵇ;
+private static readonly @string noopˢᵇ = "NOOP"u8;
 
 // Noop sends the NOOP command to the server. It does nothing but check
 // that the connection to the server is okay.
 public static error Noop(this ж<Client> Ꮡc) {
     {
-        var errΔ1 = Ꮡc.hello(); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡc.hello(); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -547,7 +561,8 @@ public static error Noop(this ж<Client> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string quitˢ = "QUIT"u8;
+internal static ref readonly @string quitˢ => ref quitˢᵇ;
+private static readonly @string quitˢᵇ = "QUIT"u8;
 
 // Quit sends the QUIT command and closes the connection to the server.
 public static error Quit(this ж<Client> Ꮡc) {
@@ -555,21 +570,22 @@ public static error Quit(this ж<Client> Ꮡc) {
 
     Ꮡc.hello(); // ignore error; we're quitting anyhow
     var (_, _, err) = Ꮡc.cmd(221, quitˢ);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return c.Text.Close();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string smtpALineMustNotContainˢ = "smtp: A line must not contain CR or LF"u8;
+internal static ref readonly @string smtpALineMustNotContainˢ => ref smtpALineMustNotContainˢᵇ;
+private static readonly @string smtpALineMustNotContainˢᵇ = "smtp: A line must not contain CR or LF"u8;
 
 // validateLine checks to see if a line has CR or LF as per RFC 5321.
 internal static error validateLine(@string line) {
-    if (strings.ContainsAny(line, "\n\r"u8)) {
+    if (strings.ContainsAny(line, "\n\r")) {
         return errors.New(smtpALineMustNotContainˢ);
     }
-    return default!;
+    return default;
 }
 
 } // end smtp_package

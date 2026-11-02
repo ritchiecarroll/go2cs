@@ -13,44 +13,44 @@ using static go.encoding.csv_package;
 
 partial class csv_internal_test_package {
 
-public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
-    Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in) => {
+public static void FuzzRoundtrip(ж<testing.F> f) {
+    f.Fuzz((ж<testing.T> t, slice<byte> @in) => {
         var buf = @new<bytes.Buffer>();
 
-        t.Logf("input = %q"u8, @in);
-        foreach (var (_, tt) in new global::go.encoding.csv_package.Reader[]{
-            new(Comma: (rune)','),
-            new(Comma: (rune)';'),
-            new(Comma: (rune)'\t'),
-            new(Comma: (rune)',', LazyQuotes: true),
-            new(Comma: (rune)',', TrimLeadingSpace: true),
-            new(Comma: (rune)',', Comment: (rune)'#'),
-            new(Comma: (rune)',', Comment: (rune)';')
-        }.slice()) {
-            t.Logf("With options:"u8);
-            t.Logf("  Comma            = %q"u8, tt.Comma);
-            t.Logf("  LazyQuotes       = %t"u8, tt.LazyQuotes);
-            t.Logf("  TrimLeadingSpace = %t"u8, tt.TrimLeadingSpace);
-            t.Logf("  Comment          = %q"u8, tt.Comment);
+        t.Logf("input = %q", @in);
+        foreach (var (_, tt) in slice<global::go.encoding.csv_package.Reader>([
+            new(Comma: ','),
+            new(Comma: ';'),
+            new(Comma: '\t'),
+            new(Comma: ',', LazyQuotes: true),
+            new(Comma: ',', TrimLeadingSpace: true),
+            new(Comma: ',', Comment: '#'),
+            new(Comma: ',', Comment: ';')
+        ])) {
+            t.Logf("With options:");
+            t.Logf("  Comma            = %q", tt.Comma);
+            t.Logf("  LazyQuotes       = %t", tt.LazyQuotes);
+            t.Logf("  TrimLeadingSpace = %t", tt.TrimLeadingSpace);
+            t.Logf("  Comment          = %q", tt.Comment);
             var r = NewReader(new csv_test_package.bytes_ReaderжReader(bytes.NewReader(@in)));
-            r.Value.Comma = tt.Comma;
-            r.Value.Comment = tt.Comment;
-            r.Value.LazyQuotes = tt.LazyQuotes;
-            r.Value.TrimLeadingSpace = tt.TrimLeadingSpace;
+            r.Comma = tt.Comma;
+            r.Comment = tt.Comment;
+            r.LazyQuotes = tt.LazyQuotes;
+            r.TrimLeadingSpace = tt.TrimLeadingSpace;
 
             var (records, err) = r.ReadAll();
-            if (err != default!) {
+            if (err != nil) {
                 continue;
             }
-            t.Logf("first records = %#v"u8, records);
+            t.Logf("first records = %#v", records);
 
             buf.Reset();
             var w = NewWriter(new csv_test_package.bytes_BufferжWriter(buf));
-            w.Value.Comma = tt.Comma;
+            w.Comma = tt.Comma;
             err = w.WriteAll(records);
-            if (err != default!) {
-                t.Logf("writer  = %#v\n"u8, w.OrTypedNil());
-                t.Logf("records = %v\n"u8, records);
+            if (err != nil) {
+                t.Logf("writer  = %#v\n", w.OrTypedNil());
+                t.Logf("records = %v\n", records);
                 t.Fatal(err);
             }
             if (tt.Comment != 0) {
@@ -58,24 +58,24 @@ public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
                 // into a non-quoted comment line, failing the roundtrip check below.
                 continue;
             }
-            t.Logf("second input = %q"u8, buf.Bytes());
+            t.Logf("second input = %q", buf.Bytes());
 
             r = NewReader(new csv_test_package.bytes_BufferжReader(buf));
-            r.Value.Comma = tt.Comma;
-            r.Value.Comment = tt.Comment;
-            r.Value.LazyQuotes = tt.LazyQuotes;
-            r.Value.TrimLeadingSpace = tt.TrimLeadingSpace;
+            r.Comma = tt.Comma;
+            r.Comment = tt.Comment;
+            r.LazyQuotes = tt.LazyQuotes;
+            r.TrimLeadingSpace = tt.TrimLeadingSpace;
             (var result, err) = r.ReadAll();
-            if (err != default!) {
-                t.Logf("reader  = %#v\n"u8, r.OrTypedNil());
-                t.Logf("records = %v\n"u8, records);
+            if (err != nil) {
+                t.Logf("reader  = %#v\n", r.OrTypedNil());
+                t.Logf("records = %v\n", records);
                 t.Fatal(err);
             }
 
             // The reader turns \r\n into \n.
             foreach (var (_, record) in records) {
                 foreach (var (i, s) in record) {
-                    record[i] = strings.ReplaceAll(s, "\r\n"u8, "\n"u8);
+                    record[i] = strings.ReplaceAll(s, "\r\n", "\n");
                 }
             }
             // Note that the reader parses the quoted record "" as an empty string,
@@ -84,11 +84,11 @@ public static void FuzzRoundtrip(ж<testing.F> Ꮡf) {
             records = slices.DeleteFunc(records, (slice<@string> record) => len(record) == 1 && record[0] == "");
             // The reader uses nil when returning no records at all.
             if (len(records) == 0) {
-                records = default!;
+                records = default;
             }
 
             if (!reflect.DeepEqual(records, result)) {
-                t.Fatalf("first read got %#v, second got %#v"u8, records, result);
+                t.Fatalf("first read got %#v, second got %#v", records, result);
             }
         }
     });

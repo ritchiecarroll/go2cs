@@ -37,7 +37,7 @@ public static any /*val*/ Load(this ж<Value> Ꮡv) {
     @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
     if (typ == nil || typ == @unsafe.Pointer.FromPinnedBox(ᏑfirstStoreInProgress)) {
         // First store not yet completed.
-        return default!;
+        return default;
     }
     @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
     var vlp = Ꮡval.Reinterpret<any, efaceWords>();
@@ -55,12 +55,12 @@ internal static ref byte firstStoreInProgress => ref ((StaticBox<byte>)ᏑfirstS
 public static void Store(this ж<Value> Ꮡv, any valʗp) {
     ref var val = ref heap(valʗp, out var Ꮡval);
 
-    if (val == default!) {
+    if (val == nil) {
         throw panic("sync/atomic: store of nil value into Value");
     }
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
     var vlp = Ꮡval.Reinterpret<any, efaceWords>();
-    while (ᐧ) {
+    for (;;) {
         @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             // Attempt to start first store.
@@ -101,12 +101,12 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
     ref var old = ref heap<any>(out var Ꮡold);
     ref var @new = ref heap(@newʗp, out var Ꮡnew);
 
-    if (@new == default!) {
+    if (@new == nil) {
         throw panic("sync/atomic: swap of nil value into Value");
     }
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
     var np = Ꮡnew.Reinterpret<any, efaceWords>();
-    while (ᐧ) {
+    for (;;) {
         @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
             // Attempt to start first store.
@@ -121,7 +121,7 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
             StorePointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value);
             StorePointer(vp.of(efaceWords.Ꮡtyp), np.of(efaceWords.Ꮡtyp).Value);
             runtime_procUnpin();
-            return default!;
+            return default;
         }
         if (typ == @unsafe.Pointer.FromPinnedBox(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
@@ -148,7 +148,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
     ref var old = ref heap(oldʗp, out var Ꮡold);
     ref var @new = ref heap(@newʗp, out var Ꮡnew);
 
-    if (@new == default!) {
+    if (@new == nil) {
         throw panic("sync/atomic: compare and swap of nil value into Value");
     }
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
@@ -157,10 +157,10 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
     if (op.of(efaceWords.Ꮡtyp).Value != nil && np.of(efaceWords.Ꮡtyp).Value != op.of(efaceWords.Ꮡtyp).Value) {
         throw panic("sync/atomic: compare and swap of inconsistently typed values");
     }
-    while (ᐧ) {
+    for (;;) {
         @unsafe.Pointer typ = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡtyp));
         if (typ == nil) {
-            if (old != default!) {
+            if (old != nil) {
                 return false;
             }
             // Attempt to start first store.

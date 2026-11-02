@@ -38,8 +38,8 @@ internal static float64 div(float64 x, float64 y) {
     return x / y;
 }
 
-public static void TestFloat64(ж<testing.T> Ꮡt) {
-    var @base = new float64[]{
+public static void TestFloat64(ж<testing.T> t) {
+    var @base = slice<float64>([
         0D,
         Δmath.Copysign(0D, -1D),
         -1D,
@@ -49,9 +49,9 @@ public static void TestFloat64(ж<testing.T> Ꮡt) {
         Δmath.Inf(-1),
         0.1D,
         1.5D,
-        1.9999999999999998D, // all 1s mantissa
-        1.3333333333333333D, // 1.010101010101...
-        1.1428571428571428D, // 1.001001001001...
+        1.9999999999999998D,     // all 1s mantissa
+        1.3333333333333333D,     // 1.010101010101...
+        1.1428571428571428D,     // 1.001001001001...
         1.112536929253601e-308D, // first normal
         2D,
         4D,
@@ -82,18 +82,18 @@ public static void TestFloat64(ж<testing.T> Ꮡt) {
         1e+306D,
         1e+307D,
         1e+308D
-    }.slice();
+    ]);
     var all = new slice<float64>(200);
     copy(all, @base);
     for (nint i = len(@base); i < len(all); i++) {
         all[i] = rand.NormFloat64();
     }
 
-    test(Ꮡt, "+"u8, add, fop(runtime_internal_test_package.Fadd64), all);
-    test(Ꮡt, "-"u8, sub, fop(runtime_internal_test_package.Fsub64), all);
+    test(t, "+", add, fop(runtime_internal_test_package.Fadd64), all);
+    test(t, "-", sub, fop(runtime_internal_test_package.Fsub64), all);
     if (GOARCH != "386"u8) { // 386 is not precise!
-        test(Ꮡt, "*"u8, mul, fop(runtime_internal_test_package.Fmul64), all);
-        test(Ꮡt, "/"u8, div, fop(runtime_internal_test_package.Fdiv64), all);
+        test(t, "*", mul, fop(runtime_internal_test_package.Fmul64), all);
+        test(t, "/", div, fop(runtime_internal_test_package.Fdiv64), all);
     }
 }
 
@@ -143,10 +143,10 @@ internal static nint nerr;
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object tooManyErrorsˢ = (@string)"too many errors"u8;
 
-internal static void err(ж<testing.T> Ꮡt, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void err(ж<testing.T> t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    Ꮡt.Errorf(format, args.ꓸꓸꓸ);
+    t.Errorf(format, args.ꓸꓸꓸ);
 
     // cut errors off after a while.
     // otherwise we spend all our time
@@ -154,46 +154,52 @@ internal static void err(ж<testing.T> Ꮡt, @string format, params ꓸꓸꓸany
     // formatted output.
     {
         runtime_test_package.nerr++; if (runtime_test_package.nerr >= 10) {
-            Ꮡt.Fatal(tooManyErrorsˢ);
+            t.Fatal(tooManyErrorsˢ);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gSGSwGHwGˢ = "%g %s %g = sw %g, hw %g\n"u8;
-internal static readonly @string to32ˢ = "to32"u8;
-internal static readonly @string to64ˢ = "to64"u8;
-internal static readonly @string toint64ˢ = "toint64"u8;
-internal static readonly @string fromint64ˢ = "fromint64"u8;
+internal static ref readonly @string gSGSwGHwGˢ => ref gSGSwGHwGˢᵇ;
+private static readonly @string gSGSwGHwGˢᵇ = "%g %s %g = sw %g, hw %g\n"u8;
+internal static ref readonly @string to32ˢ => ref to32ˢᵇ;
+private static readonly @string to32ˢᵇ = "to32"u8;
+internal static ref readonly @string to64ˢ => ref to64ˢᵇ;
+private static readonly @string to64ˢᵇ = "to64"u8;
+internal static ref readonly @string toint64ˢ => ref toint64ˢᵇ;
+private static readonly @string toint64ˢᵇ = "toint64"u8;
+internal static ref readonly @string fromint64ˢ => ref fromint64ˢᵇ;
+private static readonly @string fromint64ˢᵇ = "fromint64"u8;
 
-internal static void test(ж<testing.T> Ꮡt, @string op, Func<float64, float64, float64> hw, Func<float64, float64, float64> sw, slice<float64> all) {
+internal static void test(ж<testing.T> t, @string op, Func<float64, float64, float64> hw, Func<float64, float64, float64> sw, slice<float64> all) {
     foreach (var (_, f) in all) {
         foreach (var (_, g) in all) {
             var h = hw(f, g);
             var s = sw(f, g);
             if (!same(h, s)) {
-                err(Ꮡt, gSGSwGHwGˢ, f, op, g, s, h);
+                err(t, gSGSwGHwGˢ, f, op, g, s, h);
             }
-            testu(Ꮡt, to32ˢ, trunc32, to32sw, h);
-            testu(Ꮡt, to64ˢ, trunc32, to64sw, h);
-            testu(Ꮡt, toint64ˢ, hwint64, toint64sw, h);
-            testu(Ꮡt, fromint64ˢ, hwint64, fromint64sw, h);
-            testcmp(Ꮡt, f, h);
-            testcmp(Ꮡt, h, f);
-            testcmp(Ꮡt, g, h);
-            testcmp(Ꮡt, h, g);
+            testu(t, to32ˢ, trunc32, to32sw, h);
+            testu(t, to64ˢ, trunc32, to64sw, h);
+            testu(t, toint64ˢ, hwint64, toint64sw, h);
+            testu(t, fromint64ˢ, hwint64, fromint64sw, h);
+            testcmp(t, f, h);
+            testcmp(t, h, f);
+            testcmp(t, g, h);
+            testcmp(t, h, g);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sGSwGHwGˢ = "%s %g = sw %g, hw %g\n"u8;
+internal static ref readonly @string sGSwGHwGˢ => ref sGSwGHwGˢᵇ;
+private static readonly @string sGSwGHwGˢᵇ = "%s %g = sw %g, hw %g\n"u8;
 
-internal static void testu(ж<testing.T> Ꮡt, @string op, Func<float64, float64> hw, Func<float64, float64> sw, float64 v) {
+internal static void testu(ж<testing.T> t, @string op, Func<float64, float64> hw, Func<float64, float64> sw, float64 v) {
     var h = hw(v);
     var s = sw(v);
     if (!same(h, s)) {
-        err(Ꮡt, sGSwGHwGˢ, op, v, s, h);
+        err(t, sGSwGHwGˢ, op, v, s, h);
     }
 }
 
@@ -212,13 +218,14 @@ internal static (nint cmp, bool isnan) hwcmp(float64 f, float64 g) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cmpGGSwVVHwVVˢ = "cmp(%g, %g) = sw %v, %v, hw %v, %v\n"u8;
+internal static ref readonly @string cmpGGSwVVHwVVˢ => ref cmpGGSwVVHwVVˢᵇ;
+private static readonly @string cmpGGSwVVHwVVˢᵇ = "cmp(%g, %g) = sw %v, %v, hw %v, %v\n"u8;
 
-internal static void testcmp(ж<testing.T> Ꮡt, float64 f, float64 g) {
+internal static void testcmp(ж<testing.T> t, float64 f, float64 g) {
     var (hcmp, hisnan) = hwcmp(f, g);
     var (scmp, sisnan) = runtime_internal_test_package.Fcmp64(Δmath.Float64bits(f), Δmath.Float64bits(g));
     if ((int32)hcmp != scmp || hisnan != sisnan) {
-        err(Ꮡt, cmpGGSwVVHwVVˢ, f, g, scmp, sisnan, hcmp, hisnan);
+        err(t, cmpGGSwVVHwVVˢ, f, g, scmp, sisnan, hcmp, hisnan);
     }
 }
 

@@ -8,15 +8,6 @@ global using static global::go.io_package;
 global using static global::go.io_internal_test_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -76,7 +67,12 @@ using static global::go.io_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(dataAndErrorBuffer))]
+[assembly: GoFieldAccess(typeof(writeToChecker))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -86,9 +82,9 @@ using static global::go.io_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/io_test.go", "io_test.cs", "ACA4koKCgoKC6IKCgoKCgqaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACRSCgqyygoKCgoKSggAHEILuguyygoKCgriCgoKCgoK4goKCgoKCuIKCgoKCgriigoKClIKCuKKCgoKUgoIABxCCAAgKgta4lIKCpoKCpoKCpoKCpoKCpoKCuIKCAAkUsoKClKaCgoKmgoKCpoKCgoKClIKUgoKUgpSCgpSClIKClIKUgoKCgIKkgpSCuIKCgoKCgoCCpIKUgpSAgqSCgoKCgIIAEQiCggANLIKCgoKAgqSAgtqUgpSCgoKCgu6CgqaCggAICIIABBCCgoKAggAICoKCgoKCgpSCgpSAggAKFILWgoKCgoKAgraCgoKCgIIADgiiAAMUlIKCggAQCqKCgoKUkqaSgoKCgu6SgoKCggAHEJIACBqCgoLq1IKCgpSigoKClKSClIKCopSCgoKUoqSmgoKClIKCxpKCgvqigoKCgpS2lIKCgoK0AAoEgoKClIKCgoKUlJSCgoKUgoLKgoLmgpKCgoKmuIKCkoKiyILCgpKCog==", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4")]
-[assembly: go.GoPositionMap("io/multi_test.go", "multi_test.cs", "ABsmgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILOgoKUgoKClIKUgIIACQiClKyC+qKSiJKUgvyCgqaC1oKCgoKCAA0IiIKUgoKUgqaCpoKCpoLugqiSgoKCgqKCgqaUgqaClILKgoaCgpSCgoLqkoKCgoKCupKCgoKCgoKUgu6CqLKCgoKClNiSgoKCgqKCgriCppSCAAgSgqaUgtiSgoKUgoK+soKCgoLogoK4koKCgoC2goCCtoLmtoCCyIKClIKUuIKAgtqCgII=", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-336:1;335-335:1.1", "", "79=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
-[assembly: go.GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABMigoKClIKUqJKCgoKCgoKSgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgriCgpKCgoKmgpSUgoKUgpSCggARJIKmAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSAgtySgoKCgoKC7JKygoKClJSCgoKClIKUgpSAgtySgoKCgoKCuIKCkoKUgoKmgoKSgpSCgqaigpKCgqKCgpSCgqaCgoKClIKUgpSCtAAKBIKIgoCCpIKAgraCgoCCpIKAggAKCIK8gpSCkoKAgtqCgoCC7IKCgriClIKCooKCgIKkuIKAguyCgpSCgoKCyqKCgoKUggAFEIKCyoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1")]
+[assembly: GoPositionMap("io/io_test.go", "io_test.cs", "ACE4koKCgoKC+IKCgoKCgqaCgriCgoKCgoK4goKCgoKCuIKCgoKCgriCgoKCgoIACRSCgqyygoKCgoKCggAHEILuggAIDLKCgoKCuIKCgoKCgriCgoKCgoK4goKCgoKCuKKCgoKUgoK4ooKCgpSCggAHEIIACQqC5riUgoKmgoKmgoKmgoKmgoKmgoK4goIACRSygoKUpoKCgqaCgoKmgoKCgoKUgpSCgpSClIKClIKUgoKUgpSCgoKAgqSClIK4goKCgoKCgIKkgpSClICCpIKCgoKAggASCIKCAA0sgoKCgoCCpICC2pSClIKCgoKC7oKCpoKCAAgIggAEEIKCgoCCAAkKgoKCgoKClIKClICCAAoUguaCgoKCgoCCtoKCgoKAggAOCIIAAxSUgoKCABQKooKCgpSSppKCgoKC7pKCgoKCAAcQkgAIGoKCgurkgoKClKKCgoKUpIKUgoKilIKCgpSipKaCgoKUgoLGkoKCAAgKooKCgoKUtpSCgoKCtAAOBIKCgpSCgoKClJSUgoKClIKCyoKC5oKSgoKCpriCgpKCosiCwoKSgqI=", "515-524:1;527-537:2;540-561:3;569-606:1;582-591:1.1;639-646:1;647-659:2;663-683:3;688-693:4", "", "", "603:21,676:25,737:21,803:25,817:25,835:25")]
+[assembly: GoPositionMap("io/multi_test.go", "multi_test.cs", "AB0mgoKCgoKCgoKCgpSCgoKCpoKCpoKmlJKCgoKUkoKCgpSSuILOgoKUgoKClIKUgIIACQiClKyC+qKSiJKUgvyCgqaC1oKCgoKCAA4IiIKUgoKUgqaCpoKCpoLugqiSgoKCgqKCgqaUgqaClILKgoaCgpSCgoL6koKCgoKCupKCgoKCgoKUgu6CqLKCgoKClOiSgoKCgqKCgriCppSCAAgSgqaUguiSgoKUgoK+soKCgoLogoK4koKCgoC2goCCtoLmtoCCyIKClIKUuIKAgtqCgII=", "23-30:1;31-48:2;49-54:3;55-60:4;61-63:5;112-114:1;182-186:1;204-206:1;207-210:2;268-272:1;331-336:1;335-335:1.1", "", "81=NewReader/1/3/1,NewReader/2/3/3,NewReader/3/3/4,MultiReader/1/2/2")]
+[assembly: GoPositionMap("io/pipe_test.go", "pipe_test.cs", "ABMigoKClIKUqJKCgoKCgoKCgpSCgqaCgoKCgoKUgpS6koKCgoKCgoKClIKUgoKmgoKCAAgUkoKCpoKCgoKClIKCgoKCgriCgoKCgoKmgpSUgoKUgpSCggARJIKmAAgSgoKCgpSUgpSmgrKCgoKUlIKCgoKClIKUgpSAgtySgoKCgoKC/JKygoKClJSCgoKClIKUgpSAgtySgoKCgoKCuIKCkoKUgoKmgoKSgpSCgqaigpKCgqKCgpSCgqaCgoKClIKUgpSCtAAKBIKIgoCCpIKAgraCgoCCpIKAggAMCIK8gpSCkoKAgtqCgoCC7IKCgriClIKCooKCgIKkuIKAguyCgpSCgoKCyqKCgoKUggAFEIKCyoKC", "267-270:1;278-281:1;292-300:1;351-377:1;355-360:1.1;379-412:2;384-391:2.1;431-433:1", "", "", "310:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

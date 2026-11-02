@@ -28,7 +28,7 @@ using static go.@internal.syscall.windows.registry_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/windows/registry/export_test.go", "export_test.cs", "AAoSgg==")]
+[assembly: GoPositionMap("internal/syscall/windows/registry/export_test.go", "export_test.cs", "AAoSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall.windows;

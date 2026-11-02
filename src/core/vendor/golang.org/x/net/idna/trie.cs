@@ -9,7 +9,7 @@ partial class idna_package {
 // Sparse block handling code.
 partial struct valueRange {
     internal uint16 value; // header: value:stride
-    internal byte lo, hi;   // header: lo:n
+    internal byte lo, hi;  // header: lo:n
 }
 
 partial struct sparseBlocks {
@@ -24,7 +24,7 @@ partial struct sparseBlocks {
 internal static ref sparseBlocks idnaSparse => ref ((StaticBox<sparseBlocks>)ᏑidnaSparse).ValueSlot;
 
 // Don't use newIdnaTrie to avoid unconditional linking in of the table.
-internal static ж<idnaTrie> trie = Ꮡ(new idnaTrie(nil));
+internal static ж<idnaTrie> trie = Ꮡ(new idnaTrie());
 
 // lookup determines the type of block n and looks up the value for b.
 // For n < t.cutoff, the block is a simple lookup table. Otherwise, the block
@@ -41,7 +41,7 @@ internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
         if (r.lo <= b && b <= r.hi) {
             return (uint16)(r.value + (uint16)((byte)(b - r.lo)) * header.value);
         }
-        if (b < r.lo){
+        if (b < r.lo) {
             hi = m;
         } else {
             lo = (uint16)(m + 1);

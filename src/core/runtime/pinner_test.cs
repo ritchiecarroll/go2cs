@@ -27,22 +27,22 @@ partial struct objWith<T> {
 }
 
 internal static uintptr globalUintptr;
-internal static ж<obj> globalPtrToObj = Ꮡ(new obj(nil));
-internal static ж<objWith<ж<uintptr>>> globalPtrToObjWithPtr = Ꮡ(new objWith<ж<uintptr>>(nil));
-internal static ж<obj> globalPtrToRuntimeObj = ((Func<ж<obj>>)(() => {
-    return Ꮡ(new obj(nil));
-}))();
-internal static ж<objWith<ж<uintptr>>> globalPtrToRuntimeObjWithPtr = ((Func<ж<objWith<ж<uintptr>>>>)(() => {
-    return Ꮡ(new objWith<ж<uintptr>>(nil));
-}))();
+internal static ж<obj> globalPtrToObj = Ꮡ(new obj());
+internal static ж<objWith<ж<uintptr>>> globalPtrToObjWithPtr = Ꮡ(new objWith<ж<uintptr>>());
+internal static ж<obj> globalPtrToRuntimeObj = func(ж<obj> () => {
+    return Ꮡ(new obj());
+})();
+internal static ж<objWith<ж<uintptr>>> globalPtrToRuntimeObjWithPtr = func(ж<objWith<ж<uintptr>>> () => {
+    return Ꮡ(new objWith<ж<uintptr>>());
+})();
 
-internal static partial void assertDidPanic(ж<testing.T> Ꮡt) {
+internal static partial void assertDidPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        if (recover(calledByDefer) == default!) {
-            Ꮡt.Fatal(didNotPanicˢ);
+        if (recover(calledByDefer) == nil) {
+            t.Fatal(didNotPanicˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -52,12 +52,12 @@ internal static partial void assertDidPanic(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cgoCheckPointerDidNotˢ = (@string)"cgoCheckPointer() did not panic, make sure the tests run with cgocheck=1"u8;
 
-internal static void assertCgoCheckPanics(ж<testing.T> Ꮡt, any p) {
+internal static void assertCgoCheckPanics(ж<testing.T> t, any p) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            if (recover() == default!) {
-                Ꮡt.Fatal(cgoCheckPointerDidNotˢ);
+            if (recover() == nil) {
+                t.Fatal(cgoCheckPointerDidNotˢ);
             }
         }, ref ᒐ);
         runtime_internal_test_package.CgoCheckPointer(p, true);
@@ -72,23 +72,23 @@ internal static readonly object notMarkedAsPinnedˢ = (@string)"not marked as pi
 internal static readonly object pinCounterShouldNotExistˢ = (@string)"pin counter should not exist"u8;
 internal static readonly object stillMarkedAsPinnedˢ = (@string)"still marked as pinned"u8;
 
-public static void TestPinnerSimple(ж<testing.T> Ꮡt) {
+public static void TestPinnerSimple(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
     var p = @new<obj>();
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(p);
     if (runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(alreadyMarkedAsPinnedˢ);
+        t.Fatal(alreadyMarkedAsPinnedˢ);
     }
     pinner.Pin(p.OrTypedNil());
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.GetPinCounter(addr) != nil) {
-        Ꮡt.Fatal(pinCounterShouldNotExistˢ);
+        t.Fatal(pinCounterShouldNotExistˢ);
     }
     pinner.Unpin();
     if (runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(stillMarkedAsPinnedˢ);
+        t.Fatal(stillMarkedAsPinnedˢ);
     }
 }
 
@@ -96,7 +96,7 @@ public static void TestPinnerSimple(ж<testing.T> Ꮡt) {
 internal static readonly object pinDidnTKeepObjectAliveˢ = (@string)"Pin() didn't keep object alive"u8;
 internal static readonly object unpinDidnTReleaseObjectˢ = (@string)"Unpin() didn't release object"u8;
 
-public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> Ꮡt) {
+public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
     var p = @new<obj>();
     var done = new channel<EmptyStruct>(0);
@@ -105,14 +105,14 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> Ꮡt) {
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
     pinner.Pin(p.OrTypedNil());
-    p = default!;
+    p = default;
     Δruntime.GC();
     Δruntime.GC();
     var selᴛ75 = done;
     var selᴛ76 = time.After(time.Millisecond * 10);
     switch (select(ᐸꟷ(selᴛ75, ꓸꓸꓸ), ᐸꟷ(selᴛ76, ꓸꓸꓸ))) {
     case 0 when selᴛ75.ꟷᐳ(out _): {
-        Ꮡt.Fatal(pinDidnTKeepObjectAliveˢ);
+        t.Fatal(pinDidnTKeepObjectAliveˢ);
         break;
     }
     case 1 when selᴛ76.ꟷᐳ(out _): {
@@ -130,7 +130,7 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> Ꮡt) {
         break;
     }
     case 1 when selᴛ78.ꟷᐳ(out _): {
-        Ꮡt.Fatal(unpinDidnTReleaseObjectˢ);
+        t.Fatal(unpinDidnTReleaseObjectˢ);
         break;
     }}
 }
@@ -138,75 +138,75 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object pinCounterWasNotDeletedˢ = (@string)"pin counter was not deleted"u8;
 
-public static void TestPinnerMultiplePinsSame(ж<testing.T> Ꮡt) {
+public static void TestPinnerMultiplePinsSame(ж<testing.T> t) {
     UntypedInt N = 100;
     Δruntime.Pinner pinner = new(nil);
     var p = @new<obj>();
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(p);
     if (runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(alreadyMarkedAsPinnedˢ);
+        t.Fatal(alreadyMarkedAsPinnedˢ);
     }
     for (nint i = 0; i < N; i++) {
         pinner.Pin(p.OrTypedNil());
     }
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     {
         var cnt = runtime_internal_test_package.GetPinCounter(addr); if (cnt == nil || cnt.Value != (uintptr)(N - 1)) {
-            Ꮡt.Fatalf("pin counter incorrect: %d"u8, cnt.Value);
+            t.Fatalf("pin counter incorrect: %d", cnt.Value);
         }
     }
     pinner.Unpin();
     if (runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(stillMarkedAsPinnedˢ);
+        t.Fatal(stillMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.GetPinCounter(addr) != nil) {
-        Ꮡt.Fatal(pinCounterWasNotDeletedˢ);
+        t.Fatal(pinCounterWasNotDeletedˢ);
     }
 }
 
-public static void TestPinnerTwoPinner(ж<testing.T> Ꮡt) {
+public static void TestPinnerTwoPinner(ж<testing.T> t) {
     Δruntime.Pinner pinner1 = new(nil);
     Δruntime.Pinner pinner2 = new(nil);
     var p = @new<obj>();
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(p);
     if (runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(alreadyMarkedAsPinnedˢ);
+        t.Fatal(alreadyMarkedAsPinnedˢ);
     }
     pinner1.Pin(p.OrTypedNil());
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.GetPinCounter(addr) != nil) {
-        Ꮡt.Fatal(pinCounterShouldNotExistˢ);
+        t.Fatal(pinCounterShouldNotExistˢ);
     }
     pinner2.Pin(p.OrTypedNil());
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     {
         var cnt = runtime_internal_test_package.GetPinCounter(addr); if (cnt == nil || cnt.Value != 1) {
-            Ꮡt.Fatalf("pin counter incorrect: %d"u8, cnt.Value);
+            t.Fatalf("pin counter incorrect: %d", cnt.Value);
         }
     }
     pinner1.Unpin();
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.GetPinCounter(addr) != nil) {
-        Ꮡt.Fatal(pinCounterShouldNotExistˢ);
+        t.Fatal(pinCounterShouldNotExistˢ);
     }
     pinner2.Unpin();
     if (runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(stillMarkedAsPinnedˢ);
+        t.Fatal(stillMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.GetPinCounter(addr) != nil) {
-        Ꮡt.Fatal(pinCounterWasNotDeletedˢ);
+        t.Fatal(pinCounterWasNotDeletedˢ);
     }
 }
 
-public static void TestPinnerPinZerosizeObj(ж<testing.T> Ꮡt) {
+public static void TestPinnerPinZerosizeObj(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
@@ -214,14 +214,14 @@ public static void TestPinnerPinZerosizeObj(ж<testing.T> Ꮡt) {
         var p = @new<EmptyStruct>();
         pinner.Pin(p.OrTypedNil());
         if (!runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(p))) {
-            Ꮡt.Fatal(notMarkedAsPinnedˢ);
+            t.Fatal(notMarkedAsPinnedˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerPinGlobalPtr(ж<testing.T> Ꮡt) {
+public static void TestPinnerPinGlobalPtr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
@@ -235,7 +235,7 @@ public static void TestPinnerPinGlobalPtr(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerPinTinyObj(ж<testing.T> Ꮡt) {
+public static void TestPinnerPinTinyObj(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
     UntypedInt N = 64;
     array<@unsafe.Pointer> addr = new(64); /* N */
@@ -245,21 +245,21 @@ public static void TestPinnerPinTinyObj(ж<testing.T> Ꮡt) {
         pinner.Pin(p.OrTypedNil());
         pinner.Pin(p.OrTypedNil());
         if (!runtime_internal_test_package.IsPinned(addr[i])) {
-            Ꮡt.Fatalf("not marked as pinned: %d"u8, i);
+            t.Fatalf("not marked as pinned: %d", i);
         }
         {
             var cnt = runtime_internal_test_package.GetPinCounter(addr[i]); if (cnt == nil || cnt.Value == 0) {
-                Ꮡt.Fatalf("pin counter incorrect: %d, %d"u8, cnt.Value, i);
+                t.Fatalf("pin counter incorrect: %d, %d", cnt.Value, i);
             }
         }
     }
     pinner.Unpin();
     for (nint i = 0; i < N; i++) {
         if (runtime_internal_test_package.IsPinned(addr[i])) {
-            Ꮡt.Fatal(stillMarkedAsPinnedˢ);
+            t.Fatal(stillMarkedAsPinnedˢ);
         }
         if (runtime_internal_test_package.GetPinCounter(addr[i]) != nil) {
-            Ꮡt.Fatal(pinCounterShouldNotExistˢ);
+            t.Fatal(pinCounterShouldNotExistˢ);
         }
     }
 }
@@ -267,58 +267,56 @@ public static void TestPinnerPinTinyObj(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object markedAsPinnedˢ = (@string)"marked as pinned"u8;
 
-public static void TestPinnerInterface(ж<testing.T> Ꮡt) {
+public static void TestPinnerInterface(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
     var o = @new<obj>();
-    ref var ifc = ref heap<any>(out var Ꮡifc);
-    ifc = (any)o.OrTypedNil();
+    ref var ifc = ref heap<any>((any)o.OrTypedNil(), out var Ꮡifc);
     pinner.Pin(Ꮡifc);
     if (!runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(Ꮡifc))) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(o))) {
-        Ꮡt.Fatal(markedAsPinnedˢ);
+        t.Fatal(markedAsPinnedˢ);
     }
     pinner.Unpin();
     pinner.Pin(ifc);
     if (!runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(o))) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     if (runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(Ꮡifc))) {
-        Ꮡt.Fatal(markedAsPinnedˢ);
+        t.Fatal(markedAsPinnedˢ);
     }
     pinner.Unpin();
 }
 
-public static void TestPinnerPinNonPtrPanics(ж<testing.T> Ꮡt) {
+public static void TestPinnerPinNonPtrPanics(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
-        nint i = default!;
-        defer(assertDidPanic, Ꮡt, ref ᒐ, recovers: true);
+        nint i = default;
+        defer(assertDidPanic, t, ref ᒐ, recovers: true);
         pinner.Pin(i);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerReuse(ж<testing.T> Ꮡt) {
+public static void TestPinnerReuse(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
-    ref var p = ref heap<ж<obj>>(out var Ꮡp);
-    p = @new<obj>();
+    ref var p = ref heap<ж<obj>>(@new<obj>(), out var Ꮡp);
     var p2 = Ꮡp;
-    assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
+    assertCgoCheckPanics(t, p2.OrTypedNil());
     pinner.Pin(p.OrTypedNil());
     runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), true);
     pinner.Unpin();
-    assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
+    assertCgoCheckPanics(t, p2.OrTypedNil());
     pinner.Pin(p.OrTypedNil());
     runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), true);
     pinner.Unpin();
 }
 
-public static void TestPinnerEmptyUnpin(ж<testing.T> Ꮡt) {
+public static void TestPinnerEmptyUnpin(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
     pinner.Unpin();
     pinner.Unpin();
@@ -327,28 +325,28 @@ public static void TestPinnerEmptyUnpin(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object leakDidnTMakeGcToPanicˢ = (@string)"leak didn't make GC to panic"u8;
 
-public static void TestPinnerLeakPanics(ж<testing.T> Ꮡt) {
+public static void TestPinnerLeakPanics(ж<testing.T> t) {
     var old = runtime_internal_test_package.GetPinnerLeakPanic();
     var oldʗ1 = old;
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
-            defer(assertDidPanic, Ꮡt, ref ᒐ, recovers: true);
+            defer(assertDidPanic, t, ref ᒐ, recovers: true);
             oldʗ1();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
     var done = new channel<EmptyStruct>(0);
     var doneʗ1 = done;
     runtime_internal_test_package.SetPinnerLeakPanic(() => {
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
-    ((Action)(() => {
+    func(() => {
         Δruntime.Pinner pinner = new(nil);
         var p = @new<obj>();
         pinner.Pin(p.OrTypedNil());
-    }))();
+    })();
     Δruntime.GC();
     Δruntime.GC();
     var selᴛ79 = done;
@@ -359,20 +357,20 @@ public static void TestPinnerLeakPanics(ж<testing.T> Ꮡt) {
         break;
     }
     case 1 when selᴛ80.ꟷᐳ(out _): {
-        Ꮡt.Fatal(leakDidnTMakeGcToPanicˢ);
+        t.Fatal(leakDidnTMakeGcToPanicˢ);
         break;
     }}
     runtime_internal_test_package.SetPinnerLeakPanic(old);
 }
 
-public static void TestPinnerCgoCheckPtr2Ptr(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckPtr2Ptr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
         var p = @new<obj>();
         var p2 = Ꮡ(new objWith<ж<obj>>(o: p));
-        assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
+        assertCgoCheckPanics(t, p2.OrTypedNil());
         pinner.Pin(p.OrTypedNil());
         runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), true);
     }
@@ -380,15 +378,14 @@ public static void TestPinnerCgoCheckPtr2Ptr(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckPtr2UnsafePtr(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckPtr2UnsafePtr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
-        ref var p = ref heap<@unsafe.Pointer>(out var Ꮡp);
-        p = @unsafe.Pointer.FromPinnedBox(@new<obj>());
+        ref var p = ref heap<@unsafe.Pointer>(@unsafe.Pointer.FromPinnedBox(@new<obj>()), out var Ꮡp);
         var p2 = Ꮡ(new objWith<@unsafe.Pointer>(o: p));
-        assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
+        assertCgoCheckPanics(t, p2.OrTypedNil());
         pinner.Pin(@unsafe.Pointer.OrTypedNil(p));
         runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), true);
     }
@@ -396,32 +393,31 @@ public static void TestPinnerCgoCheckPtr2UnsafePtr(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckPtr2UnknownPtr(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckPtr2UnknownPtr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
-        ref var p = ref heap<@unsafe.Pointer>(out var Ꮡp);
-        p = @unsafe.Pointer.FromPinnedBox(@new<obj>());
+        ref var p = ref heap<@unsafe.Pointer>(@unsafe.Pointer.FromPinnedBox(@new<obj>()), out var Ꮡp);
         var p2 = Ꮡp;
         var p2ʗ1 = p2;
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
-                defer(assertDidPanic, Ꮡt, ref ᒐ, recovers: true);
-                runtime_internal_test_package.CgoCheckPointer(p2ʗ1.OrTypedNil(), default!);
+                defer(assertDidPanic, t, ref ᒐ, recovers: true);
+                runtime_internal_test_package.CgoCheckPointer(p2ʗ1.OrTypedNil(), default);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
         pinner.Pin(@unsafe.Pointer.OrTypedNil(p));
-        runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), default!);
+        runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), default);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckInterface(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckInterface(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
@@ -430,7 +426,7 @@ public static void TestPinnerCgoCheckInterface(ж<testing.T> Ꮡt) {
         ref var o = ref heap(new obj(), out var Ꮡo);
         ifc = Ꮡo;
         var p = Ꮡifc;
-        assertCgoCheckPanics(Ꮡt, p.OrTypedNil());
+        assertCgoCheckPanics(t, p.OrTypedNil());
         pinner.Pin(Ꮡo);
         runtime_internal_test_package.CgoCheckPointer(p.OrTypedNil(), true);
     }
@@ -438,14 +434,13 @@ public static void TestPinnerCgoCheckInterface(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckSlice(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckSlice(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
-        ref var sl = ref heap<slice<nint>>(out var Ꮡsl);
-        sl = new nint[]{1, 2, 3}.slice();
-        assertCgoCheckPanics(Ꮡt, Ꮡsl);
+        ref var sl = ref heap<slice<nint>>(slice<nint>([1, 2, 3]), out var Ꮡsl);
+        assertCgoCheckPanics(t, Ꮡsl);
         pinner.Pin(Ꮡ(sl, 0));
         runtime_internal_test_package.CgoCheckPointer(Ꮡsl, true);
     }
@@ -453,15 +448,14 @@ public static void TestPinnerCgoCheckSlice(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckString(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckString(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
         var b = slice<byte>("foobar"u8);
-        ref var str = ref heap<@string>(out var Ꮡstr);
-        str = @unsafe.String(Ꮡ(b, 0), 6);
-        assertCgoCheckPanics(Ꮡt, Ꮡstr);
+        ref var str = ref heap<@string>(@unsafe.String(Ꮡ(b, 0), 6), out var Ꮡstr);
+        assertCgoCheckPanics(t, Ꮡstr);
         pinner.Pin(Ꮡ(b, 0));
         runtime_internal_test_package.CgoCheckPointer(Ꮡstr, true);
     }
@@ -469,22 +463,22 @@ public static void TestPinnerCgoCheckString(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckPinned2UnpinnedPanics(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckPinned2UnpinnedPanics(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
         var p = @new<obj>();
         var p2 = Ꮡ(new objWith<ж<obj>>(o: p));
-        assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
+        assertCgoCheckPanics(t, p2.OrTypedNil());
         pinner.Pin(p2.OrTypedNil());
-        assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
+        assertCgoCheckPanics(t, p2.OrTypedNil());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestPinnerCgoCheckPtr2Pinned2Unpinned(ж<testing.T> Ꮡt) {
+public static void TestPinnerCgoCheckPtr2Pinned2Unpinned(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
@@ -492,11 +486,11 @@ public static void TestPinnerCgoCheckPtr2Pinned2Unpinned(ж<testing.T> Ꮡt) {
         var p = @new<obj>();
         var p2 = Ꮡ(new objWith<ж<obj>>(o: p));
         var p3 = Ꮡ(new objWith<ж<objWith<ж<obj>>>>(o: p2));
-        assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
-        assertCgoCheckPanics(Ꮡt, p3.OrTypedNil());
+        assertCgoCheckPanics(t, p2.OrTypedNil());
+        assertCgoCheckPanics(t, p3.OrTypedNil());
         pinner.Pin(p2.OrTypedNil());
-        assertCgoCheckPanics(Ꮡt, p2.OrTypedNil());
-        assertCgoCheckPanics(Ꮡt, p3.OrTypedNil());
+        assertCgoCheckPanics(t, p2.OrTypedNil());
+        assertCgoCheckPanics(t, p3.OrTypedNil());
         pinner.Pin(p.OrTypedNil());
         runtime_internal_test_package.CgoCheckPointer(p2.OrTypedNil(), true);
         runtime_internal_test_package.CgoCheckPointer(p3.OrTypedNil(), true);
@@ -594,8 +588,8 @@ public static void BenchmarkPinnerPinUnpinDouble(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkPinnerPinUnpinParallel(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkPinnerPinUnpinParallel(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         var p = @new<obj>();
         while (pb.Next()) {
             Δruntime.Pinner pinner = new(nil);
@@ -605,8 +599,8 @@ public static void BenchmarkPinnerPinUnpinParallel(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkPinnerPinUnpinParallelTiny(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkPinnerPinUnpinParallelTiny(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         var p = @new<bool>();
         while (pb.Next()) {
             Δruntime.Pinner pinner = new(nil);
@@ -616,8 +610,8 @@ public static void BenchmarkPinnerPinUnpinParallelTiny(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkPinnerPinUnpinParallelDouble(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkPinnerPinUnpinParallelDouble(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         var p = @new<obj>();
         while (pb.Next()) {
             Δruntime.Pinner pinner = new(nil);
@@ -681,21 +675,22 @@ public static void BenchmarkPinnerIsPinnedOnUnpinnedParallel(ж<testing.B> Ꮡb)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testConstStringˢ = "test-const-string"u8;
+internal static ref readonly @string testConstStringˢ => ref testConstStringˢᵇ;
+private static readonly @string testConstStringˢᵇ = "test-const-string"u8;
 
 // const string data is not in span.
-public static void TestPinnerConstStringData(ж<testing.T> Ꮡt) {
+public static void TestPinnerConstStringData(ж<testing.T> t) {
     Δruntime.Pinner pinner = new(nil);
     @string str = testConstStringˢ;
     var p = @unsafe.StringData(str);
     @unsafe.Pointer addr = @unsafe.Pointer.FromPinnedBox(p);
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
     pinner.Pin(p.OrTypedNil());
     pinner.Unpin();
     if (!runtime_internal_test_package.IsPinned(addr)) {
-        Ꮡt.Fatal(notMarkedAsPinnedˢ);
+        t.Fatal(notMarkedAsPinnedˢ);
     }
 }
 

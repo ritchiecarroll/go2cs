@@ -45,7 +45,7 @@ using static go.slices_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,11 +55,11 @@ using static go.slices_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("slices/iter.go", "iter.cs", "AAocwoKCggAFEMKCgoLesoKCggAFEtKClKqirNKCgqyygoIAAhDSgoIAAhDygqaClLiC", "15-21:1;27-33:1;38-44:1;102-113:1")]
-[assembly: go.GoPositionMap("slices/slices.go", "slices.cs", "AA4oAAgCgpSCgqYAAhAACAKClIKCgqYAAhQACgKCgpSCgIK2gpQAAhAACAKCgpSCgIK2gpSqwoKCpqrCgoKmqLKqwgACFgAMApSCgpSCgpTKgoKClAAPIMoABxDu7u7uAAISAAgClIKmgoKCruKCgqaCgIKCtoIAAhAACQKUgpSCgoKUpoKUgoKCppSUgoKCAA0clIKCAA4elIKCgoKUgoKCggAHEIKCgq70grgAAhIACAKClIKCgoKCgriCpq7igpSCgoKCgoK4gqYAAhDygpSAlKSqwgACEuKCgqSCAAQoooKCgriosoK84oKCgoLcgoKUAAIQ8oKmgoKCpoKCgpQ=")]
-[assembly: go.GoPositionMap("slices/sort.go", "sort.cs", "AAwg0oIAAhgACwKCqsKowoKCpqrCgoKmrOKClIKClKzSgpSCgoKmrOKClIKClKzSgpSCgoKmrgAIBKaSgpSClLgAAhQACQKmkoKUgpS4AAscgoKCgqaCqsI=")]
-[assembly: go.GoPositionMap("slices/zsortanyfunc.go", "zsortanyfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgIKkAAMuABYIuIKCgoKClLiClNy4goKCgoKUuIKUpoKCkoKClIKUlIKCgpS4goKUgpSCAAMQwoKUgoKClIK4")]
-[assembly: go.GoPositionMap("slices/zsortordered.go", "zsortordered.cs", "AAoYsoKCzsKCgoKClIKUgpSCuKKCgqaCuIKCAAMUAAgClKqClIKCuIKCuIKCpoKCuIK4goLcgoKCpoKUkoKCgoKUgoIABBLigqSClIKUgoKUgoKUgoKUgpSClIKClIKqwoKkgoKUgpSClIKClKiymIKCgqaCpoKmpoKCgpS4goKClLiqwoKCgpSCgoKUAAQU8qqUzoKUgoKmppSkpLqygoKUqLKCgoKosqaigoKCgoK4ooK4ooKSgoKClJSCgoKCgpSAgqQAAy4AGAi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDigpSCgoKUgrg=")]
+[assembly: GoPositionMap("slices/iter.go", "iter.cs", "AAocwoKCggAFEMKCgoLesoKCggAFEtKClKqirNKCgqyygoIAAhDSgoIAAhDygqaClLiC", "15-21:1;27-33:1;38-44:1;102-113:1")]
+[assembly: GoPositionMap("slices/slices.go", "slices.cs", "AA4oAAgCgpSCgqYAAhAACAKClIKCgqYAAhQACgKCgpSCgIK2gpQAAhAACAKCgpSCgIK2gpSqwoKCpqrCgoKmqLKqwgACFgAMApSCgpSCgpTKgoKClAAPIMoABxDu7u7uAAISAAgClIKmgoKCruKCgqaCgIKCtoIAAhAACQKUgpSCgoKUpoKUgoKCppSUgoKCAA0clIKCAA4elIKCgoKUgoKCggAHEIKCgq70grgAAhIACAKClIKCgoKCgriCpq7igpSCgoKCgoK4gqYAAhDygpSAlKSqwgACEuKCgqSCAAQoooKCgriosoK84oKCgoLcgoKUAAIQ8oKmgoKCpoKCgpQ=")]
+[assembly: GoPositionMap("slices/sort.go", "sort.cs", "AAwg0oIAAhgACwKCqsKowoKCpqrCgoKmrOKClIKClKzSgpSCgoKmrOKClIKClKzSgpSCgoKmrgAIBKaSgpSClLgAAhQACQKmkoKUgpS4AAscgoKCgqaCqsI=")]
+[assembly: GoPositionMap("slices/zsortanyfunc.go", "zsortanyfunc.cs", "AAgUkoKCzqKCgoKClIKUgpSCuIKCgqaCuIKCAAMU4pSqgpSCgriCgriCgqaCgriCuIKC3IKCgqaClJKCgoKClIKCAAQSwoKkgpSClIKClIKClIKClIKUgpSCgpSCqqKCpIKClIKUgpSCgpSokpiCgoKmgqaCpqaCgoKUuIKCgpS4qqKCgoKUgoKClAAEFNKqlM6ClIKCpqaUpKS6koKClKiSgoKCqJKmgoKCgoKCuIKCuIKCkoKCgpSUgoKCgoKUgIKkAAMuABYIuIKCgoKClLiClNy4goKCgoKUuIKUpoKCkoKClIKUlIKCgpS4goKUgpSCAAMQwoKUgoKClIK4")]
+[assembly: GoPositionMap("slices/zsortordered.go", "zsortordered.cs", "AAoYsoKCzsKCgoKClIKUgpSCuKKCgqaCuIKCAAMUAAgClKqClIKCuIKCuIKCpoKCuIK4goLcgoKCpoKUkoKCgoKUgoIABBLigqSClIKUgoKUgoKUgoKUgpSClIKClIKqwoKkgoKUgpSClIKClKiymIKCgqaCpoKmpoKCgpS4goKClLiqwoKCgpSCgoKUAAQU8qqUzoKUgoKmppSkpLqygoKUqLKCgoKosqaigoKCgoK4ooK4ooKSgoKClJSCgoKCgpSAgqQAAy4AGAi4goKCgoKUuIKU3LiCgoKCgpS4gpSmgoKSgoKUgpSUgoKClLiCgpSClIIAAxDigpSCgoKUgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -15,45 +15,45 @@ using static go.regexp_package;
 
 partial class regexp_internal_test_package {
 
-internal static slice<@string> goodRe = new @string[]{
-    @""u8,
-    @"."u8,
-    @"^.$"u8,
-    @"a"u8,
-    @"a*"u8,
-    @"a+"u8,
-    @"a?"u8,
-    @"a|b"u8,
-    @"a*|b*"u8,
-    @"(a*|b)(c*|d)"u8,
-    @"[a-z]"u8,
-    @"[a-abc-c\-\]\[]"u8,
-    @"[a-z]+"u8,
-    @"[abc]"u8,
-    @"[^1234]"u8,
-    @"[^\n]"u8,
-    @"\!\\"u8
-}.slice();
+internal static slice<@string> goodRe = slice<@string>([
+    @"",
+    @".",
+    @"^.$",
+    @"a",
+    @"a*",
+    @"a+",
+    @"a?",
+    @"a|b",
+    @"a*|b*",
+    @"(a*|b)(c*|d)",
+    @"[a-z]",
+    @"[a-abc-c\-\]\[]",
+    @"[a-z]+",
+    @"[abc]",
+    @"[^1234]",
+    @"[^\n]",
+    @"\!\\"
+]);
 
 internal partial struct stringError {
     internal @string re;
     internal @string err;
 }
 
-internal static slice<stringError> badRe = new stringError[]{
-    new(@"*"u8, "missing argument to repetition operator: `*`"u8),
-    new(@"+"u8, "missing argument to repetition operator: `+`"u8),
-    new(@"?"u8, "missing argument to repetition operator: `?`"u8),
-    new(@"(abc"u8, "missing closing ): `(abc`"u8),
-    new(@"abc)"u8, "unexpected ): `abc)`"u8),
-    new(@"x[a-z"u8, "missing closing ]: `[a-z`"u8),
-    new(@"[z-a]"u8, "invalid character class range: `z-a`"u8),
-    new(@"abc\"u8, "trailing backslash at end of expression"u8),
-    new(@"a**"u8, "invalid nested repetition operator: `**`"u8),
-    new(@"a*+"u8, "invalid nested repetition operator: `*+`"u8),
-    new(@"\x"u8, "invalid escape sequence: `\\x`"u8),
-    new(strings.Repeat(@"\pL"u8, 27000), "expression too large"u8)
-}.slice();
+internal static slice<stringError> badRe = slice<stringError>([
+    new(@"*", "missing argument to repetition operator: `*`"),
+    new(@"+", "missing argument to repetition operator: `+`"),
+    new(@"?", "missing argument to repetition operator: `?`"),
+    new(@"(abc", "missing closing ): `(abc`"),
+    new(@"abc)", "unexpected ): `abc)`"),
+    new(@"x[a-z", "missing closing ]: `[a-z`"),
+    new(@"[z-a]", "invalid character class range: `z-a`"),
+    new(@"abc\", "trailing backslash at end of expression"),
+    new(@"a**", "invalid nested repetition operator: `**`"),
+    new(@"a*+", "invalid nested repetition operator: `*+`"),
+    new(@"\x", "invalid escape sequence: `\\x`"),
+    new(strings.Repeat(@"\pL", 27000), "expression too large")
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object compilingˢ = (@string)"compiling `"u8;
@@ -62,104 +62,100 @@ internal static readonly object missingErrorˢ = (@string)"`; missing error"u8;
 internal static readonly object wrongErrorˢ = (@string)"`; wrong error: "u8;
 internal static readonly object wantˢ = (@string)"; want "u8;
 
-internal static ж<global::go.regexp_package.Regexp> compileTest(ж<testing.T> Ꮡt, @string expr, @string error) {
+internal static ж<global::go.regexp_package.Regexp> compileTest(ж<testing.T> t, @string expr, @string error) {
     var (re, err) = Compile(expr);
-    if (error == ""u8 && err != default!) {
-        Ꮡt.Error(compilingˢ, expr, unexpectedErrorˢ, err.Error());
+    if (error == ""u8 && err != nil) {
+        t.Error(compilingˢ, expr, unexpectedErrorˢ, err.Error());
     }
-    if (error != ""u8 && err == default!){
-        Ꮡt.Error(compilingˢ, expr, missingErrorˢ);
-    } else 
-    if (error != ""u8 && !strings.Contains(err.Error(), error)) {
-        Ꮡt.Error(compilingˢ, expr, wrongErrorˢ, err.Error(), wantˢ, error);
+    if (error != ""u8 && err == nil) {
+        t.Error(compilingˢ, expr, missingErrorˢ);
+    } else if (error != ""u8 && !strings.Contains(err.Error(), error)) {
+        t.Error(compilingˢ, expr, wrongErrorˢ, err.Error(), wantˢ, error);
     }
     return re;
 }
 
-public static void TestGoodCompile(ж<testing.T> Ꮡt) {
+public static void TestGoodCompile(ж<testing.T> t) {
     for (nint i = 0; i < len(goodRe); i++) {
-        compileTest(Ꮡt, goodRe[i], ""u8);
+        compileTest(t, goodRe[i], ""u8);
     }
 }
 
-public static void TestBadCompile(ж<testing.T> Ꮡt) {
+public static void TestBadCompile(ж<testing.T> t) {
     for (nint i = 0; i < len(badRe); i++) {
-        compileTest(Ꮡt, badRe[i].re, badRe[i].err);
+        compileTest(t, badRe[i].re, badRe[i].err);
     }
 }
 
-internal static void matchTest(ж<testing.T> Ꮡt, ж<FindTest> Ꮡtest) {
-    ref var t = ref Ꮡt.DerefOrNull();
+internal static void matchTest(ж<testing.T> t, ж<FindTest> Ꮡtest) {
     ref var test = ref Ꮡtest.DerefOrNull();
 
-    var re = compileTest(Ꮡt, test.pat, ""u8);
+    var re = compileTest(t, test.pat, ""u8);
     if (re == nil) {
         return;
     }
     var m = re.MatchString(test.text);
     if (m != (len(test.matches) > 0)) {
-        Ꮡt.Errorf("MatchString failure on %s: %t should be %t"u8, Ꮡtest.OrTypedNil(), m, len(test.matches) > 0);
+        t.Errorf("MatchString failure on %s: %t should be %t", Ꮡtest.OrTypedNil(), m, len(test.matches) > 0);
     }
     // now try bytes
     m = re.Match(slice<byte>(test.text));
     if (m != (len(test.matches) > 0)) {
-        Ꮡt.Errorf("Match failure on %s: %t should be %t"u8, Ꮡtest.OrTypedNil(), m, len(test.matches) > 0);
+        t.Errorf("Match failure on %s: %t should be %t", Ꮡtest.OrTypedNil(), m, len(test.matches) > 0);
     }
 }
 
-public static void TestMatch(ж<testing.T> Ꮡt) {
+public static void TestMatch(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in findTests) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
-        matchTest(Ꮡt, Ꮡtest);
+        matchTest(t, Ꮡtest);
     }
 }
 
-internal static void matchFunctionTest(ж<testing.T> Ꮡt, ж<FindTest> Ꮡtest) {
-    ref var t = ref Ꮡt.DerefOrNull();
+internal static void matchFunctionTest(ж<testing.T> t, ж<FindTest> Ꮡtest) {
     ref var test = ref Ꮡtest.DerefOrNull();
 
     var (m, err) = MatchString(test.pat, test.text);
-    if (err == default!) {
+    if (err == nil) {
         return;
     }
     if (m != (len(test.matches) > 0)) {
-        Ꮡt.Errorf("Match failure on %s: %t should be %t"u8, Ꮡtest.OrTypedNil(), m, len(test.matches) > 0);
+        t.Errorf("Match failure on %s: %t should be %t", Ꮡtest.OrTypedNil(), m, len(test.matches) > 0);
     }
 }
 
-public static void TestMatchFunction(ж<testing.T> Ꮡt) {
+public static void TestMatchFunction(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in findTests) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
-        matchFunctionTest(Ꮡt, Ꮡtest);
+        matchFunctionTest(t, Ꮡtest);
     }
 }
 
-internal static void copyMatchTest(ж<testing.T> Ꮡt, ж<FindTest> Ꮡtest) {
-    ref var t = ref Ꮡt.DerefOrNull();
+internal static void copyMatchTest(ж<testing.T> t, ж<FindTest> Ꮡtest) {
     ref var test = ref Ꮡtest.DerefOrNull();
 
-    var re = compileTest(Ꮡt, test.pat, ""u8);
+    var re = compileTest(t, test.pat, ""u8);
     if (re == nil) {
         return;
     }
     var m1 = re.MatchString(test.text);
     var m2 = re.Copy().MatchString(test.text);
     if (m1 != m2) {
-        Ꮡt.Errorf("Copied Regexp match failure on %s: original gave %t; copy gave %t; should be %t"u8,
+        t.Errorf("Copied Regexp match failure on %s: original gave %t; copy gave %t; should be %t",
             Ꮡtest.OrTypedNil(), m1, m2, len(test.matches) > 0);
     }
 }
 
-public static void TestCopyMatch(ж<testing.T> Ꮡt) {
+public static void TestCopyMatch(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in findTests) {
         ref var test = ref heap(new FindTest(), out var Ꮡtest);
         test = vᴛ1;
 
-        copyMatchTest(Ꮡt, Ꮡtest);
+        copyMatchTest(t, Ꮡtest);
     }
 }
 
@@ -167,116 +163,116 @@ public partial struct ReplaceTest {
     internal @string pattern, replacement, input, output;
 }
 
-internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
+internal static slice<ReplaceTest> replaceTests = slice<ReplaceTest>([
     // Test empty input and/or replacement, with pattern that matches the empty string.
-    new(""u8, ""u8, ""u8, ""u8),
-    new(""u8, "x"u8, ""u8, "x"u8),
-    new(""u8, ""u8, "abc"u8, "abc"u8),
-    new(""u8, "x"u8, "abc"u8, "xaxbxcx"u8),
+    new("", "", "", ""),
+    new("", "x", "", "x"),
+    new("", "", "abc", "abc"),
+    new("", "x", "abc", "xaxbxcx"),
 
     // Test empty input and/or replacement, with pattern that does not match the empty string.
-    new("b"u8, ""u8, ""u8, ""u8),
-    new("b"u8, "x"u8, ""u8, ""u8),
-    new("b"u8, ""u8, "abc"u8, "ac"u8),
-    new("b"u8, "x"u8, "abc"u8, "axc"u8),
-    new("y"u8, ""u8, ""u8, ""u8),
-    new("y"u8, "x"u8, ""u8, ""u8),
-    new("y"u8, ""u8, "abc"u8, "abc"u8),
-    new("y"u8, "x"u8, "abc"u8, "abc"u8),
+    new("b", "", "", ""),
+    new("b", "x", "", ""),
+    new("b", "", "abc", "ac"),
+    new("b", "x", "abc", "axc"),
+    new("y", "", "", ""),
+    new("y", "x", "", ""),
+    new("y", "", "abc", "abc"),
+    new("y", "x", "abc", "abc"),
 
     // Multibyte characters -- verify that we don't try to match in the middle
     // of a character.
-    new("[a-c]*"u8, "x"u8, "\u65e5"u8, "x\u65e5x"u8),
-    new("[^\u65e5]"u8, "x"u8, "abc\u65e5def"u8, "xxx\u65e5xxx"u8),
+    new("[a-c]*", "x", "\u65e5", "x\u65e5x"),
+    new("[^\u65e5]", "x", "abc\u65e5def", "xxx\u65e5xxx"),
 
     // Start and end of a string.
-    new("^[a-c]*"u8, "x"u8, "abcdabc"u8, "xdabc"u8),
-    new("[a-c]*$"u8, "x"u8, "abcdabc"u8, "abcdx"u8),
-    new("^[a-c]*$"u8, "x"u8, "abcdabc"u8, "abcdabc"u8),
-    new("^[a-c]*"u8, "x"u8, "abc"u8, "x"u8),
-    new("[a-c]*$"u8, "x"u8, "abc"u8, "x"u8),
-    new("^[a-c]*$"u8, "x"u8, "abc"u8, "x"u8),
-    new("^[a-c]*"u8, "x"u8, "dabce"u8, "xdabce"u8),
-    new("[a-c]*$"u8, "x"u8, "dabce"u8, "dabcex"u8),
-    new("^[a-c]*$"u8, "x"u8, "dabce"u8, "dabce"u8),
-    new("^[a-c]*"u8, "x"u8, ""u8, "x"u8),
-    new("[a-c]*$"u8, "x"u8, ""u8, "x"u8),
-    new("^[a-c]*$"u8, "x"u8, ""u8, "x"u8),
+    new("^[a-c]*", "x", "abcdabc", "xdabc"),
+    new("[a-c]*$", "x", "abcdabc", "abcdx"),
+    new("^[a-c]*$", "x", "abcdabc", "abcdabc"),
+    new("^[a-c]*", "x", "abc", "x"),
+    new("[a-c]*$", "x", "abc", "x"),
+    new("^[a-c]*$", "x", "abc", "x"),
+    new("^[a-c]*", "x", "dabce", "xdabce"),
+    new("[a-c]*$", "x", "dabce", "dabcex"),
+    new("^[a-c]*$", "x", "dabce", "dabce"),
+    new("^[a-c]*", "x", "", "x"),
+    new("[a-c]*$", "x", "", "x"),
+    new("^[a-c]*$", "x", "", "x"),
 
-    new("^[a-c]+"u8, "x"u8, "abcdabc"u8, "xdabc"u8),
-    new("[a-c]+$"u8, "x"u8, "abcdabc"u8, "abcdx"u8),
-    new("^[a-c]+$"u8, "x"u8, "abcdabc"u8, "abcdabc"u8),
-    new("^[a-c]+"u8, "x"u8, "abc"u8, "x"u8),
-    new("[a-c]+$"u8, "x"u8, "abc"u8, "x"u8),
-    new("^[a-c]+$"u8, "x"u8, "abc"u8, "x"u8),
-    new("^[a-c]+"u8, "x"u8, "dabce"u8, "dabce"u8),
-    new("[a-c]+$"u8, "x"u8, "dabce"u8, "dabce"u8),
-    new("^[a-c]+$"u8, "x"u8, "dabce"u8, "dabce"u8),
-    new("^[a-c]+"u8, "x"u8, ""u8, ""u8),
-    new("[a-c]+$"u8, "x"u8, ""u8, ""u8),
-    new("^[a-c]+$"u8, "x"u8, ""u8, ""u8),
+    new("^[a-c]+", "x", "abcdabc", "xdabc"),
+    new("[a-c]+$", "x", "abcdabc", "abcdx"),
+    new("^[a-c]+$", "x", "abcdabc", "abcdabc"),
+    new("^[a-c]+", "x", "abc", "x"),
+    new("[a-c]+$", "x", "abc", "x"),
+    new("^[a-c]+$", "x", "abc", "x"),
+    new("^[a-c]+", "x", "dabce", "dabce"),
+    new("[a-c]+$", "x", "dabce", "dabce"),
+    new("^[a-c]+$", "x", "dabce", "dabce"),
+    new("^[a-c]+", "x", "", ""),
+    new("[a-c]+$", "x", "", ""),
+    new("^[a-c]+$", "x", "", ""),
 
     // Other cases.
-    new("abc"u8, "def"u8, "abcdefg"u8, "defdefg"u8),
-    new("bc"u8, "BC"u8, "abcbcdcdedef"u8, "aBCBCdcdedef"u8),
-    new("abc"u8, ""u8, "abcdabc"u8, "d"u8),
-    new("x"u8, "xXx"u8, "xxxXxxx"u8, "xXxxXxxXxXxXxxXxxXx"u8),
-    new("abc"u8, "d"u8, ""u8, ""u8),
-    new("abc"u8, "d"u8, "abc"u8, "d"u8),
-    new(".+"u8, "x"u8, "abc"u8, "x"u8),
-    new("[a-c]*"u8, "x"u8, "def"u8, "xdxexfx"u8),
-    new("[a-c]+"u8, "x"u8, "abcbcdcdedef"u8, "xdxdedef"u8),
-    new("[a-c]*"u8, "x"u8, "abcbcdcdedef"u8, "xdxdxexdxexfx"u8),
+    new("abc", "def", "abcdefg", "defdefg"),
+    new("bc", "BC", "abcbcdcdedef", "aBCBCdcdedef"),
+    new("abc", "", "abcdabc", "d"),
+    new("x", "xXx", "xxxXxxx", "xXxxXxxXxXxXxxXxxXx"),
+    new("abc", "d", "", ""),
+    new("abc", "d", "abc", "d"),
+    new(".+", "x", "abc", "x"),
+    new("[a-c]*", "x", "def", "xdxexfx"),
+    new("[a-c]+", "x", "abcbcdcdedef", "xdxdedef"),
+    new("[a-c]*", "x", "abcbcdcdedef", "xdxdxexdxexfx"),
 
     // Substitutions
-    new("a+"u8, "($0)"u8, "banana"u8, "b(a)n(a)n(a)"u8),
-    new("a+"u8, "(${0})"u8, "banana"u8, "b(a)n(a)n(a)"u8),
-    new("a+"u8, "(${0})$0"u8, "banana"u8, "b(a)an(a)an(a)a"u8),
-    new("a+"u8, "(${0})$0"u8, "banana"u8, "b(a)an(a)an(a)a"u8),
-    new("hello, (.+)"u8, "goodbye, ${1}"u8, "hello, world"u8, "goodbye, world"u8),
-    new("hello, (.+)"u8, "goodbye, $1x"u8, "hello, world"u8, "goodbye, "u8),
-    new("hello, (.+)"u8, "goodbye, ${1}x"u8, "hello, world"u8, "goodbye, worldx"u8),
-    new("hello, (.+)"u8, "<$0><$1><$2><$3>"u8, "hello, world"u8, "<hello, world><world><><>"u8),
-    new("hello, (?P<noun>.+)"u8, "goodbye, $noun!"u8, "hello, world"u8, "goodbye, world!"u8),
-    new("hello, (?P<noun>.+)"u8, "goodbye, ${noun}"u8, "hello, world"u8, "goodbye, world"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "$x$x$x"u8, "hi"u8, "hihihi"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "$x$x$x"u8, "bye"u8, "byebyebye"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "$xyz"u8, "hi"u8, ""u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "${x}yz"u8, "hi"u8, "hiyz"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "hello $$x"u8, "hi"u8, "hello $x"u8),
-    new("a+"u8, "${oops"u8, "aaa"u8, "${oops"u8),
-    new("a+"u8, "$$"u8, "aaa"u8, "$"u8),
-    new("a+"u8, "$"u8, "aaa"u8, "$"u8),
+    new("a+", "($0)", "banana", "b(a)n(a)n(a)"),
+    new("a+", "(${0})", "banana", "b(a)n(a)n(a)"),
+    new("a+", "(${0})$0", "banana", "b(a)an(a)an(a)a"),
+    new("a+", "(${0})$0", "banana", "b(a)an(a)an(a)a"),
+    new("hello, (.+)", "goodbye, ${1}", "hello, world", "goodbye, world"),
+    new("hello, (.+)", "goodbye, $1x", "hello, world", "goodbye, "),
+    new("hello, (.+)", "goodbye, ${1}x", "hello, world", "goodbye, worldx"),
+    new("hello, (.+)", "<$0><$1><$2><$3>", "hello, world", "<hello, world><world><><>"),
+    new("hello, (?P<noun>.+)", "goodbye, $noun!", "hello, world", "goodbye, world!"),
+    new("hello, (?P<noun>.+)", "goodbye, ${noun}", "hello, world", "goodbye, world"),
+    new("(?P<x>hi)|(?P<x>bye)", "$x$x$x", "hi", "hihihi"),
+    new("(?P<x>hi)|(?P<x>bye)", "$x$x$x", "bye", "byebyebye"),
+    new("(?P<x>hi)|(?P<x>bye)", "$xyz", "hi", ""),
+    new("(?P<x>hi)|(?P<x>bye)", "${x}yz", "hi", "hiyz"),
+    new("(?P<x>hi)|(?P<x>bye)", "hello $$x", "hi", "hello $x"),
+    new("a+", "${oops", "aaa", "${oops"),
+    new("a+", "$$", "aaa", "$"),
+    new("a+", "$", "aaa", "$"),
 
     // Substitution when subexpression isn't found
-    new("(x)?"u8, "$1"u8, "123"u8, "123"u8),
-    new("abc"u8, "$1"u8, "123"u8, "123"u8),
+    new("(x)?", "$1", "123", "123"),
+    new("abc", "$1", "123", "123"),
 
     // Substitutions involving a (x){0}
-    new("(a)(b){0}(c)"u8, ".$1|$3."u8, "xacxacx"u8, "x.a|c.x.a|c.x"u8),
-    new("(a)(((b))){0}c"u8, ".$1."u8, "xacxacx"u8, "x.a.x.a.x"u8),
-    new("((a(b){0}){3}){5}(h)"u8, "y caramb$2"u8, "say aaaaaaaaaaaaaaaah"u8, "say ay caramba"u8),
-    new("((a(b){0}){3}){5}h"u8, "y caramb$2"u8, "say aaaaaaaaaaaaaaaah"u8, "say ay caramba"u8)
-}.slice();
+    new("(a)(b){0}(c)", ".$1|$3.", "xacxacx", "x.a|c.x.a|c.x"),
+    new("(a)(((b))){0}c", ".$1.", "xacxacx", "x.a.x.a.x"),
+    new("((a(b){0}){3}){5}(h)", "y caramb$2", "say aaaaaaaaaaaaaaaah", "say ay caramba"),
+    new("((a(b){0}){3}){5}h", "y caramb$2", "say aaaaaaaaaaaaaaaah", "say ay caramba")
+]);
 
-internal static slice<ReplaceTest> replaceLiteralTests = new ReplaceTest[]{
+internal static slice<ReplaceTest> replaceLiteralTests = slice<ReplaceTest>([
     // Substitutions
-    new("a+"u8, "($0)"u8, "banana"u8, "b($0)n($0)n($0)"u8),
-    new("a+"u8, "(${0})"u8, "banana"u8, "b(${0})n(${0})n(${0})"u8),
-    new("a+"u8, "(${0})$0"u8, "banana"u8, "b(${0})$0n(${0})$0n(${0})$0"u8),
-    new("a+"u8, "(${0})$0"u8, "banana"u8, "b(${0})$0n(${0})$0n(${0})$0"u8),
-    new("hello, (.+)"u8, "goodbye, ${1}"u8, "hello, world"u8, "goodbye, ${1}"u8),
-    new("hello, (?P<noun>.+)"u8, "goodbye, $noun!"u8, "hello, world"u8, "goodbye, $noun!"u8),
-    new("hello, (?P<noun>.+)"u8, "goodbye, ${noun}"u8, "hello, world"u8, "goodbye, ${noun}"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "$x$x$x"u8, "hi"u8, "$x$x$x"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "$x$x$x"u8, "bye"u8, "$x$x$x"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "$xyz"u8, "hi"u8, "$xyz"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "${x}yz"u8, "hi"u8, "${x}yz"u8),
-    new("(?P<x>hi)|(?P<x>bye)"u8, "hello $$x"u8, "hi"u8, "hello $$x"u8),
-    new("a+"u8, "${oops"u8, "aaa"u8, "${oops"u8),
-    new("a+"u8, "$$"u8, "aaa"u8, "$$"u8),
-    new("a+"u8, "$"u8, "aaa"u8, "$"u8)
-}.slice();
+    new("a+", "($0)", "banana", "b($0)n($0)n($0)"),
+    new("a+", "(${0})", "banana", "b(${0})n(${0})n(${0})"),
+    new("a+", "(${0})$0", "banana", "b(${0})$0n(${0})$0n(${0})$0"),
+    new("a+", "(${0})$0", "banana", "b(${0})$0n(${0})$0n(${0})$0"),
+    new("hello, (.+)", "goodbye, ${1}", "hello, world", "goodbye, ${1}"),
+    new("hello, (?P<noun>.+)", "goodbye, $noun!", "hello, world", "goodbye, $noun!"),
+    new("hello, (?P<noun>.+)", "goodbye, ${noun}", "hello, world", "goodbye, ${noun}"),
+    new("(?P<x>hi)|(?P<x>bye)", "$x$x$x", "hi", "$x$x$x"),
+    new("(?P<x>hi)|(?P<x>bye)", "$x$x$x", "bye", "$x$x$x"),
+    new("(?P<x>hi)|(?P<x>bye)", "$xyz", "hi", "$xyz"),
+    new("(?P<x>hi)|(?P<x>bye)", "${x}yz", "hi", "${x}yz"),
+    new("(?P<x>hi)|(?P<x>bye)", "hello $$x", "hi", "hello $$x"),
+    new("a+", "${oops", "aaa", "${oops"),
+    new("a+", "$$", "aaa", "$$"),
+    new("a+", "$", "aaa", "$")
+]);
 
 public partial struct ReplaceFuncTest {
     internal @string pattern;
@@ -284,53 +280,53 @@ public partial struct ReplaceFuncTest {
     internal @string input, output;
 }
 
-internal static slice<ReplaceFuncTest> replaceFuncTests = new ReplaceFuncTest[]{
-    new("[a-c]"u8, (@string s) => "x"u8 + s + "y"u8, "defabcdef"u8, "defxayxbyxcydef"u8),
-    new("[a-c]+"u8, (@string s) => "x"u8 + s + "y"u8, "defabcdef"u8, "defxabcydef"u8),
-    new("[a-c]*"u8, (@string s) => "x"u8 + s + "y"u8, "defabcdef"u8, "xydxyexyfxabcydxyexyfxy"u8)
-}.slice();
+internal static slice<ReplaceFuncTest> replaceFuncTests = slice<ReplaceFuncTest>([
+    new("[a-c]", (@string s) => "x"u8 + s + "y"u8, "defabcdef", "defxayxbyxcydef"),
+    new("[a-c]+", (@string s) => "x"u8 + s + "y"u8, "defabcdef", "defxabcydef"),
+    new("[a-c]*", (@string s) => "x"u8 + s + "y"u8, "defabcdef", "xydxyexyfxabcydxyexyfxy")
+]);
 
-public static void TestReplaceAll(ж<testing.T> Ꮡt) {
+public static void TestReplaceAll(ж<testing.T> t) {
     foreach (var (_, tc) in replaceTests) {
         var (re, err) = Compile(tc.pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Unexpected error compiling %q: %v"u8, tc.pattern, err);
+        if (err != nil) {
+            t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err);
             continue;
         }
         @string actual = re.ReplaceAllString(tc.input, tc.replacement);
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceAllString(%q,%q) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceAllString(%q,%q) = %q; want %q",
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
         actual = (@string)re.ReplaceAll(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceAll(%q,%q) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceAll(%q,%q) = %q; want %q",
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
     }
 }
 
-public static void TestReplaceAllLiteral(ж<testing.T> Ꮡt) {
+public static void TestReplaceAllLiteral(ж<testing.T> t) {
     // Run ReplaceAll tests that do not have $ expansions.
     foreach (var (_, tc) in replaceTests) {
-        if (strings.Contains(tc.replacement, "$"u8)) {
+        if (strings.Contains(tc.replacement, "$")) {
             continue;
         }
         var (re, err) = Compile(tc.pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Unexpected error compiling %q: %v"u8, tc.pattern, err);
+        if (err != nil) {
+            t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err);
             continue;
         }
         @string actual = re.ReplaceAllLiteralString(tc.input, tc.replacement);
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceAllLiteralString(%q,%q) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceAllLiteralString(%q,%q) = %q; want %q",
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
         actual = (@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q",
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
     }
@@ -338,44 +334,44 @@ public static void TestReplaceAllLiteral(ж<testing.T> Ꮡt) {
     // Run literal-specific tests.
     foreach (var (_, tc) in replaceLiteralTests) {
         var (re, err) = Compile(tc.pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Unexpected error compiling %q: %v"u8, tc.pattern, err);
+        if (err != nil) {
+            t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err);
             continue;
         }
         @string actual = re.ReplaceAllLiteralString(tc.input, tc.replacement);
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceAllLiteralString(%q,%q) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceAllLiteralString(%q,%q) = %q; want %q",
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
         // now try bytes
         actual = (@string)re.ReplaceAllLiteral(slice<byte>(tc.input), slice<byte>(tc.replacement));
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceAllLiteral(%q,%q) = %q; want %q",
                 tc.pattern, tc.input, tc.replacement, actual, tc.output);
         }
     }
 }
 
-public static void TestReplaceAllFunc(ж<testing.T> Ꮡt) {
+public static void TestReplaceAllFunc(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in replaceFuncTests) {
         ref var tc = ref heap(new ReplaceFuncTest(), out var Ꮡtc);
         tc = vᴛ1;
 
         var (re, err) = Compile(tc.pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Unexpected error compiling %q: %v"u8, tc.pattern, err);
+        if (err != nil) {
+            t.Errorf("Unexpected error compiling %q: %v", tc.pattern, err);
             continue;
         }
         @string actual = re.ReplaceAllStringFunc(tc.input, tc.replacement);
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q",
                 tc.pattern, tc.input, actual, tc.output);
         }
         // now try bytes
         var tcʗ1 = tc;
         actual = (@string)re.ReplaceAllFunc(slice<byte>(tc.input), (slice<byte> s) => slice<byte>(tcʗ1.replacement((@string)s)));
         if (actual != tc.output) {
-            Ꮡt.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q"u8,
+            t.Errorf("%q.ReplaceFunc(%q,fn) = %q; want %q",
                 tc.pattern, tc.input, actual, tc.output);
         }
     }
@@ -386,41 +382,43 @@ public partial struct MetaTest {
     internal bool isLiteral;
 }
 
-internal static slice<MetaTest> metaTests = new MetaTest[]{
-    new(@""u8, @""u8, @""u8, true),
-    new(@"foo"u8, @"foo"u8, @"foo"u8, true),
-    new(@"日本語+"u8, @"日本語\+"u8, @"日本語"u8, false),
-    new(@"foo\.\$"u8, @"foo\\\.\\\$"u8, @"foo.$"u8, true), // has meta but no operator
-    new(@"foo.\$"u8, @"foo\.\\\$"u8, @"foo"u8, false), // has escaped operators and real operators
-    new(@"!@#$%^&*()_+-=[{]}\|,<.>/?~"u8, @"!@#\$%\^&\*\(\)_\+-=\[\{\]\}\\\|,<\.>/\?~"u8, @"!@#"u8, false)
-}.slice();
+internal static slice<MetaTest> metaTests = slice<MetaTest>([
+    new(@"", @"", @"", true),
+    new(@"foo", @"foo", @"foo", true),
+    new(@"日本語+", @"日本語\+", @"日本語", false),
+    new(@"foo\.\$", @"foo\\\.\\\$", @"foo.$", true), // has meta but no operator
+    new(@"foo.\$", @"foo\.\\\$", @"foo", false),     // has escaped operators and real operators
+    new(@"!@#$%^&*()_+-=[{]}\|,<.>/?~", @"!@#\$%\^&\*\(\)_\+-=\[\{\]\}\\\|,<\.>/\?~", @"!@#", false)
+]);
 
-internal static slice<MetaTest> literalPrefixTests = new MetaTest[]{
+internal static slice<MetaTest> literalPrefixTests = slice<MetaTest>([
     // See golang.org/issue/11175.
     // output is unused.
-    new(@"^0^0$"u8, @""u8, @"0"u8, false),
-    new(@"^0^"u8, @""u8, @""u8, false),
-    new(@"^0$"u8, @""u8, @"0"u8, true),
-    new(@"$0^"u8, @""u8, @""u8, false),
-    new(@"$0$"u8, @""u8, @""u8, false),
-    new(@"^^0$$"u8, @""u8, @""u8, false),
-    new(@"^$^$"u8, @""u8, @""u8, false),
-    new(@"$$0^^"u8, @""u8, @""u8, false),
-    new(@"a\x{fffd}b"u8, @""u8, @"a"u8, false),
-    new(@"\x{fffd}b"u8, @""u8, @""u8, false),
-    new("\ufffd"u8, @""u8, @""u8, false)
-}.slice();
+    new(@"^0^0$", @"", @"0", false),
+    new(@"^0^", @"", @"", false),
+    new(@"^0$", @"", @"0", true),
+    new(@"$0^", @"", @"", false),
+    new(@"$0$", @"", @"", false),
+    new(@"^^0$$", @"", @"", false),
+    new(@"^$^$", @"", @"", false),
+    new(@"$$0^^", @"", @"", false),
+    new(@"a\x{fffd}b", @"", @"a", false),
+    new(@"\x{fffd}b", @"", @"", false),
+    new("\ufffd", @"", @"", false)
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xyzˢ = "xyz"u8;
-internal static readonly @string abcxyzdefˢ = "abcxyzdef"u8;
+internal static ref readonly @string xyzˢ => ref xyzˢᵇ;
+private static readonly @string xyzˢᵇ = "xyz"u8;
+internal static ref readonly @string abcxyzdefˢ => ref abcxyzdefˢᵇ;
+private static readonly @string abcxyzdefˢᵇ = "abcxyzdef"u8;
 
-public static void TestQuoteMeta(ж<testing.T> Ꮡt) {
+public static void TestQuoteMeta(ж<testing.T> t) {
     foreach (var (_, tc) in metaTests) {
         // Verify that QuoteMeta returns the expected string.
         @string quoted = QuoteMeta(tc.pattern);
         if (quoted != tc.output) {
-            Ꮡt.Errorf("QuoteMeta(`%s`) = `%s`; want `%s`"u8,
+            t.Errorf("QuoteMeta(`%s`) = `%s`; want `%s`",
                 tc.pattern, quoted, tc.output);
             continue;
         }
@@ -429,8 +427,8 @@ public static void TestQuoteMeta(ж<testing.T> Ꮡt) {
         // by Compile -- i.e. that it matches the original, unquoted string.
         if (tc.pattern != ""u8) {
             var (re, err) = Compile(quoted);
-            if (err != default!) {
-                Ꮡt.Errorf("Unexpected error compiling QuoteMeta(`%s`): %v"u8, tc.pattern, err);
+            if (err != nil) {
+                t.Errorf("Unexpected error compiling QuoteMeta(`%s`): %v", tc.pattern, err);
                 continue;
             }
             @string src = "abc"u8 + tc.pattern + "def"u8;
@@ -438,25 +436,23 @@ public static void TestQuoteMeta(ж<testing.T> Ꮡt) {
             @string replaced = re.ReplaceAllString(src, repl);
             @string expected = abcxyzdefˢ;
             if (replaced != expected) {
-                Ꮡt.Errorf("QuoteMeta(`%s`).Replace(`%s`,`%s`) = `%s`; want `%s`"u8,
+                t.Errorf("QuoteMeta(`%s`).Replace(`%s`,`%s`) = `%s`; want `%s`",
                     tc.pattern, src, repl, replaced, expected);
             }
         }
     }
 }
 
-public static void TestLiteralPrefix(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestLiteralPrefix(ж<testing.T> t) {
     foreach (var (_, tc) in appendꓸꓸꓸ(metaTests, literalPrefixTests)) {
         // Literal method needs to scan the pattern.
         var re = MustCompile(tc.pattern);
         var (str, complete) = re.LiteralPrefix();
         if (complete != tc.isLiteral) {
-            Ꮡt.Errorf("LiteralPrefix(`%s`) = %t; want %t"u8, tc.pattern, complete, tc.isLiteral);
+            t.Errorf("LiteralPrefix(`%s`) = %t; want %t", tc.pattern, complete, tc.isLiteral);
         }
         if (str != tc.literal) {
-            Ꮡt.Errorf("LiteralPrefix(`%s`) = `%s`; want `%s`"u8, tc.pattern, str, tc.literal);
+            t.Errorf("LiteralPrefix(`%s`) = `%s`; want `%s`", tc.pattern, str, tc.literal);
         }
     }
 }
@@ -473,46 +469,46 @@ internal partial struct subexpCase {
     internal slice<subexpIndex> indices;
 }
 
-internal static slice<subexpIndex> emptySubexpIndices = new subexpIndex[]{new(""u8, -1), new("missing"u8, -1)}.slice();
+internal static slice<subexpIndex> emptySubexpIndices = slice<subexpIndex>([new("", -1), new("missing", -1)]);
 
-internal static slice<subexpCase> subexpCases = new subexpCase[]{
-    new(@""u8, 0, default!, emptySubexpIndices),
-    new(@".*"u8, 0, default!, emptySubexpIndices),
-    new(@"abba"u8, 0, default!, emptySubexpIndices),
-    new(@"ab(b)a"u8, 1, new @string[]{""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"ab(.*)a"u8, 1, new @string[]{""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"(.*)ab(.*)a"u8, 2, new @string[]{""u8, ""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"(.*)(ab)(.*)a"u8, 3, new @string[]{""u8, ""u8, ""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"(.*)((a)b)(.*)a"u8, 4, new @string[]{""u8, ""u8, ""u8, ""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"(.*)(\(ab)(.*)a"u8, 3, new @string[]{""u8, ""u8, ""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"(.*)(\(a\)b)(.*)a"u8, 3, new @string[]{""u8, ""u8, ""u8, ""u8}.slice(), emptySubexpIndices),
-    new(@"(?P<foo>.*)(?P<bar>(a)b)(?P<foo>.*)a"u8, 4, new @string[]{""u8, "foo"u8, "bar"u8, ""u8, "foo"u8}.slice(), new subexpIndex[]{new(""u8, -1), new("missing"u8, -1), new("foo"u8, 1), new("bar"u8, 2)}.slice())
-}.slice();
+internal static slice<subexpCase> subexpCases = slice<subexpCase>([
+    new(@"", 0, default, emptySubexpIndices),
+    new(@".*", 0, default, emptySubexpIndices),
+    new(@"abba", 0, default, emptySubexpIndices),
+    new(@"ab(b)a", 1, slice<@string>(["", ""]), emptySubexpIndices),
+    new(@"ab(.*)a", 1, slice<@string>(["", ""]), emptySubexpIndices),
+    new(@"(.*)ab(.*)a", 2, slice<@string>(["", "", ""]), emptySubexpIndices),
+    new(@"(.*)(ab)(.*)a", 3, slice<@string>(["", "", "", ""]), emptySubexpIndices),
+    new(@"(.*)((a)b)(.*)a", 4, slice<@string>(["", "", "", "", ""]), emptySubexpIndices),
+    new(@"(.*)(\(ab)(.*)a", 3, slice<@string>(["", "", "", ""]), emptySubexpIndices),
+    new(@"(.*)(\(a\)b)(.*)a", 3, slice<@string>(["", "", "", ""]), emptySubexpIndices),
+    new(@"(?P<foo>.*)(?P<bar>(a)b)(?P<foo>.*)a", 4, slice<@string>(["", "foo", "bar", "", "foo"]), slice<subexpIndex>([new("", -1), new("missing", -1), new("foo", 1), new("bar", 2)]))
+]);
 
-public static void TestSubexp(ж<testing.T> Ꮡt) {
+public static void TestSubexp(ж<testing.T> t) {
     foreach (var (_, c) in subexpCases) {
         var re = MustCompile(c.input);
         nint n = re.NumSubexp();
         if (n != c.num) {
-            Ꮡt.Errorf("%q: NumSubexp = %d, want %d"u8, c.input, n, c.num);
+            t.Errorf("%q: NumSubexp = %d, want %d", c.input, n, c.num);
             continue;
         }
         var names = re.SubexpNames();
         if (len(names) != 1 + n) {
-            Ꮡt.Errorf("%q: len(SubexpNames) = %d, want %d"u8, c.input, len(names), n);
+            t.Errorf("%q: len(SubexpNames) = %d, want %d", c.input, len(names), n);
             continue;
         }
-        if (c.names != default!) {
+        if (c.names != nil) {
             for (nint i = 0; i < 1 + n; i++) {
                 if (names[i] != c.names[i]) {
-                    Ꮡt.Errorf("%q: SubexpNames[%d] = %q, want %q"u8, c.input, i, names[i], c.names[i]);
+                    t.Errorf("%q: SubexpNames[%d] = %q, want %q", c.input, i, names[i], c.names[i]);
                 }
             }
         }
         foreach (var (_, subexp) in c.indices) {
             nint index = re.SubexpIndex(subexp.name);
             if (index != subexp.index) {
-                Ꮡt.Errorf("%q: SubexpIndex(%q) = %d, want %d"u8, c.input, subexp.name, index, subexp.index);
+                t.Errorf("%q: SubexpIndex(%q) = %d, want %d", c.input, subexp.name, index, subexp.index);
             }
         }
     }
@@ -524,49 +520,49 @@ partial struct splitTestsᴛ1 /*dyn*/ {
     internal nint n;
     internal slice<@string> @out;
 }
-internal static slice<splitTestsᴛ1> splitTests = new splitTestsᴛ1[]{
-    new("foo:and:bar"u8, ":"u8, -1, new @string[]{"foo"u8, "and"u8, "bar"u8}.slice()),
-    new("foo:and:bar"u8, ":"u8, 1, new @string[]{"foo:and:bar"u8}.slice()),
-    new("foo:and:bar"u8, ":"u8, 2, new @string[]{"foo"u8, "and:bar"u8}.slice()),
-    new("foo:and:bar"u8, "foo"u8, -1, new @string[]{""u8, ":and:bar"u8}.slice()),
-    new("foo:and:bar"u8, "bar"u8, -1, new @string[]{"foo:and:"u8, ""u8}.slice()),
-    new("foo:and:bar"u8, "baz"u8, -1, new @string[]{"foo:and:bar"u8}.slice()),
-    new("baabaab"u8, "a"u8, -1, new @string[]{"b"u8, ""u8, "b"u8, ""u8, "b"u8}.slice()),
-    new("baabaab"u8, "a*"u8, -1, new @string[]{"b"u8, "b"u8, "b"u8}.slice()),
-    new("baabaab"u8, "ba*"u8, -1, new @string[]{""u8, ""u8, ""u8, ""u8}.slice()),
-    new("foobar"u8, "f*b*"u8, -1, new @string[]{""u8, "o"u8, "o"u8, "a"u8, "r"u8}.slice()),
-    new("foobar"u8, "f+.*b+"u8, -1, new @string[]{""u8, "ar"u8}.slice()),
-    new("foobooboar"u8, "o{2}"u8, -1, new @string[]{"f"u8, "b"u8, "boar"u8}.slice()),
-    new("a,b,c,d,e,f"u8, ","u8, 3, new @string[]{"a"u8, "b"u8, "c,d,e,f"u8}.slice()),
-    new("a,b,c,d,e,f"u8, ","u8, 0, default!),
-    new(","u8, ","u8, -1, new @string[]{""u8, ""u8}.slice()),
-    new(",,,"u8, ","u8, -1, new @string[]{""u8, ""u8, ""u8, ""u8}.slice()),
-    new(""u8, ","u8, -1, new @string[]{""u8}.slice()),
-    new(""u8, ".*"u8, -1, new @string[]{""u8}.slice()),
-    new(""u8, ".+"u8, -1, new @string[]{""u8}.slice()),
-    new(""u8, ""u8, -1, new @string[]{}.slice()),
-    new("foobar"u8, ""u8, -1, new @string[]{"f"u8, "o"u8, "o"u8, "b"u8, "a"u8, "r"u8}.slice()),
-    new("abaabaccadaaae"u8, "a*"u8, 5, new @string[]{""u8, "b"u8, "b"u8, "c"u8, "cadaaae"u8}.slice()),
-    new(":x:y:z:"u8, ":"u8, -1, new @string[]{""u8, "x"u8, "y"u8, "z"u8, ""u8}.slice())
-}.slice();
+internal static slice<splitTestsᴛ1> splitTests = slice<splitTestsᴛ1>([
+    new("foo:and:bar", ":", -1, slice<@string>(["foo", "and", "bar"])),
+    new("foo:and:bar", ":", 1, slice<@string>(["foo:and:bar"])),
+    new("foo:and:bar", ":", 2, slice<@string>(["foo", "and:bar"])),
+    new("foo:and:bar", "foo", -1, slice<@string>(["", ":and:bar"])),
+    new("foo:and:bar", "bar", -1, slice<@string>(["foo:and:", ""])),
+    new("foo:and:bar", "baz", -1, slice<@string>(["foo:and:bar"])),
+    new("baabaab", "a", -1, slice<@string>(["b", "", "b", "", "b"])),
+    new("baabaab", "a*", -1, slice<@string>(["b", "b", "b"])),
+    new("baabaab", "ba*", -1, slice<@string>(["", "", "", ""])),
+    new("foobar", "f*b*", -1, slice<@string>(["", "o", "o", "a", "r"])),
+    new("foobar", "f+.*b+", -1, slice<@string>(["", "ar"])),
+    new("foobooboar", "o{2}", -1, slice<@string>(["f", "b", "boar"])),
+    new("a,b,c,d,e,f", ",", 3, slice<@string>(["a", "b", "c,d,e,f"])),
+    new("a,b,c,d,e,f", ",", 0, default),
+    new(",", ",", -1, slice<@string>(["", ""])),
+    new(",,,", ",", -1, slice<@string>(["", "", "", ""])),
+    new("", ",", -1, slice<@string>([""])),
+    new("", ".*", -1, slice<@string>([""])),
+    new("", ".+", -1, slice<@string>([""])),
+    new("", "", -1, slice<@string>([])),
+    new("foobar", "", -1, slice<@string>(["f", "o", "o", "b", "a", "r"])),
+    new("abaabaccadaaae", "a*", 5, slice<@string>(["", "b", "b", "c", "cadaaae"])),
+    new(":x:y:z:", ":", -1, slice<@string>(["", "x", "y", "z", ""]))
+]);
 
-public static void TestSplit(ж<testing.T> Ꮡt) {
+public static void TestSplit(ж<testing.T> t) {
     foreach (var (i, test) in splitTests) {
         var (re, err) = Compile(test.r);
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: %q: compile error: %s"u8, i, test.r, err.Error());
+        if (err != nil) {
+            t.Errorf("#%d: %q: compile error: %s", i, test.r, err.Error());
             continue;
         }
 
         var split = re.Split(test.s, test.n);
         if (!slices.Equal<slice<@string>, @string>(split, test.@out)) {
-            Ꮡt.Errorf("#%d: %q: got %q; want %q"u8, i, test.r, split, test.@out);
+            t.Errorf("#%d: %q: got %q; want %q", i, test.r, split, test.@out);
         }
 
         if (QuoteMeta(test.r) == test.r) {
             var strsplit = strings.SplitN(test.s, test.r, test.n);
             if (!slices.Equal<slice<@string>, @string>(split, strsplit)) {
-                Ꮡt.Errorf("#%d: Split(%q, %q, %d): regexp vs strings mismatch\nregexp=%q\nstrings=%q"u8, i, test.s, test.r, test.n, split, strsplit);
+                t.Errorf("#%d: Split(%q, %q, %d): regexp vs strings mismatch\nregexp=%q\nstrings=%q", i, test.s, test.r, test.n, split, strsplit);
             }
         }
     }
@@ -578,69 +574,69 @@ internal partial struct TestParseAndCompile_type /*dyn*/ {
 }
 
 // The following sequence of Match calls used to panic. See issue #12980.
-public static void TestParseAndCompile(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
+public static void TestParseAndCompile(ж<testing.T> t) {
+    @string expr = "a$";
+    @string s = "a\nb";
 
-    @string expr = "a$"u8;
-    @string s = "a\nb"u8;
-
-    foreach (var (i, tc) in new TestParseAndCompile_type[]{
+    foreach (var (i, tc) in slice<TestParseAndCompile_type>([
         new((syntax.Flags)(syntax.Perl | syntax.OneLine), false),
         new((syntax.Flags)(syntax.Perl & ~syntax.OneLine), true)
-    }.slice()) {
+    ])) {
         var (parsed, err) = syntax.Parse(expr, tc.reFlags);
-        if (err != default!) {
-            Ꮡt.Fatalf("%d: parse: %v"u8, i, err);
+        if (err != nil) {
+            t.Fatalf("%d: parse: %v", i, err);
         }
         (var re, err) = Compile(parsed.String());
-        if (err != default!) {
-            Ꮡt.Fatalf("%d: compile: %v"u8, i, err);
+        if (err != nil) {
+            t.Fatalf("%d: compile: %v", i, err);
         }
         {
             var Δmatch = re.MatchString(s); if (Δmatch != tc.expMatch) {
-                Ꮡt.Errorf("%d: %q.MatchString(%q)=%t; expected=%t"u8, i, re.OrTypedNil(), s, Δmatch, tc.expMatch);
+                t.Errorf("%d: %q.MatchString(%q)=%t; expected=%t", i, re.OrTypedNil(), s, Δmatch, tc.expMatch);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x11000Y11000ˢ = @"^x{1,1000}y{1,1000}$"u8;
+internal static ref readonly @string x11000Y11000ˢ => ref x11000Y11000ˢᵇ;
+private static readonly @string x11000Y11000ˢᵇ = @"^x{1,1000}y{1,1000}$"u8;
 
 // Check that one-pass cutoff does trigger.
-public static void TestOnePassCutoff(ж<testing.T> Ꮡt) {
+public static void TestOnePassCutoff(ж<testing.T> t) {
     var (re, err) = syntax.Parse(x11000Y11000ˢ, syntax.Perl);
-    if (err != default!) {
-        Ꮡt.Fatalf("parse: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("parse: %v", err);
     }
     (var p, err) = syntax.Compile(re.Simplify());
-    if (err != default!) {
-        Ꮡt.Fatalf("compile: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("compile: %v", err);
     }
     if (compileOnePass(ref (p).DerefOrNull()) != nil) {
-        Ꮡt.Fatalf("makeOnePass succeeded; wanted nil"u8);
+        t.Fatalf("makeOnePass succeeded; wanted nil");
     }
 }
 
 // Check that the same machine can be used with the standard matcher
 // and then the backtracker when there are no captures.
-public static void TestSwitchBacktrack(ж<testing.T> Ꮡt) {
-    var re = MustCompile(@"a|b"u8);
+public static void TestSwitchBacktrack(ж<testing.T> t) {
+    var re = MustCompile(@"a|b");
     var @long = new slice<byte>(maxBacktrackVector + 1);
 
     // The following sequence of Match calls used to panic. See issue #10319.
-    re.Match(@long); // triggers standard matcher
+    re.Match(@long);      // triggers standard matcher
     re.Match(@long[..1]); // triggers backtracker
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aaabbˢ = "aaabb"u8;
+internal static ref readonly @string aaabbˢ => ref aaabbˢᵇ;
+private static readonly @string aaabbˢᵇ = "aaabb"u8;
 
 public static void BenchmarkFind(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var re = MustCompile("a+b+"u8);
+    var re = MustCompile("a+b+");
     @string wantSubs = aaabbˢ;
     var s = slice<byte>("acbb" + wantSubs + "dd");
     b.StartTimer();
@@ -648,7 +644,7 @@ public static void BenchmarkFind(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         var subs = re.Find(s);
         if (((sstring)subs) != wantSubs) {
-            Ꮡb.Fatalf("Find(%q) = %q; want %q"u8, s, subs, wantSubs);
+            Ꮡb.Fatalf("Find(%q) = %q; want %q", s, subs, wantSubs);
         }
     }
 }
@@ -656,14 +652,14 @@ public static void BenchmarkFind(ж<testing.B> Ꮡb) {
 public static void BenchmarkFindAllNoMatches(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var re = MustCompile("a+b+"u8);
+    var re = MustCompile("a+b+");
     var s = slice<byte>("acddee"u8);
     b.ReportAllocs();
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         var all = re.FindAll(s, -1);
-        if (all != default!) {
-            Ꮡb.Fatalf("FindAll(%q) = %q; want nil"u8, s, all);
+        if (all != nil) {
+            Ꮡb.Fatalf("FindAll(%q) = %q; want nil", s, all);
         }
     }
 }
@@ -672,7 +668,7 @@ public static void BenchmarkFindString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
-    var re = MustCompile("a+b+"u8);
+    var re = MustCompile("a+b+");
     @string wantSubs = aaabbˢ;
     @string s = "acbb"u8 + wantSubs + "dd"u8;
     b.StartTimer();
@@ -680,13 +676,14 @@ public static void BenchmarkFindString(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         @string subs = re.FindString(s);
         if (subs != wantSubs) {
-            Ꮡb.Fatalf("FindString(%q) = %q; want %q"u8, s, subs, wantSubs);
+            Ꮡb.Fatalf("FindString(%q) = %q; want %q", s, subs, wantSubs);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aABBˢ = "a(a+b+)b"u8;
+internal static ref readonly @string aABBˢ => ref aABBˢᵇ;
+private static readonly @string aABBˢᵇ = "a(a+b+)b"u8;
 internal static readonly object aabˢ = (@string)"aab"u8;
 
 public static void BenchmarkFindSubmatch(ж<testing.B> Ꮡb) {
@@ -701,10 +698,10 @@ public static void BenchmarkFindSubmatch(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         var subs = re.FindSubmatch(s);
         if (((sstring)subs[0]) != wantSubs) {
-            Ꮡb.Fatalf("FindSubmatch(%q)[0] = %q; want %q"u8, s, subs[0], wantSubs);
+            Ꮡb.Fatalf("FindSubmatch(%q)[0] = %q; want %q", s, subs[0], wantSubs);
         }
         if (((sstring)subs[1]) != "aab"u8) {
-            Ꮡb.Fatalf("FindSubmatch(%q)[1] = %q; want %q"u8, s, subs[1], aabˢ);
+            Ꮡb.Fatalf("FindSubmatch(%q)[1] = %q; want %q", s, subs[1], aabˢ);
         }
     }
 }
@@ -721,10 +718,10 @@ public static void BenchmarkFindStringSubmatch(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         var subs = re.FindStringSubmatch(s);
         if (subs[0] != wantSubs) {
-            Ꮡb.Fatalf("FindStringSubmatch(%q)[0] = %q; want %q"u8, s, subs[0], wantSubs);
+            Ꮡb.Fatalf("FindStringSubmatch(%q)[0] = %q; want %q", s, subs[0], wantSubs);
         }
         if (subs[1] != "aab") {
-            Ꮡb.Fatalf("FindStringSubmatch(%q)[1] = %q; want %q"u8, s, subs[1], aabˢ);
+            Ꮡb.Fatalf("FindStringSubmatch(%q)[1] = %q; want %q", s, subs[1], aabˢ);
         }
     }
 }
@@ -732,13 +729,13 @@ public static void BenchmarkFindStringSubmatch(ж<testing.B> Ꮡb) {
 public static void BenchmarkLiteral(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string x = strings.Repeat("x"u8, 50) + "y"u8;
+    @string x = strings.Repeat("x", 50) + "y"u8;
     b.StopTimer();
-    var re = MustCompile("y"u8);
+    var re = MustCompile("y");
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         if (!re.MatchString(x)) {
-            Ꮡb.Fatalf("no match!"u8);
+            Ꮡb.Fatalf("no match!");
         }
     }
 }
@@ -746,20 +743,22 @@ public static void BenchmarkLiteral(ж<testing.B> Ꮡb) {
 public static void BenchmarkNotLiteral(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string x = strings.Repeat("x"u8, 50) + "y"u8;
+    @string x = strings.Repeat("x", 50) + "y"u8;
     b.StopTimer();
-    var re = MustCompile(".y"u8);
+    var re = MustCompile(".y");
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         if (!re.MatchString(x)) {
-            Ꮡb.Fatalf("no match!"u8);
+            Ꮡb.Fatalf("no match!");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xxxxˢ = "xxxx"u8;
-internal static readonly @string abcdwˢ = "[abcdw]"u8;
+internal static ref readonly @string xxxxˢ => ref xxxxˢᵇ;
+private static readonly @string xxxxˢᵇ = "xxxx"u8;
+internal static ref readonly @string abcdwˢ => ref abcdwˢᵇ;
+private static readonly @string abcdwˢᵇ = "[abcdw]"u8;
 
 public static void BenchmarkMatchClass(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -770,13 +769,14 @@ public static void BenchmarkMatchClass(ж<testing.B> Ꮡb) {
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         if (!re.MatchString(x)) {
-            Ꮡb.Fatalf("no match!"u8);
+            Ꮡb.Fatalf("no match!");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bbbbˢ = "bbbb"u8;
+internal static ref readonly @string bbbbˢ => ref bbbbˢᵇ;
+private static readonly @string bbbbˢᵇ = "bbbb"u8;
 
 public static void BenchmarkMatchClass_InRange(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -785,22 +785,23 @@ public static void BenchmarkMatchClass_InRange(ж<testing.B> Ꮡb) {
     // 'b' is between 'a' and 'c', so the charclass
     // range checking is no help here.
     @string x = strings.Repeat(bbbbˢ, 20) + "c"u8;
-    var re = MustCompile("[ac]"u8);
+    var re = MustCompile("[ac]");
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         if (!re.MatchString(x)) {
-            Ꮡb.Fatalf("no match!"u8);
+            Ꮡb.Fatalf("no match!");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cjrwˢ = "[cjrw]"u8;
+internal static ref readonly @string cjrwˢ => ref cjrwˢᵇ;
+private static readonly @string cjrwˢᵇ = "[cjrw]"u8;
 
 public static void BenchmarkReplaceAll(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string x = "abcdefghijklmnopqrstuvwxyz"u8;
+    @string x = "abcdefghijklmnopqrstuvwxyz";
     b.StopTimer();
     var re = MustCompile(cjrwˢ);
     b.StartTimer();
@@ -810,7 +811,8 @@ public static void BenchmarkReplaceAll(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zbcDEˢ = "^zbc(d|e)"u8;
+internal static ref readonly @string zbcDEˢ => ref zbcDEˢᵇ;
+private static readonly @string zbcDEˢᵇ = "^zbc(d|e)"u8;
 
 public static void BenchmarkAnchoredLiteralShortNonMatch(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -840,7 +842,8 @@ public static void BenchmarkAnchoredLiteralLongNonMatch(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bcDEˢ = "^.bc(d|e)"u8;
+internal static ref readonly @string bcDEˢ => ref bcDEˢᵇ;
+private static readonly @string bcDEˢᵇ = "^.bc(d|e)"u8;
 
 public static void BenchmarkAnchoredShortMatch(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -870,7 +873,8 @@ public static void BenchmarkAnchoredLongMatch(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bcDEˢ2 = "^.bc(d|e)*$"u8;
+internal static ref readonly @string bcDEˢ2 => ref bcDEˢ2ᵇ;
+private static readonly @string bcDEˢ2ᵇ = "^.bc(d|e)*$"u8;
 
 public static void BenchmarkOnePassShortA(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -885,7 +889,8 @@ public static void BenchmarkOnePassShortA(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bcDEˢ3 = ".bc(d|e)*$"u8;
+internal static ref readonly @string bcDEˢ3 => ref bcDEˢ3ᵇ;
+private static readonly @string bcDEˢ3ᵇ = ".bc(d|e)*$"u8;
 
 public static void BenchmarkNotOnePassShortA(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -900,7 +905,8 @@ public static void BenchmarkNotOnePassShortA(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bcDEˢ4 = "^.bc(?:d|e)*$"u8;
+internal static ref readonly @string bcDEˢ4 => ref bcDEˢ4ᵇ;
+private static readonly @string bcDEˢ4ᵇ = "^.bc(?:d|e)*$"u8;
 
 public static void BenchmarkOnePassShortB(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -915,7 +921,8 @@ public static void BenchmarkOnePassShortB(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bcDEˢ5 = ".bc(?:d|e)*$"u8;
+internal static ref readonly @string bcDEˢ5 => ref bcDEˢ5ᵇ;
+private static readonly @string bcDEˢ5ᵇ = ".bc(?:d|e)*$"u8;
 
 public static void BenchmarkNotOnePassShortB(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -934,7 +941,7 @@ public static void BenchmarkOnePassLongPrefix(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var x = slice<byte>("abcdefghijklmnopqrstuvwxyz"u8);
-    var re = MustCompile("^abcdefghijklmnopqrstuvwxyz.*$"u8);
+    var re = MustCompile("^abcdefghijklmnopqrstuvwxyz.*$");
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         re.Match(x);
@@ -946,7 +953,7 @@ public static void BenchmarkOnePassLongNotPrefix(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var x = slice<byte>("abcdefghijklmnopqrstuvwxyz"u8);
-    var re = MustCompile("^.bcdefghijklmnopqrstuvwxyz.*$"u8);
+    var re = MustCompile("^.bcdefghijklmnopqrstuvwxyz.*$");
     b.StartTimer();
     for (nint i = 0; i < b.N; i++) {
         re.Match(x);
@@ -954,7 +961,8 @@ public static void BenchmarkOnePassLongNotPrefix(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooBaRBazˢ = "foo (ba+r)? baz"u8;
+internal static ref readonly @string fooBaRBazˢ => ref fooBaRBazˢᵇ;
+private static readonly @string fooBaRBazˢᵇ = "foo (ba+r)? baz"u8;
 
 public static void BenchmarkMatchParallelShared(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -1010,7 +1018,7 @@ public static void BenchmarkQuoteMetaAll(ж<testing.B> Ꮡb) {
 public static void BenchmarkQuoteMetaNone(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string s = "abcdefghijklmnopqrstuvwxyz"u8;
+    @string s = "abcdefghijklmnopqrstuvwxyz";
     b.SetBytes((int64)len(s));
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -1021,23 +1029,23 @@ public static void BenchmarkQuoteMetaNone(ж<testing.B> Ꮡb) {
 partial struct compileBenchDataᴛ1 /*dyn*/ {
     internal @string name, re;
 }
-internal static slice<compileBenchDataᴛ1> compileBenchData = new compileBenchDataᴛ1[]{
-    new("Onepass"u8, @"^a.[l-nA-Cg-j]?e$"u8),
-    new("Medium"u8, @"^((a|b|[d-z0-9])*(日){4,5}.)+$"u8),
-    new("Hard"u8, strings.Repeat(@"((abc)*|"u8, 50) + strings.Repeat(@")"u8, 50))
-}.slice();
+internal static slice<compileBenchDataᴛ1> compileBenchData = slice<compileBenchDataᴛ1>([
+    new("Onepass", @"^a.[l-nA-Cg-j]?e$"),
+    new("Medium", @"^((a|b|[d-z0-9])*(日){4,5}.)+$"),
+    new("Hard", strings.Repeat(@"((abc)*|", 50) + strings.Repeat(@")", 50))
+]);
 
-public static void BenchmarkCompile(ж<testing.B> Ꮡb) {
+public static void BenchmarkCompile(ж<testing.B> b) {
     foreach (var (_, vᴛ1) in compileBenchData) {
         ref var data = ref heap(new compileBenchDataᴛ1(), out var Ꮡdata);
         data = vᴛ1;
 
         var dataʗ1 = data;
-        Ꮡb.Run(data.name, (ж<testing.B> bΔ1) => {
+        b.Run(data.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 {
-                    var (_, err) = Compile(dataʗ1.re); if (err != default!) {
+                    var (_, err) = Compile(dataʗ1.re); if (err != nil) {
                         bΔ1.Fatal(err);
                     }
                 }
@@ -1047,29 +1055,31 @@ public static void BenchmarkCompile(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string aBCDˢ = "a.*b.*c.*d"u8;
-internal static readonly @string abcdefghijklmnˢ = "abcdefghijklmn"u8;
+internal static ref readonly @string aBCDˢ => ref aBCDˢᵇ;
+private static readonly @string aBCDˢᵇ = "a.*b.*c.*d"u8;
+internal static ref readonly @string abcdefghijklmnˢ => ref abcdefghijklmnˢᵇ;
+private static readonly @string abcdefghijklmnˢᵇ = "abcdefghijklmn"u8;
 
-public static void TestDeepEqual(ж<testing.T> Ꮡt) {
+public static void TestDeepEqual(ж<testing.T> t) {
     var re1 = MustCompile(aBCDˢ);
     var re2 = MustCompile(aBCDˢ);
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) { // has always been true, since Go 1.
-        Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
+        t.Errorf("DeepEqual(re1, re2) = false, want true");
     }
 
     re1.MatchString(abcdefghijklmnˢ);
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
-        Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
+        t.Errorf("DeepEqual(re1, re2) = false, want true");
     }
 
     re2.MatchString(abcdefghijklmnˢ);
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
-        Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
+        t.Errorf("DeepEqual(re1, re2) = false, want true");
     }
 
     re2.MatchString(strings.Repeat(abcdefghijklmnˢ, 100));
     if (!reflect.DeepEqual(re1.OrTypedNil(), re2.OrTypedNil())) {
-        Ꮡt.Errorf("DeepEqual(re1, re2) = false, want true"u8);
+        t.Errorf("DeepEqual(re1, re2) = false, want true");
     }
 }
 
@@ -1077,75 +1087,76 @@ partial struct minInputLenTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     internal nint min;
 }
-internal static slice<minInputLenTestsᴛ1> minInputLenTests = new minInputLenTestsᴛ1[]{
-    new(@""u8, 0),
-    new(@"a"u8, 1),
-    new(@"aa"u8, 2),
-    new(@"(aa)a"u8, 3),
-    new(@"(?:aa)a"u8, 3),
-    new(@"a?a"u8, 1),
-    new(@"(aaa)|(aa)"u8, 2),
-    new(@"(aa)+a"u8, 3),
-    new(@"(aa)*a"u8, 1),
-    new(@"(aa){3,5}"u8, 6),
-    new(@"[a-z]"u8, 1),
-    new(@"日"u8, 3)
-}.slice();
+internal static slice<minInputLenTestsᴛ1> minInputLenTests = slice<minInputLenTestsᴛ1>([
+    new(@"", 0),
+    new(@"a", 1),
+    new(@"aa", 2),
+    new(@"(aa)a", 3),
+    new(@"(?:aa)a", 3),
+    new(@"a?a", 1),
+    new(@"(aaa)|(aa)", 2),
+    new(@"(aa)+a", 3),
+    new(@"(aa)*a", 1),
+    new(@"(aa){3,5}", 6),
+    new(@"[a-z]", 1),
+    new(@"日", 3)
+]);
 
-public static void TestMinInputLen(ж<testing.T> Ꮡt) {
+public static void TestMinInputLen(ж<testing.T> t) {
     foreach (var (_, tt) in minInputLenTests) {
         var (re, _) = syntax.Parse(tt.Regexp, syntax.Perl);
         nint m = minInputLen(ref (re).DerefOrNull());
         if (m != tt.min) {
-            Ꮡt.Errorf("regexp %#q has minInputLen %d, should be %d"u8, tt.Regexp, m, tt.min);
+            t.Errorf("regexp %#q has minInputLen %d, should be %d", tt.Regexp, m, tt.min);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidPatternˢ = "invalid pattern"u8;
+internal static ref readonly @string invalidPatternˢ => ref invalidPatternˢᵇ;
+private static readonly @string invalidPatternˢᵇ = "invalid pattern"u8;
 internal static readonly object unexpectedSuccessˢ = (@string)"unexpected success"u8;
 
-public static void TestUnmarshalText(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalText(ж<testing.T> t) {
     var unmarshaled = @new<global::go.regexp_package.Regexp>();
     foreach (var i in range(goodRe)) {
-        var re = compileTest(Ꮡt, goodRe[i], ""u8);
+        var re = compileTest(t, goodRe[i], ""u8);
         var (marshaled, err) = re.MarshalText();
-        if (err != default!) {
-            Ꮡt.Errorf("regexp %#q failed to marshal: %s"u8, re.OrTypedNil(), err);
+        if (err != nil) {
+            t.Errorf("regexp %#q failed to marshal: %s", re.OrTypedNil(), err);
             continue;
         }
         {
-            var errΔ1 = unmarshaled.UnmarshalText(marshaled); if (errΔ1 != default!) {
-                Ꮡt.Errorf("regexp %#q failed to unmarshal: %s"u8, re.OrTypedNil(), errΔ1);
+            var errΔ1 = unmarshaled.UnmarshalText(marshaled); if (errΔ1 != nil) {
+                t.Errorf("regexp %#q failed to unmarshal: %s", re.OrTypedNil(), errΔ1);
                 continue;
             }
         }
         if (unmarshaled.String() != goodRe[i]) {
-            Ꮡt.Errorf("UnmarshalText returned unexpected value: %s"u8, unmarshaled.String());
+            t.Errorf("UnmarshalText returned unexpected value: %s", unmarshaled.String());
         }
 
         var buf = new slice<byte>(4, 32);
         (var marshalAppend, err) = re.AppendText(buf);
-        if (err != default!) {
-            Ꮡt.Errorf("regexp %#q failed to marshal: %s"u8, re.OrTypedNil(), err);
+        if (err != nil) {
+            t.Errorf("regexp %#q failed to marshal: %s", re.OrTypedNil(), err);
             continue;
         }
         marshalAppend = marshalAppend[4..];
         {
-            var errΔ2 = unmarshaled.UnmarshalText(marshalAppend); if (errΔ2 != default!) {
-                Ꮡt.Errorf("regexp %#q failed to unmarshal: %s"u8, re.OrTypedNil(), errΔ2);
+            var errΔ2 = unmarshaled.UnmarshalText(marshalAppend); if (errΔ2 != nil) {
+                t.Errorf("regexp %#q failed to unmarshal: %s", re.OrTypedNil(), errΔ2);
                 continue;
             }
         }
         if (unmarshaled.String() != goodRe[i]) {
-            Ꮡt.Errorf("UnmarshalText returned unexpected value: %s"u8, unmarshaled.String());
+            t.Errorf("UnmarshalText returned unexpected value: %s", unmarshaled.String());
         }
     }
-    Ꮡt.Run(invalidPatternˢ, (ж<testing.T> tΔ1) => {
+    t.Run(invalidPatternˢ, (ж<testing.T> tΔ1) => {
         var re = @new<global::go.regexp_package.Regexp>();
         var err = re.UnmarshalText(slice<byte>(@"\"u8));
-        if (err == default!) {
+        if (err == nil) {
             tΔ1.Error(unexpectedSuccessˢ);
         }
     });

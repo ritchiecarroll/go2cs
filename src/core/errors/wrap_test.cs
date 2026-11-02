@@ -19,22 +19,22 @@ internal partial struct TestIs_testCases /*dyn*/ {
     internal bool match;
 }
 
-public static void TestIs(ж<testing.T> Ꮡt) {
-    var err1 = errors.New("1"u8);
-    var erra = new wrapped("wrap 2"u8, err1);
-    var errb = new wrapped("wrap 3"u8, erra);
+public static void TestIs(ж<testing.T> t) {
+    var err1 = errors.New("1");
+    var erra = new wrapped("wrap 2", err1);
+    var errb = new wrapped("wrap 3", erra);
 
-    var err3 = errors.New("3"u8);
+    var err3 = errors.New("3");
 
     var err1ʗ1 = err1;
     var err3ʗ1 = err3;
-    var poser = Ꮡ(new poser("either 1 or 3"u8, (error err) => AreEqual(err, err1ʗ1) || AreEqual(err, err3ʗ1)
+    var poser = Ꮡ(new poser("either 1 or 3", (error err) => AreEqual(err, err1ʗ1) || AreEqual(err, err3ʗ1)
     ));
 
-    var testCases = new TestIs_testCases[]{
-        new(default!, default!, true),
-        new(default!, err1, false),
-        new(err1, default!, false),
+    var testCases = slice<TestIs_testCases>([
+        new(default, default, true),
+        new(default, err1, false),
+        new(err1, default, false),
         new(err1, err1, true),
         new(erra, err1, true),
         new(errb, err1, true),
@@ -45,33 +45,33 @@ public static void TestIs(ж<testing.T> Ꮡt) {
         new(new poserжerror(poser), err3, true),
         new(new poserжerror(poser), erra, false),
         new(new poserжerror(poser), errb, false),
-        new(new errorUncomparable(nil), new errorUncomparable(nil), true),
-        new(new errorUncomparable(nil), new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), false),
-        new(new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), new errorUncomparable(nil), true),
-        new(new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), false),
-        new(new errorUncomparable(nil), err1, false),
-        new(new errorUncomparableжerror(Ꮡ(new errorUncomparable(nil))), err1, false),
+        new(new errorUncomparable(), new errorUncomparable(), true),
+        new(new errorUncomparable(), new errorUncomparableжerror(Ꮡ(new errorUncomparable())), false),
+        new(new errorUncomparableжerror(Ꮡ(new errorUncomparable())), new errorUncomparable(), true),
+        new(new errorUncomparableжerror(Ꮡ(new errorUncomparable())), new errorUncomparableжerror(Ꮡ(new errorUncomparable())), false),
+        new(new errorUncomparable(), err1, false),
+        new(new errorUncomparableжerror(Ꮡ(new errorUncomparable())), err1, false),
         new(new multiErr(new error[]{}.slice()), err1, false),
         new(new multiErr(new error[]{err1, err3}.slice()), err1, true),
         new(new multiErr(new error[]{err3, err1}.slice()), err1, true),
-        new(new multiErr(new error[]{err1, err3}.slice()), errors.New("x"u8), false),
+        new(new multiErr(new error[]{err1, err3}.slice()), errors.New("x"), false),
         new(new multiErr(new error[]{err3, errb}.slice()), errb, true),
         new(new multiErr(new error[]{err3, errb}.slice()), erra, true),
         new(new multiErr(new error[]{err3, errb}.slice()), err1, true),
         new(new multiErr(new error[]{errb, err3}.slice()), err1, true),
         new(new multiErr(new error[]{new poserжerror(poser)}.slice()), err1, true),
         new(new multiErr(new error[]{new poserжerror(poser)}.slice()), err3, true),
-        new(new multiErr(new error[]{default!}.slice()), default!, false)
-    }.slice();
+        new(new multiErr(new error[]{default}.slice()), default, false)
+    ]);
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestIs_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(""u8, (ж<testing.T> tΔ1) => {
+        t.Run(""u8, (ж<testing.T> tΔ1) => {
             {
                 var got = errors.Is(tcʗ1.err, tcʗ1.target); if (got != tcʗ1.match) {
-                    tΔ1.Errorf("Is(%v, %v) = %v, want %v"u8, tcʗ1.err, tcʗ1.target, got, tcʗ1.match);
+                    tΔ1.Errorf("Is(%v, %v) = %v, want %v", tcʗ1.err, tcʗ1.target, got, tcʗ1.match);
                 }
             }
         });
@@ -83,7 +83,7 @@ partial struct poser {
     internal Func<error, bool> f;
 }
 
-internal static ж<fs.PathError> poserPathErr = Ꮡ(new fs.PathError(Op: "poser"u8));
+internal static ж<fs.PathError> poserPathErr = Ꮡ(new fs.PathError(Op: "poser"));
 
 internal static @string Error(this ref poser p) {
     return p.msg;
@@ -100,7 +100,7 @@ internal static bool As(this ж<poser> Ꮡp, any err) {
         break;
     }
     case ж<errorT> x: {
-        x.Value = new errorT("poser"u8);
+        x.Value = new errorT("poser");
         break;
     }
     case ж<ж<fs.PathError>> x: {
@@ -115,7 +115,8 @@ internal static bool As(this ж<poser> Ꮡp, any err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errˢ = "err"u8;
+private static ref readonly @string errˢ => ref errˢᵇ;
+private static readonly @string errˢᵇ = "err"u8;
 
 internal partial interface TestAs_timeout /*dyn*/ {
     bool Timeout();
@@ -128,46 +129,46 @@ internal partial struct TestAs_testCases /*dyn*/ {
     internal any want; // value of target on match
 }
 
-public static void TestAs(ж<testing.T> Ꮡt) {
+public static void TestAs(ж<testing.T> t) {
     ref var errT = ref heap(new errorT(), out var ᏑerrT);
     ref var errP = ref heap<ж<fs.PathError>>(out var ᏑerrP);
     ref var timeout = ref heap<TestAs_timeout>(out var Ꮡtimeout);
     ref var p = ref heap<ж<poser>>(out var Ꮡp);
     var (_, errF) = os.Open(nonExistingˢ);
-    var poserErr = Ꮡ(new poser("oh no"u8, default!));
+    var poserErr = Ꮡ(new poser("oh no", default));
 
-    var testCases = new TestAs_testCases[]{new(
-        default!,
+    var testCases = slice<TestAs_testCases>([new(
+        default,
         ᏑerrP,
         false,
-        default!
+        default
     ), new(
-        new wrapped("pitied the fool"u8, new errorT("T"u8)),
+        new wrapped("pitied the fool", new errorT("T")),
         ᏑerrT,
         true,
-        new errorT("T"u8)
+        new errorT("T")
     ), new(
         errF,
         ᏑerrP,
         true,
         errF
     ), new(
-        new errorT(nil),
+        new errorT(),
         ᏑerrP,
         false,
-        default!
+        default
     ), new(
-        new wrapped("wrapped"u8, default!),
+        new wrapped("wrapped", default),
         ᏑerrT,
         false,
-        default!
+        default
     ), new(
-        new poserжerror(Ꮡ(new poser("error"u8, default!))),
+        new poserжerror(Ꮡ(new poser("error", default))),
         ᏑerrT,
         true,
-        new errorT("poser"u8)
+        new errorT("poser")
     ), new(
-        new poserжerror(Ꮡ(new poser("path"u8, default!))),
+        new poserжerror(Ꮡ(new poser("path", default))),
         ᏑerrP,
         true,
         poserPathErr.OrTypedNil()
@@ -180,14 +181,14 @@ public static void TestAs(ж<testing.T> Ꮡt) {
         errors.New(errˢ),
         Ꮡtimeout,
         false,
-        default!
+        default
     ), new(
         errF,
         Ꮡtimeout,
         true,
         errF
     ), new(
-        new wrapped("path error"u8, errF),
+        new wrapped("path error", errF),
         Ꮡtimeout,
         true,
         errF
@@ -195,61 +196,60 @@ public static void TestAs(ж<testing.T> Ꮡt) {
         new multiErr(new error[]{}.slice()),
         ᏑerrT,
         false,
-        default!
+        default
     ), new(
-        new multiErr(new error[]{errors.New("a"u8), new errorT("T"u8)}.slice()),
+        new multiErr(new error[]{errors.New("a"), new errorT("T")}.slice()),
         ᏑerrT,
         true,
-        new errorT("T"u8)
+        new errorT("T")
     ), new(
-        new multiErr(new error[]{new errorT("T"u8), errors.New("a"u8)}.slice()),
+        new multiErr(new error[]{new errorT("T"), errors.New("a")}.slice()),
         ᏑerrT,
         true,
-        new errorT("T"u8)
+        new errorT("T")
     ), new(
-        new multiErr(new error[]{new errorT("a"u8), new errorT("b"u8)}.slice()),
+        new multiErr(new error[]{new errorT("a"), new errorT("b")}.slice()),
         ᏑerrT,
         true,
-        new errorT("a"u8)
+        new errorT("a")
     ), new(
-        new multiErr(new error[]{new multiErr(new error[]{errors.New("a"u8), new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice()),
+        new multiErr(new error[]{new multiErr(new error[]{errors.New("a"), new errorT("a")}.slice()), new errorT("b")}.slice()),
         ᏑerrT,
         true,
-        new errorT("a"u8)
+        new errorT("a")
     ), new(
-        new multiErr(new error[]{new wrapped("path error"u8, errF)}.slice()),
+        new multiErr(new error[]{new wrapped("path error", errF)}.slice()),
         Ꮡtimeout,
         true,
         errF
     ), new(
-        new multiErr(new error[]{default!}.slice()),
+        new multiErr(new error[]{default}.slice()),
         ᏑerrT,
         false,
-        default!
+        default
     )
-    }.slice();
+    ]);
     foreach (var (i, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestAs_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         @string name = fmt.Sprintf("%d:As(Errorf(..., %v), %v)"u8, i, tc.err, tc.target);
         // Clear the target pointer, in case it was set in a previous test.
-        ref var rtarget = ref heap<reflectꓸValue>(out var Ꮡrtarget);
-        rtarget = reflect.ValueOf(tc.target);
+        ref var rtarget = ref heap<reflectꓸValue>(reflect.ValueOf(tc.target), out var Ꮡrtarget);
         rtarget.Elem().Set(reflect.Zero(reflect.TypeOf(tc.target).Elem()));
         var rtargetʗ1 = rtarget;
         var tcʗ1 = tc;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        t.Run(name, (ж<testing.T> tΔ1) => {
             var match = errors.As(tcʗ1.err, tcʗ1.target);
             if (match != tcʗ1.match) {
-                tΔ1.Fatalf("match: got %v; want %v"u8, match, tcʗ1.match);
+                tΔ1.Fatalf("match: got %v; want %v", match, tcʗ1.match);
             }
             if (!match) {
                 return;
             }
             {
                 var got = rtargetʗ1.Elem().Interface(); if (!AreEqual(got, tcʗ1.want)) {
-                    tΔ1.Fatalf("got %#v, want %#v"u8, got, tcʗ1.want);
+                    tΔ1.Fatalf("got %#v, want %#v", got, tcʗ1.want);
                 }
             }
         });
@@ -257,31 +257,32 @@ public static void TestAs(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string errorˢ2 = "error"u8;
+private static ref readonly @string errorˢ2 => ref errorˢ2ᵇ;
+private static readonly @string errorˢ2ᵇ = "error"u8;
 
-public static void TestAsValidation(ж<testing.T> Ꮡt) {
+public static void TestAsValidation(ж<testing.T> t) {
     ref var s = ref heap(new @string(), out var Ꮡs);
-    var testCases = new any[]{
-        default!,
+    var testCases = slice<any>([
+        default,
         (ж<nint>)nil,
-        (@string)"error"u8,
+        errorˢ2,
         Ꮡs
-    }.slice();
+    ]);
     var err = errors.New(errorˢ2);
     foreach (var (_, tc) in testCases) {
         var errʗ1 = err;
         var tcʗ1 = tc;
-        Ꮡt.Run(fmt.Sprintf("%T(%v)"u8, tc, tc), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("%T(%v)"u8, tc, tc), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
                     recover();
                 }, ref ᒐ);
                 if (errors.As(errʗ1, tcʗ1)) {
-                    tΔ1.Errorf("As(err, %T(%v)) = true, want false"u8, tcʗ1, tcʗ1);
+                    tΔ1.Errorf("As(err, %T(%v)) = true, want false", tcʗ1, tcʗ1);
                     return;
                 }
-                tΔ1.Errorf("As(err, %T(%v)) did not panic"u8, tcʗ1, tcʗ1);
+                tΔ1.Errorf("As(err, %T(%v)) did not panic", tcʗ1, tcʗ1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -295,82 +296,82 @@ internal partial interface TestAsType_timeout /*dyn*/ :
     bool Timeout();
 }
 
-public static void TestAsType(ж<testing.T> Ꮡt) {
-    errorT errT = default!;
-    ж<fs.PathError> errP = default!;
+public static void TestAsType(ж<testing.T> t) {
+    errorT errT = default;
+    ж<fs.PathError> errP = default;
     var (_, errF) = os.Open(nonExistingˢ);
-    var poserErr = Ꮡ(new poser("oh no"u8, default!));
+    var poserErr = Ꮡ(new poser("oh no", default));
 
-    testAsType(Ꮡt,
-        default!,
+    testAsType(t,
+        default,
         errP,
         false);
-    testAsType(Ꮡt,
-        new wrapped("pitied the fool"u8, new errorT("T"u8)),
-        new errorT("T"u8),
+    testAsType(t,
+        new wrapped("pitied the fool", new errorT("T")),
+        new errorT("T"),
         true);
-    testAsType(Ꮡt,
+    testAsType(t,
         errF,
         errF,
         true);
-    testAsType(Ꮡt,
+    testAsType(t,
         errT,
         errP,
         false);
-    testAsType(Ꮡt,
-        new wrapped("wrapped"u8, default!),
+    testAsType(t,
+        new wrapped("wrapped", default),
         errT,
         false);
-    testAsType(Ꮡt,
-        new poserжerror(Ꮡ(new poser("error"u8, default!))),
-        new errorT("poser"u8),
+    testAsType(t,
+        new poserжerror(Ꮡ(new poser("error", default))),
+        new errorT("poser"),
         true);
-    testAsType(Ꮡt,
-        new poserжerror(Ꮡ(new poser("path"u8, default!))),
+    testAsType(t,
+        new poserжerror(Ꮡ(new poser("path", default))),
         poserPathErr,
         true);
-    testAsType(Ꮡt,
+    testAsType(t,
         new poserжerror(poserErr),
         poserErr,
         true);
-    testAsType(Ꮡt,
+    testAsType(t,
         errors.New(errˢ),
-        (TestAsType_timeout)default!,
+        (TestAsType_timeout)default,
         false);
-    testAsType(Ꮡt,
+    testAsType(t,
         errF,
         errF._<TestAsType_timeout>(),
         true);
-    testAsType(Ꮡt,
-        new wrapped("path error"u8, errF),
+    testAsType(t,
+        new wrapped("path error", errF),
         errF._<TestAsType_timeout>(),
         true);
-    testAsType(Ꮡt,
+    testAsType(t,
         new multiErr(new error[]{}.slice()),
         errT,
         false);
-    testAsType(Ꮡt,
-        new multiErr(new error[]{errors.New("a"u8), new errorT("T"u8)}.slice()),
-        new errorT("T"u8),
+    testAsType(t,
+        new multiErr(new error[]{errors.New("a"), new errorT("T")}.slice()),
+        new errorT("T"),
         true);
-    testAsType(Ꮡt,
-        new multiErr(new error[]{new errorT("T"u8), errors.New("a"u8)}.slice()),
-        new errorT("T"u8),
+    testAsType(t,
+        new multiErr(new error[]{new errorT("T"), errors.New("a")}.slice()),
+        new errorT("T"),
         true);
-    testAsType(Ꮡt,
-        new multiErr(new error[]{new errorT("a"u8), new errorT("b"u8)}.slice()),
-        new errorT("a"u8),
+    testAsType(t,
+        new multiErr(new error[]{new errorT("a"), new errorT("b")}.slice()),
+        new errorT("a"),
         true);
-    testAsType(Ꮡt,
-        new multiErr(new error[]{new multiErr(new error[]{errors.New("a"u8), new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice()),
-        new errorT("a"u8),
+    testAsType(t,
+        new multiErr(new error[]{new multiErr(new error[]{errors.New("a"), new errorT("a")}.slice()), new errorT("b")}.slice()),
+        new errorT("a"),
         true);
-    testAsType(Ꮡt,
-        new multiErr(new error[]{new wrapped("path error"u8, errF)}.slice()),
+    testAsType(t,
+        new multiErr(new error[]{new wrapped("path error", errF)}.slice()),
         errF._<TestAsType_timeout>(),
         true);
-    testAsType(Ꮡt,
-        new multiErr(new error[]{default!}.slice()),
+    testAsType(t,
+        new multiErr(new error[]{default}.slice()),
         errT,
         false);
 }
@@ -380,15 +381,13 @@ partial interface compError :
 {
 }
 
-internal static void testAsType<E>(ж<testing.T> Ꮡt, error err, E want, bool wantOK) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    Ꮡt.Helper();
+internal static void testAsType<E>(ж<testing.T> t, error err, E want, bool wantOK) {
+    t.Helper();
     @string name = fmt.Sprintf("AsType[%T](Errorf(..., %v))"u8, (want).OrTypedNilOf(), err);
-    Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+    t.Run(name, (ж<testing.T> tΔ1) => {
         var (got, gotOK) = errors.AsType<E>(err);
         if (gotOK != wantOK || !AreEqual(got, want)) {
-            tΔ1.Fatalf("got %v, %t; want %v, %t"u8, (got).OrTypedNilOf(), gotOK, (want).OrTypedNilOf(), wantOK);
+            tΔ1.Fatalf("got %v, %t; want %v, %t", (got).OrTypedNilOf(), gotOK, (want).OrTypedNilOf(), wantOK);
         }
     });
 }
@@ -399,8 +398,8 @@ private static readonly object isFailedˢ = (@string)"Is failed"u8;
 public static void BenchmarkIs(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var err1 = errors.New("1"u8);
-    var err2 = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{err1, new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice())}.slice());
+    var err1 = errors.New("1");
+    var err2 = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{err1, new errorT("a")}.slice()), new errorT("b")}.slice())}.slice());
 
     for (nint i = 0; i < b.N; i++) {
         if (!errors.Is(err2, err1)) {
@@ -415,7 +414,7 @@ private static readonly object asFailedˢ = (@string)"As failed"u8;
 public static void BenchmarkAs(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var err = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{errors.New("a"u8), new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice())}.slice());
+    var err = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{errors.New("a"), new errorT("a")}.slice()), new errorT("b")}.slice())}.slice());
     for (nint i = 0; i < b.N; i++) {
         ref var target = ref heap(new errorT(), out var Ꮡtarget);
         if (!errors.As(err, Ꮡtarget)) {
@@ -430,7 +429,7 @@ private static readonly object asTypeFailedˢ = (@string)"AsType failed"u8;
 public static void BenchmarkAsType(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var err = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{errors.New("a"u8), new errorT("a"u8)}.slice()), new errorT("b"u8)}.slice())}.slice());
+    var err = new multiErr(new error[]{new multiErr(new error[]{new multiErr(new error[]{errors.New("a"), new errorT("a")}.slice()), new errorT("b")}.slice())}.slice());
     foreach (var _ᴛ1 in range(b.N)) {
         {
             var (_, ok) = errors.AsType<errorT>(err); if (!ok) {
@@ -445,21 +444,21 @@ internal partial struct TestUnwrap_testCases /*dyn*/ {
     internal error want;
 }
 
-public static void TestUnwrap(ж<testing.T> Ꮡt) {
-    var err1 = errors.New("1"u8);
-    var erra = new wrapped("wrap 2"u8, err1);
+public static void TestUnwrap(ж<testing.T> t) {
+    var err1 = errors.New("1");
+    var erra = new wrapped("wrap 2", err1);
 
-    var testCases = new TestUnwrap_testCases[]{
-        new(default!, default!),
-        new(new wrapped("wrapped"u8, default!), default!),
-        new(err1, default!),
+    var testCases = slice<TestUnwrap_testCases>([
+        new(default, default),
+        new(new wrapped("wrapped", default), default),
+        new(err1, default),
         new(erra, err1),
-        new(new wrapped("wrap 3"u8, erra), erra)
-    }.slice();
+        new(new wrapped("wrap 3", erra), erra)
+    ]);
     foreach (var (_, tc) in testCases) {
         {
             var got = errors.Unwrap(tc.err); if (!AreEqual(got, tc.want)) {
-                Ꮡt.Errorf("Unwrap(%v) = %v, want %v"u8, tc.err, got, tc.want);
+                t.Errorf("Unwrap(%v) = %v, want %v", tc.err, got, tc.want);
             }
         }
     }
@@ -489,7 +488,8 @@ internal static error Unwrap(this wrapped e) {
 partial struct multiErr /*[]error*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string multiErrorˢ = "multiError"u8;
+private static ref readonly @string multiErrorˢ => ref multiErrorˢᵇ;
+private static readonly @string multiErrorˢᵇ = "multiError"u8;
 
 internal static @string Error(this multiErr m) {
     return multiErrorˢ;
@@ -504,7 +504,8 @@ partial struct errorUncomparable {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string uncomparableErrorˢ = "uncomparable error"u8;
+private static ref readonly @string uncomparableErrorˢ => ref uncomparableErrorˢᵇ;
+private static readonly @string uncomparableErrorˢᵇ = "uncomparable error"u8;
 
 internal static @string Error(this errorUncomparable _) {
     return uncomparableErrorˢ;

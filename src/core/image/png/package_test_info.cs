@@ -10,16 +10,6 @@ global using static global::go.image.png_internal_test_package;
 // <ImportedTypeAliases>
 global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 global using imageꓸRGBA = go.image_package.ΔRGBA;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,12 +32,6 @@ using static global::go.image.png_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-// This package's string literals are hoisted to `static readonly` fields (the standard
-// library's form, or -hoist-literals), so no converted file passes a bare literal for
-// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
-// the assembly.
-[assembly: go.GoHoistedLiterals]
-
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,7 +40,7 @@ using static global::go.image.png_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/png/example_test.go", "example_test.cs", "ABYskKSmgoKmlIKCgoKClJTograUgoIACBKCgqaAgoK2gII=")]
+[assembly: GoPositionMap("image/png/example_test.go", "example_test.cs", "ABcskKSmgoKmlIKCgoKClJT4graUgoIACBKCgqaAgoK2gII=")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

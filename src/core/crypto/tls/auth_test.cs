@@ -14,7 +14,8 @@ using static go.crypto.tls_package;
 partial class tls_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string godebugˢ = "GODEBUG"u8;
+internal static ref readonly @string godebugˢ => ref godebugˢᵇ;
+private static readonly @string godebugˢᵇ = "GODEBUG"u8;
 
 internal partial struct TestSignatureSelection_tests /*dyn*/ {
     internal ж<global::go.crypto.tls_package.Certificate> cert;
@@ -32,173 +33,173 @@ internal partial struct TestSignatureSelection_badTests /*dyn*/ {
     internal uint16 tlsVersion;
 }
 
-public static void TestSignatureSelection(ж<testing.T> Ꮡt) {
+public static void TestSignatureSelection(ж<testing.T> t) {
     var rsaCert = Ꮡ(new Certificate(
-        ΔCertificate: new slice<byte>[]{testRSACertificate}.slice(),
+        ΔCertificate: slice<slice<byte>>([testRSACertificate]),
         PrivateKey: testRSAPrivateKey.OrTypedNil()
     ));
     var pkcs1Cert = Ꮡ(new Certificate(
-        ΔCertificate: new slice<byte>[]{testRSACertificate}.slice(),
+        ΔCertificate: slice<slice<byte>>([testRSACertificate]),
         PrivateKey: testRSAPrivateKey.OrTypedNil(),
-        SupportedSignatureAlgorithms: new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA1, PKCS1WithSHA256}.slice()
+        SupportedSignatureAlgorithms: slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA1, PKCS1WithSHA256])
     ));
     var ecdsaCert = Ꮡ(new Certificate(
-        ΔCertificate: new slice<byte>[]{testP256Certificate}.slice(),
+        ΔCertificate: slice<slice<byte>>([testP256Certificate]),
         PrivateKey: testP256PrivateKey.OrTypedNil()
     ));
     var ed25519Cert = Ꮡ(new Certificate(
-        ΔCertificate: new slice<byte>[]{testEd25519Certificate}.slice(),
+        ΔCertificate: slice<slice<byte>>([testEd25519Certificate]),
         PrivateKey: testEd25519PrivateKey
     ));
 
-    var tests = new TestSignatureSelection_tests[]{
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA1, PKCS1WithSHA256}.slice(), VersionTLS12, ""u8, PKCS1WithSHA256, signaturePKCS1v15, crypto.SHA256),
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA1, PKCS1WithSHA256}.slice(), VersionTLS12, "tlssha1=1"u8, PKCS1WithSHA1, signaturePKCS1v15, crypto.SHA1),
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA512, PKCS1WithSHA1}.slice(), VersionTLS12, ""u8, PKCS1WithSHA512, signaturePKCS1v15, crypto.SHA512),
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA256, PKCS1WithSHA256}.slice(), VersionTLS12, ""u8, PSSWithSHA256, signatureRSAPSS, crypto.SHA256),
-        new(pkcs1Cert, new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA256, PKCS1WithSHA256}.slice(), VersionTLS12, ""u8, PKCS1WithSHA256, signaturePKCS1v15, crypto.SHA256),
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA384, PKCS1WithSHA1}.slice(), VersionTLS13, ""u8, PSSWithSHA384, signatureRSAPSS, crypto.SHA384),
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA1, PSSWithSHA384}.slice(), VersionTLS13, ""u8, PSSWithSHA384, signatureRSAPSS, crypto.SHA384),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithSHA1, ECDSAWithP256AndSHA256}.slice(), VersionTLS12, ""u8, ECDSAWithP256AndSHA256, signatureECDSA, crypto.SHA256),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithSHA1}.slice(), VersionTLS12, "tlssha1=1"u8, ECDSAWithSHA1, signatureECDSA, crypto.SHA1),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithP256AndSHA256}.slice(), VersionTLS12, ""u8, ECDSAWithP256AndSHA256, signatureECDSA, crypto.SHA256),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithP256AndSHA256}.slice(), VersionTLS13, ""u8, ECDSAWithP256AndSHA256, signatureECDSA, crypto.SHA256),
-        new(ed25519Cert, new global::go.crypto.tls_package.SignatureScheme[]{Ed25519}.slice(), VersionTLS12, ""u8, Ed25519, signatureEd25519, directSigning),
-        new(ed25519Cert, new global::go.crypto.tls_package.SignatureScheme[]{Ed25519}.slice(), VersionTLS13, ""u8, Ed25519, signatureEd25519, directSigning),
+    var tests = slice<TestSignatureSelection_tests>([
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA1, PKCS1WithSHA256]), VersionTLS12, "", PKCS1WithSHA256, signaturePKCS1v15, crypto.SHA256),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA1, PKCS1WithSHA256]), VersionTLS12, "tlssha1=1", PKCS1WithSHA1, signaturePKCS1v15, crypto.SHA1),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA512, PKCS1WithSHA1]), VersionTLS12, "", PKCS1WithSHA512, signaturePKCS1v15, crypto.SHA512),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PSSWithSHA256, PKCS1WithSHA256]), VersionTLS12, "", PSSWithSHA256, signatureRSAPSS, crypto.SHA256),
+        new(pkcs1Cert, slice<global::go.crypto.tls_package.SignatureScheme>([PSSWithSHA256, PKCS1WithSHA256]), VersionTLS12, "", PKCS1WithSHA256, signaturePKCS1v15, crypto.SHA256),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PSSWithSHA384, PKCS1WithSHA1]), VersionTLS13, "", PSSWithSHA384, signatureRSAPSS, crypto.SHA384),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA1, PSSWithSHA384]), VersionTLS13, "", PSSWithSHA384, signatureRSAPSS, crypto.SHA384),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithSHA1, ECDSAWithP256AndSHA256]), VersionTLS12, "", ECDSAWithP256AndSHA256, signatureECDSA, crypto.SHA256),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithSHA1]), VersionTLS12, "tlssha1=1", ECDSAWithSHA1, signatureECDSA, crypto.SHA1),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithP256AndSHA256]), VersionTLS12, "", ECDSAWithP256AndSHA256, signatureECDSA, crypto.SHA256),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithP256AndSHA256]), VersionTLS13, "", ECDSAWithP256AndSHA256, signatureECDSA, crypto.SHA256),
+        new(ed25519Cert, slice<global::go.crypto.tls_package.SignatureScheme>([Ed25519]), VersionTLS12, "", Ed25519, signatureEd25519, directSigning),
+        new(ed25519Cert, slice<global::go.crypto.tls_package.SignatureScheme>([Ed25519]), VersionTLS13, "", Ed25519, signatureEd25519, directSigning),
 
         // TLS 1.2 without signature_algorithms extension
-        new(rsaCert, default!, VersionTLS12, "tlssha1=1"u8, PKCS1WithSHA1, signaturePKCS1v15, crypto.SHA1),
-        new(ecdsaCert, default!, VersionTLS12, "tlssha1=1"u8, ECDSAWithSHA1, signatureECDSA, crypto.SHA1),
+        new(rsaCert, default, VersionTLS12, "tlssha1=1", PKCS1WithSHA1, signaturePKCS1v15, crypto.SHA1),
+        new(ecdsaCert, default, VersionTLS12, "tlssha1=1", ECDSAWithSHA1, signatureECDSA, crypto.SHA1),
 
         // TLS 1.2 does not restrict the ECDSA curve (our ecdsaCert is P-256)
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithP384AndSHA384}.slice(), VersionTLS12, ""u8, ECDSAWithP384AndSHA384, signatureECDSA, crypto.SHA384)
-    }.slice();
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithP384AndSHA384]), VersionTLS12, "", ECDSAWithP384AndSHA384, signatureECDSA, crypto.SHA384)
+    ]);
 
     foreach (var (testNo, test) in tests) {
         if (fips140tls.Required() && test.expectedHash == crypto.SHA1) {
-            Ꮡt.Logf("skipping test[%d] - not compatible with TLS FIPS mode"u8, testNo);
+            t.Logf("skipping test[%d] - not compatible with TLS FIPS mode", testNo);
             continue;
         }
         @string savedGODEBUG = os.Getenv(godebugˢ);
         os.Setenv(godebugˢ, savedGODEBUG + ","u8 + test.godebug);
 
         var (sigAlg, err) = selectSignatureScheme(test.tlsVersion, test.cert, test.peerSigAlgs);
-        if (err != default!) {
-            Ꮡt.Errorf("test[%d]: unexpected selectSignatureScheme error: %v"u8, testNo, err);
+        if (err != nil) {
+            t.Errorf("test[%d]: unexpected selectSignatureScheme error: %v", testNo, err);
         }
         if (test.expectedSigAlg != sigAlg) {
-            Ꮡt.Errorf("test[%d]: expected signature scheme %v, got %v"u8, testNo, test.expectedSigAlg, sigAlg);
+            t.Errorf("test[%d]: expected signature scheme %v, got %v", testNo, test.expectedSigAlg, sigAlg);
         }
         (var sigType, var hashFunc, err) = typeAndHashFromSignatureScheme(sigAlg);
-        if (err != default!) {
-            Ꮡt.Errorf("test[%d]: unexpected typeAndHashFromSignatureScheme error: %v"u8, testNo, err);
+        if (err != nil) {
+            t.Errorf("test[%d]: unexpected typeAndHashFromSignatureScheme error: %v", testNo, err);
         }
         if (test.expectedSigType != sigType) {
-            Ꮡt.Errorf("test[%d]: expected signature algorithm %#x, got %#x"u8, testNo, test.expectedSigType, sigType);
+            t.Errorf("test[%d]: expected signature algorithm %#x, got %#x", testNo, test.expectedSigType, sigType);
         }
         if (test.expectedHash != hashFunc) {
-            Ꮡt.Errorf("test[%d]: expected hash function %#x, got %#x"u8, testNo, test.expectedHash, hashFunc);
+            t.Errorf("test[%d]: expected hash function %#x, got %#x", testNo, test.expectedHash, hashFunc);
         }
 
         os.Setenv(godebugˢ, savedGODEBUG);
     }
 
     var brokenCert = Ꮡ(new Certificate(
-        ΔCertificate: new slice<byte>[]{testRSACertificate}.slice(),
+        ΔCertificate: slice<slice<byte>>([testRSACertificate]),
         PrivateKey: testRSAPrivateKey.OrTypedNil(),
-        SupportedSignatureAlgorithms: new global::go.crypto.tls_package.SignatureScheme[]{Ed25519}.slice()
+        SupportedSignatureAlgorithms: slice<global::go.crypto.tls_package.SignatureScheme>([Ed25519])
     ));
 
-    var badTests = new TestSignatureSelection_badTests[]{
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithP256AndSHA256, ECDSAWithSHA1}.slice(), VersionTLS12),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA256, PKCS1WithSHA1}.slice(), VersionTLS12),
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{0}.slice(), VersionTLS12),
-        new(ed25519Cert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithP256AndSHA256, ECDSAWithSHA1}.slice(), VersionTLS12),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{Ed25519}.slice(), VersionTLS12),
-        new(brokenCert, new global::go.crypto.tls_package.SignatureScheme[]{Ed25519}.slice(), VersionTLS12),
-        new(brokenCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA256}.slice(), VersionTLS12),
+    var badTests = slice<TestSignatureSelection_badTests>([
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithP256AndSHA256, ECDSAWithSHA1]), VersionTLS12),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA256, PKCS1WithSHA1]), VersionTLS12),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([0]), VersionTLS12),
+        new(ed25519Cert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithP256AndSHA256, ECDSAWithSHA1]), VersionTLS12),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([Ed25519]), VersionTLS12),
+        new(brokenCert, slice<global::go.crypto.tls_package.SignatureScheme>([Ed25519]), VersionTLS12),
+        new(brokenCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA256]), VersionTLS12),
         // RFC 5246, Section 7.4.1.4.1, says to only consider {sha1,ecdsa} as
         // default when the extension is missing, and RFC 8422 does not update
         // it. Anyway, if a stack supports Ed25519 it better support sigalgs.
-        new(ed25519Cert, default!, VersionTLS12),
+        new(ed25519Cert, default, VersionTLS12),
         // TLS 1.3 has no default signature_algorithms.
-        new(rsaCert, default!, VersionTLS13),
-        new(ecdsaCert, default!, VersionTLS13),
-        new(ed25519Cert, default!, VersionTLS13),
+        new(rsaCert, default, VersionTLS13),
+        new(ecdsaCert, default, VersionTLS13),
+        new(ed25519Cert, default, VersionTLS13),
         // Wrong curve, which TLS 1.3 checks
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithP384AndSHA384}.slice(), VersionTLS13),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithP384AndSHA384]), VersionTLS13),
         // TLS 1.3 does not support PKCS1v1.5 or SHA-1.
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA256}.slice(), VersionTLS13),
-        new(pkcs1Cert, new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA256, PKCS1WithSHA256}.slice(), VersionTLS13),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithSHA1}.slice(), VersionTLS13),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA256]), VersionTLS13),
+        new(pkcs1Cert, slice<global::go.crypto.tls_package.SignatureScheme>([PSSWithSHA256, PKCS1WithSHA256]), VersionTLS13),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithSHA1]), VersionTLS13),
         // The key can be too small for the hash.
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA512}.slice(), VersionTLS12),
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PSSWithSHA512]), VersionTLS12),
         // SHA-1 requires tlssha1=1
-        new(rsaCert, new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA1}.slice(), VersionTLS12),
-        new(ecdsaCert, new global::go.crypto.tls_package.SignatureScheme[]{ECDSAWithSHA1}.slice(), VersionTLS12),
-        new(rsaCert, default!, VersionTLS12),
-        new(ecdsaCert, default!, VersionTLS12)
-    }.slice();
+        new(rsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([PKCS1WithSHA1]), VersionTLS12),
+        new(ecdsaCert, slice<global::go.crypto.tls_package.SignatureScheme>([ECDSAWithSHA1]), VersionTLS12),
+        new(rsaCert, default, VersionTLS12),
+        new(ecdsaCert, default, VersionTLS12)
+    ]);
 
     foreach (var (testNo, test) in badTests) {
         var (sigAlg, err) = selectSignatureScheme(test.tlsVersion, test.cert, test.peerSigAlgs);
-        if (err == default!) {
-            Ꮡt.Errorf("test[%d]: unexpected success, got %v"u8, testNo, sigAlg);
+        if (err == nil) {
+            t.Errorf("test[%d]: unexpected success, got %v", testNo, sigAlg);
         }
     }
 }
 
-public static void TestLegacyTypeAndHash(ж<testing.T> Ꮡt) {
+public static void TestLegacyTypeAndHash(ж<testing.T> t) {
     var (sigType, hashFunc, err) = legacyTypeAndHashFromPublicKey(testRSAPrivateKey.Public());
-    if (err != default!) {
-        Ꮡt.Errorf("RSA: unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("RSA: unexpected error: %v", err);
     }
     {
         var expectedSigType = signaturePKCS1v15; if (expectedSigType != sigType) {
-            Ꮡt.Errorf("RSA: expected signature type %#x, got %#x"u8, expectedSigType, sigType);
+            t.Errorf("RSA: expected signature type %#x, got %#x", expectedSigType, sigType);
         }
     }
     {
         crypto.Hash expectedHashFunc = crypto.MD5SHA1; if (expectedHashFunc != hashFunc) {
-            Ꮡt.Errorf("RSA: expected hash %#x, got %#x"u8, expectedHashFunc, hashFunc);
+            t.Errorf("RSA: expected hash %#x, got %#x", expectedHashFunc, hashFunc);
         }
     }
 
     (sigType, hashFunc, err) = legacyTypeAndHashFromPublicKey(testECDSAPrivateKey.Public());
-    if (err != default!) {
-        Ꮡt.Errorf("ECDSA: unexpected error: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("ECDSA: unexpected error: %v", err);
     }
     {
         var expectedSigType = signatureECDSA; if (expectedSigType != sigType) {
-            Ꮡt.Errorf("ECDSA: expected signature type %#x, got %#x"u8, expectedSigType, sigType);
+            t.Errorf("ECDSA: expected signature type %#x, got %#x", expectedSigType, sigType);
         }
     }
     {
         crypto.Hash expectedHashFunc = crypto.SHA1; if (expectedHashFunc != hashFunc) {
-            Ꮡt.Errorf("ECDSA: expected hash %#x, got %#x"u8, expectedHashFunc, hashFunc);
+            t.Errorf("ECDSA: expected hash %#x, got %#x", expectedHashFunc, hashFunc);
         }
     }
 
     // Ed25519 is not supported by TLS 1.0 and 1.1.
     (_, _, err) = legacyTypeAndHashFromPublicKey(testEd25519PrivateKey.Public());
-    if (err == default!) {
-        Ꮡt.Errorf("Ed25519: unexpected success"u8);
+    if (err == nil) {
+        t.Errorf("Ed25519: unexpected success");
     }
 }
 
 // TestSupportedSignatureAlgorithms checks that all supportedSignatureAlgorithms
 // have valid type and hash information.
-public static void TestSupportedSignatureAlgorithms(ж<testing.T> Ꮡt) {
+public static void TestSupportedSignatureAlgorithms(ж<testing.T> t) {
     foreach (var (_, sigAlg) in supportedSignatureAlgorithms(VersionTLS12)) {
         var (sigType, hash, err) = typeAndHashFromSignatureScheme(sigAlg);
-        if (err != default!) {
-            Ꮡt.Errorf("%v: unexpected error: %v"u8, sigAlg, err);
+        if (err != nil) {
+            t.Errorf("%v: unexpected error: %v", sigAlg, err);
         }
         if (sigType == 0) {
-            Ꮡt.Errorf("%v: missing signature type"u8, sigAlg);
+            t.Errorf("%v: missing signature type", sigAlg);
         }
         if (hash == 0 && sigAlg != Ed25519) {
-            Ꮡt.Errorf("%v: missing hash"u8, sigAlg);
+            t.Errorf("%v: missing hash", sigAlg);
         }
     }
 }

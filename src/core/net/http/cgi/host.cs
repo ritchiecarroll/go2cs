@@ -37,30 +37,31 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class cgi_package {
 
-internal static ж<regexp.Regexp> trailingPort = regexp.MustCompile(@":([0-9]+)$"u8);
+internal static ж<regexp.Regexp> trailingPort = regexp.MustCompile(@":([0-9]+)$");
 
-internal static slice<@string> osDefaultInheritEnv = ((Func<slice<@string>>)(() => {
+internal static slice<@string> osDefaultInheritEnv = func(slice<@string> () => {
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
-        return new @string[]{"DYLD_LIBRARY_PATH"u8}.slice();
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
+        return slice<@string>(["DYLD_LIBRARY_PATH"]);
     }
-    if (exprᴛ1 == "android"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8) {
-        return new @string[]{"LD_LIBRARY_PATH"u8}.slice();
+    case {} when exprᴛ1 == "android"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
+        return slice<@string>(["LD_LIBRARY_PATH"]);
     }
-    if (exprᴛ1 == "hpux"u8) {
-        return new @string[]{"LD_LIBRARY_PATH"u8, "SHLIB_PATH"u8}.slice();
+    case {} when exprᴛ1 == "hpux"u8: {
+        return slice<@string>(["LD_LIBRARY_PATH", "SHLIB_PATH"]);
     }
-    if (exprᴛ1 == "irix"u8) {
-        return new @string[]{"LD_LIBRARY_PATH"u8, "LD_LIBRARYN32_PATH"u8, "LD_LIBRARY64_PATH"u8}.slice();
+    case {} when exprᴛ1 == "irix"u8: {
+        return slice<@string>(["LD_LIBRARY_PATH", "LD_LIBRARYN32_PATH", "LD_LIBRARY64_PATH"]);
     }
-    if (exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8) {
-        return new @string[]{"LD_LIBRARY_PATH"u8, "LD_LIBRARY_PATH_32"u8, "LD_LIBRARY_PATH_64"u8}.slice();
+    case {} when exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8: {
+        return slice<@string>(["LD_LIBRARY_PATH", "LD_LIBRARY_PATH_32", "LD_LIBRARY_PATH_64"]);
     }
-    if (exprᴛ1 == "windows"u8) {
-        return new @string[]{"SystemRoot"u8, "COMSPEC"u8, "PATHEXT"u8, "WINDIR"u8}.slice();
-    }
-    return default!;
-}))();
+    case {} when exprᴛ1 == "windows"u8: {
+        return slice<@string>(["SystemRoot", "COMSPEC", "PATHEXT", "WINDIR"]);
+    }}
+    return default;
+})();
 
 // Handler runs an executable in a subprocess with a CGI environment.
 partial struct Handler {
@@ -71,11 +72,11 @@ partial struct Handler {
     // If Path has no base directory, the current working
     // directory is used.
     public @string Dir;
-    public slice<@string> Env; // extra environment variables to set, if any, as "key=value"
+    public slice<@string> Env;        // extra environment variables to set, if any, as "key=value"
     public slice<@string> InheritEnv; // environment variables to inherit from host, as "key"
-    public ж<log.Logger> Logger; // optional log for errors or nil to use log.Print
-    public slice<@string> Args; // optional arguments to pass to child process
-    public io.Writer Stderr;   // optional stderr for the child process; nil means os.Stderr
+    public ж<log.Logger> Logger;      // optional log for errors or nil to use log.Print
+    public slice<@string> Args;       // optional arguments to pass to child process
+    public io.Writer Stderr;          // optional stderr for the child process; nil means os.Stderr
     // PathLocationHandler specifies the root http Handler that
     // should handle internal redirects when the CGI process
     // returns a Location header value starting with a "/", as
@@ -88,7 +89,7 @@ partial struct Handler {
 }
 
 internal static io.Writer stderr(this ref Handler h) {
-    if (h.Stderr != default!) {
+    if (h.Stderr != nil) {
         return h.Stderr;
     }
     return new os.FileжWriter(os.Stderr);
@@ -102,13 +103,13 @@ internal static io.Writer stderr(this ref Handler h) {
 //	  Env: []string{"SCRIPT_FILENAME=foo.php"},
 //	}
 internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> env) {
-    slice<@string> ret = default!;
+    slice<@string> ret = default;
     var retᴷ = new stackAppend<@string>(moves: true);
 
     foreach (var (i, e) in env) {
         var found = false;
         {
-            nint eq = strings.IndexByte(e, (rune)'='); if (eq != -1) {
+            nint eq = strings.IndexByte(e, (byte)'='); if (eq != -1) {
                 @string keq = e.slice(0, eq + 1); // "key="
                 foreach (var (_, e2) in env.slice(i + 1)) {
                     if (strings.HasPrefix(e2, keq)) {
@@ -127,9 +128,12 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pathˢ = "PATH"u8;
-internal static readonly @string binUsrBinUsrUcbUsrBsdUsrˢ = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin"u8;
-internal static readonly @string locationˢ = "Location"u8;
+internal static ref readonly @string pathˢ => ref pathˢᵇ;
+private static readonly @string pathˢᵇ = "PATH"u8;
+internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢ => ref binUsrBinUsrUcbUsrBsdUsrˢᵇ;
+private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇ = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin"u8;
+internal static ref readonly @string locationˢ => ref locationˢᵇ;
+private static readonly @string locationˢᵇ = "Location"u8;
 
 public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
@@ -143,12 +147,12 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             return;
         }
 
-        @string root = strings.TrimRight(h.Root, "/"u8);
-        @string pathInfo = strings.TrimPrefix((~req.URL).Path, root);
+        @string root = strings.TrimRight(h.Root, "/");
+        @string pathInfo = strings.TrimPrefix(req.URL.Path, root);
 
-        @string port = "80"u8;
+        @string port = "80";
         if (req.TLS != nil) {
-            port = "443"u8;
+            port = "443";
         }
         {
             var matches = trailingPort.FindStringSubmatch(req.Host); if (len(matches) != 0) {
@@ -156,22 +160,22 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             }
         }
 
-        var env = new @string[]{
-            "SERVER_SOFTWARE=go"u8,
-            "SERVER_PROTOCOL=HTTP/1.1"u8,
+        var env = slice<@string>([
+            "SERVER_SOFTWARE=go",
+            "SERVER_PROTOCOL=HTTP/1.1",
             "HTTP_HOST="u8 + req.Host,
-            "GATEWAY_INTERFACE=CGI/1.1"u8,
+            "GATEWAY_INTERFACE=CGI/1.1",
             "REQUEST_METHOD="u8 + req.Method,
-            "QUERY_STRING="u8 + (~req.URL).RawQuery,
+            "QUERY_STRING="u8 + req.URL.RawQuery,
             "REQUEST_URI="u8 + req.URL.RequestURI(),
             "PATH_INFO="u8 + pathInfo,
             "SCRIPT_NAME="u8 + root,
             "SCRIPT_FILENAME="u8 + h.Path,
             "SERVER_PORT="u8 + port
-        }.slice();
+        ]);
 
         {
-            var (remoteIP, remotePort, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == default!){
+            var (remoteIP, remotePort, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == nil) {
                 env = append(env, "REMOTE_ADDR="u8 + remoteIP, "REMOTE_HOST=" + remoteIP, "REMOTE_PORT=" + remotePort);
             } else {
                 // could not parse ip:port, let's use whole RemoteAddr and leave REMOTE_PORT undefined
@@ -180,7 +184,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         }
 
         {
-            var (hostDomain, _, errΔ2) = net.SplitHostPort(req.Host); if (errΔ2 == default!){
+            var (hostDomain, _, errΔ2) = net.SplitHostPort(req.Host); if (errΔ2 == nil) {
                 env = append(env, "SERVER_NAME="u8 + hostDomain);
             } else {
                 env = append(env, "SERVER_NAME="u8 + req.Host);
@@ -188,7 +192,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         }
 
         if (req.TLS != nil) {
-            env = append(env, "HTTPS=on"u8);
+            env = append(env, (@string)"HTTPS=on");
         }
 
         foreach (var (kᴛ1, v) in req.Header) {
@@ -199,9 +203,9 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 // See Issue 16405
                 continue;
             }
-            @string joinStr = ", "u8;
+            @string joinStr = ", ";
             if (k == "COOKIE"u8) {
-                joinStr = "; "u8;
+                joinStr = "; ";
             }
             env = append(env, "HTTP_"u8 + k + "="u8 + strings.Join(v, joinStr));
         }
@@ -237,7 +241,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
             }
         }
 
-        if (h.Env != default!) {
+        if (h.Env != nil) {
             env = appendꓸꓸꓸ(env, h.Env);
         }
 
@@ -245,45 +249,45 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
 
         ref var cwd = ref heap(new @string(), out var Ꮡcwd);
         ref var path = ref heap(new @string(), out var Ꮡpath);
-        if (h.Dir != ""u8){
+        if (h.Dir != ""u8) {
             path = h.Path;
             cwd = h.Dir;
         } else {
             (cwd, path) = filepath.Split(h.Path);
         }
         if (cwd == ""u8) {
-            cwd = "."u8;
+            cwd = ".";
         }
 
         void internalError(error errΔ3) {
             rw.WriteHeader(http.StatusInternalServerError);
-            Ꮡh.Value.printf("CGI error: %v"u8, errΔ3);
+            Ꮡh.Value.printf("CGI error: %v", errΔ3);
         }
 
         var cmd = Ꮡ(new exec.Cmd(
             Path: path,
-            Args: appendꓸꓸꓸ(new @string[]{h.Path}.slice(), h.Args),
+            Args: appendꓸꓸꓸ(slice<@string>([h.Path]), h.Args),
             Dir: cwd,
             Env: env,
             Stderr: h.stderr()
         ));
         if (req.ContentLength != 0) {
-            cmd.Value.Stdin = req.Body;
+            cmd.Stdin = req.Body;
         }
         var (stdoutRead, err) = cmd.StdoutPipe();
-        if (err != default!) {
+        if (err != nil) {
             internalError(err);
             return;
         }
 
         err = cmd.Start();
-        if (err != default!) {
+        if (err != nil) {
             internalError(err);
             return;
         }
         {
-            var hook = testHookStartProcess; if (hook != default!) {
-                hook((~cmd).Process);
+            var hook = testHookStartProcess; if (hook != nil) {
+                hook(cmd.Process);
             }
         }
         var cmdʗ1 = cmd;
@@ -296,19 +300,19 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         nint statusCode = 0;
         nint headerLines = 0;
         var sawBlankLine = false;
-        while (ᐧ) {
+        for (;;) {
             var (line, isPrefix, errΔ4) = linebody.ReadLine();
             if (isPrefix) {
                 rw.WriteHeader(http.StatusInternalServerError);
-                h.printf("cgi: long header line from subprocess."u8);
+                h.printf("cgi: long header line from subprocess.");
                 return;
             }
             if (AreEqual(errΔ4, io.EOF)) {
                 break;
             }
-            if (errΔ4 != default!) {
+            if (errΔ4 != nil) {
                 rw.WriteHeader(http.StatusInternalServerError);
-                h.printf("cgi: error reading headers: %v"u8, errΔ4);
+                h.printf("cgi: error reading headers: %v", errΔ4);
                 return;
             }
             if (len(line) == 0) {
@@ -316,26 +320,26 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
                 break;
             }
             headerLines++;
-            var (header, val, ok) = strings.Cut((@string)line, ":"u8);
+            var (header, val, ok) = strings.Cut((@string)line, ":");
             if (!ok) {
-                h.printf("cgi: bogus header line: %s"u8, line);
+                h.printf("cgi: bogus header line: %s", line);
                 continue;
             }
             if (!httpguts.ValidHeaderFieldName(header)) {
-                h.printf("cgi: invalid header name: %q"u8, header);
+                h.printf("cgi: invalid header name: %q", header);
                 continue;
             }
             val = textproto.TrimString(val);
             switch (ᐧ) {
             case {} when header == "Status"u8: {
                 if (len(val) < 3) {
-                    h.printf("cgi: bogus status (short): %q"u8, val);
+                    h.printf("cgi: bogus status (short): %q", val);
                     return;
                 }
                 var (code, errΔ6) = strconv.Atoi(val[0..3]);
-                if (errΔ6 != default!) {
-                    h.printf("cgi: bogus status: %q"u8, val);
-                    h.printf("cgi: line was %q"u8, line);
+                if (errΔ6 != nil) {
+                    h.printf("cgi: bogus status: %q", val);
+                    h.printf("cgi: line was %q", line);
                     return;
                 }
                 statusCode = code;
@@ -348,13 +352,13 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         }
         if (headerLines == 0 || !sawBlankLine) {
             rw.WriteHeader(http.StatusInternalServerError);
-            h.printf("cgi: no headers"u8);
+            h.printf("cgi: no headers");
             return;
         }
 
         {
             @string loc = headers.Get(locationˢ); if (loc != ""u8) {
-                if (strings.HasPrefix(loc, "/"u8) && h.PathLocationHandler != default!) {
+                if (strings.HasPrefix(loc, "/") && h.PathLocationHandler != nil) {
                     h.handleInternalRedirect(rw, Ꮡreq, loc);
                     return;
                 }
@@ -366,7 +370,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
 
         if (statusCode == 0 && headers.Get(contentTypeˢ2) == ""u8) {
             rw.WriteHeader(http.StatusInternalServerError);
-            h.printf("cgi: missing required Content-Type in headers"u8);
+            h.printf("cgi: missing required Content-Type in headers");
             return;
         }
 
@@ -386,15 +390,15 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
         rw.WriteHeader(statusCode);
 
         (_, err) = io.Copy(new http_ResponseWriterᴠWriter(rw), new bufio_ReaderжReader(linebody));
-        if (err != default!) {
-            h.printf("cgi: copy error: %v"u8, err);
+        if (err != nil) {
+            h.printf("cgi: copy error: %v", err);
             // And kill the child CGI process so we don't hang on
             // the deferred cmd.Wait above if the error was just
             // the client (rw) going away. If it was a read error
             // (because the child died itself), then the extra
             // kill of an already-dead process is harmless (the PID
             // won't be reused until the Wait above).
-            (~cmd).Process.Kill();
+            cmd.Process.Kill();
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -404,7 +408,7 @@ public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
 internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
-    if (h.Logger != nil){
+    if (h.Logger != nil) {
         h.Logger.Printf(format, v.ꓸꓸꓸ);
     } else {
         log.Printf(format, v.ꓸꓸꓸ);
@@ -415,9 +419,9 @@ internal static void handleInternalRedirect(this ref Handler h, http.ResponseWri
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var (url, err) = req.URL.Parse(path);
-    if (err != default!) {
+    if (err != nil) {
         rw.WriteHeader(http.StatusInternalServerError);
-        h.printf("cgi: error resolving local URI path %q: %v"u8, path, err);
+        h.printf("cgi: error resolving local URI path %q: %v", path, err);
         return;
     }
     // TODO: RFC 3875 isn't clear if only GET is supported, but it
@@ -430,13 +434,13 @@ internal static void handleInternalRedirect(this ref Handler h, http.ResponseWri
     // (e.g. Cookies) Which headers, if any, are copied into the
     // second request?
     var newReq = Ꮡ(new http.Request(
-        Method: "GET"u8,
+        Method: "GET",
         URL: url,
-        Proto: "HTTP/1.1"u8,
+        Proto: "HTTP/1.1",
         ProtoMajor: 1,
         ProtoMinor: 1,
         Header: new httpꓸHeader(0),
-        Host: (~url).Host,
+        Host: url.Host,
         RemoteAddr: req.RemoteAddr,
         TLS: req.TLS
     ));
@@ -445,22 +449,22 @@ internal static void handleInternalRedirect(this ref Handler h, http.ResponseWri
 
 internal static rune upperCaseAndUnderscore(rune r) {
     switch (ᐧ) {
-    case {} when r >= (rune)'a' && r <= (rune)'z': {
+    case {} when r >= 'a' && r <= 'z': {
         return r - ((rune)'a' - (rune)'A');
     }
-    case {} when r is (rune)'-': {
-        return (rune)'_';
+    case {} when r is '-': {
+        return '_';
     }
-    case {} when r is (rune)'=': {
+    case {} when r is '=': {
         // Maybe not part of the CGI 'spec' but would mess up
         // the environment in any case, as Go represents the
         // environment as a slice of "key=value" strings.
-        return (rune)'_';
+        return '_';
     }}
     // TODO: other transformations in spec or practice?
     return r;
 }
 
-internal static Action<ж<os.Process>> testHookStartProcess;  // nil except for some tests
+internal static Action<ж<os.Process>> testHookStartProcess; // nil except for some tests
 
 } // end cgi_package

@@ -13,16 +13,16 @@ partial class runtime_package {
 internal static UntypedInt kqIdent => 0xee1eb9f4;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeKeventFailedˢ = "runtime: kevent failed"u8;
+internal static ref readonly @string runtimeKeventFailedˢ => ref runtimeKeventFailedˢᵇ;
+private static readonly @string runtimeKeventFailedˢᵇ = "runtime: kevent failed"u8;
 
 internal static void addWakeupEvent(int32 kq) {
-    ref var ev = ref heap<keventt>(out var Ꮡev);
-    ev = new keventt(
+    ref var ev = ref heap<keventt>(new keventt(
         ident: kqIdent,
         filter: _EVFILT_USER,
         flags: (uint16)((uint16)_EV_ADD | (uint16)_EV_CLEAR)
-    );
-    while (ᐧ) {
+    ), out var Ꮡev);
+    for (;;) {
         var n = kevent(kq, Ꮡev, 1, nil, 0, nil);
         if (n == 0) {
             break;
@@ -33,22 +33,22 @@ internal static void addWakeupEvent(int32 kq) {
             // to make a 100% commitment.
             continue;
         }
-        println((@string)"runtime: kevent for EVFILT_USER failed with"u8, -n);
+        println((@string)"runtime: kevent for EVFILT_USER failed with", -n);
         @throw(runtimeKeventFailedˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeNetpollBreakWriteˢ = "runtime: netpollBreak write failed"u8;
+internal static ref readonly @string runtimeNetpollBreakWriteˢ => ref runtimeNetpollBreakWriteˢᵇ;
+private static readonly @string runtimeNetpollBreakWriteˢᵇ = "runtime: netpollBreak write failed"u8;
 
 internal static void wakeNetpoll(int32 kq) {
-    ref var ev = ref heap<keventt>(out var Ꮡev);
-    ev = new keventt(
+    ref var ev = ref heap<keventt>(new keventt(
         ident: kqIdent,
         filter: _EVFILT_USER,
         fflags: _NOTE_TRIGGER
-    );
-    while (ᐧ) {
+    ), out var Ꮡev);
+    for (;;) {
         var n = kevent(kq, Ꮡev, 1, nil, 0, nil);
         if (n == 0) {
             break;
@@ -57,20 +57,21 @@ internal static void wakeNetpoll(int32 kq) {
             // Check out the comment in addWakeupEvent.
             continue;
         }
-        println((@string)"runtime: netpollBreak write failed with"u8, -n);
+        println((@string)"runtime: netpollBreak write failed with", -n);
         @throw(runtimeNetpollBreakWriteˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeNetpollBreakFdˢ = "runtime: netpoll: break fd ready for something unexpected"u8;
+internal static ref readonly @string runtimeNetpollBreakFdˢ => ref runtimeNetpollBreakFdˢᵇ;
+private static readonly @string runtimeNetpollBreakFdˢᵇ = "runtime: netpoll: break fd ready for something unexpected"u8;
 
 internal static bool isWakeup(ref keventt ev) {
     if (ev.filter == _EVFILT_USER) {
         if (ev.ident == kqIdent) {
             return true;
         }
-        println((@string)"runtime: netpoll: break fd ready for"u8, ev.ident);
+        println((@string)"runtime: netpoll: break fd ready for", ev.ident);
         @throw(runtimeNetpollBreakFdˢ);
     }
     return false;

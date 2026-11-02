@@ -15,13 +15,14 @@ internal static readonly ж<Δsync.Once> ᏑonceReadServices = new StaticBox<Δs
 internal static ref Δsync.Once onceReadServices => ref ((StaticBox<Δsync.Once>)ᏑonceReadServices).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string etcServicesˢ = "/etc/services"u8;
+internal static ref readonly @string etcServicesˢ => ref etcServicesˢᵇ;
+private static readonly @string etcServicesˢᵇ = "/etc/services"u8;
 
 internal static void readServices() {
     GoFrame ᒐ = default;
     try {
         var (Δfile, err) = open(etcServicesˢ);
-        if (err != default!) {
+        if (err != nil) {
             return;
         }
         var fileʗ1 = Δfile;
@@ -30,7 +31,7 @@ internal static void readServices() {
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // "http 80/tcp www www-http # World Wide Web HTTP"
             {
-                nint i = bytealg.IndexByteString(line, (rune)'#'); if (i >= 0) {
+                nint i = bytealg.IndexByteString(line, (byte)'#'); if (i >= 0) {
                     line = line.slice(0, i);
                 }
             }
@@ -40,7 +41,7 @@ internal static void readServices() {
             }
             @string portnet = f[1]; // "80/tcp"
             var (port, j, okΔ1) = dtoi(portnet);
-            if (!okΔ1 || port <= 0 || j >= len(portnet) || portnet[j] != (rune)'/') {
+            if (!okΔ1 || port <= 0 || j >= len(portnet) || portnet[j] != '/') {
                 continue;
             }
             @string netw = portnet.slice(j + 1); // "tcp"

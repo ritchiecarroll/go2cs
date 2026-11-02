@@ -10,7 +10,8 @@ using global::go.runtime;
 partial class metrics_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string myMetricᶜ = "/memory/classes/heap/free:bytes"u8;
+private static ref readonly @string myMetricᶜ => ref myMetricᶜᵇ;
+private static readonly @string myMetricᶜᵇ = "/memory/classes/heap/free:bytes"u8;
 
 public static void ExampleRead_readingOneMetric() {
     // Name of the metric we want to read.
@@ -59,31 +60,36 @@ public static void ExampleRead_readingAllMetrics() {
         var value = sample.Value;
 
         // Handle each sample.
-        var exprᴛ1 = value.Kind();
-        if (exprᴛ1 == metrics.KindUint64) {
+        switch (value.Kind()) {
+        case var ᴛ when ᴛ == metrics.KindUint64: {
             fmt.Printf("%s: %d\n"u8, name, value.Uint64());
+            break;
         }
-        else if (exprᴛ1 == metrics.KindFloat64) {
+        case var ᴛ when ᴛ == metrics.KindFloat64: {
             fmt.Printf("%s: %f\n"u8, name, value.Float64());
+            break;
         }
-        else if (exprᴛ1 == metrics.KindFloat64Histogram) {
+        case var ᴛ when ᴛ == metrics.KindFloat64Histogram: {
             // The histogram may be quite large, so let's just pull out
             // a crude estimate for the median for the sake of this example.
             fmt.Printf("%s: %f\n"u8, name, medianBucket(value.Float64Histogram()));
+            break;
         }
-        else if (exprᴛ1 == metrics.KindBad) {
+        case var ᴛ when ᴛ == metrics.KindBad: {
             // This should never happen because all metrics are supported
             // by construction.
             throw panic("bug in runtime/metrics package!");
+            break;
         }
-        else { /* default: */
+        default: {
             // This may happen as new metrics get added.
             //
             // The safest thing to do here is to simply log it somewhere
             // as something to look into, but ignore it for now.
             // In the worst case, you might temporarily miss out on a new metric.
             fmt.Printf("%s: unexpected metric Kind: %v\n"u8, name, value.Kind());
-        }
+            break;
+        }}
     }
 }
 

@@ -11,88 +11,86 @@ using static go.mime.quotedprintable_package;
 
 partial class quotedprintable_internal_test_package {
 
-public static void TestWriter(ж<testing.T> Ꮡt) {
-    testWriter(Ꮡt, false);
+public static void TestWriter(ж<testing.T> t) {
+    testWriter(t, false);
 }
 
-public static void TestWriterBinary(ж<testing.T> Ꮡt) {
-    testWriter(Ꮡt, true);
+public static void TestWriterBinary(ж<testing.T> t) {
+    testWriter(t, true);
 }
 
 internal partial struct testWriter_tests /*dyn*/ {
     internal @string @in, want, wantB;
 }
 
-internal static void testWriter(ж<testing.T> Ꮡt, bool binary) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var tests = new testWriter_tests[]{
-        new(@in: ""u8, want: ""u8),
-        new(@in: "foo bar"u8, want: "foo bar"u8),
-        new(@in: "foo bar="u8, want: "foo bar=3D"u8),
-        new(@in: "foo bar\r"u8, want: "foo bar\r\n"u8, wantB: "foo bar=0D"u8),
-        new(@in: "foo bar\r\r"u8, want: "foo bar\r\n\r\n"u8, wantB: "foo bar=0D=0D"u8),
-        new(@in: "foo bar\n"u8, want: "foo bar\r\n"u8, wantB: "foo bar=0A"u8),
-        new(@in: "foo bar\r\n"u8, want: "foo bar\r\n"u8, wantB: "foo bar=0D=0A"u8),
-        new(@in: "foo bar\r\r\n"u8, want: "foo bar\r\n\r\n"u8, wantB: "foo bar=0D=0D=0A"u8),
-        new(@in: "foo bar "u8, want: "foo bar=20"u8),
-        new(@in: "foo bar\t"u8, want: "foo bar=09"u8),
-        new(@in: "foo bar  "u8, want: "foo bar =20"u8),
-        new(@in: "foo bar \n"u8, want: "foo bar=20\r\n"u8, wantB: "foo bar =0A"u8),
-        new(@in: "foo bar \r"u8, want: "foo bar=20\r\n"u8, wantB: "foo bar =0D"u8),
-        new(@in: "foo bar \r\n"u8, want: "foo bar=20\r\n"u8, wantB: "foo bar =0D=0A"u8),
-        new(@in: "foo bar  \n"u8, want: "foo bar =20\r\n"u8, wantB: "foo bar  =0A"u8),
-        new(@in: "foo bar  \n "u8, want: "foo bar =20\r\n=20"u8, wantB: "foo bar  =0A=20"u8),
-        new(@in: "¡Hola Señor!"u8, want: "=C2=A1Hola Se=C3=B1or!"u8),
+internal static void testWriter(ж<testing.T> t, bool binary) {
+    var tests = slice<testWriter_tests>([
+        new(@in: "", want: ""),
+        new(@in: "foo bar", want: "foo bar"),
+        new(@in: "foo bar=", want: "foo bar=3D"),
+        new(@in: "foo bar\r", want: "foo bar\r\n", wantB: "foo bar=0D"),
+        new(@in: "foo bar\r\r", want: "foo bar\r\n\r\n", wantB: "foo bar=0D=0D"),
+        new(@in: "foo bar\n", want: "foo bar\r\n", wantB: "foo bar=0A"),
+        new(@in: "foo bar\r\n", want: "foo bar\r\n", wantB: "foo bar=0D=0A"),
+        new(@in: "foo bar\r\r\n", want: "foo bar\r\n\r\n", wantB: "foo bar=0D=0D=0A"),
+        new(@in: "foo bar ", want: "foo bar=20"),
+        new(@in: "foo bar\t", want: "foo bar=09"),
+        new(@in: "foo bar  ", want: "foo bar =20"),
+        new(@in: "foo bar \n", want: "foo bar=20\r\n", wantB: "foo bar =0A"),
+        new(@in: "foo bar \r", want: "foo bar=20\r\n", wantB: "foo bar =0D"),
+        new(@in: "foo bar \r\n", want: "foo bar=20\r\n", wantB: "foo bar =0D=0A"),
+        new(@in: "foo bar  \n", want: "foo bar =20\r\n", wantB: "foo bar  =0A"),
+        new(@in: "foo bar  \n ", want: "foo bar =20\r\n=20", wantB: "foo bar  =0A=20"),
+        new(@in: "¡Hola Señor!", want: "=C2=A1Hola Se=C3=B1or!"),
         new(
-            @in: "\t !\"#$%&'()*+,-./ :;<>?@[\\]^_`{|}~"u8,
-            want: "\t !\"#$%&'()*+,-./ :;<>?@[\\]^_`{|}~"u8
+            @in: "\t !\"#$%&'()*+,-./ :;<>?@[\\]^_`{|}~",
+            want: "\t !\"#$%&'()*+,-./ :;<>?@[\\]^_`{|}~"
         ),
         new(
-            @in: strings.Repeat("a"u8, 75),
-            want: strings.Repeat("a"u8, 75)
+            @in: strings.Repeat("a", 75),
+            want: strings.Repeat("a", 75)
         ),
         new(
-            @in: strings.Repeat("a"u8, 76),
-            want: strings.Repeat("a"u8, 75) + "=\r\na"u8
+            @in: strings.Repeat("a", 76),
+            want: strings.Repeat("a", 75) + "=\r\na"u8
         ),
         new(
-            @in: strings.Repeat("a"u8, 72) + "="u8,
-            want: strings.Repeat("a"u8, 72) + "=3D"u8
+            @in: strings.Repeat("a", 72) + "="u8,
+            want: strings.Repeat("a", 72) + "=3D"u8
         ),
         new(
-            @in: strings.Repeat("a"u8, 73) + "="u8,
-            want: strings.Repeat("a"u8, 73) + "=\r\n=3D"u8
+            @in: strings.Repeat("a", 73) + "="u8,
+            want: strings.Repeat("a", 73) + "=\r\n=3D"u8
         ),
         new(
-            @in: strings.Repeat("a"u8, 74) + "="u8,
-            want: strings.Repeat("a"u8, 74) + "=\r\n=3D"u8
+            @in: strings.Repeat("a", 74) + "="u8,
+            want: strings.Repeat("a", 74) + "=\r\n=3D"u8
         ),
         new(
-            @in: strings.Repeat("a"u8, 75) + "="u8,
-            want: strings.Repeat("a"u8, 75) + "=\r\n=3D"u8
+            @in: strings.Repeat("a", 75) + "="u8,
+            want: strings.Repeat("a", 75) + "=\r\n=3D"u8
         ),
         new(
-            @in: strings.Repeat(" "u8, 73),
-            want: strings.Repeat(" "u8, 72) + "=20"u8
+            @in: strings.Repeat(" ", 73),
+            want: strings.Repeat(" ", 72) + "=20"u8
         ),
         new(
-            @in: strings.Repeat(" "u8, 74),
-            want: strings.Repeat(" "u8, 73) + "=\r\n=20"u8
+            @in: strings.Repeat(" ", 74),
+            want: strings.Repeat(" ", 73) + "=\r\n=20"u8
         ),
         new(
-            @in: strings.Repeat(" "u8, 75),
-            want: strings.Repeat(" "u8, 74) + "=\r\n=20"u8
+            @in: strings.Repeat(" ", 75),
+            want: strings.Repeat(" ", 74) + "=\r\n=20"u8
         ),
         new(
-            @in: strings.Repeat(" "u8, 76),
-            want: strings.Repeat(" "u8, 75) + "=\r\n=20"u8
+            @in: strings.Repeat(" ", 76),
+            want: strings.Repeat(" ", 75) + "=\r\n=20"u8
         ),
         new(
-            @in: strings.Repeat(" "u8, 77),
-            want: strings.Repeat(" "u8, 75) + "=\r\n =20"u8
+            @in: strings.Repeat(" ", 77),
+            want: strings.Repeat(" ", 75) + "=\r\n =20"u8
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tt) in tests) {
         var buf = @new<strings.Builder>();
@@ -100,53 +98,53 @@ internal static void testWriter(ж<testing.T> Ꮡt, bool binary) {
 
         @string want = tt.want;
         if (binary) {
-            w.Value.Binary = true;
+            w.Binary = true;
             if (tt.wantB != ""u8) {
                 want = tt.wantB;
             }
         }
 
         {
-            var (_, err) = w.Write(slice<byte>(tt.@in)); if (err != default!) {
-                Ꮡt.Errorf("Write(%q): %v"u8, tt.@in, err);
+            var (_, err) = w.Write(slice<byte>(tt.@in)); if (err != nil) {
+                t.Errorf("Write(%q): %v", tt.@in, err);
                 continue;
             }
         }
         {
-            var err = w.Close(); if (err != default!) {
-                Ꮡt.Errorf("Close(): %v"u8, err);
+            var err = w.Close(); if (err != nil) {
+                t.Errorf("Close(): %v", err);
                 continue;
             }
         }
         @string got = buf.String();
         if (got != want) {
-            Ꮡt.Errorf("Write(%q), got:\n%q\nwant:\n%q"u8, tt.@in, got, want);
+            t.Errorf("Write(%q), got:\n%q\nwant:\n%q", tt.@in, got, want);
         }
     }
 }
 
-public static void TestRoundTrip(ж<testing.T> Ꮡt) {
+public static void TestRoundTrip(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new quotedprintable_test_package.bytes_BufferжWriter(buf));
     {
-        var (_, errΔ1) = w.Write(testMsg); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("Write: %v"u8, errΔ1);
+        var (_, errΔ1) = w.Write(testMsg); if (errΔ1 != nil) {
+            t.Fatalf("Write: %v", errΔ1);
         }
     }
     {
-        var errΔ2 = w.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("Close: %v"u8, errΔ2);
+        var errΔ2 = w.Close(); if (errΔ2 != nil) {
+            t.Fatalf("Close: %v", errΔ2);
         }
     }
 
     var r = NewReader(new quotedprintable_test_package.bytes_BufferжReader(buf));
     var (gotBytes, err) = io.ReadAll(new quotedprintable_test_package.quotedprintable_ReaderжReader(r));
-    if (err != default!) {
-        Ꮡt.Fatalf("Error while reading from Reader: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Error while reading from Reader: %v", err);
     }
     @string got = (@string)gotBytes;
     if (got != ((sstring)testMsg)) {
-        Ꮡt.Errorf("Encoding and decoding changed the message, got:\n%s"u8, got);
+        t.Errorf("Encoding and decoding changed the message, got:\n%s", got);
     }
 }
 

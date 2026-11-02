@@ -10,8 +10,8 @@ partial class scan_package {
 // FilterNil packs non-nil (non-zero) values in bufp together
 // at the beginning of bufp, returning the length of the
 // packed buffer. It treats bufp as an array of size n.
-public static int32 FilterNil(ж<uintptr> Ꮡbufp, int32 n) {
-    var buf = @unsafe.Slice(Ꮡbufp, (nint)n);
+public static int32 FilterNil(ж<uintptr> bufp, int32 n) {
+    var buf = @unsafe.Slice(bufp, (nint)n);
     nint lo = 0;
     nint hi = len(buf) - 1;
     while (lo < hi) {

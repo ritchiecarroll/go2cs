@@ -17,39 +17,39 @@ internal static readonly object mMNilˢ = (@string)"m.m != nil"u8;
 internal static readonly object mSNilˢ = (@string)"m.s != nil"u8;
 internal static readonly object mMNilˢ2 = (@string)"m.m == nil"u8;
 
-public static void TestMapping(ж<testing.T> Ꮡt) {
+public static void TestMapping(ж<testing.T> t) {
     ref var m = ref heap(new global::go.net.http_package.mapping<nint, @string>(), out var Ꮡm);
     for (nint i = 0; i < maxSlice; i++) {
         m.add(i, strconv.Itoa(i));
     }
-    if (m.m != default!) {
-        Ꮡt.Fatal(mMNilˢ);
+    if (m.m != nil) {
+        t.Fatal(mMNilˢ);
     }
     for (nint i = 0; i < maxSlice; i++) {
         var (gΔ1, _) = Ꮡm.find(i);
         @string w = strconv.Itoa(i);
         if (gΔ1 != w) {
-            Ꮡt.Fatalf("%d: got %s, want %s"u8, i, gΔ1, w);
+            t.Fatalf("%d: got %s, want %s", i, gΔ1, w);
         }
     }
-    m.add(4, "4"u8);
-    if (m.s != default!) {
-        Ꮡt.Fatal(mSNilˢ);
+    m.add(4, (@string)"4");
+    if (m.s != nil) {
+        t.Fatal(mSNilˢ);
     }
-    if (m.m == default!) {
-        Ꮡt.Fatal(mMNilˢ2);
+    if (m.m == nil) {
+        t.Fatal(mMNilˢ2);
     }
     var (g, _) = Ꮡm.find(4);
     {
-        @string w = "4"u8; if (g != w) {
-            Ꮡt.Fatalf("got %s, want %s"u8, g, w);
+        @string w = "4"; if (g != w) {
+            t.Fatalf("got %s, want %s", g, w);
         }
     }
 }
 
-public static void TestMappingEachPair(ж<testing.T> Ꮡt) {
+public static void TestMappingEachPair(ж<testing.T> t) {
     ref var m = ref heap(new global::go.net.http_package.mapping<nint, @string>(), out var Ꮡm);
-    slice<global::go.net.http_package.entry<nint, @string>> want = default!;
+    slice<global::go.net.http_package.entry<nint, @string>> want = default;
     for (nint i = 0; i < maxSlice * 2; i++) {
         @string v = strconv.Itoa(i);
         m.add(i, v);
@@ -63,64 +63,67 @@ public static void TestMappingEachPair(ж<testing.T> Ꮡt) {
     });
     slices.SortFunc(got, (global::go.net.http_package.entry<nint, @string> e1, global::go.net.http_package.entry<nint, @string> e2) => cmp.Compare(e1.key, e2.key));
     if (!slices.Equal<slice<global::go.net.http_package.entry<nint, @string>>, global::go.net.http_package.entry<nint, @string>>(got, want)) {
-        Ꮡt.Errorf("got %v, want %v"u8, got, want);
+        t.Errorf("got %v, want %v", got, want);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string articlesˢ = "articles"u8;
-internal static readonly @string repLinearˢ = "rep=linear"u8;
-internal static readonly @string repMapˢ = "rep=map"u8;
+internal static ref readonly @string articlesˢ => ref articlesˢᵇ;
+private static readonly @string articlesˢᵇ = "articles"u8;
+internal static ref readonly @string repLinearˢ => ref repLinearˢᵇ;
+private static readonly @string repLinearˢᵇ = "rep=linear"u8;
+internal static ref readonly @string repMapˢ => ref repMapˢᵇ;
+private static readonly @string repMapˢᵇ = "rep=map"u8;
 
-public static void BenchmarkFindChild(ж<testing.B> Ꮡb) {
+public static void BenchmarkFindChild(ж<testing.B> b) {
     @string key = articlesˢ;
-    var children = new @string[]{
-        "*"u8,
-        "cmd.html"u8,
-        "code.html"u8,
-        "contrib.html"u8,
-        "contribute.html"u8,
-        "debugging_with_gdb.html"u8,
-        "docs.html"u8,
-        "effective_go.html"u8,
-        "files.log"u8,
-        "gccgo_contribute.html"u8,
-        "gccgo_install.html"u8,
-        "go-logo-black.png"u8,
-        "go-logo-blue.png"u8,
-        "go-logo-white.png"u8,
-        "go1.1.html"u8,
-        "go1.2.html"u8,
-        "go1.html"u8,
-        "go1compat.html"u8,
-        "go_faq.html"u8,
-        "go_mem.html"u8,
-        "go_spec.html"u8,
-        "help.html"u8,
-        "ie.css"u8,
-        "install-source.html"u8,
-        "install.html"u8,
-        "logo-153x55.png"u8,
-        "Makefile"u8,
-        "root.html"u8,
-        "share.png"u8,
-        "sieve.gif"u8,
-        "tos.html"u8,
-        "articles"u8
-    }.slice();
+    var children = slice<@string>([
+        "*",
+        "cmd.html",
+        "code.html",
+        "contrib.html",
+        "contribute.html",
+        "debugging_with_gdb.html",
+        "docs.html",
+        "effective_go.html",
+        "files.log",
+        "gccgo_contribute.html",
+        "gccgo_install.html",
+        "go-logo-black.png",
+        "go-logo-blue.png",
+        "go-logo-white.png",
+        "go1.1.html",
+        "go1.2.html",
+        "go1.html",
+        "go1compat.html",
+        "go_faq.html",
+        "go_mem.html",
+        "go_spec.html",
+        "help.html",
+        "ie.css",
+        "install-source.html",
+        "install.html",
+        "logo-153x55.png",
+        "Makefile",
+        "root.html",
+        "share.png",
+        "sieve.gif",
+        "tos.html",
+        "articles"
+    ]);
     if (builtin.len(children) != 32) {
         throw panic("bad len");
     }
-    foreach (var (_, n) in new nint[]{2, 4, 8, 16, 32}.slice()) {
+    foreach (var (_, n) in slice<nint>([2, 4, 8, 16, 32])) {
         var list = children.slice(0, n);
         var listʗ1 = list;
-        Ꮡb.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
             var listʗ2 = listʗ1;
             bΔ1.Run(repLinearˢ, (ж<testing.B> bΔ2) => {
                 var entriesᴷ = new stackAppend<global::go.net.http_package.entry<@string, any>>();
-                slice<global::go.net.http_package.entry<@string, any>> entries = default!;
+                slice<global::go.net.http_package.entry<@string, any>> entries = default;
                 foreach (var (_, c) in listʗ2) {
-                    entries = append(entriesᴷ, entries, new entry<@string, any>(c, default!));
+                    entries = append(entriesᴷ, entries, new entry<@string, any>(c, default));
                 }
                 bΔ2.ResetTimer();
                 for (nint i = 0; i < (~bΔ2).N; i++) {
@@ -131,9 +134,9 @@ public static void BenchmarkFindChild(ж<testing.B> Ꮡb) {
             bΔ1.Run(repMapˢ, (ж<testing.B> bΔ3) => {
                 var m = new map<@string, any>{};
                 foreach (var (_, c) in listʗ3) {
-                    m[c] = default!;
+                    m[c] = default;
                 }
-                any x = default!;
+                any x = default;
                 bΔ3.ResetTimer();
                 for (nint i = 0; i < (~bΔ3).N; i++) {
                     x = m[key];
@@ -144,9 +147,9 @@ public static void BenchmarkFindChild(ж<testing.B> Ꮡb) {
             bΔ1.Run(fmt.Sprintf("rep=hybrid%d"u8, maxSlice), (ж<testing.B> bΔ4) => {
                 ref var h = ref heap(new global::go.net.http_package.mapping<@string, any>(), out var Ꮡh);
                 foreach (var (_, c) in listʗ4) {
-                    h.add(c, default!);
+                    h.add(c, default);
                 }
-                any x = default!;
+                any x = default;
                 bΔ4.ResetTimer();
                 for (nint i = 0; i < (~bΔ4).N; i++) {
                     (x, _) = Ꮡh.find(key);
@@ -163,7 +166,7 @@ internal static any findChildLinear(@string key, slice<global::go.net.http_packa
             return e.value;
         }
     }
-    return default!;
+    return default;
 }
 
 } // end http_internal_test_package

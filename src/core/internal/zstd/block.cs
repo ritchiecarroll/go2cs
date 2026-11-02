@@ -11,7 +11,8 @@ partial class zstd_package {
 internal const bool debug = false;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string extraneousDataAfterNoˢ = "extraneous data after no sequences"u8;
+internal static ref readonly @string extraneousDataAfterNoˢ => ref extraneousDataAfterNoˢᵇ;
+private static readonly @string extraneousDataAfterNoˢᵇ = "extraneous data after no sequences"u8;
 
 // compressedBlock decompresses a compressed block, storing the decompressed
 // data in r.buffer. The blockSize argument is the compressed size.
@@ -19,7 +20,7 @@ internal static readonly @string extraneousDataAfterNoˢ = "extraneous data afte
 internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    if (builtin.len(r.compressedBuf) >= blockSize){
+    if (builtin.len(r.compressedBuf) >= blockSize) {
         r.compressedBuf = r.compressedBuf.slice(0, blockSize);
     } else {
         // We know that blockSize <= 128K,
@@ -29,7 +30,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     }
 
     {
-        var (_, errΔ1) = io.ReadFull(r.r, r.compressedBuf); if (errΔ1 != default!) {
+        var (_, errΔ1) = io.ReadFull(r.r, r.compressedBuf); if (errΔ1 != nil) {
             return r.wrapNonEOFError(0, errΔ1);
         }
     }
@@ -39,7 +40,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     r.buffer = r.buffer[..0];
 
     var (litoff, litbuf, err) = Ꮡr.readLiterals(data, off, r.literals[..0]);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     r.literals = litbuf;
@@ -47,7 +48,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
     off = litoff;
 
     (var seqCount, off, err) = Ꮡr.initSeqs(data, off);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -59,7 +60,7 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
 
         r.buffer = appendꓸꓸꓸ(r.buffer, litbuf);
 
-        return default!;
+        return default;
     }
 
     return Ꮡr.execSeqs(data, off, litbuf, seqCount);
@@ -76,9 +77,9 @@ internal static seqCode seqMatch => 2;
 // seqTableBits for a particular kind of sequence code.
 partial struct seqCodeInfoData {
     internal slice<fseBaselineEntry> predefTable; // predefined FSE
-    internal nint predefTableBits;               // number of bits in predefTable
-    internal nint maxSym;               // max symbol value in FSE
-    internal nint maxBits;               // max bits for FSE
+    internal nint predefTableBits;                // number of bits in predefTable
+    internal nint maxSym;                         // max symbol value in FSE
+    internal nint maxBits;                        // max bits for FSE
     // toBaseline converts from an FSE table to an FSE baseline table.
     internal Func<ж<Reader>, nint, slice<fseEntry>, slice<fseBaselineEntry>, error> toBaseline;
 }
@@ -111,7 +112,8 @@ internal static void initᴛseqCodeInfo() { seqCodeInfo = new golib.SparseArray<
 }.array(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidSymbolCompressionˢ = "invalid symbol compression mode"u8;
+internal static ref readonly @string invalidSymbolCompressionˢ => ref invalidSymbolCompressionˢᵇ;
+private static readonly @string invalidSymbolCompressionˢᵇ = "invalid symbol compression mode"u8;
 
 // initSeqs reads the Sequences_Section_Header and sets up the FSE
 // tables used to read the sequence codes. It returns the number of
@@ -126,14 +128,13 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
     var seqHdr = data[off];
     off++;
     if (seqHdr == 0) {
-        return (0, off, default!);
+        return (0, off, default);
     }
 
-    nint seqCount = default!;
-    if (seqHdr < 128){
+    nint seqCount = default;
+    if (seqHdr < 128) {
         seqCount = (nint)seqHdr;
-    } else 
-    if (seqHdr < 255){
+    } else if (seqHdr < 255) {
         if (off >= builtin.len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
@@ -160,27 +161,28 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
 
     // Set up the FSE tables used to decode the sequence codes.
 
-    error err = default!;
+    error err = default;
     (off, err) = Ꮡr.setSeqTable(data, off, seqLiteral, (byte)((symMode >> 6) & 3));
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0, err);
     }
 
     (off, err) = Ꮡr.setSeqTable(data, off, seqOffset, (byte)((symMode >> 4) & 3));
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0, err);
     }
 
     (off, err) = Ꮡr.setSeqTable(data, off, seqMatch, (byte)((symMode >> 2) & 3));
-    if (err != default!) {
+    if (err != nil) {
         return (0, 0, err);
     }
 
-    return (seqCount, off, default!);
+    return (seqCount, off, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string missingRepeatSequenceFseˢ = "missing repeat sequence FSE table"u8;
+internal static ref readonly @string missingRepeatSequenceFseˢ => ref missingRepeatSequenceFseˢᵇ;
+private static readonly @string missingRepeatSequenceFseˢᵇ = "missing repeat sequence FSE table"u8;
 
 // setSeqTable uses the Compression_Mode in mode to set up r.seqTables and
 // r.seqTableBits for kind. We store these in the Reader because one of
@@ -192,9 +194,9 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
     switch (mode) {
     case 0: {
         // Predefined_Mode
-        r.seqTables[kind] = info.Value.predefTable;
-        r.seqTableBits[kind] = (uint8)(~info).predefTableBits;
-        return (off, default!);
+        r.seqTables[kind] = info.predefTable;
+        r.seqTableBits[kind] = (uint8)info.predefTableBits;
+        return (off, default);
     }
     case 1: {
         // RLE_Mode
@@ -206,69 +208,72 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
 
         // Build a simple baseline table that always returns rle.
 
-        var entry = new fseEntry[]{
+        var entry = slice<fseEntry>([
             new(
                 sym: rle,
                 bits: 0,
                 @base: 0
             )
-        }.slice();
+        ]);
         if (cap(r.seqTableBuffers[kind]) == 0) {
-            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
+            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)(info.maxBits)));
         }
         r.seqTableBuffers[kind] = r.seqTableBuffers[kind][..1];
         {
-            var err = (~info).toBaseline(Ꮡr, off, entry, r.seqTableBuffers[kind]); if (err != default!) {
+            var err = info.toBaseline(Ꮡr, off, entry, r.seqTableBuffers[kind]); if (err != nil) {
                 return (0, err);
             }
         }
 
         r.seqTables[kind] = r.seqTableBuffers[kind];
         r.seqTableBits[kind] = 0;
-        return (off, default!);
+        return (off, default);
     }
     case 2: {
         // FSE_Compressed_Mode
-        if (cap(r.fseScratch) < ((nint)1).Lsh((int64)((~info).maxBits))) {
-            r.fseScratch = new slice<fseEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
+        if (cap(r.fseScratch) < ((nint)1).Lsh((int64)(info.maxBits))) {
+            r.fseScratch = new slice<fseEntry>(((nint)1).Lsh((int64)(info.maxBits)));
         }
-        r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)((~info).maxBits)));
+        r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)(info.maxBits)));
 
-        var (tableBits, roff, err) = Ꮡr.readFSE(data, off, (~info).maxSym, (~info).maxBits, r.fseScratch);
-        if (err != default!) {
+        var (tableBits, roff, err) = Ꮡr.readFSE(data, off, info.maxSym, info.maxBits, r.fseScratch);
+        if (err != nil) {
             return (0, err);
         }
         r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)(tableBits)));
 
         if (cap(r.seqTableBuffers[kind]) == 0) {
-            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
+            r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)(info.maxBits)));
         }
         r.seqTableBuffers[kind] = r.seqTableBuffers[kind].slice(0, ((nint)1).Lsh((int64)(tableBits)));
 
         {
-            var errΔ1 = (~info).toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != default!) {
+            var errΔ1 = info.toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != nil) {
                 return (0, errΔ1);
             }
         }
 
         r.seqTables[kind] = r.seqTableBuffers[kind];
         r.seqTableBits[kind] = (uint8)tableBits;
-        return (roff, default!);
+        return (roff, default);
     }
     case 3: {
         // Repeat_Mode
         if (builtin.len(r.seqTables[kind]) == 0) {
             return (0, r.makeError(off, missingRepeatSequenceFseˢ));
         }
-        return (off, default!);
+        return (off, default);
     }}
     throw panic("unreachable");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string uncompressedSizeTooBigˢ = "uncompressed size too big"u8;
-internal static readonly @string literalByteOverflowˢ = "literal byte overflow"u8;
-internal static readonly @string extraneousDataAfterˢ = "extraneous data after sequences"u8;
+internal static ref readonly @string uncompressedSizeTooBigˢ => ref uncompressedSizeTooBigˢᵇ;
+private static readonly @string uncompressedSizeTooBigˢᵇ = "uncompressed size too big"u8;
+internal static ref readonly @string literalByteOverflowˢ => ref literalByteOverflowˢᵇ;
+private static readonly @string literalByteOverflowˢᵇ = "literal byte overflow"u8;
+internal static ref readonly @string extraneousDataAfterˢ => ref extraneousDataAfterˢᵇ;
+private static readonly @string extraneousDataAfterˢᵇ = "extraneous data after sequences"u8;
 
 // execSeqs reads and executes the sequences. RFC 3.1.1.3.2.1.2.
 internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice<byte> litbuf, nint seqCount) {
@@ -278,22 +283,22 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
 
     ref var rbr = ref heap<reverseBitReader>(out var Ꮡrbr);
     (rbr, var err) = Ꮡr.makeReverseBitReader(data, builtin.len(data) - 1, off);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     (var literalState, err) = rbr.val(r.seqTableBits[seqLiteral]);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     (var offsetState, err) = rbr.val(r.seqTableBits[seqOffset]);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     (var matchState, err) = rbr.val(r.seqTableBits[seqMatch]);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -309,27 +314,27 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
         var ptmatch = Ꮡ(r.seqTables[seqMatch], matchState);
         var ptliteral = Ꮡ(r.seqTables[seqLiteral], literalState);
 
-        var (add, errΔ1) = rbr.val((~ptoffset).basebits);
-        if (errΔ1 != default!) {
+        var (add, errΔ1) = rbr.val(ptoffset.basebits);
+        if (errΔ1 != nil) {
             return errΔ1;
         }
-        var offset = (~ptoffset).baseline + add;
+        var offset = ptoffset.baseline + add;
 
-        (add, errΔ1) = rbr.val((~ptmatch).basebits);
-        if (errΔ1 != default!) {
+        (add, errΔ1) = rbr.val(ptmatch.basebits);
+        if (errΔ1 != nil) {
             return errΔ1;
         }
-        var match = (~ptmatch).baseline + add;
+        var match = ptmatch.baseline + add;
 
-        (add, errΔ1) = rbr.val((~ptliteral).basebits);
-        if (errΔ1 != default!) {
+        (add, errΔ1) = rbr.val(ptliteral.basebits);
+        if (errΔ1 != nil) {
             return errΔ1;
         }
-        var literal = (~ptliteral).baseline + add;
+        var literal = ptliteral.baseline + add;
 
         // Handle repeat offsets. RFC 3.1.1.5.
         // See the comment in makeOffsetBaselineFSE.
-        if ((~ptoffset).basebits > 1){
+        if (ptoffset.basebits > 1) {
             r.repeatedOffset3 = r.repeatedOffset2;
             r.repeatedOffset2 = r.repeatedOffset1;
             r.repeatedOffset1 = offset;
@@ -367,29 +372,29 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
         seq++;
         if (seq < seqCount) {
             // Update the states.
-            (add, errΔ1) = rbr.val((~ptliteral).bits);
-            if (errΔ1 != default!) {
+            (add, errΔ1) = rbr.val(ptliteral.bits);
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
-            literalState = (uint32)(~ptliteral).@base + add;
+            literalState = (uint32)ptliteral.@base + add;
 
-            (add, errΔ1) = rbr.val((~ptmatch).bits);
-            if (errΔ1 != default!) {
+            (add, errΔ1) = rbr.val(ptmatch.bits);
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
-            matchState = (uint32)(~ptmatch).@base + add;
+            matchState = (uint32)ptmatch.@base + add;
 
-            (add, errΔ1) = rbr.val((~ptoffset).bits);
-            if (errΔ1 != default!) {
+            (add, errΔ1) = rbr.val(ptoffset.bits);
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
-            offsetState = (uint32)(~ptoffset).@base + add;
+            offsetState = (uint32)ptoffset.@base + add;
         }
 
         // The next sequence is now in literal, offset, match.
 
         if (debug) {
-            println((@string)"literal"u8, literal, (@string)"offset"u8, offset, (@string)"match"u8, match);
+            println((@string)"literal", literal, (@string)"offset", offset, (@string)"match", match);
         }
 
         // Copy literal bytes from litbuf.
@@ -403,7 +408,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
 
         if (match > 0) {
             {
-                var errΔ2 = r.copyFromWindow(Ꮡrbr, offset, match); if (errΔ2 != default!) {
+                var errΔ2 = r.copyFromWindow(Ꮡrbr, offset, match); if (errΔ2 != nil) {
                     return errΔ2;
                 }
             }
@@ -416,12 +421,14 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
         return r.makeError(off, extraneousDataAfterˢ);
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidZeroOffsetˢ = "invalid zero offset"u8;
-internal static readonly @string offsetPastWindowˢ = "offset past window"u8;
+internal static ref readonly @string invalidZeroOffsetˢ => ref invalidZeroOffsetˢᵇ;
+private static readonly @string invalidZeroOffsetˢᵇ = "invalid zero offset"u8;
+internal static ref readonly @string offsetPastWindowˢ => ref offsetPastWindowˢᵇ;
+private static readonly @string offsetPastWindowˢᵇ = "offset past window"u8;
 
 // Copy match bytes from the decoded output, or the window, at offset.
 internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡrbr, uint32 offset, uint32 match) {
@@ -438,7 +445,7 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     //        |------match----------->|
     var bufferOffset = (uint32)0;
     var lenBlock = (uint32)builtin.len(r.buffer);
-    if (lenBlock < offset){
+    if (lenBlock < offset) {
         var lenWindow = r.window.len();
         var copy = offset - lenBlock;
         if (copy > lenWindow) {
@@ -464,7 +471,7 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
         r.buffer = appendꓸꓸꓸ(r.buffer, r.buffer.slice((nint)(bufferOffset), (nint)(bufferOffset + copy)));
         match -= copy;
     }
-    return default!;
+    return default;
 }
 
 } // end zstd_package

@@ -25,10 +25,9 @@ internal static uint8 slowPaeth(uint8 a, uint8 b, uint8 c) {
     nint pa = slowAbs(p - (nint)a);
     nint pb = slowAbs(p - (nint)b);
     nint pc = slowAbs(p - (nint)c);
-    if (pa <= pb && pa <= pc){
+    if (pa <= pb && pa <= pc) {
         return a;
-    } else 
-    if (pb <= pc) {
+    } else if (pb <= pc) {
         return b;
     }
     return c;
@@ -44,14 +43,14 @@ internal static void slowFilterPaeth(slice<byte> cdat, slice<byte> pdat, nint by
     }
 }
 
-public static void TestPaeth(ж<testing.T> Ꮡt) {
+public static void TestPaeth(ж<testing.T> t) {
     for (nint a = 0; a < 256; a += 15) {
         for (nint b = 0; b < 256; b += 15) {
             for (nint c = 0; c < 256; c += 15) {
                 var got = paeth((uint8)a, (uint8)b, (uint8)c);
                 var want = slowPaeth((uint8)a, (uint8)b, (uint8)c);
                 if (got != want) {
-                    Ꮡt.Errorf("a, b, c = %d, %d, %d: got %d, want %d"u8, a, b, c, got, want);
+                    t.Errorf("a, b, c = %d, %d, %d: got %d, want %d", a, b, c, got, want);
                 }
             }
         }
@@ -66,7 +65,7 @@ public static void BenchmarkPaeth(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestPaethDecode(ж<testing.T> Ꮡt) {
+public static void TestPaethDecode(ж<testing.T> t) {
     var pdat0 = new slice<byte>(32);
     var pdat1 = new slice<byte>(32);
     var pdat2 = new slice<byte>(32);
@@ -87,7 +86,7 @@ public static void TestPaethDecode(ж<testing.T> Ꮡt) {
             filterPaeth(cdat1, pdat1, bytesPerPixel);
             slowFilterPaeth(cdat2, pdat2, bytesPerPixel);
             if (!bytes.Equal(cdat1, cdat2)) {
-                Ꮡt.Errorf("bytesPerPixel: %d\npdat0: % x\ncdat0: % x\ngot:   % x\nwant:  % x"u8, bytesPerPixel, pdat0, cdat0, cdat1, cdat2);
+                t.Errorf("bytesPerPixel: %d\npdat0: % x\ncdat0: % x\ngot:   % x\nwant:  % x", bytesPerPixel, pdat0, cdat0, cdat1, cdat2);
                 break;
             }
         }

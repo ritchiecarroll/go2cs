@@ -33,7 +33,7 @@ partial struct fuzzCommand {
 }
 
 // Encoded size of fuzzCommand.
-internal static nint fuzzCommandSize = binary.Size(new fuzzCommand(nil));
+internal static nint fuzzCommandSize = binary.Size(new fuzzCommand());
 
 public partial struct fuzzOp /*num:uint8*/;
 
@@ -44,7 +44,7 @@ internal static fuzzOp fuzzOpDelete => 2;
 internal static slice<byte> encode(slice<fuzzCommand> fc) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var err = binary.Write(new maps_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, fc); if (err != default!) {
+        var err = binary.Write(new maps_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, fc); if (err != nil) {
             throw panic(fmt.Sprintf("error writing %v: %v"u8, fc, err));
         }
     }
@@ -58,11 +58,10 @@ internal static slice<fuzzCommand> decode(slice<byte> b) {
     nint usefulSize = entries * fuzzCommandSize;
     b = b.slice(0, usefulSize);
 
-    ref var fc = ref heap<slice<fuzzCommand>>(out var Ꮡfc);
-    fc = new slice<fuzzCommand>(entries);
+    ref var fc = ref heap<slice<fuzzCommand>>(new slice<fuzzCommand>(entries), out var Ꮡfc);
     var buf = bytes.NewReader(b);
     {
-        var err = binary.Read(new maps_test_package.bytes_ReaderжReader(buf), binary.LittleEndian, Ꮡfc); if (err != default!) {
+        var err = binary.Read(new maps_test_package.bytes_ReaderжReader(buf), binary.LittleEndian, Ꮡfc); if (err != nil) {
             throw panic(fmt.Sprintf("error reading %v: %v"u8, b, err));
         }
     }
@@ -70,8 +69,8 @@ internal static slice<fuzzCommand> decode(slice<byte> b) {
     return fc;
 }
 
-public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
-    var fc = new fuzzCommand[]{
+public static void TestEncodeDecode(ж<testing.T> t) {
+    var fc = slice<fuzzCommand>([
         new(
             Op: fuzzOpPut,
             Key: 123,
@@ -81,19 +80,19 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
             Op: fuzzOpGet,
             Key: 123
         )
-    }.slice();
+    ]);
 
     var b = encode(fc);
     var got = decode(b);
     if (!reflect.DeepEqual(fc, got)) {
-        Ꮡt.Errorf("encode-decode roundtrip got %+v want %+v"u8, got, fc);
+        t.Errorf("encode-decode roundtrip got %+v want %+v", got, fc);
     }
 
     // Extra trailing bytes ignored.
     b = append(b, (byte)42);
     got = decode(b);
     if (!reflect.DeepEqual(fc, got)) {
-        Ꮡt.Errorf("encode-decode (extra byte) roundtrip got %+v want %+v"u8, got, fc);
+        t.Errorf("encode-decode (extra byte) roundtrip got %+v want %+v", got, fc);
     }
 }
 
@@ -101,7 +100,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // All of the ops.
-    f.Add(encode(new fuzzCommand[]{
+    f.Add(encode(slice<fuzzCommand>([
         new(
             Op: fuzzOpPut,
             Key: 123,
@@ -115,10 +114,10 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             Op: fuzzOpGet,
             Key: 123
         )
-    }.slice()));
+    ])));
 
     // Add enough times to trigger grow.
-    f.Add(encode(new fuzzCommand[]{
+    f.Add(encode(slice<fuzzCommand>([
         new(
             Op: fuzzOpPut,
             Key: 1,
@@ -176,7 +175,7 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             Op: fuzzOpGet,
             Key: 2
         )
-    }.slice()));
+    ])));
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in) => {
         var fc = decode(@in);
@@ -190,35 +189,39 @@ public static void FuzzTable(ж<testing.F> Ꮡf) {
             ref var c = ref heap(new fuzzCommand(), out var Ꮡc);
             c = vᴛ1;
 
-            var exprᴛ1 = c.Op;
-            if (exprᴛ1 == fuzzOpGet) {
-                var (elemPtr, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(fuzzCommand.ᏑKey)));
+            switch (c.Op) {
+            case var ᴛ when ᴛ == fuzzOpGet: {
+                var (elemPtr, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.ᏑKey));
                 var (refElem, refOK) = @ref[c.Key, ꟷ];
 
                 if (ok != refOK) {
-                    t.Errorf("Get(%d) got ok %v want ok %v"u8, c.Key, ok, refOK);
+                    t.Errorf("Get(%d) got ok %v want ok %v", c.Key, ok, refOK);
                 }
                 if (!ok) {
                     continue;
                 }
                 var gotElem = ~(ж<uint32>)(uintptr)(elemPtr);
                 if (gotElem != refElem) {
-                    t.Errorf("Get(%d) got %d want %d"u8, c.Key, gotElem, refElem);
+                    t.Errorf("Get(%d) got %d want %d", c.Key, gotElem, refElem);
                 }
+                break;
             }
-            else if (exprᴛ1 == fuzzOpPut) {
-                m.Put(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(fuzzCommand.ᏑKey)), @unsafe.Pointer.FromPinnedBox(Ꮡc.of(fuzzCommand.ᏑElem)));
+            case var ᴛ when ᴛ == fuzzOpPut: {
+                m.Put(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.ᏑKey), @unsafe.Pointer.FromPinnedBox(Ꮡc.ᏑElem));
                 @ref[c.Key] = c.Elem;
+                break;
             }
-            else if (exprᴛ1 == fuzzOpDelete) {
-                m.Delete(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.of(fuzzCommand.ᏑKey)));
+            case var ᴛ when ᴛ == fuzzOpDelete: {
+                m.Delete(typ, @unsafe.Pointer.FromPinnedBox(Ꮡc.ᏑKey));
                 delete(@ref, c.Key);
+                break;
             }
-            else { /* default: */
+            default: {
                 // Just skip this command to keep the fuzzer
                 // less constrained.
                 continue;
-            }
+                break;
+            }}
         }
     });
 }

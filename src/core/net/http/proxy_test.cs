@@ -17,34 +17,34 @@ partial struct cacheKeysTestsᴛ1 /*dyn*/ {
     internal @string addr;
     internal @string key;
 }
-internal static slice<cacheKeysTestsᴛ1> cacheKeysTests = new cacheKeysTestsᴛ1[]{
-    new(""u8, "http"u8, "foo.com"u8, "|http|foo.com"u8),
-    new(""u8, "https"u8, "foo.com"u8, "|https|foo.com"u8),
-    new("http://foo.com"u8, "http"u8, "foo.com"u8, "http://foo.com|http|"u8),
-    new("http://foo.com"u8, "https"u8, "foo.com"u8, "http://foo.com|https|foo.com"u8)
-}.slice();
+internal static slice<cacheKeysTestsᴛ1> cacheKeysTests = slice<cacheKeysTestsᴛ1>([
+    new("", "http", "foo.com", "|http|foo.com"),
+    new("", "https", "foo.com", "|https|foo.com"),
+    new("http://foo.com", "http", "foo.com", "http://foo.com|http|"),
+    new("http://foo.com", "https", "foo.com", "http://foo.com|https|foo.com")
+]);
 
-public static void TestCacheKeys(ж<testing.T> Ꮡt) {
+public static void TestCacheKeys(ж<testing.T> t) {
     foreach (var (_, tt) in cacheKeysTests) {
-        ж<url.URL> proxy = default!;
+        ж<url.URL> proxy = default;
         if (tt.proxy != ""u8) {
             var (u, err) = url.Parse(tt.proxy);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             proxy = u;
         }
         var cm = new connectMethod(proxyURL: proxy, targetScheme: tt.scheme, targetAddr: tt.addr);
         {
             @string got = cm.key().String(); if (got != tt.key) {
-                Ꮡt.Fatalf("{%q, %q, %q} cache key = %q; want %q"u8, tt.proxy, tt.scheme, tt.addr, got, tt.key);
+                t.Fatalf("{%q, %q, %q} cache key = %q; want %q", tt.proxy, tt.scheme, tt.addr, got, tt.key);
             }
         }
     }
 }
 
 public static void ResetProxyEnv() {
-    foreach (var (_, v) in new @string[]{"HTTP_PROXY"u8, "http_proxy"u8, "NO_PROXY"u8, "no_proxy"u8, "REQUEST_METHOD"u8}.slice()) {
+    foreach (var (_, v) in slice<@string>(["HTTP_PROXY", "http_proxy", "NO_PROXY", "no_proxy", "REQUEST_METHOD"])) {
         os.Unsetenv(v);
     }
     ResetCachedEnvironment();
@@ -54,39 +54,39 @@ partial struct proxyAuthTestsᴛ1 /*dyn*/ {
     internal @string proxy;
     internal @string key;
 }
-internal static slice<proxyAuthTestsᴛ1> proxyAuthTests = new proxyAuthTestsᴛ1[]{
+internal static slice<proxyAuthTestsᴛ1> proxyAuthTests = slice<proxyAuthTestsᴛ1>([
     new(
-        ""u8,
-        ""u8
+        "",
+        ""
     ),
     new(
-        "http://bar.com"u8,
-        ""u8
+        "http://bar.com",
+        ""
     ),
     new(
-        "http://foo@bar.com"u8,
-        "Basic Zm9vOg=="u8
+        "http://foo@bar.com",
+        "Basic Zm9vOg=="
     ),
     new(
-        "http://foo:bar@bar.com"u8,
-        "Basic Zm9vOmJhcg=="u8
+        "http://foo:bar@bar.com",
+        "Basic Zm9vOmJhcg=="
     )
-}.slice();
+]);
 
-public static void TestProxyAuthKeys(ж<testing.T> Ꮡt) {
+public static void TestProxyAuthKeys(ж<testing.T> t) {
     foreach (var (_, tt) in proxyAuthTests) {
-        ж<url.URL> proxy = default!;
+        ж<url.URL> proxy = default;
         if (tt.proxy != ""u8) {
             var (u, err) = url.Parse(tt.proxy);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             proxy = u;
         }
         var cm = new connectMethod(proxyURL: proxy);
         {
             @string got = cm.proxyAuth(); if (got != tt.key) {
-                Ꮡt.Fatalf("{%q} proxyAuth key = %q; want %q"u8, tt.proxy, got, tt.key);
+                t.Fatalf("{%q} proxyAuth key = %q; want %q", tt.proxy, got, tt.key);
             }
         }
     }

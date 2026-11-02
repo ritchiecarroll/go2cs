@@ -15,13 +15,14 @@ internal static void _ᴛ2() {
     _ = x[delimSpaceOrTagEnd - 3];
 }
 
-internal static readonly @string _delim_name = "delimNonedelimDoubleQuotedelimSingleQuotedelimSpaceOrTagEnd"u8;
+internal static ref readonly @string _delim_name => ref _delim_nameᵇ;
+private static readonly @string _delim_nameᵇ = "delimNonedelimDoubleQuotedelimSingleQuotedelimSpaceOrTagEnd"u8;
 
 internal static array<uint8> _delim_index = new uint8[]{0, 9, 25, 41, 59}.array();
 
 internal static @string String(this delim i) {
     if (i >= ((delim)(uint8)(len(_delim_index) - 1))) {
-        return "delim("u8 + strconv.FormatInt((int64)(uint8)i, 10) + ")"u8;
+        return "delim("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _delim_name.slice(_delim_index[i], _delim_index[i + 1]);
 }

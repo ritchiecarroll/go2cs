@@ -26,7 +26,7 @@ partial interface ReadLinkFS :
 public static (@string, error) ReadLink(FS fsys, @string name) {
     var (sym, ok) = fsys._<ReadLinkFS>(ᐧ);
     if (!ok) {
-        return ("", new PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: ErrInvalid))));
+        return ("", new PathErrorжerror(Ꮡ(new PathError(Op: "readlink", Path: name, Err: ErrInvalid))));
     }
     return sym.ReadLink(name);
 }

@@ -45,7 +45,7 @@ using static go.net.http.@internal.testcert_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,7 +55,7 @@ using static go.net.http.@internal.testcert_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/internal/testcert/testcert.go", "testcert.cs", "AA8cABosACI6gA==")]
+[assembly: GoPositionMap("net/http/internal/testcert/testcert.go", "testcert.cs", "AA8cABosACQ6gA==")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http.@internal;

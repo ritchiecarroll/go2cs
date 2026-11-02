@@ -12,7 +12,7 @@ partial class mlkem_test_package {
 public static void Example() {
     // Alice generates a new key pair and sends the encapsulation key to Bob.
     var (dk, err) = Δmlkem.GenerateKey768();
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
     var encapsulationKey = dk.EncapsulationKey().Bytes();
@@ -23,7 +23,7 @@ public static void Example() {
 
     // Alice decapsulates the shared secret from the ciphertext.
     (var sharedSecret, err) = dk.Decapsulate(ciphertext);
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
 
@@ -32,11 +32,11 @@ public static void Example() {
 }
 
 public static slice<byte> /*ciphertext*/ Bob(slice<byte> encapsulationKey) {
-    slice<byte> ciphertext = default!;
+    slice<byte> ciphertext = default;
 
     // Bob encapsulates a shared secret using the encapsulation key.
     var (ek, err) = Δmlkem.NewEncapsulationKey768(encapsulationKey);
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
     (var sharedSecret, ciphertext) = ek.Encapsulate();

@@ -11,19 +11,8 @@
 
 // <ImportedTypeAliases>
 global using fuzzꓸCorpusEntry = go.@internal.fuzz_package.CorpusEntryᴛ1;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,7 +51,11 @@ using static go.testing.@internal.testdeps_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(testLog))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -72,7 +65,7 @@ using static go.testing.@internal.testdeps_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACxOsoKCgoKmpoKmgqaC7ILaggAMFILWgtaC1oKo4oKmgoKClIKCgqIACAiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABYiwoKU9qKCgoKClJSCgoCCpA==")]
+[assembly: GoPositionMap("testing/internal/testdeps/deps.go", "deps.cs", "ACxOsoKCgoKmpoKmgqaC7ILaggANFILmguaC5oKo4oKmgoKClIKCgqIACQiCgoLKgoKUpqKCgoKC2JKmAAYagpIACxiClNYACA6CkoKClNaCpoKmgqaCABYiwoKUAAoGooKCgoKUlIKCgIKk", "", "", "", "199:21,232:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing.@internal;

@@ -28,7 +28,7 @@ using static go.crypto.@internal.fips140.nistec_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/nistec/p256_table_test.go", "p256_table_test.cs", "AA8ggpSSkqaCyqKClIKmgoKClIQ=", "20-22:1", "", "47=Bytes/3/4/1,Bytes/4/4/1,Equal/2/2/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/nistec/p256_table_test.go", "p256_table_test.cs", "AA8ggpSSkqaCyoKClIKmgoKClIQ=", "20-22:1", "", "45=Bytes/3/4/1,Bytes/4/4/1,Equal/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

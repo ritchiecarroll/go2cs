@@ -6,7 +6,7 @@ namespace go.crypto.@internal;
 using godebug = go.crypto.@internal.fips140deps.godebug_package;
 using errors = errors_package;
 using strings = strings_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using go.crypto.@internal.fips140deps;
 
 partial class fips140_package {
@@ -21,10 +21,11 @@ partial class fips140_package {
 // failfipscast is a GODEBUG key allowing simulation of a CAST or PCT failure,
 // as required during FIPS 140-3 functional testing. The value is the whole name
 // of the target CAST or PCT.
-internal static @string failfipscast = godebug.Value("#failfipscast"u8);
+internal static @string failfipscast = godebug.Value("#failfipscast");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string simulatedCastFailureˢ = "simulated CAST failure"u8;
+private static ref readonly @string simulatedCastFailureˢ => ref simulatedCastFailureˢᵇ;
+private static readonly @string simulatedCastFailureˢᵇ = "simulated CAST failure"u8;
 
 // CAST runs the named Cryptographic Algorithm Self-Test (if operated in FIPS
 // mode) and aborts the program (stopping the module input/output and entering
@@ -40,7 +41,7 @@ private static readonly @string simulatedCastFailureˢ = "simulated CAST failure
 // use of the algorithm, an invocation of that algorithm should be added to
 // fipstest.TestConditionals.
 public static void CAST(@string name, Func<error> f) {
-    if (strings.ContainsAny(name, ",#=:"u8)) {
+    if (strings.ContainsAny(name, ",#=:")) {
         throw panic("fips: invalid self-test name: " + name);
     }
     if (!Enabled) {
@@ -51,17 +52,18 @@ public static void CAST(@string name, Func<error> f) {
     if (name == failfipscast) {
         err = errors.New(simulatedCastFailureˢ);
     }
-    if (err != default!) {
+    if (err != nil) {
         fatal("FIPS 140-3 self-test failed: "u8 + name + ": "u8 + err.Error());
         throw panic("unreachable");
     }
     if (debug) {
-        println((@string)"FIPS 140-3 self-test passed:"u8, name);
+        println((@string)"FIPS 140-3 self-test passed:", name);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string simulatedPctFailureˢ = "simulated PCT failure"u8;
+private static ref readonly @string simulatedPctFailureˢ => ref simulatedPctFailureˢᵇ;
+private static readonly @string simulatedPctFailureˢᵇ = "simulated PCT failure"u8;
 
 // PCT runs the named Pairwise Consistency Test (if operated in FIPS mode) and
 // aborts the program (stopping the module input/output and entering the "error
@@ -76,7 +78,7 @@ private static readonly @string simulatedPctFailureˢ = "simulated PCT failure"u
 // If a package p calls PCT during key generation, an invocation of that
 // function should be added to fipstest.TestConditionals.
 public static void PCT(@string name, Func<error> f) {
-    if (strings.ContainsAny(name, ",#=:"u8)) {
+    if (strings.ContainsAny(name, ",#=:")) {
         throw panic("fips: invalid self-test name: " + name);
     }
     if (!Enabled) {
@@ -87,12 +89,12 @@ public static void PCT(@string name, Func<error> f) {
     if (name == failfipscast) {
         err = errors.New(simulatedPctFailureˢ);
     }
-    if (err != default!) {
+    if (err != nil) {
         fatal("FIPS 140-3 self-test failed: "u8 + name + ": "u8 + err.Error());
         throw panic("unreachable");
     }
     if (debug) {
-        println((@string)"FIPS 140-3 PCT passed:"u8, name);
+        println((@string)"FIPS 140-3 PCT passed:", name);
     }
 }
 

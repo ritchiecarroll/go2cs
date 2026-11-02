@@ -11,7 +11,8 @@ partial class cfg_package {
 
 // KnownEnv is a list of environment variables that affect the operation
 // of the Go command.
-public static readonly @string KnownEnv = """
+public static ref readonly @string KnownEnv => ref KnownEnvᵇ;
+private static readonly @string KnownEnvᵇ = """
 
 	AR
 	CC

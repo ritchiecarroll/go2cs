@@ -43,7 +43,7 @@ partial struct info /*num:uint16*/;
 internal static UntypedInt catSmallMask => 0x3;
 internal static UntypedInt catBigMask => 0xF8;
 internal static UntypedInt indexShift => 3;
-internal static UntypedInt xorBit => 0x4; // interpret the index as an xor pattern
+internal static UntypedInt xorBit => 0x4;       // interpret the index as an xor pattern
 internal static UntypedInt inlineXOR => 0xE000; // These bits are set if the XOR pattern is inlined.
 
 internal static UntypedInt joinShift => 8;
@@ -60,7 +60,7 @@ internal static UntypedInt mayNeedNorm => 0x2000;
 // A category corresponds to a category defined in the IDNA mapping table.
 partial struct Δcategory /*num:uint16*/;
 
-internal static Δcategory unknown => 0;        // not currently defined in unicode.
+internal static Δcategory unknown => 0; // not currently defined in unicode.
 internal static Δcategory mapped => 1;
 internal static Δcategory disallowedSTD3Mapped => 2;
 internal static Δcategory deviation => 3;

@@ -8,7 +8,7 @@ partial class os_package {
 
 internal static (ж<File>, error) newDirFile(nint fd, @string name) {
     // We use kindNoPoll because we know that this is a directory.
-    return (newFile(fd, name, kindNoPoll, false), default!);
+    return (newFile(fd, name, kindNoPoll, false), default);
 }
 
 } // end os_package

@@ -17,13 +17,14 @@ internal static void _ᴛ1() {
     _ = x[GENERIC_RELOC_TLV - 5];
 }
 
-internal static readonly @string _RelocTypeGeneric_name = "GENERIC_RELOC_VANILLAGENERIC_RELOC_PAIRGENERIC_RELOC_SECTDIFFGENERIC_RELOC_PB_LA_PTRGENERIC_RELOC_LOCAL_SECTDIFFGENERIC_RELOC_TLV"u8;
+internal static ref readonly @string _RelocTypeGeneric_name => ref _RelocTypeGeneric_nameᵇ;
+private static readonly @string _RelocTypeGeneric_nameᵇ = "GENERIC_RELOC_VANILLAGENERIC_RELOC_PAIRGENERIC_RELOC_SECTDIFFGENERIC_RELOC_PB_LA_PTRGENERIC_RELOC_LOCAL_SECTDIFFGENERIC_RELOC_TLV"u8;
 
 internal static array<uint8> _RelocTypeGeneric_index = new uint8[]{0, 21, 39, 61, 84, 112, 129}.array();
 
 public static @string String(this RelocTypeGeneric i) {
     if (i < 0 || i >= ((RelocTypeGeneric)(len(_RelocTypeGeneric_index) - 1))) {
-        return "RelocTypeGeneric("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "RelocTypeGeneric("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeGeneric_name.slice(_RelocTypeGeneric_index[i], _RelocTypeGeneric_index[i + 1]);
 }
@@ -44,13 +45,14 @@ internal static void _ᴛ2() {
     _ = x[X86_64_RELOC_TLV - 9];
 }
 
-internal static readonly @string _RelocTypeX86_64_name = "X86_64_RELOC_UNSIGNEDX86_64_RELOC_SIGNEDX86_64_RELOC_BRANCHX86_64_RELOC_GOT_LOADX86_64_RELOC_GOTX86_64_RELOC_SUBTRACTORX86_64_RELOC_SIGNED_1X86_64_RELOC_SIGNED_2X86_64_RELOC_SIGNED_4X86_64_RELOC_TLV"u8;
+internal static ref readonly @string _RelocTypeX86_64_name => ref _RelocTypeX86_64_nameᵇ;
+private static readonly @string _RelocTypeX86_64_nameᵇ = "X86_64_RELOC_UNSIGNEDX86_64_RELOC_SIGNEDX86_64_RELOC_BRANCHX86_64_RELOC_GOT_LOADX86_64_RELOC_GOTX86_64_RELOC_SUBTRACTORX86_64_RELOC_SIGNED_1X86_64_RELOC_SIGNED_2X86_64_RELOC_SIGNED_4X86_64_RELOC_TLV"u8;
 
 internal static array<uint8> _RelocTypeX86_64_index = new uint8[]{0, 21, 40, 59, 80, 96, 119, 140, 161, 182, 198}.array();
 
 public static @string String(this RelocTypeX86_64 i) {
     if (i < 0 || i >= ((RelocTypeX86_64)(len(_RelocTypeX86_64_index) - 1))) {
-        return "RelocTypeX86_64("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "RelocTypeX86_64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeX86_64_name.slice(_RelocTypeX86_64_index[i], _RelocTypeX86_64_index[i + 1]);
 }
@@ -71,13 +73,14 @@ internal static void _ᴛ3() {
     _ = x[ARM_RELOC_HALF_SECTDIFF - 9];
 }
 
-internal static readonly @string _RelocTypeARM_name = "ARM_RELOC_VANILLAARM_RELOC_PAIRARM_RELOC_SECTDIFFARM_RELOC_LOCAL_SECTDIFFARM_RELOC_PB_LA_PTRARM_RELOC_BR24ARM_THUMB_RELOC_BR22ARM_THUMB_32BIT_BRANCHARM_RELOC_HALFARM_RELOC_HALF_SECTDIFF"u8;
+internal static ref readonly @string _RelocTypeARM_name => ref _RelocTypeARM_nameᵇ;
+private static readonly @string _RelocTypeARM_nameᵇ = "ARM_RELOC_VANILLAARM_RELOC_PAIRARM_RELOC_SECTDIFFARM_RELOC_LOCAL_SECTDIFFARM_RELOC_PB_LA_PTRARM_RELOC_BR24ARM_THUMB_RELOC_BR22ARM_THUMB_32BIT_BRANCHARM_RELOC_HALFARM_RELOC_HALF_SECTDIFF"u8;
 
 internal static array<uint8> _RelocTypeARM_index = new uint8[]{0, 17, 31, 49, 73, 92, 106, 126, 148, 162, 185}.array();
 
 public static @string String(this RelocTypeARM i) {
     if (i < 0 || i >= ((RelocTypeARM)(len(_RelocTypeARM_index) - 1))) {
-        return "RelocTypeARM("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "RelocTypeARM("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeARM_name.slice(_RelocTypeARM_index[i], _RelocTypeARM_index[i + 1]);
 }
@@ -99,13 +102,14 @@ internal static void _ᴛ4() {
     _ = x[ARM64_RELOC_ADDEND - 10];
 }
 
-internal static readonly @string _RelocTypeARM64_name = "ARM64_RELOC_UNSIGNEDARM64_RELOC_SUBTRACTORARM64_RELOC_BRANCH26ARM64_RELOC_PAGE21ARM64_RELOC_PAGEOFF12ARM64_RELOC_GOT_LOAD_PAGE21ARM64_RELOC_GOT_LOAD_PAGEOFF12ARM64_RELOC_POINTER_TO_GOTARM64_RELOC_TLVP_LOAD_PAGE21ARM64_RELOC_TLVP_LOAD_PAGEOFF12ARM64_RELOC_ADDEND"u8;
+internal static ref readonly @string _RelocTypeARM64_name => ref _RelocTypeARM64_nameᵇ;
+private static readonly @string _RelocTypeARM64_nameᵇ = "ARM64_RELOC_UNSIGNEDARM64_RELOC_SUBTRACTORARM64_RELOC_BRANCH26ARM64_RELOC_PAGE21ARM64_RELOC_PAGEOFF12ARM64_RELOC_GOT_LOAD_PAGE21ARM64_RELOC_GOT_LOAD_PAGEOFF12ARM64_RELOC_POINTER_TO_GOTARM64_RELOC_TLVP_LOAD_PAGE21ARM64_RELOC_TLVP_LOAD_PAGEOFF12ARM64_RELOC_ADDEND"u8;
 
 internal static array<uint16> _RelocTypeARM64_index = new uint16[]{0, 20, 42, 62, 80, 101, 128, 158, 184, 212, 243, 261}.array();
 
 public static @string String(this RelocTypeARM64 i) {
     if (i < 0 || i >= ((RelocTypeARM64)(len(_RelocTypeARM64_index) - 1))) {
-        return "RelocTypeARM64("u8 + strconv.FormatInt((int64)(nint)i, 10) + ")"u8;
+        return "RelocTypeARM64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
     return _RelocTypeARM64_name.slice(_RelocTypeARM64_index[i], _RelocTypeARM64_index[i + 1]);
 }

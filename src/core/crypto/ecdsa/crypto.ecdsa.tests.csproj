@@ -135,7 +135,6 @@
     <ProjectReference Include="$(go2csPath)core/crypto/ecdh/crypto.ecdh.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/elliptic/crypto.elliptic.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/ecdsa/crypto.internal.fips140.ecdsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha1/crypto.sha1.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
@@ -144,7 +143,6 @@
     <ProjectReference Include="$(go2csPath)core/encoding/hex/encoding.hex.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/big/math.big.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />

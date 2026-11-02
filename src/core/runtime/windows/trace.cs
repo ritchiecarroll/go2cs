@@ -207,16 +207,16 @@ partial struct Δtraceᴛ1 /*dyn*/ {
     //
     // Protected by trace.lock.
     internal ж<traceBuf> reading; // buffer currently handed off to user
-    internal ж<traceBuf> empty; // stack of empty buffers
+    internal ж<traceBuf> empty;   // stack of empty buffers
     internal array<traceBufQueue> full = new(2);
     internal atomic.Bool workAvailable;
     // State for the trace reader goroutine.
     //
     // Protected by trace.lock.
-    internal atomic.Uintptr readerGen; // the generation the reader is currently reading for
-    internal atomic.Uintptr flushedGen; // the last completed generation
-    internal bool headerWritten;           // whether ReadTrace has emitted trace header
-    internal bool endOfGenerationWritten;           // whether readTrace has emitted the end of the generation signal
+    internal atomic.Uintptr readerGen;    // the generation the reader is currently reading for
+    internal atomic.Uintptr flushedGen;   // the last completed generation
+    internal bool headerWritten;          // whether ReadTrace has emitted trace header
+    internal bool endOfGenerationWritten; // whether readTrace has emitted the end of the generation signal
     // doneSema is used to synchronize the reader and traceAdvance. Specifically,
     // it notifies traceAdvance that the reader is done with a generation.
     // Both semaphores are 0 by default (so, acquires block). traceAdvance
@@ -226,9 +226,9 @@ partial struct Δtraceᴛ1 /*dyn*/ {
     internal array<uint32> doneSema = new(2);
     // Trace data tables for deduplicating data going into the trace.
     // There are 2 of each: one for gen%2, one for 1-gen%2.
-    internal array<traceStackTable> stackTab = new(2, () => new()); // maps stack traces to unique ids
+    internal array<traceStackTable> stackTab = new(2, () => new());   // maps stack traces to unique ids
     internal array<traceStringTable> stringTab = new(2, () => new()); // maps strings to unique ids
-    internal array<traceTypeTable> typeTab = new(2, () => new()); // maps type pointers to unique ids
+    internal array<traceTypeTable> typeTab = new(2, () => new());     // maps type pointers to unique ids
     // cpuLogRead accepts CPU profile samples from the signal handler where
     // they're generated. There are two profBufs here: one for gen%2, one for
     // 1-gen%2. These profBufs use a three-word header to hold the IDs of the P, G,
@@ -243,7 +243,7 @@ partial struct Δtraceᴛ1 /*dyn*/ {
     //
     // Initialization and teardown of these fields is protected by traceAdvanceSema.
     internal array<ж<profBuf>> cpuLogRead = new(2);
-    internal atomic.Uint32 signalLock;              // protects use of the following member, only usable in signal handlers
+    internal atomic.Uint32 signalLock;                            // protects use of the following member, only usable in signal handlers
     internal array<atomic.Pointer<profBuf>> cpuLogWrite = new(2); // copy of cpuLogRead for use in signal handlers, set without signalLock
     internal ж<wakeableSleep> cpuSleep;
     internal /*<-*/channel<EmptyStruct> cpuLogDone = /*<-*/channel<EmptyStruct>.RecvOnly;
@@ -302,9 +302,12 @@ internal static ref uint32 traceShutdownSema => ref ((StaticBox<uint32>)Ꮡtrace
 // go2cs generated this placeholder — func StopTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string traceNonEmptyFullTraceˢ = "trace: non-empty full trace buffer for done generation"u8;
-internal static readonly @string traceNonEmptyFullTraceˢ2 = "trace: non-empty full trace buffer for next generation"u8;
-internal static readonly @string traceReadingAfterˢ = "trace: reading after shutdown"u8;
+internal static ref readonly @string traceNonEmptyFullTraceˢ => ref traceNonEmptyFullTraceˢᵇ;
+private static readonly @string traceNonEmptyFullTraceˢᵇ = "trace: non-empty full trace buffer for done generation"u8;
+internal static ref readonly @string traceNonEmptyFullTraceˢ2 => ref traceNonEmptyFullTraceˢ2ᵇ;
+private static readonly @string traceNonEmptyFullTraceˢ2ᵇ = "trace: non-empty full trace buffer for next generation"u8;
+internal static ref readonly @string traceReadingAfterˢ => ref traceReadingAfterˢᵇ;
+private static readonly @string traceReadingAfterˢᵇ = "trace: reading after shutdown"u8;
 
 // Collect all the untraced Gs.
 internal partial struct traceAdvance_untracedG /*dyn*/ {
@@ -352,8 +355,7 @@ internal static void traceAdvance(bool stopTrace) {
             return;
         }
         // Scribble down information about this goroutine.
-        ref var ug = ref heap<traceAdvance_untracedG>(out var Ꮡug);
-        Ꮡug.Value = new traceAdvance_untracedG(gp: gp, mid: -1);
+        ref var ug = ref heap<traceAdvance_untracedG>(new traceAdvance_untracedG(gp: gp, mid: -1), out var Ꮡug);
         systemstack(() => {
             var me = getg().Value.m.Value.curg;
             // We don't have to handle this G status transition because we
@@ -436,7 +438,7 @@ internal static void traceAdvance(bool stopTrace) {
 
     // Advance the generation or stop the trace.
     Δtrace.lastNonZeroGen = gen;
-    if (stopTrace){
+    if (stopTrace) {
         systemstack(() => {
             // Ordering is important here. Set shutdown first, then disable tracing,
             // so that conditions like (traceEnabled() || traceShuttingDown()) have
@@ -504,8 +506,7 @@ internal static void traceAdvance(bool stopTrace) {
     // will be flushed in time for the new generation) or it will have flushed its
     // buffers before we snapshotted it to begin with.
     @lock(Ꮡsched.of(schedt.Ꮡlock));
-    ref var mToFlush = ref heap<ж<m>>(out var ᏑmToFlush);
-    mToFlush = allm;
+    ref var mToFlush = ref heap<ж<m>>(allm, out var ᏑmToFlush);
     for (var mpΔ1 = mToFlush; mpΔ1 != nil; mpΔ1 = mpΔ1.Value.alllink) {
         mpΔ1.Value.trace.link = mpΔ1.Value.alllink;
     }
@@ -530,9 +531,9 @@ internal static void traceAdvance(bool stopTrace) {
         while (ᏑmToFlush.ValueSlot != nil) {
             var prev = ᏑmToFlush;
             for (var mpΔ3 = prev.ValueSlot; mpΔ3 != nil; ) {
-                if (mpΔ3.of(m.Ꮡtrace).of(mTraceState.Ꮡwriting).Load()) {
+                if (mpΔ3.of(m.Ꮡtrace).Ꮡwriting.Load()) {
                     // The M is writing. Come back to it later.
-                    prev = mpΔ3.of(m.Ꮡtrace).of(mTraceState.Ꮡlink);
+                    prev = mpΔ3.of(m.Ꮡtrace).Ꮡlink;
                     mpΔ3 = mpΔ3.Value.trace.link;
                     continue;
                 }
@@ -544,14 +545,14 @@ internal static void traceAdvance(bool stopTrace) {
                 foreach (var (exp, buf) in (~mpΔ3).trace.buf[gen % 2].ΔRangeSnapshot()) {
                     if (buf != nil) {
                         traceBufFlush(buf, gen);
-                        (~mpΔ3).trace.buf[gen % 2][exp] = default!;
+                        (~mpΔ3).trace.buf[gen % 2][exp] = default;
                     }
                 }
                 unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
 
                 // Remove the m from the flush list.
                 prev.ValueSlot = mpΔ3.Value.trace.link;
-                mpΔ3.Value.trace.link = default!;
+                mpΔ3.Value.trace.link = default;
                 mpΔ3 = prev.ValueSlot;
             }
             // Yield only if we're going to be going around the loop again.
@@ -564,9 +565,9 @@ internal static void traceAdvance(bool stopTrace) {
                 // this many times.
                 if (i > 100000 && !detectedDeadlock) {
                     detectedDeadlock = true;
-                    println((@string)"runtime: failing to flush"u8);
+                    println((@string)"runtime: failing to flush");
                     for (var mpΔ4 = ᏑmToFlush.ValueSlot; mpΔ4 != nil; mpΔ4 = mpΔ4.Value.trace.link) {
-                        print((@string)"runtime: m="u8, (~mpΔ4).id, (@string)"\n"u8);
+                        print((@string)"runtime: m=", (~mpΔ4).id, (@string)"\n");
                     }
                 }
                 i++;
@@ -655,8 +656,8 @@ internal static void traceAdvance(bool stopTrace) {
             // Free all the empty buffers.
             while (Δtrace.empty != nil) {
                 var buf = Δtrace.empty;
-                Δtrace.empty = buf.Value.link;
-                sysFree(@unsafe.Pointer.FromPinnedBox(buf), /* unsafe.Sizeof(*buf) */ (uintptr)65536, Ꮡmemstats.of(mstats.Ꮡother_sys));
+                Δtrace.empty = buf.link;
+                sysFree(@unsafe.Pointer.FromPinnedBox(buf), /* unsafe.Sizeof(*buf) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys);
             }
             // Clear trace.shutdown and other flags.
             Δtrace.headerWritten = false;
@@ -731,15 +732,16 @@ internal static void traceRegisterLabelsAndReasons(uintptr gen) {
 // go2cs generated this placeholder — func ReadTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string expectedRacectx0ˢ = "expected racectx == 0"u8;
+internal static ref readonly @string expectedRacectx0ˢ => ref expectedRacectx0ˢᵇ;
+private static readonly @string expectedRacectx0ˢᵇ = "expected racectx == 0"u8;
 
 // readTrace0 is ReadTrace's continuation on g0. This must run on the
 // system stack because it acquires trace.lock.
 //
 //go:systemstack
 internal static (slice<byte> buf, bool park) readTrace0() {
-    slice<byte> buf = default!;
-    bool park = default!;
+    slice<byte> buf = default;
+    bool park = default;
     GoFrame ᒐ = default;
     try {
         if (raceenabled) {
@@ -765,15 +767,15 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             // But we rather do not crash the program because of tracing,
             // because tracing can be enabled at runtime on prod servers.
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            println((@string)"runtime: ReadTrace called from multiple goroutines simultaneously"u8);
-            (buf, park) = (default!, false); goto ᒐdone;
+            println((@string)"runtime: ReadTrace called from multiple goroutines simultaneously");
+            (buf, park) = (default, false); goto ᒐdone;
         }
         // Recycle the old buffer.
         {
             var bufΔ1 = Δtrace.reading; if (bufΔ1 != nil) {
-                bufΔ1.Value.link = Δtrace.empty;
+                bufΔ1.link = Δtrace.empty;
                 Δtrace.empty = bufΔ1;
-                Δtrace.reading = default!;
+                Δtrace.reading = default;
             }
         }
         // Write trace header.
@@ -788,8 +790,8 @@ internal static (slice<byte> buf, bool park) readTrace0() {
         if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load() == 0) {
             ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Store(1);
         }
-        uintptr gen = default!;
-        while (ᐧ) {
+        uintptr gen = default;
+        for (;;) {
             assertLockHeld(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
             gen = ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load();
 
@@ -808,7 +810,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
                 if (!Δtrace.endOfGenerationWritten) {
                     Δtrace.endOfGenerationWritten = true;
                     unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-                    (buf, park) = (new byte[]{(byte)tracev2.EvEndOfGeneration}.slice(), false); goto ᒐdone;
+                    (buf, park) = (slice<byte>([(byte)tracev2.EvEndOfGeneration]), false); goto ᒐdone;
                 }
 
                 // Reset the flag.
@@ -832,7 +834,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
 
                     // We're shutting down, and the last generation is fully
                     // read. We're done.
-                    (buf, park) = (default!, false); goto ᒐdone;
+                    (buf, park) = (default, false); goto ᒐdone;
                 }
                 // Handle advancing to the next generation.
 
@@ -867,13 +869,13 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             // we drop the lock.
             ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Store(false);
             unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-            (buf, park) = (default!, true); goto ᒐdone;
+            (buf, park) = (default, true); goto ᒐdone;
         }
         // Pull a buffer.
         var tbuf = Δtrace.full[gen % 2].pop();
         Δtrace.reading = tbuf;
         unlock(ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡlock));
-        (buf, park) = ((~tbuf).arr.slice(0, (~tbuf).pos), false);
+        (buf, park) = (tbuf.arr.slice(0, tbuf.pos), false);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -889,7 +891,7 @@ internal static (slice<byte> buf, bool park) readTrace0() {
 internal static ж<g> traceReader() {
     var gp = traceReaderAvailable();
     if (gp == nil || !ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).CompareAndSwapNoWB(gp, nil)) {
-        return default!;
+        return default;
     }
     return gp;
 }
@@ -913,7 +915,7 @@ internal static ж<g> traceReaderAvailable() {
     if (ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑflushedGen).Load() == ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑreaderGen).Load() || ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑworkAvailable).Load()) {
         return ᏑΔtrace.of(runtime_package.Δtraceᴛ1.Ꮡreader).Load();
     }
-    return default!;
+    return default;
 }
 
 // Trace advancer goroutine.
@@ -971,13 +973,13 @@ partial struct wakeableSleep {
 // newWakeableSleep initializes a new wakeableSleep and returns it.
 internal static ж<wakeableSleep> newWakeableSleep() {
     var s = @new<wakeableSleep>();
-    lockInit(ref (s.of(wakeableSleep.Ꮡlock)).DerefOrNull(), lockRankWakeableSleep);
-    s.Value.wakeup = new channel<EmptyStruct>(1);
-    s.Value.timer = @new<timer>();
+    lockInit(ref (s.Ꮡlock).DerefOrNull(), lockRankWakeableSleep);
+    s.wakeup = new channel<EmptyStruct>(1);
+    s.timer = @new<timer>();
     var f = (any sΔ1, uintptr _Δp1, int64 _Δp2) => {
         sΔ1._<ж<wakeableSleep>>().wake();
     };
-    (~s).timer.init(f, s.OrTypedNil());
+    s.timer.init(f, s.OrTypedNil());
     return s;
 }
 
@@ -990,15 +992,15 @@ internal static void sleep(this ж<wakeableSleep> Ꮡs, int64 ns) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.timer.reset(nanotime() + ns, 0);
-    @lock(Ꮡs.of(wakeableSleep.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
     }
     var wakeup = s.wakeup;
     if (raceenabled) {
-        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
+        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
     }
-    unlock(Ꮡs.of(wakeableSleep.Ꮡlock));
+    unlock(Ꮡs.Ꮡlock);
     ᐸꟷ(wakeup);
     s.timer.stop();
 }
@@ -1011,11 +1013,11 @@ internal static void wake(this ж<wakeableSleep> Ꮡs) {
 
     // Grab the wakeup channel, which may be nil if we're
     // racing with close.
-    @lock(Ꮡs.of(wakeableSleep.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
     }
-    if (s.wakeup != default!) {
+    if (s.wakeup != nil) {
         // Non-blocking send.
         //
         // Others may also write to this channel and we don't
@@ -1031,9 +1033,9 @@ internal static void wake(this ж<wakeableSleep> Ꮡs) {
         }}
     }
     if (raceenabled) {
-        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
+        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
     }
-    unlock(Ꮡs.of(wakeableSleep.Ꮡlock));
+    unlock(Ꮡs.Ꮡlock);
 }
 
 // close wakes any goroutine sleeping on the timer and prevents
@@ -1047,20 +1049,20 @@ internal static void close(this ж<wakeableSleep> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Set wakeup to nil so that a late timer ends up being a no-op.
-    @lock(Ꮡs.of(wakeableSleep.Ꮡlock));
+    @lock(Ꮡs.Ꮡlock);
     if (raceenabled) {
-        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
+        raceacquire(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
     }
     var wakeup = s.wakeup;
-    s.wakeup = default!;
+    s.wakeup = default;
 
     // Close the channel.
     builtin.close(wakeup);
 
     if (raceenabled) {
-        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.of(wakeableSleep.Ꮡlock)));
+        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡs.Ꮡlock));
     }
-    unlock(Ꮡs.of(wakeableSleep.Ꮡlock));
+    unlock(Ꮡs.Ꮡlock);
     return;
 }
 

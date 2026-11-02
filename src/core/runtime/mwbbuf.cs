@@ -71,13 +71,14 @@ internal static UntypedInt wbBufEntries => 512;
 internal static UntypedInt wbMaxEntriesPerCall => 8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badWriteBarrierBufferˢ = "bad write barrier buffer bounds"u8;
+internal static ref readonly @string badWriteBarrierBufferˢ => ref badWriteBarrierBufferˢᵇ;
+private static readonly @string badWriteBarrierBufferˢᵇ = "bad write barrier buffer bounds"u8;
 
 // reset empties b by resetting its next and end pointers.
 internal static void reset(this ref wbBuf b) {
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
     b.next = start;
-    if (testSmallBuf){
+    if (testSmallBuf) {
         // For testing, make the buffer smaller but more than
         // 1 write barrier's worth, so it tests both the
         // immediate flush and delayed flush cases.
@@ -255,12 +256,12 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
 
         // Mark span.
         var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
-        if ((uint8)((~arena).pageMarks[pageIdx] & pageMask) == 0) {
+        if ((uint8)(arena.pageMarks[pageIdx] & pageMask) == 0) {
             atomic.Or8(arena.at(heapArena.ᏑpageMarks, (ulong)(pageIdx)), pageMask);
         }
 
-        if ((~span).spanclass.noscan()) {
-            gcw.Value.bytesMarked += (uint64)(~span).elemsize;
+        if (span.spanclass.noscan()) {
+            gcw.bytesMarked += (uint64)span.elemsize;
             continue;
         }
         ptrs[pos] = obj;

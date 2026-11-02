@@ -14,10 +14,10 @@ partial class utf8_package {
 // Defining them locally avoids this package depending on package unicode.
 
 // Numbers fundamental to the encoding.
-public static UntypedInt RuneError => /* '\uFFFD' */ 65533; // the "error" Rune or "Unicode replacement character"
-public static UntypedInt RuneSelf => 0x80; // characters below RuneSelf are represented as themselves in a single byte.
+public static UntypedInt RuneError => /* '\uFFFD' */ 65533;     // the "error" Rune or "Unicode replacement character"
+public static UntypedInt RuneSelf => 0x80;                      // characters below RuneSelf are represented as themselves in a single byte.
 public static UntypedInt MaxRune => /* '\U0010FFFF' */ 1114111; // Maximum valid Unicode code point.
-public static UntypedInt UTFMax => 4; // maximum number of bytes of a UTF-8 encoded Unicode character.
+public static UntypedInt UTFMax => 4;                           // maximum number of bytes of a UTF-8 encoded Unicode character.
 
 // Code points in the surrogate range are not valid for UTF-8.
 internal static UntypedInt surrogateMin => 0xD800;
@@ -47,15 +47,15 @@ internal static UntypedInt hicb => 0b10111111;
 // table below. The first nibble is an index into acceptRanges or F for
 // special one-byte cases. The second nibble is the Rune length or the
 // Status for the special one-byte case.
-internal static UntypedInt xx => 0xF1; // invalid: size 1
+internal static UntypedInt xx => 0xF1;  // invalid: size 1
 internal static UntypedInt @as => 0xF0; // ASCII: size 1
-internal static UntypedInt s1 => 0x02; // accept 0, size 2
-internal static UntypedInt s2 => 0x13; // accept 1, size 3
-internal static UntypedInt s3 => 0x03; // accept 0, size 3
-internal static UntypedInt s4 => 0x23; // accept 2, size 3
-internal static UntypedInt s5 => 0x34; // accept 3, size 4
-internal static UntypedInt s6 => 0x04; // accept 0, size 4
-internal static UntypedInt s7 => 0x44; // accept 4, size 4
+internal static UntypedInt s1 => 0x02;  // accept 0, size 2
+internal static UntypedInt s2 => 0x13;  // accept 1, size 3
+internal static UntypedInt s3 => 0x03;  // accept 0, size 3
+internal static UntypedInt s4 => 0x23;  // accept 2, size 3
+internal static UntypedInt s5 => 0x34;  // accept 3, size 4
+internal static UntypedInt s6 => 0x04;  // accept 0, size 4
+internal static UntypedInt s7 => 0x44;  // accept 4, size 4
 
 internal static UntypedInt runeErrorByte0 => /* t3 | (RuneError >> 12) */ 239;
 internal static UntypedInt runeErrorByte1 => /* tx | (RuneError>>6)&maskx */ 191;
@@ -80,7 +80,7 @@ internal static UntypedInt runeErrorByte2 => /* tx | RuneError&maskx */ 189;
     xx, xx, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, // 0xC0-0xCF
     s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, // 0xD0-0xDF
     s2, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s4, s3, s3, // 0xE0-0xEF
-    s5, s6, s6, s6, s7, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx // 0xF0-0xFF
+    s5, s6, s6, s6, s7, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx  // 0xF0-0xFF
 }.array(); }
 
 // acceptRange gives the range of valid values for the second byte in a UTF-8
@@ -112,10 +112,9 @@ public static bool FullRune(slice<byte> p) {
     }
     // Must be short or invalid.
     var accept = acceptRanges[(x >> 4)];
-    if (n > 1 && (p[1] < accept.lo || accept.hi < p[1])){
+    if (n > 1 && (p[1] < accept.lo || accept.hi < p[1])) {
         return true;
-    } else 
-    if (n > 2 && (p[2] < locb || hicb < p[2])) {
+    } else if (n > 2 && (p[2] < locb || hicb < p[2])) {
         return true;
     }
     return false;
@@ -133,10 +132,9 @@ public static bool FullRuneInString(@string s) {
     }
     // Must be short or invalid.
     var accept = acceptRanges[(x >> 4)];
-    if (n > 1 && (s[1] < accept.lo || accept.hi < s[1])){
+    if (n > 1 && (s[1] < accept.lo || accept.hi < s[1])) {
         return true;
-    } else 
-    if (n > 2 && (s[2] < locb || hicb < s[2])) {
+    } else if (n > 2 && (s[2] < locb || hicb < s[2])) {
         return true;
     }
     return false;
@@ -151,8 +149,8 @@ public static bool FullRuneInString(@string s) {
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
 public static (rune r, nint size) DecodeRune(slice<byte> p) {
-    rune r = default!;
-    nint size = default!;
+    rune r = default;
+    nint size = default;
 
     // Inlineable fast path for ASCII characters; see #48195.
     // This implementation is weird but effective at rendering the
@@ -216,13 +214,13 @@ internal static (rune r, nint size) decodeRuneSlow(slice<byte> p) {
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
 public static (rune r, nint size) DecodeRuneInString(sstring s) {
-    rune r = default!;
-    nint size = default!;
+    rune r = default;
+    nint size = default;
 
     // Inlineable fast path for ASCII characters; see #48195.
     // This implementation is a bit weird but effective at rendering the
     // function inlineable.
-    if (s != ""u8 && s[0] < RuneSelf){
+    if (s != ""u8 && s[0] < RuneSelf) {
         return ((rune)s[0], 1);
     } else {
         (r, size) = decodeRuneInStringSlow(s);
@@ -279,8 +277,8 @@ internal static (rune, nint) decodeRuneInStringSlow(@string s) {
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
 public static (rune r, nint size) DecodeLastRune(slice<byte> p) {
-    rune r = default!;
-    nint size = default!;
+    rune r = default;
+    nint size = default;
 
     nint end = len(p);
     if (end == 0) {
@@ -319,8 +317,8 @@ public static (rune r, nint size) DecodeLastRune(slice<byte> p) {
 // out of range, or is not the shortest possible UTF-8 encoding for the
 // value. No other validation is performed.
 public static (rune r, nint size) DecodeLastRuneInString(@string s) {
-    rune r = default!;
-    nint size = default!;
+    rune r = default;
+    nint size = default;
 
     nint end = len(s);
     if (end == 0) {
@@ -458,7 +456,7 @@ internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
 // encodings are treated as single runes of width 1 byte.
 public static nint RuneCount(slice<byte> p) {
     nint np = len(p);
-    nint n = default!;
+    nint n = default;
     for (; n < np; n++) {
         {
             var c = p[n]; if (c >= RuneSelf) {
@@ -472,7 +470,7 @@ public static nint RuneCount(slice<byte> p) {
 
 // RuneCountInString is like [RuneCount] but its input is a string.
 public static nint /*n*/ RuneCountInString(sstring s) {
-    nint n = default!;
+    nint n = default;
 
     foreach ((_, _) in s) {
         n++;

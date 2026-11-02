@@ -59,9 +59,9 @@ internal static nint normalClosure() {
 }
 
 internal static nint inlineClosure() {
-    return ((Func<nint>)([MethodImpl(MethodImplOptions.NoInlining)] () => {
+    return func([MethodImpl(MethodImplOptions.NoInlining)] nint () => {
         return callerStartLine(true);
-    }))();
+    })();
 }
 
 internal partial struct TestStartLine_testCases /*dyn*/ {
@@ -70,53 +70,53 @@ internal partial struct TestStartLine_testCases /*dyn*/ {
     internal nint want;
 }
 
-public static void TestStartLine(ж<testing.T> Ꮡt) {
+public static void TestStartLine(ж<testing.T> t) {
     // We test inlined vs non-inlined variants. We can't do that if
     // optimizations are disabled.
-    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(Ꮡt));
+    testenv.SkipIfOptimizationOff(new runtime_test_package.testing_TжTB(t));
 
-    var testCases = new TestStartLine_testCases[]{
+    var testCases = slice<TestStartLine_testCases>([
         new(
-            name: "normal"u8,
+            name: "normal",
             fn: normalFunc,
             want: 21
         ),
         new(
-            name: "multiline-declaration"u8,
+            name: "multiline-declaration",
             fn: multilineDeclarationFunc,
             want: 30
         ),
         new(
-            name: "blank-lines"u8,
+            name: "blank-lines",
             fn: blankLinesFunc,
             want: 35
         ),
         new(
-            name: "inline"u8,
+            name: "inline",
             fn: inlineFunc,
             want: 49
         ),
         new(
-            name: "normal-closure"u8,
+            name: "normal-closure",
             fn: normalClosure,
             want: 57
         ),
         new(
-            name: "inline-closure"u8,
+            name: "inline-closure",
             fn: inlineClosure,
             want: 64
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestStartLine_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             nint got = tcʗ1.fn();
             if (got != tcʗ1.want) {
-                tΔ1.Errorf("start line got %d want %d"u8, got, tcʗ1.want);
+                tΔ1.Errorf("start line got %d want %d", got, tcʗ1.want);
             }
         });
     }

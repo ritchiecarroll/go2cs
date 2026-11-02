@@ -8,21 +8,6 @@ global using static global::go.@internal.strconv_package;
 global using static global::go.@internal.strconv_internal_test_package;
 
 // <ImportedTypeAliases>
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +34,23 @@ using static global::go.@internal.strconv_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(atocTest))]
+[assembly: GoFieldAccess(typeof(atofTest))]
+[assembly: GoFieldAccess(typeof(ftoaTest))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Response))]
+[assembly: GoFieldAccess(typeof(parseErrorTest))]
+[assembly: GoFieldAccess(typeof(parseInt32Test))]
+[assembly: GoFieldAccess(typeof(parseInt64BaseTest))]
+[assembly: GoFieldAccess(typeof(parseInt64Test))]
+[assembly: GoFieldAccess(typeof(parseUint32Test))]
+[assembly: GoFieldAccess(typeof(parseUint64BaseTest))]
+[assembly: GoFieldAccess(typeof(parseUint64Test))]
+[assembly: GoFieldAccess(typeof(roundTest))]
+[assembly: GoFieldAccess(typeof(shiftTest))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,17 +60,17 @@ using static global::go.@internal.strconv_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/strconv/atob_test.go", "atob_test.cs", "ABImABAigoKCgsrKgoKAggALFsqCgoKC")]
-[assembly: go.GoPositionMap("internal/strconv/atoc_test.go", "atoc_test.cs", "AA4egoKClIKCggAHEoIAmgG2AoKCgoKUgoKCgtyC2JKClIKCgpSC", "", "", "32=NaN/1/4/26,NaN/2/4/27,NaN/3/4/28,NaN/4/4/28")]
-[assembly: go.GoPositionMap("internal/strconv/atof_test.go", "atof_test.cs", "ABguAMYCjAUAXb4BgqaUgpSUgoKCgqaCgoKmgoK4goKCgsqCgoKClILcgoKCgoKCgoK4goKCgoKUgoLKgoKCgoKUgoK4poCkgKSCgoKClAAJCuYAChyCgoKCgpSCgpSCgoKUgoKUupKCgpSCgoKClJSCgpS0tKSU2qKClIKCgpSCyqKCuKKCuKKCuKKCuKKCgoK4ooKCgriigoKClIKCgoKCgsqigriigriigriigoKCgpSCgriigoKCgpSCgg==", "", "", "25=Repeat/1/4/257,Repeat/2/4/260,Repeat/3/4/274,Repeat/4/4/275;352=Repeat/1/2/19,Repeat/2/2/20")]
-[assembly: go.GoPositionMap("internal/strconv/atoi_test.go", "atoi_test.cs", "ABMoABs2AF68AQAjRgBRogEAFy4AIEDcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgpSCgoKC2oKCgoLugpSCgoKC2oKCgoLugpSCgoKCyIKCgoIAChb+AAkSgoKUgpSmgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoIACQyCgpSCAAgSgu6ykoKCgtyCgpSCuILKgsqykoKCgg==", "527-529:1;530-532:2;549-555:1;560-562:1;563-565:2;581-587:1")]
-[assembly: go.GoPositionMap("internal/strconv/ctoa_test.go", "ctoa_test.cs", "ABMYggARMIKCgtyigoCCtqI=", "47-51:1")]
-[assembly: go.GoPositionMap("internal/strconv/decimal_test.go", "decimal_test.cs", "ABMkAA0cgoKCgoKCggAMGgASJIKCgoKCgoKmgoKCgqaCgoKCAAsYAAwagoKCgoKCgg==")]
-[assembly: go.GoPositionMap("internal/strconv/fp_test.go", "fp_test.cs", "ABUmgpSkpJSqooCCgoKUgoKClKaCgoKCgpSUgoKCgoKUlKSCgpSqooCCgoKClIKCgpSkgoKClNyCgpKCgoKClIKCgpSCgpSCgoKClKSCgoKUgpSC7gAPIvKClKSUuIKAgsiCgoKUgpSCgoKUgIKk1pSCgoKCgoKClIKCgoKUgpSCgoCCpJSCgoCCAAkMlIKCgoKCgoKUgpSClIKCgoKCgoKAgg==")]
-[assembly: go.GoPositionMap("internal/strconv/ftoa_test.go", "ftoa_test.cs", "ABUqgP4AygGEA4KCgoKClIKClIKCpoKUgoKUgoLcgoKCgoKAgraCgoKAguyCgoKUgoKClIKCgoKCpoKCgoKCgsqigoCCtqIACQQAMnKCspKC3IKCsqKC", "302-306:1;369-373:1;380-384:1", "", "31=fdiv/1/2/109,fdiv/2/2/110,NaN/1/2/118,NaN/2/2/119,Inf/1/3/120,Inf/2/3/121,Inf/3/3/122;340=Ldexp/1/5/22,Ldexp/2/5/23,Ldexp/3/5/34,Ldexp/4/5/35,Ldexp/5/5/36")]
-[assembly: go.GoPositionMap("internal/strconv/import_test.go", "import_test.cs", "ABAigoKCgoKCgoI=")]
-[assembly: go.GoPositionMap("internal/strconv/itoa_test.go", "itoa_test.cs", "ABImAC5YooKCgqaCgriCgoKmgoLKgoKC7oKAgraiAAgQAAgSgoKCgqaCggAJDgAWNIKCgoLKooKCgsqigoKCgsqigoKCyqKCgoKCyoKCgoKCgtyigoKCguiCspKCgoI=", "99-103:1;214-219:1;234-240:1")]
-[assembly: go.GoPositionMap("internal/strconv/math_test.go", "math_test.cs", "ABMaAAcagoKCgtyCgoKCpoKCgsyCAAkGAAQWgoKCgtyCgoKCgsqCgoKCgsqCgoKUpoKCgoKUgpSClIKUgpSClILKgoKCuIK4goLKgqKCgoKClIKU", "", "", "64=u128/1/2/7,u128/2/2/8")]
+[assembly: GoPositionMap("internal/strconv/atob_test.go", "atob_test.cs", "ABImABAigoKCgsrKgoKAggALFsqCgoKC")]
+[assembly: GoPositionMap("internal/strconv/atoc_test.go", "atoc_test.cs", "AA4egoKClIKCggAHEoIAmgG2AoKCgoKUgoKCgtyC6JKClIKCgpSC", "", "", "32=NaN/1/4/26,NaN/2/4/27,NaN/3/4/28,NaN/4/4/28")]
+[assembly: GoPositionMap("internal/strconv/atof_test.go", "atof_test.cs", "ABguAMYCjAUAXb4BgqaUgpSUgoKCgqaCgoKmgoK4goKCgsqCgoKClILcgoKCgoKCgoK4goKCgoKUgoLKgoKCgoKUgoK4poCkgKSCgoKClAAJCuYAChyCgoKCgpSCgpSCgoKUgoKUupKCgpSCgoKClJSCgpS0tKSU6qKClIKCgpSCyqKCuKKCuKKCuKKCuKKCgoK4ooKCgriigoKClIKCgoKCgsqigriigriigriigoKCgpSCgriigoKCgpSCgg==", "", "", "25=Repeat/1/4/257,Repeat/2/4/260,Repeat/3/4/274,Repeat/4/4/275;352=Repeat/1/2/19,Repeat/2/2/20")]
+[assembly: GoPositionMap("internal/strconv/atoi_test.go", "atoi_test.cs", "ABMoABs2AF68AQAjRgBRogEAFy4AIEDcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoLcgpSCgoKC6oKCgoL+gpSCgoKC6oKCgoL+gpSCgoKC2IKCgoIACxb+AAkSgoKUgpSmgoKCgoLcgoKCgoLcgoKCgoLcgoKCgoIACwyCgpSCAAgSgu6ykoKCgtyCgpSCuILKgsqykoKCgg==", "527-529:1;530-532:2;549-555:1;560-562:1;563-565:2;581-587:1")]
+[assembly: GoPositionMap("internal/strconv/ctoa_test.go", "ctoa_test.cs", "ABMYggARMIKCgtyigoCCtqI=", "47-51:1")]
+[assembly: GoPositionMap("internal/strconv/decimal_test.go", "decimal_test.cs", "ABMkAA0cgoKCgoKCggAMGgASJIKCgoKCgoKmgoKCgqaCgoKCAAsYAAwagoKCgoKCgg==")]
+[assembly: GoPositionMap("internal/strconv/fp_test.go", "fp_test.cs", "ABUmgpSkpJSqooCCgoKUgoKClKaCgoKCgpSUgoKCgoKUlKSCgpSqooCCgoKClIKCgpSkgoKClNyCgpKCgoKClIKCgpSCgqSCgoKClLSCgoKUgqSC7gARIvKCpKSUuIKAgsiCgoKUgpSCgoKUgIKk5pSCgoKCgoKClIKCgoKUgpSCgoCCpJSCgoCCAAoMlIKCgoKCgoKUgpSClIKCgoKCgoKAgg==")]
+[assembly: GoPositionMap("internal/strconv/ftoa_test.go", "ftoa_test.cs", "ABUqgAAJDgDKAYQDgoKCgoKUgoKUgoKmgpSCgpSCgtyCgoKCgoCCtoKCgoCC7IKCgpSCgoKUgoKCgoKmgoKCgoKCyqKCgIK2ogAJBAAycoKykoLcgoKyooI=", "302-306:1;369-373:1;380-384:1", "", "33=fdiv/1/2/109,fdiv/2/2/110,NaN/1/2/118,NaN/2/2/119,Inf/1/3/120,Inf/2/3/121,Inf/3/3/122;342=Ldexp/1/5/22,Ldexp/2/5/23,Ldexp/3/5/34,Ldexp/4/5/35,Ldexp/5/5/36")]
+[assembly: GoPositionMap("internal/strconv/import_test.go", "import_test.cs", "ABAigoKCgoKCgoI=")]
+[assembly: GoPositionMap("internal/strconv/itoa_test.go", "itoa_test.cs", "ABImAC5YooKCgqaCgriCgoKmgoLKgoKC7oKAgraiAAgQAAgSgoKCgqaCggAJDgAWNIKCgoLKooKCgsqigoKCgsqigoKCyqKCgoKCyoKCgoKCgtyigoKCguiCspKCgoI=", "99-103:1;214-219:1;234-240:1")]
+[assembly: GoPositionMap("internal/strconv/math_test.go", "math_test.cs", "ABMaAAcagoKCgtyCgoKCpoKCgsyCAAkGAAQWgoKCgtyCgoKCgsqCgoKCgsqCgoKUpoKCgoKUgpSClIKUgpSClILKgoKCuIK4goLKgqKCgoKClIKU", "", "", "64=u128/1/2/7,u128/2/2/8")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -26,7 +26,7 @@ using static global::go.@internal.coverage.cformat_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -36,7 +36,7 @@ using static global::go.@internal.coverage.cformat_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/cformat/fmt_test.go", "fmt_test.cs", "ADwegpTOuMqmgoKUgoKUgoKmwoCCpAAAEIKCpoKAgqSGgoK4goCCpIiCgsqCgIKkhoKCuICCpIiCgpSCgoKCuIKCgoCCpIaCggASDoSCgqaCgoKAgqSIgoLcgoKCgIKkhoKC", "18-24:1", "", "69=Invoke/1/2/1,Invoke/2/2/2;73=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3;78=Invoke/1/1/1")]
+[assembly: GoPositionMap("internal/coverage/cformat/fmt_test.go", "fmt_test.cs", "AEcegpTOuMqmgoKUgoKUgoKmwoCCpAAAEIKCpoKAgqSGgoK4goCCpIiCgsqCgIKkhoKCuICCpIiCgpSCgoKCuIKCgoCCpIaCggAUDoSCgqaCgoKAgqSIgoLcgoKCgIKkhoKC", "18-24:1", "", "80=Invoke/1/2/1,Invoke/2/2/2;84=Invoke/1/3/1,Invoke/2/3/2,Invoke/3/3/3;89=Invoke/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

@@ -53,7 +53,7 @@ using static go.@internal.cpu_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -63,11 +63,11 @@ using static go.@internal.cpu_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/cpu/cpu.go", "cpu.cs", "AMQB6ALCgoKCABEw4oKCgoKClJSClIKCgpSkgpSkpIKmgoKClKaCgoKCuMaCgqaCgqYAAxDCgoKm")]
-[assembly: go.GoPositionMap("internal/cpu/cpu_darwin.go", "cpu_darwin.cs", "AAocygAEGAAKAoKClK7CgoKCpoKCgoKUtIKCxrTGgpQ=")]
-[assembly: go.GoPositionMap("internal/cpu/cpu_x86.go", "cpu_x86.cs", "AAwYpgA1cIIACRSCpu6m7qYABxKUgoKmlJSCgoKCgoLKlIKUgpTcpgAHEJSCgqaCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCppSClIKCpoKUAAcQpoKCgrimgqyygqaUsoKCgoKCpoK4goKCuKaygtw=", "211-220:1")]
-[assembly: go.GoPositionMap("internal/cpu/cpu_x86_darwin.go", "cpu_x86_darwin.cs", "AAgSgtyCuII=")]
-[assembly: go.GoPositionMap("internal/cpu/datacache_x86.go", "datacache_x86.cs", "AAge4oKCpqa2lKaCgpSmpMyCqJKClIKCuIK4lIKCgoKU7oKmtoKCgqaUgqaCpoCCpIKmgILIgpQ=")]
+[assembly: GoPositionMap("internal/cpu/cpu.go", "cpu.cs", "AMQB6ALCgoKCABEw4oKCgoKClJSClIKCgpSkgqS0tIK2goKClKaCgoKCuMaCgqaCgqYAAxDCgoKm")]
+[assembly: GoPositionMap("internal/cpu/cpu_darwin.go", "cpu_darwin.cs", "AAocygAEGAAKAoKClK7CgoKCpoKCgoKUtIKCxrTGgpQ=")]
+[assembly: GoPositionMap("internal/cpu/cpu_x86.go", "cpu_x86.cs", "AAwYpgA1cIIACRSCpu6m7qYABxKUgoKmlJSCgoKCgoLKlIKUgpTcpgAHEJSCgqaCgoKCgoKClIKCgoKCgoKCgoKCgoKCgoKCppSClIKCpoKUAAcQpoKCgrimgqyygqaUsoKCgoKCpoK4goKCuKaygtw=", "211-220:1")]
+[assembly: GoPositionMap("internal/cpu/cpu_x86_darwin.go", "cpu_x86_darwin.cs", "AAgSgtyCuII=")]
+[assembly: GoPositionMap("internal/cpu/datacache_x86.go", "datacache_x86.cs", "AAge4oKCpqa2lKaCgpSmpMyCqJKClIKCuIK4lIKCgoKU7oKmtoKCgqaUgqaCpoCCpIKmgILIgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

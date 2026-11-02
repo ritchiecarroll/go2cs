@@ -97,9 +97,9 @@ using go.runtime;
 partial class pprof_package {
 
 [GoInit] internal static void init() {
-    @string prefix = ""u8;
-    if (godebug.New("httpmuxgo121"u8).Value() != "1"u8) {
-        prefix = "GET "u8;
+    @string prefix = "";
+    if (godebug.New("httpmuxgo121").Value() != "1"u8) {
+        prefix = "GET ";
     }
     http.HandleFunc(prefix + "/debug/pprof/"u8, Index);
     http.HandleFunc(prefix + "/debug/pprof/cmdline"u8, Cmdline);
@@ -109,18 +109,22 @@ partial class pprof_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xContentTypeOptionsˢ = "X-Content-Type-Options"u8;
-internal static readonly @string nosniffˢ = "nosniff"u8;
-internal static readonly @string contentTypeˢ = "Content-Type"u8;
-internal static readonly @string textPlainCharsetUtf8ˢ = "text/plain; charset=utf-8"u8;
+internal static ref readonly @string xContentTypeOptionsˢ => ref xContentTypeOptionsˢᵇ;
+private static readonly @string xContentTypeOptionsˢᵇ = "X-Content-Type-Options"u8;
+internal static ref readonly @string nosniffˢ => ref nosniffˢᵇ;
+private static readonly @string nosniffˢᵇ = "nosniff"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
+private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
 
 // Cmdline responds with the running program's
 // command line, with arguments separated by NUL bytes.
 // The package initialization registers it as /debug/pprof/cmdline.
-public static void Cmdline(http.ResponseWriter w, ж<http.Request> Ꮡr) {
+public static void Cmdline(http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
-    fmt.Fprint(new http_ResponseWriterᴠWriter(w), strings.Join(os.Args, "\x00"u8));
+    fmt.Fprint(new http_ResponseWriterᴠWriter(w), strings.Join(os.Args, "\x00"));
 }
 
 internal static void sleep(ж<http.Request> Ꮡr, time.Duration d) {
@@ -141,8 +145,8 @@ internal static void configureWriteDeadline(http.ResponseWriter w, ж<http.Reque
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (srv, ok) = r.Context().Value(http.ServerContextKey.OrTypedNil())._<ж<http.Server>>(ᐧ);
-    if (ok && (~srv).WriteTimeout > 0) {
-        var timeout = (~srv).WriteTimeout + ((time.Duration)(int64)(seconds * (float64)(int64)time.ΔSecond));
+    if (ok && srv.WriteTimeout > 0) {
+        var timeout = srv.WriteTimeout + ((time.Duration)(int64)(seconds * (float64)time.ΔSecond));
 
         var rc = http.NewResponseController(w);
         rc.SetWriteDeadline(time.Now().Add(timeout));
@@ -150,78 +154,84 @@ internal static void configureWriteDeadline(http.ResponseWriter w, ж<http.Reque
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xGoPprofˢ = "X-Go-Pprof"u8;
-internal static readonly @string contentDispositionˢ = "Content-Disposition"u8;
+internal static ref readonly @string xGoPprofˢ => ref xGoPprofˢᵇ;
+private static readonly @string xGoPprofˢᵇ = "X-Go-Pprof"u8;
+internal static ref readonly @string contentDispositionˢ => ref contentDispositionˢᵇ;
+private static readonly @string contentDispositionˢᵇ = "Content-Disposition"u8;
 
 internal static void serveError(http.ResponseWriter w, nint status, @string txt) {
     w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
-    w.Header().Set(xGoPprofˢ, "1"u8);
+    w.Header().Set(xGoPprofˢ, "1");
     w.Header().Del(contentDispositionˢ);
     w.WriteHeader(status);
     fmt.Fprintln(new http_ResponseWriterᴠWriter(w), txt);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string secondsˢ = "seconds"u8;
-internal static readonly @string applicationOctetStreamˢ = "application/octet-stream"u8;
-internal static readonly @string attachmentFilenameˢ = @"attachment; filename=""profile"""u8;
+internal static ref readonly @string secondsˢ => ref secondsˢᵇ;
+private static readonly @string secondsˢᵇ = "seconds"u8;
+internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
+private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
+internal static ref readonly @string attachmentFilenameˢ => ref attachmentFilenameˢᵇ;
+private static readonly @string attachmentFilenameˢᵇ = @"attachment; filename=""profile"""u8;
 
 // Profile responds with the pprof-formatted cpu profile.
 // Profiling lasts for duration specified in seconds GET parameter, or for 30 seconds if not specified.
 // The package initialization registers it as /debug/pprof/profile.
-public static void Profile(http.ResponseWriter w, ж<http.Request> Ꮡr) {
+public static void Profile(http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
-    var (sec, err) = strconv.ParseInt(Ꮡr.FormValue(secondsˢ), 10, 64);
-    if (sec <= 0 || err != default!) {
+    var (sec, err) = strconv.ParseInt(r.FormValue(secondsˢ), 10, 64);
+    if (sec <= 0 || err != nil) {
         sec = 30;
     }
 
-    configureWriteDeadline(w, Ꮡr, (float64)sec);
+    configureWriteDeadline(w, r, (float64)sec);
 
     // Set Content Type assuming StartCPUProfile will work,
     // because if it does it starts writing.
     w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
     w.Header().Set(contentDispositionˢ, attachmentFilenameˢ);
     {
-        var errΔ1 = pprof.StartCPUProfile(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != default!) {
+        var errΔ1 = pprof.StartCPUProfile(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != nil) {
             // StartCPUProfile failed, so no writes yet.
             serveError(w, http.StatusInternalServerError,
                 fmt.Sprintf("Could not enable CPU profiling: %s"u8, errΔ1));
             return;
         }
     }
-    sleep(Ꮡr, ((time.Duration)sec) * time.ΔSecond);
+    sleep(r, ((time.Duration)sec) * time.ΔSecond);
     pprof.StopCPUProfile();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string attachmentFilenameTraceˢ = @"attachment; filename=""trace"""u8;
+internal static ref readonly @string attachmentFilenameTraceˢ => ref attachmentFilenameTraceˢᵇ;
+private static readonly @string attachmentFilenameTraceˢᵇ = @"attachment; filename=""trace"""u8;
 
 // Trace responds with the execution trace in binary form.
 // Tracing lasts for duration specified in seconds GET parameter, or for 1 second if not specified.
 // The package initialization registers it as /debug/pprof/trace.
-public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
+public static void Trace(http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
-    var (sec, err) = strconv.ParseFloat(Ꮡr.FormValue(secondsˢ), 64);
-    if (sec <= 0D || err != default!) {
+    var (sec, err) = strconv.ParseFloat(r.FormValue(secondsˢ), 64);
+    if (sec <= 0D || err != nil) {
         sec = 1D;
     }
 
-    configureWriteDeadline(w, Ꮡr, sec);
+    configureWriteDeadline(w, r, sec);
 
     // Set Content Type assuming trace.Start will work,
     // because if it does it starts writing.
     w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
     w.Header().Set(contentDispositionˢ, attachmentFilenameTraceˢ);
     {
-        var errΔ1 = trace.Start(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != default!) {
+        var errΔ1 = trace.Start(new http_ResponseWriterᴠWriter(w)); if (errΔ1 != nil) {
             // trace.Start failed, so no writes yet.
             serveError(w, http.StatusInternalServerError,
                 fmt.Sprintf("Could not enable tracing: %s"u8, errΔ1));
             return;
         }
     }
-    sleep(Ꮡr, (time.Duration)(int64)(sec * (float64)(int64)time.ΔSecond));
+    sleep(r, (time.Duration)(int64)(sec * (float64)time.ΔSecond));
     trace.Stop();
 }
 
@@ -243,16 +253,16 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     // this number is 0 (no symbols available) or > 0.
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "num_symbols: 1\n"u8);
 
-    ж<bufio.Reader> b = default!;
-    if (r.Method == "POST"u8){
+    ж<bufio.Reader> b = default;
+    if (r.Method == "POST"u8) {
         b = bufio.NewReader(new io_ReadCloserᴠReader(r.Body));
     } else {
-        b = bufio.NewReader(new strings_ReaderжReader(strings.NewReader((~r.URL).RawQuery)));
+        b = bufio.NewReader(new strings_ReaderжReader(strings.NewReader(r.URL.RawQuery)));
     }
 
-    while (ᐧ) {
-        var (word, err) = b.ReadSlice((rune)'+');
-        if (err == default!) {
+    for (;;) {
+        var (word, err) = b.ReadSlice((byte)'+');
+        if (err == nil) {
             word = word.slice(0, len(word) - 1); // trim +
         }
         var (pc, _) = strconv.ParseUint((@string)word, 0, 64);
@@ -265,7 +275,7 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 
         // Wait until here to check for err; the last
         // symbol will have an err because it doesn't end in +.
-        if (err != default!) {
+        if (err != nil) {
             if (!AreEqual(err, io.EOF)) {
                 fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "reading request: %v\n"u8, err);
             }
@@ -285,10 +295,12 @@ public static httpꓸHandler Handler(@string name) {
 partial struct handler /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unknownProfileˢ = "Unknown profile"u8;
-internal static readonly @string debugˢ = "debug"u8;
+internal static ref readonly @string unknownProfileˢ => ref unknownProfileˢᵇ;
+private static readonly @string unknownProfileˢᵇ = "Unknown profile"u8;
+internal static ref readonly @string debugˢ => ref debugˢᵇ;
+private static readonly @string debugˢᵇ = "debug"u8;
 
-internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr) {
+internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> r) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     var p = pprof.Lookup((@string)name);
     if (p == nil) {
@@ -296,17 +308,17 @@ internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http
         return;
     }
     {
-        @string sec = Ꮡr.FormValue(secondsˢ); if (sec != ""u8) {
-            name.serveDeltaProfile(w, Ꮡr, p, sec);
+        @string sec = r.FormValue(secondsˢ); if (sec != ""u8) {
+            name.serveDeltaProfile(w, r, p, sec);
             return;
         }
     }
-    var (gc, _) = strconv.Atoi(Ꮡr.FormValue("gc"u8));
+    var (gc, _) = strconv.Atoi(r.FormValue("gc"));
     if (name == "heap"u8 && gc > 0) {
         runtime.GC();
     }
-    var (debug, _) = strconv.Atoi(Ꮡr.FormValue(debugˢ));
-    if (debug != 0){
+    var (debug, _) = strconv.Atoi(r.FormValue(debugˢ));
+    if (debug != 0) {
         w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
     } else {
         w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
@@ -316,19 +328,24 @@ internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidValueForSecondsˢ = @"invalid value for ""seconds"" - must be a positive integer"u8;
-internal static readonly @string secondsParameterIsNotˢ = @"""seconds"" parameter is not supported for this profile type"u8;
-internal static readonly @string secondsAndDebugParamsAreˢ = "seconds and debug params are incompatible"u8;
-internal static readonly @string failedToCollectProfileˢ = "failed to collect profile"u8;
-internal static readonly @string failedToComputeDeltaˢ = "failed to compute delta"u8;
+internal static ref readonly @string invalidValueForSecondsˢ => ref invalidValueForSecondsˢᵇ;
+private static readonly @string invalidValueForSecondsˢᵇ = @"invalid value for ""seconds"" - must be a positive integer"u8;
+internal static ref readonly @string secondsParameterIsNotˢ => ref secondsParameterIsNotˢᵇ;
+private static readonly @string secondsParameterIsNotˢᵇ = @"""seconds"" parameter is not supported for this profile type"u8;
+internal static ref readonly @string secondsAndDebugParamsAreˢ => ref secondsAndDebugParamsAreˢᵇ;
+private static readonly @string secondsAndDebugParamsAreˢᵇ = "seconds and debug params are incompatible"u8;
+internal static ref readonly @string failedToCollectProfileˢ => ref failedToCollectProfileˢᵇ;
+private static readonly @string failedToCollectProfileˢᵇ = "failed to collect profile"u8;
+internal static ref readonly @string failedToComputeDeltaˢ => ref failedToComputeDeltaˢᵇ;
+private static readonly @string failedToComputeDeltaˢᵇ = "failed to compute delta"u8;
 
-internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> Ꮡp, @string secStr) {
+internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
         var (sec, err) = strconv.ParseInt(secStr, 10, 64);
-        if (err != default! || sec <= 0) {
+        if (err != nil || sec <= 0) {
             serveError(w, http.StatusBadRequest, invalidValueForSecondsˢ);
             return;
         }
@@ -345,8 +362,8 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
             serveError(w, http.StatusBadRequest, secondsAndDebugParamsAreˢ);
             return;
         }
-        (var p0, err) = collectProfile(Ꮡp);
-        if (err != default!) {
+        (var p0, err) = collectProfile(p);
+        if (err != nil) {
             serveError(w, http.StatusInternalServerError, failedToCollectProfileˢ);
             return;
         }
@@ -356,11 +373,11 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
         defer(() => tʗ1.Stop(), ref ᒐ);
 
         var selᴛ3 = r.Context().Done();
-        var selᴛ4 = (~t).C;
+        var selᴛ4 = t.C;
         switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
         case 0 when selᴛ3.ꟷᐳ(out _): {
             var errΔ1 = r.Context().Err();
-            if (AreEqual(errΔ1, context.DeadlineExceeded)){
+            if (AreEqual(errΔ1, context.DeadlineExceeded)) {
                 serveError(w, http.StatusRequestTimeout, errΔ1.Error());
             } else { // TODO: what's a good status code for canceled requests? 400?
                 serveError(w, http.StatusInternalServerError, errΔ1.Error());
@@ -371,24 +388,24 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
             break;
         }}
 
-        (var p1, err) = collectProfile(Ꮡp);
-        if (err != default!) {
+        (var p1, err) = collectProfile(p);
+        if (err != nil) {
             serveError(w, http.StatusInternalServerError, failedToCollectProfileˢ);
             return;
         }
-        var ts = p1.Value.TimeNanos;
-        var dur = (~p1).TimeNanos - (~p0).TimeNanos;
+        var ts = p1.TimeNanos;
+        var dur = p1.TimeNanos - p0.TimeNanos;
 
         p0.Scale(-1D);
 
-        (p1, err) = profile.Merge(new ж<profile.Profile>[]{p0, p1}.slice());
-        if (err != default!) {
+        (p1, err) = profile.Merge(slice<ж<profile.Profile>>([p0, p1]));
+        if (err != nil) {
             serveError(w, http.StatusInternalServerError, failedToComputeDeltaˢ);
             return;
         }
 
-        p1.Value.TimeNanos = ts; // set since we don't know what profile.Merge set for TimeNanos.
-        p1.Value.DurationNanos = dur;
+        p1.TimeNanos = ts; // set since we don't know what profile.Merge set for TimeNanos.
+        p1.DurationNanos = dur;
 
         w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
         w.Header().Set(contentDispositionˢ, fmt.Sprintf(@"attachment; filename=""%s-delta"""u8, name));
@@ -398,48 +415,48 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
     finally { ᒐ.Run(); }
 }
 
-internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> Ꮡp) {
+internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> p) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var errΔ1 = Ꮡp.WriteTo(new bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = p.WriteTo(new bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     var ts = time.Now().UnixNano();
     var (p0, err) = profile.Parse(new bytes_BufferжReader(Ꮡbuf));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    p0.Value.TimeNanos = ts;
-    return (p0, default!);
+    p0.TimeNanos = ts;
+    return (p0, default);
 }
 
 [GoLazy] partial class lazyᴛprofileSupportsDelta { internal static map<handler, bool> profileSupportsDelta = new map<handler, bool>{
-    ["allocs"u8] = true,
-    ["block"u8] = true,
-    ["goroutineleak"u8] = true,
-    ["goroutine"u8] = true,
-    ["heap"u8] = true,
-    ["mutex"u8] = true,
-    ["threadcreate"u8] = true
+    [(@string)"allocs"] = true,
+    [(@string)"block"] = true,
+    [(@string)"goroutineleak"] = true,
+    [(@string)"goroutine"] = true,
+    [(@string)"heap"] = true,
+    [(@string)"mutex"] = true,
+    [(@string)"threadcreate"] = true
 }; }
 
 [GoLazy] partial class lazyᴛprofileDescriptions { internal static map<@string, @string> profileDescriptions = new map<@string, @string>{
-    ["allocs"u8] = "A sampling of all past memory allocations"u8,
-    ["block"u8] = "Stack traces that led to blocking on synchronization primitives"u8,
-    ["cmdline"u8] = "The command line invocation of the current program"u8,
-    ["goroutine"u8] = "Stack traces of all current goroutines. Use debug=2 as a query parameter to export in the same format as an unrecovered panic."u8,
-    ["heap"u8] = "A sampling of memory allocations of live objects. You can specify the gc GET parameter to run GC before taking the heap sample."u8,
-    ["mutex"u8] = "Stack traces of holders of contended mutexes"u8,
-    ["profile"u8] = "CPU profile. You can specify the duration in the seconds GET parameter. After you get the profile file, use the go tool pprof command to investigate the profile."u8,
-    ["symbol"u8] = "Maps given program counters to function names. Counters can be specified in a GET raw query or POST body, multiple counters are separated by '+'."u8,
-    ["threadcreate"u8] = "Stack traces that led to the creation of new OS threads"u8,
-    ["trace"u8] = "A trace of execution of the current program. You can specify the duration in the seconds GET parameter. After you get the trace file, use the go tool trace command to investigate the trace."u8
+    ["allocs"] = "A sampling of all past memory allocations",
+    ["block"] = "Stack traces that led to blocking on synchronization primitives",
+    ["cmdline"] = "The command line invocation of the current program",
+    ["goroutine"] = "Stack traces of all current goroutines. Use debug=2 as a query parameter to export in the same format as an unrecovered panic.",
+    ["heap"] = "A sampling of memory allocations of live objects. You can specify the gc GET parameter to run GC before taking the heap sample.",
+    ["mutex"] = "Stack traces of holders of contended mutexes",
+    ["profile"] = "CPU profile. You can specify the duration in the seconds GET parameter. After you get the profile file, use the go tool pprof command to investigate the profile.",
+    ["symbol"] = "Maps given program counters to function names. Counters can be specified in a GET raw query or POST body, multiple counters are separated by '+'.",
+    ["threadcreate"] = "Stack traces that led to the creation of new OS threads",
+    ["trace"] = "A trace of execution of the current program. You can specify the duration in the seconds GET parameter. After you get the trace file, use the go tool trace command to investigate the trace."
 }; }
 
 [GoInit] internal static void initΔ1() {
     if (goexperiment.GoroutineLeakProfile) {
-        profileDescriptions["goroutineleak"u8] = "Stack traces of all leaked goroutines. Use debug=2 as a query parameter to export in the same format as an unrecovered panic."u8;
+        profileDescriptions["goroutineleak"] = "Stack traces of all leaked goroutines. Use debug=2 as a query parameter to export in the same format as an unrecovered panic.";
     }
 }
 
@@ -451,8 +468,10 @@ partial struct profileEntry {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string debugPprofˢ = "/debug/pprof/"u8;
-internal static readonly @string textHtmlCharsetUtf8ˢ = "text/html; charset=utf-8"u8;
+internal static ref readonly @string debugPprofˢ => ref debugPprofˢᵇ;
+private static readonly @string debugPprofˢᵇ = "/debug/pprof/"u8;
+internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
+private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
 
 // Index responds with the pprof-formatted profile named by the request.
 // For example, "/debug/pprof/heap" serves the "heap" profile.
@@ -462,7 +481,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     {
-        var (name, found) = strings.CutPrefix((~r.URL).Path, debugPprofˢ); if (found) {
+        var (name, found) = strings.CutPrefix(r.URL.Path, debugPprofˢ); if (found) {
             if (name != ""u8) {
                 ((handler)name).ServeHTTP(w, Ꮡr);
                 return;
@@ -473,7 +492,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     w.Header().Set(contentTypeˢ, textHtmlCharsetUtf8ˢ);
 
-    slice<profileEntry> profiles = default!;
+    slice<profileEntry> profiles = default;
     foreach (var (_, p) in pprof.Profiles()) {
         profiles = append(profiles, new profileEntry(
             Name: p.Name(),
@@ -484,7 +503,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     }
 
     // Adding other profiles exposed from within this package
-    foreach (var (_, p) in new @string[]{"cmdline"u8, "profile"u8, "symbol"u8, "trace"u8}.slice()) {
+    foreach (var (_, p) in slice<@string>(["cmdline", "profile", "symbol", "trace"])) {
         profiles = append(profiles, new profileEntry(
             Name: p,
             Href: p,
@@ -495,14 +514,15 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     slices.SortFunc(profiles, (profileEntry a, profileEntry b) => strings.Compare(a.Name, b.Name));
 
     {
-        var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != default!) {
+        var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != nil) {
             log.Print(err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string htmlHeadTitleDebugPprofˢ = """
+internal static ref readonly @string htmlHeadTitleDebugPprofˢ => ref htmlHeadTitleDebugPprofˢᵇ;
+private static readonly @string htmlHeadTitleDebugPprofˢᵇ = """
 <html>
 <head>
 <title>/debug/pprof/</title>
@@ -523,7 +543,8 @@ Types of profiles available:
 <thead><td>Count</td><td>Profile</td></thead>
 
 """u8.Raw();
-internal static readonly @string tableAHrefGoroutineDebugˢ = """
+internal static ref readonly @string tableAHrefGoroutineDebugˢ => ref tableAHrefGoroutineDebugˢᵇ;
+private static readonly @string tableAHrefGoroutineDebugˢᵇ = """
 </table>
 <a href="goroutine?debug=2">full goroutine stack dump</a>
 <br>
@@ -532,7 +553,8 @@ Profile Descriptions:
 <ul>
 
 """u8.Raw();
-internal static readonly @string ulPBodyHtmlˢ = """
+internal static ref readonly @string ulPBodyHtmlˢ => ref ulPBodyHtmlˢᵇ;
+private static readonly @string ulPBodyHtmlˢᵇ = """
 </ul>
 </p>
 </body>
@@ -544,7 +566,7 @@ internal static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles
     b.WriteString(htmlHeadTitleDebugPprofˢ);
 
     foreach (var (_, profile) in profiles) {
-        var link = Ꮡ(new url.URL(Path: profile.Href, RawQuery: "debug=1"u8));
+        var link = Ꮡ(new url.URL(Path: profile.Href, RawQuery: "debug=1"));
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<tr><td>%d</td><td><a href='%s'>%s</a></td></tr>\n"u8, profile.Count, link.OrTypedNil(), html.EscapeString(profile.Name));
     }
 

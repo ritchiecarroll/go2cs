@@ -11,11 +11,11 @@ using static go.math.cmplx_package;
 
 partial class cmplx_internal_test_package {
 
-public static void TestTanHuge(ж<testing.T> Ꮡt) {
+public static void TestTanHuge(ж<testing.T> t) {
     foreach (var (i, x) in hugeIn) {
         {
             var f = Tan(x); if (!cSoclose(tanHuge[i], f, 3e-15D)) {
-                Ꮡt.Errorf("Tan(%g) = %g, want %g"u8, x, f, tanHuge[i]);
+                t.Errorf("Tan(%g) = %g, want %g", x, f, tanHuge[i]);
             }
         }
     }

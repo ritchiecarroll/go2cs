@@ -16,11 +16,11 @@ partial class runtime_test_package {
     return global::go.runtime_package.heapObjectsCanMove();
 }
 
-public static partial void TestHeapObjectsCanMove(ж<testing.T> Ꮡt) {
+public static partial void TestHeapObjectsCanMove(ж<testing.T> t) {
     if (heapObjectsCanMove()) {
         // If this happens (or this test stops building),
         // it will break go4.org/unsafe/assume-no-moving-gc.
-        Ꮡt.Fatalf("heap objects can move!"u8);
+        t.Fatalf("heap objects can move!");
     }
 }
 

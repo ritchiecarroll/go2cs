@@ -15,7 +15,8 @@ using sync;
 partial class entropy_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string v100ˢ = "v1.0.0"u8;
+private static ref readonly @string v100ˢ => ref v100ˢᵇ;
+private static readonly @string v100ˢᵇ = "v1.0.0"u8;
 
 // Version returns the version of the entropy source.
 //
@@ -37,13 +38,13 @@ partial struct ScratchBuffer /*[33554432]byte*/;
 //
 // Seed returns an error if the entropy source startup health tests fail, which
 // has a non-negligible chance of happening.
-public static (array<byte>, error) Seed(ж<ScratchBuffer> Ꮡmemory) {
+public static (array<byte>, error) Seed(ж<ScratchBuffer> memory) {
     // Collect w = 1024 samples, each certified to provide no less than h = 0.5
     // bits of entropy, for a total of hᵢₙ = w × h = 512 bits of entropy, over
     // nᵢₙ = w × n = 8192 bits of input data.
     ref var samples = ref heap(new array<byte>(1024), out var Ꮡsamples);
     {
-        var err = Samples(samples[..], Ꮡmemory); if (err != default!) {
+        var err = Samples(samples[..], memory); if (err != nil) {
             return (new byte[]{}.array(48), err);
         }
     }
@@ -73,22 +74,23 @@ public static (array<byte>, error) Seed(ж<ScratchBuffer> Ꮡmemory) {
     //   - nₒᵤₜ ≤ security strength of SHA-384 = 384 (per SP 800-107 Rev. 1, Table 1),
     //
     // we can claim the output has full entropy.
-    return (SHA384(Ꮡsamples), default!);
+    return (SHA384(Ꮡsamples), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string entropyAtLeast1024ˢ = "entropy: at least 1024 samples are required for startup health tests"u8;
+private static ref readonly @string entropyAtLeast1024ˢ => ref entropyAtLeast1024ˢᵇ;
+private static readonly @string entropyAtLeast1024ˢᵇ = "entropy: at least 1024 samples are required for startup health tests"u8;
 
 // Samples starts a new entropy source, collects the requested number of
 // samples, conducts startup health tests, and returns the samples or an error
 // if the health tests fail.
 //
 // The health tests have a non-negligible chance of failing.
-public static error Samples(slice<uint8> samples, ж<ScratchBuffer> Ꮡmemory) {
+public static error Samples(slice<uint8> samples, ж<ScratchBuffer> memory) {
     if (len(samples) < 1024) {
         return errors.New(entropyAtLeast1024ˢ);
     }
-    var s = newSource(Ꮡmemory);
+    var s = newSource(memory);
     foreach (var _ᴛ1 in range(4)) {
         // Warm up the source to avoid any initial bias.
         _ = s.Sample();
@@ -97,16 +99,16 @@ public static error Samples(slice<uint8> samples, ж<ScratchBuffer> Ꮡmemory) {
         samples[i] = s.Sample();
     }
     {
-        var err = RepetitionCountTest(samples); if (err != default!) {
+        var err = RepetitionCountTest(samples); if (err != nil) {
             return err;
         }
     }
     {
-        var err = AdaptiveProportionTest(samples); if (err != default!) {
+        var err = AdaptiveProportionTest(samples); if (err != nil) {
             return err;
         }
     }
-    return default!;
+    return default;
 }
 
 partial struct source {
@@ -115,9 +117,9 @@ partial struct source {
     internal int64 previous;
 }
 
-internal static ж<source> newSource(ж<ScratchBuffer> Ꮡmemory) {
+internal static ж<source> newSource(ж<ScratchBuffer> memory) {
     return Ꮡ(new source(
-        memory: Ꮡmemory,
+        memory: memory,
         lcgState: (uint32)time.HighPrecisionNow(),
         previous: time.HighPrecisionNow()
     ));
@@ -127,9 +129,9 @@ internal static ж<source> newSource(ж<ScratchBuffer> Ꮡmemory) {
 //
 // The memory slice is passed in and may be shared across sources e.g. to avoid
 // the significant (~500µs) cost of zeroing a new allocation on every [Seed] call.
-internal static void touchMemory(ж<ScratchBuffer> Ꮡmemory, uint32 idx) {
+internal static void touchMemory(ж<ScratchBuffer> memory, uint32 idx) {
     idx = idx / 4 * 4; // align to 32 bits
-    var u32 = Ꮡmemory.at<byte>((ulong)(idx)).Reinterpret<byte, uint32>();
+    var u32 = memory.at<byte>((ulong)(idx)).Reinterpret<byte, uint32>();
     var last = atomic.LoadUint32(u32);
     atomic.SwapUint32(u32, last + 13);
 }
@@ -160,7 +162,8 @@ internal static uint8 Sample(this ref source s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string entropyRepetitionCountˢ = "entropy: repetition count health test failed"u8;
+private static ref readonly @string entropyRepetitionCountˢ => ref entropyRepetitionCountˢᵇ;
+private static readonly @string entropyRepetitionCountˢᵇ = "entropy: repetition count health test failed"u8;
 
 // RepetitionCountTest implements the repetition count test from SP 800-90B
 // Section 4.4.1. It returns an error if any symbol is repeated C = 41 or more
@@ -178,7 +181,7 @@ public static error RepetitionCountTest(slice<uint8> samples) {
     var x = samples[0];
     nint count = 1;
     foreach (var (_, y) in samples[1..]) {
-        if (y == x){
+        if (y == x) {
             count++;
             if (count >= 41) {
                 return errors.New(entropyRepetitionCountˢ);
@@ -188,11 +191,12 @@ public static error RepetitionCountTest(slice<uint8> samples) {
             count = 1;
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string entropyAdaptiveˢ = "entropy: adaptive proportion health test failed"u8;
+private static ref readonly @string entropyAdaptiveˢ => ref entropyAdaptiveˢᵇ;
+private static readonly @string entropyAdaptiveˢᵇ = "entropy: adaptive proportion health test failed"u8;
 
 // AdaptiveProportionTest implements the adaptive proportion test from SP 800-90B
 // Section 4.4.2. It returns an error if any symbol appears C = 410 or more
@@ -221,7 +225,7 @@ public static error AdaptiveProportionTest(slice<uint8> samples) {
             return errors.New(entropyAdaptiveˢ);
         }
     }
-    return default!;
+    return default;
 }
 
 } // end entropy_package

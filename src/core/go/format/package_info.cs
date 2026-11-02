@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +46,12 @@ using static go.go.format_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.go.ast_package.GenDecl))]
+[assembly: GoFieldAccess(typeof(go.go.printer_package.CommentedNode))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,8 +61,8 @@ using static go.go.format_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/format/format.go", "format.cs", "ACVOAAQcAAoEkoKUtICCguqGooKClIKUlKaCgrgAAhYACAKCgoKmpqamgoKCppSmuA==")]
-[assembly: global::go.GoPositionMap("go/format/internal.go", "internal.cs", "ABguAAgOuILugoKCpoKUyoIACBKCgoKUgsqUgri4rAAFEISSgoKUypKCgpSUgsqCgoKUtLaClILKgoKCgpTKgrimgoKUqqI=", "45-50:1;69-81:2")]
+[assembly: GoPositionMap("go/format/format.go", "format.cs", "ACVOAAQcAAoEkoKUtICCguqGooKClIKUlKaCgrgAAhYACAKCgoKmpqamgoKCppSmuA==")]
+[assembly: GoPositionMap("go/format/internal.go", "internal.cs", "ABouAAgOuILugoKCpoKUyoIACBKCgoKUgsqUgri4rAAFEISSgoKUypKCgpSUgsqCgoKUtLaClILKgoKCgpTKgrimgoKUqqI=", "45-50:1;69-81:2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

@@ -29,7 +29,7 @@ internal static ΔBits add(this ΔBits x, ΔBits y) {
 }
 
 internal static ΔBits mul(this ΔBits x, ΔBits y) {
-    ΔBits p = default!;
+    ΔBits p = default;
     foreach (var (_, xΔ1) in x) {
         foreach (var (_, yΔ1) in y) {
             p = append(p, xΔ1 + yΔ1);
@@ -42,20 +42,20 @@ internal partial struct TestMulBits_type /*dyn*/ {
     internal ΔBits x, y, want;
 }
 
-public static void TestMulBits(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestMulBits_type[]{
-        new(default!, default!, default!),
-        new(new ΔBits(new nint[]{}.slice()), new ΔBits(new nint[]{}.slice()), default!),
+public static void TestMulBits(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestMulBits_type>([
+        new(default, default, default),
+        new(new ΔBits(new nint[]{}.slice()), new ΔBits(new nint[]{}.slice()), default),
         new(new ΔBits(new nint[]{0}.slice()), new ΔBits(new nint[]{0}.slice()), new ΔBits(new nint[]{0}.slice())),
         new(new ΔBits(new nint[]{0}.slice()), new ΔBits(new nint[]{1}.slice()), new ΔBits(new nint[]{1}.slice())),
         new(new ΔBits(new nint[]{1}.slice()), new ΔBits(new nint[]{1, 2, 3}.slice()), new ΔBits(new nint[]{2, 3, 4}.slice())),
         new(new ΔBits(new nint[]{-1}.slice()), new ΔBits(new nint[]{1}.slice()), new ΔBits(new nint[]{0}.slice())),
         new(new ΔBits(new nint[]{-10, -1, 0, 1, 10}.slice()), new ΔBits(new nint[]{1, 2, 3}.slice()), new ΔBits(new nint[]{-9, -8, -7, 0, 1, 2, 1, 2, 3, 2, 3, 4, 11, 12, 13}.slice()))
-    }.slice()) {
+    ])) {
         @string got = fmt.Sprintf("%v"u8, test.x.mul(test.y));
         @string want = fmt.Sprintf("%v"u8, test.want);
         if (got != want) {
-            Ꮡt.Errorf("%v * %v = %s; want %s"u8, test.x, test.y, got, want);
+            t.Errorf("%v * %v = %s; want %s", test.x, test.y, got, want);
         }
     }
 }
@@ -74,7 +74,7 @@ internal static ΔBits norm(this ΔBits x) {
         }
         m[b] = true;
     }
-    ΔBits z = default!;
+    ΔBits z = default;
     foreach (var (b, set) in m) {
         if (set) {
             z = append(z, b);
@@ -88,19 +88,19 @@ internal partial struct TestNormBits_type /*dyn*/ {
     internal ΔBits x, want;
 }
 
-public static void TestNormBits(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestNormBits_type[]{
-        new(default!, default!),
+public static void TestNormBits(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestNormBits_type>([
+        new(default, default),
         new(new ΔBits(new nint[]{}.slice()), new ΔBits(new nint[]{}.slice())),
         new(new ΔBits(new nint[]{0}.slice()), new ΔBits(new nint[]{0}.slice())),
         new(new ΔBits(new nint[]{0, 0}.slice()), new ΔBits(new nint[]{1}.slice())),
         new(new ΔBits(new nint[]{3, 1, 1}.slice()), new ΔBits(new nint[]{2, 3}.slice())),
         new(new ΔBits(new nint[]{10, 9, 8, 7, 6, 6}.slice()), new ΔBits(new nint[]{11}.slice()))
-    }.slice()) {
+    ])) {
         @string got = fmt.Sprintf("%v"u8, test.x.norm());
         @string want = fmt.Sprintf("%v"u8, test.want);
         if (got != want) {
-            Ꮡt.Errorf("normBits(%v) = %s; want %s"u8, test.x, got, want);
+            t.Errorf("normBits(%v) = %s; want %s", test.x, got, want);
         }
     }
 }
@@ -113,8 +113,8 @@ internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint
     x = x.norm();
 
     // determine range
-    nint min = default!;
-    nint max = default!;
+    nint min = default;
+    nint max = default;
     foreach (var (i, b) in x) {
         if (i == 0 || b < min) {
             min = b;
@@ -130,10 +130,10 @@ internal static ж<global::go.math.big_package.Float> round(this ΔBits x, nuint
     // prec < prec0
 
     // determine bit 0, rounding, and sticky bit, and result bits z
-    nuint bit0 = default!;
-    nuint rbit = default!;
-    nuint sbit = default!;
-    ΔBits z = default!;
+    nuint bit0 = default;
+    nuint rbit = default;
+    nuint sbit = default;
+    ΔBits z = default;
     nint r = max - (nint)prec;
     foreach (var (_, b) in x) {
         switch (ᐧ) {
@@ -179,7 +179,7 @@ public static ж<global::go.math.big_package.Float> ΔFloat(this ΔBits bits) {
     // len(bits) > 0
 
     // determine lsb exponent
-    nint min = default!;
+    nint min = default;
     foreach (var (i, b) in bits) {
         if (i == 0 || b < min) {
             min = b;
@@ -201,8 +201,8 @@ public static ж<global::go.math.big_package.Float> ΔFloat(this ΔBits bits) {
     // create corresponding float
     var z = @new<global::go.math.big_package.Float>().SetInt(x); // normalized
     {
-        var e = (int64)(~z).exp + (int64)min; if (MinExp <= e && e <= MaxExp){
-            z.Value.exp = (int32)e;
+        var e = (int64)z.exp + (int64)min; if (MinExp <= e && e <= MaxExp) {
+            z.exp = (int32)e;
         } else {
             // this should never happen for our test cases
             throw panic("exponent out of range");
@@ -216,28 +216,28 @@ internal partial struct TestFromBits_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestFromBits(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFromBits_type[]{
+public static void TestFromBits(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestFromBits_type>([
         // all different bit numbers
-        new(default!, "0"u8),
-        new(new ΔBits(new nint[]{0}.slice()), "0x.8p+1"u8),
-        new(new ΔBits(new nint[]{1}.slice()), "0x.8p+2"u8),
-        new(new ΔBits(new nint[]{-1}.slice()), "0x.8p+0"u8),
-        new(new ΔBits(new nint[]{63}.slice()), "0x.8p+64"u8),
-        new(new ΔBits(new nint[]{33, -30}.slice()), "0x.8000000000000001p+34"u8),
-        new(new ΔBits(new nint[]{255, 0}.slice()), "0x.8000000000000000000000000000000000000000000000000000000000000001p+256"u8),
+        new(default, "0"),
+        new(new ΔBits(new nint[]{0}.slice()), "0x.8p+1"),
+        new(new ΔBits(new nint[]{1}.slice()), "0x.8p+2"),
+        new(new ΔBits(new nint[]{-1}.slice()), "0x.8p+0"),
+        new(new ΔBits(new nint[]{63}.slice()), "0x.8p+64"),
+        new(new ΔBits(new nint[]{33, -30}.slice()), "0x.8000000000000001p+34"),
+        new(new ΔBits(new nint[]{255, 0}.slice()), "0x.8000000000000000000000000000000000000000000000000000000000000001p+256"),
 
         // multiple equal bit numbers
-        new(new ΔBits(new nint[]{0, 0}.slice()), "0x.8p+2"u8),
-        new(new ΔBits(new nint[]{0, 0, 0, 0}.slice()), "0x.8p+3"u8),
-        new(new ΔBits(new nint[]{0, 1, 0}.slice()), "0x.8p+3"u8),
-        new(appendꓸꓸꓸ(new ΔBits(new nint[]{2, 1, 0}.slice()), /* 7 */ new ΔBits(new nint[]{3, 1}.slice()) /* 10 */), "0x.88p+5"u8 /* 17 */
+        new(new ΔBits(new nint[]{0, 0}.slice()), "0x.8p+2"),
+        new(new ΔBits(new nint[]{0, 0, 0, 0}.slice()), "0x.8p+3"),
+        new(new ΔBits(new nint[]{0, 1, 0}.slice()), "0x.8p+3"),
+        new(appendꓸꓸꓸ(new ΔBits(new nint[]{2, 1, 0}.slice()), /* 7 */ new ΔBits(new nint[]{3, 1}.slice()) /* 10 */), "0x.88p+5" /* 17 */
 )
-    }.slice()) {
+    ])) {
         var f = test.bits.ΔFloat();
         {
-            @string got = f.Text((rune)'p', 0); if (got != test.want) {
-                Ꮡt.Errorf("setBits(%v) = %s; want %s"u8, test.bits, got, test.want);
+            @string got = f.Text((byte)'p', 0); if (got != test.want) {
+                t.Errorf("setBits(%v) = %s; want %s", test.bits, got, test.want);
             }
         }
     }

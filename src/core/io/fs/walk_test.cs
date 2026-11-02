@@ -24,26 +24,26 @@ partial struct Node {
 }
 
 internal static ж<Node> tree = Ꮡ(new Node(
-    "testdata"u8,
-    new ж<Node>[]{
-        Ꮡ(new Node("a"u8, default!, 0)),
-        Ꮡ(new Node("b"u8, new ж<Node>[]{}.slice(), 0)),
-        Ꮡ(new Node("c"u8, default!, 0)),
+    "testdata",
+    slice<ж<Node>>([
+        Ꮡ(new Node("a", default, 0)),
+        Ꮡ(new Node("b", slice<ж<Node>>([]), 0)),
+        Ꮡ(new Node("c", default, 0)),
         Ꮡ(new Node(
-            "d"u8,
-            new ж<Node>[]{
-                Ꮡ(new Node("x"u8, default!, 0)),
-                Ꮡ(new Node("y"u8, new ж<Node>[]{}.slice(), 0)),
+            "d",
+            slice<ж<Node>>([
+                Ꮡ(new Node("x", default, 0)),
+                Ꮡ(new Node("y", slice<ж<Node>>([]), 0)),
                 Ꮡ(new Node(
-                    "z"u8,
-                    new ж<Node>[]{
-                        Ꮡ(new Node("u"u8, default!, 0)),
-                        Ꮡ(new Node("v"u8, default!, 0))
-                    }.slice(),
+                    "z",
+                    slice<ж<Node>>([
+                        Ꮡ(new Node("u", default, 0)),
+                        Ꮡ(new Node("v", default, 0))
+                    ]),
                     0))
-            }.slice(),
+            ]),
             0))
-    }.slice(),
+    ]),
     0
 ));
 
@@ -52,16 +52,16 @@ internal static void walkTree(ж<Node> Ꮡn, @string path, Action<@string, ж<No
 
     f(path, Ꮡn);
     foreach (var (_, e) in n.entries) {
-        walkTree(e, pathpkg.Join(path, (~e).name), f);
+        walkTree(e, pathpkg.Join(path, e.name), f);
     }
 }
 
 internal static fs.FS makeTree() {
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{});
     var fsysʗ1 = fsys;
-    walkTree(tree, (~tree).name, (@string path, ж<Node> n) => {
-        if ((~n).entries == default!){
-            fsysʗ1[path] = Ꮡ(new fstest.MapFile(nil));
+    walkTree(tree, tree.name, (@string path, ж<Node> n) => {
+        if (n.entries == nil) {
+            fsysʗ1[path] = Ꮡ(new fstest.MapFile());
         } else {
             fsysʗ1[path] = Ꮡ(new fstest.MapFile(Mode: ModeDir));
         }
@@ -76,59 +76,58 @@ internal static error mark(fs.DirEntry entry, error err, ж<slice<error>> Ꮡerr
     ref var errors = ref Ꮡerrors.DerefOrNull();
 
     @string name = entry.Name();
-    walkTree(tree, (~tree).name, (@string path, ж<Node> n) => {
-        if ((~n).name == name) {
-            n.Value.mark++;
+    walkTree(tree, tree.name, (@string path, ж<Node> n) => {
+        if (n.name == name) {
+            n.mark++;
         }
     });
-    if (err != default!) {
+    if (err != nil) {
         errors = append(errors, err);
         if (clear) {
-            return default!;
+            return default;
         }
         return err;
     }
-    return default!;
+    return default;
 }
 
-public static void TestWalkDir(ж<testing.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestWalkDir(ж<testing.T> t) {
+    t.Chdir(t.TempDir());
 
     var fsys = makeTree();
-    ref var errors = ref heap<slice<error>>(out var Ꮡerrors);
-    errors = new slice<error>(0, 10);
+    ref var errors = ref heap<slice<error>>(new slice<error>(0, 10), out var Ꮡerrors);
     var clear = true;
     var markFn = (@string path, fs.DirEntry entry, error errΔ1) => mark(entry, errΔ1, Ꮡerrors, clear);
     // Expect no errors.
-    var err = WalkDir(fsys, "."u8, new Func<@string, fs.DirEntry, error, error>(markFn));
-    if (err != default!) {
-        Ꮡt.Fatalf("no error expected, found: %s"u8, err);
+    var err = WalkDir(fsys, ".", new Func<@string, fs.DirEntry, error, error>(markFn));
+    if (err != nil) {
+        t.Fatalf("no error expected, found: %s", err);
     }
     if (len(errors) != 0) {
-        Ꮡt.Fatalf("unexpected errors: %s"u8, errors);
+        t.Fatalf("unexpected errors: %s", errors);
     }
-    walkTree(tree, (~tree).name, (@string path, ж<Node> n) => {
-        if ((~n).mark != 1) {
-            Ꮡt.Errorf("node %s mark = %d; expected 1"u8, path, (~n).mark);
+    walkTree(tree, tree.name, (@string path, ж<Node> n) => {
+        if (n.mark != 1) {
+            t.Errorf("node %s mark = %d; expected 1", path, n.mark);
         }
-        n.Value.mark = 0;
+        n.mark = 0;
     });
 }
 
-public static void TestWalkDirSymlink(ж<testing.T> Ꮡt) {
+public static void TestWalkDirSymlink(ж<testing.T> t) {
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["link"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("dir"u8), Mode: ModeSymlink)),
-        ["dir/a"u8] = Ꮡ(new fstest.MapFile()),
-        ["dir/b/c"u8] = Ꮡ(new fstest.MapFile()),
-        ["dir/d"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("b"u8), Mode: ModeSymlink))
+        ["link"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("dir"u8), Mode: ModeSymlink)),
+        ["dir/a"] = Ꮡ(new fstest.MapFile()),
+        ["dir/b/c"] = Ꮡ(new fstest.MapFile()),
+        ["dir/d"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("b"u8), Mode: ModeSymlink))
     });
 
     var wantTypes = new map<@string, fs.FileMode>{
-        ["link"u8] = ModeDir,
-        ["link/a"u8] = 0,
-        ["link/b"u8] = ModeDir,
-        ["link/b/c"u8] = 0,
-        ["link/d"u8] = ModeSymlink
+        ["link"] = ModeDir,
+        ["link/a"] = 0,
+        ["link/b"] = ModeDir,
+        ["link/b/c"] = 0,
+        ["link/d"] = ModeSymlink
     };
     var marks = new map<@string, nint>();
     var marksʗ1 = marks;
@@ -136,73 +135,74 @@ public static void TestWalkDirSymlink(ж<testing.T> Ꮡt) {
     var walkFn = error (@string path, fs.DirEntry entry, error errΔ1) => {
         marksʗ1[path]++;
         {
-            var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok){
-                Ꮡt.Errorf("Unexpected path %q in walk"u8, path);
-            } else 
-            {
+            var (want, ok) = wantTypesʗ1[path, ꟷ]; if (!ok) {
+                t.Errorf("Unexpected path %q in walk", path);
+            } else {
                 var got = entry.Type(); if (got != want) {
-                    Ꮡt.Errorf("%s entry type = %v; want %v"u8, path, got, want);
+                    t.Errorf("%s entry type = %v; want %v", path, got, want);
                 }
             }
         }
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("Walking %s: %v"u8, path, errΔ1);
+        if (errΔ1 != nil) {
+            t.Errorf("Walking %s: %v", path, errΔ1);
         }
-        return default!;
+        return default;
     };
 
     // Expect no errors.
     var err = WalkDir(new fstest_MapFSᴠFS(fsys), linkˢ, new Func<@string, fs.DirEntry, error, error>(walkFn));
-    if (err != default!) {
-        Ꮡt.Fatalf("no error expected, found: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("no error expected, found: %s", err);
     }
     foreach (var (path, _) in wantTypes) {
         {
             nint got = marks[path]; if (got != 1) {
-                Ꮡt.Errorf("%s visited %d times; expected 1"u8, path, got);
+                t.Errorf("%s visited %d times; expected 1", path, got);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string badˢ = "bad"u8;
-private static readonly @string nextˢ = "next"u8;
+private static ref readonly @string badˢ => ref badˢᵇ;
+private static readonly @string badˢᵇ = "bad"u8;
+private static ref readonly @string nextˢ => ref nextˢᵇ;
+private static readonly @string nextˢᵇ = "next"u8;
 
-public static void TestIssue51617(ж<testing.T> Ꮡt) {
+public static void TestIssue51617(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        @string dir = Ꮡt.TempDir();
-        foreach (var (_, sub) in new @string[]{"a"u8, filepath.Join("a"u8, badˢ), filepath.Join("a"u8, nextˢ)}.slice()) {
+        @string dir = t.TempDir();
+        foreach (var (_, sub) in slice<@string>(["a", filepath.Join("a", badˢ), filepath.Join("a", nextˢ)])) {
             {
-                var errΔ1 = os.Mkdir(filepath.Join(dir, sub), 493); if (errΔ1 != default!) {
-                    Ꮡt.Fatal(errΔ1);
+                var errΔ1 = os.Mkdir(filepath.Join(dir, sub), 493); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
         }
         @string bad = filepath.Join(dir, "a", badˢ);
         {
-            var errΔ2 = os.Chmod(bad, 0); if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            var errΔ2 = os.Chmod(bad, 0); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
         defer(os.Chmod, bad, (fs.FileMode)448, ref ᒐ); // avoid errors on cleanup
         ref var saw = ref heap<slice<@string>>(out var Ꮡsaw);
-        var err = WalkDir(os.DirFS(dir), "."u8, error (@string path, fs.DirEntry d, error errΔ3) => {
-            if (errΔ3 != default!) {
+        var err = WalkDir(os.DirFS(dir), ".", error (@string path, fs.DirEntry d, error errΔ3) => {
+            if (errΔ3 != nil) {
                 return filepath.SkipDir;
             }
             if (d.IsDir()) {
                 Ꮡsaw.ValueSlot = append(Ꮡsaw.ValueSlot, path);
             }
-            return default!;
+            return default;
         });
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
-        var want = new @string[]{"."u8, "a"u8, "a/bad"u8, "a/next"u8}.slice();
+        var want = slice<@string>([".", "a", "a/bad", "a/next"]);
         if (!slices.Equal<slice<@string>, @string>(saw, want)) {
-            Ꮡt.Errorf("got directories %v, want %v"u8, saw, want);
+            t.Errorf("got directories %v, want %v", saw, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

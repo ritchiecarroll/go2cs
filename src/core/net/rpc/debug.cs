@@ -18,7 +18,8 @@ using io = io_package;
 
 partial class rpc_package {
 
-internal static readonly @string debugText = """
+internal static ref readonly @string debugText => ref debugTextᵇ;
+private static readonly @string debugTextᵇ = """
 <html>
 	<body>
 	<title>Services</title>
@@ -40,7 +41,7 @@ internal static readonly @string debugText = """
 	</html>
 """u8.Raw();
 
-internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New("RPC debug"u8).Parse(debugText);
+internal static (ж<template.Template>, error) tupleᴛ1ʗ = template.New("RPC debug").Parse(debugText);
 internal static ж<template.Template> debug = template.Must(tupleᴛ1ʗ.Item1, tupleᴛ1ʗ.Item2);
 
 // If set, print log statements for internal and I/O errors.
@@ -93,13 +94,13 @@ partial struct debugHTTP {
 internal static readonly object rpcErrorExecutingˢ = (@string)"rpc: error executing template:"u8;
 
 // Runs at /debug/rpc
-internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) {
+internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) {
     // Build a sorted version of the data.
     ref var services = ref heap<serviceArray>(out var Ꮡservices);
     Ꮡ(server).of(debugHTTP.ᏑserviceMap).Range((any snamei, any svci) => {
         var svc = svci._<ж<service>>();
-        var ds = new debugService(svc, snamei._<@string>(), new slice<debugMethod>(0, len((~svc).method)));
-        foreach (var (mname, method) in (~svc).method) {
+        var ds = new debugService(svc, snamei._<@string>(), new slice<debugMethod>(0, len(svc.method)));
+        foreach (var (mname, method) in svc.method) {
             ds.Method = append(ds.Method, new debugMethod(method, mname));
         }
         slices.SortFunc(ds.Method, (debugMethod a, debugMethod b) => strings.Compare(a.Name, b.Name));
@@ -108,7 +109,7 @@ internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, �
     });
     slices.SortFunc(services, (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
     var err = debug.Execute(new http_ResponseWriterᴠWriter(w), services);
-    if (err != default!) {
+    if (err != nil) {
         fmt.Fprintln(new http_ResponseWriterᴠWriter(w), rpcErrorExecutingˢ, err.Error());
     }
 }

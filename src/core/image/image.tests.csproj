@@ -265,7 +265,6 @@
     <ProjectReference Include="$(go2csPath)core/image/gif/image.gif.csproj" />
     <ProjectReference Include="$(go2csPath)core/image/jpeg/image.jpeg.csproj" />
     <ProjectReference Include="$(go2csPath)core/image/png/image.png.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />

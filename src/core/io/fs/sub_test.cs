@@ -16,36 +16,40 @@ partial struct subOnly {
 }
 
 internal static (fs.File, error) Open(this subOnly _, @string name) {
-    return (default!, ErrNotExist);
+    return (default, ErrNotExist);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string goodbyeTxtˢ = "goodbye.txt"u8;
+private static ref readonly @string goodbyeTxtˢ => ref goodbyeTxtˢᵇ;
+private static readonly @string goodbyeTxtˢᵇ = "goodbye.txt"u8;
 private static readonly object goodbyeWorldˢ = (@string)"goodbye, world"u8;
-private static readonly @string subˢ2 = "sub"u8;
-private static readonly @string subOnlyˢ = "subOnly"u8;
-private static readonly @string nonexistˢ = "nonexist"u8;
+private static ref readonly @string subˢ2 => ref subˢ2ᵇ;
+private static readonly @string subˢ2ᵇ = "sub"u8;
+private static ref readonly @string subOnlyˢ => ref subOnlyˢᵇ;
+private static readonly @string subOnlyˢᵇ = "subOnly"u8;
+private static ref readonly @string nonexistˢ => ref nonexistˢᵇ;
+private static readonly @string nonexistˢᵇ = "nonexist"u8;
 private static readonly object openNonexistSucceededˢ = (@string)"Open(nonexist): succeeded"u8;
 
-public static void TestSub(ж<testing.T> Ꮡt) {
+public static void TestSub(ж<testing.T> t) {
     void check(@string desc, fs.FS subΔ1, error errΔ1) {
-        Ꮡt.Helper();
-        if (errΔ1 != default!) {
-            Ꮡt.Errorf("Sub(sub): %v"u8, errΔ1);
+        t.Helper();
+        if (errΔ1 != nil) {
+            t.Errorf("Sub(sub): %v", errΔ1);
             return;
         }
         (var data, errΔ1) = ReadFile(subΔ1, goodbyeTxtˢ);
-        if (((sstring)data) != "goodbye, world"u8 || errΔ1 != default!) {
-            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, (@string)data, errΔ1, goodbyeWorldˢ);
+        if (((sstring)data) != "goodbye, world"u8 || errΔ1 != nil) {
+            t.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil", desc, (@string)data, errΔ1, goodbyeWorldˢ);
         }
 
-        (var dirs, errΔ1) = ReadDir(subΔ1, "."u8);
-        if (errΔ1 != default! || len(dirs) != 1 || dirs[0].Name() != "goodbye.txt"u8) {
-            slice<@string> names = default!;
+        (var dirs, errΔ1) = ReadDir(subΔ1, ".");
+        if (errΔ1 != nil || len(dirs) != 1 || dirs[0].Name() != "goodbye.txt"u8) {
+            slice<@string> names = default;
             foreach (var (_, d) in dirs) {
                 names = append(names, d.Name());
             }
-            Ꮡt.Errorf(@"ReadDir(%s, ""."") = %v, %v, want %v, nil"u8, desc, names, errΔ1, new @string[]{"goodbye.txt"u8}.slice());
+            t.Errorf(@"ReadDir(%s, ""."") = %v, %v, want %v, nil", desc, names, errΔ1, slice<@string>(["goodbye.txt"]));
         }
     }
 
@@ -58,20 +62,20 @@ public static void TestSub(ж<testing.T> Ꮡt) {
     check(openOnlyˢ, sub, err);
 
     (_, err) = sub.Open(nonexistˢ);
-    if (err == default!) {
-        Ꮡt.Fatal(openNonexistSucceededˢ);
+    if (err == nil) {
+        t.Fatal(openNonexistSucceededˢ);
     }
     var (pe, ok) = err._<ж<fs.PathError>>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("Open(nonexist): error is %T, want *PathError"u8, err);
+        t.Fatalf("Open(nonexist): error is %T, want *PathError", err);
     }
-    if ((~pe).Path != "nonexist"u8) {
-        Ꮡt.Fatalf("Open(nonexist): err.Path = %q, want %q"u8, (~pe).Path, nonexistˢ);
+    if (pe.Path != "nonexist"u8) {
+        t.Fatalf("Open(nonexist): err.Path = %q, want %q", pe.Path, nonexistˢ);
     }
 
-    (_, err) = sub.Open("./"u8);
+    (_, err) = sub.Open("./");
     if (!errors.Is(err, ErrInvalid)) {
-        Ꮡt.Fatalf("Open(./): error is %v, want %v"u8, err, ErrInvalid);
+        t.Fatalf("Open(./): error is %v, want %v", err, ErrInvalid);
     }
 }
 

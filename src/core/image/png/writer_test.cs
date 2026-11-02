@@ -37,14 +37,14 @@ internal static error diff(image.Image m0, image.Image m1) {
             }
         }
     }
-    return default!;
+    return default;
 }
 
 internal static (image.Image, error) encodeDecode(image.Image m) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var err = Encode(new png_test_package.bytes_BufferжWriter(Ꮡb), m);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return Decode(new png_test_package.bytes_BufferжReader(Ꮡb));
 }
@@ -56,7 +56,7 @@ internal static ж<image.NRGBA> convertToNRGBA(image.Image m) {
     return ret;
 }
 
-public static void TestWriter(ж<testing.T> Ꮡt) {
+public static void TestWriter(ж<testing.T> t) {
     // The filenames variable is declared in reader_test.go.
     var names = filenames;
     if (testing.Short()) {
@@ -66,25 +66,25 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         @string qfn = "testdata/pngsuite/"u8 + fn + ".png"u8;
         // Read the image.
         var (m0, err) = readPNG(qfn);
-        if (err != default!) {
-            Ꮡt.Error(fn, err);
+        if (err != nil) {
+            t.Error(fn, err);
             continue;
         }
         // Read the image again, encode it, and decode it.
         (var m1, err) = readPNG(qfn);
-        if (err != default!) {
-            Ꮡt.Error(fn, err);
+        if (err != nil) {
+            t.Error(fn, err);
             continue;
         }
         (var m2, err) = encodeDecode(m1);
-        if (err != default!) {
-            Ꮡt.Error(fn, err);
+        if (err != nil) {
+            t.Error(fn, err);
             continue;
         }
         // Compare the two.
         err = diff(m0, m2);
-        if (err != default!) {
-            Ꮡt.Error(fn, err);
+        if (err != nil) {
+            t.Error(fn, err);
             continue;
         }
     }
@@ -96,11 +96,11 @@ internal partial struct TestWriterPaletted_testCases /*dyn*/ {
     internal nint datalen;
 }
 
-public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
+public static void TestWriterPaletted(ж<testing.T> t) {
     UntypedInt width = 32;
     UntypedInt height = 16;
 
-    var testCases = new TestWriterPaletted_testCases[]{
+    var testCases = slice<TestWriterPaletted_testCases>([
         new(
             plen: 256,
             bitdepth: 8,
@@ -130,14 +130,14 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             bitdepth: 1,
             datalen: (1 + width / 8) * height
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestWriterPaletted_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(fmt.Sprintf("plen-%d"u8, tc.plen), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("plen-%d"u8, tc.plen), (ж<testing.T> tΔ1) => {
             // Create a paletted image with the correct palette length
             var palette = new color.Palette(tcʗ1.plen);
             foreach (var iΔ1 in range(palette)) {
@@ -161,7 +161,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             // Encode the image
             ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
             {
-                var err = Encode(new png_test_package.bytes_BufferжWriter(Ꮡb), new image.PalettedжImage(m0)); if (err != default!) {
+                var err = Encode(new png_test_package.bytes_BufferжWriter(Ꮡb), new image.PalettedжImage(m0)); if (err != nil) {
                     tΔ1.Error(err);
                     return;
                 }
@@ -175,27 +175,30 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
                 @string name = (@string)(data.slice(i + 4, i + 8));
 
                 var exprᴛ1 = name;
-                if (exprᴛ1 == "IHDR"u8) {
+                switch (ᐧ) {
+                case {} when exprᴛ1 == "IHDR"u8: {
                     var bitdepth = data[i + 8 + 8];
                     if (bitdepth != tcʗ1.bitdepth) {
-                        tΔ1.Errorf("got bitdepth %d, want %d"u8, bitdepth, tcʗ1.bitdepth);
+                        tΔ1.Errorf("got bitdepth %d, want %d", bitdepth, tcʗ1.bitdepth);
                     }
+                    break;
                 }
-                else if (exprᴛ1 == "IDAT"u8) {
+                case {} when exprᴛ1 == "IDAT"u8: {
                     // Uncompress the image data
                     var (r, err) = zlib.NewReader(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data.slice(i + 8, i + 8 + (nint)length))));
-                    if (err != default!) {
+                    if (err != nil) {
                         tΔ1.Error(err);
                         return;
                     }
                     (var n, err) = io.Copy(io.Discard, r);
-                    if (err != default!) {
-                        tΔ1.Errorf("got error while reading image data: %v"u8, err);
+                    if (err != nil) {
+                        tΔ1.Errorf("got error while reading image data: %v", err);
                     }
                     if (n != (int64)tcʗ1.datalen) {
-                        tΔ1.Errorf("got uncompressed data length %d, want %d"u8, n, tcʗ1.datalen);
+                        tΔ1.Errorf("got uncompressed data length %d, want %d", n, tcʗ1.datalen);
                     }
-                }
+                    break;
+                }}
 
                 i += chunkFieldsLength + (nint)length;
             }
@@ -208,39 +211,39 @@ internal static readonly object defaultCompressionˢ = (@string)"DefaultCompress
 internal static readonly object cannotDecodeˢ = (@string)"cannot decode DefaultCompression"u8;
 internal static readonly object cannotDecodeˢ2 = (@string)"cannot decode NoCompression"u8;
 
-public static void TestWriterLevels(ж<testing.T> Ꮡt) {
+public static void TestWriterLevels(ж<testing.T> t) {
     var m = image.NewNRGBA(image.Rect(0, 0, 100, 100));
 
     ref var b1 = ref heap(new bytes.Buffer(), out var Ꮡb1);
     ref var b2 = ref heap(new bytes.Buffer(), out var Ꮡb2);
     {
-        var err = (Ꮡ(new Encoder(nil))).Encode(new png_test_package.bytes_BufferжWriter(Ꮡb1), new image.NRGBAжImage(m)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = (Ꮡ(new Encoder())).Encode(new png_test_package.bytes_BufferжWriter(Ꮡb1), new image.NRGBAжImage(m)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     var noenc = Ꮡ(new Encoder(CompressionLevel: NoCompression));
     {
-        var err = noenc.Encode(new png_test_package.bytes_BufferжWriter(Ꮡb2), new image.NRGBAжImage(m)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = noenc.Encode(new png_test_package.bytes_BufferжWriter(Ꮡb2), new image.NRGBAжImage(m)); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     if (b2.Len() <= b1.Len()) {
-        Ꮡt.Error(defaultCompressionˢ);
+        t.Error(defaultCompressionˢ);
     }
     {
-        var (_, err) = Decode(new png_test_package.bytes_BufferжReader(Ꮡb1)); if (err != default!) {
-            Ꮡt.Error(cannotDecodeˢ);
+        var (_, err) = Decode(new png_test_package.bytes_BufferжReader(Ꮡb1)); if (err != nil) {
+            t.Error(cannotDecodeˢ);
         }
     }
     {
-        var (_, err) = Decode(new png_test_package.bytes_BufferжReader(Ꮡb2)); if (err != default!) {
-            Ꮡt.Error(cannotDecodeˢ2);
+        var (_, err) = Decode(new png_test_package.bytes_BufferжReader(Ꮡb2)); if (err != nil) {
+            t.Error(cannotDecodeˢ2);
         }
     }
 }
 
-public static void TestSubImage(ж<testing.T> Ꮡt) {
+public static void TestSubImage(ж<testing.T> t) {
     var m0 = image.NewRGBA(image.Rect(0, 0, 256, 256));
     for (nint y = 0; y < 256; y++) {
         for (nint x = 0; x < 256; x++) {
@@ -249,13 +252,13 @@ public static void TestSubImage(ж<testing.T> Ꮡt) {
     }
     m0 = m0.SubImage(image.Rect(50, 30, 250, 130))._<ж<imageꓸRGBA>>();
     var (m1, err) = encodeDecode(new image.ΔRGBAжImage(m0));
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
         return;
     }
     err = diff(new image.ΔRGBAжImage(m0), m1);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
         return;
     }
 }
@@ -265,7 +268,7 @@ internal partial struct TestWriteRGBA_testCases /*dyn*/ {
     internal image.Image img;
 }
 
-public static void TestWriteRGBA(ж<testing.T> Ꮡt) {
+public static void TestWriteRGBA(ж<testing.T> t) {
     const nint width = 640;
     const nint height = 480;
     var transparentImg = image.NewRGBA(image.Rect(0, 0, width, height));
@@ -284,26 +287,26 @@ public static void TestWriteRGBA(ж<testing.T> Ꮡt) {
         }
     }
 
-    var testCases = new TestWriteRGBA_testCases[]{
-        new("Transparent RGBA"u8, new image.ΔRGBAжImage(transparentImg)),
-        new("Opaque RGBA"u8, new image.ΔRGBAжImage(opaqueImg)),
-        new("50/50 Transparent/Opaque RGBA"u8, new image.ΔRGBAжImage(mixedImg)),
-        new("RGBA with variable alpha"u8, new image.ΔRGBAжImage(translucentImg))
-    }.slice();
+    var testCases = slice<TestWriteRGBA_testCases>([
+        new("Transparent RGBA", new image.ΔRGBAжImage(transparentImg)),
+        new("Opaque RGBA", new image.ΔRGBAжImage(opaqueImg)),
+        new("50/50 Transparent/Opaque RGBA", new image.ΔRGBAжImage(mixedImg)),
+        new("RGBA with variable alpha", new image.ΔRGBAжImage(translucentImg))
+    ]);
 
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestWriteRGBA_testCases(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var m0 = tcʗ1.img;
             var (m1, err) = encodeDecode(m0);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
             err = diff(new image.NRGBAжImage(convertToNRGBA(m0)), m1);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Error(err);
             }
         });
@@ -340,10 +343,9 @@ public static void BenchmarkEncodeGrayWithBufferPool(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var img = image.NewGray(image.Rect(0, 0, 640, 480));
-    ref var e = ref heap<global::go.image.png_package.Encoder>(out var Ꮡe);
-    e = new Encoder(
-        BufferPool: new png_internal_test_package.poolжEncoderBufferPool(Ꮡ(new pool(nil)))
-    );
+    ref var e = ref heap<global::go.image.png_package.Encoder>(new Encoder(
+        BufferPool: new png_internal_test_package.poolжEncoderBufferPool(Ꮡ(new pool()))
+    ), out var Ꮡe);
     b.SetBytes(640 * 480 * 1);
     b.ReportAllocs();
     b.ResetTimer();

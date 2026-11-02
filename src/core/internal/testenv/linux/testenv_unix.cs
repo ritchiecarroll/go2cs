@@ -17,23 +17,23 @@ public static readonly ж<syscallꓸSignal> ᏑSigquit = new StaticBox<syscall�
 public static ref syscallꓸSignal Sigquit => ref ((StaticBox<syscallꓸSignal>)ᏑSigquit).ValueSlot;
 
 internal static bool syscallIsNotSupported(error err) {
-    if (err == default!) {
+    if (err == nil) {
         return false;
     }
 
     {
         var (errno, ok) = errors.AsType<Δsyscall.Errno>(err); if (ok) {
-            var exprᴛ1 = errno;
-            if (exprᴛ1 == Δsyscall.EPERM || exprᴛ1 == Δsyscall.EROFS) {
+            switch (errno) {
+            case var ᴛ when ᴛ == Δsyscall.EPERM || ᴛ == Δsyscall.EROFS: {
                 // User lacks permission: either the call requires root permission and the
                 // user is not root, or the call is denied by a container security policy.
                 return true;
             }
-            if (exprᴛ1 == Δsyscall.EINVAL) {
+            case var ᴛ when ᴛ == Δsyscall.EINVAL: {
                 // Some containers return EINVAL instead of EPERM if a system call is
                 // denied by security policy.
                 return true;
-            }
+            }}
         }
     }
 

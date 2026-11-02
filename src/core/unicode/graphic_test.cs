@@ -11,9 +11,7 @@ partial class unicode_test_package {
 
 // Independently check that the special "Is" functions work
 // in the Latin-1 range through the property table.
-public static void TestIsControlLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsControlLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsControl(i);
         var want = false;
@@ -27,118 +25,100 @@ public static void TestIsControlLatin1(ж<testing.T> Ꮡt) {
             break;
         }}
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsLetterLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsLetterLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsLetter(i);
         var want = Is(Letter, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsUpperLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsUpperLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsUpper(i);
         var want = Is(Upper, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsLowerLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsLowerLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsLower(i);
         var want = Is(Lower, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestNumberLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestNumberLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsNumber(i);
         var want = Is(Number, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsPrintLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsPrintLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsPrint(i);
         var want = In(i, PrintRanges.ꓸꓸꓸ);
-        if (i == (rune)' ') {
+        if (i == ' ') {
             want = true;
         }
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsGraphicLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsGraphicLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsGraphic(i);
         var want = In(i, GraphicRanges.ꓸꓸꓸ);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsPunctLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsPunctLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsPunct(i);
         var want = Is(Punct, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsSpaceLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsSpaceLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsSpace(i);
         var want = Is(White_Space, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }
 
-public static void TestIsSymbolLatin1(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestIsSymbolLatin1(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         var got = IsSymbol(i);
         var want = Is(Symbol, i);
         if (got != want) {
-            Ꮡt.Errorf("%U incorrect: got %t; want %t"u8, i, got, want);
+            t.Errorf("%U incorrect: got %t; want %t", i, got, want);
         }
     }
 }

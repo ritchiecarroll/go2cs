@@ -35,7 +35,8 @@ partial struct PKCS1v15DecryptOptions {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoRsaUseOfPkcs1V15ˢ = "crypto/rsa: use of PKCS#1 v1.5 encryption is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoRsaUseOfPkcs1V15ˢ => ref cryptoRsaUseOfPkcs1V15ˢᵇ;
+private static readonly @string cryptoRsaUseOfPkcs1V15ˢᵇ = "crypto/rsa: use of PKCS#1 v1.5 encryption is not allowed in FIPS 140-only mode"u8;
 
 // EncryptPKCS1v15 encrypts the given message with RSA and the padding
 // scheme from PKCS #1 v1.5.  The message must be no longer than the
@@ -56,24 +57,24 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     if (fips140only.Enforced()) {
-        return (default!, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
+        return (default, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
     }
 
     {
-        var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
     nint k = pub.Size();
     if (len(msg) > k - 11) {
-        return (default!, ErrMessageTooLong);
+        return (default, ErrMessageTooLong);
     }
 
     if (boring.Enabled && rand.IsDefaultReader(random)) {
         var (bkey, errΔ2) = boringPublicKey(Ꮡpub);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         return boring.EncryptRSAPKCS1(bkey, msg);
     }
@@ -86,24 +87,24 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
     em[1] = 2;
     var (ps, mm) = (em.slice(2, len(em) - len(msg) - 1), em.slice(len(em) - len(msg)));
     var err = nonZeroRandomBytes(ps, random);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     em[len(em) - len(msg) - 1] = 0;
     copy(mm, msg);
 
     if (boring.Enabled) {
-        ж<boring.PublicKeyRSA> bkey = default!;
+        ж<boring.PublicKeyRSA> bkey = default;
         (bkey, err) = boringPublicKey(Ꮡpub);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         return boring.EncryptRSANoPadding(bkey, em);
     }
 
     (var fk, err) = fipsPublicKey(ref (Ꮡpub).DerefOrNull());
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return rsa.Encrypt(fk, em);
 }
@@ -123,31 +124,31 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
     if (boring.Enabled) {
         var (bkey, errΔ2) = boringPrivateKey(Ꮡpriv);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         (var outΔ1, errΔ2) = boring.DecryptRSAPKCS1(bkey, ciphertext);
-        if (errΔ2 != default!) {
-            return (default!, ErrDecryption);
+        if (errΔ2 != nil) {
+            return (default, ErrDecryption);
         }
-        return (outΔ1, default!);
+        return (outΔ1, default);
     }
 
     var (valid, @out, index, err) = decryptPKCS1v15(Ꮡpriv, ciphertext);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     if (valid == 0) {
-        return (default!, ErrDecryption);
+        return (default, ErrDecryption);
     }
-    return (@out.slice(index), default!);
+    return (@out.slice(index), default);
 }
 
 // DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding
@@ -195,7 +196,7 @@ public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> �
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != default!) {
+        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
@@ -206,7 +207,7 @@ public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> �
     }
 
     var (valid, em, index, err) = decryptPKCS1v15(Ꮡpriv, ciphertext);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
@@ -218,7 +219,7 @@ public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> �
 
     valid &= (nint)(subtle.ConstantTimeEq((int32)(len(em) - index), (int32)len(key)));
     subtle.ConstantTimeCopy(valid, key, em.slice(len(em) - len(key)));
-    return default!;
+    return default;
 }
 
 // decryptPKCS1v15 decrypts ciphertext using priv. It returns one or zero in
@@ -227,40 +228,40 @@ public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> �
 // independently of whether it was valid in order to maintain constant memory
 // access patterns. If the plaintext was valid then index contains the index of
 // the original message in em, to allow constant time padding removal.
-internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1v15(ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
-    nint valid = default!;
-    slice<byte> em = default!;
-    nint index = default!;
-    error err = default!;
+internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1v15(ж<PrivateKey> priv, slice<byte> ciphertext) {
+    nint valid = default;
+    slice<byte> em = default;
+    nint index = default;
+    error err = default;
 
     if (fips140only.Enforced()) {
-        return (0, default!, 0, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
+        return (0, default, 0, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
     }
 
-    nint k = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size();
+    nint k = priv.of(PrivateKey.ᏑPublicKey).Size();
     if (k < 11) {
         err = ErrDecryption;
-        return (0, default!, 0, err);
+        return (0, default, 0, err);
     }
 
-    if (boring.Enabled){
-        ж<boring.PrivateKeyRSA> bkey = default!;
-        (bkey, err) = boringPrivateKey(Ꮡpriv);
-        if (err != default!) {
-            return (0, default!, 0, err);
+    if (boring.Enabled) {
+        ж<boring.PrivateKeyRSA> bkey = default;
+        (bkey, err) = boringPrivateKey(priv);
+        if (err != nil) {
+            return (0, default, 0, err);
         }
         (em, err) = boring.DecryptRSANoPadding(bkey, ciphertext);
-        if (err != default!) {
-            return (0, default!, 0, ErrDecryption);
+        if (err != nil) {
+            return (0, default, 0, ErrDecryption);
         }
     } else {
-        var (fk, errΔ1) = fipsPrivateKey(Ꮡpriv);
-        if (errΔ1 != default!) {
-            return (0, default!, 0, errΔ1);
+        var (fk, errΔ1) = fipsPrivateKey(priv);
+        if (errΔ1 != nil) {
+            return (0, default, 0, errΔ1);
         }
         (em, errΔ1) = rsa.DecryptWithoutCheck(fk, ciphertext);
-        if (errΔ1 != default!) {
-            return (0, default!, 0, ErrDecryption);
+        if (errΔ1 != nil) {
+            return (0, default, 0, ErrDecryption);
         }
     }
 
@@ -285,22 +286,22 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
 
     valid = firstByteIsZero & secondByteIsTwo & (~lookingForIndex & 1) & validPS;
     index = subtle.ConstantTimeSelect(valid, index + 1, 0);
-    return (valid, em, index, default!);
+    return (valid, em, index, default);
 }
 
 // nonZeroRandomBytes fills the given slice with non-zero random octets.
 internal static error /*err*/ nonZeroRandomBytes(slice<byte> s, io.Reader random) {
-    error err = default!;
+    error err = default;
 
     (_, err) = io.ReadFull(random, s);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     for (nint i = 0; i < len(s); i++) {
         while (s[i] == 0) {
             (_, err) = io.ReadFull(random, s.slice(i, i + 1));
-            if (err != default!) {
+            if (err != nil) {
                 return err;
             }
             // In tests, the PRNG may return all zeros so we do

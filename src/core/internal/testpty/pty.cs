@@ -30,7 +30,7 @@ public static error Unwrap(this ref PtyError e) {
     return e.Errno;
 }
 
-public static error ErrNotSupported = errors.New("testpty.Open not implemented on this platform"u8);
+public static error ErrNotSupported = errors.New("testpty.Open not implemented on this platform");
 
 // Open returns a control pty and the name of the linked process tty.
 //

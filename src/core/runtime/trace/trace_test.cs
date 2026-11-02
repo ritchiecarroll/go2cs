@@ -12,7 +12,7 @@ using io = io_package;
 
 partial class trace_test_package {
 
-internal static ж<bool> dumpTraces = flag.Bool("dump-traces"u8, false, "dump traces to a file, even on success"u8);
+internal static ж<bool> dumpTraces = flag.Bool("dump-traces", false, "dump traces to a file, even on success");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object skippingBecauseTestTraceˢ = (@string)"skipping because -test.trace is set"u8;
@@ -20,41 +20,41 @@ private static readonly object skippingBecauseTestTraceˢ = (@string)"skipping b
 // This file just contains smoke tests and tests of runtime/trace logic only.
 // It doesn't validate the resulting traces. See the internal/trace package for
 // more comprehensive end-to-end tests.
-public static void TestTraceStartStop(ж<testing.T> Ꮡt) {
+public static void TestTraceStartStop(ж<testing.T> t) {
     if (IsEnabled()) {
-        Ꮡt.Skip(skippingBecauseTestTraceˢ);
+        t.Skip(skippingBecauseTestTraceˢ);
     }
     var buf = @new<bytes.Buffer>();
     {
-        var err = Start(new bytes_BufferжWriter(buf)); if (err != default!) {
-            Ꮡt.Fatalf("failed to start tracing: %v"u8, err);
+        var err = Start(new bytes_BufferжWriter(buf)); if (err != nil) {
+            t.Fatalf("failed to start tracing: %v", err);
         }
     }
     Stop();
     nint size = buf.Len();
     if (size == 0) {
-        Ꮡt.Fatalf("trace is empty"u8);
+        t.Fatalf("trace is empty");
     }
     time.Sleep(100 * time.Millisecond);
     if (size != buf.Len()) {
-        Ꮡt.Fatalf("trace writes after stop: %v -> %v"u8, size, buf.Len());
+        t.Fatalf("trace writes after stop: %v -> %v", size, buf.Len());
     }
 }
 
-public static void TestTraceDoubleStart(ж<testing.T> Ꮡt) {
+public static void TestTraceDoubleStart(ж<testing.T> t) {
     if (IsEnabled()) {
-        Ꮡt.Skip(skippingBecauseTestTraceˢ);
+        t.Skip(skippingBecauseTestTraceˢ);
     }
     Stop();
     var buf = @new<bytes.Buffer>();
     {
-        var err = Start(new bytes_BufferжWriter(buf)); if (err != default!) {
-            Ꮡt.Fatalf("failed to start tracing: %v"u8, err);
+        var err = Start(new bytes_BufferжWriter(buf)); if (err != nil) {
+            t.Fatalf("failed to start tracing: %v", err);
         }
     }
     {
-        var err = Start(new bytes_BufferжWriter(buf)); if (err == default!) {
-            Ꮡt.Fatalf("succeed to start tracing second time"u8);
+        var err = Start(new bytes_BufferжWriter(buf)); if (err == nil) {
+            t.Fatalf("succeed to start tracing second time");
         }
     }
     Stop();

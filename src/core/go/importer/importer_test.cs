@@ -19,55 +19,63 @@ using types = global::go.go.types_package;
 
 partial class importer_internal_test_package {
 
-public static void TestMain(ж<testing.M> Ꮡm) {
-    Δbuild.Default.GOROOT = testenv.GOROOT(default!);
-    os.Exit(Ꮡm.Run());
+public static void TestMain(ж<testing.M> m) {
+    Δbuild.Default.GOROOT = testenv.GOROOT(default);
+    os.Exit(m.Run());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string listˢ = "list"u8;
-internal static readonly @string exportˢ = "-export"u8;
-internal static readonly @string fContextCompilerExportˢ = "-f={{context.Compiler}}:{{.Export}}"u8;
+internal static ref readonly @string listˢ => ref listˢᵇ;
+private static readonly @string listˢᵇ = "list"u8;
+internal static ref readonly @string exportˢ => ref exportˢᵇ;
+private static readonly @string exportˢᵇ = "-export"u8;
+internal static ref readonly @string fContextCompilerExportˢ => ref fContextCompilerExportˢᵇ;
+private static readonly @string fContextCompilerExportˢᵇ = "-f={{context.Compiler}}:{{.Export}}"u8;
 internal static readonly object golangOrgIssue22500ˢ = (@string)"golang.org/issue/22500"u8;
-internal static readonly @string lookupDefaultˢ = "LookupDefault"u8;
-internal static readonly @string intˢ = "Int"u8;
-internal static readonly @string gorootˢ = "$GOROOT"u8;
-internal static readonly @string typeIntˢ = "type Int"u8;
-internal static readonly @string lookupCustomˢ = "LookupCustom"u8;
+internal static ref readonly @string lookupDefaultˢ => ref lookupDefaultˢᵇ;
+private static readonly @string lookupDefaultˢᵇ = "LookupDefault"u8;
+internal static ref readonly @string intˢ => ref intˢᵇ;
+private static readonly @string intˢᵇ = "Int"u8;
+internal static ref readonly @string gorootˢ => ref gorootˢᵇ;
+private static readonly @string gorootˢᵇ = "$GOROOT"u8;
+internal static ref readonly @string typeIntˢ => ref typeIntˢᵇ;
+private static readonly @string typeIntˢᵇ = "type Int"u8;
+internal static ref readonly @string lookupCustomˢ => ref lookupCustomˢᵇ;
+private static readonly @string lookupCustomˢᵇ = "LookupCustom"u8;
 internal static readonly object notSupportedByˢ = (@string)"not supported by GOEXPERIMENT=unified; see go.dev/cl/406319"u8;
-internal static readonly @string mathBiggerˢ = "math/bigger"u8;
+internal static ref readonly @string mathBiggerˢ => ref mathBiggerˢᵇ;
+private static readonly @string mathBiggerˢᵇ = "math/bigger"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string thePackageᶜ = "math/big"u8;
+internal static ref readonly @string thePackageᶜ => ref thePackageᶜᵇ;
+private static readonly @string thePackageᶜᵇ = "math/big"u8;
 
-public static void TestForCompiler(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    testenv.MustHaveGoBuild(new importer_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestForCompiler(ж<testing.T> t) {
+    testenv.MustHaveGoBuild(new importer_internal_test_package.testing_TжTB(t));
 
     @string thePackage = thePackageᶜ;
-    var (@out, err) = testenv.Command(new importer_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new importer_internal_test_package.testing_TжTB(Ꮡt)), listˢ, exportˢ, fContextCompilerExportˢ, thePackage).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("go list %s: %v\n%s"u8, thePackage, err, @out);
+    var (@out, err) = testenv.Command(new importer_internal_test_package.testing_TжTB(t), testenv.GoToolPath(new importer_internal_test_package.testing_TжTB(t)), listˢ, exportˢ, fContextCompilerExportˢ, thePackage).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("go list %s: %v\n%s", thePackage, err, @out);
     }
     @string export = strings.TrimSpace((@string)@out);
-    var (compiler, target, _) = strings.Cut(export, ":"u8);
+    var (compiler, target, _) = strings.Cut(export, ":");
 
     if (compiler == "gccgo"u8) {
-        Ꮡt.Skip(golangOrgIssue22500ˢ);
+        t.Skip(golangOrgIssue22500ˢ);
     }
 
     var fset = token.NewFileSet();
 
     var fsetʗ1 = fset;
-    Ꮡt.Run(lookupDefaultˢ, (ж<testing.T> tΔ1) => {
-        var imp = ForCompiler(fsetʗ1, compiler, default!);
+    t.Run(lookupDefaultˢ, (ж<testing.T> tΔ1) => {
+        var imp = ForCompiler(fsetʗ1, compiler, default);
         var (pkg, errΔ1) = imp.Import(thePackage);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             tΔ1.Fatal(errΔ1);
         }
         if (pkg.Path() != thePackage) {
-            tΔ1.Fatalf("Path() = %q, want %q"u8, pkg.Path(), thePackage);
+            tΔ1.Fatalf("Path() = %q, want %q", pkg.Path(), thePackage);
         }
 
         // Check that the fileset positions are accurate.
@@ -76,18 +84,18 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
         var posn = fsetʗ1.Position(mathBigInt.Pos()); // "$GOROOT/src/math/big/int.go:25:1"
         @string filename = strings.Replace(posn.Filename, gorootˢ, testenv.GOROOT(new importer_internal_test_package.testing_TжTB(tΔ1)), 1);
         (var data, errΔ1) = os.ReadFile(filename);
-        if (errΔ1 != default!) {
-            tΔ1.Fatalf("can't read file containing declaration of math/big.Int: %v"u8, errΔ1);
+        if (errΔ1 != nil) {
+            tΔ1.Fatalf("can't read file containing declaration of math/big.Int: %v", errΔ1);
         }
-        var lines = strings.Split((@string)data, "\n"u8);
+        var lines = strings.Split((@string)data, "\n");
         if (posn.Line > len(lines) || !strings.HasPrefix(lines[posn.Line - 1], typeIntˢ)) {
-            tΔ1.Fatalf("Object %v position %s does not contain its declaration"u8,
+            tΔ1.Fatalf("Object %v position %s does not contain its declaration",
                 mathBigInt, posn);
         }
     });
 
     var fsetʗ2 = fset;
-    Ꮡt.Run(lookupCustomˢ, (ж<testing.T> tΔ2) => {
+    t.Run(lookupCustomˢ, (ж<testing.T> tΔ2) => {
         // TODO(mdempsky): Decide whether to remove this test, or to fix
         // support for it in unified IR. It's not clear that we actually
         // need to support importing "math/big" as "math/bigger", for
@@ -99,23 +107,23 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
 
         var lookup = (io.ReadCloser, error) (@string path) => {
             if (path != "math/bigger"u8) {
-                tΔ2.Fatalf("lookup called with unexpected path %q"u8, path);
+                tΔ2.Fatalf("lookup called with unexpected path %q", path);
             }
             var (f, errΔ2) = os.Open(target);
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 tΔ2.Fatal(errΔ2);
             }
-            return (new importer_internal_test_package.os_FileжReadCloser(f), default!);
+            return (new importer_internal_test_package.os_FileжReadCloser(f), default);
         };
         var imp = ForCompiler(fsetʗ2, compiler, new Func<@string, (io.ReadCloser, error)>(lookup));
         var (pkg, errΔ3) = imp.Import(mathBiggerˢ);
-        if (errΔ3 != default!) {
+        if (errΔ3 != nil) {
             tΔ2.Fatal(errΔ3);
         }
         // Even though we open math/big.a, the import request was for math/bigger
         // and that should be recorded in pkg.Path(), at least for the gc toolchain.
         if (pkg.Path() != "math/bigger"u8) {
-            tΔ2.Fatalf("Path() = %q, want %q"u8, pkg.Path(), mathBiggerˢ);
+            tΔ2.Fatalf("Path() = %q, want %q", pkg.Path(), mathBiggerˢ);
         }
     });
 }

@@ -32,53 +32,53 @@ partial struct readerTestsᴛ1 /*dyn*/ {
     internal @string contents;
     internal slice<nextLine> want;
 }
-internal static slice<readerTestsᴛ1> readerTests = new readerTestsᴛ1[]{
+internal static slice<readerTestsᴛ1> readerTests = slice<readerTestsᴛ1>([
     new(
-        name: "empty"u8,
-        contents: ""u8
+        name: "empty",
+        contents: ""
     ),
     new(
-        name: "single"u8,
-        contents: "1234\n"u8,
-        want: new nextLine[]{
-            complete("1234"u8)
-        }.slice()
+        name: "single",
+        contents: "1234\n",
+        want: slice<nextLine>([
+            complete("1234")
+        ])
     ),
     new(
-        name: "single-incomplete"u8,
-        contents: "1234"u8,
-        want: new nextLine[]{
-            incomplete("1234"u8)
-        }.slice()
+        name: "single-incomplete",
+        contents: "1234",
+        want: slice<nextLine>([
+            incomplete("1234")
+        ])
     ),
     new(
-        name: "single-exact"u8,
-        contents: "1234567\n"u8,
-        want: new nextLine[]{
-            complete("1234567"u8)
-        }.slice()
+        name: "single-exact",
+        contents: "1234567\n",
+        want: slice<nextLine>([
+            complete("1234567")
+        ])
     ),
     new(
-        name: "single-exact-incomplete"u8,
-        contents: "12345678"u8,
-        want: new nextLine[]{
-            incomplete("12345678"u8)
-        }.slice()
+        name: "single-exact-incomplete",
+        contents: "12345678",
+        want: slice<nextLine>([
+            incomplete("12345678")
+        ])
     ),
     new(
-        name: "multi"u8,
+        name: "multi",
         contents: """
 1234
 5678
 
 """u8.Raw(),
-        want: new nextLine[]{
-            complete("1234"u8),
-            complete("5678"u8)
-        }.slice()
+        want: slice<nextLine>([
+            complete("1234"),
+            complete("5678")
+        ])
     ),
     new(
-        name: "multi-short"u8,
+        name: "multi-short",
         contents: """
 12
 34
@@ -86,93 +86,91 @@ internal static slice<readerTestsᴛ1> readerTests = new readerTestsᴛ1[]{
 78
 
 """u8.Raw(),
-        want: new nextLine[]{
-            complete("12"u8),
-            complete("34"u8),
-            complete("56"u8),
-            complete("78"u8)
-        }.slice()
+        want: slice<nextLine>([
+            complete("12"),
+            complete("34"),
+            complete("56"),
+            complete("78")
+        ])
     ),
     new(
-        name: "multi-notrailingnewline"u8,
+        name: "multi-notrailingnewline",
         contents: """
 1234
 5678
 """u8.Raw(),
-        want: new nextLine[]{
-            complete("1234"u8),
-            incomplete("5678"u8)
-        }.slice()
+        want: slice<nextLine>([
+            complete("1234"),
+            incomplete("5678")
+        ])
     ),
     new(
-        name: "middle-too-long"u8,
+        name: "middle-too-long",
         contents: """
 1234
 1234567890
 5678
 
 """u8.Raw(),
-        want: new nextLine[]{
-            complete("1234"u8),
-            incomplete("12345678"u8),
-            complete("5678"u8)
-        }.slice()
+        want: slice<nextLine>([
+            complete("1234"),
+            incomplete("12345678"),
+            complete("5678")
+        ])
     ),
     new(
         // Multiple reads required to find newline.
-        name: "middle-way-too-long"u8,
+        name: "middle-way-too-long",
         contents: """
 1234
 12345678900000000000000000000000000000000000000000000000000
 5678
 
 """u8.Raw(),
-        want: new nextLine[]{
-            complete("1234"u8),
-            incomplete("12345678"u8),
-            complete("5678"u8)
-        }.slice()
+        want: slice<nextLine>([
+            complete("1234"),
+            incomplete("12345678"),
+            complete("5678")
+        ])
     )
-}.slice();
+]);
 
-public static void TestLineReader(ж<testing.T> Ꮡt) {
+public static void TestLineReader(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in readerTests) {
         ref var tc = ref heap(new readerTestsᴛ1(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             array<byte> scratch = new(8); /* scratchSize */
             var l = cgroup_internal_test_package.NewLineReader(0, scratch[..], readString(tcʗ1.contents));
 
-            slice<nextLine> got = default!;
-            while (ᐧ) {
+            slice<nextLine> got = default;
+            for (;;) {
                 var err = l.Next();
-                if (AreEqual(err, cgroup_internal_test_package.ErrEOF)){
+                if (AreEqual(err, cgroup_internal_test_package.ErrEOF)) {
                     break;
-                } else 
-                if (AreEqual(err, cgroup_internal_test_package.ErrIncompleteLine)){
+                } else if (AreEqual(err, cgroup_internal_test_package.ErrIncompleteLine)) {
                     got = append(got, incomplete((@string)l.Line()));
-                } else 
-                if (err != default!){
-                    tΔ1.Fatalf("next got err %v"u8, err);
+                } else if (err != nil) {
+                    tΔ1.Fatalf("next got err %v", err);
                 } else {
                     got = append(got, complete((@string)l.Line()));
                 }
             }
 
             if (len(got) != len(tcʗ1.want)) {
-                tΔ1.Logf("got lines %+v"u8, got);
-                tΔ1.Logf("want lines %+v"u8, tcʗ1.want);
-                tΔ1.Fatalf("lineReader got %d lines, want %d"u8, len(got), len(tcʗ1.want));
+                tΔ1.Logf("got lines %+v", got);
+                tΔ1.Logf("want lines %+v", tcʗ1.want);
+                tΔ1.Fatalf("lineReader got %d lines, want %d", len(got), len(tcʗ1.want));
             }
 
             foreach (var i in range(got)) {
                 if (got[i].line != tcʗ1.want[i].line) {
-                    tΔ1.Errorf("line %d got %q want %q"u8, i, got[i].line, tcʗ1.want[i].line);
+                    tΔ1.Errorf("line %d got %q want %q", i, got[i].line, tcʗ1.want[i].line);
                 }
                 if (got[i].incomplete != tcʗ1.want[i].incomplete) {
-                    tΔ1.Errorf("line %d got incomplete %v want %v"u8, i, got[i].incomplete, tcʗ1.want[i].incomplete);
+                    tΔ1.Errorf("line %d got incomplete %v want %v", i, got[i].incomplete, tcʗ1.want[i].incomplete);
                 }
             }
         });
@@ -193,28 +191,27 @@ public static void FuzzLineReader(ж<testing.F> Ꮡf) {
             var errΔ1 = reader.Next();
             var line = reader.Line();
 
-            error expectedErr = default!;
-            if (len(expected) > scratchSize){
+            error expectedErr = default;
+            if (len(expected) > scratchSize) {
                 expected = expected[..(int)(scratchSize)];
                 expectedErr = cgroup_internal_test_package.ErrIncompleteLine;
-            } else 
-            if (expected[len(expected) - 1] == (rune)'\n'){
+            } else if (expected[len(expected) - 1] == '\n') {
                 expected = expected.slice(0, len(expected) - 1);
             } else {
                 expectedErr = cgroup_internal_test_package.ErrIncompleteLine;
             }
 
             if (!AreEqual(errΔ1, expectedErr)) {
-                t.Fatalf("got err %v, want %v"u8, errΔ1, expectedErr);
+                t.Fatalf("got err %v, want %v", errΔ1, expectedErr);
             }
 
             if (((sstring)line) != expected) {
-                t.Fatalf("got %q, want %q"u8, (@string)line, expected);
+                t.Fatalf("got %q, want %q", (@string)line, expected);
             }
         }
         var err = reader.Next();
         if (!AreEqual(err, cgroup_internal_test_package.ErrEOF)) {
-            t.Fatalf("got %v, want EOF"u8, err);
+            t.Fatalf("got %v, want EOF", err);
         }
     });
 }

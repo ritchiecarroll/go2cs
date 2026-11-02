@@ -40,9 +40,12 @@ public static @string Boundary(this ref Writer w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mimeSetBoundaryCalledˢ = "mime: SetBoundary called after write"u8;
-internal static readonly @string mimeInvalidBoundaryˢ = "mime: invalid boundary length"u8;
-internal static readonly @string mimeInvalidBoundaryˢ2 = "mime: invalid boundary character"u8;
+internal static ref readonly @string mimeSetBoundaryCalledˢ => ref mimeSetBoundaryCalledˢᵇ;
+private static readonly @string mimeSetBoundaryCalledˢᵇ = "mime: SetBoundary called after write"u8;
+internal static ref readonly @string mimeInvalidBoundaryˢ => ref mimeInvalidBoundaryˢᵇ;
+private static readonly @string mimeInvalidBoundaryˢᵇ = "mime: invalid boundary length"u8;
+internal static ref readonly @string mimeInvalidBoundaryˢ2 => ref mimeInvalidBoundaryˢ2ᵇ;
+private static readonly @string mimeInvalidBoundaryˢ2ᵇ = "mime: invalid boundary character"u8;
 
 // SetBoundary overrides the [Writer]'s default randomly-generated
 // boundary separator with an explicit value.
@@ -60,15 +63,15 @@ public static error SetBoundary(this ref Writer w, @string boundary) {
     }
     nint end = len(boundary) - 1;
     foreach (var (i, b) in boundary) {
-        if ((rune)'A' <= b && b <= (rune)'Z' || (rune)'a' <= b && b <= (rune)'z' || (rune)'0' <= b && b <= (rune)'9') {
+        if ('A' <= b && b <= 'Z' || 'a' <= b && b <= 'z' || '0' <= b && b <= '9') {
             continue;
         }
         switch (b) {
-        case (rune)'\'' or (rune)'(' or (rune)')' or (rune)'+' or (rune)'_' or (rune)',' or (rune)'-' or (rune)'.' or (rune)'/' or (rune)':' or (rune)'=' or (rune)'?': {
+        case '\'' or '(' or ')' or '+' or '_' or ',' or '-' or '.' or '/' or ':' or '=' or '?': {
             continue;
             break;
         }
-        case (rune)' ': {
+        case ' ': {
             if (i != end) {
                 continue;
             }
@@ -77,7 +80,7 @@ public static error SetBoundary(this ref Writer w, @string boundary) {
         return errors.New(mimeInvalidBoundaryˢ2);
     }
     w.boundary = boundary;
-    return default!;
+    return default;
 }
 
 // FormDataContentType returns the Content-Type for an HTTP
@@ -86,7 +89,7 @@ public static @string FormDataContentType(this ref Writer w) {
     @string b = w.boundary;
     // We must quote the boundary if it contains any of the
     // tspecials characters defined by RFC 2045, or space.
-    if (strings.ContainsAny(b, @"()<>@,;:\""/[]?= "u8)) {
+    if (strings.ContainsAny(b, @"()<>@,;:\""/[]?= ")) {
         b = @""""u8 + b + @""""u8;
     }
     return "multipart/form-data; boundary="u8 + b;
@@ -95,7 +98,7 @@ public static @string FormDataContentType(this ref Writer w) {
 internal static @string randomBoundary() {
     array<byte> buf = new(30);
     var (_, err) = io.ReadFull(rand.Reader, buf[..]);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return fmt.Sprintf("%x"u8, buf[..]);
@@ -110,13 +113,13 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
 
     if (w.lastpart != nil) {
         {
-            var errΔ1 = w.lastpart.close(); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
     }
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
-    if (w.lastpart != nil){
+    if (w.lastpart != nil) {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "\r\n--%s\r\n"u8, w.boundary);
     } else {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "--%s\r\n"u8, w.boundary);
@@ -129,17 +132,17 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
     }
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
     var (_, err) = io.Copy(w.w, new bytes_BufferжReader(Ꮡb));
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var p = Ꮡ(new part(
         mw: Ꮡw
     ));
     w.lastpart = p;
-    return (new partжWriter(p), default!);
+    return (new partжWriter(p), default);
 }
 
-internal static ж<strings.Replacer> quoteEscaper = strings.NewReplacer("\\"u8, "\\\\", @"""", "\\\"", "\r", "%0D", "\n", "%0A");
+internal static ж<strings.Replacer> quoteEscaper = strings.NewReplacer("\\", "\\\\", @"""", "\\\"", "\r", "%0D", "\n", "%0A");
 
 // escapeQuotes escapes special characters in field parameter values.
 //
@@ -158,8 +161,10 @@ internal static @string escapeQuotes(@string s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string contentTypeˢ = "Content-Type"u8;
-internal static readonly @string applicationOctetStreamˢ = "application/octet-stream"u8;
+internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
+private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
+internal static ref readonly @string applicationOctetStreamˢ => ref applicationOctetStreamˢᵇ;
+private static readonly @string applicationOctetStreamˢᵇ = "application/octet-stream"u8;
 
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
@@ -189,7 +194,7 @@ public static @string FileContentDisposition(@string fieldname, @string filename
 // WriteField calls [Writer.CreateFormField] and then writes the given value.
 public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) {
     var (p, err) = Ꮡw.CreateFormField(fieldname);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (_, err) = p.Write(slice<byte>(value));
@@ -201,11 +206,11 @@ public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string 
 public static error Close(this ref Writer w) {
     if (w.lastpart != nil) {
         {
-            var errΔ1 = w.lastpart.close(); if (errΔ1 != default!) {
+            var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
                 return errΔ1;
             }
         }
-        w.lastpart = default!;
+        w.lastpart = default;
     }
     var (_, err) = fmt.Fprintf(w.w, "\r\n--%s--\r\n"u8, w.boundary);
     return err;
@@ -223,17 +228,18 @@ internal static error close(this ref part p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string multipartCanTWriteToˢ = "multipart: can't write to finished part"u8;
+internal static ref readonly @string multipartCanTWriteToˢ => ref multipartCanTWriteToˢᵇ;
+private static readonly @string multipartCanTWriteToˢᵇ = "multipart: can't write to finished part"u8;
 
 internal static (nint n, error err) Write(this ref part p, slice<byte> d) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (p.closed) {
         return (0, errors.New(multipartCanTWriteToˢ));
     }
-    (n, err) = (~p.mw).w.Write(d);
-    if (err != default!) {
+    (n, err) = p.mw.w.Write(d);
+    if (err != nil) {
         p.we = err;
     }
     return (n, err);

@@ -21,51 +21,51 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-public static void BenchmarkTCP4OneShot(ж<testing.B> Ꮡb) {
-    benchmarkTCP(Ꮡb, false, false, "127.0.0.1:0"u8);
+public static void BenchmarkTCP4OneShot(ж<testing.B> b) {
+    benchmarkTCP(b, false, false, "127.0.0.1:0");
 }
 
-public static void BenchmarkTCP4OneShotTimeout(ж<testing.B> Ꮡb) {
-    benchmarkTCP(Ꮡb, false, true, "127.0.0.1:0"u8);
+public static void BenchmarkTCP4OneShotTimeout(ж<testing.B> b) {
+    benchmarkTCP(b, false, true, "127.0.0.1:0");
 }
 
-public static void BenchmarkTCP4Persistent(ж<testing.B> Ꮡb) {
-    benchmarkTCP(Ꮡb, true, false, "127.0.0.1:0"u8);
+public static void BenchmarkTCP4Persistent(ж<testing.B> b) {
+    benchmarkTCP(b, true, false, "127.0.0.1:0");
 }
 
-public static void BenchmarkTCP4PersistentTimeout(ж<testing.B> Ꮡb) {
-    benchmarkTCP(Ꮡb, true, true, "127.0.0.1:0"u8);
+public static void BenchmarkTCP4PersistentTimeout(ж<testing.B> b) {
+    benchmarkTCP(b, true, true, "127.0.0.1:0");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object ipv6IsNotSupportedˢ = (@string)"ipv6 is not supported"u8;
 
-public static partial void BenchmarkTCP6OneShot(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6OneShot(ж<testing.B> b) {
     if (!supportsIPv6()) {
-        Ꮡb.Skip(ipv6IsNotSupportedˢ);
+        b.Skip(ipv6IsNotSupportedˢ);
     }
-    benchmarkTCP(Ꮡb, false, false, "[::1]:0"u8);
+    benchmarkTCP(b, false, false, "[::1]:0");
 }
 
-public static partial void BenchmarkTCP6OneShotTimeout(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6OneShotTimeout(ж<testing.B> b) {
     if (!supportsIPv6()) {
-        Ꮡb.Skip(ipv6IsNotSupportedˢ);
+        b.Skip(ipv6IsNotSupportedˢ);
     }
-    benchmarkTCP(Ꮡb, false, true, "[::1]:0"u8);
+    benchmarkTCP(b, false, true, "[::1]:0");
 }
 
-public static partial void BenchmarkTCP6Persistent(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6Persistent(ж<testing.B> b) {
     if (!supportsIPv6()) {
-        Ꮡb.Skip(ipv6IsNotSupportedˢ);
+        b.Skip(ipv6IsNotSupportedˢ);
     }
-    benchmarkTCP(Ꮡb, true, false, "[::1]:0"u8);
+    benchmarkTCP(b, true, false, "[::1]:0");
 }
 
-public static partial void BenchmarkTCP6PersistentTimeout(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6PersistentTimeout(ж<testing.B> b) {
     if (!supportsIPv6()) {
-        Ꮡb.Skip(ipv6IsNotSupportedˢ);
+        b.Skip(ipv6IsNotSupportedˢ);
     }
-    benchmarkTCP(Ꮡb, true, true, "[::1]:0"u8);
+    benchmarkTCP(b, true, true, "[::1]:0");
 }
 
 internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, bool timeout, @string laddr) {
@@ -91,7 +91,7 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
         }
         bool sendMsg(global::go.net_package.Conn c, slice<byte> buf) {
             var (n, errΔ1) = c.Write(buf);
-            if (n != len(buf) || errΔ1 != default!) {
+            if (n != len(buf) || errΔ1 != nil) {
                 Ꮡb.Log(errΔ1);
                 return false;
             }
@@ -101,7 +101,7 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
             for (nint read = 0; read != len(buf); ) {
                 var (n, errΔ2) = c.Read(buf);
                 read += n;
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     Ꮡb.Log(errΔ2);
                     return false;
                 }
@@ -109,7 +109,7 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
             return true;
         }
         var (ln, err) = Listen(tcpˢ, laddr);
-        if (err != default!) {
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
         var lnʗ1 = ln;
@@ -121,9 +121,9 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
         var sendMsgʗ1 = sendMsg;
         var serverSemʗ1 = serverSem;
         goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            while (ᐧ) {
+            for (;;) {
                 var (c, errΔ3) = lnʗ2.Accept();
-                if (errΔ3 != default!) {
+                if (errΔ3 != nil) {
                     break;
                 }
                 serverSemʗ1.ᐸꟷ(true);
@@ -170,7 +170,7 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
                         ᐸꟷ(clientSemʗ2);
                     }, ref ᒐ);
                     var (c, errΔ4) = Dial(tcpˢ, lnʗ3.Addr().String());
-                    if (errΔ4 != default!) {
+                    if (errΔ4 != nil) {
                         Ꮡb.Log(errΔ4);
                         return;
                     }
@@ -199,15 +199,15 @@ internal static partial void benchmarkTCP(ж<testing.B> Ꮡb, bool persistent, b
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkTCP4ConcurrentReadWrite(ж<testing.B> Ꮡb) {
-    benchmarkTCPConcurrentReadWrite(Ꮡb, "127.0.0.1:0"u8);
+public static void BenchmarkTCP4ConcurrentReadWrite(ж<testing.B> b) {
+    benchmarkTCPConcurrentReadWrite(b, "127.0.0.1:0");
 }
 
-public static partial void BenchmarkTCP6ConcurrentReadWrite(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkTCP6ConcurrentReadWrite(ж<testing.B> b) {
     if (!supportsIPv6()) {
-        Ꮡb.Skip(ipv6IsNotSupportedˢ);
+        b.Skip(ipv6IsNotSupportedˢ);
     }
-    benchmarkTCPConcurrentReadWrite(Ꮡb, "[::1]:0"u8);
+    benchmarkTCPConcurrentReadWrite(b, "[::1]:0");
 }
 
 internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb, @string laddr) {
@@ -232,7 +232,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
         var clients = new slice<global::go.net_package.Conn>(P);
         var servers = new slice<global::go.net_package.Conn>(P);
         var (ln, err) = Listen(tcpˢ, laddr);
-        if (err != default!) {
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
         var lnʗ1 = ln;
@@ -244,7 +244,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
         goǃ(() => {
             for (nint p = 0; p < P; p++) {
                 var (s, errΔ1) = lnʗ2.Accept();
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     Ꮡb.Error(errΔ1);
                     return;
                 }
@@ -254,7 +254,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
         });
         for (nint p = 0; p < P; p++) {
             var (c, errΔ2) = Dial(tcpˢ, ln.Addr().String());
-            if (errΔ2 != default!) {
+            if (errΔ2 != nil) {
                 Ꮡb.Fatal(errΔ2);
             }
             clients[p] = c;
@@ -279,7 +279,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
                         }
                         buf[0] = v;
                         var (_, errΔ3) = c.Write(buf[..]);
-                        if (errΔ3 != default!) {
+                        if (errΔ3 != nil) {
                             Ꮡb.Error(errΔ3);
                             return;
                         }
@@ -301,7 +301,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
                     ref var buf = ref heap(new array<byte>(1), out var Ꮡbuf);
                     for (nint i = 0; i < N; i++) {
                         var (_, errΔ4) = s.Read(buf[..]);
-                        if (errΔ4 != default!) {
+                        if (errΔ4 != nil) {
                             Ꮡb.Error(errΔ4);
                             return;
                         }
@@ -326,7 +326,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
                         }
                         buf[0] = v;
                         var (_, errΔ5) = s.Write(buf[..]);
-                        if (errΔ5 != default!) {
+                        if (errΔ5 != nil) {
                             Ꮡb.Error(errΔ5);
                             return;
                         }
@@ -345,7 +345,7 @@ internal static partial void benchmarkTCPConcurrentReadWrite(ж<testing.B> Ꮡb,
                     ref var buf = ref heap(new array<byte>(1), out var Ꮡbuf);
                     for (nint i = 0; i < N; i++) {
                         var (_, errΔ6) = c.Read(buf[..]);
-                        if (errΔ6 != default!) {
+                        if (errΔ6 != nil) {
                             Ꮡb.Error(errΔ6);
                             return;
                         }
@@ -370,36 +370,36 @@ internal partial struct resolveTCPAddrTest {
 }
 
 internal static slice<resolveTCPAddrTest> resolveTCPAddrTests;
-internal static void initᴛresolveTCPAddrTests() { resolveTCPAddrTests = new resolveTCPAddrTest[]{
-    new("tcp"u8, "127.0.0.1:0"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!),
-    new("tcp4"u8, "127.0.0.1:65535"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 65535)), default!),
+internal static void initᴛresolveTCPAddrTests() { resolveTCPAddrTests = slice<resolveTCPAddrTest>([
+    new("tcp", "127.0.0.1:0", Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default),
+    new("tcp4", "127.0.0.1:65535", Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 65535)), default),
 
-    new("tcp"u8, "[::1]:0"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 0)), default!),
-    new("tcp6"u8, "[::1]:65535"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 65535)), default!),
+    new("tcp", "[::1]:0", Ꮡ(new TCPAddr(IP: ParseIP("::1"), Port: 0)), default),
+    new("tcp6", "[::1]:65535", Ꮡ(new TCPAddr(IP: ParseIP("::1"), Port: 65535)), default),
 
-    new("tcp"u8, "[::1%en0]:1"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 1, Zone: "en0"u8)), default!),
-    new("tcp6"u8, "[::1%911]:2"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 2, Zone: "911"u8)), default!),
+    new("tcp", "[::1%en0]:1", Ꮡ(new TCPAddr(IP: ParseIP("::1"), Port: 1, Zone: "en0")), default),
+    new("tcp6", "[::1%911]:2", Ꮡ(new TCPAddr(IP: ParseIP("::1"), Port: 2, Zone: "911")), default),
 
-    new(""u8, "127.0.0.1:0"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default!), // Go 1.0 behavior
-    new(""u8, "[::1]:0"u8, Ꮡ(new TCPAddr(IP: ParseIP("::1"u8), Port: 0)), default!), // Go 1.0 behavior
+    new("", "127.0.0.1:0", Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1), Port: 0)), default), // Go 1.0 behavior
+    new("", "[::1]:0", Ꮡ(new TCPAddr(IP: ParseIP("::1"), Port: 0)), default),         // Go 1.0 behavior
 
-    new("tcp"u8, ":12345"u8, Ꮡ(new TCPAddr(Port: 12345)), default!),
+    new("tcp", ":12345", Ꮡ(new TCPAddr(Port: 12345)), default),
 
-    new("http"u8, "127.0.0.1:0"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"http"u8))),
+    new("http", "127.0.0.1:0", nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"http"))),
 
-    new("tcp"u8, "127.0.0.1:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8), Port: 80)), default!),
-    new("tcp"u8, "[::ffff:127.0.0.1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("::ffff:127.0.0.1"u8), Port: 80)), default!),
-    new("tcp"u8, "[2001:db8::1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("2001:db8::1"u8), Port: 80)), default!),
-    new("tcp4"u8, "127.0.0.1:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8), Port: 80)), default!),
-    new("tcp4"u8, "[::ffff:127.0.0.1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"u8), Port: 80)), default!),
-    new("tcp6"u8, "[2001:db8::1]:http"u8, Ꮡ(new TCPAddr(IP: ParseIP("2001:db8::1"u8), Port: 80)), default!),
+    new("tcp", "127.0.0.1:http", Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"), Port: 80)), default),
+    new("tcp", "[::ffff:127.0.0.1]:http", Ꮡ(new TCPAddr(IP: ParseIP("::ffff:127.0.0.1"), Port: 80)), default),
+    new("tcp", "[2001:db8::1]:http", Ꮡ(new TCPAddr(IP: ParseIP("2001:db8::1"), Port: 80)), default),
+    new("tcp4", "127.0.0.1:http", Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"), Port: 80)), default),
+    new("tcp4", "[::ffff:127.0.0.1]:http", Ꮡ(new TCPAddr(IP: ParseIP("127.0.0.1"), Port: 80)), default),
+    new("tcp6", "[2001:db8::1]:http", Ꮡ(new TCPAddr(IP: ParseIP("2001:db8::1"), Port: 80)), default),
 
-    new("tcp4"u8, "[2001:db8::1]:http"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "2001:db8::1"u8)))),
-    new("tcp6"u8, "127.0.0.1:http"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "127.0.0.1"u8)))),
-    new("tcp6"u8, "[::ffff:127.0.0.1]:http"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "::ffff:127.0.0.1"u8))))
-}.slice(); }
+    new("tcp4", "[2001:db8::1]:http", nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "2001:db8::1")))),
+    new("tcp6", "127.0.0.1:http", nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "127.0.0.1")))),
+    new("tcp6", "[::ffff:127.0.0.1]:http", nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "::ffff:127.0.0.1"))))
+]); }
 
-public static void TestResolveTCPAddr(ж<testing.T> Ꮡt) {
+public static void TestResolveTCPAddr(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var origTestHookLookupIP = testHookLookupIP;
@@ -412,13 +412,13 @@ public static void TestResolveTCPAddr(ж<testing.T> Ꮡt) {
         foreach (var (_, tt) in resolveTCPAddrTests) {
             var (addr, err) = ResolveTCPAddr(tt.network, tt.litAddrOrName);
             if (!reflect.DeepEqual(addr.OrTypedNil(), tt.addr.OrTypedNil()) || !reflect.DeepEqual(err, tt.err)) {
-                Ꮡt.Errorf("ResolveTCPAddr(%q, %q) = %#v, %v, want %#v, %v"u8, tt.network, tt.litAddrOrName, addr.OrTypedNil(), err, tt.addr.OrTypedNil(), tt.err);
+                t.Errorf("ResolveTCPAddr(%q, %q) = %#v, %v, want %#v, %v", tt.network, tt.litAddrOrName, addr.OrTypedNil(), err, tt.addr.OrTypedNil(), tt.err);
                 continue;
             }
-            if (err == default!) {
+            if (err == nil) {
                 var (addr2, errΔ1) = ResolveTCPAddr(addr.Network(), addr.String());
                 if (!reflect.DeepEqual(addr2.OrTypedNil(), tt.addr.OrTypedNil()) || !AreEqual(errΔ1, tt.err)) {
-                    Ꮡt.Errorf("(%q, %q): ResolveTCPAddr(%q, %q) = %#v, %v, want %#v, %v"u8, tt.network, tt.litAddrOrName, addr.Network(), addr.String(), addr2.OrTypedNil(), errΔ1, tt.addr.OrTypedNil(), tt.err);
+                    t.Errorf("(%q, %q): ResolveTCPAddr(%q, %q) = %#v, %v, want %#v, %v", tt.network, tt.litAddrOrName, addr.Network(), addr.String(), addr2.OrTypedNil(), errΔ1, tt.addr.OrTypedNil(), tt.err);
                 }
             }
         }
@@ -432,28 +432,28 @@ partial struct tcpListenerNameTestsᴛ1 /*dyn*/ {
     internal ж<global::go.net_package.TCPAddr> laddr;
 }
 internal static slice<tcpListenerNameTestsᴛ1> tcpListenerNameTests;
-internal static void initᴛtcpListenerNameTests() { tcpListenerNameTests = new tcpListenerNameTestsᴛ1[]{
-    new("tcp4"u8, Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1)))),
-    new("tcp4"u8, Ꮡ(new TCPAddr(nil))),
-    new("tcp4"u8, nil)
-}.slice(); }
+internal static void initᴛtcpListenerNameTests() { tcpListenerNameTests = slice<tcpListenerNameTestsᴛ1>([
+    new("tcp4", Ꮡ(new TCPAddr(IP: IPv4(127, 0, 0, 1)))),
+    new("tcp4", Ꮡ(new TCPAddr())),
+    new("tcp4", nil)
+]); }
 
-public static void TestTCPListenerName(ж<testing.T> Ꮡt) {
+public static void TestTCPListenerName(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
         foreach (var (_, tt) in tcpListenerNameTests) {
             var (ln, err) = ListenTCP(tt.net, tt.laddr);
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            if (err != nil) {
+                t.Fatal(err);
             }
             var lnʗ1 = ln;
             defer(() => lnʗ1.Close(), ref ᒐ);
             var la = ln.Addr();
             {
-                var (a, ok) = la._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || (~a).Port == 0) {
-                    Ꮡt.Fatalf("got %v; expected a proper address with non-zero port number"u8, la);
+                var (a, ok) = la._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || a.Port == 0) {
+                    t.Fatalf("got %v; expected a proper address with non-zero port number", la);
                 }
             }
         }
@@ -462,21 +462,21 @@ public static void TestTCPListenerName(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
+public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+        testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(t));
 
         if (!supportsIPv6()) {
-            Ꮡt.Skip(iPv6IsNotSupportedˢ);
+            t.Skip(iPv6IsNotSupportedˢ);
         }
 
         foreach (var (i, tt) in ipv6LinkLocalUnicastTCPTests) {
             var (ln, err) = Listen(tt.network, tt.address);
-            if (err != default!) {
+            if (err != nil) {
                 // It might return "LookupHost returned no
                 // suitable address" error on some platforms.
-                Ꮡt.Log(err);
+                t.Log(err);
                 continue;
             }
             var ls = (Ꮡ(new streamListener(Listener: ln))).newLocalServer();
@@ -485,50 +485,50 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
             var ch = new channel<error>(1);
             var chʗ1 = ch;
             var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener lnΔ1) => {
-                lsΔ1.transponder(lnΔ1, chʗ1.WithDirection(GoChanDir.Send));
+                lsΔ1.transponder(lnΔ1, chʗ1.AsSendOnly());
             };
             {
-                var errΔ1 = ls.buildup(handler); if (errΔ1 != default!) {
-                    Ꮡt.Fatal(errΔ1);
+                var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
             {
-                var (la, ok) = ln.Addr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && (~la).Zone == ""u8) {
-                    Ꮡt.Fatalf("got %v; expected a proper address with zone identifier"u8, la.OrTypedNil());
+                var (la, ok) = ln.Addr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && la.Zone == ""u8) {
+                    t.Fatalf("got %v; expected a proper address with zone identifier", la.OrTypedNil());
                 }
             }
 
-            (var c, err) = Dial(tt.network, (~ls).Listener.Addr().String());
-            if (err != default!) {
-                Ꮡt.Fatal(err);
+            (var c, err) = Dial(tt.network, ls.Listener.Addr().String());
+            if (err != nil) {
+                t.Fatal(err);
             }
             var cʗ1 = c;
             defer(() => cʗ1.Close(), ref ᒐ);
             {
-                var (la, ok) = c.LocalAddr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && (~la).Zone == ""u8) {
-                    Ꮡt.Fatalf("got %v; expected a proper address with zone identifier"u8, la.OrTypedNil());
+                var (la, ok) = c.LocalAddr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && la.Zone == ""u8) {
+                    t.Fatalf("got %v; expected a proper address with zone identifier", la.OrTypedNil());
                 }
             }
             {
-                var (ra, ok) = c.RemoteAddr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && (~ra).Zone == ""u8) {
-                    Ꮡt.Fatalf("got %v; expected a proper address with zone identifier"u8, ra.OrTypedNil());
+                var (ra, ok) = c.RemoteAddr()._<ж<global::go.net_package.TCPAddr>>(ᐧ); if (!ok || !tt.nameLookup && ra.Zone == ""u8) {
+                    t.Fatalf("got %v; expected a proper address with zone identifier", ra.OrTypedNil());
                 }
             }
 
             {
-                var (_, errΔ2) = c.Write(slice<byte>("TCP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != default!) {
-                    Ꮡt.Fatal(errΔ2);
+                var (_, errΔ2) = c.Write(slice<byte>("TCP OVER IPV6 LINKLOCAL TEST"u8)); if (errΔ2 != nil) {
+                    t.Fatal(errΔ2);
                 }
             }
             var b = new slice<byte>(32);
             {
-                var (_, errΔ3) = c.Read(b); if (errΔ3 != default!) {
-                    Ꮡt.Fatal(errΔ3);
+                var (_, errΔ3) = c.Read(b); if (errΔ3 != nil) {
+                    t.Fatal(errΔ3);
                 }
             }
 
             foreach (var errΔ4 in ch) {
-                Ꮡt.Errorf("#%d: %v"u8, i, errΔ4);
+                t.Errorf("#%d: %v", i, errΔ4);
             }
         }
     }
@@ -536,13 +536,13 @@ public static void TestIPv6LinkLocalUnicastTCP(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
+public static partial void TestTCPConcurrentAccept(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(4), ref ᒐ);
-        var (ln, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (ln, err) = Listen(tcpˢ, "127.0.0.1:0");
+        if (err != nil) {
+            t.Fatal(err);
         }
         UntypedInt N = 10;
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -550,9 +550,9 @@ public static partial void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
         for (nint i = 0; i < N; i++) {
             var lnʗ1 = ln;
             goǃ(() => {
-                while (ᐧ) {
+                for (;;) {
                     var (c, errΔ1) = lnʗ1.Accept();
-                    if (errΔ1 != default!) {
+                    if (errΔ1 != nil) {
                         break;
                     }
                     c.Close();
@@ -565,7 +565,7 @@ public static partial void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
         var d = Ꮡ(new Dialer(Timeout: 200 * time.Millisecond));
         for (nint i = 0; i < attempts; i++) {
             var (c, errΔ2) = d.Dial(tcpˢ, ln.Addr().String());
-            if (errΔ2 != default!){
+            if (errΔ2 != nil) {
                 fails++;
             } else {
                 c.Close();
@@ -574,34 +574,36 @@ public static partial void TestTCPConcurrentAccept(ж<testing.T> Ꮡt) {
         ln.Close();
         Ꮡwg.Wait();
         if (fails > attempts / 9) { // see issues 7400 and 7541
-            Ꮡt.Fatalf("too many Dial failed: %v"u8, fails);
+            t.Fatalf("too many Dial failed: %v", fails);
         }
         if (fails > 0) {
-            Ꮡt.Logf("# of failed Dials: %v"u8, fails);
+            t.Logf("# of failed Dials: %v", fails);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
+public static partial void TestTCPReadWriteAllocs(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "plan9"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "plan9"u8: {
             // The implementation of asynchronous cancelable
             // I/O on Plan 9 allocates memory.
             // See net/fd_io_plan9.go.
-            Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
-        }
+            t.Skipf("not supported on %s", Δruntime.GOOS);
+            break;
+        }}
 
         // Optimizations are required to remove the allocs.
-        testenv.SkipIfOptimizationOff(new net_test_package.testing_TжTB(Ꮡt));
+        testenv.SkipIfOptimizationOff(new net_test_package.testing_TжTB(t));
 
         ref var err = ref heap<error>(out var Ꮡerr);
-        (var ln, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        (var ln, err) = Listen(tcpˢ, "127.0.0.1:0");
+        if (err != nil) {
+            t.Fatal(err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
@@ -610,19 +612,19 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
         var errcʗ1 = errc;
         var lnʗ2 = ln;
         goǃ(() => {
-            error errΔ1 = default!;
+            error errΔ1 = default;
             (Ꮡserver.ValueSlot, errΔ1) = lnʗ2.Accept();
             errcʗ1.ᐸꟷ(errΔ1);
         });
         (var client, err) = Dial(tcpˢ, ln.Addr().String());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
         {
-            var errΔ2 = ᐸꟷ(errc); if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            var errΔ2 = ᐸꟷ(errc); if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
         }
         defer(() => Ꮡserver.ValueSlot.Close(), ref ᒐ);
@@ -632,16 +634,16 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
         var clientʗ2 = client;
         var allocs = testing.AllocsPerRun(1000, () => {
             var (_, errΔ3) = Ꮡserver.ValueSlot.Write(bufʗ1[..]);
-            if (errΔ3 != default!) {
-                Ꮡt.Fatal(errΔ3);
+            if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
             (_, errΔ3) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(clientʗ2), bufʗ1[..]);
-            if (errΔ3 != default!) {
-                Ꮡt.Fatal(errΔ3);
+            if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
         });
         if (allocs > 0D) {
-            Ꮡt.Errorf("got %v; want 0"u8, allocs);
+            t.Errorf("got %v; want 0", allocs);
         }
 
         ref var bufwrt = ref heap(new array<byte>(128), out var Ꮡbufwrt);
@@ -663,25 +665,25 @@ public static partial void TestTCPReadWriteAllocs(ж<testing.T> Ꮡt) {
         allocs = testing.AllocsPerRun(1000, () => {
             chʗ2.ᐸꟷ(true);
             {
-                (_, Ꮡerr.ValueSlot) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(clientʗ3), bufʗ2[..]); if (Ꮡerr.ValueSlot != default!) {
-                    Ꮡt.Fatal(Ꮡerr.ValueSlot);
+                (_, Ꮡerr.ValueSlot) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(clientʗ3), bufʗ2[..]); if (Ꮡerr.ValueSlot != nil) {
+                    t.Fatal(Ꮡerr.ValueSlot);
                 }
             }
             {
-                var errΔ5 = ᐸꟷ(errcʗ3); if (errΔ5 != default!) {
-                    Ꮡt.Fatal(errΔ5);
+                var errΔ5 = ᐸꟷ(errcʗ3); if (errΔ5 != nil) {
+                    t.Fatal(errΔ5);
                 }
             }
         });
         if (allocs > 0D) {
-            Ꮡt.Errorf("got %v; want 0"u8, allocs);
+            t.Errorf("got %v; want 0", allocs);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestTCPStress(ж<testing.T> Ꮡt) {
+public static partial void TestTCPStress(ж<testing.T> t) {
     const nint conns = 2;
     UntypedInt msgLen = 512;
     nint msgs = (nint)10000;
@@ -691,8 +693,8 @@ public static partial void TestTCPStress(ж<testing.T> Ꮡt) {
 
     bool sendMsg(global::go.net_package.Conn c, slice<byte> buf) {
         var (n, errΔ1) = c.Write(buf);
-        if (n != len(buf) || errΔ1 != default!) {
-            Ꮡt.Log(errΔ1);
+        if (n != len(buf) || errΔ1 != nil) {
+            t.Log(errΔ1);
             return false;
         }
         return true;
@@ -701,17 +703,17 @@ public static partial void TestTCPStress(ж<testing.T> Ꮡt) {
         for (nint read = 0; read != len(buf); ) {
             var (n, errΔ2) = c.Read(buf);
             read += n;
-            if (errΔ2 != default!) {
-                Ꮡt.Log(errΔ2);
+            if (errΔ2 != nil) {
+                t.Log(errΔ2);
                 return false;
             }
         }
         return true;
     }
 
-    var (ln, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (ln, err) = Listen(tcpˢ, "127.0.0.1:0");
+    if (err != nil) {
+        t.Fatal(err);
     }
     var done = new channel<bool>(0);
     // Acceptor.
@@ -726,9 +728,9 @@ public static partial void TestTCPStress(ж<testing.T> Ꮡt) {
             defer(() => {
                 doneʗ2.ᐸꟷ(true);
             }, ref ᒐ);
-            while (ᐧ) {
+            for (;;) {
                 var (c, errΔ3) = lnʗ1.Accept();
-                if (errΔ3 != default!) {
+                if (errΔ3 != nil) {
                     break;
                 }
                 // Server connection.
@@ -767,8 +769,8 @@ public static partial void TestTCPStress(ж<testing.T> Ꮡt) {
                     doneʗ4.ᐸꟷ(true);
                 }, ref ᒐ);
                 var (c, errΔ4) = Dial(tcpˢ, lnʗ2.Addr().String());
-                if (errΔ4 != default!) {
-                    Ꮡt.Log(errΔ4);
+                if (errΔ4 != nil) {
+                    t.Log(errΔ4);
                     return;
                 }
                 var cʗ1 = c;
@@ -796,13 +798,13 @@ internal static readonly object testDisabledUseTcpbigToˢ = (@string)"test disab
 
 // Test that >32-bit reads work on 64-bit systems.
 // On 32-bit systems this tests that maxint reads work.
-public static void TestTCPBig(ж<testing.T> Ꮡt) {
+public static void TestTCPBig(ж<testing.T> t) {
     if (!testTCPBig.Value) {
-        Ꮡt.Skip(testDisabledUseTcpbigToˢ);
+        t.Skip(testDisabledUseTcpbigToˢ);
     }
 
-    foreach (var (_, writev) in new bool[]{false, true}.slice()) {
-        Ꮡt.Run(fmt.Sprintf("writev=%v"u8, writev), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+    foreach (var (_, writev) in slice<bool>([false, true])) {
+        t.Run(fmt.Sprintf("writev=%v"u8, writev), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), tcpˢ);
@@ -819,21 +821,21 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
                     try {
                         defer(ᴛ1 => builtin.close(ᴛ1), doneʗ1, ref ᒐ);
                         var (cΔ1, errΔ1) = lnʗ2.Accept();
-                        if (errΔ1 != default!) {
+                        if (errΔ1 != nil) {
                             tΔ1.Error(errΔ1);
                             return;
                         }
                         var bufΔ1 = new slice<byte>(x);
-                        nint nΔ1 = default!;
-                        if (writev){
-                            int64 n64 = default!;
+                        nint nΔ1 = default;
+                        if (writev) {
+                            int64 n64 = default;
                             (n64, errΔ1) = (Ꮡ(new Buffers(new slice<byte>[]{bufΔ1}.slice()))).WriteTo(new net_test_package.net_ConnᴠWriter(cΔ1));
                             nΔ1 = (nint)n64;
                         } else {
                             (nΔ1, errΔ1) = cΔ1.Write(bufΔ1);
                         }
-                        if (nΔ1 != len(bufΔ1) || errΔ1 != default!) {
-                            tΔ1.Errorf("Write(buf) = %d, %v, want %d, nil"u8, nΔ1, errΔ1, x);
+                        if (nΔ1 != len(bufΔ1) || errΔ1 != nil) {
+                            tΔ1.Errorf("Write(buf) = %d, %v, want %d, nil", nΔ1, errΔ1, x);
                         }
                         cΔ1.Close();
                     }
@@ -842,13 +844,13 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
                 });
 
                 var (c, err) = Dial(tcpˢ, ln.Addr().String());
-                if (err != default!) {
+                if (err != nil) {
                     tΔ1.Fatal(err);
                 }
                 var buf = new slice<byte>(x);
                 (var n, err) = Δio.ReadFull(new net_test_package.net_ConnᴠReader(c), buf);
-                if (n != len(buf) || err != default!) {
-                    tΔ1.Errorf("Read(buf) = %d, %v, want %d, nil"u8, n, err, x);
+                if (n != len(buf) || err != nil) {
+                    tΔ1.Errorf("Read(buf) = %d, %v, want %d, nil", n, err, x);
                 }
                 c.Close();
                 ᐸꟷ(done);
@@ -859,15 +861,17 @@ public static void TestTCPBig(ж<testing.T> Ꮡt) {
     }
 }
 
-public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
+public static partial void TestCopyPipeIntoTCP(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
-            Ꮡt.Skipf("skipping: os.Pipe not supported on %s"u8, Δruntime.GOOS);
-        }
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
+            t.Skipf("skipping: os.Pipe not supported on %s", Δruntime.GOOS);
+            break;
+        }}
 
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
@@ -875,8 +879,8 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
         var errcʗ1 = errc;
         defer(() => {
             {
-                var errΔ1 = ᐸꟷ(errcʗ1); if (errΔ1 != default!) {
-                    Ꮡt.Error(errΔ1);
+                var errΔ1 = ᐸꟷ(errcʗ1); if (errΔ1 != nil) {
+                    t.Error(errΔ1);
                 }
             }
         }, ref ᒐ);
@@ -886,7 +890,7 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
             GoFrame ᒐ = default;
             try {
                 var (cΔ1, errΔ2) = lnʗ2.Accept();
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     errcʗ2.ᐸꟷ(errΔ2);
                     return;
                 }
@@ -900,22 +904,22 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
                     return;
                 }
 
-                errcʗ2.ᐸꟷ(default!);
+                errcʗ2.ᐸꟷ(default);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
 
         var (c, err) = Dial(tcpˢ, ln.Addr().String());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var cʗ2 = c;
         defer(() => cʗ2.Close(), ref ᒐ);
 
         (var r, var w, err) = Δos.Pipe();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
@@ -924,8 +928,8 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
         var errc2ʗ1 = errc2;
         defer(() => {
             {
-                var errΔ3 = ᐸꟷ(errc2ʗ1); if (errΔ3 != default!) {
-                    Ꮡt.Error(errΔ3);
+                var errΔ3 = ᐸꟷ(errc2ʗ1); if (errΔ3 != nil) {
+                    t.Error(errΔ3);
                 }
             }
         }, ref ᒐ);
@@ -945,13 +949,13 @@ public static partial void TestCopyPipeIntoTCP(ж<testing.T> Ꮡt) {
         // drop second packet.
         var packet = new slice<byte>(1);
         (_, err) = w.Write(packet);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         time.Sleep(100 * time.Millisecond);
         (_, err) = w.Write(packet);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -971,18 +975,18 @@ public static partial void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
         var doneʗ1 = done;
         var lnʗ2 = ln;
         goǃ(() => {
-            error errΔ1 = default!;
+            error errΔ1 = default;
             (Ꮡserv.ValueSlot, errΔ1) = lnʗ2.Accept();
             doneʗ1.ᐸꟷ(errΔ1);
         });
         var (c, err) = Dial(tcpˢ, ln.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
         {
-            var errΔ2 = ᐸꟷ(done); if (errΔ2 != default!) {
+            var errΔ2 = ᐸꟷ(done); if (errΔ2 != nil) {
                 Ꮡb.Fatal(errΔ2);
             }
         }
@@ -999,10 +1003,10 @@ public static partial void BenchmarkSetReadDeadline(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestDialTCPDefaultKeepAlive(ж<testing.T> Ꮡt) {
+public static void TestDialTCPDefaultKeepAlive(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
@@ -1016,35 +1020,35 @@ public static void TestDialTCPDefaultKeepAlive(ж<testing.T> Ꮡt) {
         }, ref ᒐ);
 
         var (c, err) = DialTCP(tcpˢ, nil, ln.Addr()._<ж<global::go.net_package.TCPAddr>>());
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var cʗ1 = c;
         defer(() => cʗ1.of(global::go.net_package.TCPConn.Ꮡconn).Close(), ref ᒐ);
 
         if (got != 0) {
-            Ꮡt.Errorf("got keepalive %v; want %v"u8, got, defaultTCPKeepAliveIdle);
+            t.Errorf("got keepalive %v; want %v", got, defaultTCPKeepAliveIdle);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
+public static partial void TestTCPListenAfterClose(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Regression test for https://go.dev/issue/50216:
         // after calling Close on a Listener, the fake net implementation would
         // erroneously Accept a connection dialed before the call to Close.
 
-        var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+        var ln = newLocalListener(new net_test_package.testing_TжTB(t), tcpˢ);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         var (ctx, cancel) = context.WithCancel(context.Background());
 
-        var d = Ꮡ(new Dialer(nil));
+        var d = Ꮡ(new Dialer());
         for (nint n = 2; n > 0; n--) {
             Ꮡwg.Add(1);
             var ctxʗ1 = ctx;
@@ -1056,7 +1060,7 @@ public static partial void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
                     defer(Ꮡwg.Done, ref ᒐ);
 
                     var (cΔ1, errΔ1) = dʗ1.DialContext(ctxʗ1, lnʗ2.Addr().Network(), lnʗ2.Addr().String());
-                    if (errΔ1 == default!) {
+                    if (errΔ1 == nil) {
                         ᐸꟷ(ctxʗ1.Done());
                         cΔ1.Close();
                     }
@@ -1067,10 +1071,10 @@ public static partial void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
         }
 
         var (c, err) = ln.Accept();
-        if (err == default!){
+        if (err == nil) {
             c.Close();
         } else {
-            Ꮡt.Error(err);
+            t.Error(err);
         }
         time.Sleep(10 * time.Millisecond);
         cancel();
@@ -1079,10 +1083,10 @@ public static partial void TestTCPListenAfterClose(ж<testing.T> Ꮡt) {
 
         (c, err) = ln.Accept();
         if (!errors.Is(err, ErrClosed)) {
-            if (err == default!) {
+            if (err == nil) {
                 c.Close();
             }
-            Ꮡt.Errorf("after l.Close(), l.Accept() = _, %v\nwant %v"u8, err, ErrClosed);
+            t.Errorf("after l.Close(), l.Accept() = _, %v\nwant %v", err, ErrClosed);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

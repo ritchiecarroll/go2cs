@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
 global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
 global using ecdhꓸPublicKey = go.crypto.@internal.fips140.ecdh_package.ΔPublicKey;
@@ -54,7 +53,12 @@ using static go.crypto.ecdh_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(PrivateKey))]
+[assembly: GoFieldAccess(typeof(ΔPublicKey))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,9 +68,9 @@ using static go.crypto.ecdh_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCAAwaABE0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;163=ConstantTimeCompare/1/1/1")]
-[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABoygtaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU1qKCgoKUgoKU3KaCgpQACRTWxoKUuIKCgpSUgoKUlKYAChCClAACENCkAAUYAAMS0KQABRgAAxLQpAAFGA==", "", "", "46=Bytes/1/1/3;66=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;106=Clone/1/1/2,Bytes/1/1/3;119=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;143=Clone/1/1/2")]
-[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKUgoKClOKCgoKUgoKCgoKCgpSCgoKCgoKCgoKCgoKUgoKCgqaClIKCqJKCgpQ=", "", "", "75=Clone/1/1/2;89=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCAAwaABI0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;164=ConstantTimeCompare/1/1/1")]
+[assembly: GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABoyguaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU5qKCgoKUgoKU3KaCgpQACRTmxoKUuIKCgpSUgoKUlKYAChCClAACENCkAAUYAAMS0KQABRgAAxLQpAAFGA==", "", "", "47=Bytes/1/1/3;67=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;108=Clone/1/1/2,Bytes/1/1/3;121=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;146=Clone/1/1/2")]
+[assembly: GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KQACAiC5oKClIKCgIKk5oKClIKUgoK47oKClIKUAAkMsoKCgpSmgpSCgoKU4oKCgpSCgoKCgoKClIKCgoKCgoKCgoKCgpSCgoKCpoKUgoKokoKClA==", "", "", "78=Clone/1/1/2;92=Clone/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

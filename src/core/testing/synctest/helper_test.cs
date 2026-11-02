@@ -12,9 +12,9 @@ partial class synctest_test_package {
 // helperLog is a t.Helper which logs.
 // Since it is a helper, the log prefix should contain
 // the caller's file, not helper_test.go.
-internal static partial void helperLog(ж<testing.T> Ꮡt, @string s) {
-    Ꮡt.Helper();
-    Ꮡt.Log(s);
+internal static partial void helperLog(ж<testing.T> t, @string s) {
+    t.Helper();
+    t.Log(s);
 }
 
 } // end synctest_test_package

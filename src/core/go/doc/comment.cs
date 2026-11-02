@@ -31,7 +31,7 @@ partial class doc_package {
 //	w.Write(p.Printer().HTML(parser.Parse(d)))
 public static void ToHTML(io.Writer w, @string text, map<@string, @string> words) {
     var p = @new<Package>().Parser();
-    p.Value.Words = words;
+    p.Words = words;
     var d = p.Parse(text);
     var pr = @new<comment.Printer>();
     w.Write(pr.HTML(d));

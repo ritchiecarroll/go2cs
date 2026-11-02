@@ -36,20 +36,22 @@ partial struct chacha20poly1305 {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string chacha20poly1305UseOfˢ = "chacha20poly1305: use of ChaCha20Poly1305 is not allowed in FIPS 140-only mode"u8;
-private static readonly @string chacha20poly1305BadKeyˢ = "chacha20poly1305: bad key length"u8;
+private static ref readonly @string chacha20poly1305UseOfˢ => ref chacha20poly1305UseOfˢᵇ;
+private static readonly @string chacha20poly1305UseOfˢᵇ = "chacha20poly1305: use of ChaCha20Poly1305 is not allowed in FIPS 140-only mode"u8;
+private static ref readonly @string chacha20poly1305BadKeyˢ => ref chacha20poly1305BadKeyˢᵇ;
+private static readonly @string chacha20poly1305BadKeyˢᵇ = "chacha20poly1305: bad key length"u8;
 
 // New returns a ChaCha20-Poly1305 AEAD that uses the given 256-bit key.
 public static (cipher.AEAD, error) New(slice<byte> key) {
     if (fips140Enforced()) {
-        return (default!, errors.New(chacha20poly1305UseOfˢ));
+        return (default, errors.New(chacha20poly1305UseOfˢ));
     }
     if (len(key) != KeySize) {
-        return (default!, errors.New(chacha20poly1305BadKeyˢ));
+        return (default, errors.New(chacha20poly1305BadKeyˢ));
     }
     var ret = @new<chacha20poly1305>();
-    copy((~ret).key[..], key);
-    return (new chacha20poly1305жAEAD(ret), default!);
+    copy(ret.key[..], key);
+    return (new chacha20poly1305жAEAD(ret), default);
 }
 
 internal static nint NonceSize(this ref chacha20poly1305 c) {
@@ -72,14 +74,14 @@ internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, s
     return c.seal(dst, nonce, plaintext, additionalData);
 }
 
-internal static error errOpen = errors.New("chacha20poly1305: message authentication failed"u8);
+internal static error errOpen = errors.New("chacha20poly1305: message authentication failed");
 
 internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != ΔNonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }
     if (len(ciphertext) < 16) {
-        return (default!, errOpen);
+        return (default, errOpen);
     }
     if ((uint64)len(ciphertext) > (uint64)((274877906944L) - 48)) {
         throw panic("chacha20poly1305: ciphertext too large");
@@ -93,11 +95,11 @@ internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byt
 // second slice that aliases into it and contains only the extra bytes. If the
 // original slice has sufficient capacity then no allocation is performed.
 internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> @in, nint n) {
-    slice<byte> head = default!;
-    slice<byte> tail = default!;
+    slice<byte> head = default;
+    slice<byte> tail = default;
 
     {
-        nint total = len(@in) + n; if (cap(@in) >= total){
+        nint total = len(@in) + n; if (cap(@in) >= total) {
             head = @in.slice(0, total);
         } else {
             head = new slice<byte>(total);

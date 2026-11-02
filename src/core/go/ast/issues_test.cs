@@ -12,15 +12,13 @@ using static global::go.go.ast_internal_test_package;
 
 partial class ast_test_package {
 
-public static void TestIssue33649(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (_, src) in new @string[]{
-        @"package p; func _()"u8,
-        @"package p; func _() {"u8,
-        @"package p; func _() { _ = 0"u8,
-        @"package p; func _() { _ = 0 }"u8
-    }.slice()) {
+public static void TestIssue33649(ж<testing.T> t) {
+    foreach (var (_, src) in slice<@string>([
+        @"package p; func _()",
+        @"package p; func _() {",
+        @"package p; func _() { _ = 0",
+        @"package p; func _() { _ = 0 }"
+    ])) {
         var fset = token.NewFileSet();
         var (f, _) = parser.ParseFile(fset, ""u8, src, parser.AllErrors);
         if (f == nil) {
@@ -35,11 +33,11 @@ public static void TestIssue33649(ж<testing.T> Ꮡt) {
         });
         tokenꓸPos tfEnd = tf.End();
 
-        var fd = (~f).Decls[len((~f).Decls) - 1]._<ж<ast.FuncDecl>>();
+        var fd = f.Decls[len(f.Decls) - 1]._<ж<ast.FuncDecl>>();
         tokenꓸPos fdEnd = fd.End();
 
         if (fdEnd != tfEnd) {
-            Ꮡt.Errorf("%q: got fdEnd = %d; want %d (base = %d, size = %d)"u8, src, fdEnd, tfEnd, tf.Base(), tf.Size());
+            t.Errorf("%q: got fdEnd = %d; want %d (base = %d, size = %d)", src, fdEnd, tfEnd, tf.Base(), tf.Size());
         }
     }
 }
@@ -50,12 +48,10 @@ internal partial struct TestIssue28089_type /*dyn*/ {
 }
 
 // TestIssue28089 exercises the IsGenerated function.
-public static void TestIssue28089(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (i, test) in new TestIssue28089_type[]{
+public static void TestIssue28089(ж<testing.T> t) {
+    foreach (var (i, test) in slice<TestIssue28089_type>([
         // No file comments.
-        new(@"package p"u8, false),
+        new(@"package p", false),
         // Irrelevant file comments.
         new("""
 // Package p doc.
@@ -152,16 +148,16 @@ package p
 // Does match even though it's inside general comment (/*-style).
 
 """u8.Raw(), true)
-    }.slice()) {
+    ])) {
         var fset = token.NewFileSet();
         var (f, err) = parser.ParseFile(fset, ""u8, test.src, (parser.Mode)(parser.PackageClauseOnly | parser.ParseComments));
         if (f == nil) {
-            Ꮡt.Fatalf("parse %d failed to return AST: %v"u8, i, err);
+            t.Fatalf("parse %d failed to return AST: %v", i, err);
         }
 
         var got = ast.IsGenerated(f);
         if (got != test.want) {
-            Ꮡt.Errorf("%d: IsGenerated on <<%s>> returned %t"u8, i, test.src, got);
+            t.Errorf("%d: IsGenerated on <<%s>> returned %t", i, test.src, got);
         }
     }
 }
