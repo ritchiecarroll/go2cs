@@ -2949,8 +2949,18 @@ public static partial class builtin
     /// <code language="cs">
     ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var Ꮡv);
     /// </code>
+    /// <para>
+    /// <paramref name="target"/> is taken BY VALUE, never <c>in</c>. The converter folds a heap-boxed Go
+    /// <c>x := rhs</c> into this one call, and its rhs is usually an rvalue. An <c>in</c> parameter needs an
+    /// address, so the compiler would spill that rvalue into a hidden local of the CALLER and pass the local's
+    /// address. That local is never cleared, and when this method is not inlined the JIT reports it live for the
+    /// caller's whole frame, so the initial value outlives a later <c>x = nil</c>. Go collects it and C# did
+    /// not: crypto/internal/fips140cache's TestCache waited on exactly that and hung (1.26.10.2 freeze; guarded
+    /// by GolibTests' HeapInitRootingTests). By value, the value travels as an argument and dies with the call.
+    /// The copy into the box below happens either way.
+    /// </para>
     /// </remarks>
-    public static ref T heap<T>(in T target, out ж<T> pointer)
+    public static ref T heap<T>(T target, out ж<T> pointer)
     {
         pointer = Ꮡ(target);
         // ValueSlot, not Value: a freshly allocated box is structurally non-nil, so the Value getter's
