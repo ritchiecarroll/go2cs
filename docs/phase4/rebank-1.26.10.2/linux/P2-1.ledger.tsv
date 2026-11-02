@@ -1,0 +1,32 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# NOTE 2026-11-02T16:42:47Z P2 container: /root/dotnet10 is a symlink to this box's .NET root (/root/.dotnet-ms); FLOOR_GB=15 (container floor); kit pins checked, all three equal
+# NOTE SSL_CERT_FILE and NIX_SSL_CERT_FILE UNSET for the whole P2-1 shard (crypto/x509, seq 24, on both sides); git fetch uses GIT_SSL_CAINFO; an offline dotnet restore was checked green with both unset
+# NOTE 2026-11-02T16:42:52Z launch 2: launch 1 (16:42:08Z) was stopped by P2 30 s into row 1 (image/jpeg) because the tool's background limit (2 h) is under the shard's projection; tree restored clean at the tip; its directory kept as aborted-P2-1-launch1
+# NOTE installed under the owner's yes (2026-11-02 16:41Z): dnsutils and bind9-dnsutils 1:9.18.39-0ubuntu0.24.04.8 (apt); nslookup invalid.invalid answered NXDOMAIN from the box's real resolver (kit's nslookup.txt)
+image/jpeg	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:50:04Z
+crypto/elliptic	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:51:31Z
+log	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:52:37Z
+compress/gzip	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:53:28Z
+iter	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:53:52Z
+crypto/internal/fips140/mldsa	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:55:24Z
+net/textproto	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:56:28Z
+internal/fuzz	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:57:43Z
+internal/zstd	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:58:28Z
+strings	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T16:59:44Z
+crypto/rand	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:00:45Z
+go/internal/gccgoimporter	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:02:54Z
+compress/flate	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:04:02Z
+internal/coverage/cfile	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:05:42Z
+internal/types/errors	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:06:53Z
+crypto/cipher	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:08:43Z
+go/internal/gcimporter	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:12:49Z
+reflect	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:16:36Z
+net/http/fcgi	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793637769	PASS	0	2026-11-02T17:21:08Z
+# NOTE 2026-11-02T17:22:46Z launch 2 ABORTED by the kit at row 20 (free 13G under the 15G floor). Cause: dependency build output under src/core outside the row's own dir (10,477 ignored paths, 7.8 GB) is purged only at shard end. P2 ran the kit's own shard-end purge (git clean -fdXq -- src): tracked deletions 0, tree clean at the tip, free 20G. Launch 3 RE-ENTERS at the first unrecorded row (seq 20) with LIST = rows 20-24; the kit rebuilds the converter, so rows 20-24 carry a new converter_mtime. Rows 1-19 stand from launch 2.
+expvar	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793640176	PASS	0	2026-11-02T17:35:28Z
+database/sql	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793640176	PASS	0	2026-11-02T17:36:45Z
+# NOTE 2026-11-02T17:39:09Z launch 3 ABORTED by the kit before seq 22 (free 14G under 15G) after seq 20-21 (expvar, database/sql); its first row rebuilds the whole dependency tree. P2 removed its own idle clean trees and the Go build cache, ran the kit's shard-end purge again (tracked deletions 0, clean at the tip), free 23G. Launch 4 RE-ENTERS at seq 22 with LIST = rows 22-24; new converter_mtime on those rows.
+crypto/internal/fips140test	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641182	PASS	0	2026-11-02T17:53:10Z
+internal/trace/testtrace	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641182	PASS	0	2026-11-02T17:54:20Z
+crypto/x509	f6666d98a21ad4c3f992c959769f844ee6422ceb	f6666d98a21ad4c3f992c959769f844ee6422ceb	1793641182	PASS	0	2026-11-02T18:02:35Z
+# NOTE 2026-11-02T18:04:02Z launch 4 END: rows 22-24 PASS; the shard's TSV holds all 24 rows once (seq 1-24), every word PASS rc 0; shard-end purge residue-after 0, tracked deleted 0. Container restarts during the shard: 0 (one boot throughout).
