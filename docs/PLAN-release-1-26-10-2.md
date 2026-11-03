@@ -239,12 +239,12 @@ stops the lane.
      H9 numbers are batch 129's battery as COORD reported it; the outside-docs diff is measured here. R's three kit
      files are on no pushed ref G could read (2026-11-02); their pins are COORD's record. -->
 
-### The re-pass at the new freeze tip (PROPOSAL, for COORD's ruling)
+### The re-pass at the new freeze tip (RULED 2026-11-03)
 
 The golib fixes of batches 135 and 136 came after the freeze, so the pass at `f6666d98a2` became a discovery pass,
-and every OS re-reads at a NEW freeze tip. That tip waits on H's bank seat and H's regen; nothing below dispatches
-until COORD rules on this section and names the tip. This section proposes the deal for that re-pass. It is cut
-from the walls the discovery pass MEASURED, not from row counts.
+and every OS re-reads at a NEW freeze tip. This section is the deal for that re-pass, cut from the walls the
+discovery pass MEASURED, not from row counts. COORD ruled it on 2026-11-03: mode B, with P2's purge made
+conditional. It dispatches once COORD names the tip, which waits on H's bank seat and H's regen.
 
 **The fixed constraints** (COORD, 2026-11-03):
 1. The linux bank legs run on SDK band 400 only: P2 (10.0.403) and R-WSL (10.0.400). P1 (10.0.113) carries no
@@ -275,6 +275,10 @@ at a pinned SHA, and every line names its source:
 - `internal/runtime/gc/scan` has no WSL reading. It carries its P1 reading.
 - C1's darwin TSVs carry no wall column, so darwin keeps its 1.26.10.1 job-log walls.
 
+When RWSL-2 posts, the cutter re-runs on its walls, and the re-cut table is committed (on this branch if it has not
+landed, as a follow-up if it has), naming the mode it ran. The old-tip walls cannot move the critical path far:
+R-WSL's whole linux leg is 4.09 h, so even a 2x miss on RWSL-2's 1.11 h keeps R-LAPTOP under about 5.2 h.
+
 **The cost model.** A windows box's factor is its discovery walls over its own rows' pass-1 walls: G 0.655, i9 0.751,
 H 1.072 and R 1.551. A row's measured wall rescales to another box by the ratio of the two factors. On the box that
 measured it, a row is predicted at exactly its measured wall. Linux needs no cross-class estimate: P1's rows move to
@@ -301,21 +305,22 @@ basis of that figure. Within each list, rows run smallest-first, and `testing` r
 **The critical path is R-LAPTOP, at about 4.5 h:** its windows shard (0.44 h), then RWSL-1 (2.98 h), then RWSL-2
 (1.11 h, the old-tip figure). P2 follows at 4.31 h. The windows lanes finish in about 1.4 h, well inside both.
 
-**R-LAPTOP's windows share is the one choice to rule.** The cutter computes three options
-(`repass_cut.py <tree> <out> A|B|C`):
+**R-LAPTOP's windows share: RULED, mode B.** The cutter takes the mode as its third argument
+(`repass_cut.py <tree> <out> A|B|C`, B by default), and a re-cut names the mode it ran:
 
 | Option | R-LAPTOP's windows rows | R-LAPTOP total | Critical path |
 |:--|:--|--:|:--|
 | A | all eight off-i9 rows, as at 1.26.10.1 | 5.18 h | R-LAPTOP, 5.18 h |
-| **B (proposed)** | `crypto/tls` only; the other seven go to G | 4.53 h | R-LAPTOP, 4.53 h |
+| **B (RULED)** | `crypto/tls` only; the other seven go to G | 4.53 h | R-LAPTOP, 4.53 h |
 | C | none; all eight go to G | 4.09 h | P2, 4.31 h |
 
-B is proposed:
-- **Why `crypto/tls` stays on R-LAPTOP.** Its count depends on the host: the BoGo runner, and the throughput to
-  finish inside its wall. R-LAPTOP read the full count (1,393), and G has never banked it.
-- **Why the other seven can move.** They need only a working network, and G banked `net` itself.
-- **What C costs.** C saves about 13 minutes, but it moves `crypto/tls` onto an unproven host. It also leaves
-  R-LAPTOP with no windows leg, against constraint 5.
+Why B:
+- **`crypto/tls` stays on R-LAPTOP.** Its count depends on the host: the BoGo runner, and the throughput to finish
+  inside its wall. R-LAPTOP banked the full count (1,393). A first reading on G would turn the bank of record into
+  a discovery reading.
+- **The other seven move to G.** They need only a working network, and G banked `net` itself.
+- **A costs 0.65 h of critical path for nothing.**
+- **C breaks constraint 5** (R-LAPTOP gets no windows leg) and puts `crypto/tls` on an unproven host.
 
 **Free disk, per box,** from the discovery ledgers:
 
@@ -328,10 +333,20 @@ B is proposed:
 | R-LAPTOP's windows side | not recorded | 30 GB, checked before row 1 |
 | P2 | aborted twice at the 15 GB floor | 20 GB before row 1, 15 GB per row |
 
-**P2 is the disk risk.** Launches 2 and 3 of P2-1 stopped at rows 20 and 21, with 13 GB and 14 GB free. The cause
-was dependency build output piling up under `src/core`, outside each row's own directory. P2 now carries 92 rows, so
-its brief purges ALL ignored build output under `src/core` (`git clean -fdX -- src/core`) at every row boundary, not
-only the row's own directory, and re-checks the 15 GB floor after the purge.
+**Every re-pass brief reads free disk at launch and posts it**, against the 25 GB sweep floor, the same as every
+battery. That closes the two boxes the discovery ledgers did not record.
+
+**P2 is the disk risk; its purge is CONDITIONAL (ruled).** Launches 2 and 3 of P2-1 stopped at rows 20 and 21, with
+13 GB and 14 GB free. The cause was dependency build output piling up under `src/core`, outside each row's own
+directory. P2 now carries 92 rows. Before each row, P2 reads free disk, and only if it is under the floor plus
+10 GB (25 GB on its 15 GB floor):
+1. it runs `git clean -fdXq -- src/core`;
+2. it asserts that `git status --porcelain` shows no ` D` line;
+3. it re-checks the floor, and aborts as now if free disk is still under it.
+
+P2 logs each purge (the row, free before, free after), so the wall it adds is attributable. Why not every row: an
+unconditional purge at all 92 boundaries rebuilds every dependency closure cold. P2's 2.16 h per leg is built from
+warm walls, so the prediction would then be wrong in the direction that lengthens the critical path.
 
 **What can still move a row:** H's bank-seat retirements can change a row's count, or remove a row. The cutter
 re-runs from the tree, so a retirement re-cuts by re-running it.
@@ -343,6 +358,10 @@ re-runs from the tree, so a retirement re-cuts by re-running it.
      10,506 s). The P2 aborts are the P2-1 ledger's two NOTE lines, 2026-11-02T17:22:46Z and T17:39:09Z. R-WSL's 892
      GB is its RWSL-1 ledger host line. The mode-A and mode-C figures come from running the cutter in those modes; the
      committed TSV is mode B. -->
+<!-- Ruling (COORD, 2026-11-03, on G's proposal at 493011611c): mode B accepted, with its four reasons as above; the
+     amendment makes P2's purge conditional (under floor + 10 GB), logged per purge; the gaps are accepted as stated,
+     and RWSL-2's walls re-cut the table when they post; every re-pass brief carries the 25 GB launch preflight. The
+     section heading moved from PROPOSAL to RULED. repass-legs.tsv is unchanged by the ruling. -->
 
 ### The closing checks
 
