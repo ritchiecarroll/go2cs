@@ -1,0 +1,7 @@
+row	corpus_commit	converter_commit	converter_mtime	word	rc	ended_utc
+# NOTE 2026-11-03T19:36:10Z P2 net re-read (COORD 16:37Z): ONE row, net, at tip d9dd8f54994297f34be694b7a4594fc6ea826024 (tree 26120be4cc); clone detached at the tip, clean after P2-2's shard-end purge
+# NOTE kit pins checked by the wrapper before launch 1; wrapper repass.sh sha256 4aa5068a9ed6; host as P2-2 (TMPDIR=/tmp, GOROOT go1.26.10 with test/, SDK 10.0.403, uid 0); free 22G by df -BG at launch; kit FLOOR_GB=18, wrapper floor 15; SSL vars set
+# NOTE 2026-11-03T19:36:10Z launch 1: first unrecorded row seq 1 (net), 1 rows left, FLOOR_GB=18, free 22G
+net	d9dd8f54994297f34be694b7a4594fc6ea826024	d9dd8f54994297f34be694b7a4594fc6ea826024	1793734574	PASS	0	2026-11-03T19:47:48Z
+# NOTE 2026-11-03T19:47:55Z all 1 rows recorded at the tip; launches=1 purges=0
+# NOTE 2026-11-03T19:48:40Z END: net PASS rc 0, 593 + 3, diverged 0; TestDialCancel Go pass, C# pass (dial_test.go:742, 0.096 s); kit shard-end purge residue before 3685, after 0, tracked deleted 0; purges 0; restarts 0. Host (read-only, /proc; ip is not installed): IPv4 default route via eth0; no IPv6 stack (/proc/net/if_inet6 and /proc/net/ipv6_route absent), so no IPv6 default route

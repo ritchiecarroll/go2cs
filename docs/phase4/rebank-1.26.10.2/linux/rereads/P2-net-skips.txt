@@ -1,0 +1,67 @@
+# net at d9dd8f5499, lane P2 linux re-read (claude/p2-net-1262c): every test reading skip on BOTH sides,
+# from the row's go2cs_test_comparison.json (63 names). Skip text is the C# side's, from go2cs_test_results.json;
+# the kept files carry only the Go side's verdict word, not its text. Host: no IPv6 stack (/proc/net/if_inet6 absent).
+test	go	csharp	skip_text_csharp
+TestAddrList	skip	skip	ipsock_test.go:219: both IPv4 and IPv6 are required
+TestAddrLookupOrder	skip	skip	conf_test.go:421: skipping test because cgo resolver not available
+TestConfHostLookupOrder	skip	skip	conf_test.go:52: skipping test because cgo resolver not available
+TestCopyFromTTY	skip	skip	sendfile_unix_test.go:22: skipping test because pty open failed: testpty.Open not implemented on this platform
+TestDNSFlood	skip	skip	lookup_test.go:503: test disabled; use -dnsflood to enable
+TestDialAddrError	skip	skip	error_test.go:224: both IPv4 and IPv6 are required
+TestDialClosedPortFailFast	skip	skip	dial_test.go:894: skipping windows only test
+TestDialGoogle	skip	skip	external_test.go:66: both IPv4 and IPv6 are required
+TestDialParallelSpuriousConnection	skip	skip	dial_test.go:387: both IPv4 and IPv6 are required
+TestDialerControlContext/StreamDial/tcp6	skip	skip	dial_test.go:1044: skipping: tcp6 not available
+TestDialerDualStack	skip	skip	dial_test.go:642: skipping known flaky test without the -flaky flag; see golang.org/issue/13324
+TestDialerDualStackFDLeak	skip	skip	dial_test.go:87: both IPv4 and IPv6 are required
+TestDialerFallbackDelay	skip	skip	dial_test.go:321: both IPv4 and IPv6 are required
+TestDialerLocalAddr	skip	skip	dial_test.go:523: both IPv4 and IPv6 are required
+TestDualStackTCPListener	skip	skip	listen_test.go:230: both IPv4 and IPv6 are required
+TestDualStackUDPListener	skip	skip	listen_test.go:320: both IPv4 and IPv6 are required
+TestForceCgoDNS	skip	skip	main_conf_test.go:60: cgo resolver not available
+TestIPv6LinkLocalUnicastTCP	skip	skip	tcpsock_test.go:379: IPv6 is not supported
+TestIPv6LinkLocalUnicastUDP	skip	skip	udpsock_test.go:294: IPv6 is not supported
+TestIPv6MulticastListener	skip	skip	listen_test.go:611: IPv6 is not supported
+TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion	skip	skip	udpsock_test.go:678: skipping: udp6 not available
+TestInterfaceArrivalAndDeparture	skip	skip	interface_unix_test.go:121: test requires external command: exec: "ip": executable file not found in $PATH
+TestInterfaceArrivalAndDepartureZoneCache	skip	skip	interface_unix_test.go:193: test requires external command: exec: "ip": executable file not found in $PATH
+TestLookupGooglePublicDNSAddr	skip	skip	lookup_test.go:269: both IPv4 and IPv6 are required
+TestLookupIPv6LinkLocalAddr	skip	skip	lookup_test.go:292: IPv6 is required
+TestLookupIPv6LinkLocalAddrWithZone	skip	skip	lookup_test.go:311: IPv6 is required
+TestLookupLongTXT	skip	skip	lookup_test.go:411: skipping known flaky test without the -flaky flag; see golang.org/issue/22857
+TestPointToPointInterface	skip	skip	interface_unix_test.go:63: test requires external command: exec: "ip": executable file not found in $PATH
+TestProhibitionaryDialArg	skip	skip	dial_test.go:40: mapping ipv4 address inside ipv6 address not supported
+TestResolveGoogle	skip	skip	external_test.go:19: both IPv4 and IPv6 are required
+TestResolverLookupIP/implementation:_cgo/network:_ip6	skip	skip	lookup_test.go:1275: IPv6 is not supported
+TestResolverLookupIP/implementation:_go/network:_ip6	skip	skip	lookup_test.go:1275: IPv6 is not supported
+TestSplice/tcp-to-unix/readerAtEOF	skip	skip	splice_linux_test.go:235: skipping test on unix socket
+TestTCPBig	skip	skip	tcpsock_test.go:627: test disabled; use -tcpbig to enable
+TestTCPServer/tcp6_:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp6_[::1]:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp6_[::]:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_0.0.0.0:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_0.0.0.0:0<-::1#01	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_:0<-::1#01	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::1]:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::]:0<-127.0.0.1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::]:0<-127.0.0.1#01	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::]:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::]:0<-::1#01	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::ffff:0.0.0.0]:0<-::1	skip	skip	server_test.go:60: not testable
+TestTCPServer/tcp_[::ffff:0.0.0.0]:0<-::1#01	skip	skip	server_test.go:60: not testable
+TestUDPServer/11	skip	skip	server_test.go:255: skipping udp [::]:0<-::1 test
+TestUDPServer/12	skip	skip	server_test.go:255: skipping udp :0<-::1 test
+TestUDPServer/13	skip	skip	server_test.go:255: skipping udp 0.0.0.0:0<-::1 test
+TestUDPServer/14	skip	skip	server_test.go:255: skipping udp [::ffff:0.0.0.0]:0<-::1 test
+TestUDPServer/15	skip	skip	server_test.go:255: skipping udp [::]:0<-127.0.0.1 test
+TestUDPServer/18	skip	skip	server_test.go:255: skipping udp [::1]:0<-::1 test
+TestUDPServer/23	skip	skip	server_test.go:255: skipping udp6 :0<-::1 test
+TestUDPServer/24	skip	skip	server_test.go:255: skipping udp6 [::]:0<-::1 test
+TestUDPServer/25	skip	skip	server_test.go:255: skipping udp6 [::1]:0<-::1 test
+TestUDPServer/27	skip	skip	server_test.go:255: skipping udp [::1]:0<-::1 test
+TestUDPServer/3	skip	skip	server_test.go:255: skipping udp [::]:0<-::1 test
+TestUDPServer/4	skip	skip	server_test.go:255: skipping udp :0<-::1 test
+TestUDPServer/5	skip	skip	server_test.go:255: skipping udp 0.0.0.0:0<-::1 test
+TestUDPServer/6	skip	skip	server_test.go:255: skipping udp [::ffff:0.0.0.0]:0<-::1 test
+TestUDPServer/7	skip	skip	server_test.go:255: skipping udp [::]:0<-127.0.0.1 test

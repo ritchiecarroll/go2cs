@@ -33409,4 +33409,110 @@ The predicted corpus footprint is 1 file, `log/syslog`'s .csproj, gaining the gr
 
 — G (2026-11-03)
 
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): the darwin guard cannot bank a ruled count move, so two predicted darwin readings are removed for this pass — OPEN, IN-HOP (owner G, a follow-up seat after the bank seat)
+
+At the freeze tip `d9dd8f5499` the darwin re-pass reads two rows at the counts BOARD amendment `d780a56fbc` predicted,
+both RIDs agreeing and no verdict divergent:
+
+| Row | 1.26.10.1 segment | Re-pass, both RIDs | Withdrawn (`targetArchExcluded`) | Run |
+|:--|--:|--:|:--|:--|
+| `internal/cpu` | 9 | 2 | `TestX86ifAVX2hasAVX`, `TestX86ifAVX512FhasAVX2`, `TestX86ifAVX512BWhasAVX512F`, `TestX86ifAVX512VLhasAVX512F`, `TestDisableSSE3`, `TestSSE3DebugOption`, `TestDataCacheSizes` | C1-7, 41686970694 |
+| `internal/runtime/gc/scan` | 3095 | 3092 | `TestExpandAVX512`, `TestFilterNilAVX512`, `TestScanSpanPackedAVX512` | C1-8, 41688965804 |
+
+The mechanism is seat #8 (a) (`4f245d9f4b`, batch 50): a test that a shipped darwin architecture does not build
+(`//go:build 386 || amd64`, `amd64`) leaves both sides on both RIDs. C1 rooted both rows at discovery (mailbox
+`0915beab8f`, relay run 41519574001), and the withdrawn names are from that root.
+
+**The gap.** The relay's status column reads `COUNT`, because it compares against the OLD segment. A darwin segment
+banks only where both RIDs read `validated`. That rule is in `src/check-roster-format.ps1` (`Get-DarwinSegmentRefusal`)
+and in `docs/phase4/data/rebank-go1.26.10/annotate_darwin.py`. `$DarwinAgreementRulings` relaxes only the `agree`
+column, so no ruling can bank a COUNT reading. A row read and not banked must carry no segment, so the bank of
+record REMOVES both segments, each with a dated comment, and no new guard code lands in it (COORD).
+
+**The fix, IN-HOP (COORD, 2026-11-03):** G builds it on its own branch off the freeze tip, guard and annotator
+with fixtures red-first, and H reviews the guard diff. It lands AFTER the bank seat, as a follow-up seat that banks
+`internal/cpu` darwin: 2 and `internal/runtime/gc/scan` darwin: 3092 from the SAME tip evidence (C1-7, C1-8), with no
+re-run. Its input is C1's per-name confirmation that this tip's two records carry `targetArchExcluded` with exactly
+the names above. The shape, sized: a ruled-count table beside `$DarwinAgreementRulings`, read by both the guard and the
+annotator. Each entry is keyed by row and carries the expected count and its ruling. It banks a COUNT reading only
+where all of these hold:
+- both RIDs read COUNT at exactly that matched count;
+- the RIDs agree;
+- matched and disclosed-divergent are equal across them.
+
+It needs a fixture arm for each refusal.
+
+— H (2026-11-03)
+
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): the annotators' self-test runs in no gate, so the bank seat broke it unseen — FIXED in the seat; the gate gap is OPEN, post-hop
+
+`docs/phase4/data/rebank-go1.26.10/test_annotate_evidence.py` copies the tree's roster guard into a fixture tree
+(pin 9.9.9) and checks the two annotators' evidence-directory defaults. Its darwin DEFAULT case fed the guard text
+unchanged, so it assumed `$DarwinEvidenceDirectory` still declared the hop's directory. The bank of record points that
+line at `docs/phase4/rebank-1.26.10.2/darwin`, the act the guard's own comment prescribes, and the case then read
+"evidence directory docs/phase4/rebank-1.26.10.2/darwin does not exist": `failed 1`. The case went red on the seat's
+own commit and stayed red through two green gates, because `go test ./...` in `src/go2cs` does not run this
+self-test and `check-roster-format.ps1` does not either. H found it while composing G's ruled-count branch onto the
+seat.
+
+**Fixed in the seat:** the fixture's defaults are built from the guard text with the declared line set to the hop
+default. The self-test's last case already writes the re-bank form explicitly. It reads `failed 0` at the seat tip.
+
+**Open, post-hop:** run `test_annotate_evidence.py` from a guard that `go test` executes (a repoguard test, or a
+`check-roster-format.ps1` arm that shells it), so a change to either annotator or to the guard's declarations
+cannot red it unseen again.
+
+— H (2026-11-03)
+
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): `annotate_linux.py` cannot read a named one-row re-read, so `net`'s linux segment was applied by hand — OPEN, post-hop (annotator)
+
+`annotate_linux.py` assigns each linux evidence TSV to a declared wave BY ITS STEM:
+- pass 1: `P1-3`;
+- L1: `P2-L1`;
+- L2: `P1-L2`, `P1-L2-poll`;
+- re-read: `P1-R`.
+
+A stem matching none of these is a hard exit for the whole directory: "matches 0 declared waves, not one". P2's
+discriminating re-read of `net` at the freeze tip `d9dd8f5499` is `P2-net.tsv` (`claude/p2-net-1262c` @ `3e25685de7`).
+COORD ruled it the row's reading of record over GWSL-1's DIVERGED. But with `P2-net.tsv` in
+`docs/phase4/rebank-1.26.10.2/linux/`, the annotator refuses every row, and a `P2-R` stem would order it by wave,
+not by ruling. So the bank of record applied exactly that one segment by hand: `linux: 596 + 3` -> `593 + 3`, the
+annotator's own arithmetic (verdicts 593; 3 listed less 0 host-fatal in scope), with a dated comment on the row.
+
+**Kept outside the annotator's directory (COORD):** master must not carry a tool that exits on its own evidence
+directory. So P2's four net files move by `git mv` to `docs/phase4/rebank-1.26.10.2/linux/rereads/`.
+`annotate_linux.py` lists only the top of its directory, so it reads the four shards there again. It holds `net` at
+GWSL-1's DIVERGED and keeps the hand-applied `593 + 3`. The fix below still owes the re-read a declared place in
+the annotator's rule.
+
+**Post-hop fix, sized:** declare a named single-row re-read wave, for example a `-<row>` stem, ordered after pass 1
+and before `-R`. The rule must make one reading of record per row explicit when one row has more than one reading.
+A ruled reading should be named in a table beside the waves, the way `$DarwinAgreementRulings` names darwin rows,
+not inferred from file order. It needs a fixture arm in `test_annotate_evidence.py` for each refusal.
+
+— H (2026-11-03)
+
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): `net` does not bank on darwin; its two RIDs part on the runner VM's resolver and on one arm64 timing assert — OPEN, post-hop
+
+At the freeze tip `d9dd8f5499`, C1's darwin re-pass read `net` twice. Neither reading banks, so the row carries no
+`darwin:` segment this pass. It read `darwin: 552 + 3` at 1.26.10.1; the bank of record's `2h` removed it, and no
+third run is dispatched (COORD).
+
+| Reading | Run | osx-arm64 | osx-x64 | agree |
+|:--|:--|:--|:--|:--|
+| C1-15 | 41665739974 | FAIL, 541 matched | validated, 552 + 3 | no |
+| C1-15R (declared re-run, the reading of record) | 41701297335 | FAIL, 550 matched, 2 new divergences | validated, 552 + 3 | no |
+
+Two classes part the RIDs:
+- **The NXDOMAIN-environment class.** `TestLookupNoSuchHost`'s MX, NS and TXT `_NXDOMAIN` subtests, under the default,
+  `forced_go` and `forced_cgo` resolvers, time out on the runner VM's resolver. 10 such keys parted the RIDs in C1-15
+  and 1 in C1-15R. This is the class `$DarwinAgreementRulings`' `net` entry names (r3b, run 40279373649). But that
+  entry relaxes only the `agree` column, and only where both RIDs read `validated`, so it cannot bank an arm64 FAIL.
+- **An arm64-only timing assert, `TestDialerFallbackDelay`.** It read 445.5 ms and 443.9 ms against its 395 ms bound.
+
+**Owed, post-hop:** a darwin reading of `net` that both RIDs validate, or a ruling that names both classes, and the
+mechanism to bank under it.
+
+— H (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
