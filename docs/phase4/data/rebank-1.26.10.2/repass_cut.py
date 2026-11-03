@@ -36,9 +36,15 @@ tree, out = sys.argv[1], sys.argv[2]
 # R-LAPTOP's windows share (COORD rules between them): A = all eight off-i9 rows on R, as at 1.26.10.1;
 # B = crypto/tls on R (its count depends on the host's BoGo runner, proven on R only), the other seven dealt
 # between R and G; C = all eight dealt between R and G.
+# D (COORD, 2026-11-03: R-LAPTOP intermittent for about two days) = R-LAPTOP carries NOTHING. crypto/tls goes to G
+# windows, with net (G's NXDOMAIN placement); R-WSL's linux rows (gc/scan included: G-LAPTOP has no AVX-512) go to
+# G-LAPTOP's WSL, which runs them AFTER G's windows leg (one battery per box; the host-disk rule); every other windows
+# row is dealt onto the i9 and H, the off-i9 rows to H only (net/http never to the i9). G-WSL has never been read at 1.26, so its walls are an
+# ESTIMATE, said in every basis: R-WSL's wall x the windows G/R box ratio.
 args = sys.argv[3:]
 MODE = args.pop(0) if args and not args[0].startswith('--') else 'B'
-assert MODE in ('A', 'B', 'C'), MODE
+assert MODE in ('A', 'B', 'C', 'D'), MODE
+HOST, WSL, PFX = ('G', 'G-WSL', 'GWSL') if MODE == 'D' else ('R', 'R-WSL', 'RWSL')
 opts = dict(zip(args[::2], args[1::2]))
 assert len(args) % 2 == 0 and set(opts) <= {'--p2-to-rwsl', '--p2-recorded'}, f'unknown arguments {args}'
 MOVE_N, RECORDED = int(opts.get('--p2-to-rwsl', 0)), int(opts.get('--p2-recorded', 0))
@@ -65,8 +71,14 @@ for r in win_rows:
     box, wall, _ = disc[('windows', r)]
     wf_num[box] += wall; wf_den[box] += proj[r]
 wfactor = {b: wf_num[b] / wf_den[b] for b in wf_num}
+# A windows row G has read itself since the discovery pass, as a qualifying read for mode D. It is test-bound, so the
+# box ratio mispredicts it (it put crypto/tls at 673 s on G); the measured wall stands instead.
+QUALIFIED_ON_G = {'crypto/tls': (1322, "G's qualifying read at 25e3b6ede6, PASS 1393/1393, the runner's own 1322 s (COORD accepted, 2026-11-03)")}
 def wpred(r, lane):
     box, wall, src = disc[('windows', r)]
+    if MODE == 'D' and lane == 'G' and r in QUALIFIED_ON_G:
+        q, why = QUALIFIED_ON_G[r]
+        return q, f'{q} s measured on G ({why})'
     if lane == box:
         return wall, f'{wall} s measured on {box} ({src})'
     p = round(wall / wfactor[box] * wfactor[lane])
@@ -81,34 +93,41 @@ for r in lrows:
         box, wall, _ = disc[('linux', r['row'])]
         lf_num[box] += wall; lf_den[box] += lproj[r['row']]
 lfactor = {b: lf_num[b] / lf_den[b] for b in lf_num}
+# The WSL lane's scale: 1 on R-WSL, which measured these rows; in mode D, G-WSL's ESTIMATE.
+wsl_scale = wfactor['G'] / wfactor['R'] if MODE == 'D' else 1
+def wsl(item):
+    n, p, b = item
+    if MODE != 'D':
+        return item
+    return (n, round(p * wsl_scale), f'{b} x {wsl_scale:.3f} ESTIMATE (G-WSL unread at 1.26: the windows G/R box ratio)')
 plan = defaultdict(list)          # (os, lane, shard) -> [(row, predicted_s, basis)]
 for r in lrows:
     name, old = r['row'], r['shard']
     if ('linux', name) in disc:
         box, wall, src = disc[('linux', name)]
         if name == 'internal/runtime/gc/scan':
-            plan[('linux', 'R-WSL', 'RWSL-1')].append((name, wall, f'{wall} s measured on {box} ({src}); no WSL reading at f6666d98a2 (no AVX-512 on R-WSL: placed there by rule)'))
+            plan[('linux', WSL, f'{PFX}-1')].append(wsl((name, wall, f'{wall} s measured on {box} ({src}); no WSL reading at f6666d98a2 (no AVX-512 on {WSL}: placed there by rule)')))
         elif box == 'R-WSL':
             assert old in ('RWSL-1', 'RWSL-2'), f'{name}: read on R-WSL but dealt to {old}'
-            plan[('linux', 'R-WSL', old)].append((name, wall, f'{wall} s measured on R-WSL ({src})'))
+            plan[('linux', WSL, PFX + old[4:])].append(wsl((name, wall, f'{wall} s measured on R-WSL ({src})')))
         elif box == 'P2':
             plan[('linux', 'P2', old)].append((name, wall, f'{wall} s measured on P2 ({src})'))
         else:
             p = round(wall / lfactor['P1'] * lfactor['P2'])
             plan[('linux', 'P2', None)].append((name, p, f'{wall} s measured on P1 ({src}) x {lfactor["P2"]:.3f}/{lfactor["P1"]:.3f}'))
     else:
-        plan[('linux', 'R-WSL', 'RWSL-2')].append((name, lproj[name], f'NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall {lproj[name]} s ({r["wall_source"]})'))
+        plan[('linux', WSL, f'{PFX}-2')].append(wsl((name, lproj[name], f'NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall {lproj[name]} s ({r["wall_source"]})')))
 # P1's moved rows join P2's two shards, longest-first onto the lighter one.
 moved = sorted(plan.pop(('linux', 'P2', None)), key=lambda t: (-t[1], t[0]))
 for item in moved:
     k = min(('P2-1', 'P2-2'), key=lambda s: (sum(p for _, p, _ in plan[('linux', 'P2', s)]), s))
     plan[('linux', 'P2', k)].append(item)
-rlaptop_linux = sum(p for (o, l, _), items in plan.items() if l == 'R-WSL' for _, p, _ in items)
+host_linux = sum(p for (o, l, _), items in plan.items() if l == WSL for _, p, _ in items)
 
 # ---- windows deal
-lanes = ('i9', 'H', 'G', 'R')
+lanes = ('i9', 'H', 'G') if MODE == 'D' else ('i9', 'H', 'G', 'R')
 load = {l: 0 for l in lanes}
-offset = {'R': rlaptop_linux}           # R-LAPTOP runs its linux work after its windows shard
+offset = {HOST: host_linux}             # the WSL box runs its linux work after its windows shard
 wins = defaultdict(list)
 def put(r, lane):
     p, basis = wpred(r, lane)
@@ -120,10 +139,13 @@ for r in win_rows:
         put(r, 'i9')
     elif r in OFF_I9 and (MODE == 'A' or (MODE == 'B' and r == 'crypto/tls')):
         put(r, 'R')
+    elif MODE == 'D' and r == 'crypto/tls':
+        put(r, 'G')
 movable = [r for r in win_rows if not any(r == n for n, _, _ in wins['G'] + wins['i9'] + wins['R'])]
 cost = lambda r: disc[('windows', r)][1] / wfactor[disc[('windows', r)][0]]
 for r in sorted(movable, key=lambda r: (-cost(r), r)):
-    allowed = ('R', 'G') if r in OFF_I9 else lanes
+    # D: G keeps only net and crypto/tls, so the G-WSL estimate never decides a windows row's lane.
+    allowed = (('H',) if MODE == 'D' else ('R', 'G')) if r in OFF_I9 else (('i9', 'H') if MODE == 'D' else lanes)
     best = min(allowed, key=lambda l: (load[l] + wpred(r, l)[0] + offset.get(l, 0), l))
     put(r, best)
 for l in lanes:
@@ -142,9 +164,9 @@ if MOVE_N:
     for s, (n, p, b) in cands[:MOVE_N]:
         plan[('linux', 'P2', s)].remove((n, p, b))
         q = round(p / lfactor['P2'] * lfactor['R-WSL'])
-        plan[('linux', 'R-WSL', 'RWSL-3')].append((n, q, f'{b}; moved from {s} by --p2-to-rwsl (build weight {bw[n]}) x {lfactor["R-WSL"]:.3f}/{lfactor["P2"]:.3f}'))
+        plan[('linux', WSL, f'{PFX}-3')].append(wsl((n, q, f'{b}; moved from {s} by --p2-to-rwsl (build weight {bw[n]}) x {lfactor["R-WSL"]:.3f}/{lfactor["P2"]:.3f}')))
         moved_rows.append(n)
-    rlaptop_linux += sum(p for _, p, _ in plan[('linux', 'R-WSL', 'RWSL-3')])
+    host_linux += sum(p for _, p, _ in plan[('linux', WSL, f'{PFX}-3')])
 
 # ---- darwin, unchanged
 for r in legs:
@@ -167,6 +189,8 @@ print('windows factors: ' + ', '.join(f'{b} {f:.3f}' for b, f in sorted(wfactor.
 print('linux factors:   ' + ', '.join(f'{b} {f:.3f}' for b, f in sorted(lfactor.items())), file=sys.stderr)
 for k in sorted(tot):
     print(f'{k[0]:8} {k[1]:6} {k[2]:7} rows={rows[k]:3} predicted={tot[k]:6d} s ({tot[k] / 3600:.2f} h)', file=sys.stderr)
-print(f'R-LAPTOP: windows {load["R"]} s + linux {rlaptop_linux} s = {load["R"] + rlaptop_linux} s', file=sys.stderr)
+print(f'{HOST}-LAPTOP: windows {load[HOST]} s + linux {host_linux} s = {load[HOST] + host_linux} s', file=sys.stderr)
+if MODE == 'D':
+    print(f'G-WSL scale {wsl_scale:.3f} (ESTIMATE); unscaled, G-LAPTOP would be {load[HOST] + round(host_linux / wsl_scale)} s', file=sys.stderr)
 if MOVE_N:
     print(f'--p2-to-rwsl {MOVE_N} --p2-recorded {RECORDED}: moved to RWSL-3: {", ".join(moved_rows)}', file=sys.stderr)

@@ -329,6 +329,45 @@ Why B:
 - **A costs 0.65 h of critical path for nothing.**
 - **C breaks constraint 5** (R-LAPTOP gets no windows leg) and puts `crypto/tls` on an unproven host.
 
+**MODE D replaces B** (COORD, 2026-11-03: R-LAPTOP is intermittent for about two days, so it leaves the critical
+path, and G-LAPTOP becomes the critical host). The committed `repass-legs.tsv` is now mode D:
+- R-LAPTOP carries nothing;
+- `crypto/tls` goes to G windows, with `net`. G's qualifying read of it at `25e3b6ede6` removes the objection
+  above to a first reading on G;
+- R-WSL's linux rows, `gc/scan` included, go to G-LAPTOP's WSL (G-WSL), which has no AVX-512. G-WSL runs only after
+  G's windows leg, one battery per box;
+- every other windows row is dealt onto the i9 and H, and the seven other off-i9 rows go to H only. Keeping G's
+  windows leg to two rows means the G-WSL estimate never decides a windows row's lane.
+
+G-WSL has never been read at 1.26, so its walls are an ESTIMATE, said in every basis: R-WSL's wall times the windows
+G/R box ratio (0.655 / 1.551 = 0.423).
+
+| OS | Lane | Legs | Rows | Predicted |
+|:--|:--|:--|--:|--:|
+| windows | i9 | i9-S | 141 | 2.33 h |
+| windows | H | H-S | 95 | 2.33 h |
+| windows | G | G-S (`net`, `crypto/tls`) | 2 | 0.45 h |
+| linux | G | GWSL-1, then GWSL-2, after G-S | 15 + 129 | 1.26 h + 0.47 h (estimate) |
+| linux | P2 | P2-1, P2-2 | 46 + 46 | 2.16 h + 2.16 h |
+| darwin | C1 | C1-1 … C1-15, unchanged | 236 | about 4–4.5 h, as before |
+
+`crypto/tls` is predicted at its measured 1322 s on G, from G's qualifying read: PASS 1393 of 1393 at `25e3b6ede6`,
+which COORD accepted. The box ratio had put it at 673 s. That is wrong, because the row is bound by its tests (the
+BoGo suite), not by its build. The G-WSL estimate rests on the same ratio, so both bounds are carried:
+
+**Which bound decides the critical path:**
+- **On the estimate, it is P2, at 4.31 h,** with C1's darwin dispatches about level. G-LAPTOP finishes in 2.19 h:
+  G-S takes 0.45 h, then G-WSL 1.73 h.
+- **Unscaled, it is G-LAPTOP, at 4.55 h.** That is the case if G-WSL runs no faster than R-WSL did. It is still
+  well under the 6 h at which COORD would move G-WSL's lightest RWSL-2 rows to P2.
+
+The i9 and H finish at 2.33 h each. G-WSL's first walls settle which bound holds.
+
+<!-- Mode D (G, 2026-11-03, COORD's re-cut order of the same day). `repass_cut.py <tree> <out> D` writes the
+     committed repass-legs.tsv; modes A, B and C still reproduce their earlier output byte for byte. The G-WSL facts
+     come from G's read-only census, which COORD accepted. RWSL-2 had still not posted, so its rows carry old-tip walls,
+     scaled by the estimate. The unscaled G-LAPTOP figure comes from the cutter's own stderr. -->
+
 **Free disk, per box,** from the discovery ledgers:
 
 | Box | Recorded minimum | Floor |
