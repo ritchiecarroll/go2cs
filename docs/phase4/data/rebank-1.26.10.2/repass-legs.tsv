@@ -1,0 +1,711 @@
+os	lane	shard	seq	row	predicted_s	basis
+windows	G	G-S	1	container/ring	10	11 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	2	internal/runtime/gc/scan	10	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	3	math/cmplx	10	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	4	encoding/binary	11	13 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	5	internal/coverage/cmerge	11	13 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	6	strconv	11	13 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	7	internal/coverage/pods	12	14 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	8	crypto/sha256	13	15 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	9	regexp/syntax	13	15 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	10	debug/plan9obj	14	16 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	11	internal/runtime/atomic	14	16 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	12	crypto/rand	15	17 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	13	text/template/parse	15	17 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	14	crypto/internal/fips140/bigmod	16	18 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	15	internal/testenv	17	20 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	16	debug/dwarf	18	21 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	17	crypto/hkdf	19	22 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	18	math	19	22 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	19	path/filepath	22	25 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	20	go/version	23	38 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	21	internal/gover	23	37 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	22	log	23	26 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	23	crypto/internal/fips140/edwards25519/field	24	27 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	24	internal/fmtsort	24	39 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	25	internal/strconv	24	28 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	26	text/tabwriter	24	40 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	27	go/doc	25	29 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	28	go/printer	25	29 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	29	internal/runtime/sys	25	25 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	30	fmt	26	30 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	31	internal/sysinfo	26	26 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	32	expvar	27	31 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	33	net/http/httptrace	27	64 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	34	encoding/hex	28	28 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	35	sync	28	32 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	36	testing/fstest	28	46 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	37	internal/coverage/slicewriter	29	29 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	38	internal/profile	29	47 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	39	io/fs	29	48 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	40	text/scanner	29	29 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	41	database/sql	30	34 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	42	internal/buildcfg	30	30 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	43	internal/syscall/windows/registry	30	49 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	44	compress/gzip	31	51 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	45	crypto/cipher	31	35 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	46	image	31	50 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	47	crypto/internal/fips140/rsa	32	53 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	48	maps	32	32 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	49	go/doc/comment	33	54 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	50	internal/cpu	33	33 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	51	crypto/internal/fips140/ecdsa	34	34 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	52	crypto/subtle	34	55 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	53	debug/gosym	34	56 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	54	net/mail	34	34 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	55	internal/platform	35	58 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	56	crypto/sha512	36	36 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	57	net/http/internal	36	36 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	58	crypto/des	37	37 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	59	internal/coverage/test	37	37 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	60	encoding/base64	39	39 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	61	image/jpeg	39	63 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	62	flag	40	40 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	63	crypto/md5	41	67 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	64	internal/zstd	42	42 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	65	slices	44	44 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	66	internal/types/errors	45	74 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	67	bytes	46	46 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	68	math/rand	47	47 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	69	crypto/sha3	50	50 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	70	go/importer	50	57 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	71	internal/synctest	53	86 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	72	mime/multipart	54	54 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	73	net/rpc/jsonrpc	55	55 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	74	net/url	56	92 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	75	crypto/aes	57	57 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	76	context	65	65 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	77	regexp	66	108 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	78	crypto/hpke	68	68 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	79	crypto	70	70 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	80	crypto/internal/fips140/edwards25519	72	118 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	81	net/http/pprof	76	76 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	82	net/http/cgi	77	183 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	83	net/http/httptest	93	221 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	84	net/http/httputil	118	193 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	85	os/exec	135	320 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	86	net/rpc	141	141 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	87	crypto/internal/fips140test	182	298 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	G	G-S	88	crypto/x509	194	459 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	89	net/smtp	212	502 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	90	hash/adler32	213	213 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	91	net/http	252	597 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv) x 0.655/1.551
+windows	G	G-S	92	net	306	306 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv)
+windows	G	G-S	93	crypto/internal/fips140cache	536	614 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 0.655/0.751
+windows	G	G-S	94	testing	52	85 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.655/1.072
+windows	H	H-S	1	unicode/utf8	16	11 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	2	internal/dag	17	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	3	os/exec/internal/fdtest	17	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	4	errors	19	13 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	5	math/bits	20	14 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	6	hash/fnv	21	15 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	7	compress/bzip2	23	16 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	8	internal/reflectlite	23	16 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	9	crypto/internal/sysrand	26	18 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	10	internal/sync	27	19 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	11	crypto/internal/fips140/ecdh	30	21 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	12	go/token	33	23 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	13	internal/runtime/math	36	36 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	14	internal/saferio	38	38 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	15	encoding/ascii85	39	39 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	16	html/template	39	27 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	17	internal/abi	40	40 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	18	unicode	41	41 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	19	internal/diff	42	42 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	20	encoding/base32	43	43 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	21	cmp	44	27 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	22	internal/unsafeheader	46	28 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	23	html	47	29 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	24	runtime/debug	47	47 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	25	testing/synctest	47	33 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	26	debug/macho	48	48 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	27	go/scanner	49	49 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	28	log/slog/internal/benchmarks	50	50 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	29	encoding/pem	51	31 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	30	crypto/internal/fips140/aes	52	32 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	31	crypto/hmac	54	54 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	32	internal/coverage/slicereader	54	33 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	33	crypto/rc4	56	34 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	34	debug/pe	56	56 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	35	crypto/internal/fips140/mldsa	58	58 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	36	encoding/asn1	59	59 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	37	go/constant	60	37 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	38	mime	64	39 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	39	debug/elf	66	46 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	40	crypto/ecdh	68	68 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	41	go/build	73	73 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	42	runtime/trace	75	75 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	43	internal/fuzz	80	49 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	44	text/template	83	51 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	45	image/gif	85	52 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	46	internal/godebugs	88	62 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	47	encoding/gob	90	90 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	48	net/http/cookiejar	105	64 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	49	encoding/json	108	108 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	50	crypto/ecdsa	114	70 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	51	net/http/fcgi	121	85 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv) x 1.072/0.751
+windows	H	H-S	52	crypto/rsa	146	89 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	53	math/big	159	97 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	54	internal/syscall/windows	217	217 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	55	internal/trace	245	245 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	56	os	333	333 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	57	go/types	345	211 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 1.072/0.655
+windows	H	H-S	58	go/internal/gcimporter	393	393 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	H	H-S	59	runtime/pprof	613	613 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv)
+windows	R	R-S	1	crypto/tls	1593	1593 s measured on R (claude/r-sweep-1262b@ab383a53e7:R-S.tsv)
+windows	i9	i9-S	1	net/http/internal/ascii	11	11 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	2	hash/crc64	12	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	3	internal/syscall/unix	12	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	4	testing/iotest	12	12 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	5	image/color	13	13 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	6	crypto/internal/boring	14	14 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	7	crypto/internal/fips140/mlkem	14	14 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	8	net/textproto	14	14 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	9	embed/internal/embedtest	15	15 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	10	hash	16	16 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	11	math/big/internal/asmgen	16	16 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	12	compress/lzw	17	17 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	13	internal/runtime/cgroup	17	17 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	14	os/user	19	19 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	15	bufio	21	21 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	16	internal/poll	21	21 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	17	testing/slogtest	21	21 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	18	crypto/sha1	22	22 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	19	internal/runtime/maps	24	24 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	20	container/list	25	36 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	21	compress/flate	27	27 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	22	crypto/internal/boring/bcache	27	38 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	23	internal/chacha8rand	27	39 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	24	path	27	38 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	25	container/heap	28	40 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	26	weak	28	40 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	27	io/ioutil	29	42 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	28	log/slog/internal/buffer	29	41 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	29	unique	30	30 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	30	crypto/internal/fips140/subtle	31	27 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	31	plugin	31	27 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	32	compress/zlib	32	46 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	33	internal/singleflight	32	28 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	34	internal/trace/tracev2	32	45 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	35	hash/crc32	33	29 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	36	image/draw	33	47 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	37	iter	33	29 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	38	database/sql/driver	34	30 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	39	internal/trace/internal/tracev1	34	48 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	40	sort	34	49 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	41	testing/quick	34	30 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	42	go/format	36	31 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	43	crypto/pbkdf2	37	53 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	44	unicode/utf16	37	32 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	45	io	38	54 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	46	os/signal	38	33 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	47	encoding/csv	39	34 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	48	image/png	39	56 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	49	internal/xcoff	39	55 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	50	internal/pkgbits	40	57 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	51	mime/quotedprintable	41	36 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	52	syscall	41	36 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	53	debug/buildinfo	42	60 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	54	go/build/constraint	42	37 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	55	archive/tar	44	63 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	56	crypto/ed25519	45	64 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	57	archive/zip	47	47 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	58	crypto/fips140	47	67 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	59	runtime/metrics	47	67 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	60	crypto/elliptic	48	42 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	61	crypto/internal/fips140only	52	52 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	62	internal/coverage/cformat	52	45 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	63	net/netip	55	48 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	64	testing/cryptotest	57	50 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	65	crypto/internal/fips140/nistec	58	51 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	66	math/rand/v2	60	52 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	67	go/ast	61	53 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	68	internal/trace/testtrace	63	55 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	69	strings	63	55 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	70	internal/godebug	66	94 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	71	log/slog	76	66 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	72	encoding/xml	78	68 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	73	go/internal/srcimporter	80	114 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	74	sync/atomic	80	80 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	75	go/internal/gccgoimporter	81	71 s measured on G (claude/g-sweep-1262@13906ec1b4:G-S.tsv) x 0.751/0.655
+windows	i9	i9-S	76	internal/coverage/cfile	87	124 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	77	reflect	88	126 s measured on H (claude/h-sweep-1262b@0d9dbd348f:H-S.tsv) x 0.751/1.072
+windows	i9	i9-S	78	crypto/dsa	95	95 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	79	index/suffixarray	124	124 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	80	go/parser	128	128 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	81	hash/maphash	154	154 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	82	crypto/mlkem	179	179 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	83	time	212	212 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+windows	i9	i9-S	84	runtime	1320	1320 s measured on i9 (claude/i9-sweep-1262b@7f279ccf35:i9-S.tsv)
+linux	P2	P2-1	1	iter	23	23 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	2	internal/testenv	26	21 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	3	encoding/binary	29	23 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	4	crypto/sha256	38	30 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	5	internal/zstd	44	44 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	6	go/doc/comment	46	37 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	7	net/url	48	38 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	8	compress/gzip	50	50 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	9	crypto/internal/fips140/edwards25519/field	60	48 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	10	crypto/rand	61	61 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	11	net/mail	63	50 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	12	net/textproto	63	63 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	13	log	66	66 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	14	compress/flate	67	67 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	15	internal/trace/testtrace	69	69 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	16	internal/types/errors	71	71 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	17	internal/fuzz	74	74 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	18	fmt	75	60 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	19	strings	75	75 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	20	database/sql	76	76 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	21	net/netip	82	65 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	22	net/rpc	83	66 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	23	crypto/elliptic	85	85 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	24	crypto/hpke	87	69 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	25	os/signal	90	72 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	26	crypto/internal/fips140/mldsa	91	91 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	27	encoding/gob	98	78 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	28	internal/coverage/cfile	99	99 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	29	crypto/cipher	109	109 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	30	go/internal/srcimporter	112	89 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	31	go/internal/gccgoimporter	128	128 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	32	os/exec	144	115 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	33	regexp	151	120 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	34	reflect	226	226 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	35	net/rpc/jsonrpc	232	185 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	36	go/internal/gcimporter	244	244 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	37	net/http/httptest	252	201 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	38	net/http/fcgi	271	271 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	39	internal/trace	302	241 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	40	mime/quotedprintable	396	316 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	41	math	411	328 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-1	42	image/jpeg	434	434 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	43	crypto/internal/fips140only	462	368 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-1	44	crypto/x509	494	494 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	45	expvar	750	750 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-1	46	crypto/internal/fips140test	806	806 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-1.tsv)
+linux	P2	P2-2	1	os/user	26	21 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	2	crypto/internal/boring	35	28 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	3	context	38	30 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	4	crypto/ed25519	38	38 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	5	crypto/sha1	42	42 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	6	bufio	43	34 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	7	image/gif	45	45 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	8	net/http/httptrace	48	48 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	9	math/rand	50	50 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	10	debug/gosym	53	53 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	11	go/ast	54	43 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	12	debug/pe	55	44 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	13	go/build	64	51 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	14	runtime/metrics	65	65 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	15	syscall	66	53 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	16	debug/elf	68	68 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	17	internal/strconv	74	74 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	18	crypto/sha3	77	61 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	19	net/http/cookiejar	77	77 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	20	sync	81	81 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	21	net/http/httputil	82	65 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	22	internal/synctest	84	67 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	23	log/slog	89	71 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	24	internal/godebug	93	93 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	25	net/smtp	102	102 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	26	crypto	105	84 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	27	encoding/xml	105	105 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	28	crypto/internal/fips140/edwards25519	120	120 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	29	mime/multipart	127	101 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	30	math/big	143	143 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	31	crypto/ecdsa	156	156 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	32	go/importer	163	163 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	33	os	210	167 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	34	encoding/json	246	196 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	35	testing/synctest	258	258 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	36	net/http/pprof	272	217 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	37	go/types	301	301 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	38	net/http/cgi	361	288 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	39	debug/plan9obj	392	392 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	40	io	409	326 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-1.tsv) x 0.433/0.345
+linux	P2	P2-2	41	bytes	415	331 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	42	testing/cryptotest	431	431 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	43	go/token	460	460 s measured on P2 (claude/p2-linux-1262b@f173721327:P2-2.tsv)
+linux	P2	P2-2	44	crypto/rsa	567	452 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	45	runtime/pprof	884	705 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	P2	P2-2	46	testing	93	74 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv) x 0.433/0.345
+linux	R-WSL	RWSL-1	1	internal/runtime/gc/scan	19	19 s measured on P1 (claude/p1-linux-1262b@0b9f48bdec:P1-2.tsv); no WSL reading at f6666d98a2 (no AVX-512 on R-WSL: placed there by rule)
+linux	R-WSL	RWSL-1	2	crypto/mlkem	66	66 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	3	archive/zip	86	86 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	4	crypto/dsa	294	294 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	5	crypto/internal/fips140/mlkem	310	310 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	6	net	327	327 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	7	index/suffixarray	353	353 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	8	net/http	425	425 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	9	hash/maphash	441	441 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	10	go/parser	555	555 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	11	time	586	586 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	12	sync/atomic	612	612 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	13	crypto/tls	1271	1271 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	14	internal/poll	1658	1658 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-1	15	runtime	3724	3724 s measured on R-WSL (claude/r-linux-1262b@9602352d71:RWSL-1.tsv)
+linux	R-WSL	RWSL-2	1	internal/unsafeheader	23	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 23 s (wsl P1-3)
+linux	R-WSL	RWSL-2	2	container/list	24	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 24 s (wsl P1-1)
+linux	R-WSL	RWSL-2	3	internal/coverage/cmerge	24	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 24 s (wsl P1-1)
+linux	R-WSL	RWSL-2	4	plugin	24	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 24 s (wsl P1-1)
+linux	R-WSL	RWSL-2	5	container/heap	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-2)
+linux	R-WSL	RWSL-2	6	crypto/internal/boring/bcache	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-2)
+linux	R-WSL	RWSL-2	7	crypto/internal/fips140cache	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-3)
+linux	R-WSL	RWSL-2	8	encoding/ascii85	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-1)
+linux	R-WSL	RWSL-2	9	encoding/hex	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-1)
+linux	R-WSL	RWSL-2	10	net/http/internal/ascii	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-1)
+linux	R-WSL	RWSL-2	11	path	25	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 25 s (wsl P1-1)
+linux	R-WSL	RWSL-2	12	compress/bzip2	26	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 26 s (wsl P1-1)
+linux	R-WSL	RWSL-2	13	go/version	26	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 26 s (wsl P1-1)
+linux	R-WSL	RWSL-2	14	html	26	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 26 s (wsl P1-2)
+linux	R-WSL	RWSL-2	15	internal/coverage/slicewriter	26	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 26 s (wsl P1-1)
+linux	R-WSL	RWSL-2	16	testing/iotest	26	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 26 s (wsl P1-1)
+linux	R-WSL	RWSL-2	17	unicode/utf8	26	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 26 s (wsl P1-1)
+linux	R-WSL	RWSL-2	18	database/sql/driver	27	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 27 s (wsl P1-1)
+linux	R-WSL	RWSL-2	19	internal/diff	27	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 27 s (wsl P1-1)
+linux	R-WSL	RWSL-2	20	internal/sysinfo	27	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 27 s (wsl P1-1)
+linux	R-WSL	RWSL-2	21	text/scanner	27	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 27 s (wsl P1-1)
+linux	R-WSL	RWSL-2	22	internal/buildcfg	28	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 28 s (wsl P1-1)
+linux	R-WSL	RWSL-2	23	internal/cpu	29	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 29 s (wsl P1-2)
+linux	R-WSL	RWSL-2	24	log/slog/internal/benchmarks	29	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 29 s (wsl P1-2)
+linux	R-WSL	RWSL-2	25	log/slog/internal/buffer	29	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 29 s (wsl P1-2)
+linux	R-WSL	RWSL-2	26	archive/tar	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 295 s - 275)
+linux	R-WSL	RWSL-2	27	cmp	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 287 s - 275)
+linux	R-WSL	RWSL-2	28	compress/lzw	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 296 s - 275)
+linux	R-WSL	RWSL-2	29	container/ring	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 273 s - 275)
+linux	R-WSL	RWSL-2	30	crypto/ecdh	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 293 s - 275)
+linux	R-WSL	RWSL-2	31	crypto/hkdf	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 279 s - 275)
+linux	R-WSL	RWSL-2	32	crypto/hmac	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 297 s - 275)
+linux	R-WSL	RWSL-2	33	crypto/internal/fips140/aes	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 272 s - 275)
+linux	R-WSL	RWSL-2	34	crypto/internal/fips140/bigmod	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 288 s - 275)
+linux	R-WSL	RWSL-2	35	crypto/internal/fips140/ecdh	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 282 s - 275)
+linux	R-WSL	RWSL-2	36	crypto/internal/fips140/nistec	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 286 s - 275)
+linux	R-WSL	RWSL-2	37	crypto/internal/fips140/rsa	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 282 s - 275)
+linux	R-WSL	RWSL-2	38	crypto/internal/fips140/subtle	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 284 s - 275)
+linux	R-WSL	RWSL-2	39	crypto/internal/sysrand	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 301 s - 275)
+linux	R-WSL	RWSL-2	40	crypto/rc4	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 293 s - 275)
+linux	R-WSL	RWSL-2	41	crypto/subtle	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 297 s - 275)
+linux	R-WSL	RWSL-2	42	debug/dwarf	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 294 s - 275)
+linux	R-WSL	RWSL-2	43	debug/macho	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 281 s - 275)
+linux	R-WSL	RWSL-2	44	embed/internal/embedtest	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 276 s - 275)
+linux	R-WSL	RWSL-2	45	encoding/base32	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (wsl P1-2)
+linux	R-WSL	RWSL-2	46	encoding/base64	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 289 s - 275)
+linux	R-WSL	RWSL-2	47	encoding/csv	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 298 s - 275)
+linux	R-WSL	RWSL-2	48	encoding/pem	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 288 s - 275)
+linux	R-WSL	RWSL-2	49	errors	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 284 s - 275)
+linux	R-WSL	RWSL-2	50	flag	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 297 s - 275)
+linux	R-WSL	RWSL-2	51	go/build/constraint	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 295 s - 275)
+linux	R-WSL	RWSL-2	52	go/constant	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (wsl P1-1)
+linux	R-WSL	RWSL-2	53	go/printer	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 296 s - 275)
+linux	R-WSL	RWSL-2	54	hash/adler32	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 296 s - 275)
+linux	R-WSL	RWSL-2	55	hash/crc32	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 295 s - 275)
+linux	R-WSL	RWSL-2	56	hash/crc64	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 295 s - 275)
+linux	R-WSL	RWSL-2	57	hash/fnv	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 269 s - 275)
+linux	R-WSL	RWSL-2	58	image	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 283 s - 275)
+linux	R-WSL	RWSL-2	59	image/color	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 284 s - 275)
+linux	R-WSL	RWSL-2	60	image/draw	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 290 s - 275)
+linux	R-WSL	RWSL-2	61	image/png	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 277 s - 275)
+linux	R-WSL	RWSL-2	62	internal/chacha8rand	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 281 s - 275)
+linux	R-WSL	RWSL-2	63	internal/coverage/cformat	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 287 s - 275)
+linux	R-WSL	RWSL-2	64	internal/coverage/slicereader	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 281 s - 275)
+linux	R-WSL	RWSL-2	65	internal/dag	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 283 s - 275)
+linux	R-WSL	RWSL-2	66	internal/fmtsort	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 277 s - 275)
+linux	R-WSL	RWSL-2	67	internal/godebugs	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 297 s - 275)
+linux	R-WSL	RWSL-2	68	internal/gover	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 289 s - 275)
+linux	R-WSL	RWSL-2	69	internal/runtime/cgroup	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 285 s - 275)
+linux	R-WSL	RWSL-2	70	internal/runtime/maps	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 303 s - 275)
+linux	R-WSL	RWSL-2	71	internal/runtime/math	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 264 s - 275)
+linux	R-WSL	RWSL-2	72	internal/runtime/sys	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 270 s - 275)
+linux	R-WSL	RWSL-2	73	internal/saferio	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 273 s - 275)
+linux	R-WSL	RWSL-2	74	internal/singleflight	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 285 s - 275)
+linux	R-WSL	RWSL-2	75	internal/sync	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 280 s - 275)
+linux	R-WSL	RWSL-2	76	internal/trace/internal/tracev1	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 282 s - 275)
+linux	R-WSL	RWSL-2	77	internal/trace/tracev2	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 289 s - 275)
+linux	R-WSL	RWSL-2	78	internal/xcoff	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 289 s - 275)
+linux	R-WSL	RWSL-2	79	io/fs	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P1-R 295 s - 275)
+linux	R-WSL	RWSL-2	80	io/ioutil	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 283 s - 275)
+linux	R-WSL	RWSL-2	81	maps	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 280 s - 275)
+linux	R-WSL	RWSL-2	82	math/big/internal/asmgen	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 301 s - 275)
+linux	R-WSL	RWSL-2	83	math/cmplx	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 291 s - 275)
+linux	R-WSL	RWSL-2	84	net/http/internal	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-L2 304 s - 275)
+linux	R-WSL	RWSL-2	85	os/exec/internal/fdtest	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 291 s - 275)
+linux	R-WSL	RWSL-2	86	path/filepath	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P1-R 305 s - 275)
+linux	R-WSL	RWSL-2	87	strconv	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-L2 304 s - 275)
+linux	R-WSL	RWSL-2	88	testing/fstest	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 282 s - 275)
+linux	R-WSL	RWSL-2	89	testing/quick	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 288 s - 275)
+linux	R-WSL	RWSL-2	90	text/tabwriter	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 281 s - 275)
+linux	R-WSL	RWSL-2	91	text/template	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-3 276 s - 275)
+linux	R-WSL	RWSL-2	92	unicode	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-1 287 s - 275)
+linux	R-WSL	RWSL-2	93	weak	30	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 30 s (est: cloud P2-2 268 s - 275)
+linux	R-WSL	RWSL-2	94	crypto/pbkdf2	31	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 31 s (wsl P1-2)
+linux	R-WSL	RWSL-2	95	mime	31	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 31 s (est: cloud P2-L2 306 s - 275)
+linux	R-WSL	RWSL-2	96	compress/zlib	32	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 32 s (wsl P1-2)
+linux	R-WSL	RWSL-2	97	crypto/fips140	32	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 32 s (wsl P1-3)
+linux	R-WSL	RWSL-2	98	hash	32	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 32 s (wsl P1-2)
+linux	R-WSL	RWSL-2	99	internal/coverage/pods	32	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 32 s (wsl P1-1)
+linux	R-WSL	RWSL-2	100	text/template/parse	32	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 32 s (wsl P1-1)
+linux	R-WSL	RWSL-2	101	crypto/sha512	33	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 33 s (wsl P1-1)
+linux	R-WSL	RWSL-2	102	regexp/syntax	33	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 33 s (wsl P1-3)
+linux	R-WSL	RWSL-2	103	unique	33	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 33 s (est: cloud P2-1 308 s - 275)
+linux	R-WSL	RWSL-2	104	internal/coverage/test	34	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 34 s (wsl P1-2)
+linux	R-WSL	RWSL-2	105	internal/pkgbits	34	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 34 s (wsl P1-2)
+linux	R-WSL	RWSL-2	106	internal/profile	34	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 34 s (wsl P1-1)
+linux	R-WSL	RWSL-2	107	internal/reflectlite	34	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 34 s (wsl P1-1)
+linux	R-WSL	RWSL-2	108	runtime/debug	34	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 34 s (est: cloud P2-R 309 s - 275)
+linux	R-WSL	RWSL-2	109	go/scanner	35	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 35 s (wsl P1-1)
+linux	R-WSL	RWSL-2	110	runtime/trace	35	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 35 s (est: cloud P2-3 310 s - 275)
+linux	R-WSL	RWSL-2	111	crypto/aes	36	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 36 s (wsl P1-1)
+linux	R-WSL	RWSL-2	112	internal/abi	36	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 36 s (wsl P1-2)
+linux	R-WSL	RWSL-2	113	internal/runtime/atomic	36	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 36 s (wsl P1-3)
+linux	R-WSL	RWSL-2	114	testing/slogtest	36	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 36 s (wsl P1-1)
+linux	R-WSL	RWSL-2	115	html/template	37	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 37 s (est: cloud P2-3 312 s - 275)
+linux	R-WSL	RWSL-2	116	internal/platform	37	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 37 s (wsl P1-2)
+linux	R-WSL	RWSL-2	117	crypto/internal/fips140/ecdsa	38	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 38 s (wsl P1-2)
+linux	R-WSL	RWSL-2	118	crypto/md5	38	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 38 s (wsl P1-1)
+linux	R-WSL	RWSL-2	119	debug/buildinfo	38	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 38 s (est: cloud P2-3 313 s - 275)
+linux	R-WSL	RWSL-2	120	go/doc	38	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 38 s (est: cloud P2-3 313 s - 275)
+linux	R-WSL	RWSL-2	121	internal/syscall/unix	38	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 38 s (est: cloud P2-L1 313 s - 275)
+linux	R-WSL	RWSL-2	122	crypto/des	39	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 39 s (est: cloud P2-1 314 s - 275)
+linux	R-WSL	RWSL-2	123	math/bits	39	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 39 s (wsl P1-1)
+linux	R-WSL	RWSL-2	124	encoding/asn1	40	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 40 s (est: cloud P1-R 315 s - 275)
+linux	R-WSL	RWSL-2	125	go/format	40	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 40 s (wsl P1-1)
+linux	R-WSL	RWSL-2	126	sort	40	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 40 s (wsl P1-3)
+linux	R-WSL	RWSL-2	127	unicode/utf16	40	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 40 s (est: cloud P1-L2 315 s - 275)
+linux	R-WSL	RWSL-2	128	math/rand/v2	41	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 41 s (est: cloud P2-3 316 s - 275)
+linux	R-WSL	RWSL-2	129	slices	42	NO linux reading at f6666d98a2 (RWSL-2 not posted); 1.26.10.1 wall 42 s (wsl P1-2)
+darwin	C1	C1-1	1	container/ring	19	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 19 s, x64 19 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	2	cmp	20	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 18 s, x64 20 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	3	compress/bzip2	22	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 16 s, x64 22 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	4	container/list	22	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 22 s, x64 18 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	5	compress/lzw	26	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 26 s, x64 25 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	6	compress/zlib	27	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 27 s, x64 24 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	7	container/heap	28	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 28 s, x64 19 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	8	compress/gzip	38	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 37 s, x64 38 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	9	crypto/des	38	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 21 s, x64 38 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	10	crypto/aes	43	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 24 s, x64 43 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	11	crypto/ecdh	47	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 35 s, x64 47 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	12	context	51	unchanged; 1.26.10.1 wall (darwin run 40233485715: arm64 23 s, x64 51 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	13	compress/flate	54	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 50 s, x64 54 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	14	archive/zip	78	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 71 s, x64 78 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	15	bytes	85	unchanged; 1.26.10.1 wall (darwin run 40233485715: arm64 30 s, x64 85 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	16	crypto	105	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 57 s, x64 105 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	17	bufio	110	unchanged; 1.26.10.1 wall (darwin run 40233485715: arm64 50 s, x64 110 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	18	crypto/cipher	122	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 73 s, x64 122 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	19	crypto/dsa	122	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 50 s, x64 122 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-1	20	archive/tar	534	unchanged; 1.26.10.1 wall (darwin run 40218981427: arm64 182 s, x64 534 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	1	crypto/internal/fips140/subtle	27	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 20 s, x64 27 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	2	crypto/internal/boring/bcache	30	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 20 s, x64 30 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	3	crypto/internal/fips140/aes	34	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 26 s, x64 34 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	4	crypto/internal/fips140/nistec	35	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 23 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	5	crypto/internal/fips140/rsa	36	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 25 s, x64 36 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	6	crypto/internal/fips140/ecdh	37	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 25 s, x64 37 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	7	crypto/internal/fips140/mlkem	37	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 25 s, x64 37 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	8	crypto/internal/boring	40	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 23 s, x64 40 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	9	crypto/internal/fips140/ecdsa	45	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 25 s, x64 45 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	10	crypto/internal/fips140/mldsa	45	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 32 s, x64 45 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	11	crypto/internal/fips140/bigmod	49	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 31 s, x64 49 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	12	crypto/internal/fips140/edwards25519/field	59	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 38 s, x64 59 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	13	crypto/hmac	60	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 25 s, x64 60 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	14	crypto/hkdf	66	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 23 s, x64 66 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	15	crypto/ed25519	68	unchanged; 1.26.10.1 wall (darwin run 40233618821: arm64 38 s, x64 68 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	16	crypto/hpke	85	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 51 s, x64 85 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	17	crypto/fips140	112	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 25 s, x64 112 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	18	crypto/elliptic	135	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 50 s, x64 135 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	19	crypto/internal/fips140/edwards25519	159	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 95 s, x64 159 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-2	20	crypto/ecdsa	757	unchanged; 1.26.10.1 wall (darwin run 40218964909: arm64 214 s, x64 757 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	1	database/sql/driver	23	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 16 s, x64 23 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	2	crypto/sha512	37	unchanged; 1.26.10.1 wall (darwin run 40233636682: arm64 37 s, x64 37 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	3	crypto/pbkdf2	44	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 24 s, x64 44 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	4	crypto/rand	45	unchanged; 1.26.10.1 wall (darwin run 40233636682: arm64 42 s, x64 45 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	5	crypto/rc4	47	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 34 s, x64 47 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	6	crypto/subtle	50	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 41 s, x64 50 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	7	crypto/sha256	58	unchanged; 1.26.10.1 wall (darwin run 40233618821: arm64 29 s, x64 58 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	8	crypto/md5	63	unchanged; 1.26.10.1 wall (darwin run 40233618821: arm64 34 s, x64 63 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	9	crypto/internal/sysrand	68	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 32 s, x64 68 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	10	crypto/sha3	84	unchanged; 1.26.10.1 wall (darwin run 40233618821: arm64 52 s, x64 84 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	11	crypto/mlkem	132	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 67 s, x64 132 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	12	crypto/internal/fips140only	192	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 90 s, x64 192 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	13	database/sql	271	unchanged; 1.26.10.1 wall (darwin run 40233636682: arm64 154 s, x64 271 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	14	crypto/x509	375	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 215 s, x64 375 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	15	crypto/internal/fips140cache	462	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 198 s, x64 462 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	16	debug/buildinfo	569	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 270 s, x64 569 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	17	crypto/rsa	712	unchanged; 1.26.10.1 wall (darwin run 40233636682: arm64 318 s, x64 712 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	18	crypto/sha1	722	unchanged; 1.26.10.1 wall (darwin run 40400361240: arm64 241 s, x64 722 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	19	crypto/internal/fips140test	926	unchanged; 1.26.10.1 wall (darwin run 40233618821: arm64 424 s, x64 926 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-3	20	crypto/tls	995	unchanged; 1.26.10.1 wall (darwin run 40218842030: arm64 995 s, x64 981 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	1	debug/plan9obj	26	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 26 s, x64 24 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	2	encoding/ascii85	26	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 26 s, x64 25 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	3	errors	26	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 26 s, x64 26 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	4	encoding/base32	29	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 28 s, x64 29 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	5	debug/macho	30	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 28 s, x64 30 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	6	encoding/base64	31	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 31 s, x64 28 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	7	encoding/csv	31	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 31 s, x64 29 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	8	embed/internal/embedtest	32	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 31 s, x64 32 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	9	encoding/hex	32	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 32 s, x64 24 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	10	encoding/pem	32	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 32 s, x64 30 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	11	debug/gosym	35	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 28 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	12	encoding/asn1	42	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 40 s, x64 42 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	13	debug/pe	46	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 35 s, x64 46 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	14	encoding/binary	49	unchanged; 1.26.10.1 wall (darwin run 40233636682: arm64 31 s, x64 49 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	15	debug/dwarf	60	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 32 s, x64 60 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	16	debug/elf	73	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 53 s, x64 73 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	17	encoding/xml	83	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 83 s, x64 82 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	18	encoding/gob	98	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 98 s, x64 89 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	19	encoding/json	244	unchanged; 1.26.10.1 wall (darwin run 40227203434: arm64 196 s, x64 244 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-4	20	expvar	963	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 363 s, x64 963 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	1	go/version	32	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 13 s, x64 32 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	2	go/format	33	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 22 s, x64 33 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	3	go/constant	35	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 20 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	4	go/build/constraint	36	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 18 s, x64 36 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	5	go/internal/gccgoimporter	43	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 26 s, x64 43 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	6	go/scanner	47	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 17 s, x64 47 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	7	go/doc/comment	48	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 28 s, x64 48 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	8	go/printer	53	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 18 s, x64 53 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	9	fmt	56	unchanged; 1.26.10.1 wall (darwin run 40233503315: arm64 47 s, x64 56 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	10	go/internal/srcimporter	58	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 31 s, x64 58 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	11	go/doc	64	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 29 s, x64 64 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	12	go/token	64	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 23 s, x64 64 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	13	flag	66	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 28 s, x64 66 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	14	go/build	76	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 45 s, x64 76 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	15	go/ast	82	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 28 s, x64 82 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	16	go/importer	98	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 46 s, x64 98 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	17	go/internal/gcimporter	240	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 115 s, x64 240 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	18	go/types	333	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 153 s, x64 333 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	19	go/parser	612	unchanged; 1.26.10.1 wall (darwin run 40218875629: arm64 350 s, x64 612 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-5	20	hash	640	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 227 s, x64 640 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	1	hash/crc64	35	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 26 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	2	hash/fnv	35	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 24 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	3	image/color	35	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 22 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	4	internal/buildcfg	38	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 15 s, x64 38 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	5	image/draw	43	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 23 s, x64 43 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	6	hash/crc32	45	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 23 s, x64 45 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	7	html	46	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 26 s, x64 46 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	8	image/jpeg	47	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 29 s, x64 47 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	9	image/png	49	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 39 s, x64 49 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	10	internal/chacha8rand	50	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 25 s, x64 50 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	11	internal/abi	52	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 22 s, x64 52 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	12	image/gif	54	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 28 s, x64 54 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	13	image	61	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 32 s, x64 61 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	14	hash/adler32	64	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 37 s, x64 64 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	15	html/template	110	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 58 s, x64 110 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	16	internal/coverage/cfile	224	unchanged; 1.26.10.1 wall (darwin run 40400361240: arm64 113 s, x64 224 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	17	index/suffixarray	349	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 242 s, x64 349 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	18	hash/maphash	500	unchanged; 1.26.10.1 wall (darwin run 40227545170: arm64 280 s, x64 500 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-6	19	internal/coverage/cformat	640	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 187 s, x64 640 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	1	internal/gover	26	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 14 s, x64 26 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	2	internal/coverage/slicewriter	28	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 13 s, x64 28 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	3	internal/dag	29	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 16 s, x64 29 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	4	internal/fmtsort	30	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 17 s, x64 30 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	5	internal/diff	31	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 15 s, x64 31 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	6	internal/coverage/cmerge	32	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 20 s, x64 32 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	7	internal/coverage/pods	41	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 21 s, x64 41 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	8	internal/coverage/test	41	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 20 s, x64 41 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	9	internal/coverage/slicereader	43	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 24 s, x64 43 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	10	internal/platform	45	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 24 s, x64 45 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	11	internal/pkgbits	46	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 23 s, x64 46 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	12	internal/cpu	47	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 22 s, x64 47 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	13	internal/profile	60	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 19 s, x64 60 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	14	internal/reflectlite	67	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 22 s, x64 67 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	15	internal/runtime/atomic	68	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 25 s, x64 68 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	16	internal/fuzz	81	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 49 s, x64 81 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	17	internal/poll	90	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 34 s, x64 90 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	18	internal/godebug	93	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 70 s, x64 93 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-7	19	internal/godebugs	123	unchanged; 1.26.10.1 wall (darwin run 40227524794: arm64 73 s, x64 123 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	1	internal/trace/tracev2	21	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 20 s, x64 21 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	2	internal/unsafeheader	22	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 16 s, x64 22 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	3	internal/runtime/math	28	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 17 s, x64 28 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	4	internal/trace/internal/tracev1	28	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 20 s, x64 28 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	5	internal/trace/testtrace	28	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 26 s, x64 28 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	6	internal/sysinfo	29	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 17 s, x64 29 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	7	internal/runtime/sys	31	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 16 s, x64 31 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	8	internal/syscall/unix	32	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 21 s, x64 32 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	9	internal/testenv	32	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 23 s, x64 32 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	10	internal/saferio	35	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 18 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	11	internal/singleflight	48	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 38 s, x64 48 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	12	internal/runtime/gc/scan	50	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 31 s, x64 50 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	13	internal/sync	70	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 37 s, x64 70 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	14	internal/runtime/maps	79	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 41 s, x64 79 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	15	internal/synctest	110	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 52 s, x64 110 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	16	internal/types/errors	120	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 73 s, x64 120 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	17	internal/strconv	219	unchanged; 1.26.10.1 wall (darwin run 40234478644: arm64 126 s, x64 219 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	18	internal/trace	322	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 318 s, x64 322 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-8	19	internal/runtime/cgroup	728	unchanged; 1.26.10.1 wall (darwin run 40228938914: arm64 189 s, x64 728 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	1	log/slog/internal/buffer	26	unchanged; 1.26.10.1 wall (darwin run 40233520305: arm64 15 s, x64 26 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	2	mime	27	unchanged; 1.26.10.1 wall (darwin run 40233520305: arm64 16 s, x64 27 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	3	math/cmplx	39	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 21 s, x64 39 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	4	maps	42	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 21 s, x64 42 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	5	iter	43	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 19 s, x64 43 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	6	io/ioutil	46	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 21 s, x64 46 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	7	math/big/internal/asmgen	46	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 25 s, x64 46 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	8	math/bits	53	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 28 s, x64 53 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	9	log	54	unchanged; 1.26.10.1 wall (darwin run 40233520305: arm64 29 s, x64 54 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	10	internal/zstd	66	unchanged; 1.26.10.1 wall (darwin run 40234478644: arm64 26 s, x64 66 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	11	math/rand	67	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 43 s, x64 67 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	12	io	68	unchanged; 1.26.10.1 wall (darwin run 40233503315: arm64 52 s, x64 68 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	13	math	70	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 31 s, x64 70 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	14	log/slog/internal/benchmarks	72	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 29 s, x64 72 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	15	io/fs	95	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 42 s, x64 95 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	16	math/big	141	unchanged; 1.26.10.1 wall (darwin run 40246104125: arm64 101 s, x64 141 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	17	math/rand/v2	143	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 53 s, x64 143 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	18	log/slog	559	unchanged; 1.26.10.1 wall (no darwin wall: estimated as the linux cloud wall (cloud P1-R)); C1's discovery TSVs carry no wall
+darwin	C1	C1-9	19	internal/xcoff	857	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 245 s, x64 857 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	1	net/http/internal/ascii	31	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 13 s, x64 31 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	2	net/textproto	32	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 15 s, x64 32 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	3	net/http/internal	33	unchanged; 1.26.10.1 wall (darwin run 40233520305: arm64 21 s, x64 33 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	4	net/mail	33	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 17 s, x64 33 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	5	net/url	35	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 18 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	6	net/http/httptrace	57	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 29 s, x64 57 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	7	net/smtp	69	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 32 s, x64 69 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	8	net/http/cookiejar	71	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 36 s, x64 71 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	9	net/http/fcgi	71	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 33 s, x64 71 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	10	net/rpc/jsonrpc	73	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 37 s, x64 73 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	11	net/http/httputil	77	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 45 s, x64 77 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	12	net/http/httptest	78	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 35 s, x64 78 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	13	net/netip	96	unchanged; 1.26.10.1 wall (darwin run 40233520305: arm64 61 s, x64 96 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	14	net/rpc	99	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 39 s, x64 99 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	15	mime/multipart	108	unchanged; 1.26.10.1 wall (darwin run 40227642718: arm64 67 s, x64 108 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	16	mime/quotedprintable	545	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 158 s, x64 545 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	17	net/http/pprof	647	unchanged; 1.26.10.1 wall (darwin run 40273051935: arm64 368 s, x64 647 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	18	net/http	683	unchanged; 1.26.10.1 wall (darwin run 40218859736: arm64 280 s, x64 683 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-10	19	net/http/cgi	855	unchanged; 1.26.10.1 wall (darwin run 40246104125: arm64 444 s, x64 855 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	1	slices	35	unchanged; 1.26.10.1 wall (darwin run 40234478644: arm64 25 s, x64 35 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	2	os/user	37	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 25 s, x64 37 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	3	path	38	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 28 s, x64 38 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	4	strconv	40	unchanged; 1.26.10.1 wall (darwin run 40233503315: arm64 27 s, x64 40 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	5	regexp/syntax	48	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 28 s, x64 48 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	6	os/exec/internal/fdtest	49	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 22 s, x64 49 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	7	runtime/debug	52	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 24 s, x64 52 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	8	path/filepath	56	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 35 s, x64 56 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	9	plugin	58	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 24 s, x64 58 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	10	sort	63	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 32 s, x64 63 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	11	strings	76	unchanged; 1.26.10.1 wall (darwin run 40233503315: arm64 57 s, x64 76 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	12	runtime/metrics	87	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 32 s, x64 87 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	13	runtime/trace	89	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 46 s, x64 89 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	14	os/signal	106	unchanged; 1.26.10.1 wall (darwin run 40238984896: arm64 65 s, x64 106 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	15	regexp	201	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 113 s, x64 201 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	16	reflect	217	unchanged; 1.26.10.1 wall (darwin run 40234478644: arm64 91 s, x64 217 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	17	os	583	unchanged; 1.26.10.1 wall (darwin run 40238984896: arm64 308 s, x64 583 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	18	runtime/pprof	1209	unchanged; 1.26.10.1 wall (darwin run 40273051935: arm64 1208 s, x64 1209 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-11	19	os/exec	1243	unchanged; 1.26.10.1 wall (darwin run 40220248613: arm64 387 s, x64 1243 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	1	weak	23	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 17 s, x64 23 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	2	unicode/utf16	25	unchanged; 1.26.10.1 wall (darwin run 40233485715: arm64 14 s, x64 25 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	3	unicode/utf8	25	unchanged; 1.26.10.1 wall (darwin run 40233485715: arm64 15 s, x64 25 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	4	text/tabwriter	27	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 27 s, x64 27 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	5	unicode	27	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 26 s, x64 27 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	6	text/scanner	28	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 26 s, x64 28 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	7	testing/iotest	31	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 31 s, x64 27 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	8	testing/quick	33	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 33 s, x64 30 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	9	text/template/parse	34	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 23 s, x64 34 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	10	testing/fstest	41	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 41 s, x64 41 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	11	testing/slogtest	41	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 41 s, x64 39 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	12	unique	47	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 36 s, x64 47 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	13	text/template	54	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 44 s, x64 54 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	14	sync	78	unchanged; 1.26.10.1 wall (darwin run 40233503315: arm64 78 s, x64 72 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	15	testing/cryptotest	80	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 73 s, x64 80 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	16	testing/synctest	206	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 191 s, x64 206 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	17	time	424	unchanged; 1.26.10.1 wall (darwin run 40227504052: arm64 332 s, x64 424 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	18	syscall	759	unchanged; 1.26.10.1 wall (darwin run 40252700084: arm64 249 s, x64 759 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-12	19	testing	101	unchanged; 1.26.10.1 wall (darwin run 40400361240: arm64 71 s, x64 101 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-13	1	runtime	5811	unchanged; 1.26.10.1 wall (darwin run 40273113850: arm64 2564 s, x64 5811 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-14	1	sync/atomic	1115	unchanged; 1.26.10.1 wall (darwin run 40273013193: arm64 1008 s, x64 1115 s); C1's discovery TSVs carry no wall
+darwin	C1	C1-15	1	net	2302	unchanged; 1.26.10.1 wall (darwin run 40279373649: arm64 616 s, x64 2302 s); C1's discovery TSVs carry no wall

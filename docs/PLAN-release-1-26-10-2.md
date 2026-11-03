@@ -239,6 +239,130 @@ stops the lane.
      H9 numbers are batch 129's battery as COORD reported it; the outside-docs diff is measured here. R's three kit
      files are on no pushed ref G could read (2026-11-02); their pins are COORD's record. -->
 
+### The re-pass at the new freeze tip (RULED 2026-11-03)
+
+The golib fixes of batches 135 and 136 came after the freeze, so the pass at `f6666d98a2` became a discovery pass,
+and every OS re-reads at a NEW freeze tip. This section is the deal for that re-pass, cut from the walls the
+discovery pass MEASURED, not from row counts. COORD ruled it on 2026-11-03: mode B, with P2's purge made
+conditional. It dispatches once COORD names the tip, which waits on H's bank seat and H's regen.
+
+**The fixed constraints** (COORD, 2026-11-03):
+1. The linux bank legs run on SDK band 400 only: P2 (10.0.403) and R-WSL (10.0.400). P1 (10.0.113) carries no
+   linux leg, so its rows move.
+2. R-WSL has no AVX-512 and carries `internal/runtime/gc/scan` for that reason.
+3. `net/http` stays off the i9, and the i9 runs one heavy task at a time.
+4. Darwin stays C1's.
+5. Windows is spread over the i9, G, H and R-LAPTOP.
+6. Every re-read writes to a FRESH evidence ref, `claude/<lane>-<leg>-1262c`, never a commit on a `-1262b` ref.
+
+**The data.** [`discovery_walls.py`](phase4/data/rebank-1.26.10.2/discovery_walls.py) extracts every measured
+discovery wall into [`discovery-walls.tsv`](phase4/data/rebank-1.26.10.2/discovery-walls.tsv). It reads each source
+at a pinned SHA, and every line names its source:
+
+| Leg | Ref @ SHA | Rows |
+|:--|:--|--:|
+| windows i9-S | `claude/i9-sweep-1262b` @ `7f279ccf35` | 79 |
+| windows H-S | `claude/h-sweep-1262b` @ `0d9dbd348f` | 77 |
+| windows G-S | `claude/g-sweep-1262` @ `13906ec1b4` | 74 |
+| windows R-S | `claude/r-sweep-1262b` @ `ab383a53e7` | 8 |
+| linux P1-1, P1-2 | `claude/p1-linux-1262b` @ `0b9f48bdec` | 46 |
+| linux P2-1, P2-2 | `claude/p2-linux-1262b` @ `f173721327` | 47 |
+| linux RWSL-1 | `claude/r-linux-1262b` @ `9602352d71` | 14 |
+
+**Three gaps, stated rather than estimated:**
+- RWSL-2 had not posted, so its 129 rows have NO linux reading at `f6666d98a2`. The deal carries their 1.26.10.1
+  walls, labelled as readings at the old tip.
+- `internal/runtime/gc/scan` has no WSL reading. It carries its P1 reading.
+- C1's darwin TSVs carry no wall column, so darwin keeps its 1.26.10.1 job-log walls.
+
+When RWSL-2 posts, the cutter re-runs on its walls, and the re-cut table is committed (on this branch if it has not
+landed, as a follow-up if it has), naming the mode it ran. The old-tip walls cannot move the critical path far:
+R-WSL's whole linux leg is 4.09 h, so even a 2x miss on RWSL-2's 1.11 h keeps R-LAPTOP under about 5.2 h.
+
+**The cost model.** A windows box's factor is its discovery walls over its own rows' pass-1 walls: G 0.655, i9 0.751,
+H 1.072 and R 1.551. A row's measured wall rescales to another box by the ratio of the two factors. On the box that
+measured it, a row is predicted at exactly its measured wall. Linux needs no cross-class estimate: P1's rows move to
+P2, the other cloud container, scaled by their factors (P2 0.433 / P1 0.345). Everything else stays on the lane that
+measured it.
+
+**The deal.** [`repass_cut.py`](phase4/data/rebank-1.26.10.2/repass_cut.py) writes
+[`repass-legs.tsv`](phase4/data/rebank-1.26.10.2/repass-legs.tsv), one line per row with its predicted wall and the
+basis of that figure. Within each list, rows run smallest-first, and `testing` runs last.
+- windows: `net` on G (NXDOMAIN); the other reserved rows on the i9; the rest dealt longest-first to the lane that
+  finishes earliest;
+- R-LAPTOP: its windows shard, then its whole linux leg, because it runs one battery at a time.
+
+| OS | Lane | Legs | Rows | Predicted |
+|:--|:--|:--|--:|--:|
+| windows | i9 | i9-S | 84 | 1.43 h |
+| windows | H | H-S | 59 | 1.43 h |
+| windows | G | G-S | 94 | 1.43 h |
+| windows | R-LAPTOP | R-S (`crypto/tls`) | 1 | 0.44 h |
+| linux | R-LAPTOP | RWSL-1 (14 reserved rows + `gc/scan`), then RWSL-2 | 15 + 129 | 2.98 h + 1.11 h |
+| linux | P2 | P2-1, P2-2 (its own 47 + P1's 45) | 46 + 46 | 2.16 h + 2.16 h |
+| darwin | C1 | C1-1 … C1-15, unchanged | 236 | about 4–4.5 h, as before |
+
+**The critical path is R-LAPTOP, at about 4.5 h:** its windows shard (0.44 h), then RWSL-1 (2.98 h), then RWSL-2
+(1.11 h, the old-tip figure). P2 follows at 4.31 h. The windows lanes finish in about 1.4 h, well inside both.
+
+**R-LAPTOP's windows share: RULED, mode B.** The cutter takes the mode as its third argument
+(`repass_cut.py <tree> <out> A|B|C`, B by default), and a re-cut names the mode it ran:
+
+| Option | R-LAPTOP's windows rows | R-LAPTOP total | Critical path |
+|:--|:--|--:|:--|
+| A | all eight off-i9 rows, as at 1.26.10.1 | 5.18 h | R-LAPTOP, 5.18 h |
+| **B (RULED)** | `crypto/tls` only; the other seven go to G | 4.53 h | R-LAPTOP, 4.53 h |
+| C | none; all eight go to G | 4.09 h | P2, 4.31 h |
+
+Why B:
+- **`crypto/tls` stays on R-LAPTOP.** Its count depends on the host: the BoGo runner, and the throughput to finish
+  inside its wall. R-LAPTOP banked the full count (1,393). A first reading on G would turn the bank of record into
+  a discovery reading.
+- **The other seven move to G.** They need only a working network, and G banked `net` itself.
+- **A costs 0.65 h of critical path for nothing.**
+- **C breaks constraint 5** (R-LAPTOP gets no windows leg) and puts `crypto/tls` on an unproven host.
+
+**Free disk, per box,** from the discovery ledgers:
+
+| Box | Recorded minimum | Floor |
+|:--|:--|:--|
+| i9 | 8,145 GB | 30 GB |
+| H | 335 GB | 30 GB |
+| G | 63 GB | 30 GB |
+| R-WSL | 892 GB (its host check) | 25 GB at every row boundary |
+| R-LAPTOP's windows side | not recorded | 30 GB, checked before row 1 |
+| P2 | aborted twice at the 15 GB floor | 20 GB before row 1, 15 GB per row |
+
+**Every re-pass brief reads free disk at launch and posts it**, against the 25 GB sweep floor, the same as every
+battery. That closes the two boxes the discovery ledgers did not record.
+
+**P2 is the disk risk; its purge is CONDITIONAL (ruled).** Launches 2 and 3 of P2-1 stopped at rows 20 and 21, with
+13 GB and 14 GB free. The cause was dependency build output piling up under `src/core`, outside each row's own
+directory. P2 now carries 92 rows. Before each row, P2 reads free disk, and only if it is under the floor plus
+10 GB (25 GB on its 15 GB floor):
+1. it runs `git clean -fdXq -- src/core`;
+2. it asserts that `git status --porcelain` shows no ` D` line;
+3. it re-checks the floor, and aborts as now if free disk is still under it.
+
+P2 logs each purge (the row, free before, free after), so the wall it adds is attributable. Why not every row: an
+unconditional purge at all 92 boundaries rebuilds every dependency closure cold. P2's 2.16 h per leg is built from
+warm walls, so the prediction would then be wrong in the direction that lengthens the critical path.
+
+**What can still move a row:** H's bank-seat retirements can change a row's count, or remove a row. The cutter
+re-runs from the tree, so a retirement re-cuts by re-running it.
+
+<!-- Provenance (G, 2026-11-03, COORD's dispatch of the same day). The discovery TSVs and ledgers are read at the
+     SHAs in the table, extracted by discovery_walls.py (345 rows: 238 windows, 107 linux). Windows factors: each box's
+     discovery wall sum over its rows' sweep-shards.tsv projected_s. Linux factors: each lane's discovery sum over its
+     rows' legs.tsv projected_s (P1 6,148 s against 17,797 s; P2 7,841 s against 18,093 s; RWSL-1 10,708 s against
+     10,506 s). The P2 aborts are the P2-1 ledger's two NOTE lines, 2026-11-02T17:22:46Z and T17:39:09Z. R-WSL's 892
+     GB is its RWSL-1 ledger host line. The mode-A and mode-C figures come from running the cutter in those modes; the
+     committed TSV is mode B. -->
+<!-- Ruling (COORD, 2026-11-03, on G's proposal at 493011611c): mode B accepted, with its four reasons as above; the
+     amendment makes P2's purge conditional (under floor + 10 GB), logged per purge; the gaps are accepted as stated,
+     and RWSL-2's walls re-cut the table when they post; every re-pass brief carries the 25 GB launch preflight. The
+     section heading moved from PROPOSAL to RULED. repass-legs.tsv is unchanged by the ruling. -->
+
 ### The closing checks
 
 - **Linux:**
