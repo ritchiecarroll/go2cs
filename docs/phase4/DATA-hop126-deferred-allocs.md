@@ -128,6 +128,19 @@ arena pins were never allocation pins. They are recorded here because COORD rout
   Darwin (C1-13) reads FAIL with its two RIDs disagreeing, so runtime does not bank there. Its disclosure list is 63
   long on both RIDs, against windows' 66 banked. Linux has no runtime reading at `f6666d98a2`.
 
+**Amended again 2026-11-03 (lane H): `math/big` · `TestMulUnbalanced` is RETIRED** (bank seat 2). This is the
+table's row above, a ratio of 14 against Go's 10 on windows/amd64 at `8c091fc3aa`. It now passes on both sides on
+every platform. Readings:
+- windows (G-S) at freeze tip `f6666d98a2`: COUNT 249 against banked 248;
+- windows (lane H) at `25e3b6ede6`: 249 matched, 2 divergent, and the entry reported as an orphan, Go pass / C# pass;
+- linux (P2-1) at `f6666d98a2`: PASS 249, 2 disclosed;
+- darwin (C1-9) at `f6666d98a2`: 249 matched, 2 divergent on osx-arm64 and osx-x64. C1's per-name table moves exactly
+  one name, `TestMulUnbalanced`, from pass/fail (disclosed) to pass/pass.
+
+The manifest keeps `TestNewIntAllocs` and `TestSqrAlloc`. The roster's `linux: 248 + 3` and `darwin: 248 + 3` segments
+are removed: they claim 3 disclosures against a manifest that can now account for 2, and the re-pass at the new freeze
+tip restores them, expected 249 + 2.
+
 <!-- Provenance. Lane H, 2026-10-22. Worktree detached at 8c091fc3aa; the six rows' walls on windows/amd64 were
      crypto/sha256 249 s, strings 90 s, bytes 76 s, log/slog 272 s, math/big 156 s, crypto/internal/fips140test
      356 s. Each sweep exited 1 because the banked counts are still the go1.24.13 record, which this record does
