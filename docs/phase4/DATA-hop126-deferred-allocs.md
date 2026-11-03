@@ -141,6 +141,17 @@ The manifest keeps `TestNewIntAllocs` and `TestSqrAlloc`. The roster's `linux: 2
 are removed: they claim 3 disclosures against a manifest that can now account for 2, and the re-pass at the new freeze
 tip restores them, expected 249 + 2.
 
+The retired entry's last reading and plan, verbatim from `src/core/math/big/go2cs_test_disclosures.json` at `25e3b6ede6`,
+are kept here because living pages cite them:
+
+- reading: 5,723,096 B for a 400,320 B input, a ratio of 14 (windows/amd64, f8fe15c97e, Release untiered, the row
+  filtered to ^TestMulUnbalanced$). A thread-precise reading of the same call is 5,722,800 B = 400,376 (the result) +
+  about 1,249 x 4.2 KB. Unit: BYTES (lesson 63: the alloc-units extractor records AllocsPerRun units only).
+- plan: INCREMENT 1 (queued post-publish, COORD 2026-10-25): an allocation-free identity compare for `&a[i] ==/!= &b[j]`,
+  where golib compares the backing storage and absolute index with ж=='s semantics and the converter emits it when both
+  operands are element address-ofs. It is predicted to bring 4.2 KB per product to ~1.2 KB and the ratio to ~5 < 10,
+  retiring this entry alone. Then docs/phase4/DESIGN-nonescaping-locals.md (REC-B) for the Int locals.
+
 <!-- Provenance. Lane H, 2026-10-22. Worktree detached at 8c091fc3aa; the six rows' walls on windows/amd64 were
      crypto/sha256 249 s, strings 90 s, bytes 76 s, log/slog 272 s, math/big 156 s, crypto/internal/fips140test
      356 s. Each sweep exited 1 because the banked counts are still the go1.24.13 record, which this record does
