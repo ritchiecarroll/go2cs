@@ -2260,7 +2260,7 @@ $DarwinEvidenceWaves = @('', 'dw2', 'e1', 'reread')
 # readings points this line at it in the same commit, so the roster and its guard read the same evidence.
 # annotate_darwin.py reads its default from this line. A declared directory that does not exist is refused, except the
 # hop default before its darwin leg has run.
-$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'
+$DarwinEvidenceDirectory = 'docs/phase4/rebank-1.26.10.2/darwin'
 $DarwinEvidenceHopDefault = 'docs/phase4/h10-evidence/go{pin}/darwin'
 
 function Resolve-DarwinEvidenceDirectory {
