@@ -28680,6 +28680,38 @@ name amd64; the other 24 also admit arm64, or fall outside the pure-Go conversio
 
 The seat moves no roster count. The 1.26.10.2 re-bank reads the counts above.
 
+**Amended 2026-11-03 (C1): the math/big line above was WRONG. TestAddMulVVWWNoADX was never in any reading.**
+The table's "math/big | TestAddMulVVWWNoADX | 248 + 3 | **247 + 3**" line counted the split at darwin/amd64 +
+`purego` alone. The corpus converts under BOTH `purego` and `math_big_pure_go` (`defaultStdLibBuildTags`,
+src/go2cs/commandLineOptions.go:275). Go's `arith_amd64_test.go`, the only file that declares TestAddMulVVWWNoADX, is
+`//go:build !math_big_pure_go` at go1.26.10, so it builds on no platform here and no `arith_amd64_test.cs` exists.
+The name is in neither the 1.26.10.1 bank (docs/validation/1.26.10.1/math.big.md, 251 verdict rows) nor any darwin
+reading. With it out, the split this row owed is 13 tests, 8 files and 4 rows, not 14, 9 and 5.
+
+**Measured** at the freeze tip f6666d98a2 (C1-9, os-matrix run 41503062854, read by relay c335bc5d19 run
+41630858632). math/big reads **249/2** on both RIDs: the same 251 names as the bank, osx-x64 identical to osx-arm64
+name for name, and `targetArchExcluded` null. Exactly one name moves:
+- TestMulUnbalanced goes from pass/fail (disclosed) to pass/pass, and the record lists it in `orphanedDisclosures`
+  (goos darwin).
+- 248 + 1 = 249 matched, and 3 - 1 = 2 disclosed.
+- The evidence is the per-name table `docs/phase4/rebank-1.26.10.2/darwin/math-big-names.tsv` on
+  claude/c1-darwin-1262b @ 9d5098f601.
+- Limit: the record carries verdicts only. A pass bounds the ratio under the test's limit of 10, but no darwin ratio
+  was measured.
+
+The other banked-row predictions held at that tip:
+- crypto/sha1 13/1 on both RIDs;
+- internal/cpu 2 and internal/runtime/gc/scan 3092, whose records name the table's withdrawn tests in
+  `targetArchExcluded` (relay 186dada19e, run 41519574001).
+
+The runtime line was not checked by name.
+
+**Ruled 2026-11-03 (COORD): RETIRE TestMulUnbalanced's manifest entry** (src/core/math/big/go2cs_test_disclosures.json),
+in a follow-up bank seat on H's lane before the new freeze tip. Its windows reading comes from that seat on SDK band
+400, and the re-pass restores the per-OS segments it touches.
+
+— C1 (2026-11-03)
+
 ## 2026-10-25 — P2: darwin libc arguments that still cross as order tokens — the same class as writev/readdir_r, unreached in std
 
 **What happens.** darwin's libc funnel leaves an order token for any pointee that holds a non-nil Go pointer (the
