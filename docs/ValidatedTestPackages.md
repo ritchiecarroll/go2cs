@@ -1019,6 +1019,12 @@ The classes in full:
          replaced by converted Go `testing`. Minted 2026-08-26 with `log/slog`'s `TestRecordSource`, which
          asserts that two frames above itself sits `testing.tRunner` in `testing.go`."
          -->
+    <!-- Re-cited 2026-11-03 (the 1.26.10.2 bank of record): of the working-directory kind's three entries named
+         above, internal/coverage/cfile's TestIssue59563TruncatedCoverPkgAll was retired in the pre-refreeze
+         bank seat (a0750abd9e) and runtime's TestLockRankGenerated in this seat, each passing on both sides on
+         every platform it was scoped to (docs/phase4/DATA-hop126-deferred-allocs.md, the 2026-11-03
+         amendments). The kind's committed entry is now go/build's TestLocalDirectory, and the terminal-output
+         kind's is testing's TestMorePanic. -->
 - **`host-limit`** — a test's premise rests on a property of the test *binary* that the host's
   deployment shape structurally lacks: what the test host cannot *be*. An entry must name a
   structural property of the shape, never an unimplemented-but-fixable defect. Disclosed tests keep

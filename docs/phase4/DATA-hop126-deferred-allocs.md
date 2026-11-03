@@ -152,6 +152,23 @@ are kept here because living pages cite them:
   operands are element address-ofs. It is predicted to bring 4.2 KB per product to ~1.2 KB and the ratio to ~5 < 10,
   retiring this entry alone. Then docs/phase4/DESIGN-nonescaping-locals.md (REC-B) for the Int locals.
 
+**Amended again 2026-11-03 (lane H): `runtime` · `TestLockRankGenerated` is RETIRED** (the 1.26.10.2 bank of record,
+COORD's ruling). It is a `host-identity` pin with no `platforms` field, so it covered every platform, and the
+pre-refreeze bank seat KEPT it only because linux had no runtime reading at `f6666d98a2`. Like the arena pins, it was
+never an allocation pin; COORD routed it to this record with the others. At freeze tip `d9dd8f5499` it passes on
+both sides on all three platforms:
+- windows: the current proof page (lane H at `0e857031fe`) reads it pass | pass, an orphan, and i9-S at `d9dd8f5499`
+  reads runtime PASS 11083 at the banked count;
+- linux (GWSL-1) at `d9dd8f5499`: Go pass | C# pass in the run's comparison record, read by G and committed as the
+  verbatim entry excerpt with the full record's sha256, `docs/phase4/rebank-1.26.10.2/linux/GWSL-1-runtime-LockRank.json`
+  (claude/g-linux-1262c, GWSL-2's evidence commit);
+- darwin (C1-13) at `d9dd8f5499`: pass on osx-arm64 and osx-x64, as COORD relayed C1's per-name record. runtime
+  does not bank on darwin this round (both RIDs FAIL on other names and disagree).
+
+It is count-neutral on every platform: an orphan is in no disclosure list. Windows' page lists divergent entries only,
+so runtime's 11083 + 63 and its page do not move; linux's 11094 + 67 subtracts host-fatal entries only; darwin
+carries no runtime segment. The manifest keeps 74 entries.
+
 <!-- Provenance. Lane H, 2026-10-22. Worktree detached at 8c091fc3aa; the six rows' walls on windows/amd64 were
      crypto/sha256 249 s, strings 90 s, bytes 76 s, log/slog 272 s, math/big 156 s, crypto/internal/fips140test
      356 s. Each sweep exited 1 because the banked counts are still the go1.24.13 record, which this record does
