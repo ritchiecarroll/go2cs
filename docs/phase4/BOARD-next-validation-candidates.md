@@ -33464,4 +33464,30 @@ cannot red it unseen again.
 
 — H (2026-11-03)
 
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): `annotate_linux.py` cannot read a named one-row re-read, so `net`'s linux segment was applied by hand — OPEN, post-hop (annotator)
+
+`annotate_linux.py` assigns each linux evidence TSV to a declared wave BY ITS STEM:
+- pass 1: `P1-3`;
+- L1: `P2-L1`;
+- L2: `P1-L2`, `P1-L2-poll`;
+- re-read: `P1-R`.
+
+A stem matching none of these is a hard exit for the whole directory: "matches 0 declared waves, not one". P2's
+discriminating re-read of `net` at the freeze tip `d9dd8f5499` is `P2-net.tsv` (`claude/p2-net-1262c` @ `3e25685de7`).
+COORD ruled it the row's reading of record over GWSL-1's DIVERGED. But with `P2-net.tsv` in
+`docs/phase4/rebank-1.26.10.2/linux/`, the annotator refuses every row, and a `P2-R` stem would order it by wave,
+not by ruling. So the bank of record applied exactly that one segment by hand: `linux: 596 + 3` -> `593 + 3`, the
+annotator's own arithmetic (verdicts 593; 3 listed less 0 host-fatal in scope), with a dated comment on the row.
+
+**Consequence until fixed:** `annotate_linux.py --evidence docs/phase4/rebank-1.26.10.2/linux` exits on this directory.
+Every other linux segment was written by the annotator before `P2-net.tsv` was stacked (P2-1, P2-2, GWSL-1, GWSL-2,
+all at the tip), and the roster guard does not read linux evidence, so nothing it gates is affected.
+
+**Post-hop fix, sized:** declare a named single-row re-read wave, for example a `-<row>` stem, ordered after pass 1
+and before `-R`. The rule must make one reading of record per row explicit when one row has more than one reading.
+A ruled reading should be named in a table beside the waves, the way `$DarwinAgreementRulings` names darwin rows,
+not inferred from file order. It needs a fixture arm in `test_annotate_evidence.py` for each refusal.
+
+— H (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
