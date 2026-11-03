@@ -12,7 +12,7 @@ says what that proves and what it does not.
 
 > ### Phase 4 progress: **238 / 242 testable packages validated — 98.3%**
 >
-> **73,854 matching test verdicts · 373 disclosed** *(updated 2026-11-03 — grows as packages validate)*
+> **73,855 matching test verdicts · 372 disclosed** *(updated 2026-11-03 — grows as packages validate)*
 >
 > **Against the implementable set (242 − 4 excluded = 238): 238 / 238 — 100.0%.** Both ratios are always
 > reported. The headline measures against every package that defines a `Test` function; this line
@@ -23,7 +23,13 @@ says what that proves and what it does not.
 > listed, each with its reason, under [Excluded packages](#excluded-packages). Every row's columns are
 > its own Go 1.26.10 Windows measurement.
 >
-> **Linux: 234 of 236 applicable rows validated at their Linux counts** — 73,928 matching verdicts · 408 disclosed · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
+> **Linux: 233 of 236 applicable rows validated at their Linux counts** — 73,680 matching verdicts · 405 disclosed · 2 rows platform-exclusive (`linux: n/a`). (They are `internal/syscall/windows` and its child `internal/syscall/windows/registry`; the parent is Windows-exclusive by its own name, every source file is `*_windows.go`, and its layout-L3 csproj compiles nothing under `GoTargetOS=linux`.)
+
+<!-- Updated again 2026-11-03 (the 1.26.10.2 bank seat 2): math/big's TestMulUnbalanced disclosure retired as
+     passing. math/big moves 248 + 3 -> 249 + 2. Its linux and darwin segments are removed (see the row), and the re-pass
+     restores them. Until then the line read "**73,854 matching test verdicts · 373 disclosed**", and the Linux line
+     read "**Linux: 234 of 236 applicable rows validated at their Linux counts** — 73,928 matching verdicts · 408
+     disclosed". -->
 
 <!-- Updated 2026-11-03 (the 1.26.10.2 pre-refreeze bank seat): seven disclosures retired as passing:
      log TestDiscard; runtime TestUserArenaLiveness/Free and /Finalizer, with their parent riding them;
@@ -633,7 +639,7 @@ says what that proves and what it does not.
 | [`log/slog/internal/buffer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/log/slog/internal/buffer) | 1 | 1 | The pool-allocated byte buffer slog's built-in handlers render into — the pooled New/Free round-trip with its oversize-discard rule, and the Write/WriteString/WriteByte append path. One `alloc-count-semantics` disclosure on the zero-alloc pool assert: the deferred Free closure heap-allocates where Go's escape analysis plus pool reuse stays allocation-free. · linux: 1 + 1 · darwin: 1 + 1 · [proof](validation/current/log.slog.internal.buffer.md) |
 | [`maps`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/maps) | 14 | | Generic map helpers and iterators. · linux: 14 · darwin: 14 · [proof](validation/current/maps.md) |
 | [`math`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math) | 76 | | The core numeric package — IEEE edge cases, rounding, `Inf`/`NaN`. · linux: 76 · darwin: 76 · [proof](validation/current/math.md) |
-| [`math/big`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/big) | 248 | 3 | Arbitrary-precision `Int`/`Float`/`Rat` arithmetic — the karatsuba/toom multiplication thresholds, GCD and modular machinery, and string/scan round-trips across bases and formats. `TestMulUnbalanced`'s `MemStats` byte budget holds because `len`/`cap` of the named slice `nat` no longer box it on every call. · linux: 248 + 3 · darwin: 248 + 3 · [proof](validation/current/math.big.md) |
+| [`math/big`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/big) | 249 | 2 | Arbitrary-precision `Int`/`Float`/`Rat` arithmetic — the karatsuba/toom multiplication thresholds, GCD and modular machinery, and string/scan round-trips across bases and formats. `TestMulUnbalanced`'s `MemStats` byte budget holds because `len`/`cap` of the named slice `nat` no longer box it on every call. <!-- Segment removed 2026-11-03 (the 1.26.10.2 bank seat 2, COORD ruling): this seat retires TestMulUnbalanced's disclosure, so the linux segment's 248 + 3 claims more disclosures than the manifest's two pins in scope can account for. The discovery reading at f6666d98a2 is discovery-grade, not a bank reading, so nothing replaces it here. The 1.26.10.2 three-OS re-pass at the new freeze tip restores the segment, expected 249 + 2. Until then the segment read `linux: 248 + 3`. --> <!-- Segment removed 2026-11-03 (the 1.26.10.2 bank seat 2, COORD ruling): the darwin segment's 248 + 3 is the hop's reading (h10 evidence, reread r4). After this seat retires TestMulUnbalanced's disclosure, the manifest can account for only 2 in scope on darwin, so the roster guard's 2h rule reads that reading as superseded, and the row carries no segment. The 1.26.10.2 three-OS re-pass at the new freeze tip restores the segment, expected 249 + 2. Until then the segment read `darwin: 248 + 3`. --> · [proof](validation/current/math.big.md) |
 | [`math/big/internal/asmgen`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/big/internal/asmgen) | 11 |  | `math/big`'s assembly generator: `Test` regenerates the arithmetic kernels for each of the ten architectures and requires the output to be byte-identical to the committed `.s` files. · linux: 11 · darwin: 11 · [proof](validation/current/math.big.internal.asmgen.md) |
 | [`math/bits`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/bits) | 26 | | Bit-manipulation intrinsics. · linux: 26 · darwin: 26 · [proof](validation/current/math.bits.md) |
 | [`math/cmplx`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/cmplx) | 24 | | `complex128` transcendental math. · linux: 24 · darwin: 24 · [proof](validation/current/math.cmplx.md) |
