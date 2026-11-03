@@ -434,6 +434,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/nettrace/internal.nettrace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/singleflight/internal.singleflight.csproj" />
