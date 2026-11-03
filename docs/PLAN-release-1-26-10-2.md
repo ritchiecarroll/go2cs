@@ -487,8 +487,8 @@ re-runs from the tree, so a retirement re-cuts by re-running it.
   entry no row on any OS still needs.
 
 **Measured 2026-11-03:** every check above holds at the bank tip. See
-[`REPORT-bank-1-26-10-2.md`](phase4/REPORT-bank-1-26-10-2.md), which names 3 orphaned entries and 30 that the linux
-record counts but cannot name.
+[`REPORT-bank-1-26-10-2.md`](phase4/REPORT-bank-1-26-10-2.md), which names 3 orphaned entries, retired in `e64424e8fa`, and 30
+that the linux record counts but cannot name.
 
 ### The lane briefs (one block per lane, ready to paste)
 

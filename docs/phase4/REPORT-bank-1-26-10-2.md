@@ -8,7 +8,7 @@
 > **`d9dd8f5499`** (`d9dd8f54994297f34be694b7a4594fc6ea826024`, batch 143).
 
 **Result: every closing check holds at the bank tip.** The one list the checks ask for is the orphaned
-disclosures. It names 3 entries that no row needs on any OS. 30 more are needed on no OS by name, but the
+disclosures. It names 3 entries that no row needs on any OS, **RETIRED in `e64424e8fa`**. 30 more are needed on no OS by name, but the
 linux records count them without naming them, so they are stated as UNKNOWN with their counts, not cleared.
 
 ## The instrument
@@ -128,7 +128,7 @@ An entry is **orphaned on all three** when it is FREE on every OS.
 | Bucket | Entries |
 |:--|--:|
 | needed on some OS | **330**: 302 named on the windows page; 13 host-fatal in scope; 15 by a linux or darwin count of U = M |
-| **orphaned on all three** | **3** |
+| **orphaned on all three** | **3, RETIRED in `e64424e8fa`** |
 | unknown | **30** |
 | **total** | **363** |
 
@@ -142,8 +142,27 @@ An entry is **orphaned on all three** when it is FREE on every OS.
 
 `debug/gosym`'s entry is written for linux, where Go's test binary carries `.gosymtab`. Linux now reads the row at
 `10` with nothing disclosed. `os/signal`'s entry is darwin-only, and darwin now reads the row clean on both RIDs.
-`weak`'s entry fires on no OS. **This report names them. It does not retire them**: a removal is a cross-platform
-manifest edit, and each needs its own re-derivation (DESIGN-orphan-disclosure-check.md §5).
+`weak`'s entry fires on no OS.<!-- Until 2026-11-03 (COORD's ruling, the same day) this paragraph ended: "**This
+report names them. It does not retire them**: a removal is a cross-platform manifest edit, and each needs its own
+re-derivation (DESIGN-orphan-disclosure-check.md §5)." -->
+
+**Amended 2026-11-03: the 3 are RETIRED in `e64424e8fa`** (COORD's ruling: nothing ships pinning a divergence no OS has).
+Each was removed by span, with the parse proved equal to the original less that entry:
+- `debug/gosym` and `weak` empty (1 → 0), so their manifests are deleted;
+- `os/signal` goes 2 → 1, and `TestAllThreadsSyscallSignals` stays.
+
+The retirement is **count-neutral on every OS**, measured before and after on the same tree:
+- `check-roster-format.ps1` reads 2264 → 2263 checks. The one missing check is the per-entry `platforms` check of
+  `TestSignalTrace`, the only one of the three with a `platforms` field. Its legacy-label arm reads 363 → 360
+  entries. No header, cell or segment moves.
+- `annotate_linux.py` and `annotate_darwin.py` print byte-identical output.
+- `closing_checks.py` at `e64424e8fa` reads 47 manifests and 360 entries: 330 needed, **0 orphaned on all three**, and the
+  30 UNKNOWN below. Every other check is as above.
+- **Windows was measured at the retirement tree**: one `run-validated-sweep.ps1 -Filter <row> -Exact` per row, in a
+  throwaway worktree, with H-S's shard guards. `debug/gosym` read PASS 10 and `weak` PASS 9, rc 0, at their banked
+  counts, with no real drift and an empty deletion census.
+- `debug.gosym.md` is that sweep's own rewrite. It drops the deleted manifest's note, "Linux only: … this entry never
+  fires there".
 
 **UNKNOWN: 30 entries in 2 rows, all linux-only in effect.** Each is FREE on windows and darwin (out of scope, or
 `syscall`'s TestExecPtrace at darwin U 0), and is not needed on any OS. The linux record counts them without naming
