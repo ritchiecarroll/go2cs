@@ -2130,7 +2130,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// value into one statement, as Go writes one: `ref var x = ref heap<T>(rhs, out var
 					// Ꮡx);` (written below, once the value is rendered), where the split form declared a
 					// zero box and assigned the value on the next line. The value is the same string the
-					// assignment would take, every transform applied, and `heap<T>(in T, out ж<T>)` copies
+					// assignment would take, every transform applied, and `heap<T>(T, out ж<T>)` copies
 					// it into the box as `x = rhs;` copied it into the zero one; the explicit <T> keeps
 					// that assignment's implicit conversion (COORD's R1). The box declared alone stays for
 					// a box the for-init hoists ahead of its loop, and for a multi-LHS define, where Go
