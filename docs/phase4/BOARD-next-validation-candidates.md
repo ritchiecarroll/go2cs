@@ -33235,4 +33235,76 @@ under no-inline, the field stays rooted in BOTH the folded `heap<S>(new S(…), 
 goes to the post-hop queue.
 
 — G (2026-11-02)
+## 2026-11-03 — C2 (prep, claude/c2-nugetgo-1261002-prep): the nugetgo rebuild wave against go.* 1.26.10.2 is prepared; it publishes when 1.26.10.2 ships
+
+**What exists.** [`PLAN-nugetgo-wave-1-26-10-2.md`](../PLAN-nugetgo-wave-1-26-10-2.md) (DRAFT) fixes the wave's values.
+It holds the seven modules, their next B3 revisions (read from nuget.org's flat container on 2026-11-03), the go.*
+range `[1.26.10.2, 1.27.0)`, the order and the release-day steps. The two owner sheets,
+[`S1-PIN-SHEET.md`](nugetgo-1-26-10-2/S1-PIN-SHEET.md) and [`S2-PIN-SHEET.md`](nugetgo-1-26-10-2/S2-PIN-SHEET.md), are
+templates:
+
+- each follows its 1.26.10.1 sheet block for block;
+- the signer commit is the one placeholder, and block 1 refuses while it is left;
+- block 6 is the optional deprecation below.
+
+**Measured on the templates.**
+
+- `Test-SheetPaste.ps1`: 2 files, 14 submissions, 0 findings. Its `testdata/sheet-paste/bad.md` control still reads
+  its 5 findings.
+- Block 1's guard refuses `<<SIGNER_SHA>>` and passes a filled 40-hex SHA.
+- Block 6, run against nuget.org for both sheets:
+  - with the wave's revisions, which nuget.org does not list yet, it refuses before it prints anything;
+  - with a listed revision, it prints the page, the version and the message.
+
+**What waits.** The kits wait for `T`, the 1.26.10.2 record commit (runbook 0.3). So do `Test-PINGates.ps1` and the
+section 3 restore check, which need the release candidates.
+
+**The order (the exact-pin rule).**
+
+- S1 is the six leaves in one PIN session.
+- S2 is cobra, whose edges move to pflag 1.0.9.2 and mousetrap 1.1.0.1.
+- cobra is packed against S1's release candidates from a local folder feed. It is signed only after S1's block 5 lists
+  both edges.
+- No package may reference one built on 1.26.10.1. The restore check is `dotnet list package --include-transitive`:
+  every go.* package at 1.26.10.2, and every nugetgo.* package at this wave's revision.
+
+**The stale-package finding** (COORD ruling 2026-11-03: (a) now, (b) prepared, (c) post-hop). A nugetgo package built
+against 1.26.10.1 reads `[1.26.10.1, 1.27.0)`, which admits 1.26.10.2. A consumer on go.* 1.26.10.2 therefore restores
+it without an error, and it can fail at run time on a cross-package variable read. Exactly seven published revisions
+are in that state:
+
+- hashset 1.0.0.3, uuid 1.6.0.1, jwt/v5 5.3.1.1, x/sync 0.19.0.1, pflag 1.0.9.1, mousetrap 1.1.0 and cobra 1.10.2;
+- every older revision was built on 1.24.13 and caps at `1.25.0`.
+
+Disposition:
+
+- (a) is in the plan, and a release-note line went to COORD for the held 1.26.10.2 docs branch.
+- (b) is each sheet's block 6, OPTIONAL, owner decides. It re-checks the listing, then prints, per package, the Manage
+  page, the version and the message; it changes nothing.
+- (c) is the row below.
+
+— C2 (2026-11-03)
+
+## 2026-11-03 — C2 (COORD ruling): B4 lets a later go.* release resolve a nugetgo package that release breaks — OPEN, post-hop (owner C2)
+
+**Shape.** B4 (`PLAN-nugetgo.md` section 8) gives a nugetgo package's go.* dependency the range from its build to the
+next Go minor, for example `[1.26.10.1, 1.27.0)`. Between two releases of one minor the go.* dialect can change: in
+1.26.10.2 a package-level variable is read through an accessor, not as a field. A package built before the change
+still matches the range, and NuGet resolves it under the release that breaks it. The restore reports nothing, and the
+failure is at run time. The 1.26.10.2 wave meets this with a rebuild, a release-note line and an optional deprecation
+(row above). Nothing stops the next dialect-breaking release from meeting it again.
+
+**Direction.** When a release breaks the dialect, the packages built for the releases before it must stop matching
+it. Two shapes:
+
+- Cap the upper bound at the next release instead of the next minor. That is safe, but every release then needs a
+  rebuild wave, breaking or not.
+- Have the release record whether it breaks the dialect, and cap only the packages built before a breaking release.
+  That ties the pack to a release fact the release must state.
+
+Either is a B4 amendment, so it is the owner's ruling, sized and proposed post-hop. It sits beside the 2026-10-27 row
+on the `-nuget-map` log heading, the other post-hop C2 item.
+
+— C2 (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
