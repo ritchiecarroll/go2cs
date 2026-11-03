@@ -114,7 +114,7 @@ LANE G -- 1.26.10.2 RE-PASS, LINUX GWSL-1 then GWSL-2 on G-LAPTOP's WSL. GO NOW,
  TIP <TIP>. Plan: PLAN-release-1-26-10-2.md re-pass (mode D) + "R-WSL" brief; act: PLAN-rebank-go126.md §12 R block.
 ROWS: docs/phase4/data/rebank-1.26.10.2/repass-legs.tsv, seq order; write each list from the file:
  - GWSL-1: 15 (internal/runtime/gc/scan .. runtime): the 14 reserved rows + gc/scan (no AVX-512 here);
- - GWSL-2: 129 (container/list .. slices).
+ - GWSL-2: 129 (cmp .. crypto/internal/fips140cache).
 KIT (R's frozen kit, sha256), ledgered before row 1; a mismatch stops the lane:
  rebank-linux.sh 99cdef2e8d0ba16a81e23eff0ebc6508a5d8f9af0edd4285fdb9c919c008a1c1
  classify_row.py 81e543608d9cabce35e38ce0f2e6013cfcc3189fdc0642771c1c51cfc03d7fad
@@ -144,12 +144,12 @@ KIT (R's frozen kit, sha256), ledgered before row 1; a mismatch stops the lane:
  rebank-linux.sh 99cdef2e8d0ba16a81e23eff0ebc6508a5d8f9af0edd4285fdb9c919c008a1c1
  classify_row.py 81e543608d9cabce35e38ce0f2e6013cfcc3189fdc0642771c1c51cfc03d7fad
  derive-argv.ps1 0ea6f0b90f915fc717853de71c7b9edbbeb895d11cfac044c1d5a18319f0a6d9
-HOST: TMPDIR <= 10 bytes; <GOROOT> has test/; dotnet --version 10.0.4xx; go version go1.26.10; uid.
-DISK: free disk POSTED at launch; under 20 GB, clear the Go build cache and NuGet locals.
-BEFORE EACH ROW, only if free < 25 GB: 1. git clean -fdXq -- src/core; 2. no ' D' in git status --porcelain;
- 3. re-check the 15 GB floor. Log each purge (row, free before/after).
-FLOOR ABORT (under 20 GB at launch or 15 GB at a row): stop at the first unrecorded row; post it, free disk and
- the last wall. COORD moves the rest to G-WSL after its own leg; P1 never (constraint 1 supersedes ruling 9).
+HOST: TMPDIR <= 10 bytes; <GOROOT> has test/; dotnet 10.0.4xx; go1.26.10; uid.
+DISK: free POSTED at launch, >= 18 GB (under 20: clear Go build cache + NuGet locals). Kit FLOOR_GB=18.
+WRAPPER (outside the kit), on its floor abort: git clean -fdXq -- src/core; no ' D'; re-read free; log (row, free
+ before/after). Under 15 GB: STOP at the first unrecorded row, post; COORD moves the rest to G-WSL after its own
+ leg, P1 never. Else relaunch at the first unrecorded row, same SHARD and evidence dir. Over rows 1-12, more than
+ 1 purge per 4 rows (the wrapper's log): STOP (rebalance).
 ACT: clone detached at TIP, checked clean; argv derived by AST at TIP; rc on the next line; restore BY STATUS;
  purge build output and ' D' census every row. crypto/x509: SSL_CERT_FILE, NIX_SSL_CERT_FILE UNSET, in ledger.
 CONTAINER: resume ledger on persistent disk (corpus commit, converter commit, binary mtime); re-enter at the first

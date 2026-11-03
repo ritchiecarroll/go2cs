@@ -7,7 +7,7 @@ import csv, io, subprocess, sys
 
 repo, out = sys.argv[1], sys.argv[2]
 
-# (os, box, ref, sha, path): the discovery shards. RWSL-2 had not posted, so its rows have no reading here.
+# (os, box, ref, sha, path): the discovery shards. RWSL-2 posted later, as a new commit on its ref (e0017a1050).
 SOURCES = [
     ('windows', 'i9', 'claude/i9-sweep-1262b', '7f279ccf35', 'docs/phase4/rebank-1.26.10.2/sweep/i9-S.tsv'),
     ('windows', 'H',  'claude/h-sweep-1262b',  '0d9dbd348f', 'docs/phase4/rebank-1.26.10.2/sweep/H-S.tsv'),
@@ -18,6 +18,7 @@ SOURCES = [
     ('linux',   'P2', 'claude/p2-linux-1262b', 'f173721327', 'docs/phase4/rebank-1.26.10.2/linux/P2-1.tsv'),
     ('linux',   'P2', 'claude/p2-linux-1262b', 'f173721327', 'docs/phase4/rebank-1.26.10.2/linux/P2-2.tsv'),
     ('linux',   'R-WSL', 'claude/r-linux-1262b', '9602352d71', 'docs/phase4/rebank-1.26.10.2/linux/RWSL-1.tsv'),
+    ('linux',   'R-WSL', 'claude/r-linux-1262b', 'e0017a1050', 'docs/phase4/rebank-1.26.10.2/linux/RWSL-2.tsv'),
 ]
 
 # (os, row) -> (the TSV's wall_s, the wall read instead, why): a TSV wall that is not the row's own time. The TSV is the
@@ -26,8 +27,8 @@ SOURCES = [
 OVERRIDES = {
     # R-LAPTOP slept on battery 11:50-12:37Z with crypto/ecdh in flight: its wall_s includes the suspension. The kit's
     # monotonic elapsed time (2506 s against 5347 s of wall clock) puts the row's own time at about 83 s, and no other
-    # row spans the gap (R's post b9389661d6; COORD's re-cut input, 2026-11-03).
-    ('linux', 'crypto/ecdh'): ('2924', '83', 'host suspension 11:50-12:37Z, R post b9389661d6'),
+    # row spans the gap (R's posts b9389661d6 and, at RWSL-2's DONE, dd22b89643; COORD's re-cut input, 2026-11-03).
+    ('linux', 'crypto/ecdh'): ('2924', '83', 'host suspension 11:50-12:37Z, R posts b9389661d6, dd22b89643'),
 }
 applied = set()
 
