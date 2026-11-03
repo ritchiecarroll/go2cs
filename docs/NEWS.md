@@ -46,7 +46,9 @@ assembly built against an earlier package must be rebuilt.
 native executable for Windows, Linux and macOS on x64 and Arm64. The first conversion that needs Go downloads the
 Go release go2cs converts with, checks it against hashes built into go2cs, and keeps it in your user cache folder.
 `go2cs toolchain` installs that Go ahead of time, or from a file on a machine with no network access.
-[The go2cs dotnet tool](DotnetTool.md) has the details. Building the converter from source still works as before.
+[The go2cs dotnet tool](DotnetTool.md) has the details. Building the converter from source still works, and now
+needs the .NET 10 SDK 10.0.400 or later ([Building go2cs](BuildingGo2cs.md)); converting a module needs no particular
+.NET 10 SDK, as before.
 
 **Converted code reads closer to the Go.** Converted C# is meant to read like the Go it came from, and this release
 removes most of the remaining wrapping:
@@ -61,6 +63,8 @@ removes most of the remaining wrapping:
 - `else if` stays on one line, an opening brace follows a space as gofmt writes it, and a variable whose address
   escapes is declared and initialized in one statement.
 - Trailing comments that gofmt aligned stay aligned, and the comments C# still dropped are carried.
+- A pointer parameter keeps its Go name, a conversion between numeric types takes one cast, and an endless loop
+  reads `for (;;)`.
 
 **Faster from the first call.** A converted program counts calls toward optimizing a method from the start, rather
 than after .NET's usual quiet period of about 100 ms. On `win-x64`, a TLS handshake benchmark ran about a third
@@ -99,9 +103,19 @@ already did this; it was not announced then.
   program that starts many goroutines starts them faster ([Tuning](Tuning.md#goroutine-stacks)).
 - A package-level `sync.WaitGroup` stays outside a `testing/synctest` bubble, as in Go.
 - Panic messages name a Go `int32` as `int32` and a byte as `uint8`.
+- `fmt` handles a Go `uint16` that C# holds as a `char`: `%v` of one no longer overflows the stack, and `%T` of a
+  function type that uses one names `uint16`, not `Char`.
+- Two pointers to the same element of natively viewed memory, such as an `mmap`-ed page seen as a slice and as an
+  array pointer, compare equal, as in Go.
+- `runtime.Caller` in a deferred or `go` function reports the caller Go reports, not an internal wrapper frame.
 - Converting a single `.go` file names the output after that file, and a relative `-go2cspath` resolves.
 - The release's Windows executables are Authenticode-signed, and its `SHA256SUMS` carries a GPG signature
   ([Limitations](Limitations.md)).
+- A new guide, [Tuning](Tuning.md), covers choosing a deployment for converted code and the .NET runtime settings
+  that matter for it.
+- A package's validation page explains each test it discloses in plain words.
+- The [Tour of go2cs](https://github.com/ritchiecarroll/go2cs/blob/master/src/tour/README.md) gains a Generated Code
+  tab, which shows the source generators' output for the converted program.
 
 ---
 
