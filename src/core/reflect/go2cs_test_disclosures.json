@@ -126,12 +126,6 @@
       "reason": "runtime-capability: the test converts a **uintptr to a DEFINED pointer type. A defined pointer type emits as a go2cs-gen wrapper CLASS, so there is no aliasing view of the outer slot to hand out and the conversion cannot be performed at all -- which is why increment E3 refused it BY NAME rather than approximating it. The refusal is the honest answer: an approximation would hand back a wrapper over a COPY, and this test's whole point is that the collector must see the pointer through the conversion. reflect's own Convert is correct for every shape where an aliasing view exists; this is the one where the object model does not admit one."
     },
     {
-      "name": "TestAlignment",
-      "class": "runtime-capability",
-      "signature": "mismatched offsets in structure alignment:",
-      "reason": "runtime-capability: the assert computes field offsets by uintptr ARITHMETIC over the receiver's own address and compares them against reflect's answers. Managed memory exposes no stable byte offsets to arithmetic -- the runtime is free to lay out and to move objects -- so the test's arithmetic yields 0 where Go's yields a real offset, and the printed pair (8 0, then 16 0) is the test's OWN number against the bridge's. reflect's own Offset is CORRECT here and is not what fails: the divergence is in the measuring instrument the test builds, not in the operation under test. Pinned on the stable prefix because the two occurrences print different offsets."
-    },
-    {
       "name": "TestCallReturnsEmpty",
       "class": "codegen-liveness",
       "signature": "cleanup did not run",
