@@ -80,4 +80,18 @@ COORD expected these to read CVAC. Two read PASS instead, because the sweep scor
   - TestHappensBefore has no verdict on arm64 and reads infrastructure-error on x64.
   - Windows banks 59/0 for this row, so this is a darwin finding. The candidate cause is the darwin per-process
     thread limit against one OS thread per blocked goroutine. It is a candidate, not rooted.
+  - COORD ruled it POST-HOP (2026-11-02 20:34Z, item 6). The row has no darwin segment, so it is not a regression.
+    It is the one-thread-per-goroutine model meeting darwin's per-process thread limit, which belongs to the M:N
+    scheduler design.
+- math/big (C1-9): `math-big-names.tsv` lists all 251 names, each with its bank verdicts (the 1.26.10.1 proof page,
+  `docs/validation/1.26.10.1/math.big.md`) and its darwin verdicts at this tip.
+  - Source: relay c335bc5d19, run 41630858632, reading run 41503062854. Both RIDs are identical name for name.
+  - The two name sets are identical. Exactly one name moves: TestMulUnbalanced, from pass/fail (disclosed) to
+    pass/pass. The record lists it in `orphanedDisclosures`, with goos darwin.
+  - So 248 + 1 = 249 matched, and 3 - 1 = 2 disclosed. Both make up 251.
+  - `targetArchExcluded` is null: nothing was withdrawn from math/big.
+  - The BOARD prediction of 247 + 3 (d780a56fbc) was wrong. TestAddMulVVWWNoADX is in `arith_amd64_test.go`, which is
+    `//go:build !math_big_pure_go`. The corpus converts under `purego` and `math_big_pure_go`
+    (`defaultStdLibBuildTags`, src/go2cs/commandLineOptions.go:275), so that file is built on no platform. The name
+    is in neither the bank nor this reading.
 - runtime/debug banks 8/1, equal to its segment. Its record lists 2 disclosures, only one of which diverged.
