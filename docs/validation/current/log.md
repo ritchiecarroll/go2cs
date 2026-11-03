@@ -6,9 +6,9 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `log` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-03 · converter `0e857031f`*
 
-**23 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
+**24 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/log`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/log).
 
 Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
@@ -34,28 +34,13 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd
 | `TestCallDepth/Panicf` | pass | pass |
 | `TestCallDepth/Panicln` | pass | pass |
 | `TestDefault` | pass | pass |
-| `TestDiscard` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestDiscard` | pass | pass |
 | `TestEmptyPrintCreatesLine` | pass | pass |
 | `TestFlagAndPrefixSetting` | pass | pass |
 | `TestNonNewLogger` | pass | pass |
 | `TestOutput` | pass | pass |
 | `TestOutputRace` | pass | pass |
 | `TestUTCFlag` | pass | pass |
-
-## Disclosed divergences
-
-A disclosed divergence is a specific Go assertion this conversion does not satisfy — not
-a skipped test and not a tolerance. Each one is pinned by exact failure signature in the package's
-hand-owned [`go2cs_test_disclosures.json`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/log/go2cs_test_disclosures.json);
-a disclosed test that fails any *other* way is still a hard mismatch.
-
-The **Class** column says which kind each one is: a `deferred` entry is an assertion the managed
-CLR *can* meet, pinned against the named plan that will retire it; every other class is one it
-*provably cannot* satisfy.
-
-| Test | Class | Pinned reason |
-|:--|:--|:--|
-| `TestDiscard` | `deferred` | At-most-one AllocsPerRun assert over l.Printf("%s", <102400-byte string>): Go's single allocation is the variadic []any, and its `func(b []byte) []byte` closure over format/v does not escape Output, so Go keeps the closure off the heap. The converted call counts two objects per run: the Printf params copy (log.cs:289), Go's own one allocation, and the "%s" format literal materialized per call (log_test.cs:239). `Ꮡl.of(Logger.ᏑisDiscard)` (log.cs:226) is cached per box and accessor (golib/ж.cs:206-210) and costs nothing; the display class and delegate the C# compiler emits for the closure are not counted, so the count is a lower bound. |
 
 ## Excluded declarations
 

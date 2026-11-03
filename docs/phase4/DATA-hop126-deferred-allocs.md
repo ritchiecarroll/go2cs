@@ -107,6 +107,27 @@ tip: it read 4,081 to 4,432 per run at batch 19 and 4,071 to 4,642 at batch 24, 
 loops run a random number of times and the converted side allocates on every iteration. The successor record's
 amendment has the six readings.
 
+**Amended 2026-11-03 (lane H): two pins retired in the pre-refreeze bank seat.** Neither pin was in this record's
+table: `log`'s `TestDiscard` was relabelled `deferred` on 2026-09-23, before this record was written, and the runtime
+arena pins were never allocation pins. They are recorded here because COORD routed their retirement to this record.
+
+- **`log` · `TestDiscard`** (`deferred`, " allocs, want at most 1", no `platforms`) **is RETIRED**. Its reading
+  was 2 per run against Go's 1. It now passes on both sides on every platform. Discovery readings at freeze tip
+  `f6666d98a2`:
+  - windows (i9-S): COUNT 24 against banked 23;
+  - linux (P2-1): PASS 24, 0 disclosed;
+  - darwin (C1-9): 24 matched, 0 divergent on osx-arm64 and osx-x64.
+
+  At the seat base `0e857031fe` on windows (lane H), the comparison record reports the entry as an orphan, Go pass /
+  C# pass. The manifest is now empty and is deleted.
+- **`runtime` · `TestUserArenaLiveness/Free` and `/Finalizer`** (`codegen-liveness`, no `platforms`) **are
+  RETIRED**, and the parent `TestUserArenaLiveness` rides them. On windows the row reads 11083 = 11080 + 3:
+  - i9-S at `f6666d98a2`: COUNT 11083 against banked 11080;
+  - lane H at `0e857031fe`: 11083 matched, 63 divergent, and both entries reported as orphans, Go pass / C# pass.
+
+  Darwin (C1-13) reads FAIL with its two RIDs disagreeing, so runtime does not bank there. Its disclosure list is 63
+  long on both RIDs, against windows' 66 banked. Linux has no runtime reading at `f6666d98a2`.
+
 <!-- Provenance. Lane H, 2026-10-22. Worktree detached at 8c091fc3aa; the six rows' walls on windows/amd64 were
      crypto/sha256 249 s, strings 90 s, bytes 76 s, log/slog 272 s, math/big 156 s, crypto/internal/fips140test
      356 s. Each sweep exited 1 because the banked counts are still the go1.24.13 record, which this record does

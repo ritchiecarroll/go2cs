@@ -2206,10 +2206,11 @@ function Get-DarwinDisclosedDivergent {
 }
 
 function Get-DarwinSegmentRefusal {
-    param($Records, $Segment, [string] $AgreementRuling)
+    param($Records, $Segment, [string] $AgreementRuling, [bool] $ManifestPresent = $true, $Superseded = $null)
 
     # $Records: the evidence lines for ONE row; $Segment: the row's OS['darwin'] entry or $null; $AgreementRuling:
-    # the row's $DarwinAgreementRulings entry, or empty.
+    # the row's $DarwinAgreementRulings entry, or empty; $ManifestPresent: whether the row has a committed disclosure
+    # manifest at this tree; $Superseded: a list that receives the banked value of an exempted superseded reading.
     $arm = @($Records | Where-Object { $_.RID -ceq 'osx-arm64' })
     $x64 = @($Records | Where-Object { $_.RID -ceq 'osx-x64' })
     if (($arm.Count -ne 1) -or ($x64.Count -ne 1)) {
@@ -2227,6 +2228,14 @@ function Get-DarwinSegmentRefusal {
 
     $divergent = Get-DarwinDisclosedDivergent $a
     $want = "$($a.matched)" + $(if ($divergent -ne 0) { " + $divergent" } else { '' })
+    # SUPERSEDED (COORD, 2026-11-03): a reading that banked disclosures cannot hold where the row has no disclosure
+    # manifest, so the row owes no segment until the re-pass re-reads it, and must not carry one. A K = 0 reading
+    # is never superseded this way.
+    if (($divergent -gt 0) -and (-not $ManifestPresent)) {
+        if ($null -ne $Segment) { return "it banked at the pin with disclosures (darwin: $want), but no disclosure manifest exists for it at this tree, so that reading is superseded and it must carry no darwin: segment until the re-pass re-reads it" }
+        if ($null -ne $Superseded) { [void]$Superseded.Add("darwin: $want") }
+        return $null
+    }
     if ($null -eq $Segment) { return "it banked at the pin on both RIDs (darwin: $want) and carries no darwin: segment" }
     if (-not $Segment.Applicable) { return "it banked at the pin on both RIDs (darwin: $want) and carries darwin: n/a" }
     $have = "$($Segment.Expected)" + $(if ($Segment.Disclosed) { " + $($Segment.Disclosed)" } else { '' })
@@ -2319,6 +2328,17 @@ Assert-Equal 'darwin segment age: a row read and NOT banked that still carries a
 Assert-Equal 'darwin segment age: a row read and not banked with no segment is not refused' $null (Get-DarwinSegmentRefusal -Records $darwinSplit -Segment $null)
 Assert-Equal 'darwin segment age: one RID alone is refused, never read as banked' $true ($null -ne (Get-DarwinSegmentRefusal -Records @($darwinBanked[0]) -Segment (& $darwinSeg 98 2)))
 
+# A SUPERSEDED reading (COORD, 2026-11-03, the 1.26.10.2 pre-refreeze bank seat): a reading that banked `+ K`, K > 0,
+# cannot hold at a tree where the row has no committed disclosure manifest, so the row owes no segment until the re-pass
+# re-reads it, and the exemption is reported by name. Nothing else is exempted.
+$darwinBankedClean = @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'yes' 98 0), (New-DarwinFixtureRecord 'osx-x64' 'validated' 'yes' 98 0))
+$supersededFixture = New-Object System.Collections.Generic.List[string]
+Assert-Equal 'darwin segment age: a banked + K reading with no manifest and no segment is superseded, not refused' $null (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment $null -ManifestPresent $false -Superseded $supersededFixture)
+Assert-Equal 'darwin segment age: the superseded reading is reported by its banked value' 'darwin: 98 + 2' ($supersededFixture -join '; ')
+Assert-Equal 'darwin segment age: a superseded reading that still carries a segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment (& $darwinSeg 98 2) -ManifestPresent $false))
+Assert-Equal 'darwin segment age: a banked + K reading with its manifest present and no segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment $null -ManifestPresent $true))
+Assert-Equal 'darwin segment age: a banked K = 0 reading with no manifest and no segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinBankedClean -Segment $null -ManifestPresent $false))
+
 # The waves' contract, against a fixture TREE (the reader is part of the contract): a row failing in D-W1 and
 # validated in a later wave reads as the later wave, in either file order; a row read only in D-W1 keeps it; and
 # an undeclared subdirectory is named, never read.
@@ -2400,6 +2420,7 @@ if ((-not (Test-Path -LiteralPath $darwinEvidenceDir)) -and ($DarwinEvidenceDire
 $darwinRowsGated = 0
 $darwinRowsUnread = 0
 $darwinRefused = 0
+$darwinSuperseded = 0
 if (Test-Path -LiteralPath $darwinEvidenceDir) {
     $darwinRead = Read-DarwinEvidence -Directory $darwinEvidenceDir
     foreach ($stray in $darwinRead.Undeclared) {
@@ -2410,18 +2431,25 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
         if (-not $darwinEvidence.ContainsKey($row.Package)) { $darwinRowsUnread++; continue }
         $darwinRowsGated++
         $segment = if ($row.OS.ContainsKey('darwin')) { $row.OS['darwin'] } else { $null }
+        $manifestPresent = Test-Path -LiteralPath (Join-Path (Join-Path $PSScriptRoot 'core') ($row.Package + '/go2cs_test_disclosures.json'))
+        $superseded = New-Object System.Collections.Generic.List[string]
         $refusal = Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $darwinEvidence[$row.Package]) -Segment $segment `
-            -AgreementRuling $(if ($DarwinAgreementRulings.ContainsKey($row.Package)) { $DarwinAgreementRulings[$row.Package] } else { '' })
+            -AgreementRuling $(if ($DarwinAgreementRulings.ContainsKey($row.Package)) { $DarwinAgreementRulings[$row.Package] } else { '' }) `
+            -ManifestPresent $manifestPresent -Superseded $superseded
         if ($null -ne $refusal) {
             $darwinRefused++
             Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence $($darwinEvidenceAt.Relative))" $true $false
+        }
+        foreach ($reading in $superseded) {
+            $darwinSuperseded++
+            Write-Host ("darwin segment age (info): $($row.Package): superseded -- the evidence banked it at $reading, but there is no manifest at this tree, so it owes no segment until the re-pass re-reads it (evidence $($darwinEvidenceAt.Relative))") -ForegroundColor Yellow
         }
     }
     Assert-Equal 'darwin segment age: the evidence named at least one roster row (a zero means the rows were never matched)' $true ($darwinRowsGated -gt 0)
 }
 
 # Printed UNCONDITIONALLY: a gate whose reach is never shown cannot be told apart from one that reached nothing.
-Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused{5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' })) -ForegroundColor Cyan
+Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused, {6} superseded (no manifest; the re-pass owes them){5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' }), $darwinSuperseded) -ForegroundColor Cyan
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a
