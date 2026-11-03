@@ -6,8 +6,10 @@ its error codes mean, and where things live in the repository.
 
 ## Build the converter
 
-You need the Go release and the .NET SDK named in the README's [Requirements](README.md#requirements),
-with your Go environment set up (`GOROOT`/`GOPATH`). Converted projects target the framework named by
+You need the Go release named in the README's [Requirements](README.md#requirements) and the .NET 10
+SDK, version 10.0.400 or later, with your Go environment set up (`GOROOT`/`GOPATH`). The repository's
+[`global.json`](https://github.com/ritchiecarroll/go2cs/blob/master/global.json) sets that floor, so an
+earlier 10.0 SDK stops at the first `dotnet` command with "A compatible .NET SDK was not found". Converted projects target the framework named by
 [`src/Directory.Build.props`](https://github.com/ritchiecarroll/go2cs/blob/master/src/Directory.Build.props).
 The converter's module path is plain `go2cs`, so it cannot be installed by URL: clone the repository and
 install from the clone, as the README's [Installing the converter](README.md#installing-the-converter)
@@ -47,8 +49,8 @@ Every validated package ships its **converted C# test sources** next to the prod
 [`src/core`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core) (for example,
 [`unicode/utf8/utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8_test.cs)),
 so you can read the exact C# that runs — and re-run the validation yourself. You need the Go
-release and the .NET SDK in the README's [Requirements](README.md#requirements) (Go for the
-reference `go test` run), and `go2cs` on your `PATH` (see [Build the converter](#build-the-converter)).
+release in the README's [Requirements](README.md#requirements) (for the reference `go test` run), the
+.NET 10 SDK 10.0.400 or later, and `go2cs` on your `PATH` (see [Build the converter](#build-the-converter)).
 
 Run it from the root of your clone. The first argument is the package's Go source, and the second is
 the package's home in the converted tree; the converter locates the runtime and the package's

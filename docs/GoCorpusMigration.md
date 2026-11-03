@@ -4083,7 +4083,7 @@ release published nothing: §2, AMENDED
    and the pinned Go first on PATH, then both read back from the repository root:
    ```powershell
    $env:PATH = '<.NET 10 SDK root>;<pinned Go root>\bin;' + $env:PATH
-   dotnet --version                       # an SDK global.json admits (10.0.100, rollForward latestFeature)
+   dotnet --version                       # an SDK global.json admits (10.0.400, rollForward latestFeature)
    $env:GOTOOLCHAIN = 'local'; go version; Remove-Item Env:GOTOOLCHAIN   # the pin itself, not a re-exec
    ```
    Phase 0 refuses a dotnet whose `--version` fails from the repository root, before anything moves, and prints
