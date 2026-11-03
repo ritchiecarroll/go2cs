@@ -215,7 +215,7 @@ public class NativeFieldArrayViewTests
         }
 
         // A managed root: the helper and the raw route must agree, box for box or panic for panic.
-        ж<syscall.RawSockaddrInet4> managed = new StandardBox<syscall.RawSockaddrInet4>(default);
+        ж<syscall.RawSockaddrInet4> managed = new StandardBox<syscall.RawSockaddrInet4>(default(syscall.RawSockaddrInet4));
 
         Assert.AreEqual(
             Outcome(() => (ж<array<byte>>)(uintptr)@unsafe.Pointer.FromPinnedBox(managed.of(syscall.RawSockaddrInet4.ᏑPort))),
@@ -242,7 +242,7 @@ public class NativeFieldArrayViewTests
     [TestMethod]
     public void AManagedRootTakesTheFallback()
     {
-        ж<syscall.RawSockaddrInet4> sa = new StandardBox<syscall.RawSockaddrInet4>(default);
+        ж<syscall.RawSockaddrInet4> sa = new StandardBox<syscall.RawSockaddrInet4>(default(syscall.RawSockaddrInet4));
 
         Assert.AreEqual((nuint)0, sa.NativeAddress, "a managed box has no native address");
         Assert.IsNull(builtin.NativeFieldArrayPointer<byte>(sa.of(syscall.RawSockaddrInet4.ᏑPort), 2),

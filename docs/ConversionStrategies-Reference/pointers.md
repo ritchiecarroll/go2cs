@@ -141,7 +141,7 @@ with zero bytes allocated, Go's aliasing and equality, the chunk cost, a type wi
 fresh boxes, and a dropped backing being collected.)
 <!-- The table: src/core/golib/ж.ElemRefBox.cs:168 (`internal static ж<T> OfArrayElement(array<T> array, int index)`),
      the chunk: src/core/golib/ж.ElemRefBox.cs:158 (`private const int ElementBoxChunk = 64;`), the first of the
-     three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2679 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
+     three Ꮡ(array<T>, …) overloads: src/core/golib/builtin.cs:2693 (`return ElemRefBox<T>.OfArrayElement(target, index);`).
      Commits 8a714cf6dd, edb753ebca, 29d469bc11. The slice<T> overloads keep a fresh box per expression. -->
 
 (Guarded by the `SlicePointerIdentity` behavioral output test — self identity, distinctness, re-slice and re-slice-of-re-slice aliasing, the in-capacity `append` result, array-vs-slice-over-that-array, struct elements, a write through an element pointer observed through both views, and `map[*int]` store/overwrite/lookup/miss including a lookup keyed through a *different* window — vs `go run`. Counter-proven: pre-fix **every** identity assertion printed `false`, both map lookups returned empty, and `len(m)` grew from 2 to 3 on the overwrite.)

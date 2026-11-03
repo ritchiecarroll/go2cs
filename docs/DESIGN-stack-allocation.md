@@ -115,7 +115,7 @@ positions split into `&T{}` 422, `make` 282, `new` 118, slice literal 34 and `ma
 Ꮡ(new ΔInt(abs: z.slice(0, n2)));`). src/core/math/big/nat.cs:240
 (`Ꮡelem<Word>(x.slice(0, cap(x)), cap(x) - 1) == Ꮡelem<Word>(y.slice(0, cap(y)), cap(y) - 1)`). src/core/math/big/arith.cs:116 (`if (Ꮡelem(z, 0) != Ꮡelem(x, 0)) {`).
 Both read `Ꮡ(…)` until 1.26.10.2 seat #10 gave the compare `Ꮡelem` (docs/phase4/DESIGN-element-address-compare.md).
-src/core/golib/builtin.cs:2505-2506 (`AllocationCounter.Count();`…`return new ElemRefBox<T>(target, index);`).
+src/core/golib/builtin.cs:2519-2520 (`AllocationCounter.Count();`…`return new ElemRefBox<T>(target, index);`).
 src/go2cs/escapeAnalysisOperations.go:40-41 (`Phase A never lowers a METHOD's pointer`…`parameters (the §10.1
 boundary in the ref-lowering doc)`). -->
 

@@ -2454,10 +2454,24 @@ public static partial class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="target">Target value.</param>
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
-    public static ж<T> Ꮡ<T>(in T target)
+    /// <remarks>
+    /// <paramref name="target"/> is taken BY VALUE, never <c>in</c>, and cleared once the box holds it. This
+    /// method always COPIES into a new box (Go's <c>&amp;T{...}</c>, and through heap an escaping local), so no
+    /// caller relies on its argument's address. With <c>in</c>, an rvalue argument (the usual
+    /// <c>Ꮡ(new T(...))</c>) was spilled into a hidden local of the CALLER and passed by address, and when this
+    /// method was not inlined the JIT reported that local live for the caller's whole frame, keeping every
+    /// reference the value held alive after the box dropped it (the dump of crypto/internal/fips140cache's hung
+    /// TestCache showed one at [rsp+0x288]). The parameter is cleared for the case where this method IS inlined:
+    /// it is then a slot of the caller's frame, and the box constructor below takes it <c>in</c>. Guarded by
+    /// GolibTests' AddressOfRvalueRootingTests; heap carries the same rule for the same reason.
+    /// </remarks>
+    public static ж<T> Ꮡ<T>(T target)
     {
         // a consumer type's box carries the field-view slot (ж.Views.cs)
         ж<T> box = BoxShape<T>.Slotted ? new SlottedStandardBox<T>(target) : new StandardBox<T>(target);
+
+        // The box holds the value now; drop the parameter's own copy (see remarks).
+        target = default!;
 
         // `&T{}`, and through heap() an escaping local: a Go allocation (GoMemProfile).
         GoMemProfile.Charge<T>(box, 1, GoAllocEntry.NewObject);
@@ -2960,11 +2974,12 @@ public static partial class builtin
     /// </para>
     /// <para>
     /// By value is not enough on its own, so the parameter is CLEARED once the box holds the value. When this
-    /// method is inlined, <paramref name="target"/> becomes a slot of the caller's frame, and <c>Ꮡ(in T)</c>
-    /// below takes that slot's address. When <c>Ꮡ</c> is not inlined in turn (a shared generic in a large frame,
-    /// as in TestCache), the slot is address-exposed and reported live for the caller's whole frame: measured with
-    /// a dump of the hung test, the key was rooted by exactly that slot (an untracked <c>rsp+0x1D8</c>, written by
-    /// the inlined parameter and passed by <c>lea</c> to <c>Ꮡ</c>). Clearing it leaves that slot holding nothing.
+    /// method is inlined, <paramref name="target"/> becomes a slot of the caller's frame, and <c>Ꮡ</c> took
+    /// that slot's address while it took <c>in T</c>. When <c>Ꮡ</c> is not inlined in turn (a shared generic in a
+    /// large frame, as in TestCache), the slot is address-exposed and reported live for the caller's whole frame:
+    /// measured with a dump of the hung test, the key was rooted by exactly that slot (an untracked
+    /// <c>rsp+0x1D8</c>, passed by <c>lea</c> to <c>Ꮡ</c>). Ꮡ is by value now too, and the clear stays: any later
+    /// by-reference use of the parameter in this body would expose it again.
     /// </para>
     /// </remarks>
     public static ref T heap<T>(T target, out ж<T> pointer)

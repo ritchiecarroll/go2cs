@@ -184,8 +184,10 @@ public class FinalizerBindingTests
     // three constructors and two are reachable from a test: `StandardBox(in T value)` and
     // `StandardBox(NilType _) : base(isNull: true)`. `NilType` is a CLASS, so the untyped `default`
     // literal converts to it as null, and C#'s better-function-member tie-break prefers a by-value
-    // parameter over an `in` one -- so `new StandardBox<Holder>(default)` selects the NIL-POINTER
-    // constructor. `Holder` is a plain struct, so `IsNull` reduces to `m_isNull` alone
+    // parameter over an `in` one -- so `new StandardBox<Holder>(default)` selected the NIL-POINTER
+    // constructor. (Since 1.26.10.2 the value constructor is `StandardBox(T value)`, by value, so the tie
+    // has no winner and a bare `default` no longer compiles: the trap became a compile error, and the
+    // three sites that relied on it now spell `nil`.) `Holder` is a plain struct, so `IsNull` reduces to `m_isNull` alone
     // (`s_valueCanBeNull` is false for a non-nullable value type), and the very next `.of(...)` reads
     // `Value` and throws NilPointerDereference from inside `FieldRefWrappers.Wrap`.
     //

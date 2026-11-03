@@ -276,8 +276,8 @@ shortest exact text.
 `fmt.Sprintf("%v", x)` gives the Go text of any value as an `@string`. Converted Go code's `print` and `println`
 print a named value's underlying value and a pointer's address, as in Go, never its `String()`. That holds for a
 type-parameter value in generic code too.
-<!-- A pointer: src/core/golib/builtin.cs:3260 (`IPrintPointer pointer => pointer.PrintPointer(),`).
-     Every other value: src/core/golib/builtin.cs:3261 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
+<!-- A pointer: src/core/golib/builtin.cs:3275 (`IPrintPointer pointer => pointer.PrintPointer(),`).
+     Every other value: src/core/golib/builtin.cs:3276 (`_ => GoPrintText.Text(arg) ?? arg.ToString()`).
      The run-time unwrap of a named basic type:
      src/core/golib/GoPrintText.cs:31 (`GoReflect.TryUnwrapWrapperValue(value, out object? underlying)`).
      Guard:
