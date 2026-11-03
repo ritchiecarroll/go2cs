@@ -33479,9 +33479,11 @@ COORD ruled it the row's reading of record over GWSL-1's DIVERGED. But with `P2-
 not by ruling. So the bank of record applied exactly that one segment by hand: `linux: 596 + 3` -> `593 + 3`, the
 annotator's own arithmetic (verdicts 593; 3 listed less 0 host-fatal in scope), with a dated comment on the row.
 
-**Consequence until fixed:** `annotate_linux.py --evidence docs/phase4/rebank-1.26.10.2/linux` exits on this directory.
-Every other linux segment was written by the annotator before `P2-net.tsv` was stacked (P2-1, P2-2, GWSL-1, GWSL-2,
-all at the tip), and the roster guard does not read linux evidence, so nothing it gates is affected.
+**Kept outside the annotator's directory (COORD):** master must not carry a tool that exits on its own evidence
+directory. So P2's four net files move by `git mv` to `docs/phase4/rebank-1.26.10.2/linux/rereads/`.
+`annotate_linux.py` lists only the top of its directory, so it reads the four shards there again. It holds `net` at
+GWSL-1's DIVERGED and keeps the hand-applied `593 + 3`. The fix below still owes the re-read a declared place in
+the annotator's rule.
 
 **Post-hop fix, sized:** declare a named single-row re-read wave, for example a `-<row>` stem, ordered after pass 1
 and before `-R`. The rule must make one reading of record per row explicit when one row has more than one reading.
