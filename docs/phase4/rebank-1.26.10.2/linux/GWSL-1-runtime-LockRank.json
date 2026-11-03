@@ -1,0 +1,16 @@
+{
+  "source": {
+    "path": "/root/h10-GWSL-1/runtime/go2cs_test_comparison.json",
+    "host": "G-LAPTOP WSL (G-WSL), GWSL-1 row 15 (runtime), TIP d9dd8f54994297f34be694b7a4594fc6ea826024",
+    "size_bytes": 1155102,
+    "sha256": "7a939e380913f9abb6ce21dcca26987256f39e22d138f76d3de4d5c3db547de9",
+    "mtime_utc": "2026-11-03T18:16:59Z"
+  },
+  "go": {
+    "TestLockRankGenerated": "pass"
+  },
+  "csharp": {
+    "TestLockRankGenerated": "pass"
+  },
+  "disclosed_entries_naming_it": []
+}
