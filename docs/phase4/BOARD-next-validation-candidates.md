@@ -33490,4 +33490,27 @@ not inferred from file order. It needs a fixture arm in `test_annotate_evidence.
 
 — H (2026-11-03)
 
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): `net` does not bank on darwin; its two RIDs part on the runner VM's resolver and on one arm64 timing assert — OPEN, post-hop
+
+At the freeze tip `d9dd8f5499`, C1's darwin re-pass read `net` twice. Neither reading banks, so the row carries no
+`darwin:` segment this pass. It read `darwin: 552 + 3` at 1.26.10.1; the bank of record's `2h` removed it, and no
+third run is dispatched (COORD).
+
+| Reading | Run | osx-arm64 | osx-x64 | agree |
+|:--|:--|:--|:--|:--|
+| C1-15 | 41665739974 | FAIL, 541 matched | validated, 552 + 3 | no |
+| C1-15R (declared re-run, the reading of record) | 41701297335 | FAIL, 550 matched, 2 new divergences | validated, 552 + 3 | no |
+
+Two classes part the RIDs:
+- **The NXDOMAIN-environment class.** `TestLookupNoSuchHost`'s MX, NS and TXT `_NXDOMAIN` subtests, under the default,
+  `forced_go` and `forced_cgo` resolvers, time out on the runner VM's resolver. 10 such keys parted the RIDs in C1-15
+  and 1 in C1-15R. This is the class `$DarwinAgreementRulings`' `net` entry names (r3b, run 40279373649). But that
+  entry relaxes only the `agree` column, and only where both RIDs read `validated`, so it cannot bank an arm64 FAIL.
+- **An arm64-only timing assert, `TestDialerFallbackDelay`.** It read 445.5 ms and 443.9 ms against its 395 ms bound.
+
+**Owed, post-hop:** a darwin reading of `net` that both RIDs validate, or a ruling that names both classes, and the
+mechanism to bank under it.
+
+— H (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
