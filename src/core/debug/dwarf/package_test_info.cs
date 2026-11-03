@@ -8,24 +8,6 @@ global using static global::go.debug.dwarf_package;
 global using static global::go.debug.dwarf_internal_test_package;
 
 // <ImportedTypeAliases>
-global using dwarfꓸLineReader = go.debug.dwarf_package.ΔLineReader;
-global using dwarfꓸReader = go.debug.dwarf_package.ΔReader;
-global using dwarfꓸType = go.debug.dwarf_package.ΔType;
-global using elfꓸData = go.debug.elf_package.ΔData;
-global using elfꓸSection = go.debug.elf_package.ΔSection;
-global using machoꓸSection = go.debug.macho_package.ΔSection;
-global using machoꓸSegment = go.debug.macho_package.ΔSegment;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using peꓸSection = go.debug.pe_package.ΔSection;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +29,18 @@ using static global::go.debug.dwarf_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.debug.dwarf_package.Data))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.Entry))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.Field))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.LineFile))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.StructField))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.StructType))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.TypedefType))]
+[assembly: GoFieldAccess(typeof(go.debug.dwarf_package.UnsupportedType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,9 +50,9 @@ using static global::go.debug.dwarf_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/dwarf/entry_test.go", "entry_test.cs", "ABYgyoKCgoKUgpiigoCCpIIAEBaCAAcQlMqUypS41oIACBLWggAIEqaCgoKCgoKClIKUpoKCgpSCABAKggAjVoKClIKCgoKmgqaAgqSCgoKUgpSmggALCrgAL2qCgoKmgoKUggAJCriCgpSCgoKCgoKCgpSClIKUgoKUuIKCgtyCAGDCAYKCAAcQgoKCgpSC3ILiuIKClILosoKClIKCpoKCgoKCgpSClIKUgoKAgqSAgqSClILKgoKCgpSCuIKC", "294-322:1")]
-[assembly: go.GoPositionMap("debug/dwarf/line_test.go", "line_test.cs", "AA8egoKW7gASJpSm3IKCpgASJsr23IKSgoKUgoKmABImlNbcABAilKaUggAOHpQADgaCpoKClIKCqJKCgoKUgoKClJS4goCCkoLIgoKCgoKkgpKCyoCCpIKCgIKkpoKCgIKSggANDISSgoKCgpKCpoKC3IKmgoKSgqaCgoKCgpSmgpS4goKCgoKClMqCgoKCgriCgpSCgpSClJTWgoKCgpS4goKCgqaCuIKUgoKUgoKCgqamgoIACBIAIEKCgoKCyojyppSCgoKUgoKClIKClII=", "95-100:1")]
-[assembly: go.GoPositionMap("debug/dwarf/type_test.go", "type_test.cs", "ABIiABgyyoKCgqaCgpSmgoKCpoKClKaCgoKmgoKU5oLmgtaC5oKCgoKCgpSClIKCgpSCgoCClLaAgoKUgoLIgriCgvoACA6CgoKCgoKUgpSUypKCgoLKAAgMyoKCgoKCgpSClIKCgoKCgpSCgoKUgoKUhKaCgoKCpoKCysrKgoKmgoLWgoKmgoLWgoKmooKCgoKUgqaCgoKmlIKCgpSClKaUgpSCgoK4gsoABhoACQKC", "290-299:1", "", "247=Size/1/1/1,FormatInt/1/1/1")]
+[assembly: GoPositionMap("debug/dwarf/entry_test.go", "entry_test.cs", "ABcgyoKCgoKUgpiigoCCpIIAFBaCAAcQlMqUypS45oIACBLmggAIEqaCgoKCgoKClIKUpoKCgpSCABAKggAjVoKClIKCgoKmgqaAgqSCgoKUgpSmggALCrgAL2qCgoKmgoKUggALCriCgpSCgoKCgoKCgpSClIKUgoKUuIKCgtyCAGDCAYKCAAcQgoKCgpSC3ILiuIKClIL4soKClIKCpoKCgoKCgpSClIKUgoKAgqSAgqSClILKgoKCgpSCuIKC", "294-322:1")]
+[assembly: GoPositionMap("debug/dwarf/line_test.go", "line_test.cs", "AA8egoKW7gASJpSm3IKCpgASJsoACgbcgoKCgpSCgqYAEiaU5twAECKUppSCAA4elAAOBoKmgoKUgoKokoKCgpSCgoKUlLiCgIKCgsiCgoKCgpSCgoLKgIKkgoKAgqSmgoKAgoKCAA4MhJKCgoKCgoKmgoLcgqaCgoKCpoKCgoKClKaClLiCgoKCgoKUyoKCgoKCuIKClIKClIKUlOaCgoKClLiCgoKCpoK4gpSCgpSCgoKCpqaCggAIEgAgQoKCgoLKiPKmlIKCgpSCgoKUgoKUgg==", "95-100:1")]
+[assembly: GoPositionMap("debug/dwarf/type_test.go", "type_test.cs", "ABIiABgyyoKCgqaCgpSmgoKCpoKClKaCgoKmgoKUAAgGggAIBoLmguaCgoKCgoKUgpSCgoKUgoKAgpS2gIKClIKCyIK4goIACAoACA6CgoKCgoKUgpSU2pKCgoLKAAkMyoKCgoKCgpSClIKCgoKCgpSCgoKUgoKUhKaCgoKCpoKCysrKgoKmgoLmgoKmgoLmgoKmgoKCgoKUgqaCgoKmlIKCgpSClKaUgpSCgoK4gsoABxoACQKC", "290-299:1", "", "255=Size/1/1/1,FormatInt/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

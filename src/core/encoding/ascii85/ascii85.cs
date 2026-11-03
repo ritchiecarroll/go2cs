@@ -38,7 +38,7 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
         dst[4] = 0;
 
         // Unpack 4 bytes into uint32 to repack into base 85 5-byte.
-        uint32 v = default!;
+        uint32 v = default;
         var exprᴛ1 = len(src);
         var matchᴛ1 = false;
         var matchᴛ2 = exprᴛ1 is 3 || exprᴛ1 is 2 || exprᴛ1 is 1;
@@ -60,7 +60,7 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
 
         // Special case: zero (!!!!!) shortens to z.
         if (v == 0 && len(src) >= 4) {
-            dst[0] = (rune)'z';
+            dst[0] = (byte)'z';
             dst = dst[1..];
             src = src[4..];
             n++;
@@ -69,15 +69,15 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
 
         // Otherwise, 5 base 85 digits starting at !.
         for (nint i = 4; i >= 0; i--) {
-            dst[i] = (byte)((rune)'!' + (byte)(v % 85));
+            dst[i] = (byte)('!' + (byte)(v % 85));
             v /= 85;
         }
 
         // If src was short, discard the low destination bytes.
         nint m = 5;
-        if (len(src) < 4){
+        if (len(src) < 4) {
             m -= 4 - len(src);
-            src = default!;
+            src = default;
         } else {
             src = src[4..];
         }
@@ -104,22 +104,22 @@ public static io.WriteCloser NewEncoder(io.Writer w) {
 partial struct encoder {
     internal error err;
     internal io.Writer w;
-    internal array<byte> buf = new(4); // buffered data waiting to be encoded
-    internal nint nbuf;       // number of bytes in buf
+    internal array<byte> buf = new(4);     // buffered data waiting to be encoded
+    internal nint nbuf;                    // number of bytes in buf
     internal array<byte> @out = new(1024); // output buffer
 }
 
 internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
-    if (e.err != default!) {
+    if (e.err != nil) {
         return (0, e.err);
     }
 
     // Leading fringe.
     if (e.nbuf > 0) {
-        nint i = default!;
+        nint i = default;
         for (i = 0; i < len(p) && e.nbuf < 4; i++) {
             e.buf[e.nbuf] = p[i];
             e.nbuf++;
@@ -131,7 +131,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         nint nout = Encode(e.@out[0..], e.buf[0..]);
         {
-            (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != default!) {
+            (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != nil) {
                 return (n, e.err);
             }
         }
@@ -148,7 +148,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         if (nn > 0) {
             nint nout = Encode(e.@out[0..], p.slice(0, nn));
             {
-                (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != default!) {
+                (_, e.err) = e.w.Write(e.@out.slice(0, nout)); if (e.err != nil) {
                     return (n, e.err);
                 }
             }
@@ -168,7 +168,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
 // It is an error to call Write after calling Close.
 internal static error Close(this ref encoder e) {
     // If there's anything left in the buffer, flush it out
-    if (e.err == default! && e.nbuf > 0) {
+    if (e.err == nil && e.nbuf > 0) {
         nint nout = Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
         e.nbuf = 0;
         (_, e.err) = e.w.Write(e.@out.slice(0, nout));
@@ -199,28 +199,28 @@ public static @string Error(this CorruptInputError e) {
 //
 // [NewDecoder] wraps an [io.Reader] interface around Decode.
 public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<byte> src, bool flush) {
-    nint ndst = default!;
-    nint nsrc = default!;
-    error err = default!;
+    nint ndst = default;
+    nint nsrc = default;
+    error err = default;
 
-    uint32 v = default!;
-    nint nb = default!;
+    uint32 v = default;
+    nint nb = default;
     foreach (var (i, b) in src) {
         if (len(dst) - ndst < 4) {
             return (ndst, nsrc, err);
         }
         switch (ᐧ) {
-        case {} when b is <= (rune)' ': {
+        case {} when b is <= (byte)' ': {
             continue;
             break;
         }
-        case {} when b == (rune)'z' && nb == 0: {
+        case {} when b == (byte)'z' && nb == 0: {
             nb = 5;
             v = 0;
             break;
         }
-        case {} when (rune)'!' <= b && b <= (rune)'u': {
-            v = v * 85 + (uint32)((byte)(b - (rune)'!'));
+        case {} when (byte)'!' <= b && b <= (byte)'u': {
+            v = v * 85 + (uint32)((byte)(b - '!'));
             nb++;
             break;
         }
@@ -256,7 +256,7 @@ public static (nint ndst, nint nsrc, error err) Decode(slice<byte> dst, slice<by
             }
             for (nint i = 0; i < nb - 1; i++) {
                 dst[ndst] = (byte)(v >> 24);
-                v <<= (int)(8);
+                v <<= 8;
                 ndst++;
             }
         }
@@ -280,17 +280,17 @@ partial struct decoder {
 }
 
 internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (len(p) == 0) {
-        return (0, default!);
+        return (0, default);
     }
-    if (d.err != default!) {
+    if (d.err != nil) {
         return (0, d.err);
     }
 
-    while (ᐧ) {
+    for (;;) {
         // Copy leftover output from last decode.
         if (len(d.@out) > 0) {
             n = copy(p, d.@out);
@@ -299,22 +299,22 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         }
 
         // Decode leftover input from last read.
-        nint nn = default!;
-        nint nsrc = default!;
-        nint ndst = default!;
+        nint nn = default;
+        nint nsrc = default;
+        nint ndst = default;
         if (d.nbuf > 0) {
-            (ndst, nsrc, d.err) = Decode(d.outbuf[0..], d.buf.slice(0, d.nbuf), d.readErr != default!);
+            (ndst, nsrc, d.err) = Decode(d.outbuf[0..], d.buf.slice(0, d.nbuf), d.readErr != nil);
             if (ndst > 0) {
                 d.@out = d.outbuf.slice(0, ndst);
                 d.nbuf = copy(d.buf[0..], d.buf.slice(nsrc, d.nbuf));
                 continue; // copy out and return
             }
-            if (ndst == 0 && d.err == default!) {
+            if (ndst == 0 && d.err == nil) {
                 // Special case: input buffer is mostly filled with non-data bytes.
                 // Filter out such bytes to make room for more input.
                 nint off = 0;
                 for (nint i = 0; i < d.nbuf; i++) {
-                    if (d.buf[i] > (rune)' ') {
+                    if (d.buf[i] > ' ') {
                         d.buf[off] = d.buf[i];
                         off++;
                     }
@@ -324,10 +324,10 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         }
 
         // Out of input, out of decoded output. Check errors.
-        if (d.err != default!) {
+        if (d.err != nil) {
             return (0, d.err);
         }
-        if (d.readErr != default!) {
+        if (d.readErr != nil) {
             d.err = d.readErr;
             return (0, d.err);
         }

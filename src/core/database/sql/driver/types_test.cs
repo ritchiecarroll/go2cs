@@ -38,53 +38,53 @@ internal partial struct t /*global::go.time_package.Time*/;
 internal partial struct @is /*[]nint*/;
 
 internal static slice<valueConverterTest> valueConverterTests;
-internal static void initᴛvalueConverterTests() { valueConverterTests = new valueConverterTest[]{
-    new(Bool, (@string)"true"u8, true, ""u8),
-    new(Bool, (@string)"True"u8, true, ""u8),
-    new(Bool, slice<byte>("t"u8), true, ""u8),
-    new(Bool, true, true, ""u8),
-    new(Bool, (@string)"1"u8, true, ""u8),
-    new(Bool, (nint)1, true, ""u8),
-    new(Bool, (int64)1, true, ""u8),
-    new(Bool, (uint16)1, true, ""u8),
-    new(Bool, (@string)"false"u8, false, ""u8),
-    new(Bool, false, false, ""u8),
-    new(Bool, (@string)"0"u8, false, ""u8),
-    new(Bool, (nint)0, false, ""u8),
-    new(Bool, (int64)0, false, ""u8),
-    new(Bool, (uint16)0, false, ""u8),
-    new(c: Bool, @in: (@string)"foo"u8, err: "sql/driver: couldn't convert \"foo\" into type bool"u8),
-    new(c: Bool, @in: (nint)2, err: "sql/driver: couldn't convert 2 into type bool"u8),
-    new(DefaultParameterConverter, now, now, ""u8),
-    new(DefaultParameterConverter, (ж<int64>)nil, default!, ""u8),
-    new(DefaultParameterConverter, Ꮡanswer, answer, ""u8),
-    new(DefaultParameterConverter, Ꮡnow, now, ""u8),
-    new(DefaultParameterConverter, (i)9, (int64)9, ""u8),
-    new(DefaultParameterConverter, (f)0.1D, (float64)0.1D, ""u8),
-    new(DefaultParameterConverter, (b)true, true, ""u8),
-    new(DefaultParameterConverter, new bs(new byte[]{1}.slice()), new byte[]{1}.slice(), ""u8),
-    new(DefaultParameterConverter, (s)(@string)"a"u8, (@string)"a"u8, ""u8),
-    new(DefaultParameterConverter, (t)now, default!, "unsupported type driver.t, a struct"u8),
-    new(DefaultParameterConverter, new @is(new nint[]{1}.slice()), default!, "unsupported type driver.is, a slice of int"u8),
-    new(DefaultParameterConverter, new dec(exponent: -6), new dec(exponent: -6), ""u8)
-}.slice(); }
+internal static void initᴛvalueConverterTests() { valueConverterTests = slice<valueConverterTest>([
+    new(Bool, (@string)"true", true, ""),
+    new(Bool, (@string)"True", true, ""),
+    new(Bool, slice<byte>("t"u8), true, ""),
+    new(Bool, true, true, ""),
+    new(Bool, (@string)"1", true, ""),
+    new(Bool, (nint)1, true, ""),
+    new(Bool, (int64)1, true, ""),
+    new(Bool, (uint16)1, true, ""),
+    new(Bool, (@string)"false", false, ""),
+    new(Bool, false, false, ""),
+    new(Bool, (@string)"0", false, ""),
+    new(Bool, (nint)0, false, ""),
+    new(Bool, (int64)0, false, ""),
+    new(Bool, (uint16)0, false, ""),
+    new(c: Bool, @in: (@string)"foo", err: "sql/driver: couldn't convert \"foo\" into type bool"),
+    new(c: Bool, @in: (nint)2, err: "sql/driver: couldn't convert 2 into type bool"),
+    new(DefaultParameterConverter, now, now, ""),
+    new(DefaultParameterConverter, (ж<int64>)nil, default, ""),
+    new(DefaultParameterConverter, Ꮡanswer, answer, ""),
+    new(DefaultParameterConverter, Ꮡnow, now, ""),
+    new(DefaultParameterConverter, (i)9, (int64)9, ""),
+    new(DefaultParameterConverter, (f)0.1D, (float64)0.1D, ""),
+    new(DefaultParameterConverter, (b)true, true, ""),
+    new(DefaultParameterConverter, new bs(new byte[]{1}.slice()), slice<byte>([1]), ""),
+    new(DefaultParameterConverter, (s)(@string)"a", (@string)"a", ""),
+    new(DefaultParameterConverter, (t)now, default, "unsupported type driver.t, a struct"),
+    new(DefaultParameterConverter, new @is(new nint[]{1}.slice()), default, "unsupported type driver.is, a slice of int"),
+    new(DefaultParameterConverter, new dec(exponent: -6), new dec(exponent: -6), "")
+]); }
 
-public static void TestValueConverters(ж<testing.T> Ꮡt) {
+public static void TestValueConverters(ж<testing.T> t) {
     foreach (var (i, tt) in valueConverterTests) {
         var (@out, err) = tt.c.ConvertValue(tt.@in);
         @string goterr = ""u8;
-        if (err != default!) {
+        if (err != nil) {
             goterr = err.Error();
         }
         if (goterr != tt.err) {
-            Ꮡt.Errorf("test %d: %T(%T(%v)) error = %q; want error = %q"u8,
+            t.Errorf("test %d: %T(%T(%v)) error = %q; want error = %q",
                 i, tt.c, tt.@in, tt.@in, goterr, tt.err);
         }
         if (tt.err != ""u8) {
             continue;
         }
         if (!reflect.DeepEqual(@out, tt.@out)) {
-            Ꮡt.Errorf("test %d: %T(%T(%v)) = %v (%T); want %v (%T)"u8,
+            t.Errorf("test %d: %T(%T(%v)) = %v (%T); want %v (%T)",
                 i, tt.c, tt.@in, tt.@in, @out, @out, tt.@out, tt.@out);
         }
     }

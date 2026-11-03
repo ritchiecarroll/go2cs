@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using colorꓸRGBA = go.image.color_package.ΔRGBA;
-global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
 using go;
@@ -52,7 +51,13 @@ using static go.image.gif_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(decoder))]
+[assembly: GoFieldAccess(typeof(encoder))]
+[assembly: GoFieldAccess(typeof(image_package.Paletted))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,8 +67,8 @@ using static go.image.gif_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSSlKamgoKSgpKC3IKCkoKmqMSAgpS2lIKClIKmgoKClJSAgsiAgraCuIKUpsqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClKTYgoKmpJSCgILsgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClNbCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTagIKSgsiCgoLcgqaCgoLKgoIACAaCgIKkgoKCggARJIKU3IKCgpSAgqQACBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C")]
-[assembly: go.GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoCCtqamgpSCgpSmgoKUpoKClKaCgpTmgoKUgoK4goKUgIKCgoKCgoKCgoKUuIKCgsiCgoKCgoKCgpSCgoKC+IKClIKClMaAgpSCpIKClIKUlKaCgoKClvaygqaCgqaCgoKUgoKmgoKCgpSAgoLIgoKCgoKUlKaClJSClIKCgoKC3IKAgpSCgoKUyoKmgsiCgpSUgoKCgIKCgoKmgoKCgsiCABUowoKmgqbIgpSCgoKSgoCCyICClLaCgoKClJSCgtjEgoKmgoKUgpSCpoKCgIKCgoLayoKClNyCkoKm", "", "", "243=Equal/2/2/1;509=Dx/1/1/5,Dy/1/1/6")]
+[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmqMSAgpS2lIKClIKmgoKClJSAgtiAgraCyIKUpsqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClLTogoKmtJSCgILsgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClObCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTagIKCgsiCgoLcgqaCgoLKgoIACQaCgIKkgoKCggARJIKU3IKCgpSAgqQACBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C", "", "", "", "451:21")]
+[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoCCtqamgpSCgpSmgoKUpoKClKaCgpQACAaCgpSCgriCgpSAgoKCgoKCgoKCgpS4goKCyIKCgoKCgoKClIKCgoIACQiCgpSCgpTGgIKUgqSCgpSClJSmgoKCgpYACgaygqaCgqaCgoKUgoKmgoKCgpSAgoLIgoKCgoKUlKaClJSClIKCgoKC3IKAgpSCgoKUyoKmgsiCgpSUgoKCgIKCgoKmgoKCgsiCABkowoKmgqa4gpSCgoKCgoCCyICClLaCgoKClJSCgujEgoKmgoKUgpSCpoKCgIKCgoLayoKClNyCgoKm", "", "", "247=Equal/2/2/1;518=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

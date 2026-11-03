@@ -60,8 +60,10 @@ public static slogꓸHandler Handler(this ref LevelHandler h) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string notPrintedˢ = "not printed"u8;
-internal static readonly @string printedˢ = "printed"u8;
+internal static ref readonly @string notPrintedˢ => ref notPrintedˢᵇ;
+private static readonly @string notPrintedˢᵇ = "not printed"u8;
+internal static ref readonly @string printedˢ => ref printedˢᵇ;
+private static readonly @string printedˢᵇ = "printed"u8;
 
 // This example shows how to Use a LevelHandler to change the level of an
 // existing Handler while preserving its other behavior.
@@ -74,7 +76,7 @@ internal static readonly @string printedˢ = "printed"u8;
 public static void ExampleHandler_levelHandler() {
     var removeTime = (slice<@string> groups, Δslog.Attr a) => {
         if (a.Key == Δslog.TimeKey && len(groups) == 0) {
-            return new Δslog.Attr(nil);
+            return new Δslog.Attr();
         }
         return a;
     };

@@ -11,55 +11,55 @@ partial class cpu_package {
 internal static UntypedInt cacheLineSize => 64;
 
 internal static void initOptions() {
-    options = new option[]{
-        new(Name: "adx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
-        new(Name: "aes"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
-        new(Name: "avx"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
-        new(Name: "avx2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX2)),
-        new(Name: "avx512"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512)),
-        new(Name: "avx512f"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
-        new(Name: "avx512cd"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512CD)),
-        new(Name: "avx512er"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512ER)),
-        new(Name: "avx512pf"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512PF)),
-        new(Name: "avx512vl"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)),
-        new(Name: "avx512bw"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
-        new(Name: "avx512dq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512DQ)),
-        new(Name: "avx512ifma"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512IFMA)),
-        new(Name: "avx512vbmi"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VBMI)),
-        new(Name: "avx512vnniw"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX5124VNNIW)),
-        new(Name: "avx5124fmaps"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX5124FMAPS)),
-        new(Name: "avx512vpopcntdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPOPCNTDQ)),
-        new(Name: "avx512vpclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ)),
-        new(Name: "avx512vnni"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VNNI)),
-        new(Name: "avx512gfni"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512GFNI)),
-        new(Name: "avx512vaes"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VAES)),
-        new(Name: "avx512vbmi2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VBMI2)),
-        new(Name: "avx512bitalg"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BITALG)),
-        new(Name: "avx512bf16"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BF16)),
-        new(Name: "amxtile"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAMXTile)),
-        new(Name: "amxint8"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAMXInt8)),
-        new(Name: "amxbf16"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAMXBF16)),
-        new(Name: "bmi1"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI1)),
-        new(Name: "bmi2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI2)),
-        new(Name: "cx16"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasCX16)),
-        new(Name: "erms"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
-        new(Name: "fma"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasFMA)),
-        new(Name: "osxsave"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasOSXSAVE)),
-        new(Name: "pclmulqdq"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
-        new(Name: "popcnt"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasPOPCNT)),
-        new(Name: "rdrand"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDRAND)),
-        new(Name: "rdseed"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDSEED)),
-        new(Name: "sse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE3)),
-        new(Name: "sse41"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
-        new(Name: "sse42"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
-        new(Name: "ssse3"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)),
-        new(Name: "avxifma"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXIFMA)),
-        new(Name: "avxvnni"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXVNNI)),
-        new(Name: "avxvnniint8"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXVNNIInt8)),
+    options = slice<option>([
+        new(Name: "adx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasADX)),
+        new(Name: "aes", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAES)),
+        new(Name: "avx", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX)),
+        new(Name: "avx2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX2)),
+        new(Name: "avx512", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512)),
+        new(Name: "avx512f", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512F)),
+        new(Name: "avx512cd", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512CD)),
+        new(Name: "avx512er", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512ER)),
+        new(Name: "avx512pf", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512PF)),
+        new(Name: "avx512vl", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VL)),
+        new(Name: "avx512bw", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BW)),
+        new(Name: "avx512dq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512DQ)),
+        new(Name: "avx512ifma", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512IFMA)),
+        new(Name: "avx512vbmi", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VBMI)),
+        new(Name: "avx512vnniw", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX5124VNNIW)),
+        new(Name: "avx5124fmaps", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX5124FMAPS)),
+        new(Name: "avx512vpopcntdq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPOPCNTDQ)),
+        new(Name: "avx512vpclmulqdq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VPCLMULQDQ)),
+        new(Name: "avx512vnni", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VNNI)),
+        new(Name: "avx512gfni", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512GFNI)),
+        new(Name: "avx512vaes", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VAES)),
+        new(Name: "avx512vbmi2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512VBMI2)),
+        new(Name: "avx512bitalg", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BITALG)),
+        new(Name: "avx512bf16", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVX512BF16)),
+        new(Name: "amxtile", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAMXTile)),
+        new(Name: "amxint8", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAMXInt8)),
+        new(Name: "amxbf16", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAMXBF16)),
+        new(Name: "bmi1", Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI1)),
+        new(Name: "bmi2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasBMI2)),
+        new(Name: "cx16", Feature: ᏑX86.of(X86ᴛ1.ᏑHasCX16)),
+        new(Name: "erms", Feature: ᏑX86.of(X86ᴛ1.ᏑHasERMS)),
+        new(Name: "fma", Feature: ᏑX86.of(X86ᴛ1.ᏑHasFMA)),
+        new(Name: "osxsave", Feature: ᏑX86.of(X86ᴛ1.ᏑHasOSXSAVE)),
+        new(Name: "pclmulqdq", Feature: ᏑX86.of(X86ᴛ1.ᏑHasPCLMULQDQ)),
+        new(Name: "popcnt", Feature: ᏑX86.of(X86ᴛ1.ᏑHasPOPCNT)),
+        new(Name: "rdrand", Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDRAND)),
+        new(Name: "rdseed", Feature: ᏑX86.of(X86ᴛ1.ᏑHasRDSEED)),
+        new(Name: "sse3", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE3)),
+        new(Name: "sse41", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE41)),
+        new(Name: "sse42", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE42)),
+        new(Name: "ssse3", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSSE3)),
+        new(Name: "avxifma", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXIFMA)),
+        new(Name: "avxvnni", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXVNNI)),
+        new(Name: "avxvnniint8", Feature: ᏑX86.of(X86ᴛ1.ᏑHasAVXVNNIInt8)),
 
         // These capabilities should always be enabled on amd64:
-        new(Name: "sse2"u8, Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE2), Required: runtime.GOARCH == "amd64"u8)
-    }.slice();
+        new(Name: "sse2", Feature: ᏑX86.of(X86ᴛ1.ᏑHasSSE2), Required: runtime.GOARCH == "amd64"u8)
+    ]);
 }
 
 internal static void archInit() {
@@ -86,15 +86,15 @@ internal static void archInit() {
     X86.HasOSXSAVE = isSet(27, ecx1);
     X86.HasRDRAND = isSet(30, ecx1);
 
-    bool osSupportsAVX = default!;
-    bool osSupportsAVX512 = default!;
+    bool osSupportsAVX = default;
+    bool osSupportsAVX512 = default;
     // For XGETBV, OSXSAVE bit is required and sufficient.
     if (X86.HasOSXSAVE) {
         var (eax, _) = xgetbv();
         // Check if XMM and YMM registers have OS support.
         osSupportsAVX = isSet(1, eax) && isSet(2, eax);
 
-        if (runtime.GOOS == "darwin"u8){
+        if (runtime.GOOS == "darwin"u8) {
             // Darwin requires special AVX512 checks, see cpu_darwin_x86.go
             osSupportsAVX512 = osSupportsAVX && darwinSupportsAVX512();
         } else {

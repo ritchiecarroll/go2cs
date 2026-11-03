@@ -24,24 +24,24 @@ internal partial struct TestCleanup_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanup(ж<testing.T> Ꮡt) {
+public static partial void TestCleanup(ж<testing.T> t) {
     var ch = new channel<bool>(1);
     var done = new channel<bool>(1);
     nint want = 97531;
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanup_T>().of(TestCleanup_T.Ꮡv);
+        var v = @new<TestCleanup_T>().Ꮡv;
         v.Value = 97531;
         var chʗ2 = chʗ1;
         var cleanup = (nint x) => {
             if (x != want) {
-                Ꮡt.Errorf("cleanup %d, want %d"u8, x, want);
+                t.Errorf("cleanup %d, want %d", x, want);
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
-        v = default!;
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value });
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -57,26 +57,26 @@ internal partial struct TestCleanupMultiple_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanupMultiple(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupMultiple(ж<testing.T> t) {
     var ch = new channel<bool>(3);
     var done = new channel<bool>(1);
     nint want = 97531;
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanupMultiple_T>().of(TestCleanupMultiple_T.Ꮡv);
+        var v = @new<TestCleanupMultiple_T>().Ꮡv;
         v.Value = 97531;
         var chʗ2 = chʗ1;
         var cleanup = (nint x) => {
             if (x != want) {
-                Ꮡt.Errorf("cleanup %d, want %d"u8, x, want);
+                t.Errorf("cleanup %d, want %d", x, want);
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
-        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
-        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
-        v = default!;
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value });
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value });
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value });
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -89,7 +89,7 @@ public static partial void TestCleanupMultiple(ж<testing.T> Ꮡt) {
 internal partial struct TestCleanupZeroSizedStruct_Z /*dyn*/ {
 }
 
-public static void TestCleanupZeroSizedStruct(ж<testing.T> Ꮡt) {
+public static void TestCleanupZeroSizedStruct(ж<testing.T> t) {
     var z = @new<TestCleanupZeroSizedStruct_Z>();
     Δruntime.AddCleanup(z, (@string s) => {
     }, fooˢ2);
@@ -103,14 +103,14 @@ internal partial struct TestCleanupAfterFinalizer_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupAfterFinalizer(ж<testing.T> t) {
     var ch = new channel<nint>(2);
     var done = new channel<bool>(1);
     nint want = 97531;
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanupAfterFinalizer_T>().of(TestCleanupAfterFinalizer_T.Ꮡv);
+        var v = @new<TestCleanupAfterFinalizer_T>().Ꮡv;
         v.Value = 97531;
         var chʗ2 = chʗ1;
         var finalizer = (ж<nint> x) => {
@@ -119,26 +119,26 @@ public static partial void TestCleanupAfterFinalizer(ж<testing.T> Ꮡt) {
         var chʗ3 = chʗ1;
         var cleanup = (nint x) => {
             if (x != want) {
-                Ꮡt.Errorf("cleanup %d, want %d"u8, x, want);
+                t.Errorf("cleanup %d, want %d", x, want);
             }
             chʗ3.ᐸꟷ(2);
         };
-        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
+        Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value });
         Δruntime.SetFinalizer(v.OrTypedNil(), (finalizer).OrTypedNilFunc());
-        v = default!;
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
     Δruntime.GC();
-    nint result = default!;
+    nint result = default;
     result = ᐸꟷ(ch);
     if (result != 1) {
-        Ꮡt.Errorf("result %d, want 1"u8, result);
+        t.Errorf("result %d, want 1", result);
     }
     Δruntime.GC();
     result = ᐸꟷ(ch);
     if (result != 2) {
-        Ꮡt.Errorf("result %d, want 2"u8, result);
+        t.Errorf("result %d, want 2", result);
     }
 }
 
@@ -153,7 +153,7 @@ internal partial struct TestCleanupInteriorPointer_T /*dyn*/ {
     internal nint c;
 }
 
-public static partial void TestCleanupInteriorPointer(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupInteriorPointer(ж<testing.T> t) {
     var ch = new channel<bool>(3);
     var done = new channel<bool>(1);
     nint want = 97531;
@@ -161,20 +161,20 @@ public static partial void TestCleanupInteriorPointer(ж<testing.T> Ꮡt) {
     var doneʗ1 = done;
     goǃ(() => {
         var ts = @new<TestCleanupInteriorPointer_T>();
-        ts.Value.a = 97531;
-        ts.Value.b = 97531;
-        ts.Value.c = 97531;
+        ts.a = 97531;
+        ts.b = 97531;
+        ts.c = 97531;
         var chʗ2 = chʗ1;
         var cleanup = (nint x) => {
             if (x != want) {
-                Ꮡt.Errorf("cleanup %d, want %d"u8, x, want);
+                t.Errorf("cleanup %d, want %d", x, want);
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡa), cleanup, 97531, new object?[] { Ꮡt.Value });
-        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡb), cleanup, 97531, new object?[] { Ꮡt.Value });
-        Δruntime.AddCleanup(ts.of(TestCleanupInteriorPointer_T.Ꮡc), cleanup, 97531, new object?[] { Ꮡt.Value });
-        ts = default!;
+        Δruntime.AddCleanup(ts.Ꮡa, cleanup, 97531, new object?[] { t.Value });
+        Δruntime.AddCleanup(ts.Ꮡb, cleanup, 97531, new object?[] { t.Value });
+        Δruntime.AddCleanup(ts.Ꮡc, cleanup, 97531, new object?[] { t.Value });
+        ts = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -195,19 +195,18 @@ internal partial struct TestCleanupStop_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanupStop(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupStop(ж<testing.T> t) {
     var done = new channel<bool>(1);
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanupStop_T>().of(TestCleanupStop_T.Ꮡv);
+        var v = @new<TestCleanupStop_T>().Ꮡv;
         v.Value = 97531;
         var cleanup = (nint x) => {
-            Ꮡt.Error(cleanupCalledWantNoˢ);
+            t.Error(cleanupCalledWantNoˢ);
         };
-        ref var c = ref heap<Δruntime.Cleanup>(out var Ꮡc);
-        c = Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
+        ref var c = ref heap<Δruntime.Cleanup>(Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value }), out var Ꮡc);
         c.Stop();
-        v = default!;
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -222,21 +221,20 @@ internal partial struct TestCleanupStopMultiple_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanupStopMultiple(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupStopMultiple(ж<testing.T> t) {
     var done = new channel<bool>(1);
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanupStopMultiple_T>().of(TestCleanupStopMultiple_T.Ꮡv);
+        var v = @new<TestCleanupStopMultiple_T>().Ꮡv;
         v.Value = 97531;
         var cleanup = (nint x) => {
-            Ꮡt.Error(cleanupCalledWantNoˢ);
+            t.Error(cleanupCalledWantNoˢ);
         };
-        ref var c = ref heap<Δruntime.Cleanup>(out var Ꮡc);
-        c = Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { Ꮡt.Value });
+        ref var c = ref heap<Δruntime.Cleanup>(Δruntime.AddCleanup(v, cleanup, 97531, new object?[] { t.Value }), out var Ꮡc);
         c.Stop();
         c.Stop();
         c.Stop();
-        v = default!;
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -251,27 +249,27 @@ internal partial struct TestCleanupStopinterleavedMultiple_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanupStopinterleavedMultiple(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupStopinterleavedMultiple(ж<testing.T> t) {
     var ch = new channel<bool>(3);
     var done = new channel<bool>(1);
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanupStopinterleavedMultiple_T>().of(TestCleanupStopinterleavedMultiple_T.Ꮡv);
+        var v = @new<TestCleanupStopinterleavedMultiple_T>().Ꮡv;
         v.Value = 97531;
         var chʗ2 = chʗ1;
         var cleanup = (nint x) => {
             if (x != 1) {
-                Ꮡt.Error(cleanupCalledWantNoˢ);
+                t.Error(cleanupCalledWantNoˢ);
             }
             chʗ2.ᐸꟷ(true);
         };
-        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { Ꮡt.Value });
-        Δruntime.AddCleanup(v, cleanup, 2, new object?[] { Ꮡt.Value }).Stop();
-        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { Ꮡt.Value });
-        Δruntime.AddCleanup(v, cleanup, 2, new object?[] { Ꮡt.Value }).Stop();
-        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { Ꮡt.Value });
-        v = default!;
+        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { t.Value });
+        Δruntime.AddCleanup(v, cleanup, 2, new object?[] { t.Value }).Stop();
+        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { t.Value });
+        Δruntime.AddCleanup(v, cleanup, 2, new object?[] { t.Value }).Stop();
+        Δruntime.AddCleanup(v, cleanup, 1, new object?[] { t.Value });
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -289,22 +287,21 @@ internal partial struct TestCleanupStopAfterCleanupRuns_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestCleanupStopAfterCleanupRuns(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupStopAfterCleanupRuns(ж<testing.T> t) {
     var ch = new channel<bool>(1);
     var done = new channel<bool>(1);
     ref var stop = ref heap<Action>(out var Ꮡstop);
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
-        var v = @new<TestCleanupStopAfterCleanupRuns_T>().of(TestCleanupStopAfterCleanupRuns_T.Ꮡv);
+        var v = @new<TestCleanupStopAfterCleanupRuns_T>().Ꮡv;
         v.Value = 97531;
         var chʗ2 = chʗ1;
         var cleanup = (nint x) => {
             chʗ2.ᐸꟷ(true);
         };
-        ref var cl = ref heap<Δruntime.Cleanup>(out var Ꮡcl);
-        cl = Δruntime.AddCleanup(v, cleanup, 97531);
-        v = default!;
+        ref var cl = ref heap<Δruntime.Cleanup>(Δruntime.AddCleanup(v, cleanup, 97531), out var Ꮡcl);
+        v = default;
         var clʗ1 = cl;
                 Ꮡstop.ValueSlot = () => clʗ1.Stop();
         doneʗ1.ᐸꟷ(true);
@@ -316,7 +313,8 @@ public static partial void TestCleanupStopAfterCleanupRuns(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeAddCleanupPtrIsˢ = "runtime.AddCleanup: ptr is equal to arg, cleanup will never run"u8;
+internal static ref readonly @string runtimeAddCleanupPtrIsˢ => ref runtimeAddCleanupPtrIsˢᵇ;
+private static readonly @string runtimeAddCleanupPtrIsˢᵇ = "runtime.AddCleanup: ptr is equal to arg, cleanup will never run"u8;
 internal static readonly object wantPanicTestDidNotPanicˢ = (@string)"want panic, test did not panic"u8;
 
 // allocate struct with pointer to avoid hitting tinyalloc.
@@ -327,28 +325,27 @@ internal partial struct TestCleanupPointerEqualsArg_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static void TestCleanupPointerEqualsArg(ж<testing.T> Ꮡt) {
+public static void TestCleanupPointerEqualsArg(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // See go.dev/issue/71316
         defer(() => {
             @string want = runtimeAddCleanupPtrIsˢ;
             {
-                var r = recover(); if (r == default!){
-                    Ꮡt.Error(wantPanicTestDidNotPanicˢ);
-                } else 
-                if (AreEqual(r, want)){
+                var r = recover(); if (r == nil) {
+                    t.Error(wantPanicTestDidNotPanicˢ);
+                } else if (AreEqual(r, want)) {
                     // do nothing
                 } else {
-                    Ꮡt.Errorf("wrong panic: want=%q, got=%q"u8, want, r);
+                    t.Errorf("wrong panic: want=%q, got=%q", want, r);
                 }
             }
         }, ref ᒐ);
-        var v = @new<TestCleanupPointerEqualsArg_T>().of(TestCleanupPointerEqualsArg_T.Ꮡv);
+        var v = @new<TestCleanupPointerEqualsArg_T>().Ꮡv;
         v.Value = 97531;
         Δruntime.AddCleanup(v, (ж<nint> x) => {
         }, v);
-        v = default!;
+        v = default;
         Δruntime.GC();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -361,7 +358,7 @@ internal partial struct TestCleanupLost_T /*dyn*/ {
 }
 
 // Checks to make sure cleanups aren't lost when there are a lot of them.
-public static partial void TestCleanupLost(ж<testing.T> Ꮡt) {
+public static partial void TestCleanupLost(ж<testing.T> t) {
     nint cleanups = 10_000;
     if (testing.Short()) {
         cleanups = 100;
@@ -378,7 +375,7 @@ public static partial void TestCleanupLost(ж<testing.T> Ꮡt) {
                 defer(Ꮡwg.Done, ref ᒐ);
 
                 foreach (var _ᴛ1 in range(cleanups)) {
-                    var v = @new<TestCleanupLost_T>().of(TestCleanupLost_T.Ꮡv);
+                    var v = @new<TestCleanupLost_T>().Ꮡv;
                     v.Value = 97531;
                     Δruntime.AddCleanup(v, (nint _) => {
                         Ꮡgot.Add(1);
@@ -394,12 +391,12 @@ public static partial void TestCleanupLost(ж<testing.T> Ꮡt) {
     var timeout = (time.Duration)(10000000000L);
     var empty = runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)timeout);
     if (!empty) {
-        Ꮡt.Errorf("failed to drain cleanup queue within %s"u8, timeout);
+        t.Errorf("failed to drain cleanup queue within %s", timeout);
     }
 
     {
         nint gotΔ1 = (nint)Ꮡgot.Load(); if (gotΔ1 != want) {
-            Ꮡt.Errorf("%d cleanups executed, expected %d"u8, gotΔ1, want);
+            t.Errorf("%d cleanups executed, expected %d", gotΔ1, want);
         }
     }
 }
@@ -419,14 +416,14 @@ public static void TestCleanupUnreachablePointer(ж<testing.T> Ꮡt) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         defer(() => {
-            if (recover() == default!) {
+            if (recover() == nil) {
                 Ꮡt.Error(addCleanupFailedToDetectˢ);
             }
         }, ref ᒐ);
-        var v = Ꮡ(new TestCleanupUnreachablePointer_T(nil));
+        var v = Ꮡ(new TestCleanupUnreachablePointer_T());
         Δruntime.AddCleanup(v, (ж<nint> _) => {
             Ꮡt.Error(cleanupRanUnexpectedlyˢ);
-        }, v.of(TestCleanupUnreachablePointer_T.Ꮡf), new object?[] { t });
+        }, v.Ꮡf, new object?[] { t });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -446,14 +443,14 @@ public static void TestCleanupUnreachableClosure(ж<testing.T> Ꮡt) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         defer(() => {
-            if (recover() == default!) {
+            if (recover() == nil) {
                 Ꮡt.Error(addCleanupFailedToDetectˢ2);
             }
         }, ref ᒐ);
-        var v = Ꮡ(new TestCleanupUnreachableClosure_T(nil));
+        var v = Ꮡ(new TestCleanupUnreachableClosure_T());
         var vʗ1 = v;
         Δruntime.AddCleanup(v, (nint _) => {
-            Ꮡt.Log((~vʗ1).f);
+            Ꮡt.Log(vʗ1.f);
             Ꮡt.Error(cleanupRanUnexpectedlyˢ);
         }, 0, new object?[] { t, v });
     }

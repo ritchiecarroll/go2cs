@@ -26,12 +26,12 @@ partial struct GetRandomFlag /*num:uintptr*/;
 
 // GetRandom calls the getrandom system call.
 public static (nint n, error err) GetRandom(slice<byte> p, GetRandomFlag flags) {
-    var (ret, supported) = vgetrandom(p, (uint32)(uintptr)flags);
+    var (ret, supported) = vgetrandom(p, (uint32)flags);
     if (supported) {
         if (ret < 0) {
             return (0, ((syscall.Errno)(uintptr)(-ret)));
         }
-        return (ret, default!);
+        return (ret, default);
     }
     if (ᏑgetrandomUnsupported.Load()) {
         return (0, syscall.ENOSYS);
@@ -45,7 +45,7 @@ public static (nint n, error err) GetRandom(slice<byte> p, GetRandomFlag flags) 
         }
         return (0, errno);
     }
-    return ((nint)r1, default!);
+    return ((nint)r1, default);
 }
 
 } // end unix_package

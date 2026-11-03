@@ -34,12 +34,12 @@ internal static (@unsafe.Pointer, nint) mmap(@unsafe.Pointer addr, uintptr n, in
         // A write barrier here could break because of the way
         // that mmap uses the same value both as a pointer and
         // an errno value.
-        uintptr ret = default!;
+        uintptr ret = default;
         systemstack(() => {
             ret = callCgoMmap(addr, n, prot, flags, fd, off);
         });
         if (ret < 4096) {
-            return (default!, (nint)ret);
+            return (default, (nint)ret);
         }
         return ((@unsafe.Pointer)ret, 0);
     }

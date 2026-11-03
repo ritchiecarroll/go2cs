@@ -19,19 +19,19 @@ using static go.@internal.sync_internal_test_package;
 
 partial class sync_test_package {
 
-public static void TestHashTrieMap(ж<testing.T> Ꮡt) {
-    testHashTrieMap(Ꮡt, () => {
+public static void TestHashTrieMap(ж<testing.T> t) {
+    testHashTrieMap(t, () => {
         ref var m = ref heap(new isync.HashTrieMap<@string, nint>(), out var Ꮡm);
         return Ꮡm;
     });
 }
 
-public static void TestHashTrieMapBadHash(ж<testing.T> Ꮡt) {
-    testHashTrieMap(Ꮡt, () => sync_internal_test_package.NewBadHashTrieMap<@string, nint>());
+public static void TestHashTrieMapBadHash(ж<testing.T> t) {
+    testHashTrieMap(t, () => sync_internal_test_package.NewBadHashTrieMap<@string, nint>());
 }
 
-public static void TestHashTrieMapTruncHash(ж<testing.T> Ꮡt) {
-    testHashTrieMap(Ꮡt, () => {
+public static void TestHashTrieMapTruncHash(ж<testing.T> t) {
+    testHashTrieMap(t, () => {
         // Stub out the good hash function with a different terrible one
         // (truncated hash). Everything should still work as expected.
         // This is useful to test independently to catch issues with
@@ -41,24 +41,39 @@ public static void TestHashTrieMapTruncHash(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string loadEmptyˢ = "LoadEmpty"u8;
-internal static readonly @string loadOrStoreˢ = "LoadOrStore"u8;
-internal static readonly @string allˢ = "All"u8;
-internal static readonly @string clearˢ = "Clear"u8;
-internal static readonly @string simpleˢ = "Simple"u8;
-internal static readonly @string concurrentˢ = "Concurrent"u8;
-internal static readonly @string compareAndDeleteˢ = "CompareAndDelete"u8;
-internal static readonly @string oneˢ = "One"u8;
-internal static readonly @string multipleˢ = "Multiple"u8;
-internal static readonly @string iterateˢ = "Iterate"u8;
-internal static readonly @string concurrentUnsharedKeysˢ = "ConcurrentUnsharedKeys"u8;
-internal static readonly @string concurrentSharedKeysˢ = "ConcurrentSharedKeys"u8;
-internal static readonly @string compareAndSwapˢ = "CompareAndSwap"u8;
-internal static readonly @string swapˢ = "Swap"u8;
-internal static readonly @string loadAndDeleteˢ = "LoadAndDelete"u8;
+internal static ref readonly @string loadEmptyˢ => ref loadEmptyˢᵇ;
+private static readonly @string loadEmptyˢᵇ = "LoadEmpty"u8;
+internal static ref readonly @string loadOrStoreˢ => ref loadOrStoreˢᵇ;
+private static readonly @string loadOrStoreˢᵇ = "LoadOrStore"u8;
+internal static ref readonly @string allˢ => ref allˢᵇ;
+private static readonly @string allˢᵇ = "All"u8;
+internal static ref readonly @string clearˢ => ref clearˢᵇ;
+private static readonly @string clearˢᵇ = "Clear"u8;
+internal static ref readonly @string simpleˢ => ref simpleˢᵇ;
+private static readonly @string simpleˢᵇ = "Simple"u8;
+internal static ref readonly @string concurrentˢ => ref concurrentˢᵇ;
+private static readonly @string concurrentˢᵇ = "Concurrent"u8;
+internal static ref readonly @string compareAndDeleteˢ => ref compareAndDeleteˢᵇ;
+private static readonly @string compareAndDeleteˢᵇ = "CompareAndDelete"u8;
+internal static ref readonly @string oneˢ => ref oneˢᵇ;
+private static readonly @string oneˢᵇ = "One"u8;
+internal static ref readonly @string multipleˢ => ref multipleˢᵇ;
+private static readonly @string multipleˢᵇ = "Multiple"u8;
+internal static ref readonly @string iterateˢ => ref iterateˢᵇ;
+private static readonly @string iterateˢᵇ = "Iterate"u8;
+internal static ref readonly @string concurrentUnsharedKeysˢ => ref concurrentUnsharedKeysˢᵇ;
+private static readonly @string concurrentUnsharedKeysˢᵇ = "ConcurrentUnsharedKeys"u8;
+internal static ref readonly @string concurrentSharedKeysˢ => ref concurrentSharedKeysˢᵇ;
+private static readonly @string concurrentSharedKeysˢᵇ = "ConcurrentSharedKeys"u8;
+internal static ref readonly @string compareAndSwapˢ => ref compareAndSwapˢᵇ;
+private static readonly @string compareAndSwapˢᵇ = "CompareAndSwap"u8;
+internal static ref readonly @string swapˢ => ref swapˢᵇ;
+private static readonly @string swapˢᵇ = "Swap"u8;
+internal static ref readonly @string loadAndDeleteˢ => ref loadAndDeleteˢᵇ;
+private static readonly @string loadAndDeleteˢᵇ = "LoadAndDelete"u8;
 
-internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieMap<@string, nint>>> newMap) {
-    Ꮡt.Run(loadEmptyˢ, (ж<testing.T> tΔ1) => {
+internal static void testHashTrieMap(ж<testing.T> t, Func<ж<isync.HashTrieMap<@string, nint>>> newMap) {
+    t.Run(loadEmptyˢ, (ж<testing.T> tΔ1) => {
         var m = newMap();
 
         foreach (var (_, s) in testData.ΔRangeSnapshot()) {
@@ -66,7 +81,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             expectMissing(tΔ1, s, (nint)0)(ᴛ1, ᴛ2);
         }
     });
-    Ꮡt.Run(loadOrStoreˢ, (ж<testing.T> tΔ2) => {
+    t.Run(loadOrStoreˢ, (ж<testing.T> tΔ2) => {
         var m = newMap();
 
         foreach (var (i, s) in testData.ΔRangeSnapshot()) {
@@ -86,12 +101,12 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             expectLoaded(tΔ2, s, i)(ᴛ13, ᴛ14);
         }
     });
-    Ꮡt.Run(allˢ, (ж<testing.T> tΔ3) => {
+    t.Run(allˢ, (ж<testing.T> tΔ3) => {
         var m = newMap();
 
         testAll(tΔ3, m, testDataMap(testData[..]), (@string _Δp0, nint _Δp1) => true);
     });
-    Ꮡt.Run(clearˢ, (ж<testing.T> tΔ4) => {
+    t.Run(clearˢ, (ж<testing.T> tΔ4) => {
         tΔ4.Run(simpleˢ, (ж<testing.T> tΔ5) => {
             var m = newMap();
 
@@ -156,7 +171,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
         });
     });
-    Ꮡt.Run(compareAndDeleteˢ, (ж<testing.T> tΔ7) => {
+    t.Run(compareAndDeleteˢ, (ж<testing.T> tΔ7) => {
         tΔ7.Run(allˢ, (ж<testing.T> tΔ8) => {
             var m = newMap();
 
@@ -203,7 +218,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             expectDeleted<@string, nint>(tΔ9, testData[15], 15)(m.CompareAndDelete(testData[15], 15));
             expectNotDeleted<@string, nint>(tΔ9, testData[15], 15)(m.CompareAndDelete(testData[15], 15));
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 15){
+                if (i == 15) {
                     var (ᴛ53, ᴛ54) = m.Load(s);
                     expectMissing(tΔ9, s, (nint)0)(ᴛ53, ᴛ54);
                 } else {
@@ -225,13 +240,13 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 var (ᴛ63, ᴛ64) = m.LoadOrStore(s, 0);
                 expectLoaded(tΔ10, s, i)(ᴛ63, ᴛ64);
             }
-            foreach (var (_, i) in new nint[]{1, 105, 6, 85}.slice()) {
+            foreach (var (_, i) in slice<nint>([1, 105, 6, 85])) {
                 expectNotDeleted<@string, nint>(tΔ10, testData[i], math.MaxInt)(m.CompareAndDelete(testData[i], math.MaxInt));
                 expectDeleted(tΔ10, testData[i], i)(m.CompareAndDelete(testData[i], i));
                 expectNotDeleted(tΔ10, testData[i], i)(m.CompareAndDelete(testData[i], i));
             }
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 1 || i == 105 || i == 6 || i == 85){
+                if (i == 1 || i == 105 || i == 6 || i == 85) {
                     var (ᴛ65, ᴛ66) = m.Load(s);
                     expectMissing(tΔ10, s, (nint)0)(ᴛ65, ᴛ66);
                 } else {
@@ -336,7 +351,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             Ꮡwg.Wait();
         });
     });
-    Ꮡt.Run(compareAndSwapˢ, (ж<testing.T> tΔ14) => {
+    t.Run(compareAndSwapˢ, (ж<testing.T> tΔ14) => {
         tΔ14.Run(allˢ, (ж<testing.T> tΔ15) => {
             var m = newMap();
 
@@ -383,7 +398,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             expectSwapped<@string, nint>(tΔ16, testData[15], 15, 16)(m.CompareAndSwap(testData[15], 15, 16));
             expectNotSwapped<@string, nint>(tΔ16, testData[15], 15, 16)(m.CompareAndSwap(testData[15], 15, 16));
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 15){
+                if (i == 15) {
                     var (ᴛ115, ᴛ116) = m.Load(s);
                     expectPresent(tΔ16, s, (nint)16)(ᴛ115, ᴛ116);
                 } else {
@@ -405,13 +420,13 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 var (ᴛ125, ᴛ126) = m.LoadOrStore(s, 0);
                 expectLoaded(tΔ17, s, i)(ᴛ125, ᴛ126);
             }
-            foreach (var (_, i) in new nint[]{1, 105, 6, 85}.slice()) {
+            foreach (var (_, i) in slice<nint>([1, 105, 6, 85])) {
                 expectNotSwapped<@string, nint>(tΔ17, testData[i], math.MaxInt, i + 1)(m.CompareAndSwap(testData[i], math.MaxInt, i + 1));
                 expectSwapped(tΔ17, testData[i], i, i + 1)(m.CompareAndSwap(testData[i], i, i + 1));
                 expectNotSwapped(tΔ17, testData[i], i, i + 1)(m.CompareAndSwap(testData[i], i, i + 1));
             }
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 1 || i == 105 || i == 6 || i == 85){
+                if (i == 1 || i == 105 || i == 6 || i == 85) {
                     var (ᴛ127, ᴛ128) = m.Load(s);
                     expectPresent(tΔ17, s, i + 1)(ᴛ127, ᴛ128);
                 } else {
@@ -466,7 +481,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ14.Run("ConcurrentUnsharedKeysWithDelete"u8, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ19) => {
+        tΔ14.Run("ConcurrentUnsharedKeysWithDelete", [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ19) => {
             var m = newMap();
 
             nint gmp = Δruntime.GOMAXPROCS(-1);
@@ -554,7 +569,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             Ꮡwg.Wait();
         });
     });
-    Ꮡt.Run(swapˢ, (ж<testing.T> tΔ21) => {
+    t.Run(swapˢ, (ж<testing.T> tΔ21) => {
         tΔ21.Run(allˢ, (ж<testing.T> tΔ22) => {
             var m = newMap();
 
@@ -599,7 +614,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             var (ᴛ193, ᴛ194) = m.Swap(testData[15], 16);
             expectLoadedFromSwap(tΔ23, testData[15], (nint)15, (nint)16)(ᴛ193, ᴛ194);
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 15){
+                if (i == 15) {
                     var (ᴛ195, ᴛ196) = m.Load(s);
                     expectPresent(tΔ23, s, (nint)16)(ᴛ195, ᴛ196);
                 } else {
@@ -621,12 +636,12 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 var (ᴛ205, ᴛ206) = m.Swap(s, i);
                 expectLoadedFromSwap(tΔ24, s, i, i)(ᴛ205, ᴛ206);
             }
-            foreach (var (_, i) in new nint[]{1, 105, 6, 85}.slice()) {
+            foreach (var (_, i) in slice<nint>([1, 105, 6, 85])) {
                 var (ᴛ207, ᴛ208) = m.Swap(testData[i], i + 1);
                 expectLoadedFromSwap(tΔ24, testData[i], i, i + 1)(ᴛ207, ᴛ208);
             }
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 1 || i == 105 || i == 6 || i == 85){
+                if (i == 1 || i == 105 || i == 6 || i == 85) {
                     var (ᴛ209, ᴛ210) = m.Load(s);
                     expectPresent(tΔ24, s, i + 1)(ᴛ209, ᴛ210);
                 } else {
@@ -681,7 +696,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             }
             Ꮡwg.Wait();
         });
-        tΔ21.Run("ConcurrentUnsharedKeysWithDelete"u8, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ26) => {
+        tΔ21.Run("ConcurrentUnsharedKeysWithDelete", [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ26) => {
             var m = newMap();
 
             nint gmp = Δruntime.GOMAXPROCS(-1);
@@ -769,7 +784,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             Ꮡwg.Wait();
         });
     });
-    Ꮡt.Run(loadAndDeleteˢ, (ж<testing.T> tΔ28) => {
+    t.Run(loadAndDeleteˢ, (ж<testing.T> tΔ28) => {
         tΔ28.Run(allˢ, (ж<testing.T> tΔ29) => {
             var m = newMap();
 
@@ -822,7 +837,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
             var (ᴛ289, ᴛ290) = m.LoadAndDelete(testData[15]);
             expectNotLoadedFromDelete(tΔ30, testData[15], (nint)0)(ᴛ289, ᴛ290);
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 15){
+                if (i == 15) {
                     var (ᴛ291, ᴛ292) = m.Load(s);
                     expectMissing(tΔ30, s, (nint)0)(ᴛ291, ᴛ292);
                 } else {
@@ -844,7 +859,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 var (ᴛ301, ᴛ302) = m.LoadOrStore(s, 0);
                 expectLoaded(tΔ31, s, i)(ᴛ301, ᴛ302);
             }
-            foreach (var (_, i) in new nint[]{1, 105, 6, 85}.slice()) {
+            foreach (var (_, i) in slice<nint>([1, 105, 6, 85])) {
                 var (ᴛ303, ᴛ304) = m.Load(testData[i]);
                 expectPresent(tΔ31, testData[i], i)(ᴛ303, ᴛ304);
                 var (ᴛ305, ᴛ306) = m.LoadAndDelete(testData[i]);
@@ -855,7 +870,7 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
                 expectNotLoadedFromDelete(tΔ31, testData[i], (nint)0)(ᴛ309, ᴛ310);
             }
             foreach (var (i, s) in testData.ΔRangeSnapshot()) {
-                if (i == 1 || i == 105 || i == 6 || i == 85){
+                if (i == 1 || i == 105 || i == 6 || i == 85) {
                     var (ᴛ311, ᴛ312) = m.Load(s);
                     expectMissing(tΔ31, s, (nint)0)(ᴛ311, ᴛ312);
                 } else {
@@ -963,22 +978,22 @@ internal static void testHashTrieMap(ж<testing.T> Ꮡt, Func<ж<isync.HashTrieM
     });
 }
 
-internal static void testAll<K, V>(ж<testing.T> Ꮡt, ж<isync.HashTrieMap<K, V>> Ꮡm, map<K, V> testData, Func<K, V, bool> yield) {
+internal static void testAll<K, V>(ж<testing.T> t, ж<isync.HashTrieMap<K, V>> m, map<K, V> testData, Func<K, V, bool> yield) {
     foreach (var (k, v) in testData) {
-        var (ᴛ343, ᴛ344) = Ꮡm.LoadOrStore(k, v);
-        expectStored(Ꮡt, k, v)(ᴛ343, ᴛ344);
+        var (ᴛ343, ᴛ344) = m.LoadOrStore(k, v);
+        expectStored(t, k, v)(ᴛ343, ᴛ344);
     }
     var visited = new map<K, nint>();
     var testDataʗ1 = testData;
     var visitedʗ1 = visited;
-    Ꮡm.All()((K key, V got) => {
+    m.All()((K key, V got) => {
         var (want, ok) = testDataʗ1[key, ꟷ];
         if (!ok) {
-            Ꮡt.Errorf("unexpected key %v in map"u8, (key).OrTypedNilOf());
+            t.Errorf("unexpected key %v in map", (key).OrTypedNilOf());
             return false;
         }
         if (!AreEqual(got, want)) {
-            Ꮡt.Errorf("expected key %v to have value %v, got %v"u8, (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
+            t.Errorf("expected key %v to have value %v, got %v", (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
             return false;
         }
         visitedʗ1[key]++;
@@ -986,162 +1001,160 @@ internal static void testAll<K, V>(ж<testing.T> Ꮡt, ж<isync.HashTrieMap<K, V
     });
     foreach (var (key, n) in visited) {
         if (n > 1) {
-            Ꮡt.Errorf("visited key %v more than once"u8, (key).OrTypedNilOf());
+            t.Errorf("visited key %v more than once", (key).OrTypedNilOf());
         }
     }
 }
 
-internal static Action<V, bool> expectPresent<K, V>(ж<testing.T> Ꮡt, K key, V want) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectPresent<K, V>(ж<testing.T> t, K key, V want) {
+    t.Helper();
     return (V got, bool ok) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (!ok) {
-            Ꮡt.Errorf("expected key %v to be present in map"u8, (key).OrTypedNilOf());
+            t.Errorf("expected key %v to be present in map", (key).OrTypedNilOf());
         }
         if (ok && !AreEqual(got, want)) {
-            Ꮡt.Errorf("expected key %v to have value %v, got %v"u8, (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
+            t.Errorf("expected key %v to have value %v, got %v", (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectMissing<K, V>(ж<testing.T> Ꮡt, K key, V want) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectMissing<K, V>(ж<testing.T> t, K key, V want) {
+    t.Helper();
     if (!AreEqual(want, @new<V>().ValueSlot)) {
         // This is awkward, but the want argument is necessary to smooth over type inference.
         // Just make sure the want argument always looks the same.
         throw panic("expectMissing must always have a zero value variable");
     }
     return (V got, bool ok) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (ok) {
-            Ꮡt.Errorf("expected key %v to be missing from map, got value %v"u8, (key).OrTypedNilOf(), (got).OrTypedNilOf());
+            t.Errorf("expected key %v to be missing from map, got value %v", (key).OrTypedNilOf(), (got).OrTypedNilOf());
         }
         if (!ok && !AreEqual(got, want)) {
-            Ꮡt.Errorf("expected missing key %v to be paired with the zero value; got %v"u8, (key).OrTypedNilOf(), (got).OrTypedNilOf());
+            t.Errorf("expected missing key %v to be paired with the zero value; got %v", (key).OrTypedNilOf(), (got).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectLoaded<K, V>(ж<testing.T> Ꮡt, K key, V want) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectLoaded<K, V>(ж<testing.T> t, K key, V want) {
+    t.Helper();
     return (V got, bool loaded) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (!loaded) {
-            Ꮡt.Errorf("expected key %v to have been loaded, not stored"u8, (key).OrTypedNilOf());
+            t.Errorf("expected key %v to have been loaded, not stored", (key).OrTypedNilOf());
         }
         if (!AreEqual(got, want)) {
-            Ꮡt.Errorf("expected key %v to have value %v, got %v"u8, (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
+            t.Errorf("expected key %v to have value %v, got %v", (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectStored<K, V>(ж<testing.T> Ꮡt, K key, V want) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectStored<K, V>(ж<testing.T> t, K key, V want) {
+    t.Helper();
     return (V got, bool loaded) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (loaded) {
-            Ꮡt.Errorf("expected inserted key %v to have been stored, not loaded"u8, (key).OrTypedNilOf());
+            t.Errorf("expected inserted key %v to have been stored, not loaded", (key).OrTypedNilOf());
         }
         if (!AreEqual(got, want)) {
-            Ꮡt.Errorf("expected inserted key %v to have value %v, got %v"u8, (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
+            t.Errorf("expected inserted key %v to have value %v, got %v", (key).OrTypedNilOf(), (want).OrTypedNilOf(), (got).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<bool> expectDeleted<K, V>(ж<testing.T> Ꮡt, K key, V old) {
-    Ꮡt.Helper();
+internal static Action<bool> expectDeleted<K, V>(ж<testing.T> t, K key, V old) {
+    t.Helper();
     return (bool deleted) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (!deleted) {
-            Ꮡt.Errorf("expected key %v with value %v to be in map and deleted"u8, (key).OrTypedNilOf(), (old).OrTypedNilOf());
+            t.Errorf("expected key %v with value %v to be in map and deleted", (key).OrTypedNilOf(), (old).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<bool> expectNotDeleted<K, V>(ж<testing.T> Ꮡt, K key, V old) {
-    Ꮡt.Helper();
+internal static Action<bool> expectNotDeleted<K, V>(ж<testing.T> t, K key, V old) {
+    t.Helper();
     return (bool deleted) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (deleted) {
-            Ꮡt.Errorf("expected key %v with value %v to not be in map and thus not deleted"u8, (key).OrTypedNilOf(), (old).OrTypedNilOf());
+            t.Errorf("expected key %v with value %v to not be in map and thus not deleted", (key).OrTypedNilOf(), (old).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<bool> expectSwapped<K, V>(ж<testing.T> Ꮡt, K key, V old, V @new) {
-    Ꮡt.Helper();
+internal static Action<bool> expectSwapped<K, V>(ж<testing.T> t, K key, V old, V @new) {
+    t.Helper();
     return (bool swapped) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (!swapped) {
-            Ꮡt.Errorf("expected key %v with value %v to be in map and swapped for %v"u8, (key).OrTypedNilOf(), (old).OrTypedNilOf(), (@new).OrTypedNilOf());
+            t.Errorf("expected key %v with value %v to be in map and swapped for %v", (key).OrTypedNilOf(), (old).OrTypedNilOf(), (@new).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<bool> expectNotSwapped<K, V>(ж<testing.T> Ꮡt, K key, V old, V @new) {
-    Ꮡt.Helper();
+internal static Action<bool> expectNotSwapped<K, V>(ж<testing.T> t, K key, V old, V @new) {
+    t.Helper();
     return (bool swapped) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (swapped) {
-            Ꮡt.Errorf("expected key %v with value %v to not be in map or not swapped for %v"u8, (key).OrTypedNilOf(), (old).OrTypedNilOf(), (@new).OrTypedNilOf());
+            t.Errorf("expected key %v with value %v to not be in map or not swapped for %v", (key).OrTypedNilOf(), (old).OrTypedNilOf(), (@new).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectLoadedFromSwap<K, V>(ж<testing.T> Ꮡt, K key, V want, V @new) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectLoadedFromSwap<K, V>(ж<testing.T> t, K key, V want, V @new) {
+    t.Helper();
     return (V got, bool loaded) => {
-        Ꮡt.Helper();
+        t.Helper();
 
-        if (!loaded){
-            Ꮡt.Errorf("expected key %v to be in map and for %v to have been swapped for %v"u8, (key).OrTypedNilOf(), (want).OrTypedNilOf(), (@new).OrTypedNilOf());
-        } else 
-        if (!AreEqual(want, got)) {
-            Ꮡt.Errorf("key %v had its value %v swapped for %v, but expected it to have value %v"u8, (key).OrTypedNilOf(), (got).OrTypedNilOf(), (@new).OrTypedNilOf(), (want).OrTypedNilOf());
+        if (!loaded) {
+            t.Errorf("expected key %v to be in map and for %v to have been swapped for %v", (key).OrTypedNilOf(), (want).OrTypedNilOf(), (@new).OrTypedNilOf());
+        } else if (!AreEqual(want, got)) {
+            t.Errorf("key %v had its value %v swapped for %v, but expected it to have value %v", (key).OrTypedNilOf(), (got).OrTypedNilOf(), (@new).OrTypedNilOf(), (want).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectNotLoadedFromSwap<K, V>(ж<testing.T> Ꮡt, K key, V @new) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectNotLoadedFromSwap<K, V>(ж<testing.T> t, K key, V @new) {
+    t.Helper();
     return (V old, bool loaded) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (loaded) {
-            Ꮡt.Errorf("expected key %v to not be in map, but found value %v for it"u8, (key).OrTypedNilOf(), (old).OrTypedNilOf());
+            t.Errorf("expected key %v to not be in map, but found value %v for it", (key).OrTypedNilOf(), (old).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectLoadedFromDelete<K, V>(ж<testing.T> Ꮡt, K key, V want) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectLoadedFromDelete<K, V>(ж<testing.T> t, K key, V want) {
+    t.Helper();
     return (V got, bool loaded) => {
-        Ꮡt.Helper();
+        t.Helper();
 
-        if (!loaded){
-            Ꮡt.Errorf("expected key %v to be in map to be deleted"u8, (key).OrTypedNilOf());
-        } else 
-        if (!AreEqual(want, got)) {
-            Ꮡt.Errorf("key %v was deleted with value %v, but expected it to have value %v"u8, (key).OrTypedNilOf(), (got).OrTypedNilOf(), (want).OrTypedNilOf());
+        if (!loaded) {
+            t.Errorf("expected key %v to be in map to be deleted", (key).OrTypedNilOf());
+        } else if (!AreEqual(want, got)) {
+            t.Errorf("key %v was deleted with value %v, but expected it to have value %v", (key).OrTypedNilOf(), (got).OrTypedNilOf(), (want).OrTypedNilOf());
         }
     };
 }
 
-internal static Action<V, bool> expectNotLoadedFromDelete<K, V>(ж<testing.T> Ꮡt, K key, V _) {
-    Ꮡt.Helper();
+internal static Action<V, bool> expectNotLoadedFromDelete<K, V>(ж<testing.T> t, K key, V _) {
+    t.Helper();
     return (V old, bool loaded) => {
-        Ꮡt.Helper();
+        t.Helper();
 
         if (loaded) {
-            Ꮡt.Errorf("expected key %v to not be in map, but found value %v for it"u8, (key).OrTypedNilOf(), (old).OrTypedNilOf());
+            t.Errorf("expected key %v to not be in map, but found value %v for it", (key).OrTypedNilOf(), (old).OrTypedNilOf());
         }
     };
 }
@@ -1184,7 +1197,7 @@ internal partial struct TestConcurrentCache_cleanupArg /*dyn*/ {
 // key-value pair, they must not both succeed.
 //
 // This test is a regression test for issue #70970.
-public static partial void TestConcurrentCache(ж<testing.T> Ꮡt) {
+public static partial void TestConcurrentCache(ж<testing.T> t) {
     ref var m = ref heap(new isync.HashTrieMap<nint, weak.Pointer<TestConcurrentCache_dummy>>(), out var Ꮡm);
     var cleanup = (TestConcurrentCache_cleanupArg arg) => {
         Ꮡm.CompareAndDelete(arg.key, arg.value);
@@ -1193,7 +1206,7 @@ public static partial void TestConcurrentCache(ж<testing.T> Ꮡt) {
     ж<TestConcurrentCache_dummy> get(ж<isync.HashTrieMap<nint, weak.Pointer<TestConcurrentCache_dummy>>> mΔ1, nint key) {
         var nv = @new<TestConcurrentCache_dummy>();
         var nw = weak.Make<TestConcurrentCache_dummy>(nv);
-        while (ᐧ) {
+        for (;;) {
             var (w, loaded) = mΔ1.LoadOrStore(key, nw);
             if (!loaded) {
                 Δruntime.AddCleanup(nv, cleanupʗ1, new TestConcurrentCache_cleanupArg(key, nw));
@@ -1227,7 +1240,7 @@ public static partial void TestConcurrentCache(ж<testing.T> Ꮡt) {
                 var a = getʗ1(Ꮡm, i % P);
                 var b = getʗ1(Ꮡm, i % P);
                 if (a != b) {
-                    Ꮡt.Errorf("consecutive cache reads returned different values: a != b (%p vs %p)\n"u8, a.OrTypedNil(), b.OrTypedNil());
+                    t.Errorf("consecutive cache reads returned different values: a != b (%p vs %p)\n", a.OrTypedNil(), b.OrTypedNil());
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

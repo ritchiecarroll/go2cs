@@ -1,0 +1,45 @@
+Test run for /root/mrw-tip/src/tests/GolibTests/bin/Release/net10.0/GolibTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+  Passed AGoroutineCountsWhileAPanicRunsItsDeferredCalls [412 ms]
+  Passed ANestedRecoveryDoesNotEndTheOuterPanicsCount [2 ms]
+  Passed AGoexitDuringAPanicEndsTheCountWithTheGoroutine [< 1 ms]
+  Passed APanicACSharpCatchStoppedEndsTheCountWithTheGoroutine [< 1 ms]
+  Passed TheMainGoroutineIsNeverCounted [< 1 ms]
+  Passed AMainReturnIsReleasedByADeferredCallParkedOnAChannel [33 ms]
+  Passed AMainReturnIsReleasedByADeferredCallInASystemCall [3 ms]
+  Passed AnUnmarkedBlockHoldsMainToTheHangGuard [302 ms]
+  Passed ABusyDeferredCallIsReleasedByItsCpuBudgetNotTheGuard [21 ms]
+  Passed RepeatedWaitsLeaveTheProcessHandleCountUnchanged [535 ms]
+  Passed ARunnableGoroutineHoldsMainUntilItsCpuBudgetIsUsed [< 1 ms]
+  Passed AStarvedGoroutineHoldsMainForAsLongAsItGetsNoCpu [< 1 ms]
+  Passed TheSameBlockReleasesMainOnceItHasLastedTheConfirmation [< 1 ms]
+  Passed ANewBlockRestartsTheConfirmation [< 1 ms]
+  Passed WithoutACpuReadingTheWaitFallsBackToItsWallClockBound [< 1 ms]
+  Passed ANonOwnerNeverComesBackToPrintASecondReport [508 ms]
+  Passed TheFirstFatalPathOwnsTheReportAndGoesOnToPrint [1 ms]
+  Failed ASpinningThreadsCpuTimeAdvancesWithItsWallTime [209 ms]
+  Error Message:
+   Assert.IsTrue failed. the second read
+  Stack Trace:
+     at GolibTests.ThreadCpuTimeTests.Measure(Action work) in /root/mrw-tip/src/tests/GolibTests/ThreadCpuTimeTests.cs:line 52
+   at GolibTests.ThreadCpuTimeTests.ASpinningThreadsCpuTimeAdvancesWithItsWallTime() in /root/mrw-tip/src/tests/GolibTests/ThreadCpuTimeTests.cs:line 62
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Failed ASleepingThreadsCpuTimeStaysFlat [202 ms]
+  Error Message:
+   Assert.IsTrue failed. the second read
+  Stack Trace:
+     at GolibTests.ThreadCpuTimeTests.Measure(Action work) in /root/mrw-tip/src/tests/GolibTests/ThreadCpuTimeTests.cs:line 52
+   at GolibTests.ThreadCpuTimeTests.ASleepingThreadsCpuTimeStaysFlat() in /root/mrw-tip/src/tests/GolibTests/ThreadCpuTimeTests.cs:line 76
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+  Passed AThreadThatExitedReadsAsASeamFailure [51 ms]
+  Passed TheCallingThreadsTokenIsStable [< 1 ms]
+
+Test Run Failed.
+Total tests: 21
+     Passed: 19
+     Failed: 2
+ Total time: 3.3723 Seconds

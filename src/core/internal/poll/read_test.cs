@@ -16,10 +16,11 @@ using static go.@internal.poll_internal_test_package;
 partial class poll_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string specialFileˢ = "SpecialFile"u8;
+internal static ref readonly @string specialFileˢ => ref specialFileˢᵇ;
+private static readonly @string specialFileˢᵇ = "SpecialFile"u8;
 
-public static void TestRead(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(specialFileˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+public static void TestRead(ж<testing.T> t) {
+    t.Run(specialFileˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         foreach (var (_, p) in specialFiles()) {
             for (nint i = 0; i < 4; i++) {
@@ -30,7 +31,7 @@ public static void TestRead(ж<testing.T> Ꮡt) {
                         defer(Ꮡwg.Done, ref ᒐ);
                         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
                             {
-                                var (_, err) = os.ReadFile(pΔ1); if (err != default!) {
+                                var (_, err) = os.ReadFile(pΔ1); if (err != nil) {
                                     tΔ1.Error(err);
                                     return;
                                 }
@@ -48,24 +49,27 @@ public static void TestRead(ж<testing.T> Ꮡt) {
 }
 
 internal static slice<@string> specialFiles() {
-    slice<@string> ps = default!;
+    slice<@string> ps = default;
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8) {
-        ps = new @string[]{
-            "/dev/null"u8
-        }.slice();
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
+        ps = slice<@string>([
+            "/dev/null"
+        ]);
+        break;
     }
-    else if (exprᴛ1 == "linux"u8) {
-        ps = new @string[]{
-            "/dev/null"u8,
-            "/proc/stat"u8,
-            "/sys/devices/system/cpu/online"u8
-        }.slice();
-    }
+    case {} when exprᴛ1 == "linux"u8: {
+        ps = slice<@string>([
+            "/dev/null",
+            "/proc/stat",
+            "/sys/devices/system/cpu/online"
+        ]);
+        break;
+    }}
     var nps = ps[..0];
     foreach (var (_, p) in ps) {
         var (f, err) = os.Open(p);
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         f.Close();

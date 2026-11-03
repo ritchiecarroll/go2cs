@@ -18,34 +18,34 @@ internal partial struct rc4Test {
     internal slice<byte> key, keystream;
 }
 
-internal static slice<rc4Test> golden = new rc4Test[]{
+internal static slice<rc4Test> golden = slice<rc4Test>([
     // Test vectors from the original cypherpunk posting of ARC4:
     //   https://groups.google.com/group/sci.crypt/msg/10a300c9d21afca0?pli=1
     new(
-        new byte[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}.slice(),
-        new byte[]{0x74, 0x94, 0xc2, 0xe7, 0x10, 0x4b, 0x08, 0x79}.slice()
+        slice<byte>([0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef]),
+        slice<byte>([0x74, 0x94, 0xc2, 0xe7, 0x10, 0x4b, 0x08, 0x79])
     ),
     new(
-        new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice(),
-        new byte[]{0xde, 0x18, 0x89, 0x41, 0xa3, 0x37, 0x5d, 0x3a}.slice()
+        slice<byte>([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+        slice<byte>([0xde, 0x18, 0x89, 0x41, 0xa3, 0x37, 0x5d, 0x3a])
     ),
     new(
-        new byte[]{0xef, 0x01, 0x23, 0x45}.slice(),
-        new byte[]{0xd6, 0xa1, 0x41, 0xa7, 0xec, 0x3c, 0x38, 0xdf, 0xbd, 0x61}.slice()
+        slice<byte>([0xef, 0x01, 0x23, 0x45]),
+        slice<byte>([0xd6, 0xa1, 0x41, 0xa7, 0xec, 0x3c, 0x38, 0xdf, 0xbd, 0x61])
     ),
 
     // Test vectors from the Wikipedia page: https://en.wikipedia.org/wiki/RC4
     new(
-        new byte[]{0x4b, 0x65, 0x79}.slice(),
-        new byte[]{0xeb, 0x9f, 0x77, 0x81, 0xb7, 0x34, 0xca, 0x72, 0xa7, 0x19}.slice()
+        slice<byte>([0x4b, 0x65, 0x79]),
+        slice<byte>([0xeb, 0x9f, 0x77, 0x81, 0xb7, 0x34, 0xca, 0x72, 0xa7, 0x19])
     ),
     new(
-        new byte[]{0x57, 0x69, 0x6b, 0x69}.slice(),
-        new byte[]{0x60, 0x44, 0xdb, 0x6d, 0x41, 0xb7}.slice()
+        slice<byte>([0x57, 0x69, 0x6b, 0x69]),
+        slice<byte>([0x60, 0x44, 0xdb, 0x6d, 0x41, 0xb7])
     ),
     new(
-        new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}.slice(),
-        new byte[]{
+        slice<byte>([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+        slice<byte>([
             0xde, 0x18, 0x89, 0x41, 0xa3, 0x37, 0x5d, 0x3a,
             0x8a, 0x06, 0x1e, 0x67, 0x57, 0x6e, 0x92, 0x6d,
             0xc7, 0x1a, 0x7f, 0xa3, 0xf0, 0xcc, 0xeb, 0x97,
@@ -74,23 +74,23 @@ internal static slice<rc4Test> golden = new rc4Test[]{
             0xc8, 0x5c, 0x46, 0x98, 0x6c, 0x1b, 0xef, 0x34,
             0x90, 0xd3, 0x7b, 0x38, 0xda, 0x85, 0xd3, 0x2e,
             0x97, 0x39, 0xcb, 0x23, 0x4a, 0x2b, 0xe7, 0x40
-        }.slice()
+        ])
     )
-}.slice();
+]);
 
-internal static void testEncrypt(ж<testing.T> Ꮡt, @string desc, ж<global::go.crypto.rc4_package.Cipher> Ꮡc, slice<byte> src, slice<byte> expect) {
+internal static void testEncrypt(ж<testing.T> t, @string desc, ж<global::go.crypto.rc4_package.Cipher> Ꮡc, slice<byte> src, slice<byte> expect) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var dst = new slice<byte>(len(src));
     c.XORKeyStream(dst, src);
     foreach (var (i, v) in dst) {
         if (v != expect[i]) {
-            Ꮡt.Fatalf("%s: mismatch at byte %d:\nhave %x\nwant %x"u8, desc, i, dst, expect);
+            t.Fatalf("%s: mismatch at byte %d:\nhave %x\nwant %x", desc, i, dst, expect);
         }
     }
 }
 
-public static void TestGolden(ж<testing.T> Ꮡt) {
+public static void TestGolden(ж<testing.T> t) {
     foreach (var (gi, g) in golden) {
         var data = new slice<byte>(len(g.keystream));
         foreach (var i in range(data)) {
@@ -104,8 +104,8 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
 
         for (nint size = 1; size <= len(g.keystream); size++) {
             var (c, err) = NewCipher(g.key);
-            if (err != default!) {
-                Ꮡt.Fatalf("#%d: NewCipher: %v"u8, gi, err);
+            if (err != nil) {
+                t.Fatalf("#%d: NewCipher: %v", gi, err);
             }
 
             nint off = 0;
@@ -115,14 +115,14 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
                     n = size;
                 }
                 @string desc = fmt.Sprintf("#%d@[%d:%d]"u8, gi, off, off + n);
-                testEncrypt(Ꮡt, desc, c, data.slice(off, off + n), expect.slice(off, off + n));
+                testEncrypt(t, desc, c, data.slice(off, off + n), expect.slice(off, off + n));
                 off += n;
             }
         }
     }
 }
 
-public static void TestBlock(ж<testing.T> Ꮡt) {
+public static void TestBlock(ж<testing.T> t) {
     var (c1a, _) = NewCipher(golden[0].key);
     var (c1b, _) = NewCipher(golden[1].key);
     var data1 = new slice<byte>((1 << 20));
@@ -138,12 +138,12 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
     c2b.XORKeyStream(data2, data2);
 
     if (!bytes.Equal(data1, data2)) {
-        Ꮡt.Fatalf("bad block"u8);
+        t.Fatalf("bad block");
     }
 }
 
-public static void TestRC4Stream(ж<testing.T> Ꮡt) {
-    cryptotest.TestStream(Ꮡt, () => {
+public static void TestRC4Stream(ж<testing.T> t) {
+    cryptotest.TestStream(t, () => {
         var (c, _) = NewCipher(golden[0].key);
         return new rc4_internal_test_package.rc4_CipherжStream(c);
     });
@@ -154,7 +154,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, int64 size) {
 
     var buf = new slice<byte>((nint)(size));
     var (c, err) = NewCipher(golden[0].key);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     b.SetBytes(size);
@@ -164,16 +164,16 @@ internal static void benchmark(ж<testing.B> Ꮡb, int64 size) {
     }
 }
 
-public static void BenchmarkRC4_128(ж<testing.B> Ꮡb) {
-    benchmark(Ꮡb, 128);
+public static void BenchmarkRC4_128(ж<testing.B> b) {
+    benchmark(b, 128);
 }
 
-public static void BenchmarkRC4_1K(ж<testing.B> Ꮡb) {
-    benchmark(Ꮡb, 1024);
+public static void BenchmarkRC4_1K(ж<testing.B> b) {
+    benchmark(b, 1024);
 }
 
-public static void BenchmarkRC4_8K(ж<testing.B> Ꮡb) {
-    benchmark(Ꮡb, 8096);
+public static void BenchmarkRC4_8K(ж<testing.B> b) {
+    benchmark(b, 8096);
 }
 
 } // end rc4_internal_test_package

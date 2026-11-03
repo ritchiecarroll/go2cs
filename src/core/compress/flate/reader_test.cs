@@ -13,7 +13,7 @@ using static go.compress.flate_package;
 
 partial class flate_internal_test_package {
 
-public static void TestNlitOutOfRange(ж<testing.T> Ꮡt) {
+public static void TestNlitOutOfRange(ж<testing.T> t) {
     // Trying to decode this bogus flate data, which has a Huffman table
     // with nlit=288, should not panic.
     io.Copy(io.Discard, NewReader(new flate_test_package.strings_ReaderжReader(strings.NewReader(
@@ -23,24 +23,24 @@ public static void TestNlitOutOfRange(ж<testing.T> Ꮡt) {
 partial struct suitesᴛ1 /*dyn*/ {
     internal @string name, @file;
 }
-internal static slice<suitesᴛ1> suites = new suitesᴛ1[]{
+internal static slice<suitesᴛ1> suites = slice<suitesᴛ1>([
     // Digits is the digits of the irrational number e. Its decimal representation
     // does not repeat, but there are only 10 possible digits, so it should be
     // reasonably compressible.
-    new("Digits"u8, "../testdata/e.txt"u8),
+    new("Digits", "../testdata/e.txt"),
     // Newton is Isaac Newtons's educational text on Opticks.
-    new("Newton"u8, "../../testdata/Isaac.Newton-Opticks.txt"u8)
-}.slice();
+    new("Newton", "../../testdata/Isaac.Newton-Opticks.txt")
+]);
 
-public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
-    doBench(Ꮡb, (ж<testing.B> bΔ1, slice<byte> buf0, nint level, nint n) => {
+public static void BenchmarkDecode(ж<testing.B> b) {
+    doBench(b, (ж<testing.B> bΔ1, slice<byte> buf0, nint level, nint n) => {
         bΔ1.ReportAllocs();
         bΔ1.StopTimer();
         bΔ1.SetBytes((int64)n);
 
         var compressed = @new<bytes.Buffer>();
         var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(compressed), level);
-        if (err != default!) {
+        if (err != nil) {
             bΔ1.Fatal(err);
         }
         for (nint i = 0; i < n; i += len(buf0)) {
@@ -51,7 +51,7 @@ public static void BenchmarkDecode(ж<testing.B> Ꮡb) {
         }
         w.Close();
         var buf1 = compressed.Bytes();
-        (buf0, compressed, w) = (default!, default!, default!);
+        (buf0, compressed, w) = (default, default, default);
         runtime.GC();
         bΔ1.StartTimer();
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -64,31 +64,31 @@ partial struct levelTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint level;
 }
-internal static slice<levelTestsᴛ1> levelTests = new levelTestsᴛ1[]{
-    new("Huffman"u8, HuffmanOnly),
-    new("Speed"u8, BestSpeed),
-    new("Default"u8, DefaultCompression),
-    new("Compression"u8, BestCompression)
-}.slice();
+internal static slice<levelTestsᴛ1> levelTests = slice<levelTestsᴛ1>([
+    new("Huffman", HuffmanOnly),
+    new("Speed", BestSpeed),
+    new("Default", DefaultCompression),
+    new("Compression", BestCompression)
+]);
 
 partial struct sizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }
-internal static slice<sizesᴛ1> sizes = new sizesᴛ1[]{
-    new("1e4"u8, 10000),
-    new("1e5"u8, 100000),
-    new("1e6"u8, 1000000)
-}.slice();
+internal static slice<sizesᴛ1> sizes = slice<sizesᴛ1>([
+    new("1e4", 10000),
+    new("1e5", 100000),
+    new("1e6", 1000000)
+]);
 
-internal static void doBench(ж<testing.B> Ꮡb, Action<ж<testing.B>, slice<byte>, nint, nint> f) {
+internal static void doBench(ж<testing.B> b, Action<ж<testing.B>, slice<byte>, nint, nint> f) {
     foreach (var (_, suite) in suites) {
         var (buf, err) = os.ReadFile(suite.@file);
-        if (err != default!) {
-            Ꮡb.Fatal(err);
+        if (err != nil) {
+            b.Fatal(err);
         }
         if (len(buf) == 0) {
-            Ꮡb.Fatalf("test file %q has no data"u8, suite.@file);
+            b.Fatalf("test file %q has no data", suite.@file);
         }
         foreach (var (_, vᴛ1) in levelTests) {
             ref var l = ref heap(new levelTestsᴛ1(), out var Ꮡl);
@@ -101,7 +101,7 @@ internal static void doBench(ж<testing.B> Ꮡb, Action<ж<testing.B>, slice<byt
                 var bufʗ1 = buf;
                 var lʗ1 = l;
                 var sʗ1 = s;
-                Ꮡb.Run(suite.name + "/"u8 + l.name + "/"u8 + s.name, (ж<testing.B> bΔ1) => {
+                b.Run(suite.name + "/"u8 + l.name + "/"u8 + s.name, (ж<testing.B> bΔ1) => {
                     f(bΔ1, bufʗ1, lʗ1.level, sʗ1.n);
                 });
             }

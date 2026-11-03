@@ -15,9 +15,9 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-partial class Tintptr /*ж<nint>*/;
+partial class Tintptr /*ж<nint>*/; // assignable to *int
 
-partial struct Tint /*num:nint*/;
+partial struct Tint /*num:nint*/;  // *Tint implements Tinter, interface{}
 
 internal static void m(this ref Tint t) {
 }
@@ -39,12 +39,12 @@ internal partial struct TestFinalizerType_T /*dyn*/ {
     internal @unsafe.Pointer p;
 }
 
-public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
+public static partial void TestFinalizerType(ж<testing.T> t) {
     var ch = new channel<bool>(10);
     var chʗ1 = ch;
     void finalize(ж<nint> x) {
         if (x.Value != 97531) {
-            Ꮡt.Errorf("finalizer %d, want %d"u8, x.Value, (nint)97531);
+            t.Errorf("finalizer %d, want %d", x.Value, (nint)97531);
         }
         chʗ1.ᐸꟷ(true);
     }
@@ -67,7 +67,7 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
 
 
         var finalizeʗ6 = finalize;
-    slice<TestFinalizerType_type> finalizerTests = new TestFinalizerType_type[]{
+    slice<TestFinalizerType_type> finalizerTests = slice<TestFinalizerType_type>([
         new((ж<nint> x) => x.OrTypedNil(), (ж<nint> v) => {
             finalizeʗ1(v);
         }),
@@ -92,7 +92,7 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
             finalizeʗ6(v._<ж<nint>>());
             return new int64[]{}.array(4);
         })
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in finalizerTests) {
         ref var tt = ref heap(new TestFinalizerType_type(), out var Ꮡtt);
@@ -102,10 +102,10 @@ public static partial void TestFinalizerType(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         var ttʗ1 = tt;
         goǃ(() => {
-            var v = @new<TestFinalizerType_T>().of(TestFinalizerType_T.Ꮡv);
+            var v = @new<TestFinalizerType_T>().Ꮡv;
             v.Value = 97531;
             Δruntime.SetFinalizer(ttʗ1.convert(v), ttʗ1.finalizer);
-            v = default!;
+            v = default;
             doneʗ1.ᐸꟷ(true);
         });
         ᐸꟷ(done);
@@ -120,28 +120,27 @@ partial struct bigValue {
     internal @string up;
 }
 
-public static partial void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
+public static partial void TestFinalizerInterfaceBig(ж<testing.T> t) {
     var ch = new channel<bool>(0);
     var done = new channel<bool>(1);
     var chʗ1 = ch;
     var doneʗ1 = done;
     goǃ(() => {
-        var v = Ꮡ(new bigValue(0xDEADBEEFDEADBEEFUL, true, "It matters not how strait the gate"u8));
-        ref var old = ref heap<bigValue>(out var Ꮡold);
-        old = v.Value;
+        var v = Ꮡ(new bigValue(0xDEADBEEFDEADBEEFUL, true, "It matters not how strait the gate"));
+        ref var old = ref heap<bigValue>(v.Value, out var Ꮡold);
         var chʗ2 = chʗ1;
         var oldʗ1 = old;
         Δruntime.SetFinalizer(v.OrTypedNil(), (any vΔ1) => {
             var (i, ok) = vΔ1._<ж<bigValue>>(ᐧ);
             if (!ok) {
-                Ꮡt.Errorf("finalizer called with type %T, want *bigValue"u8, vΔ1);
+                t.Errorf("finalizer called with type %T, want *bigValue", vΔ1);
             }
             if (i.Value != oldʗ1) {
-                Ꮡt.Errorf("finalizer called with %+v, want %+v"u8, i.Value, oldʗ1);
+                t.Errorf("finalizer called with %+v, want %+v", i.Value, oldʗ1);
             }
             close(chʗ2);
         });
-        v = default!;
+        v = default;
         doneʗ1.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -149,22 +148,22 @@ public static partial void TestFinalizerInterfaceBig(ж<testing.T> Ꮡt) {
     ᐸꟷ(ch);
 }
 
-internal static void fin(ж<nint> Ꮡv) {
+internal static void fin(ж<nint> v) {
 }
 
 internal partial struct TestFinalizerZeroSizedStruct_Z /*dyn*/ {
 }
 
 // Verify we don't crash at least. golang.org/issue/6857
-public static void TestFinalizerZeroSizedStruct(ж<testing.T> Ꮡt) {
+public static void TestFinalizerZeroSizedStruct(ж<testing.T> t) {
     var z = @new<TestFinalizerZeroSizedStruct_Z>();
     Δruntime.SetFinalizer(z.OrTypedNil(), (ж<TestFinalizerZeroSizedStruct_Z> _) => {
     });
 }
 
-public static void BenchmarkFinalizer(ж<testing.B> Ꮡb) {
+public static void BenchmarkFinalizer(ж<testing.B> b) {
     UntypedInt Batch = 1000;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         array<ж<nint>> data = new(1000); /* Batch */
         for (nint i = 0; i < Batch; i++) {
             data[i] = @new<nint>();
@@ -174,14 +173,14 @@ public static void BenchmarkFinalizer(ж<testing.B> Ꮡb) {
                 Δruntime.SetFinalizer(data[i].OrTypedNil(), fin);
             }
             for (nint i = 0; i < Batch; i++) {
-                Δruntime.SetFinalizer(data[i].OrTypedNil(), default!);
+                Δruntime.SetFinalizer(data[i].OrTypedNil(), default);
             }
         }
     });
 }
 
-public static void BenchmarkFinalizerRun(ж<testing.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+public static void BenchmarkFinalizerRun(ж<testing.B> b) {
+    b.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             var v = @new<nint>();
             Δruntime.SetFinalizer(v.OrTypedNil(), fin);
@@ -201,9 +200,9 @@ partial struct objtype /*[320]byte*/;
 internal static (ж<objtype>, ж<objtype>) adjChunks() {
     var sᴷ = new stackAppend<ж<objtype>>();
 
-    slice<ж<objtype>> s = default!;
+    slice<ж<objtype>> s = default;
 
-    while (ᐧ) {
+    for (;;) {
         var c = @new<objtype>();
         foreach (var (_, d) in s) {
             if ((uintptr)c + /* unsafe.Sizeof(*c) */ (uintptr)320 == (uintptr)d) {
@@ -221,9 +220,9 @@ internal static (ж<objtype>, ж<objtype>) adjChunks() {
 internal static readonly object skippingWithAsanTestˢ = (@string)"skipping with -asan: test assumes exact size class alignment, but asan redzone breaks that assumption"u8;
 
 // Make sure an empty slice on the stack doesn't pin the next object in memory.
-public static void TestEmptySlice(ж<testing.T> Ꮡt) {
+public static void TestEmptySlice(ж<testing.T> t) {
     if (asan.Enabled) {
-        Ꮡt.Skip(skippingWithAsanTestˢ);
+        t.Skip(skippingWithAsanTestˢ);
     }
     var (x, y) = adjChunks();
 
@@ -244,9 +243,8 @@ internal static slice<byte> xsglobal;
 
 internal static (@string, ж<objtype>) adjStringChunk() {
     var b = new slice<byte>(objsize);
-    while (ᐧ) {
-        ref var s = ref heap<@string>(out var Ꮡs);
-        s = (@string)b;
+    for (;;) {
+        ref var s = ref heap<@string>((@string)b, out var Ꮡs);
         var t = @new<objtype>();
         var p = ~Ꮡs.Reinterpret<@string, uintptr>();
         var q = (uintptr)t;
@@ -257,9 +255,9 @@ internal static (@string, ж<objtype>) adjStringChunk() {
 }
 
 // Make sure an empty string on the stack doesn't pin the next object in memory.
-public static void TestEmptyString(ж<testing.T> Ꮡt) {
+public static void TestEmptyString(ж<testing.T> t) {
     if (asan.Enabled) {
-        Ꮡt.Skip(skippingWithAsanTestˢ);
+        t.Skip(skippingWithAsanTestˢ);
     }
     var (x, y) = adjStringChunk();
 
@@ -278,13 +276,13 @@ public static void TestEmptyString(ж<testing.T> Ꮡt) {
 internal static @string ssglobal;
 
 // Test for issue 7656.
-public static void TestFinalizerOnGlobal(ж<testing.T> Ꮡt) {
+public static void TestFinalizerOnGlobal(ж<testing.T> t) {
     Δruntime.SetFinalizer(Foo1.OrTypedNil(), (ж<Object1> p) => {
     });
     Δruntime.SetFinalizer(Foo2.OrTypedNil(), (ж<Object2> p) => {
     });
-    Δruntime.SetFinalizer(Foo1.OrTypedNil(), default!);
-    Δruntime.SetFinalizer(Foo2.OrTypedNil(), default!);
+    Δruntime.SetFinalizer(Foo1.OrTypedNil(), default);
+    Δruntime.SetFinalizer(Foo2.OrTypedNil(), default);
 }
 
 partial struct Object1 {
@@ -295,20 +293,20 @@ partial struct Object2 {
     public byte Something;
 }
 
-public static ж<Object2> Foo2 = Ꮡ(new Object2(nil));
-public static ж<Object1> Foo1 = Ꮡ(new Object1(nil));
+public static ж<Object2> Foo2 = Ꮡ(new Object2());
+public static ж<Object1> Foo1 = Ꮡ(new Object1());
 
-internal partial class TestDeferKeepAlive_T /*ж<nint>*/;
+internal partial class TestDeferKeepAlive_T /*ж<nint>*/; // needs to be a pointer base type to avoid tinyalloc and its never-finalized behavior.
 
-public static void TestDeferKeepAlive(ж<testing.T> Ꮡt) {
+public static void TestDeferKeepAlive(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (flagQuick.Value) {
-            Ꮡt.Skip(quickˢ);
+            t.Skip(quickˢ);
         }
 
         // See issue 21402.
-        Ꮡt.Parallel();
+        t.Parallel();
         var x = @new<TestDeferKeepAlive_T>();
         var finRun = false;
         Δruntime.SetFinalizer(x.OrTypedNil(), (ж<TestDeferKeepAlive_T> xΔ1) => {
@@ -318,7 +316,7 @@ public static void TestDeferKeepAlive(ж<testing.T> Ꮡt) {
         Δruntime.GC();
         time.Sleep(time.ΔSecond);
         if (finRun) {
-            Ꮡt.Errorf("finalizer ran prematurely"u8);
+            t.Errorf("finalizer ran prematurely");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

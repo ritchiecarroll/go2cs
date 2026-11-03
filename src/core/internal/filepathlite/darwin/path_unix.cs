@@ -10,7 +10,7 @@ using go.@internal;
 
 partial class filepathlite_package {
 
-public static UntypedInt Separator => /* '/' */ 47; // OS-specific path separator
+public static UntypedInt Separator => /* '/' */ 47;     // OS-specific path separator
 public static UntypedInt ListSeparator => /* ':' */ 58; // OS-specific path list separator
 
 public static bool IsPathSeparator(uint8 c) {
@@ -25,12 +25,12 @@ internal static (@string, error) localize(@string path) {
     if (bytealg.IndexByteString(path, 0) >= 0) {
         return ("", errInvalidPath);
     }
-    return (path, default!);
+    return (path, default);
 }
 
 // IsAbs reports whether the path is absolute.
 public static bool IsAbs(@string path) {
-    return stringslite.HasPrefix(path, "/"u8);
+    return stringslite.HasPrefix(path, "/");
 }
 
 // volumeNameLen returns length of the leading volume name on Windows.

@@ -25,7 +25,7 @@ using slices = slices_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using container;
 using go.@internal;
 using go.crypto;
@@ -43,44 +43,49 @@ public static UntypedInt VersionTLS13 => 0x0304;
 public static UntypedInt VersionSSL30 => 0x0300;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ssLv3ˢ = "SSLv3"u8;
-internal static readonly @string tls10ˢ = "TLS 1.0"u8;
-internal static readonly @string tls11ˢ = "TLS 1.1"u8;
-internal static readonly @string tls12ˢ = "TLS 1.2"u8;
-internal static readonly @string tls13ˢ = "TLS 1.3"u8;
+internal static ref readonly @string ssLv3ˢ => ref ssLv3ˢᵇ;
+private static readonly @string ssLv3ˢᵇ = "SSLv3"u8;
+internal static ref readonly @string tls10ˢ => ref tls10ˢᵇ;
+private static readonly @string tls10ˢᵇ = "TLS 1.0"u8;
+internal static ref readonly @string tls11ˢ => ref tls11ˢᵇ;
+private static readonly @string tls11ˢᵇ = "TLS 1.1"u8;
+internal static ref readonly @string tls12ˢ => ref tls12ˢᵇ;
+private static readonly @string tls12ˢᵇ = "TLS 1.2"u8;
+internal static ref readonly @string tls13ˢ => ref tls13ˢᵇ;
+private static readonly @string tls13ˢᵇ = "TLS 1.3"u8;
 
 // VersionName returns the name for the provided TLS version number
 // (e.g. "TLS 1.3"), or a fallback representation of the value if the
 // version is not implemented by this package.
 public static @string VersionName(uint16 version) {
-    var exprᴛ1 = version;
-    if (exprᴛ1 == VersionSSL30) {
+    switch (version) {
+    case var ᴛ when ᴛ == VersionSSL30: {
         return ssLv3ˢ;
     }
-    if (exprᴛ1 == VersionTLS10) {
+    case var ᴛ when ᴛ == VersionTLS10: {
         return tls10ˢ;
     }
-    if (exprᴛ1 == VersionTLS11) {
+    case var ᴛ when ᴛ == VersionTLS11: {
         return tls11ˢ;
     }
-    if (exprᴛ1 == VersionTLS12) {
+    case var ᴛ when ᴛ == VersionTLS12: {
         return tls12ˢ;
     }
-    if (exprᴛ1 == VersionTLS13) {
+    case var ᴛ when ᴛ == VersionTLS13: {
         return tls13ˢ;
     }
-    { /* default: */
+    default: {
         return fmt.Sprintf("0x%04X"u8, version);
-    }
+    }}
 }
 
-internal static UntypedInt maxPlaintext => 16384; // maximum plaintext payload length
-internal static UntypedInt maxCiphertext => /* 16384 + 2048 */ 18432; // maximum ciphertext payload length
+internal static UntypedInt maxPlaintext => 16384;                         // maximum plaintext payload length
+internal static UntypedInt maxCiphertext => /* 16384 + 2048 */ 18432;     // maximum ciphertext payload length
 internal static UntypedInt maxCiphertextTLS13 => /* 16384 + 256 */ 16640; // maximum ciphertext length in TLS 1.3
-internal static UntypedInt recordHeaderLen => 5; // record header length
-internal static UntypedInt maxHandshake => 65536; // maximum handshake we support (protocol max is 16 MB)
-internal static UntypedInt maxHandshakeCertificateMsg => 262144; // maximum certificate message size (256 KiB)
-internal static UntypedInt maxUselessRecords => 16; // maximum number of consecutive non-advancing records
+internal static UntypedInt recordHeaderLen => 5;                          // record header length
+internal static UntypedInt maxHandshake => 65536;                         // maximum handshake we support (protocol max is 16 MB)
+internal static UntypedInt maxHandshakeCertificateMsg => 262144;          // maximum certificate message size (256 KiB)
+internal static UntypedInt maxUselessRecords => 16;                       // maximum number of consecutive non-advancing records
 
 // TLS record types.
 partial struct recordType /*num:uint8*/;
@@ -106,7 +111,7 @@ internal const uint8 typeClientKeyExchange = 16;
 internal const uint8 typeFinished = 20;
 internal const uint8 typeCertificateStatus = 22;
 internal const uint8 typeKeyUpdate = 24;
-internal const uint8 typeMessageHash = 254;       // synthetic message
+internal const uint8 typeMessageHash = 254; // synthetic message
 
 // TLS compression types.
 internal const uint8 compressionNone = 0;
@@ -114,7 +119,7 @@ internal const uint8 compressionNone = 0;
 // TLS extension numbers
 internal const uint16 extensionServerName = 0;
 internal const uint16 extensionStatusRequest = 5;
-internal const uint16 extensionSupportedCurves = 10;      // supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
+internal const uint16 extensionSupportedCurves = 10; // supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
 internal const uint16 extensionSupportedPoints = 11;
 internal const uint16 extensionSignatureAlgorithms = 13;
 internal const uint16 extensionALPN = 16;
@@ -155,23 +160,23 @@ public static CurveID SecP256r1MLKEM768 => 4587;
 public static CurveID SecP384r1MLKEM1024 => 4589;
 
 internal static bool isTLS13OnlyKeyExchange(CurveID curve) {
-    var exprᴛ1 = curve;
-    if (exprᴛ1 == X25519MLKEM768 || exprᴛ1 == SecP256r1MLKEM768 || exprᴛ1 == SecP384r1MLKEM1024) {
+    switch (curve) {
+    case var ᴛ when ᴛ == X25519MLKEM768 || ᴛ == SecP256r1MLKEM768 || ᴛ == SecP384r1MLKEM1024: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 internal static bool isPQKeyExchange(CurveID curve) {
-    var exprᴛ1 = curve;
-    if (exprᴛ1 == X25519MLKEM768 || exprᴛ1 == SecP256r1MLKEM768 || exprᴛ1 == SecP384r1MLKEM1024) {
+    switch (curve) {
+    case var ᴛ when ᴛ == X25519MLKEM768 || ᴛ == SecP256r1MLKEM768 || ᴛ == SecP384r1MLKEM1024: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 // TLS 1.3 Key Share. See RFC 8446, Section 4.2.8.
@@ -216,18 +221,20 @@ internal static crypto.Hash directSigning = 0;
 
 // helloRetryRequestRandom is set as the Random value of a ServerHello
 // to signal that the message is actually a HelloRetryRequest.
-[GoLazy] partial class lazyᴛhelloRetryRequestRandom { internal static slice<byte> helloRetryRequestRandom = new byte[]{ // See RFC 8446, Section 4.1.3.
+[GoLazy] partial class lazyᴛhelloRetryRequestRandom { internal static slice<byte> helloRetryRequestRandom = slice<byte>([ // See RFC 8446, Section 4.1.3.
     0xCF, 0x21, 0xAD, 0x74, 0xE5, 0x9A, 0x61, 0x11,
     0xBE, 0x1D, 0x8C, 0x02, 0x1E, 0x65, 0xB8, 0x91,
     0xC2, 0xA2, 0x11, 0x16, 0x7A, 0xBB, 0x8C, 0x5E,
     0x07, 0x9E, 0x09, 0xE2, 0xC8, 0xA8, 0x33, 0x9C
-}.slice(); }
+]); }
 
 // downgradeCanaryTLS12 or downgradeCanaryTLS11 is embedded in the server
 // random as a downgrade protection if the server would be capable of
 // negotiating a higher version. See RFC 8446, Section 4.1.3.
-internal static readonly @string downgradeCanaryTLS12 = "DOWNGRD\x01"u8;
-internal static readonly @string downgradeCanaryTLS11 = "DOWNGRD\x00"u8;
+internal static ref readonly @string downgradeCanaryTLS12 => ref downgradeCanaryTLS12ᵇ;
+private static readonly @string downgradeCanaryTLS12ᵇ = "DOWNGRD\x01"u8;
+internal static ref readonly @string downgradeCanaryTLS11 => ref downgradeCanaryTLS11ᵇ;
+private static readonly @string downgradeCanaryTLS11ᵇ = "DOWNGRD\x00"u8;
 
 // testingOnlyForceDowngradeCanary is set in tests to force the server side to
 // include downgrade canaries even if it's using its highers supported version.
@@ -345,13 +352,13 @@ public static ClientAuthType RequireAndVerifyClientCert => 4;
 // requiresClientCert reports whether the ClientAuthType requires a client
 // certificate to be provided.
 internal static bool requiresClientCert(ClientAuthType c) {
-    var exprᴛ1 = c;
-    if (exprᴛ1 == RequireAnyClientCert || exprᴛ1 == RequireAndVerifyClientCert) {
+    switch (c) {
+    case var ᴛ when ᴛ == RequireAnyClientCert || ᴛ == RequireAndVerifyClientCert: {
         return true;
     }
-    { /* default: */
+    default: {
         return false;
-    }
+    }}
 }
 
 // ClientSessionCache is a cache of ClientSessionState objects that can be used
@@ -922,9 +929,9 @@ public static ж<Config> Clone(this ж<Config> Ꮡc) {
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (Ꮡc == nil) {
-            return default!;
+            return default;
         }
-        Ꮡc.of(Config.Ꮡmutex).RLock();
+        Ꮡc.Ꮡmutex.RLock();
         ᒐd1 = true;
         return Ꮡ(new Config(
             Rand: c.Rand,
@@ -963,8 +970,8 @@ public static ж<Config> Clone(this ж<Config> Ꮡc) {
             autoSessionTicketKeys: c.autoSessionTicketKeys
         ));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd1) Ꮡc.of(Config.Ꮡmutex).RUnlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd1) Ꮡc.Ꮡmutex.RUnlock(); ᒐ.Run(); }
 }
 
 // deprecatedSessionTicketKey is set as the prefix of SessionTicketKey if it was
@@ -987,13 +994,13 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) {
         }
 
         // We need to write some data, so get an exclusive lock and re-check any conditions.
-        Ꮡc.of(Config.Ꮡmutex).RUnlock();
+        Ꮡc.Ꮡmutex.RUnlock();
         ᒐd1 = true;
-        Ꮡc.of(Config.Ꮡmutex).Lock();
+        Ꮡc.Ꮡmutex.Lock();
         ᒐd2 = true;
-        if (c.SessionTicketKey == new byte[]{}.array(32)){
+        if (c.SessionTicketKey == new byte[]{}.array(32)) {
             {
-                var (_, err) = io.ReadFull(c.rand(), c.SessionTicketKey[..]); if (err != default!) {
+                var (_, err) = io.ReadFull(c.rand(), c.SessionTicketKey[..]); if (err != nil) {
                     throw panic(fmt.Sprintf("tls: unable to generate random session ticket key: %v"u8, err));
                 }
             }
@@ -1002,13 +1009,12 @@ internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) {
             // session ticket key, and is only randomized in case the application
             // reuses it for some reason.
             copy(c.SessionTicketKey[..], deprecatedSessionTicketKey);
-        } else 
-        if (!bytes.HasPrefix(c.SessionTicketKey[..], deprecatedSessionTicketKey) && len(c.sessionTicketKeys) == 0) {
-            c.sessionTicketKeys = new ticketKey[]{c.ticketKeyFromBytes(c.SessionTicketKey)}.slice();
+        } else if (!bytes.HasPrefix(c.SessionTicketKey[..], deprecatedSessionTicketKey) && len(c.sessionTicketKeys) == 0) {
+            c.sessionTicketKeys = slice<ticketKey>([c.ticketKeyFromBytes(c.SessionTicketKey)]);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-    finally { if (ᒐd2) Ꮡc.of(Config.Ꮡmutex).Unlock(); if (ᒐd1) Ꮡc.of(Config.Ꮡmutex).RLock(); ᒐ.Run(); }
+    finally { if (ᒐd2) Ꮡc.Ꮡmutex.Unlock(); if (ᒐd1) Ꮡc.Ꮡmutex.RLock(); ᒐ.Run(); }
 }
 
 // ticketKeys returns the ticketKeys for this connection.
@@ -1032,24 +1038,24 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
         // If the ConfigForClient callback returned a Config with explicitly set
         // keys, use those, otherwise just use the original Config.
         if (ᏑconfigForClient != nil) {
-            ᏑconfigForClient.of(Config.Ꮡmutex).RLock();
+            ᏑconfigForClient.Ꮡmutex.RLock();
             if (configForClient.SessionTicketsDisabled) {
-                ᏑconfigForClient.of(Config.Ꮡmutex).RUnlock();
-                return default!;
+                ᏑconfigForClient.Ꮡmutex.RUnlock();
+                return default;
             }
             ᏑconfigForClient.initLegacySessionTicketKeyRLocked();
             if (len(configForClient.sessionTicketKeys) != 0) {
                 var ret = configForClient.sessionTicketKeys;
-                ᏑconfigForClient.of(Config.Ꮡmutex).RUnlock();
+                ᏑconfigForClient.Ꮡmutex.RUnlock();
                 return ret;
             }
-            ᏑconfigForClient.of(Config.Ꮡmutex).RUnlock();
+            ᏑconfigForClient.Ꮡmutex.RUnlock();
         }
 
-        Ꮡc.of(Config.Ꮡmutex).RLock();
+        Ꮡc.Ꮡmutex.RLock();
         ᒐd1 = true;
         if (c.SessionTicketsDisabled) {
-            return default!;
+            return default;
         }
         Ꮡc.initLegacySessionTicketKeyRLocked();
         if (len(c.sessionTicketKeys) != 0) {
@@ -1061,15 +1067,15 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
         }
 
         // autoSessionTicketKeys are managed by auto-rotation.
-        Ꮡc.of(Config.Ꮡmutex).RUnlock();
+        Ꮡc.Ꮡmutex.RUnlock();
         ᒐd2 = true;
-        Ꮡc.of(Config.Ꮡmutex).Lock();
+        Ꮡc.Ꮡmutex.Lock();
         ᒐd3 = true;
         // Re-check the condition in case it changed since obtaining the new lock.
         if (len(c.autoSessionTicketKeys) == 0 || c.time().Sub(c.autoSessionTicketKeys[0].created) >= ticketKeyRotation) {
             array<byte> newKey = new(32);
             {
-                var (_, err) = io.ReadFull(c.rand(), newKey[..]); if (err != default!) {
+                var (_, err) = io.ReadFull(c.rand(), newKey[..]); if (err != nil) {
                     throw panic(fmt.Sprintf("unable to generate random session ticket key: %v"u8, err));
                 }
             }
@@ -1087,8 +1093,8 @@ internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> Ꮡ
         }
         return c.autoSessionTicketKeys;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
-    finally { if (ᒐd3) Ꮡc.of(Config.Ꮡmutex).Unlock(); if (ᒐd2) Ꮡc.of(Config.Ꮡmutex).RLock(); if (ᒐd1) Ꮡc.of(Config.Ꮡmutex).RUnlock(); ᒐ.Run(); }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
+    finally { if (ᒐd3) Ꮡc.Ꮡmutex.Unlock(); if (ᒐd2) Ꮡc.Ꮡmutex.RLock(); if (ᒐd1) Ꮡc.Ꮡmutex.RUnlock(); ᒐ.Run(); }
 }
 
 // SetSessionTicketKeys updates the session ticket keys for a server.
@@ -1118,14 +1124,14 @@ public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>>
         newKeys[i] = c.ticketKeyFromBytes(bytes);
     }
 
-    Ꮡc.of(Config.Ꮡmutex).Lock();
+    Ꮡc.Ꮡmutex.Lock();
     c.sessionTicketKeys = newKeys;
-    Ꮡc.of(Config.Ꮡmutex).Unlock();
+    Ꮡc.Ꮡmutex.Unlock();
 }
 
 internal static io.Reader rand(this ref Config c) {
     var r = c.Rand;
-    if (r == default!) {
+    if (r == nil) {
         return go.crypto.rand_package.Reader;
     }
     return r;
@@ -1133,7 +1139,7 @@ internal static io.Reader rand(this ref Config c) {
 
 internal static time.Time time(this ref Config c) {
     var t = c.Time;
-    if (t == default!) {
+    if (t == nil) {
         t = time_package.Now;
     }
     return t();
@@ -1142,8 +1148,8 @@ internal static time.Time time(this ref Config c) {
 internal static slice<uint16> cipherSuites(this ж<Config> Ꮡc, bool aesGCMPreferred) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    slice<uint16> ΔcipherSuites = default!;
-    if (c.CipherSuites == default!){
+    slice<uint16> ΔcipherSuites = default;
+    if (c.CipherSuites == nil) {
         ΔcipherSuites = defaultCipherSuites(aesGCMPreferred);
     } else {
         ΔcipherSuites = supportedCipherSuites(aesGCMPreferred);
@@ -1161,12 +1167,12 @@ internal static slice<uint16> supportedCipherSuites(this ж<Config> Ꮡc) {
     return Ꮡc.cipherSuites(false);
 }
 
-internal static slice<uint16> ΔsupportedVersions = new uint16[]{
+internal static slice<uint16> ΔsupportedVersions = slice<uint16>([
     VersionTLS13,
     VersionTLS12,
     VersionTLS11,
     VersionTLS10
-}.slice();
+]);
 
 // roleClient and roleServer are meant to call supportedVersions and parents
 // with more readability at the callsite.
@@ -1174,7 +1180,7 @@ internal const bool roleClient = true;
 
 internal const bool roleServer = false;
 
-internal static ж<godebug.Setting> tls10server = godebug.New("tls10server"u8);
+internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");
 
 // supportedVersions returns the list of supported TLS versions, sorted from
 // highest to lowest (and hence also in preference order).
@@ -1191,7 +1197,7 @@ internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isCli
                 continue;
             }
         }
-        if (isClient && c.EncryptedClientHelloConfigList != default! && v < VersionTLS13) {
+        if (isClient && c.EncryptedClientHelloConfigList != nil && v < VersionTLS13) {
             continue;
         }
         if (Ꮡc != nil && c.MinVersion != 0 && v < c.MinVersion) {
@@ -1268,43 +1274,43 @@ internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient
 // See go.dev/issue/67401.
 //
 //go:linkname errNoCertificates
-public static error errNoCertificates = errors.New("tls: no certificates configured"u8);
+public static error errNoCertificates = errors.New("tls: no certificates configured");
 
 // getCertificate returns the best certificate for the given ClientHelloInfo,
 // defaulting to the first element of c.Certificates.
 internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
 
-    if (c.GetCertificate != default! && (len(c.Certificates) == 0 || len(clientHello.ServerName) > 0)) {
+    if (c.GetCertificate != nil && (len(c.Certificates) == 0 || len(clientHello.ServerName) > 0)) {
         var (cert, err) = c.GetCertificate(ᏑclientHello);
-        if (cert != nil || err != default!) {
+        if (cert != nil || err != nil) {
             return (cert, err);
         }
     }
 
     if (len(c.Certificates) == 0) {
-        return (default!, errNoCertificates);
+        return (default, errNoCertificates);
     }
 
     if (len(c.Certificates) == 1) {
         // There's only one choice, so no point doing any work.
-        return (Ꮡ(c.Certificates, 0), default!);
+        return (Ꮡ(c.Certificates, 0), default);
     }
 
-    if (c.NameToCertificate != default!) {
+    if (c.NameToCertificate != nil) {
         @string name = strings.ToLower(clientHello.ServerName);
         {
             var (cert, ok) = c.NameToCertificate[name, ꟷ]; if (ok) {
-                return (cert, default!);
+                return (cert, default);
             }
         }
         if (len(name) > 0) {
-            var labels = strings.Split(name, "."u8);
-            labels[0] = "*"u8;
-            @string wildcardName = strings.Join(labels, "."u8);
+            var labels = strings.Split(name, ".");
+            labels[0] = "*";
+            @string wildcardName = strings.Join(labels, ".");
             {
                 var (cert, ok) = c.NameToCertificate[wildcardName, ꟷ]; if (ok) {
-                    return (cert, default!);
+                    return (cert, default);
                 }
             }
         }
@@ -1315,22 +1321,27 @@ internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<Cl
         cert = vᴛ1;
 
         {
-            var err = ᏑclientHello.SupportsCertificate(Ꮡcert); if (err == default!) {
-                return (Ꮡcert, default!);
+            var err = ᏑclientHello.SupportsCertificate(Ꮡcert); if (err == nil) {
+                return (Ꮡcert, default);
             }
         }
     }
 
     // If nothing matches, return the first certificate.
-    return (Ꮡ(c.Certificates, 0), default!);
+    return (Ꮡ(c.Certificates, 0), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noMutuallySupportedˢ = "no mutually supported protocol versions"u8;
-internal static readonly @string clientDoesnTSupportEcdheˢ = "client doesn't support ECDHE, can only use legacy RSA key exchange"u8;
-internal static readonly @string clientDoesnTSupportˢ = "client doesn't support certificate curve"u8;
-internal static readonly @string connectionDoesnTSupportˢ = "connection doesn't support Ed25519"u8;
-internal static readonly @string clientDoesnTSupportAnyˢ = "client doesn't support any cipher suites compatible with the certificate"u8;
+internal static ref readonly @string noMutuallySupportedˢ => ref noMutuallySupportedˢᵇ;
+private static readonly @string noMutuallySupportedˢᵇ = "no mutually supported protocol versions"u8;
+internal static ref readonly @string clientDoesnTSupportEcdheˢ => ref clientDoesnTSupportEcdheˢᵇ;
+private static readonly @string clientDoesnTSupportEcdheˢᵇ = "client doesn't support ECDHE, can only use legacy RSA key exchange"u8;
+internal static ref readonly @string clientDoesnTSupportˢ => ref clientDoesnTSupportˢᵇ;
+private static readonly @string clientDoesnTSupportˢᵇ = "client doesn't support certificate curve"u8;
+internal static ref readonly @string connectionDoesnTSupportˢ => ref connectionDoesnTSupportˢᵇ;
+private static readonly @string connectionDoesnTSupportˢᵇ = "connection doesn't support Ed25519"u8;
+internal static ref readonly @string clientDoesnTSupportAnyˢ => ref clientDoesnTSupportAnyˢᵇ;
+private static readonly @string clientDoesnTSupportAnyˢᵇ = "client doesn't support any cipher suites compatible with the certificate"u8;
 
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the client that sent the ClientHello. Otherwise, it returns an error
@@ -1354,7 +1365,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
 
     var config = chi.config;
     if (config == nil) {
-        config = Ꮡ(new Config(nil));
+        config = Ꮡ(new Config());
     }
     var (vers, ok) = config.mutualVersion(roleServer, chi.SupportedVersions);
     if (!ok) {
@@ -1365,11 +1376,11 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // certificate needs to be valid for it.
     if (chi.ServerName != ""u8) {
         var (x509Cert, errΔ1) = c.leaf();
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             return fmt.Errorf("failed to parse certificate: %w"u8, errΔ1);
         }
         {
-            var errΔ2 = x509Cert.VerifyHostname(chi.ServerName); if (errΔ2 != default!) {
+            var errΔ2 = x509Cert.VerifyHostname(chi.ServerName); if (errΔ2 != nil) {
                 return fmt.Errorf("certificate is not valid for requested server name: %w"u8, errΔ2);
             }
         }
@@ -1389,7 +1400,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         // RSA private key, not by signing, so check the PrivateKey implements
         // crypto.Decrypter, like *rsa.PrivateKey does.
         {
-            var (priv, okΔ1) = Ꮡc.Value.PrivateKey._<crypto.Decrypter>(ᐧ); if (okΔ1){
+            var (priv, okΔ1) = Ꮡc.Value.PrivateKey._<crypto.Decrypter>(ᐧ); if (okΔ1) {
                 {
                     var (_, okΔ2) = priv.Public()._<ж<rsa.PublicKey>>(ᐧ); if (!okΔ2) {
                         return unsupported;
@@ -1402,10 +1413,10 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         // Finally, there needs to be a mutual cipher suite that uses the static
         // RSA key exchange instead of ECDHE.
         var rsaCipherSuite = selectCipherSuite(Ꮡchi.Value.CipherSuites, configʗ1.supportedCipherSuites(), (ж<cipherSuite> cΔ1) => {
-            if (((~cΔ1).flags & (nint)suiteECDHE) != 0) {
+            if ((cΔ1.flags & (nint)suiteECDHE) != 0) {
                 return false;
             }
-            if (vers < VersionTLS12 && ((~cΔ1).flags & (nint)suiteTLS12) != 0) {
+            if (vers < VersionTLS12 && (cΔ1.flags & (nint)suiteTLS12) != 0) {
                 return false;
             }
             return true;
@@ -1413,14 +1424,14 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         if (rsaCipherSuite == nil) {
             return unsupported;
         }
-        return default!;
+        return default;
     }
 
     // If the client sent the signature_algorithms extension, ensure it supports
     // schemes we can use with this certificate and TLS version.
     if (len(chi.SignatureSchemes) > 0) {
         {
-            var (_, errΔ3) = selectSignatureScheme(vers, Ꮡc, chi.SignatureSchemes); if (errΔ3 != default!) {
+            var (_, errΔ3) = selectSignatureScheme(vers, Ꮡc, chi.SignatureSchemes); if (errΔ3 != nil) {
                 return supportsRSAFallback(errΔ3);
             }
         }
@@ -1430,39 +1441,42 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // ECDHE computation, point format negotiation is removed, cipher suites are
     // only relevant to the AEAD choice, and static RSA does not exist.
     if (vers == VersionTLS13) {
-        return default!;
+        return default;
     }
 
     // The only signed key exchange we support is ECDHE.
     var (ecdheSupported, err) = supportsECDHE(config, vers, chi.SupportedCurves, chi.SupportedPoints);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     if (!ecdheSupported) {
         return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢ));
     }
 
-    bool ecdsaCipherSuite = default!;
+    bool ecdsaCipherSuite = default;
     {
-        var (priv, okΔ3) = c.PrivateKey._<crypto.Signer>(ᐧ); if (okΔ3){
+        var (priv, okΔ3) = c.PrivateKey._<crypto.Signer>(ᐧ); if (okΔ3) {
             var switchᴛ2 = priv.Public();
             switch (switchᴛ2.type()) {
             case ж<ecdsa.PublicKey> pub: {
-                CurveID curve = default!;
-                var exprᴛ1 = (~pub).Curve;
-                if (AreEqual(exprᴛ1, elliptic.P256())) {
+                CurveID curve = default;
+                switch (pub.Curve) {
+                case var ᴛ when AreEqual(ᴛ, elliptic.P256()): {
                     curve = CurveP256;
+                    break;
                 }
-                else if (AreEqual(exprᴛ1, elliptic.P384())) {
+                case var ᴛ when AreEqual(ᴛ, elliptic.P384()): {
                     curve = CurveP384;
+                    break;
                 }
-                else if (AreEqual(exprᴛ1, elliptic.P521())) {
+                case var ᴛ when AreEqual(ᴛ, elliptic.P521()): {
                     curve = CurveP521;
+                    break;
                 }
-                else { /* default: */
+                default: {
                     return supportsRSAFallback(unsupportedCertificateError(ref (Ꮡc).DerefOrNull()));
-                }
-                bool curveOk = default!;
+                }}
+                bool curveOk = default;
                 foreach (var (_, cΔ2) in chi.SupportedCurves) {
                     if (cΔ2 == curve && config.supportsCurve(vers, cΔ2)) {
                         curveOk = true;
@@ -1498,10 +1512,10 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // this certificate. Cipher suite selection will then apply the logic in
     // reverse to pick it. See also serverHandshakeState.cipherSuiteOk.
     var cipherSuite = selectCipherSuite(chi.CipherSuites, config.supportedCipherSuites(), (ж<cipherSuite> cΔ3) => {
-        if (((~cΔ3).flags & (nint)suiteECDHE) == 0) {
+        if ((cΔ3.flags & (nint)suiteECDHE) == 0) {
             return false;
         }
-        if (((~cΔ3).flags & (nint)suiteECSign) != 0){
+        if ((cΔ3.flags & (nint)suiteECSign) != 0) {
             if (!ecdsaCipherSuite) {
                 return false;
             }
@@ -1510,7 +1524,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
                 return false;
             }
         }
-        if (vers < VersionTLS12 && ((~cΔ3).flags & (nint)suiteTLS12) != 0) {
+        if (vers < VersionTLS12 && (cΔ3.flags & (nint)suiteTLS12) != 0) {
             return false;
         }
         return true;
@@ -1519,11 +1533,12 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
         return supportsRSAFallback(errors.New(clientDoesnTSupportAnyˢ));
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string chainIsNotSignedByAnˢ = "chain is not signed by an acceptable CA"u8;
+internal static ref readonly @string chainIsNotSignedByAnˢ => ref chainIsNotSignedByAnˢᵇ;
+private static readonly @string chainIsNotSignedByAnˢᵇ = "chain is not signed by an acceptable CA"u8;
 
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the server that sent the CertificateRequest. Otherwise, it returns an error
@@ -1532,13 +1547,13 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
-        var (_, err) = selectSignatureScheme(cri.Version, Ꮡc, cri.SignatureSchemes); if (err != default!) {
+        var (_, err) = selectSignatureScheme(cri.Version, Ꮡc, cri.SignatureSchemes); if (err != nil) {
             return err;
         }
     }
 
     if (len(cri.AcceptableCAs) == 0) {
-        return default!;
+        return default;
     }
 
     foreach (var (j, cert) in c.ΔCertificate) {
@@ -1546,17 +1561,17 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
         // Parse the certificate if this isn't the leaf node, or if
         // chain.Leaf was nil.
         if (j != 0 || x509Cert == nil) {
-            error err = default!;
+            error err = default;
             {
-                (x509Cert, err) = Δx509.ParseCertificate(cert); if (err != default!) {
+                (x509Cert, err) = Δx509.ParseCertificate(cert); if (err != nil) {
                     return fmt.Errorf("failed to parse certificate #%d in the chain: %w"u8, j, err);
                 }
             }
         }
 
         foreach (var (_, ca) in cri.AcceptableCAs) {
-            if (bytes.Equal((~x509Cert).RawIssuer, ca)) {
-                return default!;
+            if (bytes.Equal(x509Cert.RawIssuer, ca)) {
+                return default;
             }
         }
     }
@@ -1575,32 +1590,37 @@ public static void BuildNameToCertificate(this ref Config c) {
     foreach (var i in range(c.Certificates)) {
         var cert = Ꮡ(c.Certificates, i);
         var (x509Cert, err) = cert.leaf();
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         // If SANs are *not* present, some clients will consider the certificate
         // valid for the name in the Common Name.
-        if ((~x509Cert).Subject.CommonName != ""u8 && len((~x509Cert).DNSNames) == 0) {
-            c.NameToCertificate[(~x509Cert).Subject.CommonName] = cert;
+        if (x509Cert.Subject.CommonName != ""u8 && len(x509Cert.DNSNames) == 0) {
+            c.NameToCertificate[x509Cert.Subject.CommonName] = cert;
         }
-        foreach (var (_, san) in (~x509Cert).DNSNames) {
+        foreach (var (_, san) in x509Cert.DNSNames) {
             c.NameToCertificate[san] = cert;
         }
     }
 }
 
-internal static readonly @string keyLogLabelTLS12 = "CLIENT_RANDOM"u8;
-internal static readonly @string keyLogLabelClientHandshake = "CLIENT_HANDSHAKE_TRAFFIC_SECRET"u8;
-internal static readonly @string keyLogLabelServerHandshake = "SERVER_HANDSHAKE_TRAFFIC_SECRET"u8;
-internal static readonly @string keyLogLabelClientTraffic = "CLIENT_TRAFFIC_SECRET_0"u8;
-internal static readonly @string keyLogLabelServerTraffic = "SERVER_TRAFFIC_SECRET_0"u8;
+internal static ref readonly @string keyLogLabelTLS12 => ref keyLogLabelTLS12ᵇ;
+private static readonly @string keyLogLabelTLS12ᵇ = "CLIENT_RANDOM"u8;
+internal static ref readonly @string keyLogLabelClientHandshake => ref keyLogLabelClientHandshakeᵇ;
+private static readonly @string keyLogLabelClientHandshakeᵇ = "CLIENT_HANDSHAKE_TRAFFIC_SECRET"u8;
+internal static ref readonly @string keyLogLabelServerHandshake => ref keyLogLabelServerHandshakeᵇ;
+private static readonly @string keyLogLabelServerHandshakeᵇ = "SERVER_HANDSHAKE_TRAFFIC_SECRET"u8;
+internal static ref readonly @string keyLogLabelClientTraffic => ref keyLogLabelClientTrafficᵇ;
+private static readonly @string keyLogLabelClientTrafficᵇ = "CLIENT_TRAFFIC_SECRET_0"u8;
+internal static ref readonly @string keyLogLabelServerTraffic => ref keyLogLabelServerTrafficᵇ;
+private static readonly @string keyLogLabelServerTrafficᵇ = "SERVER_TRAFFIC_SECRET_0"u8;
 
 internal static error writeKeyLog(this ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
-    if (c.KeyLogWriter == default!) {
-        return default!;
+    if (c.KeyLogWriter == nil) {
+        return default;
     }
 
-    var logLine = fmt.Appendf(default!, "%s %x %x\n"u8, label, clientRandom, secret);
+    var logLine = fmt.Appendf(default, "%s %x %x\n"u8, label, clientRandom, secret);
 
     ᏑwriterMutex.Lock();
     var (_, err) = c.KeyLogWriter.Write(logLine);
@@ -1646,7 +1666,7 @@ partial struct Certificate {
 // the corresponding c.Certificate[0].
 internal static (ж<Δx509.Certificate>, error) leaf(this ref Certificate c) {
     if (c.Leaf != nil) {
-        return (c.Leaf, default!);
+        return (c.Leaf, default);
     }
     return Δx509.ParseCertificate(c.ΔCertificate[0]);
 }
@@ -1697,7 +1717,7 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
 
 // Put adds the provided (sessionKey, cs) pair to the cache. If cs is nil, the entry
 // corresponding to sessionKey is removed from the cache instead.
-internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> Ꮡcs) {
+internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1708,12 +1728,12 @@ internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<C
 
         {
             var (elemΔ1, ok) = c.m[sessionKey, ꟷ]; if (ok) {
-                if (Ꮡcs == nil){
+                if (cs == nil) {
                     c.q.Remove(elemΔ1);
                     delete(c.m, sessionKey);
                 } else {
                     var entryΔ1 = (~elemΔ1).Value._<ж<lruSessionCacheEntry>>();
-                    entryΔ1.Value.state = Ꮡcs;
+                    entryΔ1.state = cs;
                     c.q.MoveToFront(elemΔ1);
                 }
                 return;
@@ -1721,16 +1741,16 @@ internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<C
         }
 
         if (c.q.Len() < c.capacity) {
-            var entryΔ2 = Ꮡ(new lruSessionCacheEntry(sessionKey, Ꮡcs));
+            var entryΔ2 = Ꮡ(new lruSessionCacheEntry(sessionKey, cs));
             c.m[sessionKey] = c.q.PushFront(entryΔ2.OrTypedNil());
             return;
         }
 
         var elem = c.q.Back();
         var entry = (~elem).Value._<ж<lruSessionCacheEntry>>();
-        delete(c.m, (~entry).sessionKey);
-        entry.Value.sessionKey = sessionKey;
-        entry.Value.state = Ꮡcs;
+        delete(c.m, entry.sessionKey);
+        entry.sessionKey = sessionKey;
+        entry.state = cs;
         c.q.MoveToFront(elem);
         c.m[sessionKey] = elem;
     }
@@ -1752,12 +1772,12 @@ internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc
         {
             var (elem, ok) = c.m[sessionKey, ꟷ]; if (ok) {
                 c.q.MoveToFront(elem);
-                return ((~(~elem).Value._<ж<lruSessionCacheEntry>>()).state, true);
+                return ((~elem).Value._<ж<lruSessionCacheEntry>>().state, true);
             }
         }
-        return (default!, false);
+        return (default, false);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { if (ᒐd1) Ꮡc.of(lruSessionCache.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
@@ -1779,13 +1799,13 @@ internal static slice<SignatureScheme> testingOnlySupportedSignatureAlgorithms;
 // CertificateRequest messages.
 internal static slice<SignatureScheme> supportedSignatureAlgorithms(uint16 minVers) {
     var sigAlgs = defaultSupportedSignatureAlgorithms();
-    if (testingOnlySupportedSignatureAlgorithms != default!) {
+    if (testingOnlySupportedSignatureAlgorithms != nil) {
         sigAlgs = slices.Clone<slice<SignatureScheme>, SignatureScheme>(testingOnlySupportedSignatureAlgorithms);
     }
     return slices.DeleteFunc(sigAlgs, (SignatureScheme s) => isDisabledSignatureAlgorithm(minVers, s, false));
 }
 
-internal static ж<godebug.Setting> tlssha1 = godebug.New("tlssha1"u8);
+internal static ж<godebug.Setting> tlssha1 = godebug.New("tlssha1");
 
 internal static bool isDisabledSignatureAlgorithm(uint16 version, SignatureScheme s, bool isCert) {
     if (fips140tls.Required() && !slices.Contains(allowedSignatureAlgorithmsFIPS, s)) {
@@ -1804,13 +1824,12 @@ internal static bool isDisabledSignatureAlgorithm(uint16 version, SignatureSchem
 
     // TLS 1.3 removed support for PKCS#1 v1.5 and SHA-1 signatures,
     // and Go 1.25 removed support for SHA-1 signatures in TLS 1.2.
-    if (version > VersionTLS12){
+    if (version > VersionTLS12) {
         var (sigType, sigHash, _) = typeAndHashFromSignatureScheme(s);
         if (sigType == signaturePKCS1v15 || sigHash == crypto.SHA1) {
             return true;
         }
-    } else 
-    if (tlssha1.Value() != "1"u8) {
+    } else if (tlssha1.Value() != "1"u8) {
         var (_, sigHash, _) = typeAndHashFromSignatureScheme(s);
         if (sigHash == crypto.SHA1) {
             return true;
@@ -1847,7 +1866,8 @@ public static error Unwrap(this ref CertificateVerificationError e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tlsNoFipsCompatibleˢ = "tls: no FIPS compatible certificate chains found"u8;
+internal static ref readonly @string tlsNoFipsCompatibleˢ => ref tlsNoFipsCompatibleˢᵇ;
+private static readonly @string tlsNoFipsCompatibleˢᵇ = "tls: no FIPS compatible certificate chains found"u8;
 
 // fipsAllowedChains returns chains that are allowed to be used in a TLS connection
 // based on the current fips140tls enforcement setting.
@@ -1857,7 +1877,7 @@ internal static readonly @string tlsNoFipsCompatibleˢ = "tls: no FIPS compatibl
 // If this results in no chains it returns an error.
 internal static (slice<slice<ж<Δx509.Certificate>>>, error) fipsAllowedChains(slice<slice<ж<Δx509.Certificate>>> chains) {
     if (!fips140tls.Required()) {
-        return (chains, default!);
+        return (chains, default);
     }
 
     var permittedChains = new slice<slice<ж<Δx509.Certificate>>>(0, len(chains));
@@ -1868,10 +1888,10 @@ internal static (slice<slice<ж<Δx509.Certificate>>>, error) fipsAllowedChains(
     }
 
     if (len(permittedChains) == 0) {
-        return (default!, errors.New(tlsNoFipsCompatibleˢ));
+        return (default, errors.New(tlsNoFipsCompatibleˢ));
     }
 
-    return (permittedChains, default!);
+    return (permittedChains, default);
 }
 
 internal static bool fipsAllowChain(slice<ж<Δx509.Certificate>> chain) {
@@ -1897,7 +1917,7 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
         if (len(chain) == 0) {
             continue;
         }
-        if (slices.ContainsFunc(chain, (ж<Δx509.Certificate> cert) => opts.CurrentTime.Before((~cert).NotBefore) || opts.CurrentTime.After((~cert).NotAfter))) {
+        if (slices.ContainsFunc(chain, (ж<Δx509.Certificate> cert) => opts.CurrentTime.Before(cert.NotBefore) || opts.CurrentTime.After(cert.NotAfter))) {
             continue;
         }
         // Since we already validated the chain, we only care that it is rooted
@@ -1907,21 +1927,21 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
         // root. On other platforms, we have to do full verification again,
         // because EKU handling might differ. We will want to replace this with
         // CertPool.Contains if/once that is available. See go.dev/issue/77376.
-        if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8){
+        if (runtime.GOOS == "windows"u8 || runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
             opts.Intermediates = Δx509.NewCertPool();
             foreach (var (_, cert) in chain.slice(1, max(1, len(chain) - 1))) {
                 opts.Intermediates.AddCert(cert);
             }
             var leaf = chain[0];
             {
-                var (_, err) = leaf.Verify(opts); if (err == default!) {
+                var (_, err) = leaf.Verify(opts); if (err == nil) {
                     return true;
                 }
             }
         } else {
             var root = chain[len(chain) - 1];
             {
-                var (_, err) = root.Verify(opts); if (err == default!) {
+                var (_, err) = root.Verify(opts); if (err == nil) {
                     return true;
                 }
             }

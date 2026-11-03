@@ -13,13 +13,13 @@ using static go.crypto.@internal.fips140.nistec_package;
 
 partial class nistec_internal_test_package {
 
-public static void TestP256PrecomputedTable(ж<testing.T> Ꮡt) {
+public static void TestP256PrecomputedTable(ж<testing.T> t) {
     var @base = NewP256Point().SetGenerator();
 
     for (nint iᴛ1 = 0; iᴛ1 < 43; iᴛ1++) {
         var i = iᴛ1;
         var baseʗ1 = @base;
-        Ꮡt.Run(fmt.Sprintf("table[%d]"u8, i), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("table[%d]"u8, i), (ж<testing.T> tΔ1) => {
             testP256AffineTable(tΔ1, baseʗ1, p256GeneratorTables.at<global::go.crypto.@internal.fips140.nistec_package.p256AffineTable>(i));
         });
 
@@ -29,23 +29,21 @@ public static void TestP256PrecomputedTable(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void testP256AffineTable(ж<testing.T> Ꮡt, ж<global::go.crypto.@internal.fips140.nistec_package.P256Point> Ꮡbase, ж<global::go.crypto.@internal.fips140.nistec_package.p256AffineTable> Ꮡtable) {
-    ref var table = ref Ꮡtable.DerefOrNull();
-
+internal static void testP256AffineTable(ж<testing.T> t, ж<global::go.crypto.@internal.fips140.nistec_package.P256Point> @base, ж<global::go.crypto.@internal.fips140.nistec_package.p256AffineTable> table) {
     var p = NewP256Point();
     var zInv = @new<fiat.P256Element>();
 
     for (nint j = 0; j < 32; j++) {
-        p.Add(p, Ꮡbase);
+        p.Add(p, @base);
 
         // Convert p to affine coordinates.
-        zInv.Invert(p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡz));
-        p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡx).Mul(p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡx), zInv);
-        p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡy).Mul(p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡy), zInv);
-        p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡz).One();
+        zInv.Invert(p.Ꮡz);
+        p.Ꮡx.Mul(p.Ꮡx, zInv);
+        p.Ꮡy.Mul(p.Ꮡy, zInv);
+        p.Ꮡz.One();
 
-        if (!bytes_package.Equal(Ꮡtable.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).of(global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint.Ꮡx).Bytes(), p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡx).Bytes()) || !bytes_package.Equal(Ꮡtable.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).of(global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint.Ꮡy).Bytes(), p.of(global::go.crypto.@internal.fips140.nistec_package.P256Point.Ꮡy).Bytes())) {
-            Ꮡt.Fatalf("incorrect table entry at index %d"u8, j);
+        if (!bytes_package.Equal(table.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).Ꮡx.Bytes(), p.Ꮡx.Bytes()) || !bytes_package.Equal(table.at<global::go.crypto.@internal.fips140.nistec_package.p256AffinePoint>(j).Ꮡy.Bytes(), p.Ꮡy.Bytes())) {
+            t.Fatalf("incorrect table entry at index %d", j);
         }
     }
 }

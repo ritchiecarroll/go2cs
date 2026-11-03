@@ -13,10 +13,10 @@ using syscall = syscall_package;
 
 partial class routebsd_package {
 
-internal static error errMessageMismatch = errors.New("message mismatch"u8);
-internal static error errMessageTooShort = errors.New("message too short"u8);
-internal static error errInvalidMessage = errors.New("invalid message"u8);
-internal static error errInvalidAddr = errors.New("invalid address"u8);
+internal static error errMessageMismatch = errors.New("message mismatch");
+internal static error errMessageTooShort = errors.New("message too short");
+internal static error errInvalidMessage = errors.New("invalid message");
+internal static error errInvalidAddr = errors.New("invalid address");
 
 // fetchRIB fetches a routing information base from the operating
 // system.
@@ -24,7 +24,7 @@ internal static error errInvalidAddr = errors.New("invalid address"u8);
 // The arg is an interface index or 0 for all.
 internal static (slice<byte>, error) fetchRIB(nint typ, nint arg) {
     nint @try = 0;
-    while (ᐧ) {
+    for (;;) {
         @try++;
         var (b, err) = syscall.RouteRIB(typ, arg);
 
@@ -45,14 +45,14 @@ internal static (slice<byte>, error) fetchRIB(nint typ, nint arg) {
 // The argument is an interface index or 0 for all.
 public static (slice<Message>, error) FetchRIBMessages(nint typ, nint arg) {
     var (b, err) = fetchRIB(typ, arg);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     (var ms, err) = parseRIB(b);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (ms, default!);
+    return (ms, default);
 }
 
 } // end routebsd_package

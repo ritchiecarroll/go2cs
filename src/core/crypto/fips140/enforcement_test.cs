@@ -20,48 +20,59 @@ using static go.crypto.fips140_internal_test_package;
 
 partial class fips140_test_package {
 
-internal static void expectAllowed(ж<testing.T> Ꮡt, @string why, bool expected) {
-    Ꮡt.Helper();
+internal static void expectAllowed(ж<testing.T> t, @string why, bool expected) {
+    t.Helper();
     var result = isAllowed();
     if (result != expected) {
-        Ꮡt.Fatalf("%v: expected: %v, got: %v"u8, why, expected, result);
+        t.Fatalf("%v: expected: %v, got: %v", why, expected, result);
     }
 }
 
 internal static bool isAllowed() {
     var (_, err) = des.NewCipher(new slice<byte>(8));
-    return err == default!;
+    return err == nil;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRunˢ = "-test.run=^TestWithoutEnforcement$"u8;
-internal static readonly @string testVˢ = "-test.v"u8;
-internal static readonly @string disabledˢ = "Disabled"u8;
-internal static readonly @string beforeEnforcementˢ = "before enforcement disabled"u8;
-internal static readonly @string insideWithoutEnforcementˢ = "inside WithoutEnforcement"u8;
-internal static readonly @string afterWithoutEnforcementˢ = "after WithoutEnforcement"u8;
-internal static readonly @string nestedˢ = "Nested"u8;
-internal static readonly @string beforeEnforcementBypassˢ = "before enforcement bypass"u8;
-internal static readonly @string insideNestedˢ = "inside nested WithoutEnforcement"u8;
-internal static readonly @string afterEnforcementBypassˢ = "after enforcement bypass"u8;
-internal static readonly @string goroutineInheritˢ = "GoroutineInherit"u8;
+internal static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestWithoutEnforcement$"u8;
+internal static ref readonly @string testVˢ => ref testVˢᵇ;
+private static readonly @string testVˢᵇ = "-test.v"u8;
+internal static ref readonly @string disabledˢ => ref disabledˢᵇ;
+private static readonly @string disabledˢᵇ = "Disabled"u8;
+internal static ref readonly @string beforeEnforcementˢ => ref beforeEnforcementˢᵇ;
+private static readonly @string beforeEnforcementˢᵇ = "before enforcement disabled"u8;
+internal static ref readonly @string insideWithoutEnforcementˢ => ref insideWithoutEnforcementˢᵇ;
+private static readonly @string insideWithoutEnforcementˢᵇ = "inside WithoutEnforcement"u8;
+internal static ref readonly @string afterWithoutEnforcementˢ => ref afterWithoutEnforcementˢᵇ;
+private static readonly @string afterWithoutEnforcementˢᵇ = "after WithoutEnforcement"u8;
+internal static ref readonly @string nestedˢ => ref nestedˢᵇ;
+private static readonly @string nestedˢᵇ = "Nested"u8;
+internal static ref readonly @string beforeEnforcementBypassˢ => ref beforeEnforcementBypassˢᵇ;
+private static readonly @string beforeEnforcementBypassˢᵇ = "before enforcement bypass"u8;
+internal static ref readonly @string insideNestedˢ => ref insideNestedˢᵇ;
+private static readonly @string insideNestedˢᵇ = "inside nested WithoutEnforcement"u8;
+internal static ref readonly @string afterEnforcementBypassˢ => ref afterEnforcementBypassˢᵇ;
+private static readonly @string afterEnforcementBypassˢᵇ = "after enforcement bypass"u8;
+internal static ref readonly @string goroutineInheritˢ => ref goroutineInheritˢᵇ;
+private static readonly @string goroutineInheritˢᵇ = "GoroutineInherit"u8;
 internal static readonly object goroutineDidnTInheritˢ = (@string)"goroutine didn't inherit enforcement bypass"u8;
 internal static readonly object goroutineInheritedBypassˢ = (@string)"goroutine inherited bypass after WithoutEnforcement return"u8;
 
-public static void TestWithoutEnforcement(ж<testing.T> Ꮡt) {
-    cryptotest.MustSupportFIPS140(Ꮡt);
+public static void TestWithoutEnforcement(ж<testing.T> t) {
+    cryptotest.MustSupportFIPS140(t);
     if (!fips140.Enforced()) {
-        var cmd = testenv.Command(new fips140_test_package.testing_TжTB(Ꮡt), testenv.Executable(new fips140_test_package.testing_TжTB(Ꮡt)), testRunˢ, testVˢ);
-        cmd.Value.Env = append(cmd.Environ(), "GODEBUG=fips140=only"u8);
+        var cmd = testenv.Command(new fips140_test_package.testing_TжTB(t), testenv.Executable(new fips140_test_package.testing_TжTB(t)), testRunˢ, testVˢ);
+        cmd.Env = append(cmd.Environ(), (@string)"GODEBUG=fips140=only");
         var (@out, err) = cmd.CombinedOutput();
-        Ꮡt.Logf("running with GODEBUG=fips140=only:\n%s"u8, @out);
-        if (err != default!) {
-            Ꮡt.Errorf("fips140=only subprocess failed: %v"u8, err);
+        t.Logf("running with GODEBUG=fips140=only:\n%s", @out);
+        if (err != nil) {
+            t.Errorf("fips140=only subprocess failed: %v", err);
         }
         return;
     }
 
-    Ꮡt.Run(disabledˢ, (ж<testing.T> tΔ1) => {
+    t.Run(disabledˢ, (ж<testing.T> tΔ1) => {
         expectAllowed(tΔ1, beforeEnforcementˢ, false);
         fips140.WithoutEnforcement(() => {
             expectAllowed(tΔ1, insideWithoutEnforcementˢ, true);
@@ -70,7 +81,7 @@ public static void TestWithoutEnforcement(ж<testing.T> Ꮡt) {
         expectAllowed(tΔ1, afterWithoutEnforcementˢ, false);
     });
 
-    Ꮡt.Run(nestedˢ, (ж<testing.T> tΔ2) => {
+    t.Run(nestedˢ, (ж<testing.T> tΔ2) => {
         expectAllowed(tΔ2, beforeEnforcementBypassˢ, false);
         fips140.WithoutEnforcement(() => {
             fips140.WithoutEnforcement(() => {
@@ -81,7 +92,7 @@ public static void TestWithoutEnforcement(ж<testing.T> Ꮡt) {
         expectAllowed(tΔ2, afterEnforcementBypassˢ, false);
     });
 
-    Ꮡt.Run(goroutineInheritˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
+    t.Run(goroutineInheritˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ3) => {
         var ch = new channel<bool>(2);
         expectAllowed(tΔ3, beforeEnforcementBypassˢ, false);
         var chʗ1 = ch;

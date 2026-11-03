@@ -35,7 +35,7 @@ internal static (nint, float32, array<byte>) regFinalizerPointer(ж<TintPointer>
 
 //go:registerparams
 internal static (nint, float32, array<byte>) regFinalizerIface(Tinter v) {
-    ᏑregConfirmRun.Store((int32)(~(~v._<ж<TintPointer>>()).p.Reinterpret<Tint, nint>()));
+    ᏑregConfirmRun.Store((int32)(~v._<ж<TintPointer>>().p.Reinterpret<Tint, nint>()));
     return (5151, 4.0F, new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array());
 }
 
@@ -49,10 +49,14 @@ internal static void m(this ref TintPointer _) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testFinalizerRegabiˢ = "TEST_FINALIZER_REGABI"u8;
-internal static readonly @string testRunˢ = "-test.run=^TestFinalizerRegisterABI$"u8;
-internal static readonly @string testVˢ = "-test.v"u8;
-internal static readonly @string passˢ = "PASS\n"u8;
+internal static ref readonly @string testFinalizerRegabiˢ => ref testFinalizerRegabiˢᵇ;
+private static readonly @string testFinalizerRegabiˢᵇ = "TEST_FINALIZER_REGABI"u8;
+internal static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestFinalizerRegisterABI$"u8;
+internal static ref readonly @string testVˢ => ref testVˢᵇ;
+private static readonly @string testVˢᵇ = "-test.v"u8;
+internal static ref readonly @string passˢ => ref passˢᵇ;
+private static readonly @string passˢᵇ = "PASS\n"u8;
 internal static readonly object finalizerNotAsleepˢ = (@string)"finalizer not asleep?"u8;
 internal static readonly object finalizerFailedToExecuteˢ = (@string)"finalizer failed to execute"u8;
 
@@ -62,17 +66,17 @@ internal partial struct TestFinalizerRegisterABI_tests /*dyn*/ {
     internal nint confirmValue;
 }
 
-public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
+public static void TestFinalizerRegisterABI(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Actually run the test in a subprocess because we don't want
         // finalizers from other tests interfering.
         if (Δos.Getenv(testFinalizerRegabiˢ) != "1"u8) {
-            var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(Ꮡt)), testRunˢ, testVˢ));
-            cmd.Value.Env = append((~cmd).Env, "TEST_FINALIZER_REGABI=1"u8);
+            var cmd = testenv.CleanCmdEnv(exec.Command(testenv.Executable(new runtime_test_package.testing_TжTB(t)), testRunˢ, testVˢ));
+            cmd.Env = append(cmd.Env, (@string)"TEST_FINALIZER_REGABI=1");
             var (@out, err) = cmd.CombinedOutput();
-            if (!strings.Contains((@string)@out, passˢ) || err != default!) {
-                Ꮡt.Fatalf("%s\n(exit status %v)"u8, (@string)@out, err);
+            if (!strings.Contains((@string)@out, passˢ) || err != nil) {
+                t.Fatalf("%s\n(exit status %v)", (@string)@out, err);
             }
             return;
         }
@@ -102,22 +106,22 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
             time.Sleep(20 * time.Millisecond);
         }
         if (!success) {
-            Ꮡt.Fatal(finalizerNotAsleepˢ);
+            t.Fatal(finalizerNotAsleepˢ);
         }
 
         nint argRegsBefore = runtime_internal_test_package.SetIntArgRegs(abi.IntArgRegs);
         defer(runtime_internal_test_package.SetIntArgRegs, argRegsBefore, ref ᒐ);
 
-        var tests = new TestFinalizerRegisterABI_tests[]{
-            new("Pointer"u8, regFinalizerPointer, -1),
-            new("Interface"u8, regFinalizerIface, -2)
-        }.slice();
+        var tests = slice<TestFinalizerRegisterABI_tests>([
+            new("Pointer", regFinalizerPointer, -1),
+            new("Interface", regFinalizerIface, -2)
+        ]);
         foreach (var i in range(tests)) {
             var test = Ꮡ(tests, i);
             var testʗ1 = test;
-            Ꮡt.Run((~test).name, (ж<testing.T> tΔ1) => {
+            t.Run((~test).name, (ж<testing.T> tΔ1) => {
                 var x = Ꮡ(new TintPointer(p: @new<Tint>()));
-                (~x).p.Value = (Tint)(~testʗ1).confirmValue;
+                x.p.Value = (Tint)(~testʗ1).confirmValue;
                 Δruntime.SetFinalizer(x.OrTypedNil(), (~testʗ1).fin);
 
                 Δruntime.KeepAlive(x.OrTypedNil());
@@ -131,7 +135,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
                 }
                 {
                     nint got = (nint)ᏑregConfirmRun.Load(); if (got != (~testʗ1).confirmValue) {
-                        tΔ1.Fatalf("wrong finalizer executed? got %d, want %d"u8, got, (~testʗ1).confirmValue);
+                        tΔ1.Fatalf("wrong finalizer executed? got %d, want %d", got, (~testʗ1).confirmValue);
                     }
                 }
             });

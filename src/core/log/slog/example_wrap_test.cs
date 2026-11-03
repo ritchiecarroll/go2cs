@@ -42,17 +42,17 @@ public static void Example_wrapping() {
     var replace = (slice<@string> groups, Δslog.Attr a) => {
         // Remove time.
         if (a.Key == Δslog.TimeKey && len(groups) == 0) {
-            return new Δslog.Attr(nil);
+            return new Δslog.Attr();
         }
         // Remove the directory from the source's filename.
         if (a.Key == Δslog.SourceKey) {
             var source = a.Value.Any()._<ж<slogꓸSource>>();
-            source.Value.File = filepath.Base((~source).File);
+            source.File = filepath.Base(source.File);
         }
         return a;
     };
     var logger = Δslog.New(new Δslog.TextHandlerжΔHandler(Δslog.NewTextHandler(new os.FileжWriter(os.Stdout), Ꮡ(new Δslog.HandlerOptions(AddSource: true, ReplaceAttr: replace)))));
-    Infof(logger, "message, %s"u8, formattedˢ);
+    Infof(logger, "message, %s", formattedˢ);
 
     // Output:
     // level=INFO source=example_wrap_test.go:43 msg="message, formatted"

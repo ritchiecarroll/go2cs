@@ -22,15 +22,15 @@ using Δsync = sync_package;
 
 partial class sync_test_package {
 
-public static void HammerSemaphore(ж<uint32> Ꮡs, nint loops, channel<bool> cdone) {
+public static void HammerSemaphore(ж<uint32> s, nint loops, channel<bool> cdone) {
     for (nint i = 0; i < loops; i++) {
-        sync_internal_test_package.Runtime_Semacquire(Ꮡs);
-        sync_internal_test_package.Runtime_Semrelease(Ꮡs, false, 0);
+        sync_internal_test_package.Runtime_Semacquire(s);
+        sync_internal_test_package.Runtime_Semrelease(s, false, 0);
     }
     cdone.ᐸꟷ(true);
 }
 
-public static partial void TestSemaphore(ж<Δtesting.T> Ꮡt) {
+public static partial void TestSemaphore(ж<Δtesting.T> t) {
     var s = @new<uint32>();
     s.Value = 1;
     var c = new channel<bool>(0);
@@ -71,26 +71,26 @@ public static partial void BenchmarkContendedSemaphore(ж<Δtesting.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void HammerMutex(ж<Δsync.Mutex> Ꮡm, nint loops, channel<bool> cdone) {
+public static void HammerMutex(ж<Δsync.Mutex> m, nint loops, channel<bool> cdone) {
     for (nint i = 0; i < loops; i++) {
         if (i % 3 == 0) {
-            if (Ꮡm.TryLock()) {
-                Ꮡm.Unlock();
+            if (m.TryLock()) {
+                m.Unlock();
             }
             continue;
         }
-        Ꮡm.Lock();
-        Ꮡm.Unlock();
+        m.Lock();
+        m.Unlock();
     }
     cdone.ᐸꟷ(true);
 }
 
-public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMutex(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         {
             nint n = Δruntime.SetMutexProfileFraction(1); if (n != 0) {
-                Ꮡt.Logf("got mutexrate %d expected 0"u8, n);
+                t.Logf("got mutexrate %d expected 0", n);
             }
         }
         defer(Δruntime.SetMutexProfileFraction, (nint)0, ref ᒐ);
@@ -99,17 +99,17 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
 
         m.Lock();
         if (m.TryLock()) {
-            Ꮡt.Fatalf("TryLock succeeded with mutex locked"u8);
+            t.Fatalf("TryLock succeeded with mutex locked");
         }
         m.Unlock();
         if (!m.TryLock()) {
-            Ꮡt.Fatalf("TryLock failed with mutex unlocked"u8);
+            t.Fatalf("TryLock failed with mutex unlocked");
         }
         m.Unlock();
 
         var c = new channel<bool>(0);
         for (nint i = 0; i < 10; i++) {
-            goǃ(HammerMutex, m, (nint)1000, c);
+            goǃ(HammerMutex, m, (nint)1000, c, GoStack.Bounded);
         }
         for (nint i = 0; i < 10; i++) {
             ᐸꟷ(c);
@@ -123,16 +123,16 @@ partial struct misuseTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal Action f;
 }
-internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
+internal static slice<misuseTestsᴛ1> misuseTests = slice<misuseTestsᴛ1>([
     new(
-        "Mutex.Unlock"u8,
+        "Mutex.Unlock",
         () => {
             ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
             Ꮡmu.Unlock();
         }
     ),
     new(
-        "Mutex.Unlock2"u8,
+        "Mutex.Unlock2",
         () => {
             ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
             Ꮡmu.Lock();
@@ -141,14 +141,14 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
         }
     ),
     new(
-        "RWMutex.Unlock"u8,
+        "RWMutex.Unlock",
         () => {
             ref var mu = ref heap(new Δsync.RWMutex(), out var Ꮡmu);
             Ꮡmu.Unlock();
         }
     ),
     new(
-        "RWMutex.Unlock2"u8,
+        "RWMutex.Unlock2",
         () => {
             ref var mu = ref heap(new Δsync.RWMutex(), out var Ꮡmu);
             Ꮡmu.RLock();
@@ -156,7 +156,7 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
         }
     ),
     new(
-        "RWMutex.Unlock3"u8,
+        "RWMutex.Unlock3",
         () => {
             ref var mu = ref heap(new Δsync.RWMutex(), out var Ꮡmu);
             Ꮡmu.Lock();
@@ -165,14 +165,14 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
         }
     ),
     new(
-        "RWMutex.RUnlock"u8,
+        "RWMutex.RUnlock",
         () => {
             ref var mu = ref heap(new Δsync.RWMutex(), out var Ꮡmu);
             Ꮡmu.RUnlock();
         }
     ),
     new(
-        "RWMutex.RUnlock2"u8,
+        "RWMutex.RUnlock2",
         () => {
             ref var mu = ref heap(new Δsync.RWMutex(), out var Ꮡmu);
             Ꮡmu.Lock();
@@ -180,7 +180,7 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
         }
     ),
     new(
-        "RWMutex.RUnlock3"u8,
+        "RWMutex.RUnlock3",
         () => {
             ref var mu = ref heap(new Δsync.RWMutex(), out var Ꮡmu);
             Ꮡmu.RLock();
@@ -188,7 +188,7 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
             Ꮡmu.RUnlock();
         }
     )
-}.slice();
+]);
 
 [GoInit] internal static void init() {
     if (len(Δos.Args) == 3 && Δos.Args[1] == "TESTMISUSE") {
@@ -198,7 +198,7 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
 
             if (test.name == Δos.Args[2]) {
                 var testʗ1 = test;
-                ((Action)(() => {
+                func(() => {
                     GoFrame ᒐ = default;
                     try {
                         defer(() => {
@@ -208,7 +208,7 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
-                }))();
+                })();
                 fmt.Printf("test completed\n"u8);
                 Δos.Exit(0);
             }
@@ -219,29 +219,29 @@ internal static slice<misuseTestsᴛ1> misuseTests = new misuseTestsᴛ1[]{
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testmisuseˢ = "TESTMISUSE"u8;
-internal static readonly @string unlockedˢ = "unlocked"u8;
+internal static ref readonly @string testmisuseˢ => ref testmisuseˢᵇ;
+private static readonly @string testmisuseˢᵇ = "TESTMISUSE"u8;
+internal static ref readonly @string unlockedˢ => ref unlockedˢᵇ;
+private static readonly @string unlockedˢᵇ = "unlocked"u8;
 
-public static void TestMutexMisuse(ж<Δtesting.T> Ꮡt) {
+public static void TestMutexMisuse(ж<Δtesting.T> t) {
     foreach (var (_, test) in misuseTests) {
-        var (@out, err) = exec.Command(testenv.Executable(new sync_test_package.testing_TжTB(Ꮡt)), testmisuseˢ, test.name).CombinedOutput();
-        if (err == default! || !strings.Contains((@string)@out, unlockedˢ)) {
-            Ꮡt.Errorf("%s: did not find failure with message about unlocked lock: %s\n%s\n"u8, test.name, err, @out);
+        var (@out, err) = exec.Command(testenv.Executable(new sync_test_package.testing_TжTB(t)), testmisuseˢ, test.name).CombinedOutput();
+        if (err == nil || !strings.Contains((@string)@out, unlockedˢ)) {
+            t.Errorf("%s: did not find failure with message about unlocked lock: %s\n%s\n", test.name, err, @out);
         }
     }
 }
 
-public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
+public static partial void TestMutexFairness(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         ref var mu = ref heap(new Δsync.Mutex(), out var Ꮡmu);
         var stop = new channel<bool>(0);
         defer(ᴛ1 => close(ᴛ1), stop, ref ᒐ);
         var stopʗ1 = stop;
         goǃ(() => {
-            while (ᐧ) {
+            for (;;) {
                 Ꮡmu.Lock();
                 time.Sleep(100 * time.Microsecond);
                 Ꮡmu.Unlock();
@@ -254,7 +254,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
                     break;
                 }}
             }
-        });
+        }, GoStack.Bounded);
         var done = new channel<bool>(1);
         var doneʗ1 = done;
         goǃ(() => {
@@ -264,7 +264,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
                 Ꮡmu.Unlock();
             }
             doneʗ1.ᐸꟷ(true);
-        });
+        }, GoStack.Bounded);
         var selᴛ7 = done;
         var selᴛ8 = time.After((time.Duration)(10000000000L));
         switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
@@ -272,7 +272,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ8.ꟷᐳ(out _): {
-            Ꮡt.Fatalf("can't acquire Mutex in 10 seconds"u8);
+            t.Fatalf("can't acquire Mutex in 10 seconds");
             break;
         }}
     }
@@ -285,8 +285,8 @@ internal partial struct BenchmarkMutexUncontended_PaddedMutex /*dyn*/ {
     internal array<uint8> pad = new(128);
 }
 
-public static void BenchmarkMutexUncontended(ж<Δtesting.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+public static void BenchmarkMutexUncontended(ж<Δtesting.B> b) {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         ref var mu = ref heap(new BenchmarkMutexUncontended_PaddedMutex(), out var Ꮡmu);
         while (pb.Next()) {
             Ꮡmu.of(BenchmarkMutexUncontended_PaddedMutex.ᏑMutex).Lock();
@@ -318,20 +318,20 @@ internal static void benchmarkMutex(ж<Δtesting.B> Ꮡb, bool slack, bool work)
     });
 }
 
-public static void BenchmarkMutex(ж<Δtesting.B> Ꮡb) {
-    benchmarkMutex(Ꮡb, false, false);
+public static void BenchmarkMutex(ж<Δtesting.B> b) {
+    benchmarkMutex(b, false, false);
 }
 
-public static void BenchmarkMutexSlack(ж<Δtesting.B> Ꮡb) {
-    benchmarkMutex(Ꮡb, true, false);
+public static void BenchmarkMutexSlack(ж<Δtesting.B> b) {
+    benchmarkMutex(b, true, false);
 }
 
-public static void BenchmarkMutexWork(ж<Δtesting.B> Ꮡb) {
-    benchmarkMutex(Ꮡb, false, true);
+public static void BenchmarkMutexWork(ж<Δtesting.B> b) {
+    benchmarkMutex(b, false, true);
 }
 
-public static void BenchmarkMutexWorkSlack(ж<Δtesting.B> Ꮡb) {
-    benchmarkMutex(Ꮡb, true, true);
+public static void BenchmarkMutexWorkSlack(ж<Δtesting.B> b) {
+    benchmarkMutex(b, true, true);
 }
 
 public static void BenchmarkMutexNoSpin(ж<Δtesting.B> Ꮡb) {
@@ -344,14 +344,14 @@ public static void BenchmarkMutexNoSpin(ж<Δtesting.B> Ꮡb) {
     // a blocked goroutine to other goroutines is profitable.
     // As a matter of fact, this benchmark still triggers some spinning in the mutex.
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
-    uint64 acc0 = default!;
-    uint64 acc1 = default!;
+    uint64 acc0 = default;
+    uint64 acc1 = default;
     b.SetParallelism(4);
     Ꮡb.RunParallel([MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.PB> pb) => {
         var c = new channel<bool>(0);
         array<uint64> data = new(4096); /* (4 << 10) */
         for (nint i = 0; pb.Next(); i++) {
-            if (i % 4 == 0){
+            if (i % 4 == 0) {
                 Ꮡm.Lock();
                 acc0 -= 100;
                 acc1 += 100;
@@ -365,22 +365,22 @@ public static void BenchmarkMutexNoSpin(ж<Δtesting.B> Ꮡb) {
                 var cʗ1 = c;
                 goǃ(() => {
                     cʗ1.ᐸꟷ(true);
-                });
+                }, GoStack.Bounded);
                 ᐸꟷ(c);
             }
         }
     });
 }
 
-public static void BenchmarkMutexSpin(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMutexSpin(ж<Δtesting.B> b) {
     // This benchmark models a situation where spinning in the mutex should be
     // profitable. To achieve this we create a goroutine per-proc.
     // These goroutines access considerable amount of local data so that
     // unnecessary rescheduling is penalized by cache misses.
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
-    uint64 acc0 = default!;
-    uint64 acc1 = default!;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    uint64 acc0 = default;
+    uint64 acc1 = default;
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         array<uint64> data = new(16384); /* (16 << 10) */
         for (nint i = 0; pb.Next(); i++) {
             Ꮡm.Lock();

@@ -20,28 +20,35 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
     var (ᴛ1, ᴛ2) = fs.sys.Mtimespec.Unix();
     fs.modTime = time.Unix(ᴛ1, ᴛ2);
     fs.mode = (FileMode)(uint32)((uint16)(fs.sys.Mode & 511));
-    var exprᴛ1 = (uint16)(fs.sys.Mode & (uint16)syscall.S_IFMT);
-    if (exprᴛ1 == syscall.S_IFBLK || exprᴛ1 == syscall.S_IFWHT) {
+    switch ((uint16)(fs.sys.Mode & (uint16)syscall.S_IFMT)) {
+    case var ᴛ when ᴛ == syscall.S_IFBLK || ᴛ == syscall.S_IFWHT: {
         fs.mode |= (fs.FileMode)(ModeDevice);
+        break;
     }
-    else if (exprᴛ1 == syscall.S_IFCHR) {
+    case var ᴛ when ᴛ == syscall.S_IFCHR: {
         fs.mode |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
+        break;
     }
-    else if (exprᴛ1 == syscall.S_IFDIR) {
+    case var ᴛ when ᴛ == syscall.S_IFDIR: {
         fs.mode |= (fs.FileMode)(ModeDir);
+        break;
     }
-    else if (exprᴛ1 == syscall.S_IFIFO) {
+    case var ᴛ when ᴛ == syscall.S_IFIFO: {
         fs.mode |= (fs.FileMode)(ModeNamedPipe);
+        break;
     }
-    else if (exprᴛ1 == syscall.S_IFLNK) {
+    case var ᴛ when ᴛ == syscall.S_IFLNK: {
         fs.mode |= (fs.FileMode)(ModeSymlink);
+        break;
     }
-    else if (exprᴛ1 == syscall.S_IFREG) {
+    case var ᴛ when ᴛ == syscall.S_IFREG: {
         // nothing to do
+        break;
     }
-    else if (exprᴛ1 == syscall.S_IFSOCK) {
+    case var ᴛ when ᴛ == syscall.S_IFSOCK: {
         fs.mode |= (fs.FileMode)(ModeSocket);
-    }
+        break;
+    }}
     if ((uint16)(fs.sys.Mode & (uint16)syscall.S_ISGID) != 0) {
         fs.mode |= (fs.FileMode)(ModeSetgid);
     }
@@ -55,7 +62,7 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
 
 // For testing.
 internal static time.Time atime(FileInfo fi) {
-    var (ᴛ3, ᴛ4) = fi.Sys()._<ж<syscall.Stat_t>>().of(syscall.Stat_t.ᏑAtimespec).Unix();
+    var (ᴛ3, ᴛ4) = fi.Sys()._<ж<syscall.Stat_t>>().ᏑAtimespec.Unix();
     return time.Unix(ᴛ3, ᴛ4);
 }
 

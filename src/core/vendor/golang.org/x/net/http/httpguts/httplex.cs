@@ -13,83 +13,83 @@ using unicode;
 partial class httpguts_package {
 
 [GoLazy] partial class lazyᴛisTokenTable { internal static array<bool> isTokenTable = new array<bool>(256){
-    [(rune)'!'] = true,
-    [(rune)'#'] = true,
-    [(rune)'$'] = true,
-    [(rune)'%'] = true,
-    [(rune)'&'] = true,
-    [(rune)'\''] = true,
-    [(rune)'*'] = true,
-    [(rune)'+'] = true,
-    [(rune)'-'] = true,
-    [(rune)'.'] = true,
-    [(rune)'0'] = true,
-    [(rune)'1'] = true,
-    [(rune)'2'] = true,
-    [(rune)'3'] = true,
-    [(rune)'4'] = true,
-    [(rune)'5'] = true,
-    [(rune)'6'] = true,
-    [(rune)'7'] = true,
-    [(rune)'8'] = true,
-    [(rune)'9'] = true,
-    [(rune)'A'] = true,
-    [(rune)'B'] = true,
-    [(rune)'C'] = true,
-    [(rune)'D'] = true,
-    [(rune)'E'] = true,
-    [(rune)'F'] = true,
-    [(rune)'G'] = true,
-    [(rune)'H'] = true,
-    [(rune)'I'] = true,
-    [(rune)'J'] = true,
-    [(rune)'K'] = true,
-    [(rune)'L'] = true,
-    [(rune)'M'] = true,
-    [(rune)'N'] = true,
-    [(rune)'O'] = true,
-    [(rune)'P'] = true,
-    [(rune)'Q'] = true,
-    [(rune)'R'] = true,
-    [(rune)'S'] = true,
-    [(rune)'T'] = true,
-    [(rune)'U'] = true,
-    [(rune)'W'] = true,
-    [(rune)'V'] = true,
-    [(rune)'X'] = true,
-    [(rune)'Y'] = true,
-    [(rune)'Z'] = true,
-    [(rune)'^'] = true,
-    [(rune)'_'] = true,
-    [(rune)'`'] = true,
-    [(rune)'a'] = true,
-    [(rune)'b'] = true,
-    [(rune)'c'] = true,
-    [(rune)'d'] = true,
-    [(rune)'e'] = true,
-    [(rune)'f'] = true,
-    [(rune)'g'] = true,
-    [(rune)'h'] = true,
-    [(rune)'i'] = true,
-    [(rune)'j'] = true,
-    [(rune)'k'] = true,
-    [(rune)'l'] = true,
-    [(rune)'m'] = true,
-    [(rune)'n'] = true,
-    [(rune)'o'] = true,
-    [(rune)'p'] = true,
-    [(rune)'q'] = true,
-    [(rune)'r'] = true,
-    [(rune)'s'] = true,
-    [(rune)'t'] = true,
-    [(rune)'u'] = true,
-    [(rune)'v'] = true,
-    [(rune)'w'] = true,
-    [(rune)'x'] = true,
-    [(rune)'y'] = true,
-    [(rune)'z'] = true,
-    [(rune)'|'] = true,
-    [(rune)'~'] = true
+    ['!'] = true,
+    ['#'] = true,
+    ['$'] = true,
+    ['%'] = true,
+    ['&'] = true,
+    ['\''] = true,
+    ['*'] = true,
+    ['+'] = true,
+    ['-'] = true,
+    ['.'] = true,
+    ['0'] = true,
+    ['1'] = true,
+    ['2'] = true,
+    ['3'] = true,
+    ['4'] = true,
+    ['5'] = true,
+    ['6'] = true,
+    ['7'] = true,
+    ['8'] = true,
+    ['9'] = true,
+    ['A'] = true,
+    ['B'] = true,
+    ['C'] = true,
+    ['D'] = true,
+    ['E'] = true,
+    ['F'] = true,
+    ['G'] = true,
+    ['H'] = true,
+    ['I'] = true,
+    ['J'] = true,
+    ['K'] = true,
+    ['L'] = true,
+    ['M'] = true,
+    ['N'] = true,
+    ['O'] = true,
+    ['P'] = true,
+    ['Q'] = true,
+    ['R'] = true,
+    ['S'] = true,
+    ['T'] = true,
+    ['U'] = true,
+    ['W'] = true,
+    ['V'] = true,
+    ['X'] = true,
+    ['Y'] = true,
+    ['Z'] = true,
+    ['^'] = true,
+    ['_'] = true,
+    ['`'] = true,
+    ['a'] = true,
+    ['b'] = true,
+    ['c'] = true,
+    ['d'] = true,
+    ['e'] = true,
+    ['f'] = true,
+    ['g'] = true,
+    ['h'] = true,
+    ['i'] = true,
+    ['j'] = true,
+    ['k'] = true,
+    ['l'] = true,
+    ['m'] = true,
+    ['n'] = true,
+    ['o'] = true,
+    ['p'] = true,
+    ['q'] = true,
+    ['r'] = true,
+    ['s'] = true,
+    ['t'] = true,
+    ['u'] = true,
+    ['v'] = true,
+    ['w'] = true,
+    ['x'] = true,
+    ['y'] = true,
+    ['z'] = true,
+    ['|'] = true,
+    ['~'] = true
 }; }
 
 public static bool IsTokenRune(rune r) {
@@ -110,7 +110,7 @@ public static bool HeaderValuesContainsToken(slice<@string> values, @string toke
 // isOWS reports whether b is an optional whitespace byte, as defined
 // by RFC 7230 section 3.2.3.
 internal static bool isOWS(byte b) {
-    return b == (rune)' ' || b == (rune)'\t';
+    return b == ' ' || b == '\t';
 }
 
 // trimOWS returns x with all optional whitespace removes from the
@@ -134,7 +134,7 @@ internal static @string trimOWS(@string x) {
 // contains token amongst its comma-separated tokens, ASCII
 // case-insensitively.
 internal static bool headerValueContainsToken(@string v, @string token) {
-    for (nint comma = strings.IndexByte(v, (rune)','); comma != -1; comma = strings.IndexByte(v, (rune)',')) {
+    for (nint comma = strings.IndexByte(v, (byte)','); comma != -1; comma = strings.IndexByte(v, (byte)',')) {
         if (tokenEqual(trimOWS(v.slice(0, comma)), token)) {
             return true;
         }
@@ -145,7 +145,7 @@ internal static bool headerValueContainsToken(@string v, @string token) {
 
 // lowerASCII returns the ASCII lowercase version of b.
 internal static byte lowerASCII(byte b) {
-    if ((rune)'A' <= b && b <= (rune)'Z') {
+    if ('A' <= b && b <= 'Z') {
         return (byte)(b + ((rune)'a' - (rune)'A'));
     }
     return b;
@@ -173,7 +173,7 @@ internal static bool tokenEqual(@string t1, @string t2) {
 //
 //	LWS            = [CRLF] 1*( SP | HT )
 internal static bool isLWS(byte b) {
-    return b == (rune)' ' || b == (rune)'\t';
+    return b == ' ' || b == '\t';
 }
 
 // isCTL reports whether b is a control byte, according
@@ -183,7 +183,7 @@ internal static bool isLWS(byte b) {
 //	                 (octets 0 - 31) and DEL (127)>
 internal static bool isCTL(byte b) {
     const byte del = 0x7f; // a CTL
-    return b < (rune)' ' || b == del;
+    return b < ' ' || b == del;
 }
 
 // ValidHeaderFieldName reports whether v is a valid HTTP/1.x header name.
@@ -232,38 +232,38 @@ public static bool ValidHostHeader(@string h) {
 
 // See the validHostHeader comment.
 [GoLazy] partial class lazyᴛvalidHostByte { internal static array<bool> validHostByte = new array<bool>(256){
-    [(rune)'0'] = true, [(rune)'1'] = true, [(rune)'2'] = true, [(rune)'3'] = true, [(rune)'4'] = true, [(rune)'5'] = true, [(rune)'6'] = true, [(rune)'7'] = true,
-    [(rune)'8'] = true, [(rune)'9'] = true,
+    ['0'] = true, ['1'] = true, ['2'] = true, ['3'] = true, ['4'] = true, ['5'] = true, ['6'] = true, ['7'] = true,
+    ['8'] = true, ['9'] = true,
 
-    [(rune)'a'] = true, [(rune)'b'] = true, [(rune)'c'] = true, [(rune)'d'] = true, [(rune)'e'] = true, [(rune)'f'] = true, [(rune)'g'] = true, [(rune)'h'] = true,
-    [(rune)'i'] = true, [(rune)'j'] = true, [(rune)'k'] = true, [(rune)'l'] = true, [(rune)'m'] = true, [(rune)'n'] = true, [(rune)'o'] = true, [(rune)'p'] = true,
-    [(rune)'q'] = true, [(rune)'r'] = true, [(rune)'s'] = true, [(rune)'t'] = true, [(rune)'u'] = true, [(rune)'v'] = true, [(rune)'w'] = true, [(rune)'x'] = true,
-    [(rune)'y'] = true, [(rune)'z'] = true,
+    ['a'] = true, ['b'] = true, ['c'] = true, ['d'] = true, ['e'] = true, ['f'] = true, ['g'] = true, ['h'] = true,
+    ['i'] = true, ['j'] = true, ['k'] = true, ['l'] = true, ['m'] = true, ['n'] = true, ['o'] = true, ['p'] = true,
+    ['q'] = true, ['r'] = true, ['s'] = true, ['t'] = true, ['u'] = true, ['v'] = true, ['w'] = true, ['x'] = true,
+    ['y'] = true, ['z'] = true,
 
-    [(rune)'A'] = true, [(rune)'B'] = true, [(rune)'C'] = true, [(rune)'D'] = true, [(rune)'E'] = true, [(rune)'F'] = true, [(rune)'G'] = true, [(rune)'H'] = true,
-    [(rune)'I'] = true, [(rune)'J'] = true, [(rune)'K'] = true, [(rune)'L'] = true, [(rune)'M'] = true, [(rune)'N'] = true, [(rune)'O'] = true, [(rune)'P'] = true,
-    [(rune)'Q'] = true, [(rune)'R'] = true, [(rune)'S'] = true, [(rune)'T'] = true, [(rune)'U'] = true, [(rune)'V'] = true, [(rune)'W'] = true, [(rune)'X'] = true,
-    [(rune)'Y'] = true, [(rune)'Z'] = true,
+    ['A'] = true, ['B'] = true, ['C'] = true, ['D'] = true, ['E'] = true, ['F'] = true, ['G'] = true, ['H'] = true,
+    ['I'] = true, ['J'] = true, ['K'] = true, ['L'] = true, ['M'] = true, ['N'] = true, ['O'] = true, ['P'] = true,
+    ['Q'] = true, ['R'] = true, ['S'] = true, ['T'] = true, ['U'] = true, ['V'] = true, ['W'] = true, ['X'] = true,
+    ['Y'] = true, ['Z'] = true,
 
-    [(rune)'!'] = true, // sub-delims
-    [(rune)'$'] = true, // sub-delims
-    [(rune)'%'] = true, // pct-encoded (and used in IPv6 zones)
-    [(rune)'&'] = true, // sub-delims
-    [(rune)'('] = true, // sub-delims
-    [(rune)')'] = true, // sub-delims
-    [(rune)'*'] = true, // sub-delims
-    [(rune)'+'] = true, // sub-delims
-    [(rune)','] = true, // sub-delims
-    [(rune)'-'] = true, // unreserved
-    [(rune)'.'] = true, // unreserved
-    [(rune)':'] = true, // IPv6address + Host expression's optional port
-    [(rune)';'] = true, // sub-delims
-    [(rune)'='] = true, // sub-delims
-    [(rune)'['] = true,
-    [(rune)'\''] = true, // sub-delims
-    [(rune)']'] = true,
-    [(rune)'_'] = true, // unreserved
-    [(rune)'~'] = true // unreserved
+    ['!'] = true, // sub-delims
+    ['$'] = true, // sub-delims
+    ['%'] = true, // pct-encoded (and used in IPv6 zones)
+    ['&'] = true, // sub-delims
+    ['('] = true, // sub-delims
+    [')'] = true, // sub-delims
+    ['*'] = true, // sub-delims
+    ['+'] = true, // sub-delims
+    [','] = true, // sub-delims
+    ['-'] = true, // unreserved
+    ['.'] = true, // unreserved
+    [':'] = true, // IPv6address + Host expression's optional port
+    [';'] = true, // sub-delims
+    ['='] = true, // sub-delims
+    ['['] = true,
+    ['\''] = true, // sub-delims
+    [']'] = true,
+    ['_'] = true, // unreserved
+    ['~'] = true  // unreserved
 }; }
 
 // ValidHeaderFieldValue reports whether v is a valid "field-value" according to
@@ -327,11 +327,11 @@ internal static bool isASCII(@string s) {
 // of the provided "host" or "host:port" string.
 public static (@string, error) PunycodeHostPort(@string v) {
     if (isASCII(v)) {
-        return (v, default!);
+        return (v, default);
     }
 
     var (host, port, err) = net.SplitHostPort(v);
-    if (err != default!) {
+    if (err != nil) {
         // The input 'v' argument was just a "host" argument,
         // without a port. This error should not be returned
         // to the caller.
@@ -339,15 +339,15 @@ public static (@string, error) PunycodeHostPort(@string v) {
         port = ""u8;
     }
     (host, err) = idna.ToASCII(host);
-    if (err != default!) {
+    if (err != nil) {
         // Non-UTF-8? Not representable in Punycode, in any
         // case.
         return ("", err);
     }
     if (port == ""u8) {
-        return (host, default!);
+        return (host, default);
     }
-    return (net.JoinHostPort(host, port), default!);
+    return (net.JoinHostPort(host, port), default);
 }
 
 } // end httpguts_package

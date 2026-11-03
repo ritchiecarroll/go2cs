@@ -121,13 +121,13 @@ public static void BenchmarkSliceCap(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkDeepEqual(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkDeepEqual(ж<Δtesting.B> b) {
     foreach (var (_, vᴛ1) in deepEqualPerfTests) {
         ref var bb = ref heap(new deepEqualPerfTestsᴛ1(), out var Ꮡbb);
         bb = vᴛ1;
 
         var bbʗ1 = bb;
-        Ꮡb.Run(ValueOf(bb.x).Type().String(), (ж<Δtesting.B> bΔ1) => {
+        b.Run(ValueOf(bb.x).Type().String(), (ж<Δtesting.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 sink = DeepEqual(bbʗ1.x, bbʗ1.y);
@@ -191,7 +191,7 @@ internal partial struct BenchmarkIsZero_s /*dyn*/ {
     public BenchmarkIsZero_Int512 StructInt_512;
 }
 
-public static void BenchmarkIsZero(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkIsZero(ж<Δtesting.B> b) {
     var s = new BenchmarkIsZero_s();
     s.ArrayInt_1024_NoZero[512] = 1;
     var source = ValueOf(s);
@@ -201,7 +201,7 @@ public static void BenchmarkIsZero(ж<Δtesting.B> Ꮡb) {
         value = vᴛ1;
 
         var valueʗ1 = value;
-        Ꮡb.Run(field.Name, (ж<Δtesting.B> bΔ1) => {
+        b.Run(field.Name, (ж<Δtesting.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 sink = valueʗ1.IsZero();
             }
@@ -230,7 +230,7 @@ internal partial struct BenchmarkSetZero_type /*dyn*/ {
     public reflectꓸValue Struct;
 }
 
-public static void BenchmarkSetZero(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkSetZero(ж<Δtesting.B> b) {
     var source = ValueOf(@new<BenchmarkSetZero_type>()).Elem();
 
     foreach (var (field, vᴛ1) in range<Δreflect.StructField, reflectꓸValue>(source.Fields().Invoke)) {
@@ -238,23 +238,22 @@ public static void BenchmarkSetZero(ж<Δtesting.B> Ꮡb) {
         value = vᴛ1;
 
         @string name = field.Name;
-        ref var zero = ref heap<reflectꓸValue>(out var Ꮡzero);
-        zero = Zero(value.Type());
+        ref var zero = ref heap<reflectꓸValue>(Zero(value.Type()), out var Ꮡzero);
         var valueʗ1 = value;
-        Ꮡb.Run(name + "/Direct"u8, (ж<Δtesting.B> bΔ1) => {
+        b.Run(name + "/Direct"u8, (ж<Δtesting.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 valueʗ1.SetZero();
             }
         });
         var valueʗ2 = value;
         var zeroʗ1 = zero;
-        Ꮡb.Run(name + "/CachedZero"u8, (ж<Δtesting.B> bΔ2) => {
+        b.Run(name + "/CachedZero"u8, (ж<Δtesting.B> bΔ2) => {
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 valueʗ2.Set(zeroʗ1);
             }
         });
         var valueʗ3 = value;
-        Ꮡb.Run(name + "/NewZero"u8, (ж<Δtesting.B> bΔ3) => {
+        b.Run(name + "/NewZero"u8, (ж<Δtesting.B> bΔ3) => {
             for (nint i = 0; i < (~bΔ3).N; i++) {
                 valueʗ3.Set(Zero(valueʗ3.Type()));
             }
@@ -263,11 +262,16 @@ public static void BenchmarkSetZero(ж<Δtesting.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string byteArrayˢ = "ByteArray"u8;
-internal static readonly @string bigStructˢ = "BigStruct"u8;
-internal static readonly @string smallStructˢ = "SmallStruct"u8;
-internal static readonly @string smallStructArrayˢ = "SmallStructArray"u8;
-internal static readonly @string timeˢ = "Time"u8;
+internal static ref readonly @string byteArrayˢ => ref byteArrayˢᵇ;
+private static readonly @string byteArrayˢᵇ = "ByteArray"u8;
+internal static ref readonly @string bigStructˢ => ref bigStructˢᵇ;
+private static readonly @string bigStructˢᵇ = "BigStruct"u8;
+internal static ref readonly @string smallStructˢ => ref smallStructˢᵇ;
+private static readonly @string smallStructˢᵇ = "SmallStruct"u8;
+internal static ref readonly @string smallStructArrayˢ => ref smallStructArrayˢᵇ;
+private static readonly @string smallStructArrayˢᵇ = "SmallStructArray"u8;
+internal static ref readonly @string timeˢ => ref timeˢᵇ;
+private static readonly @string timeˢᵇ = "Time"u8;
 
 internal partial struct BenchmarkZero_bm /*dyn*/ {
     internal @string name;
@@ -290,31 +294,30 @@ internal partial struct BenchmarkZero_Big /*dyn*/ {
 // BenchmarkZero overlaps some with BenchmarkSetZero,
 // but the inputs are set up differently to exercise
 // different optimizations.
-public static void BenchmarkZero(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkZero(ж<Δtesting.B> b) {
     BenchmarkZero_bm entry(@string name, any zero, any nonZero) => new BenchmarkZero_bm(name, ValueOf(zero), ValueOf(nonZero).Elem(), (nint)TypeOf(zero).Size());
     ж<time.Time> nonZeroTime() {
-        ref var t = ref heap<time.Time>(out var Ꮡt);
-        t = time.Now();
+        ref var t = ref heap<time.Time>(time.Now(), out var Ꮡt);
         return Ꮡt;
     }
 
-    var bms = new BenchmarkZero_bm[]{
+    var bms = slice<BenchmarkZero_bm>([
         entry(byteArrayˢ, new byte[]{}.array(16), Ꮡ(new byte[]{1}.array(16))),
         entry(byteArrayˢ, new byte[]{}.array(64), Ꮡ(new byte[]{1}.array(64))),
         entry(byteArrayˢ, new byte[]{}.array(1024), Ꮡ(new byte[]{1}.array(1024))),
-        entry(bigStructˢ, new BenchmarkZero_Big(nil), Ꮡ(new BenchmarkZero_Big(A: 1))),
-        entry(smallStructˢ, new BenchmarkZero_Small(nil), Ꮡ(new BenchmarkZero_Small(A: 1))),
+        entry(bigStructˢ, new BenchmarkZero_Big(), Ꮡ(new BenchmarkZero_Big(A: 1))),
+        entry(smallStructˢ, new BenchmarkZero_Small(), Ꮡ(new BenchmarkZero_Small(A: 1))),
         entry(smallStructArrayˢ, new BenchmarkZero_Small[]{}.array(4), Ꮡ(new array<BenchmarkZero_Small>(4){[0] = new(A: 1)})),
         entry(smallStructArrayˢ, new BenchmarkZero_Small[]{}.array(64), Ꮡ(new array<BenchmarkZero_Small>(64){[0] = new(A: 1)})),
-        entry(timeˢ, new time.Time(nil), nonZeroTime().OrTypedNil())
-    }.slice();
+        entry(timeˢ, new time.Time(), nonZeroTime().OrTypedNil())
+    ]);
 
     foreach (var (_, vᴛ1) in bms) {
         ref var bm = ref heap(new BenchmarkZero_bm(), out var Ꮡbm);
         bm = vᴛ1;
 
         var bmʗ1 = bm;
-        Ꮡb.Run(fmt.Sprintf("IsZero/%s/size=%d"u8, bm.name, bm.size), (ж<Δtesting.B> bΔ1) => {
+        b.Run(fmt.Sprintf("IsZero/%s/size=%d"u8, bm.name, bm.size), (ж<Δtesting.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 bmʗ1.zero.IsZero();
             }
@@ -325,7 +328,7 @@ public static void BenchmarkZero(ж<Δtesting.B> Ꮡb) {
         bm = vᴛ2;
 
         var bmʗ2 = bm;
-        Ꮡb.Run(fmt.Sprintf("SetZero/%s/size=%d"u8, bm.name, bm.size), (ж<Δtesting.B> bΔ2) => {
+        b.Run(fmt.Sprintf("SetZero/%s/size=%d"u8, bm.name, bm.size), (ж<Δtesting.B> bΔ2) => {
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 bmʗ2.nonZero.Set(bmʗ2.zero);
             }
@@ -333,19 +336,19 @@ public static void BenchmarkZero(ж<Δtesting.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkSelect(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkSelect(ж<Δtesting.B> b) {
     var Δchannel = new channel<nint>(0);
     close(Δchannel);
-    slice<Δreflect.SelectCase> cases = default!;
+    slice<Δreflect.SelectCase> cases = default;
     for (nint i = 0; i < 8; i++) {
         cases = append(cases, new SelectCase(
             Dir: SelectRecv,
             Chan: ValueOf(Δchannel)
         ));
     }
-    foreach (var (_, numCases) in new nint[]{1, 4, 8}.slice()) {
+    foreach (var (_, numCases) in slice<nint>([1, 4, 8])) {
         var casesʗ1 = cases;
-        Ꮡb.Run(strconv.Itoa(numCases), (ж<Δtesting.B> bΔ1) => {
+        b.Run(strconv.Itoa(numCases), (ж<Δtesting.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 (_, _, _) = Select(casesʗ1.slice(0, numCases));
@@ -357,13 +360,12 @@ public static void BenchmarkSelect(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkCall(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var fv = ref heap<reflectꓸValue>(out var Ꮡfv);
-    fv = ValueOf((@string a, @string bΔ1) => {
-    });
+    ref var fv = ref heap<reflectꓸValue>(ValueOf((@string a, @string bΔ1) => {
+    }), out var Ꮡfv);
     b.ReportAllocs();
     var fvʗ1 = fv;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
-        var args = new reflectꓸValue[]{ValueOf((@string)"a"u8), ValueOf((@string)"b"u8)}.slice();
+        var args = slice<reflectꓸValue>([ValueOf("a"), ValueOf("b")]);
         while (pb.Next()) {
             fvʗ1.Call(args);
         }
@@ -384,7 +386,7 @@ public static void BenchmarkCallMethod(ж<Δtesting.B> Ꮡb) {
 
     var v = ValueOf(z.inc);
     for (nint i = 0; i < b.N; i++) {
-        v.Call(default!);
+        v.Call(default);
     }
 }
 
@@ -393,7 +395,7 @@ internal partial struct BenchmarkCallArgCopy_sizes /*dyn*/ {
     internal reflectꓸValue arg;
 }
 
-public static void BenchmarkCallArgCopy(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkCallArgCopy(ж<Δtesting.B> b) {
     reflectꓸValue byteArray(nint n) => Zero(ArrayOf(n, TypeOf((byte)0)));
     var sizes = new BenchmarkCallArgCopy_sizes[]{
         new(ValueOf(([GoArrayDims(128)] array<byte> a) => {
@@ -418,7 +420,7 @@ public static void BenchmarkCallArgCopy(ж<Δtesting.B> Ꮡb) {
 
         var sizeʗ1 = size;
         var bench = (ж<Δtesting.B> bΔ1) => {
-            var args = new reflectꓸValue[]{sizeʗ1.arg}.slice();
+            var args = slice<reflectꓸValue>([sizeʗ1.arg]);
             bΔ1.SetBytes((int64)sizeʗ1.arg.Len());
             bΔ1.ResetTimer();
             var argsʗ1 = args;
@@ -430,12 +432,13 @@ public static void BenchmarkCallArgCopy(ж<Δtesting.B> Ꮡb) {
             });
         };
         @string name = fmt.Sprintf("size=%v"u8, size.arg.Len());
-        Ꮡb.Run(name, bench);
+        b.Run(name, bench);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ptrToThisˢ = "PtrToThis"u8;
+internal static ref readonly @string ptrToThisˢ => ref ptrToThisˢᵇ;
+private static readonly @string ptrToThisˢᵇ = "PtrToThis"u8;
 
 // Construct a type with a zero ptrToThis.
 internal partial struct BenchmarkPtrTo_T /*dyn*/ {
@@ -445,14 +448,14 @@ internal partial struct BenchmarkPtrTo_T /*dyn*/ {
 public static void BenchmarkPtrTo(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var t = SliceOf(TypeOf(new BenchmarkPtrTo_T(nil)));
+    var t = SliceOf(TypeOf(new BenchmarkPtrTo_T()));
     var ptrToThis = ValueOf(t).Elem().FieldByName(ptrToThisˢ);
     if (!ptrToThis.IsValid()) {
-        Ꮡb.Skipf("%v has no ptrToThis field; was it removed from rtype?"u8, t); // TODO fix this at top of refactoring
+        Ꮡb.Skipf("%v has no ptrToThis field; was it removed from rtype?", t); // TODO fix this at top of refactoring
         // b.Fatalf("%v has no ptrToThis field; was it removed from rtype?", t)
     }
     if (ptrToThis.Int() != 0) {
-        Ꮡb.Fatalf("%v.ptrToThis unexpectedly nonzero"u8, t);
+        Ꮡb.Fatalf("%v.ptrToThis unexpectedly nonzero", t);
     }
     b.ResetTimer();
 
@@ -472,32 +475,32 @@ partial struct B1 {
     public nint Z;
 }
 
-public static void BenchmarkFieldByName1(ж<Δtesting.B> Ꮡb) {
-    var t = TypeOf(new B1(nil));
+public static void BenchmarkFieldByName1(ж<Δtesting.B> b) {
+    var t = TypeOf(new B1());
     var tʗ1 = t;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
-            tʗ1.FieldByName("Z"u8);
+            tʗ1.FieldByName("Z");
         }
     });
 }
 
-public static void BenchmarkFieldByName2(ж<Δtesting.B> Ꮡb) {
-    var t = TypeOf(new S3(nil));
+public static void BenchmarkFieldByName2(ж<Δtesting.B> b) {
+    var t = TypeOf(new S3());
     var tʗ1 = t;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
-            tʗ1.FieldByName("B"u8);
+            tʗ1.FieldByName("B");
         }
     });
 }
 
-public static void BenchmarkFieldByName3(ж<Δtesting.B> Ꮡb) {
-    var t = TypeOf(new R0(nil));
+public static void BenchmarkFieldByName3(ж<Δtesting.B> b) {
+    var t = TypeOf(new R0());
     var tʗ1 = t;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
-            tʗ1.FieldByName("X"u8);
+            tʗ1.FieldByName("X");
         }
     });
 }
@@ -510,8 +513,7 @@ partial struct S {
 public static void BenchmarkInterfaceBig(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
-    v = ValueOf(new S(nil));
+    ref var v = ref heap<reflectꓸValue>(ValueOf(new S()), out var Ꮡv);
     var vʗ1 = v;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
@@ -521,21 +523,20 @@ public static void BenchmarkInterfaceBig(ж<Δtesting.B> Ꮡb) {
     b.StopTimer();
 }
 
-public static void BenchmarkInterfaceSmall(ж<Δtesting.B> Ꮡb) {
-    ref var v = ref heap<reflectꓸValue>(out var Ꮡv);
-    v = ValueOf((int64)0);
+public static void BenchmarkInterfaceSmall(ж<Δtesting.B> b) {
+    ref var v = ref heap<reflectꓸValue>(ValueOf((int64)0), out var Ꮡv);
     var vʗ1 = v;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             vʗ1.Interface();
         }
     });
 }
 
-public static void BenchmarkNew(ж<Δtesting.B> Ꮡb) {
-    var v = TypeOf(new XM(nil));
+public static void BenchmarkNew(ж<Δtesting.B> b) {
+    var v = TypeOf(new XM());
     var vʗ1 = v;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             New(vʗ1);
         }
@@ -543,8 +544,10 @@ public static void BenchmarkNew(ж<Δtesting.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mapIndexˢ = "MapIndex"u8;
-internal static readonly @string setMapIndexˢ = "SetMapIndex"u8;
+internal static ref readonly @string mapIndexˢ => ref mapIndexˢᵇ;
+private static readonly @string mapIndexˢᵇ = "MapIndex"u8;
+internal static ref readonly @string setMapIndexˢ => ref setMapIndexˢᵇ;
+private static readonly @string setMapIndexˢᵇ = "SetMapIndex"u8;
 
 internal partial class BenchmarkMap_V /*ж<nint>*/;
 
@@ -555,40 +558,40 @@ internal partial struct BenchmarkMap_tests /*dyn*/ {
     internal reflectꓸValue m, keys, value;
 }
 
-public static void BenchmarkMap(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkMap(ж<Δtesting.B> b) {
     var value = ValueOf((BenchmarkMap_V)nil);
-    var stringKeys = new @string[]{}.slice();
+    var stringKeys = slice<@string>([]);
     var mapOfStrings = new map<@string, BenchmarkMap_V>{};
-    var uint64Keys = new uint64[]{}.slice();
+    var uint64Keys = slice<uint64>([]);
     var mapOfUint64s = new map<uint64, BenchmarkMap_V>{};
-    var userStringKeys = new BenchmarkMap_S[]{}.slice();
+    var userStringKeys = slice<BenchmarkMap_S>([]);
     var mapOfUserStrings = new map<BenchmarkMap_S, BenchmarkMap_V>{};
     for (nint i = 0; i < 100; i++) {
         @string stringKey = fmt.Sprintf("key%d"u8, i);
         stringKeys = append(stringKeys, stringKey);
-        mapOfStrings[stringKey] = default!;
+        mapOfStrings[stringKey] = default;
 
         var uint64Key = (uint64)i;
         uint64Keys = append(uint64Keys, uint64Key);
-        mapOfUint64s[uint64Key] = default!;
+        mapOfUint64s[uint64Key] = default;
 
         BenchmarkMap_S userStringKey = (BenchmarkMap_S)fmt.Sprintf("key%d"u8, i);
         userStringKeys = append(userStringKeys, userStringKey);
-        mapOfUserStrings[userStringKey] = default!;
+        mapOfUserStrings[userStringKey] = default;
     }
 
-    var tests = new BenchmarkMap_tests[]{
-        new("StringKeys"u8, ValueOf(mapOfStrings), ValueOf(stringKeys), value),
-        new("Uint64Keys"u8, ValueOf(mapOfUint64s), ValueOf(uint64Keys), value),
-        new("UserStringKeys"u8, ValueOf(mapOfUserStrings), ValueOf(userStringKeys), value)
-    }.slice();
+    var tests = slice<BenchmarkMap_tests>([
+        new("StringKeys", ValueOf(mapOfStrings), ValueOf(stringKeys), value),
+        new("Uint64Keys", ValueOf(mapOfUint64s), ValueOf(uint64Keys), value),
+        new("UserStringKeys", ValueOf(mapOfUserStrings), ValueOf(userStringKeys), value)
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new BenchmarkMap_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡb.Run(tt.label, (ж<Δtesting.B> bΔ1) => {
+        b.Run(tt.label, (ж<Δtesting.B> bΔ1) => {
             var ttʗ2 = ttʗ1;
             bΔ1.Run(mapIndexˢ, (ж<Δtesting.B> bΔ2) => {
                 bΔ2.ReportAllocs();
@@ -614,7 +617,7 @@ public static void BenchmarkMap(ж<Δtesting.B> Ꮡb) {
 public static void BenchmarkMapIterNext(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var m = ValueOf(new map<@string, nint>{["a"u8] = 0, ["b"u8] = 1, ["c"u8] = 2, ["d"u8] = 3});
+    var m = ValueOf(new map<@string, nint>{["a"] = 0, ["b"] = 1, ["c"] = 2, ["d"] = 3});
     var it = m.MapRange();
     for (nint i = 0; i < b.N; i++) {
         while (it.Next()) {

@@ -7,15 +7,7 @@
 global using static global::go.crypto_package;
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
 global using cryptoꓸPublicKey = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -38,7 +30,14 @@ using static global::go.crypto_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.encoding.pem_package.Block))]
+[assembly: GoFieldAccess(typeof(go.go.build_package.Package))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -48,9 +47,9 @@ using static global::go.crypto_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("crypto/crypto_test.go", "crypto_test.cs", "ACI6gtaCpoKCgoIAIwaCAAE4lJSCgpSCgpSAgraCgpSAggALCAAKFpSCgpSAkoKUgpSCpoKCpoKCgpSmlA==", "115-140:1")]
-[assembly: global::go.GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABAclIKCgpTUgtSC1ILUgqSUgpKCgpSCAAgEwoKCgpKCgpSCgqai", "50-59:1")]
-[assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoowoKCgoKCgpSUgoKCgpSCgoKmgoKmggAIEIKClIKU", "", "", "60=GOROOT/1/1/3")]
+[assembly: GoPositionMap("crypto/crypto_test.go", "crypto_test.cs", "ACI6guaCpoKCgoIAJgaCAAE4lJSCgpSCgpSAgraCgpSAggAQCAAKFpSCgpSAkoKUgpSCpoKCpoKCgpSmlA==", "115-140:1")]
+[assembly: GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABEclIKCgpTkguSC5ILkgqSUgpKCgpSCAAoEooKCgpKCgpSCgqai", "50-59:1")]
+[assembly: GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ACAowoKCgoKCgpSUgoKCgpSCgoKmgoKmggAHEIKClIKU", "", "", "66=GOROOT/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;

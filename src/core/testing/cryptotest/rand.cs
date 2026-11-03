@@ -46,14 +46,14 @@ partial class cryptotest_package {
 //
 // SetGlobalRandom is not supported when building against the Go Cryptographic
 // Module v1.0.0 (i.e. when [crypto/fips140.Version] returns "v1.0.0").
-public static void SetGlobalRandom(ж<testing.T> Ꮡt, uint64 seed) {
-    if (Ꮡt == nil) {
+public static void SetGlobalRandom(ж<testing.T> t, uint64 seed) {
+    if (t == nil) {
         throw panic("cryptotest: SetGlobalRandom called with a nil *testing.T");
     }
     if (!testing.Testing()) {
         throw panic("cryptotest: SetGlobalRandom used in a non-test binary");
     }
-    testingCheckParallel(Ꮡt);
+    testingCheckParallel(t);
 
     array<byte> s = new(32);
     byteorder.LEPutUint64(s[..8], seed);
@@ -63,9 +63,9 @@ public static void SetGlobalRandom(ж<testing.T> Ꮡt, uint64 seed) {
     var previous = cryptorand.Reader;
     cryptorand.Reader = new lockedReaderжReader(r);
     var previousʗ1 = previous;
-    Ꮡt.Cleanup(() => {
+    t.Cleanup(() => {
         cryptorand.Reader = previousʗ1;
-        randSetTestingReader(default!);
+        randSetTestingReader(default);
     });
 }
 
@@ -75,8 +75,8 @@ partial struct lockedReader {
 }
 
 internal static (nint n, error err) Read(this ж<lockedReader> Ꮡlr, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     GoFrame ᒐ = default;
     try {
         ref var lr = ref Ꮡlr.DerefOrNull();

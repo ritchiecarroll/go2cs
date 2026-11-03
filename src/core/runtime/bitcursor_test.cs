@@ -10,25 +10,22 @@ using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
-public static void TestBitCursor(ж<testing.T> Ꮡt) {
-    ref var ones = ref heap<array<byte>>(out var Ꮡones);
-    ones = new byte[]{0xff, 0xff, 0xff, 0xff, 0xff}.array();
-    ref var zeros = ref heap<array<byte>>(out var Ꮡzeros);
-    zeros = new byte[]{0, 0, 0, 0, 0}.array();
+public static void TestBitCursor(ж<testing.T> t) {
+    ref var ones = ref heap<array<byte>>(new byte[]{0xff, 0xff, 0xff, 0xff, 0xff}.array(), out var Ꮡones);
+    ref var zeros = ref heap<array<byte>>(new byte[]{0, 0, 0, 0, 0}.array(), out var Ꮡzeros);
 
     for (var start = (uintptr)0; start < 16; start++) {
         for (var end = start + 1; end < 32; end++) {
-            ref var buf = ref heap<array<byte>>(out var Ꮡbuf);
-            buf = zeros.Clone();
+            ref var buf = ref heap<array<byte>>(zeros.Clone(), out var Ꮡbuf);
             runtime_internal_test_package.NewBitCursor(Ꮡbuf.at<byte>(0)).Offset(start).Write(Ꮡones.at<byte>(0), end - start);
 
             for (var i = (uintptr)0; i < (uintptr)(len(buf) * 8); i++) {
                 var bit = (byte)(buf[i / 8] >> (int)(i % 8) & 1);
                 if (bit == 0 && i >= start && i < end) {
-                    Ꮡt.Errorf("bit %d not set in [%d:%d]"u8, i, start, end);
+                    t.Errorf("bit %d not set in [%d:%d]", i, start, end);
                 }
                 if (bit == 1 && (i < start || i >= end)) {
-                    Ꮡt.Errorf("bit %d is set outside [%d:%d]"u8, i, start, end);
+                    t.Errorf("bit %d is set outside [%d:%d]", i, start, end);
                 }
             }
         }
@@ -36,17 +33,16 @@ public static void TestBitCursor(ж<testing.T> Ꮡt) {
 
     for (var start = (uintptr)0; start < 16; start++) {
         for (var end = start + 1; end < 32; end++) {
-            ref var buf = ref heap<array<byte>>(out var Ꮡbuf);
-            buf = ones.Clone();
+            ref var buf = ref heap<array<byte>>(ones.Clone(), out var Ꮡbuf);
             runtime_internal_test_package.NewBitCursor(Ꮡbuf.at<byte>(0)).Offset(start).Write(Ꮡzeros.at<byte>(0), end - start);
 
             for (var i = (uintptr)0; i < (uintptr)(len(buf) * 8); i++) {
                 var bit = (byte)(buf[i / 8] >> (int)(i % 8) & 1);
                 if (bit == 1 && i >= start && i < end) {
-                    Ꮡt.Errorf("bit %d not cleared in [%d:%d]"u8, i, start, end);
+                    t.Errorf("bit %d not cleared in [%d:%d]", i, start, end);
                 }
                 if (bit == 0 && (i < start || i >= end)) {
-                    Ꮡt.Errorf("bit %d cleared outside [%d:%d]"u8, i, start, end);
+                    t.Errorf("bit %d cleared outside [%d:%d]", i, start, end);
                 }
             }
         }

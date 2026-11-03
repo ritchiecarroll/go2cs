@@ -23,14 +23,14 @@ partial struct xchacha20poly1305 {
 // nonces are randomly generated.
 public static (cipher.AEAD, error) NewX(slice<byte> key) {
     if (fips140Enforced()) {
-        return (default!, errors.New(chacha20poly1305UseOfˢ));
+        return (default, errors.New(chacha20poly1305UseOfˢ));
     }
     if (len(key) != KeySize) {
-        return (default!, errors.New(chacha20poly1305BadKeyˢ));
+        return (default, errors.New(chacha20poly1305BadKeyˢ));
     }
     var ret = @new<xchacha20poly1305>();
-    copy((~ret).key[..], key);
-    return (new xchacha20poly1305жAEAD(ret), default!);
+    copy(ret.key[..], key);
+    return (new xchacha20poly1305жAEAD(ret), default);
 }
 
 internal static nint NonceSize(this ref xchacha20poly1305 _) {
@@ -57,7 +57,7 @@ internal static slice<byte> Seal(this ref xchacha20poly1305 x, slice<byte> dst, 
 
     var c = @new<chacha20poly1305>();
     var (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
-    copy((~c).key[..], hKey);
+    copy(c.key[..], hKey);
 
     // The first 4 bytes of the final nonce are unused counter space.
     var cNonce = new slice<byte>(ΔNonceSize);
@@ -71,7 +71,7 @@ internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<by
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }
     if (len(ciphertext) < 16) {
-        return (default!, errOpen);
+        return (default, errOpen);
     }
     if ((uint64)len(ciphertext) > (uint64)((274877906944L) - 48)) {
         throw panic("chacha20poly1305: ciphertext too large");
@@ -79,7 +79,7 @@ internal static (slice<byte>, error) Open(this ref xchacha20poly1305 x, slice<by
 
     var c = @new<chacha20poly1305>();
     var (hKey, _) = chacha20.HChaCha20(x.key[..], nonce[0..16]);
-    copy((~c).key[..], hKey);
+    copy(c.key[..], hKey);
 
     // The first 4 bytes of the final nonce are unused counter space.
     var cNonce = new slice<byte>(ΔNonceSize);

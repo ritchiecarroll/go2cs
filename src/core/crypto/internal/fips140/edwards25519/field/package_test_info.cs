@@ -8,11 +8,6 @@ global using static global::go.crypto.@internal.fips140.edwards25519.field_packa
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
@@ -32,7 +27,13 @@ using static global::go.crypto.@internal.fips140.edwards25519.field_internal_tes
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(TestSetBytesRoundTrip_feRTTest))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.@internal.fips140.edwards25519.field_package.Element))]
+[assembly: GoFieldAccess(typeof(go.testing.quick_package.Config))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -42,8 +43,8 @@ using static global::go.crypto.@internal.fips140.edwards25519.field_internal_tes
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_alias_test.go", "fe_alias_test.cs", "AAwYgqLGgILIgILIuIKy1oCCyIKAgraCgILIgILIgoCCtoKAgraCgILIAAkcAAoCABAwggALIIKUtKSC", "13-28:1;32-74:1;102-104:1;111-114:2;118-120:3;124-126:4")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAAoYAAsYABEmogAIEqKClKrCroLEgoKmgoKCgpSmgILIgoKCgoKmgoKCgqaCgoKCgoKCggAJCIKiuJSUgIK2osqCgpSAgqgACh6ygoKCyoKClKaCspSCgpSCpoKUlICCysKCpoKigoKUgriCpoKCgpSokpSCgoKClIK4poKCgIIACRLekoKkgoKUgqaUgoKUlIKUgriCkqSCgqaCgriCkoKkgoKUgqaUgoKUlIKClIKmkoKAgpKCyIKSpKSClIKmlIKmlIK4gpKCgqaClIKCpqaAggALCIQAKFyCgoKCgoLKgoKSpIKUgqamgILIgoKSkpKkgpSCgqaogILIgoKClA==", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;513-529:1", "", "42=Uint64/1/5/1,Uint64/2/5/2,Uint64/3/5/3,Uint64/4/5/4,Uint64/5/5/5;86=Intn/1/5/1,Intn/2/5/2,Intn/3/5/3,Intn/4/5/4,Intn/5/5/5;109=Len64/2/5/1,Len64/3/5/2,Len64/4/5/3,Len64/5/5/4;585=isInBounds/2/2/1")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_alias_test.go", "fe_alias_test.cs", "AAwYgqLGgILIgILIuIKy1oCCyIKAgraCgILIgILIgoCCtoKAgraCgILIAAkcAAoCABAwggALIIKUtKSC", "13-28:1;32-74:1;102-104:1;111-114:2;118-120:3;124-126:4")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/field/fe_test.go", "fe_test.cs", "ABcogqqigoKUpqKCAAoYAAsYABEmogAIEqKClKrCroLEgoKmgoKCgpSmgILIgoKCgoKmgoKCgqaCgoKCgoKCggAJCIKiuJSUgIK2osqCgpSAgqgACh6ygoKCyoKClKaCspSCgpSCpoKUlICCysKCpoKigoKUgriCpoKCgpSokpSCgoKClIK4poKCgIIACRLekoKkgoKUgqaUgoKUlIKUgriCgpSCgqaCgriCgoKkgoKUgqaUgoKUlIKClIKmgoKAgoKCyIKClKSClIKmlIKmlIK4gpKCgqaClIKCpqaAggALCIQAKFyCgoKCgoLKgoKClIKUgqamgILIgoKCgoKUgpSCgqaogILIgoKClA==", "107-121:1;156-164:1;169-178:2;216-231:1;411-426:1;493-505:1;513-529:1", "", "42=Uint64/1/5/1,Uint64/2/5/2,Uint64/3/5/3,Uint64/4/5/4,Uint64/5/5/5;86=Intn/1/5/1,Intn/2/5/2,Intn/3/5/3,Intn/4/5/4,Intn/5/5/5;109=Len64/2/5/1,Len64/3/5/2,Len64/4/5/3,Len64/5/5/4;572=isInBounds/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140.edwards25519;

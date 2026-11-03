@@ -8,7 +8,7 @@ namespace go.crypto.@internal.fips140.check;
 
 // blank import: go.crypto.@internal.fips140.check_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using runtime = runtime_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // go:linkname
 
 partial class checktest_package {
 

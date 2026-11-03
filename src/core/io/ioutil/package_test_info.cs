@@ -7,12 +7,6 @@
 global using static global::go.io.ioutil_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +25,11 @@ using static global::go.io.ioutil_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.io.fs_package.PathError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -41,8 +39,8 @@ using static global::go.io.ioutil_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/ioutil/ioutil_test.go", "ioutil_test.cs", "ABEggoKClIL4goKCgqaCgoKm1oKCgpSCmICCtoKCpoK4guaigpSCuIKClIKUgoKCgpSCgpSCgpSCtKSCgoKCpoKCgqaCgoKUtLaClII=")]
-[assembly: go.GoPositionMap("io/ioutil/tempfile_test.go", "tempfile_test.cs", "ABYiooKClJSCgoK05KLKgoKCgpSCgoKC2AANCqKCgpSUggAIGLKygpKCpoKCkoKkgrTEAAsEooKCpgAFEpSigoKUlIKCtKSyooIACRSSgvzCgoKUlIKCgILEAAoEooKClJSCAAgYspKCgoKSgqSC2A==", "77-93:1;79-83:1.1;114-125:1;128-131:2;140-143:3;183-194:1")]
+[assembly: GoPositionMap("io/ioutil/ioutil_test.go", "ioutil_test.cs", "ABEggoKClIIACQiCgoKCpoKCgqbmgoKClIKYgIK2goKmgriC9qKClIK4goKUgpSCgoKClIKClIKClIK0pIKCgoKmgoKCpoKCgpS0toKUgg==")]
+[assembly: GoPositionMap("io/ioutil/tempfile_test.go", "tempfile_test.cs", "ABkiooKClJSCgoK05KLKgoKCgpSCgoKC2AAPCqKCgpSUggAIGLKygpKCpoKCgoKUgrTEAA0EgoKCpgAFEpSigoKUlIKCtKSyooIACRSSggAJDMKCgpSUgoKAgsQACwSigoKUlIIACBiykoKCgoKClILY", "77-93:1;79-83:1.1;114-125:1;128-131:2;140-143:3;183-194:1")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

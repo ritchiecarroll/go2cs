@@ -13,15 +13,16 @@ partial class regexp_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingˢ = (@string)"skipping TestRE2Exhaustive during short test"u8;
-internal static readonly @string testdataRe2ExhaustiveTxtˢ = "testdata/re2-exhaustive.txt.bz2"u8;
+internal static ref readonly @string testdataRe2ExhaustiveTxtˢ => ref testdataRe2ExhaustiveTxtˢᵇ;
+private static readonly @string testdataRe2ExhaustiveTxtˢᵇ = "testdata/re2-exhaustive.txt.bz2"u8;
 
 // This test is excluded when running under the race detector because
 // it is a very expensive test and takes too long.
-public static partial void TestRE2Exhaustive(ж<testing.T> Ꮡt) {
+public static partial void TestRE2Exhaustive(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingˢ);
+        t.Skip(skippingˢ);
     }
-    testRE2(Ꮡt, testdataRe2ExhaustiveTxtˢ);
+    testRE2(t, testdataRe2ExhaustiveTxtˢ);
 }
 
 } // end regexp_internal_test_package

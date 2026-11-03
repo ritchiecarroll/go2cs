@@ -21,36 +21,35 @@ internal static readonly object newCertReturnedAUniqueˢ = (@string)"newCert ret
 internal static readonly object cacheDoesNotContainˢ = (@string)"cache does not contain expected entry"u8;
 internal static readonly object timedOutWaitingForˢ = (@string)"timed out waiting for expected ref count"u8;
 
-public static partial void TestWeakCertCache(ж<testing.T> Ꮡt) {
-    ref var wcc = ref heap<global::go.crypto.tls_package.weakCertCache>(out var Ꮡwcc);
-    wcc = new weakCertCache(nil);
+public static partial void TestWeakCertCache(ж<testing.T> t) {
+    ref var wcc = ref heap<global::go.crypto.tls_package.weakCertCache>(new weakCertCache(), out var Ꮡwcc);
     var (p, _) = pem.Decode(slice<byte>(rsaCertPEM));
     if (p == nil) {
-        Ꮡt.Fatal(failedToDecodeˢ);
+        t.Fatal(failedToDecodeˢ);
     }
 
-    var (certA, err) = Ꮡwcc.newCert((~p).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("newCert failed: %s"u8, err);
+    var (certA, err) = Ꮡwcc.newCert(p.Bytes);
+    if (err != nil) {
+        t.Fatalf("newCert failed: %s", err);
     }
-    (var certB, err) = Ꮡwcc.newCert((~p).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("newCert failed: %s"u8, err);
+    (var certB, err) = Ꮡwcc.newCert(p.Bytes);
+    if (err != nil) {
+        t.Fatalf("newCert failed: %s", err);
     }
     if (certA != certB) {
-        Ꮡt.Fatal(newCertReturnedAUniqueˢ);
+        t.Fatal(newCertReturnedAUniqueˢ);
     }
 
     {
-        var (_, ok) = Ꮡwcc.of(global::go.crypto.tls_package.weakCertCache.ᏑMap).Load((@string)(~p).Bytes); if (!ok) {
-            Ꮡt.Fatal(cacheDoesNotContainˢ);
+        var (_, ok) = Ꮡwcc.of(global::go.crypto.tls_package.weakCertCache.ᏑMap).Load((@string)p.Bytes); if (!ok) {
+            t.Fatal(cacheDoesNotContainˢ);
         }
     }
 
     void timeoutRefCheck(ж<testing.T> tΔ1, @string key, bool present) {
         tΔ1.Helper();
         var timeout = time_package.After((time.Duration)(4000000000L));
-        while (ᐧ) {
+        for (;;) {
             var selᴛ1 = timeout;
             switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
@@ -80,19 +79,19 @@ public static partial void TestWeakCertCache(ж<testing.T> Ꮡt) {
     // purposefully nil it and force the finalizer to be
     // called.
     runtime.KeepAlive(certA.OrTypedNil());
-    certA = default!;
+    certA = default;
     runtime.GC();
 
-    timeoutRefCheck(Ꮡt, (@string)(~p).Bytes, true);
+    timeoutRefCheck(t, (@string)p.Bytes, true);
 
     // Keep certB alive until at least now, so that we can
     // purposefully nil it and force the finalizer to be
     // called.
     runtime.KeepAlive(certB.OrTypedNil());
-    certB = default!;
+    certB = default;
     runtime.GC();
 
-    timeoutRefCheck(Ꮡt, (@string)(~p).Bytes, false);
+    timeoutRefCheck(t, (@string)p.Bytes, false);
 }
 
 } // end tls_internal_test_package

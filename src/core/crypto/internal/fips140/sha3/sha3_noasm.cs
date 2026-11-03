@@ -6,8 +6,8 @@ namespace go.crypto.@internal.fips140;
 
 partial class sha3_package {
 
-internal static void keccakF1600(/*[200]*/ ж<array<byte>> Ꮡa) {
-    keccakF1600Generic(Ꮡa);
+internal static void keccakF1600(/*[200]*/ ж<array<byte>> a) {
+    keccakF1600Generic(a);
 }
 
 internal static (nint n, error err) write(this ж<Digest> Ꮡd, slice<byte> p) {

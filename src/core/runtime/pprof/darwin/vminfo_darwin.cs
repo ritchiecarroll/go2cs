@@ -20,7 +20,7 @@ internal static bool machVMInfo(Action<uint64, uint64, uint64, @string, @string>
     var added = false;
     ref var addr = ref heap(new uint64(), out var Ꮡaddr);
     addr = 0x1;
-    while (ᐧ) {
+    for (;;) {
         ref var memRegionSize = ref heap(new uint64(), out var ᏑmemRegionSize);
         ref var info = ref heap(new machVMRegionBasicInfoData(), out var Ꮡinfo);
         // Get the first address and page size.

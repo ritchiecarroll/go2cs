@@ -1,0 +1,34 @@
+# The main-return wait census's classification (census.sh). One row per unmarked wait site a reader has judged:
+# path under src/core, a substring of the matched line, the bucket, and the reason. A site the census finds unmarked
+# and no row covers is UNCLASSIFIED, and the census fails until a reader marks it or adds its row here.
+golib/builtin.cs	channel.Receive(	marked-deeper	a wrapper; the channel parks with ChanReceive inside
+golib/builtin.cs	select(params SelectOp[] ops)	marked-deeper	a wrapper; the select parks with Select inside
+golib/channel.cs	m_core.Send(value, block: false)	marked-deeper	a non-blocking send; the blocking path parks with ChanSend
+golib/channel.cs	m_core.Send(value, block: true)	marked-deeper	a wrapper; the core send parks with ChanSend
+golib/channel.cs	void IChannel.Send(object value)	marked-deeper	a wrapper over the core send
+golib/channel.cs	object IChannel.Receive()	marked-deeper	a wrapper over the core receive
+golib/channel.cs	source.Send(value);	marked-deeper	a wrapper over the core send
+golib/runtime/Goroutine.cs	goroutine.ParkGate.Wait();	marked-deeper	WaitOnParkGate runs inside the caller's Park scope (the runtime's gopark)
+golib/runtime/Coro.cs	coro.m_started.Wait();	transient-runnable	Go's newcoro never parks its creator: the wait is on a runnable peer, so marking it would release main early (COORD, 2026-10-31)
+internal/synctest/synctest_impl.cs	SyncTestBubble.Wait()	marked-deeper	SyncTestBubble parks with SynctestWait
+golib/runtime/GoHighResolutionTimer.cs	timer.WaitOne();	service-thread	the timer service thread, never a goroutine
+golib/runtime/GoTimer.cs	s_wake.WaitOne	service-thread	the timer service thread, never a goroutine
+golib/runtime/GoTimer.cs	WaitHandle.WaitAny([highResolution, s_wake]);	service-thread	the timer service thread, never a goroutine
+golib/runtime/GoroutineThreadPool.cs	m_signal.Wait	service-thread	an idle pool thread between goroutines
+runtime/managed_impl.cs	Thread.Sleep(TickMs);	service-thread	the runtime's ticker thread
+golib/runtime/MainExit.cs	Thread.Sleep(Timeout.Infinite);	fatal-path	a thread behind the report owner; panicking is already set
+runtime/windows/signal_windows_impl.cs	Thread.Sleep(Timeout.Infinite);	fatal-path	the console control handler after its exit; the process is ending
+golib/runtime/GoschedBackoff.cs	Thread.Sleep(1);	runnable-in-go	Gosched's backoff: Go's Gosched leaves the goroutine runnable
+runtime/windows/usleep_windows_impl.cs	Thread.Sleep((int)(us / 1000));	runnable-in-go	runtime.usleep: Go's goroutine stays _Grunning in it
+runtime/linux/mem_linux_impl.cs	Thread.Sleep((int)(usec / 1000));	runnable-in-go	runtime.usleep's linux twin: _Grunning in Go
+runtime/managed_impl.cs	s_metricsSema.Wait();	runtime-internal	the runtime's metrics semaphore: short, runtime-internal
+runtime/managed_impl.cs	.Wait(timeoutMs)	runtime-test-support	an export_test helper for runtime's own tests, never reached by a program
+runtime/linux/netpoll_epoll_impl.cs	returned.Wait(timeoutMs);	runtime-test-support	an export_test helper for runtime's own tests
+runtime/linux/os_linux_impl.cs	acquired.Wait(timeoutMs)	runtime-test-support	an export_test helper for runtime's own tests
+runtime/park_impl.cs	Wait(timeoutMs)	runtime-test-support	a gopark probe for runtime's own tests
+runtime/park_impl.cs	Thread.Sleep(1);	runtime-test-support	a gopark probe for runtime's own tests
+runtime/park_impl.cs	thread.Join(30000)	runtime-test-support	a gopark probe for runtime's own tests
+runtime/sema_impl.cs	done.Wait(timeoutMs)	runtime-test-support	a semaphore probe for runtime's own tests
+net/windows/lookup_windows.cs	switch (select(	marked-deeper	golib select, which parks with Select
+runtime/mfinal.cs	s_idle.Wait(timeoutMs)	system-goroutine-idle	the finalizer goroutine waiting for work; it is counted only while a finalizer's panic runs, never while idle
+runtime/mfinal.cs	s_pending.Wait();	system-goroutine-idle	the finalizer goroutine waiting for work; it is counted only while a finalizer's panic runs, never while idle

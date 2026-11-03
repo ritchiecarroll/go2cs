@@ -7,24 +7,8 @@
 global using static global::go.net.http.cgi_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using httpꓸCookie = go.net.http_package.ΔCookie;
 global using httpꓸHandler = go.net.http_package.ΔHandler;
 global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using textprotoꓸError = go.net.textproto_package.ΔError;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
-global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
-global using urlꓸError = go.net.url_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,7 +40,15 @@ using static global::go.net.http.cgi_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.net.http.httptest_package.ResponseRecorder))]
+[assembly: GoFieldAccess(typeof(go.net.http.httptest_package.Server))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Request))]
+[assembly: GoFieldAccess(typeof(go.net.http_package.Response))]
+[assembly: GoFieldAccess(typeof(go.net.url_package.URL))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,9 +58,9 @@ using static global::go.net.http.cgi_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ABwkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICS+IIACRSCgpSAkqSC6ILugoKUgpSAkviCAAgSgoKUgpSAksiCAAcQgoKUgJLMoriCgpSAgqSAgqSCAAwIggAUMrKSgsqCgpSAgqSCgoCCpII=", "206-228:1", "", "251=Repeat/1/2/16,Repeat/2/2/21;279=NewRequest/1/1/1,NewWriter/1/1/3")]
-[assembly: go.GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACM6tIKCpqaCgoKClIKmpoKCgoLWxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoL4goK4ABImlICSpICS+IKCuAATKIKCgoKmgpKClIK4ytaCgrgABxDWgoK47qaCgqbcAAYYsoKmyqyAggAICoKCuO4ADAaCgoy47qaC6JKCAAgOuIKCgJIACQqCgriCgJKkgJL4goKCgpTKuAAGEPKUuIKkgoKUgoKClIKClJKCgoKmgpSClIKCgoKClLTYooKCgoKCuOiCgpLKppSCgrim1oKClJIACBLc5oKCgtyCgoKAkgAJCIIACRqCgoI=", "260-264:1;348-351:1", "", "360=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5")]
-[assembly: go.GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "AB42opS4ABImlICSpICSAAkSggAKELKClIKClIKU2qKUuIKCgoKUgoLsopS4poKAkgAIDKKUuKaCAAgGgpS4ABQysqKCgoKAggAJDpDSgNKApIK4poKC", "179-186:1", "", "190=Repeat/1/2/16,Repeat/2/2/21")]
+[assembly: GoPositionMap("net/http/cgi/child_test.go", "child_test.cs", "ACMkggAMGoKClICSpICSpICSpICCpICSpIKUgJKkgJKkgJKkgpSClICSAAgIggAJFIKClICSpIL4gu6CgpSClICSAAgIggAIEoKClIKUgJLIggAHEIKClICSzKK4goKUgIKkgIKkggANCIIAFDKykoLKgoKUgIKkgoKAgqSC", "206-228:1", "", "262=Repeat/1/2/16,Repeat/2/2/21;290=NewRequest/1/1/1,NewWriter/1/1/3")]
+[assembly: GoPositionMap("net/http/cgi/host_test.go", "host_test.cs", "ACQ6tIKCpqaCgoKClIKmpoKCgoLmxoKCgoKCgpS0pIKCgoKmxoKClIKCgqaCpoIACQiCgrgAEiaUgJKkgJIACAiCgrgAEyiCgoKCpoKSgpSCuMrmgoK4AAcQ5oKCuO6mgoKm3AAHGLKCpsqsgIIACQqCgrjuAA0GgoKMuO6mggAICJKCAAgOuIKCgJIACwqCgriCgJKkgJIACAiCgoKClMq4AAgQ8pS4gqSCgpSCgoKUgoKUkoKCgqaClIKUgoKCgoKUtOiigoKCgoK4+IKCksqmlIKCuKbmgoKUkgAIEtwACAaCgoLcgoKCgJIACQiCAAkagoKC", "260-264:1;348-351:1", "", "372=chunk/1/4/5,chunk/2/4/5,chunk/3/4/5,chunk/4/4/5", "483:21")]
+[assembly: GoPositionMap("net/http/cgi/integration_test.go", "integration_test.cs", "ACA2opS4ABImlICSpICSAAkSggALELKClIKClIKU6qKUuIKCgoKUgoL8opS4poKAkgAKDKKUuKaCAAgGgpS4ABQysqKCgoKAggAKDpDigOKApIK4poKC", "179-186:1", "", "197=Repeat/1/2/16,Repeat/2/2/21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

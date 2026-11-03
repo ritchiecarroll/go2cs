@@ -11,7 +11,7 @@ using static go.@internal.trace_package;
 
 partial class trace_internal_test_package {
 
-public static void TestMUD(ж<testing.T> Ꮡt) {
+public static void TestMUD(ж<testing.T> t) {
     // Insert random uniforms and check histogram mass and
     // cumulative sum approximations.
     var rnd = rand.New(rand.NewSource(42));
@@ -22,7 +22,7 @@ public static void TestMUD(ж<testing.T> Ꮡt) {
         if (rnd.Intn(10) == 0) {
             r = l;
         }
-        Ꮡt.Log(l, r, area);
+        t.Log(l, r, area);
         Ꮡmud.add(l, r, area);
         mass += area;
 
@@ -32,7 +32,7 @@ public static void TestMUD(ж<testing.T> Ꮡt) {
             hmass += val;
         }
         if (!aeq(mass, hmass)) {
-            Ꮡt.Fatalf("want mass %g, got %g"u8, mass, hmass);
+            t.Fatalf("want mass %g, got %g", mass, hmass);
         }
 
         // Check inverse cumulative sum approximations.
@@ -41,16 +41,16 @@ public static void TestMUD(ж<testing.T> Ꮡt) {
             var (lΔ1, u, ok) = mud.approxInvCumulativeSum();
             var (inv, ok2) = mud.invCumulativeSum(j);
             if (!ok || !ok2) {
-                Ꮡt.Fatalf("inverse cumulative sum failed: approx %v, exact %v"u8, ok, ok2);
+                t.Fatalf("inverse cumulative sum failed: approx %v, exact %v", ok, ok2);
             }
             if (!(lΔ1 <= inv && inv < u)) {
-                Ꮡt.Fatalf("inverse(%g) = %g, not ∈ [%g, %g)"u8, j, inv, lΔ1, u);
+                t.Fatalf("inverse(%g) = %g, not ∈ [%g, %g)", j, inv, lΔ1, u);
             }
         }
     }
 }
 
-public static void TestMUDTracking(ж<testing.T> Ꮡt) {
+public static void TestMUDTracking(ж<testing.T> t) {
     // Test that the tracked mass is tracked correctly across
     // updates.
     var rnd = rand.New(rand.NewSource(42));
@@ -66,22 +66,22 @@ public static void TestMUDTracking(ж<testing.T> Ꮡt) {
             (l, var u, var ok) = mud.approxInvCumulativeSum();
             var (inv, ok2) = mud.invCumulativeSum(trackMass);
 
-            if (mass < trackMass){
+            if (mass < trackMass) {
                 if (ok) {
-                    Ꮡt.Errorf("approx(%g) = [%g, %g), but mass = %g"u8, trackMass, l, u, mass);
+                    t.Errorf("approx(%g) = [%g, %g), but mass = %g", trackMass, l, u, mass);
                 }
                 if (ok2) {
-                    Ꮡt.Errorf("exact(%g) = %g, but mass = %g"u8, trackMass, inv, mass);
+                    t.Errorf("exact(%g) = %g, but mass = %g", trackMass, inv, mass);
                 }
             } else {
                 if (!ok) {
-                    Ꮡt.Errorf("approx(%g) failed, but mass = %g"u8, trackMass, mass);
+                    t.Errorf("approx(%g) failed, but mass = %g", trackMass, mass);
                 }
                 if (!ok2) {
-                    Ꮡt.Errorf("exact(%g) failed, but mass = %g"u8, trackMass, mass);
+                    t.Errorf("exact(%g) failed, but mass = %g", trackMass, mass);
                 }
                 if (ok && ok2 && !(l <= inv && inv < u)) {
-                    Ꮡt.Errorf("inverse(%g) = %g, not ∈ [%g, %g)"u8, trackMass, inv, l, u);
+                    t.Errorf("inverse(%g) = %g, not ∈ [%g, %g)", trackMass, inv, l, u);
                 }
             }
         }

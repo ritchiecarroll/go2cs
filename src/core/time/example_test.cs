@@ -23,12 +23,12 @@ public static void ExampleDuration() {
 }
 
 public static void ExampleDuration_Round() {
-    var (d, err) = Δtime.ParseDuration("1h15m30.918273645s"u8);
-    if (err != default!) {
+    var (d, err) = Δtime.ParseDuration("1h15m30.918273645s");
+    if (err != nil) {
         throw panic(err);
     }
 
-    var round = new Δtime.Duration[]{
+    var round = slice<Δtime.Duration>([
         Δtime.ΔNanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
@@ -37,7 +37,7 @@ public static void ExampleDuration_Round() {
         Δtime.ΔMinute,
         (Δtime.Duration)(600000000000L),
         Δtime.ΔHour
-    }.slice();
+    ]);
 
     foreach (var (_, r) in round) {
         fmt.Printf("d.Round(%6s) = %s\n"u8, r, d.Round(r).String());
@@ -62,12 +62,12 @@ public static void ExampleDuration_String() {
 }
 
 public static void ExampleDuration_Truncate() {
-    var (d, err) = Δtime.ParseDuration("1h15m30.918273645s"u8);
-    if (err != default!) {
+    var (d, err) = Δtime.ParseDuration("1h15m30.918273645s");
+    if (err != nil) {
         throw panic(err);
     }
 
-    var trunc = new Δtime.Duration[]{
+    var trunc = slice<Δtime.Duration>([
         Δtime.ΔNanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
@@ -76,7 +76,7 @@ public static void ExampleDuration_Truncate() {
         Δtime.ΔMinute,
         (Δtime.Duration)(600000000000L),
         Δtime.ΔHour
-    }.slice();
+    ]);
 
     foreach (var (_, t) in trunc) {
         fmt.Printf("d.Truncate(%6s) = %s\n"u8, t, d.Truncate(t).String());
@@ -93,11 +93,11 @@ public static void ExampleDuration_Truncate() {
 }
 
 public static void ExampleParseDuration() {
-    var (hours, _) = Δtime.ParseDuration("10h"u8);
-    var (complex, _) = Δtime.ParseDuration("1h10m10s"u8);
-    var (micro, _) = Δtime.ParseDuration("1µs"u8);
+    var (hours, _) = Δtime.ParseDuration("10h");
+    var (complex, _) = Δtime.ParseDuration("1h10m10s");
+    var (micro, _) = Δtime.ParseDuration("1µs");
     // The package also accepts the incorrect but common prefix u for micro.
-    var (micro2, _) = Δtime.ParseDuration("1us"u8);
+    var (micro2, _) = Δtime.ParseDuration("1us");
 
     fmt.Println(hours);
     fmt.Println(complex);
@@ -146,40 +146,40 @@ public static void ExampleDuration_Abs() {
 }
 
 public static void ExampleDuration_Hours() {
-    var (h, _) = Δtime.ParseDuration("4h30m"u8);
+    var (h, _) = Δtime.ParseDuration("4h30m");
     fmt.Printf("I've got %.1f hours of work left."u8, h.Hours());
     // Output: I've got 4.5 hours of work left.
 }
 
 public static void ExampleDuration_Microseconds() {
-    var (u, _) = Δtime.ParseDuration("1s"u8);
+    var (u, _) = Δtime.ParseDuration("1s");
     fmt.Printf("One second is %d microseconds.\n"u8, u.Microseconds());
     // Output:
     // One second is 1000000 microseconds.
 }
 
 public static void ExampleDuration_Milliseconds() {
-    var (u, _) = Δtime.ParseDuration("1s"u8);
+    var (u, _) = Δtime.ParseDuration("1s");
     fmt.Printf("One second is %d milliseconds.\n"u8, u.Milliseconds());
     // Output:
     // One second is 1000 milliseconds.
 }
 
 public static void ExampleDuration_Minutes() {
-    var (m, _) = Δtime.ParseDuration("1h30m"u8);
+    var (m, _) = Δtime.ParseDuration("1h30m");
     fmt.Printf("The movie is %.0f minutes long."u8, m.Minutes());
     // Output: The movie is 90 minutes long.
 }
 
 public static void ExampleDuration_Nanoseconds() {
-    var (u, _) = Δtime.ParseDuration("1µs"u8);
+    var (u, _) = Δtime.ParseDuration("1µs");
     fmt.Printf("One microsecond is %d nanoseconds.\n"u8, u.Nanoseconds());
     // Output:
     // One microsecond is 1000 nanoseconds.
 }
 
 public static void ExampleDuration_Seconds() {
-    var (m, _) = Δtime.ParseDuration("1m30s"u8);
+    var (m, _) = Δtime.ParseDuration("1m30s");
     fmt.Printf("Take off in t-%.0f seconds."u8, m.Seconds());
     // Output: Take off in t-90 seconds.
 }
@@ -252,10 +252,10 @@ public static partial void ExampleNewTicker() {
         goǃ(() => {
             Δtime.Sleep((Δtime.Duration)(10000000000L));
             doneʗ1.ᐸꟷ(true);
-        });
-        while (ᐧ) {
+        }, GoStack.Bounded);
+        for (;;) {
             var selᴛ3 = done;
-            var selᴛ4 = (~ticker).C;
+            var selᴛ4 = ticker.C;
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
             case 0 when selᴛ3.ꟷᐳ(out _): {
                 fmt.Println(doneˢ);
@@ -272,32 +272,42 @@ public static partial void ExampleNewTicker() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wedFeb25110639Pst2015ˢ = "Wed Feb 25 11:06:39 PST 2015"u8;
-internal static readonly @string asiaShanghaiˢ = "Asia/Shanghai"u8;
+internal static ref readonly @string wedFeb25110639Pst2015ˢ => ref wedFeb25110639Pst2015ˢᵇ;
+private static readonly @string wedFeb25110639Pst2015ˢᵇ = "Wed Feb 25 11:06:39 PST 2015"u8;
+internal static ref readonly @string asiaShanghaiˢ => ref asiaShanghaiˢᵇ;
+private static readonly @string asiaShanghaiˢᵇ = "Asia/Shanghai"u8;
 internal static readonly object defaultFormatˢ = (@string)"default format:"u8;
 internal static readonly object unixFormatˢ = (@string)"Unix format:"u8;
 internal static readonly object sameInUtcˢ = (@string)"Same, in UTC:"u8;
 internal static readonly object inShanghaiWithSecondsˢ = (@string)"in Shanghai with seconds:"u8;
 internal static readonly object inShanghaiWithColonˢ = (@string)"in Shanghai with colon seconds:"u8;
-internal static readonly @string basicFullDateˢ = "Basic full date"u8;
-internal static readonly @string monJan2150405Mst2006ˢ = "Mon Jan 2 15:04:05 MST 2006"u8;
-internal static readonly @string basicShortDateˢ = "Basic short date"u8;
-internal static readonly @string amPmˢ = "AM/PM"u8;
-internal static readonly @string wedFeb251106391234Pstˢ = "Wed Feb 25 11:06:39.1234 PST 2015"u8;
-internal static readonly @string noFractionˢ = "No fraction"u8;
-internal static readonly @string forFractionˢ = "0s for fraction"u8;
-internal static readonly @string forFractionˢ2 = "9s for fraction"u8;
+internal static ref readonly @string basicFullDateˢ => ref basicFullDateˢᵇ;
+private static readonly @string basicFullDateˢᵇ = "Basic full date"u8;
+internal static ref readonly @string monJan2150405Mst2006ˢ => ref monJan2150405Mst2006ˢᵇ;
+private static readonly @string monJan2150405Mst2006ˢᵇ = "Mon Jan 2 15:04:05 MST 2006"u8;
+internal static ref readonly @string basicShortDateˢ => ref basicShortDateˢᵇ;
+private static readonly @string basicShortDateˢᵇ = "Basic short date"u8;
+internal static ref readonly @string amPmˢ => ref amPmˢᵇ;
+private static readonly @string amPmˢᵇ = "AM/PM"u8;
+internal static ref readonly @string wedFeb251106391234Pstˢ => ref wedFeb251106391234Pstˢᵇ;
+private static readonly @string wedFeb251106391234Pstˢᵇ = "Wed Feb 25 11:06:39.1234 PST 2015"u8;
+internal static ref readonly @string noFractionˢ => ref noFractionˢᵇ;
+private static readonly @string noFractionˢᵇ = "No fraction"u8;
+internal static ref readonly @string forFractionˢ => ref forFractionˢᵇ;
+private static readonly @string forFractionˢᵇ = "0s for fraction"u8;
+internal static ref readonly @string forFractionˢ2 => ref forFractionˢ2ᵇ;
+private static readonly @string forFractionˢ2ᵇ = "9s for fraction"u8;
 
 public static void ExampleTime_Format() {
     // Parse a time value from a string in the standard Unix format.
     ref var t = ref heap<Δtime.Time>(out var Ꮡt);
     (t, var err) = Δtime.Parse(Δtime.UnixDate, wedFeb25110639Pst2015ˢ);
-    if (err != default!) { // Always check errors even if they should not happen.
+    if (err != nil) { // Always check errors even if they should not happen.
         throw panic(err);
     }
 
     (var tz, err) = Δtime.LoadLocation(asiaShanghaiˢ);
-    if (err != default!) { // Always check errors even if they should not happen.
+    if (err != nil) { // Always check errors even if they should not happen.
         throw panic(err);
     }
 
@@ -310,9 +320,9 @@ public static void ExampleTime_Format() {
     // The time zone attached to the time value affects its output.
     fmt.Println(sameInUtcˢ, t.UTC().Format(Δtime.UnixDate));
 
-    fmt.Println(inShanghaiWithSecondsˢ, t.In(tz).Format("2006-01-02T15:04:05 -070000"u8));
+    fmt.Println(inShanghaiWithSecondsˢ, t.In(tz).Format("2006-01-02T15:04:05 -070000"));
 
-    fmt.Println(inShanghaiWithColonˢ, t.In(tz).Format("2006-01-02T15:04:05 -07:00:00"u8));
+    fmt.Println(inShanghaiWithColonˢ, t.In(tz).Format("2006-01-02T15:04:05 -07:00:00"));
 
     // The rest of this function demonstrates the properties of the
     // layout string used in the format.
@@ -347,19 +357,19 @@ public static void ExampleTime_Format() {
 
     // Simple starter examples.
     @do(basicFullDateˢ, monJan2150405Mst2006ˢ, wedFeb25110639Pst2015ˢ);
-    @do(basicShortDateˢ, "2006/01/02"u8, "2015/02/25"u8);
+    @do(basicShortDateˢ, "2006/01/02", "2015/02/25");
 
     // The hour of the reference time is 15, or 3PM. The layout can express
     // it either way, and since our value is the morning we should see it as
     // an AM time. We show both in one format string. Lower case too.
-    @do(amPmˢ, "3PM==3pm==15h"u8, "11AM==11am==11h"u8);
+    @do(amPmˢ, "3PM==3pm==15h", "11AM==11am==11h");
 
     // When parsing, if the seconds value is followed by a decimal point
     // and some digits, that is taken as a fraction of a second even if
     // the layout string does not represent the fractional second.
     // Here we add a fractional second to our time value used above.
     (t, err) = Δtime.Parse(Δtime.UnixDate, wedFeb251106391234Pstˢ);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     // It does not appear in the output if the layout string does not contain
@@ -370,10 +380,10 @@ public static void ExampleTime_Format() {
     // a decimal point in the seconds value in the layout string.
     // If the layout digits are 0s, the fractional second is of the specified
     // width. Note that the output has a trailing zero.
-    @do(forFractionˢ, "15:04:05.00000"u8, "11:06:39.12340"u8);
+    @do(forFractionˢ, "15:04:05.00000", "11:06:39.12340");
 
     // If the fraction in the layout is 9s, trailing zeros are dropped.
-    @do(forFractionˢ2, "15:04:05.99999999"u8, "11:06:39.1234"u8);
+    @do(forFractionˢ2, "15:04:05.99999999", "11:06:39.1234");
 
     // Output:
     // default format: 2015-02-25 11:06:39 -0800 PST
@@ -393,19 +403,26 @@ public static void ExampleTime_Format() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string satMar7110639Pst2015ˢ = "Sat Mar 7 11:06:39 PST 2015"u8;
-internal static readonly @string unixˢ = "Unix"u8;
-internal static readonly @string satMar7110639Pst2015ˢ2 = "Sat Mar  7 11:06:39 PST 2015"u8;
-internal static readonly @string noPadˢ = "No pad"u8;
-internal static readonly @string spacesˢ = "Spaces"u8;
-internal static readonly @string zerosˢ = "Zeros"u8;
-internal static readonly @string suppressedPadˢ = "Suppressed pad"u8;
+internal static ref readonly @string satMar7110639Pst2015ˢ => ref satMar7110639Pst2015ˢᵇ;
+private static readonly @string satMar7110639Pst2015ˢᵇ = "Sat Mar 7 11:06:39 PST 2015"u8;
+internal static ref readonly @string unixˢ => ref unixˢᵇ;
+private static readonly @string unixˢᵇ = "Unix"u8;
+internal static ref readonly @string satMar7110639Pst2015ˢ2 => ref satMar7110639Pst2015ˢ2ᵇ;
+private static readonly @string satMar7110639Pst2015ˢ2ᵇ = "Sat Mar  7 11:06:39 PST 2015"u8;
+internal static ref readonly @string noPadˢ => ref noPadˢᵇ;
+private static readonly @string noPadˢᵇ = "No pad"u8;
+internal static ref readonly @string spacesˢ => ref spacesˢᵇ;
+private static readonly @string spacesˢᵇ = "Spaces"u8;
+internal static ref readonly @string zerosˢ => ref zerosˢᵇ;
+private static readonly @string zerosˢᵇ = "Zeros"u8;
+internal static ref readonly @string suppressedPadˢ => ref suppressedPadˢᵇ;
+private static readonly @string suppressedPadˢᵇ = "Suppressed pad"u8;
 
 public static void ExampleTime_Format_pad() {
     // Parse a time value from a string in the standard Unix format.
     ref var t = ref heap<Δtime.Time>(out var Ꮡt);
     (t, var err) = Δtime.Parse(Δtime.UnixDate, satMar7110639Pst2015ˢ);
-    if (err != default!) { // Always check errors even if they should not happen.
+    if (err != nil) { // Always check errors even if they should not happen.
         throw panic(err);
     }
 
@@ -427,18 +444,18 @@ public static void ExampleTime_Format_pad() {
     // two characters (7 vs. 07), use an _ instead of a space in the layout string.
     // Here we print just the day, which is 2 in our layout string and 7 in our
     // value.
-    @do(noPadˢ, "<2>"u8, "<7>"u8);
+    @do(noPadˢ, "<2>", "<7>");
 
     // An underscore represents a space pad, if the date only has one digit.
-    @do(spacesˢ, "<_2>"u8, "< 7>"u8);
+    @do(spacesˢ, "<_2>", "< 7>");
 
     // A "0" indicates zero padding for single-digit values.
-    @do(zerosˢ, "<02>"u8, "<07>"u8);
+    @do(zerosˢ, "<02>", "<07>");
 
     // If the value is already the right width, padding is not used.
     // For instance, the second (05 in the reference time) in our value is 39,
     // so it doesn't need padding, but the minutes (04, 06) does.
-    @do(suppressedPadˢ, "04:05"u8, "06:39"u8);
+    @do(suppressedPadˢ, "04:05", "06:39");
 
     // Output:
     // Unix             "Mon Jan _2 15:04:05 MST 2006" gives "Sat Mar  7 11:06:39 PST 2015"
@@ -449,8 +466,10 @@ public static void ExampleTime_Format_pad() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string jan22006At304pmMstˢ = "Jan 2, 2006 at 3:04pm (MST)"u8;
-internal static readonly @string feb32013At754pmUtcˢ = "Feb 3, 2013 at 7:54pm (UTC)"u8;
+internal static ref readonly @string jan22006At304pmMstˢ => ref jan22006At304pmMstˢᵇ;
+private static readonly @string jan22006At304pmMstˢᵇ = "Jan 2, 2006 at 3:04pm (MST)"u8;
+internal static ref readonly @string feb32013At754pmUtcˢ => ref feb32013At754pmUtcˢᵇ;
+private static readonly @string feb32013At754pmUtcˢᵇ = "Feb 3, 2013 at 7:54pm (UTC)"u8;
 
 public static void ExampleTime_GoString() {
     var t = Δtime.Date(2009, Δtime.November, 10, 23, 0, 0, 0, Δtime.ΔUTC);
@@ -470,15 +489,19 @@ public static void ExampleTime_GoString() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string feb32013At754pmPstˢ = "Feb 3, 2013 at 7:54pm (PST)"u8;
-internal static readonly @string feb03ˢ = "2013-Feb-03"u8;
+internal static ref readonly @string feb32013At754pmPstˢ => ref feb32013At754pmPstˢᵇ;
+private static readonly @string feb32013At754pmPstˢᵇ = "Feb 3, 2013 at 7:54pm (PST)"u8;
+internal static ref readonly @string feb03ˢ => ref feb03ˢᵇ;
+private static readonly @string feb03ˢᵇ = "2013-Feb-03"u8;
 internal static readonly object errorˢ = (@string)"error"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string longFormᶜ = "Jan 2, 2006 at 3:04pm (MST)"u8;
+internal static ref readonly @string longFormᶜ => ref longFormᶜᵇ;
+private static readonly @string longFormᶜᵇ = "Jan 2, 2006 at 3:04pm (MST)"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string shortFormᶜ = "2006-Jan-02"u8;
+internal static ref readonly @string shortFormᶜ => ref shortFormᶜᵇ;
+private static readonly @string shortFormᶜᵇ = "2006-Jan-02"u8;
 
 public static void ExampleParse() {
     // See the example for Time.Format for a thorough description of how
@@ -504,9 +527,9 @@ public static void ExampleParse() {
     // contains both Z and a time zone offset in order to handle both valid options:
     // 2006-01-02T15:04:05Z
     // 2006-01-02T15:04:05+07:00
-    (t, _) = Δtime.Parse(Δtime.RFC3339, "2006-01-02T15:04:05Z"u8);
+    (t, _) = Δtime.Parse(Δtime.RFC3339, "2006-01-02T15:04:05Z");
     fmt.Println(t);
-    (t, _) = Δtime.Parse(Δtime.RFC3339, "2006-01-02T15:04:05+07:00"u8);
+    (t, _) = Δtime.Parse(Δtime.RFC3339, "2006-01-02T15:04:05+07:00");
     fmt.Println(t);
     var (_, err) = Δtime.Parse(Δtime.RFC3339, Δtime.RFC3339);
     fmt.Println(errorˢ, err); // Returns an error as the layout is not a valid time value
@@ -520,15 +543,20 @@ public static void ExampleParse() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string europeBerlinˢ = "Europe/Berlin"u8;
-internal static readonly @string jul92012At502amCestˢ = "Jul 9, 2012 at 5:02am (CEST)"u8;
-internal static readonly @string jul09ˢ = "2012-Jul-09"u8;
+internal static ref readonly @string europeBerlinˢ => ref europeBerlinˢᵇ;
+private static readonly @string europeBerlinˢᵇ = "Europe/Berlin"u8;
+internal static ref readonly @string jul92012At502amCestˢ => ref jul92012At502amCestˢᵇ;
+private static readonly @string jul92012At502amCestˢᵇ = "Jul 9, 2012 at 5:02am (CEST)"u8;
+internal static ref readonly @string jul09ˢ => ref jul09ˢᵇ;
+private static readonly @string jul09ˢᵇ = "2012-Jul-09"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string longFormᶜ1 = "Jan 2, 2006 at 3:04pm (MST)"u8;
+internal static ref readonly @string longFormᶜ1 => ref longFormᶜ1ᵇ;
+private static readonly @string longFormᶜ1ᵇ = "Jan 2, 2006 at 3:04pm (MST)"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string shortFormᶜ1 = "2006-Jan-02"u8;
+internal static ref readonly @string shortFormᶜ1 => ref shortFormᶜ1ᵇ;
+private static readonly @string shortFormᶜ1ᵇ = "2006-Jan-02"u8;
 
 public static void ExampleParseInLocation() {
     var (loc, _) = Δtime.LoadLocation(europeBerlinˢ);
@@ -583,12 +611,12 @@ public static void ExampleUnixMilli() {
 
 public static void ExampleTime_Unix() {
     // 1 billion seconds of Unix, three ways.
-    fmt.Println(Δtime.Unix(1000000000, 0).UTC()); // 1e9 seconds
-    fmt.Println(Δtime.Unix(0, 1000000000000000000).UTC()); // 1e18 nanoseconds
+    fmt.Println(Δtime.Unix(1000000000, 0).UTC());                    // 1e9 seconds
+    fmt.Println(Δtime.Unix(0, 1000000000000000000).UTC());           // 1e18 nanoseconds
     fmt.Println(Δtime.Unix(2000000000, -1000000000000000000).UTC()); // 2e9 seconds - 1e18 nanoseconds
 
     var t = Δtime.Date(2001, Δtime.September, 9, 1, 46, 40, 0, Δtime.ΔUTC);
-    fmt.Println(t.Unix()); // seconds since 1970
+    fmt.Println(t.Unix());     // seconds since 1970
     fmt.Println(t.UnixNano()); // nanoseconds since 1970
 
     // Output:
@@ -601,7 +629,7 @@ public static void ExampleTime_Unix() {
 
 public static void ExampleTime_Round() {
     var t = Δtime.Date(0, 0, 0, 12, 15, 30, 918273645, Δtime.ΔUTC);
-    var round = new Δtime.Duration[]{
+    var round = slice<Δtime.Duration>([
         Δtime.ΔNanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
@@ -610,10 +638,10 @@ public static void ExampleTime_Round() {
         Δtime.ΔMinute,
         (Δtime.Duration)(600000000000L),
         Δtime.ΔHour
-    }.slice();
+    ]);
 
     foreach (var (_, d) in round) {
-        fmt.Printf("t.Round(%6s) = %s\n"u8, d, t.Round(d).Format("15:04:05.999999999"u8));
+        fmt.Printf("t.Round(%6s) = %s\n"u8, d, t.Round(d).Format("15:04:05.999999999"));
     }
     // Output:
     // t.Round(   1ns) = 12:15:30.918273645
@@ -627,12 +655,14 @@ public static void ExampleTime_Round() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string jan02150405ˢ = "2006 Jan 02 15:04:05"u8;
-internal static readonly @string dec07121530918273645ˢ = "2012 Dec 07 12:15:30.918273645"u8;
+internal static ref readonly @string jan02150405ˢ => ref jan02150405ˢᵇ;
+private static readonly @string jan02150405ˢᵇ = "2006 Jan 02 15:04:05"u8;
+internal static ref readonly @string dec07121530918273645ˢ => ref dec07121530918273645ˢᵇ;
+private static readonly @string dec07121530918273645ˢᵇ = "2012 Dec 07 12:15:30.918273645"u8;
 
 public static void ExampleTime_Truncate() {
     var (t, _) = Δtime.Parse(jan02150405ˢ, dec07121530918273645ˢ);
-    var trunc = new Δtime.Duration[]{
+    var trunc = slice<Δtime.Duration>([
         Δtime.ΔNanosecond,
         Δtime.Microsecond,
         Δtime.Millisecond,
@@ -640,10 +670,10 @@ public static void ExampleTime_Truncate() {
         2 * Δtime.ΔSecond,
         Δtime.ΔMinute,
         (Δtime.Duration)(600000000000L)
-    }.slice();
+    ]);
 
     foreach (var (_, d) in trunc) {
-        fmt.Printf("t.Truncate(%5s) = %s\n"u8, d, t.Truncate(d).Format("15:04:05.999999999"u8));
+        fmt.Printf("t.Truncate(%5s) = %s\n"u8, d, t.Truncate(d).Format("15:04:05.999999999"));
     }
     // To round to the last midnight in the local timezone, create a new Date.
     var midnight = Δtime.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, Δtime.ΔLocal);
@@ -660,11 +690,12 @@ public static void ExampleTime_Truncate() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string americaLosAngelesˢ = "America/Los_Angeles"u8;
+internal static ref readonly @string americaLosAngelesˢ => ref americaLosAngelesˢᵇ;
+private static readonly @string americaLosAngelesˢᵇ = "America/Los_Angeles"u8;
 
 public static void ExampleLoadLocation() {
     var (location, err) = Δtime.LoadLocation(americaLosAngelesˢ);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
@@ -674,7 +705,8 @@ public static void ExampleLoadLocation() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string beijingTimeˢ = "Beijing Time"u8;
+internal static ref readonly @string beijingTimeˢ => ref beijingTimeˢᵇ;
+private static readonly @string beijingTimeˢᵇ = "Beijing Time"u8;
 
 public static void ExampleLocation() {
     // China doesn't have daylight saving. It uses a fixed 8 hour offset from UTC.
@@ -720,7 +752,8 @@ public static void ExampleTime_Add() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string europeZurichˢ = "Europe/Zurich"u8;
+internal static ref readonly @string europeZurichˢ => ref europeZurichˢᵇ;
+private static readonly @string europeZurichˢᵇ = "Europe/Zurich"u8;
 
 public static void ExampleTime_AddDate() {
     var start = Δtime.Date(2023, 3, 25, 12, 0, 0, 0, Δtime.ΔUTC);
@@ -730,7 +763,7 @@ public static void ExampleTime_AddDate() {
     var oneYearLater = start.AddDate(1, 0, 0);
 
     var (zurich, err) = Δtime.LoadLocation(europeZurichˢ);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     // This was the day before a daylight saving time transition in Zürich.
@@ -855,15 +888,15 @@ public static void ExampleTime_Sub() {
 public static void ExampleTime_AppendBinary() {
     var t = Δtime.Date(2025, 4, 1, 15, 30, 45, 123456789, Δtime.ΔUTC);
 
-    slice<byte> buffer = default!;
+    slice<byte> buffer = default;
     (buffer, var err) = t.AppendBinary(buffer);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
-    Δtime.Time parseTime = default!;
+    Δtime.Time parseTime = default;
     err = parseTime.UnmarshalBinary(buffer[..]);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
@@ -894,7 +927,7 @@ public static void ExampleTime_AppendText() {
     var buffer = slice<byte>("t: "u8);
 
     (buffer, var err) = t.AppendText(buffer);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
@@ -905,7 +938,8 @@ public static void ExampleTime_AppendText() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string utc8ˢ = "UTC-8"u8;
+internal static ref readonly @string utc8ˢ => ref utc8ˢᵇ;
+private static readonly @string utc8ˢᵇ = "UTC-8"u8;
 internal static readonly object theTimeIsˢ = (@string)"The time is:"u8;
 
 public static void ExampleFixedZone() {

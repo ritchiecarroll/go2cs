@@ -10,15 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +46,7 @@ using static go.path.filepath_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -64,11 +56,11 @@ using static go.path.filepath_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE4ABoCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgqaCxrS0gsisAAgIgoKCppKCgoKUlIKCgqaCgoKCgpSSgIKkgoKAgraClKaCgoKUpoKCgqamgoKUpoKUqNKCgpSCgoKCpoKClIKClAACFgAIAqa0koK4gIKkgoCCpKaCgoKUpoK4gqaCgoKUgoKCpqiSlLakupKClLakpIKUAAMQAAgCgoKClIKUgoKUpIKUgoKClIKm2qKCgpQ=")]
-[assembly: go.GoPositionMap("path/filepath/path.go", "path.cs", "ABxuABsCAAIiAA4CAAIWAAgCrLIAAhLirsIAAhDSAAIUAAkCrsIAAhDSqJIAAhDSpoKClIKClAACGAAJAoKCgoKClIKCgpKkuIKCgqaCgrKCgpSClIKUgpSClIKUgpSUgoKClIKCgoKClIKClJTcygApVKaSgIKUlLaClIKCgpS4goKAgoKUtqiSgqaCuMqmgoKCgoCCtoKCgsoAAiQADwKCgpSUgpQAAiIADgKCgpSUgpSqooKClIKCgpSCrsIAAhLirsI=")]
-[assembly: go.GoPositionMap("path/filepath/path_windows.go", "path_windows.cs", "AAsiwoKUpriCuIKCgoKApLSCxqaCpqaCuJSCgpSmgoKCogAMFoLKggAOFoKkgoKmgpSmgg==")]
-[assembly: go.GoPositionMap("path/filepath/symlink.go", "symlink.cs", "ABMggoKUgpSCgoKCgpSCgtymlJKUkryigoKmyoKUppTKgqa4goKmgoKUyoKCpoKCpqamlIKUgpSCgpKUgoKCmKKCgqaClJSm")]
-[assembly: go.GoPositionMap("path/filepath/symlink_windows.go", "symlink_windows.cs", "AAoespSCpqiSgoKmlIKClJSqooIAAhwACwKCpoKmgqaUgoKUpoKCppSCgpSClKamlKaCgoKUgoKU")]
+[assembly: GoPositionMap("path/filepath/match.go", "match.cs", "ABQkAAE4ABoCgoKCgoKUpriCgpSClKaCgpSClIKUgri0qsKCgpSCgqaCxrS0gsisAAgIgoKCppKCgoKUlIKCgqaCgoKCgpSSgIKkgoKAgraClKaCgoKUpoKCgqamgoKUpoKUqNKCgpSCgoKCpoKClIKClAACFgAIAqa0koK4gIKkgoCCpKaCgoKUpoK4gqaCgoKUgoKCpqiSpLakupKClLakpIKUAAMQAAgCgoKClIKUgoKUpIKUgoKClIKm2qKCgpQ=", "", "", "", "377:21")]
+[assembly: GoPositionMap("path/filepath/path.go", "path.cs", "ABxuABsCAAIiAA4CAAIWAAgCrLIAAhLirsIAAhDSAAIUAAkCrsIAAhDSqJIAAhDSpoKClIKClAACGAAJAoKCgoKClIKCgoKkuIKCgqaCgrKCgpSClIKUgpSClIKUgpSUgoKClIKCgoKClIKClJTcygApVKaSgIKUlLaClIKCgpS4goKAgoKUtqiSgqaCuMqmgoKCgoCCtoKCgsoAAiQADwKCgpSUgpQAAiIADgKCgpSUgpSqooKClIKCgpSCrsIAAhLirsI=")]
+[assembly: GoPositionMap("path/filepath/path_windows.go", "path_windows.cs", "AAsiwoKUpriCuIKCgoKApLSCxqaCpqaCuJSCgpSmgoKCogAMFoLKggAOFoKkgoKmgpSmgg==")]
+[assembly: GoPositionMap("path/filepath/symlink.go", "symlink.cs", "ABQggoKUgpSCgoKCgpSCgtymlIKUgryigoKmyoKUppTKgqa4goKmgoKUyoKCpoKCpqamlIKUgpSCgoKUgoKCmKKCgqaClJSm")]
+[assembly: GoPositionMap("path/filepath/symlink_windows.go", "symlink_windows.cs", "AAoespSCpqiSgoKmlIKClJSqooIAAhwACwKCpoKmgqaUgoKUpoKCppSCgpSClKamlKaCgoKUgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.path;

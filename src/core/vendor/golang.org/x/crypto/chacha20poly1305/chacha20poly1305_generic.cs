@@ -13,21 +13,21 @@ using go.vendor.golang.org.x.crypto.@internal;
 
 partial class chacha20poly1305_package {
 
-internal static void writeWithPadding(ж<poly1305.MAC> Ꮡp, slice<byte> b) {
-    Ꮡp.Write(b);
+internal static void writeWithPadding(ж<poly1305.MAC> p, slice<byte> b) {
+    p.Write(b);
     {
         nint rem = len(b) % 16; if (rem != 0) {
             array<byte> buf = new(16);
             nint padLen = 16 - rem;
-            Ꮡp.Write(buf.slice(0, padLen));
+            p.Write(buf.slice(0, padLen));
         }
     }
 }
 
-internal static void writeUint64(ж<poly1305.MAC> Ꮡp, nint n) {
+internal static void writeUint64(ж<poly1305.MAC> p, nint n) {
     array<byte> buf = new(8);
     binary.LittleEndian.PutUint64(buf[..], (uint64)n);
-    Ꮡp.Write(buf[..]);
+    p.Write(buf[..]);
 }
 
 internal static slice<byte> sealGeneric(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
@@ -82,11 +82,11 @@ internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, sl
         foreach (var i in range(@out)) {
             @out[i] = 0;
         }
-        return (default!, errOpen);
+        return (default, errOpen);
     }
 
     s.XORKeyStream(@out, ciphertext);
-    return (ret, default!);
+    return (ret, default);
 }
 
 } // end chacha20poly1305_package

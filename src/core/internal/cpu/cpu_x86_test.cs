@@ -14,56 +14,59 @@ using static go.@internal.cpu_internal_test_package;
 
 partial class cpu_test_package {
 
-public static partial void TestX86ifAVX2hasAVX(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX2hasAVX(ж<testing.T> t) {
     if (X86.HasAVX2 && !X86.HasAVX) {
-        Ꮡt.Fatalf("HasAVX expected true when HasAVX2 is true, got false"u8);
+        t.Fatalf("HasAVX expected true when HasAVX2 is true, got false");
     }
 }
 
-public static partial void TestX86ifAVX512FhasAVX2(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX512FhasAVX2(ж<testing.T> t) {
     if (X86.HasAVX512F && !X86.HasAVX2) {
-        Ꮡt.Fatalf("HasAVX2 expected true when HasAVX512F is true, got false"u8);
+        t.Fatalf("HasAVX2 expected true when HasAVX512F is true, got false");
     }
 }
 
-public static partial void TestX86ifAVX512BWhasAVX512F(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX512BWhasAVX512F(ж<testing.T> t) {
     if (X86.HasAVX512BW && !X86.HasAVX512F) {
-        Ꮡt.Fatalf("HasAVX512F expected true when HasAVX512BW is true, got false"u8);
+        t.Fatalf("HasAVX512F expected true when HasAVX512BW is true, got false");
     }
 }
 
-public static partial void TestX86ifAVX512VLhasAVX512F(ж<testing.T> Ꮡt) {
+public static partial void TestX86ifAVX512VLhasAVX512F(ж<testing.T> t) {
     if (X86.HasAVX512VL && !X86.HasAVX512F) {
-        Ꮡt.Fatalf("HasAVX512F expected true when HasAVX512VL is true, got false"u8);
+        t.Fatalf("HasAVX512F expected true when HasAVX512VL is true, got false");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestCanTRunOnˢ = (@string)"skipping test: can't run on GOAMD64>v1 machines"u8;
-internal static readonly @string testSSE3DebugOptionˢ = "TestSSE3DebugOption"u8;
-internal static readonly @string cpuSse3Offˢ = "cpu.sse3=off"u8;
+internal static ref readonly @string testSSE3DebugOptionˢ => ref testSSE3DebugOptionˢᵇ;
+private static readonly @string testSSE3DebugOptionˢᵇ = "TestSSE3DebugOption"u8;
+internal static ref readonly @string cpuSse3Offˢ => ref cpuSse3Offˢᵇ;
+private static readonly @string cpuSse3Offˢᵇ = "cpu.sse3=off"u8;
 
-public static partial void TestDisableSSE3(ж<testing.T> Ꮡt) {
+public static partial void TestDisableSSE3(ж<testing.T> t) {
     if (cpu_internal_test_package.GetGOAMD64level() > 1) {
-        Ꮡt.Skip(skippingTestCanTRunOnˢ);
+        t.Skip(skippingTestCanTRunOnˢ);
     }
-    runDebugOptionsTest(Ꮡt, testSSE3DebugOptionˢ, cpuSse3Offˢ);
+    runDebugOptionsTest(t, testSSE3DebugOptionˢ, cpuSse3Offˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cpuSse3ˢ = "#cpu.sse3"u8;
+internal static ref readonly @string cpuSse3ˢ => ref cpuSse3ˢᵇ;
+private static readonly @string cpuSse3ˢᵇ = "#cpu.sse3"u8;
 
-public static void TestSSE3DebugOption(ж<testing.T> Ꮡt) {
-    MustHaveDebugOptionsSupport(Ꮡt);
+public static void TestSSE3DebugOption(ж<testing.T> t) {
+    MustHaveDebugOptionsSupport(t);
 
     if (godebug.New(cpuSse3ˢ).Value() != "off"u8) {
-        Ꮡt.Skipf("skipping test: GODEBUG=cpu.sse3=off not set"u8);
+        t.Skipf("skipping test: GODEBUG=cpu.sse3=off not set");
     }
 
     var want = false;
     {
         var got = X86.HasSSE3; if (got != want) {
-            Ꮡt.Errorf("X86.HasSSE3 expected %v, got %v"u8, want, got);
+            t.Errorf("X86.HasSSE3 expected %v, got %v", want, got);
         }
     }
 }

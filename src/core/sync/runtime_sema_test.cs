@@ -17,12 +17,12 @@ internal partial struct BenchmarkSemaUncontended_PaddedSem /*dyn*/ {
     internal array<uint32> pad = new(32);
 }
 
-public static void BenchmarkSemaUncontended(ж<Δtesting.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+public static void BenchmarkSemaUncontended(ж<Δtesting.B> b) {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         var sem = @new<BenchmarkSemaUncontended_PaddedSem>();
         while (pb.Next()) {
-            sync_internal_test_package.Runtime_Semrelease(sem.of(BenchmarkSemaUncontended_PaddedSem.Ꮡsem), false, 0);
-            sync_internal_test_package.Runtime_Semacquire(sem.of(BenchmarkSemaUncontended_PaddedSem.Ꮡsem));
+            sync_internal_test_package.Runtime_Semrelease(sem.Ꮡsem, false, 0);
+            sync_internal_test_package.Runtime_Semacquire(sem.Ꮡsem);
         }
     });
 }
@@ -35,8 +35,7 @@ internal static partial void benchmarkSema(ж<Δtesting.B> Ꮡb, bool block, boo
         if (b.N == 0) {
             return;
         }
-        ref var sem = ref heap<uint32>(out var Ꮡsem);
-        sem = (uint32)0;
+        ref var sem = ref heap<uint32>((uint32)0, out var Ꮡsem);
         if (block) {
             var done = new channel<bool>(0);
             var doneʗ1 = done;
@@ -71,20 +70,20 @@ internal static partial void benchmarkSema(ж<Δtesting.B> Ꮡb, bool block, boo
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkSemaSyntNonblock(ж<Δtesting.B> Ꮡb) {
-    benchmarkSema(Ꮡb, false, false);
+public static void BenchmarkSemaSyntNonblock(ж<Δtesting.B> b) {
+    benchmarkSema(b, false, false);
 }
 
-public static void BenchmarkSemaSyntBlock(ж<Δtesting.B> Ꮡb) {
-    benchmarkSema(Ꮡb, true, false);
+public static void BenchmarkSemaSyntBlock(ж<Δtesting.B> b) {
+    benchmarkSema(b, true, false);
 }
 
-public static void BenchmarkSemaWorkNonblock(ж<Δtesting.B> Ꮡb) {
-    benchmarkSema(Ꮡb, false, true);
+public static void BenchmarkSemaWorkNonblock(ж<Δtesting.B> b) {
+    benchmarkSema(b, false, true);
 }
 
-public static void BenchmarkSemaWorkBlock(ж<Δtesting.B> Ꮡb) {
-    benchmarkSema(Ꮡb, true, true);
+public static void BenchmarkSemaWorkBlock(ж<Δtesting.B> b) {
+    benchmarkSema(b, true, true);
 }
 
 } // end sync_test_package

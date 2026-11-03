@@ -117,4 +117,34 @@ public class FieldAccessorTokenTests
 
         StringAssert.Contains(pair, "public static readonly global::go.FieldRefFunc<pair<T>, T> ᏑFirst‿ = ᏑFirst;");
     }
+
+    // Native AOT names each preinitialized object by its owning type and then the allocation's instruction number,
+    // with no separator. Tokens declared on the struct itself let `IfmaMsghdr`'s sixth (instruction 23) and
+    // `IfmaMsghdr2`'s first (instruction 3) take one name, and darwin's Native AOT publish failed. So every token is
+    // declared in the struct's nested `Field‿Tokens` holder, whose name ends in a letter, and none on a Go-named type.
+    [TestMethod]
+    public void EveryTokenLivesInTheStructsHolderAndNoneOnTheStruct()
+    {
+        Dictionary<string, string> sources = RunTypeGenerator();
+
+        foreach (string type in new[] { "Plain", "Carrier", "pair_T_" })
+        {
+            SyntaxNode root = CSharpSyntaxTree.ParseText(GeneratedFor(sources, type)).GetRoot();
+
+            List<Microsoft.CodeAnalysis.CSharp.Syntax.VariableDeclaratorSyntax> tokens = root.DescendantNodes()
+                .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.VariableDeclaratorSyntax>()
+                .Where(variable => variable.Identifier.ValueText.EndsWith("‿"))
+                .ToList();
+
+            Assert.IsTrue(tokens.Count > 0, $"{type}: the generator must emit its tokens");
+
+            foreach (Microsoft.CodeAnalysis.CSharp.Syntax.VariableDeclaratorSyntax token in tokens)
+            {
+                var owner = token.Ancestors().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.TypeDeclarationSyntax>().First();
+
+                Assert.AreEqual("Field‿Tokens", owner.Identifier.ValueText, $"{type}: {token.Identifier.ValueText} is declared on {owner.Identifier.ValueText}");
+                Assert.IsInstanceOfType(owner.Parent, typeof(Microsoft.CodeAnalysis.CSharp.Syntax.StructDeclarationSyntax), $"{type}: the holder is nested in the struct");
+            }
+        }
+    }
 }

@@ -58,16 +58,16 @@ public static @string String(this CasePos pos) {
 
 // Test values for the stream test.
 // One of each JSON kind.
-internal static slice<any> streamTest = new any[]{
+internal static slice<any> streamTest = slice<any>([
     0.1D,
-    (@string)"hello"u8,
-    default!,
+    (@string)"hello",
+    default,
     true,
     false,
-    new any[]{(@string)"a"u8, (@string)"b"u8, (@string)"c"u8}.slice(),
-    new map<@string, any>{["K"u8] = (@string)"Kelvin"u8, ["ß"u8] = (@string)"long s"u8},
+    slice<any>([(@string)"a", (@string)"b", (@string)"c"]),
+    new map<@string, any>{["K"] = (@string)"Kelvin", ["ß"] = (@string)"long s"},
     3.14D // another value to make sure something can follow map
-}.slice();
+]);
 
 internal static @string streamEncoded = """
 0.1
@@ -81,25 +81,25 @@ false
 
 """u8.Raw();
 
-public static void TestEncoder(ж<testing.T> Ꮡt) {
+public static void TestEncoder(ж<testing.T> t) {
     for (nint i = 0; i <= len(streamTest); i++) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var enc = NewEncoder(new json_test_package.strings_BuilderжWriter(Ꮡbuf));
         // Check that enc.SetIndent("", "") turns off indentation.
-        enc.SetIndent(">"u8, "."u8);
+        enc.SetIndent(">", ".");
         enc.SetIndent(""u8, ""u8);
         foreach (var (j, v) in streamTest.slice(0, i)) {
             {
-                var err = enc.Encode(v); if (err != default!) {
-                    Ꮡt.Fatalf("#%d.%d Encode error: %v"u8, i, j, err);
+                var err = enc.Encode(v); if (err != nil) {
+                    t.Fatalf("#%d.%d Encode error: %v", i, j, err);
                 }
             }
         }
         {
             @string got = buf.String();
             @string want = nlines(streamEncoded, i); if (got != want) {
-                Ꮡt.Errorf("encoding %d items: mismatch:"u8, i);
-                diff(Ꮡt, slice<byte>(got), slice<byte>(want));
+                t.Errorf("encoding %d items: mismatch:", i);
+                diff(t, slice<byte>(got), slice<byte>(want));
                 break;
             }
         }
@@ -117,38 +117,37 @@ internal partial struct TestEncoderErrorAndReuseEncodeState_Data /*dyn*/ {
     public nint I;
 }
 
-public static void TestEncoderErrorAndReuseEncodeState(ж<testing.T> Ꮡt) {
+public static void TestEncoderErrorAndReuseEncodeState(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Disable the GC temporarily to prevent encodeState's in Pool being cleaned away during the test.
         nint percent = debug.SetGCPercent(-1);
         defer(debug.SetGCPercent, percent, ref ᒐ);
-        ref var dummy = ref heap<TestEncoderErrorAndReuseEncodeState_Dummy>(out var Ꮡdummy);
-        dummy = new TestEncoderErrorAndReuseEncodeState_Dummy(Name: "Dummy"u8);
+        ref var dummy = ref heap<TestEncoderErrorAndReuseEncodeState_Dummy>(new TestEncoderErrorAndReuseEncodeState_Dummy(Name: "Dummy"), out var Ꮡdummy);
         dummy.Next = Ꮡdummy;
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var enc = NewEncoder(new json_test_package.bytes_BufferжWriter(Ꮡbuf));
         {
-            var err = enc.Encode(dummy); if (err == default!) {
-                Ꮡt.Errorf("Encode(dummy) error: got nil, want non-nil"u8);
+            var err = enc.Encode(dummy); if (err == nil) {
+                t.Errorf("Encode(dummy) error: got nil, want non-nil");
             }
         }
-        var want = new TestEncoderErrorAndReuseEncodeState_Data(A: "a"u8, I: 1);
+        var want = new TestEncoderErrorAndReuseEncodeState_Data(A: "a", I: 1);
         {
-            var err = enc.Encode(want); if (err != default!) {
-                Ꮡt.Errorf("Marshal error: %v"u8, err);
+            var err = enc.Encode(want); if (err != nil) {
+                t.Errorf("Marshal error: %v", err);
             }
         }
 
         ref var got = ref heap(new TestEncoderErrorAndReuseEncodeState_Data(), out var Ꮡgot);
         {
-            var err = Unmarshal(buf.Bytes(), Ꮡgot); if (err != default!) {
-                Ꮡt.Errorf("Unmarshal error: %v"u8, err);
+            var err = Unmarshal(buf.Bytes(), Ꮡgot); if (err != nil) {
+                t.Errorf("Unmarshal error: %v", err);
             }
         }
         if (got != want) {
-            Ꮡt.Errorf("Marshal/Unmarshal roundtrip:\n\tgot:  %v\n\twant: %v"u8, got, want);
+            t.Errorf("Marshal/Unmarshal roundtrip:\n\tgot:  %v\n\twant: %v", got, want);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -174,18 +173,18 @@ false
 
 """u8.Raw();
 
-public static void TestEncoderIndent(ж<testing.T> Ꮡt) {
+public static void TestEncoderIndent(ж<testing.T> t) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var enc = NewEncoder(new json_test_package.strings_BuilderжWriter(Ꮡbuf));
-    enc.SetIndent(">"u8, "."u8);
+    enc.SetIndent(">", ".");
     foreach (var (_, v) in streamTest) {
         enc.Encode(v);
     }
     {
         @string got = buf.String();
         @string want = streamEncodedIndent; if (got != want) {
-            Ꮡt.Errorf("Encode mismatch:\ngot:\n%s\n\nwant:\n%s"u8, got, want);
-            diff(Ꮡt, slice<byte>(got), slice<byte>(want));
+            t.Errorf("Encode mismatch:\ngot:\n%s\n\nwant:\n%s", got, want);
+            diff(t, slice<byte>(got), slice<byte>(want));
         }
     }
 }
@@ -193,19 +192,22 @@ public static void TestEncoderIndent(ж<testing.T> Ꮡt) {
 internal partial struct strMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalJSON(this strMarshaler s) {
-    return (slice<byte>((@string)s), default!);
+    return (slice<byte>((@string)s), default);
 }
 
 internal partial struct strPtrMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalJSON(this ref strPtrMarshaler s) {
-    return (slice<byte>((@string)s), default!);
+    return (slice<byte>((@string)s), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tagStructˢ = "tagStruct"u8;
-internal static readonly @string strˢ = @"""<str>"""u8;
-internal static readonly @string stringOptionˢ = "stringOption"u8;
+internal static ref readonly @string tagStructˢ => ref tagStructˢᵇ;
+private static readonly @string tagStructˢᵇ = "tagStruct"u8;
+internal static ref readonly @string strˢ => ref strˢᵇ;
+private static readonly @string strˢᵇ = @"""<str>"""u8;
+internal static ref readonly @string stringOptionˢ => ref stringOptionˢᵇ;
+private static readonly @string stringOptionˢᵇ = "stringOption"u8;
 
 internal partial struct TestEncoderSetEscapeHTML_tagStruct /*dyn*/ {
     public nint Valid; /*`json:"<>&#! "`*/
@@ -228,67 +230,67 @@ internal partial struct TestEncoderSetEscapeHTML_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestEncoderSetEscapeHTML(ж<testing.T> Ꮡt) {
-    C c = default!;
-    CText ct = default!;
-    TestEncoderSetEscapeHTML_tagStruct tagStruct = default!;
+public static void TestEncoderSetEscapeHTML(ж<testing.T> t) {
+    C c = default;
+    CText ct = default;
+    TestEncoderSetEscapeHTML_tagStruct tagStruct = default;
 
     // This case is particularly interesting, as we force the encoder to
     // take the address of the Ptr field to use its MarshalJSON method. This
     // is why the '&' is important.
-    var marshalerStruct = Ꮡ(new TestEncoderSetEscapeHTML_marshalerStruct(@"""<str>"""u8, @"""<str>"""u8));
+    var marshalerStruct = Ꮡ(new TestEncoderSetEscapeHTML_marshalerStruct((@string)@"""<str>""", (@string)@"""<str>"""));
 
     // https://golang.org/issue/34154
-    var stringOption = new TestEncoderSetEscapeHTML_stringOption(@"<html>foobar</html>"u8);
+    var stringOption = new TestEncoderSetEscapeHTML_stringOption(@"<html>foobar</html>");
 
-    var tests = new TestEncoderSetEscapeHTML_tests[]{
-        new(Name("c"u8), c, @"""\u003c\u0026\u003e"""u8, @"""<&>"""u8),
-        new(Name("ct"u8), ct, @"""\""\u003c\u0026\u003e\"""""u8, @"""\""<&>\"""""u8),
-        new(Name(@"""<&>"""u8), (@string)"<&>"u8, @"""\u003c\u0026\u003e"""u8, @"""<&>"""u8),
+    var tests = slice<TestEncoderSetEscapeHTML_tests>([
+        new(Name("c"), c, @"""\u003c\u0026\u003e""", @"""<&>"""),
+        new(Name("ct"), ct, @"""\""\u003c\u0026\u003e\""""", @"""\""<&>\"""""),
+        new(Name(@"""<&>"""), (@string)"<&>", @"""\u003c\u0026\u003e""", @"""<&>"""),
         new(
             Name(tagStructˢ), tagStruct,
-            @"{""\u003c\u003e\u0026#! "":0,""Invalid"":0}"u8,
-            @"{""<>&#! "":0,""Invalid"":0}"u8
+            @"{""\u003c\u003e\u0026#! "":0,""Invalid"":0}",
+            @"{""<>&#! "":0,""Invalid"":0}"
         ),
         new(
             Name(strˢ), marshalerStruct.OrTypedNil(),
-            @"{""NonPtr"":""\u003cstr\u003e"",""Ptr"":""\u003cstr\u003e""}"u8,
-            @"{""NonPtr"":""<str>"",""Ptr"":""<str>""}"u8
+            @"{""NonPtr"":""\u003cstr\u003e"",""Ptr"":""\u003cstr\u003e""}",
+            @"{""NonPtr"":""<str>"",""Ptr"":""<str>""}"
         ),
         new(
             Name(stringOptionˢ), stringOption,
-            @"{""bar"":""\""\\u003chtml\\u003efoobar\\u003c/html\\u003e\""""}"u8,
-            @"{""bar"":""\""<html>foobar</html>\""""}"u8
+            @"{""bar"":""\""\\u003chtml\\u003efoobar\\u003c/html\\u003e\""""}",
+            @"{""bar"":""\""<html>foobar</html>\""""}"
         )
-    }.slice();
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestEncoderSetEscapeHTML_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.Name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
             var enc = NewEncoder(new json_test_package.strings_BuilderжWriter(Ꮡbuf));
             {
-                var err = enc.Encode(ttʗ1.v); if (err != default!) {
-                    tΔ1.Fatalf("%s: Encode(%s) error: %s"u8, ttʗ1.Where, ttʗ1.Name, err);
+                var err = enc.Encode(ttʗ1.v); if (err != nil) {
+                    tΔ1.Fatalf("%s: Encode(%s) error: %s", ttʗ1.Where, ttʗ1.Name, err);
                 }
             }
             {
                 @string got = strings.TrimSpace(buf.String()); if (got != ttʗ1.wantEscape) {
-                    tΔ1.Errorf("%s: Encode(%s):\n\tgot:  %s\n\twant: %s"u8, ttʗ1.Where, ttʗ1.Name, got, ttʗ1.wantEscape);
+                    tΔ1.Errorf("%s: Encode(%s):\n\tgot:  %s\n\twant: %s", ttʗ1.Where, ttʗ1.Name, got, ttʗ1.wantEscape);
                 }
             }
             buf.Reset();
             enc.SetEscapeHTML(false);
             {
-                var err = enc.Encode(ttʗ1.v); if (err != default!) {
-                    tΔ1.Fatalf("%s: SetEscapeHTML(false) Encode(%s) error: %s"u8, ttʗ1.Where, ttʗ1.Name, err);
+                var err = enc.Encode(ttʗ1.v); if (err != nil) {
+                    tΔ1.Fatalf("%s: SetEscapeHTML(false) Encode(%s) error: %s", ttʗ1.Where, ttʗ1.Name, err);
                 }
             }
             {
                 @string got = strings.TrimSpace(buf.String()); if (got != ttʗ1.want) {
-                    tΔ1.Errorf("%s: SetEscapeHTML(false) Encode(%s):\n\tgot:  %s\n\twant: %s"u8,
+                    tΔ1.Errorf("%s: SetEscapeHTML(false) Encode(%s):\n\tgot:  %s\n\twant: %s",
                         ttʗ1.Where, ttʗ1.Name, got, ttʗ1.want);
                 }
             }
@@ -296,7 +298,7 @@ public static void TestEncoderSetEscapeHTML(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestDecoder(ж<testing.T> Ꮡt) {
+public static void TestDecoder(ж<testing.T> t) {
     for (nint i = 0; i <= len(streamTest); i++) {
         // Use stream without newlines as input,
         // just to stress the decoder even more.
@@ -305,7 +307,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
         // merge two adjacent JSON values.
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         foreach (var (_, c) in nlines(streamEncoded, i)) {
-            if (c != (rune)'\n') {
+            if (c != '\n') {
                 buf.WriteRune(c);
             }
         }
@@ -313,16 +315,16 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
         var dec = NewDecoder(new json_test_package.bytes_BufferжReader(Ꮡbuf));
         foreach (var j in range(@out)) {
             {
-                var err = dec.Decode(Ꮡ(@out, j)); if (err != default!) {
-                    Ꮡt.Fatalf("decode #%d/%d error: %v"u8, j, i, err);
+                var err = dec.Decode(Ꮡ(@out, j)); if (err != nil) {
+                    t.Fatalf("decode #%d/%d error: %v", j, i, err);
                 }
             }
         }
         if (!reflect.DeepEqual(@out, streamTest.slice(0, i))) {
-            Ꮡt.Errorf("decoding %d items: mismatch:"u8, i);
+            t.Errorf("decoding %d items: mismatch:", i);
             foreach (var j in range(@out)) {
                 if (!reflect.DeepEqual(@out[j], streamTest[j])) {
-                    Ꮡt.Errorf("#%d:\n\tgot:  %v\n\twant: %v"u8, j, @out[j], streamTest[j]);
+                    t.Errorf("#%d:\n\tgot:  %v\n\twant: %v", j, @out[j], streamTest[j]);
                 }
             }
             break;
@@ -331,32 +333,34 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nameGopherExtraˢ = @"{""Name"": ""Gopher""} extra "u8;
-internal static readonly @string extraˢ = " extra "u8;
+internal static ref readonly @string nameGopherExtraˢ => ref nameGopherExtraˢᵇ;
+private static readonly @string nameGopherExtraˢᵇ = @"{""Name"": ""Gopher""} extra "u8;
+internal static ref readonly @string extraˢ => ref extraˢᵇ;
+private static readonly @string extraˢᵇ = " extra "u8;
 
 internal partial struct TestDecoderBuffered_m /*dyn*/ {
     public @string Name;
 }
 
-public static void TestDecoderBuffered(ж<testing.T> Ꮡt) {
+public static void TestDecoderBuffered(ж<testing.T> t) {
     var r = strings.NewReader(nameGopherExtraˢ);
     ref var m = ref heap(new TestDecoderBuffered_m(), out var Ꮡm);
     var d = NewDecoder(new json_test_package.strings_ReaderжReader(r));
     var err = d.Decode(Ꮡm);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (m.Name != "Gopher"u8) {
-        Ꮡt.Errorf("Name = %s, want Gopher"u8, m.Name);
+        t.Errorf("Name = %s, want Gopher", m.Name);
     }
     (var rest, err) = io.ReadAll(d.Buffered());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
         @string got = (@string)rest;
         @string want = extraˢ; if (got != want) {
-            Ꮡt.Errorf("Remaining = %s, want %s"u8, got, want);
+            t.Errorf("Remaining = %s, want %s", got, want);
         }
     }
 }
@@ -366,7 +370,7 @@ internal static @string nlines(@string s, nint n) {
         return ""u8;
     }
     foreach (var (i, c) in s) {
-        if (c == (rune)'\n') {
+        if (c == '\n') {
             {
                 n--; if (n == 0) {
                     return s.slice(0, i + 1);
@@ -384,28 +388,30 @@ internal partial struct TestRawMessage_data /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string rawᶜ = @"[""\u0056"",null]"u8;
+internal static ref readonly @string rawᶜ => ref rawᶜᵇ;
+private static readonly @string rawᶜᵇ = @"[""\u0056"",null]"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ8 = @"{""X"":0.1,""Id"":[""\u0056"",null],""Y"":0.2}"u8;
+internal static ref readonly @string wantᶜ8 => ref wantᶜ8ᵇ;
+private static readonly @string wantᶜ8ᵇ = @"{""X"":0.1,""Id"":[""\u0056"",null],""Y"":0.2}"u8;
 
-public static void TestRawMessage(ж<testing.T> Ꮡt) {
+public static void TestRawMessage(ж<testing.T> t) {
     ref var data = ref heap(new TestRawMessage_data(), out var Ꮡdata);
     @string raw = rawᶜ;
     @string want = wantᶜ8;
     var err = Unmarshal(slice<byte>(want), Ꮡdata);
-    if (err != default!) {
-        Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Unmarshal error: %v", err);
     }
     if (((sstring)((slice<byte>)data.Id)) != raw) {
-        Ꮡt.Fatalf("Unmarshal:\n\tgot:  %s\n\twant: %s"u8, (slice<byte>)data.Id, raw);
+        t.Fatalf("Unmarshal:\n\tgot:  %s\n\twant: %s", (slice<byte>)data.Id, raw);
     }
     (var got, err) = Marshal(Ꮡdata);
-    if (err != default!) {
-        Ꮡt.Fatalf("Marshal error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Marshal error: %v", err);
     }
     if (((sstring)got) != want) {
-        Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
+        t.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s", got, want);
     }
 }
 
@@ -417,30 +423,31 @@ internal partial struct TestNullRawMessage_data /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string wantᶜ9 = @"{""X"":0.1,""Id"":null,""IdPtr"":null,""Y"":0.2}"u8;
+internal static ref readonly @string wantᶜ9 => ref wantᶜ9ᵇ;
+private static readonly @string wantᶜ9ᵇ = @"{""X"":0.1,""Id"":null,""IdPtr"":null,""Y"":0.2}"u8;
 
-public static void TestNullRawMessage(ж<testing.T> Ꮡt) {
+public static void TestNullRawMessage(ж<testing.T> t) {
     ref var data = ref heap(new TestNullRawMessage_data(), out var Ꮡdata);
     @string want = wantᶜ9;
     var err = Unmarshal(slice<byte>(want), Ꮡdata);
-    if (err != default!) {
-        Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Unmarshal error: %v", err);
     }
     {
         @string wantΔ1 = nullˢ;
         @string gotΔ1 = (@string)(slice<byte>)data.Id; if (wantΔ1 != gotΔ1) {
-            Ꮡt.Fatalf("Unmarshal:\n\tgot:  %s\n\twant: %s"u8, gotΔ1, wantΔ1);
+            t.Fatalf("Unmarshal:\n\tgot:  %s\n\twant: %s", gotΔ1, wantΔ1);
         }
     }
     if (data.IdPtr != nil) {
-        Ꮡt.Fatalf("pointer mismatch: got non-nil, want nil"u8);
+        t.Fatalf("pointer mismatch: got non-nil, want nil");
     }
     (var got, err) = Marshal(Ꮡdata);
-    if (err != default!) {
-        Ꮡt.Fatalf("Marshal error: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Marshal error: %v", err);
     }
     if (((sstring)got) != want) {
-        Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
+        t.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s", got, want);
     }
 }
 
@@ -449,17 +456,17 @@ internal partial struct TestBlocking_tests /*dyn*/ {
     internal @string @in;
 }
 
-public static void TestBlocking(ж<testing.T> Ꮡt) {
-    var tests = new TestBlocking_tests[]{
-        new(Name(""u8), @"{""x"": 1}"u8),
-        new(Name(""u8), @"[1, 2, 3]"u8)
-    }.slice();
+public static void TestBlocking(ж<testing.T> t) {
+    var tests = slice<TestBlocking_tests>([
+        new(Name(""u8), @"{""x"": 1}"),
+        new(Name(""u8), @"[1, 2, 3]")
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestBlocking_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.Name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        t.Run(tt.Name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var (r, w) = net.Pipe();
             var wʗ1 = w;
             goǃ(ᴛ1 => wʗ1.Write(ᴛ1), slice<byte>(ttʗ1.@in));
@@ -468,8 +475,8 @@ public static void TestBlocking(ж<testing.T> Ꮡt) {
             // If Decode reads beyond what w.Write writes above,
             // it will block, and the test will deadlock.
             {
-                var err = NewDecoder(new json_test_package.net_ConnᴠReader(r)).Decode(Ꮡval); if (err != default!) {
-                    tΔ1.Errorf("%s: NewDecoder(%s).Decode error: %v"u8, ttʗ1.Where, ttʗ1.@in, err);
+                var err = NewDecoder(new json_test_package.net_ConnᴠReader(r)).Decode(Ꮡval); if (err != nil) {
+                    tΔ1.Errorf("%s: NewDecoder(%s).Decode error: %v", ttʗ1.Where, ttʗ1.@in, err);
                 }
             }
             r.Close();
@@ -482,113 +489,117 @@ internal partial struct decodeThis {
     internal any v;
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object objˢ = (@string)"obj"u8;
+
 internal partial struct TestDecodeInStream_tests /*dyn*/ {
     /*embed*/ public CaseName CaseName;
     internal @string json;
     internal slice<any> expTokens;
 }
 
-public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
-    var tests = new TestDecodeInStream_tests[]{
+public static void TestDecodeInStream(ж<testing.T> t) {
+    var tests = slice<TestDecodeInStream_tests>([
         // streaming token cases
-        new(CaseName: Name(""u8), json: @"10"u8, expTokens: new any[]{(float64)10D}.slice()),
-        new(CaseName: Name(""u8), json: @" [10] "u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'[', (float64)10D, (global::go.encoding.json_package.Delim)(rune)']'}.slice()),
-        new(CaseName: Name(""u8), json: @" [false,10,""b""] "u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'[', false, (float64)10D, (@string)"b"u8, (global::go.encoding.json_package.Delim)(rune)']'}.slice()),
-        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8, (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
-        new(CaseName: Name(""u8), json: @"{""a"": 1, ""b"":""3""}"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8, (float64)1D, (@string)"b"u8, (@string)"3"u8, (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
-        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] "u8, expTokens: new any[]{
+        new(CaseName: Name(""u8), json: @"10", expTokens: slice<any>([(float64)10D])),
+        new(CaseName: Name(""u8), json: @" [10] ", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'[', (float64)10D, (global::go.encoding.json_package.Delim)(rune)']'])),
+        new(CaseName: Name(""u8), json: @" [false,10,""b""] ", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'[', false, (float64)10D, (@string)"b", (global::go.encoding.json_package.Delim)(rune)']'])),
+        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}'])),
+        new(CaseName: Name(""u8), json: @"{""a"": 1, ""b"":""3""}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (@string)"b", (@string)"3", (global::go.encoding.json_package.Delim)(rune)'}'])),
+        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] ", expTokens: slice<any>([
             (global::go.encoding.json_package.Delim)(rune)'[',
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8, (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8, (float64)2D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)']'}.slice()),
-        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8, (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8, (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
-        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8, (global::go.encoding.json_package.Delim)(rune)'[',
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8, (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
-            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)2D, (global::go.encoding.json_package.Delim)(rune)'}',
+            (global::go.encoding.json_package.Delim)(rune)']'])),
+        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', objˢ, (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
+            (global::go.encoding.json_package.Delim)(rune)'}'])),
+        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', objˢ, (global::go.encoding.json_package.Delim)(rune)'[',
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a", (float64)1D, (global::go.encoding.json_package.Delim)(rune)'}',
+            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'])),
 
         // streaming tokens with intermittent Decode()
-        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a"u8,
+        new(CaseName: Name(""u8), json: @"{ ""a"": 1 }", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"a",
             new decodeThis((float64)1D),
-            (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
-        new(CaseName: Name(""u8), json: @" [ { ""a"" : 1 } ] "u8, expTokens: new any[]{
+            (global::go.encoding.json_package.Delim)(rune)'}'])),
+        new(CaseName: Name(""u8), json: @" [ { ""a"" : 1 } ] ", expTokens: slice<any>([
             (global::go.encoding.json_package.Delim)(rune)'[',
-            new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
-            (global::go.encoding.json_package.Delim)(rune)']'}.slice()),
-        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] "u8, expTokens: new any[]{
+            new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
+            (global::go.encoding.json_package.Delim)(rune)']'])),
+        new(CaseName: Name(""u8), json: @" [{""a"": 1},{""a"": 2}] ", expTokens: slice<any>([
             (global::go.encoding.json_package.Delim)(rune)'[',
-            new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
-            new decodeThis(new map<@string, any>{["a"u8] = (float64)2D}),
-            (global::go.encoding.json_package.Delim)(rune)']'}.slice()),
-        new(CaseName: Name(""u8), json: @"{ ""obj"" : [ { ""a"" : 1 } ] }"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8, (global::go.encoding.json_package.Delim)(rune)'[',
-            new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
-            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
+            new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
+            new decodeThis(new map<@string, any>{["a"] = (float64)2D}),
+            (global::go.encoding.json_package.Delim)(rune)']'])),
+        new(CaseName: Name(""u8), json: @"{ ""obj"" : [ { ""a"" : 1 } ] }", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', objˢ, (global::go.encoding.json_package.Delim)(rune)'[',
+            new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
+            (global::go.encoding.json_package.Delim)(rune)']', (global::go.encoding.json_package.Delim)(rune)'}'])),
 
-        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8,
-            new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
-            (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
-        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', (@string)"obj"u8,
-            new decodeThis(new any[]{
-                new map<@string, any>{["a"u8] = (float64)1D}
-            }.slice()
+        new(CaseName: Name(""u8), json: @"{""obj"": {""a"": 1}}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', objˢ,
+            new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
+            (global::go.encoding.json_package.Delim)(rune)'}'])),
+        new(CaseName: Name(""u8), json: @"{""obj"": [{""a"": 1}]}", expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', objˢ,
+            new decodeThis(slice<any>([
+                new map<@string, any>{["a"] = (float64)1D}
+            ])
             ),
-            (global::go.encoding.json_package.Delim)(rune)'}'}.slice()),
-        new(CaseName: Name(""u8), json: @" [{""a"": 1} {""a"": 2}] "u8, expTokens: new any[]{
+            (global::go.encoding.json_package.Delim)(rune)'}'])),
+        new(CaseName: Name(""u8), json: @" [{""a"": 1} {""a"": 2}] ", expTokens: slice<any>([
             (global::go.encoding.json_package.Delim)(rune)'[',
-            new decodeThis(new map<@string, any>{["a"u8] = (float64)1D}),
-            new decodeThis(Ꮡ(new SyntaxError("expected comma after array element"u8, 11)))
-        }.slice()),
-        new(CaseName: Name(""u8), json: @"{ """u8 + strings.Repeat("a"u8, 513) + @""" 1 }"u8, expTokens: new any[]{
-            (global::go.encoding.json_package.Delim)(rune)'{', strings.Repeat("a"u8, 513),
-            new decodeThis(Ꮡ(new SyntaxError("expected colon after object key"u8, 518)))
-        }.slice()),
-        new(CaseName: Name(""u8), json: @"{ ""\a"" }"u8, expTokens: new any[]{
+            new decodeThis(new map<@string, any>{["a"] = (float64)1D}),
+            new decodeThis(Ꮡ(new SyntaxError("expected comma after array element", 11)))
+        ])),
+        new(CaseName: Name(""u8), json: @"{ """u8 + strings.Repeat("a", 513) + @""" 1 }"u8, expTokens: slice<any>([
+            (global::go.encoding.json_package.Delim)(rune)'{', strings.Repeat("a", 513),
+            new decodeThis(Ꮡ(new SyntaxError("expected colon after object key", 518)))
+        ])),
+        new(CaseName: Name(""u8), json: @"{ ""\a"" }", expTokens: slice<any>([
             (global::go.encoding.json_package.Delim)(rune)'{',
-            Ꮡ(new SyntaxError("invalid character 'a' in string escape code"u8, 3))
-        }.slice()),
-        new(CaseName: Name(""u8), json: @" \a"u8, expTokens: new any[]{
-            Ꮡ(new SyntaxError("invalid character '\\\\' looking for beginning of value"u8, 1))
-        }.slice()),
-        new(CaseName: Name(""u8), json: @","u8, expTokens: new any[]{
-            Ꮡ(new SyntaxError("invalid character ',' looking for beginning of value"u8, 0))
-        }.slice())
-    }.slice();
+            Ꮡ(new SyntaxError("invalid character 'a' in string escape code", 3))
+        ])),
+        new(CaseName: Name(""u8), json: @" \a", expTokens: slice<any>([
+            Ꮡ(new SyntaxError("invalid character '\\\\' looking for beginning of value", 1))
+        ])),
+        new(CaseName: Name(""u8), json: @",", expTokens: slice<any>([
+            Ꮡ(new SyntaxError("invalid character ',' looking for beginning of value", 0))
+        ]))
+    ]);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestDecodeInStream_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.Name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.Name, (ж<testing.T> tΔ1) => {
             var dec = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(ttʗ1.json)));
             foreach (var (i, vᴛ2) in ttʗ1.expTokens) {
                 var want = vᴛ2;
 
                 ref var got = ref heap<any>(out var Ꮡgot);
-                error err = default!;
+                error err = default;
 
                 var wantMore = true;
-                var exprᴛ1 = want;
-                if (AreEqual(exprᴛ1, ((global::go.encoding.json_package.Delim)(rune)']')) || AreEqual(exprᴛ1, ((global::go.encoding.json_package.Delim)(rune)'}'))) {
+                switch (want) {
+                case var ᴛ when AreEqual(ᴛ, ((global::go.encoding.json_package.Delim)(rune)']')) || AreEqual(ᴛ, ((global::go.encoding.json_package.Delim)(rune)'}')): {
                     wantMore = false;
-                }
+                    break;
+                }}
                 {
                     var gotΔ1 = dec.More(); if (gotΔ1 != wantMore) {
-                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tdec.More() = %v, want %v (next token: %T(%v))"u8, ttʗ1.Where, ttʗ1.json, gotΔ1, wantMore, want, want);
+                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tdec.More() = %v, want %v (next token: %T(%v))", ttʗ1.Where, ttʗ1.json, gotΔ1, wantMore, want, want);
                     }
                 }
 
                 {
-                    var (dt, ok) = want._<decodeThis>(ᐧ); if (ok){
+                    var (dt, ok) = want._<decodeThis>(ᐧ); if (ok) {
                         want = dt.v;
                         err = dec.Decode(Ꮡgot);
                     } else {
@@ -596,18 +607,17 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
                     }
                 }
                 {
-                    var (errWant, ok) = want._<error>(ᐧ); if (ok){
-                        if (err == default! || !reflect.DeepEqual(err, errWant)) {
-                            tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: %v"u8, ttʗ1.Where, ttʗ1.json, err, errWant);
+                    var (errWant, ok) = want._<error>(ᐧ); if (ok) {
+                        if (err == nil || !reflect.DeepEqual(err, errWant)) {
+                            tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: %v", ttʗ1.Where, ttʗ1.json, err, errWant);
                         }
                         break;
-                    } else 
-                    if (err != default!) {
-                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: nil"u8, ttʗ1.Where, ttʗ1.json, err);
+                    } else if (err != nil) {
+                        tΔ1.Fatalf("%s:\n\tinput: %s\n\tgot error:  %v\n\twant error: nil", ttʗ1.Where, ttʗ1.json, err);
                     }
                 }
                 if (!reflect.DeepEqual(got, want)) {
-                    tΔ1.Fatalf("%s: token %d:\n\tinput: %s\n\tgot:  %T(%v)\n\twant: %T(%v)"u8, ttʗ1.Where, i, ttʗ1.json, got, got, want, want);
+                    tΔ1.Fatalf("%s: token %d:\n\tinput: %s\n\tgot:  %T(%v)\n\twant: %T(%v)", ttʗ1.Where, i, ttʗ1.json, got, got, want, want);
                 }
             }
         });
@@ -615,14 +625,15 @@ public static void TestDecodeInStream(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string rawᶜ1 = @"{ ""foo"": ""bar"" }"u8;
+internal static ref readonly @string rawᶜ1 => ref rawᶜ1ᵇ;
+private static readonly @string rawᶜ1ᵇ = @"{ ""foo"": ""bar"" }"u8;
 
 internal partial struct TestHTTPDecoding_foo /*dyn*/ {
     public @string Foo;
 }
 
 // Test from golang.org/issue/11893
-public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
+public static void TestHTTPDecoding(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         @string raw = rawᶜ1;
@@ -632,29 +643,28 @@ public static void TestHTTPDecoding(ж<testing.T> Ꮡt) {
         })));
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
-        var (res, err) = http.Get((~ts).URL);
-        if (err != default!) {
-            log.Fatalf("http.Get error: %v"u8, err);
+        var (res, err) = http.Get(ts.URL);
+        if (err != nil) {
+            log.Fatalf("http.Get error: %v", err);
         }
         var resʗ1 = res;
-        defer(() => (~resʗ1).Body.Close(), ref ᒐ);
+        defer(ᴛ0 => ᴛ0.Close(), resʗ1.Body, ref ᒐ);
 
-        ref var foo = ref heap<TestHTTPDecoding_foo>(out var Ꮡfoo);
-        foo = new TestHTTPDecoding_foo();
+        ref var foo = ref heap<TestHTTPDecoding_foo>(new TestHTTPDecoding_foo(), out var Ꮡfoo);
 
-        var d = NewDecoder(new json_test_package.io_ReadCloserᴠReader((~res).Body));
+        var d = NewDecoder(new json_test_package.io_ReadCloserᴠReader(res.Body));
         err = d.Decode(Ꮡfoo);
-        if (err != default!) {
-            Ꮡt.Fatalf("Decode error: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("Decode error: %v", err);
         }
         if (foo.Foo != "bar"u8) {
-            Ꮡt.Errorf(@"Decode: got %q, want ""bar"""u8, foo.Foo);
+            t.Errorf(@"Decode: got %q, want ""bar""", foo.Foo);
         }
 
         // make sure we get the EOF the second time
         err = d.Decode(Ꮡfoo);
         if (!AreEqual(err, io.EOF)) {
-            Ꮡt.Errorf("Decode error:\n\tgot:  %v\n\twant: io.EOF"u8, err);
+            t.Errorf("Decode error:\n\tgot:  %v\n\twant: io.EOF", err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -666,32 +676,32 @@ internal partial struct TestTokenTruncation_tests /*dyn*/ {
     internal error err;
 }
 
-public static void TestTokenTruncation(ж<testing.T> Ꮡt) {
-    var tests = new TestTokenTruncation_tests[]{
-        new(@in: @""u8, err: io.EOF),
-        new(@in: @"{"u8, err: io.EOF),
-        new(@in: @"{"""u8, err: io.ErrUnexpectedEOF),
-        new(@in: @"{""k"""u8, err: io.EOF),
-        new(@in: @"{""k"":"u8, err: io.EOF),
-        new(@in: @"{""k"","u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ',' after object key"u8, (int64)len(@"{""k"""))))),
-        new(@in: @"{""k""}"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' after object key"u8, (int64)len(@"{""k"""))))),
-        new(@in: @" [0"u8, err: io.EOF),
-        new(@in: @"[0."u8, err: io.ErrUnexpectedEOF),
-        new(@in: @"[0. "u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' after decimal point in numeric literal"u8, (int64)len(@"[0."))))),
-        new(@in: @"[0,"u8, err: io.EOF),
-        new(@in: @"[0:"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ':' after array element"u8, (int64)len(@"[0"))))),
-        new(@in: @"n"u8, err: io.ErrUnexpectedEOF),
-        new(@in: @"nul"u8, err: io.ErrUnexpectedEOF),
-        new(@in: @"fal "u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' in literal false (expecting 's')"u8, (int64)len(@"fal "))))),
-        new(@in: @"false"u8, err: io.EOF)
-    }.slice();
+public static void TestTokenTruncation(ж<testing.T> t) {
+    var tests = slice<TestTokenTruncation_tests>([
+        new(@in: @"", err: io.EOF),
+        new(@in: @"{", err: io.EOF),
+        new(@in: @"{""", err: io.ErrUnexpectedEOF),
+        new(@in: @"{""k""", err: io.EOF),
+        new(@in: @"{""k"":", err: io.EOF),
+        new(@in: @"{""k"",", err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ',' after object key", (int64)len(@"{""k"""))))),
+        new(@in: @"{""k""}", err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' after object key", (int64)len(@"{""k"""))))),
+        new(@in: @" [0", err: io.EOF),
+        new(@in: @"[0.", err: io.ErrUnexpectedEOF),
+        new(@in: @"[0. ", err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' after decimal point in numeric literal", (int64)len(@"[0."))))),
+        new(@in: @"[0,", err: io.EOF),
+        new(@in: @"[0:", err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ':' after array element", (int64)len(@"[0"))))),
+        new(@in: @"n", err: io.ErrUnexpectedEOF),
+        new(@in: @"nul", err: io.ErrUnexpectedEOF),
+        new(@in: @"fal ", err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character ' ' in literal false (expecting 's')", (int64)len(@"fal "))))),
+        new(@in: @"false", err: io.EOF)
+    ]);
     foreach (var (_, tt) in tests) {
         var d = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
         for (nint i = 0; true; i++) {
             {
-                var (_, err) = d.Token(); if (err != default!) {
+                var (_, err) = d.Token(); if (err != nil) {
                     if (!reflect.DeepEqual(err, tt.err)) {
-                        Ꮡt.Errorf("`%s`: %d.Token error = %#v, want %v"u8, tt.@in, i, err, tt.err);
+                        t.Errorf("`%s`: %d.Token error = %#v, want %v", tt.@in, i, err, tt.err);
                     }
                     break;
                 }
@@ -704,66 +714,64 @@ public static void TestTokenTruncation(ж<testing.T> Ꮡt) {
 internal static readonly object unconsumedTestdataˢ = (@string)"unconsumed testdata"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string inputᶜ1 = """
+internal static ref readonly @string inputᶜ1 => ref inputᶜ1ᵇ;
+private static readonly @string inputᶜ1ᵇ = """
  [
 		[ ] , [ "one" ] , [ "one" , "two" ] ,
 		{ } , { "alpha" : "bravo" } , { "alpha" : "bravo" , "fizz" : "buzz" }
 	] 
 """u8.Raw();
 
-public static void TestDecoderInputOffset(ж<testing.T> Ꮡt) {
+public static void TestDecoderInputOffset(ж<testing.T> t) {
     @string input = inputᶜ1;
-    ref var wantOffsets = ref heap<slice<int64>>(out var ᏑwantOffsets);
-    wantOffsets = new int64[]{
+    ref var wantOffsets = ref heap<slice<int64>>(slice<int64>([
         0, 1, 2, 5, 6, 7, 8, 9, 12, 13, 18, 19, 20, 21, 24, 25, 30, 31,
         38, 39, 40, 41, 46, 47, 48, 49, 52, 53, 60, 61, 70, 71, 72, 73,
         76, 77, 84, 85, 94, 95, 103, 104, 112, 113, 114, 116, 117, 117,
         117, 117
-    }.slice();
-    ref var wantMores = ref heap<slice<bool>>(out var ᏑwantMores);
-    wantMores = new bool[]{
+    ]), out var ᏑwantOffsets);
+    ref var wantMores = ref heap<slice<bool>>(slice<bool>([
         true, true, false, true, true, false, true, true, true, false,
         true, false, true, true, true, false, true, true, true, true,
         true, false, false, false, false
-    }.slice();
+    ]), out var ᏑwantMores);
 
     var d = NewDecoder(new json_test_package.strings_ReaderжReader(strings.NewReader(input)));
     var dʗ1 = d;
     void checkOffset() {
-        Ꮡt.Helper();
+        t.Helper();
         var got = dʗ1.InputOffset();
         if (len(ᏑwantOffsets.ValueSlot) == 0) {
-            Ꮡt.Fatalf("InputOffset = %d, want nil"u8, got);
+            t.Fatalf("InputOffset = %d, want nil", got);
         }
         var want = ᏑwantOffsets.ValueSlot[0];
         if (got != want) {
-            Ꮡt.Fatalf("InputOffset = %d, want %d"u8, got, want);
+            t.Fatalf("InputOffset = %d, want %d", got, want);
         }
         ᏑwantOffsets.ValueSlot = ᏑwantOffsets.ValueSlot[1..];
     }
     var dʗ2 = d;
     void checkMore() {
-        Ꮡt.Helper();
+        t.Helper();
         var got = dʗ2.More();
         if (len(ᏑwantMores.ValueSlot) == 0) {
-            Ꮡt.Fatalf("More = %v, want nil"u8, got);
+            t.Fatalf("More = %v, want nil", got);
         }
         var want = ᏑwantMores.ValueSlot[0];
         if (got != want) {
-            Ꮡt.Fatalf("More = %v, want %v"u8, got, want);
+            t.Fatalf("More = %v, want %v", got, want);
         }
         ᏑwantMores.ValueSlot = ᏑwantMores.ValueSlot[1..];
     }
     checkOffset();
     checkMore();
     checkOffset();
-    while (ᐧ) {
+    for (;;) {
         {
-            var (_, err) = d.Token(); if (AreEqual(err, io.EOF)){
+            var (_, err) = d.Token(); if (AreEqual(err, io.EOF)) {
                 break;
-            } else 
-            if (err != default!) {
-                Ꮡt.Fatalf("Token error: %v"u8, err);
+            } else if (err != nil) {
+                t.Fatalf("Token error: %v", err);
             }
         }
         checkOffset();
@@ -775,7 +783,7 @@ public static void TestDecoderInputOffset(ж<testing.T> Ꮡt) {
     checkOffset();
 
     if (len(wantOffsets) + len(wantMores) > 0) {
-        Ꮡt.Fatal(unconsumedTestdataˢ);
+        t.Fatal(unconsumedTestdataˢ);
     }
 }
 

@@ -41,50 +41,50 @@ partial class x509_internal_test_package {
 // for name constraint parsing and validation.
 //
 // [0]: https://medium.com/@sleevi_/path-building-vs-path-verifying-the-chain-of-pain-9fbab861d7d6
-public static void TestBetterTLS(ж<testing.T> Ꮡt) {
-    testenv.SkipIfShortAndSlow(new x509_test_package.testing_TжTB(Ꮡt));
+public static void TestBetterTLS(ж<testing.T> t) {
+    testenv.SkipIfShortAndSlow(new x509_test_package.testing_TжTB(t));
 
     ref var data = ref heap<betterTLS>(out var Ꮡdata);
-    (data, var roots) = betterTLSTestData(Ꮡt);
+    (data, var roots) = betterTLSTestData(t);
 
-    foreach (var (_, suite) in new @string[]{"pathbuilding"u8, "nameconstraints"u8}.slice()) {
+    foreach (var (_, suite) in slice<@string>(["pathbuilding", "nameconstraints"])) {
         var rootsʗ1 = roots;
-        Ꮡt.Run(suite, (ж<testing.T> tΔ1) => {
+        t.Run(suite, (ж<testing.T> tΔ1) => {
             runTestSuite(tΔ1, suite, Ꮡdata, rootsʗ1);
         });
     }
 }
 
-internal static void runTestSuite(ж<testing.T> Ꮡt, @string suiteName, ж<betterTLS> Ꮡdata, ж<global::go.crypto.x509_package.CertPool> Ꮡroots) {
+internal static void runTestSuite(ж<testing.T> t, @string suiteName, ж<betterTLS> Ꮡdata, ж<global::go.crypto.x509_package.CertPool> roots) {
     ref var data = ref Ꮡdata.DerefOrNull();
 
     var (suite, exists) = data.Suites[suiteName, ꟷ];
     if (!exists) {
-        Ꮡt.Fatalf("missing %s suite"u8, suiteName);
+        t.Fatalf("missing %s suite", suiteName);
     }
 
-    Ꮡt.Logf(
-        "running %s test suite with %d test cases"u8,
+    t.Logf(
+        "running %s test suite with %d test cases",
         suiteName, builtin.len(suite.TestCases));
 
     foreach (var (_, vᴛ1) in suite.TestCases) {
         var tc = vᴛ1;
 
-        Ꮡt.Logf("testing %s test case %d"u8, suiteName, tc.ID);
+        t.Logf("testing %s test case %d", suiteName, tc.ID);
 
         var (certsDER, err) = tc.Certs();
-        if (err != default!) {
-            Ꮡt.Fatalf(
-                "failed to decode certificates for test case %d: %v"u8,
+        if (err != nil) {
+            t.Fatalf(
+                "failed to decode certificates for test case %d: %v",
                 tc.ID, err);
         }
 
         if (builtin.len(certsDER) == 0) {
-            Ꮡt.Fatalf("test case %d has no certificates"u8, tc.ID);
+            t.Fatalf("test case %d has no certificates", tc.ID);
         }
 
         (var eeCert, err) = ParseCertificate(certsDER[0]);
-        if (err != default!) {
+        if (err != nil) {
             // Several constraint test cases contain invalid end-entity
             // certificate extensions that we reject ahead of verification
             // time. We consider this a pass and skip further processing.
@@ -93,117 +93,128 @@ internal static void runTestSuite(ж<testing.T> Ꮡt, @string suiteName, ж<bett
             // containing the value `"http://foo.bar, DNS:test.localhost"`, or
             // an iPAddress general name of the wrong length.
             if (suiteName == "nameconstraints"u8 && tc.Expected == expectedReject) {
-                Ꮡt.Logf(
+                t.Logf(
                     "skipping expected reject test case %d "u8 + "- end entity certificate parse error: %v"u8,
                     tc.ID, err);
                 continue;
             }
-            Ꮡt.Fatalf(
-                "failed to parse end entity certificate for test case %d: %v"u8,
+            t.Fatalf(
+                "failed to parse end entity certificate for test case %d: %v",
                 tc.ID, err);
         }
 
         var intermediates = NewCertPool();
         foreach (var (i, certDER) in certsDER[1..]) {
             var (cert, errΔ1) = ParseCertificate(certDER);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatalf(
-                    "failed to parse intermediate certificate %d for test case %d: %v"u8,
+            if (errΔ1 != nil) {
+                t.Fatalf(
+                    "failed to parse intermediate certificate %d for test case %d: %v",
                     i + 1, tc.ID, errΔ1);
             }
             intermediates.AddCert(cert);
         }
 
         (_, err) = eeCert.Verify(new VerifyOptions(
-            Roots: Ꮡroots,
+            Roots: roots,
             Intermediates: intermediates,
             DNSName: tc.Hostname,
-            KeyUsages: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+            KeyUsages: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
         ));
 
         var exprᴛ1 = tc.Expected;
-        if (exprᴛ1 == expectedAccept) {
-            if (err != default!) {
-                Ꮡt.Errorf(
-                    "test case %d failed: expected success, got error: %v"u8,
+        switch (ᐧ) {
+        case {} when exprᴛ1 == expectedAccept: {
+            if (err != nil) {
+                t.Errorf(
+                    "test case %d failed: expected success, got error: %v",
                     tc.ID, err);
             }
+            break;
         }
-        else if (exprᴛ1 == expectedReject) {
-            if (err == default!) {
-                Ꮡt.Errorf(
-                    "test case %d failed: expected failure, but verification succeeded"u8,
+        case {} when exprᴛ1 == expectedReject: {
+            if (err == nil) {
+                t.Errorf(
+                    "test case %d failed: expected failure, but verification succeeded",
                     tc.ID);
             }
+            break;
         }
-        else { /* default: */
-            Ꮡt.Fatalf(
-                "test case %d failed: unknown expected result: %s"u8,
+        default: {
+            t.Fatalf(
+                "test case %d failed: unknown expected result: %s",
                 tc.ID, tc.Expected);
-        }
+            break;
+        }}
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testsJsonˢ = "tests.json"u8;
-internal static readonly @string runˢ = "run"u8;
-internal static readonly @string testSuitesCmdBettertlsˢ = "./test-suites/cmd/bettertls"u8;
-internal static readonly @string exportTestsˢ = "export-tests"u8;
-internal static readonly @string outˢ = "--out"u8;
+internal static ref readonly @string testsJsonˢ => ref testsJsonˢᵇ;
+private static readonly @string testsJsonˢᵇ = "tests.json"u8;
+internal static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
+internal static ref readonly @string testSuitesCmdBettertlsˢ => ref testSuitesCmdBettertlsˢᵇ;
+private static readonly @string testSuitesCmdBettertlsˢᵇ = "./test-suites/cmd/bettertls"u8;
+internal static ref readonly @string exportTestsˢ => ref exportTestsˢᵇ;
+private static readonly @string exportTestsˢᵇ = "export-tests"u8;
+internal static ref readonly @string outˢ => ref outˢᵇ;
+private static readonly @string outˢᵇ = "--out"u8;
 internal static readonly object runningBettertlsExportˢ = (@string)"running bettertls export-tests command"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bettertlsModuleᶜ = "github.com/Netflix/bettertls"u8;
+internal static ref readonly @string bettertlsModuleᶜ => ref bettertlsModuleᶜᵇ;
+private static readonly @string bettertlsModuleᶜᵇ = "github.com/Netflix/bettertls"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bettertlsVersionᶜ = "v0.0.0-20250909192348-e1e99e353074"u8;
+internal static ref readonly @string bettertlsVersionᶜ => ref bettertlsVersionᶜᵇ;
+private static readonly @string bettertlsVersionᶜᵇ = "v0.0.0-20250909192348-e1e99e353074"u8;
 
-internal static (betterTLS, ж<global::go.crypto.x509_package.CertPool>) betterTLSTestData(ж<testing.T> Ꮡt) {
+internal static (betterTLS, ж<global::go.crypto.x509_package.CertPool>) betterTLSTestData(ж<testing.T> t) {
     @string bettertlsModule = bettertlsModuleᶜ;
     @string bettertlsVersion = bettertlsVersionᶜ;
 
-    @string bettertlsDir = cryptotest.FetchModule(Ꮡt, bettertlsModule, bettertlsVersion);
+    @string bettertlsDir = cryptotest.FetchModule(t, bettertlsModule, bettertlsVersion);
 
-    @string tempDir = Ꮡt.TempDir();
+    @string tempDir = t.TempDir();
     @string testsJSONPath = filepath.Join(tempDir, testsJsonˢ);
 
-    var cmd = testenv.Command(new x509_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new x509_test_package.testing_TжTB(Ꮡt)),
+    var cmd = testenv.Command(new x509_test_package.testing_TжTB(t), testenv.GoToolPath(new x509_test_package.testing_TжTB(t)),
         runˢ, testSuitesCmdBettertlsˢ,
         exportTestsˢ,
         outˢ, testsJSONPath);
-    cmd.Value.Dir = bettertlsDir;
-    Ꮡt.Log(runningBettertlsExportˢ);
+    cmd.Dir = bettertlsDir;
+    t.Log(runningBettertlsExportˢ);
     {
-        var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("failed to run bettertls export-tests: %v\n%s"u8, errΔ1, @out);
+        var (@out, errΔ1) = cmd.CombinedOutput(); if (errΔ1 != nil) {
+            t.Fatalf("failed to run bettertls export-tests: %v\n%s", errΔ1, @out);
         }
     }
 
     var (jsonData, err) = os.ReadFile(testsJSONPath);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to read exported tests.json: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to read exported tests.json: %v", err);
     }
 
-    Ꮡt.Logf("successfully loaded tests.json at %s"u8, testsJSONPath);
+    t.Logf("successfully loaded tests.json at %s", testsJSONPath);
 
     ref var data = ref heap(new betterTLS(), out var Ꮡdata);
     {
-        var errΔ2 = json.Unmarshal(jsonData, Ꮡdata); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("failed to unmarshal JSON data: %v"u8, errΔ2);
+        var errΔ2 = json.Unmarshal(jsonData, Ꮡdata); if (errΔ2 != nil) {
+            t.Fatalf("failed to unmarshal JSON data: %v", errΔ2);
         }
     }
 
-    Ꮡt.Logf("testing betterTLS revision: %s"u8, data.Revision);
-    Ꮡt.Logf("number of test suites: %d"u8, builtin.len(data.Suites));
+    t.Logf("testing betterTLS revision: %s", data.Revision);
+    t.Logf("number of test suites: %d", builtin.len(data.Suites));
 
     (var rootDER, err) = data.RootCert();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to decode trust root: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to decode trust root: %v", err);
     }
 
     (var rootCert, err) = ParseCertificate(rootDER);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse trust root certificate: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse trust root certificate: %v", err);
     }
 
     var roots = NewCertPool();
@@ -237,17 +248,19 @@ public static (slice<slice<byte>>, error) Certs(this ref betterTLSTest test) {
     var certs = new slice<slice<byte>>(builtin.len(test.Certificates));
     foreach (var (i, cert) in test.Certificates) {
         var (decoded, err) = base64.StdEncoding.DecodeString(cert);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         certs[i] = decoded;
     }
-    return (certs, default!);
+    return (certs, default);
 }
 
 public partial struct expectedResult /*@string*/;
 
-internal static readonly expectedResult expectedAccept = "ACCEPT"u8;
-internal static readonly expectedResult expectedReject = "REJECT"u8;
+internal static ref readonly expectedResult expectedAccept => ref expectedAcceptᵇ;
+private static readonly expectedResult expectedAcceptᵇ = "ACCEPT"u8;
+internal static ref readonly expectedResult expectedReject => ref expectedRejectᵇ;
+private static readonly expectedResult expectedRejectᵇ = "REJECT"u8;
 
 } // end x509_internal_test_package

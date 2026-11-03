@@ -4,7 +4,8 @@ namespace go.@internal;
 
 partial class goos_package {
 
-public static readonly @string GOOS = @"linux"u8;
+public static ref readonly @string GOOS => ref GOOSᵇ;
+private static readonly @string GOOSᵇ = @"linux"u8;
 
 public static UntypedInt IsAix => 0;
 

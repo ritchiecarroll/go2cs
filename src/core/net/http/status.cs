@@ -7,330 +7,391 @@ partial class http_package {
 
 // HTTP status codes as registered with IANA.
 // See: https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-public static UntypedInt StatusContinue => 100; // RFC 9110, 15.2.1
+public static UntypedInt StatusContinue => 100;           // RFC 9110, 15.2.1
 public static UntypedInt StatusSwitchingProtocols => 101; // RFC 9110, 15.2.2
-public static UntypedInt StatusProcessing => 102; // RFC 2518, 10.1
-public static UntypedInt StatusEarlyHints => 103; // RFC 8297
+public static UntypedInt StatusProcessing => 102;         // RFC 2518, 10.1
+public static UntypedInt StatusEarlyHints => 103;         // RFC 8297
 
-public static UntypedInt StatusOK => 200; // RFC 9110, 15.3.1
-public static UntypedInt StatusCreated => 201; // RFC 9110, 15.3.2
-public static UntypedInt StatusAccepted => 202; // RFC 9110, 15.3.3
+public static UntypedInt StatusOK => 200;                   // RFC 9110, 15.3.1
+public static UntypedInt StatusCreated => 201;              // RFC 9110, 15.3.2
+public static UntypedInt StatusAccepted => 202;             // RFC 9110, 15.3.3
 public static UntypedInt StatusNonAuthoritativeInfo => 203; // RFC 9110, 15.3.4
-public static UntypedInt StatusNoContent => 204; // RFC 9110, 15.3.5
-public static UntypedInt StatusResetContent => 205; // RFC 9110, 15.3.6
-public static UntypedInt StatusPartialContent => 206; // RFC 9110, 15.3.7
-public static UntypedInt StatusMultiStatus => 207; // RFC 4918, 11.1
-public static UntypedInt StatusAlreadyReported => 208; // RFC 5842, 7.1
-public static UntypedInt StatusIMUsed => 226; // RFC 3229, 10.4.1
+public static UntypedInt StatusNoContent => 204;            // RFC 9110, 15.3.5
+public static UntypedInt StatusResetContent => 205;         // RFC 9110, 15.3.6
+public static UntypedInt StatusPartialContent => 206;       // RFC 9110, 15.3.7
+public static UntypedInt StatusMultiStatus => 207;          // RFC 4918, 11.1
+public static UntypedInt StatusAlreadyReported => 208;      // RFC 5842, 7.1
+public static UntypedInt StatusIMUsed => 226;               // RFC 3229, 10.4.1
 
-public static UntypedInt StatusMultipleChoices => 300; // RFC 9110, 15.4.1
-public static UntypedInt StatusMovedPermanently => 301; // RFC 9110, 15.4.2
-public static UntypedInt StatusFound => 302; // RFC 9110, 15.4.3
-public static UntypedInt StatusSeeOther => 303; // RFC 9110, 15.4.4
-public static UntypedInt StatusNotModified => 304; // RFC 9110, 15.4.5
-public static UntypedInt StatusUseProxy => 305; // RFC 9110, 15.4.6
-internal static UntypedInt _ᴛ11ʗ => 306; // RFC 9110, 15.4.7 (Unused)
+public static UntypedInt StatusMultipleChoices => 300;   // RFC 9110, 15.4.1
+public static UntypedInt StatusMovedPermanently => 301;  // RFC 9110, 15.4.2
+public static UntypedInt StatusFound => 302;             // RFC 9110, 15.4.3
+public static UntypedInt StatusSeeOther => 303;          // RFC 9110, 15.4.4
+public static UntypedInt StatusNotModified => 304;       // RFC 9110, 15.4.5
+public static UntypedInt StatusUseProxy => 305;          // RFC 9110, 15.4.6
+internal static UntypedInt _ᴛ11ʗ => 306;                 // RFC 9110, 15.4.7 (Unused)
 public static UntypedInt StatusTemporaryRedirect => 307; // RFC 9110, 15.4.8
 public static UntypedInt StatusPermanentRedirect => 308; // RFC 9110, 15.4.9
 
-public static UntypedInt StatusBadRequest => 400; // RFC 9110, 15.5.1
-public static UntypedInt StatusUnauthorized => 401; // RFC 9110, 15.5.2
-public static UntypedInt StatusPaymentRequired => 402; // RFC 9110, 15.5.3
-public static UntypedInt StatusForbidden => 403; // RFC 9110, 15.5.4
-public static UntypedInt StatusNotFound => 404; // RFC 9110, 15.5.5
-public static UntypedInt StatusMethodNotAllowed => 405; // RFC 9110, 15.5.6
-public static UntypedInt StatusNotAcceptable => 406; // RFC 9110, 15.5.7
-public static UntypedInt StatusProxyAuthRequired => 407; // RFC 9110, 15.5.8
-public static UntypedInt StatusRequestTimeout => 408; // RFC 9110, 15.5.9
-public static UntypedInt StatusConflict => 409; // RFC 9110, 15.5.10
-public static UntypedInt StatusGone => 410; // RFC 9110, 15.5.11
-public static UntypedInt StatusLengthRequired => 411; // RFC 9110, 15.5.12
-public static UntypedInt StatusPreconditionFailed => 412; // RFC 9110, 15.5.13
-public static UntypedInt StatusRequestEntityTooLarge => 413; // RFC 9110, 15.5.14
-public static UntypedInt StatusRequestURITooLong => 414; // RFC 9110, 15.5.15
-public static UntypedInt StatusUnsupportedMediaType => 415; // RFC 9110, 15.5.16
+public static UntypedInt StatusBadRequest => 400;                   // RFC 9110, 15.5.1
+public static UntypedInt StatusUnauthorized => 401;                 // RFC 9110, 15.5.2
+public static UntypedInt StatusPaymentRequired => 402;              // RFC 9110, 15.5.3
+public static UntypedInt StatusForbidden => 403;                    // RFC 9110, 15.5.4
+public static UntypedInt StatusNotFound => 404;                     // RFC 9110, 15.5.5
+public static UntypedInt StatusMethodNotAllowed => 405;             // RFC 9110, 15.5.6
+public static UntypedInt StatusNotAcceptable => 406;                // RFC 9110, 15.5.7
+public static UntypedInt StatusProxyAuthRequired => 407;            // RFC 9110, 15.5.8
+public static UntypedInt StatusRequestTimeout => 408;               // RFC 9110, 15.5.9
+public static UntypedInt StatusConflict => 409;                     // RFC 9110, 15.5.10
+public static UntypedInt StatusGone => 410;                         // RFC 9110, 15.5.11
+public static UntypedInt StatusLengthRequired => 411;               // RFC 9110, 15.5.12
+public static UntypedInt StatusPreconditionFailed => 412;           // RFC 9110, 15.5.13
+public static UntypedInt StatusRequestEntityTooLarge => 413;        // RFC 9110, 15.5.14
+public static UntypedInt StatusRequestURITooLong => 414;            // RFC 9110, 15.5.15
+public static UntypedInt StatusUnsupportedMediaType => 415;         // RFC 9110, 15.5.16
 public static UntypedInt StatusRequestedRangeNotSatisfiable => 416; // RFC 9110, 15.5.17
-public static UntypedInt StatusExpectationFailed => 417; // RFC 9110, 15.5.18
-public static UntypedInt StatusTeapot => 418; // RFC 9110, 15.5.19 (Unused)
-public static UntypedInt StatusMisdirectedRequest => 421; // RFC 9110, 15.5.20
-public static UntypedInt StatusUnprocessableEntity => 422; // RFC 9110, 15.5.21
-public static UntypedInt StatusLocked => 423; // RFC 4918, 11.3
-public static UntypedInt StatusFailedDependency => 424; // RFC 4918, 11.4
-public static UntypedInt StatusTooEarly => 425; // RFC 8470, 5.2.
-public static UntypedInt StatusUpgradeRequired => 426; // RFC 9110, 15.5.22
-public static UntypedInt StatusPreconditionRequired => 428; // RFC 6585, 3
-public static UntypedInt StatusTooManyRequests => 429; // RFC 6585, 4
-public static UntypedInt StatusRequestHeaderFieldsTooLarge => 431; // RFC 6585, 5
-public static UntypedInt StatusUnavailableForLegalReasons => 451; // RFC 7725, 3
+public static UntypedInt StatusExpectationFailed => 417;            // RFC 9110, 15.5.18
+public static UntypedInt StatusTeapot => 418;                       // RFC 9110, 15.5.19 (Unused)
+public static UntypedInt StatusMisdirectedRequest => 421;           // RFC 9110, 15.5.20
+public static UntypedInt StatusUnprocessableEntity => 422;          // RFC 9110, 15.5.21
+public static UntypedInt StatusLocked => 423;                       // RFC 4918, 11.3
+public static UntypedInt StatusFailedDependency => 424;             // RFC 4918, 11.4
+public static UntypedInt StatusTooEarly => 425;                     // RFC 8470, 5.2.
+public static UntypedInt StatusUpgradeRequired => 426;              // RFC 9110, 15.5.22
+public static UntypedInt StatusPreconditionRequired => 428;         // RFC 6585, 3
+public static UntypedInt StatusTooManyRequests => 429;              // RFC 6585, 4
+public static UntypedInt StatusRequestHeaderFieldsTooLarge => 431;  // RFC 6585, 5
+public static UntypedInt StatusUnavailableForLegalReasons => 451;   // RFC 7725, 3
 
-public static UntypedInt StatusInternalServerError => 500; // RFC 9110, 15.6.1
-public static UntypedInt StatusNotImplemented => 501; // RFC 9110, 15.6.2
-public static UntypedInt StatusBadGateway => 502; // RFC 9110, 15.6.3
-public static UntypedInt StatusServiceUnavailable => 503; // RFC 9110, 15.6.4
-public static UntypedInt StatusGatewayTimeout => 504; // RFC 9110, 15.6.5
-public static UntypedInt StatusHTTPVersionNotSupported => 505; // RFC 9110, 15.6.6
-public static UntypedInt StatusVariantAlsoNegotiates => 506; // RFC 2295, 8.1
-public static UntypedInt StatusInsufficientStorage => 507; // RFC 4918, 11.5
-public static UntypedInt StatusLoopDetected => 508; // RFC 5842, 7.2
-public static UntypedInt StatusNotExtended => 510; // RFC 2774, 7
+public static UntypedInt StatusInternalServerError => 500;           // RFC 9110, 15.6.1
+public static UntypedInt StatusNotImplemented => 501;                // RFC 9110, 15.6.2
+public static UntypedInt StatusBadGateway => 502;                    // RFC 9110, 15.6.3
+public static UntypedInt StatusServiceUnavailable => 503;            // RFC 9110, 15.6.4
+public static UntypedInt StatusGatewayTimeout => 504;                // RFC 9110, 15.6.5
+public static UntypedInt StatusHTTPVersionNotSupported => 505;       // RFC 9110, 15.6.6
+public static UntypedInt StatusVariantAlsoNegotiates => 506;         // RFC 2295, 8.1
+public static UntypedInt StatusInsufficientStorage => 507;           // RFC 4918, 11.5
+public static UntypedInt StatusLoopDetected => 508;                  // RFC 5842, 7.2
+public static UntypedInt StatusNotExtended => 510;                   // RFC 2774, 7
 public static UntypedInt StatusNetworkAuthenticationRequired => 511; // RFC 6585, 6
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string continueˢ2 = "Continue"u8;
-internal static readonly @string switchingProtocolsˢ = "Switching Protocols"u8;
-internal static readonly @string processingˢ = "Processing"u8;
-internal static readonly @string earlyHintsˢ = "Early Hints"u8;
-internal static readonly @string createdˢ = "Created"u8;
-internal static readonly @string acceptedˢ = "Accepted"u8;
-internal static readonly @string nonAuthoritativeˢ = "Non-Authoritative Information"u8;
-internal static readonly @string noContentˢ = "No Content"u8;
-internal static readonly @string resetContentˢ = "Reset Content"u8;
-internal static readonly @string partialContentˢ = "Partial Content"u8;
-internal static readonly @string multiStatusˢ = "Multi-Status"u8;
-internal static readonly @string alreadyReportedˢ = "Already Reported"u8;
-internal static readonly @string imUsedˢ = "IM Used"u8;
-internal static readonly @string multipleChoicesˢ = "Multiple Choices"u8;
-internal static readonly @string movedPermanentlyˢ = "Moved Permanently"u8;
-internal static readonly @string foundˢ = "Found"u8;
-internal static readonly @string seeOtherˢ = "See Other"u8;
-internal static readonly @string notModifiedˢ = "Not Modified"u8;
-internal static readonly @string useProxyˢ = "Use Proxy"u8;
-internal static readonly @string temporaryRedirectˢ = "Temporary Redirect"u8;
-internal static readonly @string permanentRedirectˢ = "Permanent Redirect"u8;
-internal static readonly @string badRequestˢ = "Bad Request"u8;
-internal static readonly @string unauthorizedˢ = "Unauthorized"u8;
-internal static readonly @string paymentRequiredˢ = "Payment Required"u8;
-internal static readonly @string forbiddenˢ2 = "Forbidden"u8;
-internal static readonly @string notFoundˢ = "Not Found"u8;
-internal static readonly @string methodNotAllowedˢ = "Method Not Allowed"u8;
-internal static readonly @string notAcceptableˢ = "Not Acceptable"u8;
-internal static readonly @string proxyAuthenticationˢ = "Proxy Authentication Required"u8;
-internal static readonly @string requestTimeoutˢ = "Request Timeout"u8;
-internal static readonly @string conflictˢ = "Conflict"u8;
-internal static readonly @string goneˢ = "Gone"u8;
-internal static readonly @string lengthRequiredˢ = "Length Required"u8;
-internal static readonly @string preconditionFailedˢ = "Precondition Failed"u8;
-internal static readonly @string requestEntityTooLargeˢ = "Request Entity Too Large"u8;
-internal static readonly @string requestUriTooLongˢ = "Request URI Too Long"u8;
-internal static readonly @string unsupportedMediaTypeˢ = "Unsupported Media Type"u8;
-internal static readonly @string requestedRangeNotˢ = "Requested Range Not Satisfiable"u8;
-internal static readonly @string expectationFailedˢ = "Expectation Failed"u8;
-internal static readonly @string iMATeapotˢ = "I'm a teapot"u8;
-internal static readonly @string misdirectedRequestˢ = "Misdirected Request"u8;
-internal static readonly @string unprocessableEntityˢ = "Unprocessable Entity"u8;
-internal static readonly @string lockedˢ = "Locked"u8;
-internal static readonly @string failedDependencyˢ = "Failed Dependency"u8;
-internal static readonly @string tooEarlyˢ = "Too Early"u8;
-internal static readonly @string upgradeRequiredˢ = "Upgrade Required"u8;
-internal static readonly @string preconditionRequiredˢ = "Precondition Required"u8;
-internal static readonly @string tooManyRequestsˢ = "Too Many Requests"u8;
-internal static readonly @string requestHeaderFieldsTooˢ = "Request Header Fields Too Large"u8;
-internal static readonly @string unavailableForLegalˢ = "Unavailable For Legal Reasons"u8;
-internal static readonly @string internalServerErrorˢ2 = "Internal Server Error"u8;
-internal static readonly @string notImplementedˢ = "Not Implemented"u8;
-internal static readonly @string badGatewayˢ = "Bad Gateway"u8;
-internal static readonly @string serviceUnavailableˢ = "Service Unavailable"u8;
-internal static readonly @string gatewayTimeoutˢ = "Gateway Timeout"u8;
-internal static readonly @string httpVersionNotSupportedˢ = "HTTP Version Not Supported"u8;
-internal static readonly @string variantAlsoNegotiatesˢ = "Variant Also Negotiates"u8;
-internal static readonly @string insufficientStorageˢ = "Insufficient Storage"u8;
-internal static readonly @string loopDetectedˢ = "Loop Detected"u8;
-internal static readonly @string notExtendedˢ = "Not Extended"u8;
-internal static readonly @string networkAuthenticationˢ = "Network Authentication Required"u8;
+internal static ref readonly @string continueˢ2 => ref continueˢ2ᵇ;
+private static readonly @string continueˢ2ᵇ = "Continue"u8;
+internal static ref readonly @string switchingProtocolsˢ => ref switchingProtocolsˢᵇ;
+private static readonly @string switchingProtocolsˢᵇ = "Switching Protocols"u8;
+internal static ref readonly @string processingˢ => ref processingˢᵇ;
+private static readonly @string processingˢᵇ = "Processing"u8;
+internal static ref readonly @string earlyHintsˢ => ref earlyHintsˢᵇ;
+private static readonly @string earlyHintsˢᵇ = "Early Hints"u8;
+internal static ref readonly @string createdˢ => ref createdˢᵇ;
+private static readonly @string createdˢᵇ = "Created"u8;
+internal static ref readonly @string acceptedˢ => ref acceptedˢᵇ;
+private static readonly @string acceptedˢᵇ = "Accepted"u8;
+internal static ref readonly @string nonAuthoritativeˢ => ref nonAuthoritativeˢᵇ;
+private static readonly @string nonAuthoritativeˢᵇ = "Non-Authoritative Information"u8;
+internal static ref readonly @string noContentˢ => ref noContentˢᵇ;
+private static readonly @string noContentˢᵇ = "No Content"u8;
+internal static ref readonly @string resetContentˢ => ref resetContentˢᵇ;
+private static readonly @string resetContentˢᵇ = "Reset Content"u8;
+internal static ref readonly @string partialContentˢ => ref partialContentˢᵇ;
+private static readonly @string partialContentˢᵇ = "Partial Content"u8;
+internal static ref readonly @string multiStatusˢ => ref multiStatusˢᵇ;
+private static readonly @string multiStatusˢᵇ = "Multi-Status"u8;
+internal static ref readonly @string alreadyReportedˢ => ref alreadyReportedˢᵇ;
+private static readonly @string alreadyReportedˢᵇ = "Already Reported"u8;
+internal static ref readonly @string imUsedˢ => ref imUsedˢᵇ;
+private static readonly @string imUsedˢᵇ = "IM Used"u8;
+internal static ref readonly @string multipleChoicesˢ => ref multipleChoicesˢᵇ;
+private static readonly @string multipleChoicesˢᵇ = "Multiple Choices"u8;
+internal static ref readonly @string movedPermanentlyˢ => ref movedPermanentlyˢᵇ;
+private static readonly @string movedPermanentlyˢᵇ = "Moved Permanently"u8;
+internal static ref readonly @string foundˢ => ref foundˢᵇ;
+private static readonly @string foundˢᵇ = "Found"u8;
+internal static ref readonly @string seeOtherˢ => ref seeOtherˢᵇ;
+private static readonly @string seeOtherˢᵇ = "See Other"u8;
+internal static ref readonly @string notModifiedˢ => ref notModifiedˢᵇ;
+private static readonly @string notModifiedˢᵇ = "Not Modified"u8;
+internal static ref readonly @string useProxyˢ => ref useProxyˢᵇ;
+private static readonly @string useProxyˢᵇ = "Use Proxy"u8;
+internal static ref readonly @string temporaryRedirectˢ => ref temporaryRedirectˢᵇ;
+private static readonly @string temporaryRedirectˢᵇ = "Temporary Redirect"u8;
+internal static ref readonly @string permanentRedirectˢ => ref permanentRedirectˢᵇ;
+private static readonly @string permanentRedirectˢᵇ = "Permanent Redirect"u8;
+internal static ref readonly @string badRequestˢ => ref badRequestˢᵇ;
+private static readonly @string badRequestˢᵇ = "Bad Request"u8;
+internal static ref readonly @string unauthorizedˢ => ref unauthorizedˢᵇ;
+private static readonly @string unauthorizedˢᵇ = "Unauthorized"u8;
+internal static ref readonly @string paymentRequiredˢ => ref paymentRequiredˢᵇ;
+private static readonly @string paymentRequiredˢᵇ = "Payment Required"u8;
+internal static ref readonly @string forbiddenˢ2 => ref forbiddenˢ2ᵇ;
+private static readonly @string forbiddenˢ2ᵇ = "Forbidden"u8;
+internal static ref readonly @string notFoundˢ => ref notFoundˢᵇ;
+private static readonly @string notFoundˢᵇ = "Not Found"u8;
+internal static ref readonly @string methodNotAllowedˢ => ref methodNotAllowedˢᵇ;
+private static readonly @string methodNotAllowedˢᵇ = "Method Not Allowed"u8;
+internal static ref readonly @string notAcceptableˢ => ref notAcceptableˢᵇ;
+private static readonly @string notAcceptableˢᵇ = "Not Acceptable"u8;
+internal static ref readonly @string proxyAuthenticationˢ => ref proxyAuthenticationˢᵇ;
+private static readonly @string proxyAuthenticationˢᵇ = "Proxy Authentication Required"u8;
+internal static ref readonly @string requestTimeoutˢ => ref requestTimeoutˢᵇ;
+private static readonly @string requestTimeoutˢᵇ = "Request Timeout"u8;
+internal static ref readonly @string conflictˢ => ref conflictˢᵇ;
+private static readonly @string conflictˢᵇ = "Conflict"u8;
+internal static ref readonly @string goneˢ => ref goneˢᵇ;
+private static readonly @string goneˢᵇ = "Gone"u8;
+internal static ref readonly @string lengthRequiredˢ => ref lengthRequiredˢᵇ;
+private static readonly @string lengthRequiredˢᵇ = "Length Required"u8;
+internal static ref readonly @string preconditionFailedˢ => ref preconditionFailedˢᵇ;
+private static readonly @string preconditionFailedˢᵇ = "Precondition Failed"u8;
+internal static ref readonly @string requestEntityTooLargeˢ => ref requestEntityTooLargeˢᵇ;
+private static readonly @string requestEntityTooLargeˢᵇ = "Request Entity Too Large"u8;
+internal static ref readonly @string requestUriTooLongˢ => ref requestUriTooLongˢᵇ;
+private static readonly @string requestUriTooLongˢᵇ = "Request URI Too Long"u8;
+internal static ref readonly @string unsupportedMediaTypeˢ => ref unsupportedMediaTypeˢᵇ;
+private static readonly @string unsupportedMediaTypeˢᵇ = "Unsupported Media Type"u8;
+internal static ref readonly @string requestedRangeNotˢ => ref requestedRangeNotˢᵇ;
+private static readonly @string requestedRangeNotˢᵇ = "Requested Range Not Satisfiable"u8;
+internal static ref readonly @string expectationFailedˢ => ref expectationFailedˢᵇ;
+private static readonly @string expectationFailedˢᵇ = "Expectation Failed"u8;
+internal static ref readonly @string iMATeapotˢ => ref iMATeapotˢᵇ;
+private static readonly @string iMATeapotˢᵇ = "I'm a teapot"u8;
+internal static ref readonly @string misdirectedRequestˢ => ref misdirectedRequestˢᵇ;
+private static readonly @string misdirectedRequestˢᵇ = "Misdirected Request"u8;
+internal static ref readonly @string unprocessableEntityˢ => ref unprocessableEntityˢᵇ;
+private static readonly @string unprocessableEntityˢᵇ = "Unprocessable Entity"u8;
+internal static ref readonly @string lockedˢ => ref lockedˢᵇ;
+private static readonly @string lockedˢᵇ = "Locked"u8;
+internal static ref readonly @string failedDependencyˢ => ref failedDependencyˢᵇ;
+private static readonly @string failedDependencyˢᵇ = "Failed Dependency"u8;
+internal static ref readonly @string tooEarlyˢ => ref tooEarlyˢᵇ;
+private static readonly @string tooEarlyˢᵇ = "Too Early"u8;
+internal static ref readonly @string upgradeRequiredˢ => ref upgradeRequiredˢᵇ;
+private static readonly @string upgradeRequiredˢᵇ = "Upgrade Required"u8;
+internal static ref readonly @string preconditionRequiredˢ => ref preconditionRequiredˢᵇ;
+private static readonly @string preconditionRequiredˢᵇ = "Precondition Required"u8;
+internal static ref readonly @string tooManyRequestsˢ => ref tooManyRequestsˢᵇ;
+private static readonly @string tooManyRequestsˢᵇ = "Too Many Requests"u8;
+internal static ref readonly @string requestHeaderFieldsTooˢ => ref requestHeaderFieldsTooˢᵇ;
+private static readonly @string requestHeaderFieldsTooˢᵇ = "Request Header Fields Too Large"u8;
+internal static ref readonly @string unavailableForLegalˢ => ref unavailableForLegalˢᵇ;
+private static readonly @string unavailableForLegalˢᵇ = "Unavailable For Legal Reasons"u8;
+internal static ref readonly @string internalServerErrorˢ2 => ref internalServerErrorˢ2ᵇ;
+private static readonly @string internalServerErrorˢ2ᵇ = "Internal Server Error"u8;
+internal static ref readonly @string notImplementedˢ => ref notImplementedˢᵇ;
+private static readonly @string notImplementedˢᵇ = "Not Implemented"u8;
+internal static ref readonly @string badGatewayˢ => ref badGatewayˢᵇ;
+private static readonly @string badGatewayˢᵇ = "Bad Gateway"u8;
+internal static ref readonly @string serviceUnavailableˢ => ref serviceUnavailableˢᵇ;
+private static readonly @string serviceUnavailableˢᵇ = "Service Unavailable"u8;
+internal static ref readonly @string gatewayTimeoutˢ => ref gatewayTimeoutˢᵇ;
+private static readonly @string gatewayTimeoutˢᵇ = "Gateway Timeout"u8;
+internal static ref readonly @string httpVersionNotSupportedˢ => ref httpVersionNotSupportedˢᵇ;
+private static readonly @string httpVersionNotSupportedˢᵇ = "HTTP Version Not Supported"u8;
+internal static ref readonly @string variantAlsoNegotiatesˢ => ref variantAlsoNegotiatesˢᵇ;
+private static readonly @string variantAlsoNegotiatesˢᵇ = "Variant Also Negotiates"u8;
+internal static ref readonly @string insufficientStorageˢ => ref insufficientStorageˢᵇ;
+private static readonly @string insufficientStorageˢᵇ = "Insufficient Storage"u8;
+internal static ref readonly @string loopDetectedˢ => ref loopDetectedˢᵇ;
+private static readonly @string loopDetectedˢᵇ = "Loop Detected"u8;
+internal static ref readonly @string notExtendedˢ => ref notExtendedˢᵇ;
+private static readonly @string notExtendedˢᵇ = "Not Extended"u8;
+internal static ref readonly @string networkAuthenticationˢ => ref networkAuthenticationˢᵇ;
+private static readonly @string networkAuthenticationˢᵇ = "Network Authentication Required"u8;
 
 // StatusText returns a text for the HTTP status code. It returns the empty
 // string if the code is unknown.
 public static @string StatusText(nint code) {
-    var exprᴛ1 = code;
-    if (exprᴛ1 == StatusContinue) {
+    switch (code) {
+    case var ᴛ when ᴛ == StatusContinue: {
         return continueˢ2;
     }
-    if (exprᴛ1 == StatusSwitchingProtocols) {
+    case var ᴛ when ᴛ == StatusSwitchingProtocols: {
         return switchingProtocolsˢ;
     }
-    if (exprᴛ1 == StatusProcessing) {
+    case var ᴛ when ᴛ == StatusProcessing: {
         return processingˢ;
     }
-    if (exprᴛ1 == StatusEarlyHints) {
+    case var ᴛ when ᴛ == StatusEarlyHints: {
         return earlyHintsˢ;
     }
-    if (exprᴛ1 == StatusOK) {
-        return "OK"u8;
+    case var ᴛ when ᴛ == StatusOK: {
+        return "OK";
     }
-    if (exprᴛ1 == StatusCreated) {
+    case var ᴛ when ᴛ == StatusCreated: {
         return createdˢ;
     }
-    if (exprᴛ1 == StatusAccepted) {
+    case var ᴛ when ᴛ == StatusAccepted: {
         return acceptedˢ;
     }
-    if (exprᴛ1 == StatusNonAuthoritativeInfo) {
+    case var ᴛ when ᴛ == StatusNonAuthoritativeInfo: {
         return nonAuthoritativeˢ;
     }
-    if (exprᴛ1 == StatusNoContent) {
+    case var ᴛ when ᴛ == StatusNoContent: {
         return noContentˢ;
     }
-    if (exprᴛ1 == StatusResetContent) {
+    case var ᴛ when ᴛ == StatusResetContent: {
         return resetContentˢ;
     }
-    if (exprᴛ1 == StatusPartialContent) {
+    case var ᴛ when ᴛ == StatusPartialContent: {
         return partialContentˢ;
     }
-    if (exprᴛ1 == StatusMultiStatus) {
+    case var ᴛ when ᴛ == StatusMultiStatus: {
         return multiStatusˢ;
     }
-    if (exprᴛ1 == StatusAlreadyReported) {
+    case var ᴛ when ᴛ == StatusAlreadyReported: {
         return alreadyReportedˢ;
     }
-    if (exprᴛ1 == StatusIMUsed) {
+    case var ᴛ when ᴛ == StatusIMUsed: {
         return imUsedˢ;
     }
-    if (exprᴛ1 == StatusMultipleChoices) {
+    case var ᴛ when ᴛ == StatusMultipleChoices: {
         return multipleChoicesˢ;
     }
-    if (exprᴛ1 == StatusMovedPermanently) {
+    case var ᴛ when ᴛ == StatusMovedPermanently: {
         return movedPermanentlyˢ;
     }
-    if (exprᴛ1 == StatusFound) {
+    case var ᴛ when ᴛ == StatusFound: {
         return foundˢ;
     }
-    if (exprᴛ1 == StatusSeeOther) {
+    case var ᴛ when ᴛ == StatusSeeOther: {
         return seeOtherˢ;
     }
-    if (exprᴛ1 == StatusNotModified) {
+    case var ᴛ when ᴛ == StatusNotModified: {
         return notModifiedˢ;
     }
-    if (exprᴛ1 == StatusUseProxy) {
+    case var ᴛ when ᴛ == StatusUseProxy: {
         return useProxyˢ;
     }
-    if (exprᴛ1 == StatusTemporaryRedirect) {
+    case var ᴛ when ᴛ == StatusTemporaryRedirect: {
         return temporaryRedirectˢ;
     }
-    if (exprᴛ1 == StatusPermanentRedirect) {
+    case var ᴛ when ᴛ == StatusPermanentRedirect: {
         return permanentRedirectˢ;
     }
-    if (exprᴛ1 == StatusBadRequest) {
+    case var ᴛ when ᴛ == StatusBadRequest: {
         return badRequestˢ;
     }
-    if (exprᴛ1 == StatusUnauthorized) {
+    case var ᴛ when ᴛ == StatusUnauthorized: {
         return unauthorizedˢ;
     }
-    if (exprᴛ1 == StatusPaymentRequired) {
+    case var ᴛ when ᴛ == StatusPaymentRequired: {
         return paymentRequiredˢ;
     }
-    if (exprᴛ1 == StatusForbidden) {
+    case var ᴛ when ᴛ == StatusForbidden: {
         return forbiddenˢ2;
     }
-    if (exprᴛ1 == StatusNotFound) {
+    case var ᴛ when ᴛ == StatusNotFound: {
         return notFoundˢ;
     }
-    if (exprᴛ1 == StatusMethodNotAllowed) {
+    case var ᴛ when ᴛ == StatusMethodNotAllowed: {
         return methodNotAllowedˢ;
     }
-    if (exprᴛ1 == StatusNotAcceptable) {
+    case var ᴛ when ᴛ == StatusNotAcceptable: {
         return notAcceptableˢ;
     }
-    if (exprᴛ1 == StatusProxyAuthRequired) {
+    case var ᴛ when ᴛ == StatusProxyAuthRequired: {
         return proxyAuthenticationˢ;
     }
-    if (exprᴛ1 == StatusRequestTimeout) {
+    case var ᴛ when ᴛ == StatusRequestTimeout: {
         return requestTimeoutˢ;
     }
-    if (exprᴛ1 == StatusConflict) {
+    case var ᴛ when ᴛ == StatusConflict: {
         return conflictˢ;
     }
-    if (exprᴛ1 == StatusGone) {
+    case var ᴛ when ᴛ == StatusGone: {
         return goneˢ;
     }
-    if (exprᴛ1 == StatusLengthRequired) {
+    case var ᴛ when ᴛ == StatusLengthRequired: {
         return lengthRequiredˢ;
     }
-    if (exprᴛ1 == StatusPreconditionFailed) {
+    case var ᴛ when ᴛ == StatusPreconditionFailed: {
         return preconditionFailedˢ;
     }
-    if (exprᴛ1 == StatusRequestEntityTooLarge) {
+    case var ᴛ when ᴛ == StatusRequestEntityTooLarge: {
         return requestEntityTooLargeˢ;
     }
-    if (exprᴛ1 == StatusRequestURITooLong) {
+    case var ᴛ when ᴛ == StatusRequestURITooLong: {
         return requestUriTooLongˢ;
     }
-    if (exprᴛ1 == StatusUnsupportedMediaType) {
+    case var ᴛ when ᴛ == StatusUnsupportedMediaType: {
         return unsupportedMediaTypeˢ;
     }
-    if (exprᴛ1 == StatusRequestedRangeNotSatisfiable) {
+    case var ᴛ when ᴛ == StatusRequestedRangeNotSatisfiable: {
         return requestedRangeNotˢ;
     }
-    if (exprᴛ1 == StatusExpectationFailed) {
+    case var ᴛ when ᴛ == StatusExpectationFailed: {
         return expectationFailedˢ;
     }
-    if (exprᴛ1 == StatusTeapot) {
+    case var ᴛ when ᴛ == StatusTeapot: {
         return iMATeapotˢ;
     }
-    if (exprᴛ1 == StatusMisdirectedRequest) {
+    case var ᴛ when ᴛ == StatusMisdirectedRequest: {
         return misdirectedRequestˢ;
     }
-    if (exprᴛ1 == StatusUnprocessableEntity) {
+    case var ᴛ when ᴛ == StatusUnprocessableEntity: {
         return unprocessableEntityˢ;
     }
-    if (exprᴛ1 == StatusLocked) {
+    case var ᴛ when ᴛ == StatusLocked: {
         return lockedˢ;
     }
-    if (exprᴛ1 == StatusFailedDependency) {
+    case var ᴛ when ᴛ == StatusFailedDependency: {
         return failedDependencyˢ;
     }
-    if (exprᴛ1 == StatusTooEarly) {
+    case var ᴛ when ᴛ == StatusTooEarly: {
         return tooEarlyˢ;
     }
-    if (exprᴛ1 == StatusUpgradeRequired) {
+    case var ᴛ when ᴛ == StatusUpgradeRequired: {
         return upgradeRequiredˢ;
     }
-    if (exprᴛ1 == StatusPreconditionRequired) {
+    case var ᴛ when ᴛ == StatusPreconditionRequired: {
         return preconditionRequiredˢ;
     }
-    if (exprᴛ1 == StatusTooManyRequests) {
+    case var ᴛ when ᴛ == StatusTooManyRequests: {
         return tooManyRequestsˢ;
     }
-    if (exprᴛ1 == StatusRequestHeaderFieldsTooLarge) {
+    case var ᴛ when ᴛ == StatusRequestHeaderFieldsTooLarge: {
         return requestHeaderFieldsTooˢ;
     }
-    if (exprᴛ1 == StatusUnavailableForLegalReasons) {
+    case var ᴛ when ᴛ == StatusUnavailableForLegalReasons: {
         return unavailableForLegalˢ;
     }
-    if (exprᴛ1 == StatusInternalServerError) {
+    case var ᴛ when ᴛ == StatusInternalServerError: {
         return internalServerErrorˢ2;
     }
-    if (exprᴛ1 == StatusNotImplemented) {
+    case var ᴛ when ᴛ == StatusNotImplemented: {
         return notImplementedˢ;
     }
-    if (exprᴛ1 == StatusBadGateway) {
+    case var ᴛ when ᴛ == StatusBadGateway: {
         return badGatewayˢ;
     }
-    if (exprᴛ1 == StatusServiceUnavailable) {
+    case var ᴛ when ᴛ == StatusServiceUnavailable: {
         return serviceUnavailableˢ;
     }
-    if (exprᴛ1 == StatusGatewayTimeout) {
+    case var ᴛ when ᴛ == StatusGatewayTimeout: {
         return gatewayTimeoutˢ;
     }
-    if (exprᴛ1 == StatusHTTPVersionNotSupported) {
+    case var ᴛ when ᴛ == StatusHTTPVersionNotSupported: {
         return httpVersionNotSupportedˢ;
     }
-    if (exprᴛ1 == StatusVariantAlsoNegotiates) {
+    case var ᴛ when ᴛ == StatusVariantAlsoNegotiates: {
         return variantAlsoNegotiatesˢ;
     }
-    if (exprᴛ1 == StatusInsufficientStorage) {
+    case var ᴛ when ᴛ == StatusInsufficientStorage: {
         return insufficientStorageˢ;
     }
-    if (exprᴛ1 == StatusLoopDetected) {
+    case var ᴛ when ᴛ == StatusLoopDetected: {
         return loopDetectedˢ;
     }
-    if (exprᴛ1 == StatusNotExtended) {
+    case var ᴛ when ᴛ == StatusNotExtended: {
         return notExtendedˢ;
     }
-    if (exprᴛ1 == StatusNetworkAuthenticationRequired) {
+    case var ᴛ when ᴛ == StatusNetworkAuthenticationRequired: {
         return networkAuthenticationˢ;
     }
-    { /* default: */
+    default: {
         return ""u8;
-    }
+    }}
 }
 
 } // end http_package

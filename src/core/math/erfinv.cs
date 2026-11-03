@@ -87,17 +87,17 @@ public static float64 Erfinv(float64 x) {
         sign = true;
     }
 
-    float64 ans = default!;
-    if (x <= 0.85D){ // |x| <= 0.85
+    float64 ans = default;
+    if (x <= 0.85D) { // |x| <= 0.85
         var r = 0.180625D - 0.25D * x * x;
         var z1 = (((((((float64)a7 * r + (float64)a6) * r + (float64)a5) * r + (float64)a4) * r + (float64)a3) * r + (float64)a2) * r + (float64)a1) * r + (float64)a0;
         var z2 = (((((((float64)b7 * r + (float64)b6) * r + (float64)b5) * r + (float64)b4) * r + (float64)b3) * r + (float64)b2) * r + (float64)b1) * r + (float64)b0;
         ans = (x * z1) / z2;
     } else {
-        float64 z1 = default!;
-        float64 z2 = default!;
+        float64 z1 = default;
+        float64 z2 = default;
         var r = Sqrt((float64)Ln2 - Log(1.0D - x));
-        if (r <= 5.0D){
+        if (r <= 5.0D) {
             r -= 1.6D;
             z1 = (((((((float64)c7 * r + (float64)c6) * r + (float64)c5) * r + (float64)c4) * r + (float64)c3) * r + (float64)c2) * r + (float64)c1) * r + (float64)c0;
             z2 = (((((((float64)d7 * r + (float64)d6) * r + (float64)d5) * r + (float64)d4) * r + (float64)d3) * r + (float64)d2) * r + (float64)d1) * r + (float64)d0;

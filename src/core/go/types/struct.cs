@@ -18,7 +18,7 @@ partial class types_package {
 // A Struct represents a struct type.
 partial struct Struct {
     internal slice<ж<Var>> fields; // fields != nil indicates the struct is set up (possibly with len(fields) == 0)
-    internal slice<@string> tags; // field tags; nil if there are no tags
+    internal slice<@string> tags;  // field tags; nil if there are no tags
 }
 
 // NewStruct returns a new struct with the given fields and corresponding field tags.
@@ -26,9 +26,9 @@ partial struct Struct {
 // only as long as required to hold the tag with the largest index i. Consequently,
 // if no field has a tag, tags may be nil.
 public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
-    objset fset = default!;
+    objset fset = default;
     foreach (var (_, f) in fields) {
-        if ((~f).name != "_"u8 && fset.insert(new VarжObject(f)) != default!) {
+        if (f.name != "_"u8 && fset.insert(new VarжObject(f)) != nil) {
             throw panic("multiple fields with the same name");
         }
     }
@@ -63,22 +63,26 @@ public static ΔType Underlying(this ж<Struct> Ꮡt) {
 }
 
 public static @string String(this ж<Struct> Ꮡt) {
-    return TypeString(new StructжΔType(Ꮡt), default!);
+    return TypeString(new StructжΔType(Ꮡt), default);
 }
 
 // ----------------------------------------------------------------------------
 // Implementation
 internal static void markComplete(this ref Struct s) {
-    if (s.fields == default!) {
+    if (s.fields == nil) {
         s.fields = new slice<ж<Var>>(0);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string embeddedFieldTypeCannotˢ = "embedded field type cannot be unsafe.Pointer"u8;
-internal static readonly @string embeddedFieldTypeCannotˢ2 = "embedded field type cannot be a pointer"u8;
-internal static readonly @string embeddedFieldTypeCannotˢ3 = "embedded field type cannot be a (pointer to a) type parameter"u8;
-internal static readonly @string embeddedFieldTypeCannotˢ4 = "embedded field type cannot be a pointer to an interface"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ => ref embeddedFieldTypeCannotˢᵇ;
+private static readonly @string embeddedFieldTypeCannotˢᵇ = "embedded field type cannot be unsafe.Pointer"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ2 => ref embeddedFieldTypeCannotˢ2ᵇ;
+private static readonly @string embeddedFieldTypeCannotˢ2ᵇ = "embedded field type cannot be a pointer"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ3 => ref embeddedFieldTypeCannotˢ3ᵇ;
+private static readonly @string embeddedFieldTypeCannotˢ3ᵇ = "embedded field type cannot be a (pointer to a) type parameter"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ4 => ref embeddedFieldTypeCannotˢ4ᵇ;
+private static readonly @string embeddedFieldTypeCannotˢ4ᵇ = "embedded field type cannot be a pointer to an interface"u8;
 
 internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
@@ -100,17 +104,17 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
 
     // current field typ and tag
     ref var typ = ref heap<ΔType>(out var Ꮡtyp);
-    @string tag = default!;
+    @string tag = default;
     void add(ж<ast.Ident> ident, bool embedded) {
-        if (tag != ""u8 && Ꮡtags.ValueSlot == default!) {
+        if (tag != ""u8 && Ꮡtags.ValueSlot == nil) {
             Ꮡtags.ValueSlot = new slice<@string>(len(Ꮡfields.ValueSlot));
         }
-        if (Ꮡtags.ValueSlot != default!) {
+        if (Ꮡtags.ValueSlot != nil) {
             Ꮡtags.ValueSlot = append(Ꮡtags.ValueSlot, tag);
         }
 
         tokenꓸPos pos = ident.Pos();
-        @string name = ident.Value.Name;
+        @string name = ident.Name;
         var fld = NewField(pos, Ꮡcheck.Value.pkg, name, Ꮡtyp.ValueSlot, embedded);
         // spec: "Within a struct, non-blank field names must be unique."
         if (name == "_"u8 || Ꮡcheck.declareInSet(Ꮡfset, pos, new VarжObject(fld))) {
@@ -130,12 +134,12 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
         addʗ1(ident, true);
     }
 
-    foreach (var (_, f) in (~list).List) {
-        typ = Ꮡcheck.varType((~f).Type);
-        tag = Ꮡcheck.tag((~f).Tag);
-        if (len((~f).Names) > 0){
+    foreach (var (_, f) in list.List) {
+        typ = Ꮡcheck.varType(f.Type);
+        tag = Ꮡcheck.tag(f.Tag);
+        if (len(f.Names) > 0) {
             // named fields
-            foreach (var (_, name) in (~f).Names) {
+            foreach (var (_, name) in f.Names) {
                 add(name, false);
             }
         } else {
@@ -143,12 +147,12 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
             // spec: "An embedded type must be specified as a type name T or as a
             // pointer to a non-interface type name *T, and T itself may not be a
             // pointer type."
-            tokenꓸPos pos = (~f).Type.Pos(); // position of type, for errors
-            var name = embeddedFieldIdent((~f).Type);
+            tokenꓸPos pos = f.Type.Pos(); // position of type, for errors
+            var name = embeddedFieldIdent(f.Type);
             if (name == nil) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner((~f).Type), InvalidSyntaxTree, "embedded field type %s has no name"u8, (~f).Type);
-                name = ast.NewIdent("_"u8);
-                name.Value.NamePos = pos;
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(f.Type), InvalidSyntaxTree, "embedded field type %s has no name", f.Type);
+                name = ast.NewIdent("_");
+                name.NamePos = pos;
                 addInvalid(name);
                 continue;
             }
@@ -161,7 +165,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
 
             // for use in the closure below
             var embeddedTyp = typ;
-            var embeddedPos = f.Value.Type;
+            var embeddedPos = f.Type;
 
             var embeddedPosʗ1 = embeddedPos;
             var embeddedTypʗ1 = embeddedTyp;
@@ -174,7 +178,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
                         return;
                     }
                     // unsafe.Pointer is treated like a regular pointer
-                    if ((~u).kind == UnsafePointer) {
+                    if (u.kind == UnsafePointer) {
                         Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ);
                     }
                     break;
@@ -196,7 +200,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
                     }
                     break;
                 }}
-            }).describef(new ast_Exprᴠpositioner(embeddedPos), "check embedded type %s"u8, embeddedTyp);
+            }).describef(new ast_Exprᴠpositioner(embeddedPos), "check embedded type %s", embeddedTyp);
         }
     }
 
@@ -213,31 +217,31 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
     case ж<ast.StarExpr> eΔ1: {
         // *T is valid, but **T is not
         {
-            var (_, ok) = (~eΔ1).X._<ж<ast.StarExpr>>(ᐧ); if (!ok) {
-                return embeddedFieldIdent((~eΔ1).X);
+            var (_, ok) = eΔ1.X._<ж<ast.StarExpr>>(ᐧ); if (!ok) {
+                return embeddedFieldIdent(eΔ1.X);
             }
         }
         break;
     }
     case ж<ast.SelectorExpr> eΔ1: {
-        return (~eΔ1).Sel;
+        return eΔ1.Sel;
     }
     case ж<ast.IndexExpr> eΔ1: {
-        return embeddedFieldIdent((~eΔ1).X);
+        return embeddedFieldIdent(eΔ1.X);
     }
     case ж<ast.IndexListExpr> eΔ1: {
-        return embeddedFieldIdent((~eΔ1).X);
+        return embeddedFieldIdent(eΔ1.X);
     }}
-    return default!; // invalid embedded field
+    return default; // invalid embedded field
 }
 
 internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, tokenꓸPos pos, Object obj) {
     ref var oset = ref Ꮡoset.DerefOrNull();
 
     {
-        var alt = oset.insert(obj); if (alt != default!) {
+        var alt = oset.insert(obj); if (alt != nil) {
             var err = Ꮡcheck.newError(DuplicateDecl);
-            err.addf((atPos)pos, "%s redeclared"u8, obj.Name());
+            err.addf((atPos)pos, "%s redeclared", obj.Name());
             err.addAltDecl(alt);
             err.report();
             return false;
@@ -252,12 +256,12 @@ internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
     if (Ꮡt != nil) {
         if (t.Kind == token.STRING) {
             {
-                var (val, err) = strconv.Unquote(t.Value); if (err == default!) {
+                var (val, err) = strconv.Unquote(t.Value); if (err == nil) {
                     return val;
                 }
             }
         }
-        Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡt), InvalidSyntaxTree, "incorrect tag syntax: %q"u8, t.Value);
+        Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡt), InvalidSyntaxTree, "incorrect tag syntax: %q", t.Value);
     }
     return ""u8;
 }

@@ -45,7 +45,7 @@ using static go.@internal.trace.version_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,7 +55,7 @@ using static go.@internal.trace.version_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg4AAwckuqigpSCgpSClKaCggAFEKKCgoKUgpSokg==", "", "", "25=Specs/1/4/7,Specs/2/4/8,Specs/3/4/9,Specs/4/4/10")]
+[assembly: GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg4AAwckgAICqKClIKClIKUpoKCAAYQooKCgpSClKiS", "", "", "25=Specs/1/4/7,Specs/2/4/8,Specs/3/4/9,Specs/4/4/10")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

@@ -39,16 +39,15 @@ public static UntypedInt NameDnsDomain => 12;
 // object name from one format to another.
 public static (@string, error) TranslateAccountName(@string username, uint32 from, uint32 to, nint initSize) {
     var (u, e) = UTF16PtrFromString(username);
-    if (e != default!) {
+    if (e != nil) {
         return ("", e);
     }
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)50;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)50, out var Ꮡn);
+    for (;;) {
         var b = new slice<uint16>((nint)(n));
         e = TranslateName(u, from, to, Ꮡ(b, 0), Ꮡn);
-        if (e == default!) {
-            return (UTF16ToString(b.slice(0, (nint)(n))), default!);
+        if (e == nil) {
+            return (UTF16ToString(b.slice(0, (nint)(n))), default);
         }
         if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);
@@ -107,17 +106,17 @@ public static (ж<SID>, error) StringToSid(@string s) {
     try {
         ref var sid = ref heap<ж<SID>>(out var Ꮡsid);
         var (p, e) = UTF16PtrFromString(s);
-        if (e != default!) {
-            return (default!, e);
+        if (e != nil) {
+            return (default, e);
         }
         e = ConvertStringSidToSid(p, Ꮡsid);
-        if (e != default!) {
-            return (default!, e);
+        if (e != nil) {
+            return (default, e);
         }
         defer(LocalFree, (ΔHandle)(uintptr)sid, ref ᒐ);
         return sid.Copy();
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -125,40 +124,38 @@ public static (ж<SID>, error) StringToSid(@string s) {
 // and the name of the domain on which the account was found.
 // System specify target computer to search.
 public static (ж<SID> sid, @string domain, uint32 accType, error err) LookupSID(@string system, @string account) {
-    ж<SID> sid = default!;
+    ж<SID> sid = default;
     ref var accType = ref heap(new uint32(), out var ᏑaccType);
 
     if (len(account) == 0) {
-        return (default!, "", 0, EINVAL);
+        return (default, "", 0, EINVAL);
     }
     var (acc, e) = UTF16PtrFromString(account);
-    if (e != default!) {
-        return (default!, "", 0, e);
+    if (e != nil) {
+        return (default, "", 0, e);
     }
-    ж<uint16> sys = default!;
+    ж<uint16> sys = default;
     if (len(system) > 0) {
         (sys, e) = UTF16PtrFromString(system);
-        if (e != default!) {
-            return (default!, "", 0, e);
+        if (e != nil) {
+            return (default, "", 0, e);
         }
     }
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)50;
-    ref var dn = ref heap<uint32>(out var Ꮡdn);
-    dn = (uint32)50;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)50, out var Ꮡn);
+    ref var dn = ref heap<uint32>((uint32)50, out var Ꮡdn);
+    for (;;) {
         var b = new slice<byte>((nint)(n));
         var db = new slice<uint16>((nint)(dn));
         sid = Ꮡ(b, 0).Reinterpret<byte, SID>();
         e = LookupAccountName(sys, acc, sid, Ꮡn, Ꮡ(db, 0), Ꮡdn, ᏑaccType);
-        if (e == default!) {
-            return (sid, UTF16ToString(db), accType, default!);
+        if (e == nil) {
+            return (sid, UTF16ToString(db), accType, default);
         }
         if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
-            return (default!, "", 0, e);
+            return (default, "", 0, e);
         }
         if (n <= (uint32)len(b)) {
-            return (default!, "", 0, e);
+            return (default, "", 0, e);
         }
     }
 }
@@ -170,13 +167,13 @@ public static (@string, error) String(this ж<SID> Ꮡsid) {
     try {
         ref var s = ref heap<ж<uint16>>(out var Ꮡs);
         var e = ConvertSidToStringSid(Ꮡsid, Ꮡs);
-        if (e != default!) {
+        if (e != nil) {
             return ("", e);
         }
         defer(LocalFree, (ΔHandle)(uintptr)s, ref ᒐ);
-        return (utf16PtrToString(s), default!);
+        return (utf16PtrToString(s), default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -190,10 +187,10 @@ public static (ж<SID>, error) Copy(this ж<SID> Ꮡsid) {
     var b = new slice<byte>(Ꮡsid.Len());
     var sid2 = Ꮡ(b, 0).Reinterpret<byte, SID>();
     var e = CopySid((uint32)len(b), sid2, Ꮡsid);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
-    return (sid2, default!);
+    return (sid2, default);
 }
 
 // LookupAccount retrieves the name of the account for this sid
@@ -201,25 +198,23 @@ public static (ж<SID>, error) Copy(this ж<SID> Ꮡsid) {
 // System specify target computer to search for.
 public static (@string account, @string domain, uint32 accType, error err) LookupAccount(this ж<SID> Ꮡsid, @string system) {
     ref var accType = ref heap(new uint32(), out var ᏑaccType);
-    error err = default!;
+    error err = default;
 
-    ж<uint16> sys = default!;
+    ж<uint16> sys = default;
     if (len(system) > 0) {
         (sys, err) = UTF16PtrFromString(system);
-        if (err != default!) {
+        if (err != nil) {
             return ("", "", 0, err);
         }
     }
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)50;
-    ref var dn = ref heap<uint32>(out var Ꮡdn);
-    dn = (uint32)50;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)50, out var Ꮡn);
+    ref var dn = ref heap<uint32>((uint32)50, out var Ꮡdn);
+    for (;;) {
         var b = new slice<uint16>((nint)(n));
         var db = new slice<uint16>((nint)(dn));
         var e = LookupAccountSid(sys, Ꮡsid, Ꮡ(b, 0), Ꮡn, Ꮡ(db, 0), Ꮡdn, ᏑaccType);
-        if (e == default!) {
-            return (UTF16ToString(b), UTF16ToString(db), accType, default!);
+        if (e == nil) {
+            return (UTF16ToString(b), UTF16ToString(db), accType, default);
         }
         if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", "", 0, e);
@@ -319,15 +314,15 @@ partial struct Token /*num:uintptr*/;
 // associated with current process.
 public static (Token, error) OpenCurrentProcessToken() {
     var (p, e) = GetCurrentProcess();
-    if (e != default!) {
+    if (e != nil) {
         return (0, e);
     }
     ref var t = ref heap(new Token(), out var Ꮡt);
     e = OpenProcessToken(p, TOKEN_QUERY, Ꮡt);
-    if (e != default!) {
+    if (e != nil) {
         return (0, e);
     }
-    return (t, default!);
+    return (t, default);
 }
 
 // Close releases access to access token.
@@ -337,19 +332,18 @@ public static error Close(this Token t) {
 
 // getInfo retrieves a specified type of information about an access token.
 internal static (@unsafe.Pointer, error) getInfo(this Token t, uint32 @class, nint initSize) {
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)initSize;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)initSize, out var Ꮡn);
+    for (;;) {
         var b = new slice<byte>((nint)(n));
         var e = GetTokenInformation(t, @class, Ꮡ(b, 0), (uint32)len(b), Ꮡn);
-        if (e == default!) {
-            return (@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), default!);
+        if (e == nil) {
+            return (@unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), default);
         }
         if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
-            return (default!, e);
+            return (default, e);
         }
         if (n <= (uint32)len(b)) {
-            return (default!, e);
+            return (default, e);
         }
     }
 }
@@ -357,10 +351,10 @@ internal static (@unsafe.Pointer, error) getInfo(this Token t, uint32 @class, ni
 // GetTokenUser retrieves access token t user account information.
 public static (ж<Tokenuser>, error) GetTokenUser(this Token t) {
     var (i, e) = t.getInfo(TokenUser, 50);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
-    return ((ж<Tokenuser>)(uintptr)(i), default!);
+    return ((ж<Tokenuser>)(uintptr)(i), default);
 }
 
 // GetTokenPrimaryGroup retrieves access token t primary group information.
@@ -368,22 +362,21 @@ public static (ж<Tokenuser>, error) GetTokenUser(this Token t) {
 // the primary group of any objects created by a process using this access token.
 public static (ж<Tokenprimarygroup>, error) GetTokenPrimaryGroup(this Token t) {
     var (i, e) = t.getInfo(TokenPrimaryGroup, 50);
-    if (e != default!) {
-        return (default!, e);
+    if (e != nil) {
+        return (default, e);
     }
-    return ((ж<Tokenprimarygroup>)(uintptr)(i), default!);
+    return ((ж<Tokenprimarygroup>)(uintptr)(i), default);
 }
 
 // GetUserProfileDirectory retrieves path to the
 // root directory of the access token t user's profile.
 public static (@string, error) GetUserProfileDirectory(this Token t) {
-    ref var n = ref heap<uint32>(out var Ꮡn);
-    n = (uint32)100;
-    while (ᐧ) {
+    ref var n = ref heap<uint32>((uint32)100, out var Ꮡn);
+    for (;;) {
         var b = new slice<uint16>((nint)(n));
         var e = GetUserProfileDirectory(t, Ꮡ(b, 0), Ꮡn);
-        if (e == default!) {
-            return (UTF16ToString(b), default!);
+        if (e == nil) {
+            return (UTF16ToString(b), default);
         }
         if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);

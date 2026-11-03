@@ -28,8 +28,8 @@ using static go.@internal.cpu_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/cpu/export_test.go", "export_test.cs", "AAsQ")]
-[assembly: go.GoPositionMap("internal/cpu/export_x86_test.go", "export_x86_test.cs", "AAoU")]
+[assembly: GoPositionMap("internal/cpu/export_test.go", "export_test.cs", "AAsQ")]
+[assembly: GoPositionMap("internal/cpu/export_x86_test.go", "export_x86_test.cs", "AAoU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

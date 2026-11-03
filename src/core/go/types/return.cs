@@ -34,12 +34,12 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
         break;
     }
     case ж<ast.LabeledStmt> sΔ1: {
-        return check.isTerminating((~sΔ1).Stmt, (~(~sΔ1).Label).Name);
+        return check.isTerminating(sΔ1.Stmt, sΔ1.Label.Name);
     }
     case ж<ast.ExprStmt> sΔ1: {
         // calling the predeclared (possibly parenthesized) panic() function is terminating
         {
-            var (call, ok) = ast.Unparen((~sΔ1).X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
+            var (call, ok) = ast.Unparen(sΔ1.X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
                 return true;
             }
         }
@@ -49,37 +49,37 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
         return true;
     }
     case ж<ast.BranchStmt> sΔ1: {
-        if ((~sΔ1).Tok == token.GOTO || (~sΔ1).Tok == token.FALLTHROUGH) {
+        if (sΔ1.Tok == token.GOTO || sΔ1.Tok == token.FALLTHROUGH) {
             return true;
         }
         break;
     }
     case ж<ast.BlockStmt> sΔ1: {
-        return check.isTerminatingList((~sΔ1).List, ""u8);
+        return check.isTerminatingList(sΔ1.List, ""u8);
     }
     case ж<ast.IfStmt> sΔ1: {
-        if ((~sΔ1).Else != default! && check.isTerminating(new ast.BlockStmtжStmt((~sΔ1).Body), ""u8) && check.isTerminating((~sΔ1).Else, ""u8)) {
+        if (sΔ1.Else != nil && check.isTerminating(new ast.BlockStmtжStmt(sΔ1.Body), ""u8) && check.isTerminating(sΔ1.Else, ""u8)) {
             return true;
         }
         break;
     }
     case ж<ast.SwitchStmt> sΔ1: {
-        return check.isTerminatingSwitch((~sΔ1).Body, label);
+        return check.isTerminatingSwitch(sΔ1.Body, label);
     }
     case ж<ast.TypeSwitchStmt> sΔ1: {
-        return check.isTerminatingSwitch((~sΔ1).Body, label);
+        return check.isTerminatingSwitch(sΔ1.Body, label);
     }
     case ж<ast.SelectStmt> sΔ1: {
-        foreach (var (_, sΔ2) in (~(~sΔ1).Body).List) {
+        foreach (var (_, sΔ2) in sΔ1.Body.List) {
             var cc = sΔ2._<ж<ast.CommClause>>();
-            if (!check.isTerminatingList((~cc).Body, ""u8) || hasBreakList((~cc).Body, label, true)) {
+            if (!check.isTerminatingList(cc.Body, ""u8) || hasBreakList(cc.Body, label, true)) {
                 return false;
             }
         }
         return true;
     }
     case ж<ast.ForStmt> sΔ1: {
-        if ((~sΔ1).Cond == default! && !hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, true)) {
+        if (sΔ1.Cond == nil && !hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, true)) {
             return true;
         }
         break;
@@ -106,10 +106,10 @@ internal static bool isTerminatingSwitch(this ref Checker check, ж<ast.BlockStm
     var hasDefault = false;
     foreach (var (_, s) in body.List) {
         var cc = s._<ж<ast.CaseClause>>();
-        if ((~cc).List == default!) {
+        if (cc.List == nil) {
             hasDefault = true;
         }
-        if (!check.isTerminatingList((~cc).Body, ""u8) || hasBreakList((~cc).Body, label, true)) {
+        if (!check.isTerminatingList(cc.Body, ""u8) || hasBreakList(cc.Body, label, true)) {
             return false;
         }
     }
@@ -145,60 +145,60 @@ internal static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
         break;
     }
     case ж<ast.LabeledStmt> sΔ1: {
-        return hasBreak((~sΔ1).Stmt, label, @implicit);
+        return hasBreak(sΔ1.Stmt, label, @implicit);
     }
     case ж<ast.BranchStmt> sΔ1: {
-        if ((~sΔ1).Tok == token.BREAK) {
-            if ((~sΔ1).Label == nil) {
+        if (sΔ1.Tok == token.BREAK) {
+            if (sΔ1.Label == nil) {
                 return @implicit;
             }
-            if ((~(~sΔ1).Label).Name == label) {
+            if (sΔ1.Label.Name == label) {
                 return true;
             }
         }
         break;
     }
     case ж<ast.BlockStmt> sΔ1: {
-        return hasBreakList((~sΔ1).List, label, @implicit);
+        return hasBreakList(sΔ1.List, label, @implicit);
     }
     case ж<ast.IfStmt> sΔ1: {
-        if (hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, @implicit) || (~sΔ1).Else != default! && hasBreak((~sΔ1).Else, label, @implicit)) {
+        if (hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, @implicit) || sΔ1.Else != nil && hasBreak(sΔ1.Else, label, @implicit)) {
             return true;
         }
         break;
     }
     case ж<ast.CaseClause> sΔ1: {
-        return hasBreakList((~sΔ1).Body, label, @implicit);
+        return hasBreakList(sΔ1.Body, label, @implicit);
     }
     case ж<ast.SwitchStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.TypeSwitchStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.CommClause> sΔ1: {
-        return hasBreakList((~sΔ1).Body, label, @implicit);
+        return hasBreakList(sΔ1.Body, label, @implicit);
     }
     case ж<ast.SelectStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.ForStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, false)) {
             return true;
         }
         break;
     }
     case ж<ast.RangeStmt> sΔ1: {
-        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt((~sΔ1).Body), label, false)) {
+        if (label != ""u8 && hasBreak(new ast.BlockStmtжStmt(sΔ1.Body), label, false)) {
             return true;
         }
         break;

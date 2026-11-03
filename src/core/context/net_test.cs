@@ -13,13 +13,13 @@ partial class context_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object deadlineExceededDoesNotˢ = (@string)"DeadlineExceeded does not implement net.Error"u8;
 
-public static void TestDeadlineExceededIsNetError(ж<testing.T> Ꮡt) {
+public static void TestDeadlineExceededIsNetError(ж<testing.T> t) {
     var (err, ok) = context.DeadlineExceeded._<netꓸError>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatal(deadlineExceededDoesNotˢ);
+        t.Fatal(deadlineExceededDoesNotˢ);
     }
     if (!err.Timeout() || !err.Temporary()) {
-        Ꮡt.Fatalf("Timeout() = %v, Temporary() = %v, want true, true"u8, err.Timeout(), err.Temporary());
+        t.Fatalf("Timeout() = %v, Temporary() = %v, want true, true", err.Timeout(), err.Temporary());
     }
 }
 

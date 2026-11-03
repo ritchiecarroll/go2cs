@@ -11,7 +11,7 @@ partial class net_package {
 internal static Action testHookCanceledDial = () => {
 }; // for golang.org/issue/16523
 
-internal static @string hostsFilePath = "/etc/hosts"u8;
+internal static @string hostsFilePath = "/etc/hosts";
 
 // Placeholders for socket system calls.
 internal static Func<nint, nint, nint, (nint, error)> socketFunc = syscall.Socket;

@@ -31,8 +31,8 @@ public static (uintptr, bool) MulUintptr(uintptr a, uintptr b) {
 // This is a copy from math/bits.Mul64
 // On supported platforms this is an intrinsic lowered by the compiler.
 public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y) {
-    uint64 hi = default!;
-    uint64 lo = default!;
+    uint64 hi = default;
+    uint64 lo = default;
 
     const uint64 mask32 = /* 1<<32 - 1 */ 4294967295;
     var x0 = (uint64)(x & mask32);
@@ -56,8 +56,8 @@ public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y) {
 // This function's execution time does not depend on the inputs.
 // On supported platforms this is an intrinsic lowered by the compiler.
 public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry) {
-    uint64 sum = default!;
-    uint64 carryOut = default!;
+    uint64 sum = default;
+    uint64 carryOut = default;
 
     sum = x + y + carry;
     // The sum will overflow if both top bits are set (x & y) or if one of them

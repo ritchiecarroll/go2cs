@@ -31,11 +31,11 @@ internal static (syscall.Errno, bool) toErrno(error err) {
     if (!ok) {
         return (0, false);
     }
-    (var syserr, ok) = (~operr).Err._<ж<Δos.SyscallError>>(ᐧ);
+    (var syserr, ok) = operr.Err._<ж<Δos.SyscallError>>(ᐧ);
     if (!ok) {
         return (0, false);
     }
-    (var errno, ok) = (~syserr).Err._<syscall.Errno>(ᐧ);
+    (var errno, ok) = syserr.Err._<syscall.Errno>(ᐧ);
     if (!ok) {
         return (0, false);
     }
@@ -43,21 +43,24 @@ internal static (syscall.Errno, bool) toErrno(error err) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gotestDialAddrˢ = "GOTEST_DIAL_ADDR"u8;
-internal static readonly @string testRunˢ = "-test.run=^TestAcceptIgnoreSomeErrors$"u8;
-internal static readonly @string abcˢ = "abc"u8;
+internal static ref readonly @string gotestDialAddrˢ => ref gotestDialAddrˢᵇ;
+private static readonly @string gotestDialAddrˢᵇ = "GOTEST_DIAL_ADDR"u8;
+internal static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestAcceptIgnoreSomeErrors$"u8;
+internal static ref readonly @string abcˢ => ref abcˢᵇ;
+private static readonly @string abcˢᵇ = "abc"u8;
 
 // TestAcceptIgnoreSomeErrors tests that windows TCPListener.AcceptTCP
 // handles broken connections. It verifies that broken connections do
 // not affect future connections.
-public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
+public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         (@string, error) recv(global::go.net_package.Listener lnΔ1, bool ignoreSomeReadErrors) {
             GoFrame ᒐ = default;
             try {
                 var (c, errΔ1) = lnΔ1.Accept();
-                if (errΔ1 != default!) {
+                if (errΔ1 != nil) {
                     // Display windows errno in error message.
                     var (errnoΔ1, okΔ1) = toErrno(errΔ1);
                     if (!okΔ1) {
@@ -70,16 +73,16 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
 
                 var b = new slice<byte>(100);
                 (var n, errΔ1) = c.Read(b);
-                if (errΔ1 == default! || AreEqual(errΔ1, Δio.EOF)) {
-                    return ((@string)(b.slice(0, n)), default!);
+                if (errΔ1 == nil || AreEqual(errΔ1, Δio.EOF)) {
+                    return ((@string)(b.slice(0, n)), default);
                 }
                 var (errno, ok) = toErrno(errΔ1);
                 if (ok && ignoreSomeReadErrors && (errno == syscall.ERROR_NETNAME_DELETED || errno == syscall.WSAECONNRESET)) {
-                    return ("", default!);
+                    return ("", default);
                 }
                 return ("", errΔ1);
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         }
 
@@ -87,7 +90,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
             GoFrame ᒐ = default;
             try {
                 var (c, errΔ2) = Dial(tcpˢ, addr);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 var cʗ2 = c;
@@ -95,15 +98,15 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
 
                 var b = slice<byte>(data);
                 (var n, errΔ2) = c.Write(b);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 if (n != len(b)) {
                     return fmt.Errorf(@"Only %d chars of string ""%s"" sent"u8, n, data);
                 }
-                return default!;
+                return default;
             }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
             finally { ᒐ.Run(); }
         }
 
@@ -111,8 +114,8 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
             @string envaddr = Δos.Getenv(gotestDialAddrˢ); if (envaddr != ""u8) {
                 // In child process.
                 var (c, errΔ3) = Dial(tcpˢ, envaddr);
-                if (errΔ3 != default!) {
-                    Ꮡt.Fatal(errΔ3);
+                if (errΔ3 != nil) {
+                    t.Fatal(errΔ3);
                 }
                 fmt.Printf("sleeping\n"u8);
                 time.Sleep(time.ΔMinute); // process will be killed here
@@ -120,29 +123,29 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
             }
         }
 
-        var (ln, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var (ln, err) = Listen(tcpˢ, "127.0.0.1:0");
+        if (err != nil) {
+            t.Fatal(err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
 
         // Start child process that connects to our listener.
-        var cmd = exec.Command(testenv.Executable(new net_test_package.testing_TжTB(Ꮡt)), testRunˢ);
-        cmd.Value.Env = append(Δos.Environ(), "GOTEST_DIAL_ADDR="u8 + ln.Addr().String());
+        var cmd = exec.Command(testenv.Executable(new net_test_package.testing_TжTB(t)), testRunˢ);
+        cmd.Env = append(Δos.Environ(), "GOTEST_DIAL_ADDR="u8 + ln.Addr().String());
         (var stdout, err) = cmd.StdoutPipe();
-        if (err != default!) {
-            Ꮡt.Fatalf("cmd.StdoutPipe failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("cmd.StdoutPipe failed: %v", err);
         }
         err = cmd.Start();
-        if (err != default!) {
-            Ꮡt.Fatalf("cmd.Start failed: %v\n"u8, err);
+        if (err != nil) {
+            t.Fatalf("cmd.Start failed: %v\n", err);
         }
         var outReader = bufio.NewReader(stdout);
-        while (ᐧ) {
-            var (sΔ1, errΔ4) = outReader.ReadString((rune)'\n');
-            if (errΔ4 != default!) {
-                Ꮡt.Fatalf("reading stdout failed: %v"u8, errΔ4);
+        for (;;) {
+            var (sΔ1, errΔ4) = outReader.ReadString((byte)'\n');
+            if (errΔ4 != nil) {
+                t.Fatalf("reading stdout failed: %v", errΔ4);
             }
             if (sΔ1 == "sleeping\n"u8) {
                 break;
@@ -153,7 +156,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
 
         time.Duration alittle = /* 100 * time.Millisecond */ 100000000;
         time.Sleep(alittle);
-        (~cmd).Process.Kill(); // the only way to trigger the errors
+        cmd.Process.Kill(); // the only way to trigger the errors
         time.Sleep(alittle);
 
         // Send second connection data (with delay in a separate goroutine).
@@ -164,43 +167,46 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
         goǃ(() => {
             time.Sleep(alittle);
             var errΔ5 = sendʗ1(lnʗ2.Addr().String(), abcˢ);
-            if (errΔ5 != default!) {
+            if (errΔ5 != nil) {
                 resultʗ1.ᐸꟷ(errΔ5);
             }
-            resultʗ1.ᐸꟷ(default!);
+            resultʗ1.ᐸꟷ(default);
         });
         var resultʗ2 = result;
         defer(() => {
             var errΔ6 = ᐸꟷ(resultʗ2);
-            if (errΔ6 != default!) {
-                Ꮡt.Fatalf("send failed: %v"u8, errΔ6);
+            if (errΔ6 != nil) {
+                t.Fatalf("send failed: %v", errΔ6);
             }
         }, ref ᒐ);
 
         // Receive first or second connection.
         (var s, err) = recv(ln, true);
-        if (err != default!) {
-            Ꮡt.Fatalf("recv failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("recv failed: %v", err);
         }
         var exprᴛ1 = s;
-        if (exprᴛ1 == ""u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == ""u8: {
             // First connection data is received, let's get second connection data.
+            break;
         }
-        else if (exprᴛ1 == "abc"u8) {
+        case {} when exprᴛ1 == "abc"u8: {
             // First connection is lost forever, but that is ok.
             return;
         }
-        else { /* default: */
-            Ꮡt.Fatalf(@"""%s"" received from recv, but """" or ""abc"" expected"u8, s);
-        }
+        default: {
+            t.Fatalf(@"""%s"" received from recv, but """" or ""abc"" expected", s);
+            break;
+        }}
 
         // Get second connection data.
         (s, err) = recv(ln, false);
-        if (err != default!) {
-            Ꮡt.Fatalf("recv failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("recv failed: %v", err);
         }
         if (s != "abc"u8) {
-            Ꮡt.Fatalf(@"""%s"" received from recv, but ""abc"" expected"u8, s);
+            t.Fatalf(@"""%s"" received from recv, but ""abc"" expected", s);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -208,9 +214,12 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string netcmdˢ = "netcmd"u8;
-internal static readonly @string powershellˢ = "powershell"u8;
-internal static readonly @string commandˢ = "-Command"u8;
+internal static ref readonly @string netcmdˢ => ref netcmdˢᵇ;
+private static readonly @string netcmdˢᵇ = "netcmd"u8;
+internal static ref readonly @string powershellˢ => ref powershellˢᵇ;
+private static readonly @string powershellˢᵇ = "powershell"u8;
+internal static ref readonly @string commandˢ => ref commandˢᵇ;
+private static readonly @string commandˢᵇ = "-Command"u8;
 
 internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
     GoFrame ᒐ = default;
@@ -224,69 +233,74 @@ internal static (slice<byte>, error) runCmd(params ꓸꓸꓸstring argsʗp) {
             return b;
         }
         var (f, err) = Δos.CreateTemp(""u8, netcmdˢ);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         f.Close();
         defer(Δos.Remove, f.Name(), ref ᒐ);
-        @string cmd = fmt.Sprintf(@"%s | Out-File ""%s"" -encoding UTF8"u8, strings.Join(args, " "u8), f.Name());
+        @string cmd = fmt.Sprintf(@"%s | Out-File ""%s"" -encoding UTF8"u8, strings.Join(args, " "), f.Name());
         (var @out, err) = exec.Command(powershellˢ, commandˢ, cmd).CombinedOutput();
-        if (err != default!) {
+        if (err != nil) {
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
+                return (default, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
-            error err2 = default!;
+            error err2 = default;
             (@out, err2) = Δos.ReadFile(f.Name());
-            if (err2 != default!) {
-                return (default!, err2);
+            if (err2 != nil) {
+                return (default, err2);
             }
             if (len(@out) != 0) {
-                return (default!, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
+                return (default, fmt.Errorf("%s failed: %v: %q"u8, args[0], err, (@string)removeUTF8BOM(@out)));
             }
-            return (default!, fmt.Errorf("%s failed: %v"u8, args[0], err));
+            return (default, fmt.Errorf("%s failed: %v"u8, args[0], err));
         }
         (@out, err) = Δos.ReadFile(f.Name());
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        return (removeUTF8BOM(@out), default!);
+        return (removeUTF8BOM(@out), default);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string netshˢ = "netsh"u8;
-internal static readonly @string helpˢ = "help"u8;
+internal static ref readonly @string netshˢ => ref netshˢᵇ;
+private static readonly @string netshˢᵇ = "netsh"u8;
+internal static ref readonly @string helpˢ => ref helpˢᵇ;
+private static readonly @string helpˢᵇ = "help"u8;
 
-internal static void checkNetsh(ж<testing.T> Ꮡt) {
+internal static void checkNetsh(ж<testing.T> t) {
     if (testenv.Builder() == "windows-arm64-10"u8) {
         // netsh was observed to sometimes hang on this builder.
         // We have not observed failures on windows-arm64-11, so for the
         // moment we are leaving the test enabled elsewhere on the theory
         // that it may have been a platform bug fixed in Windows 11.
-        testenv.SkipFlaky(new net_test_package.testing_TжTB(Ꮡt), 52082);
+        testenv.SkipFlaky(new net_test_package.testing_TжTB(t), 52082);
     }
     var (@out, err) = runCmd(netshˢ, helpˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (bytes.Contains(@out, slice<byte>("The following helper DLL cannot be loaded"u8))) {
-        Ꮡt.Skipf("powershell failure:\n%s"u8, err);
+        t.Skipf("powershell failure:\n%s", err);
     }
     if (!bytes.Contains(@out, slice<byte>("The following commands are available:"u8))) {
-        Ꮡt.Skipf("powershell does not speak English:\n%s"u8, @out);
+        t.Skipf("powershell does not speak English:\n%s", @out);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string interfaceˢ = "interface"u8;
-internal static readonly @string showˢ = "show"u8;
-internal static readonly @string levelVerboseˢ = "level=verbose"u8;
+internal static ref readonly @string interfaceˢ => ref interfaceˢᵇ;
+private static readonly @string interfaceˢᵇ = "interface"u8;
+internal static ref readonly @string showˢ => ref showˢᵇ;
+private static readonly @string showˢᵇ = "show"u8;
+internal static ref readonly @string levelVerboseˢ => ref levelVerboseˢᵇ;
+private static readonly @string levelVerboseˢᵇ = "level=verbose"u8;
 
 internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, bool> ifaces) {
     var (@out, err) = runCmd(netshˢ, interfaceˢ, ipver, showˢ, interfaceˢ, levelVerboseˢ);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     // interface information is listed like:
@@ -298,25 +312,29 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
     //State                              : connected
     //Metric                             : 10
     //...
-    @string name = default!;
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
+    @string name = default;
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
             f = f.slice(0, len(f) - len(" Parameters"));
             name = (@string)f;
             continue;
         }
-        bool isup = default!;
+        bool isup = default;
         var exprᴛ1 = ((sstring)line);
-        if (exprᴛ1 == "State                              : connected"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "State                              : connected"u8: {
             isup = true;
+            break;
         }
-        else if (exprᴛ1 == "State                              : disconnected"u8) {
+        case {} when exprᴛ1 == "State                              : disconnected"u8: {
             isup = false;
+            break;
         }
-        else { /* default: */
+        default: {
             continue;
-        }
+            break;
+        }}
         if (name != ""u8) {
             {
                 var (v, ok) = ifaces[name, ꟷ]; if (ok && v != isup) {
@@ -327,15 +345,17 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
             name = ""u8;
         }
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ipv6ˢ = "ipv6"u8;
-internal static readonly @string ipv4ˢ = "ipv4"u8;
+internal static ref readonly @string ipv6ˢ => ref ipv6ˢᵇ;
+private static readonly @string ipv6ˢᵇ = "ipv6"u8;
+internal static ref readonly @string ipv4ˢ => ref ipv4ˢᵇ;
+private static readonly @string ipv4ˢᵇ = "ipv4"u8;
 
-public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
-    checkNetsh(Ꮡt);
+public static void TestInterfacesWithNetsh(ж<testing.T> t) {
+    checkNetsh(t);
 
     @string toString(@string name, bool isup) {
         if (isup) {
@@ -345,8 +365,8 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
     }
 
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var have = new slice<@string>(0);
     foreach (var (_, ifi) in ift) {
@@ -356,12 +376,12 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
 
     var ifaces = new map<@string, bool>();
     err = netshInterfaceIPShowInterface(ipv6ˢ, ifaces);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     err = netshInterfaceIPShowInterface(ipv4ˢ, ifaces);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var want = new slice<@string>(0);
     foreach (var (name, isup) in ifaces) {
@@ -370,7 +390,7 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
     slices.Sort<slice<@string>, @string>(want);
 
     if (!slices.Equal<slice<@string>, @string>(want, have)) {
-        Ꮡt.Fatalf("unexpected interface list %q, want %q"u8, have, want);
+        t.Fatalf("unexpected interface list %q, want %q", have, want);
     }
 }
 
@@ -394,10 +414,10 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
     //    InterfaceMetric:                      50
     //
     var addrs = new slice<@string>(0);
-    @string addr = default!;
-    @string subnetprefix = default!;
-    bool processingOurInterface = default!;
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
+    @string addr = default;
+    @string subnetprefix = default;
+    bool processingOurInterface = default;
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
         if (!processingOurInterface) {
             if (!bytes.HasPrefix(line, slice<byte>("Configuration for interface"u8))) {
                 continue;
@@ -412,11 +432,11 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
             break;
         }
         if (bytes.Contains(line, slice<byte>("Subnet Prefix:"u8))) {
-            var f = bytes.Split(line, new byte[]{(rune)':'}.slice());
+            var f = bytes.Split(line, slice<byte>([(byte)':']));
             if (len(f) == 2) {
-                f = bytes.Split(f[1], new byte[]{(rune)'('}.slice());
+                f = bytes.Split(f[1], slice<byte>([(byte)'(']));
                 if (len(f) == 2) {
-                    f = bytes.Split(f[0], new byte[]{(rune)'/'}.slice());
+                    f = bytes.Split(f[0], slice<byte>([(byte)'/']));
                     if (len(f) == 2) {
                         subnetprefix = (@string)bytes.TrimSpace(f[1]);
                         if (addr != ""u8 && subnetprefix != ""u8) {
@@ -428,7 +448,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
         }
         addr = ""u8;
         if (bytes.Contains(line, slice<byte>("IP Address:"u8))) {
-            var f = bytes.Split(line, new byte[]{(rune)':'}.slice());
+            var f = bytes.Split(line, slice<byte>([(byte)':']));
             if (len(f) == 2) {
                 addr = (@string)bytes.TrimSpace(f[1]);
             }
@@ -438,7 +458,8 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dDDDˢ = @":\d+\.\d+\.\d+\.\d+$"u8;
+internal static ref readonly @string dDDDˢ => ref dDDDˢᵇ;
+private static readonly @string dDDDˢᵇ = @":\d+\.\d+\.\d+\.\d+$"u8;
 
 internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice<byte> netshOutput) {
     // Address information is listed like:
@@ -465,9 +486,9 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
     //
 
     // TODO: need to test ipv6 netmask too, but netsh does not outputs it
-    @string addr = default!;
+    @string addr = default;
     var addrs = new slice<@string>(0);
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
         if (addr != ""u8) {
             if (len(line) == 0) {
                 addr = ""u8;
@@ -486,12 +507,12 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
         if (!bytes.HasSuffix(line, slice<byte>("Parameters"u8))) {
             continue;
         }
-        var f = bytes.Split(line, new byte[]{(rune)' '}.slice());
+        var f = bytes.Split(line, slice<byte>([(byte)' ']));
         if (len(f) != 3) {
             continue;
         }
         // remove scope ID if present
-        f = bytes.Split(f[1], new byte[]{(rune)'%'}.slice());
+        f = bytes.Split(f[1], slice<byte>([(byte)'%']));
 
         // netsh can create IPv4-embedded IPv6 addresses, like fe80::5efe:192.168.140.1.
         // Convert these to all hexadecimal fe80::5efe:c0a8:8c01 for later string comparisons.
@@ -506,23 +527,24 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string addressˢ = "address"u8;
+internal static ref readonly @string addressˢ => ref addressˢᵇ;
+private static readonly @string addressˢᵇ = "address"u8;
 
-public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
-    checkNetsh(Ꮡt);
+public static void TestInterfaceAddrsWithNetsh(ж<testing.T> t) {
+    checkNetsh(t);
 
     var (outIPV4, err) = runCmd(netshˢ, interfaceˢ, ipv4ˢ, showˢ, addressˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var outIPV6, err) = runCmd(netshˢ, interfaceˢ, ipv6ˢ, showˢ, addressˢ, levelVerboseˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     (var ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     foreach (var (_, vᴛ1) in ift) {
         ref var ifi = ref heap(new global::go.net_package.Interface(), out var Ꮡifi);
@@ -534,28 +556,28 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
         }
         var have = new slice<@string>(0);
         var (addrs, errΔ1) = Ꮡifi.Addrs();
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         foreach (var (_, addr) in addrs) {
             switch (addr.type()) {
             case ж<global::go.net_package.IPNet> addrΔ1: {
-                if ((~addrΔ1).IP.To4() != default!) {
+                if (addrΔ1.IP.To4() != nil) {
                     have = append(have, addrΔ1.String());
                 }
-                if ((~addrΔ1).IP.To16() != default! && (~addrΔ1).IP.To4() == default!) {
+                if (addrΔ1.IP.To16() != nil && addrΔ1.IP.To4() == nil) {
                     // netsh does not output netmask for ipv6, so ignore ipv6 mask
-                    have = append(have, (~addrΔ1).IP.String());
+                    have = append(have, addrΔ1.IP.String());
                 }
                 break;
             }
             case ж<global::go.net_package.IPAddr> addrΔ1: {
-                if ((~addrΔ1).IP.To4() != default!) {
+                if (addrΔ1.IP.To4() != nil) {
                     have = append(have, addrΔ1.String());
                 }
-                if ((~addrΔ1).IP.To16() != default! && (~addrΔ1).IP.To4() == default!) {
+                if (addrΔ1.IP.To16() != nil && addrΔ1.IP.To4() == nil) {
                     // netsh does not output netmask for ipv6, so ignore ipv6 mask
-                    have = append(have, (~addrΔ1).IP.String());
+                    have = append(have, addrΔ1.IP.String());
                 }
                 break;
             }}
@@ -568,42 +590,48 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
         slices.Sort<slice<@string>, @string>(want);
 
         if (!slices.Equal<slice<@string>, @string>(want, have)) {
-            Ꮡt.Errorf("%s: unexpected addresses list %q, want %q"u8, ifi.Name, have, want);
+            t.Errorf("%s: unexpected addresses list %q, want %q", ifi.Name, have, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getmacˢ = "getmac"u8;
-internal static readonly @string termGetmacIsNotˢ = "term 'getmac' is not recognized as the name of a cmdlet"u8;
+internal static ref readonly @string getmacˢ => ref getmacˢᵇ;
+private static readonly @string getmacˢᵇ = "getmac"u8;
+internal static ref readonly @string termGetmacIsNotˢ => ref termGetmacIsNotˢᵇ;
+private static readonly @string termGetmacIsNotˢᵇ = "term 'getmac' is not recognized as the name of a cmdlet"u8;
 
 // check that getmac exists as a powershell command, and that it
 // speaks English.
-internal static void checkGetmac(ж<testing.T> Ꮡt) {
+internal static void checkGetmac(ж<testing.T> t) {
     var (@out, err) = runCmd(getmacˢ, "/?");
-    if (err != default!) {
+    if (err != nil) {
         if (strings.Contains(err.Error(), termGetmacIsNotˢ)) {
-            Ꮡt.Skipf("getmac not available"u8);
+            t.Skipf("getmac not available");
         }
-        Ꮡt.Fatal(err);
+        t.Fatal(err);
     }
     if (!bytes.Contains(@out, slice<byte>("network adapters on a system"u8))) {
-        Ꮡt.Skipf("skipping test on non-English system"u8);
+        t.Skipf("skipping test on non-English system");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string listˢ = "list"u8;
-internal static readonly @string transportNameˢ = "Transport Name"u8;
-internal static readonly @string physicalAddressˢ = "Physical Address"u8;
-internal static readonly @string connectionNameˢ = "Connection Name"u8;
+internal static ref readonly @string listˢ => ref listˢᵇ;
+private static readonly @string listˢᵇ = "list"u8;
+internal static ref readonly @string transportNameˢ => ref transportNameˢᵇ;
+private static readonly @string transportNameˢᵇ = "Transport Name"u8;
+internal static ref readonly @string physicalAddressˢ => ref physicalAddressˢᵇ;
+private static readonly @string physicalAddressˢᵇ = "Physical Address"u8;
+internal static ref readonly @string connectionNameˢ => ref connectionNameˢᵇ;
+private static readonly @string connectionNameˢᵇ = "Connection Name"u8;
 
-public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
-    checkGetmac(Ꮡt);
+public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> t) {
+    checkGetmac(t);
 
     var (ift, err) = Interfaces();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     var have = new map<@string, @string>();
     foreach (var (_, ifi) in ift) {
@@ -615,8 +643,8 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
     }
 
     (var @out, err) = runCmd(getmacˢ, "/fo", listˢ, "/v");
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     // getmac output looks like:
     //
@@ -641,15 +669,14 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
     //Transport Name:   Disconnected
     //
     var want = new map<@string, @string>();
-    ref var group = ref heap<map<@string, @string>>(out var Ꮡgroup);
-    group = new map<@string, @string>(); // name / values for single adapter
+    ref var group = ref heap<map<@string, @string>>(new map<@string, @string>(), out var Ꮡgroup); // name / values for single adapter
     @string getValue(@string name) {
         var (value, found) = Ꮡgroup.ValueSlot[name, ꟷ];
         if (!found) {
-            Ꮡt.Fatalf("%q has no %q line in it"u8, Ꮡgroup.ValueSlot, name);
+            t.Fatalf("%q has no %q line in it", Ꮡgroup.ValueSlot, name);
         }
         if (value == ""u8) {
-            Ꮡt.Fatalf("%q has empty %q value"u8, Ꮡgroup.ValueSlot, name);
+            t.Fatalf("%q has empty %q value", Ꮡgroup.ValueSlot, name);
         }
         return value;
     }
@@ -669,19 +696,19 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
             // skip these
             return;
         }
-        addr = strings.ReplaceAll(addr, "-"u8, ":"u8);
+        addr = strings.ReplaceAll(addr, "-", ":");
         @string cname = getValueʗ1(connectionNameˢ);
         wantʗ1[cname] = addr;
         Ꮡgroup.ValueSlot = new map<@string, @string>();
     }
-    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, slice<byte>([(byte)'\r', (byte)'\n'])).Invoke)) {
         if (len(line) == 0) {
             processGroup();
             continue;
         }
-        nint i = bytes.IndexByte(line, (rune)':');
+        nint i = bytes.IndexByte(line, (byte)':');
         if (i == -1) {
-            Ꮡt.Fatalf("line %q has no : in it"u8, line);
+            t.Fatalf("line %q has no : in it", line);
         }
         group[((@string)(line.slice(0, i)))] = (@string)bytes.TrimSpace(line.slice(i + 1));
     }
@@ -702,7 +729,7 @@ nextWant:
         {
             var (haveAddr, ok) = have[name, ꟷ]; if (ok) {
                 if (haveAddr != wantAddr) {
-                    Ꮡt.Errorf("unexpected MAC address for %q - %v, want %v"u8, name, haveAddr, wantAddr);
+                    t.Errorf("unexpected MAC address for %q - %v, want %v", name, haveAddr, wantAddr);
                 }
                 continue;
             }
@@ -723,7 +750,7 @@ nextWant:
                 }
             }
         }
-        Ꮡt.Errorf("getmac lists %q, but it could not be found among Go interfaces %v"u8, name, have);
+        t.Errorf("getmac lists %q, but it could not be found among Go interfaces %v", name, have);
 continue_nextWant:;
     }
 break_nextWant:;

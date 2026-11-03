@@ -38,25 +38,32 @@ using path;
 
 partial class fipstest_internal_test_package {
 
-internal static ж<@string> flagEntropySamples = flag.String("entropy-samples"u8, ""u8, "store entropy samples with the provided `suffix`"u8);
+internal static ж<@string> flagEntropySamples = flag.String("entropy-samples", "", "store entropy samples with the provided `suffix`");
 
-internal static ж<bool> flagNISTSP80090B = flag.Bool("nist-sp800-90b"u8, false, "run NIST SP 800-90B tests (requires docker)"u8);
+internal static ж<bool> flagNISTSP80090B = flag.Bool("nist-sp800-90b", false, "run NIST SP 800-90B tests (requires docker)");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dockerˢ = "docker"u8;
-internal static readonly @string imageˢ = "image"u8;
-internal static readonly @string inspectˢ = "inspect"u8;
-internal static readonly @string nistSp80090bˢ = "nist-sp800-90b"u8;
-internal static readonly @string dockerfileSp80090bˢ = "Dockerfile.SP800-90B_EntropyAssessment"u8;
-internal static readonly @string varEmptyˢ = "/var/empty"u8;
-internal static readonly @string runˢ = "run"u8;
-internal static readonly @string eaNonIidˢ = "ea_non_iid"u8;
-internal static readonly @string eaRestartˢ = "ea_restart"u8;
+internal static ref readonly @string dockerˢ => ref dockerˢᵇ;
+private static readonly @string dockerˢᵇ = "docker"u8;
+internal static ref readonly @string imageˢ => ref imageˢᵇ;
+private static readonly @string imageˢᵇ = "image"u8;
+internal static ref readonly @string inspectˢ => ref inspectˢᵇ;
+private static readonly @string inspectˢᵇ = "inspect"u8;
+internal static ref readonly @string nistSp80090bˢ => ref nistSp80090bˢᵇ;
+private static readonly @string nistSp80090bˢᵇ = "nist-sp800-90b"u8;
+internal static ref readonly @string dockerfileSp80090bˢ => ref dockerfileSp80090bˢᵇ;
+private static readonly @string dockerfileSp80090bˢᵇ = "Dockerfile.SP800-90B_EntropyAssessment"u8;
+internal static ref readonly @string varEmptyˢ => ref varEmptyˢᵇ;
+private static readonly @string varEmptyˢᵇ = "/var/empty"u8;
+internal static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
+internal static ref readonly @string eaNonIidˢ => ref eaNonIidˢᵇ;
+private static readonly @string eaNonIidˢᵇ = "ea_non_iid"u8;
+internal static ref readonly @string eaRestartˢ => ref eaRestartˢᵇ;
+private static readonly @string eaRestartˢᵇ = "ea_restart"u8;
 
-public static void TestEntropySamples(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    cryptotest.MustSupportFIPS140(Ꮡt);
+public static void TestEntropySamples(ж<testing.T> t) {
+    cryptotest.MustSupportFIPS140(t);
     var now = time.Now().UTC();
 
     nint seqSampleCount = 1_000_000;
@@ -65,94 +72,94 @@ public static void TestEntropySamples(ж<testing.T> Ꮡt) {
         seqSampleCount = 300_000_000;
     }
     var seqSamples = new slice<uint8>(seqSampleCount);
-    samplesOrTryAgain(Ꮡt, seqSamples);
+    samplesOrTryAgain(t, seqSamples);
     @string seqSamplesName = fmt.Sprintf("entropy_samples_sequential_%s_%s_%s_%s_%s.bin"u8, entropy.Version(),
-        runtime.GOOS, runtime.GOARCH, flagEntropySamples.Value, now.Format("20060102T150405Z"u8));
+        runtime.GOOS, runtime.GOARCH, flagEntropySamples.Value, now.Format("20060102T150405Z"));
     if (flagEntropySamples.Value != ""u8) {
         {
-            var err = os.WriteFile(seqSamplesName, seqSamples, 420); if (err != default!) {
-                Ꮡt.Fatalf("failed to write samples to %q: %v"u8, seqSamplesName, err);
+            var err = os.WriteFile(seqSamplesName, seqSamples, 420); if (err != nil) {
+                t.Fatalf("failed to write samples to %q: %v", seqSamplesName, err);
             }
         }
-        Ꮡt.Logf("wrote %s"u8, seqSamplesName);
+        t.Logf("wrote %s", seqSamplesName);
     }
 
     array<array<uint8>> restartSamples = new(1000, () => new(1000));
     foreach (var i in range(restartSamples)) {
         array<uint8> samples = new(1024);
-        samplesOrTryAgain(Ꮡt, samples[..]);
+        samplesOrTryAgain(t, samples[..]);
         copy(restartSamples[i][..], samples[..]);
     }
     @string restartSamplesName = fmt.Sprintf("entropy_samples_restart_%s_%s_%s_%s_%s.bin"u8, entropy.Version(),
-        runtime.GOOS, runtime.GOARCH, flagEntropySamples.Value, now.Format("20060102T150405Z"u8));
+        runtime.GOOS, runtime.GOARCH, flagEntropySamples.Value, now.Format("20060102T150405Z"));
     if (flagEntropySamples.Value != ""u8) {
         var (f, err) = os.Create(restartSamplesName);
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to create %q: %v"u8, restartSamplesName, err);
+        if (err != nil) {
+            t.Fatalf("failed to create %q: %v", restartSamplesName, err);
         }
         foreach (var i in range(restartSamples)) {
             {
-                var (_, errΔ1) = f.Write(restartSamples[i][..]); if (errΔ1 != default!) {
-                    Ꮡt.Fatalf("failed to write samples to %q: %v"u8, restartSamplesName, errΔ1);
+                var (_, errΔ1) = f.Write(restartSamples[i][..]); if (errΔ1 != nil) {
+                    t.Fatalf("failed to write samples to %q: %v", restartSamplesName, errΔ1);
                 }
             }
         }
         {
-            var errΔ2 = f.Close(); if (errΔ2 != default!) {
-                Ꮡt.Fatalf("failed to close %q: %v"u8, restartSamplesName, errΔ2);
+            var errΔ2 = f.Close(); if (errΔ2 != nil) {
+                t.Fatalf("failed to close %q: %v", restartSamplesName, errΔ2);
             }
         }
-        Ꮡt.Logf("wrote %s"u8, restartSamplesName);
+        t.Logf("wrote %s", restartSamplesName);
     }
 
     if (flagNISTSP80090B.Value) {
         if (flagEntropySamples.Value == ""u8) {
-            Ꮡt.Fatalf("-nist-sp800-90b requires -entropy-samples to be set too"u8);
+            t.Fatalf("-nist-sp800-90b requires -entropy-samples to be set too");
         }
 
         // Check if the nist-sp800-90b docker image is already present,
         // and build it otherwise.
         {
-            var errΔ3 = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt),
-                dockerˢ, imageˢ, inspectˢ, nistSp80090bˢ).Run(); if (errΔ3 != default!) {
-                Ꮡt.Logf("building nist-sp800-90b docker image"u8);
-                @string dockerfile = filepath.Join(Ꮡt.TempDir(), dockerfileSp80090bˢ);
+            var errΔ3 = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t),
+                dockerˢ, imageˢ, inspectˢ, nistSp80090bˢ).Run(); if (errΔ3 != nil) {
+                t.Logf("building nist-sp800-90b docker image");
+                @string dockerfile = filepath.Join(t.TempDir(), dockerfileSp80090bˢ);
                 {
-                    var errΔ4 = os.WriteFile(dockerfile, slice<byte>(NISTSP80090BDockerfile), 420); if (errΔ4 != default!) {
-                        Ꮡt.Fatalf("failed to write Dockerfile: %v"u8, errΔ4);
+                    var errΔ4 = os.WriteFile(dockerfile, slice<byte>(NISTSP80090BDockerfile), 420); if (errΔ4 != nil) {
+                        t.Fatalf("failed to write Dockerfile: %v", errΔ4);
                     }
                 }
-                var (outΔ1, errΔ5) = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt),
+                var (outΔ1, errΔ5) = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t),
                     dockerˢ, buildˢ, "-t", nistSp80090bˢ, "-f", dockerfile, varEmptyˢ).CombinedOutput();
-                if (errΔ5 != default!) {
-                    Ꮡt.Fatalf("failed to build nist-sp800-90b docker image: %v\n%s"u8, errΔ5, outΔ1);
+                if (errΔ5 != nil) {
+                    t.Fatalf("failed to build nist-sp800-90b docker image: %v\n%s", errΔ5, outΔ1);
                 }
             }
         }
 
         var (pwd, err) = os.Getwd();
-        if (err != default!) {
-            Ꮡt.Fatalf("failed to get current working directory: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("failed to get current working directory: %v", err);
         }
-        Ꮡt.Logf("running ea_non_iid analysis"u8);
-        (var @out, err) = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt),
+        t.Logf("running ea_non_iid analysis");
+        (var @out, err) = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t),
             dockerˢ, runˢ, "--rm", "-v", fmt.Sprintf("%s:%s"u8, pwd, pwd), "-w", pwd,
             nistSp80090bˢ, eaNonIidˢ, seqSamplesName, "8").CombinedOutput();
-        if (err != default!) {
-            Ꮡt.Fatalf("ea_non_iid failed: %v\n%s"u8, err, @out);
+        if (err != nil) {
+            t.Fatalf("ea_non_iid failed: %v\n%s", err, @out);
         }
-        Ꮡt.Logf("\n%s"u8, @out);
+        t.Logf("\n%s", @out);
 
         @string H_I = (@string)@out;
-        H_I = strings.TrimSpace(H_I.slice(strings.LastIndexByte(H_I, (rune)' ') + 1));
-        Ꮡt.Logf("running ea_restart analysis with H_I = %s"u8, H_I);
-        (@out, err) = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt),
+        H_I = strings.TrimSpace(H_I.slice(strings.LastIndexByte(H_I, (byte)' ') + 1));
+        t.Logf("running ea_restart analysis with H_I = %s", H_I);
+        (@out, err) = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t),
             dockerˢ, runˢ, "--rm", "-v", fmt.Sprintf("%s:%s"u8, pwd, pwd), "-w", pwd,
             nistSp80090bˢ, eaRestartˢ, restartSamplesName, "8", H_I).CombinedOutput();
-        if (err != default!) {
-            Ꮡt.Fatalf("ea_restart failed: %v\n%s"u8, err, @out);
+        if (err != nil) {
+            t.Fatalf("ea_restart failed: %v\n%s", err, @out);
         }
-        Ꮡt.Logf("\n%s"u8, @out);
+        t.Logf("\n%s", @out);
     }
 }
 
@@ -181,21 +188,21 @@ internal static readonly object entropySamplesFailed10ˢ = (@string)"entropy.Sam
 // samplesOrTryAgain calls entropy.Samples up to 10 times until it succeeds.
 // Samples has a non-negligible chance of failing the health tests, as required
 // by SP 800-90B.
-internal static void samplesOrTryAgain(ж<testing.T> Ꮡt, slice<uint8> samples) {
-    Ꮡt.Helper();
+internal static void samplesOrTryAgain(ж<testing.T> t, slice<uint8> samples) {
+    t.Helper();
     foreach (var _ᴛ1 in range(10)) {
         {
-            var err = entropy.Samples(samples, Ꮡmemory); if (err != default!) {
-                Ꮡt.Logf("entropy.Samples() failed: %v"u8, err);
+            var err = entropy.Samples(samples, Ꮡmemory); if (err != nil) {
+                t.Logf("entropy.Samples() failed: %v", err);
                 continue;
             }
         }
         return;
     }
-    Ꮡt.Fatal(entropySamplesFailed10ˢ);
+    t.Fatal(entropySamplesFailed10ˢ);
 }
 
-public static void TestEntropySHA384(ж<testing.T> Ꮡt) {
+public static void TestEntropySHA384(ж<testing.T> t) {
     ref var input = ref heap(new array<uint8>(1024), out var Ꮡinput);
     foreach (var i in range(input)) {
         input[i] = (uint8)i;
@@ -203,7 +210,7 @@ public static void TestEntropySHA384(ж<testing.T> Ꮡt) {
     var want = sha512.Sum384(input[..]);
     var got = entropy.SHA384(Ꮡinput);
     if (got != want) {
-        Ꮡt.Errorf("SHA384() = %x, want %x"u8, got, want);
+        t.Errorf("SHA384() = %x, want %x", got, want);
     }
 
     foreach (var l in range(1024 * 3 + 1)) {
@@ -212,7 +219,7 @@ public static void TestEntropySHA384(ж<testing.T> Ꮡt) {
         var wantΔ1 = sha512.Sum384(inputΔ1);
         var gotΔ1 = entropy.TestingOnlySHA384(inputΔ1);
         if (gotΔ1 != wantΔ1) {
-            Ꮡt.Errorf("TestingOnlySHA384(%d bytes) = %x, want %x"u8, l, gotΔ1, wantΔ1);
+            t.Errorf("TestingOnlySHA384(%d bytes) = %x, want %x", l, gotΔ1, wantΔ1);
         }
     }
 }
@@ -220,28 +227,28 @@ public static void TestEntropySHA384(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object repetitionCountTestBadˢ = (@string)"RepetitionCountTest(bad) = nil, want error"u8;
 
-public static void TestEntropyRepetitionCountTest(ж<testing.T> Ꮡt) {
-    var good = bytes.Repeat(append(bytes.Repeat(new uint8[]{42}.slice(), 40), (byte)1), 100);
+public static void TestEntropyRepetitionCountTest(ж<testing.T> t) {
+    var good = bytes.Repeat(append(bytes.Repeat(slice<uint8>([42]), 40), (byte)1), 100);
     {
-        var err = entropy.RepetitionCountTest(good); if (err != default!) {
-            Ꮡt.Errorf("RepetitionCountTest(good) = %v, want nil"u8, err);
+        var err = entropy.RepetitionCountTest(good); if (err != nil) {
+            t.Errorf("RepetitionCountTest(good) = %v, want nil", err);
         }
     }
 
-    var bad = bytes.Repeat(new uint8[]{0}.slice(), 40);
-    bad = appendꓸꓸꓸ(bad, bytes.Repeat(new uint8[]{1}.slice(), 40));
-    bad = appendꓸꓸꓸ(bad, bytes.Repeat(new uint8[]{42}.slice(), 41));
-    bad = appendꓸꓸꓸ(bad, bytes.Repeat(new uint8[]{2}.slice(), 40));
+    var bad = bytes.Repeat(slice<uint8>([0]), 40);
+    bad = appendꓸꓸꓸ(bad, bytes.Repeat(slice<uint8>([1]), 40));
+    bad = appendꓸꓸꓸ(bad, bytes.Repeat(slice<uint8>([42]), 41));
+    bad = appendꓸꓸꓸ(bad, bytes.Repeat(slice<uint8>([2]), 40));
     {
-        var err = entropy.RepetitionCountTest(bad); if (err == default!) {
-            Ꮡt.Error(repetitionCountTestBadˢ);
+        var err = entropy.RepetitionCountTest(bad); if (err == nil) {
+            t.Error(repetitionCountTestBadˢ);
         }
     }
 
-    bad = bytes.Repeat(new uint8[]{42}.slice(), 41);
+    bad = bytes.Repeat(slice<uint8>([42]), 41);
     {
-        var err = entropy.RepetitionCountTest(bad); if (err == default!) {
-            Ꮡt.Error(repetitionCountTestBadˢ);
+        var err = entropy.RepetitionCountTest(bad); if (err == nil) {
+            t.Error(repetitionCountTestBadˢ);
         }
     }
 }
@@ -249,61 +256,62 @@ public static void TestEntropyRepetitionCountTest(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object adaptiveProportionTestˢ = (@string)"AdaptiveProportionTest(bad) = nil, want error"u8;
 
-public static void TestEntropyAdaptiveProportionTest(ж<testing.T> Ꮡt) {
-    var good = bytes.Repeat(new uint8[]{0}.slice(), 409);
-    good = appendꓸꓸꓸ(good, bytes.Repeat(new uint8[]{1}.slice(), 512 - 409));
-    good = appendꓸꓸꓸ(good, bytes.Repeat(new uint8[]{0}.slice(), 409));
+public static void TestEntropyAdaptiveProportionTest(ж<testing.T> t) {
+    var good = bytes.Repeat(slice<uint8>([0]), 409);
+    good = appendꓸꓸꓸ(good, bytes.Repeat(slice<uint8>([1]), 512 - 409));
+    good = appendꓸꓸꓸ(good, bytes.Repeat(slice<uint8>([0]), 409));
     {
-        var err = entropy.AdaptiveProportionTest(good); if (err != default!) {
-            Ꮡt.Errorf("AdaptiveProportionTest(good) = %v, want nil"u8, err);
+        var err = entropy.AdaptiveProportionTest(good); if (err != nil) {
+            t.Errorf("AdaptiveProportionTest(good) = %v, want nil", err);
         }
     }
 
     // These fall out of the window.
-    var bad = bytes.Repeat(new uint8[]{1}.slice(), 100);
-    bad = appendꓸꓸꓸ(bad, bytes.Repeat(new uint8[]{1, 2, 3, 4, 5, 6}.slice(), 100));
+    var bad = bytes.Repeat(slice<uint8>([1]), 100);
+    bad = appendꓸꓸꓸ(bad, bytes.Repeat(slice<uint8>([1, 2, 3, 4, 5, 6]), 100));
     // These are in the window.
-    bad = appendꓸꓸꓸ(bad, bytes.Repeat(new uint8[]{42}.slice(), 410));
+    bad = appendꓸꓸꓸ(bad, bytes.Repeat(slice<uint8>([42]), 410));
     {
-        var err = entropy.AdaptiveProportionTest(bad.slice(0, len(bad) - 1)); if (err != default!) {
-            Ꮡt.Errorf("AdaptiveProportionTest(bad[:len(bad)-1]) = %v, want nil"u8, err);
+        var err = entropy.AdaptiveProportionTest(bad.slice(0, len(bad) - 1)); if (err != nil) {
+            t.Errorf("AdaptiveProportionTest(bad[:len(bad)-1]) = %v, want nil", err);
         }
     }
     {
-        var err = entropy.AdaptiveProportionTest(bad); if (err == default!) {
-            Ꮡt.Error(adaptiveProportionTestˢ);
+        var err = entropy.AdaptiveProportionTest(bad); if (err == nil) {
+            t.Error(adaptiveProportionTestˢ);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string entropyV100ˢ = "../entropy/v1.0.0"u8;
+internal static ref readonly @string entropyV100ˢ => ref entropyV100ˢᵇ;
+private static readonly @string entropyV100ˢᵇ = "../entropy/v1.0.0"u8;
 
-public static void TestEntropyUnchanged(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSource(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestEntropyUnchanged(ж<testing.T> t) {
+    testenv.MustHaveSource(new fipstest_internal_test_package.testing_TжTB(t));
 
     var h = sha256.New();
     var root = os.DirFS(entropyV100ˢ);
     {
         var hʗ1 = h;
         var rootʗ1 = root;
-        var err = fs.WalkDir(root, "."u8, error (@string path, fs.DirEntry d, error errΔ1) => {
-            if (errΔ1 != default!) {
+        var err = fs.WalkDir(root, ".", error (@string path, fs.DirEntry d, error errΔ1) => {
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
             if (d.IsDir()) {
-                return default!;
+                return default;
             }
             (var data, errΔ1) = fs.ReadFile(rootʗ1, path);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 return errΔ1;
             }
-            Ꮡt.Logf("Hashing %s (%d bytes)"u8, path, len(data));
+            t.Logf("Hashing %s (%d bytes)", path, len(data));
             fmt.Fprintf(hʗ1, "%s %d\n"u8, path, len(data));
             hʗ1.Write(data);
-            return default!;
-        }); if (err != default!) {
-            Ꮡt.Fatalf("WalkDir: %v"u8, err);
+            return default;
+        }); if (err != nil) {
+            t.Fatalf("WalkDir: %v", err);
         }
     }
 
@@ -311,20 +319,20 @@ public static void TestEntropyUnchanged(ж<testing.T> Ꮡt) {
     // entropy source through the Entropy Source Validation program,
     // independently of the FIPS 140-3 module. It must not change even across
     // FIPS 140-3 module versions, in order to reuse the ESV certificate.
-    @string exp = "2541273241ae8aafe55026328354ed3799df1e2fb308b2097833203a42911b53"u8;
+    @string exp = "2541273241ae8aafe55026328354ed3799df1e2fb308b2097833203a42911b53";
     {
-        @string got = hex.EncodeToString(h.Sum(default!)); if (got != exp) {
-            Ꮡt.Errorf("hash of crypto/internal/entropy/v1.0.0 = %s, want %s"u8, got, exp);
+        @string got = hex.EncodeToString(h.Sum(default)); if (got != exp) {
+            t.Errorf("hash of crypto/internal/entropy/v1.0.0 = %s, want %s", got, exp);
         }
     }
 }
 
-public static partial void TestEntropyRace(ж<testing.T> Ꮡt) {
+public static partial void TestEntropyRace(ж<testing.T> t) {
     // Check that concurrent calls to Seed don't trigger the race detector.
     foreach (var _ᴛ1 in range(16)) {
         goǃ(() => {
             (_, _) = entropy.Seed(Ꮡmemory);
-        });
+        }, GoStack.Bounded);
     }
     // Same, with the higher-level DRBG.
     foreach (var _ᴛ2 in range(16)) {
@@ -337,11 +345,11 @@ public static partial void TestEntropyRace(ж<testing.T> Ꮡt) {
 
 internal static byte sink;
 
-public static void BenchmarkEntropySeed(ж<testing.B> Ꮡb) {
-    while (Ꮡb.Loop()) {
+public static void BenchmarkEntropySeed(ж<testing.B> b) {
+    while (b.Loop()) {
         var (seed, err) = entropy.Seed(Ꮡmemory);
-        if (err != default!) {
-            Ꮡb.Fatalf("entropy.Seed() failed: %v"u8, err);
+        if (err != nil) {
+            b.Fatalf("entropy.Seed() failed: %v", err);
         }
         sink ^= (byte)(seed[0]);
     }

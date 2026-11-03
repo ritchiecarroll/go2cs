@@ -8,20 +8,8 @@ global using static global::go.@internal.runtime.maps_package;
 global using static global::go.@internal.runtime.maps_internal_test_package;
 
 // <ImportedTypeAliases>
-global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
-global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
-global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
-global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using abiꓸKind = go.@internal.abi_package.ΔKind;
 global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
-global using abiꓸName = go.@internal.abi_package.ΔName;
-global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using mapsꓸMap = go.@internal.runtime.maps_package.ΔMap;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,7 +32,13 @@ using static global::go.@internal.runtime.maps_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(fuzzCommand))]
+[assembly: GoFieldAccess(typeof(global::go.@internal.runtime.maps_package.table))]
+[assembly: GoFieldAccess(typeof(go.@internal.abi_package.ΔMapType))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,8 +48,8 @@ using static global::go.@internal.runtime.maps_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/maps/fuzz_test.go", "fuzz_test.cs", "ACNEAAcUgoKAgqSmpoKClJKCgIK2poIACxiCgoK4goKCuLQAECIAO3iCgoKmgoKylIKUgpSClIKCtoKkgsg=", "174-210:1")]
-[assembly: go.GoPositionMap("internal/runtime/maps/map_test.go", "map_test.cs", "ABQggoKCuIKUkqSCgoKUgriCpoKUgoKCgoKUgoLMkpSSpIKCgpSCuIKmgpSCgoKCgpSCgsqClJKkgoKClIK4gpSCgqaCpoKUgoKCgoLKgpSSpIKCgpSCuJSCpoKUgoKCgoL+opSSkqSCgqaCgoKmgqaCgoKSgqaCgoKUgroAChSUkqSCgpQACBKClIKC3LiClJSClKamgriClJKkgoKClIK4lIKCgoKSgqaCgqaCpoKUgoKCgoKClILMkpSSpIKCgpSCuIKCkoKCgoKSgqaCgpSCuIKUuIKmgpSCgpSCgqaCgoKUgsySlJKkgoKClIK4goKSgoKCgpKCpoKClIK4griSpIKCgpSCygAHEIKUgoKUgoKmgoKClILKgpSSpIKCgpSCuIKCgoKCkoKmgoKClICCpKaCkqSCgoKUggANFqSAtoAACQaCABo+goKClILMkpSSpJSCpoKClIKCpoKCgoKC6IKYkpKUgoKClIK4gqaCgpSCgoKCgpSCgsySlJKklIKmgoKUgoKmlIKC/oKClAAcEKgAABYAWrwBkpSCgqaCgqaCpoKCpoKCuKKyoqKCyqKyoqKCyqKyoqKCyqKyoqKCAAkOgoKCgoKClKSklIKUgoLcgoKCgpSCgoIACBKCgpSC", "552-552:1;555-555:2;827-853:1;855-864:2;857-862:2.1;858-861:2.1.1;865-874:3;867-872:3.1;868-871:3.1.1;875-884:4;877-882:4.1;878-881:4.1.1;885-894:5;887-892:5.1;888-891:5.1.1;911-947:1;912-934:1.1")]
+[assembly: GoPositionMap("internal/runtime/maps/fuzz_test.go", "fuzz_test.cs", "ACNEAAcUgoKAgqSmpoKClIKCgIK2poIACxiCgoK4goKCuLQAECIAO3iCgoKmgoKylIKUgpSClIKCxoK0gtg=", "174-210:1")]
+[assembly: GoPositionMap("internal/runtime/maps/map_test.go", "map_test.cs", "ABQggoKCuIKUgpSCgoKUgriCpoKUgoKCgoKUgoLMkpSClIKCgpSCuIKmgpSCgoKCgpSCgsqClIKUgoKClIK4gpSCgqaCpoKUgoKCgoLKgpSClIKCgpSCuJSCpoKUgoKCgoL+opSCgpSCgqaCgoKmgqaCgoKSgqaCgoKUgroAChSUgpSCgpQACBKClIKC3LiClJSClKamgriClIKUgoKClIK4lIKCgoKSgqaCgqaCpoKUgoKCgoKClILMkpSClIKCgpSCuIKCgoKCgoKSgqaCgpSCuIKUuIKmgpSCgpSCgqaCgoKUgsySlIKUgoKClIK4goKCgoKCgpKCpoKClIK4griClIKCgpSCygAHEIKUgoKUgoKmgoKClILKgpSClIKCgpSCuIKCgoKCkoKmgoKClICCpKaCgpSCgoKUggAPFqSAtoAACQaCABo+goKClILMkpSClJSCpoKClIKCpoKCgoKC6IKYgoKUgoKClIK4gqaCgpSCgoKCgpSCgsySlIKUlIKmgoKUgoKmlIKC/oKClAAhEKgAABYAWrwBkpSCgqaCgqaCpoKCpoKCuKKyoqKCyqKyoqKCyqKyoqKCyqKyoqKCAAkOgoKCgoKCpLS0pIKUgoLcgoKCgpSCgoIACBKCgpSC", "552-552:1;555-555:2;827-853:1;855-864:2;857-862:2.1;858-861:2.1.1;865-874:3;867-872:3.1;868-871:3.1.1;875-884:4;877-882:4.1;878-881:4.1.1;885-894:5;887-892:5.1;888-891:5.1.1;911-947:1;912-934:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

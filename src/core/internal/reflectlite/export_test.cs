@@ -22,7 +22,7 @@ public static global::go.@internal.reflectlite_package.ΔType StructFieldType(ж
         throw panic("reflect: Field index out of bounds");
     }
     var p = Ꮡ(t.Fields, i);
-    return toType((~p).Typ);
+    return toType(p.Typ);
 }
 
 // go2cs generated this placeholder — func Zero is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -48,7 +48,7 @@ internal partial interface pinUnexpMeth {
     void f();
 }
 
-internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMeth(nil));
+internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMeth());
 
 public static ж<byte> FirstMethodNameBytes(global::go.@internal.reflectlite_package.ΔType t) {
     _ = pinUnexpMethI;

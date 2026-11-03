@@ -21,46 +21,57 @@ public static Size Large => 2;
 
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
     var exprᴛ1 = strings.ToLower((@string)text);
-    if (exprᴛ1 == "small"u8) {
-        s = Small;
-    }
-    else if (exprᴛ1 == "large"u8) {
-        s = Large;
-    }
-    else { /* default: */
+    switch (ᐧ) {
+    default: {
         s = Unrecognized;
+        break;
     }
-    return default!;
+    case {} when exprᴛ1 == "small"u8: {
+        s = Small;
+        break;
+    }
+    case {} when exprᴛ1 == "large"u8: {
+        s = Large;
+        break;
+    }}
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unrecognizedˢ = "unrecognized"u8;
-internal static readonly @string smallˢ = "small"u8;
-internal static readonly @string largeˢ = "large"u8;
+internal static ref readonly @string unrecognizedˢ => ref unrecognizedˢᵇ;
+private static readonly @string unrecognizedˢᵇ = "unrecognized"u8;
+internal static ref readonly @string smallˢ => ref smallˢᵇ;
+private static readonly @string smallˢᵇ = "small"u8;
+internal static ref readonly @string largeˢ => ref largeˢᵇ;
+private static readonly @string largeˢᵇ = "large"u8;
 
 public static (slice<byte>, error) MarshalText(this Size s) {
-    @string name = default!;
-    var exprᴛ1 = s;
-    if (exprᴛ1 == Small) {
-        name = smallˢ;
-    }
-    else if (exprᴛ1 == Large) {
-        name = largeˢ;
-    }
-    else { /* default: */
+    @string name = default;
+    switch (s) {
+    default: {
         name = unrecognizedˢ;
+        break;
     }
-    return (slice<byte>(name), default!);
+    case var ᴛ when ᴛ == Small: {
+        name = smallˢ;
+        break;
+    }
+    case var ᴛ when ᴛ == Large: {
+        name = largeˢ;
+        break;
+    }}
+    return (slice<byte>(name), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string smallRegularLargeˢ = @"[""small"",""regular"",""large"",""unrecognized"",""small"",""normal"",""small"",""large""]"u8;
+internal static ref readonly @string smallRegularLargeˢ => ref smallRegularLargeˢᵇ;
+private static readonly @string smallRegularLargeˢᵇ = @"[""small"",""regular"",""large"",""unrecognized"",""small"",""normal"",""small"",""large""]"u8;
 
 public static void Example_textMarshalJSON() {
     @string blob = smallRegularLargeˢ;
     ref var inventory = ref heap<slice<Size>>(out var Ꮡinventory);
     {
-        var err = json.Unmarshal(slice<byte>(blob), Ꮡinventory); if (err != default!) {
+        var err = json.Unmarshal(slice<byte>(blob), Ꮡinventory); if (err != nil) {
             log.Fatal(err);
         }
     }

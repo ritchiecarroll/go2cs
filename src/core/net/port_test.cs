@@ -13,46 +13,44 @@ partial struct parsePortTestsᴛ1 /*dyn*/ {
     internal nint port;
     internal bool needsLookup;
 }
-internal static slice<parsePortTestsᴛ1> parsePortTests = new parsePortTestsᴛ1[]{
-    new(""u8, 0, false),
+internal static slice<parsePortTestsᴛ1> parsePortTests = slice<parsePortTestsᴛ1>([
+    new("", 0, false),
 
     // Decimal number literals
-    new("-1073741825"u8, -1 << 30, false),
-    new("-1073741824"u8, -1 << 30, false),
-    new("-1073741823"u8, -((1 << 30) - 1), false),
-    new("-123456789"u8, -123456789, false),
-    new("-1"u8, -1, false),
-    new("-0"u8, 0, false),
-    new("0"u8, 0, false),
-    new("+0"u8, 0, false),
-    new("+1"u8, 1, false),
-    new("65535"u8, 65535, false),
-    new("65536"u8, 65536, false),
-    new("123456789"u8, 123456789, false),
-    new("1073741822"u8, (1 << 30) - 2, false),
-    new("1073741823"u8, (1 << 30) - 1, false),
-    new("1073741824"u8, (1 << 30) - 1, false),
-    new("1073741825"u8, (1 << 30) - 1, false),
+    new("-1073741825", -1 << 30, false),
+    new("-1073741824", -1 << 30, false),
+    new("-1073741823", -((1 << 30) - 1), false),
+    new("-123456789", -123456789, false),
+    new("-1", -1, false),
+    new("-0", 0, false),
+    new("0", 0, false),
+    new("+0", 0, false),
+    new("+1", 1, false),
+    new("65535", 65535, false),
+    new("65536", 65536, false),
+    new("123456789", 123456789, false),
+    new("1073741822", (1 << 30) - 2, false),
+    new("1073741823", (1 << 30) - 1, false),
+    new("1073741824", (1 << 30) - 1, false),
+    new("1073741825", (1 << 30) - 1, false),
 
     // Others
-    new("abc"u8, 0, true),
-    new("9pfs"u8, 0, true),
-    new("123badport"u8, 0, true),
-    new("bad123port"u8, 0, true),
-    new("badport123"u8, 0, true),
-    new("123456789badport"u8, 0, true),
-    new("-2147483649badport"u8, 0, true),
-    new("2147483649badport"u8, 0, true)
-}.slice();
+    new("abc", 0, true),
+    new("9pfs", 0, true),
+    new("123badport", 0, true),
+    new("bad123port", 0, true),
+    new("badport123", 0, true),
+    new("123456789badport", 0, true),
+    new("-2147483649badport", 0, true),
+    new("2147483649badport", 0, true)
+]);
 
-public static void TestParsePort(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestParsePort(ж<testing.T> t) {
     // The following test cases are cribbed from the strconv
     foreach (var (_, tt) in parsePortTests) {
         {
             var (port, needsLookup) = parsePort(tt.service); if (port != tt.port || needsLookup != tt.needsLookup) {
-                Ꮡt.Errorf("parsePort(%q) = %d, %t; want %d, %t"u8, tt.service, port, needsLookup, tt.port, tt.needsLookup);
+                t.Errorf("parsePort(%q) = %d, %t; want %d, %t", tt.service, port, needsLookup, tt.port, tt.needsLookup);
             }
         }
     }

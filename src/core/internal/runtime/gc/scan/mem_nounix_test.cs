@@ -15,7 +15,7 @@ private static readonly object mmapUnsupportedˢ = (@string)"mmap unsupported"u8
 
 internal static partial (slice<uintptr>, Action) makeMem(testing.TB t, nint nPages) {
     t.Skip(mmapUnsupportedˢ);
-    return (default!, default!);
+    return (default, default);
 }
 
 } // end scan_test_package

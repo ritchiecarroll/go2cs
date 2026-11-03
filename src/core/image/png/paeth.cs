@@ -35,10 +35,9 @@ internal static uint8 paeth(uint8 a, uint8 b, uint8 c) {
     pc = abs(pa + pb);
     pa = abs(pa);
     pb = abs(pb);
-    if (pa <= pb && pa <= pc){
+    if (pa <= pb && pa <= pc) {
         return a;
-    } else 
-    if (pb <= pc) {
+    } else if (pb <= pc) {
         return b;
     }
     return c;
@@ -47,12 +46,12 @@ internal static uint8 paeth(uint8 a, uint8 b, uint8 c) {
 // filterPaeth applies the Paeth filter to the cdat slice.
 // cdat is the current row's data, pdat is the previous row's data.
 internal static void filterPaeth(slice<byte> cdat, slice<byte> pdat, nint bytesPerPixel) {
-    nint a = default!;
-    nint b = default!;
-    nint c = default!;
-    nint pa = default!;
-    nint pb = default!;
-    nint pc = default!;
+    nint a = default;
+    nint b = default;
+    nint c = default;
+    nint pa = default;
+    nint pb = default;
+    nint pc = default;
     for (nint i = 0; i < bytesPerPixel; i++) {
         (a, c) = (0, 0);
         for (nint j = i; j < len(cdat); j += bytesPerPixel) {
@@ -62,10 +61,9 @@ internal static void filterPaeth(slice<byte> cdat, slice<byte> pdat, nint bytesP
             pc = abs(pa + pb);
             pa = abs(pa);
             pb = abs(pb);
-            if (pa <= pb && pa <= pc){
+            if (pa <= pb && pa <= pc) {
                 // No-op.
-            } else 
-            if (pb <= pc){
+            } else if (pb <= pc) {
                 a = b;
             } else {
                 a = c;

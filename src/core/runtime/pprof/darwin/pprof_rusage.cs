@@ -13,24 +13,29 @@ partial class pprof_package {
 
 // Adds MaxRSS to platforms that are supported.
 internal static void addMaxRSS(io.Writer w) {
-    uintptr rssToBytes = default!;
+    uintptr rssToBytes = default;
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8: {
         rssToBytes = 1024;
+        break;
     }
-    else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
         rssToBytes = 1;
+        break;
     }
-    else if (exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8) {
+    case {} when exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8: {
         rssToBytes = (uintptr)syscall.Getpagesize();
+        break;
     }
-    else { /* default: */
+    default: {
         throw panic("unsupported OS");
-    }
+        break;
+    }}
 
     ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
     var err = syscall.Getrusage(syscall.RUSAGE_SELF, Ꮡrusage);
-    if (err == default!) {
+    if (err == nil) {
         fmt.Fprintf(w, "# MaxRSS = %d\n"u8, (uintptr)rusage.Maxrss * rssToBytes);
     }
 }

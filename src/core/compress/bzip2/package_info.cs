@@ -48,7 +48,13 @@ using static go.compress.bzip2_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(bitReader))]
+[assembly: GoFieldAccess(typeof(huffmanNode))]
+[assembly: GoFieldAccess(typeof(reader))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,10 +64,10 @@ using static go.compress.bzip2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
-[assembly: go.GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggANELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAgGooKCgoK4goK4gqyCgsqCgpSCgtyClIKCgoKUgoKUgoKClIKUgpSAggAEXwASbsKCgoKCgoKUyoKCgoKCgoKCgtyUuIKCyoK4goKCgoKClJSClMqCgoKCgqaUgqaClIKCgoKUgpSClKaUgoK4goKUgpSCyoKmlIKCgoKUgpSCgqaClJSClIK4gpSmpoKUgoKCgpSmuAAIEoKClIKCpoLKgoKCgoKUAAIaAAoCgoKCpoKCgqYABhCCgoKCgoKUpryigoKU")]
-[assembly: go.GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgIKk7oKUgoKClIKCpsqYgoIAEybypoKCgoK4gpQADBqC3MqmgpSmgoKUlIKUpoKmlIKUpg==", "106-111:1;135-137:2")]
-[assembly: go.GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
+[assembly: GoPositionMap("compress/bzip2/bit_reader.go", "bit_reader.cs", "ABUyooKClKzSgoKClIKClIKCABAigoKmgoKmgoKmgg==")]
+[assembly: GoPositionMap("compress/bzip2/bzip2.go", "bzip2.cs", "ABQmggAVNLKCggAQELKUgoKCuIKCpoKCpoKCgpSmwoKmgoKCgpSClKaCgoKUpu6CAAkUgoKCgoKUpoKCgpSCgoKmgpSUlIKmAAwGooKCgoK4goK4gpS4goLagoKUgoLcgpSCgoKClIKClIKCgpSClIKUgIIAIQ7CgoKCgoKClMqCgoKCgoKCgoLclLiCgsqCuIKCgoKCgpSUgpTKgoKCgoKmlIKmgpSCgoKClIKUgpSmlIKCuIKClIKUgsqCppSCgoKClIKUgoKmgpSUgpSCuIKUpqaClIKCgoKUprgACBKCgpSCgqaCyoKCgoKClAACGgAKAoKCgqaCgoKmAAYQgoKCgoKClKa8ooKClA==")]
+[assembly: GoPositionMap("compress/bzip2/huffman.go", "huffman.cs", "ACNO0pSClIKUgsrKlIKUpqaCgpSUzgAKEoKmuIKCgqaCgIKk7oKUgoKClIKCpsqYgoIAFSbypoKCgoK4gpQADBqC3MqmgpSmgoKUlIKUpoKmlIKUpg==", "106-111:1;135-137:2")]
+[assembly: GoPositionMap("compress/bzip2/move_to_front.go", "move_to_front.cs", "ABAkooKUqqKCpoKClKbqgoKCqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

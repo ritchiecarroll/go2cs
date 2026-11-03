@@ -31,14 +31,14 @@ public static ж<TextHandler> NewTextHandler(io.Writer w, ж<HandlerOptions> Ꮡ
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (Ꮡopts == nil) {
-        Ꮡopts = Ꮡ(new HandlerOptions(nil)); opts = ref Ꮡopts.DerefOrNull();
+        Ꮡopts = Ꮡ(new HandlerOptions()); opts = ref Ꮡopts.DerefOrNull();
     }
     return Ꮡ(new TextHandler(
         Ꮡ(new commonHandler(
             json: false,
             w: w,
             opts: opts,
-            mu: Ꮡ(new sync.Mutex(nil))
+            mu: Ꮡ(new sync.Mutex())
         ))
     ));
 }
@@ -102,38 +102,42 @@ public static error Handle(this ref TextHandler h, context.Context _, Record r) 
 internal static error appendTextValue(ж<handleState> Ꮡs, Value v) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == KindString) {
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == KindString: {
         s.appendString(v.str());
+        break;
     }
-    else if (exprᴛ1 == KindTime) {
+    case var ᴛ when ᴛ == KindTime: {
         Ꮡs.appendTime(v.time());
+        break;
     }
-    else if (exprᴛ1 == KindAny) {
+    case var ᴛ when ᴛ == KindAny: {
         {
             var (tm, ok) = v.any._<encoding.TextMarshaler>(ᐧ); if (ok) {
                 var (data, err) = tm.MarshalText();
-                if (err != default!) {
+                if (err != nil) {
                     return err;
                 }
                 // TODO: avoid the conversion to string.
                 s.appendString((@string)data);
-                return default!;
+                return default;
             }
         }
         {
             var (bs, ok) = byteSlice(v.any); if (ok) {
                 // As of Go 1.19, this only allocates for strings longer than 32 bytes.
                 s.buf.WriteString(strconv.Quote((@string)bs));
-                return default!;
+                return default;
             }
         }
         s.appendString(fmt.Sprintf("%+v"u8, v.Any()));
+        break;
     }
-    else { /* default: */
+    default: {
         s.buf.ValueSlot = v.append(s.buf.ValueSlot);
-    }
-    return default!;
+        break;
+    }}
+    return default;
 }
 
 // byteSlice returns its argument as a []byte if the argument's
@@ -147,10 +151,10 @@ internal static (slice<byte>, bool) byteSlice(any a) {
     }
     // Like Printf's %s, we allow both the slice type and the byte element type to be named.
     var t = reflect.TypeOf(a);
-    if (t != default! && t.Kind() == reflect.ΔSlice && t.Elem().Kind() == reflect.Uint8) {
+    if (t != nil && t.Kind() == reflect.ΔSlice && t.Elem().Kind() == reflect.Uint8) {
         return (reflect.ValueOf(a).Bytes(), true);
     }
-    return (default!, false);
+    return (default, false);
 }
 
 internal static bool needsQuoting(@string s) {
@@ -162,7 +166,7 @@ internal static bool needsQuoting(@string s) {
         if (b < utf8.RuneSelf) {
             // Quote anything except a backslash that would need quoting in a
             // JSON string, as well as space and '='
-            if (b != (rune)'\\' && (b == (rune)' ' || b == (rune)'=' || !safeSet[b])) {
+            if (b != '\\' && (b == ' ' || b == '=' || !safeSet[b])) {
                 return true;
             }
             i++;

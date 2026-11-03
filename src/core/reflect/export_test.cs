@@ -32,22 +32,22 @@ internal static void initᴛCallGC() { CallGC = ᏑcallGC; }
 // takes up one byte, so that writing out test cases is a little clearer.
 // If ptrs is false, gc will be nil.
 public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uintptr retOffset, slice<byte> stack, slice<byte> gc, slice<byte> inReg, slice<byte> outReg, bool ptrs) FuncLayout(global::go.reflect_package.ΔType t, global::go.reflect_package.ΔType rcvr) {
-    global::go.reflect_package.ΔType frametype = default!;
-    uintptr argSize = default!;
-    uintptr retOffset = default!;
-    slice<byte> stack = default!;
-    slice<byte> gc = default!;
-    slice<byte> inReg = default!;
-    slice<byte> outReg = default!;
-    bool ptrs = default!;
+    global::go.reflect_package.ΔType frametype = default;
+    uintptr argSize = default;
+    uintptr retOffset = default;
+    slice<byte> stack = default;
+    slice<byte> gc = default;
+    slice<byte> inReg = default;
+    slice<byte> outReg = default;
+    bool ptrs = default;
     var stackᴷ = new stackAppend<byte>(moves: true);
     var inRegᴷ = new stackAppend<byte>(moves: true);
     var outRegᴷ = new stackAppend<byte>(moves: true);
     var gcᴷ = new stackAppend<byte>(moves: true);
 
-    ж<abi.Type> ft = default!;
+    ж<abi.Type> ft = default;
     ref var abid = ref heap(new global::go.reflect_package.abiDesc(), out var Ꮡabid);
-    if (rcvr != default!){
+    if (rcvr != nil) {
         (ft, _, abid) = funcLayout(t.common().FuncType(), rcvr.common());
     } else {
         (ft, _, abid) = funcLayout(t._<ж<global::go.reflect_package.rtype>>().Reinterpret<global::go.reflect_package.rtype, abi.Type>().FuncType(), nil);
@@ -58,8 +58,8 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
     frametype = toType(ft);
 
     // Expand stack pointer bitmap into byte-map.
-    for (var i = (uint32)0; i < (~abid.stackPtrs).n; i++) {
-        stack = builtin.append(stackᴷ, stack, (byte)((~abid.stackPtrs).data[i / 8] >> (int)(i % 8) & 1));
+    for (var i = (uint32)0; i < abid.stackPtrs.n; i++) {
+        stack = builtin.append(stackᴷ, stack, (byte)(abid.stackPtrs.data[i / 8] >> (int)(i % 8) & 1));
     }
 
     // Expand register pointer bitmaps into byte-maps.
@@ -70,14 +70,14 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         return 0;
     }
     for (nint i = 0; i < intArgRegs; i++) {
-        inReg = builtin.append(inRegᴷ, inReg, bool2byte(Ꮡabid.of(global::go.reflect_package.abiDesc.ᏑinRegPtrs).Get(i)));
-        outReg = builtin.append(outRegᴷ, outReg, bool2byte(Ꮡabid.of(global::go.reflect_package.abiDesc.ᏑoutRegPtrs).Get(i)));
+        inReg = builtin.append(inRegᴷ, inReg, bool2byte(Ꮡabid.ᏑinRegPtrs.Get(i)));
+        outReg = builtin.append(outRegᴷ, outReg, bool2byte(Ꮡabid.ᏑoutRegPtrs.Get(i)));
     }
 
     // Expand frame type's GC bitmap into byte-map.
     ptrs = ft.Pointers();
     if (ptrs) {
-        var nptrs = (~ft).PtrBytes / (uintptr)goarch.PtrSize;
+        var nptrs = ft.PtrBytes / (uintptr)goarch.PtrSize;
         var gcdata = ft.GcSlice(0, (nptrs + 7) / 8);
         for (var i = (uintptr)0; i < nptrs; i++) {
             gc = builtin.append(gcᴷ, gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
@@ -93,7 +93,7 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
 public static slice<@string> TypeLinks() {
     var rᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> r = default!;
+    slice<@string> r = default;
     var (sections, offset) = typelinks();
     foreach (var (i, offs) in offset) {
         @unsafe.Pointer rodata = sections[i];
@@ -122,7 +122,7 @@ internal partial interface pinUnexpMeth {
     void f();
 }
 
-internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMeth(nil));
+internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMeth());
 
 public static ж<byte> FirstMethodNameBytes(global::go.reflect_package.ΔType t) {
     _ = pinUnexpMethI;
@@ -155,13 +155,13 @@ public partial struct Buffer {
 }
 
 internal static void clearLayoutCache() {
-    layoutCache = new Δsync.Map(nil);
+    layoutCache = new Δsync.Map();
 }
 
 public static (nint oldInts, nint oldFloats, uintptr oldFloatSize) SetArgRegs(nint ints, nint floats, uintptr floatSize) {
-    nint oldInts = default!;
-    nint oldFloats = default!;
-    uintptr oldFloatSize = default!;
+    nint oldInts = default;
+    nint oldFloats = default;
+    uintptr oldFloatSize = default;
 
     oldInts = intArgRegs;
     oldFloats = floatArgRegs;

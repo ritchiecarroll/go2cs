@@ -25,34 +25,34 @@ internal partial struct TestEscapeArg_type /*dyn*/ {
     internal @string input, output;
 }
 
-public static void TestEscapeArg(ж<testing.T> Ꮡt) {
-    slice<TestEscapeArg_type> tests = new TestEscapeArg_type[]{
-        new(@""u8, @""""""u8),
-        new(@"a"u8, @"a"u8),
-        new(@" "u8, @""" """u8),
-        new(@"\"u8, @"\"u8),
-        new(@""""u8, @"\"""u8),
-        new(@"\"""u8, @"\\\"""u8),
-        new(@"\\"""u8, @"\\\\\"""u8),
-        new(@"\\ "u8, @"""\\ """u8),
-        new(@" \\"u8, @""" \\\\"""u8),
-        new(@"a "u8, @"""a """u8),
-        new(@"C:\"u8, @"C:\"u8),
-        new(@"C:\Program Files (x32)\Common\"u8, @"""C:\Program Files (x32)\Common\\"""u8),
-        new(@"C:\Users\Игорь\"u8, @"C:\Users\Игорь\"u8),
-        new(@"Андрей\file"u8, @"Андрей\file"u8),
-        new(@"C:\Windows\temp"u8, @"C:\Windows\temp"u8),
-        new(@"c:\temp\newfile"u8, @"c:\temp\newfile"u8),
-        new(@"\\?\C:\Windows"u8, @"\\?\C:\Windows"u8),
-        new(@"\\?\"u8, @"\\?\"u8),
-        new(@"\\.\C:\Windows\"u8, @"\\.\C:\Windows\"u8),
-        new(@"\\server\share\file"u8, @"\\server\share\file"u8),
-        new(@"\\newserver\tempshare\really.txt"u8, @"\\newserver\tempshare\really.txt"u8)
-    }.slice();
+public static void TestEscapeArg(ж<testing.T> t) {
+    slice<TestEscapeArg_type> tests = slice<TestEscapeArg_type>([
+        new(@"", @""""""),
+        new(@"a", @"a"),
+        new(@" ", @""" """),
+        new(@"\", @"\"),
+        new(@"""", @"\"""),
+        new(@"\""", @"\\\"""),
+        new(@"\\""", @"\\\\\"""),
+        new(@"\\ ", @"""\\ """),
+        new(@" \\", @""" \\\\"""),
+        new(@"a ", @"""a """),
+        new(@"C:\", @"C:\"),
+        new(@"C:\Program Files (x32)\Common\", @"""C:\Program Files (x32)\Common\\"""),
+        new(@"C:\Users\Игорь\", @"C:\Users\Игорь\"),
+        new(@"Андрей\file", @"Андрей\file"),
+        new(@"C:\Windows\temp", @"C:\Windows\temp"),
+        new(@"c:\temp\newfile", @"c:\temp\newfile"),
+        new(@"\\?\C:\Windows", @"\\?\C:\Windows"),
+        new(@"\\?\", @"\\?\"),
+        new(@"\\.\C:\Windows\", @"\\.\C:\Windows\"),
+        new(@"\\server\share\file", @"\\server\share\file"),
+        new(@"\\newserver\tempshare\really.txt", @"\\newserver\tempshare\really.txt")
+    ]);
     foreach (var (_, test) in tests) {
         {
             @string got = syscall.EscapeArg(test.input); if (got != test.output) {
-                Ꮡt.Errorf("EscapeArg(%#q) = %#q, want %#q"u8, test.input, got, test.output);
+                t.Errorf("EscapeArg(%#q) = %#q, want %#q", test.input, got, test.output);
             }
         }
     }
@@ -63,41 +63,45 @@ internal partial struct TestEnvBlockSorted_tests /*dyn*/ {
     internal slice<@string> want;
 }
 
-public static void TestEnvBlockSorted(ж<testing.T> Ꮡt) {
-    var tests = new TestEnvBlockSorted_tests[]{
+public static void TestEnvBlockSorted(ж<testing.T> t) {
+    var tests = slice<TestEnvBlockSorted_tests>([
         new(),
         new(
-            env: new @string[]{"A=1"u8}.slice(),
-            want: new @string[]{"A=1"u8}.slice()
+            env: slice<@string>(["A=1"]),
+            want: slice<@string>(["A=1"])
         ),
         new(
-            env: new @string[]{"A=1"u8, "B=2"u8, "C=3"u8}.slice(),
-            want: new @string[]{"A=1"u8, "B=2"u8, "C=3"u8}.slice()
+            env: slice<@string>(["A=1", "B=2", "C=3"]),
+            want: slice<@string>(["A=1", "B=2", "C=3"])
         ),
         new(
-            env: new @string[]{"C=3"u8, "B=2"u8, "A=1"u8}.slice(),
-            want: new @string[]{"A=1"u8, "B=2"u8, "C=3"u8}.slice()
+            env: slice<@string>(["C=3", "B=2", "A=1"]),
+            want: slice<@string>(["A=1", "B=2", "C=3"])
         ),
         new(
-            env: new @string[]{"c=3"u8, "B=2"u8, "a=1"u8}.slice(),
-            want: new @string[]{"a=1"u8, "B=2"u8, "c=3"u8}.slice()
+            env: slice<@string>(["c=3", "B=2", "a=1"]),
+            want: slice<@string>(["a=1", "B=2", "c=3"])
         )
-    }.slice();
+    ]);
     foreach (var (_, tt) in tests) {
         var got = syscall_internal_test_package.EnvSorted(tt.env);
         if (!slices.Equal<slice<@string>, @string>(got, tt.want)) {
-            Ꮡt.Errorf("EnvSorted(%q) = %q, want %q"u8, tt.env, got, tt.want);
+            t.Errorf("EnvSorted(%q) = %q, want %q", tt.env, got, tt.want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
-internal static readonly @string goWantHelperProcessFileˢ = "GO_WANT_HELPER_PROCESS_FILE"u8;
-internal static readonly @string testRunˢ = "-test.run=^TestChangingProcessParent$"u8;
-internal static readonly @string ppidTxtˢ = "ppid.txt"u8;
+internal static ref readonly @string goWantHelperProcessˢ => ref goWantHelperProcessˢᵇ;
+private static readonly @string goWantHelperProcessˢᵇ = "GO_WANT_HELPER_PROCESS"u8;
+internal static ref readonly @string goWantHelperProcessFileˢ => ref goWantHelperProcessFileˢᵇ;
+private static readonly @string goWantHelperProcessFileˢᵇ = "GO_WANT_HELPER_PROCESS_FILE"u8;
+internal static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestChangingProcessParent$"u8;
+internal static ref readonly @string ppidTxtˢ => ref ppidTxtˢᵇ;
+private static readonly @string ppidTxtˢᵇ = "ppid.txt"u8;
 
-public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
+public static void TestChangingProcessParent(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δos.Getenv(goWantHelperProcessˢ) == "parent"u8) {
@@ -116,7 +120,7 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
                 Δos.Exit(1);
             }
             var errΔ1 = Δos.WriteFile(dumpPath, slice<byte>(fmt.Sprintf("%d"u8, Δos.Getppid())), 420);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 fmt.Fprintf(new Δos.FileжWriter(Δos.Stderr), "Error writing dump file: %v"u8, errΔ1);
                 Δos.Exit(2);
             }
@@ -125,15 +129,15 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
 
         // run parent process
 
-        var parent = exec.Command(testenv.Executable(new syscall_test_package.testing_TжTB(Ꮡt)), testRunˢ);
-        parent.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=parent"u8);
+        var parent = exec.Command(testenv.Executable(new syscall_test_package.testing_TжTB(t)), testRunˢ);
+        parent.Env = append(Δos.Environ(), (@string)"GO_WANT_HELPER_PROCESS=parent");
         var err = parent.Start();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var parentʗ1 = parent;
         defer(() => {
-            (~parentʗ1).Process.Kill();
+            parentʗ1.Process.Kill();
             parentʗ1.Wait();
         }, ref ᒐ);
 
@@ -141,32 +145,32 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
 
         UntypedInt _PROCESS_CREATE_PROCESS = 0x0080;
         UntypedInt _PROCESS_DUP_HANDLE = 0x0040;
-        @string childDumpPath = filepath.Join(Ꮡt.TempDir(), ppidTxtˢ);
+        @string childDumpPath = filepath.Join(t.TempDir(), ppidTxtˢ);
         ref var ph = ref heap<syscallꓸHandle>(out var Ꮡph);
         (ph, err) = syscall.OpenProcess((uint32)((UntypedInt)(_PROCESS_CREATE_PROCESS | _PROCESS_DUP_HANDLE) | (uint32)syscall.PROCESS_QUERY_INFORMATION),
-            false, (uint32)(~(~parent).Process).Pid);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+            false, (uint32)parent.Process.Pid);
+        if (err != nil) {
+            t.Fatal(err);
         }
         defer(syscall.CloseHandle, ph, ref ᒐ);
 
-        var child = exec.Command(testenv.Executable(new syscall_test_package.testing_TжTB(Ꮡt)), testRunˢ);
-        child.Value.Env = append(Δos.Environ(),
-            "GO_WANT_HELPER_PROCESS=child"u8,
+        var child = exec.Command(testenv.Executable(new syscall_test_package.testing_TжTB(t)), testRunˢ);
+        child.Env = append(Δos.Environ(),
+            (@string)"GO_WANT_HELPER_PROCESS=child",
             "GO_WANT_HELPER_PROCESS_FILE=" + childDumpPath);
-        child.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(ParentProcess: ph));
+        child.SysProcAttr = Ꮡ(new syscall.SysProcAttr(ParentProcess: ph));
         (var childOutput, err) = child.CombinedOutput();
-        if (err != default!) {
-            Ꮡt.Errorf("child failed: %v: %v"u8, err, (@string)childOutput);
+        if (err != nil) {
+            t.Errorf("child failed: %v: %v", err, (@string)childOutput);
         }
         (childOutput, err) = Δos.ReadFile(childDumpPath);
-        if (err != default!) {
-            Ꮡt.Fatalf("reading child output failed: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("reading child output failed: %v", err);
         }
         {
             @string got = (@string)childOutput;
-            @string want = fmt.Sprintf("%d"u8, (~(~parent).Process).Pid); if (got != want) {
-                Ꮡt.Fatalf("child output: want %q, got %q"u8, want, got);
+            @string want = fmt.Sprintf("%d"u8, parent.Process.Pid); if (got != want) {
+                t.Fatalf("child output: want %q, got %q", want, got);
             }
         }
     }

@@ -19,11 +19,11 @@ using path;
 partial class exec_package {
 
 // ErrNotFound is the error resulting if a path search failed to find an executable file.
-public static error ErrNotFound = errors.New("executable file not found in $PATH"u8);
+public static error ErrNotFound = errors.New("executable file not found in $PATH");
 
 internal static error findExecutable(@string @file) {
     var (d, err) = os.Stat(@file);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     var m = d.Mode();
@@ -34,17 +34,18 @@ internal static error findExecutable(@string @file) {
     // ENOSYS means Eaccess is not available or not implemented.
     // EPERM can be returned by Linux containers employing seccomp.
     // In both cases, fall back to checking the permission bits.
-    if (err == default! || (!AreEqual(err, syscall.ENOSYS) && !AreEqual(err, syscall.EPERM))) {
+    if (err == nil || (!AreEqual(err, syscall.ENOSYS) && !AreEqual(err, syscall.EPERM))) {
         return err;
     }
     if ((fs.FileMode)(m & 73) != 0) {
-        return default!;
+        return default;
     }
     return fs.ErrPermission;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pathˢ = "PATH"u8;
+internal static ref readonly @string pathˢ => ref pathˢᵇ;
+private static readonly @string pathˢᵇ = "PATH"u8;
 
 internal static (@string, error) lookPath(@string @file) {
     // NOTE(rsc): I wish we could use the Plan 9 behavior here
@@ -52,15 +53,15 @@ internal static (@string, error) lookPath(@string @file) {
     // but that would not match all the Unix shells.
 
     {
-        var err = validateLookPath(@file); if (err != default!) {
+        var err = validateLookPath(@file); if (err != nil) {
             return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
         }
     }
 
-    if (strings.Contains(@file, "/"u8)) {
+    if (strings.Contains(@file, "/")) {
         var err = findExecutable(@file);
-        if (err == default!) {
-            return (@file, default!);
+        if (err == nil) {
+            return (@file, default);
         }
         return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
     }
@@ -70,18 +71,18 @@ internal static (@string, error) lookPath(@string @file) {
 
         if (dir == ""u8) {
             // Unix shell semantics: path element "" means "."
-            dir = "."u8;
+            dir = ".";
         }
         @string pathΔ1 = filepath.Join(dir, @file);
         {
-            var err = findExecutable(pathΔ1); if (err == default!) {
+            var err = findExecutable(pathΔ1); if (err == nil) {
                 if (!filepath.IsAbs(pathΔ1)) {
                     if (execerrdot.Value() != "0"u8) {
                         return (pathΔ1, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
                     }
                     execerrdot.IncNonDefault();
                 }
-                return (pathΔ1, default!);
+                return (pathΔ1, default);
             }
         }
     }
@@ -91,7 +92,7 @@ internal static (@string, error) lookPath(@string @file) {
 // lookExtensions is a no-op on non-Windows platforms, since
 // they do not restrict executables to specific extensions.
 internal static (@string, error) lookExtensions(@string path, @string dir) {
-    return (path, default!);
+    return (path, default);
 }
 
 } // end exec_package

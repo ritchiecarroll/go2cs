@@ -9,12 +9,12 @@ using @unsafe = unsafe_package;
 
 partial class unix_package {
 
-public static (nint n, error err) CopyFileRange(nint rfd, ж<int64> Ꮡroff, nint wfd, ж<int64> Ꮡwoff, nint len, nint flags) {
-    nint n = default!;
-    error err = default!;
+public static (nint n, error err) CopyFileRange(nint rfd, ж<int64> roff, nint wfd, ж<int64> woff, nint len, nint flags) {
+    nint n = default;
+    error err = default;
 
-    var ᴋ0 = Ꮡroff;
-    var ᴋ1 = Ꮡwoff;
+    var ᴋ0 = roff;
+    var ᴋ1 = woff;
         var (r1, _, errno) = syscall.Syscall6(copyFileRangeTrap, (uintptr)rfd, (uintptr)ᴋ0, (uintptr)wfd, (uintptr)ᴋ1, (uintptr)len, (uintptr)flags);
     System.GC.KeepAlive(ᴋ0);
     System.GC.KeepAlive(ᴋ1);

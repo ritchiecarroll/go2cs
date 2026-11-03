@@ -65,10 +65,10 @@ public static ж<Cond> NewCond(Locker l) {
 public static void Wait(this ж<Cond> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    Ꮡc.of(Cond.Ꮡchecker).check();
-    var t = runtime_notifyListAdd(Ꮡc.of(Cond.Ꮡnotify));
+    Ꮡc.Ꮡchecker.check();
+    var t = runtime_notifyListAdd(Ꮡc.Ꮡnotify);
     c.L.Unlock();
-    runtime_notifyListWait(Ꮡc.of(Cond.Ꮡnotify), t);
+    runtime_notifyListWait(Ꮡc.Ꮡnotify, t);
     c.L.Lock();
 }
 
@@ -80,8 +80,8 @@ public static void Wait(this ж<Cond> Ꮡc) {
 // Signal() does not affect goroutine scheduling priority; if other goroutines
 // are attempting to lock c.L, they may be awoken before a "waiting" goroutine.
 public static void Signal(this ж<Cond> Ꮡc) {
-    Ꮡc.of(Cond.Ꮡchecker).check();
-    runtime_notifyListNotifyOne(Ꮡc.of(Cond.Ꮡnotify));
+    Ꮡc.Ꮡchecker.check();
+    runtime_notifyListNotifyOne(Ꮡc.Ꮡnotify);
 }
 
 // Broadcast wakes all goroutines waiting on c.
@@ -89,8 +89,8 @@ public static void Signal(this ж<Cond> Ꮡc) {
 // It is allowed but not required for the caller to hold c.L
 // during the call.
 public static void Broadcast(this ж<Cond> Ꮡc) {
-    Ꮡc.of(Cond.Ꮡchecker).check();
-    runtime_notifyListNotifyAll(Ꮡc.of(Cond.Ꮡnotify));
+    Ꮡc.Ꮡchecker.check();
+    runtime_notifyListNotifyAll(Ꮡc.Ꮡnotify);
 }
 
 // copyChecker holds back pointer to itself to detect object copying.

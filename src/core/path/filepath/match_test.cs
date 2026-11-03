@@ -25,81 +25,82 @@ partial struct MatchTest {
     internal error err;
 }
 
-internal static slice<MatchTest> matchTests = new MatchTest[]{
-    new("abc"u8, "abc"u8, true, default!),
-    new("*"u8, "abc"u8, true, default!),
-    new("*c"u8, "abc"u8, true, default!),
-    new("a*"u8, "a"u8, true, default!),
-    new("a*"u8, "abc"u8, true, default!),
-    new("a*"u8, "ab/c"u8, false, default!),
-    new("a*/b"u8, "abc/b"u8, true, default!),
-    new("a*/b"u8, "a/c/b"u8, false, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxe/f"u8, true, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxexxx/f"u8, true, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxe/xxx/f"u8, false, default!),
-    new("a*b*c*d*e*/f"u8, "axbxcxdxexxx/fff"u8, false, default!),
-    new("a*b?c*x"u8, "abxbbxdbxebxczzx"u8, true, default!),
-    new("a*b?c*x"u8, "abxbbxdbxebxczzy"u8, false, default!),
-    new("ab[c]"u8, "abc"u8, true, default!),
-    new("ab[b-d]"u8, "abc"u8, true, default!),
-    new("ab[e-g]"u8, "abc"u8, false, default!),
-    new("ab[^c]"u8, "abc"u8, false, default!),
-    new("ab[^b-d]"u8, "abc"u8, false, default!),
-    new("ab[^e-g]"u8, "abc"u8, true, default!),
-    new("a\\*b"u8, "a*b"u8, true, default!),
-    new("a\\*b"u8, "ab"u8, false, default!),
-    new("a?b"u8, "a☺b"u8, true, default!),
-    new("a[^a]b"u8, "a☺b"u8, true, default!),
-    new("a???b"u8, "a☺b"u8, false, default!),
-    new("a[^a][^a][^a]b"u8, "a☺b"u8, false, default!),
-    new("[a-ζ]*"u8, "α"u8, true, default!),
-    new("*[a-ζ]"u8, "A"u8, false, default!),
-    new("a?b"u8, "a/b"u8, false, default!),
-    new("a*b"u8, "a/b"u8, false, default!),
-    new("[\\]a]"u8, "]"u8, true, default!),
-    new("[\\-]"u8, "-"u8, true, default!),
-    new("[x\\-]"u8, "x"u8, true, default!),
-    new("[x\\-]"u8, "-"u8, true, default!),
-    new("[x\\-]"u8, "z"u8, false, default!),
-    new("[\\-x]"u8, "x"u8, true, default!),
-    new("[\\-x]"u8, "-"u8, true, default!),
-    new("[\\-x]"u8, "a"u8, false, default!),
-    new("[]a]"u8, "]"u8, false, ErrBadPattern),
-    new("[-]"u8, "-"u8, false, ErrBadPattern),
-    new("[x-]"u8, "x"u8, false, ErrBadPattern),
-    new("[x-]"u8, "-"u8, false, ErrBadPattern),
-    new("[x-]"u8, "z"u8, false, ErrBadPattern),
-    new("[-x]"u8, "x"u8, false, ErrBadPattern),
-    new("[-x]"u8, "-"u8, false, ErrBadPattern),
-    new("[-x]"u8, "a"u8, false, ErrBadPattern),
-    new("\\"u8, "a"u8, false, ErrBadPattern),
-    new("[a-b-c]"u8, "a"u8, false, ErrBadPattern),
-    new("["u8, "a"u8, false, ErrBadPattern),
-    new("[^"u8, "a"u8, false, ErrBadPattern),
-    new("[^bc"u8, "a"u8, false, ErrBadPattern),
-    new("a["u8, "a"u8, false, ErrBadPattern),
-    new("a["u8, "ab"u8, false, ErrBadPattern),
-    new("a["u8, "x"u8, false, ErrBadPattern),
-    new("a/b["u8, "x"u8, false, ErrBadPattern),
-    new("*x"u8, "xxx"u8, true, default!)
-}.slice();
+internal static slice<MatchTest> matchTests = slice<MatchTest>([
+    new("abc", "abc", true, default),
+    new("*", "abc", true, default),
+    new("*c", "abc", true, default),
+    new("a*", "a", true, default),
+    new("a*", "abc", true, default),
+    new("a*", "ab/c", false, default),
+    new("a*/b", "abc/b", true, default),
+    new("a*/b", "a/c/b", false, default),
+    new("a*b*c*d*e*/f", "axbxcxdxe/f", true, default),
+    new("a*b*c*d*e*/f", "axbxcxdxexxx/f", true, default),
+    new("a*b*c*d*e*/f", "axbxcxdxe/xxx/f", false, default),
+    new("a*b*c*d*e*/f", "axbxcxdxexxx/fff", false, default),
+    new("a*b?c*x", "abxbbxdbxebxczzx", true, default),
+    new("a*b?c*x", "abxbbxdbxebxczzy", false, default),
+    new("ab[c]", "abc", true, default),
+    new("ab[b-d]", "abc", true, default),
+    new("ab[e-g]", "abc", false, default),
+    new("ab[^c]", "abc", false, default),
+    new("ab[^b-d]", "abc", false, default),
+    new("ab[^e-g]", "abc", true, default),
+    new("a\\*b", "a*b", true, default),
+    new("a\\*b", "ab", false, default),
+    new("a?b", "a☺b", true, default),
+    new("a[^a]b", "a☺b", true, default),
+    new("a???b", "a☺b", false, default),
+    new("a[^a][^a][^a]b", "a☺b", false, default),
+    new("[a-ζ]*", "α", true, default),
+    new("*[a-ζ]", "A", false, default),
+    new("a?b", "a/b", false, default),
+    new("a*b", "a/b", false, default),
+    new("[\\]a]", "]", true, default),
+    new("[\\-]", "-", true, default),
+    new("[x\\-]", "x", true, default),
+    new("[x\\-]", "-", true, default),
+    new("[x\\-]", "z", false, default),
+    new("[\\-x]", "x", true, default),
+    new("[\\-x]", "-", true, default),
+    new("[\\-x]", "a", false, default),
+    new("[]a]", "]", false, ErrBadPattern),
+    new("[-]", "-", false, ErrBadPattern),
+    new("[x-]", "x", false, ErrBadPattern),
+    new("[x-]", "-", false, ErrBadPattern),
+    new("[x-]", "z", false, ErrBadPattern),
+    new("[-x]", "x", false, ErrBadPattern),
+    new("[-x]", "-", false, ErrBadPattern),
+    new("[-x]", "a", false, ErrBadPattern),
+    new("\\", "a", false, ErrBadPattern),
+    new("[a-b-c]", "a", false, ErrBadPattern),
+    new("[", "a", false, ErrBadPattern),
+    new("[^", "a", false, ErrBadPattern),
+    new("[^bc", "a", false, ErrBadPattern),
+    new("a[", "a", false, ErrBadPattern),
+    new("a[", "ab", false, ErrBadPattern),
+    new("a[", "x", false, ErrBadPattern),
+    new("a/b[", "x", false, ErrBadPattern),
+    new("*x", "xxx", true, default)
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nilˢ = "<nil>"u8;
+internal static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
 
 internal static @string errp(error e) {
-    if (e == default!) {
+    if (e == nil) {
         return nilˢ;
     }
     return e.Error();
 }
 
-public static void TestMatch(ж<testing.T> Ꮡt) {
+public static void TestMatch(ж<testing.T> t) {
     foreach (var (_, tt) in matchTests) {
         @string pattern = tt.pattern;
         @string s = tt.s;
         if (runtime.GOOS == "windows"u8) {
-            if (strings.Contains(pattern, "\\"u8)) {
+            if (strings.Contains(pattern, "\\")) {
                 // no escape allowed on windows.
                 continue;
             }
@@ -108,19 +109,19 @@ public static void TestMatch(ж<testing.T> Ꮡt) {
         }
         var (ok, err) = Match(pattern, s);
         if (ok != tt.match || !AreEqual(err, tt.err)) {
-            Ꮡt.Errorf("Match(%#q, %#q) = %v, %q want %v, %q"u8, pattern, s, ok, errp(err), tt.match, errp(tt.err));
+            t.Errorf("Match(%#q, %#q) = %v, %q want %v, %q", pattern, s, ok, errp(err), tt.match, errp(tt.err));
         }
     }
 }
 
-public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
+public static void BenchmarkMatch(ж<testing.B> b) {
     foreach (var (_, vᴛ1) in matchTests) {
         ref var tt = ref heap(new MatchTest(), out var Ꮡtt);
         tt = vᴛ1;
 
         @string name = fmt.Sprintf("%q %q"u8, tt.pattern, tt.s);
         var ttʗ1 = tt;
-        Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
+        b.Run(name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             foreach (var _ᴛ1 in range((~bΔ1).N)) {
                 (bSink, errSink) = Match(ttʗ1.pattern, ttʗ1.s);
@@ -135,14 +136,14 @@ internal static error errSink;
 partial struct globTestsᴛ1 /*dyn*/ {
     internal @string pattern, result;
 }
-internal static slice<globTestsᴛ1> globTests = new globTestsᴛ1[]{
-    new("match.go"u8, "match.go"u8),
-    new("mat?h.go"u8, "match.go"u8),
-    new("*"u8, "match.go"u8),
-    new("../*/match.go"u8, "../filepath/match.go"u8)
-}.slice();
+internal static slice<globTestsᴛ1> globTests = slice<globTestsᴛ1>([
+    new("match.go", "match.go"),
+    new("mat?h.go", "match.go"),
+    new("*", "match.go"),
+    new("../*/match.go", "../filepath/match.go")
+]);
 
-public static void TestGlob(ж<testing.T> Ꮡt) {
+public static void TestGlob(ж<testing.T> t) {
     foreach (var (_, tt) in globTests) {
         @string pattern = tt.pattern;
         @string result = tt.result;
@@ -151,92 +152,92 @@ public static void TestGlob(ж<testing.T> Ꮡt) {
             result = Clean(result);
         }
         var (matches, err) = Glob(pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Glob error for %q: %s"u8, pattern, err);
+        if (err != nil) {
+            t.Errorf("Glob error for %q: %s", pattern, err);
             continue;
         }
         if (!slices.Contains(matches, result)) {
-            Ꮡt.Errorf("Glob(%#q) = %#v want %v"u8, pattern, matches, result);
+            t.Errorf("Glob(%#q) = %#v want %v", pattern, matches, result);
         }
     }
-    foreach (var (_, pattern) in new @string[]{"no_match"u8, "../*/no_match"u8}.slice()) {
+    foreach (var (_, pattern) in slice<@string>(["no_match", "../*/no_match"])) {
         var (matches, err) = Glob(pattern);
-        if (err != default!) {
-            Ꮡt.Errorf("Glob error for %q: %s"u8, pattern, err);
+        if (err != nil) {
+            t.Errorf("Glob error for %q: %s", pattern, err);
             continue;
         }
         if (len(matches) != 0) {
-            Ꮡt.Errorf("Glob(%#q) = %#v want []"u8, pattern, matches);
+            t.Errorf("Glob(%#q) = %#v want []", pattern, matches);
         }
     }
 }
 
-public static partial void TestCVE202230632(ж<testing.T> Ꮡt) {
+public static partial void TestCVE202230632(ж<testing.T> t) {
     // Prior to CVE-2022-30632, this would cause a stack exhaustion given a
     // large number of separators (more than 4,000,000). There is now a limit
     // of 10,000.
-    var (_, err) = Glob("/*"u8 + strings.Repeat("/"u8, 10001));
+    var (_, err) = Glob("/*"u8 + strings.Repeat("/", 10001));
     if (!AreEqual(err, ErrBadPattern)) {
-        Ꮡt.Fatalf("Glob returned err=%v, want ErrBadPattern"u8, err);
+        t.Fatalf("Glob returned err=%v, want ErrBadPattern", err);
     }
 }
 
-public static void TestGlobError(ж<testing.T> Ꮡt) {
-    var bad = new @string[]{@"[]"u8, @"nonexist/[]"u8}.slice();
+public static void TestGlobError(ж<testing.T> t) {
+    var bad = slice<@string>([@"[]", @"nonexist/[]"]);
     foreach (var (_, pattern) in bad) {
         {
             var (_, err) = Glob(pattern); if (!AreEqual(err, ErrBadPattern)) {
-                Ꮡt.Errorf("Glob(%#q) returned err=%v, want ErrBadPattern"u8, pattern, err);
+                t.Errorf("Glob(%#q) returned err=%v, want ErrBadPattern", pattern, err);
             }
         }
     }
 }
 
-public static void TestGlobUNC(ж<testing.T> Ꮡt) {
+public static void TestGlobUNC(ж<testing.T> t) {
     // Just make sure this runs without crashing for now.
     // See issue 15879.
-    Glob(@"\\?\C:\*"u8);
+    Glob(@"\\?\C:\*");
 }
 
 partial struct globSymlinkTestsᴛ1 /*dyn*/ {
     internal @string path, dest;
     internal bool brokenLink;
 }
-internal static slice<globSymlinkTestsᴛ1> globSymlinkTests = new globSymlinkTestsᴛ1[]{
-    new("test1"u8, "link1"u8, false),
-    new("test2"u8, "link2"u8, true)
-}.slice();
+internal static slice<globSymlinkTestsᴛ1> globSymlinkTests = slice<globSymlinkTestsᴛ1>([
+    new("test1", "link1", false),
+    new("test2", "link2", true)
+]);
 
-public static void TestGlobSymlink(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+public static void TestGlobSymlink(ж<testing.T> t) {
+    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(t));
 
-    @string tmpDir = Ꮡt.TempDir();
+    @string tmpDir = t.TempDir();
     foreach (var (_, tt) in globSymlinkTests) {
         @string path = Join(tmpDir, tt.path);
         @string dest = Join(tmpDir, tt.dest);
         var (f, err) = os.Create(path);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         {
-            var errΔ1 = f.Close(); if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            var errΔ1 = f.Close(); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         err = os.Symlink(path, dest);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         if (tt.brokenLink) {
             // Break the symlink.
             os.Remove(path);
         }
         (var matches, err) = Glob(dest);
-        if (err != default!) {
-            Ꮡt.Errorf("GlobSymlink error for %q: %s"u8, dest, err);
+        if (err != nil) {
+            t.Errorf("GlobSymlink error for %q: %s", dest, err);
         }
         if (!slices.Contains(matches, dest)) {
-            Ꮡt.Errorf("Glob(%#q) = %#v want %v"u8, dest, matches, dest);
+            t.Errorf("Glob(%#q) = %#v want %v", dest, matches, dest);
         }
     }
 }
@@ -258,13 +259,13 @@ internal static slice<@string> buildWant(this ref globTest test, @string root) {
 internal static error globAbs(this ref globTest test, @string root, @string rootPattern) {
     @string p = FromSlash(rootPattern + @"\"u8 + test.pattern);
     var (have, err) = Glob(p);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     slices.Sort<slice<@string>, @string>(have);
     var want = test.buildWant(root + @"\"u8);
     if (slices.Equal<slice<@string>, @string>(want, have)) {
-        return default!;
+        return default;
     }
     return fmt.Errorf("Glob(%q) returns %q, but %q expected"u8, p, have, want);
 }
@@ -272,134 +273,135 @@ internal static error globAbs(this ref globTest test, @string root, @string root
 internal static error globRel(this ref globTest test, @string root) {
     @string p = root + FromSlash(test.pattern);
     var (have, err) = Glob(p);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     slices.Sort<slice<@string>, @string>(have);
     var want = test.buildWant(root);
     if (slices.Equal<slice<@string>, @string>(want, have)) {
-        return default!;
+        return default;
     }
     // try also matching version without root prefix
     var wantWithNoRoot = test.buildWant(""u8);
     if (slices.Equal<slice<@string>, @string>(wantWithNoRoot, have)) {
-        return default!;
+        return default;
     }
     return fmt.Errorf("Glob(%q) returns %q, but %q expected"u8, p, have, want);
 }
 
-public static void TestWindowsGlob(ж<testing.T> Ꮡt) {
+public static void TestWindowsGlob(ж<testing.T> t) {
     if (runtime.GOOS != "windows"u8) {
-        Ꮡt.Skipf("skipping windows specific test"u8);
+        t.Skipf("skipping windows specific test");
     }
 
-    @string tmpDir = tempDirCanonical(Ꮡt);
+    @string tmpDir = tempDirCanonical(t);
     if (len(tmpDir) < 3) {
-        Ꮡt.Fatalf("tmpDir path %q is too short"u8, tmpDir);
+        t.Fatalf("tmpDir path %q is too short", tmpDir);
     }
-    if (tmpDir[1] != (rune)':') {
-        Ꮡt.Fatalf("tmpDir path %q must have drive letter in it"u8, tmpDir);
+    if (tmpDir[1] != ':') {
+        t.Fatalf("tmpDir path %q must have drive letter in it", tmpDir);
     }
 
-    var dirs = new @string[]{
-        "a"u8,
-        "b"u8,
-        "dir/d/bin"u8
-    }.slice();
-    var files = new @string[]{
-        "dir/d/bin/git.exe"u8
-    }.slice();
+    var dirs = slice<@string>([
+        "a",
+        "b",
+        "dir/d/bin"
+    ]);
+    var files = slice<@string>([
+        "dir/d/bin/git.exe"
+    ]);
     foreach (var (_, dir) in dirs) {
         var err = os.MkdirAll(Join(tmpDir, dir), 511);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
     }
     foreach (var (_, @file) in files) {
-        var err = os.WriteFile(Join(tmpDir, @file), default!, 438);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = os.WriteFile(Join(tmpDir, @file), default, 438);
+        if (err != nil) {
+            t.Fatal(err);
         }
     }
 
-    var tests = new globTest[]{
-        new("a"u8, new @string[]{"a"u8}.slice()),
-        new("b"u8, new @string[]{"b"u8}.slice()),
-        new("c"u8, new @string[]{}.slice()),
-        new("*"u8, new @string[]{"a"u8, "b"u8, "dir"u8}.slice()),
-        new("d*"u8, new @string[]{"dir"u8}.slice()),
-        new("*i*"u8, new @string[]{"dir"u8}.slice()),
-        new("*r"u8, new @string[]{"dir"u8}.slice()),
-        new("?ir"u8, new @string[]{"dir"u8}.slice()),
-        new("?r"u8, new @string[]{}.slice()),
-        new("d*/*/bin/git.exe"u8, new @string[]{"dir/d/bin/git.exe"u8}.slice())
-    }.slice();
+    var tests = slice<globTest>([
+        new("a", slice<@string>(["a"])),
+        new("b", slice<@string>(["b"])),
+        new("c", slice<@string>([])),
+        new("*", slice<@string>(["a", "b", "dir"])),
+        new("d*", slice<@string>(["dir"])),
+        new("*i*", slice<@string>(["dir"])),
+        new("*r", slice<@string>(["dir"])),
+        new("?ir", slice<@string>(["dir"])),
+        new("?r", slice<@string>([])),
+        new("d*/*/bin/git.exe", slice<@string>(["dir/d/bin/git.exe"]))
+    ]);
 
     // test absolute paths
     foreach (var (_, vᴛ1) in tests) {
         var test = vᴛ1;
 
-        @string p = default!;
+        @string p = default;
         {
-            var err = test.globAbs(tmpDir, tmpDir); if (err != default!) {
-                Ꮡt.Error(err);
+            var err = test.globAbs(tmpDir, tmpDir); if (err != nil) {
+                t.Error(err);
             }
         }
         // test C:\*Documents and Settings\...
         p = tmpDir;
-        p = strings.Replace(p, @":\"u8, @":\*"u8, 1);
+        p = strings.Replace(p, @":\", @":\*", 1);
         {
-            var err = test.globAbs(tmpDir, p); if (err != default!) {
-                Ꮡt.Error(err);
+            var err = test.globAbs(tmpDir, p); if (err != nil) {
+                t.Error(err);
             }
         }
         // test C:\Documents and Settings*\...
         p = tmpDir;
-        p = strings.Replace(p, @":\"u8, @":"u8, 1);
-        p = strings.Replace(p, @"\"u8, @"*\"u8, 1);
-        p = strings.Replace(p, @":"u8, @":\"u8, 1);
+        p = strings.Replace(p, @":\", @":", 1);
+        p = strings.Replace(p, @"\", @"*\", 1);
+        p = strings.Replace(p, @":", @":\", 1);
         {
-            var err = test.globAbs(tmpDir, p); if (err != default!) {
-                Ꮡt.Error(err);
+            var err = test.globAbs(tmpDir, p); if (err != nil) {
+                t.Error(err);
             }
         }
     }
 
     // test relative paths
-    Ꮡt.Chdir(tmpDir);
+    t.Chdir(tmpDir);
     foreach (var (_, vᴛ2) in tests) {
         var test = vᴛ2;
 
         var err = test.globRel(""u8);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        if (err != nil) {
+            t.Error(err);
         }
-        err = test.globRel(@".\"u8);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        err = test.globRel(@".\");
+        if (err != nil) {
+            t.Error(err);
         }
         err = test.globRel(tmpDir[..2]); // C:
-        if (err != default!) {
-            Ꮡt.Error(err);
+        if (err != nil) {
+            t.Error(err);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string matchGoˢ = @"\match.go"u8;
+internal static ref readonly @string matchGoˢ => ref matchGoˢᵇ;
+private static readonly @string matchGoˢᵇ = @"\match.go"u8;
 
-public static void TestNonWindowsGlobEscape(ж<testing.T> Ꮡt) {
+public static void TestNonWindowsGlobEscape(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8) {
-        Ꮡt.Skipf("skipping non-windows specific test"u8);
+        t.Skipf("skipping non-windows specific test");
     }
     @string pattern = matchGoˢ;
-    var want = new @string[]{"match.go"u8}.slice();
+    var want = slice<@string>(["match.go"]);
     var (matches, err) = Glob(pattern);
-    if (err != default!) {
-        Ꮡt.Fatalf("Glob error for %q: %s"u8, pattern, err);
+    if (err != nil) {
+        t.Fatalf("Glob error for %q: %s", pattern, err);
     }
     if (!slices.Equal<slice<@string>, @string>(matches, want)) {
-        Ꮡt.Fatalf("Glob(%#q) = %v want %v"u8, pattern, matches, want);
+        t.Fatalf("Glob(%#q) = %v want %v", pattern, matches, want);
     }
 }
 

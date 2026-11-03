@@ -28,7 +28,7 @@ using static go.math.rand.rand_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("math/rand/v2/export_test.go", "export_test.cs", "AAkOgqaC")]
+[assembly: GoPositionMap("math/rand/v2/export_test.go", "export_test.cs", "AAkOgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.math.rand;

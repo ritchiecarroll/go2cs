@@ -56,17 +56,17 @@ internal partial interface readBatch_r /*dyn*/ :
 internal static (batch, uint64, error) readBatch(readBatch_r r) {
     // Read batch header byte.
     var (b, err) = r.ReadByte();
-    if (err != default!) {
-        return (new batch(nil), 0, err);
+    if (err != nil) {
+        return (new batch(), 0, err);
     }
     {
         var typ = (tracev2.EventType)b; if (typ == tracev2.EvEndOfGeneration) {
-            return (new batch(m: NoThread, exp: tracev2.NoExperiment, data: new byte[]{b}.slice()), 0, default!);
+            return (new batch(m: NoThread, exp: tracev2.NoExperiment, data: slice<byte>([b])), 0, default);
         }
     }
     {
         var typ = (tracev2.EventType)b; if (typ != tracev2.EvEventBatch && typ != tracev2.EvExperimentalBatch) {
-            return (new batch(nil), 0, fmt.Errorf("expected batch event, got event %d"u8, typ));
+            return (new batch(), 0, fmt.Errorf("expected batch event, got event %d"u8, typ));
         }
     }
 
@@ -74,8 +74,8 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     tracev2.Experiment exp = tracev2.NoExperiment;
     if (((tracev2.EventType)b) == tracev2.EvExperimentalBatch) {
         var (e, errΔ1) = r.ReadByte();
-        if (errΔ1 != default!) {
-            return (new batch(nil), 0, errΔ1);
+        if (errΔ1 != nil) {
+            return (new batch(), 0, errΔ1);
         }
         exp = (tracev2.Experiment)(nuint)e;
     }
@@ -83,25 +83,25 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     // Read the batch header: gen (generation), thread (M) ID, base timestamp
     // for the batch.
     (var gen, err) = binary.ReadUvarint(r);
-    if (err != default!) {
-        return (new batch(nil), gen, fmt.Errorf("error reading batch gen: %w"u8, err));
+    if (err != nil) {
+        return (new batch(), gen, fmt.Errorf("error reading batch gen: %w"u8, err));
     }
     (var m, err) = binary.ReadUvarint(r);
-    if (err != default!) {
-        return (new batch(nil), gen, fmt.Errorf("error reading batch M ID: %w"u8, err));
+    if (err != nil) {
+        return (new batch(), gen, fmt.Errorf("error reading batch M ID: %w"u8, err));
     }
     (var ts, err) = binary.ReadUvarint(r);
-    if (err != default!) {
-        return (new batch(nil), gen, fmt.Errorf("error reading batch timestamp: %w"u8, err));
+    if (err != nil) {
+        return (new batch(), gen, fmt.Errorf("error reading batch timestamp: %w"u8, err));
     }
 
     // Read in the size of the batch to follow.
     (var size, err) = binary.ReadUvarint(r);
-    if (err != default!) {
-        return (new batch(nil), gen, fmt.Errorf("error reading batch size: %w"u8, err));
+    if (err != nil) {
+        return (new batch(), gen, fmt.Errorf("error reading batch size: %w"u8, err));
     }
     if (size > tracev2.MaxBatchSize) {
-        return (new batch(nil), gen, fmt.Errorf("invalid batch size %d, maximum is %d"u8, size, (nint)(tracev2.MaxBatchSize)));
+        return (new batch(), gen, fmt.Errorf("invalid batch size %d, maximum is %d"u8, size, (nint)(tracev2.MaxBatchSize)));
     }
 
     // Copy out the batch for later processing.
@@ -109,10 +109,10 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
     data.Grow((nint)size);
     (var n, err) = io.CopyN(new bytes_BufferжWriter(Ꮡdata), r, (int64)size);
     if (n != (int64)size) {
-        return (new batch(nil), gen, fmt.Errorf("failed to read full batch: read %d but wanted %d"u8, n, size));
+        return (new batch(), gen, fmt.Errorf("failed to read full batch: read %d but wanted %d"u8, n, size));
     }
-    if (err != default!) {
-        return (new batch(nil), gen, fmt.Errorf("copying batch data: %w"u8, err));
+    if (err != nil) {
+        return (new batch(), gen, fmt.Errorf("copying batch data: %w"u8, err));
     }
 
     // Return the batch.
@@ -121,7 +121,7 @@ internal static (batch, uint64, error) readBatch(readBatch_r r) {
         time: ((timestamp)ts),
         data: data.Bytes(),
         exp: exp
-    ), gen, default!);
+    ), gen, default);
 }
 
 } // end trace_package

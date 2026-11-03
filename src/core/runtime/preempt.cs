@@ -74,8 +74,10 @@ partial struct suspendGState {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string suspendGFromNonˢ = "suspendG from non-preemptible goroutine"u8;
-internal static readonly @string invalidGStatusˢ = "invalid g status"u8;
+internal static ref readonly @string suspendGFromNonˢ => ref suspendGFromNonˢᵇ;
+private static readonly @string suspendGFromNonˢᵇ = "suspendG from non-preemptible goroutine"u8;
+internal static ref readonly @string invalidGStatusˢ => ref invalidGStatusˢᵇ;
+private static readonly @string invalidGStatusˢᵇ = "invalid g status"u8;
 
 // suspendG suspends goroutine gp at a safe-point and returns the
 // state of the suspended goroutine. The caller gets read access to
@@ -120,14 +122,14 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
 
     // See https://golang.org/cl/21503 for justification of the yield delay.
     UntypedInt yieldDelay = /* 10 * 1000 */ 10000;
-    int64 nextYield = default!;
+    int64 nextYield = default;
 
     // Drive the goroutine to a preemption point.
     var stopped = false;
-    ж<m> asyncM = default!;
-    uint32 asyncGen = default!;
-    int64 nextPreemptM = default!;
-    for (nint i = 0; ᐧ ; i++) {
+    ж<m> asyncM = default;
+    uint32 asyncGen = default;
+    int64 nextPreemptM = default;
+    for (nint i = 0; ; i++) {
         {
             var s = readgstatus(Ꮡgp);
             var exprᴛ1 = s;
@@ -264,7 +266,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
         if (i == 0) {
             nextYield = nanotime() + (int64)yieldDelay;
         }
-        if (nanotime() < nextYield){
+        if (nanotime() < nextYield) {
             procyield(10);
         } else {
             osyield();
@@ -274,7 +276,8 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedGStatusˢ = "unexpected g status"u8;
+internal static ref readonly @string unexpectedGStatusˢ => ref unexpectedGStatusˢᵇ;
+private static readonly @string unexpectedGStatusˢᵇ = "unexpected g status"u8;
 
 // resumeG undoes the effects of suspendG, allowing the suspended
 // goroutine to continue from its current safe-point.
@@ -287,14 +290,16 @@ internal static void resumeG(suspendGState state) {
     var gp = state.g;
     {
         var s = readgstatus(gp);
-        var exprᴛ1 = s;
-        if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
-            casfrom_Gscanstatus(gp, s, s & ~(uint32)_Gscan);
-        }
-        else { /* default: */
+        switch (s) {
+        default: {
             dumpgstatus(gp);
             @throw(unexpectedGStatusˢ);
+            break;
         }
+        case var ᴛ when ᴛ == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || ᴛ == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || ᴛ == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || ᴛ == (uint32)((uint32)_Gsyscall | (uint32)_Gscan): {
+            casfrom_Gscanstatus(gp, s, s & ~(uint32)_Gscan);
+            break;
+        }}
     }
 
     if (state.stopped) {
@@ -346,7 +351,7 @@ internal static void asyncPreempt2() {
         // we're on the system stack to avoid stack splits.
         xRegSave(ref (gpΔ1).DerefOrNull());
 
-        if ((~gpΔ1).preemptStop){
+        if ((~gpΔ1).preemptStop) {
             preemptPark(gpΔ1);
         } else {
             gopreempt_m(gpΔ1);
@@ -381,8 +386,8 @@ internal static uintptr asyncPreemptStack = ~(uintptr)0;
     if (asyncPreemptStack > stackNosplit) {
         // We need more than the nosplit limit. This isn't unsafe, but it may
         // limit asynchronous preemption. Consider moving state into xRegState.
-        print((@string)"runtime: asyncPreemptStack="u8, asyncPreemptStack, (@string)"\n"u8);
-        @throw("async stack too large"u8);
+        print((@string)"runtime: asyncPreemptStack=", asyncPreemptStack, (@string)"\n");
+        @throw("async stack too large");
     }
 }
 
@@ -396,9 +401,12 @@ internal static bool wantAsyncPreempt(ж<g> Ꮡgp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string internalRuntimeˢ = "internal/runtime/"u8;
-internal static readonly @string reflectˢ = "reflect."u8;
-internal static readonly @string badRestartPcˢ = "bad restart PC"u8;
+internal static ref readonly @string internalRuntimeˢ => ref internalRuntimeˢᵇ;
+private static readonly @string internalRuntimeˢᵇ = "internal/runtime/"u8;
+internal static ref readonly @string reflectˢ => ref reflectˢᵇ;
+private static readonly @string reflectˢᵇ = "reflect."u8;
+internal static ref readonly @string badRestartPcˢ => ref badRestartPcˢᵇ;
+private static readonly @string badRestartPcˢᵇ = "bad restart PC"u8;
 
 // isAsyncSafePoint reports whether gp at instruction PC is an
 // asynchronous safe point. This indicates that:
@@ -512,8 +520,8 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
         // in incrementally.
         return (false, 0);
     }
-    var exprᴛ1 = up;
-    if (exprᴛ1 == abi.UnsafePointRestart1 || exprᴛ1 == abi.UnsafePointRestart2) {
+    switch (up) {
+    case var ᴛ when ᴛ == abi.UnsafePointRestart1 || ᴛ == abi.UnsafePointRestart2: {
         // Restartable instruction sequence. Back off PC to
         // the start PC.
         if (startpc == 0 || startpc > pc || pc - startpc > 20) {
@@ -521,10 +529,10 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
         }
         return (true, startpc);
     }
-    if (exprᴛ1 == abi.UnsafePointRestartAtEntry) {
+    case var ᴛ when ᴛ == abi.UnsafePointRestartAtEntry: {
         // Restart from the function entry at resumption.
         return (true, f.entry());
-    }
+    }}
     return (true, pc);
 }
 

@@ -436,7 +436,6 @@
     <ProjectReference Include="$(go2csPath)core/internal/asan/internal.asan.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/race/internal.race.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/runtime/syscall/windows/internal.runtime.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/singleflight/internal.singleflight.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />

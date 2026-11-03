@@ -9,15 +9,6 @@ global using static global::go.crypto.rand_internal_test_package;
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -41,7 +32,12 @@ using static global::go.crypto.rand_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(countingReader))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -51,8 +47,8 @@ using static global::go.crypto.rand_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rand/text_test.go", "text_test.cs", "AA0agoKCgtyCgoKCgpSCgqaAgqSUgoKCgqaCpoKCuKKCgoKUgoKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/rand/util_test.go", "util_test.cs", "ABUmsoKCgpSClILMkoCC+IKCgoKUgoKCgpSCpqa0goKAggAKFLKCgqrCkoKClIKClIKC3rKSgoKClIKCgoKUgu6igoCCtqKmkoKokoKmooKC", "86-97:1;104-119:1;124-128:1")]
+[assembly: GoPositionMap("crypto/rand/text_test.go", "text_test.cs", "AA0agoKCgtyCgoKCgpSCgqaAgqSUgoKCgqaCpoKCuKKCgoKUgoKCgpQ=")]
+[assembly: GoPositionMap("crypto/rand/util_test.go", "util_test.cs", "ABUmkoKCgpSClILMkoCC+IKCgoKUgoKCgpSCpqaUgoKAggAKFLKCgqqikoKClIKClIKC3pKSgoKClIKCgoKUgu6igoCCtqKmkoKokoKmooKC", "86-97:1;104-119:1;124-128:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

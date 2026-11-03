@@ -7,11 +7,7 @@
 global using static global::go.@internal.unsafeheader_package;
 
 // <ImportedTypeAliases>
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
 // </ImportedTypeAliases>
 
 using go;
@@ -30,7 +26,12 @@ using static global::go.@internal.unsafeheader_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.@internal.unsafeheader_package.Slice))]
+[assembly: GoFieldAccess(typeof(go.@internal.unsafeheader_package.String))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -40,7 +41,7 @@ using static global::go.@internal.unsafeheader_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/unsafeheader/unsafeheader_test.go", "unsafeheader_test.cs", "ABMksoKmgriCgpSCgoKCgpSClIK4gpSCuoKWggAFEuKClIKCgoKUgpSCuIKkgoKClII=", "19-21:1;23-25:2;71-86:1;88-99:2")]
+[assembly: GoPositionMap("internal/unsafeheader/unsafeheader_test.go", "unsafeheader_test.cs", "ABQksoKmgriCgpSCgoKCgpSClIK4gpSCuoKWggAGEuKClIKCgoKUgpSCuIKUgoKClII=", "19-21:1;23-25:2;71-86:1;88-99:2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

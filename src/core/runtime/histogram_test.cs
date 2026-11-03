@@ -14,7 +14,7 @@ partial class runtime_test_package {
 internal static readonly ж<global::go.runtime_internal_test_package.TimeHistogram> ᏑdummyTimeHistogram = new StaticBox<global::go.runtime_internal_test_package.TimeHistogram>(new global::go.runtime_internal_test_package.TimeHistogram());
 internal static ref global::go.runtime_internal_test_package.TimeHistogram dummyTimeHistogram => ref ((StaticBox<global::go.runtime_internal_test_package.TimeHistogram>)ᏑdummyTimeHistogram).ValueSlot;
 
-public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
+public static void TestTimeHistogram(ж<testing.T> t) {
     // We need to use a global dummy because this
     // could get stack-allocated with a non-8-byte alignment.
     // The result of this bad alignment is a segfault on
@@ -49,42 +49,41 @@ public static void TestTimeHistogram(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < runtime_internal_test_package.TimeHistNumBuckets; i++) {
         for (nint j = 0; j < runtime_internal_test_package.TimeHistNumSubBuckets; j++) {
             var (cΔ1, okΔ1) = h.Count(i, j);
-            if (!okΔ1){
-                Ꮡt.Errorf("unexpected invalid bucket: (%d, %d)"u8, i, j);
-            } else 
-            {
+            if (!okΔ1) {
+                t.Errorf("unexpected invalid bucket: (%d, %d)", i, j);
+            } else {
                 var idx = (uint64)(i * (nint)runtime_internal_test_package.TimeHistNumSubBuckets + j); if (cΔ1 != idx) {
-                    Ꮡt.Errorf("bucket (%d, %d) has count that is not %d: %d"u8, i, j, idx, cΔ1);
+                    t.Errorf("bucket (%d, %d) has count that is not %d: %d", i, j, idx, cΔ1);
                 }
             }
         }
     }
     var (c, ok) = h.Count(-1, 0);
     if (ok) {
-        Ꮡt.Errorf("expected to hit underflow bucket: (%d, %d)"u8, (nint)(-1), (nint)0);
+        t.Errorf("expected to hit underflow bucket: (%d, %d)", (nint)(-1), (nint)0);
     }
     if (c != 1) {
-        Ꮡt.Errorf("overflow bucket has count that is not 1: %d"u8, c);
+        t.Errorf("overflow bucket has count that is not 1: %d", c);
     }
 
     (c, ok) = h.Count(runtime_internal_test_package.TimeHistNumBuckets + 1, 0);
     if (ok) {
-        Ꮡt.Errorf("expected to hit overflow bucket: (%d, %d)"u8, (nint)(runtime_internal_test_package.TimeHistNumBuckets + 1), (nint)0);
+        t.Errorf("expected to hit overflow bucket: (%d, %d)", (nint)(runtime_internal_test_package.TimeHistNumBuckets + 1), (nint)0);
     }
     if (c != 2) {
-        Ꮡt.Errorf("overflow bucket has count that is not 2: %d"u8, c);
+        t.Errorf("overflow bucket has count that is not 2: %d", c);
     }
 
-    dummyTimeHistogram = new runtime_internal_test_package.TimeHistogram(nil);
+    dummyTimeHistogram = new runtime_internal_test_package.TimeHistogram();
 }
 
-public static void TestTimeHistogramMetricsBuckets(ж<testing.T> Ꮡt) {
+public static void TestTimeHistogramMetricsBuckets(ж<testing.T> t) {
     var buckets = runtime_internal_test_package.TimeHistogramMetricsBuckets();
 
     nint nonInfBucketsLen = runtime_internal_test_package.TimeHistNumSubBuckets * runtime_internal_test_package.TimeHistNumBuckets;
     nint expBucketsLen = nonInfBucketsLen + 3; // Count -Inf, the edge for the overflow bucket, and +Inf.
     if (len(buckets) != expBucketsLen) {
-        Ꮡt.Fatalf("unexpected length of buckets: got %d, want %d"u8, len(buckets), expBucketsLen);
+        t.Fatalf("unexpected length of buckets: got %d, want %d", len(buckets), expBucketsLen);
     }
     // Check some values.
     var idxToBucket = new map<nint, float64>{
@@ -112,7 +111,7 @@ public static void TestTimeHistogramMetricsBuckets(ж<testing.T> Ꮡt) {
     foreach (var (idx, bucket) in idxToBucket) {
         {
             var (got, want) = (buckets[idx], bucket); if (got != want) {
-                Ꮡt.Errorf("expected bucket %d to have value %e, got %e"u8, idx, want, got);
+                t.Errorf("expected bucket %d to have value %e, got %e", idx, want, got);
             }
         }
     }

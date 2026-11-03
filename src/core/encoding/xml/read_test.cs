@@ -17,20 +17,21 @@ using static go.encoding.xml_package;
 partial class xml_internal_test_package {
 
 // Stripped down Atom feed data structures.
-public static void TestUnmarshalFeed(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalFeed(ж<testing.T> t) {
     ref var f = ref heap(new Feed(), out var Ꮡf);
     {
-        var err = Unmarshal(slice<byte>(atomFeedString), Ꮡf); if (err != default!) {
-            Ꮡt.Fatalf("Unmarshal: %s"u8, err);
+        var err = Unmarshal(slice<byte>(atomFeedString), Ꮡf); if (err != nil) {
+            t.Fatalf("Unmarshal: %s", err);
         }
     }
     if (!reflect.DeepEqual(f, atomFeed)) {
-        Ꮡt.Fatalf("have %#v\nwant %#v"u8, f, atomFeed);
+        t.Fatalf("have %#v\nwant %#v", f, atomFeed);
     }
 }
 
 // hget http://codereview.appspot.com/rss/mine/rsc
-internal static readonly @string atomFeedString = """
+internal static ref readonly @string atomFeedString => ref atomFeedStringᵇ;
+private static readonly @string atomFeedStringᵇ = """
 
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us" updated="2009-10-04T01:35:58+00:00"><title>Code Review - My issues</title><link href="http://codereview.appspot.com/" rel="alternate"></link><link href="http://codereview.appspot.com/rss/mine/rsc" rel="self"></link><id>http://codereview.appspot.com/</id><author><name>rietveld&lt;&gt;</name></author><entry><title>rietveld: an attempt at pubsubhubbub
@@ -124,32 +125,32 @@ public partial struct Text {
 }
 
 internal static Feed atomFeed = new Feed(
-    XMLName: new Name("http://www.w3.org/2005/Atom"u8, "feed"u8),
-    Title: "Code Review - My issues"u8,
-    Link: new Link[]{
-        new(Rel: "alternate"u8, Href: "http://codereview.appspot.com/"u8),
-        new(Rel: "self"u8, Href: "http://codereview.appspot.com/rss/mine/rsc"u8)
-    }.slice(),
-    ID: "http://codereview.appspot.com/"u8,
-    Updated: ParseTime("2009-10-04T01:35:58+00:00"u8),
+    XMLName: new Name("http://www.w3.org/2005/Atom", "feed"),
+    Title: "Code Review - My issues",
+    Link: slice<Link>([
+        new(Rel: "alternate", Href: "http://codereview.appspot.com/"),
+        new(Rel: "self", Href: "http://codereview.appspot.com/rss/mine/rsc")
+    ]),
+    ID: "http://codereview.appspot.com/",
+    Updated: ParseTime("2009-10-04T01:35:58+00:00"),
     Author: new Person(
-        Name: "rietveld<>"u8,
-        InnerXML: "<name>rietveld&lt;&gt;</name>"u8
+        Name: "rietveld<>",
+        InnerXML: "<name>rietveld&lt;&gt;</name>"
     ),
-    Entry: new Entry[]{
+    Entry: slice<Entry>([
         new(
-            Title: "rietveld: an attempt at pubsubhubbub\n"u8,
-            Link: new Link[]{
-                new(Rel: "alternate"u8, Href: "http://codereview.appspot.com/126085"u8)
-            }.slice(),
-            Updated: ParseTime("2009-10-04T01:35:58+00:00"u8),
+            Title: "rietveld: an attempt at pubsubhubbub\n",
+            Link: slice<Link>([
+                new(Rel: "alternate", Href: "http://codereview.appspot.com/126085")
+            ]),
+            Updated: ParseTime("2009-10-04T01:35:58+00:00"),
             Author: new Person(
-                Name: "email-address-removed"u8,
-                InnerXML: "<name>email-address-removed</name>"u8
+                Name: "email-address-removed",
+                InnerXML: "<name>email-address-removed</name>"
             ),
-            ID: "urn:md5:134d9179c41f806be79b3a5f7877d19a"u8,
+            ID: "urn:md5:134d9179c41f806be79b3a5f7877d19a",
             Summary: new Text(
-                Type: "html"u8,
+                Type: "html",
                 Body: """
 
   An attempt at adding pubsubhubbub support to Rietveld.
@@ -187,18 +188,18 @@ the top of feeds.py marked NOTE(rsc).
             )
         ),
         new(
-            Title: "rietveld: correct tab handling\n"u8,
-            Link: new Link[]{
-                new(Rel: "alternate"u8, Href: "http://codereview.appspot.com/124106"u8)
-            }.slice(),
-            Updated: ParseTime("2009-10-03T23:02:17+00:00"u8),
+            Title: "rietveld: correct tab handling\n",
+            Link: slice<Link>([
+                new(Rel: "alternate", Href: "http://codereview.appspot.com/124106")
+            ]),
+            Updated: ParseTime("2009-10-03T23:02:17+00:00"),
             Author: new Person(
-                Name: "email-address-removed"u8,
-                InnerXML: "<name>email-address-removed</name>"u8
+                Name: "email-address-removed",
+                InnerXML: "<name>email-address-removed</name>"
             ),
-            ID: "urn:md5:0a2a4f19bb815101f0ba2904aed7c35a"u8,
+            ID: "urn:md5:0a2a4f19bb815101f0ba2904aed7c35a",
             Summary: new Text(
-                Type: "html"u8,
+                Type: "html",
                 Body: """
 
   This fixes the buggy tab rendering that can be seen at
@@ -222,10 +223,11 @@ not being used from outside intra_region_diff.py.
 """u8.Raw()
             )
         )
-    }.slice()
+    ])
 );
 
-internal static readonly @string pathTestString = """
+internal static ref readonly @string pathTestString => ref pathTestStringᵇ;
+private static readonly @string pathTestStringᵇ = """
 
 <Result>
     <Before>1</Before>
@@ -283,24 +285,24 @@ public partial struct PathTestE {
     public @string Before, After;
 }
 
-internal static slice<any> pathTests = new any[]{
-    Ꮡ(new PathTestA(Items: new PathTestItem[]{new("A"u8), new("D"u8)}.slice(), Before: "1"u8, After: "2"u8)),
-    Ꮡ(new PathTestB(Other: new PathTestItem[]{new("A"u8), new("D"u8)}.slice(), Before: "1"u8, After: "2"u8)),
-    Ꮡ(new PathTestC(Values1: new @string[]{"A"u8, "C"u8, "D"u8}.slice(), Values2: new @string[]{"B"u8}.slice(), Before: "1"u8, After: "2"u8)),
-    Ꮡ(new PathTestD(Other: new PathTestSet(Item1: new PathTestItem[]{new("A"u8), new("D"u8)}.slice()), Before: "1"u8, After: "2"u8)),
-    Ꮡ(new PathTestE(Underline: "E"u8, Before: "1"u8, After: "2"u8))
-}.slice();
+internal static slice<any> pathTests = slice<any>([
+    Ꮡ(new PathTestA(Items: slice<PathTestItem>([new("A"), new("D")]), Before: "1", After: "2")),
+    Ꮡ(new PathTestB(Other: slice<PathTestItem>([new("A"), new("D")]), Before: "1", After: "2")),
+    Ꮡ(new PathTestC(Values1: slice<@string>(["A", "C", "D"]), Values2: slice<@string>(["B"]), Before: "1", After: "2")),
+    Ꮡ(new PathTestD(Other: new PathTestSet(Item1: slice<PathTestItem>([new("A"), new("D")])), Before: "1", After: "2")),
+    Ꮡ(new PathTestE(Underline: "E", Before: "1", After: "2"))
+]);
 
-public static void TestUnmarshalPaths(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalPaths(ж<testing.T> t) {
     foreach (var (_, pt) in pathTests) {
         var v = reflect.New(reflect.TypeOf(pt).Elem()).Interface();
         {
-            var err = Unmarshal(slice<byte>(pathTestString), v); if (err != default!) {
-                Ꮡt.Fatalf("Unmarshal: %s"u8, err);
+            var err = Unmarshal(slice<byte>(pathTestString), v); if (err != nil) {
+                t.Fatalf("Unmarshal: %s", err);
             }
         }
         if (!reflect.DeepEqual(v, pt)) {
-            Ꮡt.Fatalf("have %#v\nwant %#v"u8, v, pt);
+            t.Fatalf("have %#v\nwant %#v", v, pt);
         }
     }
 }
@@ -338,27 +340,27 @@ public partial struct BadPathEmbeddedB {
 partial struct badPathTestsᴛ1 /*dyn*/ {
     internal any v, e;
 }
-internal static slice<badPathTestsᴛ1> badPathTests = new badPathTestsᴛ1[]{
-    new(Ꮡ(new BadPathTestA(nil)), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestA>(), "First"u8, "items>item1"u8, "Second"u8, "items"u8))),
-    new(Ꮡ(new BadPathTestB(nil)), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestB>(), "First"u8, "items>item1"u8, "Second"u8, "items>item1>value"u8))),
-    new(Ꮡ(new BadPathTestC(nil)), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestC>(), "First"u8, ""u8, "Second"u8, "First"u8))),
-    new(Ꮡ(new BadPathTestD(nil)), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestD>(), "First"u8, ""u8, "Second"u8, "First"u8)))
-}.slice();
+internal static slice<badPathTestsᴛ1> badPathTests = slice<badPathTestsᴛ1>([
+    new(Ꮡ(new BadPathTestA()), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestA>(), "First", "items>item1", "Second", "items"))),
+    new(Ꮡ(new BadPathTestB()), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestB>(), "First", "items>item1", "Second", "items>item1>value"))),
+    new(Ꮡ(new BadPathTestC()), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestC>(), "First", "", "Second", "First"))),
+    new(Ꮡ(new BadPathTestD()), Ꮡ(new TagPathError(reflect.TypeFor<BadPathTestD>(), "First", "", "Second", "First")))
+]);
 
-public static void TestUnmarshalBadPaths(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestUnmarshalBadPaths(ж<testing.T> t) {
     foreach (var (_, tt) in badPathTests) {
         var err = Unmarshal(slice<byte>(pathTestString), tt.v);
         if (!reflect.DeepEqual(err, tt.e)) {
-            Ꮡt.Fatalf("Unmarshal with %#v didn't fail properly:\nhave %#v,\nwant %#v"u8, tt.v, err, tt.e);
+            t.Fatalf("Unmarshal with %#v didn't fail properly:\nhave %#v,\nwant %#v", tt.v, err, tt.e);
         }
     }
 }
 
-public static readonly @string OK = "OK"u8;
+public static ref readonly @string OK => ref OKᵇ;
+private static readonly @string OKᵇ = "OK"u8;
 
-internal static readonly @string withoutNameTypeData = """
+internal static ref readonly @string withoutNameTypeData => ref withoutNameTypeDataᵇ;
+private static readonly @string withoutNameTypeDataᵇ = """
 
 <?xml version="1.0" charset="utf-8"?>
 <Test3 Attr="OK" />
@@ -369,15 +371,15 @@ public partial struct TestThree {
     public @string Attr; /*`xml:",attr"`*/
 }
 
-public static void TestUnmarshalWithoutNameType(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalWithoutNameType(ж<testing.T> t) {
     ref var x = ref heap(new TestThree(), out var Ꮡx);
     {
-        var err = Unmarshal(slice<byte>(withoutNameTypeData), Ꮡx); if (err != default!) {
-            Ꮡt.Fatalf("Unmarshal: %s"u8, err);
+        var err = Unmarshal(slice<byte>(withoutNameTypeData), Ꮡx); if (err != nil) {
+            t.Fatalf("Unmarshal: %s", err);
         }
     }
     if (x.Attr != OK) {
-        Ꮡt.Fatalf("have %v\nwant %v"u8, x.Attr, OK);
+        t.Fatalf("have %v\nwant %v", x.Attr, OK);
     }
 }
 
@@ -393,43 +395,41 @@ internal partial struct TestUnmarshalAttr_ParamStringPtr /*dyn*/ {
     public ж<@string> Int; /*`xml:"int,attr"`*/
 }
 
-public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalAttr(ж<testing.T> t) {
     var x = slice<byte>(@"<Param int=""1"" />"u8);
 
-    var p1 = Ꮡ(new TestUnmarshalAttr_ParamPtr(nil));
+    var p1 = Ꮡ(new TestUnmarshalAttr_ParamPtr());
     {
-        var err = Unmarshal(x, p1.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatalf("Unmarshal: %s"u8, err);
+        var err = Unmarshal(x, p1.OrTypedNil()); if (err != nil) {
+            t.Fatalf("Unmarshal: %s", err);
         }
     }
-    if ((~p1).Int == nil){
-        Ꮡt.Fatalf("Unmarshal failed in to *int field"u8);
-    } else 
-    if ((~p1).Int.Value != 1) {
-        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p1).Int.OrTypedNil(), (nint)1);
+    if (p1.Int == nil) {
+        t.Fatalf("Unmarshal failed in to *int field");
+    } else if (p1.Int.Value != 1) {
+        t.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v", x, p1.Int.OrTypedNil(), (nint)1);
     }
 
-    var p2 = Ꮡ(new TestUnmarshalAttr_ParamVal(nil));
+    var p2 = Ꮡ(new TestUnmarshalAttr_ParamVal());
     {
-        var err = Unmarshal(x, p2.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatalf("Unmarshal: %s"u8, err);
+        var err = Unmarshal(x, p2.OrTypedNil()); if (err != nil) {
+            t.Fatalf("Unmarshal: %s", err);
         }
     }
-    if ((~p2).Int != 1) {
-        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p2).Int, (nint)1);
+    if (p2.Int != 1) {
+        t.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v", x, p2.Int, (nint)1);
     }
 
-    var p3 = Ꮡ(new TestUnmarshalAttr_ParamStringPtr(nil));
+    var p3 = Ꮡ(new TestUnmarshalAttr_ParamStringPtr());
     {
-        var err = Unmarshal(x, p3.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatalf("Unmarshal: %s"u8, err);
+        var err = Unmarshal(x, p3.OrTypedNil()); if (err != nil) {
+            t.Fatalf("Unmarshal: %s", err);
         }
     }
-    if ((~p3).Int == nil){
-        Ꮡt.Fatalf("Unmarshal failed in to *string field"u8);
-    } else 
-    if ((~p3).Int.Value != "1"u8) {
-        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p3).Int.OrTypedNil(), (nint)1);
+    if (p3.Int == nil) {
+        t.Fatalf("Unmarshal failed in to *string field");
+    } else if (p3.Int.Value != "1"u8) {
+        t.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v", x, p3.Int.OrTypedNil(), (nint)1);
     }
 }
 
@@ -443,76 +443,76 @@ partial struct tablesᴛ1 /*dyn*/ {
     internal Tables tab;
     internal @string ns;
 }
-internal static slice<tablesᴛ1> tables = new tablesᴛ1[]{
+internal static slice<tablesᴛ1> tables = slice<tablesᴛ1>([
     new(
         xml: @"<Tables>"u8 + @"<table xmlns=""http://www.w3.org/TR/html4/"">hello</table>"u8 + @"<table xmlns=""http://www.w3schools.com/furniture"">world</table>"u8 + @"</Tables>"u8,
-        tab: new Tables("hello"u8, "world"u8)
+        tab: new Tables("hello", "world")
     ),
     new(
         xml: @"<Tables>"u8 + @"<table xmlns=""http://www.w3schools.com/furniture"">world</table>"u8 + @"<table xmlns=""http://www.w3.org/TR/html4/"">hello</table>"u8 + @"</Tables>"u8,
-        tab: new Tables("hello"u8, "world"u8)
+        tab: new Tables("hello", "world")
     ),
     new(
         xml: @"<Tables xmlns:f=""http://www.w3schools.com/furniture"" xmlns:h=""http://www.w3.org/TR/html4/"">"u8 + @"<f:table>world</f:table>"u8 + @"<h:table>hello</h:table>"u8 + @"</Tables>"u8,
-        tab: new Tables("hello"u8, "world"u8)
+        tab: new Tables("hello", "world")
     ),
     new(
         xml: @"<Tables>"u8 + @"<table>bogus</table>"u8 + @"</Tables>"u8,
-        tab: new Tables(nil)
+        tab: new Tables()
     ),
     new(
         xml: @"<Tables>"u8 + @"<table>only</table>"u8 + @"</Tables>"u8,
-        tab: new Tables(HTable: "only"u8),
-        ns: "http://www.w3.org/TR/html4/"u8
+        tab: new Tables(HTable: "only"),
+        ns: "http://www.w3.org/TR/html4/"
     ),
     new(
         xml: @"<Tables>"u8 + @"<table>only</table>"u8 + @"</Tables>"u8,
-        tab: new Tables(FTable: "only"u8),
-        ns: "http://www.w3schools.com/furniture"u8
+        tab: new Tables(FTable: "only"),
+        ns: "http://www.w3schools.com/furniture"
     ),
     new(
         xml: @"<Tables>"u8 + @"<table>only</table>"u8 + @"</Tables>"u8,
-        tab: new Tables(nil),
-        ns: "something else entirely"u8
+        tab: new Tables(),
+        ns: "something else entirely"
     )
-}.slice();
+]);
 
-public static void TestUnmarshalNS(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalNS(ж<testing.T> t) {
     foreach (var (i, tt) in tables) {
         ref var dst = ref heap(new Tables(), out var Ꮡdst);
-        error err = default!;
-        if (tt.ns != ""u8){
+        error err = default;
+        if (tt.ns != ""u8) {
             var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(tt.xml)));
-            d.Value.DefaultSpace = tt.ns;
+            d.DefaultSpace = tt.ns;
             err = d.Decode(Ꮡdst);
         } else {
             err = Unmarshal(slice<byte>(tt.xml), Ꮡdst);
         }
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: Unmarshal: %v"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: Unmarshal: %v", i, err);
             continue;
         }
         var want = tt.tab;
         if (dst != want) {
-            Ꮡt.Errorf("#%d: dst=%+v, want %+v"u8, i, dst, want);
+            t.Errorf("#%d: dst=%+v, want %+v", i, dst, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tablesTableXmlnsHttpWwwˢ = @"<Tables><table xmlns=""http://www.w3.org/TR/html4/"">hello</table><table xmlns=""http://www.w3schools.com/furniture"">world</table></Tables>"u8;
+internal static ref readonly @string tablesTableXmlnsHttpWwwˢ => ref tablesTableXmlnsHttpWwwˢᵇ;
+private static readonly @string tablesTableXmlnsHttpWwwˢᵇ = @"<Tables><table xmlns=""http://www.w3.org/TR/html4/"">hello</table><table xmlns=""http://www.w3schools.com/furniture"">world</table></Tables>"u8;
 
-public static void TestMarshalNS(ж<testing.T> Ꮡt) {
-    ref var dst = ref heap<Tables>(out var Ꮡdst);
-    dst = new Tables("hello"u8, "world"u8);
+public static void TestMarshalNS(ж<testing.T> t) {
+    ref var dst = ref heap<Tables>(new Tables("hello", "world"), out var Ꮡdst);
     var (data, err) = Marshal(Ꮡdst);
-    if (err != default!) {
-        Ꮡt.Fatalf("Marshal: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Marshal: %v", err);
     }
     @string want = tablesTableXmlnsHttpWwwˢ;
     @string str = (@string)data;
     if (str != want) {
-        Ꮡt.Errorf("have: %q\nwant: %q\n"u8, str, want);
+        t.Errorf("have: %q\nwant: %q\n", str, want);
     }
 }
 
@@ -535,99 +535,99 @@ partial struct tableAttrsᴛ1 /*dyn*/ {
     internal TableAttrs tab;
     internal @string ns;
 }
-internal static slice<tableAttrsᴛ1> tableAttrs = new tableAttrsᴛ1[]{
+internal static slice<tableAttrsᴛ1> tableAttrs = slice<tableAttrsᴛ1>([
     new(
         xml: @"<TableAttrs xmlns:f=""http://www.w3schools.com/furniture"" xmlns:h=""http://www.w3.org/TR/html4/""><TAttr "u8 + @"h:table=""hello"" f:table=""world"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: "world"u8))
+        tab: new TableAttrs(new TAttr(HTable: "hello", FTable: "world"))
     ),
     new(
         xml: @"<TableAttrs><TAttr xmlns:f=""http://www.w3schools.com/furniture"" xmlns:h=""http://www.w3.org/TR/html4/"" "u8 + @"h:table=""hello"" f:table=""world"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: "world"u8))
+        tab: new TableAttrs(new TAttr(HTable: "hello", FTable: "world"))
     ),
     new(
         xml: @"<TableAttrs><TAttr "u8 + @"h:table=""hello"" f:table=""world"" xmlns:f=""http://www.w3schools.com/furniture"" xmlns:h=""http://www.w3.org/TR/html4/"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: "world"u8))
+        tab: new TableAttrs(new TAttr(HTable: "hello", FTable: "world"))
     ),
     new(
         // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns=""http://www.w3schools.com/furniture"" xmlns:h=""http://www.w3.org/TR/html4/""><TAttr "u8 + @"h:table=""hello"" table=""world"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: ""u8))
+        tab: new TableAttrs(new TAttr(HTable: "hello", FTable: ""))
     ),
     new(
         // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns:f=""http://www.w3schools.com/furniture""><TAttr xmlns=""http://www.w3.org/TR/html4/"" "u8 + @"table=""hello"" f:table=""world"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: ""u8, FTable: "world"u8))
+        tab: new TableAttrs(new TAttr(HTable: "", FTable: "world"))
     ),
     new(
         xml: @"<TableAttrs><TAttr "u8 + @"table=""bogus"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(nil)
+        tab: new TableAttrs()
     ),
     new(
         // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns:h=""http://www.w3.org/TR/html4/""><TAttr "u8 + @"h:table=""hello"" table=""world"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: "hello"u8, FTable: ""u8)),
-        ns: "http://www.w3schools.com/furniture"u8
+        tab: new TableAttrs(new TAttr(HTable: "hello", FTable: "")),
+        ns: "http://www.w3schools.com/furniture"
     ),
     new(
         // Default space does not apply to attribute names.
         xml: @"<TableAttrs xmlns:f=""http://www.w3schools.com/furniture""><TAttr "u8 + @"table=""hello"" f:table=""world"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(new TAttr(HTable: ""u8, FTable: "world"u8)),
-        ns: "http://www.w3.org/TR/html4/"u8
+        tab: new TableAttrs(new TAttr(HTable: "", FTable: "world")),
+        ns: "http://www.w3.org/TR/html4/"
     ),
     new(
         xml: @"<TableAttrs><TAttr "u8 + @"table=""bogus"" "u8 + @"/></TableAttrs>"u8,
-        tab: new TableAttrs(nil),
-        ns: "something else entirely"u8
+        tab: new TableAttrs(),
+        ns: "something else entirely"
     )
-}.slice();
+]);
 
-public static void TestUnmarshalNSAttr(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalNSAttr(ж<testing.T> t) {
     foreach (var (i, tt) in tableAttrs) {
         ref var dst = ref heap(new TableAttrs(), out var Ꮡdst);
-        error err = default!;
-        if (tt.ns != ""u8){
+        error err = default;
+        if (tt.ns != ""u8) {
             var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(tt.xml)));
-            d.Value.DefaultSpace = tt.ns;
+            d.DefaultSpace = tt.ns;
             err = d.Decode(Ꮡdst);
         } else {
             err = Unmarshal(slice<byte>(tt.xml), Ꮡdst);
         }
-        if (err != default!) {
-            Ꮡt.Errorf("#%d: Unmarshal: %v"u8, i, err);
+        if (err != nil) {
+            t.Errorf("#%d: Unmarshal: %v", i, err);
             continue;
         }
         var want = tt.tab;
         if (dst != want) {
-            Ꮡt.Errorf("#%d: dst=%+v, want %+v"u8, i, dst, want);
+            t.Errorf("#%d: dst=%+v, want %+v", i, dst, want);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tableAttrsTAttrXmlnsˢ = @"<TableAttrs><TAttr xmlns:html4=""http://www.w3.org/TR/html4/"" html4:table=""hello"" xmlns:furniture=""http://www.w3schools.com/furniture"" furniture:table=""world"" xml:lang=""en_US"" xmlns:_xml=""http://golang.org/xml/"" _xml:other=""other1"" xmlns:_xmlfoo=""http://golang.org/xmlfoo/"" _xmlfoo:other=""other2"" xmlns:json=""http://golang.org/json/"" json:other=""other3"" xmlns:json_1=""http://golang.org/2/json/"" json_1:other=""other4""></TAttr></TableAttrs>"u8;
+internal static ref readonly @string tableAttrsTAttrXmlnsˢ => ref tableAttrsTAttrXmlnsˢᵇ;
+private static readonly @string tableAttrsTAttrXmlnsˢᵇ = @"<TableAttrs><TAttr xmlns:html4=""http://www.w3.org/TR/html4/"" html4:table=""hello"" xmlns:furniture=""http://www.w3schools.com/furniture"" furniture:table=""world"" xml:lang=""en_US"" xmlns:_xml=""http://golang.org/xml/"" _xml:other=""other1"" xmlns:_xmlfoo=""http://golang.org/xmlfoo/"" _xmlfoo:other=""other2"" xmlns:json=""http://golang.org/json/"" json:other=""other3"" xmlns:json_1=""http://golang.org/2/json/"" json_1:other=""other4""></TAttr></TableAttrs>"u8;
 
-public static void TestMarshalNSAttr(ж<testing.T> Ꮡt) {
-    ref var src = ref heap<TableAttrs>(out var Ꮡsrc);
-    src = new TableAttrs(new TAttr("hello"u8, "world"u8, "en_US"u8, "other1"u8, "other2"u8, "other3"u8, "other4"u8));
+public static void TestMarshalNSAttr(ж<testing.T> t) {
+    ref var src = ref heap<TableAttrs>(new TableAttrs(new TAttr("hello", "world", "en_US", "other1", "other2", "other3", "other4")), out var Ꮡsrc);
     var (data, err) = Marshal(Ꮡsrc);
-    if (err != default!) {
-        Ꮡt.Fatalf("Marshal: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Marshal: %v", err);
     }
     @string want = tableAttrsTAttrXmlnsˢ;
     @string str = (@string)data;
     if (str != want) {
-        Ꮡt.Errorf("Marshal:\nhave: %#q\nwant: %#q\n"u8, str, want);
+        t.Errorf("Marshal:\nhave: %#q\nwant: %#q\n", str, want);
     }
 
     ref var dst = ref heap(new TableAttrs(), out var Ꮡdst);
     {
-        var errΔ1 = Unmarshal(data, Ꮡdst); if (errΔ1 != default!) {
-            Ꮡt.Errorf("Unmarshal: %v"u8, errΔ1);
+        var errΔ1 = Unmarshal(data, Ꮡdst); if (errΔ1 != nil) {
+            t.Errorf("Unmarshal: %v", errΔ1);
         }
     }
 
     if (dst != src) {
-        Ꮡt.Errorf("Unmarshal = %q, want %q"u8, dst, src);
+        t.Errorf("Unmarshal = %q, want %q", dst, src);
     }
 }
 
@@ -638,12 +638,12 @@ public partial struct MyCharData {
 public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var (t, err) = d.Token();
         if (AreEqual(err, io.EOF)) { // found end of element
             break;
         }
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         {
@@ -652,7 +652,7 @@ public static error UnmarshalXML(this ref MyCharData m, ж<global::go.encoding.x
             }
         }
     }
-    return default!;
+    return default;
 }
 
 internal static global::go.encoding.xml_package.Unmarshaler _ᴛ3ʗ = new xml_internal_test_package.MyCharDataжUnmarshaler(((ж<MyCharData>)nil));
@@ -667,7 +667,7 @@ public partial struct MyAttr {
 
 public static error UnmarshalXMLAttr(this ref MyAttr m, global::go.encoding.xml_package.Attr attr) {
     m.attr = attr.Value;
-    return default!;
+    return default;
 }
 
 internal static global::go.encoding.xml_package.UnmarshalerAttr _ᴛ4ʗ = new xml_internal_test_package.MyAttrжUnmarshalerAttr(((ж<MyAttr>)nil));
@@ -680,7 +680,8 @@ public partial struct MyStruct {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string xmlVersion10EncodingUtf8ˢ2 = """
+internal static ref readonly @string xmlVersion10EncodingUtf8ˢ2 => ref xmlVersion10EncodingUtf8ˢ2ᵇ;
+private static readonly @string xmlVersion10EncodingUtf8ˢ2ᵇ = """
 <?xml version="1.0" encoding="utf-8"?>
 		<MyStruct Attr="attr1" Attr2="attr2">
 		<Data>hello <!-- comment -->world</Data>
@@ -689,18 +690,18 @@ internal static readonly @string xmlVersion10EncodingUtf8ˢ2 = """
 	
 """u8.Raw();
 
-public static void TestUnmarshaler(ж<testing.T> Ꮡt) {
+public static void TestUnmarshaler(ж<testing.T> t) {
     @string xml = xmlVersion10EncodingUtf8ˢ2;
 
     ref var m = ref heap(new MyStruct(), out var Ꮡm);
     {
-        var err = Unmarshal(slice<byte>(xml), Ꮡm); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = Unmarshal(slice<byte>(xml), Ꮡm); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
-    if (m.Data == nil || m.Attr == nil || (~m.Data).body != "hello world"u8 || (~m.Attr).attr != "attr1"u8 || m.Data2.body != "howdy world"u8 || m.Attr2.attr != "attr2"u8) {
-        Ꮡt.Errorf("m=%#+v\n"u8, m);
+    if (m.Data == nil || m.Attr == nil || m.Data.body != "hello world"u8 || m.Attr.attr != "attr1"u8 || m.Data2.body != "howdy world"u8 || m.Attr2.attr != "attr2"u8) {
+        t.Errorf("m=%#+v\n", m);
     }
 }
 
@@ -713,26 +714,28 @@ public partial struct Pod {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string podPeaCotelydonGreenˢ = @"<Pod><Pea><Cotelydon>Green stuff</Cotelydon></Pea></Pod>"u8;
-internal static readonly @string greenStuffˢ = "Green stuff"u8;
+internal static ref readonly @string podPeaCotelydonGreenˢ => ref podPeaCotelydonGreenˢᵇ;
+private static readonly @string podPeaCotelydonGreenˢᵇ = @"<Pod><Pea><Cotelydon>Green stuff</Cotelydon></Pea></Pod>"u8;
+internal static ref readonly @string greenStuffˢ => ref greenStuffˢᵇ;
+private static readonly @string greenStuffˢᵇ = "Green stuff"u8;
 
 // https://golang.org/issue/6836
-public static void TestUnmarshalIntoInterface(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalIntoInterface(ж<testing.T> t) {
     var pod = @new<Pod>();
-    pod.Value.Pea = @new<Pea>();
+    pod.Pea = @new<Pea>();
     @string xml = podPeaCotelydonGreenˢ;
     var err = Unmarshal(slice<byte>(xml), pod.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to unmarshal %q: %v"u8, xml, err);
+    if (err != nil) {
+        t.Fatalf("failed to unmarshal %q: %v", xml, err);
     }
-    var (pea, ok) = (~pod).Pea._<ж<Pea>>(ᐧ);
+    var (pea, ok) = pod.Pea._<ж<Pea>>(ᐧ);
     if (!ok) {
-        Ꮡt.Fatalf("unmarshaled into wrong type: have %T want *Pea"u8, (~pod).Pea);
+        t.Fatalf("unmarshaled into wrong type: have %T want *Pea", pod.Pea);
     }
-    @string have = pea.Value.Cotelydon;
+    @string have = pea.Cotelydon;
     @string want = greenStuffˢ;
     if (have != want) {
-        Ꮡt.Errorf("failed to unmarshal into interface, have %q want %q"u8, have, want);
+        t.Errorf("failed to unmarshal into interface, have %q want %q", have, want);
     }
 }
 
@@ -741,19 +744,19 @@ public partial struct X {
 }
 
 // Issue 11112. Unmarshal must reject invalid comments.
-public static void TestMalformedComment(ж<testing.T> Ꮡt) {
-    var testData = new @string[]{
-        "<X><!-- a---></X>"u8,
-        "<X><!-- -- --></X>"u8,
-        "<X><!-- a--b --></X>"u8,
-        "<X><!------></X>"u8
-    }.slice();
+public static void TestMalformedComment(ж<testing.T> t) {
+    var testData = slice<@string>([
+        "<X><!-- a---></X>",
+        "<X><!-- -- --></X>",
+        "<X><!-- a--b --></X>",
+        "<X><!------></X>"
+    ]);
     foreach (var (i, test) in testData) {
         var data = slice<byte>(test);
         var v = @new<X>();
         {
-            var err = Unmarshal(data, v.OrTypedNil()); if (err == default!) {
-                Ꮡt.Errorf("%d: unmarshal should reject invalid comments"u8, i);
+            var err = Unmarshal(data, v.OrTypedNil()); if (err == nil) {
+                t.Errorf("%d: unmarshal should reject invalid comments", i);
             }
         }
     }
@@ -765,18 +768,18 @@ public partial struct IXField {
 }
 
 // Issue 15600. ",innerxml" on a field that can't hold it.
-public static void TestInvalidInnerXMLType(ж<testing.T> Ꮡt) {
+public static void TestInvalidInnerXMLType(ж<testing.T> t) {
     var v = @new<IXField>();
     {
-        var err = Unmarshal(slice<byte>(@"<tag><five>5</five><innertag/></tag>"u8), v.OrTypedNil()); if (err != default!) {
-            Ꮡt.Errorf("Unmarshal failed: got %v"u8, err);
+        var err = Unmarshal(slice<byte>(@"<tag><five>5</five><innertag/></tag>"u8), v.OrTypedNil()); if (err != nil) {
+            t.Errorf("Unmarshal failed: got %v", err);
         }
     }
-    if ((~v).Five != 5) {
-        Ꮡt.Errorf("Five = %v, want 5"u8, (~v).Five);
+    if (v.Five != 5) {
+        t.Errorf("Five = %v, want 5", v.Five);
     }
-    if ((~v).NotInnerXML != default!) {
-        Ꮡt.Errorf("NotInnerXML = %v, want nil"u8, (~v).NotInnerXML);
+    if (v.NotInnerXML != nil) {
+        t.Errorf("NotInnerXML = %v, want nil", v.NotInnerXML);
     }
 }
 
@@ -818,7 +821,8 @@ public partial struct Parent {
     /*embed*/ public ChildToEmbed ChildToEmbed;
 }
 
-internal static readonly @string emptyXML = """
+internal static ref readonly @string emptyXML => ref emptyXMLᵇ;
+private static readonly @string emptyXMLᵇ = """
 
 <Parent>
     <I></I>
@@ -849,17 +853,17 @@ internal static readonly @string emptyXML = """
 """u8.Raw();
 
 // golang.org/issues/13417
-public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalEmptyValues(ж<testing.T> t) {
     // Test first with a zero-valued dst.
     var v = @new<Parent>();
     {
-        var err = Unmarshal(slice<byte>(emptyXML), v.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatalf("zero: Unmarshal failed: got %v"u8, err);
+        var err = Unmarshal(slice<byte>(emptyXML), v.OrTypedNil()); if (err != nil) {
+            t.Fatalf("zero: Unmarshal failed: got %v", err);
         }
     }
 
     ref var zBytes = ref heap<slice<byte>>(out var ᏑzBytes);
-    zBytes = new byte[]{}.slice();
+    zBytes = slice<byte>([]);
     ref var zInt = ref heap<nint>(out var ᏑzInt);
     zInt = 0;
     ref var zStr = ref heap<@string>(out var ᏑzStr);
@@ -870,25 +874,25 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     zBool = false;
     var want = Ꮡ(new Parent(
         IPtr: ᏑzInt,
-        Is: new nint[]{zInt}.slice(),
-        IPtrs: new ж<nint>[]{ᏑzInt}.slice(),
+        Is: slice<nint>([zInt]),
+        IPtrs: slice<ж<nint>>([ᏑzInt]),
         FPtr: ᏑzFloat,
-        Fs: new float32[]{zFloat}.slice(),
-        FPtrs: new ж<float32>[]{ᏑzFloat}.slice(),
+        Fs: slice<float32>([zFloat]),
+        FPtrs: slice<ж<float32>>([ᏑzFloat]),
         BPtr: ᏑzBool,
-        Bs: new bool[]{zBool}.slice(),
-        BPtrs: new ж<bool>[]{ᏑzBool}.slice(),
-        Bytes: new byte[]{}.slice(),
+        Bs: slice<bool>([zBool]),
+        BPtrs: slice<ж<bool>>([ᏑzBool]),
+        Bytes: slice<byte>([]),
         BytesPtr: ᏑzBytes,
         SPtr: ᏑzStr,
-        Ss: new @string[]{zStr}.slice(),
-        SPtrs: new ж<@string>[]{ᏑzStr}.slice(),
-        Children: new Child[]{new()}.slice(),
+        Ss: slice<@string>([zStr]),
+        SPtrs: slice<ж<@string>>([ᏑzStr]),
+        Children: slice<Child>([new()]),
         ChildPtr: @new<Child>(),
-        ChildToEmbed: new ChildToEmbed(nil)
+        ChildToEmbed: new ChildToEmbed()
     ));
     if (!reflect.DeepEqual(v.OrTypedNil(), want.OrTypedNil())) {
-        Ꮡt.Fatalf("zero: Unmarshal:\nhave:  %#+v\nwant: %#+v"u8, v.OrTypedNil(), want.OrTypedNil());
+        t.Fatalf("zero: Unmarshal:\nhave:  %#+v\nwant: %#+v", v.OrTypedNil(), want.OrTypedNil());
     }
 
     // Test with a pre-populated dst.
@@ -897,7 +901,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     ref var vInt0 = ref heap<nint>(out var ᏑvInt0);
     vInt0 = 1;
     ref var vStr0 = ref heap<@string>(out var ᏑvStr0);
-    vStr0 = "x"u8;
+    vStr0 = "x";
     ref var vFloat0 = ref heap<float32>(out var ᏑvFloat0);
     vFloat0 = (float32)1F;
     ref var vBool0 = ref heap<bool>(out var ᏑvBool0);
@@ -907,7 +911,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     ref var vInt1 = ref heap<nint>(out var ᏑvInt1);
     vInt1 = 1;
     ref var vStr1 = ref heap<@string>(out var ᏑvStr1);
-    vStr1 = "x"u8;
+    vStr1 = "x";
     ref var vFloat1 = ref heap<float32>(out var ᏑvFloat1);
     vFloat1 = (float32)1F;
     ref var vBool1 = ref heap<bool>(out var ᏑvBool1);
@@ -915,7 +919,7 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     ref var vInt2 = ref heap<nint>(out var ᏑvInt2);
     vInt2 = 1;
     ref var vStr2 = ref heap<@string>(out var ᏑvStr2);
-    vStr2 = "x"u8;
+    vStr2 = "x";
     ref var vFloat2 = ref heap<float32>(out var ᏑvFloat2);
     vFloat2 = (float32)1F;
     ref var vBool2 = ref heap<bool>(out var ᏑvBool2);
@@ -923,55 +927,55 @@ public static void TestUnmarshalEmptyValues(ж<testing.T> Ꮡt) {
     v = Ꮡ(new Parent(
         I: vInt0,
         IPtr: ᏑvInt1,
-        Is: new nint[]{vInt0}.slice(),
-        IPtrs: new ж<nint>[]{ᏑvInt2}.slice(),
+        Is: slice<nint>([vInt0]),
+        IPtrs: slice<ж<nint>>([ᏑvInt2]),
         F: vFloat0,
         FPtr: ᏑvFloat1,
-        Fs: new float32[]{vFloat0}.slice(),
-        FPtrs: new ж<float32>[]{ᏑvFloat2}.slice(),
+        Fs: slice<float32>([vFloat0]),
+        FPtrs: slice<ж<float32>>([ᏑvFloat2]),
         B: vBool0,
         BPtr: ᏑvBool1,
-        Bs: new bool[]{vBool0}.slice(),
-        BPtrs: new ж<bool>[]{ᏑvBool2}.slice(),
+        Bs: slice<bool>([vBool0]),
+        BPtrs: slice<ж<bool>>([ᏑvBool2]),
         Bytes: vBytes0,
         BytesPtr: ᏑvBytes1,
         S: vStr0,
         SPtr: ᏑvStr1,
-        Ss: new @string[]{vStr0}.slice(),
-        SPtrs: new ж<@string>[]{ᏑvStr2}.slice(),
+        Ss: slice<@string>([vStr0]),
+        SPtrs: slice<ж<@string>>([ᏑvStr2]),
         MyI: ((MyInt)vInt0),
         Child: new Child(G: new Child_G(I: vInt0)),
-        Children: new Child[]{new(G: new Child_G(I: vInt0))}.slice(),
+        Children: slice<Child>([new(G: new Child_G(I: vInt0))]),
         ChildPtr: Ꮡ(new Child(G: new Child_G(I: vInt0))),
         ChildToEmbed: new ChildToEmbed(X: vBool0)
     ));
     {
-        var err = Unmarshal(slice<byte>(emptyXML), v.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatalf("populated: Unmarshal failed: got %v"u8, err);
+        var err = Unmarshal(slice<byte>(emptyXML), v.OrTypedNil()); if (err != nil) {
+            t.Fatalf("populated: Unmarshal failed: got %v", err);
         }
     }
 
     want = Ꮡ(new Parent(
         IPtr: ᏑzInt,
-        Is: new nint[]{vInt0, zInt}.slice(),
-        IPtrs: new ж<nint>[]{ᏑvInt0, ᏑzInt}.slice(),
+        Is: slice<nint>([vInt0, zInt]),
+        IPtrs: slice<ж<nint>>([ᏑvInt0, ᏑzInt]),
         FPtr: ᏑzFloat,
-        Fs: new float32[]{vFloat0, zFloat}.slice(),
-        FPtrs: new ж<float32>[]{ᏑvFloat0, ᏑzFloat}.slice(),
+        Fs: slice<float32>([vFloat0, zFloat]),
+        FPtrs: slice<ж<float32>>([ᏑvFloat0, ᏑzFloat]),
         BPtr: ᏑzBool,
-        Bs: new bool[]{vBool0, zBool}.slice(),
-        BPtrs: new ж<bool>[]{ᏑvBool0, ᏑzBool}.slice(),
-        Bytes: new byte[]{}.slice(),
+        Bs: slice<bool>([vBool0, zBool]),
+        BPtrs: slice<ж<bool>>([ᏑvBool0, ᏑzBool]),
+        Bytes: slice<byte>([]),
         BytesPtr: ᏑzBytes,
         SPtr: ᏑzStr,
-        Ss: new @string[]{vStr0, zStr}.slice(),
-        SPtrs: new ж<@string>[]{ᏑvStr0, ᏑzStr}.slice(),
+        Ss: slice<@string>([vStr0, zStr]),
+        SPtrs: slice<ж<@string>>([ᏑvStr0, ᏑzStr]),
         Child: new Child(G: new Child_G(I: vInt0)), // I should == zInt0? (zero value)
-        Children: new Child[]{new(G: new Child_G(I: vInt0)), new()}.slice(),
+        Children: slice<Child>([new(G: new Child_G(I: vInt0)), new()]),
         ChildPtr: Ꮡ(new Child(G: new Child_G(I: vInt0))) // I should == zInt0? (zero value)
     ));
     if (!reflect.DeepEqual(v.OrTypedNil(), want.OrTypedNil())) {
-        Ꮡt.Fatalf("populated: Unmarshal:\nhave:  %#+v\nwant: %#+v"u8, v.OrTypedNil(), want.OrTypedNil());
+        t.Fatalf("populated: Unmarshal:\nhave:  %#+v\nwant: %#+v", v.OrTypedNil(), want.OrTypedNil());
     }
 }
 
@@ -999,7 +1003,8 @@ public partial struct WhitespaceValuesParent {
     public float64 F64Neg;
 }
 
-internal static readonly @string whitespaceValuesXML = """
+internal static ref readonly @string whitespaceValuesXML => ref whitespaceValuesXMLᵇ;
+private static readonly @string whitespaceValuesXMLᵇ = """
 
 <WhitespaceValuesParent>
     <BFalse>   false   </BFalse>
@@ -1028,12 +1033,11 @@ internal static readonly @string whitespaceValuesXML = """
 """u8.Raw();
 
 // golang.org/issues/22146
-public static void TestUnmarshalWhitespaceValues(ж<testing.T> Ꮡt) {
-    ref var v = ref heap<WhitespaceValuesParent>(out var Ꮡv);
-    v = new WhitespaceValuesParent(nil);
+public static void TestUnmarshalWhitespaceValues(ж<testing.T> t) {
+    ref var v = ref heap<WhitespaceValuesParent>(new WhitespaceValuesParent(), out var Ꮡv);
     {
-        var err = Unmarshal(slice<byte>(whitespaceValuesXML), Ꮡv); if (err != default!) {
-            Ꮡt.Fatalf("whitespace values: Unmarshal failed: got %v"u8, err);
+        var err = Unmarshal(slice<byte>(whitespaceValuesXML), Ꮡv); if (err != nil) {
+            t.Fatalf("whitespace values: Unmarshal failed: got %v", err);
         }
     }
 
@@ -1061,7 +1065,7 @@ public static void TestUnmarshalWhitespaceValues(ж<testing.T> Ꮡt) {
         F64Neg: -266.703D
     );
     if (v != want) {
-        Ꮡt.Fatalf("whitespace values: Unmarshal:\nhave: %#+v\nwant: %#+v"u8, v, want);
+        t.Fatalf("whitespace values: Unmarshal:\nhave: %#+v\nwant: %#+v", v, want);
     }
 }
 
@@ -1089,7 +1093,8 @@ public partial struct WhitespaceAttrsParent {
     public float64 F64Neg; /*`xml:",attr"`*/
 }
 
-internal static readonly @string whitespaceAttrsXML = """
+internal static ref readonly @string whitespaceAttrsXML => ref whitespaceAttrsXMLᵇ;
+private static readonly @string whitespaceAttrsXMLᵇ = """
 
 <WhitespaceAttrsParent
     BFalse="  false  "
@@ -1119,12 +1124,11 @@ internal static readonly @string whitespaceAttrsXML = """
 """u8.Raw();
 
 // golang.org/issues/22146
-public static void TestUnmarshalWhitespaceAttrs(ж<testing.T> Ꮡt) {
-    ref var v = ref heap<WhitespaceAttrsParent>(out var Ꮡv);
-    v = new WhitespaceAttrsParent(nil);
+public static void TestUnmarshalWhitespaceAttrs(ж<testing.T> t) {
+    ref var v = ref heap<WhitespaceAttrsParent>(new WhitespaceAttrsParent(), out var Ꮡv);
     {
-        var err = Unmarshal(slice<byte>(whitespaceAttrsXML), Ꮡv); if (err != default!) {
-            Ꮡt.Fatalf("whitespace attrs: Unmarshal failed: got %v"u8, err);
+        var err = Unmarshal(slice<byte>(whitespaceAttrsXML), Ꮡv); if (err != nil) {
+            t.Fatalf("whitespace attrs: Unmarshal failed: got %v", err);
         }
     }
 
@@ -1152,7 +1156,7 @@ public static void TestUnmarshalWhitespaceAttrs(ж<testing.T> Ꮡt) {
         F64Neg: -266.703D
     );
     if (v != want) {
-        Ꮡt.Fatalf("whitespace attrs: Unmarshal:\nhave: %#+v\nwant: %#+v"u8, v, want);
+        t.Fatalf("whitespace attrs: Unmarshal:\nhave: %#+v\nwant: %#+v", v, want);
     }
 }
 
@@ -1161,12 +1165,12 @@ internal partial struct TestUnmarshalIntoNil_T /*dyn*/ {
 }
 
 // golang.org/issues/53350
-public static void TestUnmarshalIntoNil(ж<testing.T> Ꮡt) {
-    ж<TestUnmarshalIntoNil_T> nilPointer = default!;
+public static void TestUnmarshalIntoNil(ж<testing.T> t) {
+    ж<TestUnmarshalIntoNil_T> nilPointer = default;
     var err = Unmarshal(slice<byte>("<T><A>1</A></T>"u8), nilPointer.OrTypedNil());
 
-    if (err == default!) {
-        Ꮡt.Fatalf("no error in unmarshaling"u8);
+    if (err == nil) {
+        t.Fatalf("no error in unmarshaling");
     }
 }
 
@@ -1177,14 +1181,13 @@ internal partial struct TestCVE202228131_nested /*dyn*/ {
     public ж<TestCVE202228131_nested> Parent; /*`xml:",any"`*/
 }
 
-public static void TestCVE202228131(ж<testing.T> Ꮡt) {
+public static void TestCVE202228131(ж<testing.T> t) {
     ref var n = ref heap(new TestCVE202228131_nested(), out var Ꮡn);
     var err = Unmarshal(bytes.Repeat(slice<byte>("<a>"u8), maxUnmarshalDepth + 1), Ꮡn);
-    if (err == default!){
-        Ꮡt.Fatal(unmarshalDidNotFailˢ);
-    } else 
-    if (!errors.Is(err, errUnmarshalDepth)) {
-        Ꮡt.Fatalf("Unmarshal unexpected error: got %q, want %q"u8, err, errUnmarshalDepth);
+    if (err == nil) {
+        t.Fatal(unmarshalDidNotFailˢ);
+    } else if (!errors.Is(err, errUnmarshalDepth)) {
+        t.Fatalf("Unmarshal unexpected error: got %q, want %q", err, errUnmarshalDepth);
     }
 }
 
@@ -1196,16 +1199,16 @@ internal partial struct TestCVE202230633_example /*dyn*/ {
     public slice<@string> Things;
 }
 
-public static void TestCVE202230633(ж<testing.T> Ꮡt) {
+public static void TestCVE202230633(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (testing.Short() || runtime.GOARCH == "wasm"u8) {
-            Ꮡt.Skip(testRequiresSignificantˢ);
+            t.Skip(testRequiresSignificantˢ);
         }
         defer(() => {
             var p = recover();
-            if (p != default!) {
-                Ꮡt.Fatal(unmarshalPanickedˢ);
+            if (p != nil) {
+                t.Fatal(unmarshalPanickedˢ);
             }
         }, ref ᒐ);
         ref var example = ref heap(new TestCVE202230633_example(), out var Ꮡexample);
@@ -1222,22 +1225,24 @@ public partial struct recursiveNode {
 
 internal partial struct UnmarshalXML_alias /*recursiveNode*/;
 
-public static error UnmarshalXML(this ref recursiveNode n, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement startʗp) {
+public static error UnmarshalXML(this ref recursiveNode n, ж<global::go.encoding.xml_package.Decoder> d, global::go.encoding.xml_package.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     ref var a = ref heap(new UnmarshalXML_alias(), out var Ꮡa);
     {
-        var err = Ꮡd.DecodeElement(Ꮡa, Ꮡstart); if (err != default!) {
+        var err = d.DecodeElement(Ꮡa, Ꮡstart); if (err != nil) {
             return err;
         }
     }
     n = (recursiveNode)a;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string goBuilderNameˢ = "GO_BUILDER_NAME"u8;
-internal static readonly @string wazeroˢ = "wazero"u8;
+internal static ref readonly @string goBuilderNameˢ => ref goBuilderNameˢᵇ;
+private static readonly @string goBuilderNameˢᵇ = "GO_BUILDER_NAME"u8;
+internal static ref readonly @string wazeroˢ => ref wazeroˢᵇ;
+private static readonly @string wazeroˢᵇ = "wazero"u8;
 
 internal partial struct TestDecodeElementRecursion_tests /*dyn*/ {
     internal @string name;
@@ -1245,44 +1250,44 @@ internal partial struct TestDecodeElementRecursion_tests /*dyn*/ {
     internal error wantErr;
 }
 
-public static void TestDecodeElementRecursion(ж<testing.T> Ꮡt) {
+public static void TestDecodeElementRecursion(ж<testing.T> t) {
     // The wazero builder is unable to build the test binary due to its small
     // stack size.
     @string builder = os.Getenv(goBuilderNameˢ);
     if (testing.Short() || strings.Contains(builder, wazeroˢ)) {
-        Ꮡt.Skip(testRequiresSignificantˢ);
+        t.Skip(testRequiresSignificantˢ);
     }
     nint maxDepth = maxUnmarshalDepth;
     if (runtime.GOARCH == "wasm"u8) {
         maxDepth = maxUnmarshalDepthWasm;
     }
-    var tests = new TestDecodeElementRecursion_tests[]{
+    var tests = slice<TestDecodeElementRecursion_tests>([
         new(
-            name: "below limit"u8,
+            name: "below limit",
             depth: maxDepth,
-            wantErr: default!
+            wantErr: default
         ),
         new(
-            name: "above limit"u8,
+            name: "above limit",
             depth: maxDepth + 1,
             wantErr: errUnmarshalDepth
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestDecodeElementRecursion_tests(), out var Ꮡtt);
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
-            var payload = bytes.Join(new slice<byte>[]{
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var payload = bytes.Join(slice<slice<byte>>([
                 bytes.Repeat(slice<byte>("<a>"u8), ttʗ1.depth),
                 bytes.Repeat(slice<byte>("</a>"u8), ttʗ1.depth)
-            }.slice(), default!);
+            ]), default);
             ref var n = ref heap(new recursiveNode(), out var Ꮡn);
             var err = Unmarshal(payload, Ꮡn);
             if (!AreEqual(err, ttʗ1.wantErr)) {
-                tΔ1.Fatalf("unexpected error: got %v, want %v"u8, err, ttʗ1.wantErr);
+                tΔ1.Fatalf("unexpected error: got %v, want %v", err, ttʗ1.wantErr);
             }
         });
     }
@@ -1297,33 +1302,37 @@ public partial struct customUnmarshalerNode {
     public standardNode Body;
 }
 
-public static error UnmarshalXML(this ref customUnmarshalerNode e, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement startʗp) {
+public static error UnmarshalXML(this ref customUnmarshalerNode e, ж<global::go.encoding.xml_package.Decoder> d, global::go.encoding.xml_package.StartElement startʗp) {
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
     ref var body = ref heap(new standardNode(), out var Ꮡbody);
     {
-        var err = Ꮡd.DecodeElement(Ꮡbody, Ꮡstart); if (err != default!) {
+        var err = d.DecodeElement(Ꮡbody, Ꮡstart); if (err != nil) {
             return err;
         }
     }
     e.Body = body;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sectionˢ = "<section>"u8;
-internal static readonly @string sectionˢ2 = "</section>"u8;
-internal static readonly @string extensionˢ = "<extension>"u8;
-internal static readonly @string extensionˢ2 = "</extension>"u8;
+internal static ref readonly @string sectionˢ => ref sectionˢᵇ;
+private static readonly @string sectionˢᵇ = "<section>"u8;
+internal static ref readonly @string sectionˢ2 => ref sectionˢ2ᵇ;
+private static readonly @string sectionˢ2ᵇ = "</section>"u8;
+internal static ref readonly @string extensionˢ => ref extensionˢᵇ;
+private static readonly @string extensionˢᵇ = "<extension>"u8;
+internal static ref readonly @string extensionˢ2 => ref extensionˢ2ᵇ;
+private static readonly @string extensionˢ2ᵇ = "</extension>"u8;
 
-public static void TestDecodeElementDepthBypass(ж<testing.T> Ꮡt) {
+public static void TestDecodeElementDepthBypass(ж<testing.T> t) {
     // Construct a document with 3 blocks of 5,000 nested <section> tags,
     // separated by <extension> tags.
     // Total XML nesting depth = 15,003 tags deep (maxUnmarshalDepth is 10,000).
     @string openSections = strings.Repeat(sectionˢ, 5000);
     @string closeSections = strings.Repeat(sectionˢ2, 5000);
 
-    bytes.Buffer buf = default!;
+    bytes.Buffer buf = default;
     foreach (var _ᴛ1 in range(3)) {
         buf.WriteString(openSections);
         buf.WriteString(extensionˢ);
@@ -1337,7 +1346,7 @@ public static void TestDecodeElementDepthBypass(ж<testing.T> Ꮡt) {
     var err = Unmarshal(buf.Bytes(), Ꮡnode);
 
     if (!AreEqual(err, errUnmarshalDepth)) {
-        Ꮡt.Fatalf("Unexpected error: got %q want %q"u8, err, errUnmarshalDepth);
+        t.Fatalf("Unexpected error: got %q want %q", err, errUnmarshalDepth);
     }
 }
 
@@ -1348,9 +1357,9 @@ public partial struct manualNode {
 public static error UnmarshalXML(this ref manualNode m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    while (ᐧ) {
+    for (;;) {
         var (tok, err) = d.Token();
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         switch (tok.type()) {
@@ -1358,7 +1367,7 @@ public static error UnmarshalXML(this ref manualNode m, ж<global::go.encoding.x
             ref var t = ref heap(tᴛ1, out var Ꮡt);
             ref var child = ref heap(new manualNode(), out var Ꮡchild);
             {
-                var errΔ1 = Ꮡd.DecodeElement(Ꮡchild, Ꮡt); if (errΔ1 != default!) {
+                var errΔ1 = Ꮡd.DecodeElement(Ꮡchild, Ꮡt); if (errΔ1 != nil) {
                     return errΔ1;
                 }
             }
@@ -1366,22 +1375,22 @@ public static error UnmarshalXML(this ref manualNode m, ж<global::go.encoding.x
             break;
         }
         case EndElement t: {
-            return default!;
+            return default;
         }}
     }
 }
 
-public static void TestRecursiveUnmarshalInterfaceDepth(ж<testing.T> Ꮡt) {
+public static void TestRecursiveUnmarshalInterfaceDepth(ж<testing.T> t) {
     nint depth = maxUnmarshalDepth + 1;
-    var payload = bytes.Join(new slice<byte>[]{
+    var payload = bytes.Join(slice<slice<byte>>([
         bytes.Repeat(slice<byte>("<a>"u8), depth),
         bytes.Repeat(slice<byte>("</a>"u8), depth)
-    }.slice(), default!);
+    ]), default);
 
     ref var node = ref heap(new manualNode(), out var Ꮡnode);
     var err = Unmarshal(payload, Ꮡnode);
     if (!AreEqual(err, errUnmarshalDepth)) {
-        Ꮡt.Fatalf("Unexpected error: got %q want %q"u8, err, errUnmarshalDepth);
+        t.Fatalf("Unexpected error: got %q want %q", err, errUnmarshalDepth);
     }
 }
 
@@ -1395,11 +1404,11 @@ internal static error UnmarshalXML(this ref rawTokenNode r, ж<global::go.encodi
     return err;
 }
 
-public static void TestUnmarshalXMLRawToken(ж<testing.T> Ꮡt) {
+public static void TestUnmarshalXMLRawToken(ж<testing.T> t) {
     ref var node = ref heap(new rawTokenNode(), out var Ꮡnode);
     var err = Unmarshal(slice<byte>("<a></a>"u8), Ꮡnode);
     if (!AreEqual(err, errRawToken)) {
-        Ꮡt.Fatalf("UnmarshalXML calling RawToken: got error %v, want %v"u8, err, errRawToken);
+        t.Fatalf("UnmarshalXML calling RawToken: got error %v, want %v", err, errRawToken);
     }
 }
 

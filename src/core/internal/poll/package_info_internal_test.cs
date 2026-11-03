@@ -29,8 +29,8 @@ using static go.@internal.poll_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/poll/export_posix_test.go", "export_posix_test.cs", "AA0agg==")]
-[assembly: go.GoPositionMap("internal/poll/export_test.go", "export_test.cs", "AAwW7IKmgqaCpoKmgg==")]
+[assembly: GoPositionMap("internal/poll/export_posix_test.go", "export_posix_test.cs", "AA0agg==")]
+[assembly: GoPositionMap("internal/poll/export_test.go", "export_test.cs", "AAwW7IKmgqaCpoKmgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

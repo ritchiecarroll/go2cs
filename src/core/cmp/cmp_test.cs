@@ -19,19 +19,19 @@ internal static ref float64 negzero => ref ((StaticBox<float64>)Ꮡnegzero).Valu
 
 internal static uintptr nonnilptr = (uintptr)Ꮡnegzero;
 
-internal static uintptr nilptr = (uintptr)(@unsafe.Pointer)default!;
+internal static uintptr nilptr = (uintptr)(@unsafe.Pointer)default;
 
 partial struct testsᴛ1 /*dyn*/ {
     internal any x, y;
     internal nint compare;
 }
-internal static slice<testsᴛ1> tests = new testsᴛ1[]{
+internal static slice<testsᴛ1> tests = slice<testsᴛ1>([
     new((nint)1, (nint)2, -1),
     new((nint)1, (nint)1, 0),
     new((nint)2, (nint)1, +1),
-    new((@string)"a"u8, (@string)"aa"u8, -1),
-    new((@string)"a"u8, (@string)"a"u8, 0),
-    new((@string)"aa"u8, (@string)"a"u8, +1),
+    new((@string)"a", (@string)"aa", -1),
+    new((@string)"a", (@string)"a", 0),
+    new((@string)"aa", (@string)"a", +1),
     new(1.0D, 1.1D, -1),
     new(1.1D, 1.1D, 0),
     new(1.1D, 1.0D, +1),
@@ -55,13 +55,11 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new(nilptr, nonnilptr, -1),
     new(nonnilptr, nilptr, 1),
     new(nonnilptr, nonnilptr, 0)
-}.slice();
+]);
 
-public static void TestLess(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestLess(ж<testing.T> t) {
     foreach (var (_, test) in tests) {
-        bool b = default!;
+        bool b = default;
         switch (test.x.type()) {
         case nint: {
             b = cmp.Less(test.x._<nint>(), test.y._<nint>());
@@ -80,14 +78,14 @@ public static void TestLess(ж<testing.T> Ꮡt) {
             break;
         }}
         if (b != (test.compare < 0)) {
-            Ꮡt.Errorf("Less(%v, %v) == %t, want %t"u8, test.x, test.y, b, test.compare < 0);
+            t.Errorf("Less(%v, %v) == %t, want %t", test.x, test.y, b, test.compare < 0);
         }
     }
 }
 
-public static void TestCompare(ж<testing.T> Ꮡt) {
+public static void TestCompare(ж<testing.T> t) {
     foreach (var (_, test) in tests) {
-        nint c = default!;
+        nint c = default;
         switch (test.x.type()) {
         case nint: {
             c = cmp.Compare(test.x._<nint>(), test.y._<nint>());
@@ -106,22 +104,22 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
             break;
         }}
         if (c != test.compare) {
-            Ꮡt.Errorf("Compare(%v, %v) == %d, want %d"u8, test.x, test.y, c, test.compare);
+            t.Errorf("Compare(%v, %v) == %d, want %d", test.x, test.y, c, test.compare);
         }
     }
 }
 
-public static void TestSort(ж<testing.T> Ꮡt) {
+public static void TestSort(ж<testing.T> t) {
     // Test that our comparison function is consistent with
     // sort.Float64s.
-    var input = new float64[]{1.0D, 0.0D, negzero, Δmath.Inf(1), Δmath.Inf(-1), Δmath.NaN()}.slice();
+    var input = slice<float64>([1.0D, 0.0D, negzero, Δmath.Inf(1), Δmath.Inf(-1), Δmath.NaN()]);
     sort.Float64s(input);
     for (nint i = 0; i < len(input) - 1; i++) {
         if (cmp.Less(input[i + 1], input[i])) {
-            Ꮡt.Errorf("Less sort mismatch at %d in %v"u8, i, input);
+            t.Errorf("Less sort mismatch at %d in %v", i, input);
         }
         if (cmp.Compare(input[i], input[i + 1]) > 0) {
-            Ꮡt.Errorf("Compare sort mismatch at %d in %v"u8, i, input);
+            t.Errorf("Compare sort mismatch at %d in %v", i, input);
         }
     }
 }
@@ -131,28 +129,30 @@ internal partial struct TestOr_cases /*dyn*/ {
     internal nint want;
 }
 
-public static void TestOr(ж<testing.T> Ꮡt) {
-    var cases = new TestOr_cases[]{
-        new(default!, 0),
-        new(new nint[]{0}.slice(), 0),
-        new(new nint[]{1}.slice(), 1),
-        new(new nint[]{0, 2}.slice(), 2),
-        new(new nint[]{3, 0}.slice(), 3),
-        new(new nint[]{4, 5}.slice(), 4),
-        new(new nint[]{0, 6, 7}.slice(), 6)
-    }.slice();
+public static void TestOr(ж<testing.T> t) {
+    var cases = slice<TestOr_cases>([
+        new(default, 0),
+        new(slice<nint>([0]), 0),
+        new(slice<nint>([1]), 1),
+        new(slice<nint>([0, 2]), 2),
+        new(slice<nint>([3, 0]), 3),
+        new(slice<nint>([4, 5]), 4),
+        new(slice<nint>([0, 6, 7]), 6)
+    ]);
     foreach (var (_, tc) in cases) {
         {
             nint got = cmp.Or(tc.@in.ꓸꓸꓸ); if (got != tc.want) {
-                Ꮡt.Errorf("cmp.Or(%v) = %v; want %v"u8, tc.@in, got, tc.want);
+                t.Errorf("cmp.Or(%v) = %v; want %v", tc.@in, got, tc.want);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string someTextˢ = "some text"u8;
-private static readonly @string defaultˢ = "default"u8;
+private static ref readonly @string someTextˢ => ref someTextˢᵇ;
+private static readonly @string someTextˢᵇ = "some text"u8;
+private static ref readonly @string defaultˢ => ref defaultˢᵇ;
+private static readonly @string defaultˢᵇ = "default"u8;
 
 public static void ExampleOr() {
     // Suppose we have some user input
@@ -176,14 +176,14 @@ internal partial struct ExampleOr_sort_Order /*dyn*/ {
 }
 
 public static void ExampleOr_sort() {
-    var orders = new ExampleOr_sort_Order[]{
-        new("foo"u8, "alice"u8, 1.00D),
-        new("bar"u8, "bob"u8, 3.00D),
-        new("baz"u8, "carol"u8, 4.00D),
-        new("foo"u8, "alice"u8, 2.00D),
-        new("bar"u8, "carol"u8, 1.00D),
-        new("foo"u8, "bob"u8, 4.00D)
-    }.slice();
+    var orders = slice<ExampleOr_sort_Order>([
+        new("foo", "alice", 1.00D),
+        new("bar", "bob", 3.00D),
+        new("baz", "carol", 4.00D),
+        new("foo", "alice", 2.00D),
+        new("bar", "carol", 1.00D),
+        new("foo", "bob", 4.00D)
+    ]);
     // Sort by customer first, product second, and last by higher price
     slices.SortFunc(orders, (ExampleOr_sort_Order a, ExampleOr_sort_Order b) => cmp.Or(
             strings.Compare(a.Customer, b.Customer),

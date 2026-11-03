@@ -71,7 +71,7 @@ internal static float64 atanh(float64 x) {
         x = -x;
         sign = true;
     }
-    float64 temp = default!;
+    float64 temp = default;
     switch (ᐧ) {
     case {} when x < NearZero: {
         temp = x;

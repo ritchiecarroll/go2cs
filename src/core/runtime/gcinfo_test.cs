@@ -14,115 +14,148 @@ internal static UntypedInt typeScalar => 0;
 internal static UntypedInt typePointer => 1;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bssPtrˢ = "bss Ptr"u8;
-internal static readonly @string bssScalarPtrˢ = "bss ScalarPtr"u8;
-internal static readonly @string bssPtrScalarˢ = "bss PtrScalar"u8;
-internal static readonly @string bssBigStructˢ = "bss BigStruct"u8;
-internal static readonly @string bssStringˢ = "bss string"u8;
-internal static readonly @string bssSliceˢ = "bss slice"u8;
-internal static readonly @string bssEfaceˢ = "bss eface"u8;
-internal static readonly @string bssIfaceˢ = "bss iface"u8;
-internal static readonly @string dataPtrˢ = "data Ptr"u8;
-internal static readonly @string dataScalarPtrˢ = "data ScalarPtr"u8;
-internal static readonly @string dataPtrScalarˢ = "data PtrScalar"u8;
-internal static readonly @string dataBigStructˢ = "data BigStruct"u8;
-internal static readonly @string dataStringˢ = "data string"u8;
-internal static readonly @string dataSliceˢ = "data slice"u8;
-internal static readonly @string dataEfaceˢ = "data eface"u8;
-internal static readonly @string dataIfaceˢ = "data iface"u8;
-internal static readonly @string stackPtrˢ = "stack Ptr"u8;
-internal static readonly @string stackScalarPtrˢ = "stack ScalarPtr"u8;
-internal static readonly @string stackPtrScalarˢ = "stack PtrScalar"u8;
-internal static readonly @string stackBigStructˢ = "stack BigStruct"u8;
-internal static readonly @string stackStringˢ = "stack string"u8;
-internal static readonly @string stackSliceˢ = "stack slice"u8;
-internal static readonly @string stackEfaceˢ = "stack eface"u8;
-internal static readonly @string stackIfaceˢ = "stack iface"u8;
-internal static readonly @string heapPtrˢ = "heap Ptr"u8;
-internal static readonly @string heapPtrSliceˢ = "heap PtrSlice"u8;
-internal static readonly @string heapScalarPtrˢ = "heap ScalarPtr"u8;
-internal static readonly @string heapScalarPtrSliceˢ = "heap ScalarPtrSlice"u8;
-internal static readonly @string heapPtrScalarˢ = "heap PtrScalar"u8;
-internal static readonly @string heapBigStructˢ = "heap BigStruct"u8;
-internal static readonly @string heapStringˢ = "heap string"u8;
-internal static readonly @string heapEfaceˢ = "heap eface"u8;
-internal static readonly @string heapIfaceˢ = "heap iface"u8;
+internal static ref readonly @string bssPtrˢ => ref bssPtrˢᵇ;
+private static readonly @string bssPtrˢᵇ = "bss Ptr"u8;
+internal static ref readonly @string bssScalarPtrˢ => ref bssScalarPtrˢᵇ;
+private static readonly @string bssScalarPtrˢᵇ = "bss ScalarPtr"u8;
+internal static ref readonly @string bssPtrScalarˢ => ref bssPtrScalarˢᵇ;
+private static readonly @string bssPtrScalarˢᵇ = "bss PtrScalar"u8;
+internal static ref readonly @string bssBigStructˢ => ref bssBigStructˢᵇ;
+private static readonly @string bssBigStructˢᵇ = "bss BigStruct"u8;
+internal static ref readonly @string bssStringˢ => ref bssStringˢᵇ;
+private static readonly @string bssStringˢᵇ = "bss string"u8;
+internal static ref readonly @string bssSliceˢ => ref bssSliceˢᵇ;
+private static readonly @string bssSliceˢᵇ = "bss slice"u8;
+internal static ref readonly @string bssEfaceˢ => ref bssEfaceˢᵇ;
+private static readonly @string bssEfaceˢᵇ = "bss eface"u8;
+internal static ref readonly @string bssIfaceˢ => ref bssIfaceˢᵇ;
+private static readonly @string bssIfaceˢᵇ = "bss iface"u8;
+internal static ref readonly @string dataPtrˢ => ref dataPtrˢᵇ;
+private static readonly @string dataPtrˢᵇ = "data Ptr"u8;
+internal static ref readonly @string dataScalarPtrˢ => ref dataScalarPtrˢᵇ;
+private static readonly @string dataScalarPtrˢᵇ = "data ScalarPtr"u8;
+internal static ref readonly @string dataPtrScalarˢ => ref dataPtrScalarˢᵇ;
+private static readonly @string dataPtrScalarˢᵇ = "data PtrScalar"u8;
+internal static ref readonly @string dataBigStructˢ => ref dataBigStructˢᵇ;
+private static readonly @string dataBigStructˢᵇ = "data BigStruct"u8;
+internal static ref readonly @string dataStringˢ => ref dataStringˢᵇ;
+private static readonly @string dataStringˢᵇ = "data string"u8;
+internal static ref readonly @string dataSliceˢ => ref dataSliceˢᵇ;
+private static readonly @string dataSliceˢᵇ = "data slice"u8;
+internal static ref readonly @string dataEfaceˢ => ref dataEfaceˢᵇ;
+private static readonly @string dataEfaceˢᵇ = "data eface"u8;
+internal static ref readonly @string dataIfaceˢ => ref dataIfaceˢᵇ;
+private static readonly @string dataIfaceˢᵇ = "data iface"u8;
+internal static ref readonly @string stackPtrˢ => ref stackPtrˢᵇ;
+private static readonly @string stackPtrˢᵇ = "stack Ptr"u8;
+internal static ref readonly @string stackScalarPtrˢ => ref stackScalarPtrˢᵇ;
+private static readonly @string stackScalarPtrˢᵇ = "stack ScalarPtr"u8;
+internal static ref readonly @string stackPtrScalarˢ => ref stackPtrScalarˢᵇ;
+private static readonly @string stackPtrScalarˢᵇ = "stack PtrScalar"u8;
+internal static ref readonly @string stackBigStructˢ => ref stackBigStructˢᵇ;
+private static readonly @string stackBigStructˢᵇ = "stack BigStruct"u8;
+internal static ref readonly @string stackStringˢ => ref stackStringˢᵇ;
+private static readonly @string stackStringˢᵇ = "stack string"u8;
+internal static ref readonly @string stackSliceˢ => ref stackSliceˢᵇ;
+private static readonly @string stackSliceˢᵇ = "stack slice"u8;
+internal static ref readonly @string stackEfaceˢ => ref stackEfaceˢᵇ;
+private static readonly @string stackEfaceˢᵇ = "stack eface"u8;
+internal static ref readonly @string stackIfaceˢ => ref stackIfaceˢᵇ;
+private static readonly @string stackIfaceˢᵇ = "stack iface"u8;
+internal static ref readonly @string heapPtrˢ => ref heapPtrˢᵇ;
+private static readonly @string heapPtrˢᵇ = "heap Ptr"u8;
+internal static ref readonly @string heapPtrSliceˢ => ref heapPtrSliceˢᵇ;
+private static readonly @string heapPtrSliceˢᵇ = "heap PtrSlice"u8;
+internal static ref readonly @string heapScalarPtrˢ => ref heapScalarPtrˢᵇ;
+private static readonly @string heapScalarPtrˢᵇ = "heap ScalarPtr"u8;
+internal static ref readonly @string heapScalarPtrSliceˢ => ref heapScalarPtrSliceˢᵇ;
+private static readonly @string heapScalarPtrSliceˢᵇ = "heap ScalarPtrSlice"u8;
+internal static ref readonly @string heapPtrScalarˢ => ref heapPtrScalarˢᵇ;
+private static readonly @string heapPtrScalarˢᵇ = "heap PtrScalar"u8;
+internal static ref readonly @string heapBigStructˢ => ref heapBigStructˢᵇ;
+private static readonly @string heapBigStructˢᵇ = "heap BigStruct"u8;
+internal static ref readonly @string heapStringˢ => ref heapStringˢᵇ;
+private static readonly @string heapStringˢᵇ = "heap string"u8;
+internal static ref readonly @string heapEfaceˢ => ref heapEfaceˢᵇ;
+private static readonly @string heapEfaceˢᵇ = "heap eface"u8;
+internal static ref readonly @string heapIfaceˢ => ref heapIfaceˢᵇ;
+private static readonly @string heapIfaceˢᵇ = "heap iface"u8;
 
 // TestGCInfo tests that various objects in heap, data and bss receive correct GC pointer type info.
-public static void TestGCInfo(ж<testing.T> Ꮡt) {
-    verifyGCInfo(Ꮡt, bssPtrˢ, ᏑbssPtr, infoPtr);
-    verifyGCInfo(Ꮡt, bssScalarPtrˢ, ᏑbssScalarPtr, infoScalarPtr);
-    verifyGCInfo(Ꮡt, bssPtrScalarˢ, ᏑbssPtrScalar, infoPtrScalar);
-    verifyGCInfo(Ꮡt, bssBigStructˢ, ᏑbssBigStruct, infoBigStruct());
-    verifyGCInfo(Ꮡt, bssStringˢ, ᏑbssString, infoString);
-    verifyGCInfo(Ꮡt, bssSliceˢ, ᏑbssSlice, infoSlice);
-    verifyGCInfo(Ꮡt, bssEfaceˢ, ᏑbssEface, infoEface);
-    verifyGCInfo(Ꮡt, bssIfaceˢ, ᏑbssIface, infoIface);
+public static void TestGCInfo(ж<testing.T> t) {
+    verifyGCInfo(t, bssPtrˢ, ᏑbssPtr, infoPtr);
+    verifyGCInfo(t, bssScalarPtrˢ, ᏑbssScalarPtr, infoScalarPtr);
+    verifyGCInfo(t, bssPtrScalarˢ, ᏑbssPtrScalar, infoPtrScalar);
+    verifyGCInfo(t, bssBigStructˢ, ᏑbssBigStruct, infoBigStruct());
+    verifyGCInfo(t, bssStringˢ, ᏑbssString, infoString);
+    verifyGCInfo(t, bssSliceˢ, ᏑbssSlice, infoSlice);
+    verifyGCInfo(t, bssEfaceˢ, ᏑbssEface, infoEface);
+    verifyGCInfo(t, bssIfaceˢ, ᏑbssIface, infoIface);
 
-    verifyGCInfo(Ꮡt, dataPtrˢ, ᏑdataPtr, infoPtr);
-    verifyGCInfo(Ꮡt, dataScalarPtrˢ, ᏑdataScalarPtr, infoScalarPtr);
-    verifyGCInfo(Ꮡt, dataPtrScalarˢ, ᏑdataPtrScalar, infoPtrScalar);
-    verifyGCInfo(Ꮡt, dataBigStructˢ, ᏑdataBigStruct, infoBigStruct());
-    verifyGCInfo(Ꮡt, dataStringˢ, ᏑdataString, infoString);
-    verifyGCInfo(Ꮡt, dataSliceˢ, ᏑdataSlice, infoSlice);
-    verifyGCInfo(Ꮡt, dataEfaceˢ, ᏑdataEface, infoEface);
-    verifyGCInfo(Ꮡt, dataIfaceˢ, ᏑdataIface, infoIface);
+    verifyGCInfo(t, dataPtrˢ, ᏑdataPtr, infoPtr);
+    verifyGCInfo(t, dataScalarPtrˢ, ᏑdataScalarPtr, infoScalarPtr);
+    verifyGCInfo(t, dataPtrScalarˢ, ᏑdataPtrScalar, infoPtrScalar);
+    verifyGCInfo(t, dataBigStructˢ, ᏑdataBigStruct, infoBigStruct());
+    verifyGCInfo(t, dataStringˢ, ᏑdataString, infoString);
+    verifyGCInfo(t, dataSliceˢ, ᏑdataSlice, infoSlice);
+    verifyGCInfo(t, dataEfaceˢ, ᏑdataEface, infoEface);
+    verifyGCInfo(t, dataIfaceˢ, ᏑdataIface, infoIface);
 
     {
         ref var x = ref heap(new Ptr(), out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackPtrˢ, Ꮡx, infoPtr);
+        verifyGCInfo(t, stackPtrˢ, Ꮡx, infoPtr);
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap(new ScalarPtr(), out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackScalarPtrˢ, Ꮡx, infoScalarPtr);
+        verifyGCInfo(t, stackScalarPtrˢ, Ꮡx, infoScalarPtr);
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap(new PtrScalar(), out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackPtrScalarˢ, Ꮡx, infoPtrScalar);
+        verifyGCInfo(t, stackPtrScalarˢ, Ꮡx, infoPtrScalar);
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap(new BigStruct(), out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackBigStructˢ, Ꮡx, infoBigStruct());
+        verifyGCInfo(t, stackBigStructˢ, Ꮡx, infoBigStruct());
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap(new @string(), out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackStringˢ, Ꮡx, infoString);
+        verifyGCInfo(t, stackStringˢ, Ꮡx, infoString);
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap<slice<@string>>(out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackSliceˢ, Ꮡx, infoSlice);
+        verifyGCInfo(t, stackSliceˢ, Ꮡx, infoSlice);
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap<any>(out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackEfaceˢ, Ꮡx, infoEface);
+        verifyGCInfo(t, stackEfaceˢ, Ꮡx, infoEface);
         Δruntime.KeepAlive(x);
     }
     {
         ref var x = ref heap<Iface>(out var Ꮡx);
-        verifyGCInfo(Ꮡt, stackIfaceˢ, Ꮡx, infoIface);
+        verifyGCInfo(t, stackIfaceˢ, Ꮡx, infoIface);
         Δruntime.KeepAlive(x);
     }
 
     for (nint i = 0; i < 10; i++) {
-        verifyGCInfo(Ꮡt, heapPtrˢ, runtime_internal_test_package.Escape(@new<Ptr>()).OrTypedNil(), trimDead(infoPtr));
-        verifyGCInfo(Ꮡt, heapPtrSliceˢ, runtime_internal_test_package.Escape(Ꮡ(new slice<ж<byte>>(10), 0)).OrTypedNil(), trimDead(infoPtr10));
-        verifyGCInfo(Ꮡt, heapScalarPtrˢ, runtime_internal_test_package.Escape(@new<ScalarPtr>()).OrTypedNil(), trimDead(infoScalarPtr));
-        verifyGCInfo(Ꮡt, heapScalarPtrSliceˢ, runtime_internal_test_package.Escape(Ꮡ(new slice<ScalarPtr>(4), 0)).OrTypedNil(), trimDead(infoScalarPtr4));
-        verifyGCInfo(Ꮡt, heapPtrScalarˢ, runtime_internal_test_package.Escape(@new<PtrScalar>()).OrTypedNil(), trimDead(infoPtrScalar));
-        verifyGCInfo(Ꮡt, heapBigStructˢ, runtime_internal_test_package.Escape(@new<BigStruct>()).OrTypedNil(), trimDead(infoBigStruct()));
-        verifyGCInfo(Ꮡt, heapStringˢ, runtime_internal_test_package.Escape(@new<@string>()).OrTypedNil(), trimDead(infoString));
-        verifyGCInfo(Ꮡt, heapEfaceˢ, runtime_internal_test_package.Escape(@new<any>()).OrTypedNil(), trimDead(infoEface));
-        verifyGCInfo(Ꮡt, heapIfaceˢ, runtime_internal_test_package.Escape(@new<Iface>()).OrTypedNil(), trimDead(infoIface));
+        verifyGCInfo(t, heapPtrˢ, runtime_internal_test_package.Escape(@new<Ptr>()).OrTypedNil(), trimDead(infoPtr));
+        verifyGCInfo(t, heapPtrSliceˢ, runtime_internal_test_package.Escape(Ꮡ(new slice<ж<byte>>(10), 0)).OrTypedNil(), trimDead(infoPtr10));
+        verifyGCInfo(t, heapScalarPtrˢ, runtime_internal_test_package.Escape(@new<ScalarPtr>()).OrTypedNil(), trimDead(infoScalarPtr));
+        verifyGCInfo(t, heapScalarPtrSliceˢ, runtime_internal_test_package.Escape(Ꮡ(new slice<ScalarPtr>(4), 0)).OrTypedNil(), trimDead(infoScalarPtr4));
+        verifyGCInfo(t, heapPtrScalarˢ, runtime_internal_test_package.Escape(@new<PtrScalar>()).OrTypedNil(), trimDead(infoPtrScalar));
+        verifyGCInfo(t, heapBigStructˢ, runtime_internal_test_package.Escape(@new<BigStruct>()).OrTypedNil(), trimDead(infoBigStruct()));
+        verifyGCInfo(t, heapStringˢ, runtime_internal_test_package.Escape(@new<@string>()).OrTypedNil(), trimDead(infoString));
+        verifyGCInfo(t, heapEfaceˢ, runtime_internal_test_package.Escape(@new<any>()).OrTypedNil(), trimDead(infoEface));
+        verifyGCInfo(t, heapIfaceˢ, runtime_internal_test_package.Escape(@new<Iface>()).OrTypedNil(), trimDead(infoIface));
     }
 }
 
-internal static void verifyGCInfo(ж<testing.T> Ꮡt, @string name, any p, slice<byte> mask0) {
+internal static void verifyGCInfo(ж<testing.T> t, @string name, any p, slice<byte> mask0) {
     var mask = runtime_internal_test_package.PointerMask(p);
     if (bytes.HasPrefix(mask, mask0)) {
         // Just the prefix matching is OK.
@@ -134,7 +167,7 @@ internal static void verifyGCInfo(ж<testing.T> Ꮡt, @string name, any p, slice
         // may be larger than we expect.
         return;
     }
-    Ꮡt.Errorf("bad GC program for %v:\nwant %+v\ngot  %+v"u8, name, mask0, mask);
+    t.Errorf("bad GC program for %v:\nwant %+v\ngot  %+v", name, mask0, mask);
 }
 
 internal static slice<byte> trimDead(slice<byte> mask) {
@@ -144,13 +177,13 @@ internal static slice<byte> trimDead(slice<byte> mask) {
     return mask;
 }
 
-internal static slice<byte> infoPtr = new byte[]{typePointer}.slice();
+internal static slice<byte> infoPtr = slice<byte>([typePointer]);
 
 partial struct Ptr {
     /*embed*/ internal ж<byte> @byte;
 }
 
-internal static slice<byte> infoPtr10 = new byte[]{typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer}.slice();
+internal static slice<byte> infoPtr10 = slice<byte>([typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer, typePointer]);
 
 partial struct ScalarPtr {
     internal nint q;
@@ -161,9 +194,9 @@ partial struct ScalarPtr {
     internal ж<nint> y;
 }
 
-internal static slice<byte> infoScalarPtr = new byte[]{typeScalar, typePointer, typeScalar, typePointer, typeScalar, typePointer}.slice();
+internal static slice<byte> infoScalarPtr = slice<byte>([typeScalar, typePointer, typeScalar, typePointer, typeScalar, typePointer]);
 
-internal static slice<byte> infoScalarPtr4 = appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(slice<byte>(default!), infoScalarPtr), infoScalarPtr), infoScalarPtr), infoScalarPtr);
+internal static slice<byte> infoScalarPtr4 = appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(appendꓸꓸꓸ(slice<byte>(default), infoScalarPtr), infoScalarPtr), infoScalarPtr), infoScalarPtr);
 
 partial struct PtrScalar {
     internal ж<nint> q;
@@ -174,7 +207,7 @@ partial struct PtrScalar {
     internal nint y;
 }
 
-internal static slice<byte> infoPtrScalar = new byte[]{typePointer, typeScalar, typePointer, typeScalar, typePointer, typeScalar}.slice();
+internal static slice<byte> infoPtrScalar = slice<byte>([typePointer, typeScalar, typePointer, typeScalar, typePointer, typeScalar]);
 
 partial struct BigStruct {
     internal ж<nint> q;
@@ -189,27 +222,29 @@ partial struct BigStruct {
 
 internal static slice<byte> infoBigStruct() {
     var exprᴛ1 = Δruntime.GOARCH;
-    if (exprᴛ1 == "386"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8) {
-        return new byte[]{
-            typePointer, // q *int
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "386"u8 || exprᴛ1 == "arm"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8: {
+        return slice<byte>([
+            typePointer,                                                // q *int
             typeScalar, typeScalar, typeScalar, typeScalar, typeScalar, // w byte; e [17]byte
             typePointer, typeScalar, typeScalar, // r []byte
             typeScalar, typeScalar, typeScalar, typeScalar, // t int; y uint16; u uint64
             typePointer, typeScalar // i string
-        }.slice();
+        ]);
     }
-    if (exprᴛ1 == "arm64"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "wasm"u8) {
-        return new byte[]{
-            typePointer, // q *int
+    case {} when exprᴛ1 == "arm64"u8 || exprᴛ1 == "amd64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "wasm"u8: {
+        return slice<byte>([
+            typePointer,                        // q *int
             typeScalar, typeScalar, typeScalar, // w byte; e [17]byte
             typePointer, typeScalar, typeScalar, // r []byte
             typeScalar, typeScalar, typeScalar, // t int; y uint16; u uint64
             typePointer, typeScalar // i string
-        }.slice();
+        ]);
     }
-    { /* default: */
+    default: {
         throw panic("unknown arch");
-    }
+        break;
+    }}
 }
 
 partial interface Iface {
@@ -248,18 +283,18 @@ internal static readonly ж<PtrScalar> ᏑdataPtrScalar = new StaticBox<PtrScala
 internal static ref PtrScalar dataPtrScalar => ref ((StaticBox<PtrScalar>)ᏑdataPtrScalar).ValueSlot;
 internal static readonly ж<BigStruct> ᏑdataBigStruct = new StaticBox<BigStruct>(new BigStruct(w: 1));
 internal static ref BigStruct dataBigStruct => ref ((StaticBox<BigStruct>)ᏑdataBigStruct).ValueSlot;
-internal static readonly ж<@string> ᏑdataString = new StaticBox<@string>("foo"u8);
+internal static readonly ж<@string> ᏑdataString = new StaticBox<@string>("foo");
 internal static ref @string dataString => ref ((StaticBox<@string>)ᏑdataString).ValueSlot;
-internal static readonly ж<slice<@string>> ᏑdataSlice = new StaticBox<slice<@string>>(new @string[]{"foo"u8}.slice());
+internal static readonly ж<slice<@string>> ᏑdataSlice = new StaticBox<slice<@string>>(slice<@string>(["foo"]));
 internal static ref slice<@string> dataSlice => ref ((StaticBox<slice<@string>>)ᏑdataSlice).ValueSlot;
 internal static readonly ж<any> ᏑdataEface = new StaticBox<any>((nint)42);
 internal static ref any dataEface => ref ((StaticBox<any>)ᏑdataEface).ValueSlot;
 internal static readonly ж<Iface> ᏑdataIface = new StaticBox<Iface>(((IfaceImpl)42));
 internal static ref Iface dataIface => ref ((StaticBox<Iface>)ᏑdataIface).ValueSlot;
 
-internal static slice<byte> infoString = new byte[]{typePointer, typeScalar}.slice();
-internal static slice<byte> infoSlice = new byte[]{typePointer, typeScalar, typeScalar}.slice();
-internal static slice<byte> infoEface = new byte[]{typeScalar, typePointer}.slice();
-internal static slice<byte> infoIface = new byte[]{typeScalar, typePointer}.slice();
+internal static slice<byte> infoString = slice<byte>([typePointer, typeScalar]);
+internal static slice<byte> infoSlice = slice<byte>([typePointer, typeScalar, typeScalar]);
+internal static slice<byte> infoEface = slice<byte>([typeScalar, typePointer]);
+internal static slice<byte> infoIface = slice<byte>([typeScalar, typePointer]);
 
 } // end runtime_test_package

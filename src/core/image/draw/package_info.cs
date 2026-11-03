@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
@@ -51,7 +50,15 @@ using static go.image.draw_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(image_package.NRGBA))]
+[assembly: GoFieldAccess(typeof(image_package.NRGBA64))]
+[assembly: GoFieldAccess(typeof(image_package.Paletted))]
+[assembly: GoFieldAccess(typeof(image_package.Uniform))]
+[assembly: GoFieldAccess(typeof(image_package.ΔRGBA))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -61,7 +68,7 @@ using static go.image.draw_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/draw/draw.go", "draw.cs", "ADZuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKkgIKUgqSCpILIgsiClIKCpIKClKSCpILGgqSCuIKkgoCCgoKCgpSCgoKClJKCguiCgIKCgpTogoCCgoKU6qKigoIACRSAgoCCgoKCgoKCgoKUgoKCAAgSlICCgoKCgoKCgpSmxrSCgoKC7gAKFAAMFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEICCgoKCgoKCgoKCgoKCgoKUpoKCgoKCgoKUppSAgoKCgoKCgoKCgoKCgoKClKaCgoKCgoKCgpSmAAoSgoKCgpSCgoKCgoIABxCUgoKCloKCgqa6koKUgpSu+IKmAAgSooCCgoKCgoKClLzCgoKUgMiUgMSAxIDYkoKmgoKCgoKCpriSooKCgoK4lIKUgoKCloKCgsqUgpSCgoKCuIKCgoKCgoKCgoKCgoKCgriCgg==", "986-986:1;992-992:2;994-994:3;996-996:4", "", "112=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;213=Dx/1/1/1;272=Dx/1/1/1;286=Dx/1/1/1")]
+[assembly: GoPositionMap("image/draw/draw.go", "draw.cs", "ADZuogALGMiigoKUrOKCgoKClIKCgpSCgoKCuIKskqrSgoIACRSUgoKUgoKUlKSCpILsgsaCpIKUgIKUgqSCpILIgsiClIKCpIKClKSCpILGgqSCuIKkgoCCgoKCgpSCgoKClIKCguiCgIKCgpTogoCCgoKU6qKigoIACRSAgoCCgoKCgoKCgoKUgoKCAAgShICCgoKCgoKCgpSmxrSCgoKC7gAKFAAMFIKCgoKCgoKCgpSUpsa0goKCgoKCgpSCgoLc7LSCgoKCgoKCgpSCgoKUgriigoKCuIKCgoKCgpSCgoKCuLKSgoLIgoKCuIKCgoKUgoKCgoKCgoKmlIKCgoKUgr66wtyCgoKUgoKCuIKCgoKUgoKCgpSUgoKCgpSCgoKCppSCgoLKgoKCgpSCgoKClJSCgoKClIKCgoLKgoKCgpSCgoKClIKCgoKCgsqCgoKClIKCgoKUgoKCgsrCgoKCgoKCgoKUppSCgoKClIKCuMKiooKCgriCgoKCgoKCgoKCgoKCgoKUgoKCggAHEJSCgoKUuMKiooKCgriCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4sqKigoKCuIKCgoKCgoKCgoKCgoKCgoKCAAcQlIKCgpS4oqKigoKCuIKCgoKCggAHEICCgoKCgoKCgoKCgoKCgoKUpoKCgoKCgoKUpoSAgoKCgoKCgoKCgoKCgoKClKaCgoKCgoKCgpSmAAoSgoKCgpSCgoKCgoIABxCUgoKCloKCgqa6koKUgpSu+IKmAAgSooCCgoKCgoKClLzCgoKUgMiUgMSAxIDYgoKmgoKCgoKCpriSooKCgoK4lIKUgoKCloKCgsqUgpSCgoKCuIKCgoKCgoKCgoKCgoKCgriCgg==", "986-986:1;992-992:2;994-994:3;996-996:4", "", "112=Sub/1/1/1,Add/1/1/1,Overlaps/1/1/1;212=Dx/1/1/1;270=Dx/1/1/1;284=Dx/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

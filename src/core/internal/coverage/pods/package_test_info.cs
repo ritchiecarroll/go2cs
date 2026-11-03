@@ -7,12 +7,6 @@
 global using static global::go.@internal.coverage.pods_package;
 
 // <ImportedTypeAliases>
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +25,7 @@ using static global::go.@internal.coverage.pods_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -41,7 +35,7 @@ using static global::go.@internal.coverage.pods_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/pods/pods_test.go", "pods_test.cs", "ABwkpoKCgIKkpoKCgIKkppKCgoKCppKCgoKCpoKCgoKmkoKCgoKUlLiCpoKmgoKCpqaCgoLugqaCgriCpoKmABAagoKCyoKCgoI=", "21-27:1;29-35:2;37-43:3;45-51:4;53-58:5;60-70:6")]
+[assembly: GoPositionMap("internal/coverage/pods/pods_test.go", "pods_test.cs", "ACAkpoKCgIKkpoKCgIKkppKCgoKCppKCgoKCpoKCgoKmkoKCgoKUlLiCpoKmgoKCpqaCgoLugqaCgriCpoKmABAagoKCyoKCgoI=", "21-27:1;29-35:2;37-43:3;45-51:4;53-58:5;60-70:6")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

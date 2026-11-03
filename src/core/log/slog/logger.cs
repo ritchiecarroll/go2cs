@@ -49,7 +49,7 @@ internal static ref LevelVar logLoggerLevel => ref ((StaticBox<LevelVar>)ᏑlogL
 //
 // SetLogLoggerLevel returns the previous value.
 public static ΔLevel /*oldLevel*/ SetLogLoggerLevel(ΔLevel level) {
-    ΔLevel oldLevel = default!;
+    ΔLevel oldLevel = default;
 
     oldLevel = ᏑlogLoggerLevel.Level();
     ᏑlogLoggerLevel.Set(level);
@@ -82,8 +82,7 @@ public static void SetDefault(ж<Logger> Ꮡl) {
     // See TestSetDefault.
     {
         var (_, ok) = l.Handler()._<ж<defaultHandler>>(ᐧ); if (!ok) {
-            ref var capturePC = ref heap<bool>(out var ᏑcapturePC);
-            capturePC = (log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0;
+            ref var capturePC = ref heap<bool>((log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0, out var ᏑcapturePC);
             log_package.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
             log_package.SetFlags(0); // we want just the log message, no time or location
         }
@@ -101,9 +100,9 @@ partial struct handlerWriter {
 internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte> buf) {
     ΔLevel level = w.level.Level();
     if (!w.h.Enabled(context.Background(), level)) {
-        return (0, default!);
+        return (0, default);
     }
-    uintptr pc = default!;
+    uintptr pc = default;
     if (!@internal.IgnorePC && w.capturePC) {
         // skip [runtime.Callers, w.Write, Logger.Output, log.Print]
         array<uintptr> pcs = new(1);
@@ -113,7 +112,7 @@ internal static partial (nint, error) Write(this ref handlerWriter w, slice<byte
 
     // Remove final newline.
     nint origLen = len(buf); // Report that the entire buf was written.
-    buf = bytes.TrimSuffix(buf, new byte[]{(rune)'\n'}.slice());
+    buf = bytes.TrimSuffix(buf, slice<byte>([(byte)'\n']));
     var r = NewRecord(time_package.Now(), level, (@string)buf, pc);
     return (origLen, w.h.Handle(context.Background(), r));
 }
@@ -129,8 +128,7 @@ partial struct Logger {
 }
 
 internal static ж<Logger> clone(this ref Logger l) {
-    ref var c = ref heap<Logger>(out var Ꮡc);
-    c = l;
+    ref var c = ref heap<Logger>(l, out var Ꮡc);
     return Ꮡc;
 }
 
@@ -150,7 +148,7 @@ public static ж<Logger> With(this ж<Logger> Ꮡl, params ꓸꓸꓸany argsʗp)
         return Ꮡl;
     }
     var c = l.clone();
-    c.Value.handler = l.handler.WithAttrs(argsToAttrSlice(args));
+    c.handler = l.handler.WithAttrs(argsToAttrSlice(args));
     return c;
 }
 
@@ -167,13 +165,13 @@ public static ж<Logger> WithGroup(this ж<Logger> Ꮡl, @string name) {
         return Ꮡl;
     }
     var c = l.clone();
-    c.Value.handler = l.handler.WithGroup(name);
+    c.handler = l.handler.WithGroup(name);
     return c;
 }
 
 // New creates a new Logger with the given non-nil Handler.
 public static ж<Logger> New(ΔHandler h) {
-    if (h == default!) {
+    if (h == nil) {
         throw panic("nil Handler");
     }
     return Ꮡ(new Logger(handler: h));
@@ -188,7 +186,7 @@ public static ж<Logger> With(params ꓸꓸꓸany argsʗp) {
 
 // Enabled reports whether l emits log records at the given context and level.
 public static bool Enabled(this ref Logger l, context.Context ctx, ΔLevel level) {
-    if (ctx == default!) {
+    if (ctx == nil) {
         ctx = context.Background();
     }
     return l.Handler().Enabled(ctx, level);
@@ -286,13 +284,13 @@ public static partial void ErrorContext(this ref Logger l, context.Context ctx, 
 internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    if (ctx == default!) {
+    if (ctx == nil) {
         ctx = context.Background();
     }
     if (!l.Enabled(ctx, level)) {
         return;
     }
-    uintptr pc = default!;
+    uintptr pc = default;
     if (!@internal.IgnorePC) {
         array<uintptr> pcs = new(1);
         // skip [runtime.Callers, this function, this function's caller]
@@ -308,13 +306,13 @@ internal static partial void log(this ref Logger l, context.Context ctx, ΔLevel
 internal static partial void logAttrs(this ref Logger l, context.Context ctx, ΔLevel level, @string msg, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.sslice();
 
-    if (ctx == default!) {
+    if (ctx == nil) {
         ctx = context.Background();
     }
     if (!l.Enabled(ctx, level)) {
         return;
     }
-    uintptr pc = default!;
+    uintptr pc = default;
     if (!@internal.IgnorePC) {
         array<uintptr> pcs = new(1);
         // skip [runtime.Callers, this function, this function's caller]

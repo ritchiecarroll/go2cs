@@ -12,69 +12,69 @@ partial struct compileTestsᴛ1 /*dyn*/ {
     public @string Regexp;
     public @string Prog;
 }
-internal static slice<compileTestsᴛ1> compileTests = new compileTestsᴛ1[]{
-    new("a"u8, """
+internal static slice<compileTestsᴛ1> compileTests = slice<compileTestsᴛ1>([
+    new("a", """
   0	fail
   1*	rune1 "a" -> 2
   2	match
 
 """u8.Raw()),
-    new("[A-M][n-z]"u8, """
+    new("[A-M][n-z]", """
   0	fail
   1*	rune "AM" -> 2
   2	rune "nz" -> 3
   3	match
 
 """u8.Raw()),
-    new(""u8, """
+    new("", """
   0	fail
   1*	nop -> 2
   2	match
 
 """u8.Raw()),
-    new("a?"u8, """
+    new("a?", """
   0	fail
   1	rune1 "a" -> 3
   2*	alt -> 1, 3
   3	match
 
 """u8.Raw()),
-    new("a??"u8, """
+    new("a??", """
   0	fail
   1	rune1 "a" -> 3
   2*	alt -> 3, 1
   3	match
 
 """u8.Raw()),
-    new("a+"u8, """
+    new("a+", """
   0	fail
   1*	rune1 "a" -> 2
   2	alt -> 1, 3
   3	match
 
 """u8.Raw()),
-    new("a+?"u8, """
+    new("a+?", """
   0	fail
   1*	rune1 "a" -> 2
   2	alt -> 3, 1
   3	match
 
 """u8.Raw()),
-    new("a*"u8, """
+    new("a*", """
   0	fail
   1	rune1 "a" -> 2
   2*	alt -> 1, 3
   3	match
 
 """u8.Raw()),
-    new("a*?"u8, """
+    new("a*?", """
   0	fail
   1	rune1 "a" -> 2
   2*	alt -> 3, 1
   3	match
 
 """u8.Raw()),
-    new("a+b+"u8, """
+    new("a+b+", """
   0	fail
   1*	rune1 "a" -> 2
   2	alt -> 1, 3
@@ -83,7 +83,7 @@ internal static slice<compileTestsᴛ1> compileTests = new compileTestsᴛ1[]{
   5	match
 
 """u8.Raw()),
-    new("(a+)(b+)"u8, """
+    new("(a+)(b+)", """
   0	fail
   1*	cap 2 -> 2
   2	rune1 "a" -> 3
@@ -96,7 +96,7 @@ internal static slice<compileTestsᴛ1> compileTests = new compileTestsᴛ1[]{
   9	match
 
 """u8.Raw()),
-    new("a+|b+"u8, """
+    new("a+|b+", """
   0	fail
   1	rune1 "a" -> 2
   2	alt -> 1, 6
@@ -106,21 +106,21 @@ internal static slice<compileTestsᴛ1> compileTests = new compileTestsᴛ1[]{
   6	match
 
 """u8.Raw()),
-    new("A[Aa]"u8, """
+    new("A[Aa]", """
   0	fail
   1*	rune1 "A" -> 2
   2	rune "A"/i -> 3
   3	match
 
 """u8.Raw()),
-    new("(?:(?:^).)"u8, """
+    new("(?:(?:^).)", """
   0	fail
   1*	empty 4 -> 2
   2	anynotnl -> 3
   3	match
 
 """u8.Raw()),
-    new("(?:|a)+"u8, """
+    new("(?:|a)+", """
   0	fail
   1	nop -> 4
   2	rune1 "a" -> 4
@@ -129,7 +129,7 @@ internal static slice<compileTestsᴛ1> compileTests = new compileTestsᴛ1[]{
   5	match
 
 """u8.Raw()),
-    new("(?:|a)*"u8, """
+    new("(?:|a)*", """
   0	fail
   1	nop -> 4
   2	rune1 "a" -> 4
@@ -139,15 +139,15 @@ internal static slice<compileTestsᴛ1> compileTests = new compileTestsᴛ1[]{
   6	match
 
 """u8.Raw())
-}.slice();
+]);
 
-public static void TestCompile(ж<testing.T> Ꮡt) {
+public static void TestCompile(ж<testing.T> t) {
     foreach (var (_, tt) in compileTests) {
         var (re, _) = Parse(tt.Regexp, Perl);
         var (p, _) = Compile(re);
         @string s = p.String();
         if (s != tt.Prog) {
-            Ꮡt.Errorf("compiled %#q:\n--- have\n%s---\n--- want\n%s---"u8, tt.Regexp, s, tt.Prog);
+            t.Errorf("compiled %#q:\n--- have\n%s---\n--- want\n%s---", tt.Regexp, s, tt.Prog);
         }
     }
 }
@@ -157,7 +157,7 @@ public static void BenchmarkEmptyOpContext(ж<testing.B> Ꮡb) {
 
     for (nint i = 0; i < b.N; i++) {
         rune r1 = -1;
-        foreach (var (_, r2) in (@string)"foo, bar, baz\nsome input text.\n"u8) {
+        foreach (var (_, r2) in (@string)"foo, bar, baz\nsome input text.\n") {
             EmptyOpContext(r1, r2);
             r1 = r2;
         }
@@ -171,7 +171,8 @@ internal static any sink;
 internal static readonly object benchmarkDidNotRunˢ = (@string)"Benchmark did not run"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string charsᶜ = "Don't communicate by sharing memory, share memory by communicating."u8;
+internal static ref readonly @string charsᶜ => ref charsᶜᵇ;
+private static readonly @string charsᶜᵇ = "Don't communicate by sharing memory, share memory by communicating."u8;
 
 public static void BenchmarkIsWordChar(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -182,10 +183,10 @@ public static void BenchmarkIsWordChar(ж<testing.B> Ꮡb) {
             sink = IsWordChar(r);
         }
     }
-    if (sink == default!) {
+    if (sink == nil) {
         Ꮡb.Fatal(benchmarkDidNotRunˢ);
     }
-    sink = default!;
+    sink = default;
 }
 
 } // end syntax_internal_test_package

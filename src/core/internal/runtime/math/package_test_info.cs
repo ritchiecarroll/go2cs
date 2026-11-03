@@ -25,7 +25,7 @@ using static global::go.@internal.runtime.math_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -35,7 +35,7 @@ using static global::go.@internal.runtime.math_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/math/math_test.go", "math_test.cs", "ABIsABAigoKCgoKCpgARFIKCgoKCgoK4goKCgoKC", "60-68:1;70-78:2")]
+[assembly: GoPositionMap("internal/runtime/math/math_test.go", "math_test.cs", "ABIsABAigoKCgoKCpgATFIKCgoKCgoK4goKCgoKC", "60-68:1;70-78:2")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

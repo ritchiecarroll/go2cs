@@ -144,10 +144,10 @@ public class FieldAccessGeneratorTests
         $"public ref {fieldType} {name} {{ {Getter} get => ref ʗp is global::go.NativeBox<{type}> ? ref ʗp.field({type}.Ꮡ{field ?? name}) : ref ʗp.Value.{name}; }}";
 
     // A field's ADDRESS property (parity seat #32, P2: `&p.f` reads `p.Ꮡf`): the field's view over the struct's own
-    // per-field token `T.Ꮡf‿` (FieldAccessorTokenTests), one delegate object for every site in every assembly, so
-    // golib's view cache compares by reference. `token` is the accessor itself where no token is visible.
+    // per-field token `T.Field‿Tokens.Ꮡf‿` (FieldAccessorTokenTests), one delegate object for every site in every
+    // assembly, so golib's view cache compares by reference. `token` is the accessor itself where no token is visible.
     private static string Address(string fieldType, string name, string type, string? token = null) =>
-        $"public global::go.ж<{fieldType}> Ꮡ{name} {{ {Getter} get => ʗp.of({type}.{token ?? $"Ꮡ{name}‿"}); }}";
+        $"public global::go.ж<{fieldType}> Ꮡ{name} {{ {Getter} get => ʗp.of({type}.{token ?? $"Field‿Tokens.Ꮡ{name}‿"}); }}";
 
     // A header-shaped struct's field: get/set over the accessor, the setter committing the header.
     private static string Header(string fieldType, string name, string type) =>
@@ -501,11 +501,21 @@ public class FieldAccessGeneratorTests
         string tokened = Generate(User, ForeignReference(Foreign.Replace(
             "public static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;",
             "public static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;\n" +
-            "                public static readonly FieldRefFunc<Sockaddr, ushort> ᏑPort‿ = ᏑPort;") +
+            "                public static class Field‿Tokens { public static readonly FieldRefFunc<Sockaddr, ushort> ᏑPort‿ = ᏑPort; }") +
             "\npublic delegate ref TField FieldRefFunc<T, TField>(ref T instance);\n"));
 
         StringAssert.Contains(tokened, Address("ushort", "Port", Sockaddr));
         StringAssert.Contains(tokened, Address("ushort", "Family", Sockaddr, token: "ᏑFamily"), "token presence is read per field");
+
+        // The token is read from the holder alone: one held on the struct itself, as the generator emitted it before
+        // the holder (and as Native AOT could not always name), is not a token.
+        string unheld = Generate(User, ForeignReference(Foreign.Replace(
+            "public static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;",
+            "public static ref ushort ᏑPort(ref Sockaddr instance) => ref instance.Port;\n" +
+            "                public static readonly FieldRefFunc<Sockaddr, ushort> ᏑPort‿ = ᏑPort;") +
+            "\npublic delegate ref TField FieldRefFunc<T, TField>(ref T instance);\n"));
+
+        StringAssert.Contains(unheld, Address("ushort", "Port", Sockaddr, token: "ᏑPort"));
     }
 
     // A test assembly that REFERENCES its package's assembly sees the package's internal GoFieldAccess class through

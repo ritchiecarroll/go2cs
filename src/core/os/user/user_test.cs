@@ -13,42 +13,40 @@ using static go.os.user_package;
 partial class user_internal_test_package {
 
 internal static bool hasCgo = false;
-internal static bool hasUSER = os.Getenv("USER"u8) != ""u8;
-internal static bool hasHOME = os.Getenv("HOME"u8) != ""u8;
+internal static bool hasUSER = os.Getenv("USER") != ""u8;
+internal static bool hasHOME = os.Getenv("HOME") != ""u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userNotImplementedˢ = (@string)"user: not implemented; skipping tests"u8;
 
-internal static partial void checkUser(ж<testing.T> Ꮡt) {
-    Ꮡt.Helper();
+internal static partial void checkUser(ж<testing.T> t) {
+    t.Helper();
     if (!userImplemented) {
-        Ꮡt.Skip(userNotImplementedˢ);
+        t.Skip(userNotImplementedˢ);
     }
 }
 
-public static void TestCurrent(ж<testing.T> Ꮡt) {
+public static void TestCurrent(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         nint old = userBuffer;
         defer(() => {
             userBuffer = old;
         }, ref ᒐ);
         userBuffer = 1; // force use of retry code
         var (u, err) = Current();
-        if (err != default!) {
-            if (hasCgo || (hasUSER && hasHOME)){
-                Ꮡt.Fatalf("Current: %v (got %#v)"u8, err, u.OrTypedNil());
+        if (err != nil) {
+            if (hasCgo || (hasUSER && hasHOME)) {
+                t.Fatalf("Current: %v (got %#v)", err, u.OrTypedNil());
             } else {
-                Ꮡt.Skipf("skipping: %v"u8, err);
+                t.Skipf("skipping: %v", err);
             }
         }
-        if ((~u).HomeDir == ""u8) {
-            Ꮡt.Errorf("didn't get a HomeDir"u8);
+        if (u.HomeDir == ""u8) {
+            t.Errorf("didn't get a HomeDir");
         }
-        if ((~u).Username == ""u8) {
-            Ꮡt.Errorf("didn't get a username"u8);
+        if (u.Username == ""u8) {
+            t.Errorf("didn't get a username");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -64,79 +62,79 @@ public static void BenchmarkCurrent(ж<testing.B> Ꮡb) {
     }
 }
 
-internal static void compare(ж<testing.T> Ꮡt, ж<global::go.os.user_package.User> Ꮡwant, ж<global::go.os.user_package.User> Ꮡgot) {
+internal static void compare(ж<testing.T> t, ж<global::go.os.user_package.User> Ꮡwant, ж<global::go.os.user_package.User> Ꮡgot) {
     ref var want = ref Ꮡwant.DerefOrNull();
     ref var got = ref Ꮡgot.DerefOrNull();
 
     if (want.Uid != got.Uid) {
-        Ꮡt.Errorf("got Uid=%q; want %q"u8, got.Uid, want.Uid);
+        t.Errorf("got Uid=%q; want %q", got.Uid, want.Uid);
     }
     if (want.Username != got.Username) {
-        Ꮡt.Errorf("got Username=%q; want %q"u8, got.Username, want.Username);
+        t.Errorf("got Username=%q; want %q", got.Username, want.Username);
     }
     if (want.Name != got.Name) {
-        Ꮡt.Errorf("got Name=%q; want %q"u8, got.Name, want.Name);
+        t.Errorf("got Name=%q; want %q", got.Name, want.Name);
     }
     if (want.HomeDir != got.HomeDir) {
-        Ꮡt.Errorf("got HomeDir=%q; want %q"u8, got.HomeDir, want.HomeDir);
+        t.Errorf("got HomeDir=%q; want %q", got.HomeDir, want.HomeDir);
     }
     if (want.Gid != got.Gid) {
-        Ꮡt.Errorf("got Gid=%q; want %q"u8, got.Gid, want.Gid);
+        t.Errorf("got Gid=%q; want %q", got.Gid, want.Gid);
     }
 }
 
-public static void TestLookup(ж<testing.T> Ꮡt) {
-    checkUser(Ꮡt);
+public static void TestLookup(ж<testing.T> t) {
+    checkUser(t);
 
     var (want, err) = Current();
-    if (err != default!) {
-        if (hasCgo || (hasUSER && hasHOME)){
-            Ꮡt.Fatalf("Current: %v"u8, err);
+    if (err != nil) {
+        if (hasCgo || (hasUSER && hasHOME)) {
+            t.Fatalf("Current: %v", err);
         } else {
-            Ꮡt.Skipf("skipping: %v"u8, err);
+            t.Skipf("skipping: %v", err);
         }
     }
 
     // TODO: Lookup() has a fast path that calls Current() and returns if the
     // usernames match, so this test does not exercise very much. It would be
     // good to try and test finding a different user than the current user.
-    (var got, err) = Lookup((~want).Username);
-    if (err != default!) {
-        Ꮡt.Fatalf("Lookup: %v"u8, err);
+    (var got, err) = Lookup(want.Username);
+    if (err != nil) {
+        t.Fatalf("Lookup: %v", err);
     }
-    compare(Ꮡt, want, got);
+    compare(t, want, got);
 }
 
-public static void TestLookupId(ж<testing.T> Ꮡt) {
-    checkUser(Ꮡt);
+public static void TestLookupId(ж<testing.T> t) {
+    checkUser(t);
 
     var (want, err) = Current();
-    if (err != default!) {
-        if (hasCgo || (hasUSER && hasHOME)){
-            Ꮡt.Fatalf("Current: %v"u8, err);
+    if (err != nil) {
+        if (hasCgo || (hasUSER && hasHOME)) {
+            t.Fatalf("Current: %v", err);
         } else {
-            Ꮡt.Skipf("skipping: %v"u8, err);
+            t.Skipf("skipping: %v", err);
         }
     }
 
-    (var got, err) = LookupId((~want).Uid);
-    if (err != default!) {
-        Ꮡt.Fatalf("LookupId: %v"u8, err);
+    (var got, err) = LookupId(want.Uid);
+    if (err != nil) {
+        t.Fatalf("LookupId: %v", err);
     }
-    compare(Ꮡt, want, got);
+    compare(t, want, got);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userGroupNotImplementedˢ = (@string)"user: group not implemented; skipping test"u8;
 
-internal static partial void checkGroup(ж<testing.T> Ꮡt) {
-    Ꮡt.Helper();
+internal static partial void checkGroup(ж<testing.T> t) {
+    t.Helper();
     if (!groupImplemented) {
-        Ꮡt.Skip(userGroupNotImplementedˢ);
+        t.Skip(userGroupNotImplementedˢ);
     }
 }
 
-public static void TestLookupGroup(ж<testing.T> Ꮡt) {
+public static void TestLookupGroup(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         nint old = groupBuffer;
@@ -144,35 +142,35 @@ public static void TestLookupGroup(ж<testing.T> Ꮡt) {
             groupBuffer = old;
         }, ref ᒐ);
         groupBuffer = 1; // force use of retry code
-        checkGroup(Ꮡt);
+        checkGroup(t);
 
         var (user, err) = Current();
-        if (err != default!) {
-            if (hasCgo || (hasUSER && hasHOME)){
-                Ꮡt.Fatalf("Current: %v"u8, err);
+        if (err != nil) {
+            if (hasCgo || (hasUSER && hasHOME)) {
+                t.Fatalf("Current: %v", err);
             } else {
-                Ꮡt.Skipf("skipping: %v"u8, err);
+                t.Skipf("skipping: %v", err);
             }
         }
 
-        (var g1, err) = LookupGroupId((~user).Gid);
-        if (err != default!) {
+        (var g1, err) = LookupGroupId(user.Gid);
+        if (err != nil) {
             // NOTE(rsc): Maybe the group isn't defined. That's fine.
             // On my OS X laptop, rsc logs in with group 5000 even
             // though there's no name for group 5000. Such is Unix.
-            Ꮡt.Logf("LookupGroupId(%q): %v"u8, (~user).Gid, err);
+            t.Logf("LookupGroupId(%q): %v", user.Gid, err);
             return;
         }
-        if ((~g1).Gid != (~user).Gid) {
-            Ꮡt.Errorf("LookupGroupId(%q).Gid = %s; want %s"u8, (~user).Gid, (~g1).Gid, (~user).Gid);
+        if (g1.Gid != user.Gid) {
+            t.Errorf("LookupGroupId(%q).Gid = %s; want %s", user.Gid, g1.Gid, user.Gid);
         }
 
-        (var g2, err) = LookupGroup((~g1).Name);
-        if (err != default!) {
-            Ꮡt.Fatalf("LookupGroup(%q): %v"u8, (~g1).Name, err);
+        (var g2, err) = LookupGroup(g1.Name);
+        if (err != nil) {
+            t.Fatalf("LookupGroup(%q): %v", g1.Name, err);
         }
-        if ((~g1).Gid != (~g2).Gid || (~g1).Name != (~g2).Name) {
-            Ꮡt.Errorf("LookupGroup(%q) = %+v; want %+v"u8, (~g1).Name, g2.OrTypedNil(), g1.OrTypedNil());
+        if (g1.Gid != g2.Gid || g1.Name != g2.Name) {
+            t.Errorf("LookupGroup(%q) = %+v; want %+v", g1.Name, g2.OrTypedNil(), g1.OrTypedNil());
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -182,31 +180,31 @@ public static void TestLookupGroup(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object userGroupListNotˢ = (@string)"user: group list not implemented; skipping test"u8;
 
-internal static partial void checkGroupList(ж<testing.T> Ꮡt) {
-    Ꮡt.Helper();
+internal static partial void checkGroupList(ж<testing.T> t) {
+    t.Helper();
     if (!groupListImplemented) {
-        Ꮡt.Skip(userGroupListNotˢ);
+        t.Skip(userGroupListNotˢ);
     }
 }
 
-public static void TestGroupIds(ж<testing.T> Ꮡt) {
-    checkGroupList(Ꮡt);
+public static void TestGroupIds(ж<testing.T> t) {
+    checkGroupList(t);
 
     var (user, err) = Current();
-    if (err != default!) {
-        if (hasCgo || (hasUSER && hasHOME)){
-            Ꮡt.Fatalf("Current: %v"u8, err);
+    if (err != nil) {
+        if (hasCgo || (hasUSER && hasHOME)) {
+            t.Fatalf("Current: %v", err);
         } else {
-            Ꮡt.Skipf("skipping: %v"u8, err);
+            t.Skipf("skipping: %v", err);
         }
     }
 
     (var gids, err) = user.GroupIds();
-    if (err != default!) {
-        Ꮡt.Fatalf("%+v.GroupIds(): %v"u8, user.OrTypedNil(), err);
+    if (err != nil) {
+        t.Fatalf("%+v.GroupIds(): %v", user.OrTypedNil(), err);
     }
-    if (!slices.Contains(gids, (~user).Gid)) {
-        Ꮡt.Errorf("%+v.GroupIds() = %v; does not contain user GID %s"u8, user.OrTypedNil(), gids, (~user).Gid);
+    if (!slices.Contains(gids, user.Gid)) {
+        t.Errorf("%+v.GroupIds() = %v; does not contain user GID %s", user.OrTypedNil(), gids, user.Gid);
     }
 }
 

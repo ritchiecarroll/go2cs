@@ -89,8 +89,8 @@ internal static void resolvePairedBrackets(ref ΔisolatingRunSequence s) {
     if ((level)(s.level & 1) != 0) {
         dirEmbed = R;
     }
-    p.locateBrackets((~s.p).pairTypes, (~s.p).pairValues);
-    p.resolveBrackets(dirEmbed, (~s.p).initialTypes);
+    p.locateBrackets(s.p.pairTypes, s.p.pairValues);
+    p.resolveBrackets(dirEmbed, s.p.initialTypes);
 }
 
 partial struct bracketPairer {
@@ -116,7 +116,7 @@ partial struct bracketPairer {
     // bracket pair positions sorted by location of opening bracket
     internal bracketPairs pairPositions;
     internal slice<ΔClass> codesIsolatedRun; // directional bidi codes for an isolated run
-    internal slice<nint> indexes; // array of index values into the original string
+    internal slice<nint> indexes;            // array of index values into the original string
 }
 
 // matchOpener reports whether characters at given positions form a matching
@@ -141,8 +141,8 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
             // continue scanning
             continue;
         }
-        var exprᴛ1 = pairTypes[index];
-        if (exprᴛ1 == bpOpen) {
+        switch (pairTypes[index]) {
+        case var ᴛ when ᴛ == bpOpen: {
             // check if maximum pairing depth reached
             if (p.openers.Len() == maxPairingDepth) {
                 p.openers.Init();
@@ -150,8 +150,9 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
             }
             // remember opener location, most recent first
             p.openers.PushFront(i);
+            break;
         }
-        else if (exprᴛ1 == bpClose) {
+        case var ᴛ when ᴛ == bpClose: {
             // see if there is a match
             nint count = 0;
             for (var elem = p.openers.Front(); elem != nil; elem = elem.Next()) {
@@ -170,7 +171,8 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
             sort.Sort(p.pairPositions);
             // if we get here, the closing bracket matched no openers
             // and gets ignored
-        }
+            break;
+        }}
     }
 }
 
@@ -230,17 +232,17 @@ internal static void locateBrackets(this ref bracketPairer p, slice<bracketType>
 //
 // TODO: have separate type for "strong" directionality.
 internal static ΔClass getStrongTypeN0(this ref bracketPairer p, nint index) {
-    var exprᴛ1 = p.codesIsolatedRun[index];
+    switch (p.codesIsolatedRun[index]) {
     // in the scope of N0, number types are treated as R
-    if (exprᴛ1 == EN || exprᴛ1 == AN || exprᴛ1 == AL || exprᴛ1 == R) {
+    case var ᴛ when ᴛ == EN || ᴛ == AN || ᴛ == AL || ᴛ == R: {
         return R;
     }
-    if (exprᴛ1 == L) {
+    case var ᴛ when ᴛ == L: {
         return L;
     }
-    { /* default: */
+    default: {
         return ON;
-    }
+    }}
 }
 
 // classifyPairContent reports the strong types contained inside a Bracket Pair,

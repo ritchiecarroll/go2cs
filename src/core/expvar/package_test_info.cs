@@ -7,24 +7,6 @@
 global using static global::go.expvar_package;
 
 // <ImportedTypeAliases>
-global using httpꓸCookie = go.net.http_package.ΔCookie;
-global using httpꓸHandler = go.net.http_package.ΔHandler;
-global using httpꓸHeader = go.net.http_package.ΔHeader;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +28,13 @@ using static global::go.expvar_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.expvar_package.Float))]
+[assembly: GoFieldAccess(typeof(global::go.expvar_package.Map))]
+[assembly: GoFieldAccess(typeof(go.net.http.httptest_package.ResponseRecorder))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,7 +44,7 @@ using static global::go.expvar_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("expvar/expvar_test.go", "expvar_test.cs", "AB0wwoKCgpSi1IKCgoLogoKCgIKkgqaCgoCCtoCCtoKAgsiClIKCyoKUgoL6goKCgpSCpoKCgIK2gIK2goCCyIKUgoLKgpSCggAKCoKCgoCCtoKAkqSAksiCgJL4gpSCggAJCoKCgoKClIKAkoKmlIKAkoLogoKUgoKUgoCSgqaCgIKkgoCSgqaCgoCSgqaCgoCCpIKAkoIACAiigpSCgoKCgIKkgIKkgILagoKCgpSCgpSCgoKUggAJCKKCgoKCgoKAgqSCgpSCgpSCuIKUlKKCyqKCgoKClKaCgpSCsoKUgoIABRLSgoKmgpSCgoL6gpSClKKCyoKCgoKCgoLKooKCgoKUppSCkoKUgoKCAAUS0oKCppSCgoLKgoKSgsqigoKCgpSmgpSCooKUgoLcgoKigoCSpICCtoKAkgAPCIKCgoKCgoKUgoKCioCCAAoIoqKCgoKCgpSSgoKCgpSCgujCAAcUlIKCpoKCgoKUkoKygoKCgoKUlJSCgoKClJSCppSCgpSigoKCgoKUgoKCgqa0tqaygoKClIKCpoK0trKCgoKCgpSCgoKCppSitqKCgoKUgoKmlKKkoqSygoKUgoKKgg==", "70-74:1;80-84:1;116-120:1;126-130:1;158-162:1;173-173:1;181-181:2;196-196:1;206-206:2;213-213:3;224-224:4;298-302:1;320-329:1;358-362:1;366-374:1;390-400:1;424-428:1;445-454:1;460-460:1;544-555:1;574-591:2;597-611:3;614-632:4;635-649:5")]
+[assembly: GoPositionMap("expvar/expvar_test.go", "expvar_test.cs", "AB0wwoKCgpSi5IKCgoL4goKCgIKkgqaCgoCCtoCCtoKAgsiClIKCyoKUgoIACAqCgoKClIKmgoKAgraAgraCgILIgpSCgsqClIKCAA4KgoKCgIK2goCSpICSyIKAkgAICIKUgoIADAqCgoKCgpSCgJKCppSCgJKC+IKClIKClIKAkoKmgoCCpIKAkoKmgoKAkoKmgoKAgqSCgJKCAAkIgoKUgoKCgoCCpICCpICC2oKCgoKUgoKUgoKClIIACwiCgoKCgoKCgIKkgoKUgoKUgriClJSigsqigoKCgpSmgoKUgrKClIKCAAUS0oKCpoKUgoKCAAgKgpSClKKCyoKCgoKCgoLKooKCgoKUppSCkoKUgoKCAAUS0oKCppSCgoLKgoKSgsqigoKCgpSmgpSCooKUgoLcgoKigoCSpICCtoKAkgASCIKCgoKCgoKUgoKCioCCAA4IoqKCgoKCgpSSgoKCgpSCgvjCAAcUlIKCpoKCgoKUkoKygoKCgoKUlJSCgoKClJSCppSCgpSigoKCgoKUgoKCgqa0tqaygoKClIKCpoK0trKCgoKCgpSCgoKCppSitqKCgoKUgoKmlKKkoqSigoKUgoKKgg==", "70-74:1;80-84:1;116-120:1;126-130:1;158-162:1;173-173:1;181-181:2;196-196:1;206-206:2;213-213:3;224-224:4;298-302:1;320-329:1;358-362:1;366-374:1;390-400:1;424-428:1;445-454:1;460-460:1;544-555:1;574-591:2;597-611:3;614-632:4;635-649:5", "", "", "725:21")]
 // </GoSourcePositionMaps>
 
 namespace go;

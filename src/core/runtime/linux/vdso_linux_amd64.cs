@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 
 partial class runtime_package {
 
@@ -11,15 +11,15 @@ partial class runtime_package {
 // See cmd/compile/internal/amd64/galign.go arch.MAXWIDTH initialization.
 internal static UntypedInt vdsoArrayMax => /* 1<<50 - 1 */ 1125899906842623;
 
-internal static readonly ж<vdsoVersionKey> ᏑvdsoLinuxVersion = new StaticBox<vdsoVersionKey>(new vdsoVersionKey("LINUX_2.6"u8, 0x3ae75f6));
+internal static readonly ж<vdsoVersionKey> ᏑvdsoLinuxVersion = new StaticBox<vdsoVersionKey>(new vdsoVersionKey("LINUX_2.6", 0x3ae75f6));
 internal static ref vdsoVersionKey vdsoLinuxVersion => ref ((StaticBox<vdsoVersionKey>)ᏑvdsoLinuxVersion).ValueSlot;
 
 internal static slice<vdsoSymbolKey> vdsoSymbolKeys;
-internal static void initᴛvdsoSymbolKeys() { vdsoSymbolKeys = new vdsoSymbolKey[]{
-    new("__vdso_gettimeofday"u8, 0x315ca59, 0xb01bca00U, ᏑvdsoGettimeofdaySym),
-    new("__vdso_clock_gettime"u8, 0xd35ec75, 0x6e43a318, ᏑvdsoClockgettimeSym),
-    new("__vdso_getrandom"u8, 0x25425d, 0x84a559bfU, ᏑvdsoGetrandomSym)
-}.slice(); }
+internal static void initᴛvdsoSymbolKeys() { vdsoSymbolKeys = slice<vdsoSymbolKey>([
+    new("__vdso_gettimeofday", 0x315ca59, 0xb01bca00U, ᏑvdsoGettimeofdaySym),
+    new("__vdso_clock_gettime", 0xd35ec75, 0x6e43a318, ᏑvdsoClockgettimeSym),
+    new("__vdso_getrandom", 0x25425d, 0x84a559bfU, ᏑvdsoGetrandomSym)
+]); }
 
 public static readonly ж<uintptr> ᏑvdsoGettimeofdaySym = new StaticBox<uintptr>(default(uintptr));
 public static ref uintptr vdsoGettimeofdaySym => ref ((StaticBox<uintptr>)ᏑvdsoGettimeofdaySym).ValueSlot;

@@ -16,13 +16,13 @@ partial class net_internal_test_package {
 // It isn't actually used for testing timeouts.
 internal static time.Duration someTimeout => /* 1 * time.Hour */ 3600000000000;
 
-public static void TestConnAndListener(ж<testing.T> Ꮡt) {
-    foreach (var (i, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
+public static void TestConnAndListener(ж<testing.T> t) {
+    foreach (var (i, network) in slice<@string>(["tcp", "unix", "unixpacket"])) {
+        t.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 if (!testableNetwork(network)) {
-                    tΔ1.Skipf("skipping %s test"u8, network);
+                    tΔ1.Skipf("skipping %s test", network);
                 }
 
                 var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), network);
@@ -31,44 +31,44 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                 var ch = new channel<error>(1);
                 var chʗ1 = ch;
                 var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
-                    lsΔ1.transponder(ln, chʗ1.WithDirection(GoChanDir.Send));
+                    lsΔ1.transponder(ln, chʗ1.AsSendOnly());
                 };
                 {
-                    var errΔ1 = ls.buildup(handler); if (errΔ1 != default!) {
+                    var errΔ1 = ls.buildup(handler); if (errΔ1 != nil) {
                         tΔ1.Fatal(errΔ1);
                     }
                 }
-                if ((~ls).Listener.Addr().Network() != network) {
-                    tΔ1.Fatalf("got %s; want %s"u8, (~ls).Listener.Addr().Network(), network);
+                if (ls.Listener.Addr().Network() != network) {
+                    tΔ1.Fatalf("got %s; want %s", ls.Listener.Addr().Network(), network);
                 }
 
-                var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
-                if (err != default!) {
+                var (c, err) = Dial(ls.Listener.Addr().Network(), ls.Listener.Addr().String());
+                if (err != nil) {
                     tΔ1.Fatal(err);
                 }
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
                 if (c.LocalAddr().Network() != network || c.RemoteAddr().Network() != network) {
-                    tΔ1.Fatalf("got %s->%s; want %s->%s"u8, c.LocalAddr().Network(), c.RemoteAddr().Network(), network, network);
+                    tΔ1.Fatalf("got %s->%s; want %s->%s", c.LocalAddr().Network(), c.RemoteAddr().Network(), network, network);
                 }
                 c.SetDeadline(time.Now().Add(someTimeout));
                 c.SetReadDeadline(time.Now().Add(someTimeout));
                 c.SetWriteDeadline(time.Now().Add(someTimeout));
 
                 {
-                    var (_, errΔ1) = c.Write(slice<byte>("CONN AND LISTENER TEST"u8)); if (errΔ1 != default!) {
+                    var (_, errΔ1) = c.Write(slice<byte>("CONN AND LISTENER TEST"u8)); if (errΔ1 != nil) {
                         tΔ1.Fatal(errΔ1);
                     }
                 }
                 var rb = new slice<byte>(128);
                 {
-                    var (_, errΔ2) = c.Read(rb); if (errΔ2 != default!) {
+                    var (_, errΔ2) = c.Read(rb); if (errΔ2 != nil) {
                         tΔ1.Fatal(errΔ2);
                     }
                 }
 
                 foreach (var errΔ3 in ch) {
-                    tΔ1.Errorf("#%d: %v"u8, i, errΔ3);
+                    tΔ1.Errorf("#%d: %v", i, errΔ3);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

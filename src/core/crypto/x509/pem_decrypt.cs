@@ -42,38 +42,38 @@ partial struct rfc1423Algo {
 
 // rfc1423Algos holds a slice of the possible ways to encrypt a PEM
 // block. The ivSize numbers were taken from the OpenSSL source.
-[GoLazy] partial class lazyᴛrfc1423Algos { internal static readonly ж<slice<rfc1423Algo>> Ꮡrfc1423Algos = new StaticBox<slice<rfc1423Algo>>(new rfc1423Algo[]{new(
+[GoLazy] partial class lazyᴛrfc1423Algos { internal static readonly ж<slice<rfc1423Algo>> Ꮡrfc1423Algos = new StaticBox<slice<rfc1423Algo>>(slice<rfc1423Algo>([new(
     cipher: PEMCipherDES,
-    name: "DES-CBC"u8,
+    name: "DES-CBC",
     cipherFunc: des.NewCipher,
     keySize: 8,
     blockSize: des.ΔBlockSize
 ), new(
     cipher: PEMCipher3DES,
-    name: "DES-EDE3-CBC"u8,
+    name: "DES-EDE3-CBC",
     cipherFunc: des.NewTripleDESCipher,
     keySize: 24,
     blockSize: des.ΔBlockSize
 ), new(
     cipher: PEMCipherAES128,
-    name: "AES-128-CBC"u8,
+    name: "AES-128-CBC",
     cipherFunc: aes.NewCipher,
     keySize: 16,
     blockSize: aes.BlockSize
 ), new(
     cipher: PEMCipherAES192,
-    name: "AES-192-CBC"u8,
+    name: "AES-192-CBC",
     cipherFunc: aes.NewCipher,
     keySize: 24,
     blockSize: aes.BlockSize
 ), new(
     cipher: PEMCipherAES256,
-    name: "AES-256-CBC"u8,
+    name: "AES-256-CBC",
     cipherFunc: aes.NewCipher,
     keySize: 32,
     blockSize: aes.BlockSize
 )
-}.slice()); }
+])); }
 internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc1423Algo>>)Ꮡrfc1423Algos).ValueSlot;
 
 // deriveKey uses a key derivation function to stretch the password into a key
@@ -82,7 +82,7 @@ internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc
 internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, slice<byte> salt) {
     var hash = md5.New();
     var @out = new slice<byte>(c.keySize);
-    slice<byte> digest = default!;
+    slice<byte> digest = default;
 
     for (nint i = 0; i < builtin.len(@out); i += builtin.len(digest)) {
         hash.Reset();
@@ -96,7 +96,8 @@ internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dekInfoˢ = "DEK-Info"u8;
+internal static ref readonly @string dekInfoˢ => ref dekInfoˢᵇ;
+private static readonly @string dekInfoˢᵇ = "DEK-Info"u8;
 
 // IsEncryptedPEMBlock returns whether the PEM block is password encrypted
 // according to RFC 1423.
@@ -112,15 +113,21 @@ public static bool IsEncryptedPEMBlock(ж<pem.Block> Ꮡb) {
 }
 
 // IncorrectPasswordError is returned when an incorrect password is detected.
-public static error IncorrectPasswordError = errors.New("x509: decryption password incorrect"u8);
+public static error IncorrectPasswordError = errors.New("x509: decryption password incorrect");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string x509NoDekInfoHeaderInˢ = "x509: no DEK-Info header in block"u8;
-internal static readonly @string x509MalformedDekInfoˢ = "x509: malformed DEK-Info header"u8;
-internal static readonly @string x509UnknownEncryptionˢ = "x509: unknown encryption mode"u8;
-internal static readonly @string x509IncorrectIvSizeˢ = "x509: incorrect IV size"u8;
-internal static readonly @string x509EncryptedPemDataIsˢ = "x509: encrypted PEM data is not a multiple of the block size"u8;
-internal static readonly @string x509InvalidPaddingˢ = "x509: invalid padding"u8;
+internal static ref readonly @string x509NoDekInfoHeaderInˢ => ref x509NoDekInfoHeaderInˢᵇ;
+private static readonly @string x509NoDekInfoHeaderInˢᵇ = "x509: no DEK-Info header in block"u8;
+internal static ref readonly @string x509MalformedDekInfoˢ => ref x509MalformedDekInfoˢᵇ;
+private static readonly @string x509MalformedDekInfoˢᵇ = "x509: malformed DEK-Info header"u8;
+internal static ref readonly @string x509UnknownEncryptionˢ => ref x509UnknownEncryptionˢᵇ;
+private static readonly @string x509UnknownEncryptionˢᵇ = "x509: unknown encryption mode"u8;
+internal static ref readonly @string x509IncorrectIvSizeˢ => ref x509IncorrectIvSizeˢᵇ;
+private static readonly @string x509IncorrectIvSizeˢᵇ = "x509: incorrect IV size"u8;
+internal static ref readonly @string x509EncryptedPemDataIsˢ => ref x509EncryptedPemDataIsˢᵇ;
+private static readonly @string x509EncryptedPemDataIsˢᵇ = "x509: encrypted PEM data is not a multiple of the block size"u8;
+internal static ref readonly @string x509InvalidPaddingˢ => ref x509InvalidPaddingˢᵇ;
+private static readonly @string x509InvalidPaddingˢᵇ = "x509: invalid padding"u8;
 
 // DecryptPEMBlock takes a PEM block encrypted according to RFC 1423 and the
 // password used to encrypt it and returns a slice of decrypted DER encoded
@@ -139,36 +146,36 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
 
     var (dek, ok) = b.Headers[dekInfoˢ, ꟷ];
     if (!ok) {
-        return (default!, errors.New(x509NoDekInfoHeaderInˢ));
+        return (default, errors.New(x509NoDekInfoHeaderInˢ));
     }
 
-    (var mode, var hexIV, ok) = strings.Cut(dek, ","u8);
+    (var mode, var hexIV, ok) = strings.Cut(dek, ",");
     if (!ok) {
-        return (default!, errors.New(x509MalformedDekInfoˢ));
+        return (default, errors.New(x509MalformedDekInfoˢ));
     }
 
     var ciph = cipherByName(mode);
     if (ciph == nil) {
-        return (default!, errors.New(x509UnknownEncryptionˢ));
+        return (default, errors.New(x509UnknownEncryptionˢ));
     }
     var (iv, err) = hex.DecodeString(hexIV);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    if (builtin.len(iv) != (~ciph).blockSize) {
-        return (default!, errors.New(x509IncorrectIvSizeˢ));
+    if (builtin.len(iv) != ciph.blockSize) {
+        return (default, errors.New(x509IncorrectIvSizeˢ));
     }
 
     // Based on the OpenSSL implementation. The salt is the first 8 bytes
     // of the initialization vector.
     var key = (~ciph).deriveKey(password, iv[..8]);
-    (var block, err) = (~ciph).cipherFunc(key);
-    if (err != default!) {
-        return (default!, err);
+    (var block, err) = ciph.cipherFunc(key);
+    if (err != nil) {
+        return (default, err);
     }
 
     if (builtin.len(b.Bytes) % block.BlockSize() != 0) {
-        return (default!, errors.New(x509EncryptedPemDataIsˢ));
+        return (default, errors.New(x509EncryptedPemDataIsˢ));
     }
 
     var data = new slice<byte>(builtin.len(b.Bytes));
@@ -182,22 +189,22 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
     //	[x y 7 7 7 7 7 7 7]
     // If we detect a bad padding, we assume it is an invalid password.
     nint dlen = builtin.len(data);
-    if (dlen == 0 || rem(dlen, (~ciph).blockSize) != 0) {
-        return (default!, errors.New(x509InvalidPaddingˢ));
+    if (dlen == 0 || rem(dlen, ciph.blockSize) != 0) {
+        return (default, errors.New(x509InvalidPaddingˢ));
     }
     nint last = (nint)data[dlen - 1];
     if (dlen < last) {
-        return (default!, IncorrectPasswordError);
+        return (default, IncorrectPasswordError);
     }
-    if (last == 0 || last > (~ciph).blockSize) {
-        return (default!, IncorrectPasswordError);
+    if (last == 0 || last > ciph.blockSize) {
+        return (default, IncorrectPasswordError);
     }
     foreach (var (_, val) in data.slice(dlen - last)) {
         if ((nint)val != last) {
-            return (default!, IncorrectPasswordError);
+            return (default, IncorrectPasswordError);
         }
     }
-    return (data.slice(0, dlen - last), default!);
+    return (data.slice(0, dlen - last), default);
 }
 
 // EncryptPEMBlock returns a PEM block of the specified type holding the
@@ -210,23 +217,23 @@ public static (slice<byte>, error) DecryptPEMBlock(ж<pem.Block> Ꮡb, slice<byt
 public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blockType, slice<byte> data, slice<byte> password, PEMCipher alg) {
     var ciph = cipherByKey(alg);
     if (ciph == nil) {
-        return (default!, errors.New(x509UnknownEncryptionˢ));
+        return (default, errors.New(x509UnknownEncryptionˢ));
     }
-    var iv = new slice<byte>((~ciph).blockSize);
+    var iv = new slice<byte>(ciph.blockSize);
     {
-        var (_, errΔ1) = io.ReadFull(rand, iv); if (errΔ1 != default!) {
-            return (default!, errors.New("x509: cannot generate IV: "u8 + errΔ1.Error()));
+        var (_, errΔ1) = io.ReadFull(rand, iv); if (errΔ1 != nil) {
+            return (default, errors.New("x509: cannot generate IV: "u8 + errΔ1.Error()));
         }
     }
     // The salt is the first 8 bytes of the initialization vector,
     // matching the key derivation in DecryptPEMBlock.
     var key = (~ciph).deriveKey(password, iv[..8]);
-    var (block, err) = (~ciph).cipherFunc(key);
-    if (err != default!) {
-        return (default!, err);
+    var (block, err) = ciph.cipherFunc(key);
+    if (err != nil) {
+        return (default, err);
     }
     var enc = cipher.NewCBCEncrypter(block, iv);
-    nint pad = (~ciph).blockSize - builtin.len(data) % (~ciph).blockSize;
+    nint pad = ciph.blockSize - builtin.len(data) % ciph.blockSize;
     var encrypted = new slice<byte>(builtin.len(data), builtin.len(data) + pad);
     // We could save this copy by encrypting all the whole blocks in
     // the data separately, but it doesn't seem worth the additional
@@ -241,31 +248,31 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
     return (Ꮡ(new pem.Block(
         Type: blockType,
         Headers: new map<@string, @string>{
-            ["Proc-Type"u8] = "4,ENCRYPTED"u8,
-            ["DEK-Info"u8] = (~ciph).name + ","u8 + hex.EncodeToString(iv)
+            ["Proc-Type"] = "4,ENCRYPTED",
+            ["DEK-Info"] = ciph.name + ","u8 + hex.EncodeToString(iv)
         },
         Bytes: encrypted
-    )), default!);
+    )), default);
 }
 
 internal static ж<rfc1423Algo> cipherByName(@string name) {
     foreach (var i in range(rfc1423Algos)) {
         var alg = Ꮡ(rfc1423Algos, i);
-        if ((~alg).name == name) {
+        if (alg.name == name) {
             return alg;
         }
     }
-    return default!;
+    return default;
 }
 
 internal static ж<rfc1423Algo> cipherByKey(PEMCipher key) {
     foreach (var i in range(rfc1423Algos)) {
         var alg = Ꮡ(rfc1423Algos, i);
-        if ((~alg).cipher == key) {
+        if (alg.cipher == key) {
             return alg;
         }
     }
-    return default!;
+    return default;
 }
 
 } // end x509_package

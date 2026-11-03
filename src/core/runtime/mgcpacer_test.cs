@@ -19,20 +19,24 @@ using ꓸꓸꓸfloat64Stream = Span<runtime_test_package.float64Stream>;
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gcUtilizationˢ = "GC utilization"u8;
-internal static readonly @string goalRatioˢ = "goal ratio"u8;
-internal static readonly @string triggerRatioˢ = "trigger ratio"u8;
-internal static readonly @string runwayˢ = "runway"u8;
+internal static ref readonly @string gcUtilizationˢ => ref gcUtilizationˢᵇ;
+private static readonly @string gcUtilizationˢᵇ = "GC utilization"u8;
+internal static ref readonly @string goalRatioˢ => ref goalRatioˢᵇ;
+private static readonly @string goalRatioˢᵇ = "goal ratio"u8;
+internal static ref readonly @string triggerRatioˢ => ref triggerRatioˢᵇ;
+private static readonly @string triggerRatioˢᵇ = "trigger ratio"u8;
+internal static ref readonly @string runwayˢ => ref runwayˢᵇ;
+private static readonly @string runwayˢᵇ = "runway"u8;
 
-public static void TestGcPacer(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestGcPacer(ж<testing.T> t) {
+    t.Parallel();
 
     const int64 initialHeapBytes = /* 256 << 10 */ 262144;
-    foreach (var (_, e) in new ж<gcExecTest>[]{
+    foreach (var (_, e) in slice<ж<gcExecTest>>([
         Ꮡ(new gcExecTest(
             // The most basic test case: a steady-state heap.
             // Growth to an O(MiB) heap, then constant heap size, alloc/scan rates.
-            name: "Steady"u8,
+            name: "Steady",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -56,7 +60,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // Same as the steady-state case, but lots of stacks to scan relative to the heap size.
-            name: "SteadyBigStacks"u8,
+            name: "SteadyBigStacks",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -83,7 +87,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // Same as the steady-state case, but lots of globals to scan relative to the heap size.
-            name: "SteadyBigGlobals"u8,
+            name: "SteadyBigGlobals",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)128 << 20),
@@ -110,7 +114,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // This tests the GC pacer's response to a small change in allocation rate.
-            name: "StepAlloc"u8,
+            name: "StepAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -132,7 +136,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // This tests the GC pacer's response to a large change in allocation rate.
-            name: "HeavyStepAlloc"u8,
+            name: "HeavyStepAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -154,7 +158,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // This tests the GC pacer's response to a change in the fraction of the scannable heap.
-            name: "StepScannableFrac"u8,
+            name: "StepScannableFrac",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -178,7 +182,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // Tests the pacer for a high GOGC value with a large heap growth happening
             // in the middle. The purpose of the large heap growth is to check if GC
             // utilization ends up sensitive
-            name: "HighGOGC"u8,
+            name: "HighGOGC",
             gcPercent: 1500,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -192,7 +196,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             checker: (ж<testing.T> tΔ7, slice<gcCycleResult> c) => {
                 nint n = len(c);
                 if (n > 12) {
-                    if (n == 26){
+                    if (n == 26) {
                         // In the 26th cycle there's a heap growth. Overshoot is expected to maintain
                         // a stable utilization, but we should *never* overshoot more than GOGC of
                         // the next cycle.
@@ -218,7 +222,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This test makes sure that in the face of a varying (in this case, oscillating) allocation
             // rate, the pacer does a reasonably good job of staying abreast of the changes.
-            name: "OscAlloc"u8,
+            name: "OscAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -241,7 +245,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // This test is the same as OscAlloc, but instead of oscillating, the allocation rate is jittery.
-            name: "JitterAlloc"u8,
+            name: "JitterAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -265,7 +269,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This test is the same as JitterAlloc, but with a much higher allocation rate.
             // The jitter is proportionally the same.
-            name: "HeavyJitterAlloc"u8,
+            name: "HeavyJitterAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -293,7 +297,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This test sets a slow allocation rate and a small heap (close to the minimum heap size)
             // to try to minimize the difference between the trigger and the goal.
-            name: "SmallHeapSlowAlloc"u8,
+            name: "SmallHeapSlowAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -329,7 +333,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This test sets a slow allocation rate and a medium heap (around 10x the min heap size)
             // to try to minimize the difference between the trigger and the goal.
-            name: "MediumHeapSlowAlloc"u8,
+            name: "MediumHeapSlowAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -365,7 +369,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This test sets a slow allocation rate and a large heap to try to minimize the
             // difference between the trigger and the goal.
-            name: "LargeHeapSlowAlloc"u8,
+            name: "LargeHeapSlowAlloc",
             gcPercent: 100,
             memoryLimit: Δmath.MaxInt64,
             globalsBytes: ((uint64)32 << 10),
@@ -402,7 +406,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             // Provide a lot of room for the limit. Essentially, this should behave just like
             // the "Steady" test. Note that we don't simulate non-heap overheads, so the
             // memory limit and the heap limit are identical.
-            name: "SteadyMemoryLimit"u8,
+            name: "SteadyMemoryLimit",
             gcPercent: 100,
             memoryLimit: ((int64)512 << 20),
             globalsBytes: ((uint64)32 << 10),
@@ -417,7 +421,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 nint n = len(c);
                 {
                     var peak = c[n - 1].heapPeak; if (peak >= applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                        tΔ14.Errorf("peak heap size reaches heap limit: %d"u8, peak);
+                        tΔ14.Errorf("peak heap size reaches heap limit: %d", peak);
                     }
                 }
                 if (n >= 25) {
@@ -432,7 +436,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This is the same as the previous test, but gcPercent = -1, so the heap *should* grow
             // all the way to the peak.
-            name: "SteadyMemoryLimitNoGCPercent"u8,
+            name: "SteadyMemoryLimitNoGCPercent",
             gcPercent: -1,
             memoryLimit: ((int64)512 << 20),
             globalsBytes: ((uint64)32 << 10),
@@ -447,7 +451,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 nint n = len(c);
                 {
                     var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                        tΔ15.Errorf("heap goal is not the heap limit: %d"u8, goal);
+                        tΔ15.Errorf("heap goal is not the heap limit: %d", goal);
                     }
                 }
                 if (n >= 25) {
@@ -462,7 +466,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         Ꮡ(new gcExecTest(
             // This test ensures that the pacer doesn't fall over even when the live heap exceeds
             // the memory limit. It also makes sure GC utilization actually rises to push back.
-            name: "ExceedMemoryLimit"u8,
+            name: "ExceedMemoryLimit",
             gcPercent: 100,
             memoryLimit: ((int64)512 << 20),
             globalsBytes: ((uint64)32 << 10),
@@ -480,7 +484,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     // as low as it possibly can be.
                     {
                         var (goal, live) = (c[n - 1].heapGoal, c[n - 1].heapLive); if (goal != live) {
-                            tΔ16.Errorf("heap goal is not equal to live heap: %d != %d"u8, goal, live);
+                            tΔ16.Errorf("heap goal is not equal to live heap: %d != %d", goal, live);
                         }
                     }
                 }
@@ -497,7 +501,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // Same as the previous test, but with gcPercent = -1.
-            name: "ExceedMemoryLimitNoGCPercent"u8,
+            name: "ExceedMemoryLimitNoGCPercent",
             gcPercent: -1,
             memoryLimit: ((int64)512 << 20),
             globalsBytes: ((uint64)32 << 10),
@@ -513,7 +517,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 if (n < 10) {
                     {
                         var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                            tΔ17.Errorf("heap goal is not the heap limit: %d"u8, goal);
+                            tΔ17.Errorf("heap goal is not the heap limit: %d", goal);
                         }
                     }
                 }
@@ -522,7 +526,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     // as low as it possibly can be.
                     {
                         var (goal, live) = (c[n - 1].heapGoal, c[n - 1].heapLive); if (goal != live) {
-                            tΔ17.Errorf("heap goal is not equal to live heap: %d != %d"u8, goal, live);
+                            tΔ17.Errorf("heap goal is not equal to live heap: %d != %d", goal, live);
                         }
                     }
                 }
@@ -539,7 +543,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // This test ensures that the pacer maintains the memory limit as the heap grows.
-            name: "MaintainMemoryLimit"u8,
+            name: "MaintainMemoryLimit",
             gcPercent: 100,
             memoryLimit: ((int64)512 << 20),
             globalsBytes: ((uint64)32 << 10),
@@ -556,7 +560,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     // We're trying to saturate the memory limit.
                     {
                         var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                            tΔ18.Errorf("heap goal is not the heap limit: %d"u8, goal);
+                            tΔ18.Errorf("heap goal is not the heap limit: %d", goal);
                         }
                     }
                 }
@@ -573,7 +577,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
             })),
         Ꮡ(new gcExecTest(
             // Same as the previous test, but with gcPercent = -1.
-            name: "MaintainMemoryLimitNoGCPercent"u8,
+            name: "MaintainMemoryLimitNoGCPercent",
             gcPercent: -1,
             memoryLimit: ((int64)512 << 20),
             globalsBytes: ((uint64)32 << 10),
@@ -588,7 +592,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 nint n = len(c);
                 {
                     var goal = c[n - 1].heapGoal; if (goal != applyMemoryLimitHeapGoalHeadroom((uint64)512 << 20)) {
-                        tΔ19.Errorf("heap goal is not the heap limit: %d"u8, goal);
+                        tΔ19.Errorf("heap goal is not the heap limit: %d", goal);
                     }
                 }
                 if (n >= 25) {
@@ -608,42 +612,39 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
         // to the runway for the case of the expected work.
         // However, it is still possible to trigger this case if something exceptional
         // happens between calls to revise; the framework just doesn't support this yet.
-    }.slice()) {
+    ])) {
         var eʗ1 = e;
-        Ꮡt.Run((~e).name, (ж<testing.T> tΔ20) => {
+        t.Run(e.name, (ж<testing.T> tΔ20) => {
             tΔ20.Parallel();
 
-            var c = runtime_internal_test_package.NewGCController((~eʗ1).gcPercent, (~eʗ1).memoryLimit);
-            int64 bytesAllocatedBlackLast = default!;
-            var results = new slice<gcCycleResult>(0, (~eʗ1).length);
-            for (nint i = 0; i < (~eʗ1).length; i++) {
+            var c = runtime_internal_test_package.NewGCController(eʗ1.gcPercent, eʗ1.memoryLimit);
+            int64 bytesAllocatedBlackLast = default;
+            var results = new slice<gcCycleResult>(0, eʗ1.length);
+            for (nint i = 0; i < eʗ1.length; i++) {
                 var cycle = eʗ1.next();
-                c.StartCycle(cycle.stackBytes, (~eʗ1).globalsBytes, cycle.scannableFrac, (~eʗ1).nCores);
+                c.StartCycle(cycle.stackBytes, eʗ1.globalsBytes, cycle.scannableFrac, eʗ1.nCores);
 
                 // Update pacer incrementally as we complete scan work.
                 time.Duration revisePeriod = /* 500 * time.Microsecond */ 500000;
                 const float64 rateConv = /* 1024 * float64(revisePeriod) / float64(time.Millisecond) */ 512;
-                int64 nextHeapMarked = default!;
-                if (i == 0){
+                int64 nextHeapMarked = default;
+                if (i == 0) {
                     nextHeapMarked = initialHeapBytes;
                 } else {
                     nextHeapMarked = (int64)((float64)((int64)c.HeapMarked() - bytesAllocatedBlackLast) * cycle.growthRate);
                 }
-                ref var globalsScanWorkLeft = ref heap<int64>(out var ᏑglobalsScanWorkLeft);
-                ᏑglobalsScanWorkLeft.Value = (int64)(~eʗ1).globalsBytes;
-                ref var stackScanWorkLeft = ref heap<int64>(out var ᏑstackScanWorkLeft);
-                ᏑstackScanWorkLeft.Value = (int64)cycle.stackBytes;
-                ref var heapScanWorkLeft = ref heap<int64>(out var ᏑheapScanWorkLeft);
-                ᏑheapScanWorkLeft.Value = (int64)((float64)nextHeapMarked * cycle.scannableFrac);
+                ref var globalsScanWorkLeft = ref heap<int64>((int64)eʗ1.globalsBytes, out var ᏑglobalsScanWorkLeft);
+                ref var stackScanWorkLeft = ref heap<int64>((int64)cycle.stackBytes, out var ᏑstackScanWorkLeft);
+                ref var heapScanWorkLeft = ref heap<int64>((int64)((float64)nextHeapMarked * cycle.scannableFrac), out var ᏑheapScanWorkLeft);
                 (int64, int64, int64) doWork(int64 work) {
                     array<int64> deltas = new(3);
 
                     // Do globals work first, then stacks, then heap.
-                    foreach (var (iΔ1, workLeft) in new ж<int64>[]{ᏑglobalsScanWorkLeft, ᏑstackScanWorkLeft, ᏑheapScanWorkLeft}.slice()) {
+                    foreach (var (iΔ1, workLeft) in slice<ж<int64>>([ᏑglobalsScanWorkLeft, ᏑstackScanWorkLeft, ᏑheapScanWorkLeft])) {
                         if (workLeft.Value == 0) {
                             continue;
                         }
-                        if (workLeft.Value > work){
+                        if (workLeft.Value > work) {
                             deltas[iΔ1] += work;
                             workLeft.Value -= work;
                             work = 0;
@@ -656,9 +657,9 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     }
                     return (deltas[0], deltas[1], deltas[2]);
                 }
-                int64 gcDuration = default!;
-                int64 assistTime = default!;
-                int64 bytesAllocatedBlack = default!;
+                int64 gcDuration = default;
+                int64 assistTime = default;
+                int64 bytesAllocatedBlack = default;
                 while (ᏑheapScanWorkLeft.Value + ᏑstackScanWorkLeft.Value + ᏑglobalsScanWorkLeft.Value > 0) {
                     // Simulate GC assist pacing.
                     //
@@ -705,8 +706,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     }
 
                     // Knowing the utilization, calculate bytesScanned and bytesAllocated.
-                    var bytesScanned = (int64)(cycle.scanRate * rateConv * (float64)(~eʗ1).nCores * utilization);
-                    var bytesAllocated = (int64)(cycle.allocRate * rateConv * (float64)(~eʗ1).nCores * (1D - utilization));
+                    var bytesScanned = (int64)(cycle.scanRate * rateConv * (float64)eʗ1.nCores * utilization);
+                    var bytesAllocated = (int64)(cycle.allocRate * rateConv * (float64)eʗ1.nCores * (1D - utilization));
 
                     // Subtract work from our model.
                     var (globalsScanned, stackScanned, heapScanned) = doWork(bytesScanned);
@@ -720,8 +721,8 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                         var actualScanned = globalsScanned + stackScanned + heapScanned; if (actualScanned < bytesScanned) {
                             // actualScanned = scanRate * rateConv * (t / revisePeriod) * nCores * u
                             // => t = actualScanned * revisePeriod / (scanRate * rateConv * nCores * u)
-                            actualElapsed = (time.Duration)(int64)((float64)actualScanned * (float64)(int64)revisePeriod / (cycle.scanRate * rateConv * (float64)(~eʗ1).nCores * utilization));
-                            actualAllocated = (int64)(cycle.allocRate * rateConv * (float64)(int64)actualElapsed / (float64)(int64)revisePeriod * (float64)(~eʗ1).nCores * (1D - utilization));
+                            actualElapsed = (time.Duration)(int64)((float64)actualScanned * (float64)revisePeriod / (cycle.scanRate * rateConv * (float64)eʗ1.nCores * utilization));
+                            actualAllocated = (int64)(cycle.allocRate * rateConv * (float64)actualElapsed / (float64)revisePeriod * (float64)eʗ1.nCores * (1D - utilization));
                         }
                     }
 
@@ -735,7 +736,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     ));
 
                     // Accumulate variables.
-                    assistTime += (int64)((float64)(int64)actualElapsed * (float64)(~eʗ1).nCores * (utilization - (float64)runtime_internal_test_package.GCBackgroundUtilization));
+                    assistTime += (int64)((float64)actualElapsed * (float64)eʗ1.nCores * (utilization - (float64)runtime_internal_test_package.GCBackgroundUtilization));
                     gcDuration += (int64)actualElapsed;
                     bytesAllocatedBlack += actualAllocated;
                 }
@@ -748,15 +749,15 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     heapTrigger: c.Triggered(),
                     heapPeak: c.HeapLive(),
                     heapGoal: c.HeapGoal(),
-                    gcUtilization: (float64)assistTime / ((float64)gcDuration * (float64)(~eʗ1).nCores) + (float64)runtime_internal_test_package.GCBackgroundUtilization
+                    gcUtilization: (float64)assistTime / ((float64)gcDuration * (float64)eʗ1.nCores) + (float64)runtime_internal_test_package.GCBackgroundUtilization
                 );
-                tΔ20.Log((@string)"GC"u8, result.String());
+                tΔ20.Log((@string)"GC", result.String());
                 results = append(results, result);
 
                 // Run the checker for this test.
                 eʗ1.check(tΔ20, results);
 
-                c.EndCycle((uint64)(nextHeapMarked + bytesAllocatedBlack), assistTime, gcDuration, (~eʗ1).nCores);
+                c.EndCycle((uint64)(nextHeapMarked + bytesAllocatedBlack), assistTime, gcDuration, eʗ1.nCores);
 
                 bytesAllocatedBlackLast = bytesAllocatedBlack;
             }
@@ -770,11 +771,11 @@ partial struct gcExecTest {
     internal int64 memoryLimit;
     internal uint64 globalsBytes;
     internal nint nCores;
-    internal float64Stream allocRate; // > 0, KiB / cpu-ms
-    internal float64Stream scanRate; // > 0, KiB / cpu-ms
-    internal float64Stream growthRate; // > 0
+    internal float64Stream allocRate;     // > 0, KiB / cpu-ms
+    internal float64Stream scanRate;      // > 0, KiB / cpu-ms
+    internal float64Stream growthRate;    // > 0
     internal float64Stream scannableFrac; // Clamped to [0, 1]
-    internal float64Stream stackBytes; // Multiple of 2048.
+    internal float64Stream stackBytes;    // Multiple of 2048.
     internal nint length;
     internal Action<ж<testing.T>, slice<gcCycleResult>> checker;
 }
@@ -801,44 +802,44 @@ internal static readonly object gcUtilizationNotWithinˢ = (@string)"GC utilizat
 internal static readonly object heapScannableIsNegativeˢ = (@string)"heapScannable is negative"u8;
 internal static readonly object testSpecificCheckerIsˢ = (@string)"test-specific checker is missing"u8;
 
-internal static void check(this ref gcExecTest e, ж<testing.T> Ꮡt, slice<gcCycleResult> results) {
-    Ꮡt.Helper();
+internal static void check(this ref gcExecTest e, ж<testing.T> t, slice<gcCycleResult> results) {
+    t.Helper();
 
     // Do some basic general checks first.
     nint n = len(results);
     switch (n) {
     case 0: {
-        Ꮡt.Fatal(noResultsPassedToCheckˢ);
+        t.Fatal(noResultsPassedToCheckˢ);
         return;
     }
     case 1: {
         if (results[0].cycle != 1) {
-            Ꮡt.Error(firstCycleHasIncorrectˢ);
+            t.Error(firstCycleHasIncorrectˢ);
         }
         break;
     }
     default: {
         if (results[n - 1].cycle != results[n - 2].cycle + 1) {
-            Ꮡt.Error(cycleNumbersOutOfOrderˢ);
+            t.Error(cycleNumbersOutOfOrderˢ);
         }
         break;
     }}
     {
         var u = results[n - 1].gcUtilization; if (u < 0D || u > 1D) {
-            Ꮡt.Fatal(gcUtilizationNotWithinˢ);
+            t.Fatal(gcUtilizationNotWithinˢ);
         }
     }
     {
         var s = results[n - 1].heapScannable; if (s < 0) {
-            Ꮡt.Fatal(heapScannableIsNegativeˢ);
+            t.Fatal(heapScannableIsNegativeˢ);
         }
     }
-    if (e.checker == default!) {
-        Ꮡt.Fatal(testSpecificCheckerIsˢ);
+    if (e.checker == nil) {
+        t.Fatal(testSpecificCheckerIsˢ);
     }
 
     // Run the test-specific checker.
-    e.checker(Ꮡt, results);
+    e.checker(t, results);
 }
 
 partial struct gcCycle {
@@ -879,15 +880,15 @@ internal static @string String(this ref gcCycleResult r) {
     return fmt.Sprintf("%d %2.1f%% %d->%d->%d (goal: %d)"u8, r.cycle, r.gcUtilization * 100D, r.heapLive, r.heapTrigger, r.heapPeak, r.heapGoal);
 }
 
-internal static partial void assertInEpsilon(ж<testing.T> Ꮡt, @string name, float64 a, float64 b, float64 epsilon) {
-    Ꮡt.Helper();
-    assertInRange(Ꮡt, name, a, b - epsilon, b + epsilon);
+internal static partial void assertInEpsilon(ж<testing.T> t, @string name, float64 a, float64 b, float64 epsilon) {
+    t.Helper();
+    assertInRange(t, name, a, b - epsilon, b + epsilon);
 }
 
-internal static partial void assertInRange(ж<testing.T> Ꮡt, @string name, float64 a, float64 min, float64 max) {
-    Ꮡt.Helper();
+internal static partial void assertInRange(ж<testing.T> t, @string name, float64 a, float64 min, float64 max) {
+    t.Helper();
     if (a < min || a > max) {
-        Ꮡt.Errorf("%s not in range (%f, %f): %f"u8, name, min, max, a);
+        t.Errorf("%s not in range (%f, %f): %f", name, min, max, a);
     }
 }
 
@@ -918,7 +919,7 @@ internal static float64Stream unit(float64 amp) {
 // oscillate returns a stream that oscillates sinusoidally
 // with the given amplitude, phase, and period.
 internal static float64Stream oscillate(float64 amp, float64 phase, nint period) {
-    nint cycle = default!;
+    nint cycle = default;
     return () => {
         var p = (float64)cycle / (float64)period * 2D * (float64)Δmath.Pi + phase;
         cycle++;
@@ -932,7 +933,7 @@ internal static float64Stream oscillate(float64 amp, float64 phase, nint period)
 // ramp returns a stream that moves from zero to height
 // over the course of length steps.
 internal static float64Stream ramp(float64 height, nint length) {
-    nint cycle = default!;
+    nint cycle = default;
     return () => {
         var h = height * (float64)cycle / (float64)length;
         if (cycle < length) {
@@ -1022,10 +1023,9 @@ internal static float64Stream max(this float64Stream f, float64 max) {
 internal static float64Stream limit(this float64Stream f, float64 min, float64 max) {
     return () => {
         var v = f();
-        if (v < min){
+        if (v < min) {
             v = min;
-        } else 
-        if (v > max) {
+        } else if (v > max) {
             v = max;
         }
         return v;
@@ -1037,7 +1037,7 @@ internal static uint64 applyMemoryLimitHeapGoalHeadroom(uint64 goal) {
     if (headroom < runtime_internal_test_package.MemoryLimitMinHeapGoalHeadroom) {
         headroom = runtime_internal_test_package.MemoryLimitMinHeapGoalHeadroom;
     }
-    if (goal < headroom || goal - headroom < headroom){
+    if (goal < headroom || goal - headroom < headroom) {
         goal = headroom;
     } else {
         goal -= headroom;
@@ -1045,67 +1045,67 @@ internal static uint64 applyMemoryLimitHeapGoalHeadroom(uint64 goal) {
     return goal;
 }
 
-public static void TestIdleMarkWorkerCount(ж<testing.T> Ꮡt) {
+public static void TestIdleMarkWorkerCount(ж<testing.T> t) {
     UntypedInt workers = 10;
     var c = runtime_internal_test_package.NewGCController(100, Δmath.MaxInt64);
     c.SetMaxIdleMarkWorkers(workers);
     for (nint i = 0; i < workers; i++) {
         if (!c.NeedIdleMarkWorker()) {
-            Ꮡt.Fatalf("expected to need idle mark workers: i=%d"u8, i);
+            t.Fatalf("expected to need idle mark workers: i=%d", i);
         }
         if (!c.AddIdleMarkWorker()) {
-            Ꮡt.Fatalf("expected to be able to add an idle mark worker: i=%d"u8, i);
+            t.Fatalf("expected to be able to add an idle mark worker: i=%d", i);
         }
     }
     if (c.NeedIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to not need idle mark workers"u8);
+        t.Fatalf("expected to not need idle mark workers");
     }
     if (c.AddIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to not be able to add an idle mark worker"u8);
+        t.Fatalf("expected to not be able to add an idle mark worker");
     }
     for (nint i = 0; i < workers; i++) {
         c.RemoveIdleMarkWorker();
         if (!c.NeedIdleMarkWorker()) {
-            Ꮡt.Fatalf("expected to need idle mark workers after removal: i=%d"u8, i);
+            t.Fatalf("expected to need idle mark workers after removal: i=%d", i);
         }
     }
     for (nint i = 0; i < (nint)(workers - 1); i++) {
         if (!c.AddIdleMarkWorker()) {
-            Ꮡt.Fatalf("expected to be able to add idle mark workers after adding again: i=%d"u8, i);
+            t.Fatalf("expected to be able to add idle mark workers after adding again: i=%d", i);
         }
     }
     for (nint i = 0; i < 10; i++) {
         if (!c.AddIdleMarkWorker()) {
-            Ꮡt.Fatalf("expected to be able to add idle mark workers interleaved: i=%d"u8, i);
+            t.Fatalf("expected to be able to add idle mark workers interleaved: i=%d", i);
         }
         if (c.AddIdleMarkWorker()) {
-            Ꮡt.Fatalf("expected to not be able to add idle mark workers interleaved: i=%d"u8, i);
+            t.Fatalf("expected to not be able to add idle mark workers interleaved: i=%d", i);
         }
         c.RemoveIdleMarkWorker();
     }
     // Support the max being below the count.
     c.SetMaxIdleMarkWorkers(0);
     if (c.NeedIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to not need idle mark workers after capacity set to 0"u8);
+        t.Fatalf("expected to not need idle mark workers after capacity set to 0");
     }
     if (c.AddIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to not be able to add idle mark workers after capacity set to 0"u8);
+        t.Fatalf("expected to not be able to add idle mark workers after capacity set to 0");
     }
     for (nint i = 0; i < (nint)(workers - 1); i++) {
         c.RemoveIdleMarkWorker();
     }
     if (c.NeedIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to not need idle mark workers after capacity set to 0"u8);
+        t.Fatalf("expected to not need idle mark workers after capacity set to 0");
     }
     if (c.AddIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to not be able to add idle mark workers after capacity set to 0"u8);
+        t.Fatalf("expected to not be able to add idle mark workers after capacity set to 0");
     }
     c.SetMaxIdleMarkWorkers(1);
     if (!c.NeedIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to need idle mark workers after capacity set to 1"u8);
+        t.Fatalf("expected to need idle mark workers after capacity set to 1");
     }
     if (!c.AddIdleMarkWorker()) {
-        Ꮡt.Fatalf("expected to be able to add idle mark workers after capacity set to 1"u8);
+        t.Fatalf("expected to be able to add idle mark workers after capacity set to 1");
     }
 }
 

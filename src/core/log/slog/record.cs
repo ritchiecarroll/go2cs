@@ -94,15 +94,17 @@ public static void Attrs(this Record r, Func<Attr, bool> f) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string bugˢ = "!BUG"u8;
-internal static readonly @string addAttrsUnsafelyCalledOnˢ = "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8;
+internal static ref readonly @string bugˢ => ref bugˢᵇ;
+private static readonly @string bugˢᵇ = "!BUG"u8;
+internal static ref readonly @string addAttrsUnsafelyCalledOnˢ => ref addAttrsUnsafelyCalledOnˢᵇ;
+private static readonly @string addAttrsUnsafelyCalledOnˢᵇ = "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8;
 
 // AddAttrs appends the given Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
 public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.slice();
 
-    nint i = default!;
+    nint i = default;
     for (i = 0; i < len(attrs) && r.nFront < len(r.front); i++) {
         var a = attrs[i];
         if (a.Value.isEmptyGroup()) {
@@ -136,17 +138,17 @@ public static void AddAttrs(this ref Record r, params ꓸꓸꓸAttr attrsʗp) {
 public static void Add(this ref Record r, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    Attr a = default!;
+    Attr a = default;
     while (len(args) > 0) {
         (a, args) = argsToAttr(args);
         if (a.Value.isEmptyGroup()) {
             continue;
         }
-        if (r.nFront < len(r.front)){
+        if (r.nFront < len(r.front)) {
             r.front[r.nFront] = a;
             r.nFront++;
         } else {
-            if (r.back == default!) {
+            if (r.back == nil) {
                 r.back = new slice<Attr>(0, countAttrs(args) + 1);
             }
             r.back = builtin.append(r.back, a);
@@ -168,7 +170,8 @@ internal static nint countAttrs(slice<any> args) {
     return n;
 }
 
-internal static readonly @string badKey = "!BADKEY"u8;
+internal static ref readonly @string badKey => ref badKeyᵇ;
+private static readonly @string badKeyᵇ = "!BADKEY"u8;
 
 // argsToAttr turns a prefix of the nonempty args slice into an Attr
 // and returns the unconsumed portion of the slice.
@@ -180,7 +183,7 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
     switch (args[0].type()) {
     case @string x: {
         if (len(args) == 1) {
-            return (String(badKey, x), default!);
+            return (String(badKey, x), default);
         }
         return (Any(x, args[1]), args[2..]);
     }
@@ -206,16 +209,19 @@ partial struct ΔSource {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string functionˢ = "function"u8;
-internal static readonly @string fileˢ = "file"u8;
-internal static readonly @string lineˢ = "line"u8;
+internal static ref readonly @string functionˢ => ref functionˢᵇ;
+private static readonly @string functionˢᵇ = "function"u8;
+internal static ref readonly @string fileˢ => ref fileˢᵇ;
+private static readonly @string fileˢᵇ = "file"u8;
+internal static ref readonly @string lineˢ => ref lineˢᵇ;
+private static readonly @string lineˢᵇ = "line"u8;
 
 // group returns the non-zero fields of s as a slice of attrs.
 // It is similar to a LogValue method, but we don't want Source
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
 internal static Value group(this ref ΔSource s) {
-    slice<Attr> @as = default!;
+    slice<Attr> @as = default;
     if (s.Function != ""u8) {
         @as = builtin.append(@as, String(functionˢ, s.Function));
     }
@@ -232,7 +238,7 @@ internal static Value group(this ref ΔSource s) {
 internal static bool isEmpty(this ж<ΔSource> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    return Ꮡs == nil || s == new ΔSource(nil);
+    return Ꮡs == nil || s == new ΔSource();
 }
 
 // Source returns a new Source for the log event using r's PC.
@@ -242,10 +248,10 @@ public static ж<ΔSource> Source(this Record r) {
     r = r.ΔClone();
 
     if (r.PC == 0) {
-        return default!;
+        return default;
     }
 
-    var fs = runtime.CallersFrames(new uintptr[]{r.PC}.slice());
+    var fs = runtime.CallersFrames(slice<uintptr>([r.PC]));
     var (f, _) = fs.Next();
     return Ꮡ(new ΔSource(
         Function: f.Function,

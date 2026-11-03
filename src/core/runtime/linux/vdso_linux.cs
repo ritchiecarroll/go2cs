@@ -48,8 +48,8 @@ internal static UntypedInt _EI_NIDENT => 16;
 internal static uintptr vdsoSymTabSize => /* vdsoArrayMax / unsafe.Sizeof(elfSym{}) */ unchecked((uintptr)46912496118442);
 internal static uintptr vdsoDynSize => /* vdsoArrayMax / unsafe.Sizeof(elfDyn{}) */ unchecked((uintptr)70368744177663);
 internal static UntypedInt vdsoSymStringsSize => /* vdsoArrayMax */ 1125899906842623; // byte
-internal static UntypedInt vdsoVerSymSize => /* vdsoArrayMax / 2 */ 562949953421311; // uint16
-internal static UntypedInt vdsoHashSize => /* vdsoArrayMax / 4 */ 281474976710655; // uint32
+internal static UntypedInt vdsoVerSymSize => /* vdsoArrayMax / 2 */ 562949953421311;  // uint16
+internal static UntypedInt vdsoHashSize => /* vdsoArrayMax / 4 */ 281474976710655;    // uint32
 
 // vdsoBloomSizeScale is a scaling factor for gnuhash tables which are uint32 indexed,
 // but contain uintptrs
@@ -107,22 +107,24 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
 
     // We need two things from the segment table: the load offset
     // and the dynamic table.
-    bool foundVaddr = default!;
-    ж<array<elfDyn>> dyn = default!;
+    bool foundVaddr = default;
+    ж<array<elfDyn>> dyn = default;
     for (var i = (uint16)0; i < hdr.e_phnum; i++) {
         var ptΔ1 = (ж<elfPhdr>)(uintptr)(add(pt, (uintptr)i * /* unsafe.Sizeof(elfPhdr{}) */ (uintptr)56));
-        var exprᴛ1 = (~ptΔ1).p_type;
-        if (exprᴛ1 == _PT_LOAD) {
+        switch (ptΔ1.p_type) {
+        case var ᴛ when ᴛ == _PT_LOAD: {
             if (!foundVaddr) {
                 foundVaddr = true;
-                info.loadOffset = info.loadAddr + (uintptr)((~ptΔ1).p_offset - (~ptΔ1).p_vaddr);
+                info.loadOffset = info.loadAddr + (uintptr)(ptΔ1.p_offset - ptΔ1.p_vaddr);
                 vdsoLoadStart = info.loadOffset;
-                vdsoLoadEnd = info.loadOffset + (uintptr)(~ptΔ1).p_memsz;
+                vdsoLoadEnd = info.loadOffset + (uintptr)ptΔ1.p_memsz;
             }
+            break;
         }
-        else if (exprᴛ1 == _PT_DYNAMIC) {
-            dyn = (ж<array<elfDyn>>)(uintptr)((@unsafe.Pointer)(info.loadAddr + (uintptr)(~ptΔ1).p_offset));
-        }
+        case var ᴛ when ᴛ == _PT_DYNAMIC: {
+            dyn = (ж<array<elfDyn>>)(uintptr)((@unsafe.Pointer)(info.loadAddr + (uintptr)ptΔ1.p_offset));
+            break;
+        }}
     }
 
     if (!foundVaddr || dyn == nil) {
@@ -131,34 +133,40 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
 
     // Fish out the useful bits of the dynamic table.
 
-    ж<array<uint32>> hash = default!;
-    ж<array<uint32>> gnuhash = default!;
+    ж<array<uint32>> hash = default;
+    ж<array<uint32>> gnuhash = default;
     info.symstrings = ж<array<byte>>.NilBoxOfDims(1125899906842623L);
     info.symtab = ж<array<elfSym>>.NilBoxOfDims(46912496118442L);
     info.versym = ж<array<uint16>>.NilBoxOfDims(562949953421311L);
-    info.verdef = default!;
+    info.verdef = default;
     for (nint i = 0; dyn.Value[i].d_tag != _DT_NULL; i++) {
         var dt = dyn.at<elfDyn>(i);
-        var Δp = info.loadOffset + (uintptr)(~dt).d_val;
-        var exprᴛ2 = (~dt).d_tag;
-        if (exprᴛ2 == _DT_STRTAB) {
+        var Δp = info.loadOffset + (uintptr)dt.d_val;
+        switch (dt.d_tag) {
+        case var ᴛ when ᴛ == _DT_STRTAB: {
             info.symstrings = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)Δp);
+            break;
         }
-        else if (exprᴛ2 == _DT_SYMTAB) {
+        case var ᴛ when ᴛ == _DT_SYMTAB: {
             info.symtab = (ж<array<elfSym>>)(uintptr)((@unsafe.Pointer)Δp);
+            break;
         }
-        else if (exprᴛ2 == _DT_HASH) {
+        case var ᴛ when ᴛ == _DT_HASH: {
             hash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)Δp);
+            break;
         }
-        else if (exprᴛ2 == _DT_GNU_HASH) {
+        case var ᴛ when ᴛ == _DT_GNU_HASH: {
             gnuhash = (ж<array<uint32>>)(uintptr)((@unsafe.Pointer)Δp);
+            break;
         }
-        else if (exprᴛ2 == _DT_VERSYM) {
+        case var ᴛ when ᴛ == _DT_VERSYM: {
             info.versym = (ж<array<uint16>>)(uintptr)((@unsafe.Pointer)Δp);
+            break;
         }
-        else if (exprᴛ2 == _DT_VERDEF) {
+        case var ᴛ when ᴛ == _DT_VERDEF: {
             info.verdef = (ж<elfVerdef>)(uintptr)((@unsafe.Pointer)Δp);
-        }
+            break;
+        }}
     }
 
     if (info.symstrings == nil || info.symtab == nil || (hash == nil && gnuhash == nil)) {
@@ -169,7 +177,7 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         info.versym = ж<array<uint16>>.NilBoxOfDims(562949953421311L);
     }
 
-    if (gnuhash != nil){
+    if (gnuhash != nil) {
         // Parse the GNU hash table header.
         var nbucket = gnuhash.Value[0];
         info.symOff = gnuhash.Value[1];
@@ -197,18 +205,18 @@ internal static int32 vdsoFindVersion(ж<vdsoInfo> Ꮡinfo, ref vdsoVersionKey v
     }
 
     var def = info.verdef;
-    while (ᐧ) {
-        if ((uint16)((~def).vd_flags & (uint16)_VER_FLG_BASE) == 0) {
-            var aux = (ж<elfVerdaux>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)(~def).vd_aux));
-            if ((~def).vd_hash == ver.verHash && ver.version == gostringnocopy(info.symstrings.at<byte>((ulong)((~aux).vda_name)))) {
-                return (int32)((uint16)((~def).vd_ndx & 0x7fff));
+    for (;;) {
+        if ((uint16)(def.vd_flags & (uint16)_VER_FLG_BASE) == 0) {
+            var aux = (ж<elfVerdaux>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)def.vd_aux));
+            if (def.vd_hash == ver.verHash && ver.version == gostringnocopy(info.symstrings.at<byte>((ulong)(aux.vda_name)))) {
+                return (int32)((uint16)(def.vd_ndx & 0x7fff));
             }
         }
 
-        if ((~def).vd_next == 0) {
+        if (def.vd_next == 0) {
             break;
         }
-        def = (ж<elfVerdef>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)(~def).vd_next));
+        def = (ж<elfVerdef>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)def.vd_next));
     }
 
     return -1; // cannot match any version
@@ -223,13 +231,13 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
 
     bool apply(uint32 symIndex, vdsoSymbolKey k) {
         var sym = Ꮡinfo.Value.symtab.at<elfSym>((ulong)(symIndex));
-        var typ = _ELF_ST_TYPE((~sym).st_info);
-        var bind = _ELF_ST_BIND((~sym).st_info);
+        var typ = _ELF_ST_TYPE(sym.st_info);
+        var bind = _ELF_ST_BIND(sym.st_info);
         // On ppc64x, VDSO functions are of type _STT_NOTYPE.
-        if (typ != _STT_FUNC && typ != _STT_NOTYPE || bind != _STB_GLOBAL && bind != _STB_WEAK || (~sym).st_shndx == _SHN_UNDEF) {
+        if (typ != _STT_FUNC && typ != _STT_NOTYPE || bind != _STB_GLOBAL && bind != _STB_WEAK || sym.st_shndx == _SHN_UNDEF) {
             return false;
         }
-        if (k.name != gostringnocopy(Ꮡinfo.Value.symstrings.at<byte>((ulong)((~sym).st_name)))) {
+        if (k.name != gostringnocopy(Ꮡinfo.Value.symstrings.at<byte>((ulong)(sym.st_name)))) {
             return false;
         }
         // Check symbol version.
@@ -237,7 +245,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
             return false;
         }
 
-        k.ptr.Value = Ꮡinfo.Value.loadOffset + (uintptr)(~sym).st_value;
+        k.ptr.Value = Ꮡinfo.Value.loadOffset + (uintptr)sym.st_value;
         return true;
     }
 
@@ -261,7 +269,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         if (symIndex < info.symOff) {
             continue;
         }
-        for (; ᐧ ; symIndex++) {
+        for (; ; symIndex++) {
             var hash = info.chain[symIndex - info.symOff];
             if ((hash | 1) == (k.gnuHash | 1)) {
                 // Found a hash match.
@@ -278,8 +286,8 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
 }
 
 internal static void vdsoauxv(uintptr tag, uintptr val) {
-    var exprᴛ1 = tag;
-    if (exprᴛ1 == _AT_SYSINFO_EHDR) {
+    switch (tag) {
+    case var ᴛ when ᴛ == _AT_SYSINFO_EHDR: {
         if (val == 0) {
             // Something went wrong
             return;
@@ -290,7 +298,8 @@ internal static void vdsoauxv(uintptr tag, uintptr val) {
         var info1 = Ꮡinfo;
         vdsoInitFromSysinfoEhdr(ref (info1).DerefOrNull(), (ж<elfEhdr>)(uintptr)((@unsafe.Pointer)val));
         vdsoParseSymbols(info1, vdsoFindVersion(info1, ref vdsoLinuxVersion));
-    }
+        break;
+    }}
 }
 
 // inVDSOPage reports whether PC is on the VDSO page.

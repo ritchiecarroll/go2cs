@@ -22,11 +22,11 @@ partial class fipstest_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object testReportsNonZeroˢ = (@string)"Test reports non-zero allocation count. See issue #70448"u8;
 
-public static void TestXAESAllocations(ж<testing.T> Ꮡt) {
+public static void TestXAESAllocations(ж<testing.T> t) {
     if (runtime.GOARCH == "ppc64"u8 || runtime.GOARCH == "ppc64le"u8) {
-        Ꮡt.Skip(testReportsNonZeroˢ);
+        t.Skip(testReportsNonZeroˢ);
     }
-    cryptotest.SkipTestAllocations(Ꮡt);
+    cryptotest.SkipTestAllocations(t);
     {
         var allocs = testing.AllocsPerRun(100, () => {
             var key = new slice<byte>(32);
@@ -36,18 +36,18 @@ public static void TestXAESAllocations(ж<testing.T> Ꮡt) {
             var ciphertext = new slice<byte>(0, 16 + 16);
             ciphertext = xaesSeal(ciphertext, key, nonce, plaintext, aad);
             {
-                var (_, err) = xaesOpen(plaintext[..0], key, nonce, ciphertext, aad); if (err != default!) {
-                    Ꮡt.Fatal(err);
+                var (_, err) = xaesOpen(plaintext[..0], key, nonce, ciphertext, aad); if (err != nil) {
+                    t.Fatal(err);
                 }
             }
         }); if (allocs > 0D) {
-            Ꮡt.Errorf("expected zero allocations, got %0.1f"u8, allocs);
+            t.Errorf("expected zero allocations, got %0.1f", allocs);
         }
     }
 }
 
-public static void TestXAES(ж<testing.T> Ꮡt) {
-    var key = bytes.Repeat(new byte[]{0x01}.slice(), 32);
+public static void TestXAES(ж<testing.T> t) {
+    var key = bytes.Repeat(slice<byte>([0x01]), 32);
     var plaintext = slice<byte>("XAES-256-GCM"u8);
     var additionalData = slice<byte>("c2sp.org/XAES-256-GCM"u8);
 
@@ -61,12 +61,12 @@ public static void TestXAES(ж<testing.T> Ꮡt) {
     var (g, _) = gcm.New(a, 12, 16);
     gcm.SealWithRandomNonce(g, nonce[12..], ciphertext, plaintext, additionalData);
 
-    var (got, err) = xaesOpen(default!, key, nonce, ciphertext, additionalData);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (got, err) = xaesOpen(default, key, nonce, ciphertext, additionalData);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (!bytes.Equal(plaintext, got)) {
-        Ꮡt.Errorf("plaintext and got are not equal"u8);
+        t.Errorf("plaintext and got are not equal");
     }
 }
 
@@ -94,48 +94,46 @@ internal static (slice<byte>, error) xaesOpen(slice<byte> dst, slice<byte> key, 
     return g.Open(dst, n, ciphertext, additionalData);
 }
 
-public static void TestXAESVectors(ж<testing.T> Ꮡt) {
-    var key = bytes.Repeat(new byte[]{0x01}.slice(), 32);
+public static void TestXAESVectors(ж<testing.T> t) {
+    var key = bytes.Repeat(slice<byte>([0x01]), 32);
     var nonce = slice<byte>("ABCDEFGHIJKLMNOPQRSTUVWX"u8);
     var plaintext = slice<byte>("XAES-256-GCM"u8);
-    var ciphertext = xaesSeal(default!, key, nonce, plaintext, default!);
-    @string expected = "ce546ef63c9cc60765923609b33a9a1974e96e52daf2fcf7075e2271"u8;
+    var ciphertext = xaesSeal(default, key, nonce, plaintext, default);
+    @string expected = "ce546ef63c9cc60765923609b33a9a1974e96e52daf2fcf7075e2271";
     {
         @string got = hex.EncodeToString(ciphertext); if (got != expected) {
-            Ꮡt.Errorf("got: %s"u8, got);
+            t.Errorf("got: %s", got);
         }
     }
     {
-        var (decrypted, err) = xaesOpen(default!, key, nonce, ciphertext, default!); if (err != default!){
-            Ꮡt.Fatal(err);
-        } else 
-        if (!bytes.Equal(plaintext, decrypted)) {
-            Ꮡt.Errorf("plaintext and decrypted are not equal"u8);
+        var (decrypted, err) = xaesOpen(default, key, nonce, ciphertext, default); if (err != nil) {
+            t.Fatal(err);
+        } else if (!bytes.Equal(plaintext, decrypted)) {
+            t.Errorf("plaintext and decrypted are not equal");
         }
     }
 
-    key = bytes.Repeat(new byte[]{0x03}.slice(), 32);
+    key = bytes.Repeat(slice<byte>([0x03]), 32);
     var aad = slice<byte>("c2sp.org/XAES-256-GCM"u8);
-    ciphertext = xaesSeal(default!, key, nonce, plaintext, aad);
-    expected = "986ec1832593df5443a179437fd083bf3fdb41abd740a21f71eb769d"u8;
+    ciphertext = xaesSeal(default, key, nonce, plaintext, aad);
+    expected = "986ec1832593df5443a179437fd083bf3fdb41abd740a21f71eb769d";
     {
         @string got = hex.EncodeToString(ciphertext); if (got != expected) {
-            Ꮡt.Errorf("got: %s"u8, got);
+            t.Errorf("got: %s", got);
         }
     }
     {
-        var (decrypted, err) = xaesOpen(default!, key, nonce, ciphertext, aad); if (err != default!){
-            Ꮡt.Fatal(err);
-        } else 
-        if (!bytes.Equal(plaintext, decrypted)) {
-            Ꮡt.Errorf("plaintext and decrypted are not equal"u8);
+        var (decrypted, err) = xaesOpen(default, key, nonce, ciphertext, aad); if (err != nil) {
+            t.Fatal(err);
+        } else if (!bytes.Equal(plaintext, decrypted)) {
+            t.Errorf("plaintext and decrypted are not equal");
         }
     }
 }
 
-public static void TestXAESAccumulated(ж<testing.T> Ꮡt) {
+public static void TestXAESAccumulated(ж<testing.T> t) {
     nint iterations = 10_000;
-    @string expected = "e6b9edf2df6cec60c8cbd864e2211b597fb69a529160cd040d56c0c210081939"u8;
+    @string expected = "e6b9edf2df6cec60c8cbd864e2211b597fb69a529160cd040d56c0c210081939";
 
     var (s, d) = (sha3.NewShake128(), sha3.NewShake128());
     for (nint i = 0; i < iterations; i++) {
@@ -151,20 +149,20 @@ public static void TestXAESAccumulated(ж<testing.T> Ꮡt) {
         var aad = new slice<byte>((nint)lenByte[0]);
         s.Read(aad);
 
-        var ciphertext = xaesSeal(default!, key, nonce, plaintext, aad);
-        var (decrypted, err) = xaesOpen(default!, key, nonce, ciphertext, aad);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        var ciphertext = xaesSeal(default, key, nonce, plaintext, aad);
+        var (decrypted, err) = xaesOpen(default, key, nonce, ciphertext, aad);
+        if (err != nil) {
+            t.Fatal(err);
         }
         if (!bytes.Equal(plaintext, decrypted)) {
-            Ꮡt.Errorf("plaintext and decrypted are not equal"u8);
+            t.Errorf("plaintext and decrypted are not equal");
         }
 
         d.Write(ciphertext);
     }
     {
-        @string got = hex.EncodeToString(d.Sum(default!)); if (got != expected) {
-            Ꮡt.Errorf("got: %s"u8, got);
+        @string got = hex.EncodeToString(d.Sum(default)); if (got != expected) {
+            t.Errorf("got: %s", got);
         }
     }
 }

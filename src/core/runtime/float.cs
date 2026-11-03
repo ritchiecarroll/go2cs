@@ -108,8 +108,8 @@ internal static float64 ceil(float64 x) {
 // N.B. Portable modf copied from math. math also has optimized arch-specific
 // implementations.
 internal static (float64 @int, float64 frac) modf(float64 f) {
-    float64 @int = default!;
-    float64 frac = default!;
+    float64 @int = default;
+    float64 frac = default;
 
     if (f < 1D) {
         switch (ᐧ) {

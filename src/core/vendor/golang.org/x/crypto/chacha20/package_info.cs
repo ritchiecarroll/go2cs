@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +46,7 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,9 +56,9 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADp6AAEWAAwIguaigpS4goKCkoKmggAJFMoACiCygoKCgoKCgoKCgoKCAAIWAAwKgoLugpSCAAMcAAoCgpSClIKCuIKCgpSCgpSClILcgoKSgu6CgpSYooKCgoKCgoLKgoKCgriCggACHAAeFIKCgoLKlKaCgoKmlIKCgqaCgoLKgoKCgoKCgoKCgoKCgoKClJS+6ILmgoKUgqaCgoKCgoKCgoKCgoKUlIKCgqaCgoKmgoKCgoKCgoKC", "", "", "102=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;112=Uint32/1/3/1,Uint32/2/3/2,Uint32/3/3/3")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AAoWgg==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20/xor.go", "xor.cs", "ABAkopLcgoKCgoKCgoKUgoKCgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_generic.go", "chacha_generic.cs", "ADp6AAEWAAwIggAIBqKClLiCgoKCgqaCAAkUygAKILKCgoKCgoKCgoKCgoIAAhYADAqCgu6ClIIAAxwACgKClIKUgoK4goKClIKClIKUgtyCgoKC7oKClJiigoKCgoKCgsqCgoKCuIKCAAIcAB4UgoKCgsqUpoKCgqaUgoKCpoKCgsqCgoKCgoKCgoKCgoKCgoKUlL7oggAIBoKClIKmgoKCgoKCgoKCgoKClJSCgoKmgoKCpoKCgoKCgoKCgg==", "", "", "103=Uint32/1/8/1,Uint32/2/8/2,Uint32/3/8/3,Uint32/4/8/4,Uint32/5/8/5,Uint32/6/8/6,Uint32/7/8/7,Uint32/8/8/8;113=Uint32/1/3/1,Uint32/2/3/2,Uint32/3/3/3")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/chacha_noasm.go", "chacha_noasm.cs", "AAoWgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20/xor.go", "xor.cs", "ABAkopLcgoKCgoKCgoKUgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;

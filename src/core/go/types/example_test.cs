@@ -30,8 +30,10 @@ using static global::go.go.types_internal_test_package;
 partial class types_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string temperatureˢ = "temperature"u8;
-internal static readonly @string aFAFDˢ = @" 0x[a-fA-F\d]*"u8;
+internal static ref readonly @string temperatureˢ => ref temperatureˢᵇ;
+private static readonly @string temperatureˢᵇ = "temperature"u8;
+internal static ref readonly @string aFAFDˢ => ref aFAFDˢᵇ;
+private static readonly @string aFAFDˢᵇ = @" 0x[a-fA-F\d]*"u8;
 
 // ExampleScope prints the tree of Scopes of a package created from a
 // set of parsed files.
@@ -40,8 +42,8 @@ public static void ExampleScope() {
 
     // Parse the source files for a package.
     var fset = token.NewFileSet();
-    slice<ж<ast.File>> files = default!;
-    foreach (var (_, src) in new @string[]{
+    slice<ж<ast.File>> files = default;
+    foreach (var (_, src) in slice<@string>([
         """
 package main
 import "fmt"
@@ -60,17 +62,16 @@ const Boiling Celsius = 100
 func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get printed
 
 """u8.Raw()
-    }.slice()) {
+    ])) {
         files = append(filesᴷ, files, mustParse(fset, src));
     }
 
     // Type-check a package consisting of these files.
     // Type information for the imported "fmt" package
     // comes from $GOROOT/pkg/$GOOS_$GOOARCH/fmt.a.
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new types.Config(Importer: defaultImporter(fset));
+    ref var conf = ref heap<types.Config>(new types.Config(Importer: defaultImporter(fset)), out var Ꮡconf);
     var (pkg, err) = Ꮡconf.Check(temperatureˢ, fset, files, nil);
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
 
@@ -116,11 +117,14 @@ func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string celsiusGoˢ = "celsius.go"u8;
-internal static readonly @string celsiusˢ = "Celsius"u8;
+internal static ref readonly @string celsiusGoˢ => ref celsiusGoˢᵇ;
+private static readonly @string celsiusGoˢᵇ = "celsius.go"u8;
+internal static ref readonly @string celsiusˢ => ref celsiusˢᵇ;
+private static readonly @string celsiusˢᵇ = "Celsius"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string inputᶜ = """
+internal static ref readonly @string inputᶜ => ref inputᶜᵇ;
+private static readonly @string inputᶜᵇ = """
 
 package temperature
 import "fmt"
@@ -139,23 +143,22 @@ public static void ExampleMethodSet() {
     @string input = inputᶜ;
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, celsiusGoˢ, input, 0);
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
 
     // Type-check a package consisting of this file.
     // Type information for the imported packages
     // comes from $GOROOT/pkg/$GOOS_$GOOARCH/fmt.a.
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new types.Config(Importer: defaultImporter(fset));
-    (var pkg, err) = Ꮡconf.Check(temperatureˢ, fset, new ж<ast.File>[]{f}.slice(), nil);
-    if (err != default!) {
+    ref var conf = ref heap<types.Config>(new types.Config(Importer: defaultImporter(fset)), out var Ꮡconf);
+    (var pkg, err) = Ꮡconf.Check(temperatureˢ, fset, slice<ж<ast.File>>([f]), nil);
+    if (err != nil) {
         log.Fatal(err);
     }
 
     // Print the method sets of Celsius and *Celsius.
     var celsius = pkg.Scope().Lookup(celsiusˢ).Type();
-    foreach (var (_, t) in new typesꓸType[]{celsius, new types.PointerжΔType(types.NewPointer(celsius))}.slice()) {
+    foreach (var (_, t) in slice<typesꓸType>([celsius, new types.PointerжΔType(types.NewPointer(celsius))])) {
         fmt.Printf("Method set of %s:\n"u8, t);
         foreach (var m in range<ж<types.Selection>>(types.NewMethodSet(t).Methods().Invoke)) {
             fmt.Println(m.OrTypedNil());
@@ -164,7 +167,7 @@ public static void ExampleMethodSet() {
     }
 
     // Print the method set of S.
-    var styp = pkg.Scope().Lookup("S"u8).Type();
+    var styp = pkg.Scope().Lookup("S").Type();
     fmt.Printf("Method set of %s:\n"u8, styp);
     fmt.Println(types.NewMethodSet(styp).OrTypedNil());
 
@@ -181,12 +184,14 @@ public static void ExampleMethodSet() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fibˢ = "fib"u8;
+internal static ref readonly @string fibˢ => ref fibˢᵇ;
+private static readonly @string fibˢᵇ = "fib"u8;
 internal static readonly object defsAndUsesOfEachNamedˢ = (@string)"Defs and Uses of each named object:"u8;
 internal static readonly object typesAndValuesOfEachˢ = (@string)"Types and Values of each expression:"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string inputᶜ1 = """
+internal static ref readonly @string inputᶜ1 => ref inputᶜ1ᵇ;
+private static readonly @string inputᶜ1ᵇ = """
 
 package fib
 
@@ -218,15 +223,14 @@ public static void ExampleInfo() {
     // Type-check the package.
     // We create an empty map for each kind of input
     // we're interested in, and Check populates them.
-    ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
-    info = new typesꓸInfo(
+    ref var info = ref heap<typesꓸInfo>(new typesꓸInfo(
         Types: new map<ast.Expr, types.TypeAndValue>(),
         Defs: new map<ж<ast.Ident>, types.Object>(),
         Uses: new map<ж<ast.Ident>, types.Object>()
-    );
+    ), out var Ꮡinfo);
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
-    var (pkg, err) = Ꮡconf.Check(fibˢ, fset, new ж<ast.File>[]{f}.slice(), Ꮡinfo);
-    if (err != default!) {
+    var (pkg, err) = Ꮡconf.Check(fibˢ, fset, slice<ж<ast.File>>([f]), Ꮡinfo);
+    if (err != nil) {
         log.Fatal(err);
     }
 
@@ -242,26 +246,26 @@ public static void ExampleInfo() {
         @string lineCol = fmt.Sprintf("%d:%d"u8, posn.Line, posn.Column);
         usesByObj[obj] = append(usesByObj[obj], lineCol);
     }
-    slice<@string> items = default!;
+    slice<@string> items = default;
     foreach (var (obj, uses) in usesByObj) {
         slices.Sort<slice<@string>, @string>(uses);
         @string item = fmt.Sprintf("%s:\n  defined at %s\n  used at %s"u8,
             types.ObjectString(obj, types.RelativeTo(pkg)),
             fset.Position(obj.Pos()),
-            strings.Join(uses, ", "u8));
+            strings.Join(uses, ", "));
         items = append(itemsᴷ, items, item);
     }
     slices.Sort<slice<@string>, @string>(items); // sort by line:col, in effect
-    fmt.Println(strings.Join(items, "\n"u8));
+    fmt.Println(strings.Join(items, "\n"));
     fmt.Println();
 
     fmt.Println(typesAndValuesOfEachˢ);
-    items = default!;
+    items = default;
     foreach (var (expr, tv) in info.Types) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
         var posn = fset.Position(expr.Pos());
         @string tvstr = tv.Type.String();
-        if (tv.Value != default!) {
+        if (tv.Value != nil) {
             tvstr += " = "u8 + tv.Value.String();
         }
         // line:col | expr | mode : type = value
@@ -271,7 +275,7 @@ public static void ExampleInfo() {
         items = append(items, buf.String());
     }
     slices.Sort<slice<@string>, @string>(items);
-    fmt.Println(strings.Join(items, "\n"u8));
+    fmt.Println(strings.Join(items, "\n"));
 
     // Output:
     // InitOrder: [c = "hello" b = S(c) a = len(b)]
@@ -331,9 +335,12 @@ public static void ExampleInfo() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string varˢ = "var"u8;
-internal static readonly @string mapindexˢ = "mapindex"u8;
-internal static readonly @string unknownˢ = "unknown"u8;
+internal static ref readonly @string varˢ => ref varˢᵇ;
+private static readonly @string varˢᵇ = "var"u8;
+internal static ref readonly @string mapindexˢ => ref mapindexˢᵇ;
+private static readonly @string mapindexˢᵇ = "mapindex"u8;
+internal static ref readonly @string unknownˢ => ref unknownˢᵇ;
+private static readonly @string unknownˢᵇ = "unknown"u8;
 
 internal static @string mode(types.TypeAndValue tv) {
     switch (ᐧ) {
@@ -363,9 +370,9 @@ internal static @string mode(types.TypeAndValue tv) {
     }}
 }
 
-internal static @string exprString(ж<token.FileSet> Ꮡfset, ast.Expr expr) {
+internal static @string exprString(ж<token.FileSet> fset, ast.Expr expr) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    format.Node(new types_test_package.strings_BuilderжWriter(Ꮡbuf), Ꮡfset, expr);
+    format.Node(new types_test_package.strings_BuilderжWriter(Ꮡbuf), fset, expr);
     return buf.String();
 }
 

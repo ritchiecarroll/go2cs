@@ -39,60 +39,58 @@ internal static iter.Seq<ΔValue> rangeNum<T, N>(N num, ΔType t)
 public static iter.Seq<ΔValue> Seq(this ΔValue v) {
     if (canRangeFunc(v.abiType())) {
         return (Func<ΔValue, bool> yield) => {
-            var rf = MakeFunc(v.Type().In(0), (slice<ΔValue> @in) => new ΔValue[]{ValueOf(yield(@in[0]))}.slice());
-            v.Call(new ΔValue[]{rf}.slice());
+            var rf = MakeFunc(v.Type().In(0), (slice<ΔValue> @in) => slice<ΔValue>([ValueOf(yield(@in[0]))]));
+            v.Call(slice<ΔValue>([rf]));
         };
     }
-    var exprᴛ1 = v.kind();
-    if (exprᴛ1 == ΔInt) {
+    switch (v.kind()) {
+    case var ᴛ when ᴛ == ΔInt: {
         return rangeNum<nint, int64>(v.Int(), v.Type());
     }
-    if (exprᴛ1 == Int8) {
+    case var ᴛ when ᴛ == Int8: {
         return rangeNum<int8, int64>(v.Int(), v.Type());
     }
-    if (exprᴛ1 == Int16) {
+    case var ᴛ when ᴛ == Int16: {
         return rangeNum<int16, int64>(v.Int(), v.Type());
     }
-    if (exprᴛ1 == Int32) {
+    case var ᴛ when ᴛ == Int32: {
         return rangeNum<int32, int64>(v.Int(), v.Type());
     }
-    if (exprᴛ1 == Int64) {
+    case var ᴛ when ᴛ == Int64: {
         return rangeNum<int64, int64>(v.Int(), v.Type());
     }
-    if (exprᴛ1 == ΔUint) {
+    case var ᴛ when ᴛ == ΔUint: {
         return rangeNum<nuint, uint64>(v.Uint(), v.Type());
     }
-    if (exprᴛ1 == Uint8) {
+    case var ᴛ when ᴛ == Uint8: {
         return rangeNum<uint8, uint64>(v.Uint(), v.Type());
     }
-    if (exprᴛ1 == Uint16) {
+    case var ᴛ when ᴛ == Uint16: {
         return rangeNum<uint16, uint64>(v.Uint(), v.Type());
     }
-    if (exprᴛ1 == Uint32) {
+    case var ᴛ when ᴛ == Uint32: {
         return rangeNum<uint32, uint64>(v.Uint(), v.Type());
     }
-    if (exprᴛ1 == Uint64) {
+    case var ᴛ when ᴛ == Uint64: {
         return rangeNum<uint64, uint64>(v.Uint(), v.Type());
     }
-    if (exprᴛ1 == Uintptr) {
+    case var ᴛ when ᴛ == Uintptr: {
         return rangeNum<uintptr, uint64>(v.Uint(), v.Type());
     }
-    if (exprᴛ1 == ΔPointer) {
-        do {
-            if (v.Elem().kind() != Array) {
-                break;
-            }
-            return (Func<ΔValue, bool> yield) => {
-                v = v.Elem();
-                foreach (var i in range(v.Len())) {
-                    if (!yield(ValueOf(i))) {
-                        return;
-                    }
+    case var ᴛ when ᴛ == ΔPointer: {
+        if (v.Elem().kind() != Array) {
+            break;
+        }
+        return (Func<ΔValue, bool> yield) => {
+            v = v.Elem();
+            foreach (var i in range(v.Len())) {
+                if (!yield(ValueOf(i))) {
+                    return;
                 }
-            };
-        } while (false);
+            }
+        };
     }
-    else if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
+    case var ᴛ when ᴛ == Array || ᴛ == ΔSlice: {
         return (Func<ΔValue, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i))) {
@@ -101,7 +99,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-    else if (exprᴛ1 == ΔString) {
+    case var ᴛ when ᴛ == ΔString: {
         return (Func<ΔValue, bool> yield) => {
             foreach (var (i, _) in v.String()) {
                 if (!yield(ValueOf(i))) {
@@ -110,7 +108,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-    else if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         return (Func<ΔValue, bool> yield) => {
             var i = v.MapRange();
             while (i.Next()) {
@@ -120,7 +118,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
             }
         };
     }
-    else if (exprᴛ1 == Chan) {
+    case var ᴛ when ᴛ == Chan: {
         return (Func<ΔValue, bool> yield) => {
             for (var (value, ok) = v.Recv(); ok; (value, ok) = v.Recv()) {
                 if (!yield(value)) {
@@ -128,7 +126,7 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
                 }
             }
         };
-    }
+    }}
     throw panic("reflect: " + v.Type().String() + " cannot produce iter.Seq[Value]");
 }
 
@@ -140,27 +138,25 @@ public static iter.Seq<ΔValue> Seq(this ΔValue v) {
 public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
     if (canRangeFunc2(v.abiType())) {
         return (Func<ΔValue, ΔValue, bool> yield) => {
-            var rf = MakeFunc(v.Type().In(0), (slice<ΔValue> @in) => new ΔValue[]{ValueOf(yield(@in[0], @in[1]))}.slice());
-            v.Call(new ΔValue[]{rf}.slice());
+            var rf = MakeFunc(v.Type().In(0), (slice<ΔValue> @in) => slice<ΔValue>([ValueOf(yield(@in[0], @in[1]))]));
+            v.Call(slice<ΔValue>([rf]));
         };
     }
-    var exprᴛ1 = v.Kind();
-    if (exprᴛ1 == ΔPointer) {
-        do {
-            if (v.Elem().kind() != Array) {
-                break;
-            }
-            return (Func<ΔValue, ΔValue, bool> yield) => {
-                v = v.Elem();
-                foreach (var i in range(v.Len())) {
-                    if (!yield(ValueOf(i), v.Index(i))) {
-                        return;
-                    }
+    switch (v.Kind()) {
+    case var ᴛ when ᴛ == ΔPointer: {
+        if (v.Elem().kind() != Array) {
+            break;
+        }
+        return (Func<ΔValue, ΔValue, bool> yield) => {
+            v = v.Elem();
+            foreach (var i in range(v.Len())) {
+                if (!yield(ValueOf(i), v.Index(i))) {
+                    return;
                 }
-            };
-        } while (false);
+            }
+        };
     }
-    else if (exprᴛ1 == Array || exprᴛ1 == ΔSlice) {
+    case var ᴛ when ᴛ == Array || ᴛ == ΔSlice: {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             foreach (var i in range(v.Len())) {
                 if (!yield(ValueOf(i), v.Index(i))) {
@@ -169,7 +165,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
             }
         };
     }
-    else if (exprᴛ1 == ΔString) {
+    case var ᴛ when ᴛ == ΔString: {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             foreach (var (i, vΔ2) in v.String()) {
                 if (!yield(ValueOf(i), ValueOf(vΔ2))) {
@@ -178,7 +174,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
             }
         };
     }
-    else if (exprᴛ1 == Map) {
+    case var ᴛ when ᴛ == Map: {
         return (Func<ΔValue, ΔValue, bool> yield) => {
             var i = v.MapRange();
             while (i.Next()) {
@@ -187,7 +183,7 @@ public static iter.Seq2<ΔValue, ΔValue> Seq2(this ΔValue v) {
                 }
             }
         };
-    }
+    }}
     throw panic("reflect: " + v.Type().String() + " cannot produce iter.Seq2[Value, Value]");
 }
 

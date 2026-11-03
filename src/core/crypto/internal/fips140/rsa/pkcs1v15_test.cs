@@ -19,7 +19,7 @@ internal partial struct TestHashPrefixes_val /*dyn*/ {
     public slice<byte> Hash;
 }
 
-public static void TestHashPrefixes(ж<testing.T> Ꮡt) {
+public static void TestHashPrefixes(ж<testing.T> t) {
     var prefixes = new map<crypto.Hash, asn1.ObjectIdentifier>{
         // RFC 3370, Section 2.1 and 2.2
         //
@@ -28,8 +28,8 @@ public static void TestHashPrefixes(ж<testing.T> Ꮡt) {
         //
         // md5 OBJECT IDENTIFIER ::= { iso(1) member-body(2) us(840)
         // 	rsadsi(113549) digestAlgorithm(2) 5 }
-        [crypto.MD5] = new nint[]{1, 2, 840, 113549, 2, 5}.slice(),
-        [crypto.SHA1] = new nint[]{1, 3, 14, 3, 2, 26}.slice(),
+        [crypto.MD5] = slice<nint>([1, 2, 840, 113549, 2, 5]),
+        [crypto.SHA1] = slice<nint>([1, 3, 14, 3, 2, 26]),
 
         // https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration
         //
@@ -48,16 +48,16 @@ public static void TestHashPrefixes(ж<testing.T> Ꮡt) {
         // id-sha3-256 OBJECT IDENTIFIER ::= { hashAlgs 8 }
         // id-sha3-384 OBJECT IDENTIFIER ::= { hashAlgs 9 }
         // id-sha3-512 OBJECT IDENTIFIER ::= { hashAlgs 10 }
-        [crypto.SHA224] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 4}.slice(),
-        [crypto.SHA256] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 1}.slice(),
-        [crypto.SHA384] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 2}.slice(),
-        [crypto.SHA512] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 3}.slice(),
-        [crypto.SHA512_224] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 5}.slice(),
-        [crypto.SHA512_256] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 6}.slice(),
-        [crypto.SHA3_224] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 7}.slice(),
-        [crypto.SHA3_256] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 8}.slice(),
-        [crypto.SHA3_384] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 9}.slice(),
-        [crypto.SHA3_512] = new nint[]{2, 16, 840, 1, 101, 3, 4, 2, 10}.slice()
+        [crypto.SHA224] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 4]),
+        [crypto.SHA256] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 1]),
+        [crypto.SHA384] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 2]),
+        [crypto.SHA512] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 3]),
+        [crypto.SHA512_224] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 5]),
+        [crypto.SHA512_256] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 6]),
+        [crypto.SHA3_224] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 7]),
+        [crypto.SHA3_256] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 8]),
+        [crypto.SHA3_384] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 9]),
+        [crypto.SHA3_512] = slice<nint>([2, 16, 840, 1, 101, 3, 4, 2, 10])
     };
 
     foreach (var (h, oid) in prefixes) {
@@ -68,13 +68,13 @@ public static void TestHashPrefixes(ж<testing.T> Ꮡt) {
             ),
             Hash: new slice<byte>(h.Size())
         ));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         want = want.slice(0, len(want) - h.Size());
         var got = hashPrefixes[h.String()];
         if (!bytes.Equal(got, want)) {
-            Ꮡt.Errorf("%s: got %x, want %x"u8, h, got, want);
+            t.Errorf("%s: got %x, want %x", h, got, want);
         }
     }
 }

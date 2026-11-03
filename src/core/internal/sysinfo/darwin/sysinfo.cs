@@ -28,7 +28,7 @@ internal static void initᴛCPUName() { CPUName = sync.OnceValue(@string () => {
         }
     }
 
-    return ""u8;
+    return "";
 }); }
 
 } // end sysinfo_package

@@ -50,7 +50,7 @@ public static UntypedInt O_ASYNC => 0x02000;
 internal static UntypedInt o_DIRECTORY => 0x04000;
 public static UntypedInt O_CLOEXEC => 0x80000;
 internal static UntypedInt o_NOFOLLOW_ANY => 0x200000000; // used by internal/syscall/windows
-internal static UntypedInt o_WRITE_ATTRS => 0x800000000; // used by internal/syscall/windows
+internal static UntypedInt o_WRITE_ATTRS => 0x800000000;  // used by internal/syscall/windows
 
 // More invented values for signals
 public static ΔSignal SIGHUP => /* Signal(0x1) */ 1;
@@ -68,21 +68,21 @@ public static ΔSignal SIGALRM => /* Signal(0xe) */ 14;
 public static ΔSignal SIGTERM => /* Signal(0xf) */ 15;
 
 [GoLazy] partial class lazyᴛsignals { internal static array<@string> signals = new array<@string>(16){
-    [1] = "hangup"u8,
-    [2] = "interrupt"u8,
-    [3] = "quit"u8,
-    [4] = "illegal instruction"u8,
-    [5] = "trace/breakpoint trap"u8,
-    [6] = "aborted"u8,
-    [7] = "bus error"u8,
-    [8] = "floating point exception"u8,
-    [9] = "killed"u8,
-    [10] = "user defined signal 1"u8,
-    [11] = "segmentation fault"u8,
-    [12] = "user defined signal 2"u8,
-    [13] = "broken pipe"u8,
-    [14] = "alarm clock"u8,
-    [15] = "terminated"u8
+    [1] = "hangup",
+    [2] = "interrupt",
+    [3] = "quit",
+    [4] = "illegal instruction",
+    [5] = "trace/breakpoint trap",
+    [6] = "aborted",
+    [7] = "bus error",
+    [8] = "floating point exception",
+    [9] = "killed",
+    [10] = "user defined signal 1",
+    [11] = "segmentation fault",
+    [12] = "user defined signal 2",
+    [13] = "broken pipe",
+    [14] = "alarm clock",
+    [15] = "terminated"
 }; }
 
 internal static UntypedInt fileFlagsMask => 0xFFF00000;
@@ -337,7 +337,7 @@ public static int64 Nanoseconds(this ref Timeval tv) {
 }
 
 public static Timeval /*tv*/ NsecToTimeval(int64 nsec) {
-    Timeval tv = default!;
+    Timeval tv = default;
 
     tv.Sec = (int32)(nsec / 1000000000);
     tv.Usec = (int32)(nsec % 1000000000 / 1000);
@@ -383,7 +383,7 @@ public static int64 Nanoseconds(this ref Filetime ft) {
 }
 
 public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
-    Filetime ft = default!;
+    Filetime ft = default;
 
     // convert into 100-nanosecond
     nsec /= 100;

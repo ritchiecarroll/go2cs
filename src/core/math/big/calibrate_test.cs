@@ -25,41 +25,46 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-internal static ж<bool> calibrate = flag.Bool("calibrate"u8, false, "run calibration test"u8);
+internal static ж<bool> calibrate = flag.Bool("calibrate", false, "run calibration test");
 
 internal static sync.Once calibrateOnce;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string karatsubaMulˢ = "KaratsubaMul"u8;
-internal static readonly @string basicSqrˢ = "BasicSqr"u8;
-internal static readonly @string karatsubaSqrˢ = "KaratsubaSqr"u8;
-internal static readonly @string divRecursiveˢ = "DivRecursive"u8;
+internal static ref readonly @string karatsubaMulˢ => ref karatsubaMulˢᵇ;
+private static readonly @string karatsubaMulˢᵇ = "KaratsubaMul"u8;
+internal static ref readonly @string basicSqrˢ => ref basicSqrˢᵇ;
+private static readonly @string basicSqrˢᵇ = "BasicSqr"u8;
+internal static ref readonly @string karatsubaSqrˢ => ref karatsubaSqrˢᵇ;
+private static readonly @string karatsubaSqrˢᵇ = "KaratsubaSqr"u8;
+internal static ref readonly @string divRecursiveˢ => ref divRecursiveˢᵇ;
+private static readonly @string divRecursiveˢᵇ = "DivRecursive"u8;
 
-public static void TestCalibrate(ж<testing.T> Ꮡt) {
+public static void TestCalibrate(ж<testing.T> t) {
     if (!calibrate.Value) {
         return;
     }
 
-    Ꮡt.Run(karatsubaMulˢ, computeKaratsubaThreshold);
-    Ꮡt.Run(basicSqrˢ, computeBasicSqrThreshold);
-    Ꮡt.Run(karatsubaSqrˢ, computeKaratsubaSqrThreshold);
-    Ꮡt.Run(divRecursiveˢ, computeDivRecursiveThreshold);
+    t.Run(karatsubaMulˢ, computeKaratsubaThreshold);
+    t.Run(basicSqrˢ, computeBasicSqrThreshold);
+    t.Run(karatsubaSqrˢ, computeKaratsubaSqrThreshold);
+    t.Run(divRecursiveˢ, computeDivRecursiveThreshold);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string karatsubaˢ = "karatsuba"u8;
+internal static ref readonly @string karatsubaˢ => ref karatsubaˢᵇ;
+private static readonly @string karatsubaˢᵇ = "karatsuba"u8;
 
-internal static void computeKaratsubaThreshold(ж<testing.T> Ꮡt) {
+internal static void computeKaratsubaThreshold(ж<testing.T> t) {
     var set = (nint n) => {
         karatsubaThreshold = n;
     };
-    computeThreshold(Ꮡt, karatsubaˢ, set, 0, 4, 200, benchMul, 200, 8, 400);
+    computeThreshold(t, karatsubaˢ, set, 0, 4, 200, benchMul, 200, 8, 400);
 }
 
 internal static Action benchMul(nint size) {
     var x = rndNat(size);
     var y = rndNat(size);
-    global::go.math.big_package.Δnat z = default!;
+    global::go.math.big_package.Δnat z = default;
     var xʗ1 = x;
     var yʗ1 = y;
     var zʗ1 = z;
@@ -69,19 +74,20 @@ internal static Action benchMul(nint size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string basicSqrˢ2 = "basicSqr"u8;
+internal static ref readonly @string basicSqrˢ2 => ref basicSqrˢ2ᵇ;
+private static readonly @string basicSqrˢ2ᵇ = "basicSqr"u8;
 
-internal static void computeBasicSqrThreshold(ж<testing.T> Ꮡt) {
-    setDuringTest(Ꮡt, ᏑkaratsubaSqrThreshold, (nint)1000000000);
+internal static void computeBasicSqrThreshold(ж<testing.T> t) {
+    setDuringTest(t, ᏑkaratsubaSqrThreshold, (nint)1000000000);
     var set = (nint n) => {
         basicSqrThreshold = n;
     };
-    computeThreshold(Ꮡt, basicSqrˢ2, set, 2, 1, 40, benchBasicSqr, 1, 1, 40);
+    computeThreshold(t, basicSqrˢ2, set, 2, 1, 40, benchBasicSqr, 1, 1, 40);
 }
 
 internal static Action benchBasicSqr(nint size) {
     var x = rndNat(size);
-    global::go.math.big_package.Δnat z = default!;
+    global::go.math.big_package.Δnat z = default;
     var xʗ1 = x;
     var zʗ1 = z;
     return () => {
@@ -94,18 +100,19 @@ internal static Action benchBasicSqr(nint size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string karatsubaSqrˢ2 = "karatsubaSqr"u8;
+internal static ref readonly @string karatsubaSqrˢ2 => ref karatsubaSqrˢ2ᵇ;
+private static readonly @string karatsubaSqrˢ2ᵇ = "karatsubaSqr"u8;
 
-internal static void computeKaratsubaSqrThreshold(ж<testing.T> Ꮡt) {
+internal static void computeKaratsubaSqrThreshold(ж<testing.T> t) {
     var set = (nint n) => {
         karatsubaSqrThreshold = n;
     };
-    computeThreshold(Ꮡt, karatsubaSqrˢ2, set, 0, 4, 200, benchSqr, 200, 8, 400);
+    computeThreshold(t, karatsubaSqrˢ2, set, 0, 4, 200, benchSqr, 200, 8, 400);
 }
 
 internal static Action benchSqr(nint size) {
     var x = rndNat(size);
-    global::go.math.big_package.Δnat z = default!;
+    global::go.math.big_package.Δnat z = default;
     var xʗ1 = x;
     var zʗ1 = z;
     return () => {
@@ -114,20 +121,21 @@ internal static Action benchSqr(nint size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string divRecursiveˢ2 = "divRecursive"u8;
+internal static ref readonly @string divRecursiveˢ2 => ref divRecursiveˢ2ᵇ;
+private static readonly @string divRecursiveˢ2ᵇ = "divRecursive"u8;
 
-internal static void computeDivRecursiveThreshold(ж<testing.T> Ꮡt) {
+internal static void computeDivRecursiveThreshold(ж<testing.T> t) {
     var set = (nint n) => {
         divRecursiveThreshold = n;
     };
-    computeThreshold(Ꮡt, divRecursiveˢ2, set, 4, 4, 200, benchDiv, 200, 8, 400);
+    computeThreshold(t, divRecursiveˢ2, set, 4, 4, 200, benchDiv, 200, 8, 400);
 }
 
 internal static Action benchDiv(nint size) {
     var divx = rndNat(2 * size);
     var divy = rndNat(size);
-    global::go.math.big_package.Δnat z = default!;
-    global::go.math.big_package.Δnat r = default!;
+    global::go.math.big_package.Δnat z = default;
+    global::go.math.big_package.Δnat r = default;
     var divxʗ1 = divx;
     var divyʗ1 = divy;
     var rʗ1 = r;
@@ -138,10 +146,12 @@ internal static Action benchDiv(nint size) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sizeThresholdˢ = "size \\ threshold"u8;
-internal static readonly @string geomeanˢ = "geomean"u8;
+internal static ref readonly @string sizeThresholdˢ => ref sizeThresholdˢᵇ;
+private static readonly @string sizeThresholdˢᵇ = "size \\ threshold"u8;
+internal static ref readonly @string geomeanˢ => ref geomeanˢᵇ;
+private static readonly @string geomeanˢᵇ = "geomean"u8;
 
-internal static void computeThreshold(ж<testing.T> Ꮡt, @string name, Action<nint> set, nint thresholdLo, nint thresholdStep, nint thresholdHi, Func<nint, Action> bench, nint sizeLo, nint sizeStep, nint sizeHi) {
+internal static void computeThreshold(ж<testing.T> t, @string name, Action<nint> set, nint thresholdLo, nint thresholdStep, nint thresholdHi, Func<nint, Action> bench, nint sizeLo, nint sizeStep, nint sizeHi) {
     GoFrame ᒐ = default;
     try {
         var sizesᴷ = new stackAppend<nint>();
@@ -157,8 +167,8 @@ internal static void computeThreshold(ж<testing.T> Ꮡt, @string name, Action<n
         fmt.Printf("calibrate,%s\n"u8, name);
 
         // Expand lists of sizes and thresholds we will test.
-        slice<nint> sizes = default!;
-        slice<nint> thresholds = default!;
+        slice<nint> sizes = default;
+        slice<nint> thresholds = default;
         for (nint size = sizeLo; size <= sizeHi; size += sizeStep) {
             sizes = append(sizesᴷ, sizes, size);
         }
@@ -215,7 +225,7 @@ internal static void computeThreshold(ж<testing.T> Ꮡt, @string name, Action<n
                     for (nint k = 0; k < Stable; k++) {
                         var start = time.Now();
                         b();
-                        var tΔ1 = (float64)(int64)time.Since(start);
+                        var tΔ1 = (float64)time.Since(start);
                         if (tΔ1 < tmin) {
                             if (tΔ1 < tmin * 99D / 100D) {
                                 better = true;
@@ -263,7 +273,7 @@ internal static void computeThreshold(ж<testing.T> Ꮡt, @string name, Action<n
                     }
                 }
             }
-            if (n == 0){
+            if (n == 0) {
                 geomeans[j] = math.Inf(+1);
             } else {
                 geomeans[j] = math.Pow(p, 1D / (float64)n);
@@ -272,11 +282,11 @@ internal static void computeThreshold(ж<testing.T> Ꮡt, @string name, Action<n
         fmt.Printf("%s\n"u8, csv(geomeanˢ, geomeans));
 
         // Add best threshold and smallest, largest within 10% and 5% of best.
-        nint lo10 = default!;
-        nint lo5 = default!;
-        nint best = default!;
-        nint hi5 = default!;
-        nint hi10 = default!;
+        nint lo10 = default;
+        nint lo5 = default;
+        nint best = default;
+        nint hi5 = default;
+        nint hi10 = default;
         foreach (var (i, g) in geomeans) {
             if (g < geomeans[best]) {
                 best = i;
@@ -317,15 +327,15 @@ internal static @string csv<T>(@string name, slice<T> values)
 {
     var lineᴷ = new stackAppend<@string>();
 
-    var line = new @string[]{name}.slice();
+    var line = slice<@string>([name]);
     foreach (var (_, v) in values) {
-        if (math.IsInf(ConvertToFloat64<T>(v), +1)){
+        if (math.IsInf(ConvertToFloat64<T>(v), +1)) {
             line = append(lineᴷ, line, ""u8);
         } else {
             line = append(line, fmt.Sprint(v));
         }
     }
-    return strings.Join(line, ","u8);
+    return strings.Join(line, ",");
 }
 
 } // end big_internal_test_package

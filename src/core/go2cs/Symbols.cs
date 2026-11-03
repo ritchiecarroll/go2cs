@@ -73,12 +73,18 @@ public static class Symbols
     // the Go method and keeps this door, which no Go identifier can spell (U+203F is a connector
     // punctuation character: legal in C#, illegal in Go).
     public const string MapWrapperSet = "Set‿";
-    // FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Ꮡf‿`: the
-    // `static readonly FieldRefFunc<T, F>` the TypeGenerator emits beside the field's `Ꮡf` accessor, which
+    // FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Field‿Tokens.Ꮡf‿`:
+    // the `static readonly FieldRefFunc<T, F>` the TypeGenerator emits for the field's `Ꮡf` accessor, which
     // the generated `p.Ꮡf` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in
     // every assembly passes one delegate object and the cache compares by reference. U+203F keeps the
     // name out of reach of every Go field's accessor, as MapWrapperSet's door does.
     public const string FieldAccessTokenSuffix = "‿";
+    // FieldAccessTokenHolder names the nested static class that holds a struct's field accessor tokens. Native
+    // AOT names a preinitialized object by its owning type and then an allocation number, with no separator, so
+    // tokens held on the struct itself let `IfmaMsghdr` + 23 meet `IfmaMsghdr2` + 3 (darwin's syscall). The
+    // holder's name ends in a letter, so no type name runs into a number, and U+203F keeps it out of reach of
+    // every Go identifier.
+    public const string FieldAccessTokenHolder = "Field‿Tokens";
     // NilDeferringDerefAccessor is the golib ж<T> extension method used in place of `.Value`
     // for EVERY direct-ж pointer entry deref alias - a RECEIVER and a PARAMETER alike, in the
     // converter's own preamble, in the pointer-reassignment re-alias, and in the RecvGenerator

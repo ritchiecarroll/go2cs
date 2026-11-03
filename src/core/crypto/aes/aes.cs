@@ -40,7 +40,7 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     nint k = len(key);
     switch (k) {
     default: {
-        return (default!, ((KeySizeError)k));
+        return (default, ((KeySizeError)k));
     }
     case 16 or 24 or 32: {
         break;

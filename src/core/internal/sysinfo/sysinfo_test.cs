@@ -11,9 +11,9 @@ using static go.@internal.sysinfo_internal_test_package;
 
 partial class sysinfo_test_package {
 
-public static partial void TestCPUName(ж<testing.T> Ꮡt) {
-    Ꮡt.Logf("CPUName: %s"u8, CPUName());
-    Ꮡt.Logf("osCPUInfoName: %s"u8, sysinfo_internal_test_package.XosCPUInfoName());
+public static partial void TestCPUName(ж<testing.T> t) {
+    t.Logf("CPUName: %s", CPUName());
+    t.Logf("osCPUInfoName: %s", sysinfo_internal_test_package.XosCPUInfoName());
 }
 
 } // end sysinfo_test_package

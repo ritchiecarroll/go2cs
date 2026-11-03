@@ -10,7 +10,7 @@ partial class http_package {
 // A mapping tries to pick a representation that makes [mapping.find] most efficient.
 partial struct mapping<K, V> {
     internal slice<entry<K, V>> s; // for few pairs
-    internal map<K, V> m;     // for many pairs
+    internal map<K, V> m;          // for many pairs
 }
 
 partial struct entry<K, V> {
@@ -24,15 +24,15 @@ internal static nint maxSlice = 8;
 
 // add adds a key-value pair to the mapping.
 internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) {
-    if (h.m == default! && builtin.len(h.s) < maxSlice){
+    if (h.m == nil && builtin.len(h.s) < maxSlice) {
         h.s = append(h.s, new entry<K, V>(k, v));
     } else {
-        if (h.m == default!) {
+        if (h.m == nil) {
             h.m = new map<K, V>{};
             foreach (var (_, e) in h.s) {
                 h.m[e.key] = e.value;
             }
-            h.s = default!;
+            h.s = default;
         }
         h.m[k] = v;
     }
@@ -43,13 +43,13 @@ internal static void add<K, V>(this ref mapping<K, V> h, K k, V v) {
 // with that key.
 internal static (V v, bool found) find<K, V>(this ж<mapping<K, V>> Ꮡh, K k) {
     V v = GoZero<V>();
-    bool found = default!;
+    bool found = default;
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil) {
         return (v, false);
     }
-    if (h.m != default!) {
+    if (h.m != nil) {
         (v, found) = h.m[k, ꟷ];
         return (v, found);
     }
@@ -69,7 +69,7 @@ internal static void eachPair<K, V>(this ж<mapping<K, V>> Ꮡh, Func<K, V, bool
     if (Ꮡh == nil) {
         return;
     }
-    if (h.m != default!){
+    if (h.m != nil) {
         foreach (var (k, v) in h.m) {
             if (!f(k, v)) {
                 return;

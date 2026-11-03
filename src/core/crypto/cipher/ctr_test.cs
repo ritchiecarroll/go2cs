@@ -45,7 +45,7 @@ internal static void xor(slice<byte> a, slice<byte> b) {
     }
 }
 
-public static void TestCTR(ж<testing.T> Ꮡt) {
+public static void TestCTR(ж<testing.T> t) {
     for (nint size = 64; size <= 1024; size *= 2) {
         var iv = new slice<byte>(size);
         var ctr = cipher.NewCTR((noopBlock)size, iv);
@@ -63,14 +63,14 @@ public static void TestCTR(ж<testing.T> Ꮡt) {
         var dst = new slice<byte>(1024);
         ctr.XORKeyStream(dst, src);
         if (!bytes.Equal(dst, want)) {
-            Ꮡt.Errorf("for size %d\nhave %x\nwant %x"u8, size, dst, want);
+            t.Errorf("for size %d\nhave %x\nwant %x", size, dst, want);
         }
     }
 }
 
-public static void TestCTRStream(ж<testing.T> Ꮡt) {
-    cryptotest.TestAllImplementations(Ꮡt, aesˢ, (ж<testing.T> tΔ1) => {
-        foreach (var (_, keylen) in new nint[]{128, 192, 256}.slice()) {
+public static void TestCTRStream(ж<testing.T> t) {
+    cryptotest.TestAllImplementations(t, aesˢ, (ж<testing.T> tΔ1) => {
+        foreach (var (_, keylen) in slice<nint>([128, 192, 256])) {
             tΔ1.Run(fmt.Sprintf("AES-%d"u8, keylen), (ж<testing.T> tΔ2) => {
                 var rng = newRandReader(tΔ2);
 
@@ -78,7 +78,7 @@ public static void TestCTRStream(ж<testing.T> Ꮡt) {
                 rng.Read(key);
 
                 var (block, err) = aes.NewCipher(key);
-                if (err != default!) {
+                if (err != nil) {
                     throw panic(err);
                 }
 
@@ -87,14 +87,14 @@ public static void TestCTRStream(ж<testing.T> Ꮡt) {
         }
     });
 
-    Ꮡt.Run(desˢ, (ж<testing.T> tΔ3) => {
+    t.Run(desˢ, (ж<testing.T> tΔ3) => {
         var rng = newRandReader(tΔ3);
 
         var key = new slice<byte>(8);
         rng.Read(key);
 
         var (block, err) = des.NewCipher(key);
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
 
@@ -102,12 +102,11 @@ public static void TestCTRStream(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestCTRExtraMethods(ж<testing.T> Ꮡt) {
+public static void TestCTRExtraMethods(ж<testing.T> t) {
     var (block, _) = aes.NewCipher(new slice<byte>(16));
     var iv = new slice<byte>(block.BlockSize());
-    ref var s = ref heap<cipher.Stream>(out var Ꮡs);
-    s = cipher.NewCTR(block, iv);
-    cryptotest.NoExtraMethods(Ꮡt, Ꮡs);
+    ref var s = ref heap<cipher.Stream>(cipher.NewCTR(block, iv), out var Ꮡs);
+    cryptotest.NoExtraMethods(t, Ꮡs);
 }
 
 } // end cipher_test_package

@@ -1,0 +1,216 @@
+  Determining projects to restore...
+  Restored <tmp>/base/src/core/unsafe/unsafe.csproj (in 221 ms).
+  Restored <tmp>/base/src/core/io/fs/io.fs.csproj (in 89 ms).
+  Restored <tmp>/base/src/core/internal/unsafeheader/internal.unsafeheader.csproj (in 14 ms).
+  Restored <tmp>/base/src/core/internal/trace/tracev2/internal.trace.tracev2.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/unicode/utf8/unicode.utf8.csproj (in 5 ms).
+  Restored <tmp>/base/src/core/unicode/unicode.csproj (in 7 ms).
+  Restored <tmp>/base/src/core/time/time.csproj (in 26 ms).
+  Restored <tmp>/base/src/core/syscall/syscall.csproj (in 28 ms).
+  Restored <tmp>/base/src/gen/go2cs-gen/go2cs-gen.csproj (in 671 ms).
+  Restored <tmp>/base/src/core/sync/atomic/sync.atomic.csproj (in 1 ms).
+  Restored <tmp>/base/src/core/sync/sync.csproj (in 22 ms).
+  Restored <tmp>/base/src/core/strconv/strconv.csproj (in 37 ms).
+  Restored <tmp>/base/src/core/slices/slices.csproj (in 17 ms).
+  Restored <tmp>/base/src/core/runtime/runtime.csproj (in 24 ms).
+  Restored <tmp>/base/src/core/reflect/reflect.csproj (in 33 ms).
+  Restored <tmp>/base/src/core/path/path.csproj (in 27 ms).
+  Restored <tmp>/base/src/core/os/os.csproj (in 46 ms).
+  Restored <tmp>/base/src/core/math/math.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/math/bits/math.bits.csproj (in 4 ms).
+  Restored <tmp>/base/src/core/iter/iter.csproj (in 36 ms).
+  Restored <tmp>/base/src/core/io/io.csproj (in 36 ms).
+  Restored <tmp>/base/src/core/internal/msan/internal.msan.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/internal/goos/internal.goos.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/internal/goexperiment/internal.goexperiment.csproj (in 1 ms).
+  Restored <tmp>/base/src/core/internal/godebugs/internal.godebugs.csproj (in 6 ms).
+  Restored <tmp>/base/src/core/internal/godebug/internal.godebug.csproj (in 29 ms).
+  Restored <tmp>/base/src/core/internal/goarch/internal.goarch.csproj (in 1 ms).
+  Restored <tmp>/base/src/core/internal/fmtsort/internal.fmtsort.csproj (in 26 ms).
+  Restored <tmp>/base/src/core/internal/filepathlite/internal.filepathlite.csproj (in 24 ms).
+  Restored <tmp>/base/src/core/internal/cpu/internal.cpu.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/internal/coverage/rtcov/internal.coverage.rtcov.csproj (in 3 ms).
+  Restored <tmp>/base/src/core/internal/chacha8rand/internal.chacha8rand.csproj (in 5 ms).
+  Restored <tmp>/base/src/core/internal/byteorder/internal.byteorder.csproj (in 1 ms).
+  Restored <tmp>/base/src/core/internal/bytealg/internal.bytealg.csproj (in 3 ms).
+  Restored <tmp>/base/src/core/internal/asan/internal.asan.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/internal/bisect/internal.bisect.csproj (in 16 ms).
+  Restored <tmp>/base/src/core/internal/abi/internal.abi.csproj (in 4 ms).
+  Restored <tmp>/base/src/core/golib/golib.csproj (in 7 ms).
+  Restored <tmp>/base/src/core/errors/errors.csproj (in 15 ms).
+  Restored <tmp>/base/src/core/fmt/fmt.csproj (in 26 ms).
+  Restored <tmp>/base/src/core/cmp/cmp.csproj (in 3 ms).
+  Restored <tmp>/base/src/core/internal/testlog/internal.testlog.csproj (in 11 ms).
+  Restored <tmp>/base/src/core/internal/syscall/unix/internal.syscall.unix.csproj (in 24 ms).
+  Restored <tmp>/base/src/core/internal/synctest/internal.synctest.csproj (in 7 ms).
+  Restored <tmp>/base/src/core/internal/sync/internal.sync.csproj (in 4 ms).
+  Restored <tmp>/base/src/core/internal/syscall/execenv/internal.syscall.execenv.csproj (in 23 ms).
+  Restored <tmp>/base/src/core/internal/stringslite/internal.stringslite.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/internal/strconv/internal.strconv.csproj (in 4 ms).
+  Restored <tmp>/base/src/core/internal/runtime/sys/internal.runtime.sys.csproj (in 7 ms).
+  Restored <tmp>/base/src/core/internal/runtime/pprof/label/internal.runtime.pprof.label.csproj (in 1 ms).
+  Restored <tmp>/base/src/core/internal/runtime/math/internal.runtime.math.csproj (in 3 ms).
+  Restored <tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj (in 3 ms).
+  Restored <tmp>/base/src/core/internal/runtime/gc/scan/internal.runtime.gc.scan.csproj (in 8 ms).
+  Restored <tmp>/base/src/core/internal/runtime/gc/internal.runtime.gc.csproj (in 2 ms).
+  Restored <tmp>/base/src/core/internal/runtime/exithook/internal.runtime.exithook.csproj (in 3 ms).
+  Restored <tmp>/base/src/core/internal/runtime/atomic/internal.runtime.atomic.csproj (in 5 ms).
+  Restored <tmp>/base/src/core/internal/reflectlite/internal.reflectlite.csproj (in 11 ms).
+  Restored <tmp>/base/src/core/internal/race/internal.race.csproj (in 11 ms).
+  Restored <tmp>/base/src/core/internal/profilerecord/internal.profilerecord.csproj (in 1 ms).
+  Restored <tmp>/base/src/core/internal/oserror/internal.oserror.csproj (in 13 ms).
+  Restored <tmp>/base/src/core/internal/poll/internal.poll.csproj (in 21 ms).
+  Restored <tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj (in 1.9 sec).
+  go2cs-gen -> <tmp>/base/src/gen/go2cs-gen/bin/Release/netstandard2.0/go2cs-gen.dll
+  golib -> <tmp>/base/src/core/golib/bin/Release/net10.0/golib.dll
+  internal.goarch -> <tmp>/base/src/core/internal/goarch/bin/Release/net10.0/internal.goarch.dll
+  internal.goos -> <tmp>/base/src/core/internal/goos/bin/Release/net10.0/internal.goos.dll
+  unsafe -> <tmp>/base/src/core/unsafe/bin/Release/net10.0/unsafe.dll
+  internal.byteorder -> <tmp>/base/src/core/internal/byteorder/bin/Release/net10.0/internal.byteorder.dll
+  unicode.utf8 -> <tmp>/base/src/core/unicode/utf8/bin/Release/net10.0/unicode.utf8.dll
+  internal.coverage.rtcov -> <tmp>/base/src/core/internal/coverage/rtcov/bin/Release/net10.0/internal.coverage.rtcov.dll
+  cmp -> <tmp>/base/src/core/cmp/bin/Release/net10.0/cmp.dll
+  internal.runtime.sys -> <tmp>/base/src/core/internal/runtime/sys/bin/Release/net10.0/internal.runtime.sys.dll
+  internal.cpu -> <tmp>/base/src/core/internal/cpu/bin/Release/net10.0/internal.cpu.dll
+  sync.atomic -> <tmp>/base/src/core/sync/atomic/bin/Release/net10.0/sync.atomic.dll
+  internal.runtime.atomic -> <tmp>/base/src/core/internal/runtime/atomic/bin/Release/net10.0/internal.runtime.atomic.dll
+  internal.godebugs -> <tmp>/base/src/core/internal/godebugs/bin/Release/net10.0/internal.godebugs.dll
+  internal.runtime.pprof.label -> <tmp>/base/src/core/internal/runtime/pprof/label/bin/Release/net10.0/internal.runtime.pprof.label.dll
+  internal.trace.tracev2 -> <tmp>/base/src/core/internal/trace/tracev2/bin/Release/net10.0/internal.trace.tracev2.dll
+  internal.msan -> <tmp>/base/src/core/internal/msan/bin/Release/net10.0/internal.msan.dll
+  internal.unsafeheader -> <tmp>/base/src/core/internal/unsafeheader/bin/Release/net10.0/internal.unsafeheader.dll
+  internal.asan -> <tmp>/base/src/core/internal/asan/bin/Release/net10.0/internal.asan.dll
+  math.bits -> <tmp>/base/src/core/math/bits/bin/Release/net10.0/math.bits.dll
+  internal.goexperiment -> <tmp>/base/src/core/internal/goexperiment/bin/Release/net10.0/internal.goexperiment.dll
+  unicode -> <tmp>/base/src/core/unicode/bin/Release/net10.0/unicode.dll
+  internal.abi -> <tmp>/base/src/core/internal/abi/bin/Release/net10.0/internal.abi.dll
+  internal.profilerecord -> <tmp>/base/src/core/internal/profilerecord/bin/Release/net10.0/internal.profilerecord.dll
+  internal.strconv -> <tmp>/base/src/core/internal/strconv/bin/Release/net10.0/internal.strconv.dll
+  internal.runtime.gc -> <tmp>/base/src/core/internal/runtime/gc/bin/Release/net10.0/internal.runtime.gc.dll
+  internal.runtime.math -> <tmp>/base/src/core/internal/runtime/math/bin/Release/net10.0/internal.runtime.math.dll
+  internal.bytealg -> <tmp>/base/src/core/internal/bytealg/bin/Release/net10.0/internal.bytealg.dll
+  internal.stringslite -> <tmp>/base/src/core/internal/stringslite/bin/Release/net10.0/internal.stringslite.dll
+  math -> <tmp>/base/src/core/math/bin/Release/net10.0/math.dll
+  internal.race -> <tmp>/base/src/core/internal/race/bin/Release/net10.0/internal.race.dll
+  internal.chacha8rand -> <tmp>/base/src/core/internal/chacha8rand/bin/Release/net10.0/internal.chacha8rand.dll
+  internal.synctest -> <tmp>/base/src/core/internal/synctest/bin/Release/net10.0/internal.synctest.dll
+  internal.runtime.gc.scan -> <tmp>/base/src/core/internal/runtime/gc/scan/bin/Release/net10.0/internal.runtime.gc.scan.dll
+  internal.runtime.exithook -> <tmp>/base/src/core/internal/runtime/exithook/bin/Release/net10.0/internal.runtime.exithook.dll
+  internal.sync -> <tmp>/base/src/core/internal/sync/bin/Release/net10.0/internal.sync.dll
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(38,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(39,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(40,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(41,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(42,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(44,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(45,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(94,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(95,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(96,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(97,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(98,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(100,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(101,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+  internal.runtime.maps -> <tmp>/base/src/core/internal/runtime/maps/bin/Release/net10.0/internal.runtime.maps.dll
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(46,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(47,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(48,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(49,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(50,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(52,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(53,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(86,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(87,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(88,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(89,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(90,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(92,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(93,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(394,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(395,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(396,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(397,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(398,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(400,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(401,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(434,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(435,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(436,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(437,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(438,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(440,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(441,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+  runtime -> <tmp>/base/src/core/runtime/bin/Release/net10.0/runtime.dll
+  iter -> <tmp>/base/src/core/iter/bin/Release/net10.0/iter.dll
+  internal.reflectlite -> <tmp>/base/src/core/internal/reflectlite/bin/Release/net10.0/internal.reflectlite.dll
+  sync -> <tmp>/base/src/core/sync/bin/Release/net10.0/sync.dll
+  internal.testlog -> <tmp>/base/src/core/internal/testlog/bin/Release/net10.0/internal.testlog.dll
+  slices -> <tmp>/base/src/core/slices/bin/Release/net10.0/slices.dll
+  internal.bisect -> <tmp>/base/src/core/internal/bisect/bin/Release/net10.0/internal.bisect.dll
+  internal.godebug -> <tmp>/base/src/core/internal/godebug/bin/Release/net10.0/internal.godebug.dll
+  errors -> <tmp>/base/src/core/errors/bin/Release/net10.0/errors.dll
+  strconv -> <tmp>/base/src/core/strconv/bin/Release/net10.0/strconv.dll
+  path -> <tmp>/base/src/core/path/bin/Release/net10.0/path.dll
+  internal.oserror -> <tmp>/base/src/core/internal/oserror/bin/Release/net10.0/internal.oserror.dll
+  io -> <tmp>/base/src/core/io/bin/Release/net10.0/io.dll
+  syscall -> <tmp>/base/src/core/syscall/bin/Release/net10.0/syscall.dll
+  internal.syscall.execenv -> <tmp>/base/src/core/internal/syscall/execenv/bin/Release/net10.0/internal.syscall.execenv.dll
+  internal.syscall.unix -> <tmp>/base/src/core/internal/syscall/unix/bin/Release/net10.0/internal.syscall.unix.dll
+  reflect -> <tmp>/base/src/core/reflect/bin/Release/net10.0/reflect.dll
+  time -> <tmp>/base/src/core/time/bin/Release/net10.0/time.dll
+  internal.poll -> <tmp>/base/src/core/internal/poll/bin/Release/net10.0/internal.poll.dll
+  internal.fmtsort -> <tmp>/base/src/core/internal/fmtsort/bin/Release/net10.0/internal.fmtsort.dll
+  io.fs -> <tmp>/base/src/core/io/fs/bin/Release/net10.0/io.fs.dll
+  internal.filepathlite -> <tmp>/base/src/core/internal/filepathlite/bin/Release/net10.0/internal.filepathlite.dll
+  os -> <tmp>/base/src/core/os/bin/Release/net10.0/os.dll
+  fmt -> <tmp>/base/src/core/fmt/bin/Release/net10.0/fmt.dll
+  GoroutinePanicAfterDeferredDone -> <tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/bin/Release/net10.0/GoroutinePanicAfterDeferredDone.dll
+
+Build succeeded.
+
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(38,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(39,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(40,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(41,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(42,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(44,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(45,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(94,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(95,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(96,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(97,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(98,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(100,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/internal/runtime/maps/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(101,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/internal/runtime/maps/internal.runtime.maps.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(46,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(47,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(48,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(49,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(50,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(52,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(53,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(86,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(87,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(88,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(89,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(90,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(92,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(93,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(394,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(395,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(396,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(397,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(398,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(400,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(401,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(434,263): warning CS8619: Nullability of reference types in value of type 'System.Type?' doesn't match target type 'System.Type'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(435,252): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(436,258): warning CS8619: Nullability of reference types in value of type 'nint[]?[]?' doesn't match target type 'nint[][]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(437,271): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(438,250): warning CS8619: Nullability of reference types in value of type 'nint[]?' doesn't match target type 'nint[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(440,273): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+<tmp>/base/src/core/runtime/Generated/go2cs-gen/go2cs.FieldAccessGenerator/GoFieldAccess.g.cs(441,274): warning CS8619: Nullability of reference types in value of type 'go.GoChanDir[]?' doesn't match target type 'go.GoChanDir[]'. [<tmp>/base/src/core/runtime/runtime.csproj]
+    42 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:02:46.16

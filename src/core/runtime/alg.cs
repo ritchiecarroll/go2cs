@@ -12,7 +12,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(stringStruct), typeof(interfacetype), typeof(structtype), typeof(Δsliceᴛ))]
 partial class runtime_package {
 
 // We use 32-bit hash on Wasm, see hash32.go.
@@ -153,15 +152,15 @@ internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
     if (tab == nil) {
         return h;
     }
-    var t = tab.Value.Type;
-    if ((~t).Equal == default!) {
+    var t = tab.Type;
+    if (t.Equal == nil) {
         // Check hashability here. We could do this check inside
         // typehash, but we want to report the topmost type in
         // the error text (e.g. in a struct with a field of slice type
         // we want to report the struct, not the slice).
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(t).@string())));
     }
-    if (t.IsDirectIface()){
+    if (t.IsDirectIface()) {
         return trimHash(c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(iface.Ꮡdata)), (uintptr)(h ^ c0)));
     } else {
         return trimHash(c1 * typehash(t, a.of(iface.Ꮡdata).Value, (uintptr)(h ^ c0)));
@@ -184,11 +183,11 @@ internal static uintptr nilinterhash(@unsafe.Pointer Δp, uintptr h) {
     if (t == nil) {
         return h;
     }
-    if ((~t).Equal == default!) {
+    if (t.Equal == nil) {
         // See comment in interhash above.
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(t).@string())));
     }
-    if (t.IsDirectIface()){
+    if (t.IsDirectIface()) {
         return trimHash(c1 * typehash(t, @unsafe.Pointer.FromBox(a.of(eface.Ꮡdata)), (uintptr)(h ^ c0)));
     } else {
         return trimHash(c1 * typehash(t, a.of(eface.Ꮡdata).Value, (uintptr)(h ^ c0)));
@@ -221,48 +220,48 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
 
     if ((abi.TFlag)(t.TFlag & abi.TFlagRegularMemory) != 0) {
         // Handle ptr sizes specially, see issue 37086.
-        var exprᴛ1 = t.Size_;
-        if (exprᴛ1 == 4) {
+        switch (t.Size_) {
+        case var ᴛ when ᴛ == 4: {
             return memhash32(Δp, h);
         }
-        if (exprᴛ1 == 8) {
+        case var ᴛ when ᴛ == 8: {
             return memhash64(Δp, h);
         }
-        { /* default: */
+        default: {
             return memhash(Δp, h, t.Size_);
-        }
+        }}
     }
-    var exprᴛ2 = t.Kind();
-    if (exprᴛ2 == abi.Float32) {
+    switch (t.Kind()) {
+    case var ᴛ when ᴛ == abi.Float32: {
         return f32hash(Δp, h);
     }
-    if (exprᴛ2 == abi.Float64) {
+    case var ᴛ when ᴛ == abi.Float64: {
         return f64hash(Δp, h);
     }
-    if (exprᴛ2 == abi.Complex64) {
+    case var ᴛ when ᴛ == abi.Complex64: {
         return c64hash(Δp, h);
     }
-    if (exprᴛ2 == abi.Complex128) {
+    case var ᴛ when ᴛ == abi.Complex128: {
         return c128hash(Δp, h);
     }
-    if (exprᴛ2 == abi.ΔString) {
+    case var ᴛ when ᴛ == abi.ΔString: {
         return strhash(Δp, h);
     }
-    if (exprᴛ2 == abi.Interface) {
+    case var ᴛ when ᴛ == abi.Interface: {
         var i = Ꮡt.Reinterpret<_type, interfacetype>();
         if (len(i.Methods) == 0) {
             return nilinterhash(Δp, h);
         }
         return interhash(Δp, h);
     }
-    if (exprᴛ2 == abi.Array) {
+    case var ᴛ when ᴛ == abi.Array: {
         var a = Ꮡt.Reinterpret<_type, arraytype>();
         for (var i = (uintptr)0; i < a.of(arraytype.ᏑLen).Value; i++) {
-            h = typehash(a.of(arraytype.ᏑElem).Value, (uintptr)add(Δp, i * (~a.of(arraytype.ᏑElem).Value).Size_), h);
+            h = typehash(a.of(arraytype.ᏑElem).Value, (uintptr)add(Δp, i * a.of(arraytype.ᏑElem).Value.Size_), h);
         }
         return h;
     }
-    if (exprᴛ2 == abi.Struct) {
+    case var ᴛ when ᴛ == abi.Struct: {
         var s = Ꮡt.Reinterpret<_type, structtype>();
         foreach (var (_, f) in s.Fields) {
             if (f.Name.IsBlank()) {
@@ -272,16 +271,17 @@ internal static uintptr typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h)
         }
         return h;
     }
-    { /* default: */
+    default: {
         // Should never happen, as typehash should only be called
         // with comparable types.
         throw panic(((errorString)("hash of unhashable type "u8 + toRType(Ꮡt).@string())));
-    }
+        break;
+    }}
 }
 
 //go:linkname reflect_typehash reflect.typehash
-internal static uintptr reflect_typehash(ж<_type> Ꮡt, @unsafe.Pointer Δp, uintptr h) {
-    return typehash(Ꮡt, Δp, h);
+internal static uintptr reflect_typehash(ж<_type> t, @unsafe.Pointer Δp, uintptr h) {
+    return typehash(t, Δp, h);
 }
 
 internal static bool memequal0(@unsafe.Pointer Δp, @unsafe.Pointer q) {
@@ -347,7 +347,7 @@ internal static bool efaceeq(ж<_type> Ꮡt, @unsafe.Pointer x, @unsafe.Pointer 
         return true;
     }
     var eq = t.Equal;
-    if (eq == default!) {
+    if (eq == nil) {
         throw panic(((errorString)("comparing uncomparable type "u8 + toRType(Ꮡt).@string())));
     }
     if (t.IsDirectIface()) {
@@ -366,8 +366,8 @@ internal static bool ifaceeq(ж<itab> Ꮡtab, @unsafe.Pointer x, @unsafe.Pointer
         return true;
     }
     var t = tab.Type;
-    var eq = t.Value.Equal;
-    if (eq == default!) {
+    var eq = t.Equal;
+    if (eq == nil) {
         throw panic(((errorString)("comparing uncomparable type "u8 + toRType(t).@string())));
     }
     if (t.IsDirectIface()) {

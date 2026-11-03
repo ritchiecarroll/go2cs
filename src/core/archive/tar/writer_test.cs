@@ -32,13 +32,16 @@ using static go.archive.tar_package;
 partial class tar_internal_test_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string uniqueAᶜ = "-  "u8;
+internal static ref readonly @string uniqueAᶜ => ref uniqueAᶜᵇ;
+private static readonly @string uniqueAᶜᵇ = "-  "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string uniqueBᶜ = "+  "u8;
+internal static ref readonly @string uniqueBᶜ => ref uniqueBᶜᵇ;
+private static readonly @string uniqueBᶜᵇ = "+  "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string identityᶜ = "   "u8;
+internal static ref readonly @string identityᶜ => ref identityᶜᵇ;
+private static readonly @string identityᶜᵇ = "   "u8;
 
 internal static @string bytediff(slice<byte> a, slice<byte> b) {
     var ssᴷ = new stackAppend<@string>();
@@ -46,11 +49,11 @@ internal static @string bytediff(slice<byte> a, slice<byte> b) {
     @string uniqueA = uniqueAᶜ;
     @string uniqueB = uniqueBᶜ;
     @string identity = identityᶜ;
-    slice<@string> ss = default!;
-    var sa = strings.Split(strings.TrimSpace(hex.Dump(a)), "\n"u8);
-    var sb = strings.Split(strings.TrimSpace(hex.Dump(b)), "\n"u8);
+    slice<@string> ss = default;
+    var sa = strings.Split(strings.TrimSpace(hex.Dump(a)), "\n");
+    var sb = strings.Split(strings.TrimSpace(hex.Dump(b)), "\n");
     while (len(sa) > 0 && len(sb) > 0) {
-        if (sa[0] == sb[0]){
+        if (sa[0] == sb[0]) {
             ss = append(ssᴷ, ss, identity + sa[0]);
         } else {
             ss = append(ss, uniqueA + sa[0]);
@@ -66,11 +69,12 @@ internal static @string bytediff(slice<byte> a, slice<byte> b) {
         ss = append(ss, uniqueB + sb[0]);
         sb = sb[1..];
     }
-    return strings.Join(ss, "\n"u8);
+    return strings.Join(ss, "\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string longnameˢ = "longname/"u8;
+internal static ref readonly @string longnameˢ => ref longnameˢᵇ;
+private static readonly @string longnameˢᵇ = "longname/"u8;
 
 internal partial struct TestWriter_testHeader /*dyn*/ {
 // WriteHeader(hdr) == wantErr
@@ -99,78 +103,78 @@ internal partial struct TestWriter_testClose /*dyn*/ {
 
 internal partial struct TestWriter_vectors /*dyn*/ {
     internal @string @file; // Optional filename of expected output
-    internal bool obscured;   // Whether file is obscured
+    internal bool obscured; // Whether file is obscured
     internal slice<TestWriter_testFnc> tests;
 }
 
-public static void TestWriter(ж<testing.T> Ꮡt) {
-    var vectors = new TestWriter_vectors[]{new(
+public static void TestWriter(ж<testing.T> t) {
+    var vectors = slice<TestWriter_vectors>([new(
         // The writer test file was produced with this command:
         // tar (GNU tar) 1.26
         //   ln -s small.txt link.txt
         //   tar -b 1 --format=ustar -c -f writer.tar small.txt small2.txt link.txt
-        @file: "testdata/writer.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/writer.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "small.txt"u8,
+                Name: "small.txt",
                 Size: 5,
                 Mode: 416,
                 Uid: 73025,
                 Gid: 5000,
-                Uname: "dsymonds"u8,
-                Gname: "eng"u8,
+                Uname: "dsymonds",
+                Gname: "eng",
                 ModTime: time.Unix(1246508266, 0)
-            ), default!),
-            new TestWriter_testWrite("Kilts"u8, 5, default!),
+            ), default),
+            new TestWriter_testWrite("Kilts", 5, default),
 
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "small2.txt"u8,
+                Name: "small2.txt",
                 Size: 11,
                 Mode: 416,
                 Uid: 73025,
-                Uname: "dsymonds"u8,
-                Gname: "eng"u8,
+                Uname: "dsymonds",
+                Gname: "eng",
                 Gid: 5000,
                 ModTime: time.Unix(1245217492, 0)
-            ), default!),
-            new TestWriter_testWrite("Google.com\n"u8, 11, default!),
+            ), default),
+            new TestWriter_testWrite("Google.com\n", 11, default),
 
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeSymlink,
-                Name: "link.txt"u8,
-                Linkname: "small.txt"u8,
+                Name: "link.txt",
+                Linkname: "small.txt",
                 Mode: 511,
                 Uid: 1000,
                 Gid: 1000,
-                Uname: "strings"u8,
-                Gname: "strings"u8,
+                Uname: "strings",
+                Gname: "strings",
                 ModTime: time.Unix(1314603082, 0)
-            ), default!),
-            new TestWriter_testWrite(""u8, 0, default!),
+            ), default),
+            new TestWriter_testWrite("", 0, default),
 
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
         // The truncated test file was produced using these commands:
         //   dd if=/dev/zero bs=1048576 count=16384 > /tmp/16gig.txt
         //   tar -b 1 -c -f- /tmp/16gig.txt | dd bs=512 count=8 > writer-big.tar
-        @file: "testdata/writer-big.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/writer-big.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "tmp/16gig.txt"u8,
+                Name: "tmp/16gig.txt",
                 Size: 17179869184L,
                 Mode: 416,
                 Uid: 73025,
                 Gid: 5000,
-                Uname: "dsymonds"u8,
-                Gname: "eng"u8,
+                Uname: "dsymonds",
+                Gname: "eng",
                 ModTime: time.Unix(1254699560, 0),
                 Format: FormatGNU
-            ), default!)
-        }.slice()
+            ), default)
+        ])
     ), new(
         // This truncated file was produced using this library.
         // It was verified to work with GNU tar 1.27.1 and BSD tar 3.1.2.
@@ -179,9 +183,9 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         //  bsdtar -xvf writer-big-long.tar
         //
         // This file is in PAX format.
-        @file: "testdata/writer-big-long.tar.base64"u8,
+        @file: "testdata/writer-big-long.tar.base64",
         obscured: true,
-        tests: new TestWriter_testFnc[]{
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
                 Name: strings.Repeat(longnameˢ, 15) + "16gig.txt"u8,
@@ -189,16 +193,16 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 Mode: 420,
                 Uid: 1000,
                 Gid: 1000,
-                Uname: "guillaume"u8,
-                Gname: "guillaume"u8,
+                Uname: "guillaume",
+                Gname: "guillaume",
                 ModTime: time.Unix(1399583047, 0)
-            ), default!)
-        }.slice()
+            ), default)
+        ])
     ), new(
         // This file was produced using GNU tar v1.17.
         //	gnutar -b 4 --format=ustar (longname/)*15 + file.txt
-        @file: "testdata/ustar.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/ustar.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
                 Name: strings.Repeat(longnameˢ, 15) + "file.txt"u8,
@@ -206,79 +210,79 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 Mode: 420,
                 Uid: 501,
                 Gid: 20,
-                Uname: "shane"u8,
-                Gname: "staff"u8,
+                Uname: "shane",
+                Gname: "staff",
                 ModTime: time.Unix(1360135598, 0)
-            ), default!),
-            new TestWriter_testWrite("hello\n"u8, 6, default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+            ), default),
+            new TestWriter_testWrite("hello\n", 6, default),
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
         // This file was produced using GNU tar v1.26:
         //	echo "Slartibartfast" > file.txt
         //	ln file.txt hard.txt
         //	tar -b 1 --format=ustar -c -f hardlink.tar file.txt hard.txt
-        @file: "testdata/hardlink.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/hardlink.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "file.txt"u8,
+                Name: "file.txt",
                 Size: 15,
                 Mode: 420,
                 Uid: 1000,
                 Gid: 100,
-                Uname: "vbatts"u8,
-                Gname: "users"u8,
+                Uname: "vbatts",
+                Gname: "users",
                 ModTime: time.Unix(1425484303, 0)
-            ), default!),
-            new TestWriter_testWrite("Slartibartfast\n"u8, 15, default!),
+            ), default),
+            new TestWriter_testWrite("Slartibartfast\n", 15, default),
 
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeLink,
-                Name: "hard.txt"u8,
-                Linkname: "file.txt"u8,
+                Name: "hard.txt",
+                Linkname: "file.txt",
                 Mode: 420,
                 Uid: 1000,
                 Gid: 100,
-                Uname: "vbatts"u8,
-                Gname: "users"u8,
+                Uname: "vbatts",
+                Gname: "users",
                 ModTime: time.Unix(1425484303, 0)
-            ), default!),
-            new TestWriter_testWrite(""u8, 0, default!),
+            ), default),
+            new TestWriter_testWrite("", 0, default),
 
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
-        tests: new TestWriter_testFnc[]{
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "bad-null.txt"u8,
-                Xattrs: new map<@string, @string>{["null\x00null\x00"u8] = "fizzbuzz"u8}
+                Name: "bad-null.txt",
+                Xattrs: new map<@string, @string>{["null\x00null\x00"] = "fizzbuzz"}
             ), new headerError(new @string[]{}.slice()))
-        }.slice()
+        ])
     ), new(
-        tests: new TestWriter_testFnc[]{
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "null\x00.txt"u8
+                Name: "null\x00.txt"
             ), new headerError(new @string[]{}.slice()))
-        }.slice()
+        ])
     ), new(
-        @file: "testdata/pax-records.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/pax-records.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "file"u8,
+                Name: "file",
                 Uname: strings.Repeat(longˢ, 10),
                 PAXRecords: new map<@string, @string>{
-                    ["path"u8] = "FILE"u8, // Should be ignored
-                    ["GNU.sparse.map"u8] = "0,0"u8, // Should be ignored
-                    ["comment"u8] = "Hello, 世界"u8,
-                    ["GOLANG.pkg"u8] = "tar"u8
+                    ["path"] = "FILE",          // Should be ignored
+                    ["GNU.sparse.map"] = "0,0", // Should be ignored
+                    ["comment"] = "Hello, 世界",
+                    ["GOLANG.pkg"] = "tar"
                 }
-            ), default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+            ), default),
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
         // Craft a theoretically valid PAX archive with global headers.
         // The GNU and BSD tar tools do not parse these the same way.
@@ -310,66 +314,66 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         //	---------- 0/0               0 2017-07-13 19:40 file2
         //	---------- 0/0               0 2017-07-13 19:40 file3
         //	---------- 0/0               0 2014-05-13 09:53 file4
-        @file: "testdata/pax-global-records.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/pax-global-records.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeXGlobalHeader,
-                PAXRecords: new map<@string, @string>{["path"u8] = "global1"u8, ["mtime"u8] = "1500000000.0"u8}
-            ), default!),
+                PAXRecords: new map<@string, @string>{["path"] = "global1", ["mtime"] = "1500000000.0"}
+            ), default),
             new TestWriter_testHeader(new Header(
-                Typeflag: TypeReg, Name: "file1"u8
-            ), default!),
+                Typeflag: TypeReg, Name: "file1"
+            ), default),
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "file2"u8,
-                PAXRecords: new map<@string, @string>{["path"u8] = "file2"u8}
-            ), default!),
+                Name: "file2",
+                PAXRecords: new map<@string, @string>{["path"] = "file2"}
+            ), default),
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeXGlobalHeader,
-                PAXRecords: new map<@string, @string>{["path"u8] = ""u8} // Should delete "path", but keep "mtime"
-            ), default!),
+                PAXRecords: new map<@string, @string>{["path"] = ""} // Should delete "path", but keep "mtime"
+            ), default),
             new TestWriter_testHeader(new Header(
-                Typeflag: TypeReg, Name: "file3"u8
-            ), default!),
+                Typeflag: TypeReg, Name: "file3"
+            ), default),
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "file4"u8,
+                Name: "file4",
                 ModTime: time.Unix(1400000000, 0),
-                PAXRecords: new map<@string, @string>{["mtime"u8] = "1400000000"u8}
-            ), default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+                PAXRecords: new map<@string, @string>{["mtime"] = "1400000000"}
+            ), default),
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
-        @file: "testdata/gnu-utf8.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/gnu-utf8.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
-                Name: "☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹"u8,
+                Name: "☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹☺☻☹",
                 Mode: 420,
                 Uid: 1000, Gid: 1000,
-                Uname: "☺"u8,
-                Gname: "⚹"u8,
+                Uname: "☺",
+                Gname: "⚹",
                 ModTime: time.Unix(0, 0),
                 Format: FormatGNU
-            ), default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+            ), default),
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
-        @file: "testdata/gnu-not-utf8.tar"u8,
-        tests: new TestWriter_testFnc[]{
+        @file: "testdata/gnu-not-utf8.tar",
+        tests: slice<TestWriter_testFnc>([
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
                 Name: ((@string)(new byte[]{0x68, 0x69, 0x80, 0x81, 0x82, 0x83, 0x62, 0x79, 0x65})),
                 Mode: 420,
                 Uid: 1000,
                 Gid: 1000,
-                Uname: "rawr"u8,
-                Gname: "dsnet"u8,
+                Uname: "rawr",
+                Gname: "dsnet",
                 ModTime: time.Unix(0, 0),
                 Format: FormatGNU
-            ), default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice() // TODO(dsnet): Re-enable this test when adding sparse support.
+            ), default),
+            new TestWriter_testClose((error)(default))
+        ]) // TODO(dsnet): Re-enable this test when adding sparse support.
  // See https://golang.org/issue/22735
  /*
 			}, {
@@ -489,22 +493,22 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 		*/
 
     ), new(
-        @file: "testdata/trailing-slash.tar"u8,
-        tests: new TestWriter_testFnc[]{
-            new TestWriter_testHeader(new Header(Name: strings.Repeat("123456789/"u8, 30)), default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+        @file: "testdata/trailing-slash.tar",
+        tests: slice<TestWriter_testFnc>([
+            new TestWriter_testHeader(new Header(Name: strings.Repeat("123456789/", 30)), default),
+            new TestWriter_testClose((error)(default))
+        ])
     ), new(
         // Automatically promote zero value of Typeflag depending on the name.
-        @file: "testdata/file-and-dir.tar"u8,
-        tests: new TestWriter_testFnc[]{
-            new TestWriter_testHeader(new Header(Name: "small.txt"u8, Size: 5), default!),
-            new TestWriter_testWrite("Kilts"u8, 5, default!),
-            new TestWriter_testHeader(new Header(Name: "dir/"u8), default!),
-            new TestWriter_testClose((error)(default!))
-        }.slice()
+        @file: "testdata/file-and-dir.tar",
+        tests: slice<TestWriter_testFnc>([
+            new TestWriter_testHeader(new Header(Name: "small.txt", Size: 5), default),
+            new TestWriter_testWrite("Kilts", 5, default),
+            new TestWriter_testHeader(new Header(Name: "dir/"), default),
+            new TestWriter_testClose((error)(default))
+        ])
     )
-    }.slice();
+    ]);
 
     bool equalError(error x, error y) {
         var (_, ok1) = x._<headerError>(ᐧ);
@@ -520,7 +524,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 
         var equalErrorʗ1 = equalError;
         var vʗ1 = v;
-        Ꮡt.Run(strings.TrimSuffix(path.Base(v.@file), base64ˢ), (ж<testing.T> tΔ1) => {
+        t.Run(strings.TrimSuffix(path.Base(v.@file), base64ˢ), (ж<testing.T> tΔ1) => {
             const int64 maxSize = /* 10 << 10 */ 10240; // 10KiB
             var buf = @new<bytes.Buffer>();
             var tw = NewWriter(iotest.TruncateWriter(new tar_test_package.bytes_BufferжWriter(buf), maxSize));
@@ -529,16 +533,16 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 switch (tf.type()) {
                 case TestWriter_testHeader tfΔ1ᴛ1: {
                     ref var tfΔ1 = ref heap(tfΔ1ᴛ1, out var ᏑtfΔ1);
-                    var err = tw.WriteHeader(ᏑtfΔ1.of(TestWriter_testHeader.Ꮡhdr));
+                    var err = tw.WriteHeader(ᏑtfΔ1.Ꮡhdr);
                     if (!equalErrorʗ1(err, tfΔ1.wantErr)) {
-                        tΔ1.Fatalf("test %d, WriteHeader() = %v, want %v"u8, i, err, tfΔ1.wantErr);
+                        tΔ1.Fatalf("test %d, WriteHeader() = %v, want %v", i, err, tfΔ1.wantErr);
                     }
                     break;
                 }
                 case TestWriter_testWrite tfΔ1: {
                     var (got, err) = tw.Write(slice<byte>(tfΔ1.str));
                     if (got != tfΔ1.wantCnt || !equalErrorʗ1(err, tfΔ1.wantErr)) {
-                        tΔ1.Fatalf("test %d, Write() = (%d, %v), want (%d, %v)"u8, i, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
+                        tΔ1.Fatalf("test %d, Write() = (%d, %v), want (%d, %v)", i, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
                     }
                     break;
                 }
@@ -546,28 +550,27 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                     var f = Ꮡ(new testFile(ops: tfΔ1.ops));
                     var (got, err) = tw.readFrom(new tar_internal_test_package.testFileжReader(f));
                     {
-                        var (_, ok) = err._<testError>(ᐧ); if (ok){
-                            tΔ1.Errorf("test %d, ReadFrom(): %v"u8, i, err);
-                        } else 
-                        if (got != tfΔ1.wantCnt || !equalErrorʗ1(err, tfΔ1.wantErr)) {
-                            tΔ1.Errorf("test %d, ReadFrom() = (%d, %v), want (%d, %v)"u8, i, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
+                        var (_, ok) = err._<testError>(ᐧ); if (ok) {
+                            tΔ1.Errorf("test %d, ReadFrom(): %v", i, err);
+                        } else if (got != tfΔ1.wantCnt || !equalErrorʗ1(err, tfΔ1.wantErr)) {
+                            tΔ1.Errorf("test %d, ReadFrom() = (%d, %v), want (%d, %v)", i, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
                         }
                     }
-                    if (len((~f).ops) > 0) {
-                        tΔ1.Errorf("test %d, expected %d more operations"u8, i, len((~f).ops));
+                    if (len(f.ops) > 0) {
+                        tΔ1.Errorf("test %d, expected %d more operations", i, len(f.ops));
                     }
                     break;
                 }
                 case TestWriter_testClose tfΔ1: {
                     var err = tw.Close();
                     if (!equalErrorʗ1(err, tfΔ1.wantErr)) {
-                        tΔ1.Fatalf("test %d, Close() = %v, want %v"u8, i, err, tfΔ1.wantErr);
+                        tΔ1.Fatalf("test %d, Close() = %v, want %v", i, err, tfΔ1.wantErr);
                     }
                     break;
                 }
                 default: {
                     var tfΔ1 = tf;
-                    tΔ1.Fatalf("test %d, unknown test operation: %T"u8, i, tfΔ1);
+                    tΔ1.Fatalf("test %d, unknown test operation: %T", i, tfΔ1);
                     break;
                 }}
             }
@@ -576,19 +579,19 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 @string pathΔ1 = vʗ1.@file;
                 if (vʗ1.obscured) {
                     var (tf, errΔ1) = obscuretestdata.DecodeToTempFile(pathΔ1);
-                    if (errΔ1 != default!) {
-                        tΔ1.Fatalf("obscuretestdata.DecodeToTempFile(%s): %v"u8, pathΔ1, errΔ1);
+                    if (errΔ1 != nil) {
+                        tΔ1.Fatalf("obscuretestdata.DecodeToTempFile(%s): %v", pathΔ1, errΔ1);
                     }
                     pathΔ1 = tf;
                 }
 
                 var (want, err) = os.ReadFile(pathΔ1);
-                if (err != default!) {
-                    tΔ1.Fatalf("ReadFile() = %v, want nil"u8, err);
+                if (err != nil) {
+                    tΔ1.Fatalf("ReadFile() = %v, want nil", err);
                 }
                 var got = buf.Bytes();
                 if (!bytes.Equal(want, got)) {
-                    tΔ1.Fatalf("incorrect result: (-got +want)\n%v"u8, bytediff(got, want));
+                    tΔ1.Fatalf("incorrect result: (-got +want)\n%v", bytediff(got, want));
                 }
             }
         });
@@ -599,95 +602,95 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 internal static readonly object expectedAtLeastOnePaxˢ = (@string)"Expected at least one PAX header to be written."u8;
 internal static readonly object couldnTRecoverLongFileˢ = (@string)"Couldn't recover long file name"u8;
 
-public static void TestPax(ж<testing.T> Ꮡt) {
+public static void TestPax(ж<testing.T> t) {
     // Create an archive with a large name
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("os.Stat: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("os.Stat: %v", err);
     }
     // Force a PAX long name to be written
-    @string longName = strings.Repeat("ab"u8, 100);
-    @string contents = strings.Repeat(" "u8, (nint)(~hdr).Size);
-    hdr.Value.Name = longName;
+    @string longName = strings.Repeat("ab", 100);
+    @string contents = strings.Repeat(" ", (nint)hdr.Size);
+    hdr.Name = longName;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        (_, err) = writer.Write(slice<byte>(contents)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        (_, err) = writer.Write(slice<byte>(contents)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var errΔ2 = writer.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = writer.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     // Simple test to make sure PAX extensions are in effect
     if (!bytes.Contains(buf.Bytes(), slice<byte>("PaxHeaders.0"u8))) {
-        Ꮡt.Fatal(expectedAtLeastOnePaxˢ);
+        t.Fatal(expectedAtLeastOnePaxˢ);
     }
     // Test that we can get a long name back out of the archive.
     var reader = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuf));
     (hdr, err) = reader.Next();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if ((~hdr).Name != longName) {
-        Ꮡt.Fatal(couldnTRecoverLongFileˢ);
+    if (hdr.Name != longName) {
+        t.Fatal(couldnTRecoverLongFileˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object couldnTRecoverLongLinkˢ = (@string)"Couldn't recover long link name"u8;
 
-public static void TestPaxSymlink(ж<testing.T> Ꮡt) {
+public static void TestPaxSymlink(ж<testing.T> t) {
     // Create an archive with a large linkname
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("os.Stat:1 %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("os.Stat:1 %v", err);
     }
-    hdr.Value.Typeflag = TypeSymlink;
+    hdr.Typeflag = TypeSymlink;
     // Force a PAX long linkname to be written
-    @string longLinkname = strings.Repeat("1234567890/1234567890"u8, 10);
-    hdr.Value.Linkname = longLinkname;
+    @string longLinkname = strings.Repeat("1234567890/1234567890", 10);
+    hdr.Linkname = longLinkname;
 
-    hdr.Value.Size = 0;
+    hdr.Size = 0;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        var errΔ2 = writer.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = writer.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     // Simple test to make sure PAX extensions are in effect
     if (!bytes.Contains(buf.Bytes(), slice<byte>("PaxHeaders.0"u8))) {
-        Ꮡt.Fatal(expectedAtLeastOnePaxˢ);
+        t.Fatal(expectedAtLeastOnePaxˢ);
     }
     // Test that we can get a long name back out of the archive.
     var reader = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuf));
     (hdr, err) = reader.Next();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if ((~hdr).Linkname != longLinkname) {
-        Ꮡt.Fatal(couldnTRecoverLongLinkˢ);
+    if (hdr.Linkname != longLinkname) {
+        t.Fatal(couldnTRecoverLongLinkˢ);
     }
 }
 
@@ -696,220 +699,220 @@ internal static readonly object couldnTRecoverUnicodeˢ = (@string)"Couldn't rec
 internal static readonly object couldnTRecoverUnicodeˢ2 = (@string)"Couldn't recover unicode group"u8;
 internal static readonly object couldnTRecoverUnicodeˢ3 = (@string)"Couldn't recover unicode user"u8;
 
-public static void TestPaxNonAscii(ж<testing.T> Ꮡt) {
+public static void TestPaxNonAscii(ж<testing.T> t) {
     // Create an archive with non ascii. These should trigger a pax header
     // because pax headers have a defined utf-8 encoding.
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("os.Stat:1 %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("os.Stat:1 %v", err);
     }
 
     // some sample data
-    @string chineseFilename = "文件名"u8;
-    @string chineseGroupname = "組"u8;
-    @string chineseUsername = "用戶名"u8;
+    @string chineseFilename = "文件名";
+    @string chineseGroupname = "組";
+    @string chineseUsername = "用戶名";
 
-    hdr.Value.Name = chineseFilename;
-    hdr.Value.Gname = chineseGroupname;
-    hdr.Value.Uname = chineseUsername;
+    hdr.Name = chineseFilename;
+    hdr.Gname = chineseGroupname;
+    hdr.Uname = chineseUsername;
 
-    @string contents = strings.Repeat(" "u8, (nint)(~hdr).Size);
+    @string contents = strings.Repeat(" ", (nint)hdr.Size);
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        (_, err) = writer.Write(slice<byte>(contents)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        (_, err) = writer.Write(slice<byte>(contents)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var errΔ2 = writer.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = writer.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     // Simple test to make sure PAX extensions are in effect
     if (!bytes.Contains(buf.Bytes(), slice<byte>("PaxHeaders.0"u8))) {
-        Ꮡt.Fatal(expectedAtLeastOnePaxˢ);
+        t.Fatal(expectedAtLeastOnePaxˢ);
     }
     // Test that we can get a long name back out of the archive.
     var reader = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuf));
     (hdr, err) = reader.Next();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if ((~hdr).Name != chineseFilename) {
-        Ꮡt.Fatal(couldnTRecoverUnicodeˢ);
+    if (hdr.Name != chineseFilename) {
+        t.Fatal(couldnTRecoverUnicodeˢ);
     }
-    if ((~hdr).Gname != chineseGroupname) {
-        Ꮡt.Fatal(couldnTRecoverUnicodeˢ2);
+    if (hdr.Gname != chineseGroupname) {
+        t.Fatal(couldnTRecoverUnicodeˢ2);
     }
-    if ((~hdr).Uname != chineseUsername) {
-        Ꮡt.Fatal(couldnTRecoverUnicodeˢ3);
+    if (hdr.Uname != chineseUsername) {
+        t.Fatal(couldnTRecoverUnicodeˢ3);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string kiltsˢ = "Kilts"u8;
+internal static ref readonly @string kiltsˢ => ref kiltsˢᵇ;
+private static readonly @string kiltsˢᵇ = "Kilts"u8;
 
-public static void TestPaxXattrs(ж<testing.T> Ꮡt) {
+public static void TestPaxXattrs(ж<testing.T> t) {
     var xattrs = new map<@string, @string>{
-        ["user.key"u8] = "value"u8
+        ["user.key"] = "value"
     };
 
     // Create an archive with an xattr
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("os.Stat: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("os.Stat: %v", err);
     }
     @string contents = kiltsˢ;
-    hdr.Value.Xattrs = xattrs;
+    hdr.Xattrs = xattrs;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        (_, err) = writer.Write(slice<byte>(contents)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        (_, err) = writer.Write(slice<byte>(contents)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var errΔ2 = writer.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = writer.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     // Test that we can get the xattrs back out of the archive.
     var reader = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuf));
     (hdr, err) = reader.Next();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>((~hdr).Xattrs, xattrs)) {
-        Ꮡt.Fatalf("xattrs did not survive round trip: got %+v, want %+v"u8,
-            (~hdr).Xattrs, xattrs);
+    if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(hdr.Xattrs, xattrs)) {
+        t.Fatalf("xattrs did not survive round trip: got %+v, want %+v",
+            hdr.Xattrs, xattrs);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object paxHeadersAreNotSortedˢ = (@string)"PAX headers are not sorted"u8;
 
-public static void TestPaxHeadersSorted(ж<testing.T> Ꮡt) {
+public static void TestPaxHeadersSorted(ж<testing.T> t) {
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("os.Stat: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("os.Stat: %v", err);
     }
-    @string contents = strings.Repeat(" "u8, (nint)(~hdr).Size);
+    @string contents = strings.Repeat(" ", (nint)hdr.Size);
 
-    hdr.Value.Xattrs = new map<@string, @string>{
-        ["foo"u8] = "foo"u8,
-        ["bar"u8] = "bar"u8,
-        ["baz"u8] = "baz"u8,
-        ["qux"u8] = "qux"u8
+    hdr.Xattrs = new map<@string, @string>{
+        ["foo"] = "foo",
+        ["bar"] = "bar",
+        ["baz"] = "baz",
+        ["qux"] = "qux"
     };
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        (_, err) = writer.Write(slice<byte>(contents)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        (_, err) = writer.Write(slice<byte>(contents)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var errΔ2 = writer.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = writer.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     // Simple test to make sure PAX extensions are in effect
     if (!bytes.Contains(buf.Bytes(), slice<byte>("PaxHeaders.0"u8))) {
-        Ꮡt.Fatal(expectedAtLeastOnePaxˢ);
+        t.Fatal(expectedAtLeastOnePaxˢ);
     }
 
     // xattr bar should always appear before others
-    var indices = new nint[]{
+    var indices = slice<nint>([
         bytes.Index(buf.Bytes(), slice<byte>("bar=bar"u8)),
         bytes.Index(buf.Bytes(), slice<byte>("baz=baz"u8)),
         bytes.Index(buf.Bytes(), slice<byte>("foo=foo"u8)),
         bytes.Index(buf.Bytes(), slice<byte>("qux=qux"u8))
-    }.slice();
+    ]);
     if (!slices.IsSorted<slice<nint>, nint>(indices)) {
-        Ꮡt.Fatal(paxHeadersAreNotSortedˢ);
+        t.Fatal(paxHeadersAreNotSortedˢ);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object couldnTRecoverLongNameˢ = (@string)"Couldn't recover long name"u8;
 
-public static void TestUSTARLongName(ж<testing.T> Ꮡt) {
+public static void TestUSTARLongName(ж<testing.T> t) {
     // Create an archive with a path that failed to split with USTAR extension in previous versions.
     var (fileinfo, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var hdr, err) = FileInfoHeader(fileinfo, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("os.Stat:1 %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("os.Stat:1 %v", err);
     }
-    hdr.Value.Typeflag = TypeDir;
+    hdr.Typeflag = TypeDir;
     // Force a PAX long name to be written. The name was taken from a practical example
     // that fails and replaced ever char through numbers to anonymize the sample.
-    @string longName = "/0000_0000000/00000-000000000/0000_0000000/00000-0000000000000/0000_0000000/00000-0000000-00000000/0000_0000000/00000000/0000_0000000/000/0000_0000000/00000000v00/0000_0000000/000000/0000_0000000/0000000/0000_0000000/00000y-00/0000/0000/00000000/0x000000/"u8;
-    hdr.Value.Name = longName;
+    @string longName = "/0000_0000000/00000-000000000/0000_0000000/00000-0000000000000/0000_0000000/00000-0000000-00000000/0000_0000000/00000000/0000_0000000/000/0000_0000000/00000000v00/0000_0000000/000000/0000_0000000/0000000/0000_0000000/00000y-00/0000/0000/00000000/0x000000/";
+    hdr.Name = longName;
 
-    hdr.Value.Size = 0;
+    hdr.Size = 0;
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var writer = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = writer.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     {
-        var errΔ2 = writer.Close(); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = writer.Close(); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
     // Test that we can get a long name back out of the archive.
     var reader = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuf));
     (hdr, err) = reader.Next();
-    if (err != default! && !AreEqual(err, ErrInsecurePath)) {
-        Ꮡt.Fatal(err);
+    if (err != nil && !AreEqual(err, ErrInsecurePath)) {
+        t.Fatal(err);
     }
-    if ((~hdr).Name != longName) {
-        Ꮡt.Fatal(couldnTRecoverLongNameˢ);
+    if (hdr.Name != longName) {
+        t.Fatal(couldnTRecoverLongNameˢ);
     }
 }
 
-public static void TestValidTypeflagWithPAXHeader(ж<testing.T> Ꮡt) {
+public static void TestValidTypeflagWithPAXHeader(ж<testing.T> t) {
     ref var buffer = ref heap(new bytes.Buffer(), out var Ꮡbuffer);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuffer));
 
-    ref var fileName = ref heap<@string>(out var ᏑfileName);
-    fileName = strings.Repeat("ab"u8, 100);
+    ref var fileName = ref heap<@string>(strings.Repeat("ab", 100), out var ᏑfileName);
 
     var hdr = Ꮡ(new Header(
         Name: fileName,
@@ -917,29 +920,29 @@ public static void TestValidTypeflagWithPAXHeader(ж<testing.T> Ꮡt) {
         Typeflag: 0
     ));
     {
-        var err = tw.WriteHeader(hdr); if (err != default!) {
-            Ꮡt.Fatalf("Failed to write header: %s"u8, err);
+        var err = tw.WriteHeader(hdr); if (err != nil) {
+            t.Fatalf("Failed to write header: %s", err);
         }
     }
     {
-        var (_, err) = tw.Write(slice<byte>("fooo"u8)); if (err != default!) {
-            Ꮡt.Fatalf("Failed to write the file's data: %s"u8, err);
+        var (_, err) = tw.Write(slice<byte>("fooo"u8)); if (err != nil) {
+            t.Fatalf("Failed to write the file's data: %s", err);
         }
     }
     tw.Close();
 
     var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡbuffer));
 
-    while (ᐧ) {
+    for (;;) {
         var (header, err) = tr.Next();
         if (AreEqual(err, io.EOF)) {
             break;
         }
-        if (err != default!) {
-            Ꮡt.Fatalf("Failed to read header: %s"u8, err);
+        if (err != nil) {
+            t.Fatalf("Failed to read header: %s", err);
         }
-        if ((~header).Typeflag != TypeReg) {
-            Ꮡt.Fatalf("Typeflag should've been %d, found %d"u8, (int32)(TypeReg), (~header).Typeflag);
+        if (header.Typeflag != TypeReg) {
+            t.Fatalf("Typeflag should've been %d, found %d", (int32)(TypeReg), header.Typeflag);
         }
     }
 }
@@ -952,174 +955,181 @@ internal static (nint, error) Write(this ref failOnceWriter w, slice<byte> b) {
         return (0, io.ErrShortWrite);
     }
     w = true;
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string headerOnlyˢ = "HeaderOnly"u8;
-internal static readonly @string negativeSizeˢ = "NegativeSize"u8;
-internal static readonly @string beforeHeaderˢ = "BeforeHeader"u8;
-internal static readonly @string afterCloseˢ = "AfterClose"u8;
-internal static readonly @string prematureFlushˢ = "PrematureFlush"u8;
-internal static readonly @string prematureCloseˢ = "PrematureClose"u8;
-internal static readonly @string persistenceˢ = "Persistence"u8;
+internal static ref readonly @string headerOnlyˢ => ref headerOnlyˢᵇ;
+private static readonly @string headerOnlyˢᵇ = "HeaderOnly"u8;
+internal static ref readonly @string negativeSizeˢ => ref negativeSizeˢᵇ;
+private static readonly @string negativeSizeˢᵇ = "NegativeSize"u8;
+internal static ref readonly @string beforeHeaderˢ => ref beforeHeaderˢᵇ;
+private static readonly @string beforeHeaderˢᵇ = "BeforeHeader"u8;
+internal static ref readonly @string afterCloseˢ => ref afterCloseˢᵇ;
+private static readonly @string afterCloseˢᵇ = "AfterClose"u8;
+internal static ref readonly @string prematureFlushˢ => ref prematureFlushˢᵇ;
+private static readonly @string prematureFlushˢᵇ = "PrematureFlush"u8;
+internal static ref readonly @string prematureCloseˢ => ref prematureCloseˢᵇ;
+private static readonly @string prematureCloseˢᵇ = "PrematureClose"u8;
+internal static ref readonly @string persistenceˢ => ref persistenceˢᵇ;
+private static readonly @string persistenceˢᵇ = "Persistence"u8;
 
-public static void TestWriterErrors(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(headerOnlyˢ, (ж<testing.T> tΔ1) => {
+public static void TestWriterErrors(ж<testing.T> t) {
+    t.Run(headerOnlyˢ, (ж<testing.T> tΔ1) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
-        var hdr = Ꮡ(new Header(Name: "dir/"u8, Typeflag: TypeDir));
+        var hdr = Ꮡ(new Header(Name: "dir/", Typeflag: TypeDir));
         {
-            var err = tw.WriteHeader(hdr); if (err != default!) {
-                tΔ1.Fatalf("WriteHeader() = %v, want nil"u8, err);
+            var err = tw.WriteHeader(hdr); if (err != nil) {
+                tΔ1.Fatalf("WriteHeader() = %v, want nil", err);
             }
         }
         {
-            var (_, err) = tw.Write(new byte[]{0x00}.slice()); if (!AreEqual(err, ErrWriteTooLong)) {
-                tΔ1.Fatalf("Write() = %v, want %v"u8, err, ErrWriteTooLong);
+            var (_, err) = tw.Write(slice<byte>([0x00])); if (!AreEqual(err, ErrWriteTooLong)) {
+                tΔ1.Fatalf("Write() = %v, want %v", err, ErrWriteTooLong);
             }
         }
     });
 
-    Ꮡt.Run(negativeSizeˢ, (ж<testing.T> tΔ2) => {
+    t.Run(negativeSizeˢ, (ж<testing.T> tΔ2) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
-        var hdr = Ꮡ(new Header(Name: "small.txt"u8, Size: -1));
+        var hdr = Ꮡ(new Header(Name: "small.txt", Size: -1));
         {
-            var err = tw.WriteHeader(hdr); if (err == default!) {
-                tΔ2.Fatalf("WriteHeader() = nil, want non-nil error"u8);
+            var err = tw.WriteHeader(hdr); if (err == nil) {
+                tΔ2.Fatalf("WriteHeader() = nil, want non-nil error");
             }
         }
     });
 
-    Ꮡt.Run(beforeHeaderˢ, (ж<testing.T> tΔ3) => {
+    t.Run(beforeHeaderˢ, (ж<testing.T> tΔ3) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
         {
             var (_, err) = tw.Write(slice<byte>("Kilts"u8)); if (!AreEqual(err, ErrWriteTooLong)) {
-                tΔ3.Fatalf("Write() = %v, want %v"u8, err, ErrWriteTooLong);
+                tΔ3.Fatalf("Write() = %v, want %v", err, ErrWriteTooLong);
             }
         }
     });
 
-    Ꮡt.Run(afterCloseˢ, (ж<testing.T> tΔ4) => {
+    t.Run(afterCloseˢ, (ж<testing.T> tΔ4) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
-        var hdr = Ꮡ(new Header(Name: "small.txt"u8));
+        var hdr = Ꮡ(new Header(Name: "small.txt"));
         {
-            var err = tw.WriteHeader(hdr); if (err != default!) {
-                tΔ4.Fatalf("WriteHeader() = %v, want nil"u8, err);
+            var err = tw.WriteHeader(hdr); if (err != nil) {
+                tΔ4.Fatalf("WriteHeader() = %v, want nil", err);
             }
         }
         {
-            var err = tw.Close(); if (err != default!) {
-                tΔ4.Fatalf("Close() = %v, want nil"u8, err);
+            var err = tw.Close(); if (err != nil) {
+                tΔ4.Fatalf("Close() = %v, want nil", err);
             }
         }
         {
             var (_, err) = tw.Write(slice<byte>("Kilts"u8)); if (!AreEqual(err, ErrWriteAfterClose)) {
-                tΔ4.Fatalf("Write() = %v, want %v"u8, err, ErrWriteAfterClose);
+                tΔ4.Fatalf("Write() = %v, want %v", err, ErrWriteAfterClose);
             }
         }
         {
             var err = tw.Flush(); if (!AreEqual(err, ErrWriteAfterClose)) {
-                tΔ4.Fatalf("Flush() = %v, want %v"u8, err, ErrWriteAfterClose);
+                tΔ4.Fatalf("Flush() = %v, want %v", err, ErrWriteAfterClose);
             }
         }
         {
-            var err = tw.Close(); if (err != default!) {
-                tΔ4.Fatalf("Close() = %v, want nil"u8, err);
+            var err = tw.Close(); if (err != nil) {
+                tΔ4.Fatalf("Close() = %v, want nil", err);
             }
         }
     });
 
-    Ꮡt.Run(prematureFlushˢ, (ж<testing.T> tΔ5) => {
+    t.Run(prematureFlushˢ, (ж<testing.T> tΔ5) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
-        var hdr = Ꮡ(new Header(Name: "small.txt"u8, Size: 5));
+        var hdr = Ꮡ(new Header(Name: "small.txt", Size: 5));
         {
-            var err = tw.WriteHeader(hdr); if (err != default!) {
-                tΔ5.Fatalf("WriteHeader() = %v, want nil"u8, err);
+            var err = tw.WriteHeader(hdr); if (err != nil) {
+                tΔ5.Fatalf("WriteHeader() = %v, want nil", err);
             }
         }
         {
-            var err = tw.Flush(); if (err == default!) {
-                tΔ5.Fatalf("Flush() = %v, want non-nil error"u8, err);
+            var err = tw.Flush(); if (err == nil) {
+                tΔ5.Fatalf("Flush() = %v, want non-nil error", err);
             }
         }
     });
 
-    Ꮡt.Run(prematureCloseˢ, (ж<testing.T> tΔ6) => {
+    t.Run(prematureCloseˢ, (ж<testing.T> tΔ6) => {
         var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(@new<bytes.Buffer>()));
-        var hdr = Ꮡ(new Header(Name: "small.txt"u8, Size: 5));
+        var hdr = Ꮡ(new Header(Name: "small.txt", Size: 5));
         {
-            var err = tw.WriteHeader(hdr); if (err != default!) {
-                tΔ6.Fatalf("WriteHeader() = %v, want nil"u8, err);
+            var err = tw.WriteHeader(hdr); if (err != nil) {
+                tΔ6.Fatalf("WriteHeader() = %v, want nil", err);
             }
         }
         {
-            var err = tw.Close(); if (err == default!) {
-                tΔ6.Fatalf("Close() = %v, want non-nil error"u8, err);
+            var err = tw.Close(); if (err == nil) {
+                tΔ6.Fatalf("Close() = %v, want non-nil error", err);
             }
         }
     });
 
-    Ꮡt.Run(persistenceˢ, (ж<testing.T> tΔ7) => {
+    t.Run(persistenceˢ, (ж<testing.T> tΔ7) => {
         var tw = NewWriter(new tar_internal_test_package.failOnceWriterжWriter(@new<failOnceWriter>()));
         {
-            var err = tw.WriteHeader(Ꮡ(new Header(nil))); if (!AreEqual(err, io.ErrShortWrite)) {
-                tΔ7.Fatalf("WriteHeader() = %v, want %v"u8, err, io.ErrShortWrite);
+            var err = tw.WriteHeader(Ꮡ(new Header())); if (!AreEqual(err, io.ErrShortWrite)) {
+                tΔ7.Fatalf("WriteHeader() = %v, want %v", err, io.ErrShortWrite);
             }
         }
         {
-            var err = tw.WriteHeader(Ꮡ(new Header(Name: "small.txt"u8))); if (err == default!) {
-                tΔ7.Errorf("WriteHeader() = got %v, want non-nil error"u8, err);
+            var err = tw.WriteHeader(Ꮡ(new Header(Name: "small.txt"))); if (err == nil) {
+                tΔ7.Errorf("WriteHeader() = got %v, want non-nil error", err);
             }
         }
         {
-            var (_, err) = tw.Write(default!); if (err == default!) {
-                tΔ7.Errorf("Write() = %v, want non-nil error"u8, err);
+            var (_, err) = tw.Write(default); if (err == nil) {
+                tΔ7.Errorf("Write() = %v, want non-nil error", err);
             }
         }
         {
-            var err = tw.Flush(); if (err == default!) {
-                tΔ7.Errorf("Flush() = %v, want non-nil error"u8, err);
+            var err = tw.Flush(); if (err == nil) {
+                tΔ7.Errorf("Flush() = %v, want non-nil error", err);
             }
         }
         {
-            var err = tw.Close(); if (err == default!) {
-                tΔ7.Errorf("Close() = %v, want non-nil error"u8, err);
+            var err = tw.Close(); if (err == nil) {
+                tΔ7.Errorf("Close() = %v, want non-nil error", err);
             }
         }
     });
 }
 
 internal partial struct TestSplitUSTARPath_vectors /*dyn*/ {
-    internal @string input; // Input path
+    internal @string input;  // Input path
     internal @string prefix; // Expected output prefix
     internal @string suffix; // Expected output suffix
-    internal bool ok;   // Split success?
+    internal bool ok;        // Split success?
 }
 
-public static void TestSplitUSTARPath(ж<testing.T> Ꮡt) {
+public static void TestSplitUSTARPath(ж<testing.T> t) {
     var sr = strings.Repeat;
 
-    var vectors = new TestSplitUSTARPath_vectors[]{
-        new(""u8, ""u8, ""u8, false),
-        new("abc"u8, ""u8, ""u8, false),
-        new("用戶名"u8, ""u8, ""u8, false),
-        new(sr("a"u8, nameSize), ""u8, ""u8, false),
-        new(sr("a"u8, nameSize) + "/"u8, ""u8, ""u8, false),
-        new(sr("a"u8, nameSize) + "/a"u8, sr("a"u8, nameSize), "a"u8, true),
-        new(sr("a"u8, prefixSize) + "/"u8, ""u8, ""u8, false),
-        new(sr("a"u8, prefixSize) + "/a"u8, sr("a"u8, prefixSize), "a"u8, true),
-        new(sr("a"u8, nameSize + 1), ""u8, ""u8, false),
-        new(sr("/"u8, nameSize + 1), sr("/"u8, nameSize - 1), "/"u8, true),
-        new(sr("a"u8, prefixSize) + "/"u8 + sr("b"u8, nameSize),
-            sr("a"u8, prefixSize), sr("b"u8, nameSize), true),
-        new(sr("a"u8, prefixSize) + "//"u8 + sr("b"u8, nameSize), ""u8, ""u8, false),
-        new(sr("a/"u8, nameSize), sr("a/"u8, 77) + "a"u8, sr("a/"u8, 22), true)
-    }.slice();
+    var vectors = slice<TestSplitUSTARPath_vectors>([
+        new("", "", "", false),
+        new("abc", "", "", false),
+        new("用戶名", "", "", false),
+        new(sr("a", nameSize), "", "", false),
+        new(sr("a", nameSize) + "/"u8, "", "", false),
+        new(sr("a", nameSize) + "/a"u8, sr("a", nameSize), "a", true),
+        new(sr("a", prefixSize) + "/"u8, "", "", false),
+        new(sr("a", prefixSize) + "/a"u8, sr("a", prefixSize), "a", true),
+        new(sr("a", nameSize + 1), "", "", false),
+        new(sr("/", nameSize + 1), sr("/", nameSize - 1), "/", true),
+        new(sr("a", prefixSize) + "/"u8 + sr("b", nameSize),
+            sr("a", prefixSize), sr("b", nameSize), true),
+        new(sr("a", prefixSize) + "//"u8 + sr("b", nameSize), "", "", false),
+        new(sr("a/", nameSize), sr("a/", 77) + "a"u8, sr("a/", 22), true)
+    ]);
 
     foreach (var (_, v) in vectors) {
         var (prefix, suffix, ok) = splitUSTARPath(v.input);
         if (prefix != v.prefix || suffix != v.suffix || ok != v.ok) {
-            Ꮡt.Errorf("splitUSTARPath(%q):\ngot  (%q, %q, %v)\nwant (%q, %q, %v)"u8,
+            t.Errorf("splitUSTARPath(%q):\ngot  (%q, %q, %v)\nwant (%q, %q, %v)",
                 v.input, prefix, suffix, ok, v.prefix, v.suffix, v.ok);
         }
     }
@@ -1128,15 +1138,15 @@ public static void TestSplitUSTARPath(ж<testing.T> Ꮡt) {
 // TestIssue12594 tests that the Writer does not attempt to populate the prefix
 // field when encoding a header in the GNU format. The prefix field is valid
 // in USTAR and PAX, but not GNU.
-public static void TestIssue12594(ж<testing.T> Ꮡt) {
-    var names = new @string[]{
-        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/file.txt"u8,
-        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/file.txt"u8,
-        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/333/file.txt"u8,
-        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/file.txt"u8,
-        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/file.txt"u8,
-        "/home/support/.openoffice.org/3/user/uno_packages/cache/registry/com.sun.star.comp.deployment.executable.PackageRegistryBackend"u8
-    }.slice();
+public static void TestIssue12594(ж<testing.T> t) {
+    var names = slice<@string>([
+        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/file.txt",
+        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/file.txt",
+        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/333/file.txt",
+        "0/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/file.txt",
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/file.txt",
+        "/home/support/.openoffice.org/3/user/uno_packages/cache/registry/com.sun.star.comp.deployment.executable.PackageRegistryBackend"
+    ]);
 
     foreach (var (i, vᴛ1) in names) {
         ref var name = ref heap(new @string(), out var Ꮡname);
@@ -1149,13 +1159,13 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
             var errΔ1 = tw.WriteHeader(Ꮡ(new Header(
                 Name: name,
                 Uid: (1 << 25) // Prevent USTAR format
-            ))); if (errΔ1 != default!) {
-                Ꮡt.Errorf("test %d, unexpected WriteHeader error: %v"u8, i, errΔ1);
+            ))); if (errΔ1 != nil) {
+                t.Errorf("test %d, unexpected WriteHeader error: %v", i, errΔ1);
             }
         }
         {
-            var errΔ2 = tw.Close(); if (errΔ2 != default!) {
-                Ꮡt.Errorf("test %d, unexpected Close error: %v"u8, i, errΔ2);
+            var errΔ2 = tw.Close(); if (errΔ2 != nil) {
+                t.Errorf("test %d, unexpected Close error: %v", i, errΔ2);
             }
         }
 
@@ -1163,18 +1173,18 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
         ref var blk = ref heap(new global::go.archive.tar_package.block(), out var Ꮡblk);
         copy(blk[..], b.Bytes());
         @string prefix = (@string)Ꮡblk.toUSTAR().prefix();
-        (prefix, _, _) = strings.Cut(prefix, "\x00"u8); // Truncate at the NUL terminator
+        (prefix, _, _) = strings.Cut(prefix, "\x00"); // Truncate at the NUL terminator
         if (Ꮡblk.getFormat() == FormatGNU && len(prefix) > 0 && strings.HasPrefix(name, prefix)) {
-            Ꮡt.Errorf("test %d, found prefix in GNU format: %s"u8, i, prefix);
+            t.Errorf("test %d, found prefix in GNU format: %s", i, prefix);
         }
 
         var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡb));
         var (hdr, err) = tr.Next();
-        if (err != default! && !AreEqual(err, ErrInsecurePath)) {
-            Ꮡt.Errorf("test %d, unexpected Next error: %v"u8, i, err);
+        if (err != nil && !AreEqual(err, ErrInsecurePath)) {
+            t.Errorf("test %d, unexpected Next error: %v", i, err);
         }
-        if ((~hdr).Name != name) {
-            Ꮡt.Errorf("test %d, hdr.Name = %s, want %s"u8, i, (~hdr).Name, name);
+        if (hdr.Name != name) {
+            t.Errorf("test %d, hdr.Name = %s, want %s", i, hdr.Name, name);
         }
     }
 }
@@ -1184,28 +1194,28 @@ internal partial struct TestWriteLongHeader_type /*dyn*/ {
     internal ж<global::go.archive.tar_package.Header> h;
 }
 
-public static void TestWriteLongHeader(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestWriteLongHeader_type[]{new(
-        name: "name too long"u8,
-        h: Ꮡ(new Header(Name: strings.Repeat("a"u8, maxSpecialFileSize)))
+public static void TestWriteLongHeader(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestWriteLongHeader_type>([new(
+        name: "name too long",
+        h: Ꮡ(new Header(Name: strings.Repeat("a", maxSpecialFileSize)))
     ), new(
-        name: "linkname too long"u8,
-        h: Ꮡ(new Header(Linkname: strings.Repeat("a"u8, maxSpecialFileSize)))
+        name: "linkname too long",
+        h: Ꮡ(new Header(Linkname: strings.Repeat("a", maxSpecialFileSize)))
     ), new(
-        name: "uname too long"u8,
-        h: Ꮡ(new Header(Uname: strings.Repeat("a"u8, maxSpecialFileSize)))
+        name: "uname too long",
+        h: Ꮡ(new Header(Uname: strings.Repeat("a", maxSpecialFileSize)))
     ), new(
-        name: "gname too long"u8,
-        h: Ꮡ(new Header(Gname: strings.Repeat("a"u8, maxSpecialFileSize)))
+        name: "gname too long",
+        h: Ꮡ(new Header(Gname: strings.Repeat("a", maxSpecialFileSize)))
     ), new(
-        name: "PAX header too long"u8,
-        h: Ꮡ(new Header(PAXRecords: new map<@string, @string>{["GOLANG.x"u8] = strings.Repeat("a"u8, maxSpecialFileSize)}))
+        name: "PAX header too long",
+        h: Ꮡ(new Header(PAXRecords: new map<@string, @string>{["GOLANG.x"] = strings.Repeat("a", maxSpecialFileSize)}))
     )
-    }.slice()) {
+    ])) {
         var w = NewWriter(io.Discard);
         {
             var err = w.WriteHeader(test.h); if (!AreEqual(err, ErrFieldTooLong)) {
-                Ꮡt.Errorf("%v: w.WriteHeader() = %v, want ErrFieldTooLong"u8, test.name, err);
+                t.Errorf("%v: w.WriteHeader() = %v, want ErrFieldTooLong", test.name, err);
             }
         }
     }
@@ -1218,7 +1228,8 @@ internal partial struct testNonEmptyWriter {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedEmptyWriteCallˢ = "unexpected empty Write call"u8;
+internal static ref readonly @string unexpectedEmptyWriteCallˢ => ref unexpectedEmptyWriteCallˢᵇ;
+private static readonly @string unexpectedEmptyWriteCallˢᵇ = "unexpected empty Write call"u8;
 
 internal static (nint, error) Write(this testNonEmptyWriter w, slice<byte> b) {
     if (len(b) == 0) {
@@ -1226,6 +1237,9 @@ internal static (nint, error) Write(this testNonEmptyWriter w, slice<byte> b) {
     }
     return w.Writer.Write(b);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object cdeXˢ = (@string)"cdeX"u8;
 
 internal partial struct TestFileWriter_testWrite /*dyn*/ {
 // Write(str) == (wantCnt, wantErr)
@@ -1263,214 +1277,213 @@ internal partial struct TestFileWriter_vectors /*dyn*/ {
     internal slice<TestFileWriter_testFnc> tests;
 }
 
-public static void TestFileWriter(ж<testing.T> Ꮡt) {
-    var vectors = new TestFileWriter_vectors[]{new(
-        maker: new TestFileWriter_makeReg(0, ""u8),
-        tests: new TestFileWriter_testFnc[]{
+public static void TestFileWriter(ж<testing.T> t) {
+    var vectors = slice<TestFileWriter_vectors>([new(
+        maker: new TestFileWriter_makeReg(0, ""),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(0, 0),
-            new TestFileWriter_testWrite(""u8, 0, default!),
-            new TestFileWriter_testWrite("a"u8, 0, ErrWriteTooLong),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)""u8}.slice()), 0, default!),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"a"u8}.slice()), 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite("", 0, default),
+            new TestFileWriter_testWrite("a", 0, ErrWriteTooLong),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)""u8}.slice()), 0, default),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"a"}.slice()), 0, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeReg(1, "a"u8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeReg(1, "a"),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(1, 1),
-            new TestFileWriter_testWrite(""u8, 0, default!),
-            new TestFileWriter_testWrite("a"u8, 1, default!),
-            new TestFileWriter_testWrite("bcde"u8, 0, ErrWriteTooLong),
-            new TestFileWriter_testWrite(""u8, 0, default!),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)""u8}.slice()), 0, default!),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"a"u8}.slice()), 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite("", 0, default),
+            new TestFileWriter_testWrite("a", 1, default),
+            new TestFileWriter_testWrite("bcde", 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite("", 0, default),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)""u8}.slice()), 0, default),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"a"}.slice()), 0, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeReg(5, "hello"u8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeReg(5, "hello"),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(5, 5),
-            new TestFileWriter_testWrite("hello"u8, 5, default!),
+            new TestFileWriter_testWrite("hello", 5, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeReg(5, "\x00\x00\x00\x00\x00"u8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeReg(5, "\x00\x00\x00\x00\x00"),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(5, 5),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"\x00\x00\x00\x00\x00"u8}.slice()), 5, default!),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"\x00\x00\x00\x00\x00"}.slice()), 5, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeReg(5, "\x00\x00\x00\x00\x00"u8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeReg(5, "\x00\x00\x00\x00\x00"),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(5, 5),
             new TestFileWriter_testReadFrom(new fileOps(new any[]{((@string)(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x65, 0x78, 0x74, 0x72, 0x61}))}.slice()), 5, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeReg(5, "abc\x00\x00"u8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeReg(5, "abc\x00\x00"),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(5, 5),
-            new TestFileWriter_testWrite("abc"u8, 3, default!),
+            new TestFileWriter_testWrite("abc", 3, default),
             new TestFileWriter_testRemaining(2, 2),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"\x00\x00"u8}.slice()), 2, default!),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"\x00\x00"}.slice()), 2, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
         maker: new TestFileWriter_makeReg(5, ((@string)(new byte[]{0x00, 0x00, 0x61, 0x62, 0x63}))),
-        tests: new TestFileWriter_testFnc[]{
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(5, 5),
-            new TestFileWriter_testWrite("\x00\x00"u8, 2, default!),
+            new TestFileWriter_testWrite("\x00\x00", 2, default),
             new TestFileWriter_testRemaining(3, 3),
-            new TestFileWriter_testWrite("abc"u8, 3, default!),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"z"u8}.slice()), 0, ErrWriteTooLong),
-            new TestFileWriter_testWrite("z"u8, 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite("abc", 3, default),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"z"}.slice()), 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite("z", 0, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(8, 5),
-            new TestFileWriter_testWrite(((@string)(new byte[]{0x61, 0x62, 0x00, 0x00, 0x00, 0x63, 0x64, 0x65})), 8, default!),
-            new TestFileWriter_testWrite("a"u8, 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite(((@string)(new byte[]{0x61, 0x62, 0x00, 0x00, 0x00, 0x63, 0x64, 0x65})), 8, default),
+            new TestFileWriter_testWrite("a", 0, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testWrite(((@string)(new byte[]{0x61, 0x62, 0x00, 0x00, 0x00, 0x63, 0x64, 0x65, 0x7a})), 8, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("ab\x00"u8, 3, default!),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("ab\x00", 3, default),
             new TestFileWriter_testRemaining(5, 3),
-            new TestFileWriter_testWrite(((@string)(new byte[]{0x00, 0x00, 0x63, 0x64, 0x65})), 5, default!),
-            new TestFileWriter_testWrite("a"u8, 0, ErrWriteTooLong),
+            new TestFileWriter_testWrite(((@string)(new byte[]{0x00, 0x00, 0x63, 0x64, 0x65})), 5, default),
+            new TestFileWriter_testWrite("a", 0, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("ab"u8, 2, default!),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("ab", 2, default),
             new TestFileWriter_testRemaining(6, 3),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(int64)3, (@string)"cde"u8}.slice()), 6, default!),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(int64)3, cdeˢ}.slice()), 6, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cde"u8}.slice()), 8, default!),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab", (int64)3, cdeˢ}.slice()), 8, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cdeX"u8}.slice()), 8, ErrWriteTooLong),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(5, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab", (int64)3, cdeXˢ}.slice()), 8, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abcd"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cd"u8}.slice()), 7, io.ErrUnexpectedEOF),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abcd"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab", (int64)3, (@string)"cd"}.slice()), 7, io.ErrUnexpectedEOF),
             new TestFileWriter_testRemaining(1, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abcd"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cde"u8}.slice()), 7, errMissData),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abcd"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab", (int64)3, cdeˢ}.slice()), 7, errMissData),
             new TestFileWriter_testRemaining(1, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(6, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab"u8, (int64)3, (@string)"cde"u8}.slice()), 8, errUnrefData),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(6, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(@string)"ab", (int64)3, cdeˢ}.slice()), 8, errUnrefData),
             new TestFileWriter_testRemaining(0, 1)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abcd"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("ab"u8, 2, default!),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abcd"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("ab", 2, default),
             new TestFileWriter_testRemaining(6, 2),
-            new TestFileWriter_testWrite("\x00\x00\x00"u8, 3, default!),
+            new TestFileWriter_testWrite("\x00\x00\x00", 3, default),
             new TestFileWriter_testRemaining(3, 2),
-            new TestFileWriter_testWrite("cde"u8, 2, errMissData),
+            new TestFileWriter_testWrite("cde", 2, errMissData),
             new TestFileWriter_testRemaining(1, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(6, "abcde"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("ab"u8, 2, default!),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(6, "abcde"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(2, 3)}.slice()), 8),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("ab", 2, default),
             new TestFileWriter_testRemaining(6, 4),
-            new TestFileWriter_testWrite("\x00\x00\x00"u8, 3, default!),
+            new TestFileWriter_testWrite("\x00\x00\x00", 3, default),
             new TestFileWriter_testRemaining(3, 4),
-            new TestFileWriter_testWrite("cde"u8, 3, errUnrefData),
+            new TestFileWriter_testWrite("cde", 3, errUnrefData),
             new TestFileWriter_testRemaining(0, 1)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(7, 3),
-            new TestFileWriter_testWrite(((@string)(new byte[]{0x00, 0x00, 0x61, 0x62, 0x63, 0x00, 0x00})), 7, default!),
+            new TestFileWriter_testWrite(((@string)(new byte[]{0x00, 0x00, 0x61, 0x62, 0x63, 0x00, 0x00})), 7, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testRemaining(7, 3),
-            new TestFileWriter_testReadFrom(new fileOps(new any[]{(int64)2, (@string)"abc"u8, (int64)1, (@string)"\x00"u8}.slice()), 7, default!),
+            new TestFileWriter_testReadFrom(new fileOps(new any[]{(int64)2, abcˢ, (int64)1, (@string)"\x00"}.slice()), 7, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, ""u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("abcdefg"u8, 0, errWriteHole)
-        }.slice()
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, ""), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("abcdefg", 0, errWriteHole)
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testWrite(((@string)(new byte[]{0x00, 0x00, 0x61, 0x62, 0x63, 0x64, 0x65})), 5, errWriteHole)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
             new TestFileWriter_testWrite(((@string)(new byte[]{0x00, 0x00, 0x61, 0x62, 0x63, 0x00, 0x00, 0x7a})), 7, ErrWriteTooLong),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("\x00\x00"u8, 2, default!),
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(3, "abc"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("\x00\x00", 2, default),
             new TestFileWriter_testRemaining(5, 3),
-            new TestFileWriter_testWrite("abc"u8, 3, default!),
+            new TestFileWriter_testWrite("abc", 3, default),
             new TestFileWriter_testRemaining(2, 0),
-            new TestFileWriter_testWrite("\x00\x00"u8, 2, default!),
+            new TestFileWriter_testWrite("\x00\x00", 2, default),
             new TestFileWriter_testRemaining(0, 0)
-        }.slice()
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(2, "ab"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("\x00\x00"u8, 2, default!),
-            new TestFileWriter_testWrite("abc"u8, 2, errMissData),
-            new TestFileWriter_testWrite("\x00\x00"u8, 0, errMissData)
-        }.slice()
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(2, "ab"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("\x00\x00", 2, default),
+            new TestFileWriter_testWrite("abc", 2, errMissData),
+            new TestFileWriter_testWrite("\x00\x00", 0, errMissData)
+        ])
     ), new(
-        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abc"u8), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
-        tests: new TestFileWriter_testFnc[]{
-            new TestFileWriter_testWrite("\x00\x00"u8, 2, default!),
-            new TestFileWriter_testWrite("abc"u8, 3, default!),
-            new TestFileWriter_testWrite("\x00\x00"u8, 2, errUnrefData)
-        }.slice()
+        maker: new TestFileWriter_makeSparse(new TestFileWriter_makeReg(4, "abc"), new sparseHoles(new global::go.archive.tar_package.sparseEntry[]{new(0, 2), new(5, 2)}.slice()), 7),
+        tests: slice<TestFileWriter_testFnc>([
+            new TestFileWriter_testWrite("\x00\x00", 2, default),
+            new TestFileWriter_testWrite("abc", 3, default),
+            new TestFileWriter_testWrite("\x00\x00", 2, errUnrefData)
+        ])
     )
-    }.slice();
+    ]);
 
     foreach (var (i, v) in vectors) {
-        @string wantStr = default!;
+        @string wantStr = default;
         var bb = @new<strings.Builder>();
-        ref var w = ref heap<testNonEmptyWriter>(out var Ꮡw);
-        w = new testNonEmptyWriter(new tar_test_package.strings_BuilderжWriter(bb));
-        global::go.archive.tar_package.fileWriter fw = default!;
+        ref var w = ref heap<testNonEmptyWriter>(new testNonEmptyWriter(new tar_test_package.strings_BuilderжWriter(bb)), out var Ꮡw);
+        global::go.archive.tar_package.fileWriter fw = default;
         switch (v.maker.type()) {
         case TestFileWriter_makeReg maker: {
             fw = new global::go.archive.tar_package.regFileWriterжfileWriter(Ꮡ(new regFileWriter(w, maker.size)));
@@ -1479,7 +1492,7 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
         }
         case TestFileWriter_makeSparse maker: {
             if (!validateSparseEntries(maker.sph, maker.size)) {
-                Ꮡt.Fatalf("invalid sparse map: %v"u8, maker.sph);
+                t.Fatalf("invalid sparse map: %v", maker.sph);
             }
             var spd = invertSparseEntries(maker.sph, maker.size);
             fw = new global::go.archive.tar_package.regFileWriterжfileWriter(Ꮡ(new regFileWriter(w, maker.makeReg.size)));
@@ -1489,7 +1502,7 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
         }
         default: {
             var maker = v.maker;
-            Ꮡt.Fatalf("test %d, unknown make operation: %T"u8, i, maker);
+            t.Fatalf("test %d, unknown make operation: %T", i, maker);
             break;
         }}
 
@@ -1498,7 +1511,7 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
             case TestFileWriter_testWrite tfΔ1: {
                 var (got, err) = fw.Write(slice<byte>(tfΔ1.str));
                 if (got != tfΔ1.wantCnt || !AreEqual(err, tfΔ1.wantErr)) {
-                    Ꮡt.Errorf("test %d.%d, Write(%s):\ngot  (%d, %v)\nwant (%d, %v)"u8, i, j, tfΔ1.str, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
+                    t.Errorf("test %d.%d, Write(%s):\ngot  (%d, %v)\nwant (%d, %v)", i, j, tfΔ1.str, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
                 }
                 break;
             }
@@ -1506,70 +1519,70 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
                 var f = Ꮡ(new testFile(ops: tfΔ1.ops));
                 var (got, err) = fw.ReadFrom(new tar_internal_test_package.testFileжReader(f));
                 {
-                    var (_, ok) = err._<testError>(ᐧ); if (ok){
-                        Ꮡt.Errorf("test %d.%d, ReadFrom(): %v"u8, i, j, err);
-                    } else 
-                    if (got != tfΔ1.wantCnt || !AreEqual(err, tfΔ1.wantErr)) {
-                        Ꮡt.Errorf("test %d.%d, ReadFrom() = (%d, %v), want (%d, %v)"u8, i, j, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
+                    var (_, ok) = err._<testError>(ᐧ); if (ok) {
+                        t.Errorf("test %d.%d, ReadFrom(): %v", i, j, err);
+                    } else if (got != tfΔ1.wantCnt || !AreEqual(err, tfΔ1.wantErr)) {
+                        t.Errorf("test %d.%d, ReadFrom() = (%d, %v), want (%d, %v)", i, j, got, err, tfΔ1.wantCnt, tfΔ1.wantErr);
                     }
                 }
-                if (len((~f).ops) > 0) {
-                    Ꮡt.Errorf("test %d.%d, expected %d more operations"u8, i, j, len((~f).ops));
+                if (len(f.ops) > 0) {
+                    t.Errorf("test %d.%d, expected %d more operations", i, j, len(f.ops));
                 }
                 break;
             }
             case TestFileWriter_testRemaining tfΔ1: {
                 {
                     var got = fw.logicalRemaining(); if (got != tfΔ1.wantLCnt) {
-                        Ꮡt.Errorf("test %d.%d, logicalRemaining() = %d, want %d"u8, i, j, got, tfΔ1.wantLCnt);
+                        t.Errorf("test %d.%d, logicalRemaining() = %d, want %d", i, j, got, tfΔ1.wantLCnt);
                     }
                 }
                 {
                     var got = fw.physicalRemaining(); if (got != tfΔ1.wantPCnt) {
-                        Ꮡt.Errorf("test %d.%d, physicalRemaining() = %d, want %d"u8, i, j, got, tfΔ1.wantPCnt);
+                        t.Errorf("test %d.%d, physicalRemaining() = %d, want %d", i, j, got, tfΔ1.wantPCnt);
                     }
                 }
                 break;
             }
             default: {
                 var tfΔ1 = tf;
-                Ꮡt.Fatalf("test %d.%d, unknown test operation: %T"u8, i, j, tfΔ1);
+                t.Fatalf("test %d.%d, unknown test operation: %T", i, j, tfΔ1);
                 break;
             }}
         }
 
         {
             @string got = bb.String(); if (got != wantStr) {
-                Ꮡt.Fatalf("test %d, String() = %q, want %q"u8, i, got, wantStr);
+                t.Fatalf("test %d, String() = %q, want %q", i, got, wantStr);
             }
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string subfolderˢ = "subfolder"u8;
+internal static ref readonly @string subfolderˢ => ref subfolderˢᵇ;
+private static readonly @string subfolderˢᵇ = "subfolder"u8;
 
-public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
+public static void TestWriterAddFS(ж<testing.T> t) {
     var namesᴷ = new stackAppend<@string>();
 
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["emptyfolder"u8] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(493 | os.ModeDir))),
-        ["file.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("hello"u8))),
-        ["subfolder/another.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8))),
-        ["symlink.go"u8] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(511 | os.ModeSymlink), Data: slice<byte>("file.go"u8)))
+        ["emptyfolder"] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(493 | os.ModeDir))),
+        ["file.go"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("hello"u8))),
+        ["subfolder/another.go"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8))),
+        ["symlink.go"] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(511 | os.ModeSymlink), Data: slice<byte>("file.go"u8)))
         // Notably missing here is the "subfolder" directory. This makes sure even
         // if we don't have a subfolder directory listed.
     });
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var err = tw.AddFS(new tar_test_package.fstest_MapFSᴠFS(fsys)); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = tw.AddFS(new tar_test_package.fstest_MapFSᴠFS(fsys)); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var err = tw.Close(); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = tw.Close(); if (err != nil) {
+            t.Fatal(err);
         }
     }
 
@@ -1590,70 +1603,73 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
         entriesLeft--;
 
         var (entryInfo, err) = fsys.Lstat(name);
-        if (err != default!) {
-            Ꮡt.Fatalf("getting entry info error: %v"u8, err);
+        if (err != nil) {
+            t.Fatalf("getting entry info error: %v", err);
         }
         (var hdr, err) = tr.Next();
         if (AreEqual(err, io.EOF)) {
             break; // End of archive
         }
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         @string tmpName = name;
         if (entryInfo.IsDir()) {
             tmpName += "/"u8;
         }
-        if ((~hdr).Name != tmpName) {
-            Ꮡt.Errorf("test fs has filename %v; archive header has %v"u8,
-                name, (~hdr).Name);
+        if (hdr.Name != tmpName) {
+            t.Errorf("test fs has filename %v; archive header has %v",
+                name, hdr.Name);
         }
 
         if (entryInfo.Mode() != hdr.FileInfo().Mode()) {
-            Ꮡt.Errorf("%s: test fs has mode %v; archive header has %v"u8,
+            t.Errorf("%s: test fs has mode %v; archive header has %v",
                 name, entryInfo.Mode(), hdr.FileInfo().Mode());
         }
 
-        var exprᴛ1 = entryInfo.Mode().Type();
-        if (exprᴛ1 == fs.ModeDir) {
+        switch (entryInfo.Mode().Type()) {
+        case var ᴛ when ᴛ == fs.ModeDir: {
             // No additional checks necessary.
+            break;
         }
-        else if (exprᴛ1 == fs.ModeSymlink) {
-            @string origtarget = (@string)(~fsys[name]).Data;
-            if ((~hdr).Linkname != origtarget) {
-                Ꮡt.Fatalf("test fs has link content %s; archive header %v"u8, origtarget, (~hdr).Linkname);
+        case var ᴛ when ᴛ == fs.ModeSymlink: {
+            @string origtarget = (@string)fsys[name].Data;
+            if (hdr.Linkname != origtarget) {
+                t.Fatalf("test fs has link content %s; archive header %v", origtarget, hdr.Linkname);
             }
+            break;
         }
-        else { /* default: */
+        default: {
             var (data, errΔ2) = io.ReadAll(new global::go.archive.tar_package.ReaderжReader(tr));
-            if (errΔ2 != default!) {
-                Ꮡt.Fatal(errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatal(errΔ2);
             }
-            var origdata = fsys[name].Value.Data;
+            var origdata = fsys[name].Data;
             if (((sstring)data) != ((sstring)origdata)) {
-                Ꮡt.Fatalf("test fs has file content %v; archive header has %v"u8, origdata, data);
+                t.Fatalf("test fs has file content %v; archive header has %v", origdata, data);
             }
-        }
+            break;
+        }}
     }
     if (entriesLeft > 0) {
-        Ꮡt.Fatalf("not all entries are in the archive"u8);
+        t.Fatalf("not all entries are in the archive");
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorGotNilˢ = (@string)"expected error, got nil"u8;
 
-public static void TestWriterAddFSNonRegularFiles(ж<testing.T> Ꮡt) {
+public static void TestWriterAddFSNonRegularFiles(ж<testing.T> t) {
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
-        ["device"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("hello"u8), Mode: (fs.FileMode)(493 | fs.ModeDevice))),
-        ["symlink"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8), Mode: (fs.FileMode)(493 | fs.ModeSymlink)))
+        ["device"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("hello"u8), Mode: (fs.FileMode)(493 | fs.ModeDevice))),
+        ["symlink"] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8), Mode: (fs.FileMode)(493 | fs.ModeSymlink)))
     });
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var err = tw.AddFS(new tar_test_package.fstest_MapFSᴠFS(fsys)); if (err == default!) {
-            Ꮡt.Fatal(expectedErrorGotNilˢ);
+        var err = tw.AddFS(new tar_test_package.fstest_MapFSᴠFS(fsys)); if (err == nil) {
+            t.Fatal(expectedErrorGotNilˢ);
         }
     }
 }

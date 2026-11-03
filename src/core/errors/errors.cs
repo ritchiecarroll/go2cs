@@ -89,6 +89,6 @@ internal static @string Error(this ref errorString e) {
 //
 // Functions and methods should document the cases in which an error
 // wrapping this will be returned.
-public static error ErrUnsupported = New("unsupported operation"u8);
+public static error ErrUnsupported = New("unsupported operation");
 
 } // end errors_package

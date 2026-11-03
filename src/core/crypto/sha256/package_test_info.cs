@@ -8,9 +8,6 @@ global using static global::go.crypto.sha256_package;
 global using static global::go.crypto.sha256_internal_test_package;
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 // </ImportedTypeAliases>
 
 using go;
@@ -29,7 +26,7 @@ using static global::go.crypto.sha256_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

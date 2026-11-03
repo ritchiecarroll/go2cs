@@ -25,39 +25,37 @@ partial class poll_test_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tcpˢ = "tcp"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
 
-public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
+public static void TestWSASocketConflict(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
         var (s, err) = windows.WSASocket(Δsyscall.AF_INET, Δsyscall.SOCK_STREAM, Δsyscall.IPPROTO_TCP, nil, 0, windows.WSA_FLAG_OVERLAPPED);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
-        ref var fd = ref heap<poll.FD>(out var Ꮡfd);
-        fd = new poll.FD(Sysfd: s, IsStream: true, ZeroReadIsEOF: true);
+        ref var fd = ref heap<poll.FD>(new poll.FD(Sysfd: s, IsStream: true, ZeroReadIsEOF: true), out var Ꮡfd);
         {
-            err = Ꮡfd.Init(tcpˢ, true); if (err != default!) {
+            err = Ꮡfd.Init(tcpˢ, true); if (err != nil) {
                 Δsyscall.CloseHandle(s);
-                Ꮡt.Fatal(err);
+                t.Fatal(err);
             }
         }
         defer(() => Ꮡfd.Close(), ref ᒐ);
 
         const uint32 SIO_TCP_INFO = /* syscall.IOC_INOUT | syscall.IOC_VENDOR | 39 */ 3623878695;
-        ref var inbuf = ref heap<uint32>(out var Ꮡinbuf);
-        inbuf = (uint32)0;
+        ref var inbuf = ref heap<uint32>((uint32)0, out var Ꮡinbuf);
         ref var outbuf = ref heap(new _TCP_INFO_v0(), out var Ꮡoutbuf);
-        ref var cbbr = ref heap<uint32>(out var Ꮡcbbr);
-        cbbr = (uint32)0;
+        ref var cbbr = ref heap<uint32>((uint32)0, out var Ꮡcbbr);
 
         ref var ov = ref heap(new Δsyscall.Overlapped(), out var Ꮡov);
         // Create an event so that we can efficiently wait for completion
         // of a requested overlapped I/O operation.
         (ov.HEvent, _) = windows.CreateEvent(nil, 0, 0, nil);
         if (ov.HEvent == 0) {
-            Ꮡt.Fatalf("could not create the event!"u8);
+            t.Fatalf("could not create the event!");
         }
         defer(Δsyscall.CloseHandle, ov.HEvent, ref ᒐ);
 
@@ -70,17 +68,17 @@ public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
                 (uint32)/* unsafe.Sizeof(outbuf) */ (uintptr)88,
                 Ꮡcbbr,
                 Ꮡov,
-                0); if (err != default! && !errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
-                Ꮡt.Fatalf("could not perform the WSAIoctl: %v"u8, err);
+                0); if (err != nil && !errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
+                t.Fatalf("could not perform the WSAIoctl: %v", err);
             }
         }
 
-        if (err != default! && errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
+        if (err != nil && errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
             // It is possible that the overlapped I/O operation completed
             // immediately so there is no need to wait for it to complete.
             {
                 var (res, errΔ1) = Δsyscall.WaitForSingleObject(ov.HEvent, Δsyscall.INFINITE); if (res != 0) {
-                    Ꮡt.Fatalf("waiting for the completion of the overlapped IO failed: %v"u8, errΔ1);
+                    t.Fatalf("waiting for the completion of the overlapped IO failed: %v", errΔ1);
                 }
             }
         }
@@ -112,14 +110,13 @@ partial struct _TCP_INFO_v0 {
 }
 
 internal static ж<poll.FD> newFD(testing.TB t, syscallꓸHandle h, @string kind, bool overlapped) {
-    ref var fd = ref heap<poll.FD>(out var Ꮡfd);
-    fd = new poll.FD(
+    ref var fd = ref heap<poll.FD>(new poll.FD(
         Sysfd: h,
         IsStream: true,
         ZeroReadIsEOF: true
-    );
+    ), out var Ꮡfd);
     var err = Ꮡfd.Init(kind, overlapped);
-    if (overlapped && err != default!) {
+    if (overlapped && err != nil) {
         // Overlapped file handles should not error.
         Ꮡfd.Close();
         t.Fatal(err);
@@ -131,12 +128,14 @@ internal static ж<poll.FD> newFD(testing.TB t, syscallꓸHandle h, @string kind
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fileˢ = "file"u8;
-internal static readonly @string pipeˢ = "pipe"u8;
+internal static ref readonly @string fileˢ => ref fileˢᵇ;
+private static readonly @string fileˢᵇ = "file"u8;
+internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
+private static readonly @string pipeˢᵇ = "pipe"u8;
 
 internal static ж<poll.FD> newFile(testing.TB t, @string name, bool overlapped) {
     var (namep, err) = Δsyscall.UTF16PtrFromString(name);
-    if (err != default!) {
+    if (err != nil) {
         t.Fatal(err);
     }
     nint flags = Δsyscall.FILE_ATTRIBUTE_NORMAL;
@@ -147,11 +146,11 @@ internal static ж<poll.FD> newFile(testing.TB t, @string name, bool overlapped)
         (uint32)((uint32)Δsyscall.GENERIC_READ | (uint32)Δsyscall.GENERIC_WRITE),
         (uint32)((uint32)Δsyscall.FILE_SHARE_WRITE | (uint32)Δsyscall.FILE_SHARE_READ),
         nil, Δsyscall.OPEN_ALWAYS, (uint32)flags, 0);
-    if (err != default!) {
+    if (err != nil) {
         t.Fatal(err);
     }
     (var typ, err) = Δsyscall.GetFileType(h);
-    if (err != default!) {
+    if (err != nil) {
         Δsyscall.CloseHandle(h);
         t.Fatal(err);
     }
@@ -162,37 +161,39 @@ internal static ж<poll.FD> newFile(testing.TB t, @string name, bool overlapped)
     return newFD(t, h, kind, overlapped);
 }
 
-public static void BenchmarkReadOverlapped(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, true);
+public static void BenchmarkReadOverlapped(ж<testing.B> b) {
+    benchmarkRead(b, true);
 }
 
-public static void BenchmarkReadSync(ж<testing.B> Ꮡb) {
-    benchmarkRead(Ꮡb, false);
+public static void BenchmarkReadSync(ж<testing.B> b) {
+    benchmarkRead(b, false);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ = "foo"u8;
+internal static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "foo"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string contentᶜ = "hello world"u8;
+internal static ref readonly @string contentᶜ => ref contentᶜᵇ;
+private static readonly @string contentᶜᵇ = "hello world"u8;
 
-internal static void benchmarkRead(ж<testing.B> Ꮡb, bool overlapped) {
-    @string name = filepath.Join(Ꮡb.TempDir(), fooˢ);
+internal static void benchmarkRead(ж<testing.B> b, bool overlapped) {
+    @string name = filepath.Join(b.TempDir(), fooˢ);
     @string content = contentᶜ;
     var err = os.WriteFile(name, slice<byte>(content), 420);
-    if (err != default!) {
-        Ꮡb.Fatal(err);
+    if (err != nil) {
+        b.Fatal(err);
     }
-    var @file = newFile(new poll_test_package.testing_BжTB(Ꮡb), name, overlapped);
+    var @file = newFile(new poll_test_package.testing_BжTB(b), name, overlapped);
     array<byte> buf = new(11); /* len(content) */
-    while (Ꮡb.Loop()) {
+    while (b.Loop()) {
         var (_, errΔ1) = io.ReadFull(new poll_test_package.poll_FDжReader(@file), buf[..]);
-        if (errΔ1 != default!) {
-            Ꮡb.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            b.Fatal(errΔ1);
         }
         {
-            var (_, errΔ2) = @file.Seek(0, io.SeekStart); if (errΔ2 != default!) {
-                Ꮡb.Fatal(errΔ2);
+            var (_, errΔ2) = @file.Seek(0, io.SeekStart); if (errΔ2 != nil) {
+                b.Fatal(errΔ2);
             }
         }
     }

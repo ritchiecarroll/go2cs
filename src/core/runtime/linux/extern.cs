@@ -309,10 +309,10 @@ partial class runtime_package {
 // on Windows), and the line number within the file of the corresponding call.
 // The boolean ok is false if it was not possible to recover the information.
 public static partial (uintptr pc, @string @file, nint line, bool ok) Caller(nint skip) {
-    uintptr pc = default!;
-    @string @file = default!;
-    nint line = default!;
-    bool ok = default!;
+    uintptr pc = default;
+    @string @file = default;
+    nint line = default;
+    bool ok = default;
 
     var rpc = new slice<uintptr>(1);
     nint n = callers(skip + 1, rpc);
@@ -328,7 +328,8 @@ public static partial (uintptr pc, @string @file, nint line, bool ok) Caller(nin
 internal static @string defaultGOROOT; // set by cmd/link
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string gorootˢ = "GOROOT"u8;
+internal static ref readonly @string gorootˢ => ref gorootˢᵇ;
+private static readonly @string gorootˢᵇ = "GOROOT"u8;
 
 // GOROOT returns the root of the Go tree. It uses the
 // GOROOT environment variable, if set at process start,
@@ -366,10 +367,12 @@ public static @string Version() {
 // GOOS is the running program's operating system target:
 // one of darwin, freebsd, linux, and so on.
 // To view possible combinations of GOOS and GOARCH, run "go tool dist list".
-public static readonly @string GOOS = "linux";
+public static ref readonly @string GOOS => ref GOOSᵇ;
+private static readonly @string GOOSᵇ = "linux";
 
 // GOARCH is the running program's architecture target:
 // one of 386, amd64, arm, s390x, and so on.
-public static readonly @string GOARCH = "amd64";
+public static ref readonly @string GOARCH => ref GOARCHᵇ;
+private static readonly @string GOARCHᵇ = "amd64";
 
 } // end runtime_package

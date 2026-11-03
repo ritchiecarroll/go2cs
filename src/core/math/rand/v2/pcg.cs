@@ -34,10 +34,10 @@ public static void Seed(this ref PCG p, uint64 seed1, uint64 seed2) {
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
 public static (slice<byte>, error) AppendBinary(this ref PCG p, slice<byte> b) {
-    b = append(b, ((@string)"pcg:"u8).ꓸꓸꓸ);
+    b = append(b, ((@string)"pcg:").ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, p.hi);
     b = byteorder.BEAppendUint64(b, p.lo);
-    return (b, default!);
+    return (b, default);
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
@@ -45,7 +45,7 @@ public static (slice<byte>, error) MarshalBinary(this ref PCG p) {
     return p.AppendBinary(new slice<byte>(0, 20));
 }
 
-internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
+internal static error errUnmarshalPCG = errors.New("invalid PCG encoding");
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
@@ -54,12 +54,12 @@ public static error UnmarshalBinary(this ref PCG p, slice<byte> data) {
     }
     p.hi = byteorder.BEUint64(data[4..]);
     p.lo = byteorder.BEUint64(data[(int)(4 + 8)..]);
-    return default!;
+    return default;
 }
 
 internal static (uint64 hi, uint64 lo) next(this ref PCG p) {
-    uint64 hi = default!;
-    uint64 lo = default!;
+    uint64 hi = default;
+    uint64 lo = default;
 
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L161
     //

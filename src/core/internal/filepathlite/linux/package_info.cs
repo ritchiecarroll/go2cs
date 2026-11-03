@@ -45,7 +45,7 @@ using static go.@internal.filepathlite_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,9 +55,9 @@ using static go.@internal.filepathlite_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlO6CgpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
-[assembly: go.GoPositionMap("internal/filepathlite/path_nonwindows.go", "path_nonwindows.cs", "AAgS")]
-[assembly: go.GoPositionMap("internal/filepathlite/path_unix.go", "path_unix.cs", "AA8mgqaCpoKClKiSqqI=")]
+[assembly: GoPositionMap("internal/filepathlite/path.go", "path.cs", "ABQkAA0cgoKUpoKCgoKUgpSCpqKCpoKClKiSgoKCgpSUlO6CgpKCgqaCpsbGgqaCgtiClIKC+oKmguyCpoKokqaCgpSCgoKCgoKmgpSClKiSgpSokoKUqJKClKaCgpSCgoKmqJKCgoKUqJKCgqaokoKmgqaUgoKUgqaClKiSgoKClIKUlKiSqqI=")]
+[assembly: GoPositionMap("internal/filepathlite/path_nonwindows.go", "path_nonwindows.cs", "AAgS")]
+[assembly: GoPositionMap("internal/filepathlite/path_unix.go", "path_unix.cs", "AA8mgqaCpoKClKiSqqI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

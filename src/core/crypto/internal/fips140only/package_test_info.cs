@@ -8,20 +8,10 @@ global using static global::go.crypto.@internal.fips140only_package;
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
 global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
 global using hpkeꓸKEM = go.crypto.hpke_package.ΔKEM;
 global using hpkeꓸPublicKey = go.crypto.hpke_package.ΔPublicKey;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +36,13 @@ using static global::go.crypto.@internal.fips140only_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.crypto.rsa_package.PrivateKey))]
+[assembly: GoFieldAccess(typeof(go.encoding.pem_package.Block))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,7 +52,7 @@ using static global::go.crypto.@internal.fips140only_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140only/fips140only_test.go", "fips140only_test.cs", "AEBggoKCgoKCgoKUlIKClIKCABkIgoKUgpSCgpSSlIKgkoKgpKCSoKSCoKSgpJKSkqSSpKSSpICSkoCkgJKSgKSAkoCAtJKSgsSC1oCSgoC0gLSSgsSC1pKCxILWkoLEgtakgoKSgqaSkpKCkoKClJK2gpKCgqaSkpKSkqSSpJK2gqSCgpSSpLa2yJKSkpKClAABIJKSpKSCgpKkpIKClIKCkpKkgoKUgoKSgoKkAAIUkoKCkoKCkpKClIKCgqaSkpKSgoKSyIIACxiCgoKCgoKCgoKCpoKC1qKCgoKAgpSAgtiipJSCgoKSgriCgoK4goKClLiCpoLmgKSCgoKClA==", "60-63:1;64-67:2;85-85:1;87-87:2;89-89:3;90-90:4;93-93:5;95-95:6;110-110:7;112-112:8;114-114:9;116-116:10;118-118:11;119-119:12;119-119:12.1;123-125:13;126-128:14;130-130:15;131-133:16;132-132:16.1;134-134:17;137-139:18;140-142:19;145-147:20;148-150:21;153-155:22;156-158:23;165-167:24;196-198:25;199-201:26;290-305:27;351-360:1", "124=crypto.Hash.New;127=crypto.Hash.New;132=crypto.Hash.New;134=crypto.Hash.New;138=crypto.Hash.New;141=crypto.Hash.New;146=crypto.Hash.New;149=crypto.Hash.New;154=crypto.Hash.New;157=crypto.Hash.New")]
+[assembly: GoPositionMap("crypto/internal/fips140only/fips140only_test.go", "fips140only_test.cs", "AEVggoKCgoKCgoKUlIKClIKCABsIgoKUgpSCgpSClIKgkoKgpKCSoKSCoKSgpJKSkqSSpKSSpICSkoCkgJKSgKSAkoCAtJKSgsSC1oCSgoC0gLSSgsSC1pKCxILWkoLEgtakgoKSgqaSkpKCkoKClJK2gpKCgqaSkpKSkqSSpJK2gqSCgpSSpLa2yJKSkpKClAABIJKSpKSCgpKkpIKClIKCkpKkgoKUgoKSgoKkAAIUkoKCkoKCkpKClIKCgqaSkpKSgoKSyIIACxiCgoKCgoKCgoKCpoKC5qKCgoKAgpSAgtiipJSCgoKCgriCgoK4goKClLiCpoIACAaApIKCgoKU", "60-63:1;64-67:2;85-85:1;87-87:2;89-89:3;90-90:4;93-93:5;95-95:6;110-110:7;112-112:8;114-114:9;116-116:10;118-118:11;119-119:12;119-119:12.1;123-125:13;126-128:14;130-130:15;131-133:16;132-132:16.1;134-134:17;137-139:18;140-142:19;145-147:20;148-150:21;153-155:22;156-158:23;165-167:24;196-198:25;199-201:26;290-305:27;351-360:1", "124=crypto.Hash.New;127=crypto.Hash.New;132=crypto.Hash.New;134=crypto.Hash.New;138=crypto.Hash.New;141=crypto.Hash.New;146=crypto.Hash.New;149=crypto.Hash.New;154=crypto.Hash.New;157=crypto.Hash.New")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

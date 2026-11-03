@@ -120,13 +120,11 @@
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
-    <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/rand/math.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
-    <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
     <ProjectReference Include="testing.quick.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>

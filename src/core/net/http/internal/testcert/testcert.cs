@@ -72,8 +72,10 @@ jel6uj2FOP9g54s+GzlSVg/T
 """u8.Raw())); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testingKeyˢ = "TESTING KEY"u8;
-private static readonly @string privateKeyˢ = "PRIVATE KEY"u8;
+private static ref readonly @string testingKeyˢ => ref testingKeyˢᵇ;
+private static readonly @string testingKeyˢᵇ = "TESTING KEY"u8;
+private static ref readonly @string privateKeyˢ => ref privateKeyˢᵇ;
+private static readonly @string privateKeyˢᵇ = "PRIVATE KEY"u8;
 
 internal static @string testingKey(@string s) {
     return strings.ReplaceAll(s, testingKeyˢ, privateKeyˢ);

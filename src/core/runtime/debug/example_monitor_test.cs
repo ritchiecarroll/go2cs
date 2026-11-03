@@ -38,17 +38,21 @@ internal static void appmain() {
     monitor();
 
     // Run the application.
-    println((@string)"hello"u8);
+    println((@string)"hello");
     throw panic("oops");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string monitorˢ = "monitor: "u8;
-private static readonly @string crashˢ = "*.crash"u8;
-private static readonly @string testRunˢ = "-test.run=^ExampleSetCrashOutput_monitor$"u8;
+private static ref readonly @string monitorˢ => ref monitorˢᵇ;
+private static readonly @string monitorˢᵇ = "monitor: "u8;
+private static ref readonly @string crashˢ => ref crashˢᵇ;
+private static readonly @string crashˢᵇ = "*.crash"u8;
+private static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^ExampleSetCrashOutput_monitor$"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string monitorVarᶜ = "RUNTIME_DEBUG_MONITOR"u8;
+private static ref readonly @string monitorVarᶜ => ref monitorVarᶜᵇ;
+private static readonly @string monitorVarᶜᵇ = "RUNTIME_DEBUG_MONITOR"u8;
 
 // monitor starts the monitor process, which performs automated
 // crash reporting. Call this function immediately within main.
@@ -64,8 +68,8 @@ internal static void monitor() {
         log.SetPrefix(monitorˢ);
 
         var (crash, errΔ1) = io.ReadAll(new os_FileжReader(os.Stdin));
-        if (errΔ1 != default!) {
-            log.Fatalf("failed to read from input pipe: %v"u8, errΔ1);
+        if (errΔ1 != nil) {
+            log.Fatalf("failed to read from input pipe: %v", errΔ1);
         }
         if (len(crash) == 0) {
             // Parent process terminated without reporting a crash.
@@ -74,43 +78,43 @@ internal static void monitor() {
 
         // Save the crash report securely in the file system.
         (var f, errΔ1) = os.CreateTemp(""u8, crashˢ);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             log.Fatal(errΔ1);
         }
         {
-            var (_, errΔ2) = f.Write(crash); if (errΔ2 != default!) {
+            var (_, errΔ2) = f.Write(crash); if (errΔ2 != nil) {
                 log.Fatal(errΔ2);
             }
         }
         {
-            var errΔ3 = f.Close(); if (errΔ3 != default!) {
+            var errΔ3 = f.Close(); if (errΔ3 != nil) {
                 log.Fatal(errΔ3);
             }
         }
-        log.Fatalf("saved crash report at %s"u8, f.Name());
+        log.Fatalf("saved crash report at %s", f.Name());
     }
 
     // This is the application process.
     // Fork+exec the same executable in monitor mode.
     var (exe, err) = os.Executable();
-    if (err != default!) {
+    if (err != nil) {
         log.Fatal(err);
     }
     var cmd = exec.Command(exe, testRunˢ);
     // Be selective in which variables we allow the child to inherit.
     // Depending on the application, some may be necessary,
     // while others (e.g. GOGC, GOMEMLIMIT) may be harmful; see #73490.
-    cmd.Value.Env = new @string[]{monitorVar + "=1"}.slice();
-    cmd.Value.Stderr = new os.FileжWriter(os.Stderr);
-    cmd.Value.Stdout = new os.FileжWriter(os.Stderr);
+    cmd.Env = slice<@string>([monitorVar + "=1"]);
+    cmd.Stderr = new os.FileжWriter(os.Stderr);
+    cmd.Stdout = new os.FileжWriter(os.Stderr);
     (var pipe, err) = cmd.StdinPipe();
-    if (err != default!) {
-        log.Fatalf("StdinPipe: %v"u8, err);
+    if (err != nil) {
+        log.Fatalf("StdinPipe: %v", err);
     }
-    debug.SetCrashOutput(pipe._<ж<os.File>>(), new debug.CrashOptions(nil)); // (this conversion is safe)
+    debug.SetCrashOutput(pipe._<ж<os.File>>(), new debug.CrashOptions()); // (this conversion is safe)
     {
-        var errΔ4 = cmd.Start(); if (errΔ4 != default!) {
-            log.Fatalf("can't start monitor: %v"u8, errΔ4);
+        var errΔ4 = cmd.Start(); if (errΔ4 != nil) {
+            log.Fatalf("can't start monitor: %v", errΔ4);
         }
     }
     // Now return and start the application proper...

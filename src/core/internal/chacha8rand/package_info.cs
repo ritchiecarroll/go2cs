@@ -46,7 +46,11 @@ using static go.@internal.chacha8rand_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(State))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,8 +60,8 @@ using static go.@internal.chacha8rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABk8AA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAgKgqiygpSCgpSClIKCgoKClA==", "", "", "64=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
-[assembly: go.GoPositionMap("internal/chacha8rand/chacha8_generic.go", "chacha8_generic.cs", "ADqWApSCggAEnAGSgoKCgoKCgoKCgoKC")]
+[assembly: GoPositionMap("internal/chacha8rand/chacha8.go", "chacha8.cs", "ABk8AA8wAAkCgoKUgqiyAAcSwoKCgoKs0oIABxCCgoKClIKCgoIAAxDigoKCgoKClKYAAhDygoKCgoKUAAkKgqiygpSCgpSClIKCgoKClA==", "", "", "64=LEUint64/1/4/1,LEUint64/2/4/2,LEUint64/3/4/3,LEUint64/4/4/4")]
+[assembly: GoPositionMap("internal/chacha8rand/chacha8_generic.go", "chacha8_generic.cs", "ADqWApSCggAEnAGSgoKCgoKCgoKCgoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

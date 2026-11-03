@@ -8,7 +8,7 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 
 partial class edwards25519_internal_test_package {
 
-public static void TestProjLookupTable(ж<testing.T> Ꮡt) {
+public static void TestProjLookupTable(ж<testing.T> t) {
     global::go.crypto.@internal.fips140.edwards25519_package.projLookupTable table = new();
     table.FromP3(B);
 
@@ -31,11 +31,11 @@ public static void TestProjLookupTable(ж<testing.T> Ꮡt) {
     accP3.fromP1xP1(ᏑaccP1xP1);
 
     if (accP3.Equal(I) != 1) {
-        Ꮡt.Errorf("Consistency check on ProjLookupTable.SelectInto failed!  %x %x %x"u8, tmp1, tmp2, tmp3);
+        t.Errorf("Consistency check on ProjLookupTable.SelectInto failed!  %x %x %x", tmp1, tmp2, tmp3);
     }
 }
 
-public static void TestAffineLookupTable(ж<testing.T> Ꮡt) {
+public static void TestAffineLookupTable(ж<testing.T> t) {
     global::go.crypto.@internal.fips140.edwards25519_package.affineLookupTable table = new();
     table.FromP3(B);
 
@@ -58,11 +58,11 @@ public static void TestAffineLookupTable(ж<testing.T> Ꮡt) {
     accP3.fromP1xP1(ᏑaccP1xP1);
 
     if (accP3.Equal(I) != 1) {
-        Ꮡt.Errorf("Consistency check on ProjLookupTable.SelectInto failed!  %x %x %x"u8, tmp1, tmp2, tmp3);
+        t.Errorf("Consistency check on ProjLookupTable.SelectInto failed!  %x %x %x", tmp1, tmp2, tmp3);
     }
 }
 
-public static void TestNafLookupTable5(ж<testing.T> Ꮡt) {
+public static void TestNafLookupTable5(ж<testing.T> t) {
     global::go.crypto.@internal.fips140.edwards25519_package.nafLookupTable5 table = new();
     table.FromP3(B);
 
@@ -91,11 +91,11 @@ public static void TestNafLookupTable5(ж<testing.T> Ꮡt) {
     rhs.fromP1xP1(ᏑaccP1xP1);
 
     if (lhs.Equal(rhs) != 1) {
-        Ꮡt.Errorf("Consistency check on nafLookupTable5 failed"u8);
+        t.Errorf("Consistency check on nafLookupTable5 failed");
     }
 }
 
-public static void TestNafLookupTable8(ж<testing.T> Ꮡt) {
+public static void TestNafLookupTable8(ж<testing.T> t) {
     global::go.crypto.@internal.fips140.edwards25519_package.nafLookupTable8 table = new();
     table.FromP3(B);
 
@@ -124,7 +124,7 @@ public static void TestNafLookupTable8(ж<testing.T> Ꮡt) {
     rhs.fromP1xP1(ᏑaccP1xP1);
 
     if (lhs.Equal(rhs) != 1) {
-        Ꮡt.Errorf("Consistency check on nafLookupTable8 failed"u8);
+        t.Errorf("Consistency check on nafLookupTable8 failed");
     }
 }
 

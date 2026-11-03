@@ -9,7 +9,7 @@ using go.@internal.runtime;
 
 partial class atomic_test_package {
 
-public static void TestXchg8(ж<testing.T> Ꮡt) {
+public static void TestXchg8(ж<testing.T> t) {
     ref var a = ref heap(new array<uint8>(16), out var Ꮡa);
     foreach (var i in range(a)) {
         var next = (uint8)(i + 50);
@@ -25,12 +25,12 @@ public static void TestXchg8(ж<testing.T> Ꮡt) {
         var pb = b[i];
         b[i] = next;
         if (pa != pb) {
-            Ꮡt.Errorf("atomic.Xchg8(a[%d]); %d != %d"u8, i, pa, pb);
+            t.Errorf("atomic.Xchg8(a[%d]); %d != %d", i, pa, pb);
         }
         if (a != b) {
-            Ꮡt.Errorf("after atomic.Xchg8(a[%d]); %d != %d"u8, i, a, b);
+            t.Errorf("after atomic.Xchg8(a[%d]); %d != %d", i, a, b);
         }
-        if (Ꮡt.Failed()) {
+        if (t.Failed()) {
             break;
         }
     }
@@ -39,17 +39,17 @@ public static void TestXchg8(ж<testing.T> Ꮡt) {
 public static void BenchmarkXchg8(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var x = ref heap(new array<uint8>(512), out var Ꮡx);                     // give byte its own cache line
+    ref var x = ref heap(new array<uint8>(512), out var Ꮡx); // give byte its own cache line
     sink = Ꮡx;
     for (nint i = 0; i < b.N; i++) {
         atomic.Xchg8(Ꮡx.at<uint8>(255), (uint8)i);
     }
 }
 
-public static void BenchmarkXchg8Parallel(ж<testing.B> Ꮡb) {
-    ref var x = ref heap(new array<uint8>(512), out var Ꮡx);                     // give byte its own cache line
+public static void BenchmarkXchg8Parallel(ж<testing.B> b) {
+    ref var x = ref heap(new array<uint8>(512), out var Ꮡx); // give byte its own cache line
     sink = Ꮡx;
-    Ꮡb.RunParallel((ж<testing.PB> pb) => {
+    b.RunParallel((ж<testing.PB> pb) => {
         var i = (uint8)0;
         while (pb.Next()) {
             atomic.Xchg8(Ꮡx.at<uint8>(255), i);

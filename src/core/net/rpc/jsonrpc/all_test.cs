@@ -41,7 +41,7 @@ public static error Add(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) 
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply.C = args.A + args.B;
-    return default!;
+    return default;
 }
 
 public static error Mul(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
@@ -49,11 +49,12 @@ public static error Mul(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) 
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply.C = args.A * args.B;
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string divideByZeroˢ = "divide by zero"u8;
+internal static ref readonly @string divideByZeroˢ => ref divideByZeroˢᵇ;
+private static readonly @string divideByZeroˢᵇ = "divide by zero"u8;
 
 public static error Div(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
     ref var args = ref Ꮡargs.DerefOrNull();
@@ -63,10 +64,10 @@ public static error Div(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) 
         return errors.New(divideByZeroˢ);
     }
     reply.C = quo(args.A, args.B);
-    return default!;
+    return default;
 }
 
-public static error Error(this ref Arith t, ж<Args> Ꮡargs, ж<Reply> Ꮡreply) {
+public static error Error(this ref Arith t, ж<Args> args, ж<Reply> reply) {
     throw panic("ERROR");
 }
 
@@ -77,29 +78,29 @@ public static error Map(this BuiltinTypes _, nint i, ж<map<nint, nint>> Ꮡrepl
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     (reply)[i] = i;
-    return default!;
+    return default;
 }
 
 public static error Slice(this BuiltinTypes _, nint i, ж<slice<nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     reply = append(reply, i);
-    return default!;
+    return default;
 }
 
 public static error Array(this BuiltinTypes _, nint i, /*[1]*/ ж<array<nint>> Ꮡreply) {
     ref var reply = ref Ꮡreply.DerefOrNull();
 
     (reply)[0] = i;
-    return default!;
+    return default;
 }
 
 [GoInit] internal static void init() {
     rpc.Register(@new<Arith>());
-    rpc.Register(new BuiltinTypes(nil));
+    rpc.Register(new BuiltinTypes());
 }
 
-public static partial void TestServerNoParams(ж<testing.T> Ꮡt) {
+public static partial void TestServerNoParams(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -111,19 +112,19 @@ public static partial void TestServerNoParams(ж<testing.T> Ꮡt) {
         fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), @"{""method"": ""Arith.Add"", ""id"": ""123""}"u8);
         ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
         {
-            var err = dec.Decode(Ꮡresp); if (err != default!) {
-                Ꮡt.Fatalf("Decode after no params: %s"u8, err);
+            var err = dec.Decode(Ꮡresp); if (err != nil) {
+                t.Fatalf("Decode after no params: %s", err);
             }
         }
-        if (resp.Error == default!) {
-            Ꮡt.Fatalf("Expected error, got nil"u8);
+        if (resp.Error == nil) {
+            t.Fatalf("Expected error, got nil");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestServerEmptyMessage(ж<testing.T> Ꮡt) {
+public static partial void TestServerEmptyMessage(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -135,19 +136,19 @@ public static partial void TestServerEmptyMessage(ж<testing.T> Ꮡt) {
         fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), "{}"u8);
         ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
         {
-            var err = dec.Decode(Ꮡresp); if (err != default!) {
-                Ꮡt.Fatalf("Decode after empty: %s"u8, err);
+            var err = dec.Decode(Ꮡresp); if (err != nil) {
+                t.Fatalf("Decode after empty: %s", err);
             }
         }
-        if (resp.Error == default!) {
-            Ꮡt.Fatalf("Expected error, got nil"u8);
+        if (resp.Error == nil) {
+            t.Fatalf("Expected error, got nil");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestServer(ж<testing.T> Ꮡt) {
+public static partial void TestServer(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -161,17 +162,17 @@ public static partial void TestServer(ж<testing.T> Ꮡt) {
             fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), @"{""method"": ""Arith.Add"", ""id"": ""\u%04d"", ""params"": [{""A"": %d, ""B"": %d}]}"u8, i, i, i + 1);
             ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
             var err = dec.Decode(Ꮡresp);
-            if (err != default!) {
-                Ꮡt.Fatalf("Decode: %s"u8, err);
+            if (err != nil) {
+                t.Fatalf("Decode: %s", err);
             }
-            if (resp.Error != default!) {
-                Ꮡt.Fatalf("resp.Error: %s"u8, resp.Error);
+            if (resp.Error != nil) {
+                t.Fatalf("resp.Error: %s", resp.Error);
             }
             if (resp.Id._<@string>() != ((@string)(rune)i)) {
-                Ꮡt.Fatalf("resp: bad id %q want %q"u8, resp.Id._<@string>(), (@string)(rune)i);
+                t.Fatalf("resp: bad id %q want %q", resp.Id._<@string>(), (@string)(rune)i);
             }
             if (resp.Result.C != 2 * i + 1) {
-                Ꮡt.Fatalf("resp: bad result: %d+%d=%d"u8, i, i + 1, resp.Result.C);
+                t.Fatalf("resp: bad result: %d+%d=%d", i, i + 1, resp.Result.C);
             }
         }
     }
@@ -180,13 +181,16 @@ public static partial void TestServer(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string arithAddˢ = "Arith.Add"u8;
-internal static readonly @string arithMulˢ = "Arith.Mul"u8;
-internal static readonly @string arithDivˢ = "Arith.Div"u8;
+internal static ref readonly @string arithAddˢ => ref arithAddˢᵇ;
+private static readonly @string arithAddˢᵇ = "Arith.Add"u8;
+internal static ref readonly @string arithMulˢ => ref arithMulˢᵇ;
+private static readonly @string arithMulˢᵇ = "Arith.Mul"u8;
+internal static ref readonly @string arithDivˢ => ref arithDivˢᵇ;
+private static readonly @string arithDivˢᵇ = "Arith.Div"u8;
 internal static readonly object divExpectedErrorˢ = (@string)"Div: expected error"u8;
 internal static readonly object divExpectedDivideByZeroˢ = (@string)"Div: expected divide by zero error; got"u8;
 
-public static partial void TestClient(ж<testing.T> Ꮡt) {
+public static partial void TestClient(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Assume server is okay (TestServer is above).
@@ -202,44 +206,44 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
         var err = client.Call(arithAddˢ, args.OrTypedNil(), reply.OrTypedNil());
-        if (err != default!) {
-            Ꮡt.Errorf("Add: expected no error but got string %q"u8, err.Error());
+        if (err != nil) {
+            t.Errorf("Add: expected no error but got string %q", err.Error());
         }
-        if ((~reply).C != (~args).A + (~args).B) {
-            Ꮡt.Errorf("Add: got %d expected %d"u8, (~reply).C, (~args).A + (~args).B);
+        if (reply.C != args.A + args.B) {
+            t.Errorf("Add: got %d expected %d", reply.C, args.A + args.B);
         }
 
         args = Ꮡ(new Args(7, 8));
         reply = @new<Reply>();
         err = client.Call(arithMulˢ, args.OrTypedNil(), reply.OrTypedNil());
-        if (err != default!) {
-            Ꮡt.Errorf("Mul: expected no error but got string %q"u8, err.Error());
+        if (err != nil) {
+            t.Errorf("Mul: expected no error but got string %q", err.Error());
         }
-        if ((~reply).C != (~args).A * (~args).B) {
-            Ꮡt.Errorf("Mul: got %d expected %d"u8, (~reply).C, (~args).A * (~args).B);
+        if (reply.C != args.A * args.B) {
+            t.Errorf("Mul: got %d expected %d", reply.C, args.A * args.B);
         }
 
         // Out of order.
         args = Ꮡ(new Args(7, 8));
         var mulReply = @new<Reply>();
-        var mulCall = client.Go(arithMulˢ, args.OrTypedNil(), mulReply.OrTypedNil(), default!);
+        var mulCall = client.Go(arithMulˢ, args.OrTypedNil(), mulReply.OrTypedNil(), default);
         var addReply = @new<Reply>();
-        var addCall = client.Go(arithAddˢ, args.OrTypedNil(), addReply.OrTypedNil(), default!);
+        var addCall = client.Go(arithAddˢ, args.OrTypedNil(), addReply.OrTypedNil(), default);
 
-        addCall = ᐸꟷ((~addCall).Done);
-        if ((~addCall).Error != default!) {
-            Ꮡt.Errorf("Add: expected no error but got string %q"u8, (~addCall).Error.Error());
+        addCall = ᐸꟷ(addCall.Done);
+        if (addCall.Error != nil) {
+            t.Errorf("Add: expected no error but got string %q", addCall.Error.Error());
         }
-        if ((~addReply).C != (~args).A + (~args).B) {
-            Ꮡt.Errorf("Add: got %d expected %d"u8, (~addReply).C, (~args).A + (~args).B);
+        if (addReply.C != args.A + args.B) {
+            t.Errorf("Add: got %d expected %d", addReply.C, args.A + args.B);
         }
 
-        mulCall = ᐸꟷ((~mulCall).Done);
-        if ((~mulCall).Error != default!) {
-            Ꮡt.Errorf("Mul: expected no error but got string %q"u8, (~mulCall).Error.Error());
+        mulCall = ᐸꟷ(mulCall.Done);
+        if (mulCall.Error != nil) {
+            t.Errorf("Mul: expected no error but got string %q", mulCall.Error.Error());
         }
-        if ((~mulReply).C != (~args).A * (~args).B) {
-            Ꮡt.Errorf("Mul: got %d expected %d"u8, (~mulReply).C, (~args).A * (~args).B);
+        if (mulReply.C != args.A * args.B) {
+            t.Errorf("Mul: got %d expected %d", mulReply.C, args.A * args.B);
         }
 
         // Error test
@@ -247,11 +251,10 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         reply = @new<Reply>();
         err = client.Call(arithDivˢ, args.OrTypedNil(), reply.OrTypedNil());
         // expect an error: zero divide
-        if (err == default!){
-            Ꮡt.Error(divExpectedErrorˢ);
-        } else 
-        if (err.Error() != "divide by zero"u8) {
-            Ꮡt.Error(divExpectedDivideByZeroˢ, err);
+        if (err == nil) {
+            t.Error(divExpectedErrorˢ);
+        } else if (err.Error() != "divide by zero"u8) {
+            t.Error(divExpectedDivideByZeroˢ, err);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -259,11 +262,14 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string builtinTypesMapˢ = "BuiltinTypes.Map"u8;
-internal static readonly @string builtinTypesSliceˢ = "BuiltinTypes.Slice"u8;
-internal static readonly @string builtinTypesArrayˢ = "BuiltinTypes.Array"u8;
+internal static ref readonly @string builtinTypesMapˢ => ref builtinTypesMapˢᵇ;
+private static readonly @string builtinTypesMapˢᵇ = "BuiltinTypes.Map"u8;
+internal static ref readonly @string builtinTypesSliceˢ => ref builtinTypesSliceˢᵇ;
+private static readonly @string builtinTypesSliceˢᵇ = "BuiltinTypes.Slice"u8;
+internal static ref readonly @string builtinTypesArrayˢ => ref builtinTypesArrayˢᵇ;
+private static readonly @string builtinTypesArrayˢᵇ = "BuiltinTypes.Array"u8;
 
-public static partial void TestBuiltinTypes(ж<testing.T> Ꮡt) {
+public static partial void TestBuiltinTypes(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -275,39 +281,36 @@ public static partial void TestBuiltinTypes(ж<testing.T> Ꮡt) {
 
         // Map
         nint arg = 7;
-        ref var replyMap = ref heap<map<nint, nint>>(out var ᏑreplyMap);
-        replyMap = new map<nint, nint>{};
+        ref var replyMap = ref heap<map<nint, nint>>(new map<nint, nint>{}, out var ᏑreplyMap);
         var err = client.Call(builtinTypesMapˢ, arg, ᏑreplyMap);
-        if (err != default!) {
-            Ꮡt.Errorf("Map: expected no error but got string %q"u8, err.Error());
+        if (err != nil) {
+            t.Errorf("Map: expected no error but got string %q", err.Error());
         }
         if (replyMap[arg] != arg) {
-            Ꮡt.Errorf("Map: expected %d got %d"u8, arg, replyMap[arg]);
+            t.Errorf("Map: expected %d got %d", arg, replyMap[arg]);
         }
 
         // Slice
-        ref var replySlice = ref heap<slice<nint>>(out var ᏑreplySlice);
-        replySlice = new nint[]{}.slice();
+        ref var replySlice = ref heap<slice<nint>>(slice<nint>([]), out var ᏑreplySlice);
         err = client.Call(builtinTypesSliceˢ, arg, ᏑreplySlice);
-        if (err != default!) {
-            Ꮡt.Errorf("Slice: expected no error but got string %q"u8, err.Error());
+        if (err != nil) {
+            t.Errorf("Slice: expected no error but got string %q", err.Error());
         }
         {
-            var e = new nint[]{arg}.slice(); if (!reflect.DeepEqual(replySlice, e)) {
-                Ꮡt.Errorf("Slice: expected %v got %v"u8, e, replySlice);
+            var e = slice<nint>([arg]); if (!reflect.DeepEqual(replySlice, e)) {
+                t.Errorf("Slice: expected %v got %v", e, replySlice);
             }
         }
 
         // Array
-        ref var replyArray = ref heap<array<nint>>(out var ᏑreplyArray);
-        replyArray = new nint[]{}.array(1);
+        ref var replyArray = ref heap<array<nint>>(new nint[]{}.array(1), out var ᏑreplyArray);
         err = client.Call(builtinTypesArrayˢ, arg, ᏑreplyArray);
-        if (err != default!) {
-            Ꮡt.Errorf("Array: expected no error but got string %q"u8, err.Error());
+        if (err != nil) {
+            t.Errorf("Array: expected no error but got string %q", err.Error());
         }
         {
             var e = new nint[]{arg}.array(); if (!reflect.DeepEqual(replyArray, e)) {
-                Ꮡt.Errorf("Array: expected %v got %v"u8, e, replyArray);
+                t.Errorf("Array: expected %v got %v", e, replyArray);
             }
         }
     }
@@ -315,17 +318,17 @@ public static partial void TestBuiltinTypes(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestMalformedInput(ж<testing.T> Ꮡt) {
+public static partial void TestMalformedInput(ж<testing.T> t) {
     var (cli, srv) = net.Pipe();
     var cliʗ1 = cli;
-    goǃ(ᴛ1 => cliʗ1.Write(ᴛ1), slice<byte>(@"{id:1}"u8)); // invalid json
+    goǃ(ᴛ1 => cliʗ1.Write(ᴛ1), slice<byte>(@"{id:1}"u8));                       // invalid json
     ServeConn(new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(srv)); // must return, not loop
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
 
-public static partial void TestMalformedOutput(ж<testing.T> Ꮡt) {
+public static partial void TestMalformedOutput(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var (cli, srv) = net.Pipe();
@@ -340,8 +343,8 @@ public static partial void TestMalformedOutput(ж<testing.T> Ꮡt) {
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
         var err = client.Call(arithAddˢ, args.OrTypedNil(), reply.OrTypedNil());
-        if (err == default!) {
-            Ꮡt.Error(expectedErrorˢ);
+        if (err == nil) {
+            t.Error(expectedErrorˢ);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -349,7 +352,8 @@ public static partial void TestMalformedOutput(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string methodArithAddId123ˢ = @"{""method"": ""Arith.Add"", ""id"": ""123"", ""params"": []}"u8;
+internal static ref readonly @string methodArithAddId123ˢ => ref methodArithAddId123ˢᵇ;
+private static readonly @string methodArithAddId123ˢᵇ = @"{""method"": ""Arith.Add"", ""id"": ""123"", ""params"": []}"u8;
 
 internal partial struct TestServerErrorHasNullResult_conn /*dyn*/ {
     /*embed*/ public io_package.Reader Reader;
@@ -358,52 +362,53 @@ internal partial struct TestServerErrorHasNullResult_conn /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string valueTextᶜ = "the value we don't want to see"u8;
+internal static ref readonly @string valueTextᶜ => ref valueTextᶜᵇ;
+private static readonly @string valueTextᶜᵇ = "the value we don't want to see"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string errorTextᶜ = "some error"u8;
+internal static ref readonly @string errorTextᶜ => ref errorTextᶜᵇ;
+private static readonly @string errorTextᶜᵇ = "some error"u8;
 
-public static void TestServerErrorHasNullResult(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestServerErrorHasNullResult(ж<testing.T> t) {
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
     var sc = NewServerCodec(new TestServerErrorHasNullResult_conn(
         Reader: new jsonrpc_internal_test_package.strings_ReaderжReader(strings.NewReader(methodArithAddId123ˢ)),
         Writer: new jsonrpc_internal_test_package.strings_BuilderжWriter(Ꮡout),
-        Closer: new jsonrpc_internal_test_package.io_ReadCloserᴠCloser(io.NopCloser(default!))
+        Closer: new jsonrpc_internal_test_package.io_ReadCloserᴠCloser(io.NopCloser(default))
     ));
     var r = @new<rpc.Request>();
     {
-        var errΔ1 = sc.ReadRequestHeader(r); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = sc.ReadRequestHeader(r); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     @string valueText = valueTextᶜ;
     @string errorText = errorTextᶜ;
     var err = sc.WriteResponse(Ꮡ(new rpc.Response(
-        ServiceMethod: "Method"u8,
+        ServiceMethod: "Method",
         Seq: 1,
         Error: errorText
     )), valueText);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (!strings.Contains(@out.String(), errorText)) {
-        Ꮡt.Fatalf("Response didn't contain expected error %q: %s"u8, errorText, Ꮡout);
+        t.Fatalf("Response didn't contain expected error %q: %s", errorText, Ꮡout);
     }
     if (strings.Contains(@out.String(), valueText)) {
-        Ꮡt.Errorf("Response contains both an error and value: %s"u8, Ꮡout);
+        t.Errorf("Response contains both an error and value: %s", Ꮡout);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedErrorˢ = "unexpected error!"u8;
+internal static ref readonly @string unexpectedErrorˢ => ref unexpectedErrorˢᵇ;
+private static readonly @string unexpectedErrorˢᵇ = "unexpected error!"u8;
 
-public static partial void TestUnexpectedError(ж<testing.T> Ꮡt) {
+public static partial void TestUnexpectedError(ж<testing.T> t) {
     var (cli, srv) = myPipe();
     var cliʗ1 = cli;
-    goǃ(ᴛ1 => (~cliʗ1).PipeWriter.CloseWithError(ᴛ1), errors.New(unexpectedErrorˢ)); // reader will get this error
-    ServeConn(new jsonrpc_internal_test_package.pipeжReadWriteCloser(srv)); // must return, not loop
+    goǃ((ᴛ0, ᴛ1) => ᴛ0.CloseWithError(ᴛ1), cliʗ1.PipeWriter, errors.New(unexpectedErrorˢ)); // reader will get this error
+    ServeConn(new jsonrpc_internal_test_package.pipeжReadWriteCloser(srv));                 // must return, not loop
 }
 
 // Copied from package net.
@@ -422,7 +427,8 @@ internal partial struct pipe {
 internal partial struct pipeAddr /*num:nint*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pipeˢ = "pipe"u8;
+internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
+private static readonly @string pipeˢᵇ = "pipe"u8;
 
 internal static @string Network(this pipeAddr _) {
     return pipeˢ;
@@ -435,7 +441,7 @@ internal static @string String(this pipeAddr _) {
 internal static error Close(this ref pipe p) {
     var err = p.PipeReader.Close();
     var err1 = p.PipeWriter.Close();
-    if (err == default!) {
+    if (err == nil) {
         err = err1;
     }
     return err;
@@ -450,7 +456,8 @@ internal static netꓸAddr RemoteAddr(this ref pipe p) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string netPipeDoesNotSupportˢ = "net.Pipe does not support timeouts"u8;
+internal static ref readonly @string netPipeDoesNotSupportˢ => ref netPipeDoesNotSupportˢᵇ;
+private static readonly @string netPipeDoesNotSupportˢᵇ = "net.Pipe does not support timeouts"u8;
 
 internal static error SetTimeout(this ref pipe p, int64 nsec) {
     return errors.New(netPipeDoesNotSupportˢ);

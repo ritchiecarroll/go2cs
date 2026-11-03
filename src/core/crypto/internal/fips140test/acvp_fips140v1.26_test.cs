@@ -14,18 +14,18 @@ partial class fipstest_internal_test_package {
 //go:embed acvp_capabilities_fips140v1.26.json
 internal static slice<byte> capabilitiesJson = go.embed_package.ΔEmbedBytes<byte>(typeof(fipstest_internal_test_package).Assembly, "go.embed/crypto/internal/fips140test_test/", "acvp_capabilities_fips140v1.26.json");
 
-internal static @string testConfigFile = "acvp_test_fips140v1.26.config.json"u8;
+internal static @string testConfigFile = "acvp_test_fips140v1.26.config.json";
 
 [GoInit] internal static void init() {
-    commands["ML-DSA-44/keyGen"u8] = cmdMlDsaKeyGenAft(mldsa.NewPrivateKey44);
-    commands["ML-DSA-65/keyGen"u8] = cmdMlDsaKeyGenAft(mldsa.NewPrivateKey65);
-    commands["ML-DSA-87/keyGen"u8] = cmdMlDsaKeyGenAft(mldsa.NewPrivateKey87);
-    commands["ML-DSA-44/sigGen"u8] = cmdMlDsaSigGenAft();
-    commands["ML-DSA-65/sigGen"u8] = cmdMlDsaSigGenAft();
-    commands["ML-DSA-87/sigGen"u8] = cmdMlDsaSigGenAft();
-    commands["ML-DSA-44/sigVer"u8] = cmdMlDsaSigVerAft(mldsa.NewPublicKey44);
-    commands["ML-DSA-65/sigVer"u8] = cmdMlDsaSigVerAft(mldsa.NewPublicKey65);
-    commands["ML-DSA-87/sigVer"u8] = cmdMlDsaSigVerAft(mldsa.NewPublicKey87);
+    commands["ML-DSA-44/keyGen"] = cmdMlDsaKeyGenAft(mldsa.NewPrivateKey44);
+    commands["ML-DSA-65/keyGen"] = cmdMlDsaKeyGenAft(mldsa.NewPrivateKey65);
+    commands["ML-DSA-87/keyGen"] = cmdMlDsaKeyGenAft(mldsa.NewPrivateKey87);
+    commands["ML-DSA-44/sigGen"] = cmdMlDsaSigGenAft();
+    commands["ML-DSA-65/sigGen"] = cmdMlDsaSigGenAft();
+    commands["ML-DSA-87/sigGen"] = cmdMlDsaSigGenAft();
+    commands["ML-DSA-44/sigVer"] = cmdMlDsaSigVerAft(mldsa.NewPublicKey44);
+    commands["ML-DSA-65/sigVer"] = cmdMlDsaSigVerAft(mldsa.NewPublicKey65);
+    commands["ML-DSA-87/sigVer"] = cmdMlDsaSigVerAft(mldsa.NewPublicKey87);
 }
 
 internal static command cmdMlDsaKeyGenAft(Func<slice<byte>, (ж<mldsa.PrivateKey>, error)> keyGen) {
@@ -35,12 +35,12 @@ internal static command cmdMlDsaKeyGenAft(Func<slice<byte>, (ж<mldsa.PrivateKey
             var seed = args[0];
 
             var (sk, err) = keyGen(seed);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-DSA 44 private key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-DSA 44 private key: %w"u8, err));
             }
 
             // Important: we must return the full encoding of sk, not the seed.
-            return (new slice<byte>[]{sk.PublicKey().Bytes(), mldsa.TestingOnlyPrivateKeySemiExpandedBytes(sk)}.slice(), default!);
+            return (slice<slice<byte>>([sk.PublicKey().Bytes(), mldsa.TestingOnlyPrivateKeySemiExpandedBytes(sk)]), default);
         }
     );
 }
@@ -50,43 +50,40 @@ internal static command cmdMlDsaSigGenAft() {
         requiredArgs: 5, // secret key, message, randomizer, mu, context
         handler: (slice<slice<byte>> args) => {
             var skSmiExpanded = args[0];
-            var message = args[1]; // Optional, exclusive with mu
-            var randomizer = args[2]; // Optional
+            var message = args[1];              // Optional, exclusive with mu
+            var randomizer = args[2];           // Optional
             @string context = (@string)args[3]; // Optional
-            var mu = args[4]; // Optional, exclusive with message
+            var mu = args[4];                   // Optional, exclusive with message
 
             var (sk, err) = mldsa.TestingOnlyNewPrivateKeyFromSemiExpanded(skSmiExpanded);
-            if (err != default!) {
-                return (default!, fmt.Errorf("making ML-DSA private key from semi-expanded form: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("making ML-DSA private key from semi-expanded form: %w"u8, err));
             }
 
             var haveMessage = len(message) != 0;
             var haveRandomizer = len(randomizer) != 0;
             var haveMu = len(mu) != 0;
 
-            slice<byte> sig = default!;
-            if (haveMessage && !haveRandomizer && !haveMu){
+            slice<byte> sig = default;
+            if (haveMessage && !haveRandomizer && !haveMu) {
                 (sig, err) = mldsa.SignDeterministic(sk, message, context);
-            } else 
-            if (haveMessage && haveRandomizer && !haveMu){
+            } else if (haveMessage && haveRandomizer && !haveMu) {
                 (sig, err) = mldsa.TestingOnlySignWithRandom(sk, message, context, randomizer);
-            } else 
-            if (!haveMessage && !haveRandomizer && haveMu){
+            } else if (!haveMessage && !haveRandomizer && haveMu) {
                 (sig, err) = mldsa.SignExternalMuDeterministic(sk, mu);
-            } else 
-            if (!haveMessage && haveRandomizer && haveMu){
+            } else if (!haveMessage && haveRandomizer && haveMu) {
                 (sig, err) = mldsa.TestingOnlySignExternalMuWithRandom(sk, mu, randomizer);
             } else {
-                return (default!, fmt.Errorf(
+                return (default, fmt.Errorf(
                     "unsupported ML-DSA sigGen args: have message=%v have randomizer=%v haveMu=%v haveContext=%v"u8,
                     haveMessage, haveRandomizer, haveMu, len(context) != 0));
             }
 
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating deterministic ML-DSA signature: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating deterministic ML-DSA signature: %w"u8, err));
             }
 
-            return (new slice<byte>[]{sig}.slice(), default!);
+            return (slice<slice<byte>>([sig]), default);
         }
     );
 }
@@ -99,31 +96,30 @@ internal static command cmdMlDsaSigVerAft(Func<slice<byte>, (ж<mldsaꓸPublicKe
             var message = args[1]; // Optional, exclusive with mu
             var signature = args[2];
             @string context = (@string)args[3]; // Optional
-            var mu = args[4]; // Optional, exclusive with message
+            var mu = args[4];                   // Optional, exclusive with message
 
             var (pk, err) = pubKey(pkRaw);
-            if (err != default!) {
-                return (default!, fmt.Errorf("loading ML-DSA public key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("loading ML-DSA public key: %w"u8, err));
             }
 
             var haveMessage = len(message) != 0;
             var haveMu = len(mu) != 0;
-            if (haveMessage && !haveMu){
+            if (haveMessage && !haveMu) {
                 err = mldsa.Verify(pk, message, signature, context);
-            } else 
-            if (!haveMessage && haveMu){
+            } else if (!haveMessage && haveMu) {
                 err = mldsa.VerifyExternalMu(pk, mu, signature);
             } else {
-                return (default!, fmt.Errorf(
+                return (default, fmt.Errorf(
                     "unsupported ML-DSA sigVer args: have message=%v haveMu=%v haveContext=%v"u8,
                     haveMessage, haveMu, len(context) != 0));
             }
 
-            if (err != default!) {
-                return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+            if (err != nil) {
+                return (slice<slice<byte>>([slice<byte>([0])]), default);
             }
 
-            return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([1])]), default);
         }
     );
 }

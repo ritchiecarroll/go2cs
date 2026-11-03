@@ -18,7 +18,7 @@ partial class sync_test_package {
 internal static readonly object goroutineNotAsleepˢ = (@string)"goroutine not asleep"u8;
 internal static readonly object tooManyGoroutinesAwakeˢ = (@string)"too many goroutines awake"u8;
 
-public static partial void TestCondSignal(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondSignal(ж<Δtesting.T> t) {
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
     var c = NewCond(new Δsync.MutexжLocker(Ꮡm));
     nint n = 2;
@@ -43,7 +43,7 @@ public static partial void TestCondSignal(ж<Δtesting.T> Ꮡt) {
         var selᴛ1 = awake;
         switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
         case 0 when selᴛ1.ꟷᐳ(out _): {
-            Ꮡt.Fatal(goroutineNotAsleepˢ);
+            t.Fatal(goroutineNotAsleepˢ);
             break;
         }
         default: {
@@ -56,7 +56,7 @@ public static partial void TestCondSignal(ж<Δtesting.T> Ꮡt) {
         var selᴛ2 = awake;
         switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
         case 0 when selᴛ2.ꟷᐳ(out _): {
-            Ꮡt.Fatal(tooManyGoroutinesAwakeˢ);
+            t.Fatal(tooManyGoroutinesAwakeˢ);
             break;
         }
         default: {
@@ -67,7 +67,7 @@ public static partial void TestCondSignal(ж<Δtesting.T> Ꮡt) {
     c.Signal();
 }
 
-public static partial void TestCondSignalGenerations(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondSignalGenerations(ж<Δtesting.T> t) {
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
     var c = NewCond(new Δsync.MutexжLocker(Ꮡm));
     nint n = 100;
@@ -87,7 +87,7 @@ public static partial void TestCondSignalGenerations(ж<Δtesting.T> Ꮡt) {
         if (i > 0) {
             nint a = ᐸꟷ(awake);
             if (a != i - 1) {
-                Ꮡt.Fatalf("wrong goroutine woke up: want %d, got %d"u8, i - 1, a);
+                t.Fatalf("wrong goroutine woke up: want %d, got %d", i - 1, a);
             }
         }
         ᐸꟷ(running);
@@ -101,7 +101,7 @@ public static partial void TestCondSignalGenerations(ж<Δtesting.T> Ꮡt) {
 internal static readonly object goroutineWokeUpTwiceˢ = (@string)"goroutine woke up twice"u8;
 internal static readonly object goroutineDidNotExitˢ = (@string)"goroutine did not exit"u8;
 
-public static partial void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondBroadcast(ж<Δtesting.T> t) {
     ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
     var c = NewCond(new Δsync.MutexжLocker(Ꮡm));
     nint n = 200;
@@ -134,7 +134,7 @@ public static partial void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
         var selᴛ3 = awake;
         switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
         case 0 when selᴛ3.ꟷᐳ(out _): {
-            Ꮡt.Fatal(goroutineNotAsleepˢ);
+            t.Fatal(goroutineNotAsleepˢ);
             break;
         }
         default: {
@@ -147,7 +147,7 @@ public static partial void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
         for (nint iΔ2 = 0; iΔ2 < n; iΔ2++) {
             nint g = ᐸꟷ(awake);
             if (seen[g]) {
-                Ꮡt.Fatal(goroutineWokeUpTwiceˢ);
+                t.Fatal(goroutineWokeUpTwiceˢ);
             }
             seen[g] = true;
         }
@@ -155,7 +155,7 @@ public static partial void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
     var selᴛ4 = running;
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
-        Ꮡt.Fatal(goroutineDidNotExitˢ);
+        t.Fatal(goroutineDidNotExitˢ);
         break;
     }
     default: {
@@ -168,61 +168,61 @@ public static partial void TestCondBroadcast(ж<Δtesting.T> Ꮡt) {
 internal static readonly object want2ˢ = (@string)"want 2"u8;
 internal static readonly object want3ˢ = (@string)"want 3"u8;
 
-public static partial void TestRace(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRace(ж<Δtesting.T> t) {
     nint x = 0;
-    var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex(nil))));
+    var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex())));
     var done = new channel<bool>(0);
     var cʗ1 = c;
     var doneʗ1 = done;
     goǃ(() => {
-        (~cʗ1).L.Lock();
+        cʗ1.L.Lock();
         x = 1;
         cʗ1.Wait();
         if (x != 2) {
-            Ꮡt.Error(want2ˢ);
+            t.Error(want2ˢ);
         }
         x = 3;
         cʗ1.Signal();
-        (~cʗ1).L.Unlock();
+        cʗ1.L.Unlock();
         doneʗ1.ᐸꟷ(true);
     });
     var cʗ2 = c;
     var doneʗ2 = done;
     goǃ(() => {
-        (~cʗ2).L.Lock();
-        while (ᐧ) {
+        cʗ2.L.Lock();
+        for (;;) {
             if (x == 1) {
                 x = 2;
                 cʗ2.Signal();
                 break;
             }
-            (~cʗ2).L.Unlock();
+            cʗ2.L.Unlock();
             Δruntime.Gosched();
-            (~cʗ2).L.Lock();
+            cʗ2.L.Lock();
         }
-        (~cʗ2).L.Unlock();
+        cʗ2.L.Unlock();
         doneʗ2.ᐸꟷ(true);
     });
     var cʗ3 = c;
     var doneʗ3 = done;
     goǃ(() => {
-        (~cʗ3).L.Lock();
-        while (ᐧ) {
+        cʗ3.L.Lock();
+        for (;;) {
             if (x == 2) {
                 cʗ3.Wait();
                 if (x != 3) {
-                    Ꮡt.Error(want3ˢ);
+                    t.Error(want3ˢ);
                 }
                 break;
             }
             if (x == 3) {
                 break;
             }
-            (~cʗ3).L.Unlock();
+            cʗ3.L.Unlock();
             Δruntime.Gosched();
-            (~cʗ3).L.Lock();
+            cʗ3.L.Lock();
         }
-        (~cʗ3).L.Unlock();
+        cʗ3.L.Unlock();
         doneʗ3.ᐸꟷ(true);
     });
     ᐸꟷ(done);
@@ -230,7 +230,7 @@ public static partial void TestRace(ж<Δtesting.T> Ꮡt) {
     ᐸꟷ(done);
 }
 
-public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
+public static partial void TestCondSignalStealing(ж<Δtesting.T> t) {
     for (nint iters = 0; iters < 1000; iters++) {
         ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
         var cond = NewCond(new Δsync.MutexжLocker(Ꮡm));
@@ -265,7 +265,7 @@ public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
         var condʗ2 = cond;
         goǃ(() => {
             condʗ2.Broadcast();
-        });
+        }, GoStack.Bounded);
 
         var condʗ3 = cond;
         goǃ(() => {
@@ -288,17 +288,16 @@ public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestCondCopy(ж<Δtesting.T> Ꮡt) {
+public static void TestCondCopy(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             var err = recover();
-            if (err == default! || err._<@string>() != "sync.Cond is copied"u8) {
-                Ꮡt.Fatalf("got %v, expect sync.Cond is copied"u8, err);
+            if (err == nil || err._<@string>() != "sync.Cond is copied"u8) {
+                t.Fatalf("got %v, expect sync.Cond is copied", err);
             }
         }, ref ᒐ);
-        ref var c = ref heap<Δsync.Cond>(out var Ꮡc);
-        c = new Cond(L: new Δsync.MutexжLocker(Ꮡ(new Mutex(nil))));
+        ref var c = ref heap<Δsync.Cond>(new Cond(L: new Δsync.MutexжLocker(Ꮡ(new Mutex()))), out var Ꮡc);
         Ꮡc.Signal();
         ref var c2 = ref heap(new Δsync.Cond(), out var Ꮡc2);
         reflect.ValueOf(Ꮡc2).Elem().Set(reflect.ValueOf(Ꮡc).Elem()); // c2 := c, hidden from vet
@@ -308,32 +307,32 @@ public static void TestCondCopy(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkCond1(ж<Δtesting.B> Ꮡb) {
-    benchmarkCond(Ꮡb, 1);
+public static void BenchmarkCond1(ж<Δtesting.B> b) {
+    benchmarkCond(b, 1);
 }
 
-public static void BenchmarkCond2(ж<Δtesting.B> Ꮡb) {
-    benchmarkCond(Ꮡb, 2);
+public static void BenchmarkCond2(ж<Δtesting.B> b) {
+    benchmarkCond(b, 2);
 }
 
-public static void BenchmarkCond4(ж<Δtesting.B> Ꮡb) {
-    benchmarkCond(Ꮡb, 4);
+public static void BenchmarkCond4(ж<Δtesting.B> b) {
+    benchmarkCond(b, 4);
 }
 
-public static void BenchmarkCond8(ж<Δtesting.B> Ꮡb) {
-    benchmarkCond(Ꮡb, 8);
+public static void BenchmarkCond8(ж<Δtesting.B> b) {
+    benchmarkCond(b, 8);
 }
 
-public static void BenchmarkCond16(ж<Δtesting.B> Ꮡb) {
-    benchmarkCond(Ꮡb, 16);
+public static void BenchmarkCond16(ж<Δtesting.B> b) {
+    benchmarkCond(b, 16);
 }
 
-public static void BenchmarkCond32(ж<Δtesting.B> Ꮡb) {
-    benchmarkCond(Ꮡb, 32);
+public static void BenchmarkCond32(ж<Δtesting.B> b) {
+    benchmarkCond(b, 32);
 }
 
-internal static partial void benchmarkCond(ж<Δtesting.B> Ꮡb, nint waiters) {
-    var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex(nil))));
+internal static partial void benchmarkCond(ж<Δtesting.B> b, nint waiters) {
+    var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex())));
     var done = new channel<bool>(0);
     nint id = 0;
 
@@ -341,25 +340,25 @@ internal static partial void benchmarkCond(ж<Δtesting.B> Ꮡb, nint waiters) {
         var cʗ1 = c;
         var doneʗ1 = done;
         goǃ(() => {
-            for (nint i = 0; i < Ꮡb.Value.N; i++) {
-                (~cʗ1).L.Lock();
+            for (nint i = 0; i < b.Value.N; i++) {
+                cʗ1.L.Lock();
                 if (id == -1) {
-                    (~cʗ1).L.Unlock();
+                    cʗ1.L.Unlock();
                     break;
                 }
                 id++;
-                if (id == waiters + 1){
+                if (id == waiters + 1) {
                     id = 0;
                     cʗ1.Broadcast();
                 } else {
                     cʗ1.Wait();
                 }
-                (~cʗ1).L.Unlock();
+                cʗ1.L.Unlock();
             }
-            (~cʗ1).L.Lock();
+            cʗ1.L.Lock();
             id = -1;
             cʗ1.Broadcast();
-            (~cʗ1).L.Unlock();
+            cʗ1.L.Unlock();
             doneʗ1.ᐸꟷ(true);
         });
     }

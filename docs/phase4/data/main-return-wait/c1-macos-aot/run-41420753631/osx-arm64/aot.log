@@ -1,0 +1,19 @@
+== host: Apple M1 (Virtual) cpus=3 rid=osx-arm64 os=15.8.2
+== dotnet: 10.0.403; runtime: Microsoft.NETCore.App 10.0.14 [<runner-home>/.dotnet/shared/Microsoft.NETCore.App]; bash 3.2.57(1)-release
+== tip 7f4279bd15, base 64d145b2c4, N=50, GoTargetOS=darwin
+BUILD FAILED: base GoroutinePanicAfterDeferredDone aot (see build-base-GoroutinePanicAfterDeferredDone-aot.log)
+  Restored <tmp>/base/src/core/internal/oserror/internal.oserror.csproj (in 18 ms).
+  errors -> <tmp>/base/src/core/errors/bin/Release/net10.0/errors.dll
+  internal.oserror -> <tmp>/base/src/core/internal/oserror/bin/Release/net10.0/internal.oserror.dll
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-arm64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-arm64/native/GoroutinePanicAfterDeferredDone.ilc.rsp"" exited with code 1. [<tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+KEY base GoroutinePanicAfterDeferredDone aot: 2 line(s) name ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+built tip GoroutinePanicAfterDeferredDone aot in 2942s
+KEY tip GoroutinePanicAfterDeferredDone aot: 0 line(s) name ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+built tip GoroutineRecoveringWhenMainReturns aot in 2042s
+KEY tip GoroutineRecoveringWhenMainReturns aot: 0 line(s) name ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+ARM r1-aot-idle load=idle N=50 loss=0 pass=50 late=0 invalid=0 spinners_all_alive=- exits=[2x50 ] mean_ms=276
+ARM r1-aot-n32 load=n32 N=50 loss=0 pass=50 late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[2x50 ] mean_ms=2676
+ARM r2-aot-idle load=idle N=50 loss=- pass=- late=0 invalid=0 spinners_all_alive=- exits=[0x50 ] mean_ms=252
+ARM r2-aot-n32 load=n32 N=50 loss=- pass=- late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[0x50 ] mean_ms=2489
+== done

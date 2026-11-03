@@ -7,18 +7,6 @@
 global using static global::go.os.user_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -39,7 +27,13 @@ using static global::go.os.user_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.os.user_package.Group))]
+[assembly: GoFieldAccess(typeof(global::go.os.user_package.User))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -49,8 +43,8 @@ using static global::go.os.user_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/user/user_test.go", "user_test.cs", "AA8egsaCgoK4woKClIKCgoKUpoKUgrSktIK4soKUgpSClIKUgriClIKCgpTugoKUpoKUgoKClLiCgpTWgoKCuKKCgpSClIKCgpS4griClIKmgoKUgrTUgoKCuIKUgoKClLiCgpSC", "28-30:1;123-125:1")]
-[assembly: go.GoPositionMap("os/user/user_windows_test.go", "user_windows_test.cs", "ACdA0oKGspSCgoakgpSUlpKUgoKCpoKEkoKCgoKCptqCgqaCgIKCtoKmkoCCgsjussqUgoKClIKClIKClIKCgoCCpIKUgoKU1qKClJKCptyCsoCCpJSCpoKUlIKUosSkooKUkoK4poCCpIKClLiCgpSi9IKmpoKCgoKUgoKCgpSClIKCgoKCuJSUgoKmgpSCuKaClKbmAAUSgoKykoKCgoKUgpSClMqCgoKCgoKUgpSCgpTcgoKykoKCgoKUgpSC3IKCgoKCgpSC", "40-51:1;96-102:2;137-139:1;163-182:1;202-208:1;289-303:1;331-344:1")]
+[assembly: GoPositionMap("os/user/user_test.go", "user_test.cs", "AA8egsaCgoK4ooKClIKCgoKUpoKUgrSktIK4soKUgpSClIKUgriClIKCgpTugoKUpoKUgoKClLiCgpTWgoKCuKKCgpSClIKCgpS4griClIKmgoKUgrTUgoKCuIKUgoKClLiCgpSC", "28-30:1;123-125:1")]
+[assembly: GoPositionMap("os/user/user_windows_test.go", "user_windows_test.cs", "ACdA0oKGspSCgoaUgpSUlpKUgoKCpoKEkoKCgoKCpsqCgqaCgIKCtoKmkoCCgsjussqUgoKClIKClIKClIKCgoCCpIKUgoKU1qKClJKCptyCsoCCpJSCpoKUlIKUosSkooKUkoK4poCCpIKClLiCgpSiAAoEgqamgoKCgpSCgoKClIKUgoKCgoK4lJSCgqaClIK4poKUpuYABRKCgrKSgoKCgpSClIKUyoKCgoKCgpSClIKClNyCgrKSgoKCgpSClILcgoKCgoKClII=", "40-51:1;96-102:2;137-139:1;163-182:1;202-208:1;289-303:1;331-344:1", "", "", "200:33")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

@@ -5,7 +5,8 @@ namespace go.crypto;
 
 partial class rand_package {
 
-internal static readonly @string base32alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"u8;
+internal static ref readonly @string base32alphabet => ref base32alphabetᵇ;
+private static readonly @string base32alphabetᵇ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"u8;
 
 // Text returns a cryptographically random string using the standard RFC 4648 base32 alphabet
 // for use when a secret string, token, password, or other text is needed.

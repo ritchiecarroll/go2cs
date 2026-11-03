@@ -47,6 +47,10 @@ partial class runtime_package
 
         if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Grunning, (uint32)_Gsyscall))
             throw new PanicException($"runtime: entersyscall on goroutine {gp.Value.goid} whose status is {readgstatus(gp)}, not _Grunning ({(uint32)_Grunning})");
+
+        // golib's half: a returning main reads a goroutine inside a system call as not runnable (Goroutine's
+        // main-return marks).
+        Goroutine.EnterBlocked();
     }
 
     // Go's entersyscallblock is entersyscall for a call known to block: it hands the P off at once
@@ -55,6 +59,8 @@ partial class runtime_package
 
     internal static void exitsyscall()
     {
+        Goroutine.ExitBlocked();
+
         ж<g> gp = getg();
 
         if (!gp.of(g.Ꮡatomicstatus).CompareAndSwap((uint32)_Gsyscall, (uint32)_Grunning))

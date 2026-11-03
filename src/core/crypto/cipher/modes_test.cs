@@ -27,15 +27,15 @@ partial struct specialCTR {
 }
 
 internal static cipher.Stream ΔNewCTR(this block _, slice<byte> iv) {
-    return new specialCTR(nil);
+    return new specialCTR();
 }
 
-public static void TestCTRAble(ж<testing.T> Ꮡt) {
-    var b = new block(nil);
+public static void TestCTRAble(ж<testing.T> t) {
+    var b = new block();
     var s = NewCTR(b, new slice<byte>(16));
     {
         var (_, ok) = s._<specialCTR>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("NewCTR did not return specialCTR"u8);
+            t.Errorf("NewCTR did not return specialCTR");
         }
     }
 }
@@ -45,25 +45,25 @@ partial struct specialCBC {
 }
 
 internal static cipher.BlockMode ΔNewCBCEncrypter(this block _, slice<byte> iv) {
-    return new specialCBC(nil);
+    return new specialCBC();
 }
 
 internal static cipher.BlockMode ΔNewCBCDecrypter(this block _, slice<byte> iv) {
-    return new specialCBC(nil);
+    return new specialCBC();
 }
 
-public static void TestCBCAble(ж<testing.T> Ꮡt) {
-    var b = new block(nil);
+public static void TestCBCAble(ж<testing.T> t) {
+    var b = new block();
     var s = NewCBCEncrypter(b, new slice<byte>(16));
     {
         var (_, ok) = s._<specialCBC>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("NewCBCEncrypter did not return specialCBC"u8);
+            t.Errorf("NewCBCEncrypter did not return specialCBC");
         }
     }
     s = NewCBCDecrypter(b, new slice<byte>(16));
     {
         var (_, ok) = s._<specialCBC>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("NewCBCDecrypter did not return specialCBC"u8);
+            t.Errorf("NewCBCDecrypter did not return specialCBC");
         }
     }
 }
@@ -73,58 +73,58 @@ partial struct specialGCM {
 }
 
 internal static (cipher.AEAD, error) ΔNewGCM(this block _, nint nonceSize, nint tagSize) {
-    return (new specialGCM(nil), default!);
+    return (new specialGCM(), default);
 }
 
-public static void TestGCM(ж<testing.T> Ꮡt) {
-    var b = new block(nil);
+public static void TestGCM(ж<testing.T> t) {
+    var b = new block();
     var (s, err) = NewGCM(b);
-    if (err != default!) {
-        Ꮡt.Errorf("NewGCM failed: %v"u8, err);
+    if (err != nil) {
+        t.Errorf("NewGCM failed: %v", err);
     }
     {
         var (_, ok) = s._<specialGCM>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("NewGCM did not return specialGCM"u8);
+            t.Errorf("NewGCM did not return specialGCM");
         }
     }
 }
 
 // TestNoExtraMethods makes sure we don't accidentally expose methods on the
 // underlying implementations of modes.
-public static void TestNoExtraMethods(ж<testing.T> Ꮡt) {
-    testAllImplementations(Ꮡt, testNoExtraMethods);
+public static void TestNoExtraMethods(ж<testing.T> t) {
+    testAllImplementations(t, testNoExtraMethods);
 }
 
-internal static void testNoExtraMethods(ж<testing.T> Ꮡt, Func<slice<byte>, cipher.Block> newBlock) {
+internal static void testNoExtraMethods(ж<testing.T> t, Func<slice<byte>, cipher.Block> newBlock) {
     var b = newBlock(new slice<byte>(16));
 
     var ctr = NewCTR(b, new slice<byte>(16));
-    var ctrExpected = new @string[]{"XORKeyStream"u8}.slice();
+    var ctrExpected = slice<@string>(["XORKeyStream"]);
     {
         var got = exportedMethods(ctr); if (!reflect.DeepEqual(got, ctrExpected)) {
-            Ꮡt.Errorf("CTR: got %v, want %v"u8, got, ctrExpected);
+            t.Errorf("CTR: got %v, want %v", got, ctrExpected);
         }
     }
 
     var cbc = NewCBCEncrypter(b, new slice<byte>(16));
-    var cbcExpected = new @string[]{"BlockSize"u8, "CryptBlocks"u8, "SetIV"u8}.slice();
+    var cbcExpected = slice<@string>(["BlockSize", "CryptBlocks", "SetIV"]);
     {
         var got = exportedMethods(cbc); if (!reflect.DeepEqual(got, cbcExpected)) {
-            Ꮡt.Errorf("CBC: got %v, want %v"u8, got, cbcExpected);
+            t.Errorf("CBC: got %v, want %v", got, cbcExpected);
         }
     }
     cbc = NewCBCDecrypter(b, new slice<byte>(16));
     {
         var got = exportedMethods(cbc); if (!reflect.DeepEqual(got, cbcExpected)) {
-            Ꮡt.Errorf("CBC: got %v, want %v"u8, got, cbcExpected);
+            t.Errorf("CBC: got %v, want %v", got, cbcExpected);
         }
     }
 
     var (gcm, _) = NewGCM(b);
-    var gcmExpected = new @string[]{"NonceSize"u8, "Open"u8, "Overhead"u8, "Seal"u8}.slice();
+    var gcmExpected = slice<@string>(["NonceSize", "Open", "Overhead", "Seal"]);
     {
         var got = exportedMethods(gcm); if (!reflect.DeepEqual(got, gcmExpected)) {
-            Ꮡt.Errorf("GCM: got %v, want %v"u8, got, gcmExpected);
+            t.Errorf("GCM: got %v, want %v", got, gcmExpected);
         }
     }
 }
@@ -132,7 +132,7 @@ internal static void testNoExtraMethods(ж<testing.T> Ꮡt, Func<slice<byte>, ci
 internal static slice<@string> exportedMethods(any x) {
     var methodsᴷ = new stackAppend<@string>(moves: true);
 
-    slice<@string> methods = default!;
+    slice<@string> methods = default;
     var v = reflect.ValueOf(x);
     for (nint i = 0; i < v.NumMethod(); i++) {
         if (v.Type().Method(i).IsExported()) {

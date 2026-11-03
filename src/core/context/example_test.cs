@@ -15,7 +15,7 @@ using static go.context_internal_test_package;
 
 partial class context_test_package {
 
-internal static channel<EmptyStruct> neverReady = new channel<EmptyStruct>(0);    // never closed
+internal static channel<EmptyStruct> neverReady = new channel<EmptyStruct>(0); // never closed
 
 // This example demonstrates the use of a cancelable context to prevent a
 // goroutine leak. By the end of the example function, the goroutine started
@@ -33,7 +33,7 @@ public static void ExampleWithCancel() {
             nint n = 1;
             var dstʗ1 = dst;
             goǃ(() => {
-                while (ᐧ) {
+                for (;;) {
                     var selᴛ3 = ctxΔ1.Done();
                     var selᴛ4 = dstʗ1.ᐸꟷ(n, ꓸꓸꓸ);
                     switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ4)) {
@@ -46,7 +46,7 @@ public static void ExampleWithCancel() {
                     }}
                 }
             });
-            return dst.WithDirection(GoChanDir.Recv);
+            return dst.AsRecvOnly();
         }
 
         var (ctx, cancel) = context.WithCancel(context.Background());
@@ -139,8 +139,10 @@ public static void ExampleWithTimeout() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object foundValueˢ = (@string)"found value:"u8;
 internal static readonly object keyNotFoundˢ = (@string)"key not found:"u8;
-internal static readonly @string languageˢ = "language"u8;
-internal static readonly @string colorˢ = "color"u8;
+internal static ref readonly @string languageˢ => ref languageˢᵇ;
+private static readonly @string languageˢᵇ = "language"u8;
+internal static ref readonly @string colorˢ => ref colorˢᵇ;
+private static readonly @string colorˢᵇ = "color"u8;
 
 internal partial struct ExampleWithValue_favContextKey /*@string*/;
 
@@ -149,7 +151,7 @@ internal partial struct ExampleWithValue_favContextKey /*@string*/;
 public static void ExampleWithValue() {
     void f(context.Context ctxΔ1, ExampleWithValue_favContextKey kΔ1) {
         {
-            var v = ctxΔ1.Value(kΔ1); if (v != default!) {
+            var v = ctxΔ1.Value(kΔ1); if (v != nil) {
                 fmt.Println(foundValueˢ, v);
                 return;
             }
@@ -158,7 +160,7 @@ public static void ExampleWithValue() {
     }
 
     ExampleWithValue_favContextKey k = (ExampleWithValue_favContextKey)(@string)languageˢ;
-    var ctx = context.WithValue(context.Background(), k, (@string)"Go"u8);
+    var ctx = context.WithValue(context.Background(), k, "Go");
 
     f(ctx, k);
     f(ctx, (ExampleWithValue_favContextKey)(@string)colorˢ);
@@ -180,8 +182,8 @@ public static partial void ExampleAfterFunc_cond() {
                     // We need to acquire cond.L here to be sure that the Broadcast
                     // below won't occur before the call to Wait, which would result
                     // in a missed signal (and deadlock).
-                    (~condΔ1).L.Lock();
-                    defer((~condΔ1).L.Unlock, ref ᒐ);
+                    condΔ1.L.Lock();
+                    defer(condΔ1.L.Unlock, ref ᒐ);
 
                     // If multiple goroutines are waiting on cond simultaneously,
                     // we need to make sure we wake up exactly this one.
@@ -204,14 +206,14 @@ public static partial void ExampleAfterFunc_cond() {
             // so to be sure that ctx is actually canceled we need to check it in a loop.
             while (!conditionMet()) {
                 condΔ1.Wait();
-                if (ctx.Err() != default!) {
+                if (ctx.Err() != nil) {
                     return ctx.Err();
                 }
             }
 
-            return default!;
+            return default;
         }
-        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
         finally { ᒐ.Run(); }
     }
 
@@ -231,9 +233,9 @@ public static partial void ExampleAfterFunc_cond() {
                 var cancelʗ1 = cancel;
                 defer(() => cancelʗ1(), ref ᒐ);
 
-                (~condʗ1).L.Lock();
+                condʗ1.L.Lock();
                 var condʗ2 = condʗ1;
-                defer((~condʗ2).L.Unlock, ref ᒐ);
+                defer(condʗ2.L.Unlock, ref ᒐ);
 
                 var err = waitOnCondʗ1(ctx, condʗ1, () => false);
                 fmt.Println(err);
@@ -252,8 +254,10 @@ public static partial void ExampleAfterFunc_cond() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tcpˢ = "tcp"u8;
-internal static readonly @string localhost0ˢ = "localhost:0"u8;
+internal static ref readonly @string tcpˢ => ref tcpˢᵇ;
+private static readonly @string tcpˢᵇ = "tcp"u8;
+internal static ref readonly @string localhost0ˢ => ref localhost0ˢᵇ;
+private static readonly @string localhost0ˢᵇ = "localhost:0"u8;
 
 // This example uses AfterFunc to define a function which reads from a net.Conn,
 // stopping the read when a context is canceled.
@@ -261,8 +265,8 @@ public static void ExampleAfterFunc_connection() {
     GoFrame ᒐ = default;
     try {
         (nint n, error err) readFromConn(context.Context ctxΔ1, Δnet.Conn connΔ1, slice<byte> bΔ1) {
-            nint n = default!;
-            error errΔ1 = default!;
+            nint n = default;
+            error errΔ1 = default;
             var stopc = new channel<EmptyStruct>(0);
             var stopcʗ1 = stopc;
             var stop = context.AfterFunc(ctxΔ1, () => {
@@ -274,14 +278,14 @@ public static void ExampleAfterFunc_connection() {
                 // The AfterFunc was started.
                 // Wait for it to complete, and reset the Conn's deadline.
                 ᐸꟷ(stopc);
-                connΔ1.SetReadDeadline(new time.Time(nil));
+                connΔ1.SetReadDeadline(new time.Time());
                 return (n, ctxΔ1.Err());
             }
             return (n, errΔ1);
         }
 
         var (listener, err) = Δnet.Listen(tcpˢ, localhost0ˢ);
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println(err);
             return;
         }
@@ -289,7 +293,7 @@ public static void ExampleAfterFunc_connection() {
         defer(() => listenerʗ1.Close(), ref ᒐ);
 
         (var conn, err) = Δnet.Dial(listener.Addr().Network(), listener.Addr().String());
-        if (err != default!) {
+        if (err != nil) {
             fmt.Println(err);
             return;
         }
@@ -312,8 +316,10 @@ public static void ExampleAfterFunc_connection() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string ctx1Canceledˢ = "ctx1 canceled"u8;
-internal static readonly @string ctx2Canceledˢ = "ctx2 canceled"u8;
+internal static ref readonly @string ctx1Canceledˢ => ref ctx1Canceledˢᵇ;
+private static readonly @string ctx1Canceledˢᵇ = "ctx1 canceled"u8;
+internal static ref readonly @string ctx2Canceledˢ => ref ctx2Canceledˢᵇ;
+private static readonly @string ctx2Canceledˢᵇ = "ctx2 canceled"u8;
 
 // This example uses AfterFunc to define a function which combines
 // the cancellation signals of two Contexts.

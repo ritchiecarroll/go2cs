@@ -232,7 +232,7 @@ public static ErrorCode ErrJSTemplate => 12;
 
 public static @string Error(this ref ΔError e) {
     switch (ᐧ) {
-    case {} when e.Node != default!: {
+    case {} when e.Node != nil: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);
         return fmt.Sprintf("html/template:%s: %s"u8, loc, e.Description);
     }
@@ -250,7 +250,7 @@ public static @string Error(this ref ΔError e) {
 internal static ж<ΔError> errorf(ErrorCode k, parse.Node node, nint line, @string f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    return Ꮡ(new ΔError(k, node, ""u8, line, fmt.Sprintf(f, args.ꓸꓸꓸ)));
+    return Ꮡ(new ΔError(k, node, "", line, fmt.Sprintf(f, args.ꓸꓸꓸ)));
 }
 
 } // end template_package

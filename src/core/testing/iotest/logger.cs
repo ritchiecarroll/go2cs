@@ -14,14 +14,14 @@ partial struct writeLogger {
 }
 
 internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = l.w.Write(p);
-    if (err != default!){
-        log.Printf("%s %x: %v"u8, l.prefix, p.slice(0, n), err);
+    if (err != nil) {
+        log.Printf("%s %x: %v", l.prefix, p.slice(0, n), err);
     } else {
-        log.Printf("%s %x"u8, l.prefix, p.slice(0, n));
+        log.Printf("%s %x", l.prefix, p.slice(0, n));
     }
     return (n, err);
 }
@@ -39,14 +39,14 @@ partial struct readLogger {
 }
 
 internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     (n, err) = l.r.Read(p);
-    if (err != default!){
-        log.Printf("%s %x: %v"u8, l.prefix, p.slice(0, n), err);
+    if (err != nil) {
+        log.Printf("%s %x: %v", l.prefix, p.slice(0, n), err);
     } else {
-        log.Printf("%s %x"u8, l.prefix, p.slice(0, n));
+        log.Printf("%s %x", l.prefix, p.slice(0, n));
     }
     return (n, err);
 }

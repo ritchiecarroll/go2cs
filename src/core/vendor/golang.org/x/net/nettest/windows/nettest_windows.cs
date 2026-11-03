@@ -15,9 +15,9 @@ internal static bool supportsRawSocket() {
     // will fail with an error code of WSAEACCES. On Windows Vista and later, access
     // for raw sockets is enforced at socket creation. In earlier versions of Windows,
     // access for raw sockets is enforced during other socket operations.
-    foreach (var (_, af) in new nint[]{syscall.AF_INET, syscall.AF_INET6}.slice()) {
+    foreach (var (_, af) in slice<nint>([syscall.AF_INET, syscall.AF_INET6])) {
         var (s, err) = syscall.Socket(af, syscall.SOCK_RAW, 0);
-        if (err != default!) {
+        if (err != nil) {
             continue;
         }
         syscall.Closesocket(s);

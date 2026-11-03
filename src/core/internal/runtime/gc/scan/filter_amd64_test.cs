@@ -15,11 +15,11 @@ partial class scan_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object avx512IsRequiredForˢ = (@string)"AVX512 is required for TestFilterNilAVX512"u8;
 
-public static partial void TestFilterNilAVX512(ж<testing.T> Ꮡt) {
+public static partial void TestFilterNilAVX512(ж<testing.T> t) {
     if (!scan.CanAVX512()) {
-        Ꮡt.Skip(avx512IsRequiredForˢ);
+        t.Skip(avx512IsRequiredForˢ);
     }
-    runTestFilterNil(Ꮡt, scan.FilterNilAVX512);
+    runTestFilterNil(t, scan.FilterNilAVX512);
 }
 
 } // end scan_test_package

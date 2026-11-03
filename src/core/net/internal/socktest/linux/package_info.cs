@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +46,13 @@ using static go.net.@internal.socktest_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Stat))]
+[assembly: GoFieldAccess(typeof(Status))]
+[assembly: GoFieldAccess(typeof(Switch))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -57,11 +62,11 @@ using static go.net.@internal.socktest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABc0goKCqLKCgoKClIKosoKCgpSCAAYQkKaQppCkggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
-[assembly: go.GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABAcgpSkpKQACQiCgpSkpKSklICCpPaClKSkpA==")]
-[assembly: go.GoPositionMap("net/internal/socktest/switch_unix.go", "switch_unix.cs", "AAsY0oKCkoKU2sKCkoI=")]
-[assembly: go.GoPositionMap("net/internal/socktest/sys_cloexec.go", "sys_cloexec.cs", "AAoYAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgg==")]
-[assembly: go.GoPositionMap("net/internal/socktest/sys_unix.go", "sys_unix.cs", "AAoY8pSCgoKUgoKUgoCCgpS2goKCgpSCgujigoKUgoKUgoKUgoCCtoKCgoKUgoLo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClILoAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgujSgoKUgoKUgoKUgoKAgraClIKCgpQ=")]
+[assembly: GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABc0goKCqLKCgoKClIKosoKCgpSCAAYQkKaQppCkggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
+[assembly: GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABMcgpSkpKQADQiCgpS0tLS0pICCpAAKBoKUpKSk")]
+[assembly: GoPositionMap("net/internal/socktest/switch_unix.go", "switch_unix.cs", "AAsY0oKCkoKU2sKCgoI=")]
+[assembly: GoPositionMap("net/internal/socktest/sys_cloexec.go", "sys_cloexec.cs", "AAoYAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgg==")]
+[assembly: GoPositionMap("net/internal/socktest/sys_unix.go", "sys_unix.cs", "AAoY8pSCgoKUgoKUgoCCgpS2goKCgpSCgujigoKUgoKUgoKUgoCCtoKCgoKUgoLo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClILoAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgujSgoKUgoKUgoKUgoKAgraClIKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.@internal;

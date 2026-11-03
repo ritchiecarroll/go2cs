@@ -17,7 +17,8 @@ using static global::go.go.ast_internal_test_package;
 
 partial class ast_test_package {
 
-internal static readonly @string src = """
+internal static ref readonly @string src => ref srcᵇ;
+private static readonly @string srcᵇ = """
 
 // the very first comment
 
@@ -77,23 +78,23 @@ func f3() {
 // res maps a key of the form "line number: node type"
 // to the associated comments' text.
 internal static map<@string, @string> res = new map<@string, @string>{
-    [" 5: *ast.File"u8] = "the very first comment\npackage p\n"u8,
-    [" 5: *ast.Ident"u8] = " the name is p\n"u8,
-    [" 8: *ast.GenDecl"u8] = "imports\n"u8,
-    [" 9: *ast.ImportSpec"u8] = "bytes\n"u8,
-    ["10: *ast.ImportSpec"u8] = "fmt\n"u8,
-    ["16: *ast.GenDecl"u8] = "T\nalso associated with T\n"u8,
-    ["17: *ast.Field"u8] = "associated with a, b, c\n"u8,
-    ["19: *ast.Field"u8] = "associated with x, y\nfloat values\n"u8,
-    ["20: *ast.Field"u8] = "complex value\n"u8,
-    ["25: *ast.GenDecl"u8] = "x\nx = 0\nalso associated with x\n"u8,
-    ["29: *ast.FuncDecl"u8] = "f1\nassociated with f1\nalso associated with f1\n"u8,
-    ["31: *ast.ExprStmt"u8] = " associated with s1\nalso associated with s1\n"u8,
-    ["37: *ast.ExprStmt"u8] = "associated with s2\nalso associated with s2\nline comment for s2\n"u8,
-    ["45: *ast.FuncDecl"u8] = "associated with f2\nf2\n"u8,
-    ["49: *ast.AssignStmt"u8] = "addition\n"u8,
-    ["49: *ast.BasicLit"u8] = " 1\n"u8,
-    ["50: *ast.Ident"u8] = "the very last comment\n"u8
+    [" 5: *ast.File"] = "the very first comment\npackage p\n",
+    [" 5: *ast.Ident"] = " the name is p\n",
+    [" 8: *ast.GenDecl"] = "imports\n",
+    [" 9: *ast.ImportSpec"] = "bytes\n",
+    ["10: *ast.ImportSpec"] = "fmt\n",
+    ["16: *ast.GenDecl"] = "T\nalso associated with T\n",
+    ["17: *ast.Field"] = "associated with a, b, c\n",
+    ["19: *ast.Field"] = "associated with x, y\nfloat values\n",
+    ["20: *ast.Field"] = "complex value\n",
+    ["25: *ast.GenDecl"] = "x\nx = 0\nalso associated with x\n",
+    ["29: *ast.FuncDecl"] = "f1\nassociated with f1\nalso associated with f1\n",
+    ["31: *ast.ExprStmt"] = " associated with s1\nalso associated with s1\n",
+    ["37: *ast.ExprStmt"] = "associated with s2\nalso associated with s2\nline comment for s2\n",
+    ["45: *ast.FuncDecl"] = "associated with f2\nf2\n",
+    ["49: *ast.AssignStmt"] = "addition\n",
+    ["49: *ast.BasicLit"] = " 1\n",
+    ["50: *ast.Ident"] = "the very last comment\n"
 };
 
 internal static @string ctext(slice<ж<ast.CommentGroup>> list) {
@@ -104,15 +105,13 @@ internal static @string ctext(slice<ж<ast.CommentGroup>> list) {
     return buf.String();
 }
 
-public static void TestCommentMap(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestCommentMap(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    var cmap = NewCommentMap(fset, new ast.FileжNode(f), (~f).Comments);
+    var cmap = NewCommentMap(fset, new ast.FileжNode(f), f.Comments);
 
     // verify correct association of comments
     foreach (var (n, list) in cmap) {
@@ -120,14 +119,14 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
         @string got = ctext(list);
         @string want = res[key];
         if (got != want) {
-            Ꮡt.Errorf("%s: got %q; want %q"u8, key, got, want);
+            t.Errorf("%s: got %q; want %q", key, got, want);
         }
     }
 
     // verify that no comments got lost
     {
-        nint n = len(cmap.Comments()); if (n != len((~f).Comments)) {
-            Ꮡt.Errorf("got %d comment groups in map; want %d"u8, n, len((~f).Comments));
+        nint n = len(cmap.Comments()); if (n != len(f.Comments)) {
+            t.Errorf("got %d comment groups in map; want %d", n, len(f.Comments));
         }
     }
 
@@ -146,20 +145,20 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestFilter(ж<testing.T> Ꮡt) {
+public static void TestFilter(ж<testing.T> t) {
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    var cmap = NewCommentMap(fset, new ast.FileжNode(f), (~f).Comments);
+    var cmap = NewCommentMap(fset, new ast.FileжNode(f), f.Comments);
 
     // delete variable declaration
-    foreach (var (i, decl) in (~f).Decls) {
+    foreach (var (i, decl) in f.Decls) {
         {
-            var (gen, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && (~gen).Tok == token.VAR) {
-                copy((~f).Decls.slice(i), (~f).Decls.slice(i + 1));
-                f.Value.Decls = (~f).Decls.slice(0, len((~f).Decls) - 1);
+            var (gen, ok) = decl._<ж<ast.GenDecl>>(ᐧ); if (ok && gen.Tok == token.VAR) {
+                copy(f.Decls.slice(i), f.Decls.slice(i + 1));
+                f.Decls = f.Decls.slice(0, len(f.Decls) - 1);
                 break;
             }
         }
@@ -172,7 +171,7 @@ public static void TestFilter(ж<testing.T> Ꮡt) {
         @string got = ctext(list);
         @string want = res[key];
         if (key == "25: *ast.GenDecl"u8 || got != want) {
-            Ꮡt.Errorf("%s: got %q; want %q"u8, key, got, want);
+            t.Errorf("%s: got %q; want %q", key, got, want);
         }
     }
 }

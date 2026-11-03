@@ -33,13 +33,13 @@ internal static array<nint> zigzag = new nint[]{
     35, 36, 48, 49, 57, 58, 62, 63
 }.array();
 
-public static void TestZigUnzig(ж<testing.T> Ꮡt) {
+public static void TestZigUnzig(ж<testing.T> t) {
     for (nint i = 0; i < blockSize; i++) {
         if (unzig[zigzag[i]] != i) {
-            Ꮡt.Errorf("unzig[zigzag[%d]] == %d"u8, i, unzig[zigzag[i]]);
+            t.Errorf("unzig[zigzag[%d]] == %d", i, unzig[zigzag[i]]);
         }
         if (zigzag[unzig[i]] != i) {
-            Ꮡt.Errorf("zigzag[unzig[%d]] == %d"u8, i, zigzag[unzig[i]]);
+            t.Errorf("zigzag[unzig[%d]] == %d", i, zigzag[unzig[i]]);
         }
     }
 }
@@ -69,32 +69,32 @@ internal static array<array<byte>> unscaledQuantInNaturalOrder = new array<byte>
         99, 99, 99, 99, 99, 99, 99, 99}.array()
 }.array();
 
-public static void TestUnscaledQuant(ж<testing.T> Ꮡt) {
+public static void TestUnscaledQuant(ж<testing.T> t) {
     var bad = false;
     for (global::go.image.jpeg_package.quantIndex i = (global::go.image.jpeg_package.quantIndex)0; i < nQuantIndex; i++) {
         for (nint zig = 0; zig < blockSize; zig++) {
             var got = unscaledQuant[i][zig];
             var want = unscaledQuantInNaturalOrder[i][unzig[zig]];
             if (got != want) {
-                Ꮡt.Errorf("i=%d, zig=%d: got %d, want %d"u8, i, zig, got, want);
+                t.Errorf("i=%d, zig=%d: got %d, want %d", i, zig, got, want);
                 bad = true;
             }
         }
     }
     if (bad) {
-        var names = new @string[]{"Luminance"u8, "Chrominance"u8}.array();
-        var buf = Ꮡ(new strings.Builder(nil));
+        var names = new @string[]{"Luminance", "Chrominance"}.array();
+        var buf = Ꮡ(new strings.Builder());
         foreach (var (i, name) in names.ΔRangeSnapshot()) {
             fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(buf), "// %s.\n{\n"u8, name);
             for (nint zig = 0; zig < blockSize; zig++) {
                 fmt.Fprintf(new jpeg_internal_test_package.strings_BuilderжWriter(buf), "%d, "u8, unscaledQuantInNaturalOrder[i][unzig[zig]]);
                 if (zig % 8 == 7) {
-                    buf.WriteString("\n"u8);
+                    buf.WriteString("\n");
                 }
             }
-            buf.WriteString("},\n"u8);
+            buf.WriteString("},\n");
         }
-        Ꮡt.Logf("expected unscaledQuant values:\n%s"u8, buf.String());
+        t.Logf("expected unscaledQuant values:\n%s", buf.String());
     }
 }
 
@@ -103,14 +103,14 @@ partial struct testCaseᴛ1 /*dyn*/ {
     internal nint quality;
     internal int64 tolerance;
 }
-internal static slice<testCaseᴛ1> testCase = new testCaseᴛ1[]{
-    new("../testdata/video-001.png"u8, 1, (int64)24 << 8),
-    new("../testdata/video-001.png"u8, 20, (int64)12 << 8),
-    new("../testdata/video-001.png"u8, 60, (int64)8 << 8),
-    new("../testdata/video-001.png"u8, 80, (int64)6 << 8),
-    new("../testdata/video-001.png"u8, 90, (int64)4 << 8),
-    new("../testdata/video-001.png"u8, 100, (int64)2 << 8)
-}.slice();
+internal static slice<testCaseᴛ1> testCase = slice<testCaseᴛ1>([
+    new("../testdata/video-001.png", 1, (int64)24 << 8),
+    new("../testdata/video-001.png", 20, (int64)12 << 8),
+    new("../testdata/video-001.png", 60, (int64)8 << 8),
+    new("../testdata/video-001.png", 80, (int64)6 << 8),
+    new("../testdata/video-001.png", 90, (int64)4 << 8),
+    new("../testdata/video-001.png", 100, (int64)2 << 8)
+]);
 
 internal static int64 delta(uint32 u0, uint32 u1) {
     var d = (int64)u0 - (int64)u1;
@@ -124,46 +124,46 @@ internal static (image.Image, error) readPng(@string filename) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = os.Open(filename);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return png.Decode(new jpeg_internal_test_package.os_FileжReader(f));
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
-public static void TestWriter(ж<testing.T> Ꮡt) {
+public static void TestWriter(ж<testing.T> t) {
     foreach (var (_, tc) in testCase) {
         // Read the image.
         var (m0, err) = readPng(tc.filename);
-        if (err != default!) {
-            Ꮡt.Error(tc.filename, err);
+        if (err != nil) {
+            t.Error(tc.filename, err);
             continue;
         }
         // Encode that image as JPEG.
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         err = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(Ꮡbuf), m0, Ꮡ(new Options(Quality: tc.quality)));
-        if (err != default!) {
-            Ꮡt.Error(tc.filename, err);
+        if (err != nil) {
+            t.Error(tc.filename, err);
             continue;
         }
         // Decode that JPEG.
         (var m1, err) = Decode(new jpeg_internal_test_package.bytes_BufferжReader(Ꮡbuf));
-        if (err != default!) {
-            Ꮡt.Error(tc.filename, err);
+        if (err != nil) {
+            t.Error(tc.filename, err);
             continue;
         }
         if (m0.Bounds() != m1.Bounds()) {
-            Ꮡt.Errorf("%s, bounds differ: %v and %v"u8, tc.filename, m0.Bounds(), m1.Bounds());
+            t.Errorf("%s, bounds differ: %v and %v", tc.filename, m0.Bounds(), m1.Bounds());
             continue;
         }
         // Compare the average delta to the tolerance level.
         {
             var d = averageDelta(m0, m1); if (d > tc.tolerance) {
-                Ꮡt.Errorf("%s, quality=%d: average delta is too high (%d > %d)"u8, tc.filename, tc.quality, d, tc.tolerance);
+                t.Errorf("%s, quality=%d: average delta is too high (%d > %d)", tc.filename, tc.quality, d, tc.tolerance);
                 continue;
             }
         }
@@ -172,34 +172,34 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 
 // TestWriteGrayscale tests that a grayscale images survives a round-trip
 // through encode/decode cycle.
-public static void TestWriteGrayscale(ж<testing.T> Ꮡt) {
+public static void TestWriteGrayscale(ж<testing.T> t) {
     var m0 = image.NewGray(image.Rect(0, 0, 32, 32));
-    foreach (var i in range((~m0).Pix)) {
-        m0.Value.Pix[i] = (uint8)i;
+    foreach (var i in range(m0.Pix)) {
+        m0.Pix[i] = (uint8)i;
     }
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var errΔ1 = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.GrayжImage(m0), nil); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = Encode(new jpeg_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.GrayжImage(m0), nil); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     var (m1, err) = Decode(new jpeg_internal_test_package.bytes_BufferжReader(Ꮡbuf));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (m0.Bounds() != m1.Bounds()) {
-        Ꮡt.Fatalf("bounds differ: %v and %v"u8, m0.Bounds(), m1.Bounds());
+        t.Fatalf("bounds differ: %v and %v", m0.Bounds(), m1.Bounds());
     }
     {
         var (_, ok) = m1._<ж<image.Gray>>(ᐧ); if (!ok) {
-            Ꮡt.Errorf("got %T, want *image.Gray"u8, m1);
+            t.Errorf("got %T, want *image.Gray", m1);
         }
     }
     // Compare the average delta to the tolerance level.
     var want = (int64)((int64)2 << 8);
     {
         var got = averageDelta(new image.GrayжImage(m0), m1); if (got > want) {
-            Ꮡt.Errorf("average delta too high; got %d, want <= %d"u8, got, want);
+            t.Errorf("average delta too high; got %d, want <= %d", got, want);
         }
     }
 }
@@ -208,8 +208,8 @@ public static void TestWriteGrayscale(ж<testing.T> Ꮡt) {
 // have the same bounds.
 internal static int64 averageDelta(image.Image m0, image.Image m1) {
     var b = m0.Bounds();
-    int64 sum = default!;
-    int64 n = default!;
+    int64 sum = default;
+    int64 n = default;
     for (nint y = b.Min.Y; y < b.Max.Y; y++) {
         for (nint x = b.Min.X; x < b.Max.X; x++) {
             var c0 = m0.At(x, y);
@@ -225,7 +225,7 @@ internal static int64 averageDelta(image.Image m0, image.Image m1) {
     return quo(sum, n);
 }
 
-public static void TestEncodeYCbCr(ж<testing.T> Ꮡt) {
+public static void TestEncodeYCbCr(ж<testing.T> t) {
     var bo = image.Rect(0, 0, 640, 480);
     var imgRGBA = image.NewRGBA(bo);
     // Must use 444 subsampling to avoid lossy RGBA to YCbCr conversion.
@@ -244,9 +244,9 @@ public static void TestEncodeYCbCr(ж<testing.T> Ꮡt) {
             nint yo = imgYCbCr.YOffset(x, y);
             nint co = imgYCbCr.COffset(x, y);
             var (cy, ccr, ccb) = color.RGBToYCbCr(col.R, col.G, col.B);
-            imgYCbCr.Value.Y[yo] = cy;
-            imgYCbCr.Value.Cb[co] = ccr;
-            imgYCbCr.Value.Cr[co] = ccb;
+            imgYCbCr.Y[yo] = cy;
+            imgYCbCr.Cb[co] = ccr;
+            imgYCbCr.Cr[co] = ccb;
         }
     }
 
@@ -256,7 +256,7 @@ public static void TestEncodeYCbCr(ж<testing.T> Ꮡt) {
     Encode(new jpeg_internal_test_package.bytes_BufferжWriter(ᏑbufRGBA), new image.ΔRGBAжImage(imgRGBA), nil);
     Encode(new jpeg_internal_test_package.bytes_BufferжWriter(ᏑbufYCbCr), new image.YCbCrжImage(imgYCbCr), nil);
     if (!bytes.Equal(bufRGBA.Bytes(), bufYCbCr.Bytes())) {
-        Ꮡt.Errorf("RGBA and YCbCr encoded bytes differ"u8);
+        t.Errorf("RGBA and YCbCr encoded bytes differ");
     }
 }
 
@@ -295,9 +295,9 @@ public static void BenchmarkEncodeYCbCr(ж<testing.B> Ꮡb) {
         for (nint x = bo.Min.X; x < bo.Max.X; x++) {
             nint cy = img.YOffset(x, y);
             nint ci = img.COffset(x, y);
-            img.Value.Y[cy] = (uint8)rnd.Intn(256);
-            img.Value.Cb[ci] = (uint8)rnd.Intn(256);
-            img.Value.Cr[ci] = (uint8)rnd.Intn(256);
+            img.Y[cy] = (uint8)rnd.Intn(256);
+            img.Cb[ci] = (uint8)rnd.Intn(256);
+            img.Cr[ci] = (uint8)rnd.Intn(256);
         }
     }
     b.SetBytes(640 * 480 * 3);

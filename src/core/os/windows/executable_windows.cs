@@ -11,11 +11,11 @@ partial class os_package {
 
 internal static (@string, error) getModuleFileName(syscallꓸHandle handle) {
     var n = (uint32)1024;
-    slice<uint16> buf = default!;
-    while (ᐧ) {
+    slice<uint16> buf = default;
+    for (;;) {
         buf = new slice<uint16>((nint)(n));
         var (r, err) = windows.GetModuleFileName(handle, Ꮡ(buf, 0), n);
-        if (err != default!) {
+        if (err != nil) {
             return ("", err);
         }
         if (r < n) {
@@ -24,7 +24,7 @@ internal static (@string, error) getModuleFileName(syscallꓸHandle handle) {
         // r == n means n not big enough
         n += 1024;
     }
-    return (syscall.UTF16ToString(buf), default!);
+    return (syscall.UTF16ToString(buf), default);
 }
 
 internal static (@string, error) executable() {

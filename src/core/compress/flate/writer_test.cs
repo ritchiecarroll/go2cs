@@ -14,8 +14,8 @@ using static go.compress.flate_package;
 
 partial class flate_internal_test_package {
 
-public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
-    doBench(Ꮡb, (ж<testing.B> bΔ1, slice<byte> buf0, nint level, nint n) => {
+public static void BenchmarkEncode(ж<testing.B> b) {
+    doBench(b, (ж<testing.B> bΔ1, slice<byte> buf0, nint level, nint n) => {
         bΔ1.StopTimer();
         bΔ1.SetBytes((int64)n);
 
@@ -26,9 +26,9 @@ public static void BenchmarkEncode(ж<testing.B> Ꮡb) {
             }
             copy(buf1.slice(i), buf0);
         }
-        buf0 = default!;
+        buf0 = default;
         var (w, err) = NewWriter(io.Discard, level);
-        if (err != default!) {
+        if (err != nil) {
             bΔ1.Fatal(err);
         }
         runtime.GC();
@@ -51,7 +51,7 @@ internal static (nint, error) Write(this ref errorWriter e, slice<byte> b) {
         return (0, io.ErrClosedPipe);
     }
     e.N--;
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -68,8 +68,8 @@ internal partial struct TestWriteError_src /*dyn*/ {
 }
 
 // Test if errors from the underlying writer is passed upwards.
-public static void TestWriteError(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestWriteError(ж<testing.T> t) {
+    t.Parallel();
     var buf = @new<bytes.Buffer>();
     nint n = 65536;
     if (!testing.Short()) {
@@ -88,36 +88,36 @@ public static void TestWriteError(ж<testing.T> Ꮡt) {
             // Fail after 'fail' writes
             var ew = Ꮡ(new errorWriter(N: fail));
             var (w, err) = NewWriter(new flate_internal_test_package.errorWriterжWriter(ew), l);
-            if (err != default!) {
-                Ꮡt.Fatalf("NewWriter: level %d: %v"u8, l, err);
+            if (err != nil) {
+                t.Fatalf("NewWriter: level %d: %v", l, err);
             }
             (var nΔ1, err) = io.CopyBuffer(new flate_test_package.flate_WriterжWriter(w), new TestWriteError_src(new flate_test_package.bytes_BufferжReader(bytes.NewBuffer(@in))), copyBuffer);
-            if (err == default!) {
-                Ꮡt.Fatalf("Level %d: Expected an error, writer was %#v"u8, l, ew.OrTypedNil());
+            if (err == nil) {
+                t.Fatalf("Level %d: Expected an error, writer was %#v", l, ew.OrTypedNil());
             }
-            (var n2, err) = w.Write(new byte[]{1, 2, 2, 3, 4, 5}.slice());
+            (var n2, err) = w.Write(slice<byte>([1, 2, 2, 3, 4, 5]));
             if (n2 != 0) {
-                Ꮡt.Fatal(levelˢ, l, expected0LengthWriteGotˢ, nΔ1);
+                t.Fatal(levelˢ, l, expected0LengthWriteGotˢ, nΔ1);
             }
-            if (err == default!) {
-                Ꮡt.Fatal(levelˢ, l, expectedAnErrorˢ);
+            if (err == nil) {
+                t.Fatal(levelˢ, l, expectedAnErrorˢ);
             }
             err = w.Flush();
-            if (err == default!) {
-                Ꮡt.Fatal(levelˢ, l, expectedAnErrorOnFlushˢ);
+            if (err == nil) {
+                t.Fatal(levelˢ, l, expectedAnErrorOnFlushˢ);
             }
             err = w.Close();
-            if (err == default!) {
-                Ꮡt.Fatal(levelˢ, l, expectedAnErrorOnCloseˢ);
+            if (err == nil) {
+                t.Fatal(levelˢ, l, expectedAnErrorOnCloseˢ);
             }
 
             w.Reset(io.Discard);
-            (n2, err) = w.Write(new byte[]{1, 2, 3, 4, 5, 6}.slice());
-            if (err != default!) {
-                Ꮡt.Fatal(levelˢ, l, gotUnexpectedErrorAfterˢ, err);
+            (n2, err) = w.Write(slice<byte>([1, 2, 3, 4, 5, 6]));
+            if (err != nil) {
+                t.Fatal(levelˢ, l, gotUnexpectedErrorAfterˢ, err);
             }
             if (n2 == 0) {
-                Ꮡt.Fatal(levelˢ, l, got0LengthWriteExpected0ˢ);
+                t.Fatal(levelˢ, l, got0LengthWriteExpected0ˢ);
             }
             if (testing.Short()) {
                 return;
@@ -128,25 +128,26 @@ public static void TestWriteError(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lm2ˢ = "LM2"u8;
+internal static ref readonly @string lm2ˢ => ref lm2ˢᵇ;
+private static readonly @string lm2ˢᵇ = "LM2"u8;
 
 // Test if two runs produce identical results
 // even when writing different sizes to the Writer.
-public static void TestDeterministic(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestDeterministic(ж<testing.T> t) {
+    t.Parallel();
     for (nint iᴛ1 = 0; iᴛ1 <= 9; iᴛ1++) {
         var i = iᴛ1;
-        Ꮡt.Run(fmt.Sprint((@string)"L"u8, i), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprint("L", i), (ж<testing.T> tΔ1) => {
             testDeterministic(i, tΔ1);
         });
     }
-    Ꮡt.Run(lm2ˢ, (ж<testing.T> tΔ2) => {
+    t.Run(lm2ˢ, (ж<testing.T> tΔ2) => {
         testDeterministic(-2, tΔ2);
     });
 }
 
-internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
+internal static void testDeterministic(nint i, ж<testing.T> t) {
+    t.Parallel();
     // Test so much we cross a good number of block boundaries.
     nint length = maxStoreBlockSize * 30 + 500;
     if (testing.Short()) {
@@ -164,14 +165,14 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
     ref var b1 = ref heap(new bytes.Buffer(), out var Ꮡb1);
     var br = bytes.NewBuffer(t1);
     var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡb1), i);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     // Use a very small prime sized buffer.
     var cbuf = new slice<byte>(787);
     (_, err) = io.CopyBuffer(new flate_test_package.flate_WriterжWriter(w), new TestWriteError_src(new flate_test_package.bytes_BufferжReader(br)), cbuf);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     w.Close();
 
@@ -181,12 +182,12 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
     cbuf = new slice<byte>(81761);
     var br2 = bytes.NewBuffer(t1);
     (var w2, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡb2), i);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (_, err) = io.CopyBuffer(new flate_test_package.flate_WriterжWriter(w2), new TestWriteError_src(new flate_test_package.bytes_BufferжReader(br2)), cbuf);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     w2.Close();
 
@@ -194,14 +195,14 @@ internal static void testDeterministic(nint i, ж<testing.T> Ꮡt) {
     var b2b = b2.Bytes();
 
     if (!bytes.Equal(b1b, b2b)) {
-        Ꮡt.Errorf("level %d did not produce deterministic result, result mismatch, len(a) = %d, len(b) = %d"u8, i, len(b1b), len(b2b));
+        t.Errorf("level %d did not produce deterministic result, result mismatch, len(a) = %d, len(b) = %d", i, len(b1b), len(b2b));
     }
 }
 
 // TestDeflateFast_Reset will test that encoding is consistent
 // across a warparound of the table offset.
 // See https://github.com/golang/go/issues/34121
-public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
+public static void TestDeflateFast_Reset(ж<testing.T> t) {
     var buf = @new<bytes.Buffer>();
     nint n = 65536;
 
@@ -219,8 +220,8 @@ public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
     // We do an encode with a clean buffer to compare.
     ref var want = ref heap(new bytes.Buffer(), out var Ꮡwant);
     var (w, err) = NewWriter(new flate_test_package.bytes_BufferжWriter(Ꮡwant), level);
-    if (err != default!) {
-        Ꮡt.Fatalf("NewWriter: level %d: %v"u8, (nint)(level), err);
+    if (err != nil) {
+        t.Fatalf("NewWriter: level %d: %v", (nint)(level), err);
     }
 
     // Output written 3 times.
@@ -231,15 +232,15 @@ public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
 
     for (; offset <= 256; offset *= 2) {
         var (wΔ1, errΔ1) = NewWriter(io.Discard, level);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatalf("NewWriter: level %d: %v"u8, (nint)(level), errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatalf("NewWriter: level %d: %v", (nint)(level), errΔ1);
         }
 
         // Reset until we are right before the wraparound.
         // Each reset adds maxMatchOffset to the offset.
         for (nint i = 0; i < ((nint)bufferReset - len(@in) - offset - (nint)maxMatchOffset) / (nint)maxMatchOffset; i++) {
             // skip ahead to where we are close to wrap around...
-            wΔ1.of(global::go.compress.flate_package.Writer.Ꮡd).reset(default!);
+            wΔ1.Ꮡd.reset(default);
         }
         ref var got = ref heap(new bytes.Buffer(), out var Ꮡgot);
         wΔ1.Reset(new flate_test_package.bytes_BufferжWriter(Ꮡgot));
@@ -247,16 +248,16 @@ public static void TestDeflateFast_Reset(ж<testing.T> Ꮡt) {
         // Write 3 times, close.
         for (nint i = 0; i < 3; i++) {
             (_, errΔ1) = wΔ1.Write(@in);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         errΔ1 = wΔ1.Close();
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
         if (!bytes.Equal(got.Bytes(), want.Bytes())) {
-            Ꮡt.Fatalf("output did not match at wraparound, len(want)  = %d, len(got) = %d"u8, want.Len(), got.Len());
+            t.Fatalf("output did not match at wraparound, len(want)  = %d, len(got) = %d", want.Len(), got.Len());
         }
     }
 }

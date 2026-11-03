@@ -492,6 +492,12 @@ var errProductionAnchoredRecords = errors.New("test variant records production-a
 func recordsRequireProductionAnchor(productionClassName, productionPackageName string, handOwnHost bool) bool {
 	_, productionAnchored := splitExternalVariantRecords(productionClassName, handOwnHost)
 
+	// A [GoFieldAccess] record never needs the production class: go2cs-gen emits its field properties into the
+	// using compilation, a foreign struct's included. The split places it only to pick the FILE whose scope resolves
+	// its name under the recompile model. Counting it here sent 20 rows to recompile and refused the host
+	// `testing` (seat #45 follow-up).
+	productionAnchored.fieldAccess = hashset.HashSet[string]{}
+
 	if !productionAnchored.isEmpty() {
 		return true
 	}
@@ -743,7 +749,7 @@ func testImplCompanionAppliesTo(name, goos string) bool {
 	return true
 }
 
-func processTestConversion(inputPath, outputPath string, options Options) error {
+func processTestConversion(inputPath, outputPath string, options Options) (err error) {
 	// The sibling declarator names steer the PRODUCTION pass only (see siblingTestFuncMethodNames);
 	// that pass is complete by the time this runs. Each variant's own analysis then computes the
 	// shadow set from its own universe — the in-package variant already contains these names, and
@@ -764,7 +770,7 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	// requirement on this package at all.
 	siblingTestPublicizedTypeNames = nil
 
-	inputPath, err := filepath.Abs(inputPath)
+	inputPath, err = filepath.Abs(inputPath)
 	if err != nil {
 		return err
 	}
@@ -773,6 +779,25 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	if err != nil {
 		return err
 	}
+
+	// A conversion that refuses leaves the output as it found it. The variants write their files as they
+	// convert, so a refusal that comes later (a hand-owned host's records, a recompile fallback with no
+	// production metadata to read) used to leave the row's committed test files rewritten (seat #45
+	// follow-up: testing rewrote 8, internal/runtime/wasitest 3).
+	before, err := snapshotTestOutput(outputPath)
+	if err != nil {
+		return fmt.Errorf("snapshot the test output before converting: %w", err)
+	}
+
+	defer func() {
+		if err == nil {
+			return
+		}
+
+		if restoreErr := before.restore(outputPath); restoreErr != nil {
+			err = errors.Join(err, fmt.Errorf("restore the test output after the refusal: %w", restoreErr))
+		}
+	}()
 
 	targetParts := strings.Split(options.targetPlatform, "/")
 	if len(targetParts) != 2 {
@@ -1020,6 +1045,15 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 		testProjectAliasScanFiles(model, outputPath, testInfoPath, outputFiles, productionFiles),
 		production.PkgPath, dependencies)...)
 
+	// The white-box model is the one whose production project grants this assembly InternalsVisibleTo (see
+	// testVariantOptions), so production's GoFieldAccess extension blocks are visible here and their receivers' packages
+	// are references (fieldAccessReceiverImports). The TARGET GOOS's file, because the records differ by GOOS: only
+	// darwin's net records internal/routebsd structs.
+	if model == testProjectWhiteboxReference {
+		referenceImports = append(referenceImports, fieldAccessReceiverImports(
+			platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform)), production.PkgPath, referenceImports)...)
+	}
+
 	// Close the reference set under the C# DECLARATION edges the converter emits
 	// (declarationClosureImports): binding a type the compilation NAMES needs the assemblies its
 	// own declaration names — an interface's base interfaces (hash's `Hash : io.Writer` reached by
@@ -1087,6 +1121,114 @@ func processTestConversion(inputPath, outputPath string, options Options) error 
 	}
 
 	return writeJSONFile(filepath.Join(outputPath, testManifestFileName), manifest)
+}
+
+// testOutputSnapshot is a -tests conversion's output directory as it stood before the conversion wrote anything:
+// every file's bytes and mode, and every directory. Build output (bin, obj) is neither recorded nor restored.
+type testOutputSnapshot struct {
+	files map[string]testOutputFile
+	dirs  hashset.HashSet[string]
+}
+
+type testOutputFile struct {
+	body []byte
+	mode fs.FileMode
+}
+
+func isTestOutputBuildDir(name string) bool {
+	return strings.EqualFold(name, "bin") || strings.EqualFold(name, "obj")
+}
+
+// walkTestOutput visits every directory and file under root, build output aside. A root that does not exist yet
+// has nothing to visit.
+func walkTestOutput(root string, visit func(path string, entry fs.DirEntry) error) error {
+	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if entry.IsDir() && path != root && isTestOutputBuildDir(entry.Name()) {
+			return filepath.SkipDir
+		}
+
+		return visit(path, entry)
+	})
+
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+
+	return err
+}
+
+func snapshotTestOutput(root string) (testOutputSnapshot, error) {
+	snapshot := testOutputSnapshot{files: map[string]testOutputFile{}, dirs: hashset.HashSet[string]{}}
+
+	err := walkTestOutput(root, func(path string, entry fs.DirEntry) error {
+		if entry.IsDir() {
+			snapshot.dirs.Add(path)
+			return nil
+		}
+
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+
+		body, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		snapshot.files[path] = testOutputFile{body: body, mode: info.Mode().Perm()}
+
+		return nil
+	})
+
+	return snapshot, err
+}
+
+// restore puts root back as the snapshot found it: a file the conversion wrote is removed, one it changed or removed
+// is written back, and a directory it created is removed once empty.
+func (snapshot testOutputSnapshot) restore(root string) error {
+	var errs []error
+	var created []string
+
+	err := walkTestOutput(root, func(path string, entry fs.DirEntry) error {
+		if entry.IsDir() {
+			if !snapshot.dirs.Contains(path) {
+				created = append(created, path)
+			}
+
+			return nil
+		}
+
+		if _, ok := snapshot.files[path]; !ok {
+			errs = append(errs, os.Remove(path))
+		}
+
+		return nil
+	})
+	errs = append(errs, err)
+
+	for path, file := range snapshot.files {
+		if current, readErr := os.ReadFile(path); readErr == nil && bytes.Equal(current, file.body) {
+			continue
+		}
+
+		errs = append(errs, os.MkdirAll(filepath.Dir(path), 0755), os.WriteFile(path, file.body, file.mode))
+	}
+
+	// Deepest first, so a created parent is empty when its turn comes. One that holds build output stays.
+	sort.Slice(created, func(i, j int) bool { return len(created[i]) > len(created[j]) })
+
+	for _, dir := range created {
+		if entries, readErr := os.ReadDir(dir); readErr == nil && len(entries) == 0 {
+			errs = append(errs, os.Remove(dir))
+		}
+	}
+
+	return errors.Join(errs...)
 }
 
 // testVariantConversionResult carries everything one convertTestVariants pass produced — the
@@ -4896,6 +5038,29 @@ func testProjectAliasScanFiles(model testProjectModel, outputPath, testInfoPath 
 }
 
 func aliasReferenceImports(infoFiles []string, productionPkgPath string, directDependencies []string) []string {
+	return scanReferenceImports(infoFiles, referenceScanTargets, productionPkgPath, directDependencies)
+}
+
+// fieldAccessReceiverImports returns the import paths of the packages that declare the struct types a PRODUCTION
+// package_info.cs records with `[assembly: GoFieldAccess(typeof(T))]`, less the ones already referenced. A white-box
+// test project needs every one of them, and nothing else supplies them.
+//
+// go2cs-gen turns each record into an extension block on ж<T> in the production assembly's internal GoFieldAccess
+// class (FieldAccessGenerator), and the white-box test assembly sees that class through InternalsVisibleTo. Every
+// `p.f` a test reads through a pointer binds by extension lookup, so the compiler examines each visible block that
+// declares a member named f — including production's block on a FOREIGN struct — and that needs T's assembly.
+// DisableTransitiveProjectReferences (B2b) hides it, and no test import names it: net's darwin package_info.cs
+// records five internal/routebsd structs, and net.tests failed CS0012 on `ifi.Name` and `x.IP` (run 41477450611).
+//
+// Only the record lines are read. The file's aliases serve the production sources, which compile in their own
+// project under the reference models (testProjectAliasScanFiles), so they are not this project's references.
+func fieldAccessReceiverImports(productionInfoFile, productionPkgPath string, referenced []string) []string {
+	return scanReferenceImports([]string{productionInfoFile}, fieldAccessRecordTargets, productionPkgPath, referenced)
+}
+
+// scanReferenceImports maps the qualifier TARGETS that targetsOf reads from each line of the files to import paths
+// in the package's transitive closure, less the package itself, testing and the already-referenced set.
+func scanReferenceImports(infoFiles []string, targetsOf func(line string) []string, productionPkgPath string, directDependencies []string) []string {
 	direct := hashset.NewHashSet(directDependencies)
 	tokens := make(map[string][]string)
 	bareTokens := make(map[string][]string)
@@ -4935,7 +5100,7 @@ func aliasReferenceImports(infoFiles []string, productionPkgPath string, directD
 		for _, line := range strings.Split(string(data), "\n") {
 			trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\r"))
 
-			for _, target := range referenceScanTargets(trimmed) {
+			for _, target := range targetsOf(trimmed) {
 				for token, paths := range tokens {
 					// Three match shapes for a multi-segment package's alias target:
 					//   Contains(target, token+".")  — token is a leading/middle namespace segment.
@@ -5090,6 +5255,30 @@ func recordTypeGoName(recorded string) string {
 	recorded = strings.TrimSuffix(strings.TrimPrefix(recorded, ShadowVarMarker), TempVarMarker)
 
 	return recorded
+}
+
+// fieldAccessRecordPrefix opens a `[assembly: GoFieldAccess(typeof(T))]` record (packageInfoWriter, parity seat #31).
+const fieldAccessRecordPrefix = "[assembly: GoFieldAccess(typeof("
+
+// fieldAccessRecordTargets returns the package-class qualifier of a field-access record's struct type, the one
+// reference target the line carries (`go.@internal.routebsd_package` for
+// `[assembly: GoFieldAccess(typeof(go.@internal.routebsd_package.InetAddr))]`). Every other line yields nothing. A
+// generic record names its open definition, `typeof(go.p_package.Pair<,>)`, so the type ends at the first `)`.
+func fieldAccessRecordTargets(line string) []string {
+	rest, ok := strings.CutPrefix(line, fieldAccessRecordPrefix)
+	if !ok {
+		return nil
+	}
+
+	typeName, _, _ := strings.Cut(rest, ")")
+
+	var targets []string
+
+	for _, match := range packageQualifierPattern.FindAllStringSubmatch(typeName, -1) {
+		targets = append(targets, match[1])
+	}
+
+	return targets
 }
 
 // conversionRecordPrefixes are the emitted assembly-attribute line prefixes whose GENERIC ARGUMENT
@@ -8486,6 +8675,18 @@ type testDisclosure struct {
 	// signatures are reconsidered at phase C.
 	Records int `json:"records,omitempty"`
 
+	// OptionalRecords names records a pinned test logs on SOME runs and not others (ruled option A,
+	// 2026-11-01, ledger 05:11). runtime's TestMemStats logs its twelve disclosed zero fields always,
+	// and a thirteenth when the CLR's real total GC pause crosses Go's 1e11 ns sanity bound, which 8 of
+	// 10 linux TC0 readings did: no exact count holds on both kinds of run. Each optional record absorbs
+	// AT MOST one record outside the signature, and only a record carrying EVERY one of its substrings,
+	// so it pins the field and the failure text together and no other record about that field is
+	// absorbed. The pin holds iff the records seen, less the optional records matched, equal Records
+	// (optionalRecordsMatched). The loader refuses an optional record on an unpinned entry, one with
+	// fewer than two substrings or an empty one, one without a reason, the same one twice, and one the
+	// signature's own record would satisfy. Each one's reason is rendered on the proof page.
+	OptionalRecords []optionalRecord `json:"optionalRecords,omitempty"`
+
 	// Halves carries a test that fails for TWO reasons, each with its own class (the two-half shape,
 	// ruled 2026-09-28 09:47, ledger 435557647c, item 3b; per-half platforms added at 17:56, ledger
 	// a4dbed7620). runtime's TestReadMetricsConsistency is the first: its linux-only mark-class check
@@ -8510,6 +8711,26 @@ type testDisclosure struct {
 	// rendered fields to that.
 	History                string `json:"history,omitempty"`
 	HostConditionalHistory string `json:"hostConditionalHistory,omitempty"`
+}
+
+// optionalRecord is one record a pinned entry may carry on some runs (testDisclosure.OptionalRecords):
+// the substrings that must ALL appear in that one record, the reason the proof page renders, and the
+// same never-rendered History beside it (testDisclosure.History).
+type optionalRecord struct {
+	Contains []string `json:"contains"`
+	Reason   string   `json:"reason"`
+	History  string   `json:"history,omitempty"`
+}
+
+// matches reports whether one record carries every one of the optional record's substrings.
+func (o optionalRecord) matches(record string) bool {
+	for _, substring := range o.Contains {
+		if !strings.Contains(record, substring) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // disclosureHalf is one reason of a two-half entry (testDisclosure.Halves): the class, signature,
@@ -8785,6 +9006,9 @@ func readTestDisclosureManifest(outputPath string) (map[string]testDisclosure, [
 		}
 		if disclosure.Records > 0 && disclosure.Class == hostFatalClass {
 			return nil, nil, fmt.Errorf("disclosure %s pins %d record(s), but a %s test is withdrawn from both sides and logs nothing to count", disclosure.Name, disclosure.Records, hostFatalClass)
+		}
+		if err := validateOptionalRecords(disclosure); err != nil {
+			return nil, nil, err
 		}
 
 		// The retirement fields' rules (the deferred contract, the floor, the structural refusal of a
@@ -9350,6 +9574,89 @@ func nonSignatureRecords(records []string, signatures ...string) []string {
 	return others
 }
 
+// validateOptionalRecords holds an entry's optional records to what they can honestly mean
+// (testDisclosure.OptionalRecords): each adjusts a record-count pin, so an unpinned entry has nothing
+// for it to adjust; it names a field AND a failure text, so it carries at least two substrings, none
+// empty; it is rendered, so it has a reason; and it must be able to absorb only a record of its own,
+// so it is not the same optional twice, and not one the signature's own record already satisfies.
+func validateOptionalRecords(disclosure testDisclosure) error {
+	if len(disclosure.OptionalRecords) == 0 {
+		return nil
+	}
+
+	if disclosure.Records <= 0 {
+		return fmt.Errorf("disclosure %s names optional records but has no record-count pin: an optional record adjusts the pin, and an unpinned entry has nothing to adjust", disclosure.Name)
+	}
+
+	seen := hashset.HashSet[string]{}
+
+	for i, optional := range disclosure.OptionalRecords {
+		if len(optional.Contains) < 2 {
+			return fmt.Errorf("disclosure %s optional record %d carries %d substring(s), and needs at least two: the field and its failure text, so no other record about the field can be absorbed", disclosure.Name, i+1, len(optional.Contains))
+		}
+
+		for _, substring := range optional.Contains {
+			if substring == "" {
+				return fmt.Errorf("disclosure %s optional record %d has an empty substring, which every record contains", disclosure.Name, i+1)
+			}
+		}
+
+		if strings.TrimSpace(optional.Reason) == "" {
+			return fmt.Errorf("disclosure %s optional record %d requires a reason: the proof page states it", disclosure.Name, i+1)
+		}
+
+		sorted := append([]string{}, optional.Contains...)
+		sort.Strings(sorted)
+
+		if !seen.Add(strings.Join(sorted, "\x00")) {
+			return fmt.Errorf("disclosure %s names optional record %q twice", disclosure.Name, optional.Contains)
+		}
+
+		for _, signature := range disclosure.signatures() {
+			if signature != "" && optional.matches(signature) {
+				return fmt.Errorf("disclosure %s optional record %q is satisfied by the signature's own record (%q), so it could absorb the record the signature pins", disclosure.Name, optional.Contains, signature)
+			}
+		}
+	}
+
+	return nil
+}
+
+// optionalRecordsMatched answers how many of an entry's optional records the C# record list carries,
+// or a failure text. Each optional record absorbs AT MOST one record, outside the signature, and two
+// optional records never share one.
+func optionalRecordsMatched(disclosure testDisclosure, records []string) (int, string) {
+	if len(disclosure.OptionalRecords) == 0 {
+		return 0, ""
+	}
+
+	signatures := disclosure.signatures()
+	used := map[int]bool{}
+	matched := 0
+
+	for _, optional := range disclosure.OptionalRecords {
+		var candidates []int
+
+		for i, record := range records {
+			if len(nonSignatureRecords([]string{record}, signatures...)) == 1 && optional.matches(record) {
+				candidates = append(candidates, i)
+			}
+		}
+
+		switch {
+		case len(candidates) > 1:
+			return 0, fmt.Sprintf("%d records match optional record %q, which absorbs at most one", len(candidates), optional.Contains)
+		case len(candidates) == 1 && used[candidates[0]]:
+			return 0, fmt.Sprintf("optional record %q matches a record another optional record already absorbed", optional.Contains)
+		case len(candidates) == 1:
+			used[candidates[0]] = true
+			matched++
+		}
+	}
+
+	return matched, ""
+}
+
 // recordPinFailure answers "" when a disclosure's record-count pin holds for the named test's C#
 // terminal event, or the mismatch text that names the records outside the signature. An unpinned
 // entry (Records == 0) always holds, and so does every entry when csRecords is nil, the legacy entry
@@ -9367,11 +9674,21 @@ func recordPinFailure(name string, disclosure testDisclosure, csRecords map[stri
 		return fmt.Sprintf("%s: the %s disclosure pins %d log record(s), but the C# terminal event carries no record list", name, disclosure.classLabel(), disclosure.Records)
 	}
 
-	if records.Dropped == 0 && len(records.Records) == disclosure.Records {
+	optionalMatched, optionalFailure := optionalRecordsMatched(disclosure, records.Records)
+
+	if records.Dropped == 0 && optionalFailure == "" && len(records.Records)-optionalMatched == disclosure.Records {
 		return ""
 	}
 
 	text := fmt.Sprintf("%s: C# logged %d record(s) where the %s disclosure pins %d", name, len(records.Records), disclosure.classLabel(), disclosure.Records)
+
+	if len(disclosure.OptionalRecords) > 0 {
+		text += fmt.Sprintf(" plus at most %d optional", len(disclosure.OptionalRecords))
+	}
+
+	if optionalFailure != "" {
+		text += "; " + optionalFailure
+	}
 
 	if records.Dropped > 0 {
 		text += fmt.Sprintf(", and the host's log cap dropped %d more", records.Dropped)

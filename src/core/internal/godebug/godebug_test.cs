@@ -21,9 +21,12 @@ using godebug = go.@internal.godebug_package;
 partial class godebug_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fooˢ = "#foo"u8;
-private static readonly @string loooooooongˢ = "#loooooooong"u8;
-private static readonly @string godebugˢ = "GODEBUG"u8;
+private static ref readonly @string fooˢ => ref fooˢᵇ;
+private static readonly @string fooˢᵇ = "#foo"u8;
+private static ref readonly @string loooooooongˢ => ref loooooooongˢᵇ;
+private static readonly @string loooooooongˢᵇ = "#loooooooong"u8;
+private static ref readonly @string godebugˢ => ref godebugˢᵇ;
+private static readonly @string godebugˢᵇ = "GODEBUG"u8;
 
 internal partial struct TestGet_tests /*dyn*/ {
     internal @string godebug;
@@ -31,35 +34,36 @@ internal partial struct TestGet_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestGet(ж<testing.T> Ꮡt) {
+public static void TestGet(ж<testing.T> t) {
     var foo = New(fooˢ);
-    var tests = new TestGet_tests[]{
-        new(""u8, New("#"u8), ""u8),
-        new(""u8, foo, ""u8),
-        new("foo=bar"u8, foo, "bar"u8),
-        new("foo=bar,after=x"u8, foo, "bar"u8),
-        new("before=x,foo=bar,after=x"u8, foo, "bar"u8),
-        new("before=x,foo=bar"u8, foo, "bar"u8),
-        new(",,,foo=bar,,,"u8, foo, "bar"u8),
-        new("foodecoy=wrong,foo=bar"u8, foo, "bar"u8),
-        new("foo="u8, foo, ""u8),
-        new("foo"u8, foo, ""u8),
-        new(",foo"u8, foo, ""u8),
-        new("foo=bar,baz"u8, New(loooooooongˢ), ""u8)
-    }.slice();
+    var tests = slice<TestGet_tests>([
+        new("", New("#"), ""),
+        new("", foo, ""),
+        new("foo=bar", foo, "bar"),
+        new("foo=bar,after=x", foo, "bar"),
+        new("before=x,foo=bar,after=x", foo, "bar"),
+        new("before=x,foo=bar", foo, "bar"),
+        new(",,,foo=bar,,,", foo, "bar"),
+        new("foodecoy=wrong,foo=bar", foo, "bar"),
+        new("foo=", foo, ""),
+        new("foo", foo, ""),
+        new(",foo", foo, ""),
+        new("foo=bar,baz", New(loooooooongˢ), "")
+    ]);
     foreach (var (_, tt) in tests) {
-        Ꮡt.Setenv(godebugˢ, tt.godebug);
+        t.Setenv(godebugˢ, tt.godebug);
         @string got = tt.setting.Value();
         if (got != tt.want) {
-            Ꮡt.Errorf("get(%q, %q) = %q; want %q"u8, tt.godebug, tt.setting.Name(), got, tt.want);
+            t.Errorf("get(%q, %q) = %q; want %q", tt.godebug, tt.setting.Name(), got, tt.want);
         }
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static readonly @string nameᶜ = "http2client"u8;
+private static ref readonly @string nameᶜ => ref nameᶜᵇ;
+private static readonly @string nameᶜᵇ = "http2client"u8;
 
-public static void TestMetrics(ж<testing.T> Ꮡt) {
+public static void TestMetrics(ж<testing.T> t) {
     @string name = nameᶜ; // must be a real name so runtime will accept it
 
     array<metrics.Sample> m = new(1);
@@ -67,7 +71,7 @@ public static void TestMetrics(ж<testing.T> Ꮡt) {
     metrics.Read(m[..]);
     {
         metrics.ValueKind kind = m[0].Value.Kind(); if (kind != metrics.KindUint64) {
-            Ꮡt.Fatalf("NonDefault kind = %v, want uint64"u8, kind);
+            t.Fatalf("NonDefault kind = %v, want uint64", kind);
         }
     }
 
@@ -79,40 +83,46 @@ public static void TestMetrics(ж<testing.T> Ꮡt) {
     metrics.Read(m[..]);
     {
         metrics.ValueKind kind = m[0].Value.Kind(); if (kind != metrics.KindUint64) {
-            Ꮡt.Fatalf("NonDefault kind = %v, want uint64"u8, kind);
+            t.Fatalf("NonDefault kind = %v, want uint64", kind);
         }
     }
     {
         var count = m[0].Value.Uint64(); if (count != 3) {
-            Ꮡt.Fatalf("NonDefault value = %d, want 3"u8, count);
+            t.Fatalf("NonDefault value = %d, want 3", count);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object skippingTestIntendedForˢ = (@string)"Skipping test intended for use with -race."u8;
-private static readonly @string testRunTestPanicNilRaceˢ = "-test.run=^TestPanicNilRace$"u8;
-private static readonly @string testVˢ = "-test.v"u8;
-private static readonly @string testParallel2ˢ = "-test.parallel=2"u8;
-private static readonly @string testCount1ˢ = "-test.count=1"u8;
-private static readonly @string oneˢ = "One"u8;
-private static readonly @string twoˢ = "Two"u8;
+private static ref readonly @string testRunTestPanicNilRaceˢ => ref testRunTestPanicNilRaceˢᵇ;
+private static readonly @string testRunTestPanicNilRaceˢᵇ = "-test.run=^TestPanicNilRace$"u8;
+private static ref readonly @string testVˢ => ref testVˢᵇ;
+private static readonly @string testVˢᵇ = "-test.v"u8;
+private static ref readonly @string testParallel2ˢ => ref testParallel2ˢᵇ;
+private static readonly @string testParallel2ˢᵇ = "-test.parallel=2"u8;
+private static ref readonly @string testCount1ˢ => ref testCount1ˢᵇ;
+private static readonly @string testCount1ˢᵇ = "-test.count=1"u8;
+private static ref readonly @string oneˢ => ref oneˢᵇ;
+private static readonly @string oneˢᵇ = "One"u8;
+private static ref readonly @string twoˢ => ref twoˢᵇ;
+private static readonly @string twoˢᵇ = "Two"u8;
 
 // TestPanicNilRace checks for a race in the runtime caused by use of runtime
 // atomics (not visible to usual race detection) to install the counter for
 // non-default panic(nil) semantics.  For #64649.
-public static void TestPanicNilRace(ж<testing.T> Ꮡt) {
+public static void TestPanicNilRace(ж<testing.T> t) {
     if (!race.Enabled) {
-        Ꮡt.Skip(skippingTestIntendedForˢ);
+        t.Skip(skippingTestIntendedForˢ);
     }
     if (os.Getenv(godebugˢ) != "panicnil=1"u8) {
-        var cmd = testenv.CleanCmdEnv(testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), testRunTestPanicNilRaceˢ, testVˢ, testParallel2ˢ, testCount1ˢ));
-        cmd.Value.Env = append((~cmd).Env, "GODEBUG=panicnil=1"u8);
+        var cmd = testenv.CleanCmdEnv(testenv.Command(new testing_TжTB(t), testenv.Executable(new testing_TжTB(t)), testRunTestPanicNilRaceˢ, testVˢ, testParallel2ˢ, testCount1ˢ));
+        cmd.Env = append(cmd.Env, (@string)"GODEBUG=panicnil=1");
         var (@out, err) = cmd.CombinedOutput();
-        Ꮡt.Logf("output:\n%s"u8, @out);
+        t.Logf("output:\n%s", @out);
 
-        if (err != default!) {
-            Ꮡt.Errorf("Was not expecting a crash"u8);
+        if (err != nil) {
+            t.Errorf("Was not expecting a crash");
         }
         return;
     }
@@ -124,44 +134,50 @@ public static void TestPanicNilRace(ж<testing.T> Ꮡt) {
             defer(() => {
                 recover();
             }, ref ᒐ);
-            throw panic(default!);
+            throw panic(default);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     };
-    Ꮡt.Run(oneˢ, test);
-    Ꮡt.Run(twoˢ, test);
+    t.Run(oneˢ, test);
+    t.Run(twoˢ, test);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string runˢ = "run"u8;
-private static readonly @string cmdVendorGolangOrgXToolsˢ = "cmd/vendor/golang.org/x/tools/cmd/bisect"u8;
-private static readonly @string godebugBuggy1Patternˢ = "GODEBUG=buggy=1#PATTERN"u8;
-private static readonly @string testRunˢ = "-test.run=^TestBisectTestCase$"u8;
-private static readonly @string godebugTestGoˢ = "godebug_test.go"u8;
-private static readonly @string godebugTestGoˢ2 = "godebug_test.go:"u8;
+private static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
+private static ref readonly @string cmdVendorGolangOrgXToolsˢ => ref cmdVendorGolangOrgXToolsˢᵇ;
+private static readonly @string cmdVendorGolangOrgXToolsˢᵇ = "cmd/vendor/golang.org/x/tools/cmd/bisect"u8;
+private static ref readonly @string godebugBuggy1Patternˢ => ref godebugBuggy1Patternˢᵇ;
+private static readonly @string godebugBuggy1Patternˢᵇ = "GODEBUG=buggy=1#PATTERN"u8;
+private static ref readonly @string testRunˢ => ref testRunˢᵇ;
+private static readonly @string testRunˢᵇ = "-test.run=^TestBisectTestCase$"u8;
+private static ref readonly @string godebugTestGoˢ => ref godebugTestGoˢᵇ;
+private static readonly @string godebugTestGoˢᵇ = "godebug_test.go"u8;
+private static ref readonly @string godebugTestGoˢ2 => ref godebugTestGoˢ2ᵇ;
+private static readonly @string godebugTestGoˢ2ᵇ = "godebug_test.go:"u8;
 
-public static void TestCmdBisect(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new testing_TжTB(Ꮡt));
-    var (@out, err) = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), runˢ, cmdVendorGolangOrgXToolsˢ, godebugBuggy1Patternˢ, os.Args[0], testRunˢ).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("exec bisect: %v\n%s"u8, err, @out);
+public static void TestCmdBisect(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new testing_TжTB(t));
+    var (@out, err) = exec.Command(testenv.GoToolPath(new testing_TжTB(t)), runˢ, cmdVendorGolangOrgXToolsˢ, godebugBuggy1Patternˢ, os.Args[0], testRunˢ).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("exec bisect: %v\n%s", err, @out);
     }
 
-    slice<@string> want = default!;
+    slice<@string> want = default;
     (var src, err) = os.ReadFile(godebugTestGoˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    foreach (var (i, line) in strings.Split((@string)src, "\n"u8)) {
+    foreach (var (i, line) in strings.Split((@string)src, "\n")) {
         if (strings.Contains(line, "BISECT"u8 + " "u8 + "BUG"u8)) {
             want = append(want, fmt.Sprintf("godebug_test.go:%d"u8, i + 1));
         }
     }
     slices.Sort<slice<@string>, @string>(want);
 
-    slice<@string> have = default!;
-    foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
+    slice<@string> have = default;
+    foreach (var (_, line) in strings.Split((@string)@out, "\n")) {
         if (strings.Contains(line, godebugTestGoˢ2)) {
             have = append(have, line.slice(strings.LastIndex(line, godebugTestGoˢ2)));
         }
@@ -169,12 +185,13 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     slices.Sort<slice<@string>, @string>(have);
 
     if (!slices.Equal<slice<@string>, @string>(have, want)) {
-        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, (@string)@out);
+        t.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s", have, want, (@string)@out);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string buggyˢ = "#buggy"u8;
+private static ref readonly @string buggyˢ => ref buggyˢᵇ;
+private static readonly @string buggyˢᵇ = "#buggy"u8;
 private static readonly object bugˢ = (@string)"bug"u8;
 
 // This test does nothing by itself, but you can run
@@ -183,7 +200,7 @@ private static readonly object bugˢ = (@string)"bug"u8;
 //
 // to see that the GODEBUG bisect support is working.
 // TestCmdBisect above does exactly that.
-public static void TestBisectTestCase(ж<testing.T> Ꮡt) {
+public static void TestBisectTestCase(ж<testing.T> t) {
     var s = New(buggyˢ);
     for (nint i = 0; i < 10; i++) {
         var a = s.Value() == "1"u8;
@@ -193,27 +210,31 @@ public static void TestBisectTestCase(ж<testing.T> Ꮡt) {
         var e = s.Value() == "1"u8; // BISECT BUG
 
         if (a) {
-            Ꮡt.Log((@string)"ok"u8);
+            t.Log((@string)"ok");
         }
         if (b) {
-            Ꮡt.Log((@string)"ok"u8);
+            t.Log((@string)"ok");
         }
         if (c) {
-            Ꮡt.Error(bugˢ);
+            t.Error(bugˢ);
         }
         if (d && e) {
-            Ꮡt.Error(bugˢ);
+            t.Error(bugˢ);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fips140ˢ = "fips140"u8;
-private static readonly @string fips140Offˢ = "fips140=off"u8;
-private static readonly @string fips140Onˢ = "fips140=on"u8;
-private static readonly @string fips140ˢ2 = "fips140="u8;
+private static ref readonly @string fips140ˢ => ref fips140ˢᵇ;
+private static readonly @string fips140ˢᵇ = "fips140"u8;
+private static ref readonly @string fips140Offˢ => ref fips140Offˢᵇ;
+private static readonly @string fips140Offˢᵇ = "fips140=off"u8;
+private static ref readonly @string fips140Onˢ => ref fips140Onˢᵇ;
+private static readonly @string fips140Onˢᵇ = "fips140=on"u8;
+private static ref readonly @string fips140ˢ2 => ref fips140ˢ2ᵇ;
+private static readonly @string fips140ˢ2ᵇ = "fips140="u8;
 
-public static void TestImmutable(ж<testing.T> Ꮡt) {
+public static void TestImmutable(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer((@string godebug) => {
@@ -225,22 +246,22 @@ public static void TestImmutable(ж<testing.T> Ꮡt) {
 
         os.Setenv(godebugˢ, fips140Offˢ);
         if (setting.Value() != value) {
-            Ꮡt.Errorf("Value() changed after setting GODEBUG=fips140=off"u8);
+            t.Errorf("Value() changed after setting GODEBUG=fips140=off");
         }
 
         os.Setenv(godebugˢ, fips140Onˢ);
         if (setting.Value() != value) {
-            Ꮡt.Errorf("Value() changed after setting GODEBUG=fips140=on"u8);
+            t.Errorf("Value() changed after setting GODEBUG=fips140=on");
         }
 
         os.Setenv(godebugˢ, fips140ˢ2);
         if (setting.Value() != value) {
-            Ꮡt.Errorf("Value() changed after setting GODEBUG=fips140="u8);
+            t.Errorf("Value() changed after setting GODEBUG=fips140=");
         }
 
         os.Setenv(godebugˢ, ""u8);
         if (setting.Value() != value) {
-            Ꮡt.Errorf("Value() changed after setting GODEBUG="u8);
+            t.Errorf("Value() changed after setting GODEBUG=");
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

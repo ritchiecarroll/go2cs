@@ -45,7 +45,7 @@ using static go.maps_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +55,8 @@ using static go.maps_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("maps/iter.go", "iter.cs", "AAkY0oKCggAFEtKCgoIABRLSgoKCAAUQwoK8ooKC", "13-19:1;26-32:1;39-45:1")]
-[assembly: go.GoPositionMap("maps/maps.go", "maps.cs", "AA4i0oKUgoCCtqrSgpSCgIK2rOjUgpSu8oK6soKC")]
+[assembly: GoPositionMap("maps/iter.go", "iter.cs", "AAkY0oKCggAFEtKCgoIABRLSgoKCAAUQwoK8ooKC", "13-19:1;26-32:1;39-45:1")]
+[assembly: GoPositionMap("maps/maps.go", "maps.cs", "AA4i0oKUgoCCtqrSgpSCgIK2rOjUgpSu8oK6soKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

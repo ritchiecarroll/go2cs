@@ -77,7 +77,7 @@ const CapturedVarMarker = "\u0297"               // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"                   // Variants: ᴛ Ŧ ᵀ
 const HoistedLiteralMarker = "\u02E2"            // Suffix of a hoisted string-literal field name (trueˢ). Variants: ˢ ˢˢ
 const HoistedConstMarker = "\u1D9C"              // Suffix of a hoisted function-local constant field name: a big constant (maskᶜ) or a string constant (fnAtoiᶜ). Variants: ᶜ ᶜᶜ
-const StaticBackingFieldMarker = "\u1D47"        // Suffix of the private backing field behind a struct-typed static read through a same-named ref readonly accessor (trueË¢áµ, seat #53). Variants: áµ
+const StaticBackingFieldMarker = "\u1D47"        // Suffix of the private backing field behind a struct-typed static read through a same-named ref readonly accessor (trueˢᵇ, seat #53). Variants: ᵇ
 const StackBufferMarker = "\u1D37"               // Suffix of a stack-append buffer local: var xᴷ = new stackAppend<T>(); at a function's entry, passed at x's first qualifying append, x = append(xᴷ, x, v).
 const FuncValueMarker = "\u1DA0"                 // Suffix of an sstring twin's canonical value delegate (Sprintfᶠ). Variants: ᶠ ᶠᶠ
 const TrueMarker = "\u1427"                      // Variants: ᐧ true
@@ -95,12 +95,19 @@ const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var 
 // punctuation character: legal in C#, illegal in Go).
 const MapWrapperSet = "Set\u203F"
 
-// FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Ꮡf‿`: the
-// `static readonly FieldRefFunc<T, F>` the TypeGenerator emits beside the field's `Ꮡf` accessor, which
+// FieldAccessTokenSuffix ends the name of a struct field's ONE accessor token, `T.Field‿Tokens.Ꮡf‿`:
+// the `static readonly FieldRefFunc<T, F>` the TypeGenerator emits for the field's `Ꮡf` accessor, which
 // the generated `p.Ꮡf` property (`&p.f`, parity seat #32) hands golib's view cache, so every site in
 // every assembly passes one delegate object and the cache compares by reference. U+203F keeps the
 // name out of reach of every Go field's accessor, as MapWrapperSet's door does.
 const FieldAccessTokenSuffix = "\u203F"
+
+// FieldAccessTokenHolder names the nested static class that holds a struct's field accessor tokens. Native
+// AOT names a preinitialized object by its owning type and then an allocation number, with no separator, so
+// tokens held on the struct itself let `IfmaMsghdr` + 23 meet `IfmaMsghdr2` + 3 (darwin's syscall). The
+// holder's name ends in a letter, so no type name runs into a number, and U+203F keeps it out of reach of
+// every Go identifier.
+const FieldAccessTokenHolder = "Field\u203FTokens"
 const PointerDerefOp = "~" // Example: `~ptr` for dereferencing a pointer
 
 // NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a

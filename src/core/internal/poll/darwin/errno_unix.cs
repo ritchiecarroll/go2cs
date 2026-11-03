@@ -17,19 +17,19 @@ internal static error errENOENT = ((Δsyscall.Errno)Δsyscall.ENOENT);
 // errnoErr returns common boxed Errno values, to prevent
 // allocations at runtime.
 internal static error errnoErr(Δsyscall.Errno e) {
-    var exprᴛ1 = e;
-    if (exprᴛ1 == (Δsyscall.Errno)(0)) {
-        return default!;
+    switch (e) {
+    case var ᴛ when ᴛ == (Δsyscall.Errno)(0): {
+        return default;
     }
-    if (exprᴛ1 == Δsyscall.EAGAIN) {
+    case var ᴛ when ᴛ == Δsyscall.EAGAIN: {
         return errEAGAIN;
     }
-    if (exprᴛ1 == Δsyscall.EINVAL) {
+    case var ᴛ when ᴛ == Δsyscall.EINVAL: {
         return errEINVAL;
     }
-    if (exprᴛ1 == Δsyscall.ENOENT) {
+    case var ᴛ when ᴛ == Δsyscall.ENOENT: {
         return errENOENT;
-    }
+    }}
     return e;
 }
 

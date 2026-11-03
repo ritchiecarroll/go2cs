@@ -12,11 +12,11 @@ using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
 
-internal static slice<byte> src = readFile("../printer/nodes.go"u8);
+internal static slice<byte> src = readFile("../printer/nodes.go");
 
 internal static slice<byte> readFile(@string filename) {
     var (data, err) = os.ReadFile(filename);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
     return data;
@@ -28,8 +28,8 @@ public static void BenchmarkParse(ж<testing.B> Ꮡb) {
     b.SetBytes((int64)len(src));
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments); if (err != default!) {
-                Ꮡb.Fatalf("benchmark failed due to parse error: %s"u8, err);
+            var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments); if (err != nil) {
+                Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
             }
         }
     }
@@ -41,8 +41,8 @@ public static void BenchmarkParseOnly(ж<testing.B> Ꮡb) {
     b.SetBytes((int64)len(src));
     for (nint i = 0; i < b.N; i++) {
         {
-            var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution)); if (err != default!) {
-                Ꮡb.Fatalf("benchmark failed due to parse error: %s"u8, err);
+            var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution)); if (err != nil) {
+                Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
             }
         }
     }
@@ -56,12 +56,12 @@ public static void BenchmarkResolve(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var fset = token.NewFileSet();
         var (@file, err) = ParseFile(fset, ""u8, src, SkipObjectResolution);
-        if (err != default!) {
-            Ꮡb.Fatalf("benchmark failed due to parse error: %s"u8, err);
+        if (err != nil) {
+            Ꮡb.Fatalf("benchmark failed due to parse error: %s", err);
         }
         b.StartTimer();
-        var handle = fset.File((~@file).Package);
-        resolveFile(ref (@file).DerefOrNull(), handle, default!);
+        var handle = fset.File(@file.Package);
+        resolveFile(ref (@file).DerefOrNull(), handle, default);
     }
 }
 

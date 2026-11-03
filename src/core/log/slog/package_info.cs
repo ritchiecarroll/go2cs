@@ -10,17 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -72,7 +63,15 @@ using static go.log.slog_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(LevelVar))]
+[assembly: GoFieldAccess(typeof(Logger))]
+[assembly: GoFieldAccess(typeof(commonHandler))]
+[assembly: GoFieldAccess(typeof(jsonEncoder))]
+[assembly: GoFieldAccess(typeof(ΔSource))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -82,15 +81,15 @@ using static go.log.slog_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/slog/attr.go", "attr.cs", "ABEkkqiSqqKokqiSqJKqoqiSAAIUAAkCAAIQ8qaCmIKClKqiqJKmgqqi")]
-[assembly: go.GoPositionMap("log/slog/handler.go", "handler.cs", "AGDIAYLcgqwACAKCgoKCkoKC1oKmggBHmAGUAAscooKClKbmgpSUkoKCgIKCgsiCgoKmppTWgoKCqvKSgoKmgoKUgoKCgoKUuIKCgoKUpoKCgpSUgoKCgpSUgoKUgoKC1sSAgoKCgoLsgoLKgoKCgoKClJSCgqaUgqa6koKUAA4egoLGou6CgpSmgoKUgIKCpKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoCCgoKmlLaCpoCCgIKClIKU2IKUypSClIKClIK4gpSmgqaCgoKUlIKUlKiSgpSCgoK0grSkpoKCgoKmgpT6wpKA3ICSgsjIgoKUlIK0pKKClLiKwoKCgoLKyICigKKAooA=", "350-355:1;586-601:1", "", "210=Clip/1/2/3,Clip/2/2/5;427=New/1/1/5")]
-[assembly: go.GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAj4AHgLYsoCmpIKCpqKUpKTagILGtqSkgoKAgpTGlAAIEpSmgoK4woKUkoKUgqaAgraCggAKENKAkoCkgoKAgoKClIKUgpS0tLTGgoKkgoKkgoKClIKCggAIEoKClIKCgoKUlIKUAAwa", "159-167:1;184-184:1;185-185:2")]
-[assembly: go.GoPositionMap("log/slog/level.go", "level.cs", "ADV2AAkCgoKUgoKUppSkpKS82AACENKCgpSqoqqiAAIQ0tbSgoK4goKAgoKCgraUpKSkpJSC6qAACxiSqJKmgqqiqqKqooKAgqSC", "60-69:1;127-131:1")]
-[assembly: go.GoPositionMap("log/slog/logger.go", "logger.cs", "ABxYABgCgoKmgqiQrvLugIKSggAMGIKCgpSChJKCuIKCggAMGoKSqJCq4oKUgoIAAhIACAKClIKCqJKClKiyqJKClKyyAAIaAAwCqLKosqiyqLKosqiyqLKosqiyrNKClIKUgoKUgpSCgqiygpSClIKClIKUgoKosqiyqLKosqiyqLKosqiyqLKosg==")]
-[assembly: go.GoPositionMap("log/slog/multi_handler.go", "multi_handler.cs", "AAsasoKCAAkUgoKCpqaygoKCgILIpoKCgpSmgoKClA==")]
-[assembly: go.GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAgOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAQW4pSClKa2ABQowoKClIKUgpSosKrSgqaCgg==")]
-[assembly: go.GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABo40oKUAAkYoqqipoIAAkoAJAKmopSkpICCgoKmgqSAlIKkpJSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
-[assembly: go.GoPositionMap("log/slog/value.go", "value.cs", "ADt8AA8agoKUAAYQkpSkxKSkpLS+sqiSqJKokqiSqJKCgpQACRyiypSCgpS4qJKq+ICCgoKCpqSokoKCgqYAAiQADwKUpKSkpKSkpKSkpKSkpKSkpKSkpLS+spSAgqSkpKSkpKSkpKSkvrKAgqSCpoKqooCSpKqigJKkqqKAkqSmgqqigJK2poKqooCStqaCqqKAkqSokpSClKS0zKKqooCCpKaCrLKCgoKUlKSkpKSkpLqSgsqqopSkpKSkpKSkpKQADSoACgKCgoCCyIKClJSCAAkGgoKCgpSCgoKCgoKClIKCgqY=", "502-506:1")]
+[assembly: GoPositionMap("log/slog/attr.go", "attr.cs", "ABEkkqiSqqKokqiSqJKqoqiSAAIUAAkCAAIQ8qaCmIKClKqiqJKmgqqi")]
+[assembly: GoPositionMap("log/slog/handler.go", "handler.cs", "AGDIAYLcgqwACAKCgoKCgoKC1oKmggBLmAGUAAscooKClKbmgpSUgoKCgIKCgsiCgoKmppTWgoKCqvKCgoKmgoKUgoKCgoKUuIKCgoKUpoKCgpSUgoKCgpSUgoKUgoKC1sSAgoKCgoLsgoLKgoKCgoKClJSCgqaUgqa6koKUAA4egoLGou6CgpSmgoKUgIKCpKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoCCgoKmlLaCpoCCgIKClIKU2IKUypSClIKClIK4gpSmgqaCgoKUlIKUlKiSgpSCgoK0grSkpoKCgoKmgpQACArCkoDcgIKCyMiCgpSUgrSkooKUuIrCgoKCgsrIgKKAooCigA==", "350-355:1;586-601:1", "", "213=Clip/1/2/3,Clip/2/2/5;428=New/1/1/5")]
+[assembly: GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAj4AHgLosoCmpIKCpqKUtLTqgILWxrS0goKAgpTWpAAIEpSmgoK4woKUkoKUgqaAgraCggANENKAkoCkgoKAgoKClIKUgpS0tLTGgoKkgoKkgoKClIKCggAIEoKClIKCgoKUlIKUAA0a", "159-167:1;184-184:1;185-185:2")]
+[assembly: GoPositionMap("log/slog/level.go", "level.cs", "ADl2AAkCgoKUgoKUppSkpKS82AACENKCgpSqoqqiAAIQ0ubSgoK4goKAgoKCgraktLS0tJSC6qAACxiSqJKmgqqiqqKqooKAgqSC", "60-69:1;127-131:1")]
+[assembly: GoPositionMap("log/slog/logger.go", "logger.cs", "ABxYABgCgoKmgqiQrvLugIKCggAMGIKCgpSChJKCuIKCggAMGoKCqJCq4oKUgoIAAhIACAKClIKCqJKClKiyqJKClKyyAAIaAAwCqLKosqiyqLKosqiyqLKosqiyrNKClIKUgoKUgpSCgqiygpSClIKClIKUgoKosqiyqLKosqiyqLKosqiyqLKosg==")]
+[assembly: GoPositionMap("log/slog/multi_handler.go", "multi_handler.cs", "AAsasoKCAAkUgoKCpqaygoKCgILIpoKCgpSmgoKClA==")]
+[assembly: GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAoOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAUW4pSClKa2ABcowoKClIKUgpSosKrSgqaCgg==")]
+[assembly: GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABo40oKUAAkYoqqipoIAAkoAJAKmopS0tICCgoKmgqSAlIKktKSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
+[assembly: GoPositionMap("log/slog/value.go", "value.cs", "ADt8ABAagoKUAAYQkpSkxKSkpLS+sqiSqJKokqiSqJKCgpQACRyiypSCgpS4qJKq+ICCgoKCpqSokoKCgqYAAiQADwKUpKSkpKSkpKSkpKSkpKSkpKSkpLS+spSAgqSkpKSkpKSkpKSkzrKAgqSCpoKqooCSpKqigJKkqqKAkqSmgqqigJK2poKqooCStqaCqqKAkqSokpSClKS0zKKqooCCpKaCrLKCgoKUlKSkpKSkpMqSgsqqopSkpKSkpKSkpKQADioACgKCgoCCyIKClJSCAAoGgoKCgpSCgoKCgoKClIKCgqY=", "502-506:1")]
 // </GoSourcePositionMaps>
 
 namespace go.log;

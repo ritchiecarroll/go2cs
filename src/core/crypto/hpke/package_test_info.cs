@@ -7,18 +7,7 @@
 global using static global::go.crypto.hpke_package;
 
 // <ImportedTypeAliases>
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
 global using ecdhꓸCurve = go.crypto.ecdh_package.ΔCurve;
-global using ecdhꓸPublicKey = go.crypto.ecdh_package.ΔPublicKey;
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +29,13 @@ using static global::go.crypto.hpke_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.crypto.hpke_package.dhKEMPrivateKey))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.hpke_package.hybridPublicKey))]
+[assembly: GoFieldAccess(typeof(global::go.crypto.hpke_package.mlkemPublicKey))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -50,7 +45,7 @@ using static global::go.crypto.hpke_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/hpke/hpke_test.go", "hpke_test.cs", "ABcqypaogoKClIKokoKCgqaCgoKmuIKCgpQAEw6CAAEWnqyCsoKClIKClIKClICCkoKkgoKUgIK2gtKC0oKClIKClIKmgoKUgoKCpoKClIKClILugoKCgpSUgoKCgsqCgoKClIKUgoKCgpSClIKmgoKClJSCgoKClIKUgoKCgpSClIKCgoKUgpSCAAgSgoKCgpTmgoKUggAqCIKCgpQAADiAgraylJKClIKUgpSCpoKClIKmgoKUgqaCgpSCpoKCgpSClIKmgpSCgoKUgqaCgqaCgoKUgpSCgqaClIKCgpSCgpSClIKmgqaCgoKUgoKUgpSCpoKCpoKCgoKCgpSCgoKUgqaCgoKCpIKCgoKUgoKUgqaCgpSCuICCpICCyIKCgoKCgpSCgoKUgqaCgoKCpoKClIKClIKmgoKUggAHEIKCgoCCpIKCgIKkpoKCgpSUgoKUuIKigoKUtoKigoKUtoKCgoKUlqKCgpTagoKCgpSWooKClLaCgoKClJaigoKUtgAVCIKClIKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSC", "98-245:1;125-243:1.1;127-241:1.1.1;166-173:1.1.1.1;174-181:1.1.1.2;259-261:1;262-264:2;307-530:1;549-552:1;559-561:2;564-570:3;573-579:4;587-589:5;590-596:6;606-608:7;609-615:8;623-625:9;626-632:10", "", "87=P256/1/1/1,DHKEM/1/4/1,P384/1/1/2,DHKEM/2/4/2,P521/1/1/3,DHKEM/3/4/3,X25519/1/1/4,DHKEM/4/4/4,MLKEM768/1/1/5,MLKEM1024/1/1/6,MLKEM768P256/1/1/7,MLKEM1024P384/1/1/8,MLKEM768X25519/1/1/9;89=HKDFSHA256/1/1/1,HKDFSHA384/1/1/2,HKDFSHA512/1/1/3,SHAKE128/1/1/4,SHAKE256/1/1/5;91=AES128GCM/1/1/1,AES256GCM/1/1/2,ChaCha20Poly1305/1/1/3")]
+[assembly: GoPositionMap("crypto/hpke/hpke_test.go", "hpke_test.cs", "ABcqypaogoKClIKokoKCgqaCgoKmuIKCgpQAHg6CAAEWnqyCsoKClIKClIKClICCgoKkgoKUgIK2gtKC0oKClIKClIKmgoKUgoKCpoKClIKClILugoKCgpSUgoKCgsqCgoKClIKUgoKCgpSClIKmgoKClJSCgoKClIKUgoKCgpSClIKCgoKUgpSCAAgSgoKCgpQACAaCgpSCACoIgoKClAAAOICCtrKUkoKUgpSClIKmgoKUgqaCgpSCpoKClIKmgoKClIKUgqaClIKCgpSCpoKCpoKCgpSClIKCpoKUgoKClIKClIKUgqaCpoKCgpSCgpSClIKmgoKmgoKCgoKClIKCgpSCpoKCgoKUgoKCgpSCgpSCpoKClIK4gIKkgILIgoKCgoKClIKCgpSCpoKCgoKmgoKUgoKUgqaCgpSCAAcQgoKCgIKkgoKAgqSmgoKClJSCgpTIgqKCgpTGgqKCgpTGgoKCgpSWooKClOqCgoKClJaigoKUxoKCgoKUlqKCgpTGABYIgoKUgpSClIKUgpSClIKUgpSClIKUgpSClIKUgpSClII=", "98-245:1;125-243:1.1;127-241:1.1.1;166-173:1.1.1.1;174-181:1.1.1.2;259-261:1;262-264:2;307-530:1;549-552:1;559-561:2;564-570:3;573-579:4;587-589:5;590-596:6;606-608:7;609-615:8;623-625:9;626-632:10", "", "98=P256/1/1/1,DHKEM/1/4/1,P384/1/1/2,DHKEM/2/4/2,P521/1/1/3,DHKEM/3/4/3,X25519/1/1/4,DHKEM/4/4/4,MLKEM768/1/1/5,MLKEM1024/1/1/6,MLKEM768P256/1/1/7,MLKEM1024P384/1/1/8,MLKEM768X25519/1/1/9;100=HKDFSHA256/1/1/1,HKDFSHA384/1/1/2,HKDFSHA512/1/1/3,SHAKE128/1/1/4,SHAKE256/1/1/5;102=AES128GCM/1/1/1,AES256GCM/1/1/2,ChaCha20Poly1305/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

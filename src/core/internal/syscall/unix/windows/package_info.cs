@@ -45,7 +45,7 @@ using static go.@internal.syscall.unix_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,8 +55,8 @@ using static go.@internal.syscall.unix_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_ge.go", "kernel_version_ge.cs", "AAcSopQ=")]
-[assembly: go.GoPositionMap("internal/syscall/unix/kernel_version_other.go", "kernel_version_other.cs", "AAgSgg==")]
+[assembly: GoPositionMap("internal/syscall/unix/kernel_version_ge.go", "kernel_version_ge.cs", "AAcSopQ=")]
+[assembly: GoPositionMap("internal/syscall/unix/kernel_version_other.go", "kernel_version_other.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;

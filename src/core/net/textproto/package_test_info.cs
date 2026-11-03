@@ -7,14 +7,6 @@
 global using static global::go.net.textproto_package;
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
-global using reflectꓸKind = go.reflect_package.ΔKind;
-global using reflectꓸMethod = go.reflect_package.ΔMethod;
-global using reflectꓸType = go.reflect_package.ΔType;
-global using reflectꓸValue = go.reflect_package.ΔValue;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -39,7 +31,11 @@ using static global::go.net.textproto_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.net.textproto_package.ΔError))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -49,9 +45,9 @@ using static global::go.net.textproto_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/textproto/header_test.go", "header_test.cs", "AA4aABYugoKAggAIDJKmgoKC")]
-[assembly: go.GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABUogtaCgoKClIKClIKCuIKCgoKClILogoKCgpSCgpSCgpSCguiCgoKClIKClIKClICCpIKC6IKCgoKCpoKCguiCgoKCgqaCgoLogoKCuILogoKCgoIACAyiABYygoKC+oKCgoKC6IKCgpSCgoKClIKCvLSKgu6CuKIADRyCgoCC2qKCgoKClLS0tMa0pIKCpoKCgoKUtLS0pIKCzOiegoKUyoK6koKCgoKSgoKClIK4gIIACBCApJTKgpSmgoIAChYAGTqSgoKCgoKUgpSC/JKcnJSCgpSClIKUguiCgoKCpoKCkoCCtoLo3ILKgqSUppSCuAAOGgASGKKC7pKCgpSCgoCCAAwOooKCgoKCgoKClICC", "359-364:1;465-469:1;488-491:1;536-547:1", "", "411=NewReader/1/3/2,MultiReader/1/1/1")]
-[assembly: go.GoPositionMap("net/textproto/writer_test.go", "writer_test.cs", "ABAagoKCgoCC+IKCgoKCgpSCgoCCyIKCgoKCgpSCgoCCyIKCgoKCgoCC")]
+[assembly: GoPositionMap("net/textproto/header_test.go", "header_test.cs", "AA4aABYugoKAggAJDJKmgoKC")]
+[assembly: GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABUoguaCgoKClIKClIKCuIKCgoKClIL4goKCgpSCgpSCgpSCgviCgoKClIKClIKClICCpIKC+IKCgoKCpoKCgviCgoKCgqaCgoL4goKCuIL4goKCgoIACAyiABYygoKCAAgKgoKCgoL4goKClIKCgoKUgoK8tIqC7oK4ggANHIKCgILagoKCgoKUtLS0xrSkgoKmgoKCgpS0tLSkgoLMyJ6CgpTKgrqSgoKCgpKCgoKUgriAggAIEICklMqClKaCggAKFgAZOpKCgoKCgpSClIIACAySnJyUgoKUgpSClIL4goKCgqaCgpKAgraC6NyCyoKklKaUgrgADhoAEhiigu6SgoKUgoKAggAODqKCgoKCgoKCgpSAgg==", "359-364:1;465-469:1;488-491:1;536-547:1", "", "414=NewReader/1/3/2,MultiReader/1/1/1")]
+[assembly: GoPositionMap("net/textproto/writer_test.go", "writer_test.cs", "ABEagoKCgoCCAAgIgoKCgoKClIKCgILIgoKCgoKClIKCgILIgoKCgoKCgII=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

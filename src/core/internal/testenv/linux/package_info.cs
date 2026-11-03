@@ -10,18 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -61,7 +51,11 @@ using static go.@internal.testenv_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -71,11 +65,11 @@ using static go.@internal.testenv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/testenv/exec.go", "exec.cs", "ABpCAAwCgIKCgpSC2ILIAAsYuMqCgpSCgq7ClIKCgoKUlKYABBKylIKCgpSCggAHFAAIAoKUpoKmgpSUAAsWAAoCgpSqgIiApoKAgoKClNqCgIIADBiUgLj6gqLc3JSUlKKClIK4qsKC", "206-222:1;225-232:2")]
-[assembly: go.GoPositionMap("internal/testenv/opt.go", "opt.cs", "AAgUkg==")]
-[assembly: go.GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "ACtGAAQWAAkC2qLKprbcgoKUgoKCgpSCgpSAgrYACBKCgoKCgpSCgpSCpqyygoKUgoK6pKqigoK+spSUqqKCggADEMKCgoLKgpSmkoDcAA8egoKmgoKClKaAgoK2goKCgpSUlIKCgoKUAAUa8oKCgpSClNiSgpSmnKKUgryirLKCgpSCgrqSpoKCgpSCgoKClIKClKiSgoK8ogAOIrKClIKCgpS+soKCvrKCgrqSgqqigoKCusiqooKCuJSCgoL4goCCgsqSlJSuwoKC6pKCggAKFAAIApSCgoKmlIKCgoKCpoKClIKClILKgILMoqyygpQ=")]
-[assembly: go.GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABEiwpT+goKUgpSCgIKkgIKClMg=")]
-[assembly: go.GoPositionMap("internal/testenv/testenv_unix.go", "testenv_unix.cs", "ABImgoKmgIK4yMiCpg==")]
+[assembly: GoPositionMap("internal/testenv/exec.go", "exec.cs", "ABpCAAwCgIKCgpSC2ILoAAsYuMqCgpSCgq7ClIKCgoKUlKYABBKylIKCgpSCggAJFAAIAoKUpoKmgpSUAAwWAAoCgpSqgIiApoKAgoKClNqCgIIADBiUgLj6gqLc3JSUlKKClIK4qsKC", "206-222:1;225-232:2")]
+[assembly: GoPositionMap("internal/testenv/opt.go", "opt.cs", "AAgUkg==")]
+[assembly: GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "ACtGAAUWAAkC6qLKprbcgoKUgoKCgpSCgpSAgrYACBKCgoKCgpSCgpSCpqyygoKUgoK6pKqigoK+sqSUqqKCggADEMKCgoLKgpSmkoDcAA8egoKmgoKClKaAgoK2goKCgpSUlIKCgoKUAAUa8oKCgpSClOiSgpSmnKKkgsyirLKCgpSCgrqSpoKCgpSCgoKClIKClKiSgoK8ogAOIrKClIKCgpS+soKCvrKCgrqSgqqigoKCusiqooKCuJSCgoIACAiCgIKCypKklK7CgoLqkoKCAA8UAAgClIKCgqaUgoKCgoKmgoKUgoKUgsqAgsyirLKClA==")]
+[assembly: GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABEiwqT+goKUgpSCgIKkgIKClNg=")]
+[assembly: GoPositionMap("internal/testenv/testenv_unix.go", "testenv_unix.cs", "ABImgoKmgIK4yMiCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

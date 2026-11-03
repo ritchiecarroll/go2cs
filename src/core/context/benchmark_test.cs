@@ -17,8 +17,10 @@ using static go.context_internal_test_package;
 partial class context_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyˢ = "key"u8;
-internal static readonly @string valueˢ = "value"u8;
+internal static ref readonly @string keyˢ => ref keyˢᵇ;
+private static readonly @string keyˢᵇ = "key"u8;
+internal static ref readonly @string valueˢ => ref valueˢᵇ;
+private static readonly @string valueˢᵇ = "value"u8;
 internal static readonly object shouldNotBeReachedˢ = (@string)"should not be reached"u8;
 
 public static void BenchmarkCommonParentCancel(ж<testing.B> Ꮡb) {
@@ -54,11 +56,11 @@ public static void BenchmarkCommonParentCancel(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkWithTimeout(ж<testing.B> Ꮡb) {
+public static void BenchmarkWithTimeout(ж<testing.B> b) {
     for (nint concurrencyᴛ1 = 40; concurrencyᴛ1 <= 400000; concurrencyᴛ1 *= 100) {
         var concurrency = concurrencyᴛ1;
         @string name = fmt.Sprintf("concurrency=%d"u8, concurrency);
-        Ꮡb.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
+        b.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             benchmarkWithTimeout(bΔ1, concurrency);
         });
     }
@@ -117,14 +119,17 @@ internal static partial void benchmarkWithTimeout(ж<testing.B> Ꮡb, nint concu
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string rootBackgroundˢ = "Root=Background"u8;
-internal static readonly @string rootOpenCancelerˢ = "Root=OpenCanceler"u8;
-internal static readonly @string rootClosedCancelerˢ = "Root=ClosedCanceler"u8;
+internal static ref readonly @string rootBackgroundˢ => ref rootBackgroundˢᵇ;
+private static readonly @string rootBackgroundˢᵇ = "Root=Background"u8;
+internal static ref readonly @string rootOpenCancelerˢ => ref rootOpenCancelerˢᵇ;
+private static readonly @string rootOpenCancelerˢᵇ = "Root=OpenCanceler"u8;
+internal static ref readonly @string rootClosedCancelerˢ => ref rootClosedCancelerˢᵇ;
+private static readonly @string rootClosedCancelerˢᵇ = "Root=ClosedCanceler"u8;
 
-public static void BenchmarkCancelTree(ж<testing.B> Ꮡb) {
-    var depths = new nint[]{1, 10, 100, 1000}.slice();
+public static void BenchmarkCancelTree(ж<testing.B> b) {
+    var depths = slice<nint>([1, 10, 100, 1000]);
     foreach (var (_, d) in depths) {
-        Ꮡb.Run(fmt.Sprintf("depth=%d"u8, d), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("depth=%d"u8, d), (ж<testing.B> bΔ1) => {
             bΔ1.Run(rootBackgroundˢ, (ж<testing.B> bΔ2) => {
                 for (nint i = 0; i < (~bΔ2).N; i++) {
                     buildContextTree(Background(), d);
@@ -155,20 +160,22 @@ internal static void buildContextTree(context.Context root, nint depth) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string errˢ = "Err"u8;
-internal static readonly @string doneˢ = "Done"u8;
+internal static ref readonly @string errˢ => ref errˢᵇ;
+private static readonly @string errˢᵇ = "Err"u8;
+internal static ref readonly @string doneˢ => ref doneˢᵇ;
+private static readonly @string doneˢᵇ = "Done"u8;
 
-public static void BenchmarkCheckCanceled(ж<testing.B> Ꮡb) {
+public static void BenchmarkCheckCanceled(ж<testing.B> b) {
     var (ctx, cancel) = WithCancel(Background());
     cancel();
     var ctxʗ1 = ctx;
-    Ꮡb.Run(errˢ, (ж<testing.B> bΔ1) => {
+    b.Run(errˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
             ctxʗ1.Err();
         }
     });
     var ctxʗ2 = ctx;
-    Ꮡb.Run(doneˢ, (ж<testing.B> bΔ2) => {
+    b.Run(doneˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
             var selᴛ1 = ctxʗ2.Done();
             switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
@@ -182,7 +189,7 @@ public static void BenchmarkCheckCanceled(ж<testing.B> Ꮡb) {
     });
 }
 
-public static void BenchmarkContextCancelDone(ж<testing.B> Ꮡb) {
+public static void BenchmarkContextCancelDone(ж<testing.B> b) {
     GoFrame ᒐ = default;
     try {
         var (ctx, cancel) = WithCancel(Background());
@@ -190,7 +197,7 @@ public static void BenchmarkContextCancelDone(ж<testing.B> Ꮡb) {
         defer(() => cancelʗ1(), ref ᒐ);
 
         var ctxʗ1 = ctx;
-        Ꮡb.RunParallel((ж<testing.PB> pb) => {
+        b.RunParallel((ж<testing.PB> pb) => {
             while (pb.Next()) {
                 var selᴛ2 = ctxʗ1.Done();
                 switch (trySelect(ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
@@ -207,15 +214,14 @@ public static void BenchmarkContextCancelDone(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> Ꮡb) {
-    foreach (var (_, depth) in new nint[]{10, 20, 30, 50, 100}.slice()) {
-        ref var ctx = ref heap<context.Context>(out var Ꮡctx);
-        ctx = Background();
+public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> b) {
+    foreach (var (_, depth) in slice<nint>([10, 20, 30, 50, 100])) {
+        ref var ctx = ref heap<context.Context>(Background(), out var Ꮡctx);
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
         }
 
-        Ꮡb.Run(fmt.Sprintf("depth=%d"u8, depth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("depth=%d"u8, depth), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                 Ꮡwg.Add(1);
@@ -234,15 +240,14 @@ public static void BenchmarkDeepValueNewGoRoutine(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkDeepValueSameGoRoutine(ж<testing.B> Ꮡb) {
-    foreach (var (_, depth) in new nint[]{10, 20, 30, 50, 100}.slice()) {
-        ref var ctx = ref heap<context.Context>(out var Ꮡctx);
-        ctx = Background();
+public static void BenchmarkDeepValueSameGoRoutine(ж<testing.B> b) {
+    foreach (var (_, depth) in slice<nint>([10, 20, 30, 50, 100])) {
+        ref var ctx = ref heap<context.Context>(Background(), out var Ꮡctx);
         for (nint i = 0; i < depth; i++) {
             ctx = WithValue(ctx, i, i);
         }
 
-        Ꮡb.Run(fmt.Sprintf("depth=%d"u8, depth), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("depth=%d"u8, depth), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 Ꮡctx.ValueSlot.Value((nint)(-1));
             }
@@ -250,16 +255,16 @@ public static void BenchmarkDeepValueSameGoRoutine(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkErrOK(ж<testing.B> Ꮡb) {
+public static void BenchmarkErrOK(ж<testing.B> b) {
     GoFrame ᒐ = default;
     try {
         var (ctx, cancel) = WithCancel(Background());
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
-        while (Ꮡb.Loop()) {
+        while (b.Loop()) {
             {
-                var err = ctx.Err(); if (err != default!) {
-                    Ꮡb.Fatalf("ctx.Err() = %v"u8, err);
+                var err = ctx.Err(); if (err != nil) {
+                    b.Fatalf("ctx.Err() = %v", err);
                 }
             }
         }
@@ -268,13 +273,13 @@ public static void BenchmarkErrOK(ж<testing.B> Ꮡb) {
     finally { ᒐ.Run(); }
 }
 
-public static void BenchmarkErrCanceled(ж<testing.B> Ꮡb) {
+public static void BenchmarkErrCanceled(ж<testing.B> b) {
     var (ctx, cancel) = WithCancel(Background());
     cancel();
-    while (Ꮡb.Loop()) {
+    while (b.Loop()) {
         {
-            var err = ctx.Err(); if (err == default!) {
-                Ꮡb.Fatalf("ctx.Err() = %v"u8, err);
+            var err = ctx.Err(); if (err == nil) {
+                b.Fatalf("ctx.Err() = %v", err);
             }
         }
     }

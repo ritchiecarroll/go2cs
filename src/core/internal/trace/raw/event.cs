@@ -27,7 +27,8 @@ partial struct Event {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string dataˢ = "\n\tdata="u8;
+private static ref readonly @string dataˢ => ref dataˢᵇ;
+private static readonly @string dataˢᵇ = "\n\tdata="u8;
 
 // String returns the canonical string representation of the event.
 //
@@ -39,25 +40,25 @@ public static @string String(this ref Event e) {
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.WriteString(spec.Name);
     foreach (var i in range(spec.Args)) {
-        Ꮡs.WriteString(" "u8);
+        Ꮡs.WriteString(" ");
         Ꮡs.WriteString(spec.Args[i]);
-        Ꮡs.WriteString("="u8);
+        Ꮡs.WriteString("=");
         Ꮡs.WriteString(strconv.FormatUint(e.Args[i], 10));
     }
     if (spec.IsStack) {
         var frames = e.Args.slice(len(spec.Args));
         for (nint i = 0; i < len(frames); i++) {
-            if (i % 4 == 0){
-                Ꮡs.WriteString("\n\t"u8);
+            if (i % 4 == 0) {
+                Ꮡs.WriteString("\n\t");
             } else {
-                Ꮡs.WriteString(" "u8);
+                Ꮡs.WriteString(" ");
             }
             Ꮡs.WriteString(frameFields[i % 4]);
-            Ꮡs.WriteString("="u8);
+            Ꮡs.WriteString("=");
             Ꮡs.WriteString(strconv.FormatUint(frames[i], 10));
         }
     }
-    if (e.Data != default!) {
+    if (e.Data != nil) {
         Ꮡs.WriteString(dataˢ);
         Ꮡs.WriteString(strconv.Quote((@string)e.Data));
     }

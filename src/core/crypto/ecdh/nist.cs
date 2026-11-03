@@ -29,19 +29,20 @@ internal static @string String(this ref nistCurve c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cryptoEcdhOnlyCryptoRandˢ = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
+private static ref readonly @string cryptoEcdhOnlyCryptoRandˢ => ref cryptoEcdhOnlyCryptoRandˢᵇ;
+private static readonly @string cryptoEcdhOnlyCryptoRandˢᵇ = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
 internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled && rand.IsDefaultReader(r)) {
         var (key, bytes, errΔ1) = boring.GenerateKeyECDH(c.name);
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         (var pub, errΔ1) = key.PublicKey();
-        if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         var kΔ1 = Ꮡ(new PrivateKey(
             curve: new nistCurveжΔCurve(Ꮡc),
@@ -49,18 +50,18 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.
             publicKey: Ꮡ(new ΔPublicKey(curve: new nistCurveжΔCurve(Ꮡc), publicKey: pub.Bytes(), boring: pub)),
             boring: key
         ));
-        return (kΔ1, default!);
+        return (kΔ1, default);
     }
 
     r = rand.CustomReader(r);
 
     if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(r)) {
-        return (default!, errors.New(cryptoEcdhOnlyCryptoRandˢ));
+        return (default, errors.New(cryptoEcdhOnlyCryptoRandˢ));
     }
 
     var (privateKey, err) = c.generate(r);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     var k = Ꮡ(new PrivateKey(
@@ -74,34 +75,35 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.
         ))
     ));
     if (boring.Enabled) {
-        var (bk, errΔ2) = boring.NewPrivateKeyECDH(c.name, (~k).privateKey);
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        var (bk, errΔ2) = boring.NewPrivateKeyECDH(c.name, k.privateKey);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         (var pub, errΔ2) = bk.PublicKey();
-        if (errΔ2 != default!) {
-            return (default!, errΔ2);
+        if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
-        k.Value.boring = bk;
-        k.Value.publicKey.Value.boring = pub;
+        k.boring = bk;
+        k.publicKey.boring = pub;
     }
-    return (k, default!);
+    return (k, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cryptoEcdhInvalidPrivateˢ = "crypto/ecdh: invalid private key"u8;
+private static ref readonly @string cryptoEcdhInvalidPrivateˢ => ref cryptoEcdhInvalidPrivateˢᵇ;
+private static readonly @string cryptoEcdhInvalidPrivateˢᵇ = "crypto/ecdh: invalid private key"u8;
 
 internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled) {
         var (bk, errΔ1) = boring.NewPrivateKeyECDH(c.name, key);
-        if (errΔ1 != default!) {
-            return (default!, errors.New(cryptoEcdhInvalidPrivateˢ));
+        if (errΔ1 != nil) {
+            return (default, errors.New(cryptoEcdhInvalidPrivateˢ));
         }
         (var pub, errΔ1) = bk.PublicKey();
-        if (errΔ1 != default!) {
-            return (default!, errors.New(cryptoEcdhInvalidPrivateˢ));
+        if (errΔ1 != nil) {
+            return (default, errors.New(cryptoEcdhInvalidPrivateˢ));
         }
         var kΔ1 = Ꮡ(new PrivateKey(
             curve: new nistCurveжΔCurve(Ꮡc),
@@ -109,12 +111,12 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, s
             publicKey: Ꮡ(new ΔPublicKey(curve: new nistCurveжΔCurve(Ꮡc), publicKey: pub.Bytes(), boring: pub)),
             boring: bk
         ));
-        return (kΔ1, default!);
+        return (kΔ1, default);
     }
 
     var (fk, err) = c.newPrivateKey(key);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     var k = Ꮡ(new PrivateKey(
         curve: new nistCurveжΔCurve(Ꮡc),
@@ -126,11 +128,12 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, s
             fips: fk.PublicKey()
         ))
     ));
-    return (k, default!);
+    return (k, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cryptoEcdhInvalidPublicˢ = "crypto/ecdh: invalid public key"u8;
+private static ref readonly @string cryptoEcdhInvalidPublicˢ => ref cryptoEcdhInvalidPublicˢᵇ;
+private static readonly @string cryptoEcdhInvalidPublicˢᵇ = "crypto/ecdh: invalid public key"u8;
 
 internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -138,26 +141,26 @@ internal static (ж<ΔPublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, s
     // Reject the point at infinity and compressed encodings.
     // Note that boring.NewPublicKeyECDH would accept them.
     if (len(key) == 0 || key[0] != 4) {
-        return (default!, errors.New(cryptoEcdhInvalidPublicˢ));
+        return (default, errors.New(cryptoEcdhInvalidPublicˢ));
     }
     var k = Ꮡ(new ΔPublicKey(
         curve: new nistCurveжΔCurve(Ꮡc),
         publicKey: bytes.Clone(key)
     ));
-    if (boring.Enabled){
-        var (bk, err) = boring.NewPublicKeyECDH(c.name, (~k).publicKey);
-        if (err != default!) {
-            return (default!, errors.New(cryptoEcdhInvalidPublicˢ));
+    if (boring.Enabled) {
+        var (bk, err) = boring.NewPublicKeyECDH(c.name, k.publicKey);
+        if (err != nil) {
+            return (default, errors.New(cryptoEcdhInvalidPublicˢ));
         }
-        k.Value.boring = bk;
+        k.boring = bk;
     } else {
         var (fk, err) = c.newPublicKey(key);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
-        k.Value.fips = fk;
+        k.fips = fk;
     }
-    return (k, default!);
+    return (k, default);
 }
 
 internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<ΔPublicKey> Ꮡremote) {
@@ -187,7 +190,7 @@ public static ΔCurve P256() {
 }
 
 [GoLazy] partial class lazyᴛp256 { internal static ж<nistCurve> p256 = Ꮡ(new nistCurve(
-    name: "P-256"u8,
+    name: "P-256",
     generate: (io.Reader r) => go.crypto.@internal.fips140.ecdh_package.GenerateKey<ecdh.P256PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P256(), r),
     newPrivateKey: (slice<byte> b) => go.crypto.@internal.fips140.ecdh_package.NewPrivateKey<ecdh.P256PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P256(), b),
     newPublicKey: (slice<byte> publicKey) => go.crypto.@internal.fips140.ecdh_package.NewPublicKey<ecdh.P256PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P256(), publicKey),
@@ -206,7 +209,7 @@ public static ΔCurve P384() {
 }
 
 [GoLazy] partial class lazyᴛp384 { internal static ж<nistCurve> p384 = Ꮡ(new nistCurve(
-    name: "P-384"u8,
+    name: "P-384",
     generate: (io.Reader r) => go.crypto.@internal.fips140.ecdh_package.GenerateKey<ecdh.P384PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P384(), r),
     newPrivateKey: (slice<byte> b) => go.crypto.@internal.fips140.ecdh_package.NewPrivateKey<ecdh.P384PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P384(), b),
     newPublicKey: (slice<byte> publicKey) => go.crypto.@internal.fips140.ecdh_package.NewPublicKey<ecdh.P384PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P384(), publicKey),
@@ -225,7 +228,7 @@ public static ΔCurve P521() {
 }
 
 [GoLazy] partial class lazyᴛp521 { internal static ж<nistCurve> p521 = Ꮡ(new nistCurve(
-    name: "P-521"u8,
+    name: "P-521",
     generate: (io.Reader r) => go.crypto.@internal.fips140.ecdh_package.GenerateKey<ecdh.P521PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P521(), r),
     newPrivateKey: (slice<byte> b) => go.crypto.@internal.fips140.ecdh_package.NewPrivateKey<ecdh.P521PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P521(), b),
     newPublicKey: (slice<byte> publicKey) => go.crypto.@internal.fips140.ecdh_package.NewPublicKey<ecdh.P521PointжPoint>(go.crypto.@internal.fips140.ecdh_package.P521(), publicKey),

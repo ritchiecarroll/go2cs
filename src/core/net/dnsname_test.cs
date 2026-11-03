@@ -16,22 +16,22 @@ internal partial struct dnsNameTest {
     internal bool result;
 }
 
-internal static slice<dnsNameTest> dnsNameTests = new dnsNameTest[]{
+internal static slice<dnsNameTest> dnsNameTests = slice<dnsNameTest>([
     // RFC 2181, section 11.
-    new("_xmpp-server._tcp.google.com"u8, true),
-    new("foo.com"u8, true),
-    new("1foo.com"u8, true),
-    new("26.0.0.73.com"u8, true),
-    new("10-0-0-1"u8, true),
-    new("fo-o.com"u8, true),
-    new("fo1o.com"u8, true),
-    new("foo1.com"u8, true),
-    new("a.b..com"u8, false),
-    new("a.b-.com"u8, false),
-    new("a.b.com-"u8, false),
-    new("a.b.."u8, false),
-    new("b.com."u8, true)
-}.slice();
+    new("_xmpp-server._tcp.google.com", true),
+    new("foo.com", true),
+    new("1foo.com", true),
+    new("26.0.0.73.com", true),
+    new("10-0-0-1", true),
+    new("fo-o.com", true),
+    new("fo1o.com", true),
+    new("foo1.com", true),
+    new("a.b..com", false),
+    new("a.b-.com", false),
+    new("a.b.com-", false),
+    new("a.b..", false),
+    new("b.com.", true)
+]);
 
 internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
     GoFrame ᒐ = default;
@@ -64,12 +64,12 @@ internal static void emitDNSNameTest(channel/*<-*/<dnsNameTest> ch) {
     finally { ᒐ.Run(); }
 }
 
-public static partial void TestDNSName(ж<testing.T> Ꮡt) {
+public static partial void TestDNSName(ж<testing.T> t) {
     var ch = new channel<dnsNameTest>(0);
-    goǃ(emitDNSNameTest, ch.WithDirection(GoChanDir.Send));
+    goǃ(emitDNSNameTest, ch.AsSendOnly(), GoStack.Bounded);
     foreach (var tc in ch) {
         if (isDomainName(tc.name) != tc.result) {
-            Ꮡt.Errorf("isDomainName(%q) = %v; want %v"u8, tc.name, !tc.result, tc.result);
+            t.Errorf("isDomainName(%q) = %v; want %v", tc.name, !tc.result, tc.result);
         }
     }
 }
@@ -79,14 +79,14 @@ public static void BenchmarkDNSName(ж<testing.B> Ꮡb) {
 
     ᏑtestHookUninstaller.Do(uninstallTestHooks);
 
-    var benchmarks = appendꓸꓸꓸ(dnsNameTests, new dnsNameTest[]{
-        new(strings.Repeat("a"u8, 63), true),
-        new(strings.Repeat("a"u8, 64), false)
-    }.slice());
+    var benchmarks = appendꓸꓸꓸ(dnsNameTests, slice<dnsNameTest>([
+        new(strings.Repeat("a", 63), true),
+        new(strings.Repeat("a", 64), false)
+    ]));
     for (nint n = 0; n < b.N; n++) {
         foreach (var (_, tc) in benchmarks) {
             if (isDomainName(tc.name) != tc.result) {
-                Ꮡb.Errorf("isDomainName(%q) = %v; want %v"u8, tc.name, !tc.result, tc.result);
+                Ꮡb.Errorf("isDomainName(%q) = %v; want %v", tc.name, !tc.result, tc.result);
             }
         }
     }

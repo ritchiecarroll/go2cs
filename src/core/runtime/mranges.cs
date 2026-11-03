@@ -28,7 +28,8 @@ partial struct addrRange {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string addrRangeBaseAndLimitAreˢ = "addr range base and limit are not in the same memory segment"u8;
+internal static ref readonly @string addrRangeBaseAndLimitAreˢ => ref addrRangeBaseAndLimitAreˢᵇ;
+private static readonly @string addrRangeBaseAndLimitAreˢᵇ = "addr range base and limit are not in the same memory segment"u8;
 
 // makeAddrRange creates a new address range from two virtual addresses.
 //
@@ -57,23 +58,21 @@ internal static bool contains(this addrRange a, uintptr addr) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badPruneˢ = "bad prune"u8;
+internal static ref readonly @string badPruneˢ => ref badPruneˢᵇ;
+private static readonly @string badPruneˢᵇ = "bad prune"u8;
 
 // subtract takes the addrRange toPrune and cuts out any overlap with
 // from, then returns the new range. subtract assumes that a and b
 // either don't overlap at all, only overlap on one side, or are equal.
 // If b is strictly contained in a, thus forcing a split, it will throw.
 internal static addrRange subtract(this addrRange a, addrRange b) {
-    if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)){
-        return new addrRange(nil);
-    } else 
-    if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)){
+    if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)) {
+        return new addrRange();
+    } else if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)) {
         @throw(badPruneˢ);
-    } else 
-    if (b.limit.lessThan(a.limit) && a.@base.lessThan(b.limit)){
+    } else if (b.limit.lessThan(a.limit) && a.@base.lessThan(b.limit)) {
         a.@base = b.limit;
-    } else 
-    if (a.@base.lessThan(b.@base) && b.@base.lessThan(a.limit)) {
+    } else if (a.@base.lessThan(b.@base) && b.@base.lessThan(a.limit)) {
         a.limit = b.@base;
     }
     return a;
@@ -107,7 +106,7 @@ internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, 
 // to addr and returns the new range.
 internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) {
     if ((new offAddr(addr)).lessEqual(a.@base)) {
-        return new addrRange(nil);
+        return new addrRange();
     }
     if (a.limit.lessEqual(new offAddr(addr))) {
         return a;
@@ -184,12 +183,12 @@ partial struct atomicOffAddr {
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
 internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
-    while (ᐧ) {
-        var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
+    for (;;) {
+        var old = Ꮡb.Ꮡa.Load();
         if (old < 0) {
             return;
         }
-        if (Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(old, (int64)(minOffAddr.addr() - (uintptr)arenaBaseOffset))) {
+        if (Ꮡb.Ꮡa.CompareAndSwap(old, (int64)(minOffAddr.addr() - (uintptr)arenaBaseOffset))) {
             return;
         }
     }
@@ -199,12 +198,12 @@ internal static void Clear(this ж<atomicOffAddr> Ꮡb) {
 // offset address space if the current value is not marked.
 internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
     var @new = (int64)(addr - (uintptr)arenaBaseOffset);
-    while (ᐧ) {
-        var old = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
+    for (;;) {
+        var old = Ꮡb.Ꮡa.Load();
         if (old < @new) {
             return;
         }
-        if (Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(old, @new)) {
+        if (Ꮡb.Ꮡa.CompareAndSwap(old, @new)) {
             return;
         }
     }
@@ -215,19 +214,19 @@ internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
 // returned by Load. This function will not store newAddr if the
 // box no longer contains markedAddr.
 internal static void StoreUnmark(this ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
-    Ꮡb.of(atomicOffAddr.Ꮡa).CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
+    Ꮡb.Ꮡa.CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
 }
 
 // StoreMarked stores addr but first converted to the offset address
 // space and then negated.
 internal static void StoreMarked(this ж<atomicOffAddr> Ꮡb, uintptr addr) {
-    Ꮡb.of(atomicOffAddr.Ꮡa).Store(-(int64)(addr - (uintptr)arenaBaseOffset));
+    Ꮡb.Ꮡa.Store(-(int64)(addr - (uintptr)arenaBaseOffset));
 }
 
 // Load returns the address in the box as a virtual address. It also
 // returns if the value was marked or not.
 internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) {
-    var v = Ꮡb.of(atomicOffAddr.Ꮡa).Load();
+    var v = Ꮡb.Ꮡa.Load();
     var wasMarked = false;
     if (v < 0) {
         wasMarked = true;
@@ -276,7 +275,7 @@ internal static nint findSucc(this ref addrRanges a, uintptr addr) {
             // its successor is the next index.
             return i + 1;
         }
-        if (@base.lessThan(a.ranges[i].@base)){
+        if (@base.lessThan(a.ranges[i].@base)) {
             // In this case i might actually be
             // the successor, but we can't be sure
             // until we check the ones before it.
@@ -336,7 +335,7 @@ internal static bool contains(this ref addrRanges a, uintptr addr) {
 // empty, it returns an empty range.
 internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) {
     if (len(a.ranges) == 0) {
-        return new addrRange(nil);
+        return new addrRange();
     }
     var r = a.ranges[len(a.ranges) - 1];
     var size = r.size();
@@ -369,7 +368,7 @@ internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) {
         var r = a.ranges[pivot - 1]; if (r.contains(addr)) {
             removed += r.size();
             r = r.removeGreaterEqual(addr);
-            if (r.size() == 0){
+            if (r.size() == 0) {
                 pivot--;
             } else {
                 removed -= r.size();

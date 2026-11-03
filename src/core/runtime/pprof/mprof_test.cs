@@ -64,29 +64,30 @@ internal static partial void allocateReflectTransient() {
 
 internal static void allocateReflect() {
     var rv = reflect.ValueOf(allocateReflectTransient);
-    rv.Call(default!);
+    rv.Call(default);
 }
 
 internal static nint memoryProfilerRun = 0;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object extraAllocationsWithAsanˢ = (@string)"extra allocations with -asan throw off the test; see #70079"u8;
-internal static readonly @string debug1ˢ = "debug=1"u8;
-internal static readonly @string heapˢ = "heap"u8;
-internal static readonly @string protoˢ = "proto"u8;
+internal static ref readonly @string debug1ˢ => ref debug1ˢᵇ;
+private static readonly @string debug1ˢᵇ = "debug=1"u8;
+internal static ref readonly @string heapˢ => ref heapˢᵇ;
+private static readonly @string heapˢᵇ = "heap"u8;
+internal static ref readonly @string protoˢ => ref protoˢᵇ;
+private static readonly @string protoˢᵇ = "proto"u8;
 
 internal partial struct TestMemoryProfiler_tests /*dyn*/ {
     internal slice<@string> stk;
     internal @string legacy;
 }
 
-public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
+public static void TestMemoryProfiler(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (asan.Enabled) {
-            Ꮡt.Skip(extraAllocationsWithAsanˢ);
+            t.Skip(extraAllocationsWithAsanˢ);
         }
 
         // Disable sampling, otherwise it's difficult to assert anything.
@@ -107,14 +108,14 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         allocateTransient2MInline();
         allocatePersistent1K();
         allocateReflect();
-        memSink = default!;
+        memSink = default;
 
         runtime.GC(); // materialize stats
 
         memoryProfilerRun++;
 
-        var tests = new TestMemoryProfiler_tests[]{new(
-            stk: new @string[]{"runtime/pprof.allocatePersistent1K"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
+        var tests = slice<TestMemoryProfiler_tests>([new(
+            stk: slice<@string>(["runtime/pprof.allocatePersistent1K", "runtime/pprof.TestMemoryProfiler"]),
             legacy: fmt.Sprintf("""
 %v: %v \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+( 0x[0-9,a-f]+ 0x[0-9,a-f]+)?
 #	0x[0-9,a-f]+	runtime/pprof\.allocatePersistent1K\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test\.go:48
@@ -122,7 +123,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 
 """u8.Raw(), 32 * memoryProfilerRun, 1024 * memoryProfilerRun, 32 * memoryProfilerRun, 1024 * memoryProfilerRun)
         ), new(
-            stk: new @string[]{"runtime/pprof.allocateTransient1M"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
+            stk: slice<@string>(["runtime/pprof.allocateTransient1M", "runtime/pprof.TestMemoryProfiler"]),
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient1M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:25
@@ -130,7 +131,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 
 """u8.Raw(), (1 << 10) * memoryProfilerRun, (1 << 20) * memoryProfilerRun)
         ), new(
-            stk: new @string[]{"runtime/pprof.allocateTransient2M"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
+            stk: slice<@string>(["runtime/pprof.allocateTransient2M", "runtime/pprof.TestMemoryProfiler"]),
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:31
@@ -138,7 +139,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 
 """u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         ), new(
-            stk: new @string[]{"runtime/pprof.allocateTransient2MInline"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
+            stk: slice<@string>(["runtime/pprof.allocateTransient2MInline", "runtime/pprof.TestMemoryProfiler"]),
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2MInline\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:35
@@ -146,70 +147,70 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
 
 """u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         ), new(
-            stk: new @string[]{"runtime/pprof.allocateReflectTransient"u8}.slice(),
+            stk: slice<@string>(["runtime/pprof.allocateReflectTransient"]),
             legacy: fmt.Sprintf("""
 0: 0 \[%v: %v\] @( 0x[0-9,a-f]+)+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateReflectTransient\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:56
 
 """u8.Raw(), memoryProfilerRun, (2 << 20) * memoryProfilerRun)
         )
-        }.slice();
+        ]);
 
         var testsʗ1 = tests;
-        Ꮡt.Run(debug1ˢ, (ж<testing.T> tΔ1) => {
+        t.Run(debug1ˢ, (ж<testing.T> tΔ1) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             {
-                var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 1); if (err != default!) {
-                    tΔ1.Fatalf("failed to write heap profile: %v"u8, err);
+                var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 1); if (err != nil) {
+                    tΔ1.Fatalf("failed to write heap profile: %v", err);
                 }
             }
 
             foreach (var (_, test) in testsʗ1) {
                 if (!regexp.MustCompile(test.legacy).Match(buf.Bytes())) {
-                    tΔ1.Fatalf("The entry did not match:\n%v\n\nProfile:\n%v\n"u8, test.legacy, Ꮡbuf.String());
+                    tΔ1.Fatalf("The entry did not match:\n%v\n\nProfile:\n%v\n", test.legacy, Ꮡbuf.String());
                 }
             }
         });
 
         var testsʗ2 = tests;
-        Ꮡt.Run(protoˢ, (ж<testing.T> tΔ2) => {
+        t.Run(protoˢ, (ж<testing.T> tΔ2) => {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             {
-                var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != default!) {
-                    tΔ2.Fatalf("failed to write heap profile: %v"u8, errΔ1);
+                var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
+                    tΔ2.Fatalf("failed to write heap profile: %v", errΔ1);
                 }
             }
             var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
-            if (err != default!) {
-                tΔ2.Fatalf("failed to parse heap profile: %v"u8, err);
+            if (err != nil) {
+                tΔ2.Fatalf("failed to parse heap profile: %v", err);
             }
-            tΔ2.Logf("Profile = %v"u8, p.OrTypedNil());
+            tΔ2.Logf("Profile = %v", p.OrTypedNil());
 
             var stks = profileStacks(p);
             foreach (var (_, test) in testsʗ2) {
                 if (!containsStack(stks, test.stk)) {
-                    tΔ2.Fatalf("No matching stack entry for %q\n\nProfile:\n%v\n"u8, test.stk, p.OrTypedNil());
+                    tΔ2.Fatalf("No matching stack entry for %q\n\nProfile:\n%v\n", test.stk, p.OrTypedNil());
                 }
             }
 
             if (!containsInlinedCall(TestMemoryProfiler, 4 << 10)) {
-                tΔ2.Logf("Can't determine whether allocateTransient2MInline was inlined into TestMemoryProfiler."u8);
+                tΔ2.Logf("Can't determine whether allocateTransient2MInline was inlined into TestMemoryProfiler.");
                 return;
             }
 
             // Check the inlined function location is encoded correctly.
-            foreach (var (_, loc) in (~p).Location) {
+            foreach (var (_, loc) in p.Location) {
                 var (inlinedCaller, inlinedCallee) = (false, false);
-                foreach (var (_, line) in (~loc).Line) {
-                    if ((~line.Function).Name == "runtime/pprof.allocateTransient2MInline"u8) {
+                foreach (var (_, line) in loc.Line) {
+                    if (line.Function.Name == "runtime/pprof.allocateTransient2MInline"u8) {
                         inlinedCallee = true;
                     }
-                    if (inlinedCallee && (~line.Function).Name == "runtime/pprof.TestMemoryProfiler"u8) {
+                    if (inlinedCallee && line.Function.Name == "runtime/pprof.TestMemoryProfiler"u8) {
                         inlinedCaller = true;
                     }
                 }
                 if (inlinedCallee != inlinedCaller) {
-                    tΔ2.Errorf("want allocateTransient2MInline after TestMemoryProfiler in one location, got separate location entries:\n%v"u8, loc.OrTypedNil());
+                    tΔ2.Errorf("want allocateTransient2MInline after TestMemoryProfiler in one location, got separate location entries:\n%v", loc.OrTypedNil());
                 }
             }
         });

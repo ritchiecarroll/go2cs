@@ -100,10 +100,12 @@ IL3050 sites at the plan's base), the named-result constant shift that masks its
 
 ## The re-bank legs
 
-The windows leg of the 1.26.10.2 re-bank is the §6 full sweep, sharded across i9, H, G-LAPTOP and R-LAPTOP as
-[`PLAN-rebank-go126.md`](PLAN-rebank-go126.md) §15 describes. The linux and darwin legs re-read every annotated row
-at the same tip, **`f75e0c53ec`** (`f75e0c53ec523161f1990db7a407c9249c9ed326`), so that each `linux:` and `darwin:`
-segment is a reading at the corpus that ships (platform parity is a standing owner goal). Both legs start at the
+The windows leg of the 1.26.10.2 re-bank is the §6 full sweep, read-only, sharded across i9, H, G-LAPTOP and
+R-LAPTOP as [`PLAN-rebank-go126.md`](PLAN-rebank-go126.md) §15 describes; its brief for this release is below. The
+linux and darwin legs re-read every annotated row at the same tip, the 1.26.10.2 freeze tip **`f6666d98a2`**
+(`f6666d98a21ad4c3f992c959769f844ee6422ceb`, batch 131), so that each `linux:` and `darwin:` segment is a reading at
+the corpus that ships (platform parity is a standing owner goal). The deal was cut at `f75e0c53ec` and re-cut at the
+freeze tip unchanged (*The re-cut at the freeze tip*, below). Both legs start at the
 tip. They do not wait for the windows bank: every row is already banked at go1.26.10, the linux act is the
 per-package pipeline (never the sweep), and the darwin sweep scores a row against its own `darwin:` expectation. The
 procedure is the runbook's H10 linux leg and its darwin leg (`GoCorpusMigration.md` H10, the 2026-10-24
@@ -115,8 +117,8 @@ smallest-first, and `testing` runs last in its list.
 
 ### The eligible sets
 
-These counts come from `ValidatedTestPackages.md` at `f75e0c53ec`, row by row, and from
-`data/rebank-go1.26.10/eligible-<os>.txt`:
+These counts come from `ValidatedTestPackages.md` at `f6666d98a2`, row by row, and from
+`data/rebank-go1.26.10/eligible-<os>.txt`. The roster reads the same at `f75e0c53ec`, segment for segment:
 
 | OS | Eligible | Read from | Not eligible |
 |:--|--:|:--|:--|
@@ -182,6 +184,61 @@ cloud row projects to 12 minutes (`runtime/pprof`).
 - **The projections exclude each shard's clone and converter build**, which were not measured here. Add about
   15 minutes per linux shard.
 
+### The re-cut at the freeze tip (2026-11-02)
+
+COORD called the freeze at `f6666d98a2` (batch 131) and ruled the deal re-cut there. Batch 129 is the darwin Native
+AOT token holder, 130 the windows kit guards, and 131 C1's macOS logs. Nothing the deal reads has moved:
+
+| Input | `f75e0c53ec` → `f6666d98a2` |
+|:--|:--|
+| Banked rows | 238 → 238, the same names |
+| Linux-eligible (a numeric `linux:` segment) | 236 → 236, every `linux:` segment identical |
+| Darwin-eligible (banked and in `eligible-darwin.txt`) | 236 → 236, every `darwin:` segment identical (228 numeric) |
+| `$longTimeouts`, the reserved set | 14 keys, the line byte-identical |
+| The wall sources | no file under `docs/phase4/h10-evidence/` changed |
+
+**The delta is empty.** No row is added or removed on any OS, and none moves between shards. The lane totals and the
+critical path above stand.
+- **Windows.** `sweep_shards.py` at `f6666d98a2` reproduces
+  [`sweep-shards.tsv`](phase4/data/rebank-go1.26.10/sweep-shards.tsv) byte-identically (sha256 `358130df30f8…`):
+  i9 79 rows (1.66 h), H 77 (1.67 h), G 74 (1.66 h), R 8 (0.71 h).
+- **Linux and darwin.** `<LEGS>` (blob sha256 `e4a0b329b15b…`) is checked at the tree, not regenerated. Its generator
+  was never committed. [`legs_check.py`](phase4/data/rebank-1.26.10.2/legs_check.py) re-reads the eligible sets
+  and `$longTimeouts` at a worktree and asserts the following, and every check passes at `f6666d98a2`:
+  - each OS's dealt rows equal its eligible set, each row exactly once;
+  - RWSL-1 equals the linux-eligible reserved set;
+  - every shard's seq runs 1..n, and `testing` ends its list (P1-2, C1-12, and H on windows);
+  - the windows deal holds all 238 rows once, R holds the off-i9 list, and `net` is on G.
+
+  It was made to fail first, with five planted defects: a linux row dropped, a darwin row dealt twice, `testing`'s
+  seq renumbered, `testing` moved to the front of P1-2, and windows `net` dropped. Each failed naming its row.
+
+**H9 needs no re-run.** Batch 129's full gates ran at `56039a371d`: CNR 954 byte-identical, and the behavioral runner
+887/887, output 858 pass, 0 fail, 29 skip. Between `56039a371d` and `f6666d98a2`, the only files outside `docs/`
+that change are `src/run-h10-recon.ps1` and `src/run-h10-dispatch.ps1` (`git diff --name-only`). No H9 gate builds or
+runs either, so the code under test at the freeze tip is the code H9 read.
+
+**The remedy route (COORD, 2026-11-02).** The windows pass is the sweep, and it banks nothing: batch 127's end regen
+already re-signed the `-tests` output and the manifests at the tip, and zero real drift is the proof that they are
+current. A row that reds is a finding. If the ruling is "re-bank the row", that row runs the kit act on a branch
+(`run-h10-dispatch.ps1 -Mode rebank` with the recon wrapper, its guards and a ledger), merged as a batch. Only then
+is the row re-swept, at the new tip. The kit is pinned. Each value is the sha256 of the LF blob as `git show` writes
+it, then of a CRLF checkout:
+- `src/run-h10-recon.ps1`: `e9fe0e4e236a1671dad917b52329b172647524a6e6de0d5b84d9a96076e0d1b5` |
+  `f218599cc8f6f9cf998e1d736960bdbab499fff5d0a8f632b743d6924d388ac4`;
+- `src/run-h10-dispatch.ps1`: `1a577c678cae650a81a47175a2fa6483fadee9b696a0fdcb8b8022b504e032b0` |
+  `2f5b3242e4573d84a705253ced5c55013127c2f11aecac341d8fe15bcc072b1c`.
+
+The linux lanes run R's frozen kit, pinned in their briefs. Each lane checks its pins before row 1, and a mismatch
+stops the lane.
+
+<!-- Provenance (G, 2026-11-02, COORD's freeze dispatch and its ruling (B) on the windows act). Measured at
+     f6666d98a2 and f75e0c53ec: the roster's banked rows and both segments per row, HTML comments stripped (two rows
+     quote a retired linux: value inside a comment); eligible-darwin.txt; the $longTimeouts line; git diff --stat over
+     docs/phase4/h10-evidence (empty). sweep_shards.py rerun at the tip is byte-identical to the committed file. The
+     H9 numbers are batch 129's battery as COORD reported it; the outside-docs diff is measured here. R's three kit
+     files are on no pushed ref G could read (2026-11-02); their pins are COORD's record. -->
+
 ### The closing checks
 
 - **Linux:**
@@ -196,22 +253,64 @@ cloud row projects to 12 minutes (`runtime/pprof`).
   - the `darwin:`-annotated set equals the darwin-eligible set by name: 236. Every eligible row that does not bank
     is named with both RIDs' readings, and its segment is REMOVED, never carried from 1.26.10.1;
   - every numeric segment equals its 1.26.10.2 reading on both RIDs.
-- **Per OS:** read + not dispatched = 236, each row exactly once. Every darwin run's `headSha` and every linux
-  TSV's `tree` column read `f75e0c53ec`.
+- **Windows:** §15.2's verdict at `f6666d98a2`:
+  - 238 rows, each exactly once;
+  - every word PASS (a PASS line with a non-zero rc is PASS?rc, a finding);
+  - zero real drift;
+  - every shard's per-row and shard-end deletion censuses empty.
+- **Per OS:** read + not dispatched = 236, each row exactly once. Every darwin run's `headSha`, every linux TSV's
+  `tree` column and every windows ledger's tip line read `f6666d98a2`.
+- **All three platforms:** the bank report lists every disclosure orphaned on ALL THREE platforms, that is, every
+  entry no row on any OS still needs.
 
 ### The lane briefs (one block per lane, ready to paste)
 
 `<GOROOT>` is the go1.26.10 root, spelled exactly as `go env GOROOT` prints it on that box. `<TREE>` is a clone
 detached at the tip. `<LEGS>` is `docs/phase4/data/rebank-1.26.10.2/legs.tsv`.
 
+#### Windows sweep (i9, H, G, R-LAPTOP; `<LANE>` is one of them)
+
+```
+LANE <LANE> -- 1.26.10.2 RE-BANK, WINDOWS: the §6 FULL SWEEP, READ-ONLY (nothing banks).
+  TIP f6666d98a21ad4c3f992c959769f844ee6422ceb.
+  Plan: docs/PLAN-release-1-26-10-2.md "The re-bank legs". The act is docs/PLAN-rebank-go126.md §15.1, with <TIP44>
+  read as this TIP, plus the evidence and guard lines below.
+ROWS: docs/phase4/data/rebank-go1.26.10/sweep-shards.tsv, rows with lane <LANE>, in seq order (i9 79, H 77, G 74,
+  R 8). Write the list from the file. Never retype it.
+H only: the H12.6 rehearsal and this shard never overlap on the box -- one battery per box.
+R only: R-WSL's linux shards start only after this shard has posted.
+BEFORE ROW 1, §15.1's list at this TIP:
+  - a throwaway linked worktree DETACHED at the TIP; its `git rev-parse HEAD` is the ledger's first line;
+  - free disk >= 30 GB; src\clean-bin.ps1 -Root <TREE>, then purge src\gen\go2cs-gen\bin and \obj SEPARATELY;
+  - the toolchain triple (go1.26.10) and the residue census;
+  - G only: `nslookup invalid.invalid` answers NXDOMAIN, recorded in the ledger before net.
+THE SURVIVAL CANARY and ENV: exactly §15.1's. Pass no -TestConfig.
+THE ACT, per row: §15.1's invocation, with rc on the next line and the row's lines captured. Then:
+  - GUARD 1: a PASS line whose rc is not 0 is recorded as PASS?rc. It is a finding, never a PASS;
+  - GUARD 2, BEFORE the restore (a restore by status checks out a deleted tracked file too, and would hide it):
+    `git status --porcelain | grep '^ D'`, read raw, must be EMPTY. A deletion stops the shard and names the row;
+  - restore the row's dirt BY STATUS; `git status --porcelain` is then empty, or the shard stops.
+SHARD END, GUARD 3: purge the build output (clean-bin -Root <TREE>, then the gen bin/obj), then the same census.
+OUTPUT: docs/phase4/rebank-1.26.10.2/sweep/<LANE>-S.tsv with its .ledger.tsv, on lane ref claude/<lane>-sweep-1262:
+  - §15.1's columns, and no new one;
+  - a ref that holds a pre-freeze dry run takes a NEW commit on top, and the ledger's tip line says which run it is;
+  - ls-remote after the push.
+POST (one, <=40 lines): §15.1's, plus the tip line, both deletion censuses (per row and at shard end), and every
+  PASS?rc by name.
+```
+
 #### R-WSL (after R's windows sweep post; one battery per box)
 
 ```
-LANE R -- 1.26.10.2 RE-BANK, LINUX READING. TIP f75e0c53ec523161f1990db7a407c9249c9ed326.
+LANE R -- 1.26.10.2 RE-BANK, LINUX READING. TIP f6666d98a21ad4c3f992c959769f844ee6422ceb.
   Plan: docs/PLAN-release-1-26-10-2.md "The re-bank legs"; the act is docs/PLAN-rebank-go126.md §12's R block.
 WHEN: ONLY after R's windows sweep shard has posted (one battery per box).
 SHARDS RWSL-1 (14, the reserved set) then RWSL-2 (129): <LEGS>, rows with lane R-WSL, in seq order. Write each
   list from the file. Never retype it.
+KIT PINS, checked before row 1 (sha256; R's frozen kit), each recorded in the ledger. A mismatch stops the lane:
+  rebank-linux.sh 99cdef2e8d0ba16a81e23eff0ebc6508a5d8f9af0edd4285fdb9c919c008a1c1
+  classify_row.py 81e543608d9cabce35e38ce0f2e6013cfcc3189fdc0642771c1c51cfc03d7fad
+  derive-argv.ps1 0ea6f0b90f915fc717853de71c7b9edbbeb895d11cfac044c1d5a18319f0a6d9
 HOST CHECKS, before row 1, recorded in the ledger:
   - TMPDIR is 10 bytes or less (/tmp);
   - <GOROOT> carries test/;
@@ -238,11 +337,13 @@ POST (one per shard, <=40 lines):
 
 ```
 LANE P1 (P2 the same, with its own shards) -- 1.26.10.2 RE-BANK, LINUX READING.
-  TIP f75e0c53ec523161f1990db7a407c9249c9ed326.
+  TIP f6666d98a21ad4c3f992c959769f844ee6422ceb.
   Plan: docs/PLAN-release-1-26-10-2.md "The re-bank legs"; docs/PLAN-rebank-go126.md §12's R and P1/P2 blocks.
 SHARDS P1-1, P1-2 (23 each; testing LAST in P1-2) | P2-1 (24), P2-2 (23):
   - <LEGS>, rows with your lane, in seq order;
   - write each list from the file; never retype it. No reserved row is yours.
+KIT PINS before row 1: R's frozen kit, the three sha256 values in the R-WSL block, each recorded in the ledger. A
+  mismatch stops the lane.
 HOST CHECKS before row 1: TMPDIR <= 10 bytes; <GOROOT> carries test/; the toolchain triple (go1.26.10), .NET, uid.
 LINUX ENV and ACT: §12's R block, in a clone detached at the TIP, checked clean; the argv derived by AST at the TIP.
   P2: crypto/x509 runs with SSL_CERT_FILE and NIX_SSL_CERT_FILE UNSET on both sides, and the ledger line says so.
@@ -261,7 +362,7 @@ POST: one per shard, as R-WSL's, plus the container's restarts during the shard.
 #### C1 (darwin, hosted runners)
 
 ```
-LANE C1 -- 1.26.10.2 RE-BANK, DARWIN READING. TIP f75e0c53ec523161f1990db7a407c9249c9ed326.
+LANE C1 -- 1.26.10.2 RE-BANK, DARWIN READING. TIP f6666d98a21ad4c3f992c959769f844ee6422ceb.
   Plan: docs/PLAN-release-1-26-10-2.md "The re-bank legs"; GoCorpusMigration.md H10, Amendment 2026-10-24 item 5.
 FIFTEEN DISPATCHES: os-matrix.yml, stage sweep-shard, goos darwin (both mac runners, osx-arm64 and osx-x64), filter =
   the dispatch's rows from <LEGS> (lane C1), comma-separated, EXACT:
@@ -270,8 +371,8 @@ FIFTEEN DISPATCHES: os-matrix.yml, stage sweep-shard, goos darwin (both mac runn
   Dispatch order: C1-13 first, then C1-15, C1-3, C1-11, then the rest (5 mac jobs run at once).
   Every row is banked, so sweep-shard reaches all 236 at the TIP. A count red against the roster is the reading's
   signal, not a stop.
-THE TIP: dispatch from a ref whose head IS f75e0c53ec, and commit nothing to that ref while runs are queued. A run
-  whose headSha is not f75e0c53ec is not evidence.
+THE TIP: dispatch from a ref whose head IS f6666d98a2, and commit nothing to that ref while runs are queued. A run
+  whose headSha is not f6666d98a2 is not evidence.
 A ROW BANKS a darwin: segment only when osx-arm64 and osx-x64 agree verdict for verdict:
   - both `validated`, equal matched, equal disclosed-divergent (divergent - new);
   - the segment is that count, read from the row's own artifacts on both RIDs;

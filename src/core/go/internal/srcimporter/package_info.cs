@@ -10,21 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using tokenꓸFile = go.go.token_package.ΔFile;
-global using tokenꓸPos = go.go.token_package.ΔPos;
-global using tokenꓸPosition = go.go.token_package.ΔPosition;
 global using typesꓸError = go.go.types_package.ΔError;
 global using typesꓸInfo = go.go.types_package.ΔInfo;
-global using typesꓸScope = go.go.types_package.ΔScope;
-global using typesꓸSignature = go.go.types_package.ΔSignature;
-global using typesꓸTerm = go.go.types_package.ΔTerm;
-global using typesꓸType = go.go.types_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;
@@ -62,7 +49,13 @@ using static go.go.@internal.srcimporter_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: global::go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(go.go.build_package.Context))]
+[assembly: GoFieldAccess(typeof(go.go.build_package.Package))]
+[assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -72,7 +65,7 @@ using static go.go.@internal.srcimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACZOAAgCAAwakgACEgALAoKmgIKkgoK4griCgoKUypSmgtqCuIKClIKCqJLIgtyCppSCgoKUuIK4goKUlJSmgta0goKAxoKUgoKC0oKCgoKUgqKkpoKCuAAJBuKCgpSUgoKUgoKUpKaCgoKCgoKClJSCgoKUgoKAgrbatqaCgIKkpqKAgqSo", "98-106:1;122-126:2;169-169:1;178-187:2", "", "48=SizesFor/1/1/3")]
+[assembly: GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACZOAAgCAAwakgACEgALAoKmgIKkgoK4griCgoKUypSmgtqCuIKClIKCqJK4gtyCppSCgoKUuIK4goKUlJSmgta0goKAxoKUgoKC0oKCgoKUgqKkpoKCuAAOBuKCgpSUgoKUgoKktLaCgoKCgoKClJSCgoKUgoKAgrbatqaCgIKkpqKAgqSo", "98-106:1;122-126:2;169-169:1;178-187:2", "", "48=SizesFor/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

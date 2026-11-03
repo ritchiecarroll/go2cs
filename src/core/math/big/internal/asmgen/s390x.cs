@@ -6,12 +6,12 @@ namespace go.math.big.@internal;
 partial class asmgen_package {
 
 [GoLazy(Initial = true)] partial class lazyᴛArchS390X { public static ж<Arch> ArchS390X = Ꮡ(new Arch(
-    Name: "s390x"u8,
+    Name: "s390x",
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // R0 is 0 by convention in this code (see setup).
         // R10 is the assembler/linker temporary.
         // R11 is a second assembler/linker temporary, for wide multiply.
@@ -20,11 +20,11 @@ partial class asmgen_package {
         // R13 is g.
         // R14 is LR.
         // R15 is SP.
-        "R1"u8, "R2"u8, "R3"u8, "R4"u8, "R5"u8, "R6"u8, "R7"u8, "R8"u8, "R9"u8,
-        "R10"u8, "R11"u8, "R12"u8
-    }.slice(),
-    reg0: "R0"u8,
-    regTmp: "R10"u8,
+        "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9",
+        "R10", "R11", "R12"
+    ]),
+    reg0: "R0",
+    regTmp: "R10",
     setup: s390xSetup,
     maxColumns: 2,
     op3: s390xOp3,
@@ -33,22 +33,22 @@ partial class asmgen_package {
     // Instruction reference: chapter 7 of
     // https://www.ibm.com/docs/en/SSQ2R2_15.0.0/com.ibm.tpf.toolkit.hlasm.doc/dz9zr006.pdf
 
-    mov: "MOVD"u8,
-    adds: "ADDC"u8, // ADD is an alias for ADDC, sets carry
-    adcs: "ADDE"u8,
-    subs: "SUBC"u8, // SUB is an alias for SUBC, sets carry
-    sbcs: "SUBE"u8,
+    mov: "MOVD",
+    adds: "ADDC", // ADD is an alias for ADDC, sets carry
+    adcs: "ADDE",
+    subs: "SUBC", // SUB is an alias for SUBC, sets carry
+    sbcs: "SUBE",
     mulWideF: s390MulWide,
-    lsh: "SLD"u8,
-    rsh: "SRD"u8,
-    and: "AND"u8,
-    or: "OR"u8,
-    xor: "XOR"u8,
-    neg: "NEG"u8,
-    lea: "LAY"u8, // LAY because LA only accepts positive offsets
+    lsh: "SLD",
+    rsh: "SRD",
+    and: "AND",
+    or: "OR",
+    xor: "XOR",
+    neg: "NEG",
+    lea: "LAY", // LAY because LA only accepts positive offsets
 
-    jmpZero: "CMPBEQ %s, $0, %s"u8,
-    jmpNonZero: "CMPBNE %s, $0, %s"u8
+    jmpZero: "CMPBEQ %s, $0, %s",
+    jmpNonZero: "CMPBNE %s, $0, %s"
 )); }
 
 internal static void s390xSetup(ж<ΔFunc> Ꮡf) {
@@ -60,12 +60,12 @@ internal static void s390xSetup(ж<ΔFunc> Ꮡf) {
         // that can propagate carry bits during parallel adds (VACC).
         // Instead of trying to generate that for this one system,
         // jump to the hand-written code in arithvec_s390x.s.
-        a.Printf("\tMOVB ·hasVX(SB), R1\n"u8);
-        a.Printf("\tCMPBEQ R1, $0, novec\n"u8);
-        a.Printf("\tJMP ·%svec(SB)\n"u8, f.Name);
-        a.Printf("novec:\n"u8);
+        a.Printf("\tMOVB ·hasVX(SB), R1\n");
+        a.Printf("\tCMPBEQ R1, $0, novec\n");
+        a.Printf("\tJMP ·%svec(SB)\n", f.Name);
+        a.Printf("novec:\n");
     }
-    a.Printf("\tMOVD $0, R0\n"u8);
+    a.Printf("\tMOVD $0, R0\n");
 }
 
 internal static bool s390xOp3(@string name) {
@@ -76,35 +76,37 @@ internal static bool s390xOp3(@string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string r11ˢ = "R11"u8;
-internal static readonly @string r10ˢ = "R10"u8;
+internal static ref readonly @string r11ˢ => ref r11ˢᵇ;
+private static readonly @string r11ˢᵇ = "R11"u8;
+internal static ref readonly @string r10ˢ => ref r10ˢᵇ;
+private static readonly @string r10ˢᵇ = "R10"u8;
 
 internal static @string s390xHint(ж<Asm> _, Hint h) {
-    var exprᴛ1 = h;
-    if (exprᴛ1 == HintMulSrc) {
+    switch (h) {
+    case var ᴛ when ᴛ == HintMulSrc: {
         return r11ˢ;
     }
-    if (exprᴛ1 == HintMulHi) {
+    case var ᴛ when ᴛ == HintMulHi: {
         return r10ˢ;
-    }
+    }}
     return ""u8;
 }
 
-internal static void s390MulWide(ж<Asm> Ꮡa, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
+internal static void s390MulWide(ж<Asm> a, ΔReg src1, ΔReg src2, ΔReg dstlo, ΔReg dsthi) {
     if (src1.name != "R11"u8 && src2.name != "R11"u8) {
-        Ꮡa.Fatalf("mulWide src1 or src2 must be R11"u8);
+        a.Fatalf("mulWide src1 or src2 must be R11");
     }
     if (dstlo.name != "R11"u8) {
-        Ꮡa.Fatalf("mulWide dstlo must be R11"u8);
+        a.Fatalf("mulWide dstlo must be R11");
     }
     if (dsthi.name != "R10"u8) {
-        Ꮡa.Fatalf("mulWide dsthi must be R10"u8);
+        a.Fatalf("mulWide dsthi must be R10");
     }
     var src = src1;
     if (src.name == "R11"u8) {
         src = src2;
     }
-    Ꮡa.Printf("\tMLGR %s, R10\n"u8, src);
+    a.Printf("\tMLGR %s, R10\n", src);
 }
 
 } // end asmgen_package

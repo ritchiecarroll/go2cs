@@ -14,31 +14,31 @@ public static void FuzzEqualFold(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<@string>[]{
-        new @string[]{""u8, ""u8}.array(),
-        new @string[]{"123abc"u8, "123ABC"u8}.array(),
-        new @string[]{"αβδ"u8, "ΑΒΔ"u8}.array(),
-        new @string[]{"abc"u8, "xyz"u8}.array(),
-        new @string[]{"abc"u8, "XYZ"u8}.array(),
-        new @string[]{"1"u8, "2"u8}.array(),
-        new @string[]{"hello, world!"u8, "hello, world!"u8}.array(),
-        new @string[]{"hello, world!"u8, "Hello, World!"u8}.array(),
-        new @string[]{"hello, world!"u8, "HELLO, WORLD!"u8}.array(),
-        new @string[]{"hello, world!"u8, "jello, world!"u8}.array(),
-        new @string[]{"γειά, κόσμε!"u8, "γειά, κόσμε!"u8}.array(),
-        new @string[]{"γειά, κόσμε!"u8, "Γειά, Κόσμε!"u8}.array(),
-        new @string[]{"γειά, κόσμε!"u8, "ΓΕΙΆ, ΚΌΣΜΕ!"u8}.array(),
-        new @string[]{"γειά, κόσμε!"u8, "ΛΕΙΆ, ΚΌΣΜΕ!"u8}.array(),
-        new @string[]{"AESKey"u8, "aesKey"u8}.array(),
-        new @string[]{"AESKEY"u8, "aes_key"u8}.array(),
-        new @string[]{"aes_key"u8, "AES_KEY"u8}.array(),
-        new @string[]{"AES_KEY"u8, "aes-key"u8}.array(),
-        new @string[]{"aes-key"u8, "AES-KEY"u8}.array(),
-        new @string[]{"AES-KEY"u8, "aesKey"u8}.array(),
-        new @string[]{"aesKey"u8, "AesKey"u8}.array(),
-        new @string[]{"AesKey"u8, "AESKey"u8}.array(),
-        new @string[]{"AESKey"u8, "aeskey"u8}.array(),
-        new @string[]{"DESKey"u8, "aeskey"u8}.array(),
-        new @string[]{"AES Key"u8, "aeskey"u8}.array()
+        new @string[]{"", ""}.array(),
+        new @string[]{"123abc", "123ABC"}.array(),
+        new @string[]{"αβδ", "ΑΒΔ"}.array(),
+        new @string[]{"abc", "xyz"}.array(),
+        new @string[]{"abc", "XYZ"}.array(),
+        new @string[]{"1", "2"}.array(),
+        new @string[]{"hello, world!", "hello, world!"}.array(),
+        new @string[]{"hello, world!", "Hello, World!"}.array(),
+        new @string[]{"hello, world!", "HELLO, WORLD!"}.array(),
+        new @string[]{"hello, world!", "jello, world!"}.array(),
+        new @string[]{"γειά, κόσμε!", "γειά, κόσμε!"}.array(),
+        new @string[]{"γειά, κόσμε!", "Γειά, Κόσμε!"}.array(),
+        new @string[]{"γειά, κόσμε!", "ΓΕΙΆ, ΚΌΣΜΕ!"}.array(),
+        new @string[]{"γειά, κόσμε!", "ΛΕΙΆ, ΚΌΣΜΕ!"}.array(),
+        new @string[]{"AESKey", "aesKey"}.array(),
+        new @string[]{"AESKEY", "aes_key"}.array(),
+        new @string[]{"aes_key", "AES_KEY"}.array(),
+        new @string[]{"AES_KEY", "aes-key"}.array(),
+        new @string[]{"aes-key", "AES-KEY"}.array(),
+        new @string[]{"AES-KEY", "aesKey"}.array(),
+        new @string[]{"aesKey", "AesKey"}.array(),
+        new @string[]{"AesKey", "AESKey"}.array(),
+        new @string[]{"AESKey", "aeskey"}.array(),
+        new @string[]{"DESKey", "aeskey"}.array(),
+        new @string[]{"AES Key", "aeskey"}.array()
     }.slice(), 2)) {
         var ss = vᴛ1.Clone();
 
@@ -50,7 +50,7 @@ public static void FuzzEqualFold(ж<testing.F> Ꮡf) {
         var got = equalFoldʗ1(x, y);
         var want = bytes.EqualFold(x, y);
         if (got != want) {
-            t.Errorf("equalFold(%q, %q) = %v, want %v"u8, x, y, got, want);
+            t.Errorf("equalFold(%q, %q) = %v, want %v", x, y, got, want);
         }
     });
 }

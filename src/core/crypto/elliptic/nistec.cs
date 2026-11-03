@@ -16,15 +16,15 @@ internal static ж<nistCurve<P224PointжnistPoint>> p224 = Ꮡ(new nistCurve<P22
 ));
 
 internal static void initP224() {
-    p224.Value.@params = Ꮡ(new CurveParams(
-        Name: "P-224"u8,
+    p224.@params = Ꮡ(new CurveParams(
+        Name: "P-224",
         BitSize: 224,
         // SP 800-186, Section 3.2.1.2
-        P: bigFromDecimal("26959946667150639794667015087019630673557916260026308143510066298881"u8),
-        N: bigFromDecimal("26959946667150639794667015087019625940457807714424391721682722368061"u8),
-        B: bigFromHex("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4"u8),
-        Gx: bigFromHex("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21"u8),
-        Gy: bigFromHex("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34"u8)
+        P: bigFromDecimal("26959946667150639794667015087019630673557916260026308143510066298881"),
+        N: bigFromDecimal("26959946667150639794667015087019625940457807714424391721682722368061"),
+        B: bigFromHex("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4"),
+        Gx: bigFromHex("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21"),
+        Gy: bigFromHex("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34")
     ));
 }
 
@@ -33,15 +33,15 @@ internal static ж<nistCurve<P256PointжnistPoint>> p256 = Ꮡ(new nistCurve<P25
 ));
 
 internal static void initP256() {
-    p256.Value.@params = Ꮡ(new CurveParams(
-        Name: "P-256"u8,
+    p256.@params = Ꮡ(new CurveParams(
+        Name: "P-256",
         BitSize: 256,
         // SP 800-186, Section 3.2.1.3
-        P: bigFromDecimal("115792089210356248762697446949407573530086143415290314195533631308867097853951"u8),
-        N: bigFromDecimal("115792089210356248762697446949407573529996955224135760342422259061068512044369"u8),
-        B: bigFromHex("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"u8),
-        Gx: bigFromHex("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"u8),
-        Gy: bigFromHex("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5"u8)
+        P: bigFromDecimal("115792089210356248762697446949407573530086143415290314195533631308867097853951"),
+        N: bigFromDecimal("115792089210356248762697446949407573529996955224135760342422259061068512044369"),
+        B: bigFromHex("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"),
+        Gx: bigFromHex("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"),
+        Gy: bigFromHex("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5")
     ));
 }
 
@@ -50,8 +50,8 @@ internal static ж<nistCurve<P384PointжnistPoint>> p384 = Ꮡ(new nistCurve<P38
 ));
 
 internal static void initP384() {
-    p384.Value.@params = Ꮡ(new CurveParams(
-        Name: "P-384"u8,
+    p384.@params = Ꮡ(new CurveParams(
+        Name: "P-384",
         BitSize: 384,
         // SP 800-186, Section 3.2.1.4
         P: bigFromDecimal("394020061963944792122790401001436138050797392704654"u8 + "46667948293404245721771496870329047266088258938001861606973112319"u8),
@@ -67,8 +67,8 @@ internal static ж<nistCurve<P521PointжnistPoint>> p521 = Ꮡ(new nistCurve<P52
 ));
 
 internal static void initP521() {
-    p521.Value.@params = Ꮡ(new CurveParams(
-        Name: "P-521"u8,
+    p521.@params = Ꮡ(new CurveParams(
+        Name: "P-521",
         BitSize: 521,
         // SP 800-186, Section 3.2.1.5
         P: bigFromDecimal("68647976601306097149819007990813932172694353001433"u8 + "0540939446345918554318339765605212255964066145455497729631139148"u8 + "0858037121987999716643812574028291115057151"u8),
@@ -124,12 +124,14 @@ internal static bool IsOnCurve<Point>(this ref nistCurve<Point> curve, ж<bigꓸ
         return false;
     }
     var (_, err) = curve.pointFromAffine(Ꮡx, Ꮡy);
-    return err == default!;
+    return err == nil;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string negativeCoordinateˢ = "negative coordinate"u8;
-internal static readonly @string overflowingCoordinateˢ = "overflowing coordinate"u8;
+internal static ref readonly @string negativeCoordinateˢ => ref negativeCoordinateˢᵇ;
+private static readonly @string negativeCoordinateˢᵇ = "negative coordinate"u8;
+internal static ref readonly @string overflowingCoordinateˢ => ref overflowingCoordinateˢᵇ;
+private static readonly @string overflowingCoordinateˢᵇ = "overflowing coordinate"u8;
 
 internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Ꮡx, ж<bigꓸInt> Ꮡy)
     where Point : nistPoint<Point>
@@ -141,17 +143,17 @@ internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<P
     // (0, 0) is by convention the point at infinity, which can't be represented
     // in affine coordinates. See Issue 37294.
     if (x.Sign() == 0 && y.Sign() == 0) {
-        return (curve.newPoint(), default!);
+        return (curve.newPoint(), default);
     }
     // Reject values that would not get correctly encoded.
     if (x.Sign() < 0 || y.Sign() < 0) {
         return (p, errors.New(negativeCoordinateˢ));
     }
-    if (x.BitLen() > (~curve.@params).BitSize || y.BitLen() > (~curve.@params).BitSize) {
+    if (x.BitLen() > curve.@params.BitSize || y.BitLen() > curve.@params.BitSize) {
         return (p, errors.New(overflowingCoordinateˢ));
     }
     // Encode the coordinates and let SetBytes reject invalid points.
-    nint byteLen = ((~curve.@params).BitSize + 7) / 8;
+    nint byteLen = (curve.@params.BitSize + 7) / 8;
     var buf = new slice<byte>(1 + 2 * byteLen);
     buf[0] = 4; // uncompressed point
     x.FillBytes(buf.slice(1, 1 + byteLen));
@@ -162,8 +164,8 @@ internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<P
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) pointToAffine<Point>(this ref nistCurve<Point> curve, Point p)
     where Point : nistPoint<Point>
 {
-    ж<bigꓸInt> x = default!;
-    ж<bigꓸInt> y = default!;
+    ж<bigꓸInt> x = default;
+    ж<bigꓸInt> y = default;
 
     var @out = p.Bytes();
     if (len(@out) == 1 && @out[0] == 0) {
@@ -171,31 +173,31 @@ internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) pointToAffine<Point>(this ref
         // coordinates API represents as (0, 0) by convention.
         return (@new<bigꓸInt>(), @new<bigꓸInt>());
     }
-    nint byteLen = ((~curve.@params).BitSize + 7) / 8;
+    nint byteLen = (curve.@params.BitSize + 7) / 8;
     x = @new<bigꓸInt>().SetBytes(@out.slice(1, 1 + byteLen));
     y = @new<bigꓸInt>().SetBytes(@out.slice(1 + byteLen));
     return (x, y);
 }
 
-internal static (ж<bigꓸInt>, ж<bigꓸInt>) Add<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1, ж<bigꓸInt> Ꮡx2, ж<bigꓸInt> Ꮡy2)
+internal static (ж<bigꓸInt>, ж<bigꓸInt>) Add<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> x1, ж<bigꓸInt> y1, ж<bigꓸInt> x2, ж<bigꓸInt> y2)
     where Point : nistPoint<Point>
 {
-    var (p1, err) = curve.pointFromAffine(Ꮡx1, Ꮡy1);
-    if (err != default!) {
+    var (p1, err) = curve.pointFromAffine(x1, y1);
+    if (err != nil) {
         throw panic("crypto/elliptic: Add was called on an invalid point");
     }
-    (var p2, err) = curve.pointFromAffine(Ꮡx2, Ꮡy2);
-    if (err != default!) {
+    (var p2, err) = curve.pointFromAffine(x2, y2);
+    if (err != nil) {
         throw panic("crypto/elliptic: Add was called on an invalid point");
     }
     return curve.pointToAffine(p1.Add(p1, p2));
 }
 
-internal static (ж<bigꓸInt>, ж<bigꓸInt>) Double<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Ꮡx1, ж<bigꓸInt> Ꮡy1)
+internal static (ж<bigꓸInt>, ж<bigꓸInt>) Double<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> x1, ж<bigꓸInt> y1)
     where Point : nistPoint<Point>
 {
-    var (p, err) = curve.pointFromAffine(Ꮡx1, Ꮡy1);
-    if (err != default!) {
+    var (p, err) = curve.pointFromAffine(x1, y1);
+    if (err != nil) {
         throw panic("crypto/elliptic: Double was called on an invalid point");
     }
     return curve.pointToAffine(p.Double(p));
@@ -206,28 +208,28 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>) Double<Point>(this ref nistCurve<
 internal static slice<byte> normalizeScalar<Point>(this ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
-    nint byteSize = ((~curve.@params).N.BitLen() + 7) / 8;
+    nint byteSize = (curve.@params.N.BitLen() + 7) / 8;
     if (len(scalar) == byteSize) {
         return scalar;
     }
     var s = @new<bigꓸInt>().SetBytes(scalar);
     if (len(scalar) > byteSize) {
-        s.Mod(s, (~curve.@params).N);
+        s.Mod(s, curve.@params.N);
     }
     var @out = new slice<byte>(byteSize);
     return s.FillBytes(@out);
 }
 
-internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> ᏑBx, ж<bigꓸInt> ᏑBy, slice<byte> scalar)
+internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> Bx, ж<bigꓸInt> By, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
-    var (p, err) = curve.pointFromAffine(ᏑBx, ᏑBy);
-    if (err != default!) {
+    var (p, err) = curve.pointFromAffine(Bx, By);
+    if (err != nil) {
         throw panic("crypto/elliptic: ScalarMult was called on an invalid point");
     }
     scalar = curve.normalizeScalar(scalar);
     (p, err) = p.ScalarMult(p, scalar);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("crypto/elliptic: nistec rejected normalized scalar");
     }
     return curve.pointToAffine(p);
@@ -238,7 +240,7 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult<Point>(this ref ni
 {
     scalar = curve.normalizeScalar(scalar);
     var (p, err) = curve.newPoint().ScalarBaseMult(scalar);
-    if (err != default!) {
+    if (err != nil) {
         throw panic("crypto/elliptic: nistec rejected normalized scalar");
     }
     return curve.pointToAffine(p);
@@ -247,21 +249,21 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult<Point>(this ref ni
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal<Point>(this ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
-    ж<bigꓸInt> x = default!;
-    ж<bigꓸInt> y = default!;
+    ж<bigꓸInt> x = default;
+    ж<bigꓸInt> y = default;
 
     if (len(data) == 0 || data[0] != 4) {
-        return (default!, default!);
+        return (default, default);
     }
     // Use SetBytes to check that data encodes a valid point.
     var (_, err) = curve.newPoint().SetBytes(data);
-    if (err != default!) {
-        return (default!, default!);
+    if (err != nil) {
+        return (default, default);
     }
     // We don't use pointToAffine because it involves an expensive field
     // inversion to convert from Jacobian to affine coordinates, which we
     // already have.
-    nint byteLen = ((~curve.@params).BitSize + 7) / 8;
+    nint byteLen = (curve.@params.BitSize + 7) / 8;
     x = @new<bigꓸInt>().SetBytes(data.slice(1, 1 + byteLen));
     y = @new<bigꓸInt>().SetBytes(data.slice(1 + byteLen));
     return (x, y);
@@ -271,11 +273,11 @@ internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) UnmarshalCompressed<Point>(th
     where Point : nistPoint<Point>
 {
     if (len(data) == 0 || (data[0] != 2 && data[0] != 3)) {
-        return (default!, default!);
+        return (default, default);
     }
     var (p, err) = curve.newPoint().SetBytes(data);
-    if (err != default!) {
-        return (default!, default!);
+    if (err != nil) {
+        return (default, default);
     }
     return curve.pointToAffine(p);
 }

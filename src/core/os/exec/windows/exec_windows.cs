@@ -17,7 +17,7 @@ internal static bool skipStdinCopyError(error err) {
     // See Issue 20445.
     syscall.Errno _ERROR_NO_DATA = /* syscall.Errno(0xe8) */ 232;
     var (pe, ok) = err._<ж<fs.PathError>>(ᐧ);
-    return ok && (~pe).Op == "write"u8 && (~pe).Path == "|1"u8 && (AreEqual((~pe).Err, syscall.ERROR_BROKEN_PIPE) || AreEqual((~pe).Err, _ERROR_NO_DATA));
+    return ok && pe.Op == "write"u8 && pe.Path == "|1"u8 && (AreEqual(pe.Err, syscall.ERROR_BROKEN_PIPE) || AreEqual(pe.Err, _ERROR_NO_DATA));
 }
 
 } // end exec_package

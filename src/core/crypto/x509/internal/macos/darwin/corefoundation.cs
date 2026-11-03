@@ -39,7 +39,7 @@ public static slice<byte> CFDataToSlice(CFRef data) {
 // in CFString, or an empty string if it's invalid.
 public static @string CFStringToString(CFRef @ref) {
     var (data, err) = CFStringCreateExternalRepresentation(@ref);
-    if (err != default!) {
+    if (err != nil) {
         return ""u8;
     }
     var b = CFDataToSlice(data);
@@ -105,7 +105,8 @@ internal static partial void x509_CFDictionaryGetValueIfPresent_trampoline();
 internal static UntypedInt kCFNumberSInt32Type => 3;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cfNumberGetValueCallˢ = "CFNumberGetValue call failed"u8;
+private static ref readonly @string cfNumberGetValueCallˢ => ref cfNumberGetValueCallˢᵇ;
+private static readonly @string cfNumberGetValueCallˢᵇ = "CFNumberGetValue call failed"u8;
 
 //go:cgo_import_dynamic x509_CFNumberGetValue CFNumberGetValue "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static (int32, error) CFNumberGetValue(CFRef num) {
@@ -116,7 +117,7 @@ public static (int32, error) CFNumberGetValue(CFRef num) {
     if (ret == 0) {
         return (0, errors.New(cfNumberGetValueCallˢ));
     }
-    return (value, default!);
+    return (value, default);
 }
 
 internal static partial void x509_CFNumberGetValue_trampoline();
@@ -208,7 +209,8 @@ public static nint CFErrorGetCode(CFRef errRef) {
 internal static partial void x509_CFErrorGetCode_trampoline();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string stringCanTBeRepresentedˢ = "string can't be represented as UTF-8"u8;
+private static ref readonly @string stringCanTBeRepresentedˢ => ref stringCanTBeRepresentedˢᵇ;
+private static readonly @string stringCanTBeRepresentedˢᵇ = "string can't be represented as UTF-8"u8;
 
 //go:cgo_import_dynamic x509_CFStringCreateExternalRepresentation CFStringCreateExternalRepresentation "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation"
 public static (CFRef, error) CFStringCreateExternalRepresentation(CFRef strRef) {
@@ -216,7 +218,7 @@ public static (CFRef, error) CFStringCreateExternalRepresentation(CFRef strRef) 
     if (ret == 0) {
         return (0, errors.New(stringCanTBeRepresentedˢ));
     }
-    return ((CFRef)ret, default!);
+    return ((CFRef)ret, default);
 }
 
 internal static partial void x509_CFStringCreateExternalRepresentation_trampoline();

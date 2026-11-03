@@ -8,7 +8,6 @@ global using static global::go.crypto.elliptic_package;
 
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,7 +26,11 @@ using static global::go.crypto.elliptic_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(global::go.crypto.elliptic_package.CurveParams))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -37,9 +40,9 @@ using static global::go.crypto.elliptic_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/elliptic/elliptic_test.go", "elliptic_test.cs", "ABImwpL2ggAJGoKUgoKSgvqCgoKCyoKCgoKCpoKCgoKUgoLKgoKmsqaCgpSSlJKmkpSSppKUkqaSyoKCgoKUgoKUgoKmgqaAgsiAgqSCgoKAggAICIKCgoKClIKCgpSCyoKU1oKCyoKClIKCgpSAgramgoKUgriClICCAAUQsoIACwaCgoK4goKmgoKCpoKCgqaCgoKmgoKC7oCCgpQACwiCgoKCgoKUgoKCgqaCgoKCuIKmgoKClPqigpSCgqaCgqaClIK4goKCgoKCAAkKggAFEoKCksqCgoKCgoKUyoKCgoKCgoIACQqCgoKigoKCgoK4ooKCgoKC", "43-46:1;52-56:1;61-77:1;157-170:1;229-233:1;278-283:1;284-289:2;291-297:3;303-309:4;337-343:1;358-360:1;365-374:1;378-386:1;390-412:1;392-401:1.1;402-411:1.2", "", "35=P256/1/2/4,P256/2/2/5,genericParamsForCurve/1/4/5,P224/1/2/6,P224/2/2/7,genericParamsForCurve/2/4/7,P384/1/2/8,P384/2/2/9,genericParamsForCurve/3/4/9,P521/1/2/10,P521/2/2/11,genericParamsForCurve/4/4/11;413=P256/1/1/4,P224/1/1/5,P384/1/1/6,P521/1/1/7")]
-[assembly: go.GoPositionMap("crypto/elliptic/p224_test.go", "p224_test.cs", "ABQmAIYCjgSCgoKCgpSCgpSCypSCgoKClIKClIL6lIKCgoI=")]
-[assembly: go.GoPositionMap("crypto/elliptic/p256_test.go", "p256_test.cs", "ABIkABAiooKUgoKClIKClIKCgoKmgsqCgoKCgoKClIKCyoKCgoKCgpSCgg==")]
+[assembly: GoPositionMap("crypto/elliptic/elliptic_test.go", "elliptic_test.cs", "ABImwoL2ggAJGoKUgoKSgvqCgoKCyoKCgoKCpoKCgoKUgoLKgoKmsqaCgpSSlJKmkpSSppKUkqaSyoKCgoKUgoKUgoKmgqaAgsiAgqSCgoKAggAICIKCgoKClIKCgpSCyoKU1oKCyoKClIKCgpSAgramgoKUgriClICCAAUQsoIAEQaCgoK4goKmgoKCpoKCgqaCgoKmgoKC7oCCgpQADgiCgoKCgoKUgoKCgqaCgoKCuIKmgoKClPqCgpSCgqaCgqaClIK4goKCgoKCAAkKggAFEoKCksqCgoKCgoKUyoKCgoKCgoIACwqCgoKigoKCgoK4ooKCgoKC", "43-46:1;52-56:1;61-77:1;157-170:1;229-233:1;278-283:1;284-289:2;291-297:3;303-309:4;337-343:1;358-360:1;365-374:1;378-386:1;390-412:1;392-401:1.1;402-411:1.2", "", "34=P256/1/2/4,P256/2/2/5,genericParamsForCurve/1/4/5,P224/1/2/6,P224/2/2/7,genericParamsForCurve/2/4/7,P384/1/2/8,P384/2/2/9,genericParamsForCurve/3/4/9,P521/1/2/10,P521/2/2/11,genericParamsForCurve/4/4/11;419=P256/1/1/4,P224/1/1/5,P384/1/1/6,P521/1/1/7")]
+[assembly: GoPositionMap("crypto/elliptic/p224_test.go", "p224_test.cs", "ABQmAIYCjgSCgoKCgpSCgpSCypSCgoKClIKClIL6lIKCgoI=")]
+[assembly: GoPositionMap("crypto/elliptic/p256_test.go", "p256_test.cs", "ABIkABAiooKUgoKClIKClIKCgoKmgsqCgoKCgoKClIKCyoKCgoKCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

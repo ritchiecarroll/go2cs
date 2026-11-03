@@ -25,8 +25,8 @@ partial struct CounterKDF {
 }
 
 // NewCounterKDF creates a new CounterKDF with the given key.
-public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> Ꮡb) {
-    return Ꮡ(new CounterKDF(mac: NewCMAC(Ꮡb).Value.ΔClone()));
+public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> b) {
+    return Ꮡ(new CounterKDF(mac: NewCMAC(b).Value.ΔClone()));
 }
 
 // DeriveKey derives a key from the given label and context.
@@ -41,10 +41,10 @@ public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[1
     copy(input[4..], context[..]);
 
     input[1] = 0x01; // i = 1
-    var K1 = Ꮡkdf.of(CounterKDF.Ꮡmac).MAC(input[..]);
+    var K1 = Ꮡkdf.Ꮡmac.MAC(input[..]);
 
     input[1] = 0x02; // i = 2
-    var K2 = Ꮡkdf.of(CounterKDF.Ꮡmac).MAC(input[..]);
+    var K2 = Ꮡkdf.Ꮡmac.MAC(input[..]);
 
     copy(output[..], K1[..]);
     copy(output[(int)(aes.ΔBlockSize)..], K2[..]);

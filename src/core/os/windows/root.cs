@@ -27,14 +27,14 @@ public static (ж<File>, error) OpenInRoot(@string dir, @string name) {
     GoFrame ᒐ = default;
     try {
         var (r, err) = OpenRoot(dir);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
         return r.Open(name);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -115,7 +115,8 @@ public static (ж<File>, error) Create(this ж<Root> Ꮡr, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unsupportedFileModeˢ = "unsupported file mode"u8;
+internal static ref readonly @string unsupportedFileModeˢ => ref unsupportedFileModeˢᵇ;
+private static readonly @string unsupportedFileModeˢᵇ = "unsupported file mode"u8;
 
 // OpenFile opens the named file in the root.
 // See [OpenFile] for more details.
@@ -126,15 +127,15 @@ public static (ж<File>, error) OpenFile(this ж<Root> Ꮡr, @string name, nint 
     ref var r = ref Ꮡr.DerefOrNull();
 
     if ((FileMode)(perm & 511) != perm) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat"u8, Path: name, Err: errors.New(unsupportedFileModeˢ)))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openat", Path: name, Err: errors.New(unsupportedFileModeˢ)))));
     }
     r.logOpen(name);
     var (rf, err) = rootOpenFileNolog(Ꮡr, name, flag, perm);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    rf.Value.appendMode = (flag & O_APPEND) != 0;
-    return (rf, default!);
+    rf.appendMode = (flag & O_APPEND) != 0;
+    return (rf, default);
 }
 
 // OpenRoot opens the named directory in the root.
@@ -160,7 +161,7 @@ public static error Chmod(this ж<Root> Ꮡr, @string name, FileMode mode) {
 // Mkdir returns an error.
 public static error Mkdir(this ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
-        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Path: name, Err: errors.New(unsupportedFileModeˢ))));
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢ))));
     }
     return rootMkdir(ref (Ꮡr).DerefOrNull(), name, perm);
 }
@@ -172,7 +173,7 @@ public static error Mkdir(this ж<Root> Ꮡr, @string name, FileMode perm) {
 // MkdirAll returns an error.
 public static error MkdirAll(this ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
-        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat"u8, Path: name, Err: errors.New(unsupportedFileModeˢ))));
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢ))));
     }
     return rootMkdirAll(Ꮡr, name, perm);
 }
@@ -270,14 +271,14 @@ public static (slice<byte>, error) ReadFile(this ж<Root> Ꮡr, @string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Ꮡr.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return readFileContents(statOrZero(f), f.Read);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -285,12 +286,12 @@ public static (slice<byte>, error) ReadFile(this ж<Root> Ꮡr, @string name) {
 // See [WriteFile] for more details.
 public static error WriteFile(this ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) {
     var (f, err) = Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (_, err) = f.Write(data);
     {
-        var err1 = f.Close(); if (err == default!) {
+        var err1 = f.Close(); if (err == nil) {
             err = err1;
         }
     }
@@ -299,7 +300,7 @@ public static error WriteFile(this ж<Root> Ꮡr, @string name, slice<byte> data
 
 internal static void logOpen(this ref Root r, @string name) {
     {
-        var log = testlog.Logger(); if (log != default!) {
+        var log = testlog.Logger(); if (log != nil) {
             // This won't be right if r's name has changed since it was opened,
             // but it's the best we can do.
             log.Open(joinPath(r.Name(), name));
@@ -309,7 +310,7 @@ internal static void logOpen(this ref Root r, @string name) {
 
 internal static void logStat(this ref Root r, @string name) {
     {
-        var log = testlog.Logger(); if (log != default!) {
+        var log = testlog.Logger(); if (log != nil) {
             // This won't be right if r's name has changed since it was opened,
             // but it's the best we can do.
             log.Stat(joinPath(r.Name(), name));
@@ -318,7 +319,8 @@ internal static void logStat(this ref Root r, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string emptyPathˢ = "empty path"u8;
+internal static ref readonly @string emptyPathˢ => ref emptyPathˢᵇ;
+private static readonly @string emptyPathˢᵇ = "empty path"u8;
 
 // splitPathInRoot splits a path into components
 // and joins it with the given prefix and suffix.
@@ -330,30 +332,30 @@ internal static readonly @string emptyPathˢ = "empty path"u8;
 //
 // endsInSlash reports whether the path ends in one or more slashes.
 internal static (slice<@string>, bool endsInSlash, error err) splitPathInRoot(@string s, slice<@string> prefix, slice<@string> suffix) {
-    bool endsInSlash = default!;
-    error err = default!;
+    bool endsInSlash = default;
+    error err = default;
 
     if (len(s) == 0) {
-        return (default!, false, errors.New(emptyPathˢ));
+        return (default, false, errors.New(emptyPathˢ));
     }
     if (IsPathSeparator(s[0])) {
-        return (default!, false, errPathEscapes);
+        return (default, false, errPathEscapes);
     }
 
     if (runtime.GOOS == "windows"u8) {
         // Windows cleans paths before opening them.
         (s, err) = rootCleanPath(s, prefix, suffix);
-        if (err != default!) {
-            return (default!, false, err);
+        if (err != nil) {
+            return (default, false, err);
         }
-        prefix = default!;
-        suffix = default!;
+        prefix = default;
+        suffix = default;
     }
 
     var parts = slices.Clone<slice<@string>, @string>(prefix);
     nint i = 0;
     nint j = 1;
-    while (ᐧ) {
+    for (;;) {
         if (j < len(s) && !IsPathSeparator(s[j])) {
             // Keep looking for the end of this component.
             j++;
@@ -384,7 +386,7 @@ internal static (slice<@string>, bool endsInSlash, error err) splitPathInRoot(@s
         parts = parts.slice(0, len(parts) - 1);
     }
     parts = appendꓸꓸꓸ(parts, suffix);
-    return (parts, endsInSlash, default!);
+    return (parts, endsInSlash, default);
 }
 
 // FS returns a file system (an fs.FS) for the tree of files in the root.
@@ -400,13 +402,13 @@ partial struct rootFS /*Root*/;
 internal static (fs.File, error) Open(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: ErrInvalid))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open", Path: name, Err: ErrInvalid))));
     }
     var (f, err) = r.Open(name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (new FileжFile(f), default!);
+    return (new FileжFile(f), default);
 }
 
 internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string name) {
@@ -414,7 +416,7 @@ internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string
     try {
         var r = Ꮡrfs.Reinterpret<rootFS, Root>();
         if (!isValidRootFSPath(name)) {
-            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: ErrInvalid))));
+            return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir", Path: name, Err: ErrInvalid))));
         }
 
         // This isn't efficient: We just open a regular file and ReadDir it.
@@ -424,8 +426,8 @@ internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string
         //
         // This suffices for the moment.
         var (f, err) = r.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
@@ -433,7 +435,7 @@ internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string
         slices.SortFunc(dirs, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (dirs, err);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -442,24 +444,24 @@ internal static (slice<byte>, error) ReadFile(this ж<rootFS> Ꮡrfs, @string na
     try {
         var r = Ꮡrfs.Reinterpret<rootFS, Root>();
         if (!isValidRootFSPath(name)) {
-            return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile"u8, Path: name, Err: ErrInvalid))));
+            return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile", Path: name, Err: ErrInvalid))));
         }
         var (f, err) = r.Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         return readFileContents(statOrZero(f), f.Read);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static (@string, error) ReadLink(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
-        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: ErrInvalid))));
+        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink", Path: name, Err: ErrInvalid))));
     }
     return r.Readlink(name);
 }
@@ -467,7 +469,7 @@ internal static (@string, error) ReadLink(this ж<rootFS> Ꮡrfs, @string name) 
 internal static (FileInfo, error) Stat(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat"u8, Path: name, Err: ErrInvalid))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: ErrInvalid))));
     }
     return r.Stat(name);
 }
@@ -475,7 +477,7 @@ internal static (FileInfo, error) Stat(this ж<rootFS> Ꮡrfs, @string name) {
 internal static (FileInfo, error) Lstat(this ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat"u8, Path: name, Err: ErrInvalid))));
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: ErrInvalid))));
     }
     return r.Lstat(name);
 }
@@ -490,7 +492,7 @@ internal static bool isValidRootFSPath(@string name) {
         // On Windows, reject the path if it contains any \ separators.
         // Other forms of invalid path (for example, "NUL") are handled by
         // Root's usual file lookup mechanisms.
-        if (stringslite.IndexByte(name, (rune)'\\') >= 0) {
+        if (stringslite.IndexByte(name, (byte)'\\') >= 0) {
             return false;
         }
     }

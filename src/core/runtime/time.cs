@@ -15,13 +15,13 @@ partial class runtime_package {
 
 //go:linkname time_runtimeNow time.runtimeNow
 internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
-    int64 sec = default!;
-    int32 nsec = default!;
+    int64 sec = default;
+    int32 nsec = default;
 
     {
         var bubble = getg().Value.bubble; if (bubble != nil) {
-            sec = (~bubble).now / (1000 * 1000 * 1000);
-            nsec = (int32)((~bubble).now % (1000 * 1000 * 1000));
+            sec = bubble.now / (1000 * 1000 * 1000);
+            nsec = (int32)(bubble.now % (1000 * 1000 * 1000));
             // Don't return a monotonic time inside a synctest bubble.
             // If we return a monotonic time based on the fake clock,
             // arithmetic on times created inside/outside bubbles is confusing.
@@ -38,7 +38,7 @@ internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
 internal static int64 time_runtimeNano() {
     var gp = getg();
     if ((~gp).bubble != nil) {
-        return (~(~gp).bubble).now;
+        return (~gp).bubble.now;
     }
     return nanotime();
 }
@@ -61,11 +61,11 @@ partial struct timer {
     // mu protects reads and writes to all fields, with exceptions noted below.
     internal mutex mu;
     internal atomic.Uint8 astate; // atomic copy of state bits at last unlock
-    internal uint8 state;        // state bits
+    internal uint8 state;         // state bits
     internal bool isChan;         // timer has a channel; immutable; can be read without lock
     internal bool isFake;         // timer is using fake time; immutable; can be read without lock
     internal uint32 blocked; // number of goroutines blocked on timer's channel
-    internal uint32 rand; // randomizes order of timers at same instant; only set when isFake
+    internal uint32 rand;    // randomizes order of timers at same instant; only set when isFake
     // Timer wakes up at when, and then at when+period, ... (period > 0 only)
     // each time calling f(arg, seq, delay) in the timer goroutine, so f must be
     // a well-behaved function and not block.
@@ -172,12 +172,12 @@ internal static bool less(this timerWhen tw, timerWhen other) {
         // When timers wake at the same time, use a per-timer random value to order them.
         // We only set the random value for timers using fake time, since there's
         // no practical way to schedule real-time timers for the same instant.
-        return (~tw.timer).rand < (~other.timer).rand;
+        return tw.timer.rand < other.timer.rand;
     }}
 }
 
 internal static void @lock(this ж<timers> Ꮡts) {
-    @lock(Ꮡts.of(timers.Ꮡmu));
+    @lock(Ꮡts.Ꮡmu);
 }
 
 internal static void unlock(this ж<timers> Ꮡts) {
@@ -190,9 +190,9 @@ internal static void unlock(this ж<timers> Ꮡts) {
     // add it back, and unlock. We want ts.len.Load to return 1 the
     // entire time, never 0. This is important for pidleput deciding
     // whether ts is empty.
-    Ꮡts.of(timers.Ꮡlen).Store((uint32)len(ts.heap));
+    Ꮡts.Ꮡlen.Store((uint32)len(ts.heap));
 
-    unlock(Ꮡts.of(timers.Ꮡmu));
+    unlock(Ꮡts.Ꮡmu);
 }
 
 // Timer state field.
@@ -231,35 +231,37 @@ internal static void trace1(this ж<timer> Ꮡt, @string op) {
     if (!timerDebug) {
         return;
     }
-    var bits = new @string[]{"h"u8, "m"u8, "z"u8, "c"u8}.array();
+    var bits = new @string[]{"h", "m", "z", "c"}.array();
     foreach (var i in range(3)) {
         if ((uint8)(t.state & (((uint8)1).Lsh((int64)(i)))) == 0) {
-            bits[i] = "-"u8;
+            bits[i] = "-";
         }
     }
     if (!t.isChan) {
-        bits[3] = "-"u8;
+        bits[3] = "-";
     }
-    print((@string)"T "u8, Ꮡt.OrTypedNil(), (@string)" "u8, bits[0], bits[1], bits[2], bits[3], (@string)" b="u8, t.blocked, (@string)" "u8, op, (@string)"\n"u8);
+    print((@string)"T ", Ꮡt.OrTypedNil(), (@string)" ", bits[0], bits[1], bits[2], bits[3], (@string)" b=", t.blocked, (@string)" ", op, (@string)"\n");
 }
 
 internal static void trace(this ж<timers> Ꮡts, @string op) {
     if (timerDebug) {
-        println((@string)"TS"u8, Ꮡts.OrTypedNil(), op);
+        println((@string)"TS", Ꮡts.OrTypedNil(), op);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lockˢ = "lock"u8;
+internal static ref readonly @string lockˢ => ref lockˢᵇ;
+private static readonly @string lockˢᵇ = "lock"u8;
 
 // lock locks the timer, allowing reading or writing any of the timer fields.
 internal static void @lock(this ж<timer> Ꮡt) {
-    @lock(Ꮡt.of(timer.Ꮡmu));
+    @lock(Ꮡt.Ꮡmu);
     Ꮡt.trace(lockˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unlockˢ = "unlock"u8;
+internal static ref readonly @string unlockˢ => ref unlockˢᵇ;
+private static readonly @string unlockˢᵇ = "unlock"u8;
 
 // unlock updates t.astate and unlocks the timer.
 internal static void unlock(this ж<timer> Ꮡt) {
@@ -268,8 +270,8 @@ internal static void unlock(this ж<timer> Ꮡt) {
     Ꮡt.trace(unlockˢ);
     // Let heap fast paths know whether heap[i].when is accurate.
     // Also let maybeRunChan know whether channel is in heap.
-    Ꮡt.of(timer.Ꮡastate).Store(t.state);
-    unlock(Ꮡt.of(timer.Ꮡmu));
+    Ꮡt.Ꮡastate.Store(t.state);
+    unlock(Ꮡt.Ꮡmu);
 }
 
 // hchan returns the channel in t.arg.
@@ -283,11 +285,12 @@ internal static ж<Δhchan> hchan(this ж<timer> Ꮡt) {
     // Note: t.arg is a chan time.Time,
     // and runtime cannot refer to that type,
     // so we cannot use a type assertion.
-    return (ж<Δhchan>)(uintptr)((~efaceOf(Ꮡt.of(timer.Ꮡarg))).data);
+    return (ж<Δhchan>)(uintptr)((~efaceOf(Ꮡt.Ꮡarg)).data);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string updateHeapˢ = "updateHeap"u8;
+internal static ref readonly @string updateHeapˢ => ref updateHeapˢᵇ;
+private static readonly @string updateHeapˢᵇ = "updateHeap"u8;
 
 // updateHeap updates t as directed by t.state, updating t.state
 // and returning a bool indicating whether the state (and ts.heap[0].when) changed.
@@ -302,14 +305,14 @@ internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
     assertWorldStoppedOrLockHeld(ref nonnil(ref t).mu);
     Ꮡt.trace(updateHeapˢ);
     var ts = t.ts;
-    if (ts == nil || Ꮡt != (~ts).heap[0].timer) {
+    if (ts == nil || Ꮡt != ts.heap[0].timer) {
         badTimer();
     }
-    assertLockHeld(ts.of(timers.Ꮡmu));
+    assertLockHeld(ts.Ꮡmu);
     if ((uint8)(t.state & timerZombie) != 0) {
         // Take timer out of heap.
         t.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
-        ts.of(timers.Ꮡzombies).Add(-1);
+        ts.Ꮡzombies.Add(-1);
         ts.deleteMin();
         return true;
     }
@@ -317,7 +320,7 @@ internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) {
     if ((uint8)(t.state & timerModified) != 0) {
         // Update ts.heap[0].when and move within heap.
         t.state &= unchecked((uint8)~(uint8)(timerModified));
-        (~ts).heap[0].when = t.when;
+        ts.heap[0].when = t.when;
         ts.siftDown(0);
         ts.updateMinWhenHeap();
         return true;
@@ -351,14 +354,14 @@ internal static void timeSleep(int64 ns) {
         t = @new<timer>();
         t.init(goroutineReady, gp.OrTypedNil());
         if ((~gp).bubble != nil) {
-            t.Value.isFake = true;
+            t.isFake = true;
         }
         gp.Value.timer = t;
     }
-    int64 now = default!;
+    int64 now = default;
     {
-        var bubble = gp.Value.bubble; if (bubble != nil){
-            now = bubble.Value.now;
+        var bubble = gp.Value.bubble; if (bubble != nil) {
+            now = bubble.now;
         } else {
             now = nanotime();
         }
@@ -368,12 +371,12 @@ internal static void timeSleep(int64 ns) {
         when = maxWhen;
     }
     gp.Value.sleepWhen = when;
-    if ((~t).isFake){
+    if (t.isFake) {
         // Call timer.reset in this goroutine, since it's the one in a bubble.
         // We don't need to worry about the timer function running before the goroutine
         // is parked, because time won't advance until we park.
         resetForSleep(gp, nil);
-        gopark(default!, nil, waitReasonSleep, traceBlockSleep, 1);
+        gopark(default, nil, waitReasonSleep, traceBlockSleep, 1);
     } else {
         gopark(resetForSleep, nil, waitReasonSleep, traceBlockSleep, 1);
     }
@@ -400,8 +403,10 @@ partial struct timeTimer {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string newˢ = "new"u8;
-internal static readonly @string invalidTimerChannelNoˢ = "invalid timer channel: no capacity"u8;
+internal static ref readonly @string newˢ => ref newˢᵇ;
+private static readonly @string newˢᵇ = "new"u8;
+internal static ref readonly @string invalidTimerChannelNoˢ => ref invalidTimerChannelNoˢᵇ;
+private static readonly @string invalidTimerChannelNoˢᵇ = "invalid timer channel: no capacity"u8;
 
 // newTimer allocates and returns a new time.Timer or time.Ticker (same layout)
 // with the given parameters.
@@ -411,22 +416,22 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
     ref var c = ref Ꮡc.DerefOrNull();
 
     var t = @new<timeTimer>();
-    t.of(timeTimer.Ꮡtimer).init(default!, default!);
+    t.Ꮡtimer.init(default, default);
     t.of(timeTimer.Ꮡtimer).trace(newˢ);
     if (raceenabled) {
-        racerelease(@unsafe.Pointer.FromPinnedBox(t.of(timeTimer.Ꮡtimer)));
+        racerelease(@unsafe.Pointer.FromPinnedBox(t.Ꮡtimer));
     }
     if (Ꮡc != nil) {
         lockInit(ref (t.of(timeTimer.ᏑsendLock)).DerefOrNull(), lockRankTimerSend);
-        t.Value.isChan = true;
-        c.timer = t.of(timeTimer.Ꮡtimer);
+        t.isChan = true;
+        c.timer = t.Ꮡtimer;
         if (c.dataqsiz == 0) {
             @throw(invalidTimerChannelNoˢ);
         }
     }
     {
         var bubble = getg().Value.bubble; if (bubble != nil) {
-            t.Value.isFake = true;
+            t.isFake = true;
         }
     }
     t.of(timeTimer.Ꮡtimer).modify(when, period, f, arg, 0);
@@ -435,7 +440,8 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stopOfSynctestTimerFromˢ = "stop of synctest timer from outside bubble"u8;
+internal static ref readonly @string stopOfSynctestTimerFromˢ => ref stopOfSynctestTimerFromˢᵇ;
+private static readonly @string stopOfSynctestTimerFromˢᵇ = "stop of synctest timer from outside bubble"u8;
 
 // stopTimer stops a timer.
 // It reports whether t was stopped before being run.
@@ -451,7 +457,8 @@ internal static bool stopTimer(ж<timeTimer> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string resetOfSynctestTimerFromˢ = "reset of synctest timer from outside bubble"u8;
+internal static ref readonly @string resetOfSynctestTimerFromˢ => ref resetOfSynctestTimerFromˢᵇ;
+private static readonly @string resetOfSynctestTimerFromˢᵇ = "reset of synctest timer from outside bubble"u8;
 
 // resetTimer resets an inactive timer, adding it to the timer heap.
 //
@@ -462,7 +469,7 @@ internal static bool resetTimer(ж<timeTimer> Ꮡt, int64 when, int64 period) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (raceenabled) {
-        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡt.of(timeTimer.Ꮡtimer)));
+        racerelease(@unsafe.Pointer.FromPinnedBox(Ꮡt.Ꮡtimer));
     }
     if (t.isFake && (~getg()).bubble == nil) {
         fatal(resetOfSynctestTimerFromˢ);
@@ -478,7 +485,8 @@ internal static void goroutineReady(any arg, uintptr _Δp1, int64 _Δp2) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tsSetInTimerˢ = "ts set in timer"u8;
+internal static ref readonly @string tsSetInTimerˢ => ref tsSetInTimerˢᵇ;
+private static readonly @string tsSetInTimerˢᵇ = "ts set in timer"u8;
 
 // addHeap adds t to the timers heap.
 // The caller must hold ts.lock or the world must be stopped.
@@ -515,7 +523,7 @@ internal static void addHeap(this ж<timers> Ꮡts, ж<timer> Ꮡt) {
 internal static void maybeRunAsync(this ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    assertLockHeld(Ꮡt.of(timer.Ꮡmu));
+    assertLockHeld(Ꮡt.Ꮡmu);
     if ((uint8)(t.state & timerHeaped) == 0 && t.isChan && t.when > 0) {
         // If timer should have triggered already (but nothing looked at it yet),
         // trigger now, so that a receive after the stop sees the "old" value
@@ -536,7 +544,8 @@ internal static void maybeRunAsync(this ж<timer> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string stopˢ = "stop"u8;
+internal static ref readonly @string stopˢ => ref stopˢᵇ;
+private static readonly @string stopˢᵇ = "stop"u8;
 
 // stop stops the timer t. It may be on some other P, so we can't
 // actually remove it from the timers heap. We can only mark it as stopped.
@@ -547,7 +556,7 @@ internal static bool stop(this ж<timer> Ꮡt) {
 
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
     if (!async && t.isChan) {
-        @lock(Ꮡt.of(timer.ᏑsendLock));
+        @lock(Ꮡt.ᏑsendLock);
     }
 
     Ꮡt.@lock();
@@ -559,7 +568,7 @@ internal static bool stop(this ж<timer> Ꮡt) {
         t.state |= (uint8)(timerModified);
         if ((uint8)(t.state & timerZombie) == 0) {
             t.state |= (uint8)(timerZombie);
-            t.ts.of(timers.Ꮡzombies).Add(1);
+            t.ts.Ꮡzombies.Add(1);
         }
     }
     var pending = t.when > 0;
@@ -575,13 +584,13 @@ internal static bool stop(this ж<timer> Ꮡt) {
         // send from actually happening. That means
         // that we should return true: the timer was
         // stopped, even though t.when may be zero.
-        if (t.period == 0 && Ꮡt.of(timer.ᏑisSending).Load() > 0) {
+        if (t.period == 0 && Ꮡt.ᏑisSending.Load() > 0) {
             pending = true;
         }
     }
     Ꮡt.unlock();
     if (!async && t.isChan) {
-        unlock(Ꮡt.of(timer.ᏑsendLock));
+        unlock(Ꮡt.ᏑsendLock);
         if (timerchandrain(Ꮡt.hchan())) {
             pending = true;
         }
@@ -591,24 +600,25 @@ internal static bool stop(this ж<timer> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wrongTimersˢ = "wrong timers"u8;
+internal static ref readonly @string wrongTimersˢ => ref wrongTimersˢᵇ;
+private static readonly @string wrongTimersˢᵇ = "wrong timers"u8;
 
 // deleteMin removes timer 0 from ts.
 // ts must be locked.
 internal static void deleteMin(this ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    assertLockHeld(Ꮡts.of(timers.Ꮡmu));
+    assertLockHeld(Ꮡts.Ꮡmu);
     var t = ts.heap[0].timer;
-    if ((~t).ts != Ꮡts) {
+    if (t.ts != Ꮡts) {
         @throw(wrongTimersˢ);
     }
-    t.Value.ts = default!;
+    t.ts = default;
     nint last = len(ts.heap) - 1;
     if (last > 0) {
         ts.heap[0] = ts.heap[last];
     }
-    ts.heap[last] = new timerWhen(nil);
+    ts.heap[last] = new timerWhen();
     ts.heap = ts.heap.slice(0, last);
     if (last > 0) {
         ts.siftDown(0);
@@ -616,15 +626,19 @@ internal static void deleteMin(this ж<timers> Ꮡts) {
     Ꮡts.updateMinWhenHeap();
     if (last == 0) {
         // If there are no timers, then clearly there are no timerModified timers.
-        Ꮡts.of(timers.ᏑminWhenModified).Store(0);
+        Ꮡts.ᏑminWhenModified.Store(0);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string timerWhenMustBePositiveˢ = "timer when must be positive"u8;
-internal static readonly @string timerPeriodMustBeNonˢ = "timer period must be non-negative"u8;
-internal static readonly @string modifyˢ = "modify"u8;
-internal static readonly @string fakeTimerExecutingWithNoˢ = "fake timer executing with no bubble"u8;
+internal static ref readonly @string timerWhenMustBePositiveˢ => ref timerWhenMustBePositiveˢᵇ;
+private static readonly @string timerWhenMustBePositiveˢᵇ = "timer when must be positive"u8;
+internal static ref readonly @string timerPeriodMustBeNonˢ => ref timerPeriodMustBeNonˢᵇ;
+private static readonly @string timerPeriodMustBeNonˢᵇ = "timer period must be non-negative"u8;
+internal static ref readonly @string modifyˢ => ref modifyˢᵇ;
+private static readonly @string modifyˢᵇ = "modify"u8;
+internal static ref readonly @string fakeTimerExecutingWithNoˢ => ref fakeTimerExecutingWithNoˢᵇ;
+private static readonly @string fakeTimerExecutingWithNoˢᵇ = "fake timer executing with no bubble"u8;
 
 // modify modifies an existing timer.
 // This is called by the netpoll code or time.Ticker.Reset or time.Timer.Reset.
@@ -642,7 +656,7 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
 
     if (!async && t.isChan) {
-        @lock(Ꮡt.of(timer.ᏑsendLock));
+        @lock(Ꮡt.ᏑsendLock);
     }
 
     Ꮡt.@lock();
@@ -652,7 +666,7 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
     Ꮡt.trace(modifyˢ);
     var oldPeriod = t.period;
     t.period = period;
-    if (f != default!) {
+    if (f != nil) {
         t.f = f;
         t.arg = arg;
         t.seq = seq;
@@ -666,17 +680,17 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         if ((uint8)(t.state & timerZombie) != 0) {
             // In the heap but marked for removal (by a Stop).
             // Unmark it, since it has been Reset and will be running again.
-            t.ts.of(timers.Ꮡzombies).Add(-1);
+            t.ts.Ꮡzombies.Add(-1);
             t.state &= unchecked((uint8)~(uint8)(timerZombie));
         }
         // The corresponding heap[i].when is updated later.
         // See comment in type timer above and in timers.adjust below.
         {
-            var min = t.ts.of(timers.ᏑminWhenModified).Load(); if (min == 0 || when < min) {
+            var min = t.ts.ᏑminWhenModified.Load(); if (min == 0 || when < min) {
                 wake = true;
                 // Force timerModified bit out to t.astate before updating t.minWhenModified,
                 // to synchronize with t.ts.adjust. See comment in adjust.
-                Ꮡt.of(timer.Ꮡastate).Store(t.state);
+                Ꮡt.Ꮡastate.Store(t.state);
                 t.ts.updateMinWhenModified(when);
             }
         }
@@ -699,13 +713,13 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         if (bubble == nil) {
             @throw(fakeTimerExecutingWithNoˢ);
         }
-        if ((uint8)(t.state & timerHeaped) == 0 && when <= (~bubble).now) {
+        if ((uint8)(t.state & timerHeaped) == 0 && when <= bubble.now) {
             var bubbleʗ1 = bubble;
             systemstack(() => {
                 if (!async && Ꮡt.Value.isChan) {
-                    unlock(Ꮡt.of(timer.ᏑsendLock));
+                    unlock(Ꮡt.ᏑsendLock);
                 }
-                Ꮡt.unlockAndRun((~bubbleʗ1).now, bubbleʗ1);
+                Ꮡt.unlockAndRun(bubbleʗ1.now, bubbleʗ1);
             });
             return pending;
         }
@@ -721,7 +735,7 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         // send from actually happening. That means
         // that we should return true: the timer was
         // stopped, even though t.when may be zero.
-        if (oldPeriod == 0 && Ꮡt.of(timer.ᏑisSending).Load() > 0) {
+        if (oldPeriod == 0 && Ꮡt.ᏑisSending.Load() > 0) {
             pending = true;
         }
     }
@@ -730,7 +744,7 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         if (timerchandrain(Ꮡt.hchan())) {
             pending = true;
         }
-        unlock(Ꮡt.of(timer.ᏑsendLock));
+        unlock(Ꮡt.ᏑsendLock);
     }
 
     if (add) {
@@ -744,17 +758,19 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string needsAddˢ = "needsAdd+"u8;
-internal static readonly @string needsAddˢ2 = "needsAdd-"u8;
+internal static ref readonly @string needsAddˢ => ref needsAddˢᵇ;
+private static readonly @string needsAddˢᵇ = "needsAdd+"u8;
+internal static ref readonly @string needsAddˢ2 => ref needsAddˢ2ᵇ;
+private static readonly @string needsAddˢ2ᵇ = "needsAdd-"u8;
 
 // needsAdd reports whether t needs to be added to a timers heap.
 // t must be locked.
 internal static bool needsAdd(this ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    assertLockHeld(Ꮡt.of(timer.Ꮡmu));
+    assertLockHeld(Ꮡt.Ꮡmu);
     var need = (uint8)(t.state & timerHeaped) == 0 && t.when > 0 && (!t.isChan || t.blocked > 0);
-    if (need){
+    if (need) {
         Ꮡt.trace(needsAddˢ);
     } else {
         Ꮡt.trace(needsAddˢ2);
@@ -763,8 +779,10 @@ internal static bool needsAdd(this ж<timer> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidTimerFakeTimeButˢ = "invalid timer: fake time but no syncgroup"u8;
-internal static readonly @string maybeAddˢ = "maybeAdd"u8;
+internal static ref readonly @string invalidTimerFakeTimeButˢ => ref invalidTimerFakeTimeButˢᵇ;
+private static readonly @string invalidTimerFakeTimeButˢᵇ = "invalid timer: fake time but no syncgroup"u8;
+internal static ref readonly @string maybeAddˢ => ref maybeAddˢᵇ;
+private static readonly @string maybeAddˢᵇ = "maybeAdd"u8;
 
 // maybeAdd adds t to the local timers heap if it needs to be in a heap.
 // The caller must not hold t's lock nor any timers heap lock.
@@ -797,13 +815,13 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
     // Calling acquirem instead of using getg().m makes sure that
     // we end up locking and inserting into the current P's timers.
     var mp = acquirem();
-    ж<timers> ts = default!;
-    if (t.isFake){
+    ж<timers> ts = default;
+    if (t.isFake) {
         var bubble = getg().Value.bubble;
         if (bubble == nil) {
             @throw(invalidTimerFakeTimeButˢ);
         }
-        ts = bubble.of(synctestBubble.Ꮡtimers);
+        ts = bubble.Ꮡtimers;
     } else {
         ts = (~mp).p.ptr().of(runtime_package.Δp.Ꮡtimers);
     }
@@ -838,12 +856,14 @@ internal static void maybeAdd(this ж<timer> Ꮡt) {
 // If used for an inactive timer, the timer will become active.
 // Reports whether the timer was active and was stopped.
 internal static bool reset(this ж<timer> Ꮡt, int64 when, int64 period) {
-    return Ꮡt.modify(when, period, default!, default!, 0);
+    return Ꮡt.modify(when, period, default, default, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cleanHeadˢ = "cleanHead"u8;
-internal static readonly @string badTsˢ = "bad ts"u8;
+internal static ref readonly @string cleanHeadˢ => ref cleanHeadˢᵇ;
+private static readonly @string cleanHeadˢᵇ = "cleanHead"u8;
+internal static ref readonly @string badTsˢ => ref badTsˢᵇ;
+private static readonly @string badTsˢᵇ = "bad ts"u8;
 
 // cleanHead cleans up the head of the timer queue. This speeds up
 // programs that create and delete timers; leaving them in the heap
@@ -853,9 +873,9 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(cleanHeadˢ);
-    assertLockHeld(Ꮡts.of(timers.Ꮡmu));
+    assertLockHeld(Ꮡts.Ꮡmu);
     var gp = getg();
-    while (ᐧ) {
+    for (;;) {
         if (len(ts.heap) == 0) {
             return;
         }
@@ -874,13 +894,13 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         // shortening this loop.
         nint n = len(ts.heap);
         {
-            var tΔ1 = ts.heap[n - 1].timer; if ((uint8)(tΔ1.of(timer.Ꮡastate).Load() & timerZombie) != 0) {
+            var tΔ1 = ts.heap[n - 1].timer; if ((uint8)(tΔ1.Ꮡastate.Load() & timerZombie) != 0) {
                 tΔ1.@lock();
-                if ((uint8)((~tΔ1).state & timerZombie) != 0) {
-                    tΔ1.Value.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
-                    tΔ1.Value.ts = default!;
-                    Ꮡts.of(timers.Ꮡzombies).Add(-1);
-                    ts.heap[n - 1] = new timerWhen(nil);
+                if ((uint8)(tΔ1.state & timerZombie) != 0) {
+                    tΔ1.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+                    tΔ1.ts = default;
+                    Ꮡts.Ꮡzombies.Add(-1);
+                    ts.heap[n - 1] = new timerWhen();
                     ts.heap = ts.heap.slice(0, n - 1);
                 }
                 tΔ1.unlock();
@@ -889,11 +909,11 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         }
 
         var t = ts.heap[0].timer;
-        if ((~t).ts != Ꮡts) {
+        if (t.ts != Ꮡts) {
             @throw(badTsˢ);
         }
 
-        if ((uint8)(t.of(timer.Ꮡastate).Load() & ((uint8)(timerModified | timerZombie))) == 0) {
+        if ((uint8)(t.Ꮡastate.Load() & ((uint8)(timerModified | timerZombie))) == 0) {
             // Fast path: head of timers does not need adjustment.
             return;
         }
@@ -909,7 +929,8 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string takeˢ = "take"u8;
+internal static ref readonly @string takeˢ => ref takeˢᵇ;
+private static readonly @string takeˢᵇ = "take"u8;
 
 // take moves any timers from src into ts
 // and then clears the timer state from src,
@@ -928,25 +949,26 @@ internal static void take(this ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
         // which we'd rather avoid in the static ranking.
         foreach (var (_, tw) in src.heap) {
             var t = tw.timer;
-            t.Value.ts = default!;
-            if ((uint8)((~t).state & timerZombie) != 0){
-                t.Value.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+            t.ts = default;
+            if ((uint8)(t.state & timerZombie) != 0) {
+                t.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
             } else {
-                t.Value.state &= unchecked((uint8)~(uint8)(timerModified));
+                t.state &= unchecked((uint8)~(uint8)(timerModified));
                 Ꮡts.addHeap(t);
             }
         }
-        src.heap = default!;
-        Ꮡsrc.of(timers.Ꮡzombies).Store(0);
-        Ꮡsrc.of(timers.ᏑminWhenHeap).Store(0);
-        Ꮡsrc.of(timers.ᏑminWhenModified).Store(0);
-        Ꮡsrc.of(timers.Ꮡlen).Store(0);
-        Ꮡts.of(timers.Ꮡlen).Store((uint32)len(ts.heap));
+        src.heap = default;
+        Ꮡsrc.Ꮡzombies.Store(0);
+        Ꮡsrc.ᏑminWhenHeap.Store(0);
+        Ꮡsrc.ᏑminWhenModified.Store(0);
+        Ꮡsrc.Ꮡlen.Store(0);
+        Ꮡts.Ꮡlen.Store((uint32)len(ts.heap));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string adjustˢ = "adjust"u8;
+internal static ref readonly @string adjustˢ => ref adjustˢᵇ;
+private static readonly @string adjustˢᵇ = "adjust"u8;
 
 // adjust looks through the timers in ts.heap for
 // any timers that have been modified to run earlier, and puts them in
@@ -957,14 +979,14 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(adjustˢ);
-    assertLockHeld(Ꮡts.of(timers.Ꮡmu));
+    assertLockHeld(Ꮡts.Ꮡmu);
     // If we haven't yet reached the time of the earliest modified
     // timer, don't do anything. This speeds up programs that adjust
     // a lot of timers back and forth if the timers rarely expire.
     // We'll postpone looking through all the adjusted timers until
     // one would actually expire.
     if (!force) {
-        var first = Ꮡts.of(timers.ᏑminWhenModified).Load();
+        var first = Ꮡts.ᏑminWhenModified.Load();
         if (first == 0 || first > now) {
             if (verifyTimers) {
                 Ꮡts.verify();
@@ -1023,43 +1045,43 @@ internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) {
     // in t.astate *before* calling t.updateMinWhenModified. That ensures that the
     // overwrite in Step 2 cannot lose an update: if it does overwrite an update, Step 3
     // will see the timerModified and do a full lock.
-    Ꮡts.of(timers.ᏑminWhenHeap).Store(Ꮡts.wakeTime());
-    Ꮡts.of(timers.ᏑminWhenModified).Store(0);
+    Ꮡts.ᏑminWhenHeap.Store(Ꮡts.wakeTime());
+    Ꮡts.ᏑminWhenModified.Store(0);
 
     var changed = false;
     for (nint i = 0; i < len(ts.heap); i++) {
         var tw = Ꮡ(ts.heap, i);
-        var t = tw.Value.timer;
-        if ((~t).ts != Ꮡts) {
+        var t = tw.timer;
+        if (t.ts != Ꮡts) {
             @throw(badTsˢ);
         }
 
-        if ((uint8)(t.of(timer.Ꮡastate).Load() & ((uint8)(timerModified | timerZombie))) == 0) {
+        if ((uint8)(t.Ꮡastate.Load() & ((uint8)(timerModified | timerZombie))) == 0) {
             // Does not need adjustment.
             continue;
         }
 
         t.@lock();
         switch (ᐧ) {
-        case {} when (uint8)((~t).state & timerHeaped) == 0: {
+        case {} when (uint8)(t.state & timerHeaped) == 0: {
             badTimer();
             break;
         }
-        case {} when (uint8)((~t).state & timerZombie) != 0: {
-            Ꮡts.of(timers.Ꮡzombies).Add(-1);
-            t.Value.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+        case {} when (uint8)(t.state & timerZombie) != 0: {
+            Ꮡts.Ꮡzombies.Add(-1);
+            t.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
             nint n = len(ts.heap);
             ts.heap[i] = ts.heap[n - 1];
-            ts.heap[n - 1] = new timerWhen(nil);
+            ts.heap[n - 1] = new timerWhen();
             ts.heap = ts.heap.slice(0, n - 1);
-            t.Value.ts = default!;
+            t.ts = default;
             i--;
             changed = true;
             break;
         }
-        case {} when (uint8)((~t).state & timerModified) != 0: {
-            tw.Value.when = t.Value.when;
-            t.Value.state &= unchecked((uint8)~(uint8)(timerModified));
+        case {} when (uint8)(t.state & timerModified) != 0: {
+            tw.when = t.when;
+            t.state &= unchecked((uint8)~(uint8)(timerModified));
             changed = true;
             break;
         }}
@@ -1088,8 +1110,8 @@ internal static int64 wakeTime(this ж<timers> Ꮡts) {
     // We read minWhen after reading minNextWhen so that
     // if we see a cleared minNextWhen, we are guaranteed to see
     // the updated minWhen.
-    var nextWhen = Ꮡts.of(timers.ᏑminWhenModified).Load();
-    var when = Ꮡts.of(timers.ᏑminWhenHeap).Load();
+    var nextWhen = Ꮡts.ᏑminWhenModified.Load();
+    var when = Ꮡts.ᏑminWhenHeap.Load();
     if (when == 0 || (nextWhen != 0 && nextWhen < when)) {
         when = nextWhen;
     }
@@ -1097,7 +1119,8 @@ internal static int64 wakeTime(this ж<timers> Ꮡts) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkˢ = "check"u8;
+internal static ref readonly @string checkˢ => ref checkˢᵇ;
+private static readonly @string checkˢᵇ = "check"u8;
 
 // check runs any timers in ts that are ready.
 // If now is not 0 it is the current time.
@@ -1109,9 +1132,9 @@ internal static readonly @string checkˢ = "check"u8;
 // We pass now in and out to avoid extra calls of nanotime.
 //
 //go:yeswritebarrierrec
-internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> Ꮡbubble) {
-    int64 pollUntil = default!;
-    bool ran = default!;
+internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
+    int64 pollUntil = default;
+    bool ran = default;
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(checkˢ);
@@ -1130,11 +1153,11 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
     // If this is the local P, and there are a lot of deleted timers,
     // clear them out. We only do this for the local P to reduce
     // lock contention on timersLock.
-    var zombies = Ꮡts.of(timers.Ꮡzombies).Load();
+    var zombies = Ꮡts.Ꮡzombies.Load();
     if (zombies < 0) {
         badTimer();
     }
-    var force = Ꮡts == (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers) && (nint)zombies > (nint)Ꮡts.of(timers.Ꮡlen).Load() / 4;
+    var force = Ꮡts == (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers) && (nint)zombies > (nint)Ꮡts.Ꮡlen.Load() / 4;
 
     if (now < next && !force) {
         // Next timer is not ready to run, and we don't need to clear deleted timers.
@@ -1147,7 +1170,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         while (len(ts.heap) > 0) {
             // Note that runtimer may temporarily unlock ts.
             {
-                var tw = Ꮡts.run(now, Ꮡbubble); if (tw != 0) {
+                var tw = Ꮡts.run(now, bubble); if (tw != 0) {
                     if (tw > 0) {
                         pollUntil = tw;
                     }
@@ -1162,7 +1185,7 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         // is significantly faster under contention, such as in
         // package time's BenchmarkTimerAdjust10000,
         // though we do not fully understand why.
-        force = Ꮡts == (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers) && (nint)Ꮡts.of(timers.Ꮡzombies).Load() > (nint)Ꮡts.of(timers.Ꮡlen).Load() / 4;
+        force = Ꮡts == (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers) && (nint)Ꮡts.Ꮡzombies.Load() > (nint)Ꮡts.Ꮡlen.Load() / 4;
         if (force) {
             Ꮡts.adjust(now, true);
         }
@@ -1173,7 +1196,8 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runˢ = "run"u8;
+internal static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
 
 // run examines the first timer in ts. If it is ready based on now,
 // it runs the timer and removes or updates it.
@@ -1183,22 +1207,22 @@ internal static readonly @string runˢ = "run"u8;
 // If a timer is run, this will temporarily unlock ts.
 //
 //go:systemstack
-internal static int64 run(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> Ꮡbubble) {
+internal static int64 run(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(runˢ);
-    assertLockHeld(Ꮡts.of(timers.Ꮡmu));
+    assertLockHeld(Ꮡts.Ꮡmu);
 Redo:
     if (len(ts.heap) == 0) {
         return -1;
     }
     var tw = ts.heap[0];
     var t = tw.timer;
-    if ((~t).ts != Ꮡts) {
+    if (t.ts != Ꮡts) {
         @throw(badTsˢ);
     }
 
-    if ((uint8)(t.of(timer.Ꮡastate).Load() & ((uint8)(timerModified | timerZombie))) == 0 && tw.when > now) {
+    if ((uint8)(t.Ꮡastate.Load() & ((uint8)(timerModified | timerZombie))) == 0 && tw.when > now) {
         // Fast path: not ready to run.
         return tw.when;
     }
@@ -1209,27 +1233,32 @@ Redo:
         goto Redo;
     }
 
-    if ((uint8)((~t).state & timerHeaped) == 0 || (uint8)((~t).state & timerModified) != 0) {
+    if ((uint8)(t.state & timerHeaped) == 0 || (uint8)(t.state & timerModified) != 0) {
         badTimer();
     }
 
-    if ((~t).when > now) {
+    if (t.when > now) {
         // Not ready to run.
         t.unlock();
-        return (~t).when;
+        return t.when;
     }
 
-    t.unlockAndRun(now, Ꮡbubble);
-    assertLockHeld(Ꮡts.of(timers.Ꮡmu)); // t is unlocked now, but not ts
+    t.unlockAndRun(now, bubble);
+    assertLockHeld(Ꮡts.Ꮡmu); // t is unlocked now, but not ts
     return 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unlockAndRunˢ = "unlockAndRun"u8;
-internal static readonly @string tooManyConcurrentTimerˢ = "too many concurrent timer firings"u8;
-internal static readonly @string unexpectedRacectxˢ = "unexpected racectx"u8;
-internal static readonly @string unexpectedSyncgroupSetˢ = "unexpected syncgroup set"u8;
-internal static readonly @string mismatchedIsSendingˢ = "mismatched isSending updates"u8;
+internal static ref readonly @string unlockAndRunˢ => ref unlockAndRunˢᵇ;
+private static readonly @string unlockAndRunˢᵇ = "unlockAndRun"u8;
+internal static ref readonly @string tooManyConcurrentTimerˢ => ref tooManyConcurrentTimerˢᵇ;
+private static readonly @string tooManyConcurrentTimerˢᵇ = "too many concurrent timer firings"u8;
+internal static ref readonly @string unexpectedRacectxˢ => ref unexpectedRacectxˢᵇ;
+private static readonly @string unexpectedRacectxˢᵇ = "unexpected racectx"u8;
+internal static ref readonly @string unexpectedSyncgroupSetˢ => ref unexpectedSyncgroupSetˢᵇ;
+private static readonly @string unexpectedSyncgroupSetˢᵇ = "unexpected syncgroup set"u8;
+internal static ref readonly @string mismatchedIsSendingˢ => ref mismatchedIsSendingˢᵇ;
+private static readonly @string mismatchedIsSendingˢᵇ = "mismatched isSending updates"u8;
 
 // unlockAndRun unlocks and runs the timer t (which must be locked).
 // If t is in a timer set (t.ts != nil), the caller must also have locked the timer set,
@@ -1242,25 +1271,25 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     Ꮡt.trace(unlockAndRunˢ);
-    assertLockHeld(Ꮡt.of(timer.Ꮡmu));
+    assertLockHeld(Ꮡt.Ꮡmu);
     if (t.ts != nil) {
-        assertLockHeld(t.ts.of(timers.Ꮡmu));
+        assertLockHeld(t.ts.Ꮡmu);
     }
     if (raceenabled) {
         // Note that we are running on a system stack,
         // so there is no chance of getg().m being reassigned
         // out from under us while this function executes.
         var gp = getg();
-        ж<timers> tsLocal = default!;
-        if (Ꮡbubble == nil){
+        ж<timers> tsLocal = default;
+        if (Ꮡbubble == nil) {
             tsLocal = (~(~gp).m).p.ptr().of(runtime_package.Δp.Ꮡtimers);
         } else {
-            tsLocal = Ꮡbubble.of(synctestBubble.Ꮡtimers);
+            tsLocal = Ꮡbubble.Ꮡtimers;
         }
-        if ((~tsLocal).raceCtx == 0) {
-            tsLocal.Value.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, ж<synctestBubble>, int64>)(run))) + (uintptr)sys.PCQuantum);
+        if (tsLocal.raceCtx == 0) {
+            tsLocal.raceCtx = racegostart(abi.FuncPCABIInternal(((Func<ж<timers>, int64, ж<synctestBubble>, int64>)(run))) + (uintptr)sys.PCQuantum);
         }
-        raceacquirectx((~tsLocal).raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
+        raceacquirectx(tsLocal.raceCtx, (uintptr)@unsafe.Pointer.FromRef(ref t));
     }
 
     if ((uint8)(t.state & ((uint8)(timerModified | timerZombie))) != 0) {
@@ -1270,9 +1299,9 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
     var f = t.f;
     var arg = t.arg;
     var seq = t.seq;
-    int64 next = default!;
+    int64 next = default;
     var delay = now - t.when;
-    if (t.period > 0){
+    if (t.period > 0) {
         // Leave in heap but adjust next time to fire.
         next = t.when + t.period * (1 + quo(delay, t.period));
         if (next < 0) { // check for overflow.
@@ -1287,7 +1316,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
         t.state |= (uint8)(timerModified);
         if (next == 0) {
             t.state |= (uint8)(timerZombie);
-            t.ts.of(timers.Ꮡzombies).Add(1);
+            t.ts.Ꮡzombies.Add(1);
         }
         Ꮡt.updateHeap();
     }
@@ -1295,7 +1324,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
     if (!async && t.isChan && t.period == 0) {
         // Tell Stop/Reset that we are sending a value.
-        if (Ꮡt.of(timer.ᏑisSending).Add(1) < 0) {
+        if (Ꮡt.ᏑisSending.Add(1) < 0) {
             @throw(tooManyConcurrentTimerˢ);
         }
     }
@@ -1308,7 +1337,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
         if ((~gp).racectx != 0) {
             @throw(unexpectedRacectxˢ);
         }
-        if (Ꮡbubble == nil){
+        if (Ꮡbubble == nil) {
             gp.Value.racectx = (~(~gp).m).p.ptr().Value.timers.raceCtx;
         } else {
             gp.Value.racectx = bubble.timers.raceCtx;
@@ -1348,13 +1377,13 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
         // The isSending field tells t.stop or t.modify that we have
         // started to send the value. That lets them correctly return
         // true meaning that no value was sent.
-        @lock(Ꮡt.of(timer.ᏑsendLock));
+        @lock(Ꮡt.ᏑsendLock);
 
         if (t.period == 0) {
             // We are committed to possibly sending a value
             // based on seq, so no need to keep telling
             // stop/modify that we are sending.
-            if (Ꮡt.of(timer.ᏑisSending).Add(-1) < 0) {
+            if (Ꮡt.ᏑisSending.Add(-1) < 0) {
                 @throw(mismatchedIsSendingˢ);
             }
         }
@@ -1368,7 +1397,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
     f(arg, seq, delay);
 
     if (!async && t.isChan) {
-        unlock(Ꮡt.of(timer.ᏑsendLock));
+        unlock(Ꮡt.ᏑsendLock);
     }
 
     if (Ꮡbubble != nil) {
@@ -1379,7 +1408,7 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
             // the next synctest.Wait call.
             racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)Ꮡbubble.raceaddr());
         }
-        gp.Value.bubble = default!;
+        gp.Value.bubble = default;
     }
 
     if (ts != nil) {
@@ -1393,8 +1422,10 @@ internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBub
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string badTimerHeapˢ = "bad timer heap"u8;
-internal static readonly @string badTimerHeapLenˢ = "bad timer heap len"u8;
+internal static ref readonly @string badTimerHeapˢ => ref badTimerHeapˢᵇ;
+private static readonly @string badTimerHeapˢᵇ = "bad timer heap"u8;
+internal static ref readonly @string badTimerHeapLenˢ => ref badTimerHeapLenˢᵇ;
+private static readonly @string badTimerHeapLenˢᵇ = "bad timer heap len"u8;
 
 // verifyTimerHeap verifies that the timers is in a valid state.
 // This is only for debugging, and is only called if verifyTimers is true.
@@ -1402,7 +1433,7 @@ internal static readonly @string badTimerHeapLenˢ = "bad timer heap len"u8;
 internal static void verify(this ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    assertLockHeld(Ꮡts.of(timers.Ꮡmu));
+    assertLockHeld(Ꮡts.Ꮡmu);
     foreach (var (i, tw) in ts.heap) {
         if (i == 0) {
             // First timer has no parent.
@@ -1412,13 +1443,13 @@ internal static void verify(this ж<timers> Ꮡts) {
         // The heap is timerHeapN-ary. See siftupTimer and siftdownTimer.
         nint Δp = (nint)((nuint)(i - 1) / (nuint)timerHeapN);
         if (tw.less(ts.heap[Δp])) {
-            print((@string)"bad timer heap at "u8, i, (@string)": "u8, Δp, (@string)": "u8, ts.heap[Δp].when, (@string)", "u8, i, (@string)": "u8, tw.when, (@string)"\n"u8);
+            print((@string)"bad timer heap at ", i, (@string)": ", Δp, (@string)": ", ts.heap[Δp].when, (@string)", ", i, (@string)": ", tw.when, (@string)"\n");
             @throw(badTimerHeapˢ);
         }
     }
     {
-        nint n = (nint)Ꮡts.of(timers.Ꮡlen).Load(); if (len(ts.heap) != n) {
-            println((@string)"timer heap len"u8, len(ts.heap), (@string)"!= atomic len"u8, n);
+        nint n = (nint)Ꮡts.Ꮡlen.Load(); if (len(ts.heap) != n) {
+            println((@string)"timer heap len", len(ts.heap), (@string)"!= atomic len", n);
             @throw(badTimerHeapLenˢ);
         }
     }
@@ -1430,22 +1461,22 @@ internal static void updateMinWhenHeap(this ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertWorldStoppedOrLockHeld(ref nonnil(ref ts).mu);
-    if (len(ts.heap) == 0){
-        Ꮡts.of(timers.ᏑminWhenHeap).Store(0);
+    if (len(ts.heap) == 0) {
+        Ꮡts.ᏑminWhenHeap.Store(0);
     } else {
-        Ꮡts.of(timers.ᏑminWhenHeap).Store(ts.heap[0].when);
+        Ꮡts.ᏑminWhenHeap.Store(ts.heap[0].when);
     }
 }
 
 // updateMinWhenModified updates ts.minWhenModified to be <= when.
 // ts need not be (and usually is not) locked.
 internal static void updateMinWhenModified(this ж<timers> Ꮡts, int64 when) {
-    while (ᐧ) {
-        var old = Ꮡts.of(timers.ᏑminWhenModified).Load();
+    for (;;) {
+        var old = Ꮡts.ᏑminWhenModified.Load();
         if (old != 0 && old < when) {
             return;
         }
-        if (Ꮡts.of(timers.ᏑminWhenModified).CompareAndSwap(old, when)) {
+        if (Ꮡts.ᏑminWhenModified.CompareAndSwap(old, when)) {
             return;
         }
     }
@@ -1526,7 +1557,7 @@ internal static void siftDown(this ref timers ts, nint i) {
     if (tw.when <= 0) {
         badTimer();
     }
-    while (ᐧ) {
+    for (;;) {
         nint leftChild = i * (nint)timerHeapN + 1;
         if (leftChild >= n) {
             break;
@@ -1564,7 +1595,8 @@ internal static void initHeap(this ref timers ts) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string timerDataCorruptionˢ = "timer data corruption"u8;
+internal static ref readonly @string timerDataCorruptionˢ => ref timerDataCorruptionˢᵇ;
+private static readonly @string timerDataCorruptionˢᵇ = "timer data corruption"u8;
 
 // badTimer is called if the timer data structures have been corrupted,
 // presumably due to racy use by the program. We panic here rather than
@@ -1575,9 +1607,12 @@ internal static void badTimer() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string synctestTimerAccessedˢ = "synctest timer accessed from outside bubble"u8;
-internal static readonly @string maybeRunChanˢ = "maybeRunChan-"u8;
-internal static readonly @string maybeRunChanˢ2 = "maybeRunChan+"u8;
+internal static ref readonly @string synctestTimerAccessedˢ => ref synctestTimerAccessedˢᵇ;
+private static readonly @string synctestTimerAccessedˢᵇ = "synctest timer accessed from outside bubble"u8;
+internal static ref readonly @string maybeRunChanˢ => ref maybeRunChanˢᵇ;
+private static readonly @string maybeRunChanˢᵇ = "maybeRunChan-"u8;
+internal static ref readonly @string maybeRunChanˢ2 => ref maybeRunChanˢ2ᵇ;
+private static readonly @string maybeRunChanˢ2ᵇ = "maybeRunChan+"u8;
 
 // Timer channels.
 
@@ -1592,7 +1627,7 @@ internal static void maybeRunChan(this ж<timer> Ꮡt, ж<Δhchan> Ꮡc) {
         // This should have been checked by the caller, but check just in case.
         fatal(synctestTimerAccessedˢ);
     }
-    if ((uint8)(Ꮡt.of(timer.Ꮡastate).Load() & timerHeaped) != 0) {
+    if ((uint8)(Ꮡt.Ꮡastate.Load() & timerHeaped) != 0) {
         // If the timer is in the heap, the ordinary timer code
         // is in charge of sending when appropriate.
         return;
@@ -1601,7 +1636,7 @@ internal static void maybeRunChan(this ж<timer> Ꮡt, ж<Δhchan> Ꮡc) {
     Ꮡt.@lock();
     var now = nanotime();
     if (t.isFake) {
-        now = getg().Value.bubble.Value.now;
+        now = getg().Value.bubble.now;
     }
     if ((uint8)(t.state & timerHeaped) != 0 || t.when == 0 || t.when > now) {
         Ꮡt.trace(maybeRunChanˢ);
@@ -1616,7 +1651,8 @@ internal static void maybeRunChan(this ж<timer> Ꮡt, ж<Δhchan> Ꮡc) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string blockTimerChanˢ = "blockTimerChan"u8;
+internal static ref readonly @string blockTimerChanˢ => ref blockTimerChanˢᵇ;
+private static readonly @string blockTimerChanˢᵇ = "blockTimerChan"u8;
 
 // blockTimerChan is called when a channel op has decided to block on c.
 // The caller holds the channel lock for c and possibly other channels.
@@ -1624,25 +1660,25 @@ internal static readonly @string blockTimerChanˢ = "blockTimerChan"u8;
 // adding it if needed.
 internal static void blockTimerChan(ref Δhchan c) {
     var t = c.timer;
-    if ((~t).isFake && c.bubble != (~getg()).bubble) {
+    if (t.isFake && c.bubble != (~getg()).bubble) {
         // This should have been checked by the caller, but check just in case.
         fatal(synctestTimerAccessedˢ);
     }
 
     t.@lock();
     t.trace(blockTimerChanˢ);
-    if (!(~t).isChan) {
+    if (!t.isChan) {
         badTimer();
     }
 
-    t.Value.blocked++;
+    t.blocked++;
 
     // If this is the first enqueue after a recent dequeue,
     // the timer may still be in the heap but marked as a zombie.
     // Unmark it in this case, if the timer is still pending.
-    if ((uint8)((~t).state & timerHeaped) != 0 && (uint8)((~t).state & timerZombie) != 0 && (~t).when > 0) {
-        t.Value.state &= unchecked((uint8)~(uint8)(timerZombie));
-        (~t).ts.of(timers.Ꮡzombies).Add(-1);
+    if ((uint8)(t.state & timerHeaped) != 0 && (uint8)(t.state & timerZombie) != 0 && t.when > 0) {
+        t.state &= unchecked((uint8)~(uint8)(timerZombie));
+        t.ts.Ꮡzombies.Add(-1);
     }
 
     // t.maybeAdd must be called with t unlocked,
@@ -1659,7 +1695,8 @@ internal static void blockTimerChan(ref Δhchan c) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unblockTimerChanˢ = "unblockTimerChan"u8;
+internal static ref readonly @string unblockTimerChanˢ => ref unblockTimerChanˢᵇ;
+private static readonly @string unblockTimerChanˢᵇ = "unblockTimerChan"u8;
 
 // unblockTimerChan is called when a channel op that was blocked on c
 // is no longer blocked. Every call to blockTimerChan must be paired with
@@ -1671,16 +1708,16 @@ internal static void unblockTimerChan(ref Δhchan c) {
     var t = c.timer;
     t.@lock();
     t.trace(unblockTimerChanˢ);
-    if (!(~t).isChan || (~t).blocked == 0) {
+    if (!t.isChan || t.blocked == 0) {
         badTimer();
     }
-    t.Value.blocked--;
-    if ((~t).blocked == 0 && (uint8)((~t).state & timerHeaped) != 0 && (uint8)((~t).state & timerZombie) == 0) {
+    t.blocked--;
+    if (t.blocked == 0 && (uint8)(t.state & timerHeaped) != 0 && (uint8)(t.state & timerZombie) == 0) {
         // Last goroutine that was blocked on this timer.
         // Mark for removal from heap but do not clear t.when,
         // so that we know what time it is still meant to trigger.
-        t.Value.state |= (uint8)(timerZombie);
-        (~t).ts.of(timers.Ꮡzombies).Add(1);
+        t.state |= (uint8)(timerZombie);
+        t.ts.Ꮡzombies.Add(1);
     }
     t.unlock();
 }

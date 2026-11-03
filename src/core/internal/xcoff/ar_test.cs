@@ -18,63 +18,63 @@ internal partial struct archiveTest {
 
 internal static readonly ж<slice<archiveTest>> ᏑarchTest = new StaticBox<slice<archiveTest>>(default(slice<archiveTest>));
 internal static ref slice<archiveTest> archTest => ref ((StaticBox<slice<archiveTest>>)ᏑarchTest).ValueSlot;
-internal static void initᴛarchTest() { archTest = new archiveTest[]{
+internal static void initᴛarchTest() { archTest = slice<archiveTest>([
     new(
-        "testdata/bigar-ppc64"u8,
+        "testdata/bigar-ppc64",
         new ArchiveHeader(AIAMAGBIG),
-        new ж<global::go.@internal.xcoff_package.MemberHeader>[]{
-            Ꮡ(new global::go.@internal.xcoff_package.MemberHeader("printbye.o"u8, 836)),
-            Ꮡ(new global::go.@internal.xcoff_package.MemberHeader("printhello.o"u8, 860))
-        }.slice(),
-        new global::go.@internal.xcoff_package.FileHeader[]{
+        slice<ж<global::go.@internal.xcoff_package.MemberHeader>>([
+            Ꮡ(new global::go.@internal.xcoff_package.MemberHeader("printbye.o", 836)),
+            Ꮡ(new global::go.@internal.xcoff_package.MemberHeader("printhello.o", 860))
+        ]),
+        slice<global::go.@internal.xcoff_package.FileHeader>([
             new(U64_TOCMAGIC),
             new(U64_TOCMAGIC)
-        }.slice()
+        ])
     ),
     new(
-        "testdata/bigar-empty"u8,
+        "testdata/bigar-empty",
         new ArchiveHeader(AIAMAGBIG),
-        new ж<global::go.@internal.xcoff_package.MemberHeader>[]{}.slice(),
-        new global::go.@internal.xcoff_package.FileHeader[]{}.slice()
+        slice<ж<global::go.@internal.xcoff_package.MemberHeader>>([]),
+        slice<global::go.@internal.xcoff_package.FileHeader>([])
     )
-}.slice(); }
+]); }
 
-public static void TestOpenArchive(ж<testing.T> Ꮡt) {
+public static void TestOpenArchive(ж<testing.T> t) {
     foreach (var i in range(archTest)) {
         var tt = Ꮡ(archTest, i);
-        var (arch, err) = OpenArchive((~tt).@file);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        var (arch, err) = OpenArchive(tt.@file);
+        if (err != nil) {
+            t.Error(err);
             continue;
         }
-        if (!reflect.DeepEqual((~arch).ArchiveHeader, (~tt).hdr)) {
-            Ꮡt.Errorf("open archive %s:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, (~arch).ArchiveHeader, (~tt).hdr);
+        if (!reflect.DeepEqual(arch.ArchiveHeader, tt.hdr)) {
+            t.Errorf("open archive %s:\n\thave %#v\n\twant %#v\n", tt.@file, arch.ArchiveHeader, tt.hdr);
             continue;
         }
 
-        foreach (var (iΔ1, mem) in (~arch).Members) {
-            if (iΔ1 >= len((~tt).members)) {
+        foreach (var (iΔ1, mem) in arch.Members) {
+            if (iΔ1 >= len(tt.members)) {
                 break;
             }
-            var have = mem.of(global::go.@internal.xcoff_package.Member.ᏑMemberHeader);
-            var want = (~tt).members[iΔ1];
+            var have = mem.ᏑMemberHeader;
+            var want = tt.members[iΔ1];
             if (!reflect.DeepEqual(have.OrTypedNil(), want.OrTypedNil())) {
-                Ꮡt.Errorf("open %s, member %d:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, iΔ1, have.OrTypedNil(), want.OrTypedNil());
+                t.Errorf("open %s, member %d:\n\thave %#v\n\twant %#v\n", tt.@file, iΔ1, have.OrTypedNil(), want.OrTypedNil());
             }
 
-            var (f, errΔ1) = arch.GetFile((~mem).Name);
-            if (errΔ1 != default!) {
-                Ꮡt.Error(errΔ1);
+            var (f, errΔ1) = arch.GetFile(mem.Name);
+            if (errΔ1 != nil) {
+                t.Error(errΔ1);
                 continue;
             }
-            if (!reflect.DeepEqual((~f).FileHeader, (~tt).membersFileHeader[iΔ1])) {
-                Ꮡt.Errorf("open %s, member file header %d:\n\thave %#v\n\twant %#v\n"u8, (~tt).@file, iΔ1, (~f).FileHeader, (~tt).membersFileHeader[iΔ1]);
+            if (!reflect.DeepEqual(f.FileHeader, tt.membersFileHeader[iΔ1])) {
+                t.Errorf("open %s, member file header %d:\n\thave %#v\n\twant %#v\n", tt.@file, iΔ1, f.FileHeader, tt.membersFileHeader[iΔ1]);
             }
         }
-        nint tn = len((~tt).members);
-        nint an = len((~arch).Members);
+        nint tn = len(tt.members);
+        nint an = len(arch.Members);
         if (tn != an) {
-            Ꮡt.Errorf("open %s: len(Members) = %d, want %d"u8, (~tt).@file, an, tn);
+            t.Errorf("open %s: len(Members) = %d, want %d", tt.@file, an, tn);
         }
     }
 }

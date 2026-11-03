@@ -31,28 +31,30 @@ internal static (ж<types.Package>, error) ImportFrom(this ref resolveTestImport
     if (mode != 0) {
         throw panic("mode must be 0");
     }
-    if (imp.importer == default!) {
+    if (imp.importer == nil) {
         imp.importer = defaultImporter(fset)._<ImporterFrom>();
         imp.imported = new map<@string, bool>();
     }
     var (pkg, err) = imp.importer.ImportFrom(path, srcDir, mode);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     imp.imported[path] = true;
-    return (pkg, default!);
+    return (pkg, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testResolveIdentsˢ = "testResolveIdents"u8;
-internal static readonly @string mutexStringerErrorˢ = "[Mutex Stringer error]"u8;
+internal static ref readonly @string testResolveIdentsˢ => ref testResolveIdentsˢᵇ;
+private static readonly @string testResolveIdentsˢᵇ = "testResolveIdents"u8;
+internal static ref readonly @string mutexStringerErrorˢ => ref mutexStringerErrorˢᵇ;
+private static readonly @string mutexStringerErrorˢᵇ = "[Mutex Stringer error]"u8;
 
-public static void TestResolveIdents(ж<testing.T> Ꮡt) {
+public static void TestResolveIdents(ж<testing.T> t) {
     var filesᴷ = new stackAppend<ж<ast.File>>();
 
-    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(t));
 
-    var sources = new @string[]{
+    var sources = slice<@string>([
         """
 
 		package p
@@ -127,35 +129,34 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
 		}
 		
 """u8.Raw()
-    }.slice();
+    ]);
 
-    var pkgnames = new @string[]{
-        "fmt"u8,
-        "math"u8
-    }.slice();
+    var pkgnames = slice<@string>([
+        "fmt",
+        "math"
+    ]);
 
     // parse package files
     var fset = token.NewFileSet();
-    slice<ж<ast.File>> files = default!;
+    slice<ж<ast.File>> files = default;
     foreach (var (_, src) in sources) {
         files = append(filesᴷ, files, mustParse(fset, src));
     }
 
     // resolve and type-check package AST
     var importer = Ꮡ(new resolveTestImporter(fset: fset));
-    ref var conf = ref heap<types.Config>(out var Ꮡconf);
-    conf = new Config(Importer: new types_test_package.resolveTestImporterжImporter(importer));
+    ref var conf = ref heap<types.Config>(new Config(Importer: new types_test_package.resolveTestImporterжImporter(importer)), out var Ꮡconf);
     var uses = new map<ж<ast.Ident>, types.Object>();
     var defs = new map<ж<ast.Ident>, types.Object>();
     var (_, err) = Ꮡconf.Check(testResolveIdentsˢ, fset, files, Ꮡ(new typesꓸInfo(Defs: defs, Uses: uses)));
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     // check that all packages were imported
     foreach (var (_, name) in pkgnames) {
-        if (!(~importer).imported[name]) {
-            Ꮡt.Errorf("package %s not imported"u8, name);
+        if (!importer.imported[name]) {
+            t.Errorf("package %s not imported", name);
         }
     }
 
@@ -167,15 +168,15 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
             {
                 var (s, ok) = n._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
                     {
-                        var (x, okΔ1) = (~s).X._<ж<ast.Ident>>(ᐧ); if (okΔ1) {
+                        var (x, okΔ1) = s.X._<ж<ast.Ident>>(ᐧ); if (okΔ1) {
                             var obj = usesʗ1[x];
-                            if (obj == default!) {
-                                Ꮡt.Errorf("%s: unresolved qualified identifier %s"u8, fsetʗ1.Position(x.Pos()), (~x).Name);
+                            if (obj == nil) {
+                                t.Errorf("%s: unresolved qualified identifier %s", fsetʗ1.Position(x.Pos()), x.Name);
                                 return false;
                             }
                             {
-                                var (_, okΔ2) = obj._<ж<types.PkgName>>(ᐧ); if (okΔ2 && usesʗ1[(~s).Sel] == default!) {
-                                    Ꮡt.Errorf("%s: unresolved selector %s"u8, fsetʗ1.Position((~s).Sel.Pos()), (~(~s).Sel).Name);
+                                var (_, okΔ2) = obj._<ж<types.PkgName>>(ᐧ); if (okΔ2 && usesʗ1[s.Sel] == nil) {
+                                    t.Errorf("%s: unresolved selector %s", fsetʗ1.Position(s.Sel.Pos()), s.Sel.Name);
                                     return false;
                                 }
                             }
@@ -190,8 +191,8 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
     }
 
     foreach (var (id, obj) in uses) {
-        if (obj == default!) {
-            Ꮡt.Errorf("%s: Uses[%s] == nil"u8, fset.Position(id.Pos()), (~id).Name);
+        if (obj == nil) {
+            t.Errorf("%s: Uses[%s] == nil", fset.Position(id.Pos()), id.Name);
         }
     }
 
@@ -204,7 +205,7 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
             {
                 var (x, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-                    nint objects = default!;
+                    nint objects = default;
                     {
                         var (_, found) = usesʗ2[x, ꟷ]; if (found) {
                             objects |= (nint)(1);
@@ -217,11 +218,10 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
                             delete(defsʗ1, x);
                         }
                     }
-                    if (objects == 0){
-                        Ꮡt.Errorf("%s: unresolved identifier %s"u8, fsetʗ2.Position(x.Pos()), (~x).Name);
-                    } else 
-                    if (objects == 3) {
-                        Ꮡboth.ValueSlot = append(Ꮡboth.ValueSlot, (~x).Name);
+                    if (objects == 0) {
+                        t.Errorf("%s: unresolved identifier %s", fsetʗ2.Position(x.Pos()), x.Name);
+                    } else if (objects == 3) {
+                        Ꮡboth.ValueSlot = append(Ꮡboth.ValueSlot, x.Name);
                     }
                     return false;
                 }
@@ -235,16 +235,16 @@ public static void TestResolveIdents(ж<testing.T> Ꮡt) {
     {
         @string got = fmt.Sprint(both);
         @string want = mutexStringerErrorˢ; if (got != want) {
-            Ꮡt.Errorf("simultaneous uses/defs = %s, want %s"u8, got, want);
+            t.Errorf("simultaneous uses/defs = %s, want %s", got, want);
         }
     }
 
     // any left-over identifiers didn't exist in the source
     foreach (var (x, _) in uses) {
-        Ꮡt.Errorf("%s: identifier %s not present in source"u8, fset.Position(x.Pos()), (~x).Name);
+        t.Errorf("%s: identifier %s not present in source", fset.Position(x.Pos()), x.Name);
     }
     foreach (var (x, _) in defs) {
-        Ꮡt.Errorf("%s: identifier %s not present in source"u8, fset.Position(x.Pos()), (~x).Name);
+        t.Errorf("%s: identifier %s not present in source", fset.Position(x.Pos()), x.Name);
     }
 
     // TODO(gri) add tests to check ImplicitObj callbacks

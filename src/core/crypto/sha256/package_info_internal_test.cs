@@ -20,6 +20,10 @@ using static go.crypto.sha256_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(cgoData))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -28,7 +32,7 @@ using static go.crypto.sha256_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha256/sha256_test.go", "sha256_test.cs", "ABgyACFEACREgqaCgoKClIKCgpSCgpSCgpSmgoKClIKCgpSCgpSCgpTKggAIBoIABBKykoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSAgv6CgoKCgoKCgpSCgoKCgpSCgtyCgoKCgoKCgpSCgoKCgpSCgtyCgpSCgqaAgsiCgoCCpIKAgsiCgoCCABEiABMowoKAgsjkgoSCgIKCtoKCgqaCyoKCgIKClIKCgoKUgoKCgqaClAAJEqaCgoKCguaCgoKmgoIACQqCgoKCpoKCgsqigJKkpuSCgoKigoKCgoKmkoKCgqaSgoKCyoKmgqaCpoKmgqaCgoKCgoKClII=", "157-199:1;319-323:1;350-369:1;391-395:1;392-394:1.1;396-400:2;397-399:2.1;404-409:1;405-408:1.1;410-415:2;411-414:2.1;430-438:1;439-445:2;446-452:3;477-483:1")]
+[assembly: GoPositionMap("crypto/sha256/sha256_test.go", "sha256_test.cs", "ABgyACFEACVEgqaCgoKClIKCgpSCgpSCgpSmgoKClIKCgpSCgpSCgpTKggAIBoIABBKykoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSAgv6CgoKCgoKCgpSCgoKCgpSCgtyCgoKCgoKCgpSCgoKCgpSCgtyCgpSCgqaAgsiCgoCCpIKAgsiCgoCCABEiABMowoKAgsjkgoSCgIKCtoKCgqaCyoKCgIKClIKCgoKUgoKCgqaClAAJEqaCgoKCggAIBoKCgqaCggAMCoKCgoKmgoKCyqKAkqSmAAkEgoKCooKCgoKCppKCgoKmkoKCgsqCpoKmgqaCpoKmgoKCgoKCgpSC", "157-199:1;319-323:1;350-369:1;391-395:1;392-394:1.1;396-400:2;397-399:2.1;404-409:1;405-408:1.1;410-415:2;411-414:2.1;430-438:1;439-445:2;446-452:3;477-483:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

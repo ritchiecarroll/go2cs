@@ -18,19 +18,19 @@ internal static UntypedInt sizeofIfMsghdr2 => 0xa0;
 internal static (nint, map<nint, ж<wireFormat>>) probeRoutingStack() {
     var ifm = Ꮡ(new wireFormat(extOff: 16, bodyOff: syscall.SizeofIfMsghdr));
     var ifmʗ1 = ifm;
-        ifm.Value.parse = (slice<byte> p1) => ifmʗ1.parseInterfaceMessage(p1);
+        ifm.parse = (slice<byte> p1) => ifmʗ1.parseInterfaceMessage(p1);
     var ifm2 = Ꮡ(new wireFormat(extOff: 32, bodyOff: sizeofIfMsghdr2));
     var ifm2ʗ1 = ifm2;
-        ifm2.Value.parse = (slice<byte> p1) => ifm2ʗ1.parseInterfaceMessage(p1);
+        ifm2.parse = (slice<byte> p1) => ifm2ʗ1.parseInterfaceMessage(p1);
     var ifam = Ꮡ(new wireFormat(extOff: syscall.SizeofIfaMsghdr, bodyOff: syscall.SizeofIfaMsghdr));
     var ifamʗ1 = ifam;
-        ifam.Value.parse = (slice<byte> p1) => ifamʗ1.parseInterfaceAddrMessage(p1);
+        ifam.parse = (slice<byte> p1) => ifamʗ1.parseInterfaceAddrMessage(p1);
     var ifmam = Ꮡ(new wireFormat(extOff: syscall.SizeofIfmaMsghdr, bodyOff: syscall.SizeofIfmaMsghdr));
     var ifmamʗ1 = ifmam;
-        ifmam.Value.parse = (slice<byte> p1) => ifmamʗ1.parseInterfaceMulticastAddrMessage(p1);
+        ifmam.parse = (slice<byte> p1) => ifmamʗ1.parseInterfaceMulticastAddrMessage(p1);
     var ifmam2 = Ꮡ(new wireFormat(extOff: syscall.SizeofIfmaMsghdr2, bodyOff: syscall.SizeofIfmaMsghdr2));
     var ifmam2ʗ1 = ifmam2;
-        ifmam2.Value.parse = (slice<byte> p1) => ifmam2ʗ1.parseInterfaceMulticastAddrMessage(p1);
+        ifmam2.parse = (slice<byte> p1) => ifmam2ʗ1.parseInterfaceMulticastAddrMessage(p1);
     // Darwin kernels require 32-bit aligned access to routing facilities.
     return (4, new map<nint, ж<wireFormat>>{
         [syscall.RTM_NEWADDR] = ifam,

@@ -15,50 +15,50 @@ internal partial struct TestPrefixSuffixSaver_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestPrefixSuffixSaver(ж<testing.T> Ꮡt) {
-    var tests = new TestPrefixSuffixSaver_tests[]{
+public static void TestPrefixSuffixSaver(ж<testing.T> t) {
+    var tests = slice<TestPrefixSuffixSaver_tests>([
         new(
             N: 2,
-            writes: default!,
-            want: ""u8
+            writes: default,
+            want: ""
         ),
         new(
             N: 2,
-            writes: new @string[]{"a"u8}.slice(),
-            want: "a"u8
+            writes: slice<@string>(["a"]),
+            want: "a"
         ),
         new(
             N: 2,
-            writes: new @string[]{"abc"u8, "d"u8}.slice(),
-            want: "abcd"u8
+            writes: slice<@string>(["abc", "d"]),
+            want: "abcd"
         ),
         new(
             N: 2,
-            writes: new @string[]{"abc"u8, "d"u8, "e"u8}.slice(),
-            want: "ab\n... omitting 1 bytes ...\nde"u8
+            writes: slice<@string>(["abc", "d", "e"]),
+            want: "ab\n... omitting 1 bytes ...\nde"
         ),
         new(
             N: 2,
-            writes: new @string[]{"ab______________________yz"u8}.slice(),
-            want: "ab\n... omitting 22 bytes ...\nyz"u8
+            writes: slice<@string>(["ab______________________yz"]),
+            want: "ab\n... omitting 22 bytes ...\nyz"
         ),
         new(
             N: 2,
-            writes: new @string[]{"ab_______________________y"u8, "z"u8}.slice(),
-            want: "ab\n... omitting 23 bytes ...\nyz"u8
+            writes: slice<@string>(["ab_______________________y", "z"]),
+            want: "ab\n... omitting 23 bytes ...\nyz"
         )
-    }.slice();
+    ]);
     foreach (var (i, tt) in tests) {
         var w = Ꮡ(new prefixSuffixSaver(N: tt.N));
         foreach (var (_, s) in tt.writes) {
             var (n, err) = io.WriteString(new global::go.os.exec_package.prefixSuffixSaverжWriter(w), s);
-            if (err != default! || n != len(s)) {
-                Ꮡt.Errorf("%d. WriteString(%q) = %v, %v; want %v, %v"u8, i, s, n, err, len(s), (any)(default!));
+            if (err != nil || n != len(s)) {
+                t.Errorf("%d. WriteString(%q) = %v, %v; want %v, %v", i, s, n, err, len(s), (any)(default));
             }
         }
         {
             @string got = (@string)w.Bytes(); if (got != tt.want) {
-                Ꮡt.Errorf("%d. Bytes = %q; want %q"u8, i, got, tt.want);
+                t.Errorf("%d. Bytes = %q; want %q", i, got, tt.want);
             }
         }
     }

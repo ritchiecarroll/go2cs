@@ -18,7 +18,7 @@ partial class pkgbits_package {
 // A SectionKind indicates a section, as well as the ordering of sections within
 // unified export data. Any object given a dedicated section can be referred to
 // via a section / index pair (and thus dereferenced) in other sections.
-partial struct SectionKind /*num:int32*/;
+partial struct SectionKind /*num:int32*/; // TODO(markfreeman): Replace with uint8.
 
 public static SectionKind SectionString => /* iota */ 0;
 public static SectionKind SectionMeta => 1;

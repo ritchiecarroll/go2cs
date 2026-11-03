@@ -49,7 +49,12 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(chacha20poly1305))]
+[assembly: GoFieldAccess(typeof(xchacha20poly1305))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -59,11 +64,11 @@ using static go.vendor.golang.org.x.crypto.chacha20poly1305_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "AClQkoKUgpSCgqaCpoKmgoKmgqamlIKClIKUgqau8oCClIKkgg==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKAgoKCyIKCgqaCgoKClIKmgoKCgpSCgoKCgpSmgoKUgoKClIKCgoKUgoKUgpSCgpSmgg==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAgSgqaC")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/fips140only_go1.26.go", "fips140only_go1.26.cs", "AAsWgA==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgpSCgqaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305.go", "chacha20poly1305.cs", "ACtQkoKUgpSCgqaCpoKmgoKmgqamlIKClIKUgqau8oCClIKkgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_generic.go", "chacha20poly1305_generic.cs", "AA8egoKAgoKCyIKCgqaCgoKClIKmgoKCgpSCgoKCgpSmgoKUgoKClIKCgoKUgoKUgpSCgpSmgg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/chacha20poly1305_noasm.go", "chacha20poly1305_noasm.cs", "AAgSgqaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/fips140only_go1.26.go", "fips140only_go1.26.cs", "AAsWgA==")]
+[assembly: GoPositionMap("vendor/golang.org/x/crypto/chacha20poly1305/xchacha20poly1305.go", "xchacha20poly1305.cs", "ABEw4oKUgpSCgqaCpoKmgoIABxCCpoKCpoKUpoKClIKUgqaCgqaClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;

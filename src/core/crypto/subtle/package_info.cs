@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +45,7 @@ using static go.crypto.subtle_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,9 +55,9 @@ using static go.crypto.subtle_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/subtle/constant_time.go", "constant_time.cs", "AA8q8qqiqJKokqyyqqI=")]
-[assembly: go.GoPositionMap("crypto/subtle/dit.go", "dit.cs", "AAxQAB4CgoKmuIKCuKKmxg==", "50-54:1")]
-[assembly: go.GoPositionMap("crypto/subtle/xor.go", "xor.cs", "AAoiAAgC")]
+[assembly: GoPositionMap("crypto/subtle/constant_time.go", "constant_time.cs", "AA8q8qqiqJKokqyyqqI=")]
+[assembly: GoPositionMap("crypto/subtle/dit.go", "dit.cs", "AAxQAB4CgoKmuIKCuKKmxg==", "50-54:1")]
+[assembly: GoPositionMap("crypto/subtle/xor.go", "xor.cs", "AAoiAAgC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -10,7 +10,7 @@ using static global::go.reflect_internal_test_package;
 partial class reflect_test_package {
 
 // See also runtime_test.TestGroupSizeZero.
-public static void TestGroupSizeZero(ж<Δtesting.T> Ꮡt) {
+public static void TestGroupSizeZero(ж<Δtesting.T> t) {
     var st = Δreflect.TypeFor<EmptyStruct>();
     var grp = reflect_internal_test_package.MapGroupOf(st, st);
 
@@ -18,7 +18,7 @@ public static void TestGroupSizeZero(ж<Δtesting.T> Ꮡt) {
     // are size 0. We should have reserved an extra word to ensure that
     // pointers to the zero-size type at the end of group are valid.
     if (grp.Size() <= 8) {
-        Ꮡt.Errorf("Group size got %d want >8"u8, grp.Size());
+        t.Errorf("Group size got %d want >8", grp.Size());
     }
 }
 

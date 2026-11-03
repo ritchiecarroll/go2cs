@@ -12,7 +12,7 @@ internal static ref @string target => ref ((StaticBox<@string>)Ꮡtarget).ValueS
 
 [GoInit] internal static void init() {
     // The dist test runner passes -target when running this as a host test.
-    flag.StringVar(Ꮡtarget, "target"u8, ""u8, ""u8);
+    flag.StringVar(Ꮡtarget, "target", "", "");
 }
 
 } // end wasi_test_package

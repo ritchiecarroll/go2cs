@@ -436,6 +436,12 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 			for _, part := range disclosure.parts() {
 				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), escapeProofCell(part.Class), escapeProofCell(part.Reason))
 			}
+
+			// And one row per optional record, the record the test logs on some runs (option A,
+			// 2026-11-01), so a visitor reads why the count can differ by one.
+			for _, optional := range disclosure.OptionalRecords {
+				fmt.Fprintf(&page, "| `%s` | `%s` | %s |\n", escapeProofCell(name), disclosureOptionalRecordLabel, escapeProofCell(optional.Reason))
+			}
 		}
 
 		// A platform-skip row's own note. The ruling's anti-laundering clause requires the verdict
@@ -1107,6 +1113,10 @@ func productionProjectInputDigest(outputPath string, manifest testManifest) stri
 // disclosureClassAggregate is the class a proof page and the console summary give a disclosed parent that is purely
 // the roll-up of its disclosed subtests: it has no manifest entry, so no class of its own.
 const disclosureClassAggregate = "aggregate"
+
+// disclosureOptionalRecordLabel fills the Class column of a proof-page row that states an entry's optional record
+// (testDisclosure.OptionalRecords): it is a record the entry's own test logs on some runs, not a class of its own.
+const disclosureOptionalRecordLabel = "optional record"
 
 // writeThirdPartyModuleSummary regenerates <moduleDir>/MODULE.md from the package pages beneath it: one
 // row per page (its import path, matched and disclosed counts, a link) and the module's totals.

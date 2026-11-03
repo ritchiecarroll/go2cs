@@ -17,12 +17,12 @@ internal static readonly object expectedUnconditionalˢ = (@string)"expected unc
 
 // Make sure open-coded defer exit code is not lost, even when there is an
 // unconditional panic (hence no return from the function)
-public static void TestUnconditionalPanic(ж<testing.T> Ꮡt) {
+public static void TestUnconditionalPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             if (!AreEqual(recover(), (@string)("testUnconditional"))) {
-                Ꮡt.Fatal(expectedUnconditionalˢ);
+                t.Fatal(expectedUnconditionalˢ);
             }
         }, ref ᒐ);
         throw panic("testUnconditional");
@@ -38,21 +38,21 @@ internal static readonly object expectedTestNonOpenPanicˢ = (@string)"expected 
 
 // Test an open-coded defer and non-open-coded defer - make sure both defers run
 // and call recover()
-public static void TestOpenAndNonOpenDefers(ж<testing.T> Ꮡt) {
+public static void TestOpenAndNonOpenDefers(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        while (ᐧ) {
+        for (;;) {
             // Non-open defer because in a loop
             defer((nint n) => {
                 if (!AreEqual(recover(), (@string)("testNonOpenDefer"))) {
-                    Ꮡt.Fatal(expectedTestNonOpenPanicˢ);
+                    t.Fatal(expectedTestNonOpenPanicˢ);
                 }
             }, (nint)3, ref ᒐ);
             if (glob > 2) {
                 break;
             }
         }
-        testOpen(Ꮡt, 47);
+        testOpen(t, 47);
         throw panic("testNonOpenDefer");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -63,12 +63,12 @@ public static void TestOpenAndNonOpenDefers(ж<testing.T> Ꮡt) {
 internal static readonly object expectedTestOpenPanicˢ = (@string)"expected testOpen panic"u8;
 
 //go:noinline
-internal static partial void testOpen(ж<testing.T> Ꮡt, nint arg) {
+internal static partial void testOpen(ж<testing.T> t, nint arg) {
     GoFrame ᒐ = default;
     try {
         defer((nint n) => {
             if (!AreEqual(recover(), (@string)("testOpenDefer"))) {
-                Ꮡt.Fatal(expectedTestOpenPanicˢ);
+                t.Fatal(expectedTestOpenPanicˢ);
             }
         }, (nint)4, ref ᒐ);
         if (arg > 2) {
@@ -81,15 +81,15 @@ internal static partial void testOpen(ж<testing.T> Ꮡt, nint arg) {
 
 // Test a non-open-coded defer and an open-coded defer - make sure both defers run
 // and call recover()
-public static void TestNonOpenAndOpenDefers(ж<testing.T> Ꮡt) {
+public static void TestNonOpenAndOpenDefers(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        testOpen(Ꮡt, 47);
-        while (ᐧ) {
+        testOpen(t, 47);
+        for (;;) {
             // Non-open defer because in a loop
             defer((nint n) => {
                 if (!AreEqual(recover(), (@string)("testNonOpenDefer"))) {
-                    Ꮡt.Fatal(expectedTestNonOpenPanicˢ);
+                    t.Fatal(expectedTestNonOpenPanicˢ);
                 }
             }, (nint)3, ref ᒐ);
             if (glob > 2) {
@@ -109,18 +109,18 @@ internal static readonly object expectedPanicˢ = (@string)"expected panic"u8;
 
 // Make sure that conditional open-coded defers are activated correctly and run in
 // the correct order.
-public static void TestConditionalDefers(ж<testing.T> Ꮡt) {
+public static void TestConditionalDefers(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         list = new slice<nint>(0, 10);
 
         defer(() => {
             if (!AreEqual(recover(), (@string)("testConditional"))) {
-                Ꮡt.Fatal(expectedPanicˢ);
+                t.Fatal(expectedPanicˢ);
             }
-            var want = new nint[]{4, 2, 1}.slice();
+            var want = slice<nint>([4, 2, 1]);
             if (!slices.Equal<slice<nint>, nint>(want, list)) {
-                Ꮡt.Fatalf("wanted %v, got %v"u8, want, list);
+                t.Fatalf("wanted %v, got %v", want, list);
             }
         }, ref ᒐ);
         testConditionalDefers(8);
@@ -141,7 +141,7 @@ internal static void testConditionalDefers(nint n) {
         if (n > 5) {
             var doappendʗ2 = doappend;
             defer(doappendʗ2, (nint)2, ref ᒐ);
-            if (n > 8){
+            if (n > 8) {
                 var doappendʗ3 = doappend;
                 defer(doappendʗ3, (nint)3, ref ᒐ);
             } else {
@@ -160,15 +160,17 @@ internal static readonly object deferShouldnTRunˢ = (@string)"Defer shouldn't r
 
 // Test that there is no compile-time or run-time error if an open-coded defer
 // call is removed by constant propagation and dead-code elimination.
-public static void TestDisappearingDefer(ж<testing.T> Ꮡt) {
+public static void TestDisappearingDefer(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var exprᴛ1 = Δruntime.GOOS;
-        if (exprᴛ1 == "invalidOS"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "invalidOS"u8: {
             defer(() => {
-                Ꮡt.Fatal(deferShouldnTRunˢ);
+                t.Fatal(deferShouldnTRunˢ);
             }, ref ᒐ);
-        }
+            break;
+        }}
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -183,19 +185,19 @@ public static void TestDisappearingDefer(ж<testing.T> Ꮡt) {
 // continue panic processing or be recovered. If the panic P2 does a recover at
 // some point, it will naturally remove the original panic P1 from the stack
 // (since the original panic had to be in frame F or a descendant of F).
-public static void TestAbortedPanic(ж<testing.T> Ꮡt) {
+public static void TestAbortedPanic(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             var r = recover();
-            if (r != default!) {
-                Ꮡt.Fatalf("wanted nil recover, got %v"u8, r);
+            if (r != nil) {
+                t.Fatalf("wanted nil recover, got %v", r);
             }
         }, ref ᒐ);
         defer(() => {
             var r = recover();
             if (!AreEqual(r, (@string)("panic2"))) {
-                Ꮡt.Fatalf("wanted %v, got %v"u8, panic2ˢ, r);
+                t.Fatalf("wanted %v, got %v", panic2ˢ, r);
             }
         }, ref ᒐ);
         defer(() => {
@@ -214,13 +216,13 @@ internal static readonly object panic1ˢ = (@string)"panic1"u8;
 // defer function that is directly called by the panic.  Here, we first call it
 // from a defer function that is created by the defer function called directly by
 // the panic.
-public static void TestRecoverMatching(ж<testing.T> Ꮡt) {
+public static void TestRecoverMatching(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
             var r = recover();
             if (!AreEqual(r, (@string)("panic1"))) {
-                Ꮡt.Fatalf("wanted %v, got %v"u8, panic1ˢ, r);
+                t.Fatalf("wanted %v, got %v", panic1ˢ, r);
             }
         }, ref ᒐ);
         defer(() => {
@@ -231,8 +233,8 @@ public static void TestRecoverMatching(ж<testing.T> Ꮡt) {
                     // from a defer function, since this defer function was
                     // not directly called by the panic.
                     var r = recover();
-                    if (r != default!) {
-                        Ꮡt.Fatalf("wanted nil recover, got %v"u8, r);
+                    if (r != nil) {
+                        t.Fatalf("wanted nil recover, got %v", r);
                     }
                 }, ref ᒐ);
             }
@@ -276,38 +278,38 @@ internal static containsBigStruct sideeffect2(containsBigStruct @in) {
 }
 
 // Test that nonSSAable arguments to defer are handled correctly and only evaluated once.
-public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
+public static void TestNonSSAableArgs(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         globint1 = 0;
         globint2 = 0;
         globint3 = 0;
-        byte save1 = default!;
-        int64 save2 = default!;
-        int64 save3 = default!;
-        int64 save4 = default!;
+        byte save1 = default;
+        int64 save2 = default;
+        int64 save3 = default;
+        int64 save4 = default;
 
         defer(() => {
             if (globint1 != 1) {
-                Ꮡt.Fatalf("globint1:  wanted: 1, got %v"u8, globint1);
+                t.Fatalf("globint1:  wanted: 1, got %v", globint1);
             }
             if (save1 != 5) {
-                Ꮡt.Fatalf("save1:  wanted: 5, got %v"u8, save1);
+                t.Fatalf("save1:  wanted: 5, got %v", save1);
             }
             if (globint2 != 1) {
-                Ꮡt.Fatalf("globint2:  wanted: 1, got %v"u8, globint2);
+                t.Fatalf("globint2:  wanted: 1, got %v", globint2);
             }
             if (save2 != 2) {
-                Ꮡt.Fatalf("save2:  wanted: 2, got %v"u8, save2);
+                t.Fatalf("save2:  wanted: 2, got %v", save2);
             }
             if (save3 != 4) {
-                Ꮡt.Fatalf("save3:  wanted: 4, got %v"u8, save3);
+                t.Fatalf("save3:  wanted: 4, got %v", save3);
             }
             if (globint3 != 1) {
-                Ꮡt.Fatalf("globint3:  wanted: 1, got %v"u8, globint3);
+                t.Fatalf("globint3:  wanted: 1, got %v", globint3);
             }
             if (save4 != 4) {
-                Ꮡt.Fatalf("save1:  wanted: 4, got %v"u8, save4);
+                t.Fatalf("save1:  wanted: 4, got %v", save4);
             }
         }, ref ᒐ);
 
@@ -322,8 +324,7 @@ public static void TestNonSSAableArgs(ж<testing.T> Ꮡt) {
         }, new bigStruct(1, 2, 3, 4, 5, sideeffect(6)), ref ᒐ);
 
         // Test struct field reference that is non-SSAable
-        ref var foo = ref heap<containsBigStruct>(out var Ꮡfoo);
-        foo = new containsBigStruct(nil);
+        ref var foo = ref heap<containsBigStruct>(new containsBigStruct(), out var Ꮡfoo);
         foo.element.z = 4;
         defer((bigStruct element) => {
             save3 = element.z;
@@ -344,20 +345,19 @@ internal static partial void doPanic() {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object didnTFindExpectedPanicˢ = (@string)"Didn't find expected panic"u8;
 
-public static void TestDeferForFuncWithNoExit(ж<testing.T> Ꮡt) {
+public static void TestDeferForFuncWithNoExit(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         nint cond = 1;
         defer(() => {
             if (cond != 2) {
-                Ꮡt.Fatalf("cond: wanted 2, got %v"u8, cond);
+                t.Fatalf("cond: wanted 2, got %v", cond);
             }
             if (!AreEqual(recover(), (@string)("Test panic"))) {
-                Ꮡt.Fatal(didnTFindExpectedPanicˢ);
+                t.Fatal(didnTFindExpectedPanicˢ);
             }
         }, ref ᒐ);
-        ref var x = ref heap<nint>(out var Ꮡx);
-        x = 0;
+        ref var x = ref heap<nint>(0, out var Ꮡx);
         // Force a stack copy, to make sure that the &cond pointer passed to defer
         // function is properly updated.
         growStackIter(Ꮡx, 1000);
@@ -365,7 +365,7 @@ public static void TestDeferForFuncWithNoExit(ж<testing.T> Ꮡt) {
         doPanic();
 
         // This function has no exit/return, since it ends with an infinite loop
-        while (ᐧ) {
+        for (;;) {
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -378,7 +378,7 @@ public static void TestDeferForFuncWithNoExit(ж<testing.T> Ꮡt) {
 // are no stale defer structs on the defer chain after the interpreter() sequence,
 // by writing a bunch of 0xffffffffs into several recursive stack frames, and then
 // doing a single panic-recover which would invoke any such stale defer structs.
-public static void TestDeferWithRepeatedRepanics(ж<testing.T> Ꮡt) {
+public static void TestDeferWithRepeatedRepanics(ж<testing.T> t) {
     interpreter(0, 6, 2);
     recurseFnPanicRec(0, 10);
     interpreter(0, 5, 1);
@@ -392,7 +392,7 @@ internal static void interpreter(nint level, nint maxlevel, nint rec) {
     try {
         defer(() => {
             var e = recover();
-            if (e == default!) {
+            if (e == nil) {
                 return;
             }
             if (level != e._<nint>()) {
@@ -401,7 +401,7 @@ internal static void interpreter(nint level, nint maxlevel, nint rec) {
             }
             //fmt.Fprintln(os.Stderr, "Recovered, level", level)
         }, ref ᒐ);
-        if (level + 1 < maxlevel){
+        if (level + 1 < maxlevel) {
             interpreter(level + 1, maxlevel, rec);
         } else {
             //fmt.Fprintln(os.Stderr, "Initiating panic")
@@ -428,7 +428,7 @@ internal static uint32 saveInt;
 
 internal static void recurseFn(nint level, nint maxlevel) {
     var a = new uint32[]{0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU}.array();
-    if (level + 1 < maxlevel){
+    if (level + 1 < maxlevel) {
         // Make sure a array is referenced, so it is not optimized away
         saveInt = a[4];
         recurseFn(level + 1, maxlevel);
@@ -441,7 +441,7 @@ internal static void recurseFn(nint level, nint maxlevel) {
 // mistakenly held, and that struct keeps a pointer to a stack-allocated defer
 // struct, and that stack-allocated struct gets overwritten or the stack gets
 // moved, so a memory error happens on GC.
-public static void TestIssue37688(ж<testing.T> Ꮡt) {
+public static void TestIssue37688(ж<testing.T> t) {
     for (nint j = 0; j < 10; j++) {
         g2();
         g3();
@@ -493,17 +493,17 @@ partial struct globstructᴛ1 /*dyn*/ {
 }
 internal static globstructᴛ1 globstruct;
 
-internal static void ff1(ж<foo> Ꮡap, nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i) {
+internal static void ff1(ж<foo> ap, nint a, nint b, nint c, nint d, nint e, nint f, nint g, nint h, nint i) {
     GoFrame ᒐ = default;
     try {
-        defer(Ꮡap.method1, ref ᒐ);
+        defer(ap.method1, ref ᒐ);
 
         // Make a defer that has a very large set of args, hence big size for the
         // defer record for the open-coded frame (which means it won't use the
         // defer pool)
         defer((ж<foo> apΔ1, nint aΔ1, nint bΔ1, nint cΔ1, nint dΔ1, nint eΔ1, nint fΔ1, nint gΔ1, nint hΔ1, nint iΔ1) => {
             {
-                var v = recover(); if (v != default!) {
+                var v = recover(); if (v != nil) {
                 }
             }
             globstruct.a = aΔ1;
@@ -514,7 +514,7 @@ internal static void ff1(ж<foo> Ꮡap, nint a, nint b, nint c, nint d, nint e, 
             globstruct.f = fΔ1;
             globstruct.g = gΔ1;
             globstruct.h = hΔ1;
-        }, Ꮡap, a, b, c, d, e, f, g, h, i, ref ᒐ);
+        }, ap, a, b, c, d, e, f, g, h, i, ref ᒐ);
         throw panic("ff1 panic");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -527,17 +527,17 @@ internal static void rec1(nint max) {
     }
 }
 
-public static void TestIssue43921(ж<testing.T> Ꮡt) {
+public static void TestIssue43921(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            expect(Ꮡt, 1, recover());
+            expect(t, 1, recover());
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
                 // Prevent open-coded defers
-                while (ᐧ) {
+                for (;;) {
                     defer(() => {
                     }, ref ᒐ);
                     break;
@@ -547,7 +547,7 @@ public static void TestIssue43921(ж<testing.T> Ꮡt) {
                     GoFrame ᒐ = default;
                     try {
                         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-                            expect(Ꮡt, 4, recover());
+                            expect(t, 4, recover());
                         }, ref ᒐ);
                         throw panic((nint)4);
                     }
@@ -558,25 +558,25 @@ public static void TestIssue43921(ж<testing.T> Ꮡt) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-internal static partial void expect(ж<testing.T> Ꮡt, nint n, any err) {
+internal static partial void expect(ж<testing.T> t, nint n, any err) {
     if (!AreEqual(n, err)) {
-        Ꮡt.Fatalf("have %v, want %v"u8, err, n);
+        t.Fatalf("have %v, want %v", err, n);
     }
 }
 
-public static void TestIssue43920(ж<testing.T> Ꮡt) {
+public static void TestIssue43920(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var steps = ref heap(new nint(), out var Ꮡsteps);
 
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-            expect(Ꮡt, 1, recover());
+            expect(t, 1, recover());
         }, ref ᒐ);
         defer(() => {
             GoFrame ᒐ = default;
@@ -585,67 +585,67 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
                     GoFrame ᒐ = default;
                     try {
                         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-                            expect(Ꮡt, 5, recover());
+                            expect(t, 5, recover());
                         }, ref ᒐ);
                         defer(ᴛ1 => throw panic(ᴛ1), (nint)5, ref ᒐ);
-                        ((Action)(() => {
+                        func(() => {
                             throw panic((nint)4);
-                        }))();
+                        })();
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 }, ref ᒐ);
                 defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-                    expect(Ꮡt, 3, recover());
+                    expect(t, 3, recover());
                 }, ref ᒐ);
                 defer(ᴛ1 => throw panic(ᴛ1), (nint)3, ref ᒐ);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
-                defer(step, Ꮡt, Ꮡsteps, (nint)1, ref ᒐ);
+                defer(step, t, Ꮡsteps, (nint)1, ref ᒐ);
                 throw panic((nint)1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-internal static partial void step(ж<testing.T> Ꮡt, ж<nint> Ꮡsteps, nint want) {
+internal static partial void step(ж<testing.T> t, ж<nint> Ꮡsteps, nint want) {
     ref var steps = ref Ꮡsteps.DerefOrNull();
 
     steps++;
     if (steps != want) {
-        Ꮡt.Fatalf("have %v, want %v"u8, steps, want);
+        t.Fatalf("have %v, want %v", steps, want);
     }
 }
 
-public static void TestIssue43941(ж<testing.T> Ꮡt) {
+public static void TestIssue43941(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var steps = ref heap(new nint(), out var Ꮡsteps);
         steps = 7;
         defer(() => {
-            step(Ꮡt, Ꮡsteps, 14);
-            expect(Ꮡt, 4, recover());
+            step(t, Ꮡsteps, 14);
+            expect(t, 4, recover());
         }, ref ᒐ);
-        ((Action)(() => {
+        func(() => {
             GoFrame ᒐ = default;
             try {
-                ((Action)(() => {
+                func(() => {
                     GoFrame ᒐ = default;
                     try {
                         defer(() => {
                             GoFrame ᒐ = default;
                             try {
                                 defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-                                    expect(Ꮡt, 3, recover());
+                                    expect(t, 3, recover());
                                 }, ref ᒐ);
                                 defer(ᴛ1 => throw panic(ᴛ1), (nint)3, ref ᒐ);
                                 throw panic((nint)2);
@@ -654,52 +654,52 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                             finally { ᒐ.Run(); }
                         }, ref ᒐ);
                         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
-                            expect(Ꮡt, 1, recover());
+                            expect(t, 1, recover());
                         }, ref ᒐ);
                         defer(ᴛ1 => throw panic(ᴛ1), (nint)1, ref ᒐ);
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
-                }))();
+                })();
                 defer(() => {
                 }, ref ᒐ);
                 defer(() => {
                 }, ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)10, ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)9, ref ᒐ);
-                step(Ꮡt, Ꮡsteps, 8);
+                defer(step, t, Ꮡsteps, (nint)10, ref ᒐ);
+                defer(step, t, Ꮡsteps, (nint)9, ref ᒐ);
+                step(t, Ꮡsteps, 8);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
-        ((Action)(() => {
+        })();
+        func(() => {
             GoFrame ᒐ = default;
             try {
-                defer(step, Ꮡt, Ꮡsteps, (nint)13, ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)12, ref ᒐ);
-                ((Action)(() => {
+                defer(step, t, Ꮡsteps, (nint)13, ref ᒐ);
+                defer(step, t, Ꮡsteps, (nint)12, ref ᒐ);
+                func(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(step, Ꮡt, Ꮡsteps, (nint)11, ref ᒐ);
+                        defer(step, t, Ꮡsteps, (nint)11, ref ᒐ);
                         throw panic((nint)4);
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
-                }))();
+                })();
 
                 // Code below isn't executed,
                 // but removing it breaks the test case.
                 defer(() => {
                 }, ref ᒐ);
                 defer(ᴛ1 => throw panic(ᴛ1), (nint)(-1), ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)(-1), ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)(-1), ref ᒐ);
+                defer(step, t, Ꮡsteps, (nint)(-1), ref ᒐ);
+                defer(step, t, Ꮡsteps, (nint)(-1), ref ᒐ);
                 defer(() => {
                 }, ref ᒐ);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }))();
+        })();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

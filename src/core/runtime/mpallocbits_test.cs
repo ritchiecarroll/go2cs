@@ -15,18 +15,14 @@ partial class runtime_test_package {
 
 // Ensures that got and want are the same, and if not, reports
 // detailed diff information.
-internal static bool checkPallocBits(ж<testing.T> Ꮡt, ж<global::go.runtime_internal_test_package.ΔPallocBits> Ꮡgot, ж<global::go.runtime_internal_test_package.ΔPallocBits> Ꮡwant) {
-    ref var t = ref Ꮡt.DerefOrNull();
-    ref var got = ref Ꮡgot.DerefOrNull();
-    ref var want = ref Ꮡwant.DerefOrNull();
-
-    var d = runtime_internal_test_package.DiffPallocBits(Ꮡgot, Ꮡwant);
+internal static bool checkPallocBits(ж<testing.T> t, ж<global::go.runtime_internal_test_package.ΔPallocBits> got, ж<global::go.runtime_internal_test_package.ΔPallocBits> want) {
+    var d = runtime_internal_test_package.DiffPallocBits(got, want);
     if (len(d) != 0) {
-        Ꮡt.Errorf("%d range(s) different"u8, len(d));
+        t.Errorf("%d range(s) different", len(d));
         foreach (var (_, bits) in d) {
-            Ꮡt.Logf("\t@ bit index %d"u8, bits.I);
-            Ꮡt.Logf("\t|  got: %s"u8, runtime_internal_test_package.StringifyPallocBits(Ꮡgot, bits));
-            Ꮡt.Logf("\t| want: %s"u8, runtime_internal_test_package.StringifyPallocBits(Ꮡwant, bits));
+            t.Logf("\t@ bit index %d", bits.I);
+            t.Logf("\t|  got: %s", runtime_internal_test_package.StringifyPallocBits(got, bits));
+            t.Logf("\t| want: %s", runtime_internal_test_package.StringifyPallocBits(want, bits));
         }
         return false;
     }
@@ -44,49 +40,56 @@ internal static ж<global::go.runtime_internal_test_package.ΔPallocBits> makePa
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string oneLowˢ = "OneLow"u8;
-internal static readonly @string oneHighˢ = "OneHigh"u8;
-internal static readonly @string innerˢ = "Inner"u8;
-internal static readonly @string alignedˢ = "Aligned"u8;
-internal static readonly @string beginˢ = "Begin"u8;
-internal static readonly @string endˢ = "End"u8;
-internal static readonly @string allˢ = "All"u8;
+internal static ref readonly @string oneLowˢ => ref oneLowˢᵇ;
+private static readonly @string oneLowˢᵇ = "OneLow"u8;
+internal static ref readonly @string oneHighˢ => ref oneHighˢᵇ;
+private static readonly @string oneHighˢᵇ = "OneHigh"u8;
+internal static ref readonly @string innerˢ => ref innerˢᵇ;
+private static readonly @string innerˢᵇ = "Inner"u8;
+internal static ref readonly @string alignedˢ => ref alignedˢᵇ;
+private static readonly @string alignedˢᵇ = "Aligned"u8;
+internal static ref readonly @string beginˢ => ref beginˢᵇ;
+private static readonly @string beginˢᵇ = "Begin"u8;
+internal static ref readonly @string endˢ => ref endˢᵇ;
+private static readonly @string endˢᵇ = "End"u8;
+internal static ref readonly @string allˢ => ref allˢᵇ;
+private static readonly @string allˢᵇ = "All"u8;
 
 // Ensures that PallocBits.AllocRange works, which is a fundamental
 // method used for testing and initialization since it's used by
 // makePallocBits.
-public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
+public static void TestPallocBitsAllocRange(ж<testing.T> t) {
     void test(ж<testing.T> tΔ1, nuint i, nuint n, ж<global::go.runtime_internal_test_package.ΔPallocBits> want) {
-        checkPallocBits(tΔ1, makePallocBits(new global::go.runtime_internal_test_package.BitRange[]{new(i, n)}.slice()), want);
+        checkPallocBits(tΔ1, makePallocBits(slice<global::go.runtime_internal_test_package.BitRange>([new(i, n)])), want);
     }
     var testʗ1 = test;
-    Ꮡt.Run(oneLowˢ, (ж<testing.T> tΔ2) => {
+    t.Run(oneLowˢ, (ж<testing.T> tΔ2) => {
         var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
         want.Value[0] = 0x1;
         testʗ1(tΔ2, 0, 1, want);
     });
     var testʗ2 = test;
-    Ꮡt.Run(oneHighˢ, (ж<testing.T> tΔ3) => {
+    t.Run(oneHighˢ, (ж<testing.T> tΔ3) => {
         var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
         want.Value[runtime_internal_test_package.PallocChunkPages / 64 - 1] = (uint64)1 << 63;
         testʗ2(tΔ3, runtime_internal_test_package.PallocChunkPages - 1, 1, want);
     });
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
         var testʗ3 = test;
-        Ꮡt.Run(innerˢ, (ж<testing.T> tΔ4) => {
+        t.Run(innerˢ, (ж<testing.T> tΔ4) => {
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
             want.Value[..][2] = 0x3e;
             testʗ3(tΔ4, 129, 5, want);
         });
         var testʗ4 = test;
-        Ꮡt.Run(alignedˢ, (ж<testing.T> tΔ5) => {
+        t.Run(alignedˢ, (ж<testing.T> tΔ5) => {
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
             want.Value[..][2] = ~(uint64)0;
             want.Value[..][3] = ~(uint64)0;
             testʗ4(tΔ5, 128, 128, want);
         });
         var testʗ5 = test;
-        Ꮡt.Run(beginˢ, (ж<testing.T> tΔ6) => {
+        t.Run(beginˢ, (ж<testing.T> tΔ6) => {
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
             want.Value[..][0] = ~(uint64)0;
             want.Value[..][1] = ~(uint64)0;
@@ -97,7 +100,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
             testʗ5(tΔ6, 0, 321, want);
         });
         var testʗ6 = test;
-        Ꮡt.Run(endˢ, (ж<testing.T> tΔ7) => {
+        t.Run(endˢ, (ж<testing.T> tΔ7) => {
             // avoid constant overflow when PallocChunkPages is small
             nuint PallocChunkPages = runtime_internal_test_package.PallocChunkPages;
             var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
@@ -109,7 +112,7 @@ public static void TestPallocBitsAllocRange(ж<testing.T> Ꮡt) {
         });
     }
     var testʗ7 = test;
-    Ꮡt.Run(allˢ, (ж<testing.T> tΔ8) => {
+    t.Run(allˢ, (ж<testing.T> tΔ8) => {
         var want = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
         foreach (var i in range(want, 8)) {
             want.Value[i] = ~(uint64)0;
@@ -131,19 +134,21 @@ internal static void invertPallocBits(ж<global::go.runtime_internal_test_packag
 // of the difference if they're not.
 internal static void checkPallocSum(testing.TB t, global::go.runtime_internal_test_package.PallocSum got, global::go.runtime_internal_test_package.PallocSum want) {
     if (got.Start() != want.Start()) {
-        t.Errorf("inconsistent start: got %d, want %d"u8, got.Start(), want.Start());
+        t.Errorf("inconsistent start: got %d, want %d", got.Start(), want.Start());
     }
     if (got.Max() != want.Max()) {
-        t.Errorf("inconsistent max: got %d, want %d"u8, got.Max(), want.Max());
+        t.Errorf("inconsistent max: got %d, want %d", got.Max(), want.Max());
     }
     if (got.End() != want.End()) {
-        t.Errorf("inconsistent end: got %d, want %d"u8, got.End(), want.End());
+        t.Errorf("inconsistent end: got %d, want %d", got.End(), want.End());
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string oddBoundˢ = "OddBound"u8;
-internal static readonly @string scatteredˢ = "Scattered"u8;
+internal static ref readonly @string oddBoundˢ => ref oddBoundˢᵇ;
+private static readonly @string oddBoundˢᵇ = "OddBound"u8;
+internal static ref readonly @string scatteredˢ => ref scatteredˢᵇ;
+private static readonly @string scatteredˢᵇ = "Scattered"u8;
 
 internal partial struct TestMallocBitsPopcntRange_test /*dyn*/ {
     internal nuint i, n; // bit range to popcnt over.
@@ -152,33 +157,33 @@ internal partial struct TestMallocBitsPopcntRange_test /*dyn*/ {
 
 internal partial struct TestMallocBitsPopcntRange_testCase /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> init; // bit ranges to set to 1 in the bitmap.
-    internal slice<TestMallocBitsPopcntRange_test> tests; // a set of popcnt tests to run over the bitmap.
+    internal slice<TestMallocBitsPopcntRange_test> tests;                   // a set of popcnt tests to run over the bitmap.
 }
 
-public static void TestMallocBitsPopcntRange(ж<testing.T> Ꮡt) {
+public static void TestMallocBitsPopcntRange(ж<testing.T> t) {
     var tests = new map<@string, TestMallocBitsPopcntRange_testCase>{
-        ["None"u8] = new(
-            tests: new TestMallocBitsPopcntRange_test[]{
+        ["None"] = new(
+            tests: slice<TestMallocBitsPopcntRange_test>([
                 new(0, 1, 0),
                 new(5, 3, 0),
                 new(2, 11, 0),
                 new(runtime_internal_test_package.PallocChunkPages / 4 + 1, runtime_internal_test_package.PallocChunkPages / 2, 0),
                 new(0, runtime_internal_test_package.PallocChunkPages, 0)
-            }.slice()
+            ])
         ),
-        ["All"u8] = new(
-            init: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
-            tests: new TestMallocBitsPopcntRange_test[]{
+        ["All"] = new(
+            init: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
+            tests: slice<TestMallocBitsPopcntRange_test>([
                 new(0, 1, 1),
                 new(5, 3, 3),
                 new(2, 11, 11),
                 new(runtime_internal_test_package.PallocChunkPages / 4 + 1, runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2),
                 new(0, runtime_internal_test_package.PallocChunkPages, runtime_internal_test_package.PallocChunkPages)
-            }.slice()
+            ])
         ),
-        ["Half"u8] = new(
-            init: new global::go.runtime_internal_test_package.BitRange[]{new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)}.slice(),
-            tests: new TestMallocBitsPopcntRange_test[]{
+        ["Half"] = new(
+            init: slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2)]),
+            tests: slice<TestMallocBitsPopcntRange_test>([
                 new(0, 1, 0),
                 new(5, 3, 0),
                 new(2, 11, 0),
@@ -190,13 +195,13 @@ public static void TestMallocBitsPopcntRange(ж<testing.T> Ꮡt) {
                 new(runtime_internal_test_package.PallocChunkPages / 4, runtime_internal_test_package.PallocChunkPages / 4 + 1, 1),
                 new(runtime_internal_test_package.PallocChunkPages / 4 + 1, runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 4 + 1),
                 new(0, runtime_internal_test_package.PallocChunkPages, runtime_internal_test_package.PallocChunkPages / 2)
-            }.slice()
+            ])
         )
     };
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
         tests[oddBoundˢ] = new TestMallocBitsPopcntRange_testCase(
-            init: new global::go.runtime_internal_test_package.BitRange[]{new(0, 111)}.slice(),
-            tests: new TestMallocBitsPopcntRange_test[]{
+            init: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 111)]),
+            tests: slice<TestMallocBitsPopcntRange_test>([
                 new(0, 1, 1),
                 new(5, 3, 3),
                 new(2, 11, 11),
@@ -208,17 +213,17 @@ public static void TestMallocBitsPopcntRange(ж<testing.T> Ꮡt) {
                 new(120, 1, 0),
                 new(runtime_internal_test_package.PallocChunkPages / 2, runtime_internal_test_package.PallocChunkPages / 2, 0),
                 new(0, runtime_internal_test_package.PallocChunkPages, 111)
-            }.slice()
+            ])
         );
         tests[scatteredˢ] = new TestMallocBitsPopcntRange_testCase(
-            init: new global::go.runtime_internal_test_package.BitRange[]{
+            init: slice<global::go.runtime_internal_test_package.BitRange>([
                 new(1, 3), new(5, 1), new(7, 1), new(10, 2), new(13, 1), new(15, 4),
                 new(21, 1), new(23, 1), new(26, 2), new(30, 5), new(36, 2), new(40, 3),
                 new(44, 6), new(51, 1), new(53, 2), new(58, 3), new(63, 1), new(67, 2),
                 new(71, 10), new(84, 1), new(89, 7), new(99, 2), new(103, 1), new(107, 2),
                 new(111, 1), new(113, 1), new(115, 1), new(118, 1), new(120, 2), new(125, 5)
-            }.slice(),
-            tests: new TestMallocBitsPopcntRange_test[]{
+            ]),
+            tests: slice<TestMallocBitsPopcntRange_test>([
                 new(0, 11, 6),
                 new(0, 64, 39),
                 new(13, 64, 40),
@@ -226,7 +231,7 @@ public static void TestMallocBitsPopcntRange(ж<testing.T> Ꮡt) {
                 new(0, 128, 73),
                 new(1, 128, 74),
                 new(0, runtime_internal_test_package.PallocChunkPages, 75)
-            }.slice()
+            ])
         );
     }
     foreach (var (name, vᴛ1) in tests) {
@@ -234,12 +239,12 @@ public static void TestMallocBitsPopcntRange(ж<testing.T> Ꮡt) {
         v = vᴛ1;
 
         var vʗ1 = v;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        t.Run(name, (ж<testing.T> tΔ1) => {
             var b = makePallocBits(vʗ1.init);
             foreach (var (_, h) in vʗ1.tests) {
                 {
                     nuint got = b.PopcntRange(h.i, h.n); if (got != h.want) {
-                        tΔ1.Errorf("bad popcnt (i=%d, n=%d): got %d, want %d"u8, h.i, h.n, got, h.want);
+                        tΔ1.Errorf("bad popcnt (i=%d, n=%d): got %d, want %d", h.i, h.n, got, h.want);
                     }
                 }
             }
@@ -249,7 +254,7 @@ public static void TestMallocBitsPopcntRange(ж<testing.T> Ꮡt) {
 
 // Ensures computing bit summaries works as expected by generating random
 // bitmaps and checking against a reference implementation.
-public static void TestPallocBitsSummarizeRandom(ж<testing.T> Ꮡt) {
+public static void TestPallocBitsSummarizeRandom(ж<testing.T> t) {
     var b = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
     for (nint i = 0; i < 1000; i++) {
         // Randomize bitmap.
@@ -257,19 +262,27 @@ public static void TestPallocBitsSummarizeRandom(ж<testing.T> Ꮡt) {
             b.Value[iΔ1] = rand.Uint64();
         }
         // Check summary against reference implementation.
-        checkPallocSum(new runtime_test_package.testing_TжTB(Ꮡt), b.Summarize(), runtime_internal_test_package.SummarizeSlow(b));
+        checkPallocSum(new runtime_test_package.testing_TжTB(t), b.Summarize(), runtime_internal_test_package.SummarizeSlow(b));
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string noneFreeˢ = "NoneFree"u8;
-internal static readonly @string onlyStartˢ = "OnlyStart"u8;
-internal static readonly @string onlyEndˢ = "OnlyEnd"u8;
-internal static readonly @string startAndEndˢ = "StartAndEnd"u8;
-internal static readonly @string startMaxEndˢ = "StartMaxEnd"u8;
-internal static readonly @string onlyMaxˢ = "OnlyMax"u8;
-internal static readonly @string multiMaxˢ = "MultiMax"u8;
-internal static readonly @string oneˢ = "One"u8;
+internal static ref readonly @string noneFreeˢ => ref noneFreeˢᵇ;
+private static readonly @string noneFreeˢᵇ = "NoneFree"u8;
+internal static ref readonly @string onlyStartˢ => ref onlyStartˢᵇ;
+private static readonly @string onlyStartˢᵇ = "OnlyStart"u8;
+internal static ref readonly @string onlyEndˢ => ref onlyEndˢᵇ;
+private static readonly @string onlyEndˢᵇ = "OnlyEnd"u8;
+internal static ref readonly @string startAndEndˢ => ref startAndEndˢᵇ;
+private static readonly @string startAndEndˢᵇ = "StartAndEnd"u8;
+internal static ref readonly @string startMaxEndˢ => ref startMaxEndˢᵇ;
+private static readonly @string startMaxEndˢᵇ = "StartMaxEnd"u8;
+internal static ref readonly @string onlyMaxˢ => ref onlyMaxˢᵇ;
+private static readonly @string onlyMaxˢᵇ = "OnlyMax"u8;
+internal static ref readonly @string multiMaxˢ => ref multiMaxˢᵇ;
+private static readonly @string multiMaxˢᵇ = "MultiMax"u8;
+internal static ref readonly @string oneˢ => ref oneˢᵇ;
+private static readonly @string oneˢᵇ = "One"u8;
 
 internal partial struct TestPallocBitsSummarize_test /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> free; // Ranges of free (zero) bits.
@@ -277,71 +290,71 @@ internal partial struct TestPallocBitsSummarize_test /*dyn*/ {
 }
 
 // Ensures computing bit summaries works as expected.
-public static void TestPallocBitsSummarize(ж<testing.T> Ꮡt) {
+public static void TestPallocBitsSummarize(ж<testing.T> t) {
     global::go.runtime_internal_test_package.PallocSum emptySum = runtime_internal_test_package.PackPallocSum(runtime_internal_test_package.PallocChunkPages, runtime_internal_test_package.PallocChunkPages, runtime_internal_test_package.PallocChunkPages);
     var tests = new map<@string, TestPallocBitsSummarize_test>();
     tests[noneFreeˢ] = new TestPallocBitsSummarize_test(
-        free: new global::go.runtime_internal_test_package.BitRange[]{}.slice(),
-        hits: new global::go.runtime_internal_test_package.PallocSum[]{
+        free: slice<global::go.runtime_internal_test_package.BitRange>([]),
+        hits: slice<global::go.runtime_internal_test_package.PallocSum>([
             runtime_internal_test_package.PackPallocSum(0, 0, 0)
-        }.slice()
+        ])
     );
     tests[onlyStartˢ] = new TestPallocBitsSummarize_test(
-        free: new global::go.runtime_internal_test_package.BitRange[]{new(0, 10)}.slice(),
-        hits: new global::go.runtime_internal_test_package.PallocSum[]{
+        free: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 10)]),
+        hits: slice<global::go.runtime_internal_test_package.PallocSum>([
             runtime_internal_test_package.PackPallocSum(10, 10, 0)
-        }.slice()
+        ])
     );
     tests[onlyEndˢ] = new TestPallocBitsSummarize_test(
-        free: new global::go.runtime_internal_test_package.BitRange[]{new(runtime_internal_test_package.PallocChunkPages - 40, 40)}.slice(),
-        hits: new global::go.runtime_internal_test_package.PallocSum[]{
+        free: slice<global::go.runtime_internal_test_package.BitRange>([new(runtime_internal_test_package.PallocChunkPages - 40, 40)]),
+        hits: slice<global::go.runtime_internal_test_package.PallocSum>([
             runtime_internal_test_package.PackPallocSum(0, 40, 40)
-        }.slice()
+        ])
     );
     tests[startAndEndˢ] = new TestPallocBitsSummarize_test(
-        free: new global::go.runtime_internal_test_package.BitRange[]{new(0, 11), new(runtime_internal_test_package.PallocChunkPages - 23, 23)}.slice(),
-        hits: new global::go.runtime_internal_test_package.PallocSum[]{
+        free: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 11), new(runtime_internal_test_package.PallocChunkPages - 23, 23)]),
+        hits: slice<global::go.runtime_internal_test_package.PallocSum>([
             runtime_internal_test_package.PackPallocSum(11, 23, 23)
-        }.slice()
+        ])
     );
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
         tests[startMaxEndˢ] = new TestPallocBitsSummarize_test(
-            free: new global::go.runtime_internal_test_package.BitRange[]{new(0, 4), new(50, 100), new(runtime_internal_test_package.PallocChunkPages - 4, 4)}.slice(),
-            hits: new global::go.runtime_internal_test_package.PallocSum[]{
+            free: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 4), new(50, 100), new(runtime_internal_test_package.PallocChunkPages - 4, 4)]),
+            hits: slice<global::go.runtime_internal_test_package.PallocSum>([
                 runtime_internal_test_package.PackPallocSum(4, 100, 4)
-            }.slice()
+            ])
         );
         tests[onlyMaxˢ] = new TestPallocBitsSummarize_test(
-            free: new global::go.runtime_internal_test_package.BitRange[]{new(1, 20), new(35, 241), new(runtime_internal_test_package.PallocChunkPages - 50, 30)}.slice(),
-            hits: new global::go.runtime_internal_test_package.PallocSum[]{
+            free: slice<global::go.runtime_internal_test_package.BitRange>([new(1, 20), new(35, 241), new(runtime_internal_test_package.PallocChunkPages - 50, 30)]),
+            hits: slice<global::go.runtime_internal_test_package.PallocSum>([
                 runtime_internal_test_package.PackPallocSum(0, 241, 0)
-            }.slice()
+            ])
         );
         tests[multiMaxˢ] = new TestPallocBitsSummarize_test(
-            free: new global::go.runtime_internal_test_package.BitRange[]{new(35, 2), new(40, 5), new(100, 5)}.slice(),
-            hits: new global::go.runtime_internal_test_package.PallocSum[]{
+            free: slice<global::go.runtime_internal_test_package.BitRange>([new(35, 2), new(40, 5), new(100, 5)]),
+            hits: slice<global::go.runtime_internal_test_package.PallocSum>([
                 runtime_internal_test_package.PackPallocSum(0, 5, 0)
-            }.slice()
+            ])
         );
     }
     tests[oneˢ] = new TestPallocBitsSummarize_test(
-        free: new global::go.runtime_internal_test_package.BitRange[]{new(2, 1)}.slice(),
-        hits: new global::go.runtime_internal_test_package.PallocSum[]{
+        free: slice<global::go.runtime_internal_test_package.BitRange>([new(2, 1)]),
+        hits: slice<global::go.runtime_internal_test_package.PallocSum>([
             runtime_internal_test_package.PackPallocSum(0, 1, 0)
-        }.slice()
+        ])
     );
     tests[allFreeˢ] = new TestPallocBitsSummarize_test(
-        free: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
-        hits: new global::go.runtime_internal_test_package.PallocSum[]{
+        free: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
+        hits: slice<global::go.runtime_internal_test_package.PallocSum>([
             emptySum
-        }.slice()
+        ])
     );
     foreach (var (name, vᴛ1) in tests) {
         ref var v = ref heap(new TestPallocBitsSummarize_test(), out var Ꮡv);
         v = vᴛ1;
 
         var vʗ1 = v;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        t.Run(name, (ж<testing.T> tΔ1) => {
             var b = makePallocBits(vʗ1.free);
             // In the PallocBits we create 1's represent free spots, but in our actual
             // PallocBits 1 means not free, so invert.
@@ -354,8 +367,8 @@ public static void TestPallocBitsSummarize(ж<testing.T> Ꮡt) {
 }
 
 // Benchmarks how quickly we can summarize a PallocBits.
-public static void BenchmarkPallocBitsSummarize(ж<testing.B> Ꮡb) {
-    var patterns = new uint64[]{
+public static void BenchmarkPallocBitsSummarize(ж<testing.B> b) {
+    var patterns = slice<uint64>([
         0,
         ~(uint64)0,
         0xaa,
@@ -370,14 +383,14 @@ public static void BenchmarkPallocBitsSummarize(ж<testing.B> Ꮡb) {
         0x4040404040404040UL,
         0x4000400040004000UL,
         0x1000404044ccaaffUL
-    }.slice();
+    ]);
     foreach (var (_, p) in patterns) {
         var buf = @new<global::go.runtime_internal_test_package.ΔPallocBits>();
         for (nint i = 0; i < 8; i++) {
             buf.Value[i] = p;
         }
         var bufʗ1 = buf;
-        Ꮡb.Run(fmt.Sprintf("Unpacked%02X"u8, p), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("Unpacked%02X"u8, p), (ж<testing.B> bΔ1) => {
             checkPallocSum(new runtime_test_package.testing_BжTB(bΔ1), bufʗ1.Summarize(), runtime_internal_test_package.SummarizeSlow(bufʗ1));
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 bufʗ1.Summarize();
@@ -387,9 +400,12 @@ public static void BenchmarkPallocBitsSummarize(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string someFree64ˢ = "SomeFree64"u8;
-internal static readonly @string exactFit65ˢ = "ExactFit65"u8;
-internal static readonly @string someFree161ˢ = "SomeFree161"u8;
+internal static ref readonly @string someFree64ˢ => ref someFree64ˢᵇ;
+private static readonly @string someFree64ˢᵇ = "SomeFree64"u8;
+internal static ref readonly @string exactFit65ˢ => ref exactFit65ˢᵇ;
+private static readonly @string exactFit65ˢᵇ = "ExactFit65"u8;
+internal static ref readonly @string someFree161ˢ => ref someFree161ˢᵇ;
+private static readonly @string someFree161ˢᵇ = "SomeFree161"u8;
 
 internal partial struct TestPallocBitsAlloc_test /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> before;
@@ -399,64 +415,64 @@ internal partial struct TestPallocBitsAlloc_test /*dyn*/ {
 }
 
 // Ensures page allocation works.
-public static void TestPallocBitsAlloc(ж<testing.T> Ꮡt) {
+public static void TestPallocBitsAlloc(ж<testing.T> t) {
     var tests = new map<@string, TestPallocBitsAlloc_test>{
-        ["AllFree1"u8] = new(
+        ["AllFree1"] = new(
             npages: 1,
-            hits: new nuint[]{0, 1, 2, 3, 4, 5}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 6)}.slice()
+            hits: slice<nuint>([0, 1, 2, 3, 4, 5]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 6)])
         ),
-        ["AllFree2"u8] = new(
+        ["AllFree2"] = new(
             npages: 2,
-            hits: new nuint[]{0, 2, 4, 6, 8, 10}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 12)}.slice()
+            hits: slice<nuint>([0, 2, 4, 6, 8, 10]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 12)])
         ),
-        ["AllFree5"u8] = new(
+        ["AllFree5"] = new(
             npages: 5,
-            hits: new nuint[]{0, 5, 10, 15, 20}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 25)}.slice()
+            hits: slice<nuint>([0, 5, 10, 15, 20]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 25)])
         ),
-        ["NoneFree1"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+        ["NoneFree1"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
             npages: 1,
-            hits: new nuint[]{~(nuint)0, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([~(nuint)0, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         ),
-        ["NoneFree2"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+        ["NoneFree2"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
             npages: 2,
-            hits: new nuint[]{~(nuint)0, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([~(nuint)0, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         ),
-        ["NoneFree5"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+        ["NoneFree5"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
             npages: 5,
-            hits: new nuint[]{~(nuint)0, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([~(nuint)0, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         ),
-        ["NoneFree65"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice(),
+        ["NoneFree65"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)]),
             npages: 65,
-            hits: new nuint[]{~(nuint)0, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([~(nuint)0, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         ),
-        ["ExactFit1"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages / 2 - 3), new(runtime_internal_test_package.PallocChunkPages / 2 - 2, runtime_internal_test_package.PallocChunkPages / 2 + 2)}.slice(),
+        ["ExactFit1"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2 - 3), new(runtime_internal_test_package.PallocChunkPages / 2 - 2, runtime_internal_test_package.PallocChunkPages / 2 + 2)]),
             npages: 1,
-            hits: new nuint[]{runtime_internal_test_package.PallocChunkPages / 2 - 3, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([runtime_internal_test_package.PallocChunkPages / 2 - 3, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         ),
-        ["ExactFit2"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages / 2 - 3), new(runtime_internal_test_package.PallocChunkPages / 2 - 1, runtime_internal_test_package.PallocChunkPages / 2 + 1)}.slice(),
+        ["ExactFit2"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2 - 3), new(runtime_internal_test_package.PallocChunkPages / 2 - 1, runtime_internal_test_package.PallocChunkPages / 2 + 1)]),
             npages: 2,
-            hits: new nuint[]{runtime_internal_test_package.PallocChunkPages / 2 - 3, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([runtime_internal_test_package.PallocChunkPages / 2 - 3, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         ),
-        ["ExactFit5"u8] = new(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages / 2 - 3), new(runtime_internal_test_package.PallocChunkPages / 2 + 2, runtime_internal_test_package.PallocChunkPages / 2 - 2)}.slice(),
+        ["ExactFit5"] = new(
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages / 2 - 3), new(runtime_internal_test_package.PallocChunkPages / 2 + 2, runtime_internal_test_package.PallocChunkPages / 2 - 2)]),
             npages: 5,
-            hits: new nuint[]{runtime_internal_test_package.PallocChunkPages / 2 - 3, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, runtime_internal_test_package.PallocChunkPages)}.slice()
+            hits: slice<nuint>([runtime_internal_test_package.PallocChunkPages / 2 - 3, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, runtime_internal_test_package.PallocChunkPages)])
         )
     };
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
@@ -464,31 +480,31 @@ public static void TestPallocBitsAlloc(ж<testing.T> Ꮡt) {
         nuint PallocChunkPages = runtime_internal_test_package.PallocChunkPages;
         tests[allFree64ˢ] = new TestPallocBitsAlloc_test(
             npages: 64,
-            hits: new nuint[]{0, 64, 128}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 192)}.slice()
+            hits: slice<nuint>([0, 64, 128]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 192)])
         );
         tests[allFree65ˢ] = new TestPallocBitsAlloc_test(
             npages: 65,
-            hits: new nuint[]{0, 65, 130}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 195)}.slice()
+            hits: slice<nuint>([0, 65, 130]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 195)])
         );
         tests[someFree64ˢ] = new TestPallocBitsAlloc_test(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, 32), new(64, 32), new(100, PallocChunkPages - 100)}.slice(),
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 32), new(64, 32), new(100, PallocChunkPages - 100)]),
             npages: 64,
-            hits: new nuint[]{~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 32), new(64, 32), new(100, PallocChunkPages - 100)}.slice()
+            hits: slice<nuint>([~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 32), new(64, 32), new(100, PallocChunkPages - 100)])
         );
         tests[exactFit65ˢ] = new TestPallocBitsAlloc_test(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, PallocChunkPages / 2 - 31), new(PallocChunkPages / 2 + 34, PallocChunkPages / 2 - 34)}.slice(),
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, PallocChunkPages / 2 - 31), new(PallocChunkPages / 2 + 34, PallocChunkPages / 2 - 34)]),
             npages: 65,
-            hits: new nuint[]{PallocChunkPages / 2 - 31, ~(nuint)0}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, PallocChunkPages)}.slice()
+            hits: slice<nuint>([PallocChunkPages / 2 - 31, ~(nuint)0]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, PallocChunkPages)])
         );
         tests[someFree161ˢ] = new TestPallocBitsAlloc_test(
-            before: new global::go.runtime_internal_test_package.BitRange[]{new(0, 185), new(331, 1)}.slice(),
+            before: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 185), new(331, 1)]),
             npages: 161,
-            hits: new nuint[]{332}.slice(),
-            after: new global::go.runtime_internal_test_package.BitRange[]{new(0, 185), new(331, 162)}.slice()
+            hits: slice<nuint>([332]),
+            after: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 185), new(331, 162)])
         );
     }
     foreach (var (name, vᴛ1) in tests) {
@@ -496,12 +512,12 @@ public static void TestPallocBitsAlloc(ж<testing.T> Ꮡt) {
         v = vᴛ1;
 
         var vʗ1 = v;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        t.Run(name, (ж<testing.T> tΔ1) => {
             var b = makePallocBits(vʗ1.before);
             foreach (var (iter, i) in vʗ1.hits) {
                 var (a, _) = b.Find(vʗ1.npages, 0);
                 if (i != a) {
-                    tΔ1.Fatalf("find #%d picked wrong index: want %d, got %d"u8, iter + 1, i, a);
+                    tΔ1.Fatalf("find #%d picked wrong index: want %d, got %d", iter + 1, i, a);
                 }
                 if (i != ~(nuint)0) {
                     b.AllocRange(a, (nuint)vʗ1.npages);
@@ -514,9 +530,12 @@ public static void TestPallocBitsAlloc(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string someFreeˢ = "SomeFree"u8;
-internal static readonly @string noneFree64ˢ = "NoneFree64"u8;
-internal static readonly @string noneFree65ˢ = "NoneFree65"u8;
+internal static ref readonly @string someFreeˢ => ref someFreeˢᵇ;
+private static readonly @string someFreeˢᵇ = "SomeFree"u8;
+internal static ref readonly @string noneFree64ˢ => ref noneFree64ˢᵇ;
+private static readonly @string noneFree64ˢᵇ = "NoneFree64"u8;
+internal static ref readonly @string noneFree65ˢ => ref noneFree65ˢᵇ;
+private static readonly @string noneFree65ˢᵇ = "NoneFree65"u8;
 
 internal partial struct TestPallocBitsFree_test /*dyn*/ {
     internal slice<global::go.runtime_internal_test_package.BitRange> beforeInv;
@@ -526,40 +545,40 @@ internal partial struct TestPallocBitsFree_test /*dyn*/ {
 }
 
 // Ensures page freeing works.
-public static void TestPallocBitsFree(ж<testing.T> Ꮡt) {
+public static void TestPallocBitsFree(ж<testing.T> t) {
     var tests = new map<@string, TestPallocBitsFree_test>{
-        ["NoneFree1"u8] = new(
+        ["NoneFree1"] = new(
             npages: 1,
-            frees: new nuint[]{0, 1, 2, 3, 4, 5}.slice(),
-            afterInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 6)}.slice()
+            frees: slice<nuint>([0, 1, 2, 3, 4, 5]),
+            afterInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 6)])
         ),
-        ["NoneFree2"u8] = new(
+        ["NoneFree2"] = new(
             npages: 2,
-            frees: new nuint[]{0, 2, 4, 6, 8, 10}.slice(),
-            afterInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 12)}.slice()
+            frees: slice<nuint>([0, 2, 4, 6, 8, 10]),
+            afterInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 12)])
         ),
-        ["NoneFree5"u8] = new(
+        ["NoneFree5"] = new(
             npages: 5,
-            frees: new nuint[]{0, 5, 10, 15, 20}.slice(),
-            afterInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 25)}.slice()
+            frees: slice<nuint>([0, 5, 10, 15, 20]),
+            afterInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 25)])
         )
     };
     if (runtime_internal_test_package.PallocChunkPages >= 512) {
         tests[someFreeˢ] = new TestPallocBitsFree_test(
             npages: 1,
-            beforeInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 32), new(64, 32), new(100, 1)}.slice(),
-            frees: new nuint[]{32}.slice(),
-            afterInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 33), new(64, 32), new(100, 1)}.slice()
+            beforeInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 32), new(64, 32), new(100, 1)]),
+            frees: slice<nuint>([32]),
+            afterInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 33), new(64, 32), new(100, 1)])
         );
         tests[noneFree64ˢ] = new TestPallocBitsFree_test(
             npages: 64,
-            frees: new nuint[]{0, 64, 128}.slice(),
-            afterInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 192)}.slice()
+            frees: slice<nuint>([0, 64, 128]),
+            afterInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 192)])
         );
         tests[noneFree65ˢ] = new TestPallocBitsFree_test(
             npages: 65,
-            frees: new nuint[]{0, 65, 130}.slice(),
-            afterInv: new global::go.runtime_internal_test_package.BitRange[]{new(0, 195)}.slice()
+            frees: slice<nuint>([0, 65, 130]),
+            afterInv: slice<global::go.runtime_internal_test_package.BitRange>([new(0, 195)])
         );
     }
     foreach (var (name, vᴛ1) in tests) {
@@ -567,7 +586,7 @@ public static void TestPallocBitsFree(ж<testing.T> Ꮡt) {
         v = vᴛ1;
 
         var vʗ1 = v;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        t.Run(name, (ж<testing.T> tΔ1) => {
             var b = makePallocBits(vʗ1.beforeInv);
             invertPallocBits(b);
             foreach (var (_, i) in vʗ1.frees) {
@@ -580,14 +599,13 @@ public static void TestPallocBitsFree(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestFindBitRange64(ж<testing.T> Ꮡt) {
+public static void TestFindBitRange64(ж<testing.T> t) {
     void check(uint64 x, nuint n, nuint result) {
         nuint i = runtime_internal_test_package.FindBitRange64(x, n);
-        if (result == ~(nuint)0 && i < 64){
-            Ꮡt.Errorf("case (%016x, %d): got %d, want failure"u8, x, n, i);
-        } else 
-        if (result != ~(nuint)0 && i != result) {
-            Ꮡt.Errorf("case (%016x, %d): got %d, want %d"u8, x, n, i, result);
+        if (result == ~(nuint)0 && i < 64) {
+            t.Errorf("case (%016x, %d): got %d, want failure", x, n, i);
+        } else if (result != ~(nuint)0 && i != result) {
+            t.Errorf("case (%016x, %d): got %d, want %d", x, n, i, result);
         }
     }
     for (nuint i = (nuint)1; i <= 64; i++) {
@@ -606,8 +624,8 @@ public static void TestFindBitRange64(ж<testing.T> Ꮡt) {
     check(0x0fff03ff01079fffUL, 16, ~(nuint)0);
 }
 
-public static void BenchmarkFindBitRange64(ж<testing.B> Ꮡb) {
-    var patterns = new uint64[]{
+public static void BenchmarkFindBitRange64(ж<testing.B> b) {
+    var patterns = slice<uint64>([
         0,
         ~(uint64)0,
         0xaa,
@@ -621,13 +639,13 @@ public static void BenchmarkFindBitRange64(ж<testing.B> Ꮡb) {
         0x4444444444444444UL,
         0x4040404040404040UL,
         0x4000400040004000UL
-    }.slice();
-    var sizes = new nuint[]{
+    ]);
+    var sizes = slice<nuint>([
         2, 8, 32
-    }.slice();
+    ]);
     foreach (var (_, pattern) in patterns) {
         foreach (var (_, size) in sizes) {
-            Ꮡb.Run(fmt.Sprintf("Pattern%02XSize%d"u8, pattern, size), (ж<testing.B> bΔ1) => {
+            b.Run(fmt.Sprintf("Pattern%02XSize%d"u8, pattern, size), (ж<testing.B> bΔ1) => {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     runtime_internal_test_package.FindBitRange64(pattern, size);
                 }

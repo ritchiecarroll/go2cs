@@ -45,7 +45,14 @@ using static go.crypto.@internal.fips140.mlkem_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(DecapsulationKey1024))]
+[assembly: GoFieldAccess(typeof(DecapsulationKey768))]
+[assembly: GoFieldAccess(typeof(EncapsulationKey1024))]
+[assembly: GoFieldAccess(typeof(EncapsulationKey768))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -55,10 +62,10 @@ using static go.crypto.@internal.fips140.mlkem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/cast.go", "cast.cs", "ABEgggAHEuLc3Nzc3NyCgoKCgoKUgoKClIKCgpQ=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/field.go", "field.cs", "ABMikoKUqJKUgqaCgqaCggAFFKKCpoKCqqKCqqKCgqr8goIADRyClpKq2ILKpgAHENKClKjSgpSs0oKCgoKCgpQABhDygpSCgoKCgoCCpICCpJSu8oCClIKkggACEPKCgoKUAAIQ0oKCgoKUAAIQ8oKClAACENKCgoKUAAIQ8oKCgoKCgoKCgoKCgpQAAhDygoKCgoKCgoKUAAIQAAgCgoKCgoKCgoKCgoKCgriClAADENKCgoKCgoKCgoKCgoKCppSClAACEPIAAhDyAAIQ8gACEPKssoKCgoLKgoKCgoKClAAJEprilIKCgoKUyprSgoKCgpSCgoKCuKzSgoKCgpSCgoKCuIKUrLKCggAZNIKCgoKCgoKUgoKCgoKUgpSCgpSCpg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/mlkem1024.go", "mlkem1024.cs", "ABk8soKCggACEPKmgriClKaClKqiAA4gpIKmgoKUggANILSC1oKCgoKCgoKCgqqigoKCqrSC1oKClIKCgoIABxTygqaCgoKCgpSmgoKUgoKClIKUlNyUAAIQAAgCgpSCgoKCgpSCgoK4goKCgpSCgoKmgoKCgriCgoIABRYACgKCgoKClIKUrsSSpoKCgqaCqqKCgqzygoKCgpKCqrSC3uKCpoKClIKCgoKUlJSCgriu4oKCgoKUgoKUlIKCgpSUppSCgpSUgqKUlN7CgoKUuKzSgoKCgoKCgoKCgoKCgpSCruKCgoKmgpSCgpSU", "122-122:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/mlkem/mlkem768.go", "mlkem768.cs", "AE6yAbKCgoIAAhDypoK4gpSmgpSqogAOIKSCpoKClIIADSC0gqaCgoKCgoKCgoKqooKCgqq0gqaCgpSCgoKCAAIU8oKmgoKCgoKUpoKClIKCgpSClJTclAACEAAIAoKUgoKCgoKUgoKCuIKCgoKUgoKCpoKCgoK4goKCAAIWAAoCgoKCgpSClK7EkqaCgoKmgqqigoKs8oKCgoKSgqq0gq7igqaCgpSCgoKClJSUgoK4ruKCgoKClIKClJSCgoKUlKaUgoKUlIKilJSuwoKClLgABBDSgoKCgoKCgoKCgoKCgpSCpoKu4oKCgqaClIKClJQ=", "181-181:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/mlkem/cast.go", "cast.cs", "ABEgggAKEuLc3Nzc3NyCgoKCgoKUgoKClIKCgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/mlkem/field.go", "field.cs", "ABQikoKUqJKUgqaCgqaCggAFFKKCpoKCqqKCqqKCgqr8goIADRyClpKq2ILKpgAHENKClKjSgpSs0oKCgoKCgpQACBDygpSCgoKCgoCCpICCpJSu8oCClIKkggACEPKCgoKUAAIQ0oKCgoKUAAIQ8oKClAACENKCgoKUAAIQ8oKCgoKCgoKCgoKCgpQAAhDygoKCgoKCgoKUAAIQAAgCgoKCgoKCgoKCgoKCgriClAADENKCgoKCgoKCgoKCgoKCppSClAACEPIAAhDyAAIQ8gACEPKssoKCgoLKgoKCgoKClAAJEprilIKCgoKUyprSgoKCgpSCgoKCuKzSgoKCgpSCgoKCuIKUrLKCggAZNIKCgoKCgoKUgoKCgoKUgpSCgpSCpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/mlkem/mlkem1024.go", "mlkem1024.cs", "ABk8soKCggACEPKmgriClKaClKqiAA4gpIKmgoKUggANILSC5oKCgoKCgoKCgqqigoKCqrSC5oKClIKCgoIAChTygqaCgoKCgpSmgoKUgoKClIKUlNyUAAIQAAgCgpSCgoKCgpSCgoK4goKCgpSCgoKmgoKCgriCgoIABhYACgKCgoKClIKUrsSSpoKCgqaCqqKCgqzygoKCgpKCqrSC7uKCpoKClIKCgoKUlJSCgriu4oKCgoKUgoKUlIKCgpSUppSCgpSUgqKUlO7CgoKUuKzSgoKCgoKCgoKCgoKCgpSCruKCgoKmgpSCgpSU", "122-122:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/mlkem/mlkem768.go", "mlkem768.cs", "AE6yAbKCgoIAAhDypoK4gpSmgpSqogAOIKSCpoKClIIADSC0gqaCgoKCgoKCgoKqooKCgqq0gqaCgpSCgoKCAAIU8oKmgoKCgoKUpoKClIKCgpSClJTclAACEAAIAoKUgoKCgoKUgoKCuIKCgoKUgoKCpoKCgoK4goKCAAIWAAoCgoKCgpSClK7EkqaCgoKmgqqigoKs8oKCgoKSgqq0gq7igqaCgpSCgoKClJSUgoK4ruKCgoKClIKClJSCgoKUlKaUgoKUlIKilJSuwoKClLgABBDSgoKCgoKCgoKCgoKCgpSCpoKu4oKCgqaClIKClJQ=", "181-181:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

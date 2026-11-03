@@ -24,15 +24,16 @@ using Δos = os_package;
 partial class os_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testRemoveAllˢ = "_TestRemoveAll_"u8;
+internal static ref readonly @string testRemoveAllˢ => ref testRemoveAllˢᵇ;
+private static readonly @string testRemoveAllˢᵇ = "_TestRemoveAll_"u8;
 
-public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestRemoveAll(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    @string tmpDir = Ꮡt.TempDir();
+    @string tmpDir = t.TempDir();
     {
-        var errΔ1 = RemoveAll(""u8); if (errΔ1 != default!) {
-            Ꮡt.Errorf("RemoveAll(\"\"): %v; want nil"u8, errΔ1);
+        var errΔ1 = RemoveAll(""u8); if (errΔ1 != nil) {
+            t.Errorf("RemoveAll(\"\"): %v; want nil", errΔ1);
         }
     }
 
@@ -43,67 +44,67 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
 
     // Make a regular file and remove
     var (fd, err) = Create(@file);
-    if (err != default!) {
-        Ꮡt.Fatalf("create %q: %s"u8, @file, err);
+    if (err != nil) {
+        t.Fatalf("create %q: %s", @file, err);
     }
     fd.Close();
     {
-        err = RemoveAll(@file); if (err != default!) {
-            Ꮡt.Fatalf("RemoveAll %q (first): %s"u8, @file, err);
+        err = RemoveAll(@file); if (err != nil) {
+            t.Fatalf("RemoveAll %q (first): %s", @file, err);
         }
     }
     {
-        (_, err) = Lstat(@file); if (err == default!) {
-            Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (first)"u8, @file);
+        (_, err) = Lstat(@file); if (err == nil) {
+            t.Fatalf("Lstat %q succeeded after RemoveAll (first)", @file);
         }
     }
 
     // Make directory with 1 file and remove.
     {
-        var errΔ2 = MkdirAll(path, 511); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("MkdirAll %q: %s"u8, path, errΔ2);
+        var errΔ2 = MkdirAll(path, 511); if (errΔ2 != nil) {
+            t.Fatalf("MkdirAll %q: %s", path, errΔ2);
         }
     }
     (fd, err) = Create(fpath);
-    if (err != default!) {
-        Ꮡt.Fatalf("create %q: %s"u8, fpath, err);
+    if (err != nil) {
+        t.Fatalf("create %q: %s", fpath, err);
     }
     fd.Close();
     {
-        err = RemoveAll(path); if (err != default!) {
-            Ꮡt.Fatalf("RemoveAll %q (second): %s"u8, path, err);
+        err = RemoveAll(path); if (err != nil) {
+            t.Fatalf("RemoveAll %q (second): %s", path, err);
         }
     }
     {
-        (_, err) = Lstat(path); if (err == default!) {
-            Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (second)"u8, path);
+        (_, err) = Lstat(path); if (err == nil) {
+            t.Fatalf("Lstat %q succeeded after RemoveAll (second)", path);
         }
     }
 
     // Make directory with file and subdirectory and remove.
     {
-        err = MkdirAll(dpath, 511); if (err != default!) {
-            Ꮡt.Fatalf("MkdirAll %q: %s"u8, dpath, err);
+        err = MkdirAll(dpath, 511); if (err != nil) {
+            t.Fatalf("MkdirAll %q: %s", dpath, err);
         }
     }
     (fd, err) = Create(fpath);
-    if (err != default!) {
-        Ꮡt.Fatalf("create %q: %s"u8, fpath, err);
+    if (err != nil) {
+        t.Fatalf("create %q: %s", fpath, err);
     }
     fd.Close();
     (fd, err) = Create(dpath + "/file"u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("create %q: %s"u8, fpath, err);
+    if (err != nil) {
+        t.Fatalf("create %q: %s", fpath, err);
     }
     fd.Close();
     {
-        err = RemoveAll(path); if (err != default!) {
-            Ꮡt.Fatalf("RemoveAll %q (third): %s"u8, path, err);
+        err = RemoveAll(path); if (err != nil) {
+            t.Fatalf("RemoveAll %q (third): %s", path, err);
         }
     }
     {
-        var (_, errΔ3) = Lstat(path); if (errΔ3 == default!) {
-            Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (third)"u8, path);
+        var (_, errΔ3) = Lstat(path); if (errΔ3 == nil) {
+            t.Fatalf("Lstat %q succeeded after RemoveAll (third)", path);
         }
     }
 
@@ -111,21 +112,21 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
     if (Δruntime.GOOS != "windows"u8 && Δruntime.GOOS != "wasip1"u8 && Getuid() != 0) {
         // Make directory with file and subdirectory and trigger error.
         {
-            err = MkdirAll(dpath, 511); if (err != default!) {
-                Ꮡt.Fatalf("MkdirAll %q: %s"u8, dpath, err);
+            err = MkdirAll(dpath, 511); if (err != nil) {
+                t.Fatalf("MkdirAll %q: %s", dpath, err);
             }
         }
 
-        foreach (var (_, s) in new @string[]{fpath, dpath + "/file1"u8, path + "/zzz"u8}.slice()) {
+        foreach (var (_, s) in slice<@string>([fpath, dpath + "/file1"u8, path + "/zzz"u8])) {
             (fd, err) = Create(s);
-            if (err != default!) {
-                Ꮡt.Fatalf("create %q: %s"u8, s, err);
+            if (err != nil) {
+                t.Fatalf("create %q: %s", s, err);
             }
             fd.Close();
         }
         {
-            err = Chmod(dpath, 0); if (err != default!) {
-                Ꮡt.Fatalf("Chmod %q 0: %s"u8, dpath, err);
+            err = Chmod(dpath, 0); if (err != nil) {
+                t.Fatalf("Chmod %q 0: %s", dpath, err);
             }
         }
 
@@ -139,62 +140,63 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
         RemoveAll(path);
         Chmod(dpath, 511);
 
-        foreach (var (_, s) in new @string[]{fpath, path + "/zzz"u8}.slice()) {
+        foreach (var (_, s) in slice<@string>([fpath, path + "/zzz"u8])) {
             {
-                (_, err) = Lstat(s); if (err == default!) {
-                    Ꮡt.Fatalf("Lstat %q succeeded after partial RemoveAll"u8, s);
+                (_, err) = Lstat(s); if (err == nil) {
+                    t.Fatalf("Lstat %q succeeded after partial RemoveAll", s);
                 }
             }
         }
     }
     {
-        err = RemoveAll(path); if (err != default!) {
-            Ꮡt.Fatalf("RemoveAll %q after partial RemoveAll: %s"u8, path, err);
+        err = RemoveAll(path); if (err != nil) {
+            t.Fatalf("RemoveAll %q after partial RemoveAll: %s", path, err);
         }
     }
     {
-        (_, err) = Lstat(path); if (err == default!) {
-            Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (final)"u8, path);
+        (_, err) = Lstat(path); if (err == nil) {
+            t.Fatalf("Lstat %q succeeded after RemoveAll (final)", path);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in short mode"u8;
-internal static readonly @string testRemoveAllLargeˢ = "_TestRemoveAllLarge_"u8;
+internal static ref readonly @string testRemoveAllLargeˢ => ref testRemoveAllLargeˢᵇ;
+private static readonly @string testRemoveAllLargeˢᵇ = "_TestRemoveAllLarge_"u8;
 
 // Test RemoveAll on a large directory.
-public static void TestRemoveAllLarge(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllLarge(ж<Δtesting.T> t) {
     if (Δtesting.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    @string tmpDir = Ꮡt.TempDir();
+    @string tmpDir = t.TempDir();
     @string path = filepath.Join(tmpDir, testRemoveAllLargeˢ);
 
     // Make directory with 1000 files and remove.
     {
-        var err = MkdirAll(path, 511); if (err != default!) {
-            Ꮡt.Fatalf("MkdirAll %q: %s"u8, path, err);
+        var err = MkdirAll(path, 511); if (err != nil) {
+            t.Fatalf("MkdirAll %q: %s", path, err);
         }
     }
     for (nint i = 0; i < 1000; i++) {
         @string fpath = fmt.Sprintf("%s/file%d"u8, path, i);
         var (fd, err) = Create(fpath);
-        if (err != default!) {
-            Ꮡt.Fatalf("create %q: %s"u8, fpath, err);
+        if (err != nil) {
+            t.Fatalf("create %q: %s", fpath, err);
         }
         fd.Close();
     }
     {
-        var err = RemoveAll(path); if (err != default!) {
-            Ꮡt.Fatalf("RemoveAll %q: %s"u8, path, err);
+        var err = RemoveAll(path); if (err != nil) {
+            t.Fatalf("RemoveAll %q: %s", path, err);
         }
     }
     {
-        var (_, err) = Lstat(path); if (err == default!) {
-            Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll"u8, path);
+        var (_, err) = Lstat(path); if (err == nil) {
+            t.Fatalf("Lstat %q succeeded after RemoveAll", path);
         }
     }
 }
@@ -202,31 +204,32 @@ public static void TestRemoveAllLarge(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingForNotˢ = (@string)"skipping for not implemented platforms"u8;
 
-public static void TestRemoveAllLongPath(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllLongPath(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8) {
-        do {
-            break;
-        } while (false);
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8: {
+        break;
+        break;
     }
-    else { /* default: */
-        Ꮡt.Skip(skippingForNotˢ);
-    }
+    default: {
+        t.Skip(skippingForNotˢ);
+        break;
+    }}
 
-    @string startPath = Ꮡt.TempDir();
-    Ꮡt.Chdir(startPath);
+    @string startPath = t.TempDir();
+    t.Chdir(startPath);
 
     // Removing paths with over 4096 chars commonly fails.
-    @string name = strings.Repeat("a"u8, 100);
+    @string name = strings.Repeat("a", 100);
     for (nint i = 0; i < 41; i++) {
         {
-            var errΔ1 = Mkdir(name, 493); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("Could not mkdir %s: %s"u8, name, errΔ1);
+            var errΔ1 = Mkdir(name, 493); if (errΔ1 != nil) {
+                t.Fatalf("Could not mkdir %s: %s", name, errΔ1);
             }
         }
         {
-            var errΔ2 = Chdir(name); if (errΔ2 != default!) {
-                Ꮡt.Fatalf("Could not chdir %s: %s"u8, name, errΔ2);
+            var errΔ2 = Chdir(name); if (errΔ2 != nil) {
+                t.Fatalf("Could not chdir %s: %s", name, errΔ2);
             }
         }
     }
@@ -234,46 +237,46 @@ public static void TestRemoveAllLongPath(ж<Δtesting.T> Ꮡt) {
     // Chdir out of startPath before attempting to remove it,
     // otherwise RemoveAll fails on aix, illumos and solaris.
     var err = Chdir(filepath.Join(startPath, ".."));
-    if (err != default!) {
-        Ꮡt.Fatalf("Could not chdir: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("Could not chdir: %s", err);
     }
 
     err = RemoveAll(startPath);
-    if (err != default!) {
-        Ꮡt.Errorf("RemoveAll could not remove long file path %s: %s"u8, startPath, err);
+    if (err != nil) {
+        t.Errorf("RemoveAll could not remove long file path %s: %s", startPath, err);
     }
 }
 
-public static void TestRemoveAllDot(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Chdir(Ꮡt.TempDir());
+public static void TestRemoveAllDot(ж<Δtesting.T> t) {
+    t.Chdir(t.TempDir());
 
     {
-        var err = RemoveAll("."u8); if (err == default!) {
-            Ꮡt.Errorf("RemoveAll succeed to remove ."u8);
+        var err = RemoveAll("."); if (err == nil) {
+            t.Errorf("RemoveAll succeed to remove .");
         }
     }
 }
 
-public static void TestRemoveAllDotDot(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Parallel();
+public static void TestRemoveAllDotDot(ж<Δtesting.T> t) {
+    t.Parallel();
 
-    @string tempDir = Ꮡt.TempDir();
+    @string tempDir = t.TempDir();
     @string subdir = filepath.Join(tempDir, "x");
     @string subsubdir = filepath.Join(subdir, "y");
     {
-        var err = MkdirAll(subsubdir, 511); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = MkdirAll(subsubdir, 511); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var err = RemoveAll(filepath.Join(subsubdir, "..")); if (err != default!) {
-            Ꮡt.Error(err);
+        var err = RemoveAll(filepath.Join(subsubdir, "..")); if (err != nil) {
+            t.Error(err);
         }
     }
-    foreach (var (_, dir) in new @string[]{subsubdir, subdir}.slice()) {
+    foreach (var (_, dir) in slice<@string>([subsubdir, subdir])) {
         {
-            var (_, err) = Stat(dir); if (err == default!) {
-                Ꮡt.Errorf("%s: exists after RemoveAll"u8, dir);
+            var (_, err) = Stat(dir); if (err == nil) {
+                t.Errorf("%s: exists after RemoveAll", dir);
             }
         }
     }
@@ -283,16 +286,16 @@ public static void TestRemoveAllDotDot(ж<Δtesting.T> Ꮡt) {
 internal static readonly object subdirectoryWasNotˢ = (@string)"subdirectory was not removed"u8;
 
 // Issue #29178.
-public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveReadOnlyDir(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        Ꮡt.Parallel();
+        t.Parallel();
 
-        @string tempDir = Ꮡt.TempDir();
+        @string tempDir = t.TempDir();
         @string subdir = filepath.Join(tempDir, "x");
         {
-            var err = Mkdir(subdir, 0); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = Mkdir(subdir, 0); if (err != nil) {
+                t.Fatal(err);
             }
         }
 
@@ -301,14 +304,14 @@ public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
         defer(Chmod, subdir, (fs.FileMode)511, ref ᒐ);
 
         {
-            var err = RemoveAll(subdir); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = RemoveAll(subdir); if (err != nil) {
+                t.Fatal(err);
             }
         }
 
         {
-            var (_, err) = Stat(subdir); if (err == default!) {
-                Ꮡt.Error(subdirectoryWasNotˢ);
+            var (_, err) = Stat(subdir); if (err == nil) {
+                t.Error(subdirectoryWasNotˢ);
             }
         }
     }
@@ -320,28 +323,28 @@ public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
 internal static readonly object removeAllSucceededˢ = (@string)"RemoveAll succeeded unexpectedly"u8;
 
 // Issue #29983.
-public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        testRequiresPermissions(Ꮡt);
+        testRequiresPermissions(t);
 
-        Ꮡt.Parallel();
+        t.Parallel();
 
-        @string tempDir = Ꮡt.TempDir();
-        var dirs = new @string[]{
-            "a"u8,
-            "a/x"u8,
-            "a/x/1"u8,
-            "b"u8,
-            "b/y"u8,
-            "b/y/2"u8,
-            "c"u8,
-            "c/z"u8,
-            "c/z/3"u8
-        }.slice();
-        var @readonly = new @string[]{
-            "b"u8
-        }.slice();
+        @string tempDir = t.TempDir();
+        var dirs = slice<@string>([
+            "a",
+            "a/x",
+            "a/x/1",
+            "b",
+            "b/y",
+            "b/y/2",
+            "c",
+            "c/z",
+            "c/z/3"
+        ]);
+        var @readonly = slice<@string>([
+            "b"
+        ]);
         var readonlyʗ1 = @readonly;
         bool inReadonly(@string d) {
             foreach (var (_, ro) in readonlyʗ1) {
@@ -358,16 +361,16 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
 
         foreach (var (_, dir) in dirs) {
             {
-                var errΔ1 = Mkdir(filepath.Join(tempDir, dir), 511); if (errΔ1 != default!) {
-                    Ꮡt.Fatal(errΔ1);
+                var errΔ1 = Mkdir(filepath.Join(tempDir, dir), 511); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
         }
         foreach (var (_, dir) in @readonly) {
             @string d = filepath.Join(tempDir, dir);
             {
-                var errΔ2 = Chmod(d, 365); if (errΔ2 != default!) {
-                    Ꮡt.Fatal(errΔ2);
+                var errΔ2 = Chmod(d, 365); if (errΔ2 != nil) {
+                    t.Fatal(errΔ2);
                 }
             }
 
@@ -377,32 +380,32 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
         }
 
         var err = RemoveAll(tempDir);
-        if (err == default!) {
-            Ꮡt.Fatal(removeAllSucceededˢ);
+        if (err == nil) {
+            t.Fatal(removeAllSucceededˢ);
         }
 
         // The error should be of type *PathError.
         // see issue 30491 for details.
         {
-            var (pathErr, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok){
+            var (pathErr, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
                 @string want = filepath.Join(tempDir, "b", "y");
-                if ((~pathErr).Path != want) {
-                    Ꮡt.Errorf("RemoveAll(%q): err.Path=%q, want %q"u8, tempDir, (~pathErr).Path, want);
+                if (pathErr.Path != want) {
+                    t.Errorf("RemoveAll(%q): err.Path=%q, want %q", tempDir, pathErr.Path, want);
                 }
             } else {
-                Ꮡt.Errorf("RemoveAll(%q): error has type %T, want *fs.PathError"u8, tempDir, err);
+                t.Errorf("RemoveAll(%q): error has type %T, want *fs.PathError", tempDir, err);
             }
         }
 
         foreach (var (_, dir) in dirs) {
             var (_, errΔ3) = Stat(filepath.Join(tempDir, dir));
-            if (inReadonly(dir)){
-                if (errΔ3 != default!) {
-                    Ꮡt.Errorf("file %q was deleted but should still exist"u8, dir);
+            if (inReadonly(dir)) {
+                if (errΔ3 != nil) {
+                    t.Errorf("file %q was deleted but should still exist", dir);
                 }
             } else {
-                if (errΔ3 == default!) {
-                    Ꮡt.Errorf("file %q still exists but should have been deleted"u8, dir);
+                if (errΔ3 == nil) {
+                    t.Errorf("file %q still exists but should have been deleted", dir);
                 }
             }
         }
@@ -411,33 +414,35 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestRemoveUnreadableDir(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveUnreadableDir(ж<Δtesting.T> t) {
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "js"u8) {
-        Ꮡt.Skipf("skipping test on %s"u8, Δruntime.GOOS);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "js"u8: {
+        t.Skipf("skipping test on %s", Δruntime.GOOS);
+        break;
+    }}
 
     if (Getuid() == 0) {
-        Ꮡt.Skip(skippingTestWhenRunningˢ);
+        t.Skip(skippingTestWhenRunningˢ);
     }
 
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    @string tempDir = Ꮡt.TempDir();
+    @string tempDir = t.TempDir();
     @string target = filepath.Join(tempDir, "d0", "d1", "d2");
     {
-        var err = MkdirAll(target, 493); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = MkdirAll(target, 493); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var err = Chmod(target, 192); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = Chmod(target, 192); if (err != nil) {
+            t.Fatal(err);
         }
     }
     {
-        var err = RemoveAll(filepath.Join(tempDir, "d0")); if (err != default!) {
-            Ꮡt.Fatal(err);
+        var err = RemoveAll(filepath.Join(tempDir, "d0")); if (err != nil) {
+            t.Fatal(err);
         }
     }
 }
@@ -446,28 +451,28 @@ public static void TestRemoveUnreadableDir(ж<Δtesting.T> Ꮡt) {
 internal static readonly object removeAllReadOnlyˢ = (@string)"RemoveAll(<read-only directory>) = nil; want error"u8;
 
 // Issue 29921
-public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         if (Δtesting.Short()) {
-            Ꮡt.Skip(skippingInShortModeˢ);
+            t.Skip(skippingInShortModeˢ);
         }
-        Ꮡt.Parallel();
+        t.Parallel();
 
-        @string tmpDir = Ꮡt.TempDir();
+        @string tmpDir = t.TempDir();
         @string path = filepath.Join(tmpDir, "_TestRemoveAllWithMoreErrorThanReqSize_");
 
         // Make directory with 1025 read-only files.
         {
-            var errΔ1 = MkdirAll(path, 511); if (errΔ1 != default!) {
-                Ꮡt.Fatalf("MkdirAll %q: %s"u8, path, errΔ1);
+            var errΔ1 = MkdirAll(path, 511); if (errΔ1 != nil) {
+                t.Fatalf("MkdirAll %q: %s", path, errΔ1);
             }
         }
         for (nint i = 0; i < 1025; i++) {
             @string fpath = filepath.Join(path, fmt.Sprintf("file%d"u8, i));
             var (fd, errΔ2) = Create(fpath);
-            if (errΔ2 != default!) {
-                Ꮡt.Fatalf("create %q: %s"u8, fpath, errΔ2);
+            if (errΔ2 != nil) {
+                t.Fatalf("create %q: %s", fpath, errΔ2);
             }
             fd.Close();
         }
@@ -475,8 +480,8 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
         // Make the parent directory read-only. On some platforms, this is what
         // prevents Remove from removing the files within that directory.
         {
-            var errΔ3 = Chmod(path, 365); if (errΔ3 != default!) {
-                Ꮡt.Fatal(errΔ3);
+            var errΔ3 = Chmod(path, 365); if (errΔ3 != nil) {
+                t.Fatal(errΔ3);
             }
         }
         defer(Chmod, path, (fs.FileMode)493, ref ᒐ);
@@ -489,7 +494,7 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
             // On many platforms, root can remove files from read-only directories.
             return;
         }
-        if (err == default!) {
+        if (err == nil) {
             if (Δruntime.GOOS == "windows"u8 || Δruntime.GOOS == "wasip1"u8) {
                 // Marking a directory as read-only in Windows does not prevent the RemoveAll
                 // from creating or removing files within it.
@@ -498,19 +503,19 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
                 // RemoveAll from removing the files.
                 return;
             }
-            Ꮡt.Fatal(removeAllReadOnlyˢ);
+            t.Fatal(removeAllReadOnlyˢ);
         }
 
         (var dir, err) = Open(path);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         var dirʗ1 = dir;
         defer(() => dirʗ1.Close(), ref ᒐ);
 
         var (names, _) = dir.Readdirnames(1025);
         if (len(names) < 1025) {
-            Ꮡt.Fatalf("RemoveAll(<read-only directory>) unexpectedly removed %d read-only files from that directory"u8, 1025 - len(names));
+            t.Fatalf("RemoveAll(<read-only directory>) unexpectedly removed %d read-only files from that directory", 1025 - len(names));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -518,25 +523,30 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string binStraceˢ = "/bin/strace"u8;
-internal static readonly @string subdirˢ = "subdir"u8;
-internal static readonly @string fcntlˢ = "fcntl"u8;
-internal static readonly @string testRunˢ4 = "-test.run=^TestRemoveAllNoFcntl$"u8;
+internal static ref readonly @string binStraceˢ => ref binStraceˢᵇ;
+private static readonly @string binStraceˢᵇ = "/bin/strace"u8;
+internal static ref readonly @string subdirˢ => ref subdirˢᵇ;
+private static readonly @string subdirˢᵇ = "subdir"u8;
+internal static ref readonly @string fcntlˢ => ref fcntlˢᵇ;
+private static readonly @string fcntlˢᵇ = "fcntl"u8;
+internal static ref readonly @string testRunˢ4 => ref testRunˢ4ᵇ;
+private static readonly @string testRunˢ4ᵇ = "-test.run=^TestRemoveAllNoFcntl$"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string envᶜ = "GO_TEST_REMOVE_ALL_NO_FCNTL"u8;
+internal static ref readonly @string envᶜ => ref envᶜᵇ;
+private static readonly @string envᶜᵇ = "GO_TEST_REMOVE_ALL_NO_FCNTL"u8;
 
-public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllNoFcntl(ж<Δtesting.T> t) {
     if (Δtesting.Short()) {
-        Ꮡt.Skip(skippingInShortModeˢ);
+        t.Skip(skippingInShortModeˢ);
     }
 
     @string env = envᶜ;
     {
         @string dir = Getenv(env); if (dir != ""u8) {
             {
-                var errΔ1 = RemoveAll(dir); if (errΔ1 != default!) {
-                    Ꮡt.Fatal(errΔ1);
+                var errΔ1 = RemoveAll(dir); if (errΔ1 != nil) {
+                    t.Fatal(errΔ1);
                 }
             }
             return;
@@ -547,98 +557,98 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
     // The code is OS-independent so if it passes on Linux
     // it should pass on other Unix systems.
     if (Δruntime.GOOS != "linux"u8) {
-        Ꮡt.Skipf("skipping test on %s"u8, Δruntime.GOOS);
+        t.Skipf("skipping test on %s", Δruntime.GOOS);
     }
     {
-        var (_, errΔ2) = Stat(binStraceˢ); if (errΔ2 != default!) {
-            Ꮡt.Skipf("skipping test because /bin/strace not found: %v"u8, errΔ2);
+        var (_, errΔ2) = Stat(binStraceˢ); if (errΔ2 != nil) {
+            t.Skipf("skipping test because /bin/strace not found: %v", errΔ2);
         }
     }
     var (me, err) = Executable();
-    if (err != default!) {
-        Ꮡt.Skipf("skipping because Executable failed: %v"u8, err);
+    if (err != nil) {
+        t.Skipf("skipping because Executable failed: %v", err);
     }
 
     // Create 100 directories.
     // The test is that we can remove them without calling fcntl
     // on each one.
-    @string tmpdir = Ꮡt.TempDir();
+    @string tmpdir = t.TempDir();
     @string subdir = filepath.Join(tmpdir, subdirˢ);
     {
-        var errΔ3 = Mkdir(subdir, 493); if (errΔ3 != default!) {
-            Ꮡt.Fatal(errΔ3);
+        var errΔ3 = Mkdir(subdir, 493); if (errΔ3 != nil) {
+            t.Fatal(errΔ3);
         }
     }
     for (nint i = 0; i < 100; i++) {
         @string subsubdir = filepath.Join(subdir, strconv.Itoa(i));
         {
-            var errΔ4 = Mkdir(filepath.Join(subdir, strconv.Itoa(i)), 493); if (errΔ4 != default!) {
-                Ꮡt.Fatal(errΔ4);
+            var errΔ4 = Mkdir(filepath.Join(subdir, strconv.Itoa(i)), 493); if (errΔ4 != nil) {
+                t.Fatal(errΔ4);
             }
         }
         {
-            var errΔ5 = WriteFile(filepath.Join(subsubdir, fileˢ2), default!, 420); if (errΔ5 != default!) {
-                Ꮡt.Fatal(errΔ5);
+            var errΔ5 = WriteFile(filepath.Join(subsubdir, fileˢ2), default, 420); if (errΔ5 != nil) {
+                t.Fatal(errΔ5);
             }
         }
     }
 
-    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), binStraceˢ, "-f"u8, "-e", fcntlˢ, me, testRunˢ4);
+    var cmd = testenv.Command(new os_test_package.testing_TжTB(t), binStraceˢ, "-f", "-e", fcntlˢ, me, testRunˢ4);
     cmd = testenv.CleanCmdEnv(cmd);
-    cmd.Value.Env = append((~cmd).Env, env + "=" + subdir);
+    cmd.Env = append(cmd.Env, env + "=" + subdir);
     (var @out, err) = cmd.CombinedOutput();
     if (len(@out) > 0) {
-        Ꮡt.Logf("%s"u8, @out);
+        t.Logf("%s", @out);
     }
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     {
         nint got = bytes.Count(@out, slice<byte>("fcntl"u8)); if (got >= 100) {
-            Ꮡt.Errorf("found %d fcntl calls, want < 100"u8, got);
+            t.Errorf("found %d fcntl calls, want < 100", got);
         }
     }
 }
 
-public static void TestRemoveAllTrailingSlash(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllTrailingSlash(ж<Δtesting.T> t) {
     var slashesᴷ = new stackAppend<@string>();
 
-    var slashes = new @string[]{"/"u8}.slice();
+    var slashes = slice<@string>(["/"]);
     if (Δruntime.GOOS == "windows"u8) {
-        slashes = append(slashesᴷ, slashes, @"\"u8);
+        slashes = append(slashesᴷ, slashes, (@string)@"\");
     }
     foreach (var (_, slash) in slashes) {
-        @string dir = makefs(Ꮡt, new @string[]{
-            "dir/a/file1"u8,
-            "dir/a/file2"u8,
-            "dir/file3"u8
-        }.slice());
+        @string dir = makefs(t, slice<@string>([
+            "dir/a/file1",
+            "dir/a/file2",
+            "dir/file3"
+        ]));
         @string path = dir + "/dir"u8;
         {
-            var err = RemoveAll(path + slash); if (err != default!) {
-                Ꮡt.Fatal(err);
+            var err = RemoveAll(path + slash); if (err != nil) {
+                t.Fatal(err);
             }
         }
         {
             var (_, err) = Stat(path); if (!IsNotExist(err)) {
-                Ꮡt.Errorf("after RemoveAll(%q), directory still exists"u8, path + slash);
+                t.Errorf("after RemoveAll(%q), directory still exists", path + slash);
             }
         }
     }
 }
 
-public static void TestRemoveAllSymlinkRemovalFailure(ж<Δtesting.T> Ꮡt) {
+public static void TestRemoveAllSymlinkRemovalFailure(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
-        testRequiresPermissions(Ꮡt);
-        @string dir = makefs(Ꮡt, new @string[]{
-            "parent/"u8,
-            "parent/link => target"u8
-        }.slice());
+        testRequiresPermissions(t);
+        @string dir = makefs(t, slice<@string>([
+            "parent/",
+            "parent/link => target"
+        ]));
         {
-            var errΔ1 = Chmod(dir + "/parent"u8, 365); if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            var errΔ1 = Chmod(dir + "/parent"u8, 365); if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }
         defer(() => {
@@ -647,7 +657,7 @@ public static void TestRemoveAllSymlinkRemovalFailure(ж<Δtesting.T> Ꮡt) {
 
         var err = RemoveAll(dir + "/parent/link"u8);
         if (!errors.Is(err, ErrPermission)) {
-            Ꮡt.Fatalf("RemoveAll = %v; want ErrPermission"u8, err);
+            t.Fatalf("RemoveAll = %v; want ErrPermission", err);
         }
         // Issue #78490: RemoveAll leaked errSymlink, which panics when printed.
         _ = err.Error();
@@ -659,14 +669,16 @@ public static void TestRemoveAllSymlinkRemovalFailure(ж<Δtesting.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestRunningAsˢ = (@string)"skipping test: running as root (which ignores file permissions)"u8;
 
-internal static void testRequiresPermissions(ж<Δtesting.T> Ꮡt) {
-    Ꮡt.Helper();
+internal static void testRequiresPermissions(ж<Δtesting.T> t) {
+    t.Helper();
     var exprᴛ1 = Δruntime.GOOS;
-    if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8 || exprᴛ1 == "windows"u8) {
-        Ꮡt.Skipf("skipping test: %s does not support chmod"u8, Δruntime.GOOS);
-    }
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8 || exprᴛ1 == "windows"u8: {
+        t.Skipf("skipping test: %s does not support chmod", Δruntime.GOOS);
+        break;
+    }}
     if (Getuid() == 0) {
-        Ꮡt.Skip(skippingTestRunningAsˢ);
+        t.Skip(skippingTestRunningAsˢ);
     }
 }
 
@@ -678,13 +690,13 @@ public static void BenchmarkRemoveAll(ж<Δtesting.B> Ꮡb) {
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         b.StopTimer();
-        var err = CopyFS(tmpDir, DirFS("."u8));
-        if (err != default!) {
+        var err = CopyFS(tmpDir, DirFS("."));
+        if (err != nil) {
             Ꮡb.Fatal(err);
         }
         b.StartTimer();
         {
-            var errΔ1 = RemoveAll(tmpDir); if (errΔ1 != default!) {
+            var errΔ1 = RemoveAll(tmpDir); if (errΔ1 != nil) {
                 Ꮡb.Fatal(errΔ1);
             }
         }

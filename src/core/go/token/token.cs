@@ -25,11 +25,11 @@ public static Token COMMENT => 2;
 internal static Token literal_beg => 3;
 // Identifiers and basic type literals
 // (these tokens stand for classes of literals)
-public static Token IDENT => 4; // main
-public static Token INT => 5; // 12345
-public static Token FLOAT => 6; // 123.45
-public static Token IMAG => 7; // 123.45i
-public static Token CHAR => 8; // 'a'
+public static Token IDENT => 4;  // main
+public static Token INT => 5;    // 12345
+public static Token FLOAT => 6;  // 123.45
+public static Token IMAG => 7;   // 123.45i
+public static Token CHAR => 8;   // 'a'
 public static Token STRING => 9; // "abc"
 internal static Token literal_end => 10;
 
@@ -41,11 +41,11 @@ public static Token MUL => 14; // *
 public static Token QUO => 15; // /
 public static Token REM => 16; // %
 
-public static Token AND => 17; // &
-public static Token OR => 18; // |
-public static Token XOR => 19; // ^
-public static Token SHL => 20; // <<
-public static Token SHR => 21; // >>
+public static Token AND => 17;     // &
+public static Token OR => 18;      // |
+public static Token XOR => 19;     // ^
+public static Token SHL => 20;     // <<
+public static Token SHR => 21;     // >>
 public static Token AND_NOT => 22; // &^
 
 public static Token ADD_ASSIGN => 23; // +=
@@ -54,42 +54,42 @@ public static Token MUL_ASSIGN => 25; // *=
 public static Token QUO_ASSIGN => 26; // /=
 public static Token REM_ASSIGN => 27; // %=
 
-public static Token AND_ASSIGN => 28; // &=
-public static Token OR_ASSIGN => 29; // |=
-public static Token XOR_ASSIGN => 30; // ^=
-public static Token SHL_ASSIGN => 31; // <<=
-public static Token SHR_ASSIGN => 32; // >>=
+public static Token AND_ASSIGN => 28;     // &=
+public static Token OR_ASSIGN => 29;      // |=
+public static Token XOR_ASSIGN => 30;     // ^=
+public static Token SHL_ASSIGN => 31;     // <<=
+public static Token SHR_ASSIGN => 32;     // >>=
 public static Token AND_NOT_ASSIGN => 33; // &^=
 
-public static Token LAND => 34; // &&
-public static Token LOR => 35; // ||
+public static Token LAND => 34;  // &&
+public static Token LOR => 35;   // ||
 public static Token ARROW => 36; // <-
-public static Token INC => 37; // ++
-public static Token DEC => 38; // --
+public static Token INC => 37;   // ++
+public static Token DEC => 38;   // --
 
-public static Token EQL => 39; // ==
-public static Token LSS => 40; // <
-public static Token GTR => 41; // >
+public static Token EQL => 39;    // ==
+public static Token LSS => 40;    // <
+public static Token GTR => 41;    // >
 public static Token ASSIGN => 42; // =
-public static Token NOT => 43; // !
+public static Token NOT => 43;    // !
 
-public static Token NEQ => 44; // !=
-public static Token LEQ => 45; // <=
-public static Token GEQ => 46; // >=
-public static Token DEFINE => 47; // :=
+public static Token NEQ => 44;      // !=
+public static Token LEQ => 45;      // <=
+public static Token GEQ => 46;      // >=
+public static Token DEFINE => 47;   // :=
 public static Token ELLIPSIS => 48; // ...
 
 public static Token LPAREN => 49; // (
 public static Token LBRACK => 50; // [
 public static Token LBRACE => 51; // {
-public static Token COMMA => 52; // ,
+public static Token COMMA => 52;  // ,
 public static Token PERIOD => 53; // .
 
-public static Token RPAREN => 54; // )
-public static Token RBRACK => 55; // ]
-public static Token RBRACE => 56; // }
+public static Token RPAREN => 54;    // )
+public static Token RBRACK => 55;    // ]
+public static Token RBRACE => 56;    // }
 public static Token SEMICOLON => 57; // ;
-public static Token COLON => 58; // :
+public static Token COLON => 58;     // :
 internal static Token operator_end => 59;
 
 internal static Token keyword_beg => 60;
@@ -131,105 +131,105 @@ public static Token TILDE => 88;
 internal static Token additional_end => 89;
 
 [GoLazy] partial class lazyᴛtokens { internal static array<@string> tokens = new golib.SparseArray<@string>{
-    [(int)ILLEGAL] = "ILLEGAL"u8,
+    [(int)ILLEGAL] = "ILLEGAL",
 
-    [(int)EOF] = "EOF"u8,
-    [(int)COMMENT] = "COMMENT"u8,
+    [(int)EOF] = "EOF",
+    [(int)COMMENT] = "COMMENT",
 
-    [(int)IDENT] = "IDENT"u8,
-    [(int)INT] = "INT"u8,
-    [(int)FLOAT] = "FLOAT"u8,
-    [(int)IMAG] = "IMAG"u8,
-    [(int)CHAR] = "CHAR"u8,
-    [(int)STRING] = "STRING"u8,
+    [(int)IDENT] = "IDENT",
+    [(int)INT] = "INT",
+    [(int)FLOAT] = "FLOAT",
+    [(int)IMAG] = "IMAG",
+    [(int)CHAR] = "CHAR",
+    [(int)STRING] = "STRING",
 
-    [(int)ADD] = "+"u8,
-    [(int)SUB] = "-"u8,
-    [(int)MUL] = "*"u8,
-    [(int)QUO] = "/"u8,
-    [(int)REM] = "%"u8,
+    [(int)ADD] = "+",
+    [(int)SUB] = "-",
+    [(int)MUL] = "*",
+    [(int)QUO] = "/",
+    [(int)REM] = "%",
 
-    [(int)AND] = "&"u8,
-    [(int)OR] = "|"u8,
-    [(int)XOR] = "^"u8,
-    [(int)SHL] = "<<"u8,
-    [(int)SHR] = ">>"u8,
-    [(int)AND_NOT] = "&^"u8,
+    [(int)AND] = "&",
+    [(int)OR] = "|",
+    [(int)XOR] = "^",
+    [(int)SHL] = "<<",
+    [(int)SHR] = ">>",
+    [(int)AND_NOT] = "&^",
 
-    [(int)ADD_ASSIGN] = "+="u8,
-    [(int)SUB_ASSIGN] = "-="u8,
-    [(int)MUL_ASSIGN] = "*="u8,
-    [(int)QUO_ASSIGN] = "/="u8,
-    [(int)REM_ASSIGN] = "%="u8,
+    [(int)ADD_ASSIGN] = "+=",
+    [(int)SUB_ASSIGN] = "-=",
+    [(int)MUL_ASSIGN] = "*=",
+    [(int)QUO_ASSIGN] = "/=",
+    [(int)REM_ASSIGN] = "%=",
 
-    [(int)AND_ASSIGN] = "&="u8,
-    [(int)OR_ASSIGN] = "|="u8,
-    [(int)XOR_ASSIGN] = "^="u8,
-    [(int)SHL_ASSIGN] = "<<="u8,
-    [(int)SHR_ASSIGN] = ">>="u8,
-    [(int)AND_NOT_ASSIGN] = "&^="u8,
+    [(int)AND_ASSIGN] = "&=",
+    [(int)OR_ASSIGN] = "|=",
+    [(int)XOR_ASSIGN] = "^=",
+    [(int)SHL_ASSIGN] = "<<=",
+    [(int)SHR_ASSIGN] = ">>=",
+    [(int)AND_NOT_ASSIGN] = "&^=",
 
-    [(int)LAND] = "&&"u8,
-    [(int)LOR] = "||"u8,
-    [(int)ARROW] = "<-"u8,
-    [(int)INC] = "++"u8,
-    [(int)DEC] = "--"u8,
+    [(int)LAND] = "&&",
+    [(int)LOR] = "||",
+    [(int)ARROW] = "<-",
+    [(int)INC] = "++",
+    [(int)DEC] = "--",
 
-    [(int)EQL] = "=="u8,
-    [(int)LSS] = "<"u8,
-    [(int)GTR] = ">"u8,
-    [(int)ASSIGN] = "="u8,
-    [(int)NOT] = "!"u8,
+    [(int)EQL] = "==",
+    [(int)LSS] = "<",
+    [(int)GTR] = ">",
+    [(int)ASSIGN] = "=",
+    [(int)NOT] = "!",
 
-    [(int)NEQ] = "!="u8,
-    [(int)LEQ] = "<="u8,
-    [(int)GEQ] = ">="u8,
-    [(int)DEFINE] = ":="u8,
-    [(int)ELLIPSIS] = "..."u8,
+    [(int)NEQ] = "!=",
+    [(int)LEQ] = "<=",
+    [(int)GEQ] = ">=",
+    [(int)DEFINE] = ":=",
+    [(int)ELLIPSIS] = "...",
 
-    [(int)LPAREN] = "("u8,
-    [(int)LBRACK] = "["u8,
-    [(int)LBRACE] = "{"u8,
-    [(int)COMMA] = ","u8,
-    [(int)PERIOD] = "."u8,
+    [(int)LPAREN] = "(",
+    [(int)LBRACK] = "[",
+    [(int)LBRACE] = "{",
+    [(int)COMMA] = ",",
+    [(int)PERIOD] = ".",
 
-    [(int)RPAREN] = ")"u8,
-    [(int)RBRACK] = "]"u8,
-    [(int)RBRACE] = "}"u8,
-    [(int)SEMICOLON] = ";"u8,
-    [(int)COLON] = ":"u8,
+    [(int)RPAREN] = ")",
+    [(int)RBRACK] = "]",
+    [(int)RBRACE] = "}",
+    [(int)SEMICOLON] = ";",
+    [(int)COLON] = ":",
 
-    [(int)BREAK] = "break"u8,
-    [(int)CASE] = "case"u8,
-    [(int)CHAN] = "chan"u8,
-    [(int)CONST] = "const"u8,
-    [(int)CONTINUE] = "continue"u8,
+    [(int)BREAK] = "break",
+    [(int)CASE] = "case",
+    [(int)CHAN] = "chan",
+    [(int)CONST] = "const",
+    [(int)CONTINUE] = "continue",
 
-    [(int)DEFAULT] = "default"u8,
-    [(int)DEFER] = "defer"u8,
-    [(int)ELSE] = "else"u8,
-    [(int)FALLTHROUGH] = "fallthrough"u8,
-    [(int)FOR] = "for"u8,
+    [(int)DEFAULT] = "default",
+    [(int)DEFER] = "defer",
+    [(int)ELSE] = "else",
+    [(int)FALLTHROUGH] = "fallthrough",
+    [(int)FOR] = "for",
 
-    [(int)FUNC] = "func"u8,
-    [(int)GO] = "go"u8,
-    [(int)GOTO] = "goto"u8,
-    [(int)IF] = "if"u8,
-    [(int)IMPORT] = "import"u8,
+    [(int)FUNC] = "func",
+    [(int)GO] = "go",
+    [(int)GOTO] = "goto",
+    [(int)IF] = "if",
+    [(int)IMPORT] = "import",
 
-    [(int)INTERFACE] = "interface"u8,
-    [(int)MAP] = "map"u8,
-    [(int)PACKAGE] = "package"u8,
-    [(int)RANGE] = "range"u8,
-    [(int)RETURN] = "return"u8,
+    [(int)INTERFACE] = "interface",
+    [(int)MAP] = "map",
+    [(int)PACKAGE] = "package",
+    [(int)RANGE] = "range",
+    [(int)RETURN] = "return",
 
-    [(int)SELECT] = "select"u8,
-    [(int)STRUCT] = "struct"u8,
-    [(int)SWITCH] = "switch"u8,
-    [(int)TYPE] = "type"u8,
-    [(int)VAR] = "var"u8,
+    [(int)SELECT] = "select",
+    [(int)STRUCT] = "struct",
+    [(int)SWITCH] = "switch",
+    [(int)TYPE] = "type",
+    [(int)VAR] = "var",
 
-    [(int)TILDE] = "~"u8
+    [(int)TILDE] = "~"
 }.array(89); }
 
 // String returns the string corresponding to the token tok.
@@ -261,22 +261,22 @@ public static UntypedInt HighestPrec => 7;
 // operator op. If op is not a binary operator, the result
 // is LowestPrecedence.
 public static nint Precedence(this Token op) {
-    var exprᴛ1 = op;
-    if (exprᴛ1 == LOR) {
+    switch (op) {
+    case var ᴛ when ᴛ == LOR: {
         return 1;
     }
-    if (exprᴛ1 == LAND) {
+    case var ᴛ when ᴛ == LAND: {
         return 2;
     }
-    if (exprᴛ1 == EQL || exprᴛ1 == NEQ || exprᴛ1 == LSS || exprᴛ1 == LEQ || exprᴛ1 == GTR || exprᴛ1 == GEQ) {
+    case var ᴛ when ᴛ == EQL || ᴛ == NEQ || ᴛ == LSS || ᴛ == LEQ || ᴛ == GTR || ᴛ == GEQ: {
         return 3;
     }
-    if (exprᴛ1 == ADD || exprᴛ1 == SUB || exprᴛ1 == OR || exprᴛ1 == XOR) {
+    case var ᴛ when ᴛ == ADD || ᴛ == SUB || ᴛ == OR || ᴛ == XOR: {
         return 4;
     }
-    if (exprᴛ1 == MUL || exprᴛ1 == QUO || exprᴛ1 == REM || exprᴛ1 == SHL || exprᴛ1 == SHR || exprᴛ1 == AND || exprᴛ1 == AND_NOT) {
+    case var ᴛ when ᴛ == MUL || ᴛ == QUO || ᴛ == REM || ᴛ == SHL || ᴛ == SHR || ᴛ == AND || ᴛ == AND_NOT: {
         return 5;
-    }
+    }}
     return LowestPrec;
 }
 
@@ -340,7 +340,7 @@ public static bool IsIdentifier(@string name) {
         return false;
     }
     foreach (var (i, c) in name) {
-        if (!unicode.IsLetter(c) && c != (rune)'_' && (i == 0 || !unicode.IsDigit(c))) {
+        if (!unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c))) {
             return false;
         }
     }

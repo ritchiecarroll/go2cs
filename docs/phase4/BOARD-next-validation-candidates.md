@@ -32945,4 +32945,294 @@ record (TC0) is unchanged and the golden is unaffected.
 
 — H (2026-10-31)
 
+## 2026-11-01 — G (in-hop seat, claude/g-main-return-wait): a returning main waits on whether a panicking goroutine can run, not on a 20 ms clock — DONE on the seat branch, without the exit hold
+
+The record is `docs/phase4/DESIGN-main-return-wait.md`. COORD ruled the seat in-hop, design E (2026-10-31): golib-only,
+no regen rung.
+
+**CLOSES the WATCH "`GoroutinePanicAfterDeferredDone`'s Go oracle is racy on a loaded Windows box"** (COORD,
+2026-10-31), together with the converted wait's time bound that batch 116 left tracked here.
+- Go's side: batch 116 (`6e3cb82622`, the i9's oracle fix) sets `runtime.GOMAXPROCS(1)`. Go exited 2 in 80 of 80
+  runs across idle and three loads.
+- The converted side: when `main` returns while a goroutine runs a panic's deferred calls, `MainExit` no longer waits
+  20 ms by the wall clock. It waits while that goroutine can run, which it reads from golib's own scheduler marks:
+  - a park (`Goroutine.Park`), or a system call, whose windows funnel is now marked too;
+  - plus the goroutine's CPU time, budgeted at 20 ms, for a deferred call that runs user code.
+  A block held for 1 ms releases `main`. The only wall-clock bound left is a disclosed 10 s hang guard.
+- R1 on the i9, windows: 0 lost reports in every arm, JIT and AOT, at idle, n8, n32 and hi, against R0's base JIT
+  losses (2 of 211 at n32, 2 of 45 at hi). The linux leg (R) and the macOS leg (C1) follow at the merged SHA, from
+  `docs/phase4/data/main-return-wait/leg-briefs.md`.
+- A red on `GoroutinePanicAfterDeferredDone` now is a real red. The old signature was exit 0 on Go's side with an empty
+  stderr.
+
+**WATCH: `GoroutineRecoveringWhenMainReturns` prints "recovered" after `main` returns, converted only, under load.**
+The test, at this seat's shape: the recovering deferred call parks on a channel, `main`'s last statement starts a
+500 ms timer that closes it, and `main` sets `GOMAXPROCS(1)`.
+
+| late "recovered" (i9, 4 pinned CPUs) | n32 | hi |
+|:--|:--|:--|
+| Go | 0/400 | 0/100 |
+| converted JIT | 0/100 | 2-4/100 |
+| converted AOT | 10-11/100 | 25-45/100 |
+
+- Idle and n8 read 0 in every arm. hi varies by session: r3 read 28, r4's untraced half 40. Raw logs are on the i9's
+  branches `claude/i9-mrw-r0` to `-r4`.
+- **The mechanism, as traced** (r4, `51067a72d4`). The wait decided right in every traced run.
+  - In 14 of 45 late hi runs it released on the original park, sampled before the print. `main` was then starved for
+    seconds doing microseconds of work after the release.
+  - In the other 38 late runs (27 at hi, 11 at n32) it held for a goroutine the timer had already readied, as Go does.
+  - Go does not race here because, with one P, the timer cannot run while `main` holds that P. golib's goroutines and
+    timers are OS threads, and its `GOMAXPROCS` is bookkeeping, so a starved `main` thread loses the race.
+- **No release rule tightens it.** An early release for a parked goroutine was already the case in the 14 runs above.
+  It would also drop a goroutine a runnable peer is about to wake, which Go honors.
+- **Tried and reverted:** an exit hold on a counted goroutine's system calls after the exit decision (`438c43dbab`,
+  reverted on top by `12d5e3eb91`). AOT did not move: at hi 25 against 28, at n32 10 against 11.
+- **Residual routes the wait cannot see:** golib's `print` builtin and a C# caller's own I/O pass no system-call mark.
+- **The structural fix is the M:N horizon.** See "RULING -- W7's disposition: honest FAIL, ring closure priced to the
+  M:N horizon" (coordinator, 2026-08-22). The same OS-thread scheduling gap lands here. Cooperative M:N scheduling
+  under one P would let a timer fire only when `main` yields, as Go's does.
+- **As a gate flake:** about 0. The behavioral runner's Output phase runs projects one at a time, so the box is not
+  loaded. The signature is exit 0, stdout "before goroutine panic" then "recovered", and Go's side clean. Any other
+  signature is a real red.
+
+**Scored, gates, files.** DESIGN section 7 scores P1 to P8 and the trace arm's prediction. The misses are P1's AOT
+arm, P3 under load, P6's base level (9 ns), and the trace arm's mechanism. The gate coverage is listed there too.
+COORD's merge battery is the gate of record. The census (`docs/phase4/data/main-return-wait/census.sh`) reads
+0 unclassified wait sites. The trace kit is `kit/make-trace.sh` beside it.
+## 2026-11-01 — G (#45 follow-up, claude/g-seat45-followup): testing's TestTBHelper misreports a caller line under seat #53's literal accessor — DISCLOSED for .2 (structural, Release only); the fix is queued post-hop
+
+**The finding.** Once the #45 follow-up let `testing` convert again, its bank-act row failed one test that the bank
+had validated. `TestTBHelper` reads Go's `helperfuncs_test.go:86` and `:87` as `:84`, the previous statement's line.
+
+- **The bisect.** Windows, Release, one tree (`c5a4637bba`), one act. Every converter after #45 refuses `testing`
+  without the follow-up, so the fix (`d9da4a7f11`) was cherry-picked onto each arm:
+
+  | Converter | testing |
+  |:--|:--|
+  | `7072ef5904` (batch 98) | validated 83 + 2 |
+  | `1dacbdf4b6` (batch 109) | validated 83 + 2 |
+  | `5bf0fcb694` (batch 110, seat #53) | fails `TestTBHelper` alone (`TestAllocsPerRun` and `TestMorePanic` are its two disclosures) |
+
+- **The emission.** At `5bf0fcb694` the converted test reads the two literals through #53's hoist-mode accessor,
+  `private static ref readonly @string genericFloat64ˢ => ref genericFloat64ˢᵇ;`. Exactly the two calls that pass
+  them misreport; every call that passes a plain literal reports its own line.
+- **Configuration.** `-test-config Debug` at `d9da4a7f11` validates 83 + 2. So the class follows `TestLineNumber`'s:
+  structural, for the default Release configuration.
+- **Reach.** Hoist-mode emission only: the standard library and its converted tests. User code is plain.
+
+**RULED (COORD, 2026-11-01).**
+- **(C) for .2:** `testing`'s manifest discloses `TestTBHelper` (`structural`, signature
+  `helperfuncs_test.go:84: GenericFloat64`, `3b9a3d7209`). Its bank-act row at that commit reads **82 + 3**: one test
+  moves from matched to disclosed, so the total is 85 on both sides. The roster row still reads 83 | 2 until the
+  re-bank records it.
+- **(A) REFUSED:** a `-tests`-only plain-field emission. The owner's standing ruling (2026-09-28, ledger
+  `e15a841635`) never changes visible emission to satisfy a test that asserts diagnostic-only output. It would also
+  make the standard library's tests read differently from its production code.
+- **(B) QUEUED POST-HOP:** the retirement. #55's caller-line resolver maps a call made through an inlined accessor
+  to its own line, with a census first of the standard library's caller-line readers (`log`'s `Lshortfile`,
+  `testing.Helper`), since the same accessor reaches their callers.
+
+— G (2026-11-01)
+
+## 2026-11-01 — H (restore probe, measured on H): the behavioral runner's restore phase costs 46 minutes on H because RestoreAll issues one MSBuild Restore per target; one static-graph restore of the same 887 runs in 82 s — post-hop runner change, owner H
+
+**The finding.** On H (15.8 GB RAM, 8 logical processors) the behavioral runner's restore phase read 2,748 s and
+2,809 s over 887 targets in the build-wall pair (`8b993b7b1d` and `59b0798e4c`, purged trees). That is above the
+runner's default 2,400 s budget, so every default-budget run on H times out its restore. The one-shot build of the
+same 887 reads about 335 s. The restore WORK is not the cost: the runner's `RestoreAll` target is
+`<MSBuild Projects="@(ProjectToBuild)" Targets="Restore" BuildInParallel="true" />` (Program.cs,
+`WriteTraversalProject`), so each target gets its own Restore. Each Restore repeats the graph walk and the no-op
+checks over that target's closure.
+
+**The slice pair (prediction MISSED, as worded).** Master `d95801abf7`, purged before each arm, runner
+`--phase compile --build-timeout 3600`, every line timestamped. S99 is a superset of S50.
+
+| arm | targets | pre-build deps | transpile | pre-build | restore | one-shot |
+|:--|--:|--:|--:|--:|--:|--:|
+| S50 (`--slice 1/18`) | 50 | 17 | 88 s | 353 s | 52 s | 47 s |
+| S99 (`--slice 1/9`) | 99 | 22 | 144 s | 391 s | 76 s | 60 s |
+| 887 (build-wall pair) | 887 | 124 | ~1,220 s | ~1,780 s | 2,748–2,809 s | ~335 s |
+
+- **Predicted** (per project, from the mechanism): restore(S99)/restore(S50) = 1.98 (band 1.7–2.3), and
+  restore(S50) about 160 s (band 100–260 s).
+- **Measured:** 1.46, inside the 1.4–1.7 band stated beforehand as ambiguous, and 52 s, which MISSED low.
+- **Superlinear past 99.** The line through the two points, 27.5 s + 0.49 s × N, extrapolates to about 460 s at
+  887. The measured restore is about 6x that. Restore runs 1.1x the one-shot at S50, 1.3x at S99 and 8x at 887.
+
+**Second instrument: the static closure** (each target's transitive ProjectReference closure, read from the csprojs):
+
+| set | mean closure per target | max | union |
+|:--|--:|--:|--:|
+| S50 | 68.2 | 72 | 77 |
+| S99 | 68.3 | 72 | 83 |
+| all 887 | 68.4 | 150 | 267 |
+
+- The mean is flat, so the sum of closures is linear in N. "Later targets are heavier" does not explain the 887.
+- A two-term fit (a × N + b × union) from S50 and S99 predicts about 500 s at 887, so that model fails too.
+
+**Cross-box line (COORD, i7, 31.9 GB, 12 logical).** The i7 runs the WHOLE 887 battery (transpile, pre-build,
+restore, one-shot, run) in 5,530 s at batch 120. That is about twice H's restore phase alone. The runner logs no
+per-phase walls, so the i7's restore cannot be split out.
+
+**The discriminating arm (RULED (b), one arm, memory telemetry).** Master `d95801abf7`, the tree purged (0 bin/obj
+left). The 887 targets were restored as ONE static graph: `dotnet restore` of a scratch `.slnx` listing them, with
+`-p:RestoreUseStaticGraphEvaluation=true` and the runner's global properties (Configuration=Release,
+go2csPath=`<src>/`). No runner change.
+- **82 s,** rc 0, 0 errors, MSB4166 0. It wrote 1,134 `project.assets.json`: 954 under Behavioral (the 887 and
+  their nested sub-libraries) and 180 in core, golib and gen.
+- **Conservative.** This arm restored the whole 267-project union cold. The runner's restore phase runs after its
+  pre-build, which has already restored the shared deps.
+- **Memory clear.** Read once a minute: at least 5,179 MB available; committed peak 15,605 MB of a 34,912 MB limit.
+- **Tree clean** after the arm.
+
+**Reading.** The graph restore collapses the wall about 34x with memory clear, so by the rule stated before the arm
+the runner's `RestoreAll` shape is the cost, not H's RAM. M's 887 reading lost 34 targets' assets to an MSB4166
+node crash. That crash rides the per-target shape, whose cost grows past 99 targets in a way neither the target
+count nor the closure explains.
+
+**RULED (COORD, 2026-11-01): post-hop, owner H.** `RestoreAll` becomes one static-graph restore of a generated
+`.slnx`, in its own process, with the same common arguments. It gates on the full runner on H, building against
+the graph-restored assets; the expected restore phase is about 80–100 s. Not built against here: this arm measured
+the restore only. No gate-instrument change goes in during the freeze window.
+
+— H (2026-11-01)
+## 2026-11-01 — G (in-hop seat, claude/g-aot-frozen-token-holder): darwin Native AOT failed in ILC on a frozen-object name collision from seat #32's field tokens — FIXED by a nested token holder
+
+**The failure.** C1's macOS leg (run 41351205394) failed every Native AOT publish, base and tip, on osx-arm64 and
+osx-x64, inside ILC:
+`An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23`.
+The linux-flavour AOT publish of the same programs succeeded.
+
+**The mechanism** (dotnet/runtime `v10.0.11`).
+- `SerializedFrozenObjectNode.AppendMangledName` names a preinitialized object `__FrozenObj_`, then the owning type's
+  mangled name, then the allocation site id, with no separator.
+- `TypePreinit`'s allocation site id is the interpreted instruction counter in the owning type's static constructor,
+  unique only within that type.
+- **The origin is seat #32** (`f5e6a25155`, 2026-10-29). Its per-field token,
+  `static readonly FieldRefFunc<S, F> ᏑF‿ = ᏑF;`, compiles to `ldnull`, `ldftn`, `newobj`, `stsfld`, so a struct's
+  tokens are allocated at instructions 3, 7, 11, and so on.
+- darwin's `syscall.IfmaMsghdr` has 7 fields, so its sixth token sits at 23. `IfmaMsghdr2`'s first sits at 3, and
+  `IfmaMsghdr` + `23` spells the same symbol as `IfmaMsghdr2` + `3`.
+- **A standalone C# repro** fails the same way with no go2cs code: static class `A` with six `Func<int>` statics and
+  `A2` with one give `Key: __FrozenObj_FrozenRepro_A23`. Renamed `AB`, it publishes, runs and exits 8.
+
+**In-hop by measurement.** The failure reproduces on win-x64 with `-p:GoTargetOS=darwin`: the collision is in
+managed code, so no Mac is needed. GoroutinePanicAfterDeferredDone's Native AOT publish:
+
+| Tree | Result |
+|:--|:--|
+| `nuget-1.26.10.1` (`b6ccfa80a5`) | rc 0, executable |
+| master `64d145b2c4` | rc 1, C1's key |
+
+**Reach, by census** (`docs/phase4/data/aot-frozen-collision/frozen-census.pl` over `src/core` at `64d145b2c4`,
+per package and GOOS flavour): 158 same-package struct pairs `X` / `X<digits>`, and one predicted collision, darwin
+`syscall`'s `IfmaMsghdr` / `IfmaMsghdr2` (ids 23 and 27). Every darwin Native AOT publish that reaches `syscall` failed,
+which is effectively every program. JIT, ReadyToRun, and linux and windows Native AOT were unaffected.
+
+**RULED (COORD, 2026-11-01).**
+- **(A), in-hop:** the generator moves the tokens into a nested holder.
+- **(B), refused:** an app-wide `--nopreinitstatics`, an unmeasured startup cost.
+- **(C):** an upstream issue, drafted at `docs/phase4/data/aot-frozen-collision/ilc-issue-DRAFT.md` and not posted;
+  the owner decides.
+
+**The fix (A).**
+- StructTypeTemplate emits a struct's tokens inside a nested `public static class Field‿Tokens`, and
+  FieldAccessGenerator's address property reads `S.Field‿Tokens.ᏑF‿`. The converter never names the token, so
+  visible emission is unchanged.
+- **The name.** Go cannot write U+203F, so no Go member can take it. ILC sanitizes it to `_` and deduplicates mangled
+  type names within a module. The ILC map reads `syscall_go_syscall_package_IfmaMsghdr_Field_Tokens` and
+  `..._IfmaMsghdr2_Field_Tokens`, which end in a letter.
+- **No new collision class.** A census over `src/core` finds no type or identifier spelled `*Field_Tokens*`, which is
+  the only Go spelling that could alias a holder's mangled name; the control pattern finds 318 `*_package`
+  identifiers.
+- **Preinitialization is kept**, read from the ILC map:
+  - every holder with GC statics (644) carries `GCStaticsPreInitData`, with a zero-length `NonGCStatics`, so it has
+    no class-constructor context;
+  - on the windows flavour, base against fix: runtime cctors 18,637 = 18,637;
+  - the six shared-canonical generic cctors (`atomic.Pointer`, `iter.Pull`/`Pull2`, `internal/sync.HashTrieMap`,
+    `gc/scan.unsafeBuf`) move from the struct to its holder one for one;
+  - five class-init contexts disappear, and none are added. A holder whose tokens a program never reads is not
+    built at all.
+- **Red-first.**
+  - The darwin-flavour probe: rc 1 at base with C1's key, rc 0 at the fix with an executable.
+  - GenTests' `EveryTokenLivesInTheStructsHolderAndNoneOnTheStruct` fails at the base template with
+    "ᏑCount‿ is declared on Plain", and passes at the fix; the template was restored byte-identical.
+
+C1 confirms on the runners: an osx-arm64 and osx-x64 Native AOT publish and run of the amplifier, which also closes the
+main-return-wait leg's darwin AOT arms.
+
+— G (2026-11-01)
+
+
+## 2026-11-02 — G (in-hop seat, claude/g-heap-byvalue): crypto/internal/fips140cache's TestCache hung at the 1.26.10.2 freeze because heap<T>'s initial value stayed rooted for the caller's whole frame — FIXED IN GOLIB
+
+**The finding.** At the freeze tip `f6666d98a2`, crypto/internal/fips140cache read FAIL on the i9's windows sweep:
+TestCache was still in flight at the 10-minute package deadline. At `f75e0c53ec` it passed in 14 s. It hangs
+deterministically: 9 of 9 runs, at TC0 and tiered alike. TestCache drops a key and loops `runtime.GC()` until the
+key's AddCleanup callback runs. Go collects the key; the converted test never did.
+
+**The emission that exposed it.** Seat #29 (H2, `29bead80f1`, batch 87) folds a heap-boxed `x := rhs` into one call,
+`ref var k1 = ref heap<ж<key>>(newKey(), out var Ꮡk1);`. Batch 127's end regen carried the fold into this test. The
+fold itself is sound and STAYS (COORD's ruling): the defect is golib's parameter.
+
+**Two roots, both found by measurement.**
+- **The call site.** `heap<T>(in T target, out ж<T>)` takes `in`, and an `in` parameter needs an address. For the
+  rvalue `newKey()` the compiler spilled the value into a hidden local of the caller and passed `ldloca`. In the
+  converted TestCache's IL, each of k1, k2 and k3 had a second `ldloca` (V_27, V_29, V_30) beside its out box. That
+  local is never cleared, and address-taken, so the JIT reports it live for the whole frame unless heap inlines.
+- **Inside heap, once heap took its value by value.** The row still hung. Three dumps of the spinning test, with
+  dotnet-dump `gcroot`, found exactly one live key and one root: TestCache's own frame at `rsp+1d8`. `gcinfo` lists that
+  slot among the frame's 49 UNTRACKED slots. `DOTNET_JitDisasm=TestCache` (FullOpts) named it: heap was INLINED, its
+  by-value parameter became `[rsp+0x1D8]`, and `lea rdx, [rsp+0x1D8]` fed `Ꮡ[__Canon](byref)`, which is not inlined
+  (a shared generic). So by-value alone moved the spill from the call site into heap's own inlined body. The cleanup
+  path was not involved (COORD's fork B): the key was rooted, so its cleanup could not run.
+
+**The fix, golib only:** `heap<T>(T target, out ж<T>)` takes its value by value, and clears `target = default!` once
+`Ꮡ(target)` holds it. A cleared address-exposed slot holds nothing, and where the JIT drops the store as dead, the
+slot was tracked and dead already. No call passes `in` explicitly, so every caller rebinds unchanged. The converter is
+byte-identical to master's when built with `-ldflags=-buildid=` (sha256 `5cbd892b…`), so the emission cannot move.
+
+**Guards** (`src/tests/GolibTests/HeapInitRootingTests.cs`):
+- the IL guard: a folded frame declares exactly its split twin's IL locals. It is red at master for a reference T and
+  for a struct T;
+- `HeapClearsItsParameterOnceTheBoxHoldsTheValue`: heap's IL must hold `ldarga.s 0; initobj` (`0F 00 FE 15`). It is
+  red with the by-value-only golib;
+- two reachability arms, measured only under `DOTNET_JitNoInline=1`, which is the condition that reproduces the
+  call-site spill in a small frame. The reference arm is red at master and green at the fix.
+
+**Measured.**
+- **The row, through the sweep, at TC0:** PASS 1 in 36 s and 191 s (cold). It hung to the deadline at the
+  by-value-only commit.
+- **Copy cost of by-value:** an rvalue costs within 1% at 8, 32 and 128 B; an lvalue costs within 1% up to 32 B, and
+  +16% (about 4 ns) at 128 B. 232 of the 1,185 folds pass an lvalue, almost all small types.
+- **The 16-file lead:** of the test files that use both the fold and a GC-reachability API, only fips140cache waits
+  on a folded value to die.
+
+**Gates, at `390e9b8bda`:**
+- GolibTests Release 2,327 passed / 0 failed / 27 skipped, and Debug 2,309 / 0 / 45;
+- GenTests rc 0; go test every package ok, after this seat's re-cites for repoguard;
+- go2cs.slnx Debug and go2cs-stdlib.slnx Release both 0 errors;
+- CNR byte-identical across all 954 packages;
+- behavioral 887 transpile, compile and target, Output 858 pass / 0 fail / 29 skip.
+
+**The sibling, ruled in-hop as its own seat:** `Ꮡ<T>(in T)` has the same shape. The same disassembly shows
+`Ꮡ(new value())` spilled to `[rsp+0x288]` and passed by `lea`; it is harmless there, but it roots any rvalue struct
+holding references.
+
+— G (2026-11-02)
+
+## 2026-11-02 — G (post-hop, measured in the heap seat): with nothing inlined, a struct constructor's `newobj` temp roots the struct's reference fields for the whole frame — POST-HOP QUEUE
+
+**The shape.** Go `x := S{p: obj}` converts to `new S(obj, …)`, a positional constructor. Under
+`DOTNET_JitNoInline=1`, the constructor is not inlined, so the JIT builds the value in a temp and passes its address
+as `this`. That temp is address-exposed and reported live for the frame, so `obj` stays reachable after `x.p = nil`.
+
+**Evidence** (HeapInitRootingTests' struct arm, measured with its gates lifted, the file restored byte-identical):
+under no-inline, the field stays rooted in BOTH the folded `heap<S>(new S(…), out …)` shape and the split
+`heap<S>(out …); x = new S(…);` shape. At default inlining both shapes collect.
+
+**Ruled (COORD, 2026-11-02):** not a shipping configuration and pre-existing JIT behaviour, so no seat in this hop. It
+goes to the post-hop queue.
+
+— G (2026-11-02)
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

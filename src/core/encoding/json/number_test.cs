@@ -10,114 +10,114 @@ using static go.encoding.json_package;
 
 partial class json_internal_test_package {
 
-public static void TestNumberIsValid(ж<testing.T> Ꮡt) {
+public static void TestNumberIsValid(ж<testing.T> t) {
     // From: https://stackoverflow.com/a/13340826
     ж<regexp.Regexp> jsonNumberRegexp = regexp.MustCompile(dDEEDˢ);
 
-    var validTests = new @string[]{
-        "0"u8,
-        "-0"u8,
-        "1"u8,
-        "-1"u8,
-        "0.1"u8,
-        "-0.1"u8,
-        "1234"u8,
-        "-1234"u8,
-        "12.34"u8,
-        "-12.34"u8,
-        "12E0"u8,
-        "12E1"u8,
-        "12e34"u8,
-        "12E-0"u8,
-        "12e+1"u8,
-        "12e-34"u8,
-        "-12E0"u8,
-        "-12E1"u8,
-        "-12e34"u8,
-        "-12E-0"u8,
-        "-12e+1"u8,
-        "-12e-34"u8,
-        "1.2E0"u8,
-        "1.2E1"u8,
-        "1.2e34"u8,
-        "1.2E-0"u8,
-        "1.2e+1"u8,
-        "1.2e-34"u8,
-        "-1.2E0"u8,
-        "-1.2E1"u8,
-        "-1.2e34"u8,
-        "-1.2E-0"u8,
-        "-1.2e+1"u8,
-        "-1.2e-34"u8,
-        "0E0"u8,
-        "0E1"u8,
-        "0e34"u8,
-        "0E-0"u8,
-        "0e+1"u8,
-        "0e-34"u8,
-        "-0E0"u8,
-        "-0E1"u8,
-        "-0e34"u8,
-        "-0E-0"u8,
-        "-0e+1"u8,
-        "-0e-34"u8
-    }.slice();
+    var validTests = slice<@string>([
+        "0",
+        "-0",
+        "1",
+        "-1",
+        "0.1",
+        "-0.1",
+        "1234",
+        "-1234",
+        "12.34",
+        "-12.34",
+        "12E0",
+        "12E1",
+        "12e34",
+        "12E-0",
+        "12e+1",
+        "12e-34",
+        "-12E0",
+        "-12E1",
+        "-12e34",
+        "-12E-0",
+        "-12e+1",
+        "-12e-34",
+        "1.2E0",
+        "1.2E1",
+        "1.2e34",
+        "1.2E-0",
+        "1.2e+1",
+        "1.2e-34",
+        "-1.2E0",
+        "-1.2E1",
+        "-1.2e34",
+        "-1.2E-0",
+        "-1.2e+1",
+        "-1.2e-34",
+        "0E0",
+        "0E1",
+        "0e34",
+        "0E-0",
+        "0e+1",
+        "0e-34",
+        "-0E0",
+        "-0E1",
+        "-0e34",
+        "-0E-0",
+        "-0e+1",
+        "-0e-34"
+    ]);
 
     foreach (var (_, test) in validTests) {
         if (!isValidNumber(test)) {
-            Ꮡt.Errorf("%s should be valid"u8, test);
+            t.Errorf("%s should be valid", test);
         }
 
         ref var f = ref heap(new float64(), out var Ꮡf);
         {
-            var err = Unmarshal(slice<byte>(test), Ꮡf); if (err != default!) {
-                Ꮡt.Errorf("%s should be valid but Unmarshal failed: %v"u8, test, err);
+            var err = Unmarshal(slice<byte>(test), Ꮡf); if (err != nil) {
+                t.Errorf("%s should be valid but Unmarshal failed: %v", test, err);
             }
         }
 
         if (!jsonNumberRegexp.MatchString(test)) {
-            Ꮡt.Errorf("%s should be valid but regexp does not match"u8, test);
+            t.Errorf("%s should be valid but regexp does not match", test);
         }
     }
 
-    var invalidTests = new @string[]{
-        ""u8,
-        "invalid"u8,
-        "1.0.1"u8,
-        "1..1"u8,
-        "-1-2"u8,
-        "012a42"u8,
-        "01.2"u8,
-        "012"u8,
-        "12E12.12"u8,
-        "1e2e3"u8,
-        "1e+-2"u8,
-        "1e--23"u8,
-        "1e"u8,
-        "e1"u8,
-        "1e+"u8,
-        "1ea"u8,
-        "1a"u8,
-        "1.a"u8,
-        "1."u8,
-        "01"u8,
-        "1.e1"u8
-    }.slice();
+    var invalidTests = slice<@string>([
+        "",
+        "invalid",
+        "1.0.1",
+        "1..1",
+        "-1-2",
+        "012a42",
+        "01.2",
+        "012",
+        "12E12.12",
+        "1e2e3",
+        "1e+-2",
+        "1e--23",
+        "1e",
+        "e1",
+        "1e+",
+        "1ea",
+        "1a",
+        "1.a",
+        "1.",
+        "01",
+        "1.e1"
+    ]);
 
     foreach (var (_, test) in invalidTests) {
         if (isValidNumber(test)) {
-            Ꮡt.Errorf("%s should be invalid"u8, test);
+            t.Errorf("%s should be invalid", test);
         }
 
         ref var f = ref heap(new float64(), out var Ꮡf);
         {
-            var err = Unmarshal(slice<byte>(test), Ꮡf); if (err == default!) {
-                Ꮡt.Errorf("%s should be invalid but unmarshal wrote %v"u8, test, f);
+            var err = Unmarshal(slice<byte>(test), Ꮡf); if (err == nil) {
+                t.Errorf("%s should be invalid but unmarshal wrote %v", test, f);
             }
         }
 
         if (jsonNumberRegexp.MatchString(test)) {
-            Ꮡt.Errorf("%s should be invalid but matches regexp"u8, test);
+            t.Errorf("%s should be invalid but matches regexp", test);
         }
     }
 }

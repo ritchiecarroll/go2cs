@@ -101,11 +101,11 @@ public static uint64 String(ΔSeed seed, @string s) {
 // If multiple goroutines must compute the same seeded hash,
 // each can declare its own Hash and call SetSeed with a common Seed.
 partial struct Hash {
-    internal array<Action> _ = new(0); // not comparable
-    internal ΔSeed seed;          // initial seed used for this hash
-    internal ΔSeed state;          // current hash of all flushed bytes
+    internal array<Action> _ = new(0);       // not comparable
+    internal ΔSeed seed;                     // initial seed used for this hash
+    internal ΔSeed state;                    // current hash of all flushed bytes
     internal array<byte> buf = new(bufSize); // unflushed byte buffer
-    internal nint n;          // number of unflushed bytes
+    internal nint n;                         // number of unflushed bytes
 }
 
 // bufSize is the size of the Hash write buffer.
@@ -135,7 +135,7 @@ public static error WriteByte(this ref Hash h, byte b) {
     }
     h.buf[h.n] = b;
     h.n++;
-    return default!;
+    return default;
 }
 
 // Write adds b to the sequence of bytes hashed by h.
@@ -150,7 +150,7 @@ public static (nint, error) Write(this ref Hash h, slice<byte> b) {
         h.n += k;
         if (h.n < bufSize) {
             // Copied the entirety of b to h.buf.
-            return (size, default!);
+            return (size, default);
         }
         b = b.slice(k);
         h.flush();
@@ -167,7 +167,7 @@ public static (nint, error) Write(this ref Hash h, slice<byte> b) {
     // Copy the tail.
     copy(h.buf[..], b);
     h.n = len(b);
-    return (size, default!);
+    return (size, default);
 }
 
 // WriteString adds the bytes of s to the sequence of bytes hashed by h.
@@ -179,7 +179,7 @@ public static (nint, error) WriteString(this ref Hash h, @string s) {
         nint k = copy(h.buf.slice(h.n), s);
         h.n += k;
         if (h.n < bufSize) {
-            return (size, default!);
+            return (size, default);
         }
         s = s.slice(k);
         h.flush();
@@ -193,7 +193,7 @@ public static (nint, error) WriteString(this ref Hash h, @string s) {
     }
     copy(h.buf[..], s);
     h.n = len(s);
-    return (size, default!);
+    return (size, default);
 }
 
 // Seed returns h's seed value.
@@ -248,8 +248,8 @@ public static uint64 Sum64(this ref Hash h) {
 
 // MakeSeed returns a new random seed.
 public static ΔSeed MakeSeed() {
-    uint64 s = default!;
-    while (ᐧ) {
+    uint64 s = default;
+    for (;;) {
         s = randUint64();
         // We use seed 0 to indicate an uninitialized seed/hash,
         // so keep trying until we get a non-zero seed.
@@ -289,9 +289,8 @@ public static nint BlockSize(this ref Hash h) {
 // Clone implements [hash.Cloner].
 public static (hash.Cloner, error) Clone(this ref Hash h) {
     h.initSeed();
-    ref var r = ref heap<Hash>(out var Ꮡr);
-    r = h.ΔClone();
-    return (new HashжCloner(Ꮡr), default!);
+    ref var r = ref heap<Hash>(h.ΔClone(), out var Ꮡr);
+    return (new HashжCloner(Ꮡr), default);
 }
 
 // Comparable returns the hash of comparable value v with the given seed

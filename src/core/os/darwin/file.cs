@@ -74,24 +74,24 @@ public static @string Name(this ref File f) {
 // closing Stderr may cause those messages to go elsewhere, perhaps
 // to a file opened later.
 public static ж<File> Stdin;
-internal static void initᴛStdin() { Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8); }
+internal static void initᴛStdin() { Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"); }
 public static ж<File> Stdout;
-internal static void initᴛStdout() { Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8); }
+internal static void initᴛStdout() { Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"); }
 public static ж<File> Stderr;
-internal static void initᴛStderr() { Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8); }
+internal static void initᴛStderr() { Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"); }
 
 // Flags to OpenFile wrapping those of the underlying system. Not all
 // flags may be implemented on a given system.
 // Exactly one of O_RDONLY, O_WRONLY, or O_RDWR must be specified.
-public const nint O_RDONLY = /* syscall.O_RDONLY */ 0;             // open the file read-only.
-public const nint O_WRONLY = /* syscall.O_WRONLY */ 1;             // open the file write-only.
-public const nint O_RDWR = /* syscall.O_RDWR */ 2;               // open the file read-write.
+public const nint O_RDONLY = /* syscall.O_RDONLY */ 0; // open the file read-only.
+public const nint O_WRONLY = /* syscall.O_WRONLY */ 1; // open the file write-only.
+public const nint O_RDWR = /* syscall.O_RDWR */ 2;     // open the file read-write.
 // The remaining values may be or'ed in to control behavior.
-public const nint O_APPEND = /* syscall.O_APPEND */ 8;             // append data to the file when writing.
-public const nint O_CREATE = /* syscall.O_CREAT */ 512;             // create a new file if none exists.
-public const nint O_EXCL = /* syscall.O_EXCL */ 2048;               // used with O_CREATE, file must not exist.
-public const nint O_SYNC = /* syscall.O_SYNC */ 128;               // open for synchronous I/O.
-public const nint O_TRUNC = /* syscall.O_TRUNC */ 1024;              // truncate regular writable file when opened.
+public const nint O_APPEND = /* syscall.O_APPEND */ 8;  // append data to the file when writing.
+public const nint O_CREATE = /* syscall.O_CREAT */ 512; // create a new file if none exists.
+public const nint O_EXCL = /* syscall.O_EXCL */ 2048;   // used with O_CREATE, file must not exist.
+public const nint O_SYNC = /* syscall.O_SYNC */ 128;    // open for synchronous I/O.
+public const nint O_TRUNC = /* syscall.O_TRUNC */ 1024; // truncate regular writable file when opened.
 
 // Seek whence values.
 //
@@ -137,17 +137,18 @@ public static ж<File> NewFile(uintptr fd, @string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string readˢ = "read"u8;
+internal static ref readonly @string readˢ => ref readˢᵇ;
+private static readonly @string readˢᵇ = "read"u8;
 
 // Read reads up to len(b) bytes from the File and stores them in b.
 // It returns the number of bytes read and any error encountered.
 // At end of file, Read returns 0, io.EOF.
 public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
-    nint n = default!;
+    nint n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
@@ -156,30 +157,31 @@ public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string negativeOffsetˢ = "negative offset"u8;
+internal static ref readonly @string negativeOffsetˢ => ref negativeOffsetˢᵇ;
+private static readonly @string negativeOffsetˢᵇ = "negative offset"u8;
 
 // ReadAt reads len(b) bytes from the File starting at byte offset off.
 // It returns the number of bytes read and the error, if any.
 // ReadAt always returns a non-nil error when n < len(b).
 // At end of file, that error is io.EOF.
 public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
 
     if (off < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat"u8, Path: f.name, Err: errors.New(negativeOffsetˢ)))));
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat", Path: f.name, Err: errors.New(negativeOffsetˢ)))));
     }
 
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pread(b, off);
-        if (e != default!) {
+        if (e != nil) {
             err = f.wrapErr(readˢ, e);
             break;
         }
@@ -191,15 +193,16 @@ public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int6
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writeˢ = "write"u8;
+internal static ref readonly @string writeˢ => ref writeˢᵇ;
+private static readonly @string writeˢᵇ = "write"u8;
 
 // ReadFrom implements io.ReaderFrom.
 public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
-    int64 n = default!;
+    int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
@@ -229,20 +232,20 @@ partial struct fileWithoutReadFrom {
     /*embed*/ public ж<File> File;
 }
 
-internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
-    return Δio.Copy(new fileWithoutReadFrom(File: Ꮡf), r);
+internal static (int64, error) genericReadFrom(ж<File> f, Δio.Reader r) {
+    return Δio.Copy(new fileWithoutReadFrom(File: f), r);
 }
 
 // Write writes len(b) bytes from b to the File.
 // It returns the number of bytes written and an error, if any.
 // Write returns a non-nil error when n != len(b).
 public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
@@ -256,14 +259,14 @@ public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
 
     epipecheck(ref (Ꮡf).DerefOrNull(), e);
 
-    if (e != default!) {
+    if (e != nil) {
         err = f.wrapErr(writeˢ, e);
     }
 
     return (n, err);
 }
 
-internal static error errWriteAtInAppendMode = errors.New("os: invalid use of WriteAt on file opened with O_APPEND"u8);
+internal static error errWriteAtInAppendMode = errors.New("os: invalid use of WriteAt on file opened with O_APPEND");
 
 // WriteAt writes len(b) bytes to the File starting at byte offset off.
 // It returns the number of bytes written and an error, if any.
@@ -271,12 +274,12 @@ internal static error errWriteAtInAppendMode = errors.New("os: invalid use of Wr
 //
 // If file was opened with the [O_APPEND] flag, WriteAt returns an error.
 public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
@@ -285,12 +288,12 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
     }
 
     if (off < 0) {
-        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat"u8, Path: f.name, Err: errors.New(negativeOffsetˢ)))));
+        return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat", Path: f.name, Err: errors.New(negativeOffsetˢ)))));
     }
 
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pwrite(b, off);
-        if (e != default!) {
+        if (e != nil) {
             err = f.wrapErr(writeˢ, e);
             break;
         }
@@ -303,11 +306,11 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
 
 // WriteTo implements io.WriterTo.
 public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
-    int64 n = default!;
+    int64 n = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
@@ -337,12 +340,13 @@ partial struct fileWithoutWriteTo {
     /*embed*/ public ж<File> File;
 }
 
-internal static (int64, error) genericWriteTo(ж<File> Ꮡf, Δio.Writer w) {
-    return Δio.Copy(w, new fileWithoutWriteTo(File: Ꮡf));
+internal static (int64, error) genericWriteTo(ж<File> f, Δio.Writer w) {
+    return Δio.Copy(w, new fileWithoutWriteTo(File: f));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string seekˢ = "seek"u8;
+internal static ref readonly @string seekˢ => ref seekˢᵇ;
+private static readonly @string seekˢᵇ = "seek"u8;
 
 // Seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
@@ -353,18 +357,18 @@ public static (int64 ret, error err) Seek(this ж<File> Ꮡf, int64 offset, nint
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
-        var errΔ1 = Ꮡf.checkValid(seekˢ); if (errΔ1 != default!) {
+        var errΔ1 = Ꮡf.checkValid(seekˢ); if (errΔ1 != nil) {
             return (0, errΔ1);
         }
     }
     var (r, e) = Ꮡf.seek(offset, whence);
-    if (e == default! && Ꮡf.of(File.Ꮡdirinfo).Load() != nil && r != 0) {
+    if (e == nil && Ꮡf.of(File.Ꮡdirinfo).Load() != nil && r != 0) {
         e = syscall.EISDIR;
     }
-    if (e != default!) {
+    if (e != nil) {
         return (0, f.wrapErr(seekˢ, e));
     }
-    return (r, default!);
+    return (r, default);
 }
 
 // WriteString is like Write, but writes the contents of string s rather than
@@ -381,27 +385,27 @@ public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
     var e = ignoringEINTR(() => syscall.Mkdir(longName, syscallMode(perm)));
 
-    if (e != default!) {
-        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: name, Err: e)));
+    if (e != nil) {
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir", Path: name, Err: e)));
     }
 
     // mkdir(2) itself won't handle the sticky bit on *BSD and Solaris
     if (!supportsCreateWithStickyBit && (FileMode)(perm & ModeSticky) != 0) {
         e = setStickyBit(name);
 
-        if (e != default!) {
+        if (e != nil) {
             Remove(name);
             return e;
         }
     }
 
-    return default!;
+    return default;
 }
 
 // setStickyBit adds ModeSticky to the permission bits of path, non atomic.
 internal static error setStickyBit(@string name) {
     var (fi, err) = Stat(name);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     return Chmod(name, (fs.FileMode)(fi.Mode() | ModeSticky));
@@ -411,15 +415,15 @@ internal static error setStickyBit(@string name) {
 // If there is an error, it will be of type [*PathError].
 public static error Chdir(@string dir) {
     {
-        var e = syscall.Chdir(dir); if (e != default!) {
+        var e = syscall.Chdir(dir); if (e != nil) {
             testlog.Open(dir); // observe likely non-existent directory
-            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chdir"u8, Path: dir, Err: e)));
+            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chdir", Path: dir, Err: e)));
         }
     }
     if (runtime.GOOS == "windows"u8) {
         var abs = filepathlite.IsAbs(dir);
         ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Lock();
-        if (abs){
+        if (abs) {
             getwdCache.dir = dir;
         } else {
             getwdCache.dir = ""u8;
@@ -427,14 +431,14 @@ public static error Chdir(@string dir) {
         ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
     }
     {
-        var log = testlog.Logger(); if (log != default!) {
+        var log = testlog.Logger(); if (log != nil) {
             var (wd, err) = Getwd();
-            if (err == default!) {
+            if (err == nil) {
                 log.Chdir(wd);
             }
         }
     }
-    return default!;
+    return default;
 }
 
 // Open opens the named file for reading. If successful, methods on
@@ -465,15 +469,15 @@ public static (ж<File>, error) Create(@string name) {
 public static (ж<File>, error) OpenFile(@string name, nint flag, FileMode perm) {
     testlog.Open(name);
     var (f, err) = openFileNolog(name, flag, perm);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    f.Value.appendMode = (flag & O_APPEND) != 0;
+    f.appendMode = (flag & O_APPEND) != 0;
 
-    return (f, default!);
+    return (f, default);
 }
 
-internal static error errPathEscapes = errors.New("path escapes from parent"u8);
+internal static error errPathEscapes = errors.New("path escapes from parent");
 
 // openDir opens a file which is assumed to be a directory. As such, it skips
 // the syscalls that make the file descriptor non-blocking as these take time
@@ -519,13 +523,12 @@ internal static bool checkWrapErr = false;
 // It passes io.EOF through unchanged, otherwise converts
 // poll.ErrFileClosing to ErrClosed and wraps the error in a PathError.
 internal static error wrapErr(this ref File f, @string op, error err) {
-    if (err == default! || AreEqual(err, Δio.EOF)) {
+    if (err == nil || AreEqual(err, Δio.EOF)) {
         return err;
     }
-    if (AreEqual(err, poll.ErrFileClosing)){
+    if (AreEqual(err, poll.ErrFileClosing)) {
         err = ErrClosed;
-    } else 
-    if (checkWrapErr && errors.Is(err, poll.ErrFileClosing)) {
+    } else if (checkWrapErr && errors.Is(err, poll.ErrFileClosing)) {
         throw panic("unexpected error wrapping poll.ErrFileClosing: " + err.Error());
     }
     return new fs.PathErrorжerror(Ꮡ(new PathError(Op: op, Path: f.name, Err: err)));
@@ -545,15 +548,24 @@ public static @string TempDir() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string localAppDataˢ = "LocalAppData"u8;
-internal static readonly @string localAppDataIsNotDefinedˢ = "%LocalAppData% is not defined"u8;
-internal static readonly @string homeˢ = "HOME"u8;
-internal static readonly @string homeIsNotDefinedˢ = "$HOME is not defined"u8;
-internal static readonly @string homeˢ2 = "home"u8;
-internal static readonly @string homeIsNotDefinedˢ2 = "$home is not defined"u8;
-internal static readonly @string xdgCacheHomeˢ = "XDG_CACHE_HOME"u8;
-internal static readonly @string neitherXdgCacheHomeNorˢ = "neither $XDG_CACHE_HOME nor $HOME are defined"u8;
-internal static readonly @string pathInXdgCacheHomeIsˢ = "path in $XDG_CACHE_HOME is relative"u8;
+internal static ref readonly @string localAppDataˢ => ref localAppDataˢᵇ;
+private static readonly @string localAppDataˢᵇ = "LocalAppData"u8;
+internal static ref readonly @string localAppDataIsNotDefinedˢ => ref localAppDataIsNotDefinedˢᵇ;
+private static readonly @string localAppDataIsNotDefinedˢᵇ = "%LocalAppData% is not defined"u8;
+internal static ref readonly @string homeˢ => ref homeˢᵇ;
+private static readonly @string homeˢᵇ = "HOME"u8;
+internal static ref readonly @string homeIsNotDefinedˢ => ref homeIsNotDefinedˢᵇ;
+private static readonly @string homeIsNotDefinedˢᵇ = "$HOME is not defined"u8;
+internal static ref readonly @string homeˢ2 => ref homeˢ2ᵇ;
+private static readonly @string homeˢ2ᵇ = "home"u8;
+internal static ref readonly @string homeIsNotDefinedˢ2 => ref homeIsNotDefinedˢ2ᵇ;
+private static readonly @string homeIsNotDefinedˢ2ᵇ = "$home is not defined"u8;
+internal static ref readonly @string xdgCacheHomeˢ => ref xdgCacheHomeˢᵇ;
+private static readonly @string xdgCacheHomeˢᵇ = "XDG_CACHE_HOME"u8;
+internal static ref readonly @string neitherXdgCacheHomeNorˢ => ref neitherXdgCacheHomeNorˢᵇ;
+private static readonly @string neitherXdgCacheHomeNorˢᵇ = "neither $XDG_CACHE_HOME nor $HOME are defined"u8;
+internal static ref readonly @string pathInXdgCacheHomeIsˢ => ref pathInXdgCacheHomeIsˢᵇ;
+private static readonly @string pathInXdgCacheHomeIsˢᵇ = "path in $XDG_CACHE_HOME is relative"u8;
 
 // UserCacheDir returns the default root directory to use for user-specific
 // cached data. Users should create their own application-specific subdirectory
@@ -569,52 +581,61 @@ internal static readonly @string pathInXdgCacheHomeIsˢ = "path in $XDG_CACHE_HO
 // If the location cannot be determined (for example, $HOME is not defined) or
 // the path in $XDG_CACHE_HOME is relative, then it will return an error.
 public static (@string, error) UserCacheDir() {
-    @string dir = default!;
+    @string dir = default;
 
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "windows"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8: {
         dir = Getenv(localAppDataˢ);
         if (dir == ""u8) {
             return ("", errors.New(localAppDataIsNotDefinedˢ));
         }
+        break;
     }
-    else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
         dir = Getenv(homeˢ);
         if (dir == ""u8) {
             return ("", errors.New(homeIsNotDefinedˢ));
         }
         dir += "/Library/Caches"u8;
+        break;
     }
-    else if (exprᴛ1 == "plan9"u8) {
+    case {} when exprᴛ1 == "plan9"u8: {
         dir = Getenv(homeˢ2);
         if (dir == ""u8) {
             return ("", errors.New(homeIsNotDefinedˢ2));
         }
         dir += "/lib/cache"u8;
+        break;
     }
-    else { /* default: */ // Unix
+    default: { // Unix
         dir = Getenv(xdgCacheHomeˢ);
-        if (dir == ""u8){
+        if (dir == ""u8) {
             dir = Getenv(homeˢ);
             if (dir == ""u8) {
                 return ("", errors.New(neitherXdgCacheHomeNorˢ));
             }
             dir += "/.cache"u8;
-        } else 
-        if (!filepathlite.IsAbs(dir)) {
+        } else if (!filepathlite.IsAbs(dir)) {
             return ("", errors.New(pathInXdgCacheHomeIsˢ));
         }
-    }
+        break;
+    }}
 
-    return (dir, default!);
+    return (dir, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string appDataˢ = "AppData"u8;
-internal static readonly @string appDataIsNotDefinedˢ = "%AppData% is not defined"u8;
-internal static readonly @string xdgConfigHomeˢ = "XDG_CONFIG_HOME"u8;
-internal static readonly @string neitherXdgConfigHomeNorˢ = "neither $XDG_CONFIG_HOME nor $HOME are defined"u8;
-internal static readonly @string pathInXdgConfigHomeIsˢ = "path in $XDG_CONFIG_HOME is relative"u8;
+internal static ref readonly @string appDataˢ => ref appDataˢᵇ;
+private static readonly @string appDataˢᵇ = "AppData"u8;
+internal static ref readonly @string appDataIsNotDefinedˢ => ref appDataIsNotDefinedˢᵇ;
+private static readonly @string appDataIsNotDefinedˢᵇ = "%AppData% is not defined"u8;
+internal static ref readonly @string xdgConfigHomeˢ => ref xdgConfigHomeˢᵇ;
+private static readonly @string xdgConfigHomeˢᵇ = "XDG_CONFIG_HOME"u8;
+internal static ref readonly @string neitherXdgConfigHomeNorˢ => ref neitherXdgConfigHomeNorˢᵇ;
+private static readonly @string neitherXdgConfigHomeNorˢᵇ = "neither $XDG_CONFIG_HOME nor $HOME are defined"u8;
+internal static ref readonly @string pathInXdgConfigHomeIsˢ => ref pathInXdgConfigHomeIsˢᵇ;
+private static readonly @string pathInXdgConfigHomeIsˢᵇ = "path in $XDG_CONFIG_HOME is relative"u8;
 
 // UserConfigDir returns the default root directory to use for user-specific
 // configuration data. Users should create their own application-specific
@@ -630,52 +651,61 @@ internal static readonly @string pathInXdgConfigHomeIsˢ = "path in $XDG_CONFIG_
 // If the location cannot be determined (for example, $HOME is not defined) or
 // the path in $XDG_CONFIG_HOME is relative, then it will return an error.
 public static (@string, error) UserConfigDir() {
-    @string dir = default!;
+    @string dir = default;
 
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "windows"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8: {
         dir = Getenv(appDataˢ);
         if (dir == ""u8) {
             return ("", errors.New(appDataIsNotDefinedˢ));
         }
+        break;
     }
-    else if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    case {} when exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
         dir = Getenv(homeˢ);
         if (dir == ""u8) {
             return ("", errors.New(homeIsNotDefinedˢ));
         }
         dir += "/Library/Application Support"u8;
+        break;
     }
-    else if (exprᴛ1 == "plan9"u8) {
+    case {} when exprᴛ1 == "plan9"u8: {
         dir = Getenv(homeˢ2);
         if (dir == ""u8) {
             return ("", errors.New(homeIsNotDefinedˢ2));
         }
         dir += "/lib"u8;
+        break;
     }
-    else { /* default: */ // Unix
+    default: { // Unix
         dir = Getenv(xdgConfigHomeˢ);
-        if (dir == ""u8){
+        if (dir == ""u8) {
             dir = Getenv(homeˢ);
             if (dir == ""u8) {
                 return ("", errors.New(neitherXdgConfigHomeNorˢ));
             }
             dir += "/.config"u8;
-        } else 
-        if (!filepathlite.IsAbs(dir)) {
+        } else if (!filepathlite.IsAbs(dir)) {
             return ("", errors.New(pathInXdgConfigHomeIsˢ));
         }
-    }
+        break;
+    }}
 
-    return (dir, default!);
+    return (dir, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string homeˢ3 = "$HOME"u8;
-internal static readonly @string userprofileˢ = "USERPROFILE"u8;
-internal static readonly @string userprofileˢ2 = "%userprofile%"u8;
-internal static readonly @string homeˢ4 = "$home"u8;
-internal static readonly @string sdcardˢ = "/sdcard"u8;
+internal static ref readonly @string homeˢ3 => ref homeˢ3ᵇ;
+private static readonly @string homeˢ3ᵇ = "$HOME"u8;
+internal static ref readonly @string userprofileˢ => ref userprofileˢᵇ;
+private static readonly @string userprofileˢᵇ = "USERPROFILE"u8;
+internal static ref readonly @string userprofileˢ2 => ref userprofileˢ2ᵇ;
+private static readonly @string userprofileˢ2ᵇ = "%userprofile%"u8;
+internal static ref readonly @string homeˢ4 => ref homeˢ4ᵇ;
+private static readonly @string homeˢ4ᵇ = "$home"u8;
+internal static ref readonly @string sdcardˢ => ref sdcardˢᵇ;
+private static readonly @string sdcardˢᵇ = "/sdcard"u8;
 
 // UserHomeDir returns the current user's home directory.
 //
@@ -689,25 +719,29 @@ public static (@string, error) UserHomeDir() {
     @string env = homeˢ;
     @string enverr = homeˢ3;
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "windows"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "windows"u8: {
         (env, enverr) = (userprofileˢ, userprofileˢ2);
+        break;
     }
-    else if (exprᴛ1 == "plan9"u8) {
+    case {} when exprᴛ1 == "plan9"u8: {
         (env, enverr) = (homeˢ2, homeˢ4);
-    }
+        break;
+    }}
     {
         @string v = Getenv(env); if (v != ""u8) {
-            return (v, default!);
+            return (v, default);
         }
     }
     // On some operating systems the home directory is not always defined.
     var exprᴛ2 = runtime.GOOS;
-    if (exprᴛ2 == "android"u8) {
-        return (sdcardˢ, default!);
+    switch (ᐧ) {
+    case {} when exprᴛ2 == "android"u8: {
+        return (sdcardˢ, default);
     }
-    if (exprᴛ2 == "ios"u8) {
-        return ("/", default!);
-    }
+    case {} when exprᴛ2 == "ios"u8: {
+        return ("/", default);
+    }}
     return ("", errors.New(enverr + " is not defined"u8));
 }
 
@@ -786,14 +820,15 @@ public static error SetWriteDeadline(this ж<File> Ꮡf, time.Time t) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string syscallConnˢ = "SyscallConn"u8;
+internal static ref readonly @string syscallConnˢ => ref syscallConnˢᵇ;
+private static readonly @string syscallConnˢᵇ = "SyscallConn"u8;
 
 // SyscallConn returns a raw file.
 // This implements the syscall.Conn interface.
 public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
     {
-        var err = Ꮡf.checkValid(syscallConnˢ); if (err != default!) {
-            return (default!, err);
+        var err = Ꮡf.checkValid(syscallConnˢ); if (err != nil) {
+            return (default, err);
         }
     }
     var (ᴛ1, ᴛ2) = newRawConn(Ꮡf);
@@ -854,19 +889,19 @@ partial struct dirFS /*@string*/;
 
 internal static (fs.File, error) Open(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open", Path: name, Err: err))));
     }
     (var f, err) = Open(fullname);
-    if (err != default!) {
+    if (err != nil) {
         // DirFS takes a string appropriate for GOOS,
         // while the name argument here is always slash separated.
         // dir.join will have mixed the two; undo that for
         // error reporting.
-        err._<ж<PathError>>().Value.Path = name;
-        return (default!, err);
+        err._<ж<PathError>>().Path = name;
+        return (default, err);
     }
-    return (new FileжFile(f), default!);
+    return (new FileжFile(f), default);
 }
 
 // The ReadFile method calls the [ReadFile] function for the file
@@ -875,80 +910,81 @@ internal static (fs.File, error) Open(this dirFS dir, @string name) {
 // Through this method, dirFS implements [io/fs.ReadFileFS].
 internal static (slice<byte>, error) ReadFile(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readfile", Path: name, Err: err))));
     }
     (var b, err) = ReadFile(fullname);
-    if (err != default!) {
+    if (err != nil) {
         {
             var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
                 // See comment in dirFS.Open.
-                e.Value.Path = name;
+                e.Path = name;
             }
         }
-        return (default!, err);
+        return (default, err);
     }
-    return (b, default!);
+    return (b, default);
 }
 
 // ReadDir reads the named directory, returning all its directory entries sorted
 // by filename. Through this method, dirFS implements [io/fs.ReadDirFS].
 internal static (slice<DirEntry>, error) ReadDir(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdir", Path: name, Err: err))));
     }
     (var entries, err) = ReadDir(fullname);
-    if (err != default!) {
+    if (err != nil) {
         {
             var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
                 // See comment in dirFS.Open.
-                e.Value.Path = name;
+                e.Path = name;
             }
         }
-        return (default!, err);
+        return (default, err);
     }
-    return (entries, default!);
+    return (entries, default);
 }
 
 internal static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: err))));
     }
     (var f, err) = Stat(fullname);
-    if (err != default!) {
+    if (err != nil) {
         // See comment in dirFS.Open.
-        err._<ж<PathError>>().Value.Path = name;
-        return (default!, err);
+        err._<ж<PathError>>().Path = name;
+        return (default, err);
     }
-    return (f, default!);
+    return (f, default);
 }
 
 internal static (fs.FileInfo, error) Lstat(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
-    if (err != default!) {
-        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: err))));
     }
     (var f, err) = Lstat(fullname);
-    if (err != default!) {
+    if (err != nil) {
         // See comment in dirFS.Open.
-        err._<ж<PathError>>().Value.Path = name;
-        return (default!, err);
+        err._<ж<PathError>>().Path = name;
+        return (default, err);
     }
-    return (f, default!);
+    return (f, default);
 }
 
 internal static (@string, error) ReadLink(this dirFS dir, @string name) {
     var (fullname, err) = dir.join(name);
-    if (err != default!) {
-        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
+    if (err != nil) {
+        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink", Path: name, Err: err))));
     }
     return Readlink(fullname);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string osDirFSWithEmptyRootˢ = "os: DirFS with empty root"u8;
+internal static ref readonly @string osDirFSWithEmptyRootˢ => ref osDirFSWithEmptyRootˢᵇ;
+private static readonly @string osDirFSWithEmptyRootˢᵇ = "os: DirFS with empty root"u8;
 
 // join returns the path for name in dir.
 internal static (@string, error) join(this dirFS dir, @string name) {
@@ -956,13 +992,13 @@ internal static (@string, error) join(this dirFS dir, @string name) {
         return ("", errors.New(osDirFSWithEmptyRootˢ));
     }
     (name, var err) = filepathlite.Localize(name);
-    if (err != default!) {
+    if (err != nil) {
         return ("", ErrInvalid);
     }
     if (IsPathSeparator(dir[len(dir) - 1])) {
-        return (((@string)dir) + name, default!);
+        return (((@string)dir) + name, default);
     }
-    return (((@string)dir) + ((@string)(rune)PathSeparator) + name, default!);
+    return (((@string)dir) + ((@string)(rune)PathSeparator) + name, default);
 }
 
 // ReadFile reads the named file and returns the contents.
@@ -973,21 +1009,21 @@ public static (slice<byte>, error) ReadFile(@string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Open(name);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
         return readFileContents(statOrZero(f), f.Read);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
-internal static int64 statOrZero(ж<File> Ꮡf) {
+internal static int64 statOrZero(ж<File> f) {
     {
-        var (fi, err) = Ꮡf.Stat(); if (err == default!) {
+        var (fi, err) = f.Stat(); if (err == nil) {
             return fi.Size();
         }
     }
@@ -1005,7 +1041,7 @@ internal static (slice<byte>, error) readFileContents(int64 statSize, Func<slice
     // Figure out how big to make the initial slice. For files with known size
     // that fit in memory, use that size + 1. Otherwise, use a small buffer and
     // we'll grow.
-    nint size = default!;
+    nint size = default;
     if ((int64)(nint)statSize == statSize) {
         size = (nint)statSize;
     }
@@ -1020,12 +1056,12 @@ internal static (slice<byte>, error) readFileContents(int64 statSize, Func<slice
     }
 
     var data = new slice<byte>(0, size);
-    while (ᐧ) {
+    for (;;) {
         var (n, err) = read(data.slice(len(data), cap(data)));
         data = data.slice(0, len(data) + n);
-        if (err != default!) {
+        if (err != nil) {
             if (AreEqual(err, Δio.EOF)) {
-                err = default!;
+                err = default;
             }
             return (data, err);
         }
@@ -1047,12 +1083,12 @@ internal static (slice<byte>, error) readFileContents(int64 statSize, Func<slice
 // can leave the file in a partially written state.
 public static error WriteFile(@string name, slice<byte> data, FileMode perm) {
     var (f, err) = OpenFile(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (_, err) = f.Write(data);
     {
-        var err1 = f.Close(); if (err1 != default! && err == default!) {
+        var err1 = f.Close(); if (err1 != nil && err == nil) {
             err = err1;
         }
     }

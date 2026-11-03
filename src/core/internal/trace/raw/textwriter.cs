@@ -19,10 +19,10 @@ partial struct TextWriter {
 // NewTextWriter creates a new write for the trace text format.
 public static (ж<TextWriter>, error) NewTextWriter(io.Writer w, version.Version v) {
     var (_, err) = fmt.Fprintf(w, "Trace Go1.%d\n"u8, v);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new TextWriter(w: w, v: v)), default!);
+    return (Ꮡ(new TextWriter(w: w, v: v)), default);
 }
 
 // WriteEvent writes a single event to the stream.

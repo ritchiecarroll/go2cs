@@ -18,9 +18,9 @@ partial class strings_package {
 public static iter.Seq<@string> Lines(@string s) {
     return (Func<@string, bool> yield) => {
         while (len(s) > 0) {
-            @string line = default!;
+            @string line = default;
             {
-                nint i = IndexByte(s, (rune)'\n'); if (i >= 0){
+                nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
                     (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
                 } else {
                     (line, s) = (s, "");
@@ -47,7 +47,7 @@ internal static iter.Seq<@string> splitSeq(@string s, @string sep, nint sepSave)
             }
             return;
         }
-        while (ᐧ) {
+        for (;;) {
             nint i = Index(s, sep);
             if (i < 0) {
                 break;
@@ -93,15 +93,14 @@ public static iter.Seq<@string> FieldsSeq(@string s) {
                 (r, size) = utf8.DecodeRuneInString(s.slice(i));
                 isSpace = Δunicode.IsSpace(r);
             }
-            if (isSpace){
+            if (isSpace) {
                 if (start >= 0) {
                     if (!yield(s.slice(start, i))) {
                         return;
                     }
                     start = -1;
                 }
-            } else 
-            if (start < 0) {
+            } else if (start < 0) {
                 start = i;
             }
             i += size;
@@ -121,15 +120,14 @@ public static iter.Seq<@string> FieldsFuncSeq(@string s, Func<rune, bool> f) {
         nint start = -1;
         for (nint i = 0; i < len(s); ) {
             var (r, size) = utf8.DecodeRuneInString(s.slice(i));
-            if (f(r)){
+            if (f(r)) {
                 if (start >= 0) {
                     if (!yield(s.slice(start, i))) {
                         return;
                     }
                     start = -1;
                 }
-            } else 
-            if (start < 0) {
+            } else if (start < 0) {
                 start = i;
             }
             i += size;

@@ -35,16 +35,16 @@ internal static nint cmp(this goVersion x, goVersion y) {
 }
 
 // Go versions that introduced language changes
-internal static goVersion go1_9 = asGoVersion("go1.9"u8);
-internal static goVersion go1_13 = asGoVersion("go1.13"u8);
-internal static goVersion go1_14 = asGoVersion("go1.14"u8);
-internal static goVersion go1_17 = asGoVersion("go1.17"u8);
-internal static goVersion go1_18 = asGoVersion("go1.18"u8);
-internal static goVersion go1_20 = asGoVersion("go1.20"u8);
-internal static goVersion go1_21 = asGoVersion("go1.21"u8);
-internal static goVersion go1_22 = asGoVersion("go1.22"u8);
-internal static goVersion go1_23 = asGoVersion("go1.23"u8);
-internal static goVersion go1_26 = asGoVersion("go1.26"u8);
+internal static goVersion go1_9 = asGoVersion("go1.9");
+internal static goVersion go1_13 = asGoVersion("go1.13");
+internal static goVersion go1_14 = asGoVersion("go1.14");
+internal static goVersion go1_17 = asGoVersion("go1.17");
+internal static goVersion go1_18 = asGoVersion("go1.18");
+internal static goVersion go1_20 = asGoVersion("go1.20");
+internal static goVersion go1_21 = asGoVersion("go1.21");
+internal static goVersion go1_22 = asGoVersion("go1.22");
+internal static goVersion go1_23 = asGoVersion("go1.23");
+internal static goVersion go1_26 = asGoVersion("go1.26");
 
 // current (deployed) Go version
 internal static goVersion go_current = asGoVersion(fmt.Sprintf("go1.%d"u8, (nint)(goversion.Version)));

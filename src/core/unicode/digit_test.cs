@@ -9,7 +9,7 @@ using Δunicode = unicode_package;
 
 partial class unicode_test_package {
 
-internal static slice<rune> testDigit = new rune[]{
+internal static slice<rune> testDigit = slice<rune>([
     0x0030,
     0x0039,
     0x0661,
@@ -66,9 +66,9 @@ internal static slice<rune> testDigit = new rune[]{
     0xFF19,
     0x104A1,
     0x1D7CE
-}.slice();
+]);
 
-internal static slice<rune> testLetter = new rune[]{
+internal static slice<rune> testLetter = slice<rune>([
     0x0041,
     0x0061,
     0x00AA,
@@ -101,26 +101,26 @@ internal static slice<rune> testLetter = new rune[]{
     0x20000,
     0x2F800,
     0x2FA1D
-}.slice();
+]);
 
-public static void TestDigit(ж<testing.T> Ꮡt) {
+public static void TestDigit(ж<testing.T> t) {
     foreach (var (_, r) in testDigit) {
         if (!IsDigit(r)) {
-            Ꮡt.Errorf("IsDigit(U+%04X) = false, want true"u8, r);
+            t.Errorf("IsDigit(U+%04X) = false, want true", r);
         }
     }
     foreach (var (_, r) in testLetter) {
         if (IsDigit(r)) {
-            Ꮡt.Errorf("IsDigit(U+%04X) = true, want false"u8, r);
+            t.Errorf("IsDigit(U+%04X) = true, want false", r);
         }
     }
 }
 
 // Test that the special case in IsDigit agrees with the table
-public static void TestDigitOptimization(ж<testing.T> Ꮡt) {
+public static void TestDigitOptimization(ж<testing.T> t) {
     for (var i = (rune)0; i <= MaxLatin1; i++) {
         if (Is(Digit, i) != IsDigit(i)) {
-            Ꮡt.Errorf("IsDigit(U+%04X) disagrees with Is(Digit)"u8, i);
+            t.Errorf("IsDigit(U+%04X) disagrees with Is(Digit)", i);
         }
     }
 }

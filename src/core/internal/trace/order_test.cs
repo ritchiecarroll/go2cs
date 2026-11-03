@@ -9,13 +9,18 @@ using static go.@internal.trace_package;
 partial class trace_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string oneElementˢ = "one element"u8;
-internal static readonly @string twoElementsˢ = "two elements"u8;
-internal static readonly @string sixElementsˢ = "six elements"u8;
-internal static readonly @string oneElementAgainˢ = "one element again"u8;
-internal static readonly @string twoElementsAgainˢ = "two elements again"u8;
+internal static ref readonly @string oneElementˢ => ref oneElementˢᵇ;
+private static readonly @string oneElementˢᵇ = "one element"u8;
+internal static ref readonly @string twoElementsˢ => ref twoElementsˢᵇ;
+private static readonly @string twoElementsˢᵇ = "two elements"u8;
+internal static ref readonly @string sixElementsˢ => ref sixElementsˢᵇ;
+private static readonly @string sixElementsˢᵇ = "six elements"u8;
+internal static ref readonly @string oneElementAgainˢ => ref oneElementAgainˢᵇ;
+private static readonly @string oneElementAgainˢᵇ = "one element again"u8;
+internal static ref readonly @string twoElementsAgainˢ => ref twoElementsAgainˢᵇ;
+private static readonly @string twoElementsAgainˢᵇ = "two elements again"u8;
 
-public static void TestQueue(ж<testing.T> Ꮡt) {
+public static void TestQueue(ж<testing.T> t) {
     ref var q = ref heap(new global::go.@internal.trace_package.queue<nint>(), out var Ꮡq);
     void check(@string name, slice<nint> exp) {
         foreach (var (_, v) in exp) {
@@ -23,30 +28,29 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
         }
         foreach (var (i, want) in exp) {
             {
-                var (got, ok) = Ꮡq.Value.pop(); if (!ok){
-                    Ꮡt.Fatalf("check %q: expected to be able to pop after %d pops"u8, name, i + 1);
-                } else 
-                if (got != want) {
-                    Ꮡt.Fatalf("check %q: expected value %d after on pop %d, got %d"u8, name, want, i + 1, got);
+                var (got, ok) = Ꮡq.Value.pop(); if (!ok) {
+                    t.Fatalf("check %q: expected to be able to pop after %d pops", name, i + 1);
+                } else if (got != want) {
+                    t.Fatalf("check %q: expected value %d after on pop %d, got %d", name, want, i + 1, got);
                 }
             }
         }
         {
             var (_, ok) = Ꮡq.Value.pop(); if (ok) {
-                Ꮡt.Fatalf("check %q: did not expect to be able to pop more values"u8, name);
+                t.Fatalf("check %q: did not expect to be able to pop more values", name);
             }
         }
         {
             var (_, ok) = Ꮡq.Value.pop(); if (ok) {
-                Ꮡt.Fatalf("check %q: did not expect to be able to pop more values a second time"u8, name);
+                t.Fatalf("check %q: did not expect to be able to pop more values a second time", name);
             }
         }
     }
-    check(oneElementˢ, new nint[]{4}.slice());
-    check(twoElementsˢ, new nint[]{64, 12}.slice());
-    check(sixElementsˢ, new nint[]{55, 16423, 2352, 644, 12874, 9372}.slice());
-    check(oneElementAgainˢ, new nint[]{7}.slice());
-    check(twoElementsAgainˢ, new nint[]{77, 6336}.slice());
+    check(oneElementˢ, slice<nint>([4]));
+    check(twoElementsˢ, slice<nint>([64, 12]));
+    check(sixElementsˢ, slice<nint>([55, 16423, 2352, 644, 12874, 9372]));
+    check(oneElementAgainˢ, slice<nint>([7]));
+    check(twoElementsAgainˢ, slice<nint>([77, 6336]));
 }
 
 } // end trace_internal_test_package

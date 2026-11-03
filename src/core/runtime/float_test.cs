@@ -8,20 +8,18 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-public static void TestIssue48807(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (_, i) in new uint64[]{
+public static void TestIssue48807(ж<testing.T> t) {
+    foreach (var (_, i) in slice<uint64>([
         0x8234508000000001UL, // from issue48807
         (uint64)(72057598332895232L + 1)
-    }.slice()) {
+    ])) {
         var got = (float32)i;
         var dontwant = (float32)(float64)i;
         if (got == dontwant) {
             // The test cases above should be uint64s such that
             // this equality doesn't hold. These examples trigger
             // the case where using an intermediate float64 doesn't work.
-            Ꮡt.Errorf("direct float32 conversion doesn't work: arg=%x got=%x dontwant=%x"u8, i, got, dontwant);
+            t.Errorf("direct float32 conversion doesn't work: arg=%x got=%x dontwant=%x", i, got, dontwant);
         }
     }
 }

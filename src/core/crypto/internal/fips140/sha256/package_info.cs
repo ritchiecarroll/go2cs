@@ -46,7 +46,11 @@ using static go.crypto.@internal.fips140.sha256_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Digest))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,10 +60,10 @@ using static go.crypto.@internal.fips140.sha256_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/cast.go", "cast.cs", "AAwagoK43IKCgIKk", "14-31:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AD+CAYKmgoKUlIKCgoKCgoKCgoKC5oKClIKUgoKCgoKCgoKCgoKCpoKmgqaCkqaCgoKCgoKCgoKUgoKCgoKCgpSCqJKCgqiSgoKCpoKClKaApMKCgoKCgoKClJSCgoKCgpSClIKUpoKUkoKClKaihJKCgoKUuIKCgpSCppSCgoKCgoKCgqY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256block.go", "sha256block.cs", "AA0aAEKGAYKCgoKUgoKClIKCgoKmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/sha256/sha256block_noasm.go", "sha256block_noasm.cs", "AAgSgg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha256/cast.go", "cast.cs", "AAwagoK43IKCgIKk", "14-31:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256.go", "sha256.cs", "AEGCAYKmgoKUlIKCgoKCgoKCgoKCAAgGgoKUgpSCgoKCgoKCgoKCgoKmgqaCpoKCpoKCgoKCgoKCgpSCgoKCgoKClIKokoKCqJKCgoKmgoKUpoCkwoKCgoKCgoKUlIKCgoKClIKUgpSmgpSCgoKUpqKEkoKCgpS4goKClIKmlIKCgoKCgoKCpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256block.go", "sha256block.cs", "AA0aAEKGAYKCgoKUgoKClIKCgoKmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha256/sha256block_noasm.go", "sha256block_noasm.cs", "AAgSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

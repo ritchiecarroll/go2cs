@@ -51,10 +51,10 @@ internal static void enqueue(this ref queue q, any e) {
 
 internal static (any, bool) dequeue(this ref queue q) {
     if (q.len == 0) {
-        return (default!, false);
+        return (default, false);
     }
     var e = q.elems[q.head];
-    q.elems[q.head] = default!;
+    q.elems[q.head] = default;
     q.head = rem((q.head + 1), q.cap());
     q.len--;
     return (e, true);
@@ -62,13 +62,13 @@ internal static (any, bool) dequeue(this ref queue q) {
 
 internal static (any, bool) peek(this ref queue q) {
     if (q.len == 0) {
-        return (default!, false);
+        return (default, false);
     }
     return (q.elems[q.head], true);
 }
 
 internal static void clear(this ref queue q) {
-    q = new queue(nil);
+    q = new queue();
 }
 
 } // end fuzz_package

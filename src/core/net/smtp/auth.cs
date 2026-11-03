@@ -32,8 +32,8 @@ partial interface ΔAuth {
 
 // ServerInfo records information about an SMTP server.
 partial struct ServerInfo {
-    public @string Name;  // SMTP server name
-    public bool TLS;     // using TLS, with valid certificate for Name
+    public @string Name;        // SMTP server name
+    public bool TLS;            // using TLS, with valid certificate for Name
     public slice<@string> Auth; // advertised authentication mechanisms
 }
 
@@ -59,9 +59,12 @@ internal static bool isLocalhost(@string name) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unencryptedConnectionˢ = "unencrypted connection"u8;
-internal static readonly @string wrongHostNameˢ = "wrong host name"u8;
-internal static readonly @string plainˢ = "PLAIN"u8;
+internal static ref readonly @string unencryptedConnectionˢ => ref unencryptedConnectionˢᵇ;
+private static readonly @string unencryptedConnectionˢᵇ = "unencrypted connection"u8;
+internal static ref readonly @string wrongHostNameˢ => ref wrongHostNameˢᵇ;
+private static readonly @string wrongHostNameˢᵇ = "wrong host name"u8;
+internal static ref readonly @string plainˢ => ref plainˢᵇ;
+private static readonly @string plainˢᵇ = "PLAIN"u8;
 
 internal static (@string, slice<byte>, error) Start(this ref plainAuth a, ж<ServerInfo> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
@@ -72,24 +75,25 @@ internal static (@string, slice<byte>, error) Start(this ref plainAuth a, ж<Ser
     // That might just be the attacker saying
     // "it's ok, you can trust me with your password."
     if (!server.TLS && !isLocalhost(server.Name)) {
-        return ("", default!, errors.New(unencryptedConnectionˢ));
+        return ("", default, errors.New(unencryptedConnectionˢ));
     }
     if (server.Name != a.host) {
-        return ("", default!, errors.New(wrongHostNameˢ));
+        return ("", default, errors.New(wrongHostNameˢ));
     }
     var resp = slice<byte>(a.identity + "\x00" + a.username + "\x00" + a.password);
-    return (plainˢ, resp, default!);
+    return (plainˢ, resp, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedServerˢ = "unexpected server challenge"u8;
+internal static ref readonly @string unexpectedServerˢ => ref unexpectedServerˢᵇ;
+private static readonly @string unexpectedServerˢᵇ = "unexpected server challenge"u8;
 
 internal static (slice<byte>, error) Next(this ref plainAuth a, slice<byte> fromServer, bool more) {
     if (more) {
         // We've already sent everything.
-        return (default!, errors.New(unexpectedServerˢ));
+        return (default, errors.New(unexpectedServerˢ));
     }
-    return (default!, default!);
+    return (default, default);
 }
 
 partial struct cramMD5Auth {
@@ -105,10 +109,11 @@ public static ΔAuth CRAMMD5Auth(@string username, @string secret) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cramMd5ˢ = "CRAM-MD5"u8;
+internal static ref readonly @string cramMd5ˢ => ref cramMd5ˢᵇ;
+private static readonly @string cramMd5ˢᵇ = "CRAM-MD5"u8;
 
-internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> Ꮡserver) {
-    return (cramMd5ˢ, default!, default!);
+internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> server) {
+    return (cramMd5ˢ, default, default);
 }
 
 internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fromServer, bool more) {
@@ -116,9 +121,9 @@ internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fr
         var d = hmac.New(md5.New, slice<byte>(a.secret));
         d.Write(fromServer);
         var s = new slice<byte>(0, d.Size());
-        return (fmt.Appendf(default!, "%s %x"u8, a.username, d.Sum(s)), default!);
+        return (fmt.Appendf(default, "%s %x"u8, a.username, d.Sum(s)), default);
     }
-    return (default!, default!);
+    return (default, default);
 }
 
 } // end smtp_package

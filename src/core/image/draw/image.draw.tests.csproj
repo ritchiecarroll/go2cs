@@ -131,7 +131,6 @@
     <ProjectReference Include="$(go2csPath)core/image/color/image.color.csproj" />
     <ProjectReference Include="$(go2csPath)core/image/image.csproj" />
     <ProjectReference Include="$(go2csPath)core/image/png/image.png.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/rand/math.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />

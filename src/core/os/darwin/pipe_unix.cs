@@ -9,7 +9,8 @@ using syscall = syscall_package;
 partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pipeˢ = "pipe"u8;
+internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
+private static readonly @string pipeˢᵇ = "pipe"u8;
 
 // Pipe returns a connected pair of Files; reads from r return bytes written to w.
 // It returns the files and an error, if any.
@@ -19,15 +20,15 @@ public static (ж<File> r, ж<File> w, error err) Pipe() {
     // See ../syscall/exec.go for description of lock.
     syscall.ᏑForkLock.RLock();
     var e = syscall.Pipe(p[0..]);
-    if (e != default!) {
+    if (e != nil) {
         syscall.ᏑForkLock.RUnlock();
-        return (default!, default!, NewSyscallError(pipeˢ, e));
+        return (default, default, NewSyscallError(pipeˢ, e));
     }
     syscall.CloseOnExec(p[0]);
     syscall.CloseOnExec(p[1]);
     syscall.ᏑForkLock.RUnlock();
 
-    return (newFile(p[0], "|0"u8, kindPipe, false), newFile(p[1], "|1"u8, kindPipe, false), default!);
+    return (newFile(p[0], "|0", kindPipe, false), newFile(p[1], "|1", kindPipe, false), default);
 }
 
 } // end os_package

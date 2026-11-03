@@ -17,50 +17,49 @@ internal partial struct TestConsume_tests /*dyn*/ {
     internal slice<slice<byte>> want;
 }
 
-public static void TestConsume(ж<testing.T> Ꮡt) {
-    var tests = new TestConsume_tests[]{
+public static void TestConsume(ж<testing.T> t) {
+    var tests = slice<TestConsume_tests>([
         new(
-            @in: new slice<byte>[]{slice<byte>("foo"u8), slice<byte>("bar"u8)}.slice(),
+            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
             consume: 0,
-            want: new slice<byte>[]{slice<byte>("foo"u8), slice<byte>("bar"u8)}.slice()
+            want: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)])
         ),
         new(
-            @in: new slice<byte>[]{slice<byte>("foo"u8), slice<byte>("bar"u8)}.slice(),
+            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
             consume: 2,
-            want: new slice<byte>[]{slice<byte>("o"u8), slice<byte>("bar"u8)}.slice()
+            want: slice<slice<byte>>([slice<byte>("o"u8), slice<byte>("bar"u8)])
         ),
         new(
-            @in: new slice<byte>[]{slice<byte>("foo"u8), slice<byte>("bar"u8)}.slice(),
+            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
             consume: 3,
-            want: new slice<byte>[]{slice<byte>("bar"u8)}.slice()
+            want: slice<slice<byte>>([slice<byte>("bar"u8)])
         ),
         new(
-            @in: new slice<byte>[]{slice<byte>("foo"u8), slice<byte>("bar"u8)}.slice(),
+            @in: slice<slice<byte>>([slice<byte>("foo"u8), slice<byte>("bar"u8)]),
             consume: 4,
-            want: new slice<byte>[]{slice<byte>("ar"u8)}.slice()
+            want: slice<slice<byte>>([slice<byte>("ar"u8)])
         ),
         new(
-            @in: new slice<byte>[]{default!, default!, default!, slice<byte>("bar"u8)}.slice(),
+            @in: slice<slice<byte>>([default, default, default, slice<byte>("bar"u8)]),
             consume: 1,
-            want: new slice<byte>[]{slice<byte>("ar"u8)}.slice()
+            want: slice<slice<byte>>([slice<byte>("ar"u8)])
         ),
         new(
-            @in: new slice<byte>[]{default!, default!, default!, slice<byte>("foo"u8)}.slice(),
+            @in: slice<slice<byte>>([default, default, default, slice<byte>("foo"u8)]),
             consume: 0,
-            want: new slice<byte>[]{slice<byte>("foo"u8)}.slice()
+            want: slice<slice<byte>>([slice<byte>("foo"u8)])
         ),
         new(
-            @in: new slice<byte>[]{default!, default!, default!}.slice(),
+            @in: slice<slice<byte>>([default, default, default]),
             consume: 0,
-            want: new slice<byte>[]{}.slice()
+            want: slice<slice<byte>>([])
         )
-    }.slice();
+    ]);
     foreach (var (i, tt) in tests) {
-        ref var @in = ref heap<slice<slice<byte>>>(out var Ꮡin);
-        @in = tt.@in;
+        ref var @in = ref heap<slice<slice<byte>>>(tt.@in, out var Ꮡin);
         poll_internal_test_package.Consume(Ꮡin, tt.consume);
         if (!reflect.DeepEqual(@in, tt.want)) {
-            Ꮡt.Errorf("%d. after consume(%d) = %+v, want %+v"u8, i, tt.consume, @in, tt.want);
+            t.Errorf("%d. after consume(%d) = %+v, want %+v", i, tt.consume, @in, tt.want);
         }
     }
 }

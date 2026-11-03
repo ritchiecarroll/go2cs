@@ -48,7 +48,7 @@ using static go.net.http.internal_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,7 +58,7 @@ using static go.net.http.internal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/internal/chunked.go", "chunked.cs", "ABMqAAEQ4oKClAAOGISSgoKUgoKCgpSCggAQIoKCgpSCuIKCgoKU1qKCgriUgIKCgqaClKSUgqaUgpSClIKClIKCgoKmgpKCpu7igqaCkoKUAAcQgIKSgqSUgpSmgoKUpoKmAAES8rgAAhwACwIACBj2gqaAgqSAgqSCgpSAgqSAgqSmgoIAEBiygpSilLS0tJSClIKU")]
+[assembly: GoPositionMap("net/http/internal/chunked.go", "chunked.cs", "ABMqAAEQ4oKClAAPGISSgoKUgoKCgpSCggAQIoKCgpSCuIKCgoKU5qKCgriUgIKCgqaClKSUgqaUgpSClIKClIKCgoKmgoKCpgAIDuKCpoKCgpQABxCAgoKCpJSClKaCgpSmgqYAARLyuAACHAALAgAIGPaCpoCCpICCpIKClICCpICCpKaCggATGLKClKKUtLS0lIKUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

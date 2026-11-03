@@ -778,6 +778,41 @@ function Test-GoPinContract {
     return $ok
 }
 
+# ⚠ THE WORD OF A ROW THAT PRODUCED A COMPARISON, as one function so -SelfTest can drive it. It is
+# reached only after the thrown, CONVERT, BUILD, TIMEOUT and stale arms, so $Rc is an int here.
+# An unreadable artifact is NOVERDICT (the comment at the call says why), a net divergence is DIVERGED.
+function Get-ComparisonWord($Diverged, $Rc) {
+    if     ($Diverged -isnot [int]) { return 'NOVERDICT' }
+    elseif ($Diverged -gt 0)        { return 'DIVERGED' }
+    # ⚠ PASS?rc: NO DIVERGENCE, BUT THE ROW EXITED NON-ZERO, AND IT DOES NOT BANK. The arms before this
+    # function catch a non-zero exit only when its output names a conversion failure or a CS error, so a
+    # row whose -tests run failed some other way and still wrote a clean, fresh comparison read PASS and
+    # banked (R's linux finding, the same chain on windows). Every consumer banks on PASS and DIVERGED by
+    # name only (run-h10-dispatch.ps1 `banked`, annotate_linux.py), so the `?rc` spelling is what keeps
+    # the row out of the bank while its readings stay in the TSV.
+    elseif ($Rc -ne 0)              { return 'PASS?rc' }
+    else                            { return 'PASS' }
+}
+
+function Test-ComparisonWordContract {
+    Write-Host '  comparison word contract (a non-zero exit never reads PASS):'
+    $ok = $true
+    $cases = @(
+        @('UNREAD', 0, 'NOVERDICT', 'an unreadable artifact'),
+        @(3,        0, 'DIVERGED',  'a net divergence'),
+        @(3,        1, 'DIVERGED',  'a net divergence with a non-zero exit'),
+        @(0,        0, 'PASS',      'no divergence, exit 0'),
+        @(0,        1, 'PASS?rc',   'no divergence, but the row exited non-zero')
+    )
+    foreach ($c in $cases) {
+        $got  = Get-ComparisonWord $c[0] $c[1]
+        $pass = ($got -ceq $c[2])
+        if (-not $pass) { $ok = $false }
+        Write-Host ("    diverged {0,-7} rc {1} -> {2,-9} {3,-6} {4}" -f $c[0], $c[1], $got, $(if ($pass) { 'ok' } else { 'FAILED' }), $c[3])
+    }
+    return $ok
+}
+
 # ⚠⚠ THE ARM, AND ITS FIRST CASE OF EACH HALF IS THE ONE THAT WAS RED. Measured against the base's
 # behaviour (the blob this commit replaces, 158ce37f6c): the floor-replaces-ask rule returns 30m for
 # the first deadline case and 60m for the second, and the empty-extra call returns `-test-config
@@ -921,11 +956,13 @@ if ($SelfTest) {
     # The deadline and the pin, captured before the canary for the same order reason.
     $okR = Test-RowInvocationContract
     $okP = Test-GoPinContract
+    $okW = Test-ComparisonWordContract
     Assert-OrdinalJsonReader
-    if ($ok -and $okX -and $okR -and $okP) { Write-Host '  SELF-TEST PASSED -- the summary-line contract, the verdict cross-check contract, the row invocation contract, the go pin contract AND the ordinal-reader canary'; exit 0 }
+    if ($ok -and $okX -and $okR -and $okP -and $okW) { Write-Host '  SELF-TEST PASSED -- the summary-line contract, the verdict cross-check contract, the row invocation contract, the go pin contract, the comparison word contract AND the ordinal-reader canary'; exit 0 }
     if (-not $ok)  { Deny 'the summary-line contract FAILED its self-test -- the parse and its controls disagree' }
     if (-not $okX) { Deny 'the verdict cross-check contract FAILED its self-test -- see the case list above' }
     if (-not $okP) { Deny 'the go pin contract FAILED its self-test -- a release matched other than whole; see the case list above' }
+    if (-not $okW) { Deny 'the comparison word contract FAILED its self-test -- a row that exited non-zero read PASS; see the case list above' }
     Deny 'the row invocation contract FAILED its self-test -- a deadline that is not the LONGER of the floor and the ask, or a row run without its roster execution pin; see the case list above'
 }
 
@@ -1118,6 +1155,38 @@ if (-not $plat) {
     if ($goos -and $goarch) { $plat = "$goos/$goarch" }
 }
 if (-not $plat) { Deny "cannot determine the platform -- `go env GOOS/GOARCH` produced nothing, and a row's reading is not comparable without it" }
+
+# ---------------------------------------------------------------- the per-row deletion census (ruled)
+# ⚠ A TRACKED FILE A ROW DELETED IS NAMED ON THAT ROW. That glob class has removed tracked sources
+# three times, and the next commit is the wrong place to find it. After every row, `git status
+# --porcelain` is read and each ` D` path not seen before is charged to the row that just ran; the
+# run refuses after its TSV is written, so the readings survive. A deletion already present before
+# row 1 is printed, not charged: no row of this run made it.
+#
+# ⚠ READ ONLY, so it runs under -DryRun too. The CLEAN is the dispatcher's, once, at shard end: a
+# clean here would run after every dispatched row (the dispatcher calls this script once per row),
+# make every row cold, and change sweep_s against the rows already banked.
+#
+# ⚠ NOT GitTry. GitTry trims its output, and the trim eats the leading space of the first line, so
+# a ` D` deletion listed first would read `D ` and pass. The lines are read raw.
+function Get-TrackedDeletions {
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $lines = @(& git -C $Tree status --porcelain)
+        $code = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $old }
+    if ($code -ne 0) { return $null }
+    return ,@($lines | Where-Object { $_ -like ' D *' } | ForEach-Object { $_.Substring(3) })
+}
+$deletionsSeen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::Ordinal)
+$deletionFindings = New-Object System.Collections.Generic.List[string]
+$deletedBefore = Get-TrackedDeletions
+if ($null -eq $deletedBefore) { Deny "git status failed in '$Tree' before row 1 -- the per-row deletion census has no baseline" }
+foreach ($p in $deletedBefore) { [void] $deletionsSeen.Add($p) }
+if ($deletedBefore.Count -gt 0) {
+    Write-Host "  !! $($deletedBefore.Count) tracked file(s) already deleted before row 1, charged to no row: $($deletedBefore -join ', ')" -ForegroundColor Yellow
+}
 
 $i = 0
 foreach ($row in $rows) {
@@ -1417,9 +1486,7 @@ foreach ($row in $rows) {
         # is the only record of WHICH verdict a cost was measured under, and a reader filtering on it
         # would have seen a pass over an artifact that was never read. NOVERDICT is the honest class:
         # the row ran, and this instrument cannot say what it did.
-        if     ($diverged -isnot [int]) { $word = 'NOVERDICT' }
-        elseif ($diverged -gt 0)        { $word = 'DIVERGED' }
-        else                            { $word = 'PASS' }
+        $word = Get-ComparisonWord $diverged $rc
     }
 
     # ---- verdicts: cross-checked, and NEVER 0 on a failure to read.
@@ -1556,9 +1623,9 @@ foreach ($row in $rows) {
     # worse fact than never having produced one. UNREAD is set INSIDE the derivation and reaches
     # NOVERDICT through the `-isnot [int]` guard, so it is excluded by name here.
     #
-    # PASS and DIVERGED are the only two words the derivation produces; every other word means it
-    # never ran, whatever the initialiser holds.
-    if ($word -ne 'PASS' -and $word -ne 'DIVERGED' -and $diverged -ne 'UNREAD') { $diverged = 'n/a' }
+    # PASS, PASS?rc and DIVERGED are the only words the derivation produces; every other word means it
+    # never ran, whatever the initialiser holds. PASS?rc keeps its 0: the comparison was read.
+    if ($word -ne 'PASS' -and $word -ne 'PASS?rc' -and $word -ne 'DIVERGED' -and $diverged -ne 'UNREAD') { $diverged = 'n/a' }
 
     # ⚠ AND THE SAME RULE FOR rc. A row that threw has no exit code; emitting an empty cell would read
     # as a zero, which is the SUCCESS value -- the worst possible default for the one row that failed
@@ -1618,7 +1685,30 @@ foreach ($row in $rows) {
     $postS = [int] ((Get-Date) - $postStarted).TotalSeconds
     $emit.Add("$row`t$word`t$verdicts`t$sweepS`t$first`t$rcCell`t$diverged`t$plat`t$treeSha`t$wallS`t$postS")
 
+    # The deletion census for THIS row (see "the per-row deletion census" above the loop).
+    $deletedNow = Get-TrackedDeletions
+    if ($null -eq $deletedNow) {
+        $deletionFindings.Add("$($row): git status failed after the row, so no deletion census")
+        Write-Host '     !! git status failed after this row -- no deletion census' -ForegroundColor Red
+    } else {
+        $newlyDeleted = @($deletedNow | Where-Object { $deletionsSeen.Add($_) })
+        if ($newlyDeleted.Count -gt 0) {
+            $deletionFindings.Add("$($row) deleted $($newlyDeleted.Count) tracked file(s): $($newlyDeleted -join ', ')")
+            Write-Host "     !! tracked file(s) DELETED during this row: $($newlyDeleted -join ', ')" -ForegroundColor Red
+        }
+    }
+
     if ($DryRun) { break }
+}
+
+# ---------------------------------------------------------------- the deletion census's verdict
+# Refused below, after the TSV is written, so the readings survive the refusal.
+$deletionDenial = $null
+if ($deletionFindings.Count -gt 0) {
+    $deletionDenial = "tracked file(s) DELETED in '$Tree': " + ($deletionFindings -join '; ')
+} else {
+    Write-Host ''
+    Write-Host '  deletion census   : no row deleted a tracked file'
 }
 
 # ---------------------------------------------------------------- write, LF only
@@ -1634,6 +1724,7 @@ if ($DryRun) {
     Write-Host "    $($emit[$emit.Count - 1])"
     Write-Host ''
     Write-Host '  nothing written.'
+    if ($deletionDenial) { Deny $deletionDenial }
     exit 0
 }
 
@@ -1648,4 +1739,5 @@ if ($hasNet -eq 0) {
     Write-Host '  !! NOTE: no `net` row in this emission. shardmap.py refuses a basis in which the' -ForegroundColor Yellow
     Write-Host '     hand-stopped drop never fired, so the COMBINED basis must carry it from some worker.' -ForegroundColor Yellow
 }
+if ($deletionDenial) { Deny $deletionDenial }
 exit 0

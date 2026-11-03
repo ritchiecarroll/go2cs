@@ -25,13 +25,13 @@ partial class scan_test_package {
 
 // type scanFunc is a methodless func type — rendered inline as its base delegate
 
-internal static void testScanSpanPacked(ж<testing.T> Ꮡt, Func<@unsafe.Pointer, ж<uintptr>, ж<gc.ObjMask>, uintptr, ж<gc.PtrMask>, int32> scanF) {
+internal static void testScanSpanPacked(ж<testing.T> t, Func<@unsafe.Pointer, ж<uintptr>, ж<gc.ObjMask>, uintptr, ж<gc.PtrMask>, int32> scanF) {
     GoFrame ᒐ = default;
     try {
         var scanR = scan.ScanSpanPackedReference;
 
         // Construct a fake memory
-        var (mem, free) = makeMem(new testing_TжTB(Ꮡt), 1);
+        var (mem, free) = makeMem(new testing_TжTB(t), 1);
         var freeʗ1 = free;
         defer(freeʗ1, ref ᒐ);
         foreach (var i in range(mem)) {
@@ -53,15 +53,14 @@ internal static void testScanSpanPacked(ж<testing.T> Ꮡt, Func<@unsafe.Pointer
         var bufRʗ1 = bufR;
         var memʗ1 = mem;
         var scanRʗ1 = scanR;
-        testObjs(Ꮡt, (ж<testing.T> tΔ1, nint sizeClass, ж<gc.ObjMask> objs) => {
+        testObjs(t, (ж<testing.T> tΔ1, nint sizeClass, ж<gc.ObjMask> objs) => {
             var nF = scanF(@unsafe.Pointer.FromBox(Ꮡ(memʗ1, 0)), Ꮡ(bufFʗ1, 0), objs, (uintptr)sizeClass, Ꮡptrs);
             var nR = scanRʗ1(@unsafe.Pointer.FromBox(Ꮡ(memʗ1, 0)), Ꮡ(bufRʗ1, 0), objs, (uintptr)sizeClass, Ꮡptrs);
 
-            if (nR != nF){
-                tΔ1.Errorf("want %d count, got %d"u8, nR, nF);
-            } else 
-            if (!slices.Equal<slice<uintptr>, uintptr>(bufFʗ1.slice(0, nF), bufRʗ1.slice(0, nR))) {
-                tΔ1.Errorf("want scanned pointers %d, got %d"u8, bufRʗ1.slice(0, nR), bufFʗ1.slice(0, nF));
+            if (nR != nF) {
+                tΔ1.Errorf("want %d count, got %d", nR, nF);
+            } else if (!slices.Equal<slice<uintptr>, uintptr>(bufFʗ1.slice(0, nF), bufRʗ1.slice(0, nR))) {
+                tΔ1.Errorf("want scanned pointers %d, got %d", bufRʗ1.slice(0, nR), bufFʗ1.slice(0, nF));
             }
         });
     }
@@ -69,7 +68,7 @@ internal static void testScanSpanPacked(ж<testing.T> Ꮡt, Func<@unsafe.Pointer
     finally { ᒐ.Run(); }
 }
 
-internal static void testObjs(ж<testing.T> Ꮡt, Action<ж<testing.T>, nint, ж<gc.ObjMask>> f) {
+internal static void testObjs(ж<testing.T> t, Action<ж<testing.T>, nint, ж<gc.ObjMask>> f) {
     foreach (var sizeClass in range(gc.NumSizeClasses)) {
         if (sizeClass == 0) {
             continue;
@@ -78,7 +77,7 @@ internal static void testObjs(ж<testing.T> Ꮡt, Action<ж<testing.T>, nint, ж
         if (size > gc.MinSizeForMallocHeader) {
             break; // Pointer/scalar metadata is not packed for larger sizes.
         }
-        Ꮡt.Run(fmt.Sprintf("size=%d"u8, size), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("size=%d"u8, size), (ж<testing.T> tΔ1) => {
             // Scan a few objects near i to test boundary conditions.
             UntypedInt objMask = 0x101;
             var nObj = (uintptr)gc.SizeClassToNPages[sizeClass] * (uintptr)gc.PageSize / size;
@@ -101,21 +100,22 @@ internal static Func<slice<uintptr>> dataCacheSizes = sync.OnceValue(slice<uintp
     return cs;
 });
 
-public static void BenchmarkScanSpanPacked(ж<testing.B> Ꮡb) {
-    benchmarkCacheSizes(Ꮡb, benchmarkScanSpanPackedAllSizeClasses);
+public static void BenchmarkScanSpanPacked(ж<testing.B> b) {
+    benchmarkCacheSizes(b, benchmarkScanSpanPackedAllSizeClasses);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cacheTinyPages1ˢ = "cache=tiny/pages=1"u8;
+private static ref readonly @string cacheTinyPages1ˢ => ref cacheTinyPages1ˢᵇ;
+private static readonly @string cacheTinyPages1ˢᵇ = "cache=tiny/pages=1"u8;
 
-internal static void benchmarkCacheSizes(ж<testing.B> Ꮡb, Action<ж<testing.B>, nint> fn) {
+internal static void benchmarkCacheSizes(ж<testing.B> b, Action<ж<testing.B>, nint> fn) {
     var cacheSizes = dataCacheSizes();
-    Ꮡb.Run(cacheTinyPages1ˢ, (ж<testing.B> bΔ1) => {
+    b.Run(cacheTinyPages1ˢ, (ж<testing.B> bΔ1) => {
         fn(bΔ1, 1);
     });
     foreach (var (i, cacheBytes) in cacheSizes) {
         nint pages = (nint)(cacheBytes * 3 / 4) / (nint)gc.PageSize;
-        Ꮡb.Run(fmt.Sprintf("cache=L%d/pages=%d"u8, i + 1, pages), (ж<testing.B> bΔ2) => {
+        b.Run(fmt.Sprintf("cache=L%d/pages=%d"u8, i + 1, pages), (ж<testing.B> bΔ2) => {
             fn(bΔ2, pages);
         });
     }
@@ -123,12 +123,12 @@ internal static void benchmarkCacheSizes(ж<testing.B> Ꮡb, Action<ж<testing.B
         return;
     }
     nint ramPages = (nint)(cacheSizes[len(cacheSizes) - 1] * 3 / 2) / (nint)gc.PageSize;
-    Ꮡb.Run(fmt.Sprintf("cache=ram/pages=%d"u8, ramPages), (ж<testing.B> bΔ3) => {
+    b.Run(fmt.Sprintf("cache=ram/pages=%d"u8, ramPages), (ж<testing.B> bΔ3) => {
         fn(bΔ3, ramPages);
     });
 }
 
-internal static void benchmarkScanSpanPackedAllSizeClasses(ж<testing.B> Ꮡb, nint nPages) {
+internal static void benchmarkScanSpanPackedAllSizeClasses(ж<testing.B> b, nint nPages) {
     foreach (var sc in range(gc.NumSizeClasses)) {
         if (sc == 0) {
             continue;
@@ -137,24 +137,27 @@ internal static void benchmarkScanSpanPackedAllSizeClasses(ж<testing.B> Ꮡb, n
         if (size >= gc.MinSizeForMallocHeader) {
             break;
         }
-        Ꮡb.Run(fmt.Sprintf("sizeclass=%d"u8, sc), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("sizeclass=%d"u8, sc), (ж<testing.B> bΔ1) => {
             benchmarkScanSpanPacked(bΔ1, nPages, sc);
         });
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string implReferenceˢ = "impl=Reference"u8;
-private static readonly @string implGoˢ = "impl=Go"u8;
-private static readonly @string implPlatformˢ = "impl=Platform"u8;
+private static ref readonly @string implReferenceˢ => ref implReferenceˢᵇ;
+private static readonly @string implReferenceˢᵇ = "impl=Reference"u8;
+private static ref readonly @string implGoˢ => ref implGoˢᵇ;
+private static readonly @string implGoˢᵇ = "impl=Go"u8;
+private static ref readonly @string implPlatformˢ => ref implPlatformˢᵇ;
+private static readonly @string implPlatformˢᵇ = "impl=Platform"u8;
 
-internal static void benchmarkScanSpanPacked(ж<testing.B> Ꮡb, nint nPages, nint sizeClass) {
+internal static void benchmarkScanSpanPacked(ж<testing.B> b, nint nPages, nint sizeClass) {
     GoFrame ᒐ = default;
     try {
         var rnd = rand.New(new rand.PCGжSource(rand.NewPCG(42, 42)));
 
         // Construct a fake memory
-        var (mem, free) = makeMem(new testing_BжTB(Ꮡb), nPages);
+        var (mem, free) = makeMem(new testing_BжTB(b), nPages);
         var freeʗ1 = free;
         defer(freeʗ1, ref ᒐ);
         foreach (var i in range(mem)) {
@@ -212,7 +215,7 @@ internal static void benchmarkScanSpanPacked(ж<testing.B> Ꮡb, nint nPages, ni
             var memʗ1 = mem;
             var pageOrderʗ1 = pageOrder;
             var ptrsʗ1 = ptrs;
-            Ꮡb.Run(fmt.Sprintf("pct=%d"u8, (nint)(100D * frac)), (ж<testing.B> bΔ1) => {
+            b.Run(fmt.Sprintf("pct=%d"u8, (nint)(100D * frac)), (ж<testing.B> bΔ1) => {
                 var bufʗ2 = bufʗ1;
                 var memʗ2 = memʗ1;
                 var pageOrderʗ2 = pageOrderʗ1;
@@ -280,11 +283,11 @@ internal static nint countGreyClusters(nint sizeClass, ж<gc.ObjMask> ᏑobjMark
     return clusters;
 }
 
-public static void BenchmarkScanMaxBandwidth(ж<testing.B> Ꮡb) {
+public static void BenchmarkScanMaxBandwidth(ж<testing.B> b) {
     // Measure the theoretical "maximum" bandwidth of scanning by reproducing
     // the memory access pattern of a full page scan, but using memcpy as the
     // kernel instead of scanning.
-    benchmarkCacheSizes(Ꮡb, (ж<testing.B> bΔ1, nint heapPages) => {
+    benchmarkCacheSizes(b, (ж<testing.B> bΔ1, nint heapPages) => {
         GoFrame ᒐ = default;
         try {
             var (mem, free) = makeMem(new testing_BжTB(bΔ1), heapPages);

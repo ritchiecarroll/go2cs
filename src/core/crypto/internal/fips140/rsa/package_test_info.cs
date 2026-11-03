@@ -9,15 +9,6 @@ global using static global::go.crypto.@internal.fips140.rsa_package;
 // <ImportedTypeAliases>
 global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
 global using bigꓸInt = go.math.big_package.ΔInt;
-global using bigꓸRat = go.math.big_package.ΔRat;
-global using cryptoꓸDecrypterOpts = object;
-global using cryptoꓸPrivateKey = object;
-global using cryptoꓸPublicKey = object;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
 // </ImportedTypeAliases>
 
 using go;
@@ -39,7 +30,7 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -49,9 +40,9 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABgkgoKCpoKSgoKCgoKCpoKUlKSktqSUgoKUgqaCgoKCpoKCgoKmgoKCyKaAggAKCIKCgqaygoKCgoKCpoKUpKSklIKClIKmgoKClJSCgILIgoKClJSClICC2KaAgsiCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAnUIIABhSClIKCgg==", "", "", "64=Size/1/1/8")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA4alAANHLgADyCCgpSCgpSCpoCC")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABkkgoKCpoKSgoKCgoKCpoKkpLS01rSUgoKUgqaCgoKCpoKCgoKmgoKC2LaAggALCIKCgqaygoKCgoKCpoKktLS0lIKClIKmgoKClJSCgILIgoKClJSClICC6LaAgsiCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAnUIIABhSClIKCgg==", "", "", "64=Size/1/1/8")]
+[assembly: GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA4alAANHLgADyCCgpSCgpSCpoCC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

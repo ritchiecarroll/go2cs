@@ -22,7 +22,8 @@
 
 `validationProofPages.go` writes each disclosure's `reason` verbatim into the **Pinned reason** column of
 `docs/validation/<release>/<package>.md`. For a two-half entry it writes each half's `reason`
-(`halves[].reason`). Those pages are the public proof behind every roster row: bufio's single reason
+(`halves[].reason`), and for an entry with optional records each one's `reason` on a row of its own
+(`optionalRecords[].reason`). Those pages are the public proof behind every roster row: bufio's single reason
 appears on 17 release pages. A visitor reading one needs two things: **what the converted program does
 differently** (the mechanism) and **how that was established** (the evidence). Who decided the class, on
 which day and in which channel tells a visitor nothing, so it does not belong in the sentence.
@@ -36,8 +37,9 @@ GitHub, so they are public, but they are not on the page.
 |:--|:--|
 | `reason` | **Yes**, every one. |
 | `halves[].reason` | **Yes**, every one. |
+| `optionalRecords[].reason` | **Yes**, every one. |
 | `plan`, `reading`, `notes`, `want`, `records`, `floor`, `proof` | Only where the same JSON line also carries a rendered field. Otherwise leave them as they are. |
-| `signature`, `class`, `name`, `platforms` | **Never.** The signature is matched against failure text, so changing it changes behaviour. |
+| `signature`, `class`, `name`, `platforms`, `optionalRecords[].contains` | **Never.** The signature is matched against failure text, so changing it changes behaviour. |
 
 **Remove from rendered text:**
 
@@ -288,7 +290,8 @@ pat = re.compile(r'\b(?:COORD|BOARD)\b|(?i:\b(?:rul(?:ing|ings|ed)|lanes?|bank(?
                  r'|\b(?:C1|C2|P1|P2|i7|i9|R-LAPTOP|G-LAPTOP)\b|\b(?:SUB-)?Q\d+\b|docs/phase4|\bclaude/[\w./-]+')
 for p in sorted(pathlib.Path('src/core').rglob('go2cs_test_disclosures.json')):
     for d in json.loads(p.read_text(encoding='utf-8-sig'))['disclosures']:
-        texts = [d.get('reason')] + [h.get('reason') for h in d.get('halves') or [] if isinstance(h, dict)]
+        texts = [d.get('reason')] + [h.get('reason') for h in (d.get('halves') or []) + (d.get('optionalRecords') or [])
+                                     if isinstance(h, dict)]
         for t in texts:
             if isinstance(t, str) and pat.search(t):
                 print(f"{p.parent.as_posix()} {d['name']}: {sorted(set(pat.findall(t)))}")

@@ -31,14 +31,14 @@ using static go.go.types_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/types/context_test.go", "context_test.cs", "ABEcgoIAChzSlIKUlIKUlIKCpqaCgILagILagILIgII=")]
-[assembly: global::go.GoPositionMap("go/types/errors_test.go", "errors_test.cs", "ABAYgoKCgIK2goKAgraCgoCCAAgIggAGEoKC")]
-[assembly: global::go.GoPositionMap("go/types/sizeof_test.go", "sizeof_test.cs", "ABEakpQAH0iCgoKClII=")]
-[assembly: global::go.GoPositionMap("go/types/termlist_test.go", "termlist_test.cs", "AA8gkoKCgoKUpoKCuIIAChaAgtqCAAgSgoKCyoIACRSCgoIACAqCAA0ggoKCAAgKggAPJoKCgoIACAqCABEqgoKCggAJCoIAChyCgoKCAAkKggAMIIKCgoIACQqCABY0goKCggAJCoIAESqCgoKC")]
-[assembly: global::go.GoPositionMap("go/types/token_test.go", "token_test.cs", "ABAeAA0chJKCuJSCgoKCgg==")]
-[assembly: global::go.GoPositionMap("go/types/typeset_test.go", "typeset_test.cs", "ABMcgoLoggAbOIKCgoKokoKCuIKClIKCuIKC")]
-[assembly: global::go.GoPositionMap("go/types/typeterm_test.go", "typeterm_test.cs", "AA8egoK2AAkUgoKAgtqCgoKUpoKCgpSmggAPIIKCgoKAgraCgILaggAgQoKCgoKCgILaggARJIKCgoKAgraCgILaggAJFIKCgoKAgtqCABImgoKCgoCC2oIACxiCgoKCgIK2goCC")]
-[assembly: global::go.GoPositionMap("go/types/util_test.go", "util_test.cs", "AA8igKSgooA=")]
+[assembly: GoPositionMap("go/types/context_test.go", "context_test.cs", "ABEcgoIAChzSlIKUlIKUlIKCpqaCgILagILagILIgII=")]
+[assembly: GoPositionMap("go/types/errors_test.go", "errors_test.cs", "ABIYgoKCgIK2goKAgraCgoCCAAgIggAGEoKC")]
+[assembly: GoPositionMap("go/types/sizeof_test.go", "sizeof_test.cs", "ABEakpQAH0iCgoKClII=")]
+[assembly: GoPositionMap("go/types/termlist_test.go", "termlist_test.cs", "AA8gkoKCgoKUpoKCuIIAChaAgtqCAAgSgoKCyoIACRSCgoIACAqCAA0ggoKCAAgKggAPJoKCgoIACAqCABEqgoKCggAJCoIAChyCgoKCAAkKggAMIIKCgoIACQqCABY0goKCggAJCoIAESqCgoKC")]
+[assembly: GoPositionMap("go/types/token_test.go", "token_test.cs", "ABAeAA0chJKCuJSCgoKCgg==")]
+[assembly: GoPositionMap("go/types/typeset_test.go", "typeset_test.cs", "ABMcgoL4ggAbOIKCgoKokoKCuIKClIKCuIKC")]
+[assembly: GoPositionMap("go/types/typeterm_test.go", "typeterm_test.cs", "AA8egoK2AAkUgoKAgtqCgoKUpoKCgpSmggAPIIKCgoKAgraCgILaggAgQoKCgoKCgILaggARJIKCgoKAgraCgILaggAJFIKCgoKAgtqCABImgoKCgoCC2oIACxiCgoKCgIK2goCC")]
+[assembly: GoPositionMap("go/types/util_test.go", "util_test.cs", "AA8igKSgooA=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;

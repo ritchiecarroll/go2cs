@@ -7,7 +7,7 @@ namespace go;
 partial class os_package {
 
 internal static (@string, error) rootCleanPath(@string s, slice<@string> prefix, slice<@string> suffix) {
-    return (s, default!);
+    return (s, default);
 }
 
 } // end os_package

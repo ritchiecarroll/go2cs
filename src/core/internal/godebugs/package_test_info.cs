@@ -7,13 +7,6 @@
 global using static global::go.@internal.godebugs_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -33,7 +26,7 @@ using static global::go.@internal.godebugs_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -43,7 +36,7 @@ using static global::go.@internal.godebugs_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/godebugs/godebugs_test.go", "godebugs_test.cs", "ABkmgpSCgoKUlJSUgoKClJSClIKUgpSElILKAAgEyoKCpoKCgpSCgpSCgoKUgoKUgrimgoKC", "", "", "56=Contains/2/2/1")]
+[assembly: GoPositionMap("internal/godebugs/godebugs_test.go", "godebugs_test.cs", "ABomgpSCgoKUlJSUgoKClJSClIKUgpSElILKAA0EyoKCpoKCgpSCgpSCgoKUgoKUgrimgoKC", "", "", "57=Contains/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

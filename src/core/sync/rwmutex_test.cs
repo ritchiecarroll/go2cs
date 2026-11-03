@@ -19,11 +19,11 @@ partial class sync_test_package {
 
 // There is a modified copy of this file in runtime/rwmutex_test.go.
 // If you make any changes here, see if you should make them there.
-internal static void parallelReader(ж<Δsync.RWMutex> Ꮡm, channel<bool> clocked, channel<bool> cunlock, channel<bool> cdone) {
-    Ꮡm.RLock();
+internal static void parallelReader(ж<Δsync.RWMutex> m, channel<bool> clocked, channel<bool> cunlock, channel<bool> cdone) {
+    m.RLock();
     clocked.ᐸꟷ(true);
     ᐸꟷ(cunlock);
-    Ꮡm.RUnlock();
+    m.RUnlock();
     cdone.ᐸꟷ(true);
 }
 
@@ -34,7 +34,7 @@ internal static partial void doTestParallelReaders(nint numReaders, nint gomaxpr
     var cunlock = new channel<bool>(0);
     var cdone = new channel<bool>(0);
     for (nint i = 0; i < numReaders; i++) {
-        goǃ(parallelReader, Ꮡm, clocked, cunlock, cdone);
+        goǃ(parallelReader, Ꮡm, clocked, cunlock, cdone, GoStack.Bounded);
     }
     // Wait for all parallel RLock()s to succeed.
     for (nint i = 0; i < numReaders; i++) {
@@ -49,7 +49,7 @@ internal static partial void doTestParallelReaders(nint numReaders, nint gomaxpr
     }
 }
 
-public static void TestParallelReaders(ж<Δtesting.T> Ꮡt) {
+public static void TestParallelReaders(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(-1), ref ᒐ);
@@ -61,34 +61,34 @@ public static void TestParallelReaders(ж<Δtesting.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void reader(ж<Δsync.RWMutex> Ꮡrwm, nint num_iterations, ж<int32> Ꮡactivity, channel<bool> cdone) {
+internal static void reader(ж<Δsync.RWMutex> rwm, nint num_iterations, ж<int32> activity, channel<bool> cdone) {
     for (nint i = 0; i < num_iterations; i++) {
-        Ꮡrwm.RLock();
-        var n = atomic.AddInt32(Ꮡactivity, 1);
+        rwm.RLock();
+        var n = atomic.AddInt32(activity, 1);
         if (n < 1 || n >= 10000) {
-            Ꮡrwm.RUnlock();
+            rwm.RUnlock();
             throw panic(fmt.Sprintf("wlock(%d)\n"u8, n));
         }
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
         }
-        atomic.AddInt32(Ꮡactivity, -1);
-        Ꮡrwm.RUnlock();
+        atomic.AddInt32(activity, -1);
+        rwm.RUnlock();
     }
     cdone.ᐸꟷ(true);
 }
 
-internal static void writer(ж<Δsync.RWMutex> Ꮡrwm, nint num_iterations, ж<int32> Ꮡactivity, channel<bool> cdone) {
+internal static void writer(ж<Δsync.RWMutex> rwm, nint num_iterations, ж<int32> activity, channel<bool> cdone) {
     for (nint i = 0; i < num_iterations; i++) {
-        Ꮡrwm.Lock();
-        var n = atomic.AddInt32(Ꮡactivity, 10000);
+        rwm.Lock();
+        var n = atomic.AddInt32(activity, 10000);
         if (n != 10000) {
-            Ꮡrwm.Unlock();
+            rwm.Unlock();
             throw panic(fmt.Sprintf("wlock(%d)\n"u8, n));
         }
         for (nint iΔ1 = 0; iΔ1 < 100; iΔ1++) {
         }
-        atomic.AddInt32(Ꮡactivity, -10000);
-        Ꮡrwm.Unlock();
+        atomic.AddInt32(activity, -10000);
+        rwm.Unlock();
     }
     cdone.ᐸꟷ(true);
 }
@@ -100,7 +100,7 @@ public static partial void HammerRWMutex(nint gomaxprocs, nint numReaders, nint 
     ref var rwm = ref heap(new Δsync.RWMutex(), out var Ꮡrwm);
     var cdone = new channel<bool>(0);
     goǃ(writer, Ꮡrwm, num_iterations, Ꮡactivity, cdone);
-    nint i = default!;
+    nint i = default;
     for (i = 0; i < numReaders / 2; i++) {
         goǃ(reader, Ꮡrwm, num_iterations, Ꮡactivity, cdone);
     }
@@ -114,33 +114,33 @@ public static partial void HammerRWMutex(nint gomaxprocs, nint numReaders, nint 
     }
 }
 
-public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
+public static void TestRWMutex(ж<Δtesting.T> t) {
     GoFrame ᒐ = default;
     try {
         ref var m = ref heap(new Δsync.RWMutex(), out var Ꮡm);
 
         Ꮡm.Lock();
         if (Ꮡm.TryLock()) {
-            Ꮡt.Fatalf("TryLock succeeded with mutex locked"u8);
+            t.Fatalf("TryLock succeeded with mutex locked");
         }
         if (Ꮡm.TryRLock()) {
-            Ꮡt.Fatalf("TryRLock succeeded with mutex locked"u8);
+            t.Fatalf("TryRLock succeeded with mutex locked");
         }
         Ꮡm.Unlock();
 
         if (!Ꮡm.TryLock()) {
-            Ꮡt.Fatalf("TryLock failed with mutex unlocked"u8);
+            t.Fatalf("TryLock failed with mutex unlocked");
         }
         Ꮡm.Unlock();
 
         if (!Ꮡm.TryRLock()) {
-            Ꮡt.Fatalf("TryRLock failed with mutex unlocked"u8);
+            t.Fatalf("TryRLock failed with mutex unlocked");
         }
         if (!Ꮡm.TryRLock()) {
-            Ꮡt.Fatalf("TryRLock failed with mutex rlocked"u8);
+            t.Fatalf("TryRLock failed with mutex rlocked");
         }
         if (Ꮡm.TryLock()) {
-            Ꮡt.Fatalf("TryLock succeeded with mutex rlocked"u8);
+            t.Fatalf("TryLock succeeded with mutex rlocked");
         }
         Ꮡm.RUnlock();
         Ꮡm.RUnlock();
@@ -169,9 +169,9 @@ public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
 internal static readonly object rLockerDidnTReadLockItˢ = (@string)"RLocker() didn't read-lock it"u8;
 internal static readonly object rLockerDidnTRespectTheˢ = (@string)"RLocker() didn't respect the write lock"u8;
 
-public static partial void TestRLocker(ж<Δtesting.T> Ꮡt) {
+public static partial void TestRLocker(ж<Δtesting.T> t) {
     ref var wl = ref heap(new Δsync.RWMutex(), out var Ꮡwl);
-    Δsync.Locker rl = default!;
+    Δsync.Locker rl = default;
     var wlocked = new channel<bool>(1);
     var rlocked = new channel<bool>(1);
     rl = Ꮡwl.RLocker();
@@ -194,7 +194,7 @@ public static partial void TestRLocker(ж<Δtesting.T> Ꮡt) {
         var selᴛ9 = wlocked;
         switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
         case 0 when selᴛ9.ꟷᐳ(out _): {
-            Ꮡt.Fatal(rLockerDidnTReadLockItˢ);
+            t.Fatal(rLockerDidnTReadLockItˢ);
             break;
         }
         default: {
@@ -205,7 +205,7 @@ public static partial void TestRLocker(ж<Δtesting.T> Ꮡt) {
         var selᴛ10 = rlocked;
         switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
         case 0 when selᴛ10.ꟷᐳ(out _): {
-            Ꮡt.Fatal(rLockerDidnTRespectTheˢ);
+            t.Fatal(rLockerDidnTRespectTheˢ);
             break;
         }
         default: {
@@ -220,8 +220,8 @@ internal partial struct BenchmarkRWMutexUncontended_PaddedRWMutex /*dyn*/ {
     internal array<uint32> pad = new(32);
 }
 
-public static void BenchmarkRWMutexUncontended(ж<Δtesting.B> Ꮡb) {
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+public static void BenchmarkRWMutexUncontended(ж<Δtesting.B> b) {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         ref var rwm = ref heap(new BenchmarkRWMutexUncontended_PaddedRWMutex(), out var Ꮡrwm);
         while (pb.Next()) {
             Ꮡrwm.of(BenchmarkRWMutexUncontended_PaddedRWMutex.ᏑRWMutex).RLock();
@@ -234,13 +234,13 @@ public static void BenchmarkRWMutexUncontended(ж<Δtesting.B> Ꮡb) {
     });
 }
 
-internal static void benchmarkRWMutex(ж<Δtesting.B> Ꮡb, nint localWork, nint writeRatio) {
+internal static void benchmarkRWMutex(ж<Δtesting.B> b, nint localWork, nint writeRatio) {
     ref var rwm = ref heap(new Δsync.RWMutex(), out var Ꮡrwm);
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         nint foo = 0;
         while (pb.Next()) {
             foo++;
-            if (rem(foo, writeRatio) == 0){
+            if (rem(foo, writeRatio) == 0) {
                 Ꮡrwm.Lock();
                 Ꮡrwm.Unlock();
             } else {
@@ -256,20 +256,20 @@ internal static void benchmarkRWMutex(ж<Δtesting.B> Ꮡb, nint localWork, nint
     });
 }
 
-public static void BenchmarkRWMutexWrite100(ж<Δtesting.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 0, 100);
+public static void BenchmarkRWMutexWrite100(ж<Δtesting.B> b) {
+    benchmarkRWMutex(b, 0, 100);
 }
 
-public static void BenchmarkRWMutexWrite10(ж<Δtesting.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 0, 10);
+public static void BenchmarkRWMutexWrite10(ж<Δtesting.B> b) {
+    benchmarkRWMutex(b, 0, 10);
 }
 
-public static void BenchmarkRWMutexWorkWrite100(ж<Δtesting.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 100, 100);
+public static void BenchmarkRWMutexWorkWrite100(ж<Δtesting.B> b) {
+    benchmarkRWMutex(b, 100, 100);
 }
 
-public static void BenchmarkRWMutexWorkWrite10(ж<Δtesting.B> Ꮡb) {
-    benchmarkRWMutex(Ꮡb, 100, 10);
+public static void BenchmarkRWMutexWorkWrite10(ж<Δtesting.B> b) {
+    benchmarkRWMutex(b, 100, 10);
 }
 
 } // end sync_test_package

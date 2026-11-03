@@ -45,7 +45,7 @@ internal static Func<global::go.crypto.@internal.fips140.edwards25519.field_pack
         var x1 = x;
         var y1 = y;
         ref var v1 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡv1);
-        v1 = new Element(nil);
+        v1 = new Element();
 
         // Calculate a reference f(x, y) without aliasing.
         {
@@ -119,49 +119,49 @@ internal partial struct TestAliasing_target /*dyn*/ {
 //	v.Add(v, v)
 //
 // without any of the inputs getting clobbered by the output being written.
-public static void TestAliasing(ж<testing.T> Ꮡt) {
-    foreach (var (_, tt) in new TestAliasing_target[]{
-        new(name: "Absolute"u8, oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Absolute))),
-        new(name: "Invert"u8, oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Invert))),
-        new(name: "Negate"u8, oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Negate))),
-        new(name: "Set"u8, oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Set))),
-        new(name: "Square"u8, oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Square))),
-        new(name: "Pow22523"u8, oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Pow22523))),
+public static void TestAliasing(ж<testing.T> t) {
+    foreach (var (_, tt) in slice<TestAliasing_target>([
+        new(name: "Absolute", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Absolute))),
+        new(name: "Invert", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Invert))),
+        new(name: "Negate", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Negate))),
+        new(name: "Set", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Set))),
+        new(name: "Square", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Square))),
+        new(name: "Pow22523", oneArgF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Pow22523))),
         new(
-            name: "Mult32"u8,
+            name: "Mult32",
             oneArgF: (ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> v, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> x) => v.Mult32(x, 0xffffffffU)
         ),
-        new(name: "Multiply"u8, twoArgsF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Multiply))),
-        new(name: "Add"u8, twoArgsF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Add))),
-        new(name: "Subtract"u8, twoArgsF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Subtract))),
+        new(name: "Multiply", twoArgsF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Multiply))),
+        new(name: "Add", twoArgsF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Add))),
+        new(name: "Subtract", twoArgsF: ((Func<ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>>)(global::go.crypto.@internal.fips140.edwards25519.field_package.Subtract))),
         new(
-            name: "SqrtRatio"u8,
+            name: "SqrtRatio",
             twoArgsF: (ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> v, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> x, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> y) => {
                 var (r, _) = v.SqrtRatio(x, y);
                 return r;
             }
         ),
         new(
-            name: "Select0"u8,
+            name: "Select0",
             twoArgsF: (ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> v, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> x, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> y) => v.Select(x, y, 0)
         ),
         new(
-            name: "Select1"u8,
+            name: "Select1",
             twoArgsF: (ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> v, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> x, ж<global::go.crypto.@internal.fips140.edwards25519.field_package.Element> y) => v.Select(x, y, 1)
         )
-    }.slice()) {
-        error err = default!;
+    ])) {
+        error err = default;
         switch (ᐧ) {
-        case {} when tt.oneArgF != default!: {
+        case {} when tt.oneArgF != nil: {
             err = quick.Check((checkAliasingOneArg(tt.oneArgF)).OrTypedNilFunc(), quickCheckConfig(256));
             break;
         }
-        case {} when tt.twoArgsF != default!: {
+        case {} when tt.twoArgsF != nil: {
             err = quick.Check((checkAliasingTwoArgs(tt.twoArgsF)).OrTypedNilFunc(), quickCheckConfig(256));
             break;
         }}
-        if (err != default!) {
-            Ꮡt.Errorf("%v: %v"u8, tt.name, err);
+        if (err != nil) {
+            t.Errorf("%v: %v", tt.name, err);
         }
     }
 }

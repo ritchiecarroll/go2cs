@@ -10,11 +10,11 @@ partial class syscall_package {
 // descriptors.
 internal static error forkExecPipe(slice<nint> p) {
     var err = Pipe(p);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (_, err) = fcntl(p[0], F_SETFD, FD_CLOEXEC);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
     (_, err) = fcntl(p[1], F_SETFD, FD_CLOEXEC);

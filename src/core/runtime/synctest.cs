@@ -8,20 +8,19 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
-[GoFieldAccess(typeof(specialBubble))]
 partial class runtime_package {
 
 // A synctestBubble is a set of goroutines started by synctest.Run.
 partial struct synctestBubble {
     internal mutex mu;
     internal timers timers;
-    internal uint64 id; // unique id
-    internal int64 now;  // current fake time
-    internal ж<g> root;  // caller of synctest.Run
+    internal uint64 id;    // unique id
+    internal int64 now;    // current fake time
+    internal ж<g> root;    // caller of synctest.Run
     internal ж<g> waiter;  // caller of synctest.Wait
-    internal ж<g> main;  // goroutine started by synctest.Run
-    internal bool waiting;   // true if a goroutine is calling synctest.Wait
-    internal bool done;   // true if main has exited
+    internal ж<g> main;    // goroutine started by synctest.Run
+    internal bool waiting; // true if a goroutine is calling synctest.Wait
+    internal bool done;    // true if main has exited
     // The bubble is active (not blocked) so long as running > 0 || active > 0.
     //
     // running is the number of goroutines which are not "durably blocked":
@@ -33,14 +32,16 @@ partial struct synctestBubble {
     // For example, park_m can choose to immediately unpark a goroutine after parking it.
     // It increments the active count to keep the bubble active until it has determined
     // that the park operation has completed.
-    internal nint total; // total goroutines
+    internal nint total;   // total goroutines
     internal nint running; // non-blocked goroutines
-    internal nint active; // other sources of activity
+    internal nint active;  // other sources of activity
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string total0ˢ = "total < 0"u8;
-internal static readonly @string running0ˢ = "running < 0"u8;
+internal static ref readonly @string total0ˢ => ref total0ˢᵇ;
+private static readonly @string total0ˢᵇ = "total < 0"u8;
+internal static ref readonly @string running0ˢ => ref running0ˢᵇ;
+private static readonly @string running0ˢᵇ = "running < 0"u8;
 
 // changegstatus is called when the non-lock status of a g changes.
 // It is never called with a Gscanstatus.
@@ -58,40 +59,44 @@ internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡg
     // but if stack growth occurs while bubble.mu is held, we must not recursively lock.
     nint totalDelta = 0;
     var wasRunning = true;
-    var exprᴛ1 = oldval;
-    if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
+    switch (oldval) {
+    case var ᴛ when ᴛ == _Gdead || ᴛ == _Gdeadextra: {
         wasRunning = false;
         totalDelta++;
+        break;
     }
-    else if (exprᴛ1 == _Gwaiting) {
+    case var ᴛ when ᴛ == _Gwaiting: {
         if (gp.waitreason.isIdleInSynctest()) {
             wasRunning = false;
         }
-    }
+        break;
+    }}
     var isRunning = true;
-    var exprᴛ2 = newval;
-    if (exprᴛ2 == _Gdead || exprᴛ2 == _Gdeadextra) {
+    switch (newval) {
+    case var ᴛ when ᴛ == _Gdead || ᴛ == _Gdeadextra: {
         isRunning = false;
         totalDelta--;
         if (Ꮡgp == bubble.main) {
             bubble.done = true;
         }
+        break;
     }
-    else if (exprᴛ2 == _Gwaiting) {
+    case var ᴛ when ᴛ == _Gwaiting: {
         if (gp.waitreason.isIdleInSynctest()) {
             isRunning = false;
         }
-    }
+        break;
+    }}
     // It's possible for wasRunning == isRunning while totalDelta != 0;
     // for example, if a new goroutine is created in a non-running state.
     if (wasRunning == isRunning && totalDelta == 0) {
         return;
     }
 
-    @lock(Ꮡbubble.of(synctestBubble.Ꮡmu));
+    @lock(Ꮡbubble.Ꮡmu);
     bubble.total += totalDelta;
     if (wasRunning != isRunning) {
-        if (isRunning){
+        if (isRunning) {
             bubble.running++;
         } else {
             bubble.running--;
@@ -109,7 +114,7 @@ internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡg
         fatal(running0ˢ);
     }
     var wake = Ꮡbubble.maybeWakeLocked();
-    unlock(Ꮡbubble.of(synctestBubble.Ꮡmu));
+    unlock(Ꮡbubble.Ꮡmu);
     if (wake != nil) {
         goready(wake, 0);
     }
@@ -120,25 +125,26 @@ internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡg
 internal static void incActive(this ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
-    @lock(Ꮡbubble.of(synctestBubble.Ꮡmu));
+    @lock(Ꮡbubble.Ꮡmu);
     bubble.active++;
-    unlock(Ꮡbubble.of(synctestBubble.Ꮡmu));
+    unlock(Ꮡbubble.Ꮡmu);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string active0ˢ = "active < 0"u8;
+internal static ref readonly @string active0ˢ => ref active0ˢᵇ;
+private static readonly @string active0ˢᵇ = "active < 0"u8;
 
 // decActive decrements the active-count for the bubble.
 internal static void decActive(this ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
-    @lock(Ꮡbubble.of(synctestBubble.Ꮡmu));
+    @lock(Ꮡbubble.Ꮡmu);
     bubble.active--;
     if (bubble.active < 0) {
         @throw(active0ˢ);
     }
     var wake = Ꮡbubble.maybeWakeLocked();
-    unlock(Ꮡbubble.of(synctestBubble.Ꮡmu));
+    unlock(Ꮡbubble.Ꮡmu);
     if (wake != nil) {
         goready(wake, 0);
     }
@@ -149,7 +155,7 @@ internal static ж<g> maybeWakeLocked(this ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     if (bubble.running > 0 || bubble.active > 0) {
-        return default!;
+        return default;
     }
     // Increment the bubble active count, since we've determined to wake something.
     // The woken goroutine will decrement the count.
@@ -161,7 +167,7 @@ internal static ж<g> maybeWakeLocked(this ж<synctestBubble> Ꮡbubble) {
     // Two wakes happening at the same time leads to very confusing failure modes,
     // so we take steps to avoid it happening.
     bubble.active++;
-    var next = Ꮡbubble.of(synctestBubble.Ꮡtimers).wakeTime();
+    var next = Ꮡbubble.Ꮡtimers.wakeTime();
     if (next > 0 && next <= bubble.now) {
         // A timer is scheduled to fire. Wake the root goroutine to handle it.
         return bubble.root;
@@ -188,13 +194,17 @@ internal static @unsafe.Pointer raceaddr(this ж<synctestBubble> Ꮡbubble) {
 }
 
 internal static readonly ж<atomic.Uint64> ᏑbubbleGen = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
-internal static ref atomic.Uint64 bubbleGen => ref ((StaticBox<atomic.Uint64>)ᏑbubbleGen).ValueSlot;     // bubble ID counter
+internal static ref atomic.Uint64 bubbleGen => ref ((StaticBox<atomic.Uint64>)ᏑbubbleGen).ValueSlot; // bubble ID counter
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string timeWentBackwardsˢ = "time went backwards"u8;
-internal static readonly @string deadlockMainBubbleˢ = "deadlock: main bubble goroutine has exited but blocked goroutines remain"u8;
-internal static readonly @string deadlockAllGoroutinesInˢ = "deadlock: all goroutines in bubble are blocked"u8;
-internal static readonly @string synctestRootGoroutineHasˢ = "synctest root goroutine has a fake timer"u8;
+internal static ref readonly @string timeWentBackwardsˢ => ref timeWentBackwardsˢᵇ;
+private static readonly @string timeWentBackwardsˢᵇ = "time went backwards"u8;
+internal static ref readonly @string deadlockMainBubbleˢ => ref deadlockMainBubbleˢᵇ;
+private static readonly @string deadlockMainBubbleˢᵇ = "deadlock: main bubble goroutine has exited but blocked goroutines remain"u8;
+internal static ref readonly @string deadlockAllGoroutinesInˢ => ref deadlockAllGoroutinesInˢᵇ;
+private static readonly @string deadlockAllGoroutinesInˢᵇ = "deadlock: all goroutines in bubble are blocked"u8;
+internal static ref readonly @string synctestRootGoroutineHasˢ => ref synctestRootGoroutineHasˢᵇ;
+private static readonly @string synctestRootGoroutineHasˢᵇ = "synctest root goroutine has a fake timer"u8;
 
 //go:linkname synctestRun internal/synctest.Run
 internal static void synctestRun(Action fʗp) {
@@ -217,14 +227,14 @@ internal static void synctestRun(Action fʗp) {
             root: gp
         ));
         const int64 synctestBaseTime = 946684800000000000; // midnight UTC 2000-01-01
-        bubble.Value.now = synctestBaseTime;
-        lockInit(ref (bubble.of(synctestBubble.Ꮡmu)).DerefOrNull(), lockRankSynctest);
-        lockInit(ref (bubble.of(synctestBubble.Ꮡtimers).of(timers.Ꮡmu)).DerefOrNull(), lockRankTimers);
+        bubble.now = synctestBaseTime;
+        lockInit(ref (bubble.Ꮡmu).DerefOrNull(), lockRankSynctest);
+        lockInit(ref (bubble.Ꮡtimers.Ꮡmu).DerefOrNull(), lockRankTimers);
 
         gp.Value.bubble = bubble;
         var gpʗ1 = gp;
         defer(() => {
-            gpʗ1.Value.bubble = default!;
+            gpʗ1.Value.bubble = default;
         }, ref ᒐ);
 
         // This is newproc, but also records the new g in bubble.main.
@@ -233,62 +243,62 @@ internal static void synctestRun(Action fʗp) {
         var gpʗ2 = gp;
         systemstack(() => {
             var fv = ~Ꮡf.Reinterpret<Action, ж<funcval>>();
-            bubbleʗ1.Value.main = newproc1(fv, gpʗ2, pc, false, waitReasonZero);
+            bubbleʗ1.main = newproc1(fv, gpʗ2, pc, false, waitReasonZero);
             var pp = (~(~getg()).m).p.ptr();
-            runqput(pp, (~bubbleʗ1).main, true);
+            runqput(pp, bubbleʗ1.main, true);
             wakep();
         });
 
-        @lock(bubble.of(synctestBubble.Ꮡmu));
-        bubble.Value.active++;
-        while (ᐧ) {
-            unlock(bubble.of(synctestBubble.Ꮡmu));
+        @lock(bubble.Ꮡmu);
+        bubble.active++;
+        for (;;) {
+            unlock(bubble.Ꮡmu);
             var bubbleʗ2 = bubble;
             var gpʗ3 = gp;
             systemstack(() => {
                 // Clear gp.m.curg while running timers,
                 // so timer goroutines inherit their child race context from g0.
                 var curg = gpʗ3.Value.m.Value.curg;
-                gpʗ3.Value.m.Value.curg = default!;
-                (~gpʗ3).bubble.of(synctestBubble.Ꮡtimers).check((~bubbleʗ2).now, bubbleʗ2);
+                gpʗ3.Value.m.Value.curg = default;
+                (~gpʗ3).bubble.Ꮡtimers.check(bubbleʗ2.now, bubbleʗ2);
                 gpʗ3.Value.m.Value.curg = curg;
             });
             gopark(synctestidle_c, nil, waitReasonSynctestRun, traceBlockSynctest, 0);
-            @lock(bubble.of(synctestBubble.Ꮡmu));
-            if ((~bubble).active < 0) {
+            @lock(bubble.Ꮡmu);
+            if (bubble.active < 0) {
                 @throw(active0ˢ);
             }
-            var next = bubble.of(synctestBubble.Ꮡtimers).wakeTime();
+            var next = bubble.Ꮡtimers.wakeTime();
             if (next == 0) {
                 break;
             }
-            if (next < (~bubble).now) {
+            if (next < bubble.now) {
                 @throw(timeWentBackwardsˢ);
             }
-            if ((~bubble).done) {
+            if (bubble.done) {
                 // Time stops once the bubble's main goroutine has exited.
                 break;
             }
-            bubble.Value.now = next;
+            bubble.now = next;
         }
 
-        nint total = bubble.Value.total;
-        unlock(bubble.of(synctestBubble.Ꮡmu));
+        nint total = bubble.total;
+        unlock(bubble.Ꮡmu);
         if (raceenabled) {
             // Establish a happens-before relationship between bubbled goroutines exiting
             // and Run returning.
             raceacquireg(ref (gp).DerefOrNull(), (uintptr)(~gp).bubble.raceaddr());
         }
         if (total != 1) {
-            @string reason = default!;
-            if ((~bubble).done){
+            @string reason = default;
+            if (bubble.done) {
                 reason = deadlockMainBubbleˢ;
             } else {
                 reason = deadlockAllGoroutinesInˢ;
             }
             throw panic(new synctestDeadlockError(reason: reason, bubble: bubble));
         }
-        if ((~gp).timer != nil && (~(~gp).timer).isFake) {
+        if ((~gp).timer != nil && (~gp).timer.isFake) {
             // Verify that we haven't marked this goroutine's sleep timer as fake.
             // This could happen if something in Run were to call timeSleep.
             @throw(synctestRootGoroutineHasˢ);
@@ -310,15 +320,15 @@ internal static @string Error(this synctestDeadlockError e) {
 internal static bool synctestidle_c(ж<g> Ꮡgp, @unsafe.Pointer _) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    @lock(gp.bubble.of(synctestBubble.Ꮡmu));
+    @lock(gp.bubble.Ꮡmu);
     var canIdle = true;
-    if ((~gp.bubble).running == 0 && (~gp.bubble).active == 1){
+    if (gp.bubble.running == 0 && gp.bubble.active == 1) {
         // All goroutines in the bubble have blocked or exited.
         canIdle = false;
     } else {
-        gp.bubble.Value.active--;
+        gp.bubble.active--;
     }
-    unlock(gp.bubble.of(synctestBubble.Ꮡmu));
+    unlock(gp.bubble.Ꮡmu);
     return canIdle;
 }
 
@@ -328,26 +338,26 @@ internal static void synctestWait() {
     if ((~gp).bubble == nil) {
         throw panic("goroutine is not in a bubble");
     }
-    @lock((~gp).bubble.of(synctestBubble.Ꮡmu));
+    @lock((~gp).bubble.Ꮡmu);
     // We use a bubble.waiting bool to detect simultaneous calls to Wait rather than
     // checking to see if bubble.waiter is non-nil. This avoids a race between unlocking
     // bubble.mu and setting bubble.waiter while parking.
-    if ((~(~gp).bubble).waiting) {
-        unlock((~gp).bubble.of(synctestBubble.Ꮡmu));
+    if ((~gp).bubble.waiting) {
+        unlock((~gp).bubble.Ꮡmu);
         throw panic("wait already in progress");
     }
-    gp.Value.bubble.Value.waiting = true;
-    unlock((~gp).bubble.of(synctestBubble.Ꮡmu));
+    gp.Value.bubble.waiting = true;
+    unlock((~gp).bubble.Ꮡmu);
     gopark(synctestwait_c, nil, waitReasonSynctestWait, traceBlockSynctest, 0);
 
-    @lock((~gp).bubble.of(synctestBubble.Ꮡmu));
-    gp.Value.bubble.Value.active--;
-    if ((~(~gp).bubble).active < 0) {
+    @lock((~gp).bubble.Ꮡmu);
+    gp.Value.bubble.active--;
+    if ((~gp).bubble.active < 0) {
         @throw(active0ˢ);
     }
-    gp.Value.bubble.Value.waiter = default!;
-    gp.Value.bubble.Value.waiting = false;
-    unlock((~gp).bubble.of(synctestBubble.Ꮡmu));
+    gp.Value.bubble.waiter = default;
+    gp.Value.bubble.waiting = false;
+    unlock((~gp).bubble.Ꮡmu);
 
     // Establish a happens-before relationship on the activity of the now-blocked
     // goroutines in the bubble.
@@ -357,18 +367,19 @@ internal static void synctestWait() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string running0Active0ˢ = "running == 0 && active == 0"u8;
+internal static ref readonly @string running0Active0ˢ => ref running0Active0ˢᵇ;
+private static readonly @string running0Active0ˢᵇ = "running == 0 && active == 0"u8;
 
 internal static bool synctestwait_c(ж<g> Ꮡgp, @unsafe.Pointer _) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    @lock(gp.bubble.of(synctestBubble.Ꮡmu));
-    if ((~gp.bubble).running == 0 && (~gp.bubble).active == 0) {
+    @lock(gp.bubble.Ꮡmu);
+    if (gp.bubble.running == 0 && gp.bubble.active == 0) {
         // This shouldn't be possible, since gopark increments active during unlockf.
         @throw(running0Active0ˢ);
     }
-    gp.bubble.Value.waiter = Ꮡgp;
-    unlock(gp.bubble.of(synctestBubble.Ꮡmu));
+    gp.bubble.waiter = Ꮡgp;
+    unlock(gp.bubble.Ꮡmu);
     return true;
 }
 
@@ -385,7 +396,7 @@ internal static any synctest_acquire() {
             return bubble.OrTypedNil();
         }
     }
-    return default!;
+    return default;
 }
 
 //go:linkname synctest_release internal/synctest.release
@@ -404,7 +415,7 @@ internal static void synctest_inBubble(any bubble, Action f) {
         gp.Value.bubble = bubble._<ж<synctestBubble>>();
         var gpʗ1 = gp;
         defer(() => {
-            gpʗ1.Value.bubble = default!;
+            gpʗ1.Value.bubble = default;
         }, ref ᒐ);
         f();
     }
@@ -420,9 +431,9 @@ partial struct specialBubble {
 }
 
 // Keep these in sync with internal/synctest.
-internal static UntypedInt bubbleAssocUnbubbled => iota; // not associated with any bubble
+internal static UntypedInt bubbleAssocUnbubbled => iota;  // not associated with any bubble
 internal static UntypedInt bubbleAssocCurrentBubble => 1; // associated with the current bubble
-internal static UntypedInt bubbleAssocOtherBubble => 2; // associated with a different bubble
+internal static UntypedInt bubbleAssocOtherBubble => 2;   // associated with a different bubble
 
 // getOrSetBubbleSpecial checks the special record for p's bubble membership.
 //
@@ -433,7 +444,7 @@ internal static UntypedInt bubbleAssocOtherBubble => 2; // associated with a dif
 // (including if a new association was added),
 // and ok==false if not.
 internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64 bubbleid, bool add) {
-    nint assoc = default!;
+    nint assoc = default;
 
     var span = spanOfHeap((uintptr)Δp);
     if (span == nil) {
@@ -450,26 +461,25 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
 
     var offset = (uintptr)Δp - span.@base();
 
-    @lock(span.of(mspan.Ꮡspeciallock));
+    @lock(span.Ꮡspeciallock);
 
     // Find splice point, check for existing record.
     var (iter, exists) = span.specialFindSplicePoint(offset, _KindSpecialBubble);
-    if (exists){
+    if (exists) {
         // p is already associated with a bubble.
         // Return true iff it's the same bubble.
         var s = iter.ValueSlot.Reinterpret<special, specialBubble>();
-        if (s.bubbleid == bubbleid){
+        if (s.bubbleid == bubbleid) {
             assoc = bubbleAssocCurrentBubble;
         } else {
             assoc = bubbleAssocOtherBubble;
         }
-    } else 
-    if (add){
+    } else if (add) {
         // p is not associated with a bubble,
         // and we've been asked to add an association.
-        @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        var s = (ж<specialBubble>)(uintptr)(Ꮡmheap_.of(mheap.ᏑspecialBubbleAlloc).alloc());
-        unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
+        @lock(Ꮡmheap_.Ꮡspeciallock);
+        var s = (ж<specialBubble>)(uintptr)(Ꮡmheap_.ᏑspecialBubbleAlloc.alloc());
+        unlock(Ꮡmheap_.Ꮡspeciallock);
         s.bubbleid = bubbleid;
         s.special.kind = _KindSpecialBubble;
         s.special.offset = offset;
@@ -482,7 +492,7 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
         assoc = bubbleAssocUnbubbled;
     }
 
-    unlock(span.of(mspan.Ꮡspeciallock));
+    unlock(span.Ꮡspeciallock);
     releasem(ref (mp).DerefOrNull());
 
     return assoc;
@@ -493,7 +503,7 @@ internal static nint /*assoc*/ getOrSetBubbleSpecial(@unsafe.Pointer Δp, uint64
 //
 //go:linkname synctest_associate internal/synctest.associate
 internal static nint synctest_associate(@unsafe.Pointer Δp) {
-    return getOrSetBubbleSpecial(Δp, (~(~getg()).bubble).id, true);
+    return getOrSetBubbleSpecial(Δp, (~getg()).bubble.id, true);
 }
 
 // synctest_disassociate disassociates p from its bubble.
@@ -507,7 +517,7 @@ internal static void synctest_disassociate(@unsafe.Pointer Δp) {
 //
 //go:linkname synctest_isAssociated internal/synctest.isAssociated
 internal static bool synctest_isAssociated(@unsafe.Pointer Δp) {
-    return getOrSetBubbleSpecial(Δp, (~(~getg()).bubble).id, false) == bubbleAssocCurrentBubble;
+    return getOrSetBubbleSpecial(Δp, (~getg()).bubble.id, false) == bubbleAssocCurrentBubble;
 }
 
 } // end runtime_package

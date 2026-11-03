@@ -6,12 +6,12 @@ namespace go.math.big.@internal;
 partial class asmgen_package {
 
 [GoLazy(Initial = true)] partial class lazyᴛArchRISCV64 { public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
-    Name: "riscv64"u8,
+    Name: "riscv64",
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
 
-    regs: new @string[]{
+    regs: slice<@string>([
         // X0 is zero.
         // X1 is LR.
         // X2 is SP.
@@ -20,31 +20,31 @@ partial class asmgen_package {
         // X27 is g.
         // X28 and X29 are our virtual carry flags.
         // X31 is the assembler/linker temporary (which we use too).
-        "X5"u8, "X6"u8, "X7"u8, "X8"u8, "X9"u8,
-        "X10"u8, "X11"u8, "X12"u8, "X13"u8, "X14"u8, "X15"u8, "X16"u8, "X17"u8, "X18"u8, "X19"u8,
-        "X20"u8, "X21"u8, "X22"u8, "X23"u8, "X24"u8, "X25"u8, "X26"u8,
-        "X30"u8
-    }.slice(),
+        "X5", "X6", "X7", "X8", "X9",
+        "X10", "X11", "X12", "X13", "X14", "X15", "X16", "X17", "X18", "X19",
+        "X20", "X21", "X22", "X23", "X24", "X25", "X26",
+        "X30"
+    ]),
 
-    reg0: "X0"u8,
-    regCarry: "X28"u8,
-    regAltCarry: "X29"u8,
-    regTmp: "X31"u8,
+    reg0: "X0",
+    regCarry: "X28",
+    regAltCarry: "X29",
+    regTmp: "X31",
 
-    mov: "MOV"u8,
-    add: "ADD"u8,
-    sub: "SUB"u8,
-    mul: "MUL"u8,
-    mulhi: "MULHU"u8,
-    lsh: "SLL"u8,
-    rsh: "SRL"u8,
-    and: "AND"u8,
-    or: "OR"u8,
-    xor: "XOR"u8,
-    sltu: "SLTU"u8,
+    mov: "MOV",
+    add: "ADD",
+    sub: "SUB",
+    mul: "MUL",
+    mulhi: "MULHU",
+    lsh: "SLL",
+    rsh: "SRL",
+    and: "AND",
+    or: "OR",
+    xor: "XOR",
+    sltu: "SLTU",
 
-    jmpZero: "BEQZ %s, %s"u8,
-    jmpNonZero: "BNEZ %s, %s"u8
+    jmpZero: "BEQZ %s, %s",
+    jmpNonZero: "BNEZ %s, %s"
 )); }
 
 } // end asmgen_package

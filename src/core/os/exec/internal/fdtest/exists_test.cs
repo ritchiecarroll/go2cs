@@ -13,13 +13,13 @@ partial class fdtest_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object existsNotImplementedForˢ = (@string)"Exists not implemented for windows"u8;
 
-public static void TestExists(ж<testing.T> Ꮡt) {
+public static void TestExists(ж<testing.T> t) {
     if (runtime.GOOS == "windows"u8) {
-        Ꮡt.Skip(existsNotImplementedForˢ);
+        t.Skip(existsNotImplementedForˢ);
     }
 
     if (!Exists(os.Stdout.Fd())) {
-        Ꮡt.Errorf("Exists(%d) got false want true"u8, os.Stdout.Fd());
+        t.Errorf("Exists(%d) got false want true", os.Stdout.Fd());
     }
 }
 

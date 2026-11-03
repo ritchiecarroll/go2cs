@@ -38,13 +38,13 @@ internal static (ж<profile.Profile>, error) translateCPUProfile(slice<uint64> d
     var b = newProfileBuilder(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf));
     var tags = new slice<@unsafe.Pointer>(count);
     {
-        var err = b.addCPUData(data, tags); if (err != default!) {
-            return (default!, err);
+        var err = b.addCPUData(data, tags); if (err != nil) {
+            return (default, err);
         }
     }
     {
-        var err = b.build(); if (err != default!) {
-            return (default!, err);
+        var err = b.build(); if (err != nil) {
+            return (default, err);
         }
     }
     return profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
@@ -54,38 +54,38 @@ internal static (ж<profile.Profile>, error) translateCPUProfile(slice<uint64> d
 // It works reasonably well for printing protocol-buffer
 // data structures like profile.Profile.
 internal static @string fmtJSON(any x) {
-    var (js, _) = json.MarshalIndent(x, ""u8, "\t"u8);
+    var (js, _) = json.MarshalIndent(x, ""u8, "\t");
     return (@string)js;
 }
 
-public static void TestConvertCPUProfileNoSamples(ж<testing.T> Ꮡt) {
+public static void TestConvertCPUProfileNoSamples(ж<testing.T> t) {
     // A test server with mock cpu profile data.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
 
-    var b = new uint64[]{3, 0, 500}.slice(); // empty profile at 500 Hz (2ms sample period)
+    var b = slice<uint64>([3, 0, 500]); // empty profile at 500 Hz (2ms sample period)
     var (p, err) = translateCPUProfile(b, 1);
-    if (err != default!) {
-        Ꮡt.Fatalf("translateCPUProfile: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("translateCPUProfile: %v", err);
     }
     {
-        var errΔ1 = p.Write(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf)); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("writing profile: %v"u8, errΔ1);
+        var errΔ1 = p.Write(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf)); if (errΔ1 != nil) {
+            t.Fatalf("writing profile: %v", errΔ1);
         }
     }
 
     (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
-    if (err != default!) {
-        Ꮡt.Fatalf("profile.Parse: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("profile.Parse: %v", err);
     }
 
     // Expected PeriodType and SampleType.
-    var periodType = Ꮡ(new profile.ValueType(Type: "cpu"u8, Unit: "nanoseconds"u8));
-    var sampleType = new ж<profile.ValueType>[]{
-        Ꮡ(new profile.ValueType(Type: "samples"u8, Unit: "count"u8)),
-        Ꮡ(new profile.ValueType(Type: "cpu"u8, Unit: "nanoseconds"u8))
-    }.slice();
+    var periodType = Ꮡ(new profile.ValueType(Type: "cpu", Unit: "nanoseconds"));
+    var sampleType = slice<ж<profile.ValueType>>([
+        Ꮡ(new profile.ValueType(Type: "samples", Unit: "count")),
+        Ꮡ(new profile.ValueType(Type: "cpu", Unit: "nanoseconds"))
+    ]);
 
-    checkProfile(Ꮡt, p, 2000 * 1000, periodType, sampleType, default!, ""u8);
+    checkProfile(t, p, 2000 * 1000, periodType, sampleType, default, ""u8);
 }
 
 //go:noinline
@@ -99,26 +99,27 @@ internal static partial void f2() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string procSelfMapsˢ = "/proc/self/maps"u8;
+internal static ref readonly @string procSelfMapsˢ => ref procSelfMapsˢᵇ;
+private static readonly @string procSelfMapsˢᵇ = "/proc/self/maps"u8;
 
 // testPCs returns two PCs and two corresponding memory mappings
 // to use in test profiles.
-internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profile.Mapping> map2) testPCs(ж<testing.T> Ꮡt) {
-    uint64 addr1 = default!;
-    uint64 addr2 = default!;
-    ж<profile.Mapping> map1 = default!;
-    ж<profile.Mapping> map2 = default!;
+internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profile.Mapping> map2) testPCs(ж<testing.T> t) {
+    uint64 addr1 = default;
+    uint64 addr2 = default;
+    ж<profile.Mapping> map1 = default;
+    ж<profile.Mapping> map2 = default;
 
     var exprᴛ1 = runtime.GOOS;
-    if (exprᴛ1 == "linux"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "netbsd"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "linux"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "netbsd"u8: {
         // Figure out two addresses from /proc/self/maps.
         var (mmap, err) = os.ReadFile(procSelfMapsˢ);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         ref var mappings = ref heap<slice<ж<profile.Mapping>>>(out var Ꮡmappings);
-        ref var id = ref heap<uint64>(out var Ꮡid);
-        id = (uint64)1;
+        ref var id = ref heap<uint64>((uint64)1, out var Ꮡid);
         parseProcSelfMaps(mmap, (uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) => {
             Ꮡmappings.ValueSlot = append(Ꮡmappings.ValueSlot, Ꮡ(new profile.Mapping(
                 ID: Ꮡid.Value,
@@ -133,14 +134,15 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
         if (len(mappings) < 2) {
             // It is possible for a binary to only have 1 executable
             // region of memory.
-            Ꮡt.Skipf("need 2 or more mappings, got %v"u8, len(mappings));
+            t.Skipf("need 2 or more mappings, got %v", len(mappings));
         }
-        addr1 = mappings[0].Value.Start;
+        addr1 = mappings[0].Start;
         map1 = mappings[0];
-        addr2 = mappings[1].Value.Start;
+        addr2 = mappings[1].Start;
         map2 = mappings[1];
+        break;
     }
-    else if (exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
+    case {} when exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8: {
         addr1 = (uint64)abi.FuncPCABIInternal(f1);
         addr2 = (uint64)abi.FuncPCABIInternal(f2);
 
@@ -149,8 +151,8 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
         ref var exe = ref heap<@string>(out var Ꮡexe);
         ref var buildID = ref heap<@string>(out var ᏑbuildID);
         (start, end, exe, buildID, var err) = readMainModuleMapping();
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
 
         map1 = Ꮡ(new profile.Mapping(
@@ -169,90 +171,93 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
             BuildID: buildID,
             HasFunctions: true
         ));
+        break;
     }
-    else if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+    case {} when exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8: {
         addr1 = (uint64)abi.FuncPCABIInternal(f1);
         addr2 = (uint64)abi.FuncPCABIInternal(f2);
+        break;
     }
-    else { /* default: */
+    default: {
         addr1 = (uint64)abi.FuncPCABIInternal(f1);
         addr2 = (uint64)abi.FuncPCABIInternal(f2);
         // Fake mapping - HasFunctions will be true because two PCs from Go
         // will be fully symbolized.
         var fake = Ꮡ(new profile.Mapping(ID: 1, HasFunctions: true));
         (map1, map2) = (fake, fake);
-    }
+        break;
+    }}
     return (addr1, addr2, map1, map2);
 }
 
-public static void TestConvertCPUProfile(ж<testing.T> Ꮡt) {
-    var (addr1, addr2, map1, map2) = testPCs(Ꮡt);
+public static void TestConvertCPUProfile(ж<testing.T> t) {
+    var (addr1, addr2, map1, map2) = testPCs(t);
 
-    var b = new uint64[]{
+    var b = slice<uint64>([
         3, 0, 500, // hz = 500
         5, 0, 10, (uint64)(addr1 + 1), (uint64)(addr1 + 2), // 10 samples in addr1
         5, 0, 40, (uint64)(addr2 + 1), (uint64)(addr2 + 2), // 40 samples in addr2
-        5, 0, 10, (uint64)(addr1 + 1), (uint64)(addr1 + 2) // 10 samples in addr1
-    }.slice();
+        5, 0, 10, (uint64)(addr1 + 1), (uint64)(addr1 + 2)  // 10 samples in addr1
+    ]);
     var (p, err) = translateCPUProfile(b, 4);
-    if (err != default!) {
-        Ꮡt.Fatalf("translating profile: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("translating profile: %v", err);
     }
     var period = (int64)(2000 * 1000);
-    var periodType = Ꮡ(new profile.ValueType(Type: "cpu"u8, Unit: "nanoseconds"u8));
-    var sampleType = new ж<profile.ValueType>[]{
-        Ꮡ(new profile.ValueType(Type: "samples"u8, Unit: "count"u8)),
-        Ꮡ(new profile.ValueType(Type: "cpu"u8, Unit: "nanoseconds"u8))
-    }.slice();
-    var samples = new ж<profile.Sample>[]{
-        Ꮡ(new profile.Sample(Value: new int64[]{20, 20 * 2000 * 1000}.slice(), Location: new ж<profile.Location>[]{
+    var periodType = Ꮡ(new profile.ValueType(Type: "cpu", Unit: "nanoseconds"));
+    var sampleType = slice<ж<profile.ValueType>>([
+        Ꮡ(new profile.ValueType(Type: "samples", Unit: "count")),
+        Ꮡ(new profile.ValueType(Type: "cpu", Unit: "nanoseconds"))
+    ]);
+    var samples = slice<ж<profile.Sample>>([
+        Ꮡ(new profile.Sample(Value: slice<int64>([20, 20 * 2000 * 1000]), Location: slice<ж<profile.Location>>([
             Ꮡ(new profile.Location(ID: 1, Mapping: map1, Address: addr1)),
             Ꮡ(new profile.Location(ID: 2, Mapping: map1, Address: addr1 + 1))
-        }.slice())),
-        Ꮡ(new profile.Sample(Value: new int64[]{40, 40 * 2000 * 1000}.slice(), Location: new ж<profile.Location>[]{
+        ]))),
+        Ꮡ(new profile.Sample(Value: slice<int64>([40, 40 * 2000 * 1000]), Location: slice<ж<profile.Location>>([
             Ꮡ(new profile.Location(ID: 3, Mapping: map2, Address: addr2)),
             Ꮡ(new profile.Location(ID: 4, Mapping: map2, Address: addr2 + 1))
-        }.slice()))
-    }.slice();
-    checkProfile(Ꮡt, p, period, periodType, sampleType, samples, ""u8);
+        ])))
+    ]);
+    checkProfile(t, p, period, periodType, sampleType, samples, ""u8);
 }
 
-internal static void checkProfile(ж<testing.T> Ꮡt, ж<profile.Profile> Ꮡp, int64 period, ж<profile.ValueType> ᏑperiodType, slice<ж<profile.ValueType>> sampleType, slice<ж<profile.Sample>> samples, @string defaultSampleType) {
+internal static void checkProfile(ж<testing.T> t, ж<profile.Profile> Ꮡp, int64 period, ж<profile.ValueType> periodType, slice<ж<profile.ValueType>> sampleType, slice<ж<profile.Sample>> samples, @string defaultSampleType) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    Ꮡt.Helper();
+    t.Helper();
 
     if (p.Period != period) {
-        Ꮡt.Errorf("p.Period = %d, want %d"u8, p.Period, period);
+        t.Errorf("p.Period = %d, want %d", p.Period, period);
     }
-    if (!reflect.DeepEqual(p.PeriodType.OrTypedNil(), ᏑperiodType.OrTypedNil())) {
-        Ꮡt.Errorf("p.PeriodType = %v\nwant = %v"u8, fmtJSON(p.PeriodType.OrTypedNil()), fmtJSON(ᏑperiodType.OrTypedNil()));
+    if (!reflect.DeepEqual(p.PeriodType.OrTypedNil(), periodType.OrTypedNil())) {
+        t.Errorf("p.PeriodType = %v\nwant = %v", fmtJSON(p.PeriodType.OrTypedNil()), fmtJSON(periodType.OrTypedNil()));
     }
     if (!reflect.DeepEqual(p.SampleType, sampleType)) {
-        Ꮡt.Errorf("p.SampleType = %v\nwant = %v"u8, fmtJSON(p.SampleType), fmtJSON(sampleType));
+        t.Errorf("p.SampleType = %v\nwant = %v", fmtJSON(p.SampleType), fmtJSON(sampleType));
     }
     if (defaultSampleType != p.DefaultSampleType) {
-        Ꮡt.Errorf("p.DefaultSampleType = %v\nwant = %v"u8, p.DefaultSampleType, defaultSampleType);
+        t.Errorf("p.DefaultSampleType = %v\nwant = %v", p.DefaultSampleType, defaultSampleType);
     }
     // Clear line info since it is not in the expected samples.
     // If we used f1 and f2 above, then the samples will have line info.
     foreach (var (_, s) in p.Sample) {
-        foreach (var (_, l) in (~s).Location) {
-            l.Value.Line = default!;
+        foreach (var (_, l) in s.Location) {
+            l.Line = default;
         }
     }
     if (fmtJSON(p.Sample) != fmtJSON(samples)) { // ignore unexported fields
         if (len(p.Sample) == len(samples)) {
             foreach (var i in range(p.Sample)) {
                 if (!reflect.DeepEqual(p.Sample[i].OrTypedNil(), samples[i].OrTypedNil())) {
-                    Ꮡt.Errorf("sample %d = %v\nwant = %v\n"u8, i, fmtJSON(p.Sample[i].OrTypedNil()), fmtJSON(samples[i].OrTypedNil()));
+                    t.Errorf("sample %d = %v\nwant = %v\n", i, fmtJSON(p.Sample[i].OrTypedNil()), fmtJSON(samples[i].OrTypedNil()));
                 }
             }
-            if (Ꮡt.Failed()) {
-                Ꮡt.FailNow();
+            if (t.Failed()) {
+                t.FailNow();
             }
         }
-        Ꮡt.Fatalf("p.Sample = %v\nwant = %v"u8, fmtJSON(p.Sample), fmtJSON(samples));
+        t.Fatalf("p.Sample = %v\nwant = %v", fmtJSON(p.Sample), fmtJSON(samples));
     }
 }
 
@@ -352,17 +357,19 @@ ffffffffff600000 ffffffffff601000 00000090 [vsyscall]
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object malformedTestCaseˢ = (@string)"malformed test case"u8;
-internal static readonly @string normalˢ = "Normal"u8;
-internal static readonly @string withDeletedFileˢ = "WithDeletedFile"u8;
+internal static ref readonly @string normalˢ => ref normalˢᵇ;
+private static readonly @string normalˢᵇ = "Normal"u8;
+internal static ref readonly @string withDeletedFileˢ => ref withDeletedFileˢᵇ;
+private static readonly @string withDeletedFileˢᵇ = "WithDeletedFile"u8;
 
-public static void TestProcSelfMaps(ж<testing.T> Ꮡt) {
+public static void TestProcSelfMaps(ж<testing.T> t) {
     void f(ж<testing.T> tΔ1, @string input) {
-        foreach (var (tx, tt) in strings_package.Split(input, "\n\n"u8)) {
-            var (@in, @out, ok) = strings_package.Cut(tt, "->\n"u8);
+        foreach (var (tx, tt) in strings_package.Split(input, "\n\n")) {
+            var (@in, @out, ok) = strings_package.Cut(tt, "->\n");
             if (!ok) {
                 tΔ1.Fatal(malformedTestCaseˢ);
             }
-            if (len(@out) > 0 && @out[len(@out) - 1] != (rune)'\n') {
+            if (len(@out) > 0 && @out[len(@out) - 1] != '\n') {
                 @out += "\n"u8;
             }
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -370,25 +377,27 @@ public static void TestProcSelfMaps(ж<testing.T> Ꮡt) {
                 fmt.Fprintf(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡbuf), "%08x %08x %08x %s\n"u8, lo, hi, offset, @file);
             });
             if (Ꮡbuf.Value.String() != @out) {
-                tΔ1.Errorf("#%d: have:\n%s\nwant:\n%s\n%q\n%q"u8, tx, Ꮡbuf.Value.String(), @out, Ꮡbuf.Value.String(), @out);
+                tΔ1.Errorf("#%d: have:\n%s\nwant:\n%s\n%q\n%q", tx, Ꮡbuf.Value.String(), @out, Ꮡbuf.Value.String(), @out);
             }
         }
     }
 
     var fʗ1 = f;
-    Ꮡt.Run(normalˢ, (ж<testing.T> tΔ2) => {
+    t.Run(normalˢ, (ж<testing.T> tΔ2) => {
         fʗ1(tΔ2, profSelfMapsTests);
     });
 
     var fʗ2 = f;
-    Ꮡt.Run(withDeletedFileˢ, (ж<testing.T> tΔ3) => {
+    t.Run(withDeletedFileˢ, (ж<testing.T> tΔ3) => {
         fʗ2(tΔ3, profSelfMapsTestsWithDeleted);
     });
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataMappingtestMainˢ = "./testdata/mappingtest/main.go"u8;
-internal static readonly @string runˢ = "run"u8;
+internal static ref readonly @string testdataMappingtestMainˢ => ref testdataMappingtestMainˢᵇ;
+private static readonly @string testdataMappingtestMainˢᵇ = "./testdata/mappingtest/main.go"u8;
+internal static ref readonly @string runˢ => ref runˢᵇ;
+private static readonly @string runˢᵇ = "run"u8;
 internal static readonly object noLocationWithMissingˢ = (@string)"no location with missing symbol info was sampled"u8;
 
 // TestMapping checks the mapping section of CPU profiles
@@ -398,53 +407,53 @@ internal static readonly object noLocationWithMissingˢ = (@string)"no location 
 // its HasFunctions field set true.
 // The test generates a CPU profile that includes PCs from C side
 // that the runtime can't symbolize. See ./testdata/mappingtest.
-public static void TestMapping(ж<testing.T> Ꮡt) {
-    testenv.MustHaveGoRun(new pprof_internal_test_package.testing_TжTB(Ꮡt));
-    testenv.MustHaveCGO(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestMapping(ж<testing.T> t) {
+    testenv.MustHaveGoRun(new pprof_internal_test_package.testing_TжTB(t));
+    testenv.MustHaveCGO(new pprof_internal_test_package.testing_TжTB(t));
 
     @string prog = testdataMappingtestMainˢ;
 
     // GoOnly includes only Go symbols that runtime will symbolize.
     // Go+C includes C symbols that runtime will not symbolize.
-    foreach (var (_, traceback) in new @string[]{"GoOnly"u8, "Go+C"u8}.slice()) {
-        Ꮡt.Run("traceback"u8 + traceback, (ж<testing.T> tΔ1) => {
+    foreach (var (_, traceback) in slice<@string>(["GoOnly", "Go+C"])) {
+        t.Run("traceback"u8 + traceback, (ж<testing.T> tΔ1) => {
             var cmd = exec.Command(testenv.GoToolPath(new pprof_internal_test_package.testing_TжTB(tΔ1)), runˢ, prog);
             if (traceback != "GoOnly"u8) {
-                cmd.Value.Env = append(os.Environ(), "SETCGOTRACEBACK=1"u8);
+                cmd.Env = append(os.Environ(), (@string)"SETCGOTRACEBACK=1");
             }
-            cmd.Value.Stderr = new pprof_internal_test_package.bytes_BufferжWriter(@new<bytes.Buffer>());
+            cmd.Stderr = new pprof_internal_test_package.bytes_BufferжWriter(@new<bytes.Buffer>());
 
             var (@out, err) = cmd.Output();
-            if (err != default!) {
-                tΔ1.Fatalf("failed to run the test program %q: %v\n%v"u8, prog, err, (~cmd).Stderr);
+            if (err != nil) {
+                tΔ1.Fatalf("failed to run the test program %q: %v\n%v", prog, err, cmd.Stderr);
             }
 
             (var prof, err) = profile.Parse(new pprof_internal_test_package.bytes_ReaderжReader(bytes.NewReader(@out)));
-            if (err != default!) {
-                tΔ1.Fatalf("failed to parse the generated profile data: %v"u8, err);
+            if (err != nil) {
+                tΔ1.Fatalf("failed to parse the generated profile data: %v", err);
             }
-            tΔ1.Logf("Profile: %s"u8, prof.OrTypedNil());
+            tΔ1.Logf("Profile: %s", prof.OrTypedNil());
 
             var hit = new map<ж<profile.Mapping>, bool>();
             var miss = new map<ж<profile.Mapping>, bool>();
-            foreach (var (_, loc) in (~prof).Location) {
-                if (symbolized(loc)){
-                    hit[(~loc).Mapping] = true;
+            foreach (var (_, loc) in prof.Location) {
+                if (symbolized(loc)) {
+                    hit[loc.Mapping] = true;
                 } else {
-                    miss[(~loc).Mapping] = true;
+                    miss[loc.Mapping] = true;
                 }
             }
             if (len(miss) == 0) {
                 tΔ1.Log(noLocationWithMissingˢ);
             }
 
-            foreach (var (_, m) in (~prof).Mapping) {
-                if (miss[m] && (~m).HasFunctions) {
-                    tΔ1.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization"u8, m.OrTypedNil());
+            foreach (var (_, m) in prof.Mapping) {
+                if (miss[m] && m.HasFunctions) {
+                    tΔ1.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization", m.OrTypedNil());
                     continue;
                 }
-                if (!miss[m] && hit[m] && !(~m).HasFunctions) {
-                    tΔ1.Errorf("mapping %+v has HasFunctions=false, but all referenced locations from this lapping were symbolized successfully"u8, m.OrTypedNil());
+                if (!miss[m] && hit[m] && !m.HasFunctions) {
+                    tΔ1.Errorf("mapping %+v has HasFunctions=false, but all referenced locations from this lapping were symbolized successfully", m.OrTypedNil());
                     continue;
                 }
             }
@@ -453,9 +462,9 @@ public static void TestMapping(ж<testing.T> Ꮡt) {
                 // The test code was arranged to have PCs from C and
                 // they are not symbolized.
                 // Check no Location containing those unsymbolized PCs contains multiple lines.
-                foreach (var (i, loc) in (~prof).Location) {
-                    if (!symbolized(loc) && len((~loc).Line) > 1) {
-                        tΔ1.Errorf("Location[%d] contains unsymbolized PCs and multiple lines: %v"u8, i, loc.OrTypedNil());
+                foreach (var (i, loc) in prof.Location) {
+                    if (!symbolized(loc) && len(loc.Line) > 1) {
+                        tΔ1.Errorf("Location[%d] contains unsymbolized PCs and multiple lines: %v", i, loc.OrTypedNil());
                     }
                 }
             }
@@ -471,7 +480,7 @@ internal static bool symbolized(ж<profile.Location> Ꮡloc) {
     }
     var l = loc.Line[0];
     var f = l.Function;
-    if (l.ΔLine == 0 || f == nil || (~f).Name == ""u8 || (~f).Filename == ""u8) {
+    if (l.ΔLine == 0 || f == nil || f.Name == ""u8 || f.Filename == ""u8) {
         return false;
     }
     return true;
@@ -483,38 +492,38 @@ internal static readonly object wantProfileWithAtLeastˢ = (@string)"want profil
 // TestFakeMapping tests if at least one mapping exists
 // (including a fake mapping), and their HasFunctions bits
 // are set correctly.
-public static void TestFakeMapping(ж<testing.T> Ꮡt) {
+public static void TestFakeMapping(ж<testing.T> t) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("failed to write heap profile: %v"u8, errΔ1);
+        var errΔ1 = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != nil) {
+            t.Fatalf("failed to write heap profile: %v", errΔ1);
         }
     }
     var (prof, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse the generated profile data: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to parse the generated profile data: %v", err);
     }
-    Ꮡt.Logf("Profile: %s"u8, prof.OrTypedNil());
-    if (len((~prof).Mapping) == 0) {
-        Ꮡt.Fatal(wantProfileWithAtLeastˢ);
+    t.Logf("Profile: %s", prof.OrTypedNil());
+    if (len(prof.Mapping) == 0) {
+        t.Fatal(wantProfileWithAtLeastˢ);
     }
 
     var hit = new map<ж<profile.Mapping>, bool>();
     var miss = new map<ж<profile.Mapping>, bool>();
-    foreach (var (_, loc) in (~prof).Location) {
-        if (symbolized(loc)){
-            hit[(~loc).Mapping] = true;
+    foreach (var (_, loc) in prof.Location) {
+        if (symbolized(loc)) {
+            hit[loc.Mapping] = true;
         } else {
-            miss[(~loc).Mapping] = true;
+            miss[loc.Mapping] = true;
         }
     }
-    foreach (var (_, m) in (~prof).Mapping) {
-        if (miss[m] && (~m).HasFunctions) {
-            Ꮡt.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization"u8, m.OrTypedNil());
+    foreach (var (_, m) in prof.Mapping) {
+        if (miss[m] && m.HasFunctions) {
+            t.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization", m.OrTypedNil());
             continue;
         }
-        if (!miss[m] && hit[m] && !(~m).HasFunctions) {
-            Ꮡt.Errorf("mapping %+v has HasFunctions=false, but all referenced locations from this lapping were symbolized successfully"u8, m.OrTypedNil());
+        if (!miss[m] && hit[m] && !m.HasFunctions) {
+            t.Errorf("mapping %+v has HasFunctions=false, but all referenced locations from this lapping were symbolized successfully", m.OrTypedNil());
             continue;
         }
     }
@@ -522,18 +531,18 @@ public static void TestFakeMapping(ж<testing.T> Ꮡt) {
 
 // Make sure the profiler can handle an empty stack trace.
 // See issue 37967.
-public static void TestEmptyStack(ж<testing.T> Ꮡt) {
-    var b = new uint64[]{
+public static void TestEmptyStack(ж<testing.T> t) {
+    var b = slice<uint64>([
         3, 0, 500, // hz = 500
         3, 0, 10 // 10 samples with an empty stack trace
-    }.slice();
+    ]);
     var (_, err) = translateCPUProfile(b, 2);
-    if (err != default!) {
-        Ꮡt.Fatalf("translating profile: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("translating profile: %v", err);
     }
 }
 
-internal static error errWrite = errors.New("error from writer"u8);
+internal static error errWrite = errors.New("error from writer");
 
 internal partial struct errWriter {
 }
@@ -542,10 +551,10 @@ internal static (nint, error) Write(this errWriter _, slice<byte> p) {
     return (0, errWrite);
 }
 
-public static partial void TestWriteToErr(ж<testing.T> Ꮡt) {
-    var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.errWriterжWriter(Ꮡ(new errWriter(nil))), 0);
+public static partial void TestWriteToErr(ж<testing.T> t) {
+    var err = Lookup(heapˢ).WriteTo(new pprof_internal_test_package.errWriterжWriter(Ꮡ(new errWriter())), 0);
     if (!errors.Is(err, errWrite)) {
-        Ꮡt.Fatalf("want error from writer, got: %v"u8, err);
+        t.Fatalf("want error from writer, got: %v", err);
     }
 }
 

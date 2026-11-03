@@ -50,7 +50,12 @@ using static go.math.rand.rand_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(ChaCha8))]
+[assembly: GoFieldAccess(typeof(Zipf))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,12 +65,12 @@ using static go.math.rand.rand_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/rand/v2/chacha8.go", "chacha8.cs", "ABUwsoKCqMKCgqiygoKClAADFAAKAoKCgpSCgoKUgoKClNiygoKCgoKUlKaCgpSmgoKUqLKCgoKUqKQ=")]
-[assembly: go.GoPositionMap("math/rand/v2/exp.go", "exp.cs", "ABI88oKCgoKCgpSClILKADZsAEKEAQ==")]
-[assembly: go.GoPositionMap("math/rand/v2/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKClKaUgoKCgqaClJSCygAcOAAiRA==")]
-[assembly: go.GoPositionMap("math/rand/v2/pcg.go", "pcg.cs", "ABcwkqiSgqiSgoKCqJKmlpKClIKCpgADEgANEIKCgoKCgqiSAAsakoKCgoI=")]
-[assembly: go.GoPositionMap("math/rand/v2/rand.go", "rand.cs", "ACZQoqiQppCmkKaQppCmkKiigpSqooKUqJKClIIAIEKCgoKCpqqiggAQIoKCgoKCgoKCgoKCgoKmqqKClKqigpTOooKUqqKClKikqKSqooKClJCSrLKCAAgSgoIACRSW6oKqoKigqrCqsKigqKCmkKaQqrCqsKqwqrCq0oKUAAcUoKigqKCqsAACFAAIAAACEvA=", "226-226:1")]
-[assembly: go.GoPositionMap("math/rand/v2/zipf.go", "zipf.cs", "ABo2gqaCruKCgpSCgoKCgoKCgoKqwoKUlIKCgoKCgpSCpg==")]
+[assembly: GoPositionMap("math/rand/v2/chacha8.go", "chacha8.cs", "ABUwsoKCqMKCgqiygoKClAADFAAKAoKCgpSCgoKUgoKClOiygoKCgoKUlKaCgpSmgoKUqLKCgoKUqKQ=")]
+[assembly: GoPositionMap("math/rand/v2/exp.go", "exp.cs", "ABI88oKCgoKCgpSClILKADZsAEKEAQ==")]
+[assembly: GoPositionMap("math/rand/v2/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKClKaUgoKCgqaClJSCygAcOAAiRA==")]
+[assembly: GoPositionMap("math/rand/v2/pcg.go", "pcg.cs", "ABcwkqiSgqiSgoKCqJKmlpKClIKCpgADEgANEIKCgoKCgqiSAAsakoKCgoI=")]
+[assembly: GoPositionMap("math/rand/v2/rand.go", "rand.cs", "ACZQoqiQppCmkKaQppCmkKiigpSqooKUqJKClIIAIEKCgoKCpqqiggAQIoKCgoKCgoKCgoKCgoKmqqKClKqigpTOooKUqqKClKikqKSqooKClJCSrLKCAAgSgoIACRSW6oKqoKigqrCqsKigqKCmkKaQqrCqsKqwqrCq0oKUAAcUoKigqKCqsAACFAAIAAACEvA=", "226-226:1")]
+[assembly: GoPositionMap("math/rand/v2/zipf.go", "zipf.cs", "ABo2gqaCruKCgpSCgoKCgoKCgoKqwoKUlIKCgoKCgpSCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.math.rand;

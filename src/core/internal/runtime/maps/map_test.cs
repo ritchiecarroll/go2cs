@@ -18,20 +18,18 @@ using static go.@internal.runtime.maps_internal_test_package;
 
 partial class maps_test_package {
 
-public static partial void TestCtrlSize(ж<testing.T> Ꮡt) {
+public static partial void TestCtrlSize(ж<testing.T> t) {
     var cs = /* unsafe.Sizeof(maps.CtrlGroup(0)) */ (uintptr)8;
     if (cs != abi.MapGroupSlots) {
-        Ꮡt.Errorf("ctrlGroup size got %d want abi.MapGroupSlots %d"u8, cs, (nint)(abi.MapGroupSlots));
+        t.Errorf("ctrlGroup size got %d want abi.MapGroupSlots %d", cs, (nint)(abi.MapGroupSlots));
     }
 }
 
-public static void TestMapPut(ж<testing.T> Ꮡt) {
+public static void TestMapPut(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(8);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -44,7 +42,7 @@ public static void TestMapPut(ж<testing.T> Ꮡt) {
     }
 
     if (m.Used() != 31) {
-        Ꮡt.Errorf("Used() used got %d want 31"u8, m.Used());
+        t.Errorf("Used() used got %d want 31", m.Used());
     }
 
     key = (uint32)0;
@@ -55,23 +53,21 @@ public static void TestMapPut(ж<testing.T> Ꮡt) {
         elem += 1;
         var (got, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
         if (!ok) {
-            Ꮡt.Errorf("Get(%d) got ok false want true"u8, key);
+            t.Errorf("Get(%d) got ok false want true", key);
         }
         var gotElem = ~(ж<uint64>)(uintptr)(got);
         if (gotElem != elem) {
-            Ꮡt.Errorf("Get(%d) got elem %d want %d"u8, key, gotElem, elem);
+            t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
         }
     }
 }
 
 // Grow enough to cause a table split.
-public static void TestMapSplit(ж<testing.T> Ꮡt) {
+public static void TestMapSplit(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(0);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < (nint)(2 * maps_internal_test_package.MaxTableCapacity); i++) {
         key += 1;
@@ -84,7 +80,7 @@ public static void TestMapSplit(ж<testing.T> Ꮡt) {
     }
 
     if (m.Used() != (uint64)(2 * maps_internal_test_package.MaxTableCapacity)) {
-        Ꮡt.Errorf("Used() used got %d want 31"u8, m.Used());
+        t.Errorf("Used() used got %d want 31", m.Used());
     }
 
     key = (uint32)0;
@@ -95,22 +91,20 @@ public static void TestMapSplit(ж<testing.T> Ꮡt) {
         elem += 1;
         var (got, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
         if (!ok) {
-            Ꮡt.Errorf("Get(%d) got ok false want true"u8, key);
+            t.Errorf("Get(%d) got ok false want true", key);
         }
         var gotElem = ~(ж<uint64>)(uintptr)(got);
         if (gotElem != elem) {
-            Ꮡt.Errorf("Get(%d) got elem %d want %d"u8, key, gotElem, elem);
+            t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
         }
     }
 }
 
-public static void TestMapDelete(ж<testing.T> Ꮡt) {
+public static void TestMapDelete(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(32);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -131,7 +125,7 @@ public static void TestMapDelete(ж<testing.T> Ꮡt) {
     }
 
     if (m.Used() != 0) {
-        Ꮡt.Errorf("Used() used got %d want 0"u8, m.Used());
+        t.Errorf("Used() used got %d want 0", m.Used());
     }
 
     key = (uint32)0;
@@ -142,18 +136,16 @@ public static void TestMapDelete(ж<testing.T> Ꮡt) {
         elem += 1;
         var (_, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
         if (ok) {
-            Ꮡt.Errorf("Get(%d) got ok true want false"u8, key);
+            t.Errorf("Get(%d) got ok true want false", key);
         }
     }
 }
 
-public static void TestTableClear(ж<testing.T> Ꮡt) {
+public static void TestTableClear(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(32);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -168,7 +160,7 @@ public static void TestTableClear(ж<testing.T> Ꮡt) {
     m.Clear(typ);
 
     if (m.Used() != 0) {
-        Ꮡt.Errorf("Clear() used got %d want 0"u8, m.Used());
+        t.Errorf("Clear() used got %d want 0", m.Used());
     }
 
     key = (uint32)0;
@@ -179,7 +171,7 @@ public static void TestTableClear(ж<testing.T> Ꮡt) {
         elem += 1;
         var (_, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
         if (ok) {
-            Ꮡt.Errorf("Get(%d) got ok true want false"u8, key);
+            t.Errorf("Get(%d) got ok true want false", key);
         }
     }
 }
@@ -189,15 +181,12 @@ internal static readonly object itKeyGotNilWantKeyˢ = (@string)"it.Key() got ni
 
 // +0.0 and -0.0 compare equal, but we must still must update the key slot when
 // overwriting.
-public static void TestTableKeyUpdate(ж<testing.T> Ꮡt) {
+public static void TestTableKeyUpdate(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<float64, uint64>(8);
 
-    ref var zero = ref heap<float64>(out var Ꮡzero);
-    zero = (float64)0.0D;
-    ref var negZero = ref heap<float64>(out var ᏑnegZero);
-    negZero = math.Copysign(zero, -1.0D);
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)0;
+    ref var zero = ref heap<float64>((float64)0.0D, out var Ꮡzero);
+    ref var negZero = ref heap<float64>(math.Copysign(zero, -1.0D), out var ᏑnegZero);
+    ref var elem = ref heap<uint64>((uint64)0, out var Ꮡelem);
 
     m.Put(typ, @unsafe.Pointer.FromPinnedBox(Ꮡzero), @unsafe.Pointer.FromPinnedBox(Ꮡelem));
     if (maps_internal_test_package.DebugLog) {
@@ -211,7 +200,7 @@ public static void TestTableKeyUpdate(ж<testing.T> Ꮡt) {
     }
 
     if (m.Used() != 1) {
-        Ꮡt.Errorf("Used() used got %d want 1"u8, m.Used());
+        t.Errorf("Used() used got %d want 1", m.Used());
     }
 
     var it = @new<maps.Iter>();
@@ -220,21 +209,21 @@ public static void TestTableKeyUpdate(ж<testing.T> Ꮡt) {
     @unsafe.Pointer keyPtr = (uintptr)it.Key();
     @unsafe.Pointer elemPtr = (uintptr)it.Elem();
     if (keyPtr == nil) {
-        Ꮡt.Fatal(itKeyGotNilWantKeyˢ);
+        t.Fatal(itKeyGotNilWantKeyˢ);
     }
 
     var key = ~(ж<float64>)(uintptr)(keyPtr);
     elem = ~(ж<uint64>)(uintptr)(elemPtr);
     if (math.Copysign(1.0D, key) > 0D) {
-        Ꮡt.Errorf("map key %f has positive sign"u8, key);
+        t.Errorf("map key %f has positive sign", key);
     }
     if (elem != 1) {
-        Ꮡt.Errorf("map elem got %d want 1"u8, elem);
+        t.Errorf("map elem got %d want 1", elem);
     }
 }
 
 // Put should reuse a deleted slot rather than consuming an empty slot.
-public static void TestTablePutDelete(ж<testing.T> Ꮡt) {
+public static void TestTablePutDelete(ж<testing.T> t) {
     // Put will reuse the first deleted slot it encounters.
     //
     // This is awkward to test because Delete will only install ctrlDeleted
@@ -246,12 +235,10 @@ public static void TestTablePutDelete(ж<testing.T> Ꮡt) {
     // Avoid small maps, they have no tables.
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint32>(16);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint32>(out var Ꮡelem);
-    elem = (uint32)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint32>((uint32)(256 + 0), out var Ꮡelem);
 
-    while (ᐧ) {
+    for (;;) {
         key += 1;
         elem += 1;
 
@@ -290,21 +277,19 @@ public static void TestTablePutDelete(ж<testing.T> Ꮡt) {
     if (tabGot != tabWant) {
         // There shouldn't be a grow, as replacing a deleted slot
         // doesn't require more space.
-        Ꮡt.Errorf("Put(%d) grew table got %v want %v map %v"u8, key, tabGot.OrTypedNil(), tabWant.OrTypedNil(), m.OrTypedNil());
+        t.Errorf("Put(%d) grew table got %v want %v map %v", key, tabGot.OrTypedNil(), tabWant.OrTypedNil(), m.OrTypedNil());
     }
 
     if (growthLeftGot != growthLeftWant) {
-        Ꮡt.Errorf("GrowthLeft got %d want %d: map %v tab %v"u8, growthLeftGot, growthLeftWant, m.OrTypedNil(), tabGot.OrTypedNil());
+        t.Errorf("GrowthLeft got %d want %d: map %v tab %v", growthLeftGot, growthLeftWant, m.OrTypedNil(), tabGot.OrTypedNil());
     }
 }
 
-public static void TestTableIteration(ж<testing.T> Ꮡt) {
+public static void TestTableIteration(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(8);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -320,7 +305,7 @@ public static void TestTableIteration(ж<testing.T> Ꮡt) {
 
     var it = @new<maps.Iter>();
     it.Init(typ, m);
-    while (ᐧ) {
+    for (;;) {
         it.Next();
         @unsafe.Pointer keyPtr = (uintptr)it.Key();
         @unsafe.Pointer elemPtr = (uintptr)it.Elem();
@@ -334,7 +319,7 @@ public static void TestTableIteration(ж<testing.T> Ꮡt) {
     }
 
     if (len(got) != 31) {
-        Ꮡt.Errorf("Iteration got %d entries, want 31: %+v"u8, len(got), got);
+        t.Errorf("Iteration got %d entries, want 31: %+v", len(got), got);
     }
 
     key = (uint32)0;
@@ -345,23 +330,21 @@ public static void TestTableIteration(ж<testing.T> Ꮡt) {
         elem += 1;
         var (gotElem, ok) = got[key, ꟷ];
         if (!ok) {
-            Ꮡt.Errorf("Iteration missing key %d"u8, key);
+            t.Errorf("Iteration missing key %d", key);
             continue;
         }
         if (gotElem != elem) {
-            Ꮡt.Errorf("Iteration key %d got elem %d want %d"u8, key, gotElem, elem);
+            t.Errorf("Iteration key %d got elem %d want %d", key, gotElem, elem);
         }
     }
 }
 
 // Deleted keys shouldn't be visible in iteration.
-public static void TestTableIterationDelete(ж<testing.T> Ꮡt) {
+public static void TestTableIterationDelete(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(8);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -375,11 +358,10 @@ public static void TestTableIterationDelete(ж<testing.T> Ꮡt) {
 
     var got = new map<uint32, uint64>();
     var first = true;
-    ref var deletedKey = ref heap<uint32>(out var ᏑdeletedKey);
-    deletedKey = (uint32)1;
+    ref var deletedKey = ref heap<uint32>((uint32)1, out var ᏑdeletedKey);
     var it = @new<maps.Iter>();
     it.Init(typ, m);
-    while (ᐧ) {
+    for (;;) {
         it.Next();
         @unsafe.Pointer keyPtr = (uintptr)it.Key();
         @unsafe.Pointer elemPtr = (uintptr)it.Elem();
@@ -404,7 +386,7 @@ public static void TestTableIterationDelete(ж<testing.T> Ꮡt) {
     }
 
     if (len(got) != 30) {
-        Ꮡt.Errorf("Iteration got %d entries, want 30: %+v"u8, len(got), got);
+        t.Errorf("Iteration got %d entries, want 30: %+v", len(got), got);
     }
 
     key = (uint32)0;
@@ -421,23 +403,21 @@ public static void TestTableIterationDelete(ж<testing.T> Ꮡt) {
 
         var (gotElem, gotOK) = got[key, ꟷ];
         if (gotOK != wantOK) {
-            Ꮡt.Errorf("Iteration key %d got ok %v want ok %v"u8, key, gotOK, wantOK);
+            t.Errorf("Iteration key %d got ok %v want ok %v", key, gotOK, wantOK);
             continue;
         }
         if (wantOK && gotElem != elem) {
-            Ꮡt.Errorf("Iteration key %d got elem %d want %d"u8, key, gotElem, elem);
+            t.Errorf("Iteration key %d got elem %d want %d", key, gotElem, elem);
         }
     }
 }
 
 // Deleted keys shouldn't be visible in iteration even after a grow.
-public static void TestTableIterationGrowDelete(ж<testing.T> Ꮡt) {
+public static void TestTableIterationGrowDelete(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(8);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -451,11 +431,10 @@ public static void TestTableIterationGrowDelete(ж<testing.T> Ꮡt) {
 
     var got = new map<uint32, uint64>();
     var first = true;
-    ref var deletedKey = ref heap<uint32>(out var ᏑdeletedKey);
-    deletedKey = (uint32)1;
+    ref var deletedKey = ref heap<uint32>((uint32)1, out var ᏑdeletedKey);
     var it = @new<maps.Iter>();
     it.Init(typ, m);
-    while (ᐧ) {
+    for (;;) {
         it.Next();
         @unsafe.Pointer keyPtr = (uintptr)it.Key();
         @unsafe.Pointer elemPtr = (uintptr)it.Elem();
@@ -477,10 +456,8 @@ public static void TestTableIterationGrowDelete(ж<testing.T> Ꮡt) {
             }
 
             // Double the number of elements to force a grow.
-            ref var keyΔ2 = ref heap<uint32>(out var ᏑkeyΔ2);
-            keyΔ2 = (uint32)32;
-            ref var elemΔ2 = ref heap<uint64>(out var ᏑelemΔ2);
-            elemΔ2 = (uint64)(256 + 32);
+            ref var keyΔ2 = ref heap<uint32>((uint32)32, out var ᏑkeyΔ2);
+            ref var elemΔ2 = ref heap<uint64>((uint64)(256 + 32), out var ᏑelemΔ2);
 
             for (nint i = 0; i < 31; i++) {
                 keyΔ2 += 1;
@@ -515,22 +492,20 @@ public static void TestTableIterationGrowDelete(ж<testing.T> Ꮡt) {
 
         var (gotElem, gotOK) = got[key, ꟷ];
         if (gotOK != wantOK) {
-            Ꮡt.Errorf("Iteration key %d got ok %v want ok %v"u8, key, gotOK, wantOK);
+            t.Errorf("Iteration key %d got ok %v want ok %v", key, gotOK, wantOK);
             continue;
         }
         if (wantOK && gotElem != elem) {
-            Ꮡt.Errorf("Iteration key %d got elem %d want %d"u8, key, gotElem, elem);
+            t.Errorf("Iteration key %d got elem %d want %d", key, gotElem, elem);
         }
     }
 }
 
-internal static void testTableIterationGrowDuplicate(ж<testing.T> Ꮡt, nint grow) {
+internal static void testTableIterationGrowDuplicate(ж<testing.T> t, nint grow) {
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint64>(8);
 
-    ref var key = ref heap<uint32>(out var Ꮡkey);
-    key = (uint32)0;
-    ref var elem = ref heap<uint64>(out var Ꮡelem);
-    elem = (uint64)(256 + 0);
+    ref var key = ref heap<uint32>((uint32)0, out var Ꮡkey);
+    ref var elem = ref heap<uint64>((uint64)(256 + 0), out var Ꮡelem);
 
     for (nint i = 0; i < 31; i++) {
         key += 1;
@@ -545,7 +520,7 @@ internal static void testTableIterationGrowDuplicate(ж<testing.T> Ꮡt, nint gr
     var got = new map<uint32, uint64>();
     var it = @new<maps.Iter>();
     it.Init(typ, m);
-    for (nint i = 0; ᐧ ; i++) {
+    for (nint i = 0; ; i++) {
         it.Next();
         @unsafe.Pointer keyPtr = (uintptr)it.Key();
         @unsafe.Pointer elemPtr = (uintptr)it.Elem();
@@ -556,21 +531,19 @@ internal static void testTableIterationGrowDuplicate(ж<testing.T> Ꮡt, nint gr
         var keyΔ1 = ~(ж<uint32>)(uintptr)(keyPtr);
         var elemΔ1 = ~(ж<uint64>)(uintptr)(elemPtr);
         if (elemΔ1 != 256 + (uint64)keyΔ1) {
-            Ꮡt.Errorf("iteration got key %d elem %d want elem %d"u8, keyΔ1, elemΔ1, 256 + (uint64)keyΔ1);
+            t.Errorf("iteration got key %d elem %d want elem %d", keyΔ1, elemΔ1, 256 + (uint64)keyΔ1);
         }
         {
             var (_, ok) = got[keyΔ1, ꟷ]; if (ok) {
-                Ꮡt.Errorf("iteration got key %d more than once"u8, keyΔ1);
+                t.Errorf("iteration got key %d more than once", keyΔ1);
             }
         }
         got[keyΔ1] = elemΔ1;
 
         // Grow halfway through iteration.
         if (i == 16) {
-            ref var keyΔ2 = ref heap<uint32>(out var ᏑkeyΔ2);
-            keyΔ2 = (uint32)32;
-            ref var elemΔ2 = ref heap<uint64>(out var ᏑelemΔ2);
-            elemΔ2 = (uint64)(256 + 32);
+            ref var keyΔ2 = ref heap<uint32>((uint32)32, out var ᏑkeyΔ2);
+            ref var elemΔ2 = ref heap<uint64>((uint64)(256 + 32), out var ᏑelemΔ2);
 
             for (nint iΔ1 = 0; iΔ1 < grow; iΔ1++) {
                 keyΔ2 += 1;
@@ -589,18 +562,20 @@ internal static void testTableIterationGrowDuplicate(ж<testing.T> Ꮡt, nint gr
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string growˢ = "grow"u8;
-internal static readonly @string splitˢ = "split"u8;
+internal static ref readonly @string growˢ => ref growˢᵇ;
+private static readonly @string growˢᵇ = "grow"u8;
+internal static ref readonly @string splitˢ => ref splitˢᵇ;
+private static readonly @string splitˢᵇ = "split"u8;
 
 // Grow should not allow duplicate keys to appear.
-public static void TestTableIterationGrowDuplicate(ж<testing.T> Ꮡt) {
+public static void TestTableIterationGrowDuplicate(ж<testing.T> t) {
     // Small grow, only enough to cause table grow.
-    Ꮡt.Run(growˢ, (ж<testing.T> tΔ1) => {
+    t.Run(growˢ, (ж<testing.T> tΔ1) => {
         testTableIterationGrowDuplicate(tΔ1, 32);
     });
 
     // Large grow, to cause table split.
-    Ꮡt.Run(splitˢ, (ж<testing.T> tΔ2) => {
+    t.Run(splitˢ, (ж<testing.T> tΔ2) => {
         testTableIterationGrowDuplicate(tΔ2, 2 * maps_internal_test_package.MaxTableCapacity);
     });
 }
@@ -611,8 +586,8 @@ internal partial struct TestAlignUpPow2_tests /*dyn*/ {
     internal bool overflow;
 }
 
-public static void TestAlignUpPow2(ж<testing.T> Ꮡt) {
-    var tests = new TestAlignUpPow2_tests[]{
+public static void TestAlignUpPow2(ж<testing.T> t) {
+    var tests = slice<TestAlignUpPow2_tests>([
         new(
             @in: 0,
             want: 0
@@ -637,27 +612,25 @@ public static void TestAlignUpPow2(ж<testing.T> Ꮡt) {
             @in: 9223372036854775809UL,
             overflow: true
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tc) in tests) {
         var (got, overflow) = maps_internal_test_package.AlignUpPow2(tc.@in);
         if (got != tc.want) {
-            Ꮡt.Errorf("alignUpPow2(%d) got %d, want %d"u8, tc.@in, got, tc.want);
+            t.Errorf("alignUpPow2(%d) got %d, want %d", tc.@in, got, tc.want);
         }
         if (overflow != tc.overflow) {
-            Ꮡt.Errorf("alignUpPow2(%d) got overflow %v, want %v"u8, tc.@in, overflow, tc.overflow);
+            t.Errorf("alignUpPow2(%d) got overflow %v, want %v", tc.@in, overflow, tc.overflow);
         }
     }
 }
 
 // Verify that a map with zero-size slot is safe to use.
-public static void TestMapZeroSizeSlot(ж<testing.T> Ꮡt) {
+public static void TestMapZeroSizeSlot(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<EmptyStruct, EmptyStruct>(16);
 
-    ref var key = ref heap<EmptyStruct>(out var Ꮡkey);
-    key = new EmptyStruct();
-    ref var elem = ref heap<EmptyStruct>(out var Ꮡelem);
-    elem = new EmptyStruct();
+    ref var key = ref heap<EmptyStruct>(new EmptyStruct(), out var Ꮡkey);
+    ref var elem = ref heap<EmptyStruct>(new EmptyStruct(), out var Ꮡelem);
 
     m.Put(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey), @unsafe.Pointer.FromPinnedBox(Ꮡelem));
 
@@ -667,32 +640,30 @@ public static void TestMapZeroSizeSlot(ж<testing.T> Ꮡt) {
 
     var (got, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
     if (!ok) {
-        Ꮡt.Errorf("Get(%d) got ok false want true"u8, key);
+        t.Errorf("Get(%d) got ok false want true", key);
     }
     var gotElem = ((ж<EmptyStruct>)(uintptr)(got)).Value;
     if (gotElem != elem) {
-        Ꮡt.Errorf("Get(%d) got elem %d want %d"u8, key, gotElem, elem);
+        t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
     }
 
     var tab = m.TableFor(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
     @unsafe.Pointer start = (uintptr)tab.GroupsStart();
     var length = tab.GroupsLength();
-    @unsafe.Pointer end = (@unsafe.Pointer)((uintptr)start + length * (~typ).GroupSize - 1); // inclusive to ensure we have a valid pointer
+    @unsafe.Pointer end = (@unsafe.Pointer)((uintptr)start + length * typ.GroupSize - 1); // inclusive to ensure we have a valid pointer
     if ((uintptr)got < (uintptr)start || (uintptr)got > (uintptr)end) {
-        Ꮡt.Errorf("elem address outside groups allocation; got %p want [%p, %p]"u8, @unsafe.Pointer.OrTypedNil(got), @unsafe.Pointer.OrTypedNil(start), @unsafe.Pointer.OrTypedNil(end));
+        t.Errorf("elem address outside groups allocation; got %p want [%p, %p]", @unsafe.Pointer.OrTypedNil(got), @unsafe.Pointer.OrTypedNil(start), @unsafe.Pointer.OrTypedNil(end));
     }
 }
 
 /* [abi.MapMaxKeyBytes + abi.MapMaxElemBytes]byte */
 internal partial struct TestMapIndirect_big /*[256]byte*/;
 
-public static void TestMapIndirect(ж<testing.T> Ꮡt) {
+public static void TestMapIndirect(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<TestMapIndirect_big, TestMapIndirect_big>(8);
 
-    ref var key = ref heap<TestMapIndirect_big>(out var Ꮡkey);
-    key = new TestMapIndirect_big(new byte[256].array());
-    ref var elem = ref heap<TestMapIndirect_big>(out var Ꮡelem);
-    elem = new TestMapIndirect_big(new byte[256].array());
+    ref var key = ref heap<TestMapIndirect_big>(new TestMapIndirect_big(new byte[256].array()), out var Ꮡkey);
+    ref var elem = ref heap<TestMapIndirect_big>(new TestMapIndirect_big(new byte[256].array()), out var Ꮡelem);
     elem[0] = 128;
 
     for (nint i = 0; i < 31; i++) {
@@ -706,7 +677,7 @@ public static void TestMapIndirect(ж<testing.T> Ꮡt) {
     }
 
     if (m.Used() != 31) {
-        Ꮡt.Errorf("Used() used got %d want 31"u8, m.Used());
+        t.Errorf("Used() used got %d want 31", m.Used());
     }
 
     key = new TestMapIndirect_big(new byte[256].array());
@@ -718,23 +689,21 @@ public static void TestMapIndirect(ж<testing.T> Ꮡt) {
         elem[0] += 1;
         var (got, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
         if (!ok) {
-            Ꮡt.Errorf("Get(%v) got ok false want true"u8, key);
+            t.Errorf("Get(%v) got ok false want true", key);
         }
         var gotElem = (~(ж<TestMapIndirect_big>)(uintptr)(got)).Clone();
         if (gotElem != elem) {
-            Ꮡt.Errorf("Get(%v) got elem %v want %v"u8, key, gotElem, elem);
+            t.Errorf("Get(%v) got elem %v want %v", key, gotElem, elem);
         }
     }
 }
 
 // Delete should clear element. See https://go.dev/issue/25936.
-public static void TestMapDeleteClear(ж<testing.T> Ꮡt) {
+public static void TestMapDeleteClear(ж<testing.T> t) {
     var (m, typ) = maps_internal_test_package.NewTestMap<int64, int64>(8);
 
-    ref var key = ref heap<int64>(out var Ꮡkey);
-    key = (int64)0;
-    ref var elem = ref heap<int64>(out var Ꮡelem);
-    elem = (int64)128;
+    ref var key = ref heap<int64>((int64)0, out var Ꮡkey);
+    ref var elem = ref heap<int64>((int64)128, out var Ꮡelem);
 
     m.Put(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey), @unsafe.Pointer.FromPinnedBox(Ꮡelem));
 
@@ -744,18 +713,18 @@ public static void TestMapDeleteClear(ж<testing.T> Ꮡt) {
 
     var (got, ok) = m.Get(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
     if (!ok) {
-        Ꮡt.Errorf("Get(%d) got ok false want true"u8, key);
+        t.Errorf("Get(%d) got ok false want true", key);
     }
     var gotElem = ~(ж<int64>)(uintptr)(got);
     if (gotElem != elem) {
-        Ꮡt.Errorf("Get(%d) got elem %d want %d"u8, key, gotElem, elem);
+        t.Errorf("Get(%d) got elem %d want %d", key, gotElem, elem);
     }
 
     m.Delete(typ, @unsafe.Pointer.FromPinnedBox(Ꮡkey));
 
     gotElem = ~(ж<int64>)(uintptr)(got);
     if (gotElem != 0) {
-        Ꮡt.Errorf("Delete(%d) failed to clear element. got %d want 0"u8, key, gotElem);
+        t.Errorf("Delete(%d) failed to clear element. got %d want 0", key, gotElem);
     }
 }
 
@@ -770,15 +739,20 @@ internal static T escape<T>(T x) {
     return x;
 }
 
-internal static UntypedInt belowMax => /* abi.MapGroupSlots * 3 / 2 */ 12;                         // 1.5 * group max = 2 groups @ 75%
+internal static UntypedInt belowMax => /* abi.MapGroupSlots * 3 / 2 */ 12;                                       // 1.5 * group max = 2 groups @ 75%
 internal static UntypedInt atMax => /* (2 * abi.MapGroupSlots * maps.MaxAvgGroupLoad) / abi.MapGroupSlots */ 14; // 2 groups at 7/8 full.
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mapliteralˢ = "mapliteral"u8;
-internal static readonly @string escapeˢ = "escape"u8;
-internal static readonly @string nohintˢ = "nohint"u8;
-internal static readonly @string makemapˢ = "makemap"u8;
-internal static readonly @string makemap64ˢ = "makemap64"u8;
+internal static ref readonly @string mapliteralˢ => ref mapliteralˢᵇ;
+private static readonly @string mapliteralˢᵇ = "mapliteral"u8;
+internal static ref readonly @string escapeˢ => ref escapeˢᵇ;
+private static readonly @string escapeˢᵇ = "escape"u8;
+internal static ref readonly @string nohintˢ => ref nohintˢᵇ;
+private static readonly @string nohintˢᵇ = "nohint"u8;
+internal static ref readonly @string makemapˢ => ref makemapˢᵇ;
+private static readonly @string makemapˢᵇ = "makemap"u8;
+internal static ref readonly @string makemap64ˢ => ref makemap64ˢᵇ;
+private static readonly @string makemap64ˢᵇ = "makemap64"u8;
 
 internal partial struct TestTableGroupCount_mapCount /*dyn*/ {
     internal nint tables;
@@ -792,15 +766,15 @@ internal partial struct TestTableGroupCount_mapCase /*dyn*/ {
 }
 
 internal partial struct TestTableGroupCount_type /*dyn*/ {
-    internal nint n;    // n is the number of map elements
+    internal nint n;                             // n is the number of map elements
     internal TestTableGroupCount_mapCase escape; // expected values for escaping map
 }
 
-public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
+public static void TestTableGroupCount(ж<testing.T> t) {
     // Test that maps of different sizes have the right number of
     // tables/groups.
 
-    slice<TestTableGroupCount_type> testCases = new TestTableGroupCount_type[]{
+    slice<TestTableGroupCount_type> testCases = slice<TestTableGroupCount_type>([
         new(
             n: -(1 << 30),
             escape: new TestTableGroupCount_mapCase(
@@ -889,7 +863,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
                 after: new TestTableGroupCount_mapCount(1, 8)
             )
         )
-    }.slice();
+    ]);
 
     void testMap(ж<testing.T> tΔ1, map<nint, nint> mʗp, nint n, TestTableGroupCount_mapCount initial, TestTableGroupCount_mapCount after) {
         ref var m = ref heap(mʗp, out var Ꮡm);
@@ -897,12 +871,12 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
 
         nint gotTab = mm.TableCount();
         if (gotTab != initial.tables) {
-            tΔ1.Errorf("initial TableCount got %d want %d"u8, gotTab, initial.tables);
+            tΔ1.Errorf("initial TableCount got %d want %d", gotTab, initial.tables);
         }
 
         var gotGroup = mm.GroupCount();
         if (gotGroup != initial.groups) {
-            tΔ1.Errorf("initial GroupCount got %d want %d"u8, gotGroup, initial.groups);
+            tΔ1.Errorf("initial GroupCount got %d want %d", gotGroup, initial.groups);
         }
 
         for (nint i = 0; i < n; i++) {
@@ -911,18 +885,18 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
 
         gotTab = mm.TableCount();
         if (gotTab != after.tables) {
-            tΔ1.Errorf("after TableCount got %d want %d"u8, gotTab, after.tables);
+            tΔ1.Errorf("after TableCount got %d want %d", gotTab, after.tables);
         }
 
         gotGroup = mm.GroupCount();
         if (gotGroup != after.groups) {
-            tΔ1.Errorf("after GroupCount got %d want %d"u8, gotGroup, after.groups);
+            tΔ1.Errorf("after GroupCount got %d want %d", gotGroup, after.groups);
         }
     }
 
     var testCasesʗ1 = testCases;
     var testMapʗ1 = testMap;
-    Ꮡt.Run(mapliteralˢ, (ж<testing.T> tΔ2) => {
+    t.Run(mapliteralˢ, (ж<testing.T> tΔ2) => {
         foreach (var (_, vᴛ1) in testCasesʗ1) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ1;
@@ -941,7 +915,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
     });
     var testCasesʗ2 = testCases;
     var testMapʗ4 = testMap;
-    Ꮡt.Run(nohintˢ, (ж<testing.T> tΔ5) => {
+    t.Run(nohintˢ, (ж<testing.T> tΔ5) => {
         foreach (var (_, vᴛ2) in testCasesʗ2) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ2;
@@ -960,7 +934,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
     });
     var testCasesʗ3 = testCases;
     var testMapʗ7 = testMap;
-    Ꮡt.Run(makemapˢ, (ж<testing.T> tΔ8) => {
+    t.Run(makemapˢ, (ж<testing.T> tΔ8) => {
         foreach (var (_, vᴛ3) in testCasesʗ3) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ3;
@@ -979,7 +953,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
     });
     var testCasesʗ4 = testCases;
     var testMapʗ10 = testMap;
-    Ꮡt.Run(makemap64ˢ, (ж<testing.T> tΔ11) => {
+    t.Run(makemap64ˢ, (ж<testing.T> tΔ11) => {
         foreach (var (_, vᴛ4) in testCasesʗ4) {
             ref var tc = ref heap(new TestTableGroupCount_type(), out var Ꮡtc);
             tc = vᴛ4;
@@ -1001,23 +975,27 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object lenMShouldRemainConstantˢ = (@string)"len(m) should remain constant"u8;
 
-public static void TestTombstoneGrow(ж<testing.T> Ꮡt) {
-    var tableSizes = new nint[]{16, 32, 64, 128, 256}.slice();
+public static void TestTombstoneGrow(ж<testing.T> t) {
+    var tableSizes = slice<nint>([16, 32, 64, 128, 256]);
     foreach (var (_, tableSize) in tableSizes) {
-        foreach (var (_, load) in new @string[]{"low"u8, "mid"u8, "high"u8}.slice()) {
+        foreach (var (_, load) in slice<@string>(["low", "mid", "high"])) {
             nint capacity = tableSize * 7 / 8;
-            nint initialElems = default!;
+            nint initialElems = default;
             var exprᴛ1 = load;
-            if (exprᴛ1 == "low"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "low"u8: {
                 initialElems = capacity / 8;
+                break;
             }
-            else if (exprᴛ1 == "mid"u8) {
+            case {} when exprᴛ1 == "mid"u8: {
                 initialElems = capacity / 2;
+                break;
             }
-            else if (exprᴛ1 == "high"u8) {
+            case {} when exprᴛ1 == "high"u8: {
                 initialElems = capacity;
-            }
-            Ꮡt.Run(fmt.Sprintf("tableSize=%d/elems=%d/load=%0.3f"u8, tableSize, initialElems, (float64)initialElems / (float64)tableSize), (ж<testing.T> tΔ1) => {
+                break;
+            }}
+            t.Run(fmt.Sprintf("tableSize=%d/elems=%d/load=%0.3f"u8, tableSize, initialElems, (float64)initialElems / (float64)tableSize), (ж<testing.T> tΔ1) => {
                 var allocs = testing.AllocsPerRun(1, () => {
                     // Fill the map with elements.
                     var m = new map<nint, nint>(capacity);
@@ -1051,7 +1029,7 @@ public static void TestTombstoneGrow(ж<testing.T> Ꮡt) {
                     allowed += 2D;
                 }
                 if (allocs > allowed) {
-                    tΔ1.Fatalf("got %v allocations, allowed %v"u8, allocs, allowed);
+                    tΔ1.Fatalf("got %v allocations, allowed %v", allocs, allowed);
                 }
             });
         }

@@ -12,26 +12,26 @@ partial class strings_test_package {
 
 internal static @string emptyString;
 
-public static void TestClone(ж<testing.T> Ꮡt) {
-    slice<@string> cloneTests = new @string[]{
-        ""u8,
+public static void TestClone(ж<testing.T> t) {
+    slice<@string> cloneTests = slice<@string>([
+        "",
         strings.Clone(""u8),
-        strings.Repeat("a"u8, 42)[..0],
-        "short"u8,
-        strings.Repeat("a"u8, 42)
-    }.slice();
+        strings.Repeat("a", 42)[..0],
+        "short",
+        strings.Repeat("a", 42)
+    ]);
     foreach (var (_, input) in cloneTests) {
         @string clone = strings.Clone(input);
         if (clone != input) {
-            Ꮡt.Errorf("Clone(%q) = %q; want %q"u8, input, clone, input);
+            t.Errorf("Clone(%q) = %q; want %q", input, clone, input);
         }
 
         if (len(input) != 0 && @unsafe.StringData(clone) == @unsafe.StringData(input)) {
-            Ꮡt.Errorf("Clone(%q) return value should not reference inputs backing memory."u8, input);
+            t.Errorf("Clone(%q) return value should not reference inputs backing memory.", input);
         }
 
         if (len(input) == 0 && @unsafe.StringData(clone) != @unsafe.StringData(emptyString)) {
-            Ꮡt.Errorf("Clone(%#v) return value should be equal to empty string."u8, @unsafe.StringData(input).OrTypedNil());
+            t.Errorf("Clone(%#v) return value should be equal to empty string.", @unsafe.StringData(input).OrTypedNil());
         }
     }
 }
@@ -39,7 +39,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
 public static void BenchmarkClone(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    @string str = strings.Repeat("a"u8, 42);
+    @string str = strings.Repeat("a", 42);
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
         stringSink = strings.Clone(str);

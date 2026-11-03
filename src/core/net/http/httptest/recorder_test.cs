@@ -16,31 +16,56 @@ using ꓸꓸꓸstring = Span<@string>;
 partial class httptest_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hiFirstˢ = "hi first"u8;
-internal static readonly @string textPlainCharsetUtf8ˢ = "text/plain; charset=utf-8"u8;
-internal static readonly @string htmlˢ = "<html>"u8;
-internal static readonly @string textHtmlCharsetUtf8ˢ = "text/html; charset=utf-8"u8;
-internal static readonly @string someEncodingˢ = "some encoding"u8;
-internal static readonly @string someTypeˢ = "some/type"u8;
-internal static readonly @string keyˢ = "Key"u8;
-internal static readonly @string correctˢ = "correct"u8;
-internal static readonly @string incorrectˢ = "incorrect"u8;
-internal static readonly @string nonTrailerˢ = "Non-Trailer"u8;
-internal static readonly @string trailerATrailerBˢ = "Trailer-A, Trailer-B"u8;
-internal static readonly @string trailerCˢ = "Trailer-C"u8;
-internal static readonly @string trailerAˢ = "Trailer-A"u8;
-internal static readonly @string valueaˢ = "valuea"u8;
-internal static readonly @string valuecˢ = "valuec"u8;
-internal static readonly @string trailerNotDeclaredˢ = "Trailer-NotDeclared"u8;
-internal static readonly @string shouldBeOmittedˢ = "should be omitted"u8;
-internal static readonly @string trailerTrailerDˢ = "Trailer:Trailer-D"u8;
-internal static readonly @string withPrefixˢ = "with prefix"u8;
-internal static readonly @string trailerBˢ = "Trailer-B"u8;
-internal static readonly @string trailerDˢ = "Trailer-D"u8;
-internal static readonly @string xFooˢ = "X-Foo"u8;
-internal static readonly @string xBarˢ = "X-Bar"u8;
-internal static readonly @string someBodyˢ = "Some body"u8;
-internal static readonly @string httpFooComˢ = "http://foo.com/"u8;
+internal static ref readonly @string hiFirstˢ => ref hiFirstˢᵇ;
+private static readonly @string hiFirstˢᵇ = "hi first"u8;
+internal static ref readonly @string textPlainCharsetUtf8ˢ => ref textPlainCharsetUtf8ˢᵇ;
+private static readonly @string textPlainCharsetUtf8ˢᵇ = "text/plain; charset=utf-8"u8;
+internal static ref readonly @string htmlˢ => ref htmlˢᵇ;
+private static readonly @string htmlˢᵇ = "<html>"u8;
+internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
+private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
+internal static ref readonly @string someEncodingˢ => ref someEncodingˢᵇ;
+private static readonly @string someEncodingˢᵇ = "some encoding"u8;
+internal static ref readonly @string someTypeˢ => ref someTypeˢᵇ;
+private static readonly @string someTypeˢᵇ = "some/type"u8;
+internal static ref readonly @string keyˢ => ref keyˢᵇ;
+private static readonly @string keyˢᵇ = "Key"u8;
+internal static ref readonly @string correctˢ => ref correctˢᵇ;
+private static readonly @string correctˢᵇ = "correct"u8;
+internal static ref readonly @string incorrectˢ => ref incorrectˢᵇ;
+private static readonly @string incorrectˢᵇ = "incorrect"u8;
+internal static ref readonly @string nonTrailerˢ => ref nonTrailerˢᵇ;
+private static readonly @string nonTrailerˢᵇ = "Non-Trailer"u8;
+internal static ref readonly @string trailerATrailerBˢ => ref trailerATrailerBˢᵇ;
+private static readonly @string trailerATrailerBˢᵇ = "Trailer-A, Trailer-B"u8;
+internal static ref readonly @string trailerCˢ => ref trailerCˢᵇ;
+private static readonly @string trailerCˢᵇ = "Trailer-C"u8;
+internal static ref readonly @string trailerAˢ => ref trailerAˢᵇ;
+private static readonly @string trailerAˢᵇ = "Trailer-A"u8;
+internal static ref readonly @string valueaˢ => ref valueaˢᵇ;
+private static readonly @string valueaˢᵇ = "valuea"u8;
+internal static ref readonly @string valuecˢ => ref valuecˢᵇ;
+private static readonly @string valuecˢᵇ = "valuec"u8;
+internal static ref readonly @string trailerNotDeclaredˢ => ref trailerNotDeclaredˢᵇ;
+private static readonly @string trailerNotDeclaredˢᵇ = "Trailer-NotDeclared"u8;
+internal static ref readonly @string shouldBeOmittedˢ => ref shouldBeOmittedˢᵇ;
+private static readonly @string shouldBeOmittedˢᵇ = "should be omitted"u8;
+internal static ref readonly @string trailerTrailerDˢ => ref trailerTrailerDˢᵇ;
+private static readonly @string trailerTrailerDˢᵇ = "Trailer:Trailer-D"u8;
+internal static ref readonly @string withPrefixˢ => ref withPrefixˢᵇ;
+private static readonly @string withPrefixˢᵇ = "with prefix"u8;
+internal static ref readonly @string trailerBˢ => ref trailerBˢᵇ;
+private static readonly @string trailerBˢᵇ = "Trailer-B"u8;
+internal static ref readonly @string trailerDˢ => ref trailerDˢᵇ;
+private static readonly @string trailerDˢᵇ = "Trailer-D"u8;
+internal static ref readonly @string xFooˢ => ref xFooˢᵇ;
+private static readonly @string xFooˢᵇ = "X-Foo"u8;
+internal static ref readonly @string xBarˢ => ref xBarˢᵇ;
+private static readonly @string xBarˢᵇ = "X-Bar"u8;
+internal static ref readonly @string someBodyˢ => ref someBodyˢᵇ;
+private static readonly @string someBodyˢᵇ = "Some body"u8;
+internal static ref readonly @string httpFooComˢ => ref httpFooComˢᵇ;
+private static readonly @string httpFooComˢᵇ = "http://foo.com/"u8;
 
 internal partial struct TestRecorder_type /*dyn*/ {
     internal @string name;
@@ -48,9 +73,7 @@ internal partial struct TestRecorder_type /*dyn*/ {
     internal slice<Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>> checks;
 }
 
-public static void TestRecorder(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestRecorder(ж<testing.T> t) {
     // type checkFunc is a methodless func type — rendered inline as its base delegate
     slice<Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>> check(params Span<Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>> fnsʗp) {
         var fns = fnsʗp.slice();
@@ -58,104 +81,104 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
     }
 
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasStatus(nint wantCode) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            if ((~rec).Code != wantCode) {
-                return fmt.Errorf("Status = %d; want %d"u8, (~rec).Code, wantCode);
+            if (rec.Code != wantCode) {
+                return fmt.Errorf("Status = %d; want %d"u8, rec.Code, wantCode);
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasResultStatus(@string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            if ((~rec.Result()).Status != want) {
-                return fmt.Errorf("Result().Status = %q; want %q"u8, (~rec.Result()).Status, want);
+            if (rec.Result().Status != want) {
+                return fmt.Errorf("Result().Status = %q; want %q"u8, rec.Result().Status, want);
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasResultStatusCode(nint wantCode) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            if ((~rec.Result()).StatusCode != wantCode) {
-                return fmt.Errorf("Result().StatusCode = %d; want %d"u8, (~rec.Result()).StatusCode, wantCode);
+            if (rec.Result().StatusCode != wantCode) {
+                return fmt.Errorf("Result().StatusCode = %d; want %d"u8, rec.Result().StatusCode, wantCode);
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasResultContents(@string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            var (contentBytes, err) = io.ReadAll((~rec.Result()).Body);
-            if (err != default!) {
+            var (contentBytes, err) = io.ReadAll(rec.Result().Body);
+            if (err != nil) {
                 return err;
             }
             @string contents = (@string)contentBytes;
             if (contents != want) {
                 return fmt.Errorf("Result().Body = %s; want %s"u8, contents, want);
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasContents(@string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            if ((~rec).Body.String() != want) {
-                return fmt.Errorf("wrote = %q; want %q"u8, (~rec).Body.String(), want);
+            if (rec.Body.String() != want) {
+                return fmt.Errorf("wrote = %q; want %q"u8, rec.Body.String(), want);
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasFlush(bool want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            if ((~rec).Flushed != want) {
-                return fmt.Errorf("Flushed = %v; want %v"u8, (~rec).Flushed, want);
+            if (rec.Flushed != want) {
+                return fmt.Errorf("Flushed = %v; want %v"u8, rec.Flushed, want);
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasOldHeader(@string key, @string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             {
-                @string got = (~rec).HeaderMap.Get(key); if (got != want) {
+                @string got = rec.HeaderMap.Get(key); if (got != want) {
                     return fmt.Errorf("HeaderMap header %s = %q; want %q"u8, key, got, want);
                 }
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasHeader(@string key, @string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             {
-                @string got = (~rec.Result()).Header.Get(key); if (got != want) {
+                @string got = rec.Result().Header.Get(key); if (got != want) {
                     return fmt.Errorf("final header %s = %q; want %q"u8, key, got, want);
                 }
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasNotHeaders(params ꓸꓸꓸstring keysʗp) {
         var keys = keysʗp.slice();
         var keysʗ1 = keys;
         return (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             foreach (var (_, k) in keysʗ1) {
-                var (v, ok) = (~rec.Result()).Header[http.CanonicalHeaderKey(k), ꟷ];
+                var (v, ok) = rec.Result().Header[http.CanonicalHeaderKey(k), ꟷ];
                 if (ok) {
                     return fmt.Errorf("unexpected header %s with value %q"u8, k, v);
                 }
             }
-            return default!;
+            return default;
         });
     }
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasTrailer(@string key, @string want) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             {
-                @string got = (~rec.Result()).Trailer.Get(key); if (got != want) {
+                @string got = rec.Result().Trailer.Get(key); if (got != want) {
                     return fmt.Errorf("trailer %s = %q; want %q"u8, key, got, want);
                 }
             }
-            return default!;
+            return default;
         });
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasNotTrailers(params ꓸꓸꓸstring keysʗp) {
         var keys = keysʗp.slice();
         var keysʗ2 = keys;
         return (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
-            var trailers = rec.Result().Value.Trailer;
+            var trailers = rec.Result().Trailer;
             foreach (var (_, k) in keysʗ2) {
                 var (_, ok) = trailers[http.CanonicalHeaderKey(k), ꟷ];
                 if (ok) {
                     return fmt.Errorf("unexpected trailer %s"u8, k);
                 }
             }
-            return default!;
+            return default;
         });
     }
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasContentLength(int64 length) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             {
-                var got = rec.Result().Value.ContentLength; if (got != length) {
+                var got = rec.Result().ContentLength; if (got != length) {
                     return fmt.Errorf("ContentLength = %d; want %d"u8, got, length);
                 }
             }
-            return default!;
+            return default;
         });
 
 
@@ -174,22 +197,22 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
 
     foreach (var (_, vᴛ1) in new TestRecorder_type[]{
         new(
-            "200 default"u8,
+            "200 default",
             (http.ResponseWriter w, ж<http.Request> r) => {
             },
             check(hasStatus(200), hasContents(""u8))
         ),
         new(
-            "first code only"u8,
+            "first code only",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w.WriteHeader(201);
                 w.WriteHeader(202);
                 w.Write(slice<byte>("hi"u8));
             },
-            check(hasStatus(201), hasContents("hi"u8))
+            check(hasStatus(201), hasContents("hi"))
         ),
         new(
-            "write sends 200"u8,
+            "write sends 200",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w.Write(slice<byte>("hi first"u8));
                 w.WriteHeader(201);
@@ -198,7 +221,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             check(hasStatus(200), hasContents(hiFirstˢ), hasFlush(false))
         ),
         new(
-            "write string"u8,
+            "write string",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), hiFirstˢ);
             },
@@ -209,7 +232,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
                 hasHeader(contentTypeˢ, textPlainCharsetUtf8ˢ))
         ),
         new(
-            "flush"u8,
+            "flush",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w._<http.Flusher>().Flush(); // also sends a 200
                 w.WriteHeader(201);
@@ -217,14 +240,14 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             check(hasStatus(200), hasFlush(true), hasContentLength(-1))
         ),
         new(
-            "Content-Type detection"u8,
+            "Content-Type detection",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), htmlˢ);
             },
             check(hasHeader(contentTypeˢ, textHtmlCharsetUtf8ˢ))
         ),
         new(
-            "no Content-Type detection with Transfer-Encoding"u8,
+            "no Content-Type detection with Transfer-Encoding",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w.Header().Set(transferEncodingˢ, someEncodingˢ);
                 io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), htmlˢ);
@@ -233,7 +256,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
 
         ),
         new(
-            "no Content-Type detection if set explicitly"u8,
+            "no Content-Type detection if set explicitly",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w.Header().Set(contentTypeˢ, someTypeˢ);
                 io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), htmlˢ);
@@ -241,18 +264,18 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             check(hasHeader(contentTypeˢ, someTypeˢ))
         ),
         new(
-            "Content-Type detection doesn't crash if HeaderMap is nil"u8,
+            "Content-Type detection doesn't crash if HeaderMap is nil",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 // Act as if the user wrote new(httptest.ResponseRecorder)
                 // rather than using NewRecorder (which initializes
                 // HeaderMap)
-                w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().Value.HeaderMap = default!;
+                w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().HeaderMap = default;
                 io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), htmlˢ);
             },
             check(hasHeader(contentTypeˢ, textHtmlCharsetUtf8ˢ))
         ),
         new(
-            "Header is not changed after write"u8,
+            "Header is not changed after write",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 var hdr = w.Header();
                 hdr.Set(keyˢ, correctˢ);
@@ -262,7 +285,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             check(hasHeader(keyˢ, correctˢ))
         ),
         new(
-            "Trailer headers are correctly recorded"u8,
+            "Trailer headers are correctly recorded",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w.Header().Set(nonTrailerˢ, correctˢ);
                 w.Header().Set(trailerˢ, trailerATrailerBˢ);
@@ -285,40 +308,40 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
                 hasTrailer(trailerDˢ, withPrefixˢ))
         ),
         new(
-            "Header set without any write"u8, // Issue 15560
+            "Header set without any write", // Issue 15560
             (http.ResponseWriter w, ж<http.Request> r) => {
-                w.Header().Set(xFooˢ, "1"u8);
+                w.Header().Set(xFooˢ, "1");
 
                 // Simulate somebody using
                 // new(ResponseRecorder) instead of
                 // using the constructor which sets
                 // this to 200
-                w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().Value.Code = 0;
+                w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().Code = 0;
             },
             check(
-                hasOldHeader(xFooˢ, "1"u8),
+                hasOldHeader(xFooˢ, "1"),
                 hasStatus(0),
-                hasHeader(xFooˢ, "1"u8),
-                hasResultStatus("200 OK"u8),
+                hasHeader(xFooˢ, "1"),
+                hasResultStatus("200 OK"),
                 hasResultStatusCode(200))
         ),
         new(
-            "HeaderMap vs FinalHeaders"u8, // more for Issue 15560
+            "HeaderMap vs FinalHeaders", // more for Issue 15560
             (http.ResponseWriter w, ж<http.Request> r) => {
                 var h = w.Header();
-                h.Set(xFooˢ, "1"u8);
+                h.Set(xFooˢ, "1");
                 w.Write(slice<byte>("hi"u8));
-                h.Set(xFooˢ, "2"u8);
-                h.Set(xBarˢ, "2"u8);
+                h.Set(xFooˢ, "2");
+                h.Set(xBarˢ, "2");
             },
             check(
-                hasOldHeader(xFooˢ, "2"u8),
-                hasOldHeader(xBarˢ, "2"u8),
-                hasHeader(xFooˢ, "1"u8),
+                hasOldHeader(xFooˢ, "2"),
+                hasOldHeader(xBarˢ, "2"),
+                hasHeader(xFooˢ, "1"),
                 hasNotHeaders(xBarˢ))
         ),
         new(
-            "setting Content-Length header"u8,
+            "setting Content-Length header",
             (http.ResponseWriter w, ж<http.Request> r) => {
                 @string body = someBodyˢ;
                 @string contentLength = fmt.Sprintf("%d"u8, len(body));
@@ -328,10 +351,10 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             check(hasStatus(200), hasContents(someBodyˢ), hasContentLength(9))
         ),
         new(
-            "nil ResponseRecorder.Body"u8, // Issue 26642
+            "nil ResponseRecorder.Body", // Issue 26642
             (http.ResponseWriter w, ж<http.Request> r) => {
-                w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().Value.Body = default!;
-                io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), "hi"u8);
+                w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().Body = default;
+                io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), "hi");
             },
             check(hasResultContents(""u8)) // check we don't crash reading the body
 
@@ -341,14 +364,14 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
-            var (r, _) = http.NewRequest(getˢ, httpFooComˢ, default!);
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var (r, _) = http.NewRequest(getˢ, httpFooComˢ, default);
             var h = NilSafeDelegateConversion<http.HandlerFunc, Action<http.ResponseWriter, ж<http.Request>>>(ttʗ1.h);
             var rec = NewRecorder();
             h.ServeHTTP(new httptest_test_package.httptest_ResponseRecorderжResponseWriter(rec), r);
             foreach (var (_, checkΔ1) in ttʗ1.checks) {
                 {
-                    var err = checkΔ1(rec); if (err != default!) {
+                    var err = checkΔ1(rec); if (err != nil) {
                         tΔ1.Error(err);
                     }
                 }
@@ -358,28 +381,30 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string worldˢ = "world"u8;
-internal static readonly @string helloWorldˢ = "hello world"u8;
+internal static ref readonly @string worldˢ => ref worldˢᵇ;
+private static readonly @string worldˢᵇ = "world"u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "hello world"u8;
 
-public static void TestBodyNotAllowed(ж<testing.T> Ꮡt) {
+public static void TestBodyNotAllowed(ж<testing.T> t) {
     var rw = NewRecorder();
-    rw.Value.Body = @new<bytes.Buffer>();
+    rw.Body = @new<bytes.Buffer>();
     rw.WriteHeader(204);
 
     var (_, err) = rw.Write(slice<byte>("hello "u8));
     if (!errors.Is(err, http.ErrBodyNotAllowed)) {
-        Ꮡt.Errorf("expected BodyNotAllowed for Write after 204, got: %v"u8, err);
+        t.Errorf("expected BodyNotAllowed for Write after 204, got: %v", err);
     }
 
     (_, err) = rw.WriteString(worldˢ);
     if (!errors.Is(err, http.ErrBodyNotAllowed)) {
-        Ꮡt.Errorf("expected BodyNotAllowed for WriteString after 204, got: %v"u8, err);
+        t.Errorf("expected BodyNotAllowed for WriteString after 204, got: %v", err);
     }
 
     {
-        @string got = (~rw).Body.String();
+        @string got = rw.Body.String();
         @string want = helloWorldˢ; if (got != want) {
-            Ꮡt.Errorf("got Body=%q, want %q"u8, got, want);
+            t.Errorf("got Body=%q, want %q", got, want);
         }
     }
 }
@@ -390,35 +415,35 @@ internal partial struct TestParseContentLength_tests /*dyn*/ {
 }
 
 // issue 39017 - disallow Content-Length values such as "+3"
-public static void TestParseContentLength(ж<testing.T> Ꮡt) {
-    var tests = new TestParseContentLength_tests[]{
+public static void TestParseContentLength(ж<testing.T> t) {
+    var tests = slice<TestParseContentLength_tests>([
         new(
-            cl: "3"u8,
+            cl: "3",
             want: 3
         ),
         new(
-            cl: "+3"u8,
+            cl: "+3",
             want: -1
         ),
         new(
-            cl: "-3"u8,
+            cl: "-3",
             want: -1
         ),
         new(
             // max int64, for safe conversion before returning
-            cl: "9223372036854775807"u8,
+            cl: "9223372036854775807",
             want: 9223372036854775807L
         ),
         new(
-            cl: "9223372036854775808"u8,
+            cl: "9223372036854775808",
             want: -1
         )
-    }.slice();
+    ]);
 
     foreach (var (_, tt) in tests) {
         {
             var got = parseContentLength(tt.cl); if (got != tt.want) {
-                Ꮡt.Errorf("%q:\n\tgot=%d\n\twant=%d"u8, tt.cl, got, tt.want);
+                t.Errorf("%q:\n\tgot=%d\n\twant=%d", tt.cl, got, tt.want);
             }
         }
     }
@@ -426,21 +451,22 @@ public static void TestParseContentLength(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedAPanicˢ = (@string)"Expected a panic"u8;
-internal static readonly @string httpExampleOrgˢ = "http://example.org/"u8;
+internal static ref readonly @string httpExampleOrgˢ => ref httpExampleOrgˢᵇ;
+private static readonly @string httpExampleOrgˢᵇ = "http://example.org/"u8;
 
 // Ensure that httptest.Recorder panics when given a non-3 digit (XXX)
 // status HTTP code. See https://golang.org/issues/45353
-public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> Ꮡt) {
-    var badCodes = new nint[]{
+public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> t) {
+    var badCodes = slice<nint>([
         -100, 0, 99, 1000, 20000
-    }.slice();
+    ]);
     foreach (var (_, badCode) in badCodes) {
-        Ꮡt.Run(fmt.Sprintf("Code=%d"u8, badCode), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("Code=%d"u8, badCode), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
                     {
-                        var rΔ1 = recover(); if (rΔ1 == default!) {
+                        var rΔ1 = recover(); if (rΔ1 == nil) {
                             tΔ1.Fatal(expectedAPanicˢ);
                         }
                     }
@@ -449,7 +475,7 @@ public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> Ꮡt) {
                 void handler(http.ResponseWriter rwΔ1, ж<http.Request> _Δp1) {
                     rwΔ1.WriteHeader(badCode);
                 }
-                var (r, _) = http.NewRequest(getˢ, httpExampleOrgˢ, default!);
+                var (r, _) = http.NewRequest(getˢ, httpExampleOrgˢ, default);
                 var rw = NewRecorder();
                 handler(new httptest_test_package.httptest_ResponseRecorderжResponseWriter(rw), r);
             }

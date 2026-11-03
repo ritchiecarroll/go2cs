@@ -134,14 +134,14 @@ public static Rectangle Sub(this Rectangle r, Point p) {
 // of r's dimensions is less than 2*n then an empty rectangle near the center
 // of r will be returned.
 public static Rectangle Inset(this Rectangle r, nint n) {
-    if (r.Dx() < 2 * n){
+    if (r.Dx() < 2 * n) {
         r.Min.X = (r.Min.X + r.Max.X) / 2;
         r.Max.X = r.Min.X;
     } else {
         r.Min.X += n;
         r.Max.X -= n;
     }
-    if (r.Dy() < 2 * n){
+    if (r.Dy() < 2 * n) {
         r.Min.Y = (r.Min.Y + r.Max.Y) / 2;
         r.Max.Y = r.Min.Y;
     } else {
@@ -171,7 +171,7 @@ public static Rectangle Intersect(this Rectangle r, Rectangle s) {
     //
     // if max(r0.Min.X, s0.Min.X) >= min(r0.Max.X, s0.Max.X) || likewiseForY { etc }
     if (r.Empty()) {
-        return new Rectangle(nil);
+        return new Rectangle();
     }
     return r;
 }
@@ -250,7 +250,7 @@ public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return new color.RGBA64(0xffff, 0xffff, 0xffff, 0xffff);
     }
-    return new color.RGBA64(nil);
+    return new color.RGBA64();
 }
 
 // Bounds implements the [Image] interface.

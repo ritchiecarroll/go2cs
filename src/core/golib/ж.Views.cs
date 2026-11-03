@@ -95,8 +95,10 @@ public sealed class SlottedStandardBox<T> : StandardBox<T>
 {
     internal ViewEntry? m_views;
 
-    public SlottedStandardBox(in T value) : base(value)
+    // By value, and cleared after the base stores it: the rule StandardBox's constructor documents.
+    public SlottedStandardBox(T value) : base(value)
     {
+        value = default!;
     }
 }
 

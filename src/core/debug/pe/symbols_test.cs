@@ -17,26 +17,27 @@ internal partial struct testpoint {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataLlvmMingwˢ = "testdata/llvm-mingw-20211002-msvcrt-x86_64-crt2"u8;
+internal static ref readonly @string testdataLlvmMingwˢ => ref testdataLlvmMingwˢᵇ;
+private static readonly @string testdataLlvmMingwˢᵇ = "testdata/llvm-mingw-20211002-msvcrt-x86_64-crt2"u8;
 
-public static void TestReadCOFFSymbolAuxInfo(ж<testing.T> Ꮡt) {
+public static void TestReadCOFFSymbolAuxInfo(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         var testpoints = new map<nint, testpoint>{
             [39] = new testpoint(
-                name: ".rdata$.refptr.__native_startup_lock"u8,
+                name: ".rdata$.refptr.__native_startup_lock",
                 ok: true,
-                auxstr: "{Size:8 NumRelocs:1 NumLineNumbers:0 Checksum:0 SecNum:16 Selection:2 _:[0 0 0]}"u8
+                auxstr: "{Size:8 NumRelocs:1 NumLineNumbers:0 Checksum:0 SecNum:16 Selection:2 _:[0 0 0]}"
             ),
             [81] = new testpoint(
-                name: ".debug_line"u8,
+                name: ".debug_line",
                 ok: true,
-                auxstr: "{Size:994 NumRelocs:1 NumLineNumbers:0 Checksum:1624223678 SecNum:32 Selection:0 _:[0 0 0]}"u8
+                auxstr: "{Size:994 NumRelocs:1 NumLineNumbers:0 Checksum:1624223678 SecNum:32 Selection:0 _:[0 0 0]}"
             ),
             [155] = new testpoint(
-                name: ".file"u8,
+                name: ".file",
                 ok: false,
-                err: "incorrect symbol storage class"u8
+                err: "incorrect symbol storage class"
             )
         };
 
@@ -47,49 +48,49 @@ public static void TestReadCOFFSymbolAuxInfo(ж<testing.T> Ꮡt) {
         // compiler based on LLVM 13. More build details can be found at
         // https://github.com/mstorsjo/llvm-mingw/releases.
         var (f, err) = Open(testdataLlvmMingwˢ);
-        if (err != default!) {
-            Ꮡt.Errorf("open failed with %v"u8, err);
+        if (err != nil) {
+            t.Errorf("open failed with %v", err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        foreach (var k in range((~f).COFFSymbols)) {
+        foreach (var k in range(f.COFFSymbols)) {
             var (tp, ok) = testpoints[k, ꟷ];
             if (!ok) {
                 continue;
             }
-            var sym = Ꮡ((~f).COFFSymbols, k);
-            if ((~sym).NumberOfAuxSymbols == 0) {
-                Ꮡt.Errorf("expected aux symbols for sym %d"u8, k);
+            var sym = Ꮡ(f.COFFSymbols, k);
+            if (sym.NumberOfAuxSymbols == 0) {
+                t.Errorf("expected aux symbols for sym %d", k);
                 continue;
             }
-            var (name, nerr) = sym.FullName((~f).StringTable);
-            if (nerr != default!) {
-                Ꮡt.Errorf("FullName(%d) failed with %v"u8, k, nerr);
+            var (name, nerr) = sym.FullName(f.StringTable);
+            if (nerr != nil) {
+                t.Errorf("FullName(%d) failed with %v", k, nerr);
                 continue;
             }
             if (name != tp.name) {
-                Ꮡt.Errorf("name check for %d, got %s want %s"u8, k, name, tp.name);
+                t.Errorf("name check for %d, got %s want %s", k, name, tp.name);
                 continue;
             }
             var (ap, errΔ1) = f.COFFSymbolReadSectionDefAux(k);
-            if (tp.ok){
-                if (errΔ1 != default!) {
-                    Ꮡt.Errorf("unexpected failure on %d, got error %v"u8, k, errΔ1);
+            if (tp.ok) {
+                if (errΔ1 != nil) {
+                    t.Errorf("unexpected failure on %d, got error %v", k, errΔ1);
                     continue;
                 }
                 @string got = fmt.Sprintf("%+v"u8, ap.Value);
                 if (got != tp.auxstr) {
-                    Ꮡt.Errorf("COFFSymbolReadSectionDefAux on %d bad return, got:\n%s\nwant:\n%s\n"u8, k, got, tp.auxstr);
+                    t.Errorf("COFFSymbolReadSectionDefAux on %d bad return, got:\n%s\nwant:\n%s\n", k, got, tp.auxstr);
                     continue;
                 }
             } else {
-                if (errΔ1 == default!) {
-                    Ꮡt.Errorf("unexpected non-failure on %d"u8, k);
+                if (errΔ1 == nil) {
+                    t.Errorf("unexpected non-failure on %d", k);
                     continue;
                 }
                 @string got = fmt.Sprintf("%v"u8, errΔ1);
                 if (got != tp.err) {
-                    Ꮡt.Errorf("COFFSymbolReadSectionDefAux %d wrong error, got %q want %q"u8, k, got, tp.err);
+                    t.Errorf("COFFSymbolReadSectionDefAux %d wrong error, got %q want %q", k, got, tp.err);
                     continue;
                 }
             }

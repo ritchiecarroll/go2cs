@@ -18,12 +18,13 @@ internal static @string PublicSuffix(this dummypsl _, @string domain) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string dummyˢ = "dummy"u8;
+internal static ref readonly @string dummyˢ => ref dummyˢᵇ;
+private static readonly @string dummyˢᵇ = "dummy"u8;
 
 internal static @string String(this dummypsl _) {
     return dummyˢ;
 }
 
-internal static dummypsl publicsuffix = new dummypsl(nil);
+internal static dummypsl publicsuffix = new dummypsl();
 
 } // end cookiejar_test_package

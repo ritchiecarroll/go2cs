@@ -18,39 +18,40 @@ partial class gccgoimporter_internal_test_package {
 partial struct typeParserTestsᴛ1 /*dyn*/ {
     internal @string id, typ, want, underlying, methods;
 }
-internal static slice<typeParserTestsᴛ1> typeParserTests = new typeParserTestsᴛ1[]{
-    new(id: "foo"u8, typ: "<type -1>"u8, want: "int8"u8),
-    new(id: "foo"u8, typ: "<type 1 *<type -19>>"u8, want: "*error"u8),
-    new(id: "foo"u8, typ: "<type 1 *any>"u8, want: "unsafe.Pointer"u8),
-    new(id: "foo"u8, typ: "<type 1 \"Bar\" <type 2 *<type 1>>>"u8, want: "foo.Bar"u8, underlying: "*foo.Bar"u8),
-    new(id: "foo"u8, typ: "<type 1 \"bar.Foo\" \"bar\" <type -1>\nfunc (? <type 1>) M ();\n>"u8, want: "bar.Foo"u8, underlying: "int8"u8, methods: "func (bar.Foo).M()"u8),
-    new(id: "foo"u8, typ: "<type 1 \".bar.foo\" \"bar\" <type -1>>"u8, want: "bar.foo"u8, underlying: "int8"u8),
-    new(id: "foo"u8, typ: "<type 1 []<type -1>>"u8, want: "[]int8"u8),
-    new(id: "foo"u8, typ: "<type 1 [42]<type -1>>"u8, want: "[42]int8"u8),
-    new(id: "foo"u8, typ: "<type 1 map [<type -1>] <type -2>>"u8, want: "map[int8]int16"u8),
-    new(id: "foo"u8, typ: "<type 1 chan <type -1>>"u8, want: "chan int8"u8),
-    new(id: "foo"u8, typ: "<type 1 chan <- <type -1>>"u8, want: "<-chan int8"u8),
-    new(id: "foo"u8, typ: "<type 1 chan -< <type -1>>"u8, want: "chan<- int8"u8),
-    new(id: "foo"u8, typ: "<type 1 struct { I8 <type -1>; I16 <type -2> \"i16\"; }>"u8, want: "struct{I8 int8; I16 int16 \"i16\"}"u8),
-    new(id: "foo"u8, typ: "<type 1 interface { Foo (a <type -1>, b <type -2>) <type -1>; Bar (? <type -2>, ? ...<type -1>) (? <type -2>, ? <type -1>); Baz (); }>"u8, want: "interface{Bar(int16, ...int8) (int16, int8); Baz(); Foo(a int8, b int16) int8}"u8),
-    new(id: "foo"u8, typ: "<type 1 (? <type -1>) <type -2>>"u8, want: "func(int8) int16"u8)
-}.slice();
+internal static slice<typeParserTestsᴛ1> typeParserTests = slice<typeParserTestsᴛ1>([
+    new(id: "foo", typ: "<type -1>", want: "int8"),
+    new(id: "foo", typ: "<type 1 *<type -19>>", want: "*error"),
+    new(id: "foo", typ: "<type 1 *any>", want: "unsafe.Pointer"),
+    new(id: "foo", typ: "<type 1 \"Bar\" <type 2 *<type 1>>>", want: "foo.Bar", underlying: "*foo.Bar"),
+    new(id: "foo", typ: "<type 1 \"bar.Foo\" \"bar\" <type -1>\nfunc (? <type 1>) M ();\n>", want: "bar.Foo", underlying: "int8", methods: "func (bar.Foo).M()"),
+    new(id: "foo", typ: "<type 1 \".bar.foo\" \"bar\" <type -1>>", want: "bar.foo", underlying: "int8"),
+    new(id: "foo", typ: "<type 1 []<type -1>>", want: "[]int8"),
+    new(id: "foo", typ: "<type 1 [42]<type -1>>", want: "[42]int8"),
+    new(id: "foo", typ: "<type 1 map [<type -1>] <type -2>>", want: "map[int8]int16"),
+    new(id: "foo", typ: "<type 1 chan <type -1>>", want: "chan int8"),
+    new(id: "foo", typ: "<type 1 chan <- <type -1>>", want: "<-chan int8"),
+    new(id: "foo", typ: "<type 1 chan -< <type -1>>", want: "chan<- int8"),
+    new(id: "foo", typ: "<type 1 struct { I8 <type -1>; I16 <type -2> \"i16\"; }>", want: "struct{I8 int8; I16 int16 \"i16\"}"),
+    new(id: "foo", typ: "<type 1 interface { Foo (a <type -1>, b <type -2>) <type -1>; Bar (? <type -2>, ? ...<type -1>) (? <type -2>, ? <type -1>); Baz (); }>", want: "interface{Bar(int16, ...int8) (int16, int8); Baz(); Foo(a int8, b int16) int8}"),
+    new(id: "foo", typ: "<type 1 (? <type -1>) <type -2>>", want: "func(int8) int16")
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testGoxˢ = "test.gox"u8;
+internal static ref readonly @string testGoxˢ => ref testGoxˢᵇ;
+private static readonly @string testGoxˢᵇ = "test.gox"u8;
 
-public static void TestTypeParser(ж<testing.T> Ꮡt) {
+public static void TestTypeParser(ж<testing.T> t) {
     foreach (var (_, test) in typeParserTests) {
         ref var p = ref heap(new global::go.go.@internal.gccgoimporter_package.parser(), out var Ꮡp);
         Ꮡp.init(testGoxˢ, new gccgoimporter_internal_test_package.strings_ReaderжReader(strings.NewReader(test.typ)), new map<@string, ж<types.Package>>());
-        p.version = "v2"u8;
+        p.version = "v2";
         p.pkgname = test.id;
         p.pkgpath = test.id;
         p.maybeCreatePackage();
         var typ = Ꮡp.parseType(p.pkg);
 
         if (p.tok != scanner.EOF) {
-            Ꮡt.Errorf("expected full parse, stopped at %q"u8, p.lit);
+            t.Errorf("expected full parse, stopped at %q", p.lit);
         }
 
         // interfaces must be explicitly completed
@@ -62,13 +63,13 @@ public static void TestTypeParser(ж<testing.T> Ꮡt) {
 
         @string got = typ.String();
         if (got != test.want) {
-            Ꮡt.Errorf("got type %q, expected %q"u8, got, test.want);
+            t.Errorf("got type %q, expected %q", got, test.want);
         }
 
         if (test.underlying != ""u8) {
             @string underlying = typ.Underlying().String();
             if (underlying != test.underlying) {
-                Ꮡt.Errorf("got underlying type %q, expected %q"u8, underlying, test.underlying);
+                t.Errorf("got underlying type %q, expected %q", underlying, test.underlying);
             }
         }
 
@@ -80,7 +81,7 @@ public static void TestTypeParser(ж<testing.T> Ꮡt) {
             }
             @string methods = Ꮡbuf.String();
             if (methods != test.methods) {
-                Ꮡt.Errorf("got methods %q, expected %q"u8, methods, test.methods);
+                t.Errorf("got methods %q, expected %q", methods, test.methods);
             }
         }
     }

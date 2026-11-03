@@ -16,10 +16,11 @@ internal partial struct respWriteTest {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string abcdefˢ = "abcdef"u8;
+internal static ref readonly @string abcdefˢ => ref abcdefˢᵇ;
+private static readonly @string abcdefˢᵇ = "abcdef"u8;
 
-public static void TestResponseWrite(ж<testing.T> Ꮡt) {
-    var respWriteTests = new respWriteTest[]{
+public static void TestResponseWrite(ж<testing.T> t) {
+    var respWriteTests = slice<respWriteTest>([
         // HTTP/1.0, identity coding; no trailer
         new(
             new Response(
@@ -86,7 +87,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: -1,
-                TransferEncoding: new @string[]{"chunked"u8}.slice(),
+                TransferEncoding: slice<@string>(["chunked"]),
                 Close: false
             ),
             "HTTP/1.1 200 OK\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + "6\r\nabcdef\r\n0\r\n\r\n"u8
@@ -99,7 +100,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 ProtoMinor: 1,
                 Request: dummyReq11(getˢ),
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
-                Body: default!,
+                Body: default,
                 ContentLength: 0,
                 Close: false
             ),
@@ -143,7 +144,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: 6,
-                TransferEncoding: new @string[]{"chunked"u8}.slice(),
+                TransferEncoding: slice<@string>(["chunked"]),
                 Close: true
             ),
 
@@ -159,11 +160,11 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 ProtoMinor: 1,
                 Request: dummyReq(getˢ),
                 Header: new ΔHeader(new map<@string, slice<@string>>{
-                    ["Foo"u8] = new @string[]{" Bar\nBaz "u8}.slice()
+                    ["Foo"] = slice<@string>([" Bar\nBaz "])
                 }),
-                Body: default!,
+                Body: default,
                 ContentLength: 0,
-                TransferEncoding: new @string[]{"chunked"u8}.slice(),
+                TransferEncoding: slice<@string>(["chunked"]),
                 Close: true
             ),
 
@@ -177,13 +178,13 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 StatusCode: StatusOK,
                 ProtoMajor: 1,
                 ProtoMinor: 1,
-                Request: Ꮡ(new Request(Method: "POST"u8)),
+                Request: Ꮡ(new Request(Method: "POST")),
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 ContentLength: 0,
-                TransferEncoding: default!,
-                Body: default!
+                TransferEncoding: default,
+                Body: default
             ),
-            "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n"u8
+            "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n"
         ),
 
         // When a response to a POST has Content-Length: -1, make sure we don't
@@ -193,12 +194,12 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 StatusCode: StatusOK,
                 ProtoMajor: 1,
                 ProtoMinor: 1,
-                Request: Ꮡ(new Request(Method: "POST"u8)),
+                Request: Ꮡ(new Request(Method: "POST")),
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 ContentLength: -1,
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ)))
             ),
-            "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\nabcdef"u8
+            "HTTP/1.1 200 OK\r\nConnection: close\r\n\r\nabcdef"
         ),
 
         // Status code under 100 should be zero-padded to
@@ -208,15 +209,15 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
         new(
             new Response(
                 StatusCode: 7,
-                Status: "license to violate specs"u8,
+                Status: "license to violate specs",
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
-                Body: default!
+                Body: default
             ),
 
-            "HTTP/1.0 007 license to violate specs\r\nContent-Length: 0\r\n\r\n"u8
+            "HTTP/1.0 007 license to violate specs\r\nContent-Length: 0\r\n\r\n"
         ),
 
         // No stutter.  Status code in 1xx range response should
@@ -224,15 +225,15 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
         new(
             new Response(
                 StatusCode: 123,
-                Status: "123 Sesame Street"u8,
+                Status: "123 Sesame Street",
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
-                Body: default!
+                Body: default
             ),
 
-            "HTTP/1.0 123 Sesame Street\r\n\r\n"u8
+            "HTTP/1.0 123 Sesame Street\r\n\r\n"
         ),
 
         // Status code 204 (No content) response should not include a
@@ -240,29 +241,29 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
         new(
             new Response(
                 StatusCode: 204,
-                Status: "No Content"u8,
+                Status: "No Content",
                 ProtoMajor: 1,
                 ProtoMinor: 0,
                 Request: dummyReq(getˢ),
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
-                Body: default!
+                Body: default
             ),
 
-            "HTTP/1.0 204 No Content\r\n\r\n"u8
+            "HTTP/1.0 204 No Content\r\n\r\n"
         )
-    }.slice();
+    ]);
 
     foreach (var i in range(respWriteTests)) {
         var tt = Ꮡ(respWriteTests, i);
         ref var braw = ref heap(new strings.Builder(), out var Ꮡbraw);
-        var err = tt.of(respWriteTest.ᏑResp).Write(new http_test_package.strings_BuilderжWriter(Ꮡbraw));
-        if (err != default!) {
-            Ꮡt.Errorf("error writing #%d: %s"u8, i, err);
+        var err = tt.ᏑResp.Write(new http_test_package.strings_BuilderжWriter(Ꮡbraw));
+        if (err != nil) {
+            t.Errorf("error writing #%d: %s", i, err);
             continue;
         }
         @string sraw = braw.String();
-        if (sraw != (~tt).Raw) {
-            Ꮡt.Errorf("Test %d, expecting:\n%q\nGot:\n%q\n"u8, i, (~tt).Raw, sraw);
+        if (sraw != tt.Raw) {
+            t.Errorf("Test %d, expecting:\n%q\nGot:\n%q\n", i, tt.Raw, sraw);
             continue;
         }
     }

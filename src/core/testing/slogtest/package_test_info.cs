@@ -7,13 +7,7 @@
 global using static global::go.testing.slogtest_package;
 
 // <ImportedTypeAliases>
-global using jsonꓸToken = object;
-global using jsonꓸΔToken = object;
 global using slogꓸHandler = go.log.slog_package.ΔHandler;
-global using slogꓸKind = go.log.slog_package.ΔKind;
-global using slogꓸLevel = go.log.slog_package.ΔLevel;
-global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
-global using slogꓸSource = go.log.slog_package.ΔSource;
 // </ImportedTypeAliases>
 
 using go;
@@ -33,7 +27,7 @@ using static global::go.testing.slogtest_test_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -43,7 +37,7 @@ using static global::go.testing.slogtest_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/slogtest/run_test.go", "run_test.cs", "ABEegpSCgpSCkoCCpKY=", "18-21:1;22-28:2")]
+[assembly: GoPositionMap("testing/slogtest/run_test.go", "run_test.cs", "ABEegpSCgpSCgoCCpKY=", "18-21:1;22-28:2")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

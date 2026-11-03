@@ -32,13 +32,13 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
     // If there's only enough tmp for one slice,
     // we make it the bucket offsets and recompute
     // the character frequency each time we need it.
-    slice<int64> freq = default!;
-    slice<int64> bucket = default!;
-    if (builtin.len(tmp) >= 2 * textMax){
+    slice<int64> freq = default;
+    slice<int64> bucket = default;
+    if (builtin.len(tmp) >= 2 * textMax) {
         (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp.slice(0, textMax));
+        (freq, bucket) = (default, tmp.slice(0, textMax));
     }
 
     // The SAIS algorithm.
@@ -46,14 +46,14 @@ internal static void sais_8_64(slice<byte> text, nint textMax, slice<int64> sa, 
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_8_64(text, sa, freq, bucket);
-    if (numLMS <= 1){
+    if (numLMS <= 1) {
         // 0 or 1 items are already sorted. Do nothing.
     } else {
         induceSubL_8_64(text, sa, freq, bucket);
         induceSubS_8_64(text, sa, freq, bucket);
         length_8_64(text, sa, numLMS);
         nint maxID = assignID_8_64(text, sa, numLMS);
-        if (maxID < numLMS){
+        if (maxID < numLMS) {
             map_64(sa, numLMS);
             recurse_64(sa, tmp, numLMS, maxID);
             unmap_8_64(text, sa, numLMS);
@@ -95,13 +95,13 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
     // If there's only enough tmp for one slice,
     // we make it the bucket offsets and recompute
     // the character frequency each time we need it.
-    slice<int32> freq = default!;
-    slice<int32> bucket = default!;
-    if (builtin.len(tmp) >= 2 * textMax){
+    slice<int32> freq = default;
+    slice<int32> bucket = default;
+    if (builtin.len(tmp) >= 2 * textMax) {
         (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp.slice(0, textMax));
+        (freq, bucket) = (default, tmp.slice(0, textMax));
     }
 
     // The SAIS algorithm.
@@ -109,14 +109,14 @@ internal static void sais_32(slice<int32> text, nint textMax, slice<int32> sa, s
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_32(text, sa, freq, bucket);
-    if (numLMS <= 1){
+    if (numLMS <= 1) {
         // 0 or 1 items are already sorted. Do nothing.
     } else {
         induceSubL_32(text, sa, freq, bucket);
         induceSubS_32(text, sa, freq, bucket);
         length_32(text, sa, numLMS);
         nint maxID = assignID_32(text, sa, numLMS);
-        if (maxID < numLMS){
+        if (maxID < numLMS) {
             map_32(sa, numLMS);
             recurse_32(sa, tmp, numLMS, maxID);
             unmap_32(text, sa, numLMS);
@@ -158,13 +158,13 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
     // If there's only enough tmp for one slice,
     // we make it the bucket offsets and recompute
     // the character frequency each time we need it.
-    slice<int64> freq = default!;
-    slice<int64> bucket = default!;
-    if (builtin.len(tmp) >= 2 * textMax){
+    slice<int64> freq = default;
+    slice<int64> bucket = default;
+    if (builtin.len(tmp) >= 2 * textMax) {
         (freq, bucket) = (tmp.slice(0, textMax), tmp.slice(textMax, 2 * textMax));
         freq[0] = -1; // mark as uninitialized
     } else {
-        (freq, bucket) = (default!, tmp.slice(0, textMax));
+        (freq, bucket) = (default, tmp.slice(0, textMax));
     }
 
     // The SAIS algorithm.
@@ -172,14 +172,14 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
     // See the individual functions for documentation
     // about each's role in the algorithm.
     nint numLMS = placeLMS_64(text, sa, freq, bucket);
-    if (numLMS <= 1){
+    if (numLMS <= 1) {
         // 0 or 1 items are already sorted. Do nothing.
     } else {
         induceSubL_64(text, sa, freq, bucket);
         induceSubS_64(text, sa, freq, bucket);
         length_64(text, sa, numLMS);
         nint maxID = assignID_64(text, sa, numLMS);
-        if (maxID < numLMS){
+        if (maxID < numLMS) {
             map_64(sa, numLMS);
             recurse_64(sa, tmp, numLMS, maxID);
             unmap_64(text, sa, numLMS);
@@ -203,10 +203,10 @@ internal static void sais_64(slice<int64> text, nint textMax, slice<int64> sa, s
 }
 
 internal static slice<int64> freq_8_64(slice<byte> text, slice<int64> freq, slice<int64> bucket) {
-    if (freq != default! && freq[0] >= 0) {
+    if (freq != nil && freq[0] >= 0) {
         return freq; // already computed
     }
-    if (freq == default!) {
+    if (freq == nil) {
         freq = bucket;
     }
 
@@ -219,10 +219,10 @@ internal static slice<int64> freq_8_64(slice<byte> text, slice<int64> freq, slic
 }
 
 internal static slice<int32> freq_32(slice<int32> text, slice<int32> freq, slice<int32> bucket) {
-    if (freq != default! && freq[0] >= 0) {
+    if (freq != nil && freq[0] >= 0) {
         return freq; // already computed
     }
-    if (freq == default!) {
+    if (freq == nil) {
         freq = bucket;
     }
 
@@ -234,10 +234,10 @@ internal static slice<int32> freq_32(slice<int32> text, slice<int32> freq, slice
 }
 
 internal static slice<int64> freq_64(slice<int64> text, slice<int64> freq, slice<int64> bucket) {
-    if (freq != default! && freq[0] >= 0) {
+    if (freq != nil && freq[0] >= 0) {
         return freq; // already computed
     }
-    if (freq == default!) {
+    if (freq == nil) {
         freq = bucket;
     }
 
@@ -250,7 +250,7 @@ internal static slice<int64> freq_64(slice<int64> text, slice<int64> freq, slice
 
 internal static void bucketMin_8_64(slice<byte> text, slice<int64> freq, slice<int64> bucket) {
     freq = freq_8_64(text, freq, bucket);
-    freq = freq[..256]; // establish len(freq) = 256, so 0 ≤ i < 256 below
+    freq = freq[..256];     // establish len(freq) = 256, so 0 ≤ i < 256 below
     bucket = bucket[..256]; // eliminate bounds check for bucket[i] below
     var total = (int64)0;
     foreach (var (i, n) in freq) {
@@ -279,7 +279,7 @@ internal static void bucketMin_64(slice<int64> text, slice<int64> freq, slice<in
 
 internal static void bucketMax_8_64(slice<byte> text, slice<int64> freq, slice<int64> bucket) {
     freq = freq_8_64(text, freq, bucket);
-    freq = freq[..256]; // establish len(freq) = 256, so 0 ≤ i < 256 below
+    freq = freq[..256];     // establish len(freq) = 256, so 0 ≤ i < 256 below
     bucket = bucket[..256]; // eliminate bounds check for bucket[i] below
     var total = (int64)0;
     foreach (var (i, n) in freq) {
@@ -341,10 +341,9 @@ internal static nint placeLMS_8_64(slice<byte> text, slice<int64> sa, slice<int6
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Bucket the index i+1 for the start of an LMS-substring.
@@ -407,10 +406,9 @@ internal static nint placeLMS_32(slice<int32> text, slice<int32> sa, slice<int32
     var (c0, c1, isTypeS) = ((int32)0, (int32)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Bucket the index i+1 for the start of an LMS-substring.
@@ -473,10 +471,9 @@ internal static nint placeLMS_64(slice<int64> text, slice<int64> sa, slice<int64
     var (c0, c1, isTypeS) = ((int64)0, (int64)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Bucket the index i+1 for the start of an LMS-substring.
@@ -955,17 +952,16 @@ internal static void length_8_64(slice<byte> text, slice<int64> sa, nint numLMS)
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
         cx = cx << 8 | (uint64)((byte)(c1 + 1)); // byte-only
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
-            int64 code = default!;
-            if (end == 0){
+            int64 code = default;
+            if (end == 0) {
                 code = 0;
             } else {
                 code = (int64)(end - j);
@@ -1006,17 +1002,16 @@ internal static void length_32(slice<int32> text, slice<int32> sa, nint numLMS) 
     var (c0, c1, isTypeS) = ((int32)0, (int32)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
-            int32 code = default!;
-            if (end == 0){
+            int32 code = default;
+            if (end == 0) {
                 code = 0;
             } else {
                 code = (int32)(end - j);
@@ -1053,17 +1048,16 @@ internal static void length_64(slice<int64> text, slice<int64> sa, nint numLMS) 
     var (c0, c1, isTypeS) = ((int64)0, (int64)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Index j = i+1 is the start of an LMS-substring.
             // Compute length or encoded text to store in sa[j/2].
             nint j = i + 1;
-            int64 code = default!;
-            if (end == 0){
+            int64 code = default;
+            if (end == 0) {
                 code = 0;
             } else {
                 code = (int64)(end - j);
@@ -1263,10 +1257,9 @@ internal static void unmap_8_64(slice<byte> text, slice<int64> sa, nint numLMS) 
     var (c0, c1, isTypeS) = ((byte)0, (byte)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Populate inverse map.
@@ -1290,10 +1283,9 @@ internal static void unmap_32(slice<int32> text, slice<int32> sa, nint numLMS) {
     var (c0, c1, isTypeS) = ((int32)0, (int32)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Populate inverse map.
@@ -1317,10 +1309,9 @@ internal static void unmap_64(slice<int64> text, slice<int64> sa, nint numLMS) {
     var (c0, c1, isTypeS) = ((int64)0, (int64)0, false);
     for (nint i = builtin.len(text) - 1; i >= 0; i--) {
         (c0, c1) = (text[i], c0);
-        if (c0 < c1){
+        if (c0 < c1) {
             isTypeS = true;
-        } else 
-        if (c0 > c1 && isTypeS) {
+        } else if (c0 > c1 && isTypeS) {
             isTypeS = false;
 
             // Populate inverse map.

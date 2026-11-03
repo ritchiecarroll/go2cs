@@ -30,7 +30,7 @@
 namespace go;
 
 using atomic = @internal.runtime.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
 using @internal.runtime;
 
 partial class runtime_package {
@@ -64,7 +64,8 @@ internal static UntypedInt sigReceiving => 1;
 internal static UntypedInt sigSending => 2;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sigsendInconsistentStateˢ = "sigsend: inconsistent state"u8;
+internal static ref readonly @string sigsendInconsistentStateˢ => ref sigsendInconsistentStateˢᵇ;
+private static readonly @string sigsendInconsistentStateˢᵇ = "sigsend: inconsistent state"u8;
 
 // sigsend delivers a signal from sighandler to the internal signal delivery queue.
 // It reports whether the signal was sent. If not, the caller typically crashes the program.
@@ -86,7 +87,7 @@ internal static bool sigsend(uint32 s) {
     }
 
     // Add signal to outgoing queue.
-    while (ᐧ) {
+    for (;;) {
         var mask = sig.mask[s / 32];
         if ((mask & bit) != 0) {
             Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
@@ -99,18 +100,24 @@ internal static bool sigsend(uint32 s) {
 
     // Notify receiver that queue has new bit.
 Send:
-    while (ᐧ) {
-        var exprᴛ1 = Ꮡsig.of(sigᴛ1.Ꮡstate).Load();
-        if (exprᴛ1 == sigIdle) {
+    for (;;) {
+        switch (Ꮡsig.of(sigᴛ1.Ꮡstate).Load()) {
+        default: {
+            @throw(sigsendInconsistentStateˢ);
+            break;
+        }
+        case var ᴛ when ᴛ == sigIdle: {
             if (Ꮡsig.of(sigᴛ1.Ꮡstate).CompareAndSwap(sigIdle, sigSending)) {
                 goto break_Send;
             }
+            break;
         }
-        else if (exprᴛ1 == sigSending) {
+        case var ᴛ when ᴛ == sigSending: {
             // notification already pending
             goto break_Send;
+            break;
         }
-        else if (exprᴛ1 == sigReceiving) {
+        case var ᴛ when ᴛ == sigReceiving: {
             if (Ꮡsig.of(sigᴛ1.Ꮡstate).CompareAndSwap(sigReceiving, sigIdle)) {
                 if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
                     sigNoteWakeup(Ꮡsig.of(sigᴛ1.Ꮡnote));
@@ -119,10 +126,8 @@ Send:
                 notewakeup(Ꮡsig.of(sigᴛ1.Ꮡnote));
                 goto break_Send;
             }
-        }
-        else { /* default: */
-            @throw(sigsendInconsistentStateˢ);
-        }
+            break;
+        }}
 continue_Send:;
     }
 break_Send:;
@@ -132,14 +137,15 @@ break_Send:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string signalRecvInconsistentˢ = "signal_recv: inconsistent state"u8;
+internal static ref readonly @string signalRecvInconsistentˢ => ref signalRecvInconsistentˢᵇ;
+private static readonly @string signalRecvInconsistentˢᵇ = "signal_recv: inconsistent state"u8;
 
 // Called to receive the next queued signal.
 // Must only be called from a single goroutine at a time.
 //
 //go:linkname signal_recv os/signal.signal_recv
 public static uint32 signal_recv() {
-    while (ᐧ) {
+    for (;;) {
         // Serve any signals from local copy.
         for (var i = (uint32)0; i < _NSIG; i++) {
             if ((sig.recv[i / 32] & ((uint32)1 << (int)(i & 31))) != 0) {
@@ -150,9 +156,13 @@ public static uint32 signal_recv() {
 
         // Wait for updates to be available from signal sender.
 Receive:
-        while (ᐧ) {
-            var exprᴛ1 = Ꮡsig.of(sigᴛ1.Ꮡstate).Load();
-            if (exprᴛ1 == sigIdle) {
+        for (;;) {
+            switch (Ꮡsig.of(sigᴛ1.Ꮡstate).Load()) {
+            default: {
+                @throw(signalRecvInconsistentˢ);
+                break;
+            }
+            case var ᴛ when ᴛ == sigIdle: {
                 if (Ꮡsig.of(sigᴛ1.Ꮡstate).CompareAndSwap(sigIdle, sigReceiving)) {
                     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
                         sigNoteSleep(Ꮡsig.of(sigᴛ1.Ꮡnote));
@@ -162,15 +172,14 @@ Receive:
                     noteclear(Ꮡsig.of(sigᴛ1.Ꮡnote));
                     goto break_Receive;
                 }
+                break;
             }
-            else if (exprᴛ1 == sigSending) {
+            case var ᴛ when ᴛ == sigSending: {
                 if (Ꮡsig.of(sigᴛ1.Ꮡstate).CompareAndSwap(sigSending, sigIdle)) {
                     goto break_Receive;
                 }
-            }
-            else { /* default: */
-                @throw(signalRecvInconsistentˢ);
-            }
+                break;
+            }}
 continue_Receive:;
         }
 break_Receive:;
@@ -216,7 +225,7 @@ public static void signal_enable(uint32 s) {
     if (!sig.inuse) {
         // This is the first call to signal_enable. Initialize.
         sig.inuse = true; // enable reception of signals; cannot disable
-        if (GOOS == "darwin"u8 || GOOS == "ios"u8){
+        if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
             sigNoteSetup(Ꮡsig.of(sigᴛ1.Ꮡnote));
         } else {
             noteclear(Ꮡsig.of(sigᴛ1.Ꮡnote));

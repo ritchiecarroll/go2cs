@@ -277,7 +277,7 @@ func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 //
 // The one-hop form `&recv.field` is the common case and was the only one the converter recognised
 // until 2026-08-23. A DEEPER chain matched no arm and fell through to the `Ꮡ(value)` copy-box,
-// which boxes a COPY -- golib's `Ꮡ(in T)` ctor is documented as doing exactly that -- so every
+// which boxes a COPY -- golib's `Ꮡ(T)` ctor is documented as doing exactly that -- so every
 // write through the returned pointer was silently dropped. Measured in
 // `vendor/golang.org/x/net/dns/dnsmessage`'s `incrementSectionCount`, whose four
 // `count = &b.header.<section>` sites made `*count++` increment a temporary: the DNS header's
@@ -833,7 +833,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				// refRecv is computed from the ROOT identifier of the index base (getIdentifier walks
 				// selector chains), so a slice FIELD of the receiver — `&b.lines[i]`, whose base
 				// `b.lines` roots at the receiver `b` — matches it too. But the receiver copy-form
-				// `Ꮡ(b.lines[i])` boxes a COPY of the element via `Ꮡ(in T)` and silently drops writes
+				// `Ꮡ(b.lines[i])` boxes a COPY of the element via `Ꮡ(T)` and silently drops writes
 				// back through the pointer: tabwriter's terminateCell does `line := &b.lines[len-1];
 				// *line = append(*line, c)`, and the append's length write never lands in b.lines, so
 				// every line stays empty (empty formatted output). The copy-form is valid ONLY when the
@@ -858,7 +858,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 				// Same object-identity rule the slice branch above applies, for the same reason:
 				// refRecv is computed from the ROOT identifier, so an array FIELD of the receiver —
 				// `&d.hashHead[h]`, rooting at the receiver `d` — matched it too and took the copy-
-				// form. `Ꮡ(d.hashHead[h])` binds the one-arg `Ꮡ(in T)` overload, which boxes a COPY
+				// form. `Ꮡ(d.hashHead[h])` binds the one-arg `Ꮡ(T)` overload, which boxes a COPY
 				// of the ELEMENT, so every write through the pointer is silently dropped: flate's
 				// deflate() does `hh := &d.hashHead[hash&hashMask]; … *hh = uint32(d.index +
 				// d.hashOffset)`, the hash heads stayed all-zero, findMatch was never reached (its
@@ -1104,7 +1104,7 @@ func (v *Visitor) convUnaryExprCore(unaryExpr *ast.UnaryExpr, context UnaryExprC
 
 		// A package-QUALIFIED selector naming ANOTHER package's package-level VALUE var — `&pkg.V`,
 		// written or synthesized for a pointer-receiver call (`syscall.ForkLock.RLock()`). The copy
-		// wrap below (`Ꮡ(pkg.V)`, golib's Ꮡ<T>(in T) = new StandardBox<T>(target)) boxes a COPY, so a
+		// wrap below (`Ꮡ(pkg.V)`, golib's Ꮡ<T>(T) = new StandardBox<T>(target)) boxes a COPY, so a
 		// lock taken through one fresh box is released through another: measured on darwin as
 		// os.Pipe's `fatal error: sync: RUnlock of unlocked RWMutex` (2026-09-03), and hidden on
 		// every other platform by the hand-owned mutex's lazily shared state — a copy taken AFTER the

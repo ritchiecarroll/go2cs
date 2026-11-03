@@ -25,102 +25,102 @@ using static go.index.suffixarray_package;
 partial class suffixarray_internal_test_package {
 
 internal partial struct testCase {
-    internal @string name;  // name of test case
-    internal @string source;  // source to index
+    internal @string name;            // name of test case
+    internal @string source;          // source to index
     internal slice<@string> patterns; // patterns to lookup
 }
 
-internal static slice<testCase> testCases = new testCase[]{
+internal static slice<testCase> testCases = slice<testCase>([
     new(
-        "empty string"u8,
-        ""u8,
-        new @string[]{
-            ""u8,
-            "foo"u8,
-            "(foo)"u8,
-            ".*"u8,
-            "a*"u8
-        }.slice()
+        "empty string",
+        "",
+        slice<@string>([
+            "",
+            "foo",
+            "(foo)",
+            ".*",
+            "a*"
+        ])
     ),
 
     new(
-        "all a's"u8,
-        "aaaaaaaaaa"u8, // 10 a's
-        new @string[]{
-            ""u8,
-            "a"u8,
-            "aa"u8,
-            "aaa"u8,
-            "aaaa"u8,
-            "aaaaa"u8,
-            "aaaaaa"u8,
-            "aaaaaaa"u8,
-            "aaaaaaaa"u8,
-            "aaaaaaaaa"u8,
-            "aaaaaaaaaa"u8,
-            "aaaaaaaaaaa"u8, // 11 a's
-            "."u8,
-            ".*"u8,
-            "a+"u8,
-            "aa+"u8,
-            "aaaa[b]?"u8,
-            "aaa*"u8
-        }.slice()
+        "all a's",
+        "aaaaaaaaaa", // 10 a's
+        slice<@string>([
+            "",
+            "a",
+            "aa",
+            "aaa",
+            "aaaa",
+            "aaaaa",
+            "aaaaaa",
+            "aaaaaaa",
+            "aaaaaaaa",
+            "aaaaaaaaa",
+            "aaaaaaaaaa",
+            "aaaaaaaaaaa", // 11 a's
+            ".",
+            ".*",
+            "a+",
+            "aa+",
+            "aaaa[b]?",
+            "aaa*"
+        ])
     ),
 
     new(
-        "abc"u8,
-        "abc"u8,
-        new @string[]{
-            "a"u8,
-            "b"u8,
-            "c"u8,
-            "ab"u8,
-            "bc"u8,
-            "abc"u8,
-            "a.c"u8,
-            "a(b|c)"u8,
-            "abc?"u8
-        }.slice()
+        "abc",
+        "abc",
+        slice<@string>([
+            "a",
+            "b",
+            "c",
+            "ab",
+            "bc",
+            "abc",
+            "a.c",
+            "a(b|c)",
+            "abc?"
+        ])
     ),
 
     new(
-        "barbara*3"u8,
-        "barbarabarbarabarbara"u8,
-        new @string[]{
-            "a"u8,
-            "bar"u8,
-            "rab"u8,
-            "arab"u8,
-            "barbar"u8,
-            "bara?bar"u8
-        }.slice()
+        "barbara*3",
+        "barbarabarbarabarbara",
+        slice<@string>([
+            "a",
+            "bar",
+            "rab",
+            "arab",
+            "barbar",
+            "bara?bar"
+        ])
     ),
 
     new(
-        "typing drill"u8,
-        "Now is the time for all good men to come to the aid of their country."u8,
-        new @string[]{
-            "Now"u8,
-            "the time"u8,
-            "to come the aid"u8,
-            "is the time for all good men to come to the aid of their"u8,
-            "to (come|the)?"u8
-        }.slice()
+        "typing drill",
+        "Now is the time for all good men to come to the aid of their country.",
+        slice<@string>([
+            "Now",
+            "the time",
+            "to come the aid",
+            "is the time for all good men to come to the aid of their",
+            "to (come|the)?"
+        ])
     ),
 
     new(
-        "godoc simulation"u8,
-        "package main\n\nimport(\n    \"rand\"\n    "u8,
-        new @string[]{}.slice()
+        "godoc simulation",
+        "package main\n\nimport(\n    \"rand\"\n    ",
+        slice<@string>([])
     )
-}.slice();
+]);
 
 // find all occurrences of s in source; report at most n occurrences
 internal static slice<nint> find(@string src, @string s, nint n) {
     var resᴷ = new stackAppend<nint>(moves: true);
 
-    slice<nint> res = default!;
+    slice<nint> res = default;
     if (s != ""u8 && n != 0) {
         // find at most n occurrences of s in src
         for (nint i = -1; n < 0 || builtin.len(res) < n; ) {
@@ -136,15 +136,15 @@ internal static slice<nint> find(@string src, @string s, nint n) {
     return res;
 }
 
-internal static void testLookup(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx, @string s, nint n) {
+internal static void testLookup(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> x, @string s, nint n) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
-    var res = Ꮡx.Lookup(slice<byte>(s), n);
+    var res = x.Lookup(slice<byte>(s), n);
     var exp = find(tc.source, s, n);
 
     // check that the lengths match
     if (builtin.len(res) != builtin.len(exp)) {
-        Ꮡt.Errorf("test %q, lookup %q (n = %d): expected %d results; got %d"u8, tc.name, s, n, builtin.len(exp), builtin.len(res));
+        t.Errorf("test %q, lookup %q (n = %d): expected %d results; got %d", tc.name, s, n, builtin.len(exp), builtin.len(res));
     }
 
     // if n >= 0 the number of results is limited --- unless n >= all results,
@@ -155,14 +155,13 @@ internal static void testLookup(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<globa
     // check that each result is in fact a correct match and there are no duplicates
     slices.Sort<slice<nint>, nint>(res);
     foreach (var (i, r) in res) {
-        if (r < 0 || builtin.len(tc.source) <= r){
-            Ꮡt.Errorf("test %q, lookup %q, result %d (n = %d): index %d out of range [0, %d["u8, tc.name, s, i, n, r, builtin.len(tc.source));
-        } else 
-        if (!strings.HasPrefix(tc.source.slice(r), s)) {
-            Ꮡt.Errorf("test %q, lookup %q, result %d (n = %d): index %d not a match"u8, tc.name, s, i, n, r);
+        if (r < 0 || builtin.len(tc.source) <= r) {
+            t.Errorf("test %q, lookup %q, result %d (n = %d): index %d out of range [0, %d[", tc.name, s, i, n, r, builtin.len(tc.source));
+        } else if (!strings.HasPrefix(tc.source.slice(r), s)) {
+            t.Errorf("test %q, lookup %q, result %d (n = %d): index %d not a match", tc.name, s, i, n, r);
         }
         if (i > 0 && res[i - 1] == r) {
-            Ꮡt.Errorf("test %q, lookup %q, result %d (n = %d): found duplicate index %d"u8, tc.name, s, i, n, r);
+            t.Errorf("test %q, lookup %q, result %d (n = %d): found duplicate index %d", tc.name, s, i, n, r);
         }
     }
 
@@ -171,21 +170,21 @@ internal static void testLookup(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<globa
         foreach (var (i, r) in res) {
             nint e = exp[i];
             if (r != e) {
-                Ꮡt.Errorf("test %q, lookup %q, result %d: expected index %d; got %d"u8, tc.name, s, i, e, r);
+                t.Errorf("test %q, lookup %q, result %d: expected index %d; got %d", tc.name, s, i, e, r);
             }
         }
     }
 }
 
-internal static void testFindAllIndex(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx, ж<regexp.Regexp> Ꮡrx, nint n) {
+internal static void testFindAllIndex(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> x, ж<regexp.Regexp> rx, nint n) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
-    var res = Ꮡx.FindAllIndex(Ꮡrx, n);
-    var exp = Ꮡrx.FindAllStringIndex(tc.source, n);
+    var res = x.FindAllIndex(rx, n);
+    var exp = rx.FindAllStringIndex(tc.source, n);
 
     // check that the lengths match
     if (builtin.len(res) != builtin.len(exp)) {
-        Ꮡt.Errorf("test %q, FindAllIndex %q (n = %d): expected %d results; got %d"u8, tc.name, Ꮡrx.OrTypedNil(), n, builtin.len(exp), builtin.len(res));
+        t.Errorf("test %q, FindAllIndex %q (n = %d): expected %d results; got %d", tc.name, rx.OrTypedNil(), n, builtin.len(exp), builtin.len(res));
     }
 
     // if n >= 0 the number of results is limited --- unless n >= all results,
@@ -195,11 +194,10 @@ internal static void testFindAllIndex(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж
 
     // check that each result is in fact a correct match and the result is sorted
     foreach (var (i, r) in res) {
-        if (r[0] < 0 || r[0] > r[1] || builtin.len(tc.source) < r[1]){
-            Ꮡt.Errorf("test %q, FindAllIndex %q, result %d (n == %d): illegal match [%d, %d]"u8, tc.name, Ꮡrx.OrTypedNil(), i, n, r[0], r[1]);
-        } else 
-        if (!Ꮡrx.MatchString(tc.source.slice(r[0], r[1]))) {
-            Ꮡt.Errorf("test %q, FindAllIndex %q, result %d (n = %d): [%d, %d] not a match"u8, tc.name, Ꮡrx.OrTypedNil(), i, n, r[0], r[1]);
+        if (r[0] < 0 || r[0] > r[1] || builtin.len(tc.source) < r[1]) {
+            t.Errorf("test %q, FindAllIndex %q, result %d (n == %d): illegal match [%d, %d]", tc.name, rx.OrTypedNil(), i, n, r[0], r[1]);
+        } else if (!rx.MatchString(tc.source.slice(r[0], r[1]))) {
+            t.Errorf("test %q, FindAllIndex %q, result %d (n = %d): [%d, %d] not a match", tc.name, rx.OrTypedNil(), i, n, r[0], r[1]);
         }
     }
 
@@ -208,21 +206,21 @@ internal static void testFindAllIndex(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж
         foreach (var (i, r) in res) {
             var e = exp[i];
             if (r[0] != e[0] || r[1] != e[1]) {
-                Ꮡt.Errorf("test %q, FindAllIndex %q, result %d: expected match [%d, %d]; got [%d, %d]"u8,
-                    tc.name, Ꮡrx.OrTypedNil(), i, e[0], e[1], r[0], r[1]);
+                t.Errorf("test %q, FindAllIndex %q, result %d: expected match [%d, %d]; got [%d, %d]",
+                    tc.name, rx.OrTypedNil(), i, e[0], e[1], r[0], r[1]);
             }
         }
     }
 }
 
-internal static void testLookups(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx, nint n) {
+internal static void testLookups(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> x, nint n) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
     foreach (var (_, pat) in tc.patterns) {
-        testLookup(Ꮡt, Ꮡtc, Ꮡx, pat, n);
+        testLookup(t, Ꮡtc, x, pat, n);
         {
-            var (rx, err) = regexp.Compile(pat); if (err == default!) {
-                testFindAllIndex(Ꮡt, Ꮡtc, Ꮡx, rx, n);
+            var (rx, err) = regexp.Compile(pat); if (err == nil) {
+                testFindAllIndex(t, Ꮡtc, x, rx, n);
             }
         }
     }
@@ -240,7 +238,7 @@ internal static bool Less(this ref index x, nint i, nint j) {
 }
 
 internal static void Swap(this ref index x, nint i, nint j) {
-    if (x.sa.int32 != default!){
+    if (x.sa.int32 != nil) {
         (x.sa.int32[i], x.sa.int32[j]) = (x.sa.int32[j], x.sa.int32[i]);
     } else {
         (x.sa.int64[i], x.sa.int64[j]) = (x.sa.int64[j], x.sa.int64[i]);
@@ -251,11 +249,11 @@ internal static slice<byte> at(this ref index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 
-internal static partial void testConstruction(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
+internal static partial void testConstruction(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> x) {
     ref var tc = ref Ꮡtc.DerefOrNull();
 
-    if (!sort.IsSorted(new suffixarray_internal_test_package.indexжInterface(Ꮡx.Reinterpret<global::go.index.suffixarray_package.Index, index>()))) {
-        Ꮡt.Errorf("failed testConstruction %s"u8, tc.name);
+    if (!sort.IsSorted(new suffixarray_internal_test_package.indexжInterface(x.Reinterpret<global::go.index.suffixarray_package.Index, index>()))) {
+        t.Errorf("failed testConstruction %s", tc.name);
     }
 }
 
@@ -279,28 +277,27 @@ internal static bool equal(ж<global::go.index.suffixarray_package.Index> Ꮡx, 
 }
 
 // returns the serialized index size
-internal static nint testSaveRestore(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
+internal static nint testSaveRestore(ж<testing.T> t, ж<testCase> Ꮡtc, ж<global::go.index.suffixarray_package.Index> Ꮡx) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
         ref var tc = ref Ꮡtc.DerefOrNull();
         ref var x = ref Ꮡx.DerefOrNull();
 
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         {
-            var err = x.Write(new suffixarray_test_package.bytes_BufferжWriter(Ꮡbuf)); if (err != default!) {
-                Ꮡt.Errorf("failed writing index %s (%s)"u8, tc.name, err);
+            var err = x.Write(new suffixarray_test_package.bytes_BufferжWriter(Ꮡbuf)); if (err != nil) {
+                t.Errorf("failed writing index %s (%s)", tc.name, err);
             }
         }
         nint size = buf.Len();
         ref var y = ref heap(new global::go.index.suffixarray_package.Index(), out var Ꮡy);
         {
-            var err = y.Read(new suffixarray_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))); if (err != default!) {
-                Ꮡt.Errorf("failed reading index %s (%s)"u8, tc.name, err);
+            var err = y.Read(new suffixarray_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))); if (err != nil) {
+                t.Errorf("failed reading index %s (%s)", tc.name, err);
             }
         }
         if (!equal(Ꮡx, Ꮡy)) {
-            Ꮡt.Errorf("restored index doesn't match saved index %s"u8, tc.name);
+            t.Errorf("restored index doesn't match saved index %s", tc.name);
         }
 
         nint old = maxData32;
@@ -308,70 +305,70 @@ internal static nint testSaveRestore(ж<testing.T> Ꮡt, ж<testCase> Ꮡtc, ж<
             maxData32 = old;
         }, ref ᒐ);
         // Reread as forced 32.
-        y = new Index(nil);
+        y = new Index();
         maxData32 = realMaxData32;
         {
-            var err = y.Read(new suffixarray_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))); if (err != default!) {
-                Ꮡt.Errorf("failed reading index %s (%s)"u8, tc.name, err);
+            var err = y.Read(new suffixarray_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))); if (err != nil) {
+                t.Errorf("failed reading index %s (%s)", tc.name, err);
             }
         }
         if (!equal(Ꮡx, Ꮡy)) {
-            Ꮡt.Errorf("restored index doesn't match saved index %s"u8, tc.name);
+            t.Errorf("restored index doesn't match saved index %s", tc.name);
         }
 
         // Reread as forced 64.
-        y = new Index(nil);
+        y = new Index();
         maxData32 = -1;
         {
-            var err = y.Read(new suffixarray_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))); if (err != default!) {
-                Ꮡt.Errorf("failed reading index %s (%s)"u8, tc.name, err);
+            var err = y.Read(new suffixarray_test_package.bytes_ReaderжReader(bytes.NewReader(buf.Bytes()))); if (err != nil) {
+                t.Errorf("failed reading index %s (%s)", tc.name, err);
             }
         }
         if (!equal(Ꮡx, Ꮡy)) {
-            Ꮡt.Errorf("restored index doesn't match saved index %s"u8, tc.name);
+            t.Errorf("restored index doesn't match saved index %s", tc.name);
         }
 
         return size;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
-internal static void testIndex(ж<testing.T> Ꮡt) {
+internal static void testIndex(ж<testing.T> t) {
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new testCase(), out var Ꮡtc);
         tc = vᴛ1;
 
         var x = New(slice<byte>(tc.source));
-        testConstruction(Ꮡt, Ꮡtc, x);
-        testSaveRestore(Ꮡt, Ꮡtc, x);
-        testLookups(Ꮡt, Ꮡtc, x, 0);
-        testLookups(Ꮡt, Ꮡtc, x, 1);
-        testLookups(Ꮡt, Ꮡtc, x, 10);
-        testLookups(Ꮡt, Ꮡtc, x, 2000000000);
-        testLookups(Ꮡt, Ꮡtc, x, -1);
+        testConstruction(t, Ꮡtc, x);
+        testSaveRestore(t, Ꮡtc, x);
+        testLookups(t, Ꮡtc, x, 0);
+        testLookups(t, Ꮡtc, x, 1);
+        testLookups(t, Ꮡtc, x, 10);
+        testLookups(t, Ꮡtc, x, 2000000000);
+        testLookups(t, Ꮡtc, x, -1);
     }
 }
 
-public static void TestIndex32(ж<testing.T> Ꮡt) {
-    testIndex(Ꮡt);
+public static void TestIndex32(ж<testing.T> t) {
+    testIndex(t);
 }
 
-public static void TestIndex64(ж<testing.T> Ꮡt) {
+public static void TestIndex64(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         maxData32 = -1;
         defer(() => {
             maxData32 = realMaxData32;
         }, ref ᒐ);
-        testIndex(Ꮡt);
+        testIndex(t);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-public static void TestNew32(ж<testing.T> Ꮡt) {
-    test(Ꮡt, (slice<byte> x) => {
+public static void TestNew32(ж<testing.T> t) {
+    test(t, (slice<byte> x) => {
         var sa = new slice<int32>(builtin.len(x));
         text_32(x, sa);
         var @out = new slice<nint>(builtin.len(sa));
@@ -382,8 +379,8 @@ public static void TestNew32(ж<testing.T> Ꮡt) {
     });
 }
 
-public static void TestNew64(ж<testing.T> Ꮡt) {
-    test(Ꮡt, (slice<byte> x) => {
+public static void TestNew64(ж<testing.T> t) {
+    test(t, (slice<byte> x) => {
         var sa = new slice<int64>(builtin.len(x));
         text_64(x, sa);
         var @out = new slice<nint>(builtin.len(sa));
@@ -395,15 +392,19 @@ public static void TestNew64(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string abababˢ = "ababab..."u8;
-internal static readonly @string forceallocˢ = "forcealloc"u8;
-internal static readonly @string exhaustive2ˢ = "exhaustive2"u8;
-internal static readonly @string exhaustive3ˢ = "exhaustive3"u8;
+internal static ref readonly @string abababˢ => ref abababˢᵇ;
+private static readonly @string abababˢᵇ = "ababab..."u8;
+internal static ref readonly @string forceallocˢ => ref forceallocˢᵇ;
+private static readonly @string forceallocˢᵇ = "forcealloc"u8;
+internal static ref readonly @string exhaustive2ˢ => ref exhaustive2ˢᵇ;
+private static readonly @string exhaustive2ˢᵇ = "exhaustive2"u8;
+internal static ref readonly @string exhaustive3ˢ => ref exhaustive3ˢᵇ;
+private static readonly @string exhaustive3ˢᵇ = "exhaustive3"u8;
 
 // test tests an arbitrary suffix array construction function.
 // Generates many inputs, builds and checks suffix arrays.
-internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> build) {
-    Ꮡt.Run(abababˢ, (ж<testing.T> tΔ1) => {
+internal static void test(ж<testing.T> t, Func<slice<byte>, slice<nint>> build) {
+    t.Run(abababˢ, (ж<testing.T> tΔ1) => {
         // Very repetitive input has numLMS = len(x)/2-1
         // at top level, the largest it can be.
         // But maxID is only two (aba and ab$).
@@ -418,7 +419,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         testSA(tΔ1, x, build);
     });
 
-    Ꮡt.Run(forceallocˢ, (ж<testing.T> tΔ2) => {
+    t.Run(forceallocˢ, (ж<testing.T> tΔ2) => {
         // Construct a pathological input that forces
         // recurse_32 to allocate a new temporary buffer.
         // The input must have more than N/3 LMS-substrings,
@@ -434,7 +435,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         var lo = (byte)1;
         var hi = (byte)255;
         foreach (var i in range(x)) {
-            if (i % 2 == 0){
+            if (i % 2 == 0) {
                 x[i] = lo;
             } else {
                 x[i] = hi;
@@ -452,12 +453,11 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         testSA(tΔ2, x, build);
     });
 
-    Ꮡt.Run(exhaustive2ˢ, (ж<testing.T> tΔ3) => {
+    t.Run(exhaustive2ˢ, (ж<testing.T> tΔ3) => {
         // All inputs over {0,1} up to length 21.
         // Runs in about 10 seconds on my laptop.
         var x = new slice<byte>(30);
-        ref var numFail = ref heap<nint>(out var ᏑnumFail);
-        numFail = 0;
+        ref var numFail = ref heap<nint>(0, out var ᏑnumFail);
         for (nint n = 0; n <= 21; n++) {
             if (n > 12 && testing.Short()) {
                 break;
@@ -467,12 +467,11 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         }
     });
 
-    Ꮡt.Run(exhaustive3ˢ, (ж<testing.T> tΔ4) => {
+    t.Run(exhaustive3ˢ, (ж<testing.T> tΔ4) => {
         // All inputs over {0,1,2} up to length 14.
         // Runs in about 10 seconds on my laptop.
         var x = new slice<byte>(30);
-        ref var numFail = ref heap<nint>(out var ᏑnumFail);
-        numFail = 0;
+        ref var numFail = ref heap<nint>(0, out var ᏑnumFail);
         for (nint n = 0; n <= 14; n++) {
             if (n > 8 && testing.Short()) {
                 break;
@@ -485,58 +484,58 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
 
 // testRec fills x[i:] with all possible combinations of values in [1,max]
 // and then calls testSA(t, x, build) for each one.
-internal static void testRec(ж<testing.T> Ꮡt, slice<byte> x, nint i, nint max, ж<nint> ᏑnumFail, Func<slice<byte>, slice<nint>> build) {
+internal static void testRec(ж<testing.T> t, slice<byte> x, nint i, nint max, ж<nint> ᏑnumFail, Func<slice<byte>, slice<nint>> build) {
     ref var numFail = ref ᏑnumFail.DerefOrNull();
 
     if (i < builtin.len(x)) {
         for (x[i] = 1; x[i] <= (byte)max; x[i]++) {
-            testRec(Ꮡt, x, i + 1, max, ᏑnumFail, build);
+            testRec(t, x, i + 1, max, ᏑnumFail, build);
         }
         return;
     }
 
-    if (!testSA(Ꮡt, x, build)) {
+    if (!testSA(t, x, build)) {
         numFail++;
         if (numFail >= 10) {
-            Ꮡt.Errorf("stopping after %d failures"u8, numFail);
-            Ꮡt.FailNow();
+            t.Errorf("stopping after %d failures", numFail);
+            t.FailNow();
         }
     }
 }
 
 // testSA tests the suffix array build function on the input x.
 // It constructs the suffix array and then checks that it is correct.
-internal static bool testSA(ж<testing.T> Ꮡt, slice<byte> x, Func<slice<byte>, slice<nint>> build) {
+internal static bool testSA(ж<testing.T> t, slice<byte> x, Func<slice<byte>, slice<nint>> build) {
     GoFrame ᒐ = default;
     try {
         var xʗ1 = x;
         defer(() => {
             {
-                var e = recover(); if (e != default!) {
-                    Ꮡt.Logf("build %v"u8, xʗ1);
+                var e = recover(); if (e != nil) {
+                    t.Logf("build %v", xʗ1);
                     throw panic(e);
                 }
             }
         }, ref ᒐ);
         var sa = build(x);
         if (builtin.len(sa) != builtin.len(x)) {
-            Ꮡt.Errorf("build %v: len(sa) = %d, want %d"u8, x, builtin.len(sa), builtin.len(x));
+            t.Errorf("build %v: len(sa) = %d, want %d", x, builtin.len(sa), builtin.len(x));
             return false;
         }
         for (nint i = 0; i + 1 < builtin.len(sa); i++) {
             if (sa[i] < 0 || sa[i] >= builtin.len(x) || sa[i + 1] < 0 || sa[i + 1] >= builtin.len(x)) {
-                Ꮡt.Errorf("build %s: sa out of range: %v\n"u8, x, sa);
+                t.Errorf("build %s: sa out of range: %v\n", x, sa);
                 return false;
             }
             if (bytes.Compare(x.slice(sa[i]), x.slice(sa[i + 1])) >= 0) {
-                Ꮡt.Errorf("build %v -> %v\nsa[%d:] = %d,%d out of order"u8, x, sa, i, sa[i], sa[i + 1]);
+                t.Errorf("build %v -> %v\nsa[%d:] = %d,%d out of order", x, sa, i, sa[i], sa[i + 1]);
                 return false;
             }
         }
 
         return true;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
@@ -568,47 +567,53 @@ internal static void benchmarkNew(ж<testing.B> Ꮡb, bool random) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataIsaacNewtonˢ = "../../testdata/Isaac.Newton-Opticks.txt"u8;
+internal static ref readonly @string testdataIsaacNewtonˢ => ref testdataIsaacNewtonˢᵇ;
+private static readonly @string testdataIsaacNewtonˢᵇ = "../../testdata/Isaac.Newton-Opticks.txt"u8;
 
 internal static (slice<byte>, error) makeText(@string name) {
     ref var data = ref heap<slice<byte>>(out var Ꮡdata);
     var exprᴛ1 = name;
-    if (exprᴛ1 == "opticks"u8) {
-        error err = default!;
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "opticks"u8: {
+        error err = default;
         (data, err) = os.ReadFile(testdataIsaacNewtonˢ);
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
+        break;
     }
-    else if (exprᴛ1 == "go"u8) {
-        var err = filepath.WalkDir("../.."u8, error (@string path, fs.DirEntry info, error errΔ1) => {
-            if (errΔ1 == default! && strings.HasSuffix(path, ".go"u8) && !info.IsDir()) {
+    case {} when exprᴛ1 == "go"u8: {
+        var err = filepath.WalkDir("../..", error (@string path, fs.DirEntry info, error errΔ1) => {
+            if (errΔ1 == nil && strings.HasSuffix(path, ".go") && !info.IsDir()) {
                 var (@file, errΔ2) = os.ReadFile(path);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     return errΔ2;
                 }
                 Ꮡdata.ValueSlot = appendꓸꓸꓸ(Ꮡdata.ValueSlot, @file);
             }
-            return default!;
+            return default;
         });
-        if (err != default!) {
-            return (default!, err);
+        if (err != nil) {
+            return (default, err);
         }
+        break;
     }
-    else if (exprᴛ1 == "zero"u8) {
+    case {} when exprᴛ1 == "zero"u8: {
         data = new slice<byte>(50000000);
+        break;
     }
-    else if (exprᴛ1 == "rand"u8) {
+    case {} when exprᴛ1 == "rand"u8: {
         data = new slice<byte>(50000000);
         foreach (var i in range(data)) {
             data[i] = (byte)rand.Intn(256);
         }
-    }
-    return (data, default!);
+        break;
+    }}
+    return (data, default);
 }
 
 internal static Action /*cleanup*/ setBits(nint bits) {
-    if (bits == 32){
+    if (bits == 32) {
         maxData32 = realMaxData32;
     } else {
         maxData32 = -1; // force use of 64-bit code
@@ -618,17 +623,17 @@ internal static Action /*cleanup*/ setBits(nint bits) {
     };
 }
 
-public static void BenchmarkNew(ж<testing.B> Ꮡb) {
-    foreach (var (_, text) in new @string[]{"opticks"u8, "go"u8, "zero"u8, "rand"u8}.slice()) {
-        Ꮡb.Run("text="u8 + text, (ж<testing.B> bΔ1) => {
+public static void BenchmarkNew(ж<testing.B> b) {
+    foreach (var (_, text) in slice<@string>(["opticks", "go", "zero", "rand"])) {
+        b.Run("text="u8 + text, (ж<testing.B> bΔ1) => {
             var (data, err) = makeText(text);
-            if (err != default!) {
+            if (err != nil) {
                 bΔ1.Fatal(err);
             }
             if (testing.Short() && builtin.len(data) > 5000000) {
                 data = data[..(int)5000000];
             }
-            foreach (var (_, size) in new nint[]{100000, 500000, 1000000, 5000000, 10000000, 50000000}.slice()) {
+            foreach (var (_, size) in slice<nint>([100000, 500000, 1000000, 5000000, 10000000, 50000000])) {
                 if (builtin.len(data) < size) {
                     continue;
                 }
@@ -639,7 +644,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
                 }
                 var dataʗ1 = dataΔ1;
                 bΔ1.Run("size="u8 + name, (ж<testing.B> bΔ2) => {
-                    foreach (var (_, bits) in new nint[]{32, 64}.slice()) {
+                    foreach (var (_, bits) in slice<nint>([32, 64])) {
                         if (~(nuint)0 == 0xffffffffU && bits == 64) {
                             continue;
                         }
@@ -667,18 +672,18 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
+public static void BenchmarkSaveRestore(ж<testing.B> b) {
     var r = rand.New(rand.NewSource(0x5a77a1)); // guarantee always same sequence
-    var data = new slice<byte>((1 << 20)); // 1MB of data to index
+    var data = new slice<byte>((1 << 20));      // 1MB of data to index
     foreach (var i in range(data)) {
         data[i] = (byte)r.Intn(256);
     }
-    foreach (var (_, bits) in new nint[]{32, 64}.slice()) {
+    foreach (var (_, bits) in slice<nint>([32, 64])) {
         if (~(nuint)0 == 0xffffffffU && bits == 64) {
             continue;
         }
         var dataʗ1 = data;
-        Ꮡb.Run(fmt.Sprintf("bits=%d"u8, bits), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("bits=%d"u8, bits), (ж<testing.B> bΔ1) => {
             GoFrame ᒐ = default;
             try {
                 var cleanup = setBits(bits);
@@ -687,7 +692,7 @@ public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
 
                 bΔ1.StopTimer();
                 var x = New(dataʗ1);
-                nint size = testSaveRestore(nil, nil, x); // verify correctness
+                nint size = testSaveRestore(nil, nil, x);         // verify correctness
                 var buf = bytes.NewBuffer(new slice<byte>(size)); // avoid growing
                 bΔ1.SetBytes((int64)size);
                 bΔ1.StartTimer();
@@ -695,13 +700,13 @@ public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     buf.Reset();
                     {
-                        var err = x.Write(new suffixarray_test_package.bytes_BufferжWriter(buf)); if (err != default!) {
+                        var err = x.Write(new suffixarray_test_package.bytes_BufferжWriter(buf)); if (err != nil) {
                             bΔ1.Fatal(err);
                         }
                     }
-                    global::go.index.suffixarray_package.Index y = default!;
+                    global::go.index.suffixarray_package.Index y = default;
                     {
-                        var err = y.Read(new suffixarray_test_package.bytes_BufferжReader(buf)); if (err != default!) {
+                        var err = y.Read(new suffixarray_test_package.bytes_BufferжReader(buf)); if (err != nil) {
                             bΔ1.Fatal(err);
                         }
                     }

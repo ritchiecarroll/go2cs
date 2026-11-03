@@ -10,11 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using syscallꓸHandle = go.syscall_package.ΔHandle;
-global using syscallꓸSignal = go.syscall_package.ΔSignal;
-global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
-global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
-global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +45,7 @@ using static go.@internal.syscall.execenv_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -60,7 +55,7 @@ using static go.@internal.syscall.execenv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/syscall/execenv/execenv_windows.go", "execenv_windows.cs", "AA0uAA4CgpSCgoKUlIKUgoKmgoKU")]
+[assembly: GoPositionMap("internal/syscall/execenv/execenv_windows.go", "execenv_windows.cs", "AA0uAA4CgpSCgoKUlIKUgoKmgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.syscall;

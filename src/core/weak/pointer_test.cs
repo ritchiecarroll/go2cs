@@ -31,21 +31,21 @@ partial struct T {
 private static readonly object valueOfZeroValueOfWeakˢ = (@string)"Value of zero value of weak.Pointer is not nil"u8;
 private static readonly object valueOfWeakMakeTNilIsNotˢ = (@string)"Value of weak.Make[T](nil) is not nil"u8;
 
-public static void TestPointer(ж<testing.T> Ꮡt) {
-    weak.Pointer<T> zero = default!;
+public static void TestPointer(ж<testing.T> t) {
+    weak.Pointer<T> zero = default;
     if (zero.Value() != nil) {
-        Ꮡt.Error(valueOfZeroValueOfWeakˢ);
+        t.Error(valueOfZeroValueOfWeakˢ);
     }
     var zeroNil = weak.Make<T>(nil);
     if (zeroNil.Value() != nil) {
-        Ꮡt.Error(valueOfWeakMakeTNilIsNotˢ);
+        t.Error(valueOfWeakMakeTNilIsNotˢ);
     }
 
     var bt = @new<T>();
     var wt = weak.Make<T>(bt);
     {
         var st = wt.Value(); if (st != bt) {
-            Ꮡt.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p"u8, st.OrTypedNil(), bt.OrTypedNil());
+            t.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p", st.OrTypedNil(), bt.OrTypedNil());
         }
     }
     // bt is still referenced.
@@ -53,7 +53,7 @@ public static void TestPointer(ж<testing.T> Ꮡt) {
 
     {
         var st = wt.Value(); if (st != bt) {
-            Ꮡt.Fatalf("weak pointer is not the same as strong pointer after GC: %p vs. %p"u8, st.OrTypedNil(), bt.OrTypedNil());
+            t.Fatalf("weak pointer is not the same as strong pointer after GC: %p vs. %p", st.OrTypedNil(), bt.OrTypedNil());
         }
     }
     // bt is no longer referenced.
@@ -61,7 +61,7 @@ public static void TestPointer(ж<testing.T> Ꮡt) {
 
     {
         var st = wt.Value(); if (st != nil) {
-            Ꮡt.Fatalf("expected weak pointer to be nil, got %p"u8, st.OrTypedNil());
+            t.Fatalf("expected weak pointer to be nil, got %p", st.OrTypedNil());
         }
     }
 }
@@ -69,11 +69,11 @@ public static void TestPointer(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object weakMakeTNilZeroValueOfˢ = (@string)"weak.Make[T](nil) != zero value of weak.Pointer[T]"u8;
 
-public static void TestPointerEquality(ж<testing.T> Ꮡt) {
-    weak.Pointer<T> zero = default!;
+public static void TestPointerEquality(ж<testing.T> t) {
+    weak.Pointer<T> zero = default;
     var zeroNil = weak.Make<T>(nil);
     if (zero != zeroNil) {
-        Ꮡt.Error(weakMakeTNilZeroValueOfˢ);
+        t.Error(weakMakeTNilZeroValueOfˢ);
     }
 
     var bt = new slice<ж<T>>(10);
@@ -82,28 +82,28 @@ public static void TestPointerEquality(ж<testing.T> Ꮡt) {
     foreach (var i in range(bt)) {
         bt[i] = @new<T>();
         wt[i] = weak.Make<T>(bt[i]);
-        wo[i] = weak.Make<nint>(bt[i].of(T.Ꮡa));
+        wo[i] = weak.Make<nint>(bt[i].Ꮡa);
     }
     foreach (var i in range(bt)) {
         var st = wt[i].Value();
         if (st != bt[i]) {
-            Ꮡt.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p"u8, st.OrTypedNil(), bt[i].OrTypedNil());
+            t.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p", st.OrTypedNil(), bt[i].OrTypedNil());
         }
         {
             var wp = weak.Make<T>(st); if (wp != wt[i]) {
-                Ꮡt.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v"u8, wp, wt[i]);
+                t.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v", wp, wt[i]);
             }
         }
         {
-            var wp = weak.Make<nint>(st.of(T.Ꮡa)); if (wp != wo[i]) {
-                Ꮡt.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v"u8, wp, wo[i]);
+            var wp = weak.Make<nint>(st.Ꮡa); if (wp != wo[i]) {
+                t.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v", wp, wo[i]);
             }
         }
         if (i == 0) {
             continue;
         }
         if (wt[i] == wt[i - 1]) {
-            Ꮡt.Fatalf("expected weak pointers to not be equal to each other, but got %v"u8, wt[i]);
+            t.Fatalf("expected weak pointers to not be equal to each other, but got %v", wt[i]);
         }
     }
     // bt is still referenced.
@@ -111,52 +111,51 @@ public static void TestPointerEquality(ж<testing.T> Ꮡt) {
     foreach (var i in range(bt)) {
         var st = wt[i].Value();
         if (st != bt[i]) {
-            Ꮡt.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p"u8, st.OrTypedNil(), bt[i].OrTypedNil());
+            t.Fatalf("weak pointer is not the same as strong pointer: %p vs. %p", st.OrTypedNil(), bt[i].OrTypedNil());
         }
         {
             var wp = weak.Make<T>(st); if (wp != wt[i]) {
-                Ꮡt.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v"u8, wp, wt[i]);
+                t.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v", wp, wt[i]);
             }
         }
         {
-            var wp = weak.Make<nint>(st.of(T.Ꮡa)); if (wp != wo[i]) {
-                Ꮡt.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v"u8, wp, wo[i]);
+            var wp = weak.Make<nint>(st.Ꮡa); if (wp != wo[i]) {
+                t.Fatalf("new weak pointer not equal to existing weak pointer: %v vs. %v", wp, wo[i]);
             }
         }
         if (i == 0) {
             continue;
         }
         if (wt[i] == wt[i - 1]) {
-            Ꮡt.Fatalf("expected weak pointers to not be equal to each other, but got %v"u8, wt[i]);
+            t.Fatalf("expected weak pointers to not be equal to each other, but got %v", wt[i]);
         }
     }
-    bt = default!;
+    bt = default;
     // bt is no longer referenced.
     Δruntime.GC();
     foreach (var i in range(wt)) {
         var st = wt[i].Value();
         if (st != nil) {
-            Ꮡt.Fatalf("expected weak pointer to be nil, got %p"u8, st.OrTypedNil());
+            t.Fatalf("expected weak pointer to be nil, got %p", st.OrTypedNil());
         }
         if (i == 0) {
             continue;
         }
         if (wt[i] == wt[i - 1]) {
-            Ꮡt.Fatalf("expected weak pointers to not be equal to each other, but got %v"u8, wt[i]);
+            t.Fatalf("expected weak pointers to not be equal to each other, but got %v", wt[i]);
         }
     }
 }
 
-public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
+public static void TestPointerFinalizer(ж<testing.T> t) {
     var bt = @new<T>();
-    ref var wt = ref heap<weak.Pointer<T>>(out var Ꮡwt);
-    wt = weak.Make<T>(bt);
+    ref var wt = ref heap<weak.Pointer<T>>(weak.Make<T>(bt), out var Ꮡwt);
     var done = new channel<EmptyStruct>(1);
     var doneʗ1 = done;
     var wtʗ1 = wt;
     Δruntime.SetFinalizer(bt.OrTypedNil(), (ж<T> btΔ1) => {
         if (wtʗ1.Value() != nil) {
-            Ꮡt.Errorf("weak pointer did not go nil before finalizer ran"u8);
+            t.Errorf("weak pointer did not go nil before finalizer ran");
         }
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
@@ -164,7 +163,7 @@ public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
     // Make sure the weak pointer stays around while bt is live.
     Δruntime.GC();
     if (wt.Value() == nil) {
-        Ꮡt.Errorf("weak pointer went nil too soon"u8);
+        t.Errorf("weak pointer went nil too soon");
     }
     Δruntime.KeepAlive(bt.OrTypedNil());
 
@@ -173,7 +172,7 @@ public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
     // Run one cycle to queue the finalizer.
     Δruntime.GC();
     if (wt.Value() != nil) {
-        Ꮡt.Errorf("weak pointer did not go nil when finalizer was enqueued"u8);
+        t.Errorf("weak pointer did not go nil when finalizer was enqueued");
     }
 
     // Wait for the finalizer to run.
@@ -182,7 +181,7 @@ public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
     // The weak pointer should still be nil after the finalizer runs.
     Δruntime.GC();
     if (wt.Value() != nil) {
-        Ꮡt.Errorf("weak pointer is non-nil even after finalization: %v"u8, wt);
+        t.Errorf("weak pointer is non-nil even after finalization: %v", wt);
     }
 }
 
@@ -190,14 +189,13 @@ public static void TestPointerCleanup(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var bt = @new<T>();
-    ref var wt = ref heap<weak.Pointer<T>>(out var Ꮡwt);
-    wt = weak.Make<T>(bt);
+    ref var wt = ref heap<weak.Pointer<T>>(weak.Make<T>(bt), out var Ꮡwt);
     var done = new channel<EmptyStruct>(1);
     var doneʗ1 = done;
     var wtʗ1 = wt;
     Δruntime.AddCleanup(bt, (bool _) => {
         if (wtʗ1.Value() != nil) {
-            Ꮡt.Errorf("weak pointer did not go nil before cleanup was executed"u8);
+            Ꮡt.Errorf("weak pointer did not go nil before cleanup was executed");
         }
         doneʗ1.ᐸꟷ(new EmptyStruct());
     }, true, new object?[] { t }, new object?[] { wt });
@@ -205,7 +203,7 @@ public static void TestPointerCleanup(ж<testing.T> Ꮡt) {
     // Make sure the weak pointer stays around while bt is live.
     Δruntime.GC();
     if (wt.Value() == nil) {
-        Ꮡt.Errorf("weak pointer went nil too soon"u8);
+        Ꮡt.Errorf("weak pointer went nil too soon");
     }
     Δruntime.KeepAlive(bt.OrTypedNil());
 
@@ -214,7 +212,7 @@ public static void TestPointerCleanup(ж<testing.T> Ꮡt) {
     // Run one cycle to queue the cleanup.
     Δruntime.GC();
     if (wt.Value() != nil) {
-        Ꮡt.Errorf("weak pointer did not go nil when cleanup was enqueued"u8);
+        Ꮡt.Errorf("weak pointer did not go nil when cleanup was enqueued");
     }
 
     // Wait for the cleanup to run.
@@ -223,15 +221,15 @@ public static void TestPointerCleanup(ж<testing.T> Ꮡt) {
     // The weak pointer should still be nil after the cleanup runs.
     Δruntime.GC();
     if (wt.Value() != nil) {
-        Ꮡt.Errorf("weak pointer is non-nil even after cleanup: %v"u8, wt);
+        Ꮡt.Errorf("weak pointer is non-nil even after cleanup: %v", wt);
     }
 }
 
-public static void TestPointerSize(ж<testing.T> Ꮡt) {
-    weak.Pointer<T> p = default!;
+public static void TestPointerSize(ж<testing.T> t) {
+    weak.Pointer<T> p = default;
     var size = /* unsafe.Sizeof(p) */ (uintptr)8;
     if (size != goarch.PtrSize) {
-        Ꮡt.Errorf("weak.Pointer[T] size = %d, want %d"u8, size, (nint)(goarch.PtrSize));
+        t.Errorf("weak.Pointer[T] size = %d, want %d", size, (nint)(goarch.PtrSize));
     }
 }
 
@@ -286,7 +284,7 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
-                while (ᐧ) {
+                for (;;) {
                     Δruntime.GC();
 
                     var selᴛ1 = ctxʗ1.Done();
@@ -309,18 +307,17 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
-                    while (ᐧ) {
+                    for (;;) {
                         foreach (var _ᴛ2 in range(5)) {
                             var bt = @new<T>();
-                            ref var wt = ref heap<weak.Pointer<T>>(out var Ꮡwt);
-                            wt = weak.Make<T>(bt);
-                            bt = default!;
+                            ref var wt = ref heap<weak.Pointer<T>>(weak.Make<T>(bt), out var Ꮡwt);
+                            bt = default;
                             time.Sleep(1 * time.Millisecond);
                             bt = wt.Value();
                             if (bt != nil) {
                                 time.Sleep(4 * time.Millisecond);
-                                bt.Value.t = bt;
-                                bt.Value.a = 12;
+                                bt.t = bt;
+                                bt.a = 12;
                             }
                             Δruntime.KeepAlive(bt.OrTypedNil());
                         }
@@ -347,12 +344,12 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object failedToLookUpSpecialAndˢ = (@string)"failed to look up special and made duplicate weak handle; see issue #70739"u8;
 
-public static void TestIssue70739(ж<testing.T> Ꮡt) {
+public static void TestIssue70739(ж<testing.T> t) {
     var x = new slice<ж<nint>>((4 << 16));
     var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
     var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
     if (wx1 != wx2) {
-        Ꮡt.Fatal(failedToLookUpSpecialAndˢ);
+        t.Fatal(failedToLookUpSpecialAndˢ);
     }
 }
 
@@ -363,29 +360,29 @@ internal static ref T immortal => ref ((StaticBox<T>)Ꮡimmortal).ValueSlot;
 private static readonly object immortalWeakPointersToˢ = (@string)"immortal weak pointers to the same pointer not equal"u8;
 private static readonly object separateImmortalPointersˢ = (@string)"separate immortal pointers (same object) have the same pointer"u8;
 
-public static void TestImmortalPointer(ж<testing.T> Ꮡt) {
+public static void TestImmortalPointer(ж<testing.T> t) {
     var w0 = weak.Make<T>(Ꮡimmortal);
     if (weak.Make<T>(Ꮡimmortal) != w0) {
-        Ꮡt.Error(immortalWeakPointersToˢ);
+        t.Error(immortalWeakPointersToˢ);
     }
-    var w0a = weak.Make<nint>(Ꮡimmortal.of(T.Ꮡa));
-    var w0b = weak.Make<nint>(Ꮡimmortal.of(T.Ꮡb));
+    var w0a = weak.Make<nint>(Ꮡimmortal.Ꮡa);
+    var w0b = weak.Make<nint>(Ꮡimmortal.Ꮡb);
     if (w0a == w0b) {
-        Ꮡt.Error(separateImmortalPointersˢ);
+        t.Error(separateImmortalPointersˢ);
     }
     {
         var (got, want) = (w0.Value(), Ꮡimmortal); if (got != want) {
-            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+            t.Errorf("immortal weak pointer to %p has unexpected Value %p", want.OrTypedNil(), got.OrTypedNil());
         }
     }
     {
-        var (got, want) = (w0a.Value(), Ꮡimmortal.of(T.Ꮡa)); if (got != want) {
-            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        var (got, want) = (w0a.Value(), Ꮡimmortal.Ꮡa); if (got != want) {
+            t.Errorf("immortal weak pointer to %p has unexpected Value %p", want.OrTypedNil(), got.OrTypedNil());
         }
     }
     {
-        var (got, want) = (w0b.Value(), Ꮡimmortal.of(T.Ꮡb)); if (got != want) {
-            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        var (got, want) = (w0b.Value(), Ꮡimmortal.Ꮡb); if (got != want) {
+            t.Errorf("immortal weak pointer to %p has unexpected Value %p", want.OrTypedNil(), got.OrTypedNil());
         }
     }
 
@@ -396,22 +393,22 @@ public static void TestImmortalPointer(ж<testing.T> Ꮡt) {
     // All immortal weak pointers should never get cleared.
     {
         var (got, want) = (w0.Value(), Ꮡimmortal); if (got != want) {
-            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+            t.Errorf("immortal weak pointer to %p has unexpected Value %p", want.OrTypedNil(), got.OrTypedNil());
         }
     }
     {
-        var (got, want) = (w0a.Value(), Ꮡimmortal.of(T.Ꮡa)); if (got != want) {
-            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        var (got, want) = (w0a.Value(), Ꮡimmortal.Ꮡa); if (got != want) {
+            t.Errorf("immortal weak pointer to %p has unexpected Value %p", want.OrTypedNil(), got.OrTypedNil());
         }
     }
     {
-        var (got, want) = (w0b.Value(), Ꮡimmortal.of(T.Ꮡb)); if (got != want) {
-            Ꮡt.Errorf("immortal weak pointer to %p has unexpected Value %p"u8, want.OrTypedNil(), got.OrTypedNil());
+        var (got, want) = (w0b.Value(), Ꮡimmortal.Ꮡb); if (got != want) {
+            t.Errorf("immortal weak pointer to %p has unexpected Value %p", want.OrTypedNil(), got.OrTypedNil());
         }
     }
 }
 
-public static void TestPointerTiny(ж<testing.T> Ꮡt) {
+public static void TestPointerTiny(ж<testing.T> t) {
     Δruntime.GC(); // Clear tiny-alloc caches.
 
     UntypedInt N = 1000;
@@ -441,7 +438,7 @@ public static void TestPointerTiny(ж<testing.T> Ꮡt) {
     }
     const nint want = /* 3 * N / 4 */ 750;
     if (n < want) {
-        Ꮡt.Fatalf("not enough weak pointers are nil: expected at least %v, got %v"u8, (nint)(want), n);
+        t.Fatalf("not enough weak pointers are nil: expected at least %v, got %v", (nint)(want), n);
     }
 }
 

@@ -13,7 +13,7 @@ using global::go.net;
 
 partial class jsonrpc_package {
 
-internal static error errMissingParams = errors.New("jsonrpc: request body missing params"u8);
+internal static error errMissingParams = errors.New("jsonrpc: request body missing params");
 
 partial struct serverCodec {
     internal ж<json.Decoder> dec; // for reading JSON values
@@ -50,8 +50,8 @@ partial struct serverRequest {
 
 internal static void reset(this ref serverRequest r) {
     r.Method = ""u8;
-    r.Params = default!;
-    r.Id = default!;
+    r.Params = default;
+    r.Id = default;
 }
 
 partial struct serverResponse {
@@ -66,7 +66,7 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
 
     c.req.reset();
     {
-        var err = c.dec.Decode(Ꮡc.of(serverCodec.Ꮡreq)); if (err != default!) {
+        var err = c.dec.Decode(Ꮡc.Ꮡreq); if (err != nil) {
             return err;
         }
     }
@@ -78,16 +78,16 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
     c.mutex.Lock();
     c.seq++;
     c.pending[c.seq] = c.req.Id;
-    c.req.Id = default!;
+    c.req.Id = default;
     r.Seq = c.seq;
     c.mutex.Unlock();
 
-    return default!;
+    return default;
 }
 
 internal static error ReadRequestBody(this ref serverCodec c, any x) {
-    if (x == default!) {
-        return default!;
+    if (x == nil) {
+        return default;
     }
     if (c.req.Params == nil) {
         return errMissingParams;
@@ -105,7 +105,8 @@ internal static readonly ж<json.RawMessage> Ꮡnull = new StaticBox<json.RawMes
 internal static ref json.RawMessage @null => ref ((StaticBox<json.RawMessage>)Ꮡnull).ValueSlot;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidSequenceNumberInˢ = "invalid sequence number in response"u8;
+internal static ref readonly @string invalidSequenceNumberInˢ => ref invalidSequenceNumberInˢᵇ;
+private static readonly @string invalidSequenceNumberInˢᵇ = "invalid sequence number in response"u8;
 
 internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -125,7 +126,7 @@ internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> 
         b = Ꮡnull;
     }
     var resp = new serverResponse(Id: b);
-    if (r.Error == ""u8){
+    if (r.Error == ""u8) {
         resp.Result = x;
     } else {
         resp.Error = r.Error;

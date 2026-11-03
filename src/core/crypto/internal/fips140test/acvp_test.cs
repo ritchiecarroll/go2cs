@@ -71,26 +71,27 @@ using path;
 
 partial class fipstest_internal_test_package {
 
-internal static bool noPAAPAI = os.Getenv("GONOPAAPAI"u8) == "1"u8;
+internal static bool noPAAPAI = os.Getenv("GONOPAAPAI") == "1"u8;
 
 // Use the capabilities, configuration and commands for the entropy source.
 // This is used to test the separate entropy source in crypto/internal/entropy
 // since the algorithm name alone can't indicate which to test.
-internal static bool entropyTesting = os.Getenv("GOENTROPYSOURCEACVP"u8) == "1"u8;
+internal static bool entropyTesting = os.Getenv("GOENTROPYSOURCEACVP") == "1"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string acvpWrapperˢ = "ACVP_WRAPPER"u8;
+internal static ref readonly @string acvpWrapperˢ => ref acvpWrapperˢᵇ;
+private static readonly @string acvpWrapperˢᵇ = "ACVP_WRAPPER"u8;
 
-public static void TestMain(ж<testing.M> Ꮡm) {
+public static void TestMain(ж<testing.M> m) {
     if (noPAAPAI) {
         foreach (var (_, p) in impl.Packages()) {
             impl.Select(p, ""u8);
         }
     }
-    if (os.Getenv(acvpWrapperˢ) == "1"u8){
+    if (os.Getenv(acvpWrapperˢ) == "1"u8) {
         wrapperMain();
     } else {
-        os.Exit(Ꮡm.Run());
+        os.Exit(m.Run());
     }
 }
 
@@ -103,7 +104,7 @@ internal static void wrapperMain() {
         os.Exit(2);
     }
     {
-        var err = processingLoop(new fipstest_internal_test_package.bufio_ReaderжReader(bufio.NewReader(new fipstest_internal_test_package.os_FileжReader(os.Stdin))), new os.FileжWriter(os.Stdout)); if (err != default!) {
+        var err = processingLoop(new fipstest_internal_test_package.bufio_ReaderжReader(bufio.NewReader(new fipstest_internal_test_package.os_FileжReader(os.Stdin))), new os.FileжWriter(os.Stdout)); if (err != nil) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "processing error: %v\n"u8, err);
             os.Exit(1);
         }
@@ -145,253 +146,254 @@ internal static slice<byte> entropyCapabilitiesJson = go.embed_package.ΔEmbedBy
 // is supported.
 internal static map<@string, command> commands;
 internal static void initᴛcommands() { commands = new map<@string, command>{
-    ["getConfig"u8] = cmdGetConfig(),
+    ["getConfig"] = cmdGetConfig(),
 
-    ["SHA2-224"u8] = cmdHashAft(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["SHA2-224/MCT"u8] = cmdHashMct(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["SHA2-256"u8] = cmdHashAft(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["SHA2-256/MCT"u8] = cmdHashMct(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["SHA2-384"u8] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["SHA2-384/MCT"u8] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["SHA2-512"u8] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["SHA2-512/MCT"u8] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["SHA2-512/224"u8] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["SHA2-512/224/MCT"u8] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["SHA2-512/256"u8] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["SHA2-512/256/MCT"u8] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["SHA2-224"] = cmdHashAft(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["SHA2-224/MCT"] = cmdHashMct(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["SHA2-256"] = cmdHashAft(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["SHA2-256/MCT"] = cmdHashMct(new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["SHA2-384"] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["SHA2-384/MCT"] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["SHA2-512"] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["SHA2-512/MCT"] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["SHA2-512/224"] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["SHA2-512/224/MCT"] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["SHA2-512/256"] = cmdHashAft(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["SHA2-512/256/MCT"] = cmdHashMct(new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
 
-    ["SHA3-256"u8] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["SHA3-256/MCT"u8] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["SHA3-224"u8] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["SHA3-224/MCT"u8] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["SHA3-384"u8] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["SHA3-384/MCT"u8] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["SHA3-512"u8] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
-    ["SHA3-512/MCT"u8] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["SHA3-256"] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["SHA3-256/MCT"] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["SHA3-224"] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["SHA3-224/MCT"] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["SHA3-384"] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["SHA3-384/MCT"] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["SHA3-512"] = cmdHashAft(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["SHA3-512/MCT"] = cmdSha3Mct(new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
 
     // Note: the "/ENTROPY" suffix is our own creation, and applied conditionally
     // based on the environment variable that indicates our acvp_test module wrapper
     // is being used for evaluating the separate SHA-384 implementation for the
     // CPU jitter entropy conditioning. Set GOENTROPYSOURCEACVP=1 to use these commands
     // in place of SHA2-384.
-    ["SHA2-384/ENTROPY"u8] = cmdEntropyHashEntropySha384Aft(),
-    ["SHA2-384/MCT/ENTROPY"u8] = cmdEntropyHashEntropySha384Mct(),
+    ["SHA2-384/ENTROPY"] = cmdEntropyHashEntropySha384Aft(),
+    ["SHA2-384/MCT/ENTROPY"] = cmdEntropyHashEntropySha384Mct(),
 
     // Note: SHAKE AFT and VOT test types can be handled by the same command
     // handler impl, but use distinct acvptool command names, and so are
     // registered twice with the same digest: once under "SHAKE-xxx" for AFT,
     // and once under"SHAKE-xxx/VOT" for VOT.
-    ["SHAKE-128"u8] = cmdShakeAftVot(sha3.NewShake128()),
-    ["SHAKE-128/VOT"u8] = cmdShakeAftVot(sha3.NewShake128()),
-    ["SHAKE-128/MCT"u8] = cmdShakeMct(sha3.NewShake128()),
-    ["SHAKE-256"u8] = cmdShakeAftVot(sha3.NewShake256()),
-    ["SHAKE-256/VOT"u8] = cmdShakeAftVot(sha3.NewShake256()),
-    ["SHAKE-256/MCT"u8] = cmdShakeMct(sha3.NewShake256()),
+    ["SHAKE-128"] = cmdShakeAftVot(sha3.NewShake128()),
+    ["SHAKE-128/VOT"] = cmdShakeAftVot(sha3.NewShake128()),
+    ["SHAKE-128/MCT"] = cmdShakeMct(sha3.NewShake128()),
+    ["SHAKE-256"] = cmdShakeAftVot(sha3.NewShake256()),
+    ["SHAKE-256/VOT"] = cmdShakeAftVot(sha3.NewShake256()),
+    ["SHAKE-256/MCT"] = cmdShakeMct(sha3.NewShake256()),
 
-    ["cSHAKE-128"u8] = cmdCShakeAft((slice<byte> N, slice<byte> S) => sha3.NewCShake128(N, S)),
-    ["cSHAKE-128/MCT"u8] = cmdCShakeMct((slice<byte> N, slice<byte> S) => sha3.NewCShake128(N, S)),
-    ["cSHAKE-256"u8] = cmdCShakeAft((slice<byte> N, slice<byte> S) => sha3.NewCShake256(N, S)),
-    ["cSHAKE-256/MCT"u8] = cmdCShakeMct((slice<byte> N, slice<byte> S) => sha3.NewCShake256(N, S)),
+    ["cSHAKE-128"] = cmdCShakeAft((slice<byte> N, slice<byte> S) => sha3.NewCShake128(N, S)),
+    ["cSHAKE-128/MCT"] = cmdCShakeMct((slice<byte> N, slice<byte> S) => sha3.NewCShake128(N, S)),
+    ["cSHAKE-256"] = cmdCShakeAft((slice<byte> N, slice<byte> S) => sha3.NewCShake256(N, S)),
+    ["cSHAKE-256/MCT"] = cmdCShakeMct((slice<byte> N, slice<byte> S) => sha3.NewCShake256(N, S)),
 
-    ["HMAC-SHA2-224"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["HMAC-SHA2-256"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["HMAC-SHA2-384"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["HMAC-SHA2-512"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["HMAC-SHA2-512/224"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["HMAC-SHA2-512/256"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["HMAC-SHA3-224"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["HMAC-SHA3-256"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["HMAC-SHA3-384"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["HMAC-SHA3-512"u8] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["HMAC-SHA2-224"] = cmdHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["HMAC-SHA2-256"] = cmdHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["HMAC-SHA2-384"] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["HMAC-SHA2-512"] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["HMAC-SHA2-512/224"] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["HMAC-SHA2-512/256"] = cmdHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["HMAC-SHA3-224"] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["HMAC-SHA3-256"] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["HMAC-SHA3-384"] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["HMAC-SHA3-512"] = cmdHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
 
-    ["HKDF/SHA2-224"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["HKDF/SHA2-256"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["HKDF/SHA2-384"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["HKDF/SHA2-512"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["HKDF/SHA2-512/224"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["HKDF/SHA2-512/256"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["HKDF/SHA3-224"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["HKDF/SHA3-256"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["HKDF/SHA3-384"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["HKDF/SHA3-512"u8] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["HKDF/SHA2-224"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["HKDF/SHA2-256"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["HKDF/SHA2-384"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["HKDF/SHA2-512"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["HKDF/SHA2-512/224"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["HKDF/SHA2-512/256"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["HKDF/SHA3-224"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["HKDF/SHA3-256"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["HKDF/SHA3-384"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["HKDF/SHA3-512"] = cmdHkdfAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
 
-    ["HKDFExtract/SHA2-256"u8] = cmdHkdfExtractAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["HKDFExtract/SHA2-384"u8] = cmdHkdfExtractAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["HKDFExpandLabel/SHA2-256"u8] = cmdHkdfExpandLabelAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["HKDFExpandLabel/SHA2-384"u8] = cmdHkdfExpandLabelAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["HKDFExtract/SHA2-256"] = cmdHkdfExtractAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["HKDFExtract/SHA2-384"] = cmdHkdfExtractAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["HKDFExpandLabel/SHA2-256"] = cmdHkdfExpandLabelAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["HKDFExpandLabel/SHA2-384"] = cmdHkdfExpandLabelAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
 
-    ["PBKDF"u8] = cmdPbkdf(),
+    ["PBKDF"] = cmdPbkdf(),
 
-    ["ML-KEM-768/keyGen"u8] = cmdMlKem768KeyGenAft(),
-    ["ML-KEM-768/encap"u8] = cmdMlKem768EncapAft(),
-    ["ML-KEM-768/decap"u8] = cmdMlKem768DecapAft(),
-    ["ML-KEM-1024/keyGen"u8] = cmdMlKem1024KeyGenAft(),
-    ["ML-KEM-1024/encap"u8] = cmdMlKem1024EncapAft(),
-    ["ML-KEM-1024/decap"u8] = cmdMlKem1024DecapAft(),
+    ["ML-KEM-768/keyGen"] = cmdMlKem768KeyGenAft(),
+    ["ML-KEM-768/encap"] = cmdMlKem768EncapAft(),
+    ["ML-KEM-768/decap"] = cmdMlKem768DecapAft(),
+    ["ML-KEM-1024/keyGen"] = cmdMlKem1024KeyGenAft(),
+    ["ML-KEM-1024/encap"] = cmdMlKem1024EncapAft(),
+    ["ML-KEM-1024/decap"] = cmdMlKem1024DecapAft(),
 
-    ["hmacDRBG/SHA2-224"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["hmacDRBG/SHA2-256"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["hmacDRBG/SHA2-384"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["hmacDRBG/SHA2-512"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["hmacDRBG/SHA2-512/224"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["hmacDRBG/SHA2-512/256"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["hmacDRBG/SHA3-224"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["hmacDRBG/SHA3-256"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["hmacDRBG/SHA3-384"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["hmacDRBG/SHA3-512"u8] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["hmacDRBG/SHA2-224"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["hmacDRBG/SHA2-256"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["hmacDRBG/SHA2-384"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["hmacDRBG/SHA2-512"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["hmacDRBG/SHA2-512/224"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["hmacDRBG/SHA2-512/256"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["hmacDRBG/SHA3-224"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["hmacDRBG/SHA3-256"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["hmacDRBG/SHA3-384"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["hmacDRBG/SHA3-512"] = cmdHmacDrbgAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
 
-    ["EDDSA/keyGen"u8] = cmdEddsaKeyGenAft(),
-    ["EDDSA/keyVer"u8] = cmdEddsaKeyVerAft(),
-    ["EDDSA/sigGen"u8] = cmdEddsaSigGenAftBft(),
-    ["EDDSA/sigVer"u8] = cmdEddsaSigVerAft(),
+    ["EDDSA/keyGen"] = cmdEddsaKeyGenAft(),
+    ["EDDSA/keyVer"] = cmdEddsaKeyVerAft(),
+    ["EDDSA/sigGen"] = cmdEddsaSigGenAftBft(),
+    ["EDDSA/sigVer"] = cmdEddsaSigVerAft(),
 
-    ["ECDSA/keyGen"u8] = cmdEcdsaKeyGenAft(),
-    ["ECDSA/keyVer"u8] = cmdEcdsaKeyVerAft(),
-    ["ECDSA/sigGen"u8] = cmdEcdsaSigGenAft(ecdsaSigTypeNormal),
-    ["ECDSA/sigVer"u8] = cmdEcdsaSigVerAft(),
-    ["DetECDSA/sigGen"u8] = cmdEcdsaSigGenAft(ecdsaSigTypeDeterministic),
+    ["ECDSA/keyGen"] = cmdEcdsaKeyGenAft(),
+    ["ECDSA/keyVer"] = cmdEcdsaKeyVerAft(),
+    ["ECDSA/sigGen"] = cmdEcdsaSigGenAft(ecdsaSigTypeNormal),
+    ["ECDSA/sigVer"] = cmdEcdsaSigVerAft(),
+    ["DetECDSA/sigGen"] = cmdEcdsaSigGenAft(ecdsaSigTypeDeterministic),
 
-    ["AES-CBC/encrypt"u8] = cmdAesCbc(aesEncrypt),
-    ["AES-CBC/decrypt"u8] = cmdAesCbc(aesDecrypt),
-    ["AES-CTR/encrypt"u8] = cmdAesCtr(aesEncrypt),
-    ["AES-CTR/decrypt"u8] = cmdAesCtr(aesDecrypt),
-    ["AES-GCM/seal"u8] = cmdAesGcmSeal(false),
-    ["AES-GCM/open"u8] = cmdAesGcmOpen(false),
-    ["AES-GCM-randnonce/seal"u8] = cmdAesGcmSeal(true),
-    ["AES-GCM-randnonce/open"u8] = cmdAesGcmOpen(true),
+    ["AES-CBC/encrypt"] = cmdAesCbc(aesEncrypt),
+    ["AES-CBC/decrypt"] = cmdAesCbc(aesDecrypt),
+    ["AES-CTR/encrypt"] = cmdAesCtr(aesEncrypt),
+    ["AES-CTR/decrypt"] = cmdAesCtr(aesDecrypt),
+    ["AES-GCM/seal"] = cmdAesGcmSeal(false),
+    ["AES-GCM/open"] = cmdAesGcmOpen(false),
+    ["AES-GCM-randnonce/seal"] = cmdAesGcmSeal(true),
+    ["AES-GCM-randnonce/open"] = cmdAesGcmOpen(true),
 
-    ["CMAC-AES"u8] = cmdCmacAesAft(),
-    ["CMAC-AES/verify"u8] = cmdCmacAesVerifyAft(),
+    ["CMAC-AES"] = cmdCmacAesAft(),
+    ["CMAC-AES/verify"] = cmdCmacAesVerifyAft(),
 
     // Note: Only SHA2-256, SHA2-384 and SHA2-512 are valid hash functions for TLSKDF.
     // 		 See https://pages.nist.gov/ACVP/draft-celi-acvp-kdf-tls.html#section-7.2.1
-    ["TLSKDF/1.2/SHA2-256"u8] = cmdTlsKdf12Aft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["TLSKDF/1.2/SHA2-384"u8] = cmdTlsKdf12Aft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["TLSKDF/1.2/SHA2-512"u8] = cmdTlsKdf12Aft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["TLSKDF/1.2/SHA2-256"] = cmdTlsKdf12Aft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["TLSKDF/1.2/SHA2-384"] = cmdTlsKdf12Aft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["TLSKDF/1.2/SHA2-512"] = cmdTlsKdf12Aft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
 
     // Note: only SHA2-224, SHA2-256, SHA2-384 and SHA2-512 are valid hash functions for SSHKDF.
     // 		 See https://pages.nist.gov/ACVP/draft-celi-acvp-kdf-ssh.html#section-7.2.1
-    ["SSHKDF/SHA2-224/client"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), ssh.ClientKeys),
-    ["SSHKDF/SHA2-224/server"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), ssh.ServerKeys),
-    ["SSHKDF/SHA2-256/client"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), ssh.ClientKeys),
-    ["SSHKDF/SHA2-256/server"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), ssh.ServerKeys),
-    ["SSHKDF/SHA2-384/client"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), ssh.ClientKeys),
-    ["SSHKDF/SHA2-384/server"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), ssh.ServerKeys),
-    ["SSHKDF/SHA2-512/client"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), ssh.ClientKeys),
-    ["SSHKDF/SHA2-512/server"u8] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), ssh.ServerKeys),
+    ["SSHKDF/SHA2-224/client"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), ssh.ClientKeys),
+    ["SSHKDF/SHA2-224/server"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), ssh.ServerKeys),
+    ["SSHKDF/SHA2-256/client"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), ssh.ClientKeys),
+    ["SSHKDF/SHA2-256/server"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), ssh.ServerKeys),
+    ["SSHKDF/SHA2-384/client"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), ssh.ClientKeys),
+    ["SSHKDF/SHA2-384/server"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), ssh.ServerKeys),
+    ["SSHKDF/SHA2-512/client"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), ssh.ClientKeys),
+    ["SSHKDF/SHA2-512/server"] = cmdSshKdfAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), ssh.ServerKeys),
 
-    ["ECDH/P-224"u8] = cmdEcdhAftVal<ecdh.P224PointжPoint>(ecdh.P224()),
-    ["ECDH/P-256"u8] = cmdEcdhAftVal<ecdh.P256PointжPoint>(ecdh.P256()),
-    ["ECDH/P-384"u8] = cmdEcdhAftVal<ecdh.P384PointжPoint>(ecdh.P384()),
-    ["ECDH/P-521"u8] = cmdEcdhAftVal<ecdh.P521PointжPoint>(ecdh.P521()),
+    ["ECDH/P-224"] = cmdEcdhAftVal<ecdh.P224PointжPoint>(ecdh.P224()),
+    ["ECDH/P-256"] = cmdEcdhAftVal<ecdh.P256PointжPoint>(ecdh.P256()),
+    ["ECDH/P-384"] = cmdEcdhAftVal<ecdh.P384PointжPoint>(ecdh.P384()),
+    ["ECDH/P-521"] = cmdEcdhAftVal<ecdh.P521PointжPoint>(ecdh.P521()),
 
-    ["ctrDRBG/AES-256"u8] = cmdCtrDrbgAft(),
-    ["ctrDRBG-reseed/AES-256"u8] = cmdCtrDrbgReseedAft(),
+    ["ctrDRBG/AES-256"] = cmdCtrDrbgAft(),
+    ["ctrDRBG-reseed/AES-256"] = cmdCtrDrbgReseedAft(),
 
-    ["RSA/keyGen"u8] = cmdRsaKeyGenAft(),
+    ["RSA/keyGen"] = cmdRsaKeyGenAft(),
 
-    ["RSA/sigGen/SHA2-224/pkcs1v1.5"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224"u8, false),
-    ["RSA/sigGen/SHA2-256/pkcs1v1.5"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256"u8, false),
-    ["RSA/sigGen/SHA2-384/pkcs1v1.5"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384"u8, false),
-    ["RSA/sigGen/SHA2-512/pkcs1v1.5"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512"u8, false),
-    ["RSA/sigGen/SHA2-224/pss"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224"u8, true),
-    ["RSA/sigGen/SHA2-256/pss"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256"u8, true),
-    ["RSA/sigGen/SHA2-384/pss"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384"u8, true),
-    ["RSA/sigGen/SHA2-512/pss"u8] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512"u8, true),
+    ["RSA/sigGen/SHA2-224/pkcs1v1.5"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224", false),
+    ["RSA/sigGen/SHA2-256/pkcs1v1.5"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256", false),
+    ["RSA/sigGen/SHA2-384/pkcs1v1.5"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384", false),
+    ["RSA/sigGen/SHA2-512/pkcs1v1.5"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512", false),
+    ["RSA/sigGen/SHA2-224/pss"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224", true),
+    ["RSA/sigGen/SHA2-256/pss"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256", true),
+    ["RSA/sigGen/SHA2-384/pss"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384", true),
+    ["RSA/sigGen/SHA2-512/pss"] = cmdRsaSigGenAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512", true),
 
-    ["RSA/sigVer/SHA2-224/pkcs1v1.5"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224"u8, false),
-    ["RSA/sigVer/SHA2-256/pkcs1v1.5"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256"u8, false),
-    ["RSA/sigVer/SHA2-384/pkcs1v1.5"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384"u8, false),
-    ["RSA/sigVer/SHA2-512/pkcs1v1.5"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512"u8, false),
-    ["RSA/sigVer/SHA2-224/pss"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224"u8, true),
-    ["RSA/sigVer/SHA2-256/pss"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256"u8, true),
-    ["RSA/sigVer/SHA2-384/pss"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384"u8, true),
-    ["RSA/sigVer/SHA2-512/pss"u8] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512"u8, true),
+    ["RSA/sigVer/SHA2-224/pkcs1v1.5"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224", false),
+    ["RSA/sigVer/SHA2-256/pkcs1v1.5"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256", false),
+    ["RSA/sigVer/SHA2-384/pkcs1v1.5"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384", false),
+    ["RSA/sigVer/SHA2-512/pkcs1v1.5"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512", false),
+    ["RSA/sigVer/SHA2-224/pss"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224()), "SHA-224", true),
+    ["RSA/sigVer/SHA2-256/pss"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New()), "SHA-256", true),
+    ["RSA/sigVer/SHA2-384/pss"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384()), "SHA-384", true),
+    ["RSA/sigVer/SHA2-512/pss"] = cmdRsaSigVerAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New()), "SHA-512", true),
 
-    ["KDF-counter"u8] = cmdKdfCounterAft(),
-    ["KDF-feedback"u8] = cmdKdfFeedbackAft(),
+    ["KDF-counter"] = cmdKdfCounterAft(),
+    ["KDF-feedback"] = cmdKdfFeedbackAft(),
 
-    ["OneStepNoCounter/HMAC-SHA2-224"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["OneStepNoCounter/HMAC-SHA2-256"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["OneStepNoCounter/HMAC-SHA2-384"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["OneStepNoCounter/HMAC-SHA2-512"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["OneStepNoCounter/HMAC-SHA2-512/224"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["OneStepNoCounter/HMAC-SHA2-512/256"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["OneStepNoCounter/HMAC-SHA3-224"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["OneStepNoCounter/HMAC-SHA3-256"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["OneStepNoCounter/HMAC-SHA3-384"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["OneStepNoCounter/HMAC-SHA3-512"u8] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["OneStepNoCounter/HMAC-SHA2-224"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["OneStepNoCounter/HMAC-SHA2-256"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["OneStepNoCounter/HMAC-SHA2-384"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["OneStepNoCounter/HMAC-SHA2-512"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["OneStepNoCounter/HMAC-SHA2-512/224"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["OneStepNoCounter/HMAC-SHA2-512/256"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["OneStepNoCounter/HMAC-SHA3-224"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["OneStepNoCounter/HMAC-SHA3-256"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["OneStepNoCounter/HMAC-SHA3-384"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["OneStepNoCounter/HMAC-SHA3-512"] = cmdOneStepNoCounterHmacAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
 
-    ["KTS-IFC/SHA2-224/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["KTS-IFC/SHA2-224/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
-    ["KTS-IFC/SHA2-256/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["KTS-IFC/SHA2-256/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
-    ["KTS-IFC/SHA2-384/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["KTS-IFC/SHA2-384/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
-    ["KTS-IFC/SHA2-512/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["KTS-IFC/SHA2-512/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
-    ["KTS-IFC/SHA2-512/224/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["KTS-IFC/SHA2-512/224/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
-    ["KTS-IFC/SHA2-512/256/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["KTS-IFC/SHA2-512/256/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
-    ["KTS-IFC/SHA3-224/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["KTS-IFC/SHA3-224/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
-    ["KTS-IFC/SHA3-256/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["KTS-IFC/SHA3-256/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
-    ["KTS-IFC/SHA3-384/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["KTS-IFC/SHA3-384/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
-    ["KTS-IFC/SHA3-512/initiator"u8] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
-    ["KTS-IFC/SHA3-512/responder"u8] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512()))
+    ["KTS-IFC/SHA2-224/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["KTS-IFC/SHA2-224/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224())),
+    ["KTS-IFC/SHA2-256/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["KTS-IFC/SHA2-256/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New())),
+    ["KTS-IFC/SHA2-384/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["KTS-IFC/SHA2-384/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384())),
+    ["KTS-IFC/SHA2-512/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["KTS-IFC/SHA2-512/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New())),
+    ["KTS-IFC/SHA2-512/224/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["KTS-IFC/SHA2-512/224/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224())),
+    ["KTS-IFC/SHA2-512/256/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["KTS-IFC/SHA2-512/256/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256())),
+    ["KTS-IFC/SHA3-224/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["KTS-IFC/SHA3-224/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224())),
+    ["KTS-IFC/SHA3-256/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["KTS-IFC/SHA3-256/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256())),
+    ["KTS-IFC/SHA3-384/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["KTS-IFC/SHA3-384/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384())),
+    ["KTS-IFC/SHA3-512/initiator"] = cmdKtsIfcInitiatorAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512())),
+    ["KTS-IFC/SHA3-512/responder"] = cmdKtsIfcResponderAft(() => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512()))
 }; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sha2384ˢ = "SHA2-384"u8;
+internal static ref readonly @string sha2384ˢ => ref sha2384ˢᵇ;
+private static readonly @string sha2384ˢᵇ = "SHA2-384"u8;
 
 internal static error processingLoop(io.Reader reader, io.Writer writer) {
     // Per ACVP.md:
     //   The protocol is request–response: the subprocess only speaks in response to a request
     //   and there is exactly one response for every request.
-    while (ᐧ) {
+    for (;;) {
         var (req, err) = readRequest(reader);
-        if (errors.Is(err, io.EOF)){
+        if (errors.Is(err, io.EOF)) {
             break;
-        } else 
-        if (err != default!) {
+        } else if (err != nil) {
             return fmt.Errorf("reading request: %w"u8, err);
         }
 
-        if (entropyTesting && strings.HasPrefix((~req).name, sha2384ˢ)) {
-            req.Value.name = fmt.Sprintf("%s/ENTROPY"u8, (~req).name);
+        if (entropyTesting && strings.HasPrefix(req.name, sha2384ˢ)) {
+            req.name = fmt.Sprintf("%s/ENTROPY"u8, req.name);
         }
 
-        var (cmd, exists) = commands[(~req).name, ꟷ];
+        var (cmd, exists) = commands[req.name, ꟷ];
         if (!exists) {
-            return fmt.Errorf("unknown command: %q"u8, (~req).name);
+            return fmt.Errorf("unknown command: %q"u8, req.name);
         }
 
         {
-            nint gotArgs = len((~req).args); if (gotArgs != cmd.requiredArgs) {
-                return fmt.Errorf("command %q expected %d args, got %d"u8, (~req).name, cmd.requiredArgs, gotArgs);
+            nint gotArgs = len(req.args); if (gotArgs != cmd.requiredArgs) {
+                return fmt.Errorf("command %q expected %d args, got %d"u8, req.name, cmd.requiredArgs, gotArgs);
             }
         }
 
-        (var response, err) = cmd.handler((~req).args);
-        if (err != default!) {
-            return fmt.Errorf("command %q failed: %w"u8, (~req).name, err);
+        (var response, err) = cmd.handler(req.args);
+        if (err != nil) {
+            return fmt.Errorf("command %q failed: %w"u8, req.name, err);
         }
 
         {
-            err = writeResponse(writer, response); if (err != default!) {
-                return fmt.Errorf("command %q response failed: %w"u8, (~req).name, err);
+            err = writeResponse(writer, response); if (err != nil) {
+                return fmt.Errorf("command %q response failed: %w"u8, req.name, err);
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string invalidRequestZeroArgsˢ = "invalid request: zero args"u8;
+internal static ref readonly @string invalidRequestZeroArgsˢ => ref invalidRequestZeroArgsˢᵇ;
+private static readonly @string invalidRequestZeroArgsˢᵇ = "invalid request: zero args"u8;
 
 internal static (ж<request>, error) readRequest(io.Reader reader) {
     // Per ACVP.md:
@@ -402,23 +404,23 @@ internal static (ж<request>, error) readRequest(io.Reader reader) {
     //   concatenated in the order specified.
     ref var numArgs = ref heap(new uint32(), out var ᏑnumArgs);
     {
-        var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     if (numArgs == 0) {
-        return (default!, errors.New(invalidRequestZeroArgsˢ));
+        return (default, errors.New(invalidRequestZeroArgsˢ));
     }
 
     var (args, err) = readArgs(reader, numArgs);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     return (Ꮡ(new request(
         name: ((@string)args[0]),
         args: args[1..]
-    )), default!);
+    )), default);
 }
 
 internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 requiredArgs) {
@@ -427,8 +429,8 @@ internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 re
 
     foreach (var i in range(argLengths)) {
         {
-            var err = binary.Read(reader, binary.LittleEndian, Ꮡ(argLengths, i)); if (err != default!) {
-                return (default!, fmt.Errorf("invalid request: failed to read %d-th arg len: %w"u8, i, err));
+            var err = binary.Read(reader, binary.LittleEndian, Ꮡ(argLengths, i)); if (err != nil) {
+                return (default, fmt.Errorf("invalid request: failed to read %d-th arg len: %w"u8, i, err));
             }
         }
     }
@@ -436,14 +438,14 @@ internal static (slice<slice<byte>>, error) readArgs(io.Reader reader, uint32 re
     foreach (var (i, length) in argLengths) {
         var buf = new slice<byte>((nint)(length));
         {
-            var (_, err) = io.ReadFull(reader, buf); if (err != default!) {
-                return (default!, fmt.Errorf("invalid request: failed to read %d-th arg data: %w"u8, i, err));
+            var (_, err) = io.ReadFull(reader, buf); if (err != nil) {
+                return (default, fmt.Errorf("invalid request: failed to read %d-th arg data: %w"u8, i, err));
             }
         }
         args[i] = buf;
     }
 
-    return (args, default!);
+    return (args, default);
 }
 
 internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
@@ -452,14 +454,14 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
     //   and the first byte string has no special meaning.
     var numArgs = (uint32)len(args);
     {
-        var err = binary.Write(writer, binary.LittleEndian, numArgs); if (err != default!) {
+        var err = binary.Write(writer, binary.LittleEndian, numArgs); if (err != nil) {
             return fmt.Errorf("writing arg count: %w"u8, err);
         }
     }
 
     foreach (var (i, arg) in args) {
         {
-            var err = binary.Write(writer, binary.LittleEndian, (uint32)len(arg)); if (err != default!) {
+            var err = binary.Write(writer, binary.LittleEndian, (uint32)len(arg)); if (err != nil) {
                 return fmt.Errorf("writing %d-th arg length: %w"u8, i, err);
             }
         }
@@ -467,13 +469,13 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
 
     foreach (var (i, b) in args) {
         {
-            var (_, err) = writer.Write(b); if (err != default!) {
+            var (_, err) = writer.Write(b); if (err != nil) {
                 return fmt.Errorf("writing %d-th arg data: %w"u8, i, err);
             }
         }
     }
 
-    return default!;
+    return default;
 }
 
 // "All implementations must support the getConfig command
@@ -482,14 +484,14 @@ internal static error writeResponse(io.Writer writer, slice<slice<byte>> args) {
 internal static command cmdGetConfig() {
     // If GOENTROPYSOURCEACVP is set, then use the entropyCapabilitiesJson
     // instead of capabilitiesJson.
-    var capabilities = new slice<byte>[]{capabilitiesJson}.slice();
+    var capabilities = slice<slice<byte>>([capabilitiesJson]);
     if (entropyTesting) {
-        capabilities = new slice<byte>[]{entropyCapabilitiesJson}.slice();
+        capabilities = slice<slice<byte>>([entropyCapabilitiesJson]);
     }
 
         var capabilitiesʗ1 = capabilities;
     return new command(
-        handler: (slice<slice<byte>> args) => (capabilitiesʗ1, default!)
+        handler: (slice<slice<byte>> args) => (capabilitiesʗ1, default)
     );
 }
 
@@ -509,7 +511,7 @@ internal static command cmdHashAft(hash.Hash h) {
             var digest = new slice<byte>(0, h.Size());
             digest = h.Sum(digest);
 
-            return (new slice<byte>[]{digest}.slice(), default!);
+            return (slice<slice<byte>>([digest]), default);
         }
     );
 }
@@ -537,7 +539,7 @@ internal static command cmdHashMct(hash.Hash h) {
 
             {
                 nint seedLen = len(seed); if (seedLen != hSize) {
-                    return (default!, fmt.Errorf("invalid seed size: expected %d got %d"u8, hSize, seedLen));
+                    return (default, fmt.Errorf("invalid seed size: expected %d got %d"u8, hSize, seedLen));
                 }
             }
 
@@ -556,7 +558,7 @@ internal static command cmdHashMct(hash.Hash h) {
                 copy(buf.slice(2 * hSize), digest);
             }
 
-            return (new slice<byte>[]{buf.slice(hSize * 2)}.slice(), default!);
+            return (slice<slice<byte>>([buf.slice(hSize * 2)]), default);
         }
     );
 }
@@ -568,7 +570,7 @@ internal static command cmdEntropyHashEntropySha384Aft() {
         requiredArgs: 1, // Message to hash.
         handler: (slice<slice<byte>> args) => {
             var digest = entropy.TestingOnlySHA384(args[0]);
-            return (new slice<byte>[]{digest[..]}.slice(), default!);
+            return (slice<slice<byte>>([digest[..]]), default);
         }
     );
 }
@@ -596,7 +598,7 @@ internal static command cmdEntropyHashEntropySha384Mct() {
                 copy(buf.slice(2 * hSize), digest);
             }
 
-            return (new slice<byte>[]{buf.slice(hSize * 2)}.slice(), default!);
+            return (slice<slice<byte>>([buf.slice(hSize * 2)]), default);
         }
     );
 }
@@ -625,15 +627,15 @@ internal static command cmdSha3Mct(hash.Hash h) {
             for (nint i = 1; i <= 1000; i++) {
                 h.Reset();
                 h.Write(md[i - 1]);
-                md[i] = h.Sum(default!);
+                md[i] = h.Sum(default);
             }
 
-            return (new slice<byte>[]{md[1000]}.slice(), default!);
+            return (slice<slice<byte>>([md[1000]]), default);
         }
     );
 }
 
-internal static command cmdShakeAftVot(ж<sha3.SHAKE> Ꮡh) {
+internal static command cmdShakeAftVot(ж<sha3.SHAKE> h) {
     return new command(
         requiredArgs: 2, // Message, output length (bytes)
         handler: (slice<slice<byte>> args) => {
@@ -642,16 +644,16 @@ internal static command cmdShakeAftVot(ж<sha3.SHAKE> Ꮡh) {
             var outLenBytes = binary.LittleEndian.Uint32(args[1]);
             var digest = new slice<byte>((nint)(outLenBytes));
 
-            Ꮡh.Reset();
-            Ꮡh.Write(msg);
-            Ꮡh.Read(digest);
+            h.Reset();
+            h.Write(msg);
+            h.Read(digest);
 
-            return (new slice<byte>[]{digest}.slice(), default!);
+            return (slice<slice<byte>>([digest]), default);
         }
     );
 }
 
-internal static command cmdShakeMct(ж<sha3.SHAKE> Ꮡh) {
+internal static command cmdShakeMct(ж<sha3.SHAKE> h) {
     return new command(
         requiredArgs: 4, // Seed message, min output length (bytes), max output length (bytes), output length (bytes)
         handler: (slice<slice<byte>> args) => {
@@ -661,12 +663,12 @@ internal static command cmdShakeMct(ж<sha3.SHAKE> Ꮡh) {
 
             var outputLenBytes = binary.LittleEndian.Uint32(args[3]);
             if (outputLenBytes < 2) {
-                return (default!, fmt.Errorf("invalid output length: %d"u8, outputLenBytes));
+                return (default, fmt.Errorf("invalid output length: %d"u8, outputLenBytes));
             }
 
             var rangeBytes = maxOutBytes - minOutBytes + 1;
             if (rangeBytes == 0) {
-                return (default!, fmt.Errorf("invalid maxOutBytes and minOutBytes: %d, %d"u8, maxOutBytes, minOutBytes));
+                return (default, fmt.Errorf("invalid maxOutBytes and minOutBytes: %d, %d"u8, maxOutBytes, minOutBytes));
             }
 
             for (nint i = 0; i < 1000; i++) {
@@ -677,10 +679,10 @@ internal static command cmdShakeMct(ж<sha3.SHAKE> Ꮡh) {
                 copy(msg, md.slice(0, boundary));
 
                 //  MD[i] = SHAKE(MSG[i], OutputLen * 8)
-                Ꮡh.Reset();
-                Ꮡh.Write(msg);
+                h.Reset();
+                h.Write(msg);
                 var digest = new slice<byte>((nint)(outputLenBytes));
-                Ꮡh.Read(digest);
+                h.Read(digest);
                 md = digest;
 
                 // RightmostOutputBits = 16 rightmost bits of MD[i] as an integer
@@ -692,7 +694,7 @@ internal static command cmdShakeMct(ж<sha3.SHAKE> Ꮡh) {
             var encodedOutputLenBytes = new slice<byte>(4);
             binary.LittleEndian.PutUint32(encodedOutputLenBytes, outputLenBytes);
 
-            return (new slice<byte>[]{md, encodedOutputLenBytes}.slice(), default!);
+            return (slice<slice<byte>>([md, encodedOutputLenBytes]), default);
         }
     );
 }
@@ -712,7 +714,7 @@ internal static command cmdCShakeAft(Func<slice<byte>, slice<byte>, ж<sha3.SHAK
             var @out = new slice<byte>((nint)(outLenBytes));
             h.Read(@out);
 
-            return (new slice<byte>[]{@out}.slice(), default!);
+            return (slice<slice<byte>>([@out]), default);
         }
     );
 }
@@ -729,12 +731,12 @@ internal static command cmdCShakeMct(Func<slice<byte>, slice<byte>, ж<sha3.SHAK
             var customization = args[5];
 
             if (outputLenBytes < 2) {
-                return (default!, fmt.Errorf("invalid output length: %d"u8, outputLenBytes));
+                return (default, fmt.Errorf("invalid output length: %d"u8, outputLenBytes));
             }
 
             var rangeBits = (maxOutLenBytes * 8 - minOutLenBytes * 8) + 1;
             if (rangeBits == 0) {
-                return (default!, fmt.Errorf("invalid maxOutLenBytes and minOutLenBytes: %d, %d"u8, maxOutLenBytes, minOutLenBytes));
+                return (default, fmt.Errorf("invalid maxOutLenBytes and minOutLenBytes: %d, %d"u8, maxOutLenBytes, minOutLenBytes));
             }
 
             // cSHAKE Monte Carlo test inner loop:
@@ -746,7 +748,7 @@ internal static command cmdCShakeMct(Func<slice<byte>, slice<byte>, ж<sha3.SHAK
                 copy(innerMsg, message.slice(0, boundary));
 
                 // Output[i] = CSHAKE(InnerMsg, OutputLen, FunctionName, Customization);
-                var h = hFn(default!, customization); // Note: function name fixed to "" for MCT.
+                var h = hFn(default, customization); // Note: function name fixed to "" for MCT.
                 h.Write(innerMsg);
                 var digest = new slice<byte>((nint)(outputLenBytes));
                 h.Read(digest);
@@ -776,7 +778,7 @@ internal static command cmdCShakeMct(Func<slice<byte>, slice<byte>, ж<sha3.SHAK
             var encodedOutputLenBytes = new slice<byte>(4);
             binary.LittleEndian.PutUint32(encodedOutputLenBytes, outputLenBytes);
 
-            return (new slice<byte>[]{message, encodedOutputLenBytes, customization}.slice(), default!);
+            return (slice<slice<byte>>([message, encodedOutputLenBytes, customization]), default);
         }
     );
 }
@@ -789,7 +791,7 @@ internal static command cmdHmacAft(Func<hash.Hash> h) {
             var key = args[1];
             var mac = hmac.New(h, key);
             mac.Write(msg);
-            return (new slice<byte>[]{mac.Sum(default!)}.slice(), default!);
+            return (slice<slice<byte>>([mac.Sum(default)]), default);
         }
     );
 }
@@ -803,7 +805,7 @@ internal static command cmdHkdfAft(Func<hash.Hash> h) {
             var info = args[2];
             nint keyLen = (nint)binary.LittleEndian.Uint32(args[3]);
 
-            return (new slice<byte>[]{hkdf.Key(h, key, salt, (@string)info, keyLen)}.slice(), default!);
+            return (slice<slice<byte>>([hkdf.Key(h, key, salt, (@string)info, keyLen)]), default);
         }
     );
 }
@@ -815,7 +817,7 @@ internal static command cmdHkdfExtractAft(Func<hash.Hash> h) {
             var secret = args[0];
             var salt = args[1];
 
-            return (new slice<byte>[]{hkdf.Extract(h, secret, salt)}.slice(), default!);
+            return (slice<slice<byte>>([hkdf.Extract(h, secret, salt)]), default);
         }
     );
 }
@@ -829,7 +831,7 @@ internal static command cmdHkdfExpandLabelAft(Func<hash.Hash> h) {
             var label = args[2];
             var transcriptHash = args[3];
 
-            return (new slice<byte>[]{tls13.ExpandLabel(h, secret, (@string)label, transcriptHash, keyLen)}.slice(), default!);
+            return (slice<slice<byte>>([tls13.ExpandLabel(h, secret, (@string)label, transcriptHash, keyLen)]), default);
         }
     );
 }
@@ -840,8 +842,8 @@ internal static command cmdPbkdf() {
         requiredArgs: 5,
         handler: (slice<slice<byte>> args) => {
             var (h, err) = lookupHash((@string)args[0]);
-            if (err != default!) {
-                return (default!, fmt.Errorf("PBKDF2 failed: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("PBKDF2 failed: %w"u8, err));
             }
 
             var keyLen = binary.LittleEndian.Uint32(args[1]) / 8;
@@ -850,11 +852,11 @@ internal static command cmdPbkdf() {
             var iterationCount = binary.LittleEndian.Uint32(args[4]);
 
             (var derivedKey, err) = pbkdf2.Key(h, (@string)password, salt, (nint)iterationCount, (nint)keyLen);
-            if (err != default!) {
-                return (default!, fmt.Errorf("PBKDF2 failed: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("PBKDF2 failed: %w"u8, err));
             }
 
-            return (new slice<byte>[]{derivedKey}.slice(), default!);
+            return (slice<slice<byte>>([derivedKey]), default);
         }
     );
 }
@@ -864,12 +866,12 @@ internal static command cmdEddsaKeyGenAft() {
         requiredArgs: 1, // Curve name
         handler: (slice<slice<byte>> args) => {
             if (((sstring)args[0]) != "ED-25519"u8) {
-                return (default!, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
+                return (default, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
             }
 
             var (sk, err) = ed25519.GenerateKey();
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating EDDSA keypair: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating EDDSA keypair: %w"u8, err));
             }
 
             // EDDSA/keyGen/AFT responses are d & q, described[0] as:
@@ -881,7 +883,7 @@ internal static command cmdEddsaKeyGenAft() {
             //
             // [0]: https://pages.nist.gov/ACVP/draft-celi-acvp-eddsa.html#section-9.1
             // [1]: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf
-            return (new slice<byte>[]{sk.Seed(), sk.PublicKey()}.slice(), default!);
+            return (slice<slice<byte>>([sk.Seed(), sk.PublicKey()]), default);
         }
     );
 }
@@ -891,19 +893,19 @@ internal static command cmdEddsaKeyVerAft() {
         requiredArgs: 2, // Curve name, Q
         handler: (slice<slice<byte>> args) => {
             if (((sstring)args[0]) != "ED-25519"u8) {
-                return (default!, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
+                return (default, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
             }
 
             // Verify the point is on the curve. The higher-level ed25519 API does
             // this at signature verification time so we have to use the lower-level
             // edwards25519 package to do it here in absence of a signature to verify.
             {
-                var (_, err) = @new<edwards25519.Point>().SetBytes(args[1]); if (err != default!) {
-                    return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+                var (_, err) = @new<edwards25519.Point>().SetBytes(args[1]); if (err != nil) {
+                    return (slice<slice<byte>>([slice<byte>([0])]), default);
                 }
             }
 
-            return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([1])]), default);
         }
     );
 }
@@ -913,34 +915,34 @@ internal static command cmdEddsaSigGenAftBft() {
         requiredArgs: 5, // Curve name, private key seed, message, prehash, context
         handler: (slice<slice<byte>> args) => {
             if (((sstring)args[0]) != "ED-25519"u8) {
-                return (default!, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
+                return (default, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
             }
 
             var (sk, err) = ed25519.NewPrivateKeyFromSeed(args[1]);
-            if (err != default!) {
-                return (default!, fmt.Errorf("error creating private key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("error creating private key: %w"u8, err));
             }
             var msg = args[2];
             var prehash = args[3];
             @string context = (@string)args[4];
 
-            slice<byte> sig = default!;
-            if (prehash[0] == 1){
+            slice<byte> sig = default;
+            if (prehash[0] == 1) {
                 var h = sha512.New();
                 h.Write(msg);
-                msg = h.Sum(default!);
+                msg = h.Sum(default);
 
                 // With ed25519 the context is only specified for sigGen tests when using prehashing.
                 // See https://pages.nist.gov/ACVP/draft-celi-acvp-eddsa.html#section-8.6
                 (sig, err) = ed25519.SignPH(sk, msg, context);
-                if (err != default!) {
-                    return (default!, fmt.Errorf("error signing message: %w"u8, err));
+                if (err != nil) {
+                    return (default, fmt.Errorf("error signing message: %w"u8, err));
                 }
             } else {
                 sig = ed25519.Sign(sk, msg);
             }
 
-            return (new slice<byte>[]{sig}.slice(), default!);
+            return (slice<slice<byte>>([sig]), default);
         }
     );
 }
@@ -950,33 +952,33 @@ internal static command cmdEddsaSigVerAft() {
         requiredArgs: 5, // Curve name, message, public key, signature, prehash
         handler: (slice<slice<byte>> args) => {
             if (((sstring)args[0]) != "ED-25519"u8) {
-                return (default!, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
+                return (default, fmt.Errorf("unsupported EDDSA curve: %q"u8, args[0]));
             }
 
             var msg = args[1];
             var (pk, err) = ed25519.NewPublicKey(args[2]);
-            if (err != default!) {
-                return (default!, fmt.Errorf("invalid public key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("invalid public key: %w"u8, err));
             }
             var sig = args[3];
             var prehash = args[4];
 
-            if (prehash[0] == 1){
+            if (prehash[0] == 1) {
                 var h = sha512.New();
                 h.Write(msg);
-                msg = h.Sum(default!);
+                msg = h.Sum(default);
                 // Context is only specified for sigGen, not sigVer.
                 // See https://pages.nist.gov/ACVP/draft-celi-acvp-eddsa.html#section-8.6
-                err = ed25519.VerifyPH(pk, msg, sig, ""u8);
+                err = ed25519.VerifyPH(pk, msg, sig, "");
             } else {
                 err = ed25519.Verify(pk, msg, sig);
             }
 
-            if (err != default!) {
-                return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+            if (err != nil) {
+                return (slice<slice<byte>>([slice<byte>([0])]), default);
             }
 
-            return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([1])]), default);
         }
     );
 }
@@ -986,40 +988,44 @@ internal static command cmdEcdsaKeyGenAft() {
         requiredArgs: 1, // Curve name
         handler: (slice<slice<byte>> args) => {
             var (curve, err) = lookupCurve((@string)args[0]);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
-            ж<ecdsa.PrivateKey> sk = default!;
-            var exprᴛ1 = curve.Params();
-            if (exprᴛ1 == elliptic.P224().Params()) {
+            ж<ecdsa.PrivateKey> sk = default;
+            switch (curve.Params()) {
+            case var ᴛ when ᴛ == elliptic.P224().Params(): {
                 (sk, err) = ecdsa.GenerateKey<ecdsa.P224PointжPoint>(ecdsa.P224(), rand.Reader);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P256().Params()) {
+            case var ᴛ when ᴛ == elliptic.P256().Params(): {
                 (sk, err) = ecdsa.GenerateKey<ecdsa.P256PointжPoint>(ecdsa.P256(), rand.Reader);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P384().Params()) {
+            case var ᴛ when ᴛ == elliptic.P384().Params(): {
                 (sk, err) = ecdsa.GenerateKey<ecdsa.P384PointжPoint>(ecdsa.P384(), rand.Reader);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P521().Params()) {
+            case var ᴛ when ᴛ == elliptic.P521().Params(): {
                 (sk, err) = ecdsa.GenerateKey<ecdsa.P521PointжPoint>(ecdsa.P521(), rand.Reader);
+                break;
             }
-            else { /* default: */
-                return (default!, fmt.Errorf("unsupported curve: %v"u8, curve));
-            }
+            default: {
+                return (default, fmt.Errorf("unsupported curve: %v"u8, curve));
+            }}
 
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             var pubBytes = sk.PublicKey().Bytes();
-            nint byteLen = ((~curve.Params()).BitSize + 7) / 8;
+            nint byteLen = (curve.Params().BitSize + 7) / 8;
 
-            return (new slice<byte>[]{
+            return (slice<slice<byte>>([
                 sk.Bytes(),
                 pubBytes.slice(1, 1 + byteLen),
                 pubBytes.slice(1 + byteLen)
-            }.slice(), default!);
+            ]), default);
         }
     );
 }
@@ -1029,18 +1035,18 @@ internal static command cmdEcdsaKeyVerAft() {
         requiredArgs: 3, // Curve name, X, Y
         handler: (slice<slice<byte>> args) => {
             var (curve, err) = lookupCurve((@string)args[0]);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             var x = @new<bigꓸInt>().SetBytes(args[1]);
             var y = @new<bigꓸInt>().SetBytes(args[2]);
 
             if (curve.IsOnCurve(x, y)) {
-                return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
+                return (slice<slice<byte>>([slice<byte>([1])]), default);
             }
 
-            return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([0])]), default);
         }
     );
 }
@@ -1051,13 +1057,13 @@ internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<bi
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
-    nint bitSize = curve.Params().Value.BitSize;
+    nint bitSize = curve.Params().BitSize;
     // Reject values that would not get correctly encoded.
     if (x.Sign() < 0 || y.Sign() < 0) {
-        return (default!, errors.New("negative coordinate"u8));
+        return (default, errors.New("negative coordinate"));
     }
     if (x.BitLen() > bitSize || y.BitLen() > bitSize) {
-        return (default!, errors.New("overflowing coordinate"u8));
+        return (default, errors.New("overflowing coordinate"));
     }
     // Encode the coordinates and let SetBytes reject invalid points.
     nint byteLen = (bitSize + 7) / 8;
@@ -1065,34 +1071,36 @@ internal static (slice<byte>, error) pointFromAffine(elliptic.Curve curve, ж<bi
     buf[0] = 4; // uncompressed point
     x.FillBytes(buf.slice(1, 1 + byteLen));
     y.FillBytes(buf.slice(1 + byteLen, 1 + 2 * byteLen));
-    return (buf, default!);
+    return (buf, default);
 }
 
-internal static (ж<ecdsa.Signature>, error) signEcdsa<P, H>(ж<ecdsa.Curve<P>> Ꮡc, Func<H> h, ecdsaSigType sigType, slice<byte> q, slice<byte> sk, slice<byte> digest)
+internal static (ж<ecdsa.Signature>, error) signEcdsa<P, H>(ж<ecdsa.Curve<P>> c, Func<H> h, ecdsaSigType sigType, slice<byte> q, slice<byte> sk, slice<byte> digest)
     where P : ecdsa.Point<P>
     where H : hash.Hash
 {
-    var (priv, err) = ecdsa.NewPrivateKey(Ꮡc, sk, q);
-    if (err != default!) {
-        return (default!, fmt.Errorf("invalid private key: %w"u8, err));
+    var (priv, err) = ecdsa.NewPrivateKey(c, sk, q);
+    if (err != nil) {
+        return (default, fmt.Errorf("invalid private key: %w"u8, err));
     }
 
-    ж<ecdsa.Signature> sig = default!;
-    var exprᴛ1 = sigType;
-    if (exprᴛ1 == ecdsaSigTypeNormal) {
-        (sig, err) = ecdsa.Sign(Ꮡc, h, priv, rand.Reader, digest);
+    ж<ecdsa.Signature> sig = default;
+    switch (sigType) {
+    case var ᴛ when ᴛ == ecdsaSigTypeNormal: {
+        (sig, err) = ecdsa.Sign(c, h, priv, rand.Reader, digest);
+        break;
     }
-    else if (exprᴛ1 == ecdsaSigTypeDeterministic) {
-        (sig, err) = ecdsa.SignDeterministic(Ꮡc, h, priv, digest);
+    case var ᴛ when ᴛ == ecdsaSigTypeDeterministic: {
+        (sig, err) = ecdsa.SignDeterministic(c, h, priv, digest);
+        break;
     }
-    else { /* default: */
-        return (default!, fmt.Errorf("unsupported signature type: %v"u8, sigType));
-    }
-    if (err != default!) {
-        return (default!, fmt.Errorf("signing failed: %w"u8, err));
+    default: {
+        return (default, fmt.Errorf("unsupported signature type: %v"u8, sigType));
+    }}
+    if (err != nil) {
+        return (default, fmt.Errorf("signing failed: %w"u8, err));
     }
 
-    return (sig, default!);
+    return (sig, default);
 }
 
 internal static command cmdEcdsaSigGenAft(ecdsaSigType sigType) {
@@ -1100,51 +1108,55 @@ internal static command cmdEcdsaSigGenAft(ecdsaSigType sigType) {
         requiredArgs: 4, // Curve name, private key, hash name, message
         handler: (slice<slice<byte>> args) => {
             var (curve, err) = lookupCurve((@string)args[0]);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             var sk = args[1];
 
             (var newH, err) = lookupHash((@string)args[2]);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             var msg = args[3];
             var hashFunc = newH();
             hashFunc.Write(msg);
-            var digest = hashFunc.Sum(default!);
+            var digest = hashFunc.Sum(default);
 
             var d = @new<bigꓸInt>().SetBytes(sk);
             var (x, y) = curve.ScalarBaseMult(d.Bytes());
             (var q, err) = pointFromAffine(curve, x, y);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
-            ж<ecdsa.Signature> sig = default!;
-            var exprᴛ1 = curve.Params();
-            if (exprᴛ1 == elliptic.P224().Params()) {
+            ж<ecdsa.Signature> sig = default;
+            switch (curve.Params()) {
+            case var ᴛ when ᴛ == elliptic.P224().Params(): {
                 (sig, err) = signEcdsa<ecdsa.P224PointжPoint, hash.Hash>(ecdsa.P224(), newH, sigType, q, sk, digest);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P256().Params()) {
+            case var ᴛ when ᴛ == elliptic.P256().Params(): {
                 (sig, err) = signEcdsa<ecdsa.P256PointжPoint, hash.Hash>(ecdsa.P256(), newH, sigType, q, sk, digest);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P384().Params()) {
+            case var ᴛ when ᴛ == elliptic.P384().Params(): {
                 (sig, err) = signEcdsa<ecdsa.P384PointжPoint, hash.Hash>(ecdsa.P384(), newH, sigType, q, sk, digest);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P521().Params()) {
+            case var ᴛ when ᴛ == elliptic.P521().Params(): {
                 (sig, err) = signEcdsa<ecdsa.P521PointжPoint, hash.Hash>(ecdsa.P521(), newH, sigType, q, sk, digest);
+                break;
             }
-            else { /* default: */
-                return (default!, fmt.Errorf("unsupported curve: %v"u8, curve));
-            }
-            if (err != default!) {
-                return (default!, err);
+            default: {
+                return (default, fmt.Errorf("unsupported curve: %v"u8, curve));
+            }}
+            if (err != nil) {
+                return (default, err);
             }
 
-            return (new slice<byte>[]{(~sig).R, (~sig).S}.slice(), default!);
+            return (slice<slice<byte>>([sig.R, sig.S]), default);
         }
     );
 }
@@ -1154,104 +1166,119 @@ internal static command cmdEcdsaSigVerAft() {
         requiredArgs: 7, // Curve name, hash name, message, X, Y, R, S
         handler: (slice<slice<byte>> args) => {
             var (curve, err) = lookupCurve((@string)args[0]);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             (var newH, err) = lookupHash((@string)args[1]);
-            if (err != default!) {
-                return (default!, err);
+            if (err != nil) {
+                return (default, err);
             }
 
             var msg = args[2];
             var hashFunc = newH();
             hashFunc.Write(msg);
-            var digest = hashFunc.Sum(default!);
+            var digest = hashFunc.Sum(default);
 
             var (x, y) = (args[3], args[4]);
             (var q, err) = pointFromAffine(curve, @new<bigꓸInt>().SetBytes(x), @new<bigꓸInt>().SetBytes(y));
-            if (err != default!) {
-                return (default!, fmt.Errorf("invalid x/y coordinates: %v"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("invalid x/y coordinates: %v"u8, err));
             }
 
             var signature = Ꮡ(new ecdsa.Signature(R: args[5], S: args[6]));
 
-            var exprᴛ1 = curve.Params();
-            if (exprᴛ1 == elliptic.P224().Params()) {
+            switch (curve.Params()) {
+            case var ᴛ when ᴛ == elliptic.P224().Params(): {
                 err = verifyEcdsa<ecdsa.P224PointжPoint>(ecdsa.P224(), q, digest, signature);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P256().Params()) {
+            case var ᴛ when ᴛ == elliptic.P256().Params(): {
                 err = verifyEcdsa<ecdsa.P256PointжPoint>(ecdsa.P256(), q, digest, signature);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P384().Params()) {
+            case var ᴛ when ᴛ == elliptic.P384().Params(): {
                 err = verifyEcdsa<ecdsa.P384PointжPoint>(ecdsa.P384(), q, digest, signature);
+                break;
             }
-            else if (exprᴛ1 == elliptic.P521().Params()) {
+            case var ᴛ when ᴛ == elliptic.P521().Params(): {
                 err = verifyEcdsa<ecdsa.P521PointжPoint>(ecdsa.P521(), q, digest, signature);
+                break;
             }
-            else { /* default: */
-                return (default!, fmt.Errorf("unsupported curve: %v"u8, curve));
+            default: {
+                return (default, fmt.Errorf("unsupported curve: %v"u8, curve));
+            }}
+
+            if (err == nil) {
+                return (slice<slice<byte>>([slice<byte>([1])]), default);
             }
 
-            if (err == default!) {
-                return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
-            }
-
-            return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([0])]), default);
         }
     );
 }
 
-internal static error verifyEcdsa<P>(ж<ecdsa.Curve<P>> Ꮡc, slice<byte> q, slice<byte> digest, ж<ecdsa.Signature> Ꮡsig)
+internal static error verifyEcdsa<P>(ж<ecdsa.Curve<P>> c, slice<byte> q, slice<byte> digest, ж<ecdsa.Signature> sig)
     where P : ecdsa.Point<P>
 {
-    var (pub, err) = ecdsa.NewPublicKey(Ꮡc, q);
-    if (err != default!) {
+    var (pub, err) = ecdsa.NewPublicKey(c, q);
+    if (err != nil) {
         return fmt.Errorf("invalid public key: %w"u8, err);
     }
 
-    return ecdsa.Verify(Ꮡc, pub, digest, Ꮡsig);
+    return ecdsa.Verify(c, pub, digest, sig);
 }
 
 internal static (Func<hash.Hash>, error) lookupHash(@string name) {
-    Func<hash.Hash> h = default!;
+    Func<hash.Hash> h = default;
 
     var exprᴛ1 = name;
-    if (exprᴛ1 == "SHA2-224"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "SHA2-224"u8: {
         h = () => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New224());
+        break;
     }
-    else if (exprᴛ1 == "SHA2-256"u8) {
+    case {} when exprᴛ1 == "SHA2-256"u8: {
         h = () => new fipstest_internal_test_package.sha256_DigestжHash(sha256.New());
+        break;
     }
-    else if (exprᴛ1 == "SHA2-384"u8) {
+    case {} when exprᴛ1 == "SHA2-384"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New384());
+        break;
     }
-    else if (exprᴛ1 == "SHA2-512"u8) {
+    case {} when exprᴛ1 == "SHA2-512"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New());
+        break;
     }
-    else if (exprᴛ1 == "SHA2-512/224"u8) {
+    case {} when exprᴛ1 == "SHA2-512/224"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_224());
+        break;
     }
-    else if (exprᴛ1 == "SHA2-512/256"u8) {
+    case {} when exprᴛ1 == "SHA2-512/256"u8: {
         h = () => new fipstest_internal_test_package.sha512_DigestжHash(sha512.New512_256());
+        break;
     }
-    else if (exprᴛ1 == "SHA3-224"u8) {
+    case {} when exprᴛ1 == "SHA3-224"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New224());
+        break;
     }
-    else if (exprᴛ1 == "SHA3-256"u8) {
+    case {} when exprᴛ1 == "SHA3-256"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New256());
+        break;
     }
-    else if (exprᴛ1 == "SHA3-384"u8) {
+    case {} when exprᴛ1 == "SHA3-384"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New384());
+        break;
     }
-    else if (exprᴛ1 == "SHA3-512"u8) {
+    case {} when exprᴛ1 == "SHA3-512"u8: {
         h = () => new fipstest_internal_test_package.sha3_DigestжHash(sha3.New512());
+        break;
     }
-    else { /* default: */
-        return (default!, fmt.Errorf("unknown hash name: %q"u8, name));
-    }
+    default: {
+        return (default, fmt.Errorf("unknown hash name: %q"u8, name));
+    }}
 
-    return (h, default!);
+    return (h, default);
 }
 
 internal static command cmdMlKem768KeyGenAft() {
@@ -1261,12 +1288,12 @@ internal static command cmdMlKem768KeyGenAft() {
             var seed = args[0];
 
             var (dk, err) = mlkem.NewDecapsulationKey768(seed);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-KEM 768 decapsulation key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-KEM 768 decapsulation key: %w"u8, err));
             }
 
             // Important: we must return the full encoding of dk, not the seed.
-            return (new slice<byte>[]{dk.EncapsulationKey().Bytes(), mlkem.TestingOnlyExpandedBytes768(dk)}.slice(), default!);
+            return (slice<slice<byte>>([dk.EncapsulationKey().Bytes(), mlkem.TestingOnlyExpandedBytes768(dk)]), default);
         }
     );
 }
@@ -1279,17 +1306,17 @@ internal static command cmdMlKem768EncapAft() {
             var entropy = args[1];
 
             var (ek, err) = mlkem.NewEncapsulationKey768(pk);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-KEM 768 encapsulation key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-KEM 768 encapsulation key: %w"u8, err));
             }
 
             if (len(entropy) != 32) {
-                return (default!, fmt.Errorf("wrong entropy length: got %d, want 32"u8, len(entropy)));
+                return (default, fmt.Errorf("wrong entropy length: got %d, want 32"u8, len(entropy)));
             }
 
             var (sharedKey, ct) = ek.EncapsulateInternal(Ꮡ(array<byte>.Alias(entropy[..32], 32)));
 
-            return (new slice<byte>[]{ct, sharedKey}.slice(), default!);
+            return (slice<slice<byte>>([ct, sharedKey]), default);
         }
     );
 }
@@ -1302,16 +1329,16 @@ internal static command cmdMlKem768DecapAft() {
             var ct = args[1];
 
             var (dk, err) = mlkem.TestingOnlyNewDecapsulationKey768(pk);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-KEM 768 decapsulation key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-KEM 768 decapsulation key: %w"u8, err));
             }
 
             (var sharedKey, err) = dk.Decapsulate(ct);
-            if (err != default!) {
-                return (default!, fmt.Errorf("decapsulating ML-KEM 768 ciphertext: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("decapsulating ML-KEM 768 ciphertext: %w"u8, err));
             }
 
-            return (new slice<byte>[]{sharedKey}.slice(), default!);
+            return (slice<slice<byte>>([sharedKey]), default);
         }
     );
 }
@@ -1323,12 +1350,12 @@ internal static command cmdMlKem1024KeyGenAft() {
             var seed = args[0];
 
             var (dk, err) = mlkem.NewDecapsulationKey1024(seed);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-KEM 1024 decapsulation key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-KEM 1024 decapsulation key: %w"u8, err));
             }
 
             // Important: we must return the full encoding of dk, not the seed.
-            return (new slice<byte>[]{dk.EncapsulationKey().Bytes(), mlkem.TestingOnlyExpandedBytes1024(dk)}.slice(), default!);
+            return (slice<slice<byte>>([dk.EncapsulationKey().Bytes(), mlkem.TestingOnlyExpandedBytes1024(dk)]), default);
         }
     );
 }
@@ -1341,17 +1368,17 @@ internal static command cmdMlKem1024EncapAft() {
             var entropy = args[1];
 
             var (ek, err) = mlkem.NewEncapsulationKey1024(pk);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-KEM 1024 encapsulation key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-KEM 1024 encapsulation key: %w"u8, err));
             }
 
             if (len(entropy) != 32) {
-                return (default!, fmt.Errorf("wrong entropy length: got %d, want 32"u8, len(entropy)));
+                return (default, fmt.Errorf("wrong entropy length: got %d, want 32"u8, len(entropy)));
             }
 
             var (sharedKey, ct) = ek.EncapsulateInternal(Ꮡ(array<byte>.Alias(entropy[..32], 32)));
 
-            return (new slice<byte>[]{ct, sharedKey}.slice(), default!);
+            return (slice<slice<byte>>([ct, sharedKey]), default);
         }
     );
 }
@@ -1364,41 +1391,46 @@ internal static command cmdMlKem1024DecapAft() {
             var ct = args[1];
 
             var (dk, err) = mlkem.TestingOnlyNewDecapsulationKey1024(pk);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating ML-KEM 1024 decapsulation key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating ML-KEM 1024 decapsulation key: %w"u8, err));
             }
 
             (var sharedKey, err) = dk.Decapsulate(ct);
-            if (err != default!) {
-                return (default!, fmt.Errorf("decapsulating ML-KEM 1024 ciphertext: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("decapsulating ML-KEM 1024 ciphertext: %w"u8, err));
             }
 
-            return (new slice<byte>[]{sharedKey}.slice(), default!);
+            return (slice<slice<byte>>([sharedKey]), default);
         }
     );
 }
 
 internal static (elliptic.Curve, error) lookupCurve(@string name) {
-    elliptic.Curve c = default!;
+    elliptic.Curve c = default;
 
     var exprᴛ1 = name;
-    if (exprᴛ1 == "P-224"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "P-224"u8: {
         c = elliptic.P224();
+        break;
     }
-    else if (exprᴛ1 == "P-256"u8) {
+    case {} when exprᴛ1 == "P-256"u8: {
         c = elliptic.P256();
+        break;
     }
-    else if (exprᴛ1 == "P-384"u8) {
+    case {} when exprᴛ1 == "P-384"u8: {
         c = elliptic.P384();
+        break;
     }
-    else if (exprᴛ1 == "P-521"u8) {
+    case {} when exprᴛ1 == "P-521"u8: {
         c = elliptic.P521();
+        break;
     }
-    else { /* default: */
-        return (default!, fmt.Errorf("unknown curve name: %q"u8, name));
-    }
+    default: {
+        return (default, fmt.Errorf("unknown curve name: %q"u8, name));
+    }}
 
-    return (c, default!);
+    return (c, default);
 }
 
 internal static command cmdAesCbc(aesDirection direction) {
@@ -1415,17 +1447,17 @@ internal static command cmdAesCbc(aesDirection direction) {
             var numIterations = binary.LittleEndian.Uint32(args[3]);
 
             var (blockCipher, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
             }
 
             if (len(input) % blockCipher.BlockSize() != 0 || len(input) == 0) {
-                return (default!, fmt.Errorf("invalid ciphertext/plaintext size %d: not a multiple of block size %d"u8,
+                return (default, fmt.Errorf("invalid ciphertext/plaintext size %d: not a multiple of block size %d"u8,
                     len(input), blockCipher.BlockSize()));
             }
 
             if (blockCipher.BlockSize() != len(iv)) {
-                return (default!, fmt.Errorf("invalid IV size: expected %d, got %d"u8, blockCipher.BlockSize(), len(iv)));
+                return (default, fmt.Errorf("invalid IV size: expected %d, got %d"u8, blockCipher.BlockSize(), len(iv)));
             }
 
             var result = new slice<byte>(len(input));
@@ -1436,14 +1468,14 @@ internal static command cmdAesCbc(aesDirection direction) {
                 copy(prevResult, result);
 
                 if (i > 0) {
-                    if (direction == aesEncrypt){
+                    if (direction == aesEncrypt) {
                         copy(iv, result);
                     } else {
                         copy(iv, prevInput);
                     }
                 }
 
-                if (direction == aesEncrypt){
+                if (direction == aesEncrypt) {
                     var cbcEnc = aes.NewCBCEncrypter(blockCipher, new array<byte>(iv, 16));
                     cbcEnc.CryptBlocks(result, input);
                 } else {
@@ -1455,14 +1487,14 @@ internal static command cmdAesCbc(aesDirection direction) {
                     copy(prevInput, input);
                 }
 
-                if (i == 0){
+                if (i == 0) {
                     copy(input, iv);
                 } else {
                     copy(input, prevResult);
                 }
             }
 
-            return (new slice<byte>[]{result, prevResult}.slice(), default!);
+            return (slice<slice<byte>>([result, prevResult]), default);
         }
     );
 }
@@ -1480,23 +1512,23 @@ internal static command cmdAesCtr(aesDirection direction) {
             var iv = args[2];
             var numIterations = binary.LittleEndian.Uint32(args[3]);
             if (numIterations != 1) {
-                return (default!, fmt.Errorf("invalid num iterations: expected 1, got %d"u8, numIterations));
+                return (default, fmt.Errorf("invalid num iterations: expected 1, got %d"u8, numIterations));
             }
 
             if (len(iv) != aes.ΔBlockSize) {
-                return (default!, fmt.Errorf("invalid IV size: expected %d, got %d"u8, (nint)(aes.ΔBlockSize), len(iv)));
+                return (default, fmt.Errorf("invalid IV size: expected %d, got %d"u8, (nint)(aes.ΔBlockSize), len(iv)));
             }
 
             var (blockCipher, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
             }
 
             var result = new slice<byte>(len(input));
             var stream = aes.NewCTR(blockCipher, iv);
             stream.XORKeyStream(result, input);
 
-            return (new slice<byte>[]{result}.slice(), default!);
+            return (slice<slice<byte>>([result]), default);
         }
     );
 }
@@ -1512,18 +1544,18 @@ internal static command cmdAesGcmSeal(bool randNonce) {
             var additionalData = args[4];
 
             var (blockCipher, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
             }
 
             (var aesGCM, err) = gcm.New(blockCipher, 12, (nint)tagLen);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES-GCM with tag len %d: %w"u8, tagLen, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES-GCM with tag len %d: %w"u8, tagLen, err));
             }
 
-            slice<byte> ct = default!;
-            if (!randNonce){
-                ct = aesGCM.Seal(default!, nonce, plaintext, additionalData);
+            slice<byte> ct = default;
+            if (!randNonce) {
+                ct = aesGCM.Seal(default, nonce, plaintext, additionalData);
             } else {
                 array<byte> internalNonce = new(12);
                 ct = new slice<byte>(len(plaintext) + 16);
@@ -1532,7 +1564,7 @@ internal static command cmdAesGcmSeal(bool randNonce) {
                 ct = appendꓸꓸꓸ(ct, internalNonce[..]);
             }
 
-            return (new slice<byte>[]{ct}.slice(), default!);
+            return (slice<slice<byte>>([ct]), default);
         }
     );
 }
@@ -1548,13 +1580,13 @@ internal static command cmdAesGcmOpen(bool randNonce) {
             var additionalData = args[4];
 
             var (blockCipher, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
             }
 
             (var aesGCM, err) = gcm.New(blockCipher, 12, (nint)tagLen);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES-GCM with tag len %d: %w"u8, tagLen, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES-GCM with tag len %d: %w"u8, tagLen, err));
             }
 
             if (randNonce) {
@@ -1563,12 +1595,12 @@ internal static command cmdAesGcmOpen(bool randNonce) {
                 ciphertext = ciphertext.slice(0, len(ciphertext) - 12);
             }
 
-            (var pt, err) = aesGCM.Open(default!, nonce, ciphertext, additionalData);
-            if (err != default!) {
-                return (new slice<byte>[]{new byte[]{0}.slice(), default!}.slice(), default!);
+            (var pt, err) = aesGCM.Open(default, nonce, ciphertext, additionalData);
+            if (err != nil) {
+                return (slice<slice<byte>>([slice<byte>([0]), default]), default);
             }
 
-            return (new slice<byte>[]{new byte[]{1}.slice(), pt}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([1]), pt]), default);
         }
     );
 }
@@ -1583,18 +1615,18 @@ internal static command cmdCmacAesAft() {
             var message = args[2];
 
             var (blockCipher, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
             }
 
             var cmac = gcm.NewCMAC(blockCipher);
             var tag = cmac.MAC(message);
 
             if (outputLen > len(tag)) {
-                return (default!, fmt.Errorf("invalid output length: expected %d, got %d"u8, outputLen, len(tag)));
+                return (default, fmt.Errorf("invalid output length: expected %d, got %d"u8, outputLen, len(tag)));
             }
 
-            return (new slice<byte>[]{tag.slice(0, outputLen)}.slice(), default!);
+            return (slice<slice<byte>>([tag.slice(0, outputLen)]), default);
         }
     );
 }
@@ -1608,18 +1640,18 @@ internal static command cmdCmacAesVerifyAft() {
             var claimedMAC = args[2];
 
             var (blockCipher, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
+            if (err != nil) {
+                return (default, fmt.Errorf("creating AES block cipher with key len %d: %w"u8, len(key), err));
             }
 
             var cmac = gcm.NewCMAC(blockCipher);
             var tag = cmac.MAC(message);
 
             if (subtle.ConstantTimeCompare(tag.slice(0, len(claimedMAC)), claimedMAC) != 1) {
-                return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+                return (slice<slice<byte>>([slice<byte>([0])]), default);
             }
 
-            return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([1])]), default);
         }
     );
 }
@@ -1634,7 +1666,7 @@ internal static command cmdTlsKdf12Aft(Func<hash.Hash> h) {
             var seed1 = args[3];
             var seed2 = args[4];
 
-            return (new slice<byte>[]{tls12.PRF(h, secret, label, appendꓸꓸꓸ(seed1, seed2), (nint)outputLen)}.slice(), default!);
+            return (slice<slice<byte>>([tls12.PRF(h, secret, label, appendꓸꓸꓸ(seed1, seed2), (nint)outputLen)]), default);
         }
     );
 }
@@ -1649,28 +1681,32 @@ internal static command cmdSshKdfAft(Func<hash.Hash> hFunc, ssh.Direction direct
             var sessionID = args[2];
             @string cipher = (@string)args[3];
 
-            nint keyLen = default!;
+            nint keyLen = default;
             var exprᴛ1 = cipher;
-            if (exprᴛ1 == "AES-128"u8) {
+            switch (ᐧ) {
+            case {} when exprᴛ1 == "AES-128"u8: {
                 keyLen = 16;
+                break;
             }
-            else if (exprᴛ1 == "AES-192"u8) {
+            case {} when exprᴛ1 == "AES-192"u8: {
                 keyLen = 24;
+                break;
             }
-            else if (exprᴛ1 == "AES-256"u8) {
+            case {} when exprᴛ1 == "AES-256"u8: {
                 keyLen = 32;
+                break;
             }
-            else { /* default: */
-                return (default!, fmt.Errorf("unsupported cipher: %q"u8, cipher));
-            }
+            default: {
+                return (default, fmt.Errorf("unsupported cipher: %q"u8, cipher));
+            }}
 
             var (ivKey, encKey, intKey) = ssh.Keys(hFunc, directionʗ1, k, h, sessionID, 16, keyLen, hFunc().Size());
-            return (new slice<byte>[]{ivKey, encKey, intKey}.slice(), default!);
+            return (slice<slice<byte>>([ivKey, encKey, intKey]), default);
         }
     );
 }
 
-internal static command cmdEcdhAftVal<P>(ж<ecdh.Curve<P>> Ꮡcurve)
+internal static command cmdEcdhAftVal<P>(ж<ecdh.Curve<P>> curve)
     where P : ecdh.Point<P>
 {
     return new command(
@@ -1680,20 +1716,20 @@ internal static command cmdEcdhAftVal<P>(ж<ecdh.Curve<P>> Ꮡcurve)
             var peerY = args[1];
             var rawSk = args[2];
 
-            var uncompressedPk = appendꓸꓸꓸ(new byte[]{4}.slice(), appendꓸꓸꓸ(peerX, peerY)); // 4 for uncompressed point format
-            var (pk, err) = ecdh.NewPublicKey(Ꮡcurve, uncompressedPk);
-            if (err != default!) {
-                return (default!, fmt.Errorf("invalid peer public key x,y: %v"u8, err));
+            var uncompressedPk = appendꓸꓸꓸ(slice<byte>([4]), appendꓸꓸꓸ(peerX, peerY)); // 4 for uncompressed point format
+            var (pk, err) = ecdh.NewPublicKey(curve, uncompressedPk);
+            if (err != nil) {
+                return (default, fmt.Errorf("invalid peer public key x,y: %v"u8, err));
             }
 
-            ж<ecdh.PrivateKey> sk = default!;
-            if (len(rawSk) > 0){
-                (sk, err) = ecdh.NewPrivateKey(Ꮡcurve, rawSk);
+            ж<ecdh.PrivateKey> sk = default;
+            if (len(rawSk) > 0) {
+                (sk, err) = ecdh.NewPrivateKey(curve, rawSk);
             } else {
-                (sk, err) = ecdh.GenerateKey(Ꮡcurve, rand.Reader);
+                (sk, err) = ecdh.GenerateKey(curve, rand.Reader);
             }
-            if (err != default!) {
-                return (default!, fmt.Errorf("private key error: %v"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("private key error: %v"u8, err));
             }
 
             var pubBytes = sk.PublicKey().Bytes();
@@ -1701,12 +1737,12 @@ internal static command cmdEcdhAftVal<P>(ж<ecdh.Curve<P>> Ꮡcurve)
             var x = pubBytes.slice(1, 1 + coordLen);
             var y = pubBytes.slice(1 + coordLen);
 
-            (var secret, err) = ecdh.ECDH(Ꮡcurve, sk, pk);
-            if (err != default!) {
-                return (default!, fmt.Errorf("key agreement failed: %v"u8, err));
+            (var secret, err) = ecdh.ECDH(curve, sk, pk);
+            if (err != nil) {
+                return (default, fmt.Errorf("key agreement failed: %v"u8, err));
             }
 
-            return (new slice<byte>[]{x, y, secret}.slice(), default!);
+            return (slice<slice<byte>>([x, y, secret]), default);
         }
     );
 }
@@ -1724,7 +1760,7 @@ internal static command cmdHmacDrbgAft(Func<hash.Hash> h) {
 
             // Our capabilities describe no additional data support.
             if (len(ad1) != 0 || len(ad2) != 0) {
-                return (default!, errors.New("additional data not supported"u8));
+                return (default, errors.New("additional data not supported"));
             }
 
             // Our capabilities describe no prediction resistance (requires reseed) and no reseed.
@@ -1739,7 +1775,7 @@ internal static command cmdHmacDrbgAft(Func<hash.Hash> h) {
             drbg.Generate(@out);
             drbg.Generate(@out);
 
-            return (new slice<byte>[]{@out}.slice(), default!);
+            return (slice<slice<byte>>([@out]), default);
         }
     );
 }
@@ -1781,51 +1817,51 @@ internal partial struct acvpCtrDrbg {
     internal slice<byte> ad1;
     internal slice<byte> ad2;
     internal slice<byte> nonce;
-    internal slice<byte> reseedAd; // May be empty for no reseed
+    internal slice<byte> reseedAd;      // May be empty for no reseed
     internal slice<byte> reseedEntropy; // May be empty for no reseed
 }
 
 internal static (slice<slice<byte>>, error) process(this acvpCtrDrbg args) {
     // Our capability describes no personalization support.
     if (len(args.personalization) > 0) {
-        return (default!, errors.New("personalization string not supported"u8));
+        return (default, errors.New("personalization string not supported"));
     }
 
     // Our capability describes no derivation function support, so the nonce
     // should be empty.
     if (len(args.nonce) > 0) {
-        return (default!, errors.New("unexpected nonce value"u8));
+        return (default, errors.New("unexpected nonce value"));
     }
 
     // Our capability describes entropy input len of 384 bits.
     var (entropy, err) = require48Bytes(args.entropy);
-    if (err != default!) {
-        return (default!, fmt.Errorf("entropy: %w"u8, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("entropy: %w"u8, err));
     }
 
     // Our capability describes additional input len of 384 bits.
     (var ad1, err) = require48Bytes(args.ad1);
-    if (err != default!) {
-        return (default!, fmt.Errorf("AD1: %w"u8, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("AD1: %w"u8, err));
     }
     (var ad2, err) = require48Bytes(args.ad2);
-    if (err != default!) {
-        return (default!, fmt.Errorf("AD2: %w"u8, err));
+    if (err != nil) {
+        return (default, fmt.Errorf("AD2: %w"u8, err));
     }
 
     var withReseed = len(args.reseedAd) > 0;
-    ж<array<byte>> reseedAd = default!;
-    ж<array<byte>> reseedEntropy = default!;
+    ж<array<byte>> reseedAd = default;
+    ж<array<byte>> reseedEntropy = default;
     if (withReseed) {
         // Ditto RE: entropy and additional data lengths for reseeding.
         {
-            (reseedAd, err) = require48Bytes(args.reseedAd); if (err != default!) {
-                return (default!, fmt.Errorf("reseed AD: %w"u8, err));
+            (reseedAd, err) = require48Bytes(args.reseedAd); if (err != nil) {
+                return (default, fmt.Errorf("reseed AD: %w"u8, err));
             }
         }
         {
-            (reseedEntropy, err) = require48Bytes(args.reseedEntropy); if (err != default!) {
-                return (default!, fmt.Errorf("reseed entropy: %w"u8, err));
+            (reseedEntropy, err) = require48Bytes(args.reseedEntropy); if (err != nil) {
+                return (default, fmt.Errorf("reseed entropy: %w"u8, err));
             }
         }
     }
@@ -1846,7 +1882,7 @@ internal static (slice<slice<byte>>, error) process(this acvpCtrDrbg args) {
     ctrDrbg.Generate(@out, ad1);
     ctrDrbg.Generate(@out, ad2);
 
-    return (new slice<byte>[]{@out}.slice(), default!);
+    return (slice<slice<byte>>([@out]), default);
 }
 
 // Verify input is 48 byte slice, and cast it to a pointer to a fixed-size array
@@ -1857,7 +1893,7 @@ internal static (ж<array<byte>>, error) require48Bytes(slice<byte> input) {
             return (ж<array<byte>>.NilBoxOfDims(48L), fmt.Errorf("invalid length: %d"u8, inputLen));
         }
     }
-    return (Ꮡ(array<byte>.Alias(input, 48)), default!);
+    return (Ꮡ(array<byte>.Alias(input, 48)), default);
 }
 
 internal static command cmdKdfCounterAft() {
@@ -1871,32 +1907,32 @@ internal static command cmdKdfCounterAft() {
             var counterBits = binary.LittleEndian.Uint32(args[4]);
 
             if (outputBytes != 32) {
-                return (default!, fmt.Errorf("KDF received unsupported output length %d bytes"u8, outputBytes));
+                return (default, fmt.Errorf("KDF received unsupported output length %d bytes"u8, outputBytes));
             }
             if (!bytes.Equal(prf, slice<byte>("CMAC-AES128"u8)) && !bytes.Equal(prf, slice<byte>("CMAC-AES192"u8)) && !bytes.Equal(prf, slice<byte>("CMAC-AES256"u8))) {
-                return (default!, fmt.Errorf("KDF received unsupported PRF %q"u8, (@string)prf));
+                return (default, fmt.Errorf("KDF received unsupported PRF %q"u8, (@string)prf));
             }
             if (!bytes.Equal(counterLocation, slice<byte>("before fixed data"u8))) {
-                return (default!, fmt.Errorf("KDF received unsupported counter location %q"u8, (@string)counterLocation));
+                return (default, fmt.Errorf("KDF received unsupported counter location %q"u8, (@string)counterLocation));
             }
             // The spec doesn't describe the "deferred" property for a KDF counterMode test case.
             // BoringSSL's acvptool sends an empty key when deferred=true, but with the capabilities
             // we register all test cases ahve deferred=false and provide a key from the populated
             // keyIn property.
             if (len(key) == 0) {
-                return (default!, errors.New("deferred test cases are not supported"u8));
+                return (default, errors.New("deferred test cases are not supported"));
             }
             if (counterBits != 16) {
-                return (default!, fmt.Errorf("KDF received unsupported counter length %d"u8, counterBits));
+                return (default, fmt.Errorf("KDF received unsupported counter length %d"u8, counterBits));
             }
 
             var (block, err) = aes.New(key);
-            if (err != default!) {
-                return (default!, fmt.Errorf("failed to create cipher: %v"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("failed to create cipher: %v"u8, err));
             }
             var kdf = gcm.NewCounterKDF(block);
 
-            byte label = default!;
+            byte label = default;
             array<byte> context = new(12);
             rand.Reader.Read(context[..]);
 
@@ -1906,7 +1942,7 @@ internal static command cmdKdfCounterAft() {
             fixedData[0] = label;
             copy(fixedData[2..], context[..]);
 
-            return (new slice<byte>[]{key, fixedData, result[..]}.slice(), default!);
+            return (slice<slice<byte>>([key, fixedData, result[..]]), default);
         }
     );
 }
@@ -1924,18 +1960,18 @@ internal static command cmdKdfFeedbackAft() {
             var key = args[3];
             var counterBits = binary.LittleEndian.Uint32(args[4]);
 
-            if (!strings.HasPrefix(prf, "HMAC-"u8)) {
-                return (default!, fmt.Errorf("feedback KDF received unsupported PRF %q"u8, prf));
+            if (!strings.HasPrefix(prf, "HMAC-")) {
+                return (default, fmt.Errorf("feedback KDF received unsupported PRF %q"u8, prf));
             }
             prf = prf[(int)(len("HMAC-"))..];
 
             var (h, err) = lookupHash(prf);
-            if (err != default!) {
-                return (default!, fmt.Errorf("feedback KDF received unsupported PRF %q: %w"u8, prf, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("feedback KDF received unsupported PRF %q: %w"u8, prf, err));
             }
 
             if (!bytes.Equal(counterLocation, slice<byte>("after fixed data"u8))) {
-                return (default!, fmt.Errorf("feedback KDF received unsupported counter location %q"u8, (@string)counterLocation));
+                return (default, fmt.Errorf("feedback KDF received unsupported counter location %q"u8, (@string)counterLocation));
             }
 
             // The spec doesn't describe the "deferred" property for a KDF counterMode test case.
@@ -1943,11 +1979,11 @@ internal static command cmdKdfFeedbackAft() {
             // we register all test cases have deferred=false and provide a key from the populated
             // keyIn property.
             if (len(key) == 0) {
-                return (default!, errors.New("deferred test cases are not supported"u8));
+                return (default, errors.New("deferred test cases are not supported"));
             }
 
             if (counterBits != 8) {
-                return (default!, fmt.Errorf("feedback KDF received unsupported counter length %d"u8, counterBits));
+                return (default, fmt.Errorf("feedback KDF received unsupported counter length %d"u8, counterBits));
             }
 
             array<byte> context = new(12);
@@ -1957,7 +1993,7 @@ internal static command cmdKdfFeedbackAft() {
 
             var result = hkdf.Expand(h, key, (@string)(fixedData[..]), outputBytes);
 
-            return (new slice<byte>[]{key, fixedData[..], result[..]}.slice(), default!);
+            return (slice<slice<byte>>([key, fixedData[..], result[..]]), default);
         }
     );
 }
@@ -1969,8 +2005,8 @@ internal static command cmdRsaKeyGenAft() {
             var bitSize = binary.LittleEndian.Uint32(args[0]);
 
             var (key, err) = getRSAKey((nint)bitSize);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating RSA key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating RSA key: %w"u8, err));
             }
 
             var (N, e, d, P, Q, _, _, _) = key.Export();
@@ -1978,7 +2014,7 @@ internal static command cmdRsaKeyGenAft() {
             var eBytes = new slice<byte>(4);
             binary.BigEndian.PutUint32(eBytes, (uint32)e);
 
-            return (new slice<byte>[]{eBytes, P, Q, N, d}.slice(), default!);
+            return (slice<slice<byte>>([eBytes, P, Q, N, d]), default);
         }
     );
 }
@@ -1991,24 +2027,24 @@ internal static command cmdRsaSigGenAft(Func<hash.Hash> hashFunc, @string hashNa
             var msg = args[1];
 
             var (key, err) = getRSAKey((nint)bitSize);
-            if (err != default!) {
-                return (default!, fmt.Errorf("generating RSA key: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("generating RSA key: %w"u8, err));
             }
 
             var h = hashFunc();
             h.Write(msg);
-            var digest = h.Sum(default!);
+            var digest = h.Sum(default);
 
-            slice<byte> sig = default!;
-            if (!pss){
+            slice<byte> sig = default;
+            if (!pss) {
                 (sig, err) = rsa.SignPKCS1v15(key, hashName, digest);
-                if (err != default!) {
-                    return (default!, fmt.Errorf("signing RSA message: %w"u8, err));
+                if (err != nil) {
+                    return (default, fmt.Errorf("signing RSA message: %w"u8, err));
                 }
             } else {
                 (sig, err) = rsa.SignPSS(rand.Reader, key, hashFunc(), digest, h.Size());
-                if (err != default!) {
-                    return (default!, fmt.Errorf("signing RSA message: %w"u8, err));
+                if (err != nil) {
+                    return (default, fmt.Errorf("signing RSA message: %w"u8, err));
                 }
             }
 
@@ -2016,7 +2052,7 @@ internal static command cmdRsaSigGenAft(Func<hash.Hash> hashFunc, @string hashNa
             var eBytes = new slice<byte>(4);
             binary.BigEndian.PutUint32(eBytes, (uint32)e);
 
-            return (new slice<byte>[]{N, eBytes, sig}.slice(), default!);
+            return (slice<slice<byte>>([N, eBytes, sig]), default);
         }
     );
 }
@@ -2032,12 +2068,11 @@ internal static command cmdRsaSigVerAft(Func<hash.Hash> hashFunc, @string hashNa
 
             var paddedE = new slice<byte>(4);
             copy(paddedE.slice(4 - len(eBytes)), eBytes);
-            ref var e = ref heap<nint>(out var Ꮡe);
-            e = (nint)binary.BigEndian.Uint32(paddedE);
+            ref var e = ref heap<nint>((nint)binary.BigEndian.Uint32(paddedE), out var Ꮡe);
 
             var (n, err) = bigmod.NewModulus(nBytes);
-            if (err != default!) {
-                return (default!, fmt.Errorf("invalid RSA modulus: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("invalid RSA modulus: %w"u8, err));
             }
 
             var pub = Ꮡ(new rsaꓸPublicKey(
@@ -2047,18 +2082,18 @@ internal static command cmdRsaSigVerAft(Func<hash.Hash> hashFunc, @string hashNa
 
             var h = hashFunc();
             h.Write(msg);
-            var digest = h.Sum(default!);
+            var digest = h.Sum(default);
 
-            if (!pss){
+            if (!pss) {
                 err = rsa.VerifyPKCS1v15(pub, hashName, digest, sig);
             } else {
                 err = rsa.VerifyPSS(pub, hashFunc(), digest, sig);
             }
-            if (err != default!) {
-                return (new slice<byte>[]{new byte[]{0}.slice()}.slice(), default!);
+            if (err != nil) {
+                return (slice<slice<byte>>([slice<byte>([0])]), default);
             }
 
-            return (new slice<byte>[]{new byte[]{1}.slice()}.slice(), default!);
+            return (slice<slice<byte>>([slice<byte>([1])]), default);
         }
     );
 }
@@ -2071,17 +2106,17 @@ internal static map<nint, ж<rsa.PrivateKey>> rsaKeyCache = new map<nint, ж<rsa
 internal static (ж<rsa.PrivateKey>, error) getRSAKey(nint bits) {
     {
         var (keyΔ1, exists) = rsaKeyCache[bits, ꟷ]; if (exists) {
-            return (keyΔ1, default!);
+            return (keyΔ1, default);
         }
     }
 
     var (key, err) = rsa.GenerateKey(rand.Reader, bits);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
 
     rsaKeyCache[bits] = key;
-    return (key, default!);
+    return (key, default);
 }
 
 internal static command cmdOneStepNoCounterHmacAft(Func<hash.Hash> h) {
@@ -2097,7 +2132,7 @@ internal static command cmdOneStepNoCounterHmacAft(Func<hash.Hash> h) {
             mac.Size();
 
             if (outBytes != (uint32)mac.Size()) {
-                return (default!, fmt.Errorf("invalid output length: got %d, want %d"u8, outBytes, mac.Size()));
+                return (default, fmt.Errorf("invalid output length: got %d, want %d"u8, outBytes, mac.Size()));
             }
 
             var data = new slice<byte>(0, len(key) + len(info));
@@ -2105,9 +2140,9 @@ internal static command cmdOneStepNoCounterHmacAft(Func<hash.Hash> h) {
             data = appendꓸꓸꓸ(data, info);
 
             mac.Write(data);
-            var @out = mac.Sum(default!);
+            var @out = mac.Sum(default);
 
-            return (new slice<byte>[]{@out}.slice(), default!);
+            return (slice<slice<byte>>([@out]), default);
         }
     );
 }
@@ -2121,16 +2156,15 @@ internal static command cmdKtsIfcInitiatorAft(Func<hash.Hash> h) {
             var eBytes = args[2];
 
             var (n, err) = bigmod.NewModulus(nBytes);
-            if (err != default!) {
-                return (default!, fmt.Errorf("invalid RSA modulus: %w"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("invalid RSA modulus: %w"u8, err));
             }
 
             var paddedE = new slice<byte>(4);
             copy(paddedE.slice(4 - len(eBytes)), eBytes);
-            ref var e = ref heap<nint>(out var Ꮡe);
-            e = (nint)binary.BigEndian.Uint32(paddedE);
+            ref var e = ref heap<nint>((nint)binary.BigEndian.Uint32(paddedE), out var Ꮡe);
             if (e != 0x10001) {
-                return (default!, errors.New("e must be 0x10001"u8));
+                return (default, errors.New("e must be 0x10001"));
             }
 
             var pub = Ꮡ(new rsaꓸPublicKey(
@@ -2140,17 +2174,17 @@ internal static command cmdKtsIfcInitiatorAft(Func<hash.Hash> h) {
 
             var dkm = new slice<byte>((nint)(outputBytes));
             {
-                var (_, errΔ1) = rand.Read(dkm); if (errΔ1 != default!) {
-                    return (default!, fmt.Errorf("failed to generate random DKM: %v"u8, errΔ1));
+                var (_, errΔ1) = rand.Read(dkm); if (errΔ1 != nil) {
+                    return (default, fmt.Errorf("failed to generate random DKM: %v"u8, errΔ1));
                 }
             }
 
-            (var iutC, err) = rsa.EncryptOAEP(h(), h(), rand.Reader, pub, dkm, default!);
-            if (err != default!) {
-                return (default!, fmt.Errorf("OAEP encryption failed: %v"u8, err));
+            (var iutC, err) = rsa.EncryptOAEP(h(), h(), rand.Reader, pub, dkm, default);
+            if (err != nil) {
+                return (default, fmt.Errorf("OAEP encryption failed: %v"u8, err));
             }
 
-            return (new slice<byte>[]{iutC, dkm}.slice(), default!);
+            return (slice<slice<byte>>([iutC, dkm]), default);
         }
     );
 }
@@ -2172,45 +2206,53 @@ internal static command cmdKtsIfcResponderAft(Func<hash.Hash> h) {
             copy(paddedE.slice(4 - len(eBytes)), eBytes);
             nint e = (nint)binary.BigEndian.Uint32(paddedE);
             if (e != 0x10001) {
-                return (default!, errors.New("e must be 0x10001"u8));
+                return (default, errors.New("e must be 0x10001"));
             }
 
             var (priv, err) = rsa.NewPrivateKey(nBytes, (nint)e, dBytes, pBytes, qBytes);
-            if (err != default!) {
-                return (default!, fmt.Errorf("failed to create private key: %v"u8, err));
+            if (err != nil) {
+                return (default, fmt.Errorf("failed to create private key: %v"u8, err));
             }
 
-            (var dkm, err) = rsa.DecryptOAEP(h(), h(), priv, cBytes, default!);
-            if (err != default!) {
-                return (default!, fmt.Errorf("OAEP decryption failed: %v"u8, err));
+            (var dkm, err) = rsa.DecryptOAEP(h(), h(), priv, cBytes, default);
+            if (err != nil) {
+                return (default, fmt.Errorf("OAEP decryption failed: %v"u8, err));
             }
 
-            return (new slice<byte>[]{dkm}.slice(), default!);
+            return (slice<slice<byte>>([dkm]), default);
         }
     );
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object buildingAcvptoolˢ = (@string)"building acvptool"u8;
-internal static readonly @string acvptoolExeˢ = "acvptool.exe"u8;
-internal static readonly @string buildˢ = "build"u8;
-internal static readonly @string utilFipstoolsAcvpˢ = "./util/fipstools/acvp/acvptool"u8;
-internal static readonly @string utilFipstoolsAcvpˢ2 = "util/fipstools/acvp/acvptool/test/check_expected.go"u8;
+internal static ref readonly @string acvptoolExeˢ => ref acvptoolExeˢᵇ;
+private static readonly @string acvptoolExeˢᵇ = "acvptool.exe"u8;
+internal static ref readonly @string buildˢ => ref buildˢᵇ;
+private static readonly @string buildˢᵇ = "build"u8;
+internal static ref readonly @string utilFipstoolsAcvpˢ => ref utilFipstoolsAcvpˢᵇ;
+private static readonly @string utilFipstoolsAcvpˢᵇ = "./util/fipstools/acvp/acvptool"u8;
+internal static ref readonly @string utilFipstoolsAcvpˢ2 => ref utilFipstoolsAcvpˢ2ᵇ;
+private static readonly @string utilFipstoolsAcvpˢ2ᵇ = "util/fipstools/acvp/acvptool/test/check_expected.go"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bsslModuleᶜ = "boringssl.googlesource.com/boringssl.git"u8;
+internal static ref readonly @string bsslModuleᶜ => ref bsslModuleᶜᵇ;
+private static readonly @string bsslModuleᶜᵇ = "boringssl.googlesource.com/boringssl.git"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string bsslVersionᶜ = "v0.0.0-20251111011041-baaf868e6e8f"u8;
+internal static ref readonly @string bsslVersionᶜ => ref bsslVersionᶜᵇ;
+private static readonly @string bsslVersionᶜᵇ = "v0.0.0-20251111011041-baaf868e6e8f"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string goAcvpModuleᶜ = "github.com/geomys/acvp-testdata"u8;
+internal static ref readonly @string goAcvpModuleᶜ => ref goAcvpModuleᶜᵇ;
+private static readonly @string goAcvpModuleᶜᵇ = "github.com/geomys/acvp-testdata"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string goAcvpVersionᶜ = "v0.0.0-20251201200548-d893de8b8b1c"u8;
+internal static ref readonly @string goAcvpVersionᶜ => ref goAcvpVersionᶜᵇ;
+private static readonly @string goAcvpVersionᶜᵇ = "v0.0.0-20251201200548-d893de8b8b1c"u8;
 
-public static void TestACVP(ж<testing.T> Ꮡt) {
-    testenv.SkipIfShortAndSlow(new fipstest_internal_test_package.testing_TжTB(Ꮡt));
+public static void TestACVP(ж<testing.T> t) {
+    testenv.SkipIfShortAndSlow(new fipstest_internal_test_package.testing_TжTB(t));
 
     @string bsslModule = bsslModuleᶜ;
     @string bsslVersion = bsslVersionᶜ;
@@ -2223,192 +2265,197 @@ public static void TestACVP(ж<testing.T> Ꮡt) {
     // Stat the acvp test config file so the test will be re-run if it changes, invalidating cached results
     // from the old config.
     {
-        var (_, errΔ1) = os.Stat(testConfigFile); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("failed to stat config file: %s"u8, errΔ1);
+        var (_, errΔ1) = os.Stat(testConfigFile); if (errΔ1 != nil) {
+            t.Fatalf("failed to stat config file: %s", errΔ1);
         }
     }
 
     // Fetch the BSSL module and use the JSON output to find the absolute path to the dir.
-    @string bsslDir = cryptotest.FetchModule(Ꮡt, bsslModule, bsslVersion);
+    @string bsslDir = cryptotest.FetchModule(t, bsslModule, bsslVersion);
 
-    Ꮡt.Log(buildingAcvptoolˢ);
+    t.Log(buildingAcvptoolˢ);
 
     // Build the acvptool binary.
-    @string toolPath = filepath.Join(Ꮡt.TempDir(), acvptoolExeˢ);
-    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new fipstest_internal_test_package.testing_TжTB(Ꮡt)),
+    @string toolPath = filepath.Join(t.TempDir(), acvptoolExeˢ);
+    var cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t), testenv.GoToolPath(new fipstest_internal_test_package.testing_TжTB(t)),
         buildˢ,
         "-o", toolPath,
         utilFipstoolsAcvpˢ);
-    cmd.Value.Dir = bsslDir;
+    cmd.Dir = bsslDir;
     {
-        var (outΔ1, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("failed to build acvptool: %s\n%s"u8, errΔ2, outΔ1);
+        var (outΔ1, errΔ2) = cmd.CombinedOutput(); if (errΔ2 != nil) {
+            t.Fatalf("failed to build acvptool: %s\n%s", errΔ2, outΔ1);
         }
     }
 
     // Similarly, fetch the ACVP data module that has vectors/expected answers.
-    @string dataDir = cryptotest.FetchModule(Ꮡt, goAcvpModule, goAcvpVersion);
+    @string dataDir = cryptotest.FetchModule(t, goAcvpModule, goAcvpVersion);
 
     var (cwd, err) = os.Getwd();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to fetch cwd: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to fetch cwd: %s", err);
     }
     @string configPath = filepath.Join(cwd, testConfigFile);
-    Ꮡt.Logf("running check_expected.go\ncwd: %q\ndata_dir: %q\nconfig: %q\ntool: %q\nmodule-wrapper: %q\n"u8,
-        cwd, dataDir, configPath, toolPath, testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)));
+    t.Logf("running check_expected.go\ncwd: %q\ndata_dir: %q\nconfig: %q\ntool: %q\nmodule-wrapper: %q\n",
+        cwd, dataDir, configPath, toolPath, testenv.Executable(new fipstest_internal_test_package.testing_TжTB(t)));
 
     // Run the check_expected test driver using the acvptool we built, and this test binary as the
     // module wrapper. The file paths in the config file are specified relative to the dataDir root
     // so we run the command from that dir.
-    var args = new @string[]{
-        "run"u8,
+    var args = slice<@string>([
+        "run",
         filepath.Join(bsslDir, utilFipstoolsAcvpˢ2),
-        "-tool"u8,
+        "-tool",
         toolPath,
         // Note: module prefix must match Wrapper value in testConfigFile.
-        "-module-wrappers"u8, "go:"u8 + testenv.Executable(new fipstest_internal_test_package.testing_TжTB(Ꮡt)),
-        "-tests"u8, configPath
-    }.slice();
-    cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new fipstest_internal_test_package.testing_TжTB(Ꮡt)), args.ꓸꓸꓸ);
-    cmd.Value.Dir = dataDir;
-    cmd.Value.Env = append(os.Environ(),
-        "ACVP_WRAPPER=1"u8,
-        "GODEBUG=fips140=on");
+        "-module-wrappers", "go:"u8 + testenv.Executable(new fipstest_internal_test_package.testing_TжTB(t)),
+        "-tests", configPath
+    ]);
+    cmd = testenv.Command(new fipstest_internal_test_package.testing_TжTB(t), testenv.GoToolPath(new fipstest_internal_test_package.testing_TжTB(t)), args.ꓸꓸꓸ);
+    cmd.Dir = dataDir;
+    cmd.Env = append(os.Environ(),
+        (@string)"ACVP_WRAPPER=1",
+        (@string)"GODEBUG=fips140=on");
     (var @out, err) = cmd.CombinedOutput();
-    Ꮡt.Logf("\n%s"u8, @out);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to run acvp tests: %s"u8, err);
+    t.Logf("\n%s", @out);
+    if (err != nil) {
+        t.Fatalf("failed to run acvp tests: %s", err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testˢ = "test"u8;
-internal static readonly @string expected1ArgsGot0ˢ = "expected 1 args, got 0"u8;
+internal static ref readonly @string testˢ => ref testˢᵇ;
+private static readonly @string testˢᵇ = "test"u8;
+internal static ref readonly @string expected1ArgsGot0ˢ => ref expected1ArgsGot0ˢᵇ;
+private static readonly @string expected1ArgsGot0ˢᵇ = "expected 1 args, got 0"u8;
 
-public static void TestTooFewArgs(ж<testing.T> Ꮡt) {
+public static void TestTooFewArgs(ж<testing.T> t) {
     commands[testˢ] = new command(
         requiredArgs: 1,
         handler: (slice<slice<byte>> args) => {
             {
                 nint gotArgs = len(args); if (gotArgs != 1) {
-                    return (default!, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
+                    return (default, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
                 }
             }
-            return (default!, default!);
+            return (default, default);
         }
     );
 
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
-    var err = processingLoop(mockRequest(Ꮡt, testˢ, default!), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
-    if (err == default!) {
-        Ꮡt.Fatalf("expected error, got nil"u8);
+    var err = processingLoop(mockRequest(t, testˢ, default), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
+    if (err == nil) {
+        t.Fatalf("expected error, got nil");
     }
     @string expectedErr = expected1ArgsGot0ˢ;
     if (!strings.Contains(err.Error(), expectedErr)) {
-        Ꮡt.Errorf("expected error to contain %q, got %v"u8, expectedErr, err);
+        t.Errorf("expected error to contain %q, got %v", expectedErr, err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string expected1ArgsGot2ˢ = "expected 1 args, got 2"u8;
+internal static ref readonly @string expected1ArgsGot2ˢ => ref expected1ArgsGot2ˢᵇ;
+private static readonly @string expected1ArgsGot2ˢᵇ = "expected 1 args, got 2"u8;
 
-public static void TestTooManyArgs(ж<testing.T> Ꮡt) {
+public static void TestTooManyArgs(ж<testing.T> t) {
     commands[testˢ] = new command(
         requiredArgs: 1,
         handler: (slice<slice<byte>> args) => {
             {
                 nint gotArgs = len(args); if (gotArgs != 1) {
-                    return (default!, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
+                    return (default, fmt.Errorf("expected 1 args, got %d"u8, gotArgs));
                 }
             }
-            return (default!, default!);
+            return (default, default);
         }
     );
 
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
     var err = processingLoop(mockRequest(
-        Ꮡt, testˢ, new slice<byte>[]{slice<byte>("one"u8), slice<byte>("two"u8)}.slice()), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
-    if (err == default!) {
-        Ꮡt.Fatalf("expected error, got nil"u8);
+        t, testˢ, slice<slice<byte>>([slice<byte>("one"u8), slice<byte>("two"u8)])), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
+    if (err == nil) {
+        t.Fatalf("expected error, got nil");
     }
     @string expectedErr = expected1ArgsGot2ˢ;
     if (!strings.Contains(err.Error(), expectedErr)) {
-        Ꮡt.Errorf("expected error to contain %q, got %v"u8, expectedErr, err);
+        t.Errorf("expected error to contain %q, got %v", expectedErr, err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string getConfigˢ = "getConfig"u8;
+internal static ref readonly @string getConfigˢ => ref getConfigˢᵇ;
+private static readonly @string getConfigˢᵇ = "getConfig"u8;
 
-public static void TestGetConfig(ж<testing.T> Ꮡt) {
+public static void TestGetConfig(ж<testing.T> t) {
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
-    var err = processingLoop(mockRequest(Ꮡt, getConfigˢ, default!), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
-    if (err != default!) {
-        Ꮡt.Errorf("unexpected error: %v"u8, err);
+    var err = processingLoop(mockRequest(t, getConfigˢ, default), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
+    if (err != nil) {
+        t.Errorf("unexpected error: %v", err);
     }
 
-    var respArgs = readResponse(Ꮡt, new fipstest_internal_test_package.bytes_BufferжReader(Ꮡoutput));
+    var respArgs = readResponse(t, new fipstest_internal_test_package.bytes_BufferжReader(Ꮡoutput));
     if (len(respArgs) != 1) {
-        Ꮡt.Fatalf("expected 1 response arg, got %d"u8, len(respArgs));
+        t.Fatalf("expected 1 response arg, got %d", len(respArgs));
     }
 
     if (!bytes.Equal(respArgs[0], capabilitiesJson)) {
-        Ꮡt.Errorf("expected config %q, got %q"u8, (@string)capabilitiesJson, (@string)respArgs[0]);
+        t.Errorf("expected config %q, got %q", (@string)capabilitiesJson, (@string)respArgs[0]);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string sha2256ˢ = "SHA2-256"u8;
+internal static ref readonly @string sha2256ˢ => ref sha2256ˢᵇ;
+private static readonly @string sha2256ˢᵇ = "SHA2-256"u8;
 
-public static void TestSha2256(ж<testing.T> Ꮡt) {
+public static void TestSha2256(ж<testing.T> t) {
     var testMessage = slice<byte>("gophers eat grass"u8);
-    var expectedDigest = new byte[]{
+    var expectedDigest = slice<byte>([
         188, 142, 10, 214, 48, 236, 72, 143, 70, 216, 223, 205, 219, 69, 53, 29,
         205, 207, 162, 6, 14, 70, 113, 60, 251, 170, 201, 236, 119, 39, 141, 172
-    }.slice();
+    ]);
 
     ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
-    var err = processingLoop(mockRequest(Ꮡt, sha2256ˢ, new slice<byte>[]{testMessage}.slice()), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
-    if (err != default!) {
-        Ꮡt.Errorf("unexpected error: %v"u8, err);
+    var err = processingLoop(mockRequest(t, sha2256ˢ, slice<slice<byte>>([testMessage])), new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡoutput));
+    if (err != nil) {
+        t.Errorf("unexpected error: %v", err);
     }
 
-    var respArgs = readResponse(Ꮡt, new fipstest_internal_test_package.bytes_BufferжReader(Ꮡoutput));
+    var respArgs = readResponse(t, new fipstest_internal_test_package.bytes_BufferжReader(Ꮡoutput));
     if (len(respArgs) != 1) {
-        Ꮡt.Fatalf("expected 1 response arg, got %d"u8, len(respArgs));
+        t.Fatalf("expected 1 response arg, got %d", len(respArgs));
     }
 
     if (!bytes.Equal(respArgs[0], expectedDigest)) {
-        Ꮡt.Errorf("expected digest %v, got %v"u8, expectedDigest, respArgs[0]);
+        t.Errorf("expected digest %v, got %v", expectedDigest, respArgs[0]);
     }
 }
 
-internal static io.Reader mockRequest(ж<testing.T> Ꮡt, @string cmd, slice<slice<byte>> args) {
-    Ꮡt.Helper();
+internal static io.Reader mockRequest(ж<testing.T> t, @string cmd, slice<slice<byte>> args) {
+    t.Helper();
 
-    var msgData = appendꓸꓸꓸ(new slice<byte>[]{slice<byte>(cmd)}.slice(), args);
+    var msgData = appendꓸꓸꓸ(slice<slice<byte>>([slice<byte>(cmd)]), args);
 
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var err = writeResponse(new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡbuf), msgData); if (err != default!) {
-            Ꮡt.Fatalf("writeResponse error: %v"u8, err);
+        var err = writeResponse(new fipstest_internal_test_package.bytes_BufferжWriter(Ꮡbuf), msgData); if (err != nil) {
+            t.Fatalf("writeResponse error: %v", err);
         }
     }
 
     return new fipstest_internal_test_package.bytes_BufferжReader(Ꮡbuf);
 }
 
-internal static slice<slice<byte>> readResponse(ж<testing.T> Ꮡt, io.Reader reader) {
+internal static slice<slice<byte>> readResponse(ж<testing.T> t, io.Reader reader) {
     ref var numArgs = ref heap(new uint32(), out var ᏑnumArgs);
     {
-        var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("failed to read response args count: %v"u8, errΔ1);
+        var errΔ1 = binary.Read(reader, binary.LittleEndian, ᏑnumArgs); if (errΔ1 != nil) {
+            t.Fatalf("failed to read response args count: %v", errΔ1);
         }
     }
 
     var (args, err) = readArgs(reader, numArgs);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to read %d response args: %v"u8, numArgs, err);
+    if (err != nil) {
+        t.Fatalf("failed to read %d response args: %v", numArgs, err);
     }
 
     return args;

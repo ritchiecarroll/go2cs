@@ -2090,6 +2090,7 @@ internal class StructTypeTemplate : TemplateBase
                 return $"// -- {NonGenericStructName} has no defined fields";
 
             StringBuilder result = new();
+            List<string> tokens = [];
 
             foreach ((string typeName, string memberName, _, _, _) in StructMembers)
             {
@@ -2124,7 +2125,22 @@ internal class StructTypeTemplate : TemplateBase
                 // The field's ONE accessor token (parity seat #32): `&p.f` reads `p.Ꮡf`, whose view every site in every
                 // assembly asks golib's cache for with this same delegate object, so the cache compares by reference.
                 // It is the accessor's method group, since golib reads the field's name off the delegate's method.
-                result.Append($"\r\n{TypeElemIndent}{fieldScope} static readonly global::go.FieldRefFunc<{StructName}, {typeName}> {accessor}{FieldAccessTokenSuffix} = {accessor};");
+                tokens.Add($"{fieldScope} static readonly global::go.FieldRefFunc<{StructName}, {typeName}> {accessor}{FieldAccessTokenSuffix} = {accessor};");
+            }
+
+            // The tokens live in a nested holder, not on the struct. Native AOT preinitializes them, and it names each
+            // preinitialized object by its owning type and then the allocation's instruction number, with no separator.
+            // Held on the struct itself, `IfmaMsghdr`'s sixth token (instruction 23) and `IfmaMsghdr2`'s first
+            // (instruction 3) took one name, and every darwin Native AOT publish failed. The holder's name ends in a
+            // letter, so no owning type runs into a number.
+            if (tokens.Count > 0)
+            {
+                result.Append($"\r\n\r\n{TypeElemIndent}public static class {FieldAccessTokenHolder}\r\n{TypeElemIndent}{{");
+
+                foreach (string token in tokens)
+                    result.Append($"\r\n{TypeElemIndent}    {token}");
+
+                result.Append($"\r\n{TypeElemIndent}}}");
             }
 
             return result.ToString();

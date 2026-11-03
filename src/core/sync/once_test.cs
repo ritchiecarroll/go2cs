@@ -18,46 +18,45 @@ internal static void Increment(this ref one o) {
     o++;
 }
 
-internal static void run(ж<Δtesting.T> Ꮡt, ж<Δsync.Once> Ꮡonce, ж<one> Ꮡo, channel<bool> c) {
-    ref var once = ref Ꮡonce.DerefOrNull();
+internal static void run(ж<Δtesting.T> t, ж<Δsync.Once> once, ж<one> Ꮡo, channel<bool> c) {
     ref var o = ref Ꮡo.DerefOrNull();
 
-    Ꮡonce.Do(() => {
+    once.Do(() => {
         Ꮡo.Value.Increment();
     });
     {
         one v = o; if (v != 1) {
-            Ꮡt.Errorf("once failed inside run: %d is not 1"u8, v);
+            t.Errorf("once failed inside run: %d is not 1", v);
         }
     }
     c.ᐸꟷ(true);
 }
 
-public static partial void TestOnce(ж<Δtesting.T> Ꮡt) {
+public static partial void TestOnce(ж<Δtesting.T> t) {
     var o = @new<one>();
     var once = @new<Δsync.Once>();
     var c = new channel<bool>(0);
     const nint N = 10;
     for (nint i = 0; i < N; i++) {
-        goǃ(run, Ꮡt, once, o, c);
+        goǃ(run, t, once, o, c);
     }
     for (nint i = 0; i < N; i++) {
         ᐸꟷ(c);
     }
     if (o.Value != 1) {
-        Ꮡt.Errorf("once failed outside run: %d is not 1"u8, o.Value);
+        t.Errorf("once failed outside run: %d is not 1", o.Value);
     }
 }
 
-public static void TestOncePanic(ж<Δtesting.T> Ꮡt) {
+public static void TestOncePanic(ж<Δtesting.T> t) {
     ref var once = ref heap(new Δsync.Once(), out var Ꮡonce);
-    ((Action)(() => {
+    func(() => {
         GoFrame ᒐ = default;
         try {
             defer(() => {
                 {
-                    var r = recover(); if (r == default!) {
-                        Ꮡt.Fatalf("Once.Do did not panic"u8);
+                    var r = recover(); if (r == nil) {
+                        t.Fatalf("Once.Do did not panic");
                     }
                 }
             }, ref ᒐ);
@@ -67,19 +66,19 @@ public static void TestOncePanic(ж<Δtesting.T> Ꮡt) {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))();
+    })();
 
     Ꮡonce.Do(() => {
-        Ꮡt.Fatalf("Once.Do called twice"u8);
+        t.Fatalf("Once.Do called twice");
     });
 }
 
-public static void BenchmarkOnce(ж<Δtesting.B> Ꮡb) {
+public static void BenchmarkOnce(ж<Δtesting.B> b) {
     ref var once = ref heap(new Δsync.Once(), out var Ꮡonce);
     var f = () => {
     };
     var fʗ1 = f;
-    Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
+    b.RunParallel((ж<Δtesting.PB> pb) => {
         while (pb.Next()) {
             Ꮡonce.Do(fʗ1);
         }

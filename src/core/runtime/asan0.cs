@@ -14,7 +14,8 @@ internal const bool asanenabled = false;
 internal static UntypedInt asanenabledBit => 0;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string asanˢ = "asan"u8;
+internal static ref readonly @string asanˢ => ref asanˢᵇ;
+private static readonly @string asanˢᵇ = "asan"u8;
 
 // Because asanenabled is false, none of these functions should be called.
 internal static void asanread(@unsafe.Pointer addr, uintptr sz) {

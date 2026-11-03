@@ -16,11 +16,11 @@ using go.sync;
 partial class os_package {
 
 // ErrProcessDone indicates a [Process] has finished.
-public static error ErrProcessDone = errors.New("os: process already finished"u8);
+public static error ErrProcessDone = errors.New("os: process already finished");
 // errProcessReleased indicates a [Process] has been released.
-internal static error errProcessReleased = errors.New("os: process already released"u8);
+internal static error errProcessReleased = errors.New("os: process already released");
 // ErrNoHandle indicates a [Process] does not have a handle.
-public static error ErrNoHandle = errors.New("os: process handle unavailable"u8);
+public static error ErrNoHandle = errors.New("os: process handle unavailable");
 
 // processStatus describes the status of a [Process].
 partial struct processStatus /*num:uint32*/;
@@ -81,15 +81,15 @@ partial struct processHandle {
 internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
-    while (ᐧ) {
-        var refs = Ꮡph.of(processHandle.Ꮡrefs).Load();
+    for (;;) {
+        var refs = Ꮡph.Ꮡrefs.Load();
         if (refs < 0) {
             throw panic("internal error: negative process handle reference count");
         }
         if (refs == 0) {
             return (0, false);
         }
-        if (Ꮡph.of(processHandle.Ꮡrefs).CompareAndSwap(refs, refs + 1)) {
+        if (Ꮡph.Ꮡrefs.CompareAndSwap(refs, refs + 1)) {
             return (ph.handle, true);
         }
     }
@@ -99,12 +99,12 @@ internal static (uintptr, bool) acquire(this ж<processHandle> Ꮡph) {
 internal static void release(this ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
-    while (ᐧ) {
-        var refs = Ꮡph.of(processHandle.Ꮡrefs).Load();
+    for (;;) {
+        var refs = Ꮡph.Ꮡrefs.Load();
         if (refs <= 0) {
             throw panic("internal error: too many releases of process handle");
         }
-        if (Ꮡph.of(processHandle.Ꮡrefs).CompareAndSwap(refs, refs - 1)) {
+        if (Ꮡph.Ꮡrefs.CompareAndSwap(refs, refs - 1)) {
             if (refs == 1) {
                 ph.closeHandle();
             }
@@ -129,14 +129,14 @@ internal static ж<Process> newHandleProcess(nint pid, uintptr handle) {
 
     // Start the reference count as 1,
     // meaning the reference from the returned Process.
-    ph.of(processHandle.Ꮡrefs).Store(1);
+    ph.Ꮡrefs.Store(1);
 
     var p = Ꮡ(new Process(
         Pid: pid,
         handle: ph
     ));
 
-    p.Value.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(release)), ph);
+    p.cleanup = runtime.AddCleanup<Process, ж<processHandle>>(p, ((Action<ж<processHandle>>)(release)), ph);
 
     return p;
 }
@@ -148,7 +148,7 @@ internal static ж<Process> newDoneProcess(nint pid) {
     var p = Ꮡ(new Process(
         Pid: pid
     ));
-    p.of(Process.Ꮡstate).Store((uint32)statusDone); // No persistent reference, as there is no handle.
+    p.Ꮡstate.Store((uint32)statusDone); // No persistent reference, as there is no handle.
     return p;
 }
 
@@ -161,7 +161,7 @@ internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process>
         throw panic("handleTransientAcquire called in invalid mode");
     }
 
-    var status = (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
+    var status = (processStatus)Ꮡp.Ꮡstate.Load();
     if (status != statusOK) {
         return (0, status);
     }
@@ -174,7 +174,7 @@ internal static (uintptr, processStatus) handleTransientAcquire(this ж<Process>
     // We always set the status to non-zero before closing the handle.
     // If we get here the status must have been set non-zero after
     // we just checked it above.
-    status = (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
+    status = (processStatus)Ꮡp.Ꮡstate.Load();
     if (status == statusOK) {
         throw panic("inconsistent process status");
     }
@@ -197,7 +197,7 @@ internal static processStatus pidStatus(this ж<Process> Ꮡp) {
         throw panic("pidStatus called in invalid mode");
     }
 
-    return (processStatus)Ꮡp.of(Process.Ꮡstate).Load();
+    return (processStatus)Ꮡp.Ꮡstate.Load();
 }
 
 // ProcAttr holds the attributes that will be applied to a new process
@@ -270,9 +270,9 @@ public static (ж<Process>, error) FindProcess(nint pid) {
 // higher-level interfaces.
 //
 // If there is an error, it will be of type [*PathError].
-public static (ж<Process>, error) StartProcess(@string name, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
+public static (ж<Process>, error) StartProcess(@string name, slice<@string> argv, ж<ProcAttr> attr) {
     testlog.Open(name);
-    return startProcess(name, argv, Ꮡattr);
+    return startProcess(name, argv, attr);
 }
 
 // Release releases any resources associated with the [Process] p,
@@ -299,7 +299,7 @@ public static error Release(this ж<Process> Ꮡp) {
         }
     }
 
-    return default!;
+    return default;
 }
 
 // doRelease releases a [Process], setting the status to newStatus.
@@ -308,14 +308,14 @@ public static error Release(this ж<Process> Ꮡp) {
 internal static processStatus doRelease(this ж<Process> Ꮡp, processStatus newStatus) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    while (ᐧ) {
-        var state = Ꮡp.of(Process.Ꮡstate).Load();
+    for (;;) {
+        var state = Ꮡp.Ꮡstate.Load();
         var oldStatus = (processStatus)state;
         if (oldStatus != statusOK) {
             return oldStatus;
         }
 
-        if (!Ꮡp.of(Process.Ꮡstate).CompareAndSwap(state, (uint32)newStatus)) {
+        if (!Ꮡp.Ꮡstate.CompareAndSwap(state, (uint32)newStatus)) {
             continue;
         }
 

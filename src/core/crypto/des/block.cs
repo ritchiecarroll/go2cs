@@ -17,7 +17,7 @@ internal static void cryptBlock(slice<uint64> subkeys, slice<byte> dst, slice<by
     left = (left << 1) | (left >> 31);
     right = (right << 1) | (right >> 31);
 
-    if (decrypt){
+    if (decrypt) {
         for (nint i = 0; i < 8; i++) {
             (left, right) = feistel(left, right, subkeys[15 - 2 * i], subkeys[15 - (2 * i + 1)]);
         }
@@ -38,7 +38,7 @@ internal static void cryptBlock(slice<uint64> subkeys, slice<byte> dst, slice<by
 // DES Feistel function. feistelBox must be initialized via
 // feistelBoxOnce.Do(initFeistelBox) first.
 internal static (uint32 lout, uint32 rout) feistel(uint32 l, uint32 r, uint64 k0, uint64 k1) {
-    uint32 t = default!;
+    uint32 t = default;
 
     t = r ^ (uint32)(k0 >> 32);
     l ^= (uint32)((feistelBox[7][(t & 0x3f)] ^ feistelBox[5][((t >> 8) & 0x3f)] ^ feistelBox[3][((t >> 16) & 0x3f)] ^ feistelBox[1][((t >> 24) & 0x3f)]));
@@ -64,7 +64,7 @@ internal static ref sync.Once feistelBoxOnce => ref ((StaticBox<sync.Once>)Ꮡfe
 
 // general purpose function to perform DES block permutations.
 internal static uint64 /*block*/ permuteBlock(uint64 src, slice<uint8> permutation) {
-    uint64 block = default!;
+    uint64 block = default;
 
     foreach (var (position, n) in permutation) {
         var bit = (src.Rsh((uint64)(n))) & 1;
@@ -192,7 +192,7 @@ internal static uint64 permuteFinalBlock(uint64 block) {
 // creates 16 28-bit blocks rotated according
 // to the rotation schedule.
 internal static slice<uint32> /*out*/ ksRotate(uint32 @in) {
-    slice<uint32> @out = default!;
+    slice<uint32> @out = default;
 
     @out = new slice<uint32>(16);
     var last = @in;

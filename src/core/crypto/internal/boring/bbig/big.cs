@@ -15,7 +15,7 @@ public static boring.BigInt Enc(ж<bigꓸInt> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
-        return default!;
+        return default;
     }
     var x = b.Bits();
     if (len(x) == 0) {
@@ -25,8 +25,8 @@ public static boring.BigInt Enc(ж<bigꓸInt> Ꮡb) {
 }
 
 public static ж<bigꓸInt> Dec(boring.BigInt b) {
-    if (b == default!) {
-        return default!;
+    if (b == nil) {
+        return default;
     }
     if (len(b) == 0) {
         return @new<bigꓸInt>();

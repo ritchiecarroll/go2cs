@@ -26,12 +26,18 @@ using static go.log_package;
 
 partial class log_internal_test_package {
 
-public static readonly @string Rdate = @"[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]"u8;
-public static readonly @string Rtime = @"[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"u8;
-public static readonly @string Rmicroseconds = @"\.[0-9][0-9][0-9][0-9][0-9][0-9]"u8;
-public static readonly @string Rline = @"(67|69):"u8; // must update if the calls to l.Printf / l.Print below move
-public static readonly @string Rlongfile = ".*/[A-Za-z0-9_\\-]+\\.go:(67|69):";
-public static readonly @string Rshortfile = "[A-Za-z0-9_\\-]+\\.go:(67|69):";
+public static ref readonly @string Rdate => ref Rdateᵇ;
+private static readonly @string Rdateᵇ = @"[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]"u8;
+public static ref readonly @string Rtime => ref Rtimeᵇ;
+private static readonly @string Rtimeᵇ = @"[0-9][0-9]:[0-9][0-9]:[0-9][0-9]"u8;
+public static ref readonly @string Rmicroseconds => ref Rmicrosecondsᵇ;
+private static readonly @string Rmicrosecondsᵇ = @"\.[0-9][0-9][0-9][0-9][0-9][0-9]"u8;
+public static ref readonly @string Rline => ref Rlineᵇ;
+private static readonly @string Rlineᵇ = @"(67|69):"u8; // must update if the calls to l.Printf / l.Print below move
+public static ref readonly @string Rlongfile => ref Rlongfileᵇ;
+private static readonly @string Rlongfileᵇ = ".*/[A-Za-z0-9_\\-]+\\.go:(67|69):";
+public static ref readonly @string Rshortfile => ref Rshortfileᵇ;
+private static readonly @string Rshortfileᵇ = "[A-Za-z0-9_\\-]+\\.go:(67|69):";
 
 internal partial struct tester {
     internal nint flag;
@@ -39,24 +45,24 @@ internal partial struct tester {
     internal @string pattern; // regexp that log output must match; we add ^ and expected_text$ always
 }
 
-internal static slice<tester> tests = new tester[]{
+internal static slice<tester> tests = slice<tester>([
     // individual pieces:
-    new(0, ""u8, ""u8),
-    new(0, "XXX"u8, "XXX"u8),
-    new(Ldate, ""u8, Rdate + " "),
-    new(Ltime, ""u8, Rtime + " "),
-    new((nint)((nint)Ltime | (nint)Lmsgprefix), "XXX"u8, Rtime + " XXX"),
-    new((nint)((nint)Ltime | (nint)Lmicroseconds), ""u8, Rtime + Rmicroseconds + " "),
-    new(Lmicroseconds, ""u8, Rtime + Rmicroseconds + " "), // microsec implies time
-    new(Llongfile, ""u8, Rlongfile + " "),
-    new(Lshortfile, ""u8, Rshortfile + " "),
-    new((nint)((nint)Llongfile | (nint)Lshortfile), ""u8, Rshortfile + " "), // shortfile overrides longfile
+    new(0, "", ""),
+    new(0, "XXX", "XXX"),
+    new(Ldate, "", Rdate + " "),
+    new(Ltime, "", Rtime + " "),
+    new((nint)((nint)Ltime | (nint)Lmsgprefix), "XXX", Rtime + " XXX"),
+    new((nint)((nint)Ltime | (nint)Lmicroseconds), "", Rtime + Rmicroseconds + " "),
+    new(Lmicroseconds, "", Rtime + Rmicroseconds + " "), // microsec implies time
+    new(Llongfile, "", Rlongfile + " "),
+    new(Lshortfile, "", Rshortfile + " "),
+    new((nint)((nint)Llongfile | (nint)Lshortfile), "", Rshortfile + " "), // shortfile overrides longfile
     // everything at once:
-    new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Llongfile), "XXX"u8, "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " "),
-    new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Lshortfile), "XXX"u8, "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " "),
-    new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix), "XXX"u8, Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " XXX"),
-    new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Lshortfile) | (nint)Lmsgprefix), "XXX"u8, Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " XXX")
-}.slice();
+    new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Llongfile), "XXX", "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " "),
+    new((nint)((nint)(UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | (nint)Lshortfile), "XXX", "XXX" + Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " "),
+    new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix), "XXX", Rdate + " " + Rtime + Rmicroseconds + " " + Rlongfile + " XXX"),
+    new((nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Lshortfile) | (nint)Lmsgprefix), "XXX", Rdate + " " + Rtime + Rmicroseconds + " " + Rshortfile + " XXX")
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object helloˢ = (@string)"hello"u8;
@@ -64,13 +70,13 @@ internal static readonly object worldˢ = (@string)"world"u8;
 internal static readonly object patternDidNotCompileˢ = (@string)"pattern did not compile:"u8;
 
 // Test using Println("hello", 23, "world") or using Printf("hello %d world", 23)
-internal static void testPrint(ж<testing.T> Ꮡt, nint flag, @string prefix, @string pattern, bool useFormat) {
+internal static void testPrint(ж<testing.T> t, nint flag, @string prefix, @string pattern, bool useFormat) {
     var buf = @new<strings.Builder>();
     SetOutput(new log_test_package.strings_BuilderжWriter(buf));
     SetFlags(flag);
     SetPrefix(prefix);
-    if (useFormat){
-        Printf("hello %d world"u8, (nint)23);
+    if (useFormat) {
+        Printf("hello %d world", (nint)23);
     } else {
         Println(helloˢ, (nint)23, worldˢ);
     }
@@ -78,52 +84,53 @@ internal static void testPrint(ж<testing.T> Ꮡt, nint flag, @string prefix, @s
     line = line.slice(0, len(line) - 1);
     pattern = "^"u8 + pattern + "hello 23 world$"u8;
     var (matched, err) = Δregexp.MatchString(pattern, line);
-    if (err != default!) {
-        Ꮡt.Fatal(patternDidNotCompileˢ, err);
+    if (err != nil) {
+        t.Fatal(patternDidNotCompileˢ, err);
     }
     if (!matched) {
-        Ꮡt.Errorf("log output should match %q is %q"u8, pattern, line);
+        t.Errorf("log output should match %q is %q", pattern, line);
     }
     SetOutput(new Δos.FileжWriter(Δos.Stderr));
 }
 
-public static partial void TestDefault(ж<testing.T> Ꮡt) {
+public static partial void TestDefault(ж<testing.T> t) {
     {
         var got = Default(); if (got != std) {
-            Ꮡt.Errorf("Default [%p] should be std [%p]"u8, got.OrTypedNil(), std.OrTypedNil());
+            t.Errorf("Default [%p] should be std [%p]", got.OrTypedNil(), std.OrTypedNil());
         }
     }
 }
 
-public static void TestAll(ж<testing.T> Ꮡt) {
+public static void TestAll(ж<testing.T> t) {
     foreach (var (_, testcase) in tests) {
-        testPrint(Ꮡt, testcase.flag, testcase.prefix, testcase.pattern, false);
-        testPrint(Ꮡt, testcase.flag, testcase.prefix, testcase.pattern, true);
+        testPrint(t, testcase.flag, testcase.prefix, testcase.pattern, false);
+        testPrint(t, testcase.flag, testcase.prefix, testcase.pattern, true);
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string testStringᶜ = "test"u8;
+internal static ref readonly @string testStringᶜ => ref testStringᶜᵇ;
+private static readonly @string testStringᶜᵇ = "test"u8;
 
-public static void TestOutput(ж<testing.T> Ꮡt) {
+public static void TestOutput(ж<testing.T> t) {
     @string testString = testStringᶜ;
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var l = New(new log_test_package.strings_BuilderжWriter(Ꮡb), ""u8, 0);
     l.Println(testString);
     {
         @string expect = testString + "\n"; if (b.String() != expect) {
-            Ꮡt.Errorf("log output should match %q is %q"u8, expect, b.String());
+            t.Errorf("log output should match %q is %q", expect, b.String());
         }
     }
 }
 
-public static void TestNonNewLogger(ж<testing.T> Ꮡt) {
+public static void TestNonNewLogger(ж<testing.T> t) {
     ref var l = ref heap(new global::go.log_package.Logger(), out var Ꮡl);
     Ꮡl.SetOutput(new log_test_package.bytes_BufferжWriter(@new<bytes.Buffer>())); // minimal work to initialize a Logger
     Ꮡl.Print(helloˢ);
 }
 
-public static partial void TestOutputRace(ж<testing.T> Ꮡt) {
+public static partial void TestOutputRace(ж<testing.T> t) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var l = New(new log_test_package.bytes_BufferжWriter(Ꮡb), ""u8, 0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -145,55 +152,57 @@ public static partial void TestOutputRace(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testˢ = "Test:"u8;
-internal static readonly @string realityˢ = "Reality:"u8;
+internal static ref readonly @string testˢ => ref testˢᵇ;
+private static readonly @string testˢᵇ = "Test:"u8;
+internal static ref readonly @string realityˢ => ref realityˢᵇ;
+private static readonly @string realityˢᵇ = "Reality:"u8;
 internal static readonly object messageDidNotMatchˢ = (@string)"message did not match pattern"u8;
 
-public static void TestFlagAndPrefixSetting(ж<testing.T> Ꮡt) {
+public static void TestFlagAndPrefixSetting(ж<testing.T> t) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var l = New(new log_test_package.bytes_BufferжWriter(Ꮡb), testˢ, LstdFlags);
     nint f = l.Flags();
     if (f != LstdFlags) {
-        Ꮡt.Errorf("Flags 1: expected %x got %x"u8, (nint)(LstdFlags), f);
+        t.Errorf("Flags 1: expected %x got %x", (nint)(LstdFlags), f);
     }
     l.SetFlags(f | (nint)Lmicroseconds);
     f = l.Flags();
     if (f != (nint)((nint)LstdFlags | (nint)Lmicroseconds)) {
-        Ꮡt.Errorf("Flags 2: expected %x got %x"u8, (nint)((nint)LstdFlags | (nint)Lmicroseconds), f);
+        t.Errorf("Flags 2: expected %x got %x", (nint)((nint)LstdFlags | (nint)Lmicroseconds), f);
     }
     @string p = l.Prefix();
     if (p != "Test:"u8) {
-        Ꮡt.Errorf(@"Prefix: expected ""Test:"" got %q"u8, p);
+        t.Errorf(@"Prefix: expected ""Test:"" got %q", p);
     }
     l.SetPrefix(realityˢ);
     p = l.Prefix();
     if (p != "Reality:"u8) {
-        Ꮡt.Errorf(@"Prefix: expected ""Reality:"" got %q"u8, p);
+        t.Errorf(@"Prefix: expected ""Reality:"" got %q", p);
     }
     // Verify a log message looks right, with our prefix and microseconds present.
     l.Print(helloˢ);
     @string pattern = "^Reality:" + Rdate + " " + Rtime + Rmicroseconds + " hello\n";
     var (matched, err) = Δregexp.Match(pattern, b.Bytes());
-    if (err != default!) {
-        Ꮡt.Fatalf("pattern %q did not compile: %s"u8, pattern, err);
+    if (err != nil) {
+        t.Fatalf("pattern %q did not compile: %s", pattern, err);
     }
     if (!matched) {
-        Ꮡt.Error(messageDidNotMatchˢ);
+        t.Error(messageDidNotMatchˢ);
     }
 
     // Ensure that a newline is added only if the buffer lacks a newline suffix.
     b.Reset();
     l.SetFlags(0);
-    l.SetPrefix("\n"u8);
+    l.SetPrefix("\n");
     l.Output(0, ""u8);
     {
         @string got = Ꮡb.String(); if (got != "\n"u8) {
-            Ꮡt.Errorf("message mismatch:\ngot  %q\nwant %q"u8, got, (@string)"\n"u8);
+            t.Errorf("message mismatch:\ngot  %q\nwant %q", got, (@string)"\n");
         }
     }
 }
 
-public static void TestUTCFlag(ж<testing.T> Ꮡt) {
+public static void TestUTCFlag(ж<testing.T> t) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var l = New(new log_test_package.strings_BuilderжWriter(Ꮡb), testˢ, LstdFlags);
     l.SetFlags((nint)((nint)(UntypedInt)(Ldate | Ltime) | (nint)LUTC));
@@ -214,15 +223,17 @@ public static void TestUTCFlag(ж<testing.T> Ꮡt) {
     if (got == want) {
         return;
     }
-    Ꮡt.Errorf("got %q; want %q"u8, got, want);
+    t.Errorf("got %q; want %q", got, want);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string headerˢ = "Header:"u8;
+internal static ref readonly @string headerˢ => ref headerˢᵇ;
+private static readonly @string headerˢᵇ = "Header:"u8;
 internal static readonly object nonEmptyˢ = (@string)"non-empty"u8;
-internal static readonly @string headerˢ2 = "Header"u8;
+internal static ref readonly @string headerˢ2 => ref headerˢ2ᵇ;
+private static readonly @string headerˢ2ᵇ = "Header"u8;
 
-public static void TestEmptyPrintCreatesLine(ж<testing.T> Ꮡt) {
+public static void TestEmptyPrintCreatesLine(ж<testing.T> t) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     var l = New(new log_test_package.strings_BuilderжWriter(Ꮡb), headerˢ, LstdFlags);
     l.Print();
@@ -230,27 +241,27 @@ public static void TestEmptyPrintCreatesLine(ж<testing.T> Ꮡt) {
     @string output = b.String();
     {
         nint n = strings.Count(output, headerˢ2); if (n != 2) {
-            Ꮡt.Errorf("expected 2 headers, got %d"u8, n);
+            t.Errorf("expected 2 headers, got %d", n);
         }
     }
     {
-        nint n = strings.Count(output, "\n"u8); if (n != 2) {
-            Ꮡt.Errorf("expected 2 lines, got %d"u8, n);
+        nint n = strings.Count(output, "\n"); if (n != 2) {
+            t.Errorf("expected 2 lines, got %d", n);
         }
     }
 }
 
-public static void TestDiscard(ж<testing.T> Ꮡt) {
+public static void TestDiscard(ж<testing.T> t) {
     var l = New(Δio.Discard, ""u8, 0);
-    @string s = strings.Repeat("a"u8, 102400);
+    @string s = strings.Repeat("a", 102400);
     var lʗ1 = l;
     var c = testing.AllocsPerRun(100, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-        lʗ1.Printf("%s"u8, s);
+        lʗ1.Printf("%s", s);
     });
     // One allocation for slice passed to Printf,
     // but none for formatting of long string.
     if (c > 1D) {
-        Ꮡt.Errorf("got %v allocs, want at most 1"u8, c);
+        t.Errorf("got %v allocs, want at most 1", c);
     }
 }
 
@@ -258,13 +269,16 @@ public static void TestDiscard(ж<testing.T> Ꮡt) {
 internal static readonly object skippingTestInShortModeˢ = (@string)"skipping test in short mode"u8;
 internal static readonly object fatalˢ = (@string)"Fatal"u8;
 internal static readonly object fatallnˢ = (@string)"Fatalln"u8;
-internal static readonly @string outputˢ = "Output"u8;
+internal static ref readonly @string outputˢ => ref outputˢᵇ;
+private static readonly @string outputˢᵇ = "Output"u8;
 internal static readonly object panicˢ = (@string)"Panic"u8;
 internal static readonly object defaultFatalˢ = (@string)"Default.Fatal"u8;
 internal static readonly object defaultFatallnˢ = (@string)"Default.Fatalln"u8;
-internal static readonly @string defaultOutputˢ = "Default.Output"u8;
+internal static ref readonly @string defaultOutputˢ => ref defaultOutputˢᵇ;
+private static readonly @string defaultOutputˢᵇ = "Default.Output"u8;
 internal static readonly object defaultPanicˢ = (@string)"Default.Panic"u8;
-internal static readonly @string testCount1ˢ = "-test.count=1"u8;
+internal static ref readonly @string testCount1ˢ => ref testCount1ˢᵇ;
+private static readonly @string testCount1ˢᵇ = "-test.count=1"u8;
 
 internal partial struct TestCallDepth_tests /*dyn*/ {
     internal @string name;
@@ -272,70 +286,69 @@ internal partial struct TestCallDepth_tests /*dyn*/ {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string envVarᶜ = "LOGTEST_CALL_DEPTH"u8;
+internal static ref readonly @string envVarᶜ => ref envVarᶜᵇ;
+private static readonly @string envVarᶜᵇ = "LOGTEST_CALL_DEPTH"u8;
 
-public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static partial void TestCallDepth(ж<testing.T> t) {
     if (testing.Short()) {
-        Ꮡt.Skip(skippingTestInShortModeˢ);
+        t.Skip(skippingTestInShortModeˢ);
     }
 
-    testenv.MustHaveExec(new log_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveExec(new log_test_package.testing_TжTB(t));
     var (ep, err) = Δos.Executable();
-    if (err != default!) {
-        Ꮡt.Fatalf("Executable failed: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Executable failed: %v", err);
     }
 
-    var tests = new TestCallDepth_tests[]{
-        new("Fatal"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+    var tests = slice<TestCallDepth_tests>([
+        new("Fatal", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Fatal(fatalˢ);
         }),
-        new("Fatalf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-            Fatalf("Fatalf"u8);
+        new("Fatalf", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Fatalf("Fatalf");
         }),
-        new("Fatalln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Fatalln", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Fatalln(fatallnˢ);
         }),
-        new("Output"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Output", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Output(1, outputˢ);
         }),
-        new("Panic"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Panic", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Panic(panicˢ);
         }),
-        new("Panicf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-            Panicf("Panicf"u8);
+        new("Panicf", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Panicf("Panicf");
         }),
-        new("Panicln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-            Panicf("Panicln"u8);
+        new("Panicln", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Panicf("Panicln");
         }),
-        new("Default.Fatal"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Default.Fatal", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Default().Fatal(defaultFatalˢ);
         }),
-        new("Default.Fatalf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-            Default().Fatalf("Default.Fatalf"u8);
+        new("Default.Fatalf", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Fatalf("Default.Fatalf");
         }),
-        new("Default.Fatalln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Default.Fatalln", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Default().Fatalln(defaultFatallnˢ);
         }),
-        new("Default.Output"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Default.Output", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Default().Output(1, defaultOutputˢ);
         }),
-        new("Default.Panic"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        new("Default.Panic", [MethodImpl(MethodImplOptions.NoInlining)] () => {
             Default().Panic(defaultPanicˢ);
         }),
-        new("Default.Panicf"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-            Default().Panicf("Default.Panicf"u8);
+        new("Default.Panicf", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Panicf("Default.Panicf");
         }),
-        new("Default.Panicln"u8, [MethodImpl(MethodImplOptions.NoInlining)] () => {
-            Default().Panicf("Default.Panicln"u8);
+        new("Default.Panicln", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+            Default().Panicf("Default.Panicln");
         })
-    }.slice();
+    ]);
 
     // calculate the line offset until the first test case
     var (_, _, line, ok) = Δruntime.Caller(0);
     if (!ok) {
-        Ꮡt.Fatalf("runtime.Caller failed"u8);
+        t.Fatalf("runtime.Caller failed");
     }
     line -= len(tests) + 3;
 
@@ -344,7 +357,7 @@ public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
         tt = vᴛ1;
 
         var ttʗ1 = tt;
-        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+        t.Run(tt.name, (ж<testing.T> tΔ1) => {
             // some of these calls uses os.Exit() to spawn a command and capture output
             @string envVar = envVarᶜ;
             if (Δos.Getenv(envVar) == "1"u8) {
@@ -357,18 +370,18 @@ public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
             var cmd = testenv.Command(new log_test_package.testing_TжTB(tΔ1), ep,
                 "-test.run=^"u8 + Δregexp.QuoteMeta(tΔ1.Name()) + "$"u8,
                 testCount1ˢ);
-            cmd.Value.Env = append(cmd.Environ(), envVar + "=1");
+            cmd.Env = append(cmd.Environ(), envVar + "=1");
 
             var (@out, errΔ1) = cmd.CombinedOutput();
             {
                 var (_, okΔ1) = errors.AsType<ж<exec.ExitError>>(errΔ1); if (!okΔ1) {
-                    tΔ1.Fatalf("expected exec.ExitError: %v"u8, errΔ1);
+                    tΔ1.Fatalf("expected exec.ExitError: %v", errΔ1);
                 }
             }
 
             (_, var firstLine, errΔ1) = bufio.ScanLines(@out, true);
-            if (errΔ1 != default!) {
-                tΔ1.Fatalf("failed to split line: %v"u8, errΔ1);
+            if (errΔ1 != nil) {
+                tΔ1.Fatalf("failed to split line: %v", errΔ1);
             }
             @string got = (@string)firstLine;
 
@@ -377,7 +390,7 @@ public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
                 line + i, ttʗ1.name);
             if (got != want) {
                 tΔ1.Errorf(
-                    "output from %s() mismatch:\n\t got: %s\n\twant: %s"u8,
+                    "output from %s() mismatch:\n\t got: %s\n\twant: %s",
                     ttʗ1.name, got, want);
             }
         });
@@ -387,22 +400,22 @@ public static partial void TestCallDepth(ж<testing.T> Ꮡt) {
 public static void BenchmarkItoa(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    ref var dst = ref heap<slice<byte>>(out var Ꮡdst);
-    dst = new slice<byte>(0, 64);
+    ref var dst = ref heap<slice<byte>>(new slice<byte>(0, 64), out var Ꮡdst);
     for (nint i = 0; i < b.N; i++) {
         dst = dst[0..0];
-        itoa(ref dst, 2015, 4); // year
-        itoa(ref dst, 1, 2); // month
-        itoa(ref dst, 30, 2); // day
-        itoa(ref dst, 12, 2); // hour
-        itoa(ref dst, 56, 2); // minute
-        itoa(ref dst, 0, 2); // second
+        itoa(ref dst, 2015, 4);   // year
+        itoa(ref dst, 1, 2);      // month
+        itoa(ref dst, 30, 2);     // day
+        itoa(ref dst, 12, 2);     // hour
+        itoa(ref dst, 56, 2);     // minute
+        itoa(ref dst, 0, 2);      // second
         itoa(ref dst, 987654, 6); // microsecond
     }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string testStringᶜ1 = "test"u8;
+internal static ref readonly @string testStringᶜ1 => ref testStringᶜ1ᵇ;
+private static readonly @string testStringᶜ1ᵇ = "test"u8;
 
 public static void BenchmarkPrintln(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -418,7 +431,8 @@ public static void BenchmarkPrintln(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string testStringᶜ2 = "test"u8;
+internal static ref readonly @string testStringᶜ2 => ref testStringᶜ2ᵇ;
+private static readonly @string testStringᶜ2ᵇ = "test"u8;
 
 public static void BenchmarkPrintlnNoFlags(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -439,15 +453,17 @@ internal partial struct discard {
 }
 
 internal static (nint, error) Write(this discard _, slice<byte> p) {
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string prefixˢ = "prefix: "u8;
-internal static readonly @string helloWorldˢ = "hello, world!"u8;
+internal static ref readonly @string prefixˢ => ref prefixˢᵇ;
+private static readonly @string prefixˢᵇ = "prefix: "u8;
+internal static ref readonly @string helloWorldˢ => ref helloWorldˢᵇ;
+private static readonly @string helloWorldˢᵇ = "hello, world!"u8;
 
-public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
-    var l = New(new discard(nil), prefixˢ, (nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix));
+public static partial void BenchmarkConcurrent(ж<testing.B> b) {
+    var l = New(new discard(), prefixˢ, (nint)((nint)(UntypedInt)((UntypedInt)((UntypedInt)(Ldate | Ltime) | Lmicroseconds) | Llongfile) | (nint)Lmsgprefix));
     ref var group = ref heap(new Δsync.WaitGroup(), out var Ꮡgroup);
     for (nint i = Δruntime.NumCPU(); i > 0; i--) {
         Ꮡgroup.Add(1);
@@ -455,7 +471,7 @@ public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
         goǃ(() => {
             GoFrame ᒐ = default;
             try {
-                for (nint iΔ1 = 0; iΔ1 < Ꮡb.Value.N; iΔ1++) {
+                for (nint iΔ1 = 0; iΔ1 < b.Value.N; iΔ1++) {
                     lʗ1.Output(0, helloWorldˢ);
                 }
                 defer(Ꮡgroup.Done, ref ᒐ);
@@ -476,7 +492,7 @@ public static void BenchmarkDiscard(ж<testing.B> Ꮡb) {
     var l = New(Δio.Discard, ""u8, (nint)((nint)LstdFlags | (nint)Lshortfile));
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
-        l.Printf("processing %d objects from bucket %q"u8, (nint)1234, fizzbuzzˢ);
+        l.Printf("processing %d objects from bucket %q", (nint)1234, fizzbuzzˢ);
     }
 }
 

@@ -12,16 +12,16 @@ using io = io_package;
 partial class pkgbits_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string packageIdˢ = "package_id"u8;
+private static ref readonly @string packageIdˢ => ref packageIdˢᵇ;
+private static readonly @string packageIdˢᵇ = "package_id"u8;
 
-public static void TestRoundTrip(ж<testing.T> Ꮡt) {
-    foreach (var (_, version) in new pkgbitsꓸVersion[]{
+public static void TestRoundTrip(ж<testing.T> t) {
+    foreach (var (_, version) in slice<pkgbitsꓸVersion>([
         pkgbits.V0,
         pkgbits.V1,
         pkgbits.V2
-    }.slice()) {
-        ref var pw = ref heap<pkgbits.PkgEncoder>(out var Ꮡpw);
-        pw = pkgbits.NewPkgEncoder(version, -1);
+    ])) {
+        ref var pw = ref heap<pkgbits.PkgEncoder>(pkgbits.NewPkgEncoder(version, -1), out var Ꮡpw);
         var w = Ꮡpw.NewEncoder(pkgbits.SectionMeta, pkgbits.SyncPublic);
         w.Flush();
 
@@ -29,12 +29,11 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
         _ = Ꮡpw.DumpTo(new strings_BuilderжWriter(Ꮡb));
         @string input = b.String();
 
-        ref var pr = ref heap<pkgbits.PkgDecoder>(out var Ꮡpr);
-        pr = pkgbits.NewPkgDecoder(packageIdˢ, input);
+        ref var pr = ref heap<pkgbits.PkgDecoder>(pkgbits.NewPkgDecoder(packageIdˢ, input), out var Ꮡpr);
         var r = Ꮡpr.NewDecoder(pkgbits.SectionMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
 
         if (r.Version() != w.Version()) {
-            Ꮡt.Errorf("Expected reader version %d to be the writer version %d"u8, r.Version(), w.Version());
+            t.Errorf("Expected reader version %d to be the writer version %d", r.Version(), w.Version());
         }
     }
 }
@@ -49,9 +48,9 @@ internal partial struct TestVersions_vfpair /*dyn*/ {
     internal pkgbits.Field f;
 }
 
-public static void TestVersions(ж<testing.T> Ꮡt) {
+public static void TestVersions(ж<testing.T> t) {
     // has field tests
-    foreach (var (_, c) in new TestVersions_vfpair[]{
+    foreach (var (_, c) in slice<TestVersions_vfpair>([
         new(pkgbits.V1, pkgbits.Flags),
         new(pkgbits.V2, pkgbits.Flags),
         new(pkgbits.V0, pkgbits.HasInit),
@@ -61,23 +60,23 @@ public static void TestVersions(ж<testing.T> Ꮡt) {
         new(pkgbits.V0, pkgbits.DerivedInfoNeeded),
         new(pkgbits.V1, pkgbits.DerivedInfoNeeded),
         new(pkgbits.V2, pkgbits.AliasTypeParamNames)
-    }.slice()) {
+    ])) {
         if (!c.v.Has(c.f)) {
-            Ꮡt.Errorf("Expected version %v to have field %v"u8, c.v, c.f);
+            t.Errorf("Expected version %v to have field %v", c.v, c.f);
         }
     }
 
     // does not have field tests
-    foreach (var (_, c) in new TestVersions_vfpair[]{
+    foreach (var (_, c) in slice<TestVersions_vfpair>([
         new(pkgbits.V0, pkgbits.Flags),
         new(pkgbits.V2, pkgbits.HasInit),
         new(pkgbits.V2, pkgbits.DerivedFuncInstance),
         new(pkgbits.V2, pkgbits.DerivedInfoNeeded),
         new(pkgbits.V0, pkgbits.AliasTypeParamNames),
         new(pkgbits.V1, pkgbits.AliasTypeParamNames)
-    }.slice()) {
+    ])) {
         if (c.v.Has(c.f)) {
-            Ꮡt.Errorf("Expected version %v to not have field %v"u8, c.v, c.f);
+            t.Errorf("Expected version %v to not have field %v", c.v, c.f);
         }
     }
 }

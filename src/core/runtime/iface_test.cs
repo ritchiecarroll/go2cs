@@ -85,9 +85,9 @@ internal static bool ok;
 internal static readonly object skippingOnNonGcCompilerˢ = (@string)"skipping on non-gc compiler"u8;
 
 // Issue 9370
-public static void TestCmpIfaceConcreteAlloc(ж<testing.T> Ꮡt) {
+public static void TestCmpIfaceConcreteAlloc(ж<testing.T> t) {
     if (Δruntime.Compiler != "gc") {
-        Ꮡt.Skip(skippingOnNonGcCompilerˢ);
+        t.Skip(skippingOnNonGcCompilerˢ);
     }
 
     var n = testing.AllocsPerRun(100, () => {
@@ -97,7 +97,7 @@ public static void TestCmpIfaceConcreteAlloc(ж<testing.T> Ꮡt) {
     });
 
     if (n > 0D) {
-        Ꮡt.Fatalf("iface cmp allocs=%v; want 0"u8, n);
+        t.Fatalf("iface cmp allocs=%v; want 0", n);
     }
 }
 
@@ -134,16 +134,18 @@ public static void BenchmarkNeIfaceConcrete(ж<testing.B> Ꮡb) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string boolˢ = "bool"u8;
-internal static readonly @string uint8ˢ = "uint8"u8;
+internal static ref readonly @string boolˢ => ref boolˢᵇ;
+private static readonly @string boolˢᵇ = "bool"u8;
+internal static ref readonly @string uint8ˢ => ref uint8ˢᵇ;
+private static readonly @string uint8ˢᵇ = "uint8"u8;
 
-public static void BenchmarkConvT2EByteSized(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(boolˢ, (ж<testing.B> bΔ1) => {
+public static void BenchmarkConvT2EByteSized(ж<testing.B> b) {
+    b.Run(boolˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
             e = yes;
         }
     });
-    Ꮡb.Run(uint8ˢ, (ж<testing.B> bΔ2) => {
+    b.Run(uint8ˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
             e = eight8;
         }
@@ -333,45 +335,45 @@ public static void BenchmarkAssertE2E2Blank(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void TestNonEscapingConvT2E(ж<testing.T> Ꮡt) {
+public static void TestNonEscapingConvT2E(ж<testing.T> t) {
     var m = new map<any, bool>();
     m[(nint)42] = true;
     if (!m[(nint)42]) {
-        Ꮡt.Fatalf("42 is not present in the map"u8);
+        t.Fatalf("42 is not present in the map");
     }
     if (m[(nint)0]) {
-        Ꮡt.Fatalf("0 is present in the map"u8);
+        t.Fatalf("0 is present in the map");
     }
 
     var mʗ1 = m;
     var n = testing.AllocsPerRun(1000, () => {
         if (mʗ1[(nint)0]) {
-            Ꮡt.Fatalf("0 is present in the map"u8);
+            t.Fatalf("0 is present in the map");
         }
     });
     if (n != 0D) {
-        Ꮡt.Fatalf("want 0 allocs, got %v"u8, n);
+        t.Fatalf("want 0 allocs, got %v", n);
     }
 }
 
-public static void TestNonEscapingConvT2I(ж<testing.T> Ꮡt) {
+public static void TestNonEscapingConvT2I(ж<testing.T> t) {
     var m = new map<I1, bool>();
     m[((TM)42)] = true;
     if (!m[((TM)42)]) {
-        Ꮡt.Fatalf("42 is not present in the map"u8);
+        t.Fatalf("42 is not present in the map");
     }
     if (m[((TM)0)]) {
-        Ꮡt.Fatalf("0 is present in the map"u8);
+        t.Fatalf("0 is present in the map");
     }
 
     var mʗ1 = m;
     var n = testing.AllocsPerRun(1000, () => {
         if (mʗ1[((TM)0)]) {
-            Ꮡt.Fatalf("0 is present in the map"u8);
+            t.Fatalf("0 is present in the map");
         }
     });
     if (n != 0D) {
-        Ꮡt.Fatalf("want 0 allocs, got %v"u8, n);
+        t.Fatalf("want 0 allocs, got %v", n);
     }
 }
 
@@ -383,61 +385,61 @@ internal partial struct TestZeroConvT2x_tests /*dyn*/ {
     internal Action fn;
 }
 
-public static void TestZeroConvT2x(ж<testing.T> Ꮡt) {
-    var tests = new TestZeroConvT2x_tests[]{
-        new(name: "E8"u8, fn: () => {
+public static void TestZeroConvT2x(ж<testing.T> t) {
+    var tests = slice<TestZeroConvT2x_tests>([
+        new(name: "E8", fn: () => {
             e = eight8;
         }), // any byte-sized value does not allocate
-        new(name: "E16"u8, fn: () => {
+        new(name: "E16", fn: () => {
             e = zero16;
         }), // zero values do not allocate
-        new(name: "E32"u8, fn: () => {
+        new(name: "E32", fn: () => {
             e = zero32;
         }),
-        new(name: "E64"u8, fn: () => {
+        new(name: "E64", fn: () => {
             e = zero64;
         }),
-        new(name: "Estr"u8, fn: () => {
+        new(name: "Estr", fn: () => {
             e = zerostr;
         }),
-        new(name: "Eslice"u8, fn: () => {
+        new(name: "Eslice", fn: () => {
             e = zeroslice;
         }),
-        new(name: "Econstflt"u8, fn: () => {
+        new(name: "Econstflt", fn: () => {
             e = 99.0D;
         }), // constants do not allocate
-        new(name: "Econststr"u8, fn: () => {
+        new(name: "Econststr", fn: () => {
             e = changeˢ;
         }),
-        new(name: "I8"u8, fn: () => {
+        new(name: "I8", fn: () => {
             i1 = eight8I;
         }),
-        new(name: "I16"u8, fn: () => {
+        new(name: "I16", fn: () => {
             i1 = zero16I;
         }),
-        new(name: "I32"u8, fn: () => {
+        new(name: "I32", fn: () => {
             i1 = zero32I;
         }),
-        new(name: "I64"u8, fn: () => {
+        new(name: "I64", fn: () => {
             i1 = zero64I;
         }),
-        new(name: "Istr"u8, fn: () => {
+        new(name: "Istr", fn: () => {
             i1 = zerostrI;
         }),
-        new(name: "Islice"u8, fn: () => {
+        new(name: "Islice", fn: () => {
             i1 = zerosliceI;
         })
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestZeroConvT2x_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+        t.Run(test.name, (ж<testing.T> tΔ1) => {
             var n = testing.AllocsPerRun(1000, testʗ1.fn);
             if (n != 0D) {
-                tΔ1.Errorf("want zero allocs, got %v"u8, n);
+                tΔ1.Errorf("want zero allocs, got %v", n);
             }
         });
     }
@@ -462,39 +464,46 @@ internal static T64 zero64I = 0;
 internal static uint64 one64 = 1;
 internal static uint64 thousand64 = 1000;
 
-internal static @string zerostr = ""u8;
+internal static @string zerostr = "";
 internal static Tstr zerostrI = ""u8;
-internal static @string nzstr = "abc"u8;
+internal static @string nzstr = "abc";
 
-internal static slice<byte> zeroslice = default!;
-internal static Tslice zerosliceI = default!;
+internal static slice<byte> zeroslice = default;
+internal static Tslice zerosliceI = default;
 internal static slice<byte> nzslice = slice<byte>("abc"u8);
 
 internal static array<byte> zerobig = new(512);
 internal static array<byte> nzbig = new array<byte>(512){[511] = 1};
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string zeroˢ = "zero"u8;
-internal static readonly @string strˢ = "str"u8;
-internal static readonly @string sliceˢ = "slice"u8;
-internal static readonly @string bigˢ = "big"u8;
-internal static readonly @string nonzeroˢ = "nonzero"u8;
-internal static readonly @string smallintˢ = "smallint"u8;
-internal static readonly @string largeintˢ = "largeint"u8;
+internal static ref readonly @string zeroˢ => ref zeroˢᵇ;
+private static readonly @string zeroˢᵇ = "zero"u8;
+internal static ref readonly @string strˢ => ref strˢᵇ;
+private static readonly @string strˢᵇ = "str"u8;
+internal static ref readonly @string sliceˢ => ref sliceˢᵇ;
+private static readonly @string sliceˢᵇ = "slice"u8;
+internal static ref readonly @string bigˢ => ref bigˢᵇ;
+private static readonly @string bigˢᵇ = "big"u8;
+internal static ref readonly @string nonzeroˢ => ref nonzeroˢᵇ;
+private static readonly @string nonzeroˢᵇ = "nonzero"u8;
+internal static ref readonly @string smallintˢ => ref smallintˢᵇ;
+private static readonly @string smallintˢᵇ = "smallint"u8;
+internal static ref readonly @string largeintˢ => ref largeintˢᵇ;
+private static readonly @string largeintˢᵇ = "largeint"u8;
 
-public static void BenchmarkConvT2Ezero(ж<testing.B> Ꮡb) {
-    Ꮡb.Run(zeroˢ, (ж<testing.B> bΔ1) => {
-        bΔ1.Run("16"u8, (ж<testing.B> bΔ2) => {
+public static void BenchmarkConvT2Ezero(ж<testing.B> b) {
+    b.Run(zeroˢ, (ж<testing.B> bΔ1) => {
+        bΔ1.Run("16", (ж<testing.B> bΔ2) => {
             for (nint i = 0; i < (~bΔ2).N; i++) {
                 e = zero16;
             }
         });
-        bΔ1.Run("32"u8, (ж<testing.B> bΔ3) => {
+        bΔ1.Run("32", (ж<testing.B> bΔ3) => {
             for (nint i = 0; i < (~bΔ3).N; i++) {
                 e = zero32;
             }
         });
-        bΔ1.Run("64"u8, (ж<testing.B> bΔ4) => {
+        bΔ1.Run("64", (ж<testing.B> bΔ4) => {
             for (nint i = 0; i < (~bΔ4).N; i++) {
                 e = zero64;
             }
@@ -515,7 +524,7 @@ public static void BenchmarkConvT2Ezero(ж<testing.B> Ꮡb) {
             }
         });
     });
-    Ꮡb.Run(nonzeroˢ, (ж<testing.B> bΔ8) => {
+    b.Run(nonzeroˢ, (ж<testing.B> bΔ8) => {
         bΔ8.Run(strˢ, (ж<testing.B> bΔ9) => {
             for (nint i = 0; i < (~bΔ9).N; i++) {
                 e = nzstr;
@@ -532,35 +541,35 @@ public static void BenchmarkConvT2Ezero(ж<testing.B> Ꮡb) {
             }
         });
     });
-    Ꮡb.Run(smallintˢ, (ж<testing.B> bΔ12) => {
-        bΔ12.Run("16"u8, (ж<testing.B> bΔ13) => {
+    b.Run(smallintˢ, (ж<testing.B> bΔ12) => {
+        bΔ12.Run("16", (ж<testing.B> bΔ13) => {
             for (nint i = 0; i < (~bΔ13).N; i++) {
                 e = one16;
             }
         });
-        bΔ12.Run("32"u8, (ж<testing.B> bΔ14) => {
+        bΔ12.Run("32", (ж<testing.B> bΔ14) => {
             for (nint i = 0; i < (~bΔ14).N; i++) {
                 e = one32;
             }
         });
-        bΔ12.Run("64"u8, (ж<testing.B> bΔ15) => {
+        bΔ12.Run("64", (ж<testing.B> bΔ15) => {
             for (nint i = 0; i < (~bΔ15).N; i++) {
                 e = one64;
             }
         });
     });
-    Ꮡb.Run(largeintˢ, (ж<testing.B> bΔ16) => {
-        bΔ16.Run("16"u8, (ж<testing.B> bΔ17) => {
+    b.Run(largeintˢ, (ж<testing.B> bΔ16) => {
+        bΔ16.Run("16", (ж<testing.B> bΔ17) => {
             for (nint i = 0; i < (~bΔ17).N; i++) {
                 e = thousand16;
             }
         });
-        bΔ16.Run("32"u8, (ж<testing.B> bΔ18) => {
+        bΔ16.Run("32", (ж<testing.B> bΔ18) => {
             for (nint i = 0; i < (~bΔ18).N; i++) {
                 e = thousand32;
             }
         });
-        bΔ16.Run("64"u8, (ж<testing.B> bΔ19) => {
+        bΔ16.Run("64", (ж<testing.B> bΔ19) => {
             for (nint i = 0; i < (~bΔ19).N; i++) {
                 e = thousand64;
             }

@@ -19,10 +19,10 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class types_test_package {
 
-public static ж<nint> H = flag.Int("H"u8, 5, "Hilbert matrix size"u8);
-internal static ж<@string> @out = flag.String("out"u8, ""u8, "write generated program to out"u8);
+public static ж<nint> H = flag.Int("H", 5, "Hilbert matrix size");
+internal static ж<@string> @out = flag.String("out", "", "write generated program to out");
 
-public static void TestHilbert(ж<testing.T> Ꮡt) {
+public static void TestHilbert(ж<testing.T> t) {
     // generate source
     var src = program(H.Value, @out.Value);
     if (@out.Value != ""u8) {
@@ -78,74 +78,82 @@ partial struct gen {
 internal static void p(this ж<gen> Ꮡg, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    fmt.Fprintf(new types_test_package.bytes_BufferжWriter(Ꮡg.of(gen.ᏑBuffer)), format, args.ꓸꓸꓸ);
+    fmt.Fprintf(new types_test_package.bytes_BufferжWriter(Ꮡg.ᏑBuffer), format, args.ꓸꓸꓸ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hilbertMatrixNDConstˢ = """
+internal static ref readonly @string hilbertMatrixNDConstˢ => ref hilbertMatrixNDConstˢᵇ;
+private static readonly @string hilbertMatrixNDConstˢᵇ = """
 // Hilbert matrix, n = %d
 const (
 
 """u8.Raw();
-internal static readonly @string hDDˢ = "h%d_%d"u8;
-internal static readonly @string iotaDˢ = "1.0/(iota + %d)"u8;
+internal static ref readonly @string hDDˢ => ref hDDˢᵇ;
+private static readonly @string hDDˢᵇ = "h%d_%d"u8;
+internal static ref readonly @string iotaDˢ => ref iotaDˢᵇ;
+private static readonly @string iotaDˢᵇ = "1.0/(iota + %d)"u8;
 
 internal static void hilbert(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(hilbertMatrixNDConstˢ, n);
     for (nint i = 0; i < n; i++) {
-        Ꮡg.p("\t"u8);
+        Ꮡg.p("\t");
         for (nint j = 0; j < n; j++) {
             if (j > 0) {
-                Ꮡg.p(", "u8);
+                Ꮡg.p(", ");
             }
             Ꮡg.p(hDDˢ, i, j);
         }
         if (i == 0) {
-            Ꮡg.p(" = "u8);
+            Ꮡg.p(" = ");
             for (nint j = 0; j < n; j++) {
                 if (j > 0) {
-                    Ꮡg.p(", "u8);
+                    Ꮡg.p(", ");
                 }
                 Ꮡg.p(iotaDˢ, j + 1);
             }
         }
-        Ꮡg.p("\n"u8);
+        Ꮡg.p("\n");
     }
-    Ꮡg.p(")\n\n"u8);
+    Ꮡg.p(")\n\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string inverseHilbertMatrixˢ = """
+internal static ref readonly @string inverseHilbertMatrixˢ => ref inverseHilbertMatrixˢᵇ;
+private static readonly @string inverseHilbertMatrixˢᵇ = """
 // Inverse Hilbert matrix
 const (
 
 """u8.Raw();
-internal static readonly @string iDDSDBDDBDDBDDBDDˢ = "\ti%d_%d = %s%d * b%d_%d * b%d_%d * b%d_%d * b%d_%d\n"u8;
+internal static ref readonly @string iDDSDBDDBDDBDDBDDˢ => ref iDDSDBDDBDDBDDBDDˢᵇ;
+private static readonly @string iDDSDBDDBDDBDDBDDˢᵇ = "\ti%d_%d = %s%d * b%d_%d * b%d_%d * b%d_%d * b%d_%d\n"u8;
 
 internal static void inverse(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(inverseHilbertMatrixˢ);
     for (nint i = 0; i < n; i++) {
         for (nint j = 0; j < n; j++) {
-            @string s = "+"u8;
+            @string s = "+";
             if (((i + j) & 1) != 0) {
-                s = "-"u8;
+                s = "-";
             }
             Ꮡg.p(iDDSDBDDBDDBDDBDDˢ,
                 i, j, s, i + j + 1, n + i, n - j - 1, n + j, n - i - 1, i + j, i, i + j, i);
         }
-        Ꮡg.p("\n"u8);
+        Ꮡg.p("\n");
     }
-    Ꮡg.p(")\n\n"u8);
+    Ꮡg.p(")\n\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string productMatrixConstˢ = """
+internal static ref readonly @string productMatrixConstˢ => ref productMatrixConstˢᵇ;
+private static readonly @string productMatrixConstˢᵇ = """
 // Product matrix
 const (
 
 """u8.Raw();
-internal static readonly @string pDDˢ = "\tp%d_%d = "u8;
-internal static readonly @string hDDIDDˢ = "h%d_%d*i%d_%d"u8;
+internal static ref readonly @string pDDˢ => ref pDDˢᵇ;
+private static readonly @string pDDˢᵇ = "\tp%d_%d = "u8;
+internal static ref readonly @string hDDIDDˢ => ref hDDIDDˢᵇ;
+private static readonly @string hDDIDDˢᵇ = "h%d_%d*i%d_%d"u8;
 
 internal static void product(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(productMatrixConstˢ);
@@ -154,35 +162,39 @@ internal static void product(this ж<gen> Ꮡg, nint n) {
             Ꮡg.p(pDDˢ, i, j);
             for (nint k = 0; k < n; k++) {
                 if (k > 0) {
-                    Ꮡg.p(" + "u8);
+                    Ꮡg.p(" + ");
                 }
                 Ꮡg.p(hDDIDDˢ, i, k, k, j);
             }
-            Ꮡg.p("\n"u8);
+            Ꮡg.p("\n");
         }
-        Ꮡg.p("\n"u8);
+        Ꮡg.p("\n");
     }
-    Ꮡg.p(")\n\n"u8);
+    Ꮡg.p(")\n\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string verifyThatProductIsTheˢ = """
+internal static ref readonly @string verifyThatProductIsTheˢ => ref verifyThatProductIsTheˢᵇ;
+private static readonly @string verifyThatProductIsTheˢᵇ = """
 // Verify that product is the identity matrix
 const ok =
 
 """u8.Raw();
-internal static readonly @string pDDDˢ = "p%d_%d == %d"u8;
-internal static readonly @string trueˢ2 = "\ttrue\n\n"u8;
-internal static readonly @string constAssertOkˢ = "const _ = assert(ok)\n\n"u8;
+internal static ref readonly @string pDDDˢ => ref pDDDˢᵇ;
+private static readonly @string pDDDˢᵇ = "p%d_%d == %d"u8;
+internal static ref readonly @string trueˢ2 => ref trueˢ2ᵇ;
+private static readonly @string trueˢ2ᵇ = "\ttrue\n\n"u8;
+internal static ref readonly @string constAssertOkˢ => ref constAssertOkˢᵇ;
+private static readonly @string constAssertOkˢᵇ = "const _ = assert(ok)\n\n"u8;
 
 internal static void verify(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(verifyThatProductIsTheˢ);
     for (nint i = 0; i < n; i++) {
         for (nint j = 0; j < n; j++) {
-            if (j == 0){
-                Ꮡg.p("\t"u8);
+            if (j == 0) {
+                Ꮡg.p("\t");
             } else {
-                Ꮡg.p(" && "u8);
+                Ꮡg.p(" && ");
             }
             nint v = 0;
             if (i == j) {
@@ -190,7 +202,7 @@ internal static void verify(this ж<gen> Ꮡg, nint n) {
             }
             Ꮡg.p(pDDDˢ, i, j, v);
         }
-        Ꮡg.p(" &&\n"u8);
+        Ꮡg.p(" &&\n");
     }
     Ꮡg.p(trueˢ2);
 
@@ -201,9 +213,12 @@ internal static void verify(this ж<gen> Ꮡg, nint n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string funcPrintProductˢ = "func printProduct() {\n"u8;
-internal static readonly @string printlnˢ = "\tprintln("u8;
-internal static readonly @string pDDˢ2 = "p%d_%d"u8;
+internal static ref readonly @string funcPrintProductˢ => ref funcPrintProductˢᵇ;
+private static readonly @string funcPrintProductˢᵇ = "func printProduct() {\n"u8;
+internal static ref readonly @string printlnˢ => ref printlnˢᵇ;
+private static readonly @string printlnˢᵇ = "\tprintln("u8;
+internal static ref readonly @string pDDˢ2 => ref pDDˢ2ᵇ;
+private static readonly @string pDDˢ2ᵇ = "p%d_%d"u8;
 
 internal static void printProduct(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(funcPrintProductˢ);
@@ -211,52 +226,56 @@ internal static void printProduct(this ж<gen> Ꮡg, nint n) {
         Ꮡg.p(printlnˢ);
         for (nint j = 0; j < n; j++) {
             if (j > 0) {
-                Ꮡg.p(", "u8);
+                Ꮡg.p(", ");
             }
             Ꮡg.p(pDDˢ2, i, j);
         }
-        Ꮡg.p(")\n"u8);
+        Ꮡg.p(")\n");
     }
-    Ꮡg.p("}\n\n"u8);
+    Ꮡg.p("}\n\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string binomialsConstˢ = """
+internal static ref readonly @string binomialsConstˢ => ref binomialsConstˢᵇ;
+private static readonly @string binomialsConstˢᵇ = """
 // Binomials
 const (
 
 """u8.Raw();
-internal static readonly @string bDDFDFDFDˢ = "\tb%d_%d = f%d / (f%d*f%d)\n"u8;
+internal static ref readonly @string bDDFDFDFDˢ => ref bDDFDFDFDˢᵇ;
+private static readonly @string bDDFDFDFDˢᵇ = "\tb%d_%d = f%d / (f%d*f%d)\n"u8;
 
 internal static void binomials(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(binomialsConstˢ);
     for (nint j = 0; j <= n; j++) {
         if (j > 0) {
-            Ꮡg.p("\n"u8);
+            Ꮡg.p("\n");
         }
         for (nint k = 0; k <= j; k++) {
             Ꮡg.p(bDDFDFDFDˢ, j, k, j, k, j - k);
         }
     }
-    Ꮡg.p(")\n\n"u8);
+    Ꮡg.p(")\n\n");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string factorialsConstF01F11ˢ = """
+internal static ref readonly @string factorialsConstF01F11ˢ => ref factorialsConstF01F11ˢᵇ;
+private static readonly @string factorialsConstF01F11ˢᵇ = """
 // Factorials
 const (
 	f0 = 1
 	f1 = 1
 
 """u8.Raw();
-internal static readonly @string fDFDDˢ = "\tf%d = f%d * %d\n"u8;
+internal static ref readonly @string fDFDDˢ => ref fDFDDˢᵇ;
+private static readonly @string fDFDDˢᵇ = "\tf%d = f%d * %d\n"u8;
 
 internal static void factorials(this ж<gen> Ꮡg, nint n) {
     Ꮡg.p(factorialsConstF01F11ˢ);
     for (nint i = 2; i <= n; i++) {
         Ꮡg.p(fDFDDˢ, i, i - 1, i);
     }
-    Ꮡg.p(")\n\n"u8);
+    Ꮡg.p(")\n\n");
 }
 
 } // end types_test_package

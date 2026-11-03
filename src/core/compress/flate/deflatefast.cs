@@ -9,10 +9,10 @@ partial class flate_package {
 
 // This encoding algorithm, which prioritizes speed over output size, is
 // based on Snappy's LZ77-style encoder: github.com/golang/snappy
-internal static UntypedInt tableBits => 14; // Bits used in the table.
+internal static UntypedInt tableBits => 14;                         // Bits used in the table.
 internal static UntypedInt tableSize => /* 1 << tableBits */ 16384; // Size of the table.
-internal static UntypedInt tableMask => /* tableSize - 1 */ 16383; // Mask for table indices. Redundant, but can eliminate bounds checks.
-internal static UntypedInt tableShift => /* 32 - tableBits */ 18; // Right-shift to get the tableBits most significant bits of a uint32.
+internal static UntypedInt tableMask => /* tableSize - 1 */ 16383;  // Mask for table indices. Redundant, but can eliminate bounds checks.
+internal static UntypedInt tableShift => /* 32 - tableBits */ 18;   // Right-shift to get the tableBits most significant bits of a uint32.
 
 // Reset the buffer offset when reaching this.
 // Offsets are stored between blocks as int32 values.
@@ -52,7 +52,7 @@ partial struct tableEntry {
 partial struct deflateFast {
     internal array<tableEntry> table = new(tableSize);
     internal slice<byte> prev; // Previous block, zero length if unknown.
-    internal int32 cur;  // Current match offset.
+    internal int32 cur;        // Current match offset.
 }
 
 internal static ж<deflateFast> newDeflateFast() {
@@ -86,7 +86,7 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
     var cv = load32(src, s);
     var nextHash = hash(cv);
 
-    while (ᐧ) {
+    for (;;) {
         // Copied from the C++ snappy implementation:
         //
         // Heuristic match skipping: If 32 bytes are scanned with no matches
@@ -105,8 +105,8 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
         var skip = (int32)32;
 
         var nextS = s;
-        tableEntry candidate = default!;
-        while (ᐧ) {
+        tableEntry candidate = default;
+        for (;;) {
             s = nextS;
             var bytesBetweenHashLookups = skip >> 5;
             nextS = s + bytesBetweenHashLookups;
@@ -141,7 +141,7 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
         // though we don't yet know how big the literal will be. We handle that
         // by proceeding to the next iteration of the main loop. We also can
         // exit this loop via goto if we get close to exhausting the input.
-        while (ᐧ) {
+        for (;;) {
             // Invariant: we have a 4-byte match at s, and no need to emit any
             // literal bytes prior to s.
 
@@ -168,7 +168,7 @@ internal static slice<token> encode(this ref deflateFast e, slice<token> dst, sl
             var x = load64(src, s - 1);
             var prevHash = hash((uint32)x);
             e.table[(prevHash & (uint32)tableMask)] = new tableEntry(offset: e.cur + s - 1, val: (uint32)x);
-            x >>= (int)(8);
+            x >>= 8;
             var currHash = hash((uint32)x);
             candidate = e.table[(currHash & (uint32)tableMask)];
             e.table[(currHash & (uint32)tableMask)] = new tableEntry(offset: e.cur + s, val: (uint32)x);

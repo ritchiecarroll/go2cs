@@ -22,35 +22,37 @@ partial struct templateFile {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string templateˢ = "template"u8;
+internal static ref readonly @string templateˢ => ref templateˢᵇ;
+private static readonly @string templateˢᵇ = "template"u8;
 
 internal static @string createTestDir(slice<templateFile> files) {
     GoFrame ᒐ = default;
     try {
         var (dir, err) = os.MkdirTemp(""u8, templateˢ);
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(err);
         }
         foreach (var (_, @file) in files) {
             var (f, errΔ1) = os.Create(filepath.Join(dir, @file.name));
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 log.Fatal(errΔ1);
             }
             var fʗ1 = f;
             defer(() => fʗ1.Close(), ref ᒐ);
             (_, errΔ1) = io.WriteString(new os.FileжWriter(f), @file.contents);
-            if (errΔ1 != default!) {
+            if (errΔ1 != nil) {
                 log.Fatal(errΔ1);
             }
         }
         return dir;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmplˢ = "*.tmpl"u8;
+internal static ref readonly @string tmplˢ => ref tmplˢᵇ;
+private static readonly @string tmplˢᵇ = "*.tmpl"u8;
 
 // The following example is duplicated in text/template; keep them in sync.
 
@@ -61,14 +63,14 @@ public static void ExampleTemplate_glob() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(new templateFile[]{
+        @string dir = createTestDir(slice<templateFile>([
             // T0.tmpl is a plain template file that just invokes T1.
-            new("T0.tmpl"u8, @"T0 invokes T1: ({{template ""T1""}})"u8),
+            new("T0.tmpl", @"T0 invokes T1: ({{template ""T1""}})"),
             // T1.tmpl defines a template, T1 that invokes T2.
-            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8),
+            new("T1.tmpl", @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"),
             // T2.tmpl defines a template T2.
-            new("T2.tmpl"u8, @"{{define ""T2""}}This is T2{{end}}"u8)
-        }.slice());
+            new("T2.tmpl", @"{{define ""T2""}}This is T2{{end}}")
+        ]));
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
 
@@ -81,9 +83,9 @@ public static void ExampleTemplate_glob() {
         var (ᴛ1, ᴛ2) = template.ParseGlob(pattern);
         var tmpl = template.Must(ᴛ1, ᴛ2);
 
-        var err = tmpl.Execute(new os.FileжWriter(os.Stdout), default!);
-        if (err != default!) {
-            log.Fatalf("template execution: %s"u8, err);
+        var err = tmpl.Execute(new os.FileжWriter(os.Stdout), default);
+        if (err != nil) {
+            log.Fatalf("template execution: %s", err);
         }
         // Output:
         // T0 invokes T1: (T1 invokes T2: (This is T2))
@@ -93,8 +95,10 @@ public static void ExampleTemplate_glob() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string t1Tmplˢ = "T1.tmpl"u8;
-internal static readonly @string t2Tmplˢ = "T2.tmpl"u8;
+internal static ref readonly @string t1Tmplˢ => ref t1Tmplˢᵇ;
+private static readonly @string t1Tmplˢᵇ = "T1.tmpl"u8;
+internal static ref readonly @string t2Tmplˢ => ref t2Tmplˢᵇ;
+private static readonly @string t2Tmplˢᵇ = "T2.tmpl"u8;
 
 // Here we demonstrate loading a set of templates from files in different directories
 public static void ExampleTemplate_parsefiles() {
@@ -103,15 +107,15 @@ public static void ExampleTemplate_parsefiles() {
         // Here we create different temporary directories and populate them with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir1 = createTestDir(new templateFile[]{
+        @string dir1 = createTestDir(slice<templateFile>([
             // T1.tmpl is a plain template file that just invokes T2.
-            new("T1.tmpl"u8, @"T1 invokes T2: ({{template ""T2""}})"u8)
-        }.slice());
+            new("T1.tmpl", @"T1 invokes T2: ({{template ""T2""}})")
+        ]));
 
-        @string dir2 = createTestDir(new templateFile[]{
+        @string dir2 = createTestDir(slice<templateFile>([
             // T2.tmpl defines a template T2.
-            new("T2.tmpl"u8, @"{{define ""T2""}}This is T2{{end}}"u8)
-        }.slice());
+            new("T2.tmpl", @"{{define ""T2""}}This is T2{{end}}")
+        ]));
 
         // Clean up after the test; another quirk of running as an example.
         defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring dirsʗp) => {
@@ -123,16 +127,16 @@ public static void ExampleTemplate_parsefiles() {
 
         // Here starts the example proper.
         // Let's just parse only dir1/T0 and dir2/T2
-        var paths = new @string[]{
+        var paths = slice<@string>([
             filepath.Join(dir1, t1Tmplˢ),
             filepath.Join(dir2, t2Tmplˢ)
-        }.slice();
+        ]);
         var (ᴛ3, ᴛ4) = template.ParseFiles(paths.ꓸꓸꓸ);
         var tmpl = template.Must(ᴛ3, ᴛ4);
 
-        var err = tmpl.Execute(new os.FileжWriter(os.Stdout), default!);
-        if (err != default!) {
-            log.Fatalf("template execution: %s"u8, err);
+        var err = tmpl.Execute(new os.FileжWriter(os.Stdout), default);
+        if (err != nil) {
+            log.Fatalf("template execution: %s", err);
         }
         // Output:
         // T1 invokes T2: (This is T2)
@@ -142,12 +146,16 @@ public static void ExampleTemplate_parsefiles() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string defineDriver1Driver1ˢ = "{{define `driver1`}}Driver 1 calls T1: ({{template `T1`}})\n{{end}}"u8;
+internal static ref readonly @string defineDriver1Driver1ˢ => ref defineDriver1Driver1ˢᵇ;
+private static readonly @string defineDriver1Driver1ˢᵇ = "{{define `driver1`}}Driver 1 calls T1: ({{template `T1`}})\n{{end}}"u8;
 internal static readonly object parsingDriver1ˢ = (@string)"parsing driver1: "u8;
-internal static readonly @string defineDriver2Driver2ˢ = "{{define `driver2`}}Driver 2 calls T2: ({{template `T2`}})\n{{end}}"u8;
+internal static ref readonly @string defineDriver2Driver2ˢ => ref defineDriver2Driver2ˢᵇ;
+private static readonly @string defineDriver2Driver2ˢᵇ = "{{define `driver2`}}Driver 2 calls T2: ({{template `T2`}})\n{{end}}"u8;
 internal static readonly object parsingDriver2ˢ = (@string)"parsing driver2: "u8;
-internal static readonly @string driver1ˢ = "driver1"u8;
-internal static readonly @string driver2ˢ = "driver2"u8;
+internal static ref readonly @string driver1ˢ => ref driver1ˢᵇ;
+private static readonly @string driver1ˢᵇ = "driver1"u8;
+internal static ref readonly @string driver2ˢ => ref driver2ˢᵇ;
+private static readonly @string driver2ˢᵇ = "driver2"u8;
 
 // The following example is duplicated in text/template; keep them in sync.
 
@@ -160,12 +168,12 @@ public static void ExampleTemplate_helpers() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(new templateFile[]{
+        @string dir = createTestDir(slice<templateFile>([
             // T1.tmpl defines a template, T1 that invokes T2.
-            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8),
+            new("T1.tmpl", @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"),
             // T2.tmpl defines a template T2.
-            new("T2.tmpl"u8, @"{{define ""T2""}}This is T2{{end}}"u8)
-        }.slice());
+            new("T2.tmpl", @"{{define ""T2""}}This is T2{{end}}")
+        ]));
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
 
@@ -178,23 +186,23 @@ public static void ExampleTemplate_helpers() {
         var templates = template.Must(ᴛ5, ᴛ6);
         // Add one driver template to the bunch; we do this with an explicit template definition.
         var (_, err) = templates.Parse(defineDriver1Driver1ˢ);
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(parsingDriver1ˢ, err);
         }
         // Add another driver template.
         (_, err) = templates.Parse(defineDriver2Driver2ˢ);
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(parsingDriver2ˢ, err);
         }
         // We load all the templates before execution. This package does not require
         // that behavior but html/template's escaping does, so it's a good habit.
-        err = templates.ExecuteTemplate(new os.FileжWriter(os.Stdout), driver1ˢ, default!);
-        if (err != default!) {
-            log.Fatalf("driver1 execution: %s"u8, err);
+        err = templates.ExecuteTemplate(new os.FileжWriter(os.Stdout), driver1ˢ, default);
+        if (err != nil) {
+            log.Fatalf("driver1 execution: %s", err);
         }
-        err = templates.ExecuteTemplate(new os.FileжWriter(os.Stdout), driver2ˢ, default!);
-        if (err != default!) {
-            log.Fatalf("driver2 execution: %s"u8, err);
+        err = templates.ExecuteTemplate(new os.FileжWriter(os.Stdout), driver2ˢ, default);
+        if (err != nil) {
+            log.Fatalf("driver2 execution: %s", err);
         }
         // Output:
         // Driver 1 calls T1: (T1 invokes T2: (This is T2))
@@ -206,11 +214,14 @@ public static void ExampleTemplate_helpers() {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object cloningHelpersˢ = (@string)"cloning helpers: "u8;
-internal static readonly @string defineT2T2VersionAEndˢ = "{{define `T2`}}T2, version A{{end}}"u8;
+internal static ref readonly @string defineT2T2VersionAEndˢ => ref defineT2T2VersionAEndˢᵇ;
+private static readonly @string defineT2T2VersionAEndˢᵇ = "{{define `T2`}}T2, version A{{end}}"u8;
 internal static readonly object parsingT2ˢ = (@string)"parsing T2: "u8;
 internal static readonly object cloningDriversˢ = (@string)"cloning drivers: "u8;
-internal static readonly @string defineT2T2VersionBEndˢ = "{{define `T2`}}T2, version B{{end}}"u8;
-internal static readonly @string t0Tmplˢ = "T0.tmpl"u8;
+internal static ref readonly @string defineT2T2VersionBEndˢ => ref defineT2T2VersionBEndˢᵇ;
+private static readonly @string defineT2T2VersionBEndˢᵇ = "{{define `T2`}}T2, version B{{end}}"u8;
+internal static ref readonly @string t0Tmplˢ => ref t0Tmplˢᵇ;
+private static readonly @string t0Tmplˢᵇ = "T0.tmpl"u8;
 internal static readonly object secondˢ = (@string)"second"u8;
 internal static readonly object firstˢ = (@string)"first"u8;
 
@@ -224,12 +235,12 @@ public static void ExampleTemplate_share() {
         // Here we create a temporary directory and populate it with our sample
         // template definition files; usually the template files would already
         // exist in some location known to the program.
-        @string dir = createTestDir(new templateFile[]{
+        @string dir = createTestDir(slice<templateFile>([
             // T0.tmpl is a plain template file that just invokes T1.
-            new("T0.tmpl"u8, "T0 ({{.}} version) invokes T1: ({{template `T1`}})\n"u8),
+            new("T0.tmpl", "T0 ({{.}} version) invokes T1: ({{template `T1`}})\n"),
             // T1.tmpl defines a template, T1 that invokes T2. Note T2 is not defined
-            new("T1.tmpl"u8, @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}"u8)
-        }.slice());
+            new("T1.tmpl", @"{{define ""T1""}}T1 invokes T2: ({{template ""T2""}}){{end}}")
+        ]));
         // Clean up after the test; another quirk of running as an example.
         defer(os.RemoveAll, dir, ref ᒐ);
 
@@ -246,36 +257,36 @@ public static void ExampleTemplate_share() {
 
         // 1. Clone the helper set to create a new name space from which to run them.
         var (first, err) = drivers.Clone();
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(cloningHelpersˢ, err);
         }
         // 2. Define T2, version A, and parse it.
         (_, err) = first.Parse(defineT2T2VersionAEndˢ);
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(parsingT2ˢ, err);
         }
 
         // Now repeat the whole thing, using a different version of T2.
         // 1. Clone the drivers.
         (var second, err) = drivers.Clone();
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(cloningDriversˢ, err);
         }
         // 2. Define T2, version B, and parse it.
         (_, err) = second.Parse(defineT2T2VersionBEndˢ);
-        if (err != default!) {
+        if (err != nil) {
             log.Fatal(parsingT2ˢ, err);
         }
 
         // Execute the templates in the reverse order to verify the
         // first is unaffected by the second.
         err = second.ExecuteTemplate(new os.FileжWriter(os.Stdout), t0Tmplˢ, secondˢ);
-        if (err != default!) {
-            log.Fatalf("second execution: %s"u8, err);
+        if (err != nil) {
+            log.Fatalf("second execution: %s", err);
         }
         err = first.ExecuteTemplate(new os.FileжWriter(os.Stdout), t0Tmplˢ, firstˢ);
-        if (err != default!) {
-            log.Fatalf("first: execution: %s"u8, err);
+        if (err != nil) {
+            log.Fatalf("first: execution: %s", err);
         }
 
         // Output:

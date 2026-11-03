@@ -20,7 +20,7 @@ public static void Add(this MIMEHeader h, @string key, @string value) {
 // the single element value. It replaces any existing
 // values associated with key.
 public static void Set(this MIMEHeader h, @string key, @string value) {
-    h[CanonicalMIMEHeaderKey(key)] = new @string[]{value}.slice();
+    h[CanonicalMIMEHeaderKey(key)] = slice<@string>([value]);
 }
 
 // Get gets the first value associated with the given key.
@@ -29,7 +29,7 @@ public static void Set(this MIMEHeader h, @string key, @string value) {
 // If there are no values associated with the key, Get returns "".
 // To use non-canonical keys, access the map directly.
 public static @string Get(this MIMEHeader h, @string key) {
-    if (h == default!) {
+    if (h == nil) {
         return ""u8;
     }
     var v = h[CanonicalMIMEHeaderKey(key)];
@@ -45,8 +45,8 @@ public static @string Get(this MIMEHeader h, @string key) {
 // keys, access the map directly.
 // The returned slice is not a copy.
 public static slice<@string> Values(this MIMEHeader h, @string key) {
-    if (h == default!) {
-        return default!;
+    if (h == nil) {
+        return default;
     }
     return h[CanonicalMIMEHeaderKey(key)];
 }

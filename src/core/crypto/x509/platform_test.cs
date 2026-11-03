@@ -34,8 +34,10 @@ partial class x509_internal_test_package {
 // On Windows the certificate can also be constrained to only server
 // authentication in the properties pane of the certificate in the
 // "Certificates" snap-in of mmc.exe.
-internal static readonly @string rootCertPath = "platform_root_cert.pem"u8;
-internal static readonly @string rootKeyPath = "platform_root_key.pem"u8;
+internal static ref readonly @string rootCertPath => ref rootCertPathᵇ;
+private static readonly @string rootCertPathᵇ = "platform_root_cert.pem"u8;
+internal static ref readonly @string rootKeyPath => ref rootKeyPathᵇ;
+private static readonly @string rootKeyPathᵇ = "platform_root_key.pem"u8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object onlyTestedOnWindowsAndˢ = (@string)"only tested on windows and darwin"u8;
@@ -52,161 +54,161 @@ internal partial struct TestPlatformVerifier_tests /*dyn*/ {
     internal @string macosErr;
 }
 
-public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
+public static void TestPlatformVerifier(ж<testing.T> t) {
     if (runtime.GOOS != "windows"u8 && runtime.GOOS != "darwin"u8) {
-        Ꮡt.Skip(onlyTestedOnWindowsAndˢ);
+        t.Skip(onlyTestedOnWindowsAndˢ);
     }
 
     var (der, err) = os.ReadFile(rootCertPath);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to read test root: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to read test root: %s", err);
     }
     var (b, _) = pem.Decode(der);
-    (var testRoot, err) = ParseCertificate((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse test root: %s"u8, err);
+    (var testRoot, err) = ParseCertificate(b.Bytes);
+    if (err != nil) {
+        t.Fatalf("failed to parse test root: %s", err);
     }
 
     (der, err) = os.ReadFile(rootKeyPath);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to read test key: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("failed to read test key: %s", err);
     }
     (b, _) = pem.Decode(der);
-    (var testRootKey, err) = ParseECPrivateKey((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to parse test key: %s"u8, err);
+    (var testRootKey, err) = ParseECPrivateKey(b.Bytes);
+    if (err != nil) {
+        t.Fatalf("failed to parse test key: %s", err);
     }
 
     {
-        var (_, errΔ1) = testRoot.Verify(new VerifyOptions(nil)); if (errΔ1 != default!) {
-            Ꮡt.Skipf("test root is not in trust store, skipping (err: %q)"u8, errΔ1);
+        var (_, errΔ1) = testRoot.Verify(new VerifyOptions()); if (errΔ1 != nil) {
+            t.Skipf("test root is not in trust store, skipping (err: %q)", errΔ1);
         }
     }
 
     var now = time.Now();
 
-    var tests = new TestPlatformVerifier_tests[]{
+    var tests = slice<TestPlatformVerifier_tests>([
         new(
-            name: "valid"u8,
+            name: "valid",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             ))
         ),
         new(
-            name: "valid (with name)"u8,
+            name: "valid (with name)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
-            dnsName: "valid.testing.golang.invalid"u8
+            dnsName: "valid.testing.golang.invalid"
         ),
         new(
-            name: "valid (with time)"u8,
+            name: "valid (with time)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
             time: now.Add((time.Duration)(1800000000000L))
         ),
         new(
-            name: "valid (with eku)"u8,
+            name: "valid (with eku)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
-            eku: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+            eku: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
         ),
         new(
-            name: "wrong name"u8,
+            name: "wrong name",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
-            dnsName: "invalid.testing.golang.invalid"u8,
-            expectedErr: "x509: certificate is valid for valid.testing.golang.invalid, not invalid.testing.golang.invalid"u8
+            dnsName: "invalid.testing.golang.invalid",
+            expectedErr: "x509: certificate is valid for valid.testing.golang.invalid, not invalid.testing.golang.invalid"
         ),
         new(
-            name: "expired (future)"u8,
+            name: "expired (future)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
-            )),
-            time: now.Add((time.Duration)(7200000000000L)),
-            expectedErr: "x509: certificate has expired or is not yet valid"u8
-        ),
-        new(
-            name: "expired (past)"u8,
-            cert: Ꮡ(new Certificate(
-                SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
-                NotBefore: now.Add(-time.ΔHour),
-                NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
             time: now.Add((time.Duration)(7200000000000L)),
-            expectedErr: "x509: certificate has expired or is not yet valid"u8
+            expectedErr: "x509: certificate has expired or is not yet valid"
         ),
         new(
-            name: "self-signed"u8,
+            name: "expired (past)",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
+            )),
+            time: now.Add((time.Duration)(7200000000000L)),
+            expectedErr: "x509: certificate has expired or is not yet valid"
+        ),
+        new(
+            name: "self-signed",
+            cert: Ꮡ(new Certificate(
+                SerialNumber: big.NewInt(1),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
+                NotBefore: now.Add(-time.ΔHour),
+                NotAfter: now.Add(time.ΔHour),
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
             selfSigned: true,
-            macosErr: "x509: “valid.testing.golang.invalid” certificate is not trusted"u8,
-            windowsErr: "x509: certificate signed by unknown authority"u8
+            macosErr: "x509: “valid.testing.golang.invalid” certificate is not trusted",
+            windowsErr: "x509: certificate signed by unknown authority"
         ),
         new(
-            name: "non-specified KU"u8,
+            name: "non-specified KU",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageServerAuth])
             )),
-            eku: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageEmailProtection}.slice(),
-            expectedErr: "x509: certificate specifies an incompatible key usage"u8
+            eku: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageEmailProtection]),
+            expectedErr: "x509: certificate specifies an incompatible key usage"
         ),
         new(
-            name: "non-nested KU"u8,
+            name: "non-nested KU",
             cert: Ꮡ(new Certificate(
                 SerialNumber: big.NewInt(1),
-                DNSNames: new @string[]{"valid.testing.golang.invalid"u8}.slice(),
+                DNSNames: slice<@string>(["valid.testing.golang.invalid"]),
                 NotBefore: now.Add(-time.ΔHour),
                 NotAfter: now.Add(time.ΔHour),
-                ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageEmailProtection}.slice()
+                ExtKeyUsage: slice<global::go.crypto.x509_package.ExtKeyUsage>([ExtKeyUsageEmailProtection])
             )),
-            macosErr: "x509: “valid.testing.golang.invalid” certificate is not permitted for this usage"u8,
-            windowsErr: "x509: certificate specifies an incompatible key usage"u8
+            macosErr: "x509: “valid.testing.golang.invalid” certificate is not permitted for this usage",
+            windowsErr: "x509: certificate specifies an incompatible key usage"
         )
-    }.slice();
+    ]);
 
     (var leafKey, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatalf("ecdsa.GenerateKey failed: %s"u8, err);
+    if (err != nil) {
+        t.Fatalf("ecdsa.GenerateKey failed: %s", err);
     }
 
     foreach (var (_, vᴛ1) in tests) {
@@ -217,22 +219,22 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
         var tcʗ1 = tc;
         var testRootʗ1 = testRoot;
         var testRootKeyʗ1 = testRootKey;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var parent = testRootʗ1;
             if (tcʗ1.selfSigned) {
                 parent = tcʗ1.cert;
             }
             var (certDER, errΔ2) = CreateCertificate(rand.Reader, tcʗ1.cert, parent, leafKeyʗ1.Public(), testRootKeyʗ1.OrTypedNil());
-            if (errΔ2 != default!) {
-                tΔ1.Fatalf("CreateCertificate failed: %s"u8, errΔ2);
+            if (errΔ2 != nil) {
+                tΔ1.Fatalf("CreateCertificate failed: %s", errΔ2);
             }
             (var cert, errΔ2) = ParseCertificate(certDER);
-            if (errΔ2 != default!) {
-                tΔ1.Fatalf("ParseCertificate failed: %s"u8, errΔ2);
+            if (errΔ2 != nil) {
+                tΔ1.Fatalf("ParseCertificate failed: %s", errΔ2);
             }
 
-            global::go.crypto.x509_package.VerifyOptions opts = default!;
+            global::go.crypto.x509_package.VerifyOptions opts = default;
             if (tcʗ1.dnsName != ""u8) {
                 opts.DNSName = tcʗ1.dnsName;
             }
@@ -244,22 +246,19 @@ public static void TestPlatformVerifier(ж<testing.T> Ꮡt) {
             }
 
             @string expectedErr = tcʗ1.expectedErr;
-            if (runtime.GOOS == "darwin"u8 && tcʗ1.macosErr != ""u8){
+            if (runtime.GOOS == "darwin"u8 && tcʗ1.macosErr != ""u8) {
                 expectedErr = tcʗ1.macosErr;
-            } else 
-            if (runtime.GOOS == "windows"u8 && tcʗ1.windowsErr != ""u8) {
+            } else if (runtime.GOOS == "windows"u8 && tcʗ1.windowsErr != ""u8) {
                 expectedErr = tcʗ1.windowsErr;
             }
 
             (_, errΔ2) = cert.Verify(opts);
-            if (errΔ2 != default! && expectedErr == ""u8){
-                tΔ1.Errorf("unexpected verification error: %s"u8, errΔ2);
-            } else 
-            if (errΔ2 != default! && !strings.HasPrefix(errΔ2.Error(), expectedErr)){
-                tΔ1.Errorf("unexpected verification error: got %q, want %q"u8, errΔ2.Error(), expectedErr);
-            } else 
-            if (errΔ2 == default! && expectedErr != ""u8) {
-                tΔ1.Errorf("unexpected verification success: want %q"u8, expectedErr);
+            if (errΔ2 != nil && expectedErr == ""u8) {
+                tΔ1.Errorf("unexpected verification error: %s", errΔ2);
+            } else if (errΔ2 != nil && !strings.HasPrefix(errΔ2.Error(), expectedErr)) {
+                tΔ1.Errorf("unexpected verification error: got %q, want %q", errΔ2.Error(), expectedErr);
+            } else if (errΔ2 == nil && expectedErr != ""u8) {
+                tΔ1.Errorf("unexpected verification success: want %q", expectedErr);
             }
         });
     }

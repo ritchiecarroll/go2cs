@@ -127,10 +127,8 @@
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/net.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/textproto/net.textproto.csproj" />
-    <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
-    <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
     <ProjectReference Include="net.http.httptrace.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>

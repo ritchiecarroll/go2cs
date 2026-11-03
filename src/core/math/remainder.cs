@@ -72,7 +72,7 @@ internal static float64 remainder(float64 x, float64 y) {
     if (y <= HalfMax) {
         x = Mod(x, y + y); // now x < 2y
     }
-    if (y < Tiny){
+    if (y < Tiny) {
         if (x + x > y) {
             x -= y;
             if (x + x >= y) {

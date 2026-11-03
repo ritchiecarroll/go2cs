@@ -14,24 +14,22 @@ internal static UntypedInt maxGroups => 2048;
 
 internal static (slice<@string>, error) listGroups(ref User u) {
     var (ug, err) = strconv.Atoi(u.Gid);
-    if (err != default!) {
-        return (default!, fmt.Errorf("user: list groups for %s: invalid gid %q"u8, u.Username, u.Gid));
+    if (err != nil) {
+        return (default, fmt.Errorf("user: list groups for %s: invalid gid %q"u8, u.Username, u.Gid));
     }
     var userGID = (_C_gid_t)ug;
     var nameC = new slice<byte>(len(u.Username) + 1);
     copy(nameC, u.Username);
 
-    ref var n = ref heap<_C_int>(out var Ꮡn);
-    n = (_C_int)256;
-    ref var gidsC = ref heap<slice<_C_gid_t>>(out var ᏑgidsC);
-    gidsC = new slice<_C_gid_t>(n);
+    ref var n = ref heap<_C_int>((_C_int)256, out var Ꮡn);
+    ref var gidsC = ref heap<slice<_C_gid_t>>(new slice<_C_gid_t>(n), out var ᏑgidsC);
     var rv = getGroupList(Ꮡ(nameC, 0), userGID, Ꮡ(gidsC, 0), Ꮡn);
     if (rv == -1) {
         // Mac is the only Unix that does not set n properly when rv == -1, so
         // we need to use different logic for Mac vs. the other OS's.
         {
-            var errΔ1 = groupRetry(u.Username, nameC, userGID, ᏑgidsC, Ꮡn); if (errΔ1 != default!) {
-                return (default!, errΔ1);
+            var errΔ1 = groupRetry(u.Username, nameC, userGID, ᏑgidsC, Ꮡn); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
         }
     }
@@ -40,7 +38,7 @@ internal static (slice<@string>, error) listGroups(ref User u) {
     foreach (var (_, g) in gidsC.slice(0, n)) {
         gids = append(gids, strconv.Itoa((nint)g));
     }
-    return (gids, default!);
+    return (gids, default);
 }
 
 // groupRetry retries getGroupList with much larger size for n. The result is
@@ -58,7 +56,7 @@ internal static error groupRetry(@string username, slice<byte> name, _C_gid_t us
     if (rv == -1) {
         return fmt.Errorf("user: list groups for %s failed"u8, username);
     }
-    return default!;
+    return default;
 }
 
 } // end user_package

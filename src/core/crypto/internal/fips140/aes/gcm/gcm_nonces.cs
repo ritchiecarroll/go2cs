@@ -24,7 +24,7 @@ partial class gcm_package {
 // This complies with FIPS 140-3 IG C.H Scenario 2.
 //
 // Note that this is NOT a [cipher.AEAD].Seal method.
-public static void SealWithRandomNonce(ж<GCM> Ꮡg, slice<byte> nonce, slice<byte> @out, slice<byte> plaintext, slice<byte> additionalData) {
+public static void SealWithRandomNonce(ж<GCM> g, slice<byte> nonce, slice<byte> @out, slice<byte> plaintext, slice<byte> additionalData) {
     if ((uint64)len(plaintext) > (uint64)((uint64)((4294967296L) - 2) * (uint64)gcmBlockSize)) {
         throw panic("crypto/cipher: message too large for GCM");
     }
@@ -42,7 +42,7 @@ public static void SealWithRandomNonce(ж<GCM> Ꮡg, slice<byte> nonce, slice<by
     }
     fips140.RecordApproved();
     drbg.Read(nonce);
-    seal(@out, Ꮡg, nonce, plaintext, additionalData);
+    seal(@out, g, nonce, plaintext, additionalData);
 }
 
 // NewGCMWithCounterNonce returns a new AEAD that works like GCM, but enforces
@@ -53,12 +53,12 @@ public static void SealWithRandomNonce(ж<GCM> Ꮡg, slice<byte> nonce, slice<by
 // If the counter reaches the starting value minus one, Seal will panic.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 3.
-public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Block> Ꮡcipher) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Block> cipher) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default!);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default);
 }
 
 // NewGCMForTLS12 returns a new AEAD that works like GCM, but enforces the
@@ -66,25 +66,25 @@ public static (ж<GCMWithCounterNonce>, error) NewGCMWithCounterNonce(ж<aes.Blo
 // Section 7.2.1.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 1.a.
-public static (ж<GCMWithCounterNonce>, error) NewGCMForTLS12(ж<aes.Block> Ꮡcipher) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithCounterNonce>, error) NewGCMForTLS12(ж<aes.Block> cipher) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
     // TLS 1.2 counters always start at zero.
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value, startReady: true)), default!);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value, startReady: true)), default);
 }
 
 // NewGCMForSSH returns a new AEAD that works like GCM, but enforces the
 // construction of nonces as specified in RFC 5647.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 1.d.
-public static (ж<GCMWithCounterNonce>, error) NewGCMForSSH(ж<aes.Block> Ꮡcipher) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithCounterNonce>, error) NewGCMForSSH(ж<aes.Block> cipher) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default!);
+    return (Ꮡ(new GCMWithCounterNonce(g: g.Value)), default);
 }
 
 partial struct GCMWithCounterNonce {
@@ -144,12 +144,12 @@ public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> ds
     }
 
     fips140.RecordApproved();
-    return Ꮡg.of(GCMWithCounterNonce.Ꮡg).sealAfterIndicator(dst, nonce, plaintext, data);
+    return Ꮡg.Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
 public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     fips140.RecordApproved();
-    return Ꮡg.of(GCMWithCounterNonce.Ꮡg).Open(dst, nonce, ciphertext, data);
+    return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
 // NewGCMWithXORCounterNonce returns a new AEAD that works like GCM, but
@@ -162,36 +162,36 @@ public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice
 // counter reaches 2⁶⁴ minus one, Seal will panic.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 3.
-public static (ж<GCMWithXORCounterNonce>, error) NewGCMWithXORCounterNonce(ж<aes.Block> Ꮡcipher) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithXORCounterNonce>, error) NewGCMWithXORCounterNonce(ж<aes.Block> cipher) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default!);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
 }
 
 // NewGCMForTLS13 returns a new AEAD that works like GCM, but enforces the
 // construction of nonces as specified in RFC 8446, Section 5.3.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 1.a.
-public static (ж<GCMWithXORCounterNonce>, error) NewGCMForTLS13(ж<aes.Block> Ꮡcipher) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithXORCounterNonce>, error) NewGCMForTLS13(ж<aes.Block> cipher) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default!);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
 }
 
 // NewGCMForHPKE returns a new AEAD that works like GCM, but enforces the
 // construction of nonces as specified in RFC 9180, Section 5.2.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 5.
-public static (ж<GCMWithXORCounterNonce>, error) NewGCMForHPKE(ж<aes.Block> Ꮡcipher) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithXORCounterNonce>, error) NewGCMForHPKE(ж<aes.Block> cipher) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
-    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default!);
+    return (Ꮡ(new GCMWithXORCounterNonce(g: g.Value)), default);
 }
 
 // NewGCMForQUIC returns a new AEAD that works like GCM, but enforces the
@@ -205,18 +205,18 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForHPKE(ж<aes.Block> �
 // increasing.
 //
 // This complies with FIPS 140-3 IG C.H Scenario 5.
-public static (ж<GCMWithXORCounterNonce>, error) NewGCMForQUIC(ж<aes.Block> Ꮡcipher, slice<byte> iv) {
-    var (g, err) = newGCM(Ꮡ(new GCM(nil)), Ꮡcipher, gcmStandardNonceSize, gcmTagSize);
-    if (err != default!) {
-        return (default!, err);
+public static (ж<GCMWithXORCounterNonce>, error) NewGCMForQUIC(ж<aes.Block> cipher, slice<byte> iv) {
+    var (g, err) = newGCM(Ꮡ(new GCM()), cipher, gcmStandardNonceSize, gcmTagSize);
+    if (err != nil) {
+        return (default, err);
     }
     var gcm = Ꮡ(new GCMWithXORCounterNonce(g: g.Value));
     {
-        var errΔ1 = gcm.SetNoncePrefixAndMask(iv); if (errΔ1 != default!) {
-            return (default!, errΔ1);
+        var errΔ1 = gcm.SetNoncePrefixAndMask(iv); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
-    return (gcm, default!);
+    return (gcm, default);
 }
 
 partial struct GCMWithXORCounterNonce {
@@ -228,8 +228,10 @@ partial struct GCMWithXORCounterNonce {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string cryptoCipherIncorrectˢ = "crypto/cipher: incorrect nonce length given to SetNoncePrefixAndMask"u8;
-private static readonly @string cryptoCipherˢ = "crypto/cipher: SetNoncePrefixAndMask called twice or after first Seal"u8;
+private static ref readonly @string cryptoCipherIncorrectˢ => ref cryptoCipherIncorrectˢᵇ;
+private static readonly @string cryptoCipherIncorrectˢᵇ = "crypto/cipher: incorrect nonce length given to SetNoncePrefixAndMask"u8;
+private static ref readonly @string cryptoCipherˢ => ref cryptoCipherˢᵇ;
+private static readonly @string cryptoCipherˢᵇ = "crypto/cipher: SetNoncePrefixAndMask called twice or after first Seal"u8;
 
 // SetNoncePrefixAndMask sets the fixed prefix and XOR mask for the nonces used
 // in Seal. It must be called before the first call to Seal.
@@ -250,7 +252,7 @@ public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, sli
     g.prefix = byteorder.BEUint32(nonce[..4]);
     g.mask = byteorder.BEUint64(nonce[4..]);
     g.ready = true;
-    return default!;
+    return default;
 }
 
 public static nint NonceSize(this ref GCMWithXORCounterNonce g) {
@@ -298,12 +300,12 @@ public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte>
     }
 
     fips140.RecordApproved();
-    return Ꮡg.of(GCMWithXORCounterNonce.Ꮡg).sealAfterIndicator(dst, nonce, plaintext, data);
+    return Ꮡg.Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
 public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     fips140.RecordApproved();
-    return Ꮡg.of(GCMWithXORCounterNonce.Ꮡg).Open(dst, nonce, ciphertext, data);
+    return Ꮡg.Ꮡg.Open(dst, nonce, ciphertext, data);
 }
 
 } // end gcm_package

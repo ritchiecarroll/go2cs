@@ -10,7 +10,7 @@ partial class types_package {
 // BasicKind describes the kind of basic type.
 partial struct BasicKind /*num:nint*/;
 
-public static BasicKind Invalid => /* iota */ 0;  // type is invalid
+public static BasicKind Invalid => /* iota */ 0; // type is invalid
 
 // predeclared types
 public static BasicKind Bool => 1;
@@ -88,7 +88,7 @@ public static ΔType Underlying(this ж<Basic> Ꮡb) {
 }
 
 public static @string String(this ж<Basic> Ꮡb) {
-    return TypeString(new BasicжΔType(Ꮡb), default!);
+    return TypeString(new BasicжΔType(Ꮡb), default);
 }
 
 } // end types_package

@@ -9,7 +9,7 @@ using static global::go.runtime_package;
 partial class runtime_internal_test_package {
 
 public static void RunStealOrderTest() {
-    global::go.runtime_package.randomOrder ord = default!;
+    global::go.runtime_package.randomOrder ord = default;
     for (nint procs = 1; procs <= 64; procs++) {
         ord.reset((uint32)procs);
         if (procs >= 3 && len(ord.coprimes) < 2) {
@@ -21,7 +21,7 @@ public static void RunStealOrderTest() {
             for (nint Δp = 0; Δp < procs; Δp++) {
                 var x = @enum.position();
                 if (@checked[x]) {
-                    println((@string)"procs:"u8, procs, (@string)"inc:"u8, @enum.inc);
+                    println((@string)"procs:", procs, (@string)"inc:", @enum.inc);
                     throw panic("duplicate during enumeration");
                 }
                 @checked[x] = true;
@@ -43,7 +43,7 @@ public static void RunStealOrderTest() {
             var @enum = ord.start((uint32)i);
             var j = @enum.pos * (uint32)procs + @enum.inc;
             if (@checked[j]) {
-                println((@string)"procs:"u8, procs, (@string)"pos:"u8, @enum.pos, (@string)"inc:"u8, @enum.inc);
+                println((@string)"procs:", procs, (@string)"pos:", @enum.pos, (@string)"inc:", @enum.inc);
                 throw panic("duplicate pos+inc during enumeration");
             }
             @checked[j] = true;

@@ -18,22 +18,24 @@ partial struct statOnly {
 }
 
 internal static (fs.File, error) Open(this statOnly _, @string name) {
-    return (default!, ErrNotExist);
+    return (default, ErrNotExist);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string nilˢ = "<nil>"u8;
-private static readonly @string statOnlyˢ = "statOnly"u8;
+private static ref readonly @string nilˢ => ref nilˢᵇ;
+private static readonly @string nilˢᵇ = "<nil>"u8;
+private static ref readonly @string statOnlyˢ => ref statOnlyˢᵇ;
+private static readonly @string statOnlyˢᵇ = "statOnly"u8;
 
-public static partial void TestStat(ж<testing.T> Ꮡt) {
+public static partial void TestStat(ж<testing.T> t) {
     void check(@string desc, fs.FileInfo infoΔ1, error errΔ1) {
-        Ꮡt.Helper();
-        if (errΔ1 != default! || infoΔ1 == default! || infoΔ1.Mode() != 302) {
+        t.Helper();
+        if (errΔ1 != nil || infoΔ1 == nil || infoΔ1.Mode() != 302) {
             @string infoStr = nilˢ;
-            if (infoΔ1 != default!) {
+            if (infoΔ1 != nil) {
                 infoStr = fmt.Sprintf("FileInfo(Mode: %#o)"u8, infoΔ1.Mode());
             }
-            Ꮡt.Fatalf("Stat(%s) = %v, %v, want Mode:0456, nil"u8, desc, infoStr, errΔ1);
+            t.Fatalf("Stat(%s) = %v, %v, want Mode:0456, nil", desc, infoStr, errΔ1);
         }
     }
 

@@ -16,17 +16,19 @@ internal static UntypedInt errorfMinArgCount => 4;
 internal static UntypedInt errorfFormatIndex => 2;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string checkˢ = "check"u8;
-internal static readonly @string errorfˢ = "errorf"u8;
+internal static ref readonly @string checkˢ => ref checkˢᵇ;
+private static readonly @string checkˢᵇ = "check"u8;
+internal static ref readonly @string errorfˢ => ref errorfˢᵇ;
+private static readonly @string errorfˢᵇ = "errorf"u8;
 
 // TestErrorCalls makes sure that check.errorf calls have at least
 // errorfMinArgCount arguments (otherwise we should use check.error)
 // and use balanced parentheses/brackets.
-public static void TestErrorCalls(ж<testing.T> Ꮡt) {
+public static void TestErrorCalls(ж<testing.T> t) {
     var fset = token.NewFileSet();
-    var (files, err) = pkgFiles(fset, "."u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (files, err) = pkgFiles(fset, ".");
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     foreach (var (_, @file) in files) {
@@ -36,30 +38,30 @@ public static void TestErrorCalls(ж<testing.T> Ꮡt) {
             if (call == nil) {
                 return true;
             }
-            var (selx, _) = (~call).Fun._<ж<ast.SelectorExpr>>(ᐧ);
+            var (selx, _) = call.Fun._<ж<ast.SelectorExpr>>(ᐧ);
             if (selx == nil) {
                 return true;
             }
-            if (!(isName((~selx).X, checkˢ) && isName(new ast.IdentжNode((~selx).Sel), errorfˢ))) {
+            if (!(isName(selx.X, checkˢ) && isName(new ast.IdentжNode(selx.Sel), errorfˢ))) {
                 return true;
             }
             // check.errorf calls should have at least errorfMinArgCount arguments:
             // position, code, format string, and arguments to format
             {
-                nint nΔ1 = len((~call).Args); if (nΔ1 < errorfMinArgCount) {
-                    Ꮡt.Errorf("%s: got %d arguments, want at least %d"u8, fsetʗ1.Position(call.Pos()), nΔ1, (nint)(errorfMinArgCount));
+                nint nΔ1 = len(call.Args); if (nΔ1 < errorfMinArgCount) {
+                    t.Errorf("%s: got %d arguments, want at least %d", fsetʗ1.Position(call.Pos()), nΔ1, (nint)(errorfMinArgCount));
                     return false;
                 }
             }
-            var format = (~call).Args[errorfFormatIndex];
+            var format = call.Args[errorfFormatIndex];
             var fsetʗ2 = fsetʗ1;
             ast.Inspect(format, (ast.Node nΔ2) => {
                 {
-                    var (lit, _) = nΔ2._<ж<ast.BasicLit>>(ᐧ); if (lit != nil && (~lit).Kind == token.STRING) {
+                    var (lit, _) = nΔ2._<ж<ast.BasicLit>>(ᐧ); if (lit != nil && lit.Kind == token.STRING) {
                         {
-                            var (s, errΔ1) = strconv.Unquote((~lit).Value); if (errΔ1 == default!) {
+                            var (s, errΔ1) = strconv.Unquote((~lit).Value); if (errΔ1 == nil) {
                                 if (!balancedParentheses(s)) {
-                                    Ꮡt.Errorf("%s: unbalanced parentheses/brackets"u8, fsetʗ2.Position((~lit).ValuePos));
+                                    t.Errorf("%s: unbalanced parentheses/brackets", fsetʗ2.Position(lit.ValuePos));
                                 }
                             }
                         }
@@ -76,7 +78,7 @@ public static void TestErrorCalls(ж<testing.T> Ꮡt) {
 internal static bool isName(ast.Node n, @string name) {
     {
         var (nΔ1, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok) {
-            return (~nΔ1).Name == name;
+            return nΔ1.Name == name;
         }
     }
     return false;
@@ -85,25 +87,25 @@ internal static bool isName(ast.Node n, @string name) {
 internal static bool balancedParentheses(@string s) {
     var stackᴷ = new stackAppend<byte>();
 
-    slice<byte> stack = default!;
+    slice<byte> stack = default;
     foreach (var (_, ch) in s) {
-        byte open = default!;
+        byte open = default;
         switch (ch) {
-        case (rune)'(' or (rune)'[' or (rune)'{': {
+        case '(' or '[' or '{': {
             stack = append(stackᴷ, stack, (byte)ch);
             continue;
             break;
         }
-        case (rune)')': {
-            open = (rune)'(';
+        case ')': {
+            open = (byte)'(';
             break;
         }
-        case (rune)']': {
-            open = (rune)'[';
+        case ']': {
+            open = (byte)'[';
             break;
         }
-        case (rune)'}': {
-            open = (rune)'{';
+        case '}': {
+            open = (byte)'{';
             break;
         }
         default: {

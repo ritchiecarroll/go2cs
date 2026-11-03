@@ -28,7 +28,7 @@ using static go.crypto.@internal.fips140.aes_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/aes/aes_test.go", "aes_test.cs", "AAoawoKCgpSCgsySgoKCppSCuIKCpqiSgpSCgoKCuICCAAYUwoKAgqSAgt6igoKCgoKCgoCCpM6igoKCgoKCgoKCgIKk")]
+[assembly: GoPositionMap("crypto/internal/fips140/aes/aes_test.go", "aes_test.cs", "AAoawoKCgpSCgsySgoKCppSCuIKCpqiSgpSCgoKCuICCAAYUwoKAgqSAgt6igoKCgoKCgoCCpM6igoKCgoKCgoKCgIKk")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

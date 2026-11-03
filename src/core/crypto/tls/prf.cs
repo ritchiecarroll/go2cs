@@ -22,8 +22,8 @@ partial class tls_package {
 
 // Split a premaster secret in two as specified in RFC 4346, Section 5.
 internal static (slice<byte> s1, slice<byte> s2) splitPreMasterSecret(slice<byte> secret) {
-    slice<byte> s1 = default!;
-    slice<byte> s2 = default!;
+    slice<byte> s1 = default;
+    slice<byte> s2 = default;
 
     s1 = secret.slice(0, (len(secret) + 1) / 2);
     s2 = secret.slice(len(secret) / 2);
@@ -34,20 +34,20 @@ internal static (slice<byte> s1, slice<byte> s2) splitPreMasterSecret(slice<byte
 internal static void pHash(slice<byte> result, slice<byte> secret, slice<byte> seed, Func<hash.Hash> hashΔ1) {
     var h = hmac.New(hashΔ1, secret);
     h.Write(seed);
-    var a = h.Sum(default!);
+    var a = h.Sum(default);
 
     nint j = 0;
     while (j < len(result)) {
         h.Reset();
         h.Write(a);
         h.Write(seed);
-        var b = h.Sum(default!);
+        var b = h.Sum(default);
         copy(result.slice(j), b);
         j += len(b);
 
         h.Reset();
         h.Write(a);
-        a = h.Sum(default!);
+        a = h.Sum(default);
     }
 }
 
@@ -78,33 +78,39 @@ internal static Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prf12
     return (slice<byte> secret, @string label, slice<byte> seed, nint keyLen) => tls12.PRF(hashFunc, secret, label, seed, keyLen);
 }
 
-internal static UntypedInt masterSecretLength => 48; // Length of a master secret in TLS 1.1.
+internal static UntypedInt masterSecretLength => 48;   // Length of a master secret in TLS 1.1.
 internal static UntypedInt finishedVerifyLength => 12; // Length of verify_data in a Finished message.
 
-internal static readonly @string masterSecretLabel = "master secret"u8;
+internal static ref readonly @string masterSecretLabel => ref masterSecretLabelᵇ;
+private static readonly @string masterSecretLabelᵇ = "master secret"u8;
 
-internal static readonly @string extendedMasterSecretLabel = "extended master secret"u8;
+internal static ref readonly @string extendedMasterSecretLabel => ref extendedMasterSecretLabelᵇ;
+private static readonly @string extendedMasterSecretLabelᵇ = "extended master secret"u8;
 
-internal static readonly @string keyExpansionLabel = "key expansion"u8;
+internal static ref readonly @string keyExpansionLabel => ref keyExpansionLabelᵇ;
+private static readonly @string keyExpansionLabelᵇ = "key expansion"u8;
 
-internal static readonly @string clientFinishedLabel = "client finished"u8;
+internal static ref readonly @string clientFinishedLabel => ref clientFinishedLabelᵇ;
+private static readonly @string clientFinishedLabelᵇ = "client finished"u8;
 
-internal static readonly @string serverFinishedLabel = "server finished"u8;
+internal static ref readonly @string serverFinishedLabel => ref serverFinishedLabelᵇ;
+private static readonly @string serverFinishedLabelᵇ = "server finished"u8;
 
 internal static (Func<slice<byte>, @string, slice<byte>, nint, slice<byte>>, crypto.Hash) prfAndHashForVersion(uint16 version, ref cipherSuite suite) {
-    var exprᴛ1 = version;
-    if (exprᴛ1 == VersionTLS10 || exprᴛ1 == VersionTLS11) {
+    switch (version) {
+    case var ᴛ when ᴛ == VersionTLS10 || ᴛ == VersionTLS11: {
         return (prf10, (crypto.Hash)0);
     }
-    if (exprᴛ1 == VersionTLS12) {
+    case var ᴛ when ᴛ == VersionTLS12: {
         if ((suite.flags & (nint)suiteSHA384) != 0) {
             return (prf12(sha512.New384), crypto.SHA384);
         }
         return (prf12(sha256.New), crypto.SHA256);
     }
-    { /* default: */
+    default: {
         throw panic("unknown version");
-    }
+        break;
+    }}
 }
 
 internal static Func<slice<byte>, @string, slice<byte>, nint, slice<byte>> prfForVersion(uint16 version, ref cipherSuite suite) {
@@ -139,12 +145,12 @@ internal static slice<byte> extMasterFromPreMasterSecret(uint16 version, ref cip
 // secret, given the lengths of the MAC key, cipher key and IV, as defined in
 // RFC 2246, Section 6.3.
 internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clientKey, slice<byte> serverKey, slice<byte> clientIV, slice<byte> serverIV) keysFromMasterSecret(uint16 version, ref cipherSuite suite, slice<byte> masterSecret, slice<byte> clientRandom, slice<byte> serverRandom, nint macLen, nint keyLen, nint ivLen) {
-    slice<byte> clientMAC = default!;
-    slice<byte> serverMAC = default!;
-    slice<byte> clientKey = default!;
-    slice<byte> serverKey = default!;
-    slice<byte> clientIV = default!;
-    slice<byte> serverIV = default!;
+    slice<byte> clientMAC = default;
+    slice<byte> serverMAC = default;
+    slice<byte> clientKey = default;
+    slice<byte> serverKey = default;
+    slice<byte> clientIV = default;
+    slice<byte> serverIV = default;
 
     var seed = new slice<byte>(0, len(serverRandom) + len(clientRandom));
     seed = appendꓸꓸꓸ(seed, serverRandom);
@@ -167,14 +173,14 @@ internal static (slice<byte> clientMAC, slice<byte> serverMAC, slice<byte> clien
 }
 
 internal static ΔfinishedHash newFinishedHash(uint16 version, ref cipherSuite cipherSuite) {
-    slice<byte> buffer = default!;
+    slice<byte> buffer = default;
     if (version >= VersionTLS12) {
-        buffer = new byte[]{}.slice();
+        buffer = slice<byte>([]);
     }
 
     var (prf, hash) = prfAndHashForVersion(version, ref cipherSuite);
     if (hash != 0) {
-        return new ΔfinishedHash(hash.New(), hash.New(), default!, default!, buffer, version, prf);
+        return new ΔfinishedHash(hash.New(), hash.New(), default, default, buffer, version, prf);
     }
 
     return new ΔfinishedHash(sha1.New(), sha1.New(), md5.New(), md5.New(), buffer, version, prf);
@@ -203,16 +209,16 @@ internal static (nint n, error err) Write(this ref ΔfinishedHash h, slice<byte>
         h.serverMD5.Write(msg);
     }
 
-    if (h.buffer != default!) {
+    if (h.buffer != nil) {
         h.buffer = appendꓸꓸꓸ(h.buffer, msg);
     }
 
-    return (len(msg), default!);
+    return (len(msg), default);
 }
 
 internal static slice<byte> Sum(this ΔfinishedHash h) {
     if (h.version >= VersionTLS12) {
-        return h.client.Sum(default!);
+        return h.client.Sum(default);
     }
 
     var @out = new slice<byte>(0, md5.ΔSize + sha1.ΔSize);
@@ -236,7 +242,7 @@ internal static slice<byte> serverSum(this ΔfinishedHash h, slice<byte> masterS
 // suitable for signing by a TLS 1.0 and 1.1 client certificate.
 internal static slice<byte> hashForClientCertificate(this ΔfinishedHash h, uint8 sigType) {
     if (sigType == signatureECDSA) {
-        return h.server.Sum(default!);
+        return h.server.Sum(default);
     }
 
     return h.Sum();
@@ -245,43 +251,46 @@ internal static slice<byte> hashForClientCertificate(this ΔfinishedHash h, uint
 // discardHandshakeBuffer is called when there is no more need to
 // buffer the entirety of the handshake messages.
 internal static void discardHandshakeBuffer(this ref ΔfinishedHash h) {
-    h.buffer = default!;
+    h.buffer = default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoTlsˢ = "crypto/tls: ExportKeyingMaterial is unavailable when renegotiation is enabled"u8;
+internal static ref readonly @string cryptoTlsˢ => ref cryptoTlsˢᵇ;
+private static readonly @string cryptoTlsˢᵇ = "crypto/tls: ExportKeyingMaterial is unavailable when renegotiation is enabled"u8;
 
 // noEKMBecauseRenegotiation is used as a value of
 // ConnectionState.ekm when renegotiation is enabled and thus
 // we wish to fail all key-material export requests.
 internal static (slice<byte>, error) noEKMBecauseRenegotiation(@string label, slice<byte> context, nint length) {
-    return (default!, errors.New(cryptoTlsˢ));
+    return (default, errors.New(cryptoTlsˢ));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cryptoTlsˢ2 = "crypto/tls: ExportKeyingMaterial is unavailable when neither TLS 1.3 nor Extended Master Secret are negotiated; override with GODEBUG=tlsunsafeekm=1"u8;
+internal static ref readonly @string cryptoTlsˢ2 => ref cryptoTlsˢ2ᵇ;
+private static readonly @string cryptoTlsˢ2ᵇ = "crypto/tls: ExportKeyingMaterial is unavailable when neither TLS 1.3 nor Extended Master Secret are negotiated; override with GODEBUG=tlsunsafeekm=1"u8;
 
 // noEKMBecauseNoEMS is used as a value of ConnectionState.ekm when Extended
 // Master Secret is not negotiated and thus we wish to fail all key-material
 // export requests.
 internal static (slice<byte>, error) noEKMBecauseNoEMS(@string label, slice<byte> context, nint length) {
-    return (default!, errors.New(cryptoTlsˢ2));
+    return (default, errors.New(cryptoTlsˢ2));
 }
 
 // ekmFromMasterSecret generates exported keying material as defined in RFC 5705.
-internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMasterSecret(uint16 version, ж<cipherSuite> Ꮡsuite, slice<byte> masterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
+internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMasterSecret(uint16 version, ж<cipherSuite> suite, slice<byte> masterSecret, slice<byte> clientRandom, slice<byte> serverRandom) {
     var clientRandomʗ1 = clientRandom;
     var masterSecretʗ1 = masterSecret;
     var serverRandomʗ1 = serverRandom;
     return (@string label, slice<byte> context, nint length) => {
         var exprᴛ1 = label;
-        if (exprᴛ1 == "client finished"u8 || exprᴛ1 == "server finished"u8 || exprᴛ1 == "master secret"u8 || exprᴛ1 == "key expansion"u8) {
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "client finished"u8 || exprᴛ1 == "server finished"u8 || exprᴛ1 == "master secret"u8 || exprᴛ1 == "key expansion"u8: {
             // These values are reserved and may not be used.
-            return (default!, fmt.Errorf("crypto/tls: reserved ExportKeyingMaterial label: %s"u8, label));
-        }
+            return (default, fmt.Errorf("crypto/tls: reserved ExportKeyingMaterial label: %s"u8, label));
+        }}
 
         nint seedLen = len(serverRandomʗ1) + len(clientRandomʗ1);
-        if (context != default!) {
+        if (context != nil) {
             seedLen += 2 + len(context);
         }
         var seed = new slice<byte>(0, seedLen);
@@ -289,15 +298,15 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
         seed = appendꓸꓸꓸ(seed, clientRandomʗ1);
         seed = appendꓸꓸꓸ(seed, serverRandomʗ1);
 
-        if (context != default!) {
+        if (context != nil) {
             if (len(context) >= 1 << 16) {
-                return (default!, fmt.Errorf("crypto/tls: ExportKeyingMaterial context too long"u8));
+                return (default, fmt.Errorf("crypto/tls: ExportKeyingMaterial context too long"u8));
             }
             seed = append(seed, (byte)(len(context) >> 8), (byte)len(context));
             seed = appendꓸꓸꓸ(seed, context);
         }
 
-        return (prfForVersion(version, ref (Ꮡsuite).DerefOrNull())(masterSecretʗ1, label, seed, length), default!);
+        return (prfForVersion(version, ref (suite).DerefOrNull())(masterSecretʗ1, label, seed, length), default);
     };
 }
 

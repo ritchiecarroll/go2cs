@@ -46,7 +46,11 @@ using static go.encoding.csv_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(position))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,8 +60,8 @@ using static go.encoding.csv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/csv/reader.go", "reader.cs", "AEqUAYKClIKUpoC4goKmlpSCAEKkAZIABR4ADAKCgpSUAAIS4oKUgqyyAAca8oKCgpSClAADEMKCgoKCgpSUgoKUgqaClICCgqSokoKUqJKCpoKCqJKCgoKCgpSCgpSUgqiSgoKSgoKCgoKCgoaCgpSClJSCgoKUpoKAgpKCtoKCgoKCgpSmgoKCgoKUgoKCgLaCgsaCgoKCxoKCxsaCxJSCgpSCgoKClIK4goKUgoLqgsqCgoKUgoKCgriCgv6ClA==", "333-335:1", "", "169=NewReader/1/1/2")]
-[assembly: go.GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACVOkgAFFMKCpqKCgILsgoCCpKaAgqSUgoK4gIKkpoKClLSCxoKUtoKCuICCtoKClJSqoqqigqqigoKCpgACHgAMAoKmgqaCgoKCuIK4gg==", "", "", "40=NewWriter/1/1/2")]
+[assembly: GoPositionMap("encoding/csv/reader.go", "reader.cs", "AEqUAYKClIKUpoC4goKmlpSCAEKkAZIABR4ADAKCgpSUAAIS4oKUgqyyAAca8oKCgpSClAADEMKCgoKCgpSUgoKUgqaClICCgqSokoKUqJKCpoKCqJKCgoKCgpSCgpSUgqiSgoKCgoKCgoKCgoaCgpSClJSCgoKUpoKAgoKCtoKCgoKCgpSmgoKCgoKUgoKCgLaCgsaCgoKCxoKCxsaCtJSCgpSCgoKClIK4goKUgoLqgsqCgoKUgoKCgriCgu6ClA==", "333-335:1", "", "169=NewReader/1/1/2")]
+[assembly: GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACVOkgAFFMKCpqKCgILsgoCCpKaAgqSUgoK4gIKkpoKClLSCxoKUtoKCuICCtoKClJSqoqqigqqigoKCpgACHgAMAoKmgqaCgoKCuIK4gg==", "", "", "40=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

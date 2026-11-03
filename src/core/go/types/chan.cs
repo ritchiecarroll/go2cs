@@ -41,7 +41,7 @@ public static ΔType Underlying(this ж<Chan> Ꮡc) {
 }
 
 public static @string String(this ж<Chan> Ꮡc) {
-    return TypeString(new ChanжΔType(Ꮡc), default!);
+    return TypeString(new ChanжΔType(Ꮡc), default);
 }
 
 } // end types_package

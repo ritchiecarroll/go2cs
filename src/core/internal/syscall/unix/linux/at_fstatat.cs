@@ -9,15 +9,15 @@ using @unsafe = unsafe_package;
 
 partial class unix_package {
 
-public static error Fstatat(nint dirfd, @string path, ж<syscall.Stat_t> Ꮡstat, nint flags) {
-    ж<byte> p = default!;
+public static error Fstatat(nint dirfd, @string path, ж<syscall.Stat_t> stat, nint flags) {
+    ж<byte> p = default;
     (p, var err) = syscall.BytePtrFromString(path);
-    if (err != default!) {
+    if (err != nil) {
         return err;
     }
 
     var ᴋ0 = p;
-    var ᴋ1 = Ꮡstat;
+    var ᴋ1 = stat;
         var (_, _, errno) = syscall.Syscall6(fstatatTrap, (uintptr)dirfd, (uintptr)ᴋ0, (uintptr)ᴋ1, (uintptr)flags, 0, 0);
     System.GC.KeepAlive(ᴋ0);
     System.GC.KeepAlive(ᴋ1);
@@ -25,7 +25,7 @@ public static error Fstatat(nint dirfd, @string path, ж<syscall.Stat_t> Ꮡstat
         return errno;
     }
 
-    return default!;
+    return default;
 }
 
 } // end unix_package

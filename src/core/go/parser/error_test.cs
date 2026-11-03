@@ -37,15 +37,16 @@ using static global::go.go.parser_package;
 
 partial class parser_internal_test_package {
 
-internal static ж<bool> traceErrs = flag.Bool("trace_errs"u8, false, "whether to enable tracing for error tests"u8);
+internal static ж<bool> traceErrs = flag.Bool("trace_errs", false, "whether to enable tracing for error tests");
 
-internal static readonly @string testdata = "testdata"u8;
+internal static ref readonly @string testdata => ref testdataᵇ;
+private static readonly @string testdataᵇ = "testdata"u8;
 
 // getFile assumes that each filename occurs at most once
-internal static ж<tokenꓸFile> /*file*/ getFile(ж<token.FileSet> Ꮡfset, @string filename) {
-    ж<tokenꓸFile> @file = default!;
+internal static ж<tokenꓸFile> /*file*/ getFile(ж<token.FileSet> fset, @string filename) {
+    ж<tokenꓸFile> @file = default;
 
-    Ꮡfset.Iterate((ж<tokenꓸFile> f) => {
+    fset.Iterate((ж<tokenꓸFile> f) => {
         if (f.Name() == filename) {
             if (@file != nil) {
                 throw panic(filename + " used multiple times");
@@ -57,9 +58,9 @@ internal static ж<tokenꓸFile> /*file*/ getFile(ж<token.FileSet> Ꮡfset, @st
     return @file;
 }
 
-internal static tokenꓸPos getPos(ж<token.FileSet> Ꮡfset, @string filename, nint offset) {
+internal static tokenꓸPos getPos(ж<token.FileSet> fset, @string filename, nint offset) {
     {
-        var f = getFile(Ꮡfset, filename); if (f != nil) {
+        var f = getFile(fset, filename); if (f != nil) {
             return f.Pos(offset);
         }
     }
@@ -72,22 +73,22 @@ internal static tokenꓸPos getPos(ж<token.FileSet> Ꮡfset, @string filename, 
 // messages that appear immediately after a token, rather than at
 // a token's position, and ERROR AFTER means after the comment
 // (e.g. at end of line).
-internal static ж<regexp.Regexp> errRx = regexp.MustCompile(@"^/\* *ERROR *(HERE|AFTER)? *""([^""]*)"" *\*/$"u8);
+internal static ж<regexp.Regexp> errRx = regexp.MustCompile(@"^/\* *ERROR *(HERE|AFTER)? *""([^""]*)"" *\*/$");
 
 // expectedErrors collects the regular expressions of ERROR comments found
 // in files and returns them as a map of error positions to error messages.
-internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfset, @string filename, slice<byte> src) {
+internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> fset, @string filename, slice<byte> src) {
     var errors = new map<tokenꓸPos, @string>();
 
-    scanner.Scanner s = default!;
+    scanner.Scanner s = default;
     // file was parsed already - do not add it again to the file
     // set otherwise the position information returned here will
     // not match the position information collected by the parser
-    s.Init(getFile(Ꮡfset, filename), src, default!, scanner.ScanComments);
-    tokenꓸPos prev = default!;                // position of last non-comment, non-semicolon token
-    tokenꓸPos here = default!;                // position immediately after the token at position prev
+    s.Init(getFile(fset, filename), src, default, scanner.ScanComments);
+    tokenꓸPos prev = default; // position of last non-comment, non-semicolon token
+    tokenꓸPos here = default; // position immediately after the token at position prev
 
-    while (ᐧ) {
+    for (;;) {
         var (pos, tok, lit) = s.Scan();
         var exprᴛ1 = tok;
         var matchᴛ1 = false;
@@ -97,10 +98,9 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
         if (exprᴛ1 == token.COMMENT) { matchᴛ1 = true;
             var sΔ2 = errRx.FindStringSubmatch(lit);
             if (len(sΔ2) == 3) {
-                if (sΔ2[1] == "HERE"){
+                if (sΔ2[1] == "HERE") {
                     pos = here; // position right after the previous token prior to comment
-                } else 
-                if (sΔ2[1] == "AFTER"){
+                } else if (sΔ2[1] == "AFTER") {
                     pos += ((tokenꓸPos)len(lit)); // end of comment
                 } else {
                     pos = prev; // token prior to comment
@@ -119,8 +119,8 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
         }
         if (fallthrough || !matchᴛ1) { /* default: */
             prev = pos;
-            nint l = default!;       // token length
-            if (tok.IsLiteral()){
+            nint l = default; // token length
+            if (tok.IsLiteral()) {
                 l = len(lit);
             } else {
                 l = len(tok.String());
@@ -132,23 +132,23 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
 
 // compareErrors compares the map of expected error messages with the list
 // of found errors and reports discrepancies.
-internal static void compareErrors(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset, map<tokenꓸPos, @string> expected, scanner.ErrorList found) {
-    Ꮡt.Helper();
+internal static void compareErrors(ж<testing.T> t, ж<token.FileSet> fset, map<tokenꓸPos, @string> expected, scanner.ErrorList found) {
+    t.Helper();
     foreach (var (_, error) in found) {
         // error.Pos is a token.Position, but we want
         // a token.Pos so we can do a map lookup
-        tokenꓸPos pos = getPos(Ꮡfset, (~error).Pos.Filename, (~error).Pos.Offset);
+        tokenꓸPos pos = getPos(fset, error.Pos.Filename, error.Pos.Offset);
         {
-            var (msg, foundΔ1) = expected[pos, ꟷ]; if (foundΔ1){
+            var (msg, foundΔ1) = expected[pos, ꟷ]; if (foundΔ1) {
                 // we expect a message at pos; check if it matches
                 var (rx, err) = regexp.Compile(msg);
-                if (err != default!) {
-                    Ꮡt.Errorf("%s: %v"u8, (~error).Pos, err);
+                if (err != nil) {
+                    t.Errorf("%s: %v", error.Pos, err);
                     continue;
                 }
                 {
-                    var match = rx.MatchString((~error).Msg); if (!match) {
-                        Ꮡt.Errorf("%s: %q does not match %q"u8, (~error).Pos, (~error).Msg, msg);
+                    var match = rx.MatchString(error.Msg); if (!match) {
+                        t.Errorf("%s: %q does not match %q", error.Pos, error.Msg, msg);
                         continue;
                     }
                 }
@@ -159,25 +159,25 @@ internal static void compareErrors(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset
                 // If the same error position occurs multiple times in errors,
                 // this message will be triggered (because the first error at
                 // the position removes this position from the expected errors).
-                Ꮡt.Errorf("%s: unexpected error: %s"u8, (~error).Pos, (~error).Msg);
+                t.Errorf("%s: unexpected error: %s", error.Pos, error.Msg);
             }
         }
     }
 
     // there should be no expected errors left
     if (len(expected) > 0) {
-        Ꮡt.Errorf("%d errors not reported:"u8, len(expected));
+        t.Errorf("%d errors not reported:", len(expected));
         foreach (var (pos, msg) in expected) {
-            Ꮡt.Errorf("%s: %s\n"u8, Ꮡfset.Position(pos), msg);
+            t.Errorf("%s: %s\n", fset.Position(pos), msg);
         }
     }
 }
 
-internal static void checkErrors(ж<testing.T> Ꮡt, @string filename, any input, global::go.go.parser_package.Mode mode, bool expectErrors) {
-    Ꮡt.Helper();
+internal static void checkErrors(ж<testing.T> t, @string filename, any input, global::go.go.parser_package.Mode mode, bool expectErrors) {
+    t.Helper();
     var (src, err) = readSource(filename, input);
-    if (err != default!) {
-        Ꮡt.Error(err);
+    if (err != nil) {
+        t.Error(err);
         return;
     }
 
@@ -185,8 +185,8 @@ internal static void checkErrors(ж<testing.T> Ꮡt, @string filename, any input
     (_, err) = ParseFile(fset, filename, src, mode);
     ref var found = ref heap<scanner.ErrorList>(out var Ꮡfound);
     (found, var ok) = err._<scanner.ErrorList>(ᐧ);
-    if (err != default! && !ok) {
-        Ꮡt.Error(err);
+    if (err != nil && !ok) {
+        t.Error(err);
         return;
     }
     Ꮡfound.RemoveMultiples();
@@ -199,28 +199,30 @@ internal static void checkErrors(ж<testing.T> Ꮡt, @string filename, any input
     }
 
     // verify errors returned by the parser
-    compareErrors(Ꮡt, fset, expected, found);
+    compareErrors(t, fset, expected, found);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string srcˢ = ".src"u8;
-internal static readonly @string go2ˢ = ".go2"u8;
+internal static ref readonly @string srcˢ => ref srcˢᵇ;
+private static readonly @string srcˢᵇ = ".src"u8;
+internal static ref readonly @string go2ˢ => ref go2ˢᵇ;
+private static readonly @string go2ˢᵇ = ".go2"u8;
 
-public static void TestErrors(ж<testing.T> Ꮡt) {
+public static void TestErrors(ж<testing.T> t) {
     var (list, err) = os.ReadDir(testdata);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     foreach (var (_, d) in list) {
         @string name = d.Name();
         var dʗ1 = d;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
-            if (!dʗ1.IsDir() && !strings.HasPrefix(name, "."u8) && (strings.HasSuffix(name, srcˢ) || strings.HasSuffix(name, go2ˢ))) {
+        t.Run(name, (ж<testing.T> tΔ1) => {
+            if (!dʗ1.IsDir() && !strings.HasPrefix(name, ".") && (strings.HasSuffix(name, srcˢ) || strings.HasSuffix(name, go2ˢ))) {
                 global::go.go.parser_package.Mode mode = (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors);
                 if (traceErrs.Value) {
                     mode |= (global::go.go.parser_package.Mode)(Trace);
                 }
-                checkErrors(tΔ1, filepath.Join(testdata, name), default!, mode, true);
+                checkErrors(tΔ1, filepath.Join(testdata, name), default, mode, true);
             }
         });
     }

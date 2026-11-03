@@ -25,60 +25,62 @@ using static go.path.filepath_internal_test_package;
 partial class filepath_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string comSpecˢ = "ComSpec"u8;
+internal static ref readonly @string comSpecˢ => ref comSpecˢᵇ;
+private static readonly @string comSpecˢᵇ = "ComSpec"u8;
 internal static readonly object comSpecMustBeSetˢ = (@string)"%ComSpec% must be set"u8;
 
-public static void TestWinSplitListTestsAreValid(ж<testing.T> Ꮡt) {
+public static void TestWinSplitListTestsAreValid(ж<testing.T> t) {
     @string comspec = os.Getenv(comSpecˢ);
     if (comspec == ""u8) {
-        Ꮡt.Fatal(comSpecMustBeSetˢ);
+        t.Fatal(comSpecMustBeSetˢ);
     }
 
     foreach (var (ti, tt) in winsplitlisttests) {
-        testWinSplitListTestIsValid(Ꮡt, ti, tt, comspec);
+        testWinSplitListTestIsValid(t, ti, tt, comspec);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string systemRootˢ = "SystemRoot"u8;
+internal static ref readonly @string systemRootˢ => ref systemRootˢᵇ;
+private static readonly @string systemRootˢᵇ = "SystemRoot"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string cmdfileᶜ = @"printdir.cmd"u8;
+internal static ref readonly @string cmdfileᶜ => ref cmdfileᶜᵇ;
+private static readonly @string cmdfileᶜᵇ = @"printdir.cmd"u8;
 
-internal static void testWinSplitListTestIsValid(ж<testing.T> Ꮡt, nint ti, SplitListTest tt, @string comspec) {
+internal static void testWinSplitListTestIsValid(ж<testing.T> t, nint ti, SplitListTest tt, @string comspec) {
     @string cmdfile = cmdfileᶜ;
     fs.FileMode perm = /* 0700 */ 448;
 
-    ref var tmp = ref heap<@string>(out var Ꮡtmp);
-    tmp = Ꮡt.TempDir();
+    ref var tmp = ref heap<@string>(t.TempDir(), out var Ꮡtmp);
     foreach (var (i, d) in tt.result) {
         if (d == ""u8) {
             continue;
         }
         {
-            @string cd = filepath.Clean(d); if (filepath.VolumeName(cd) != ""u8 || cd[0] == (rune)'\\' || cd == ".."u8 || (len(cd) >= 3 && cd[0..3] == @"..\")) {
-                Ꮡt.Errorf("%d,%d: %#q refers outside working directory"u8, ti, i, d);
+            @string cd = filepath.Clean(d); if (filepath.VolumeName(cd) != ""u8 || cd[0] == '\\' || cd == ".."u8 || (len(cd) >= 3 && cd[0..3] == @"..\")) {
+                t.Errorf("%d,%d: %#q refers outside working directory", ti, i, d);
                 return;
             }
         }
         @string dd = filepath.Join(tmp, d);
         {
-            var (_, err) = os.Stat(dd); if (err == default!) {
-                Ꮡt.Errorf("%d,%d: %#q already exists"u8, ti, i, d);
+            var (_, err) = os.Stat(dd); if (err == nil) {
+                t.Errorf("%d,%d: %#q already exists", ti, i, d);
                 return;
             }
         }
         {
-            var err = os.MkdirAll(dd, perm); if (err != default!) {
-                Ꮡt.Errorf("%d,%d: MkdirAll(%#q) failed: %v"u8, ti, i, dd, err);
+            var err = os.MkdirAll(dd, perm); if (err != nil) {
+                t.Errorf("%d,%d: MkdirAll(%#q) failed: %v", ti, i, dd, err);
                 return;
             }
         }
         @string fn = filepath.Join(dd, cmdfile);
         var data = slice<byte>("@echo " + d + "\r\n");
         {
-            var err = os.WriteFile(fn, data, perm); if (err != default!) {
-                Ꮡt.Errorf("%d,%d: WriteFile(%#q) failed: %v"u8, ti, i, fn, err);
+            var err = os.WriteFile(fn, data, perm); if (err != nil) {
+                t.Errorf("%d,%d: WriteFile(%#q) failed: %v", ti, i, fn, err);
                 return;
             }
         }
@@ -94,135 +96,140 @@ internal static void testWinSplitListTestIsValid(ж<testing.T> Ꮡt, nint ti, Sp
         var exp = slice<byte>(d + "\r\n");
         var cmd = Ꮡ(new exec.Cmd(
             Path: comspec,
-            Args: new @string[]{@"/c"u8, cmdfile}.slice(),
-            Env: new @string[]{@"Path="u8 + systemRoot + "/System32;"u8 + tt.list, @"SystemRoot="u8 + systemRoot}.slice(),
+            Args: slice<@string>([@"/c", cmdfile]),
+            Env: slice<@string>([@"Path="u8 + systemRoot + "/System32;"u8 + tt.list, @"SystemRoot="u8 + systemRoot]),
             Dir: tmp
         ));
         var (@out, err) = cmd.CombinedOutput();
         switch (ᐧ) {
-        case {} when err != default!: {
-            Ꮡt.Errorf("%d,%d: execution error %v\n%q"u8, ti, i, err, @out);
+        case {} when err != nil: {
+            t.Errorf("%d,%d: execution error %v\n%q", ti, i, err, @out);
             return;
         }
         case {} when !slices.Equal<slice<byte>, byte>(@out, exp): {
-            Ꮡt.Errorf("%d,%d: expected %#q, got %#q"u8, ti, i, exp, @out);
+            t.Errorf("%d,%d: expected %#q, got %#q", ti, i, exp, @out);
             return;
         }
         default: {
             // unshadow cmdfile in next directory
             err = os.Remove(filepath.Join(tmp, d, cmdfile));
-            if (err != default!) {
-                Ꮡt.Fatalf("Remove test command failed: %v"u8, err);
+            if (err != nil) {
+                t.Fatalf("Remove test command failed: %v", err);
             }
             break;
         }}
     }
 }
 
-public static void TestWindowsEvalSymlinks(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+public static void TestWindowsEvalSymlinks(ж<testing.T> t) {
+    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(t));
 
-    @string tmpDir = tempDirCanonical(Ꮡt);
+    @string tmpDir = tempDirCanonical(t);
 
     if (len(tmpDir) < 3) {
-        Ꮡt.Fatalf("tmpDir path %q is too short"u8, tmpDir);
+        t.Fatalf("tmpDir path %q is too short", tmpDir);
     }
-    if (tmpDir[1] != (rune)':') {
-        Ꮡt.Fatalf("tmpDir path %q must have drive letter in it"u8, tmpDir);
+    if (tmpDir[1] != ':') {
+        t.Fatalf("tmpDir path %q must have drive letter in it", tmpDir);
     }
-    var test = new EvalSymlinksTest("test/linkabswin"u8, tmpDir[..3]);
+    var test = new EvalSymlinksTest("test/linkabswin", tmpDir[..3]);
 
     // Create the symlink farm using relative paths.
     var testdirs = append(EvalSymlinksTestDirs, test);
     foreach (var (_, d) in testdirs) {
-        error err = default!;
+        error err = default;
         @string pathΔ1 = simpleJoin(tmpDir, d.path);
-        if (d.dest == ""u8){
+        if (d.dest == ""u8) {
             err = os.Mkdir(pathΔ1, 493);
         } else {
             err = os.Symlink(d.dest, pathΔ1);
         }
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
     }
 
     @string path = simpleJoin(tmpDir, test.path);
 
-    testEvalSymlinks(Ꮡt, path, test.dest);
+    testEvalSymlinks(t, path, test.dest);
 
-    testEvalSymlinksAfterChdir(Ꮡt, path, "."u8, test.dest);
+    testEvalSymlinksAfterChdir(t, path, ".", test.dest);
 
-    testEvalSymlinksAfterChdir(Ꮡt,
+    testEvalSymlinksAfterChdir(t,
         path,
         filepath.VolumeName(tmpDir) + "."u8,
         test.dest);
 
-    testEvalSymlinksAfterChdir(Ꮡt,
+    testEvalSymlinksAfterChdir(t,
         simpleJoin(tmpDir, testˢ),
-        simpleJoin(".."u8, test.path),
+        simpleJoin("..", test.path),
         test.dest);
 
-    testEvalSymlinksAfterChdir(Ꮡt, tmpDir, test.path, test.dest);
+    testEvalSymlinksAfterChdir(t, tmpDir, test.path, test.dest);
 }
 
 // TestEvalSymlinksCanonicalNames verify that EvalSymlinks
 // returns "canonical" path names on windows.
-public static void TestEvalSymlinksCanonicalNames(ж<testing.T> Ꮡt) {
-    @string ctmp = tempDirCanonical(Ꮡt);
-    var dirs = new @string[]{
-        "test"u8,
-        "test/dir"u8,
-        "testing_long_dir"u8,
-        "TEST2"u8
-    }.slice();
+public static void TestEvalSymlinksCanonicalNames(ж<testing.T> t) {
+    @string ctmp = tempDirCanonical(t);
+    var dirs = slice<@string>([
+        "test",
+        "test/dir",
+        "testing_long_dir",
+        "TEST2"
+    ]);
 
     foreach (var (_, d) in dirs) {
         @string dir = filepath.Join(ctmp, d);
         var err = os.Mkdir(dir, 493);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         (var cname, err) = filepath.EvalSymlinks(dir);
-        if (err != default!) {
-            Ꮡt.Errorf("EvalSymlinks(%q) error: %v"u8, dir, err);
+        if (err != nil) {
+            t.Errorf("EvalSymlinks(%q) error: %v", dir, err);
             continue;
         }
         if (dir != cname) {
-            Ꮡt.Errorf("EvalSymlinks(%q) returns %q, but should return %q"u8, dir, cname, dir);
+            t.Errorf("EvalSymlinks(%q) returns %q, but should return %q", dir, cname, dir);
             continue;
         }
         // test non-canonical names
         @string test = strings.ToUpper(dir);
         (var p, err) = filepath.EvalSymlinks(test);
-        if (err != default!) {
-            Ꮡt.Errorf("EvalSymlinks(%q) error: %v"u8, test, err);
+        if (err != nil) {
+            t.Errorf("EvalSymlinks(%q) error: %v", test, err);
             continue;
         }
         if (p != cname) {
-            Ꮡt.Errorf("EvalSymlinks(%q) returns %q, but should return %q"u8, test, p, cname);
+            t.Errorf("EvalSymlinks(%q) returns %q, but should return %q", test, p, cname);
             continue;
         }
         // another test
         test = strings.ToLower(dir);
         (p, err) = filepath.EvalSymlinks(test);
-        if (err != default!) {
-            Ꮡt.Errorf("EvalSymlinks(%q) error: %v"u8, test, err);
+        if (err != nil) {
+            t.Errorf("EvalSymlinks(%q) error: %v", test, err);
             continue;
         }
         if (p != cname) {
-            Ꮡt.Errorf("EvalSymlinks(%q) returns %q, but should return %q"u8, test, p, cname);
+            t.Errorf("EvalSymlinks(%q) returns %q, but should return %q", test, p, cname);
             continue;
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fsutilˢ = "fsutil"u8;
-internal static readonly @string queryˢ = "query"u8;
-internal static readonly @string theRegistryStateOfˢ = "The registry state of NtfsDisable8dot3NameCreation is 2, the default (Volume level setting)"u8;
-internal static readonly @string theRegistryStateIs2Perˢ = "The registry state is: 2 (Per volume setting - the default)"u8;
-internal static readonly @string basedOnTheAboveTwoˢ = "Based on the above two settings, 8dot3 name creation is %s on %s"u8;
+internal static ref readonly @string fsutilˢ => ref fsutilˢᵇ;
+private static readonly @string fsutilˢᵇ = "fsutil"u8;
+internal static ref readonly @string queryˢ => ref queryˢᵇ;
+private static readonly @string queryˢᵇ = "query"u8;
+internal static ref readonly @string theRegistryStateOfˢ => ref theRegistryStateOfˢᵇ;
+private static readonly @string theRegistryStateOfˢᵇ = "The registry state of NtfsDisable8dot3NameCreation is 2, the default (Volume level setting)"u8;
+internal static ref readonly @string theRegistryStateIs2Perˢ => ref theRegistryStateIs2Perˢᵇ;
+private static readonly @string theRegistryStateIs2Perˢᵇ = "The registry state is: 2 (Per volume setting - the default)"u8;
+internal static ref readonly @string basedOnTheAboveTwoˢ => ref basedOnTheAboveTwoˢᵇ;
+private static readonly @string basedOnTheAboveTwoˢᵇ = "Based on the above two settings, 8dot3 name creation is %s on %s"u8;
 internal static readonly object enabledˢ = (@string)"enabled"u8;
 internal static readonly object disabledˢ = (@string)"disabled"u8;
 
@@ -247,7 +254,7 @@ internal static readonly object disabledˢ = (@string)"disabled"u8;
 internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     // It appears, on some systems "fsutil 8dot3name query ..." command always
     // exits with error. Ignore exit code, and look at fsutil output instead.
-    var (@out, _) = exec.Command(fsutilˢ, "8dot3name"u8, queryˢ, vol).CombinedOutput();
+    var (@out, _) = exec.Command(fsutilˢ, "8dot3name", queryˢ, vol).CombinedOutput();
     // Check that system has "Volume level setting" set.
     @string expected = theRegistryStateOfˢ;
     if (!strings.Contains((@string)@out, expected)) {
@@ -259,7 +266,7 @@ internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     }
     // Now check the volume setting.
     expected = basedOnTheAboveTwoˢ;
-    if (enabled){
+    if (enabled) {
         expected = fmt.Sprintf(expected, enabledˢ, vol);
     } else {
         expected = fmt.Sprintf(expected, disabledˢ, vol);
@@ -267,18 +274,19 @@ internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     if (!strings.Contains((@string)@out, expected)) {
         return fmt.Errorf("unexpected fsutil output: %q"u8, (@string)@out);
     }
-    return default!;
+    return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string successfullyS8dot3nameˢ = "Successfully %s 8dot3name generation on %s\r\n"u8;
+internal static ref readonly @string successfullyS8dot3nameˢ => ref successfullyS8dot3nameˢᵇ;
+private static readonly @string successfullyS8dot3nameˢᵇ = "Successfully %s 8dot3name generation on %s\r\n"u8;
 
 internal static error setVolume8dot3Setting(@string vol, bool enabled) {
-    var cmd = new @string[]{"fsutil"u8, "8dot3name"u8, "set"u8, vol}.slice();
-    if (enabled){
-        cmd = append(cmd, "0"u8);
+    var cmd = slice<@string>(["fsutil", "8dot3name", "set", vol]);
+    if (enabled) {
+        cmd = append(cmd, (@string)"0");
     } else {
-        cmd = append(cmd, "1"u8);
+        cmd = append(cmd, (@string)"1");
     }
     // It appears, on some systems "fsutil 8dot3name set ..." command always
     // exits with error. Ignore exit code, and look at fsutil output instead.
@@ -287,7 +295,7 @@ internal static error setVolume8dot3Setting(@string vol, bool enabled) {
     if (@outᴛ1 != "\r\nSuccessfully set 8dot3name behavior.\r\n"u8) {
         // Windows 10 version of fsutil has different output message.
         @string expectedWindow10 = successfullyS8dot3nameˢ;
-        if (enabled){
+        if (enabled) {
             expectedWindow10 = fmt.Sprintf(expectedWindow10, enabledˢ, vol);
         } else {
             expectedWindow10 = fmt.Sprintf(expectedWindow10, disabledˢ, vol);
@@ -296,60 +304,64 @@ internal static error setVolume8dot3Setting(@string vol, bool enabled) {
             return fmt.Errorf("%v command failed: %q"u8, cmd, (@string)@out);
         }
     }
-    return default!;
+    return default;
 }
 
-internal static ж<bool> runFSModifyTests = flag.Bool("run_fs_modify_tests"u8, false, "run tests which modify filesystem parameters"u8);
+internal static ж<bool> runFSModifyTests = flag.Bool("run_fs_modify_tests", false, "run tests which modify filesystem parameters");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestThatModifiesˢ = (@string)"skipping test that modifies file system setting; enable with -run_fs_modify_tests"u8;
 
 // This test assumes registry state of NtfsDisable8dot3NameCreation is 2,
 // the default (Volume level setting).
-public static void TestEvalSymlinksCanonicalNamesWith8dot3Disabled(ж<testing.T> Ꮡt) {
+public static void TestEvalSymlinksCanonicalNamesWith8dot3Disabled(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         if (!runFSModifyTests.Value) {
-            Ꮡt.Skip(skippingTestThatModifiesˢ);
+            t.Skip(skippingTestThatModifiesˢ);
         }
         @string tempVol = filepath.VolumeName(os.TempDir());
         if (len(tempVol) != 2) {
-            Ꮡt.Fatalf("unexpected temp volume name %q"u8, tempVol);
+            t.Fatalf("unexpected temp volume name %q", tempVol);
         }
 
         var err = checkVolume8dot3Setting(tempVol, true);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         err = setVolume8dot3Setting(tempVol, false);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
         defer(() => {
             var errΔ1 = setVolume8dot3Setting(tempVol, true);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
             errΔ1 = checkVolume8dot3Setting(tempVol, true);
-            if (errΔ1 != default!) {
-                Ꮡt.Fatal(errΔ1);
+            if (errΔ1 != nil) {
+                t.Fatal(errΔ1);
             }
         }, ref ᒐ);
         err = checkVolume8dot3Setting(tempVol, false);
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        if (err != nil) {
+            t.Fatal(err);
         }
-        TestEvalSymlinksCanonicalNames(Ꮡt);
+        TestEvalSymlinksCanonicalNames(t);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmpTestFooBarˢ = @"{{tmp}}\test\foo\bar"u8;
-internal static readonly @string tmpˢ = "{{tmp}}"u8;
-internal static readonly @string tmpvolˢ = "{{tmpvol}}"u8;
-internal static readonly @string tmpnovolˢ = "{{tmpnovol}}"u8;
+internal static ref readonly @string tmpTestFooBarˢ => ref tmpTestFooBarˢᵇ;
+private static readonly @string tmpTestFooBarˢᵇ = @"{{tmp}}\test\foo\bar"u8;
+internal static ref readonly @string tmpˢ => ref tmpˢᵇ;
+private static readonly @string tmpˢᵇ = "{{tmp}}"u8;
+internal static ref readonly @string tmpvolˢ => ref tmpvolˢᵇ;
+private static readonly @string tmpvolˢᵇ = "{{tmpvol}}"u8;
+internal static ref readonly @string tmpnovolˢ => ref tmpnovolˢᵇ;
+private static readonly @string tmpnovolˢᵇ = "{{tmpnovol}}"u8;
 
 internal partial struct TestToNorm_tests /*dyn*/ {
     internal @string arg;
@@ -362,12 +374,12 @@ internal partial struct TestToNorm_testsDir /*dyn*/ {
     internal @string want;
 }
 
-public static void TestToNorm(ж<testing.T> Ꮡt) {
+public static void TestToNorm(ж<testing.T> t) {
     var stubBase = (@string, error) (@string path) => {
         @string vol = filepath.VolumeName(path);
         path = path.slice(len(vol));
 
-        if (strings.Contains(path, "/"u8)) {
+        if (strings.Contains(path, "/")) {
             return ("", fmt.Errorf("invalid path is given to base: %s"u8, vol + path));
         }
 
@@ -380,96 +392,95 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
             return ("", fmt.Errorf("invalid path is given to base: %s"u8, vol + path));
         }
         if (i == -1) {
-            return (strings.ToUpper(path), default!);
+            return (strings.ToUpper(path), default);
         }
 
-        return (strings.ToUpper(path.slice(i + 1)), default!);
+        return (strings.ToUpper(path.slice(i + 1)), default);
     };
 
     // On this test, toNorm should be same as string.ToUpper(filepath.Clean(path)) except empty string.
-    var tests = new TestToNorm_tests[]{
-        new(""u8, ""u8),
-        new("."u8, "."u8),
-        new("./foo/bar"u8, @"FOO\BAR"u8),
-        new("/"u8, @"\"u8),
-        new("/foo/bar"u8, @"\FOO\BAR"u8),
-        new("/foo/bar/baz/qux"u8, @"\FOO\BAR\BAZ\QUX"u8),
-        new("foo/bar"u8, @"FOO\BAR"u8),
-        new("C:/foo/bar"u8, @"C:\FOO\BAR"u8),
-        new("C:foo/bar"u8, @"C:FOO\BAR"u8),
-        new("c:/foo/bar"u8, @"C:\FOO\BAR"u8),
-        new("C:/foo/bar"u8, @"C:\FOO\BAR"u8),
-        new("C:/foo/bar/"u8, @"C:\FOO\BAR"u8),
-        new(@"C:\foo\bar"u8, @"C:\FOO\BAR"u8),
-        new(@"C:\foo/bar\"u8, @"C:\FOO\BAR"u8),
-        new("C:/ふー/バー"u8, @"C:\ふー\バー"u8)
-    }.slice();
+    var tests = slice<TestToNorm_tests>([
+        new("", ""),
+        new(".", "."),
+        new("./foo/bar", @"FOO\BAR"),
+        new("/", @"\"),
+        new("/foo/bar", @"\FOO\BAR"),
+        new("/foo/bar/baz/qux", @"\FOO\BAR\BAZ\QUX"),
+        new("foo/bar", @"FOO\BAR"),
+        new("C:/foo/bar", @"C:\FOO\BAR"),
+        new("C:foo/bar", @"C:FOO\BAR"),
+        new("c:/foo/bar", @"C:\FOO\BAR"),
+        new("C:/foo/bar", @"C:\FOO\BAR"),
+        new("C:/foo/bar/", @"C:\FOO\BAR"),
+        new(@"C:\foo\bar", @"C:\FOO\BAR"),
+        new(@"C:\foo/bar\", @"C:\FOO\BAR"),
+        new("C:/ふー/バー", @"C:\ふー\バー")
+    ]);
 
     foreach (var (_, test) in tests) {
-        @string path = default!;
+        @string path = default;
         if (test.arg != ""u8) {
             path = filepath.Clean(test.arg);
         }
         var (got, errΔ1) = filepath_internal_test_package.ToNorm(path, stubBase);
-        if (errΔ1 != default!){
-            Ꮡt.Errorf("toNorm(%s) failed: %v\n"u8, test.arg, errΔ1);
-        } else 
-        if (got != test.want) {
-            Ꮡt.Errorf("toNorm(%s) returns %s, but %s expected\n"u8, test.arg, got, test.want);
+        if (errΔ1 != nil) {
+            t.Errorf("toNorm(%s) failed: %v\n", test.arg, errΔ1);
+        } else if (got != test.want) {
+            t.Errorf("toNorm(%s) returns %s, but %s expected\n", test.arg, got, test.want);
         }
     }
 
     @string testPath = tmpTestFooBarˢ;
 
-    var testsDir = new TestToNorm_testsDir[]{
+    var testsDir = slice<TestToNorm_testsDir>([
         // test absolute paths
-        new("."u8, @"{{tmp}}\test\foo\bar"u8, @"{{tmp}}\test\foo\bar"u8),
-        new("."u8, @"{{tmp}}\.\test/foo\bar"u8, @"{{tmp}}\test\foo\bar"u8),
-        new("."u8, @"{{tmp}}\test\..\test\foo\bar"u8, @"{{tmp}}\test\foo\bar"u8),
-        new("."u8, @"{{tmp}}\TEST\FOO\BAR"u8, @"{{tmp}}\test\foo\bar"u8),
+        new(".", @"{{tmp}}\test\foo\bar", @"{{tmp}}\test\foo\bar"),
+        new(".", @"{{tmp}}\.\test/foo\bar", @"{{tmp}}\test\foo\bar"),
+        new(".", @"{{tmp}}\test\..\test\foo\bar", @"{{tmp}}\test\foo\bar"),
+        new(".", @"{{tmp}}\TEST\FOO\BAR", @"{{tmp}}\test\foo\bar"),
 
         // test relative paths begin with drive letter
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}."u8, @"{{tmpvol}}."u8),
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}.."u8, @"{{tmpvol}}.."u8),
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}foo\bar"u8, @"{{tmpvol}}foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}.\foo\bar"u8, @"{{tmpvol}}foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}foo\..\foo\bar"u8, @"{{tmpvol}}foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}FOO\BAR"u8, @"{{tmpvol}}foo\bar"u8),
+        new(@"{{tmp}}\test", @"{{tmpvol}}.", @"{{tmpvol}}."),
+        new(@"{{tmp}}\test", @"{{tmpvol}}..", @"{{tmpvol}}.."),
+        new(@"{{tmp}}\test", @"{{tmpvol}}foo\bar", @"{{tmpvol}}foo\bar"),
+        new(@"{{tmp}}\test", @"{{tmpvol}}.\foo\bar", @"{{tmpvol}}foo\bar"),
+        new(@"{{tmp}}\test", @"{{tmpvol}}foo\..\foo\bar", @"{{tmpvol}}foo\bar"),
+        new(@"{{tmp}}\test", @"{{tmpvol}}FOO\BAR", @"{{tmpvol}}foo\bar"),
 
         // test relative paths begin with '\'
-        new("{{tmp}}"u8, @"{{tmpnovol}}\test\foo\bar"u8, @"{{tmpnovol}}\test\foo\bar"u8),
-        new("{{tmp}}"u8, @"{{tmpnovol}}\.\test\foo\bar"u8, @"{{tmpnovol}}\test\foo\bar"u8),
-        new("{{tmp}}"u8, @"{{tmpnovol}}\test\..\test\foo\bar"u8, @"{{tmpnovol}}\test\foo\bar"u8),
-        new("{{tmp}}"u8, @"{{tmpnovol}}\TEST\FOO\BAR"u8, @"{{tmpnovol}}\test\foo\bar"u8),
+        new("{{tmp}}", @"{{tmpnovol}}\test\foo\bar", @"{{tmpnovol}}\test\foo\bar"),
+        new("{{tmp}}", @"{{tmpnovol}}\.\test\foo\bar", @"{{tmpnovol}}\test\foo\bar"),
+        new("{{tmp}}", @"{{tmpnovol}}\test\..\test\foo\bar", @"{{tmpnovol}}\test\foo\bar"),
+        new("{{tmp}}", @"{{tmpnovol}}\TEST\FOO\BAR", @"{{tmpnovol}}\test\foo\bar"),
 
         // test relative paths begin without '\'
-        new(@"{{tmp}}\test"u8, "."u8, @"."u8),
-        new(@"{{tmp}}\test"u8, ".."u8, @".."u8),
-        new(@"{{tmp}}\test"u8, @"foo\bar"u8, @"foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @".\foo\bar"u8, @"foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"foo\..\foo\bar"u8, @"foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"FOO\BAR"u8, @"foo\bar"u8),
+        new(@"{{tmp}}\test", ".", @"."),
+        new(@"{{tmp}}\test", "..", @".."),
+        new(@"{{tmp}}\test", @"foo\bar", @"foo\bar"),
+        new(@"{{tmp}}\test", @".\foo\bar", @"foo\bar"),
+        new(@"{{tmp}}\test", @"foo\..\foo\bar", @"foo\bar"),
+        new(@"{{tmp}}\test", @"FOO\BAR", @"foo\bar"),
 
         // test UNC paths
-        new("."u8, @"\\localhost\c$"u8, @"\\localhost\c$"u8)
-    }.slice();
+        new(".", @"\\localhost\c$", @"\\localhost\c$")
+    ]);
 
-    @string ctmp = tempDirCanonical(Ꮡt);
+    @string ctmp = tempDirCanonical(t);
     {
-        var errΔ2 = os.MkdirAll(strings.ReplaceAll(testPath, tmpˢ, ctmp), 511); if (errΔ2 != default!) {
-            Ꮡt.Fatal(errΔ2);
+        var errΔ2 = os.MkdirAll(strings.ReplaceAll(testPath, tmpˢ, ctmp), 511); if (errΔ2 != nil) {
+            t.Fatal(errΔ2);
         }
     }
 
     var (cwd, err) = os.Getwd();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    Ꮡt.Chdir("."u8); // Ensure cwd is restored after the test.
+    t.Chdir("."); // Ensure cwd is restored after the test.
 
     @string tmpVol = filepath.VolumeName(ctmp);
     if (len(tmpVol) != 2) {
-        Ꮡt.Fatalf("unexpected temp volume name %q"u8, tmpVol);
+        t.Fatalf("unexpected temp volume name %q", tmpVol);
     }
 
     @string tmpNoVol = ctmp.slice(len(tmpVol));
@@ -481,17 +492,17 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
         @string arg = replacer.Replace(test.arg);
         @string want = replacer.Replace(test.want);
 
-        if (test.wd == "."u8){
+        if (test.wd == "."u8) {
             var errΔ3 = os.Chdir(cwd);
-            if (errΔ3 != default!) {
-                Ꮡt.Error(errΔ3);
+            if (errΔ3 != nil) {
+                t.Error(errΔ3);
 
                 continue;
             }
         } else {
             var errΔ4 = os.Chdir(wd);
-            if (errΔ4 != default!) {
-                Ꮡt.Error(errΔ4);
+            if (errΔ4 != nil) {
+                t.Error(errΔ4);
 
                 continue;
             }
@@ -500,206 +511,216 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
             arg = filepath.Clean(arg);
         }
         var (got, errΔ5) = filepath_internal_test_package.ToNorm(arg, filepath_internal_test_package.NormBase);
-        if (errΔ5 != default!){
-            Ꮡt.Errorf("toNorm(%s) failed: %v (wd=%s)\n"u8, arg, errΔ5, wd);
-        } else 
-        if (got != want) {
-            Ꮡt.Errorf("toNorm(%s) returns %s, but %s expected (wd=%s)\n"u8, arg, got, want, wd);
+        if (errΔ5 != nil) {
+            t.Errorf("toNorm(%s) failed: %v (wd=%s)\n", arg, errΔ5, wd);
+        } else if (got != want) {
+            t.Errorf("toNorm(%s) returns %s, but %s expected (wd=%s)\n", arg, got, want, wd);
         }
     }
 }
 
-public static void TestUNC(ж<testing.T> Ꮡt) {
+public static void TestUNC(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
         // Test that this doesn't go into an infinite recursion.
         // See golang.org/issue/15879.
         defer(debug.SetMaxStack, debug.SetMaxStack(1000000), ref ᒐ);
-        filepath.Glob(@"\\?\c:\*"u8);
+        filepath.Glob(@"\\?\c:\*");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string cmdˢ = "cmd"u8;
-internal static readonly @string mklinkˢ = "mklink"u8;
+internal static ref readonly @string cmdˢ => ref cmdˢᵇ;
+private static readonly @string cmdˢᵇ = "cmd"u8;
+internal static ref readonly @string mklinkˢ => ref mklinkˢᵇ;
+private static readonly @string mklinkˢᵇ = "mklink"u8;
 
-internal static void testWalkMklink(ж<testing.T> Ꮡt, @string linktype) {
-    var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
+internal static void testWalkMklink(ж<testing.T> t, @string linktype) {
+    var (output, _) = exec.Command(cmdˢ, "/c", mklinkˢ, "/?").Output();
     if (!strings.Contains((@string)output, fmt.Sprintf(" /%s "u8, linktype))) {
-        Ꮡt.Skipf(@"skipping test; mklink does not supports /%s parameter"u8, linktype);
+        t.Skipf(@"skipping test; mklink does not supports /%s parameter", linktype);
     }
-    testWalkSymlink(Ꮡt, error (@string target, @string link) => {
-        var (outputΔ1, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/" + linktype, link, target).CombinedOutput();
-        if (err != default!) {
+    testWalkSymlink(t, error (@string target, @string link) => {
+        var (outputΔ1, err) = exec.Command(cmdˢ, "/c", mklinkˢ, "/" + linktype, link, target).CombinedOutput();
+        if (err != nil) {
             return fmt.Errorf(@"""mklink /%s %v %v"" command failed: %v\n%v"u8, linktype, link, target, err, (@string)outputΔ1);
         }
-        return default!;
+        return default;
     });
 }
 
-public static void TestWalkDirectoryJunction(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
-    testWalkMklink(Ꮡt, "J"u8);
+public static void TestWalkDirectoryJunction(ж<testing.T> t) {
+    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(t));
+    testWalkMklink(t, "J");
 }
 
-public static void TestWalkDirectorySymlink(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
-    testWalkMklink(Ꮡt, "D"u8);
+public static void TestWalkDirectorySymlink(ж<testing.T> t) {
+    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(t));
+    testWalkMklink(t, "D");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string powershellˢ = "powershell"u8;
-internal static readonly @string commandˢ = "-Command"u8;
-internal static readonly @string testPs1ˢ = "test.ps1"u8;
-internal static readonly @string fileˢ2 = "-File"u8;
+internal static ref readonly @string powershellˢ => ref powershellˢᵇ;
+private static readonly @string powershellˢᵇ = "powershell"u8;
+internal static ref readonly @string commandˢ => ref commandˢᵇ;
+private static readonly @string commandˢᵇ = "-Command"u8;
+internal static ref readonly @string testPs1ˢ => ref testPs1ˢᵇ;
+private static readonly @string testPs1ˢᵇ = "test.ps1"u8;
+internal static ref readonly @string fileˢ2 => ref fileˢ2ᵇ;
+private static readonly @string fileˢ2ᵇ = "-File"u8;
 internal static readonly object skippingTestBecauseˢ = (@string)"skipping test because failed to create VHD: "u8;
 
-internal static slice<byte> createMountPartition(ж<testing.T> Ꮡt, @string vhd, @string args) {
-    testenv.MustHaveExecPath(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ);
-    Ꮡt.Cleanup(() => {
-        var cmdΔ1 = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ, commandˢ, fmt.Sprintf("Dismount-VHD %q"u8, vhd));
+internal static slice<byte> createMountPartition(ж<testing.T> t, @string vhd, @string args) {
+    testenv.MustHaveExecPath(new filepath_test_package.testing_TжTB(t), powershellˢ);
+    t.Cleanup(() => {
+        var cmdΔ1 = testenv.Command(new filepath_test_package.testing_TжTB(t), powershellˢ, commandˢ, fmt.Sprintf("Dismount-VHD %q"u8, vhd));
         var (@out, errΔ1) = cmdΔ1.CombinedOutput();
-        if (errΔ1 != default!) {
-            if (Ꮡt.Skipped()){
+        if (errΔ1 != nil) {
+            if (t.Skipped()) {
                 // Probably failed to dismount because we never mounted it in
                 // the first place. Log the error, but ignore it.
-                Ꮡt.Logf("%v: %v (skipped)\n%s"u8, cmdΔ1.OrTypedNil(), errΔ1, @out);
+                t.Logf("%v: %v (skipped)\n%s", cmdΔ1.OrTypedNil(), errΔ1, @out);
             } else {
                 // Something went wrong, and we don't want to leave dangling VHDs.
                 // Better to fail the test than to just log the error and continue.
-                Ꮡt.Errorf("%v: %v\n%s"u8, cmdΔ1.OrTypedNil(), errΔ1, @out);
+                t.Errorf("%v: %v\n%s", cmdΔ1.OrTypedNil(), errΔ1, @out);
             }
         }
     });
 
-    @string script = filepath.Join(Ꮡt.TempDir(), testPs1ˢ);
-    @string cmd = strings.Join(new @string[]{
-        "$ErrorActionPreference = \"Stop\""u8,
+    @string script = filepath.Join(t.TempDir(), testPs1ˢ);
+    @string cmd = strings.Join(slice<@string>([
+        "$ErrorActionPreference = \"Stop\"",
         fmt.Sprintf("$vhd = New-VHD -Path %q -SizeBytes 3MB -Fixed"u8, vhd),
-        "$vhd | Mount-VHD"u8,
+        "$vhd | Mount-VHD",
         fmt.Sprintf("$vhd = Get-VHD %q"u8, vhd),
-        "$vhd | Get-Disk | Initialize-Disk -PartitionStyle GPT"u8,
-        "$part = $vhd | Get-Disk | New-Partition -UseMaximumSize -AssignDriveLetter:$false"u8,
-        "$vol = $part | Format-Volume -FileSystem NTFS"u8,
+        "$vhd | Get-Disk | Initialize-Disk -PartitionStyle GPT",
+        "$part = $vhd | Get-Disk | New-Partition -UseMaximumSize -AssignDriveLetter:$false",
+        "$vol = $part | Format-Volume -FileSystem NTFS",
         args
-    }.slice(), "\n"u8);
+    ]), "\n");
 
     var err = os.WriteFile(script, slice<byte>(cmd), 438);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    (var output, err) = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ, fileˢ2, script).CombinedOutput();
-    if (err != default!) {
+    (var output, err) = testenv.Command(new filepath_test_package.testing_TжTB(t), powershellˢ, fileˢ2, script).CombinedOutput();
+    if (err != nil) {
         // This can happen if Hyper-V is not installed or enabled.
-        Ꮡt.Skip(skippingTestBecauseˢ, err, (@string)output);
+        t.Skip(skippingTestBecauseˢ, err, (@string)output);
     }
     return output;
 }
 
-internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
+internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink");
 
-internal static ж<godebug.Setting> winreadlinkvolume = godebug.New("winreadlinkvolume"u8);
+internal static ж<godebug.Setting> winreadlinkvolume = godebug.New("winreadlinkvolume");
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestBecauseˢ2 = (@string)"skipping test because winsymlink is not enabled"u8;
 internal static readonly object skippingTestBecauseˢ3 = (@string)"skipping test because mklink command does not support junctions"u8;
-internal static readonly @string testVhdxˢ = "Test.vhdx"u8;
-internal static readonly @string writeHostVolPathˢ = "Write-Host $vol.Path -NoNewline"u8;
-internal static readonly @string dirlinkˢ = "dirlink"u8;
+internal static ref readonly @string testVhdxˢ => ref testVhdxˢᵇ;
+private static readonly @string testVhdxˢᵇ = "Test.vhdx"u8;
+internal static ref readonly @string writeHostVolPathˢ => ref writeHostVolPathˢᵇ;
+private static readonly @string writeHostVolPathˢᵇ = "Write-Host $vol.Path -NoNewline"u8;
+internal static ref readonly @string dirlinkˢ => ref dirlinkˢᵇ;
+private static readonly @string dirlinkˢᵇ = "dirlink"u8;
 
-public static void TestEvalSymlinksJunctionToVolumeID(ж<testing.T> Ꮡt) {
+public static void TestEvalSymlinksJunctionToVolumeID(ж<testing.T> t) {
     // Test that EvalSymlinks resolves a directory junction which
     // is mapped to volumeID (instead of drive letter). See go.dev/issue/39786.
     if (winsymlink.Value() == "0"u8) {
-        Ꮡt.Skip(skippingTestBecauseˢ2);
+        t.Skip(skippingTestBecauseˢ2);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains((@string)output, " /J "u8)) {
-        Ꮡt.Skip(skippingTestBecauseˢ3);
+    var (output, _) = exec.Command(cmdˢ, "/c", mklinkˢ, "/?").Output();
+    if (!strings.Contains((@string)output, " /J ")) {
+        t.Skip(skippingTestBecauseˢ3);
     }
 
-    @string tmpdir = tempDirCanonical(Ꮡt);
+    @string tmpdir = tempDirCanonical(t);
     @string vhd = filepath.Join(tmpdir, testVhdxˢ);
-    output = createMountPartition(Ꮡt, vhd, writeHostVolPathˢ);
+    output = createMountPartition(t, vhd, writeHostVolPathˢ);
     @string vol = (@string)output;
 
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
-    (output, var err) = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), cmdˢ, "/c"u8, mklinkˢ, "/J", dirlink, vol).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to run mklink %v %v: %v %q"u8, dirlink, vol, err, output);
+    (output, var err) = testenv.Command(new filepath_test_package.testing_TжTB(t), cmdˢ, "/c", mklinkˢ, "/J", dirlink, vol).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("failed to run mklink %v %v: %v %q", dirlink, vol, err, output);
     }
     (var got, err) = filepath.EvalSymlinks(dirlink);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (got != dirlink) {
-        Ꮡt.Errorf(@"EvalSymlinks(%q): got %q, want %q"u8, dirlink, got, dirlink);
+        t.Errorf(@"EvalSymlinks(%q): got %q, want %q", dirlink, got, dirlink);
     }
 }
 
-public static void TestEvalSymlinksMountPointRecursion(ж<testing.T> Ꮡt) {
+public static void TestEvalSymlinksMountPointRecursion(ж<testing.T> t) {
     // Test that EvalSymlinks doesn't follow recursive mount points.
     // See go.dev/issue/40176.
     if (winsymlink.Value() == "0"u8) {
-        Ꮡt.Skip(skippingTestBecauseˢ2);
+        t.Skip(skippingTestBecauseˢ2);
     }
-    Ꮡt.Parallel();
+    t.Parallel();
 
-    @string tmpdir = tempDirCanonical(Ꮡt);
+    @string tmpdir = tempDirCanonical(t);
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
     var err = os.Mkdir(dirlink, 493);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     @string vhd = filepath.Join(tmpdir, testVhdxˢ);
-    createMountPartition(Ꮡt, vhd, fmt.Sprintf("$part | Add-PartitionAccessPath -AccessPath %q\n"u8, dirlink));
+    createMountPartition(t, vhd, fmt.Sprintf("$part | Add-PartitionAccessPath -AccessPath %q\n"u8, dirlink));
 
     (var got, err) = filepath.EvalSymlinks(dirlink);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     if (got != dirlink) {
-        Ꮡt.Errorf(@"EvalSymlinks(%q): got %q, want %q"u8, dirlink, got, dirlink);
+        t.Errorf(@"EvalSymlinks(%q): got %q, want %q", dirlink, got, dirlink);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mountvolˢ = "mountvol"u8;
-internal static readonly @string filelinkˢ = "filelink"u8;
+internal static ref readonly @string mountvolˢ => ref mountvolˢᵇ;
+private static readonly @string mountvolˢᵇ = "mountvol"u8;
+internal static ref readonly @string filelinkˢ => ref filelinkˢᵇ;
+private static readonly @string filelinkˢᵇ = "filelink"u8;
 
-public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
-    var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains((@string)output, " /J "u8)) {
-        Ꮡt.Skip(skippingTestBecauseˢ3);
+public static void TestNTNamespaceSymlink(ж<testing.T> t) {
+    var (output, _) = exec.Command(cmdˢ, "/c", mklinkˢ, "/?").Output();
+    if (!strings.Contains((@string)output, " /J ")) {
+        t.Skip(skippingTestBecauseˢ3);
     }
 
-    @string tmpdir = tempDirCanonical(Ꮡt);
+    @string tmpdir = tempDirCanonical(t);
 
     @string vol = filepath.VolumeName(tmpdir);
-    (output, var err) = exec.Command(cmdˢ, "/c"u8, mountvolˢ, vol, "/L").CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to run mountvol %v /L: %v %q"u8, vol, err, output);
+    (output, var err) = exec.Command(cmdˢ, "/c", mountvolˢ, vol, "/L").CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("failed to run mountvol %v /L: %v %q", vol, err, output);
     }
-    @string target = strings.Trim((@string)output, " \n\r"u8);
+    @string target = strings.Trim((@string)output, " \n\r");
 
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
-    (output, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/J", dirlink, target).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to run mklink %v %v: %v %q"u8, dirlink, target, err, output);
+    (output, err) = exec.Command(cmdˢ, "/c", mklinkˢ, "/J", dirlink, target).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("failed to run mklink %v %v: %v %q", dirlink, target, err, output);
     }
 
     (var got, err) = filepath.EvalSymlinks(dirlink);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    @string want = default!;
-    if (winsymlink.Value() == "0"u8){
-        if (winreadlinkvolume.Value() == "0"u8){
+    @string want = default;
+    if (winsymlink.Value() == "0"u8) {
+        if (winreadlinkvolume.Value() == "0"u8) {
             want = vol + @"\"u8;
         } else {
             want = target;
@@ -708,38 +729,38 @@ public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
         want = dirlink;
     }
     if (got != want) {
-        Ꮡt.Errorf(@"EvalSymlinks(%q): got %q, want %q"u8, dirlink, got, want);
+        t.Errorf(@"EvalSymlinks(%q): got %q, want %q", dirlink, got, want);
     }
 
     // Make sure we have sufficient privilege to run mklink command.
-    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+    testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(t));
 
     @string @file = filepath.Join(tmpdir, fileˢ);
     err = os.WriteFile(@file, slice<byte>(""u8), 438);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     target = filepath.Join(target, @file.slice(len(filepath.VolumeName(@file))));
 
     @string filelink = filepath.Join(tmpdir, filelinkˢ);
-    (output, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, filelink, target).CombinedOutput();
-    if (err != default!) {
-        Ꮡt.Fatalf("failed to run mklink %v %v: %v %q"u8, filelink, target, err, output);
+    (output, err) = exec.Command(cmdˢ, "/c", mklinkˢ, filelink, target).CombinedOutput();
+    if (err != nil) {
+        t.Fatalf("failed to run mklink %v %v: %v %q", filelink, target, err, output);
     }
 
     (got, err) = filepath.EvalSymlinks(filelink);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
-    if (winreadlinkvolume.Value() == "0"u8){
+    if (winreadlinkvolume.Value() == "0"u8) {
         want = @file;
     } else {
         want = target;
     }
     if (got != want) {
-        Ꮡt.Errorf(@"EvalSymlinks(%q): got %q, want %q"u8, filelink, got, want);
+        t.Errorf(@"EvalSymlinks(%q): got %q, want %q", filelink, got, want);
     }
 }
 
@@ -748,25 +769,25 @@ internal partial struct TestIssue52476_tests /*dyn*/ {
     internal @string want;
 }
 
-public static void TestIssue52476(ж<testing.T> Ꮡt) {
-    var tests = new TestIssue52476_tests[]{
-        new(@"..\."u8, @"C:"u8, @"..\C:"u8),
-        new(@".."u8, @"C:"u8, @"..\C:"u8),
-        new(@"."u8, @":"u8, @".\:"u8),
-        new(@"."u8, @"C:"u8, @".\C:"u8),
-        new(@"."u8, @"C:/a/b/../c"u8, @".\C:\a\c"u8),
-        new(@"."u8, @"\C:"u8, @".\C:"u8),
-        new(@"C:\"u8, @"."u8, @"C:\"u8),
-        new(@"C:\"u8, @"C:\"u8, @"C:\C:"u8),
-        new(@"C"u8, @":"u8, @"C\:"u8),
-        new(@"\."u8, @"C:"u8, @"\C:"u8),
-        new(@"\"u8, @"C:"u8, @"\C:"u8)
-    }.slice();
+public static void TestIssue52476(ж<testing.T> t) {
+    var tests = slice<TestIssue52476_tests>([
+        new(@"..\.", @"C:", @"..\C:"),
+        new(@"..", @"C:", @"..\C:"),
+        new(@".", @":", @".\:"),
+        new(@".", @"C:", @".\C:"),
+        new(@".", @"C:/a/b/../c", @".\C:\a\c"),
+        new(@".", @"\C:", @".\C:"),
+        new(@"C:\", @".", @"C:\"),
+        new(@"C:\", @"C:\", @"C:\C:"),
+        new(@"C", @":", @"C\:"),
+        new(@"\.", @"C:", @"\C:"),
+        new(@"\", @"C:", @"\C:")
+    ]);
 
     foreach (var (_, test) in tests) {
         @string got = filepath.Join(test.lhs, test.rhs);
         if (got != test.want) {
-            Ꮡt.Errorf(@"Join(%q, %q): got %q, want %q"u8, test.lhs, test.rhs, got, test.want);
+            t.Errorf(@"Join(%q, %q): got %q, want %q", test.lhs, test.rhs, got, test.want);
         }
     }
 }
@@ -776,19 +797,19 @@ internal partial struct TestAbsWindows_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestAbsWindows(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestAbsWindows_type[]{
-        new(@"C:\foo"u8, @"C:\foo"u8),
-        new(@"\\host\share\foo"u8, @"\\host\share\foo"u8),
-        new(@"\\host"u8, @"\\host"u8),
-        new(@"\\.\NUL"u8, @"\\.\NUL"u8),
-        new(@"NUL"u8, @"\\.\NUL"u8),
-        new(@"COM1"u8, @"\\.\COM1"u8),
-        new(@"a/NUL"u8, @"\\.\NUL"u8)
-    }.slice()) {
+public static void TestAbsWindows(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestAbsWindows_type>([
+        new(@"C:\foo", @"C:\foo"),
+        new(@"\\host\share\foo", @"\\host\share\foo"),
+        new(@"\\host", @"\\host"),
+        new(@"\\.\NUL", @"\\.\NUL"),
+        new(@"NUL", @"\\.\NUL"),
+        new(@"COM1", @"\\.\COM1"),
+        new(@"a/NUL", @"\\.\NUL")
+    ])) {
         var (got, err) = filepath.Abs(test.path);
-        if (err != default! || got != test.want) {
-            Ꮡt.Errorf("Abs(%q) = %q, %v; want %q, nil"u8, test.path, got, err, test.want);
+        if (err != nil || got != test.want) {
+            t.Errorf("Abs(%q) = %q, %v; want %q, nil", test.path, got, err, test.want);
         }
     }
 }

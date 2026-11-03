@@ -32,7 +32,7 @@ public partial struct ArrayStruct {
 
 public partial struct Gobber /*num:nint*/;
 
-public partial struct ValueGobber /*@string*/;
+public partial struct ValueGobber /*@string*/; // encodes with a value, decodes with a pointer.
 
 public partial struct BinaryGobber /*num:nint*/;
 
@@ -48,12 +48,14 @@ public static (slice<byte>, error) GobEncode(this ref ByteStruct g) {
     b[0] = g.a;
     b[1] = (byte)(g.a + 1);
     b[2] = (byte)(g.a + 2);
-    return (b, default!);
+    return (b, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string nilReceiverˢ = "NIL RECEIVER"u8;
-internal static readonly @string invalidDataSequenceˢ = "invalid data sequence"u8;
+internal static ref readonly @string nilReceiverˢ => ref nilReceiverˢᵇ;
+private static readonly @string nilReceiverˢᵇ = "NIL RECEIVER"u8;
+internal static ref readonly @string invalidDataSequenceˢ => ref invalidDataSequenceˢᵇ;
+private static readonly @string invalidDataSequenceˢᵇ = "invalid data sequence"u8;
 
 public static error GobDecode(this ж<ByteStruct> Ꮡg, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
@@ -71,11 +73,11 @@ public static error GobDecode(this ж<ByteStruct> Ꮡg, slice<byte> data) {
             return errors.New(invalidDataSequenceˢ);
         }
     }
-    return default!;
+    return default;
 }
 
 public static (slice<byte>, error) GobEncode(this ref StringStruct g) {
-    return (slice<byte>(g.s), default!);
+    return (slice<byte>(g.s), default);
 }
 
 public static error GobDecode(this ref StringStruct g, slice<byte> data) {
@@ -90,26 +92,27 @@ public static error GobDecode(this ref StringStruct g, slice<byte> data) {
         }
     }
     g.s = (@string)data;
-    return default!;
+    return default;
 }
 
 public static (slice<byte>, error) GobEncode(this ref ArrayStruct a) {
-    return (a.a[..], default!);
+    return (a.a[..], default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string wrongLengthInArrayDecodeˢ = "wrong length in array decode"u8;
+internal static ref readonly @string wrongLengthInArrayDecodeˢ => ref wrongLengthInArrayDecodeˢᵇ;
+private static readonly @string wrongLengthInArrayDecodeˢᵇ = "wrong length in array decode"u8;
 
 public static error GobDecode(this ref ArrayStruct a, slice<byte> data) {
     if (len(data) != len(a.a)) {
         return errors.New(wrongLengthInArrayDecodeˢ);
     }
     copy(a.a[..], data);
-    return default!;
+    return default;
 }
 
 public static (slice<byte>, error) GobEncode(this ref Gobber g) {
-    return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default!);
+    return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default);
 }
 
 public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
@@ -118,7 +121,7 @@ public static error GobDecode(this ж<Gobber> Ꮡg, slice<byte> data) {
 }
 
 public static (slice<byte>, error) MarshalBinary(this ref BinaryGobber g) {
-    return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default!);
+    return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default);
 }
 
 public static error UnmarshalBinary(this ж<BinaryGobber> Ꮡg, slice<byte> data) {
@@ -127,7 +130,7 @@ public static error UnmarshalBinary(this ж<BinaryGobber> Ꮡg, slice<byte> data
 }
 
 public static (slice<byte>, error) MarshalText(this ref TextGobber g) {
-    return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default!);
+    return (slice<byte>(fmt.Sprintf("VALUE=%d"u8, g)), default);
 }
 
 public static error UnmarshalText(this ж<TextGobber> Ꮡg, slice<byte> data) {
@@ -136,7 +139,7 @@ public static error UnmarshalText(this ж<TextGobber> Ꮡg, slice<byte> data) {
 }
 
 public static (slice<byte>, error) GobEncode(this ValueGobber v) {
-    return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default!);
+    return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default);
 }
 
 public static error GobDecode(this ж<ValueGobber> Ꮡv, slice<byte> data) {
@@ -145,7 +148,7 @@ public static error GobDecode(this ж<ValueGobber> Ꮡv, slice<byte> data) {
 }
 
 public static (slice<byte>, error) MarshalBinary(this BinaryValueGobber v) {
-    return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default!);
+    return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default);
 }
 
 public static error UnmarshalBinary(this ж<BinaryValueGobber> Ꮡv, slice<byte> data) {
@@ -154,7 +157,7 @@ public static error UnmarshalBinary(this ж<BinaryValueGobber> Ꮡv, slice<byte>
 }
 
 public static (slice<byte>, error) MarshalText(this TextValueGobber v) {
-    return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default!);
+    return (slice<byte>(fmt.Sprintf("VALUE=%s"u8, v)), default);
 }
 
 public static error UnmarshalText(this ж<TextValueGobber> Ꮡv, slice<byte> data) {
@@ -174,7 +177,7 @@ public partial struct GobTest1 {
 }
 
 public partial struct GobTest2 {
-    public nint X;   // guarantee we have  something in common with GobTest*
+    public nint X;    // guarantee we have  something in common with GobTest*
     public @string G; // not a GobEncoder - should give us errors
 }
 
@@ -229,7 +232,7 @@ public partial struct GobTestValueEncDec {
 }
 
 public partial struct GobTestIndirectEncDec {
-    public nint X;            // guarantee we have  something in common with GobTest*
+    public nint X;                  // guarantee we have  something in common with GobTest*
     public ж<ж<ж<StringStruct>>> G; // indirections to the receiver.
 }
 
@@ -239,97 +242,92 @@ public partial struct GobTestArrayEncDec {
 }
 
 public partial struct GobTestIndirectArrayEncDec {
-    public nint X;           // guarantee we have  something in common with GobTest*
+    public nint X;                 // guarantee we have  something in common with GobTest*
     public ж<ж<ж<ArrayStruct>>> A; // indirections to a large receiver.
 }
 
-public static void TestGobEncoderField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     // First a field that's a structure.
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(new GobTest0(17, Ꮡ(new ByteStruct((rune)'A'))));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(new GobTest0(17, Ꮡ(new ByteStruct((byte)'A'))));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTest0>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~(~x).G).a != (rune)'A') {
-        Ꮡt.Errorf("expected 'A' got %c"u8, (~(~x).G).a);
+    if (x.G.a != 'A') {
+        t.Errorf("expected 'A' got %c", x.G.a);
     }
     // Now a field that's not a structure.
     b.Reset();
-    ref var gobber = ref heap<Gobber>(out var Ꮡgobber);
-    gobber = (Gobber)23;
-    ref var bgobber = ref heap<BinaryGobber>(out var Ꮡbgobber);
-    bgobber = (BinaryGobber)24;
-    ref var tgobber = ref heap<TextGobber>(out var Ꮡtgobber);
-    tgobber = (TextGobber)25;
+    ref var gobber = ref heap<Gobber>((Gobber)23, out var Ꮡgobber);
+    ref var bgobber = ref heap<BinaryGobber>((BinaryGobber)24, out var Ꮡbgobber);
+    ref var tgobber = ref heap<TextGobber>((TextGobber)25, out var Ꮡtgobber);
     err = enc.Encode(new GobTest3(17, Ꮡgobber, Ꮡbgobber, Ꮡtgobber));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var y = @new<GobTest3>();
     err = dec.Decode(y.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~y).G.Value != 23 || (~y).B.Value != 24 || (~y).T.Value != 25) {
-        Ꮡt.Errorf("expected '23 got %d"u8, (~y).G.Value);
+    if (y.G.Value != 23 || y.B.Value != 24 || y.T.Value != 25) {
+        t.Errorf("expected '23 got %d", y.G.Value);
     }
 }
 
 // Even though the field is a value, we can still take its address
 // and should be able to call the methods.
-public static void TestGobEncoderValueField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderValueField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     // First a field that's a structure.
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(Ꮡ(new GobTestValueEncDec(17, new StringStruct("HIJKL"u8))));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(Ꮡ(new GobTestValueEncDec(17, new StringStruct("HIJKL"))));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTestValueEncDec>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~x).G.s != "HIJKL"u8) {
-        Ꮡt.Errorf("expected `HIJKL` got %s"u8, (~x).G.s);
+    if (x.G.s != "HIJKL"u8) {
+        t.Errorf("expected `HIJKL` got %s", x.G.s);
     }
 }
 
 // GobEncode/Decode should work even if the value is
 // more indirect than the receiver.
-public static void TestGobEncoderIndirectField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderIndirectField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     // First a field that's a structure.
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    ref var s = ref heap<ж<StringStruct>>(out var Ꮡs);
-    s = Ꮡ(new StringStruct("HIJKL"u8));
-    ref var sp = ref heap<ж<ж<StringStruct>>>(out var Ꮡsp);
-    sp = Ꮡs;
+    ref var s = ref heap<ж<StringStruct>>(Ꮡ(new StringStruct("HIJKL")), out var Ꮡs);
+    ref var sp = ref heap<ж<ж<StringStruct>>>(Ꮡs, out var Ꮡsp);
     var err = enc.Encode(new GobTestIndirectEncDec(17, Ꮡsp));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTestIndirectEncDec>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if (((((~x).G.ValueSlot).ValueSlot).Value).s != "HIJKL"u8) {
-        Ꮡt.Errorf("expected `HIJKL` got %s"u8, ((((~x).G.ValueSlot).ValueSlot).Value).s);
+    if ((((x.G.ValueSlot).ValueSlot).Value).s != "HIJKL"u8) {
+        t.Errorf("expected `HIJKL` got %s", (((x.G.ValueSlot).ValueSlot).Value).s);
     }
 }
 
 // Test with a large field with methods.
-public static void TestGobEncoderArrayField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderArrayField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     ref var a = ref heap(new GobTestArrayEncDec(), out var Ꮡa);
@@ -338,51 +336,49 @@ public static void TestGobEncoderArrayField(ж<testing.T> Ꮡt) {
         a.A.a[i] = (byte)i;
     }
     var err = enc.Encode(Ꮡa);
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTestArrayEncDec>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    foreach (var (i, v) in (~x).A.a.ΔRangeSnapshot()) {
+    foreach (var (i, v) in x.A.a.ΔRangeSnapshot()) {
         if (v != (byte)i) {
-            Ꮡt.Errorf("expected %x got %x"u8, (byte)i, v);
+            t.Errorf("expected %x got %x", (byte)i, v);
             break;
         }
     }
 }
 
 // Test an indirection to a large field with methods.
-public static void TestGobEncoderIndirectArrayField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderIndirectArrayField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    GobTestIndirectArrayEncDec a = default!;
+    GobTestIndirectArrayEncDec a = default;
     a.X = 17;
     ref var Δarray = ref heap(new ArrayStruct(), out var Ꮡarray);
-    ref var ap = ref heap<ж<ArrayStruct>>(out var Ꮡap);
-    ap = Ꮡarray;
-    ref var app = ref heap<ж<ж<ArrayStruct>>>(out var Ꮡapp);
-    app = Ꮡap;
+    ref var ap = ref heap<ж<ArrayStruct>>(Ꮡarray, out var Ꮡap);
+    ref var app = ref heap<ж<ж<ArrayStruct>>>(Ꮡap, out var Ꮡapp);
     a.A = Ꮡapp;
     foreach (var i in range(Δarray.a)) {
         Δarray.a[i] = (byte)i;
     }
     var err = enc.Encode(a);
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTestIndirectArrayEncDec>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    foreach (var (i, v) in ((((~x).A.ValueSlot).ValueSlot).Value).a.ΔRangeSnapshot()) {
+    foreach (var (i, v) in (((x.A.ValueSlot).ValueSlot).Value).a.ΔRangeSnapshot()) {
         if (v != (byte)i) {
-            Ꮡt.Errorf("expected %x got %x"u8, (byte)i, v);
+            t.Errorf("expected %x got %x", (byte)i, v);
             break;
         }
     }
@@ -393,77 +389,78 @@ public static void TestGobEncoderIndirectArrayField(ж<testing.T> Ꮡt) {
 // and may even be bad but it works and it's hard to prevent
 // without exposing the contents of the object, which would
 // defeat the purpose.
-public static void TestGobEncoderFieldsOfDifferentType(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderFieldsOfDifferentType(ж<testing.T> t) {
     // first, string in field to byte in field
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(new GobTest1(17, Ꮡ(new StringStruct("ABC"u8))));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(new GobTest1(17, Ꮡ(new StringStruct("ABC"))));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTest0>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~(~x).G).a != (rune)'A') {
-        Ꮡt.Errorf("expected 'A' got %c"u8, (~(~x).G).a);
+    if (x.G.a != 'A') {
+        t.Errorf("expected 'A' got %c", x.G.a);
     }
     // now the other direction, byte in field to string in field
     b.Reset();
-    err = enc.Encode(new GobTest0(17, Ꮡ(new ByteStruct((rune)'X'))));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    err = enc.Encode(new GobTest0(17, Ꮡ(new ByteStruct((byte)'X'))));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var y = @new<GobTest1>();
     err = dec.Decode(y.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~(~y).G).s != "XYZ"u8) {
-        Ꮡt.Fatalf("expected `XYZ` got %q"u8, (~(~y).G).s);
+    if (y.G.s != "XYZ"u8) {
+        t.Fatalf("expected `XYZ` got %q", y.G.s);
     }
 }
 
 // Test that we can encode a value and decode into a pointer.
-public static void TestGobEncoderValueEncoder(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderValueEncoder(ж<testing.T> t) {
     // first, string in field to byte in field
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(new GobTest4(17, (ValueGobber)(@string)helloˢ, (BinaryValueGobber)(@string)"Καλημέρα"u8, (TextValueGobber)(@string)"こんにちは"u8));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(new GobTest4(17, (ValueGobber)(@string)helloˢ, (BinaryValueGobber)(@string)"Καλημέρα", (TextValueGobber)(@string)"こんにちは"));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTest5>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~x).V.Value != "hello"u8 || (~x).BV.Value != "Καλημέρα"u8 || (~x).TV.Value != "こんにちは"u8) {
-        Ꮡt.Errorf("expected `hello` got %s"u8, (~x).V.Value);
+    if (x.V.Value != "hello"u8 || x.BV.Value != "Καλημέρα"u8 || x.TV.Value != "こんにちは"u8) {
+        t.Errorf("expected `hello` got %s", x.V.Value);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fortyTwoˢ = "forty-two"u8;
-internal static readonly @string sixByNineˢ = "six-by-nine"u8;
-internal static readonly @string secondsˢ = "πseconds"u8;
-internal static readonly @string ftSˢ = "π²ft/s²"u8;
+internal static ref readonly @string fortyTwoˢ => ref fortyTwoˢᵇ;
+private static readonly @string fortyTwoˢᵇ = "forty-two"u8;
+internal static ref readonly @string sixByNineˢ => ref sixByNineˢᵇ;
+private static readonly @string sixByNineˢᵇ = "six-by-nine"u8;
+internal static ref readonly @string secondsˢ => ref secondsˢᵇ;
+private static readonly @string secondsˢᵇ = "πseconds"u8;
+internal static ref readonly @string ftSˢ => ref ftSˢᵇ;
+private static readonly @string ftSˢᵇ = "π²ft/s²"u8;
 
 // Test that we can use a value then a pointer type of a GobEncoder
 // in the same encoded value. Bug 4647.
-public static void TestGobEncoderValueThenPointer(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderValueThenPointer(ж<testing.T> t) {
     ValueGobber v = (ValueGobber)(@string)fortyTwoˢ;
-    ref var w = ref heap<ValueGobber>(out var Ꮡw);
-    w = (ValueGobber)(@string)sixByNineˢ;
-    BinaryValueGobber bv = (BinaryValueGobber)(@string)"1nanocentury"u8;
-    ref var bw = ref heap<BinaryValueGobber>(out var Ꮡbw);
-    bw = (BinaryValueGobber)(@string)secondsˢ;
-    TextValueGobber tv = (TextValueGobber)(@string)"gravitationalacceleration"u8;
-    ref var tw = ref heap<TextValueGobber>(out var Ꮡtw);
-    tw = (TextValueGobber)(@string)ftSˢ;
+    ref var w = ref heap<ValueGobber>((ValueGobber)(@string)sixByNineˢ, out var Ꮡw);
+    BinaryValueGobber bv = (BinaryValueGobber)(@string)"1nanocentury";
+    ref var bw = ref heap<BinaryValueGobber>((BinaryValueGobber)(@string)secondsˢ, out var Ꮡbw);
+    TextValueGobber tv = (TextValueGobber)(@string)"gravitationalacceleration";
+    ref var tw = ref heap<TextValueGobber>((TextValueGobber)(@string)ftSˢ, out var Ꮡtw);
 
     // this was a bug: encoding a GobEncoder by value before a GobEncoder
     // pointer would cause duplicate type definitions to be sent.
@@ -471,140 +468,131 @@ public static void TestGobEncoderValueThenPointer(ж<testing.T> Ꮡt) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     {
-        var err = enc.Encode(new GobTest6(42, v, Ꮡw, bv, Ꮡbw, tv, Ꮡtw)); if (err != default!) {
-            Ꮡt.Fatal(encodeErrorˢ, err);
+        var err = enc.Encode(new GobTest6(42, v, Ꮡw, bv, Ꮡbw, tv, Ꮡtw)); if (err != nil) {
+            t.Fatal(encodeErrorˢ, err);
         }
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTest6>();
     {
-        var err = dec.Decode(x.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatal(decodeErrorˢ, err);
+        var err = dec.Decode(x.OrTypedNil()); if (err != nil) {
+            t.Fatal(decodeErrorˢ, err);
         }
     }
 
     {
-        ValueGobber got = x.Value.V;
+        ValueGobber got = x.V;
         ValueGobber want = v; if (got != want) {
-            Ꮡt.Errorf("v = %q, want %q"u8, got, want);
+            t.Errorf("v = %q, want %q", got, want);
         }
     }
     {
-        var got = x.Value.W;
-        ValueGobber want = w; if (got == nil){
-            Ꮡt.Errorf("w = nil, want %q"u8, want);
-        } else 
-        if (got.Value != want) {
-            Ꮡt.Errorf("w = %q, want %q"u8, got.Value, want);
+        var got = x.W;
+        ValueGobber want = w; if (got == nil) {
+            t.Errorf("w = nil, want %q", want);
+        } else if (got.Value != want) {
+            t.Errorf("w = %q, want %q", got.Value, want);
         }
     }
 
     {
-        BinaryValueGobber got = x.Value.BV;
+        BinaryValueGobber got = x.BV;
         BinaryValueGobber want = bv; if (got != want) {
-            Ꮡt.Errorf("bv = %q, want %q"u8, got, want);
+            t.Errorf("bv = %q, want %q", got, want);
         }
     }
     {
-        var got = x.Value.BW;
-        BinaryValueGobber want = bw; if (got == nil){
-            Ꮡt.Errorf("bw = nil, want %q"u8, want);
-        } else 
-        if (got.Value != want) {
-            Ꮡt.Errorf("bw = %q, want %q"u8, got.Value, want);
+        var got = x.BW;
+        BinaryValueGobber want = bw; if (got == nil) {
+            t.Errorf("bw = nil, want %q", want);
+        } else if (got.Value != want) {
+            t.Errorf("bw = %q, want %q", got.Value, want);
         }
     }
 
     {
-        TextValueGobber got = x.Value.TV;
+        TextValueGobber got = x.TV;
         TextValueGobber want = tv; if (got != want) {
-            Ꮡt.Errorf("tv = %q, want %q"u8, got, want);
+            t.Errorf("tv = %q, want %q", got, want);
         }
     }
     {
-        var got = x.Value.TW;
-        TextValueGobber want = tw; if (got == nil){
-            Ꮡt.Errorf("tw = nil, want %q"u8, want);
-        } else 
-        if (got.Value != want) {
-            Ꮡt.Errorf("tw = %q, want %q"u8, got.Value, want);
+        var got = x.TW;
+        TextValueGobber want = tw; if (got == nil) {
+            t.Errorf("tw = nil, want %q", want);
+        } else if (got.Value != want) {
+            t.Errorf("tw = %q, want %q", got.Value, want);
         }
     }
 }
 
 // Test that we can use a pointer then a value type of a GobEncoder
 // in the same encoded value.
-public static void TestGobEncoderPointerThenValue(ж<testing.T> Ꮡt) {
-    ref var v = ref heap<ValueGobber>(out var Ꮡv);
-    v = (ValueGobber)(@string)fortyTwoˢ;
+public static void TestGobEncoderPointerThenValue(ж<testing.T> t) {
+    ref var v = ref heap<ValueGobber>((ValueGobber)(@string)fortyTwoˢ, out var Ꮡv);
     ValueGobber w = (ValueGobber)(@string)sixByNineˢ;
-    ref var bv = ref heap<BinaryValueGobber>(out var Ꮡbv);
-    bv = (BinaryValueGobber)(@string)"1nanocentury"u8;
+    ref var bv = ref heap<BinaryValueGobber>((BinaryValueGobber)(@string)"1nanocentury", out var Ꮡbv);
     BinaryValueGobber bw = (BinaryValueGobber)(@string)secondsˢ;
-    ref var tv = ref heap<TextValueGobber>(out var Ꮡtv);
-    tv = (TextValueGobber)(@string)"gravitationalacceleration"u8;
+    ref var tv = ref heap<TextValueGobber>((TextValueGobber)(@string)"gravitationalacceleration", out var Ꮡtv);
     TextValueGobber tw = (TextValueGobber)(@string)ftSˢ;
 
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     {
-        var err = enc.Encode(new GobTest7(42, Ꮡv, w, Ꮡbv, bw, Ꮡtv, tw)); if (err != default!) {
-            Ꮡt.Fatal(encodeErrorˢ, err);
+        var err = enc.Encode(new GobTest7(42, Ꮡv, w, Ꮡbv, bw, Ꮡtv, tw)); if (err != nil) {
+            t.Fatal(encodeErrorˢ, err);
         }
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTest7>();
     {
-        var err = dec.Decode(x.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatal(decodeErrorˢ, err);
+        var err = dec.Decode(x.OrTypedNil()); if (err != nil) {
+            t.Fatal(decodeErrorˢ, err);
         }
     }
 
     {
-        var got = x.Value.V;
-        ValueGobber want = v; if (got == nil){
-            Ꮡt.Errorf("v = nil, want %q"u8, want);
-        } else 
-        if (got.Value != want) {
-            Ꮡt.Errorf("v = %q, want %q"u8, got.Value, want);
+        var got = x.V;
+        ValueGobber want = v; if (got == nil) {
+            t.Errorf("v = nil, want %q", want);
+        } else if (got.Value != want) {
+            t.Errorf("v = %q, want %q", got.Value, want);
         }
     }
     {
-        ValueGobber got = x.Value.W;
+        ValueGobber got = x.W;
         ValueGobber want = w; if (got != want) {
-            Ꮡt.Errorf("w = %q, want %q"u8, got, want);
+            t.Errorf("w = %q, want %q", got, want);
         }
     }
 
     {
-        var got = x.Value.BV;
-        BinaryValueGobber want = bv; if (got == nil){
-            Ꮡt.Errorf("bv = nil, want %q"u8, want);
-        } else 
-        if (got.Value != want) {
-            Ꮡt.Errorf("bv = %q, want %q"u8, got.Value, want);
+        var got = x.BV;
+        BinaryValueGobber want = bv; if (got == nil) {
+            t.Errorf("bv = nil, want %q", want);
+        } else if (got.Value != want) {
+            t.Errorf("bv = %q, want %q", got.Value, want);
         }
     }
     {
-        BinaryValueGobber got = x.Value.BW;
+        BinaryValueGobber got = x.BW;
         BinaryValueGobber want = bw; if (got != want) {
-            Ꮡt.Errorf("bw = %q, want %q"u8, got, want);
+            t.Errorf("bw = %q, want %q", got, want);
         }
     }
 
     {
-        var got = x.Value.TV;
-        TextValueGobber want = tv; if (got == nil){
-            Ꮡt.Errorf("tv = nil, want %q"u8, want);
-        } else 
-        if (got.Value != want) {
-            Ꮡt.Errorf("tv = %q, want %q"u8, got.Value, want);
+        var got = x.TV;
+        TextValueGobber want = tv; if (got == nil) {
+            t.Errorf("tv = nil, want %q", want);
+        } else if (got.Value != want) {
+            t.Errorf("tv = %q, want %q", got.Value, want);
         }
     }
     {
-        TextValueGobber got = x.Value.TW;
+        TextValueGobber got = x.TW;
         TextValueGobber want = tw; if (got != want) {
-            Ꮡt.Errorf("tw = %q, want %q"u8, got, want);
+            t.Errorf("tw = %q, want %q", got, want);
         }
     }
 }
@@ -614,141 +602,138 @@ internal static readonly object expectedDecodeErrorForˢ = (@string)"expected de
 internal static readonly object expectedTypeErrorGotˢ = (@string)"expected type error; got"u8;
 internal static readonly object expectedDecodeErrorForˢ2 = (@string)"expected decode error for mismatched fields (non-encoder to decoder)"u8;
 
-public static void TestGobEncoderFieldTypeError(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderFieldTypeError(ж<testing.T> t) {
     // GobEncoder to non-decoder: error
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(new GobTest1(17, Ꮡ(new StringStruct("ABC"u8))));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(new GobTest1(17, Ꮡ(new StringStruct("ABC"))));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
-    var x = Ꮡ(new GobTest2(nil));
+    var x = Ꮡ(new GobTest2());
     err = dec.Decode(x.OrTypedNil());
-    if (err == default!) {
-        Ꮡt.Fatal(expectedDecodeErrorForˢ);
+    if (err == nil) {
+        t.Fatal(expectedDecodeErrorForˢ);
     }
     if (!strings.Contains(err.Error(), typeˢ)) {
-        Ꮡt.Fatal(expectedTypeErrorGotˢ, err);
+        t.Fatal(expectedTypeErrorGotˢ, err);
     }
     // Non-encoder to GobDecoder: error
     b.Reset();
-    err = enc.Encode(new GobTest2(17, "ABC"u8));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    err = enc.Encode(new GobTest2(17, "ABC"));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
-    var y = Ꮡ(new GobTest1(nil));
+    var y = Ꮡ(new GobTest1());
     err = dec.Decode(y.OrTypedNil());
-    if (err == default!) {
-        Ꮡt.Fatal(expectedDecodeErrorForˢ2);
+    if (err == nil) {
+        t.Fatal(expectedDecodeErrorForˢ2);
     }
     if (!strings.Contains(err.Error(), typeˢ)) {
-        Ꮡt.Fatal(expectedTypeErrorGotˢ, err);
+        t.Fatal(expectedTypeErrorGotˢ, err);
     }
 }
 
 // Even though ByteStruct is a struct, it's treated as a singleton at the top level.
-public static void TestGobEncoderStructSingleton(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderStructSingleton(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(Ꮡ(new ByteStruct((rune)'A')));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(Ꮡ(new ByteStruct((byte)'A')));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<ByteStruct>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~x).a != (rune)'A') {
-        Ꮡt.Errorf("expected 'A' got %c"u8, (~x).a);
+    if (x.a != 'A') {
+        t.Errorf("expected 'A' got %c", x.a);
     }
 }
 
-public static void TestGobEncoderNonStructSingleton(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderNonStructSingleton(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     ref var g = ref heap(new Gobber(), out var Ꮡg);
     g = 1234;
     var err = enc.Encode(Ꮡg);
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     ref var x = ref heap(new Gobber(), out var Ꮡx);
     err = dec.Decode(Ꮡx);
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
     if (x != 1234) {
-        Ꮡt.Errorf("expected 1234 got %d"u8, x);
+        t.Errorf("expected 1234 got %d", x);
     }
 }
 
-public static void TestGobEncoderIgnoreStructField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderIgnoreStructField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     // First a field that's a structure.
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    var err = enc.Encode(new GobTest0(17, Ꮡ(new ByteStruct((rune)'A'))));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    var err = enc.Encode(new GobTest0(17, Ꮡ(new ByteStruct((byte)'A'))));
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTestIgnoreEncoder>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~x).X != 17) {
-        Ꮡt.Errorf("expected 17 got %c"u8, (~x).X);
+    if (x.X != 17) {
+        t.Errorf("expected 17 got %c", x.X);
     }
 }
 
-public static void TestGobEncoderIgnoreNonStructField(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderIgnoreNonStructField(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     // First a field that's a structure.
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
-    ref var gobber = ref heap<Gobber>(out var Ꮡgobber);
-    gobber = (Gobber)23;
-    ref var bgobber = ref heap<BinaryGobber>(out var Ꮡbgobber);
-    bgobber = (BinaryGobber)24;
-    ref var tgobber = ref heap<TextGobber>(out var Ꮡtgobber);
-    tgobber = (TextGobber)25;
+    ref var gobber = ref heap<Gobber>((Gobber)23, out var Ꮡgobber);
+    ref var bgobber = ref heap<BinaryGobber>((BinaryGobber)24, out var Ꮡbgobber);
+    ref var tgobber = ref heap<TextGobber>((TextGobber)25, out var Ꮡtgobber);
     var err = enc.Encode(new GobTest3(17, Ꮡgobber, Ꮡbgobber, Ꮡtgobber));
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTestIgnoreEncoder>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~x).X != 17) {
-        Ꮡt.Errorf("expected 17 got %c"u8, (~x).X);
+    if (x.X != 17) {
+        t.Errorf("expected 17 got %c", x.X);
     }
 }
 
-public static void TestGobEncoderIgnoreNilEncoder(ж<testing.T> Ꮡt) {
+public static void TestGobEncoderIgnoreNilEncoder(ж<testing.T> t) {
     var b = @new<bytes.Buffer>();
     // First a field that's a structure.
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var err = enc.Encode(new GobTest0(X: 18)); // G is nil
-    if (err != default!) {
-        Ꮡt.Fatal(encodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeErrorˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     var x = @new<GobTest0>();
     err = dec.Decode(x.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(decodeErrorˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeErrorˢ, err);
     }
-    if ((~x).X != 18) {
-        Ꮡt.Errorf("expected x.X = 18, got %v"u8, (~x).X);
+    if (x.X != 18) {
+        t.Errorf("expected x.X = 18, got %v", x.X);
     }
-    if ((~x).G != nil) {
-        Ꮡt.Errorf("expected x.G = nil, got %v"u8, (~x).G.OrTypedNil());
+    if (x.G != nil) {
+        t.Errorf("expected x.G = nil, got %v", x.G.OrTypedNil());
     }
 }
 
@@ -761,35 +746,35 @@ internal static @string String(this ref gobDecoderBug0 br) {
 }
 
 internal static (slice<byte>, error) GobEncode(this ref gobDecoderBug0 br) {
-    return (slice<byte>(br.String()), default!);
+    return (slice<byte>(br.String()), default);
 }
 
 internal static error GobDecode(this ref gobDecoderBug0 br, slice<byte> b) {
     br.foo = fooˢ;
     br.bar = barˢ;
-    return default!;
+    return default;
 }
 
 // This was a bug: the receiver has a different indirection level
 // than the variable.
-public static void TestGobEncoderExtraIndirect(ж<testing.T> Ꮡt) {
-    var gdb = Ꮡ(new gobDecoderBug0("foo"u8, "bar"u8));
+public static void TestGobEncoderExtraIndirect(ж<testing.T> t) {
+    var gdb = Ꮡ(new gobDecoderBug0("foo", "bar"));
     var buf = @new<bytes.Buffer>();
     var e = NewEncoder(new gob_test_package.bytes_BufferжWriter(buf));
     {
-        var err = e.Encode(gdb.OrTypedNil()); if (err != default!) {
-            Ꮡt.Fatalf("encode: %v"u8, err);
+        var err = e.Encode(gdb.OrTypedNil()); if (err != nil) {
+            t.Fatalf("encode: %v", err);
         }
     }
     var d = NewDecoder(new gob_test_package.bytes_BufferжReader(buf));
     ref var got = ref heap<ж<gobDecoderBug0>>(out var Ꮡgot);
     {
-        var err = d.Decode(Ꮡgot); if (err != default!) {
-            Ꮡt.Fatalf("decode: %v"u8, err);
+        var err = d.Decode(Ꮡgot); if (err != nil) {
+            t.Fatalf("decode: %v", err);
         }
     }
-    if ((~got).foo != (~gdb).foo || (~got).bar != (~gdb).bar) {
-        Ꮡt.Errorf("got = %q, want %q"u8, got.OrTypedNil(), gdb.OrTypedNil());
+    if (got.foo != gdb.foo || got.bar != gdb.bar) {
+        t.Errorf("got = %q, want %q", got.OrTypedNil(), gdb.OrTypedNil());
     }
 }
 
@@ -808,11 +793,11 @@ public partial struct isZeroBugArray /*[2]uint8*/;
 
 // Receiver is value, not pointer, to test isZero of array.
 public static (slice<byte> b, error e) GobEncode(this isZeroBugArray a) {
-    slice<byte> b = default!;
+    slice<byte> b = default;
     a = a.Clone();
 
     b = appendꓸꓸꓸ(b, a[..]);
-    return (b, default!);
+    return (b, default);
 }
 
 public static error GobDecode(this ж<isZeroBugArray> Ꮡa, slice<byte> data) {
@@ -823,7 +808,7 @@ public static error GobDecode(this ж<isZeroBugArray> Ꮡa, slice<byte> data) {
     }
     a.Value[0] = data[0];
     a.Value[1] = data[1];
-    return default!;
+    return default;
 }
 
 public partial struct isZeroBugInterface {
@@ -831,63 +816,62 @@ public partial struct isZeroBugInterface {
 }
 
 public static (slice<byte> b, error e) GobEncode(this isZeroBugInterface i) {
-    return (new byte[]{}.slice(), default!);
+    return (slice<byte>([]), default);
 }
 
 public static error GobDecode(this ref isZeroBugInterface i, slice<byte> data) {
-    return default!;
+    return default;
 }
 
-public static void TestGobEncodeIsZero(ж<testing.T> Ꮡt) {
-    var x = new isZeroBug(time.Unix(1000000000, 0), "hello"u8, -55, new isZeroBugArray(new uint8[]{1, 2}.array()), new isZeroBugInterface(nil));
+public static void TestGobEncodeIsZero(ж<testing.T> t) {
+    var x = new isZeroBug(time.Unix(1000000000, 0), "hello", -55, new isZeroBugArray(new uint8[]{1, 2}.array()), new isZeroBugInterface());
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     var err = enc.Encode(x);
-    if (err != default!) {
-        Ꮡt.Fatal(encodeˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeˢ, err);
     }
     ref var y = ref heap(new isZeroBug(), out var Ꮡy);
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
     err = dec.Decode(Ꮡy);
-    if (err != default!) {
-        Ꮡt.Fatal(decodeˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeˢ, err);
     }
     if (x != y) {
-        Ꮡt.Fatalf("%v != %v"u8, x, y);
+        t.Fatalf("%v != %v", x, y);
     }
 }
 
-public static void TestGobEncodePtrError(ж<testing.T> Ꮡt) {
+public static void TestGobEncodePtrError(ж<testing.T> t) {
     ref var err = ref heap<error>(out var Ꮡerr);
     var b = @new<bytes.Buffer>();
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     err = enc.Encode(Ꮡerr);
-    if (err != default!) {
-        Ꮡt.Fatal(encodeˢ, err);
+    if (err != nil) {
+        t.Fatal(encodeˢ, err);
     }
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
-    ref var err2 = ref heap<error>(out var Ꮡerr2);
-    err2 = fmt.Errorf("foo"u8);
+    ref var err2 = ref heap<error>(fmt.Errorf("foo"u8), out var Ꮡerr2);
     err = dec.Decode(Ꮡerr2);
-    if (err != default!) {
-        Ꮡt.Fatal(decodeˢ, err);
+    if (err != nil) {
+        t.Fatal(decodeˢ, err);
     }
-    if (err2 != default!) {
-        Ꮡt.Fatalf("expected nil, got %v"u8, err2);
+    if (err2 != nil) {
+        t.Fatalf("expected nil, got %v", err2);
     }
 }
 
-public static void TestNetIP(ж<testing.T> Ꮡt) {
+public static void TestNetIP(ж<testing.T> t) {
     // Encoding of net.IP{1,2,3,4} in Go 1.1.
-    var enc = new byte[]{0x07, 0x0a, 0x00, 0x04, 0x01, 0x02, 0x03, 0x04}.slice();
+    var enc = slice<byte>([0x07, 0x0a, 0x00, 0x04, 0x01, 0x02, 0x03, 0x04]);
 
     ref var ip = ref heap<net.IP>(out var Ꮡip);
     var err = NewDecoder(new gob_test_package.bytes_ReaderжReader(bytes.NewReader(enc))).Decode(Ꮡip);
-    if (err != default!) {
-        Ꮡt.Fatalf("decode: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("decode: %v", err);
     }
     if (ip.String() != "1.2.3.4"u8) {
-        Ꮡt.Errorf("decoded to %v, want 1.2.3.4"u8, ip.String());
+        t.Errorf("decoded to %v, want 1.2.3.4", ip.String());
     }
 }
 
@@ -895,11 +879,9 @@ internal partial struct TestIgnoreDepthLimit_output /*dyn*/ {
     public nint Hello;
 }
 
-public static void TestIgnoreDepthLimit(ж<testing.T> Ꮡt) {
+public static void TestIgnoreDepthLimit(ж<testing.T> t) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // We don't test the actual depth limit because it requires building an
         // extremely large message, which takes quite a while.
         nint oldNestingDepth = maxIgnoreNestingDepth;
@@ -916,28 +898,28 @@ public static void TestIgnoreDepthLimit(ж<testing.T> Ꮡt) {
         for (nint i = 0; i < 100; i++) {
             nested = reflect.ArrayOf(1, nested);
         }
-        var badStruct = reflect.New(reflect.StructOf(new reflect.StructField[]{new(Name: "F"u8, Type: nested)}.slice()));
+        var badStruct = reflect.New(reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: nested)])));
         enc.Encode(badStruct.Interface());
         var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
         ref var output = ref heap(new TestIgnoreDepthLimit_output(), out var Ꮡoutput);
         @string expectedErr = invalidNestingDepthˢ;
         {
-            var err = dec.Decode(Ꮡoutput); if (err == default! || err.Error() != expectedErr) {
-                Ꮡt.Errorf("Decode didn't fail with depth limit of 100: want %q, got %q"u8, expectedErr, err);
+            var err = dec.Decode(Ꮡoutput); if (err == nil || err.Error() != expectedErr) {
+                t.Errorf("Decode didn't fail with depth limit of 100: want %q, got %q", expectedErr, err);
             }
         }
 
         // Nested struct
-        nested = reflect.StructOf(new reflect.StructField[]{new(Name: "F"u8, Type: typ)}.slice());
+        nested = reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: typ)]));
         for (nint i = 0; i < 100; i++) {
-            nested = reflect.StructOf(new reflect.StructField[]{new(Name: "F"u8, Type: nested)}.slice());
+            nested = reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: nested)]));
         }
-        badStruct = reflect.New(reflect.StructOf(new reflect.StructField[]{new(Name: "F"u8, Type: nested)}.slice()));
+        badStruct = reflect.New(reflect.StructOf(slice<reflect.StructField>([new(Name: "F", Type: nested)])));
         enc.Encode(badStruct.Interface());
         dec = NewDecoder(new gob_test_package.bytes_BufferжReader(b));
         {
-            var err = dec.Decode(Ꮡoutput); if (err == default! || err.Error() != expectedErr) {
-                Ꮡt.Errorf("Decode didn't fail with depth limit of 100: want %q, got %q"u8, expectedErr, err);
+            var err = dec.Decode(Ꮡoutput); if (err == nil || err.Error() != expectedErr) {
+                t.Errorf("Decode didn't fail with depth limit of 100: want %q, got %q", expectedErr, err);
             }
         }
     }

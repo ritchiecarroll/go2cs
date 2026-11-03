@@ -10,16 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using netꓸAddr = go.net_package.ΔAddr;
-global using netꓸError = go.net_package.ΔError;
-global using osꓸDirEntry = go.io.fs_package.DirEntry;
-global using osꓸFileInfo = go.io.fs_package.FileInfo;
-global using osꓸFileMode = go.io.fs_package.FileMode;
-global using osꓸPathError = go.io.fs_package.PathError;
-global using osꓸSignal = go.os_package.ΔSignal;
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,7 +48,11 @@ using static go.log.syslog_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Writer))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,8 +62,8 @@ using static go.log.syslog_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/syslog/syslog.go", "syslog.cs", "AGHWAcIABRQACQKCpoKUpAAHEIKkgoKUAAgKwpSCpoKCgqaCgoK4griosqjigpSCgoKU2qKCqqKCqqKCqqKCqqKCqqKCqqKCqqKCptKUgpSCgIK2gIKk2rSCgqaCgsqmgriCppSCpqaCrsKCgpQ=", "", "", "324=Getpid/1/1/2;330=Getpid/1/1/2")]
-[assembly: go.GoPositionMap("log/syslog/syslog_unix.go", "syslog_unix.cs", "AA8iooKCgoKCgrg=")]
+[assembly: GoPositionMap("log/syslog/syslog.go", "syslog.cs", "AGHWAcIABhQACQKCpoKUpAAHEIKkgoKUAAkKwpSCpoKCgqaCgoK4griosqjigpSCgoKU2qKCqqKCqqKCqqKCqqKCqqKCqqKCqqKCptKUgpSCgIK2gIKk2rSCgqaCgsqmgriCppSCpqaCrsKCgpQ=", "", "", "326=Getpid/1/1/2;332=Getpid/1/1/2")]
+[assembly: GoPositionMap("log/syslog/syslog_unix.go", "syslog_unix.cs", "ABAiooKCgoKCgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.log;

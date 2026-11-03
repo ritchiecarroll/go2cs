@@ -17,19 +17,19 @@ internal static error removeAll(@string path) {
         if (path == ""u8) {
             // fail silently to retain compatibility with previous behavior
             // of RemoveAll. See issue 28830.
-            return default!;
+            return default;
         }
 
         // The rmdir system call does not permit removing ".",
         // so we don't permit it either.
         if (endsWithDot(path)) {
-            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll"u8, Path: path, Err: syscall.EINVAL)));
+            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "RemoveAll", Path: path, Err: syscall.EINVAL)));
         }
 
         // Simple case: if Remove works, we're done.
         var err = Remove(path);
-        if (err == default! || IsNotExist(err)) {
-            return default!;
+        if (err == nil || IsNotExist(err)) {
+            return default;
         }
 
         // RemoveAll recurses by deleting the path base from
@@ -47,36 +47,36 @@ internal static error removeAll(@string path) {
         (var parent, err) = OpenFile(parentDir, flag, 0);
         if (IsNotExist(err)) {
             // If parent does not exist, base cannot exist. Fail silently
-            return default!;
+            return default;
         }
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         var parentʗ1 = parent;
         defer(() => parentʗ1.Close(), ref ᒐ);
 
         {
-            var errΔ1 = removeAllFrom((sysfdType)parent.Fd(), @base); if (errΔ1 != default!) {
+            var errΔ1 = removeAllFrom((sysfdType)parent.Fd(), @base); if (errΔ1 != nil) {
                 {
                     var (pathErr, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
-                        pathErr.Value.Path = parentDir + ((@string)(rune)PathSeparator) + (~pathErr).Path;
+                        pathErr.Path = parentDir + ((@string)(rune)PathSeparator) + pathErr.Path;
                         errΔ1 = new fs.PathErrorжerror(pathErr);
                     }
                 }
                 return errΔ1;
             }
         }
-        return default!;
+        return default;
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static error removeAllFrom(sysfdType parentFd, @string @base) {
     // Simple case: if Unlink (aka remove) works, we're done.
     var err = removefileat(parentFd, @base);
-    if (err == default! || IsNotExist(err)) {
-        return default!;
+    if (err == nil || IsNotExist(err)) {
+        return default;
     }
 
     // EISDIR means that we have a directory, and we need to
@@ -86,25 +86,25 @@ internal static error removeAllFrom(sysfdType parentFd, @string @base) {
     // whose contents need to be removed.
     // Otherwise just return the error.
     if (!AreEqual(err, syscall.EISDIR) && !AreEqual(err, syscall.EPERM) && !AreEqual(err, syscall.EACCES)) {
-        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat"u8, Path: @base, Err: err)));
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat", Path: @base, Err: err)));
     }
     var uErr = err;
 
     // Remove the directory's entries.
-    error recurseErr = default!;
-    while (ᐧ) {
+    error recurseErr = default;
+    for (;;) {
         const nint reqSize = 1024;
-        nint respSize = default!;
+        nint respSize = default;
 
         // Open the directory to recurse into.
         var (@file, errΔ1) = openDirAt(parentFd, @base);
-        if (errΔ1 != default!) {
+        if (errΔ1 != nil) {
             if (IsNotExist(errΔ1)) {
-                return default!;
+                return default;
             }
             if (AreEqual(errΔ1, syscall.ENOTDIR)) {
                 // Not a directory; return the error from the removefileat.
-                return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat"u8, Path: @base, Err: uErr)));
+                return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat", Path: @base, Err: uErr)));
             }
             {
                 var (_, ok) = errΔ1._<errSymlink>(ᐧ); if (ok) {
@@ -112,34 +112,34 @@ internal static error removeAllFrom(sysfdType parentFd, @string @base) {
                     errΔ1 = uErr;
                 }
             }
-            recurseErr = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openfdat"u8, Path: @base, Err: errΔ1)));
+            recurseErr = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openfdat", Path: @base, Err: errΔ1)));
             break;
         }
 
-        while (ᐧ) {
+        for (;;) {
             nint numErr = 0;
 
             var (names, readErr) = @file.Readdirnames(reqSize);
             // Errors other than EOF should stop us from continuing.
-            if (readErr != default! && !AreEqual(readErr, Δio.EOF)) {
+            if (readErr != nil && !AreEqual(readErr, Δio.EOF)) {
                 @file.Close();
                 if (IsNotExist(readErr)) {
-                    return default!;
+                    return default;
                 }
-                return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdirnames"u8, Path: @base, Err: readErr)));
+                return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readdirnames", Path: @base, Err: readErr)));
             }
 
             respSize = len(names);
             foreach (var (_, name) in names) {
                 var errΔ2 = removeAllFrom((sysfdType)@file.Fd(), name);
-                if (errΔ2 != default!) {
+                if (errΔ2 != nil) {
                     {
                         var (pathErr, ok) = errΔ2._<ж<PathError>>(ᐧ); if (ok) {
-                            pathErr.Value.Path = @base + ((@string)(rune)PathSeparator) + (~pathErr).Path;
+                            pathErr.Path = @base + ((@string)(rune)PathSeparator) + pathErr.Path;
                         }
                     }
                     numErr++;
-                    if (recurseErr == default!) {
+                    if (recurseErr == nil) {
                         recurseErr = errΔ2;
                     }
                 }
@@ -167,14 +167,14 @@ internal static error removeAllFrom(sysfdType parentFd, @string @base) {
 
     // Remove the directory itself.
     var unlinkError = removedirat(parentFd, @base);
-    if (unlinkError == default! || IsNotExist(unlinkError)) {
-        return default!;
+    if (unlinkError == nil || IsNotExist(unlinkError)) {
+        return default;
     }
 
-    if (recurseErr != default!) {
+    if (recurseErr != nil) {
         return recurseErr;
     }
-    return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat"u8, Path: @base, Err: unlinkError)));
+    return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat", Path: @base, Err: unlinkError)));
 }
 
 // openDirAt opens a directory name relative to the directory referred to by
@@ -187,8 +187,8 @@ internal static error removeAllFrom(sysfdType parentFd, @string @base) {
 // The contents of this file are not relevant for test caching.
 internal static (ж<File>, error) openDirAt(sysfdType dirfd, @string name) {
     var (fd, err) = rootOpenDir(dirfd, name);
-    if (err != default!) {
-        return (default!, err);
+    if (err != nil) {
+        return (default, err);
     }
     return newDirFile(fd, name);
 }

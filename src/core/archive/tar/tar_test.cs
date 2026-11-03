@@ -40,11 +40,12 @@ internal partial struct testFile {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedReadOperationˢ = "unexpected Read operation"u8;
+internal static ref readonly @string unexpectedReadOperationˢ => ref unexpectedReadOperationˢᵇ;
+private static readonly @string unexpectedReadOperationˢᵇ = "unexpected Read operation"u8;
 
 internal static (nint, error) Read(this ref testFile f, slice<byte> b) {
     if (len(b) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     if (len(f.ops) == 0) {
         return (0, io.EOF);
@@ -55,21 +56,22 @@ internal static (nint, error) Read(this ref testFile f, slice<byte> b) {
     }
 
     nint n = copy(b, s);
-    if (len(s) > n){
+    if (len(s) > n) {
         f.ops[0] = s.slice(n);
     } else {
         f.ops = f.ops[1..];
     }
     f.pos += (int64)len(b);
-    return (n, default!);
+    return (n, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedWriteOperationˢ = "unexpected Write operation"u8;
+internal static ref readonly @string unexpectedWriteOperationˢ => ref unexpectedWriteOperationˢᵇ;
+private static readonly @string unexpectedWriteOperationˢᵇ = "unexpected Write operation"u8;
 
 internal static (nint, error) Write(this ref testFile f, slice<byte> b) {
     if (len(b) == 0) {
-        return (0, default!);
+        return (0, default);
     }
     if (len(f.ops) == 0) {
         return (0, errors.New(unexpectedWriteOperationˢ));
@@ -82,21 +84,22 @@ internal static (nint, error) Write(this ref testFile f, slice<byte> b) {
     if (!strings.HasPrefix(s, (@string)b)) {
         return (0, new testError(fmt.Errorf("got Write(%q), want Write(%q)"u8, b, s)));
     }
-    if (len(s) > len(b)){
+    if (len(s) > len(b)) {
         f.ops[0] = s.slice(len(b));
     } else {
         f.ops = f.ops[1..];
     }
     f.pos += (int64)len(b);
-    return (len(b), default!);
+    return (len(b), default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string unexpectedSeekOperationˢ = "unexpected Seek operation"u8;
+internal static ref readonly @string unexpectedSeekOperationˢ => ref unexpectedSeekOperationˢᵇ;
+private static readonly @string unexpectedSeekOperationˢᵇ = "unexpected Seek operation"u8;
 
 internal static (int64, error) Seek(this ref testFile f, int64 pos, nint whence) {
     if (pos == 0 && whence == io.SeekCurrent) {
-        return (f.pos, default!);
+        return (f.pos, default);
     }
     if (len(f.ops) == 0) {
         return (0, errors.New(unexpectedSeekOperationˢ));
@@ -111,284 +114,289 @@ internal static (int64, error) Seek(this ref testFile f, int64 pos, nint whence)
     }
     f.pos += s;
     f.ops = f.ops[1..];
-    return (f.pos, default!);
+    return (f.pos, default);
 }
 
 internal partial struct TestSparseEntries_vectors /*dyn*/ {
     internal slice<global::go.archive.tar_package.sparseEntry> @in;
     internal int64 size;
-    internal bool wantValid;          // Result of validateSparseEntries
-    internal slice<global::go.archive.tar_package.sparseEntry> wantAligned; // Result of alignSparseEntries
+    internal bool wantValid;                                                 // Result of validateSparseEntries
+    internal slice<global::go.archive.tar_package.sparseEntry> wantAligned;  // Result of alignSparseEntries
     internal slice<global::go.archive.tar_package.sparseEntry> wantInverted; // Result of invertSparseEntries
 }
 
-public static void TestSparseEntries(ж<testing.T> Ꮡt) {
-    var vectors = new TestSparseEntries_vectors[]{new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{}.slice(), size: 0,
+public static void TestSparseEntries(ж<testing.T> t) {
+    var vectors = slice<TestSparseEntries_vectors>([new(
+        @in: slice<global::go.archive.tar_package.sparseEntry>([]), size: 0,
         wantValid: true,
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(0, 0)}.slice()
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 0)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([]), size: 5000,
         wantValid: true,
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(0, 5000)}.slice()
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, 5000)}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)]), size: 5000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(0, 5000)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(5000, 0)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(5000, 0)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(1000, 4000)}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1000, 4000)]), size: 5000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(1024, 3976)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(0, 1000), new(5000, 0)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(1024, 3976)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 1000), new(5000, 0)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, 3000)}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 3000)]), size: 5000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(0, 2560)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(3000, 2000)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2560)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(3000, 2000)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(3000, 2000)}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(3000, 2000)]), size: 5000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(3072, 1928)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(0, 3000), new(5000, 0)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(3072, 1928)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 3000), new(5000, 0)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(2000, 2000)}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(2000, 2000)]), size: 5000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(2048, 1536)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(0, 2000), new(4000, 1000)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(2048, 1536)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2000), new(4000, 1000)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, 2000), new(8000, 2000)}.slice(), size: 10000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2000), new(8000, 2000)]), size: 10000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(0, 1536), new(8192, 1808)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(2000, 6000), new(10000, 0)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 1536), new(8192, 1808)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(2000, 6000), new(10000, 0)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, 2000), new(2000, 2000), new(4000, 0), new(4000, 3000), new(7000, 1000), new(8000, 0), new(8000, 2000)}.slice(), size: 10000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 2000), new(2000, 2000), new(4000, 0), new(4000, 3000), new(7000, 1000), new(8000, 0), new(8000, 2000)]), size: 10000,
         wantValid: true,
-        wantAligned: new global::go.archive.tar_package.sparseEntry[]{new(0, 1536), new(2048, 1536), new(4096, 2560), new(7168, 512), new(8192, 1808)}.slice(),
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(10000, 0)}.slice()
+        wantAligned: slice<global::go.archive.tar_package.sparseEntry>([new(0, 1536), new(2048, 1536), new(4096, 2560), new(7168, 512), new(8192, 1808)]),
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(10000, 0)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, 0), new(1000, 0), new(2000, 0), new(3000, 0), new(4000, 0), new(5000, 0)}.slice(), size: 5000,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 0), new(1000, 0), new(2000, 0), new(3000, 0), new(4000, 0), new(5000, 0)]), size: 5000,
         wantValid: true,
-        wantInverted: new global::go.archive.tar_package.sparseEntry[]{new(0, 5000)}.slice()
+        wantInverted: slice<global::go.archive.tar_package.sparseEntry>([new(0, 5000)])
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(1, 0)}.slice(), size: 0,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1, 0)]), size: 0,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(-1, 0)}.slice(), size: 100,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(-1, 0)]), size: 100,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, -1)}.slice(), size: 100,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, -1)]), size: 100,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(0, 0)}.slice(), size: -100,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(0, 0)]), size: -100,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(math.MaxInt64, 3), new(6, -5)}.slice(), size: 35,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(math.MaxInt64, 3), new(6, -5)]), size: 35,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(6, -5)}.slice(), size: 35,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1, 3), new(6, -5)]), size: 35,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(math.MaxInt64, math.MaxInt64)}.slice(), size: math.MaxInt64,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(math.MaxInt64, math.MaxInt64)]), size: math.MaxInt64,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(3, 3)}.slice(), size: 5,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(3, 3)]), size: 5,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(2, 0), new(1, 0), new(0, 0)}.slice(), size: 3,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(2, 0), new(1, 0), new(0, 0)]), size: 3,
         wantValid: false
     ), new(
-        @in: new global::go.archive.tar_package.sparseEntry[]{new(1, 3), new(2, 2)}.slice(), size: 10,
+        @in: slice<global::go.archive.tar_package.sparseEntry>([new(1, 3), new(2, 2)]), size: 10,
         wantValid: false
     )
-    }.slice();
+    ]);
 
     foreach (var (i, v) in vectors) {
         var gotValid = validateSparseEntries(v.@in, v.size);
         if (gotValid != v.wantValid) {
-            Ꮡt.Errorf("test %d, validateSparseEntries() = %v, want %v"u8, i, gotValid, v.wantValid);
+            t.Errorf("test %d, validateSparseEntries() = %v, want %v", i, gotValid, v.wantValid);
         }
         if (!v.wantValid) {
             continue;
         }
-        var gotAligned = alignSparseEntries(appendꓸꓸꓸ(new global::go.archive.tar_package.sparseEntry[]{}.slice(), v.@in), v.size);
+        var gotAligned = alignSparseEntries(appendꓸꓸꓸ(slice<global::go.archive.tar_package.sparseEntry>([]), v.@in), v.size);
         if (!slices.Equal<slice<global::go.archive.tar_package.sparseEntry>, global::go.archive.tar_package.sparseEntry>(gotAligned, v.wantAligned)) {
-            Ꮡt.Errorf("test %d, alignSparseEntries():\ngot  %v\nwant %v"u8, i, gotAligned, v.wantAligned);
+            t.Errorf("test %d, alignSparseEntries():\ngot  %v\nwant %v", i, gotAligned, v.wantAligned);
         }
-        var gotInverted = invertSparseEntries(appendꓸꓸꓸ(new global::go.archive.tar_package.sparseEntry[]{}.slice(), v.@in), v.size);
+        var gotInverted = invertSparseEntries(appendꓸꓸꓸ(slice<global::go.archive.tar_package.sparseEntry>([]), v.@in), v.size);
         if (!slices.Equal<slice<global::go.archive.tar_package.sparseEntry>, global::go.archive.tar_package.sparseEntry>(gotInverted, v.wantInverted)) {
-            Ꮡt.Errorf("test %d, inverseSparseEntries():\ngot  %v\nwant %v"u8, i, gotInverted, v.wantInverted);
+            t.Errorf("test %d, inverseSparseEntries():\ngot  %v\nwant %v", i, gotInverted, v.wantInverted);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataSmallTxtˢ = "testdata/small.txt"u8;
-internal static readonly @string smallTxtˢ = "small.txt"u8;
+internal static ref readonly @string testdataSmallTxtˢ => ref testdataSmallTxtˢᵇ;
+private static readonly @string testdataSmallTxtˢᵇ = "testdata/small.txt"u8;
+internal static ref readonly @string smallTxtˢ => ref smallTxtˢᵇ;
+private static readonly @string smallTxtˢᵇ = "small.txt"u8;
 
-public static void TestFileInfoHeader(ж<testing.T> Ꮡt) {
+public static void TestFileInfoHeader(ж<testing.T> t) {
     var (fi, err) = os.Stat(testdataSmallTxtˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var h, err) = FileInfoHeader(fi, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("FileInfoHeader: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("FileInfoHeader: %v", err);
     }
     {
-        @string g = h.Value.Name;
+        @string g = h.Name;
         @string e = smallTxtˢ; if (g != e) {
-            Ꮡt.Errorf("Name = %q; want %q"u8, g, e);
+            t.Errorf("Name = %q; want %q", g, e);
         }
     }
     {
-        var (g, e) = (h.Value.Mode, (int64)(uint32)fi.Mode().Perm()); if (g != e) {
-            Ꮡt.Errorf("Mode = %#o; want %#o"u8, g, e);
+        var (g, e) = (h.Mode, (int64)fi.Mode().Perm()); if (g != e) {
+            t.Errorf("Mode = %#o; want %#o", g, e);
         }
     }
     {
-        var (g, e) = (h.Value.Size, (int64)5); if (g != e) {
-            Ꮡt.Errorf("Size = %v; want %v"u8, g, e);
+        var (g, e) = (h.Size, (int64)5); if (g != e) {
+            t.Errorf("Size = %v; want %v", g, e);
         }
     }
     {
-        var (g, e) = (h.Value.ModTime, fi.ModTime()); if (!g.Equal(e)) {
-            Ꮡt.Errorf("ModTime = %v; want %v"u8, g, e);
+        var (g, e) = (h.ModTime, fi.ModTime()); if (!g.Equal(e)) {
+            t.Errorf("ModTime = %v; want %v", g, e);
         }
     }
     // FileInfoHeader should error when passing nil FileInfo
     {
-        var (_, errΔ1) = FileInfoHeader(default!, ""u8); if (errΔ1 == default!) {
-            Ꮡt.Fatalf("Expected error when passing nil to FileInfoHeader"u8);
+        var (_, errΔ1) = FileInfoHeader(default, ""u8); if (errΔ1 == nil) {
+            t.Fatalf("Expected error when passing nil to FileInfoHeader");
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testdataˢ = "testdata"u8;
-internal static readonly @string testdataˢ2 = "testdata/"u8;
+internal static ref readonly @string testdataˢ => ref testdataˢᵇ;
+private static readonly @string testdataˢᵇ = "testdata"u8;
+internal static ref readonly @string testdataˢ2 => ref testdataˢ2ᵇ;
+private static readonly @string testdataˢ2ᵇ = "testdata/"u8;
 
-public static void TestFileInfoHeaderDir(ж<testing.T> Ꮡt) {
+public static void TestFileInfoHeaderDir(ж<testing.T> t) {
     var (fi, err) = os.Stat(testdataˢ);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     (var h, err) = FileInfoHeader(fi, ""u8);
-    if (err != default!) {
-        Ꮡt.Fatalf("FileInfoHeader: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("FileInfoHeader: %v", err);
     }
     {
-        @string g = h.Value.Name;
+        @string g = h.Name;
         @string e = testdataˢ2; if (g != e) {
-            Ꮡt.Errorf("Name = %q; want %q"u8, g, e);
+            t.Errorf("Name = %q; want %q", g, e);
         }
     }
     // Ignoring c_ISGID for golang.org/issue/4867
     {
-        var (g, e) = ((~h).Mode & ~(int64)c_ISGID, (int64)(uint32)fi.Mode().Perm()); if (g != e) {
-            Ꮡt.Errorf("Mode = %#o; want %#o"u8, g, e);
+        var (g, e) = (h.Mode & ~(int64)c_ISGID, (int64)fi.Mode().Perm()); if (g != e) {
+            t.Errorf("Mode = %#o; want %#o", g, e);
         }
     }
     {
-        var (g, e) = (h.Value.Size, (int64)0); if (g != e) {
-            Ꮡt.Errorf("Size = %v; want %v"u8, g, e);
+        var (g, e) = (h.Size, (int64)0); if (g != e) {
+            t.Errorf("Size = %v; want %v", g, e);
         }
     }
     {
-        var (g, e) = (h.Value.ModTime, fi.ModTime()); if (!g.Equal(e)) {
-            Ꮡt.Errorf("ModTime = %v; want %v"u8, g, e);
+        var (g, e) = (h.ModTime, fi.ModTime()); if (!g.Equal(e)) {
+            t.Errorf("ModTime = %v; want %v", g, e);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string linkˢ = "link"u8;
+internal static ref readonly @string linkˢ => ref linkˢᵇ;
+private static readonly @string linkˢᵇ = "link"u8;
 
-public static void TestFileInfoHeaderSymlink(ж<testing.T> Ꮡt) {
-    testenv.MustHaveSymlink(new tar_test_package.testing_TжTB(Ꮡt));
+public static void TestFileInfoHeaderSymlink(ж<testing.T> t) {
+    testenv.MustHaveSymlink(new tar_test_package.testing_TжTB(t));
 
-    @string tmpdir = Ꮡt.TempDir();
+    @string tmpdir = t.TempDir();
 
     @string link = filepath.Join(tmpdir, linkˢ);
     @string target = tmpdir;
     {
-        var errΔ1 = os.Symlink(target, link); if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
+        var errΔ1 = os.Symlink(target, link); if (errΔ1 != nil) {
+            t.Fatal(errΔ1);
         }
     }
     var (fi, err) = os.Lstat(link);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
 
     (var h, err) = FileInfoHeader(fi, target);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
     {
-        @string g = h.Value.Name;
+        @string g = h.Name;
         @string e = fi.Name(); if (g != e) {
-            Ꮡt.Errorf("Name = %q; want %q"u8, g, e);
+            t.Errorf("Name = %q; want %q", g, e);
         }
     }
     {
-        @string g = h.Value.Linkname;
+        @string g = h.Linkname;
         @string e = target; if (g != e) {
-            Ꮡt.Errorf("Linkname = %q; want %q"u8, g, e);
+            t.Errorf("Linkname = %q; want %q", g, e);
         }
     }
     {
-        var (g, e) = (h.Value.Typeflag, (byte)TypeSymlink); if (g != e) {
-            Ꮡt.Errorf("Typeflag = %v; want %v"u8, g, e);
+        var (g, e) = (h.Typeflag, (byte)TypeSymlink); if (g != e) {
+            t.Errorf("Typeflag = %v; want %v", g, e);
         }
     }
 }
 
-public static void TestRoundTrip(ж<testing.T> Ꮡt) {
+public static void TestRoundTrip(ж<testing.T> t) {
     var data = slice<byte>("some file contents"u8);
 
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡb));
     var hdr = Ꮡ(new Header(
-        Name: "file.txt"u8,
+        Name: "file.txt",
         Uid: (1 << 21), // Too big for 8 octal digits
         Size: (int64)len(data),
         ModTime: time.Now().Round(time.ΔSecond),
-        PAXRecords: new map<@string, @string>{["uid"u8] = "2097152"u8},
+        PAXRecords: new map<@string, @string>{["uid"] = "2097152"},
         Format: FormatPAX,
         Typeflag: TypeReg
     ));
     {
-        var errΔ1 = tw.WriteHeader(hdr); if (errΔ1 != default!) {
-            Ꮡt.Fatalf("tw.WriteHeader: %v"u8, errΔ1);
+        var errΔ1 = tw.WriteHeader(hdr); if (errΔ1 != nil) {
+            t.Fatalf("tw.WriteHeader: %v", errΔ1);
         }
     }
     {
-        var (_, errΔ2) = tw.Write(data); if (errΔ2 != default!) {
-            Ꮡt.Fatalf("tw.Write: %v"u8, errΔ2);
+        var (_, errΔ2) = tw.Write(data); if (errΔ2 != nil) {
+            t.Fatalf("tw.Write: %v", errΔ2);
         }
     }
     {
-        var errΔ3 = tw.Close(); if (errΔ3 != default!) {
-            Ꮡt.Fatalf("tw.Close: %v"u8, errΔ3);
+        var errΔ3 = tw.Close(); if (errΔ3 != nil) {
+            t.Fatalf("tw.Close: %v", errΔ3);
         }
     }
 
     // Read it back.
     var tr = NewReader(new tar_test_package.bytes_BufferжReader(Ꮡb));
     var (rHdr, err) = tr.Next();
-    if (err != default!) {
-        Ꮡt.Fatalf("tr.Next: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("tr.Next: %v", err);
     }
     if (!reflect.DeepEqual(rHdr.OrTypedNil(), hdr.OrTypedNil())) {
-        Ꮡt.Errorf("Header mismatch.\n got %+v\nwant %+v"u8, rHdr.OrTypedNil(), hdr.OrTypedNil());
+        t.Errorf("Header mismatch.\n got %+v\nwant %+v", rHdr.OrTypedNil(), hdr.OrTypedNil());
     }
     (var rData, err) = io.ReadAll(new global::go.archive.tar_package.ReaderжReader(tr));
-    if (err != default!) {
-        Ꮡt.Fatalf("Read: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Read: %v", err);
     }
     if (!bytes.Equal(rData, data)) {
-        Ꮡt.Errorf("Data mismatch.\n got %q\nwant %q"u8, rData, data);
+        t.Errorf("Data mismatch.\n got %q\nwant %q", rData, data);
     }
 }
 
@@ -397,13 +405,11 @@ internal partial struct headerRoundTripTest {
     internal fs.FileMode fm;
 }
 
-public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var vectors = new headerRoundTripTest[]{new(
+public static void TestHeaderRoundTrip(ж<testing.T> t) {
+    var vectors = slice<headerRoundTripTest>([new(
         // regular file.
         h: Ꮡ(new Header(
-            Name: "test.txt"u8,
+            Name: "test.txt",
             Mode: 420,
             Size: 12,
             ModTime: time.Unix(1360600916, 0),
@@ -413,7 +419,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // symbolic link.
         h: Ꮡ(new Header(
-            Name: "link.txt"u8,
+            Name: "link.txt",
             Mode: 511,
             Size: 0,
             ModTime: time.Unix(1360600852, 0),
@@ -423,7 +429,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // character device node.
         h: Ꮡ(new Header(
-            Name: "dev/null"u8,
+            Name: "dev/null",
             Mode: 438,
             Size: 0,
             ModTime: time.Unix(1360578951, 0),
@@ -433,7 +439,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // block device node.
         h: Ꮡ(new Header(
-            Name: "dev/sda"u8,
+            Name: "dev/sda",
             Mode: 432,
             Size: 0,
             ModTime: time.Unix(1360578954, 0),
@@ -443,7 +449,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // directory.
         h: Ꮡ(new Header(
-            Name: "dir/"u8,
+            Name: "dir/",
             Mode: 493,
             Size: 0,
             ModTime: time.Unix(1360601116, 0),
@@ -453,7 +459,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // fifo node.
         h: Ꮡ(new Header(
-            Name: "dev/initctl"u8,
+            Name: "dev/initctl",
             Mode: 384,
             Size: 0,
             ModTime: time.Unix(1360578949, 0),
@@ -463,7 +469,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // setuid.
         h: Ꮡ(new Header(
-            Name: "bin/su"u8,
+            Name: "bin/su",
             Mode: (int64)(493 | (int64)c_ISUID),
             Size: 23232,
             ModTime: time.Unix(1355405093, 0),
@@ -473,7 +479,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // setguid.
         h: Ꮡ(new Header(
-            Name: "group.txt"u8,
+            Name: "group.txt",
             Mode: (int64)(488 | (int64)c_ISGID),
             Size: 0,
             ModTime: time.Unix(1360602346, 0),
@@ -483,7 +489,7 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // sticky.
         h: Ꮡ(new Header(
-            Name: "sticky.txt"u8,
+            Name: "sticky.txt",
             Mode: (int64)(384 | (int64)c_ISVTX),
             Size: 7,
             ModTime: time.Unix(1360602540, 0),
@@ -493,10 +499,10 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // hard link.
         h: Ꮡ(new Header(
-            Name: "hard.txt"u8,
+            Name: "hard.txt",
             Mode: 420,
             Size: 0,
-            Linkname: "file.txt"u8,
+            Linkname: "file.txt",
             ModTime: time.Unix(1360600916, 0),
             Typeflag: TypeLink
         )),
@@ -504,123 +510,123 @@ public static void TestHeaderRoundTrip(ж<testing.T> Ꮡt) {
     ), new(
         // More information.
         h: Ꮡ(new Header(
-            Name: "info.txt"u8,
+            Name: "info.txt",
             Mode: 384,
             Size: 0,
             Uid: 1000,
             Gid: 1000,
             ModTime: time.Unix(1360602540, 0),
-            Uname: "slartibartfast"u8,
-            Gname: "users"u8,
+            Uname: "slartibartfast",
+            Gname: "users",
             Typeflag: TypeReg
         )),
         fm: 384
     )
-    }.slice();
+    ]);
 
     foreach (var (i, v) in vectors) {
         var fi = v.h.FileInfo();
         var (h2, err) = FileInfoHeader(fi, ""u8);
-        if (err != default!) {
-            Ꮡt.Error(err);
+        if (err != nil) {
+            t.Error(err);
             continue;
         }
-        if (strings.Contains(fi.Name(), "/"u8)) {
-            Ꮡt.Errorf("FileInfo of %q contains slash: %q"u8, (~v.h).Name, fi.Name());
+        if (strings.Contains(fi.Name(), "/")) {
+            t.Errorf("FileInfo of %q contains slash: %q", v.h.Name, fi.Name());
         }
-        @string name = path.Base((~v.h).Name);
+        @string name = path.Base(v.h.Name);
         if (fi.IsDir()) {
             name += "/"u8;
         }
         {
-            @string got = h2.Value.Name;
+            @string got = h2.Name;
             @string want = name; if (got != want) {
-                Ꮡt.Errorf("i=%d: Name: got %v, want %v"u8, i, got, want);
+                t.Errorf("i=%d: Name: got %v, want %v", i, got, want);
             }
         }
         {
-            var (got, want) = (h2.Value.Size, v.h.Value.Size); if (got != want) {
-                Ꮡt.Errorf("i=%d: Size: got %v, want %v"u8, i, got, want);
+            var (got, want) = (h2.Size, v.h.Size); if (got != want) {
+                t.Errorf("i=%d: Size: got %v, want %v", i, got, want);
             }
         }
         {
-            nint got = h2.Value.Uid;
-            nint want = v.h.Value.Uid; if (got != want) {
-                Ꮡt.Errorf("i=%d: Uid: got %d, want %d"u8, i, got, want);
+            nint got = h2.Uid;
+            nint want = v.h.Uid; if (got != want) {
+                t.Errorf("i=%d: Uid: got %d, want %d", i, got, want);
             }
         }
         {
-            nint got = h2.Value.Gid;
-            nint want = v.h.Value.Gid; if (got != want) {
-                Ꮡt.Errorf("i=%d: Gid: got %d, want %d"u8, i, got, want);
+            nint got = h2.Gid;
+            nint want = v.h.Gid; if (got != want) {
+                t.Errorf("i=%d: Gid: got %d, want %d", i, got, want);
             }
         }
         {
-            @string got = h2.Value.Uname;
-            @string want = v.h.Value.Uname; if (got != want) {
-                Ꮡt.Errorf("i=%d: Uname: got %q, want %q"u8, i, got, want);
+            @string got = h2.Uname;
+            @string want = v.h.Uname; if (got != want) {
+                t.Errorf("i=%d: Uname: got %q, want %q", i, got, want);
             }
         }
         {
-            @string got = h2.Value.Gname;
-            @string want = v.h.Value.Gname; if (got != want) {
-                Ꮡt.Errorf("i=%d: Gname: got %q, want %q"u8, i, got, want);
+            @string got = h2.Gname;
+            @string want = v.h.Gname; if (got != want) {
+                t.Errorf("i=%d: Gname: got %q, want %q", i, got, want);
             }
         }
         {
-            @string got = h2.Value.Linkname;
-            @string want = v.h.Value.Linkname; if (got != want) {
-                Ꮡt.Errorf("i=%d: Linkname: got %v, want %v"u8, i, got, want);
+            @string got = h2.Linkname;
+            @string want = v.h.Linkname; if (got != want) {
+                t.Errorf("i=%d: Linkname: got %v, want %v", i, got, want);
             }
         }
         {
-            var (got, want) = (h2.Value.Typeflag, v.h.Value.Typeflag); if (got != want) {
-                Ꮡt.Logf("%#v %#v"u8, v.h.OrTypedNil(), fi.Sys());
-                Ꮡt.Errorf("i=%d: Typeflag: got %q, want %q"u8, i, got, want);
+            var (got, want) = (h2.Typeflag, v.h.Typeflag); if (got != want) {
+                t.Logf("%#v %#v", v.h.OrTypedNil(), fi.Sys());
+                t.Errorf("i=%d: Typeflag: got %q, want %q", i, got, want);
             }
         }
         {
-            var (got, want) = (h2.Value.Mode, v.h.Value.Mode); if (got != want) {
-                Ꮡt.Errorf("i=%d: Mode: got %o, want %o"u8, i, got, want);
+            var (got, want) = (h2.Mode, v.h.Mode); if (got != want) {
+                t.Errorf("i=%d: Mode: got %o, want %o", i, got, want);
             }
         }
         {
             var (got, want) = (fi.Mode(), v.fm); if (got != want) {
-                Ꮡt.Errorf("i=%d: fi.Mode: got %o, want %o"u8, i, got, want);
+                t.Errorf("i=%d: fi.Mode: got %o, want %o", i, got, want);
             }
         }
         {
-            var (got, want) = (h2.Value.AccessTime, v.h.Value.AccessTime); if (got != want) {
-                Ꮡt.Errorf("i=%d: AccessTime: got %v, want %v"u8, i, got, want);
+            var (got, want) = (h2.AccessTime, v.h.AccessTime); if (got != want) {
+                t.Errorf("i=%d: AccessTime: got %v, want %v", i, got, want);
             }
         }
         {
-            var (got, want) = (h2.Value.ChangeTime, v.h.Value.ChangeTime); if (got != want) {
-                Ꮡt.Errorf("i=%d: ChangeTime: got %v, want %v"u8, i, got, want);
+            var (got, want) = (h2.ChangeTime, v.h.ChangeTime); if (got != want) {
+                t.Errorf("i=%d: ChangeTime: got %v, want %v", i, got, want);
             }
         }
         {
-            var (got, want) = (h2.Value.ModTime, v.h.Value.ModTime); if (got != want) {
-                Ꮡt.Errorf("i=%d: ModTime: got %v, want %v"u8, i, got, want);
+            var (got, want) = (h2.ModTime, v.h.ModTime); if (got != want) {
+                t.Errorf("i=%d: ModTime: got %v, want %v", i, got, want);
             }
         }
         {
             var (sysh, ok) = fi.Sys()._<ж<global::go.archive.tar_package.Header>>(ᐧ); if (!ok || sysh != v.h) {
-                Ꮡt.Errorf("i=%d: Sys didn't return original *Header"u8, i);
+                t.Errorf("i=%d: Sys didn't return original *Header", i);
             }
         }
     }
 }
 
 internal partial struct TestHeaderAllowedFormats_vectors /*dyn*/ {
-    internal ж<global::go.archive.tar_package.Header> header;        // Input header
-    internal map<@string, @string> paxHdrs; // Expected PAX headers that may be needed
-    internal global::go.archive.tar_package.Format formats;            // Expected formats that can encode the header
+    internal ж<global::go.archive.tar_package.Header> header; // Input header
+    internal map<@string, @string> paxHdrs;                   // Expected PAX headers that may be needed
+    internal global::go.archive.tar_package.Format formats;   // Expected formats that can encode the header
 }
 
-public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
-    var vectors = new TestHeaderAllowedFormats_vectors[]{new(
-        header: Ꮡ(new Header(nil)),
+public static void TestHeaderAllowedFormats(ж<testing.T> t) {
+    var vectors = slice<TestHeaderAllowedFormats_vectors>([new(
+        header: Ꮡ(new Header()),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
         header: Ꮡ(new Header(Size: 8589934591L)),
@@ -636,15 +642,15 @@ public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(Size: 8589934592L)),
-        paxHdrs: new map<@string, @string>{[paxSize] = "8589934592"u8},
+        paxHdrs: new map<@string, @string>{[paxSize] = "8589934592"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(Size: 8589934592L, Format: FormatPAX)),
-        paxHdrs: new map<@string, @string>{[paxSize] = "8589934592"u8},
+        paxHdrs: new map<@string, @string>{[paxSize] = "8589934592"},
         formats: FormatPAX
     ), new(
         header: Ꮡ(new Header(Size: 8589934592L, Format: FormatGNU)),
-        paxHdrs: new map<@string, @string>{[paxSize] = "8589934592"u8},
+        paxHdrs: new map<@string, @string>{[paxSize] = "8589934592"},
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(Mode: 2097151)),
@@ -668,73 +674,73 @@ public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
         header: Ꮡ(new Header(Devmajor: -72057594037927937L)),
         formats: FormatUnknown
     ), new(
-        header: Ꮡ(new Header(Name: "用戶名"u8, Devmajor: -72057594037927936L)),
+        header: Ꮡ(new Header(Name: "用戶名", Devmajor: -72057594037927936L)),
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(Size: math.MaxInt64)),
-        paxHdrs: new map<@string, @string>{[paxSize] = "9223372036854775807"u8},
+        paxHdrs: new map<@string, @string>{[paxSize] = "9223372036854775807"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(Size: math.MinInt64)),
-        paxHdrs: new map<@string, @string>{[paxSize] = "-9223372036854775808"u8},
+        paxHdrs: new map<@string, @string>{[paxSize] = "-9223372036854775808"},
         formats: FormatUnknown
     ), new(
-        header: Ꮡ(new Header(Uname: "0123456789abcdef0123456789abcdef"u8)),
+        header: Ꮡ(new Header(Uname: "0123456789abcdef0123456789abcdef")),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Uname: "0123456789abcdef0123456789abcdefx"u8)),
-        paxHdrs: new map<@string, @string>{[paxUname] = "0123456789abcdef0123456789abcdefx"u8},
+        header: Ꮡ(new Header(Uname: "0123456789abcdef0123456789abcdefx")),
+        paxHdrs: new map<@string, @string>{[paxUname] = "0123456789abcdef0123456789abcdefx"},
         formats: FormatPAX
     ), new(
-        header: Ꮡ(new Header(Name: "foobar"u8)),
+        header: Ꮡ(new Header(Name: "foobar")),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Name: strings.Repeat("a"u8, nameSize))),
+        header: Ꮡ(new Header(Name: strings.Repeat("a", nameSize))),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Name: strings.Repeat("a"u8, nameSize + 1))),
-        paxHdrs: new map<@string, @string>{[paxPath] = strings.Repeat("a"u8, nameSize + 1)},
+        header: Ꮡ(new Header(Name: strings.Repeat("a", nameSize + 1))),
+        paxHdrs: new map<@string, @string>{[paxPath] = strings.Repeat("a", nameSize + 1)},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Linkname: "用戶名"u8)),
-        paxHdrs: new map<@string, @string>{[paxLinkpath] = "用戶名"u8},
+        header: Ꮡ(new Header(Linkname: "用戶名")),
+        paxHdrs: new map<@string, @string>{[paxLinkpath] = "用戶名"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Linkname: strings.Repeat("用戶名\x00"u8, nameSize))),
-        paxHdrs: new map<@string, @string>{[paxLinkpath] = strings.Repeat("用戶名\x00"u8, nameSize)},
+        header: Ꮡ(new Header(Linkname: strings.Repeat("用戶名\x00", nameSize))),
+        paxHdrs: new map<@string, @string>{[paxLinkpath] = strings.Repeat("用戶名\x00", nameSize)},
         formats: FormatUnknown
     ), new(
-        header: Ꮡ(new Header(Linkname: "\x00hello"u8)),
-        paxHdrs: new map<@string, @string>{[paxLinkpath] = "\x00hello"u8},
+        header: Ꮡ(new Header(Linkname: "\x00hello")),
+        paxHdrs: new map<@string, @string>{[paxLinkpath] = "\x00hello"},
         formats: FormatUnknown
     ), new(
         header: Ꮡ(new Header(Uid: 2097151)),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
         header: Ꮡ(new Header(Uid: 2097151 + 1)),
-        paxHdrs: new map<@string, @string>{[paxUid] = "2097152"u8},
+        paxHdrs: new map<@string, @string>{[paxUid] = "2097152"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Xattrs: default!)),
+        header: Ꮡ(new Header(Xattrs: default)),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo"u8] = "bar"u8})),
-        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "foo"] = "bar"u8},
+        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo"] = "bar"})),
+        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "foo"] = "bar"},
         formats: FormatPAX
     ), new(
-        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo"u8] = "bar"u8}, Format: FormatGNU)),
-        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "foo"] = "bar"u8},
+        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo"] = "bar"}, Format: FormatGNU)),
+        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "foo"] = "bar"},
         formats: FormatUnknown
     ), new(
-        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["用戶名"u8] = "\x00hello"u8})),
-        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "用戶名"] = "\x00hello"u8},
+        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["用戶名"] = "\x00hello"})),
+        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "用戶名"] = "\x00hello"},
         formats: FormatPAX
     ), new(
-        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo=bar"u8] = "baz"u8})),
+        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo=bar"] = "baz"})),
         formats: FormatUnknown
     ), new(
-        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo"u8] = ""u8})),
-        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "foo"] = ""u8},
+        header: Ꮡ(new Header(Xattrs: new map<@string, @string>{["foo"] = ""})),
+        paxHdrs: new map<@string, @string>{[paxSchilyXattr + "foo"] = ""},
         formats: FormatPAX
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(0, 0))),
@@ -744,23 +750,23 @@ public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(8589934592L, 0))),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "8589934592"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "8589934592"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(math.MaxInt64, 0))),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "9223372036854775807"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "9223372036854775807"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(math.MaxInt64, 0), Format: FormatUSTAR)),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "9223372036854775807"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "9223372036854775807"},
         formats: FormatUnknown
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(-1, 0))),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "-1"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "-1"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(1, 500))),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"},
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(1, 0))),
@@ -770,96 +776,98 @@ public static void TestHeaderAllowedFormats(ж<testing.T> Ꮡt) {
         formats: (global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(1, 500), Format: FormatUSTAR)),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"},
         formats: FormatUSTAR
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(1, 500), Format: FormatPAX)),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"},
         formats: FormatPAX
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(1, 500), Format: FormatGNU)),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "1.0000005"},
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(-1, 500))),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "-0.9999995"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "-0.9999995"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ModTime: time.Unix(-1, 500), Format: FormatGNU)),
-        paxHdrs: new map<@string, @string>{[paxMtime] = "-0.9999995"u8},
+        paxHdrs: new map<@string, @string>{[paxMtime] = "-0.9999995"},
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(AccessTime: time.Unix(0, 0))),
-        paxHdrs: new map<@string, @string>{[paxAtime] = "0"u8},
+        paxHdrs: new map<@string, @string>{[paxAtime] = "0"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(AccessTime: time.Unix(0, 0), Format: FormatUSTAR)),
-        paxHdrs: new map<@string, @string>{[paxAtime] = "0"u8},
+        paxHdrs: new map<@string, @string>{[paxAtime] = "0"},
         formats: FormatUnknown
     ), new(
         header: Ꮡ(new Header(AccessTime: time.Unix(0, 0), Format: FormatPAX)),
-        paxHdrs: new map<@string, @string>{[paxAtime] = "0"u8},
+        paxHdrs: new map<@string, @string>{[paxAtime] = "0"},
         formats: FormatPAX
     ), new(
         header: Ꮡ(new Header(AccessTime: time.Unix(0, 0), Format: FormatGNU)),
-        paxHdrs: new map<@string, @string>{[paxAtime] = "0"u8},
+        paxHdrs: new map<@string, @string>{[paxAtime] = "0"},
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(AccessTime: time.Unix(-123, 0))),
-        paxHdrs: new map<@string, @string>{[paxAtime] = "-123"u8},
+        paxHdrs: new map<@string, @string>{[paxAtime] = "-123"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(AccessTime: time.Unix(-123, 0), Format: FormatPAX)),
-        paxHdrs: new map<@string, @string>{[paxAtime] = "-123"u8},
+        paxHdrs: new map<@string, @string>{[paxAtime] = "-123"},
         formats: FormatPAX
     ), new(
         header: Ꮡ(new Header(ChangeTime: time.Unix(123, 456))),
-        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"u8},
+        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"},
         formats: (global::go.archive.tar_package.Format)(FormatPAX | FormatGNU)
     ), new(
         header: Ꮡ(new Header(ChangeTime: time.Unix(123, 456), Format: FormatUSTAR)),
-        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"u8},
+        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"},
         formats: FormatUnknown
     ), new(
         header: Ꮡ(new Header(ChangeTime: time.Unix(123, 456), Format: FormatGNU)),
-        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"u8},
+        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"},
         formats: FormatGNU
     ), new(
         header: Ꮡ(new Header(ChangeTime: time.Unix(123, 456), Format: FormatPAX)),
-        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"u8},
+        paxHdrs: new map<@string, @string>{[paxCtime] = "123.000000456"},
         formats: FormatPAX
     ), new(
-        header: Ꮡ(new Header(Name: "foo/"u8, Typeflag: TypeDir)),
+        header: Ꮡ(new Header(Name: "foo/", Typeflag: TypeDir)),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     ), new(
-        header: Ꮡ(new Header(Name: "foo/"u8, Typeflag: TypeReg)),
+        header: Ꮡ(new Header(Name: "foo/", Typeflag: TypeReg)),
         formats: FormatUnknown
     ), new(
-        header: Ꮡ(new Header(Name: "foo/"u8, Typeflag: TypeSymlink)),
+        header: Ꮡ(new Header(Name: "foo/", Typeflag: TypeSymlink)),
         formats: (global::go.archive.tar_package.Format)((global::go.archive.tar_package.Format)(FormatUSTAR | FormatPAX) | FormatGNU)
     )
-    }.slice();
+    ]);
 
     foreach (var (i, v) in vectors) {
         var (formats, paxHdrs, err) = (~v.header).allowedFormats();
         if (formats != v.formats) {
-            Ꮡt.Errorf("test %d, allowedFormats(): got %v, want %v"u8, i, formats, v.formats);
+            t.Errorf("test %d, allowedFormats(): got %v, want %v", i, formats, v.formats);
         }
         if ((global::go.archive.tar_package.Format)(formats & FormatPAX) > 0 && !maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(paxHdrs, v.paxHdrs) && !(len(paxHdrs) == 0 && len(v.paxHdrs) == 0)) {
-            Ꮡt.Errorf("test %d, allowedFormats():\ngot  %v\nwant %s"u8, i, paxHdrs, v.paxHdrs);
+            t.Errorf("test %d, allowedFormats():\ngot  %v\nwant %s", i, paxHdrs, v.paxHdrs);
         }
-        if ((formats != FormatUnknown) && (err != default!)) {
-            Ꮡt.Errorf("test %d, unexpected error: %v"u8, i, err);
+        if ((formats != FormatUnknown) && (err != nil)) {
+            t.Errorf("test %d, unexpected error: %v", i, err);
         }
-        if ((formats == FormatUnknown) && (err == default!)) {
-            Ꮡt.Errorf("test %d, got nil-error, want non-nil error"u8, i);
+        if ((formats == FormatUnknown) && (err == nil)) {
+            t.Errorf("test %d, got nil-error, want non-nil error", i);
         }
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string writerˢ = "Writer"u8;
-internal static readonly @string readerˢ = "Reader"u8;
+internal static ref readonly @string writerˢ => ref writerˢᵇ;
+private static readonly @string writerˢᵇ = "Writer"u8;
+internal static ref readonly @string readerˢ => ref readerˢᵇ;
+private static readonly @string readerˢᵇ = "Reader"u8;
 
 internal partial struct Benchmark_file /*dyn*/ {
     internal ж<global::go.archive.tar_package.Header> hdr;
@@ -871,42 +879,42 @@ internal partial struct Benchmark_vectors /*dyn*/ {
     internal slice<Benchmark_file> files;
 }
 
-public static void Benchmark(ж<testing.B> Ꮡb) {
-    var vectors = new Benchmark_vectors[]{new(
-        "USTAR"u8,
-        new Benchmark_file[]{new(
-            Ꮡ(new Header(Name: "bar"u8, Mode: 416, Size: (int64)3)),
+public static void Benchmark(ж<testing.B> b) {
+    var vectors = slice<Benchmark_vectors>([new(
+        "USTAR",
+        slice<Benchmark_file>([new(
+            Ꮡ(new Header(Name: "bar", Mode: 416, Size: (int64)3)),
             slice<byte>("foo"u8)
         ), new(
-            Ꮡ(new Header(Name: "world"u8, Mode: 416, Size: (int64)5)),
+            Ꮡ(new Header(Name: "world", Mode: 416, Size: (int64)5)),
             slice<byte>("hello"u8)
         )
-        }.slice()
+        ])
     ), new(
-        "GNU"u8,
-        new Benchmark_file[]{new(
-            Ꮡ(new Header(Name: "bar"u8, Mode: 416, Size: (int64)3, Devmajor: -1)),
+        "GNU",
+        slice<Benchmark_file>([new(
+            Ꮡ(new Header(Name: "bar", Mode: 416, Size: (int64)3, Devmajor: -1)),
             slice<byte>("foo"u8)
         ), new(
-            Ꮡ(new Header(Name: "world"u8, Mode: 416, Size: (int64)5, Devmajor: -1)),
+            Ꮡ(new Header(Name: "world", Mode: 416, Size: (int64)5, Devmajor: -1)),
             slice<byte>("hello"u8)
         )
-        }.slice()
+        ])
     ), new(
-        "PAX"u8,
-        new Benchmark_file[]{new(
-            Ꮡ(new Header(Name: "bar"u8, Mode: 416, Size: (int64)3, Xattrs: new map<@string, @string>{["foo"u8] = "bar"u8})),
+        "PAX",
+        slice<Benchmark_file>([new(
+            Ꮡ(new Header(Name: "bar", Mode: 416, Size: (int64)3, Xattrs: new map<@string, @string>{["foo"] = "bar"})),
             slice<byte>("foo"u8)
         ), new(
-            Ꮡ(new Header(Name: "world"u8, Mode: 416, Size: (int64)5, Xattrs: new map<@string, @string>{["foo"u8] = "bar"u8})),
+            Ꮡ(new Header(Name: "world", Mode: 416, Size: (int64)5, Xattrs: new map<@string, @string>{["foo"] = "bar"})),
             slice<byte>("hello"u8)
         )
-        }.slice()
+        ])
     )
-    }.slice();
+    ]);
 
     var vectorsʗ1 = vectors;
-    Ꮡb.Run(writerˢ, (ж<testing.B> bΔ1) => {
+    b.Run(writerˢ, (ж<testing.B> bΔ1) => {
         foreach (var (_, vᴛ1) in vectorsʗ1) {
             ref var v = ref heap(new Benchmark_vectors(), out var Ꮡv);
             v = vᴛ1;
@@ -920,19 +928,19 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
                     var tw = NewWriter(io.Discard);
                     foreach (var (_, @file) in vʗ1.files) {
                         {
-                            var err = tw.WriteHeader(@file.hdr); if (err != default!) {
-                                bΔ2.Errorf("unexpected WriteHeader error: %v"u8, err);
+                            var err = tw.WriteHeader(@file.hdr); if (err != nil) {
+                                bΔ2.Errorf("unexpected WriteHeader error: %v", err);
                             }
                         }
                         {
-                            var (_, err) = tw.Write(@file.body); if (err != default!) {
-                                bΔ2.Errorf("unexpected Write error: %v"u8, err);
+                            var (_, err) = tw.Write(@file.body); if (err != nil) {
+                                bΔ2.Errorf("unexpected Write error: %v", err);
                             }
                         }
                     }
                     {
-                        var err = tw.Close(); if (err != default!) {
-                            bΔ2.Errorf("unexpected Close error: %v"u8, err);
+                        var err = tw.Close(); if (err != nil) {
+                            bΔ2.Errorf("unexpected Close error: %v", err);
                         }
                     }
                 }
@@ -941,7 +949,7 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
     });
 
     var vectorsʗ2 = vectors;
-    Ꮡb.Run(readerˢ, (ж<testing.B> bΔ3) => {
+    b.Run(readerˢ, (ж<testing.B> bΔ3) => {
         foreach (var (_, v) in vectorsʗ2) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             ref var r = ref heap(new bytes.Reader(), out var Ꮡr);
@@ -960,13 +968,13 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
                     Ꮡr.Value.Reset(Ꮡbuf.Value.Bytes());
                     var tr = NewReader(new tar_test_package.bytes_ReaderжReader(Ꮡr));
                     {
-                        var (_, err) = tr.Next(); if (err != default!) {
-                            bΔ4.Errorf("unexpected Next error: %v"u8, err);
+                        var (_, err) = tr.Next(); if (err != nil) {
+                            bΔ4.Errorf("unexpected Next error: %v", err);
                         }
                     }
                     {
-                        var (_, err) = io.Copy(io.Discard, new global::go.archive.tar_package.ReaderжReader(tr)); if (err != default!) {
-                            bΔ4.Errorf("unexpected Copy error : %v"u8, err);
+                        var (_, err) = io.Copy(io.Discard, new global::go.archive.tar_package.ReaderжReader(tr)); if (err != nil) {
+                            bΔ4.Errorf("unexpected Copy error : %v", err);
                         }
                     }
                 }
@@ -975,13 +983,14 @@ public static void Benchmark(ж<testing.B> Ꮡb) {
     });
 }
 
-internal static fileInfoNames _ᴛ1ʗ = new fileInfoNames(nil);
+internal static fileInfoNames _ᴛ1ʗ = new fileInfoNames();
 
 internal partial struct fileInfoNames {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string tmpˢ = "tmp"u8;
+internal static ref readonly @string tmpˢ => ref tmpˢᵇ;
+private static readonly @string tmpˢᵇ = "tmp"u8;
 
 internal static @string Name(this ref fileInfoNames f) {
     return tmpˢ;
@@ -996,7 +1005,7 @@ internal static fs.FileMode Mode(this ref fileInfoNames f) {
 }
 
 internal static time.Time ModTime(this ref fileInfoNames f) {
-    return new time.Time(nil);
+    return new time.Time();
 }
 
 internal static bool IsDir(this ref fileInfoNames f) {
@@ -1004,28 +1013,28 @@ internal static bool IsDir(this ref fileInfoNames f) {
 }
 
 internal static any Sys(this ref fileInfoNames f) {
-    return default!;
+    return default;
 }
 
 internal static (@string, error) Uname(this ref fileInfoNames f) {
-    return (unameˢ, default!);
+    return (unameˢ, default);
 }
 
 internal static (@string, error) Gname(this ref fileInfoNames f) {
-    return (gnameˢ, default!);
+    return (gnameˢ, default);
 }
 
-public static void TestFileInfoHeaderUseFileInfoNames(ж<testing.T> Ꮡt) {
-    var info = Ꮡ(new fileInfoNames(nil));
+public static void TestFileInfoHeaderUseFileInfoNames(ж<testing.T> t) {
+    var info = Ꮡ(new fileInfoNames());
     var (header, err) = FileInfoHeader(new tar_internal_test_package.fileInfoNamesжFileInfo(info), ""u8);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if ((~header).Uname != "Uname"u8) {
-        Ꮡt.Fatalf("header.Uname: got %s, want %s"u8, (~header).Uname, unameˢ);
+    if (header.Uname != "Uname"u8) {
+        t.Fatalf("header.Uname: got %s, want %s", header.Uname, unameˢ);
     }
-    if ((~header).Gname != "Gname"u8) {
-        Ꮡt.Fatalf("header.Gname: got %s, want %s"u8, (~header).Gname, gnameˢ);
+    if (header.Gname != "Gname"u8) {
+        t.Fatalf("header.Gname: got %s, want %s", header.Gname, gnameˢ);
     }
 }
 

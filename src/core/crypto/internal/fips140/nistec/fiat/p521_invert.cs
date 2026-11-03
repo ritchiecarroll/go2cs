@@ -9,7 +9,7 @@ partial class fiat_package {
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> Ꮡx) {
+public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 13 multiplications and 520 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.
@@ -35,8 +35,8 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
     ж<P521Element> z = @new<P521Element>().Set(Ꮡe);
     ж<P521Element> t0 = @new<P521Element>();
 
-    z.Square(Ꮡx);
-    z.Mul(Ꮡx, z);
+    z.Square(x);
+    z.Mul(x, z);
     t0.Square(z);
     for (nint s = 1; s < 2; s++) {
         t0.Square(t0);
@@ -63,19 +63,19 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
     }
     z.Mul(z, t0);
     t0.Square(z);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     for (nint s = 0; s < 64; s++) {
         t0.Square(t0);
     }
     z.Mul(z, t0);
     t0.Square(z);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     for (nint s = 0; s < 129; s++) {
         t0.Square(t0);
     }
     z.Mul(z, t0);
     t0.Square(z);
-    t0.Mul(Ꮡx, t0);
+    t0.Mul(x, t0);
     for (nint s = 0; s < 259; s++) {
         t0.Square(t0);
     }
@@ -83,7 +83,7 @@ public static ж<P521Element> Invert(this ж<P521Element> Ꮡe, ж<P521Element> 
     for (nint s = 0; s < 2; s++) {
         z.Square(z);
     }
-    z.Mul(Ꮡx, z);
+    z.Mul(x, z);
 
     return Ꮡe.Set(z);
 }

@@ -14,20 +14,20 @@ internal partial struct TestDecimalString_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestDecimalString(ж<testing.T> Ꮡt) {
-    foreach (var (_, vᴛ1) in new TestDecimalString_type[]{
-        new(want: "0"u8),
-        new(new @decimal(default!, 1000), "0"u8), // exponent of 0 is ignored
-        new(new @decimal(slice<byte>("12345"u8), 0), "0.12345"u8),
-        new(new @decimal(slice<byte>("12345"u8), -3), "0.00012345"u8),
-        new(new @decimal(slice<byte>("12345"u8), +3), "123.45"u8),
-        new(new @decimal(slice<byte>("12345"u8), +10), "1234500000"u8)
-    }.slice()) {
+public static void TestDecimalString(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestDecimalString_type>([
+        new(want: "0"),
+        new(new @decimal(default, 1000), "0"), // exponent of 0 is ignored
+        new(new @decimal(slice<byte>("12345"u8), 0), "0.12345"),
+        new(new @decimal(slice<byte>("12345"u8), -3), "0.00012345"),
+        new(new @decimal(slice<byte>("12345"u8), +3), "123.45"),
+        new(new @decimal(slice<byte>("12345"u8), +10), "1234500000")
+    ])) {
         var test = vᴛ1;
 
         {
             @string got = test.x.String(); if (got != test.want) {
-                Ꮡt.Errorf("%v == %s; want %s"u8, test.x, got, test.want);
+                t.Errorf("%v == %s; want %s", test.x, got, test.want);
             }
         }
     }
@@ -39,25 +39,25 @@ internal partial struct TestDecimalInit_type /*dyn*/ {
     internal @string want;
 }
 
-public static void TestDecimalInit(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestDecimalInit_type[]{
-        new(0, 0, "0"u8),
-        new(0, -100, "0"u8),
-        new(0, 100, "0"u8),
-        new(1, 0, "1"u8),
-        new(1, 10, "1024"u8),
-        new(1, 100, "1267650600228229401496703205376"u8),
-        new(1, -100, "0.0000000000000000000000000000007888609052210118054117285652827862296732064351090230047702789306640625"u8),
-        new(12345678, 8, "3160493568"u8),
-        new(12345678, -8, "48225.3046875"u8),
-        new(195312, 9, "99999744"u8),
-        new(1953125, 9, "1000000000"u8)
-    }.slice()) {
+public static void TestDecimalInit(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestDecimalInit_type>([
+        new(0, 0, "0"),
+        new(0, -100, "0"),
+        new(0, 100, "0"),
+        new(1, 0, "1"),
+        new(1, 10, "1024"),
+        new(1, 100, "1267650600228229401496703205376"),
+        new(1, -100, "0.0000000000000000000000000000007888609052210118054117285652827862296732064351090230047702789306640625"),
+        new(12345678, 8, "3160493568"),
+        new(12345678, -8, "48225.3046875"),
+        new(195312, 9, "99999744"),
+        new(1953125, 9, "1000000000")
+    ])) {
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
         Ꮡd.init(new Δnat(new global::go.math.big_package.Word[]{test.x}.slice()).norm(), test.shift);
         {
             @string got = d.String(); if (got != test.want) {
-                Ꮡt.Errorf("%d << %d == %s; want %s"u8, test.x, test.shift, got, test.want);
+                t.Errorf("%d << %d == %s; want %s", test.x, test.shift, got, test.want);
             }
         }
     }
@@ -69,42 +69,42 @@ internal partial struct TestDecimalRounding_type /*dyn*/ {
     internal @string down, even, up;
 }
 
-public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestDecimalRounding_type[]{
-        new(0, 0, "0"u8, "0"u8, "0"u8),
-        new(0, 1, "0"u8, "0"u8, "0"u8),
+public static void TestDecimalRounding(ж<testing.T> t) {
+    foreach (var (_, test) in slice<TestDecimalRounding_type>([
+        new(0, 0, "0", "0", "0"),
+        new(0, 1, "0", "0", "0"),
 
-        new(1, 0, "0"u8, "0"u8, "10"u8),
-        new(5, 0, "0"u8, "0"u8, "10"u8),
-        new(9, 0, "0"u8, "10"u8, "10"u8),
+        new(1, 0, "0", "0", "10"),
+        new(5, 0, "0", "0", "10"),
+        new(9, 0, "0", "10", "10"),
 
-        new(15, 1, "10"u8, "20"u8, "20"u8),
-        new(45, 1, "40"u8, "40"u8, "50"u8),
-        new(95, 1, "90"u8, "100"u8, "100"u8),
+        new(15, 1, "10", "20", "20"),
+        new(45, 1, "40", "40", "50"),
+        new(95, 1, "90", "100", "100"),
 
-        new(12344999, 4, "12340000"u8, "12340000"u8, "12350000"u8),
-        new(12345000, 4, "12340000"u8, "12340000"u8, "12350000"u8),
-        new(12345001, 4, "12340000"u8, "12350000"u8, "12350000"u8),
-        new(23454999, 4, "23450000"u8, "23450000"u8, "23460000"u8),
-        new(23455000, 4, "23450000"u8, "23460000"u8, "23460000"u8),
-        new(23455001, 4, "23450000"u8, "23460000"u8, "23460000"u8),
+        new(12344999, 4, "12340000", "12340000", "12350000"),
+        new(12345000, 4, "12340000", "12340000", "12350000"),
+        new(12345001, 4, "12340000", "12350000", "12350000"),
+        new(23454999, 4, "23450000", "23450000", "23460000"),
+        new(23455000, 4, "23450000", "23460000", "23460000"),
+        new(23455001, 4, "23450000", "23460000", "23460000"),
 
-        new(99994999, 4, "99990000"u8, "99990000"u8, "100000000"u8),
-        new(99995000, 4, "99990000"u8, "100000000"u8, "100000000"u8),
-        new(99999999, 4, "99990000"u8, "100000000"u8, "100000000"u8),
+        new(99994999, 4, "99990000", "99990000", "100000000"),
+        new(99995000, 4, "99990000", "100000000", "100000000"),
+        new(99999999, 4, "99990000", "100000000", "100000000"),
 
-        new(12994999, 4, "12990000"u8, "12990000"u8, "13000000"u8),
-        new(12995000, 4, "12990000"u8, "13000000"u8, "13000000"u8),
-        new(12999999, 4, "12990000"u8, "13000000"u8, "13000000"u8)
-    }.slice()) {
-        var x = ((global::go.math.big_package.Δnat)default!).setUint64(test.x);
+        new(12994999, 4, "12990000", "12990000", "13000000"),
+        new(12995000, 4, "12990000", "13000000", "13000000"),
+        new(12999999, 4, "12990000", "13000000", "13000000")
+    ])) {
+        var x = ((global::go.math.big_package.Δnat)default).setUint64(test.x);
 
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
         Ꮡd.init(x, 0);
         Ꮡd.roundDown(test.n);
         {
             @string got = d.String(); if (got != test.down) {
-                Ꮡt.Errorf("roundDown(%d, %d) = %s; want %s"u8, test.x, test.n, got, test.down);
+                t.Errorf("roundDown(%d, %d) = %s; want %s", test.x, test.n, got, test.down);
             }
         }
 
@@ -112,7 +112,7 @@ public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
         Ꮡd.round(test.n);
         {
             @string got = d.String(); if (got != test.even) {
-                Ꮡt.Errorf("round(%d, %d) = %s; want %s"u8, test.x, test.n, got, test.even);
+                t.Errorf("round(%d, %d) = %s; want %s", test.x, test.n, got, test.even);
             }
         }
 
@@ -120,7 +120,7 @@ public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
         d.roundUp(test.n);
         {
             @string got = d.String(); if (got != test.up) {
-                Ꮡt.Errorf("roundUp(%d, %d) = %s; want %s"u8, test.x, test.n, got, test.up);
+                t.Errorf("roundUp(%d, %d) = %s; want %s", test.x, test.n, got, test.up);
             }
         }
     }
@@ -140,12 +140,12 @@ public static void BenchmarkDecimalConversion(ж<testing.B> Ꮡb) {
     }
 }
 
-public static void BenchmarkFloatString(ж<testing.B> Ꮡb) {
+public static void BenchmarkFloatString(ж<testing.B> b) {
     var x = @new<global::go.math.big_package.Float>();
-    foreach (var (_, prec) in new nuint[]{100, 1000, 10000, 100000}.slice()) {
+    foreach (var (_, prec) in slice<nuint>([100, 1000, 10000, 100000])) {
         x.SetPrec(prec).SetRat(NewRat(1, 3));
         var xʗ1 = x;
-        Ꮡb.Run(fmt.Sprintf("%v"u8, prec), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprintf("%v"u8, prec), (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 sink = xʗ1.String();

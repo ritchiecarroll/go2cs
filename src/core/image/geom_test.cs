@@ -9,9 +9,7 @@ using static go.image_package;
 
 partial class image_internal_test_package {
 
-public static void TestRectangle(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestRectangle(ж<testing.T> t) {
     // in checks that every point in f is in g.
     error @in(global::go.image_package.Rectangle f, global::go.image_package.Rectangle g) {
         if (!f.In(g)) {
@@ -25,10 +23,10 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
                 }
             }
         }
-        return default!;
+        return default;
     }
 
-    var rects = new global::go.image_package.Rectangle[]{
+    var rects = slice<global::go.image_package.Rectangle>([
         Rect(0, 0, 10, 10),
         Rect(10, 0, 20, 10),
         Rect(1, 2, 3, 4),
@@ -40,16 +38,16 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
         Rect(8, 8, 8, 8),
         Rect(88, 88, 88, 88),
         Rect(6, 5, 4, 3)
-    }.slice();
+    ]);
 
     // r.Eq(s) should be equivalent to every point in r being in s, and every
     // point in s being in r.
     foreach (var (_, r) in rects) {
         foreach (var (_, s) in rects) {
             var got = r.Eq(s);
-            var want = @in(r, s) == default! && @in(s, r) == default!;
+            var want = @in(r, s) == nil && @in(s, r) == nil;
             if (got != want) {
-                Ꮡt.Errorf("Eq: r=%s, s=%s: got %t, want %t"u8, r, s, got, want);
+                t.Errorf("Eq: r=%s, s=%s: got %t, want %t", r, s, got, want);
             }
         }
     }
@@ -60,18 +58,18 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
         foreach (var (_, s) in rects) {
             var a = r.Intersect(s);
             {
-                var err = @in(a, r); if (err != default!) {
-                    Ꮡt.Errorf("Intersect: r=%s, s=%s, a=%s, a not in r: %v"u8, r, s, a, err);
+                var err = @in(a, r); if (err != nil) {
+                    t.Errorf("Intersect: r=%s, s=%s, a=%s, a not in r: %v", r, s, a, err);
                 }
             }
             {
-                var err = @in(a, s); if (err != default!) {
-                    Ꮡt.Errorf("Intersect: r=%s, s=%s, a=%s, a not in s: %v"u8, r, s, a, err);
+                var err = @in(a, s); if (err != nil) {
+                    t.Errorf("Intersect: r=%s, s=%s, a=%s, a not in s: %v", r, s, a, err);
                 }
             }
             {
-                var (isZero, overlaps) = (a == (new Rectangle(nil)), r.Overlaps(s)); if (isZero == overlaps) {
-                    Ꮡt.Errorf("Intersect: r=%s, s=%s, a=%s: isZero=%t same as overlaps=%t"u8,
+                var (isZero, overlaps) = (a == (new Rectangle()), r.Overlaps(s)); if (isZero == overlaps) {
+                    t.Errorf("Intersect: r=%s, s=%s, a=%s: isZero=%t same as overlaps=%t",
                         r, s, a, isZero, overlaps);
                 }
             }
@@ -85,8 +83,8 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
                     // b isn't actually larger than a.
                     continue;
                 }
-                if (@in(b, r) == default! && @in(b, s) == default!) {
-                    Ꮡt.Errorf("Intersect: r=%s, s=%s, a=%s, b=%s, i=%d: intersection could be larger"u8,
+                if (@in(b, r) == nil && @in(b, s) == nil) {
+                    t.Errorf("Intersect: r=%s, s=%s, a=%s, b=%s, i=%d: intersection could be larger",
                         r, s, a, b, i);
                 }
             }
@@ -99,13 +97,13 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
         foreach (var (_, s) in rects) {
             var a = r.Union(s);
             {
-                var err = @in(r, a); if (err != default!) {
-                    Ꮡt.Errorf("Union: r=%s, s=%s, a=%s, r not in a: %v"u8, r, s, a, err);
+                var err = @in(r, a); if (err != nil) {
+                    t.Errorf("Union: r=%s, s=%s, a=%s, r not in a: %v", r, s, a, err);
                 }
             }
             {
-                var err = @in(s, a); if (err != default!) {
-                    Ꮡt.Errorf("Union: r=%s, s=%s, a=%s, s not in a: %v"u8, r, s, a, err);
+                var err = @in(s, a); if (err != nil) {
+                    t.Errorf("Union: r=%s, s=%s, a=%s, s not in a: %v", r, s, a, err);
                 }
             }
             if (a.Empty()) {
@@ -118,8 +116,8 @@ public static void TestRectangle(ж<testing.T> Ꮡt) {
             smallerThanA[2].Max.X--;
             smallerThanA[3].Max.Y--;
             foreach (var (i, b) in smallerThanA.ΔRangeSnapshot()) {
-                if (@in(r, b) == default! && @in(s, b) == default!) {
-                    Ꮡt.Errorf("Union: r=%s, s=%s, a=%s, b=%s, i=%d: union could be smaller"u8,
+                if (@in(r, b) == nil && @in(s, b) == nil) {
+                    t.Errorf("Union: r=%s, s=%s, a=%s, b=%s, i=%d: union could be smaller",
                         r, s, a, b, i);
                 }
             }

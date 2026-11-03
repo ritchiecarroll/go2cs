@@ -33,25 +33,26 @@ internal static void pHash<H>(Func<H> hashΔ1, slice<byte> result, slice<byte> s
 {
     var h = hmac.New(hashΔ1, secret);
     h.Write(seed);
-    var a = h.Sum(default!);
+    var a = h.Sum(default);
 
     while (len(result) > 0) {
         h.Reset();
         h.Write(a);
         h.Write(seed);
-        var b = h.Sum(default!);
+        var b = h.Sum(default);
         nint n = copy(result, b);
         result = result.slice(n);
 
         h.Reset();
         h.Write(a);
-        a = h.Sum(default!);
+        a = h.Sum(default);
     }
 }
 
 internal static UntypedInt masterSecretLength => 48;
 
-internal static readonly @string extendedMasterSecretLabel = "extended master secret"u8;
+internal static ref readonly @string extendedMasterSecretLabel => ref extendedMasterSecretLabelᵇ;
+private static readonly @string extendedMasterSecretLabelᵇ = "extended master secret"u8;
 
 // MasterSecret implements the TLS 1.2 extended master secret derivation, as
 // defined in RFC 7627 and allowed by SP 800-135, Revision 1, Section 4.2.2.

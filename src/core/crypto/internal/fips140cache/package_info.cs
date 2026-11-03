@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -46,7 +45,11 @@ using static go.crypto.@internal.fips140cache_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(Cache<,>))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,7 +59,7 @@ using static go.crypto.@internal.fips140cache_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140cache/cache.go", "cache.cs", "ABhA8oKAgoKCtoKClICCpKaC")]
+[assembly: GoPositionMap("crypto/internal/fips140cache/cache.go", "cache.cs", "ABhA8oKAgoKCtoKClICCpKaC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

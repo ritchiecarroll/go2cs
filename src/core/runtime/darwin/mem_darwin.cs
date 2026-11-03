@@ -14,7 +14,7 @@ partial class runtime_package {
 internal static @unsafe.Pointer sysAllocOS(uintptr n, @string _) {
     var (v, err) = mmap(nil, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
-        return default!;
+        return default;
     }
     return v;
 }
@@ -56,7 +56,7 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @string _) {
     var (Δp, err) = mmap(v, n, _PROT_NONE, (int32)((int32)_MAP_ANON | (int32)_MAP_PRIVATE), -1, 0);
     if (err != 0) {
-        return default!;
+        return default;
     }
     return Δp;
 }
@@ -64,8 +64,10 @@ internal static @unsafe.Pointer sysReserveOS(@unsafe.Pointer v, uintptr n, @stri
 internal static UntypedInt _ENOMEM => 12;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeOutOfMemoryˢ = "runtime: out of memory"u8;
-internal static readonly @string runtimeCannotMapPagesInˢ = "runtime: cannot map pages in arena address space"u8;
+internal static ref readonly @string runtimeOutOfMemoryˢ => ref runtimeOutOfMemoryˢᵇ;
+private static readonly @string runtimeOutOfMemoryˢᵇ = "runtime: out of memory"u8;
+internal static ref readonly @string runtimeCannotMapPagesInˢ => ref runtimeCannotMapPagesInˢᵇ;
+private static readonly @string runtimeCannotMapPagesInˢᵇ = "runtime: cannot map pages in arena address space"u8;
 
 internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string _) {
     var (Δp, err) = mmap(v, n, (int32)((int32)_PROT_READ | (int32)_PROT_WRITE), (int32)((UntypedInt)(_MAP_ANON | _MAP_FIXED) | (int32)_MAP_PRIVATE), -1, 0);
@@ -73,7 +75,7 @@ internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string _) {
         @throw(runtimeOutOfMemoryˢ);
     }
     if (Δp != v || err != 0) {
-        print((@string)"runtime: mmap("u8, @unsafe.Pointer.OrTypedNil(v), (@string)", "u8, n, (@string)") returned "u8, @unsafe.Pointer.OrTypedNil(Δp), (@string)", "u8, err, (@string)"\n"u8);
+        print((@string)"runtime: mmap(", @unsafe.Pointer.OrTypedNil(v), (@string)", ", n, (@string)") returned ", @unsafe.Pointer.OrTypedNil(Δp), (@string)", ", err, (@string)"\n");
         @throw(runtimeCannotMapPagesInˢ);
     }
 }

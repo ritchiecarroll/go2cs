@@ -10,8 +10,8 @@ using static go.image_package;
 
 partial class image_internal_test_package {
 
-public static void TestYCbCr(ж<testing.T> Ꮡt) {
-    var rects = new global::go.image_package.Rectangle[]{
+public static void TestYCbCr(ж<testing.T> t) {
+    var rects = slice<global::go.image_package.Rectangle>([
         Rect(0, 0, 16, 16),
         Rect(1, 0, 16, 16),
         Rect(0, 1, 16, 16),
@@ -32,25 +32,25 @@ public static void TestYCbCr(ж<testing.T> Ꮡt) {
         Rect(8, 8, 17, 17),
         Rect(9, 9, 17, 17),
         Rect(10, 10, 17, 17)
-    }.slice();
-    var subsampleRatios = new global::go.image_package.YCbCrSubsampleRatio[]{
+    ]);
+    var subsampleRatios = slice<global::go.image_package.YCbCrSubsampleRatio>([
         YCbCrSubsampleRatio444,
         YCbCrSubsampleRatio422,
         YCbCrSubsampleRatio420,
         YCbCrSubsampleRatio440,
         YCbCrSubsampleRatio411,
         YCbCrSubsampleRatio410
-    }.slice();
-    var deltas = new global::go.image_package.Point[]{
+    ]);
+    var deltas = slice<global::go.image_package.Point>([
         Pt(0, 0),
         Pt(1000, 1001),
         Pt(5001, -400),
         Pt(-701, -801)
-    }.slice();
+    ]);
     foreach (var (_, r) in rects) {
         foreach (var (_, subsampleRatio) in subsampleRatios) {
             foreach (var (_, delta) in deltas) {
-                testYCbCr(Ꮡt, r, subsampleRatio, delta);
+                testYCbCr(t, r, subsampleRatio, delta);
             }
         }
         if (testing.Short()) {
@@ -59,14 +59,14 @@ public static void TestYCbCr(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rectangle r, global::go.image_package.YCbCrSubsampleRatio subsampleRatio, global::go.image_package.Point delta) {
+internal static void testYCbCr(ж<testing.T> t, global::go.image_package.Rectangle r, global::go.image_package.YCbCrSubsampleRatio subsampleRatio, global::go.image_package.Point delta) {
     // Create a YCbCr image m, whose bounds are r translated by (delta.X, delta.Y).
     var r1 = r.Add(delta);
     var m = NewYCbCr(r1, subsampleRatio);
 
     // Test that the image buffer is reasonably small even if (delta.X, delta.Y) is far from the origin.
-    if (len((~m).Y) > 100 * 100) {
-        Ꮡt.Errorf("r=%v, subsampleRatio=%v, delta=%v: image buffer is too large"u8,
+    if (len(m.Y) > 100 * 100) {
+        t.Errorf("r=%v, subsampleRatio=%v, delta=%v: image buffer is too large",
             r, subsampleRatio, delta);
         return;
     }
@@ -77,9 +77,9 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
         for (nint x = r1.Min.X; x < r1.Max.X; x++) {
             nint yi = m.YOffset(x, y);
             nint ci = m.COffset(x, y);
-            m.Value.Y[yi] = (uint8)(16 * y + x);
-            m.Value.Cb[ci] = (uint8)(y + 16 * x);
-            m.Value.Cr[ci] = (uint8)(y + 16 * x);
+            m.Y[yi] = (uint8)(16 * y + x);
+            m.Cb[ci] = (uint8)(y + 16 * x);
+            m.Cr[ci] = (uint8)(y + 16 * x);
         }
     }
 
@@ -92,12 +92,12 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
                     var sub = m.SubImage(subRect)._<ж<global::go.image_package.YCbCr>>();
 
                     // For each point in the sub-image's bounds, check that m.At(x, y) equals sub.At(x, y).
-                    for (nint y = sub.Value.Rect.Min.Y; y < (~sub).Rect.Max.Y; y++) {
-                        for (nint x = sub.Value.Rect.Min.X; x < (~sub).Rect.Max.X; x++) {
+                    for (nint y = sub.Rect.Min.Y; y < sub.Rect.Max.Y; y++) {
+                        for (nint x = sub.Rect.Min.X; x < sub.Rect.Max.X; x++) {
                             var color0 = m.At(x, y)._<color.Color, color.YCbCr>();
                             var color1 = sub.At(x, y)._<color.Color, color.YCbCr>();
                             if (color0 != color1) {
-                                Ꮡt.Errorf("r=%v, subsampleRatio=%v, delta=%v, x=%d, y=%d, color0=%v, color1=%v"u8,
+                                t.Errorf("r=%v, subsampleRatio=%v, delta=%v, x=%d, y=%d, color0=%v, color1=%v",
                                     r, subsampleRatio, delta, x, y, color0, color1);
                                 return;
                             }
@@ -109,14 +109,14 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
     }
 }
 
-public static void TestYCbCrSlicesDontOverlap(ж<testing.T> Ꮡt) {
+public static void TestYCbCrSlicesDontOverlap(ж<testing.T> t) {
     var m = NewYCbCr(Rect(0, 0, 8, 8), YCbCrSubsampleRatio420);
-    var names = new @string[]{"Y"u8, "Cb"u8, "Cr"u8}.slice();
-    var slices = new slice<byte>[]{
-        (~m).Y.slice(0, cap((~m).Y)),
-        (~m).Cb.slice(0, cap((~m).Cb)),
-        (~m).Cr.slice(0, cap((~m).Cr))
-    }.slice();
+    var names = slice<@string>(["Y", "Cb", "Cr"]);
+    var slices = slice<slice<byte>>([
+        m.Y.slice(0, cap(m.Y)),
+        m.Cb.slice(0, cap(m.Cb)),
+        m.Cr.slice(0, cap(m.Cr))
+    ]);
     foreach (var (i, Δslice) in slices) {
         var want = (uint8)(10 + i);
         foreach (var j in range(Δslice)) {
@@ -127,7 +127,7 @@ public static void TestYCbCrSlicesDontOverlap(ж<testing.T> Ꮡt) {
         var want = (uint8)(10 + i);
         foreach (var (j, got) in Δslice) {
             if (got != want) {
-                Ꮡt.Fatalf("m.%s[%d]: got %d, want %d"u8, names[i], j, got, want);
+                t.Fatalf("m.%s[%d]: got %d, want %d", names[i], j, got, want);
             }
         }
     }

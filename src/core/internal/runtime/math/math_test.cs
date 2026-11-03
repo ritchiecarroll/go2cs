@@ -16,7 +16,7 @@ partial struct mulUintptrTest {
     internal bool overflow;
 }
 
-internal static slice<mulUintptrTest> mulUintptrTests = new mulUintptrTest[]{
+internal static slice<mulUintptrTest> mulUintptrTests = slice<mulUintptrTest>([
     new(0, 0, false),
     new(1000, 1000, false),
     new(MaxUintptr, 0, false),
@@ -31,15 +31,15 @@ internal static slice<mulUintptrTest> mulUintptrTests = new mulUintptrTest[]{
     new((uintptr)1 << (int)(UintptrSize / 2), (uintptr)1 << (int)(UintptrSize / 2), true),
     new(MaxUintptr >> 32, MaxUintptr >> 32, false),
     new(MaxUintptr, MaxUintptr, true)
-}.slice();
+]);
 
-public static void TestMulUintptr(ж<testing.T> Ꮡt) {
+public static void TestMulUintptr(ж<testing.T> t) {
     foreach (var (_, test) in mulUintptrTests) {
         var (a, b) = (test.a, test.b);
         for (nint i = 0; i < 2; i++) {
             var (mul, overflow) = MulUintptr(a, b);
             if (mul != a * b || overflow != test.overflow) {
-                Ꮡt.Errorf("MulUintptr(%v, %v) = %v, %v want %v, %v"u8,
+                t.Errorf("MulUintptr(%v, %v) = %v, %v want %v, %v",
                     a, b, mul, overflow, a * b, test.overflow);
             }
             (a, b) = (b, a);
@@ -57,14 +57,16 @@ internal static uintptr x;
 internal static uintptr y;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string smallˢ = "small"u8;
-private static readonly @string largeˢ = "large"u8;
+private static ref readonly @string smallˢ => ref smallˢᵇ;
+private static readonly @string smallˢᵇ = "small"u8;
+private static ref readonly @string largeˢ => ref largeˢᵇ;
+private static readonly @string largeˢᵇ = "large"u8;
 
-public static void BenchmarkMulUintptr(ж<testing.B> Ꮡb) {
+public static void BenchmarkMulUintptr(ж<testing.B> b) {
     (x, y) = (1, 2);
-    Ꮡb.Run(smallˢ, (ж<testing.B> bΔ1) => {
+    b.Run(smallˢ, (ж<testing.B> bΔ1) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
-            bool overflow = default!;
+            bool overflow = default;
             (SinkUintptr, overflow) = MulUintptr(x, y);
             if (overflow) {
                 SinkUintptr = 0;
@@ -72,9 +74,9 @@ public static void BenchmarkMulUintptr(ж<testing.B> Ꮡb) {
         }
     });
     (x, y) = (MaxUintptr, MaxUintptr - 1);
-    Ꮡb.Run(largeˢ, (ж<testing.B> bΔ2) => {
+    b.Run(largeˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
-            bool overflow = default!;
+            bool overflow = default;
             (SinkUintptr, overflow) = MulUintptr(x, y);
             if (overflow) {
                 SinkUintptr = 0;

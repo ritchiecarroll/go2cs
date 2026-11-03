@@ -57,13 +57,14 @@ internal static nint BlockSize(this ref digest d) {
     return 4;
 }
 
-internal static readonly @string magic = "adl\x01"u8;
+internal static ref readonly @string magic => ref magicᵇ;
+private static readonly @string magicᵇ = "adl\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 
 internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(d));
-    return (b, default!);
+    return (b, default);
 }
 
 internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
@@ -71,8 +72,10 @@ internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string hashAdler32InvalidHashˢ = "hash/adler32: invalid hash state identifier"u8;
-internal static readonly @string hashAdler32InvalidHashˢ2 = "hash/adler32: invalid hash state size"u8;
+internal static ref readonly @string hashAdler32InvalidHashˢ => ref hashAdler32InvalidHashˢᵇ;
+private static readonly @string hashAdler32InvalidHashˢᵇ = "hash/adler32: invalid hash state identifier"u8;
+internal static ref readonly @string hashAdler32InvalidHashˢ2 => ref hashAdler32InvalidHashˢ2ᵇ;
+private static readonly @string hashAdler32InvalidHashˢ2ᵇ = "hash/adler32: invalid hash state size"u8;
 
 internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
@@ -82,20 +85,19 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
         return errors.New(hashAdler32InvalidHashˢ2);
     }
     d = (digest)byteorder.BEUint32(b[(int)(len(magic))..]);
-    return default!;
+    return default;
 }
 
 internal static (hash.Cloner, error) Clone(this ref digest d) {
-    ref var r = ref heap<digest>(out var Ꮡr);
-    r = d;
-    return (new digestжCloner(Ꮡr), default!);
+    ref var r = ref heap<digest>(d, out var Ꮡr);
+    return (new digestжCloner(Ꮡr), default);
 }
 
 // Add p to the running checksum d.
 internal static digest update(digest d, slice<byte> p) {
     var (s1, s2) = ((uint32)((digest)(d & 0xffff)), (uint32)(d >> 16));
     while (len(p) > 0) {
-        slice<byte> q = default!;
+        slice<byte> q = default;
         if (len(p) > nmax) {
             (p, q) = (p[..(int)(nmax)], p[(int)(nmax)..]);
         }
@@ -123,7 +125,7 @@ internal static digest update(digest d, slice<byte> p) {
 
 internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
     d = update(d, p);
-    return (len(p), default!);
+    return (len(p), default);
 }
 
 internal static uint32 Sum32(this ref digest d) {

@@ -47,7 +47,7 @@ internal static float64 sinh(float64 x) {
         sign = true;
     }
 
-    float64 temp = default!;
+    float64 temp = default;
     switch (ᐧ) {
     case {} when x is > 21D: {
         temp = Exp(x) * 0.5D;

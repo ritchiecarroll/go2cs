@@ -130,7 +130,6 @@
     <ProjectReference Include="$(go2csPath)core/encoding/hex/encoding.hex.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/big/math.big.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />

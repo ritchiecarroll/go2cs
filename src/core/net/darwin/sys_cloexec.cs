@@ -14,7 +14,8 @@ using @internal;
 partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string socketˢ = "socket"u8;
+internal static ref readonly @string socketˢ => ref socketˢᵇ;
+private static readonly @string socketˢᵇ = "socket"u8;
 
 // Wrapper around the socket system call that marks the returned file
 // descriptor as nonblocking and close-on-exec.
@@ -22,20 +23,20 @@ internal static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
     // See ../syscall/exec_unix.go for description of ForkLock.
     syscall.ᏑForkLock.RLock();
     var (s, err) = socketFunc(family, sotype, proto);
-    if (err == default!) {
+    if (err == nil) {
         syscall.CloseOnExec(s);
     }
     syscall.ᏑForkLock.RUnlock();
-    if (err != default!) {
+    if (err != nil) {
         return (-1, os.NewSyscallError(socketˢ, err));
     }
     {
-        err = syscall.SetNonblock(s, true); if (err != default!) {
+        err = syscall.SetNonblock(s, true); if (err != nil) {
             poll.CloseFunc(s);
             return (-1, os.NewSyscallError(setnonblockˢ, err));
         }
     }
-    return (s, default!);
+    return (s, default);
 }
 
 } // end net_package

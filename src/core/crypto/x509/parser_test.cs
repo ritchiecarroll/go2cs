@@ -27,123 +27,121 @@ internal partial struct TestParseASN1String_tests /*dyn*/ {
     internal @string expectedErr;
 }
 
-public static void TestParseASN1String(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    var tests = new TestParseASN1String_tests[]{
+public static void TestParseASN1String(ж<testing.T> t) {
+    var tests = slice<TestParseASN1String_tests>([
         new(
-            name: "T61String"u8,
+            name: "T61String",
             tag: cryptobyte_asn1.T61String,
-            value: new byte[]{0xbf, 0x61, 0x3f}.slice(),
+            value: slice<byte>([0xbf, 0x61, 0x3f]),
             expected: ((@string)"¿a?"u8)
         ),
         new(
-            name: "PrintableString"u8,
+            name: "PrintableString",
             tag: cryptobyte_asn1.PrintableString,
-            value: new byte[]{80, 81, 82}.slice(),
+            value: slice<byte>([80, 81, 82]),
             expected: ((@string)"PQR"u8)
         ),
         new(
-            name: "PrintableString (invalid)"u8,
+            name: "PrintableString (invalid)",
             tag: cryptobyte_asn1.PrintableString,
-            value: new byte[]{1, 2, 3}.slice(),
-            expectedErr: "invalid PrintableString"u8
+            value: slice<byte>([1, 2, 3]),
+            expectedErr: "invalid PrintableString"
         ),
         new(
-            name: "UTF8String"u8,
+            name: "UTF8String",
             tag: cryptobyte_asn1.UTF8String,
-            value: new byte[]{80, 81, 82}.slice(),
+            value: slice<byte>([80, 81, 82]),
             expected: ((@string)"PQR"u8)
         ),
         new(
-            name: "UTF8String (invalid)"u8,
+            name: "UTF8String (invalid)",
             tag: cryptobyte_asn1.UTF8String,
-            value: new byte[]{255}.slice(),
-            expectedErr: "invalid UTF-8 string"u8
+            value: slice<byte>([255]),
+            expectedErr: "invalid UTF-8 string"
         ),
         new(
-            name: "BMPString"u8,
+            name: "BMPString",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: new byte[]{80, 81}.slice(),
+            value: slice<byte>([80, 81]),
             expected: ((@string)"偑"u8)
         ),
         new(
-            name: "BMPString (invalid length)"u8,
+            name: "BMPString (invalid length)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: new byte[]{255}.slice(),
-            expectedErr: "invalid BMPString"u8
+            value: slice<byte>([255]),
+            expectedErr: "invalid BMPString"
         ),
         new(
-            name: "BMPString (invalid surrogate)"u8,
+            name: "BMPString (invalid surrogate)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: new byte[]{80, 81, 216, 1}.slice(),
-            expectedErr: "invalid BMPString"u8
+            value: slice<byte>([80, 81, 216, 1]),
+            expectedErr: "invalid BMPString"
         ),
         new(
-            name: "BMPString (invalid noncharacter 0xfdd1)"u8,
+            name: "BMPString (invalid noncharacter 0xfdd1)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: new byte[]{80, 81, 253, 209}.slice(),
-            expectedErr: "invalid BMPString"u8
+            value: slice<byte>([80, 81, 253, 209]),
+            expectedErr: "invalid BMPString"
         ),
         new(
-            name: "BMPString (invalid noncharacter 0xffff)"u8,
+            name: "BMPString (invalid noncharacter 0xffff)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: new byte[]{80, 81, 255, 255}.slice(),
-            expectedErr: "invalid BMPString"u8
+            value: slice<byte>([80, 81, 255, 255]),
+            expectedErr: "invalid BMPString"
         ),
         new(
-            name: "BMPString (invalid noncharacter 0xfffe)"u8,
+            name: "BMPString (invalid noncharacter 0xfffe)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagBMPString),
-            value: new byte[]{80, 81, 255, 254}.slice(),
-            expectedErr: "invalid BMPString"u8
+            value: slice<byte>([80, 81, 255, 254]),
+            expectedErr: "invalid BMPString"
         ),
         new(
-            name: "IA5String"u8,
+            name: "IA5String",
             tag: cryptobyte_asn1.IA5String,
-            value: new byte[]{80, 81}.slice(),
+            value: slice<byte>([80, 81]),
             expected: ((@string)"PQ"u8)
         ),
         new(
-            name: "IA5String (invalid)"u8,
+            name: "IA5String (invalid)",
             tag: cryptobyte_asn1.IA5String,
-            value: new byte[]{255}.slice(),
-            expectedErr: "invalid IA5String"u8
+            value: slice<byte>([255]),
+            expectedErr: "invalid IA5String"
         ),
         new(
-            name: "NumericString"u8,
+            name: "NumericString",
             tag: ((cryptobyte_asn1.Tag)asn1.TagNumericString),
-            value: new byte[]{49, 50}.slice(),
+            value: slice<byte>([49, 50]),
             expected: ((@string)"12"u8)
         ),
         new(
-            name: "NumericString (invalid)"u8,
+            name: "NumericString (invalid)",
             tag: ((cryptobyte_asn1.Tag)asn1.TagNumericString),
-            value: new byte[]{80}.slice(),
-            expectedErr: "invalid NumericString"u8
+            value: slice<byte>([80]),
+            expectedErr: "invalid NumericString"
         )
-    }.slice();
+    ]);
 
     foreach (var (_, vᴛ1) in tests) {
         ref var tc = ref heap(new TestParseASN1String_tests(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var (@out, err) = parseASN1String(tcʗ1.tag, tcʗ1.value);
-            if (err != default! && err.Error() != tcʗ1.expectedErr){
-                tΔ1.Fatalf("parseASN1String returned unexpected error: got %q, want %q"u8, err, tcʗ1.expectedErr);
-            } else 
-            if (err == default! && tcʗ1.expectedErr != ""u8) {
-                tΔ1.Fatalf("parseASN1String didn't fail, expected: %s"u8, tcʗ1.expectedErr);
+            if (err != nil && err.Error() != tcʗ1.expectedErr) {
+                tΔ1.Fatalf("parseASN1String returned unexpected error: got %q, want %q", err, tcʗ1.expectedErr);
+            } else if (err == nil && tcʗ1.expectedErr != ""u8) {
+                tΔ1.Fatalf("parseASN1String didn't fail, expected: %s", tcʗ1.expectedErr);
             }
             if (@out != tcʗ1.expected) {
-                tΔ1.Fatalf("parseASN1String returned unexpected value: got %q, want %q"u8, @out, tcʗ1.expected);
+                tΔ1.Fatalf("parseASN1String returned unexpected value: got %q, want %q", @out, tcʗ1.expected);
             }
         });
     }
 }
 
-internal static readonly @string policyPEM = """
+internal static ref readonly @string policyPEM => ref policyPEMᵇ;
+private static readonly @string policyPEMᵇ = """
 -----BEGIN CERTIFICATE-----
 MIIGeDCCBWCgAwIBAgIUED9KQBi0ScBDoufB2mgAJ63G5uIwDQYJKoZIhvcNAQEL
 BQAwVTELMAkGA1UEBhMCVVMxGDAWBgNVBAoTD1UuUy4gR292ZXJubWVudDENMAsG
@@ -189,53 +187,53 @@ internal static readonly object expectedˢ = (@string)"expected RequireExplicitP
 internal static readonly object expectedˢ2 = (@string)"expected InhibitPolicyMappingZero to be set"u8;
 internal static readonly object expectedˢ3 = (@string)"expected InhibitAnyPolicyZero to be set"u8;
 
-public static void TestPolicyParse(ж<testing.T> Ꮡt) {
+public static void TestPolicyParse(ж<testing.T> t) {
     var (b, _) = pem.Decode(slice<byte>(policyPEM));
-    var (c, err) = ParseCertificate((~b).Bytes);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    var (c, err) = ParseCertificate(b.Bytes);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    if (builtin.len((~c).Policies) != 9) {
-        Ꮡt.Errorf("unexpected number of policies: got %d, want %d"u8, builtin.len((~c).Policies), (nint)9);
+    if (builtin.len(c.Policies) != 9) {
+        t.Errorf("unexpected number of policies: got %d, want %d", builtin.len(c.Policies), (nint)9);
     }
-    if (builtin.len((~c).PolicyMappings) != 9) {
-        Ꮡt.Errorf("unexpected number of policy mappings: got %d, want %d"u8, builtin.len((~c).PolicyMappings), (nint)9);
+    if (builtin.len(c.PolicyMappings) != 9) {
+        t.Errorf("unexpected number of policy mappings: got %d, want %d", builtin.len(c.PolicyMappings), (nint)9);
     }
-    if (!(~c).RequireExplicitPolicyZero) {
-        Ꮡt.Error(expectedˢ);
+    if (!c.RequireExplicitPolicyZero) {
+        t.Error(expectedˢ);
     }
-    if (!(~c).InhibitPolicyMappingZero) {
-        Ꮡt.Error(expectedˢ2);
+    if (!c.InhibitPolicyMappingZero) {
+        t.Error(expectedˢ2);
     }
-    if (!(~c).InhibitAnyPolicyZero) {
-        Ꮡt.Error(expectedˢ3);
+    if (!c.InhibitAnyPolicyZero) {
+        t.Error(expectedˢ3);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object parsingShouldVeFailedˢ = (@string)"parsing should've failed"u8;
 
-public static void TestParsePolicies(ж<testing.T> Ꮡt) {
-    foreach (var (_, tc) in new @string[]{
-        "testdata/policy_leaf_duplicate.pem"u8,
-        "testdata/policy_leaf_invalid.pem"u8
-    }.slice()) {
-        Ꮡt.Run(tc, (ж<testing.T> tΔ1) => {
+public static void TestParsePolicies(ж<testing.T> t) {
+    foreach (var (_, tc) in slice<@string>([
+        "testdata/policy_leaf_duplicate.pem",
+        "testdata/policy_leaf_invalid.pem"
+    ])) {
+        t.Run(tc, (ж<testing.T> tΔ1) => {
             var (b, err) = os.ReadFile(tc);
-            if (err != default!) {
+            if (err != nil) {
                 tΔ1.Fatal(err);
             }
             var (p, _) = pem.Decode(b);
-            (_, err) = ParseCertificate((~p).Bytes);
-            if (err == default!) {
+            (_, err) = ParseCertificate(p.Bytes);
+            if (err == nil) {
                 tΔ1.Error(parsingShouldVeFailedˢ);
             }
         });
     }
 }
 
-public static void TestParseCertificateNegativeMaxPathLength(ж<testing.T> Ꮡt) {
-    var certs = new @string[]{
+public static void TestParseCertificateNegativeMaxPathLength(ж<testing.T> t) {
+    var certs = slice<@string>([
         // Certificate with MaxPathLen set to -1.
         """
 
@@ -270,13 +268,13 @@ d5l1tRhScKu2NBgm74nYmJxJYgvuTA38wGhRrGU=
 -----END CERTIFICATE-----
 
 """u8.Raw()
-    }.slice();
+    ]);
 
     foreach (var (_, cert) in certs) {
         var (b, _) = pem.Decode(slice<byte>(cert));
-        var (_, err) = ParseCertificate((~b).Bytes);
-        if (err == default! || err.Error() != "x509: invalid basic constraints"u8) {
-            Ꮡt.Errorf(@"ParseCertificate() = %v; want = ""x509: invalid basic constraints"""u8, err);
+        var (_, err) = ParseCertificate(b.Bytes);
+        if (err == nil || err.Error() != "x509: invalid basic constraints"u8) {
+            t.Errorf(@"ParseCertificate() = %v; want = ""x509: invalid basic constraints""", err);
         }
     }
 }
@@ -288,10 +286,8 @@ internal partial struct TestDomainNameValid_type /*dyn*/ {
     internal bool valid;
 }
 
-public static void TestDomainNameValid(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-    foreach (var (_, vᴛ1) in new TestDomainNameValid_type[]{
+public static void TestDomainNameValid(ж<testing.T> t) {
+    foreach (var (_, vᴛ1) in slice<TestDomainNameValid_type>([
         // TODO(#75835): these tests are for stricter name validation, which we
         // had to disable. Once we reenable these strict checks, behind a
         // GODEBUG, we should add them back in.
@@ -307,88 +303,86 @@ public static void TestDomainNameValid(ж<testing.T> Ꮡt) {
 
         // TODO(#75835): these are the inverse of the tests above, they should be removed
         // once the strict checking is enabled.
-        new("254 char label, name"u8, strings.Repeat("a.a"u8, 84) + "aaa"u8, false, true),
-        new("254 char label, constraint"u8, strings.Repeat("a.a"u8, 84) + "aaa"u8, true, true),
-        new("253 char label, name"u8, strings.Repeat("a.a"u8, 84) + "aa"u8, false, true),
-        new("253 char label, constraint"u8, strings.Repeat("a.a"u8, 84) + "aa"u8, true, true),
-        new("64 char single label, name"u8, strings.Repeat("a"u8, 64), false, true),
-        new("64 char single label, constraint"u8, strings.Repeat("a"u8, 64), true, true),
-        new("64 char label, name"u8, "a."u8 + strings.Repeat("a"u8, 64), false, true),
-        new("64 char label, constraint"u8, "a."u8 + strings.Repeat("a"u8, 64), true, true),
+        new("254 char label, name", strings.Repeat("a.a", 84) + "aaa"u8, false, true),
+        new("254 char label, constraint", strings.Repeat("a.a", 84) + "aaa"u8, true, true),
+        new("253 char label, name", strings.Repeat("a.a", 84) + "aa"u8, false, true),
+        new("253 char label, constraint", strings.Repeat("a.a", 84) + "aa"u8, true, true),
+        new("64 char single label, name", strings.Repeat("a", 64), false, true),
+        new("64 char single label, constraint", strings.Repeat("a", 64), true, true),
+        new("64 char label, name", "a."u8 + strings.Repeat("a", 64), false, true),
+        new("64 char label, constraint", "a."u8 + strings.Repeat("a", 64), true, true),
 
         // Check we properly enforce properties of domain names.
-        new("empty name, constraint"u8, ""u8, true, true),
-        new("empty label, name"u8, "a..a"u8, false, false),
-        new("empty label, constraint"u8, "a..a"u8, true, false),
-        new("period, name"u8, "."u8, false, false),
-        new("period, constraint"u8, "."u8, true, false), // TODO(roland): not entirely clear if this is a valid constraint (require at least one label?)
-        new("valid, name"u8, "a.b.c"u8, false, true),
-        new("valid, constraint"u8, "a.b.c"u8, true, true),
-        new("leading period, name"u8, ".a.b.c"u8, false, false),
-        new("leading period, constraint"u8, ".a.b.c"u8, true, true),
-        new("trailing period, name"u8, "a."u8, false, false),
-        new("trailing period, constraint"u8, "a."u8, true, false),
-        new("bare label, name"u8, "a"u8, false, true),
-        new("bare label, constraint"u8, "a"u8, true, true),
-        new("63 char single label, name"u8, strings.Repeat("a"u8, 63), false, true),
-        new("63 char single label, constraint"u8, strings.Repeat("a"u8, 63), true, true),
-        new("63 char label, name"u8, "a."u8 + strings.Repeat("a"u8, 63), false, true),
-        new("63 char label, constraint"u8, "a."u8 + strings.Repeat("a"u8, 63), true, true)
-    }.slice()) {
+        new("empty name, constraint", "", true, true),
+        new("empty label, name", "a..a", false, false),
+        new("empty label, constraint", "a..a", true, false),
+        new("period, name", ".", false, false),
+        new("period, constraint", ".", true, false), // TODO(roland): not entirely clear if this is a valid constraint (require at least one label?)
+        new("valid, name", "a.b.c", false, true),
+        new("valid, constraint", "a.b.c", true, true),
+        new("leading period, name", ".a.b.c", false, false),
+        new("leading period, constraint", ".a.b.c", true, true),
+        new("trailing period, name", "a.", false, false),
+        new("trailing period, constraint", "a.", true, false),
+        new("bare label, name", "a", false, true),
+        new("bare label, constraint", "a", true, true),
+        new("63 char single label, name", strings.Repeat("a", 63), false, true),
+        new("63 char single label, constraint", strings.Repeat("a", 63), true, true),
+        new("63 char label, name", "a."u8 + strings.Repeat("a", 63), false, true),
+        new("63 char label, constraint", "a."u8 + strings.Repeat("a", 63), true, true)
+    ])) {
         ref var tc = ref heap(new TestDomainNameValid_type(), out var Ꮡtc);
         tc = vᴛ1;
 
         var tcʗ1 = tc;
-        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+        t.Run(tc.name, (ж<testing.T> tΔ1) => {
             var valid = domainNameValid(tcʗ1.dnsName, tcʗ1.constraint);
             if (tcʗ1.valid != valid) {
-                tΔ1.Errorf("domainNameValid(%q, %t) = %v; want %v"u8, tcʗ1.dnsName, tcʗ1.constraint, !tcʗ1.valid, tcʗ1.valid);
+                tΔ1.Errorf("domainNameValid(%q, %t) = %v; want %v", tcʗ1.dnsName, tcʗ1.constraint, !tcʗ1.valid, tcʗ1.valid);
             }
             // Also check that we enforce the same properties as domainToReverseLabels
             @string trimmedName = tcʗ1.dnsName;
-            if (tcʗ1.constraint && builtin.len(trimmedName) > 1 && trimmedName[0] == (rune)'.') {
+            if (tcʗ1.constraint && builtin.len(trimmedName) > 1 && trimmedName[0] == '.') {
                 trimmedName = trimmedName[1..];
             }
             var (_, revValid) = domainToReverseLabels(trimmedName);
             if (valid != revValid) {
-                tΔ1.Errorf("domainNameValid(%q, %t) = %t != domainToReverseLabels(%q) = %t"u8, tcʗ1.dnsName, tcʗ1.constraint, valid, trimmedName, revValid);
+                tΔ1.Errorf("domainNameValid(%q, %t) = %t != domainToReverseLabels(%q) = %t", tcʗ1.dnsName, tcʗ1.constraint, valid, trimmedName, revValid);
             }
         });
     }
 }
 
-public static void TestRoundtripWeirdSANs(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestRoundtripWeirdSANs(ж<testing.T> t) {
     // TODO(#75835): check that certificates we create with CreateCertificate that have malformed SAN values
     // can be parsed by ParseCertificate. We should eventually restrict this, but for now we have to maintain
     // this property as people have been relying on it.
     var (k, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    if (err != nil) {
+        t.Fatal(err);
     }
-    var badNames = new @string[]{
-        "baredomain"u8,
-        "baredomain."u8,
-        strings.Repeat("a"u8, 255),
-        strings.Repeat("a"u8, 65) + ".com"u8
-    }.slice();
+    var badNames = slice<@string>([
+        "baredomain",
+        "baredomain.",
+        strings.Repeat("a", 255),
+        strings.Repeat("a", 65) + ".com"u8
+    ]);
     var tmpl = Ꮡ(new Certificate(
         EmailAddresses: badNames,
         DNSNames: badNames
     ));
-    (var b, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.of(ecdsa.PrivateKey.ᏑPublicKey), k.OrTypedNil());
-    if (err != default!) {
-        Ꮡt.Fatal(err);
+    (var b, err) = CreateCertificate(rand.Reader, tmpl, tmpl, k.ᏑPublicKey, k.OrTypedNil());
+    if (err != nil) {
+        t.Fatal(err);
     }
     (_, err) = ParseCertificate(b);
-    if (err != default!) {
-        Ꮡt.Fatalf("Couldn't roundtrip certificate: %v"u8, err);
+    if (err != nil) {
+        t.Fatalf("Couldn't roundtrip certificate: %v", err);
     }
 }
 
-public static void FuzzDomainNameValid(ж<testing.F> Ꮡf) {
-    Ꮡf.Fuzz((ж<testing.T> t, @string data) => {
+public static void FuzzDomainNameValid(ж<testing.F> f) {
+    f.Fuzz((ж<testing.T> t, @string data) => {
         domainNameValid(data, false);
         domainNameValid(data, true);
     });

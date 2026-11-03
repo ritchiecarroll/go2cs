@@ -13,13 +13,13 @@ partial class runtime_test_package {
 // TestStartLineAsm tests the start line metadata of an assembly function. This
 // is only tested on amd64 to avoid the need for a proliferation of per-arch
 // copies of this function.
-public static void TestStartLineAsm(ж<testing.T> Ꮡt) {
+public static void TestStartLineAsm(ж<testing.T> t) {
     startlinetest.CallerStartLine = callerStartLine;
 
     const nint wantLine = 23;
     nint got = startlinetest.AsmFunc();
     if (got != wantLine) {
-        Ꮡt.Errorf("start line got %d want %d"u8, got, (nint)(wantLine));
+        t.Errorf("start line got %d want %d", got, (nint)(wantLine));
     }
 }
 

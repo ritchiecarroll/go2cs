@@ -28,9 +28,9 @@ partial class pem_package {
 //
 // where [Block.Headers] is a possibly empty sequence of Key: Value lines.
 partial struct Block {
-    public @string Type;           // The type, taken from the preamble (i.e. "RSA PRIVATE KEY").
+    public @string Type;                  // The type, taken from the preamble (i.e. "RSA PRIVATE KEY").
     public map<@string, @string> Headers; // Optional headers.
-    public slice<byte> Bytes;       // The decoded bytes of the contents. Typically a DER encoded ASN.1 structure.
+    public slice<byte> Bytes;             // The decoded bytes of the contents. Typically a DER encoded ASN.1 structure.
 }
 
 // getLine results the first \r\n or \n delineated line from the given byte
@@ -39,18 +39,18 @@ partial struct Block {
 // bytes) is also returned and this will always be smaller than the original
 // argument.
 internal static (slice<byte> line, slice<byte> rest, nint consumed) getLine(slice<byte> data) {
-    nint i = bytes.IndexByte(data, (rune)'\n');
-    nint j = default!;
-    if (i < 0){
+    nint i = bytes.IndexByte(data, (byte)'\n');
+    nint j = default;
+    if (i < 0) {
         i = len(data);
         j = i;
     } else {
         j = i + 1;
-        if (i > 0 && data[i - 1] == (rune)'\r') {
+        if (i > 0 && data[i - 1] == '\r') {
             i--;
         }
     }
-    return (bytes.TrimRight(data.slice(0, i), " \t"u8), data.slice(j), j);
+    return (bytes.TrimRight(data.slice(0, i), " \t"), data.slice(j), j);
 }
 
 // removeSpacesAndTabs returns a copy of its input with all spaces and tabs
@@ -59,7 +59,7 @@ internal static (slice<byte> line, slice<byte> rest, nint consumed) getLine(slic
 // The base64 decoder already skips newline characters, so we don't need to
 // filter them out here.
 internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
-    if (!bytes.ContainsAny(data, " \t"u8)) {
+    if (!bytes.ContainsAny(data, " \t")) {
         // Fast path; most base64 data within PEM contains newlines, but
         // no spaces nor tabs. Skip the extra alloc and work.
         return data;
@@ -68,7 +68,7 @@ internal static slice<byte> removeSpacesAndTabs(slice<byte> data) {
     nint n = 0;
 
     foreach (var (_, b) in data) {
-        if (b == (rune)' ' || b == (rune)'\t') {
+        if (b == ' ' || b == '\t') {
             continue;
         }
         result[n] = b;
@@ -91,19 +91,19 @@ internal static slice<byte> colon = slice<byte>(":"u8);
 // no PEM data is found, p is nil and the whole of the input is returned in
 // rest. Blocks must start at the beginning of a line and end at the end of a line.
 public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
-    ж<Block> p = default!;
-    slice<byte> rest = default!;
+    ж<Block> p = default;
+    slice<byte> rest = default;
 
     // pemStart begins with a newline. However, at the very beginning of
     // the byte array, we'll accept the start string without it.
     rest = data;
 
     nint endTrailerIndex = 0;
-    while (ᐧ) {
+    for (;;) {
         // If we've already tried parsing a block, skip past the END we already
         // saw.
         if (endTrailerIndex < 0 || endTrailerIndex > len(rest)) {
-            return (default!, data);
+            return (default, data);
         }
         rest = rest.slice(endTrailerIndex);
 
@@ -112,19 +112,19 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
         // have a matching END.
         nint endIndex = bytes.Index(rest, pemEnd);
         if (endIndex < 0) {
-            return (default!, data);
+            return (default, data);
         }
         endTrailerIndex = endIndex + len(pemEnd);
         nint beginIndex = bytes.LastIndex(rest.slice(0, endIndex), pemStart[1..]);
-        if (beginIndex < 0 || (beginIndex > 0 && rest[beginIndex - 1] != (rune)'\n')) {
+        if (beginIndex < 0 || (beginIndex > 0 && rest[beginIndex - 1] != '\n')) {
             continue;
         }
         rest = rest.slice(beginIndex + len(pemStart) - 1);
         endIndex -= beginIndex + len(pemStart) - 1;
         endTrailerIndex -= beginIndex + len(pemStart) - 1;
 
-        slice<byte> typeLine = default!;
-        nint consumed = default!;
+        slice<byte> typeLine = default;
+        nint consumed = default;
         (typeLine, rest, consumed) = getLine(rest);
         endIndex -= consumed;
         endTrailerIndex -= consumed;
@@ -138,11 +138,11 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             Type: ((@string)typeLine)
         ));
 
-        while (ᐧ) {
+        for (;;) {
             // This loop terminates because getLine's second result is
             // always smaller than its argument.
             if (len(rest) == 0) {
-                return (default!, data);
+                return (default, data);
             }
             var (line, next, consumedΔ1) = getLine(rest);
 
@@ -154,7 +154,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             // TODO(agl): need to cope with values that spread across lines.
             key = bytes.TrimSpace(key);
             val = bytes.TrimSpace(val);
-            p.Value.Headers[((@string)key)] = (@string)val;
+            p.Headers[((@string)key)] = (@string)val;
             rest = next;
             endIndex -= consumedΔ1;
             endTrailerIndex -= consumedΔ1;
@@ -162,7 +162,7 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
 
         // If there were headers, there must be a newline between the headers
         // and the END line, so endIndex should be >= 0.
-        if (len((~p).Headers) > 0 && endIndex < 0) {
+        if (len(p.Headers) > 0 && endIndex < 0) {
             continue;
         }
 
@@ -187,15 +187,15 @@ public static (ж<Block> p, slice<byte> rest) Decode(slice<byte> data) {
             }
         }
 
-        p.Value.Bytes = new byte[]{}.slice();
+        p.Bytes = slice<byte>([]);
         if (endIndex > 0) {
             var base64Data = removeSpacesAndTabs(rest.slice(0, endIndex));
-            p.Value.Bytes = new slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
-            var (n, err) = base64.StdEncoding.Decode((~p).Bytes, base64Data);
-            if (err != default!) {
+            p.Bytes = new slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
+            var (n, err) = base64.StdEncoding.Decode(p.Bytes, base64Data);
+            if (err != nil) {
                 continue;
             }
-            p.Value.Bytes = (~p).Bytes.slice(0, n);
+            p.Bytes = p.Bytes.slice(0, n);
         }
 
         // the -1 is because we might have only matched pemEnd without the
@@ -213,32 +213,32 @@ partial struct lineBreaker {
     internal io.Writer @out;
 }
 
-internal static slice<byte> nl = new byte[]{(rune)'\n'}.slice();
+internal static slice<byte> nl = slice<byte>([(byte)'\n']);
 
 internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) {
-    nint n = default!;
-    error err = default!;
+    nint n = default;
+    error err = default;
 
     if (l.used + len(b) < pemLineLength) {
         copy(l.line.slice(l.used), b);
         l.used += len(b);
-        return (len(b), default!);
+        return (len(b), default);
     }
 
     (n, err) = l.@out.Write(l.line.slice(0, l.used));
-    if (err != default!) {
+    if (err != nil) {
         return (n, err);
     }
     nint excess = (nint)pemLineLength - l.used;
     l.used = 0;
 
     (n, err) = l.@out.Write(b.slice(0, excess));
-    if (err != default!) {
+    if (err != nil) {
         return (n, err);
     }
 
     (n, err) = l.@out.Write(nl);
-    if (err != default!) {
+    if (err != nil) {
         return (n, err);
     }
 
@@ -246,11 +246,11 @@ internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b)
 }
 
 internal static error /*err*/ Close(this ref lineBreaker l) {
-    error err = default!;
+    error err = default;
 
     if (l.used > 0) {
         (_, err) = l.@out.Write(l.line.slice(0, l.used));
-        if (err != default!) {
+        if (err != nil) {
             return err;
         }
         (_, err) = l.@out.Write(nl);
@@ -265,10 +265,12 @@ internal static error writeHeader(io.Writer @out, @string k, @string v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string pemCannotEncodeAHeaderˢ = "pem: cannot encode a header key that contains a colon"u8;
+internal static ref readonly @string pemCannotEncodeAHeaderˢ => ref pemCannotEncodeAHeaderˢᵇ;
+private static readonly @string pemCannotEncodeAHeaderˢᵇ = "pem: cannot encode a header key that contains a colon"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string procTypeᶜ = "Proc-Type"u8;
+internal static ref readonly @string procTypeᶜ => ref procTypeᶜᵇ;
+private static readonly @string procTypeᶜᵇ = "Proc-Type"u8;
 
 // Encode writes the PEM encoding of b to out.
 public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
@@ -277,7 +279,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
 
     // Check for invalid block before writing any output.
     foreach (var (k, _) in b.Headers) {
-        if (strings.Contains(k, ":"u8)) {
+        if (strings.Contains(k, ":")) {
             return errors.New(pemCannotEncodeAHeaderˢ);
         }
     }
@@ -286,12 +288,12 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
     // so it is now safe to write data.
 
     {
-        var (_, errΔ1) = @out.Write(pemStart[1..]); if (errΔ1 != default!) {
+        var (_, errΔ1) = @out.Write(pemStart[1..]); if (errΔ1 != nil) {
             return errΔ1;
         }
     }
     {
-        var (_, errΔ2) = @out.Write(slice<byte>(b.Type + "-----\n")); if (errΔ2 != default!) {
+        var (_, errΔ2) = @out.Write(slice<byte>(b.Type + "-----\n")); if (errΔ2 != nil) {
             return errΔ2;
         }
     }
@@ -311,7 +313,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
         // See RFC 1421, section 4.6.1.1
         if (hasProcType) {
             {
-                var errΔ3 = writeHeader(@out, procType, b.Headers[procType]); if (errΔ3 != default!) {
+                var errΔ3 = writeHeader(@out, procType, b.Headers[procType]); if (errΔ3 != nil) {
                     return errΔ3;
                 }
             }
@@ -320,13 +322,13 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
         slices.Sort<slice<@string>, @string>(h);
         foreach (var (_, k) in h) {
             {
-                var errΔ4 = writeHeader(@out, k, b.Headers[k]); if (errΔ4 != default!) {
+                var errΔ4 = writeHeader(@out, k, b.Headers[k]); if (errΔ4 != nil) {
                     return errΔ4;
                 }
             }
         }
         {
-            var (_, errΔ5) = @out.Write(nl); if (errΔ5 != default!) {
+            var (_, errΔ5) = @out.Write(nl); if (errΔ5 != nil) {
                 return errΔ5;
             }
         }
@@ -337,7 +339,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
 
     var b64 = base64.NewEncoder(base64.StdEncoding, new lineBreakerжWriter(Ꮡbreaker));
     {
-        var (_, errΔ6) = b64.Write(b.Bytes); if (errΔ6 != default!) {
+        var (_, errΔ6) = b64.Write(b.Bytes); if (errΔ6 != nil) {
             return errΔ6;
         }
     }
@@ -345,7 +347,7 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
     breaker.Close();
 
     {
-        var (_, errΔ7) = @out.Write(pemEnd[1..]); if (errΔ7 != default!) {
+        var (_, errΔ7) = @out.Write(pemEnd[1..]); if (errΔ7 != nil) {
             return errΔ7;
         }
     }
@@ -358,11 +360,11 @@ public static error Encode(io.Writer @out, ж<Block> Ꮡb) {
 // If b has invalid headers and cannot be encoded,
 // EncodeToMemory returns nil. If it is important to
 // report details about this error case, use [Encode] instead.
-public static slice<byte> EncodeToMemory(ж<Block> Ꮡb) {
+public static slice<byte> EncodeToMemory(ж<Block> b) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
-        var err = Encode(new bytes_BufferжWriter(Ꮡbuf), Ꮡb); if (err != default!) {
-            return default!;
+        var err = Encode(new bytes_BufferжWriter(Ꮡbuf), b); if (err != nil) {
+            return default;
         }
     }
     return buf.Bytes();

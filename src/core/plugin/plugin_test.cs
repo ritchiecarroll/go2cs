@@ -8,7 +8,7 @@ using testing = testing_package;
 
 partial class plugin_test_package {
 
-public static void TestPlugin(ж<testing.T> Ꮡt) {
+public static void TestPlugin(ж<testing.T> t) {
     // This test makes sure that executable that imports plugin
     // package can actually run. See issue #28789 for details.
 }

@@ -40,7 +40,7 @@ partial struct mcentral {
     // sweeper and mcentral that do consume from the unswept list may
     // encounter swept spans, and these should be ignored.
     internal array<spanSet> partial = new(2, () => new()); // list of spans with a free object
-    internal array<spanSet> full = new(2, () => new()); // list of spans with no free objects
+    internal array<spanSet> full = new(2, () => new());    // list of spans with no free objects
 }
 
 // Initialize a single central free list.
@@ -77,7 +77,8 @@ internal static ж<spanSet> fullSwept(this ref mcentral c, uint32 sweepgen) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string spanHasNoFreeObjectsˢ = "span has no free objects"u8;
+internal static ref readonly @string spanHasNoFreeObjectsˢ => ref spanHasNoFreeObjectsˢᵇ;
+private static readonly @string spanHasNoFreeObjectsˢᵇ = "span has no free objects"u8;
 
 // Allocate a span to use in an mcache.
 internal static ж<mspan> cacheSpan(this ref mcentral c) {
@@ -107,8 +108,8 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // allocation if the budget runs low.
     nint spanBudget = 100;
 
-    ж<mspan> s = default!;
-    sweepLocker sl = default!;
+    ж<mspan> s = default;
+    sweepLocker sl = default;
 
     // Try partial swept spans first.
     var sg = mheap_.sweepgen;
@@ -118,7 +119,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
         }
     }
 
-    sl = ᏑΔsweep.of(sweepdata.Ꮡactive).begin();
+    sl = ᏑΔsweep.Ꮡactive.begin();
     if (sl.valid) {
         // Now try partial unswept spans.
         for (; spanBudget >= 0; spanBudget--) {
@@ -130,7 +131,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
                 var (sΔ1, ok) = sl.tryAcquire(s); if (ok) {
                     // We got ownership of the span, so let's sweep it and use it.
                     sΔ1.sweep(true);
-                    ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
+                    ᏑΔsweep.Ꮡactive.end(sl);
                     goto havespan;
                 }
             }
@@ -156,7 +157,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
                     var freeIndex = sΔ2.nextFreeIndex();
                     if (freeIndex != sΔ2.nelems) {
                         sΔ2.freeindex = freeIndex;
-                        ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
+                        ᏑΔsweep.Ꮡactive.end(sl);
                         goto havespan;
                     }
                     // Add it to the swept list, because sweeping didn't give us any free space.
@@ -165,7 +166,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
             }
             // See comment for partial unswept spans.
         }
-        ᏑΔsweep.of(sweepdata.Ꮡactive).end(sl);
+        ᏑΔsweep.Ꮡactive.end(sl);
     }
     Δtrace = traceAcquire();
     if (Δtrace.ok()) {
@@ -177,7 +178,7 @@ internal static ж<mspan> cacheSpan(this ref mcentral c) {
     // We failed to get a span from the mcentral so get one from mheap.
     s = c.grow();
     if (s == nil) {
-        return default!;
+        return default;
     }
 
     // At this point s is a span that should have free slots.
@@ -189,24 +190,25 @@ havespan:
             traceRelease(traceΔ1);
         }
     }
-    nint n = (nint)(~s).nelems - (nint)(~s).allocCount;
-    if (n == 0 || (~s).freeindex == (~s).nelems || (~s).allocCount == (~s).nelems) {
+    nint n = (nint)s.nelems - (nint)s.allocCount;
+    if (n == 0 || s.freeindex == s.nelems || s.allocCount == s.nelems) {
         @throw(spanHasNoFreeObjectsˢ);
     }
-    var freeByteBase = (uint16)((~s).freeindex & ~(64 - 1));
+    var freeByteBase = (uint16)(s.freeindex & ~(64 - 1));
     var whichByte = (uint16)(freeByteBase / 8);
     // Init alloc bits cache.
     s.refillAllocCache(whichByte);
 
     // Adjust the allocCache so that s.freeindex corresponds to the low bit in
     // s.allocCache.
-    s.Value.allocCache >>= (int)((~s).freeindex % 64);
+    s.allocCache >>= (int)(s.freeindex % 64);
 
     return s;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string uncachingSpanButSˢ = "uncaching span but s.allocCount == 0"u8;
+internal static ref readonly @string uncachingSpanButSˢ => ref uncachingSpanButSˢᵇ;
+private static readonly @string uncachingSpanButSˢᵇ = "uncaching span but s.allocCount == 0"u8;
 
 // Return span from an mcache.
 //
@@ -223,21 +225,21 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
     var stale = s.sweepgen == sg + 1;
 
     // Fix up sweepgen.
-    if (stale){
+    if (stale) {
         // Span was cached before sweep began. It's our
         // responsibility to sweep it.
         //
         // Set sweepgen to indicate it's not cached but needs
         // sweeping and can't be allocated from. sweep will
         // set s.sweepgen to indicate s is swept.
-        atomic.Store(Ꮡs.of(mspan.Ꮡsweepgen), sg - 1);
+        atomic.Store(Ꮡs.Ꮡsweepgen, sg - 1);
     } else {
         // Indicate that s is no longer cached.
-        atomic.Store(Ꮡs.of(mspan.Ꮡsweepgen), sg);
+        atomic.Store(Ꮡs.Ꮡsweepgen, sg);
     }
 
     // Put the span in the appropriate place.
-    if (stale){
+    if (stale) {
         // It's stale, so just sweep it. Sweeping will put it on
         // the right list.
         //
@@ -248,7 +250,7 @@ internal static void uncacheSpan(this ref mcentral c, ж<mspan> Ꮡs) {
         var ss = new sweepLocked(Ꮡs);
         ss.sweep(false);
     } else {
-        if ((nint)s.nelems - (nint)s.allocCount > 0){
+        if ((nint)s.nelems - (nint)s.allocCount > 0) {
             // Put it back on the partial swept list.
             c.partialSwept(sg).push(Ꮡs);
         } else {
@@ -264,7 +266,7 @@ internal static ж<mspan> grow(this ref mcentral c) {
     var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {
-        return default!;
+        return default;
     }
     s.initHeapBits();
     return s;

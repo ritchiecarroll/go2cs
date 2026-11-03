@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using colorꓸRGBA = go.image.color_package.ΔRGBA;
 global using imageꓸRGBA = go.image_package.ΔRGBA;
 // </ImportedTypeAliases>
 
@@ -52,7 +51,15 @@ using static go.image.jpeg_package;
 // library's form, or -hoist-literals), so no converted file passes a bare literal for
 // go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
 // the assembly.
-[assembly: go.GoHoistedLiterals]
+[assembly: GoHoistedLiterals]
+
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(huffman))]
+[assembly: GoFieldAccess(typeof(image_package.CMYK))]
+[assembly: GoFieldAccess(typeof(image_package.Gray))]
+[assembly: GoFieldAccess(typeof(image_package.YCbCr))]
+[assembly: GoFieldAccess(typeof(image_package.ΔRGBA))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -62,11 +69,11 @@ using static go.image.jpeg_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/jpeg/dct.go", "dct.cs", "AAeYAQBKBoKCggA/ggGCqqKCrLKCgoKCgoKCggAHEIKCggAIEoK4gtymAAkUgoKClILKgpTKgoKCvMKCgoKCgoKCgoLcgoKCyoKmgsqUlILKgpTKgoKCgoKCgsqCgoKCgoKCAANQACUEgqrCgoKCgoKCgoKCAA0cgpTKlILKgpS4gsqCpoLKgoKC7oKCgoKCgoK+soKCgoKCgoKC7rimpoLKpoKmgqaCpoKCgqaCgoKCgoKCpoKCgoKCgoI=")]
-[assembly: go.GoPositionMap("image/jpeg/huffman.go", "huffman.cs", "ACtgsoKCgoKUlIKCgpSUgqaqooKAgraCgoKCgpQACQqigoKUgIKkgoKUlIKUyoKCgoKUgpSClIKClICCyIKSgoLcgoKClIK6ooKCgoKUgoKCgpSm6sKCpoKAgoLKgpS2gIKCgoK2goKCgIK2gpSCgoKUtKaCgoCCtoKCgqaCgoCCtoKCgoI=")]
-[assembly: go.GoPositionMap("image/jpeg/reader.go", "reader.cs", "ABUogNqAAC9qAEWUAaKCuIKCgqaCgoKUgpQAAhDSgoKCgoK80oKAgraCgoIABhDUgoKCgoKUgpSCgqaUgoKUgoKmgoKUgoKUqrSCgpSmgoKCgoKUgIK2qKSCgpSmgoKClIKCgpSAgrYACwiSgpSUpKSklICCtoKUgoKCpoKmgoK4goKmgpKClIKUAAwaAAoUyoLGgsaCAA8clILGgsaC6oKU6JKCgoKCgpSCgpSUpIKUgoCCpILGgpSCgIKkguiClNiSgpSAgqSCpoKClICCpJSUgpSmgoKUgIKklIKCpoKUAAgIkqaAgqSCuIKCgpQAFCqCgoKmgpSUpoKCpoKU7sqAgqSCgqaUgoKCgraClLaClLaClKSClLakpIKSgpSmgriCgIK2gpSCgpKClJQAChTygu7KgoKCgoKmAAsYgpQABRKCgoKCgpSCgoKUuKaCgpSmlKaCgoKCgoKCgoKCgoKmqJKC2qKCgIKklOyCgpTs3KaC")]
-[assembly: go.GoPositionMap("image/jpeg/scan.go", "scan.cs", "AAkYkoKCgqaCgoKCgpS0tLS0tLSkgpSCkoIAFgqSgpSClICCpIKClIqCgoKCgoKmgpTcgoKmpoKAgqSCgILaggATKIKCgoKCgoKUgpSCypKCgoKUgoKCgsqCkgAHEoKCgoKCggAZNIKClIKCgoKCyoKUpoKAgraCgpSCgpSClIKClIKmgqaCgoKClIKCgoKClIKClJSCgoKCgpSUgpTclAAHEJSAgsiCuICCkoKAgsaCgqaUlMrq1IKClIKClIKUuIKCgoKCgoKUgpSUgoKCgoKUlMaCgoKUgsamgoKUgpSC2IKCgIK2qsKCgoKClIKUgoKUgpSClKampoKCgoKUgoKCgoKAgtrawoKClIKSgpSUtLS0tLiCgoKCgoKSgpSUpgAFGAAJAsqUgoKSgpIABxCmgoKmgII=")]
-[assembly: go.GoPositionMap("image/jpeg/writer.go", "writer.cs", "AA4gkoKUuAAcPgAwagBIkgGigoKCpoKSgoKCgoKU/oKiABkygoKUpoKClKaCgpSqooKCgoKCgoKUgpSokoKqooKClIKClJSCgrqSgoKCgqiSgoKCgrqSgoKCgoKCgoKClIKUgpSCpqiSgoKUlKKUgqKCgr7SlIKUkoKCgpSCgpSCpoKUqqKCgoKCgoKCgoLMsoKCgoKCgoLMsoKCgoKCgpSCgoKClIKCgoLMsoKCgoKCgpSCgoKUgoKCgs6igoKCgoKCAAwaAAwazJKUtKQACBCCpoKCgoLogoKCgoKCgoKCkoKUlJSCgoLaAA4cwoKClIKAgpS2goKCgpKCqJKClKaCgoKCgpKClLiCpraCgpSUlJSUgoKCgg==")]
+[assembly: GoPositionMap("image/jpeg/dct.go", "dct.cs", "AAeYAQBKBoKCggA/ggGCqqKCrLKCgoKCgoKCggAHEIKCggAIEoK4gtymAAkUgoKClILKgpTKgoKCvMKCgoKCgoKCgoLcgoKCyoKmgsqUlILKgpTKgoKCgoKCgsqCgoKCgoKCAANQACUEgqrCgoKCgoKCgoKCAA0cgpTKlILKgpS4gsqCpoLKgoKC7oKCgoKCgoK+soKCgoKCgoKC7rimpoLKpoKmgqaCpoKCgqaCgoKCgoKCpoKCgoKCgoI=")]
+[assembly: GoPositionMap("image/jpeg/huffman.go", "huffman.cs", "ACtgsoKCgoKUlIKCgpSUgqaqooKAgraCgoKCgpQADgqigoKUgIKkgoKUlIKUyoKCgoKUgpSClIKClICCyIKSgoLcgoKClIK6ooKCgoKUgoKCgpSmAAgKwoKmgoCCgsqClLaAgoKCgraCgoKAgraClIKCgpS0poKCgIK2goKCpoKCgIK2goKCgg==")]
+[assembly: GoPositionMap("image/jpeg/reader.go", "reader.cs", "ABUogNqAAC9qAEWUAaKCuIKCgqaCgoKUgpQAAhDSgoKCgoK80oKAgraCgoIABhDUgoKCgoKUgpSCgqaUgoKUgoKmgoKUgoKUqrSCgpSmgoKCgoKUgIK2qKSCgpSmgoKClIKCgpSAgrYAEgiSgpSUtLS0lICCtoKUgoKCpoKmgoK4goKmgpKClIKUAAwaAAoUyoLGgsaCAA8clILGgsaC6oKUAAgIkoKCgoKClIKClJSkgpSCgIKkgsaClIKAgqSC6IKU6JKClICCpIKmgoKUgIKklJSClKaCgpSAgqSUgoKmgpQADAiSpoCCpIK4goKClAAUKoKCgqaClJSmgoKmgpTuyoCCpIKCppSCgoKCxoKUxoKUxoKUtIKUxrS0goKClLaCuIKAgraClIKCgoKUlAALFPKC7sqCgoKCgqYACxiClAAFEoKCgoKClIKCgpS4poKClKaUpoKCgoKCgoKCgoKCgqaokoLqooKAgqSU7IKClOzcpoI=")]
+[assembly: GoPositionMap("image/jpeg/scan.go", "scan.cs", "AAkYkoKCgqaCgoKCgpS0tLS0tLSkgpSCkoIAIQqSgpSClICCpIKClIqCgoKCgoKmgpTcgoKmpoKAgqSCgILaggATKIKCgoKCgoKUgpSCypKCgoKUgoKCgsqCkgAHEoKCgoKCggAZNIKClIKCgoKCyoKUpoKAgraCgpSCgpSClIKClIKmgqaCgoKClIKCgoKClIKClJSCgoKCgpSUgpTclAAHEJSAgsiCuICCgoKAgsaCgqaUlMoACArUgoKUgoKUgpS4goKCgoKCgpSClJSCgoKCgpSUxoKCgpSCxqaCgpSClILYgoKAgraqwoKCgoKUgpSCgpSClIKUpqamgoKCgpSCgoKCgoCC2urCgoKUgpKClJS0tLS0uIKCgoKCgoKClJSmAAYYAAkCypSCgoKCggAHEJaCgqaAgg==")]
+[assembly: GoPositionMap("image/jpeg/writer.go", "writer.cs", "AA4gkoKUuAAcPgAwagBIkgGigoKCpoKSgoKCgoKU/oKiABkygoKUpoKClKaCgpSqooKCgoKCgoKUgpSokoKqooKClIKClJSCgrqSgoKCgqiSgoKCgrqSgoKCgoKCgoKClIKUgpSCpqiSgoKUlKKUgqKCgr7SlIKUkoKCgpSCgpSCpoKUqqKCgoKCgoKCgoLMsoKCgoKCgoLMsoKCgoKCgpSCgoKClIKCgoLMsoKCgoKCgpSCgoKUgoKCgs6igoKCgoKCAAwaAAwazJKUtKQACBCCpoKCgoLogoKCgoKCgoKCgoKUlJSCgoLaAA8cwoKClIKAgpS2goKCgoKCqJKClKaCgoKCgoKClLiCpraCgpSUlJSUgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

@@ -30,7 +30,7 @@ partial struct dictDecoder {
     // Invariant: 0 <= rdPos <= wrPos <= len(hist)
     internal nint wrPos; // Current output position in buffer
     internal nint rdPos; // Have emitted hist[:rdPos] already
-    internal bool full; // Has a full window length been written yet?
+    internal bool full;  // Has a full window length been written yet?
 }
 
 // init initializes dictDecoder to have a sliding window dictionary of the given

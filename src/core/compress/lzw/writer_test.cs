@@ -18,21 +18,21 @@ using static go.compress.lzw_package;
 
 partial class lzw_internal_test_package {
 
-internal static slice<@string> filenames = new @string[]{
-    "../testdata/gettysburg.txt"u8,
-    "../testdata/e.txt"u8,
-    "../testdata/pi.txt"u8
-}.slice();
+internal static slice<@string> filenames = slice<@string>([
+    "../testdata/gettysburg.txt",
+    "../testdata/e.txt",
+    "../testdata/pi.txt"
+]);
 
 // testFile tests that compressing and then decompressing the given file with
 // the given options yields equivalent bytes to the original file.
-internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go.compress.lzw_package.Order order, nint litWidth) {
+internal static partial void testFile(ж<testing.T> t, @string fn, global::go.compress.lzw_package.Order order, nint litWidth) {
     GoFrame ᒐ = default;
     try {
         // Read the file, as golden output.
         var (golden, err) = os.Open(fn);
-        if (err != default!) {
-            Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err);
+        if (err != nil) {
+            t.Errorf("%s (order=%d litWidth=%d): %v", fn, order, litWidth, err);
             return;
         }
         var goldenʗ1 = golden;
@@ -40,8 +40,8 @@ internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go
 
         // Read the file again, and push it through a pipe that compresses at the write end, and decompresses at the read end.
         (var raw, err) = os.Open(fn);
-        if (err != default!) {
-            Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err);
+        if (err != nil) {
+            t.Errorf("%s (order=%d litWidth=%d): %v", fn, order, litWidth, err);
             return;
         }
 
@@ -61,15 +61,15 @@ internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go
                 var lzwwʗ1 = lzww;
                 defer(() => lzwwʗ1.Close(), ref ᒐ);
                 ref var b = ref heap(new array<byte>(4096), out var Ꮡb);
-                while (ᐧ) {
+                for (;;) {
                     var (n, err0Δ1) = rawʗ1.Read(b[..]);
-                    if (err0Δ1 != default! && !AreEqual(err0Δ1, io.EOF)) {
-                        Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err0Δ1);
+                    if (err0Δ1 != nil && !AreEqual(err0Δ1, io.EOF)) {
+                        t.Errorf("%s (order=%d litWidth=%d): %v", fn, order, litWidth, err0Δ1);
                         return;
                     }
                     var (_, err1Δ1) = lzww.Write(b.slice(0, n));
-                    if (err1Δ1 != default!) {
-                        Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err1Δ1);
+                    if (err1Δ1 != nil) {
+                        t.Errorf("%s (order=%d litWidth=%d): %v", fn, order, litWidth, err1Δ1);
                         return;
                     }
                     if (AreEqual(err0Δ1, io.EOF)) {
@@ -87,21 +87,21 @@ internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go
         // Compare the two.
         var (b0, err0) = io.ReadAll(new lzw_internal_test_package.os_FileжReader(golden));
         var (b1, err1) = io.ReadAll(lzwr);
-        if (err0 != default!) {
-            Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err0);
+        if (err0 != nil) {
+            t.Errorf("%s (order=%d litWidth=%d): %v", fn, order, litWidth, err0);
             return;
         }
-        if (err1 != default!) {
-            Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err1);
+        if (err1 != nil) {
+            t.Errorf("%s (order=%d litWidth=%d): %v", fn, order, litWidth, err1);
             return;
         }
         if (len(b1) != len(b0)) {
-            Ꮡt.Errorf("%s (order=%d litWidth=%d): length mismatch %d != %d"u8, fn, order, litWidth, len(b1), len(b0));
+            t.Errorf("%s (order=%d litWidth=%d): length mismatch %d != %d", fn, order, litWidth, len(b1), len(b0));
             return;
         }
         for (nint i = 0; i < len(b0); i++) {
             if (b1[i] != b0[i]) {
-                Ꮡt.Errorf("%s (order=%d litWidth=%d): mismatch at %d, 0x%02x != 0x%02x\n"u8, fn, order, litWidth, i, b1[i], b0[i]);
+                t.Errorf("%s (order=%d litWidth=%d): mismatch at %d, 0x%02x != 0x%02x\n", fn, order, litWidth, i, b1[i], b0[i]);
                 return;
             }
         }
@@ -110,7 +110,7 @@ internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go
     finally { ᒐ.Run(); }
 }
 
-public static void TestWriter(ж<testing.T> Ꮡt) {
+public static void TestWriter(ж<testing.T> t) {
     foreach (var (_, filename) in filenames) {
         foreach (var (_, order) in new global::go.compress.lzw_package.Order[]{LSB, MSB}.array()) {
             // The test data "2.71828 etcetera" is ASCII text requiring at least 6 bits.
@@ -118,7 +118,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 if (filename == "../testdata/gettysburg.txt"u8 && litWidth == 6) {
                     continue;
                 }
-                testFile(Ꮡt, filename, order, litWidth);
+                testFile(t, filename, order, litWidth);
             }
         }
         if (testing.Short() && testenv.Builder() == ""u8) {
@@ -127,29 +127,29 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestWriterReset(ж<testing.T> Ꮡt) {
+public static void TestWriterReset(ж<testing.T> t) {
     foreach (var (_, order) in new global::go.compress.lzw_package.Order[]{LSB, MSB}.array()) {
-        Ꮡt.Run(fmt.Sprintf("Order %d"u8, order), (ж<testing.T> tΔ1) => {
+        t.Run(fmt.Sprintf("Order %d"u8, order), (ж<testing.T> tΔ1) => {
             for (nint litWidthᴛ1 = 6; litWidthᴛ1 <= 8; litWidthᴛ1++) {
                 var litWidth = litWidthᴛ1;
                 tΔ1.Run(fmt.Sprintf("LitWidth %d"u8, litWidth), (ж<testing.T> tΔ2) => {
-                    slice<byte> data = default!;
-                    if (litWidth == 6){
-                        data = new byte[]{1, 2, 3}.slice();
+                    slice<byte> data = default;
+                    if (litWidth == 6) {
+                        data = slice<byte>([1, 2, 3]);
                     } else {
                         data = slice<byte>(@"lorem ipsum dolor sit amet"u8);
                     }
                     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
                     var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), order, litWidth);
                     {
-                        var (_, err) = w.Write(data); if (err != default!) {
-                            tΔ2.Errorf("write: %v: %v"u8, (@string)data, err);
+                        var (_, err) = w.Write(data); if (err != nil) {
+                            tΔ2.Errorf("write: %v: %v", (@string)data, err);
                         }
                     }
 
                     {
-                        var err = w.Close(); if (err != default!) {
-                            tΔ2.Errorf("close: %v"u8, err);
+                        var err = w.Close(); if (err != nil) {
+                            tΔ2.Errorf("close: %v", err);
                         }
                     }
 
@@ -159,20 +159,20 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
                     w._<ж<global::go.compress.lzw_package.Writer>>().Reset(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), order, litWidth);
 
                     {
-                        var (_, err) = w.Write(data); if (err != default!) {
-                            tΔ2.Errorf("write: %v: %v"u8, (@string)data, err);
+                        var (_, err) = w.Write(data); if (err != nil) {
+                            tΔ2.Errorf("write: %v: %v", (@string)data, err);
                         }
                     }
 
                     {
-                        var err = w.Close(); if (err != default!) {
-                            tΔ2.Errorf("close: %v"u8, err);
+                        var err = w.Close(); if (err != nil) {
+                            tΔ2.Errorf("close: %v", err);
                         }
                     }
                     var b2 = buf.Bytes();
 
                     if (!bytes.Equal(b1, b2)) {
-                        tΔ2.Errorf("bytes written were not same"u8);
+                        tΔ2.Errorf("bytes written were not same");
                     }
                 });
             }
@@ -180,34 +180,32 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestWriterReturnValues(ж<testing.T> Ꮡt) {
+public static void TestWriterReturnValues(ж<testing.T> t) {
     var w = NewWriter(io.Discard, LSB, 8);
     var (n, err) = w.Write(slice<byte>("asdf"u8));
-    if (n != 4 || err != default!) {
-        Ꮡt.Errorf("got %d, %v, want 4, nil"u8, n, err);
+    if (n != 4 || err != nil) {
+        t.Errorf("got %d, %v, want 4, nil", n, err);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object writeAByte12GotNilErrorˢ = (@string)"write a byte >= 1<<2: got nil error, want non-nil"u8;
 
-public static void TestSmallLitWidth(ж<testing.T> Ꮡt) {
+public static void TestSmallLitWidth(ж<testing.T> t) {
     var w = NewWriter(io.Discard, LSB, 2);
     {
-        var (_, err) = w.Write(new byte[]{0x03}.slice()); if (err != default!) {
-            Ꮡt.Fatalf("write a byte < 1<<2: %v"u8, err);
+        var (_, err) = w.Write(slice<byte>([0x03])); if (err != nil) {
+            t.Fatalf("write a byte < 1<<2: %v", err);
         }
     }
     {
-        var (_, err) = w.Write(new byte[]{0x04}.slice()); if (err == default!) {
-            Ꮡt.Fatal(writeAByte12GotNilErrorˢ);
+        var (_, err) = w.Write(slice<byte>([0x04])); if (err == nil) {
+            t.Fatal(writeAByte12GotNilErrorˢ);
         }
     }
 }
 
-public static void TestStartsWithClearCode(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+public static void TestStartsWithClearCode(ж<testing.T> t) {
     // A literal width of 7 bits means that the code width starts at 8 bits,
     // which makes it easier to visually inspect the output (provided that the
     // output is short so codes don't get longer). Each byte is a code:
@@ -215,7 +213,7 @@ public static void TestStartsWithClearCode(ж<testing.T> Ꮡt) {
     //  - 0x80 is the clear code,
     //  - 0x81 is the end code.
     //  - 0x82 and above are copy codes (unused in this test case).
-    foreach (var (_, empty) in new bool[]{false, true}.slice()) {
+    foreach (var (_, empty) in slice<bool>([false, true])) {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), LSB, 7);
         if (!empty) {
@@ -230,18 +228,18 @@ public static void TestStartsWithClearCode(ж<testing.T> Ꮡt) {
         }
 
         if (got != want) {
-            Ꮡt.Errorf("empty=%t: got %q, want %q"u8, empty, got, want);
+            t.Errorf("empty=%t: got %q, want %q", empty, got, want);
         }
     }
 }
 
-public static void BenchmarkEncoder(ж<testing.B> Ꮡb) {
+public static void BenchmarkEncoder(ж<testing.B> b) {
     var (buf, err) = os.ReadFile(testdataETxtˢ);
-    if (err != default!) {
-        Ꮡb.Fatal(err);
+    if (err != nil) {
+        b.Fatal(err);
     }
     if (len(buf) == 0) {
-        Ꮡb.Fatalf("test file has no data"u8);
+        b.Fatalf("test file has no data");
     }
 
     for (nint e = 4; e <= 6; e++) {
@@ -254,10 +252,10 @@ public static void BenchmarkEncoder(ж<testing.B> Ꮡb) {
             }
             copy(buf1.slice(i), buf0);
         }
-        buf0 = default!;
+        buf0 = default;
         runtime.GC();
         var buf1ʗ1 = buf1;
-        Ꮡb.Run(fmt.Sprint((@string)"1e"u8, e), (ж<testing.B> bΔ1) => {
+        b.Run(fmt.Sprint("1e", e), (ж<testing.B> bΔ1) => {
             bΔ1.SetBytes((int64)n);
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 var w = NewWriter(io.Discard, LSB, 8);
@@ -266,7 +264,7 @@ public static void BenchmarkEncoder(ж<testing.B> Ꮡb) {
             }
         });
         var buf1ʗ2 = buf1;
-        Ꮡb.Run(fmt.Sprint(reuseˢ, e), (ж<testing.B> bΔ2) => {
+        b.Run(fmt.Sprint(reuseˢ, e), (ж<testing.B> bΔ2) => {
             bΔ2.SetBytes((int64)n);
             var w = NewWriter(io.Discard, LSB, 8);
             for (nint i = 0; i < (~bΔ2).N; i++) {

@@ -14,13 +14,14 @@ using static global::go.runtime_internal_test_package;
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string testsynctestˢ = "testsynctest"u8;
+internal static ref readonly @string testsynctestˢ => ref testsynctestˢᵇ;
+private static readonly @string testsynctestˢᵇ = "testsynctest"u8;
 
-public static void TestSynctest(ж<testing.T> Ꮡt) {
-    @string output = runTestProg(Ꮡt, testsynctestˢ, ""u8);
+public static void TestSynctest(ж<testing.T> t) {
+    @string output = runTestProg(t, testsynctestˢ, ""u8);
     @string want = successˢ;
     if (output != want) {
-        Ꮡt.Fatalf("output:\n%s\n\nwanted:\n%s"u8, output, want);
+        t.Fatalf("output:\n%s\n\nwanted:\n%s", output, want);
     }
 }
 
@@ -29,9 +30,9 @@ internal static readonly object mismatchRuntimeˢ = (@string)"mismatch: runtime.
 
 // TestSynctestAssocConsts verifies that constants defined
 // in both runtime and internal/synctest match.
-public static partial void TestSynctestAssocConsts(ж<testing.T> Ꮡt) {
+public static partial void TestSynctestAssocConsts(ж<testing.T> t) {
     if (runtime_internal_test_package.BubbleAssocUnbubbled != synctest.Unbubbled || runtime_internal_test_package.BubbleAssocCurrentBubble != synctest.CurrentBubble || runtime_internal_test_package.BubbleAssocOtherBubble != synctest.OtherBubble) {
-        Ꮡt.Fatal(mismatchRuntimeˢ);
+        t.Fatal(mismatchRuntimeˢ);
     }
 }
 

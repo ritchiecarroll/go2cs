@@ -1,0 +1,25 @@
+2026-11-01 23:12:24Z START N=100 nproc=10 loadavg=2.99 1.62 1.48
+2026-11-01 23:13:44Z ARM r0-jit idle N=100 80s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:14:20Z ARM r0-aot idle N=100 36s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:15:39Z ARM r1-jit idle N=100 79s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:16:12Z ARM r1-aot idle N=100 33s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:17:31Z ARM rec-jit idle N=100 79s exit0=100 exit2=0 empty_stderr=100 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 23:18:04Z ARM rec-aot idle N=100 33s exit0=100 exit2=0 empty_stderr=100 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 23:18:06Z ARM rec-go idle N=100 2s exit0=100 exit2=0 empty_stderr=100 exit2_panic=0 recovered=0 alive=100/100
+2026-11-01 23:18:08Z ARM pad-go idle N=100 2s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:28:39Z ARM r0-jit load N=100 631s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:33:39Z ARM r0-aot load N=100 300s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:46:31Z ARM r1-jit load N=100 772s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-01 23:51:27Z ARM r1-aot load N=100 296s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-02 00:03:47Z ARM rec-jit load N=100 740s exit0=100 exit2=0 empty_stderr=100 exit2_panic=0 recovered=0 alive=100/100
+2026-11-02 00:09:08Z ARM rec-aot load N=100 321s exit0=100 exit2=0 empty_stderr=100 exit2_panic=0 recovered=0 alive=100/100
+2026-11-02 00:09:19Z ARM rec-go load N=100 11s exit0=100 exit2=0 empty_stderr=100 exit2_panic=0 recovered=0 alive=100/100
+2026-11-02 00:09:30Z ARM pad-go load N=100 11s exit0=0 exit2=100 empty_stderr=0 exit2_panic=100 recovered=0 alive=100/100
+2026-11-02 00:09:30Z rows=1600
+MRW-RUN-DONE rc=0
+2026-11-02 00:10:35Z EXT START loadavg=11.20 26.86 30.38
+2026-11-02 00:36:04Z ARM r0-jit load2 N=300 1529s exit0=1 exit2=299 empty_stderr=1 exit2_panic=299 recovered=0 alive=300/300
+2026-11-02 01:13:37Z ARM r1-jit load2 N=300 2253s exit0=0 exit2=300 empty_stderr=0 exit2_panic=300 recovered=0 alive=300/300
+2026-11-02 01:13:40Z hi spinner pid=76157 nice=-10
+2026-11-02 01:36:46Z EXT STOPPED by hand in the hi arms: 22 of 22 hi runs timed out at 60 s (exit 124). Spinners at nice -10 starve the test outright, so hi measures starvation, not the race. hi rows are excluded from the tally.
+MRW-EXT-DONE rc=3 stopped

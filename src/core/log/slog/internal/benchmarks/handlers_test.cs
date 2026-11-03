@@ -16,41 +16,42 @@ using time = time_package;
 partial class benchmarks_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string textˢ = "text"u8;
-internal static readonly @string asyncˢ = "async"u8;
+internal static ref readonly @string textˢ => ref textˢᵇ;
+private static readonly @string textˢᵇ = "text"u8;
+internal static ref readonly @string asyncˢ => ref asyncˢᵇ;
+private static readonly @string asyncˢᵇ = "async"u8;
 
-public static void TestHandlers(ж<testing.T> Ꮡt) {
+public static void TestHandlers(ж<testing.T> t) {
     var ctx = context.Background();
-    ref var r = ref heap<slog.Record>(out var Ꮡr);
-    r = slog.NewRecord(testTime, slog.LevelInfo, testMessage, 0);
+    ref var r = ref heap<slog.Record>(slog.NewRecord(testTime, slog.LevelInfo, testMessage, 0), out var Ꮡr);
     r.AddAttrs(testAttrs.ꓸꓸꓸ);
     var ctxʗ1 = ctx;
     var rʗ1 = r;
-    Ꮡt.Run(textˢ, (ж<testing.T> tΔ1) => {
+    t.Run(textˢ, (ж<testing.T> tΔ1) => {
         ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
         var h = newFastTextHandler(new benchmarks_internal_test_package.bytes_BufferжWriter(Ꮡb));
         {
-            var err = h.Handle(ctxʗ1, rʗ1); if (err != default!) {
+            var err = h.Handle(ctxʗ1, rʗ1); if (err != nil) {
                 tΔ1.Fatal(err);
             }
         }
         @string got = Ꮡb.String();
         if (got != wantText) {
-            tΔ1.Errorf("\ngot  %q\nwant %q"u8, got, wantText);
+            tΔ1.Errorf("\ngot  %q\nwant %q", got, wantText);
         }
     });
     var ctxʗ2 = ctx;
     var rʗ2 = r;
-    Ꮡt.Run(asyncˢ, (ж<testing.T> tΔ2) => {
+    t.Run(asyncˢ, (ж<testing.T> tΔ2) => {
         var h = newAsyncHandler();
         {
-            var err = h.Handle(ctxʗ2, rʗ2); if (err != default!) {
+            var err = h.Handle(ctxʗ2, rʗ2); if (err != nil) {
                 tΔ2.Fatal(err);
             }
         }
-        var got = (~h).ringBuffer[0].ΔClone();
+        var got = h.ringBuffer[0].ΔClone();
         if (!got.Time.Equal(rʗ2.Time) || !slices.EqualFunc<slice<slog.Attr>, slice<slog.Attr>, slog.Attr, slog.Attr>(attrSlice(got), attrSlice(rʗ2), ((Func<slog.Attr, slog.Attr, bool>)(slog.Equal)))) {
-            tΔ2.Errorf("got %+v, want %+v"u8, got, rʗ2);
+            tΔ2.Errorf("got %+v, want %+v", got, rʗ2);
         }
     });
 }

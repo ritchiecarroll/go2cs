@@ -364,7 +364,6 @@
     <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/quick/testing.quick.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
-    <ProjectReference Include="$(go2csPath)core/text/template/text.template.csproj" />
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/unicode.csproj" />
     <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/crypto/cryptobyte/vendor.golang.org.x.crypto.cryptobyte.csproj" />

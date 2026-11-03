@@ -65,6 +65,11 @@ internal sealed class GoThreadState
     // fatal report begins.
     internal bool RunningPanicDefers;
 
+    // This OS thread's ThreadCpuTime token, taken the first time a panic counts it (MainExit) and kept: a token names
+    // the THREAD, so a pooled thread's next goroutine reuses it. 0 until then, and where the OS has no seam.
+    internal long CpuTimeToken;
+    internal bool CpuTimeTokenTaken;
+
     /// <summary>Clears this thread's state before a pooled thread runs its next goroutine; a thread with no holder has nothing to clear.</summary>
     internal static void ResetThread() { if (t_current is { } state) state.Reset(); }
 

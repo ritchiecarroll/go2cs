@@ -1,0 +1,90 @@
+== host: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz cpus=4 rid=osx-x64 os=15.7.9
+== dotnet: 10.0.403; runtime: Microsoft.NETCore.App 10.0.14 [<runner-home>/.dotnet/shared/Microsoft.NETCore.App]; bash 3.2.57(1)-release
+== tip bbf1725aa7, base c5a4637bba, N=50, GoTargetOS=darwin
+== GolibTests (MainExit*, ThreadCpuTime*) at the tip, GoTargetOS unset
+golibtests exit=0 Total tests: 21      Passed: 21 
+   1 Passed ABusyDeferredCallIsReleasedByItsCpuBudgetNotTheGuard [70 ms]
+   1 Passed AGoexitDuringAPanicEndsTheCountWithTheGoroutine [1 ms]
+   1 Passed AGoroutineCountsWhileAPanicRunsItsDeferredCalls [590 ms]
+   1 Passed AMainReturnIsReleasedByADeferredCallInASystemCall [2 ms]
+   1 Passed AMainReturnIsReleasedByADeferredCallParkedOnAChannel [40 ms]
+   1 Passed ANestedRecoveryDoesNotEndTheOuterPanicsCount [15 ms]
+   1 Passed ANewBlockRestartsTheConfirmation [< 1 ms]
+   1 Passed ANonOwnerNeverComesBackToPrintASecondReport [606 ms]
+   1 Passed AnUnmarkedBlockHoldsMainToTheHangGuard [301 ms]
+   1 Passed APanicACSharpCatchStoppedEndsTheCountWithTheGoroutine [11 ms]
+   1 Passed ARunnableGoroutineHoldsMainUntilItsCpuBudgetIsUsed [< 1 ms]
+   1 Passed ASleepingThreadsCpuTimeStaysFlat [215 ms]
+   1 Passed ASpinningThreadsCpuTimeAdvancesWithItsWallTime [234 ms]
+   1 Passed AStarvedGoroutineHoldsMainForAsLongAsItGetsNoCpu [< 1 ms]
+   1 Passed AThreadThatExitedReadsAsASeamFailure [165 ms]
+   1 Passed RepeatedWaitsLeaveTheProcessHandleCountUnchanged [1 s]
+   1 Passed TheCallingThreadsTokenIsStable [< 1 ms]
+   1 Passed TheFirstFatalPathOwnsTheReportAndGoesOnToPrint [1 ms]
+   1 Passed TheMainGoroutineIsNeverCounted [< 1 ms]
+   1 Passed TheSameBlockReleasesMainOnceItHasLastedTheConfirmation [< 1 ms]
+   1 Passed WithoutACpuReadingTheWaitFallsBackToItsWallClockBound [< 1 ms]
+built base GoroutinePanicAfterDeferredDone jit in 366s
+BUILD FAILED: base GoroutinePanicAfterDeferredDone aot (see build-base-GoroutinePanicAfterDeferredDone-aot.log)
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<go.string,System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.internal.runtime.gc.scan_package+unsafeBuf`1<System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<int32,System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,int32>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,go.slice`1<uint8>>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+  System.ArgumentException: An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+     at System.Collections.Generic.Dictionary`2.TryInsert(TKey, TValue, InsertionBehavior) + 0x28f
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, IObjectDumper, Logger) + 0x9a6
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, NodeFactory, ObjectWritingOptions, IObjectDumper, Logger) + 0xe6
+     at ILCompiler.Compilation.ILCompiler.ICompilation.Compile(String, ObjectDumper) + 0x3d
+     at ILCompiler.Program.Run() + 0x318f
+     at ILCompiler.ILCompilerRootCommand.<>c__DisplayClass261_0.<.ctor>b__0(ParseResult) + 0x31a
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-x64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-x64/native/GoroutinePanicAfterDeferredDone.ilc.rsp"" exited with code 1. [<tmp>/base/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+built tip GoroutinePanicAfterDeferredDone jit in 283s
+BUILD FAILED: tip GoroutinePanicAfterDeferredDone aot (see build-tip-GoroutinePanicAfterDeferredDone-aot.log)
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<go.string,System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.internal.runtime.gc.scan_package+unsafeBuf`1<System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<int32,System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,int32>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,go.slice`1<uint8>>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/tip/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+  System.ArgumentException: An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+     at System.Collections.Generic.Dictionary`2.TryInsert(TKey, TValue, InsertionBehavior) + 0x28f
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, IObjectDumper, Logger) + 0x9a6
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, NodeFactory, ObjectWritingOptions, IObjectDumper, Logger) + 0xe6
+     at ILCompiler.Compilation.ILCompiler.ICompilation.Compile(String, ObjectDumper) + 0x3d
+     at ILCompiler.Program.Run() + 0x318f
+     at ILCompiler.ILCompilerRootCommand.<>c__DisplayClass261_0.<.ctor>b__0(ParseResult) + 0x31a
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-x64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-x64/native/GoroutinePanicAfterDeferredDone.ilc.rsp"" exited with code 1. [<tmp>/tip/src/tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj]
+built tip GoroutineRecoveringWhenMainReturns jit in 39s
+BUILD FAILED: tip GoroutineRecoveringWhenMainReturns aot (see build-tip-GoroutineRecoveringWhenMainReturns-aot.log)
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<go.string,System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.internal.runtime.gc.scan_package+unsafeBuf`1<System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<int32,System.__Canon>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,int32>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,go.slice`1<uint8>>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+  ILC: Method '[golib]go.ж`1<go.array`1<go.array`1<go.array`1<go.array`1<go.array`1<go.map`2<System.__Canon,bool>>>>>>>.ToString()' will always throw because: Failed to load type 'go.GoMethodText' from assembly 'golib, Version=1.26.10.1, Culture=neutral, PublicKey=null'
+EXEC : error : An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23 [<tmp>/tip/src/tests/Behavioral/GoroutineRecoveringWhenMainReturns/GoroutineRecoveringWhenMainReturns.csproj]
+  System.ArgumentException: An item with the same key has already been added. Key: ___FrozenObj_syscall_go_syscall_package_IfmaMsghdr23
+     at System.Collections.Generic.Dictionary`2.TryInsert(TKey, TValue, InsertionBehavior) + 0x28f
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, IObjectDumper, Logger) + 0x9a6
+     at ILCompiler.ObjectWriter.ObjectWriter.EmitObject(String, IReadOnlyCollection`1, NodeFactory, ObjectWritingOptions, IObjectDumper, Logger) + 0xe6
+     at ILCompiler.Compilation.ILCompiler.ICompilation.Compile(String, ObjectDumper) + 0x3d
+     at ILCompiler.Program.Run() + 0x318f
+     at ILCompiler.ILCompilerRootCommand.<>c__DisplayClass261_0.<.ctor>b__0(ParseResult) + 0x31a
+<runner-home>/.nuget/packages/microsoft.dotnet.ilcompiler/10.0.14/build/Microsoft.NETCore.Native.targets(330,5): error MSB3073: The command ""<runner-home>/.nuget/packages/runtime.osx-x64.microsoft.dotnet.ilcompiler/10.0.14/tools/ilc" @"obj/Release/net10.0/osx-x64/native/GoroutineRecoveringWhenMainReturns.ilc.rsp"" exited with code 1. [<tmp>/tip/src/tests/Behavioral/GoroutineRecoveringWhenMainReturns/GoroutineRecoveringWhenMainReturns.csproj]
+ARM r0-jit-idle load=idle N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=- exits=[2x50 ] mean_ms=908
+ARM r0-jit-n32 load=n32 N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[2x50 ] mean_ms=7170
+ARM r0-aot-idle: NOT MEASURED (no executable)
+ARM r0-aot-n32: NOT MEASURED (no executable)
+ARM r1-jit-idle load=idle N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=- exits=[2x50 ] mean_ms=839
+ARM r1-jit-n32 load=n32 N=50 loss= pass=50 late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[2x50 ] mean_ms=6546
+ARM r1-aot-idle: NOT MEASURED (no executable)
+ARM r1-aot-n32: NOT MEASURED (no executable)
+ARM r2-jit-idle load=idle N=50 loss=- pass=- late=0 invalid=0 spinners_all_alive=- exits=[0x50 ] mean_ms=829
+ARM r2-jit-n32 load=n32 N=50 loss=- pass=- late=0 invalid=0 spinners_all_alive=yes 50/50 exits=[0x50 ] mean_ms=7202
+ARM r2-aot-idle: NOT MEASURED (no executable)
+ARM r2-aot-n32: NOT MEASURED (no executable)
+== done
