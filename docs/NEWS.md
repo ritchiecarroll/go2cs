@@ -16,8 +16,16 @@ their full text.
 
 **NuGet 1.26.10.2.** The first fix release on the Go 1.26 line. The converted standard library is still built from
 Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. Two of the changes below
-break compiled C#. C# source that uses the packages compiles unchanged, but an assembly built against an earlier
-package must be rebuilt against this one.
+break compiled C#. C# source that uses the packages compiles unchanged, apart from the one call listed under
+*Upgrading from 1.26.10.1*, but an assembly built against an earlier package must be rebuilt against this one.
+
+**Upgrading from 1.26.10.1.**
+
+- **Rebuild what you built against 1.26.10.1.** An assembly or nugetgo package compiled against go.* 1.26.10.1 must
+  be rebuilt against 1.26.10.2, or have its nugetgo.* references pinned to their 1.26.10.2 revisions. A read of
+  another package's variable changed shape, and NuGet still restores a 1.26.10.1-built nugetgo package under
+  1.26.10.2 without an error, so the failure shows at run time.
+- `new StandardBox<T>(default)` no longer compiles; spell `nil` for a nil box or `default(T)` for a boxed zero value.
 
 **Another package's variables, by address.** Taking the address of a variable another package exports now
 reaches the variable, as in Go: `&otherpkg.V`, `flag.BoolVar(&otherpkg.Debug, ...)`, a pointer-receiver method
