@@ -323,7 +323,7 @@ func TestGlobalJsonPinsTheSdkBand(t *testing.T) {
 		t.Fatalf("global.json has no \"sdk\" object")
 	}
 
-	if sdk["version"] != "10.0.100" || sdk["rollForward"] != "latestFeature" || sdk["allowPrerelease"] != false || len(sdk) != 3 {
-		t.Errorf("global.json sdk = %v, want version 10.0.100, rollForward latestFeature, allowPrerelease false and nothing else", sdk)
+	if sdk["version"] != "10.0.400" || sdk["rollForward"] != "latestFeature" || sdk["allowPrerelease"] != false || len(sdk) != 3 {
+		t.Errorf("global.json sdk = %v, want version 10.0.400, rollForward latestFeature, allowPrerelease false and nothing else", sdk)
 	}
 }
