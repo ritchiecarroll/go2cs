@@ -1,0 +1,7 @@
+# HEAD d9dd8f54994297f34be694b7a4594fc6ea826024 (git rev-parse HEAD in the detached sweep tree; the 1.26.10.2 re-pass at the freeze tip, mode D)
+# run-validated-sweep.ps1 sha256 290fb64b29f3aec917bd6b0b93785e0f5edb8466700d0792c0e40a0359e79238 (the pin, read at launch)
+utc	row	rc	word	count	wall_s	real_drift	oracle_rerun	disk_gb	deleted	restored	timing_tsv
+2026-11-03T15:31:24Z	# NXDOMAIN check before net	*** one.one.one.one can't find invalid.invalid: Non-existent domain
+2026-11-03T15:39:29Z	net	0	PASS	505	484	0	no	79	0	0/left=0	C:\go2cs\abw\g-s1262c\scratchpad\sweep-row-walltimes\20261103-093143-sweep.tsv
+2026-11-03T15:58:32Z	crypto/tls	0	PASS	1393	1118	0	no	76	0	0/left=0	C:\go2cs\abw\g-s1262c\scratchpad\sweep-row-walltimes\20261103-093953-sweep.tsv
+# SHARD END 2026-11-03T15:59:55Z: purge (clean-bin -Root -Force + src/gen bin/obj); tracked dirt 0 -> 0, deleted 0 -> 0, ignored residue 7107 -> 281 (src/core/net 233, src/core/crypto/tls 47, scratchpad 1); free 79 GB
