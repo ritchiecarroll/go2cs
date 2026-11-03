@@ -1,11 +1,19 @@
 # Cuts the 1.26.10.2 RE-PASS deal for the new freeze tip from the MEASURED walls of the discovery pass at f6666d98a2
 # (PLAN-release-1-26-10-2.md "The re-pass at the new freeze tip"; COORD's constraints of 2026-11-03), deterministically.
-# Usage: py -3 -I repass_cut.py <worktree> <out.tsv>
+# Usage: py -3 -I repass_cut.py <worktree> <out.tsv> [A|B|C] [--p2-to-rwsl N [--p2-recorded K]]
 # Inputs (all read from the worktree):
 #   docs/phase4/data/rebank-1.26.10.2/discovery-walls.tsv   the discovery walls, each with its source ref@sha
 #   docs/phase4/data/rebank-go1.26.10/sweep-shards.tsv       the windows rows and their pass-1 walls (the cost shape)
 #   docs/phase4/data/rebank-1.26.10.2/legs.tsv               the linux and darwin rows and their 1.26.10.1 walls
+#   docs/phase4/data/rebank-1.26.10.2/build-weight.tsv       each linux row's build weight (build_weight.py), read
+#                                                           only by --p2-to-rwsl
 #   src/run-validated-sweep.ps1                             $longTimeouts, the reserved set
+# The P2 REBALANCE (COORD, 2026-11-03: P2's purge-rate trigger, more than 1 purge in 4 over its first 12 rows, stops
+# P2, and COORD moves its heavy-build rows to R-WSL). --p2-to-rwsl N moves P2's N heaviest unrecorded rows, by build
+# weight (then predicted wall, then name), to a new shard RWSL-3 that R-WSL runs after its own legs (ruling 1 on the
+# re-pass briefs), each predicted at its P2 wall x factor(R-WSL)/factor(P2). --p2-recorded K holds P2-1's first K rows
+# in seq order (the rows P2 has already recorded) where they are. The windows deal is cut first and never moves.
+# Without --p2-to-rwsl the output is the deal as ruled.
 # The cost model, stated:
 #   - A windows box's FACTOR is its discovery walls over its own rows' pass-1 walls. A row's measured wall on the box
 #     that read it becomes a box-free cost (wall / that box's factor), and its prediction on lane L is cost x factor(L).
@@ -28,8 +36,13 @@ tree, out = sys.argv[1], sys.argv[2]
 # R-LAPTOP's windows share (COORD rules between them): A = all eight off-i9 rows on R, as at 1.26.10.1;
 # B = crypto/tls on R (its count depends on the host's BoGo runner, proven on R only), the other seven dealt
 # between R and G; C = all eight dealt between R and G.
-MODE = sys.argv[3] if len(sys.argv) > 3 else 'B'
+args = sys.argv[3:]
+MODE = args.pop(0) if args and not args[0].startswith('--') else 'B'
 assert MODE in ('A', 'B', 'C'), MODE
+opts = dict(zip(args[::2], args[1::2]))
+assert len(args) % 2 == 0 and set(opts) <= {'--p2-to-rwsl', '--p2-recorded'}, f'unknown arguments {args}'
+MOVE_N, RECORDED = int(opts.get('--p2-to-rwsl', 0)), int(opts.get('--p2-recorded', 0))
+assert MOVE_N >= 0 and RECORDED >= 0 and (MOVE_N or not RECORDED), '--p2-recorded needs --p2-to-rwsl'
 rd = lambda p: open(os.path.join(tree, p), encoding='utf-8', newline='')
 
 disc = {}
@@ -76,7 +89,8 @@ for r in lrows:
         if name == 'internal/runtime/gc/scan':
             plan[('linux', 'R-WSL', 'RWSL-1')].append((name, wall, f'{wall} s measured on {box} ({src}); no WSL reading at f6666d98a2 (no AVX-512 on R-WSL: placed there by rule)'))
         elif box == 'R-WSL':
-            plan[('linux', 'R-WSL', 'RWSL-1')].append((name, wall, f'{wall} s measured on R-WSL ({src})'))
+            assert old in ('RWSL-1', 'RWSL-2'), f'{name}: read on R-WSL but dealt to {old}'
+            plan[('linux', 'R-WSL', old)].append((name, wall, f'{wall} s measured on R-WSL ({src})'))
         elif box == 'P2':
             plan[('linux', 'P2', old)].append((name, wall, f'{wall} s measured on P2 ({src})'))
         else:
@@ -115,6 +129,23 @@ for r in sorted(movable, key=lambda r: (-cost(r), r)):
 for l in lanes:
     plan[('windows', l, f'{l}-S')] = wins[l]
 
+# ---- the P2 rebalance (only with --p2-to-rwsl)
+order = lambda items: sorted(items, key=lambda t: (t[0] == 'testing', t[1], t[0]))
+moved_rows = []
+if MOVE_N:
+    bw = {r['row']: int(r['build_weight']) for r in csv.DictReader(rd('docs/phase4/data/rebank-1.26.10.2/build-weight.tsv'), delimiter='\t')}
+    recorded = {n for n, _, _ in order(plan[('linux', 'P2', 'P2-1')])[:RECORDED]}
+    assert len(recorded) == RECORDED, f'--p2-recorded {RECORDED} exceeds P2-1'
+    cands = [(s, item) for s in ('P2-1', 'P2-2') for item in plan[('linux', 'P2', s)] if item[0] not in recorded]
+    cands.sort(key=lambda c: (-bw[c[1][0]], -c[1][1], c[1][0]))
+    assert MOVE_N <= len(cands), f'--p2-to-rwsl {MOVE_N} exceeds the {len(cands)} unrecorded P2 rows'
+    for s, (n, p, b) in cands[:MOVE_N]:
+        plan[('linux', 'P2', s)].remove((n, p, b))
+        q = round(p / lfactor['P2'] * lfactor['R-WSL'])
+        plan[('linux', 'R-WSL', 'RWSL-3')].append((n, q, f'{b}; moved from {s} by --p2-to-rwsl (build weight {bw[n]}) x {lfactor["R-WSL"]:.3f}/{lfactor["P2"]:.3f}'))
+        moved_rows.append(n)
+    rlaptop_linux += sum(p for _, p, _ in plan[('linux', 'R-WSL', 'RWSL-3')])
+
 # ---- darwin, unchanged
 for r in legs:
     if r['os'] == 'darwin':
@@ -124,7 +155,6 @@ for r in legs:
 for goos, want in (('windows', set(win_rows)), ('linux', {r['row'] for r in lrows})):
     got = [n for (o, _, _), items in plan.items() if o == goos for n, _, _ in items]
     assert len(got) == len(set(got)) and set(got) == want, f'{goos}: {len(got)} dealt vs {len(want)}'
-order = lambda items: sorted(items, key=lambda t: (t[0] == 'testing', t[1], t[0]))
 with open(out, 'w', encoding='utf-8', newline='\n') as fh:
     fh.write('os\tlane\tshard\tseq\trow\tpredicted_s\tbasis\n')
     for key in sorted(plan, key=lambda k: (['windows', 'linux', 'darwin'].index(k[0]), k[1], int(re.sub(r'\D', '', k[2]) or 0), k[2])):
@@ -138,3 +168,5 @@ print('linux factors:   ' + ', '.join(f'{b} {f:.3f}' for b, f in sorted(lfactor.
 for k in sorted(tot):
     print(f'{k[0]:8} {k[1]:6} {k[2]:7} rows={rows[k]:3} predicted={tot[k]:6d} s ({tot[k] / 3600:.2f} h)', file=sys.stderr)
 print(f'R-LAPTOP: windows {load["R"]} s + linux {rlaptop_linux} s = {load["R"] + rlaptop_linux} s', file=sys.stderr)
+if MOVE_N:
+    print(f'--p2-to-rwsl {MOVE_N} --p2-recorded {RECORDED}: moved to RWSL-3: {", ".join(moved_rows)}', file=sys.stderr)

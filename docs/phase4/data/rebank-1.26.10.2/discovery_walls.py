@@ -20,6 +20,17 @@ SOURCES = [
     ('linux',   'R-WSL', 'claude/r-linux-1262b', '9602352d71', 'docs/phase4/rebank-1.26.10.2/linux/RWSL-1.tsv'),
 ]
 
+# (os, row) -> (the TSV's wall_s, the wall read instead, why): a TSV wall that is not the row's own time. The TSV is the
+# kit's record and stays as written; the correction is applied here, named in the source column, and asserted against
+# the exact wall it corrects, so a re-read of the row is never silently overridden.
+OVERRIDES = {
+    # R-LAPTOP slept on battery 11:50-12:37Z with crypto/ecdh in flight: its wall_s includes the suspension. The kit's
+    # monotonic elapsed time (2506 s against 5347 s of wall clock) puts the row's own time at about 83 s, and no other
+    # row spans the gap (R's post b9389661d6; COORD's re-cut input, 2026-11-03).
+    ('linux', 'crypto/ecdh'): ('2924', '83', 'host suspension 11:50-12:37Z, R post b9389661d6'),
+}
+applied = set()
+
 seen = set()
 with open(out, 'w', encoding='utf-8', newline='\n') as fh:
     fh.write('os\trow\tbox\twall_s\tword\tsource\n')
@@ -32,7 +43,15 @@ with open(out, 'w', encoding='utf-8', newline='\n') as fh:
             seen.add(key)
             wall = r['wall_s'].strip()
             assert wall.isdigit(), f'{path}: {r["row"]} has no numeric wall_s ({wall!r})'
-            fh.write(f'{goos}\t{r["row"]}\t{box}\t{wall}\t{r["word"]}\t{ref}@{sha}:{path.rsplit("/", 1)[1]}\n')
+            note = ''
+            if key in OVERRIDES:
+                was, wall, why = OVERRIDES[key]
+                assert r['wall_s'].strip() == was, f'{key}: the override corrects wall_s {was}, but {path} reads {r["wall_s"]!r}'
+                note = f'; wall_s {was} read as {wall} ({why})'
+                applied.add(key)
+            fh.write(f'{goos}\t{r["row"]}\t{box}\t{wall}\t{r["word"]}\t{ref}@{sha}:{path.rsplit("/", 1)[1]}{note}\n')
             n += 1
         print(f'{ref}@{sha} {path.rsplit("/", 1)[1]}: {n} rows', file=sys.stderr)
 print(f'{len(seen)} rows written', file=sys.stderr)
+for key in sorted(set(OVERRIDES) - applied):
+    print(f'override {key} not applied: no source reads that row yet', file=sys.stderr)

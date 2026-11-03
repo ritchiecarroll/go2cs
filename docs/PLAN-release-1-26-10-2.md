@@ -275,6 +275,13 @@ at a pinned SHA, and every line names its source:
 - `internal/runtime/gc/scan` has no WSL reading. It carries its P1 reading.
 - C1's darwin TSVs carry no wall column, so darwin keeps its 1.26.10.1 job-log walls.
 
+**One wall is corrected, not read.** R-LAPTOP slept on battery from 11:50Z to 12:37Z while RWSL-2's `crypto/ecdh`
+was running, so that row's `wall_s` of 2924 includes the suspension. The kit's monotonic elapsed time puts the row
+at about 83 s. No other row spans the gap (R's post `b9389661d6`). The TSV stays as the kit wrote it, and
+`discovery_walls.py` reads that row as 83:
+- the correction is named in the row's source column;
+- it is asserted against the exact value it corrects, so a re-read of the row is never overridden.
+
 When RWSL-2 posts, the cutter re-runs on its walls, and the re-cut table is committed (on this branch if it has not
 landed, as a follow-up if it has), naming the mode it ran. The old-tip walls cannot move the critical path far:
 R-WSL's whole linux leg is 4.09 h, so even a 2x miss on RWSL-2's 1.11 h keeps R-LAPTOP under about 5.2 h.
@@ -347,6 +354,22 @@ directory. P2 now carries 92 rows. Before each row, P2 reads free disk, and only
 P2 logs each purge (the row, free before, free after), so the wall it adds is attributable. Why not every row: an
 unconditional purge at all 92 boundaries rebuilds every dependency closure cold. P2's 2.16 h per leg is built from
 warm walls, so the prediction would then be wrong in the direction that lengthens the critical path.
+
+**P2's purge-rate trigger, and the rebalance it calls for** (COORD, 2026-11-03). P2's free disk at launch is thin:
+25 GB by the kit's `df -BG`. If P2 purges more than once in four rows over its first 12 rows, it STOPS, and COORD
+moves its heavy-build rows to R-WSL. The cutter emits that rebalance on demand, and it is not run unless the trigger
+fires:
+- `repass_cut.py <tree> <out> B --p2-to-rwsl N --p2-recorded K` moves P2's N heaviest unrecorded rows to a new shard,
+  RWSL-3. R-WSL runs RWSL-3 after its own legs, as ruling 1 on the re-pass briefs places reassigned rows;
+- `--p2-recorded K` holds P2-1's first K rows (the ones P2 has already recorded) where they are;
+- each moved row is predicted at its P2 wall scaled by R-WSL's factor over P2's, and the windows deal never moves.
+
+The weight is
+[`build-weight.tsv`](phase4/data/rebank-1.26.10.2/build-weight.tsv), written by
+[`build_weight.py`](phase4/data/rebank-1.26.10.2/build_weight.py). A row's weight is the count of distinct standard
+packages in its linux test binary, as `go list -test` reports it under go1.26.10. A `-tests` run builds a project for
+each of them, and that dependency output under `src/core` is what filled P2's disk. The count is a proxy, stated as
+one, because no ledger records disk per row.
 
 **What can still move a row:** H's bank-seat retirements can change a row's count, or remove a row. The cutter
 re-runs from the tree, so a retirement re-cuts by re-running it.
