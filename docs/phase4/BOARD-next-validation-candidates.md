@@ -33409,7 +33409,7 @@ The predicted corpus footprint is 1 file, `log/syslog`'s .csproj, gaining the gr
 
 — G (2026-11-03)
 
-## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): the darwin guard cannot bank a ruled count move, so two predicted darwin readings are removed for this pass — OPEN, post-hop (guard)
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): the darwin guard cannot bank a ruled count move, so two predicted darwin readings are removed for this pass — OPEN, IN-HOP (owner G, a follow-up seat after the bank seat)
 
 At the freeze tip `d9dd8f5499` the darwin re-pass reads two rows at the counts BOARD amendment `d780a56fbc` predicted,
 both RIDs agreeing and no verdict divergent:
@@ -33429,15 +33429,18 @@ and in `docs/phase4/data/rebank-go1.26.10/annotate_darwin.py`. `$DarwinAgreement
 column, so no ruling can bank a COUNT reading. A row read and not banked must carry no segment, so the bank of
 record REMOVES both segments, each with a dated comment, and no new guard code lands in it (COORD).
 
-**The post-hop fix, sized:** a ruled-count table beside `$DarwinAgreementRulings`, read by both the guard and the
+**The fix, IN-HOP (COORD, 2026-11-03):** G builds it on its own branch off the freeze tip, guard and annotator
+with fixtures red-first, and H reviews the guard diff. It lands AFTER the bank seat, as a follow-up seat that banks
+`internal/cpu` darwin: 2 and `internal/runtime/gc/scan` darwin: 3092 from the SAME tip evidence (C1-7, C1-8), with no
+re-run. Its input is C1's per-name confirmation that this tip's two records carry `targetArchExcluded` with exactly
+the names above. The shape, sized: a ruled-count table beside `$DarwinAgreementRulings`, read by both the guard and the
 annotator. Each entry is keyed by row and carries the expected count and its ruling. It banks a COUNT reading only
 where all of these hold:
 - both RIDs read COUNT at exactly that matched count;
 - the RIDs agree;
 - matched and disclosed-divergent are equal across them.
 
-It needs a fixture arm for each refusal. Until it lands, a predicted darwin count move re-banks only on a re-read
-whose status the relay scores against the NEW count.
+It needs a fixture arm for each refusal.
 
 — H (2026-11-03)
 
