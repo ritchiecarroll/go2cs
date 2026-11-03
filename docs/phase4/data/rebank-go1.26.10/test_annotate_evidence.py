@@ -88,6 +88,25 @@ try:
         case('darwin: with the guard declaring the re-bank, the default reads it (6)', rc == 0 and '-> darwin: 6' in out, f'rc {rc}, out {out!r}, err {err.strip()!r}')
     else:
         case('darwin: with the guard declaring the re-bank, the default reads it (6)', False, f'{args.guard} declares no $DarwinEvidenceDirectory')
+
+    # THE RULED-COUNT PATH (COORD, 2026-11-03; H's review). The re-bank's darwin reading is COUNT 6 on both RIDs, not
+    # validated. It banks only through a $DarwinRuledCounts entry at exactly 6/0; a different ruled count, or no entry,
+    # leaves the row unbanked, so its segment is removed. The guard's own table is used, with the fixture row added.
+    write(os.path.join(root, NEW, 'darwin', 'C1-1.tsv'), DARWIN_HEADER + '\n' + ''.join(
+        '\t'.join(['C1-1', 'f/pkg', rid, '6', '6', '0', '0', '0', 'COUNT', 'yes']) + '\n' for rid in ('osx-arm64', 'osx-x64')))
+    ruled_open = re.compile(r'^\$DarwinRuledCounts = @\{(\r?\n)', re.M)   # LF in the blob, CRLF in a Windows checkout
+    if ruled_open.search(guard_text):
+        def ruled_guard(entry):
+            hop = declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1)
+            return hop if entry is None else ruled_open.sub(lambda m: m.group(0) + f"    'f/pkg' = '{entry} -- fixture ruling'" + m.group(1), hop, count=1)
+        for entry, want, name in (('6/0', '-> darwin: 6', 'darwin: a COUNT reading at its ruled count (6/0) is written (6)'),
+                                  ('7/0', '-> -', 'darwin: a COUNT reading off its ruled count (7/0) does not bank; the segment is removed'),
+                                  (None, '-> -', 'darwin: a COUNT reading with no ruled-count entry does not bank; the segment is removed')):
+            write(os.path.join(root, 'src/check-roster-format.ps1'), ruled_guard(entry))
+            rc, out, err = run('annotate_darwin.py', root, '--evidence', f'{NEW}/darwin')
+            case(name, rc == 0 and want in out, f'rc {rc}, out {out!r}, err {err.strip()!r}')
+    else:
+        case('darwin: the ruled-count path', False, f'{args.guard} declares no $DarwinRuledCounts table')
 finally:
     shutil.rmtree(work, ignore_errors=True)
 

@@ -2184,9 +2184,36 @@ Assert-Equal 'legacy-label arm: it read at least one manifest entry (a zero mean
 # the CONVERTED code behaving the same RELATIVE TO GO on both arches. An ORACLE-side environment difference that the
 # converted code mirrors on each RID meets it, though the TSV's agree column (raw verdicts compared across the RIDs)
 # reads NO. The TSV carries no per-key outcome, so each such row is named here with its ruling, and it applies ONLY
-# where both RIDs read `validated` with equal matched and disclosed counts. annotate_darwin.py reads this table.
+# where both RIDs read `validated` (or a ruled count, below) with equal matched and disclosed counts.
+# annotate_darwin.py reads this table.
 $DarwinAgreementRulings = @{
     'net' = 'COORD 2026-10-26 (r3b, run 40279373649): 10 TestLookupNoSuchHost NXDOMAIN keys differ across the RIDs (the runners'' resolvers: arm64 pass/pass, x64 fail/fail), Go == C# on every key within each RID'
+}
+
+# RULED COUNTS (COORD, 2026-11-03, the darwin ruled-count seat). The sweep reads a row COUNT, not validated, when its
+# count differs from the roster's expectation. A count that moved for a PREDICTED, ROOTED reason is still the row's
+# reading of record, so it is named here with its ruled value and its rulings, and it banks ONLY at that exact value:
+# both RIDs read status COUNT, agree (the column, or an agreement ruling above), and read exactly the ruled matched
+# count and the ruled disclosed-divergent count. Anything else is refused as before: a different count, one RID, a
+# disagreement, another status, or no entry. The value is "<matched>/<disclosed-divergent> -- <citations>".
+# annotate_darwin.py reads this table, so the annotation and the guard bank by one rule.
+# Both entries: seat #8(a) 4f245d9f4b leaves a test file that no shipped darwin architecture builds out of BOTH sides
+# (targetArchExcluded); BOARD d780a56fbc predicted the two counts; C1 rooted them at 0915beab8f. C1's per-name probe
+# at the tip d9dd8f5499 (relay run 41705475766 at 0d791a57e2, mailbox 910b0994ed) read the exclusions EXACTLY on both
+# RIDs: internal/cpu (run 41686970694) TestDataCacheSizes, TestDisableSSE3, TestSSE3DebugOption, TestX86ifAVX2hasAVX,
+# TestX86ifAVX512BWhasAVX512F, TestX86ifAVX512FhasAVX2, TestX86ifAVX512VLhasAVX512F, leaving 2; gc/scan (run
+# 41688965804) TestExpandAVX512, TestFilterNilAVX512, TestScanSpanPackedAVX512, leaving 3092.
+$DarwinRuledCounts = @{
+    'internal/cpu' = '2/0 -- seat #8(a) 4f245d9f4b (7 x86-file tests targetArchExcluded), BOARD d780a56fbc, C1 0915beab8f; per-name at d9dd8f5499: run 41686970694, relay 41705475766, mailbox 910b0994ed'
+    'internal/runtime/gc/scan' = '3092/0 -- seat #8(a) 4f245d9f4b (3 AVX-512 tests targetArchExcluded), BOARD d780a56fbc, C1 0915beab8f; per-name at d9dd8f5499: run 41688965804, relay 41705475766, mailbox 910b0994ed'
+}
+
+# The two tables never share a row (H's review of the seat, 2026-11-03). The bank predicate ORs an agreement ruling into
+# "agreed", so a row in BOTH would bank a COUNT whose agree column reads no; the ruled-count rule says the RIDs agree.
+# The guard refuses an overlap by name, and annotate_darwin.py fails on one at parse time.
+function Get-DarwinTableOverlap {
+    param($AgreementRulings, $RuledCounts)
+    return @($RuledCounts.Keys | Where-Object { $AgreementRulings.ContainsKey($_) } | Sort-Object)
 }
 
 # The DISCLOSED-DIVERGENT count of one evidence line (COORD 2026-10-26, R's finding). The TSV's `disclosed` column is
@@ -2206,12 +2233,13 @@ function Get-DarwinDisclosedDivergent {
 }
 
 function Get-DarwinSegmentRefusal {
-    param($Records, $Segment, [string] $AgreementRuling, $Ceiling = $null, $Superseded = $null)
+    param($Records, $Segment, [string] $AgreementRuling, $Ceiling = $null, $Superseded = $null, [string] $RuledCount = '')
 
     # $Records: the evidence lines for ONE row; $Segment: the row's OS['darwin'] entry or $null; $AgreementRuling:
     # the row's $DarwinAgreementRulings entry, or empty; $Ceiling: how many darwin disclosures the row's committed
     # manifest can account for at this tree (Get-DisclosureCeiling; 0 with no manifest; $null when not supplied, which
-    # exempts nothing); $Superseded: a list that receives the banked value of an exempted superseded reading.
+    # exempts nothing); $Superseded: a list that receives the banked value of an exempted superseded reading;
+    # $RuledCount: the row's $DarwinRuledCounts entry, or empty (an entry that does not parse rules nothing).
     $arm = @($Records | Where-Object { $_.RID -ceq 'osx-arm64' })
     $x64 = @($Records | Where-Object { $_.RID -ceq 'osx-x64' })
     if (($arm.Count -ne 1) -or ($x64.Count -ne 1)) {
@@ -2219,11 +2247,19 @@ function Get-DarwinSegmentRefusal {
     }
     $a = $arm[0]; $x = $x64[0]
     $agreed = (($a.agree -ceq 'yes') -and ($x.agree -ceq 'yes')) -or ([bool]$AgreementRuling)
-    $banked = ($a.status -ceq 'validated') -and ($x.status -ceq 'validated') -and $agreed -and
+    # A COUNT reading banks only at its ruled value, on both RIDs; validated banks as before. One predicate decides.
+    $ruled = [regex]::Match($RuledCount, '^(\d+)/(\d+) -- ')
+    $atRuledCount = $ruled.Success -and ($a.status -ceq 'COUNT') -and ($x.status -ceq 'COUNT') -and
+        ("$($a.matched)" -ceq $ruled.Groups[1].Value) -and ("$($x.matched)" -ceq $ruled.Groups[1].Value) -and
+        ((Get-DarwinDisclosedDivergent $a) -eq [int]$ruled.Groups[2].Value) -and ((Get-DarwinDisclosedDivergent $x) -eq [int]$ruled.Groups[2].Value)
+    $banked = ((($a.status -ceq 'validated') -and ($x.status -ceq 'validated')) -or $atRuledCount) -and $agreed -and
         ($a.matched -eq $x.matched) -and ((Get-DarwinDisclosedDivergent $a) -eq (Get-DarwinDisclosedDivergent $x))
 
     if (-not $banked) {
         if ($null -eq $Segment) { return $null }
+        if ($ruled.Success -and (($a.status -ceq 'COUNT') -or ($x.status -ceq 'COUNT'))) {
+            return "it read COUNT at the pin (osx-arm64 $($a.status) $($a.matched)/$(Get-DarwinDisclosedDivergent $a), osx-x64 $($x.status) $($x.matched)/$(Get-DarwinDisclosedDivergent $x), agree $($a.agree)/$($x.agree)), not its ruled count $($ruled.Groups[1].Value)/$($ruled.Groups[2].Value) on both RIDs, so it does not bank, but it carries a darwin: segment -- correct the ruling or remove the segment"
+        }
         return "it was read at the pin and did not bank (osx-arm64 $($a.status), osx-x64 $($x.status), agree $($a.agree)/$($x.agree)), but still carries a darwin: segment from an earlier hop -- re-read it at the pin or remove the segment"
     }
 
@@ -2346,6 +2382,28 @@ Assert-Equal 'darwin segment age: a banked K = 0 reading with no segment is refu
 # at the seat-1 guard (-ManifestPresent) and at this one (-Ceiling); a plain function ignores the one it does not declare.
 Assert-Equal 'darwin segment age: a banked + K reading with no manifest (ceiling 0) and no segment is still superseded' $null (Get-DarwinSegmentRefusal -Records $darwinBanked -Segment $null -ManifestPresent $false -Ceiling 0)
 
+# RULED COUNTS (COORD, 2026-11-03): a COUNT reading banks only at its ruled value, on both RIDs, agreed; every other
+# shape is refused as before. The fixture rows read COUNT 2/0 on both RIDs, and each refusal varies exactly one thing.
+$ruled = '2/0 -- fixture ruling'
+$darwinCount = @((New-DarwinFixtureRecord 'osx-arm64' 'COUNT' 'yes' 2 0), (New-DarwinFixtureRecord 'osx-x64' 'COUNT' 'yes' 2 0))
+Assert-Equal 'darwin ruled count: both RIDs at the ruled count, agreed, with the segment, banks (not refused)' $null (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0) -RuledCount $ruled)
+Assert-Equal 'darwin ruled count: banked at the ruled count but carrying no segment is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment $null -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: a WRONG ruled matched count is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0) -RuledCount '3/0 -- fixture ruling'))
+Assert-Equal 'darwin ruled count: a WRONG ruled disclosed-divergent count is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0) -RuledCount '2/1 -- fixture ruling'))
+Assert-Equal 'darwin ruled count: ONE RID alone is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records @($darwinCount[0]) -Segment (& $darwinSeg 2 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: RIDs that DISAGREE are refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records @((New-DarwinFixtureRecord 'osx-arm64' 'COUNT' 'NO' 2 0), (New-DarwinFixtureRecord 'osx-x64' 'COUNT' 'NO' 2 0)) -Segment (& $darwinSeg 2 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: one RID OFF the ruled count is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records @($darwinCount[0], (New-DarwinFixtureRecord 'osx-x64' 'COUNT' 'yes' 3 0)) -Segment (& $darwinSeg 2 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: a status other than COUNT or validated is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records @((New-DarwinFixtureRecord 'osx-arm64' 'failing' 'yes' 2 0), $darwinCount[1]) -Segment (& $darwinSeg 2 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: a COUNT reading with NO entry is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0)))
+Assert-Equal 'darwin ruled count: an entry that does not parse rules nothing (refused)' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0) -RuledCount '2 -- no slash'))
+Assert-Equal 'darwin ruled count: a validated row still banks as before, the entry aside' $null (Get-DarwinSegmentRefusal -Records $darwinBankedClean -Segment (& $darwinSeg 98 0) -RuledCount $ruled)
+# H's review, 2026-11-03: the near-miss between the two bank paths, a reading at the ruled count beside a different
+# carried segment, and the two tables sharing a row.
+Assert-Equal 'darwin ruled count: a MIXED pair (osx-arm64 validated 2, osx-x64 COUNT 2) banks on neither path (refused)' $true ($null -ne (Get-DarwinSegmentRefusal -Records @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'yes' 2 0), $darwinCount[1]) -Segment (& $darwinSeg 2 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: at the ruled count but carrying a DIFFERENT segment (darwin: 9 kept) is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 9 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: a row in BOTH tables is named as an overlap' 'w/both' ((Get-DarwinTableOverlap @{ 'w/both' = 'r'; 'w/agree' = 'r' } @{ 'w/both' = '2/0 -- x'; 'w/ruled' = '2/0 -- x' }) -join ', ')
+Assert-Equal 'darwin ruled count: disjoint tables name no overlap' '' ((Get-DarwinTableOverlap @{ 'w/agree' = 'r' } @{ 'w/ruled' = '2/0 -- x' }) -join ', ')
+
 # The waves' contract, against a fixture TREE (the reader is part of the contract): a row failing in D-W1 and
 # validated in a later wave reads as the later wave, in either file order; a row read only in D-W1 keeps it; and
 # an undeclared subdirectory is named, never read.
@@ -2428,6 +2486,13 @@ $darwinRowsGated = 0
 $darwinRowsUnread = 0
 $darwinRefused = 0
 $darwinSuperseded = 0
+$darwinRuledBanked = 0
+$darwinTableOverlap = (Get-DarwinTableOverlap $DarwinAgreementRulings $DarwinRuledCounts) -join ', '
+Assert-Equal "darwin ruled count: no row sits in both `$DarwinAgreementRulings and `$DarwinRuledCounts (found: $darwinTableOverlap)" '' $darwinTableOverlap
+# Every ruled count must parse: an entry that does not rules nothing, and would sit in the table looking like a ruling.
+foreach ($ruledRow in $DarwinRuledCounts.Keys) {
+    Assert-Equal "darwin ruled count: $ruledRow's entry reads '<matched>/<disclosed-divergent> -- <citations>'" $true ($DarwinRuledCounts[$ruledRow] -cmatch '^\d+/\d+ -- \S')
+}
 if (Test-Path -LiteralPath $darwinEvidenceDir) {
     $darwinRead = Read-DarwinEvidence -Directory $darwinEvidenceDir
     foreach ($stray in $darwinRead.Undeclared) {
@@ -2448,10 +2513,14 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
         $superseded = New-Object System.Collections.Generic.List[string]
         $refusal = Get-DarwinSegmentRefusal -Records (Select-LatestDarwinWave $darwinEvidence[$row.Package]) -Segment $segment `
             -AgreementRuling $(if ($DarwinAgreementRulings.ContainsKey($row.Package)) { $DarwinAgreementRulings[$row.Package] } else { '' }) `
-            -Ceiling $darwinCeiling -Superseded $superseded
+            -Ceiling $darwinCeiling -Superseded $superseded `
+            -RuledCount $(if ($DarwinRuledCounts.ContainsKey($row.Package)) { $DarwinRuledCounts[$row.Package] } else { '' })
         if ($null -ne $refusal) {
             $darwinRefused++
             Assert-Equal "darwin segment age: $($row.Package): $refusal (evidence $($darwinEvidenceAt.Relative))" $true $false
+        } elseif ($DarwinRuledCounts.ContainsKey($row.Package) -and ($null -ne $segment) -and
+                  (@(Select-LatestDarwinWave $darwinEvidence[$row.Package] | Where-Object { $_.status -ceq 'COUNT' }).Count -eq 2)) {
+            $darwinRuledBanked++
         }
         foreach ($reading in $superseded) {
             $darwinSuperseded++
@@ -2462,7 +2531,7 @@ if (Test-Path -LiteralPath $darwinEvidenceDir) {
 }
 
 # Printed UNCONDITIONALLY: a gate whose reach is never shown cannot be told apart from one that reached nothing.
-Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused, {6} superseded (manifest ceiling below the reading; the re-pass owes them){5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' }), $darwinSuperseded) -ForegroundColor Cyan
+Write-Host ('darwin segments against {0} (pin go{1}): {2} rows read at the pin, {3} not yet read (not gated), {4} refused, {6} superseded (manifest ceiling below the reading; the re-pass owes them), {7} of {8} ruled count(s) banked{5}' -f $darwinEvidenceAt.Relative, $goPin, $darwinRowsGated, $darwinRowsUnread, $darwinRefused, $(if (Test-Path -LiteralPath $darwinEvidenceDir) { '' } else { ' -- no darwin evidence there yet, so nothing is gated' }), $darwinSuperseded, $darwinRuledBanked, $DarwinRuledCounts.Count) -ForegroundColor Cyan
 
 # ---- 3. the RENDERED table's column integrity -----------------------------------------------------
 # Everything above guards what the roster MEANS to the parser. This guards what it LOOKS LIKE to a

@@ -10,7 +10,8 @@
 # The rule, §2h's:
 #   - the evidence is <evidence>/, read in DECLARED WAVES ('' = D-W1 at the top, dw2,
 #     e1, reread), and a row's reading of record is its LATEST wave;
-#   - banked = both RIDs `validated`, `agree` yes on both, and equal matched and disclosed-divergent. The segment is
+#   - banked = both RIDs `validated` (or both `COUNT` at a RULED count, below), `agree` yes on both, and equal matched
+#     and disclosed-divergent. The segment is
 #     then "matched[ + disclosed-divergent]". Disclosed-divergent is `divergent - new` (the disclosed share of the
 #     non-matching verdicts), NOT the `disclosed` column: that is len(comparison.disclosed), the disclosure LIST, which
 #     the converter builds as the divergent set PLUS every host-fatal name in scope, tests with no verdict on either side
@@ -37,6 +38,21 @@ assert waves and waves[0] == '', waves
 rulings_block = re.search(r'^\$DarwinAgreementRulings = @\{(.*?)^\}', guard, re.M | re.S).group(1)
 rulings = set(re.findall(r"^\s*'([^']+)'\s*=", rulings_block, re.M))
 assert rulings, 'no agreement rulings parsed'
+# The guard's $DarwinRuledCounts (COORD 2026-11-03): row -> (matched, disclosed-divergent). A row reading COUNT banks
+# only at exactly that value on both RIDs. Read from the guard, and every entry must parse, so the two cannot drift.
+ruled_match = re.search(r'^\$DarwinRuledCounts = @\{(.*?)^\}', guard, re.M | re.S)
+if not ruled_match:
+    sys.exit('the guard has no $DarwinRuledCounts table: this annotator banks by the guard\'s ruled-count rule and will not '
+             'run against a guard that lacks it')
+ruled_block = ruled_match.group(1)
+ruled_keys = re.findall(r"^\s*'([^']+)'\s*=", ruled_block, re.M)
+ruled = {k: (m, int(d)) for k, m, d in re.findall(r"^\s*'([^']+)'\s*=\s*'(\d+)/(\d+) -- \S", ruled_block, re.M)}
+assert len(ruled) == len(ruled_keys), f'a $DarwinRuledCounts entry does not parse: {sorted(set(ruled_keys) - set(ruled))}'
+# The two tables never share a row (H's review, 2026-11-03): an agreement ruling ORs into "agreed", so a row in both
+# would bank a COUNT whose agree column reads no. The guard refuses the same overlap by name.
+both = sorted(rulings & set(ruled_keys))
+if both:
+    sys.exit(f'rows in BOTH $DarwinAgreementRulings and $DarwinRuledCounts: {both}')
 
 declared = re.search(r"^\$DarwinEvidenceDirectory = '([^']+)'", guard, re.M)
 assert declared, 'no $DarwinEvidenceDirectory parsed from the guard'
@@ -70,10 +86,15 @@ def reading(records):
         sys.exit(f"{rs[0]['row']}: {len(arm)} osx-arm64 and {len(x64)} osx-x64 lines in its latest wave")
     a, x = arm[0], x64[0]
     agreed = a['agree'] == x['agree'] == 'yes' or a['row'] in rulings
-    if not (a['status'] == x['status'] == 'validated' and agreed):
+    r = ruled.get(a['row'])
+    counted = r is not None and a['status'] == x['status'] == 'COUNT'
+    if not ((a['status'] == x['status'] == 'validated' or counted) and agreed):
         return None
     div_a = int(a['divergent']) - int(a['new'])
     div_x = int(x['divergent']) - int(x['new'])
+    # A COUNT reading banks only at exactly its ruled value on both RIDs.
+    if counted and not (a['matched'] == x['matched'] == r[0] and div_a == div_x == r[1]):
+        return None
     banked = a['matched'] == x['matched'] and div_a == div_x
     if not banked:
         return None
