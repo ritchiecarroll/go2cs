@@ -95,8 +95,12 @@ IL3050 sites at the plan's base), the named-result constant shift that masks its
 
 ## 4. Open questions for the owner
 
-- **OQ-1.** Four pages on the published docs site use fleet language: CIMatrix, Glossary,
-  DESIGN-mn-scheduler-sizing and NugetgoPublish. Rewrite them for visitors, or exclude them from the site?
+- **OQ-1. ANSWERED** (owner ruling, batch 49, `2a1698bc21`): "no fleet language on any page reachable from
+  go2cs.net". <!-- Amended 2026-11-03 (H, the bank report, COORD): the ruling landed as batch 49 (claude/r-docs-followup
+  187adbd295: 783 -> 766 reachable pages, 0 visitor links into records, the Glossary split with its process terms on an
+  excluded page). Until then this line read: "**OQ-1.** Four pages on the published docs site use fleet language:
+  CIMatrix, Glossary, DESIGN-mn-scheduler-sizing and NugetgoPublish. Rewrite them for visitors, or exclude them from the
+  site?" -->
 
 ## The re-bank legs
 
@@ -469,15 +473,22 @@ re-runs from the tree, so a retirement re-cuts by re-running it.
   - the `darwin:`-annotated set equals the darwin-eligible set by name: 236. Every eligible row that does not bank
     is named with both RIDs' readings, and its segment is REMOVED, never carried from 1.26.10.1;
   - every numeric segment equals its 1.26.10.2 reading on both RIDs.
-- **Windows:** §15.2's verdict at `f6666d98a2`:
+- **Windows:** §15.2's verdict at the freeze tip `d9dd8f5499`:<!-- Amended 2026-11-03 (H, the bank report, COORD): the
+  re-pass moved the freeze tip (*The re-pass at the new freeze tip*). Until then this line read "§15.2's verdict at
+  `f6666d98a2`:". -->
   - 238 rows, each exactly once;
   - every word PASS (a PASS line with a non-zero rc is PASS?rc, a finding);
   - zero real drift;
   - every shard's per-row and shard-end deletion censuses empty.
 - **Per OS:** read + not dispatched = 236, each row exactly once. Every darwin run's `headSha`, every linux TSV's
-  `tree` column and every windows ledger's tip line read `f6666d98a2`.
+  `tree` column and every windows ledger's tip line read `d9dd8f5499`.<!-- Amended 2026-11-03 (H, the bank report,
+  COORD), as the windows line above. Until then it read "... read `f6666d98a2`." -->
 - **All three platforms:** the bank report lists every disclosure orphaned on ALL THREE platforms, that is, every
   entry no row on any OS still needs.
+
+**Measured 2026-11-03:** every check above holds at the bank tip. See
+[`REPORT-bank-1-26-10-2.md`](phase4/REPORT-bank-1-26-10-2.md), which names 3 orphaned entries and 30 that the linux
+record counts but cannot name.
 
 ### The lane briefs (one block per lane, ready to paste)
 
