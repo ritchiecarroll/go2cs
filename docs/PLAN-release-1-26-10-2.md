@@ -270,21 +270,24 @@ at a pinned SHA, and every line names its source:
 | linux RWSL-1 | `claude/r-linux-1262b` @ `9602352d71` | 14 |
 
 **Three gaps, stated rather than estimated:**
-- RWSL-2 had not posted, so its 129 rows have NO linux reading at `f6666d98a2`. The deal carries their 1.26.10.1
-  walls, labelled as readings at the old tip.
+- RWSL-2 had not posted, so its 129 rows had NO linux reading at `f6666d98a2`. The deal carried their 1.26.10.1
+  walls, labelled as readings at the old tip. **CLOSED 2026-11-03:** RWSL-2 posted at `e0017a1050` (129 rows, 127
+  PASS), and the deal now reads its walls.
 - `internal/runtime/gc/scan` has no WSL reading. It carries its P1 reading.
 - C1's darwin TSVs carry no wall column, so darwin keeps its 1.26.10.1 job-log walls.
 
 **One wall is corrected, not read.** R-LAPTOP slept on battery from 11:50Z to 12:37Z while RWSL-2's `crypto/ecdh`
 was running, so that row's `wall_s` of 2924 includes the suspension. The kit's monotonic elapsed time puts the row
-at about 83 s. No other row spans the gap (R's post `b9389661d6`). The TSV stays as the kit wrote it, and
+at about 83 s. No other row spans the gap (R's posts `b9389661d6` and, at RWSL-2's DONE, `dd22b89643`). The TSV
+stays as the kit wrote it, and
 `discovery_walls.py` reads that row as 83:
 - the correction is named in the row's source column;
 - it is asserted against the exact value it corrects, so a re-read of the row is never overridden.
 
-When RWSL-2 posts, the cutter re-runs on its walls, and the re-cut table is committed (on this branch if it has not
-landed, as a follow-up if it has), naming the mode it ran. The old-tip walls cannot move the critical path far:
-R-WSL's whole linux leg is 4.09 h, so even a 2x miss on RWSL-2's 1.11 h keeps R-LAPTOP under about 5.2 h.
+When RWSL-2 posted (`claude/r-linux-1262b` @ `e0017a1050`), `discovery_walls.py` gained it as a source, and the
+cutter re-ran in mode D. The shard measures 8691 s (2.41 h) with `crypto/ecdh` corrected, against the 1.11 h old-tip
+figure. So the old-tip walls were not a near miss: they were half the real cost, and the mode-D figures below are
+the re-cut on the measured walls.
 
 **The cost model.** A windows box's factor is its discovery walls over its own rows' pass-1 walls: G 0.655, i9 0.751,
 H 1.072 and R 1.551. A row's measured wall rescales to another box by the ratio of the two factors. On the box that
@@ -347,7 +350,7 @@ G/R box ratio (0.655 / 1.551 = 0.423).
 | windows | i9 | i9-S | 141 | 2.33 h |
 | windows | H | H-S | 95 | 2.33 h |
 | windows | G | G-S (`net`, `crypto/tls`) | 2 | 0.45 h |
-| linux | G | GWSL-1, then GWSL-2, after G-S | 15 + 129 | 1.26 h + 0.47 h (estimate) |
+| linux | G | GWSL-1, then GWSL-2, after G-S | 15 + 129 | 1.26 h + 1.02 h (estimate) |
 | linux | P2 | P2-1, P2-2 | 46 + 46 | 2.16 h + 2.16 h |
 | darwin | C1 | C1-1 … C1-15, unchanged | 236 | about 4–4.5 h, as before |
 
@@ -356,17 +359,32 @@ which COORD accepted. The box ratio had put it at 673 s. That is wrong, because 
 BoGo suite), not by its build. The G-WSL estimate rests on the same ratio, so both bounds are carried:
 
 **Which bound decides the critical path:**
-- **On the estimate, it is P2, at 4.31 h,** with C1's darwin dispatches about level. G-LAPTOP finishes in 2.19 h:
-  G-S takes 0.45 h, then G-WSL 1.73 h.
-- **Unscaled, it is G-LAPTOP, at 4.55 h.** That is the case if G-WSL runs no faster than R-WSL did. It is still
-  well under the 6 h at which COORD would move G-WSL's lightest RWSL-2 rows to P2.
+- **On the estimate, it is P2, at 4.31 h,** with C1's darwin dispatches about level. G-LAPTOP finishes in 2.73 h:
+  G-S takes 0.45 h, then G-WSL 2.28 h.
+- **Unscaled, it is G-LAPTOP, at 5.85 h (21053 s).** That is the case if G-WSL runs no faster than R-WSL did: 0.45 h
+  for G-S, then R-WSL's measured 2.98 h for GWSL-1 and 2.41 h for GWSL-2. It is under COORD's 6 h line, so nothing
+  moves.
+- **The margin is thin.** G-LAPTOP crosses 6 h (21600 s) only if G-WSL runs more than 2.8% slower than R-WSL did:
+  (21600 − 1628) / 19425 = 1.028.
 
-The i9 and H finish at 2.33 h each. G-WSL's first walls settle which bound holds.
+**If that line is crossed,** nothing qualified can take GWSL-2's rows:
+- P2 is disk-tight, and COORD rules it out;
+- the i9 is windows-only;
+- H's WSL has not been qualified;
+- R-LAPTOP is intermittent.
+
+So the estimate's 0.423 rides until GWSL-1's first walls, which settle the bound.
+
+The i9 and H finish at 2.33 h each.
 
 <!-- Mode D (G, 2026-11-03, COORD's re-cut order of the same day). `repass_cut.py <tree> <out> D` writes the
      committed repass-legs.tsv; modes A, B and C still reproduce their earlier output byte for byte. The G-WSL facts
      come from G's read-only census, which COORD accepted. RWSL-2 had still not posted, so its rows carry old-tip walls,
-     scaled by the estimate. The unscaled G-LAPTOP figure comes from the cutter's own stderr. -->
+     scaled by the estimate. The unscaled G-LAPTOP figure comes from the cutter's own stderr.
+     Re-cut (G, 2026-11-03, COORD's order of the same day): RWSL-2 at e0017a1050 joined discovery_walls.py as a source
+     (474 rows: 238 windows, 236 linux). crypto/ecdh's override fired (2924 read as 83). Mode D then gives GWSL-2
+     3675 s on the estimate (1.02 h) and G-LAPTOP 9837 s on the estimate, 21053 s unscaled. P2, the i9, H and G-S are
+     unchanged. -->
 
 **Free disk, per box,** from the discovery ledgers:
 
@@ -377,29 +395,41 @@ The i9 and H finish at 2.33 h each. G-WSL's first walls settle which bound holds
 | G | 63 GB | 30 GB |
 | R-WSL | 892 GB (its host check) | 25 GB at every row boundary |
 | R-LAPTOP's windows side | not recorded | 30 GB, checked before row 1 |
-| P2 | aborted twice at the 15 GB floor | 20 GB before row 1, 15 GB per row |
+| P2 | aborted twice at the 15 GB floor | 18 GB at launch; the kit's floor 18 GB, then the wrapper's purge, stopping under 15 GB |
 
 **Every re-pass brief reads free disk at launch and posts it**, against the 25 GB sweep floor, the same as every
 battery. That closes the two boxes the discovery ledgers did not record.
 
-**P2 is the disk risk; its purge is CONDITIONAL (ruled).** Launches 2 and 3 of P2-1 stopped at rows 20 and 21, with
-13 GB and 14 GB free. The cause was dependency build output piling up under `src/core`, outside each row's own
-directory. P2 now carries 92 rows. Before each row, P2 reads free disk, and only if it is under the floor plus
-10 GB (25 GB on its 15 GB floor):
-1. it runs `git clean -fdXq -- src/core`;
-2. it asserts that `git status --porcelain` shows no ` D` line;
-3. it re-checks the floor, and aborts as now if free disk is still under it.
+**P2 is the disk risk; its purge is a KIT ABORT PLUS A WRAPPER (ruled; amended 2026-11-03).** Launches 2 and 3 of
+P2-1 stopped at rows 20 and 21, with 13 GB and 14 GB free. The cause was dependency build output piling up under
+`src/core`, outside each row's own directory. P2 now carries 92 rows.
 
-P2 logs each purge (the row, free before, free after), so the wall it adds is attributable. Why not every row: an
-unconditional purge at all 92 boundaries rebuilds every dependency closure cold. P2's 2.16 h per leg is built from
-warm walls, so the prediction would then be wrong in the direction that lengthens the critical path.
+The first ruling put the purge "before each row, under the floor plus 10 GB". The frozen kit cannot do that: its row
+loop has no seam between rows, and no kit byte changes. A 25 GB trigger from a 25 GB start would also fire at every
+row. So the purge lives OUTSIDE the kit, and the kit's own floor triggers it:
+1. **Launch preflight:** free disk >= 18 GB, read and posted. Under 20 GB, ruling 9's cache clear runs first (the Go
+   build cache and the NuGet locals).
+2. **The kit runs with `FLOOR_GB=18`.** It aborts on its own when free disk is under 18 GB before a row.
+3. **On that abort, the wrapper:**
+   - runs `git clean -fdXq -- src/core` in the clone;
+   - asserts that `git status --porcelain` shows no ` D` line;
+   - re-reads free disk and logs the purge (the first unrecorded row, free before, free after).
+4. **Then, under 15 GB:** P2 STOPS at the first unrecorded row and posts. The unrun rows take ruling 1's routing, to
+   the other band-400 linux box after its own leg (G-WSL in mode D), never to P1.
+5. **Otherwise:** the wrapper relaunches the kit at the first unrecorded row, as P2's discovery launches 3 and 4 did,
+   with the same `SHARD` and the same evidence directory.
+
+The wrapper's log makes the wall each purge adds attributable. A purge happens only when the kit's floor fires. An
+unconditional purge at all 92 boundaries would rebuild every dependency closure cold, and P2's 2.16 h per leg is
+built from warm walls: the prediction would then be wrong in the direction that lengthens the critical path.
 
 **P2's purge-rate trigger, and the rebalance it calls for** (COORD, 2026-11-03). P2's free disk at launch is thin:
-25 GB by the kit's `df -BG`. If P2 purges more than once in four rows over its first 12 rows, it STOPS, and COORD
-moves its heavy-build rows to R-WSL. The cutter emits that rebalance on demand, and it is not run unless the trigger
-fires:
-- `repass_cut.py <tree> <out> B --p2-to-rwsl N --p2-recorded K` moves P2's N heaviest unrecorded rows to a new shard,
-  RWSL-3. R-WSL runs RWSL-3 after its own legs, as ruling 1 on the re-pass briefs places reassigned rows;
+25 GB by the kit's `df -BG`. If P2 purges more than once in four rows over its first 12 rows, counted on the wrapper's
+log, it STOPS, and COORD moves its heavy-build rows to the mode's WSL lane (G-WSL in mode D). The cutter emits that
+rebalance on demand, and it is not run unless the trigger fires:
+- `repass_cut.py <tree> <out> D --p2-to-rwsl N --p2-recorded K` moves P2's N heaviest unrecorded rows to a new shard
+  on the WSL lane (GWSL-3 in mode D; RWSL-3 in modes A to C). It runs after that lane's own legs, as ruling 1 on the
+  re-pass briefs places reassigned rows;
 - `--p2-recorded K` holds P2-1's first K rows (the ones P2 has already recorded) where they are;
 - each moved row is predicted at its P2 wall scaled by R-WSL's factor over P2's, and the windows deal never moves.
 
