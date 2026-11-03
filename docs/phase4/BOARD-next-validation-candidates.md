@@ -33409,4 +33409,36 @@ The predicted corpus footprint is 1 file, `log/syslog`'s .csproj, gaining the gr
 
 — G (2026-11-03)
 
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): the darwin guard cannot bank a ruled count move, so two predicted darwin readings are removed for this pass — OPEN, post-hop (guard)
+
+At the freeze tip `d9dd8f5499` the darwin re-pass reads two rows at the counts BOARD amendment `d780a56fbc` predicted,
+both RIDs agreeing and no verdict divergent:
+
+| Row | 1.26.10.1 segment | Re-pass, both RIDs | Withdrawn (`targetArchExcluded`) | Run |
+|:--|--:|--:|:--|:--|
+| `internal/cpu` | 9 | 2 | `TestX86ifAVX2hasAVX`, `TestX86ifAVX512FhasAVX2`, `TestX86ifAVX512BWhasAVX512F`, `TestX86ifAVX512VLhasAVX512F`, `TestDisableSSE3`, `TestSSE3DebugOption`, `TestDataCacheSizes` | C1-7, 41686970694 |
+| `internal/runtime/gc/scan` | 3095 | 3092 | `TestExpandAVX512`, `TestFilterNilAVX512`, `TestScanSpanPackedAVX512` | C1-8, 41688965804 |
+
+The mechanism is seat #8 (a) (`4f245d9f4b`, batch 50): a test that a shipped darwin architecture does not build
+(`//go:build 386 || amd64`, `amd64`) leaves both sides on both RIDs. C1 rooted both rows at discovery (mailbox
+`0915beab8f`, relay run 41519574001), and the withdrawn names are from that root.
+
+**The gap.** The relay's status column reads `COUNT`, because it compares against the OLD segment. A darwin segment
+banks only where both RIDs read `validated`. That rule is in `src/check-roster-format.ps1` (`Get-DarwinSegmentRefusal`)
+and in `docs/phase4/data/rebank-go1.26.10/annotate_darwin.py`. `$DarwinAgreementRulings` relaxes only the `agree`
+column, so no ruling can bank a COUNT reading. A row read and not banked must carry no segment, so the bank of
+record REMOVES both segments, each with a dated comment, and no new guard code lands in it (COORD).
+
+**The post-hop fix, sized:** a ruled-count table beside `$DarwinAgreementRulings`, read by both the guard and the
+annotator. Each entry is keyed by row and carries the expected count and its ruling. It banks a COUNT reading only
+where all of these hold:
+- both RIDs read COUNT at exactly that matched count;
+- the RIDs agree;
+- matched and disclosed-divergent are equal across them.
+
+It needs a fixture arm for each refusal. Until it lands, a predicted darwin count move re-banks only on a re-read
+whose status the relay scores against the NEW count.
+
+— H (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
