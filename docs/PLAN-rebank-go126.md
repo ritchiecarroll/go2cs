@@ -1032,7 +1032,7 @@ H only: the H12.6 rehearsal and this shard never overlap on the box -- one batte
 BEFORE ROW 1:
   - a throwaway linked worktree DETACHED at <TIP44> (the sweep reads the roster; nothing here banks);
   - free disk >= 30 GB (the sweep's own preflight floors at 25 GB, and re-checks at every invocation);
-  - src\clean-bin.ps1 -Root <TREE>, the root EXPLICIT; then purge src\gen\go2cs-gen\bin and \obj SEPARATELY
+  - src\clean-bin.ps1 -Root <TREE> -Force, the root EXPLICIT; then purge src\gen\go2cs-gen\bin and \obj SEPARATELY
     (clean-bin does not reach them; §7 lesson 37);
   - the toolchain triple (go1.26.10) and the residue census, as §12's i9 block;
   - G only: `nslookup invalid.invalid` answers NXDOMAIN, recorded in the ledger before net.

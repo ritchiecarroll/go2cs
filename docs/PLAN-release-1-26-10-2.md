@@ -281,7 +281,7 @@ H only: the H12.6 rehearsal and this shard never overlap on the box -- one batte
 R only: R-WSL's linux shards start only after this shard has posted.
 BEFORE ROW 1, §15.1's list at this TIP:
   - a throwaway linked worktree DETACHED at the TIP; its `git rev-parse HEAD` is the ledger's first line;
-  - free disk >= 30 GB; src\clean-bin.ps1 -Root <TREE>, then purge src\gen\go2cs-gen\bin and \obj SEPARATELY;
+  - free disk >= 30 GB; src\clean-bin.ps1 -Root <TREE> -Force, then purge src\gen\go2cs-gen\bin and \obj SEPARATELY;
   - the toolchain triple (go1.26.10) and the residue census;
   - G only: `nslookup invalid.invalid` answers NXDOMAIN, recorded in the ledger before net.
 THE SURVIVAL CANARY and ENV: exactly §15.1's. Pass no -TestConfig.
@@ -290,10 +290,11 @@ THE ACT, per row: §15.1's invocation, with rc on the next line and the row's li
   - GUARD 2, BEFORE the restore (a restore by status checks out a deleted tracked file too, and would hide it):
     `git status --porcelain | grep '^ D'`, read raw, must be EMPTY. A deletion stops the shard and names the row;
   - restore the row's dirt BY STATUS; `git status --porcelain` is then empty, or the shard stops.
-SHARD END, GUARD 3: purge the build output (clean-bin -Root <TREE>, then the gen bin/obj), then the same census.
+SHARD END, GUARD 3: purge the build output (clean-bin -Root <TREE> -Force, then the gen bin/obj), then the same census.
 OUTPUT: docs/phase4/rebank-1.26.10.2/sweep/<LANE>-S.tsv with its .ledger.tsv, on lane ref claude/<lane>-sweep-1262:
   - §15.1's columns, and no new one;
-  - a ref that holds a pre-freeze dry run takes a NEW commit on top, and the ledger's tip line says which run it is;
+  - a ref that holds a pre-freeze dry run is left as it is: the re-read takes a FRESH ref, claude/<lane>-sweep-1262b,
+    cut from the TIP (ruling 10), and the ledger's tip line says which run it is;
   - ls-remote after the push.
 POST (one, <=40 lines): §15.1's, plus the tip line, both deletion censuses (per row and at shard end), and every
   PASS?rc by name.
@@ -324,7 +325,8 @@ LINUX ENV and LINUX ACT: exactly §12's R block, in a clone detached at the TIP 
   - rc on the next line; restore the row's dirt BY STATUS; purge build output.
 EVIDENCE: docs/phase4/rebank-1.26.10.2/linux/RWSL-1.tsv and RWSL-2.tsv, each with its .ledger.tsv:
   - columns: row word verdicts sweep_s first_in_list rc diverged platform tree wall_s post_s matched disclosed;
-  - on lane ref claude/r-linux-1262, pushed as each shard ends, then ls-remote; raw JSON kept outside the clone.
+  - on lane ref claude/r-linux-1262 (claude/r-linux-1262b if that ref holds a dry run; ruling 10), pushed as each
+    shard ends, then ls-remote; raw JSON kept outside the clone.
 POST (one per shard, <=40 lines):
   - WHAT: lane, shard, TIP, ref@SHA;
   - EVIDENCE: the triple; rows run against listed; the word tally; each row's matched (+ disclosed) BESIDE its
@@ -355,7 +357,8 @@ CONTAINER RULES (about 30 GB of disk; tmpfs wiped on restart; OOM history):
   - commit and push each shard's TSV and ledger the moment the shard ends.
 EVIDENCE: docs/phase4/rebank-1.26.10.2/linux/<shard>.tsv (+ .ledger.tsv):
   - columns as R-WSL's;
-  - on lane ref claude/p1-linux-1262 (P2: claude/p2-linux-1262); ls-remote after each push.
+  - on lane ref claude/p1-linux-1262 (P2: claude/p2-linux-1262), or its -1262b fresh ref if that ref holds a dry
+    run (ruling 10); ls-remote after each push.
 POST: one per shard, as R-WSL's, plus the container's restarts during the shard.
 ```
 
@@ -382,7 +385,8 @@ EVIDENCE: one TSV per dispatch, docs/phase4/rebank-1.26.10.2/darwin/<dispatch>.t
   - columns: shard row RID verdicts matched disclosed divergent new status agree win_expected win_disclosed
     darwin_seg win_differs;
   - one line per row per RID;
-  - on lane ref claude/c1-darwin-1262; ls-remote after each push.
+  - on lane ref claude/c1-darwin-1262 (claude/c1-darwin-1262b if that ref holds a dry run; ruling 10); ls-remote
+    after each push.
 POST: one per dispatch:
   - WHAT: the dispatch, the run id, the headSha;
   - EVIDENCE: rows agreeing on both RIDs, with their counts beside the current darwin: segments; rows disagreeing,
@@ -407,3 +411,9 @@ POST: one per dispatch:
 9. **A container needs room before its first row:** a lane whose free disk is under 20 GB clears its own caches
    first (the Go build cache and the NuGet locals). If it still cannot reach 20 GB, its shards move to the other
    container, after that container's own.
+10. **Evidence refs (COORD, 2026-11-02):** a leg whose lane ref already holds pre-freeze content (a dry run, or
+    files from an older cut) pushes its re-read to a FRESH ref cut from the TIP, named with the -1262b suffix
+    (`claude/<lane>-<leg>-1262b`). It never commits on top of the old ref, merges the TIP into it or force-pushes
+    it, so the posted dry-run SHA stays untouched and nothing from the old cut reaches master. A lane ref that does
+    not exist, or holds nothing, keeps its plain name. The post names the ref used; the ledger's tip line still
+    reads the TIP.
