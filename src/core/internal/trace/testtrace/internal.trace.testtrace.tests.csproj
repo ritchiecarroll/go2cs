@@ -130,6 +130,7 @@
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal.trace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/raw/internal.trace.raw.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/version/internal.trace.version.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/txtar/internal.txtar.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />

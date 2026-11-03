@@ -6,9 +6,9 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `math/big` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `3e3f18925`*
+*Validated 2026-11-03 · converter `25e3b6ede`*
 
-**248 matched · 3 disclosed** — Go 1.26.10, `windows/amd64`, converted package
+**249 matched · 2 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/math/big`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/math/big).
 
 Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
@@ -198,7 +198,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd
 | `TestMulBits` | pass | pass |
 | `TestMulRangeN` | pass | pass |
 | `TestMulRangeZ` | pass | pass |
-| `TestMulUnbalanced` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestMulUnbalanced` | pass | pass |
 | `TestMulWW` | pass | pass |
 | `TestNLZ` | pass | pass |
 | `TestNatDiv` | pass | pass |
@@ -282,7 +282,6 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestMulUnbalanced` | `deferred` | A MemStats bytes meter, not an AllocsPerRun one: allocBytes reads runtime.MemStats.TotalAlloc around one nat.mul of a 50,000-word by a 40-word operand and asserts the bytes stay under 10 times the inputs' size. It passes on both sides at go1.24.13; at go1.26.10 Go hands nat.mul a preallocated getStack() stack, which is how Go stays near 1x (its one ~400 KB result). A thread-precise probe of the converted call shows the stack reused correctly (save, nat and restore cost 0 bytes) and an excess of about 4.2 KB in each of the ~1,249 40x40 products. 74% of it is one converted construct: an element address-of whose only use is an identity compare. alias()'s `&x[cap-1] == &y[cap-1]` mints two 184-byte element boxes per call and nat.mul calls it twice, across four mul frames per product (2,944 B); addVW's `&z[0] != &x[0]` adds 144 B. Another 21% is karatsuba's nine non-escaping `&Int{...}` locals at 96 B each (864 B). The rest is karatsuba's defer (~216 B) and basicMul (56 B). Go allocates none of these. |
 | `TestNewIntAllocs` | `deferred` | A want-zero AllocsPerRun assert over `x.Add(x, NewInt(n))`: NewInt is arranged to inline so that its `&Int{...}` and its one-word abs slice live on Go's stack. The divergence is an ORACLE-side change, not a C# regression. The test body, NewInt and Int.Add are byte-for-byte the same at go1.24.13 and go1.26.10, and the go1.24.13 page reads `fail` on both sides: Go failed this test too, so it matched. At go1.26.10 Go passes it, and C# still allocates, so it now reads Go=pass / C#=fail. |
 | `TestSqrAlloc` | `deferred` | AllocsPerRun assert new at go1.26.10 (escape_test.go:43-50): squaring an 80-word nat through Mul(x, x) must allocate at most once (the result). go1.26.10's multiplication takes its scratch from a stack (natmul.go, getStack), which Go keeps off the heap; the converted side heap-allocates that scratch and reads 4.00 objects per run on both OSes. Same Go-side change as the TestMulUnbalanced entry beside it. |
 

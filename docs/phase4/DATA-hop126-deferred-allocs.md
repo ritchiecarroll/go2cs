@@ -107,6 +107,68 @@ tip: it read 4,081 to 4,432 per run at batch 19 and 4,071 to 4,642 at batch 24, 
 loops run a random number of times and the converted side allocates on every iteration. The successor record's
 amendment has the six readings.
 
+**Amended 2026-11-03 (lane H): two pins retired in the pre-refreeze bank seat.** Neither pin was in this record's
+table: `log`'s `TestDiscard` was relabelled `deferred` on 2026-09-23, before this record was written, and the runtime
+arena pins were never allocation pins. They are recorded here because COORD routed their retirement to this record.
+
+- **`log` · `TestDiscard`** (`deferred`, " allocs, want at most 1", no `platforms`) **is RETIRED**. Its reading
+  was 2 per run against Go's 1. It now passes on both sides on every platform. Discovery readings at freeze tip
+  `f6666d98a2`:
+  - windows (i9-S): COUNT 24 against banked 23;
+  - linux (P2-1): PASS 24, 0 disclosed;
+  - darwin (C1-9): 24 matched, 0 divergent on osx-arm64 and osx-x64.
+
+  At the seat base `0e857031fe` on windows (lane H), the comparison record reports the entry as an orphan, Go pass /
+  C# pass. The manifest is now empty and is deleted.
+- **`runtime` · `TestUserArenaLiveness/Free` and `/Finalizer`** (`codegen-liveness`, no `platforms`) **are
+  RETIRED**, and the parent `TestUserArenaLiveness` rides them. On windows the row reads 11083 = 11080 + 3:
+  - i9-S at `f6666d98a2`: COUNT 11083 against banked 11080;
+  - lane H at `0e857031fe`: 11083 matched, 63 divergent, and both entries reported as orphans, Go pass / C# pass.
+
+  Darwin (C1-13) reads FAIL with its two RIDs disagreeing, so runtime does not bank there. Its disclosure list is 63
+  long on both RIDs, against windows' 66 banked. Linux has no runtime reading at `f6666d98a2`.
+
+**Amended again 2026-11-03 (lane H): `math/big` · `TestMulUnbalanced` is RETIRED** (bank seat 2). This is the
+table's row above, a ratio of 14 against Go's 10 on windows/amd64 at `8c091fc3aa`. It now passes on both sides on
+every platform. Readings:
+- windows (G-S) at freeze tip `f6666d98a2`: COUNT 249 against banked 248;
+- windows (lane H) at `25e3b6ede6`: 249 matched, 2 divergent, and the entry reported as an orphan, Go pass / C# pass;
+- linux (P2-1) at `f6666d98a2`: PASS 249, 2 disclosed;
+- darwin (C1-9) at `f6666d98a2`: 249 matched, 2 divergent on osx-arm64 and osx-x64. C1's per-name table moves exactly
+  one name, `TestMulUnbalanced`, from pass/fail (disclosed) to pass/pass.
+
+The manifest keeps `TestNewIntAllocs` and `TestSqrAlloc`. The roster's `linux: 248 + 3` and `darwin: 248 + 3` segments
+are removed: they claim 3 disclosures against a manifest that can now account for 2, and the re-pass at the new freeze
+tip restores them, expected 249 + 2.
+
+The retired entry's last reading and plan, verbatim from `src/core/math/big/go2cs_test_disclosures.json` at `25e3b6ede6`,
+are kept here because living pages cite them:
+
+- reading: 5,723,096 B for a 400,320 B input, a ratio of 14 (windows/amd64, f8fe15c97e, Release untiered, the row
+  filtered to ^TestMulUnbalanced$). A thread-precise reading of the same call is 5,722,800 B = 400,376 (the result) +
+  about 1,249 x 4.2 KB. Unit: BYTES (lesson 63: the alloc-units extractor records AllocsPerRun units only).
+- plan: INCREMENT 1 (queued post-publish, COORD 2026-10-25): an allocation-free identity compare for `&a[i] ==/!= &b[j]`,
+  where golib compares the backing storage and absolute index with ж=='s semantics and the converter emits it when both
+  operands are element address-ofs. It is predicted to bring 4.2 KB per product to ~1.2 KB and the ratio to ~5 < 10,
+  retiring this entry alone. Then docs/phase4/DESIGN-nonescaping-locals.md (REC-B) for the Int locals.
+
+**Amended again 2026-11-03 (lane H): `runtime` · `TestLockRankGenerated` is RETIRED** (the 1.26.10.2 bank of record,
+COORD's ruling). It is a `host-identity` pin with no `platforms` field, so it covered every platform, and the
+pre-refreeze bank seat KEPT it only because linux had no runtime reading at `f6666d98a2`. Like the arena pins, it was
+never an allocation pin; COORD routed it to this record with the others. At freeze tip `d9dd8f5499` it passes on
+both sides on all three platforms:
+- windows: the current proof page (lane H at `0e857031fe`) reads it pass | pass, an orphan, and i9-S at `d9dd8f5499`
+  reads runtime PASS 11083 at the banked count;
+- linux (GWSL-1) at `d9dd8f5499`: Go pass | C# pass in the run's comparison record, read by G and committed as the
+  verbatim entry excerpt with the full record's sha256, `docs/phase4/rebank-1.26.10.2/linux/GWSL-1-runtime-LockRank.json`
+  (claude/g-linux-1262c, GWSL-2's evidence commit);
+- darwin (C1-13) at `d9dd8f5499`: pass on osx-arm64 and osx-x64, as COORD relayed C1's per-name record. runtime
+  does not bank on darwin this round (both RIDs FAIL on other names and disagree).
+
+It is count-neutral on every platform: an orphan is in no disclosure list. Windows' page lists divergent entries only,
+so runtime's 11083 + 63 and its page do not move; linux's 11094 + 67 subtracts host-fatal entries only; darwin
+carries no runtime segment. The manifest keeps 74 entries.
+
 <!-- Provenance. Lane H, 2026-10-22. Worktree detached at 8c091fc3aa; the six rows' walls on windows/amd64 were
      crypto/sha256 249 s, strings 90 s, bytes 76 s, log/slog 272 s, math/big 156 s, crypto/internal/fips140test
      356 s. Each sweep exited 1 because the banked counts are still the go1.24.13 record, which this record does
