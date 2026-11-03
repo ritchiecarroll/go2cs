@@ -59,7 +59,7 @@ internal static partial class panicframesprobe_package
         GoFrame ᒐ = default;
         try {
             defer(() => { recover(); got = callersHere(); }, ref ᒐ);
-            got = [derefWrapper(new StandardBox<F>(default)).ToString()];
+            got = [derefWrapper(new StandardBox<F>(nil)).ToString()];
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }

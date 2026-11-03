@@ -49,7 +49,15 @@ public class StandardBox<T> : ж<T>
     /// Creates a new pointer to a heap allocated instance of type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="value">Source value for the heap allocated reference.</param>
-    public StandardBox(in T value)
+    /// <remarks>
+    /// <paramref name="value"/> is taken BY VALUE, never <c>in</c>, and cleared once the box holds it. With
+    /// <c>in</c>, an rvalue argument (<c>new StandardBox&lt;X&gt;(&lt;call&gt;)</c>) was spilled into a hidden local
+    /// of the CALLER and passed by address. Where this constructor is not inlined (a large caller frame, measured
+    /// at default inlining: <c>lea rdx, [rsp+0x20]; call StandardBox`1[__Canon]:.ctor(byref)</c>), that local is
+    /// reported live for the caller's whole frame and keeps the value alive after the box drops it. Guarded by
+    /// GolibTests' BoxConstructorRvalueRootingTests; heap and Ꮡ carry the same rule.
+    /// </remarks>
+    public StandardBox(T value)
     {
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
         {
@@ -66,6 +74,9 @@ public class StandardBox<T> : ж<T>
             m_slot = [value];
             AllocationCounter.Count(2);
         }
+
+        // The box holds the value now; drop the parameter's own copy (see remarks).
+        value = default!;
     }
 
     /// <summary>
