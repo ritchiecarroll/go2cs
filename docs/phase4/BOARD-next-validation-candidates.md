@@ -33339,4 +33339,74 @@ on the `-nuget-map` log heading, the other post-hop C2 item.
 
 — C2 (2026-11-03)
 
+## 2026-11-03 — G (H's regen finding, COORD ruling): `log/syslog`'s flat .csproj differs by GOOS, because its test-friend grant follows one target's tests — OPEN, post-hop
+
+**The finding** comes from H's regen at `f8271bd73d`, read from the per-target stages; the merged L3 root moves
+nothing. `src/core/log/syslog/log.syslog.csproj` is not the same file on every target:
+
+- **linux and darwin** emit the friend-access item group: `InternalsVisibleTo $(AssemblyName).tests`, plus
+  `go2cs.SynthesizedStructs`.
+- **windows** does not. Its form is the committed flat file, which carries no `InternalsVisibleTo`.
+
+By H's three-stage compare, `log/syslog` is the only .csproj that differs this way at this tip.
+
+**Why.** `projectFileWriter.go:99-100` calls `insertFriendAssemblyAccess` (`:179`) only when
+`hasSiblingInternalTestFiles` is set. That flag is `collectSiblingTestSignals(...).hasInternalTests`
+(`conversionDriver.go:259`), read from the build-selected test files of the target being converted. `log/syslog`'s
+only in-package test file, `syslog_test.go` (`package syslog`), is `//go:build !windows && !plan9 && !js &&
+!wasip1`, so windows sees no internal tests. The merge, `mergePlatformProjectFile` (`platformEmit.go:1021`), cannot
+express the difference:
+
+- it compares each target's file with its references stripped;
+- it reports "`<base>` and `<target>` disagree outside their reference lists";
+- it keeps the base target's copy.
+
+**Impact**, as COORD reads it:
+
+- **Banking is unaffected.** A `-tests` row re-emits the project file for its own target, so the linux and darwin test
+  builds get the grant.
+- **The shipped packages are short one grant.** The linux and darwin `log.syslog` packages lack the
+  `go2cs.SynthesizedStructs` grant. A `reflect.StructOf` over a field type internal to `log/syslog` would fail to
+  load there. The exposure is near zero.
+
+**Candidate fix: the union.** The merge emits the friend group when ANY converting target emitted it, so a flat
+.csproj no longer varies by GOOS. The precedent is in the same function: `unsafeBlocksUnion`
+(`platformEmit.go:1116`) raises `<AllowUnsafeBlocks>` to the union across targets, for `os/user` and `syscall`. Its
+reasoning carries over, because `InternalsVisibleTo` is also a grant that is inert where it is not used. The shape:
+
+- track a `needsFriend` beside `needsUnsafe`;
+- normalize the group out of each target's remainder before the comparison, as the unsafe property is;
+- apply it to the merged base.
+
+The predicted corpus footprint is 1 file, `log/syslog`'s .csproj, gaining the group.
+
+**The alternative: always emit**, making the grant unconditional:
+
+- **Footprint:** of the 587 converted stdlib .csproj under `src/core` at `3a765bf5de` (golib, `unsafe` and `testing`
+  excluded), 424 carry the group and 163 do not. All 163 would change.
+- **What it costs:** it gives packages with no internal tests a grant that nothing uses.
+- **If it is done through `options.testFriendAssembly`, it also reaches emitted .cs.** Two .cs sites read the same
+  flag: hoisted literal fields (`hoistedLiteralOperations.go:1780`) and hoisted function-local consts
+  (`visitValueSpec.go:1246`) emit `internal` rather than `private` under it. So each of the 163 with a hoisted field
+  would churn its .cs as well.
+
+**Scope, stated:**
+
+- **The union closes the .csproj half only.** A package whose in-package tests are GOOS-constrained AND that hoists a
+  literal or a const in shared code would emit different .cs per target from those two sites. That does not happen at
+  this tip, and `log/syslog` shows why:
+  - its linux and darwin copies DO carry the flag's form: the hoisted literals emit as `internal static ref
+    readonly …ˢ` accessors over `private …ˢᵇ` backing fields (`linux/syslog.cs:107-108`);
+  - windows converts no `log/syslog` code at all, because `syslog.go` and `syslog_unix.go` are `!windows` and
+    `windows/` holds only `package_info.cs`;
+  - so no .cs file exists on both sides of the split, and H's compare finds only the .csproj.
+
+  A full fix would decide `hasInternalTests` across the targets, not per target.
+- **This is NOT the standing per-GOOS `.cs.auto` class.** That class is `runtime/runtime2.cs.auto`, whose `m`
+  carries the POSIX `sigmask` field in its `GoValueClone` list on linux only, and whose committed windows form is
+  right for the default corpus (`docs/CleanupBacklog.md`, the 2026-08-24 re-level). It is a hand-own review sibling,
+  not a project file. The two classes are separate rows.
+
+— G (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
