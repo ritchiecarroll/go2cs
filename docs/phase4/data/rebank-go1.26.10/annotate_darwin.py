@@ -40,10 +40,19 @@ rulings = set(re.findall(r"^\s*'([^']+)'\s*=", rulings_block, re.M))
 assert rulings, 'no agreement rulings parsed'
 # The guard's $DarwinRuledCounts (COORD 2026-11-03): row -> (matched, disclosed-divergent). A row reading COUNT banks
 # only at exactly that value on both RIDs. Read from the guard, and every entry must parse, so the two cannot drift.
-ruled_block = re.search(r'^\$DarwinRuledCounts = @\{(.*?)^\}', guard, re.M | re.S).group(1)
+ruled_match = re.search(r'^\$DarwinRuledCounts = @\{(.*?)^\}', guard, re.M | re.S)
+if not ruled_match:
+    sys.exit('the guard has no $DarwinRuledCounts table: this annotator banks by the guard\'s ruled-count rule and will not '
+             'run against a guard that lacks it')
+ruled_block = ruled_match.group(1)
 ruled_keys = re.findall(r"^\s*'([^']+)'\s*=", ruled_block, re.M)
 ruled = {k: (m, int(d)) for k, m, d in re.findall(r"^\s*'([^']+)'\s*=\s*'(\d+)/(\d+) -- \S", ruled_block, re.M)}
 assert len(ruled) == len(ruled_keys), f'a $DarwinRuledCounts entry does not parse: {sorted(set(ruled_keys) - set(ruled))}'
+# The two tables never share a row (H's review, 2026-11-03): an agreement ruling ORs into "agreed", so a row in both
+# would bank a COUNT whose agree column reads no. The guard refuses the same overlap by name.
+both = sorted(rulings & set(ruled_keys))
+if both:
+    sys.exit(f'rows in BOTH $DarwinAgreementRulings and $DarwinRuledCounts: {both}')
 
 declared = re.search(r"^\$DarwinEvidenceDirectory = '([^']+)'", guard, re.M)
 assert declared, 'no $DarwinEvidenceDirectory parsed from the guard'

@@ -2208,6 +2208,14 @@ $DarwinRuledCounts = @{
     'internal/runtime/gc/scan' = '3092/0 -- seat #8(a) 4f245d9f4b (3 AVX-512 tests targetArchExcluded), BOARD d780a56fbc, C1 0915beab8f; per-name at d9dd8f5499: run 41688965804, relay 41705475766, mailbox 910b0994ed'
 }
 
+# The two tables never share a row (H's review of the seat, 2026-11-03). The bank predicate ORs an agreement ruling into
+# "agreed", so a row in BOTH would bank a COUNT whose agree column reads no; the ruled-count rule says the RIDs agree.
+# The guard refuses an overlap by name, and annotate_darwin.py fails on one at parse time.
+function Get-DarwinTableOverlap {
+    param($AgreementRulings, $RuledCounts)
+    return @($RuledCounts.Keys | Where-Object { $AgreementRulings.ContainsKey($_) } | Sort-Object)
+}
+
 # The DISCLOSED-DIVERGENT count of one evidence line (COORD 2026-10-26, R's finding). The TSV's `disclosed` column is
 # len(comparison.disclosed), the disclosure LIST, which the converter builds as the divergent set PLUS every host-fatal
 # name in scope (testConversion.go, hostFatalNames: tests run on neither side, with no verdict). The roster banks the
@@ -2389,6 +2397,12 @@ Assert-Equal 'darwin ruled count: a status other than COUNT or validated is refu
 Assert-Equal 'darwin ruled count: a COUNT reading with NO entry is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0)))
 Assert-Equal 'darwin ruled count: an entry that does not parse rules nothing (refused)' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 2 0) -RuledCount '2 -- no slash'))
 Assert-Equal 'darwin ruled count: a validated row still banks as before, the entry aside' $null (Get-DarwinSegmentRefusal -Records $darwinBankedClean -Segment (& $darwinSeg 98 0) -RuledCount $ruled)
+# H's review, 2026-11-03: the near-miss between the two bank paths, a reading at the ruled count beside a different
+# carried segment, and the two tables sharing a row.
+Assert-Equal 'darwin ruled count: a MIXED pair (osx-arm64 validated 2, osx-x64 COUNT 2) banks on neither path (refused)' $true ($null -ne (Get-DarwinSegmentRefusal -Records @((New-DarwinFixtureRecord 'osx-arm64' 'validated' 'yes' 2 0), $darwinCount[1]) -Segment (& $darwinSeg 2 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: at the ruled count but carrying a DIFFERENT segment (darwin: 9 kept) is refused' $true ($null -ne (Get-DarwinSegmentRefusal -Records $darwinCount -Segment (& $darwinSeg 9 0) -RuledCount $ruled))
+Assert-Equal 'darwin ruled count: a row in BOTH tables is named as an overlap' 'w/both' ((Get-DarwinTableOverlap @{ 'w/both' = 'r'; 'w/agree' = 'r' } @{ 'w/both' = '2/0 -- x'; 'w/ruled' = '2/0 -- x' }) -join ', ')
+Assert-Equal 'darwin ruled count: disjoint tables name no overlap' '' ((Get-DarwinTableOverlap @{ 'w/agree' = 'r' } @{ 'w/ruled' = '2/0 -- x' }) -join ', ')
 
 # The waves' contract, against a fixture TREE (the reader is part of the contract): a row failing in D-W1 and
 # validated in a later wave reads as the later wave, in either file order; a row read only in D-W1 keeps it; and
@@ -2473,6 +2487,8 @@ $darwinRowsUnread = 0
 $darwinRefused = 0
 $darwinSuperseded = 0
 $darwinRuledBanked = 0
+$darwinTableOverlap = (Get-DarwinTableOverlap $DarwinAgreementRulings $DarwinRuledCounts) -join ', '
+Assert-Equal "darwin ruled count: no row sits in both `$DarwinAgreementRulings and `$DarwinRuledCounts (found: $darwinTableOverlap)" '' $darwinTableOverlap
 # Every ruled count must parse: an entry that does not rules nothing, and would sit in the table looking like a ruling.
 foreach ($ruledRow in $DarwinRuledCounts.Keys) {
     Assert-Equal "darwin ruled count: $ruledRow's entry reads '<matched>/<disclosed-divergent> -- <citations>'" $true ($DarwinRuledCounts[$ruledRow] -cmatch '^\d+/\d+ -- \S')
