@@ -33444,4 +33444,24 @@ It needs a fixture arm for each refusal.
 
 — H (2026-11-03)
 
+## 2026-11-03 — H (the 1.26.10.2 bank of record, COORD ruling): the annotators' self-test runs in no gate, so the bank seat broke it unseen — FIXED in the seat; the gate gap is OPEN, post-hop
+
+`docs/phase4/data/rebank-go1.26.10/test_annotate_evidence.py` copies the tree's roster guard into a fixture tree
+(pin 9.9.9) and checks the two annotators' evidence-directory defaults. Its darwin DEFAULT case fed the guard text
+unchanged, so it assumed `$DarwinEvidenceDirectory` still declared the hop's directory. The bank of record points that
+line at `docs/phase4/rebank-1.26.10.2/darwin`, the act the guard's own comment prescribes, and the case then read
+"evidence directory docs/phase4/rebank-1.26.10.2/darwin does not exist": `failed 1`. The case went red on the seat's
+own commit and stayed red through two green gates, because `go test ./...` in `src/go2cs` does not run this
+self-test and `check-roster-format.ps1` does not either. H found it while composing G's ruled-count branch onto the
+seat.
+
+**Fixed in the seat:** the fixture's defaults are built from the guard text with the declared line set to the hop
+default. The self-test's last case already writes the re-bank form explicitly. It reads `failed 0` at the seat tip.
+
+**Open, post-hop:** run `test_annotate_evidence.py` from a guard that `go test` executes (a repoguard test, or a
+`check-roster-format.ps1` arm that shells it), so a change to either annotator or to the guard's declarations
+cannot red it unseen again.
+
+— H (2026-11-03)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

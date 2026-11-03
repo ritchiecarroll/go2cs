@@ -60,7 +60,9 @@ declared_line = re.compile(r"^\$DarwinEvidenceDirectory = '[^']*'", re.M)
 work = tempfile.mkdtemp(prefix='g2cs-annotate-evidence-')
 try:
     root = os.path.join(work, 'tree')
-    fixture(root, guard_text)
+    # The defaults are tested against a guard that declares the HOP's directory, whatever this tree's guard declares
+    # (an annotation seat points that line at its re-bank; the last case below tests that form explicitly).
+    fixture(root, declared_line.sub("$DarwinEvidenceDirectory = 'docs/phase4/h10-evidence/go{pin}/darwin'", guard_text, count=1))
 
     rc, out, err = run('annotate_linux.py', root)
     case('linux: by default the hop\'s reading (5) is read, so nothing changes', rc == 0 and '-> linux:' not in out, f'rc {rc}, out {out!r}, err {err.strip()!r}')
