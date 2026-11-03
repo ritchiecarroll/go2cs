@@ -297,8 +297,9 @@ func TestDirectoryBuildPropsCarriesTheLanguageVersionPin(t *testing.T) {
 }
 
 // global.json pins the SDK band, and NOTHING else: a `test` key would change `dotnet test`'s runner
-// (docs/DotNetMigration.md step 4). The floor 10.0.100 with `latestFeature` admits every 10.0.x SDK on
-// the fleet (the 1xx and 4xx bands) and refuses an 11.x SDK and a 9.x one. The `latestMajor` family is
+// (docs/DotNetMigration.md step 4). The floor 10.0.400 with `latestFeature` admits every band-400-or-later 10.0.x SDK
+// and refuses a 10.0.1xx one, an 11.x and a 9.x. Band 400 (Roslyn 5.9) is the release compiler; a 1xx build is blind
+// to the CS0012 class batch 134 fixed, so it must fail at SDK resolution rather than read green. The `latestMajor` family is
 // the trap: it is the only roll-forward that crosses a major, so it would admit 11.x.
 func TestGlobalJsonPinsTheSdkBand(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join(repoRootFromPackageDir(t), "global.json"))
