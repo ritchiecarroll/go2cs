@@ -19,13 +19,13 @@ package, on Windows and Linux, and the same validation is in progress on macOS.
 
 ## 📰 NEWS — Another package's variables by address, and converted code that reads like Go
 
-**November XX, 2026, NuGet 1.26.10.2.** The first fix release on the Go 1.26 line, still built from Go 1.26.10.
+**November 3, 2026, NuGet 1.26.10.2.** The first fix release on the Go 1.26 line, still built from Go 1.26.10.
 Taking the address of a variable another package exports now reaches the variable, as in Go, and converted C#
 reads closer to the Go it came from: `p.f` through a pointer, `err != nil`, and slice literals as C# collection
 expressions. Two changes break compiled C#, so an assembly built against an earlier package must be rebuilt.
 go2cs now installs as a .NET tool, `dotnet tool install -g go2cs`, and needs no Go installed. A goroutine's crash
 is no longer lost when `main` returns, and a converted program optimizes its hot methods sooner.
-[Full announcement](NEWS.md#november-xx-2026--another-packages-variables-by-address-and-converted-code-that-reads-like-go).
+[Full announcement](NEWS.md#november-3-2026--another-packages-variables-by-address-and-converted-code-that-reads-like-go).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 

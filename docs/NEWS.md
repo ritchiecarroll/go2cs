@@ -8,11 +8,10 @@ their full text.
 
 ---
 
-## November XX, 2026 — Another package's variables by address, and converted code that reads like Go
+## November 3, 2026 — Another package's variables by address, and converted code that reads like Go
 
-<!-- RELEASE DAY: replace "November XX" with the publish date here, in the README's NEWS block, and in that block's
-     link anchor. This entry is held unmerged until release day, and lands just before the release tag mints
-     (GoCorpusMigration.md, the release ritual, item 1). -->
+<!-- Written ahead and held unmerged until release day; dated November 3, 2026 and landed as the last change before
+     the release tag (GoCorpusMigration.md, the release ritual, item 1). -->
 
 **NuGet 1.26.10.2.** The first fix release on the Go 1.26 line. The converted standard library is still built from
 Go 1.26.10, and converting a module still needs a Go 1.26 toolchain and the .NET 10 SDK. Two of the changes below
