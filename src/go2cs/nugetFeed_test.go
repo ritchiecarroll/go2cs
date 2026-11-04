@@ -106,6 +106,44 @@ func TestNuGetMapFeedPrefersAReleaseToARehearsal(t *testing.T) {
 	}
 }
 
+// A rebuild's rehearsal is the rebuild's version plus the rehearsal label: nugetgo-pack.ps1 -Revision 1
+// -RehearsalSuffix int.1 packs mousetrap v1.1.0 as 1.1.0.1-int.1 (the go.* 1.26.10.2 wave, 2026-11-04, where the
+// hosted rows refused a conversion that never selected it). It is admitted from a configured feed, it ranks above the
+// base version's rehearsal, and the higher revision ranks first.
+func TestNuGetMapFeedAdmitsARebuildsRehearsal(t *testing.T) {
+	setNuGetMapFeed(t, t.TempDir())
+	published := []string{"1.300.0-local.1", "1.300.0.1-local.1", "1.300.0.2-local.1", "1.300.0.x-local.1", "1.300.1.1-local.1"}
+	got, err := nugetSelectionCandidates("v1.300.0", published)
+	want := []string{"1.300.0.2-local.1", "1.300.0.1-local.1", "1.300.0-local.1"}
+
+	if err != nil || strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("candidates %v (err %v); want %v", got, err, want)
+	}
+
+	got, _ = nugetSelectionCandidates("v1.0.0-rc.1", []string{"1.0.0-rc.1.local.1", "1.0.0-rc.1.0.1.local.1"})
+	want = []string{"1.0.0-rc.1.0.1.local.1", "1.0.0-rc.1.local.1"}
+
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("prerelease candidates %v; want %v", got, want)
+	}
+
+	newNuGetMapFixture(t)
+	mod := thirdPartyModule{path: modShape.path, version: "v1.300.0"}
+	pkg := shapePackage(t, mod)
+	dir := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(dir, feedPackageID+".1.300.0.1-int.1.nupkg"), pkg, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	setNuGetMapFeed(t, dir)
+	choice, notes, err := selectNuGetPackage(feedPackageID, mod, nugetLockEntry{}, false, false)
+
+	if err != nil || choice.packageVersion != "1.300.0.1-int.1" || choice.contentHash != nupkgHash(pkg) {
+		t.Fatalf("choice %+v, notes %q (err %v); want the rebuild's rehearsal 1.300.0.1-int.1 from the folder", choice, notes, err)
+	}
+}
+
 // The flag is refused where it would do nothing or could be rewritten in transit.
 func TestNuGetMapFeedIsRefusedByName(t *testing.T) {
 	missing := filepath.Join(t.TempDir(), "absent")
