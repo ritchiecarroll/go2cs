@@ -21,7 +21,7 @@
   -->
   <PropertyGroup>
     <GoStdLibVersion>1.26.10</GoStdLibVersion>
-    <GoBuildNumber>1</GoBuildNumber>
+    <GoBuildNumber>2</GoBuildNumber>
     <Version>$(GoStdLibVersion).$(GoBuildNumber)</Version>
   </PropertyGroup>
 
