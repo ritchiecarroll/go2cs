@@ -715,12 +715,12 @@ button {
   scrollbar-color: var(--scrollbar) transparent;
 }
 
-/* The Tour scrolls its output rather than wrapping it, so a line that is too
-   long breaks in the same place -- or not at all -- in both panes. The pre grows
-   to its widest line so its background still covers a scrolled view. */
+/* The output wraps a long line as the Tour's does: the pinned Tour (x/website 52d470bcf26e) sets
+   `.output > pre > span { text-wrap: wrap }` over a pre with overflow-wrap: break-word, so each output span
+   wraps at the pane's edge and a word longer than the pane breaks. A wide picture still overflows and the
+   pane scrolls to it, as the Tour's does. */
 #output-view {
   min-width: 100%;
-  width: max-content;
   min-height: 0;
   margin: 0;
   padding: 10px;
@@ -728,6 +728,11 @@ button {
   background: var(--output-pre);
   font: 400 16px/24px "Inconsolata", monospace;
   white-space: pre;
+  overflow-wrap: break-word;
+}
+
+#output-view > span {
+  white-space: pre-wrap;
 }
 
 /* A picture keeps its natural size and stays inline -- as it does in the Tour,
