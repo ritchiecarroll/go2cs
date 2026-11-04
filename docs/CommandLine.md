@@ -25,6 +25,7 @@ go2cs -recurse=module,nuget module_dir out   # convert only the module's own pac
 go2cs -tests goroot_pkg_dir converted_pkg_dir   # convert a package plus its Go test suite
 go2cs -tests -test-action all goroot_pkg_dir converted_pkg_dir   # ...and build, run, and diff vs go test
 go2cs -tests -recurse -test-action all -go2cspath <go2cs_clone>/src module_dir out_root   # validate a whole module against its own tests
+go2cs toolchain env                    # the Go toolchain go2cs converts with (see below)
 ```
 
 ## Options
@@ -73,6 +74,22 @@ go2cs -tests -recurse -test-action all -go2cspath <go2cs_clone>/src module_dir o
 All converted C# code references a hand-written runtime library (`golib`, published as the [`go.lib`](https://www.nuget.org/packages/go.lib)
 NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time (published as
 [`go.gen`](https://www.nuget.org/packages/go.gen)). A `-recurse=nuget` conversion wires both up for you.
+
+## The Go toolchain
+
+The converter loads and type-checks Go with the Go toolchain. A release build, such as the
+[go2cs dotnet tool](DotnetTool.md), downloads the Go release it converts with on first use when no Go of that
+release is set up, and `go2cs toolchain` manages that copy:
+
+```shell
+go2cs toolchain install             # download it now
+go2cs toolchain install -from FILE  # install it from a Go release archive or toolchain module zip
+go2cs toolchain env                 # print GOROOT, GOVERSION and GO, the go command go2cs uses
+go2cs toolchain prune [-all]        # remove copies of other Go releases (-all: this one too)
+```
+
+`GO2CS_GOROOT` names an existing install of that release to use instead. [The go2cs dotnet tool](DotnetTool.md)
+has the whole order go2cs chooses a Go in.
 
 ## Diagnostics
 

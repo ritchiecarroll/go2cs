@@ -17,14 +17,15 @@ machinery stays out of the converted files. Behavior comes first: a goroutine ru
 and is not rewritten into `async`. The converted Go standard library passes Go's own tests, package by
 package, on Windows and Linux, and the same validation is in progress on macOS.
 
-## 📰 NEWS — The converted standard library moves to Go 1.26.10
+## 📰 NEWS — Another package's variables by address, and converted code that reads like Go
 
-**October 26, 2026, NuGet 1.26.10.1.** The converted standard library is built from Go 1.26.10, a release
-Go still supports, and every package that can be validated passes Go's own tests at Go 1.26.10 on
-Windows x64 and Linux x64. Converting needs Go 1.26.10. Go 1.26's new packages are new `go.*` package
-IDs, and the ten IDs Go 1.26 no longer has are deprecated, pointing at 1.24.13.7. A limitation is newly
-documented: the address of another package's variable is the address of a copy.
-[Full announcement](NEWS.md#october-26-2026--the-converted-standard-library-moves-to-go-12610).
+**November 3, 2026, NuGet 1.26.10.2.** The first fix release on the Go 1.26 line, still built from Go 1.26.10.
+Taking the address of a variable another package exports now reaches the variable, as in Go, and converted C#
+reads closer to the Go it came from: `p.f` through a pointer, `err != nil`, and slice literals as C# collection
+expressions. Two changes break compiled C#, so an assembly built against an earlier package must be rebuilt.
+go2cs now installs as a .NET tool, `dotnet tool install -g go2cs`, and needs no Go installed. A goroutine's crash
+is no longer lost when `main` returns, and a converted program optimizes its hot methods sooner.
+[Full announcement](NEWS.md#november-3-2026--another-packages-variables-by-address-and-converted-code-that-reads-like-go).
 
 **➡ All announcements can be found in the [go2cs News Archive](NEWS.md).**
 
@@ -92,10 +93,12 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 ## Requirements
 
 - **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#.
-- **[Go 1.26](https://go.dev/dl/)**, any 1.26.x release, to convert a module. The standard library
-  packages are converted from, and validated on, Go 1.26.10. The converter is a Go program and uses
-  the Go toolchain to load and type-check the source it converts, so that source must already build
-  with `go build`. The [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
+- **No Go installation, with the go2cs dotnet tool.** The converter uses the Go toolchain to load and
+  type-check the source it converts, so that source must already build with `go build`. The
+  [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.10, on first use.
+  To build the converter from source instead, you need [Go 1.26](https://go.dev/dl/). The standard
+  library packages are converted from, and validated on, Go 1.26.10, and the
+  [Roadmap](Roadmap.md#go-releases) says which Go releases come next.
 - **Windows or Linux on x64**, where the converted standard library is validated against Go's own
   tests. macOS, on Intel and Apple silicon, has packages and is being validated package by package
   ([Platforms](Roadmap.md#platforms)).
@@ -104,6 +107,19 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
   ([Microsoft's list](https://learn.microsoft.com/dotnet/core/install/linux-scripted-manual#dependencies)).
 
 ## Installing the converter
+
+Install it as a .NET tool:
+
+```shell
+dotnet tool install -g go2cs
+```
+
+The tool is the converter itself, built for Windows, Linux and macOS on x64 and Arm64, and it needs no Go: the
+first conversion downloads the Go release go2cs converts with, checks it against hashes built into go2cs, and
+keeps it in your user cache folder. [The go2cs dotnet tool](DotnetTool.md) explains where that Go comes from,
+how to install it from a file on a machine with no network access, and `go2cs toolchain`.
+
+### Building it from source
 
 Clone the repository and install the converter from the clone. `go install` puts the `go2cs` binary in
 `GOBIN` (or `GOPATH/bin`), which a standard Go setup already has on its `PATH`:

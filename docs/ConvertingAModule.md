@@ -21,6 +21,18 @@ a genuine dependency graph:
 > **NOTE:** _the commands below run verbatim in both PowerShell and a POSIX shell (bash/zsh), on Windows and
 > on Linux. Where the two genuinely differ, both forms are shown and the block is labelled with its shell._
 
+> **NOTE — no Go installed?** _The walkthrough runs `go` to make and check the program it converts. With only
+> the [go2cs dotnet tool](DotnetTool.md) installed, put the Go it converts with first on `PATH` (the first
+> `go2cs toolchain env` downloads it):_
+>
+> ```powershell
+> $env:PATH = (Split-Path (go2cs toolchain env | Select-String '^GO=').Line.Substring(3)) + [IO.Path]::PathSeparator + $env:PATH   # PowerShell
+> ```
+>
+> ```bash
+> export PATH="$(dirname "$(go2cs toolchain env | sed -n 's/^GO=//p')"):$PATH"   # bash / zsh
+> ```
+
 **1 — Go: get the app and confirm it builds as Go.**
 
 ```shell
