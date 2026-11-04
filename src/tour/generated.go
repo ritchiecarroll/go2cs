@@ -19,7 +19,10 @@ import (
 // interface implementations, pointer-receiver overloads, embedding forwarders, field properties and literal
 // interceptors. The tour adds nothing to the build; this endpoint only lists and serves that folder.
 //
-// GET /api/generated?conversionId=<id>&path=<slash path under the root>
+// GET /api/generated?conversionId=<id>&path=<slash path under the root>[&tree=1]
+//
+// With tree=1 a folder comes back whole: every folder under it that holds a .cs file somewhere below, each with
+// its children, so the page draws the generated code as one tree instead of a folder at a time.
 //
 // The root is the conversion's .artifacts/gen, and nothing outside it is reachable: a path is refused when it is
 // absolute, holds a `..` segment, names a symbolic link anywhere along it, or resolves outside the root. A listing
@@ -37,7 +40,12 @@ type generatedEntry struct {
 	Path  string `json:"path"`
 	Kind  string `json:"kind"`
 	Size  int64  `json:"size,omitempty"`
+	// Children is a folder's contents, filled only for a tree=1 request.
+	Children []generatedEntry `json:"children,omitempty"`
 }
+
+// maxGeneratedTreeDepth bounds a tree=1 walk. The generators' output is a handful of levels deep.
+const maxGeneratedTreeDepth = 16
 
 type generatedResult struct {
 	// State is "ready", "pending" (the conversion's build has not finished) or "unavailable" (no build has
@@ -131,7 +139,7 @@ func resolveGenerated(root, clean string) (string, fs.FileInfo, error) {
 	return current, info, nil
 }
 
-func (p *pipelineRunner) generated(id, requested string) (generatedResult, error) {
+func (p *pipelineRunner) generated(id, requested string, tree bool) (generatedResult, error) {
 	clean, err := cleanGeneratedPath(requested)
 	if err != nil {
 		return generatedResult{}, err
@@ -175,15 +183,31 @@ func (p *pipelineRunner) generated(id, requested string) (generatedResult, error
 		return result, nil
 	}
 
-	entries, err := os.ReadDir(target)
-	if err != nil {
-		return generatedResult{}, err
-	}
 	labels := map[string]string{}
 	if clean == "" {
 		labels = projectTokenLabels(artifact)
 	}
 	result.Kind = "dir"
+	depth := 0
+	if tree {
+		depth = maxGeneratedTreeDepth
+	}
+	result.Entries, err = listGenerated(target, clean, labels, depth)
+	if err != nil {
+		return generatedResult{}, err
+	}
+	return result, nil
+}
+
+// listGenerated answers a folder's folders and .cs files, folders first, each in name order. With depth > 0 each
+// folder carries its own contents to that depth, and a folder with no .cs file anywhere below it is left out.
+// A symbolic link is never listed, so it is never followed.
+func listGenerated(dir, clean string, labels map[string]string, depth int) ([]generatedEntry, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	var listed []generatedEntry
 	for _, entry := range entries {
 		if entry.Type()&fs.ModeSymlink != 0 {
 			continue
@@ -192,6 +216,14 @@ func (p *pipelineRunner) generated(id, requested string) (generatedResult, error
 		switch {
 		case entry.IsDir():
 			item.Kind, item.Label = "dir", labels[entry.Name()]
+			if depth > 0 {
+				if item.Children, err = listGenerated(filepath.Join(dir, entry.Name()), item.Path, nil, depth-1); err != nil {
+					return nil, err
+				}
+				if len(item.Children) == 0 {
+					continue
+				}
+			}
 		case strings.EqualFold(filepath.Ext(entry.Name()), ".cs"):
 			item.Kind = "file"
 			if fileInfo, err := entry.Info(); err == nil {
@@ -200,16 +232,16 @@ func (p *pipelineRunner) generated(id, requested string) (generatedResult, error
 		default:
 			continue
 		}
-		result.Entries = append(result.Entries, item)
+		listed = append(listed, item)
 	}
-	sort.Slice(result.Entries, func(i, j int) bool {
-		a, b := result.Entries[i], result.Entries[j]
+	sort.Slice(listed, func(i, j int) bool {
+		a, b := listed[i], listed[j]
 		if a.Kind != b.Kind {
 			return a.Kind == "dir"
 		}
 		return strings.ToLower(a.Name) < strings.ToLower(b.Name)
 	})
-	return result, nil
+	return listed, nil
 }
 
 // projectTokenLabels names the root's per-project token directories: go2cs's Directory.Build.props keys a
@@ -240,7 +272,8 @@ func projectTokenLabels(artifact *conversionArtifact) map[string]string {
 }
 
 func (s *server) handleGenerated(w http.ResponseWriter, r *http.Request) {
-	result, err := s.pipeline.generated(r.URL.Query().Get("conversionId"), r.URL.Query().Get("path"))
+	query := r.URL.Query()
+	result, err := s.pipeline.generated(query.Get("conversionId"), query.Get("path"), query.Get("tree") == "1")
 	if err != nil {
 		s.writePipelineError(w, err)
 		return

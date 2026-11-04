@@ -102,6 +102,49 @@ func TestGeneratedServesACSharpFile(t *testing.T) {
 	}
 }
 
+// tree=1 answers the whole folder at once: each folder carries its children, non-C# files stay out as in a
+// listing, and a folder with no C# anywhere below it (an empty generator folder, added for the check) is left out.
+func TestGeneratedTreeAnswersEveryFolderAtOnce(t *testing.T) {
+	s, artifact := generatedFixture(t)
+	if err := os.MkdirAll(filepath.Join(artifact.outputDir, ".artifacts", "gen", "0a1b2c3d4e5f", "go2cs-gen", "go2cs.EmptyGenerator"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	query := url.Values{"conversionId": {"conv1"}, "path": {""}, "tree": {"1"}}
+	recorder := httptest.NewRecorder()
+	s.routes().ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/generated?"+query.Encode(), nil))
+	var result generatedResult
+	if recorder.Code != http.StatusOK || json.Unmarshal(recorder.Body.Bytes(), &result) != nil || result.Kind != "dir" {
+		t.Fatalf("tree: %d %s", recorder.Code, recorder.Body.String())
+	}
+	var lines []string
+	var walk func(entries []generatedEntry, indent string)
+	walk = func(entries []generatedEntry, indent string) {
+		for _, e := range entries {
+			lines = append(lines, indent+e.Kind+":"+e.Name+"="+e.Path+"|"+e.Label)
+			walk(e.Children, indent+"  ")
+		}
+	}
+	walk(result.Entries, "")
+	want := strings.Join([]string{
+		"dir:0a1b2c3d4e5f=0a1b2c3d4e5f|session",
+		"  dir:go2cs-gen=0a1b2c3d4e5f/go2cs-gen|",
+		"    dir:go2cs.ImplementedInterfaceGenerator=0a1b2c3d4e5f/go2cs-gen/go2cs.ImplementedInterfaceGenerator|",
+		"      file:main_S.cs=0a1b2c3d4e5f/go2cs-gen/go2cs.ImplementedInterfaceGenerator/main_S.cs|",
+		"    dir:go2cs.RecvGenerator=0a1b2c3d4e5f/go2cs-gen/go2cs.RecvGenerator|",
+		"      file:main_S_Inc.cs=0a1b2c3d4e5f/go2cs-gen/go2cs.RecvGenerator/main_S_Inc.cs|",
+	}, "\n")
+	if got := strings.Join(lines, "\n"); got != want {
+		t.Fatalf("tree =\n%s\nwant\n%s", got, want)
+	}
+	// Without tree=1 a listing still answers one level, with no children.
+	_, flat, _ := getGenerated(t, s, "conv1", "0a1b2c3d4e5f/go2cs-gen")
+	for _, e := range flat.Entries {
+		if len(e.Children) != 0 {
+			t.Fatalf("a one-level listing carried children: %+v", flat.Entries)
+		}
+	}
+}
+
 // Every way out of the root is refused by name, and so is a file that is not C#.
 func TestGeneratedRefusesPathsOutsideTheRoot(t *testing.T) {
 	s, artifact := generatedFixture(t)

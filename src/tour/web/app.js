@@ -24,8 +24,8 @@
   const solutionsLink = document.querySelector("#solutions-link");
   const generatedView = document.querySelector("#generated-view");
   const generatedBack = document.querySelector("#generated-back");
-  const generatedUp = document.querySelector("#generated-up");
   const generatedPath = document.querySelector("#generated-path");
+  const generatedFolderHint = document.querySelector("#generated-folder");
   const generatedMessage = document.querySelector("#generated-message");
   const generatedList = document.querySelector("#generated-list");
   const generatedFile = document.querySelector("#generated-file");
@@ -54,7 +54,7 @@
   let warmupReadyTimer = null;
   // The Generated Code tab: the conversion it shows, where it is (a folder, or a file opened from one), the
   // locations Back returns to, the project names of the root's token folders, and the last load's state.
-  const generated = { conversionId: "", folder: "", file: "", history: [], labels: {}, state: "", request: null };
+  const generated = { conversionId: "", file: "", tree: null, treeScroll: 0, state: "", request: null };
 
   // Run with Go is on unless this browser turned it off: only a stored "false" unchecks it.
   const syncRunStorageKey = "go2cs-run-with-go";
@@ -524,11 +524,12 @@
 
   // ---- Generated Code tab ----------------------------------------------------------------------------------
   // The source generators' output for the current conversion, served read-only by /api/generated from the
-  // conversion's own build: a folder explorer, and a viewer that takes its place when a .cs file is opened.
+  // conversion's own build. Two screens: the whole folder as one tree, every folder shown and every .cs file a link,
+  // and the viewer a file opens in, whose Back returns to the tree where it was left.
 
   function resetGeneratedCode(id) {
     generated.request?.abort();
-    Object.assign(generated, { conversionId: id, folder: "", file: "", history: [], labels: {}, state: "", request: null });
+    Object.assign(generated, { conversionId: id, file: "", tree: null, treeScroll: 0, state: "", request: null });
     showGeneratedMessage(id ? "The generated code appears here when the conversion's build finishes."
       : "Convert a Tour page to see the code go2cs-gen writes for it.");
     renderGeneratedNav();
@@ -539,38 +540,19 @@
   function generatedBuildSettled(id) {
     if (id !== generated.conversionId || generated.state === "ready") return;
     generated.state = "";
+    generated.tree = null;
     if (!generatedView.hidden) loadGeneratedCode();
   }
 
-  function generatedNavigate(folder, file) {
-    generated.history.push({ folder: generated.folder, file: generated.file });
-    generated.folder = folder;
+  function openGeneratedFile(file) {
+    generated.treeScroll = generatedList.scrollTop;
     generated.file = file;
     loadGeneratedCode();
   }
 
   function goGeneratedBack() {
-    if (generated.file) {
-      // The viewer returns to the explorer at the folder the file was opened from.
-      generated.file = "";
-    } else {
-      const previous = generated.history.pop();
-      if (!previous) return;
-      generated.folder = previous.folder;
-      generated.file = previous.file;
-    }
-    loadGeneratedCode();
-  }
-
-  function goGeneratedUp() {
-    if (generated.file) {
-      generated.file = "";
-    } else if (generated.folder) {
-      generated.history.push({ folder: generated.folder, file: "" });
-      generated.folder = generated.folder.includes("/") ? generated.folder.slice(0, generated.folder.lastIndexOf("/")) : "";
-    } else {
-      return;
-    }
+    if (!generated.file) return;
+    generated.file = "";
     loadGeneratedCode();
   }
 
@@ -578,12 +560,16 @@
     const id = generated.conversionId;
     renderGeneratedNav();
     if (!id) return;
+    if (!generated.file && generated.tree) {
+      showGeneratedTree();
+      return;
+    }
     generated.request?.abort();
     const controller = new AbortController();
     generated.request = controller;
-    const target = generated.file || generated.folder;
+    const query = generated.file ? { conversionId: id, path: generated.file } : { conversionId: id, path: "", tree: "1" };
     try {
-      const response = await fetch(`/api/generated?${new URLSearchParams({ conversionId: id, path: target })}`, { signal: controller.signal });
+      const response = await fetch(`/api/generated?${new URLSearchParams(query)}`, { signal: controller.signal });
       const result = await response.json();
       if (generated.request !== controller) return;
       if (!response.ok) throw new Error(result.error || `Generated code unavailable (${response.status})`);
@@ -596,7 +582,9 @@
         generatedFile.scrollTop = 0;
         generatedFile.scrollLeft = 0;
       } else {
-        renderGeneratedListing(result.entries || []);
+        generated.tree = result.entries || [];
+        renderGeneratedTree(generated.tree);
+        showGeneratedTree();
       }
     } catch (error) {
       if (error.name === "AbortError" || generated.request !== controller) return;
@@ -608,33 +596,58 @@
     }
   }
 
-  function renderGeneratedListing(entries) {
-    generatedList.replaceChildren();
-    if (!entries.length) {
-      showGeneratedMessage("This folder holds no generated C#.");
+  function showGeneratedTree() {
+    if (!generated.tree.length) {
+      showGeneratedMessage("This conversion's build wrote no generated C#.");
       return;
     }
-    for (const entry of entries) {
-      if (entry.label) generated.labels[entry.name] = entry.label;
-      const item = document.createElement("li");
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `generated-entry generated-entry-${entry.kind}`;
+    showGeneratedPart(generatedList);
+    generatedList.scrollTop = generated.treeScroll;
+  }
+
+  // One tree, drawn once per conversion: a folder is a label, never a link, and a chain of folders that each hold
+  // only one folder is drawn as one row ("go2cs-gen / go2cs.RecvGenerator"), so the depth shows without being
+  // walked. Each file is a link to the viewer.
+  function renderGeneratedTree(entries) {
+    generatedList.replaceChildren(...entries.map(generatedTreeItem));
+  }
+
+  function generatedTreeItem(entry) {
+    const item = document.createElement("li");
+    if (entry.kind === "dir") {
+      const names = [entry.label || entry.name];
+      let folder = entry;
+      while (folder.children?.length === 1 && folder.children[0].kind === "dir") {
+        folder = folder.children[0];
+        names.push(folder.name);
+      }
+      const row = document.createElement("div");
+      row.className = "generated-entry generated-entry-dir";
+      row.title = folder.path;
       const name = document.createElement("span");
       name.className = "generated-entry-name";
-      name.textContent = entry.label ? entry.label : entry.name;
-      button.append(name);
-      const detail = document.createElement("span");
-      detail.className = "generated-entry-detail";
-      detail.textContent = entry.label ? entry.name : entry.kind === "file" ? formatBytes(entry.size || 0) : "";
-      button.append(detail);
-      button.addEventListener("click", () => entry.kind === "dir"
-        ? generatedNavigate(entry.path, "")
-        : generatedNavigate(generated.folder, entry.path));
-      item.append(button);
-      generatedList.append(item);
+      name.textContent = names.join(" / ");
+      row.append(name);
+      const children = document.createElement("ul");
+      children.className = "generated-tree";
+      children.replaceChildren(...(folder.children || []).map(generatedTreeItem));
+      item.append(row, children);
+      return item;
     }
-    showGeneratedPart(generatedList);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "generated-entry generated-entry-file";
+    button.title = entry.path;
+    const name = document.createElement("span");
+    name.className = "generated-entry-name";
+    name.textContent = entry.name;
+    const detail = document.createElement("span");
+    detail.className = "generated-entry-detail";
+    detail.textContent = formatBytes(entry.size || 0);
+    button.append(name, detail);
+    button.addEventListener("click", () => openGeneratedFile(entry.path));
+    item.append(button);
+    return item;
   }
 
   function showGeneratedMessage(text) {
@@ -646,16 +659,20 @@
     for (const candidate of [generatedMessage, generatedList, generatedFile]) candidate.hidden = candidate !== part;
   }
 
-  // The bar shows where the tab is, folders by their project name where the root's token folder has one, and
-  // offers Back and Up whenever there is somewhere to go.
+  // The bar names the screen: the tree, or the open file by name with the folders it sits in beside it, and
+  // offers Back from a file to the tree.
   function renderGeneratedNav() {
-    const segments = (generated.file || generated.folder).split("/").filter(Boolean);
-    if (segments.length && generated.labels[segments[0]]) segments[0] = generated.labels[segments[0]];
-    generatedPath.textContent = ["Generated code", ...segments].join(" / ");
-    generatedPath.title = generated.file || generated.folder || "";
-    const ready = Boolean(generated.conversionId);
-    generatedBack.disabled = !ready || (!generated.file && generated.history.length === 0);
-    generatedUp.disabled = !ready || (!generated.file && !generated.folder);
+    if (generated.file) {
+      const segments = generated.file.split("/");
+      generatedPath.textContent = segments.pop();
+      generatedPath.title = generated.file;
+      generatedFolderHint.textContent = segments.slice(1).join(" / ");
+    } else {
+      generatedPath.textContent = "Generated code";
+      generatedPath.title = "";
+      generatedFolderHint.textContent = "";
+    }
+    generatedBack.disabled = !generated.conversionId || !generated.file;
   }
 
   function formatBytes(size) {
@@ -822,7 +839,6 @@
     frame.contentWindow?.postMessage({ type: "go2cs-request-source" }, window.location.origin);
   });
   generatedBack.addEventListener("click", goGeneratedBack);
-  generatedUp.addEventListener("click", goGeneratedUp);
   sourceTabs.addEventListener("click", event => {
     const button = event.target.closest("[data-view]");
     if (button) selectSourceView(button.dataset.view);

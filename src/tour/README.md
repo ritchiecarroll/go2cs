@@ -14,9 +14,10 @@ The interface is deliberately parallel:
 - The **Generated Code** tab browses what go2cs-gen's source generators wrote
   for the conversion once its build has run: interface implementations,
   pointer-receiver overloads, embedding forwarders, field properties and
-  literal interceptors. A back/up bar stays above a folder explorer; opening a
-  `.cs` file shows it read-only in the same place, highlighted as the Code tab
-  is, and back or up returns to the folder it came from.
+  literal interceptors. The whole folder shows as one tree, each level offset
+  under its folder, with every `.cs` file a link; a chain of folders that each
+  hold one folder is one row. Opening a file shows it read-only in the same
+  place, highlighted as the Code tab is, and Back returns to the tree.
 - Conversion runs with comments on, so a lesson's own commentary crosses over
   with the code it explains: a Go end-of-line comment stays an end-of-line
   comment, on the statement it annotates
@@ -224,7 +225,9 @@ does the expiry of its workspace; should the older conversion still be run, it b
 the Run request cancels the running program; a background build it was waiting for carries on, so the
 next Run finds it finished.
 
-The Generated Code tab reads `GET /api/generated?conversionId=<id>&path=<folder or file>`. The converted
+The Generated Code tab reads `GET /api/generated?conversionId=<id>&path=<folder or file>`, with `&tree=1` for
+the tree: a folder then comes back whole, each folder with its children, leaving out any folder with no `.cs`
+file below it. The converted
 project emits its generators' output (`EmitCompilerGeneratedFiles`), and the `Directory.Build.targets` go2cs
 writes beside the converted tree routes it to `.artifacts/gen/<project token>`; the tab adds nothing to the
 build and only reads that folder, labelling each token folder with the project it belongs to. The endpoint

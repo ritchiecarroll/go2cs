@@ -1,5 +1,8 @@
 :root {
   color-scheme: dark;
+  /* The Tour's own toolbar text (its .menu-button: hello.go, Syntax, Imports, Reset, Format, Run), measured at
+     14.4px. The C# pane's tab rows use it too, so the two sides read at one size. */
+  --toolbar-font: 14.4px;
   --go: #00add8;
   --go-dark: #007d9c;
   --cs: #682078;
@@ -358,16 +361,30 @@ button {
   background: var(--tabs);
 }
 
+/* At the Tour's size the source tabs and the Runtime picker need about 545px. A narrower pane first drops the
+   picker's "Runtime" word (the select keeps its aria-label and title), then tightens the tabs, so the picker stays
+   in view at the side-by-side layout's usual widths; below that the row scrolls sideways rather than clipping. */
+.dotnet-pane {
+  container: dotnet / inline-size;
+}
+
+.source-tabs {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
 .source-tabs button,
 .output-tabs button {
+  flex: 0 0 auto;
   height: 100%;
-  padding: 0 12px;
+  padding: 0 10px;
   border: 0;
   border-bottom: 2px solid transparent;
   color: var(--muted);
   background: transparent;
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--toolbar-font);
+  white-space: nowrap;
 }
 
 .source-tabs button[aria-selected="true"] {
@@ -383,14 +400,16 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 0 0 auto;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--toolbar-font);
+  white-space: nowrap;
 }
 
 .runtime-picker select {
   min-width: 0;
-  max-width: 132px;
-  height: 24px;
+  max-width: 160px;
+  height: 26px;
   border: 1px solid var(--line);
   border-radius: 2px;
   color: var(--text);
@@ -474,8 +493,19 @@ button {
 }
 
 .generated-path {
-  min-width: 0;
+  flex: none;
+  max-width: 60%;
   margin-left: 6px;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* In the file viewer, the folders the open file sits in, after its name and dimmer than it. */
+.generated-folder {
+  min-width: 0;
   overflow: hidden;
   color: var(--muted);
   font-size: 11px;
@@ -521,9 +551,34 @@ button {
   text-align: left;
 }
 
-.generated-entry:hover,
-.generated-entry:focus-visible {
+/* The tree: each level is offset a step to the right of its folder. A folder row is a label; only a file is a
+   link, so only a file row reacts to the pointer. */
+.generated-tree {
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style: none;
+}
+
+.generated-entry-dir {
+  color: var(--muted);
+  cursor: default;
+}
+
+.generated-entry-file:hover,
+.generated-entry-file:focus-visible {
   background: var(--output-pre);
+}
+
+.generated-entry-file .generated-entry-name {
+  color: var(--code-text);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 2px;
+}
+
+.generated-entry-file:hover .generated-entry-name,
+.generated-entry-file:focus-visible .generated-entry-name {
+  text-decoration-color: currentColor;
 }
 
 .generated-entry-name {
@@ -534,7 +589,7 @@ button {
 }
 
 .generated-entry-dir .generated-entry-name::before {
-  content: "\25B8\00A0";
+  content: "\25BE\00A0";
   color: var(--cs-light);
 }
 
@@ -602,7 +657,6 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
 }
 
 .output-tabs button[aria-selected="true"] {
@@ -691,6 +745,24 @@ button {
 
 .output-system {
   color: var(--output-system);
+}
+
+/* The narrow-pane steps for the source tabs' row (see .dotnet-pane's container), after the rules they override. */
+@container dotnet (max-width: 600px) {
+  .runtime-picker > span {
+    display: none;
+  }
+}
+
+@container dotnet (max-width: 500px) {
+  .source-tabs button {
+    padding: 0 6px;
+  }
+
+  /* The select's widest option ("Deployed stdlib", "NuGet packages") measures 127px at the Tour's size. */
+  .runtime-picker {
+    padding: 0 4px;
+  }
 }
 
 @media (max-width: 900px) {
