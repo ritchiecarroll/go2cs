@@ -8,9 +8,9 @@ their full text.
 
 ---
 
-## November 3, 2026 — Another package's variables by address, and converted code that reads like Go
+## November 4, 2026 — Another package's variables by address, and converted code that reads like Go
 
-<!-- Written ahead and held unmerged until release day; dated November 3, 2026 and landed as the last change before
+<!-- Written ahead and held unmerged until release day; dated November 4, 2026 (first dated November 3; the release ran past midnight after the tool-package fix) and landed as the last change before
      the release tag (GoCorpusMigration.md, the release ritual, item 1). -->
 
 **NuGet 1.26.10.2.** The first fix release on the Go 1.26 line. The converted standard library is still built from
