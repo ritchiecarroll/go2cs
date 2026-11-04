@@ -1,10 +1,9 @@
 # PIN session S2: sign and push cobra, built on go.* 1.26.10.2 (runbook section 4)
 
-> **TEMPLATE (C2, 2026-11-03), for the nugetgo rebuild wave against go.* 1.26.10.2
-> ([`PLAN-nugetgo-wave-1-26-10-2.md`](../../PLAN-nugetgo-wave-1-26-10-2.md)).** It is not pasted as it stands. On release
-> day C2 fills its one placeholder, `<<SIGNER_SHA>>` in block 1: the same signer commit as the filled S1 sheet. C2 then
-> re-runs `Test-SheetPaste.ps1` on the filled copy and posts it to COORD. Block 1 refuses while any `<<...>>`
-> placeholder is left.
+> **FILLED (C2, 2026-11-04), for the nugetgo rebuild wave against go.* 1.26.10.2
+> ([`PLAN-nugetgo-wave-1-26-10-2.md`](../../PLAN-nugetgo-wave-1-26-10-2.md)).** The signer is master `2e44d1caff`,
+> the same commit as the filled S1 sheet. `Test-SheetPaste.ps1` reads this copy clean. Block 6 is ruled SKIP. Paste it
+> only after S1's block 5 has listed pflag and mousetrap, and only when COORD says so.
 
 It is one owner sheet for one `dotnet nuget sign` process (one PIN) over one package. Nothing is edited at the table.
 It follows the 1.26.10.1 wave's S2 sheet block for block. What changes: the release, the revisions (cobra's own, and
@@ -30,6 +29,18 @@ Each block is ONE statement (a dot-sourced `{ ... }`). A `throw` stops that whol
 runs. Read each block's output before you paste the next. Block 0 refuses the two missteps of 2026-10-14 with the
 fix printed: a Windows PowerShell 5.1 window, and a window outside the go2cs clone (another repository, such as the
 registry clone, counts as outside: it checks for `src/go2cs/main.go`).
+
+## First: renew the nugetgo NuGet API key
+
+**Renew the nugetgo key first, before block 0.** The nuget.org API key for `nugetgo.*` expires on or about
+2026-11-09, and nuget.org keys now expire every 30 days, so a key that is valid today can lapse before the next
+session. On nuget.org: your account, **API Keys**, then **Regenerate** (or **Create**) the nugetgo key:
+
+- **Glob pattern:** ONE pattern per entry. Type `nugetgo.*` (or `*`). A comma-separated list in that field fails.
+- **Scope:** **Push**, with *Push only new package versions*. cobra already exists on nuget.org, so no new package ID is pushed; the scope *Push new packages and package versions* is needed only when an ID is new.
+- **Expires in:** the longest offered.
+
+Copy the new key once, into `$env:NUGETGO_API_KEY` in the window you will use, or keep it ready for block 4's prompt.
 
 ## Before the first block
 
@@ -74,7 +85,7 @@ This block uses only Windows PowerShell 5.1 syntax, so it runs (and refuses) in 
     if ((dotnet --version) -notlike '10.*') { throw 'dotnet is not .NET 10: check DOTNET_ROOT' }
 
     $Release = '1.26.10.2'
-    $Signer  = '<<SIGNER_SHA>>'
+    $Signer  = '2e44d1caff80df6a660f4c37d3618a10b219af42'
     if ($Signer -like '*<<*' -or $Signer -notmatch '^[0-9a-f]{40}$') { throw 'this sheet is the TEMPLATE: the signer SHA is not filled in. Ask COORD for the filled copy.' }
     $Org     = 'https://api.nuget.org/v3/index.json'
     $Pub     = Join-Path ([IO.Path]::GetTempPath()) 'nugetgo-1261002-s2'
@@ -252,6 +263,8 @@ Checks the flat container and the registration for every package once a minute, 
 ```
 
 ## Block 6 (OPTIONAL, owner decides): deprecate cobra 1.10.2, built on go.* 1.26.10.1
+
+**Ruled: SKIP this block** (owner ruling, LEDGER 2026-11-03 17:46: no consumer has used the 1.26.10.1-built revisions, so there is no one to warn). Block 7 then reads `deprecation: skipped`.
 
 **Why.** cobra 1.10.2 was built against go.* 1.26.10.1, and its range, `[1.26.10.1, 1.27.0)`, also admits 1.26.10.2,
 so a consumer on go.* 1.26.10.2 still restores it without an error, and it can fail at run time on a cross-package
