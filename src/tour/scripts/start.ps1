@@ -46,8 +46,13 @@ Write-Host "Checking .NET..."
 
 $goPath = (& go env GOPATH).Trim()
 $tourBinary = Join-Path $goPath "bin/tour$ExeSuffix"
-if (-not (Test-Path -LiteralPath $tourBinary)) {
-    Write-Host "Installing the official offline Tour of Go..."
+# Reinstall unless the binary there is the pinned revision: an older tour (a 2020 GOPATH-era build was found on a
+# development machine) starts but cannot find its lessons, and the server reports the Tour unavailable.
+$installedTour = if (Test-Path -LiteralPath $tourBinary) {
+    (& go version -m $tourBinary 2>$null | Where-Object { $_ -match '^\s*mod\s+golang\.org/x/website\s' } | Select-Object -First 1)
+}
+if (-not ($installedTour -match "\s$([regex]::Escape($TourVersion))(\s|$)")) {
+    Write-Host "Installing the official offline Tour of Go ($TourVersion)..."
     & go install golang.org/x/website/tour@$TourVersion
 }
 

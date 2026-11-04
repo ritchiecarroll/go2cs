@@ -27,8 +27,11 @@ dotnet --version
 
 go_path=$(go env GOPATH)
 tour_binary="$go_path/bin/tour"
-if [ ! -x "$tour_binary" ]; then
-  echo "Installing the official offline Tour of Go..."
+# Reinstall unless the binary there is the pinned revision: an older tour starts but cannot find its lessons.
+installed_tour=""
+[ -x "$tour_binary" ] && installed_tour=$(go version -m "$tour_binary" 2>/dev/null | awk '$1 == "mod" && $2 == "golang.org/x/website" { print $3 }')
+if [ "$installed_tour" != "$tour_version" ]; then
+  echo "Installing the official offline Tour of Go ($tour_version)..."
   go install golang.org/x/website/tour@$tour_version
 fi
 
