@@ -6,7 +6,7 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `debug/gosym` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-25 · converter `b5fc1294d`*
+*Validated 2026-11-03 · converter `2d60e8215`*
 
 **10 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/debug/gosym`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/debug/gosym).
@@ -14,8 +14,6 @@ comparison — it is the evidence behind the `debug/gosym` row in
 Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 4 of the matched tests identically.
-
-> Linux only: on Windows both runtimes skip TestSymVersion identically (skipIfNotELF), so the Windows row stays 10 matched / 0 disclosed and this entry never fires there.
 
 ## Verdicts
 
