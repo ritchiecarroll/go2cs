@@ -36,6 +36,9 @@ function Die([string] $Message) { Write-Host "smoke-go2cs-tool: FAIL: $Message" 
 
 # Runs a native command and returns its exit code and output lines, stdout and stderr together.
 function Invoke-Native([string] $Exe, [string[]] $Arguments) {
+    # A command that does not exist must stop the smoke, not read as a run: `&` on a missing path writes an error
+    # record and leaves $LASTEXITCODE at the previous command's 0, so a missing go2cs once passed the reference step.
+    if (-not (Get-Command $Exe -ErrorAction SilentlyContinue)) { Die "no command '$Exe'" }
     $ErrorActionPreference = 'Continue'
     $out = @(& $Exe @Arguments 2>&1 | ForEach-Object { "$_" })
     [pscustomobject]@{ ExitCode = $LASTEXITCODE; Output = $out }
@@ -70,12 +73,19 @@ $wantGo = 'go' + ((Select-String -Path $goMod -Pattern '^go\s+(\S+)' | Select-Ob
 New-Item -ItemType Directory -Force -Path $Work | Out-Null
 $Work = (Resolve-Path $Work).Path
 $tool = Join-Path $Work 'tool'
-$go2cs = Join-Path $tool "go2cs$exe"
 
 # ---- 1. install ----------------------------------------------------------------------------------------------------
 $install = Invoke-Native 'dotnet' @('tool', 'install', 'go2cs', '--version', $Version, '--add-source', (Resolve-Path $Feed).Path, '--tool-path', $tool)
 $install.Output | ForEach-Object { Write-Host "    $_" }
 if ($install.ExitCode -ne 0) { Die "dotnet tool install exited $($install.ExitCode)" }
+
+# The command the install put on the tool path, run the way a user runs it. go2cs is a native executable, not a .NET
+# app, so on Windows the .NET CLI installs a go2cs.cmd shim that calls go2cs.exe in the tool store; elsewhere it links
+# a plain go2cs.
+$names = if ($IsWindows) { @('go2cs.cmd', 'go2cs.exe') } else { @('go2cs') }
+$go2cs = $names | ForEach-Object { Join-Path $tool $_ } | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $go2cs) { Die "the install put none of $($names -join ', ') in $tool; it holds: $((Get-ChildItem -Name $tool) -join ', ')" }
+Write-Host "smoke-go2cs-tool: installed command $go2cs"
 
 # ---- 2. the reference: Go installed --------------------------------------------------------------------------------
 $env:GOTOOLCHAIN = 'local'

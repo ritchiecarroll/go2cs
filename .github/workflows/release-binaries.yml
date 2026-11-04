@@ -301,9 +301,13 @@ jobs:
           - { rid: osx-x64,     runner: macos-15-intel }
           - { rid: osx-arm64,   runner: macos-15 }
     steps:
+      # The product under test is the feed the build job packed from the record commit. The smoke script and its
+      # inputs come from the commit this run was started on, so a smoke fixed after a tag can still draft that tag
+      # (workflow_dispatch tag=...): nuget-1.26.10.2's tag run failed only because its record commit's smoke looked
+      # for go2cs.exe where the .NET CLI installs a go2cs.cmd shim. The script still requires the Go that this
+      # commit's go.mod names, so a smoke from a later Go line refuses an older tag instead of passing it.
       - uses: actions/checkout@v5
         with:
-          ref: ${{ needs.build.outputs.record-sha || github.sha }}
           sparse-checkout: |
             src/tools/go2cs-tool
             src/go2cs
