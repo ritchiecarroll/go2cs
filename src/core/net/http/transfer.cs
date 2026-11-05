@@ -21,7 +21,6 @@ using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
-using System.Runtime.CompilerServices;
 using go.@internal;
 using go.net;
 using go.net.http;

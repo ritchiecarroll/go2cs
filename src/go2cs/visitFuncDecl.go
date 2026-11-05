@@ -1522,12 +1522,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	// The attribute prefix for every arm below: empty when the mark rides the generated declaring part.
-	// noInliningPrefix still registers its `using System.Runtime.CompilerServices` either way, so a
-	// file's using block reads the same in both renderings and only the signature line changes.
-	noInliningAttribute := v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))
+	// noInliningPrefix registers `using System.Runtime.CompilerServices` only when it is called, so a
+	// partial carrier's file imports the namespace only if something else in it writes a name from it
+	// (the owner's 2026-11-04 ask, seen in the Tour's Channels lesson: an unused using in every such file).
+	// The runtime's bootstrap inits are emitted without their attribute line (see the GoInit arm below), so they
+	// write no attribute either.
+	noInliningAttribute := ""
 
-	if noInliningPartial {
-		noInliningAttribute = ""
+	if !noInliningPartial && !runtimeBootstrapInit {
+		noInliningAttribute = v.noInliningPrefix(v.info.ObjectOf(funcDecl.Name))
 	}
 
 	// An sstring TWIN (sstringTwinOperations.go): this declaration is the member that carries the

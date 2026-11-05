@@ -11,7 +11,6 @@ using @internal = go.log.slog.internal_package;
 using runtime = runtime_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go.log.slog;
 using go.sync;
 using io = io_package;

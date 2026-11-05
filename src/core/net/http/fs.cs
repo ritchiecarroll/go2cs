@@ -21,7 +21,6 @@ using sort = sort_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go.@internal;
 using go.io;
 using go.mime;

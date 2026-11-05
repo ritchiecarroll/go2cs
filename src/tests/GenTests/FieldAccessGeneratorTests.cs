@@ -672,6 +672,98 @@ public class FieldAccessGeneratorTests
         }
     }
 
+    // A field the package declares NULLABLE keeps its `?` on the property: the generated file opens `#nullable enable`,
+    // so a `ref global::System.Type` over a `Type?` field is CS8619 at the property (runtime, reflect, maps, reflectlite
+    // and sync read 91 of them in a Release build). The package is compiled with its annotations, as golib is, and the
+    // SDK compiler compiles the generated class with a site reading each field. Inconclusive only where no SDK compiler
+    // resolves.
+    private const string NullablePackage = """
+        #nullable enable
+
+        namespace go;
+
+        public static partial class abi_package
+        {
+            public partial struct rtype
+            {
+                public System.Type? sysType;
+                public nint[]? dims;
+                public nint[]?[]? nested;
+                public string? name;
+
+                public static ref System.Type? ᏑsysType(ref rtype instance) => ref instance.sysType;
+                public static ref nint[]? Ꮡdims(ref rtype instance) => ref instance.dims;
+                public static ref nint[]?[]? Ꮡnested(ref rtype instance) => ref instance.nested;
+                public static ref string? Ꮡname(ref rtype instance) => ref instance.name;
+            }
+        }
+        """;
+
+    private const string NullableUser = """
+        namespace go;
+
+        [GoFieldAccess(typeof(abi_package.rtype))]
+        partial class user_package { }
+        """;
+
+    [TestMethod]
+    public void ANullableFieldKeepsItsAnnotationSoTheGeneratedFileHasNoCS8619()
+    {
+        if (SdkCompiler() is not { } compiler)
+        {
+            Assert.Inconclusive("no SDK csc.dll resolves (DOTNET_HOST_PATH, DOTNET_ROOT, PATH): nothing here can compile a C# 14 extension block");
+            return;
+        }
+
+        string directory = Directory.CreateTempSubdirectory("go2cs-fieldaccess-nullable-").FullName;
+
+        try
+        {
+            File.WriteAllText(Path.Combine(directory, "package.cs"), NullablePackage);
+            File.WriteAllText(Path.Combine(directory, "stubs.cs"), Stubs);
+
+            (int code, string output) = Compile(compiler, directory, "abi.dll", ["package.cs", "stubs.cs"], []);
+            Assert.AreEqual(0, code, $"the package fixture compiles under the SDK compiler:\n{output}");
+
+            CSharpCompilation compilation = CSharpCompilation.Create("test",
+                [CSharpSyntaxTree.ParseText(NullableUser)],
+                [MetadataReference.CreateFromFile(typeof(object).Assembly.Location), MetadataReference.CreateFromFile(Path.Combine(directory, "abi.dll"))],
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            GeneratorDriverRunResult result = CSharpGeneratorDriver.Create(new FieldAccessGenerator()).RunGenerators(compilation).GetRunResult();
+            Assert.AreEqual(0, result.Diagnostics.Length, string.Join("\n", result.Diagnostics));
+
+            string generated = result.GeneratedTrees.SingleOrDefault()?.ToString() ?? "";
+            StringAssert.Contains(generated, "#nullable enable");
+
+            File.WriteAllText(Path.Combine(directory, "test.cs"), NullableUser);
+            File.WriteAllText(Path.Combine(directory, "generated.cs"), generated);
+            File.WriteAllText(Path.Combine(directory, "site.cs"), """
+                #nullable enable
+
+                namespace go;
+
+                static class site
+                {
+                    static int read(ж<abi_package.rtype> t) =>
+                        (t.sysType is null ? 0 : 1) + (t.dims?.Length ?? 0) + (t.nested?[0]?.Length ?? 0) + (t.name?.Length ?? 0);
+                }
+                """);
+
+            (code, output) = Compile(compiler, directory, "test.dll", ["test.cs", "generated.cs", "site.cs"], ["abi.dll"]);
+            Assert.AreEqual(0, code, $"the generated class compiles:\n{output}");
+            Assert.IsFalse(output.Contains("CS8619"), $"every ref property's type matches its nullable field; the compiler reported:\n{output}");
+            StringAssert.Contains(generated, "public ref global::System.Type? sysType ");
+            StringAssert.Contains(generated, "public ref nint[]? dims ");
+            StringAssert.Contains(generated, "public ref nint[]?[]? nested ");
+            StringAssert.Contains(generated, "public ref string? name ");
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     // The SDK's csc.dll beside the dotnet host, newest SDK first: (host, csc.dll).
     private static (string Host, string Csc)? SdkCompiler()
     {

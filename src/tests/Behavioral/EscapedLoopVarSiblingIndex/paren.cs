@@ -1,7 +1,5 @@
 namespace go;
 
-using System.Runtime.CompilerServices;
-
 partial class main_package {
 
 internal static partial nint parenIndex() {

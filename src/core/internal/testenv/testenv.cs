@@ -25,7 +25,6 @@ using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
 using fs = io.fs_package;
 using go;
 using go.@internal;

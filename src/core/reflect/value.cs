@@ -13,7 +13,6 @@ using Δmath = math_package;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using Δsync = sync_package;
 
 partial class reflect_package {

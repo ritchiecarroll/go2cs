@@ -1,0 +1,13 @@
+# RE-KEYED 2026-11-05T00:41:30Z by G (COORD's ruling 2026-11-04; PLAN-perf-rebaseline.md section 10, after P0 a1d87ef3ba):
+# the 1.24.13.7 lines of aot-foldoff/aot-manifest.tsv (untouched beside this file), the sourceHash column replaced by the
+# runner's MASKED ConsumerProject.SourceHash. Converted tonight with the converter exe sha256 999da4994d8ef81784c662349542cd96c10a41a7da27aaf2c540d736c05f06d9
+# (October's SHA256SUMS), from Go sources identical to October's f57648805c. Each line's UNMASKED hash, with
+# October's path rewrite, reproduced the original value before its masked hash was written (October's gate: 56/56
+# MATCH), and the unrewritten hash differed from it. Only the 1.24.13.7 lines are carried: tonight's run adopts no other.
+# go2cs perf re-baseline S1: FOLDING-OFF DIAGNOSTIC Native AOT images published on the i9 (COORD ruling (b), 2026-10-27).
+# win-x64, dotnet publish -c Release -r win-x64 -p:PublishAot=true -p:IlcFoldIdenticalMethodBodies=false, otherwise the template default; converted with each release's converter, -recurse=nuget.
+# leg program sha256 sourceHash size ilc sdk
+go1.24.13.7	PerfChannel	40af1eead5f6767f229e3d933fe780655d0395cc1e7a86e7951ae244546a6089	c28f575f5d7dae82ab03f85a317482f08cb5b9b8dc6d96fa8b2347a36e1e90fe	563323392	10.0.14	10.0.403
+go1.24.13.7	PerfFib	ea37ee296d9c683e05cf6ad6977a74f3bb94ff21158bc59d52feb9b7d002b95b	83664b1f8523b24618ac29223131ff850d9ec21038a0104851fb597a11167f55	563320832	10.0.14	10.0.403
+go1.24.13.7	PerfRefLower	6ebd69ee0cce4d0d1d393ab34561782a0e4c51c7c7c6d495b033951864feec18	091602d43c8a35a34a95dafa07552650586cb436925de88a18675e5340736bf4	563332608	10.0.14	10.0.403
+go1.24.13.7	PerfStartup	279cb8a88ef6a31e68ea2539722bb1c44a63fc2390cb26c45676f2d96b630b05	76e0fe8d9e3cf7d057d6ba8cf80f3441e515d02242fd9e6d07623aea48c53223	563321856	10.0.14	10.0.403

@@ -6,7 +6,6 @@ namespace go.crypto;
 using context = context_package;
 using errors = errors_package;
 using fmt = fmt_package;
-using System.Runtime.CompilerServices;
 using go.sync;
 using net = net_package;
 

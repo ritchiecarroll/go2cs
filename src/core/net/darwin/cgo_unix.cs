@@ -17,7 +17,6 @@ using syscall = syscall_package;
 using @unsafe = unsafe_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using net;
 using vendor.golang.org.x.net.dns;
 

@@ -11,7 +11,6 @@ using os = os_package;
 using runtime = runtime_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
 using @internal;
-using System.Runtime.CompilerServices;
 
 partial class debug_package {
 

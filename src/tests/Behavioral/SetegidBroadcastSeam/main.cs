@@ -5,7 +5,6 @@ using os = os_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using syscall = syscall_package;
-using System.Runtime.CompilerServices;
 
 partial class main_package {
 

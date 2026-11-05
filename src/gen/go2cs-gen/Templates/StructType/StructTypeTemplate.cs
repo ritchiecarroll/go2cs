@@ -2486,9 +2486,9 @@ internal class StructTypeTemplate : TemplateBase
             result.AppendLine(isPromotedStruct ?
                 $"{EmbedStorage(memberName)} = {memberValue};" :
                 IsFixedArrayMember(typeName, isReferenceType) ?
-                    $"if ({memberName}.Source is not null) this.{memberName} = {memberName};" :
+                    $"if ({memberName}.Source is not null)\r\n{TypeElemIndent}        this.{memberName} = {memberName};" :
                     ChanDirInitializerMembers.Contains(memberName) ?
-                        $"if ({memberName} != nil) this.{memberName} = {memberName};" :
+                        $"if ({memberName} != nil)\r\n{TypeElemIndent}        this.{memberName} = {memberName};" :
                         IsNeedyValueStructMember(typeName, isReferenceType, isPromotedStruct) ?
                             $"this.{memberName} = {memberName} ?? new {typeName}(nil);" :
                             $"this.{memberName} = {memberName};");

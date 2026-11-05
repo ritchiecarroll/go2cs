@@ -6,6 +6,13 @@
 > was changed.** Every number is a census over 2,578 files that go2cs-gen wrote during real builds (§1), read by
 > three instruments, each shown red on planted input first. Writer lines are cited `file:line` at that master.
 >
+> **STATUS UPDATE, 2026-11-05 (P2, on COORD's relay of the owner's rulings):** the scout landed as batch 158 and
+> both seats are approved as sized in §6. The owner ruled §7 (verbatim): "Fine on attributes on one line." Class C is
+> therefore **out of scope**: its 849 files keep their attribute lists on one line, and the guard admits that shape.
+> Seat 1 is classes A and B plus the guard's layout half, on `claude/p2-gen-format-1` (record:
+> [`phase4/CENSUS-gen-format-seat1.md`](phase4/CENSUS-gen-format-seat1.md)). Seat 2 is classes D to G. The numbers
+> below are the scout's and are not restated.
+>
 > **The owner's ask (verbatim):** "I noticed in the generated tab of the go2cs tour, while exploring, some of the
 > generated code had bad nested brace alignments in some cases. This code should be more standard C# formatted, not
 > following converted code conventions. Mabybe a scout here could check generated code against standard C# code
@@ -252,6 +259,9 @@ where coding-style rule 1 puts the embedded statement on its own indented line. 
 
 ### C. Two attribute lists on one line: TemplateBase and StructTypeTemplate
 
+> **RULED OUT OF SCOPE, 2026-11-05:** the owner ruled attribute lists may stay on one line (§7). This class is kept as
+> the scout measured it; no seat changes these writers.
+
 <!-- attribute-shown: go2cs-gen output, which still writes it -->
 **Cause.** `TemplateBase.cs:38`–`:40` (`GoTypeAttributePrefix`) ends `[GoType]` (and `[GoChanDir(…)]`) with a
 space, and the Struct, Inherited and Interface templates put it in front of the `[GeneratedCode…]` list on the
@@ -427,6 +437,9 @@ back, with seat 2 on top of seat 1. Each is about a day of lane time. The `ildif
 twice, dominate.
 
 ## 7. One call for the owner
+
+> **RULED, 2026-11-05 (owner, verbatim):** "Fine on attributes on one line." Both shapes stay admitted; class C is out
+> of scope.
 
 Class C's fix changes visible output shape: **each attribute list on its own line** (recommended), against
 **`[A][B]` on one line**, which is what `dotnet format` makes of a member's lists. Both are fixed points of the

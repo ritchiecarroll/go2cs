@@ -11,7 +11,6 @@ using log = log_package;
 using net = net_package;
 using Δhttp = global::go.net.http_package;
 using sync = sync_package;
-using System.Runtime.CompilerServices;
 using encoding;
 using global::go.net;
 

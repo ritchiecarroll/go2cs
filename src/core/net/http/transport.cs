@@ -32,7 +32,6 @@ using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using httpproxy = vendor.golang.org.x.net.http.httpproxy_package;
-using System.Runtime.CompilerServices;
 using compress;
 using container;
 using crypto;

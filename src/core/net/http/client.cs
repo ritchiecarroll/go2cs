@@ -22,7 +22,6 @@ using strings = strings_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using crypto;
 using encoding;
 using go.net;

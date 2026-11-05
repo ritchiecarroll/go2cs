@@ -385,6 +385,19 @@ button {
   cursor: pointer;
   font-size: var(--toolbar-font);
   white-space: nowrap;
+  position: relative;
+}
+
+/* A short divider between neighbouring tabs, so each tab's edge reads at a glance. It is ::after because the
+   output tabs' ::before carries their pass/fail mark. */
+.source-tabs button + button::after,
+.output-tabs button + button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 30%;
+  bottom: 30%;
+  border-left: 1px solid var(--line);
 }
 
 .source-tabs button[aria-selected="true"] {

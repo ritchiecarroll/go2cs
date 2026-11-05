@@ -14,7 +14,6 @@ using cgi = go.net.http.cgi_package;
 using os = os_package;
 using strings = strings_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go.net;
 using go.net.http;
 
