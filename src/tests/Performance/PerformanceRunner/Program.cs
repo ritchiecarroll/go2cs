@@ -25,7 +25,9 @@ namespace PerformanceRunner
 
     internal enum Variant { Go, Jit, Aot }
 
-    internal readonly record struct RunSample(double WallMs, double InnerMs, long PeakBytes);
+    // Parts: the benchmark's named parts (TimingLines.Parts), when it times any.
+    internal readonly record struct RunSample(double WallMs, double InnerMs, long PeakBytes,
+        IReadOnlyList<(string Name, double Ms)>? Parts = null);
 
     internal sealed class VariantResult
     {
@@ -863,7 +865,7 @@ namespace PerformanceRunner
                             break;
                         }
 
-                        vr.Samples.Add(new RunSample(wallMs, ParseInnerMs(stdOut), peakBytes));
+                        vr.Samples.Add(new RunSample(wallMs, ParseInnerMs(stdOut), peakBytes, TimingLines.Parts(stdOut)));
                     }
                 }
 
@@ -1009,6 +1011,8 @@ namespace PerformanceRunner
                 (p, vr) => TimeMetric(p, vr),
                 (value, goValue) => FormatTimeCell(value, goValue, ci));
 
+            AppendPartsTable(sb, projects, results, noAot, ci);
+
             sb.AppendLine();
             sb.AppendLine("**Peak memory** (working set, MB -- lower is better):");
             sb.AppendLine();
@@ -1017,6 +1021,55 @@ namespace PerformanceRunner
                 (value, _) => value.ToString("N1", ci));
 
             return sb.ToString();
+        }
+
+        // The named parts of the rows that time them (TimingLines.cs): one line per part, the median of each
+        // variant's runs, its ratio to Go's. Nothing is written when no row times a part.
+        private static void AppendPartsTable(StringBuilder sb, IReadOnlyList<string> projects,
+            Dictionary<string, ProjectResult> results, bool noAot, CultureInfo ci)
+        {
+            List<(string Project, string Part)> rows = projects
+                .SelectMany(p => results[p].Variants[Variant.Go].Samples
+                    .SelectMany(s => s.Parts ?? [])
+                    .Select(part => part.Name)
+                    .Distinct()
+                    .Select(part => (p, part)))
+                .ToList();
+
+            if (rows.Count == 0)
+                return;
+
+            double PartMedian(VariantResult vr, string part) =>
+                Median(vr.Samples.SelectMany(s => (s.Parts ?? []).Where(x => x.Name == part).Select(x => x.Ms)));
+
+            sb.AppendLine();
+            sb.AppendLine("**Named parts** (milliseconds, measured in-program -- lower is better):");
+            sb.AppendLine();
+            sb.AppendLine("| Benchmark: part | Go | C# (JIT) | C# (Native AOT) |");
+            sb.AppendLine("|---|---:|---:|---:|");
+
+            foreach ((string p, string part) in rows)
+            {
+                ProjectResult result = results[p];
+                double goValue = PartMedian(result.Variants[Variant.Go], part);
+
+                sb.Append($"| {DisplayName(p)}: {part} | {goValue.ToString("N1", ci)} ");
+
+                foreach (Variant v in new[] { Variant.Jit, Variant.Aot })
+                {
+                    VariantResult vr = result.Variants[v];
+
+                    if ((v == Variant.Aot && noAot) || vr.Samples.Count == 0)
+                    {
+                        sb.Append("| n/a ");
+                        continue;
+                    }
+
+                    sb.Append($"| {FormatTimeCell(PartMedian(vr, part), goValue, ci)} ");
+                }
+
+                sb.AppendLine("|");
+            }
         }
 
         private static string FormatTimeCell(double value, double goValue, CultureInfo ci)

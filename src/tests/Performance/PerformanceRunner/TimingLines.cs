@@ -8,7 +8,10 @@
 // ReleaseLegs.cs it is pure and LINKED into PerformanceRunnerTests, which pins it (TimingLinesTests).
 //
 // Every benchmark prints its workload time on one `elapsed_ns: <n>` line, which Verify drops before it
-// compares the three binaries' output and Measure reads as the row's time.
+// compares the three binaries' output and Measure reads as the row's time. A benchmark may also time parts
+// of its workload on their own and print each as a named part, `elapsed_ns.<name>: <n>` (PerfDeferPanic
+// does): Verify drops those too, and Measure reads each one for the report's table of parts. A line
+// that starts `elapsed_ns.` with no name or no colon is the program's output, compared and not read.
 
 namespace PerformanceRunner;
 
@@ -17,8 +20,22 @@ internal static class TimingLines
     // The row's workload time.
     internal const string Total = "elapsed_ns:";
 
+    // A named part's prefix: `elapsed_ns.<name>: <n>`.
+    internal const string PartPrefix = "elapsed_ns.";
+
     // Whether a line is a timing line, which differs run to run and is not compared.
-    internal static bool IsTiming(string line) => line.StartsWith(Total, StringComparison.Ordinal);
+    internal static bool IsTiming(string line) => line.StartsWith(Total, StringComparison.Ordinal) || PartName(line) is not null;
+
+    // The part a line names, or null when it is not a part line.
+    private static string? PartName(string line)
+    {
+        if (!line.StartsWith(PartPrefix, StringComparison.Ordinal))
+            return null;
+
+        int colon = line.IndexOf(':', PartPrefix.Length);
+
+        return colon > PartPrefix.Length ? line[PartPrefix.Length..colon] : null;
+    }
 
     // The output with its timing lines removed and its line endings made '\n', as Verify compares it.
     internal static string Filter(string output) =>
@@ -39,6 +56,22 @@ internal static class TimingLines
         return 0.0;
     }
 
-    // The row's named parts, in the order it printed them.
-    internal static IReadOnlyList<(string Name, double Ms)> Parts(string stdOut) => [];
+    // The row's named parts in milliseconds, in the order it printed them; none when it printed none.
+    internal static IReadOnlyList<(string Name, double Ms)> Parts(string stdOut)
+    {
+        List<(string Name, double Ms)> parts = [];
+
+        foreach (string raw in stdOut.Split('\n'))
+        {
+            string line = raw.TrimEnd('\r');
+
+            if (PartName(line) is not { } name)
+                continue;
+
+            if (long.TryParse(line[(PartPrefix.Length + name.Length + 1)..].Trim(), out long ns))
+                parts.Add((name, ns / 1_000_000.0));
+        }
+
+        return parts;
+    }
 }
