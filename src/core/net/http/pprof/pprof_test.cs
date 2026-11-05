@@ -255,7 +255,7 @@ public static partial void TestDeltaProfile(ж<testing.T> t) {
                     break;
                 }}
             }
-        }, GoStack.Bounded);
+        });
         var doneʗ2 = done;
         defer(() => { // cleanup the above goroutine.
             doneʗ2.ᐸꟷ(true);

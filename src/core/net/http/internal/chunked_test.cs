@@ -244,7 +244,7 @@ public static partial void TestChunkReadPartial(ж<testing.T> t) {
     var pwʗ1 = pw;
     goǃ(() => {
         pwʗ1.Write(slice<byte>("7\r\n1234567"u8));
-    }, GoStack.Bounded);
+    });
     var cr = NewChunkedReader(new io.PipeReaderжReader(pr));
     var readBuf = new slice<byte>(7);
     var (n, err) = cr.Read(readBuf);
@@ -258,7 +258,7 @@ public static partial void TestChunkReadPartial(ж<testing.T> t) {
     var pwʗ2 = pw;
     goǃ(() => {
         pwʗ2.Write(slice<byte>("xx"u8));
-    }, GoStack.Bounded);
+    });
     (_, err) = cr.Read(readBuf);
     {
         @string got = fmt.Sprint(err); if (!strings.Contains(got, malformedˢ)) {

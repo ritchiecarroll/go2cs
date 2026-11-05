@@ -34,7 +34,7 @@ internal static partial void doTestParallelReaders(nint numReaders, nint gomaxpr
     var cunlock = new channel<bool>(0);
     var cdone = new channel<bool>(0);
     for (nint i = 0; i < numReaders; i++) {
-        goǃ(parallelReader, Ꮡm, clocked, cunlock, cdone, GoStack.Bounded);
+        goǃ(parallelReader, Ꮡm, clocked, cunlock, cdone);
     }
     // Wait for all parallel RLock()s to succeed.
     for (nint i = 0; i < numReaders; i++) {

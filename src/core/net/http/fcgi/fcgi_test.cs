@@ -478,7 +478,7 @@ public static partial void TestSlowRequest(ж<testing.T> t) {
                 time.Sleep(100 * time.Millisecond);
             }
             close(writerDoneʗ1);
-        }, GoStack.Bounded);
+        });
         var pwʗ2 = pw;
         var writerDoneʗ2 = writerDone;
         defer(() => {

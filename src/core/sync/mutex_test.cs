@@ -109,7 +109,7 @@ public static partial void TestMutex(ж<Δtesting.T> t) {
 
         var c = new channel<bool>(0);
         for (nint i = 0; i < 10; i++) {
-            goǃ(HammerMutex, m, (nint)1000, c, GoStack.Bounded);
+            goǃ(HammerMutex, m, (nint)1000, c);
         }
         for (nint i = 0; i < 10; i++) {
             ᐸꟷ(c);
@@ -254,7 +254,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> t) {
                     break;
                 }}
             }
-        }, GoStack.Bounded);
+        });
         var done = new channel<bool>(1);
         var doneʗ1 = done;
         goǃ(() => {
@@ -264,7 +264,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> t) {
                 Ꮡmu.Unlock();
             }
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         var selᴛ7 = done;
         var selᴛ8 = time.After((time.Duration)(10000000000L));
         switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
@@ -365,7 +365,7 @@ public static void BenchmarkMutexNoSpin(ж<Δtesting.B> Ꮡb) {
                 var cʗ1 = c;
                 goǃ(() => {
                     cʗ1.ᐸꟷ(true);
-                }, GoStack.Bounded);
+                });
                 ᐸꟷ(c);
             }
         }
