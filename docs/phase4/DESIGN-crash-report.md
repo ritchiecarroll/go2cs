@@ -123,6 +123,14 @@ banked convention rather than minting a number. A panic on a non-main goroutine 
 `goroutine 1`; that divergence predates this arc, is guarded where it is observable
 (`sync`'s `TestOnceFuncPanicTraceback`), and retires with goroutine identity numbering, not here.
 
+> **Amended 2026-11-05 (C1, S1).** Retired. The crash header now names the goroutine that panicked,
+> through the same `appendGoroutineHeader` `runtime.Stack` uses, and its block ends with Go's
+> `created by <func> in goroutine <parent>` and the `go` statement's position (`appendCreatedBy`).
+> The escaping panic disposes the goroutine root's scope before the backstop reports, so the root's
+> first-pass filter records the goroutine (`Goroutine.Crashing`). Main still reports `goroutine 1`;
+> a thread with no goroutine identity keeps the literal header. Guarded by the behavioral test
+> `CrashGoroutineCreatedBy`. `TestOnceFuncPanicTraceback` reads `debug.Stack()`, not this path.
+
 ## 4. The tee — `SetCrashOutput`'s fd
 
 The slot already exists: `runtime/debug`'s hand-owned `runtime_setCrashFD` remembers an fd and is

@@ -186,7 +186,15 @@ partial class runtime_package
         StackTrace stack = panic.PanicTrace ?? new StackTrace(thrown, fNeedFileInfo: false);
         StringBuilder trace = new();
 
-        trace.Append("goroutine 1 [running]:\n");
+        // The crashing goroutine's own header, as runtime.Stack writes it (Go's goroutineheader), and under its frames the
+        // `go` statement that started it (printcreatedby; none for main). A thread with no goroutine identity keeps the
+        // header it always printed.
+        Goroutine? crashing = Goroutine.Crashing(thrown);
+
+        if (crashing is null)
+            trace.Append("goroutine 1 [running]:\n");
+        else
+            appendGoroutineHeader(trace, crashing);
 
         // A panic a deferred call raised while an older one was handled: its own frames, then Go's `panic(...)`, above
         // the older panic's, which PanicTrace already holds (crashChainPrefix). Any other panic prints as it always has.
@@ -207,6 +215,9 @@ partial class runtime_package
         {
             appendGoFrames(trace, frames, panic);
         }
+
+        if (crashing is not null)
+            appendCreatedBy(trace, crashing);
 
         return trace.ToString();
     }
