@@ -143,12 +143,12 @@ internal static nint Len(this int64Encoder i) {
 
     while (i > 127) {
         n++;
-        i >>= (int)(8);
+        i >>= 8;
     }
 
     while (i < -128) {
         n++;
-        i >>= (int)(8);
+        i >>= 8;
     }
 
     return n;

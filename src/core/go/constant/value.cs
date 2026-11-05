@@ -948,7 +948,7 @@ public static slice<byte> Bytes(Value x) {
 
         for (nint j = 0; j < wordSize; j++) {
             bytes[i] = (byte)w;
-            w >>= (int)(8);
+            w >>= 8;
             i++;
         }
     }
