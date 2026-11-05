@@ -272,6 +272,23 @@ Every generated named-slice wrapper also implements the non-generic `IArray` sur
 
 C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) have no direct C# form (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `/*num:**/` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; math/rand/v2's `N` takes this path.)
 
+### Any constant Go types as the parameter is materialized, once, at its top-most node
+
+Go gives an untyped constant the type of the type parameter it meets, not only as a binary operand: `return 1`
+in a function returning `T`, `var x T = 1 << n`, an argument `pair(x, 2)`, an element of `[]T{1, 2}`, and the
+left operand of `1 << n`, which takes the shift's type. C# leaves each one an `int` literal (CS0029, CS0030 or
+CS0019), so `convExpr` wraps every constant expression whose type is an integer type parameter in
+`ConvertToType<T>(…)`, at the top-most constant node only: `return 1 << 3` is `ConvertToType<T>(1 << 3)`, never
+a wrap inside a wrap. The shift case then binds golib's generic guard, `ConvertToType<T>(1).Lsh(n)`
+(`.Lsh((int64)(n))` for a signed count), so a count at or past the type argument's width yields 0 and a negative
+count panics, as in Go; a bare `1 << (int)(n)` on `T` would also have been masked by .NET's `IShiftOperators`.
+The binary-operand wrap above, the per-argument cast and the bitwise compound right-side cast step aside for an
+operand that is already `T`. Guarded by `TypeParamUntypedConst` (fifteen arms over `~uint8 | ~uint32 | ~int8 |
+~int64`, values vs Go) and `typeParamUntypedConst_test.go`.
+<!-- 2026-11-05: at the base the program's emission failed with 10 CS0029, 2 CS0030 and 1 CS0019. Census (top-most
+constant typed as an integer type parameter, three GOOS, tests included): std 10 sites and the behavioral corpus 6,
+all non-shift binary operands the binary-operand wrap already materialized, so neither corpus moved. -->
+
 ## A named-wide-integer or type-parameter slice index casts to `nint`
 
 Go permits any integer type as a slice/array index, converting it to `int` for the access. The C#
