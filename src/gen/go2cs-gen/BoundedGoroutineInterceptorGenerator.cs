@@ -433,8 +433,10 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
         source.Append("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]\r\n");
         source.Append("    file sealed class InterceptsLocationAttribute : global::System.Attribute\r\n    {\r\n");
         source.Append("        public InterceptsLocationAttribute(int version, string data) { }\r\n    }\r\n}\r\n\r\n");
+        // A block namespace (the file opens System.Runtime.CompilerServices as one above, and C# allows only one form per
+        // file), its body indented one level like any block's, as LiteralInterceptorGenerator writes its own.
         source.Append("namespace go2cs.Interceptors\r\n{\r\n");
-        source.Append("file static class ˢBoundedGoroutines\r\n{\r\n");
+        source.Append("    file static class ˢBoundedGoroutines\r\n    {\r\n");
 
         for (int ordinal = 0; ordinal < order.Count; ordinal++)
         {
@@ -444,7 +446,7 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
                 source.Append("\r\n");
 
             foreach (InterceptableLocation location in rungs[rung])
-                source.Append($"    [global::System.Runtime.CompilerServices.InterceptsLocation({location.Version}, \"{location.Data}\")]\r\n");
+                source.Append($"        [global::System.Runtime.CompilerServices.InterceptsLocation({location.Version}, \"{location.Data}\")]\r\n");
 
             string typeParameters = rung.TypeParameters.Length == 0 ? string.Empty : "<" + string.Join(", ", rung.TypeParameters.Select(parameter => parameter.Name)) + ">";
             string parameters = string.Join(", ", rung.Parameters.Select(parameter => $"{parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} {Escape(parameter.Name)}"));
@@ -453,12 +455,12 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
             arguments.Add("global::go.GoStack.Bounded");
             arguments.AddRange(rung.Parameters.Skip(rung.Parameters.Length - 2).Select(parameter => Escape(parameter.Name)));
 
-            source.Append($"    [{GeneratedCodeAttribute}, global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough]\r\n");
-            source.Append($"    public static void ˢB{ordinal.ToString(CultureInfo.InvariantCulture)}{typeParameters}({parameters}) =>\r\n");
-            source.Append($"        global::go.builtin.{LauncherName}({string.Join(", ", arguments)});\r\n");
+            source.Append($"        [{GeneratedCodeAttribute}, global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough]\r\n");
+            source.Append($"        public static void ˢB{ordinal.ToString(CultureInfo.InvariantCulture)}{typeParameters}({parameters}) =>\r\n");
+            source.Append($"            global::go.builtin.{LauncherName}({string.Join(", ", arguments)});\r\n");
         }
 
-        source.Append("}\r\n}\r\n");
+        source.Append("    }\r\n}\r\n");
 
         return source.ToString();
     }
