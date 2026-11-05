@@ -186,9 +186,17 @@ else {
     Write-Host '  working tree     : clean'
 }
 
+# A release is cut on master, or on a maintenance line's release/go1.N branch (docs/PLAN-version-lines.md, T4);
+# any other branch is worth a second look, so it is flagged, never refused.
+function Test-GoReleaseBranch {
+    param([AllowEmptyString()][string] $Branch)
+
+    return ($Branch -ceq 'master' -or $Branch -cmatch '^release/go[0-9]+\.[0-9]+$')
+}
+
 $branch = (git -C $RepoRoot branch --show-current 2>$null)
 Write-Host "  branch           : $branch"
-if ($branch -ne 'master') { Write-Host '    (not master -- intentional?)' -ForegroundColor Yellow }
+if (-not (Test-GoReleaseBranch $branch)) { Write-Host '    (not master or a release/go1.N line -- intentional?)' -ForegroundColor Yellow }
 
 # THE SDK IS READ HERE, NOT DISCOVERED BY THE FIRST BUILD (2026-10-06, the 1.24.13.4 run on the i7).
 # That run's shell resolved a machine dotnet with no SDK satisfying global.json, and the first build

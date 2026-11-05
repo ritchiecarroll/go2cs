@@ -476,6 +476,14 @@ function Compare-GoReleaseStamp {
     return 0
 }
 
+# The Go minor a release version belongs to, its first two components: 1.26.10.2 -> 1.26. A release line
+# (master or release/go1.N) carries exactly one Go minor, so this names the line a version was cut on.
+function Get-GoReleaseLine {
+    param([Parameter(Mandatory)][string]$Version)
+
+    return (@($Version.Split('.') | Select-Object -First 2) -join '.')
+}
+
 #
 # THE TAGS ARE READ FROM ORIGIN TOO (2026-09-24, ledger 620ba7a2b8). -Tags is the LOCAL list and
 # -RemoteTags origin's (`git ls-remote --tags origin`, read-only); the comparison runs over their UNION.
@@ -500,7 +508,7 @@ function Get-GoNextReleaseVerification {
 
     if ($base -notmatch '^[0-9]+(\.[0-9]+)*$' -or $counter -notmatch '^[0-9]+$') {
         $problems.Add("the next release cannot be composed: version.props reads GoStdLibVersion '$base' and GoBuildNumber '$counter'")
-        return [pscustomobject]@{ Next = ''; Base = $base; Counter = $counter; Newest = ''; NewestFrom = ''
+        return [pscustomobject]@{ Next = ''; Base = $base; Counter = $counter; Line = ''; Newest = ''; NewestFrom = ''
                                   Snapshots = 0; ReleaseTags = 0; Excluded = @(); Problems = $problems.ToArray() }
     }
 
@@ -565,20 +573,25 @@ function Get-GoNextReleaseVerification {
         }
     }
 
-    # MONOTONICITY, numerically, against every OTHER recorded name (an exact name is existence's).
+    # MONOTONICITY, numerically, against every OTHER recorded name OF THE SAME GO MINOR (an exact name is
+    # existence's, which spans every line above). Each landed minor keeps a release/go1.N maintenance line
+    # (docs/PLAN-version-lines.md), so a security release 1.26.11.4 cut after 1.27.0.1 is newer on ITS line
+    # and must pass; a release that is not newer than its own line's newest is still refused (T1).
+    $line = Get-GoReleaseLine $next
     $newest = ''
     foreach ($version in @($recorded.Keys)) {
+        if ((Get-GoReleaseLine $version) -cne $line) { continue }
         if (-not $newest -or (Compare-GoReleaseStamp $version $newest) -gt 0) { $newest = $version }
         if ($version -ceq $next) { continue }
         if ((Compare-GoReleaseStamp $next $version) -le 0) {
-            $problems.Add("the next release $next is not strictly newer than recorded release $version ($($recorded[$version] -join ' + ')) -- compared numerically per component")
+            $problems.Add("the next release $next is not strictly newer than recorded release $version ($($recorded[$version] -join ' + ')) of its Go minor $line -- compared numerically per component")
         }
     }
 
-    $newestFrom = if ($newest) { $recorded[$newest] -join ' + ' } else { '' }
+    $newestFrom = if ($newest) { $recorded[$newest] -join ' + ' } else { 'none on this line yet' }
 
     return [pscustomobject]@{
-        Next = $next; Base = $base; Counter = $counter; Newest = $newest; NewestFrom = $newestFrom
+        Next = $next; Base = $base; Counter = $counter; Line = $line; Newest = $newest; NewestFrom = $newestFrom
         Snapshots = $snapshotCount; ReleaseTags = $tagCount; OriginOnlyTags = $originOnlyCount
         Excluded = $excluded.ToArray(); Problems = $problems.ToArray()
     }
@@ -778,8 +791,8 @@ $nextRelease = Get-GoNextReleaseVerification -VersionPropsText $preflightPropsTe
 if ($tagReadProblem) { $censusProblems.Add($tagReadProblem) }
 foreach ($problem in $nextRelease.Problems) { $censusProblems.Add($problem) }
 
-$nextVerdict = if ($nextRelease.Problems.Count -or $tagReadProblem) { 'REFUSED' } else { 'unrecorded, and strictly newer than every recorded release' }
-Write-Step ("Next release: {0} (base {1} + counter {2} + 1): {3} -- newest recorded {4} ({5}), across {6} snapshot(s), {7} local release tag(s) and {8} on origin only, compared numerically per component" -f `
+$nextVerdict = if ($nextRelease.Problems.Count -or $tagReadProblem) { 'REFUSED' } else { "unrecorded on any line, and strictly newer than every recorded release of Go $($nextRelease.Line)" }
+Write-Step ("Next release: {0} (base {1} + counter {2} + 1): {3} -- newest recorded on its line {4} ({5}), across {6} snapshot(s), {7} local release tag(s) and {8} on origin only, compared numerically per component" -f `
             $nextRelease.Next, $nextRelease.Base, $nextRelease.Counter, $nextVerdict, $nextRelease.Newest, $nextRelease.NewestFrom,
             $nextRelease.Snapshots, $nextRelease.ReleaseTags, $nextRelease.OriginOnlyTags)
 if ($originTags.Problem) {
