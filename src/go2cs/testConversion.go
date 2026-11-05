@@ -3294,7 +3294,8 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 			// Hand-owned destination: the visit above already fed this file's package-wide state;
 			// emit the auto conversion to the `.cs.auto` review sibling, leaving the marked `.cs`
 			// untouched. The HAND-OWNED `.cs` is the compile item; the `.cs.auto` sibling never is.
-			outputName := filepath.Join(outputPath, baseName+".cs.auto")
+			// The tree's own per-GOOS sibling when it holds one there (reviewSiblingLayoutPath), flat otherwise.
+			outputName := platformLayoutPath(outputPath, goosOfTarget(options.targetPlatform), baseName+".cs.auto")
 			visitor.finalizePositionMap(outputName)
 			visitor.alignEmittedTrailingComments()
 
