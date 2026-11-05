@@ -383,7 +383,7 @@ func (cw closeWaiter) Close() { close(cw) }
 func (cw closeWaiter) Wait()  { <-cw }
 ```
 
-<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:8-20 -->
+<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:7-19 -->
 ```csharp
 partial struct closeWaiter /*chan EmptyStruct*/;
 
@@ -683,7 +683,7 @@ case v := <-fresh():
 }
 ```
 
-<!-- source: src/tests/Behavioral/SelectOperandOnceEval/main.cs:37-39, 41-42 -->
+<!-- source: src/tests/Behavioral/SelectOperandOnceEval/main.cs:36-41 -->
 ```csharp
 var selᴛ1 = fresh();
 switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {

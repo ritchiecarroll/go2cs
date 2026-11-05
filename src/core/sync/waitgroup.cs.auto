@@ -14,7 +14,6 @@ using synctest = @internal.synctest_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using go.sync;
 

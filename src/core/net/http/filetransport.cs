@@ -6,7 +6,6 @@ namespace go.net;
 using fmt = fmt_package;
 using io = io_package;
 using fs = go.io.fs_package;
-using System.Runtime.CompilerServices;
 using go.io;
 
 partial class http_package {

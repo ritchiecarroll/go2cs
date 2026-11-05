@@ -10,7 +10,6 @@ using net = net_package;
 using httptrace = go.net.http.httptrace_package;
 using url = go.net.url_package;
 using sync = sync_package;
-using System.Runtime.CompilerServices;
 using go.net;
 using go.net.http;
 using io = io_package;

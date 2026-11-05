@@ -1,7 +1,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
 
 partial class main_package {
 

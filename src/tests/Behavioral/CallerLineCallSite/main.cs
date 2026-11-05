@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
-using System.Runtime.CompilerServices;
 using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {

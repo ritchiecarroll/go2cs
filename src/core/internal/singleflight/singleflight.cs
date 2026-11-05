@@ -7,7 +7,6 @@
 namespace go.@internal;
 
 using sync = go.sync_package;
-using System.Runtime.CompilerServices;
 using go;
 
 partial class singleflight_package {

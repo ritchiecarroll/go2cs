@@ -82,6 +82,12 @@ import (
 func launchUpper(done chan string) {
 	go func() { done <- strings.ToUpper(Unsafe) }()
 }
+
+// launchUpper above is a partial carrier, which names no attribute and so demands no namespace; this literal
+// writes [MethodImpl(MethodImplOptions.NoInlining)] itself.
+func upperLauncher(done chan string) func() {
+	return func() { go func() { done <- strings.ToUpper(Unsafe) }() }
+}
 `)
 
 	// CONTROL -- the same two demands in a file with no using static.
@@ -96,6 +102,12 @@ func main() {
 	done := make(chan string)
 	go launch(done)
 	println(<-done, total(counter{v: 1}), gauge{v: 2}.v)
+}
+
+// main above is a partial carrier, which names no attribute and so demands no namespace; this literal writes
+// [MethodImpl(MethodImplOptions.NoInlining)] itself.
+func spawner(done chan string) func() {
+	return func() { go launch(done) }
 }
 `)
 
@@ -226,9 +238,11 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 		"go.mod":    "module example/aliasvariant\n\ngo 1.23\n",
 		"lib.go":    "package aliasvariant\n\nvar Unsafe = \"unsafe\"\n\nfunc Name() string { return Unsafe }\n",
 		"inner_test.go": "package aliasvariant\n\n" +
-			"func innerProbe(done chan string) {\n\tgo func() { done <- Unsafe }()\n}\n",
+			"func innerProbe(done chan string) {\n\tgo func() { done <- Unsafe }()\n}\n\n" +
+			"func innerLauncher(done chan string) func() {\n\treturn func() { go func() { done <- Unsafe }() }\n}\n",
 		"outer_test.go": "package aliasvariant_test\n\nimport \"example/aliasvariant\"\n\n" +
-			"func outerProbe(done chan string) {\n\tgo func() { done <- aliasvariant.Name() }()\n}\n",
+			"func outerProbe(done chan string) {\n\tgo func() { done <- aliasvariant.Name() }()\n}\n\n" +
+			"func outerLauncher(done chan string) func() {\n\treturn func() { go func() { done <- aliasvariant.Name() }() }\n}\n",
 	})
 
 	internal, external := loadBothTestVariantsForDir(t, dir)
@@ -282,7 +296,9 @@ func TestEveryFileOfAReferenceModelTestProjectBindsByAlias(t *testing.T) {
 	for _, name := range []string{"inner_test.cs", "outer_test.cs"} {
 		cs := readConvertedTestFile(t, outputPath, name)
 
-		// Control: each file executes a go, so its frame is kept and the namespace is demanded.
+		// Control: each file executes a go, so its frame is kept. Its probe is a partial carrier, which names no
+		// attribute; its launcher's func literal writes [MethodImpl(MethodImplOptions.NoInlining)], which demands
+		// the namespace.
 		if !fileKeepsAFrame(cs) {
 			t.Fatalf("control: %s must carry the no-inline mark, or this test proves nothing:\n%s", name, cs)
 		}
@@ -309,7 +325,8 @@ func TestAnExternalOnlyTestFileBindsByAlias(t *testing.T) {
 		"go.mod": "module example/aliasexternal\n\ngo 1.23\n",
 		"lib.go": "package aliasexternal\n\nvar Unsafe = \"unsafe\"\n\nfunc Name() string { return Unsafe }\n",
 		"outer_test.go": "package aliasexternal_test\n\nimport \"example/aliasexternal\"\n\n" +
-			"func outerProbe(done chan string) {\n\tgo func() { done <- aliasexternal.Name() }()\n}\n",
+			"func outerProbe(done chan string) {\n\tgo func() { done <- aliasexternal.Name() }()\n}\n\n" +
+			"func outerLauncher(done chan string) func() {\n\treturn func() { go func() { done <- aliasexternal.Name() }() }\n}\n",
 	})
 
 	_, external := loadBothTestVariantsForDir(t, dir)

@@ -6,7 +6,6 @@ namespace go.crypto.@internal.fips140;
 using fips140 = go.crypto.@internal.fips140_package;
 using alias = go.crypto.@internal.fips140.alias_package;
 using strconv = strconv_package;
-using System.Runtime.CompilerServices;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 

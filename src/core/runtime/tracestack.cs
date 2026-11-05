@@ -11,7 +11,6 @@ using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
 using @internal.trace;
-using System.Runtime.CompilerServices;
 using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {

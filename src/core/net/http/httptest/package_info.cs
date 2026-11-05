@@ -74,7 +74,7 @@ using static go.net.http.httptest_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAMNAAXAoKUgoKUpoKClIKUtLTEpIKUgIKU/pSCpoLu")]
 [assembly: GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC5mkgALHsKCgoKUAAgU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpSqopSkpJSmAAsYgrqSgqaCgoKClKqigpQACCQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAIQ0oKClIKClA==")]
-[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD56goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACg6ygqaCgriSgpSClJSWgoKCgoL6soKUgpSCgqaCgpSUgoKClJSClIKClIKC3IKSgpSClJSCgoKCqqKCggAGEuKCgoKCggASJoK4gqTKgILIgoCCyKLk0oKCgoKClKKm0oKCgoKUAAcQgpKC+MaoogACEuKmgoKigqK6woKygpSUgIKkgriCgsrGgIKClNaAgoKUpILqgIKmxoK0uqCoooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "124=newLocalListener/1/1/1", "285:25,358:21")]
+[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD16goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACg6ygqaCgriSgpSClJSWgoKCgoL6soKUgpSCgqaCgpSUgoKClJSClIKClIKC3IKSgpSClJSCgoKCqqKCggAGEuKCgoKCggASJoK4gqTKgILIgoCCyKLk0oKCgoKClKKm0oKCgoKUAAcQgpKC+MaoogACEuKmgoKigqK6woKygpSUgIKkgriCgsrGgIKClNaAgoKUpILqgIKmxoK0uqCoooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "123=newLocalListener/1/1/1", "284:25,357:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

@@ -11,7 +11,6 @@ using io = io_package;
 using rand = math.rand_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go.@internal;
 using go.crypto.@internal;
 using math;
