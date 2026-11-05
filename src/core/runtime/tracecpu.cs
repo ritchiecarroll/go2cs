@@ -8,7 +8,6 @@ using tracev2 = @internal.trace.tracev2_package;
 using @internal.runtime;
 using @internal.trace;
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
 using atomic = @internal.runtime.atomic_package;
 
 partial class runtime_package {

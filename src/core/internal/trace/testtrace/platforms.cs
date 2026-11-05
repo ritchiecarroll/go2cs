@@ -5,7 +5,6 @@ namespace go.@internal.trace;
 
 using runtime = runtime_package;
 using testing = testing_package;
-using System.Runtime.CompilerServices;
 
 partial class testtrace_package {
 

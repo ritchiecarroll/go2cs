@@ -8,7 +8,6 @@ using goarch = go.@internal.goarch_package;
 using unsafeheader = go.@internal.unsafeheader_package;
 using Δruntime = runtime_package;
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
 using go.@internal;
 
 partial class reflectlite_package {

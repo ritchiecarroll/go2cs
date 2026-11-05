@@ -297,7 +297,6 @@ namespace go;
 using goarch = @internal.goarch_package;
 using goos = @internal.goos_package;
 using @internal;
-using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 

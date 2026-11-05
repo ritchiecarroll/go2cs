@@ -20,7 +20,6 @@ using filepath = path.filepath_package;
 using strings = strings_package;
 using sync = sync_package;
 /* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
-using System.Runtime.CompilerServices;
 using global::go.go;
 using global::go.os;
 using path;

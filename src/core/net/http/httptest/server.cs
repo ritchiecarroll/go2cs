@@ -17,7 +17,6 @@ using os = os_package;
 using strings = strings_package;
 using sync = sync_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using crypto;
 using go.net;
 using go.net.http.@internal;

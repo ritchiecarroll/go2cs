@@ -5,7 +5,6 @@ namespace go.crypto;
 
 using sys = go.@internal.runtime.sys_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-using System.Runtime.CompilerServices;
 using go.@internal.runtime;
 
 partial class subtle_package {

@@ -14,7 +14,6 @@ using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go;
 using go.os;
 using ꓸꓸꓸstring = Span<@string>;
