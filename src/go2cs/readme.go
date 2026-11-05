@@ -11,7 +11,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/doc/comment"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,6 +52,67 @@ func extractPackageDoc(files []*ast.File) string {
 	}
 
 	return strings.Join(docs, "\n\n")
+}
+
+// pkgsiteDocContexts are the build contexts pkg.go.dev documents a package under, in its order (pkgsite's
+// fetch.BuildContexts). It shows the documentation of the first one that builds the package.
+var pkgsiteDocContexts = []string{"linux/amd64", "windows/amd64", "darwin/amd64", "js/wasm"}
+
+// packageDocFor returns the package doc for the README: the doc of the files the converting target selected
+// (extractPackageDoc), or, when those carry none, the doc pkg.go.dev shows. One README serves every platform --
+// it is packed flat from the project directory -- and a package can keep its doc in a file one target excludes:
+// os/exec/internal/fdtest's is in exists_unix.go, so its windows emission had no doc while linux and darwin had
+// one, and the three-target merge kept windows' copy. Falling back to pkg.go.dev's doc makes every target emit
+// the same README, the one the README's Docs badge links to. A target whose own files carry a doc keeps it.
+func packageDocFor(files []*ast.File, sourceDir string, packageName string) string {
+	if doc := extractPackageDoc(files); doc != "" || sourceDir == "" {
+		return doc
+	}
+
+	entries, err := os.ReadDir(sourceDir)
+
+	if err != nil {
+		return ""
+	}
+
+	fset := token.NewFileSet()
+
+	for _, platform := range pkgsiteDocContexts {
+		context := build.Default
+		context.GOOS, context.GOARCH, _ = strings.Cut(platform, "/")
+		context.CgoEnabled = false
+		context.BuildTags = nil
+		context.ReleaseTags = loaderReleaseTags(sourceDir)
+		context.ToolTags = loaderToolTags(sourceDir)
+
+		var selected []*ast.File
+
+		for _, entry := range entries {
+			name := entry.Name()
+
+			if entry.IsDir() || filepath.Ext(name) != ".go" || strings.HasSuffix(name, "_test.go") {
+				continue
+			}
+
+			if included, err := context.MatchFile(sourceDir, name); err != nil || !included {
+				continue
+			}
+
+			file, err := parser.ParseFile(fset, filepath.Join(sourceDir, name), nil, parser.PackageClauseOnly|parser.ParseComments)
+
+			if err != nil || file.Name == nil || file.Name.Name != packageName {
+				continue
+			}
+
+			selected = append(selected, file)
+		}
+
+		if doc := extractPackageDoc(selected); doc != "" {
+			return doc
+		}
+	}
+
+	return ""
 }
 
 // renderPackageDoc renders a package's godoc markup to the GitHub-flavored Markdown the README
