@@ -51,6 +51,12 @@ using static global::go.bytes_test_package;
 // the assembly.
 [assembly: GoHoistedLiterals]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("reader_test.cs", 123, 9)]
+[assembly: GoBoundedGoroutine("reader_test.cs", 146, 9)]
+[assembly: GoBoundedGoroutine("reader_test.cs", 157, 9)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

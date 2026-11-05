@@ -2046,7 +2046,7 @@ public static partial void TestConcurrentTimerReset(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, i, GoStack.Bounded);
+        }, i);
     }
     Ꮡwg.Wait();
 }
@@ -2070,7 +2070,7 @@ public static partial void TestConcurrentTimerResetStop(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, i, GoStack.Bounded);
+        }, i);
         var timerʗ2 = timer;
         goǃ((nint iΔ2) => {
             GoFrame ᒐ = default;
@@ -2080,7 +2080,7 @@ public static partial void TestConcurrentTimerResetStop(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, i, GoStack.Bounded);
+        }, i);
     }
     Ꮡwg.Wait();
 }

@@ -206,7 +206,7 @@ func TestSStringTwinEmission(t *testing.T) {
 	// renders inside the thunk's call in the ordinary call's form, `b.write("x"u8)` (seat #33)
 	body := liftFunctionBody(t, emitted, "internal static partial @string use(") // use executes a go: a no-inline carrier
 
-	for _, want := range []string{`defer(() => Ꮡb.ValueSlot.write("deferred"u8),`, `defer(() => Count("deferred"u8),`, `goǃ(() => Count("go"u8),`} {
+	for _, want := range []string{`defer(() => Ꮡb.ValueSlot.write("deferred"u8),`, `defer(() => Count("deferred"u8),`, `goǃ(() => Count("go"u8));`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("use: want the lambda form %q:\n%s", want, body)
 		}

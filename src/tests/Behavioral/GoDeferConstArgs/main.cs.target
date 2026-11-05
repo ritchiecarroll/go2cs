@@ -130,7 +130,7 @@ internal static partial void spawned() {
 
     var b = Ꮡ(new box(name: "b"));
     var bʗ1 = b;
-    goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);
+    goǃ(bʗ1.say, (@string)"hello");
     fmt.Println(ᐸꟷ(results));
 
     var f = report;

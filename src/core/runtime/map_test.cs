@@ -376,7 +376,7 @@ internal static partial void testConcurrentReadsAfterGrowth(ж<testing.T> t, boo
                         }
                         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                         finally { ᒐ.Run(); }
-                    }, GoStack.Bounded);
+                    });
                     var mʗ2 = m;
                     goǃ(() => {
                         GoFrame ᒐ = default;
@@ -388,7 +388,7 @@ internal static partial void testConcurrentReadsAfterGrowth(ж<testing.T> t, boo
                         }
                         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                         finally { ᒐ.Run(); }
-                    }, GoStack.Bounded);
+                    });
                     if (useReflect) {
                         Ꮡwg.Add(1);
                         var mʗ3 = m;

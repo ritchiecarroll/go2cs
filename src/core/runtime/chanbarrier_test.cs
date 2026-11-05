@@ -44,12 +44,12 @@ internal static partial (ж<response>, error) doRequest(bool useSelect) {
             case 1 when selᴛ67.ꟷᐳ(out _): {
                 break;
             }}
-        }, GoStack.Bounded);
+        });
     } else {
         var chʗ2 = ch;
         goǃ(() => {
             chʗ2.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError())));
-        }, GoStack.Bounded);
+        });
     }
 
     var r = ᐸꟷ(ch);

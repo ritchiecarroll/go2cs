@@ -406,7 +406,7 @@ public static partial void TestAcceptIgnoreAbortedConnRequest(ж<testing.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
         var syserrʗ2 = syserr;
         Ꮡsw.Set(socktest.FilterAccept, (ж<socktest.Status> so) => {
             {

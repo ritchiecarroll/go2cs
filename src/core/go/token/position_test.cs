@@ -282,7 +282,7 @@ public static partial void TestFileSetRace2(ж<testing.T> t) {
             fileʗ1.AddLine(i);
         }
         chʗ1.ᐸꟷ(1);
-    }, GoStack.Bounded);
+    });
 
     var chʗ2 = ch;
     var fileʗ2 = @file;
@@ -731,7 +731,7 @@ public static partial void TestRemoveFileRace(ж<testing.T> t) {
         ᐸꟷ(startʗ1); // unlock main test goroutine
         close(race1ʗ1);
         close(race2ʗ1);
-    }, GoStack.Bounded);
+    });
 
     var fsetʗ1 = fset;
     var race1ʗ2 = race1;
@@ -739,7 +739,7 @@ public static partial void TestRemoveFileRace(ж<testing.T> t) {
         foreach (var f in race1ʗ2) {
             fsetʗ1.File(((global::go.go.token_package.ΔPos)f.Base()) + 5); // populates s.last with f
         }
-    }, GoStack.Bounded);
+    });
 
     start.ᐸꟷ(new EmptyStruct());
     foreach (var f in race2) {

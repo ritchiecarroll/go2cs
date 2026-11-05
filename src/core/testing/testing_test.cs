@@ -652,7 +652,7 @@ internal static partial void doRace() {
     goǃ(() => {
         x = 1; // racy write
         c1ʗ1.ᐸꟷ(true);
-    }, GoStack.Bounded);
+    });
     _ = x; // racy read
     ᐸꟷ(c1);
 }
@@ -846,7 +846,7 @@ public static partial void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> 
             Ꮡready.Wait();
             doRace(); // This race happens while both subtests are running.
             close(doneʗ1);
-        }, GoStack.Bounded);
+        });
 
         var doneʗ2 = done;
         t.Run(subˢ, (ж<testing.T> tΔ1) => {

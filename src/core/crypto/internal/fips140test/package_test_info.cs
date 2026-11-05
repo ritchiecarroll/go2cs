@@ -53,6 +53,12 @@ using static global::go.crypto.@internal.fips140test.fipstest_internal_test_pack
 [assembly: GoFieldAccess(typeof(go.runtime.debug_package.BuildInfo))]
 [assembly: GoFieldAccess(typeof(request))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("entropy_test.cs", 333, 9)]
+[assembly: GoBoundedGoroutine("indicator_test.cs", 66, 5)]
+[assembly: GoBoundedGoroutine("indicator_test.cs", 79, 5)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

@@ -244,7 +244,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/ForVariants/ForVariants.cs.target:55,61#aa26ca ·
   src/tests/Behavioral/ExprSwitch/ExprSwitch.cs.target:57#5657c6 · src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:41,70#b164fa +
   src/tests/Behavioral/TypeSwitch/TypeSwitch.cs.target:42#deabd8 · src/tests/Behavioral/DeferSimple/DeferSimple.cs.target:8-15#6be1c6 +
-  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,36#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:74#3d4175 ·
+  src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:18,36#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:74#4f87df ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:10,31,73,76#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
   src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:56#64aa80 + src/core/reflect/type.cs:1263#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
@@ -8548,10 +8548,10 @@ internal static void emit(channel<nint> @out) {
 internal static partial void Main() {
     var @out = new channel<nint>(0);
 
-    goǃ(ᴛ1 => sum(ᴛ1, 3, 4), @out, GoStack.Bounded);
+    goǃ(ᴛ1 => sum(ᴛ1, 3, 4), @out);
     fmt.Println("sum:", ᐸꟷ(@out));
     …
-    goǃ(emit, @out, GoStack.Bounded);
+    goǃ(emit, @out);
     fmt.Println("emit:", ᐸꟷ(@out));
     …
 }
@@ -8632,7 +8632,7 @@ internal static partial void Main() {
 
     goǃ(() => {
         throw panic("goroutine boom");
-    }, GoStack.Bounded);
+    });
 
     ᐸꟷ(done);
 }
@@ -8666,9 +8666,9 @@ return waits for its report and exits 2 with it (golib's `MainExit`; see
 256 MiB stack for each goroutine by default (`GO2CS_GOROUTINE_STACK` changes it). That reservation is address
 space rather than memory, but it is what makes a hundred thousand goroutines parked at once slow to start. The
 converter proves, for each `go` statement, whether its goroutine can recurse: every call it can make must resolve
-to a function the converter can see, and no chain of calls may return to a function already on it. A goroutine it
-proves cannot recurse is started with a mark, and golib runs it on a 16 MiB stack
-(`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce` only computes and sends on a channel:
+to a function the converter can see, and no chain of calls may return to a function already on it. golib runs a
+goroutine it proves cannot recurse on a 16 MiB stack (`GO2CS_GOROUTINE_BOUNDED_STACK` changes it). Here `produce`
+only computes and sends on a channel, and its `go` statement reads as any other:
 
 <!-- source: src/tests/Behavioral/GoroutineStackReserve/main.go:47 -->
 ```go
@@ -8677,15 +8677,27 @@ go produce(i, out)
 
 <!-- source: src/tests/Behavioral/GoroutineStackReserve/main.cs.target:42 -->
 ```csharp
-goǃ(produce, i, @out.AsSendOnly(), GoStack.Bounded);
+goǃ(produce, i, @out.AsSendOnly());
 ```
 
-Anything the proof cannot follow keeps the full stack, unmarked. That includes a call through an interface or a
+The mark is a record in the package's `package_info.cs`, naming the file, line and column where that `goǃ` call
+starts. go2cs-gen intercepts the call there and starts the goroutine on the smaller stack. A record that no longer
+lands on such a call fails the build (`GO2CS0010`) rather than start some other goroutine on the small stack:
+
+<!-- source: src/tests/Behavioral/GoroutineStackReserve/package_info.cs:46 -->
+```csharp
+[assembly: GoBoundedGoroutine("main.cs", 42, 9)]
+```
+
+Anything the proof cannot follow keeps the full stack, unrecorded. That includes a call through an interface or a
 func value, a range-over-func loop, and a goroutine that reaches either through the standard library, so a
 goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
 crash where Go grows the stack, so the proof gives up rather than guess.
-<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:338
-     `if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {`. golib:
+<!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:244
+     `recorded := bounded && v.boundedGoRecordable()`, recorded by src/go2cs/goroutineStackRecords.go:131
+     `func applyBoundedGoRecords(packageInfoLines []string, packageInfoFileName string, mergeExisting bool) []string {`;
+     the interception: src/gen/go2cs-gen/BoundedGoroutineInterceptorGenerator.cs:55
+     `public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator`. golib:
      src/core/golib/runtime/Goroutine.cs:95 `private const int DefaultBoundedStackReserve = 16 * 1024 * 1024;` and one
      worker pool per reservation, src/core/golib/runtime/GoroutineThreadPool.cs:53
      `private static readonly Pool s_bounded = new(Goroutine.BoundedStackReserve);`. Sample: the behavioral test
@@ -8847,7 +8859,7 @@ go sendOnly(mychanl)
 ```csharp
 var mychanl = new channel<@string>(0);
 
-goǃ(sendOnly, mychanl.AsSendOnly(), GoStack.Bounded);
+goǃ(sendOnly, mychanl.AsSendOnly());
 ```
 
 **`range` over a channel becomes `foreach`.** The loop receives each value and ends when the channel
@@ -10781,7 +10793,7 @@ go2cs-gen boxes as a Go string because `fmt.Println` takes `any` arguments.
 
 A `defer` or `go` call to such a function works too. Its arguments are stored until the call runs, and C# cannot
 store a `ref`, so the statement stores the address as a box when it runs and turns it into a `ref` only when
-the call itself runs ([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:11#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:237#cd7334, :250#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:30-34#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:16 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:3024#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:125#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:62 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:86#80ced2; reference: docs/ConversionStrategies-Reference/pointers.md:265#25611d, :269#fed198 -->
+the call itself runs ([Defer / Panic / Recover](#defer--panic--recover), [Goroutines](#goroutines)). <!-- signature `internal static void addTo(ref uint64 @out, uint64 v)` at src/tests/Behavioral/RefLoweredParams/main.cs.target:11#2a62e6 (Go: main.go:16#1242af). unexported-only: docs/ConversionStrategies-Reference/pointers.md:237#cd7334, :250#eddd04 (exported functions, func-value uses and others keep the box; boxedBump used as a func value keeps ж<uint64>: RefLoweredParams/main.cs.target:30-34#e4b0fb). nonnil at a lowered call: RefLoweredParams/main.go:23 `addTo(&v.x, k)` -> main.cs.target:16 `addTo(ref nonnil(ref v).x, k);`; golib builtin.cs:3024#56a4ed. Stdlib instance: src/core/crypto/internal/fips140/nistec/fiat/p224.cs:125#08a083. defer keeps the box: RefLoweredParams/main.go:73 `defer printVal(&x)` -> main.cs.target:62 `defer(ᴛ1 => printVal(ref ᴛ1.DerefOrNull()), Ꮡx, ref ᒐ);`; go: main.go:85#b7d682 -> main.cs.target:86#98f632; reference: docs/ConversionStrategies-Reference/pointers.md:265#25611d, :269#fed198 -->
 
 **A pointer receiver is `this ref T`, or the box `this ж<T>` when the method needs the pointer itself.**
 Methods are C# extension methods, so the receiver is the first parameter
@@ -12292,8 +12304,8 @@ statement, which converted code writes as golib's `goǃ(…)` ([Goroutines](#gor
 that starts a goroutine carries its own record, kept by hand, that maps each `goǃ(` line to the Go `go`
 statement it replaces and no other line. A traceback's `created by` line then names the Go position, as
 Go's does.
-<!-- the converter's record: src/go2cs/positionMapOperations.go:590 (`Go source positions are recorded here, one`)
-     and :595 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
+<!-- the converter's record: src/go2cs/positionMapOperations.go:594 (`Go source positions are recorded here, one`)
+     and :599 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
      A hand-kept record: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
      for its goǃ( at :246 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per

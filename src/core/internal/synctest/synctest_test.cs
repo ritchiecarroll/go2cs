@@ -103,7 +103,7 @@ public static void TestSimpleWait(ж<testing.T> t) {
 public static void TestGoroutineWait(ж<testing.T> t) {
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         goǃ(() => {
-        }, GoStack.Bounded);
+        });
         synctest.Wait();
     });
 }
@@ -223,7 +223,7 @@ public static void TestTimeAfter(ж<testing.T> t) {
             goǃ(() => {
                 time.Sleep(1 * time.ΔSecond);
                 i++; // 2
-            }, GoStack.Bounded);
+            });
         });
         time.Sleep((time.Duration)(3000000000L));
         synctest.Wait();
@@ -301,11 +301,11 @@ public static void TestSleepNondeterminism(ж<testing.T> t) {
             goǃ(() => {
                 time.Sleep(1);
                 Ꮡfirst.CompareAndSwap(0, 1);
-            }, GoStack.Bounded);
+            });
             goǃ(() => {
                 time.Sleep(1);
                 Ꮡfirst.CompareAndSwap(0, 2);
-            }, GoStack.Bounded);
+            });
             time.Sleep(1);
             synctest.Wait();
             {
@@ -698,7 +698,7 @@ public static void TestDeadlockChild(ж<testing.T> t) {
         synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 select();
-            }, GoStack.Bounded);
+            });
         });
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -742,7 +742,7 @@ public static void TestCond(ж<testing.T> t) {
             Ꮡmu.Lock();
             condʗ1.Broadcast();
             Ꮡmu.Unlock();
-        }, GoStack.Bounded);
+        });
 
         // Wait for cond.Signal.
         Ꮡmu.Lock();
@@ -879,7 +879,7 @@ public static void TestWaitGroupInBubble(ж<testing.T> t) {
         goǃ(() => {
             time.Sleep(delay);
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
         var start = time.Now();
         Ꮡwg.Wait();
         {
@@ -986,7 +986,7 @@ public static void TestWaitGroupDisassociateInAdd(ж<testing.T> t) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     synctest.Run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         Ꮡwg.Add(1);
-        goǃ(Ꮡwg.Wait, GoStack.Bounded);
+        goǃ(Ꮡwg.Wait);
         synctest.Wait(); // wait for Wait to block
         // Count is 0 and waiters != 0, so Done wakes the waiters and
         // disassociates the WaitGroup.
@@ -1023,7 +1023,7 @@ public static void TestWaitGroupHeapAllocated(ж<testing.T> t) {
         // This package-scoped WaitGroup var should have been heap-allocated,
         // so we can associate it with a bubble.
         testWaitGroupHeapAllocatedWG.Add(1);
-        goǃ(testWaitGroupHeapAllocatedWG.Wait, GoStack.Bounded);
+        goǃ(testWaitGroupHeapAllocatedWG.Wait);
         synctest.Wait();
         testWaitGroupHeapAllocatedWG.Done();
     });
@@ -1064,10 +1064,10 @@ public static void TestHappensBefore(ж<testing.T> t) {
         // Wait returns after these goroutines exit.
         goǃ(() => {
             v1++; // 2
-        }, GoStack.Bounded);
+        });
         goǃ(() => {
             v2++; // 2
-        }, GoStack.Bounded);
+        });
         synctest.Wait();
 
         v1++; // 3
@@ -1079,12 +1079,12 @@ public static void TestHappensBefore(ж<testing.T> t) {
         goǃ(() => {
             v1++; // 4
             ᐸꟷ(ch1ʗ1);
-        }, GoStack.Bounded);
+        });
         var ch1ʗ2 = ch1;
         goǃ(() => {
             v2++; // 4
             ᐸꟷ(ch1ʗ2);
-        }, GoStack.Bounded);
+        });
         synctest.Wait();
 
         v1++; // 5
@@ -1126,13 +1126,13 @@ public static void TestHappensBefore(ж<testing.T> t) {
         goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 v1++; // 10
-            }, GoStack.Bounded);
-        }, GoStack.Bounded);
+            });
+        });
         goǃ([MethodImpl(MethodImplOptions.NoInlining)] () => {
             goǃ(() => {
                 v2++; // 10
-            }, GoStack.Bounded);
-        }, GoStack.Bounded);
+            });
+        });
     });
     // These tests happen after Run returns.
     {

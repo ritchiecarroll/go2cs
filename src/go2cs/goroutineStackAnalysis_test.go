@@ -7,9 +7,10 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards the goroutine stack-bound proof (goroutineStackAnalysis.go) and its mark (visitGoStmt.go). A go statement
-// whose goroutine provably cannot recurse is emitted `goǃ(…, GoStack.Bounded)` and starts on golib's small stack
-// reservation; every goroutine the proof cannot follow keeps the Go-scale default, unmarked, because an
-// under-reserved goroutine that recurses deeply ends the process where Go would have grown its stack.
+// whose goroutine provably cannot recurse is recorded in package_info.cs, `[assembly: GoBoundedGoroutine(file, line,
+// column)]` at its goǃ call, which go2cs-gen intercepts to start it on golib's small stack reservation; every goroutine
+// the proof cannot follow keeps the Go-scale default, unrecorded, because an under-reserved goroutine that recurses
+// deeply ends the process where Go would have grown its stack.
 
 package main
 
@@ -17,9 +18,12 @@ import (
 	"go/ast"
 	"go/build"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
+	"unicode/utf16"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -65,6 +69,29 @@ func seq(yield func(int) bool) {
 	}
 }
 
+// runtime/pprof's BenchmarkGoroutine shape: the literal a single-return literal returns holds the go statement, and the
+// outer literal collapses to an expression-bodied local function.
+func idle(n int, fn func(int)) {
+	withIdle := func(n int, fn func(int)) func(int) {
+		return func(k int) {
+			c := make(chan int)
+			var ready, done sync.WaitGroup
+			defer func() {
+				close(c)
+				done.Wait()
+			}()
+			for i := 0; i < n; i++ {
+				ready.Add(1)
+				done.Add(1)
+				go func() { ready.Done(); <-c; done.Done() }() // BOUNDED: inside the literal a collapsed literal returns
+			}
+			ready.Wait()
+			fn(k)
+		}
+	}
+	withIdle(n, fn)(1)
+}
+
 func worker(ch chan int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	ch <- chain(1)
@@ -86,6 +113,8 @@ func main() {
 	go f()                                     // UNBOUNDED: a func value
 	go func() { for i := range seq { ch <- i } }() // UNBOUNDED: range over func
 	go fmt.Println("hi")                       // UNBOUNDED: fmt reaches interface calls
+
+	idle(3, func(k int) { ch <- k })
 
 	for range 10 {
 		<-ch
@@ -150,12 +179,12 @@ func TestGoroutineStackBoundedProvesOnlyNonRecursiveStaticCallGraphs(t *testing.
 		})
 	}
 
-	if verdicts != 9 {
-		t.Fatalf("read %d go statements, want 9: the fixture and the walk disagree", verdicts)
+	if verdicts != 10 {
+		t.Fatalf("read %d go statements, want 10: the fixture and the walk disagree", verdicts)
 	}
 }
 
-func TestABoundedGoroutineIsEmittedWithTheBoundedStackMark(t *testing.T) {
+func TestABoundedGoroutineIsRecordedInThePackageInfoNotInItsStatement(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
@@ -191,18 +220,60 @@ func TestABoundedGoroutineIsEmittedWithTheBoundedStackMark(t *testing.T) {
 		t.Fatalf("ConvertModule: %v", err)
 	}
 
-	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "gostack", "main.cs"))
+	packageDir := filepath.Join(options.go2csPath, "src", "example.com", "gostack")
+	mainCs := readGenerated(t, filepath.Join(packageDir, "main.cs"))
+	packageInfo := readGenerated(t, filepath.Join(packageDir, "package_info.cs"))
 
-	if got := strings.Count(mainCs, ", GoStack.Bounded);"); got != 3 {
-		t.Errorf("want exactly the 3 bounded go statements marked, got %d:\n%s", got, mainCs)
+	// The statement reads as any other: the mark is not in the converted source.
+	if strings.Contains(mainCs, "GoStack") {
+		t.Errorf("a go statement still carries a visible GoStack mark:\n%s", mainCs)
 	}
 
-	for _, want := range []string{
-		"goǃ(worker, ch, Ꮡwg, GoStack.Bounded);",
-		"goǃ(fʗ1);",
-	} {
+	for _, want := range []string{"goǃ(worker, ch, Ꮡwg);", "goǃ(fʗ1);"} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q:\n%s", want, mainCs)
+		}
+	}
+
+	records := regexp.MustCompile(`GoBoundedGoroutine\("main\.cs", (\d+), (\d+)\)\]`).FindAllStringSubmatch(packageInfo, -1)
+
+	// The fourth sits inside a literal that a single-return literal returns, whose collapse to an expression body
+	// rewrites the captured text: its record must survive the rewrite.
+	if len(records) != 4 {
+		t.Fatalf("want exactly the 4 bounded go statements recorded, got %d:\n%s", len(records), packageInfo)
+	}
+
+	lines := strings.Split(mainCs, "\n")
+	recorded := map[int]bool{}
+
+	// Each record lands on the first token of a goǃ call: the generator intercepts exactly that position.
+	for _, record := range records {
+		line, _ := strconv.Atoi(record[1])
+		column, _ := strconv.Atoi(record[2])
+
+		if line < 1 || line > len(lines) {
+			t.Fatalf("record %s names line %d of a %d-line file", record[0], line, len(lines))
+		}
+
+		units := utf16.Encode([]rune(lines[line-1]))
+
+		if column < 1 || column > len(units) || !strings.HasPrefix(string(utf16.Decode(units[column-1:])), "goǃ(") {
+			t.Errorf("record %s does not land on a goǃ call: %q", record[0], lines[line-1])
+		}
+
+		recorded[line] = true
+	}
+
+	for index, line := range lines {
+		bounded := strings.Contains(line, "goǃ(worker, ch, Ꮡwg);")
+		unbounded := strings.Contains(line, "goǃ(fʗ1);")
+
+		if bounded && !recorded[index+1] {
+			t.Errorf("the bounded worker statement on line %d has no record:\n%s", index+1, packageInfo)
+		}
+
+		if unbounded && recorded[index+1] {
+			t.Errorf("the unbounded func-value statement on line %d is recorded:\n%s", index+1, packageInfo)
 		}
 	}
 }
