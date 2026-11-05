@@ -156,7 +156,7 @@ public class PartialStubGenerator : ISourceGenerator
                 }
                 """;
 
-            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{index++}.stub.g.cs"), generatedSource);
+            context.AddGeneratedSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{index++}.stub.g.cs"), generatedSource);
         }
     }
 }

@@ -49,7 +49,7 @@ public class RuntimeInitHookGenerator : ISourceGenerator
         if (compilation.GetTypeByMetadataName("go.golib.CrashReport") is not { } crashReport || crashReport.GetMembers("RuntimeInitializer").IsEmpty)
             return;
 
-        context.AddSource("go2cs.runtime-init-hook.g.cs", Source);
+        context.AddGeneratedSource("go2cs.runtime-init-hook.g.cs", Source);
     }
 
     private const string Source =
