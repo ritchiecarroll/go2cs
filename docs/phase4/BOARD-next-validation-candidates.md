@@ -33771,4 +33771,54 @@ runs at the merge commit.
 
 — C2 (2026-11-05)
 
+## 2026-11-05 — P1 (S8, claude/p1-s8-tbhelper-caller): the dropped-boundary step-over lands narrowed; TestTBHelper keeps its disclosure, and an emission shape that keeps both boundaries is OPEN
+
+**What landed (COORD ruling (a), 2026-11-05).** The runtime's caller-line resolver settles a frame across a
+boundary the optimized JIT drops (`droppedBoundarySettledCallSite` in `src/core/runtime/managed_impl.cs`). The
+dropped boundary is a stack-empty boundary whose statement's first call is a hoisted-literal accessor (a static
+`get_…ˢ` returning a byref). The step-over settles only a lone direct call of a non-generic callee. A virtual,
+interface, calli or delegate call in the widened region refuses it, and so do two calls of the callee.
+
+**Why TestTBHelper still fails (measured, linux, Release, tiering off, at `8aaa6cebc8`).** This answers option (B)
+of the 2026-11-01 row above.
+- The GenericFloat64 frame and the GenericInt frame (a delegate call) both report `testHelper` IL `0xE9`, the
+  recoverHelper statement.
+- `StackFrame.GetMethod` returns the open definition `genericHelper[G]` for both, so the capture records them as one
+  call site. A plain C# probe reproduces it: both frames read caller IL `0x1E` and `GHelper[G]`, and only their native
+  offsets differ (`0x96`, `0xC0`). `GetNativeIP` is 0 under the JIT, and no in-process map ties a native offset to
+  a call.
+- Ranking the frames by native offset was refused: it needs both calls to have run, and the test reads the
+  GenericFloat64 line before the GenericInt call happens.
+- The disclosure stays, its cause restated (`src/core/testing/go2cs_test_disclosures.json`).
+
+**Firings, each a frame whose line was wrong before** (temporary trace, `go2cs -tests -test-action all`):
+
+| Run | Firings | Frame, before → after |
+|:--|:--|:--|
+| testing | 1 | TestArtifactDirSpecified's runTest frame, `testing_test.go:1073` → `:1074` |
+| runtime/pprof | 1 | printCountProfile's key closure, `pprof.go:500` (`if lbls != nil`, no call) → `:501` |
+| log, log/slog | 0 | — |
+| runtime/debug | 0 | one frame refused after widening (TestStack), line kept |
+| behavioral corpus, `DOTNET_TieredCompilation=0`, four slices | 0 | no trace line at all |
+
+- **The prediction scored.** Testing 1 MET. runtime/pprof was predicted 0 and read 1: a MISS on the location, while
+  the mechanism held. The `:501` reading is an inference: the widened region holds only `:501`'s WriteString.
+  The statement on `:502` starts with no accessor, so by the probe's evidence its boundary is kept.
+- Rows unchanged: testing 82 + 3, log 24, log/slog 228 + 21, runtime/debug 8 + 1, runtime/pprof 148 + 8.
+- The behavioral slices failed CallerLineCallSite and NilPointerValueReceiverCall at tiering off. With no trace line,
+  the step-over returned nothing in any program, so those readings are master's.
+- Guard: GolibTests `DroppedBoundaryCallSiteTests`. It read 1 fail and 4 pass at master's runtime and 5/5 with the fix.
+
+**OPEN — an emission shape that keeps both statements' boundaries in the optimized method.** Not a seat now.
+The probe readings so far:
+- A by-value accessor (`@string genericFloat64ˢ => genericFloat64ˢᵇ;`) fixed the C# probe. The real `testHelper`
+  still read `:84` for both calls.
+- `DOTNET_JitNoForwardSub=1` and a `NoInlining` accessor changed nothing in the probe.
+- The native code of `testHelper` shows both generic statements begin exactly at the previous call's return
+  address, with no mapping of their own.
+
+**Owner:** unassigned. A fix retires TestTBHelper's disclosure.
+
+— P1 (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -4806,7 +4806,94 @@ partial class runtime_package
             found = call;
         }
 
-        return found;
+        return found >= 0 ? found : droppedBoundarySettledCallSite(method, ilOffset, end, callee, calls, boundaries);
+    }
+
+    // THE DROPPED BOUNDARY. The optimized JIT can keep no IL boundary at all for a statement that reads a closure-captured
+    // variable and then calls a hoisted-literal accessor (`genericHelper<float64>(t, genericFloat64ˢ)` where `t` is a
+    // display-class field): a frame suspended in that statement's call reports the PREVIOUS statement's offset, so the
+    // region above, which ends at the modelled boundary the JIT dropped, holds no call of the callee and today's line
+    // names a statement that does not hold the suspended call. Measured 2026-11-05 on linux, Release, tiering off:
+    // testing's testHelper reported IL 0xE9 (the recoverHelper statement) for both calls at helperfuncs_test.go:86 and
+    // :87, TestArtifactDirSpecified's runTest frame read testing_test.go:1073 for the call on :1074, and runtime/pprof's
+    // printCountProfile key closure read pprof.go:500 (an `if` with no call) for the WriteString on :501. In a plain C#
+    // probe the drift held with the accessor inlined or not; the same call with the field read directly, an ldstr
+    // literal, or an uncaptured parameter reported its own statement.
+    //
+    // The region is widened across every following boundary the JIT may drop, defined narrowly: a stack-empty boundary
+    // whose statement's first call is a hoisted-literal accessor (droppedBoundary). The call settled must then be the ONLY
+    // call of the callee in the widened region, and no virtual, interface, calli or delegate call may sit in it (COORD
+    // ruling (a), 2026-11-05). A GENERIC callee is refused outright: the frame reports a generic method as its open
+    // definition (StackFrame.GetMethod takes the typical definition), so two instantiations' calls in one region are one
+    // observation with one IL offset -- TestTBHelper's GenericFloat64 and GenericInt frames, which differ only in their
+    // native offsets, and no in-process map ties a native offset to a call. That test keeps its disclosure.
+    // It fires only where today's reading is already wrong: the region settle found no call of the callee, so today's
+    // line names a statement that does not hold the suspended call.
+    private static int droppedBoundarySettledCallSite(System.Reflection.MethodBase method, int ilOffset, int end, System.Reflection.MethodBase callee, int[] calls, int[] boundaries)
+    {
+        if (callee.ContainsGenericParameters)
+            return -1;
+
+        int widened = end;
+
+        while (widened != int.MaxValue && droppedBoundary(method, widened, calls, boundaries))
+        {
+            int next = Array.BinarySearch(boundaries, widened + 1);
+
+            if (next < 0)
+                next = ~next;
+
+            widened = next < boundaries.Length ? boundaries[next] : int.MaxValue;
+        }
+
+        if (widened == end)
+            return -1;
+
+        int settled = -1;
+
+        foreach (int call in calls)
+        {
+            if (call < ilOffset || call >= widened)
+                continue;
+
+            if (callTarget(method, call) is not { } target || isIndirectCall(method, call, target))
+                return -1;
+
+            if (!targetsCallee(target, callee))
+                continue;
+
+            if (settled >= 0)
+                return -1;
+
+            settled = call;
+        }
+
+        return settled;
+    }
+
+    // Whether the optimized JIT may drop the boundary at `boundary`: it is a stack-empty boundary (a PDB statement
+    // start) whose statement's first call, before the next boundary, is a hoisted-literal accessor -- the static
+    // `ref readonly` getter the converter emits for a hoisted literal (`genericFloat64ˢ`).
+    private static bool droppedBoundary(System.Reflection.MethodBase method, int boundary, int[] calls, int[] boundaries)
+    {
+        if (sequencePointOffsets(method) is not { } statements || Array.BinarySearch(statements, boundary) < 0)
+            return false;
+
+        int next = Array.BinarySearch(boundaries, boundary + 1);
+
+        if (next < 0)
+            next = ~next;
+
+        int end = next < boundaries.Length ? boundaries[next] : int.MaxValue;
+        int index = Array.BinarySearch(calls, boundary);
+
+        if (index < 0)
+            index = ~index;
+
+        return index < calls.Length && calls[index] < end && callTarget(method, calls[index]) is System.Reflection.MethodInfo
+        {
+            IsStatic: true, IsSpecialName: true, ReturnType.IsByRef: true
+        } accessor && accessor.Name.StartsWith("get_", StringComparison.Ordinal) && accessor.Name.EndsWith("ˢ", StringComparison.Ordinal);
     }
 
     private static bool isDirectCall(System.Reflection.MethodBase method, int ilOffset) =>
