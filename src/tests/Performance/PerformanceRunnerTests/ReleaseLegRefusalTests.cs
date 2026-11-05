@@ -316,4 +316,19 @@ public class ReleaseLegRefusalTests
         Assert.ThrowsException<FormatException>(() => ReleaseLeg.Parse(@"name=1.26;go2cs=C:\tools\go2cs.exe;go=C:\go.exe"));
         Assert.ThrowsException<FormatException>(() => ReleaseLeg.Parse(@"name=1 26;go2cs=a;version=b;go=c"));
     }
+
+    [TestMethod]
+    public void ALegIsUnpinnedUnlessItSaysPinTrue()
+    {
+        Assert.IsFalse(s_leg.Pin);
+        Assert.IsNull(s_leg.PinnedVersion);
+
+        ReleaseLeg pinned = ReleaseLeg.Parse(@"name=1.26; go2cs=C:\tools\go2cs.exe; version=1.26.10.1; go=C:\sdk\go1.26.10\bin\go.exe; pin=true");
+        Assert.AreEqual(s_leg with { Pin = true }, pinned);
+        Assert.AreEqual("1.26.10.1", pinned.PinnedVersion);
+
+        Assert.IsNull(ReleaseLeg.Parse(@"name=1.26;go2cs=a;version=1.26.10.1;go=c;pin=false").PinnedVersion);
+        Assert.ThrowsException<FormatException>(() => ReleaseLeg.Parse(@"name=1.26;go2cs=a;version=1.26.10.1;go=c;pin=yes"));
+        Assert.ThrowsException<FormatException>(() => ReleaseLeg.Parse(@"name=1.26;go2cs=a;version=1.26.10.1;go=c;pin=1.26.10.2"));
+    }
 }

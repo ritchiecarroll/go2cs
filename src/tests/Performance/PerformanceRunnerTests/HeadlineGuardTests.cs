@@ -82,6 +82,37 @@ public class HeadlineGuardTests
         AssertNames(Headline.ArgvRefusals(Column, HeadlineCommand.GoBuild, "build -gcflags=-B -o x.exe ."), "-gcflags=-B");
     }
 
+    // A pinned leg (ReleaseLeg.Pin) sets exactly one property, GoStdLibVersion, at exactly its own version, on exactly
+    // its release build and publish. Both directions: what the builder writes is admitted for that leg, and the same
+    // property is refused for an unpinned leg, at another value, on another command, or beside another property.
+    [TestMethod]
+    public void APinnedLegCarriesExactlyItsOwnVersionAndNothingElse()
+    {
+        const string pin = "1.26.10.1";
+
+        foreach ((HeadlineCommand command, Func<string?, string> build) in new (HeadlineCommand, Func<string?, string>)[]
+                 {
+                     (HeadlineCommand.ReleaseJitBuild, v => Headline.ReleaseJitBuild(@"D:\work\out\PerfFib.csproj", @"D:\work\bin\jit\PerfFib\", v)),
+                     (HeadlineCommand.ReleaseReadyToRunPublish, v => Headline.ReleaseReadyToRunPublish(@"D:\work\r2r-src\PerfFib.csproj", @"D:\work\bin\r2r\PerfFib", v)),
+                 })
+        {
+            string pinned = build(pin);
+            StringAssert.Contains(pinned, $"-p:GoStdLibVersion={pin}");
+            Assert.IsFalse(build(null).Contains("GoStdLibVersion", StringComparison.OrdinalIgnoreCase), $"{command}: an unpinned leg writes the property");
+
+            IReadOnlyList<HeadlineRefusal> admitted = Headline.ArgvRefusals(Column, command, pinned, pin);
+            Assert.AreEqual(0, admitted.Count, $"{command} [{pinned}]: {string.Join(" | ", admitted)}");
+
+            AssertNames(Headline.ArgvRefusals(Column, command, pinned), $"GoStdLibVersion={pin}");
+            AssertNames(Headline.ArgvRefusals(Column, command, build("1.26.10.2"), pin), "GoStdLibVersion=1.26.10.2");
+            AssertNames(Headline.ArgvRefusals(Column, command, build("1.26.*"), pin), "GoStdLibVersion=1.26.*");
+            AssertNames(Headline.ArgvRefusals(Column, command, pinned + " -p:GoReadyToRunUserCode=true", pin), "GoReadyToRunUserCode");
+        }
+
+        AssertNames(Headline.ArgvRefusals(Column, HeadlineCommand.InTreeJitBuild,
+            Headline.InTreeJitBuild("all.proj", "src/") + Headline.Pin(pin), pin), $"GoStdLibVersion={pin}");
+    }
+
     // ---- the build files ----
 
     [TestMethod]

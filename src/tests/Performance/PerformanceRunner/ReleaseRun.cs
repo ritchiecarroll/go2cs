@@ -208,7 +208,7 @@ namespace PerformanceRunner
             // Directory.Build.props beside the program, and only an evaluation sees its conditions and imports.
             string csprojText = File.ReadAllText(csproj);
             IReadOnlyList<string> consumer = ConsumerProject.Refusals(program, csprojText, leg,
-                EvaluatedProperties(csproj, projectDir, ConsumerProject.VersionProperties(csprojText)));
+                EvaluatedProperties(csproj, projectDir, ConsumerProject.VersionProperties(csprojText), leg.PinnedVersion));
 
             lp.SourceHash = ConsumerProject.SourceHash(Directory.GetFiles(projectDir, "*", SearchOption.AllDirectories)
                 .Select(f => Path.GetRelativePath(projectDir, f))
@@ -232,7 +232,7 @@ namespace PerformanceRunner
             // The build restored the packages: a floating reference is the leg's release only if it RESOLVED to it.
             // Where the restore wrote it, as MSBuild evaluates it: the release template redirects obj out of the
             // project tree (Directory.Build.props, BaseIntermediateOutputPath under .artifacts), so obj\ is a guess.
-            string assets = EvaluatedProperties(csproj, projectDir, ["ProjectAssetsFile"]).TryGetValue("ProjectAssetsFile", out string? evaluated)
+            string assets = EvaluatedProperties(csproj, projectDir, ["ProjectAssetsFile"], leg.PinnedVersion).TryGetValue("ProjectAssetsFile", out string? evaluated)
                 ? evaluated
                 : Path.Combine(projectDir, "obj", "project.assets.json");
             IReadOnlyList<string> resolved = ConsumerProject.ResolvedRefusals(program, File.Exists(assets) ? File.ReadAllText(assets) : null, leg);
@@ -274,7 +274,8 @@ namespace PerformanceRunner
         {
             string outDir = Path.Combine(legRoot, "bin", "jit", program) + Path.DirectorySeparatorChar;
 
-            if (Runner.ExecHeadline(headline, Column(ReleaseArm.Jit), HeadlineCommand.ReleaseJitBuild, "dotnet", Headline.ReleaseJitBuild(csproj, outDir), projectDir, BuildTimeoutMs) is not { } r)
+            if (Runner.ExecHeadline(headline, Column(ReleaseArm.Jit), HeadlineCommand.ReleaseJitBuild, "dotnet", Headline.ReleaseJitBuild(csproj, outDir, leg.PinnedVersion),
+                    projectDir, BuildTimeoutMs, pinnedVersion: leg.PinnedVersion) is not { } r)
                 return;
 
             if (r.ExitCode != 0)
@@ -328,7 +329,7 @@ namespace PerformanceRunner
             string outDir = Path.Combine(legRoot, "bin", "r2r", program);
 
             if (Runner.ExecHeadline(headline, Column(ReleaseArm.ReadyToRun), HeadlineCommand.ReleaseReadyToRunPublish, "dotnet",
-                    Headline.ReleaseReadyToRunPublish(copiedProject, outDir), copy, BuildTimeoutMs) is not { } r)
+                    Headline.ReleaseReadyToRunPublish(copiedProject, outDir, leg.PinnedVersion), copy, BuildTimeoutMs, pinnedVersion: leg.PinnedVersion) is not { } r)
                 return;
 
             if (r.ExitCode != 0)
@@ -379,7 +380,7 @@ namespace PerformanceRunner
             string copiedProject = Path.Combine(copy, Path.GetRelativePath(output, csproj));
             string outDir = Path.Combine(legRoot, "bin", "fd1", program);
             Runner.ProcResult r = Runner.Exec("dotnet",
-                $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release -r win-x64 --self-contained false -p:PublishTrimmed=false -p:PublishReadyToRun=true -o \"{outDir}\"",
+                $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release -r win-x64 --self-contained false -p:PublishTrimmed=false -p:PublishReadyToRun=true -o \"{outDir}\"{Headline.Pin(leg.PinnedVersion)}",
                 copy, BuildTimeoutMs);
 
             if (r.ExitCode != 0)
@@ -541,6 +542,10 @@ namespace PerformanceRunner
                 sb.AppendLine();
                 sb.AppendLine($"### Leg {leg.Name}: go.* {leg.PackageVersion}");
                 sb.AppendLine();
+                sb.AppendLine(leg.Pin
+                    ? $"Pinned: every build and publish of this leg sets `-p:{Headline.PinProperty}={leg.PackageVersion}`, as the converted Directory.Build.props tells a consumer to, because the version it writes floats to a later release on the feed."
+                    : $"Template default: the version the converter writes floats to the newest matching release on the feed, which resolved to {leg.PackageVersion}.");
+                sb.AppendLine();
 
                 // What this leg's ReadyToRun column measured, as its published files showed it: from the .2 template on,
                 // the program's own code is IL-only and only golib and the packages are precompiled.
@@ -619,13 +624,14 @@ namespace PerformanceRunner
 
         // The named properties as MSBuild evaluates the project (`dotnet msbuild -getProperty`); a property the
         // evaluation does not answer is left out, so the refusal names it.
-        private static Dictionary<string, string> EvaluatedProperties(string csproj, string projectDir, IReadOnlyList<string> names)
+        // Evaluated as the leg's builds evaluate it: a pinned leg's pin included.
+        private static Dictionary<string, string> EvaluatedProperties(string csproj, string projectDir, IReadOnlyList<string> names, string? pinnedVersion)
         {
             Dictionary<string, string> properties = new(StringComparer.OrdinalIgnoreCase);
 
             foreach (string name in names)
             {
-                Runner.ProcResult r = Runner.Exec("dotnet", $"msbuild \"{csproj}\" -nologo -getProperty:{name}", projectDir, BuildTimeoutMs);
+                Runner.ProcResult r = Runner.Exec("dotnet", $"msbuild \"{csproj}\" -nologo -getProperty:{name}{Headline.Pin(pinnedVersion)}", projectDir, BuildTimeoutMs);
                 string value = r.StdOut.Trim();
 
                 if (r.ExitCode == 0 && value.Length > 0)

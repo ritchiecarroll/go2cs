@@ -21,10 +21,20 @@ namespace PerformanceRunner
     /// <summary>
     /// One release leg: the converter that converts the programs, the package version their project files must
     /// reference, and the Go toolchain that builds the Go column. Spelled on the command line as
-    /// <c>name=1.26;go2cs=C:\...\go2cs.exe;version=1.26.10.1;go=C:\...\go.exe</c>.
+    /// <c>name=1.26;go2cs=C:\...\go2cs.exe;version=1.26.10.1;go=C:\...\go.exe</c>, with an optional <c>pin=true</c>.
+    /// <para>
+    /// A converted program floats: its Directory.Build.props sets <c>GoStdLibVersion</c> to <c>1.26.*</c>, which restores
+    /// the newest matching release on the feed, so an older leg stops resolving to itself once a later release
+    /// publishes. <c>pin=true</c> pins the leg the way that props file tells a consumer to, with
+    /// <c>-p:GoStdLibVersion=&lt;version&gt;</c> on every build and publish of the leg; the headline guard admits exactly
+    /// that property at exactly that value. Off by default: an unpinned leg measures what a consumer gets.
+    /// </para>
     /// </summary>
-    internal sealed record ReleaseLeg(string Name, string Converter, string PackageVersion, string Go)
+    internal sealed record ReleaseLeg(string Name, string Converter, string PackageVersion, string Go, bool Pin = false)
     {
+        /// <summary>The version this leg's builds and publishes pin, or null for an unpinned leg.</summary>
+        internal string? PinnedVersion => Pin ? PackageVersion : null;
+
         internal static ReleaseLeg Parse(string spec)
         {
             Dictionary<string, string> parts = new(StringComparer.OrdinalIgnoreCase);
@@ -48,7 +58,12 @@ namespace PerformanceRunner
             if (parts["name"].IndexOfAny(['/', '\\', ' ', '\t']) >= 0)
                 throw new FormatException($"--leg \"{spec}\": a leg name names a folder; it takes no separator or space");
 
-            return new ReleaseLeg(parts["name"], parts["go2cs"], parts["version"], parts["go"]);
+            bool pin = false;
+
+            if (parts.TryGetValue("pin", out string? pinValue) && !bool.TryParse(pinValue, out pin))
+                throw new FormatException($"--leg \"{spec}\": pin= takes true or false, not \"{pinValue}\"");
+
+            return new ReleaseLeg(parts["name"], parts["go2cs"], parts["version"], parts["go"], pin);
         }
     }
 
