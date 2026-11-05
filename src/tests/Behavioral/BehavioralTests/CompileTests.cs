@@ -358,6 +358,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]
+    public void CheckCrashGoroutineCreatedBy() => CheckTarget("CrashGoroutineCreatedBy");
+
+    [TestMethod]
     public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
 
     [TestMethod]
@@ -2444,6 +2447,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
+
+    [TestMethod]
+    public void CheckTypeParamUntypedConst() => CheckTarget("TypeParamUntypedConst");
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");

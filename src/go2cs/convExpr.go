@@ -552,6 +552,41 @@ func getExprContext[TContext ExprContext](contexts []ExprContext) TContext {
 }
 
 func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
+	// Go gives an untyped constant the type of the integer TYPE PARAMETER it meets -- `return 1` in a func
+	// returning T, `var x T = 1 << n`, an argument for a T parameter, a []T element, the left operand of a
+	// shift typed T -- and C# has no implicit conversion from a numeric literal to a type parameter (CS0029,
+	// or CS0030 for a cast). So the outermost such constant is materialized once through golib's
+	// ConvertToType<T>, the same helper a `T(x)` conversion takes, and the constant inside renders as it
+	// always has: `ConvertToType<T>(1 << 3)`.
+	if tp := v.typeParamConstType(expr); tp != nil && !v.renderingTypeParamConst {
+		v.renderingTypeParamConst = true
+		inner := v.convExprCore(expr, contexts)
+		v.renderingTypeParamConst = false
+
+		return fmt.Sprintf("ConvertToType<%s>(%s)", v.getCSharpTypeName(tp), stripOuterParens(inner))
+	}
+
+	return v.convExprCore(expr, contexts)
+}
+
+// typeParamConstType reports the integer type parameter Go types a constant expression as, or nil: the
+// condition under which convExpr materializes it through ConvertToType<T>.
+func (v *Visitor) typeParamConstType(expr ast.Expr) *types.TypeParam {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil || tv.Type == nil {
+		return nil
+	}
+
+	if tp, ok := types.Unalias(tv.Type).(*types.TypeParam); ok && typeParamIsInteger(tp) {
+		return tp
+	}
+
+	return nil
+}
+
+// convExprCore is convExpr without the type-parameter constant materialization.
+func (v *Visitor) convExprCore(expr ast.Expr, contexts []ExprContext) string {
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
 		context := getExprContext[ArrayTypeContext](contexts)

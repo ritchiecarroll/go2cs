@@ -1,0 +1,10 @@
+ITEM 6 PREDICTION, written 2026-11-05 before any p6 measurement. StringView JIT, .2 at 21.9 ms against 1.24.13.7 at 18.9 (+15.9%, 15.1% spread).
+Read from window 1, before this probe: the .1 JIT is 21.3 ms, and .1 has NO call-counting delay setting (runtime default 100 ms).
+So the step is 1.24.13.7 -> 1.26.10.1, not .1 -> .2. Go's own StringView halved at 1.26 (18.8 -> 9.6 ms), so the 1.26
+standard library the converter consumes is DIFFERENT source.
+PREDICT (21 rounds alone, interleaved):
+ P1. J26/J24 lands in [1.08, 1.20]: the regression is REAL, but smaller than or equal to window 1's +15.9%.
+ P2. J26/J21 lands in [0.95, 1.05]: the .1 -> .2 step is flat.
+ P3. J26d100/J26 lands in [0.95, 1.05]: the template's call-counting delay of 0 is NOT the cause.
+ P4. The A/A pair J26/J26AA agrees within 3%.
+If P1 fails low (< 1.08), item 6 is noise and closes. If P3 fails, the cause is the delay, and item 5's probe inherits it.

@@ -347,6 +347,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckConstraintProxyEmbeddedInterface() => CheckTarget("ConstraintProxyEmbeddedInterface");
 
     [TestMethod]
+    public void CheckCrashGoroutineCreatedBy() => CheckTarget("CrashGoroutineCreatedBy");
+
+    [TestMethod]
     public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
 
     [TestMethod]
@@ -2370,6 +2373,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
+
+    [TestMethod]
+    public void CheckTypeParamUntypedConst() => CheckTarget("TypeParamUntypedConst");
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");

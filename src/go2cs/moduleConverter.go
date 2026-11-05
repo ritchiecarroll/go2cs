@@ -210,7 +210,7 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 	// 4c. -nuget-map: the provenance report -- which layer answered each module, and that S3a has not
 	//     applied any of it yet.
 	if len(m.nugetDecisions) > 0 || len(m.nugetWarnings) > 0 {
-		fmt.Print(formatNuGetMapReport(m.nugetDecisions, m.nugetWarnings))
+		fmt.Print(formatNuGetMapReport(m.nugetDecisions, m.nugetWarnings, nugetMapSourceList(m.options.nugetMap)))
 	}
 
 	// 5. Emit a per-project .slnx next to each converted .csproj, over that project + its transitive

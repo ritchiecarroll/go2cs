@@ -110,7 +110,7 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
                 productionContext.ReportDiagnostic(record.ToDiagnostic());
 
             if (output.Source.Length > 0)
-                productionContext.AddSource(output.HintName, output.Source);
+                productionContext.AddGeneratedSource(output.HintName, output.Source);
         });
     }
 

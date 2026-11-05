@@ -536,7 +536,7 @@ generated half of the `partial` type.
 
 <!-- receiver clamp: src/go2cs/visitFuncDecl.go:876-884#d781c1 (receiverAccess from :2043-2060#fc124b; getAccess at src/go2cs/identifierNaming.go:381#c6c426); example src/core/errors/join.cs:47 `internal static @string Error(this ref joinError e) {` -->
 <!-- generator adds the modifier: src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:134 (`{{Scope}} partial struct`), Templates/InterfaceType/InterfaceTypeTemplate.cs:50 (`{{Scope}} partial interface`). "usually": lifted local types carry `internal` (LiftedLocalTypes/main.cs.target:38#24371b) and an unexported type an exported field exposes carries `public` (PublicizedFieldType/main.cs.target:9#6ba0fc); package-level declarations otherwise emit `partial` bare (src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5 `partial struct reg {`). A named function type becomes a delegate that carries its own modifier: src/tests/Behavioral/CaptureHoistThroughConversion/main.cs.target:7 `public delegate void Handler(nint _);` (Go main.go:23 `type Handler func(int)`); GenericTypeInstantiation.cs.target:45 `public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);` -->
-<!-- new accum(): the generated parameterless constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2177#ff2b44, whose body is the NilType constructor's (:2163#653c7a); "an empty struct literal reads new T()" is the Struct Types section's rule (parity seat #21). Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
+<!-- new accum(): the generated parameterless constructor, src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2177#065f38, whose body is the NilType constructor's (:2163#a988bf); "an empty struct literal reads new T()" is the Struct Types section's rule (parity seat #21). Section length (about 200 lines) exceeds the 120-line guide because the owner's review asks each section to stand alone: the worked example defines every glyph it uses before the tables, and the glyph index is split into common and less-common tables so a first read can stop at the first. -->
 
 <!-- The glyph tables' intended reference home is a names-and-glyphs reference page (naming.md), which does not exist yet; until it lands, this section links shadowing.md, which is also the Shadowing section's reference page. -->
 **Full detail:** [Reference → Shadowing the names go2cs itself spells](ConversionStrategies-Reference/shadowing.md#shadowing-the-names-go2cs-itself-spells-nil-golib-names-emitter-spelled-type-names-c-keywords) —
@@ -5899,6 +5899,10 @@ Even the constant `0` in `n <= 0` goes through `ConvertToType`, because C# canno
 an `Int` either. The long `where` clause is what an integer-only type set becomes: every arithmetic,
 bitwise, shift and comparison interface.
 
+The same holds wherever Go gives a constant the parameter's type: a returned `1`, an argument, a composite
+literal element, and the `1` in `1 << n`, which takes the shift's type. That shift becomes
+`ConvertToType<T>(1).Lsh(n)`, so a count at or past the type argument's width yields 0, as in Go.
+
 **Full detail:** [Reference → Generic Constraints](ConversionStrategies-Reference/generic-constraints.md#generic-constraints) — array and map type sets, pointer and self-referential constraints, unions such as `string | []byte`, per-field equality in generic structs, and how explicit type arguments are chosen, including when an untyped constant argument decides one.
 
 ---
@@ -8667,7 +8671,7 @@ carries nothing over: golib resets its thread state between goroutines, and each
 even while goroutines are still running. The one exception, also Go's, is a goroutine that is panicking: `main`'s
 return waits for its report and exits 2 with it (golib's `MainExit`; see
 [defer, panic and recover](ConversionStrategies-Reference/defer-panic-recover.md)).
-<!-- src/core/golib/runtime/Goroutine.cs:1206 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
+<!-- src/core/golib/runtime/Goroutine.cs:1234 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
      src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
      `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :181
      `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
@@ -11772,8 +11776,8 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:4843 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
-     the printed form :1942 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
+<!-- src/core/runtime/managed_impl.cs:4854 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+     the printed form :1953 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
 
@@ -12338,7 +12342,7 @@ The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 The placeholder names the attribute that the `*_impl.cs` file carries. It is the same attribute as
 `go.GoManualConversion`; `go` is its namespace. The hand-owned `managed_impl.cs` supplies the method:
 
-<!-- source: src/core/runtime/managed_impl.cs:482-494 -->
+<!-- source: src/core/runtime/managed_impl.cs:493-505 -->
 ```csharp
 // Gosched yields the processor, allowing other goroutines to run. It does not suspend the
 // current goroutine, so execution resumes automatically.

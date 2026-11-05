@@ -1,0 +1,27 @@
+start 2026-11-05 01:46:21
+drop newest=1793858467.2364877000 /c/go2cs-perf/drop1262/aot-manifest.composed.tsv files=161
+arms 12
+== warm-control-DISCARDED 01:46:22
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== control-start 01:46:25
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== tc0 01:46:28
+PerfIfaceShellChurn: verified 5 arms, output equal
+PerfIfaceShellChurn: 11 rounds done
+PerfStringMatch: verified 5 arms, output equal
+PerfStringMatch: 11 rounds done
+PerfStartup: verified 2 arms, output equal
+PerfStartup: 11 rounds done
+== control-end 01:51:28
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+drop newest=1793858467.2364877000 /c/go2cs-perf/drop1262/aot-manifest.composed.tsv files=161
+end 2026-11-05 01:51:32 rc=0

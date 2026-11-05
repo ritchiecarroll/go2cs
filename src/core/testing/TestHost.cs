@@ -1149,7 +1149,7 @@ public static class TestHost
     /// executable's directory, which this method already trusts, is strictly the better answer.
     /// </para>
     /// </remarks>
-    private static (string runRoot, string workingDirectory) CreateRunDirectory(string package)
+    internal static (string runRoot, string workingDirectory) CreateRunDirectory(string package)
     {
         Exception? firstFailure = null;
 
@@ -1161,7 +1161,7 @@ public static class TestHost
             // io/fs's TestGlob globs `*/glob.go` against os.DirFS("..") and expects `fs/glob.go` —
             // which a bare GUID directory answers with the GUID (and, worse, with every SIBLING run
             // still on disk).
-            string runRoot = Path.Combine(root, "go2cs-tests", SanitizePath(package), Guid.NewGuid().ToString("N"));
+            string runRoot = NewRunRootPath(Path.Combine(root, RunRootParentName));
             string workingDirectory = Path.Combine(runRoot, PackageDirectoryPath(package));
 
             try
@@ -1178,6 +1178,39 @@ public static class TestHost
         throw new InvalidOperationException(
             "testing: could not create an isolated run directory under the temp path or the test binary's own directory",
             firstFailure);
+    }
+
+    /// <summary>
+    /// The directory every run root sits in, directly under the temp path: <c>&lt;temp&gt;/go2cs-t/&lt;8 hex&gt;</c>.
+    /// </summary>
+    /// <remarks>
+    /// The run root is short because everything a test makes lives inside it: its <c>t.TempDir</c>
+    /// (<c>&lt;run root&gt;/.tmp/&lt;name&gt;-&lt;hash&gt;/001</c>) and every unix socket it binds there. Linux caps a socket
+    /// path at 108 bytes and darwin at 104. The earlier root, <c>go2cs-tests/&lt;package&gt;/&lt;32 hex&gt;</c>, added
+    /// about 50 bytes plus the package name, so bufio's TestCopyUnixpacket reached 116 bytes under a 19-byte
+    /// TMPDIR and skipped on bind's EINVAL where Go passed. The root is now 21 bytes deeper than the temp
+    /// path to its <c>.tmp</c>, against Go's 0, and the package name no longer adds to it. Every package's
+    /// runs share the parent; <see cref="PackageAncestry"/> reclaims only a sibling whose owner marker names
+    /// a process that is gone, so a live run of any package is never touched.
+    /// </remarks>
+    internal const string RunRootParentName = "go2cs-t";
+
+    /// <summary>
+    /// A fresh run root under <paramref name="parent"/>: eight hex digits of a new GUID, re-drawn while the
+    /// name is taken. 32 random bits make a collision between two live runs vanishingly rare, and a name
+    /// already on disk is never reused.
+    /// </summary>
+    internal static string NewRunRootPath(string parent)
+    {
+        for (int attempt = 0; attempt < 16; attempt++)
+        {
+            string candidate = Path.Combine(parent, Guid.NewGuid().ToString("N")[..8]);
+
+            if (!Directory.Exists(candidate))
+                return candidate;
+        }
+
+        return Path.Combine(parent, Guid.NewGuid().ToString("N"));
     }
 
     // The bases CreateRunDirectory will try, in order. The temp path leads because it is the right

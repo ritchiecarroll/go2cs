@@ -394,8 +394,9 @@ func runNuGetMapResolution(modules []thirdPartyModule, o nugetMapOptions, outRoo
 // formatNuGetMapReport renders the provenance report (docs/PLAN-nugetgo.md 4.5): every warning first,
 // then one line per module. A mapping that was APPLIED names the exact-pinned PackageReference it became; a
 // mapping that was not says the module converted locally, and why. A community mapping is marked TRUST,
-// because using it is a trust decision the user is making.
-func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string) string {
+// because using it is a trust decision the user is making. The heading names the sources the run read
+// (nugetMapSourceList), so a run given no -nuget-map is not told about the flag.
+func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string, sources []string) string {
 	var report strings.Builder
 	mapped, applied := 0, 0
 
@@ -410,10 +411,10 @@ func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string) strin
 	}
 
 	for _, warning := range warnings {
-		fmt.Fprintf(&report, "WARNING (-nuget-map): %s\n", warning)
+		fmt.Fprintf(&report, "WARNING (NuGet mappings): %s\n", warning)
 	}
 
-	fmt.Fprintf(&report, "\nNuGet mappings (-nuget-map): %d third-party module(s), %d mapped, %d referenced as packages\n", len(decisions), mapped, applied)
+	fmt.Fprintf(&report, "\nNuGet mappings (%s): %d third-party module(s), %d mapped, %d referenced as packages\n", nugetMapSourcesLabel(sources), len(decisions), mapped, applied)
 
 	for _, decision := range decisions {
 		subject := decision.module
@@ -451,4 +452,39 @@ func formatNuGetMapReport(decisions []nugetMapDecision, warnings []string) strin
 	}
 
 	return report.String()
+}
+
+// nugetMapSourcesLabel names the sources a run read, in precedence order, as the user knows them: the -nuget-map
+// flag for the sources it listed, the default registry for nugetMapRegistryURL.
+func nugetMapSourcesLabel(sources []string) string {
+	flag, registry := false, false
+
+	for _, src := range sources {
+		if src == nugetMapRegistryURL {
+			registry = true
+		} else {
+			flag = true
+		}
+	}
+
+	switch {
+	case flag && registry:
+		return "-nuget-map, then the default registry"
+	case registry:
+		return "the default registry"
+	case flag:
+		return "-nuget-map"
+	default:
+		return "no source"
+	}
+}
+
+// nugetMapSourceName names one source in a message: the default registry by that name, since no flag gave it,
+// and any other source by the -nuget-map flag that listed it.
+func nugetMapSourceName(src string) string {
+	if src == nugetMapRegistryURL {
+		return "the default registry " + src
+	}
+
+	return "-nuget-map " + src
 }

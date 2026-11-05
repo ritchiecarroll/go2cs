@@ -1,0 +1,33 @@
+start 2026-11-05 03:53:55
+golib diff 9d5d67c735..b061a01052:  1 file changed, 74 insertions(+), 43 deletions(-)
+src/core/golib/StringLiteralCache.cs
+src/tests/GolibTests/NoUncountedBackingAllocationsTests.cs
+src/tests/GolibTests/StringLiteralCacheTests.cs
+src/tests/GolibTests/ThreadStateCensusTests.cs
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.81
+C0 golib @ 9d5d67c735 build rc=0 R2R=False	ILOnly=True	version=1.26.10.2
+C0 jit golib sha256 ceb78579e43355a6 (P's: aa0768eafd1d9a1c)
+  Determining projects to restore...
+C:\go2cs\scratch\p1262\hp\C0\out\src\go2cs\PerfStringMatch\PerfStringMatch.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9 [C:\go2cs\scratch\p1262\hp\C0\out\src\go2cs\PerfStringMatch\PerfStringMatch.slnx]
+  Restored C:\go2cs\scratch\p1262\hp\C0\out\src\go2cs\PerfStringMatch\PerfStringMatch.csproj (in 4.76 sec).
+C0 restore rc=0
+C0 aot rc=0 wall=980s exe=183964160 sha256 729ba8ef34fa459d
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.02
+C golib @ b061a01052 build rc=0 R2R=False	ILOnly=True	version=1.26.10.2
+C jit golib sha256 74337d69ab6f621a (P's: aa0768eafd1d9a1c)
+  Determining projects to restore...
+C:\go2cs\scratch\p1262\hp\C\out\src\go2cs\PerfStringMatch\PerfStringMatch.csproj : warning NU1903: Package 'Microsoft.DotNet.ILCompiler' 10.0.11 has a known high severity vulnerability, https://github.com/advisories/GHSA-p3jp-9v83-76w9 [C:\go2cs\scratch\p1262\hp\C\out\src\go2cs\PerfStringMatch\PerfStringMatch.slnx]
+  Restored C:\go2cs\scratch\p1262\hp\C\out\src\go2cs\PerfStringMatch\PerfStringMatch.csproj (in 8.49 sec).
+C restore rc=0
+C aot rc=0 wall=1011s exe=183577600 sha256 5f6c396f238c610c
+end 2026-11-05 04:27:50

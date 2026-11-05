@@ -1260,12 +1260,12 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(typedParams);
                 }
 
-                result.AppendLine($"){structConstraints}");
-                result.AppendLine("    {");
-                result.AppendLine($"        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;");
+                result.Append($"){structConstraints}\r\n");
+                result.Append("    {\r\n");
+                result.Append($"        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;\r\n");
                 result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}{receiver}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(ArgumentName)));
-                result.AppendLine(");");
+                result.Append(");\r\n");
                 result.Append("    }");
             }
         }
@@ -2160,10 +2160,10 @@ internal class StructTypeTemplate : TemplateBase
             // AppendZeroValueInitializers assigns only what `default` leaves broken: the promoted-embed
             // fields (a value embed by its own NilType ctor, a pointer embed as a nil box) and any plain
             // struct-typed field whose own type needs construction (see AppendZeroValueInitializers).
-            result.AppendLine($"public {NonGenericStructName}(NilType _)");
-            result.AppendLine($"{TypeElemIndent}{{");
+            result.Append($"public {NonGenericStructName}(NilType _)\r\n");
+            result.Append($"{TypeElemIndent}{{\r\n");
             AppendZeroValueInitializers(result);
-            result.AppendLine($"{TypeElemIndent}}}");
+            result.Append($"{TypeElemIndent}}}\r\n");
 
             // Parameterless constructor so C# RUNS the struct's field initializers — most importantly an
             // array field's `= new(N)`, which gives a Go `[N]T` field its fixed length (its backing T[]).
@@ -2173,11 +2173,11 @@ internal class StructTypeTemplate : TemplateBase
             // field lacking an initializer; a slice/map/etc. field — which has no `= new(N)` initializer —
             // stays its nil zero value, matching Go.) The promoted-embed fields are built here too, so
             // `new S()` — the zero value golib's `@new<T>()`/`heap()` materialize — is fully usable.
-            result.AppendLine();
-            result.AppendLine($"{TypeElemIndent}public {NonGenericStructName}()");
-            result.AppendLine($"{TypeElemIndent}{{");
+            result.Append("\r\n");
+            result.Append($"{TypeElemIndent}public {NonGenericStructName}()\r\n");
+            result.Append($"{TypeElemIndent}{{\r\n");
             AppendZeroValueInitializers(result);
-            result.AppendLine($"{TypeElemIndent}}}");
+            result.Append($"{TypeElemIndent}}}\r\n");
 
             // Generate exported constructor from public fields. When an ALL-fields internal
             // ctor follows (mixed-visibility struct), a same-assembly named-args call matching
@@ -2185,14 +2185,14 @@ internal class StructTypeTemplate : TemplateBase
             // os fileStat) - deprioritize the subset so same-assembly calls bind the full ctor;
             // cross-assembly callers never see the internal one, so resolution there is unaffected.
             if (PublicStructMembers.Count != StructMembers.Count && PublicStructMembers.Count > 0)
-                result.AppendLine($"{TypeElemIndent}[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+                result.Append($"{TypeElemIndent}[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]\r\n");
 
             GenerateConstructor("public", PublicStructMembers, result);
 
             // Generate internal constructor with all fields
             if (PublicStructMembers.Count != StructMembers.Count)
             {
-                result.AppendLine();
+                result.Append("\r\n");
                 GenerateConstructor("internal", StructMembers, result);
             }
 
@@ -2231,7 +2231,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append($"{TypeElemIndent}    ");
                 // A keyword-named embed composes a legacy backing field from the UNESCAPED member name
                 // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
-                result.AppendLine($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");
+                result.Append($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);\r\n");
                 continue;
             }
 
@@ -2239,7 +2239,7 @@ internal class StructTypeTemplate : TemplateBase
                 continue;
 
             result.Append($"{TypeElemIndent}    ");
-            result.AppendLine($"this.{memberName} = new {typeName}(nil);");
+            result.Append($"this.{memberName} = new {typeName}(nil);\r\n");
         }
     }
 
@@ -2435,7 +2435,7 @@ internal class StructTypeTemplate : TemplateBase
         if (structMembers.Count == 0)
             return;
 
-        result.AppendLine();
+        result.Append("\r\n");
         result.Append($"{TypeElemIndent}{scope} {NonGenericStructName}(");
         // A needy VALUE-struct member takes a NULLABLE parameter (`onceError? rerr = default!`) so an
         // OMITTED argument is a genuine `null` sentinel the body can distinguish from a passed value —
@@ -2444,8 +2444,8 @@ internal class StructTypeTemplate : TemplateBase
         // `?? new T(nil)` reconstruction and IsNeedyValueStructMember.
         result.Append(string.Join(", ", structMembers.Select(item =>
             $"{(IsNeedyValueStructMember(item.typeName, item.isReferenceType, item.isPromotedStruct) ? $"{item.typeName}?" : item.typeName)} {item.memberName} = default!")));
-        result.AppendLine(")");
-        result.AppendLine($"{TypeElemIndent}{{");
+        result.Append(")\r\n");
+        result.Append($"{TypeElemIndent}{{\r\n");
 
         foreach ((string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, _) in structMembers)
         {
@@ -2483,7 +2483,7 @@ internal class StructTypeTemplate : TemplateBase
             // channel the caller constructed) assigns as before; only the nil case defers to the
             // initializer. See GetChanDirInitializerMembers for why this is scoped to direction
             // stamps alone and never a general field-initializer fallback.
-            result.AppendLine(isPromotedStruct ?
+            result.Append(isPromotedStruct ?
                 $"{EmbedStorage(memberName)} = {memberValue};" :
                 IsFixedArrayMember(typeName, isReferenceType) ?
                     $"if ({memberName}.Source is not null)\r\n{TypeElemIndent}        this.{memberName} = {memberName};" :
@@ -2491,7 +2491,7 @@ internal class StructTypeTemplate : TemplateBase
                         $"if ({memberName} != nil)\r\n{TypeElemIndent}        this.{memberName} = {memberName};" :
                         IsNeedyValueStructMember(typeName, isReferenceType, isPromotedStruct) ?
                             $"this.{memberName} = {memberName} ?? new {typeName}(nil);" :
-                            $"this.{memberName} = {memberName};");
+                            $"this.{memberName} = {memberName};").Append("\r\n");
         }
 
         // A MIXED-VISIBILITY struct's PUBLIC subset constructor names only the exported members, so

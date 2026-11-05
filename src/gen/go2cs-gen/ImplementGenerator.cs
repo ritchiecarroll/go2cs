@@ -352,7 +352,7 @@ public class ImplementGenerator : ISourceGenerator
                 }
                 .Generate();
 
-                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-iface.g.cs")), interfaceAdapterSource);
+                context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-iface.g.cs")), interfaceAdapterSource);
                 continue;
             }
 
@@ -1335,7 +1335,7 @@ public class ImplementGenerator : ISourceGenerator
                     adapters.Add(adapterTemplate.AdapterName);
                 }
 
-                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-ptr.g.cs")), adapterSource);
+                context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-ptr.g.cs")), adapterSource);
                 continue;
             }
 
@@ -1413,7 +1413,7 @@ public class ImplementGenerator : ISourceGenerator
                 }
                 .Generate();
 
-                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-val.g.cs")), valueAdapterSource);
+                context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-val.g.cs")), valueAdapterSource);
                 continue;
             }
 
@@ -1506,7 +1506,7 @@ public class ImplementGenerator : ISourceGenerator
             // Add the source code to the compilation. The hint name uses the same OPEN form the
             // declaration does, so a generic struct's one partial does not take its file name
             // from whichever instantiation the record list happened to list first.
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{implHintName}-{interfaceName}.g.cs")), generatedSource);
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{implHintName}-{interfaceName}.g.cs")), generatedSource);
         }
 
         EmitAdapterRegistrations(context, emittedHintNames, adapterRegistrations);
@@ -1536,7 +1536,7 @@ public class ImplementGenerator : ISourceGenerator
                 "    }\r\n" +
                 "}\r\n";
 
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.AdapterRegistry.g.cs")), source);
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.AdapterRegistry.g.cs")), source);
         }
     }
 
@@ -1870,7 +1870,7 @@ public class ImplementGenerator : ISourceGenerator
         }
         .Generate();
 
-        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{proxyName}-proxy.g.cs")), proxySource);
+        context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{proxyName}-proxy.g.cs")), proxySource);
     }
 
     // The generic constraint proxy's name: the interface's simple name behind the pointer marker, `жLesser<E>`. The
@@ -2034,7 +2034,7 @@ public class ImplementGenerator : ISourceGenerator
         }
         .Generate();
 
-        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClass.Name}.{proxyName}-generic-proxy.g.cs")), proxySource);
+        context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClass.Name}.{proxyName}-generic-proxy.g.cs")), proxySource);
     }
 
     /// <summary>
@@ -2111,7 +2111,7 @@ public class ImplementGenerator : ISourceGenerator
         }
         .Generate();
 
-        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.{elementType.Name}{PointerPrefix}{interfaceDef.Name}-bind.g.cs")), bindSource);
+        context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.{elementType.Name}{PointerPrefix}{interfaceDef.Name}-bind.g.cs")), bindSource);
     }
 
     /// <summary>
