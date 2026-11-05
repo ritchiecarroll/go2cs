@@ -650,6 +650,7 @@
     <Project Path="tests/Behavioral/InferredForeignTypeNoImport/InferredForeignTypeNoImport.csproj" />
     <Project Path="tests/Behavioral/InitFrameNames/InitFrameNames.csproj" />
     <Project Path="tests/Behavioral/InitOrderTupleSpecs/InitOrderTupleSpecs.csproj" />
+    <Project Path="tests/Behavioral/InitStatementScope/InitStatementScope.csproj" />
     <Project Path="tests/Behavioral/InterfaceAssertionMapKey/InterfaceAssertionMapKey.csproj" />
     <Project Path="tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
     <Project Path="tests/Behavioral/InterfaceEqualityTyped/InterfaceEqualityTyped.csproj" />
