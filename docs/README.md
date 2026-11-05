@@ -3,7 +3,7 @@
 # go2cs — Go to C# Converter
 
 [![golib NuGet package](https://img.shields.io/nuget/dt/go.lib?label=go.lib%20NuGet%20package)
-](https://www.nuget.org/packages/go.lib)
+](https://www.nuget.org/packages/go.lib) [![go2cs dotnet tool](https://img.shields.io/nuget/dt/go2cs?label=go2cs%20dotnet%20tool)](https://www.nuget.org/packages/go2cs)
 
 Browse all: [Go Standard Library NuGet packages](https://www.nuget.org/packages?q=go2cs%20ritchiecarroll) · [Converted Go module NuGet packages](https://www.nuget.org/packages?q=nugetgo)
 
