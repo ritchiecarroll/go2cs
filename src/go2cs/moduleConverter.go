@@ -574,7 +574,7 @@ func (m *ModuleConverter) convertAll() {
 
 		start := time.Now()
 
-		err := func() (err error) {
+		err := stallWatch(pkgPath, func() (err error) {
 			defer func() {
 				if r := recover(); r != nil {
 					err = fmt.Errorf("panic converting %s: %v", pkgPath, r)
@@ -588,7 +588,7 @@ func (m *ModuleConverter) convertAll() {
 			packageOptions.programDependencies = m.sortedThirdPartyModules()
 
 			return processConversion(pkg.Dir, true, outputDir, packageOptions)
-		}()
+		})
 
 		// Recorded for FAILED packages too: one that burns minutes before failing is exactly the row
 		// worth seeing, and the error path below skips the rest of this iteration.

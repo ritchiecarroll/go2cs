@@ -622,7 +622,7 @@ func (c *StdLibConverter) convertAllPackages() error {
 				}
 			}()
 
-			conversionErr = c.convertPackage(pkg.Dir, outputPath)
+			conversionErr = stallWatch(pkgPath, func() error { return c.convertPackage(pkg.Dir, outputPath) })
 		}()
 
 		conversionDuration := time.Since(pkgStartTime)
