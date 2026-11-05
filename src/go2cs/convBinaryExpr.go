@@ -494,49 +494,112 @@ func (v *Visitor) shiftGuardWidth(binaryExpr *ast.BinaryExpr) (*types.Basic, int
 }
 
 // compoundShiftGuarded reports whether a compound shift-assign (`x <<= n` / `x >>= n`) takes golib's
-// Go-semantics guard (`x.LshAssign(n)` / `x.RshAssign(n)`, GoShift's `ref this` twins) rather than the
-// native C# operator, which MASKS the count. The rule is the binary shift's own -- an UNNAMED basic
-// integer target (shiftGuardWidthOfType) whose count shiftCountGuarded cannot prove to lie in
-// [0, width) -- so the two forms of one shift can never disagree.
-//
-// One target shape is OUT of scope and keeps the native form: a MAP INDEX (`m[k] >>= n`), which renders
-// through golib's value-returning map indexer, where a `ref this` call cannot bind (CS1510) and a
-// rewrite to `m[k] = m[k].Rsh(n)` would evaluate the key twice.
+// Go-semantics guard rather than the native C# operator, which MASKS the count. The rule is the binary shift's
+// own -- an UNNAMED basic integer target (shiftGuardWidthOfType), or an integer type parameter at the narrowest
+// width its constraint allows (typeParamShiftWidth), whose count shiftCountGuarded cannot prove to lie in
+// [0, width) -- so the two forms of one shift can never disagree. compoundShiftForm says how it renders.
 func (v *Visitor) compoundShiftGuarded(assignStmt *ast.AssignStmt) bool {
 	if len(assignStmt.Lhs) != 1 || len(assignStmt.Rhs) != 1 {
 		return false
 	}
 
-	lhs := assignStmt.Lhs[0]
-	target := lhs
-
-	for {
-		paren, ok := target.(*ast.ParenExpr)
-
-		if !ok {
-			break
-		}
-
-		target = paren.X
-	}
-
-	if index, ok := target.(*ast.IndexExpr); ok {
-		if containerType := v.info.TypeOf(index.X); containerType != nil {
-			if _, isMap := containerType.Underlying().(*types.Map); isMap {
-				return false
-			}
-		}
-	}
-
-	lhsType := v.info.TypeOf(lhs)
+	lhsType := v.info.TypeOf(assignStmt.Lhs[0])
 
 	if lhsType == nil {
 		return false
 	}
 
-	_, width, ok := shiftGuardWidthOfType(types.Unalias(lhsType))
+	width, ok := shiftTargetWidth(types.Unalias(lhsType))
 
 	return ok && v.shiftCountGuarded(assignStmt.Rhs[0], width)
+}
+
+// shiftTargetWidth is the width compoundShiftGuarded measures a count against: a basic integer's own, or a
+// type parameter's narrowest.
+func shiftTargetWidth(t types.Type) (int, bool) {
+	if tp, ok := t.(*types.TypeParam); ok {
+		return typeParamShiftWidth(tp)
+	}
+
+	_, width, ok := shiftGuardWidthOfType(t)
+
+	return width, ok
+}
+
+// typeParamShiftWidth reports the narrowest width of an integer type parameter's type set, the width at
+// which a count first reaches Go's rule for some type argument: 8 for `~uint8 | ~uint32`. It walks the
+// constraint as typeParamIsInteger does, and reports false for a set that is not all integers.
+func typeParamShiftWidth(tp *types.TypeParam) (int, bool) {
+	if !typeParamIsInteger(tp) {
+		return 0, false
+	}
+
+	iface, _ := tp.Constraint().Underlying().(*types.Interface)
+	narrowest := 0
+
+	consider := func(t types.Type) {
+		if _, width, ok := shiftGuardWidthOfType(t.Underlying()); ok && (narrowest == 0 || width < narrowest) {
+			narrowest = width
+		}
+	}
+
+	for i := range iface.NumEmbeddeds() {
+		if union, ok := iface.EmbeddedType(i).(*types.Union); ok {
+			for j := range union.Len() {
+				consider(union.Term(j).Type())
+			}
+		} else {
+			consider(iface.EmbeddedType(i))
+		}
+	}
+
+	return narrowest, narrowest > 0
+}
+
+// compoundShiftForm renders a guarded compound shift-assign (compoundShiftGuarded) so the target is still
+// evaluated once, in signedCompoundAssign's terms:
+//   - a basic target takes golib's `ref this` twin, `x.RshAssign(n)`, as a field, a local and golib's
+//     ref-returning element indexers all bind;
+//   - a MAP ELEMENT has no ref: one whose map and key can be read twice is written `m[k] = m[k].Rsh(n)`, and
+//     any other takes the map and its key, `m.RshAssign(key(), n)`;
+//   - a TYPE PARAMETER target that can be read twice is written `x = x.Rsh(n)`; any other is passed by `ref`,
+//     `GoShift.RshAssign(ref s[f()], n)`, since a `ref this` receiver of a type parameter needs a struct
+//     constraint that a Go constraint never carries.
+func (v *Visitor) compoundShiftForm(assignStmt *ast.AssignStmt) signedCompoundForm {
+	lhs := assignStmt.Lhs[0]
+	method := "Lsh"
+
+	if assignStmt.Tok == token.SHR_ASSIGN {
+		method = "Rsh"
+	}
+
+	_, typeParam := types.Unalias(v.info.TypeOf(lhs)).(*types.TypeParam)
+	readTwice := isSideEffectFreeLvalue(lhs)
+
+	if index, ok := ast.Unparen(lhs).(*ast.IndexExpr); ok {
+		if containerType := v.info.TypeOf(index.X); containerType != nil {
+			if _, isMap := containerType.Underlying().(*types.Map); isMap {
+				if readTwice {
+					return signedCompoundForm{operator: fmt.Sprintf(" = %s.%s(", v.convExpr(lhs, nil), method), close: true}
+				}
+
+				return signedCompoundForm{
+					target:   v.convExpr(index.X, nil),
+					operator: fmt.Sprintf(".%sAssign(%s, ", method, v.convExpr(index.Index, nil)),
+					close:    true,
+				}
+			}
+		}
+	}
+
+	switch {
+	case typeParam && readTwice:
+		return signedCompoundForm{operator: fmt.Sprintf(" = %s.%s(", v.convExpr(lhs, nil), method), close: true}
+	case typeParam:
+		return signedCompoundForm{target: fmt.Sprintf("GoShift.%sAssign(ref %s", method, v.convExpr(lhs, nil)), operator: ", ", close: true}
+	}
+
+	return signedCompoundForm{operator: "." + method + "Assign(", close: true}
 }
 
 // namedShiftWidth is shiftGuardWidth for a NAMED integer left operand, which shifts through its wrapper's
@@ -1997,6 +2060,16 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 
 			if basic, width, inScope := v.shiftGuardWidth(binaryExpr); inScope && v.shiftCountGuarded(binaryExpr.Y, width) && (isFolded || !v.shiftLeftRendersAsUntypedWrapper(binaryExpr.X)) {
 				return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, basic)
+			}
+
+			// An integer TYPE PARAMETER left operand shifts through IShiftOperators<T, int, T>, and .NET's operator
+			// masks the count to the type argument's width (`x << 9` on a uint8 type argument read as `x << 1`), so a
+			// count not provably below the narrowest width its constraint allows takes golib's generic guard,
+			// `x.Lsh(n)`. An untyped constant left operand is not one: it renders as a bare C# literal.
+			if tp, ok := types.Unalias(v.info.TypeOf(binaryExpr)).(*types.TypeParam); ok && !v.isUntypedNumericConstArg(binaryExpr.X) {
+				if width, ok := typeParamShiftWidth(tp); ok && v.shiftCountGuarded(binaryExpr.Y, width) {
+					return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, nil)
+				}
 			}
 
 			// A NAMED integer left operand shifts through its wrapper's generated operator, which guards the width
