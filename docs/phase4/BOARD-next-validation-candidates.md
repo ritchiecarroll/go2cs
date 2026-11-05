@@ -33559,4 +33559,37 @@ the wave plan names; the B4 change stays the post-hop row (owner C2).
 
 — C2 (2026-11-05)
 
+## 2026-11-05 — C1 (COORD ruling, master reds seat): `runtime.GOARCH` reads `amd64` on Apple silicon, because one amd64-converted darwin build serves both mac RIDs — OPEN, post-hop
+
+**What happens.** The darwin flavour of the corpus is converted ONCE, for `darwin/amd64`, and shipped under both mac
+RIDs (osx-x64 and osx-arm64; the same one-build fact seat #8 (a)'s `targetArchExcluded` withdrawal rests on). Its
+`runtime.GOARCH` is that conversion's constant:
+
+- `src/core/runtime/darwin/extern.cs:375-376`: `GOARCH => ref GOARCHᵇ`, `GOARCHᵇ = "amd64"` (linux and windows carry
+  the same pair, and match their only shipped architecture);
+- `src/core/internal/goarch/zgoarch_amd64.cs:7-8`: `goarch.GOARCH = "amd64"`, with the amd64 `zgoarch` set beside
+  it (`IsAmd64 => 1`, `IsArm64 => 0` at :12 and :20) and `goarch_amd64.cs:8`'s `_ArchFamily` (AMD64);
+- `src/core/runtime/debug/stubs_impl.cs:199`: `debug.ReadBuildInfo`'s `GOARCH` setting is composed from
+  `runtime.GOARCH` (golib `GoModInfoAttribute.Compose`, `GoModInfoAttribute.cs:144`).
+
+So a converted program on an Apple-silicon Mac reports `GOARCH=amd64` where Go's own binary reports `arm64`. It is
+USER-VISIBLE: any program that prints `runtime.GOARCH`, branches on it, or reads its build settings sees the wrong
+architecture. Measured as master's darwin osx-arm64 behavioral red (run 41964964302, `BuildInfoSettings [Output]`,
+"stdout mismatch C# vs Go"); osx-x64, linux and windows agree because their host IS amd64.
+
+**Not fixed here (COORD ruling).** BuildInfoSettings now prints `GOARCH is runtime.GOARCH: <bool>`, a host-invariant
+fact (claude/c1-master-reds), so the test stops reading the divergence; the divergence itself stands.
+
+**Candidate fix shapes, unmeasured, for whoever owns it:**
+1. A run-time GOARCH for the shared darwin flavour: a hand-own of the GOARCH backing field reading the PROCESS
+   architecture (`RuntimeInformation.ProcessArchitecture`: `X64` gives `amd64`, `Arm64` gives `arm64`). The census it
+   owes first: every site where the converter or a hand-own FOLDED an amd64 decision at conversion time (`goarch`
+   constants, `IsAmd64`/`IsArm64`, `PtrSize`, dead-branch folding on `GOARCH ==`), since a run-time string beside
+   compile-time-folded amd64 branches would make the two disagree inside one binary.
+2. A per-architecture darwin flavour (osx-arm64 converted for `darwin/arm64`): the honest constant, at the cost of a
+   second darwin build in the pack, and of the arm64-only test files that `targetArchExcluded` withdraws today.
+3. Disclosure only: name `runtime.GOARCH` on osx-arm64 in the known-divergences docs, if neither is taken.
+
+— C1 (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
