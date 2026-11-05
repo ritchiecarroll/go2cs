@@ -741,10 +741,18 @@ namespace BehavioralRunner
             // curiosity: it fires on any fresh worktree, after clean-bin, and for any dependency
             // subtree the pre-build does not cover. Restore runs as a SEPARATE invocation because
             // restore rewrites a project's imports, so it must not share an evaluation with Build.
+            //
+            // ONE static-graph restore of a generated solution, not one Restore per target. The traversal's
+            // per-target Restore repeated the graph walk and the no-op checks over each target's closure:
+            // over 887 targets on H (15.8 GB, 8 logical processors) it read 2,748 s and 2,809 s, past the
+            // default batch budget, while one static-graph restore of the same 887 read 82 s
+            // (BOARD-next-validation-candidates.md, 2026-11-01, the restore probe).
+            string solution = WriteRestoreSolution(projects);
+
             Console.Write($"[Compile]  C# (restoring {projects.Count})... ");
 
             ProcResult restore = Exec("dotnet",
-                $"build \"{traversal}\" -t:RestoreAll {commonArgs}",
+                $"restore \"{solution}\" {commonArgs} -p:RestoreUseStaticGraphEvaluation=true",
                 s_behavioralDir, s_buildAllTimeoutMs);
 
             Console.WriteLine(restore.ExitCode == 0 ? "ok" : $"restore reported errors (exit {restore.ExitCode})");
@@ -1355,11 +1363,8 @@ namespace BehavioralRunner
 
             sb.AppendLine("  </ItemGroup>");
             // Global props (Configuration, go2csPath) passed on the command line propagate to each project.
-            // ("Target" is a reserved MSBuild item name, hence ProjectToBuild.) RestoreAll and BuildAll are
-            // separate targets because the runner drives them in separate processes -- see RunCompileCSharp.
-            sb.AppendLine("  <Target Name=\"RestoreAll\">");
-            sb.AppendLine("    <MSBuild Projects=\"@(ProjectToBuild)\" Targets=\"Restore\" BuildInParallel=\"true\" />");
-            sb.AppendLine("  </Target>");
+            // ("Target" is a reserved MSBuild item name, hence ProjectToBuild.) The restore is not a target
+            // here: it is one static-graph restore of WriteRestoreSolution's solution -- see RunCompileCSharp.
             sb.AppendLine("  <Target Name=\"BuildAll\">");
             sb.AppendLine("    <MSBuild Projects=\"@(ProjectToBuild)\" Targets=\"Build\" BuildInParallel=\"true\" />");
             sb.AppendLine("  </Target>");
@@ -1367,6 +1372,30 @@ namespace BehavioralRunner
 
             File.WriteAllText(projFile, sb.ToString());
             return projFile;
+        }
+
+        // Writes a solution listing every target csproj, for the one static-graph restore. A static-graph restore
+        // follows each project's ProjectReferences, so the shared core, golib and gen projects are restored with
+        // the targets without being listed.
+        private static string WriteRestoreSolution(IReadOnlyList<string> projects)
+        {
+            string objDir = Path.Combine(AppContext.BaseDirectory, "traversal");
+            Directory.CreateDirectory(objDir);
+            string solutionFile = Path.Combine(objDir, "_AllTargets.slnx");
+
+            StringBuilder sb = new();
+            sb.AppendLine("<Solution>");
+
+            foreach (string p in projects)
+            {
+                string csproj = Path.GetRelativePath(objDir, Path.Combine(s_behavioralDir, p, $"{p}.csproj"));
+                sb.AppendLine($"  <Project Path=\"{csproj.Replace('\\', '/')}\" />");
+            }
+
+            sb.AppendLine("</Solution>");
+
+            File.WriteAllText(solutionFile, sb.ToString());
+            return solutionFile;
         }
 
         private static bool MatchConsoleOutput(string project)
