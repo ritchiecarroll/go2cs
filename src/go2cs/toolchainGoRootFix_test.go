@@ -215,9 +215,21 @@ func TestLoaderEnvironmentPinsTheToolchain(t *testing.T) {
 			"nobody pinned")
 	}
 
-	if !strings.Contains(string(source), "cfg.Env = append(os.Environ()") {
-		t.Error("the loader env is expected to extend os.Environ(); if that changed, this test's premise " +
+	// The env is built by converterLoaderEnv (loaderEnvironment.go), which extends os.Environ() and pins cgo off.
+	if !strings.Contains(string(source), "cfg.Env = converterLoaderEnv(") {
+		t.Error("the loader env is expected to be converterLoaderEnv(...); if that changed, this test's premise " +
 			"no longer holds and the GOTOOLCHAIN assertion above needs re-siting")
+	}
+
+	helper, err := os.ReadFile(filepath.Join(filepath.Dir(thisFile), "loaderEnvironment.go"))
+
+	if err != nil {
+		t.Fatalf("failed to read loaderEnvironment.go: %v", err)
+	}
+
+	if !strings.Contains(string(helper), "env := append(os.Environ(), settings...)") {
+		t.Error("converterLoaderEnv is expected to extend os.Environ() with the caller's settings; " +
+			"if that changed, this test's premise no longer holds")
 	}
 }
 
