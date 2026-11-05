@@ -47,7 +47,7 @@ internal static void Main() {
     var fieldV = () => recvʗ1.label();
     h1.p.Name = "A";
 
-    fmt.Println("field   ", fieldV(), (~h1.p).label());
+    fmt.Println("field   ", fieldV(), h1.p.label());
 
     var h2 = new holder(p: Ꮡ(new frame(Name: "b")));
     var recvʗ2 = ~h2.p;
@@ -56,7 +56,7 @@ internal static void Main() {
     var repoint = () => recvʗ2.label();
     h2.p = Ꮡ(new frame(Name: "B"));
 
-    fmt.Println("repoint ", repoint(), (~h2.p).label());
+    fmt.Println("repoint ", repoint(), h2.p.label());
 
     var p3 = Ꮡ(new frame(Name: "c"));
     var recvʗ3 = ~p3;

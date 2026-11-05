@@ -51,7 +51,7 @@ internal static void derefCopy() {
     var p = Ꮡd;
     var d0 = p.Value.ΔClone();
     d0.bump();
-    fmt.Println("deref:      ", (~p).show(), "|", d0.show());
+    fmt.Println("deref:      ", p.show(), "|", d0.show());
 }
 
 internal static void identCopy() {
