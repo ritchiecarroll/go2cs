@@ -153,7 +153,10 @@ names the tooling that must land before the first maintenance release.
 4. **The version** keeps the line's base and takes the next build counter, which `push-nuget.ps1 -Push` assigns.
 5. **The record commit and the tag land on `release/go1.N`.** The line's NEWS entry lands on master. The GitHub
    Release is published with *Set as the latest release* cleared, because `releases/latest/download/` must keep
-   serving the current line's converter.
+   serving the current line's converter. The binaries workflow finds the record on `release/go1.N` and creates the
+   draft with that mark cleared and notes that say to keep it cleared; the person who publishes it keeps it cleared.
+   <!-- AMENDED 2026-11-05 (C2, S7): docs/PLAN-version-lines.md section 6, T2 and T3, in
+        .github/workflows/release-binaries.yml; src/tests/release-version-lines-selftest.ps1 runs both steps. -->
 
 ---
 

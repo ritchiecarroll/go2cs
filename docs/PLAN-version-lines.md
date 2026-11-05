@@ -211,6 +211,12 @@ row on the [BOARD](phase4/BOARD-next-validation-candidates.md) (2026-10-24, C2).
 | **T3** | A maintenance-line GitHub Release is published with *Set as the latest release* cleared. | Asset names carry no version, so `releases/latest/download/<name>` serves whichever Release is marked latest. A maintenance Release marked latest would serve an older converter. |
 | **T4** | `release-nuget.ps1` accepts a `release/go1.N` branch without its "not master" warning. | `src/release-nuget.ps1:155` `if ($branch -ne 'master') { Write-Host '    (not master -- intentional?)' -ForegroundColor Yellow }` only warns, so this one is cosmetic. |
 
+**Done 2026-11-05 (C2, S7), all four**, guarded by `src/tests/release-version-lines-selftest.ps1`: T1 in
+`Get-GoNextReleaseVerification` (monotonicity per Go minor via `Get-GoReleaseLine`, existence across every line), T2 and
+T3 in `release-binaries.yml` (the record is searched on master and on `release/go1.N`, and a maintenance draft is
+created with `--latest=false`), T4 in `release-nuget.ps1` (`Test-GoReleaseBranch`). The table above records what each
+one fixed.
+
 The docs site deploys from master, so it documents the current line only. A maintenance release's
 NEWS entry lands on master, where readers look for it.
 

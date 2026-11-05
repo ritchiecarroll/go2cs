@@ -35,6 +35,14 @@
 [CmdletBinding()]
 param()
 $ErrorActionPreference = 'Stop'
+
+# This PowerShell, found by edition under $PSHOME and never by the process path: a pwsh installed as a .NET global
+# tool runs as the dotnet host, so (Get-Process -Id $PID).Path names dotnet and the child would run as
+# `dotnet -NoProfile ...` (BOARD 2026-10-27; check-no-regression.ps1 resolves its child shell the same way).
+$shellName = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
+$pwshPath = @((Join-Path $PSHOME "$shellName.exe"), (Join-Path $PSHOME $shellName)) |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+if (-not $pwshPath) { Write-Host "nuget-push selftest: cannot locate '$shellName' under `$PSHOME ($PSHOME)"; exit 1 }
 . (Join-Path $PSScriptRoot '../_nugetpush.ps1')
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
@@ -283,7 +291,7 @@ try {
         $savedKey = $env:NUGET_API_KEY
         $env:NUGET_API_KEY = 'selftest-key'
         try {
-            $out = @(& (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File (Join-Path $src 'release-nuget.ps1') `
+            $out = @(& $pwshPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $src 'release-nuget.ps1') `
                 -ResumePush -Yes -Source $source -OutDir $OutDir 2>&1 | ForEach-Object { "$_" })
             $code = $LASTEXITCODE
         }
