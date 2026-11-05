@@ -28478,6 +28478,17 @@ returned EINVAL and the converted side SKIPPED a test Go passed. The re-bank wor
 
 — G (2026-10-25)
 
+
+**Amended 2026-11-05 (C2, .3 S6) — CLOSED by batch 176 (`118c037943`, merging `claude/c2-s6-short-test-root` @
+`4a4c4507bb`).** The run root is now `go2cs-t/<8 hex>` under the temp path (`TestHost.RunRootParentName`), so a
+`t.TempDir`'s parent sits 21 bytes below it for every package, against 50 bytes plus the package name before.
+Measured on linux/amd64, `bufio` `-tests -test-action all` under the 19-byte `TMPDIR=/tmp/c2s6-tmpdir-xx`: the old host
+skipped `TestCopyUnixpacket` (socket path 116 bytes, `bind: invalid argument`) and the package did not match; the new
+host passed it (82 bytes) and validated `bufio` at 81 + 1, the banked linux row. GolibTests' `HostRunRootLengthTests` is
+the guard (red at the old host: 55 bytes). A census of GOROOT's tests at go1.26.10 finds no other socket bound inside
+`t.TempDir`, and unixpacket does not exist on darwin, so the darwin rows are predicted unchanged (not re-run). Residual:
+the socket path is `TMPDIR` + 63 bytes against Go's + 42, so a linux `TMPDIR` of 45 to 65 bytes still skips that test.
+KnownIssues retired its entry into a dated comment, and runbook lesson 88 now reads a `TMPDIR` of 44 bytes or less.
 ## 2026-10-25 — G (COORD's ruling, the linux-leg review): should `runtime/pprof`'s six host-fatal pins be scoped `["linux"]`? — POST-PUBLISH, a question, no change now
 
 `runtime/pprof`'s manifest has 14 pins, none OS-scoped. Windows discloses 8; linux discloses all 14. The six
@@ -29334,6 +29345,15 @@ it working.
 
 — C2 (2026-10-27)
 
+
+**Amended 2026-11-05 (C2, .3 S3) — CLOSED by batch 175 (`73d005cdba`, merging `claude/c2-s3-nugetmap-source` @
+`fb0fce9fcc`).** The heading names the sources the run read, in precedence order: `NuGet mappings (the default
+registry): ...`, `(-nuget-map)` under `-nuget-map-only`, or `(-nuget-map, then the default registry)`. Warnings carry the
+prefix `WARNING (NuGet mappings): `, and a message about a fetched source names it as `the default registry <url>` or
+`-nuget-map <src>` (`nugetMapSourceName`); a local mapping file keeps the flag's name. `referenced as packages` is
+unchanged, so the section 6 demo script still matches. Red first: `TestNuGetMapSourceFailureNamesTheSource` failed at the
+parent on the old warning; `TestNuGetMapReportNamesTheSourceThatWasRead` did not compile there (the report took no source
+list). No corpus footprint: the report is console output only.
 ## 2026-10-27 — R (1.26.10.2 seat #3, option A of DESIGN-mn-scheduler-sizing.md): a goroutine the converter PROVES cannot recurse starts on a 16 MiB stack reserve; every other keeps 256 MiB — LANDED on claude/r-stack-reserve
 
 **What changed.** The converter proves, per `go` statement, that the goroutine cannot recurse
