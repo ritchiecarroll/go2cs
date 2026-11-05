@@ -98,7 +98,7 @@ internal static partial void armC() {
         goǃ(() => {
             ᐸꟷ(readyʗ1);
             throw panic("a goroutine panics after main's Goexit");
-        }, GoStack.Bounded);
+        });
 
         defer(() => fmt.Println("main's deferred call ran"), ref ᒐ);
         runtime.Goexit();
