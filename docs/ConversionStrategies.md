@@ -1024,7 +1024,7 @@ Settings with no managed value (`-compiler`, `-buildmode`, `GOAMD64`, `vcs.*`) a
 converted outside a module carries no stamp, and a replaced dependency is reported without its replacement,
 which can be a local path:
 
-<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:192-194 -->
+<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:193-195 -->
 ```xml
     <AssemblyAttribute Include="go.GoModInfoAttribute">
       <_Parameter1>path&#9;go2cs/BuildInfoSettings&#10;mod&#9;go2cs/BuildInfoSettings&#9;(devel)&#9;&#10;</_Parameter1>
