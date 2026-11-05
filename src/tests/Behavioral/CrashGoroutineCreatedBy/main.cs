@@ -24,7 +24,7 @@ internal static void Main() {
 }
 
 internal static partial void child() {
-    goǃ(worker, GoStack.Bounded);
+    goǃ(worker);
     time.Sleep(time.ΔMinute);
 }
 

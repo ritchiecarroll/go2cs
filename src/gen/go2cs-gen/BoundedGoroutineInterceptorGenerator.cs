@@ -84,7 +84,7 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
                 productionContext.ReportDiagnostic(record.ToDiagnostic());
 
             if (generated.Source.Length > 0)
-                productionContext.AddSource(HintName, generated.Source);
+                productionContext.AddGeneratedSource(HintName, generated.Source);
         });
     }
 
