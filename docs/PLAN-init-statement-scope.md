@@ -186,6 +186,15 @@ was compared:
 - **linux and darwin** compile the transformed tree too (`-p:GoTargetOS=linux` and `darwin`, Release), each with rc 0
   and 0 errors. IL was compared on windows only. Warning totals were not compared: each build's total counts only the
   projects that build recompiled.
+  <!-- Amended 2026-11-04 (H), same day, before any ruling. The first linux and darwin readings were INCREMENTAL
+       builds over a tree that had just built windows; harness-gates.md requires --no-incremental for a
+       GoTargetOS build, because what differs between targets is the Compile item set, not a timestamp. So
+       those two readings did not establish the claim. Re-measured on a fresh copy of 33589333b2 with the same
+       transform: linux --no-incremental rc 0, 0 errors, 449 s; darwin --no-incremental rc 0, 0 errors, 381 s.
+       Control: all 31 L3 package assemblies hash differently after the darwin build than after the linux
+       build, so each build compiled its own target's files. The claim stands; its first evidence did not. -->
+  These two builds ran on a fresh tree, `--no-incremental`. All 31 L3 package assemblies hash differently between
+  them, which shows each build compiled its own target's files.
 
 The comparer's own controls: base against base reads every body identical (222,184 Release, 222,471 Debug), and the
 plant is named in both configurations. Two of its drafts were wrong, and each was caught by a body it named:
