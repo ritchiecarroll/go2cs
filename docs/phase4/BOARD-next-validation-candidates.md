@@ -33673,4 +33673,37 @@ locals' 98 production lines in 14 files.
 
 — C2 (2026-11-05)
 
+### 2026-11-05: value-receiver ж twins (claude/c2-value-recv-box-twins): the footprint prediction, scored
+
+**The prediction, as posted before the measurement.** Two seeded `-stdlib` reconverts, each target: exactly 5
+production files (crypto/x509/pem_decrypt, encoding/base64/base64, internal/trace/gc, internal/trace/summary,
+math/big/nat), 33 lines -/+, each `(~x).M(` becoming `x.M(`; 0 GoPositionMap lines and 0 other kinds; identical
+across windows, linux and darwin. Behavioral: 8 goldens, 11 lines, outputs unchanged. Falsifiers: any other file,
+a map line, a per-target difference, a golden output change, a compile error.
+
+**The measurement** (two seeded roots from master 4dc48b62e2, base and seat converters built there, three
+targets, one conversion at a time):
+- 14 flat files, 98 lines -/+; 0 package_info.cs and 0 map lines; no per-GOOS file differs. A balanced-paren
+  check finds every one of the 98 lines is exactly a removed `(~X)` wrapper.
+- The 5 predicted files hold 33 lines, exactly as predicted. 9 files the prediction did not name hold 65:
+  go/scanner/errors, six internal/runtime/maps files, net/http/h2_bundle and net/http/transport.
+- Behavioral: 9 projects, 12 lines (base CNR 0 drift over 953 packages); every output unchanged against Go.
+
+**Score: mechanism MET, specifics MISSED.** The falsifier "any other file" fired. The cause is the census
+predicate, which admitted only a dotted identifier inside the deref (`\(~([A-Za-zʗᏑ_][\w.ʗᏑ]*)\)`), so
+`(~p[0]).Error()`, `(~g.ctrls()).matchH2(h)` and `(~t.Protocols).HTTP1()` were invisible to it. The
+discriminating re-count of the BASE root with a balanced-paren predicate finds 98 lines in exactly the 14
+changed files. The other 30 lines it finds are `Rsh`/`Lsh` calls on C#'s bitwise complement of a numeric value
+(Go's `^x`, not a dereference), which stay unchanged. The behavioral extra, ShadowLocalOverRecvName's
+`(~tΔ1).Sum(`, was filed OTHER because the census compared the C# name `tΔ1` with Go's `t`.
+
+**The compile falsifier also fired once, on the instrument:** 62 CS1929 in internal/runtime/maps on the first
+build. Both roots had been seeded from master, so the seat root carried master's go2cs-gen, and a tar overlay of
+the seat's generator kept older mtimes, so MSBuild never rebuilt it. With the seat's generator and golib
+rebuilt, net/http (with crypto/x509, encoding/base64 and internal/runtime/maps), go/scanner, internal/trace and
+math/big build linux with 0 errors. The windows closure is the i7's at the merge tree; behavioral-full darwin
+runs at the merge commit.
+
+— C2 (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
