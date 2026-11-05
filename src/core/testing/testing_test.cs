@@ -276,7 +276,7 @@ public static void TestSetenv(ж<testing.T> t) {
         )
     ]);
 
-    foreach (var (_, vᴛ1) in tests) {
+    foreach (var (_, vᴛ1) in range(tests)) {
         ref var test = ref heap(new TestSetenv_tests(), out var Ꮡtest);
         test = vᴛ1;
 
@@ -466,7 +466,7 @@ public static void TestChdir(ж<testing.T> t) {
             rel = skipˢ;
         }
 
-        foreach (var (_, vᴛ1) in slice<TestChdir_type>([
+        foreach (var (_, vᴛ1) in range(slice<TestChdir_type>([
             new(
                 name: "absolute",
                 dir: tmp,
@@ -489,7 +489,7 @@ public static void TestChdir(ж<testing.T> t) {
 
                 extraChdir: true
             )
-        ])) {
+        ]))) {
             ref var tc = ref heap(new TestChdir_type(), out var Ꮡtc);
             tc = vᴛ1;
 
@@ -1320,7 +1320,7 @@ public static void TestAttrInvalid(ж<testing.T> t) {
     ]);
 
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
-        foreach (var (i, vᴛ1) in tests) {
+        foreach (var (i, vᴛ1) in range(tests)) {
             ref var test = ref heap(new TestAttrInvalid_tests(), out var Ꮡtest);
             test = vᴛ1;
 
@@ -1334,7 +1334,7 @@ public static void TestAttrInvalid(ж<testing.T> t) {
 
     @string @out = (@string)runTest(t, testAttrInvalidˢ);
 
-    foreach (var i in range(tests)) {
+    foreach (var i in range(len(tests))) {
         @string want = fmt.Sprintf("--- FAIL: TestAttrInvalid/%v "u8, i);
         if (!strings.Contains(@out, want)) {
             t.Errorf("expected output containing %q, got:\n%q", want, @out);
@@ -1386,7 +1386,7 @@ public static void TestArtifactDirNoArtifacts(ж<testing.T> t) {
     if (err != nil) {
         t.Fatal(err);
     }
-    foreach (var (_, e) in ents) {
+    foreach (var (_, e) in range(ents)) {
         t.Errorf("unexpected file in current directory after test: %v", e.Name());
     }
 }
@@ -1447,7 +1447,7 @@ internal static void checkArtifactDir(ж<testing.T> t, slice<byte> @out, @string
         t.Fatalf("want artifact directory contained in %q, got %q", outputDir, artifactDir);
     }
 
-    foreach (var (_, part) in strings.Split(relDir, (@string)(rune)Δos.PathSeparator)) {
+    foreach (var (_, part) in range(strings.Split(relDir, (@string)(rune)Δos.PathSeparator))) {
         const nint maxSize = 64;
         if (len(part) > maxSize) {
             t.Errorf("artifact directory %q contains component >%v characters long: %q", relDir, (nint)(maxSize), part);

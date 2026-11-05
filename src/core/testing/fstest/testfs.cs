@@ -51,13 +51,13 @@ public static error TestFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
             return err;
         }
     }
-    foreach (var (_, name) in expected) {
+    foreach (var (_, name) in range(expected)) {
         {
             nint i = strings.Index(name, "/"); if (i >= 0) {
                 @string dir = name.slice(0, i);
                 @string dirSlash = name.slice(0, i + 1);
                 slice<@string> subExpected = default;
-                foreach (var (_, nameΔ1) in expected) {
+                foreach (var (_, nameΔ1) in range(expected)) {
                     if (strings.HasPrefix(nameΔ1, dirSlash)) {
                         subExpected = append(subExpectedᴷ, subExpected, nameΔ1.slice(len(dirSlash)));
                     }
@@ -85,10 +85,10 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
     Ꮡt.checkDir(".");
     Ꮡt.checkOpen(".");
     var found = new map<@string, bool>();
-    foreach (var (_, dir) in t.dirs) {
+    foreach (var (_, dir) in range(t.dirs)) {
         found[dir] = true;
     }
-    foreach (var (_, @file) in t.files) {
+    foreach (var (_, @file) in range(t.files)) {
         found[@file] = true;
     }
     delete(found, "."u8);
@@ -99,7 +99,7 @@ internal static error testFS(fs.FS fsys, params ꓸꓸꓸstring expectedʗp) {
         }
         t.errorf("expected empty file system but found files:\n%s", strings.Join(list, "\n"));
     }
-    foreach (var (_, name) in expected) {
+    foreach (var (_, name) in range(expected)) {
         if (!found[name]) {
             t.errorf("expected but not found: %s", name);
         }
@@ -177,7 +177,7 @@ internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) {
         } else {
             prefix = dir + "/"u8;
         }
-        foreach (var (_, info) in list) {
+        foreach (var (_, info) in range(list)) {
             @string name = info.Name();
             switch (ᐧ) {
             case {} when (name == "."u8) || (name == ".."u8) || (name == ""u8): {
@@ -360,7 +360,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
     @string glob = default;
     if (dir != "."u8) {
         var elem = strings.Split(dir, "/");
-        foreach (var (i, e) in elem) {
+        foreach (var (i, e) in range(elem)) {
             slice<rune> pattern = default;
             foreach (var (j, r) in e) {
                 if (r == '*' || r == '?' || r == '\\' || r == '[' || r == '-') {
@@ -406,7 +406,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
     var c = (rune)'a';
     for (; c <= 'z'; c++) {
         var (have, haveNot) = (false, false);
-        foreach (var (_, d) in list) {
+        foreach (var (_, d) in range(list)) {
             if (strings.ContainsRune(d.Name(), c)) {
                 have = true;
             } else {
@@ -423,7 +423,7 @@ internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEnt
     glob += "*"u8 + ((@string)c) + "*"u8;
 
     slice<@string> want = default;
-    foreach (var (_, d) in list) {
+    foreach (var (_, d) in range(list)) {
         if (strings.ContainsRune(d.Name(), c)) {
             want = append(wantᴷ, want, path.Join(dir, d.Name()));
         }
@@ -567,13 +567,13 @@ internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string d
         }
     }
 
-    foreach (var (_, entry1) in list1) {
+    foreach (var (_, entry1) in range(list1)) {
         old[entry1.Name()] = entry1;
         checkMode(entry1);
     }
 
     slice<@string> diffs = default;
-    foreach (var (_, entry2) in list2) {
+    foreach (var (_, entry2) in range(list2)) {
         var entry1 = old[entry2.Name()];
         if (entry1 == nil) {
             checkMode(entry2);
@@ -657,7 +657,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
 
                 // Modify the data and check it again. Modifying the
                 // returned byte slice should not affect the next call.
-                foreach (var i in range(data2Δ1)) {
+                foreach (var i in range(len(data2Δ1))) {
                     data2Δ1[i]++;
                 }
                 (data2Δ1, errΔ2) = fsys.ReadFile(@file);
@@ -756,7 +756,7 @@ internal static void checkBadPath(this ref fsTester t, @string @file, @string de
         }
     }
 
-    foreach (var (_, b) in bad) {
+    foreach (var (_, b) in range(bad)) {
         {
             var err = open(b); if (err == nil) {
                 t.errorf("%s: %s(%s) succeeded, want error", @file, desc, b);

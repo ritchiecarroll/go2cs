@@ -226,7 +226,7 @@ public static unsafe (slice<@string> val, uint32 valtype, error err) GetStringsV
     }
     val = new slice<@string>(0, 5);
     nint from = 0;
-    foreach (var (i, c) in p) {
+    foreach (var (i, c) in range(p)) {
         if (c == 0) {
             val = append(val, syscall.UTF16ToString(p[(int)(from)..(int)(i)]));
             from = i + 1;
@@ -336,7 +336,7 @@ internal static readonly @string stringCannotHave0Insideˢ = "string cannot have
 // must not contain a zero byte.
 public static unsafe error SetStringsValue(this Key k, @string name, slice<@string> value) {
     @string ss = ""u8;
-    foreach (var (_, s) in value) {
+    foreach (var (_, s) in range(value)) {
         for (nint i = 0; i < len(s); i++) {
             if (s[i] == 0) {
                 return errors.New(stringCannotHave0Insideˢ);
