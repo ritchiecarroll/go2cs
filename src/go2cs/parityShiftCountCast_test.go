@@ -22,12 +22,12 @@ import (
 // never `x <<= (int)(8)`. Both are the same IL (measured 2026-10-16, 48 of 48 pairs). The binary form and the
 // compound form of an unnamed basic target with a decimal literal already read that way (seats SH and #27); this
 // pins the compound shapes they left cast: a NAMED-numeric target (its wrapper's `operator <<(T, int)` binds a bare
-// int literal exactly, as the binary form `n << 4` already relies on), a TYPE-PARAMETER target with a count below 8
-// (in range for every integer type its set can hold), and a hex or binary literal count.
+// int literal exactly, as the binary form `n << 4` already relies on), a TYPE-PARAMETER target with a count below the
+// narrowest width its set holds (in range for every type argument), and a hex or binary literal count.
 //
 // The cast STAYS for every count the rule does not cover: an identifier or expression count, a named-type count,
-// and a type-parameter count of 8 or more. (A basic or named target never reaches the native form with a constant
-// count at or past its width: the guard, or the wrapper's wide operator, takes it.)
+// (No target reaches the native form with a constant count at or past its width: the guard, generic for a type
+// parameter, or a named wrapper's wide operator, takes it.)
 
 const shiftCountCastFixture = `package main
 
@@ -65,6 +65,7 @@ func generic[T integer](x T) T {
 	x <<= 3
 	x >>= 0x7
 	x <<= 9
+	x >>= 40
 	return x
 }
 `
@@ -113,9 +114,11 @@ func TestShiftCountConstantLiteralUncast(t *testing.T) {
 		// Dropped: a constant literal count in [0, width).
 		`w >>= 8;`, `w <<= 0x3;`, `c <<= 1;`, `c >>= 0b10;`,
 		`x >>= 0x8;`, `x <<= 0b11;`,
-		`x <<= 3;`, `x >>= 0x7;`,
-		// Kept: an identifier, expression or named-type count, and a type-parameter count of 8 or more.
-		`w >>= (int)(shift);`, `w <<= (int)(namedShift);`, `x >>= (int)((shift / 4));`, `x <<= (int)(9);`,
+		`x <<= 3;`, `x >>= 0x7;`, `x <<= 9;`,
+		// Kept: an identifier, expression or named-type count.
+		`w >>= (int)(shift);`, `w <<= (int)(namedShift);`, `x >>= (int)((shift / 4));`,
+		// A type-parameter count at or past the narrowest width takes the generic guard, not the native form.
+		`x = x.Rsh((uint64)40);`,
 	}
 
 	for _, want := range wants {
