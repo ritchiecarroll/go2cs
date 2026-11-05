@@ -241,7 +241,7 @@ func runModuleTests(moduleDir string, outRoot string, options Options, corpusRel
 		outputDir := converter.outputDirFor(pkg.Path)
 		fmt.Printf("\n-tests %s -> %s\n", pkg.Path, outputDir)
 
-		if err := convertAndActOnPackageTests(pkg.Dir, outputDir, pkgOptions); err != nil {
+		if err := convertAndActOnPackageTests(pkg.Dir, outputDir, pkgOptions, pkg.Path); err != nil {
 			failed = append(failed, fmt.Sprintf("  %s: %v", pkg.Path, err))
 			unvalidated[pkg.Path] = err.Error()
 		}
@@ -268,9 +268,9 @@ func recordsUnvalidatedPackages(options Options) bool {
 	return (options.testAction == "all" || options.testAction == "compare") && strings.TrimSpace(options.testFilter) == ""
 }
 
-// convertAndActOnPackageTests is the single-package -tests flow of main() for one package: convert
-// (production recompiled with the test closure's usings, then the tests), then the requested action.
-func convertAndActOnPackageTests(inputDir string, outputDir string, options Options) error {
+// convertAndActOnPackageTests is the single-package -tests flow for one package pkgPath (named for the stall watch):
+// convert (production recompiled with the test closure's usings, then the tests), then the requested action.
+func convertAndActOnPackageTests(inputDir string, outputDir string, options Options, pkgPath string) error {
 	kind, err := requireConvertibleTestTarget(inputDir, outputDir, options)
 
 	if err != nil {

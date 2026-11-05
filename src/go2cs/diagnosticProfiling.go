@@ -10,9 +10,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	// Registers the /debug/pprof handlers on http.DefaultServeMux from its init. Nothing is served
 	// unless startDiagnosticProfiling actually starts a listener below.
@@ -110,4 +112,39 @@ func isLoopbackHost(host string) bool {
 	ip := net.ParseIP(host)
 
 	return ip != nil && ip.IsLoopback()
+}
+
+// RED-FIRST STUB: the stall watch's shape, doing nothing yet; the next commit implements it.
+const (
+	stallWarnEnv     = "GO2CS_STALL_WARN"
+	stallDumpEnv     = "GO2CS_STALL_DUMP"
+	defaultStallWarn = 2 * time.Minute
+	defaultStallDump = 5 * time.Minute
+	stallRepeatCap   = 16 * time.Minute
+)
+
+type stallWatchConfig struct {
+	warn      time.Duration
+	dump      time.Duration
+	repeatCap time.Duration
+	out       io.Writer
+	dumpDir   string
+}
+
+var stallWatch = withStallWatch
+
+func withStallWatch(label string, convert func() error) error {
+	return watchForStall(stallWatchConfig{}, label, convert)
+}
+
+func stallWatchConfigFrom(getenv func(string) string, out io.Writer) stallWatchConfig {
+	return stallWatchConfig{}
+}
+
+func nextStallWarning(at time.Duration, repeatCap time.Duration) time.Duration {
+	return at
+}
+
+func watchForStall(config stallWatchConfig, label string, convert func() error) error {
+	return convert()
 }
