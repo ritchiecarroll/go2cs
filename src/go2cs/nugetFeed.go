@@ -168,22 +168,52 @@ func nugetSelectionCandidates(moduleVersion string, published []string) ([]strin
 		base, separator = match[1]+"-"+match[2], "."
 	}
 
-	var rehearsals []string
+	type rehearsal struct {
+		version  string
+		revision int
+	}
+
+	var rehearsals []rehearsal
+
+	// A rebuild's rehearsal is its B3 version plus the label: core.N-label, or a prerelease's base.0.N.label.
+	rebuildRehearsal := regexp.MustCompile(`^` + regexp.QuoteMeta(base) + `\.(\d+)-(.+)$`)
+
+	if separator == "." {
+		rebuildRehearsal = regexp.MustCompile(`^` + regexp.QuoteMeta(base) + `\.0\.(\d+)\.(.+)$`)
+	}
 
 	for _, version := range published {
 		lower := strings.ToLower(version)
+		revision := 0
 		label, ok := strings.CutPrefix(lower, base+separator)
+
+		if m := rebuildRehearsal.FindStringSubmatch(lower); m != nil {
+			revision, _ = strconv.Atoi(m[1])
+			label, ok = m[2], true
+		}
 
 		// A prerelease's rebuild L.0.N is B3's, not a rehearsal.
 		if !ok || !nugetRehearsalLabelPattern.MatchString(label) || (separator == "." && regexp.MustCompile(`^0\.\d+$`).MatchString(label)) {
 			continue
 		}
 
-		rehearsals = append(rehearsals, lower)
+		rehearsals = append(rehearsals, rehearsal{lower, revision})
 	}
 
-	sort.SliceStable(rehearsals, func(i, j int) bool { return nugetLabelAfter(rehearsals[i], rehearsals[j]) })
-	return append(candidates, rehearsals...), nil
+	// Highest first: the newest rebuild's rehearsals, then the label order within one rebuild.
+	sort.SliceStable(rehearsals, func(i, j int) bool {
+		if rehearsals[i].revision != rehearsals[j].revision {
+			return rehearsals[i].revision > rehearsals[j].revision
+		}
+
+		return nugetLabelAfter(rehearsals[i].version, rehearsals[j].version)
+	})
+
+	for _, r := range rehearsals {
+		candidates = append(candidates, r.version)
+	}
+
+	return candidates, nil
 }
 
 // nugetLabelAfter orders two versions dot-segment by segment, numbers numerically, so local.10 follows local.9.
