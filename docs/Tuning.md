@@ -216,8 +216,10 @@ Every use still reads `Version` and `Name`, so the Go function bodies are unchan
   - a literal argument inside the loop took roughly 1.6 times as long under the JIT, and a sixth longer under Native
     AOT;
   - a local assigned from a literal took between a tenth and a seventh longer.
-- In whole programs on the i9: a literal-heavy string-matching benchmark took roughly an eighth more time plain under
-  the JIT, and the same time under Native AOT. Parsing URL queries took about the same time either way.
+- In whole programs, a literal-heavy string-matching benchmark runs faster hoisted under Native AOT on both machines
+  measured on `win-x64`: about 9% faster on an AMD Ryzen 5 PRO 6650U and about 5% on an Intel Core i9-13900K. On
+  the Ryzen it runs about a quarter faster hoisted under the JIT. Parsing URL queries took about the same time
+  either way.
 
 Every comparison in this list after the first was measured against the direct field read, before the accessor
 existed; the accessor reads faster than that field.
@@ -246,7 +248,14 @@ describes both forms.
      ParseQuery: flat on the JIT; AOT plain/hybrid 1.02, which the i9 reads as layout.
      Ryzen 5 PRO 6650U (G-LAPTOP), win-x64, .NET 10.0.11, LiteralSiteBench, 15 interleaved rounds, per-round medians:
      return C2 1.707 (JIT) and 1.772 (AOT); argument C1 1.637 and 1.169; local C5 1.148 and 1.112; any slot C6 1.008
-     and 1.003, inside the A/A band. Data: docs/phase4/data/seat52-literal-classes. -->
+     and 1.003, inside the A/A band. Data: docs/phase4/data/seat52-literal-classes.
+     2026-11-05, the whole-program bullet re-measured at the 1.26.10.2 shipping commit (converter 7871e564), the SAME
+     four PerfStringMatch Native AOT images timed on both boxes under one protocol (G's cross-box PROTOCOL v3, A/A per
+     arm, 21 rounds; the i9's runs 1-2 recorded invalid, run 3 valid): hoisted/plain 0.909 (G-LAPTOP, floor 1.2%) and
+     0.945 (i9, floor 1.8%). On G alone, the same pair under the default JIT read 0.752 and under TC0 0.794
+     (docs/phase4/DATA-hop126-perf.md section 8.4, the policy pair table). The 10-30 Test 1 reading (AOT 1.004) was its
+     own images (893d48976f) and does not reproduce on the i9 with these. The owner kept plain as the default for user
+     programs (2026-11-05, "Keep plain"); -hoist-literals stays the opt-in. -->
 
 ### Goroutine stacks
 
