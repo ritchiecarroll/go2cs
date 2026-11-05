@@ -154,21 +154,19 @@ internal static void rangeUnderOverwrite() {
         }
         var overwritten = false;
         foreach (var (k, v) in m) {
-            {
-                var (f, ok) = k._<float64>(ᐧ); if (ok) {
-                    @string want = "+0";
-                    if (overwritten) {
-                        want = "-0";
-                        after++;
-                        if (v != 3) {
-                            bad++;
-                        }
-                    } else {
-                        before++;
-                    }
-                    if (sign(f) != want) {
+            var (f, ok) = k._<float64>(ᐧ); if (ok) {
+                @string want = "+0";
+                if (overwritten) {
+                    want = "-0";
+                    after++;
+                    if (v != 3) {
                         bad++;
                     }
+                } else {
+                    before++;
+                }
+                if (sign(f) != want) {
+                    bad++;
                 }
             }
             if (!overwritten) {
@@ -184,11 +182,9 @@ internal static void @try(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
-                    fmt.Println(label + ": panic:", r, "runtime.Error:", isRuntimeError);
-                }
+            var r = recover(); if (r != nil) {
+                var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                fmt.Println(label + ": panic:", r, "runtime.Error:", isRuntimeError);
             }
         }, ref ᒐ);
         f();

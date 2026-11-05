@@ -11,10 +11,8 @@ internal static void tryWrite(map<@string, nint> m) {
     try {
         writePanicked = false;
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    writePanicked = true;
-                }
+            var r = recover(); if (r != nil) {
+                writePanicked = true;
             }
         }, ref ᒐ);
         m["x"] = 1;

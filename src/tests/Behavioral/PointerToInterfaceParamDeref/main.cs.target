@@ -9,11 +9,9 @@ internal static void handle(@string label, ref error err) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                var prev = err;
-                throw panic(fmt.Sprintf("wrapped %s: %v (prev=%v)"u8, label, e, prev));
-            }
+        var e = recover(calledByDefer); if (e != nil) {
+            var prev = err;
+            throw panic(fmt.Sprintf("wrapped %s: %v (prev=%v)"u8, label, e, prev));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -38,10 +36,8 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    fmt.Println(e);
-                }
+            var e = recover(); if (e != nil) {
+                fmt.Println(e);
             }
         }, ref ᒐ);
         doit();

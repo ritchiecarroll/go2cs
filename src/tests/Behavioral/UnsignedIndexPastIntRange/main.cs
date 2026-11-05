@@ -14,10 +14,8 @@ internal static void @try(@string name, Func<byte> f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s: %v\n"u8, name, r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s: %v\n"u8, name, r);
             }
         }, ref ᒐ);
         fmt.Printf("%s: read %d\n"u8, name, f());

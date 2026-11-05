@@ -23,10 +23,8 @@ internal static void @try(@string label, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(label, "panicked:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(label, "panicked:", r);
             }
         }, ref ᒐ);
         f();

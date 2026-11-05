@@ -22,10 +22,8 @@ internal static error checkValid(this ж<File> Ꮡf, @string op) {
 public static error Chdir(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var err = Ꮡf.checkValid("chdir"); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid("chdir"); if (err != nil) {
+        return err;
     }
     return fmt.Errorf("chdir %s"u8, f.name);
 }
@@ -62,11 +60,9 @@ internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%s -> panic: %v\n"u8, label, r);
-                    return;
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%s -> panic: %v\n"u8, label, r);
+                return;
             }
         }, ref ᒐ);
         fn();

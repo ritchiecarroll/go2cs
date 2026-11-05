@@ -10,10 +10,8 @@ internal static (any v, error err) call(Func<(any, error)> fn) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    err = fmt.Errorf("recovered: %v"u8, r);
-                }
+            var r = recover(); if (r != nil) {
+                err = fmt.Errorf("recovered: %v"u8, r);
             }
         }, ref ᒐ);
 

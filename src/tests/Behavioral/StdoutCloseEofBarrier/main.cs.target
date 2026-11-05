@@ -36,11 +36,9 @@ internal static void parent() {
         fmt.Println("StdoutPipe error:", err);
         Δos.Exit(1);
     }
-    {
-        var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
-            fmt.Println("Start error:", errΔ1);
-            Δos.Exit(1);
-        }
+    var errΔ1 = cmd.Start(); if (errΔ1 != nil) {
+        fmt.Println("Start error:", errΔ1);
+        Δos.Exit(1);
     }
     var (data, _) = Δio.ReadAll(@out);
     stdin.Write(slice<byte>([(byte)'\n']));

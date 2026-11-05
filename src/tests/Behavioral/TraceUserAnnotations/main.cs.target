@@ -40,11 +40,9 @@ internal static void annotate(@string label) {
 internal static void Main() {
     annotate("off:");
 
-    {
-        var err = trace.Start(Δio.Discard); if (err != nil) {
-            fmt.Println("trace.Start failed:", err);
-            return;
-        }
+    var err = trace.Start(Δio.Discard); if (err != nil) {
+        fmt.Println("trace.Start failed:", err);
+        return;
     }
     annotate("on:");
     trace.Stop();

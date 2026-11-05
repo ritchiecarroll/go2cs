@@ -32,10 +32,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("closure recovered:", r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("closure recovered:", r);
                 }
             }, ref ᒐ);
             fmt.Println(quo(a, b));
@@ -51,10 +49,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        result = -1;
-                    }
+                var r = recover(); if (r != nil) {
+                    result = -1;
                 }
             }, ref ᒐ);
             result = quo(a, b); goto ᒐdone;
@@ -102,10 +98,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("outer recovered:", r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("outer recovered:", r);
                 }
             }, ref ᒐ);
             throw panic("from-iife");

@@ -54,20 +54,16 @@ internal static newCounter_R0 newCounter() {
 
 internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
     if (c.excluded != nil) {
-        {
-            var (t, found) = c.excluded.query(s); if (found) {
-                T zeroΔ1 = GoZero<T>();
-                _ = t;
-                return (zeroΔ1, false);
-            }
+        var (t, found) = c.excluded.query(s); if (found) {
+            T zeroΔ1 = GoZero<T>();
+            _ = t;
+            return (zeroΔ1, false);
         }
     }
 
     if (c.permitted != nil) {
-        {
-            var (t, found) = c.permitted.query(s); if (found) {
-                return (t, true);
-            }
+        var (t, found) = c.permitted.query(s); if (found) {
+            return (t, true);
         }
     }
 

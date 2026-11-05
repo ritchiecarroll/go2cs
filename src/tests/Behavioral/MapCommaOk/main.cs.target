@@ -16,10 +16,8 @@ internal static void Main() {
     var (_, ok3) = m["b", ꟷ];
     fmt.Println(ok3);
 
-    {
-        var (_, ok4) = m["z", ꟷ]; if (!ok4) {
-            fmt.Println("z absent");
-        }
+    var (_, ok4) = m["z", ꟷ]; if (!ok4) {
+        fmt.Println("z absent");
     }
 
     nint w = default;

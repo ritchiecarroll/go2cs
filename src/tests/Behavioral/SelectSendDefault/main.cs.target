@@ -99,10 +99,8 @@ internal static void closedChannel() {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println("closed channel: recovered:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println("closed channel: recovered:", r);
             }
         }, ref ᒐ);
 

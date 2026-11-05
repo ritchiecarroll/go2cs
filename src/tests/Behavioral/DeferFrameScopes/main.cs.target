@@ -128,10 +128,8 @@ internal static @string /*msg*/ guarded(bool boom) {
     try {
         defer(() => fmt.Println("guarded cleanup"), ref ᒐ);
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    msg = fmt.Sprint("recovered ", r);
-                }
+            var r = recover(); if (r != nil) {
+                msg = fmt.Sprint("recovered ", r);
             }
         }, ref ᒐ);
 

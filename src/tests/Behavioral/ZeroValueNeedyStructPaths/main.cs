@@ -43,10 +43,8 @@ internal static void arm(@string name, Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(name, "PANIC", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(name, "PANIC", r);
             }
         }, ref ᒐ);
         f();
