@@ -129,7 +129,7 @@ public static partial void TestReaderAtConcurrent(ж<testing.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, i, GoStack.Bounded);
+        }, i);
     }
     Ꮡwg.Wait();
 }
@@ -152,7 +152,7 @@ public static partial void TestEmptyReaderConcurrent(ж<testing.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
         var rʗ2 = r;
         goǃ(() => {
             GoFrame ᒐ = default;
@@ -162,7 +162,7 @@ public static partial void TestEmptyReaderConcurrent(ж<testing.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
 }

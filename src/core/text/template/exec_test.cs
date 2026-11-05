@@ -863,7 +863,7 @@ internal static partial channel<@string> count(nint n) {
             cʗ1.ᐸꟷ("abcdefghijklmnop"u8.slice(i, i + 1));
         }
         close(cʗ1);
-    }, GoStack.Bounded);
+    });
     return c;
 }
 

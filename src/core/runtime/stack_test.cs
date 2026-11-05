@@ -271,7 +271,7 @@ public static partial void TestStackGrowthCallback(ж<testing.T> t) {
                 var doneʗ1 = done;
                 goǃ(() => {
                     doneʗ1.ᐸꟷ(true);
-                }, GoStack.Bounded);
+                });
                 ᐸꟷ(done);
             });
         }

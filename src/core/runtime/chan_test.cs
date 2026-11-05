@@ -35,13 +35,13 @@ public static partial void TestChan(ж<testing.T> t) {
                 goǃ(() => {
                     _ = ᐸꟷ(cʗ1);
                     recv1 = true;
-                }, GoStack.Bounded);
+                });
                 var recv2 = false;
                 var cʗ2 = c;
                 goǃ(() => {
                     (_, _) = ᐸꟷ(cʗ2, ꟷ);
                     recv2 = true;
-                }, GoStack.Bounded);
+                });
                 time.Sleep(time.Millisecond);
                 if (recv1 || recv2) {
                     t.Fatalf("chan[%d]: receive from empty chan", chanCap);
@@ -80,7 +80,7 @@ public static partial void TestChan(ж<testing.T> t) {
                 goǃ(() => {
                     cʗ3.ᐸꟷ(0);
                     atomic.StoreUint32(Ꮡsent, 1);
-                }, GoStack.Bounded);
+                });
                 time.Sleep(time.Millisecond);
                 if (atomic.LoadUint32(Ꮡsent) != 0) {
                     t.Fatalf("chan[%d]: send to full chan", chanCap);
@@ -132,7 +132,7 @@ public static partial void TestChan(ж<testing.T> t) {
                 goǃ(() => {
                     var (v, ok) = ᐸꟷ(cʗ4, ꟷ);
                     doneʗ1.ᐸꟷ(v == 0 && ok == false);
-                }, GoStack.Bounded);
+                });
                 time.Sleep(time.Millisecond);
                 close(c);
                 if (!ᐸꟷ(done)) {
@@ -149,7 +149,7 @@ public static partial void TestChan(ж<testing.T> t) {
                     for (nint i = 0; i < 100; i++) {
                         cʗ5.ᐸꟷ(i);
                     }
-                }, GoStack.Bounded);
+                });
                 for (nint i = 0; i < 100; i++) {
                     nint v = ᐸꟷ(c);
                     if (v != i) {
@@ -163,7 +163,7 @@ public static partial void TestChan(ж<testing.T> t) {
                     for (nint i = 0; i < 100; i++) {
                         cʗ6.ᐸꟷ(i);
                     }
-                }, GoStack.Bounded);
+                });
                 for (nint i = 0; i < 100; i++) {
                     var (v, ok) = ᐸꟷ(c, ꟷ);
                     if (!ok) {
@@ -184,7 +184,7 @@ public static partial void TestChan(ж<testing.T> t) {
                         for (nint i = 0; i < L; i++) {
                             cʗ7.ᐸꟷ(i);
                         }
-                    }, GoStack.Bounded);
+                    });
                 }
                 var done = new channel<map<nint, nint>>(0);
                 for (nint p = 0; p < P; p++) {
@@ -197,7 +197,7 @@ public static partial void TestChan(ж<testing.T> t) {
                             recvΔ1[v] = recvΔ1[v] + 1;
                         }
                         doneʗ2.ᐸꟷ(recvΔ1);
-                    }, GoStack.Bounded);
+                    });
                 }
                 var recv = new map<nint, nint>();
                 for (nint p = 0; p < P; p++) {
@@ -310,7 +310,7 @@ public static partial void TestNonblockSelectRace(ж<testing.T> t) {
                 return;
             }}
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         c2.ᐸꟷ(1);
         var selᴛ7 = c1;
         switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
@@ -355,7 +355,7 @@ public static partial void TestNonblockSelectRace2(ж<testing.T> t) {
                 return;
             }}
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         close(c2);
         var selᴛ10 = c1;
         switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
@@ -460,14 +460,14 @@ public static partial void TestSelectStress(ж<testing.T> t) {
                     cʗ1[k].ᐸꟷ(0);
                 }
                 Ꮡwg.Done();
-            }, GoStack.Bounded);
+            });
             var cʗ2 = c;
             goǃ(() => {
                 for (nint i = 0; i < N; i++) {
                     ᐸꟷ(cʗ2[k]);
                 }
                 Ꮡwg.Done();
-            }, GoStack.Bounded);
+            });
         }
         var cʗ3 = c;
         goǃ(() => {
@@ -509,7 +509,7 @@ public static partial void TestSelectStress(ж<testing.T> t) {
                 }}
             }
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
         var cʗ4 = c;
         goǃ(() => {
             ref var n = ref heap(new array<nint>(4), out var Ꮡn);
@@ -550,7 +550,7 @@ public static partial void TestSelectStress(ж<testing.T> t) {
                 }}
             }
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
         Ꮡwg.Wait();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -616,7 +616,7 @@ public static partial void TestSelectFairness(ж<testing.T> t) {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }, GoStack.Bounded);
+    });
     nint cnt1 = 0;
     nint cnt2 = 0;
     for (nint i = 0; i < trials; i++) {
@@ -763,7 +763,7 @@ public static partial void TestMultiConsumer(ж<testing.T> t) {
         close(qʗ2); // no more work
         Ꮡwg.Wait(); // workers done
         close(rʗ2); // ... so there can be no more results
-    }, GoStack.Bounded);
+    });
 
     // consume & check
     nint n = 0;
@@ -903,14 +903,14 @@ public static partial void TestSelectDuplicateChannel(ж<testing.T> t) {
             break;
         }}
         eʗ1.ᐸꟷ(9);
-    }, GoStack.Bounded);
+    });
     time.Sleep(time.Millisecond); // make sure goroutine A gets queued first on c
 
     // goroutine B
     var cʗ2 = c;
     goǃ(() => {
         ᐸꟷ(cʗ2);
-    }, GoStack.Bounded);
+    });
     time.Sleep(time.Millisecond); // make sure goroutine B gets queued on c before continuing
 
     d.ᐸꟷ(7); // wake up A, it dequeues itself from c.  This operation used to corrupt c.recvq.
@@ -1135,7 +1135,7 @@ public static void BenchmarkSelectSyncContended(ж<testing.B> b) {
                     return;
                 }}
             }
-        }, GoStack.Bounded);
+        });
         while (pb.Next()) {
             var selᴛ48 = myc1ʗ1;
             var selᴛ49 = myc2ʗ1;
@@ -1289,7 +1289,7 @@ internal static partial void benchmarkChanSync(ж<testing.B> Ꮡb, nint work) {
                 }
             }
             cʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     for (nint p = 0; p < procs; p++) {
         ᐸꟷ(c);
@@ -1328,7 +1328,7 @@ internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chan
             }
             mycʗ1.ᐸꟷ(0);
             cʗ1.ᐸꟷ(foo == 42);
-        }, GoStack.Bounded);
+        });
         var cʗ2 = c;
         var mycʗ2 = myc;
         goǃ(() => {
@@ -1344,7 +1344,7 @@ internal static partial void benchmarkChanProdCons(ж<testing.B> Ꮡb, nint chan
                 }
             }
             cʗ2.ᐸꟷ(foo == 42);
-        }, GoStack.Bounded);
+        });
     }
     for (nint p = 0; p < procs; p++) {
         ᐸꟷ(c);
@@ -1528,7 +1528,7 @@ public static partial void BenchmarkChanPopular(ж<testing.B> Ꮡb) {
                 }}
             }
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, d) in a) {

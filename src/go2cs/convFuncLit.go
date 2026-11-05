@@ -972,7 +972,10 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// A collapsed body has no emitted line of its own — it lands on the enclosing statement's
 		// line, which already carries that statement's sentinel — so the collapse DROPS them
 		// rather than relocating them, and the block-body path below keeps the original text.
-		collapsible := stripPositionSentinels(body)
+		// A BOUNDED sentinel is not a position: it is the only mark a bounded go statement inside
+		// the returned expression has, and dropping it would start that goroutine on the default
+		// reservation (goroutineStackRecords.go), so it is kept; it only ever follows the `return`.
+		collapsible := stripPositionSentinelsKeepingBounded(body)
 
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(collapsible, "return ")

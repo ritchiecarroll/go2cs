@@ -920,6 +920,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	packageInfoLines = applyGoSourcePositionMaps(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyHoistedLiteralsStamp(packageInfoLines, packageInfoFileName)
 	packageInfoLines = applyFieldAccessRecords(packageInfoLines, packageInfoFileName, mergeExisting, qualifyLocalTypeRef)
+	packageInfoLines = applyBoundedGoRecords(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
 
 	// Remove trailing empty lines

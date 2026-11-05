@@ -1338,9 +1338,10 @@ public sealed class Goroutine
     }
 
     // The first frame above golib's own launch machinery -- the `goǃ` rungs live on `builtin`, Start
-    // and this walk on Goroutine -- located by IDENTITY rather than by a skip count, so a rung the
-    // JIT inlines (they are one-line bodies, exactly the shape it inlines eagerly) cannot shift the
-    // answer onto the wrong function. No file info: see Creator. The frame's IL offset rides along
+    // and this walk on Goroutine, and go2cs-gen's interceptor of a bounded `go` statement forwards to a
+    // rung from a frame of its own (namespace go2cs.Interceptors) -- located by IDENTITY rather than by
+    // a skip count, so a rung the JIT inlines (they are one-line bodies, exactly the shape it inlines
+    // eagerly) cannot shift the answer onto the wrong function. No file info: see Creator. The frame's IL offset rides along
     // (see CreatorILOffset). A MethodBase, not a name: Creator is matched by identity and resolved to Go's
     // file and line through its IL offset.
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -1360,7 +1361,7 @@ public sealed class Goroutine
 
             Type? declaring = method.DeclaringType;
 
-            if (declaring == typeof(Goroutine) || declaring == typeof(builtin))
+            if (declaring == typeof(Goroutine) || declaring == typeof(builtin) || declaring?.Namespace == InterceptorNamespace)
                 continue;
 
             return (method, frame.GetILOffset());
@@ -1368,6 +1369,9 @@ public sealed class Goroutine
 
         return (null, System.Diagnostics.StackFrame.OFFSET_UNKNOWN);
     }
+
+    // The namespace go2cs-gen declares its interceptors in (go.lib.targets admits it as InterceptorsNamespaces).
+    private const string InterceptorNamespace = "go2cs.Interceptors";
 
     // `labels` seeds the profile mirror INSIDE the gate's shared section, together with the insertion:
     // a goroutine a profile can see is never one whose labels it cannot (see s_profileGate).

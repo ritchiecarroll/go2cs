@@ -19,7 +19,7 @@ public static partial void XTestSPWrite(TestingT t) {
     goǃ(() => {
         testSPWrite(); // Defined in assembly
         doneʗ1.ᐸꟷ(true);
-    }, GoStack.Bounded);
+    });
     ᐸꟷ(done);
 }
 

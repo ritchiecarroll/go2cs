@@ -432,7 +432,7 @@ public static partial void TestConcurrentClear(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
     }
 
     Ꮡwg.Wait();

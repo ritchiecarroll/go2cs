@@ -485,7 +485,7 @@ var pʗ1 = p;
     var pʗ2 = pʗ1;
     goǃ(() => {
         outʗ2.ᐸꟷ(pʗ2.sum());
-    }, GoStack.Bounded);
+    });
 }
 ```
 

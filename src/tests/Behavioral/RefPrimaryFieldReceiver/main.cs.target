@@ -64,7 +64,7 @@ internal static partial void bumpAsync(this ж<counter> Ꮡc, nint times, ж<Δs
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }, GoStack.Bounded);
+    });
 }
 
 internal static bool tryWhileHeld(this ж<counter> Ꮡc) {
@@ -96,7 +96,7 @@ internal static partial void Main() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < workers; i++) {
         Ꮡwg.Add(1);
@@ -114,7 +114,7 @@ internal static partial void Main() {
     goǃ(() => {
         cʗ2.Ꮡmu.Unlock();
         releasedʗ1.ᐸꟷ(true);
-    }, GoStack.Bounded);
+    });
     ᐸꟷ(released);
     c.Ꮡmu.Lock();
     c.Ꮡmu.Unlock();
