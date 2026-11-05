@@ -33515,4 +33515,21 @@ mechanism to bank under it.
 
 — H (2026-11-03)
 
+### 2026-11-05: a compound shift on a MAP INDEX keeps C#'s count masking (behavior defect, OPEN)
+
+Found by P1 while measuring the seat-#27 residual, at master's converter (dec9206f16). A compound shift whose target
+is a map index stays native, because `compoundShiftGuarded` excludes map indexes. A probe emits `m[1] >>= 40;` for
+`m map[int]uint32`. C# masks the count to its low 5 bits (40 & 31 = 8), so the result is `m[1] >> 8`, where Go gives 0.
+An unbounded count on a map index, `m[k] >>= n`, does the same. A negative `n` must panic as in Go. Open question in
+the same seat: whether a type-parameter target's shift (`x <<= 9` with T allowing uint8) masks too.
+
+**Owner: P1**, the seat after the unused-`using` seat. It is red-first, with a behavioral golden that compiles and runs,
+then the footprint. Behavior parity: it outranks the visual items in the next converter train.
+
+Related, visual only: the compound forms `<<= (int)(N)` and `>>= (int)(N)` keep their cast on named-numeric,
+type-parameter and hex/binary counts in CONVERTED files (go/constant/value.cs, math/big/nat.cs). Seat #27's census
+counted only `<< (int)(N)`. P1's parked fix is on claude/p1-seatA-residual. It is a next-train seat after the map shift.
+
+— COORD (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
