@@ -132,5 +132,18 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // BoundedGoroutineInterceptorGenerator starts a recorded go statement on the bounded stack reservation by
+    // intercepting the goǃ call at the record's position. A record that lands on no such call, or on one the generator
+    // cannot forward to the GoStack-marked rung, is stale or wrong: skipping it would start a goroutine the converter
+    // proved bounded on the default reservation, and a stale record moved onto another statement would start an unproved
+    // goroutine on the small one, whose overflow cannot be caught. So the build fails at the record instead.
+    public static readonly DiagnosticDescriptor BoundedGoroutineRecordMismatch = new(
+        id: "GO2CS0010",
+        title: "A [GoBoundedGoroutine] record does not land on a call of an unmarked goǃ rung",
+        messageFormat: "The [GoBoundedGoroutine] record {0}:{1}:{2} {3}; re-convert the package so its records match its source",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }
