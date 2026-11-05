@@ -437,6 +437,11 @@ type Visitor struct {
 	// (see finalizePositionMap). Pure AST facts, recorded at declaration-visit time so no emission
 	// reordering, collapse, or double conversion of an expression can perturb the counter.
 	funcLitEntries []funcLitEntry
+	// deferredClosureLit is the Go func literal a defer statement hands straight to defer (`defer func() { … }()`),
+	// set by visitDeferStmt for the conversion of its call only; convFuncLit marks that literal's lambda with the
+	// deferred-closure sentinels (markDeferredClosureBody) and clears it, so no other literal (a nested one, an
+	// argument of the deferred call) is ever marked.
+	deferredClosureLit *ast.FuncLit
 	// methodValueEntries collects this FILE's value-receiver method values -- the Go line and the
 	// `pkg.Recv.Method` Go names the `-fm` wrapper by -- appended per function declaration beside the
 	// literal names (collectMethodValueNames) and emitted as the record's methodValues argument.
