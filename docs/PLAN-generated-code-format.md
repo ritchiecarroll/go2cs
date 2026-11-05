@@ -248,11 +248,11 @@ one-line braced block, `{ T ᴛc = v; return …; }`, which the formatter leaves
 The same class has a second writer. `StructTypeTemplate.cs:2489` and `:2491` write a constructor's
 `if (x.Source is not null) this.x = x;` and `if (x != nil) this.x = x;` as one line (239 lines in 128 files),
 where coding-style rule 1 puts the embedded statement on its own indented line. `dotnet format` makes that split.
-**Fix:** a `"
-"` and four more columns before `this.`.
+**Fix:** a `"\r\n"` and four more columns before `this.`.
 
 ### C. Two attribute lists on one line: TemplateBase and StructTypeTemplate
 
+<!-- attribute-shown: go2cs-gen output, which still writes it -->
 **Cause.** `TemplateBase.cs:38`–`:40` (`GoTypeAttributePrefix`) ends `[GoType]` (and `[GoChanDir(…)]`) with a
 space, and the Struct, Inherited and Interface templates put it in front of the `[GeneratedCode…]` list on the
 same line. `StructTypeTemplate.cs:755` (`PromotedMark`, used at `:1242` and `:1895`) does the same for a promoted
@@ -262,6 +262,7 @@ lines (845 diagnostics across the three templates). For a member it deletes the 
 
 `core/runtime/…/go.runtime_package.dlogPerM.g.cs`, before and after:
 
+<!-- attribute-shown: go2cs-gen output, which still writes it -->
 ```csharp
     [GoType] [global::System.CodeDom.Compiler.GeneratedCode("go2cs-gen", "1.26.10"), global::System.Diagnostics.DebuggerNonUserCode]
     internal partial struct dlogPerM
@@ -273,6 +274,7 @@ lines (845 diagnostics across the three templates). For a member it deletes the 
 
 `core/syscall/…/go.syscall_package.mmapper.g.cs`, a promoted forwarder, before and the recommended after:
 
+<!-- attribute-shown: go2cs-gen output, which still writes it -->
 ```csharp
     [global::go.GoPromoted] [global::go.GoRecv] internal static void Lock(this ref global::go.syscall_package.mmapper target) => target.Mutex.Lock();
 
@@ -389,7 +391,7 @@ template ends can ride along, or be left to the helper.
    `src/tools/ildiff <base> <seat> --roots <base src>;<seat src>`. It must read `differing=0`. One caveat to check,
    not assume: a generated call to a `[CallerLineNumber]` parameter would embed the moved line number as an IL
    constant. golib's only such parameters are on the goroutine launchers, which no generated file in the sample
-calls, and `ildiff --show` would name any method this affects.
+   calls, and `ildiff --show` would name any method this affects.
 2. **GenTests pass.** 9 GenTests files pin text that contains `\r\n`, and 586 assertions use `Contains(`. A pin
    that spans moved whitespace changes with the output. Each changed pin is listed in the seat's record.
 3. **CNR and the behavioral suite read NO REGRESSION.** The converter and the goldens are untouched (generated
