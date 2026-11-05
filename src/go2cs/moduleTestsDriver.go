@@ -109,7 +109,7 @@ func (m *ModuleConverter) addTestOnlyPackages(moduleDir string, closure map[stri
 		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedModule | packages.NeedForTest,
 		Dir:   moduleDir,
 		Tests: true,
-		Env:   os.Environ(),
+		Env:   converterLoaderEnv(),
 	}
 
 	roots, err := packages.Load(cfg, "./...")

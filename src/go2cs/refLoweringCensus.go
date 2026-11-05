@@ -268,7 +268,7 @@ func censusOneTarget(options Options, target string, packageFilter []string) (*r
 		Mode:       packages.LoadAllSyntax,
 		Dir:        srcPath,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: append(os.Environ(), "GO111MODULE=off",
+		Env: converterLoaderEnv("GO111MODULE=off",
 			fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}
 

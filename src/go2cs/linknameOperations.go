@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"os"
 	"strings"
 
 	"github.com/ritchiecarroll/hashset"
@@ -161,7 +160,7 @@ func loadLinknameTargetImportClosure(targetPath string, options Options) linknam
 		Mode:       packages.NeedName | packages.NeedImports | packages.NeedDeps,
 		Dir:        packageSourceDir,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: append(os.Environ(),
+		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, targetPath)

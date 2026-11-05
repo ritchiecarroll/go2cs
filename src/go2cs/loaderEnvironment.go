@@ -25,5 +25,11 @@ import "os"
 // must still be refused by name (refuseSelectedCgoSources, owner ruling 578 item 7), never converted as its cgo-off
 // selection. An empty value is Go's "unset". A value set with `go env -w` is not visible here and reads as unset.
 func converterLoaderEnv(settings ...string) []string {
-	return append(os.Environ(), settings...)
+	env := append(os.Environ(), settings...)
+
+	if value, set := os.LookupEnv("CGO_ENABLED"); set && value != "" {
+		return env
+	}
+
+	return append(env, "CGO_ENABLED=0")
 }
