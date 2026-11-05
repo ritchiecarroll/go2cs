@@ -1704,7 +1704,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				} else {
 					binaryType := v.info.Types[rhs].Type
 
-					if binaryType != nil {
+					// A right side typed as a type parameter is already T: C#'s operator on T returns T, so it takes no
+					// cast (only a basic operand's promotion to int needs one).
+					if _, typeParam := types.Unalias(binaryType).(*types.TypeParam); binaryType != nil && !typeParam {
 						binaryTypeName = convertToCSTypeName(v.getAliasQualifiedTypeName(binaryType, false))
 					}
 				}
