@@ -22,7 +22,6 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
-using System.Runtime.CompilerServices;
 using bufio = bufio_package;
 using go.@internal;
 using go.net;

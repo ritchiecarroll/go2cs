@@ -11,7 +11,6 @@ using io = io_package;
 using big = math.big_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
-using System.Runtime.CompilerServices;
 using crypto;
 using encoding;
 using global::go.go;

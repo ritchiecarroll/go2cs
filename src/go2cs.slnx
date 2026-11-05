@@ -717,6 +717,7 @@
     <Project Path="tests/Behavioral/MapArrayValueZero/MapArrayValueZero.csproj" />
     <Project Path="tests/Behavioral/MapCloneLinkname/MapCloneLinkname.csproj" />
     <Project Path="tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
+    <Project Path="tests/Behavioral/MapIndexShiftCount/MapIndexShiftCount.csproj" />
     <Project Path="tests/Behavioral/MapKeyUpdateAndHashPanic/MapKeyUpdateAndHashPanic.csproj" />
     <Project Path="tests/Behavioral/MapMutateDuringRange/MapMutateDuringRange.csproj" />
     <Project Path="tests/Behavioral/MapPointerElementLiteral/MapPointerElementLiteral.csproj" />

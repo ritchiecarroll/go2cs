@@ -11,7 +11,6 @@ using sync = sync_package;
 using atomic = go.sync.atomic_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal.trace;
-using System.Runtime.CompilerServices;
 using go.sync;
 
 partial class trace_package {

@@ -79,8 +79,8 @@ using static go.@internal.pkgbits_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsgKKAAA4igKKAABQugKKA")]
-[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADh+sKaQqrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgoCktqSkpKSCgqTIgoKClKaCgoIAAhQACAKCgoKClIKUqsKCgoKCgoKCgoKCpoKUlKiQ")]
-[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACZMkAACEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooCCgraCgoKssoKCruKClAASLrKWksqClIKCgoKCgqaCgpSmgoK4goKCgqaUgoKmpoKCgoCCtqaCgoKmgoKuwoKCgsqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
+[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+sKaQqrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgoCktqSkpKSCgqTIgoKClKaCgoIAAhQACAKCgoKClIKUqsKCgoKCgoKCgoKCpoKUlKiQ")]
+[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMkAACEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooCCgraCgoKssoKCruKClAASLrKWksqClIKCgoKCgqaCgpSmgoK4goKCgqaUgoKmpoKCgoCCtqaCgoKmgoKuwoKCgsqCgoIAAyIADQKCgoKUgoKokoKokoKokICmkKaQAAIQ4oKokoIAAhLiqqKCqqKCgryigoKClLiCtLSCtIK0grSCtIKCtILIooKCpoKCqJA=", "61-63:1")]
 [assembly: GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
 [assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlJQABBCygqaCgoKCgg==", "16-21:1")]
 [assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKClA==")]

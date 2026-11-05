@@ -1,7 +1,6 @@
 namespace go.example.com.dotted;
 
 using runtime = runtime_package;
-using System.Runtime.CompilerServices;
 
 partial class dotted_package {
 

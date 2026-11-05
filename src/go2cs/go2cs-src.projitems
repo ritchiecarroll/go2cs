@@ -379,6 +379,8 @@
     <None Include="$(MSBuildThisFileDirectory)linkStagedFixtures_test.go" />
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold.go" />
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)loaderEnvironment.go" />
+    <None Include="$(MSBuildThisFileDirectory)loaderEnvironment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localFuncTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localStringConstHoist_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localTypeLift_test.go" />
@@ -393,6 +395,7 @@
     <None Include="$(MSBuildThisFileDirectory)manualTypeReceiverRefusal.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeReceiverRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeUnwrapBox_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)mapIndexShift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)managedSliceViewRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)markerComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)memberMarkGuard_test.go" />
@@ -436,6 +439,7 @@
     <None Include="$(MSBuildThisFileDirectory)nilCompareCollections_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nilCompareOperands_test.go" />
     <None Include="$(MSBuildThisFileDirectory)noinlineDirective_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)noInliningPartialUsing_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetFeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetLock.go" />

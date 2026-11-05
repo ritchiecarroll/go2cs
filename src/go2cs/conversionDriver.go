@@ -139,7 +139,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 	// names both versions, which is the good failure; a stdlib load inside a GOROOT `src` directory
 	// carries no such line, so ordinary runs are unaffected. (COORD ruling `bc59c619d`. If a real stdlib
 	// load is ever found to need `auto`, that is a finding to post, not a reason to drop the pin quietly.)
-	cfg.Env = append(os.Environ(), fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1]),
+	cfg.Env = converterLoaderEnv(fmt.Sprintf("GOOS=%s", targetParts[0]), fmt.Sprintf("GOARCH=%s", targetParts[1]),
 		"GOTOOLCHAIN=local")
 
 	// A MODULE-CACHE package is loaded from the MAIN MODULE's directory, by import path — not from

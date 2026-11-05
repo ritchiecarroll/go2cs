@@ -934,7 +934,7 @@ windows/amd64, linux/amd64 and darwin/amd64, whatever the conversion's own targe
 The function that appends declares one `stackAppend<T>` per hinted variable at its entry, and the site
 passes it to golib's `append`:
 
-<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:8-17 -->
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:7-16 -->
 ```csharp
 internal static partial void loopCaps() {
     var xᴷ = new stackAppend<int64>();

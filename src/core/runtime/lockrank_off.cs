@@ -4,8 +4,6 @@
 //go:build !goexperiment.staticlockranking
 namespace go;
 
-using System.Runtime.CompilerServices;
-
 partial class runtime_package {
 
 internal const bool staticLockRanking = false;

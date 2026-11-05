@@ -1,7 +1,6 @@
 namespace go;
 
 using runtime = runtime_package;
-using System.Runtime.CompilerServices;
 
 partial class XpkgPromotedInnerLib_package {
 

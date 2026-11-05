@@ -91,7 +91,6 @@ using tabwriter = text.tabwriter_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using text;
 
 partial class pprof_package {

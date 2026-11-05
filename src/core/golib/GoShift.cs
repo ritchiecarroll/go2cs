@@ -326,4 +326,61 @@ public static class GoShift
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void LshAssign(ref this int8 x, int64 n) => x = x.Lsh(n);
+
+    // ---- a TYPE PARAMETER target -----------------------------------------------------------------------
+    //
+    // A Go type parameter constrained to integers converts to a C# type parameter carrying
+    // IShiftOperators<T, int, T>, and .NET's operator masks the count to the type argument's width
+    // (`(byte)(x << (n & 7))` for byte), so `x <<= 9` on a uint8 type argument read as `x << 1`. These
+    // take the width from the type argument's size, which is its Go width for every integer type and
+    // for a named integer's wrapper, and shift by width - 1 and then 1 for a count at or past it: 0 for
+    // a left or an unsigned right shift, and the sign fill for a signed right shift, with no need to
+    // know the sign. Overload resolution prefers the non-generic overloads above for a basic receiver.
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Rsh<T>(this T x, uint64 n) where T : IShiftOperators<T, int, T> =>
+        n >= (uint64)(Unsafe.SizeOf<T>() * 8) ? x >> (Unsafe.SizeOf<T>() * 8 - 1) >> 1 : x >> (int)n;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Lsh<T>(this T x, uint64 n) where T : IShiftOperators<T, int, T> =>
+        n >= (uint64)(Unsafe.SizeOf<T>() * 8) ? x << (Unsafe.SizeOf<T>() * 8 - 1) << 1 : x << (int)n;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Rsh<T>(this T x, int64 n) where T : IShiftOperators<T, int, T> =>
+        n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Rsh((uint64)n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Lsh<T>(this T x, int64 n) where T : IShiftOperators<T, int, T> =>
+        n < 0 ? throw RuntimeErrorPanic.NegativeShiftAmount() : x.Lsh((uint64)n);
+
+    // A type parameter's compound shift whose target cannot be read twice: a `ref this` receiver of a type
+    // parameter needs a struct constraint that a Go constraint never carries, so the target is passed by
+    // `ref` instead, `GoShift.RshAssign(ref s[f()], n)`, and is still evaluated once.
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign<T>(ref T x, uint64 n) where T : IShiftOperators<T, int, T> => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign<T>(ref T x, uint64 n) where T : IShiftOperators<T, int, T> => x = x.Lsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RshAssign<T>(ref T x, int64 n) where T : IShiftOperators<T, int, T> => x = x.Rsh(n);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void LshAssign<T>(ref T x, int64 n) where T : IShiftOperators<T, int, T> => x = x.Lsh(n);
+
+    // ---- a MAP ELEMENT target --------------------------------------------------------------------------
+    //
+    // Go's `m[k] >>= n` on a map element. A map element has no `ref`, so it takes the map and its key and
+    // evaluates the key once, `m.RshAssign(key(), n)`; a target whose map and key can be read twice is
+    // written `m[k] = m[k].Rsh(n)` instead. Generic over the element, so the type-parameter guard above
+    // serves every integer element type and every named integer's wrapper.
+
+    public static void RshAssign<TKey, T>(this IMap<TKey, T> m, TKey key, uint64 n) where TKey : notnull where T : IShiftOperators<T, int, T> => m[key] = m[key].Rsh(n);
+
+    public static void LshAssign<TKey, T>(this IMap<TKey, T> m, TKey key, uint64 n) where TKey : notnull where T : IShiftOperators<T, int, T> => m[key] = m[key].Lsh(n);
+
+    public static void RshAssign<TKey, T>(this IMap<TKey, T> m, TKey key, int64 n) where TKey : notnull where T : IShiftOperators<T, int, T> => m[key] = m[key].Rsh(n);
+
+    public static void LshAssign<TKey, T>(this IMap<TKey, T> m, TKey key, int64 n) where TKey : notnull where T : IShiftOperators<T, int, T> => m[key] = m[key].Lsh(n);
 }

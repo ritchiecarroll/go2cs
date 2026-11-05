@@ -7,7 +7,6 @@ using fips140 = go.crypto.@internal.fips140_package;
 using aes = go.crypto.@internal.fips140.aes_package;
 using alias = go.crypto.@internal.fips140.alias_package;
 using errors = errors_package;
-using System.Runtime.CompilerServices;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 

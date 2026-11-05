@@ -179,7 +179,6 @@ namespace go.@internal;
 using Δruntime = runtime_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
-using System.Runtime.CompilerServices;
 using go;
 using go.sync;
 using ꓸꓸꓸany = Span<any>;

@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using Δio = io_package;
 using Δnet = net_package;
-using System.Runtime.CompilerServices;
 
 partial class main_package {
 

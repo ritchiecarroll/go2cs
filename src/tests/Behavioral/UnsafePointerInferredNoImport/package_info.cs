@@ -52,7 +52,7 @@ using static go.main_package;
 [assembly: GoPositionMap("consumer_blank.go", "consumer_blank.cs", "AAcWgpKCpoCsgoKCgg==")]
 [assembly: GoPositionMap("consumer_composite.go", "consumer_composite.cs", "AAYSgpKS")]
 [assembly: GoPositionMap("main.go", "main.cs", "AAcSgpKUgoKCgoI=")]
-[assembly: GoPositionMap("producer.go", "producer.cs", "AAcsgKaApoA=")]
+[assembly: GoPositionMap("producer.go", "producer.cs", "AAYsgKaApoA=")]
 // </GoSourcePositionMaps>
 
 namespace go;

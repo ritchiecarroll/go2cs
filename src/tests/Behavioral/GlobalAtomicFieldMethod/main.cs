@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using atomic = sync.atomic_package;
-using System.Runtime.CompilerServices;
 using sync;
 
 partial class main_package {

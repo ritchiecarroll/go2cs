@@ -6,7 +6,6 @@ namespace go;
 using godebug = @internal.godebug_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
 
 partial class time_package {
 

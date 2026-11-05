@@ -1,0 +1,85 @@
+start 2026-11-05 00:37:15
+composed manifest: 54 images sha256-equal; manifest sha256 328f85dea1d99d55782e838305d6e98ea1ff2fbe942921af72f58c248748bfb9
+== box start 2026-11-05 00:38:09
+Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)AC=True
+build/toolchain processes: 0
+free=42G
+drop newest=1793858467.2364877000 /c/go2cs-perf/drop1262/aot-manifest.composed.tsv files=161
+arms: rest 49, review 39
+== warm-control-DISCARDED 00:38:15
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== warm-null-DISCARDED 00:38:18
+NullJit: verified 2 arms, output equal
+NullJit: 11 rounds done
+NullAot: verified 2 arms, output equal
+NullAot: 11 rounds done
+== control-start 00:38:55
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== null-start 00:38:58
+NullJit: verified 2 arms, output equal
+NullJit: 11 rounds done
+NullAot: verified 2 arms, output equal
+NullAot: 11 rounds done
+== rest 00:39:34
+PerfFib: verified 5 arms, output equal
+PerfFib: 5 rounds done
+PerfIfaceShell: verified 5 arms, output equal
+PerfIfaceShell: 5 rounds done
+PerfIfaceShellChurn: verified 5 arms, output equal
+PerfIfaceShellChurn: 5 rounds done
+PerfMap: verified 5 arms, output equal
+PerfMap: 5 rounds done
+PerfMatMul: verified 5 arms, output equal
+PerfMatMul: 5 rounds done
+PerfSieve: verified 5 arms, output equal
+PerfSieve: 5 rounds done
+PerfString: verified 5 arms, output equal
+PerfString: 5 rounds done
+PerfStringMatch: verified 5 arms, output equal
+PerfStringMatch: 5 rounds done
+PerfStringView: verified 5 arms, output equal
+PerfStringView: 5 rounds done
+PerfTlsHandshake: verified 4 arms, output equal
+PerfTlsHandshake: 5 rounds done
+== control-mid 00:44:22
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== review 00:44:26
+PerfChannel: verified 5 arms, output equal
+PerfChannel: 11 rounds done
+PerfFieldView: verified 5 arms, output equal
+PerfFieldView: 11 rounds done
+PerfIface: verified 7 arms, output equal
+PerfIface: 11 rounds done
+PerfIfaceCall: verified 5 arms, output equal
+PerfIfaceCall: 11 rounds done
+PerfRefLower: verified 7 arms, output equal
+PerfRefLower: 11 rounds done
+PerfSort: verified 5 arms, output equal
+PerfSort: 11 rounds done
+PerfStartup: verified 5 arms, output equal
+PerfStartup: 11 rounds done
+== control-end 00:51:39
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== null-end 00:51:42
+NullJit: verified 2 arms, output equal
+NullJit: 11 rounds done
+NullAot: verified 2 arms, output equal
+NullAot: 11 rounds done
+== box end 2026-11-05 00:52:20
+Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)AC=True
+build/toolchain processes: 0
+free=42G
+drop newest=1793858467.2364877000 /c/go2cs-perf/drop1262/aot-manifest.composed.tsv files=161
+end 2026-11-05 00:52:22 rc=0

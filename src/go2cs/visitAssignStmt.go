@@ -1096,15 +1096,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		// LHS whose count is not provably in [0, width) renders `lhs.RshAssign(count)` -- golib's
 		// `ref this` twin, so the target is evaluated once -- and a bounded count stays native. The RHS
 		// arms close it through andNotUncheckedClose, the one post-RHS close every compound site writes.
+		// A map element, which has no ref, and a type parameter's target, which cannot be a `ref this`
+		// receiver, take the forms compoundShiftForm names, still evaluating the target once.
 		if v.compoundShiftGuarded(assignStmt) {
-			operator = ".LshAssign("
-
-			if assignStmt.Tok == token.SHR_ASSIGN {
-				operator = ".RshAssign("
-			}
-
+			form := v.compoundShiftForm(assignStmt)
+			operator = form.operator
+			signedAssignTarget = form.target
 			shiftAssignGuarded = true
-			andNotUncheckedClose = true
+			andNotUncheckedClose = form.close
 		}
 	case token.AND_NOT_ASSIGN:
 		// C# doesn't have a direct AND NOT equivalent, so expand `&^=` to `&= ~`. The `~` promotes

@@ -9,8 +9,9 @@
 // Guards the COMPOUND shift-assign's Go-semantics guard (visitAssignStmt's SHL_ASSIGN case,
 // compoundShiftGuarded): `x >>= n` with a count not provably below the width renders golib's
 // `x.RshAssign(n)`, because C#'s native `x >>= (int)n` masks the count -- runtime's softfloat fadd64
-// shifted by 24 where Go shifts by 664 and yields 0. The controls carry as much weight: a bounded count, a
-// named-type target and a map-index target must keep the native form.
+// shifted by 24 where Go shifts by 664 and yields 0. The controls carry as much weight: a bounded count and a
+// named-type target must keep the native form. A map-index target has no ref, so it takes Go's rule as
+// `m[k] = m[k].Rsh(n)` (mapIndexShift_test.go covers its other forms).
 
 package main
 
@@ -46,7 +47,7 @@ func onField(h *holder, n uint) uint64    { h.bits <<= n; return h.bits }
 func onElement(a []uint32, n uint) uint32 { a[1] >>= n; return a[1] }
 func onSigned(x int64, n uint) int64      { x >>= n; return x }
 
-// CONTROLS - a provably bounded count, a named target, a map-index target.
+// CONTROLS - a provably bounded count, a named target. A map-index target is checked on its own.
 func boundedConst(x uint64) uint64          { x >>= 3; return x }
 func boundedMask(x uint64, n uint) uint64   { x >>= n & 63; return x }
 func onNamed(x named, n uint) named         { x >>= n; return x }
@@ -106,7 +107,11 @@ func main() {
 		}
 	}
 
-	for _, control := range []string{"boundedConst", "boundedMask", "onNamed", "onMapIndex"} {
+	if !regexp.MustCompile(`m\[1\] = m\[1\]\.Rsh\(n\);`).MatchString(bodyOf("onMapIndex")) {
+		t.Errorf("onMapIndex: expected Go's rule through `m[1] = m[1].Rsh(n);`; emission:\n%s", bodyOf("onMapIndex"))
+	}
+
+	for _, control := range []string{"boundedConst", "boundedMask", "onNamed"} {
 		if guarded.MatchString(bodyOf(control)) {
 			t.Errorf("%s: must keep the native compound shift; emission:\n%s", control, bodyOf(control))
 		}

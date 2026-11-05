@@ -193,6 +193,101 @@ public partial class StringLiteralCacheTests
         Assert.IsTrue(StringLiteralCache.Count >= s_literals.Length);
     }
 
+    private static readonly Type s_cache = typeof(StringLiteralCache);
+
+    private static object? CacheStatic(string name) =>
+        s_cache.GetField(name, BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null);
+
+    [TestMethod]
+    public void TheShiftMatchesThePublishedTableAndAnOlderShiftIndexesItInBounds()
+    {
+        // Force growth past the initial table, as the concurrent test does.
+        foreach (string literal in s_literals)
+            _ = (@string)literal;
+
+        Array slots = (Array)CacheStatic("s_slots")!;
+        int shift = (int)CacheStatic("s_shift")!;
+        int log2 = System.Numerics.BitOperations.Log2((uint)slots.Length);
+
+        Assert.AreEqual(1 << log2, slots.Length, "the table length is a power of two");
+        Assert.IsTrue(log2 > 8, "the table grew past its initial 256 slots");
+        Assert.AreEqual(64 - log2, shift, "at rest, s_shift is the published table's shift");
+        Assert.IsTrue(slots.Length >= 2 * StringLiteralCache.Count, "the table is at most half full");
+
+        // A reader can pair a newer table with an older shift (it acquires s_shift first). Tables only
+        // grow, so every older shift indexes the newer table in bounds.
+        MethodInfo index = s_cache.GetMethod("Index", BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        foreach (string literal in s_literals)
+        {
+            for (int older = 64 - 8; older >= shift; older--)
+            {
+                int i = (int)index.Invoke(null, [literal, older])!;
+                Assert.IsTrue(i >= 0 && i < slots.Length, $"{literal}: shift {older} gives index {i} outside {slots.Length} slots");
+            }
+        }
+    }
+
+    [TestMethod]
+    public void TheGrownTableIsPublishedBeforeItsShiftAndReadAfterIt()
+    {
+        // The ordering that keeps a hit in bounds without a lock, pinned in the source because a race
+        // test cannot make the wrong order fail on demand: the writer publishes s_slots, THEN s_shift;
+        // the reader acquires s_shift, THEN reads s_slots.
+        string file = Path.GetFullPath(Path.Combine(TestSourceDirectory(), "..", "..", "core", "golib", "StringLiteralCache.cs"));
+
+        if (!File.Exists(file))
+            Assert.Inconclusive($"golib source not found at {file}");
+
+        string source = File.ReadAllText(file);
+
+        AssertOrdered(source, "int shift = Volatile.Read(ref s_shift);", "GetArrayDataReference(s_slots)", "the hit path acquires s_shift before it reads s_slots");
+        AssertOrdered(source, "Volatile.Write(ref s_slots, grown);", "Volatile.Write(ref s_shift, 64 - log2);", "a grow publishes s_slots before s_shift");
+        Assert.AreEqual(1, Count(source, "Volatile.Write(ref s_shift"), "s_shift is written in one place");
+        Assert.AreEqual(1, Count(source, "Volatile.Write(ref s_slots"), "s_slots is written in one place");
+
+        static void AssertOrdered(string text, string first, string second, string why)
+        {
+            int a = text.IndexOf(first, StringComparison.Ordinal), b = text.IndexOf(second, StringComparison.Ordinal);
+            Assert.IsTrue(a >= 0, $"not found: {first}");
+            Assert.IsTrue(b >= 0, $"not found: {second}");
+            Assert.IsTrue(a < b, why);
+        }
+
+        static int Count(string text, string what) => (text.Length - text.Replace(what, "").Length) / what.Length;
+    }
+
+    private static string TestSourceDirectory([CallerFilePath] string thisFile = "") => Path.GetDirectoryName(thisFile)!;
+
+    [TestMethod]
+    public void AnUncachedConversionIsCopiedOutAndALargeOneSkipsTheThreadSlot()
+    {
+        // Every conversion returns a ref the operator copies from at once; an uncached one lands in a
+        // per-thread slot first, so two in a row must not alias.
+        @string a = RuntimeCopy("plc-uncached-a");
+        @string b = RuntimeCopy("plc-uncached-b");
+
+        Assert.AreEqual("plc-uncached-a", a.ToString(), "the first conversion survives the second");
+        Assert.AreEqual("plc-uncached-b", b.ToString());
+        Assert.IsFalse(SameBacking(a, b));
+
+        // At the limit the conversion uses the slot; one byte over, it gets a box of its own and the
+        // slot keeps what it held, so the slot never keeps a large backing alive.
+        @string atLimit = new string('x', StringLiteralCache.UncachedSlotLimit);
+        Assert.IsTrue(SameBacking(atLimit, (@string)CacheStatic("t_uncached")!), "a conversion at the limit lands in the slot");
+
+        @string overLimit = new string('y', StringLiteralCache.UncachedSlotLimit + 1);
+        Assert.IsTrue(SameBacking(atLimit, (@string)CacheStatic("t_uncached")!), "a conversion over the limit leaves the slot alone");
+        Assert.AreEqual(new string('y', StringLiteralCache.UncachedSlotLimit + 1), overLimit.ToString());
+        Assert.AreEqual(new string('x', StringLiteralCache.UncachedSlotLimit), atLimit.ToString());
+
+        // A hit returns a ref into the table and never touches the slot.
+        @string first = "plc-uncached-literal";
+        @string second = "plc-uncached-literal";
+        Assert.IsTrue(SameBacking(first, second));
+        Assert.IsTrue(SameBacking(atLimit, (@string)CacheStatic("t_uncached")!), "a literal conversion leaves the slot alone");
+    }
+
     [TestMethod]
     public void AHitChargesNothingAndARunTimeMissChargesOneAllocation()
     {
