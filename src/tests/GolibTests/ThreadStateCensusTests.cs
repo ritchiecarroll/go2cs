@@ -72,6 +72,8 @@ public class ThreadStateCensusTests
         ("golib/runtime/GoschedBackoff.cs|t_consecutiveInertYields", Disposition.GolibReset, "internal static void ResetThread() => t_consecutiveInertYields = 0;", "a Gosched backoff streak"),
         ("golib/runtime/GoroutineThreadPool.cs|t_stackReserve", Disposition.KeptThreadResource, "private static int t_stackReserve;", "the stack reservation this pooled thread was created with: a property of the thread, which only ever runs goroutines of that reservation"),
         ("golib/runtime/Goroutine.cs|t_current", Disposition.RetiredByRun, "t_current = null;", "the goroutine identity; Goroutine.Run's scope retires it"),
+        ("golib/runtime/Goroutine.cs|t_escaped", Disposition.Registered, "GoroutineThreadState.Register(static () => t_escaped = null)", "the last exception that escaped a goroutine root on this thread, which a crash report matches to name the goroutine (Crashing)"),
+        ("golib/runtime/Goroutine.cs|t_escapedFrom", Disposition.Registered, "GoroutineThreadState.Register(static () => t_escapedFrom = null)", "the goroutine that exception escaped"),
         ("golib/runtime/Goroutine.cs|s_profileLabels", Disposition.FlowsWithContext, "AsyncLocal<object?> s_profileLabels", "pprof labels, inherited at goroutine creation"),
         ("runtime/stubs_impl.cs|t_getg", Disposition.Registered, "GoroutineThreadState.Register(static () => t_getg = null)", "getg()'s cache of the goroutine's g"),
         ("runtime/stubs_impl.cs|t_getgOwner", Disposition.Registered, "GoroutineThreadState.Register(static () => t_getgOwner = null)", "the golib identity getg()'s cache was minted for"),

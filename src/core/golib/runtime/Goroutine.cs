@@ -121,6 +121,21 @@ public sealed class Goroutine
     [ThreadStatic]
     private static Goroutine? t_current;
 
+    // The last exception that escaped a goroutine root on this thread, and the goroutine it escaped, marked by
+    // Observed in the first pass while t_current still names it. The second pass disposes the root's scope, which
+    // clears t_current, BEFORE golib's backstop reports the crash on this same thread; the report reads this pair
+    // instead (Crashing). Keyed on the exception because a host may run a root inline and catch what escapes it
+    // (GolibTests does), and a later report on that thread is about a different panic. A pooled thread drops the
+    // pair before its next goroutine.
+    [ThreadStatic]
+    private static Exception? t_escaped;
+
+    [ThreadStatic]
+    private static Goroutine? t_escapedFrom;
+
+    private static readonly bool s_escapedReset = GoroutineThreadState.Register(static () => t_escaped = null);
+    private static readonly bool s_escapedFromReset = GoroutineThreadState.Register(static () => t_escapedFrom = null);
+
     // The containment policy, when a HOST installed one. Only ever assigned non-null, so a root
     // whose filter observed a policy can never find it gone by the time the handler runs.
     private static Action<Exception>? s_containment;
@@ -463,6 +478,19 @@ public sealed class Goroutine
     /// </para>
     /// </remarks>
     public static Goroutine? Current => t_current;
+
+    /// <summary>
+    /// The goroutine a crash report of <paramref name="thrown"/> on the calling thread describes: the goroutine whose
+    /// root it escaped, or, where it escaped none, <see cref="Current"/>.
+    /// </summary>
+    /// <remarks>
+    /// Go's crash report names the goroutine that panicked, <c>goroutine N [running]:</c>, and ends its block with
+    /// the <c>go</c> statement that started it. By the time golib's backstop runs, the escaping panic has already
+    /// disposed the root's scope and <see cref="Current"/> reads <c>null</c>, so the root marks the goroutine in its
+    /// first-pass filter, while the stack is still standing, and the report reads it here.
+    /// </remarks>
+    public static Goroutine? Crashing(Exception thrown) =>
+        ReferenceEquals(thrown, t_escaped) ? t_escapedFrom : t_current;
 
     /// <summary>
     /// Marks the calling thread as running a goroutine body for the lifetime of the returned scope.
@@ -1521,6 +1549,11 @@ public sealed class Goroutine
         // goroutine's scope Dispose before the backstop starts, and a returning main must not exit 0 between
         // them (MainExit).
         MainExit.BeginFatal(2);
+
+        // The same second pass clears t_current before the backstop's report reads it, so the goroutine the report
+        // names is recorded now, with the exception it is recorded for (Crashing).
+        t_escaped = ex;
+        t_escapedFrom = t_current;
 
         if (Volatile.Read(ref s_panicObserver) is not { } observer)
             return false;
