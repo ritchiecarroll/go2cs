@@ -81,10 +81,12 @@ public class PanicFramesReviewTests
             new[] { "runtime.gopanic", Pkg + "gDeferPanics", Pkg + "deferTheCatcherOnNormalReturn" },
             Below(Run(panicframesprobe_package.deferTheCatcherOnNormalReturn), "deferTheCatcherOnNormalReturn"));
 
-    // ---- a panic a deferred CLOSURE raises: NO splice (a stated residual). The converter's defer
-    // wrappers (`defer panic(v)`'s thunk, `() => c()`, the lambda for a call whose results are dropped)
-    // are indistinguishable from Go closures at run time, and Go shows its deferwrap only over the panic
-    // machinery, so splicing any closure-raised site risks a frame Go does not show (verification B2/C3).
+    // ---- a panic an UNRECORDED deferred CLOSURE raises: NO splice. The converter's defer wrappers
+    // (`defer panic(v)`'s thunk, `() => c()`, the lambda for a call whose results are dropped) look like Go
+    // closures at run time, and Go shows its deferwrap only over the panic machinery, so splicing any
+    // closure-raised site risks a frame Go does not show (verification B2/C3). This probe carries no
+    // GoPositionMap record, so its closures read as an older artifact's; the converter's DEFERRED-CLOSURE
+    // record splices a recorded closure's site (DeferredClosureChainTests, B1).
 
     // Go: normalReturnPanic.func1 | gopanic | normalReturnPanic.func2 | normalReturnPanic.
     [TestMethod]
