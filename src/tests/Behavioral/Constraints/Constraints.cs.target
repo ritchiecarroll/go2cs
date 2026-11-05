@@ -75,11 +75,9 @@ partial interface Ordered<ΔT> /*operators = Sum, Comparable, Ordered*/ {
 partial struct recordA {
     internal nint n;
 }
-
 partial struct recordB {
     internal nint n;
 }
-
 partial struct recordC {
     internal nint n;
 }

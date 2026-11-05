@@ -159,9 +159,7 @@ internal static @string passThrough() {
     return joinPair(ᴛ1, ᴛ2);
 }
 
-internal static (@string, error) fetchPair() {
-    return ("pair", default);
-}
+internal static (@string, error) fetchPair() { return ("pair", default); }
 
 internal static @string joinPair(@string s, error err) {
     if (err != nil) {
@@ -196,9 +194,7 @@ internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
     return len(b) + w.n;
 }
 
-internal static void bump(this ref worker w) {
-    w.n++;
-}
+internal static void bump(this ref worker w) { w.n++; }
 
 internal static error /*err*/ initWorker(this ref worker w, nint level) {
     switch (ᐧ) {
@@ -223,9 +219,7 @@ internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {
 
 internal delegate nint handler(nint _);
 
-internal static @string tag(this handler h) {
-    return "handler";
-}
+internal static @string tag(this handler h) { return "handler"; }
 
 partial interface tagged {
     @string tag();

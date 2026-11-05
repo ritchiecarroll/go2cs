@@ -14,9 +14,7 @@ partial struct Ord2<T>
 
 public static bool Below<T>(this Ord2<T> o, T t)
     where T : Lesser<T>
-{
-    return o.V.Less(t);
-}
+{ return o.V.Less(t); }
 
 public partial interface Ord_T<T> /*dyn*/ {
     bool Less(T _);
@@ -30,8 +28,6 @@ partial struct Ord<T>
 
 public static bool Below<T>(this Ord<T> o, T t)
     where T : Ord_T<T>
-{
-    return o.V.Less(t);
-}
+{ return o.V.Less(t); }
 
 } // end lib_package

@@ -10,17 +10,11 @@ partial struct holder {
     internal uint64 bits;
 }
 
-internal static nint recvOnly(/*<-*/channel<nint> c) {
-    return ᐸꟷ(c);
-}
+internal static nint recvOnly(/*<-*/channel<nint> c) { return ᐸꟷ(c); }
 
-internal static void sendOnly(channel/*<-*/<nint> c, nint v) {
-    c.ᐸꟷ(v);
-}
+internal static void sendOnly(channel/*<-*/<nint> c, nint v) { c.ᐸꟷ(v); }
 
-internal static /*<-*/channel<nint> narrowed(channel<nint> ch) {
-    return ch.AsRecvOnly();
-}
+internal static /*<-*/channel<nint> narrowed(channel<nint> ch) { return ch.AsRecvOnly(); }
 
 internal static nint loops() {
     nint i = 0;

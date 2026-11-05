@@ -11,8 +11,7 @@ partial struct counters {
     internal array<atomic.Uint64> d = new(2);
 }
 
-internal static void touch(ref atomic.Int32 p) {
-}
+internal static void touch(ref atomic.Int32 p) { }
 
 internal static ж<atomic.Int32> last(any vals) {
     var ptrs = vals._<slice<ж<atomic.Int32>>>();

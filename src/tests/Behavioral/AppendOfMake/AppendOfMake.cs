@@ -27,18 +27,14 @@ partial struct point {
     public nint X, Y;
 }
 
-internal static slice<nint> withCap(slice<nint> s, nint n) {
-    return appendꓸꓸꓸ(s, new slice<nint>(n, n + 1));
-}
+internal static slice<nint> withCap(slice<nint> s, nint n) { return appendꓸꓸꓸ(s, new slice<nint>(n, n + 1)); }
 
 internal static slice<nint> named(slice<nint> s, nint n) {
     var m = new slice<nint>(n);
     return appendꓸꓸꓸ(s, m);
 }
 
-internal static slice<array<nint>> arrays(slice<array<nint>> s, nint n) {
-    return appendꓸꓸꓸ(s, GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(2)), 2));
-}
+internal static slice<array<nint>> arrays(slice<array<nint>> s, nint n) { return appendꓸꓸꓸ(s, GoReflect.WithElemDims(new slice<array<nint>>(n, () => new(2)), 2)); }
 
 internal static void Main() {
     var s = new slice<nint>(2, 4);

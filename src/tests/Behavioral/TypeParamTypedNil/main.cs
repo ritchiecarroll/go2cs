@@ -8,17 +8,11 @@ partial struct P {
     internal nint x;
 }
 
-internal static @string show<E>(E e) {
-    return fmt.Sprintf("%T %v"u8, (e).OrTypedNilOf(), (e).OrTypedNilOf());
-}
+internal static @string show<E>(E e) { return fmt.Sprintf("%T %v"u8, (e).OrTypedNilOf(), (e).OrTypedNilOf()); }
 
-internal static any box<E>(E e) {
-    return (e).OrTypedNilOf();
-}
+internal static any box<E>(E e) { return (e).OrTypedNilOf(); }
 
-internal static bool isNil<E>(E e) {
-    return ((any)(e).OrTypedNilOf()) == nil;
-}
+internal static bool isNil<E>(E e) { return ((any)(e).OrTypedNilOf()) == nil; }
 
 internal static any assign<E>(E e) {
     any x = default;
@@ -26,9 +20,7 @@ internal static any assign<E>(E e) {
     return x;
 }
 
-internal static slice<any> slot<E>(E e) {
-    return slice<any>([(e).OrTypedNilOf()]);
-}
+internal static slice<any> slot<E>(E e) { return slice<any>([(e).OrTypedNilOf()]); }
 
 internal static any send<E>(E e) {
     var c = new channel<any>(1);
@@ -41,22 +33,16 @@ partial interface compError :
 {
 }
 
-internal static @string nameOf<E>(E want) {
-    return fmt.Sprintf("%T"u8, (want).OrTypedNilOf());
-}
+internal static @string nameOf<E>(E want) { return fmt.Sprintf("%T"u8, (want).OrTypedNilOf()); }
 
 partial struct myErr {
 }
 
-internal static @string Error(this ref myErr _) {
-    return "myErr";
-}
+internal static @string Error(this ref myErr _) { return "myErr"; }
 
 internal static any plain<T>(T t)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
-{
-    return t;
-}
+{ return t; }
 
 internal static void Main() {
     ж<P> p = default;

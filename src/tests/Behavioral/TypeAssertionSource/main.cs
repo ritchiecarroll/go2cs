@@ -16,32 +16,18 @@ partial interface namer {
 
 partial struct a {
 }
-
 partial struct b {
 }
 
 partial struct pipe {
 }
 
-internal static (nint, error) Read(this ref pipe _, slice<byte> p) {
-    return (0, Δio.EOF);
-}
+internal static (nint, error) Read(this ref pipe _, slice<byte> p) { return (0, Δio.EOF); }
+internal static (nint, error) Write(this ref pipe _, slice<byte> p) { return (len(p), default); }
+internal static error Close(this ref pipe _) { return default; }
 
-internal static (nint, error) Write(this ref pipe _, slice<byte> p) {
-    return (len(p), default);
-}
-
-internal static error Close(this ref pipe _) {
-    return default;
-}
-
-internal static @string name(this ref a _) {
-    return "a";
-}
-
-internal static @string name(this ref b _) {
-    return "b";
-}
+internal static @string name(this ref a _) { return "a"; }
+internal static @string name(this ref b _) { return "b"; }
 
 internal static void @catch(@string what, Action f) {
     GoFrame ᒐ = default;

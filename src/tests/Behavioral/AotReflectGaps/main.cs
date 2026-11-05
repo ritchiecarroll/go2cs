@@ -17,13 +17,9 @@ partial struct Num {
     public nint N;
 }
 
-public static (nint, @string) Add(this Num n, nint d, @string label) {
-    return (n.N + d, label);
-}
+public static (nint, @string) Add(this Num n, nint d, @string label) { return (n.N + d, label); }
 
-public static float64 Scale(this Num n, float64 f) {
-    return (float64)n.N * f;
-}
+public static float64 Scale(this Num n, float64 f) { return (float64)n.N * f; }
 
 partial interface Shaper {
     complex64 Area(int8 a, uint16 b);
@@ -33,9 +29,7 @@ partial struct Ghost {
     public nint X;
 }
 
-public static uint32 Haunt(this Ghost g, bool b, rune r) {
-    return (uint32)g.X + (uint32)r;
-}
+public static uint32 Haunt(this Ghost g, bool b, rune r) { return (uint32)g.X + (uint32)r; }
 
 internal static void run(@string name, Action f) {
     GoFrame ᒐ = default;

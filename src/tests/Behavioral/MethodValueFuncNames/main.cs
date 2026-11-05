@@ -10,13 +10,9 @@ partial struct T {
     internal nint n;
 }
 
-internal static nint valueMethod(this T t) {
-    return t.n;
-}
+internal static nint valueMethod(this T t) { return t.n; }
 
-internal static nint pointerMethod(this ref T t) {
-    return t.n;
-}
+internal static nint pointerMethod(this ref T t) { return t.n; }
 
 internal static @string nameOf(any fn) {
     var f = runtime.FuncForPC(reflect.ValueOf(fn).Pointer());
@@ -79,8 +75,6 @@ internal static partial void Main() {
 
 partial struct named /*num:nint*/;
 
-internal static @string String(this named n) {
-    return "named";
-}
+internal static @string String(this named n) { return "named"; }
 
 } // end main_package

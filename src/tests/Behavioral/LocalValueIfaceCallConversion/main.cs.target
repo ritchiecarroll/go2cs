@@ -6,17 +6,13 @@ partial class main_package {
 
 partial struct LocalKey /*[]byte*/;
 
-public static @string String(this LocalKey k) {
-    return "key:"u8 + ((@string)(slice<byte>)k);
-}
+public static @string String(this LocalKey k) { return "key:"u8 + ((@string)(slice<byte>)k); }
 
 partial struct Label {
     public @string Text;
 }
 
-public static @string String(this Label l) {
-    return "label:"u8 + l.Text;
-}
+public static @string String(this Label l) { return "label:"u8 + l.Text; }
 
 partial interface unexpIface {
     @string f();
@@ -25,9 +21,7 @@ partial interface unexpIface {
 partial struct embedWithUnexpMeth {
 }
 
-internal static @string f(this embedWithUnexpMeth _) {
-    return "f";
-}
+internal static @string f(this embedWithUnexpMeth _) { return "f"; }
 
 internal static unexpIface pinUnexpMethI = ((unexpIface)new embedWithUnexpMeth());
 
@@ -39,21 +33,15 @@ partial struct localImpl {
     public nint N;
 }
 
-internal static @string G(this localImpl l) {
-    return fmt.Sprint("g", l.N);
-}
+internal static @string G(this localImpl l) { return fmt.Sprint("g", l.N); }
 
 internal delegate nint meter();
 
-internal static nint Value(this meter m) {
-    return m();
-}
+internal static nint Value(this meter m) { return m(); }
 
 partial struct gauge /*num:nint*/;
 
-internal static nint Value(this gauge g) {
-    return (nint)g * 2;
-}
+internal static nint Value(this gauge g) { return (nint)g * 2; }
 
 partial interface valued {
     nint Value();

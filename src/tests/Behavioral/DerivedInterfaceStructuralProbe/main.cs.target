@@ -8,21 +8,14 @@ partial struct tempErr {
     internal @string msg;
 }
 
-internal static @string Error(this ref tempErr e) {
-    return e.msg;
-}
-
-internal static bool Temporary(this ref tempErr e) {
-    return true;
-}
+internal static @string Error(this ref tempErr e) { return e.msg; }
+internal static bool Temporary(this ref tempErr e) { return true; }
 
 partial struct plainErr {
     internal @string msg;
 }
 
-internal static @string Error(this ref plainErr e) {
-    return e.msg;
-}
+internal static @string Error(this ref plainErr e) { return e.msg; }
 
 internal partial interface classify_type /*dyn*/ :
     error
@@ -54,29 +47,16 @@ partial struct node {
     internal @string id;
 }
 
-internal static @string String(this ref node n) {
-    return "node:"u8 + n.id;
-}
-
-internal static @string Name(this ref node n) {
-    return n.id;
-}
-
-internal static nint Depth(this ref node n) {
-    return 3;
-}
+internal static @string String(this ref node n) { return "node:"u8 + n.id; }
+internal static @string Name(this ref node n) { return n.id; }
+internal static nint Depth(this ref node n) { return 3; }
 
 partial struct shallow {
     internal @string id;
 }
 
-internal static @string String(this ref shallow s) {
-    return "shallow:"u8 + s.id;
-}
-
-internal static @string Name(this ref shallow s) {
-    return s.id;
-}
+internal static @string String(this ref shallow s) { return "shallow:"u8 + s.id; }
+internal static @string Name(this ref shallow s) { return s.id; }
 
 internal partial interface describe_type /*dyn*/ :
     named

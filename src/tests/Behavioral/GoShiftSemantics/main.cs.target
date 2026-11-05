@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct word /*num:nuint*/;
-
 partial struct halfword /*num:uint32*/;
-
 partial struct signedword /*num:int64*/;
 
 internal static void Main() {

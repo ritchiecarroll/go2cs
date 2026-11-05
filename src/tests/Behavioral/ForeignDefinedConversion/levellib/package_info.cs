@@ -49,7 +49,7 @@ using static go.ForeignDefinedConversion.levellib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("levellib.go", "levellib.cs", "AAYQgA==")]
+[assembly: GoPositionMap("levellib.go", "levellib.cs", "AAYQ")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignDefinedConversion;

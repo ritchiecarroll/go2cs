@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct stringID /*num:uint64*/;
-
 partial struct offset /*num:int32*/;
 
 internal static K mix<K>(K id, K step)

@@ -9,9 +9,7 @@ partial class main_package {
 partial struct NS /*@string*/;
 
 partial struct NA /*[2]uint8*/;
-
 partial struct NB /*[]byte*/;
-
 partial struct NI /*num:nint*/;
 
 public partial struct inner {

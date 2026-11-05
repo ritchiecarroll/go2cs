@@ -14,9 +14,7 @@ partial struct Ord<T>
 
 public static bool Below<T>(this Ord<T> o, T t)
     where T : Ord_T<T>
-{
-    return o.v.Less(t);
-}
+{ return o.v.Less(t); }
 
 partial interface Lesser<T> {
     bool Less(T _);
@@ -24,9 +22,7 @@ partial interface Lesser<T> {
 
 partial struct age /*num:nint*/;
 
-internal static bool Less(this age a, age b) {
-    return a < b;
-}
+internal static bool Less(this age a, age b) { return a < b; }
 
 partial struct node {
     internal nint k;
@@ -42,8 +38,6 @@ partial struct wrap<E> {
     internal nint n;
 }
 
-internal static bool Less<E>(this wrap<E> w, wrap<E> o) {
-    return w.n < o.n;
-}
+internal static bool Less<E>(this wrap<E> w, wrap<E> o) { return w.n < o.n; }
 
 } // end main_package

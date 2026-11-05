@@ -21,9 +21,7 @@ partial struct dnsC {
     internal @string allow;
 }
 
-internal static (@string, bool) query(this dnsC d, @string s) {
-    return ("dns:" + d.allow, s == d.allow);
-}
+internal static (@string, bool) query(this dnsC d, @string s) { return ("dns:" + d.allow, s == d.allow); }
 
 partial struct counter {
     internal nint n;
@@ -40,17 +38,13 @@ internal partial interface newDNS_R0 /*dyn*/ {
     new (@string, bool) query(@string _);
 }
 
-internal static newDNS_R0 newDNS(@string allow) {
-    return new dnsC(allow);
-}
+internal static newDNS_R0 newDNS(@string allow) { return new dnsC(allow); }
 
 internal partial interface newCounter_R0 /*dyn*/ {
     new (ж<counter>, bool) query(nint _);
 }
 
-internal static newCounter_R0 newCounter() {
-    return new counterжnewCounter_R0(Ꮡ(new counter()));
-}
+internal static newCounter_R0 newCounter() { return new counterжnewCounter_R0(Ꮡ(new counter())); }
 
 internal static (T, bool) check<T, V>(constraints<T, V> c, V s) {
     if (c.excluded != nil) {

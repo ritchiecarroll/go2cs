@@ -11,8 +11,7 @@ partial struct Δp {
 partial struct tagger {
 }
 
-internal static void p(this tagger _) {
-}
+internal static void p(this tagger _) { }
 
 partial struct counter {
     internal nint n;
@@ -24,9 +23,7 @@ internal static void add(this ж<counter> Ꮡc, nint d) {
     addInt(ref nonnil(ref c).n, d);
 }
 
-internal static void addInt(ref nint x, nint d) {
-    x += d;
-}
+internal static void addInt(ref nint x, nint d) { x += d; }
 
 internal static void bumpTwice(this ж<counter> Ꮡp) {
     Ꮡp.add(1);

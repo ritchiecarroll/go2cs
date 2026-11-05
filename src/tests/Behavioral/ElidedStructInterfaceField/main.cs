@@ -8,17 +8,13 @@ partial struct pointerErr {
     internal @string msg;
 }
 
-internal static @string Error(this ref pointerErr p) {
-    return p.msg;
-}
+internal static @string Error(this ref pointerErr p) { return p.msg; }
 
 partial struct valueErr {
     internal @string msg;
 }
 
-internal static @string Error(this valueErr v) {
-    return v.msg;
-}
+internal static @string Error(this valueErr v) { return v.msg; }
 
 internal partial struct main_cases /*dyn*/ {
     internal error err;

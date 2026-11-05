@@ -10,17 +10,13 @@ partial class main_package {
 partial struct R {
 }
 
-public static bool Equal(this R _, /*<-*/channel<bool> y) {
-    return true;
-}
+public static bool Equal(this R _, /*<-*/channel<bool> y) { return true; }
 
 partial struct S {
     internal nint n;
 }
 
-public static void Feed(this ref S s, channel/*<-*/<nint> c) {
-    s.n++;
-}
+public static void Feed(this ref S s, channel/*<-*/<nint> c) { s.n++; }
 
 partial interface Notifier {
     /*<-*/channel<EmptyStruct> Done();
@@ -28,29 +24,15 @@ partial interface Notifier {
 
 partial struct AssignD /*<-chan bool*/;
 
-public static bool Equal(this AssignD x, /*<-*/channel<bool> y) {
-    return true;
-}
+public static bool Equal(this AssignD x, /*<-*/channel<bool> y) { return true; }
 
-internal static void recvLocal(/*<-*/channel<nint> c) {
-}
+internal static void recvLocal(/*<-*/channel<nint> c) { }
+internal static void bidiLocal(channel<nint> c) { }
+internal static void sendOnly(channel/*<-*/<@string> c) { }
+internal static (/*<-*/channel<nint>, error) two() { return (default, default); }
+internal static /*<-*/channel<bool> mixed(nint a, channel/*<-*/<nint> c) { return default; }
 
-internal static void bidiLocal(channel<nint> c) {
-}
-
-internal static void sendOnly(channel/*<-*/<@string> c) {
-}
-
-internal static (/*<-*/channel<nint>, error) two() {
-    return (default, default);
-}
-
-internal static /*<-*/channel<bool> mixed(nint a, channel/*<-*/<nint> c) {
-    return default;
-}
-
-internal static void nestedDir(channel/*<-*/</*<-*/channel<nint>> c) {
-}
+internal static void nestedDir(channel/*<-*/</*<-*/channel<nint>> c) { }
 
 internal static void Main() {
     Func<time.Duration, /*<-*/channel<time.Time>> after = time.After;

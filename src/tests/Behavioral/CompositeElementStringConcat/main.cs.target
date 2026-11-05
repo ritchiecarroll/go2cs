@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static slice<@string> take(slice<@string> s) {
-    return s;
-}
+internal static slice<@string> take(slice<@string> s) { return s; }
 
 internal partial struct main_rec /*dyn*/ {
     internal @string a, b;

@@ -9,9 +9,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void add(this ref counter c, uintptr d) {
-    c.n += (nint)d;
-}
+internal static void add(this ref counter c, uintptr d) { c.n += (nint)d; }
 
 internal static partial @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
     return (@unsafe.Pointer)((uintptr)p + x);

@@ -17,9 +17,7 @@ public static nint Bump(this ref Inner i) {
     return i.n;
 }
 
-public static nint Get(this Inner i) {
-    return i.n;
-}
+public static nint Get(this Inner i) { return i.n; }
 
 partial struct SameP {
     /*embed*/ public ж<Inner> Inner;
@@ -32,7 +30,6 @@ partial struct SameV {
 partial struct MidP {
     /*embed*/ public ж<Inner> Inner;
 }
-
 partial struct OuterVP {
     /*embed*/ public MidP MidP;
 }
@@ -40,7 +37,6 @@ partial struct OuterVP {
 partial struct MidV {
     /*embed*/ public Inner Inner;
 }
-
 partial struct OuterPV {
     /*embed*/ public ж<MidV> MidV;
 }

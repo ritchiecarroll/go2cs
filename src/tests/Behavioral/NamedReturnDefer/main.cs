@@ -49,9 +49,7 @@ internal static (nint a, nint b) swapAndBump() {
     return (a, b);
 }
 
-internal static nint @double(nint n) {
-    return n * 2;
-}
+internal static nint @double(nint n) { return n * 2; }
 
 internal static nint /*total*/ closures(nint n) {
     nint total = default;

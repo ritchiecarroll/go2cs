@@ -8,33 +8,23 @@ partial struct counter {
     internal int64 n;
 }
 
-internal static ж<counter> ptr(this ж<counter> Ꮡc) {
-    return Ꮡc;
-}
-
-internal static void inc(this ж<counter> Ꮡc) {
-    Ꮡc.ptr().n++;
-}
+internal static ж<counter> ptr(this ж<counter> Ꮡc) { return Ꮡc; }
+internal static void inc(this ж<counter> Ꮡc) { Ꮡc.ptr().n++; }
 
 partial struct holder {
     internal counter c;
 }
-
 partial struct box {
     internal holder h;
 }
 
-internal static void viaParam(ж<box> b) {
-    b.Ꮡh.Ꮡc.inc();
-}
+internal static void viaParam(ж<box> b) { b.Ꮡh.Ꮡc.inc(); }
 
 partial struct wrapper {
     internal box b;
 }
 
-internal static ж<wrapper> self(this ж<wrapper> Ꮡw) {
-    return Ꮡw;
-}
+internal static ж<wrapper> self(this ж<wrapper> Ꮡw) { return Ꮡw; }
 
 internal static void bump(this ж<wrapper> Ꮡw) {
     _ = Ꮡw.self();
@@ -44,14 +34,11 @@ internal static void bump(this ж<wrapper> Ꮡw) {
 partial struct mid {
     internal counter c;
 }
-
 partial struct deep {
     internal mid mid;
 }
 
-internal static void bumpDeep(this ж<deep> Ꮡd) {
-    Ꮡd.Ꮡmid.Ꮡc.inc();
-}
+internal static void bumpDeep(this ж<deep> Ꮡd) { Ꮡd.Ꮡmid.Ꮡc.inc(); }
 
 internal static void Main() {
     var b = Ꮡ(new box());

@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedFloat tenth => 0.1;
-
 internal static UntypedFloat twoTo53 => 9007199254740992.0;
-
 internal static UntypedFloat third => /* 1.0 / 3 */ 0.3333333333333333;
 
 internal static void Main() {

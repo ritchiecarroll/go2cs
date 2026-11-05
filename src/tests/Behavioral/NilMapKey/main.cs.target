@@ -8,9 +8,7 @@ partial struct myErr {
     internal @string msg;
 }
 
-internal static @string Error(this ref myErr e) {
-    return e.msg;
-}
+internal static @string Error(this ref myErr e) { return e.msg; }
 
 internal static void Main() {
     var m = new map<any, @string>();

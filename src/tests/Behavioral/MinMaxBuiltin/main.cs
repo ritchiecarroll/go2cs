@@ -5,21 +5,14 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt limit => /* 128 << 10 */ 131072;
-
 internal static UntypedInt floor => 16;
 
-internal static partial uintptr clampU(uintptr n) {
-    return min(n, (uintptr)(limit));
-}
+internal static partial uintptr clampU(uintptr n) { return min(n, (uintptr)(limit)); }
 
-internal static partial int32 clampI(int32 d) {
-    return max(d, (int32)(floor));
-}
+internal static partial int32 clampI(int32 d) { return max(d, (int32)(floor)); }
 
 partial struct fieldElement /*num:uint16*/;
-
 partial struct ratio /*num:float64*/;
-
 partial struct delta /*num:int8*/;
 
 internal static partial fieldElement spread(fieldElement a, fieldElement b) {

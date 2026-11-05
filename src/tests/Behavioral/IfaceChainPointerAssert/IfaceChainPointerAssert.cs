@@ -17,25 +17,15 @@ partial struct conn {
     internal @string data;
 }
 
-internal static @string Read(this ref conn c) {
-    return "read:"u8 + c.data;
-}
-
-internal static @string Close(this ref conn c) {
-    return "closed:"u8 + c.data;
-}
+internal static @string Read(this ref conn c) { return "read:"u8 + c.data; }
+internal static @string Close(this ref conn c) { return "closed:"u8 + c.data; }
 
 partial struct valConn {
     internal @string tag;
 }
 
-internal static @string Read(this valConn v) {
-    return "vread:"u8 + v.tag;
-}
-
-internal static @string Close(this valConn v) {
-    return "vclosed:"u8 + v.tag;
-}
+internal static @string Read(this valConn v) { return "vread:"u8 + v.tag; }
+internal static @string Close(this valConn v) { return "vclosed:"u8 + v.tag; }
 
 internal static void Main() {
     readCloser rc = new connжreadCloser(Ꮡ(new conn(data: "init")));

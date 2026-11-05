@@ -13,8 +13,6 @@ partial struct ΔKind /*num:nint*/;
 partial struct S {
 }
 
-public static ΔKind Kind(this S _) {
-    return 1;
-}
+public static ΔKind Kind(this S _) { return 1; }
 
 } // end foo_package

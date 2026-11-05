@@ -8,13 +8,9 @@ partial struct gList {
     internal nint n;
 }
 
-internal static (gList, nint) makeList() {
-    return (new gList(n: 7), 3);
-}
+internal static (gList, nint) makeList() { return (new gList(n: 7), 3); }
 
-internal static void use(ref gList g) {
-    g.n++;
-}
+internal static void use(ref gList g) { g.n++; }
 
 internal static (nint, nint) run() {
     var (list, delta) = makeList();

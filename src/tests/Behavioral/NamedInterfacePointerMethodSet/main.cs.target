@@ -10,44 +10,32 @@ partial struct PtrOnly {
     internal @string name;
 }
 
-public static @string Speak(this ref PtrOnly p) {
-    return "ptr:"u8 + p.name;
-}
+public static @string Speak(this ref PtrOnly p) { return "ptr:"u8 + p.name; }
 
 partial struct ValOnly {
     internal @string name;
 }
 
-public static @string Speak(this ValOnly v) {
-    return "val:"u8 + v.name;
-}
+public static @string Speak(this ValOnly v) { return "val:"u8 + v.name; }
 
 partial struct Mixed {
     internal nint n;
 }
 
-public static @string Speak(this Mixed m) {
-    return fmt.Sprintf("mixed:%d"u8, m.n);
-}
+public static @string Speak(this Mixed m) { return fmt.Sprintf("mixed:%d"u8, m.n); }
 
-public static void Bump(this ref Mixed m) {
-    m.n++;
-}
+public static void Bump(this ref Mixed m) { m.n++; }
 
 partial struct WrongSig {
 }
 
-public static @string Speak(this WrongSig w, nint times) {
-    return "wrong";
-}
+public static @string Speak(this WrongSig w, nint times) { return "wrong"; }
 
 partial struct gbox<T> {
     internal T v;
 }
 
-internal static T Get<T>(this gbox<T> b) {
-    return b.v;
-}
+internal static T Get<T>(this gbox<T> b) { return b.v; }
 
 internal static void report(@string label, @string s, bool ok) {
     fmt.Println(label, ok, s);

@@ -41,25 +41,15 @@ internal static @string kind(any v) {
     }}
 }
 
-internal static void report(any v) {
-    results.ᐸꟷ(kind(v));
-}
+internal static void report(any v) { results.ᐸꟷ(kind(v)); }
 
-internal static void show(any v) {
-    fmt.Println("deferred", kind(v));
-}
+internal static void show(any v) { fmt.Println("deferred", kind(v)); }
 
-internal static void worker(nint n) {
-    results.ᐸꟷ(fmt.Sprint("worker ", n));
-}
+internal static void worker(nint n) { results.ᐸꟷ(fmt.Sprint("worker ", n)); }
 
-internal static void pair(@string label, nint n) {
-    results.ᐸꟷ(fmt.Sprint(label, " ", n));
-}
+internal static void pair(@string label, nint n) { results.ᐸꟷ(fmt.Sprint(label, " ", n)); }
 
-internal static void showPair(@string label, nint n) {
-    fmt.Println("deferred", label, n);
-}
+internal static void showPair(@string label, nint n) { fmt.Println("deferred", label, n); }
 
 internal static nint seq;
 
@@ -68,17 +58,13 @@ internal static nint next() {
     return seq;
 }
 
-internal static void trio(nint a, @string s, nint b) {
-    fmt.Println("deferred trio", a, s, b);
-}
+internal static void trio(nint a, @string s, nint b) { fmt.Println("deferred trio", a, s, b); }
 
 partial struct box {
     internal @string name;
 }
 
-internal static void say(this ref box b, @string msg) {
-    results.ᐸꟷ(b.name + " says "u8 + msg);
-}
+internal static void say(this ref box b, @string msg) { results.ᐸꟷ(b.name + " says "u8 + msg); }
 
 internal static void @catch(@string tag) {
     GoFrame ᒐ = default;

@@ -11,9 +11,7 @@ partial struct celsius /*num:float64*/;
 partial struct myErr {
 }
 
-internal static @string Error(this ref myErr _) {
-    return "myErr";
-}
+internal static @string Error(this ref myErr _) { return "myErr"; }
 
 partial interface shape {
     float64 area();
@@ -24,21 +22,14 @@ partial struct square {
     internal float64 side;
 }
 
-internal static float64 perimeter(this square s) {
-    return 4D * s.side;
-}
+internal static float64 perimeter(this square s) { return 4D * s.side; }
 
 partial struct circle {
     internal float64 r;
 }
 
-internal static float64 area(this ref circle c) {
-    return 3D * c.r * c.r;
-}
-
-internal static float64 perimeter(this ref circle c) {
-    return 6D * c.r;
-}
+internal static float64 area(this ref circle c) { return 3D * c.r * c.r; }
+internal static float64 perimeter(this ref circle c) { return 6D * c.r; }
 
 partial struct point {
     internal nint x, y;

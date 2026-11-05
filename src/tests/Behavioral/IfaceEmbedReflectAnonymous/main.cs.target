@@ -12,21 +12,14 @@ partial struct E {
     public nint Code;
 }
 
-public static @string Error(this E _) {
-    return "e";
-}
-
-public static @string GoString(this E _) {
-    return "E!";
-}
+public static @string Error(this E _) { return "e"; }
+public static @string GoString(this E _) { return "E!"; }
 
 partial struct S {
     public nint N;
 }
 
-public static @string String(this S _) {
-    return "s";
-}
+public static @string String(this S _) { return "s"; }
 
 partial struct w {
     /*embed*/ internal error error;

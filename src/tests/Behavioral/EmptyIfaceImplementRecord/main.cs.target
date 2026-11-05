@@ -11,9 +11,7 @@ partial struct name {
     internal @string s;
 }
 
-internal static @string String(this name n) {
-    return n.s;
-}
+internal static @string String(this name n) { return n.s; }
 
 internal static nint args(params ꓸꓸꓸany xsʗp) {
     var xs = xsʗp.sslice();

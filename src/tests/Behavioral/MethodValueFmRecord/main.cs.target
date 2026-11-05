@@ -10,9 +10,7 @@ partial struct T {
     internal nint n;
 }
 
-internal static nint valueMethod(this T t) {
-    return t.n;
-}
+internal static nint valueMethod(this T t) { return t.n; }
 
 internal static @string nameOf(any fn) {
     var f = runtime.FuncForPC(reflect.ValueOf(fn).Pointer());
@@ -60,8 +58,6 @@ internal static partial nint walk(this T t) {
     }
 }
 
-internal static partial nint call(Func<nint> f) {
-    return f();
-}
+internal static partial nint call(Func<nint> f) { return f(); }
 
 } // end main_package

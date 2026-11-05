@@ -17,9 +17,7 @@ internal static slice<nint> sinkInts;
 internal static ж<T> sinkT;
 internal static ж<T> sinkLit;
 
-internal static partial void allocMake() {
-    sinkBytes = new slice<byte>((1 << 16));
-}
+internal static partial void allocMake() { sinkBytes = new slice<byte>((1 << 16)); }
 
 internal static partial void allocGrow() {
     var s = new slice<nint>(0, 4);
@@ -29,13 +27,9 @@ internal static partial void allocGrow() {
     sinkInts = s;
 }
 
-internal static partial void allocNew() {
-    sinkT = @new<T>();
-}
+internal static partial void allocNew() { sinkT = @new<T>(); }
 
-internal static partial void allocLiteral() {
-    sinkLit = Ꮡ(new T(a: 1));
-}
+internal static partial void allocLiteral() { sinkLit = Ꮡ(new T(a: 1)); }
 
 internal static partial void Main() {
     var namesᴷ = new stackAppend<@string>();

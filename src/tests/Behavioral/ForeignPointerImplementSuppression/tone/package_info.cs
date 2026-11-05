@@ -53,7 +53,7 @@ using static go.ForeignPointerImplementSuppression.tone_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AA4ugKKAooDsgKKAooAABhSAooCigKiCnIA=")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AA4ugoLcgoIABRSCgpiCnA==")]
 // </GoSourcePositionMaps>
 
 namespace go.ForeignPointerImplementSuppression;

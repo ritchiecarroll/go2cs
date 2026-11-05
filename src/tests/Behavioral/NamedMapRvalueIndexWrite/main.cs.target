@@ -12,13 +12,9 @@ partial struct response {
     internal ΔHeader hdr;
 }
 
-internal static ΔHeader Header(this ref response r) {
-    return r.hdr;
-}
+internal static ΔHeader Header(this ref response r) { return r.hdr; }
 
-internal static ж<response> newResponse() {
-    return Ꮡ(new response(hdr: new ΔHeader(new map<@string, slice<@string>>{})));
-}
+internal static ж<response> newResponse() { return Ꮡ(new response(hdr: new ΔHeader(new map<@string, slice<@string>>{}))); }
 
 internal static void Main() {
     var r = newResponse();

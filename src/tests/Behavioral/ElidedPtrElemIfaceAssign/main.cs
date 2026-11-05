@@ -51,9 +51,7 @@ public static @string Describe(this List l) {
     return @out;
 }
 
-internal static @string take(Describer d) {
-    return d.Describe();
-}
+internal static @string take(Describer d) { return d.Describe(); }
 
 internal static void Main() {
     Describer d = new Reg(new map<@string, ж<Item>>{["a"] = Ꮡ(new Item(Name: "alpha", N: 1))});

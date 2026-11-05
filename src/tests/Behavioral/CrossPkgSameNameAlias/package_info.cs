@@ -50,7 +50,7 @@ using static go.CrossPkgSameNameAlias.atomic_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("alias.go", "alias.cs", "AAkmgA==")]
+[assembly: GoPositionMap("alias.go", "alias.cs", "AAkm")]
 // </GoSourcePositionMaps>
 
 namespace go.CrossPkgSameNameAlias;

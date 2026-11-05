@@ -17,9 +17,7 @@ partial struct Pair<K, V> {
 // type SP[V any] = StrPair[V]
 // type IntMap[V any] = map[int]V
 
-internal static Pair<T, T> swap<T>(Pair<T, T> p) {
-    return new Pair<T, T>(Key: p.Val, Val: p.Key);
-}
+internal static Pair<T, T> swap<T>(Pair<T, T> p) { return new Pair<T, T>(Key: p.Val, Val: p.Key); }
 
 internal static lib.Box<T> wrap<T>(T v) {
     lib.Box<T> a = lib.NewBox<T>(v);

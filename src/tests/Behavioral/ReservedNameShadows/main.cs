@@ -57,9 +57,7 @@ partial struct box {
     internal slice<nint> items;
 }
 
-internal static nint len(this ref box b) {
-    return builtin.len(b.items) + 1;
-}
+internal static nint len(this ref box b) { return builtin.len(b.items) + 1; }
 
 internal static nint freeLen() {
     var s = slice<nint>([1, 2, 3]);

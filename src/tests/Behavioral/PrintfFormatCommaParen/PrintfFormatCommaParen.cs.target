@@ -8,9 +8,7 @@ partial struct stringer {
     internal @string s;
 }
 
-internal static @string String(this stringer b) {
-    return b.s;
-}
+internal static @string String(this stringer b) { return b.s; }
 
 internal static void Main() {
     @string name = "x";

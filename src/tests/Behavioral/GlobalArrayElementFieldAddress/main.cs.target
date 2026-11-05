@@ -23,9 +23,7 @@ partial struct gridᴛ1 /*dyn*/ {
 internal static readonly ж<array<gridᴛ1>> Ꮡgrid = new StaticBox<array<gridᴛ1>>(new array<gridᴛ1>(3, () => new()));
 internal static ref array<gridᴛ1> grid => ref ((StaticBox<array<gridᴛ1>>)Ꮡgrid).ValueSlot;
 
-internal static partial void setInt(ref nint p) {
-    p = 7;
-}
+internal static partial void setInt(ref nint p) { p = 7; }
 
 internal static void Main() {
     pool[1].inner.n = 5;

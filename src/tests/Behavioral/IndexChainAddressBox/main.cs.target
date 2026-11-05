@@ -10,9 +10,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void inc(this ref counter c) {
-    c.n++;
-}
+internal static void inc(this ref counter c) { c.n++; }
 
 partial struct hist {
     internal array<atomic.Uint64> counts = new(4);

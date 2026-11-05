@@ -13,9 +13,7 @@ partial struct holder {
     internal global::go.DotImportNameCollision.a.keys_package.Count v;
 }
 
-internal static T first<T>(slice<T> xs) {
-    return xs[0];
-}
+internal static T first<T>(slice<T> xs) { return xs[0]; }
 
 internal static void Main() {
     ж<global::go.DotImportNameCollision.a.keys_package.Key> k = NewKey("dot");

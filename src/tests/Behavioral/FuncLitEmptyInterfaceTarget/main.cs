@@ -38,13 +38,9 @@ internal static Hook retNamed() {
     };
 }
 
-internal static any retConst() {
-    return int64 () => 1;
-}
+internal static any retConst() { return int64 () => 1; }
 
-internal static any take(any h) {
-    return h;
-}
+internal static any take(any h) { return h; }
 
 internal static @string call(any h) {
     switch (h.type()) {

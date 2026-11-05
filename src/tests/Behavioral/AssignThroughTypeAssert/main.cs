@@ -13,16 +13,14 @@ partial struct Lit {
     public @string Name;
 }
 
-internal static void node(this ref Lit _) {
-}
+internal static void node(this ref Lit _) { }
 
 partial struct ValueSpec {
     public slice<@string> Names;
     public slice<Node> Values;
 }
 
-internal static void node(this ref ValueSpec _) {
-}
+internal static void node(this ref ValueSpec _) { }
 
 internal static void walk(Node root, Func<Node, bool> f) {
     f(root);

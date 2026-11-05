@@ -8,9 +8,7 @@ partial struct buf {
     internal nint n;
 }
 
-internal static partial void add(ref nint p, nint d) {
-    p += d;
-}
+internal static partial void add(ref nint p, nint d) { p += d; }
 
 internal static void bump(this ж<buf> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -18,9 +16,7 @@ internal static void bump(this ж<buf> Ꮡb) {
     add(ref nonnil(ref b).n, 1);
 }
 
-internal static nint get(this ref buf b) {
-    return b.n;
-}
+internal static nint get(this ref buf b) { return b.n; }
 
 partial struct tracer {
     internal slice<buf> tabs;
@@ -29,9 +25,7 @@ partial struct tracer {
 internal static readonly ж<tracer> Ꮡtr = new StaticBox<tracer>(default(tracer));
 internal static ref tracer tr => ref ((StaticBox<tracer>)Ꮡtr).ValueSlot;
 
-internal static partial void keep(ж<tracer> t) {
-    _ = t;
-}
+internal static partial void keep(ж<tracer> t) { _ = t; }
 
 internal static void Main() {
     keep(Ꮡtr);

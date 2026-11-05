@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static UntypedInt pkgConst => 1000;
-
 internal static UntypedInt hugeConst => /* 1 << 63 */ 9223372036854775808;
 
 internal static void Main() {

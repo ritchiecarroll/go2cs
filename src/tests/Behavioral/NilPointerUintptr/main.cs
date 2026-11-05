@@ -11,9 +11,7 @@ partial struct T {
 
 internal static readonly ж<T> Ꮡglobal = new StaticBox<T>(new T(x: 42));
 internal static ref T global => ref ((StaticBox<T>)Ꮡglobal).ValueSlot;
-
 internal static uintptr gPtr = (uintptr)Ꮡglobal;
-
 internal static uintptr gNil = (uintptr)(@unsafe.Pointer)default;
 
 internal static void Main() {

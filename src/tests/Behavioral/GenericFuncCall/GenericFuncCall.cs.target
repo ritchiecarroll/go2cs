@@ -42,9 +42,7 @@ public static U Convert<T, U>(T value, Func<T, U> converter) {
     return converter(value);
 }
 
-internal static T escape<T>(T x) {
-    return x;
-}
+internal static T escape<T>(T x) { return x; }
 
 internal static ж<nint> renew(ж<nint> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();

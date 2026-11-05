@@ -4,29 +4,17 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static any retConst() {
-    return (@string)("r1" + "r2");
-}
+internal static any retConst() { return (@string)("r1" + "r2"); }
 
-internal static any retConstParen() {
-    return (@string)("r3" + "r4");
-}
+internal static any retConstParen() { return (@string)("r3" + "r4"); }
 
-internal static any retVar(@string a) {
-    return a + "-r";
-}
+internal static any retVar(@string a) { return a + "-r"; }
 
-internal static any retVarParen(@string a) {
-    return (a + "-r");
-}
+internal static any retVarParen(@string a) { return (a + "-r"); }
 
-internal static (any, nint) pairConst() {
-    return ((@string)("t1" + "t2"), 1);
-}
+internal static (any, nint) pairConst() { return ((@string)("t1" + "t2"), 1); }
 
-internal static (any, nint) pairConstParen() {
-    return ((@string)("t3" + "t4"), 2);
-}
+internal static (any, nint) pairConstParen() { return ((@string)("t3" + "t4"), 2); }
 
 internal static void Main() {
     @string a = "v";

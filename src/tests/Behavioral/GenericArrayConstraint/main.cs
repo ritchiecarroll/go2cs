@@ -7,7 +7,6 @@ partial class main_package {
 partial struct fieldElement /*num:uint16*/;
 
 partial struct ringElement /*[4]fieldElement*/;
-
 partial struct nttElement /*[4]fieldElement*/;
 
 internal static T /*s*/ addPoly<T>(T a, T b)

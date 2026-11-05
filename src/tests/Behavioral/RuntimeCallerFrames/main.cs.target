@@ -33,13 +33,8 @@ internal static partial (nint, nint) sameSite() {
     return (callerLine(), wrapGrand());
 }
 
-internal static partial nint siteA() {
-    return callerLine();
-}
-
-internal static partial nint siteB() {
-    return callerLine();
-}
+internal static partial nint siteA() { return callerLine(); }
+internal static partial nint siteB() { return callerLine(); }
 
 internal static partial bool okAt(nint skip) {
     var (_, _, _, ok) = runtime.Caller(skip);
@@ -205,20 +200,12 @@ partial struct genRecv<X> {
     internal X v;
 }
 
-internal static partial @string ptrFrame(this ref recvT t) {
-    return stackText();
-}
+internal static partial @string ptrFrame(this ref recvT t) { return stackText(); }
 
-internal static partial @string valueFrame(this recvT t) {
-    return t.ptrFrame();
-}
+internal static partial @string valueFrame(this recvT t) { return t.ptrFrame(); }
 
-internal static partial @string genFrame<X>(this genRecv<X> g) {
-    return stackText();
-}
+internal static partial @string genFrame<X>(this genRecv<X> g) { return stackText(); }
 
-internal static partial @string plainFrame() {
-    return stackText();
-}
+internal static partial @string plainFrame() { return stackText(); }
 
 } // end main_package

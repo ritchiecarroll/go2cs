@@ -35,9 +35,7 @@ partial struct Outer {
 partial struct loc {
 }
 
-internal static inner.Token Tok(this loc _) {
-    return new inner.Token(N: 7);
-}
+internal static inner.Token Tok(this loc _) { return new inner.Token(N: 7); }
 
 [StructLayout(LayoutKind.Explicit, Size = 16)] partial struct Five {
     [FieldOffset(0)] /*embed*/ public XpkgPromotedMidLib_package.Mid Mid;
@@ -93,7 +91,6 @@ partial struct Broken {
 partial struct Stamp {
     /*embed*/ public time_package.Time Time;
 }
-
 partial struct PtrStamp {
     /*embed*/ public ж<time_package.Time> Time;
 }
@@ -105,9 +102,7 @@ partial struct BufP {
 partial struct deepTok {
 }
 
-internal static inner.Token Tok(this deepTok _) {
-    return new inner.Token(N: 5);
-}
+internal static inner.Token Tok(this deepTok _) { return new inner.Token(N: 5); }
 
 partial struct localTok {
     /*embed*/ internal deepTok deepTok;

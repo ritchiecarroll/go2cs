@@ -5,9 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct bytes /*[]byte*/;
-
 partial struct path /*@string*/;
-
 partial struct block /*[4]byte*/;
 
 internal static void @try(@string name, Func<byte> f) {

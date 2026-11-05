@@ -9,9 +9,7 @@ partial struct gauge {
     internal nint level;
 }
 
-internal static nint ShadowedImportConstLib(this gauge g) {
-    return g.level;
-}
+internal static nint ShadowedImportConstLib(this gauge g) { return g.level; }
 
 internal static void Main() {
     var g = new gauge(level: 3);

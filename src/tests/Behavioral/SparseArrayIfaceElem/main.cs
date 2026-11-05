@@ -11,16 +11,12 @@ partial interface shape {
 partial struct circle {
 }
 
-internal static @string name(this circle _) {
-    return "circle";
-}
+internal static @string name(this circle _) { return "circle"; }
 
 partial struct square {
 }
 
-internal static @string name(this square _) {
-    return "square";
-}
+internal static @string name(this square _) { return "square"; }
 
 internal static UntypedInt kCircle => /* iota + 2 */ 2;
 internal static UntypedInt kSquare => 3;

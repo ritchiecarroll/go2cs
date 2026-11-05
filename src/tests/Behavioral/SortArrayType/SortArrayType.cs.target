@@ -81,9 +81,7 @@ partial struct PeopleByAge /*[]Person*/;
 
 partial struct Roster /*[]Person*/;
 
-internal static nint headcount(this Roster r) {
-    return len(r);
-}
+internal static nint headcount(this Roster r) { return len(r); }
 
 partial struct levelToken /*num:uint32*/;
 

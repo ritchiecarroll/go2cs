@@ -20,9 +20,7 @@ partial struct splitTest {
     new("zero", maxInt - maxInt)
 ]); }
 
-internal static partial nint half(nint n) {
-    return n / 2;
-}
+internal static partial nint half(nint n) { return n / 2; }
 
 internal static void Main() {
     foreach (var (_, tt) in tests) {

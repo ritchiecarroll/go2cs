@@ -9,9 +9,7 @@ partial struct box {
     internal nint n;
 }
 
-internal static nint helper(ref box b) {
-    return b.n;
-}
+internal static nint helper(ref box b) { return b.n; }
 
 internal static nint consume(ref box ioΔ1, Δio.Writer w) {
     _ = w;

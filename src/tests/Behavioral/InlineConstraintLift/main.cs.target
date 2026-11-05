@@ -8,22 +8,15 @@ partial struct namer {
     internal @string s;
 }
 
-internal static @string Name(this namer n) {
-    return n.s;
-}
+internal static @string Name(this namer n) { return n.s; }
 
 partial struct tagged {
     internal @string s;
     internal nint tag;
 }
 
-internal static @string Name(this tagged t) {
-    return t.s;
-}
-
-internal static nint Tag(this tagged t) {
-    return t.tag;
-}
+internal static @string Name(this tagged t) { return t.s; }
+internal static nint Tag(this tagged t) { return t.tag; }
 
 public partial interface Show_T /*dyn*/ {
     @string Name();
@@ -31,15 +24,11 @@ public partial interface Show_T /*dyn*/ {
 
 public static @string Show<T>(T t)
     where T : Show_T
-{
-    return "<"u8 + t.Name() + ">"u8;
-}
+{ return "<"u8 + t.Name() + ">"u8; }
 
 internal static @string show<T>(T t)
     where T : Show_T
-{
-    return "["u8 + t.Name() + "]"u8;
-}
+{ return "["u8 + t.Name() + "]"u8; }
 
 public partial interface Label_T /*dyn*/ {
     @string Name();
@@ -64,9 +53,7 @@ partial struct Box<T>
 
 public static void Add<T>(this ref Box<T> b, T t)
     where T : Box_T
-{
-    b.items = append(b.items, t);
-}
+{ b.items = append(b.items, t); }
 
 public static @string Names<T>(this ref Box<T> b)
     where T : Box_T
@@ -90,9 +77,7 @@ partial struct pair<T>
 
 internal static @string joined<T>(this pair<T> p)
     where T : pair_T
-{
-    return p.a.Name() + "+"u8 + p.b.Name();
-}
+{ return p.a.Name() + "+"u8 + p.b.Name(); }
 
 partial interface nameI {
     @string Name();
@@ -106,9 +91,7 @@ partial struct slot<T>
 
 internal static @string get<T>(this slot<T> s)
     where T : nameI
-{
-    return s.v.Name();
-}
+{ return s.v.Name(); }
 
 public partial interface Both_C /*dyn*/ {
     nint Tag();

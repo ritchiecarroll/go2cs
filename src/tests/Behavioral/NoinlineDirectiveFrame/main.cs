@@ -27,9 +27,7 @@ internal static partial @string bump(this ref counter c) {
     return callerName();
 }
 
-internal static partial @string forward(slice<byte> b, nint i) {
-    return keeper(b, i);
-}
+internal static partial @string forward(slice<byte> b, nint i) { return keeper(b, i); }
 
 internal static void Main() {
     var b = slice<byte>([7, 9]);

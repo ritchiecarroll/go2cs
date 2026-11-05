@@ -16,9 +16,7 @@ partial struct holder {
     internal ж<rec> r;
 }
 
-internal static void bump(ref cycle c) {
-    c.n++;
-}
+internal static void bump(ref cycle c) { c.n++; }
 
 internal static void viaParam(ж<rec> p, nint i) {
     var c = p.at(rec.Ꮡfuture, i);

@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static uint32 takesUint32(uint32 v) {
-    return v;
-}
+internal static uint32 takesUint32(uint32 v) { return v; }
 
 internal static uintptr big => unchecked((uintptr)33054211828000289);
 

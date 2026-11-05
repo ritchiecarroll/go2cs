@@ -8,9 +8,7 @@ partial struct box {
     internal nint n;
 }
 
-internal static ж<box> get(this ж<box> Ꮡb) {
-    return Ꮡb;
-}
+internal static ж<box> get(this ж<box> Ꮡb) { return Ꮡb; }
 
 internal static partial nint run() {
     ref var arr = ref heap(new array<box>(3), out var Ꮡarr);

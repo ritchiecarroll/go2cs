@@ -8,9 +8,7 @@ partial struct Delim /*num:rune*/;
 
 partial struct Code /*num:nint*/;
 
-public static @string String(this Delim d) {
-    return (@string)(rune)d;
-}
+public static @string String(this Delim d) { return (@string)(rune)d; }
 
 internal static void Main() {
     var d = (Delim)(rune)'{';

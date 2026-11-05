@@ -13,9 +13,7 @@ internal static void inc(this ж<counter> Ꮡc) {
     p.Value++;
 }
 
-internal static nint get(this ref counter c) {
-    return c.n;
-}
+internal static nint get(this ref counter c) { return c.n; }
 
 partial struct holder {
     internal array<counter> arr = new(3);

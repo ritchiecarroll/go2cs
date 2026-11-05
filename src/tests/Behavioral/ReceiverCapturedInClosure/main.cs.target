@@ -8,9 +8,7 @@ partial struct counter {
     internal nint n;
 }
 
-internal static void addInt(ref nint x, nint d) {
-    x += d;
-}
+internal static void addInt(ref nint x, nint d) { x += d; }
 
 internal static nint addInClosure(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
@@ -40,21 +38,15 @@ internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
 
 partial struct label /*num:nint*/;
 
-internal static @string render(this label l) {
-    return fmt.Sprintf("L%d"u8, (nint)l);
-}
+internal static @string render(this label l) { return fmt.Sprintf("L%d"u8, (nint)l); }
 
 partial struct widget {
     internal label id;
 }
 
-internal static @string tag(this widget w) {
-    return fmt.Sprintf("W%d"u8, (nint)w.id);
-}
+internal static @string tag(this widget w) { return fmt.Sprintf("W%d"u8, (nint)w.id); }
 
-internal static @string call(Func<@string> f) {
-    return f();
-}
+internal static @string call(Func<@string> f) { return f(); }
 
 internal static @string viaFieldMethodValue(this ж<widget> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();

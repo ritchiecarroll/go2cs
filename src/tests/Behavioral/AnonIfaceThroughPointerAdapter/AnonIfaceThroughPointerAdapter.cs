@@ -8,13 +8,8 @@ partial struct thing {
     internal nint n;
 }
 
-internal static @string Ping(this ref thing t) {
-    return fmt.Sprintf("ping %d"u8, t.n);
-}
-
-internal static @string Pong(this thing t) {
-    return "pong";
-}
+internal static @string Ping(this ref thing t) { return fmt.Sprintf("ping %d"u8, t.n); }
+internal static @string Pong(this thing t) { return "pong"; }
 
 partial interface speaker {
     @string Pong();

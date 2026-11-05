@@ -8,9 +8,7 @@ partial struct node {
     internal ж<node> next;
 }
 
-internal static partial void link(this ref node n, ж<node> m) {
-    n.next = m;
-}
+internal static partial void link(this ref node n, ж<node> m) { n.next = m; }
 
 internal static partial array<nint> process(nint n) {
     array<nint> a = new(5);

@@ -14,17 +14,13 @@ partial struct loud {
     internal nint n;
 }
 
-internal static @string greet(this ref loud l) {
-    return "LOUD";
-}
+internal static @string greet(this ref loud l) { return "LOUD"; }
 
 partial struct soft {
     internal nint n;
 }
 
-internal static @string greet(this soft s) {
-    return "soft";
-}
+internal static @string greet(this soft s) { return "soft"; }
 
 partial interface stamper {
     @string Stamp();

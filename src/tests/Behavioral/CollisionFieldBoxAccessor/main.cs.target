@@ -11,8 +11,7 @@ partial struct Δmark {
 partial struct tagger {
 }
 
-internal static void mark(this tagger _) {
-}
+internal static void mark(this tagger _) { }
 
 partial struct holder {
     internal nint mark;
@@ -38,9 +37,7 @@ partial struct w {
     internal nint other;
 }
 
-internal static partial void run(Action f) {
-    f();
-}
+internal static partial void run(Action f) { f(); }
 
 internal static partial nint capturedLocalNamedAfterType() {
     var w = Ꮡ(new w(park: 30, other: 4));

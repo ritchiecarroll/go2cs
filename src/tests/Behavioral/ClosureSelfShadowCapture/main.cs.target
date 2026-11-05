@@ -9,9 +9,7 @@ partial struct span {
     internal nint val;
 }
 
-internal static partial void onstack(Action f) {
-    f();
-}
+internal static partial void onstack(Action f) { f(); }
 
 internal static partial nint run() {
     var s = Ꮡ(new span(largeType: 5, val: 100));

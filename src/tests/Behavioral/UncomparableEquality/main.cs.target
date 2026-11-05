@@ -47,9 +47,7 @@ partial struct sliceErr {
     public slice<nint> S;
 }
 
-internal static @string Error(this sliceErr _) {
-    return "sliceErr";
-}
+internal static @string Error(this sliceErr _) { return "sliceErr"; }
 
 internal static void check(@string name, Action f) {
     GoFrame ᒐ = default;

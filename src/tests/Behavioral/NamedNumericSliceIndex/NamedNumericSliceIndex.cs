@@ -5,7 +5,6 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct PID /*num:int64*/;
-
 partial struct rank /*num:nint*/;
 
 internal static (@string, @string) lookup<K>(slice<@string> dense, K id)

@@ -27,7 +27,6 @@ public partial struct coder {
 partial struct EncBuffer /*coder*/;
 
 public partial struct tally /*num:nint*/;
-
 public partial struct weight /*num:nint*/;
 
 public static tally Tally(this CaseRange cr) {

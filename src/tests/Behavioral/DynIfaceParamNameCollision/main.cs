@@ -13,17 +13,13 @@ internal static error Push(this pusher p, @string target, nint weight) {
     return default;
 }
 
-internal static @string Label(this pusher p) {
-    return "pusher:"u8 + p.id;
-}
+internal static @string Label(this pusher p) { return "pusher:"u8 + p.id; }
 
 partial struct setter {
     internal @string id;
 }
 
-internal static void Set(this ref setter s, @string value) {
-    fmt.Println("set", value, "on", s.id);
-}
+internal static void Set(this ref setter s, @string value) { fmt.Println("set", value, "on", s.id); }
 
 internal partial interface serve_type /*dyn*/ {
     error Push(@string target, nint weight);

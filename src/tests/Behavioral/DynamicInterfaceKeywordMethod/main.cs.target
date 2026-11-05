@@ -14,16 +14,9 @@ partial struct harness {
     internal nint deadline;
 }
 
-internal static @string Name(this harness h) {
-    return h.name;
-}
-
-internal static void @private(this harness h) {
-}
-
-internal static (nint, bool) Deadline(this harness h) {
-    return (h.deadline, true);
-}
+internal static @string Name(this harness h) { return h.name; }
+internal static void @private(this harness h) { }
+internal static (nint, bool) Deadline(this harness h) { return (h.deadline, true); }
 
 internal partial interface commandContext_type /*dyn*/ :
     TB
@@ -46,13 +39,8 @@ partial struct gate {
     internal @string name;
 }
 
-internal static void @private(this gate g) {
-    fmt.Println("sealed:", g.name);
-}
-
-internal static @string Kind(this gate g) {
-    return "gate:"u8 + g.name;
-}
+internal static void @private(this gate g) { fmt.Println("sealed:", g.name); }
+internal static @string Kind(this gate g) { return "gate:"u8 + g.name; }
 
 internal partial interface direct_type /*dyn*/ {
     void @private();
@@ -69,7 +57,6 @@ internal static void direct(any v) {
         }
     }
 }
-
 internal static void Main() {
     commandContext(new harness(name: "cmd", deadline: 100));
 

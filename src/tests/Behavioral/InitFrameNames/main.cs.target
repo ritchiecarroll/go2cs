@@ -21,9 +21,7 @@ internal static @string viaClosure2 = func([MethodImpl(MethodImplOptions.NoInlin
     return here();
 })();
 
-[GoInit] internal static void initΔ1() {
-    fmt.Println("main.go init 1:", here());
-}
+[GoInit] internal static void initΔ1() { fmt.Println("main.go init 1:", here()); }
 
 [GoInit] internal static void initΔ2() {
     [MethodImpl(MethodImplOptions.NoInlining)] @string literal() => here();

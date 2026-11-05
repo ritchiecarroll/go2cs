@@ -5,11 +5,8 @@ using fmt = fmt_package;
 partial class main_package {
 
 partial struct traceArg /*num:uint64*/;
-
 partial struct arenaIdx /*num:nuint*/;
-
 partial struct nameOff /*num:int32*/;
-
 partial struct idx /*num:nuint*/;
 
 internal static void Main() {

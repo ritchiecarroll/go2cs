@@ -11,7 +11,6 @@ partial struct holder {
 }
 
 internal static ж<array<nint>> leaked;
-
 internal static ж<Row> leakedRow;
 
 internal static array<nint> leakLocal() {

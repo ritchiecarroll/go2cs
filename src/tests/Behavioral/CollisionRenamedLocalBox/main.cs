@@ -11,15 +11,13 @@ partial struct Δp {
 partial struct tagger {
 }
 
-internal static void p(this tagger _) {
-}
+internal static void p(this tagger _) { }
 
 partial struct box {
     internal nint n;
 }
 
 internal static ж<box> lastBox;
-
 internal static ж<nint> lastInt;
 
 internal static void setN(ж<box> Ꮡb, nint v) {
@@ -39,9 +37,7 @@ internal static void bump(ж<nint> Ꮡnp) {
 internal static readonly ж<box> ᏑΔcounter = new StaticBox<box>(default(box));
 internal static ref box Δcounter => ref ((StaticBox<box>)ᏑΔcounter).ValueSlot;
 
-internal static nint counter(this tagger _) {
-    return 1;
-}
+internal static nint counter(this tagger _) { return 1; }
 
 internal static nint usesTypeP() {
     Δp pv = default;
