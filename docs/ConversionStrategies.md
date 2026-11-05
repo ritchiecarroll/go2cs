@@ -8700,12 +8700,14 @@ goǃ(produce, i, @out.AsSendOnly());
 ```
 
 The mark is a record in the package's `package_info.cs`, naming the file, line and column where that `goǃ` call
-starts. go2cs-gen intercepts the call there and starts the goroutine on the smaller stack. A record that no longer
-lands on such a call fails the build (`GO2CS0010`) rather than start some other goroutine on the small stack:
+starts, and which `goǃ` call of the file it is (here the second, ordinal 1). go2cs-gen intercepts the call there and
+starts the goroutine on the smaller stack. A record that no longer lands on such a call fails the build (`GO2CS0010`)
+rather than start some other goroutine on the small stack. The ordinal is what catches a record a merge left one
+line off, on a neighbouring `goǃ` call, which the position alone cannot tell from the right one:
 
 <!-- source: src/tests/Behavioral/GoroutineStackReserve/package_info.cs:46 -->
 ```csharp
-[assembly: GoBoundedGoroutine("main.cs", 42, 9)]
+[assembly: GoBoundedGoroutine("main.cs", 42, 9, 1)]
 ```
 
 Anything the proof cannot follow keeps the full stack, unrecorded. That includes a call through an interface or a
@@ -8713,7 +8715,7 @@ func value, a range-over-func loop, and a goroutine that reaches either through 
 goroutine that does I/O, formats with `fmt` or serves a connection keeps today's reservation. A mistaken mark would
 crash where Go grows the stack, so the proof gives up rather than guess.
 <!-- The proof: src/go2cs/goroutineStackAnalysis.go; the mark: src/go2cs/visitGoStmt.go:247
-     `recorded := bounded && v.boundedGoRecordable()`, recorded by src/go2cs/goroutineStackRecords.go:131
+     `recorded := bounded && v.boundedGoRecordable()`, recorded by src/go2cs/goroutineStackRecords.go:136
      `func applyBoundedGoRecords(packageInfoLines []string, packageInfoFileName string, mergeExisting bool) []string {`;
      the interception: src/gen/go2cs-gen/BoundedGoroutineInterceptorGenerator.cs:55
      `public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator`. golib:
@@ -12327,8 +12329,8 @@ statement, which converted code writes as golib's `goǃ(…)` ([Goroutines](#gor
 that starts a goroutine carries its own record, kept by hand, that maps each `goǃ(` line to the Go `go`
 statement it replaces and no other line. A traceback's `created by` line then names the Go position, as
 Go's does.
-<!-- the converter's record: src/go2cs/positionMapOperations.go:594 (`Go source positions are recorded here, one`)
-     and :599 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
+<!-- the converter's record: src/go2cs/positionMapOperations.go:595 (`Go source positions are recorded here, one`)
+     and :600 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
      A hand-kept record: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
      for its goǃ( at :246 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per
