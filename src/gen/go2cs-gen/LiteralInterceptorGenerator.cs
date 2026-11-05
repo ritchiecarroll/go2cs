@@ -524,7 +524,7 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
 
                 string field = "ˢ" + cacheFields.Count.ToString(CultureInfo.InvariantCulture);
                 cacheFields[slot.Value] = field;
-                cache.Append($"    internal static readonly object {field} = (global::go.@string){SymbolDisplay.FormatLiteral(slot.Value, quote: true)}u8;\r\n");
+                cache.Append($"        internal static readonly object {field} = (global::go.@string){SymbolDisplay.FormatLiteral(slot.Value, quote: true)}u8;\r\n");
             }
         }
 
@@ -556,11 +556,13 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
         source.Append("    [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]\r\n");
         source.Append("    file sealed class InterceptsLocationAttribute : global::System.Attribute\r\n    {\r\n");
         source.Append("        public InterceptsLocationAttribute(int version, string data) { }\r\n    }\r\n}\r\n\r\n");
+        // A block namespace: the file opens System.Runtime.CompilerServices as one above, and C# allows only one form
+        // per file. Its body is indented one level like any block's (docs/PLAN-generated-code-format.md, class A).
         source.Append("namespace go2cs.Interceptors\r\n{\r\n");
-        source.Append("file static class ˢLiterals\r\n{\r\n");
+        source.Append("    file static class ˢLiterals\r\n    {\r\n");
         source.Append(cache);
-        source.Append("}\r\n\r\n");
-        source.Append("file static class ˢInterceptors\r\n{\r\n");
+        source.Append("    }\r\n\r\n");
+        source.Append("    file static class ˢInterceptors\r\n    {\r\n");
 
         int ordinal = 0;
 
@@ -572,23 +574,23 @@ public sealed class LiteralInterceptorGenerator : IIncrementalGenerator
                 source.Append("\r\n");
 
             foreach (InterceptableLocation location in locations)
-                source.Append($"    [global::System.Runtime.CompilerServices.InterceptsLocation({location.Version}, \"{location.Data}\")]\r\n");
+                source.Append($"        [global::System.Runtime.CompilerServices.InterceptsLocation({location.Version}, \"{location.Data}\")]\r\n");
 
-            source.Append($"    [{GeneratedCodeAttribute}, global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough]\r\n");
-            source.Append($"    public static {ReturnType(method)} ˢI{ordinal.ToString(CultureInfo.InvariantCulture)}({Parameters(method)})\r\n    {{\r\n");
+            source.Append($"        [{GeneratedCodeAttribute}, global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough]\r\n");
+            source.Append($"        public static {ReturnType(method)} ˢI{ordinal.ToString(CultureInfo.InvariantCulture)}({Parameters(method)})\r\n        {{\r\n");
 
             foreach (Slot slot in slots)
             {
                 string name = ParameterName(method.Parameters[slot.Ordinal]);
                 string target = slot.Element < 0 ? name : $"{name}[{slot.Element.ToString(CultureInfo.InvariantCulture)}]";
-                source.Append($"        {target} = ˢLiterals.{cacheFields[slot.Value]};\r\n");
+                source.Append($"            {target} = ˢLiterals.{cacheFields[slot.Value]};\r\n");
             }
 
-            source.Append($"        {(method.ReturnsVoid ? "" : "return ")}{Forward(method)};\r\n    }}\r\n");
+            source.Append($"            {(method.ReturnsVoid ? "" : "return ")}{Forward(method)};\r\n        }}\r\n");
             ordinal++;
         }
 
-        source.Append("}\r\n}\r\n");
+        source.Append("    }\r\n}\r\n");
 
         return source.ToString();
     }
