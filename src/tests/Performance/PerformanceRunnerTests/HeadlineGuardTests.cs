@@ -241,16 +241,19 @@ public class HeadlineGuardTests
     [TestMethod]
     public void ABuildFileOutsideTheListedChainIsRefused()
     {
-        string project = Path.Combine(@"C:\go2cs\src\tests\Performance", "PerfFib");
-        string rsp = Path.Combine(@"C:\go2cs", "Directory.Build.rsp");
+        // The guard walks up a real folder with Path.GetDirectoryName, which splits at this host's separators only,
+        // so the folders are spelled from this host's root: a Windows spelling is one segment on linux and macOS.
+        string root = Path.GetPathRoot(AppContext.BaseDirectory)!;
+        string project = Path.Combine(root, "go2cs", "src", "tests", "Performance", "PerfFib");
+        string rsp = Path.Combine(root, "go2cs", "Directory.Build.rsp");
         string shadow = Path.Combine(project, "Directory.Build.props");
 
         Assert.AreEqual(0, Headline.StrayBuildFiles(project, _ => false).Count);
         AssertNames(Headline.StrayBuildFiles(project, f => f == rsp), rsp);
         AssertNames(Headline.StrayBuildFiles(project, f => f == shadow), shadow);
 
-        string work = @"D:\perf\work";
-        string above = Path.Combine(@"D:\perf", "Directory.Build.props");
+        string work = Path.Combine(root, "perf", "work");
+        string above = Path.Combine(root, "perf", "Directory.Build.props");
         Assert.AreEqual(0, Headline.BuildFilesAtOrAbove(work, _ => false).Count);
         AssertNames(Headline.BuildFilesAtOrAbove(work, f => f == above), above);
     }
