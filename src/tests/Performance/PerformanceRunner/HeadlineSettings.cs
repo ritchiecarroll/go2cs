@@ -52,11 +52,21 @@ namespace PerformanceRunner
 
         internal static string ReleaseConvert(string source, string output) => $"-recurse=nuget \"{source}\" \"{output}\"";
 
-        internal static string ReleaseJitBuild(string csproj, string outDir) =>
-            $"build \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration} \"-p:OutDir={outDir}\"";
+        internal static string ReleaseJitBuild(string csproj, string outDir, string? pinnedVersion = null) =>
+            $"build \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration}{Pin(pinnedVersion)} \"-p:OutDir={outDir}\"";
 
-        internal static string ReleaseReadyToRunPublish(string csproj, string outDir) =>
-            $"publish \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration} -r win-x64 -o \"{outDir}\"";
+        internal static string ReleaseReadyToRunPublish(string csproj, string outDir, string? pinnedVersion = null) =>
+            $"publish \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration}{Pin(pinnedVersion)} -r win-x64 -o \"{outDir}\"";
+
+        // A pinned release leg (ReleaseLeg.Pin) sets the package version the converted Directory.Build.props otherwise
+        // floats; it chooses which published release is measured, never how it is compiled. It goes before any quoted
+        // path: OutDir ends in a separator, so its closing quote is \", which Windows reads as a literal quote and
+        // which swallows whatever follows into the OutDir value.
+        internal const string PinProperty = "GoStdLibVersion";
+
+        internal static string Pin(string? pinnedVersion) => pinnedVersion is null ? "" : $" -p:{PinProperty}={pinnedVersion}";
+
+        private static bool Pins(HeadlineCommand command) => command is HeadlineCommand.ReleaseJitBuild or HeadlineCommand.ReleaseReadyToRunPublish;
 
         // The options each command may carry, and the MSBuild properties it may set with -p:. A path or verb is not an
         // option. PerfAot is the suite's gate for the Native AOT set in its Directory.Build.targets; go2csPath and OutDir
@@ -78,14 +88,18 @@ namespace PerformanceRunner
 
         /// <summary>
         /// Why <paramref name="argv"/> is not a headline <paramref name="command"/>, one finding per token: an option or
-        /// a -p: property outside the command's allowlist, or a configuration other than Release. Empty when it is.
+        /// a -p: property outside the command's allowlist, or a configuration other than Release. Empty when it is. A
+        /// pinned leg's release build and publish may also carry <see cref="PinProperty"/>, at exactly
+        /// <paramref name="pinnedVersion"/> and nothing else; an unpinned one may not carry it at all.
         /// </summary>
-        internal static IReadOnlyList<HeadlineRefusal> ArgvRefusals(string column, HeadlineCommand command, string argv)
+        internal static IReadOnlyList<HeadlineRefusal> ArgvRefusals(string column, HeadlineCommand command, string argv, string? pinnedVersion = null)
         {
             (string[] options, string[] properties) = Allowed[command];
             List<string> tokens = Tokens(argv);
             List<string> refused = new();
-            string expected = $"only {string.Join(" ", options.Concat(properties.Select(p => $"-p:{p}")))}, with configuration {Configuration}";
+            bool pinned = pinnedVersion is not null && Pins(command);
+            string expected = $"only {string.Join(" ", options.Concat(properties.Select(p => $"-p:{p}")))}" +
+                $"{(pinned ? $" -p:{PinProperty}={pinnedVersion}" : "")}, with configuration {Configuration}";
 
             for (int i = 0; i < tokens.Count; i++)
             {
@@ -99,6 +113,9 @@ namespace PerformanceRunner
 
                 if (property is not null)
                 {
+                    if (pinned && property.Equals(PinProperty, StringComparison.OrdinalIgnoreCase) && value == pinnedVersion)
+                        continue;
+
                     if (!properties.Contains(property, StringComparer.OrdinalIgnoreCase))
                         refused.Add(token);
                     else if (property.Equals("Configuration", StringComparison.OrdinalIgnoreCase) && value != Configuration)
