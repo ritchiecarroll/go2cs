@@ -500,10 +500,10 @@ public class MemberRecordGenerator : ISourceGenerator
         HashSet<string> hintNames = new(StringComparer.OrdinalIgnoreCase);
 
         foreach (KeyValuePair<INamedTypeSymbol, (string ns, List<string> records)> pair in byType)
-            context.AddSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "members"), GeneratedPartials.Source(pair.Value.ns, pair.Key, pair.Value.records));
+            context.AddGeneratedSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "members"), GeneratedPartials.Source(pair.Value.ns, pair.Key, pair.Value.records));
 
         foreach (KeyValuePair<INamedTypeSymbol, (string ns, List<string> dependencies)> pair in recordedMethods)
-            context.AddSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "paramdims-keep"), ParamDimsDependencies(pair.Value.ns, pair.Key, pair.Value.dependencies));
+            context.AddGeneratedSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "paramdims-keep"), ParamDimsDependencies(pair.Value.ns, pair.Key, pair.Value.dependencies));
     }
 
     // One EMPTY module initializer per package class carrying a [DynamicDependency] for every method a [GoParamDims]

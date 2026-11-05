@@ -2446,6 +2446,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
 
     [TestMethod]
+    public void CheckTypeParamUntypedConst() => CheckTarget("TypeParamUntypedConst");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]

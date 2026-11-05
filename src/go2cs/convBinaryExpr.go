@@ -843,7 +843,8 @@ func (v *Visitor) emitGuardedShift(binaryExpr *ast.BinaryExpr, leftOperand, rawC
 	// shift's resolved basic type first — the same width the native path's retype logic would apply.
 	var receiver string
 
-	if v.isUntypedNumericConstArg(binaryExpr.X) || v.tightenedNarrowConstRef(binaryExpr.X) {
+	// A type parameter's shift passes no basic: its untyped constant left operand is already ConvertToType<T>(…).
+	if basic != nil && (v.isUntypedNumericConstArg(binaryExpr.X) || v.tightenedNarrowConstRef(binaryExpr.X)) {
 		underlyingCS := v.getCSharpTypeName(basic)
 
 		if v.needsParentheses(binaryExpr.X) {
@@ -1962,7 +1963,8 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 	wrapTypeParamConst := func(operandType types.Type, other ast.Expr, otherOperand string) string {
 		tp, ok := types.Unalias(operandType).(*types.TypeParam)
 
-		if !ok || !typeParamIsInteger(tp) {
+		// convExpr has already materialized a constant Go types as the type parameter.
+		if !ok || !typeParamIsInteger(tp) || v.typeParamConstType(other) != nil {
 			return otherOperand
 		}
 
@@ -2094,8 +2096,9 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 			// An integer TYPE PARAMETER left operand shifts through IShiftOperators<T, int, T>, and .NET's operator
 			// masks the count to the type argument's width (`x << 9` on a uint8 type argument read as `x << 1`), so a
 			// count not provably below the narrowest width its constraint allows takes golib's generic guard,
-			// `x.Lsh(n)`. An untyped constant left operand is not one: it renders as a bare C# literal.
-			if tp, ok := types.Unalias(v.info.TypeOf(binaryExpr)).(*types.TypeParam); ok && !v.isUntypedNumericConstArg(binaryExpr.X) {
+			// `x.Lsh(n)`. An untyped constant left operand takes the shift's type, so convExpr has rendered it
+			// `ConvertToType<T>(1)`, which is the receiver.
+			if tp, ok := types.Unalias(v.info.TypeOf(binaryExpr)).(*types.TypeParam); ok {
 				if width, ok := typeParamShiftWidth(tp); ok && v.shiftCountGuarded(binaryExpr.Y, width) {
 					return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, nil)
 				}

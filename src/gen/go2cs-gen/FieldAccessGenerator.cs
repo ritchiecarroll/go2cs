@@ -97,7 +97,7 @@ public class FieldAccessGenerator : ISourceGenerator
         List<INamedTypeSymbol> types = RecordedTypes(context.Compilation, finder.Candidates);
 
         if (types.Count > 0)
-            context.AddSource("GoFieldAccess.g.cs", Source(context.Compilation, types));
+            context.AddGeneratedSource("GoFieldAccess.g.cs", Source(context.Compilation, types));
     }
 
     // The struct types the records list, each once, generic ones by their open definition. The converter writes the

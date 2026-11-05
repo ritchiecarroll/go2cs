@@ -128,7 +128,7 @@ public class RecvGenerator : ISourceGenerator
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
         }
     }
 

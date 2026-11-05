@@ -13,6 +13,11 @@
 > [`phase4/CENSUS-gen-format-seat1.md`](phase4/CENSUS-gen-format-seat1.md)). Seat 2 is classes D to G. The numbers
 > below are the scout's and are not restated.
 >
+> **STATUS UPDATE, 2026-11-05 (P2): seat 2 measured** on `claude/p2-gen-format-2`, stacked on seat 1 (record:
+> [`phase4/CENSUS-gen-format-seat2.md`](phase4/CENSUS-gen-format-seat2.md)). Classes D to G read 0 over the scout's
+> corpus. `dotnet format` keeps only class C's 1,117 diagnostics, so §6's "returning 0" gate reads exit 2 by the
+> owner's ruling, not by a residue of this seat.
+>
 > **The owner's ask (verbatim):** "I noticed in the generated tab of the go2cs tour, while exploring, some of the
 > generated code had bad nested brace alignments in some cases. This code should be more standard C# formatted, not
 > following converted code conventions. Mabybe a scout here could check generated code against standard C# code

@@ -161,16 +161,16 @@ func fetchNuGetMapURL(src string, refresh bool) ([]byte, string, error) {
 				fetched = info.ModTime().UTC().Format(time.RFC3339)
 			}
 
-			return cached, fmt.Sprintf("-nuget-map %s could not be fetched (%v); using the cached copy from %s", src, failure, fetched), nil
+			return cached, fmt.Sprintf("%s could not be fetched (%v); using the cached copy from %s", nugetMapSourceName(src), failure, fetched), nil
 		}
 
-		return nil, "", fmt.Errorf("-nuget-map %s: %w", src, failure)
+		return nil, "", fmt.Errorf("%s: %w", nugetMapSourceName(src), failure)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, src, nil)
 
 	if err != nil {
-		return nil, "", fmt.Errorf("-nuget-map %s: %w", src, err)
+		return nil, "", fmt.Errorf("%s: %w", nugetMapSourceName(src), err)
 	}
 
 	if haveCache {
@@ -185,7 +185,7 @@ func fetchNuGetMapURL(src string, refresh bool) ([]byte, string, error) {
 
 	if err != nil {
 		if errors.Is(err, errNuGetMapInsecureRedirect) {
-			return nil, "", fmt.Errorf("-nuget-map %s: %w", src, err)
+			return nil, "", fmt.Errorf("%s: %w", nugetMapSourceName(src), err)
 		}
 
 		return fallback(err)
@@ -202,7 +202,7 @@ func fetchNuGetMapURL(src string, refresh bool) ([]byte, string, error) {
 	}
 
 	if resp.ContentLength > nugetMapMaxBytes {
-		return nil, "", fmt.Errorf("-nuget-map %s: larger than the %d-byte cap on a mapping source", src, nugetMapMaxBytes)
+		return nil, "", fmt.Errorf("%s: larger than the %d-byte cap on a mapping source", nugetMapSourceName(src), nugetMapMaxBytes)
 	}
 
 	data, err := io.ReadAll(io.LimitReader(resp.Body, nugetMapMaxBytes+1))
@@ -212,14 +212,14 @@ func fetchNuGetMapURL(src string, refresh bool) ([]byte, string, error) {
 	}
 
 	if int64(len(data)) > nugetMapMaxBytes {
-		return nil, "", fmt.Errorf("-nuget-map %s: larger than the %d-byte cap on a mapping source", src, nugetMapMaxBytes)
+		return nil, "", fmt.Errorf("%s: larger than the %d-byte cap on a mapping source", nugetMapSourceName(src), nugetMapMaxBytes)
 	}
 
 	warning := ""
 
 	if cacheErr == nil {
 		if err := writeNuGetMapCache(cacheBody, cacheTag, data, resp.Header.Get("ETag")); err != nil {
-			warning = fmt.Sprintf("-nuget-map %s: the cache could not be written (%v); the next run fetches it again", src, err)
+			warning = fmt.Sprintf("%s: the cache could not be written (%v); the next run fetches it again", nugetMapSourceName(src), err)
 		}
 	}
 

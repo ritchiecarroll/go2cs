@@ -436,7 +436,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		// Apply an explicit per-argument cast when requested (e.g. an untyped-constant element
 		// of an `append` call cast to the slice's element type to avoid C# overload ambiguity).
-		if callContext != nil && callContext.castArgToType != nil {
+		// A constant Go types as a type parameter is already ConvertToType<T>(…) (see convExpr); a cast to T over
+		// it is redundant.
+		if callContext != nil && callContext.castArgToType != nil && v.typeParamConstType(expr) == nil {
 			if castType, ok := callContext.castArgToType[i]; ok && len(castType) > 0 {
 				// A KEYED struct-literal element renders as a C# named argument
 				// (`Y: value`) — cast the VALUE only, mirroring the wrapArgWithNew handling

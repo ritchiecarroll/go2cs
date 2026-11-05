@@ -155,6 +155,128 @@ func TestWhiteboxTestProjectReferencesProductionFieldAccessReceivers(t *testing.
 	resetPackageState(&packages.Package{})
 }
 
+// golang-jwt/jwt/v5 on go.* 1.26.10.2 (the nugetgo rebuild wave, 2026-11-04): jwt's production package_info.cs records
+// `[assembly: GoFieldAccess(typeof(go.crypto.x509_package.Certificate))]`, and jwt.tests failed CS0012 ×3 on
+// `claims.Issuer` (example_test.cs), "'pkix_package.Name' is defined in an assembly that is not referenced". The
+// receiver's package, crypto/x509, IS referenced (the receiver edge above), but the extension block on
+// ж<x509.Certificate> also declares Issuer, of type pkix.Name, and ranking that candidate binds its type. So the
+// packages of the receiver's FIELD types are references too, for the fields a test selects by name: a field no test
+// selects by name is never a candidate, and its type's package stays out.
+func writeForeignReceiverFieldTypeFixture(t *testing.T) string {
+	t.Helper()
+
+	dir := t.TempDir()
+
+	writeModuleFiles(t, dir, map[string]string{
+		"go.mod":         "module example/foreignfield\n\ngo 1.23\n",
+		"name/name.go":   "package name\n\ntype Name struct{ CommonName string }\n",
+		"spare/spare.go": "package spare\n\ntype Part struct{ N int }\n",
+		"cert/cert.go": "package cert\n\nimport (\n\t\"example/foreignfield/name\"\n\t\"example/foreignfield/spare\"\n)\n\n" +
+			"type Certificate struct {\n\tIssuer name.Name\n\tSpare  spare.Part\n\tSerial int\n}\n",
+		"widget/widget.go": "package widget\n\nimport \"example/foreignfield/cert\"\n\n" +
+			"func SerialOf(c *cert.Certificate) int { return c.Serial }\n",
+		"widget/widget_test.go": "package widget\n\nimport \"testing\"\n\n" +
+			"type claims struct{ Issuer string }\n\n" +
+			"func TestIssuer(t *testing.T) {\n" +
+			"\tp := &claims{Issuer: \"x\"}\n" +
+			"\tif p.Issuer != \"x\" {\n" +
+			"\t\tt.Fatal(p.Issuer)\n" +
+			"\t}\n" +
+			"}\n",
+	})
+
+	return filepath.Join(dir, "widget")
+}
+
+const foreignReceiverFieldTypeProductionInfo = "[assembly: GoFieldAccess(typeof(go.example.foreignfield.cert_package.Certificate))]\r\n"
+
+func TestWhiteboxTestProjectReferencesProductionFieldAccessFieldTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	inputPath := writeForeignReceiverFieldTypeFixture(t)
+
+	loaded, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax, Dir: inputPath, Tests: true}, ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	production := findProductionPackage(loaded, inputPath)
+	if production == nil {
+		t.Fatal("production package was not loaded")
+	}
+
+	internal, external := findTestVariants(loaded, production)
+
+	if model := selectTestProjectModel(internal, external); model != testProjectWhiteboxReference {
+		t.Fatalf("fixture model = %v, want whitebox-reference", model)
+	}
+
+	outputPath := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(outputPath, PackageInfoFileName), []byte(foreignReceiverFieldTypeProductionInfo), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resetPackageState(&packages.Package{})
+	packageNamespace = "go"
+
+	goRoot := build.Default.GOROOT
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+		convertTests:        true,
+		targetPlatform:      runtime.GOOS + "/" + runtime.GOARCH,
+	}
+
+	if err := processTestConversion(inputPath, outputPath, options); err != nil {
+		t.Fatalf("processTestConversion: %v", err)
+	}
+
+	projects, err := filepath.Glob(filepath.Join(outputPath, "*.tests.csproj"))
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("want one test project in the output, got %v (%v)", projects, err)
+	}
+
+	body, err := os.ReadFile(projects[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var references []string
+
+	for _, line := range strings.Split(string(body), "\n") {
+		if strings.Contains(line, "<ProjectReference ") {
+			references = append(references, strings.TrimSpace(line))
+		}
+	}
+
+	t.Logf("%s references: %v", filepath.Base(projects[0]), references)
+
+	// Positive control: the receiver edge still holds, so the reference list read below is the real one.
+	if !containsReferenceTo(references, "cert") {
+		t.Fatalf("the receiver's own package (example/foreignfield/cert) must be referenced: %v", references)
+	}
+
+	if !containsReferenceTo(references, "/name/") {
+		t.Errorf("the test project must reference the package of a field a test selects by name on a production "+
+			"[GoFieldAccess] receiver (example/foreignfield/name, Certificate.Issuer): `p.Issuer` ranks the "+
+			"extension block's Issuer, of type name.Name, so without it the build is CS0012: %v", references)
+	}
+
+	if containsReferenceTo(references, "spare") {
+		t.Errorf("a receiver field no test selects by name (Certificate.Spare) is never a candidate; its package "+
+			"(example/foreignfield/spare) must stay out: %v", references)
+	}
+
+	resetPackageState(&packages.Package{})
+}
+
 func containsReferenceTo(references []string, fragment string) bool {
 	for _, reference := range references {
 		if strings.Contains(reference, fragment) {

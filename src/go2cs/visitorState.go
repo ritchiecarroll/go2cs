@@ -518,6 +518,10 @@ type Visitor struct {
 	// that stays inside the thunk's call (goDeferConstArgs.go): its string literal takes an ordinary
 	// argument's form rather than the at-site `(@string)` cast an eager argument takes.
 	renderingInlinedGoDeferArg bool
+
+	// renderingTypeParamConst is set while convExpr renders the inside of a constant it materializes through
+	// ConvertToType<T> (see convExpr), so a constant nested in it is not materialized a second time.
+	renderingTypeParamConst bool
 	// entryAliasBoxPaths maps a parameter's entry deref ALIAS to the box expression it was declared
 	// from (`c` → `Ꮡc.DerefOrNull()`). The alias is declared INSIDE the frame's try, so the finally
 	// cannot name it and a lowered defer's call is re-rooted on the box instead.

@@ -146,7 +146,7 @@ public class LazyHolderGenerator : ISourceGenerator
             for (int suffix = 2; !hintNames.Add(hintName); suffix++)
                 hintName = $"{System.IO.Path.GetFileNameWithoutExtension(file.Key.FilePath)}.lazy-holders{suffix}.g.cs";
 
-            context.AddSource(hintName, source.ToString());
+            context.AddGeneratedSource(hintName, source.ToString());
         }
     }
 

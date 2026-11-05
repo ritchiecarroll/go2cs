@@ -253,7 +253,7 @@ public class NoInliningPartialGenerator : ISourceGenerator
             for (int index = 1; !hintNames.Add(unique); index++)
                 unique = $"{index}.{hint}";
 
-            context.AddSource(GetValidFileName(unique), source.ToString());
+            context.AddGeneratedSource(GetValidFileName(unique), source.ToString());
         }
     }
 }

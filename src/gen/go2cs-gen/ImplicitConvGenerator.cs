@@ -333,7 +333,7 @@ public class ImplicitConvGenerator : ISourceGenerator
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}{(inverted ? "-inv" : "")}.g.cs")), generatedSource);
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}{(inverted ? "-inv" : "")}.g.cs")), generatedSource);
         }
     }
 

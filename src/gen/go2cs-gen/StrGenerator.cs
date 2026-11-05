@@ -88,7 +88,7 @@ public class StrGenerator : ISourceGenerator
             if (!template.IsRenderable)
                 continue;
 
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{method.Name}.str.g.cs")), template.Generate());
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{method.Name}.str.g.cs")), template.Generate());
         }
     }
 

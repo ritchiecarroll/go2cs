@@ -568,7 +568,7 @@ public class TypeGenerator : ISourceGenerator
                 generatedSource = MethodSetKeep.OnToString(generatedSource, semanticModel.GetDeclaredSymbol(targetSyntax) as INamedTypeSymbol);
 
                 // Add the source code to the compilation
-                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs")), generatedSource);
+                context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs")), generatedSource);
 
                 if (semanticModel.GetDeclaredSymbol(targetSyntax) is { } generatedType && registeredTypes.Add(generatedType))
                 {
@@ -579,11 +579,11 @@ public class TypeGenerator : ISourceGenerator
 
                     // A generic value type's Go methods, closed over its own type parameters for golib (MethodSource).
                     if (MethodSource.Source(packageNamespace, generatedType as INamedTypeSymbol) is { } methodSource)
-                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
+                        context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
 
                     // A value type's exported Go methods as compiled delegates, reached only through reflect's method paths (MethodSet).
                     if (MethodSet.Source(packageNamespace, generatedType as INamedTypeSymbol, context.Compilation, generatedSource) is { } methodSet)
-                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSet.g.cs")), methodSet);
+                        context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSet.g.cs")), methodSet);
                 }
             }
         }
@@ -620,7 +620,7 @@ public class TypeGenerator : ISourceGenerator
                 $"    internal static void {TempVarMarker}RegisterGoTypes() {{ }}\r\n" +
                 "}\r\n";
 
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.GoTypeRegistry.g.cs")), source);
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.GoTypeRegistry.g.cs")), source);
         }
     }
 
@@ -648,7 +648,7 @@ public class TypeGenerator : ISourceGenerator
                 "    }\r\n" +
                 "}\r\n";
 
-            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.GoZeroFactories.g.cs")), source);
+            context.AddGeneratedSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.GoZeroFactories.g.cs")), source);
         }
     }
 

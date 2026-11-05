@@ -2443,6 +2443,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
 
     [TestMethod]
+    public void CheckTypeParamUntypedConst() => CheckTarget("TypeParamUntypedConst");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]
