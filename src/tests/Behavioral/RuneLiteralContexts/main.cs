@@ -131,7 +131,7 @@ internal static partial void Main() {
     var doneʗ1 = done;
     goǃ((rune rΔ2) => {
         doneʗ1.ᐸꟷ(rΔ2);
-    }, (rune)'g', GoStack.Bounded);
+    }, (rune)'g');
     fmt.Println(tm["a"], tm["b"], tw, ᐸꟷ(sel), ᐸꟷ(done));
 
     foreach (var (_, c) in slice<byte>("a_7."u8)) {

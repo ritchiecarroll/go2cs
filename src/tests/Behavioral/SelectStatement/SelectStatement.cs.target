@@ -72,12 +72,12 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
 
 internal static partial void sieve() {
     var ch = new channel<nint>(0);
-    goǃ(generate, ch.AsSendOnly(), GoStack.Bounded);
+    goǃ(generate, ch.AsSendOnly());
     for (;;) {
         nint prime = ᐸꟷ(ch);
         fmt.Print(prime, "\n");
         var ch1 = new channel<nint>(0);
-        goǃ(filter, ch.AsRecvOnly(), ch1.AsSendOnly(), prime, GoStack.Bounded);
+        goǃ(filter, ch.AsRecvOnly(), ch1.AsSendOnly(), prime);
         ch = ch1;
 
         if (prime > 40) {
@@ -105,10 +105,10 @@ internal static partial void Main() {
     var ch3 = new channel<nint>(0);
     var ch4 = new channel<nint>(0);
 
-    goǃ(g1, ch1, GoStack.Bounded);
-    goǃ(g2, ch2, GoStack.Bounded);
-    goǃ(g1, ch3, GoStack.Bounded);
-    goǃ(g2, ch4, GoStack.Bounded);
+    goǃ(g1, ch1);
+    goǃ(g2, ch2);
+    goǃ(g1, ch3);
+    goǃ(g2, ch4);
 
     for (nint i = 0; i < 4; i++) {
         var selᴛ3 = ch1;
@@ -167,9 +167,9 @@ internal static partial void Main() {
     var s = slice<nint>([7, 2, 8, -9, 4, 0]);
 
     var c = new channel<nint>(0);
-    goǃ(sum, s.slice(0, len(s) / 2), c, GoStack.Bounded);
-    goǃ(sum, s.slice(len(s) / 2), c, GoStack.Bounded);
-    goǃ(sum, s[2..5], c, GoStack.Bounded);
+    goǃ(sum, s.slice(0, len(s) / 2), c);
+    goǃ(sum, s.slice(len(s) / 2), c);
+    goǃ(sum, s[2..5], c);
     nint x = ᐸꟷ(c);
     nint y = ᐸꟷ(c);
     nint z = ᐸꟷ(c);
@@ -188,7 +188,7 @@ internal static partial void Main() {
 
     var mychanl = new channel<@string>(0);
 
-    goǃ(sendOnly, mychanl.AsSendOnly(), GoStack.Bounded);
+    goǃ(sendOnly, mychanl.AsSendOnly());
 
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);

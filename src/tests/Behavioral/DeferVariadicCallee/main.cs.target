@@ -75,12 +75,12 @@ internal static partial void Main() {
     }
     fmt.Println("counter:", c.n);
 
-    goǃ(() => signalDone(), GoStack.Bounded);
+    goǃ(() => signalDone());
     ᐸꟷ(defaultDone);
     fmt.Println("go variadic zero-arg done");
 
     var ch = new channel<EmptyStruct>(0);
-    goǃ(ᴛ1 => signalDone(ᴛ1), ch, GoStack.Bounded);
+    goǃ(ᴛ1 => signalDone(ᴛ1), ch);
     ᐸꟷ(ch);
     fmt.Println("go variadic with-arg done");
 }
