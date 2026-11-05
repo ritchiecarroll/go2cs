@@ -2,8 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using static UsingStaticNamespaceAlias.aliaslib_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
 using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
 using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;

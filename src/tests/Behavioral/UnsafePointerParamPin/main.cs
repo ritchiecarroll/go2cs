@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
 
 partial class main_package {
 
