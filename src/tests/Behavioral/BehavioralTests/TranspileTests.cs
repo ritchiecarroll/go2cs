@@ -2632,6 +2632,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckValuePunBits() => CheckTarget("ValuePunBits");
 
     [TestMethod]
+    public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
+
+    [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]

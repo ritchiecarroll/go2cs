@@ -2635,6 +2635,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckValuePunBits() => CheckTarget("ValuePunBits");
 
     [TestMethod]
+    public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
+
+    [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
