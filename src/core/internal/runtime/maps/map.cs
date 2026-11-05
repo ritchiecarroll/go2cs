@@ -462,7 +462,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeySmall(this re
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     while (match != 0) {
         var i = match.first();
@@ -567,7 +567,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     // Look for an existing slot containing this key.
     while (match != 0) {
@@ -595,7 +595,7 @@ internal static @unsafe.Pointer putSlotSmall(this ref ΔMap m, ж<abiꓸMapType>
     // There can't be deleted slots, small maps can't have them
     // (see deleteSmall). Use matchEmptyOrDeleted as it is a bit
     // more efficient than matchEmpty.
-    match = (~g.ctrls()).matchEmptyOrDeleted();
+    match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
         fatal(smallMapWithNoEmptySlotˢ);
         return default;
@@ -725,7 +725,7 @@ internal static void deleteSmall(this ref ΔMap m, ж<abiꓸMapType> Ꮡtyp, uin
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     while (match != 0) {
         var i = match.first();

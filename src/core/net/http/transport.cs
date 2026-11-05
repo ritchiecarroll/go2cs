@@ -2179,7 +2179,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
         }
 
         // Possible unencrypted HTTP/2 with prior knowledge.
-        var unencryptedHTTP2 = pconn.tlsState == nil && t.Protocols != nil && (~t.Protocols).UnencryptedHTTP2() && !(~t.Protocols).HTTP1();
+        var unencryptedHTTP2 = pconn.tlsState == nil && t.Protocols != nil && t.Protocols.UnencryptedHTTP2() && !t.Protocols.HTTP1();
 
         if (isClientConn && (unencryptedHTTP2 || (pconn.tlsState != nil && pconn.tlsState.NegotiatedProtocol == "h2"u8))) {
             var (altProto, _) = Ꮡt.ᏑaltProto.Load()._<map<@string, RoundTripper>>(ᐧ);

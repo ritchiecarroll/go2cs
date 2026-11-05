@@ -1211,6 +1211,7 @@
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/ValueAdapterDynamicType.csproj" />
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/colorlike/ValueAdapterDynamicType.colorlike.csproj" />
     <Project Path="tests/Behavioral/ValuePunBits/ValuePunBits.csproj" />
+    <Project Path="tests/Behavioral/ValueReceiverArgumentOrder/ValueReceiverArgumentOrder.csproj" />
     <Project Path="tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />
@@ -1252,6 +1253,7 @@
   </Folder>
   <Folder Name="/tests/performance/target-projects/">
     <Project Path="tests/Performance/PerfChannel/PerfChannel.csproj" />
+    <Project Path="tests/Performance/PerfDeferPanic/PerfDeferPanic.csproj" />
     <Project Path="tests/Performance/PerfFieldView/PerfFieldView.csproj" />
     <Project Path="tests/Performance/PerfFib/PerfFib.csproj" />
     <Project Path="tests/Performance/PerfIface/PerfIface.csproj" />

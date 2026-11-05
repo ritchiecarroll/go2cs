@@ -156,7 +156,7 @@ internal static void Main() {
     fmt.Println("recv plain  :", rb.PlainRecv());
 
     var rq = Ꮡ(new Box(new Rect(0, 16), 6));
-    fmt.Println("recv via ptr:", (~rq).BumpedRecv(), "caller:", rq.Tag);
+    fmt.Println("recv via ptr:", rq.BumpedRecv(), "caller:", rq.Tag);
 
     Bumper iface = new Box(new Rect(0, 16), 6);
     fmt.Println("recv iface  :", iface.BumpedRecv());

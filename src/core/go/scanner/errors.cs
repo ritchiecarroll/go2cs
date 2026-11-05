@@ -106,7 +106,7 @@ public static @string Error(this ErrorList p) {
         return noErrorsˢ;
     }
     case 1: {
-        return (~p[0]).Error();
+        return p[0].Error();
     }}
     return fmt.Sprintf("%s (and %d more errors)"u8, p[0].OrTypedNil(), len(p) - 1);
 }

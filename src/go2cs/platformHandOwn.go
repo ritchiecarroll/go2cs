@@ -55,6 +55,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -257,6 +258,16 @@ func applyHandOwnPlacement(placement handOwnPlacement) (int, int, error) {
 	for _, name := range []string{fileName, fileName + ".auto"} {
 		contents, found, err := readSingleHandOwnCopy(placement.candidates, name)
 
+		// Differing copies of the `.cs.auto` sibling are not two hand-maintained copies: the sibling is the converter's
+		// emission, and the companion merge keeps one per GOOS folder where a FLAT hand-own's emission differs by GOOS
+		// (mergeReviewSiblings). It stays where that merge put it. A single agreed copy is still carried, which keeps a
+		// hand-own that moves folders together with its sibling in one merge.
+		var differing *handOwnCopiesDiffer
+
+		if err != nil && name != fileName && errors.As(err, &differing) {
+			continue
+		}
+
 		if err != nil {
 			return written, removed, err
 		}
@@ -301,6 +312,16 @@ func applyHandOwnPlacement(placement handOwnPlacement) (int, int, error) {
 	return written, removed, nil
 }
 
+// handOwnCopiesDiffer is readSingleHandOwnCopy's refusal: two copies of one file that disagree.
+type handOwnCopiesDiffer struct {
+	name, first, second string
+}
+
+func (e *handOwnCopiesDiffer) Error() string {
+	return fmt.Sprintf("hand-owned file %q exists at %q and %q with DIFFERENT contents; "+
+		"layout L3 cannot choose between two hand-maintained copies — reconcile them first", e.name, e.first, e.second)
+}
+
 // readSingleHandOwnCopy reads the one copy of a hand-owned file the candidate directories hold. Two
 // copies that disagree are an ERROR rather than a first-wins choice: a hand-owned file duplicated
 // across per-GOOS folders is hand-maintained in each, so silently propagating one over the other is
@@ -327,9 +348,7 @@ func readSingleHandOwnCopy(candidates []string, name string) ([]byte, bool, erro
 		}
 
 		if string(found) != string(contents) {
-			return nil, false, fmt.Errorf("hand-owned file %q exists at %q and %q with DIFFERENT contents; "+
-				"layout L3 cannot choose between two hand-maintained copies — reconcile them first",
-				name, source, filePath)
+			return nil, false, &handOwnCopiesDiffer{name: name, first: source, second: filePath}
 		}
 	}
 

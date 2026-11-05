@@ -315,9 +315,9 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:52#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:36#201bcf and UnsafeOperations.cs.target:26#216378; AddressOfParamWrite/main.cs.target:159#3e49fc; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:328#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:106#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:14#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:19#4be793, ChannelRendezvous/main.cs.target:22#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:261-262#a94661; SStringTwinPilot/main.cs.target:33#034d50; src/core/encoding/json/package_info.cs:14#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1175#a8d8ac), ChannelRendezvous/main.cs.target:23#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:34#6193c1, ChannelRendezvous/main.cs.target:24#e54771; GoCallVariations.cs.target:9#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:40#af46cf; src/core/io/fs/sub.cs:83#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:48#810daf; ExprSwitch.cs.target:245#743672; AppendOfMake/AppendOfMake.cs.target:70#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:41#2a5223;
-DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:38#eed889; AdapterNameInterfaceCollision/main.cs.target:25#b09b5a; GoCallVariations.cs.target:43#1baedb; GoCallVariations.cs.target:44#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:52#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:36#201bcf and UnsafeOperations.cs.target:26#216378; NilPointerValueReceiverCall/main.cs.target:61#0e574a; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:328#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:107#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:14#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:19#4be793, ChannelRendezvous/main.cs.target:22#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:261-262#a94661; SStringTwinPilot/main.cs.target:33#034d50; src/core/encoding/json/package_info.cs:14#3f709d;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1189#a8d8ac), ChannelRendezvous/main.cs.target:23#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:34#6193c1, ChannelRendezvous/main.cs.target:24#e54771; GoCallVariations.cs.target:9#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:40#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:50#810daf; ExprSwitch.cs.target:253#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:41#2a5223;
+DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:40#eed889; AdapterNameInterfaceCollision/main.cs.target:25#b09b5a; GoCallVariations.cs.target:43#1baedb; GoCallVariations.cs.target:44#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#9f1df3, ж.FieldRefBox.cs:80#8f6484, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:305#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:82#c69f13).
 Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.Ꮡoff);` for Go PointerToPointer.go:49 `PrintValPtr(&b.off)`; the static field-reference members are generated by src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2085#94522c (FieldReferences). ᒐdone: NamedReturnDefer/main.cs.target:89#c704c8; [GoRecv]: ReservedNameShadows/main.cs.target:60#b558a4.
@@ -332,7 +332,7 @@ _ΔpN: src/go2cs/visitFuncDecl.go:1394-1408#03b3c7 and :2952-2960#701c82; :60-68
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:512#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:368-376#853c51).
 A member golib adds itself: src/core/golib/array.cs:571 `public array<T> ΔClone()`.
-The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:75-79#b0ed6c and :124#941a6a.
+The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:86-90#b0ed6c and :144#941a6a.
 Set‿ example: NamedMapMethodShadow/main.cs.target:100#7fd7fe (a user package, so plain literals).
 lazyᴛ_Lu (the ᴛ row's holder example): src/core/unicode/tables.cs:2887 `[GoLazy] partial class lazyᴛ_Lu {`. -->
 
@@ -426,7 +426,7 @@ code, and the section that explains it in full.
 |---|---|---|---|
 | `ж<T>`, `StandardBox<T>` | Go pointer `*T`: a golib heap box (read "zhe"). `StandardBox<T>` is the class a new box is created as when it holds its own value; other box kinds point into existing storage, such as an array element, a struct field or native memory | `ж<accum> Ꮡa`, `new StandardBox<Outer>(default(Outer))` | [Pointers](#pointers) |
 | `Ꮡ` | Address-of `&x`. As a prefix: a variable that holds a box, or a field's generated address property, Go's `&s.f` | `Ꮡ(new accum())`, `ᏑgOuter`, `Ꮡb.Ꮡoff` for `&b.off` | [Pointers](#pointers) |
-| `~p` | Reads the whole value through a pointer, a copy, and panics on nil like Go's `*p` | `(~rq).BumpedRecv()`, a value method called on a copy | [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing) |
+| `~p` | Reads the whole value through a pointer, a copy, and panics on nil like Go's `*p` | `var recvʗ1 = ~p;`, the copy a method value `p.Hello` binds | [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing) |
 | `Δ` prefix | A name renamed to avoid a clash with a golib name, a method, `Main` or a namespace. go2cs and golib also use it for members they add themselves | `ΔGoFrame`, `ΔMonth`, `ΔMain`, `using Δio = io_package;` (`go.io` is also a namespace), golib's `array<T>.ΔClone()` | The naming rules in this section |
 | `Δ1` suffix | A second declaration of the same name: a variable that shadows an outer one, or a repeated `init` function | `hourΔ1`, `initΔ1` | [Shadowing](#short-variable-redeclaration-shadowing); repeated `init`: [Functions and Methods](#functions-and-methods) |
 | `ʗ1` suffix | A copy of a variable, taken for the lambda that uses it | `var f1ʗ1 = f1;` | [Function Values and Closures](#function-values-and-closures) |
@@ -1394,7 +1394,7 @@ such an initializer reads is always built on its first read too, so it has a hol
 the ordered static constructor. When every var a package would move there is built on its first read instead,
 the conversion writes no `package_init.cs` for the package, and removes one that an earlier conversion wrote.
 <!-- src/go2cs/initOrderOperations.go:504 `func retireStalePackageInitFile(outputDir string) error {`; across
-     -platforms targets: src/go2cs/platformEmit.go:1337 `func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`,
+     -platforms targets: src/go2cs/platformEmit.go:1541 `func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`,
      guarded by TestMergeRetiresAPackageInitNoTargetEmitted (src/go2cs/platformPackageInitRetire_test.go). -->
 
 **A var that reads another package's var needs no ordering.** Each Go package is its own C# class.
@@ -1800,7 +1800,7 @@ also gets `go.lib`, the [golib runtime](#the-golib-runtime-library), and `go.gen
 [source generators](#source-generators). The program's own packages stay project references. A program
 that imports `fmt` gets these lines in its `.csproj`:
 
-<!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:405,408,516#a5a0d6 -->
+<!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:408,411,519#a5a0d6 -->
 <!-- source (not checked): the three lines src/go2cs/moduleConverter_integration_test.go:264-266 (`<PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />`) asserts, which it holds as Go string literals -->
 ```xml
 <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
@@ -1811,7 +1811,7 @@ that imports `fmt` gets these lines in its `.csproj`:
 **`$(GoStdLibVersion)` follows the Go minor doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it to that minor with a float. For
 example, Go 1.N.P gives `1.N.*`, and restore takes the newest published `1.N.x.y` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:836-837 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:310 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:836-837 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:157-165#813dcf); test: src/go2cs/moduleConverter_integration_test.go:310 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
@@ -6446,9 +6446,11 @@ A box method such as `initSelf` takes the box directly. A `this ref` method such
 ```
 <!-- builtin Ꮡ: src/core/golib/builtin.cs:2468#d7402b (public static ж<T> Ꮡ<T>(T target)) -->
 
-**A value method called on a pointer runs on a copy, as in Go.** The call reads the value first with `~`.
-golib overloads C#'s `~` operator on `ж<T>` to mean Go's `*p`, so `~pb` is not a bitwise NOT. Here `pb`
-points at `PeopleByAge`, a named slice type whose `Len` method has a value receiver, and `@new<T>()` is Go's `new(T)`:
+**A value method called on a pointer runs on a copy, as in Go, and the call is written as Go writes it.** Here
+`pb` points at `PeopleByAge`, a named slice type whose `Len` method has a value receiver, and `@new<T>()` is Go's
+`new(T)`. go2cs-gen gives `Len` a twin over the box that reads the value with `~` and calls `Len` on that copy,
+after the call's arguments are evaluated, which is when Go takes the copy. golib overloads C#'s `~` operator on
+`ж<T>` to mean Go's `*p`, so `~p` is not a bitwise NOT:
 
 <!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.go:231-233 -->
 ```go
@@ -6460,7 +6462,7 @@ points at `PeopleByAge`, a named slice type whose `Len` method has a value recei
 ```csharp
     var pb = @new<PeopleByAge>();
     …
-    fmt.Println((~pb).Len());
+    fmt.Println(pb.Len());
 ```
 
 **On a value, Go takes the address for you, and so does the converted code.** In this complete program,
@@ -10529,7 +10531,7 @@ At a glance:
 | `&a[i]` | `Ꮡa.at<T>(i)` | The address of an array element. |
 | `&x.f` | `Ꮡx.Ꮡf` | The address of a struct field, through its generated address property. |
 
-<!-- table sources, in row order (paths under src/tests/Behavioral/): PointerToPointer/PointerToPointer.cs.target:19-20#451253 (ж<ж<nint>>); PointerToPointer.cs.target:24#06ea55 (ptr = Ꮡa); IncDecPointerField/main.cs.target:21#bc1189 (Ꮡ(new counter(n: 5))); PointerToArrayElementAddress/main.cs.target:20#973281 (@new<grid>()); AddressOfParamWrite/main.cs.target:159#3e49fc ((~rq)) and PointerToPointer.cs.target:32#c84a6c (ptr.Value for a whole-value *ptr read, Go PointerToPointer.go:35#e45beb); SlicePointerIdentity/main.cs.target:42#04fe83 (p.Value = 42); SlicePointerIdentity/main.cs.target:41#963cd5 (Ꮡ(s, 1)); PointerToArrayElementAddress/main.cs.target:22#e5ae00 and ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 (`Ꮡa.at<nint>(2)`); PointerToPointer.cs.target:47#011070 (Ꮡb.Ꮡoff). `~` is ж<T>'s operator ~, src/core/golib/ж.cs:871#3d6147 (returns ValueSlot, throws the nil-dereference panic); `.Value` performs the same nil check (ж.cs:120-134#3e6cc3, ValueSlot is "identical to Value except it never throws"). box nil compare: src/tests/Behavioral/NilPointerParamMethods/main.cs.target:17#575444; `return nil` -> `return default`: same file :20#25320b -->
+<!-- table sources, in row order (paths under src/tests/Behavioral/): PointerToPointer/PointerToPointer.cs.target:19-20#451253 (ж<ж<nint>>); PointerToPointer.cs.target:24#06ea55 (ptr = Ꮡa); IncDecPointerField/main.cs.target:21#bc1189 (Ꮡ(new counter(n: 5))); PointerToArrayElementAddress/main.cs.target:20#973281 (@new<grid>()); NilPointerValueReceiverCall/main.cs.target:61#0e574a (~p, the copy a method value binds) and PointerToPointer.cs.target:32#c84a6c (ptr.Value for a whole-value *ptr read, Go PointerToPointer.go:35#e45beb); SlicePointerIdentity/main.cs.target:42#04fe83 (p.Value = 42); SlicePointerIdentity/main.cs.target:41#963cd5 (Ꮡ(s, 1)); PointerToArrayElementAddress/main.cs.target:22#e5ae00 and ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:149 (`Ꮡa.at<nint>(2)`); PointerToPointer.cs.target:47#011070 (Ꮡb.Ꮡoff). `~` is ж<T>'s operator ~, src/core/golib/ж.cs:871#3d6147 (returns ValueSlot, throws the nil-dereference panic); `.Value` performs the same nil check (ж.cs:120-134#3e6cc3, ValueSlot is "identical to Value except it never throws"). box nil compare: src/tests/Behavioral/NilPointerParamMethods/main.cs.target:17#575444; `return nil` -> `return default`: same file :20#25320b -->
 
 **An address-taken local has two names for one storage.** A converted Go pointer is a `ж<T>`
 box, a heap object, and a heap object cannot point at a C# local. So when Go takes a local's address, golib's
@@ -11125,9 +11127,12 @@ call that returns one over a byte array or byte slice, also reaches an array fie
      main.cs.target:79 `fmt.Println("returned:", got.Flags, got.of(reparse.ᏑPath).ElementRef(0), err);`.
      Guard: TestFieldAccessCrossesOneReturn (src/go2cs/fieldAccessReturn_test.go). -->
 
-A value-receiver method called through a pointer local is called on the copy `~p`. So the method gets
-its own copy of the value, exactly as in Go.
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:190-191; src/tests/Behavioral/AddressOfParamWrite/main.cs.target:159-160 (rq := &Box{...}; rq.BumpedRecv() becomes (~rq).BumpedRecv(), where BumpedRecv is a value method, main.go:90). The worked example is left out here because its golden uses unrelated glyphs; the reference covers it. -->
+A value-receiver method called through a pointer local is written `p.M()`, as in Go, and still works on its
+own copy of the value: the method's generated box twin copies `*p` after the call's arguments are evaluated, so an
+argument that writes through `p` is seen by the method, as in Go. A method named like a member of `ж<T>` keeps the
+explicit copy `(~p).M()`
+([Reference → Implicit Pointer Dereferencing](ConversionStrategies-Reference/implicit-dereferencing.md#implicit-pointer-dereferencing)).
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:190-191; src/tests/Behavioral/AddressOfParamWrite/main.cs.target:159-160 (rq := &Box{...}; rq.BumpedRecv() stays rq.BumpedRecv(), where BumpedRecv is a value method, main.go:90). Argument order: src/tests/Behavioral/ValueReceiverArgumentOrder/main.go (p.Show(set(10)) prints "10 10"). The worked example is left out here because its golden uses unrelated glyphs; the reference covers it. -->
 
 **A pointer method on a variable takes the variable's address for you.** A pointer-receiver method
 usually becomes a C# extension method whose receiver is `this ref T`
@@ -11255,7 +11260,7 @@ internal static void Main() {
 
 A chain reads as Go spells it too. Go's `b.next.data` passes through two pointers, `b` and `b.next`: `b.next`
 is the property on `b`'s box, which answers the `next` box, and `.data` is the property on that one.
-<!-- generator overload shape: src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:103-108#1c2d4b (ref var r = ref Ꮡr.DerefOrNull(); r.linkTo(...)); chain read also at src/tests/Behavioral/ReceiverPointerValue/main.go:64#fc25d0 -> main.cs.target:52#426b6c (a.next.data). initSelf/advance/chain/pair are direct-ж receivers (this ж<ring> Ꮡr, no [GoRecv]) at main.cs.target:12, 22, 30, 43#20836b. -->
+<!-- generator overload shape: src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:123-128#1c2d4b (ref var r = ref Ꮡr.DerefOrNull(); r.linkTo(...)); chain read also at src/tests/Behavioral/ReceiverPointerValue/main.go:64#fc25d0 -> main.cs.target:52#426b6c (a.next.data). initSelf/advance/chain/pair are direct-ж receivers (this ж<ring> Ꮡr, no [GoRecv]) at main.cs.target:12, 22, 30, 43#20836b. -->
 
 **Full detail:** [Reference → Implicit Pointer Dereferencing](ConversionStrategies-Reference/implicit-dereferencing.md#implicit-pointer-dereferencing) — how the converter decides that a selector base needs a dereference, promoted fields through a pointer local, nested and indexed write targets, and `*p.field` through parameters and receivers.
 
@@ -11847,7 +11852,7 @@ is the delegate's `Invoke`. So when a function's last statement calls a function
 function of the same package that reads its caller's frame, the converter marks the calling function too:
 on linux/amd64, a method marked `NoInlining` was measured to make no implicit tail call. For a marked
 pointer-receiver method, the `ж<T>` overload that `RecvGenerator` writes carries the same two attributes.
-<!-- go2cs-gen: src/gen/go2cs-gen/NoInliningPartialGenerator.cs:37#4a0c19 (AttributeFor), :68#3747bf (CallerFrameAttribute = "global::System.Security.DynamicSecurityMethod"), :242#113df9 (the declaring part takes AttributeFor(callerFrame); callerFrame is true when a public System.Security.DynamicSecurityMethodAttribute is in view, which golib declares: src/core/golib/DynamicSecurityMethodAttribute.cs, whose remarks name RequireSecObject and the VM's canTailCall). The ж<T> forwarder: src/gen/go2cs-gen/RecvGenerator.cs:51#984c99, :124#03de0e; Templates/ReceiverMethod/ReceiverMethodTemplate.cs:45-46#f0facf. The caller-side mark: src/go2cs/callerInliningAnalysis.go:340#4e8118 ("a [MethodImpl(NoInlining)] method makes no implicit tail call (measured on linux/amd64 ...)"), :454#df5783 (markTailCalledObservingValues). Guards: src/go2cs/tailCalledFuncValue_test.go:152#8d30b9 (TestTailCalledFuncValueKeepsTheCallersFrame); GolibTests TailCallFrameGuardTests. -->
+<!-- go2cs-gen: src/gen/go2cs-gen/NoInliningPartialGenerator.cs:37#4a0c19 (AttributeFor), :68#3747bf (CallerFrameAttribute = "global::System.Security.DynamicSecurityMethod"), :242#113df9 (the declaring part takes AttributeFor(callerFrame); callerFrame is true when a public System.Security.DynamicSecurityMethodAttribute is in view, which golib declares: src/core/golib/DynamicSecurityMethodAttribute.cs, whose remarks name RequireSecObject and the VM's canTailCall). The ж<T> forwarder: src/gen/go2cs-gen/RecvGenerator.cs:51#984c99, :124#03de0e; Templates/ReceiverMethod/ReceiverMethodTemplate.cs:56-57#f0facf. The caller-side mark: src/go2cs/callerInliningAnalysis.go:340#4e8118 ("a [MethodImpl(NoInlining)] method makes no implicit tail call (measured on linux/amd64 ...)"), :454#df5783 (markTailCalledObservingValues). Guards: src/go2cs/tailCalledFuncValue_test.go:152#8d30b9 (TestTailCalledFuncValueKeepsTheCallersFrame); GolibTests TailCallFrameGuardTests. -->
 
 A function literal cannot be `partial`, so a marked literal keeps the attribute itself:
 `var lit = [MethodImpl(MethodImplOptions.NoInlining)] @string () => here();`. A marked `init` keeps

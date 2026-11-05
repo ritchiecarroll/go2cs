@@ -43,7 +43,7 @@ internal static (uint64, count, uint64) shifts(uint64 x, nuint n, count c, ref h
     x.LshAssign(n);
     h.bits <<= 4;
     h.bits.RshAssign(n);
-    c <<= (int)(1);
+    c <<= 1;
     return (x, c, h.bits);
 }
 

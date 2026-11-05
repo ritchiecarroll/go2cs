@@ -42,7 +42,7 @@ public static nint PtrShadowCall(this ref Thing t, ж<Thing> other) {
     nint sum = t.Sum();
     {
         var tΔ1 = other;
-        sum += (~tΔ1).Sum();
+        sum += tΔ1.Sum();
     }
     return sum;
 }

@@ -753,7 +753,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
                 (zz, r, q, z) = (q, z, zz, r);
             }
 
-            v <<= (int)(1);
+            v <<= 1;
         }
 
         for (nint i = len(y) - 2; i >= 0; i--) {
@@ -773,7 +773,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
                     (zz, r, q, z) = (q, z, zz, r);
                 }
 
-                v <<= (int)(1);
+                v <<= 1;
             }
         }
 
@@ -867,10 +867,10 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         powers[1] = powers[1].trunc(x, logM);
         for (nint iΔ2 = 2; iΔ2 < (nint)(1 << (int)(n)); iΔ2 += 2) {
             var (p2, p, p1) = (Ꮡpowers.at<Δnat>(iΔ2 / 2), Ꮡpowers.at<Δnat>(iΔ2), Ꮡpowers.at<Δnat>(iΔ2 + 1));
-            p.ValueSlot = (~p).sqr(Ꮡstk, p2.ValueSlot);
-            p.ValueSlot = (~p).trunc(p.ValueSlot, logM);
-            p1.ValueSlot = (~p1).mul(Ꮡstk, p.ValueSlot, x);
-            p1.ValueSlot = (~p1).trunc(p1.ValueSlot, logM);
+            p.ValueSlot = p.sqr(Ꮡstk, p2.ValueSlot);
+            p.ValueSlot = p.trunc(p.ValueSlot, logM);
+            p1.ValueSlot = p1.mul(Ꮡstk, p.ValueSlot, x);
+            p1.ValueSlot = p1.trunc(p1.ValueSlot, logM);
         }
 
         // Because phi(2**logM) = 2**(logM-1), x**(2**(logM-1)) = 1,
@@ -1046,7 +1046,7 @@ internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
             } else if ((byte)d != 0) {
                 throw panic("math/big: buffer too small to fit value");
             }
-            d >>= (int)(8);
+            d >>= 8;
         }
     }
 

@@ -178,7 +178,6 @@ func insertProjectItemGroup(projectFileContents, itemGroup string) string {
 
 func insertFriendAssemblyAccess(projectFileContents string) string {
 	const anchor = "</PropertyGroup>"
-	const friendItemGroup = "\r\n\r\n  <!-- Same-package Go tests run in a separate assembly but retain package-private access. -->\r\n  <ItemGroup>\r\n    <InternalsVisibleTo Include=\"$(AssemblyName).tests\" />\r\n    <!-- reflect.StructOf mints synthesized structs into this fixed-name dynamic assembly; a field type that is internal here cannot be loaded from there without the grant. -->\r\n    <InternalsVisibleTo Include=\"go2cs.SynthesizedStructs\" />\r\n  </ItemGroup>"
 
 	idx := strings.Index(projectFileContents, anchor)
 
@@ -187,8 +186,12 @@ func insertFriendAssemblyAccess(projectFileContents string) string {
 	}
 
 	insertAt := idx + len(anchor)
-	return projectFileContents[:insertAt] + friendItemGroup + projectFileContents[insertAt:]
+	return projectFileContents[:insertAt] + friendAssemblyAccessGroup + projectFileContents[insertAt:]
 }
+
+// friendAssemblyAccessGroup is the item group insertFriendAssemblyAccess places after the project file's first
+// </PropertyGroup>. The three-target merge reads it too (friendAccessUnion).
+const friendAssemblyAccessGroup = "\r\n\r\n  <!-- Same-package Go tests run in a separate assembly but retain package-private access. -->\r\n  <ItemGroup>\r\n    <InternalsVisibleTo Include=\"$(AssemblyName).tests\" />\r\n    <!-- reflect.StructOf mints synthesized structs into this fixed-name dynamic assembly; a field type that is internal here cannot be loaded from there without the grant. -->\r\n    <InternalsVisibleTo Include=\"go2cs.SynthesizedStructs\" />\r\n  </ItemGroup>"
 
 // validationPackBlock renders the .csproj block that packs a converted stdlib package's versioned
 // validation proof sheet into its .nupkg as VALIDATION.md, or "" for any other conversion.

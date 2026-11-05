@@ -151,11 +151,12 @@ public class MethodSetKeepTests
         Assert.AreEqual(0, KeptOnToString(generated, "Plain").Length, "a type without methods keeps nothing");
 
         // Each name keeps the receiver methods golib binds: P's covers both its `this ref P` method and the ж<P> twin
-        // RecvGenerator writes, and the parameter-less form resolves through the package class alone.
+        // RecvGenerator writes, Kind's and S's cover their value methods' ж twins, and the parameter-less form resolves
+        // through the package class alone.
         INamedTypeSymbol package = output.GetTypeByMetadataName("go.mtest_package")!;
         string[] stringReceivers = [.. package.GetMembers("String").OfType<IMethodSymbol>().Select(method => method.Parameters[0].Type.ToDisplayString()).OrderBy(name => name, StringComparer.Ordinal)];
 
-        CollectionAssert.AreEqual(new[] { "go.mtest_package.Kind", "go.mtest_package.P", "go.mtest_package.S", "go.ж<go.mtest_package.P>" }, stringReceivers,
+        CollectionAssert.AreEqual(new[] { "go.mtest_package.Kind", "go.mtest_package.P", "go.mtest_package.S", "go.ж<go.mtest_package.Kind>", "go.ж<go.mtest_package.P>", "go.ж<go.mtest_package.S>" }, stringReceivers,
             "the kept name covers every receiver form, the twin included: " + string.Join(", ", stringReceivers));
     }
 
