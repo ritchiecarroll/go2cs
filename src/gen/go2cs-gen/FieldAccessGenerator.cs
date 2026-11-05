@@ -76,6 +76,14 @@ public class FieldAccessGenerator : ISourceGenerator
 
     private static readonly HashSet<string> s_collisionNames = LoadCollisionNames();
 
+    /// <summary>
+    /// Fully qualified, keeping a nullable reference type's <c>?</c>. The generated file opens <c>#nullable enable</c>,
+    /// so a property typed <c>ref global::System.Type</c> over a <c>Type?</c> field is CS8619 at the property (91 in a
+    /// Release build of reflect's closure). A type compiled without annotations prints as before.
+    /// </summary>
+    private static readonly SymbolDisplayFormat s_typeFormat =
+        SymbolDisplayFormat.FullyQualifiedFormat.AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
     public void Initialize(GeneratorInitializationContext context)
     {
         context.RegisterForSyntaxNotifications(() => new FieldAccessRecordFinder());
@@ -146,7 +154,7 @@ public class FieldAccessGenerator : ISourceGenerator
             if (properties.Count == 0)
                 continue;
 
-            string typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string typeName = type.ToDisplayString(s_typeFormat);
 
             source.Append(first ? "\r\n" : "\r\n\r\n");
             source.Append($"    extension{TypeParameterList(type)}(global::go.{PointerPrefix}<{typeName}> {ReceiverName}){Constraints(type)}\r\n    {{");
@@ -205,7 +213,7 @@ public class FieldAccessGenerator : ISourceGenerator
     {
         List<string> properties = [];
         HashSet<string> served = new(StringComparer.Ordinal);
-        string typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        string typeName = type.ToDisplayString(s_typeFormat);
         bool foreign = !type.Locations.Any(location => location.IsInSource);
         bool header = IsHeaderShaped(type);
 
@@ -625,7 +633,7 @@ public class FieldAccessGenerator : ISourceGenerator
     private static string TypeName(ITypeSymbol type, INamedTypeSymbol owner)
     {
         if (!ContainsErrorType(type))
-            return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            return type.ToDisplayString(s_typeFormat);
 
         switch (type)
         {
@@ -641,7 +649,7 @@ public class FieldAccessGenerator : ISourceGenerator
                         : "global::";
                 return $"{(container == "global::" ? container : container + ".")}{EscapeCsKeyword(named.Name)}{TypeArguments(named, owner)}";
             default:
-                return type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                return type.ToDisplayString(s_typeFormat);
         }
     }
 
