@@ -382,3 +382,97 @@ above confirmed.
 ### 8.5 Item 7
 
 TlsHandshake's AOT at 2.4x its JIT: QUEUED behind item 4 (COORD), with no seat yet. §8.1 corrects how §6 stated it.
+
+---
+
+## 9. Appendix, 2026-11-05: the cross-box literal-policy check (the owner's "Run i9 check")
+
+Appended after §8. The owner asked for this check before ruling on the literal policy (§8.4.4). The question: G read
+hoisted/plain (H/P) 0.894 on Native AOT, while the i9's 10-30 macro read about 1.004. With the same images on both
+boxes, is the difference the box or the harness? The owner then ruled **"Keep plain"** with this result in hand:
+programs stay plain by default, the standard library stays hybrid, and `-hoist-literals` stays the opt-in.
+
+The raw files are in [`DATA-hop126-perf/xbox/`](DATA-hop126-perf/xbox/):
+- `i9-run1/` to `i9-run3/`, the i9's own output folders, copied over the owner-mapped drive. Runs 2 and 3 are
+  byte-identical to the bundle's `out-<timestamp>` folders;
+- `G-v1/` and `G-v2/`, G's same-script runs (`G-v1/run.log` line 1: the host name is redacted to G; v1's `run.sh` printed it, and later versions do not);
+- `protocol/`: each version's `run.sh` and `PROTOCOL` text, `census.ps1`, `PREDICTION.txt`, the v2 and v3 manifests,
+  the v3 reader `v3read.sh` and armab's source.
+
+### 9.1 The bundle
+
+G staged the four PerfStringMatch Native AOT images from the §8.4.4 window, byte-identical to that window's log:
+
+| arm | what it is | sha256 (prefix) |
+|:--|:--|:--|
+| P | the default plain emission, with the released golib | `3a7b4d5e1aee1aa8` |
+| H | `-hoist-literals` | `ad83322c646f40d9` |
+| C0 | P's program, with golib at master `9d5d67c735` | `729ba8ef34fa459d` |
+| C | P's program, with golib at H's cheaper-hit seat `b061a01052` | `5f6c396f238c610c` |
+
+The bundle also carries armab, the 1.24.13 Go Fib/Sieve control binaries, `boot.sh` and `run.sh`, plus the protocol and
+the prediction. G pushed it to the i9 at `C:\go2cs-perf\xbox-literal\` over the owner-mapped drive; the i9 has no
+route into G. Its `manifest.sha256` went v1 `f0fda1f7…`, then v2 `1fe9d45a…`, then v3 `d04cb912…`; the images
+never changed. Each version was verified over the drive, and `run.sh` re-checks the manifest on the box itself before
+timing.
+
+The protocol is G's 04:28 window repeated:
+- a box census, a discarded warm control, then the control start;
+- the 8 arms, each image twice (A and AA), interleaved with the order alternating;
+- the control end, the box census, and the Fib bootstrap.
+
+### 9.2 The protocol versions, each stated BEFORE the run it governed
+
+- **v1** (11 rounds). Valid only if: rc 0; 0 build/toolchain processes at both ends on AC power; each A/A pair within
+  1%; and the Fib control's bootstrap 95% interval holds 0.
+- **v2** (21 rounds), amended after run1. A `dotnet.exe` whose command line runs `pwsh.dll` is an interactive shell. It
+  is admitted if the same PID is listed at both ends and its CPU time grows by less than 1 s. G proved the
+  classifier both ways: two dotnet-hosted pwsh processes were admitted, and a live dotnet running armab was counted.
+  The 1% A/A rule was kept.
+- **v3** (21 rounds), amended after run2, for run3 onward only.
+  - Validity: every arm's A/A gap is under 3%; above that, the run is disturbed and void.
+  - Reading: the plan's §8 rule. An arm's value is the mean of its A and AA medians. A ratio's floor is the largest of
+    its two arms' A/A gaps and IQRs, and the ratio is "moved" only if |ratio − 1| exceeds that floor.
+  - The reason: v1/v2's fixed 1% had been calibrated on G, whose AOT A/A gaps are 0.02-0.66%. The i9 showed one arm
+    above 1% per run, a different arm each time.
+
+### 9.3 The runs
+
+| run | box | protocol | verdict | reason |
+|:--|:--|:--|:--|:--|
+| i9 run1 | i9-13900K | v1 | **INVALID**, not read | rule 2: the owner's idle dotnet-hosted pwsh terminal counted as a toolchain process; rule 3: C0 1.57%, C 1.21% |
+| i9 run2 | i9-13900K | v2 | **INVALID**, not read | rule 3: P 1.26% (the i9 computed 1.24%, the same gap measured from the other side) |
+| i9 run3 | i9-13900K | v3 | **VALID** | rc 0; 0 processes; the pwsh host grew +0.04 s; A/A 0.13-0.27%; Fib −0.28% [−1.80%, +4.54%] |
+| G v1 | AMD 6650U | v1 | valid | the bundle's self-check before shipping; A/A 0.09-0.31%; Fib +0.55% [−3.33%, +2.43%] |
+| G v2 | AMD 6650U | v2, and valid under v3 too | valid | A/A 0.08-0.66%; Fib −0.67% [−2.49%, +6.35%] |
+
+The i9's Sieve control (reported only) drifted +1.02% [+0.02%, +2.02%] in run3, not holding 0.
+
+### 9.4 The result: both boxes under v3
+
+PerfStringMatch, Native AOT, the same four images. Each arm is the mean of its A and AA medians, in ms:
+
+| box | P | H | C0 | C |
+|:--|--:|--:|--:|--:|
+| G (AMD Ryzen 5 PRO 6650U), v2 run | 1288.5 | 1171.8 | 1284.5 | 1245.9 |
+| i9 (Intel i9-13900K), run3 | 582.1 | 550.0 | 584.9 | 581.9 |
+
+| box | H/P | C/C0 | C0/P |
+|:--|:--|:--|:--|
+| G | **0.909**, floor 1.2%: moved | **0.970**, floor 1.6%: moved | 0.997, floor 1.6%: within |
+| i9 | **0.945**, floor 1.8%: moved | 0.995, floor 1.6%: within | 1.005, floor 1.6%: within |
+
+G's other valid readings of the same images were H/P 0.894 and 0.899, and C/C0 0.958 and 0.959.
+
+**The prediction, scored as worded** (`protocol/PREDICTION.txt`, written before any i9 run). It said H/P on the i9 in
+`[0.86, 0.93]`; if H/P were 0.97 or above instead, the cause was the box. **FAILED HIGH:** the reading was 0.945, which
+also falls short of the 0.97 box line. So both are true: the images carry the gap, and the box sets its size.
+
+**What the owner ruled with:**
+- With the shipping commit's images, hoisting wins under Native AOT on both boxes, by about 9% (G) and 5.5% (i9).
+- The 10-30 macro's 1.004 does not reproduce on the i9 itself with these images. That reading belonged to its own
+  images at master `893d48976f`.
+- H's cheaper cache hit (`b061a01052`) is box-dependent: 3% on G, within the floor on the i9.
+- The rest of master's golib drift (C0/P) is within the floor on both boxes.
+- The residual price of "programs plain" on a literal-heavy row is about 5-9% under Native AOT, and larger under the
+  JIT on G (H/P 0.752, §8.4.4). The i9 timed AOT only.
