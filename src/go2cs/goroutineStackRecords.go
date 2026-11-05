@@ -52,6 +52,21 @@ func (v *Visitor) boundedGoRecordable() bool {
 	return v.fset != nil && strings.TrimSpace(v.options.positionMapTarget) != ""
 }
 
+// stripPositionSentinelsKeepingBounded is stripPositionSentinels for a site that REWRITES captured text from the stripped
+// form (convFuncLit's single-return collapse): every sentinel goes but a BOUNDED one, which is the only mark its go
+// statement has. Dropped, the statement would lose both its visible argument and its record, and its goroutine would
+// start on the default reservation instead of the one the converter proved it needs no more than.
+func stripPositionSentinelsKeepingBounded(fragment string) string {
+	bounded := boundedGoSentinel()
+	parts := strings.Split(fragment, bounded)
+
+	for i := range parts {
+		parts[i] = stripPositionSentinels(parts[i])
+	}
+
+	return strings.Join(parts, bounded)
+}
+
 // boundedGoSentinel marks the start of a bounded `goǃ` invocation. Write it immediately before `goǃ(`.
 func boundedGoSentinel() string {
 	return PositionSentinel + BoundedGoSentinelMark + PositionSentinel

@@ -69,6 +69,29 @@ func seq(yield func(int) bool) {
 	}
 }
 
+// runtime/pprof's BenchmarkGoroutine shape: the literal a single-return literal returns holds the go statement, and the
+// outer literal collapses to an expression-bodied local function.
+func idle(n int, fn func(int)) {
+	withIdle := func(n int, fn func(int)) func(int) {
+		return func(k int) {
+			c := make(chan int)
+			var ready, done sync.WaitGroup
+			defer func() {
+				close(c)
+				done.Wait()
+			}()
+			for i := 0; i < n; i++ {
+				ready.Add(1)
+				done.Add(1)
+				go func() { ready.Done(); <-c; done.Done() }() // BOUNDED: inside the literal a collapsed literal returns
+			}
+			ready.Wait()
+			fn(k)
+		}
+	}
+	withIdle(n, fn)(1)
+}
+
 func worker(ch chan int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	ch <- chain(1)
@@ -90,6 +113,8 @@ func main() {
 	go f()                                     // UNBOUNDED: a func value
 	go func() { for i := range seq { ch <- i } }() // UNBOUNDED: range over func
 	go fmt.Println("hi")                       // UNBOUNDED: fmt reaches interface calls
+
+	idle(3, func(k int) { ch <- k })
 
 	for range 10 {
 		<-ch
@@ -154,8 +179,8 @@ func TestGoroutineStackBoundedProvesOnlyNonRecursiveStaticCallGraphs(t *testing.
 		})
 	}
 
-	if verdicts != 9 {
-		t.Fatalf("read %d go statements, want 9: the fixture and the walk disagree", verdicts)
+	if verdicts != 10 {
+		t.Fatalf("read %d go statements, want 10: the fixture and the walk disagree", verdicts)
 	}
 }
 
@@ -212,8 +237,10 @@ func TestABoundedGoroutineIsRecordedInThePackageInfoNotInItsStatement(t *testing
 
 	records := regexp.MustCompile(`GoBoundedGoroutine\("main\.cs", (\d+), (\d+)\)\]`).FindAllStringSubmatch(packageInfo, -1)
 
-	if len(records) != 3 {
-		t.Fatalf("want exactly the 3 bounded go statements recorded, got %d:\n%s", len(records), packageInfo)
+	// The fourth sits inside a literal that a single-return literal returns, whose collapse to an expression body
+	// rewrites the captured text: its record must survive the rewrite.
+	if len(records) != 4 {
+		t.Fatalf("want exactly the 4 bounded go statements recorded, got %d:\n%s", len(records), packageInfo)
 	}
 
 	lines := strings.Split(mainCs, "\n")
