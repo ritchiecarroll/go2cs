@@ -115,7 +115,7 @@ internal static T sum<T>()
 {
     T total = GoZero<T>();
 
-    foreach (var (_, v) in slice<T>([ConvertToType<T>(1), ConvertToType<T>(2), ConvertToType<T>(3)])) {
+    foreach (var (_, v) in range(slice<T>([ConvertToType<T>(1), ConvertToType<T>(2), ConvertToType<T>(3)]))) {
         total += v;
     }
 

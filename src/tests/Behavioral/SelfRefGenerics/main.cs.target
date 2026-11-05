@@ -29,7 +29,7 @@ public static A Sum<A>(params Span<A> xsʗp)
     var xs = xsʗp.sslice();
 
     A total = GoZero<A>();
-    foreach (var (_, x) in xs) {
+    foreach (var (_, x) in range(xs)) {
         total = total.Add(x);
     }
     return total;
@@ -71,7 +71,7 @@ public static T Least<T>(this ref MinSet<T> s)
     where T : Ordered<T>
 {
     var m = s.items[0];
-    foreach (var (_, x) in s.items[1..]) {
+    foreach (var (_, x) in range(s.items[1..])) {
         m = Min(m, x);
     }
     return m;

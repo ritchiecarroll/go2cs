@@ -16,7 +16,7 @@ partial struct List /*[]nint*/;
 
 public static nint Sum(this List l) {
     nint t = 0;
-    foreach (var (_, v) in l) {
+    foreach (var (_, v) in range<nint>(l)) {
         t += v;
     }
     return t;

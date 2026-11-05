@@ -53,7 +53,7 @@ internal static partial void table() {
         new(nint () => 2, "second literal in the table")
     ]);
 
-    foreach (var (_, row) in rows) {
+    foreach (var (_, row) in range(rows)) {
         fmt.Printf("%-48s %s\n"u8, row.label + ":", nameOf(row.fn));
     }
 }

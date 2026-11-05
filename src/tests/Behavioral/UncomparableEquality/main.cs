@@ -132,7 +132,7 @@ internal static void Main() {
         _ = AreEqual(nfʗ1, nfʗ1);
     });
 
-    any ws = new withSlice(1, slice<nint>([2]));
+    any ws = new withSlice(1, [2]);
     var wsʗ1 = ws;
     check("struct w/ slice", () => {
         _ = AreEqual(wsʗ1, wsʗ1);
@@ -160,7 +160,7 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("== array length is part of the reported type ==");
 
-    any aos = new slice<nint>[]{slice<nint>([1])}.array();
+    any aos = new slice<nint>[]{[1]}.array();
     var aosʗ1 = aos;
     check("array of slice", () => {
         _ = AreEqual(aosʗ1, aosʗ1);
@@ -207,7 +207,7 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("== non-empty interface ==");
 
-    error e = new sliceErr(slice<nint>([1]));
+    error e = new sliceErr([1]);
     var eʗ1 = e;
     check("error w/ slice", () => {
         _ = AreEqual(eʗ1, eʗ1);

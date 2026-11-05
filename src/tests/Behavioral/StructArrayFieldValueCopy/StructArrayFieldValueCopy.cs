@@ -11,7 +11,7 @@ partial struct digest {
 }
 
 internal static void bump(this ref digest d) {
-    foreach (var i in range(d.h)) {
+    foreach (var i in range(len(d.h))) {
         d.h[i]++;
     }
     d.x[0]++;
@@ -113,7 +113,7 @@ internal static void rangeCopy() {
     var d = newDigest();
     var arr = new digest[]{d.ΔClone(), d.ΔClone()}.array();
 
-    foreach (var (_, vᴛ1) in arr.ΔRangeSnapshot()) {
+    foreach (var (_, vᴛ1) in range(arr.ΔRangeSnapshot())) {
         var g = vᴛ1.ΔClone();
 
         g.bump();

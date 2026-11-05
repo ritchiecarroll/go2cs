@@ -18,7 +18,7 @@ internal static void secondWriteOps() {
 
     nint sum = 0;
 
-    foreach (var (_, t) in tests) {
+    foreach (var (_, t) in range(tests)) {
         {
             var (op, ok) = t._<secondWriteOps_readOp>(ᐧ); if (ok) {
                 sum += op.cnt;

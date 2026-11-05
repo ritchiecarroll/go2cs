@@ -17,7 +17,7 @@ internal static void Main() {
     nint sum(params ꓸꓸꓸnint numsʗp) {
         var nums = numsʗp.sslice();
         nint total = 0;
-        foreach (var (_, n) in nums) {
+        foreach (var (_, n) in range(nums)) {
             total += n;
         }
         return total;

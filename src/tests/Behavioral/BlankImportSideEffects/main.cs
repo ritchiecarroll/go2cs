@@ -17,7 +17,7 @@ internal static nint countAtInit;
 internal static void Main() {
     fmt.Println("count at init:", countAtInit);
 
-    foreach (var (_, name) in slice<@string>(["jpeglike", "pnglike", "giflike"])) {
+    foreach (var (_, name) in range(slice<@string>(["jpeglike", "pnglike", "giflike"]))) {
         {
             var (describe, ok) = registry.Lookup(name); if (ok) {
                 fmt.Println("found:", name, "=>", describe);

@@ -14,7 +14,7 @@ internal static void Main() {
     var c = slice<nuint>([0, 1, 63, 64, 65, 200]);
     uint64 u = 0x8000000000000001UL;
 
-    foreach (var (_, k) in c) {
+    foreach (var (_, k) in range(c)) {
         fmt.Println(u.Rsh(k), u.Lsh(k));
     }
 
@@ -23,7 +23,7 @@ internal static void Main() {
     fmt.Println(neg.Rsh(c[3]), neg.Rsh(c[5]), pos.Rsh(c[3]));
 
     uint32 u32 = 0xDEADBEEFU;
-    foreach (var (_, k) in slice<nuint>([31, 32, 40])) {
+    foreach (var (_, k) in range(slice<nuint>([31, 32, 40]))) {
         fmt.Println(u32.Rsh(k));
     }
 
@@ -34,12 +34,12 @@ internal static void Main() {
     const nuint W = 64;
     nuint h = c[0];
     fmt.Println((nuint)(w >> (W - h)), (nuint)(w << (W - h)));
-    foreach (var (_, k) in c) {
+    foreach (var (_, k) in range(c)) {
         fmt.Println((nuint)(w >> k), (nuint)(w << k));
     }
 
     halfword hw = 0xDEADBEEFU;
-    foreach (var (_, k) in slice<nuint>([31, 32, 40])) {
+    foreach (var (_, k) in range(slice<nuint>([31, 32, 40]))) {
         fmt.Println((uint32)(hw >> k));
     }
 
@@ -48,7 +48,7 @@ internal static void Main() {
     fmt.Println((int64)(sw >> c[3]), (int64)(sw >> c[5]), (int64)(swp >> c[3]));
 
     var far = slice<nuint>([(nuint)1 << 32, (nuint)(4294967296L + 1)]);
-    foreach (var (_, k) in far) {
+    foreach (var (_, k) in range(far)) {
         fmt.Println((uint32)(hw << k), (uint32)(hw >> k));
     }
     var hc = hw;

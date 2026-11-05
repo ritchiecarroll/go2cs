@@ -11,7 +11,7 @@ internal static @string gather(@string prefix, params ꓸꓸꓸnint valsʗp) {
 
     nint total = 0;
 
-    foreach (var (_, v) in vals) {
+    foreach (var (_, v) in range(vals)) {
         total += v;
     }
 

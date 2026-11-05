@@ -75,7 +75,7 @@ internal static void Main() {
     z("outer{I.S:x}", new outer(I: new inner(S: ((NS)(@string)"x"))));
     ref var n = ref heap<nint>(0, out var Ꮡn);
     z("outer{P:&n}", new outer(P: Ꮡn));
-    z("outer{Sl:[]}", new outer(Sl: slice<nint>([])));
+    z("outer{Sl:[]}", new outer(Sl: []));
 
     fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf((any)((NS)(@string)""u8)).IsZero());
     fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf((any)((NS)(@string)"v")).IsZero());

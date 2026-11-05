@@ -28,7 +28,7 @@ internal static void utf16() {
     var poisoned = new uint16[]{0, 'x', 'y', 'z'}.array();
     show("leading NUL", syscall.UTF16ToString(poisoned[..]));
 
-    show("empty slice", syscall.UTF16ToString(slice<uint16>([])));
+    show("empty slice", syscall.UTF16ToString([]));
     show("nil slice", syscall.UTF16ToString(default));
 }
 

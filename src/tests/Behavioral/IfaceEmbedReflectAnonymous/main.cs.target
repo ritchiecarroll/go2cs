@@ -63,7 +63,7 @@ internal static void describe(@string label, reflectꓸType t) {
 }
 
 internal static void visible(@string label, reflectꓸType t) {
-    foreach (var (_, f) in reflect.VisibleFields(t)) {
+    foreach (var (_, f) in range(reflect.VisibleFields(t))) {
         fmt.Printf("%s visible: name=%s anonymous=%v index=%v\n"u8, label, f.Name, f.Anonymous, f.Index);
     }
 }
@@ -101,12 +101,12 @@ internal static void Main() {
     fmt.Println("Named -> named twin:", reflect.TypeOf(new Named()).ConvertibleTo(plain));
     fmt.Println("Pub -> Named:", reflect.TypeOf(new Pub()).ConvertibleTo(reflect.TypeOf(new Named())));
 
-    foreach (var (_, value) in slice<any>([new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub()])) {
+    foreach (var (_, value) in range(slice<any>([new Pub(new S(3)), new Named(new S(3)), new Tagged(new S(3), 1), new Omitted(new S(3), 1), new Pub()]))) {
         var (b, err) = json.Marshal(value);
         fmt.Printf("json %T: %s %v\n"u8, value, b, err);
     }
 
-    foreach (var (_, value) in slice<any>([new X(new E(7), 1), new Pub(new S(3)), new Named(new S(3))])) {
+    foreach (var (_, value) in range(slice<any>([new X(new E(7), 1), new Pub(new S(3)), new Named(new S(3))]))) {
         var (b, err) = xml.Marshal(value);
         fmt.Printf("xml %T: %s %v\n"u8, value, b, err);
     }

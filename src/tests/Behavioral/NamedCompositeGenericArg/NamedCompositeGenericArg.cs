@@ -34,7 +34,7 @@ internal static E total<E>(slice<E> s)
     where E : /* int | float64 */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IIncrementOperators<E>, IDecrementOperators<E>, IUnaryNegationOperators<E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     E t = GoZero<E>();
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         t += v;
     }
     return t;
@@ -51,7 +51,7 @@ internal static slice<T> drain<T>(channel<T> c) {
 
 internal static nint count<T>(slice<T> items, Func<T, bool> p) {
     nint n = 0;
-    foreach (var (_, it) in items) {
+    foreach (var (_, it) in range(items)) {
         if (p(it)) {
             n++;
         }

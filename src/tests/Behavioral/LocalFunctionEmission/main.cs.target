@@ -15,7 +15,7 @@ internal static void p1() {
     nint /*x*/ parseUint(@string s, nint min, nint max) {
         nint x = default;
         calls++;
-        foreach (var (_, cΔ1) in slice<byte>(s)) {
+        foreach (var (_, cΔ1) in range(slice<byte>(s))) {
             if (cΔ1 < '0' || '9' < cΔ1) {
                 ok = false;
                 return min;

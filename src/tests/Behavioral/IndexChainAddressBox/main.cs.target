@@ -28,12 +28,12 @@ partial struct wrap {
 internal static uint64 closureLocal() {
     uint64 record(slice<nint> samples) {
         ref var h = ref heap(new hist(), out var Ꮡh);
-        foreach (var (_, s) in samples) {
+        foreach (var (_, s) in range(samples)) {
             Ꮡh.at(hist.Ꮡcounts, s % 4).Add(1);
         }
         return Ꮡh.at(hist.Ꮡcounts, 1).Load();
     }
-    return record(slice<nint>([1, 5, 2, 9]));
+    return record([1, 5, 2, 9]);
 }
 
 internal static uint64 fieldArrayMethod() {

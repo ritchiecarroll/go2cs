@@ -58,7 +58,7 @@ internal static nint total(params ꓸꓸꓸnint aʗp) {
     var a = aʗp.sslice();
 
     nint n = 0;
-    foreach (var (_, v) in a) {
+    foreach (var (_, v) in range(a)) {
         n += v;
     }
     return n;

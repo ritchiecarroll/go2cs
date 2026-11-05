@@ -87,7 +87,7 @@ internal static void Main() {
             p.n = 3;
         }
 
-        foreach (var (_, aΔ1) in values) {
+        foreach (var (_, aΔ1) in range(values)) {
             {
                 var (v, okΔ3) = aΔ1._<main_type>(ᐧ); if (okΔ3) {
                     sum += v.Len();

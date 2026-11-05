@@ -53,7 +53,7 @@ internal static ж<cell> fresh() {
 
 internal static slice<nint> ints() {
     calls++;
-    return slice<nint>([Δmath.MinInt, 7]);
+    return [Δmath.MinInt, 7];
 }
 
 internal static T div<T>(T a, T b)

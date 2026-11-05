@@ -27,7 +27,7 @@ internal static void Main() {
     fmt.Println(s.span());
     fmt.Println(s);
 
-    var sv = new Sieve(vals: slice<nint>([1, 2, 3, 4, 5, 6]));
+    var sv = new Sieve(vals: [1, 2, 3, 4, 5, 6]);
     Func<nint, bool> even = (nint n) => n % 2 == 0;
     fmt.Println(sv.Filter(even));
 }
@@ -40,7 +40,7 @@ partial struct Sieve {
 
 public static nint Filter(this Sieve sv, Func<nint, bool> f) {
     nint count = 0;
-    foreach (var (_, v) in sv.vals) {
+    foreach (var (_, v) in range(sv.vals)) {
         if (f(v)) {
             count++;
         }

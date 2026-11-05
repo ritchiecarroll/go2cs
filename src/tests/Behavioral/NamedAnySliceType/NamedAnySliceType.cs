@@ -27,7 +27,7 @@ internal static void Main() {
         new("%d %s", new SE(new any[]{(nint)2, twoˢ}.slice())),
         new("%6.2f", new SE(new any[]{12.0D}.slice()))
     ]);
-    foreach (var (_, r) in rows) {
+    foreach (var (_, r) in range(rows)) {
         fmt.Printf(r.format + "\n"u8, r.val.ꓸꓸꓸ);
     }
 
@@ -37,7 +37,7 @@ internal static void Main() {
     fmt.Println(s[0], s[1], s[2]);
     fmt.Println(s[1..], s.describe());
 
-    foreach (var (i, v) in s) {
+    foreach (var (i, v) in range<any>(s)) {
         fmt.Print(i, "=", v, ";");
     }
     fmt.Println();

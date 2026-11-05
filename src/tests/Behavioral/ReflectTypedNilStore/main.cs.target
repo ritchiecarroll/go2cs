@@ -35,7 +35,7 @@ internal static void Main() {
 
         var s = reflect.Append(reflect.ValueOf(slice<any>([])), f).Interface()._<slice<any>>();
 
-        var @out = reflect.ValueOf(take).Call(slice<reflectꓸValue>([f]))[0].Interface();
+        var @out = reflect.ValueOf(take).Call([f])[0].Interface();
 
         var ch = new channel<any>(1);
         reflect.ValueOf(ch).Send(f);

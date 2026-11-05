@@ -16,7 +16,7 @@ internal static void g2(channel<nint> ch) {
 
 internal static void sum(slice<nint> s, channel<nint> c) {
     nint sum = 0;
-    foreach (var (_, v) in s) {
+    foreach (var (_, v) in range(s)) {
         sum += v;
     }
     c.ᐸꟷ(sum);
@@ -47,7 +47,7 @@ internal static void sendOnly(channel/*<-*/<@string> s) {
 public static Action<Func<nint, bool>> All(this IntSlice s) {
     var sʗ1 = s;
     return (Func<nint, bool> yield) => {
-        foreach (var (_, v) in sʗ1) {
+        foreach (var (_, v) in range<nint>(sʗ1)) {
             if (!yield(v)) {
                 return;
             }

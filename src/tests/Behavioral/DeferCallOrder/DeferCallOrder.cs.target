@@ -115,7 +115,7 @@ internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) {
 
         defer(() => fmt.Println("notified"), ref ᒐ);
         nint total = 0;
-        foreach (var (_, v) in vals) {
+        foreach (var (_, v) in range(vals)) {
             total += v;
         }
         return total;

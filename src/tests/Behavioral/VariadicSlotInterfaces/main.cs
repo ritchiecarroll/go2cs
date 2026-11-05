@@ -35,7 +35,7 @@ internal static nint totalArea(nint scale, params ꓸꓸꓸShape shapesʗp) {
 
     nint sum = 0;
 
-    foreach (var (_, s) in shapes) {
+    foreach (var (_, s) in range(shapes)) {
         sum += s.Area();
     }
 

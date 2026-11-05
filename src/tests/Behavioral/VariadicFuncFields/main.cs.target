@@ -17,7 +17,7 @@ internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
 
     @string joined = "";
 
-    foreach (var (i, e) in elem) {
+    foreach (var (i, e) in range(elem)) {
         if (i > 0) {
             joined += "/"u8;
         }

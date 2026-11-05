@@ -34,7 +34,7 @@ internal static void Main() {
         new("decimal", 339.7784D, 3.5F),
         new("small", 33909D, 8F)
     ]);
-    foreach (var (_, s) in samples) {
+    foreach (var (_, s) in range(samples)) {
         fmt.Println(s.name, s.value, s.small);
     }
     fmt.Println(bigReturn(), smallReturn(), f32Return());

@@ -30,7 +30,7 @@ internal partial struct writeOps_opClose /*dyn*/ {
 internal static void writeOps() {
     var ops = slice<writeOps_testFnc>([new writeOps_opWrite("abc"), new writeOps_opClose("eof"), new writeOps_opWrite("de")]);
 
-    foreach (var (_, op) in ops) {
+    foreach (var (_, op) in range(ops)) {
         switch (op.type()) {
         case writeOps_opWrite v: {
             fmt.Println("write:", v.str);
@@ -60,7 +60,7 @@ internal static void fileOps() {
 
     var total = (int64)0;
 
-    foreach (var (_, m) in makers) {
+    foreach (var (_, m) in range(makers)) {
         switch (m.type()) {
         case fileOps_makeReg v: {
             total += v.size;

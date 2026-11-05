@@ -17,14 +17,14 @@ partial struct IntSlice /*[]nint*/;
 
 internal static nint sum(slice<nint> xs) {
     nint total = 0;
-    foreach (var (_, x) in xs) {
+    foreach (var (_, x) in range(xs)) {
         total += x;
     }
     return total;
 }
 
 internal static slice<nint> pair() {
-    return slice<nint>([1, 2]);
+    return [1, 2];
 }
 
 internal static T first<T>(slice<T> xs) {
@@ -51,25 +51,25 @@ internal static void Main() {
     a[0] = 99;
     fmt.Println("fresh:", a, b);
 
-    x = slice<nint>([4, 5]);
+    x = [4, 5];
     fmt.Println("assigned:", x, len(x), cap(x));
 
-    ref var bx = ref heap<box>(new box(data: slice<nint>([4, 5]), tags: slice<@string>(["t"])), out var Ꮡbx);
+    ref var bx = ref heap<box>(new box(data: [4, 5], tags: ["t"]), out var Ꮡbx);
     var p = Ꮡbx;
-    p.data = slice<nint>([6, 7, 8]);
+    p.data = [6, 7, 8];
     fmt.Println("box:", bx.data, bx.tags);
 
-    var m = new map<@string, slice<nint>>{["k"] = slice<nint>([1, 2])};
-    var grid = slice<slice<nint>>([slice<nint>([1, 2]), slice<nint>([3])]);
+    var m = new map<@string, slice<nint>>{["k"] = [1, 2]};
+    var grid = slice<slice<nint>>([[1, 2], [3]]);
     fmt.Println("map:", m["k"], "grid:", grid, len(grid[1]));
 
-    fmt.Println("sum:", sum(slice<nint>([1, 2, 3])), "first:", first<nint>(slice<nint>([9, 8])));
+    fmt.Println("sum:", sum([1, 2, 3]), "first:", first<nint>(slice<nint>([9, 8])));
 
     fmt.Printf("%T %T\n"u8, x, grid);
 
     fmt.Println("any:", slice<nint>([1]));
     fmt.Println("inferred:", first(slice<nint>([7, 8])), len(slice<nint>([1, 2])), append(slice<nint>([1]), (nint)2));
-    foreach (var (_, v) in slice<nint>([10, 20])) {
+    foreach (var (_, v) in range(slice<nint>([10, 20]))) {
         fmt.Print(v, " ");
     }
     fmt.Println(count(slice<nint>([1, 2, 3]).ꓸꓸꓸ));

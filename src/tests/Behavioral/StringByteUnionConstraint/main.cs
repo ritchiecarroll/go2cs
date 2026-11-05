@@ -57,7 +57,7 @@ internal static nint digitSum<T>(T s)
 {
     nint parse(T part) {
         nint n = 0;
-        foreach (var (_, c) in part.ToSlice()) {
+        foreach (var (_, c) in range(part.ToSlice())) {
             n = n * 10 + (nint)((byte)(c - '0'));
         }
         return n;

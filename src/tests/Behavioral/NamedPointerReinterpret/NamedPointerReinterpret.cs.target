@@ -62,7 +62,7 @@ internal static void Main() {
 
     fmt.Println(consume("abcd"));
 
-    fmt.Println(sliceToArray(slice<byte>([1, 2, 3, 4])));
+    fmt.Println(sliceToArray([1, 2, 3, 4]));
 
     var v2 = new view(new @base(a: 5, b: 6));
     fmt.Println(v2.a + v2.b);

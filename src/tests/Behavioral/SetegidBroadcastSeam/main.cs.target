@@ -13,7 +13,7 @@ internal static @string gidLine(nint tid) {
     if (err != nil) {
         return "read error";
     }
-    foreach (var (_, line) in strings.Split((@string)b, "\n")) {
+    foreach (var (_, line) in range(strings.Split((@string)b, "\n"))) {
         if (strings.HasPrefix(line, "Gid:")) {
             return strings.Join(strings.Fields(line[4..]), " ");
         }

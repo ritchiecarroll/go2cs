@@ -148,10 +148,10 @@ internal static void loop() {
 }
 
 internal static void Main() {
-    foreach (var (_, t) in slice<nint>([1, 2, 3, 4, 5, 9])) {
+    foreach (var (_, t) in range(slice<nint>([1, 2, 3, 4, 5, 9]))) {
         leading(t);
     }
-    foreach (var (_, t) in slice<nint>([5, 6, 7, 9])) {
+    foreach (var (_, t) in range(slice<nint>([5, 6, 7, 9]))) {
         middle(t);
     }
     nested("p", 1);

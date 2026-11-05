@@ -11,7 +11,7 @@ partial struct tracker {
 internal static void flush(this ref tracker t) {
     fmt.Printf("flush: %d lines\n"u8, len(t.lines));
 
-    foreach (var (_, l) in t.lines) {
+    foreach (var (_, l) in range(t.lines)) {
         fmt.Println("line:", l);
     }
 }

@@ -119,7 +119,7 @@ internal static void Main() {
     fmt.Println(c1.Name(), c1.BaseLabel(), c1.Combined(), c1.Fresh());
     fmt.Println(c2.Name(), c2.BaseLabel(), c2.Combined(), c2.Fresh());
 
-    foreach (var (_, c) in slice<Curve>([c1, c2])) {
+    foreach (var (_, c) in range(slice<Curve>([c1, c2]))) {
         fmt.Println(c.Name(), "->", c.BaseLabel(), "->", c.Combined(), "->", c.Fresh());
     }
 }

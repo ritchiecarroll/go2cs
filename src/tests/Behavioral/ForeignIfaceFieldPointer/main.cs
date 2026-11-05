@@ -20,7 +20,7 @@ internal static void Main() {
         new(new addrlib.UnixAddrжAddr(ta), new addrlib.UnixAddrжAddr(Ꮡ(new addrlib.UnixAddr(Name: "/tmp/sock", Net: "unix"))))
     }.array();
 
-    foreach (var (i, ca) in connAddrs.ΔRangeSnapshot()) {
+    foreach (var (i, ca) in range(connAddrs.ΔRangeSnapshot())) {
         fmt.Printf("%d got  T=%T v=%#v\n"u8, i, ca.got, ca.got);
         fmt.Printf("%d want T=%T v=%#v\n"u8, i, ca.want, ca.want);
         fmt.Printf("%d deepequal=%v\n"u8, i, reflect.DeepEqual(ca.got, ca.want));

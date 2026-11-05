@@ -96,7 +96,7 @@ break_outer:;
         iᴛ1 = must(ᴛ15, ᴛ16);
     }
     funcs = move2heap(funcsᴷ, funcs);
-    foreach (var (_, f) in funcs) {
+    foreach (var (_, f) in range(funcs)) {
         fmt.Print(f(), " ");
     }
     fmt.Println();

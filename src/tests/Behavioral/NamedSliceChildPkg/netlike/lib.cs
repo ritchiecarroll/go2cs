@@ -25,7 +25,7 @@ public static @string ElementName(InfoList infos, nint i) {
 
 public static nint TotalSize(InfoList infos) {
     nint sum = 0;
-    foreach (var (_, info) in infos) {
+    foreach (var (_, info) in range<FsLike.Info>(infos)) {
         sum += info.Size;
     }
     return sum;

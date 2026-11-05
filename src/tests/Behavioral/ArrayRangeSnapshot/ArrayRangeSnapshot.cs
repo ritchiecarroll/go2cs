@@ -15,7 +15,7 @@ partial struct holder {
 internal static void arrayValue() {
     var a = new nint[]{1, 2, 3, 4}.array();
 
-    foreach (var (i, v) in a.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(a.ΔRangeSnapshot())) {
         if (i == 0) {
             (a[1], a[2], a[3]) = (91, 92, 93);
         }
@@ -29,7 +29,7 @@ internal static void arrayValue() {
 internal static void namedArrayValue() {
     var r = new Row(new nint[]{1, 2, 3, 4}.array());
 
-    foreach (var (i, v) in r.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(r.ΔRangeSnapshot())) {
         if (i == 0) {
             (r[1], r[2], r[3]) = (91, 92, 93);
         }
@@ -43,7 +43,7 @@ internal static void namedArrayValue() {
 internal static void arrayField() {
     var h = new holder(arr: new nint[]{1, 2, 3, 4}.array());
 
-    foreach (var (i, v) in h.arr.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(h.arr.ΔRangeSnapshot())) {
         if (i == 0) {
             (h.arr[1], h.arr[2], h.arr[3]) = (91, 92, 93);
         }
@@ -57,7 +57,7 @@ internal static void arrayField() {
 internal static void arrayOfArrays() {
     var m = new array<nint>[]{new nint[]{1, 2}.array(), new nint[]{3, 4}.array(), new nint[]{5, 6}.array()}.array();
 
-    foreach (var (i, vᴛ1) in m.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(m.ΔRangeSnapshot())) {
         var row = vᴛ1.Clone();
 
         if (i == 0) {
@@ -74,7 +74,7 @@ internal static void pointerArray() {
     ref var b = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡb);
     var p = Ꮡb;
 
-    foreach (var (i, v) in p.Value) {
+    foreach (var (i, v) in range(p.Value)) {
         if (i == 0) {
             (b[1], b[2], b[3]) = (91, 92, 93);
         }
@@ -88,7 +88,7 @@ internal static void pointerArray() {
 internal static void sliceValue() {
     var s = slice<nint>([1, 2, 3, 4]);
 
-    foreach (var (i, v) in s) {
+    foreach (var (i, v) in range(s)) {
         if (i == 0) {
             (s[1], s[2], s[3]) = (91, 92, 93);
         }
@@ -102,7 +102,7 @@ internal static void sliceValue() {
 internal static void indexOnly() {
     var a = new nint[]{1, 2, 3, 4}.array();
 
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         if (i == 0) {
             (a[1], a[2], a[3]) = (91, 92, 93);
         }
@@ -116,7 +116,7 @@ internal static void assignVars() {
     nint i = default;
     nint v = default;
 
-    foreach (var (iᴛ1, vᴛ1) in a.ΔRangeSnapshot()) {
+    foreach (var (iᴛ1, vᴛ1) in range(a.ΔRangeSnapshot())) {
         i = iᴛ1;
         v = vᴛ1;
 
@@ -131,7 +131,7 @@ internal static void assignVars() {
 internal static void mutableRangeVar() {
     var a = new nint[]{1, 2, 3, 4}.array();
 
-    foreach (var (i, vᴛ1) in a.ΔRangeSnapshot()) {
+    foreach (var (i, vᴛ1) in range(a.ΔRangeSnapshot())) {
         var v = vᴛ1;
 
         if (i == 0) {
@@ -148,7 +148,7 @@ internal static void aliasedElement() {
     ref var a = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡa);
     var q = Ꮡa.at<nint>(2);
 
-    foreach (var (i, v) in a.ΔRangeSnapshot()) {
+    foreach (var (i, v) in range(a.ΔRangeSnapshot())) {
         if (i == 0) {
             q.Value = 90;
         }
@@ -162,7 +162,7 @@ internal static void aliasedElement() {
 internal static void arrayOfNamedSlices() {
     var rows = new Digits[]{slice<nint>([1, 2]), slice<nint>([3, 4]), slice<nint>([5, 6])}.array();
 
-    foreach (var (i, r) in rows.ΔRangeSnapshot()) {
+    foreach (var (i, r) in range(rows.ΔRangeSnapshot())) {
         if (i == 0) {
             rows[1] = new Digits(new nint[]{91, 92}.slice());
             rows[2][0] = 93;

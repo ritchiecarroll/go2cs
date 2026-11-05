@@ -15,7 +15,7 @@ internal static void set(this ref ints p, nint i, nint v) {
 }
 
 internal static void show(ref ints p) {
-    foreach (var (i, x) in p) {
+    foreach (var (i, x) in range<nint>(p)) {
         if (i > 0) {
             fmt.Print(" ");
         }
@@ -43,7 +43,7 @@ internal static void setAt(this ref cells c, nint i, nint v) {
 }
 
 internal static void showCells(ref cells c) {
-    foreach (var (i, x) in c) {
+    foreach (var (i, x) in range<cell>(c)) {
         if (i > 0) {
             fmt.Print(" ");
         }

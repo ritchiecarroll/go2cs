@@ -15,7 +15,7 @@ internal static T /*s*/ addPoly<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var i in range(s)) {
+    foreach (var i in range(len(s))) {
         s[i] = (fieldElement)(a[i] + b[i]);
     }
     return s;
@@ -25,7 +25,7 @@ internal static T scalePoly<T>(T a, fieldElement k)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
     T f = GoZero<T>();
-    foreach (var i in range(a)) {
+    foreach (var i in range(len(a))) {
         f[i] = (fieldElement)(a[i] * k);
     }
     return f;
@@ -35,7 +35,7 @@ internal static fieldElement sum<T>(T a)
     where T : /* ~[4]go2cs/GenericArrayConstraint.fieldElement */ IArray<fieldElement>, new()
 {
     fieldElement total = default;
-    foreach (var (_, x) in a) {
+    foreach (var (_, x) in range(a)) {
         total += x;
     }
     return total;

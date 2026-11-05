@@ -143,7 +143,7 @@ internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
         return (0, Δio.EOF);
     }
     nint n = 0;
-    foreach (var i in range(p)) {
+    foreach (var i in range(len(p))) {
         if (b.left == 0) {
             break;
         }
@@ -162,7 +162,7 @@ partial struct frame {
 
 internal static nint checksum(ref frame f) {
     nint s = 0;
-    foreach (var (_, v) in f.data[..]) {
+    foreach (var (_, v) in range(f.data[..])) {
         s += (nint)v;
     }
     return s;

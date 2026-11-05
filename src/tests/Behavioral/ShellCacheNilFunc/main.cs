@@ -25,7 +25,7 @@ internal static void Main() {
     var values = slice<any>([(none).OrTypedNilFunc(), (seven).OrTypedNilFunc(), (eight).OrTypedNilFunc(), (none).OrTypedNilFunc()]);
 
     for (nint round = 0; round < 3; round++) {
-        foreach (var (i, a) in values) {
+        foreach (var (i, a) in range(values)) {
             {
                 var (v, ok) = a._<main_type>(ᐧ); if (ok) {
                     fmt.Println("round", round, "value", i, "ok", v.Len());

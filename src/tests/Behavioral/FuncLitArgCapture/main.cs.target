@@ -28,14 +28,14 @@ partial struct payload {
 
 internal static nint sum(this payload p) {
     nint t = 0;
-    foreach (var (_, v) in p.vals) {
+    foreach (var (_, v) in range(p.vals)) {
         t += v;
     }
     return t;
 }
 
 internal static nint nestedStructCapture() {
-    ref var p = ref heap<payload>(new payload(vals: slice<nint>([1, 2, 3, 4])), out var Ꮡp);
+    ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
     var @out = new channel<nint>(1);
     var outʗ1 = @out;
     var pʗ1 = p;
@@ -83,7 +83,7 @@ internal static nint nestedArgLiteralCapture() {
     run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var items = slice<nint>([1, 2, 3]);
         var done = new channel<nint>(len(items));
-        foreach (var i in range(items)) {
+        foreach (var i in range(len(items))) {
             nint iΔ1 = i;
             var doneʗ1 = done;
             var itemsʗ1 = items;
@@ -92,7 +92,7 @@ internal static nint nestedArgLiteralCapture() {
             });
         }
         nint sum = 0;
-        foreach (var _ᴛ1 in range(items)) {
+        foreach (var _ᴛ1 in range(len(items))) {
             sum += ᐸꟷ(done);
         }
         totalʗ1.ᐸꟷ(sum);

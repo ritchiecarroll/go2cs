@@ -82,7 +82,7 @@ internal static void Main() {
 
         (var entries, err) = os.ReadDir(dir);
         fmt.Println("readdir:", len(entries), err);
-        foreach (var (_, e) in entries) {
+        foreach (var (_, e) in range(entries)) {
             var (info, ierr) = e.Info();
             fmt.Println("  entry:", e.Name(), "IsDir =", e.IsDir(), "Info agrees =", ierr == nil && info.IsDir() == e.IsDir());
         }

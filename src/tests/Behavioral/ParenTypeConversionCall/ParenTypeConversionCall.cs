@@ -28,7 +28,7 @@ internal static void Main() {
         new(@unsafe.Pointer.FromPinnedBox(@new<nint>()), false),
         new(@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default), true)
     ]);
-    foreach (var (i, row) in table) {
+    foreach (var (i, row) in range(table)) {
         fmt.Println("A4 row", i, "isNil:", AreEqual(row.v, ((any)@unsafe.Pointer.OrTypedNil((@unsafe.Pointer)default))), "want:", row.want);
     }
 

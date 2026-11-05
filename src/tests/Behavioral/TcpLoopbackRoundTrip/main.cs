@@ -11,7 +11,7 @@ internal static UntypedInt payloadSize => /* 64 * 1024 */ 65536;
 
 internal static slice<byte> makePayload() {
     var buf = new slice<byte>(payloadSize);
-    foreach (var i in range(buf)) {
+    foreach (var i in range(len(buf))) {
         buf[i] = (byte)(i * 7 + 11);
     }
     return buf;
@@ -19,7 +19,7 @@ internal static slice<byte> makePayload() {
 
 internal static uint32 checksum(slice<byte> b) {
     uint32 sum = default;
-    foreach (var (_, c) in b) {
+    foreach (var (_, c) in range(b)) {
         sum = sum * 31 + (uint32)c;
     }
     return sum;

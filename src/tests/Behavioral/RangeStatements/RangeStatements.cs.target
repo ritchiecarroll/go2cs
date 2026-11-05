@@ -12,7 +12,7 @@ internal static void Main() {
     nint num = default;
     nint total = default;
 
-    foreach (var (iᴛ1, vᴛ1) in nums) {
+    foreach (var (iᴛ1, vᴛ1) in range(nums)) {
         i = iᴛ1;
         num = vᴛ1;
 
@@ -21,22 +21,22 @@ internal static void Main() {
     }
     fmt.Println("sum:", sum, "total:", total);
 
-    foreach (var (iΔ1, numΔ1) in nums) {
+    foreach (var (iΔ1, numΔ1) in range(nums)) {
         if (numΔ1 == 3) {
             fmt.Println("index:", iΔ1);
         }
     }
 
-    foreach (var (_, numΔ2) in nums) {
+    foreach (var (_, numΔ2) in range(nums)) {
         fmt.Println("num:", numΔ2);
     }
 
-    foreach (var iΔ2 in range(nums)) {
+    foreach (var iΔ2 in range(len(nums))) {
         fmt.Println("index:", iΔ2);
     }
 
     total = 0;
-    foreach (var _ᴛ1 in range(nums)) {
+    foreach (var _ᴛ1 in range(len(nums))) {
         total++;
     }
     fmt.Println("Total:", total);
@@ -117,19 +117,19 @@ internal static void Main() {
 
     var arr = new array<nint>(5){[2] = 42, [4] = 100};
 
-    foreach (var (iΔ4, vΔ4) in arr.ΔRangeSnapshot()) {
+    foreach (var (iΔ4, vΔ4) in range(arr.ΔRangeSnapshot())) {
         fmt.Println(iΔ4, vΔ4);
     }
 
     var Δslice = new slice<nint>(5){[2] = 42, [4] = 100};
 
-    foreach (var (iΔ5, vΔ5) in Δslice) {
+    foreach (var (iΔ5, vΔ5) in range(Δslice)) {
         fmt.Println(iΔ5, vΔ5);
     }
 
     nint v1 = default;
 
-    foreach (var (iᴛ4, vᴛ4) in Δslice) {
+    foreach (var (iᴛ4, vᴛ4) in range(Δslice)) {
         i1 = iᴛ4;
         v1 = vᴛ4;
 
@@ -138,7 +138,7 @@ internal static void Main() {
 
     var farr = new float32[]{1.1F, 2.2F, 3.3F}.array();
 
-    foreach (var (iΔ6, vΔ6) in farr.ΔRangeSnapshot()) {
+    foreach (var (iΔ6, vΔ6) in range(farr.ΔRangeSnapshot())) {
         fmt.Println(iΔ6, vΔ6);
     }
 

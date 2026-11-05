@@ -82,7 +82,7 @@ internal static void Main() {
         @string second = deep + sep + "another.dat"u8;
 
         {
-            var errΔ3 = os.WriteFile(second, slice<byte>([1, 2, 3]), 420); if (errΔ3 != nil) {
+            var errΔ3 = os.WriteFile(second, [1, 2, 3], 420); if (errΔ3 != nil) {
                 fmt.Println("second writefile failed:", errΔ3);
             }
         }
@@ -90,7 +90,7 @@ internal static void Main() {
         (var entries, err) = os.ReadDir(deep);
         var names = new slice<@string>(0, len(entries));
 
-        foreach (var (_, entry) in entries) {
+        foreach (var (_, entry) in range(entries)) {
             names = append(namesᴷ, names, fmt.Sprintf("%s:%v"u8, entry.Name(), entry.IsDir()));
         }
 
@@ -104,7 +104,7 @@ internal static void Main() {
             new("trailing-dot", @file + "."u8)
         ]);
 
-        foreach (var (_, probe) in probes) {
+        foreach (var (_, probe) in range(probes)) {
             var (probeInfo, probeErr) = os.Stat(probe.path);
             fmt.Println("normalize " + probe.label + ":", probeErr == nil, probeInfo != nil && probeInfo.Size() == (int64)(len(payload) + 1));
         }

@@ -23,8 +23,8 @@ internal static ж<response> newResponse() {
 internal static void Main() {
     var r = newResponse();
 
-    r.Header()["Content-Type"] = slice<@string>(["text/plain"]);
-    r.Header()["X-Trace"] = slice<@string>(["a", "b"]);
+    r.Header()["Content-Type"] = ["text/plain"];
+    r.Header()["X-Trace"] = ["a", "b"];
 
     fmt.Println(r.hdr["Content-Type"], len(r.hdr["X-Trace"]));
 

@@ -98,7 +98,7 @@ internal static void viaArray() {
 }
 
 internal static void viaSlice() {
-    var s = new ViaSlice(new map<nint, slice<ViaSlice>>{[1] = slice<ViaSlice>([new ViaSlice(new map<nint, slice<ViaSlice>>{[2] = default}), default])});
+    var s = new ViaSlice(new map<nint, slice<ViaSlice>>{[1] = [new ViaSlice(new map<nint, slice<ViaSlice>>{[2] = default}), default]});
     fmt.Println("viaSlice:", len(s), len(s[1]), len(s[1][0]), s[1][1] == nil);
 }
 

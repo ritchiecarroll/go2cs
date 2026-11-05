@@ -124,7 +124,7 @@ internal static void Main() {
     fmt.Printf("%v %v\n"u8, f(), err);
 
     var animals = slice<Animal>([new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(), new JavaProgrammer()]);
-    foreach (var (_, animal) in animals) {
+    foreach (var (_, animal) in range(animals)) {
         fmt.Println(animal.Speak());
     }
 

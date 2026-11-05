@@ -73,7 +73,7 @@ internal static C128 takeMany(params ꓸꓸꓸC128 csʗp) {
     var cs = csʗp.sslice();
 
     C128 sum = default;
-    foreach (var (_, c) in cs) {
+    foreach (var (_, c) in range(cs)) {
         sum += c;
     }
     return sum;

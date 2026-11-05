@@ -90,7 +90,7 @@ internal static bool printableASCII(slice<byte> b) {
     if (len(b) == 0 || b[0] == 0) {
         return false;
     }
-    foreach (var (_, c) in b) {
+    foreach (var (_, c) in range(b)) {
         if (c == 0) {
             return true;
         }
@@ -105,7 +105,7 @@ internal static bool printableUTF16(slice<uint16> s) {
     if (len(s) == 0 || s[0] == 0) {
         return false;
     }
-    foreach (var (_, r) in s) {
+    foreach (var (_, r) in range(s)) {
         if (r == 0) {
             return true;
         }

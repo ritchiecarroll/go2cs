@@ -123,7 +123,7 @@ internal static void Main() {
         elements[0], elements[1], converted, namedConverted, sent, positional.h, first, second,
         declaredConst, byName["seven"], named]);
 
-    foreach (var (i, f) in all) {
+    foreach (var (i, f) in range(all)) {
         fmt.Printf("%2d: %s\n"u8, i, call(f));
     }
 }

@@ -48,9 +48,9 @@ internal static void Main() {
 
     build(root);
 
-    foreach (var (_, d) in dirs) {
+    foreach (var (_, d) in range(dirs)) {
         fmt.Printf("-- enumerate %s --\n"u8, ascii(shown(d.rel)));
-        foreach (var (_, e) in enumerate(filepath.Join(root, d.rel))) {
+        foreach (var (_, e) in range(enumerate(filepath.Join(root, d.rel)))) {
             fmt.Printf("%s alt=%s dir=%v size=%d mtime=%d\n"u8, ascii(e.name), ascii(e.alt), e.isDir, e.size, e.mtime);
         }
     }
@@ -68,7 +68,7 @@ internal static void Main() {
     if (err != nil) {
         fatal("EvalSymlinks(root)", err);
     }
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         var (got, errΔ1) = filepath.EvalSymlinks(strings.ToLower(filepath.Join(root, f.rel)));
         if (errΔ1 != nil) {
             fatal("EvalSymlinks", errΔ1);
@@ -84,7 +84,7 @@ internal static void Main() {
 }
 
 internal static void build(@string root) {
-    foreach (var (_, d) in dirs) {
+    foreach (var (_, d) in range(dirs)) {
         {
             var err = os.MkdirAll(filepath.Join(root, d.rel), 493); if (err != nil) {
                 fatal("MkdirAll", err);
@@ -92,9 +92,9 @@ internal static void build(@string root) {
         }
     }
 
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         var body = new slice<byte>(f.size);
-        foreach (var i in range(body)) {
+        foreach (var i in range(len(body))) {
             body[i] = (byte)('a' + i % 26);
         }
         {
@@ -104,7 +104,7 @@ internal static void build(@string root) {
         }
     }
 
-    foreach (var (_, f) in files) {
+    foreach (var (_, f) in range(files)) {
         {
             var err = os.Chtimes(filepath.Join(root, f.rel), f.stamp, f.stamp); if (err != nil) {
                 fatal("Chtimes", err);

@@ -70,7 +70,7 @@ internal static (nint, nint) viaNamedSlice() {
     ref var l = ref heap<intList>(out var Ꮡl);
     applyPush(Ꮡl.push);
     nint total = 0;
-    foreach (var (_, v) in l) {
+    foreach (var (_, v) in range<nint>(l)) {
         total += v;
     }
     return (len(l), total);

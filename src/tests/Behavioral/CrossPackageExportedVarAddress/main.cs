@@ -30,7 +30,7 @@ internal static void Main() {
 
     var fs = flag.NewFlagSet("guard", flag.ContinueOnError);
     fs.BoolVar(lib.ᏑFlag, "x", false, "");
-    fs.Parse(slice<@string>(["-x"]));
+    fs.Parse(["-x"]);
     fmt.Println("flag.BoolVar:", lib.Flag);
 
     var q = lib.ᏑS.ᏑN;
