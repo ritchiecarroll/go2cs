@@ -140,6 +140,7 @@ type Visitor struct {
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
 	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
+	lastDeclShape      declShape           // the shape of the top-level declaration just emitted (topLevelSeparation.go)
 	callParens         [][3]token.Pos      // the `(`, `)` and first argument of each call being converted, innermost last (convExprList)
 	processedComments  hashset.HashSet[token.Pos]
 	trailingRuns       map[token.Pos]int // each Go trailing // comment's gofmt-aligned run (trailingCommentAlignment.go)
