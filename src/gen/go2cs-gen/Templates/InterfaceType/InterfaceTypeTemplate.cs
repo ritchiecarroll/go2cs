@@ -115,9 +115,9 @@ internal class InterfaceTypeTemplate : TemplateBase
             StringBuilder implementation = new();
             string constraints = string.Join(",\r\n", OperatorConstraints.SelectMany(GetConstraintName));
 
-            implementation.AppendLine(" :");
-            implementation.AppendLine(constraints);
-            implementation.AppendLine($"{Indent}where {TypeT} :");
+            implementation.Append(" :\r\n");
+            implementation.Append(constraints).Append("\r\n");
+            implementation.Append($"{Indent}where {TypeT} :\r\n");
             implementation.Append(constraints);
 
             return implementation.ToString();

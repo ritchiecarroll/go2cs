@@ -173,7 +173,7 @@ public class ChanDirSigGenerator : ISourceGenerator
 
         // The entries sit on the method's declaring type, reopened inside each enclosing partial.
         foreach (KeyValuePair<INamedTypeSymbol, (string ns, List<string> entries)> pair in byType)
-            context.AddSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "chandir"), GeneratedPartials.Source(pair.Value.ns, pair.Key, pair.Value.entries));
+            context.AddGeneratedSource(GeneratedPartials.HintName(hintNames, pair.Value.ns, pair.Key, "chandir"), GeneratedPartials.Source(pair.Value.ns, pair.Key, pair.Value.entries));
     }
 
     private static string Entry(string name, string[] parameterTypes, byte[] parameterDirs, byte[] resultDirs) =>

@@ -129,7 +129,7 @@ public class NativeArrayOpenerGenerator : ISourceGenerator
         foreach (KeyValuePair<INamedTypeSymbol, Openers> pair in byPackage.Where(pair => pair.Value.Count > 0))
         {
             string ns = pair.Key.ContainingNamespace.ToDisplayString();
-            context.AddSource(GeneratedPartials.HintName(hintNames, ns, pair.Key, "native-array-openers"), Registry(ns, pair.Key, pair.Value));
+            context.AddGeneratedSource(GeneratedPartials.HintName(hintNames, ns, pair.Key, "native-array-openers"), Registry(ns, pair.Key, pair.Value));
         }
     }
 
