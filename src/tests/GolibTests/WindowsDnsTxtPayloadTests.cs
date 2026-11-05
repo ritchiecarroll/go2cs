@@ -151,7 +151,7 @@ public unsafe class WindowsDnsTxtPayloadTests
             string[] read = new string[count];
             nint i = 0;
 
-            foreach ((nint _, ж<uint16> v) in array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1 << 10).slice(0, count, count))
+            foreach ((nint _, ж<uint16> v) in range(array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1 << 10).slice(0, count, count)))
                 read[i++] = windows.UTF16PtrToString(v);
 
             CollectionAssert.AreEqual(new[] { "first", "second" }, read);

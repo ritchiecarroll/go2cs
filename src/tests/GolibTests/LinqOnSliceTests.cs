@@ -12,12 +12,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GolibTests;
 
 /// <summary>
-/// LINQ binds a Go slice or array as its sequence of VALUES, and <c>foreach</c> still yields Go's
-/// <c>(index, value)</c> pairs. Before, <c>slice&lt;T&gt;</c> implemented both <c>IEnumerable&lt;T&gt;</c> (through
-/// <c>IList&lt;T&gt;</c>) and <c>IEnumerable&lt;(nint, T)&gt;</c> (through <c>IArray&lt;T&gt;</c>), so C# could
-/// infer neither element type and no LINQ method bound on a slice (CS1061); a consumer had to name the element
-/// type first. The pairs now come from <c>IArray&lt;T&gt;</c>'s own <c>GetEnumerator</c>, which <c>foreach</c>
-/// binds by pattern, and the only generic sequence interface left is <c>IEnumerable&lt;T&gt;</c>.
+/// LINQ and <c>foreach</c> both see a Go slice or array as its sequence of VALUES, and <c>range(x)</c> yields Go's
+/// <c>(index, value)</c> pairs (docs/PLAN-collection-expressions.md). Before, <c>slice&lt;T&gt;</c> implemented
+/// both <c>IEnumerable&lt;T&gt;</c> (through <c>IList&lt;T&gt;</c>) and <c>IEnumerable&lt;(nint, T)&gt;</c> (through
+/// <c>IArray&lt;T&gt;</c>), so C# could infer neither element type and no LINQ method bound on a slice (CS1061); a
+/// consumer had to name the element type first. The only generic sequence interface left is
+/// <c>IEnumerable&lt;T&gt;</c>.
 /// </summary>
 [TestClass]
 public class LinqOnSliceTests
@@ -26,7 +26,7 @@ public class LinqOnSliceTests
     {
         long n = 0;
 
-        foreach (var (i, _) in s)
+        foreach (var (i, _) in range(s))
             n += i;
 
         return n;
@@ -61,19 +61,24 @@ public class LinqOnSliceTests
 
         Assert.AreEqual(24, (int)ia.Sum(x => (int)x), "LINQ over the interface sees values");
 
-        foreach (var (i, v) in ia)
+        foreach (var (i, v) in range(ia))
             pairs += i * 100 + v;
 
-        Assert.AreEqual(324, pairs, "foreach over the interface still yields (index, value) pairs");
+        Assert.AreEqual(324, pairs, "range over the interface yields (index, value) pairs");
     }
 
     [TestMethod]
-    public void ForeachStillYieldsPairs()
+    public void RangeYieldsPairsAndForeachYieldsValues()
     {
         slice<nint> s = new nint[] { 7, 8, 9 };
-        long indices = 0, values = 0;
+        long indices = 0, values = 0, foreachValues = 0;
 
-        foreach (var (i, v) in s)
+        foreach (nint v in s)
+            foreachValues += v;
+
+        Assert.AreEqual(24, foreachValues, "foreach yields the values");
+
+        foreach (var (i, v) in range(s))
         {
             indices += i;
             values += v;
