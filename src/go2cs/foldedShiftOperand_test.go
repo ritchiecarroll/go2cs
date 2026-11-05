@@ -90,6 +90,11 @@ func funcBody(t *testing.T, cs, signature string) string {
 		t.Fatalf("no %q in the emission:\n%s", signature, cs)
 	}
 
+	// A function written on one line (class K) ends on its own line.
+	if eol := strings.Index(cs[start:], "\n"); eol >= 0 && strings.HasSuffix(strings.TrimRight(cs[start:start+eol], " \t\r"), "}") {
+		return cs[start : start+eol]
+	}
+
 	end := strings.Index(cs[start:], "\n}")
 
 	if end < 0 {

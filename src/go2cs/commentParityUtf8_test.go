@@ -38,7 +38,7 @@ var wantUtf8Census = map[string]int{
 	// word[T]), and the converter's reading of that new code is one site per class -- a blank line the C#
 	// adds before `hiBits` (utf8.go:460), the blank line before `for len(p) > 0 {` it drops (utf8.go:476),
 	// and one unexplained extra body line after Valid's `p = p[:len(p):len(p)]` (utf8.cs:509).
-	"top:go-none-cs-blank":   1,
+	// Class K (2026-11-05): the top-level blank line before `hiBits` is gone, as Go has none there.
 	"body:go-blank-cs-none":  1,
 	"body:extra:unexplained": 1,
 }
