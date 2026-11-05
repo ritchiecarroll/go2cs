@@ -100,7 +100,7 @@ func main() {
 		"x |= ConvertToType<T>(1).Lsh(n);",
 		"x = ConvertToType<T>(7);",
 		"return pair(x, ConvertToType<T>(2));",
-		"slice<T>([ConvertToType<T>(1), ConvertToType<T>(2)])",
+		"return [ConvertToType<T>(1), ConvertToType<T>(2)];",
 		// Controls: the two places that already materialized the constant do so once.
 		"return AreEqual(x, ConvertToType<T>(0));",
 		"return ConvertToType<T>(4);",

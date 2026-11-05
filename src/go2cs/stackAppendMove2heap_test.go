@@ -240,7 +240,7 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 		"    nr = move2heap(nrᴷ, nr);\n    return nr;\n",
 		// a range over a slice that never escapes
 		"    var gᴷ = new stackAppend<byte>(moves: true);\n",
-		"    g = move2heap(gᴷ, g);\n    foreach (var (_, b) in g) {\n",
+		"    g = move2heap(gᴷ, g);\n    foreach (var (_, b) in range(g)) {\n",
 		// x = x[i:j] observes the capacity
 		"    var sᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);\n",
 		"    s = move2heap(sᴷ, s);\n    return s;\n",
@@ -268,7 +268,7 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 	}
 
 	// The moves come ahead of the statement Go's transition belongs to.
-	for _, order := range [][2]string{{"p = move2heap(pᴷ, p);", "len(t) > 0"}, {"l = move2heap(lᴷ, l);", "foreach (var (_, b) in l)"}} {
+	for _, order := range [][2]string{{"p = move2heap(pᴷ, p);", "len(t) > 0"}, {"l = move2heap(lᴷ, l);", "foreach (var (_, b) in range(l))"}} {
 		if move, use := strings.Index(emitted, order[0]), strings.Index(emitted, order[1]); move < 0 || use < 0 || move > use {
 			t.Errorf("%q is not ahead of %q:\n%s", order[0], order[1], emitted)
 		}

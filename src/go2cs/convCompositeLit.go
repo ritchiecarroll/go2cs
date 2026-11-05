@@ -209,6 +209,10 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 				elements := v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.withValueCloneArgs(compositeLit.Elts, v.elidedElemContext(u.Elem(), compositeLit.Elts)))
 
 				if takesBuiltin {
+					if v.targetedSliceLiterals[compositeLit] {
+						return addrOf(fmt.Sprintf("[%s]", elements))
+					}
+
 					return addrOf(fmt.Sprintf("slice<%s>([%s])", csElem, elements))
 				}
 
@@ -1147,7 +1151,12 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	takesBuiltin := sliceLiteralTakesBuiltin(exprType) && compositeSuffix == ".slice()" && !namedArrayComposite &&
 		!namedMapComposite && namedStructWrapRender == "" && !arrayTypeContext.indexedInitializer && arrayTypeContext.maxLength == 0
 
-	if takesBuiltin {
+	if takesBuiltin && v.targetedSliceLiterals[compositeLit] {
+		// Where C# knows the target is this slice<T>, the collection expression stands alone, `[1, 2]`, and
+		// slice<T>'s [CollectionBuilder] builds it (markTargetedSliceLiterals).
+		lbrace, rbrace, compositeSuffix = "[", "]", ""
+		result.WriteString(fmt.Sprintf("%s%s", lbracePrefix, lbrace))
+	} else if takesBuiltin {
 		csElementType := convertToCSTypeName(v.getAliasQualifiedTypeName(elementType, false))
 		lbrace, rbrace, compositeSuffix = "[", "]", ")"
 		result.WriteString(fmt.Sprintf("slice<%s>(%s%s", csElementType, lbracePrefix, lbrace))

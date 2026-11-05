@@ -83,6 +83,9 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// Decide which rune literals render as a bare C# char (see markRuneLiteralForms)
 	v.markRuneLiteralForms(file)
 
+	// Mark the slice literals that render as a bare collection expression (see markTargetedSliceLiterals)
+	v.markTargetedSliceLiterals(file)
+
 	// Index the file's function declarations for methodSetConstraintNeeded
 	v.collectFileFuncDecls(file)
 
