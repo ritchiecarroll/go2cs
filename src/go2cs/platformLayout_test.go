@@ -91,6 +91,37 @@ func TestPlatformLayoutRoutesOnlyExistingPerGoosFiles(t *testing.T) {
 	}
 }
 
+// A whole-file hand-own's `.cs.auto` review sibling is written where the tree already holds it. A FLAT hand-own
+// whose emission differs by GOOS (runtime/runtime2.cs) keeps one sibling per GOOS folder, so a single-target
+// reconvert writes its flavour back into its own folder rather than laying a flat sibling beside the three; a
+// sibling the tree does not hold per-GOOS follows its hand-owned `.cs`, flat or per-GOOS.
+func TestReviewSiblingFollowsTheTreesPerGoosSibling(t *testing.T) {
+	packageDir := newL3PackageDir(t)
+
+	writeTestFile(t, filepath.Join(packageDir, "runtime2.cs"), "hand-owned, flat")
+	writeTestFile(t, filepath.Join(packageDir, "linux", "runtime2.cs.auto"), "linux flavour")
+	writeTestFile(t, filepath.Join(packageDir, "linux", "siginfo_linux.cs"), "hand-owned, linux only")
+
+	tests := []struct {
+		goos     string
+		baseName string
+		want     string
+	}{
+		// The tree holds linux's flavour in linux/: it goes back there.
+		{"linux", "runtime2", filepath.Join(packageDir, "linux", "runtime2.cs.auto")},
+		// The tree holds no windows flavour per-GOOS: it follows the flat hand-own.
+		{"windows", "runtime2", filepath.Join(packageDir, "runtime2.cs.auto")},
+		// A per-GOOS hand-own's sibling follows it into its folder, as it always did.
+		{"linux", "siginfo_linux", filepath.Join(packageDir, "linux", "siginfo_linux.cs.auto")},
+	}
+
+	for _, test := range tests {
+		if got := reviewSiblingLayoutPath(packageDir, test.goos, test.baseName); got != test.want {
+			t.Errorf("reviewSiblingLayoutPath(%q, %q) = %q, want %q", test.goos, test.baseName, got, test.want)
+		}
+	}
+}
+
 // TestPlatformLayoutIgnoresNestedPackageNamedForGOOS is the negative case that matters most:
 // `internal/syscall/windows` is a converted PACKAGE whose directory name is a GOOS. Folding its
 // sources into `internal/syscall` would corrupt both, so the discriminator is the project file every

@@ -555,6 +555,14 @@ func (c *StdLibConverter) convertAllPackages() error {
 	successCount := 0
 	failedPackages := make([]string, 0)
 
+	// A package that hits -convert-timeout ends the run (COORD ruling 2026-11-05). The fired cap abandons its
+	// conversion goroutine, which keeps running on the converter's package-global state; converting the next package
+	// beside it corrupts both (a full run at a 1500ms cap died at its 146th package on visitFile's "Multiple package
+	// names encountered"). So the timed-out package and every later one are failed, listed for a resume, and the
+	// returned error makes main exit before the abandoned goroutine can write anything more.
+	timedOut := ""
+	var notConverted []string
+
 	// Create a benchmark file to track conversion progress
 	benchmarkFile := filepath.Join(c.go2csPath, "stdlib_conversion_progress.txt")
 	benchmark, err := os.Create(benchmarkFile)
@@ -632,10 +640,22 @@ func (c *StdLibConverter) convertAllPackages() error {
 			log.Println(msg)
 			failedPackages = append(failedPackages, pkgPath)
 
+			status := "FAILED"
+
+			if errors.Is(conversionErr, errConversionTimedOut) {
+				status = "TIMED OUT"
+				timedOut = pkgPath
+				notConverted = c.graph.sortedQueue[i+1:]
+			}
+
 			if benchmark != nil {
 				fmt.Fprintf(benchmark, "%-40s %-15s %-15s %s\n",
-					pkgPath, "FAILED", formatDuration(conversionDuration),
+					pkgPath, status, formatDuration(conversionDuration),
 					time.Now().Format(time.RFC3339))
+			}
+
+			if timedOut != "" {
+				break
 			}
 		} else {
 			successCount++
@@ -647,6 +667,19 @@ func (c *StdLibConverter) convertAllPackages() error {
 					time.Now().Format(time.RFC3339))
 			}
 		}
+	}
+
+	for _, pkgPath := range notConverted {
+		failedPackages = append(failedPackages, pkgPath)
+
+		if benchmark != nil {
+			fmt.Fprintf(benchmark, "%-45s %-15s\n", pkgPath, "NOT CONVERTED")
+		}
+	}
+
+	if timedOut != "" {
+		fmt.Printf("\nThe run stopped after %s timed out: %d later package(s) not converted (run stopped after a timeout).\n",
+			timedOut, len(notConverted))
 	}
 
 	// Print final statistics
@@ -689,6 +722,12 @@ func (c *StdLibConverter) convertAllPackages() error {
 		}
 	}
 
+	if timedOut != "" {
+		return fmt.Errorf("%s timed out after %s, so the run stopped there: its abandoned conversion keeps running and must not "+
+			"overlap another package's; %d later package(s) were not converted, and %s lists every package to convert again",
+			timedOut, c.packageConvertTimeout(), len(notConverted), filepath.Join(c.go2csPath, "failed_packages.txt"))
+	}
+
 	return nil
 }
 
@@ -701,7 +740,7 @@ func (c *StdLibConverter) getOutputPath(pkgPath string) string {
 // defaultConvertTimeout is the per-package conversion cap the -stdlib driver applies when
 // -convert-timeout is not passed. It is a SAFETY NET against a hung conversion, never a
 // performance assumption: the number has to clear the slowest legitimate package on the slowest
-// legitimate host, because everything it kills early is reported as a failed package and a
+// legitimate host, because a package it kills early stops the whole run (exit 1) and a
 // killed-but-healthy conversion reads exactly like a converter defect. It was hard-coded at this
 // value until 2026-09-02, when concurrent lane load on an i7-class machine pushed one package's
 // conversion past it mid two-seeded A/B -- which would have banked a whole package as a spurious
@@ -753,18 +792,26 @@ func runPackageConversionWithTimeout(timeout time.Duration, convert func() error
 	case err := <-done:
 		return err
 	case <-time.After(timeout):
-		return fmt.Errorf("conversion timed out after %s (per-package -convert-timeout cap; raise it, e.g. -convert-timeout %s -- the cap is a safety net against a hung conversion, never a performance assumption)",
-			timeout, timeout*3)
+		return fmt.Errorf("%w after %s (per-package -convert-timeout cap; raise it, e.g. -convert-timeout %s -- the cap is a safety net against a hung conversion, never a performance assumption)",
+			errConversionTimedOut, timeout, timeout*3)
 	}
 }
+
+// errConversionTimedOut marks the error runPackageConversionWithTimeout returns when the cap fires, so the driver
+// can tell a timeout, which ends the run, from a package that failed on its own.
+var errConversionTimedOut = errors.New("conversion timed out")
 
 // convertPackage converts a single package
 func (c *StdLibConverter) convertPackage(inputPath, outputPath string) error {
 	return runPackageConversionWithTimeout(c.packageConvertTimeout(), func() error {
-		// Call the existing processConversion function
-		return processConversion(inputPath, true, outputPath, c.options)
+		// Call the existing processConversion function (through a variable a driver test can replace)
+		return stdLibProcessConversion(inputPath, true, outputPath, c.options)
 	})
 }
+
+// stdLibProcessConversion is the conversion convertPackage runs: processConversion, except in a test of the driver
+// loop, which replaces it with work it controls (a real conversion cannot be abandoned safely in a test).
+var stdLibProcessConversion = processConversion
 
 // GenerateDependencyGraph creates a visual representation of the dependency graph
 func (c *StdLibConverter) GenerateDependencyGraph() error {

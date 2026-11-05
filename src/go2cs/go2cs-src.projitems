@@ -478,6 +478,7 @@
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)parityShiftCountCast_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainHeapFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainPatternSwitch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainSmallFour_test.go" />
@@ -542,6 +543,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeFromCSharp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)readmePackageDoc_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />

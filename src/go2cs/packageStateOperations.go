@@ -135,9 +135,6 @@ func resetPackageState(pkg *packages.Package) {
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}
 
-	// Capture the package-level Go doc (rendered to Markdown) for the NuGet README
-	packageDoc = extractPackageDoc(pkg.Syntax)
-
 	// Capture the package's own source directory for the README's validation badge, which has to
 	// look at the Go sources the conversion never compiles (the `_test.go` files) to tell a package
 	// with an unvalidated test suite from one that has no tests at all. Dir comes straight from the
@@ -147,6 +144,10 @@ func resetPackageState(pkg *packages.Package) {
 	if packageSourceDir == "" && len(pkg.GoFiles) > 0 {
 		packageSourceDir = filepath.Dir(pkg.GoFiles[0])
 	}
+
+	// Capture the package-level Go doc (rendered to Markdown) for the NuGet README: this target's own, or
+	// pkg.go.dev's where this target's files carry none (packageDocFor).
+	packageDoc = packageDocFor(pkg.Syntax, packageSourceDir, pkg.Name)
 
 	importPackageDirs = make(map[string]importedPackageMeta)
 	importedPackageSources = make(map[string]*packages.Package)
