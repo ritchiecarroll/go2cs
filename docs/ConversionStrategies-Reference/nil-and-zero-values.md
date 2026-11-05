@@ -25,7 +25,7 @@ func typedNilErr() error {
 	fmt.Println("typed nil pointer in error != nil:", err != nil)
 	fmt.Println("nil == typed nil pointer in error:", nil == err)
 ```
-<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:15-18, 62-64 -->
+<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:13-16, 60-62 -->
 ```csharp
 internal static error typedNilErr() {
     ж<myErr> p = default;
@@ -267,7 +267,7 @@ explicitly, and the ordinary conversion renderer emits the cast:
 ```go
 fmt.Println(reflect.TypeOf(map[string]int(nil)))
 ```
-<!-- source: src/tests/Behavioral/UnnamedMapNilConversion/main.cs.target:13 -->
+<!-- source: src/tests/Behavioral/UnnamedMapNilConversion/main.cs.target:12 -->
 ```csharp
 fmt.Println(reflect.TypeOf((map<@string, nint>)default));
 ```

@@ -117,7 +117,7 @@ A beyond-float64 value still routes to the `GoBigConst` (BigInteger) overflow pa
 
 **A literal-only float const folds only where C#'s steps would land off Go's value.**<!-- 2026-10-04 --> A float constant built only from literals (`1 - .999`, `0.1 + 0.2`) keeps its operator form (`1D - .999D`), which C# evaluates one operation at a time, rounding after each. That agrees with Go's exact-then-rounded value for most expressions (`1.5 * 2.0`), but not when a decimal with no exact binary form makes a step round differently: `1 - .999` is 0.001 in Go and 0.0010000000000000009 in C#, which is what `internal/trace/traceviewer`'s quantile list `[]float64{0, 1 - .999, 1 - .99, 1 - .95}` computed. `foldedInexactLiteralFloatConst` (`literalFloatConstFold.go`) works out the value the emitted operator form produces (a literal parsed to the nearest double, or float for a float32 target; a pair of integer operands kept as C# integer arithmetic, so `7/2 + .5` is 3.5 as in Go; each float operation rounded) and folds the expression to Go's value, in the same `/* <expr> */ <literal>` form as the named-constant fold, only when the two differ. The decision is made once, for the outermost literal expression, so `(1 - .999) * 1000` folds whole to `/* (1 - .999) * 1000 */ 1D`; an expression whose steps already give Go's value keeps its operator form and so do all the literal operations inside it. (Guarded by `literalFloatConstFold_test.go`, with `1.5 * 2.0`, `7/2 + .5` and float32 `0.1 + 0.2` as the controls that must not fold, and by the `LiteralFloatConstFold` behavioral test, output-compared vs Go.)
 
-**Function-local untyped constants TIGHTEN to their single concrete use type.** A per-function analysis pass (`performUntypedConstAnalysis`) resolves every use of each function-local untyped numeric constant through go/types: when ALL uses record the SAME concrete basic type — and none participates in constant folding — the declaration emits at that type (with C#'s `const` keyword where legal: the primitive aliases; native-int/`uintptr` values fall to the existing `static readonly`/`unchecked` demotions), and every cast the wrapper made necessary (the bitwise/arith operand casts, the `append`/deferred-call element casts, the 32-bit-and-wider shift retype) is skipped as redundant. One cast is **kept because it is value-changing, not wrapper-driven**: a tightened const of a *sub-int32* type (`int8`/`int16`/`uint8`/`uint16`) as the LEFT operand of a non-constant shift keeps its width cast — C# promotes a narrow shifted operand to `int`, so the shift is golib's guarded `Lsh` on the cast receiver, `((byte)cb).Lsh(k)`, whose `byte` overload wraps at the declared width (`const cb = 200; b + cb<<k` → Go wraps `200<<1` to 144, byte width, result 145; a promoted C# shift computes 400 → 401).<!-- src/tests/Behavioral/UntypedConstDefine/main.cs.target:75 (`fmt.Println((byte)(b + ((byte)cb).Lsh(sh1)));`). Before the GoShift guard the retype was (byte)(cb << (int)(k)). --> The emitted code otherwise reads like the Go source — math `cbrt`:
+**Function-local untyped constants TIGHTEN to their single concrete use type.** A per-function analysis pass (`performUntypedConstAnalysis`) resolves every use of each function-local untyped numeric constant through go/types: when ALL uses record the SAME concrete basic type — and none participates in constant folding — the declaration emits at that type (with C#'s `const` keyword where legal: the primitive aliases; native-int/`uintptr` values fall to the existing `static readonly`/`unchecked` demotions), and every cast the wrapper made necessary (the bitwise/arith operand casts, the `append`/deferred-call element casts, the 32-bit-and-wider shift retype) is skipped as redundant. One cast is **kept because it is value-changing, not wrapper-driven**: a tightened const of a *sub-int32* type (`int8`/`int16`/`uint8`/`uint16`) as the LEFT operand of a non-constant shift keeps its width cast — C# promotes a narrow shifted operand to `int`, so the shift is golib's guarded `Lsh` on the cast receiver, `((byte)cb).Lsh(k)`, whose `byte` overload wraps at the declared width (`const cb = 200; b + cb<<k` → Go wraps `200<<1` to 144, byte width, result 145; a promoted C# shift computes 400 → 401).<!-- src/tests/Behavioral/UntypedConstDefine/main.cs.target:72 (`fmt.Println((byte)(b + ((byte)cb).Lsh(sh1)));`). Before the GoShift guard the retype was (byte)(cb << (int)(k)). --> The emitted code otherwise reads like the Go source — math `cbrt`:
 
 ```go
 const (
@@ -296,7 +296,7 @@ See [Named Numeric Types and Constant Contexts](named-numeric-types.md#named-num
 
 ## `string()` of an untyped constant reference hops through the default type
 `string(utf8.RuneError)` renders the argument as its cross-package Untyped* wrapper property, from which `@string` has no conversion (CS0030).<!-- src/core/unicode/utf8/utf8.cs:17 (`public static UntypedInt RuneError =>`) --> The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:251 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:218 -->
 ```csharp
 fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 ```
@@ -360,7 +360,7 @@ Bare, in `rune` slots:
 	digit := byte('7')
 	fmt.Println(digit-'0', int(digit-'0'))
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:67-78 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:58-69 -->
 ```csharp
     fmt.Println(takesRune('y'), retRune());
     if (r == 'a' && r < 'z') {
@@ -393,7 +393,7 @@ Cast to the target, in `byte`, `int8` and `int16` slots:
 	var i8 int8 = 'A'
 	var i16 int16 = 'B'
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:46-59 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:37-50 -->
 ```csharp
     byte b = (byte)'q';
     switch (b) {
@@ -423,7 +423,7 @@ Kept, where C# would box or infer a `char`:
 	// Inferred locals stay int32.
 	r := 'a'
 ```
-<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:32-37 -->
+<!-- source: src/tests/Behavioral/RuneLiteralContexts/main.cs.target:23-28 -->
 ```csharp
     fmt.Println((rune)'a');
     fmt.Printf("%T %v\n"u8, (rune)'a', (rune)'a');

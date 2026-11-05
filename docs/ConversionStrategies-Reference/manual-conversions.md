@@ -2834,7 +2834,7 @@ go2cs-gen records on the struct, and golib's field projection reads that record 
 **An embed's TAG is read like any other field's.** The converter writes the tag as a comment after the
 embed's declaration, exactly as it does for a named field, and go2cs-gen records it the same way:
 
-<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:35-40 -->
+<!-- source: src/tests/Behavioral/ReflectBridgeClosure/main.cs.target:33-38 -->
 ```csharp
 partial struct host {
     public nint Plain;

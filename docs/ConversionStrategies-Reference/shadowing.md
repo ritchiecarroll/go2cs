@@ -842,7 +842,7 @@ its Δ rename). A TYPE reference to the dot-imported package rendered through th
 use. When the name is bound to a different target, the type is therefore named through the dot-import's own
 class, rooted in `global::`:
 
-<!-- source: src/tests/Behavioral/DotImportNameCollision/main.cs:4-5, 21, 29 -->
+<!-- source: src/tests/Behavioral/DotImportNameCollision/main.cs:4-5, 19, 27 -->
 ```csharp
 using static DotImportNameCollision.a.keys_package;
 using keys = DotImportNameCollision.b.keys_package;

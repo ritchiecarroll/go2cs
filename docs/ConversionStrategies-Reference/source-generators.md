@@ -258,7 +258,7 @@ its definition does not spell. Nested arrays list each length in order.
 …
 internal static nint hash(/*[32]*/ array<byte> b) {
 …
-internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) {
+internal static void fill(nint n, ref array<int32> p, /*[4][8]*/ array<array<byte>> grid) { grid = grid.Clone(); }
 ```
 
 **A string twin is the function that takes an `sstring`.** A few registered functions exist twice, so that a
@@ -277,7 +277,7 @@ public static (rune r, nint size) DecodeRuneInString(sstring s) {
 a wrapper over golib's `channel<bool>`, which has no direction in its type. The comment after the name spells
 the type as Go does, arrow included, and the generator records the direction from it.
 
-<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:29 -->
+<!-- source: src/tests/Behavioral/ReflectFuncChanDir/main.cs.target:25 -->
 ```csharp
 partial struct AssignD /*<-chan bool*/;
 ```

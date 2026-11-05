@@ -20,13 +20,13 @@ func show(v I) { fmt.Printf("I: %T %v\n", v, v) }
 …
 func back(n int8) I { return n }
 ```
-<!-- source: src/tests/Behavioral/NamedEmptyInterface/main.cs.target:1, 13, 21 -->
+<!-- source: src/tests/Behavioral/NamedEmptyInterface/main.cs.target:1, 13, 17 -->
 ```csharp
 global using I = object;
 …
-internal static void show(I v) {
+internal static void show(I v) { fmt.Printf("I: %T %v\n"u8, v, v); }
 …
-internal static I back(int8 n) {
+internal static I back(int8 n) { return n; }
 ```
 <!-- source: src/tests/Behavioral/NamedEmptyInterface/package_info.cs:70 -->
 ```csharp
@@ -353,7 +353,7 @@ already leads with the cast so the two can never double up:
 …
 	shk := holder{v: "seed"}
 ```
-<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:152-153, 157, 161, 165, 170 -->
+<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:133-134, 138, 142, 146, 151 -->
 ```csharp
     fmt.Println("str var lit   :", variadicEq(s, "seed"));
     fmt.Println("str var cat   :", variadicEq(s, (@string)("se" + "ed")));

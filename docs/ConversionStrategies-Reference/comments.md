@@ -4,8 +4,8 @@
 
 Two things are converted here, under different switches.
 
-- **Blank lines inside a function body, and the one after the converter's prelude, follow Go in every
-  conversion.**
+- **Blank lines inside a function body, the one after the converter's prelude, and those between top-level
+  declarations follow Go in every conversion, and a function Go writes on one line is one line.**
 - **Comments are carried only with `-comments`** (default off). The standard-library conversion turns it on,
   because the converted C# is a derivative work whose per-file `// Copyright … The Go Authors` header must
   survive and because Go's doc comments are most of what makes the output readable. So does `-tests`, and the
@@ -231,7 +231,7 @@ follows every switch whether Go has one or not. A behavioral golden shows it:
 	return "other"
 ```
 
-<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:61-65 -->
+<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:46-50 -->
 ```csharp
     case @string: {
         return "string";
@@ -273,6 +273,75 @@ internal static UntypedInt surrSelf => 0x10000;
 ```
 
 **Limits.** Only `const` and `var` groups. Without `-comments` this rule is not applied.
+
+### Between top-level declarations, a blank line only where Go has one
+
+**Rule.** In every conversion, two top-level declarations are separated by a blank line only where Go has one
+between them; declarations Go writes next to each other are next to each other in C#. A function that Go writes
+on one line is written on one line, as a block body: Go's `{ return nil }` is `{ return default; }`, and an
+empty body is `{ }`. A trailing comment on that line, with `-comments`, follows the closing brace.
+
+<!-- source: src/tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.go:60-63 -->
+```go
+type embeddedImpl struct{}
+
+func (embeddedImpl) Close() error { return nil }
+func (embeddedImpl) Flush() error { return nil }
+```
+
+<!-- source: src/tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.cs.target:80-84 -->
+```csharp
+partial struct embeddedImpl {
+}
+
+internal static error Close(this embeddedImpl _) { return default; }
+internal static error Flush(this embeddedImpl _) { return default; }
+```
+
+The same holds for `const`, `var` and `type` declarations written one per line:
+
+<!-- source: src/tests/Behavioral/ParallelAssignmentHazard/main.go:58-59 -->
+```go
+var left = 10
+var right = 20
+```
+
+<!-- source: src/tests/Behavioral/ParallelAssignmentHazard/main.cs.target:46-47 -->
+```csharp
+internal static nint left = 10;
+internal static nint right = 20;
+```
+
+**Exception.** A one-line Go function whose C# body needs more than one statement (a receiver or parameter
+dereference, a heap box or a copied array ahead of Go's statement, two statements on Go's one line, a deferred
+call's frame) is written as the converter writes any body, and keeps a blank line on each side, so a
+several-line member never sits directly against its neighbours. A C# body of exactly one statement is one line
+even when that statement is the converter's own, such as `{ v = v.Clone(); }` for Go's empty body.
+
+<!-- source: src/tests/Behavioral/NamedFuncTypeStructuralField/main.go:44 -->
+```go
+func byName(a, b *item) bool { return a.name < b.name }
+```
+
+<!-- source: src/tests/Behavioral/NamedFuncTypeStructuralField/main.cs.target:35-40 -->
+```csharp
+internal static bool byName(ж<item> Ꮡa, ж<item> Ꮡb) {
+    ref var a = ref Ꮡa.DerefOrNull();
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    return a.name < b.name;
+}
+```
+
+**Why.** One-line functions and adjacent declarations are how Go programmers group small members, such as a
+type's accessors or a run of constants. Writing them as Go does keeps that grouping, and Go's text plus a
+semicolon reads the same as Go. A block body, rather than an `=>` expression body, works for every one-line
+shape, including the empty body and a statement that is not an expression, and is not confused with the `=>`
+properties the converter already writes for constants.
+
+**Limits.** Imports do not take part. A declaration that writes nothing in its place (an alias written as a
+`global using`) ends the run, so the declaration after it keeps its blank line. A package-level struct type
+that a `var` declares inline is lifted above the `var` as it was before.
 
 ## Doc comments
 
@@ -764,6 +833,8 @@ converter writes through another path. The census below counts them per class, s
 - `bodyBlankLines_test.go`: blank lines in bodies with and without `-comments`, the switch rule, and the brace
   and `case` placements.
 - `preludeSeparator_test.go`: the blank line after the prelude.
+- `topLevelSeparation_test.go`: blank lines between top-level declarations and one-line functions, with and
+  without `-comments`, including the one-liners C# cannot write on one line.
 - `docComments_test.go`: group docs, non-struct type docs, group blank lines, and no blank-line runs around a
   lifted package-level struct.
 - `aliasDocComments_test.go`: alias docs above their `global using`.
