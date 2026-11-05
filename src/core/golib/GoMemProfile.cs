@@ -251,6 +251,11 @@ public static class GoMemProfile
         if (Recorder is not { } recorder)
             return;
 
+        // Go records a sample outside mallocgc (the M's profStack, persistentalloc'd buckets, static size-class
+        // tables), so a sample never adds to MemStats.Mallocs and testing.AllocsPerRun never sees one. The
+        // recorder here allocates through golib (its stack buffer; on the first sample, the size-class tables'
+        // lazy holders), so what it allocated is taken back off this thread's count.
+        long counted = AllocationCounter.CurrentThreadCount;
         t_recording = true;
 
         try
@@ -260,6 +265,7 @@ public static class GoMemProfile
         finally
         {
             t_recording = false;
+            AllocationCounter.RewindThread(counted);
         }
     }
 
