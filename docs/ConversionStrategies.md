@@ -8650,7 +8650,7 @@ carries nothing over: golib resets its thread state between goroutines, and each
 even while goroutines are still running. The one exception, also Go's, is a goroutine that is panicking: `main`'s
 return waits for its report and exits 2 with it (golib's `MainExit`; see
 [defer, panic and recover](ConversionStrategies-Reference/defer-panic-recover.md)).
-<!-- src/core/golib/runtime/Goroutine.cs:1206 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
+<!-- src/core/golib/runtime/Goroutine.cs:1234 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`;
      src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
      `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :181
      `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
@@ -11755,8 +11755,8 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:4843 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
-     the printed form :1942 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
+<!-- src/core/runtime/managed_impl.cs:4854 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+     the printed form :1953 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
 
@@ -12321,7 +12321,7 @@ The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 The placeholder names the attribute that the `*_impl.cs` file carries. It is the same attribute as
 `go.GoManualConversion`; `go` is its namespace. The hand-owned `managed_impl.cs` supplies the method:
 
-<!-- source: src/core/runtime/managed_impl.cs:482-494 -->
+<!-- source: src/core/runtime/managed_impl.cs:493-505 -->
 ```csharp
 // Gosched yields the processor, allowing other goroutines to run. It does not suspend the
 // current goroutine, so execution resumes automatically.
