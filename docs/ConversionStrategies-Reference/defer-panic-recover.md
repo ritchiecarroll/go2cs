@@ -187,7 +187,7 @@ or `defer` beside the thunk, numbered `ᴛ1`, `ᴛ2`, … in order:
 
     var b = Ꮡ(new box(name: "b"));
     var bʗ1 = b;
-    goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);
+    goǃ(bʗ1.say, (@string)"hello");
     fmt.Println(ᐸꟷ(results));
 
     var f = report;

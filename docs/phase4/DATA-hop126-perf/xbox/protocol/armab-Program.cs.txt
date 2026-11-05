@@ -1,0 +1,137 @@
+// armab: October's foldab (C:\go2cs\scratch\foldab: the folding-off A/B for COORD's order (2), 2026-10-27), with ONE change
+// for the 1.26.10.2 run's diagnostic arms (PGO0-Sort): an optional 5th column, env, "K=V;K=V", set on that arm's process
+// only. Everything else is foldab verbatim: the performance runner's own primitives (RunMeasured, ParseInnerMs,
+// FilterTimingLines, from src/tests/Performance/PerformanceRunner/Program.cs at e6b7f24f81). Per program: verify every
+// arm's output equal and exit 0, one discarded warmup per arm, then N rounds whose arm order alternates forward/reverse.
+// Usage: armab <arms.tsv> <rounds> <out.tsv>; arms.tsv rows: program<TAB>arm<TAB>exe<TAB>workdir[<TAB>env].
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
+
+const int RunTimeoutMs = 600_000;
+string[] rows = File.ReadAllLines(args[0]).Where(l => l.Length > 0 && !l.StartsWith('#')).ToArray();
+int rounds = int.Parse(args[1], CultureInfo.InvariantCulture);
+var outTsv = new StringBuilder("program\tarm\tround\twall_ms\tinner_ms\tpeak_bytes\n");
+var arms = rows.Select(r => r.Split('\t')).Select(c => (Program: c[0], Arm: c[1], Exe: c[2], Work: c[3], Env: c.Length > 4 ? c[4] : "")).ToList();
+
+foreach (var group in arms.GroupBy(a => a.Program))
+{
+    var list = group.ToList();
+    string? reference = null;
+    foreach (var a in list)
+    {
+        var (code, stdout, _, _) = RunMeasured(a.Exe, a.Work, a.Env);
+        string o = FilterTimingLines(stdout);
+        if (code != 0) { Console.WriteLine($"VERIFY FAIL {a.Program}/{a.Arm}: exit {code}"); return 1; }
+        if (reference is null) reference = o;
+        else if (o != reference) { Console.WriteLine($"VERIFY FAIL {a.Program}/{a.Arm}: output differs"); return 1; }
+    }
+    Console.WriteLine($"{group.Key}: verified {list.Count} arms, output equal");
+    foreach (var a in list) RunMeasured(a.Exe, a.Work, a.Env);   // warmup, discarded
+    for (int i = 0; i < rounds; i++)
+    {
+        var order = i % 2 == 0 ? list : Enumerable.Reverse(list).ToList();
+        foreach (var a in order)
+        {
+            var (code, stdout, wall, peak) = RunMeasured(a.Exe, a.Work, a.Env);
+            if (code != 0) { Console.WriteLine($"MEASURE FAIL {a.Program}/{a.Arm} round {i}: exit {code}"); return 1; }
+            outTsv.Append(CultureInfo.InvariantCulture, $"{a.Program}\t{a.Arm}\t{i}\t{wall:F3}\t{ParseInnerMs(stdout):F3}\t{peak}\n");
+        }
+    }
+    Console.WriteLine($"{group.Key}: {rounds} rounds done");
+}
+File.WriteAllText(args[2], outTsv.ToString());
+return 0;
+
+static string FilterTimingLines(string output)
+{
+    return string.Join('\n', output
+        .Replace("\r", "")
+        .Split('\n')
+        .Where(l => !l.StartsWith("elapsed_ns:", StringComparison.Ordinal)));
+}
+
+static double ParseInnerMs(string stdOut)
+{
+    foreach (string line in stdOut.Split('\n'))
+    {
+        if (!line.StartsWith("elapsed_ns:", StringComparison.Ordinal))
+            continue;
+
+        if (long.TryParse(line["elapsed_ns:".Length..].Trim(), out long ns))
+            return ns / 1_000_000.0;
+    }
+
+    return 0.0;
+}
+
+static (int exitCode, string stdOut, double wallMs, long peakBytes) RunMeasured(string exe, string workDir, string env)
+{
+    ProcessStartInfo startInfo = new()
+    {
+        FileName = exe,
+        Arguments = "",
+        WorkingDirectory = workDir,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true
+    };
+
+    foreach (string kv in env.Split(';', StringSplitOptions.RemoveEmptyEntries))
+    {
+        int eq = kv.IndexOf('=');
+        startInfo.Environment[kv[..eq]] = kv[(eq + 1)..];
+    }
+
+    StringBuilder outBuf = new();
+
+    using Process process = new();
+    process.StartInfo = startInfo;
+    process.OutputDataReceived += (_, e) => { if (e.Data is not null) outBuf.AppendLine(e.Data); };
+    process.ErrorDataReceived += (_, _) => { };
+
+    Stopwatch sw = Stopwatch.StartNew();
+    process.Start();
+    process.BeginOutputReadLine();
+    process.BeginErrorReadLine();
+
+    long peak = 0;
+
+    try
+    {
+        peak = process.PeakWorkingSet64;
+    }
+    catch
+    {
+    }
+
+    while (!process.WaitForExit(1))
+    {
+        try
+        {
+            process.Refresh();
+            long ws = process.PeakWorkingSet64;
+
+            if (ws > peak)
+                peak = ws;
+        }
+        catch
+        {
+        }
+
+        if (sw.ElapsedMilliseconds > RunTimeoutMs)
+        {
+            try { process.Kill(entireProcessTree: true); }
+            catch { }
+
+            process.WaitForExit(5000);
+            return (-1, outBuf.ToString(), sw.Elapsed.TotalMilliseconds, peak);
+        }
+    }
+
+    sw.Stop();
+    process.WaitForExit();
+
+    return (process.ExitCode, outBuf.ToString(), sw.Elapsed.TotalMilliseconds, peak);
+}

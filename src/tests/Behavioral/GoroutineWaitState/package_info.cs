@@ -41,6 +41,13 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("main.cs", 72, 5)]
+[assembly: GoBoundedGoroutine("main.cs", 80, 5)]
+[assembly: GoBoundedGoroutine("main.cs", 88, 5)]
+[assembly: GoBoundedGoroutine("main.cs", 102, 5)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

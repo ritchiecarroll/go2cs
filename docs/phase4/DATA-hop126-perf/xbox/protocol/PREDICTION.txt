@@ -1,0 +1,9 @@
+CROSS-BOX PREDICTION, written by G on 2026-11-05 before any i9 run of this bundle.
+G read (04:28 window, these four images, the same protocol): AOT H/P 0.894, C/C0 0.958, C0/P 0.985.
+The i9's 10-30 macro read P/HY about 1.004 on AOT, i.e. H/P about 0.996, but with ITS OWN images built at 893d48976f.
+Its own record flags that as an unexplained asymmetry, because its AOT kernels kept the gap (C2 1.77).
+PREDICTION: the gap is a property of the IMAGES, not of the box. On the i9, with these images and this harness:
+ H/P in [0.86, 0.93], C/C0 in [0.94, 0.98], and each A/A pair within 1%.
+So the 10-30 1.004 came from that run's images or driver, not from the i9's silicon.
+If instead H/P on the i9 is at or above 0.97, it is the BOX (Intel Raptor Lake against AMD Zen 3+): the cost of a plain
+literal under AOT depends on the microarchitecture, and the owner's choice should weigh both boxes.

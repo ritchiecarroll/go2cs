@@ -546,7 +546,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> t) {
         goǃ(() => {
             Ꮡwg.Wait();
             close(doneʗ1);
-        }, GoStack.Bounded);
+        });
         var selᴛ18 = done;
         var selᴛ19 = stuck;
         switch (select(ᐸꟷ(selᴛ18, ꓸꓸꓸ), ᐸꟷ(selᴛ19, ꓸꓸꓸ))) {

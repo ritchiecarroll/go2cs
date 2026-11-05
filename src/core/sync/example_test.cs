@@ -63,7 +63,7 @@ public static partial void ExampleWaitGroup_addAndDone() {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, url, GoStack.Bounded);
+        }, url);
     }
     // Wait for all HTTP fetches to complete.
     Ꮡwg.Wait();

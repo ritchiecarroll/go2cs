@@ -554,7 +554,7 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> b) {
             Ꮡready.Done();
             ᐸꟷ(chʗ1);
             Ꮡdone.Done();
-        }, GoStack.Bounded);
+        });
     }
     Ꮡready.Wait();
 

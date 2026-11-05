@@ -210,7 +210,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> t) {
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
-            }, GoStack.Bounded);
+            });
         }
         foreach (var _ᴛ2 in range(count)) {
             Sleep(1 * Microsecond);
@@ -273,7 +273,7 @@ public static partial void TestLongAdjustTimers(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
 
         foreach (var i in range(50000)) {
             const nint @try = 20;
@@ -675,7 +675,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/c
     goǃ(() => {
         ᐸꟷ(Cʗ5);
         close(Ꮡdone.ValueSlot);
-    }, GoStack.Bounded);
+    });
     Sleep(sched);
     notDone(done);
 
@@ -721,7 +721,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/c
             break;
         }}
         close(done1ʗ1);
-    }, GoStack.Bounded);
+    });
     var Cʗ7 = C;
     var done2ʗ1 = done2;
     goǃ(() => {
@@ -736,7 +736,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/c
             break;
         }}
         close(done2ʗ1);
-    }, GoStack.Bounded);
+    });
     Sleep(sched);
     notDone(done);
     tim.Reset(sched / 2);
@@ -786,7 +786,7 @@ internal static partial void testTimerChan(ж<Δtesting.T> t, timer tim, /*<-*/c
                 break;
             }}
             Ꮡdone.ValueSlot.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     Sleep(sched);
     close(stop);

@@ -1,0 +1,20 @@
+CROSS-BOX LITERAL-POLICY CHECK -- PROTOCOL v3 (G, 2026-11-05; amended after run2, BEFORE run3; applies to run3 onward ONLY).
+HISTORY, not re-read:
+ - run1 (v1, 11 rounds): INVALID. Rule 2 counted an idle pwsh host; rule 3 failed (C/C0 A/A 1.22% / 1.57%).
+ - run2 (v2, 21 rounds): INVALID under v2. Rule 3 failed on P (A/A 1.24%). It stays invalid; v3 does not admit it.
+WHY v3: v2's fixed 1% A/A bound was calibrated on G (its AOT A/A gaps are 0.02-0.66%). The i9 shows one arm per run above
+ 1%, a different arm each time, so its own A/A floor is above 1%. A fixed bound then tests the box's floor, not the run.
+ v3 states rule 3 the way the whole re-baseline judges a ratio (PLAN section 8): a move must exceed the larger of its arms'
+ own null (the A/A gap) and spread (the IQR). Gross disturbance is still refused.
+RUN (Git Bash): bash /c/go2cs-perf/xbox-literal/run.sh   (unchanged: ROUNDS 21, its own out-<timestamp>/ folder)
+VALID ONLY IF ALL hold (from out-<timestamp>/run.log and sm-aot.tsv):
+ 1. "end ... rc=0" and manifest.sha256 checked OK at the start.
+ 2. "build/toolchain processes: 0" at box start and box end, on AC power. An admitted pwsh host must be the same PID at
+    both ends, with cpu_s growth under 1.0 s.
+ 3. v3, a VALIDITY bound only: every arm's A/A gap (|X/X-AA - 1|, on medians) is under 3%. Above that, the run is
+    disturbed and void.
+ 4. The Fib control's bootstrap 95% interval holds 0.
+READING (v3, the same for both boxes): an arm's value is the mean of its A and AA medians. For each ratio, H/P, C/C0 and
+ C0/P, its FLOOR is the largest of the two arms' A/A gaps and the two arms' four IQRs. The ratio is "moved" only if
+ |ratio - 1| > floor; otherwise it reads "within". G's v2 run (A/A 0.08-0.66%) is valid under v3 as well and is read the
+ same way.

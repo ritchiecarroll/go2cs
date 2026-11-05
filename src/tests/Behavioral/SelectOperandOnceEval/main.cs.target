@@ -21,7 +21,7 @@ internal static partial channel<nint> after() {
     var chʗ1 = ch;
     goǃ(() => {
         chʗ1.ᐸꟷ(99);
-    }, GoStack.Bounded);
+    });
     return ch;
 }
 

@@ -39,7 +39,7 @@ public static void TestWait(ж<testing.T> t) {
         var done = false;
         goǃ(() => {
             done = true;
-        }, GoStack.Bounded);
+        });
         // Wait will block until the goroutine above has finished.
         synctest.Wait();
         tΔ1.Log(done); // always logs "true"

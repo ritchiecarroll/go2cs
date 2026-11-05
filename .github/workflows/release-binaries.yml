@@ -9,14 +9,16 @@ name: Release binaries
 # built at the tag would name the previous release (the first tag run, 38268359067, showed exactly that and
 # failed its own version check). So a release run:
 #   - refuses a tag that is not nuget-N.N.N.N, or that does not exist;
-#   - finds the record commit on master: the first commit after the tag whose corpus-release.txt reads the
+#   - finds the record commit on master, or for a maintenance release on its line's release/go1.N branch
+#     (docs/PLAN-version-lines.md): the first commit after the tag whose corpus-release.txt reads the
 #     tag's version. On a tag push it waits for it, up to two hours, because the record lands minutes after the
 #     tag; started by hand it looks once;
 #   - requires the tag's commit to be an ancestor of the record commit, and src/go2cs to be byte-identical
 #     between the two apart from corpus-release.txt, so what is built is the tagged converter source;
 #   - attests the archives' build provenance (verify one with `gh attestation verify <file> --repo <owner>/<repo>`);
 #   - fails unless `go2cs -version` on every platform names the tag's version as go2cs.release;
-#   - creates a DRAFT GitHub Release for the tag holding the six archives, SHA256SUMS and the attestation bundle.
+#   - creates a DRAFT GitHub Release for the tag holding the six archives, SHA256SUMS and the attestation bundle;
+#     a maintenance release's draft is created with the latest mark cleared, and its notes say to keep it cleared.
 # Every run also packs the go2cs dotnet tool from the same source, UNSIGNED, and proves on each platform's runner that
 # it installs and converts with no Go installed, byte-identically to a conversion with Go (tool-smoke). The packages
 # nuget.org gets are packed and signed on the release machine (src/release-nuget.ps1 Phase 1b), never by this workflow.
@@ -62,11 +64,12 @@ jobs:
       release-version: ${{ steps.tag.outputs.version }}
       release-tag: ${{ steps.tag.outputs.tag }}
       record-sha: ${{ steps.tag.outputs.record }}
+      record-branch: ${{ steps.tag.outputs.branch }}
       tool-version: ${{ steps.tool.outputs.version }}
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0   # the record commit is found in master's history
+          fetch-depth: 0   # the record commit is found in master's history, or a maintenance line's
 
       - name: Find the release's record commit and check it out
         id: tag
@@ -88,6 +91,9 @@ jobs:
             exit 1
           fi
           version="${tag#nuget-}"
+          # A maintenance release is cut on its Go minor's release/go1.N branch, and its record lands there, not on
+          # master (docs/PLAN-version-lines.md, T2). Both are searched; the branch that holds the record is reported.
+          line_branch="release/go$(printf '%s' "$version" | cut -d. -f1,2)"
           # --force: on a tag push the checkout already wrote this tag as a lightweight ref at its commit, and
           # origin's annotated tag would otherwise be refused as a clobber (run 38523494714 died here).
           if ! git fetch --quiet --tags --force origin; then
@@ -106,20 +112,36 @@ jobs:
               echo "::error::git fetch of origin master failed"
               exit 1
             fi
+            # Origin may have no branch for this line (every release of a current minor is cut on master).
+            git fetch --quiet origin "+refs/heads/$line_branch:refs/remotes/origin/$line_branch" 2>/dev/null || true
+            refs="origin/master"
+            if git rev-parse --verify --quiet "refs/remotes/origin/$line_branch" >/dev/null; then refs="$refs origin/$line_branch"; fi
             if [ "$(reads "$tag_commit")" = "$version" ]; then
               record="$tag_commit"
             else
-              for c in $(git log --reverse --format=%H "$tag_commit..origin/master" -- "$release_file"); do
-                if [ "$(reads "$c")" = "$version" ]; then record="$c"; break; fi
+              for ref in $refs; do
+                for c in $(git log --reverse --format=%H "$tag_commit..$ref" -- "$release_file"); do
+                  if [ "$(reads "$c")" = "$version" ]; then record="$c"; break; fi
+                done
+                if [ -n "$record" ]; then break; fi
               done
             fi
             if [ -n "$record" ] || [ "$try" -ge "$tries" ]; then break; fi
-            echo "The record commit for $version is not on master yet (look $try of $tries). Waiting two minutes."
+            echo "The record commit for $version is not on master or $line_branch yet (look $try of $tries). Waiting two minutes."
             sleep 120
             try=$((try + 1))
           done
           if [ -z "$record" ]; then
-            echo "::error::record commit not found: no commit on master after $tag sets $release_file to $version. Re-run with workflow_dispatch tag=$tag once it has landed."
+            echo "::error::record commit not found: no commit on master or $line_branch after $tag sets $release_file to $version. Re-run with workflow_dispatch tag=$tag once it has landed."
+            exit 1
+          fi
+          # The line the record is on: master when master holds it, else the maintenance branch.
+          if git merge-base --is-ancestor "$record" origin/master; then
+            branch=master
+          elif git rev-parse --verify --quiet "refs/remotes/origin/$line_branch" >/dev/null && git merge-base --is-ancestor "$record" "origin/$line_branch"; then
+            branch="$line_branch"
+          else
+            echo "::error::the record commit $record is on neither master nor $line_branch"
             exit 1
           fi
           if ! git merge-base --is-ancestor "$tag_commit" "$record"; then
@@ -139,8 +161,9 @@ jobs:
             echo "tag=$tag"
             echo "version=$version"
             echo "record=$record"
+            echo "branch=$branch"
           } >> "$GITHUB_OUTPUT"
-          echo "Release run for \`$tag\`: tag commit \`$tag_commit\`, record commit \`$record\` (checked out and built)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Release run for \`$tag\`: tag commit \`$tag_commit\`, record commit \`$record\` on $branch (checked out and built)." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/setup-go@v6
         id: go
@@ -351,11 +374,13 @@ jobs:
           TAG: ${{ needs.build.outputs.release-tag }}
           VERSION: ${{ needs.build.outputs.release-version }}
           RECORD: ${{ needs.build.outputs.record-sha }}
+          RECORD_BRANCH: ${{ needs.build.outputs.record-branch }}
         run: |
           set -euo pipefail
           test -n "$VERSION"
           test -n "$TAG"
           test -n "$RECORD"
+          test -n "$RECORD_BRANCH"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "::error::a Release already exists for $TAG; this workflow does not overwrite one"
             exit 1
@@ -365,7 +390,15 @@ jobs:
           test -s dist/SHA256SUMS
           test -s dist/go2cs-attestation.sigstore.jsonl
           notes="DRAFT, created by the release-binaries workflow for tag $TAG. The binaries were built from the release record commit $RECORD. Before publishing: on the release machine run src/sign-release-binaries.ps1 -Tag $TAG -Apply (signs the Windows executables and SHA256SUMS), then run the attest-release workflow for $TAG; and replace this text with the release notes."
-          gh release create "$TAG" --draft --verify-tag --title "go2cs $VERSION" --notes "$notes" \
+          # Asset names carry no version, so releases/latest/download/<name> serves the Release marked latest. A
+          # maintenance release (its record on a release/go1.N branch) must never take that mark from the current
+          # line (docs/PLAN-version-lines.md, T3): the draft is created with it cleared, and its notes say so.
+          latest=()
+          if [ "$RECORD_BRANCH" != master ]; then
+            latest=(--latest=false)
+            notes="$notes MAINTENANCE RELEASE on $RECORD_BRANCH: publish it with Set as the latest release CLEARED, or releases/latest serves this older converter."
+          fi
+          gh release create "$TAG" --draft --verify-tag "${latest[@]}" --title "go2cs $VERSION" --notes "$notes" \
             dist/go2cs-*.zip dist/go2cs-*.tar.gz dist/SHA256SUMS dist/go2cs-attestation.sigstore.jsonl
           draft="$(gh release view "$TAG" --json isDraft --jq .isDraft)"
           if [ "$draft" != "true" ]; then

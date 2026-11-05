@@ -150,7 +150,7 @@ public static partial void TestTickerConcurrentStress(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
     ticker.Stop();
@@ -186,13 +186,13 @@ public static partial void TestAfterFuncStarvation(ж<Δtesting.T> t) {
             }
             close(cʗ1);
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
         var cʗ2 = c;
         goǃ(() => {
             foreach (var _ᴛ1 in cʗ2) {
             }
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
 
         AfterFunc(1 * Microsecond, () => {
             Ꮡstop.Store(true);
@@ -353,7 +353,7 @@ public static void BenchmarkSleep1000(ж<Δtesting.B> b) {
                 goǃ(() => {
                     Sleep(ΔNanosecond);
                     Ꮡwg.Done();
-                }, GoStack.Bounded);
+                });
             }
             Ꮡwg.Wait();
         }
@@ -529,7 +529,7 @@ internal static partial error testAfterQueuing1(Δtime.Duration delta, Func<Δti
 
     var t0 = Now();
     foreach (var (_, slot) in slots) {
-        goǃ(await, slot, result.AsSendOnly(), After(((Δtime.Duration)(int64)slot) * delta), GoStack.Bounded);
+        goǃ(await, slot, result.AsSendOnly(), After(((Δtime.Duration)(int64)slot) * delta));
     }
     slice<nint> order = default;
     slice<Δtime.Time> times = default;
@@ -674,7 +674,7 @@ public static partial void TestOverflowSleep(ж<Δtesting.T> t) {
         // On failure, this may return after the test has completed, so
         // we need to panic instead.
         throw panic("big sleep returned");
-    }, GoStack.Bounded);
+    });
 
     var selᴛ9 = After(big);
     var selᴛ10 = After(25 * Millisecond);
@@ -1107,7 +1107,7 @@ public static partial void TestMultiWakeupTimer(ж<Δtesting.T> t) {
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
 }
@@ -1263,7 +1263,7 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> b) {
                             }
                             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                             finally { ᒐ.Run(); }
-                        }, (~bΔ2).N, ticker, ᏑexpectedWakeup.Value, GoStack.Bounded);
+                        }, (~bΔ2).N, ticker, ᏑexpectedWakeup.Value);
                     }
                     Ꮡwg.Wait();
 
@@ -1302,7 +1302,7 @@ internal static partial void warmupScheduler(nint targetThreadCount) {
             // spin a bit more to ensure they are all running on separate CPUs.
             doWork(Millisecond);
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
 }

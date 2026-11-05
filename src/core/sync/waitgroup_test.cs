@@ -35,7 +35,7 @@ internal static partial void testWaitGroup(ж<Δtesting.T> t, ж<Δsync.WaitGrou
             wg1.Done();
             wg2.Wait();
             exitedʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     wg1.Wait();
     for (nint i = 0; i != n; i++) {
@@ -102,7 +102,7 @@ public static partial void TestWaitGroupRace(ж<Δtesting.T> t) {
         goǃ(() => {
             atomic.AddInt32(nʗ1, 1);
             wgʗ1.Done();
-        }, GoStack.Bounded);
+        });
         // spawn goroutine 2
         wg.Add(1);
         var nʗ2 = n;
@@ -110,7 +110,7 @@ public static partial void TestWaitGroupRace(ж<Δtesting.T> t) {
         goǃ(() => {
             atomic.AddInt32(nʗ2, 1);
             wgʗ2.Done();
-        }, GoStack.Bounded);
+        });
         // Wait for goroutine 1 and 2
         wg.Wait();
         if (atomic.LoadInt32(n) != 2) {
@@ -129,7 +129,7 @@ public static partial void TestWaitGroupAlign(ж<Δtesting.T> t) {
     Ꮡx.Ꮡwg.Add(1);
     goǃ((ж<TestWaitGroupAlign_X> xΔ1) => {
         xΔ1.Ꮡwg.Done();
-    }, Ꮡx, GoStack.Bounded);
+    }, Ꮡx);
     Ꮡx.Ꮡwg.Wait();
 }
 
@@ -252,7 +252,7 @@ public static void BenchmarkWaitGroupActuallyWait(ж<Δtesting.B> Ꮡb) {
             Ꮡwg.Add(1);
             goǃ(() => {
                 Ꮡwg.Done();
-            }, GoStack.Bounded);
+            });
             Ꮡwg.Wait();
         }
     });

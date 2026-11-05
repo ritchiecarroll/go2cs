@@ -35,6 +35,14 @@
 [CmdletBinding()]
 param()
 $ErrorActionPreference = 'Stop'
+
+# This PowerShell, found by edition under $PSHOME and never by the process path: a pwsh installed as a .NET global
+# tool runs as the dotnet host, so (Get-Process -Id $PID).Path names dotnet and the child would run as
+# `dotnet -NoProfile ...` (BOARD 2026-10-27; check-no-regression.ps1 resolves its child shell the same way).
+$shellName = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
+$pwshPath = @((Join-Path $PSHOME "$shellName.exe"), (Join-Path $PSHOME $shellName)) |
+    Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+if (-not $pwshPath) { Write-Host "nuget-push selftest: cannot locate '$shellName' under `$PSHOME ($PSHOME)"; exit 1 }
 . (Join-Path $PSScriptRoot '../_nugetpush.ps1')
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
@@ -165,7 +173,11 @@ function Invoke-Case([System.IO.FileInfo[]] $Packages, [switch] $Stop) {
 }
 
 try {
-    $version = '1.26.10.2'
+    # A version no go2cs release can carry (a release is <Go release>.<counter>, and Go is 1.x). The release-nuget cases
+    # below push the tree's own version.props release through this same mock, whose Published set every case shares;
+    # an in-process version equal to that release marked go.lib and go.gen published before they ran, so resume-release
+    # skipped both (the i7's batch-180 gate, once version.props reached 1.26.10.2).
+    $version = '0.0.0.1'
     $packages = @('go.lib', 'go.gen', 'go.a', 'go.b', 'go.c' | ForEach-Object { New-FakePackage $_ $version })
 
     # ---- order ----------------------------------------------------------------------------------------------------
@@ -207,10 +219,10 @@ try {
 
     # ---- normalized -----------------------------------------------------------------------------------------------
     $state.Puts.Clear()
-    $zero = New-FakePackage 'go.zero' '1.26.10.0'
-    $state.Published['go.zero/1.26.10'] = $true
+    $zero = New-FakePackage 'go.zero' '0.0.1.0'
+    $state.Published['go.zero/0.0.1'] = $true
     try { [void](Invoke-Case @($zero)) } catch { $failures.Add("normalized: threw: $_") }
-    Check ($state.Puts.Count -eq 0) "normalized: go.zero 1.26.10.0 is published as 1.26.10 and was PUT anyway"
+    Check ($state.Puts.Count -eq 0) "normalized: go.zero 0.0.1.0 is published as 0.0.1 and was PUT anyway"
 
     # ---- conflict -------------------------------------------------------------------------------------------------
     $state.Puts.Clear()
@@ -278,12 +290,18 @@ try {
     $release = "$($group.GoStdLibVersion).$($group.GoBuildNumber)".Trim()
     $flat = ConvertTo-GoNuGetNormalizedVersion $release
 
+    # The release cases start from a feed that holds nothing of the release: no in-process case may have published one
+    # of its versions into the shared mock, and nothing the cases above left behind may answer for them.
+    $leaked = @($state.Published.Keys | Where-Object { $_ -like "*/$flat" } | Sort-Object)
+    Check ($leaked.Count -eq 0) "release cases: the mock already holds the release $release before they run ($($leaked -join ', ')); an in-process case pushed that version"
+    $state.Published.Clear()
+
     function Invoke-Release([string] $OutDir) {
         $ErrorActionPreference = 'Continue'
         $savedKey = $env:NUGET_API_KEY
         $env:NUGET_API_KEY = 'selftest-key'
         try {
-            $out = @(& (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File (Join-Path $src 'release-nuget.ps1') `
+            $out = @(& $pwshPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $src 'release-nuget.ps1') `
                 -ResumePush -Yes -Source $source -OutDir $OutDir 2>&1 | ForEach-Object { "$_" })
             $code = $LASTEXITCODE
         }

@@ -184,7 +184,7 @@ internal static partial void doDefaultTest(ж<testing.T> t, @string v) {
     goǃ(() => {
         Ꮡwg.Wait();
         close(chʗ4);
-    }, GoStack.Bounded);
+    });
 
     var m = new map<uint64, bool>();
     foreach (var i in ch) {

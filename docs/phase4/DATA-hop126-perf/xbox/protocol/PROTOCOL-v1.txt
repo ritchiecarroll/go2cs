@@ -1,0 +1,13 @@
+CROSS-BOX LITERAL-POLICY CHECK -- what to run and what makes the run valid (G, 2026-11-05).
+RUN (Git Bash): bash /c/go2cs-perf/xbox-literal/run.sh
+ - armab is framework-dependent: it needs a .NET 10 runtime. If .NET 10 is not the machine-wide install, export DOTNET_ROOT
+   to it first. The images themselves are self-contained Native AOT and need nothing.
+ - Close or idle every build: no dotnet/MSBuild/ilc/link/go build may run during it. It takes about 4-6 minutes.
+VALID ONLY IF ALL of these hold (read them from out/run.log):
+ 1. "end ... rc=0" (armab verified all 8 arms: exit 0, outputs equal) and manifest.sha256 checked OK at the start.
+ 2. "build/toolchain processes: 0" at "box start" and at "box end", and the machine on AC power (Balanced or High
+    performance; say which).
+ 3. Each A/A pair (X vs X-AA) agrees within 1% (G's widest on AOT was 0.4%).
+ 4. The Fib control's bootstrap 95% interval holds 0 (Sieve is reported only, as in every G window).
+REPORT BACK: out/run.log in full, the raw out/sm-aot.tsv, out/ctl-start.tsv and out/ctl-end.tsv, and the CPU line.
+G compares: H/P, C/C0 and C0/P on each box, with means of each arm's A/A medians.

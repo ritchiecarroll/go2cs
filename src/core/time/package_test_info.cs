@@ -84,6 +84,28 @@ using static global::go.time_test_package;
 [assembly: GoFieldAccess(typeof(time_package.Ticker))]
 [assembly: GoFieldAccess(typeof(time_package.Timer))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("example_test.cs", 252, 9)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 143, 9)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 183, 9)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 191, 9)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 353, 17)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 532, 9)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 672, 5)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 1092, 9)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 1243, 25)]
+[assembly: GoBoundedGoroutine("sleep_test.cs", 1296, 9)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 205, 13)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 240, 9)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 675, 5)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 712, 5)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 727, 5)]
+[assembly: GoBoundedGoroutine("tick_test.cs", 777, 9)]
+[assembly: GoBoundedGoroutine("time_test.cs", 2039, 9)]
+[assembly: GoBoundedGoroutine("time_test.cs", 2063, 9)]
+[assembly: GoBoundedGoroutine("time_test.cs", 2075, 9)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

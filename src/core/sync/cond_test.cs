@@ -265,7 +265,7 @@ public static partial void TestCondSignalStealing(ж<Δtesting.T> t) {
         var condʗ2 = cond;
         goǃ(() => {
             condʗ2.Broadcast();
-        }, GoStack.Bounded);
+        });
 
         var condʗ3 = cond;
         goǃ(() => {

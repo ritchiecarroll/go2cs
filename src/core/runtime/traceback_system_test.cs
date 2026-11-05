@@ -58,7 +58,7 @@ internal static partial void crashViaTrap() {
     goǃ(() => {
         // This call is typically inlined.
         trap1();
-    }, GoStack.Bounded);
+    });
     select();
 }
 

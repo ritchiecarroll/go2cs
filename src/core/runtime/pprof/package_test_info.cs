@@ -43,6 +43,26 @@ using static global::go.runtime.pprof_internal_test_package;
 [assembly: GoFieldAccess(typeof(runtime_package.MemProfileRecord))]
 [assembly: GoFieldAccess(typeof(runtime_package.StackRecord))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("pprof_test.cs", 742, 9)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1356, 9)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1716, 17)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1720, 17)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1724, 17)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1741, 21)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1745, 21)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 1749, 21)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 2021, 9)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 2022, 9)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 2365, 25)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 2581, 21)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 3040, 13)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 3494, 5)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 3600, 13)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 3701, 9)]
+[assembly: GoBoundedGoroutine("pprof_test.cs", 3704, 9)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

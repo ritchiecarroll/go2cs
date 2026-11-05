@@ -33,7 +33,7 @@ public static partial void ExampleValue_config() {
             time.Sleep((time.Duration)(10000000000L));
             Ꮡconfig.Store(loadConfig());
         }
-    }, GoStack.Bounded);
+    });
     // Create worker goroutines that handle incoming requests
     // using the latest config value.
     for (nint i = 0; i < 10; i++) {
@@ -44,7 +44,7 @@ public static partial void ExampleValue_config() {
                 _ = r;
                 _ = c;
             }
-        }, GoStack.Bounded);
+        });
     }
 }
 
