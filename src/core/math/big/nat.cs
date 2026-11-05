@@ -767,7 +767,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
                 (zz, r, q, z) = (q, z, zz, r);
             }
 
-            v <<= (int)(1);
+            v <<= 1;
         }
 
         for (nint i = len(y) - 2; i >= 0; i--) {
@@ -787,7 +787,7 @@ internal static Δnat expNN(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δnat y, Δ
                     (zz, r, q, z) = (q, z, zz, r);
                 }
 
-                v <<= (int)(1);
+                v <<= 1;
             }
         }
 
@@ -1062,7 +1062,7 @@ internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
             } else if ((byte)d != 0) {
                 throw panic("math/big: buffer too small to fit value");
             }
-            d >>= (int)(8);
+            d >>= 8;
         }
     }
 

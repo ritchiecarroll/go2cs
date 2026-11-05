@@ -10,6 +10,7 @@ package repoguard
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -74,6 +75,84 @@ func scanHandOwnBoxParity(handOwns, twins map[string]string) []string {
 	return findings
 }
 
+// twinPrincipal returns the hand-owned file a tracked `.cs.auto` twin reviews: the `.cs` beside it, or, for a twin
+// in a GOOS folder of a package (a folder holding no project file of its own), the flat `.cs` in the package directory
+// above. A FLAT hand-own whose emission differs by GOOS keeps one twin per GOOS folder (runtime/runtime2.cs; the
+// three-target merge's mergeReviewSiblings), and reading only beside the twin dropped all of them from this guard.
+func twinPrincipal(root string, twin string) (string, bool) {
+	beside := strings.TrimSuffix(twin, ".auto")
+
+	if regularFile(filepath.Join(root, filepath.FromSlash(beside))) {
+		return beside, true
+	}
+
+	dir := path.Dir(twin)
+
+	switch path.Base(dir) {
+	case "windows", "linux", "darwin":
+	default:
+		return "", false
+	}
+
+	if projects, _ := filepath.Glob(filepath.Join(root, filepath.FromSlash(dir), "*.csproj")); len(projects) > 0 {
+		return "", false
+	}
+
+	flat := path.Join(path.Dir(dir), path.Base(beside))
+
+	if regularFile(filepath.Join(root, filepath.FromSlash(flat))) {
+		return flat, true
+	}
+
+	return "", false
+}
+
+func regularFile(filePath string) bool {
+	info, err := os.Stat(filePath)
+	return err == nil && info.Mode().IsRegular()
+}
+
+// A per-GOOS twin of a flat hand-own pairs with the flat file; a twin beside its hand-own pairs as always; a twin in
+// a nested package merely NAMED for a GOOS, or with no hand-own anywhere, pairs with nothing.
+func TestTwinPrincipalFindsAFlatHandOwnAboveItsGOOSFolder(t *testing.T) {
+	root := t.TempDir()
+
+	for relPath, contents := range map[string]string{
+		"src/core/runtime/runtime2.cs":                      "flat hand-own",
+		"src/core/runtime/linux/runtime2.cs.auto":           "linux twin",
+		"src/core/runtime/linux/os_linux.cs":                "per-GOOS source",
+		"src/core/syscall/linux/exec_unix.cs":               "per-GOOS hand-own",
+		"src/core/syscall/linux/exec_unix.cs.auto":          "its twin",
+		"src/core/internal/syscall/syscall.cs":              "parent hand-own",
+		"src/core/internal/syscall/windows/windows.csproj":  "<Project />",
+		"src/core/internal/syscall/windows/syscall.cs.auto": "a nested package's file",
+		"src/core/runtime/darwin/orphan.cs.auto":            "reviews nothing",
+	} {
+		filePath := filepath.Join(root, filepath.FromSlash(relPath))
+
+		if err := os.MkdirAll(filepath.Dir(filePath), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(filePath, []byte(contents), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	cases := []struct{ twin, want string }{
+		{"src/core/runtime/linux/runtime2.cs.auto", "src/core/runtime/runtime2.cs"},
+		{"src/core/syscall/linux/exec_unix.cs.auto", "src/core/syscall/linux/exec_unix.cs"},
+		{"src/core/internal/syscall/windows/syscall.cs.auto", ""},
+		{"src/core/runtime/darwin/orphan.cs.auto", ""},
+	}
+
+	for _, c := range cases {
+		if got, _ := twinPrincipal(root, c.twin); got != c.want {
+			t.Errorf("twinPrincipal(%q) = %q, want %q", c.twin, got, c.want)
+		}
+	}
+}
+
 func TestHandOwnExportedPackageBoxesMatchTheirTwins(t *testing.T) {
 	root := repoRootFromPackageDir(t)
 	handOwns := map[string]string{}
@@ -84,7 +163,12 @@ func TestHandOwnExportedPackageBoxesMatchTheirTwins(t *testing.T) {
 			continue
 		}
 
-		principal := strings.TrimSuffix(p, ".auto")
+		principal, ok := twinPrincipal(root, p)
+
+		if !ok {
+			continue
+		}
+
 		handOwn, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(principal)))
 
 		if err != nil {
@@ -110,8 +194,10 @@ func TestHandOwnExportedPackageBoxesMatchTheirTwins(t *testing.T) {
 			t.Fatalf("reading %s: %v", p, err)
 		}
 
-		handOwns[principal] = string(handOwn)
-		twins[principal] = string(twin)
+		// Keyed by the TWIN: a flat hand-own whose emission differs by GOOS has one twin per GOOS folder, and each is
+		// compared with it.
+		handOwns[p] = string(handOwn)
+		twins[p] = string(twin)
 	}
 
 	if len(twins) == 0 {

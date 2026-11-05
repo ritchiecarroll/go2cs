@@ -168,6 +168,16 @@ content differences). Seeding, the marker gate, the overlay rule and the phantom
   marked file's `.cs.auto`), then REFUSES unless every candidate — each flavour folder plus flat — is BYTE-IDENTICAL; a
   companion with no emitted principal is left UNCOMPARED. **A per-flavour companion that differs from its sibling carries a
   flavour-distinct basename; a byte-identical one keeps one basename.**
+- **A FLAT hand-own's `.cs.auto` review sibling splits per GOOS when its emission differs**: one
+  `<pkg>/<goos>/<name>.cs.auto` per emitting target, back to one flat sibling when they agree (`mergeReviewSiblings`). A
+  single-target run writes its flavour back into its folder (`reviewSiblingLayoutPath`); the hand-own move leaves the split
+  alone, and its single-copy refusal binds hand-maintained files only. A reader pairing `X.cs` with `X.cs.auto` also looks
+  one folder up from a GOOS folder. <!-- COORD's S5 ruling (a), 2026-11-05, C1 claude/c1-flatfile-drift. The case:
+     runtime/runtime2.cs.auto, whose linux flavour carries `sigmask` in m's [GoValueClone] list and `public partial
+     struct g`, and whose darwin flavour differs by one mPadded line (R's end-regen F2); the one windows-flavoured flat
+     sibling hid both. A package with no per-GOOS source folder keeps the first flavour flat and is NAMED in the merge
+     report. The flat test-side package_info_internal_test.cs files are NOT this class: -tests deletes and re-emits them
+     per run for its own target, and the -stdlib merge never writes them. -->
 - **L3 work owes a `-p:GoTargetOS=linux` build** — the windows `go2cs-stdlib.slnx` gate compiles no `linux/`/`darwin/` file.
 - **darwin COMPILES CLEAN**: its census is a cheap regression guard at any branch tip (`.github/workflows/os-matrix.yml`,
   `goos=darwin stage=census`), not a wall. What darwin lacks is a RUN layer: `docs/phase4/FINDING-darwin-run-layer.md`.

@@ -107,7 +107,8 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 			projectImports.UnionWithSet(visitor.importQueue)
 
 			baseName := strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")
-			autoFileName := filepath.Join(packageOutputPath, baseName+".cs.auto")
+			// The tree's own per-GOOS sibling when it holds one there (reviewSiblingLayoutPath), flat otherwise.
+			autoFileName := platformLayoutPath(packageOutputPath, goosOfTarget(options.targetPlatform), baseName+".cs.auto")
 
 			visitor.finalizePositionMap(autoFileName)
 			visitor.alignEmittedTrailingComments()

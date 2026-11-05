@@ -33642,6 +33642,71 @@ anonymous structs that are structurally identical but declared in different file
 
 — i9 (2026-11-05, COORD's ask)
 
+## 2026-11-05 — C1 (COORD ruling, S1 seat): GolibTests `AppendOfMakeTests.GrowingCountsOneObjectWhereMakeThenAppendCountsTwo` failed one full run in five and never alone — OPEN, candidate flake, unrooted
+
+**The readings**, all on one linux cloud box, GolibTests from `src/tests/GolibTests` with `-p:GoTargetOS=linux`, on the
+S1 seat's tree (`claude/c1-crash-goroutine-id`, before and after its merge with master `b0de16b015`):
+
+| Run | Build | Result for this test |
+|:--|:--|:--|
+| full suite, 1st on the fix's source | fresh | pass |
+| full suite, 2nd on the final source | fresh | **FAIL**: `Expected:<2>. Actual:<4>. control: the make's backing and the growth are both counted` (`AppendOfMakeTests.cs:105`) |
+| class alone (`--filter AppendOfMakeTests`), 3 runs | same build, `--no-build` | pass 3 of 3 |
+| full suite, 2 reruns | same build, `--no-build` | pass, pass |
+| full suite at the merge tree | fresh | pass |
+
+So 1 failure in 5 full runs, 0 in 3 isolated runs. The failing assertion is the CONTROL half: the plain
+`append(s, new slice<nint>(3))` read 4 counted allocations on the test thread where it reads 2. The S1 change touched no
+slice or allocation-counter path (golib `Goroutine.cs`, runtime `managed_impl.cs`).
+
+**What it is not yet.** Unrooted. `AllocationCounter.CurrentThreadCount` is a per-thread tally, so two extra counts in
+the control window are allocations some other code made ON THE TEST THREAD between the two reads, in a full-suite order
+only. Candidates to discriminate, none measured: a lazily initialized path (a first-use cache in `appendꓸꓸꓸ` or the
+slice growth helper) that an earlier test in the run sometimes warms and sometimes does not; or work MSTest schedules
+on the same worker thread between the reads.
+
+**Why it is filed (COORD).** A test that fails one run in five is a gate that misreports, rooted or not. The arm that
+discriminates: the full suite repeated with the test's window logging which allocation sites counted, or with the
+control repeated twice in a row inside the test, so a first-use cost shows as the first window only.
+
+**Owner:** unassigned.
+
+— C1 (2026-11-05)
+
+## 2026-11-05 — P2 (COORD ruling, claude/p2-convert-timeout-overlap): a `-stdlib` package that hits `-convert-timeout` kept converting beside the next one — FIXED on the seat branch: a timeout now stops the run
+
+**What happened.** `runPackageConversionWithTimeout` (`src/go2cs/stdLibConverter.go`) runs one package's conversion on
+a goroutine and returns when the cap fires, but nothing stops that goroutine. It kept running on the converter's
+package-global state (`resetPackageState`, `packageStateOperations.go`) while the driver converted the next package,
+which the driver's own comment calls inherently sequential. Found by reading the code during the stall-warning
+re-check (D2), then reproduced at master `118c037943` on linux with a plain converter binary and seeded roots:
+
+- full `-stdlib` at `-convert-timeout 1500ms`: 9 packages timed out (runtime, reflect, syscall, os, archive/tar,
+  compress/flate, math/big, nistec/fiat, nistec), and at its 146th of 358 packages the RUN DIED on visitFile's
+  `log.Fatalf("Multiple package names encountered: ecdh and fiat")`. Exit 1, 212 packages never converted, and the
+  root left half-written: their seeded copies stood, and so did runtime's `runtime2.cs.auto`, which the abandoned
+  runtime conversion never wrote in the 74 s it had (a clean runtime conversion takes 24 s there);
+- `ecdh` reported "Completed" while two abandoned conversions ran, and its emission matched the clean run, so silent
+  damage to a successor's emission was not observed; the crash and the lost writes were;
+- a `-race` converter on a four-package run reported no race: the converter's log and stdout locks give the two
+  goroutines happens-before edges, so the race detector is not an instrument for this class.
+
+**Why it matters.** It is safety-floor item 1's class inside one process: a conversion overlapping another
+corrupts state and reads like a converter defect. The cap's default is 10m, so it fires only on a hung or very
+slow package, which is exactly when an operator least expects the next packages to be suspect.
+
+**Ruled and fixed (option (a)).** The first timeout ends the run. The timed-out package is marked `TIMED OUT` and
+every later one `NOT CONVERTED` in `stdlib_conversion_progress.txt`; both go into `failed_packages.txt`, so `-stdlib`
+with that list resumes; `convertAllPackages` returns an error, main exits 1 before the abandoned goroutine can write
+more, and the solution and attribution steps are skipped. `TestStdLibTimeoutStopsTheRun` (`convertTimeout_test.go`)
+was red on all five assertions before the fix. The flag help, `docs/CommandLine.md` and the converter rules line say
+a timeout stops the run.
+
+**Noted, not ruled:** one child process per package, killed at the cap, is the design if the fleet ever needs a
+run to continue past a timeout. A cancellable walk was not recommended: a loop between checkpoints would still overlap.
+
+— P2 (2026-11-05)
+
 ### 2026-11-05: a nil pointer PARAMETER's value-method call returns under TC0 where Go panics (OPEN)
 
 **The gap.** A pointer parameter (or the enclosing method's pointer receiver) reads as its value alias,

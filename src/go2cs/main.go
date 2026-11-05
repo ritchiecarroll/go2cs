@@ -262,7 +262,7 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library (implies -tags purego by default; pass an explicit -tags to override)")
-	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, "Per-package cap the -stdlib driver applies to ONE package's conversion; Go duration syntax, must be greater than zero. It is a safety net against a hung conversion, never a performance assumption -- a slow host under concurrent load can legitimately need far more than the default, and a package killed early is reported as a failed package")
+	convertTimeoutCmd := commandLine.Duration("convert-timeout", defaultConvertTimeout, "Per-package cap the -stdlib driver applies to ONE package's conversion; Go duration syntax, must be greater than zero. It is a safety net against a hung conversion, never a performance assumption -- a slow host under concurrent load can legitimately need far more than the default, and a package that hits it stops the run (exit 1), and failed_packages.txt lists it with every package not yet converted, for a resume")
 	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project")
 	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
 	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare); the test host's dotnet publish gets at least 30m")

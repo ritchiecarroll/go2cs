@@ -339,6 +339,7 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnedGoStatementPositions_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\handOwnPackageBoxParity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\l3BlockPosition_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)internal\repoguard\lineKeyedRecords_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\moduleDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\stdlibDisclosureWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\generatorLoadGuard_test.go" />
@@ -478,6 +479,7 @@
     <None Include="$(MSBuildThisFileDirectory)parenFuncLitGoDeferCallee_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission.go" />
     <None Include="$(MSBuildThisFileDirectory)parityOperatorEmission_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)parityShiftCountCast_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainHeapFold_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainPatternSwitch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)parityTrainSmallFour_test.go" />
@@ -542,6 +544,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeDocLinks_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeFromCSharp_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)readmePackageDoc_test.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />

@@ -42,7 +42,7 @@ internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref ΔMap m, ж<a
                 j = i;
             }
             slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
-            ctrls >>= (int)(8);
+            ctrls >>= 8;
         }
         if (j == abi.MapGroupSlots) {
             // No slot passed the quick test.
@@ -69,7 +69,7 @@ dohash:
             return (@unsafe.Pointer)((uintptr)slotKey + (uintptr)(2 * goarch.PtrSize));
         }
         slotKey = (@unsafe.Pointer)((uintptr)slotKey + slotSize);
-        ctrls >>= (int)(8);
+        ctrls >>= 8;
     }
     return default;
 }
