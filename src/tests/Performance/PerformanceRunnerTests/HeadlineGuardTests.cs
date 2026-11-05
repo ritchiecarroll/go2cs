@@ -113,6 +113,91 @@ public class HeadlineGuardTests
             Headline.InTreeJitBuild("all.proj", "src/") + Headline.Pin(pin), pin), $"GoStdLibVersion={pin}");
     }
 
+    // The process, not the guard, decides what MSBuild receives. The JIT build's OutDir ends in a separator, so its
+    // closing quote is written \" -- which Windows reads as a literal quote, swallowing everything after it into the
+    // OutDir value. A pin written there reaches no restore (seen on the first integration run: the pinned leg restored
+    // 1.26.10.2). So each pinned builder's pin must be its own argument as the Windows command line splits it.
+    [TestMethod]
+    public void APinIsItsOwnArgumentAsWindowsSplitsTheCommandLine()
+    {
+        const string pin = "1.26.10.1";
+
+        foreach (string argv in new[]
+                 {
+                     Headline.ReleaseJitBuild(@"D:\work\out\PerfFib.csproj", @"D:\work\bin\jit\PerfFib\", pin),
+                     Headline.ReleaseReadyToRunPublish(@"D:\work\r2r-src\PerfFib.csproj", @"D:\work\bin\r2r\PerfFib", pin),
+                 })
+        {
+            List<string> args = WindowsArguments(argv);
+            CollectionAssert.Contains(args, $"-p:GoStdLibVersion={pin}", $"[{argv}] splits as: {string.Join(" | ", args)}");
+        }
+    }
+
+    // The Windows C runtime's rule (CommandLineToArgvW): 2n backslashes before a quote are n backslashes and the quote
+    // toggles quoting; 2n+1 are n backslashes and a literal quote; backslashes elsewhere are literal.
+    private static List<string> WindowsArguments(string commandLine)
+    {
+        List<string> args = new();
+        System.Text.StringBuilder current = new();
+        bool quoted = false, any = false;
+
+        for (int i = 0; i < commandLine.Length; i++)
+        {
+            char c = commandLine[i];
+
+            if (c == '\\')
+            {
+                int run = 0;
+
+                while (i < commandLine.Length && commandLine[i] == '\\')
+                {
+                    run++;
+                    i++;
+                }
+
+                if (i < commandLine.Length && commandLine[i] == '"')
+                {
+                    current.Append('\\', run / 2);
+
+                    if (run % 2 == 1)
+                        current.Append('"');
+                    else
+                        quoted = !quoted;
+                }
+                else
+                {
+                    current.Append('\\', run);
+                    i--;
+                }
+
+                any = true;
+            }
+            else if (c == '"')
+            {
+                quoted = !quoted;
+                any = true;
+            }
+            else if (char.IsWhiteSpace(c) && !quoted)
+            {
+                if (any)
+                    args.Add(current.ToString());
+
+                current.Clear();
+                any = false;
+            }
+            else
+            {
+                current.Append(c);
+                any = true;
+            }
+        }
+
+        if (any)
+            args.Add(current.ToString());
+
+        return args;
+    }
+
     // ---- the build files ----
 
     [TestMethod]

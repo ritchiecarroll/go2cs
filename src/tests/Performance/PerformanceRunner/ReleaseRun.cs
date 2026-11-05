@@ -380,7 +380,7 @@ namespace PerformanceRunner
             string copiedProject = Path.Combine(copy, Path.GetRelativePath(output, csproj));
             string outDir = Path.Combine(legRoot, "bin", "fd1", program);
             Runner.ProcResult r = Runner.Exec("dotnet",
-                $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release -r win-x64 --self-contained false -p:PublishTrimmed=false -p:PublishReadyToRun=true -o \"{outDir}\"{Headline.Pin(leg.PinnedVersion)}",
+                $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release{Headline.Pin(leg.PinnedVersion)} -r win-x64 --self-contained false -p:PublishTrimmed=false -p:PublishReadyToRun=true -o \"{outDir}\"",
                 copy, BuildTimeoutMs);
 
             if (r.ExitCode != 0)

@@ -53,13 +53,15 @@ namespace PerformanceRunner
         internal static string ReleaseConvert(string source, string output) => $"-recurse=nuget \"{source}\" \"{output}\"";
 
         internal static string ReleaseJitBuild(string csproj, string outDir, string? pinnedVersion = null) =>
-            $"build \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration} \"-p:OutDir={outDir}\"{Pin(pinnedVersion)}";
+            $"build \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration}{Pin(pinnedVersion)} \"-p:OutDir={outDir}\"";
 
         internal static string ReleaseReadyToRunPublish(string csproj, string outDir, string? pinnedVersion = null) =>
-            $"publish \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration} -r win-x64 -o \"{outDir}\"{Pin(pinnedVersion)}";
+            $"publish \"{csproj}\" -nologo -clp:ErrorsOnly -c {Configuration}{Pin(pinnedVersion)} -r win-x64 -o \"{outDir}\"";
 
         // A pinned release leg (ReleaseLeg.Pin) sets the package version the converted Directory.Build.props otherwise
-        // floats; it chooses which published release is measured, never how it is compiled.
+        // floats; it chooses which published release is measured, never how it is compiled. It goes before any quoted
+        // path: OutDir ends in a separator, so its closing quote is \", which Windows reads as a literal quote and
+        // which swallows whatever follows into the OutDir value.
         internal const string PinProperty = "GoStdLibVersion";
 
         internal static string Pin(string? pinnedVersion) => pinnedVersion is null ? "" : $" -p:{PinProperty}={pinnedVersion}";
