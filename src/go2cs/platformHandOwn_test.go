@@ -512,10 +512,27 @@ func isConvertedTestArtifact(name string) bool {
 	return strings.HasSuffix(name, "_test.cs") || name == "package_test_info.cs" || name == "go2cs_test_host.cs"
 }
 
-// assertCorpusAutoSiblingsAreColocated checks rule 2: every `<name>.cs.auto` has its hand-owned
-// `<name>.cs` in the same directory.
+// assertCorpusAutoSiblingsAreColocated checks rule 2: every `<name>.cs.auto` follows the hand-owned `<name>.cs` it
+// reviews (strayReviewSiblings).
 func assertCorpusAutoSiblingsAreColocated(t *testing.T, coreDir string) {
 	t.Helper()
+
+	strays, err := strayReviewSiblings(coreDir)
+
+	if err != nil {
+		t.Fatalf("failed to walk %q: %v", coreDir, err)
+	}
+
+	for _, stray := range strays {
+		t.Errorf("%s has no hand-owned .cs it reviews; a review sibling must follow the file it reviews", stray)
+	}
+}
+
+// strayReviewSiblings returns every `<name>.cs.auto` under coreDir with no hand-owned `<name>.cs` beside it, or, for
+// a sibling in a GOOS folder, in the package directory above it: a FLAT hand-own whose emission differs by GOOS keeps
+// one sibling per GOOS folder (mergeReviewSiblings; COORD's S5 ruling (a), runtime/runtime2.cs).
+func strayReviewSiblings(coreDir string) ([]string, error) {
+	var strays []string
 
 	err := filepath.WalkDir(coreDir, func(filePath string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -526,17 +543,55 @@ func assertCorpusAutoSiblingsAreColocated(t *testing.T, coreDir string) {
 			return nil
 		}
 
-		sibling := strings.TrimSuffix(filePath, ".auto")
+		handOwn := strings.TrimSuffix(filePath, ".auto")
 
-		if info, err := os.Stat(sibling); err != nil || !info.Mode().IsRegular() {
-			t.Errorf("%s has no hand-owned .cs beside it; a review sibling must follow the file it reviews", filePath)
+		if info, err := os.Stat(handOwn); err == nil && info.Mode().IsRegular() {
+			return nil
 		}
 
+		if dir := filepath.Dir(filePath); isPlatformSourceFolder(filepath.Dir(dir), filepath.Base(dir)) {
+			flat := filepath.Join(filepath.Dir(dir), filepath.Base(handOwn))
+
+			if info, err := os.Stat(flat); err == nil && info.Mode().IsRegular() {
+				return nil
+			}
+		}
+
+		strays = append(strays, filePath)
 		return nil
 	})
 
+	return strays, err
+}
+
+// The colocation rule admits a per-GOOS review sibling of a FLAT hand-own, and still names a sibling that reviews
+// nothing: one with no hand-own beside it or above its GOOS folder, and one in a nested package that is merely NAMED
+// for a GOOS (internal/syscall/windows), whose parent's hand-own it does not review.
+func TestStrayReviewSiblingsAdmitsASplitSiblingOfAFlatHandOwn(t *testing.T) {
+	coreDir := newHandOwnCorpus(t)
+
+	writeTestFile(t, filepath.Join(coreDir, "runtime", "runtime2.cs"), "hand-owned, flat")
+	writeTestFile(t, filepath.Join(coreDir, "runtime", "linux", "runtime2.cs.auto"), "linux flavour")
+	writeTestFile(t, filepath.Join(coreDir, "runtime", "windows", "runtime2.cs.auto"), "windows flavour")
+	writeTestFile(t, filepath.Join(coreDir, "runtime", "linux", "orphan.cs.auto"), "reviews nothing")
+	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "syscall.cs"), "hand-owned, parent package")
+	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "windows.csproj"), "<Project />")
+	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "zsyscall.cs"), "nested package source")
+	writeTestFile(t, filepath.Join(coreDir, "internal", "syscall", "windows", "syscall.cs.auto"), "not the parent's sibling")
+
+	strays, err := strayReviewSiblings(coreDir)
+
 	if err != nil {
-		t.Fatalf("failed to walk %q: %v", coreDir, err)
+		t.Fatalf("strayReviewSiblings: %v", err)
+	}
+
+	want := []string{
+		filepath.Join(coreDir, "internal", "syscall", "windows", "syscall.cs.auto"),
+		filepath.Join(coreDir, "runtime", "linux", "orphan.cs.auto"),
+	}
+
+	if strings.Join(strays, "\n") != strings.Join(want, "\n") {
+		t.Errorf("strays = %q, want %q", strays, want)
 	}
 }
 
