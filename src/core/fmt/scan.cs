@@ -298,16 +298,12 @@ internal static (slice<byte> tok, error err) Token(this ж<ss> Ꮡs, bool skipSp
         ref var s = ref Ꮡs.DerefOrNull();
 
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    {
-                        ref var se = ref heap<scanError>(out var Ꮡse);
-                        (se, var ok) = e._<scanError>(ᐧ); if (ok) {
-                            err = se.err;
-                        } else {
-                            throw panic(e);
-                        }
-                    }
+            var e = recover(); if (e != nil) {
+                ref var se = ref heap<scanError>(out var Ꮡse);
+                (se, var ok) = e._<scanError>(ᐧ); if (ok) {
+                    err = se.err;
+                } else {
+                    throw panic(e);
                 }
             }
         }, ref ᒐ);
@@ -459,12 +455,10 @@ internal static (ж<ss> s, ssave old) newScanState(Δio.Reader r, bool nlIsSpace
     ssave old = default;
 
     s = ᏑssFree.Get()._<ж<ss>>();
-    {
-        var (rs, ok) = r._<Δio.RuneScanner>(ᐧ); if (ok) {
-            s.rs = rs;
-        } else {
-            s.rs = new readRuneжRuneScanner(Ꮡ(new readRune(reader: r, peekRune: -1)));
-        }
+    var (rs, ok) = r._<Δio.RuneScanner>(ᐧ); if (ok) {
+        s.rs = rs;
+    } else {
+        s.rs = new readRuneжRuneScanner(Ꮡ(new readRune(reader: r, peekRune: -1)));
     }
     s.nlIsSpace = nlIsSpace;
     s.nlIsEnd = nlIsEnd;
@@ -590,10 +584,8 @@ internal static bool peek(this ref ss s, sstring ok) {
 
 internal static void notEOF(this ref ss s) {
     // Guarantee there is data to be read.
-    {
-        var r = s.getRune(); if (r == eof) {
-            throw panic(Δio.EOF);
-        }
+    var r = s.getRune(); if (r == eof) {
+        throw panic(Δio.EOF);
     }
     s.UnreadRune();
 }
@@ -903,32 +895,26 @@ internal static float64 convertFloat(this ref ss s, @string str, nint n) {
     // strconv.ParseFloat will handle "+0x1.fp+2",
     // but we have to implement our non-standard
     // decimal+binary exponent mix (1.2p4) ourselves.
-    {
-        nint p = indexRune(str, 'p'); if (p >= 0 && !hasX(str)) {
-            // Atof doesn't handle power-of-2 exponents,
-            // but they're easy to evaluate.
-            var (fΔ1, errΔ1) = strconv.ParseFloat(str.slice(0, p), n);
-            if (errΔ1 != nil) {
-                // Put full string into error.
-                {
-                    var (e, ok) = errΔ1._<ж<strconv.NumError>>(ᐧ); if (ok) {
-                        e.Num = str;
-                    }
-                }
-                s.error(errΔ1);
+    nint p = indexRune(str, 'p'); if (p >= 0 && !hasX(str)) {
+        // Atof doesn't handle power-of-2 exponents,
+        // but they're easy to evaluate.
+        var (fΔ1, errΔ1) = strconv.ParseFloat(str.slice(0, p), n);
+        if (errΔ1 != nil) {
+            // Put full string into error.
+            var (e, ok) = errΔ1._<ж<strconv.NumError>>(ᐧ); if (ok) {
+                e.Num = str;
             }
-            (var m, errΔ1) = strconv.Atoi(str.slice(p + 1));
-            if (errΔ1 != nil) {
-                // Put full string into error.
-                {
-                    var (e, ok) = errΔ1._<ж<strconv.NumError>>(ᐧ); if (ok) {
-                        e.Num = str;
-                    }
-                }
-                s.error(errΔ1);
-            }
-            return Δmath.Ldexp(fΔ1, m);
+            s.error(errΔ1);
         }
+        (var m, errΔ1) = strconv.Atoi(str.slice(p + 1));
+        if (errΔ1 != nil) {
+            // Put full string into error.
+            var (e, ok) = errΔ1._<ж<strconv.NumError>>(ᐧ); if (ok) {
+                e.Num = str;
+            }
+            s.error(errΔ1);
+        }
+        return Δmath.Ldexp(fΔ1, m);
     }
     var (f, err) = strconv.ParseFloat(str, n);
     if (err != nil) {
@@ -1242,53 +1228,51 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
             s.errorString("type not a pointer: "u8 + val.Type().String());
             return;
         }
-        {
-            var vΔ1 = ptr.Elem();
-            switch (vΔ1.Kind()) {
-            case var ᴛ when ᴛ == reflect.ΔBool: {
-                vΔ1.SetBool(s.scanBool(verb));
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
-                vΔ1.SetInt(s.scanInt(verb, vΔ1.Type().Bits()));
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
-                vΔ1.SetUint(s.scanUint(verb, vΔ1.Type().Bits()));
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔString: {
-                vΔ1.SetString(s.convertString(verb));
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.ΔSlice: {
-                // For now, can only handle (renamed) []byte.
-                var typ = vΔ1.Type();
-                if (typ.Elem().Kind() != reflect.Uint8) {
-                    s.errorString("can't scan type: "u8 + val.Type().String());
-                }
-                @string str = s.convertString(verb);
-                vΔ1.Set(reflect.MakeSlice(typ, len(str), len(str)));
-                for (nint i = 0; i < len(str); i++) {
-                    vΔ1.Index(i).SetUint((uint64)str[i]);
-                }
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
-                s.SkipSpace();
-                s.notEOF();
-                vΔ1.SetFloat(s.convertFloat(s.floatToken(), vΔ1.Type().Bits()));
-                break;
-            }
-            case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
-                vΔ1.SetComplex(s.scanComplex(verb, vΔ1.Type().Bits()));
-                break;
-            }
-            default: {
-                s.errorString("can't scan type: "u8 + val.Type().String());
-                break;
-            }}
+        var vΔ1 = ptr.Elem();
+        switch (vΔ1.Kind()) {
+        case var ᴛ when ᴛ == reflect.ΔBool: {
+            vΔ1.SetBool(s.scanBool(verb));
+            break;
         }
+        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+            vΔ1.SetInt(s.scanInt(verb, vΔ1.Type().Bits()));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+            vΔ1.SetUint(s.scanUint(verb, vΔ1.Type().Bits()));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔString: {
+            vΔ1.SetString(s.convertString(verb));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.ΔSlice: {
+            // For now, can only handle (renamed) []byte.
+            var typ = vΔ1.Type();
+            if (typ.Elem().Kind() != reflect.Uint8) {
+                s.errorString("can't scan type: "u8 + val.Type().String());
+            }
+            @string str = s.convertString(verb);
+            vΔ1.Set(reflect.MakeSlice(typ, len(str), len(str)));
+            for (nint i = 0; i < len(str); i++) {
+                vΔ1.Index(i).SetUint((uint64)str[i]);
+            }
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+            s.SkipSpace();
+            s.notEOF();
+            vΔ1.SetFloat(s.convertFloat(s.floatToken(), vΔ1.Type().Bits()));
+            break;
+        }
+        case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
+            vΔ1.SetComplex(s.scanComplex(verb, vΔ1.Type().Bits()));
+            break;
+        }
+        default: {
+            s.errorString("can't scan type: "u8 + val.Type().String());
+            break;
+        }}
         break;
     }}
 }
@@ -1299,19 +1283,13 @@ internal static void errorHandler(ref error errp) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                {
-                    var (se, ok) = e._<scanError>(ᐧ); if (ok) { // catch local error
-                        errp = se.err;
-                    } else {
-                        var (eof, okΔ1) = e._<error>(ᐧ); if (okΔ1 && AreEqual(eof, Δio.EOF)) { // out of input
-                            errp = eof;
-                        } else {
-                            throw panic(e);
-                        }
-                    }
-                }
+        var e = recover(calledByDefer); if (e != nil) {
+            var (se, ok) = e._<scanError>(ᐧ); if (ok) { // catch local error
+                errp = se.err;
+            } else if (e._<error>(ᐧ) is var (eof, okΔ1) && okΔ1 && AreEqual(eof, Δio.EOF)) { // out of input
+                errp = eof;
+            } else {
+                throw panic(e);
             }
         }
     }
@@ -1509,10 +1487,8 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
                 continue; // Do not consume an argument.
             }
             s.argLimit = s.limit;
-            {
-                nint f = s.count + s.maxWid; if (f < s.argLimit) {
-                    s.argLimit = f;
-                }
+            nint f = s.count + s.maxWid; if (f < s.argLimit) {
+                s.argLimit = f;
             }
 
             if (numProcessed >= len(a)) { // out of operands

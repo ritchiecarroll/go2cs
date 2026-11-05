@@ -30,13 +30,11 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept4(this ж<Switch> 
             (ns, sa, err) = (-1, default, err); goto ᒐdone;
         }
         (ns, sa, so.Err) = syscall.Accept4(s, flags);
-        {
-            err = af.apply(so); if (err != nil) {
-                if (so.Err == nil) {
-                    syscall.Close(ns);
-                }
-                (ns, sa, err) = (-1, default, err); goto ᒐdone;
+        err = af.apply(so); if (err != nil) {
+            if (so.Err == nil) {
+                syscall.Close(ns);
             }
+            (ns, sa, err) = (-1, default, err); goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();

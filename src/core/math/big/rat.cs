@@ -160,12 +160,10 @@ internal static (float32 f, bool exact) quotToFloat32(ж<stack> stk, Δnat a, Δ
     if ((mantissa & 1) != 0) {
         exact = false;
         if (haveRem || (mantissa & 2) != 0) {
-            {
-                mantissa++; if (mantissa >= (uint32)((uint32)1 << (int)(Msize2))) {
-                    // Complete rollover 11...1 => 100...0, so shift is safe
-                    mantissa >>= 1;
-                    exp++;
-                }
+            mantissa++; if (mantissa >= (uint32)((uint32)1 << (int)(Msize2))) {
+                // Complete rollover 11...1 => 100...0, so shift is safe
+                mantissa >>= 1;
+                exp++;
             }
         }
     }
@@ -264,12 +262,10 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, Δnat a, Δ
     if ((mantissa & 1) != 0) {
         exact = false;
         if (haveRem || (mantissa & 2) != 0) {
-            {
-                mantissa++; if (mantissa >= (uint64)((uint64)1 << (int)(Msize2))) {
-                    // Complete rollover 11...1 => 100...0, so shift is safe
-                    mantissa >>= 1;
-                    exp++;
-                }
+            mantissa++; if (mantissa >= (uint64)((uint64)1 << (int)(Msize2))) {
+                // Complete rollover 11...1 => 100...0, so shift is safe
+                mantissa >>= 1;
+                exp++;
             }
         }
     }
@@ -512,11 +508,9 @@ internal static ж<ΔRat> norm(this ж<ΔRat> Ꮡz) {
             var neg = z.a.neg;
             z.a.neg = false;
             z.b.neg = false;
-            {
-                var f = NewInt(0).lehmerGCD(nil, nil, Ꮡz.Ꮡa, Ꮡz.Ꮡb); if (f.Cmp(intOne) != 0) {
-                    (z.a.abs, _) = z.a.abs.div(stk, default, z.a.abs, f.abs);
-                    (z.b.abs, _) = z.b.abs.div(stk, default, z.b.abs, f.abs);
-                }
+            var f = NewInt(0).lehmerGCD(nil, nil, Ꮡz.Ꮡa, Ꮡz.Ꮡb); if (f.Cmp(intOne) != 0) {
+                (z.a.abs, _) = z.a.abs.div(stk, default, z.a.abs, f.abs);
+                (z.b.abs, _) = z.b.abs.div(stk, default, z.b.abs, f.abs);
             }
             z.a.neg = neg;
         }

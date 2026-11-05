@@ -225,16 +225,14 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
                 return;
             }
 
-            {
-                nint end = len(Ꮡsizes.ValueSlot) - 1; if (start < end) {
-                    sʗ1.Ranges = append(sʗ1.Ranges, new Range(
-                        Name: fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)),
-                        Start: start,
-                        End: end,
-                        StartTime: (int64)(Ꮡsizes.ValueSlot[start].Time * 1000D),
-                        EndTime: (int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)
-                    ));
-                }
+            nint end = len(Ꮡsizes.ValueSlot) - 1; if (start < end) {
+                sʗ1.Ranges = append(sʗ1.Ranges, new Range(
+                    Name: fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)),
+                    Start: start,
+                    End: end,
+                    StartTime: (int64)(Ꮡsizes.ValueSlot[start].Time * 1000D),
+                    EndTime: (int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)
+                ));
             }
         }
     ));

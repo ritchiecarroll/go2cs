@@ -40,14 +40,12 @@ internal static void catchError(ref error err) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                var (ge, ok) = e._<gobError>(ᐧ);
-                if (!ok) {
-                    throw panic(e);
-                }
-                err = ge.err;
+        var e = recover(calledByDefer); if (e != nil) {
+            var (ge, ok) = e._<gobError>(ᐧ);
+            if (!ok) {
+                throw panic(e);
             }
+            err = ge.err;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

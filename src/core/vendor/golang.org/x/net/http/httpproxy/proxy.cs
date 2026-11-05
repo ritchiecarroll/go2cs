@@ -112,10 +112,8 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
     var names = namesʗp.sslice();
 
     foreach (var (_, n) in names) {
-        {
-            @string val = os.Getenv(n); if (val != ""u8) {
-                return val;
-            }
+        @string val = os.Getenv(n); if (val != ""u8) {
+            return val;
         }
     }
     return ""u8;
@@ -176,10 +174,8 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
         // proxy was bogus. Try prepending "http://" to it and
         // see if that parses correctly. If not, we fall
         // through and complain about the original one.
-        {
-            var (proxyURLΔ1, errΔ1) = url.Parse("http://"u8 + proxy); if (errΔ1 == nil) {
-                return (proxyURLΔ1, default);
-            }
+        var (proxyURLΔ1, errΔ1) = url.Parse("http://"u8 + proxy); if (errΔ1 == nil) {
+            return (proxyURLΔ1, default);
         }
     }
     if (err != nil) {
@@ -276,11 +272,9 @@ internal static void init(this ref config c) {
             phost = p;
         }
         // IPv4, IPv6
-        {
-            var pip = net.ParseIP(phost); if (pip != nil) {
-                c.ipMatchers = append(c.ipMatchers, (matcher)(new ipMatch(ip: pip, port: pport)));
-                continue;
-            }
+        var pip = net.ParseIP(phost); if (pip != nil) {
+            c.ipMatchers = append(c.ipMatchers, (matcher)(new ipMatch(ip: pip, port: pport)));
+            continue;
         }
 
         if (len(phost) == 0) {
@@ -320,10 +314,8 @@ internal static @string canonicalAddr(ж<url.URL> Ꮡurl) {
     ref var urlΔ1 = ref Ꮡurl.DerefOrNull();
 
     @string addr = urlΔ1.Hostname();
-    {
-        var (v, err) = idnaASCII(addr); if (err == nil) {
-            addr = v;
-        }
+    var (v, err) = idnaASCII(addr); if (err == nil) {
+        addr = v;
     }
     @string port = urlΔ1.Port();
     if (port == ""u8) {

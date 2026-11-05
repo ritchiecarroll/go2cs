@@ -170,10 +170,8 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
                 d = -1; // don't confuse deadline right now with no deadline
             }
         }
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         defer(() => Ꮡfd.decref(), ref ᒐ);
 

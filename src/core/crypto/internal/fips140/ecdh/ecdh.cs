@@ -258,10 +258,8 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     // the point is on the curve. Along with the rejection of the point at
     // infinity (the identity element) above, this fulfills the requirements
     // of NIST SP 800-56A Rev. 3, Section 5.6.2.3.4.
-    {
-        var (_, err) = c.newPoint().SetBytes(key); if (err != nil) {
-            return (default, err);
-        }
+    var (_, err) = c.newPoint().SetBytes(key); if (err != nil) {
+        return (default, err);
     }
 
     return (Ꮡ(new ΔPublicKey(curve: c.curve, q: bytes.Clone(key))), default);
@@ -307,10 +305,8 @@ internal static (slice<byte>, error) ecdh<P>(ref Curve<P> c, ref PrivateKey k, r
     }
 
     // Compute P according to Section 5.7.1.2.
-    {
-        var (_, errΔ1) = p.ScalarMult(p, k.d); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = p.ScalarMult(p, k.d); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     // BytesX checks that the result is not the identity element, and returns the

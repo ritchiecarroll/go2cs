@@ -371,10 +371,8 @@ internal static void validate(this ж<Float> Ꮡx) {
         // avoid performance bugs
         throw panic("validate called but debugFloat is not set");
     }
-    {
-        @string msg = Ꮡx.validate0(); if (msg != ""u8) {
-            throw panic(msg);
-        }
+    @string msg = Ꮡx.validate0(); if (msg != ""u8) {
+        throw panic(msg);
     }
 }
 
@@ -1460,12 +1458,10 @@ internal static void uquo(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
 
         // compute adjusted x.mant such that we get enough result precision
         var xadj = x.mant;
-        {
-            nint dΔ1 = n - len(x.mant) + len(y.mant); if (dΔ1 > 0) {
-                // d extra words needed => add d "0 digits" to x
-                xadj = new Δnat(len(x.mant) + dΔ1);
-                copy(xadj.slice(dΔ1), x.mant);
-            }
+        nint dΔ1 = n - len(x.mant) + len(y.mant); if (dΔ1 > 0) {
+            // d extra words needed => add d "0 digits" to x
+            xadj = new Δnat(len(x.mant) + dΔ1);
+            copy(xadj.slice(dΔ1), x.mant);
         }
         // TODO(gri): If we have too many digits (d < 0), we should be able
         // to shorten x for faster division. But we must be extra careful

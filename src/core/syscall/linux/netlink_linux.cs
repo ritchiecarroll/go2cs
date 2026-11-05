@@ -65,16 +65,12 @@ public static (slice<byte>, error) NetlinkRIB(nint proto, nint family) {
         }
         defer(Close, s, ref ᒐ);
         var sa = Ꮡ(new SockaddrNetlink(Family: AF_NETLINK));
-        {
-            var errΔ1 = Bind(s, new SockaddrNetlinkжSockaddr(sa)); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = Bind(s, new SockaddrNetlinkжSockaddr(sa)); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
         var wb = newNetlinkRouteRequest(proto, 1, family);
-        {
-            var errΔ2 = Sendto(s, wb, 0, new SockaddrNetlinkжSockaddr(sa)); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var errΔ2 = Sendto(s, wb, 0, new SockaddrNetlinkжSockaddr(sa)); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         (var lsa, err) = Getsockname(s);
         if (err != nil) {

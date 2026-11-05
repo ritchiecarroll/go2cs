@@ -174,10 +174,8 @@ internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) {
     foreach (var (_, f) in funcs) {
         if (f.Recv != ""u8) {
             @string r = strings.TrimPrefix(f.Recv, "*");
-            {
-                nint i = strings.IndexByte(r, (byte)'['); if (i >= 0) {
-                    r = r.slice(0, i); // remove type parameters
-                }
+            nint i = strings.IndexByte(r, (byte)'['); if (i >= 0) {
+                r = r.slice(0, i); // remove type parameters
             }
             p.syms[r + "."u8 + f.Name] = true;
         } else {
@@ -298,22 +296,20 @@ public static (ж<Package>, error) NewFromFiles(ж<token.FileSet> fset, slice<ж
         if (f == nil) {
             return (default, fmt.Errorf("file files[%d] is not found in the provided file set"u8, i));
         }
-        {
-            @string filename = f.Name();
-            switch (ᐧ) {
-            case {} when strings.HasSuffix(filename, testGoˢ): {
-                testGoFiles = append(testGoFilesᴷ, testGoFiles, @file);
-                break;
-            }
-            case {} when strings.HasSuffix(filename, ".go"): {
-                pkgName = @file.Name.Name;
-                goFiles[filename] = @file;
-                break;
-            }
-            default: {
-                return (default, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, filename));
-            }}
+        @string filename = f.Name();
+        switch (ᐧ) {
+        case {} when strings.HasSuffix(filename, testGoˢ): {
+            testGoFiles = append(testGoFilesᴷ, testGoFiles, @file);
+            break;
         }
+        case {} when strings.HasSuffix(filename, ".go"): {
+            pkgName = @file.Name.Name;
+            goFiles[filename] = @file;
+            break;
+        }
+        default: {
+            return (default, fmt.Errorf("file files[%d] filename %q does not have a .go extension"u8, i, filename));
+        }}
     }
 
     // Compute package documentation.
@@ -350,13 +346,11 @@ internal static bool lookupSym(this ref Package p, @string recv, @string name) {
 // to signal a reference to p.
 // Otherwise, importPath returns "", false.
 internal static (@string importPath, bool ok) lookupPackage(this ref Package p, @string name) {
-    {
-        var (path, okΔ1) = p.importByName[name, ꟷ]; if (okΔ1) {
-            if (path == ""u8) {
-                return ("", false); // multiple imports used the name
-            }
-            return (path, true); // found import
+    var (path, okΔ1) = p.importByName[name, ꟷ]; if (okΔ1) {
+        if (path == ""u8) {
+            return ("", false); // multiple imports used the name
         }
+        return (path, true); // found import
     }
     if (p.Name == name) {
         return ("", true); // allow reference to this package

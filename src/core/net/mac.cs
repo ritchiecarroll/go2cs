@@ -59,10 +59,8 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         hw = new HardwareAddr(n);
         for ((nint x, nint i) = (0, 0); i < n; i++) {
             bool ok = default;
-            {
-                (hw[i], ok) = xtoi2(s.slice(x), s[2]); if (!ok) {
-                    goto error;
-                }
+            (hw[i], ok) = xtoi2(s.slice(x), s[2]); if (!ok) {
+                goto error;
             }
             x += 3;
         }
@@ -77,15 +75,11 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         hw = new HardwareAddr(n);
         for ((nint x, nint i) = (0, 0); i < n; i += 2) {
             bool ok = default;
-            {
-                (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
-                    goto error;
-                }
+            (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
+                goto error;
             }
-            {
-                (hw[i + 1], ok) = xtoi2(s.slice(x + 2), s[4]); if (!ok) {
-                    goto error;
-                }
+            (hw[i + 1], ok) = xtoi2(s.slice(x + 2), s[4]); if (!ok) {
+                goto error;
             }
             x += 5;
         }
@@ -102,10 +96,8 @@ public static (HardwareAddr hw, error err) ParseMAC(@string s) {
         hw = new HardwareAddr(len(s) / 2);
         for ((nint x, nint i) = (0, 0); i < n; i++) {
             bool ok = default;
-            {
-                (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
-                    goto error;
-                }
+            (hw[i], ok) = xtoi2(s.slice(x, x + 2), 0); if (!ok) {
+                goto error;
             }
             x += 2;
         }

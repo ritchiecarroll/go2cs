@@ -18,18 +18,16 @@ internal static (int64 sec, int32 nsec, int64 mono) time_runtimeNow() {
     int64 sec = default;
     int32 nsec = default;
 
-    {
-        var bubble = getg().Value.bubble; if (bubble != nil) {
-            sec = bubble.now / (1000 * 1000 * 1000);
-            nsec = (int32)(bubble.now % (1000 * 1000 * 1000));
-            // Don't return a monotonic time inside a synctest bubble.
-            // If we return a monotonic time based on the fake clock,
-            // arithmetic on times created inside/outside bubbles is confusing.
-            // If we return a monotonic time based on the real monotonic clock,
-            // arithmetic on times created in the same bubble is confusing.
-            // Simplest is to omit the monotonic time within a bubble.
-            return (sec, nsec, 0);
-        }
+    var bubble = getg().Value.bubble; if (bubble != nil) {
+        sec = bubble.now / (1000 * 1000 * 1000);
+        nsec = (int32)(bubble.now % (1000 * 1000 * 1000));
+        // Don't return a monotonic time inside a synctest bubble.
+        // If we return a monotonic time based on the fake clock,
+        // arithmetic on times created inside/outside bubbles is confusing.
+        // If we return a monotonic time based on the real monotonic clock,
+        // arithmetic on times created in the same bubble is confusing.
+        // Simplest is to omit the monotonic time within a bubble.
+        return (sec, nsec, 0);
     }
     return time_now();
 }
@@ -359,12 +357,10 @@ internal static void timeSleep(int64 ns) {
         gp.Value.timer = t;
     }
     int64 now = default;
-    {
-        var bubble = gp.Value.bubble; if (bubble != nil) {
-            now = bubble.now;
-        } else {
-            now = nanotime();
-        }
+    var bubble = gp.Value.bubble; if (bubble != nil) {
+        now = bubble.now;
+    } else {
+        now = nanotime();
     }
     var when = now + ns;
     if (when < 0) { // check for overflow.
@@ -429,10 +425,8 @@ internal static ж<timeTimer> newTimer(int64 when, int64 period, Action<any, uin
             @throw(invalidTimerChannelNoˢ);
         }
     }
-    {
-        var bubble = getg().Value.bubble; if (bubble != nil) {
-            t.isFake = true;
-        }
+    var bubble = getg().Value.bubble; if (bubble != nil) {
+        t.isFake = true;
     }
     t.of(timeTimer.Ꮡtimer).modify(when, period, f, arg, 0);
     t.Value.init = true;
@@ -685,14 +679,12 @@ internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Actio
         }
         // The corresponding heap[i].when is updated later.
         // See comment in type timer above and in timers.adjust below.
-        {
-            var min = t.ts.ᏑminWhenModified.Load(); if (min == 0 || when < min) {
-                wake = true;
-                // Force timerModified bit out to t.astate before updating t.minWhenModified,
-                // to synchronize with t.ts.adjust. See comment in adjust.
-                Ꮡt.Ꮡastate.Store(t.state);
-                t.ts.updateMinWhenModified(when);
-            }
+        var min = t.ts.ᏑminWhenModified.Load(); if (min == 0 || when < min) {
+            wake = true;
+            // Force timerModified bit out to t.astate before updating t.minWhenModified,
+            // to synchronize with t.ts.adjust. See comment in adjust.
+            Ꮡt.Ꮡastate.Store(t.state);
+            t.ts.updateMinWhenModified(when);
         }
     }
 
@@ -893,19 +885,17 @@ internal static void cleanHead(this ж<timers> Ꮡts) {
         // in heap[0] for the tail of the heap, we'll get a non-zombie timer,
         // shortening this loop.
         nint n = len(ts.heap);
-        {
-            var tΔ1 = ts.heap[n - 1].timer; if ((uint8)(tΔ1.Ꮡastate.Load() & timerZombie) != 0) {
-                tΔ1.@lock();
-                if ((uint8)(tΔ1.state & timerZombie) != 0) {
-                    tΔ1.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
-                    tΔ1.ts = default;
-                    Ꮡts.Ꮡzombies.Add(-1);
-                    ts.heap[n - 1] = new timerWhen();
-                    ts.heap = ts.heap.slice(0, n - 1);
-                }
-                tΔ1.unlock();
-                continue;
+        var tΔ1 = ts.heap[n - 1].timer; if ((uint8)(tΔ1.Ꮡastate.Load() & timerZombie) != 0) {
+            tΔ1.@lock();
+            if ((uint8)(tΔ1.state & timerZombie) != 0) {
+                tΔ1.state &= unchecked((uint8)~(uint8)((uint8)((uint8)(timerHeaped | timerZombie) | timerModified)));
+                tΔ1.ts = default;
+                Ꮡts.Ꮡzombies.Add(-1);
+                ts.heap[n - 1] = new timerWhen();
+                ts.heap = ts.heap.slice(0, n - 1);
             }
+            tΔ1.unlock();
+            continue;
         }
 
         var t = ts.heap[0].timer;
@@ -1169,13 +1159,11 @@ internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> �
         Ꮡts.adjust(now, false);
         while (len(ts.heap) > 0) {
             // Note that runtimer may temporarily unlock ts.
-            {
-                var tw = Ꮡts.run(now, bubble); if (tw != 0) {
-                    if (tw > 0) {
-                        pollUntil = tw;
-                    }
-                    break;
+            var tw = Ꮡts.run(now, bubble); if (tw != 0) {
+                if (tw > 0) {
+                    pollUntil = tw;
                 }
+                break;
             }
             ran = true;
         }
@@ -1447,11 +1435,9 @@ internal static void verify(this ж<timers> Ꮡts) {
             @throw(badTimerHeapˢ);
         }
     }
-    {
-        nint n = (nint)Ꮡts.Ꮡlen.Load(); if (len(ts.heap) != n) {
-            println((@string)"timer heap len", len(ts.heap), (@string)"!= atomic len", n);
-            @throw(badTimerHeapLenˢ);
-        }
+    nint n = (nint)Ꮡts.Ꮡlen.Load(); if (len(ts.heap) != n) {
+        println((@string)"timer heap len", len(ts.heap), (@string)"!= atomic len", n);
+        @throw(badTimerHeapLenˢ);
     }
 }
 
@@ -1497,10 +1483,8 @@ internal static int64 timeSleepUntil() {
             continue;
         }
 
-        {
-            var w = pp.of(runtime_package.Δp.Ꮡtimers).wakeTime(); if (w != 0) {
-                next = min(next, w);
-            }
+        var w = pp.of(runtime_package.Δp.Ꮡtimers).wakeTime(); if (w != 0) {
+            next = min(next, w);
         }
     }
     unlock(ᏑallpLock);

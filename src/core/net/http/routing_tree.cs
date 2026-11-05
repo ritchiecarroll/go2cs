@@ -95,10 +95,8 @@ internal static ж<routingNode> addChild(this ж<routingNode> Ꮡn, @string key)
         }
         return n.emptyChild;
     }
-    {
-        var cΔ1 = Ꮡn.findChild(key); if (cΔ1 != nil) {
-            return cΔ1;
-        }
+    var cΔ1 = Ꮡn.findChild(key); if (cΔ1 != nil) {
+        return cΔ1;
     }
     var c = Ꮡ(new routingNode());
     n.children.add(key, c);
@@ -128,10 +126,8 @@ internal static (ж<routingNode>, slice<@string>) match(this ж<routingNode> Ꮡ
         // There is a host. If there is a pattern that specifies that host and it
         // matches, we are done. If the pattern doesn't match, fall through to
         // try patterns with no host.
-        {
-            var (l, m) = Ꮡroot.findChild(host).matchMethodAndPath(method, path); if (l != nil) {
-                return (l, m);
-            }
+        var (l, m) = Ꮡroot.findChild(host).matchMethodAndPath(method, path); if (l != nil) {
+            return (l, m);
         }
     }
     return root.emptyChild.matchMethodAndPath(method, path);
@@ -154,10 +150,8 @@ internal static (ж<routingNode>, slice<@string>) matchMethodAndPath(this ж<rou
     }
     if (method == "HEAD"u8) {
         // GET matches HEAD too.
-        {
-            var (l, m) = Ꮡn.findChild(getˢ).matchPath(path, default); if (l != nil) {
-                return (l, m);
-            }
+        var (l, m) = Ꮡn.findChild(getˢ).matchPath(path, default); if (l != nil) {
+            return (l, m);
         }
     }
     // No exact match; try patterns with no method.
@@ -202,23 +196,19 @@ internal static (ж<routingNode>, slice<@string>) matchPath(this ж<routingNode>
     // We skip this step if the segment is a trailing slash, because single wildcards
     // don't match trailing slashes.
     if (seg != "/"u8) {
-        {
-            var (nΔ2, m) = n.emptyChild.matchPath(rest, append(matches, seg)); if (nΔ2 != nil) {
-                return (nΔ2, m);
-            }
+        var (nΔ2, m) = n.emptyChild.matchPath(rest, append(matches, seg)); if (nΔ2 != nil) {
+            return (nΔ2, m);
         }
     }
     // Lastly, match the pattern (there can be at most one) that has a multi
     // wildcard in this position to the rest of the path.
-    {
-        var c = n.multiChild; if (c != nil) {
-            // Don't record a match for a nameless wildcard (which arises from a
-            // trailing slash in the pattern).
-            if (c.pattern.lastSegment().s != ""u8) {
-                matches = append(matches, pathUnescape(path[1..])); // remove initial slash
-            }
-            return (c, matches);
+    var c = n.multiChild; if (c != nil) {
+        // Don't record a match for a nameless wildcard (which arises from a
+        // trailing slash in the pattern).
+        if (c.pattern.lastSegment().s != ""u8) {
+            matches = append(matches, pathUnescape(path[1..])); // remove initial slash
         }
+        return (c, matches);
     }
     return (default, default);
 }
@@ -259,10 +249,8 @@ internal static void matchingMethodsPath(this ж<routingNode> Ꮡn, @string path
     }
     var setʗ1 = set;
     Ꮡn.Ꮡchildren.eachPair((@string method, ж<routingNode> c) => {
-        {
-            var (p, _) = c.matchPath(path, default); if (p != nil) {
-                setʗ1[method] = true;
-            }
+        var (p, _) = c.matchPath(path, default); if (p != nil) {
+            setʗ1[method] = true;
         }
         return true;
     });

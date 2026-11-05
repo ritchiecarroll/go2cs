@@ -79,12 +79,10 @@ public static void SetDefault(ж<Logger> Ꮡl) {
     // set to, which is correct.
     // This can occur with SetDefault(Default()).
     // See TestSetDefault.
-    {
-        var (_, ok) = l.Handler()._<ж<defaultHandler>>(ᐧ); if (!ok) {
-            ref var capturePC = ref heap<bool>((log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0, out var ᏑcapturePC);
-            log_package.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
-            log_package.SetFlags(0); // we want just the log message, no time or location
-        }
+    var (_, ok) = l.Handler()._<ж<defaultHandler>>(ᐧ); if (!ok) {
+        ref var capturePC = ref heap<bool>((log_package.Flags() & (nint)((nint)((nint)log_package.Lshortfile | (nint)log_package.Llongfile))) != 0, out var ᏑcapturePC);
+        log_package.SetOutput(new handlerWriterжWriter(Ꮡ(new handlerWriter(l.Handler(), new LevelVarжLeveler(ᏑlogLoggerLevel), capturePC))));
+        log_package.SetFlags(0); // we want just the log message, no time or location
     }
 }
 

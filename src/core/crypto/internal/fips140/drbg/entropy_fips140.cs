@@ -39,10 +39,8 @@ internal static ж<array<byte>> getEntropy() {
         // Each time it does, it enters a permanent failure state, and we
         // restart it anew. This is not expected to happen more than a few times
         // in a row.
-        {
-            retries++; if (retries > 100) {
-                throw panic("fips140/drbg: failed to obtain initial entropy");
-            }
+        retries++; if (retries > 100) {
+            throw panic("fips140/drbg: failed to obtain initial entropy");
         }
         (seed, err) = entropy.Seed(Ꮡmemory);
     }

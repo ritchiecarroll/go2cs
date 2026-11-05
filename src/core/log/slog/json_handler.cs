@@ -103,12 +103,10 @@ private static readonly @string timeTimeYearOutsideOfˢᵇ = "time.Time year out
 internal static void appendJSONTime(ж<handleState> Ꮡs, time.Time t) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    {
-        nint y = t.Year(); if (y < 0 || y >= 10000) {
-            // RFC 3339 is clear that years are 4 digits exactly.
-            // See golang.org/issue/4556#c15 for more discussion.
-            s.appendError(errors.New(timeTimeYearOutsideOfˢ));
-        }
+    nint y = t.Year(); if (y < 0 || y >= 10000) {
+        // RFC 3339 is clear that years are 4 digits exactly.
+        // See golang.org/issue/4556#c15 for more discussion.
+        s.appendError(errors.New(timeTimeYearOutsideOfˢ));
     }
     s.buf.WriteByte((byte)'"');
     s.buf.ValueSlot = t.AppendFormat(s.buf.ValueSlot, time_package.RFC3339Nano);
@@ -208,10 +206,8 @@ internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
             jsonEncoderPool.Put(jʗ1.OrTypedNil());
         }, ref ᒐ);
 
-        {
-            var err = j.json.Encode(v); if (err != nil) {
-                return err;
-            }
+        var err = j.json.Encode(v); if (err != nil) {
+            return err;
         }
 
         var bs = j.buf.Bytes();
@@ -245,44 +241,42 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
 
     nint start = 0;
     for (nint i = 0; i < len(s); ) {
-        {
-            var b = s[i]; if (b < utf8.RuneSelf) {
-                if (safeSet[b]) {
-                    i++;
-                    continue;
-                }
-                if (start < i) {
-                    str(s.slice(start, i));
-                }
-                @char((byte)'\\');
-                switch (b) {
-                case (byte)'\\' or (byte)'"': {
-                    @char(b);
-                    break;
-                }
-                case (byte)'\n': {
-                    @char((byte)'n');
-                    break;
-                }
-                case (byte)'\r': {
-                    @char((byte)'r');
-                    break;
-                }
-                case (byte)'\t': {
-                    @char((byte)'t');
-                    break;
-                }
-                default: {
-                    // This encodes bytes < 0x20 except for \t, \n and \r.
-                    str(u00ˢ);
-                    @char(hex[(b >> 4)]);
-                    @char(hex[(byte)(b & 0xF)]);
-                    break;
-                }}
+        var b = s[i]; if (b < utf8.RuneSelf) {
+            if (safeSet[b]) {
                 i++;
-                start = i;
                 continue;
             }
+            if (start < i) {
+                str(s.slice(start, i));
+            }
+            @char((byte)'\\');
+            switch (b) {
+            case (byte)'\\' or (byte)'"': {
+                @char(b);
+                break;
+            }
+            case (byte)'\n': {
+                @char((byte)'n');
+                break;
+            }
+            case (byte)'\r': {
+                @char((byte)'r');
+                break;
+            }
+            case (byte)'\t': {
+                @char((byte)'t');
+                break;
+            }
+            default: {
+                // This encodes bytes < 0x20 except for \t, \n and \r.
+                str(u00ˢ);
+                @char(hex[(b >> 4)]);
+                @char(hex[(byte)(b & 0xF)]);
+                break;
+            }}
+            i++;
+            start = i;
+            continue;
         }
         var (c, size) = utf8.DecodeRuneInString(s.slice(i));
         if (c == utf8.RuneError && size == 1) {

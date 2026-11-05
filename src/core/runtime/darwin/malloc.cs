@@ -1192,10 +1192,8 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
 
     // Pre-malloc debug hooks.
     if (debug.malloc) {
-        {
-            @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
-                return xΔ1;
-            }
+        @unsafe.Pointer xΔ1 = (uintptr)preMallocgcDebug(size, Ꮡtyp); if (xΔ1 != nil) {
+            return xΔ1;
         }
     }
 
@@ -1287,10 +1285,8 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
 
     // Adjust our GC assist debt to account for internal fragmentation.
     if (gcBlackenEnabled != 0 && elemsize != 0) {
-        {
-            var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
-                assistG.Value.gcAssistBytes -= (int64)(elemsize - size);
-            }
+        var assistG = getg().Value.m.Value.curg; if (assistG != nil) {
+            assistG.Value.gcAssistBytes -= (int64)(elemsize - size);
         }
     }
 
@@ -1440,10 +1436,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcTiny(uintptr size, ж<_type> 
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
 
@@ -1560,10 +1554,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallNoscan(uintptr size, ж<
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     return (x, size);
@@ -1713,10 +1705,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanNoHeader(uintptr siz
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     return (x, size);
@@ -1814,10 +1804,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcSmallScanHeader(uintptr size,
     releasem(ref (mp).DerefOrNull());
 
     if (checkGCTrigger) {
-        {
-            var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-                gcStart(t);
-            }
+        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+            gcStart(t);
         }
     }
     return (x, size);
@@ -1892,10 +1880,8 @@ internal static (@unsafe.Pointer, uintptr) mallocgcLarge(uintptr size, ж<_type>
     releasem(ref (mp).DerefOrNull());
 
     // Check to see if we need to trigger the GC.
-    {
-        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-            gcStart(t);
-        }
+    var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+        gcStart(t);
     }
 
     // Objects can be zeroed late in a context where preemption can occur.
@@ -2133,10 +2119,8 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
         if (span == nil) {
             @throw(nextReusableNilSpanForˢ);
         }
-        {
-            var state = span.Ꮡstate.get(); if (state != mSpanInUse) {
-                @throw(nextReusableSpanIsNotInˢ);
-            }
+        var state = span.Ꮡstate.get(); if (state != mSpanInUse) {
+            @throw(nextReusableSpanIsNotInˢ);
         }
     }
 
@@ -2265,10 +2249,8 @@ internal static void doubleCheckNextReusable(gclinkptr v) {
     if (span == nil) {
         @throw(nextReusableNilSpanForˢ);
     }
-    {
-        var state = span.Ꮡstate.get(); if (state != mSpanInUse) {
-            @throw(nextReusableSpanIsNotInˢ);
-        }
+    var state = span.Ꮡstate.get(); if (state != mSpanInUse) {
+        @throw(nextReusableSpanIsNotInˢ);
     }
     if ((uintptr)v < span.@base() || (uintptr)v >= span.limit) {
         @throw(nextReusableSpanIsNotInˢ2);
@@ -2563,16 +2545,14 @@ internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uint
         return default;
     }
     l.next = Δp + size;
-    {
-        var pEnd = alignUp(l.next - 1, physPageSize); if (pEnd > l.mapped) {
-            if (l.mapMemory) {
-                // Transition from Reserved to Prepared to Ready.
-                var n = pEnd - l.mapped;
-                sysMap((@unsafe.Pointer)l.mapped, n, sysStat, vmaName);
-                sysUsed((@unsafe.Pointer)l.mapped, n, n);
-            }
-            l.mapped = pEnd;
+    var pEnd = alignUp(l.next - 1, physPageSize); if (pEnd > l.mapped) {
+        if (l.mapMemory) {
+            // Transition from Reserved to Prepared to Ready.
+            var n = pEnd - l.mapped;
+            sysMap((@unsafe.Pointer)l.mapped, n, sysStat, vmaName);
+            sysUsed((@unsafe.Pointer)l.mapped, n, n);
         }
+        l.mapped = pEnd;
     }
     return (@unsafe.Pointer)Δp;
 }

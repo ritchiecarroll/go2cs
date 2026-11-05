@@ -124,14 +124,12 @@ public static error Err(this ErrorList p) {
 // one error per line, if the err parameter is an [ErrorList]. Otherwise
 // it prints the err string.
 public static void PrintError(io.Writer w, error err) {
-    {
-        var (list, ok) = err._<ErrorList>(ᐧ); if (ok) {
-            foreach (var (_, e) in list) {
-                fmt.Fprintf(w, "%s\n"u8, e.OrTypedNil());
-            }
-        } else if (err != nil) {
-            fmt.Fprintf(w, "%s\n"u8, err);
+    var (list, ok) = err._<ErrorList>(ᐧ); if (ok) {
+        foreach (var (_, e) in list) {
+            fmt.Fprintf(w, "%s\n"u8, e.OrTypedNil());
         }
+    } else if (err != nil) {
+        fmt.Fprintf(w, "%s\n"u8, err);
     }
 }
 

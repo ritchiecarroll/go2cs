@@ -247,12 +247,10 @@ internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<A
         ref var state = ref heap<handleState>(h2.newHandleState(h2.ᏑpreformattedAttrs.Reinterpret<slice<byte>, buffer.Buffer>(), false, ""u8), out var Ꮡstate);
         defer(Ꮡstate.free, ref ᒐ);
         state.prefix.WriteString(h.groupPrefix);
-        {
-            var pfa = h2.preformattedAttrs; if (len(pfa) > 0) {
-                state.sep = h.attrSep();
-                if (h2.json && pfa[len(pfa) - 1] == '{') {
-                    state.sep = ""u8;
-                }
+        var pfa = h2.preformattedAttrs; if (len(pfa) > 0) {
+            state.sep = h.attrSep();
+            if (h2.json && pfa[len(pfa) - 1] == '{') {
+                state.sep = ""u8;
             }
         }
         // Remember the position in the buffer, in case all attrs are empty.
@@ -350,14 +348,12 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // preformatted Attrs
-    {
-        var pfa = s.h.preformattedAttrs; if (len(pfa) > 0) {
-            s.buf.WriteString(s.sep);
-            s.buf.Write(pfa);
-            s.sep = s.h.attrSep();
-            if (s.h.json && pfa[len(pfa) - 1] == '{') {
-                s.sep = ""u8;
-            }
+    var pfa = s.h.preformattedAttrs; if (len(pfa) > 0) {
+        s.buf.WriteString(s.sep);
+        s.buf.Write(pfa);
+        s.sep = s.h.attrSep();
+        if (s.h.json && pfa[len(pfa) - 1] == '{') {
+            s.sep = ""u8;
         }
     }
     // Attrs in Record -- unlike the built-in ones, they are in groups started
@@ -443,11 +439,9 @@ internal static void free(this ref handleState s) {
     if (s.freeBuf) {
         s.buf.Free();
     }
-    {
-        var gs = s.groups; if (gs != nil) {
-            gs.ValueSlot = (gs.ValueSlot)[..0];
-            ᏑgroupPool.Put(gs.OrTypedNil());
-        }
+    var gs = s.groups; if (gs != nil) {
+        gs.ValueSlot = (gs.ValueSlot)[..0];
+        ᏑgroupPool.Put(gs.OrTypedNil());
     }
     s.prefix.Free();
 }
@@ -511,36 +505,30 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     a.Value = a.Value.Resolve();
-    {
-        var rep = s.h.opts.ReplaceAttr; if (rep != nil && a.Value.Kind() != KindGroup) {
-            slice<@string> gs = default;
-            if (s.groups != nil) {
-                gs = s.groups.ValueSlot;
-            }
-            // a.Value is resolved before calling ReplaceAttr, so the user doesn't have to.
-            a = rep(gs, a);
-            // The ReplaceAttr function may return an unresolved Attr.
-            a.Value = a.Value.Resolve();
+    var rep = s.h.opts.ReplaceAttr; if (rep != nil && a.Value.Kind() != KindGroup) {
+        slice<@string> gs = default;
+        if (s.groups != nil) {
+            gs = s.groups.ValueSlot;
         }
+        // a.Value is resolved before calling ReplaceAttr, so the user doesn't have to.
+        a = rep(gs, a);
+        // The ReplaceAttr function may return an unresolved Attr.
+        a.Value = a.Value.Resolve();
     }
     // Elide empty Attrs.
     if (a.isEmpty()) {
         return false;
     }
     // Special case: Source.
-    {
-        var v = a.Value; if (v.Kind() == KindAny) {
-            {
-                var (src, ok) = v.Any()._<ж<ΔSource>>(ᐧ); if (ok) {
-                    if (src.isEmpty()) {
-                        return false;
-                    }
-                    if (s.h.json) {
-                        a.Value = src.group();
-                    } else {
-                        a.Value = StringValue(fmt.Sprintf("%s:%d"u8, src.File, src.Line));
-                    }
-                }
+    var v = a.Value; if (v.Kind() == KindAny) {
+        var (src, ok) = v.Any()._<ж<ΔSource>>(ᐧ); if (ok) {
+            if (src.isEmpty()) {
+                return false;
+            }
+            if (s.h.json) {
+                a.Value = src.group();
+            } else {
+                a.Value = StringValue(fmt.Sprintf("%s:%d"u8, src.File, src.Line));
             }
         }
     }
@@ -640,23 +628,19 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
 
         var vʗ1 = v;
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    // If it panics with a nil pointer, the most likely cases are
-                    // an encoding.TextMarshaler or error fails to guard against nil,
-                    // in which case "<nil>" seems to be the feasible choice.
-                    //
-                    // Adapted from the code in fmt/print.go.
-                    {
-                        ref var vΔ1 = ref heap<reflectꓸValue>(reflect.ValueOf(vʗ1.any), out var ᏑvΔ1); if (vΔ1.Kind() == reflect.ΔPointer && vΔ1.IsNil()) {
-                            Ꮡs.Value.appendString(nilˢ);
-                            return;
-                        }
-                    }
-
-                    // Otherwise just print the original panic message.
-                    Ꮡs.Value.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
+            var r = recover(); if (r != nil) {
+                // If it panics with a nil pointer, the most likely cases are
+                // an encoding.TextMarshaler or error fails to guard against nil,
+                // in which case "<nil>" seems to be the feasible choice.
+                //
+                // Adapted from the code in fmt/print.go.
+                ref var vΔ1 = ref heap<reflectꓸValue>(reflect.ValueOf(vʗ1.any), out var ᏑvΔ1); if (vΔ1.Kind() == reflect.ΔPointer && vΔ1.IsNil()) {
+                    Ꮡs.Value.appendString(nilˢ);
+                    return;
                 }
+
+                // Otherwise just print the original panic message.
+                Ꮡs.Value.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
             }
         }, ref ᒐ);
 

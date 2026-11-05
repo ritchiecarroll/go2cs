@@ -140,19 +140,15 @@ internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) {
     error err = default;
     ref var rec = ref Ꮡrec.DerefOrNull();
 
-    {
-        err = binary.Read(r, binary.BigEndian, Ꮡrec.Ꮡh); if (err != nil) {
-            return err;
-        }
+    err = binary.Read(r, binary.BigEndian, Ꮡrec.Ꮡh); if (err != nil) {
+        return err;
     }
     if (rec.h.Version != 1) {
         return errors.New(fcgiInvalidHeaderVersionˢ);
     }
     nint n = (nint)rec.h.ContentLength + (nint)rec.h.PaddingLength;
-    {
-        (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != nil) {
-            return err;
-        }
+    (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != nil) {
+        return err;
     }
     return default;
 }
@@ -172,20 +168,14 @@ internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 re
         ᒐd1 = true;
         c.buf.Reset();
         c.h.init(recType, reqId, len(b));
-        {
-            var errΔ1 = binary.Write(new bytes_BufferжWriter(Ꮡc.Ꮡbuf), binary.BigEndian, c.h); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = binary.Write(new bytes_BufferжWriter(Ꮡc.Ꮡbuf), binary.BigEndian, c.h); if (errΔ1 != nil) {
+            return errΔ1;
         }
-        {
-            var (_, errΔ2) = c.buf.Write(b); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var (_, errΔ2) = c.buf.Write(b); if (errΔ2 != nil) {
+            return errΔ2;
         }
-        {
-            var (_, errΔ3) = c.buf.Write(pad.slice(0, c.h.PaddingLength)); if (errΔ3 != nil) {
-                return errΔ3;
-            }
+        var (_, errΔ3) = c.buf.Write(pad.slice(0, c.h.PaddingLength)); if (errΔ3 != nil) {
+            return errΔ3;
         }
         var (_, err) = c.rwc.Write(c.buf.Bytes());
         return err;
@@ -269,11 +259,9 @@ partial struct bufWriter {
 }
 
 internal static error Close(this ref bufWriter w) {
-    {
-        var err = w.Writer.Flush(); if (err != nil) {
-            w.closer.Close();
-            return err;
-        }
+    var err = w.Writer.Flush(); if (err != nil) {
+        w.closer.Close();
+        return err;
     }
     return w.closer.Close();
 }
@@ -299,10 +287,8 @@ internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) {
         if (n > maxWrite) {
             n = maxWrite;
         }
-        {
-            var err = w.c.writeRecord(w.recType, w.reqId, p.slice(0, n)); if (err != nil) {
-                return (nn, err);
-            }
+        var err = w.c.writeRecord(w.recType, w.reqId, p.slice(0, n)); if (err != nil) {
+            return (nn, err);
         }
         nn += n;
         p = p.slice(n);

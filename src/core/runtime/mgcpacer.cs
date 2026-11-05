@@ -1011,43 +1011,41 @@ internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcCont
     goal = Ꮡc.ᏑgcPercentHeapGoal.Load();
 
     // Check if the memory-limit-based goal is smaller, and if so, pick that.
-    {
-        var newGoal = Ꮡc.memoryLimitHeapGoal(); if (newGoal < goal) {
-            goal = newGoal;
-        } else {
-            // We're not limited by the memory limit goal, so perform a series of
-            // adjustments that might move the goal forward in a variety of circumstances.
+    var newGoal = Ꮡc.memoryLimitHeapGoal(); if (newGoal < goal) {
+        goal = newGoal;
+    } else {
+        // We're not limited by the memory limit goal, so perform a series of
+        // adjustments that might move the goal forward in a variety of circumstances.
 
-            var sweepDistTrigger = Ꮡc.ᏑsweepDistMinTrigger.Load();
-            if (sweepDistTrigger > goal) {
-                // Set the goal to maintain a minimum sweep distance since
-                // the last call to commit. Note that we never want to do this
-                // if we're in the memory limit regime, because it could push
-                // the goal up.
-                goal = sweepDistTrigger;
-            }
-            // Since we ignore the sweep distance trigger in the memory
-            // limit regime, we need to ensure we don't propagate it to
-            // the trigger, because it could cause a violation of the
-            // invariant that the trigger < goal.
-            minTrigger = sweepDistTrigger;
+        var sweepDistTrigger = Ꮡc.ᏑsweepDistMinTrigger.Load();
+        if (sweepDistTrigger > goal) {
+            // Set the goal to maintain a minimum sweep distance since
+            // the last call to commit. Note that we never want to do this
+            // if we're in the memory limit regime, because it could push
+            // the goal up.
+            goal = sweepDistTrigger;
+        }
+        // Since we ignore the sweep distance trigger in the memory
+        // limit regime, we need to ensure we don't propagate it to
+        // the trigger, because it could cause a violation of the
+        // invariant that the trigger < goal.
+        minTrigger = sweepDistTrigger;
 
-            // Ensure that the heap goal is at least a little larger than
-            // the point at which we triggered. This may not be the case if GC
-            // start is delayed or if the allocation that pushed gcController.heapLive
-            // over trigger is large or if the trigger is really close to
-            // GOGC. Assist is proportional to this distance, so enforce a
-            // minimum distance, even if it means going over the GOGC goal
-            // by a tiny bit.
-            //
-            // Ignore this if we're in the memory limit regime: we'd prefer to
-            // have the GC respond hard about how close we are to the goal than to
-            // push the goal back in such a manner that it could cause us to exceed
-            // the memory limit.
-            const uint64 minRunway = /* 64 << 10 */ 65536;
-            if (c.triggered != ~(uint64)0 && goal < c.triggered + minRunway) {
-                goal = c.triggered + minRunway;
-            }
+        // Ensure that the heap goal is at least a little larger than
+        // the point at which we triggered. This may not be the case if GC
+        // start is delayed or if the allocation that pushed gcController.heapLive
+        // over trigger is large or if the trigger is really close to
+        // GOGC. Assist is proportional to this distance, so enforce a
+        // minimum distance, even if it means going over the GOGC goal
+        // by a tiny bit.
+        //
+        // Ignore this if we're in the memory limit regime: we'd prefer to
+        // have the GC respond hard about how close we are to the goal than to
+        // push the goal back in such a manner that it could cause us to exceed
+        // the memory limit.
+        const uint64 minRunway = /* 64 << 10 */ 65536;
+        if (c.triggered != ~(uint64)0 && goal < c.triggered + minRunway) {
+            goal = c.triggered + minRunway;
         }
     }
     return (goal, minTrigger);
@@ -1312,10 +1310,8 @@ internal static void commit(this ж<gcControllerState> Ꮡc, bool isSweepDone) {
     // has grown by GOGC/100 over where it started the last cycle,
     // plus additional runway for non-heap sources of GC work.
     var gcPercentHeapGoal = ~(uint64)0;
-    {
-        var gcPercent = Ꮡc.ᏑgcPercent.Load(); if (gcPercent >= 0) {
-            gcPercentHeapGoal = c.heapMarked + (c.heapMarked + Ꮡc.ᏑlastStackScan.Load() + Ꮡc.ᏑglobalsScan.Load()) * (uint64)gcPercent / 100;
-        }
+    var gcPercent = Ꮡc.ᏑgcPercent.Load(); if (gcPercent >= 0) {
+        gcPercentHeapGoal = c.heapMarked + (c.heapMarked + Ꮡc.ᏑlastStackScan.Load() + Ꮡc.ᏑglobalsScan.Load()) * (uint64)gcPercent / 100;
     }
     // Apply the minimum heap size here. It's defined in terms of gcPercent
     // and is only updated by functions that call commit.
@@ -1401,10 +1397,8 @@ internal static int32 readGOGC() {
     if (Δp == "off"u8) {
         return -1;
     }
-    {
-        var (n, err) = strconv.ParseInt(Δp, 10, 32); if (err == nil) {
-            return (int32)n;
-        }
+    var (n, err) = strconv.ParseInt(Δp, 10, 32); if (err == nil) {
+        return (int32)n;
     }
     return 100;
 }

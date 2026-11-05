@@ -447,10 +447,8 @@ public static (ж<URL>, error) Parse(@string rawURL) {
     if (frag == ""u8) {
         return (url, default);
     }
-    {
-        err = url.setFragment(frag); if (err != nil) {
-            return (default, new ΔErrorжerror(Ꮡ(new ΔError("parse", rawURL, err))));
-        }
+    err = url.setFragment(frag); if (err != nil) {
+        return (default, new ΔErrorжerror(Ꮡ(new ΔError("parse", rawURL, err))));
     }
     return (url, default);
 }
@@ -502,10 +500,8 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
 
     // Split off possible leading "http:", "mailto:", etc.
     // Cannot contain escaped characters.
-    {
-        (url.Scheme, rest, err) = getScheme(rawURL); if (err != nil) {
-            return (default, err);
-        }
+    (url.Scheme, rest, err) = getScheme(rawURL); if (err != nil) {
+        return (default, err);
     }
     url.Scheme = strings.ToLower(url.Scheme);
 
@@ -532,21 +528,17 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
         // RFC 3986, §3.3:
         // In addition, a URI reference (Section 4.1) may be a relative-path reference,
         // in which case the first path segment cannot contain a colon (":") character.
-        {
-            var (segment, _, _) = strings.Cut(rest, "/"); if (strings.Contains(segment, ":")) {
-                // First path segment has colon. Not allowed in relative URL.
-                return (default, errors.New(firstPathSegmentInUrlˢ));
-            }
+        var (segment, _, _) = strings.Cut(rest, "/"); if (strings.Contains(segment, ":")) {
+            // First path segment has colon. Not allowed in relative URL.
+            return (default, errors.New(firstPathSegmentInUrlˢ));
         }
     }
 
     if ((url.Scheme != ""u8 || !viaRequest && !strings.HasPrefix(rest, "///")) && strings.HasPrefix(rest, "//")) {
         @string authority = default;
         (authority, rest) = (rest[2..], "");
-        {
-            nint i = strings.Index(authority, "/"); if (i >= 0) {
-                (authority, rest) = (authority.slice(0, i), authority.slice(i));
-            }
+        nint i = strings.Index(authority, "/"); if (i >= 0) {
+            (authority, rest) = (authority.slice(0, i), authority.slice(i));
         }
         (url.User, url.Host, err) = parseAuthority(url.Scheme, authority);
         if (err != nil) {
@@ -562,10 +554,8 @@ internal static (ж<URL>, error) parse(@string rawURL, bool viaRequest) {
     // RawPath is a hint of the encoding of Path. We don't want to set it if
     // the default escaping of Path is equivalent, to help make sure that people
     // don't rely on it in general.
-    {
-        var errΔ1 = url.setPath(rest); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = url.setPath(rest); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     return (url, default);
 }
@@ -596,23 +586,17 @@ internal static (ж<Userinfo> user, @string host, error err) parseAuthority(@str
         return (default, "", errors.New(netUrlInvalidUserinfoˢ));
     }
     if (!strings.Contains(userinfo, ":")) {
-        {
-            (userinfo, err) = unescape(userinfo, encodeUserPassword); if (err != nil) {
-                return (default, "", err);
-            }
+        (userinfo, err) = unescape(userinfo, encodeUserPassword); if (err != nil) {
+            return (default, "", err);
         }
         user = User(userinfo);
     } else {
         var (username, password, _) = strings.Cut(userinfo, ":");
-        {
-            (username, err) = unescape(username, encodeUserPassword); if (err != nil) {
-                return (default, "", err);
-            }
+        (username, err) = unescape(username, encodeUserPassword); if (err != nil) {
+            return (default, "", err);
         }
-        {
-            (password, err) = unescape(password, encodeUserPassword); if (err != nil) {
-                return (default, "", err);
-            }
+        (password, err) = unescape(password, encodeUserPassword); if (err != nil) {
+            return (default, "", err);
         }
         user = UserPassword(username, password);
     }
@@ -628,100 +612,96 @@ private static readonly @string missingInHostˢᵇ = "missing ']' in host"u8;
 // parseHost parses host as an authority without user
 // information. That is, as host[:port].
 internal static (@string, error) parseHost(@string scheme, @string host) {
-    {
-        nint openBracketIdx = strings.LastIndex(host, "["); if (openBracketIdx > 0) {
-            return ("", errors.New(invalidIpLiteralˢ));
-        } else if (openBracketIdx == 0) {
-            // Parse an IP-Literal in RFC 3986 and RFC 6874.
-            // E.g., "[fe80::1]", "[fe80::1%25en0]", "[fe80::1]:80".
-            nint closeBracketIdx = strings.LastIndex(host, "]");
-            if (closeBracketIdx < 0) {
-                return ("", errors.New(missingInHostˢ));
-            }
+    nint openBracketIdx = strings.LastIndex(host, "["); if (openBracketIdx > 0) {
+        return ("", errors.New(invalidIpLiteralˢ));
+    } else if (openBracketIdx == 0) {
+        // Parse an IP-Literal in RFC 3986 and RFC 6874.
+        // E.g., "[fe80::1]", "[fe80::1%25en0]", "[fe80::1]:80".
+        nint closeBracketIdx = strings.LastIndex(host, "]");
+        if (closeBracketIdx < 0) {
+            return ("", errors.New(missingInHostˢ));
+        }
 
-            @string colonPort = host.slice(closeBracketIdx + 1);
-            if (!validOptionalPort(colonPort)) {
-                return ("", fmt.Errorf("invalid port %q after host"u8, colonPort));
-            }
-            var (unescapedColonPort, errΔ1) = unescape(colonPort, encodeHost);
-            if (errΔ1 != nil) {
-                return ("", errΔ1);
-            }
+        @string colonPort = host.slice(closeBracketIdx + 1);
+        if (!validOptionalPort(colonPort)) {
+            return ("", fmt.Errorf("invalid port %q after host"u8, colonPort));
+        }
+        var (unescapedColonPort, errΔ1) = unescape(colonPort, encodeHost);
+        if (errΔ1 != nil) {
+            return ("", errΔ1);
+        }
 
-            @string hostname = host.slice(openBracketIdx + 1, closeBracketIdx);
-            @string unescapedHostname = default;
-            // RFC 6874 defines that %25 (%-encoded percent) introduces
-            // the zone identifier, and the zone identifier can use basically
-            // any %-encoding it likes. That's different from the host, which
-            // can only %-encode non-ASCII bytes.
-            // We do impose some restrictions on the zone, to avoid stupidity
-            // like newlines.
-            nint zoneIdx = strings.Index(hostname, "%25");
-            if (zoneIdx >= 0) {
-                var (hostPart, errΔ2) = unescape(hostname.slice(0, zoneIdx), encodeHost);
-                if (errΔ2 != nil) {
-                    return ("", errΔ2);
-                }
-                (var zonePart, errΔ2) = unescape(hostname.slice(zoneIdx), encodeZone);
-                if (errΔ2 != nil) {
-                    return ("", errΔ2);
-                }
-                unescapedHostname = hostPart + zonePart;
-            } else {
-                error errΔ3 = default;
-                (unescapedHostname, errΔ3) = unescape(hostname, encodeHost);
-                if (errΔ3 != nil) {
-                    return ("", errΔ3);
-                }
+        @string hostname = host.slice(openBracketIdx + 1, closeBracketIdx);
+        @string unescapedHostname = default;
+        // RFC 6874 defines that %25 (%-encoded percent) introduces
+        // the zone identifier, and the zone identifier can use basically
+        // any %-encoding it likes. That's different from the host, which
+        // can only %-encode non-ASCII bytes.
+        // We do impose some restrictions on the zone, to avoid stupidity
+        // like newlines.
+        nint zoneIdx = strings.Index(hostname, "%25");
+        if (zoneIdx >= 0) {
+            var (hostPart, errΔ2) = unescape(hostname.slice(0, zoneIdx), encodeHost);
+            if (errΔ2 != nil) {
+                return ("", errΔ2);
             }
-
-            // Per RFC 3986, only a host identified by a valid
-            // IPv6 address can be enclosed by square brackets.
-            // This excludes any IPv4, but notably not IPv4-mapped addresses.
-            (var addr, errΔ1) = netip.ParseAddr(unescapedHostname);
-            if (errΔ1 != nil) {
-                return ("", fmt.Errorf("invalid host: %w"u8, errΔ1));
+            (var zonePart, errΔ2) = unescape(hostname.slice(zoneIdx), encodeZone);
+            if (errΔ2 != nil) {
+                return ("", errΔ2);
             }
-            if (addr.Is4()) {
-                return ("", errors.New(invalidIpLiteralˢ));
-            }
-            return ("[" + unescapedHostname + "]" + unescapedColonPort, default);
+            unescapedHostname = hostPart + zonePart;
         } else {
-            nint i = strings.Index(host, ":"); if (i != -1) {
-                nint lastColon = strings.LastIndex(host, ":");
-                if (lastColon != i) {
-                    // RFC 3986 does not allow colons to appear in the host subcomponent.
-                    //
-                    // However, a number of databases including PostgreSQL and MongoDB
-                    // permit a comma-separated list of hosts (with optional ports) in the
-                    // host subcomponent.
-                    //
-                    // Since we historically permitted colons to appear in the host,
-                    // enforce strict colons only for http and https URLs.
-                    //
-                    // See https://go.dev/issue/75223 and https://go.dev/issue/78077.
-                    if (scheme == "http"u8 || scheme == "https"u8) {
-                        if (urlstrictcolons.Value() == "0"u8) {
-                            urlstrictcolons.IncNonDefault();
-                            i = lastColon;
-                        }
-                    } else {
+            error errΔ3 = default;
+            (unescapedHostname, errΔ3) = unescape(hostname, encodeHost);
+            if (errΔ3 != nil) {
+                return ("", errΔ3);
+            }
+        }
+
+        // Per RFC 3986, only a host identified by a valid
+        // IPv6 address can be enclosed by square brackets.
+        // This excludes any IPv4, but notably not IPv4-mapped addresses.
+        (var addr, errΔ1) = netip.ParseAddr(unescapedHostname);
+        if (errΔ1 != nil) {
+            return ("", fmt.Errorf("invalid host: %w"u8, errΔ1));
+        }
+        if (addr.Is4()) {
+            return ("", errors.New(invalidIpLiteralˢ));
+        }
+        return ("[" + unescapedHostname + "]" + unescapedColonPort, default);
+    } else {
+        nint i = strings.Index(host, ":"); if (i != -1) {
+            nint lastColon = strings.LastIndex(host, ":");
+            if (lastColon != i) {
+                // RFC 3986 does not allow colons to appear in the host subcomponent.
+                //
+                // However, a number of databases including PostgreSQL and MongoDB
+                // permit a comma-separated list of hosts (with optional ports) in the
+                // host subcomponent.
+                //
+                // Since we historically permitted colons to appear in the host,
+                // enforce strict colons only for http and https URLs.
+                //
+                // See https://go.dev/issue/75223 and https://go.dev/issue/78077.
+                if (scheme == "http"u8 || scheme == "https"u8) {
+                    if (urlstrictcolons.Value() == "0"u8) {
+                        urlstrictcolons.IncNonDefault();
                         i = lastColon;
                     }
+                } else {
+                    i = lastColon;
                 }
-                @string colonPort = host.slice(i);
-                if (!validOptionalPort(colonPort)) {
-                    return ("", fmt.Errorf("invalid port %q after host"u8, colonPort));
-                }
+            }
+            @string colonPort = host.slice(i);
+            if (!validOptionalPort(colonPort)) {
+                return ("", fmt.Errorf("invalid port %q after host"u8, colonPort));
             }
         }
     }
 
     error err = default;
-    {
-        (host, err) = unescape(host, encodeHost); if (err != nil) {
-            return ("", err);
-        }
+    (host, err) = unescape(host, encodeHost); if (err != nil) {
+        return ("", err);
     }
     return (host, default);
 }
@@ -750,13 +730,11 @@ internal static error setPath(this ref URL u, @string p) {
         return err;
     }
     u.Path = path;
-    {
-        @string escp = escape(path, encodePath); if (p == escp) {
-            // Default encoding is fine.
-            u.RawPath = ""u8;
-        } else {
-            u.RawPath = p;
-        }
+    @string escp = escape(path, encodePath); if (p == escp) {
+        // Default encoding is fine.
+        u.RawPath = ""u8;
+    } else {
+        u.RawPath = p;
     }
     return default;
 }
@@ -826,13 +804,11 @@ internal static error setFragment(this ref URL u, @string f) {
         return err;
     }
     u.Fragment = frag;
-    {
-        @string escf = escape(frag, encodeFragment); if (f == escf) {
-            // Default encoding is fine.
-            u.RawFragment = ""u8;
-        } else {
-            u.RawFragment = f;
-        }
+    @string escf = escape(frag, encodeFragment); if (f == escf) {
+        // Default encoding is fine.
+        u.RawFragment = ""u8;
+    } else {
+        u.RawFragment = f;
     }
     return default;
 }
@@ -925,16 +901,12 @@ public static @string String(this ref URL u) {
                 if (u.Host != ""u8 || u.Path != ""u8 || u.User != nil) {
                     Ꮡbuf.WriteString("//");
                 }
-                {
-                    var ui = u.User; if (ui != nil) {
-                        Ꮡbuf.WriteString(ui.String());
-                        Ꮡbuf.WriteByte((byte)'@');
-                    }
+                var ui = u.User; if (ui != nil) {
+                    Ꮡbuf.WriteString(ui.String());
+                    Ꮡbuf.WriteByte((byte)'@');
                 }
-                {
-                    @string h = u.Host; if (h != ""u8) {
-                        Ꮡbuf.WriteString(escape(h, encodeHost));
-                    }
+                @string h = u.Host; if (h != ""u8) {
+                    Ꮡbuf.WriteString(escape(h, encodeHost));
                 }
             }
         }
@@ -949,10 +921,8 @@ public static @string String(this ref URL u) {
             // it would be mistaken for a scheme name. Such a segment must be
             // preceded by a dot-segment (e.g., "./this:that") to make a relative-
             // path reference.
-            {
-                var (segment, _, _) = strings.Cut(path, "/"); if (strings.Contains(segment, ":")) {
-                    Ꮡbuf.WriteString("./");
-                }
+            var (segment, _, _) = strings.Cut(path, "/"); if (strings.Contains(segment, ":")) {
+                Ꮡbuf.WriteString("./");
             }
         }
         Ꮡbuf.WriteString(path);
@@ -982,10 +952,8 @@ public static @string Redacted(this ж<URL> Ꮡu) {
     }
 
     var ru = u;
-    {
-        var (_, has) = ru.User.Password(); if (has) {
-            ru.User = UserPassword(ru.User.Username(), xxxxxˢ);
-        }
+    var (_, has) = ru.User.Password(); if (has) {
+        ru.User = UserPassword(ru.User.Username(), xxxxxˢ);
     }
     return ru.String();
 }
@@ -1173,12 +1141,10 @@ internal static @string resolvePath(@string @base, @string @ref) {
             break;
         }
         case {} when exprᴛ1 == ".."u8: {
-            {
-                nint i = bytes.LastIndexByte(dst[1..], (byte)'/'); if (i >= 0) {
-                    dst = dst.slice(0, i + 1);
-                } else {
-                    dst = dst[..1];
-                }
+            nint i = bytes.LastIndexByte(dst[1..], (byte)'/'); if (i >= 0) {
+                dst = dst.slice(0, i + 1);
+            } else {
+                dst = dst[..1];
             }
             first = len(dst) == 1;
             break;

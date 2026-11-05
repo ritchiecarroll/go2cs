@@ -404,10 +404,8 @@ internal static void grow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) 
     // A grow operation is a lot like a free operation, so if our
     // chunk ends up below p.searchAddr, update p.searchAddr to the
     // new address, just like in free.
-    {
-        var b = (new offAddr(@base)); if (b.lessThan(Δp.searchAddr)) {
-            Δp.searchAddr = b;
-        }
+    var b = (new offAddr(@base)); if (b.lessThan(Δp.searchAddr)) {
+        Δp.searchAddr = b;
     }
 
     // Add entries into chunks, which is sparse, if needed. Then,
@@ -772,10 +770,8 @@ nextLevel:
         // searchAddr on the previous level or we're on the root level, in which
         // case the searchAddr should be the same as i after levelShift.
         nint j0 = 0;
-        {
-            nint searchIdxΔ1 = offAddrToLevelIndex(l, Δp.searchAddr); if ((searchIdxΔ1 & ~(entriesPerBlock - 1)) == i) {
-                j0 = searchIdxΔ1 & (entriesPerBlock - 1);
-            }
+        nint searchIdxΔ1 = offAddrToLevelIndex(l, Δp.searchAddr); if ((searchIdxΔ1 & ~(entriesPerBlock - 1)) == i) {
+            j0 = searchIdxΔ1 & (entriesPerBlock - 1);
         }
 
         // Run over the level entries looking for
@@ -921,18 +917,16 @@ internal static (uintptr addr, uintptr scav) alloc(this ref pageAlloc Δp, uintp
     if ((nuint)pallocChunkPages - chunkPageIndex(Δp.searchAddr.addr()) >= (nuint)npages) {
         // npages is guaranteed to be no greater than pallocChunkPages here.
         chunkIdx i = chunkIndex(Δp.searchAddr.addr());
-        {
-            nuint max = Δp.summary[len(Δp.summary) - 1][i].max(); if (max >= (nuint)npages) {
-                var (j, searchIdx) = Δp.chunkOf(i).of(pallocData.ᏑpallocBits).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
-                if (j == ~(nuint)0) {
-                    print((@string)"runtime: max = ", max, (@string)", npages = ", npages, (@string)"\n");
-                    print((@string)"runtime: searchIdx = ", chunkPageIndex(Δp.searchAddr.addr()), (@string)", p.searchAddr = ", (Δhex)(uint64)Δp.searchAddr.addr(), (@string)"\n");
-                    @throw(badSummaryDataˢ);
-                }
-                addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
-                searchAddr = new offAddr(chunkBase(i) + (uintptr)searchIdx * (uintptr)pageSize);
-                goto Found;
+        nuint max = Δp.summary[len(Δp.summary) - 1][i].max(); if (max >= (nuint)npages) {
+            var (j, searchIdx) = Δp.chunkOf(i).of(pallocData.ᏑpallocBits).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
+            if (j == ~(nuint)0) {
+                print((@string)"runtime: max = ", max, (@string)", npages = ", npages, (@string)"\n");
+                print((@string)"runtime: searchIdx = ", chunkPageIndex(Δp.searchAddr.addr()), (@string)", p.searchAddr = ", (Δhex)(uint64)Δp.searchAddr.addr(), (@string)"\n");
+                @throw(badSummaryDataˢ);
             }
+            addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
+            searchAddr = new offAddr(chunkBase(i) + (uintptr)searchIdx * (uintptr)pageSize);
+            goto Found;
         }
     }
     // We failed to use a searchAddr for one reason or another, so try
@@ -975,10 +969,8 @@ internal static void free(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages
     assertLockHeld(Δp.mheapLock);
 
     // If we're freeing pages below the p.searchAddr, update searchAddr.
-    {
-        var b = (new offAddr(@base)); if (b.lessThan(Δp.searchAddr)) {
-            Δp.searchAddr = b;
-        }
+    var b = (new offAddr(@base)); if (b.lessThan(Δp.searchAddr)) {
+        Δp.searchAddr = b;
     }
     var limit = @base + npages * (uintptr)pageSize - 1;
     if (npages == 1) {

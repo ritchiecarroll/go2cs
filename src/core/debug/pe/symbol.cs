@@ -47,10 +47,8 @@ internal static (bool, uint32) isSymNameOffset(/*[8]*/ array<byte> name) {
 // in sym.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
 public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) {
-    {
-        var (ok, offset) = isSymNameOffset(sym.Name); if (ok) {
-            return st.String(offset);
-        }
+    var (ok, offset) = isSymNameOffset(sym.Name); if (ok) {
+        return st.String(offset);
     }
     return (cstring(sym.Name[..]), default);
 }

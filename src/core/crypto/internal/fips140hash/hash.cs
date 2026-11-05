@@ -23,10 +23,8 @@ partial class fips140hash_package {
 // [crypto/internal/fips140/sha512.Digest], or
 // [crypto/internal/fips140/sha3.Digest] if it is a FIPS 140-3 approved hash.
 public static hash.Hash Unwrap(hash.Hash h) {
-    {
-        var (sha3Δ1, ok) = h._<ж<sha3.SHA3>>(ᐧ); if (ok) {
-            return new sha3_DigestжHash(sha3Unwrap(sha3Δ1));
-        }
+    var (sha3Δ1, ok) = h._<ж<sha3.SHA3>>(ᐧ); if (ok) {
+        return new sha3_DigestжHash(sha3Unwrap(sha3Δ1));
     }
     return h;
 }

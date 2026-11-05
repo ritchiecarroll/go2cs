@@ -729,11 +729,9 @@ internal static void gcStart(gcTrigger trigger) {
         // Check and setup per-P state.
         foreach (var (_, Δp) in allp) {
             // Check that all Ps have finished deferred mcache flushes.
-            {
-                var fg = (~Δp).mcache.ᏑflushGen.Load(); if (fg != mheap_.sweepgen) {
-                    println((@string)"runtime: p", (~Δp).id, (@string)"flushGen", fg, (@string)"!= sweepgen", mheap_.sweepgen);
-                    @throw(pMcacheNotFlushedˢ);
-                }
+            var fg = (~Δp).mcache.ᏑflushGen.Load(); if (fg != mheap_.sweepgen) {
+                println((@string)"runtime: p", (~Δp).id, (@string)"flushGen", fg, (@string)"!= sweepgen", mheap_.sweepgen);
+                @throw(pMcacheNotFlushedˢ);
             }
             // Initialize ptrBuf if necessary.
             if (goexperiment.GreenTeaGC && (~Δp).gcw.ptrBuf == nil) {
@@ -1168,13 +1166,11 @@ internal static bool /*moreWork*/ findMaybeRunnableGoroutines() {
             continue;
         }
         for (ivIndex = ivIndex - 1; ivIndex != vIndex; ivIndex = ivIndex - 1) {
-            {
-                var gp = work.stackRoots[ivIndex]; if (gp.isMaybeRunnable()) {
-                    work.stackRoots[ivIndex] = work.stackRoots[vIndex];
-                    work.stackRoots[vIndex] = gp;
-                    vIndex = vIndex + 1;
-                    break;
-                }
+            var gp = work.stackRoots[ivIndex]; if (gp.isMaybeRunnable()) {
+                work.stackRoots[ivIndex] = work.stackRoots[vIndex];
+                work.stackRoots[vIndex] = gp;
+                vIndex = vIndex + 1;
+                break;
             }
         }
     }
@@ -1753,25 +1749,23 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
         gopark((ж<g> g, @unsafe.Pointer nodep) => {
             var nodeΔ1 = (ж<gcBgMarkWorkerNode>)(uintptr)(nodep);
 
-            {
-                var mp = nodeΔ1.m.ptr(); if (mp != nil) {
-                    // The worker G is no longer running; release
-                    // the M.
-                    //
-                    // N.B. it is _safe_ to release the M as soon
-                    // as we are no longer performing P-local mark
-                    // work.
-                    //
-                    // However, since we cooperatively stop work
-                    // when gp.preempt is set, if we releasem in
-                    // the loop then the following call to gopark
-                    // would immediately preempt the G. This is
-                    // also safe, but inefficient: the G must
-                    // schedule again only to enter gopark and park
-                    // again. Thus, we defer the release until
-                    // after parking the G.
-                    releasem(ref (mp).DerefOrNull());
-                }
+            var mp = nodeΔ1.m.ptr(); if (mp != nil) {
+                // The worker G is no longer running; release
+                // the M.
+                //
+                // N.B. it is _safe_ to release the M as soon
+                // as we are no longer performing P-local mark
+                // work.
+                //
+                // However, since we cooperatively stop work
+                // when gp.preempt is set, if we releasem in
+                // the loop then the following call to gopark
+                // would immediately preempt the G. This is
+                // also safe, but inefficient: the G must
+                // schedule again only to enter gopark and park
+                // again. Thus, we defer the release until
+                // after parking the G.
+                releasem(ref (mp).DerefOrNull());
             }
 
             // Release this G to the pool.
@@ -1834,12 +1828,10 @@ internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
                     // everything out of the run
                     // queue so it can run
                     // somewhere else.
-                    {
-                        ref var drainQ = ref heap<gQueue>(runqdrain(ppʗ1), out var ᏑdrainQ); if (!drainQ.empty()) {
-                            @lock(Ꮡsched.of(schedt.Ꮡlock));
-                            globrunqputbatch(ref (ᏑdrainQ).DerefOrNull());
-                            unlock(Ꮡsched.of(schedt.Ꮡlock));
-                        }
+                    ref var drainQ = ref heap<gQueue>(runqdrain(ppʗ1), out var ᏑdrainQ); if (!drainQ.empty()) {
+                        @lock(Ꮡsched.of(schedt.Ꮡlock));
+                        globrunqputbatch(ref (ᏑdrainQ).DerefOrNull());
+                        unlock(Ꮡsched.of(schedt.Ꮡlock));
                     }
                 }
                 // Go back to draining, this time
@@ -1951,11 +1943,9 @@ internal static void gcMark(int64 startTime) {
     work.tstart = startTime;
 
     // Check that there's no marking work remaining.
-    {
-        var (next, jobs) = (Ꮡwork.ᏑmarkrootNext.Load(), Ꮡwork.ᏑmarkrootJobs.Load()); if (work.full != 0 || next < jobs) {
-            print((@string)"runtime: full=", (Δhex)(uint64)work.full, (@string)" next=", next, (@string)" jobs=", jobs, (@string)" nDataRoots=", work.nDataRoots, (@string)" nBSSRoots=", work.nBSSRoots, (@string)" nSpanRoots=", work.nSpanRoots, (@string)" nStackRoots=", work.nStackRoots, (@string)"\n");
-            throw panic("non-empty mark queue after concurrent mark");
-        }
+    var (next, jobs) = (Ꮡwork.ᏑmarkrootNext.Load(), Ꮡwork.ᏑmarkrootJobs.Load()); if (work.full != 0 || next < jobs) {
+        print((@string)"runtime: full=", (Δhex)(uint64)work.full, (@string)" next=", next, (@string)" jobs=", jobs, (@string)" nDataRoots=", work.nDataRoots, (@string)" nBSSRoots=", work.nBSSRoots, (@string)" nSpanRoots=", work.nSpanRoots, (@string)" nStackRoots=", work.nStackRoots, (@string)"\n");
+        throw panic("non-empty mark queue after concurrent mark");
     }
 
     if (debug.gccheckmark > 0) {
@@ -2273,10 +2263,8 @@ internal static @string gcTestPointerClass(@unsafe.Pointer Δp) {
     if ((~gp).stack.lo <= p2 && p2 < (~gp).stack.hi) {
         return stackˢ;
     }
-    {
-        var (@base, _, _) = findObject(p2, 0, 0); if (@base != 0) {
-            return heapˢ;
-        }
+    var (@base, _, _) = findObject(p2, 0, 0); if (@base != 0) {
+        return heapˢ;
     }
     foreach (var (_, datap) in activeModules()) {
         if (datap.data <= p2 && p2 < datap.edata || datap.noptrdata <= p2 && p2 < datap.enoptrdata) {

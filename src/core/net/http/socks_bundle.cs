@@ -92,16 +92,12 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
                 b = append(b, (byte)amΔ1);
             }
         }
-        {
-            (_, ctxErr) = c.Write(b); if (ctxErr != nil) {
-                goto ᒐdone;
-            }
+        (_, ctxErr) = c.Write(b); if (ctxErr != nil) {
+            goto ᒐdone;
         }
 
-        {
-            (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b[..2]); if (ctxErr != nil) {
-                goto ᒐdone;
-            }
+        (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b[..2]); if (ctxErr != nil) {
+            goto ᒐdone;
         }
         if (b[0] != socksVersion5) {
             (_ᴛ1, ctxErr) = (default, errors.New("unexpected protocol version "u8 + strconv.Itoa((nint)b[0]))); goto ᒐdone;
@@ -111,58 +107,44 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
             (_ᴛ1, ctxErr) = (default, errors.New(noAcceptableˢ)); goto ᒐdone;
         }
         if (d.Authenticate != nil) {
-            {
-                ctxErr = d.Authenticate(ctx, new net_ConnᴠReadWriter(c), am); if (ctxErr != nil) {
-                    goto ᒐdone;
-                }
+            ctxErr = d.Authenticate(ctx, new net_ConnᴠReadWriter(c), am); if (ctxErr != nil) {
+                goto ᒐdone;
             }
         }
 
         b = b[..0];
         b = append(b, (byte)(socksVersion5), (byte)d.cmd, (byte)0);
-        {
-            var ip = net.ParseIP(host); if (ip != nil) {
-                {
-                    var ip4 = ip.To4(); if (ip4 != nil) {
-                        b = append(b, (byte)(socksAddrTypeIPv4));
-                        b = appendꓸꓸꓸ(b, ip4);
-                    } else {
-                        var ip6 = ip.To16(); if (ip6 != nil) {
-                            b = append(b, (byte)(socksAddrTypeIPv6));
-                            b = appendꓸꓸꓸ(b, ip6);
-                        } else {
-                            (_ᴛ1, ctxErr) = (default, errors.New(unknownAddressTypeˢ)); goto ᒐdone;
-                        }
-                    }
-                }
+        var ip = net.ParseIP(host); if (ip != nil) {
+            var ip4 = ip.To4(); if (ip4 != nil) {
+                b = append(b, (byte)(socksAddrTypeIPv4));
+                b = appendꓸꓸꓸ(b, ip4);
+            } else if (ip.To16() is var ip6 && ip6 != nil) {
+                b = append(b, (byte)(socksAddrTypeIPv6));
+                b = appendꓸꓸꓸ(b, ip6);
             } else {
-                if (builtin.len(host) > 255) {
-                    (_ᴛ1, ctxErr) = (default, errors.New(fqdnTooLongˢ)); goto ᒐdone;
-                }
-                b = append(b, (byte)(socksAddrTypeFQDN));
-                b = append(b, (byte)builtin.len(host));
-                b = append(b, host.ꓸꓸꓸ);
+                (_ᴛ1, ctxErr) = (default, errors.New(unknownAddressTypeˢ)); goto ᒐdone;
             }
+        } else {
+            if (builtin.len(host) > 255) {
+                (_ᴛ1, ctxErr) = (default, errors.New(fqdnTooLongˢ)); goto ᒐdone;
+            }
+            b = append(b, (byte)(socksAddrTypeFQDN));
+            b = append(b, (byte)builtin.len(host));
+            b = append(b, host.ꓸꓸꓸ);
         }
         b = append(b, (byte)(port >> 8), (byte)port);
-        {
-            (_, ctxErr) = c.Write(b); if (ctxErr != nil) {
-                goto ᒐdone;
-            }
+        (_, ctxErr) = c.Write(b); if (ctxErr != nil) {
+            goto ᒐdone;
         }
 
-        {
-            (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b[..4]); if (ctxErr != nil) {
-                goto ᒐdone;
-            }
+        (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b[..4]); if (ctxErr != nil) {
+            goto ᒐdone;
         }
         if (b[0] != socksVersion5) {
             (_ᴛ1, ctxErr) = (default, errors.New("unexpected protocol version "u8 + strconv.Itoa((nint)b[0]))); goto ᒐdone;
         }
-        {
-            socksReply cmdErr = (socksReply)(nint)b[1]; if (cmdErr != socksStatusSucceeded) {
-                (_ᴛ1, ctxErr) = (default, errors.New("unknown error "u8 + cmdErr.String())); goto ᒐdone;
-            }
+        socksReply cmdErr = (socksReply)(nint)b[1]; if (cmdErr != socksStatusSucceeded) {
+            (_ᴛ1, ctxErr) = (default, errors.New("unknown error "u8 + cmdErr.String())); goto ᒐdone;
         }
         if (b[2] != 0) {
             (_ᴛ1, ctxErr) = (default, errors.New(nonZeroReservedFieldˢ)); goto ᒐdone;
@@ -181,10 +163,8 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
             break;
         }
         case var ᴛ when ᴛ == socksAddrTypeFQDN: {
-            {
-                var (_, errΔ2) = io.ReadFull(new net_ConnᴠReader(c), b[..1]); if (errΔ2 != nil) {
-                    (_ᴛ1, ctxErr) = (default, errΔ2); goto ᒐdone;
-                }
+            var (_, errΔ2) = io.ReadFull(new net_ConnᴠReader(c), b[..1]); if (errΔ2 != nil) {
+                (_ᴛ1, ctxErr) = (default, errΔ2); goto ᒐdone;
             }
             l += (nint)b[0];
             break;
@@ -197,10 +177,8 @@ internal static partial (netꓸAddr, error ctxErr) connect(this ж<socksDialer> 
         } else {
             b = b.slice(0, l);
         }
-        {
-            (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b); if (ctxErr != nil) {
-                goto ᒐdone;
-            }
+        (_, ctxErr) = io.ReadFull(new net_ConnᴠReader(c), b); if (ctxErr != nil) {
+            goto ᒐdone;
         }
         if (a.IP != nil) {
             copy(a.IP, b);
@@ -413,11 +391,9 @@ private static readonly @string nilContextˢᵇ = "nil context"u8;
 internal static (net.Conn, error) DialContext(this ж<socksDialer> Ꮡd, context.Context ctx, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    {
-        var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
-            var (proxy, dst, _) = d.pathAddrs(address);
-            return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errΔ1))));
-        }
+    var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
+        var (proxy, dst, _) = d.pathAddrs(address);
+        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errΔ1))));
     }
     if (ctx == nil) {
         var (proxy, dst, _) = d.pathAddrs(address);
@@ -453,11 +429,9 @@ internal static (net.Conn, error) DialContext(this ж<socksDialer> Ꮡd, context
 internal static (netꓸAddr, error) DialWithConn(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    {
-        var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
-            var (proxy, dst, _) = d.pathAddrs(address);
-            return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errΔ1))));
-        }
+    var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
+        var (proxy, dst, _) = d.pathAddrs(address);
+        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errΔ1))));
     }
     if (ctx == nil) {
         var (proxy, dst, _) = d.pathAddrs(address);
@@ -480,11 +454,9 @@ internal static (netꓸAddr, error) DialWithConn(this ж<socksDialer> Ꮡd, cont
 internal static (net.Conn, error) Dial(this ж<socksDialer> Ꮡd, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    {
-        var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
-            var (proxy, dst, _) = d.pathAddrs(address);
-            return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errΔ1))));
-        }
+    var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
+        var (proxy, dst, _) = d.pathAddrs(address);
+        return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: errΔ1))));
     }
     error err = default;
     net.Conn c = default;
@@ -497,11 +469,9 @@ internal static (net.Conn, error) Dial(this ж<socksDialer> Ꮡd, @string networ
         var (proxy, dst, _) = d.pathAddrs(address);
         return (default, new net.OpErrorжerror(Ꮡ(new net.OpError(Op: d.cmd.String(), Net: network, Source: proxy, Addr: dst, Err: err))));
     }
-    {
-        var (_, errΔ2) = Ꮡd.DialWithConn(context_package.Background(), c, network, address); if (errΔ2 != nil) {
-            c.Close();
-            return (default, errΔ2);
-        }
+    var (_, errΔ2) = Ꮡd.DialWithConn(context_package.Background(), c, network, address); if (errΔ2 != nil) {
+        c.Close();
+        return (default, errΔ2);
     }
     return (c, default);
 }

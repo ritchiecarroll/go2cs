@@ -56,9 +56,9 @@ using static go.math.cmplx_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("math/cmplx/abs.go", "abs.cs", "AA0akA==")]
-[assembly: GoPositionMap("math/cmplx/asin.go", "asin.cs", "AAlmACkCgKSkpJSkpMaUpKTGpIKCgoKCqJKApKSklKSkxpSkpMakgoIAAiIADgKCqJKClIKClAACSgAiAoCkpKSClKSkgoKClIKUgoKClIKCqJKCgg==")]
+[assembly: GoPositionMap("math/cmplx/asin.go", "asin.cs", "AAlmACkCpKSklKSkxpSkpMaUgoKCgoKokqSkpJSkpMaUpKTGlIKCAAIiAA4CgqiSgpSCgpQAAkoAIgKkpKSClKSUgoKClIKUgoKClIKCqJKCgg==")]
 [assembly: GoPositionMap("math/cmplx/conj.go", "conj.cs", "AAcQkA==")]
-[assembly: GoPositionMap("math/cmplx/exp.go", "exp.cs", "AAlmACkCgKSUpIKU6ILGgoI=")]
+[assembly: GoPositionMap("math/cmplx/exp.go", "exp.cs", "AAlmACkCpJSkgpTograCgg==")]
 [assembly: GoPositionMap("math/cmplx/isinf.go", "isinf.cs", "AAkUkoKUqJKC")]
 [assembly: GoPositionMap("math/cmplx/isnan.go", "isnan.cs", "AAkWopSklKiSgg==")]
 [assembly: GoPositionMap("math/cmplx/log.go", "log.cs", "AAlyAC8CqJKC")]
@@ -66,9 +66,9 @@ using static go.math.cmplx_package;
 [assembly: GoPositionMap("math/cmplx/polar.go", "polar.cs", "AAcUsg==")]
 [assembly: GoPositionMap("math/cmplx/pow.go", "pow.cs", "AAlkACgCgoKUgpSkgpSklJSCgpSCgoKCgpSC")]
 [assembly: GoPositionMap("math/cmplx/rect.go", "rect.cs", "AAkUkoI=")]
-[assembly: GoPositionMap("math/cmplx/sin.go", "sin.cs", "AAlqACsCgKSklKTGpIKCAAIiAA4CgKSklKTGpIKCAAIsABMCgKSklKTGpIKCAAIgAA0CgKSklKTGpIKCqJKClIKCgg==")]
+[assembly: GoPositionMap("math/cmplx/sin.go", "sin.cs", "AAlqACsCpKSUpMaUgoIAAiIADgKkpJSkxpSCggACLAATAqSklKTGlIKCAAIgAA0CpKSUpMaUgoKokoKUgoKC")]
 [assembly: GoPositionMap("math/cmplx/sqrt.go", "sqrt.cs", "AAl0ADAClIKUgpSCgpSCgoKUgpSCgpSCgoKUgoKUgoKCgoKUgoKUgpQ=")]
-[assembly: GoPositionMap("math/cmplx/tan.go", "tan.cs", "AAt8ADECgKSUlKSkgoKUgpQAAiAADQKApJSUpKSCgpQAAhYACBIACAKEAAoYgoKClgAGEIKCgpwAHDKSgoKUgoKCgpSClIKUgpSClKiSgoKCgoKCgoKCgoKCgoKCgoKCgoKUgoKCgoKCgoKCpqYAAjoAGgKCgpSClA==")]
+[assembly: GoPositionMap("math/cmplx/tan.go", "tan.cs", "AAt8ADECpJSUpJSCgpSClAACIAANAqSUlKSUgoKUAAIWAAgSAAgChAAKGIKCgpYABhCCgoKcABwykoKClIKCgoKUgpSClIKUgpSokoKCgoKCgoKCgoKCgoKCgoKCgoKClIKCgoKCgoKCgqamAAI6ABoCgoKUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.math;

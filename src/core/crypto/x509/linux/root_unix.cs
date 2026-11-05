@@ -33,10 +33,8 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
     var roots = NewCertPool();
 
     var files = certFiles;
-    {
-        @string f = os.Getenv(certFileEnv); if (f != ""u8) {
-            files = slice<@string>([f]);
-        }
+    @string f = os.Getenv(certFileEnv); if (f != ""u8) {
+        files = slice<@string>([f]);
     }
 
     error firstErr = default;
@@ -52,14 +50,12 @@ internal static (ж<CertPool>, error) loadSystemRoots() {
     }
 
     var dirs = certDirectories;
-    {
-        @string d = os.Getenv(certDirEnv); if (d != ""u8) {
-            // OpenSSL and BoringSSL both use ":" as the SSL_CERT_DIR separator.
-            // See:
-            //  * https://golang.org/issue/35325
-            //  * https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html
-            dirs = strings.Split(d, ":");
-        }
+    @string d = os.Getenv(certDirEnv); if (d != ""u8) {
+        // OpenSSL and BoringSSL both use ":" as the SSL_CERT_DIR separator.
+        // See:
+        //  * https://golang.org/issue/35325
+        //  * https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html
+        dirs = strings.Split(d, ":");
     }
 
     foreach (var (_, directory) in dirs) {

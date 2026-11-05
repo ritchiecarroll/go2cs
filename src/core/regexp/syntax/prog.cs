@@ -264,15 +264,13 @@ public static nint MatchRunePos(this ref Inst i, rune r) {
     nint hi = len(rune) / 2;
     while (lo < hi) {
         nint m = (nint)((nuint)(lo + hi) >> 1);
-        {
-            var c = rune[2 * m]; if (c <= r) {
-                if (r <= rune[2 * m + 1]) {
-                    return m;
-                }
-                lo = m + 1;
-            } else {
-                hi = m;
+        var c = rune[2 * m]; if (c <= r) {
+            if (r <= rune[2 * m + 1]) {
+                return m;
             }
+            lo = m + 1;
+        } else {
+            hi = m;
         }
     }
     return noMatch;

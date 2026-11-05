@@ -110,16 +110,14 @@ public static (ж<ast.File> f, error err) ParseFile(ж<token.FileSet> fset, @str
         ref var p = ref heap(new parser(), out var Ꮡp);
         var fileʗ1 = @file;
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    // resume same panic if it's not a bailout
-                    ref var bail = ref heap<bailout>(out var Ꮡbail);
-                    (bail, var ok) = e._<bailout>(ᐧ);
-                    if (!ok) {
-                        throw panic(e);
-                    } else if (bail.msg != ""u8) {
-                        Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
-                    }
+            var e = recover(); if (e != nil) {
+                // resume same panic if it's not a bailout
+                ref var bail = ref heap<bailout>(out var Ꮡbail);
+                (bail, var ok) = e._<bailout>(ᐧ);
+                if (!ok) {
+                    throw panic(e);
+                } else if (bail.msg != ""u8) {
+                    Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
                 }
             }
 
@@ -193,21 +191,19 @@ public static (map<@string, ж<ast.Package>> pkgs, error first) ParseDir(ж<toke
             }
         }
         @string filename = filepath.Join(path, d.Name());
-        {
-            var (src, errΔ2) = ParseFile(fset, filename, default, mode); if (errΔ2 == nil) {
-                ref var name = ref heap<@string>(src.Name.Name, out var Ꮡname);
-                var (pkg, found) = pkgs[name, ꟷ];
-                if (!found) {
-                    pkg = Ꮡ(new ast.Package(
-                        Name: name,
-                        Files: new map<@string, ж<ast.File>>()
-                    ));
-                    pkgs[name] = pkg;
-                }
-                pkg.Files[filename] = src;
-            } else if (first == nil) {
-                first = errΔ2;
+        var (src, errΔ2) = ParseFile(fset, filename, default, mode); if (errΔ2 == nil) {
+            ref var name = ref heap<@string>(src.Name.Name, out var Ꮡname);
+            var (pkg, found) = pkgs[name, ꟷ];
+            if (!found) {
+                pkg = Ꮡ(new ast.Package(
+                    Name: name,
+                    Files: new map<@string, ж<ast.File>>()
+                ));
+                pkgs[name] = pkg;
             }
+            pkg.Files[filename] = src;
+        } else if (first == nil) {
+            first = errΔ2;
         }
     }
 
@@ -243,16 +239,14 @@ public static (ast.Expr expr, error err) ParseExprFrom(ж<token.FileSet> fset, @
 
         ref var p = ref heap(new parser(), out var Ꮡp);
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    // resume same panic if it's not a bailout
-                    ref var bail = ref heap<bailout>(out var Ꮡbail);
-                    (bail, var ok) = e._<bailout>(ᐧ);
-                    if (!ok) {
-                        throw panic(e);
-                    } else if (bail.msg != ""u8) {
-                        Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
-                    }
+            var e = recover(); if (e != nil) {
+                // resume same panic if it's not a bailout
+                ref var bail = ref heap<bailout>(out var Ꮡbail);
+                (bail, var ok) = e._<bailout>(ᐧ);
+                if (!ok) {
+                    throw panic(e);
+                } else if (bail.msg != ""u8) {
+                    Ꮡp.Value.errors.Add(Ꮡp.Value.@file.Position(bail.pos), bail.msg);
                 }
             }
             Ꮡp.Value.errors.Sort();

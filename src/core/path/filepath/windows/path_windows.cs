@@ -33,19 +33,17 @@ internal static slice<@string> splitList(@string path) {
     nint start = 0;
     var quo = false;
     for (nint i = 0; i < len(path); i++) {
-        {
-            var c = path[i];
-            switch (ᐧ) {
-            case {} when c is (byte)'"': {
-                quo = !quo;
-                break;
-            }
-            case {} when c == ListSeparator && !quo: {
-                list = append(list, path.slice(start, i));
-                start = i + 1;
-                break;
-            }}
+        var c = path[i];
+        switch (ᐧ) {
+        case {} when c is (byte)'"': {
+            quo = !quo;
+            break;
         }
+        case {} when c == ListSeparator && !quo: {
+            list = append(list, path.slice(start, i));
+            start = i + 1;
+            break;
+        }}
     }
     list = append(list, path.slice(start));
 

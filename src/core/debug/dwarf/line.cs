@@ -162,10 +162,8 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
     ), out var Ꮡr);
 
     // Read the header.
-    {
-        var err = Ꮡr.readHeader(compDir); if (err != nil) {
-            return (default, err);
-        }
+    var err = Ꮡr.readHeader(compDir); if (err != nil) {
+        return (default, err);
     }
 
     // Initialize line reader state.
@@ -249,10 +247,8 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         return buf.err;
     }
     foreach (var (i, length) in r.opcodeLengths) {
-        {
-            var (known, ok) = knownOpcodeLengths[i, ꟷ]; if (ok && known != length) {
-                return new DecodeError("line", hdrOffset, fmt.Sprintf("opcode %d expected to have length %d, but has length %d"u8, i, known, length));
-            }
+        var (known, ok) = knownOpcodeLengths[i, ꟷ]; if (ok && known != length) {
+            return new DecodeError("line", hdrOffset, fmt.Sprintf("opcode %d expected to have length %d, but has length %d"u8, i, known, length));
         }
     }
 
@@ -279,12 +275,10 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         // so leave the first entry nil.
         r.fileEntries = new slice<ж<LineFile>>(1);
         for (;;) {
-            {
-                var (done, err) = r.readFileEntry(); if (err != nil) {
-                    return err;
-                } else if (done) {
-                    break;
-                }
+            var (done, err) = r.readFileEntry(); if (err != nil) {
+                return err;
+            } else if (done) {
+                break;
             }
         }
     } else {
@@ -616,14 +610,12 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
             break;
         }
         case var ᴛ2 when ᴛ2 == lneDefineFile: {
-            {
-                var (done, err) = r.readFileEntry(); if (err != nil) {
-                    r.buf.err = err;
-                    return false;
-                } else if (done) {
-                    r.buf.err = new DecodeError("line", startOff, "malformed DW_LNE_define_file operation");
-                    return false;
-                }
+            var (done, err) = r.readFileEntry(); if (err != nil) {
+                r.buf.err = err;
+                return false;
+            } else if (done) {
+                r.buf.err = new DecodeError("line", startOff, "malformed DW_LNE_define_file operation");
+                return false;
             }
             r.updateFile();
             break;
@@ -826,10 +818,8 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
     if (entry.Address > pc) {
         // We're too far. Start at the beginning of the table.
         r.Reset();
-        {
-            var err = r.Next(Ꮡentry); if (err != nil) {
-                return err;
-            }
+        var err = r.Next(Ꮡentry); if (err != nil) {
+            return err;
         }
         if (entry.Address > pc) {
             // The whole table starts after pc.
@@ -842,13 +832,11 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
     for (;;) {
         ref var next = ref heap(new LineEntry(), out var Ꮡnext);
         var pos = r.Tell();
-        {
-            var err = r.Next(Ꮡnext); if (err != nil) {
-                if (AreEqual(err, io.EOF)) {
-                    return ErrUnknownPC;
-                }
-                return err;
+        var err = r.Next(Ꮡnext); if (err != nil) {
+            if (AreEqual(err, io.EOF)) {
+                return ErrUnknownPC;
             }
+            return err;
         }
         if (next.Address > pc) {
             if (entry.EndSequence) {
@@ -913,10 +901,8 @@ internal static @string pathJoin(@string dirname, @string filename) {
 // path, if any. path == drive + rest
 internal static (@string drive, @string rest) splitDrive(@string path) {
     if (len(path) >= 2 && path[1] == ':') {
-        {
-            var c = path[0]; if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z') {
-                return (path[..2], path[2..]);
-            }
+        var c = path[0]; if ('a' <= c && c <= 'z' || 'A' <= c && c <= 'Z') {
+            return (path[..2], path[2..]);
         }
     }
     if (len(path) > 3 && (path[0] == '\\' || path[0] == '/') && (path[1] == '\\' || path[1] == '/')) {

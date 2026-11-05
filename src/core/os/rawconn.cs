@@ -19,10 +19,8 @@ internal static ref readonly @string syscallConnControlˢ => ref syscallConnCont
 private static readonly @string syscallConnControlˢᵇ = "SyscallConn.Control"u8;
 
 internal static error Control(this ref rawConn c, Action<uintptr> f) {
-    {
-        var errΔ1 = c.@file.checkValid(syscallConnControlˢ); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = c.@file.checkValid(syscallConnControlˢ); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawControl(f);
     runtime.KeepAlive(c.@file.OrTypedNil());
@@ -34,10 +32,8 @@ internal static ref readonly @string syscallConnReadˢ => ref syscallConnReadˢ�
 private static readonly @string syscallConnReadˢᵇ = "SyscallConn.Read"u8;
 
 internal static error Read(this ref rawConn c, Func<uintptr, bool> f) {
-    {
-        var errΔ1 = c.@file.checkValid(syscallConnReadˢ); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = c.@file.checkValid(syscallConnReadˢ); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawRead(f);
     runtime.KeepAlive(c.@file.OrTypedNil());
@@ -49,10 +45,8 @@ internal static ref readonly @string syscallConnWriteˢ => ref syscallConnWrite�
 private static readonly @string syscallConnWriteˢᵇ = "SyscallConn.Write"u8;
 
 internal static error Write(this ref rawConn c, Func<uintptr, bool> f) {
-    {
-        var errΔ1 = c.@file.checkValid(syscallConnWriteˢ); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = c.@file.checkValid(syscallConnWriteˢ); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawWrite(f);
     runtime.KeepAlive(c.@file.OrTypedNil());

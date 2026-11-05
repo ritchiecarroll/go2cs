@@ -65,10 +65,8 @@ public static (context.Context ctx, ж<Task> task) NewTask(context.Context pctx,
 }
 
 internal static ж<Task> fromContext(context.Context ctx) {
-    {
-        var (s, ok) = ctx.Value(new traceContextKey())._<ж<Task>>(ᐧ); if (ok) {
-            return s;
-        }
+    var (s, ok) = ctx.Value(new traceContextKey())._<ж<Task>>(ᐧ); if (ok) {
+        return s;
     }
     return ᏑbgTask;
 }

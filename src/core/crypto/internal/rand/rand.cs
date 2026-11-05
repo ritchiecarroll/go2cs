@@ -21,10 +21,8 @@ partial struct reader {
 
 internal static (nint n, error err) Read(this reader r, slice<byte> b) {
     if (Δboring.Enabled) {
-        {
-            var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != nil) {
-                throw panic("crypto/rand: boring RandReader failed: " + errΔ1.Error());
-            }
+        var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != nil) {
+            throw panic("crypto/rand: boring RandReader failed: " + errΔ1.Error());
         }
         return (len(b), default);
     }

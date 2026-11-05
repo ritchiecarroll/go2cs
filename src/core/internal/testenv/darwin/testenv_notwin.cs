@@ -39,18 +39,14 @@ internal static Func<(bool, @string)> hasSymlink = sync.OnceValues((bool ok, @st
                 _ = os.RemoveAll(dir);
             }, ref ᒐ);
             @string fpath = filepath.Join(dir, "testfile.txt");
-            {
-                var errΔ1 = os.WriteFile(fpath, default, 420); if (errΔ1 != nil) {
-                    (ok, reason) = (false, ""); goto ᒐdone;
-                }
+            var errΔ1 = os.WriteFile(fpath, default, 420); if (errΔ1 != nil) {
+                (ok, reason) = (false, ""); goto ᒐdone;
             }
-            {
-                var errΔ2 = os.Symlink(fpath, filepath.Join(dir, "testlink")); if (errΔ2 != nil) {
-                    if (SyscallIsNotSupported(errΔ2)) {
-                        (ok, reason) = (false, fmt.Sprintf("symlinks unsupported: %s"u8, errΔ2.Error())); goto ᒐdone;
-                    }
-                    (ok, reason) = (false, ""); goto ᒐdone;
+            var errΔ2 = os.Symlink(fpath, filepath.Join(dir, "testlink")); if (errΔ2 != nil) {
+                if (SyscallIsNotSupported(errΔ2)) {
+                    (ok, reason) = (false, fmt.Sprintf("symlinks unsupported: %s"u8, errΔ2.Error())); goto ᒐdone;
                 }
+                (ok, reason) = (false, ""); goto ᒐdone;
             }
             break;
         }}

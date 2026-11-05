@@ -62,10 +62,8 @@ public static bool IsOnCurve(this ж<CurveParams> Ꮡcurve, ж<bigꓸInt> Ꮡx, 
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
-    {
-        var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.IsOnCurve(Ꮡx, Ꮡy);
-        }
+    var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
+        return specific.IsOnCurve(Ꮡx, Ꮡy);
     }
 
     if (x.Sign() < 0 || Ꮡx.Cmp(curve.P) >= 0 || y.Sign() < 0 || Ꮡy.Cmp(curve.P) >= 0) {
@@ -126,10 +124,8 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Add(this ж<CurveParams> Ꮡcurve, 
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
-    {
-        var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.Add(x1, y1, x2, y2);
-        }
+    var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
+        return specific.Add(x1, y1, x2, y2);
     }
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), x1, y1);
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), x2, y2);
@@ -232,10 +228,8 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) Double(this ж<CurveParams> Ꮡcurv
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
-    {
-        var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.Double(x1, y1);
-        }
+    var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
+        return specific.Double(x1, y1);
     }
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), x1, y1);
 
@@ -316,10 +310,8 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarMult(this ж<CurveParams> Ꮡ
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
-    {
-        var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.ScalarMult(Bx, By, k);
-        }
+    var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
+        return specific.ScalarMult(Bx, By, k);
     }
     panicIfNotOnCurve(new CurveParamsжCurve(Ꮡcurve), Bx, By);
 
@@ -352,10 +344,8 @@ public static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult(this ж<CurveParams>
 
     // If there is a dedicated constant-time implementation for this curve operation,
     // use that instead of the generic one.
-    {
-        var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
-            return specific.ScalarBaseMult(k);
-        }
+    var (specific, ok) = matchesSpecificCurve(Ꮡcurve); if (ok) {
+        return specific.ScalarBaseMult(k);
     }
 
     return Ꮡcurve.ScalarMult(curve.Gx, curve.Gy, k);

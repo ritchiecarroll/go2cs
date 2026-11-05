@@ -267,10 +267,8 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
 {
     for (;;) {
         var b = new slice<byte>(c.N.Size());
-        {
-            var errΔ1 = generate(b); if (errΔ1 != nil) {
-                return (default, default, errΔ1);
-            }
+        var errΔ1 = generate(b); if (errΔ1 != nil) {
+            return (default, default, errΔ1);
         }
 
         // Take only the leftmost bits of the generated random value. This is
@@ -282,15 +280,13 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
         // These are the most dangerous lines in the package and maybe in the
         // library: a single bit of bias in the selection of nonces would likely
         // lead to key recovery, but no tests would fail. Look but DO NOT TOUCH.
-        {
-            nint excess = len(b) * 8 - c.N.BitLen(); if (excess > 0) {
-                // Just to be safe, assert that this only happens for the one curve that
-                // doesn't have a round number of bits.
-                if (c.curve != p521) {
-                    throw panic("ecdsa: internal error: unexpectedly masking off bits");
-                }
-                b = rightShift(b, excess);
+        nint excess = len(b) * 8 - c.N.BitLen(); if (excess > 0) {
+            // Just to be safe, assert that this only happens for the one curve that
+            // doesn't have a round number of bits.
+            if (c.curve != p521) {
+                throw panic("ecdsa: internal error: unexpectedly masking off bits");
             }
+            b = rightShift(b, excess);
         }
 
         // FIPS 186-5, Appendix A.4.2 makes us check x <= N - 2 and then return
@@ -298,11 +294,9 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
         // checks that k < N, and we explicitly check 0 != k. Since k can't be
         // negative, this is strictly equivalent. None of this matters anyway
         // because the chance of selecting zero is cryptographically negligible.
-        {
-            var (kΔ1, errΔ2) = bigmod.NewNat().SetBytes(b, c.N); if (errΔ2 == nil && kΔ1.IsZero() == 0) {
-                var (pΔ1, errΔ3) = c.newPoint().ScalarBaseMult(kΔ1.Bytes(c.N));
-                return (kΔ1, pΔ1, errΔ3);
-            }
+        var (kΔ1, errΔ2) = bigmod.NewNat().SetBytes(b, c.N); if (errΔ2 == nil && kΔ1.IsZero() == 0) {
+            var (pΔ1, errΔ3) = c.newPoint().ScalarBaseMult(kΔ1.Bytes(c.N));
+            return (kΔ1, pΔ1, errΔ3);
         }
 
         if (testingOnlyRejectionSamplingLooped != nil) {
@@ -348,10 +342,8 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
     // advantage of closely resembling Deterministic ECDSA.
 
     var Z = new slice<byte>(len(priv.d));
-    {
-        var err = drbg.ReadWithReader(rand, Z); if (err != nil) {
-            return (default, err);
-        }
+    var err = drbg.ReadWithReader(rand, Z); if (err != nil) {
+        return (default, err);
     }
 
     // See https://github.com/cfrg/draft-irtf-cfrg-det-sigs-with-noise/issues/6
@@ -486,14 +478,10 @@ internal static void hashToNat<P>(ref Curve<P> c, ж<bigmodꓸNat> e, slice<byte
     // an integer modulo N. This is the absolute worst of all worlds: we still
     // have to reduce, because the result might still overflow N, but to take
     // the left-most bits for P-521 we have to do a right shift.
-    {
-        nint size = c.N.Size(); if (len(hash) >= size) {
-            hash = hash.slice(0, size);
-            {
-                nint excess = len(hash) * 8 - c.N.BitLen(); if (excess > 0) {
-                    hash = rightShift(hash, excess);
-                }
-            }
+    nint size = c.N.Size(); if (len(hash) >= size) {
+        hash = hash.slice(0, size);
+        nint excess = len(hash) * 8 - c.N.BitLen(); if (excess > 0) {
+            hash = rightShift(hash, excess);
         }
     }
     var (_, err) = e.SetOverflowingBytes(hash, c.N);

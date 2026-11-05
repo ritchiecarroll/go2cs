@@ -18,10 +18,8 @@ internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
             return (fi, err);
         }
     }
-    {
-        var log = testlog.Logger(); if (log != nil) {
-            log.Stat(joinPath(f.Name(), name));
-        }
+    var log = testlog.Logger(); if (log != nil) {
+        log.Stat(joinPath(f.Name(), name));
     }
     return Ꮡf.lstatatNolog(name);
 }

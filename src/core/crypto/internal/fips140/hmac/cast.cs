@@ -28,10 +28,8 @@ partial class hmac_package {
         var h = New<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), input);
         h.Write(input);
         h.Write(input);
-        {
-            var got = h.Sum(default); if (!bytes.Equal(got, want)) {
-                return errors.New("unexpected result");
-            }
+        var got = h.Sum(default); if (!bytes.Equal(got, want)) {
+            return errors.New("unexpected result");
         }
         return default;
     });

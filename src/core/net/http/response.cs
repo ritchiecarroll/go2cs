@@ -178,10 +178,8 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> r, ж<Request>
     if (err != nil || resp.StatusCode < 0) {
         return (default, badStringError(malformedHttpStatusCodeˢ, statusCode));
     }
-    {
-        (resp.ProtoMajor, resp.ProtoMinor, ok) = ParseHTTPVersion(resp.Proto); if (!ok) {
-            return (default, badStringError(malformedHttpVersionˢ, resp.Proto));
-        }
+    (resp.ProtoMajor, resp.ProtoMinor, ok) = ParseHTTPVersion(resp.Proto); if (!ok) {
+        return (default, badStringError(malformedHttpVersionˢ, resp.Proto));
     }
 
     // Parse the response headers.
@@ -218,13 +216,9 @@ private static readonly @string cacheControlˢᵇ = "Cache-Control"u8;
 //
 //	Cache-Control: no-cache
 internal static void fixPragmaCacheControl(ΔHeader header) {
-    {
-        var (hp, ok) = header[pragmaˢ, ꟷ]; if (ok && builtin.len(hp) > 0 && hp[0] == "no-cache") {
-            {
-                var (_, presentcc) = header[cacheControlˢ, ꟷ]; if (!presentcc) {
-                    header[cacheControlˢ] = slice<@string>(["no-cache"]);
-                }
-            }
+    var (hp, ok) = header[pragmaˢ, ꟷ]; if (ok && builtin.len(hp) > 0 && hp[0] == "no-cache") {
+        var (_, presentcc) = header[cacheControlˢ, ꟷ]; if (!presentcc) {
+            header[cacheControlˢ] = slice<@string>(["no-cache"]);
         }
     }
 }
@@ -274,10 +268,8 @@ public static error Write(this ref Response r, io.Writer w) {
         text = strings.TrimPrefix(text, strconv.Itoa(r.StatusCode) + " "u8);
     }
 
-    {
-        var (_, errΔ1) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n"u8, r.ProtoMajor, r.ProtoMinor, r.StatusCode, text); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n"u8, r.ProtoMajor, r.ProtoMinor, r.StatusCode, text); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     // Clone it, so we can modify r1 as needed.
@@ -330,18 +322,14 @@ public static error Write(this ref Response r, io.Writer w) {
     // POST/PUT requests, even if zero length. See Issue 8180.
     var contentLengthAlreadySent = tw.shouldSendContentLength();
     if (r1.ContentLength == 0 && !chunked(r1.TransferEncoding) && !contentLengthAlreadySent && bodyAllowedForStatus(r.StatusCode)) {
-        {
-            var (_, errΔ3) = io.WriteString(w, contentLength0ˢ); if (errΔ3 != nil) {
-                return errΔ3;
-            }
+        var (_, errΔ3) = io.WriteString(w, contentLength0ˢ); if (errΔ3 != nil) {
+            return errΔ3;
         }
     }
 
     // End-of-header
-    {
-        var (_, errΔ4) = io.WriteString(w, "\r\n"); if (errΔ4 != nil) {
-            return errΔ4;
-        }
+    var (_, errΔ4) = io.WriteString(w, "\r\n"); if (errΔ4 != nil) {
+        return errΔ4;
     }
 
     // Write body and trailer

@@ -212,10 +212,8 @@ internal static (context, nint) tBeforeValue(context c, slice<byte> s) {
 
 // tHTMLCmt is the context transition function for stateHTMLCmt.
 internal static (context, nint) tHTMLCmt(context c, slice<byte> s) {
-    {
-        nint i = bytes.Index(s, commentEnd); if (i != -1) {
-            return (new context(), i + 3);
-        }
+    nint i = bytes.Index(s, commentEnd); if (i != -1) {
+        return (new context(), i + 3);
     }
     return (c, len(s));
 }
@@ -242,10 +240,8 @@ internal static (context, nint) tSpecialTagEnd(context c, slice<byte> s) {
         if (c.element == elementScript && (isInScriptLiteral(c.state) || isComment(c.state))) {
             return (c, len(s));
         }
-        {
-            nint i = indexTagEnd(s, specialTagEndMarkers[c.element]); if (i != -1) {
-                return (new context(), i);
-            }
+        nint i = indexTagEnd(s, specialTagEndMarkers[c.element]); if (i != -1) {
+            return (new context(), i);
         }
     }
     return (c, len(s));
@@ -724,11 +720,9 @@ internal static (context, nint) tError(context c, slice<byte> s) {
 internal static (context, nint) tMetaContent(context c, slice<byte> s) {
     foreach (var i in range(len(s))) {
         if (i + 3 <= len(s) - 1 && bytes.EqualFold(s.slice(i, i + 3), slice<byte>("url"u8))) {
-            {
-                nint j = eatWhiteSpace(s, i + 3); if (j < len(s) && s[j] == '=') {
-                    c.state = stateMetaContentURL;
-                    return (c, j + 1);
-                }
+            nint j = eatWhiteSpace(s, i + 3); if (j < len(s) && s[j] == '=') {
+                c.state = stateMetaContentURL;
+                return (c, j + 1);
             }
         }
     }

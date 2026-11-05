@@ -211,10 +211,8 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
 // sort reorders SRV records as specified in RFC 2782.
 internal static void sort(this byPriorityWeight addrs) {
     slices.SortFunc(addrs, (ж<SRV> a, ж<SRV> b) => {
-        {
-            nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
-                return r;
-            }
+        nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
+            return r;
         }
         return cmp.Compare(a.Weight, b.Weight);
     });

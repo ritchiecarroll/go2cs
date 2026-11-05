@@ -92,10 +92,8 @@ public static error CloseRead(this ж<UnixConn> Ꮡc) {
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.closeRead(); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = c.fd.closeRead(); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -108,10 +106,8 @@ public static error CloseWrite(this ж<UnixConn> Ꮡc) {
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.closeWrite(); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = c.fd.closeWrite(); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -330,10 +326,8 @@ public static error Close(this ж<UnixListener> Ꮡl) {
     if (!Ꮡl.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = Ꮡl.close(); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err)));
-        }
+    var err = Ꮡl.close(); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err)));
     }
     return default;
 }

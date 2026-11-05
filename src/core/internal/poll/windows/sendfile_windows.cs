@@ -26,25 +26,19 @@ public static (int64 written, error err, bool handled) SendFile(ж<FD> Ꮡfd, ui
             (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
         }
         var hsrc = (syscallꓸHandle)src;
-        {
-            var (ft, _) = Δsyscall.GetFileType(hsrc); if (ft == Δsyscall.FILE_TYPE_PIPE) {
-                (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
-            }
+        var (ft, _) = Δsyscall.GetFileType(hsrc); if (ft == Δsyscall.FILE_TYPE_PIPE) {
+            (written, err, handled) = (0, Δsyscall.ESPIPE, false); goto ᒐdone;
         }
 
-        {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
-                (written, err, handled) = (0, errΔ1, false); goto ᒐdone;
-            }
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
+            (written, err, handled) = (0, errΔ1, false); goto ᒐdone;
         }
         defer(Ꮡfd.writeUnlock, ref ᒐ);
 
         // Get the file size so we don't read past the end of the file.
         ref var fi = ref heap(new Δsyscall.ByHandleFileInformation(), out var Ꮡfi);
-        {
-            var errΔ2 = Δsyscall.GetFileInformationByHandle(hsrc, Ꮡfi); if (errΔ2 != nil) {
-                (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
-            }
+        var errΔ2 = Δsyscall.GetFileInformationByHandle(hsrc, Ꮡfi); if (errΔ2 != nil) {
+            (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
         }
         var fileSize = ((int64)fi.FileSizeHigh << 32) + (int64)fi.FileSizeLow;
         (var startpos, err) = Δsyscall.Seek(hsrc, 0, io.SeekCurrent);

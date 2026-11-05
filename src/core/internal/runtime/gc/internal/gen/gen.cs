@@ -249,10 +249,8 @@ internal static bool cse(this ref Func fn) {
         h.WriteString(op.Δop);
         // TODO: Ideally we would hash o1.c, but we don't have a good way to do that.
         foreach (var (_, arg) in op.args) {
-            {
-                var (_, ok) = hashes[arg, ꟷ]; if (!ok) {
-                    throw panic("ops not in dependency order");
-                }
+            var (_, ok) = hashes[arg, ꟷ]; if (!ok) {
+                throw panic("ops not in dependency order");
             }
             binary.NativeEndian.PutUint64(bbuf[..], hashes[arg]);
             h.Write(bbuf[..]);
@@ -434,11 +432,9 @@ internal static bool Less(this opHeap h, nint i, nint j) {
         }
         return 100;
     }
-    {
-        nint p1 = priority(h[i]);
-        nint p2 = priority(h[j]); if (p1 != p2) {
-            return p1 < p2;
-        }
+    nint p1 = priority(h[i]);
+    nint p2 = priority(h[j]); if (p1 != p2) {
+        return p1 < p2;
     }
     return h[i].id < h[j].id;
 }
@@ -571,13 +567,11 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
                 fmt.Fprint(w, locs[arg].LocString());
             }
         }
-        {
-            var (_, ok) = opRMW[o.Δop, ꟷ]; if (ok) {
-                // Read-modify-write instructions, so the output is already in the
-                // arguments above.
-            } else {
-                fmt.Fprintf(w, ", %s"u8, locs[o].LocString());
-            }
+        var (_, ok) = opRMW[o.Δop, ꟷ]; if (ok) {
+            // Read-modify-write instructions, so the output is already in the
+            // arguments above.
+        } else {
+            fmt.Fprintf(w, ", %s"u8, locs[o].LocString());
         }
         fmt.Fprintf(w, "\n"u8);
     }

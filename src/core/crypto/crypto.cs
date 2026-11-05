@@ -299,10 +299,8 @@ partial interface Decrypter {
 // [MessageSigner.SignMessage] is called directly. Otherwise, msg is hashed
 // with opts.HashFunc() and signed with [Signer.Sign].
 public static (slice<byte> signature, error err) SignMessage(Signer signer, io.Reader rand, slice<byte> msg, SignerOpts opts) {
-    {
-        var (ms, ok) = signer._<MessageSigner>(ᐧ); if (ok) {
-            return ms.SignMessage(rand, msg, opts);
-        }
+    var (ms, ok) = signer._<MessageSigner>(ᐧ); if (ok) {
+        return ms.SignMessage(rand, msg, opts);
     }
     if (opts.HashFunc() != 0) {
         var h = opts.HashFunc().New();

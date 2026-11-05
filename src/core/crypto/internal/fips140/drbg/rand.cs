@@ -72,16 +72,14 @@ public static void Read(slice<byte> b) {
 
         while (len(b) > 0) {
             nint size = min(len(b), (nint)(maxRequestSize));
-            {
-                var reseedRequired = drbg.Generate(b.slice(0, size), additionalInput); if (reseedRequired) {
-                    // See SP 800-90A Rev. 1, Section 9.3.1, Steps 6-8, as explained in
-                    // Section 9.3.2: if Generate reports a reseed is required, the
-                    // additional input is passed to Reseed along with the entropy and
-                    // then nulled before the next Generate call.
-                    drbg.Reseed(getEntropy(), additionalInput);
-                    additionalInput = ж<array<byte>>.NilBoxOfDims(48L);
-                    continue;
-                }
+            var reseedRequired = drbg.Generate(b.slice(0, size), additionalInput); if (reseedRequired) {
+                // See SP 800-90A Rev. 1, Section 9.3.1, Steps 6-8, as explained in
+                // Section 9.3.2: if Generate reports a reseed is required, the
+                // additional input is passed to Reseed along with the entropy and
+                // then nulled before the next Generate call.
+                drbg.Reseed(getEntropy(), additionalInput);
+                additionalInput = ж<array<byte>>.NilBoxOfDims(48L);
+                continue;
             }
             b = b.slice(size);
         }
@@ -114,11 +112,9 @@ partial interface DefaultReader {
 // ReadWithReader uses Reader to fill b with cryptographically secure random
 // bytes. It is intended for use in APIs that expose a rand io.Reader.
 public static error ReadWithReader(io.Reader r, slice<byte> b) {
-    {
-        var (_, ok) = r._<DefaultReader>(ᐧ); if (ok) {
-            Read(b);
-            return default;
-        }
+    var (_, ok) = r._<DefaultReader>(ᐧ); if (ok) {
+        Read(b);
+        return default;
     }
 
     fips140.RecordNonApproved();

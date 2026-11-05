@@ -593,10 +593,8 @@ internal static bool netpollblock(ж<pollDesc> pd, int32 mode, bool waitio) {
 
         // Double check that this isn't corrupt; otherwise we'd loop
         // forever.
-        {
-            var v = gpp.Load(); if (v != pdReady && v != pdNil) {
-                @throw(runtimeDoubleWaitˢ);
-            }
+        var v = gpp.Load(); if (v != pdReady && v != pdNil) {
+            @throw(runtimeDoubleWaitˢ);
         }
     }
 

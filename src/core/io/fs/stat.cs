@@ -21,10 +21,8 @@ partial interface StatFS :
 public static (FileInfo, error) Stat(FS fsys, @string name) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (fsysΔ1, ok) = fsys._<StatFS>(ᐧ); if (ok) {
-                return fsysΔ1.Stat(name);
-            }
+        var (fsysΔ1, ok) = fsys._<StatFS>(ᐧ); if (ok) {
+            return fsysΔ1.Stat(name);
         }
 
         var (@file, err) = fsys.Open(name);

@@ -277,11 +277,9 @@ internal static void doSigPreempt(ж<g> Ꮡgp, ж<sigctxt> Ꮡctxt) {
     // Check if this G wants to be preempted and is safe to
     // preempt.
     if (wantAsyncPreempt(Ꮡgp)) {
-        {
-            var (ok, newpc) = isAsyncSafePoint(Ꮡgp, ctxt.sigpc(), ctxt.sigsp(), ctxt.siglr()); if (ok) {
-                // Adjust the PC and inject a call to asyncPreempt.
-                ctxt.pushCall(abi.FuncPCABI0(asyncPreempt), newpc);
-            }
+        var (ok, newpc) = isAsyncSafePoint(Ꮡgp, ctxt.sigpc(), ctxt.sigsp(), ctxt.siglr()); if (ok) {
+            // Adjust the PC and inject a call to asyncPreempt.
+            ctxt.pushCall(abi.FuncPCABI0(asyncPreempt), newpc);
         }
     }
 
@@ -769,12 +767,10 @@ internal static void sighandler(uint32 sig, ж<siginfo> info, @unsafe.Pointer ct
                 usleep(crashSleepMicros);
                 timeout -= crashSleepMicros;
 
-                {
-                    var cΔ1 = Ꮡcrashing.Load(); if (cΔ1 > maxCrashing) {
-                        // We make progress, so reset the watchdog timeout
-                        maxCrashing = cΔ1;
-                        timeout = watchdogTimeoutMicros;
-                    }
+                var cΔ1 = Ꮡcrashing.Load(); if (cΔ1 > maxCrashing) {
+                    // We make progress, so reset the watchdog timeout
+                    maxCrashing = cΔ1;
+                    timeout = watchdogTimeoutMicros;
                 }
             }
         } else {

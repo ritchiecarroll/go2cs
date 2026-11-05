@@ -30,13 +30,11 @@ public static (int64 n, error err, bool handled) SendFile(ж<FD> dstFD, uintptr 
     error err = default;
     bool handled = default;
 
-    {
-        @string goos = Δruntime.GOOS; if (goos == "linux"u8 || goos == "android"u8) {
-            // Linux's sendfile doesn't require any setup:
-            // It sends from the current position of the source file and
-            // updates the position of the source after sending.
-            return sendFile(dstFD, (nint)src, nil, size);
-        }
+    @string goos = Δruntime.GOOS; if (goos == "linux"u8 || goos == "android"u8) {
+        // Linux's sendfile doesn't require any setup:
+        // It sends from the current position of the source file and
+        // updates the position of the source after sending.
+        return sendFile(dstFD, (nint)src, nil, size);
     }
 
     // Non-Linux sendfile implementations don't use the current position of the source file,
@@ -67,17 +65,13 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
         defer(() => {
             TestHookDidSendFile(ᏑdstFD, (uintptr)src, written, err, handled);
         }, ref ᒐ);
-        {
-            var errΔ1 = ᏑdstFD.writeLock(); if (errΔ1 != nil) {
-                (written, err, handled) = (0, errΔ1, false); goto ᒐdone;
-            }
+        var errΔ1 = ᏑdstFD.writeLock(); if (errΔ1 != nil) {
+            (written, err, handled) = (0, errΔ1, false); goto ᒐdone;
         }
         defer(ᏑdstFD.writeUnlock, ref ᒐ);
 
-        {
-            var errΔ2 = dstFD.pd.prepareWrite(dstFD.isFile); if (errΔ2 != nil) {
-                (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
-            }
+        var errΔ2 = dstFD.pd.prepareWrite(dstFD.isFile); if (errΔ2 != nil) {
+            (written, err, handled) = (0, errΔ2, false); goto ᒐdone;
         }
 
         nint dst = dstFD.Sysfd;
@@ -116,10 +110,8 @@ internal static (int64 written, error err, bool handled) sendFile(ж<FD> ᏑdstF
                 if (size > 0 && written >= size) {
                     (written, err, handled) = (written, default, true); goto ᒐdone;
                 }
-                {
-                    err = dstFD.pd.waitWrite(dstFD.isFile); if (err != nil) {
-                        (written, err, handled) = (written, err, true); goto ᒐdone;
-                    }
+                err = dstFD.pd.waitWrite(dstFD.isFile); if (err != nil) {
+                    (written, err, handled) = (written, err, true); goto ᒐdone;
                 }
                 break;
             }

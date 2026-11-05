@@ -142,10 +142,8 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
             if (err != nil) {
                 return;
             }
-            {
-                err = e.validateTableIDs(); if (err != nil) {
-                    return;
-                }
+            err = e.validateTableIDs(); if (err != nil) {
+                return;
             }
             if (e.@base.time <= Ꮡr.Value.lastTs) {
                 e.@base.time = Ꮡr.Value.lastTs + 1;
@@ -154,10 +152,8 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
         }, ref ᒐ);
 
         // Consume any events in the ordering first.
-        {
-            var (evΔ3, okΔ2) = r.order.Next(); if (okΔ2) {
-                (e, err) = (evΔ3.ΔClone(), default); goto ᒐdone;
-            }
+        var (evΔ3, okΔ2) = r.order.Next(); if (okΔ2) {
+            (e, err) = (evΔ3.ΔClone(), default); goto ᒐdone;
         }
 
         // Check if we need to refresh the generation.
@@ -183,10 +179,8 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
         (bool, error) tryAdvance(nint i) {
             var bc = Ꮡr.Value.frontier[i];
 
-            {
-                var (okΔ3, errΔ3) = Ꮡr.Ꮡorder.Advance(bc.Ꮡev, Ꮡr.Value.gen.evTable, bc.m, Ꮡr.Value.gen.gen); if (!okΔ3 || errΔ3 != nil) {
-                    return (okΔ3, errΔ3);
-                }
+            var (okΔ3, errΔ3) = Ꮡr.Ꮡorder.Advance(bc.Ꮡev, Ꮡr.Value.gen.evTable, bc.m, Ꮡr.Value.gen.gen); if (!okΔ3 || errΔ3 != nil) {
+                return (okΔ3, errΔ3);
             }
 
             // Refresh the cursor's event.
@@ -228,13 +222,11 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 slices.SortFunc<slice<ж<batchCursor>>, ж<batchCursor>>(r.frontier, ((Func<ж<batchCursor>, ж<batchCursor>, nint>)(compare)));
                 var success = false;
                 for (nint i = 1; i < len(r.frontier); i++) {
-                    {
-                        (okΔ5, errΔ5) = tryAdvance(i); if (errΔ5 != nil) {
-                            (e, err) = (new ΔEvent(), errΔ5); goto ᒐdone;
-                        } else if (okΔ5) {
-                            success = true;
-                            break;
-                        }
+                    (okΔ5, errΔ5) = tryAdvance(i); if (errΔ5 != nil) {
+                        (e, err) = (new ΔEvent(), errΔ5); goto ᒐdone;
+                    } else if (okΔ5) {
+                        success = true;
+                        break;
                     }
                 }
                 if (!success) {

@@ -296,19 +296,15 @@ partial struct MemStats {
 }
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ4() {
-    {
-        var offset = /* unsafe.Offsetof(memstats.heapStats) */ (uintptr)0; if (offset % 8 != 0) {
-            println(offset);
-            @throw("memstats.heapStats not aligned to 8 bytes");
-        }
+    var offset = /* unsafe.Offsetof(memstats.heapStats) */ (uintptr)0; if (offset % 8 != 0) {
+        println(offset);
+        @throw("memstats.heapStats not aligned to 8 bytes");
     }
     // Ensure the size of heapStatsDelta causes adjacent fields/slots (e.g.
     // [3]heapStatsDelta) to be 8-byte aligned.
-    {
-        var size = /* unsafe.Sizeof(heapStatsDelta{}) */ (uintptr)1168; if (size % 8 != 0) {
-            println(size);
-            @throw("heapStatsDelta not a multiple of 8 bytes in size");
-        }
+    var size = /* unsafe.Sizeof(heapStatsDelta{}) */ (uintptr)1168; if (size % 8 != 0) {
+        println(size);
+        @throw("heapStatsDelta not a multiple of 8 bytes in size");
     }
 }
 
@@ -734,17 +730,15 @@ private static readonly @string badSequenceNumberˢᵇ = "bad sequence number"u8
 internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    {
-        var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
-            var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
-            if (seq % 2 == 0) {
-                // Should have been incremented to odd.
-                print((@string)"runtime: seq=", seq, (@string)"\n");
-                @throw(badSequenceNumberˢ);
-            }
-        } else {
-            @lock(Ꮡm.ᏑnoPLock);
+    var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
+        var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
+        if (seq % 2 == 0) {
+            // Should have been incremented to odd.
+            print((@string)"runtime: seq=", seq, (@string)"\n");
+            @throw(badSequenceNumberˢ);
         }
+    } else {
+        @lock(Ꮡm.ᏑnoPLock);
     }
     var gen = Ꮡm.Ꮡgen.Load() % 3;
     return Ꮡ(m.stats, gen);
@@ -767,17 +761,15 @@ internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) {
 internal static void release(this ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    {
-        var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
-            var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
-            if (seq % 2 != 0) {
-                // Should have been incremented to even.
-                print((@string)"runtime: seq=", seq, (@string)"\n");
-                @throw(badSequenceNumberˢ);
-            }
-        } else {
-            unlock(Ꮡm.ᏑnoPLock);
+    var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
+        var seq = pp.of(runtime_package.Δp.ᏑstatsSeq).Add(1);
+        if (seq % 2 != 0) {
+            // Should have been incremented to even.
+            print((@string)"runtime: seq=", seq, (@string)"\n");
+            @throw(badSequenceNumberˢ);
         }
+    } else {
+        unlock(Ꮡm.ᏑnoPLock);
     }
 }
 

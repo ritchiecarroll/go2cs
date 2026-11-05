@@ -104,10 +104,8 @@ internal static UntypedInt skipComment => -9;
 
 // TokenString returns a printable string for a token or Unicode character.
 public static @string TokenString(rune tok) {
-    {
-        var (s, found) = tokenString[tok, ꟷ]; if (found) {
-            return s;
-        }
+    var (s, found) = tokenString[tok, ꟷ]; if (found) {
+        return s;
     }
     return fmt.Sprintf("%q"u8, (@string)tok);
 }
@@ -496,30 +494,28 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
     }
 
     // exponent
-    {
-        var e = lower(ch); if ((e == 'e' || e == 'p') && (s.Mode & (nuint)ScanFloats) != 0) {
-            switch (ᐧ) {
-            case {} when e == 'e' && prefix != 0 && prefix != '0': {
-                Ꮡs.errorf("%q exponent requires decimal mantissa", ch);
-                break;
-            }
-            case {} when e == 'p' && prefix != 'x': {
-                Ꮡs.errorf("%q exponent requires hexadecimal mantissa", ch);
-                break;
-            }}
-            ch = Ꮡs.next();
-            tok = Float;
-            if (ch == '+' || ch == '-') {
-                ch = Ꮡs.next();
-            }
-            (ch, ds) = Ꮡs.digits(ch, 10, nil);
-            digsep |= (nint)(ds);
-            if ((ds & 1) == 0) {
-                Ꮡs.error(exponentHasNoDigitsˢ);
-            }
-        } else if (prefix == 'x' && tok == Float) {
-            Ꮡs.error(hexadecimalMantissaˢ);
+    var e = lower(ch); if ((e == 'e' || e == 'p') && (s.Mode & (nuint)ScanFloats) != 0) {
+        switch (ᐧ) {
+        case {} when e == 'e' && prefix != 0 && prefix != '0': {
+            Ꮡs.errorf("%q exponent requires decimal mantissa", ch);
+            break;
         }
+        case {} when e == 'p' && prefix != 'x': {
+            Ꮡs.errorf("%q exponent requires hexadecimal mantissa", ch);
+            break;
+        }}
+        ch = Ꮡs.next();
+        tok = Float;
+        if (ch == '+' || ch == '-') {
+            ch = Ꮡs.next();
+        }
+        (ch, ds) = Ꮡs.digits(ch, 10, nil);
+        digsep |= (nint)(ds);
+        if ((ds & 1) == 0) {
+            Ꮡs.error(exponentHasNoDigitsˢ);
+        }
+    } else if (prefix == 'x' && tok == Float) {
+        Ꮡs.error(hexadecimalMantissaˢ);
     }
 
     if (tok == Int && invalid != 0) {
@@ -528,10 +524,8 @@ internal static (rune, rune) scanNumber(this ж<Scanner> Ꮡs, rune ch, bool see
 
     if ((digsep & 2) != 0) {
         s.tokEnd = s.srcPos - s.lastCharLen; // make sure token text is terminated
-        {
-            nint i = invalidSep(Ꮡs.TokenText()); if (i >= 0) {
-                Ꮡs.error(mustSeparateSuccessiveˢ);
-            }
+        nint i = invalidSep(Ꮡs.TokenText()); if (i >= 0) {
+            Ꮡs.error(mustSeparateSuccessiveˢ);
         }
     }
 

@@ -152,13 +152,11 @@ internal static error /*err*/ parse(this ж<ΔLevel> Ꮡl, @string s) {
 
         @string name = s;
         nint offset = 0;
-        {
-            nint i = strings.IndexAny(s, "+-"); if (i >= 0) {
-                name = s.slice(0, i);
-                (offset, err) = strconv.Atoi(s.slice(i));
-                if (err != nil) {
-                    goto ᒐdone;
-                }
+        nint i = strings.IndexAny(s, "+-"); if (i >= 0) {
+            name = s.slice(0, i);
+            (offset, err) = strconv.Atoi(s.slice(i));
+            if (err != nil) {
+                goto ᒐdone;
             }
         }
         var exprᴛ1 = strings.ToUpper(name);
@@ -235,10 +233,8 @@ public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) {
 // by calling [Level.UnmarshalText].
 public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) {
     ref var l = ref heap(new ΔLevel(), out var Ꮡl);
-    {
-        var err = Ꮡl.UnmarshalText(data); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡl.UnmarshalText(data); if (err != nil) {
+        return err;
     }
     Ꮡv.Set(l);
     return default;

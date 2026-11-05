@@ -355,11 +355,9 @@ public static (nint advance, slice<byte> token, error err) ScanLines(slice<byte>
     if (atEOF && len(data) == 0) {
         return (0, default, default);
     }
-    {
-        nint i = bytes.IndexByte(data, (byte)'\n'); if (i >= 0) {
-            // We have a full newline-terminated line.
-            return (i + 1, dropCR(data.slice(0, i)), default);
-        }
+    nint i = bytes.IndexByte(data, (byte)'\n'); if (i >= 0) {
+        // We have a full newline-terminated line.
+        return (i + 1, dropCR(data.slice(0, i)), default);
     }
     // If we're at EOF, we have a final, non-terminated line. Return it.
     if (atEOF) {

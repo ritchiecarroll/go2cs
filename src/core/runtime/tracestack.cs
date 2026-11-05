@@ -171,10 +171,8 @@ internal static uint64 put(this ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
 internal static void dump(this ж<traceStackTable> Ꮡt, uintptr gen) {
     var stackBuf = new slice<uintptr>(tracev2.MaxFramesPerStack);
     var w = unsafeTraceWriter(gen, nil);
-    {
-        var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
-            w = dumpStacksRec(root, w, stackBuf);
-        }
+    var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
+        w = dumpStacksRec(root, w, stackBuf);
     }
     w.flush().end();
     Ꮡt.Ꮡtab.reset();
@@ -337,10 +335,8 @@ outer:
         if (!fi.valid()) {
             // There is no funcInfo if callPC belongs to a C function. In this case
             // we still keep the pc, but don't attempt to expand inlined frames.
-            {
-                var more = skipOrAdd(retPC); if (!more) {
-                    goto break_outer;
-                }
+            var more = skipOrAdd(retPC); if (!more) {
+                goto break_outer;
             }
             continue;
         }
@@ -350,10 +346,8 @@ outer:
             var sf = u.srcFunc(uf);
             if (sf.funcID == abi.FuncIDWrapper && elideWrapperCalling(lastFuncID)) {
                 // ignore wrappers
-            } else {
-                var more = skipOrAdd(uf.pc + 1); if (!more) {
-                    goto break_outer;
-                }
+            } else if (skipOrAdd(uf.pc + 1) is var more && !more) {
+                goto break_outer;
             }
             lastFuncID = sf.funcID;
         }

@@ -146,10 +146,8 @@ internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, i
         return (line, default);
     }
 
-    {
-        var errΔ1 = validateFirstLine(line); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = validateFirstLine(line); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     // Optimistically assume that we have started to buffer the next line
@@ -838,10 +836,8 @@ internal static (@string, bool ok) canonicalMIMEHeaderKey(slice<byte> a) {
     // The compiler recognizes m[string(byteSlice)] as a special
     // case, so a copy of a's bytes into a new string does not
     // happen in this map lookup:
-    {
-        @string v = commonHeader[tmpstring(a)]; if (v != ""u8) {
-            return (v, true);
-        }
+    @string v = commonHeader[tmpstring(a)]; if (v != ""u8) {
+        return (v, true);
     }
     return ((@string)a, true);
 }

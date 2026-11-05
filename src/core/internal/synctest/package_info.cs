@@ -55,7 +55,7 @@ using static go.@internal.synctest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "AA8gpqoACxq0gqimkqimkqimpqYACRaigIKkqsKClIKqwoKU")]
+[assembly: GoPositionMap("internal/synctest/synctest.go", "synctest.cs", "AA8gpqoACxq0gqimkqimkqimpqYACRaigpSqwoKUgqrCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -152,19 +152,15 @@ internal static contentType attrType(@string name) {
         // widely applied.
         // Treat data-action as URL below.
         name = name[5..];
-    } else {
-        var (prefix, @short, ok) = strings.Cut(name, ":"); if (ok) {
-            if (prefix == "xmlns"u8) {
-                return contentTypeURL;
-            }
-            // Treat svg:href and xlink:href as href below.
-            name = @short;
+    } else if (strings.Cut(name, ":") is var (prefix, @short, ok) && ok) {
+        if (prefix == "xmlns"u8) {
+            return contentTypeURL;
         }
+        // Treat svg:href and xlink:href as href below.
+        name = @short;
     }
-    {
-        var (t, ok) = attrTypeMap[name, ꟷ]; if (ok) {
-            return t;
-        }
+    if (attrTypeMap[name, ꟷ] is (var t, true)) {
+        return t;
     }
     // Treat partial event handler names as script.
     if (strings.HasPrefix(name, "on")) {

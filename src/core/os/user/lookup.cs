@@ -42,10 +42,8 @@ internal static ref cacheᴛ1 cache => ref ((StaticBox<cacheᴛ1>)Ꮡcache).Valu
 // Lookup looks up a user by username. If the user cannot be found, the
 // returned error is of type [UnknownUserError].
 public static (ж<User>, error) Lookup(@string username) {
-    {
-        var (u, err) = Current(); if (err == nil && u.Username == username) {
-            return (u, err);
-        }
+    var (u, err) = Current(); if (err == nil && u.Username == username) {
+        return (u, err);
     }
     return lookupUser(username);
 }
@@ -53,10 +51,8 @@ public static (ж<User>, error) Lookup(@string username) {
 // LookupId looks up a user by userid. If the user cannot be found, the
 // returned error is of type [UnknownUserIdError].
 public static (ж<User>, error) LookupId(@string uid) {
-    {
-        var (u, err) = Current(); if (err == nil && u.Uid == uid) {
-            return (u, err);
-        }
+    var (u, err) = Current(); if (err == nil && u.Uid == uid) {
+        return (u, err);
     }
     return lookupUserId(uid);
 }

@@ -74,11 +74,11 @@ using static go.@internal.runtime.gc.@internal.gen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gen.go", "gen.cs", "ABgqogAIEoKmggAHELgACRSCgqrkgoKCgoK4goKCptKCgoKCgqaigoKUggARKIKmgqaigpSCgqamgoKClIKUgpSClKaCgoIADwjG6oKmgoKUgqaClIKCgpSCgpSUgqaClJS6pIKCgpSClIKAgqSClKaCooKCgqaCuIKCgoKCgriokoKCkoKUgoK4gqTIgpSCgoKmgsoACRb6goKCgtyUlIKCgoKU7oKCgoKmAAgGooKUtLTsyoCigKKCgpSUlJSUgJKkpoKmgoKCgoIACAj+goKCgoKUlIKmlIKCgpSCgoKCgoK4goKCgoKCgqbmoqaCgoK4poK2pKS2ppSCuJSCgpSUgpSmgLiklIKmgpSCgoKClKaCuIKCgoKCgoKUpg==", "173-179:1;230-239:1;259-267:1;366-376:1")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gen.go", "gen.cs", "ABgqogAIEoKmggAHELgACRSCgqrkgoKCgoK4goKCptKCgoKCgqaigoKUggARKIKmgqaigpSCgqamgoKClIKUgpSClKaCgoIADwjG6oKmgoKUgqaClIKCgpSCgpSUgqaClJS6pIKCgpSClIKClIKUpoKigoKCpoK4goKCgoKCuKiSgoKSgpSCgriCpMiClIKCgqaCygAJFvqCgoKC3JSUgoKCgpTugoKCgqYACAaigpS0tOzKgKKAooKClJSUlJSSlKaCpoKCgoKCAAgI/oKCgoKClJSCppSCgoKUgoKCgoKCuIKCgoKCgoKm5qKmgoKCuKaCtqSktqaUgriUgoKUlIKUpriUlIKmgpSCgoKClKaCuIKCgoKCgoKUpg==", "173-179:1;230-239:1;259-267:1;366-376:1")]
 [assembly: GoPositionMap("internal/runtime/gc/internal/gen/gp.go", "gp.cs", "AAsWlKKCpoKmgoKC")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/regalloc.go", "regalloc.cs", "AB9EgpSkpKSUpoKmggAIEoKClIKUgpSmgqaCgpQACBIADCCS3KKClIKClIKUgpSmgoKUgoKUgpSClKa0poKCAAgSgoKUgpTKgoKUgoKU7oKCgsqCgriClKaUgtKAgoKklIKmuIKCpIKUtIKUgoKCgoKUtIKUlJKClLSCtILo2oKCpoCUtoKCgsqCppSCuICCyIKCgriClLSCxoLGgraCpg==", "215-227:1")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/regalloc.go", "regalloc.cs", "AB9EgpSkpKSUpoKmggAIEoKClIKUgpSmgqaCgpQACBIADCCS3KKClIKClIKUgpSmgoKUgoKUgpSClKa0poKCAAgSgoKUgpTKgoKUgoKU7oKCgsqCgriClKaUgtKCgpSUgqa4goKkgpS0gpSCgoKCgpS0gpSUkoKUtIK0gujagoKmlKaCgoLKgqaUgriCuIKCgriClLSCxoLGgraCpg==", "215-227:1")]
 [assembly: GoPositionMap("internal/runtime/gc/internal/gen/simd.go", "simd.cs", "AAsWlLKCpoKmgoKCpqKCpqLclILKgoKmooKCpqKCgq7kgoKmtIKCprSCgu6UxIKmooKmooKmgqaCgoKmooKmtIKmooKmtIKmooKmtILulKKCgoKmgqaCgoKmooKmooKmooKUlO6UooKCgqaCpoKCgqaigqaigqaigpSUpqKClJQ=")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/val.go", "val.cs", "ACpMlIAACQ6UpKKCgoKCgpSmooKCpsKCgoKUgqaygoKCgqaCAAgO5oKmpJLu7KKClIKUpoKAgoLagg==")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/val.go", "val.cs", "ACpMlIAACQ6UpKKCgoKCgpSmooKCpsKCgoKUgqaygoKCgqaCAAgO5oKmpJLu7KKClIKUpoKCgsqC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.gc.@internal;

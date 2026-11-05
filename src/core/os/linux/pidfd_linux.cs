@@ -206,10 +206,8 @@ internal static error checkPidfd() {
         }
 
         // Check pidfd_send_signal works (should be able to send 0 to itself).
-        {
-            var errΔ1 = unix.PidFDSendSignal(fd, 0); if (errΔ1 != nil) {
-                return NewSyscallError(pidfdSendSignalˢ, errΔ1);
-            }
+        var errΔ1 = unix.PidFDSendSignal(fd, 0); if (errΔ1 != nil) {
+            return NewSyscallError(pidfdSendSignalˢ, errΔ1);
         }
 
         // Verify that clone(CLONE_PIDFD) works.
@@ -217,10 +215,8 @@ internal static error checkPidfd() {
         // This shouldn't be necessary since pidfd_open was added in Linux 5.3,
         // after CLONE_PIDFD in Linux 5.2, but some alternative Linux
         // implementations may not adhere to this ordering.
-        {
-            var errΔ2 = checkClonePidfd(); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = checkClonePidfd(); if (errΔ2 != nil) {
+            return errΔ2;
         }
 
         return default;

@@ -770,12 +770,10 @@ internal static (slice<byte> buf, bool park) readTrace0() {
             (buf, park) = (default, false); goto ᒐdone;
         }
         // Recycle the old buffer.
-        {
-            var bufΔ1 = Δtrace.reading; if (bufΔ1 != nil) {
-                bufΔ1.link = Δtrace.empty;
-                Δtrace.empty = bufΔ1;
-                Δtrace.reading = default;
-            }
+        var bufΔ1 = Δtrace.reading; if (bufΔ1 != nil) {
+            bufΔ1.link = Δtrace.empty;
+            Δtrace.empty = bufΔ1;
+            Δtrace.reading = default;
         }
         // Write trace header.
         if (!Δtrace.headerWritten) {

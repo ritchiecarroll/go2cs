@@ -108,10 +108,8 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
 
     // Read File Header
     array<byte> magic = new(8); /* SAIAMAG */
-    {
-        var (_, errΔ1) = sr.ReadAt(magic[..], 0); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = sr.ReadAt(magic[..], 0); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     var arch = @new<Archive>();
@@ -129,15 +127,11 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
     }}
 
     ref var fhdr = ref heap(new bigarFileHeader(), out var Ꮡfhdr);
-    {
-        var (_, errΔ2) = sr.Seek(0, io.SeekStart); if (errΔ2 != nil) {
-            return (default, errΔ2);
-        }
+    var (_, errΔ2) = sr.Seek(0, io.SeekStart); if (errΔ2 != nil) {
+        return (default, errΔ2);
     }
-    {
-        var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡfhdr); if (errΔ3 != nil) {
-            return (default, errΔ3);
-        }
+    var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡfhdr); if (errΔ3 != nil) {
+        return (default, errΔ3);
     }
 
     var (off, err) = parseDecimalBytes(fhdr.Flfstmoff[..]);
@@ -161,17 +155,13 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
         // The member header is normally 2 bytes larger. But it's easier
         // to read the name if the header is read without _ar_nam.
         // However, AIAFMAG must be read afterward.
-        {
-            var (_, errΔ4) = sr.Seek(off, io.SeekStart); if (errΔ4 != nil) {
-                return (default, errΔ4);
-            }
+        var (_, errΔ4) = sr.Seek(off, io.SeekStart); if (errΔ4 != nil) {
+            return (default, errΔ4);
         }
 
         ref var mhdr = ref heap(new bigarMemberHeader(), out var Ꮡmhdr);
-        {
-            var errΔ5 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡmhdr); if (errΔ5 != nil) {
-                return (default, errΔ5);
-            }
+        var errΔ5 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡmhdr); if (errΔ5 != nil) {
+            return (default, errΔ5);
         }
 
         var member = @new<Member>();
@@ -189,29 +179,23 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
             return (default, fmt.Errorf("error parsing name length in member header(%q); %v"u8, mhdr, errΔ6));
         }
         var name = new slice<byte>((nint)(namlen));
-        {
-            var errΔ7 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, name); if (errΔ7 != nil) {
-                return (default, errΔ7);
-            }
+        var errΔ7 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, name); if (errΔ7 != nil) {
+            return (default, errΔ7);
         }
         member.Name = (@string)name;
 
         var fileoff = off + (int64)AR_HSZ_BIG + namlen;
         if ((fileoff & 1) != 0) {
             fileoff++;
-            {
-                var (_, errΔ8) = sr.Seek(1, io.SeekCurrent); if (errΔ8 != nil) {
-                    return (default, errΔ8);
-                }
+            var (_, errΔ8) = sr.Seek(1, io.SeekCurrent); if (errΔ8 != nil) {
+                return (default, errΔ8);
             }
         }
 
         // Read AIAFMAG string
         ref var fmag = ref heap(new array<byte>(2), out var Ꮡfmag);
-        {
-            var errΔ9 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡfmag); if (errΔ9 != nil) {
-                return (default, errΔ9);
-            }
+        var errΔ9 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, Ꮡfmag); if (errΔ9 != nil) {
+            return (default, errΔ9);
         }
         if (((sstring)(fmag[..])) != AIAFMAG) {
             return (default, fmt.Errorf("AIAFMAG not found after member header"u8));

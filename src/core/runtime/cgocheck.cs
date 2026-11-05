@@ -145,10 +145,8 @@ internal static void cgoCheckTypedBlock(ж<_type> Ꮡtyp, @unsafe.Pointer src, u
     if (typ.PtrBytes <= off) {
         return;
     }
-    {
-        var ptrdataSize = typ.PtrBytes - off; if (size > ptrdataSize) {
-            size = ptrdataSize;
-        }
+    var ptrdataSize = typ.PtrBytes - off; if (size > ptrdataSize) {
+        size = ptrdataSize;
     }
 
     cgoCheckBits(src, getGCMask(Ꮡtyp), off, size);

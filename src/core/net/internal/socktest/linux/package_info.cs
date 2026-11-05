@@ -63,10 +63,10 @@ using static go.net.@internal.socktest_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("net/internal/socktest/switch.go", "switch.cs", "ABc0goKCqLKCgoKClIKosoKCgpSCAAYQkKaQppCkggAJFIIAEyyCyoKCgoKUABc0goKUAAsYgoKUqLKCgoI=")]
-[assembly: GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABMcgpSkpKQADQiCgpS0tLS0pICCpAAKBoKUpKSk")]
+[assembly: GoPositionMap("net/internal/socktest/switch_posix.go", "switch_posix.cs", "ABMcgpSkpKQADQiCgpS0tLS0pIKUAAoGgpSkpKQ=")]
 [assembly: GoPositionMap("net/internal/socktest/switch_unix.go", "switch_unix.cs", "AAsY0oKCkoKU2sKCgoI=")]
-[assembly: GoPositionMap("net/internal/socktest/sys_cloexec.go", "sys_cloexec.cs", "AAoYAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgg==")]
-[assembly: GoPositionMap("net/internal/socktest/sys_unix.go", "sys_unix.cs", "AAoY8pSCgoKUgoKUgoCCgpS2goKCgpSCgujigoKUgoKUgoKUgoCCtoKCgoKUgoLo4oKClIKClIKClIKAgraCgoKClILo4oKClIKClIKClIKAgraCgoKClILoAAgCgoKUgoKUgoKUgoCCgpS2goKCgpSCgujSgoKUgoKUgoKUgoKAgraClIKCgpQ=")]
+[assembly: GoPositionMap("net/internal/socktest/sys_cloexec.go", "sys_cloexec.cs", "AAoYAAgCgoKUgoKUgoKUgoKClKaCgoKClIKC")]
+[assembly: GoPositionMap("net/internal/socktest/sys_unix.go", "sys_unix.cs", "AAoY8pSCgoKUgoKUgoKClKaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClIKC6OKCgpSCgpSCgpSCgqaCgoKClILo4oKClIKClIKClIKCpoKCgoKUgugACAKCgpSCgpSCgpSCgoKUpoKCgoKUgoLo0oKClIKClIKClIKCgqaClIKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net.@internal;

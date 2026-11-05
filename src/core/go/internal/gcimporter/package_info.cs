@@ -70,9 +70,9 @@ using static go.go.@internal.gcimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoCCpIKClJSCgoKClLiAgsiSgpSClKaUpIKCgoKUlIKE", "62-67:1", "", "", "83:21")]
+[assembly: GoPositionMap("go/internal/gcimporter/gcimporter.go", "gcimporter.cs", "ABUs8oKCpoKUpoKUgoKUlIKCgoKUuIK4koKUgpSmlKSCgoKClJSChA==", "62-67:1", "", "", "79:21")]
 [assembly: GoPositionMap("go/internal/gcimporter/support.go", "support.cs", "ABAggoK4ogAPIO6CgoKmgpSCuKaCgoKCpoIAFyySgoKUgoKClA==", "64-69:1")]
-[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooCCtoKC7pSmgoKmtJSCgqqygqbGgIK2goKmooKktKSmgIK2lIKUqrKmgoKClKaygoKCgpSmgIK2goKClIKCpoCCtoKmooCkgramgoKCgpSmpoKkgqSkpKSkpKTIgoKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpqakgoKCgpSClIKmgoK4gIK2gpSClJKmlLaCgoKUgraCgoK2goKCtpSCgpSUyoCCgoKClIKCpoKCpoKCtpSCyIKCyKaklIKCgIK2goKmgoKCgoK4uKai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaAooCigKSCgq7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;134=NewDecoder/1/1/1;141=TempDecoder/1/1/1")]
+[assembly: GoPositionMap("go/internal/gcimporter/ureader.go", "ureader.cs", "ACVUkqriAA4elIKCgqamgoKUgqaUgqaCqJKCgqaGlIIAGzqC3ILcgqqygoK4goKCpqKmooKmgoLulKaCgqa0lIKCqrKCpsaCpoKCpqKCpLSkpoKmlIKUqrKmgoKClKaygoKCgpSmgqaCgoKUgoKmgqaCpqKkgramgoKCgpSmpoKkgqSkpKSkpKS4goKCgoKCgoKUgoKClKamgoKClKaigoKUgoKCgqaCpoKCAAkUlKaClIKClKaClIKCpqaClIKClIKCqrKUgqaClIKCpqakgoKCgpSClIKmgoK4gqaClIKUkqaUtoKCgpSCtoKCgraCgoK2lIKClJTKgoKCgpSCgqaCgqaCgqaUgsiCgsimpJSCgoKmgoKmgoKCgoK4uKai7oIABxCCgoKUgqaCggAOHoKigrimgoKClIKUgqaAooCigKSCgq7CgpTotqSCgoKUgg==", "100-102:1;483-485:1;638-642:1", "", "50=NumElems/1/3/11,NumElems/2/3/12,NumElems/3/3/13;134=NewDecoder/1/1/1;141=TempDecoder/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

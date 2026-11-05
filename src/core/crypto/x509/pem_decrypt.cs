@@ -220,10 +220,8 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
         return (default, errors.New(x509UnknownEncryptionˢ));
     }
     var iv = new slice<byte>(ciph.blockSize);
-    {
-        var (_, errΔ1) = io.ReadFull(rand, iv); if (errΔ1 != nil) {
-            return (default, errors.New("x509: cannot generate IV: "u8 + errΔ1.Error()));
-        }
+    var (_, errΔ1) = io.ReadFull(rand, iv); if (errΔ1 != nil) {
+        return (default, errors.New("x509: cannot generate IV: "u8 + errΔ1.Error()));
     }
     // The salt is the first 8 bytes of the initialization vector,
     // matching the key derivation in DecryptPEMBlock.

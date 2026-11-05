@@ -29,20 +29,16 @@ partial struct Element {
 
 // Next returns the next list element or nil.
 public static ж<Element> Next(this ref Element e) {
-    {
-        var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
-            return p;
-        }
+    var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
+        return p;
     }
     return default;
 }
 
 // Prev returns the previous list element or nil.
 public static ж<Element> Prev(this ref Element e) {
-    {
-        var p = e.prev; if (e.list != nil && p != e.list.Ꮡroot) {
-            return p;
-        }
+    var p = e.prev; if (e.list != nil && p != e.list.Ꮡroot) {
+        return p;
     }
     return default;
 }

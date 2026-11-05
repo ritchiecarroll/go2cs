@@ -33,10 +33,8 @@ partial interface ReadFileFS :
 public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (fsysΔ1, ok) = fsys._<ReadFileFS>(ᐧ); if (ok) {
-                return fsysΔ1.ReadFile(name);
-            }
+        var (fsysΔ1, ok) = fsys._<ReadFileFS>(ᐧ); if (ok) {
+            return fsysΔ1.ReadFile(name);
         }
 
         var (@file, err) = fsys.Open(name);
@@ -47,12 +45,10 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) {
         defer(() => fileʗ1.Close(), ref ᒐ);
 
         nint size = default;
-        {
-            var (info, errΔ1) = @file.Stat(); if (errΔ1 == nil) {
-                var size64 = info.Size();
-                if ((int64)(nint)size64 == size64) {
-                    size = (nint)size64;
-                }
+        var (info, errΔ1) = @file.Stat(); if (errΔ1 == nil) {
+            var size64 = info.Size();
+            if ((int64)(nint)size64 == size64) {
+                size = (nint)size64;
             }
         }
 

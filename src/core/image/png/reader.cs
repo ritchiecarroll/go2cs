@@ -152,10 +152,8 @@ internal static error parseIHDR(this ref decoder d, uint32 length) {
     if (length != 13) {
         return ((FormatError)(@string)badIhdrLengthˢ);
     }
-    {
-        var (_, err) = io.ReadFull(d.r, d.tmp[..13]); if (err != nil) {
-            return err;
-        }
+    var (_, err) = io.ReadFull(d.r, d.tmp[..13]); if (err != nil) {
+        return err;
     }
     d.crc.Write(d.tmp[..13]);
     if (d.tmp[10] != 0) {
@@ -413,17 +411,13 @@ internal static (nint, error) Read(this ref decoder d, slice<byte> p) {
     }
     while (d.idatLength == 0) {
         // We have exhausted an IDAT chunk. Verify the checksum of that chunk.
-        {
-            var errΔ1 = d.verifyChecksum(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = d.verifyChecksum(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         // Read the length and chunk type of the next chunk, and check that
         // it is an IDAT chunk.
-        {
-            var (_, errΔ2) = io.ReadFull(d.r, d.tmp[..8]); if (errΔ2 != nil) {
-                return (0, errΔ2);
-            }
+        var (_, errΔ2) = io.ReadFull(d.r, d.tmp[..8]); if (errΔ2 != nil) {
+            return (0, errΔ2);
         }
         d.idatLength = binary.BigEndian.Uint32(d.tmp[..4]);
         if (((sstring)(d.tmp[4..8])) != "IDAT"u8) {
@@ -1137,10 +1131,8 @@ internal static ref readonly @string invalidChecksumˢ => ref invalidChecksumˢ�
 private static readonly @string invalidChecksumˢᵇ = "invalid checksum"u8;
 
 internal static error verifyChecksum(this ref decoder d) {
-    {
-        var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != nil) {
-            return err;
-        }
+    var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != nil) {
+        return err;
     }
     if (binary.BigEndian.Uint32(d.tmp[..4]) != d.crc.Sum32()) {
         return ((FormatError)(@string)invalidChecksumˢ);
@@ -1179,13 +1171,11 @@ public static (image.Image, error) Decode(io.Reader r) {
         }
     }
     while (d.stage != dsSeenIEND) {
-        {
-            var err = d.parseChunk(false); if (err != nil) {
-                if (AreEqual(err, io.EOF)) {
-                    err = io.ErrUnexpectedEOF;
-                }
-                return (default, err);
+        var err = d.parseChunk(false); if (err != nil) {
+            if (AreEqual(err, io.EOF)) {
+                err = io.ErrUnexpectedEOF;
             }
+            return (default, err);
         }
     }
     return (d.img, default);
@@ -1208,13 +1198,11 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
     }
 
     for (;;) {
-        {
-            var err = d.parseChunk(true); if (err != nil) {
-                if (AreEqual(err, io.EOF)) {
-                    err = io.ErrUnexpectedEOF;
-                }
-                return (new image.Config(), err);
+        var err = d.parseChunk(true); if (err != nil) {
+            if (AreEqual(err, io.EOF)) {
+                err = io.ErrUnexpectedEOF;
             }
+            return (new image.Config(), err);
         }
 
         if (cbPaletted(d.cb)) {

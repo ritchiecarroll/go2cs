@@ -192,10 +192,8 @@ internal static (byte x, error err) readByte(this ref decoder d) {
     error err = default;
 
     while (d.bytes.i == d.bytes.j) {
-        {
-            err = d.fill(); if (err != nil) {
-                return (0, err);
-            }
+        err = d.fill(); if (err != nil) {
+            return (0, err);
         }
     }
     x = d.bytes.buf[d.bytes.i];
@@ -269,10 +267,8 @@ internal static error readFull(this ref decoder d, slice<byte> p) {
         if (len(p) == 0) {
             break;
         }
-        {
-            var err = d.fill(); if (err != nil) {
-                return err;
-            }
+        var err = d.fill(); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -298,10 +294,8 @@ internal static error ignore(this ref decoder d, nint n) {
         if (n == 0) {
             break;
         }
-        {
-            var err = d.fill(); if (err != nil) {
-                return err;
-            }
+        var err = d.fill(); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -344,10 +338,8 @@ internal static error processSOF(this ref decoder d, nint n) {
     default: {
         return ((UnsupportedError)(@string)numberOfComponentsˢ);
     }}
-    {
-        var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
-            return err;
-        }
+    var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
+        return err;
     }
     // We only support 8-bit precision.
     if (d.tmp[0] != 8) {
@@ -497,10 +489,8 @@ loop:
                 goto break_loop;
             }
             n -= blockSize;
-            {
-                var errΔ3 = d.readFull(d.tmp[..(int)(blockSize)]); if (errΔ3 != nil) {
-                    return errΔ3;
-                }
+            var errΔ3 = d.readFull(d.tmp[..(int)(blockSize)]); if (errΔ3 != nil) {
+                return errΔ3;
             }
             foreach (var i in range(d.quant[tq])) {
                 d.quant[tq][i] = (int32)d.tmp[i];
@@ -512,10 +502,8 @@ loop:
                 goto break_loop;
             }
             n -= 2 * blockSize;
-            {
-                var errΔ4 = d.readFull(d.tmp[..(int)(2 * blockSize)]); if (errΔ4 != nil) {
-                    return errΔ4;
-                }
+            var errΔ4 = d.readFull(d.tmp[..(int)(2 * blockSize)]); if (errΔ4 != nil) {
+                return errΔ4;
             }
             foreach (var i in range(d.quant[tq])) {
                 d.quant[tq][i] = (int32)d.tmp[2 * i] << 8 | (int32)d.tmp[2 * i + 1];
@@ -540,10 +528,8 @@ internal static error processDRI(this ref decoder d, nint n) {
     if (n != 2) {
         return ((FormatError)(@string)driHasWrongLengthˢ);
     }
-    {
-        var err = d.readFull(d.tmp[..2]); if (err != nil) {
-            return err;
-        }
+    var err = d.readFull(d.tmp[..2]); if (err != nil) {
+        return err;
     }
     d.ri = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1];
     return default;
@@ -553,10 +539,8 @@ internal static error processApp0Marker(this ref decoder d, nint n) {
     if (n < 5) {
         return d.ignore(n);
     }
-    {
-        var err = d.readFull(d.tmp[..5]); if (err != nil) {
-            return err;
-        }
+    var err = d.readFull(d.tmp[..5]); if (err != nil) {
+        return err;
     }
     n -= 5;
 
@@ -572,10 +556,8 @@ internal static error processApp14Marker(this ref decoder d, nint n) {
     if (n < 12) {
         return d.ignore(n);
     }
-    {
-        var err = d.readFull(d.tmp[..12]); if (err != nil) {
-            return err;
-        }
+    var err = d.readFull(d.tmp[..12]); if (err != nil) {
+        return err;
     }
     n -= 12;
 
@@ -675,10 +657,8 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
 
         // Read the 16-bit length of the segment. The value includes the 2 bytes for the
         // length itself, so we subtract 2 to get the number of remaining bytes.
-        {
-            err = d.readFull(d.tmp[..2]); if (err != nil) {
-                return (default, err);
-            }
+        err = d.readFull(d.tmp[..2]); if (err != nil) {
+            return (default, err);
         }
         nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
@@ -750,10 +730,8 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
     }
 
     if (d.progressive) {
-        {
-            var err = d.reconstructProgressiveImage(); if (err != nil) {
-                return (default, err);
-            }
+        var err = d.reconstructProgressiveImage(); if (err != nil) {
+            return (default, err);
         }
     }
     if (d.img1 != nil) {
@@ -892,10 +870,8 @@ private static readonly @string missingSofMarkerˢᵇ = "missing SOF marker"u8;
 // decoding the entire image.
 public static (image.Config, error) DecodeConfig(io.Reader r) {
     decoder d = new();
-    {
-        var (_, err) = d.decode(r, true); if (err != nil) {
-            return (new image.Config(), err);
-        }
+    var (_, err) = d.decode(r, true); if (err != nil) {
+        return (new image.Config(), err);
     }
     switch (d.nComp) {
     case 1: {

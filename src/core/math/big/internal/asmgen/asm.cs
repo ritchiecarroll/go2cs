@@ -150,18 +150,16 @@ public static ΔReg Reg(this ж<Asm> Ꮡa) {
 public static ΔReg RegHint(this ж<Asm> Ꮡa, Hint hint) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    {
-        @string name = Ꮡa.hint(hint); if (name != ""u8) {
-            nint i = slices.Index(a.Arch.regs, name);
-            if (i < 0) {
-                return new ΔReg(name);
-            }
-            if ((a.regavail & (((uint64)1).Lsh((int64)(i)))) == 0) {
-                Ꮡa.Fatalf("hint for already allocated register %s", name);
-            }
-            a.regavail &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((int64)(i))));
+    @string name = Ꮡa.hint(hint); if (name != ""u8) {
+        nint i = slices.Index(a.Arch.regs, name);
+        if (i < 0) {
             return new ΔReg(name);
         }
+        if ((a.regavail & (((uint64)1).Lsh((int64)(i)))) == 0) {
+            Ꮡa.Fatalf("hint for already allocated register %s", name);
+        }
+        a.regavail &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((int64)(i))));
+        return new ΔReg(name);
     }
     return Ꮡa.Reg();
 }
@@ -397,10 +395,8 @@ public static ΔReg LshReg(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src) {
 public static void Lsh(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    {
-        @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
-            Ꮡa.Fatalf("shift count not in %s", need);
-        }
+    @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
+        Ꮡa.Fatalf("shift count not in %s", need);
     }
     if (a.HasRegShift()) {
         Ꮡa.Mov(Ꮡa.LshReg(shift, src), dst);
@@ -417,10 +413,8 @@ public static void LshWide(this ж<Asm> Ꮡa, ΔReg shift, ΔReg adj, ΔReg src,
     if (a.Arch.lshd == ""u8) {
         Ꮡa.Fatalf("no lshwide on %s", a.Arch.Name);
     }
-    {
-        @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
-            Ꮡa.Fatalf("shift count not in %s", need);
-        }
+    @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
+        Ꮡa.Fatalf("shift count not in %s", need);
     }
     Ꮡa.op3(fmt.Sprintf("%s %s,"u8, a.Arch.lshd, shift), adj, src, dst);
 }
@@ -441,10 +435,8 @@ public static ΔReg RshReg(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src) {
 public static void Rsh(this ж<Asm> Ꮡa, ΔReg shift, ΔReg src, ΔReg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    {
-        @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
-            Ꮡa.Fatalf("shift count not in %s", need);
-        }
+    @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
+        Ꮡa.Fatalf("shift count not in %s", need);
     }
     if (a.HasRegShift()) {
         Ꮡa.Mov(Ꮡa.RshReg(shift, src), dst);
@@ -461,10 +453,8 @@ public static void RshWide(this ж<Asm> Ꮡa, ΔReg shift, ΔReg adj, ΔReg src,
     if (a.Arch.lshd == ""u8) {
         Ꮡa.Fatalf("no rshwide on %s", a.Arch.Name);
     }
-    {
-        @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
-            Ꮡa.Fatalf("shift count not in %s", need);
-        }
+    @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
+        Ꮡa.Fatalf("shift count not in %s", need);
     }
     Ꮡa.op3(fmt.Sprintf("%s %s,"u8, a.Arch.rshd, shift), adj, src, dst);
 }
@@ -852,15 +842,13 @@ public static void SaveCarry(this ж<Asm> Ꮡa, ΔReg dst) {
     // Note: As implemented here, the carry flag is actually left unmodified,
     // but we say it is in an undefined state in case that changes in the future.
     // (The SmashCarry could be changed to SetCarry if so.)
-    {
-        var cr = a.Carry(); if (cr.Valid()) {
-            if (cr == dst) {
-                return; // avoid EOL
-            }
-            Ꮡa.Mov(cr, dst);
-        } else {
-            Ꮡa.Sub(dst, dst, dst, (ΔCarry)(UseCarry | SmashCarry));
+    var cr = a.Carry(); if (cr.Valid()) {
+        if (cr == dst) {
+            return; // avoid EOL
         }
+        Ꮡa.Mov(cr, dst);
+    } else {
+        Ꮡa.Sub(dst, dst, dst, (ΔCarry)(UseCarry | SmashCarry));
     }
     Ꮡa.EOL(saveCarryˢ);
 }
@@ -874,21 +862,19 @@ private static readonly @string restoreCarryˢᵇ = "restore carry"u8;
 public static void RestoreCarry(this ж<Asm> Ꮡa, ΔReg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    {
-        var cr = a.Carry(); if (cr.Valid()) {
-            if (cr == src) {
-                return; // avoid EOL
-            }
-            Ꮡa.Mov(src, cr);
-        } else if (a.Arch.subCarryIsBorrow) {
-            Ꮡa.Add(src, src, src, SetCarry);
-        } else {
-            // SaveCarry saved the sub carry flag with an encoding of 0, 1 -> 0, ^0.
-            // Restore it by subtracting from a value less than ^0, which will carry if src != 0.
-            // If there is no zero register, the SP register is guaranteed to be less than ^0.
-            // (This may seem too clever, but on GOARCH=arm we have no other good options.)
-            Ꮡa.Sub(src, cmp.Or(a.ZR(), new ΔReg("SP")), src, SetCarry);
+    var cr = a.Carry(); if (cr.Valid()) {
+        if (cr == src) {
+            return; // avoid EOL
         }
+        Ꮡa.Mov(src, cr);
+    } else if (a.Arch.subCarryIsBorrow) {
+        Ꮡa.Add(src, src, src, SetCarry);
+    } else {
+        // SaveCarry saved the sub carry flag with an encoding of 0, 1 -> 0, ^0.
+        // Restore it by subtracting from a value less than ^0, which will carry if src != 0.
+        // If there is no zero register, the SP register is guaranteed to be less than ^0.
+        // (This may seem too clever, but on GOARCH=arm we have no other good options.)
+        Ꮡa.Sub(src, cmp.Or(a.ZR(), new ΔReg("SP")), src, SetCarry);
     }
     Ꮡa.EOL(restoreCarryˢ);
 }

@@ -42,11 +42,9 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
         typ = Unalias(typ);
 
         if (check.conf._Trace) {
-            {
-                var (t, _) = typ._<ж<Named>>(ᐧ); if (t != nil && t.obj != nil) {
-                    /* obj should always exist but be conservative */
-                    pos = t.obj.pos;
-                }
+            var (t, _) = typ._<ж<Named>>(ᐧ); if (t != nil && t.obj != nil) {
+                /* obj should always exist but be conservative */
+                pos = t.obj.pos;
             }
             check.indent++;
             Ꮡcheck.trace(pos, validTypeSNestVPathVˢ, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
@@ -175,29 +173,27 @@ internal static bool validType0(this ж<Checker> Ꮡcheck, tokenꓸPos pos, ΔTy
             // A type parameter stands for the type (argument) it was instantiated with.
             // Check the corresponding type argument for validity if we are in an
             // instantiated type.
-            {
-                nint d = len(nest) - 1; if (d >= 0) {
-                    var inst = nest[d]; // the type instance
-                    // Find the corresponding type argument for the type parameter
-                    // and proceed with checking that type argument.
-                    foreach (var (i, tparam) in inst.TypeParams().list()) {
-                        // The type parameter and type argument lists should
-                        // match in length but be careful in case of errors.
-                        if (t == tparam && i < inst.TypeArgs().Len()) {
-                            var targ = inst.TypeArgs().At(i);
-                            // The type argument must be valid in the enclosing
-                            // type (where inst was instantiated), hence we must
-                            // check targ's validity in the type nest excluding
-                            // the current (instantiated) type (see the example
-                            // at the end of this file).
-                            // For error reporting we keep the full path.
-                            var res = Ꮡcheck.validType0(pos, targ, nest.slice(0, d), path);
-                            // The check.validType0 call with nest[:d] may have
-                            // overwritten the entry at the current depth d.
-                            // Restore the entry (was issue go.dev/issue/66323).
-                            nest[d] = inst;
-                            return res;
-                        }
+            nint d = len(nest) - 1; if (d >= 0) {
+                var inst = nest[d]; // the type instance
+                // Find the corresponding type argument for the type parameter
+                // and proceed with checking that type argument.
+                foreach (var (i, tparam) in inst.TypeParams().list()) {
+                    // The type parameter and type argument lists should
+                    // match in length but be careful in case of errors.
+                    if (t == tparam && i < inst.TypeArgs().Len()) {
+                        var targ = inst.TypeArgs().At(i);
+                        // The type argument must be valid in the enclosing
+                        // type (where inst was instantiated), hence we must
+                        // check targ's validity in the type nest excluding
+                        // the current (instantiated) type (see the example
+                        // at the end of this file).
+                        // For error reporting we keep the full path.
+                        var res = Ꮡcheck.validType0(pos, targ, nest.slice(0, d), path);
+                        // The check.validType0 call with nest[:d] may have
+                        // overwritten the entry at the current depth d.
+                        // Restore the entry (was issue go.dev/issue/66323).
+                        nest[d] = inst;
+                        return res;
                     }
                 }
             }

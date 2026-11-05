@@ -73,10 +73,8 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
     }
 
     if (Ꮡm == nil || m.Used() == 0) {
-        {
-            var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
-                throw panic(err); // see issue 23734
-            }
+        var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
+            throw panic(err); // see issue 23734
         }
         return @unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0));
     }
@@ -153,10 +151,8 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
     }
 
     if (Ꮡm == nil || m.Used() == 0) {
-        {
-            var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
-                throw panic(err); // see issue 23734
-            }
+        var err = mapKeyError(Ꮡtyp, key); if (err != nil) {
+            throw panic(err); // see issue 23734
         }
         return (@unsafe.Pointer.FromPinnedBox(ᏑzeroVal.at<byte>(0)), false);
     }

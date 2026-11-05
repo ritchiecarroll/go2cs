@@ -79,11 +79,9 @@ internal static bool sigsend(uint32 s) {
     Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(1);
     // We are running in the signal handler; defer is not available.
 
-    {
-        var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32))); if ((w & bit) == 0) {
-            Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
-            return false;
-        }
+    var w = atomic.Load(Ꮡsig.at(sigᴛ1.Ꮡwanted, (ulong)(s / 32))); if ((w & bit) == 0) {
+        Ꮡsig.of(sigᴛ1.Ꮡdelivering).Add(-1);
+        return false;
     }
 
     // Add signal to outgoing queue.

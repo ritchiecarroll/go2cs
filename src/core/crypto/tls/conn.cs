@@ -191,12 +191,10 @@ internal static bool Temporary(this ref permanentError e) {
 }
 
 internal static error setErrorLocked(this ref halfConn hc, error err) {
-    {
-        var (e, ok) = err._<netꓸError>(ᐧ); if (ok) {
-            hc.err = new permanentErrorжerror(Ꮡ(new permanentError(err: e)));
-        } else {
-            hc.err = err;
-        }
+    var (e, ok) = err._<netꓸError>(ᐧ); if (ok) {
+        hc.err = new permanentErrorжerror(Ꮡ(new permanentError(err: e)));
+    } else {
+        hc.err = err;
     }
     return hc.err;
 }
@@ -485,13 +483,11 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     slice<byte> head = default;
     slice<byte> tail = default;
 
-    {
-        nint total = len(@in) + n; if (cap(@in) >= total) {
-            head = @in.slice(0, total);
-        } else {
-            head = new slice<byte>(total);
-            copy(head, @in);
-        }
+    nint total = len(@in) + n; if (cap(@in) >= total) {
+        head = @in.slice(0, total);
+    } else {
+        head = new slice<byte>(total);
+        copy(head, @in);
     }
     tail = head.slice(len(@in));
     return (head, tail);
@@ -505,28 +501,22 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
     }
 
     slice<byte> explicitNonce = default;
-    {
-        nint explicitNonceLen = hc.explicitNonceLen(); if (explicitNonceLen > 0) {
-            (record, explicitNonce) = sliceForAppend(record, explicitNonceLen);
-            {
-                var (_, isCBC) = hc.cipher._<cbcMode>(ᐧ); if (!isCBC && explicitNonceLen < 16) {
-                    // The AES-GCM construction in TLS has an explicit nonce so that the
-                    // nonce can be random. However, the nonce is only 8 bytes which is
-                    // too small for a secure, random nonce. Therefore we use the
-                    // sequence number as the nonce. The 3DES-CBC construction also has
-                    // an 8 bytes nonce but its nonces must be unpredictable (see RFC
-                    // 5246, Appendix F.3), forcing us to use randomness. That's not
-                    // 3DES' biggest problem anyway because the birthday bound on block
-                    // collision is reached first due to its similarly small block size
-                    // (see the Sweet32 attack).
-                    copy(explicitNonce, hc.seq[..]);
-                } else {
-                    {
-                        var (_, err) = io.ReadFull(rand, explicitNonce); if (err != nil) {
-                            return (default, err);
-                        }
-                    }
-                }
+    nint explicitNonceLen = hc.explicitNonceLen(); if (explicitNonceLen > 0) {
+        (record, explicitNonce) = sliceForAppend(record, explicitNonceLen);
+        var (_, isCBC) = hc.cipher._<cbcMode>(ᐧ); if (!isCBC && explicitNonceLen < 16) {
+            // The AES-GCM construction in TLS has an explicit nonce so that the
+            // nonce can be random. However, the nonce is only 8 bytes which is
+            // too small for a secure, random nonce. Therefore we use the
+            // sequence number as the nonce. The 3DES-CBC construction also has
+            // an 8 bytes nonce but its nonces must be unpredictable (see RFC
+            // 5246, Appendix F.3), forcing us to use randomness. That's not
+            // 3DES' biggest problem anyway because the birthday bound on block
+            // collision is reached first due to its similarly small block size
+            // (see the Sweet32 attack).
+            copy(explicitNonce, hc.seq[..]);
+        } else {
+            var (_, err) = io.ReadFull(rand, explicitNonce); if (err != nil) {
+                return (default, err);
             }
         }
     }
@@ -678,21 +668,17 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
     }
 
     // Read header, payload.
-    {
-        var errΔ1 = c.readFromUntil(new net_ConnᴠReader(c.conn), recordHeaderLen); if (errΔ1 != nil) {
-            // RFC 8446, Section 6.1 suggests that EOF without an alertCloseNotify
-            // is an error, but popular web sites seem to do this, so we accept it
-            // if and only if at the record boundary.
-            if (AreEqual(errΔ1, io.ErrUnexpectedEOF) && c.rawInput.Len() == 0) {
-                errΔ1 = io.EOF;
-            }
-            {
-                var (e, ok) = errΔ1._<netꓸError>(ᐧ); if (!ok || !e.Temporary()) {
-                    c.@in.setErrorLocked(errΔ1);
-                }
-            }
-            return errΔ1;
+    var errΔ1 = c.readFromUntil(new net_ConnᴠReader(c.conn), recordHeaderLen); if (errΔ1 != nil) {
+        // RFC 8446, Section 6.1 suggests that EOF without an alertCloseNotify
+        // is an error, but popular web sites seem to do this, so we accept it
+        // if and only if at the record boundary.
+        if (AreEqual(errΔ1, io.ErrUnexpectedEOF) && c.rawInput.Len() == 0) {
+            errΔ1 = io.EOF;
         }
+        var (e, ok) = errΔ1._<netꓸError>(ᐧ); if (!ok || !e.Temporary()) {
+            c.@in.setErrorLocked(errΔ1);
+        }
+        return errΔ1;
     }
     var hdr = c.rawInput.Bytes()[..(int)(recordHeaderLen)];
     var typ = (recordType)hdr[0];
@@ -733,15 +719,11 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         @string msg = fmt.Sprintf("oversized record received with length %d"u8, n);
         return c.@in.setErrorLocked(c.newRecordHeaderError(default, msg));
     }
-    {
-        var errΔ2 = c.readFromUntil(new net_ConnᴠReader(c.conn), (nint)recordHeaderLen + n); if (errΔ2 != nil) {
-            {
-                var (e, ok) = errΔ2._<netꓸError>(ᐧ); if (!ok || !e.Temporary()) {
-                    c.@in.setErrorLocked(errΔ2);
-                }
-            }
-            return errΔ2;
+    var errΔ2 = c.readFromUntil(new net_ConnᴠReader(c.conn), (nint)recordHeaderLen + n); if (errΔ2 != nil) {
+        var (e, ok) = errΔ2._<netꓸError>(ᐧ); if (!ok || !e.Temporary()) {
+            c.@in.setErrorLocked(errΔ2);
         }
+        return errΔ2;
     }
 
     // Process message.
@@ -827,10 +809,8 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         if (!expectChangeCipherSpec) {
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
         }
-        {
-            var errΔ4 = c.@in.changeCipherSpec(); if (errΔ4 != nil) {
-                return c.@in.setErrorLocked(Ꮡc.sendAlert(errΔ4._<alert>()));
-            }
+        var errΔ4 = c.@in.changeCipherSpec(); if (errΔ4 != nil) {
+            return c.@in.setErrorLocked(Ꮡc.sendAlert(errΔ4._<alert>()));
         }
         break;
     }
@@ -1085,10 +1065,8 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
             }
             c.quicWriteCryptoData(c.@out.level, data);
             if (!c.buffering) {
-                {
-                    var (_, err) = c.flush(); if (err != nil) {
-                        return (0, err);
-                    }
+                var (_, err) = c.flush(); if (err != nil) {
+                    return (0, err);
                 }
             }
             return (len(data), default);
@@ -1110,10 +1088,8 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
         nint n = default;
         while (len(data) > 0) {
             nint m = len(data);
-            {
-                nint maxPayload = c.maxPayloadSizeForWrite(typ); if (m > maxPayload) {
-                    m = maxPayload;
-                }
+            nint maxPayload = c.maxPayloadSizeForWrite(typ); if (m > maxPayload) {
+                m = maxPayload;
             }
 
             (_, outBuf) = sliceForAppend(outBuf[..0], recordHeaderLen);
@@ -1138,20 +1114,16 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
             if (err != nil) {
                 return (n, err);
             }
-            {
-                var (_, errΔ1) = c.write(outBuf); if (errΔ1 != nil) {
-                    return (n, errΔ1);
-                }
+            var (_, errΔ1) = c.write(outBuf); if (errΔ1 != nil) {
+                return (n, errΔ1);
             }
             n += m;
             data = data.slice(m);
         }
 
         if (typ == recordTypeChangeCipherSpec && c.vers != VersionTLS13) {
-            {
-                var err = c.@out.changeCipherSpec(); if (err != nil) {
-                    return (n, Ꮡc.sendAlertLocked(err._<alert>()));
-                }
+            var err = c.@out.changeCipherSpec(); if (err != nil) {
+                return (n, Ꮡc.sendAlertLocked(err._<alert>()));
             }
         }
 
@@ -1208,10 +1180,8 @@ internal static error readHandshakeBytes(this ж<Conn> Ꮡc, nint n) {
         return Ꮡc.quicReadHandshakeBytes(n);
     }
     while (c.hand.Len() < n) {
-        {
-            var err = Ꮡc.readRecord(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡc.readRecord(); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -1381,19 +1351,15 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
         }
         defer(Ꮡc.ᏑactiveCall.Add, (int32)(-2), ref ᒐ);
 
-        {
-            var errΔ1 = Ꮡc.Handshake(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡc.Handshake(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
 
         Ꮡc.Ꮡout.of(halfConn.ᏑMutex).Lock();
         defer(Ꮡc.Ꮡout.of(halfConn.ᏑMutex).Unlock, ref ᒐ);
 
-        {
-            var errΔ2 = c.@out.err; if (errΔ2 != nil) {
-                return (0, errΔ2);
-            }
+        var errΔ2 = c.@out.err; if (errΔ2 != nil) {
+            return (0, errΔ2);
         }
 
         if (!Ꮡc.ᏑisHandshakeComplete.Load()) {
@@ -1415,14 +1381,12 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
 
         nint m = default;
         if (len(b) > 1 && c.vers == VersionTLS10) {
-            {
-                var (_, ok) = c.@out.cipher._<cipher.BlockMode>(ᐧ); if (ok) {
-                    var (nΔ1, errΔ3) = Ꮡc.writeRecordLocked(recordTypeApplicationData, b[..1]);
-                    if (errΔ3 != nil) {
-                        return (nΔ1, c.@out.setErrorLocked(errΔ3));
-                    }
-                    (m, b) = (1, b[1..]);
+            var (_, ok) = c.@out.cipher._<cipher.BlockMode>(ᐧ); if (ok) {
+                var (nΔ1, errΔ3) = Ꮡc.writeRecordLocked(recordTypeApplicationData, b[..1]);
+                if (errΔ3 != nil) {
+                    return (nΔ1, c.@out.setErrorLocked(errΔ3));
                 }
+                (m, b) = (1, b[1..]);
             }
         }
 
@@ -1488,10 +1452,8 @@ internal static error handleRenegotiation(this ж<Conn> Ꮡc) {
         ᒐd1 = true;
 
         Ꮡc.ᏑisHandshakeComplete.Store(false);
-        {
-            c.handshakeErr = Ꮡc.clientHandshake(context.Background()); if (c.handshakeErr == nil) {
-                c.handshakes++;
-            }
+        c.handshakeErr = Ꮡc.clientHandshake(context.Background()); if (c.handshakeErr == nil) {
+            c.handshakes++;
         }
         return c.handshakeErr;
     }
@@ -1624,10 +1586,8 @@ public static (nint, error) Read(this ж<Conn> Ꮡc, slice<byte> b) {
                 }
             }
             while (c.hand.Len() > 0) {
-                {
-                    var err = Ꮡc.handlePostHandshakeMessage(); if (err != nil) {
-                        return (0, err);
-                    }
+                var err = Ꮡc.handlePostHandshakeMessage(); if (err != nil) {
+                    return (0, err);
                 }
             }
         }
@@ -1642,10 +1602,8 @@ public static (nint, error) Read(this ж<Conn> Ꮡc, slice<byte> b) {
         // have already tried to reuse the HTTP connection for a new request.
         // See https://golang.org/cl/76400046 and https://golang.org/issue/3514
         if (n != 0 && c.input.Len() == 0 && c.rawInput.Len() > 0 && ((recordType)c.rawInput.Bytes()[0]) == recordTypeAlert) {
-            {
-                var err = Ꮡc.readRecord(); if (err != nil) {
-                    return (n, err); // will be io.EOF on closeNotify
-                }
+            var err = Ꮡc.readRecord(); if (err != nil) {
+                return (n, err); // will be io.EOF on closeNotify
             }
         }
 
@@ -1682,10 +1640,8 @@ public static error Close(this ж<Conn> Ꮡc) {
 
     error alertErr = default;
     if (Ꮡc.ᏑisHandshakeComplete.Load()) {
-        {
-            var err = Ꮡc.closeNotify(); if (err != nil) {
-                alertErr = fmt.Errorf("tls: failed to send closeNotify alert (but connection was closed anyway): %w"u8, err);
-            }
+        var err = Ꮡc.closeNotify(); if (err != nil) {
+            alertErr = fmt.Errorf("tls: failed to send closeNotify alert (but connection was closed anyway): %w"u8, err);
         }
     }
 
@@ -1844,10 +1800,8 @@ internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Conte
                 // Provide the 1-RTT read secret now that the handshake is complete.
                 // The QUIC layer MUST NOT decrypt 1-RTT packets prior to completing
                 // the handshake (RFC 9001, Section 5.7).
-                {
-                    var err = Ꮡc.quicSetReadSecret(QUICEncryptionLevelApplication, c.cipherSuite, c.@in.trafficSecret); if (err != nil) {
-                        ret = err; goto ᒐdone;
-                    }
+                var err = Ꮡc.quicSetReadSecret(QUICEncryptionLevelApplication, c.cipherSuite, c.@in.trafficSecret); if (err != nil) {
+                    ret = err; goto ᒐdone;
                 }
             } else {
                 Ꮡc.Ꮡout.of(halfConn.ᏑMutex).Lock();

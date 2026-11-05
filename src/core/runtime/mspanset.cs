@@ -341,10 +341,8 @@ partial struct spanSetBlockAlloc {
 // alloc tries to grab a spanSetBlock out of the pool, and if it fails
 // persistentallocs a new one and returns it.
 internal static ж<spanSetBlock> alloc(this ж<spanSetBlockAlloc> Ꮡp) {
-    {
-        var s = (ж<spanSetBlock>)(uintptr)(Ꮡp.Ꮡstack.pop()); if (s != nil) {
-            return s;
-        }
+    var s = (ж<spanSetBlock>)(uintptr)(Ꮡp.Ꮡstack.pop()); if (s != nil) {
+        return s;
     }
     return (ж<spanSetBlock>)(uintptr)(persistentalloc(/* unsafe.Sizeof(spanSetBlock{}) */ (uintptr)4608, builtin.max(cpu.CacheLineSize, (uintptr)(tagAlign)), Ꮡmemstats.ᏑgcMiscSys));
 }

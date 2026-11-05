@@ -9,10 +9,8 @@ using syscall = syscall_package;
 partial class net_package {
 
 internal static bool isConnError(error err) {
-    {
-        var (se, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
-            return se == syscall.ECONNRESET || se == syscall.ECONNABORTED;
-        }
+    var (se, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
+        return se == syscall.ECONNRESET || se == syscall.ECONNABORTED;
     }
     return false;
 }

@@ -34,10 +34,8 @@ public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig co
                 return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
             }
         }
-    } else {
-        var err = setKeepAliveIdleAndInterval(c.fd, config.Idle, config.Interval); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    } else if (setKeepAliveIdleAndInterval(c.fd, config.Idle, config.Interval) is var err && err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     {
         var err = setKeepAliveCount(c.fd, config.Count); if (err != nil) {

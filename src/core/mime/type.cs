@@ -47,10 +47,8 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
                 throw panic(err);
             }
             slice<@string> exts = default;
-            {
-                var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
-                    exts = ei._<slice<@string>>();
-                }
+            var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
+                exts = ei._<slice<@string>>();
             }
             Ꮡextensions.Store(justType, append(exts, k));
         }
@@ -144,13 +142,11 @@ internal static Action testInitMime;
 internal static Action osInitMime;
 
 internal static void initMime() {
-    {
-        var fn = testInitMime; if (fn != nil) {
-            fn();
-        } else {
-            setMimeTypes(builtinTypesLower, builtinTypesLower);
-            osInitMime();
-        }
+    var fn = testInitMime; if (fn != nil) {
+        fn();
+    } else {
+        setMimeTypes(builtinTypesLower, builtinTypesLower);
+        osInitMime();
     }
 }
 
@@ -180,10 +176,8 @@ public static @string TypeByExtension(@string ext) {
     Ꮡonce.Do(initMime);
 
     // Case-sensitive lookup.
-    {
-        var (v, ok) = ᏑmimeTypes.Load(ext); if (ok) {
-            return v._<@string>();
-        }
+    var (v, ok) = ᏑmimeTypes.Load(ext); if (ok) {
+        return v._<@string>();
     }
 
     // Case-insensitive lookup.
@@ -280,10 +274,8 @@ internal static error setExtensionType(@string extension, @string mimeType) {
         ᏑextensionsMu.Lock();
         defer(ᏑextensionsMu.Unlock, ref ᒐ);
         slice<@string> exts = default;
-        {
-            var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
-                exts = ei._<slice<@string>>();
-            }
+        var (ei, ok) = Ꮡextensions.Load(justType); if (ok) {
+            exts = ei._<slice<@string>>();
         }
         foreach (var (_, v) in exts) {
             if (v == extLower) {

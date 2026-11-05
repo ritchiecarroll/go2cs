@@ -272,10 +272,8 @@ internal static ΔClass classifyPairContent(this ref bracketPairer p, bracketPai
 // Pair. Return R or L if strong type found, otherwise ON.
 internal static ΔClass classBeforePair(this ref bracketPairer p, bracketPair loc) {
     for (nint i = loc.opener - 1; i >= 0; i--) {
-        {
-            ΔClass dir = p.getStrongTypeN0(i); if (dir != ON) {
-                return dir;
-            }
+        ΔClass dir = p.getStrongTypeN0(i); if (dir != ON) {
+            return dir;
         }
     }
     // no strong types found, return sos

@@ -162,10 +162,8 @@ internal static partial void testBasicIO(ж<testing.T> t, net.Conn c1, net.Conn 
         dataChʗ1.ᐸꟷ(wr.Bytes());
     });
 
-    {
-        var got = ᐸꟷ(dataCh); if (!bytes.Equal(got, want)) {
-            t.Error(transmittedDataDiffersˢ);
-        }
+    var got = ᐸꟷ(dataCh); if (!bytes.Equal(got, want)) {
+        t.Error(transmittedDataDiffersˢ);
     }
 }
 
@@ -320,10 +318,8 @@ internal static partial void testReadTimeout(ж<testing.T> t, net.Conn c1, net.C
     c1.SetReadDeadline(aLongTimeAgo);
     var (_, err) = c1.Read(new slice<byte>(1024));
     checkForTimeoutError(t, err);
-    {
-        var (_, errΔ1) = c1.Write(new slice<byte>(1024)); if (errΔ1 != nil) {
-            t.Errorf("unexpected Write error: %v", errΔ1);
-        }
+    var (_, errΔ1) = c1.Write(new slice<byte>(1024)); if (errΔ1 != nil) {
+        t.Errorf("unexpected Write error: %v", errΔ1);
     }
 }
 
@@ -334,10 +330,8 @@ internal static partial void testWriteTimeout(ж<testing.T> t, net.Conn c1, net.
     c1.SetWriteDeadline(aLongTimeAgo);
     var (_, err) = c1.Write(new slice<byte>(1024));
     checkForTimeoutError(t, err);
-    {
-        var (_, errΔ1) = c1.Read(new slice<byte>(1024)); if (errΔ1 != nil) {
-            t.Errorf("unexpected Read error: %v", errΔ1);
-        }
+    var (_, errΔ1) = c1.Read(new slice<byte>(1024)); if (errΔ1 != nil) {
+        t.Errorf("unexpected Read error: %v", errΔ1);
     }
 }
 
@@ -610,18 +604,16 @@ internal static partial void testConcurrentMethods(ж<testing.T> t, net.Conn c1,
 // and that Timeout returns true.
 internal static void checkForTimeoutError(ж<testing.T> t, error err) {
     t.Helper();
-    {
-        var (nerr, ok) = err._<netꓸError>(ᐧ); if (ok) {
-            if (!nerr.Timeout()) {
-                if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8 && t.Name() == "TestTestConn/TCP/RacyRead"u8) {
-                    t.Logf("ignoring known failure mode on windows/arm64; see https://go.dev/issue/52893");
-                } else {
-                    t.Errorf("got error: %v, want err.Timeout() = true", nerr);
-                }
+    var (nerr, ok) = err._<netꓸError>(ᐧ); if (ok) {
+        if (!nerr.Timeout()) {
+            if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm64"u8 && t.Name() == "TestTestConn/TCP/RacyRead"u8) {
+                t.Logf("ignoring known failure mode on windows/arm64; see https://go.dev/issue/52893");
+            } else {
+                t.Errorf("got error: %v, want err.Timeout() = true", nerr);
             }
-        } else {
-            t.Errorf("got %T: %v, want net.Error", err, err);
         }
+    } else {
+        t.Errorf("got %T: %v, want net.Error", err, err);
     }
 }
 

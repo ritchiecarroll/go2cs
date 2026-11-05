@@ -377,13 +377,9 @@ internal static any Get(this textValue v) {
 }
 
 internal static @string String(this textValue v) {
-    {
-        var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
-            {
-                var (b, err) = m.MarshalText(); if (err == nil) {
-                    return (@string)b;
-                }
-            }
+    var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
+        var (b, err) = m.MarshalText(); if (err == nil) {
+            return (@string)b;
         }
     }
     return ""u8;
@@ -622,13 +618,11 @@ internal static (bool ok, error err) isZeroValue(ж<Flag> Ꮡflag, @string value
         // usage message from being printed, but that we should report to the
         // user so that they know to fix their code.
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    if (Ꮡtyp.ValueSlot.Kind() == reflect.ΔPointer) {
-                        Ꮡtyp.ValueSlot = Ꮡtyp.ValueSlot.Elem();
-                    }
-                    err = fmt.Errorf("panic calling String method on zero %v for flag %s: %v"u8, Ꮡtyp.ValueSlot, Ꮡflag.Value.Name, e);
+            var e = recover(); if (e != nil) {
+                if (Ꮡtyp.ValueSlot.Kind() == reflect.ΔPointer) {
+                    Ꮡtyp.ValueSlot = Ꮡtyp.ValueSlot.Elem();
                 }
+                err = fmt.Errorf("panic calling String method on zero %v for flag %s: %v"u8, Ꮡtyp.ValueSlot, Ꮡflag.Value.Name, e);
             }
         }, ref ᒐ);
         (ok, err) = (value == z.Interface()._<Value>().String(), default);
@@ -740,18 +734,14 @@ public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
 
         // Print the default value only if it differs to the zero value
         // for this flag type.
-        {
-            var (isZero, err) = isZeroValue(flag, flag.DefValue); if (err != nil) {
-                ᏑisZeroValueErrs.ValueSlot = append(ᏑisZeroValueErrs.ValueSlot, err);
-            } else if (!isZero) {
-                {
-                    var (_, ok) = (~flag).Value._<ж<stringValue>>(ᐧ); if (ok) {
-                        // put quotes on the value
-                        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), " (default %q)"u8, flag.DefValue);
-                    } else {
-                        fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), " (default %v)"u8, flag.DefValue);
-                    }
-                }
+        var (isZero, err) = isZeroValue(flag, flag.DefValue); if (err != nil) {
+            ᏑisZeroValueErrs.ValueSlot = append(ᏑisZeroValueErrs.ValueSlot, err);
+        } else if (!isZero) {
+            var (_, ok) = (~flag).Value._<ж<stringValue>>(ᐧ); if (ok) {
+                // put quotes on the value
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), " (default %q)"u8, flag.DefValue);
+            } else {
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡb), " (default %v)"u8, flag.DefValue);
             }
         }
         fmt.Fprint(Ꮡf.Value.Output(), b.String(), "\n");
@@ -759,12 +749,10 @@ public static void PrintDefaults(this ж<FlagSet> Ꮡf) {
     // If calling String on any zero flag.Values triggered a panic, print
     // the messages after the full set of defaults so that the programmer
     // knows to fix the panic.
-    {
-        var errs = isZeroValueErrs; if (len(errs) > 0) {
-            fmt.Fprintln(f.Output());
-            foreach (var (_, err) in errs) {
-                fmt.Fprintln(f.Output(), err);
-            }
+    var errs = isZeroValueErrs; if (len(errs) > 0) {
+        fmt.Fprintln(f.Output());
+        foreach (var (_, err) in errs) {
+            fmt.Fprintln(f.Output(), err);
         }
     }
 }
@@ -1161,10 +1149,8 @@ public static void Var(this ref FlagSet f, Value value, @string name, @string us
         }
         throw panic(msg); // Happens only if flags are declared with identical names
     }
-    {
-        @string pos = f.undef[name]; if (pos != ""u8) {
-            throw panic(fmt.Sprintf("flag %s set at %s before being defined"u8, name, pos));
-        }
+    @string pos = f.undef[name]; if (pos != ""u8) {
+        throw panic(fmt.Sprintf("flag %s set at %s before being defined"u8, name, pos));
     }
     if (f.formal == nil) {
         f.formal = new map<@string, ж<Flag>>();
@@ -1264,36 +1250,28 @@ internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) {
         return (false, Ꮡf.failf("flag provided but not defined: -%s", name));
     }
 
-    {
-        var (fv, okΔ1) = (~flag).Value._<boolFlag>(ᐧ); if (okΔ1 && fv.IsBoolFlag()) { // special case: doesn't need an arg
-            if (hasValue) {
-                {
-                    var err = fv.Set(value); if (err != nil) {
-                        return (false, Ꮡf.failf("invalid boolean value %q for -%s: %v", value, name, err));
-                    }
-                }
-            } else {
-                {
-                    var err = fv.Set(trueˢ); if (err != nil) {
-                        return (false, Ꮡf.failf("invalid boolean flag %s: %v", name, err));
-                    }
-                }
+    var (fv, okΔ1) = (~flag).Value._<boolFlag>(ᐧ); if (okΔ1 && fv.IsBoolFlag()) { // special case: doesn't need an arg
+        if (hasValue) {
+            var err = fv.Set(value); if (err != nil) {
+                return (false, Ꮡf.failf("invalid boolean value %q for -%s: %v", value, name, err));
             }
         } else {
-            // It must have a value, which might be the next argument.
-            if (!hasValue && len(f.args) > 0) {
-                // value is the next arg
-                hasValue = true;
-                (value, f.args) = (f.args[0], f.args[1..]);
+            var err = fv.Set(trueˢ); if (err != nil) {
+                return (false, Ꮡf.failf("invalid boolean flag %s: %v", name, err));
             }
-            if (!hasValue) {
-                return (false, Ꮡf.failf("flag needs an argument: -%s", name));
-            }
-            {
-                var err = (~flag).Value.Set(value); if (err != nil) {
-                    return (false, Ꮡf.failf("invalid value %q for flag -%s: %v", value, name, err));
-                }
-            }
+        }
+    } else {
+        // It must have a value, which might be the next argument.
+        if (!hasValue && len(f.args) > 0) {
+            // value is the next arg
+            hasValue = true;
+            (value, f.args) = (f.args[0], f.args[1..]);
+        }
+        if (!hasValue) {
+            return (false, Ꮡf.failf("flag needs an argument: -%s", name));
+        }
+        var err = (~flag).Value.Set(value); if (err != nil) {
+            return (false, Ꮡf.failf("invalid value %q for flag -%s: %v", value, name, err));
         }
     }
     if (f.actual == nil) {

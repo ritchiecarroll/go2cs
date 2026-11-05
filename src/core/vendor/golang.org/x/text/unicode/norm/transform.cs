@@ -26,12 +26,10 @@ public static (nint nDst, nint nSrc, error err) Transform(this Form f, slice<byt
     // Cap the maximum number of src bytes to check.
     var b = src;
     var eof = atEOF;
-    {
-        nint ns = len(dst); if (ns < len(b)) {
-            err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
-            eof = false;
-            b = b.slice(0, ns);
-        }
+    nint ns = len(dst); if (ns < len(b)) {
+        err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
+        eof = false;
+        b = b.slice(0, ns);
     }
     var (i, ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), eof);
     nint n = copy(dst, b.slice(0, i));
@@ -82,12 +80,10 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
         // Next quickSpan.
         end = rb.nsrc;
         var eof = atEOF;
-        {
-            nint nΔ1 = nSrc + len(dst) - nDst; if (nΔ1 < end) {
-                err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
-                end = nΔ1;
-                eof = false;
-            }
+        nint nΔ1 = nSrc + len(dst) - nDst; if (nΔ1 < end) {
+            err = go.vendor.golang.org.x.text.transform_package.ErrShortDst;
+            end = nΔ1;
+            eof = false;
         }
         (end, var ok) = rb.f.quickSpan(rb.src, nSrc, end, eof);
         nint n = copy(dst.slice(nDst), rb.src.bytes.slice(nSrc, end));

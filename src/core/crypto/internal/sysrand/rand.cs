@@ -52,17 +52,15 @@ public static void Read(slice<byte> b) {
             var tʗ1 = t;
             defer(() => tʗ1.Stop(), ref ᒐ);
         }
-        {
-            var err = read(b); if (err != nil || testingOnlyFailRead) {
-                @string errStr = default;
-                if (!testingOnlyFailRead) {
-                    errStr = err.Error();
-                } else {
-                    errStr = testingSimulatedFailureˢ;
-                }
-                fatal("crypto/rand: failed to read random data (see https://go.dev/issue/66821): "u8 + errStr);
-                throw panic("unreachable"); // To be sure.
+        var err = read(b); if (err != nil || testingOnlyFailRead) {
+            @string errStr = default;
+            if (!testingOnlyFailRead) {
+                errStr = err.Error();
+            } else {
+                errStr = testingSimulatedFailureˢ;
             }
+            fatal("crypto/rand: failed to read random data (see https://go.dev/issue/66821): "u8 + errStr);
+            throw panic("unreachable"); // To be sure.
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

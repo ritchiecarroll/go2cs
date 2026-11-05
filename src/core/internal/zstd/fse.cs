@@ -35,10 +35,8 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
     ref var r = ref Ꮡr.DerefOrNull();
 
     var br = Ꮡr.makeBitReader(data, off);
-    {
-        var errΔ1 = br.moreBits(); if (errΔ1 != nil) {
-            return (0, 0, errΔ1);
-        }
+    var errΔ1 = br.moreBits(); if (errΔ1 != nil) {
+        return (0, 0, errΔ1);
     }
 
     nint accuracyLog = (nint)br.val(4) + 5;
@@ -67,10 +65,8 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
     array<int16> norm = new(256);
 
     while (remaining > 1 && sym <= maxSym) {
-        {
-            var errΔ2 = br.moreBits(); if (errΔ2 != nil) {
-                return (0, 0, errΔ2);
-            }
+        var errΔ2 = br.moreBits(); if (errΔ2 != nil) {
+            return (0, 0, errΔ2);
         }
 
         if (prev0) {
@@ -82,20 +78,16 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
                 zsym += 3 * 6;
                 br.bits >>= 12;
                 br.cnt -= 12;
-                {
-                    var errΔ3 = br.moreBits(); if (errΔ3 != nil) {
-                        return (0, 0, errΔ3);
-                    }
+                var errΔ3 = br.moreBits(); if (errΔ3 != nil) {
+                    return (0, 0, errΔ3);
                 }
             }
             while ((br.bits & 3) == 3) {
                 zsym += 3;
                 br.bits >>= 2;
                 br.cnt -= 2;
-                {
-                    var errΔ4 = br.moreBits(); if (errΔ4 != nil) {
-                        return (0, 0, errΔ4);
-                    }
+                var errΔ4 = br.moreBits(); if (errΔ4 != nil) {
+                    return (0, 0, errΔ4);
                 }
             }
 
@@ -163,10 +155,8 @@ internal static (nint tableBits, nint roff, error err) readFSE(this ж<Reader> �
 
     br.backup();
 
-    {
-        var errΔ5 = r.buildFSE(off, norm.slice(0, maxSym + 1), table, accuracyLog); if (errΔ5 != nil) {
-            return (0, 0, errΔ5);
-        }
+    var errΔ5 = r.buildFSE(off, norm.slice(0, maxSym + 1), table, accuracyLog); if (errΔ5 != nil) {
+        return (0, 0, errΔ5);
     }
 
     return (accuracyLog, (nint)br.off, default);

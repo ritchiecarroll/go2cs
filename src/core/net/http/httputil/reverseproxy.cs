@@ -412,12 +412,10 @@ internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWri
     if (p.ModifyResponse == nil) {
         return true;
     }
-    {
-        var err = p.ModifyResponse(Ꮡres); if (err != nil) {
-            res.Body.Close();
-            Ꮡp.getErrorHandler()(rw, req, err);
-            return false;
-        }
+    var err = p.ModifyResponse(Ꮡres); if (err != nil) {
+        res.Body.Close();
+        Ꮡp.getErrorHandler()(rw, req, err);
+        return false;
     }
     return true;
 }
@@ -464,29 +462,27 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             // means it is either context.Background, or a custom
             // Context implementation with no cancellation signal),
             // then consult the CloseNotifier if available.
-        } else {
-            var (cn, ok) = rw._<http.CloseNotifier>(ᐧ); if (ok) {
-                Action cancel = default;
-                (ctx, cancel) = context.WithCancel(ctx);
-                var cancelʗ1 = cancel;
-                defer(() => cancelʗ1(), ref ᒐ);
-                var notifyChan = cn.CloseNotify();
-                var cancelʗ2 = cancel;
-                var ctxʗ1 = ctx;
-                var notifyChanʗ1 = notifyChan;
-                goǃ(() => {
-                    var selᴛ3 = notifyChanʗ1;
-                    var selᴛ4 = ctxʗ1.Done();
-                    switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-                    case 0 when selᴛ3.ꟷᐳ(out _): {
-                        cancelʗ2();
-                        break;
-                    }
-                    case 1 when selᴛ4.ꟷᐳ(out _): {
-                        break;
-                    }}
-                });
-            }
+        } else if (rw._<http.CloseNotifier>(out var cn)) {
+            Action cancel = default;
+            (ctx, cancel) = context.WithCancel(ctx);
+            var cancelʗ1 = cancel;
+            defer(() => cancelʗ1(), ref ᒐ);
+            var notifyChan = cn.CloseNotify();
+            var cancelʗ2 = cancel;
+            var ctxʗ1 = ctx;
+            var notifyChanʗ1 = notifyChan;
+            goǃ(() => {
+                var selᴛ3 = notifyChanʗ1;
+                var selᴛ4 = ctxʗ1.Done();
+                switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
+                case 0 when selᴛ3.ꟷᐳ(out _): {
+                    cancelʗ2();
+                    break;
+                }
+                case 1 when selᴛ4.ꟷᐳ(out _): {
+                    break;
+                }}
+            });
         }
 
         var outreq = req.Clone(ctx);
@@ -574,19 +570,17 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             p.Rewrite(pr);
             outreq = pr.Out;
         } else {
-            {
-                var (clientIP, _, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == nil) {
-                    // If we aren't the first proxy retain prior
-                    // X-Forwarded-For information as a comma+space
-                    // separated list and fold multiple headers into one.
-                    var (prior, ok) = outreq.Header[xForwardedForˢ, ꟷ];
-                    var omit = ok && prior == nil; // Issue 38079: nil now means don't populate the header
-                    if (len(prior) > 0) {
-                        clientIP = strings.Join(prior, ", ") + ", "u8 + clientIP;
-                    }
-                    if (!omit) {
-                        outreq.Header.Set(xForwardedForˢ, clientIP);
-                    }
+            var (clientIP, _, errΔ1) = net.SplitHostPort(req.RemoteAddr); if (errΔ1 == nil) {
+                // If we aren't the first proxy retain prior
+                // X-Forwarded-For information as a comma+space
+                // separated list and fold multiple headers into one.
+                var (prior, ok) = outreq.Header[xForwardedForˢ, ꟷ];
+                var omit = ok && prior == nil; // Issue 38079: nil now means don't populate the header
+                if (len(prior) > 0) {
+                    clientIP = strings.Join(prior, ", ") + ", "u8 + clientIP;
+                }
+                if (!omit) {
+                    outreq.Header.Set(xForwardedForˢ, clientIP);
                 }
             }
         }
@@ -606,12 +600,10 @@ public static partial void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWr
             return;
         }
 
-        {
-            var (_, ok) = outreq.Header[userAgentˢ, ꟷ]; if (!ok) {
-                // If the outbound request doesn't have a User-Agent header set,
-                // don't send the default Go HTTP client User-Agent.
-                outreq.Header.Set(userAgentˢ, ""u8);
-            }
+        if (outreq.Header[userAgentˢ, ꟷ] is not (_, true)) {
+            // If the outbound request doesn't have a User-Agent header set,
+            // don't send the default Go HTTP client User-Agent.
+            outreq.Header.Set(userAgentˢ, ""u8);
         }
 
         ref var roundTripMutex = ref heap(new sync.Mutex(), out var ᏑroundTripMutex);
@@ -750,10 +742,8 @@ internal static void removeHopByHopHeaders(httpꓸHeader h) {
     foreach (var (_, f) in h[connectionˢ]) {
         foreach (var iᴛ1 in range<@string>(strings.SplitSeq(f, ",").Invoke)) {
             var sf = iᴛ1;
-            {
-                sf = textproto.TrimString(sf); if (sf != ""u8) {
-                    h.Del(sf);
-                }
+            sf = textproto.TrimString(sf); if (sf != ""u8) {
+                h.Del(sf);
             }
         }
     }
@@ -778,10 +768,8 @@ internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Res
 
     // For Server-Sent Events responses, flush immediately.
     // The MIME type is defined in https://www.w3.org/TR/eventsource/#text-event-stream
-    {
-        var (baseCT, _, _) = mime.ParseMediaType(resCT); if (baseCT == "text/event-stream"u8) {
-            return -1; // negative means immediately
-        }
+    var (baseCT, _, _) = mime.ParseMediaType(resCT); if (baseCT == "text/event-stream"u8) {
+        return -1; // negative means immediately
     }
 
     // We might have the case of streaming for which Content-Length might be unset.
@@ -1010,17 +998,13 @@ internal static partial void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, h
 
         res.Header = rw.Header();
         res.Body = default; // so res.Write only writes the headers; we have res.Body in backConn above
-        {
-            var errΔ1 = res.Write(new bufio_ReadWriterжWriter(brw)); if (errΔ1 != nil) {
-                Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("response write: %v"u8, errΔ1));
-                return;
-            }
+        var errΔ1 = res.Write(new bufio_ReadWriterжWriter(brw)); if (errΔ1 != nil) {
+            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("response write: %v"u8, errΔ1));
+            return;
         }
-        {
-            var errΔ2 = brw.Value.Writer.Value.Flush(); if (errΔ2 != nil) {
-                Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("response flush: %v"u8, errΔ2));
-                return;
-            }
+        var errΔ2 = brw.Value.Writer.Value.Flush(); if (errΔ2 != nil) {
+            Ꮡp.getErrorHandler()(rw, Ꮡreq, fmt.Errorf("response flush: %v"u8, errΔ2));
+            return;
         }
         var errc = new channel<error>(1);
         ref var spc = ref heap<switchProtocolCopier>(new switchProtocolCopier(user: new net_ConnᴠReadWriter(conn), backend: new io_ReadWriteCloserᴠReadWriter(backConn)), out var Ꮡspc);
@@ -1053,38 +1037,30 @@ internal partial interface copyFromBackend_type /*dyn*/ {
 }
 
 internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) {
-    {
-        var (_, err) = io.Copy(c.user, c.backend); if (err != nil) {
-            errc.ᐸꟷ(err);
-            return;
-        }
+    var (_, err) = io.Copy(c.user, c.backend); if (err != nil) {
+        errc.ᐸꟷ(err);
+        return;
     }
 
     // backend conn has reached EOF so propogate close write to user conn
-    {
-        var (wc, ok) = c.user._<copyFromBackend_type>(ᐧ); if (ok) {
-            errc.ᐸꟷ(wc.CloseWrite());
-            return;
-        }
+    var (wc, ok) = c.user._<copyFromBackend_type>(ᐧ); if (ok) {
+        errc.ᐸꟷ(wc.CloseWrite());
+        return;
     }
 
     errc.ᐸꟷ(errCopyDone);
 }
 
 internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) {
-    {
-        var (_, err) = io.Copy(c.backend, c.user); if (err != nil) {
-            errc.ᐸꟷ(err);
-            return;
-        }
+    var (_, err) = io.Copy(c.backend, c.user); if (err != nil) {
+        errc.ᐸꟷ(err);
+        return;
     }
 
     // user conn has reached EOF so propogate close write to backend conn
-    {
-        var (wc, ok) = c.backend._<copyFromBackend_type>(ᐧ); if (ok) {
-            errc.ᐸꟷ(wc.CloseWrite());
-            return;
-        }
+    var (wc, ok) = c.backend._<copyFromBackend_type>(ᐧ); if (ok) {
+        errc.ᐸꟷ(wc.CloseWrite());
+        return;
     }
 
     errc.ᐸꟷ(errCopyDone);
@@ -1104,11 +1080,9 @@ internal static @string cleanQueryParams(@string s) {
         // Always reencode when a non-default urlmaxqueryparams is set.
         return reencode(s);
     }
-    {
-        nint numParams = strings.Count(s, "&") + 1; if (numParams > defaultMaxParams) {
-            // Too many query parameters.
-            return reencode(s);
-        }
+    nint numParams = strings.Count(s, "&") + 1; if (numParams > defaultMaxParams) {
+        // Too many query parameters.
+        return reencode(s);
     }
     for (nint i = 0; i < len(s); ) {
         switch (s[i]) {

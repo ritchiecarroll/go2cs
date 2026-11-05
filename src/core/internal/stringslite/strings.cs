@@ -111,10 +111,8 @@ public static nint Index(@string s, @string substr) {
 }
 
 public static (@string before, @string after, bool found) Cut(@string s, @string sep) {
-    {
-        nint i = Index(s, sep); if (i >= 0) {
-            return (s.slice(0, i), s.slice(i + len(sep)), true);
-        }
+    nint i = Index(s, sep); if (i >= 0) {
+        return (s.slice(0, i), s.slice(i + len(sep)), true);
     }
     return (s, "", false);
 }

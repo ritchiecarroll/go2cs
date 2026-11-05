@@ -379,10 +379,8 @@ internal static void stableOrdered<E>(slice<E> data, nint n)
             a = b;
             b += 2 * blockSize;
         }
-        {
-            nint m = a + blockSize; if (m < n) {
-                symMergeOrdered(data, a, m, n);
-            }
+        nint m = a + blockSize; if (m < n) {
+            symMergeOrdered(data, a, m, n);
         }
         blockSize *= 2;
     }

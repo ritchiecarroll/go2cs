@@ -19,10 +19,8 @@ internal static bool underIs(ΔType typ, Func<ΔType, bool> f) {
 // all reports whether f(t, u) is true for all (type/underlying type)
 // pairs in the typeset of t. See [typeset] for details of sequence.
 internal static bool all(ΔType t, Func<ΔType, ΔType, bool> f) {
-    {
-        var (p, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (p != nil) {
-            return p.typeset(f);
-        }
+    var (p, _) = Unalias(t)._<ж<TypeParam>>(ᐧ); if (p != nil) {
+        return p.typeset(f);
     }
     return f(t, t.Underlying());
 }
@@ -85,10 +83,8 @@ internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔTyp
     ΔType cu = default;
     foreach (var (tΔ1, u) in range<ΔType, ΔType>(typeset(t).Invoke)) {
         if (cond != nil) {
-            {
-                var err = cond(tΔ1, u); if (err != nil) {
-                    return (default, err);
-                }
+            var err = cond(tΔ1, u); if (err != nil) {
+                return (default, err);
             }
         }
 
@@ -103,30 +99,26 @@ internal static (ΔType, ж<typeError>) commonUnder(ΔType t, Func<ΔType, ΔTyp
         }
 
         // If we've seen a channel before, and we have a channel now, they must be compatible.
-        {
-            var (chu, _) = cu._<ж<Chan>>(ᐧ); if (chu != nil) {
-                {
-                    var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil) {
-                        if (!Identical(chu.elem, ch.elem)) {
-                            return (default, typeErrorf("channels %s and %s have different element types", ct, tΔ1));
-                        }
-                        // If we have different channel directions, keep the restricted one
-                        // and complain if they conflict.
-                        switch (ᐧ) {
-                        case {} when chu.dir == ch.dir: {
-                            // nothing to do
-                            break;
-                        }
-                        case {} when chu.dir == SendRecv: {
-                            (ct, cu) = (tΔ1, u); // switch to restricted channel
-                            break;
-                        }
-                        case {} when ch.dir != SendRecv: {
-                            return (default, typeErrorf("channels %s and %s have conflicting directions", ct, tΔ1));
-                        }}
-                        continue;
-                    }
+        var (chu, _) = cu._<ж<Chan>>(ᐧ); if (chu != nil) {
+            var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil) {
+                if (!Identical(chu.elem, ch.elem)) {
+                    return (default, typeErrorf("channels %s and %s have different element types", ct, tΔ1));
                 }
+                // If we have different channel directions, keep the restricted one
+                // and complain if they conflict.
+                switch (ᐧ) {
+                case {} when chu.dir == ch.dir: {
+                    // nothing to do
+                    break;
+                }
+                case {} when chu.dir == SendRecv: {
+                    (ct, cu) = (tΔ1, u); // switch to restricted channel
+                    break;
+                }
+                case {} when ch.dir != SendRecv: {
+                    return (default, typeErrorf("channels %s and %s have conflicting directions", ct, tΔ1));
+                }}
+                continue;
             }
         }
 

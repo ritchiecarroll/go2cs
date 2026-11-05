@@ -42,10 +42,8 @@ internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
 // can guarantee that there are no more writers to the table.
 internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) {
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
-    {
-        var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
-            w = dumpTypesRec(root, w);
-        }
+    var root = (ж<traceMapNode>)(uintptr)(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
+        w = dumpTypesRec(root, w);
     }
     w.flush().end();
     Ꮡt.Ꮡtab.reset();

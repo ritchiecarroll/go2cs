@@ -54,10 +54,8 @@ public static ж<ΔPipe> Pipe(this ж<ΔFunc> Ꮡf) {
         label: "loop",
         maxColumns: 10000000
     ));
-    {
-        nint m = a.Arch.maxColumns; if (m != 0) {
-            p.maxColumns = m;
-        }
+    nint m = a.Arch.maxColumns; if (m != 0) {
+        p.maxColumns = m;
     }
     return p;
 }
@@ -400,20 +398,18 @@ public static void Start(this ref ΔPipe p, ΔReg n, params ꓸꓸꓸnint factor
     // adjust the loop not to scan those columns, assuming that
     // either the code already called an equivalent StoreN or else
     // that it will do so after the loop.
-    {
-        nint off = p.readOff; if (off != 0) {
-            if (p.indexCounter < 0) {
-                // Index is negated, so add off instead of subtracting.
-                a.Add(a.Imm(off), n, n, SmashCarry);
-            } else {
-                a.Sub(a.Imm(off), n, n, SmashCarry);
-            }
-            if (p.indexCounter != 0) {
-                // n is also the index we are using, so adjust readOff and writeOff
-                // to continue to point at the same positions as before we changed n.
-                p.readOff -= off;
-                p.writeOff -= off;
-            }
+    nint off = p.readOff; if (off != 0) {
+        if (p.indexCounter < 0) {
+            // Index is negated, so add off instead of subtracting.
+            a.Add(a.Imm(off), n, n, SmashCarry);
+        } else {
+            a.Sub(a.Imm(off), n, n, SmashCarry);
+        }
+        if (p.indexCounter != 0) {
+            // n is also the index we are using, so adjust readOff and writeOff
+            // to continue to point at the same positions as before we changed n.
+            p.readOff -= off;
+            p.writeOff -= off;
         }
     }
 

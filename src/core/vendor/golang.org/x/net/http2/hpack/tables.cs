@@ -68,10 +68,8 @@ internal static void evictOldest(this ref headerFieldTable t, nint n) {
         if (t.byName[f.Name] == id) {
             delete(t.byName, f.Name);
         }
-        {
-            var p = (new pairNameValue(f.Name, f.Value)); if (t.byNameValue[p] == id) {
-                delete(t.byNameValue, p);
-            }
+        var p = (new pairNameValue(f.Name, f.Value)); if (t.byNameValue[p] == id) {
+            delete(t.byNameValue, p);
         }
     }
     copy(t.ents, t.ents.slice(n));
@@ -102,10 +100,8 @@ internal static (uint64 i, bool nameValueMatch) search(this ж<headerFieldTable>
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!f.Sensitive) {
-        {
-            var id = t.byNameValue[new pairNameValue(f.Name, f.Value)]; if (id != 0) {
-                return (Ꮡt.idToIndex(id), true);
-            }
+        var id = t.byNameValue[new pairNameValue(f.Name, f.Value)]; if (id != 0) {
+            return (Ꮡt.idToIndex(id), true);
         }
     }
     {

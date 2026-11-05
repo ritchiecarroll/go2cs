@@ -207,11 +207,9 @@ internal static (ж<Conn>, error) dial(context.Context ctx, ж<net.Dialer> Ꮡne
         }
 
         var conn = Client(rawConn, Ꮡconfig);
-        {
-            var errΔ1 = conn.HandshakeContext(ctx); if (errΔ1 != nil) {
-                rawConn.Close();
-                return (default, errΔ1);
-            }
+        var errΔ1 = conn.HandshakeContext(ctx); if (errΔ1 != nil) {
+            rawConn.Close();
+            return (default, errΔ1);
         }
         return (conn, default);
     }

@@ -112,11 +112,9 @@ internal static any indirect(any a) {
     if (a == nil) {
         return default;
     }
-    {
-        var t = reflect.TypeOf(a); if (t.Kind() != reflect.ΔPointer) {
-            // Avoid creating a reflect.Value if it's not a pointer.
-            return a;
-        }
+    var t = reflect.TypeOf(a); if (t.Kind() != reflect.ΔPointer) {
+        // Avoid creating a reflect.Value if it's not a pointer.
+        return a;
     }
     var v = reflect.ValueOf(a);
     while (v.Kind() == reflect.ΔPointer && !v.IsNil()) {

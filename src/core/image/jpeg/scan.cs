@@ -268,10 +268,8 @@ internal static error processSOS(this ref decoder d, nint n) {
                     }
 
                     if (ah != 0) {
-                        {
-                            var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable], scan[i].ta), zigStart, zigEnd, ((int32)1).Lsh((uint64)(al))); if (err != nil) {
-                                return err;
-                            }
+                        var err = d.refine(Ꮡb, Ꮡ(d.huff[acTable], scan[i].ta), zigStart, zigEnd, ((int32)1).Lsh((uint64)(al))); if (err != nil) {
+                            return err;
                         }
                     } else {
                         var zig = zigStart;
@@ -358,15 +356,11 @@ internal static error processSOS(this ref decoder d, nint n) {
                 // For well-formed input, the RST[0-7] restart marker follows
                 // immediately. For corrupt input, call findRST to try to
                 // resynchronize.
-                {
-                    var err = d.readFull(d.tmp[..2]); if (err != nil) {
-                        return err;
-                    } else if (d.tmp[0] != 0xff || d.tmp[1] != expectedRST) {
-                        {
-                            var errΔ1 = d.findRST(expectedRST); if (errΔ1 != nil) {
-                                return errΔ1;
-                            }
-                        }
+                var err = d.readFull(d.tmp[..2]); if (err != nil) {
+                    return err;
+                } else if (d.tmp[0] != 0xff || d.tmp[1] != expectedRST) {
+                    var errΔ1 = d.findRST(expectedRST); if (errΔ1 != nil) {
+                        return errΔ1;
                     }
                 }
                 expectedRST++;
@@ -471,10 +465,8 @@ break_loop:;
     }
     if (d.eobRun > 0) {
         d.eobRun--;
-        {
-            var (_, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, -1, delta); if (err != nil) {
-                return err;
-            }
+        var (_, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, -1, delta); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -524,10 +516,8 @@ internal static error reconstructProgressiveImage(this ref decoder d) {
         nint stride = mxx * d.comp[i].h;
         for (nint by = 0; by * v < d.height; by++) {
             for (nint bx = 0; bx * h < d.width; bx++) {
-                {
-                    var err = d.reconstructBlock(Ꮡ(d.progCoeffs[i], by * stride + bx), bx, by, i); if (err != nil) {
-                        return err;
-                    }
+                var err = d.reconstructBlock(Ꮡ(d.progCoeffs[i], by * stride + bx), bx, by, i); if (err != nil) {
+                    return err;
                 }
             }
         }
@@ -635,10 +625,8 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
             i = 1;
         }
 
-        {
-            var err = d.readFull(d.tmp.slice(i, 2)); if (err != nil) {
-                return err;
-            }
+        var err = d.readFull(d.tmp.slice(i, 2)); if (err != nil) {
+            return err;
         }
     }
 }

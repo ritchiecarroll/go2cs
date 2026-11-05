@@ -185,10 +185,8 @@ internal static void next0(this ж<parser> Ꮡp) {
         (p.pos, p.tok, p.lit) = p.scanner.Scan();
         if (p.tok == token.COMMENT) {
             if (p.top && strings.HasPrefix(p.lit, goBuildˢ)) {
-                {
-                    var (x, err) = constraint.Parse(p.lit); if (err == nil) {
-                        p.goVersion = constraint.GoVersion(x);
-                    }
+                var (x, err) = constraint.Parse(p.lit); if (err == nil) {
+                    p.goVersion = constraint.GoVersion(x);
                 }
             }
             if ((Mode)(p.mode & ParseComments) == 0) {
@@ -1196,11 +1194,9 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             // all unnamed => found names are type names
             foreach (var i in range(list)) {
                 var par = Ꮡ(list, i);
-                {
-                    var typΔ1 = par.name; if (typΔ1 != nil) {
-                        par.typ = new ast.IdentжExpr(typΔ1);
-                        par.name = default;
-                    }
+                var typΔ1 = par.name; if (typΔ1 != nil) {
+                    par.typ = new ast.IdentжExpr(typΔ1);
+                    par.name = default;
                 }
             }
             if (tparams) {
@@ -1226,22 +1222,20 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             ref var errPos = ref heap(new tokenꓸPos(), out var ᏑerrPos); // left-most error position (or invalid)
             ast.Expr typΔ2 = default;                                    // current type (from right to left)
             foreach (var i in range(list)) {
-                {
-                    var par = Ꮡ(list, len(list) - i - 1); if (par.typ != nil) {
-                        typΔ2 = par.typ;
-                        if (par.name == nil) {
-                            errPos = typΔ2.Pos();
-                            var n = ast.NewIdent("_");
-                            n.NamePos = errPos; // correct position
-                            par.name = n;
-                        }
-                    } else if (typΔ2 != nil) {
-                        par.typ = typΔ2;
-                    } else {
-                        // par.typ == nil && typ == nil => we only have a par.name
-                        errPos = par.name.Pos();
-                        par.typ = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: errPos, To: p.pos)));
+                var par = Ꮡ(list, len(list) - i - 1); if (par.typ != nil) {
+                    typΔ2 = par.typ;
+                    if (par.name == nil) {
+                        errPos = typΔ2.Pos();
+                        var n = ast.NewIdent("_");
+                        n.NamePos = errPos; // correct position
+                        par.name = n;
                     }
+                } else if (typΔ2 != nil) {
+                    par.typ = typΔ2;
+                } else {
+                    // par.typ == nil && typ == nil => we only have a par.name
+                    errPos = par.name.Pos();
+                    par.typ = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: errPos, To: p.pos)));
                 }
             }
             if (errPos.IsValid()) {
@@ -1278,21 +1272,19 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
         var first = true; // only report first occurrence
         foreach (var i in range(list)) {
             var f = Ꮡ(list, i);
-            {
-                var (t, _) = f.typ._<ж<ast.Ellipsis>>(ᐧ); if (t != nil && (!dddok || i + 1 < len(list))) {
-                    if (first) {
-                        first = false;
-                        if (dddok) {
-                            Ꮡp.error(t.ΔEllipsis, canOnlyUseWithFinalˢ);
-                        } else {
-                            Ꮡp.error(t.ΔEllipsis, invalidUseOfˢ);
-                        }
+            var (t, _) = f.typ._<ж<ast.Ellipsis>>(ᐧ); if (t != nil && (!dddok || i + 1 < len(list))) {
+                if (first) {
+                    first = false;
+                    if (dddok) {
+                        Ꮡp.error(t.ΔEllipsis, canOnlyUseWithFinalˢ);
+                    } else {
+                        Ꮡp.error(t.ΔEllipsis, invalidUseOfˢ);
                     }
-                    // use T instead of invalid ...T
-                    // TODO(gri) would like to use `f.typ = t.Elt` but that causes problems
-                    //           with the resolver in cases of reuse of the same identifier
-                    f.typ = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: t.Pos(), To: t.End())));
                 }
+                // use T instead of invalid ...T
+                // TODO(gri) would like to use `f.typ = t.Elt` but that causes problems
+                //           with the resolver in cases of reuse of the same identifier
+                f.typ = new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: t.Pos(), To: t.End())));
             }
         }
 
@@ -1391,12 +1383,10 @@ internal static ж<ast.FieldList> parseParameters(this ж<parser> Ꮡp, bool res
             return Ꮡ(new ast.FieldList(Opening: lparen, List: list, Closing: rparen));
         }
 
-        {
-            var typ = Ꮡp.tryIdentOrType(); if (typ != nil) {
-                var list = new slice<ж<ast.Field>>(1);
-                list[0] = Ꮡ(new ast.Field(Type: typ));
-                return Ꮡ(new ast.FieldList(List: list));
-            }
+        var typ = Ꮡp.tryIdentOrType(); if (typ != nil) {
+            var list = new slice<ж<ast.Field>>(1);
+            list[0] = Ꮡ(new ast.Field(Type: typ));
+            return Ꮡ(new ast.FieldList(List: list));
         }
 
         return default;
@@ -1458,78 +1448,74 @@ internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) {
         slice<ж<ast.Ident>> idents = default;
         ast.Expr typ = default;
         var x = Ꮡp.parseTypeName(nil);
-        {
-            var (ident, _) = x._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
-                switch (ᐧ) {
-                case {} when p.tok == token.LBRACK: {
-                    // generic method or embedded instantiated type
-                    tokenꓸPos lbrack = p.pos;
-                    Ꮡp.next();
-                    p.exprLev++;
-                    var xΔ2 = Ꮡp.parseExpr();
-                    p.exprLev--;
-                    {
-                        var (name0, _) = xΔ2._<ж<ast.Ident>>(ᐧ); if (name0 != nil && p.tok != token.COMMA && p.tok != token.RBRACK) {
-                            // generic method m[T any]
-                            //
-                            // Interface methods do not have type parameters. We parse them for a
-                            // better error message and improved error recovery.
-                            _ = Ꮡp.parseParameterList(name0, default, token.RBRACK, false);
-                            _ = Ꮡp.expect(token.RBRACK);
-                            Ꮡp.error(lbrack, interfaceMethodMustHaveˢ);
+        var (ident, _) = x._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
+            switch (ᐧ) {
+            case {} when p.tok == token.LBRACK: {
+                // generic method or embedded instantiated type
+                tokenꓸPos lbrack = p.pos;
+                Ꮡp.next();
+                p.exprLev++;
+                var xΔ2 = Ꮡp.parseExpr();
+                p.exprLev--;
+                var (name0, _) = xΔ2._<ж<ast.Ident>>(ᐧ); if (name0 != nil && p.tok != token.COMMA && p.tok != token.RBRACK) {
+                    // generic method m[T any]
+                    //
+                    // Interface methods do not have type parameters. We parse them for a
+                    // better error message and improved error recovery.
+                    _ = Ꮡp.parseParameterList(name0, default, token.RBRACK, false);
+                    _ = Ꮡp.expect(token.RBRACK);
+                    Ꮡp.error(lbrack, interfaceMethodMustHaveˢ);
 
-                            // TODO(rfindley) refactor to share code with parseFuncType.
-                            var @params = Ꮡp.parseParameters(false);
-                            var results = Ꮡp.parseParameters(true);
-                            idents = slice<ж<ast.Ident>>([ident]);
-                            typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(
-                                Func: token.NoPos,
-                                Params: @params,
-                                Results: results
-                            )));
-                        } else {
-                            // embedded instantiated type
-                            // TODO(rfindley) should resolve all identifiers in x.
-                            var list = slice<ast.Expr>([xΔ2]);
-                            if (Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
-                                p.exprLev++;
-                                Ꮡp.next();
-                                while (p.tok != token.RBRACK && p.tok != token.EOF) {
-                                    list = append(list, Ꮡp.parseType());
-                                    if (!Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
-                                        break;
-                                    }
-                                    Ꮡp.next();
-                                }
-                                p.exprLev--;
-                            }
-                            tokenꓸPos rbrack = Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢ);
-                            typ = packIndexExpr(new ast.IdentжExpr(ident), lbrack, list, rbrack);
-                        }
-                    }
-                    break;
-                }
-                case {} when p.tok == token.LPAREN: {
-                    // ordinary method
                     // TODO(rfindley) refactor to share code with parseFuncType.
                     var @params = Ꮡp.parseParameters(false);
                     var results = Ꮡp.parseParameters(true);
                     idents = slice<ж<ast.Ident>>([ident]);
-                    typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(Func: token.NoPos, Params: @params, Results: results)));
-                    break;
+                    typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(
+                        Func: token.NoPos,
+                        Params: @params,
+                        Results: results
+                    )));
+                } else {
+                    // embedded instantiated type
+                    // TODO(rfindley) should resolve all identifiers in x.
+                    var list = slice<ast.Expr>([xΔ2]);
+                    if (Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
+                        p.exprLev++;
+                        Ꮡp.next();
+                        while (p.tok != token.RBRACK && p.tok != token.EOF) {
+                            list = append(list, Ꮡp.parseType());
+                            if (!Ꮡp.atComma(typeArgumentListˢ, token.RBRACK)) {
+                                break;
+                            }
+                            Ꮡp.next();
+                        }
+                        p.exprLev--;
+                    }
+                    tokenꓸPos rbrack = Ꮡp.expectClosing(token.RBRACK, typeArgumentListˢ);
+                    typ = packIndexExpr(new ast.IdentжExpr(ident), lbrack, list, rbrack);
                 }
-                default: {
-                    // embedded type
-                    typ = x;
-                    break;
-                }}
-            } else {
-                // embedded, possibly instantiated type
+                break;
+            }
+            case {} when p.tok == token.LPAREN: {
+                // ordinary method
+                // TODO(rfindley) refactor to share code with parseFuncType.
+                var @params = Ꮡp.parseParameters(false);
+                var results = Ꮡp.parseParameters(true);
+                idents = slice<ж<ast.Ident>>([ident]);
+                typ = new ast.FuncTypeжExpr(Ꮡ(new ast.FuncType(Func: token.NoPos, Params: @params, Results: results)));
+                break;
+            }
+            default: {
+                // embedded type
                 typ = x;
-                if (p.tok == token.LBRACK) {
-                    // embedded instantiated interface
-                    typ = Ꮡp.parseTypeInstance(typ);
-                }
+                break;
+            }}
+        } else {
+            // embedded, possibly instantiated type
+            typ = x;
+            if (p.tok == token.LBRACK) {
+                // embedded instantiated interface
+                typ = Ꮡp.parseTypeInstance(typ);
             }
         }
 
@@ -1647,14 +1633,12 @@ parseElements:
                 break;
             }
             default: {
-                {
-                    var t = Ꮡp.tryIdentOrType(); if (t != nil) {
-                        var typ = Ꮡp.embeddedElem(t);
-                        var comment = Ꮡp.expectSemi();
-                        list = append(list, Ꮡ(new ast.Field(Type: typ, Comment: comment)));
-                    } else {
-                        goto break_parseElements;
-                    }
+                var t = Ꮡp.tryIdentOrType(); if (t != nil) {
+                    var typ = Ꮡp.embeddedElem(t);
+                    var comment = Ꮡp.expectSemi();
+                    list = append(list, Ꮡ(new ast.Field(Type: typ, Comment: comment)));
+                } else {
+                    goto break_parseElements;
                 }
                 break;
             }}
@@ -1983,13 +1967,11 @@ internal static ast.Expr parseOperand(this ж<parser> Ꮡp) {
             return Ꮡp.parseFuncTypeOrLit();
         }}
 
-        {
-            var typ = Ꮡp.tryIdentOrType(); if (typ != nil) { // do not consume trailing type parameters
-                // could be type for composite literal or conversion
-                var (_, isIdent) = typ._<ж<ast.Ident>>(ᐧ);
-                assert(!isIdent, typeCannotBeIdentifierˢ);
-                return typ;
-            }
+        var typ = Ꮡp.tryIdentOrType(); if (typ != nil) { // do not consume trailing type parameters
+            // could be type for composite literal or conversion
+            var (_, isIdent) = typ._<ж<ast.Ident>>(ᐧ);
+            assert(!isIdent, typeCannotBeIdentifierˢ);
+            return typ;
         }
 
         // we have an error
@@ -2461,27 +2443,25 @@ internal static ast.Expr parseUnaryExpr(this ж<parser> Ꮡp) {
             var x = Ꮡp.parseUnaryExpr();
 
             // determine which case we have
-            {
-                var (typ, ok) = x._<ж<ast.ChanType>>(ᐧ); if (ok) {
-                    // (<-type)
+            var (typ, ok) = x._<ж<ast.ChanType>>(ᐧ); if (ok) {
+                // (<-type)
 
-                    // re-associate position info and <-
-                    ast.ChanDir dir = ast.SEND;
-                    while (ok && dir == ast.SEND) {
-                        if (typ.Dir == ast.RECV) {
-                            // error: (<-type) is (<-(<-chan T))
-                            Ꮡp.errorExpected(typ.Arrow, chanˢ);
-                        }
-                        (arrow, typ.Begin, typ.Arrow) = (typ.Arrow, arrow, arrow);
-                        (dir, typ.Dir) = (typ.Dir, ast.RECV);
-                        (typ, ok) = (~typ).Value._<ж<ast.ChanType>>(ᐧ);
+                // re-associate position info and <-
+                ast.ChanDir dir = ast.SEND;
+                while (ok && dir == ast.SEND) {
+                    if (typ.Dir == ast.RECV) {
+                        // error: (<-type) is (<-(<-chan T))
+                        Ꮡp.errorExpected(typ.Arrow, chanˢ);
                     }
-                    if (dir == ast.SEND) {
-                        Ꮡp.errorExpected(arrow, channelTypeˢ);
-                    }
-
-                    return x;
+                    (arrow, typ.Begin, typ.Arrow) = (typ.Arrow, arrow, arrow);
+                    (dir, typ.Dir) = (typ.Dir, ast.RECV);
+                    (typ, ok) = (~typ).Value._<ж<ast.ChanType>>(ᐧ);
                 }
+                if (dir == ast.SEND) {
+                    Ꮡp.errorExpected(arrow, channelTypeˢ);
+                }
+
+                return x;
             }
 
             // <-(expr)
@@ -2644,14 +2624,12 @@ internal static (ast.Stmt, bool) parseSimpleStmt(this ж<parser> Ꮡp, nint mode
             // labeled statement
             ref var colon = ref heap<tokenꓸPos>(p.pos, out var Ꮡcolon);
             Ꮡp.next();
-            {
-                var (label, isIdent) = x[0]._<ж<ast.Ident>>(ᐧ); if (mode == labelOk && isIdent) {
-                    // Go spec: The scope of a label is the body of the function
-                    // in which it is declared and excludes the body of any nested
-                    // function.
-                    var stmt = Ꮡ(new ast.LabeledStmt(Label: label, Colon: colon, Stmt: Ꮡp.parseStmt()));
-                    return (new ast.LabeledStmtжStmt(stmt), false);
-                }
+            var (label, isIdent) = x[0]._<ж<ast.Ident>>(ᐧ); if (mode == labelOk && isIdent) {
+                // Go spec: The scope of a label is the body of the function
+                // in which it is declared and excludes the body of any nested
+                // function.
+                var stmt = Ꮡ(new ast.LabeledStmt(Label: label, Colon: colon, Stmt: Ꮡp.parseStmt()));
+                return (new ast.LabeledStmtжStmt(stmt), false);
             }
             // The label declaration typically starts at x[0].Pos(), but the label
             // declaration may be erroneous due to a token after that position (and
@@ -2685,22 +2663,16 @@ internal static (ast.Stmt, bool) parseSimpleStmt(this ж<parser> Ꮡp, nint mode
 
 internal static ж<ast.CallExpr> parseCallExpr(this ж<parser> Ꮡp, @string callType) {
     var x = Ꮡp.parseRhs(); // could be a conversion: (some type)(x)
-    {
-        var t = ast.Unparen(x); if (!AreEqual(t, x)) {
-            Ꮡp.error(x.Pos(), fmt.Sprintf("expression in %s must not be parenthesized"u8, callType));
-            x = t;
-        }
+    var t = ast.Unparen(x); if (!AreEqual(t, x)) {
+        Ꮡp.error(x.Pos(), fmt.Sprintf("expression in %s must not be parenthesized"u8, callType));
+        x = t;
     }
-    {
-        var (call, isCall) = x._<ж<ast.CallExpr>>(ᐧ); if (isCall) {
-            return call;
-        }
+    var (call, isCall) = x._<ж<ast.CallExpr>>(ᐧ); if (isCall) {
+        return call;
     }
-    {
-        var (_, isBad) = x._<ж<ast.BadExpr>>(ᐧ); if (!isBad) {
-            // only report error if it's a new one
-            Ꮡp.error(x.End(), fmt.Sprintf("expression in %s must be function call"u8, callType));
-        }
+    var (_, isBad) = x._<ж<ast.BadExpr>>(ᐧ); if (!isBad) {
+        // only report error if it's a new one
+        Ꮡp.error(x.End(), fmt.Sprintf("expression in %s must be function call"u8, callType));
     }
     return default;
 }
@@ -2822,16 +2794,12 @@ internal static ast.Expr makeExpr(this ж<parser> Ꮡp, ast.Stmt s, @string want
     if (s == nil) {
         return default;
     }
-    {
-        var (es, isExpr) = s._<ж<ast.ExprStmt>>(ᐧ); if (isExpr) {
-            return es.X;
-        }
+    var (es, isExpr) = s._<ж<ast.ExprStmt>>(ᐧ); if (isExpr) {
+        return es.X;
     }
     @string found = simpleStatementˢ;
-    {
-        var (_, isAss) = s._<ж<ast.AssignStmt>>(ᐧ); if (isAss) {
-            found = assignmentˢ;
-        }
+    var (_, isAss) = s._<ж<ast.AssignStmt>>(ᐧ); if (isAss) {
+        found = assignmentˢ;
     }
     Ꮡp.error(s.Pos(), fmt.Sprintf("expected %s, found %s (missing parentheses around composite literal?)"u8, want, found));
     return new ast.BadExprжExpr(Ꮡ(new ast.BadExpr(From: s.Pos(), To: s.End())));
@@ -3131,26 +3099,24 @@ internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) {
                 comm = new ast.SendStmtжStmt(Ꮡ(new ast.SendStmt(Chan: lhs[0], Arrow: arrow, Value: rhs)));
             } else {
                 // RecvStmt
-                {
-                    ref var tok = ref heap<token.Token>(p.tok, out var Ꮡtok); if (tok == token.ASSIGN || tok == token.DEFINE) {
-                        // RecvStmt with assignment
-                        if (len(lhs) > 2) {
-                            Ꮡp.errorExpected(lhs[0].Pos(), or2Expressionsˢ);
-                            // continue with first two expressions
-                            lhs = lhs[0..2];
-                        }
-                        ref var posΔ1 = ref heap<tokenꓸPos>(p.pos, out var ᏑposΔ1);
-                        Ꮡp.next();
-                        var rhs = Ꮡp.parseRhs();
-                        comm = new ast.AssignStmtжStmt(Ꮡ(new ast.AssignStmt(Lhs: lhs, TokPos: posΔ1, Tok: tok, Rhs: slice<ast.Expr>([rhs]))));
-                    } else {
-                        // lhs must be single receive operation
-                        if (len(lhs) > 1) {
-                            Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2);
-                            // continue with first expression
-                        }
-                        comm = new ast.ExprStmtжStmt(Ꮡ(new ast.ExprStmt(X: lhs[0])));
+                ref var tok = ref heap<token.Token>(p.tok, out var Ꮡtok); if (tok == token.ASSIGN || tok == token.DEFINE) {
+                    // RecvStmt with assignment
+                    if (len(lhs) > 2) {
+                        Ꮡp.errorExpected(lhs[0].Pos(), or2Expressionsˢ);
+                        // continue with first two expressions
+                        lhs = lhs[0..2];
                     }
+                    ref var posΔ1 = ref heap<tokenꓸPos>(p.pos, out var ᏑposΔ1);
+                    Ꮡp.next();
+                    var rhs = Ꮡp.parseRhs();
+                    comm = new ast.AssignStmtжStmt(Ꮡ(new ast.AssignStmt(Lhs: lhs, TokPos: posΔ1, Tok: tok, Rhs: slice<ast.Expr>([rhs]))));
+                } else {
+                    // lhs must be single receive operation
+                    if (len(lhs) > 1) {
+                        Ꮡp.errorExpected(lhs[0].Pos(), expressionˢ2);
+                        // continue with first expression
+                    }
+                    comm = new ast.ExprStmtжStmt(Ꮡ(new ast.ExprStmt(X: lhs[0])));
                 }
             }
         } else {
@@ -3332,10 +3298,8 @@ internal static ast.Stmt /*s*/ parseStmt(this ж<parser> Ꮡp) {
             // because of the required look-ahead, labeled statements are
             // parsed by parseSimpleStmt - don't expect a semicolon after
             // them
-            {
-                var (_, isLabeledStmt) = s._<ж<ast.LabeledStmt>>(ᐧ); if (!isLabeledStmt) {
-                    Ꮡp.expectSemi();
-                }
+            var (_, isLabeledStmt) = s._<ж<ast.LabeledStmt>>(ᐧ); if (!isLabeledStmt) {
+                Ꮡp.expectSemi();
             }
             break;
         }
@@ -3602,17 +3566,15 @@ internal static ast.Spec parseTypeSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup
                 // array declaration; a type parameter type that could also be
                 // an ordinary expression but which is followed by a comma tilts
                 // the decision towards a type parameter list.
-                {
-                    var (pname, ptype) = extractName(x, p.tok == token.COMMA); if (pname != nil && (ptype != nil || p.tok != token.RBRACK)) {
-                        // spec.Name "[" pname ...
-                        // spec.Name "[" pname ptype ...
-                        // spec.Name "[" pname ptype "," ...
-                        Ꮡp.parseGenericType(spec, lbrack, pname, ptype); // ptype may be nil
-                    } else {
-                        // spec.Name "[" pname "]" ...
-                        // spec.Name "[" x ...
-                        spec.Type = new ast.ArrayTypeжExpr(Ꮡp.parseArrayType(lbrack, x));
-                    }
+                var (pname, ptype) = extractName(x, p.tok == token.COMMA); if (pname != nil && (ptype != nil || p.tok != token.RBRACK)) {
+                    // spec.Name "[" pname ...
+                    // spec.Name "[" pname ptype ...
+                    // spec.Name "[" pname ptype "," ...
+                    Ꮡp.parseGenericType(spec, lbrack, pname, ptype); // ptype may be nil
+                } else {
+                    // spec.Name "[" pname "]" ...
+                    // spec.Name "[" x ...
+                    spec.Type = new ast.ArrayTypeжExpr(Ꮡp.parseArrayType(lbrack, x));
                 }
             } else {
                 // array type

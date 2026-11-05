@@ -156,10 +156,8 @@ internal static ж<Interface> iface(this ref TypeParam t) {
         // pos is used for tracing output; start with the type parameter position.
         tokenꓸPos pos = t.obj.pos;
         // use the (original or possibly instantiated) type bound position if we have one
-        {
-            var n = asNamed(bound); if (n != nil) {
-                pos = n.obj.pos;
-            }
+        var n = asNamed(bound); if (n != nil) {
+            pos = n.obj.pos;
         }
         computeInterfaceTypeSet(t.check, pos, ityp);
     }

@@ -36,20 +36,14 @@ partial class rsa_package {
 
 // incCounter increments a four byte, big-endian counter.
 internal static void incCounter(ref array<byte> c) {
-    {
-        c[3]++; if (c[3] != 0) {
-            return;
-        }
+    c[3]++; if (c[3] != 0) {
+        return;
     }
-    {
-        c[2]++; if (c[2] != 0) {
-            return;
-        }
+    c[2]++; if (c[2] != 0) {
+        return;
     }
-    {
-        c[1]++; if (c[1] != 0) {
-            return;
-        }
+    c[1]++; if (c[1] != 0) {
+        return;
     }
     c[0]++;
 }
@@ -308,10 +302,8 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
         fips140.RecordNonApproved();
     }
     var salt = new slice<byte>(saltLength);
-    {
-        var errΔ1 = drbg.ReadWithReader(rand, salt); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = drbg.ReadWithReader(rand, salt); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     nint emBits = priv.pub.N.BitLen() - 1;
@@ -327,13 +319,11 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
     // This is extremely annoying, as all other encrypt and decrypt inputs are
     // always the exact same size as the modulus. Since it only happens for
     // weird modulus sizes, fix it by padding inefficiently.
-    {
-        nint emLen = len(em);
-        nint k = priv.pub.Size(); if (emLen < k) {
-            var emNew = new slice<byte>(k);
-            copy(emNew.slice(k - emLen), em);
-            em = emNew;
-        }
+    nint emLen = len(em);
+    nint k = priv.pub.Size(); if (emLen < k) {
+        var emNew = new slice<byte>(k);
+        copy(emNew.slice(k - emLen), em);
+        em = emNew;
     }
 
     return decrypt(ref (Ꮡpriv).DerefOrNull(), em, withCheck);
@@ -358,12 +348,10 @@ internal static error verifyPSS(ж<ΔPublicKey> Ꮡpub, hash.Hash hashΔ1, slice
     fipsSelfTest();
     fips140.RecordApproved();
     checkApprovedHash(hashΔ1);
-    {
-        var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
-            return errΔ1;
-        } else if (!fipsApproved) {
-            fips140.RecordNonApproved();
-        }
+    var (fipsApproved, errΔ1) = checkPublicKey(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
+        return errΔ1;
+    } else if (!fipsApproved) {
+        fips140.RecordNonApproved();
     }
 
     if (len(sig) != pub.Size()) {

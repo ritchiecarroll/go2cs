@@ -78,10 +78,8 @@ public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @str
             throw panic("non-zero import mode");
         }
 
-        {
-            var (abs, errΔ1) = p.absPath(srcDir); if (errΔ1 == nil) { // see issue #14282
-                srcDir = abs;
-            }
+        var (abs, errΔ1) = p.absPath(srcDir); if (errΔ1 == nil) { // see issue #14282
+            srcDir = abs;
         }
         var (bp, err) = p.ctxt.Import(path, srcDir, 0);
         if (err != nil) {
@@ -290,10 +288,8 @@ internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Packa
 
         var cmd = exec.Command(args[0], args[1..].ꓸꓸꓸ);
         cmd.Dir = bp.Dir;
-        {
-            var errΔ2 = cmd.Run(); if (errΔ2 != nil) {
-                return (default, fmt.Errorf("go tool cgo: %w"u8, errΔ2));
-            }
+        var errΔ2 = cmd.Run(); if (errΔ2 != nil) {
+            return (default, fmt.Errorf("go tool cgo: %w"u8, errΔ2));
         }
 
         return parser.ParseFile(p.fset, filepath.Join(tmpdir, cgoGotypesGoˢ), default, parser.SkipObjectResolution);
@@ -310,10 +306,8 @@ internal static (@string, error) absPath(this ref Importer p, @string path) {
 }
 
 internal static bool isAbsPath(this ref Importer p, @string path) {
-    {
-        var f = p.ctxt.IsAbsPath; if (f != nil) {
-            return f(path);
-        }
+    var f = p.ctxt.IsAbsPath; if (f != nil) {
+        return f(path);
     }
     return filepath.IsAbs(path);
 }
@@ -321,10 +315,8 @@ internal static bool isAbsPath(this ref Importer p, @string path) {
 internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
-    {
-        var f = p.ctxt.JoinPath; if (f != nil) {
-            return f(elem.ꓸꓸꓸ);
-        }
+    var f = p.ctxt.JoinPath; if (f != nil) {
+        return f(elem.ꓸꓸꓸ);
     }
     return filepath.Join(elem.ꓸꓸꓸ);
 }

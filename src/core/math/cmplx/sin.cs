@@ -51,26 +51,24 @@ partial class cmplx_package {
 
 // Sin returns the sine of x.
 public static complex128 Sin(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
-        switch (ᐧ) {
-        case {} when im == 0D && (math.IsInf(re, 0) || math.IsNaN(re)): {
-            return complex(math.NaN(), im);
-        }
-        case {} when math.IsInf(im, 0): {
-            switch (ᐧ) {
-            case {} when re is 0D: {
-                return x;
-            }
-            case {} when math.IsInf(re, 0) || math.IsNaN(re): {
-                return complex(math.NaN(), im);
-            }}
-            break;
-        }
-        case {} when re == 0D && math.IsNaN(im): {
-            return x;
-        }}
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when im == 0D && (math.IsInf(re, 0) || math.IsNaN(re)): {
+        return complex(math.NaN(), im);
     }
+    case {} when math.IsInf(im, 0): {
+        switch (ᐧ) {
+        case {} when re is 0D: {
+            return x;
+        }
+        case {} when math.IsInf(re, 0) || math.IsNaN(re): {
+            return complex(math.NaN(), im);
+        }}
+        break;
+    }
+    case {} when re == 0D && math.IsNaN(im): {
+        return x;
+    }}
     var (s, c) = math.Sincos(real(x));
     var (sh, ch) = sinhcosh(imag(x));
     return complex(s * ch, c * sh);
@@ -91,26 +89,24 @@ public static complex128 Sin(complex128 x) {
 
 // Sinh returns the hyperbolic sine of x.
 public static complex128 Sinh(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
-        switch (ᐧ) {
-        case {} when re == 0D && (math.IsInf(im, 0) || math.IsNaN(im)): {
-            return complex(re, math.NaN());
-        }
-        case {} when math.IsInf(re, 0): {
-            switch (ᐧ) {
-            case {} when im is 0D: {
-                return complex(re, im);
-            }
-            case {} when math.IsInf(im, 0) || math.IsNaN(im): {
-                return complex(re, math.NaN());
-            }}
-            break;
-        }
-        case {} when im == 0D && math.IsNaN(re): {
-            return complex(math.NaN(), im);
-        }}
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when re == 0D && (math.IsInf(im, 0) || math.IsNaN(im)): {
+        return complex(re, math.NaN());
     }
+    case {} when math.IsInf(re, 0): {
+        switch (ᐧ) {
+        case {} when im is 0D: {
+            return complex(re, im);
+        }
+        case {} when math.IsInf(im, 0) || math.IsNaN(im): {
+            return complex(re, math.NaN());
+        }}
+        break;
+    }
+    case {} when im == 0D && math.IsNaN(re): {
+        return complex(math.NaN(), im);
+    }}
     var (s, c) = math.Sincos(imag(x));
     var (sh, ch) = sinhcosh(real(x));
     return complex(c * sh, s * ch);
@@ -136,26 +132,24 @@ public static complex128 Sinh(complex128 x) {
 
 // Cos returns the cosine of x.
 public static complex128 Cos(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
-        switch (ᐧ) {
-        case {} when im == 0D && (math.IsInf(re, 0) || math.IsNaN(re)): {
-            return complex(math.NaN(), -im * math.Copysign(0D, re));
-        }
-        case {} when math.IsInf(im, 0): {
-            switch (ᐧ) {
-            case {} when re is 0D: {
-                return complex(math.Inf(1), -re * math.Copysign(0D, im));
-            }
-            case {} when math.IsInf(re, 0) || math.IsNaN(re): {
-                return complex(math.Inf(1), math.NaN());
-            }}
-            break;
-        }
-        case {} when re == 0D && math.IsNaN(im): {
-            return complex(math.NaN(), 0D);
-        }}
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when im == 0D && (math.IsInf(re, 0) || math.IsNaN(re)): {
+        return complex(math.NaN(), -im * math.Copysign(0D, re));
     }
+    case {} when math.IsInf(im, 0): {
+        switch (ᐧ) {
+        case {} when re is 0D: {
+            return complex(math.Inf(1), -re * math.Copysign(0D, im));
+        }
+        case {} when math.IsInf(re, 0) || math.IsNaN(re): {
+            return complex(math.Inf(1), math.NaN());
+        }}
+        break;
+    }
+    case {} when re == 0D && math.IsNaN(im): {
+        return complex(math.NaN(), 0D);
+    }}
     var (s, c) = math.Sincos(real(x));
     var (sh, ch) = sinhcosh(imag(x));
     return complex(c * ch, -s * sh);
@@ -175,26 +169,24 @@ public static complex128 Cos(complex128 x) {
 
 // Cosh returns the hyperbolic cosine of x.
 public static complex128 Cosh(complex128 x) {
-    {
-        var (re, im) = (real(x), imag(x));
-        switch (ᐧ) {
-        case {} when re == 0D && (math.IsInf(im, 0) || math.IsNaN(im)): {
-            return complex(math.NaN(), re * math.Copysign(0D, im));
-        }
-        case {} when math.IsInf(re, 0): {
-            switch (ᐧ) {
-            case {} when im is 0D: {
-                return complex(math.Inf(1), im * math.Copysign(0D, re));
-            }
-            case {} when math.IsInf(im, 0) || math.IsNaN(im): {
-                return complex(math.Inf(1), math.NaN());
-            }}
-            break;
-        }
-        case {} when im == 0D && math.IsNaN(re): {
-            return complex(math.NaN(), im);
-        }}
+    var (re, im) = (real(x), imag(x));
+    switch (ᐧ) {
+    case {} when re == 0D && (math.IsInf(im, 0) || math.IsNaN(im)): {
+        return complex(math.NaN(), re * math.Copysign(0D, im));
     }
+    case {} when math.IsInf(re, 0): {
+        switch (ᐧ) {
+        case {} when im is 0D: {
+            return complex(math.Inf(1), im * math.Copysign(0D, re));
+        }
+        case {} when math.IsInf(im, 0) || math.IsNaN(im): {
+            return complex(math.Inf(1), math.NaN());
+        }}
+        break;
+    }
+    case {} when im == 0D && math.IsNaN(re): {
+        return complex(math.NaN(), im);
+    }}
     var (s, c) = math.Sincos(imag(x));
     var (sh, ch) = sinhcosh(real(x));
     return complex(c * ch, s * sh);

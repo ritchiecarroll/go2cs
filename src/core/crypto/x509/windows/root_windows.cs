@@ -221,11 +221,9 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
         if (parent.PublicKeyAlgorithm != ECDSA) {
             continue;
         }
-        {
-            var errΔ1 = parent.CheckSignature(chain[i].SignatureAlgorithm,
-                chain[i].RawTBSCertificate, chain[i].Signature); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = parent.CheckSignature(chain[i].SignatureAlgorithm,
+            chain[i].RawTBSCertificate, chain[i].Signature); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
     return (chain, default);
@@ -259,10 +257,8 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
                 oids = default;
                 break;
             }
-            {
-                var (oid, ok) = windowsExtKeyUsageOIDs[eku, ꟷ]; if (ok) {
-                    oids = append(oids, Ꮡ(oid, 0));
-                }
+            var (oid, ok) = windowsExtKeyUsageOIDs[eku, ꟷ]; if (ok) {
+                oids = append(oids, Ꮡ(oid, 0));
             }
         }
         if (oids != nil) {
@@ -299,14 +295,12 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             chains = append(chains, chain);
         }
 
-        {
-            var lqCtxCount = topCtx.LowerQualityChainCount; if (lqCtxCount > 0) {
-                var lqCtxs = @unsafe.Slice(topCtx.LowerQualityChains, lqCtxCount);
-                foreach (var (_, ctx) in lqCtxs) {
-                    var (chainΔ1, errΔ1) = verifyChain(Ꮡc, ctx, Ꮡopts);
-                    if (errΔ1 == nil) {
-                        chains = append(chains, chainΔ1);
-                    }
+        var lqCtxCount = topCtx.LowerQualityChainCount; if (lqCtxCount > 0) {
+            var lqCtxs = @unsafe.Slice(topCtx.LowerQualityChains, lqCtxCount);
+            foreach (var (_, ctx) in lqCtxs) {
+                var (chainΔ1, errΔ1) = verifyChain(Ꮡc, ctx, Ꮡopts);
+                if (errΔ1 == nil) {
+                    chains = append(chains, chainΔ1);
                 }
             }
         }

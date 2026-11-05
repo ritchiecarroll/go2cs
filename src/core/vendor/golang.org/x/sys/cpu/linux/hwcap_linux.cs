@@ -24,24 +24,22 @@ internal static nuint hwCap2;
 
 internal static error readHWCAP() {
     // For Go 1.21+, get auxv from the Go runtime.
-    {
-        var a = getAuxv(); if (len(a) > 0) {
-            while (len(a) >= 2) {
-                var tag = a[0];
-                nuint val = (nuint)a[1];
-                a = a[2..];
-                switch (tag) {
-                case var ᴛ when ᴛ == _AT_HWCAP: {
-                    hwCap = val;
-                    break;
-                }
-                case var ᴛ when ᴛ == _AT_HWCAP2: {
-                    hwCap2 = val;
-                    break;
-                }}
+    var a = getAuxv(); if (len(a) > 0) {
+        while (len(a) >= 2) {
+            var tag = a[0];
+            nuint val = (nuint)a[1];
+            a = a[2..];
+            switch (tag) {
+            case var ᴛ when ᴛ == _AT_HWCAP: {
+                hwCap = val;
+                break;
             }
-            return default;
+            case var ᴛ when ᴛ == _AT_HWCAP2: {
+                hwCap2 = val;
+                break;
+            }}
         }
+        return default;
     }
 
     var (buf, err) = os.ReadFile(procAuxv);

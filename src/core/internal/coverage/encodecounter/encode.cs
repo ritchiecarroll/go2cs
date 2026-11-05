@@ -69,10 +69,8 @@ public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byt
     metaFileHash = metaFileHash.Clone();
     ref var cfw = ref Ꮡcfw.DerefOrNull();
 
-    {
-        var err = cfw.writeHeader(metaFileHash); if (err != nil) {
-            return err;
-        }
+    var err = cfw.writeHeader(metaFileHash); if (err != nil) {
+        return err;
     }
     return Ꮡcfw.AppendSegment(args, visitor);
 }
@@ -85,12 +83,10 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     var rem = (uint32)sz % 4;
     if (rem != 0) {
         var pad = zeros.slice(0, (nint)(4 - rem));
-        {
-            var (nw, err) = ws.Write(pad); if (err != nil) {
-                return err;
-            } else if (nw != len(pad)) {
-                return fmt.Errorf("error: short write"u8);
-            }
+        var (nw, err) = ws.Write(pad); if (err != nil) {
+            return err;
+        } else if (nw != len(pad)) {
+            return fmt.Errorf("error: short write"u8);
         }
     }
     return default;
@@ -105,24 +101,18 @@ internal static error patchSegmentHeader(this ref CoverageDataWriter cfw, ж<sli
         return fmt.Errorf("error seeking in patchSegmentHeader: %v"u8, err);
     }
     // seek back to start so that we can update the segment header
-    {
-        var (_, errΔ1) = ws.Seek(0, io.SeekStart); if (errΔ1 != nil) {
-            return fmt.Errorf("error seeking in patchSegmentHeader: %v"u8, errΔ1);
-        }
+    var (_, errΔ1) = ws.Seek(0, io.SeekStart); if (errΔ1 != nil) {
+        return fmt.Errorf("error seeking in patchSegmentHeader: %v"u8, errΔ1);
     }
     if (cfw.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= writing counter segment header: %+v"u8, cfw.csh);
     }
-    {
-        var errΔ2 = binary.Write(new slicewriter_WriteSeekerжWriter(Ꮡws), binary.LittleEndian, cfw.csh); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = binary.Write(new slicewriter_WriteSeekerжWriter(Ꮡws), binary.LittleEndian, cfw.csh); if (errΔ2 != nil) {
+        return errΔ2;
     }
     // ... and finally return to the original offset.
-    {
-        var (_, errΔ3) = ws.Seek(off, io.SeekStart); if (errΔ3 != nil) {
-            return fmt.Errorf("error seeking in patchSegmentHeader: %v"u8, errΔ3);
-        }
+    var (_, errΔ3) = ws.Seek(off, io.SeekStart); if (errΔ3 != nil) {
+        return fmt.Errorf("error seeking in patchSegmentHeader: %v"u8, errΔ3);
     }
     return default;
 }
@@ -154,10 +144,8 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
     error wrULEB128(nuint v) {
         Ꮡcfw.Value.tmp = Ꮡcfw.Value.tmp[..0];
         Ꮡcfw.Value.tmp = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, v);
-        {
-            var (_, err) = Ꮡws.Value.Write(Ꮡcfw.Value.tmp); if (err != nil) {
-                return err;
-            }
+        var (_, err) = Ꮡws.Value.Write(Ꮡcfw.Value.tmp); if (err != nil) {
+            return err;
         }
         return default;
     }
@@ -210,35 +198,23 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
     }
 
     var ws = Ꮡ(new slicewriter.WriteSeeker());
-    {
-        err = Ꮡcfw.writeSegmentPreamble(args, ws); if (err != nil) {
-            return err;
-        }
+    err = Ꮡcfw.writeSegmentPreamble(args, ws); if (err != nil) {
+        return err;
     }
-    {
-        err = Ꮡcfw.writeCounters(visitor, ws); if (err != nil) {
-            return err;
-        }
+    err = Ꮡcfw.writeCounters(visitor, ws); if (err != nil) {
+        return err;
     }
-    {
-        err = cfw.patchSegmentHeader(ws); if (err != nil) {
-            return err;
-        }
+    err = cfw.patchSegmentHeader(ws); if (err != nil) {
+        return err;
     }
-    {
-        var errΔ1 = cfw.writeBytes(ws.BytesWritten()); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = cfw.writeBytes(ws.BytesWritten()); if (errΔ1 != nil) {
+        return errΔ1;
     }
-    {
-        err = cfw.writeFooter(); if (err != nil) {
-            return err;
-        }
+    err = cfw.writeFooter(); if (err != nil) {
+        return err;
     }
-    {
-        var errΔ2 = cfw.w.Flush(); if (errΔ2 != nil) {
-            return fmt.Errorf("write error: %v"u8, errΔ2);
-        }
+    var errΔ2 = cfw.w.Flush(); if (errΔ2 != nil) {
+        return fmt.Errorf("write error: %v"u8, errΔ2);
     }
     cfw.stab = default;
     return default;
@@ -255,10 +231,8 @@ internal static error writeHeader(this ref CoverageDataWriter cfw, /*[16]*/ arra
         CFlavor: cfw.cflavor,
         BigEndian: false
     );
-    {
-        var err = binary.Write(new bufio_WriterжWriter(cfw.w), binary.LittleEndian, ch); if (err != nil) {
-            return err;
-        }
+    var err = binary.Write(new bufio_WriterжWriter(cfw.w), binary.LittleEndian, ch); if (err != nil) {
+        return err;
     }
     return default;
 }
@@ -301,12 +275,10 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
         } else {
             throw panic("internal error: bad counter flavor");
         }
-        {
-            var (sz, err) = ws.Value.Write(buf); if (err != nil) {
-                return err;
-            } else if (sz != towr) {
-                return fmt.Errorf("writing counters: short write"u8);
-            }
+        var (sz, err) = ws.Value.Write(buf); if (err != nil) {
+            return err;
+        } else if (sz != towr) {
+            return fmt.Errorf("writing counters: short write"u8);
         }
         return default;
     }
@@ -333,10 +305,8 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
             }
         }
         foreach (var (_, val) in counters) {
-            {
-                var err = wrvalʗ1(val); if (err != nil) {
-                    return err;
-                }
+            var err = wrvalʗ1(val); if (err != nil) {
+                return err;
             }
         }
         return default;
@@ -355,10 +325,8 @@ internal static error writeFooter(this ref CoverageDataWriter cfw) {
         Magic: coverage.CovCounterMagic.Clone(),
         NumSegments: cfw.segs
     );
-    {
-        var err = binary.Write(new bufio_WriterжWriter(cfw.w), binary.LittleEndian, cf); if (err != nil) {
-            return err;
-        }
+    var err = binary.Write(new bufio_WriterжWriter(cfw.w), binary.LittleEndian, cf); if (err != nil) {
+        return err;
     }
     return default;
 }

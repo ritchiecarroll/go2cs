@@ -799,10 +799,8 @@ internal static (slice<byte> ch, error err) sigDecode(slice<byte> sig, slice<rin
         z[i] = bitUnpack(sig.slice(0, length), p);
         sig = sig.slice(length);
     }
-    {
-        var errΔ1 = hintDecode(sig, h, p); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = hintDecode(sig, h, p); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     return (ch, default);
 }

@@ -15,12 +15,10 @@ partial class chacha20poly1305_package {
 
 internal static void writeWithPadding(ж<poly1305.MAC> p, slice<byte> b) {
     p.Write(b);
-    {
-        nint rem = len(b) % 16; if (rem != 0) {
-            array<byte> buf = new(16);
-            nint padLen = 16 - rem;
-            p.Write(buf.slice(0, padLen));
-        }
+    nint rem = len(b) % 16; if (rem != 0) {
+        array<byte> buf = new(16);
+        nint padLen = 16 - rem;
+        p.Write(buf.slice(0, padLen));
     }
 }
 

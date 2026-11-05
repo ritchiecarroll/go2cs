@@ -302,10 +302,8 @@ internal static void def(Object obj) {
         return; // nothing to do
     }
     // fix Obj link for named types
-    {
-        var typ = asNamed(obj.Type()); if (typ != nil) {
-            typ.obj = obj._<ж<TypeName>>();
-        }
+    var typ = asNamed(obj.Type()); if (typ != nil) {
+        typ.obj = obj._<ж<TypeName>>();
     }
     // exported identifiers go into package unsafe
     var scope = Universe;

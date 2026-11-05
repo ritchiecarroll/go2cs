@@ -160,10 +160,8 @@ internal static error rootMkdirAll(ж<Root> r, @string fullname, FileMode perm) 
             }
             // Try again on EEXIST, because the directory may have been created
             // by another process or thread between the rootOpenDir and mkdirat calls.
-            {
-                var errΔ2 = mkdirat(parent, name, perm); if (errΔ2 != nil && !AreEqual(errΔ2, syscall.EEXIST)) {
-                    return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Err: errΔ2))));
-                }
+            var errΔ2 = mkdirat(parent, name, perm); if (errΔ2 != nil && !AreEqual(errΔ2, syscall.EEXIST)) {
+                return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Err: errΔ2))));
             }
         }
         throw panic("unreachable");
@@ -212,10 +210,8 @@ internal static error rootMkdirAll(ж<Root> r, @string fullname, FileMode perm) 
     }}
     var (_, err) = doInRoot(ref (r).DerefOrNull(), fullname, flags, openDirFunc, openLastComponentFunc);
     if (err != nil) {
-        {
-            var (_, ok) = err._<ж<PathError>>(ᐧ); if (!ok) {
-                err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: fullname, Err: err)));
-            }
+        var (_, ok) = err._<ж<PathError>>(ᐧ); if (!ok) {
+            err = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: fullname, Err: err)));
         }
     }
     return err;
@@ -276,12 +272,10 @@ internal static error rootRename(ж<Root> r, @string oldname, @string newname) {
             // Same checks as applied by rename (in file_unix.go):
             var (fi, errΔ3) = lstatat(newparent, newnameΔ1);
             if (errΔ3 == nil && fi.IsDir()) {
-                {
-                    var (ofi, errΔ4) = lstatat(oldparent, oldnameΔ1); if (errΔ4 != nil) {
-                        return (new EmptyStruct(), errΔ4);
-                    } else if (newnameΔ1 == oldnameΔ1 || !SameFile(fi, ofi)) {
-                        return (new EmptyStruct(), syscall.EEXIST);
-                    }
+                var (ofi, errΔ4) = lstatat(oldparent, oldnameΔ1); if (errΔ4 != nil) {
+                    return (new EmptyStruct(), errΔ4);
+                } else if (newnameΔ1 == oldnameΔ1 || !SameFile(fi, ofi)) {
+                    return (new EmptyStruct(), syscall.EEXIST);
                 }
             }
             return (new EmptyStruct(), renameat(oldparent, oldnameΔ1, newparent, newnameΔ1));
@@ -358,10 +352,8 @@ internal static (T ret, error err) doInRoot<T>(ref Root r, @string name, nuint f
     error err = default;
     GoFrame ᒐ = default;
     try {
-        {
-            var errΔ1 = r.root.incref(); if (errΔ1 != nil) {
-                (ret, err) = (ret, errΔ1); goto ᒐdone;
-            }
+        var errΔ1 = r.root.incref(); if (errΔ1 != nil) {
+            (ret, err) = (ret, errΔ1); goto ᒐdone;
         }
         defer(r.root.decref, ref ᒐ);
 

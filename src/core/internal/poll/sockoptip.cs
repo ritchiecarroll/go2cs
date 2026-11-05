@@ -15,10 +15,8 @@ public static error SetsockoptIPMreq(this ж<FD> Ꮡfd, nint level, nint name, �
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptIPMreq(fd.Sysfd, level, name, mreq);
@@ -34,10 +32,8 @@ public static error SetsockoptIPv6Mreq(this ж<FD> Ꮡfd, nint level, nint name,
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptIPv6Mreq(fd.Sysfd, level, name, mreq);

@@ -41,10 +41,8 @@ public static error Handle(this ref MultiHandler h, context.Context ctx, Record 
     slice<error> errs = default;
     foreach (var i in range(h.multi)) {
         if (h.multi[i].Enabled(ctx, r.Level)) {
-            {
-                var err = h.multi[i].Handle(ctx, r.Clone()); if (err != nil) {
-                    errs = builtin.append(errsᴷ, errs, err);
-                }
+            var err = h.multi[i].Handle(ctx, r.Clone()); if (err != nil) {
+                errs = builtin.append(errsᴷ, errs, err);
             }
         }
     }

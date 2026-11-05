@@ -56,7 +56,7 @@ using static go.@internal.fmtsort_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/fmtsort/sort.go", "sort.cs", "AB5iABICgsqCgoKClIauwoKClJSkpKSkgoCCpKSClKSkxqSAgqSkgoCCtqSCgIK2pICCpIKClLYABBLSgoKUlIKU", "62-64:1")]
+[assembly: GoPositionMap("internal/fmtsort/sort.go", "sort.cs", "AB5iABICgsqCgoKClIauwoKClJSkpKSkgoCCpKSClKSkxqSAgqSkgoKmpIKCpqSAgqSCgpS2AAQS0oKClJSClA==", "62-64:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

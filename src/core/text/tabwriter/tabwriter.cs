@@ -126,13 +126,9 @@ internal static void addLine(this ref Writer b, bool flushed) {
         // of how many cells the current line will have.
         // If the current line's capacity is smaller than that,
         // abandon it and make a new one.
-        {
-            nint n = len(b.lines); if (n >= 2) {
-                {
-                    nint prev = len(b.lines[n - 2]); if (prev > cap(b.lines[n - 1])) {
-                        b.lines[n - 1] = new slice<cell>(0, prev);
-                    }
-                }
+        nint n = len(b.lines); if (n >= 2) {
+            nint prev = len(b.lines[n - 2]); if (prev > cap(b.lines[n - 1])) {
+                b.lines[n - 1] = new slice<cell>(0, prev);
             }
         }
     }
@@ -387,10 +383,8 @@ internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, ni
             // cell exists in this column
             var c = line[column];
             // update width
-            {
-                nint w = c.width + b.padding; if (w > width) {
-                    width = w;
-                }
+            nint w = c.width + b.padding; if (w > width) {
+                width = w;
             }
             // update discardable
             if (c.width > 0 || c.htab) {
@@ -494,20 +488,16 @@ internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                if (op == "Flush"u8) {
-                    // If Flush ran into a panic, we still need to reset.
-                    b.reset();
-                }
-                {
-                    var (nerr, ok) = e._<osError>(ᐧ); if (ok) {
-                        err = nerr.err;
-                        return;
-                    }
-                }
-                throw panic(fmt.Sprintf("tabwriter: panic during %s (%v)"u8, op, e));
+        var e = recover(calledByDefer); if (e != nil) {
+            if (op == "Flush"u8) {
+                // If Flush ran into a panic, we still need to reset.
+                b.reset();
             }
+            var (nerr, ok) = e._<osError>(ᐧ); if (ok) {
+                err = nerr.err;
+                return;
+            }
+            throw panic(fmt.Sprintf("tabwriter: panic during %s (%v)"u8, op, e));
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

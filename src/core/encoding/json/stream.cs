@@ -67,10 +67,8 @@ public static error Decode(this ж<Decoder> Ꮡdec, any v) {
         return dec.err;
     }
 
-    {
-        var errΔ1 = dec.tokenPrepareForDecode(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = dec.tokenPrepareForDecode(); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     if (!dec.tokenValueAllowed()) {
@@ -257,10 +255,8 @@ public static error Encode(this ж<Encoder> Ꮡenc, any v) {
             }
             b = enc.indentBuf;
         }
-        {
-            (_, err) = enc.w.Write(b); if (err != nil) {
-                enc.err = err;
-            }
+        (_, err) = enc.w.Write(b); if (err != nil) {
+            enc.err = err;
         }
         return err;
     }
@@ -489,10 +485,8 @@ public static (ΔToken, error) Token(this ж<Decoder> Ꮡdec) {
                 return dec.tokenError(c);
             }
             ref var x = ref heap<any>(out var Ꮡx);
-            {
-                var errΔ4 = Ꮡdec.Decode(Ꮡx); if (errΔ4 != nil) {
-                    return (default, errΔ4);
-                }
+            var errΔ4 = Ꮡdec.Decode(Ꮡx); if (errΔ4 != nil) {
+                return (default, errΔ4);
             }
             return (x, default);
         }

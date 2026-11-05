@@ -44,18 +44,14 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
         }}
 
         if (i > n) {
-            {
-                var errΔ1 = w.write(p.slice(n, i)); if (errΔ1 != nil) {
-                    return (n, errΔ1);
-                }
+            var errΔ1 = w.write(p.slice(n, i)); if (errΔ1 != nil) {
+                return (n, errΔ1);
             }
             n = i;
         }
 
-        {
-            var errΔ2 = w.encode(b); if (errΔ2 != nil) {
-                return (n, errΔ2);
-            }
+        var errΔ2 = w.encode(b); if (errΔ2 != nil) {
+            return (n, errΔ2);
         }
         n++;
     }
@@ -64,10 +60,8 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
         return (n, default);
     }
 
-    {
-        var errΔ3 = w.write(p.slice(n)); if (errΔ3 != nil) {
-            return (n, errΔ3);
-        }
+    var errΔ3 = w.write(p.slice(n)); if (errΔ3 != nil) {
+        return (n, errΔ3);
     }
 
     return (len(p), default);
@@ -76,10 +70,8 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> p) {
 // Close closes the [Writer], flushing any unwritten data to the underlying
 // [io.Writer], but does not close the underlying io.Writer.
 public static error Close(this ref Writer w) {
-    {
-        var err = w.checkLastByte(); if (err != nil) {
-            return err;
-        }
+    var err = w.checkLastByte(); if (err != nil) {
+        return err;
     }
 
     return w.flush();
@@ -113,10 +105,8 @@ internal static error write(this ref Writer w, slice<byte> p) {
         }
 
         if (w.i == (nint)(lineMaxLen - 1)) {
-            {
-                var err = w.insertSoftLineBreak(); if (err != nil) {
-                    return err;
-                }
+            var err = w.insertSoftLineBreak(); if (err != nil) {
+                return err;
             }
         }
 
@@ -130,10 +120,8 @@ internal static error write(this ref Writer w, slice<byte> p) {
 
 internal static error encode(this ref Writer w, byte b) {
     if ((nint)(lineMaxLen - 1) - w.i < 3) {
-        {
-            var err = w.insertSoftLineBreak(); if (err != nil) {
-                return err;
-            }
+        var err = w.insertSoftLineBreak(); if (err != nil) {
+            return err;
         }
     }
 
@@ -157,10 +145,8 @@ internal static error checkLastByte(this ref Writer w) {
     var b = w.line[w.i - 1];
     if (isWhitespace(b)) {
         w.i--;
-        {
-            var err = w.encode(b); if (err != nil) {
-                return err;
-            }
+        var err = w.encode(b); if (err != nil) {
+            return err;
         }
     }
 
@@ -183,10 +169,8 @@ internal static error insertCRLF(this ref Writer w) {
 }
 
 internal static error flush(this ref Writer w) {
-    {
-        var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != nil) {
-            return err;
-        }
+    var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != nil) {
+        return err;
     }
 
     w.i = 0;

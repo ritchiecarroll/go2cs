@@ -240,10 +240,8 @@ internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
 
         var e = builtin.recover(calledByDefer);
         if (e != nil) {
-            {
-                var (_, ok) = e._<runtimeꓸError>(ᐧ); if (ok) {
-                    throw panic(e);
-                }
+            var (_, ok) = e._<runtimeꓸError>(ᐧ); if (ok) {
+                throw panic(e);
             }
             if (Ꮡt != nil) {
                 t.stopParse();
@@ -396,18 +394,16 @@ internal static void parse(this ж<Tree> Ꮡt) {
             }
             t.backup2(delim);
         }
-        {
-            var n = Ꮡt.textOrAction();
-            switch (n.Type()) {
-            case var ᴛ when ᴛ == nodeEnd || ᴛ == nodeElse: {
-                t.errorf("unexpected %s", n);
-                break;
-            }
-            default: {
-                t.Root.append(n);
-                break;
-            }}
+        var n = Ꮡt.textOrAction();
+        switch (n.Type()) {
+        case var ᴛ when ᴛ == nodeEnd || ᴛ == nodeElse: {
+            t.errorf("unexpected %s", n);
+            break;
         }
+        default: {
+            t.Root.append(n);
+            break;
+        }}
     }
 }
 
@@ -517,37 +513,35 @@ private static readonly @string commandˢᵇ = "command"u8;
 internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var tokenΔ1 = t.nextNonSpace();
-        switch (tokenΔ1.typ) {
-        case var ᴛ when ᴛ == itemBlock: {
-            return Ꮡt.blockControl();
-        }
-        case var ᴛ when ᴛ == itemBreak: {
-            return Ꮡt.breakControl(tokenΔ1.pos, tokenΔ1.line);
-        }
-        case var ᴛ when ᴛ == itemContinue: {
-            return Ꮡt.continueControl(tokenΔ1.pos, tokenΔ1.line);
-        }
-        case var ᴛ when ᴛ == itemElse: {
-            return Ꮡt.elseControl();
-        }
-        case var ᴛ when ᴛ == itemEnd: {
-            return Ꮡt.endControl();
-        }
-        case var ᴛ when ᴛ == itemIf: {
-            return Ꮡt.ifControl();
-        }
-        case var ᴛ when ᴛ == itemRange: {
-            return Ꮡt.rangeControl();
-        }
-        case var ᴛ when ᴛ == itemTemplate: {
-            return Ꮡt.templateControl();
-        }
-        case var ᴛ when ᴛ == itemWith: {
-            return Ꮡt.withControl();
-        }}
+    var tokenΔ1 = t.nextNonSpace();
+    switch (tokenΔ1.typ) {
+    case var ᴛ when ᴛ == itemBlock: {
+        return Ꮡt.blockControl();
     }
+    case var ᴛ when ᴛ == itemBreak: {
+        return Ꮡt.breakControl(tokenΔ1.pos, tokenΔ1.line);
+    }
+    case var ᴛ when ᴛ == itemContinue: {
+        return Ꮡt.continueControl(tokenΔ1.pos, tokenΔ1.line);
+    }
+    case var ᴛ when ᴛ == itemElse: {
+        return Ꮡt.elseControl();
+    }
+    case var ᴛ when ᴛ == itemEnd: {
+        return Ꮡt.endControl();
+    }
+    case var ᴛ when ᴛ == itemIf: {
+        return Ꮡt.ifControl();
+    }
+    case var ᴛ when ᴛ == itemRange: {
+        return Ꮡt.rangeControl();
+    }
+    case var ᴛ when ᴛ == itemTemplate: {
+        return Ꮡt.templateControl();
+    }
+    case var ᴛ when ᴛ == itemWith: {
+        return Ꮡt.withControl();
+    }}
     t.backup();
     var token = t.peek();
     // Do not pop variables; they persist until "end".
@@ -562,10 +556,8 @@ internal static Node /*n*/ action(this ж<Tree> Ꮡt) {
 internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
-            t.unexpected(token, breakˢ);
-        }
+    var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
+        t.unexpected(token, breakˢ);
     }
     if (t.rangeDepth == 0) {
         t.errorf("{{break}} outside {{range}}");
@@ -581,10 +573,8 @@ internal static Node breakControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
 internal static Node continueControl(this ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
-            t.unexpected(token, continueˢ);
-        }
+    var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
+        t.unexpected(token, continueˢ);
     }
     if (t.rangeDepth == 0) {
         t.errorf("{{continue}} outside {{range}}");
@@ -603,71 +593,67 @@ internal static ж<PipeNode> /*pipe*/ pipeline(this ж<Tree> Ꮡt, @string conte
     pipe = Ꮡt.newPipeline(token.pos, token.line, default);
     // Are there declarations or assignments?
 decls:
-    {
-        var v = t.peekNonSpace(); if (v.typ == itemVariable) {
-            t.next();
-            // Since space is a token, we need 3-token look-ahead here in the worst case:
-            // in "$x foo" we need to read "foo" (as opposed to ":=") to know that $x is an
-            // argument variable rather than a declaration. So remember the token
-            // adjacent to the variable so we can push it back if necessary.
-            var tokenAfterVariable = t.peek();
-            var next = t.peekNonSpace();
-            switch (ᐧ) {
-            case {} when (next.typ == itemAssign) || (next.typ == itemDeclare): {
-                pipe.IsAssign = next.typ == itemAssign;
-                t.nextNonSpace();
-                pipe.Decl = builtin.append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
-                t.vars = builtin.append(t.vars, v.val);
-                break;
-            }
-            case {} when next.typ == itemChar && next.val == ","u8: {
-                t.nextNonSpace();
-                pipe.Decl = builtin.append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
-                t.vars = builtin.append(t.vars, v.val);
-                if (context == "range"u8 && len(pipe.Decl) < 2) {
-                    switch (t.peekNonSpace().typ) {
-                    case var ᴛ when ᴛ == itemVariable || ᴛ == itemRightDelim || ᴛ == itemRightParen: {
-                        // second initialized variable in a range pipeline
-                        goto decls;
-                        break;
-                    }
-                    default: {
-                        t.errorf("range can only initialize variables");
-                        break;
-                    }}
-                }
-                t.errorf("too many declarations in %s", context);
-                break;
-            }
-            case {} when tokenAfterVariable.typ == itemSpace: {
-                t.backup3(v, tokenAfterVariable);
-                break;
-            }
-            default: {
-                t.backup2(v);
-                break;
-            }}
+    var v = t.peekNonSpace(); if (v.typ == itemVariable) {
+        t.next();
+        // Since space is a token, we need 3-token look-ahead here in the worst case:
+        // in "$x foo" we need to read "foo" (as opposed to ":=") to know that $x is an
+        // argument variable rather than a declaration. So remember the token
+        // adjacent to the variable so we can push it back if necessary.
+        var tokenAfterVariable = t.peek();
+        var next = t.peekNonSpace();
+        switch (ᐧ) {
+        case {} when (next.typ == itemAssign) || (next.typ == itemDeclare): {
+            pipe.IsAssign = next.typ == itemAssign;
+            t.nextNonSpace();
+            pipe.Decl = builtin.append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
+            t.vars = builtin.append(t.vars, v.val);
+            break;
         }
+        case {} when next.typ == itemChar && next.val == ","u8: {
+            t.nextNonSpace();
+            pipe.Decl = builtin.append(pipe.Decl, Ꮡt.newVariable(v.pos, v.val));
+            t.vars = builtin.append(t.vars, v.val);
+            if (context == "range"u8 && len(pipe.Decl) < 2) {
+                switch (t.peekNonSpace().typ) {
+                case var ᴛ when ᴛ == itemVariable || ᴛ == itemRightDelim || ᴛ == itemRightParen: {
+                    // second initialized variable in a range pipeline
+                    goto decls;
+                    break;
+                }
+                default: {
+                    t.errorf("range can only initialize variables");
+                    break;
+                }}
+            }
+            t.errorf("too many declarations in %s", context);
+            break;
+        }
+        case {} when tokenAfterVariable.typ == itemSpace: {
+            t.backup3(v, tokenAfterVariable);
+            break;
+        }
+        default: {
+            t.backup2(v);
+            break;
+        }}
     }
     for (;;) {
-        {
-            var tokenΔ1 = t.nextNonSpace();
-            switch (tokenΔ1.typ) {
-            case var ᴛ when ᴛ == end: {
-                // At this point, the pipeline is complete
-                t.checkPipeline(pipe, context);
-                return pipe;
-            }
-            case var ᴛ when ᴛ == itemBool || ᴛ == itemCharConstant || ᴛ == itemComplex || ᴛ == itemDot || ᴛ == itemField || ᴛ == itemIdentifier || ᴛ == itemNumber || ᴛ == itemNil || ᴛ == itemRawString || ᴛ == itemString || ᴛ == itemVariable || ᴛ == itemLeftParen: {
-                t.backup();
-                pipe.append(Ꮡt.command());
-                break;
-            }
-            default: {
-                t.unexpected(tokenΔ1, context);
-                break;
-            }}
+        var tokenΔ1 = t.nextNonSpace();
+        switch (tokenΔ1.typ) {
+        case var ᴛ when ᴛ == end: {
+            // At this point, the pipeline is complete
+            t.checkPipeline(pipe, context);
+            return pipe;
         }
+        case var ᴛ when ᴛ == itemBool || ᴛ == itemCharConstant || ᴛ == itemComplex || ᴛ == itemDot || ᴛ == itemField || ᴛ == itemIdentifier || ᴛ == itemNumber || ᴛ == itemNil || ᴛ == itemRawString || ᴛ == itemString || ᴛ == itemVariable || ᴛ == itemLeftParen: {
+            t.backup();
+            pipe.append(Ꮡt.command());
+            break;
+        }
+        default: {
+            t.unexpected(tokenΔ1, context);
+            break;
+        }}
     }
 }
 
@@ -919,26 +905,24 @@ internal static ж<CommandNode> command(this ж<Tree> Ꮡt) {
         if (operand != nil) {
             cmd.append(operand);
         }
-        {
-            var token = t.next();
-            switch (token.typ) {
-            case var ᴛ when ᴛ == itemSpace: {
-                continue;
-                break;
-            }
-            case var ᴛ when ᴛ == itemRightDelim || ᴛ == itemRightParen: {
-                t.backup();
-                break;
-            }
-            case var ᴛ when ᴛ == itemPipe: {
-                // nothing here; break loop below
-                break;
-            }
-            default: {
-                t.unexpected(token, operandˢ);
-                break;
-            }}
+        var token = t.next();
+        switch (token.typ) {
+        case var ᴛ when ᴛ == itemSpace: {
+            continue;
+            break;
         }
+        case var ᴛ when ᴛ == itemRightDelim || ᴛ == itemRightParen: {
+            t.backup();
+            break;
+        }
+        case var ᴛ when ᴛ == itemPipe: {
+            // nothing here; break loop below
+            break;
+        }
+        default: {
+            t.unexpected(token, operandˢ);
+            break;
+        }}
         break;
     }
     if (len(cmd.Args) == 0) {

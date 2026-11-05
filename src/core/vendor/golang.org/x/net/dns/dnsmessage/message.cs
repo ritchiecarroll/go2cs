@@ -77,20 +77,16 @@ public static Type TypeALL => 255;
 
 // String implements fmt.Stringer.String.
 public static @string String(this Type t) {
-    {
-        var (n, ok) = typeNames[t, ꟷ]; if (ok) {
-            return n;
-        }
+    var (n, ok) = typeNames[t, ꟷ]; if (ok) {
+        return n;
     }
     return printUint16((uint16)t);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this Type t) {
-    {
-        var (n, ok) = typeNames[t, ꟷ]; if (ok) {
-            return "dnsmessage."u8 + n;
-        }
+    var (n, ok) = typeNames[t, ꟷ]; if (ok) {
+        return "dnsmessage."u8 + n;
     }
     return printUint16((uint16)t);
 }
@@ -117,20 +113,16 @@ internal static map<Class, @string> classNames = new map<Class, @string>{
 
 // String implements fmt.Stringer.String.
 public static @string String(this Class c) {
-    {
-        var (n, ok) = classNames[c, ꟷ]; if (ok) {
-            return n;
-        }
+    var (n, ok) = classNames[c, ꟷ]; if (ok) {
+        return n;
     }
     return printUint16((uint16)c);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this Class c) {
-    {
-        var (n, ok) = classNames[c, ꟷ]; if (ok) {
-            return "dnsmessage."u8 + n;
-        }
+    var (n, ok) = classNames[c, ꟷ]; if (ok) {
+        return "dnsmessage."u8 + n;
     }
     return printUint16((uint16)c);
 }
@@ -165,20 +157,16 @@ public static RCode RCodeRefused => 5;        // Refused
 
 // String implements fmt.Stringer.String.
 public static @string String(this RCode r) {
-    {
-        var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
-            return n;
-        }
+    var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
+        return n;
     }
     return printUint16((uint16)r);
 }
 
 // GoString implements fmt.GoStringer.GoString.
 public static @string GoString(this RCode r) {
-    {
-        var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
-            return "dnsmessage."u8 + n;
-        }
+    var (n, ok) = rCodeNames[r, ꟷ]; if (ok) {
+        return "dnsmessage."u8 + n;
     }
     return printUint16((uint16)r);
 }
@@ -460,35 +448,23 @@ internal static slice<byte> pack(this ref Δheader h, slice<byte> msg) {
 internal static (nint, error) unpack(this ref Δheader h, slice<byte> msg, nint off) {
     nint newOff = off;
     error err = default;
-    {
-        (h.id, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("id", err))));
-        }
+    (h.id, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("id", err))));
     }
-    {
-        (h.bits, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("bits", err))));
-        }
+    (h.bits, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("bits", err))));
     }
-    {
-        (h.questions, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("questions", err))));
-        }
+    (h.questions, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("questions", err))));
     }
-    {
-        (h.answers, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("answers", err))));
-        }
+    (h.answers, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("answers", err))));
     }
-    {
-        (h.authorities, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("authorities", err))));
-        }
+    (h.authorities, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("authorities", err))));
     }
-    {
-        (h.additionals, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("additionals", err))));
-        }
+    (h.additionals, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("additionals", err))));
     }
     return (newOff, default);
 }
@@ -545,10 +521,8 @@ internal static (slice<byte>, error) pack(this ref Resource r, slice<byte> msg, 
     if (err != nil) {
         return (msg, new nestedErrorжerror(Ꮡ(new nestedError("content", err))));
     }
-    {
-        var errΔ1 = r.Header.fixLen(msg, lenOff, preLen); if (errΔ1 != nil) {
-            return (oldMsg, errΔ1);
-        }
+    var errΔ1 = r.Header.fixLen(msg, lenOff, preLen); if (errΔ1 != nil) {
+        return (oldMsg, errΔ1);
     }
     return (msg, default);
 }
@@ -586,10 +560,8 @@ public static (Header, error) Start(this ref Parser p, slice<byte> msg) {
     }
     p.msg = msg;
     error err = default;
-    {
-        (p.off, err) = p.header.unpack(msg, 0); if (err != nil) {
-            return (new Header(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking header", err))));
-        }
+    (p.off, err) = p.header.unpack(msg, 0); if (err != nil) {
+        return (new Header(), new nestedErrorжerror(Ꮡ(new nestedError("unpacking header", err))));
     }
     p.section = sectionQuestions;
     return (p.header.header(), default);
@@ -632,10 +604,8 @@ internal static (ResourceHeader, error) resourceHeader(this ref Parser p, sectio
         p.off = p.resHeaderOffset;
     }
 
-    {
-        var errΔ1 = p.checkAdvance(sec); if (errΔ1 != nil) {
-            return (new ResourceHeader(), errΔ1);
-        }
+    var errΔ1 = p.checkAdvance(sec); if (errΔ1 != nil) {
+        return (new ResourceHeader(), errΔ1);
     }
     ResourceHeader hdr = new();
     var (off, err) = hdr.unpack(p.msg, p.off);
@@ -661,10 +631,8 @@ internal static error skipResource(this ref Parser p, section sec) {
         p.index++;
         return default;
     }
-    {
-        var errΔ1 = p.checkAdvance(sec); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = p.checkAdvance(sec); if (errΔ1 != nil) {
+        return errΔ1;
     }
     error err = default;
     (p.off, err) = skipResource(p.msg, p.off);
@@ -677,10 +645,8 @@ internal static error skipResource(this ref Parser p, section sec) {
 
 // Question parses a single Question.
 public static (ΔQuestion, error) Question(this ref Parser p) {
-    {
-        var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != nil) {
-            return (new ΔQuestion(), errΔ1);
-        }
+    var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != nil) {
+        return (new ΔQuestion(), errΔ1);
     }
     Name name = new();
     var (off, err) = name.unpack(p.msg, p.off);
@@ -723,24 +689,18 @@ public static (slice<ΔQuestion>, error) AllQuestions(this ref Parser p) {
 
 // SkipQuestion skips a single Question.
 public static error SkipQuestion(this ref Parser p) {
-    {
-        var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = p.checkAdvance(sectionQuestions); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (off, err) = skipName(p.msg, p.off);
     if (err != nil) {
         return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Name", err)));
     }
-    {
-        (off, err) = skipType(p.msg, off); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Type", err)));
-        }
+    (off, err) = skipType(p.msg, off); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Type", err)));
     }
-    {
-        (off, err) = skipClass(p.msg, off); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Class", err)));
-        }
+    (off, err) = skipClass(p.msg, off); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("skipping Question Class", err)));
     }
     p.off = off;
     p.index++;
@@ -750,12 +710,10 @@ public static error SkipQuestion(this ref Parser p) {
 // SkipAllQuestions skips all Questions.
 public static error SkipAllQuestions(this ref Parser p) {
     for (;;) {
-        {
-            var err = p.SkipQuestion(); if (AreEqual(err, ErrSectionDone)) {
-                return default;
-            } else if (err != nil) {
-                return err;
-            }
+        var err = p.SkipQuestion(); if (AreEqual(err, ErrSectionDone)) {
+            return default;
+        } else if (err != nil) {
+            return err;
         }
     }
 }
@@ -805,12 +763,10 @@ public static error SkipAnswer(this ref Parser p) {
 // SkipAllAnswers skips all Answer Resources.
 public static error SkipAllAnswers(this ref Parser p) {
     for (;;) {
-        {
-            var err = p.SkipAnswer(); if (AreEqual(err, ErrSectionDone)) {
-                return default;
-            } else if (err != nil) {
-                return err;
-            }
+        var err = p.SkipAnswer(); if (AreEqual(err, ErrSectionDone)) {
+            return default;
+        } else if (err != nil) {
+            return err;
         }
     }
 }
@@ -860,12 +816,10 @@ public static error SkipAuthority(this ref Parser p) {
 // SkipAllAuthorities skips all Authority Resources.
 public static error SkipAllAuthorities(this ref Parser p) {
     for (;;) {
-        {
-            var err = p.SkipAuthority(); if (AreEqual(err, ErrSectionDone)) {
-                return default;
-            } else if (err != nil) {
-                return err;
-            }
+        var err = p.SkipAuthority(); if (AreEqual(err, ErrSectionDone)) {
+            return default;
+        } else if (err != nil) {
+            return err;
         }
     }
 }
@@ -915,12 +869,10 @@ public static error SkipAdditional(this ref Parser p) {
 // SkipAllAdditionals skips all Additional Resources.
 public static error SkipAllAdditionals(this ref Parser p) {
     for (;;) {
-        {
-            var err = p.SkipAdditional(); if (AreEqual(err, ErrSectionDone)) {
-                return default;
-            } else if (err != nil) {
-                return err;
-            }
+        var err = p.SkipAdditional(); if (AreEqual(err, ErrSectionDone)) {
+            return default;
+        } else if (err != nil) {
+            return err;
         }
     }
 }
@@ -1127,30 +1079,20 @@ public static (ΔUnknownResource, error) UnknownResource(this ref Parser p) {
 public static error Unpack(this ref Message m, slice<byte> msg) {
     Parser p = default;
     error err = default;
-    {
-        (m.Header, err) = p.Start(msg); if (err != nil) {
-            return err;
-        }
+    (m.Header, err) = p.Start(msg); if (err != nil) {
+        return err;
     }
-    {
-        (m.Questions, err) = p.AllQuestions(); if (err != nil) {
-            return err;
-        }
+    (m.Questions, err) = p.AllQuestions(); if (err != nil) {
+        return err;
     }
-    {
-        (m.Answers, err) = p.AllAnswers(); if (err != nil) {
-            return err;
-        }
+    (m.Answers, err) = p.AllAnswers(); if (err != nil) {
+        return err;
     }
-    {
-        (m.Authorities, err) = p.AllAuthorities(); if (err != nil) {
-            return err;
-        }
+    (m.Authorities, err) = p.AllAuthorities(); if (err != nil) {
+        return err;
     }
-    {
-        (m.Additionals, err) = p.AllAdditionals(); if (err != nil) {
-            return err;
-        }
+    (m.Additionals, err) = p.AllAdditionals(); if (err != nil) {
+        return err;
     }
     return default;
 }
@@ -1202,34 +1144,26 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
 
     foreach (var i in range(m.Questions)) {
         error err = default;
-        {
-            (msg, err) = m.Questions[i].pack(msg, compression, compressionOff); if (err != nil) {
-                return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Question", err))));
-            }
+        (msg, err) = m.Questions[i].pack(msg, compression, compressionOff); if (err != nil) {
+            return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Question", err))));
         }
     }
     foreach (var i in range(m.Answers)) {
         error err = default;
-        {
-            (msg, err) = m.Answers[i].pack(msg, compression, compressionOff); if (err != nil) {
-                return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Answer", err))));
-            }
+        (msg, err) = m.Answers[i].pack(msg, compression, compressionOff); if (err != nil) {
+            return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Answer", err))));
         }
     }
     foreach (var i in range(m.Authorities)) {
         error err = default;
-        {
-            (msg, err) = m.Authorities[i].pack(msg, compression, compressionOff); if (err != nil) {
-                return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Authority", err))));
-            }
+        (msg, err) = m.Authorities[i].pack(msg, compression, compressionOff); if (err != nil) {
+            return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Authority", err))));
         }
     }
     foreach (var i in range(m.Additionals)) {
         error err = default;
-        {
-            (msg, err) = m.Additionals[i].pack(msg, compression, compressionOff); if (err != nil) {
-                return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Additional", err))));
-            }
+        (msg, err) = m.Additionals[i].pack(msg, compression, compressionOff); if (err != nil) {
+            return (default, new nestedErrorжerror(Ꮡ(new nestedError("packing Additional", err))));
         }
     }
 
@@ -1352,10 +1286,8 @@ internal static error startCheck(this ref Builder b, section s) {
 
 // StartQuestions prepares the builder for packing Questions.
 public static error StartQuestions(this ref Builder b) {
-    {
-        var err = b.startCheck(sectionQuestions); if (err != nil) {
-            return err;
-        }
+    var err = b.startCheck(sectionQuestions); if (err != nil) {
+        return err;
     }
     b.section = sectionQuestions;
     return default;
@@ -1363,10 +1295,8 @@ public static error StartQuestions(this ref Builder b) {
 
 // StartAnswers prepares the builder for packing Answers.
 public static error StartAnswers(this ref Builder b) {
-    {
-        var err = b.startCheck(sectionAnswers); if (err != nil) {
-            return err;
-        }
+    var err = b.startCheck(sectionAnswers); if (err != nil) {
+        return err;
     }
     b.section = sectionAnswers;
     return default;
@@ -1374,10 +1304,8 @@ public static error StartAnswers(this ref Builder b) {
 
 // StartAuthorities prepares the builder for packing Authorities.
 public static error StartAuthorities(this ref Builder b) {
-    {
-        var err = b.startCheck(sectionAuthorities); if (err != nil) {
-            return err;
-        }
+    var err = b.startCheck(sectionAuthorities); if (err != nil) {
+        return err;
     }
     b.section = sectionAuthorities;
     return default;
@@ -1385,10 +1313,8 @@ public static error StartAuthorities(this ref Builder b) {
 
 // StartAdditionals prepares the builder for packing Additionals.
 public static error StartAdditionals(this ref Builder b) {
-    {
-        var err = b.startCheck(sectionAdditionals); if (err != nil) {
-            return err;
-        }
+    var err = b.startCheck(sectionAdditionals); if (err != nil) {
+        return err;
     }
     b.section = sectionAdditionals;
     return default;
@@ -1442,10 +1368,8 @@ public static error Question(this ж<Builder> Ꮡb, ΔQuestion q) {
     if (err != nil) {
         return err;
     }
-    {
-        var errΔ1 = Ꮡb.incrementSectionCount(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = Ꮡb.incrementSectionCount(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     b.msg = msg;
     return default;
@@ -1467,10 +1391,8 @@ public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔCNA
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1478,20 +1400,14 @@ public static error CNAMEResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔCNA
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("CNAMEResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("CNAMEResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1503,10 +1419,8 @@ public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔMXReso
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1514,20 +1428,14 @@ public static error MXResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔMXReso
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("MXResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("MXResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1539,10 +1447,8 @@ public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔNSReso
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1550,20 +1456,14 @@ public static error NSResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔNSReso
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("NSResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("NSResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1575,10 +1475,8 @@ public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔPTRRe
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1586,20 +1484,14 @@ public static error PTRResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔPTRRe
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("PTRResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("PTRResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1611,10 +1503,8 @@ public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSOARe
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1622,20 +1512,14 @@ public static error SOAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSOARe
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("SOAResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("SOAResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1646,10 +1530,8 @@ public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔTXTRe
     h = h.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1657,20 +1539,14 @@ public static error TXTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔTXTRe
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("TXTResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("TXTResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1682,10 +1558,8 @@ public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSRVRe
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1693,20 +1567,14 @@ public static error SRVResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔSRVRe
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("SRVResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("SRVResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1718,10 +1586,8 @@ public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAResour
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1729,20 +1595,14 @@ public static error AResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAResour
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("AResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("AResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1754,10 +1614,8 @@ public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAAAA
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1765,20 +1623,14 @@ public static error AAAAResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔAAAA
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("AAAAResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("AAAAResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1789,10 +1641,8 @@ public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔOPTRe
     h = h.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1800,20 +1650,14 @@ public static error OPTResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔOPTRe
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("OPTResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("OPTResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1824,10 +1668,8 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
     h = h.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
 
-    {
-        var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = b.checkResourceSection(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
@@ -1835,20 +1677,14 @@ public static error UnknownResource(this ж<Builder> Ꮡb, ResourceHeader h, ΔU
         return new nestedErrorжerror(Ꮡ(new nestedError("ResourceHeader", err)));
     }
     nint preLen = len(msg);
-    {
-        (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
-            return new nestedErrorжerror(Ꮡ(new nestedError("UnknownResource body", err)));
-        }
+    (msg, err) = r.pack(msg, b.compression, b.start); if (err != nil) {
+        return new nestedErrorжerror(Ꮡ(new nestedError("UnknownResource body", err)));
     }
-    {
-        var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
-            return errΔ2;
-        }
+    var errΔ2 = h.fixLen(msg, lenOff, preLen); if (errΔ2 != nil) {
+        return errΔ2;
     }
-    {
-        var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
-            return errΔ3;
-        }
+    var errΔ3 = Ꮡb.incrementSectionCount(); if (errΔ3 != nil) {
+        return errΔ3;
     }
     b.msg = msg;
     return default;
@@ -1901,10 +1737,8 @@ internal static (slice<byte> msg, nint lenOff, error err) pack(this ref Resource
     error err = default;
 
     msg = oldMsg;
-    {
-        (msg, err) = h.Name.pack(msg, compression, compressionOff); if (err != nil) {
-            return (oldMsg, 0, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
-        }
+    (msg, err) = h.Name.pack(msg, compression, compressionOff); if (err != nil) {
+        return (oldMsg, 0, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
     }
     msg = packType(msg, h.Type);
     msg = packClass(msg, h.Class);
@@ -1917,30 +1751,20 @@ internal static (slice<byte> msg, nint lenOff, error err) pack(this ref Resource
 internal static (nint, error) unpack(this ref ResourceHeader h, slice<byte> msg, nint off) {
     nint newOff = off;
     error err = default;
-    {
-        (newOff, err) = h.Name.unpack(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
-        }
+    (newOff, err) = h.Name.unpack(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
     }
-    {
-        (h.Type, newOff, err) = unpackType(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Type", err))));
-        }
+    (h.Type, newOff, err) = unpackType(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Type", err))));
     }
-    {
-        (h.Class, newOff, err) = unpackClass(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Class", err))));
-        }
+    (h.Class, newOff, err) = unpackClass(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Class", err))));
     }
-    {
-        (h.TTL, newOff, err) = unpackUint32(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("TTL", err))));
-        }
+    (h.TTL, newOff, err) = unpackUint32(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("TTL", err))));
     }
-    {
-        (h.Length, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Length", err))));
-        }
+    (h.Length, newOff, err) = unpackUint16(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Length", err))));
     }
     return (newOff, default);
 }
@@ -2005,29 +1829,21 @@ internal static (nint, error) skipResource(slice<byte> msg, nint off) {
     if (err != nil) {
         return (off, new nestedErrorжerror(Ꮡ(new nestedError("Name", err))));
     }
-    {
-        (newOff, err) = skipType(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Type", err))));
-        }
+    (newOff, err) = skipType(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Type", err))));
     }
-    {
-        (newOff, err) = skipClass(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("Class", err))));
-        }
+    (newOff, err) = skipClass(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("Class", err))));
     }
-    {
-        (newOff, err) = skipUint32(msg, newOff); if (err != nil) {
-            return (off, new nestedErrorжerror(Ꮡ(new nestedError("TTL", err))));
-        }
+    (newOff, err) = skipUint32(msg, newOff); if (err != nil) {
+        return (off, new nestedErrorжerror(Ꮡ(new nestedError("TTL", err))));
     }
     (var length, newOff, err) = unpackUint16(msg, newOff);
     if (err != nil) {
         return (off, new nestedErrorжerror(Ꮡ(new nestedError("Length", err))));
     }
-    {
-        newOff += (nint)length; if (newOff > len(msg)) {
-            return (off, errResourceLen);
-        }
+    newOff += (nint)length; if (newOff > len(msg)) {
+        return (off, errResourceLen);
     }
     return (newOff, default);
 }
@@ -2240,12 +2056,10 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
         // segment. A pointer is two bytes with the two most significant
         // bits set to 1 to indicate that it is a pointer.
         if ((i == 0 || n.Data[i - 1] == '.') && compression != nil) {
-            {
-                var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
-                    // Hit. Emit a pointer instead of the rest of
-                    // the domain.
-                    return (append(msg, (byte)((uint16)(ptr >> 8 | 0xC0)), (byte)ptr), default);
-                }
+            var (ptr, ok) = compression[tmpstring(n.Data.slice(i, n.Length)), ꟷ]; if (ok) {
+                // Hit. Emit a pointer instead of the rest of
+                // the domain.
+                return (append(msg, (byte)((uint16)(ptr >> 8 | 0xC0)), (byte)ptr), default);
             }
 
             // Miss. Add the suffix to the compression table if the
@@ -2323,10 +2137,8 @@ Loop:
                 newOff = currOff;
             }
             // Don't follow too many pointers, maybe there's a loop.
-            {
-                ptr++; if (ptr > 10) {
-                    return (off, errTooManyPtr);
-                }
+            ptr++; if (ptr > 10) {
+                return (off, errTooManyPtr);
             }
             currOff = (c ^ 0xC0) << 8 | (nint)c1;
             break;
@@ -2567,10 +2379,8 @@ public static @string GoString(this ref ΔCNAMEResource r) {
 
 internal static (ΔCNAMEResource, error) unpackCNAMEResource(slice<byte> msg, nint off) {
     Name cname = new();
-    {
-        var (_, err) = cname.unpack(msg, off); if (err != nil) {
-            return (new ΔCNAMEResource(), err);
-        }
+    var (_, err) = cname.unpack(msg, off); if (err != nil) {
+        return (new ΔCNAMEResource(), err);
     }
     return (new ΔCNAMEResource(cname.ΔClone()), default);
 }
@@ -2607,10 +2417,8 @@ internal static (ΔMXResource, error) unpackMXResource(slice<byte> msg, nint off
         return (new ΔMXResource(), new nestedErrorжerror(Ꮡ(new nestedError("Pref", err))));
     }
     Name mx = new();
-    {
-        var (_, errΔ1) = mx.unpack(msg, off); if (errΔ1 != nil) {
-            return (new ΔMXResource(), new nestedErrorжerror(Ꮡ(new nestedError("MX", errΔ1))));
-        }
+    var (_, errΔ1) = mx.unpack(msg, off); if (errΔ1 != nil) {
+        return (new ΔMXResource(), new nestedErrorжerror(Ꮡ(new nestedError("MX", errΔ1))));
     }
     return (new ΔMXResource(pref, mx.ΔClone()), default);
 }
@@ -2636,10 +2444,8 @@ public static @string GoString(this ref ΔNSResource r) {
 
 internal static (ΔNSResource, error) unpackNSResource(slice<byte> msg, nint off) {
     Name ns = new();
-    {
-        var (_, err) = ns.unpack(msg, off); if (err != nil) {
-            return (new ΔNSResource(), err);
-        }
+    var (_, err) = ns.unpack(msg, off); if (err != nil) {
+        return (new ΔNSResource(), err);
     }
     return (new ΔNSResource(ns.ΔClone()), default);
 }
@@ -2665,10 +2471,8 @@ public static @string GoString(this ref ΔPTRResource r) {
 
 internal static (ΔPTRResource, error) unpackPTRResource(slice<byte> msg, nint off) {
     Name ptr = new();
-    {
-        var (_, err) = ptr.unpack(msg, off); if (err != nil) {
-            return (new ΔPTRResource(), err);
-        }
+    var (_, err) = ptr.unpack(msg, off); if (err != nil) {
+        return (new ΔPTRResource(), err);
     }
     return (new ΔPTRResource(ptr.ΔClone()), default);
 }
@@ -2721,10 +2525,8 @@ internal static (ΔSOAResource, error) unpackSOAResource(slice<byte> msg, nint o
         return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("NS", err))));
     }
     Name mbox = new();
-    {
-        (off, err) = mbox.unpack(msg, off); if (err != nil) {
-            return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("MBox", err))));
-        }
+    (off, err) = mbox.unpack(msg, off); if (err != nil) {
+        return (new ΔSOAResource(), new nestedErrorжerror(Ꮡ(new nestedError("MBox", err))));
     }
     (var serial, off, err) = unpackUint32(msg, off);
     if (err != nil) {
@@ -2793,10 +2595,8 @@ internal static (ΔTXTResource, error) unpackTXTResource(slice<byte> msg, nint o
     for (var n = (uint16)0; n < length; ) {
         @string t = default;
         error err = default;
-        {
-            (t, off, err) = unpackText(msg, off); if (err != nil) {
-                return (new ΔTXTResource(), new nestedErrorжerror(Ꮡ(new nestedError("text", err))));
-            }
+        (t, off, err) = unpackText(msg, off); if (err != nil) {
+            return (new ΔTXTResource(), new nestedErrorжerror(Ꮡ(new nestedError("text", err))));
         }
         // Check if we got too many bytes.
         if ((uint16)(length - n) < (uint16)((uint16)len(t) + 1)) {
@@ -2852,10 +2652,8 @@ internal static (ΔSRVResource, error) unpackSRVResource(slice<byte> msg, nint o
         return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Port", err))));
     }
     Name target = new();
-    {
-        var (_, errΔ1) = target.unpack(msg, off); if (errΔ1 != nil) {
-            return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target", errΔ1))));
-        }
+    var (_, errΔ1) = target.unpack(msg, off); if (errΔ1 != nil) {
+        return (new ΔSRVResource(), new nestedErrorжerror(Ꮡ(new nestedError("Target", errΔ1))));
     }
     return (new ΔSRVResource(priority, weight, port, target.ΔClone()), default);
 }
@@ -2881,10 +2679,8 @@ public static @string GoString(this ref ΔAResource r) {
 
 internal static (ΔAResource, error) unpackAResource(slice<byte> msg, nint off) {
     array<byte> a = new(4);
-    {
-        var (_, err) = unpackBytes(msg, off, a[..]); if (err != nil) {
-            return (new ΔAResource(), err);
-        }
+    var (_, err) = unpackBytes(msg, off, a[..]); if (err != nil) {
+        return (new ΔAResource(), err);
     }
     return (new ΔAResource(a.Clone()), default);
 }
@@ -2910,10 +2706,8 @@ internal static (slice<byte>, error) pack(this ref ΔAAAAResource r, slice<byte>
 
 internal static (ΔAAAAResource, error) unpackAAAAResource(slice<byte> msg, nint off) {
     array<byte> aaaa = new(16);
-    {
-        var (_, err) = unpackBytes(msg, off, aaaa[..]); if (err != nil) {
-            return (new ΔAAAAResource(), err);
-        }
+    var (_, err) = unpackBytes(msg, off, aaaa[..]); if (err != nil) {
+        return (new ΔAAAAResource(), err);
     }
     return (new ΔAAAAResource(aaaa.Clone()), default);
 }
@@ -3022,10 +2816,8 @@ internal static (ΔUnknownResource, error) unpackUnknownResource(Type recordType
         Type: recordType,
         Data: new slice<byte>(length)
     );
-    {
-        var (_, err) = unpackBytes(msg, off, parsed.Data); if (err != nil) {
-            return (new ΔUnknownResource(), err);
-        }
+    var (_, err) = unpackBytes(msg, off, parsed.Data); if (err != nil) {
+        return (new ΔUnknownResource(), err);
     }
     return (parsed, default);
 }

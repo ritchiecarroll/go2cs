@@ -695,28 +695,24 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
         asanunpoison((@unsafe.Pointer)span.@base(), span.elemsize);
     }
 
-    {
-        nint rate = MemProfileRate; if (rate > 0) {
-            var c = getMCache(ref (mp).DerefOrNull());
-            if (c == nil) {
-                @throw(newUserArenaChunkCalledˢ2);
-            }
-            // Note cache c only valid while m acquired; see #47302
-            if (rate != 1 && (int64)userArenaChunkBytes < c.nextSample) {
-                c.nextSample -= (int64)userArenaChunkBytes;
-            } else {
-                profilealloc(ref (mp).DerefOrNull(), (@unsafe.Pointer)span.@base(), userArenaChunkBytes);
-            }
+    nint rate = MemProfileRate; if (rate > 0) {
+        var c = getMCache(ref (mp).DerefOrNull());
+        if (c == nil) {
+            @throw(newUserArenaChunkCalledˢ2);
+        }
+        // Note cache c only valid while m acquired; see #47302
+        if (rate != 1 && (int64)userArenaChunkBytes < c.nextSample) {
+            c.nextSample -= (int64)userArenaChunkBytes;
+        } else {
+            profilealloc(ref (mp).DerefOrNull(), (@unsafe.Pointer)span.@base(), userArenaChunkBytes);
         }
     }
     mp.Value.mallocing = 0;
     releasem(ref (mp).DerefOrNull());
 
     // Again, because this chunk counts toward heapLive, potentially trigger a GC.
-    {
-        var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
-            gcStart(t);
-        }
+    var t = (new gcTrigger(kind: gcTriggerHeap)); if (t.test()) {
+        gcStart(t);
     }
 
     if (debug.malloc) {

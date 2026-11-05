@@ -147,11 +147,9 @@ public static void Reset(this ref Buffer b) {
 // internal buffer only needs to be resliced.
 // It returns the index where bytes should be written and whether it succeeded.
 internal static (nint, bool) tryGrowByReslice(this ref Buffer b, nint n) {
-    {
-        nint l = len(b.buf); if (n <= cap(b.buf) - l) {
-            b.buf = b.buf.slice(0, l + n);
-            return (l, true);
-        }
+    nint l = len(b.buf); if (n <= cap(b.buf) - l) {
+        b.buf = b.buf.slice(0, l + n);
+        return (l, true);
     }
     return (0, false);
 }
@@ -166,10 +164,8 @@ internal static nint grow(this ref Buffer b, nint n) {
         b.Reset();
     }
     // Try to grow by means of a reslice.
-    {
-        var (i, ok) = b.tryGrowByReslice(n); if (ok) {
-            return i;
-        }
+    var (i, ok) = b.tryGrowByReslice(n); if (ok) {
+        return i;
     }
     if (b.buf == nil && n <= smallBufferSize) {
         b.buf = new slice<byte>(n, smallBufferSize);
@@ -304,22 +300,20 @@ public static (int64 n, error err) WriteTo(this ref Buffer b, io.Writer w) {
     int64 n = default;
 
     b.lastRead = opInvalid;
-    {
-        nint nBytes = b.Len(); if (nBytes > 0) {
-            var (m, e) = w.Write(b.buf.slice(b.off));
-            if (m > nBytes) {
-                throw panic("bytes.Buffer.WriteTo: invalid Write count");
-            }
-            b.off += m;
-            n = (int64)m;
-            if (e != nil) {
-                return (n, e);
-            }
-            // all bytes should have been written, by definition of
-            // Write method in io.Writer
-            if (m != nBytes) {
-                return (n, io.ErrShortWrite);
-            }
+    nint nBytes = b.Len(); if (nBytes > 0) {
+        var (m, e) = w.Write(b.buf.slice(b.off));
+        if (m > nBytes) {
+            throw panic("bytes.Buffer.WriteTo: invalid Write count");
+        }
+        b.off += m;
+        n = (int64)m;
+        if (e != nil) {
+            return (n, e);
+        }
+        // all bytes should have been written, by definition of
+        // Write method in io.Writer
+        if (m != nBytes) {
+            return (n, io.ErrShortWrite);
         }
     }
     // Buffer is now empty; reset.

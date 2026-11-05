@@ -956,10 +956,8 @@ internal static slice<byte> appendTo6(this ΔAddr ip, slice<byte> ret) {
         while (j < 8 && ip.v6u16(j) == 0) {
             j++;
         }
-        {
-            var l = (uint8)(j - i); if (l >= 2 && l > (uint8)(zeroEnd - zeroStart)) {
-                (zeroStart, zeroEnd) = (i, j);
-            }
+        var l = (uint8)(j - i); if (l >= 2 && l > (uint8)(zeroEnd - zeroStart)) {
+            (zeroStart, zeroEnd) = (i, j);
         }
     }
 
@@ -1242,10 +1240,8 @@ public static bool IsValid(this AddrPort p) {
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // AddrPorts sort first by IP address, then port.
 public static nint Compare(this AddrPort p, AddrPort p2) {
-    {
-        nint c = p.Addr().Compare(p2.Addr()); if (c != 0) {
-            return c;
-        }
+    nint c = p.Addr().Compare(p2.Addr()); if (c != 0) {
+        return c;
     }
     return cmp.Compare(p.Port(), p2.Port());
 }
@@ -1552,11 +1548,9 @@ public static bool Contains(this ΔPrefix p, ΔAddr ip) {
     if (!p.IsValid() || ip.hasZone()) {
         return false;
     }
-    {
-        nint f1 = p.ip.BitLen();
-        nint f2 = ip.BitLen(); if (f1 == 0 || f2 == 0 || f1 != f2) {
-            return false;
-        }
+    nint f1 = p.ip.BitLen();
+    nint f2 = ip.BitLen(); if (f1 == 0 || f2 == 0 || f1 != f2) {
+        return false;
     }
     if (ip.Is4()) {
         // xor the IP addresses together; mismatched bits are now ones.
@@ -1592,13 +1586,11 @@ public static bool Overlaps(this ΔPrefix p, ΔPrefix o) {
         return false;
     }
     nint minBits = default;
-    {
-        nint pb = p.Bits();
-        nint ob = o.Bits(); if (pb < ob) {
-            minBits = pb;
-        } else {
-            minBits = ob;
-        }
+    nint pb = p.Bits();
+    nint ob = o.Bits(); if (pb < ob) {
+        minBits = pb;
+    } else {
+        minBits = ob;
     }
     if (minBits == 0) {
         return true;
@@ -1608,15 +1600,11 @@ public static bool Overlaps(this ΔPrefix p, ΔPrefix o) {
     // so the Prefix call on the one that's already minBits serves to zero
     // out any remaining bits in IP.
     error err = default;
-    {
-        (p, err) = p.ip.Prefix(minBits); if (err != nil) {
-            return false;
-        }
+    (p, err) = p.ip.Prefix(minBits); if (err != nil) {
+        return false;
     }
-    {
-        (o, err) = o.ip.Prefix(minBits); if (err != nil) {
-            return false;
-        }
+    (o, err) = o.ip.Prefix(minBits); if (err != nil) {
+        return false;
     }
     return p.ip == o.ip;
 }

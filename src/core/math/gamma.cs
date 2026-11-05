@@ -155,10 +155,8 @@ public static float64 Gamma(float64 x) {
         // so x must be small enough to be in range for conversion to int64.
         // If |x| were >= 2⁶³ it would have to be an integer.
         nint signgam = 1;
-        {
-            var ip = (int64)p; if ((ip & 1) == 0) {
-                signgam = -1;
-            }
+        var ip = (int64)p; if ((ip & 1) == 0) {
+            signgam = -1;
         }
         var zΔ1 = q - p;
         if (zΔ1 > 0.5D) {

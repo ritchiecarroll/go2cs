@@ -58,10 +58,8 @@ public static (slice<byte> text, error err) MarshalText(this ж<ΔInt> Ꮡx) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 public static error UnmarshalText(this ж<ΔInt> Ꮡz, slice<byte> text) {
-    {
-        var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes_package.NewReader(text)), 0); if (!ok) {
-            return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
-        }
+    var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes_package.NewReader(text)), 0); if (!ok) {
+        return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
     }
     return default;
 }

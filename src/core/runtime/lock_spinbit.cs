@@ -107,16 +107,12 @@ internal static void lockVerifyMSize() {
 //
 //go:nosplit
 internal static muintptr mutexWaitListHead(uintptr v) {
-    {
-        var highBits = (uintptr)(v & ~(uintptr)(uintptr)mutexMMask); if (highBits == 0) {
-            return 0;
-        } else {
-            var m0bits = new muintptr(Ꮡm0); if (highBits == (uintptr)((uintptr)m0bits & ~(uintptr)(uintptr)mutexMMask)) {
-                return m0bits;
-            } else {
-                return (muintptr)(highBits + (uintptr)mutexMOffset);
-            }
-        }
+    var highBits = (uintptr)(v & ~(uintptr)(uintptr)mutexMMask); if (highBits == 0) {
+        return 0;
+    } else if ((new muintptr(Ꮡm0)) is var m0bits && highBits == (uintptr)((uintptr)m0bits & ~(uintptr)(uintptr)mutexMMask)) {
+        return m0bits;
+    } else {
+        return (muintptr)(highBits + (uintptr)mutexMOffset);
     }
 }
 
@@ -164,17 +160,15 @@ internal static partial void unlock(ж<mutex> l) {
 // mutexSampleContention returns whether the current mutex operation should
 // report any contention it discovers.
 internal static bool mutexSampleContention() {
-    {
-        var rate = (int64)atomic.Load64(Ꮡmutexprofilerate); if (rate <= 0) {
-            return false;
-        } else {
-            // TODO: have SetMutexProfileFraction do the clamping
-            var rate32 = (uint32)rate;
-            if ((int64)rate32 != rate) {
-                rate32 = ~(uint32)0;
-            }
-            return cheaprandn(rate32) == 0;
+    var rate = (int64)atomic.Load64(Ꮡmutexprofilerate); if (rate <= 0) {
+        return false;
+    } else {
+        // TODO: have SetMutexProfileFraction do the clamping
+        var rate32 = (uint32)rate;
+        if ((int64)rate32 != rate) {
+            rate32 = ~(uint32)0;
         }
+        return cheaprandn(rate32) == 0;
     }
 }
 

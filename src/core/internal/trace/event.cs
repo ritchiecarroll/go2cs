@@ -428,10 +428,8 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
             (e, err) = (new ΔEvent(), fmt.Errorf("the Kind field must be provided"u8)); goto ᒐdone;
         }
         case var ᴛ when ᴛ == EventMetric: {
-            {
-                var (m, ok) = ((any)c.Details)._<ΔMetric>(ᐧ); if (ok) {
-                    (e, err) = makeMetricEvent(e, m); goto ᒐdone;
-                }
+            if (((any)c.Details)._<ΔMetric>(out var m)) {
+                (e, err) = makeMetricEvent(e, m); goto ᒐdone;
             }
             break;
         }
@@ -460,10 +458,8 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
             break;
         }
         case var ᴛ when ᴛ == EventSync: {
-            {
-                var (s, ok) = ((any)c.Details)._<ΔSync>(ᐧ); if (ok) {
-                    (e, err) = makeSyncEvent(e, s); goto ᒐdone;
-                }
+            if (((any)c.Details)._<ΔSync>(out var s)) {
+                (e, err) = makeSyncEvent(e, s); goto ᒐdone;
             }
             break;
         }
@@ -492,10 +488,8 @@ public static (ΔEvent e, error err) MakeEvent<T>(EventConfig<T> c)
             break;
         }
         case var ᴛ when ᴛ == EventStackSample: {
-            {
-                var (_, ok) = ((any)c.Details)._<StackSample>(ᐧ); if (ok) {
-                    (e, err) = makeStackSampleEvent(e, c.Stack); goto ᒐdone;
-                }
+            if (((any)c.Details)._<StackSample>(out _)) {
+                (e, err) = makeStackSampleEvent(e, c.Stack); goto ᒐdone;
             }
             break;
         }}
@@ -1096,10 +1090,8 @@ private static readonly @string gcMarkAssistˢᵇ = "GC mark assist"u8;
 public static ΔRange Range(this ΔEvent e) {
     e = e.ΔClone();
 
-    {
-        var kind = e.Kind(); if (kind != EventRangeBegin && kind != EventRangeActive && kind != EventRangeEnd) {
-            throw panic("Range called on non-Range event");
-        }
+    var kind = e.Kind(); if (kind != EventRangeBegin && kind != EventRangeActive && kind != EventRangeEnd) {
+        throw panic("Range called on non-Range event");
     }
     ΔRange r = default;
     switch (e.@base.typ) {
@@ -1172,10 +1164,8 @@ public static slice<RangeAttribute> RangeAttributes(this ΔEvent e) {
 public static ΔTask Task(this ΔEvent e) {
     e = e.ΔClone();
 
-    {
-        var kind = e.Kind(); if (kind != EventTaskBegin && kind != EventTaskEnd) {
-            throw panic("Task called on non-Task event");
-        }
+    var kind = e.Kind(); if (kind != EventTaskBegin && kind != EventTaskEnd) {
+        throw panic("Task called on non-Task event");
     }
     var parentID = NoTask;
     @string typ = default;
@@ -1207,10 +1197,8 @@ public static ΔTask Task(this ΔEvent e) {
 public static ΔRegion Region(this ΔEvent e) {
     e = e.ΔClone();
 
-    {
-        var kind = e.Kind(); if (kind != EventRegionBegin && kind != EventRegionEnd) {
-            throw panic("Region called on non-Region event");
-        }
+    var kind = e.Kind(); if (kind != EventRegionBegin && kind != EventRegionEnd) {
+        throw panic("Region called on non-Region event");
     }
     if (e.@base.typ != tracev2.EvUserRegionBegin && e.@base.typ != tracev2.EvUserRegionEnd) {
         throw panic(fmt.Sprintf("internal error: unexpected wire-format event type for Region kind: %d"u8, e.@base.typ));
@@ -1519,106 +1507,102 @@ public static @string String(this ΔEvent e) {
     fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "M=%d P=%d G=%d"u8, e.Thread(), e.Proc(), e.Goroutine());
     fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " %s Time=%d"u8, e.Kind(), e.Time());
     // Kind-specific fields.
-    {
-        var kind = e.Kind();
-        switch (kind) {
-        case var ᴛ when ᴛ == EventMetric: {
-            var m = e.Metric();
-            @string v = m.Value.String();
-            if (m.Value.Kind() == ValueString) {
-                v = strconv.Quote(v);
-            }
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Value=%s"u8, m.Name, m.Value);
-            break;
+    var kind = e.Kind();
+    switch (kind) {
+    case var ᴛ when ᴛ == EventMetric: {
+        var m = e.Metric();
+        @string v = m.Value.String();
+        if (m.Value.Kind() == ValueString) {
+            v = strconv.Quote(v);
         }
-        case var ᴛ when ᴛ == EventLabel: {
-            var l = e.Label();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Label=%q Resource=%s"u8, l.ΔΔLabel, l.Resource);
-            break;
-        }
-        case var ᴛ when ᴛ == EventRangeBegin || ᴛ == EventRangeActive || ᴛ == EventRangeEnd: {
-            var r = e.Range();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Scope=%s"u8, r.Name, r.Scope);
-            if (kind == EventRangeEnd) {
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Attributes=["u8);
-                foreach (var (i, attr) in e.RangeAttributes()) {
-                    if (i != 0) {
-                        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " "u8);
-                    }
-                    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "%q=%s"u8, attr.Name, attr.Value);
-                }
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "]"u8);
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == EventTaskBegin || ᴛ == EventTaskEnd: {
-            var t = e.Task();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ID=%d Parent=%d Type=%q"u8, t.ID, t.Parent, t.Type);
-            break;
-        }
-        case var ᴛ when ᴛ == EventRegionBegin || ᴛ == EventRegionEnd: {
-            var r = e.Region();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Task=%d Type=%q"u8, r.Task, r.Type);
-            break;
-        }
-        case var ᴛ when ᴛ == EventLog: {
-            var l = e.Log();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Task=%d Category=%q Message=%q"u8, l.Task, l.Category, l.Message);
-            break;
-        }
-        case var ᴛ when ᴛ == EventStateTransition: {
-            var s = e.StateTransition();
-            switch (s.Resource.Kind) {
-            case var ᴛ2 when ᴛ2 == ResourceGoroutine: {
-                var id = s.Resource.Goroutine();
-                var (old, @new) = s.Goroutine();
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " GoID=%d %s->%s"u8, id, old, @new);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == ResourceProc: {
-                var id = s.Resource.Proc();
-                var (old, @new) = s.Proc();
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ProcID=%d %s->%s"u8, id, old, @new);
-                break;
-            }}
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Reason=%q"u8, s.Reason);
-            if (s.Stack != NoStack) {
-                fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
-                fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), transitionStackˢ);
-                printStack(new strings_BuilderжWriter(Ꮡsb), "\t", s.Stack.Frames());
-            }
-            break;
-        }
-        case var ᴛ when ᴛ == EventExperimental: {
-            var r = e.Experimental();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%s Args=["u8, r.Name);
-            foreach (var (i, arg) in r.Args) {
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Value=%s"u8, m.Name, m.Value);
+        break;
+    }
+    case var ᴛ when ᴛ == EventLabel: {
+        var l = e.Label();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Label=%q Resource=%s"u8, l.ΔΔLabel, l.Resource);
+        break;
+    }
+    case var ᴛ when ᴛ == EventRangeBegin || ᴛ == EventRangeActive || ᴛ == EventRangeEnd: {
+        var r = e.Range();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%q Scope=%s"u8, r.Name, r.Scope);
+        if (kind == EventRangeEnd) {
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Attributes=["u8);
+            foreach (var (i, attr) in e.RangeAttributes()) {
                 if (i != 0) {
-                    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), ", "u8);
+                    fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " "u8);
                 }
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "%s=%s"u8, arg, r.ArgValue(i).String());
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "%q=%s"u8, attr.Name, attr.Value);
             }
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "]"u8);
+        }
+        break;
+    }
+    case var ᴛ when ᴛ == EventTaskBegin || ᴛ == EventTaskEnd: {
+        var t = e.Task();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ID=%d Parent=%d Type=%q"u8, t.ID, t.Parent, t.Type);
+        break;
+    }
+    case var ᴛ when ᴛ == EventRegionBegin || ᴛ == EventRegionEnd: {
+        var r = e.Region();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Task=%d Type=%q"u8, r.Task, r.Type);
+        break;
+    }
+    case var ᴛ when ᴛ == EventLog: {
+        var l = e.Log();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Task=%d Category=%q Message=%q"u8, l.Task, l.Category, l.Message);
+        break;
+    }
+    case var ᴛ when ᴛ == EventStateTransition: {
+        var s = e.StateTransition();
+        switch (s.Resource.Kind) {
+        case var ᴛ2 when ᴛ2 == ResourceGoroutine: {
+            var id = s.Resource.Goroutine();
+            var (old, @new) = s.Goroutine();
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " GoID=%d %s->%s"u8, id, old, @new);
             break;
         }
-        case var ᴛ when ᴛ == EventSync: {
-            var s = e.Sync();
-            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " N=%d"u8, s.N);
-            if (s.ClockSnapshot != nil) {
-                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Trace=%d Mono=%d Wall=%s"u8,
-                    s.ClockSnapshot.Trace,
-                    s.ClockSnapshot.Mono,
-                    s.ClockSnapshot.Wall.Format(time.RFC3339Nano));
-            }
+        case var ᴛ2 when ᴛ2 == ResourceProc: {
+            var id = s.Resource.Proc();
+            var (old, @new) = s.Proc();
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " ProcID=%d %s->%s"u8, id, old, @new);
             break;
         }}
-    }
-    {
-        var stk = e.Stack(); if (stk != NoStack) {
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Reason=%q"u8, s.Reason);
+        if (s.Stack != NoStack) {
             fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
-            fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), stackˢ);
-            printStack(new strings_BuilderжWriter(Ꮡsb), "\t", stk.Frames());
+            fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), transitionStackˢ);
+            printStack(new strings_BuilderжWriter(Ꮡsb), "\t", s.Stack.Frames());
         }
+        break;
+    }
+    case var ᴛ when ᴛ == EventExperimental: {
+        var r = e.Experimental();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Name=%s Args=["u8, r.Name);
+        foreach (var (i, arg) in r.Args) {
+            if (i != 0) {
+                fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), ", "u8);
+            }
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "%s=%s"u8, arg, r.ArgValue(i).String());
+        }
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "]"u8);
+        break;
+    }
+    case var ᴛ when ᴛ == EventSync: {
+        var s = e.Sync();
+        fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " N=%d"u8, s.N);
+        if (s.ClockSnapshot != nil) {
+            fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), " Trace=%d Mono=%d Wall=%s"u8,
+                s.ClockSnapshot.Trace,
+                s.ClockSnapshot.Mono,
+                s.ClockSnapshot.Wall.Format(time.RFC3339Nano));
+        }
+        break;
+    }}
+    var stk = e.Stack(); if (stk != NoStack) {
+        fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb));
+        fmt.Fprintln(new strings_BuilderжWriter(Ꮡsb), stackˢ);
+        printStack(new strings_BuilderжWriter(Ꮡsb), "\t", stk.Frames());
     }
     return sb.String();
 }

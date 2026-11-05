@@ -106,21 +106,19 @@ private static readonly @string runlockOfUnlockedRwmutexˢᵇ = "runlock of unlo
 internal static void runlock(this ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
-    {
-        var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
-            if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
-                @throw(runlockOfUnlockedRwmutexˢ);
+    var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
+        if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
+            @throw(runlockOfUnlockedRwmutexˢ);
+        }
+        // A writer is pending.
+        if (Ꮡrw.ᏑreaderWait.Add(-1) == 0) {
+            // The last reader unblocks the writer.
+            @lock(Ꮡrw.ᏑrLock);
+            var w = rw.writer.ptr();
+            if (w != nil) {
+                notewakeup(w.of(m.Ꮡpark));
             }
-            // A writer is pending.
-            if (Ꮡrw.ᏑreaderWait.Add(-1) == 0) {
-                // The last reader unblocks the writer.
-                @lock(Ꮡrw.ᏑrLock);
-                var w = rw.writer.ptr();
-                if (w != nil) {
-                    notewakeup(w.of(m.Ꮡpark));
-                }
-                unlock(Ꮡrw.ᏑrLock);
-            }
+            unlock(Ꮡrw.ᏑrLock);
         }
     }
     releaseLockRankAndM(rw.readRank);

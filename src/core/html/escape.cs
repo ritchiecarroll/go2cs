@@ -146,25 +146,19 @@ internal static (nint dst1, nint src1) unescapeEntity(slice<byte> b, nint dst, n
         // No-op.
     } else if (attribute && entityName[len(entityName) - 1] != ';' && len(s) > i && s[i] == '=') {
         // No-op.
-    } else {
-        var x = entity[tmpstring(entityName)]; if (x != 0) {
-            return (dst + utf8.EncodeRune(b.slice(dst), x), src + i);
-        } else {
-            var xΔ1 = entity2[tmpstring(entityName), () => new array<rune>(2)].Clone(); if (xΔ1[0] != 0) {
-                nint dst1Δ1 = dst + utf8.EncodeRune(b.slice(dst), xΔ1[0]);
-                return (dst1Δ1 + utf8.EncodeRune(b.slice(dst1Δ1), xΔ1[1]), src + i);
-            } else if (!attribute) {
-                nint maxLen = len(entityName) - 1;
-                if (maxLen > longestEntityWithoutSemicolon) {
-                    maxLen = longestEntityWithoutSemicolon;
-                }
-                for (nint j = maxLen; j > 1; j--) {
-                    {
-                        var xΔ2 = entity[tmpstring(entityName.slice(0, j))]; if (xΔ2 != 0) {
-                            return (dst + utf8.EncodeRune(b.slice(dst), xΔ2), src + j + 1);
-                        }
-                    }
-                }
+    } else if (entity[tmpstring(entityName)] is var x && x != 0) {
+        return (dst + utf8.EncodeRune(b.slice(dst), x), src + i);
+    } else if (entity2[tmpstring(entityName), () => new array<rune>(2)].Clone() is var xΔ1 && xΔ1[0] != 0) {
+        nint dst1Δ1 = dst + utf8.EncodeRune(b.slice(dst), xΔ1[0]);
+        return (dst1Δ1 + utf8.EncodeRune(b.slice(dst1Δ1), xΔ1[1]), src + i);
+    } else if (!attribute) {
+        nint maxLen = len(entityName) - 1;
+        if (maxLen > longestEntityWithoutSemicolon) {
+            maxLen = longestEntityWithoutSemicolon;
+        }
+        for (nint j = maxLen; j > 1; j--) {
+            var xΔ2 = entity[tmpstring(entityName.slice(0, j))]; if (xΔ2 != 0) {
+                return (dst + utf8.EncodeRune(b.slice(dst), xΔ2), src + j + 1);
             }
         }
     }

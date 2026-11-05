@@ -205,21 +205,17 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         (numRead, d.err) = d.r.Read(d.arr.slice(numCopy));
         d.@in = d.arr.slice(0, numCopy + numRead);
         if (AreEqual(d.err, io.EOF) && len(d.@in) % 2 != 0) {
-            {
-                var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 0x0f) {
-                    d.err = ((InvalidByteError)d.@in[len(d.@in) - 1]);
-                } else {
-                    d.err = io.ErrUnexpectedEOF;
-                }
+            var a = reverseHexTable[d.@in[len(d.@in) - 1]]; if (a > 0x0f) {
+                d.err = ((InvalidByteError)d.@in[len(d.@in) - 1]);
+            } else {
+                d.err = io.ErrUnexpectedEOF;
             }
         }
     }
 
     // Decode internal buffer into output buffer
-    {
-        nint numAvail = len(d.@in) / 2; if (len(p) > numAvail) {
-            p = p.slice(0, numAvail);
-        }
+    nint numAvail = len(d.@in) / 2; if (len(p) > numAvail) {
+        p = p.slice(0, numAvail);
     }
     (var numDec, err) = Decode(p, d.@in.slice(0, len(p) * 2));
     d.@in = d.@in.slice(2 * numDec);

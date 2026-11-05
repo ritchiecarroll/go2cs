@@ -81,10 +81,8 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
 
         // Resize it to the correct size.
         nint totalSize = sharedMemSize(size);
-        {
-            var errΔ1 = f.Truncate((int64)totalSize); if (errΔ1 != nil) {
-                (m, err) = (default, errΔ1); goto ᒐdone;
-            }
+        var errΔ1 = f.Truncate((int64)totalSize); if (errΔ1 != nil) {
+            (m, err) = (default, errΔ1); goto ᒐdone;
         }
 
         // Map the file into memory.

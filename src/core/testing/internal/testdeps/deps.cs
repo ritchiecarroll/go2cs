@@ -308,10 +308,8 @@ internal static (@string, error) coverTearDown(@string coverprofile, @string goc
         }
         CoverMarkProfileEmittedFunc(true);
         @string cmode = CoverMode;
-        {
-            var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != nil) {
-                return (errorGeneratingCoverageˢ, errΔ1);
-            }
+        var errΔ1 = CoverProcessTestDirFunc(gocoverdir, coverprofile, cmode, Covered, new os.FileжWriter(os.Stdout), CoverSelectedPackages); if (errΔ1 != nil) {
+            return (errorGeneratingCoverageˢ, errΔ1);
         }
         return ("", default);
     }

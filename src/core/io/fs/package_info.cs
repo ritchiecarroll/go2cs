@@ -69,13 +69,13 @@ using static go.io.fs_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
 [assembly: GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAANV6CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
-[assembly: GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKkpAADEPKCgoKmgoKCgpSCpqqigpSm")]
-[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABo6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1", "", "", "47:21")]
-[assembly: GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIK2goKUpIKAgoKCyIKCgoKUgoKCgpQ=", "", "", "", "47:21")]
+[assembly: GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSCuIKUgoKUpoKUgriCpoKCgpSCgoKmqJKkpAADEPKCgoKmgoKCgpSCpqqigpSm")]
+[assembly: GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABo6AAgCgqaCgpSkgoKmgoYAChCCpoKmgqaCpoKqooKU", "46-48:1", "", "", "45:21")]
+[assembly: GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgqaCgpSkgoKCgriCgoKClIKCgoKU", "", "", "", "45:21")]
 [assembly: GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
-[assembly: GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCtoKClJI=", "", "", "", "35:21")]
-[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClICCpKaSkpKSAAYQkoKUqJKClIKUqJKAgoCCxuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlICCpIKmgoKCgoKUlOaigpSSgpQ=")]
-[assembly: GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKAgpSUtoKUgoKClLiCgoCCgpS2AAIeAAwCgoKUlIKU")]
+[assembly: GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oKmgoKUkg==", "", "", "", "33:21")]
+[assembly: GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClIKUppKSkpIABhCSgpSokoKUgpSokoKCpuaCgoKUguaCgoKUgqaCgoKUguaCgoKUgoKU5oKCgpSCgpSmlIKUgqaCgoKCgpSU5qKClJKClA==")]
+[assembly: GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKClJSmgpSCgoKUuIKCgoKUpgACHgAMAoKClJSClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

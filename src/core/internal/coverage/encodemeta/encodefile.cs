@@ -75,10 +75,8 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
         CGranularity: granularity
     );
     error err = default;
-    {
-        err = binary.Write(new bufio_WriterжWriter(m.w), binary.LittleEndian, mh); if (err != nil) {
-            return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
-        }
+    err = binary.Write(new bufio_WriterжWriter(m.w), binary.LittleEndian, mh); if (err != nil) {
+        return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
     }
 
     if (m.debug) {
@@ -91,10 +89,8 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     var buf = new slice<byte>(8);
     foreach (var (_, blob) in blobs) {
         binary.LittleEndian.PutUint64(buf, off);
-        {
-            (_, err) = m.w.Write(buf); if (err != nil) {
-                return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
-            }
+        (_, err) = m.w.Write(buf); if (err != nil) {
+            return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
         }
         if (m.debug) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= pkg offset %d 0x%x\n"u8, off, off);
@@ -105,10 +101,8 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     foreach (var (_, blob) in blobs) {
         var bl = (uint64)len(blob);
         binary.LittleEndian.PutUint64(buf, bl);
-        {
-            (_, err) = m.w.Write(buf); if (err != nil) {
-                return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
-            }
+        (_, err) = m.w.Write(buf); if (err != nil) {
+            return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
         }
         if (m.debug) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= pkg len %d 0x%x\n"u8, bl, bl);
@@ -117,10 +111,8 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     }
 
     // Emit string table
-    {
-        err = Ꮡm.Ꮡstab.Write(new bufio_WriterжWriter(m.w)); if (err != nil) {
-            return err;
-        }
+    err = Ꮡm.Ꮡstab.Write(new bufio_WriterжWriter(m.w)); if (err != nil) {
+        return err;
     }
 
     // Now emit blobs themselves.
@@ -130,10 +122,8 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
             h.Write(blob);
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= writing blob %d len %d at off=%d hash %s\n"u8, k, len(blob), off2, fmt.Sprintf("%x"u8, h.Sum(default)));
         }
-        {
-            (_, err) = m.w.Write(blob); if (err != nil) {
-                return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
-            }
+        (_, err) = m.w.Write(blob); if (err != nil) {
+            return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
         }
         if (m.debug) {
             fmt.Fprintf(new os.FileжWriter(os.Stderr), "=+= wrote package payload of %d bytes\n"u8,
@@ -143,10 +133,8 @@ public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
     }
 
     // Flush writer, and we're done.
-    {
-        err = m.w.Flush(); if (err != nil) {
-            return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
-        }
+    err = m.w.Flush(); if (err != nil) {
+        return fmt.Errorf("error writing %s: %v"u8, m.mfname, err);
     }
     return default;
 }

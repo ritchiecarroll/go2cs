@@ -138,46 +138,38 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
     var mm = new map<@string, protoPod>();
     foreach (var (_, f) in files) {
         @string @base = filepath.Base(f);
-        {
-            var m = metaRE.FindStringSubmatch(@base); if (m != nil) {
-                @string tag = m[1];
-                // We need to allow for the possibility of duplicate
-                // meta-data files. If we hit this case, use the
-                // first encountered as the canonical version.
-                {
-                    var (_, ok) = mm[tag, ꟷ]; if (!ok) {
-                        mm[tag] = new protoPod(mf: f);
-                    }
-                }
-                // FIXME: should probably check file length and hash here for
-                // the duplicate.
+        var m = metaRE.FindStringSubmatch(@base); if (m != nil) {
+            @string tag = m[1];
+            // We need to allow for the possibility of duplicate
+            // meta-data files. If we hit this case, use the
+            // first encountered as the canonical version.
+            var (_, ok) = mm[tag, ꟷ]; if (!ok) {
+                mm[tag] = new protoPod(mf: f);
             }
+            // FIXME: should probably check file length and hash here for
+            // the duplicate.
         }
     }
     var counterRE = regexp.MustCompile(fmt.Sprintf(coverage.CounterFileRegexp, coverage.CounterFilePref));
     foreach (var (k, f) in files) {
         @string @base = filepath.Base(f);
-        {
-            var m = counterRE.FindStringSubmatch(@base); if (m != nil) {
-                @string tag = m[1]; // meta hash
-                var (pid, err) = strconv.Atoi(m[2]);
-                if (err != nil) {
-                    continue;
+        var m = counterRE.FindStringSubmatch(@base); if (m != nil) {
+            @string tag = m[1]; // meta hash
+            var (pid, err) = strconv.Atoi(m[2]);
+            if (err != nil) {
+                continue;
+            }
+            var (v, ok) = mm[tag, ꟷ]; if (ok) {
+                nint idx = -1;
+                if (dirIndices != nil) {
+                    idx = dirIndices[k];
                 }
-                {
-                    var (v, ok) = mm[tag, ꟷ]; if (ok) {
-                        nint idx = -1;
-                        if (dirIndices != nil) {
-                            idx = dirIndices[k];
-                        }
-                        var fo = new fileWithAnnotations(@file: f, origin: idx, pid: pid);
-                        v.elements = append(v.elements, fo);
-                        mm[tag] = v;
-                    } else {
-                        if (warn) {
-                            warning(skippingOrphanedCounterˢ, f);
-                        }
-                    }
+                var fo = new fileWithAnnotations(@file: f, origin: idx, pid: pid);
+                v.elements = append(v.elements, fo);
+                mm[tag] = v;
+            } else {
+                if (warn) {
+                    warning(skippingOrphanedCounterˢ, f);
                 }
             }
         }
@@ -191,10 +183,8 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
     var pods = new slice<Pod>(0, len(mm));
     foreach (var (_, p) in mm) {
         slices.SortFunc(p.elements, (fileWithAnnotations a, fileWithAnnotations b) => {
-            {
-                nint r = cmp.Compare(a.origin, b.origin); if (r != 0) {
-                    return r;
-                }
+            nint r = cmp.Compare(a.origin, b.origin); if (r != 0) {
+                return r;
             }
             return strings.Compare(a.@file, b.@file);
         });

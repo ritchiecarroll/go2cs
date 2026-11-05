@@ -51,10 +51,8 @@ internal static error setDefaultListenerSockopts(nint s) {
 internal static error setDefaultMulticastSockopts(nint s) {
     // Allow multicast UDP and raw IP datagram sockets to listen
     // concurrently across multiple listeners.
-    {
-        var err = syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1); if (err != nil) {
-            return os.NewSyscallError(setsockoptˢ, err);
-        }
+    var err = syscall.SetsockoptInt(s, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1); if (err != nil) {
+        return os.NewSyscallError(setsockoptˢ, err);
     }
     // Allow reuse of recently-used ports.
     // This option is supported only in descendants of 4.4BSD,

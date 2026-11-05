@@ -74,16 +74,14 @@ internal static (@string, error) lookPath(@string @file) {
             dir = ".";
         }
         @string pathΔ1 = filepath.Join(dir, @file);
-        {
-            var err = findExecutable(pathΔ1); if (err == nil) {
-                if (!filepath.IsAbs(pathΔ1)) {
-                    if (execerrdot.Value() != "0"u8) {
-                        return (pathΔ1, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
-                    }
-                    execerrdot.IncNonDefault();
+        var err = findExecutable(pathΔ1); if (err == nil) {
+            if (!filepath.IsAbs(pathΔ1)) {
+                if (execerrdot.Value() != "0"u8) {
+                    return (pathΔ1, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
                 }
-                return (pathΔ1, default);
+                execerrdot.IncNonDefault();
             }
+            return (pathΔ1, default);
         }
     }
     return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrNotFound))));

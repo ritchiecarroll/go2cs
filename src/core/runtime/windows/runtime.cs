@@ -203,10 +203,8 @@ internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
 internal static void godebugNotify(bool envChanged) {
     var update = ᏑgodebugUpdate.Load();
     @string env = default;
-    {
-        var Δp = ᏑgodebugEnv.Load(); if (Δp != nil) {
-            env = Δp.Value;
-        }
+    var Δp = ᏑgodebugEnv.Load(); if (Δp != nil) {
+        env = Δp.Value;
     }
     if (envChanged) {
         reparsedebugvars(env);

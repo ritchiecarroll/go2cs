@@ -542,10 +542,8 @@ public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡo
     if (err != nil) {
         return false;
     }
-    {
-        @string serialized = res.Format(generalizedTimeFormatStr); if (serialized != t) {
-            return false;
-        }
+    @string serialized = res.Format(generalizedTimeFormatStr); if (serialized != t) {
+        return false;
     }
     @out = res;
     return true;
@@ -579,10 +577,8 @@ public static bool ReadASN1UTCTime(this ref String s, ж<time.Time> Ꮡout) {
         return false;
     }
 
-    {
-        @string serialized = res.Format(formatStr); if (serialized != t) {
-            return false;
-        }
+    @string serialized = res.Format(formatStr); if (serialized != t) {
+        return false;
     }
 
     if (res.Year() >= 2050) {
@@ -756,12 +752,10 @@ public static bool ReadOptionalASN1Integer(this ref String s, any @out, asn1.Tag
             break;
         }
         case ж<bigꓸInt>: {
-            {
-                var (defaultValueΔ1, ok) = defaultValue._<ж<bigꓸInt>>(ᐧ); if (ok) {
-                    @out._<ж<bigꓸInt>>().Set(defaultValueΔ1);
-                } else {
-                    throw panic("out points to big.Int, but defaultValue does not");
-                }
+            var (defaultValueΔ1, ok) = defaultValue._<ж<bigꓸInt>>(ᐧ); if (ok) {
+                @out._<ж<bigꓸInt>>().Set(defaultValueΔ1);
+            } else {
+                throw panic("out points to big.Int, but defaultValue does not");
             }
             break;
         }

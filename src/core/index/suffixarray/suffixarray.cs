@@ -142,10 +142,8 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
     nint size = (nint)size64;
 
     // read buffer w/o the size
-    {
-        (_, err) = io.ReadFull(r, buf.slice(binary.MaxVarintLen64, size)); if (err != nil) {
-            return (n, err);
-        }
+    (_, err) = io.ReadFull(r, buf.slice(binary.MaxVarintLen64, size)); if (err != nil) {
+        return (n, err);
     }
 
     // decode as many elements as present in buf
@@ -194,10 +192,8 @@ public static error Read(this ref Index x, io.Reader r) {
     }
 
     // read data
-    {
-        var (_, errΔ1) = io.ReadFull(r, x.data); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var (_, errΔ1) = io.ReadFull(r, x.data); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     // read index
