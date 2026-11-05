@@ -33559,4 +33559,34 @@ the wave plan names; the B4 change stays the post-hop row (owner C2).
 
 — C2 (2026-11-05)
 
+### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
+
+This is the owed row for a gap that until now was recorded only as prose, at
+`docs/ConversionStrategies-Reference/interfaces.md:1557-1560` (section "An anonymous interface lifted out of a
+GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it").
+
+**The gap.** In Go, a structurally identical anonymous interface is one type wherever it appears. For example,
+`interface{ query(string) (string, bool) }` is the same type as a function's result and as
+`constraints[string, string].permitted` in crypto/x509. In C#, each lift is a type of its own.
+- The converter bridges ONE direction: each concrete instantiation of the generic struct writes a partial part making
+  the shape's lift DERIVE the closed generic lift, an implicit reference conversion.
+- The other direction is NOT covered. Assigning the generic field back to the concrete lift
+  (`var q interface{ query(string) (string, bool) } = c.permitted`) is a base-to-derived conversion, which C# does not
+  make implicitly.
+- crypto/x509 never does it, so nothing validated depends on it today.
+
+**What closes it, as the prose states it:** a Go type identity becoming ONE C# type, which retires the partial parts.
+The prose names the direction (the generic lift as the dyn name for every structurally identical shape). No design
+exists, and this row does not propose one.
+
+**The current guards:** `GenericLiftedInterfaceField` (behavioral) and
+`TestLiftedInterfaceFieldOfAGenericStructCarriesItsTypeParameters`. Neither exercises the uncovered direction.
+
+**Related, structs:** the same reference's anonymous-struct residual (`interfaces.md:1725-1729`). Two package-level
+anonymous structs that are structurally identical but declared in different files still lift to two distinct C# types.
+
+**Owner:** unassigned.
+
+— i9 (2026-11-05, COORD's ask)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
