@@ -253,16 +253,20 @@ A publish that is not a single file never makes a composite image, so it is not 
      purged tree, peak 3,069 MiB, 34,286,516 bytes, median run 0.76 s. Every arm that published printed `go run`'s
      output. Median run = the middle two of 10 warm runs. -->
 
-## On Linux, a converted test suite can skip its unix-socket tests under a long TMPDIR
-
-The converted test host keeps each run's temporary files under `go2cs-tests/<package>/<run id>/.tmp` inside
-`TMPDIR`, about 60 bytes deeper than Go's own `t.TempDir`. Linux limits a unix socket's path to 108 bytes, so a
-test that binds a socket there can fail to bind under a long `TMPDIR` and is reported as skipped where Go passes
-it (`bufio`'s `TestCopyUnixpacket`, for example). Run converted test suites with a short `TMPDIR`, such as
-`/tmp`; 10 bytes or fewer leaves every socket path in range.
-<!-- BOARD-next-validation-candidates.md, the 2026-10-25 row "the converted test host's temp root is long enough to
-     break unix-socket tests under an ordinary TMPDIR" (G, from P2's linux-leg finding): under
-     TMPDIR=/dev/shm/p2-h10-tmp, TestCopyUnixpacket's socket path reached 116 bytes, bind returned EINVAL and the
-     converted side skipped a test Go passed. The re-bank worked around it by host checklist (the Go hop runbook's
-     lesson 88: TMPDIR of 10 bytes or less). Listed here on 2026-10-26 (R's docs follow-up) until the host's temp
-     root is shortened. -->
+<!-- RETIRED 2026-11-05 (C2, the .3 queue's S6): "On Linux, a converted test suite can skip its unix-socket tests
+     under a long TMPDIR". The entry read: "The converted test host keeps each run's temporary files under
+     `go2cs-tests/<package>/<run id>/.tmp` inside `TMPDIR`, about 60 bytes deeper than Go's own `t.TempDir`. Linux
+     limits a unix socket's path to 108 bytes, so a test that binds a socket there can fail to bind under a long
+     `TMPDIR` and is reported as skipped where Go passes it (`bufio`'s `TestCopyUnixpacket`, for example). Run
+     converted test suites with a short `TMPDIR`, such as `/tmp`; 10 bytes or fewer leaves every socket path in
+     range."
+     The host's run root is now `go2cs-t/<8 hex>` (src/core/testing/TestHost.cs, RunRootParentName), so a
+     t.TempDir's parent sits 21 bytes below the temp path, against 50 bytes plus the package name before.
+     Measured on linux/amd64 at master 1e99f5bb44, bufio -tests -test-action all under the 19-byte
+     TMPDIR=/tmp/c2s6-tmpdir-xx: the old host SKIPPED TestCopyUnixpacket ("bind: invalid argument", socket path
+     116 bytes) and the package did not match; the new host PASSED it (82 bytes) and validated bufio at 81 + 1,
+     the banked linux row. GolibTests' HostRunRootLengthTests is the guard (red at the old host: 55 bytes).
+     Census of GOROOT's tests at go1.26.10: bufio's TestCopyUnixpacket is the only test that binds a socket inside
+     t.TempDir; net, os and nettest bind theirs under os.MkdirTemp(""), which the run root does not touch, and
+     unixpacket does not exist on darwin or windows. Residual, stated: the socket path is now 63 bytes plus TMPDIR
+     against Go's 42, so a linux TMPDIR of 45 to 65 bytes still skips that one test where Go passes. -->

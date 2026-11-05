@@ -1280,8 +1280,7 @@ internal static class PackageAncestry
     }
 
     /// <summary>
-    /// Removes sandboxes for THIS package that were left behind by a host that died without running
-    /// its teardown.
+    /// Removes sandboxes that were left behind by a host that died without running its teardown.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -1294,8 +1293,10 @@ internal static class PackageAncestry
     /// </para>
     /// <para>
     /// Reclaiming is scoped so it can never touch a LIVE run, including one belonging to another
-    /// worktree. Only sandboxes of the same package are considered — nothing else creates them — and
-    /// only those whose recorded owner process is gone. An age threshold would not do: a legitimate
+    /// worktree. Only the run root's siblings under the test host's own parent directory
+    /// (<see cref="TestHost.RunRootParentName"/>) are considered, the runs of every package, since
+    /// nothing else creates them, and only those whose recorded owner process is gone; a directory with
+    /// no marker counts as live. An age threshold would not do: a legitimate
     /// suite can run for hours (hash/maphash takes ~40 minutes, index/suffixarray longer), so
     /// "old" and "abandoned" are different questions and only the second one is safe to act on.
     /// </para>

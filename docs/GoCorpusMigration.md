@@ -5139,8 +5139,15 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     test host roots each run at `go2cs-tests/<pkg>/<32 hex>/.tmp` under it, about 60 bytes, so a unix-socket test's
     path can pass Linux's 108-byte `sun_path` limit where Go's own `t.TempDir` does not: `bind` returns EINVAL and the
     converted side SKIPS a test Go passes. Why: `bufio` `TestCopyUnixpacket` reached 116 bytes under
-    `/dev/shm/p2-h10-tmp`. **Step text:** the linux leg's act, AMENDED 2026-10-25.
-    <!-- P2's L2 finding, relayed by COORD 2026-10-25; P2 re-read bufio with a short TMPDIR. -->
+    `/dev/shm/p2-h10-tmp`. **Step text:** the linux leg's act, AMENDED 2026-10-25. **AMENDED 2026-11-05:** the
+    host's run root is now `go2cs-t/<8 hex>`, 21 bytes, so the limit is a `TMPDIR` of 44 bytes or less; `/tmp`
+    still meets it, and the lane checks the length rather than the name.
+    <!-- P2's L2 finding, relayed by COORD 2026-10-25; P2 re-read bufio with a short TMPDIR.
+         2026-11-05, C2 (.3 S6, COORD's queue): measured on linux/amd64 at master 1e99f5bb44, bufio -tests all under
+         the 19-byte TMPDIR=/tmp/c2s6-tmpdir-xx: old host TestCopyUnixpacket SKIP (socket path 116 bytes, bind EINVAL),
+         new host PASS (82 bytes), bufio validated 81 + 1. The socket path is TMPDIR + 63 bytes against Go's TMPDIR +
+         42, so Linux's 107-byte usable sun_path holds for a TMPDIR of 44 bytes or less (Go's own: 65). TestCopyUnixpacket
+         is the only GOROOT test that binds a socket inside t.TempDir (census at go1.26.10). -->
 89. **(2026-10-25, the Go 1.26 re-bank's linux leg.) A linux lane's pinned GOROOT carries `test/`.** Distribution
     toolchains (cmd/distpack) strip `GOROOT/test`, and every test that reads it skips on BOTH sides, so the row
     agrees at a smaller count and nothing reds. Check `test/` exists before the leg; copy it byte-exact from the same
