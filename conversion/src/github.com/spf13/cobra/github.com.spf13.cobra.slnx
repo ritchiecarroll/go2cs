@@ -1,0 +1,13 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="github.com.spf13.cobra.csproj" DefaultStartup="true" />
+  </Folder>
+  <Folder Name="/pkg/">
+    <Project Path="../../../../pkg/github.com/spf13/pflag/github.com.spf13.pflag.csproj" />
+  </Folder>
+</Solution>
