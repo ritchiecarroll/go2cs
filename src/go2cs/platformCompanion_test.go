@@ -15,6 +15,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -183,5 +184,135 @@ func TestMergeTakesCompanionsFromATargetThatConvertedThePackage(t *testing.T) {
 
 	if got := readCompanionFile(t, filepath.Join(coreDir, "os", "exec", "internal", "fdtest", "README.md")); got != "fdtest README, windows flavor" {
 		t.Errorf("root fdtest README.md = %q, want the Windows flavor: the first target that converted the package wins even when its rewrite left the bytes unchanged", got)
+	}
+}
+
+// runtimeSiblingSeed is runtime's shape for the review-sibling split: per-GOOS source folders (an L3 package), a FLAT
+// whole-file hand-own, runtime2.cs, and its review sibling wherever `siblings` puts it.
+func runtimeSiblingSeed(siblings map[string]string) map[string]string {
+	seed := map[string]string{
+		"runtime/runtime.csproj":        "<Project />",
+		"runtime/runtime2.cs":           "hand-owned, flat",
+		"runtime/windows/os_windows.cs": "seed windows source",
+		"runtime/linux/os_linux.cs":     "seed linux source",
+		"runtime/darwin/os_darwin.cs":   "seed darwin source",
+	}
+
+	for relPath, contents := range siblings {
+		seed[relPath] = contents
+	}
+
+	return seed
+}
+
+// convertRuntimeIn has every target convert runtime: each rewrites its own per-GOOS source, so the merge reads the
+// package as converted there, and writes its flavour of the review sibling at relPath(goos).
+func convertRuntimeIn(t *testing.T, targets []string, stages []string, relPath func(goos string) string, flavour func(goos string) string) {
+	t.Helper()
+
+	for i, target := range targets {
+		goos := goosOfTarget(target)
+		writeTestFile(t, filepath.Join(stages[i], "core", "runtime", goos, "os_"+goos+".cs"), goos+" source")
+		writeTestFile(t, filepath.Join(stages[i], "core", filepath.FromSlash(relPath(goos))), flavour(goos))
+	}
+}
+
+func companionFileExists(t *testing.T, filePath string) bool {
+	t.Helper()
+
+	_, err := os.Stat(filePath)
+
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatalf("failed to stat %q: %v", filePath, err)
+	}
+
+	return err == nil
+}
+
+// A review sibling exists to show a whole-file hand-own's drift from what the converter emits, and a FLAT hand-own's
+// emission can differ by GOOS: runtime/runtime2.go's m carries "sigmask" in its [GoValueClone] list on linux only,
+// and g is `public partial struct g` there (R's end-regen F2). One flat sibling kept windows' flavour and hid the
+// others (COORD's S5 ruling (a)). When the converting targets' siblings DIFFER, the merge keeps one per GOOS folder
+// and drops the flat one; when they AGREE it keeps one flat sibling and drops the folders' copies.
+func TestMergeSplitsAFlatHandOwnsReviewSiblingWhenItsFlavoursDiffer(t *testing.T) {
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+	flat := func(string) string { return "runtime/runtime2.cs.auto" }
+	perGOOS := func(goos string) string { return "runtime/" + goos + "/runtime2.cs.auto" }
+
+	// (i) The committed shape: one flat sibling. Each target emits it flat, each in its own flavour.
+	coreDir, stages := newCompanionStages(t, targets, runtimeSiblingSeed(map[string]string{"runtime/runtime2.cs.auto": "seed flat sibling"}))
+	convertRuntimeIn(t, targets, stages, flat, func(goos string) string { return goos + " flavour" })
+
+	if _, _, _, err := mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages)); err != nil {
+		t.Fatalf("(i) mergeCompanionArtifacts failed: %v", err)
+	}
+
+	for _, target := range targets {
+		goos := goosOfTarget(target)
+
+		if got := readCompanionFile(t, filepath.Join(coreDir, "runtime", goos, "runtime2.cs.auto")); got != goos+" flavour" {
+			t.Errorf("(i) root runtime/%s/runtime2.cs.auto = %q, want %q", goos, got, goos+" flavour")
+		}
+	}
+
+	if companionFileExists(t, filepath.Join(coreDir, "runtime", "runtime2.cs.auto")) {
+		t.Error("(i) the flat sibling survived a split: the root holds both shapes")
+	}
+
+	// (ii) The split shape, after the flavours converge: each target writes its own folder's sibling (the single-target
+	// routing, reviewSiblingLayoutPath), all with the same bytes. One flat sibling again, and no folder copies.
+	coreDir, stages = newCompanionStages(t, targets, runtimeSiblingSeed(map[string]string{
+		"runtime/windows/runtime2.cs.auto": "seed windows",
+		"runtime/linux/runtime2.cs.auto":   "seed linux",
+		"runtime/darwin/runtime2.cs.auto":  "seed darwin",
+	}))
+	convertRuntimeIn(t, targets, stages, perGOOS, func(string) string { return "one flavour" })
+
+	if _, _, _, err := mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages)); err != nil {
+		t.Fatalf("(ii) mergeCompanionArtifacts failed: %v", err)
+	}
+
+	if got := readCompanionFile(t, filepath.Join(coreDir, "runtime", "runtime2.cs.auto")); got != "one flavour" {
+		t.Errorf("(ii) root runtime/runtime2.cs.auto = %q, want the agreed flavour flat", got)
+	}
+
+	for _, target := range targets {
+		if goos := goosOfTarget(target); companionFileExists(t, filepath.Join(coreDir, "runtime", goos, "runtime2.cs.auto")) {
+			t.Errorf("(ii) runtime/%s/runtime2.cs.auto survived flavours that agree", goos)
+		}
+	}
+}
+
+// A package with no per-GOOS source folders cannot hold a per-GOOS sibling: a single-target reconvert routes a file
+// into <goos>/ only where that folder is a source folder (isPlatformSourceFolder). There the merge keeps the first
+// converting target's flavour flat, as before, and NAMES the package rather than hiding the difference.
+func TestMergeNamesADifferingReviewSiblingItCannotSplit(t *testing.T) {
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+	seed := map[string]string{
+		"time/time.csproj":  "<Project />",
+		"time/sleep.cs":     "seed source",
+		"time/tick.cs":      "hand-owned, flat",
+		"time/tick.cs.auto": "seed sibling",
+	}
+
+	coreDir, stages := newCompanionStages(t, targets, seed)
+
+	for i, target := range targets {
+		writeTestFile(t, filepath.Join(stages[i], "core", "time", "sleep.cs"), "source")
+		writeTestFile(t, filepath.Join(stages[i], "core", "time", "tick.cs.auto"), goosOfTarget(target)+" flavour")
+	}
+
+	_, residual, _, err := mergeCompanionArtifacts(coreDir, targets, snapshotCompanionStages(t, targets, stages))
+
+	if err != nil {
+		t.Fatalf("mergeCompanionArtifacts failed: %v", err)
+	}
+
+	if got := readCompanionFile(t, filepath.Join(coreDir, "time", "tick.cs.auto")); got != "windows flavour" {
+		t.Errorf("root time/tick.cs.auto = %q, want the first converting target's flavour", got)
+	}
+
+	if note := residual["time"]; !strings.Contains(note, "tick.cs.auto") {
+		t.Errorf("the unsplittable difference was not named: residual[time] = %q", note)
 	}
 }

@@ -633,8 +633,9 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 	// §4). The merge still lands the first target's remainder, but the difference is named rather
 	// than absorbed: it is either a genuine design gap or a measurement worth recording.
 	if len(residual) > 0 {
-		fmt.Printf("\n⚠ %d package(s) emitted project files that differ OUTSIDE their <ProjectReference>\n", len(residual))
-		fmt.Printf("  lists. Layout L3 conditions references only, so %s's remainder was kept:\n", goosOfTarget(targets[0]))
+		fmt.Printf("\n⚠ %d package(s) emitted a flat companion that differs by GOOS in a way layout L3 does not express\n", len(residual))
+		fmt.Printf("  (a project file outside its <ProjectReference> lists, or a review sibling with no per-GOOS folder to hold it),\n")
+		fmt.Printf("  so %s's copy was kept:\n", goosOfTarget(targets[0]))
 
 		for _, pkg := range sortedKeys(func() map[string]bool {
 			keys := map[string]bool{}
@@ -851,6 +852,14 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	conditioned := map[string]bool{}
 	residual := map[string]string{}
 
+	siblingsWritten, err := mergeReviewSiblings(coreDir, emissions, names, residual)
+
+	if err != nil {
+		return nil, nil, written, err
+	}
+
+	written += siblingsWritten
+
 	for _, rawPath := range sortedKeys(names) {
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))
 
@@ -863,7 +872,7 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 			}
 
 			if len(note) > 0 {
-				residual[artifactPackage(rawPath)] = note
+				addResidualNote(residual, artifactPackage(rawPath), note)
 			}
 
 			if strings.Contains(merged, platformReferenceBlockHeader) {
@@ -947,6 +956,182 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	return sortedKeys(conditioned), residual, written, nil
 }
 
+// mergeReviewSiblings places the `.cs.auto` review siblings of FLAT whole-file hand-owns, and removes them from names
+// so the per-artifact rule below does not see them. A review sibling exists to show a hand-own's drift from what the
+// converter emits, and a flat hand-own's emission can differ by GOOS: runtime/runtime2.go's m carries "sigmask" in its
+// [GoValueClone] list on linux only, and g is `public partial struct g` there (R's end-regen F2). One flat sibling,
+// taken from the first target, hid the other flavours (COORD's S5 ruling (a)). So, per sibling:
+//
+//   - the targets that EMITTED it are read, each from the copy it wrote: flat, or in its own GOOS folder once the tree
+//     holds the sibling there (reviewSiblingLayoutPath). A census stage writes every sibling, changed or not
+//     (alwaysWriteSources), so "emitted" is exact here, unlike for a README;
+//   - when every flavour agrees, one flat sibling, and the GOOS folders' copies go;
+//   - when they differ, one sibling per emitting GOOS folder, and the flat copy goes;
+//   - when they differ and the package has no per-GOOS source folder for some emitting GOOS, the first target's
+//     flavour stays flat and the package is NAMED: a single-target reconvert routes into <goos>/ only where that
+//     folder is a source folder (isPlatformSourceFolder), so a folder holding only a sibling would never be written.
+//
+// A sibling whose hand-own is not flat in the root (a per-GOOS hand-own's, or one with no hand-own) keeps the
+// per-artifact rule, which already takes a per-GOOS sibling from its own target (perGOOSReviewSiblingOwner).
+func mergeReviewSiblings(coreDir string, emissions []*platformEmission, names map[string]bool, residual map[string]string) (int, error) {
+	groups := map[string][]string{}
+
+	for rawPath := range names {
+		if strings.HasSuffix(rawPath, ".cs.auto") {
+			logical := companionLogicalPath(rawPath, emissions)
+			groups[logical] = append(groups[logical], rawPath)
+		}
+	}
+
+	written := 0
+
+	for _, logical := range sortedMapKeys(groups) {
+		handOwn, err := os.Stat(filepath.Join(coreDir, filepath.FromSlash(strings.TrimSuffix(logical, ".auto"))))
+
+		if err != nil || !handOwn.Mode().IsRegular() {
+			continue
+		}
+
+		type flavour struct {
+			goos     string
+			contents []byte
+		}
+
+		var flavours []flavour
+
+		for _, emission := range emissions {
+			for _, rawPath := range sortedStrings(groups[logical]) {
+				state, ok := emission.artifacts[rawPath]
+
+				if !ok || !state.emitted || (rawPath != logical && path.Base(path.Dir(rawPath)) != emission.goos) {
+					continue
+				}
+
+				contents, err := os.ReadFile(filepath.Join(emission.root, "core", filepath.FromSlash(rawPath)))
+
+				if err != nil {
+					return written, fmt.Errorf("failed to read staged review sibling %q for target %s: %w", rawPath, emission.target, err)
+				}
+
+				flavours = append(flavours, flavour{emission.goos, contents})
+				break
+			}
+		}
+
+		for _, rawPath := range groups[logical] {
+			delete(names, rawPath)
+		}
+
+		if len(flavours) == 0 {
+			continue
+		}
+
+		pkg, name := path.Dir(logical), path.Base(logical)
+		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
+		agree, splittable := true, true
+
+		for _, f := range flavours {
+			agree = agree && bytes.Equal(f.contents, flavours[0].contents)
+			splittable = splittable && isPlatformSourceFolder(packageDir, f.goos)
+		}
+
+		destinations := map[string][]byte{}
+
+		if agree || !splittable {
+			destinations[filepath.Join(packageDir, name)] = flavours[0].contents
+
+			if !agree {
+				addResidualNote(residual, pkg, fmt.Sprintf("review sibling %s differs by GOOS, and the package has no per-GOOS "+
+					"source folder for every flavour, so %s's was kept flat", name, flavours[0].goos))
+			}
+		} else {
+			for _, f := range flavours {
+				destinations[filepath.Join(packageDir, f.goos, name)] = f.contents
+			}
+		}
+
+		// Every place the sibling can be: flat, and each GOOS folder that is a source folder (not a nested package
+		// named for a GOOS, internal/syscall/windows).
+		candidates := []string{filepath.Join(packageDir, name)}
+
+		for _, emission := range emissions {
+			if isPlatformSourceFolder(packageDir, emission.goos) {
+				candidates = append(candidates, filepath.Join(packageDir, emission.goos, name))
+			}
+		}
+
+		for _, destination := range sortedMapKeys(destinations) {
+			changed, err := writeMergedContents(destination, string(destinations[destination]))
+
+			if err != nil {
+				return written, err
+			}
+
+			if changed {
+				written++
+			}
+		}
+
+		for _, candidate := range candidates {
+			if _, keep := destinations[candidate]; keep {
+				continue
+			}
+
+			gone, err := removeIfPresent(candidate)
+
+			if err != nil {
+				return written, err
+			}
+
+			if gone {
+				written++
+			}
+		}
+	}
+
+	return written, nil
+}
+
+// companionLogicalPath returns a companion's logical path (`<pkg>/<file>`, any per-GOOS folder folded away), read
+// through the first emission that holds it, as companionPackage reads its package.
+func companionLogicalPath(rawPath string, emissions []*platformEmission) string {
+	for _, emission := range emissions {
+		if state, ok := emission.artifacts[rawPath]; ok {
+			return state.logicalPath(rawPath)
+		}
+	}
+
+	return rawPath
+}
+
+// addResidualNote records a difference the merge could not express for a package, keeping any note already there.
+func addResidualNote(residual map[string]string, pkg string, note string) {
+	if existing, ok := residual[pkg]; ok && len(existing) > 0 {
+		residual[pkg] = existing + "; " + note
+		return
+	}
+
+	residual[pkg] = note
+}
+
+// sortedMapKeys returns a map's keys in sorted order.
+func sortedMapKeys[V any](values map[string]V) []string {
+	keys := make([]string, 0, len(values))
+
+	for key := range values {
+		keys = append(keys, key)
+	}
+
+	sort.Strings(keys)
+	return keys
+}
+
+func sortedStrings(values []string) []string {
+	sorted := append([]string(nil), values...)
+	sort.Strings(sorted)
+	return sorted
+}
+
 // convertedPackages returns the packages (logical `<pkg>` paths) a target CONVERTED this run: those
 // with at least one `.cs` it emitted. A census stage writes every source whether or not its bytes
 // changed (alwaysWriteSources), so for `.cs` emission is exact, unlike for a companion, which the
@@ -1022,7 +1207,7 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 	sets := map[string][]string{}
 
 	base, baseTarget, baseRemainder, note := "", "", "", ""
-	needsUnsafe := false
+	needsUnsafe, needsFriend := false, false
 
 	pkg := companionPackage(rawPath, emissions)
 	converts := func(i int) bool { return i < len(converted) && converted[i][pkg] }
@@ -1073,7 +1258,11 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 			needsUnsafe = true
 		}
 
-		remainder := stripPlatformReferences(unsafeBlocksUnion(string(contents), true))
+		if strings.Contains(string(contents), friendAssemblyAccessGroup) {
+			needsFriend = true
+		}
+
+		remainder := stripPlatformReferences(friendAccessUnion(unsafeBlocksUnion(string(contents), true), true))
 
 		if len(base) == 0 {
 			base, baseTarget, baseRemainder = string(contents), target, remainder
@@ -1086,7 +1275,7 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 	}
 
 	shared, deltas, _ := splitPlatformReferenceSets(sets)
-	merged, err := renderPlatformReferences(unsafeBlocksUnion(base, needsUnsafe), shared, deltas)
+	merged, err := renderPlatformReferences(friendAccessUnion(unsafeBlocksUnion(base, needsUnsafe), needsFriend), shared, deltas)
 
 	if err != nil {
 		return base, note, fmt.Errorf("failed to compose conditioned references for %q: %w", rawPath, err)
@@ -1119,6 +1308,21 @@ func unsafeBlocksUnion(contents string, needsUnsafe bool) string {
 	}
 
 	return strings.Replace(contents, unsafeBlocksDisabled, unsafeBlocksEnabled, 1)
+}
+
+// friendAccessUnion gives a merged project file the friend-access group (insertFriendAssemblyAccess) when ANY
+// converting target emitted it. The writer emits the group when the target being converted sees in-package test
+// files, and those can be GOOS-constrained: log/syslog's only one, syslog_test.go, is `!windows`, so linux and
+// darwin emitted the group and windows did not, and the merge kept windows' copy (BOARD 2026-11-03, G). A
+// .csproj is ONE file serving every platform, so this takes the union for the reason unsafeBlocksUnion does:
+// InternalsVisibleTo grants access and uses none, so it is inert where nothing needs it, while its absence
+// leaves the linux and darwin packages without the go2cs.SynthesizedStructs grant reflect.StructOf relies on.
+func friendAccessUnion(contents string, needsFriend bool) string {
+	if !needsFriend || strings.Contains(contents, friendAssemblyAccessGroup) {
+		return contents
+	}
+
+	return insertFriendAssemblyAccess(contents)
 }
 
 // stripPlatformReferences returns a project file with every reference removed — the unconditioned

@@ -7,6 +7,8 @@
 
 From C#, call this package through the static class go.os.exec.@internal.fdtest_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
+Package fdtest provides test helpers for working with file descriptors across exec.
+
 ---
 
 Copyright 2009 The Go Authors. All rights reserved. This C# package is converted from Go standard library source; use of that source is governed by a BSD-style license that can be found in the [LICENSE](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/LICENSE) file.
