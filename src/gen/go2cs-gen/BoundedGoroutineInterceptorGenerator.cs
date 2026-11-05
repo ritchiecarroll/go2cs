@@ -276,11 +276,14 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
             return null;
         }
 
-        // A lambda also says how many parameters its delegate takes (Action against WaitCallback).
-        int? parameterCount = invocation.ArgumentList.Arguments[0].Expression switch
+        // A lambda says how many parameters its delegate takes (Action against WaitCallback), and so does a method group
+        // whose methods agree on it.
+        ExpressionSyntax function = invocation.ArgumentList.Arguments[0].Expression;
+        int? parameterCount = function switch
         {
             ParenthesizedLambdaExpressionSyntax lambda => lambda.ParameterList.Parameters.Count,
             SimpleLambdaExpressionSyntax => 1,
+            IdentifierNameSyntax or MemberAccessExpressionSyntax or GenericNameSyntax => GroupParameterCount(semanticModel, function, cancellationToken),
             _ => null
         };
 
@@ -318,14 +321,85 @@ public sealed class BoundedGoroutineInterceptorGenerator : IIncrementalGenerator
                 if (type is not null && type.TypeKind != TypeKind.Error)
                     return type.SpecialType != SpecialType.System_Void;
 
-                return MethodsReturnValue(semanticModel.GetSymbolInfo(body, cancellationToken));
+                return MethodsReturnValue(semanticModel.GetSymbolInfo(body, cancellationToken)) ??
+                       (body is InvocationExpressionSyntax call ? MethodsNamedReturnValue(semanticModel, call.Expression, cancellationToken) : null);
             }
 
             case IdentifierNameSyntax or MemberAccessExpressionSyntax or GenericNameSyntax:
-                return MethodsReturnValue(semanticModel.GetSymbolInfo(function, cancellationToken));
+                return MethodsReturnValue(semanticModel.GetSymbolInfo(function, cancellationToken)) ??
+                       MethodsNamedReturnValue(semanticModel, function, cancellationToken);
         }
 
         return null;
+    }
+
+    // Whether the methods a method group's NAME can mean all return a value or all return none, for a group that does not
+    // resolve here: its receiver or the overload it binds comes from a sibling generator (a pointer receiver's box
+    // overload, `Ꮡt.loop`; a field property, `r.root.release`). The candidates are every method of that name the group can
+    // reach in this compilation: its own member group, the receiver type's members and extension methods (and, through a
+    // box `ж<T>`, T's), and the names in scope, where a package class's methods and their converted receiver forms live.
+    // A generated overload of a converted method returns what that method returns, so agreement decides; any disagreement
+    // or an empty set leaves it undecided.
+    private static bool? MethodsNamedReturnValue(SemanticModel semanticModel, ExpressionSyntax group, CancellationToken cancellationToken)
+    {
+        List<IMethodSymbol> methods = MethodsNamed(semanticModel, group, cancellationToken);
+
+        if (methods.Count == 0)
+            return null;
+
+        bool first = !methods[0].ReturnsVoid;
+
+        return methods.All(method => !method.ReturnsVoid == first) ? first : null;
+    }
+
+    // How many parameters the delegate a method group converts to takes, when every method it can mean agrees: the
+    // bound method's own, or the candidates of MethodsNamed, an extension method found unreduced counting its receiver
+    // out when the group names it through one (`Ꮡt.loop`).
+    private static int? GroupParameterCount(SemanticModel semanticModel, ExpressionSyntax group, CancellationToken cancellationToken)
+    {
+        if (semanticModel.GetSymbolInfo(group, cancellationToken).Symbol is IMethodSymbol bound)
+            return bound.Parameters.Length;
+
+        bool throughReceiver = group is MemberAccessExpressionSyntax;
+        int[] counts =
+        [
+            .. MethodsNamed(semanticModel, group, cancellationToken)
+                .Select(method => method.Parameters.Length - (throughReceiver && method.IsExtensionMethod && method.ReducedFrom is null ? 1 : 0))
+                .Distinct()
+        ];
+
+        return counts is [var only] ? only : null;
+    }
+
+    // Every method a method group's name can mean in this compilation (see MethodsNamedReturnValue).
+    private static List<IMethodSymbol> MethodsNamed(SemanticModel semanticModel, ExpressionSyntax group, CancellationToken cancellationToken)
+    {
+        SimpleNameSyntax? name = group switch
+        {
+            MemberAccessExpressionSyntax access => access.Name,
+            SimpleNameSyntax simple => simple,
+            _ => null
+        };
+
+        if (name is null)
+            return [];
+
+        string identifier = name.Identifier.ValueText;
+        int position = group.SpanStart;
+        List<IMethodSymbol> methods = [.. semanticModel.GetMemberGroup(group, cancellationToken).OfType<IMethodSymbol>()];
+
+        if (group is MemberAccessExpressionSyntax { Expression: { } receiver } &&
+            semanticModel.GetTypeInfo(receiver, cancellationToken).Type is INamedTypeSymbol { TypeKind: not TypeKind.Error } receiverType)
+        {
+            methods.AddRange(semanticModel.LookupSymbols(position, receiverType, identifier, includeReducedExtensionMethods: true).OfType<IMethodSymbol>());
+
+            if (receiverType is { Name: "ж", TypeArguments: [INamedTypeSymbol { TypeKind: not TypeKind.Error } boxed] })
+                methods.AddRange(semanticModel.LookupSymbols(position, boxed, identifier, includeReducedExtensionMethods: true).OfType<IMethodSymbol>());
+        }
+
+        methods.AddRange(semanticModel.LookupSymbols(position, name: identifier).OfType<IMethodSymbol>());
+
+        return methods;
     }
 
     // Whether the method a call or a method group names returns a value, when every candidate agrees.

@@ -71,6 +71,11 @@ public class BoundedGoroutineInterceptorGeneratorTests
 
                 public static void other(System.Action action) => action();
             }
+
+            public sealed class ж<T>
+            {
+                public T val = default!;
+            }
         }
         """;
 
@@ -104,6 +109,14 @@ public class BoundedGoroutineInterceptorGeneratorTests
                 private struct hidden { public int n; }
 
                 private static int Leaf(int n) => n + 1;
+
+                // A converted value-receiver method and two same-named methods that disagree on returning a value; the box
+                // overloads (`Ꮡw.send`) and the boxes come from a sibling generator (AddsABoxOverload).
+                internal struct watcher { public int n; }
+                internal static void send(this ref watcher w, int v) => w.n = v;
+                internal static void tick(this ref watcher w) => w.n++;
+                internal static int pick(this ref watcher w, int v) => v;
+                internal static void pick(this ref watcher w, string v) { }
 
                 public static string Body()
                 {
@@ -236,6 +249,49 @@ public class BoundedGoroutineInterceptorGeneratorTests
 
         Assert.AreEqual(0, run.GeneratorDiagnostics.Length, string.Join("; ", run.GeneratorDiagnostics));
         Assert.AreEqual($"bounded:{rung}@{site.line}", Execute(run.Updated));
+    }
+
+    // go2cs-gen's pointer-receiver box overloads, and a box only a sibling supplies (a field property's, `r.root`).
+    private sealed class AddsABoxOverload : IIncrementalGenerator
+    {
+        public void Initialize(IncrementalGeneratorInitializationContext context) =>
+            context.RegisterSourceOutput(context.CompilationProvider, static (production, _) =>
+                production.AddSource("box.g.cs",
+                    "namespace go { public static partial class main_package { " +
+                    "internal static ж<watcher> AddedBox => new(); " +
+                    "internal static void send(this ж<watcher> w, int v) => w.val.n = v; " +
+                    "internal static void tick(this ж<watcher> w) => w.val.n++; " +
+                    "internal static int pick(this ж<watcher> w, int v) => v; } }"));
+    }
+
+    // A method group whose receiver or overload only a sibling supplies does not resolve here, as at the census's six
+    // behavioral sites (`goǃ(Ꮡs.send, (nint)7)`, `goǃ(r.root.release)`): RED, GO2CS0010 on a valid build, before the
+    // name lookup. Every method the name can mean agrees on returning no value, so the rung is the void one.
+    [TestMethod]
+    [DataRow("var Ꮡw = new ж<watcher>(); goǃ(Ꮡw.send, 7);", "Action1", DisplayName = "a box overload of a converted method")]
+    [DataRow("goǃ(AddedBox.send, 7);", "Action1", DisplayName = "a box overload on a receiver the sibling supplies")]
+    [DataRow("goǃ(AddedBox.tick);", "Action", DisplayName = "a parameterless box overload: its methods' parameter count rules out WaitCallback")]
+    public void AMethodGroupOnlyASiblingResolvesIsInterceptedByWhatItsNameMeans(string statement, string rung)
+    {
+        string source = MainSource(statement);
+        (int line, int column) site = Site(source, 0);
+        Run run = Generate(source, [Record("main.cs", site)], sibling: new AddsABoxOverload());
+
+        Assert.AreEqual(0, run.GeneratorDiagnostics.Length, string.Join("; ", run.GeneratorDiagnostics));
+        Assert.AreEqual($"bounded:{rung}@{site.line}", Execute(run.Updated));
+    }
+
+    // Methods of that name that disagree on returning a value leave the rung undecided: an error, never a guess.
+    [TestMethod]
+    public void AMethodGroupWhoseNameMeansMethodsThatDisagreeFailsTheBuild()
+    {
+        string source = MainSource("goǃ(AddedBox.pick, 7);");
+        Run run = Generate(source, [Record("main.cs", Site(source, 0))], sibling: new AddsABoxOverload());
+
+        string[] mismatches = Mismatches(run);
+
+        Assert.AreEqual(1, mismatches.Length, string.Join("; ", run.GeneratorDiagnostics));
+        StringAssert.Contains(mismatches[0], "cannot be read as returning a value or not");
     }
 
     // (a) of the proof: a record that does not land on a call of an unmarked goǃ rung fails the build at the record.
