@@ -12969,7 +12969,7 @@ internal static (http2FrameWriteRequest, bool) consume(this ref http2writeQueue 
     if (q.empty()) {
         return (new http2FrameWriteRequest(), false);
     }
-    var (consumed, rest, numresult) = (~q.peek()).Consume(n);
+    var (consumed, rest, numresult) = q.peek().Consume(n);
     switch (numresult) {
     case 0: {
         return (new http2FrameWriteRequest(), false);

@@ -505,6 +505,14 @@ public static partial class TypeExtensions
                 if (!ReceiverElementMatches(receiverElement, valueElement))
                     continue;
 
+                // A VALUE method's ж<X> twin (go2cs-gen's `M(this ж<X> Ꮡv)`, which copies *v and calls `M(this X)`) is
+                // the same Go method as its original, already a candidate of the *X set, and never a pointer receiver:
+                // Go has one method per name. Only the original is a candidate, so the table, the probe and the binder
+                // see one shape of it, and reflect's call through a nil *X raises Go's panicwrap as it did before the
+                // twin existed.
+                if (receiverIsPointer && !receiver.IsByRef && IsValueMethodTwin(method, receiverElement))
+                    continue;
+
                 // A method of a Go GENERIC type is emitted as a generic extension method, and the scan
                 // finds its OPEN definition (`String<K, V>(this Pair<K, V>)`). Every consumer of this
                 // list binds what it is handed, and an open method binds nothing: reflect's CreateDelegate
@@ -654,6 +662,44 @@ public static partial class TypeExtensions
         return emittedName.Length > ShadowVarMarker.Length && emittedName.StartsWith(ShadowVarMarker, StringComparison.Ordinal)
             ? emittedName[ShadowVarMarker.Length..]
             : emittedName;
+    }
+
+    // Whether `M(this ж<X>, …)` is the ж<X> twin of a VALUE method: its own class also declares `M(this X, …)` with the
+    // same remaining parameters. Go forbids a value and a pointer method of one name on X, so such a pair is one Go
+    // method in two shapes. A pointer method's twin pairs with a `this ref X` original instead and is not matched. A
+    // generic pair is matched by the receiver's generic definition and the parameter count, as each method declares its
+    // own type parameters.
+    private static bool IsValueMethodTwin(MethodInfo method, Type receiverElement)
+    {
+        if (method.DeclaringType is not { } declaringType)
+            return false;
+
+        ParameterInfo[] parameters = method.GetParameters();
+
+        foreach (MemberInfo member in declaringType.GetMember(method.Name, MemberTypes.Method, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+        {
+            if (member is not MethodInfo sibling || sibling == method || sibling.IsGenericMethodDefinition != method.IsGenericMethodDefinition)
+                continue;
+
+            ParameterInfo[] siblingParameters = sibling.GetParameters();
+
+            if (siblingParameters.Length != parameters.Length || siblingParameters[0].ParameterType is not { IsByRef: false } siblingReceiver)
+                continue;
+
+            if (method.IsGenericMethodDefinition)
+            {
+                if (siblingReceiver.IsGenericType && receiverElement.IsGenericType &&
+                    siblingReceiver.GetGenericTypeDefinition() == receiverElement.GetGenericTypeDefinition())
+                    return true;
+
+                continue;
+            }
+
+            if (siblingReceiver == receiverElement && siblingParameters.Skip(1).Select(static p => p.ParameterType).SequenceEqual(parameters.Skip(1).Select(static p => p.ParameterType)))
+                return true;
+        }
+
+        return false;
     }
 
     // Of two emitted shapes of the SAME Go method, prefer the one a delegate can bind: a `this ref X`

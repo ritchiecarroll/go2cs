@@ -20,7 +20,7 @@ internal static void Main() {
     fmt.Println("literal:", m.Marker());
 
     var p = Ꮡ(new renamedlibꓸMarker(Name: "beta", Size: 5));
-    fmt.Println("ptr-literal:", (~p).Marker());
+    fmt.Println("ptr-literal:", p.Marker());
 
     var d = new renamedlibꓸDetail(Label: "gamma", Rank: 7);
     fmt.Println("detail-literal:", d.Show());

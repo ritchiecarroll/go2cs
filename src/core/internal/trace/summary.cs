@@ -675,7 +675,7 @@ public static ж<Summary> ΔFinalize(this ref Summarizer s) {
             if (y == nil) {
                 return +1;
             }
-            return cmp.Compare((~x).Time(), (~y).Time());
+            return cmp.Compare(x.Time(), y.Time());
         });
         g.goroutineSummary = default;
     }

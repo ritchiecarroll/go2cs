@@ -36,7 +36,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡt
         var g = new groupReference(
             data: m.dirPtr
         );
-        var full = (~g.ctrls()).matchFull();
+        var full = g.ctrls().matchFull();
         @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
@@ -64,7 +64,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡt
     for (; ; seq = seq.next()) {
         var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -77,7 +77,7 @@ internal static @unsafe.Pointer runtime_mapaccess1_fast32(ж<abiꓸMapType> Ꮡt
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -110,7 +110,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapTy
         var g = new groupReference(
             data: m.dirPtr
         );
-        var full = (~g.ctrls()).matchFull();
+        var full = g.ctrls().matchFull();
         @unsafe.Pointer slotKey = (uintptr)g.key(Ꮡtyp, 0);
         var slotSize = typ.SlotSize;
         while (full != 0) {
@@ -138,7 +138,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapTy
     for (; ; seq = seq.next()) {
         var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -151,7 +151,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abiꓸMapTy
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -165,7 +165,7 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMa
         data: m.dirPtr
     );
 
-    var match = (~g.ctrls()).matchH2(h2(hash));
+    var match = g.ctrls().matchH2(h2(hash));
 
     // Look for an existing slot containing this key.
     while (match != 0) {
@@ -182,7 +182,7 @@ internal static @unsafe.Pointer putSlotSmallFast32(this ref ΔMap m, ж<abiꓸMa
     // There can't be deleted slots, small maps can't have them
     // (see deleteSmall). Use matchEmptyOrDeleted as it is a bit
     // more efficient than matchEmpty.
-    match = (~g.ctrls()).matchEmptyOrDeleted();
+    match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
         fatal(smallMapWithNoEmptySlotˢ);
     }
@@ -263,7 +263,7 @@ outer:
         var h2Hash = h2(hash);
         for (; ; seq = seq.next()) {
             var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
-            var match = (~g.ctrls()).matchH2(h2Hash);
+            var match = g.ctrls().matchH2(h2Hash);
 
             // Look for an existing slot containing this key.
             while (match != 0) {
@@ -281,7 +281,7 @@ outer:
 
             // No existing slot for this key in this group. Is this the end
             // of the probe sequence?
-            match = (~g.ctrls()).matchEmptyOrDeleted();
+            match = g.ctrls().matchEmptyOrDeleted();
             if (match == 0) {
                 continue; // nothing but filled slots. Keep probing.
             }
@@ -408,7 +408,7 @@ outer:
         var h2Hash = h2(hash);
         for (; ; seq = seq.next()) {
             var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
-            var match = (~g.ctrls()).matchH2(h2Hash);
+            var match = g.ctrls().matchH2(h2Hash);
 
             // Look for an existing slot containing this key.
             while (match != 0) {
@@ -426,7 +426,7 @@ outer:
 
             // No existing slot for this key in this group. Is this the end
             // of the probe sequence?
-            match = (~g.ctrls()).matchEmptyOrDeleted();
+            match = g.ctrls().matchEmptyOrDeleted();
             if (match == 0) {
                 continue; // nothing but filled slots. Keep probing.
             }
