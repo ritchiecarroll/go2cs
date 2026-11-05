@@ -222,6 +222,44 @@ func TestMergeRefusesDivergentHandOwnCopies(t *testing.T) {
 	}
 }
 
+// The single-copy refusal above is for HAND-MAINTAINED files: two disagreeing copies of one are a fix applied to one
+// flavour. A whole-file hand-own's `.cs.auto` review sibling is the converter's emission, and when a FLAT hand-own's
+// emission differs by GOOS the companion merge keeps one sibling per GOOS folder (mergeReviewSiblings; COORD's S5
+// ruling (a)). Carrying the sibling with its hand-own then found three different copies and refused the whole run.
+// The move must leave a split sibling where the companion merge put it, and still move the hand-own.
+func TestMergeLeavesASplitReviewSiblingWhereTheCompanionMergePutIt(t *testing.T) {
+	coreDir := newHandOwnCorpus(t)
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+
+	writeTestFile(t, filepath.Join(coreDir, "runtime", "runtime2.cs"), "hand-owned, flat")
+
+	emissions := newHandOwnEmissions(coreDir, targets)
+
+	for i, target := range targets {
+		goos := goosOfTarget(target)
+		rawPath := "runtime/" + goos + "/runtime2.cs.auto"
+		writeTestFile(t, filepath.Join(coreDir, filepath.FromSlash(rawPath)), goos+" flavour")
+
+		emissions[i].artifacts[rawPath] = artifactState{hash: rawPath, logical: "runtime/runtime2.cs.auto", emitted: true}
+		emissions[i].artifacts["runtime/runtime2.cs"] = artifactState{hash: "runtime/runtime2.cs", logical: "runtime/runtime2.cs"}
+	}
+
+	if _, _, _, err := mergeHandOwnedArtifacts(coreDir, targets, emissions); err != nil {
+		t.Fatalf("a review sibling split per GOOS stopped the hand-own merge: %v", err)
+	}
+
+	assertFileExists(t, filepath.Join(coreDir, "runtime", "runtime2.cs"), true)
+	assertFileExists(t, filepath.Join(coreDir, "runtime", "runtime2.cs.auto"), false)
+
+	for _, target := range targets {
+		goos := goosOfTarget(target)
+
+		if got := readCompanionFile(t, filepath.Join(coreDir, "runtime", goos, "runtime2.cs.auto")); got != goos+" flavour" {
+			t.Errorf("runtime/%s/runtime2.cs.auto = %q, want %q left where the companion merge put it", goos, got, goos+" flavour")
+		}
+	}
+}
+
 // TestMergeLeavesPrincipalLessCompanionsWhereTheyAre: a companion with no Go counterpart AND no
 // converted principal — internal/poll's runtime_netpoll_impl.cs, which supplies bodies for the FLAT
 // fd_poll_runtime.cs's bodyless partials — carries a DIFFERENT implementation per flavor by design (a
