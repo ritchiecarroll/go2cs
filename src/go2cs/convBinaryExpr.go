@@ -878,9 +878,9 @@ func (v *Visitor) shiftReceiverRendersAsCast(expr ast.Expr) bool {
 // reads as Go writes it (visual-parity train #27; seat A of the next train): `x <<= 3`, `w >>= 0x8`. Both are the
 // same IL. A NAMED-numeric target takes the bare literal too: its wrapper's generated `operator <<(T, int)` binds an
 // int literal exactly, ahead of the wide uint64/int64 overloads (batch 43), as the binary form `w << 4` already
-// does. A TYPE-PARAMETER target takes it only below 8, a count in [0, width) for every integer type its set can hold.
-// A basic or named target never reaches here with a constant count at or past its width: the guard, or the wrapper's
-// wide operator, takes that count first.
+// does. A TYPE-PARAMETER target takes it below the narrowest width its type set holds (typeParamShiftWidth), a count
+// in [0, width) for every type argument. No target reaches here with a constant count at or past its width: the
+// guard (generic, for a type parameter), or a named wrapper's wide operator, takes that count first.
 func (v *Visitor) literalShiftCount(lhs, rhs ast.Expr, rendered string) bool {
 	tv, ok := v.info.Types[rhs]
 
@@ -894,9 +894,10 @@ func (v *Visitor) literalShiftCount(lhs, rhs ast.Expr, rendered string) bool {
 		return false
 	}
 
-	switch types.Unalias(v.info.TypeOf(lhs)).(type) {
+	switch target := types.Unalias(v.info.TypeOf(lhs)).(type) {
 	case *types.TypeParam:
-		return value < 8
+		width, ok := typeParamShiftWidth(target)
+		return ok && value < int64(width)
 	case nil:
 		return false
 	}
