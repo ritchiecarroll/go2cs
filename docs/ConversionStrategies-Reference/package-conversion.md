@@ -1071,7 +1071,7 @@ import (
 )
 type fsOnly struct{ fs.FS }
 ```
-<!-- source: src/core/testing/fstest/mapfs.cs:7, 221 -->
+<!-- source: src/core/testing/fstest/mapfs.cs:7, 219 -->
 ```csharp
 using fs = go.io.fs_package;
 …

@@ -201,7 +201,7 @@ generator writes the overload that takes a pointer (`ж<Reader>`), and the runti
 to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
 Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:223 -->
+<!-- source: src/core/bufio/bufio.cs:221 -->
 ```csharp
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 ```

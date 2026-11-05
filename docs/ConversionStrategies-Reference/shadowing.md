@@ -68,6 +68,252 @@ For a **function-literal parameter** that shadows an enclosing local, the rename
 
 Conversely, a **local that shadows a *pointer parameter*** must not inherit the parameter's special emission. A deref-aliased pointer parameter is `ж<T> Ꮡp` with `ref var p = ref Ꮡp.DerefOrNull()`, so passing it whole to a `*T`-expecting function emits its box `Ꮡp`. But a *local* `t` shadowing a `t *T` parameter (`func mapKeyError2(t *_type, …){ … var t *_type; … }`) is a plain pointer local — passing it should stay `use(tΔ2)`, not `use(ᏑtΔ2)` (the spurious `&` references an undefined `ᏑtΔ2` box → CS0103). The "is this a parameter?" check therefore verifies the resolved object is genuinely one of the function's parameter objects; a match by *name* would misclassify the shadowing local. (Guarded by the `ShadowedPointerParam` behavioral test; runtime has the shape in `mapKeyError2`/`interhash`'s inner `var t *_type`.)
 
+## An init statement keeps its block only where moving its names could change what they mean
+
+Go scopes an `if`, `switch` or type-switch init statement to its statement. C# has no init clause, so the
+init either becomes a statement of the enclosing block, folds into the condition, or keeps a block of its
+own. Moving a declaration into the enclosing block is invisible to the program unless a name it declares
+collides with, or rebinds, another use there; the converter therefore decides each init from the final
+C# names, after every `Δ` rename above.
+
+### The init becomes a statement of the enclosing block when its names occur nowhere else there
+
+The init moves out, in Go's own token order, when two things hold. First, no identifier spelling a name the
+init declares occurs anywhere else in the enclosing block, at any depth, before the statement or after it:
+not a declaration, a use, a parameter or a type name. The enclosing block is the nearest Go block; for a
+`case` body it is the whole switch body, C#'s one switch block. A member name after a `.`, a struct field
+key and a label bind no local, so they do not count. Second, the statement holds nothing the emitter turns
+into a lambda over its variables: a func literal, a `go` or `defer` call, a `select`, a range over a func
+iterator, or a method value.
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.go:35-46 -->
+```go
+func dropped(n int) string {
+	if m := next(n); m > 3 {
+		return fmt.Sprint("big ", m)
+	} else if m > 1 {
+		return fmt.Sprint("mid ", m)
+	}
+	switch k := n * 3; k {
+	case 3:
+		return "three"
+	}
+	return "small"
+}
+```
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:43-56 -->
+```csharp
+internal static @string dropped(nint n) {
+    nint m = next(n); if (m > 3) {
+        return fmt.Sprint("big ", m);
+    } else if (m > 1) {
+        return fmt.Sprint("mid ", m);
+    }
+    nint k = n * 3;
+    switch (k) {
+    case 3: {
+        return "three";
+    }}
+
+    return "small";
+}
+```
+
+Why both conditions: either failure would compile and run differently, so neither may be left to the
+compiler. A later use of a moved name that bound to a package member or an outer name would bind to the
+moved local instead, and a closure over a moved variable would share one variable across what were
+separate passes of a backward `goto` loop. A collision the compiler does report (a second declaration of
+the name in the block, or a use before it) is refused by the same first condition.
+
+### A head `if` refused only because a sibling declares the same `ok` folds its init into the condition
+
+A comma-ok init whose only collision is its own `ok` folds into the condition, which declares no `ok`.
+An assertion uses golib's out-parameter overload, `x._<T>(out var v)`, which assigns `v` in both branches
+(the zero value when the assertion fails, as the tuple form does); `!ok` reads `!x._<T>(out var v)`. A
+map lookup becomes a positional pattern on the comma-ok tuple: `m[k, ꟷ] is (var v, true)` when the value
+is not read in the else branch, and `is not (var v, true)` for `!ok` when it is not read in the body,
+since the pattern variable is assigned only where the pattern holds (or, under `not`, where it fails).
+The value's name must still pass the first condition above, since a condition's variables belong to the
+enclosing block. Siblings that refuse each other only by `ok` fold together, and a fold frees a sibling
+refused only by the `ok` it gave up.
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.go:59-70 -->
+```go
+func classify(x any) string {
+	if s, ok := x.(Shape); ok {
+		return fmt.Sprint("area ", s.Area())
+	}
+	if l, ok := x.(Named); ok {
+		return "name " + l.Name()
+	}
+	if _, ok := x.(error); !ok {
+		return "not an error"
+	}
+	return "error"
+}
+```
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:70-94 -->
+```csharp
+internal static @string classify(any x) {
+    if (x._<Shape>(out var s)) {
+        return fmt.Sprint("area ", s.Area());
+    }
+    if (x._<Named>(out var l)) {
+        return "name "u8 + l.Name();
+    }
+    if (!x._<error>(out _)) {
+        return "not an error";
+    }
+    return "error";
+}
+
+internal static nint lookup(map<@string, nint> m, @string k) {
+    if (m[k, ꟷ] is (var v, true)) {
+        return v;
+    }
+    if (m[k + k, ꟷ] is (var w, true)) {
+        return -w;
+    }
+    if (m["zero", ꟷ] is not (_, true)) {
+        return 0;
+    }
+    return 100;
+}
+```
+
+### An else-if's own init folds into its condition
+
+An else-if's init block is its `else`'s own block, so it cannot simply go. It folds instead: an assertion
+into the out-parameter overload, a comma-ok lookup into its pattern, and any other `var` declaration into a
+`var` pattern, `f() is var (n, err) && cond`. A `var` pattern always matches and assigns every name in both
+branches, so the names stay readable in the later else branches, as in Go. A condition's variables in an
+else-if stay in the else's nested scope, so these folds need no check against the enclosing block. A typed
+declaration (`nint k = h();`) and an init that assigns rather than declares keep today's `else` block: a
+type pattern would test the run-time type, which is not what a typed declaration means.
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.go:87-100 -->
+```go
+func chain(x any, m map[string]int, n int) string {
+	if x == nil {
+		return "nil"
+	} else if s, ok := x.(Shape); ok {
+		return fmt.Sprint("shape ", s.Area())
+	} else if v, ok := m["k"]; !ok {
+		return "no k"
+	} else if d, err := pair(n - v); err != nil || d > 10 {
+		return fmt.Sprint("pair ", d, " ", err)
+	} else if e := errors.New("fallback"); e != nil {
+		return e.Error()
+	}
+	return "end"
+}
+```
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:96-109 -->
+```csharp
+internal static @string chain(any x, map<@string, nint> m, nint n) {
+    if (x == nil) {
+        return "nil";
+    } else if (x._<Shape>(out var s)) {
+        return fmt.Sprint("shape ", s.Area());
+    } else if (m["k", ꟷ] is not (var v, true)) {
+        return "no k";
+    } else if (pair(n - v) is var (d, err) && (err != nil || d > 10)) {
+        return fmt.Sprint("pair ", d, " ", err);
+    } else if (errors.New("fallback") is var e && e != nil) {
+        return e.Error();
+    }
+    return "end";
+}
+```
+
+A fold works from the init's own emitted text, so whatever its emission decided (a `Δ` name, a typed or
+heap-boxed declaration) is folded or refused as it stands: only one plain `var` declaration folds. The
+value operand of `is` is parenthesized unless it is one primary expression, and a condition holding `||`
+is parenthesized under the `&&`.
+
+### Everything else keeps its block
+
+A name that occurs elsewhere in the enclosing block keeps the block, and so does any closure in the
+statement. The rebinding case: the later `limit` is the package constant, so moving the local `limit` out
+would capture it.
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.go:103-108 -->
+```go
+func rebinding() int {
+	if limit := next(0); limit > 0 {
+		fmt.Println("inner limit", limit)
+	}
+	return limit
+}
+```
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:111-118 -->
+```csharp
+internal static nint rebinding() {
+    {
+        nint limit = next(0); if (limit > 0) {
+            fmt.Println("inner limit", limit);
+        }
+    }
+    return main_package.limit;
+}
+```
+
+The closure case: each pass of the backward `goto` loop captures its own `x` because the block is a fresh
+scope each time it is entered. Siblings declaring the same name keep their blocks too, rather than
+renaming one of them.
+
+<!-- source: src/tests/Behavioral/InitStatementScope/main.cs.target:120-154 -->
+```csharp
+internal static slice<nint> captures() {
+    var fnsᴷ = new stackAppend<Func<nint>>();
+    var outᴷ = new stackAppend<nint>(moves: true);
+
+    slice<Func<nint>> fns = default;
+    nint i = 0;
+loop:
+    {
+        nint x = i; if (x < 3) {
+            fns = append(fnsᴷ, fns, () => x);
+            i++;
+            goto loop;
+        }
+    }
+    slice<nint> @out = default;
+    foreach (var (_, f) in fns) {
+        @out = append(outᴷ, @out, f());
+    }
+    @out = move2heap(outᴷ, @out);
+    return @out;
+}
+
+internal static error siblings(nint n) {
+    {
+        var (_, err) = pair(n); if (err != nil) {
+            return err;
+        }
+    }
+    {
+        var (_, err) = pair(n - 10); if (err != nil) {
+            return fmt.Errorf("second: %w"u8, err);
+        }
+    }
+    return default;
+}
+```
+
+Guarded by: the converter tests `TestInitScopeDropsTheBlockWhenNoNameCollides`,
+`TestInitScopeFoldsAHeadIfRefusedOnlyForOk`, `TestInitScopeFoldsAnElseIfsOwnInit`,
+`TestInitScopeKeepsTheBlockForEachRefusal`, `TestInitFoldPartsReadsOnlyAPlainVarDeclaration` and
+`TestInitFoldOperandParenthesizesAllButAPrimary`, and the `InitStatementScope` behavioral test, whose
+output matches Go for every shape and for the rebinding and closure cases.
+<!-- Ruled 2026-11-05 (docs/PLAN-init-statement-scope.md, section 5: "Yes, no rename"). The C# rules each
+     shape depends on (R1-R16) are measured in that plan; the predicate and the folds are
+     src/go2cs/initScopeOperations.go. -->
+
 ## Type-vs-Method Name Collisions
 
 Go keeps types and methods in separate namespaces, so a package may legally declare both a type `foo` and a method `foo` on some receiver. In C# both land in the same package class — the nested type and the `this ref` extension method — where a type and a method cannot share a name (CS0102). The converter resolves this by `Δ`-prefixing the **type** (`Δfoo`) while the method keeps its core-sanitized name (`foo`), so they do not collide.

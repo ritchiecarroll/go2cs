@@ -399,7 +399,7 @@ emitted C# line: after one space, or at the column of its gofmt-aligned run (bel
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1185-1187 -->
+<!-- source: src/core/strings/strings.cs:1173-1175 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -449,7 +449,7 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:726-732 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:708-714 -->
 ```csharp
             if (t == L) {
                 // no change
@@ -508,7 +508,7 @@ Above a label:
 	case exp > 0 && exp <= 15+22: // int * 10^k
 ```
 
-<!-- source: src/core/internal/strconv/atof.cs:486-493 -->
+<!-- source: src/core/internal/strconv/atof.cs:484-491 -->
 ```csharp
     switch (ᐧ) {
     case {} when exp is 0: {
@@ -570,7 +570,7 @@ An empty block:
 		}
 ```
 
-<!-- source: src/core/encoding/xml/xml.cs:1260-1266 -->
+<!-- source: src/core/encoding/xml/xml.cs:1202-1208 -->
 ```csharp
         if (b == '\r') {
             d.buf.WriteByte((byte)'\n');
@@ -636,7 +636,7 @@ var unitMap = map[string]uint64{
 	"μs": uint64(Microsecond), // U+03BC = Greek letter mu
 ```
 
-<!-- source: src/core/time/format.cs:1830-1834 -->
+<!-- source: src/core/time/format.cs:1818-1822 -->
 ```csharp
 [GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"] = (uint64)ΔNanosecond,
@@ -661,7 +661,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3200-3204 -->
+<!-- source: src/core/database/sql/sql.cs:3176-3180 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
@@ -696,7 +696,7 @@ func appendLines(x, y []byte) []byte {
 }
 ```
 
-<!-- source: src/core/go/printer/gobuild.cs:146-152 -->
+<!-- source: src/core/go/printer/gobuild.cs:144-150 -->
 ```csharp
 internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     if (len(y) > 0 && isNL(y[0]) && // y starts in blank line
@@ -714,7 +714,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:999 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:937 -->
 ```csharp
         clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */);
 ```
@@ -740,7 +740,7 @@ own line at the next place it can. The comment is then misplaced, never lost:
 				// underflow to ±0
 ```
 
-<!-- source: src/core/math/big/float.cs:933-935 -->
+<!-- source: src/core/math/big/float.cs:931-933 -->
 ```csharp
             if (p < 0 /* m <= 0.25 */ || p == 0 && x.mant.sticky((nuint)len(x.mant) * (nuint)_W - 1) == 0) {
                 /* m == 0.5 */

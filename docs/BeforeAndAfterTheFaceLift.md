@@ -70,7 +70,7 @@ Before, `src/core/container/list/list.cs`:
 
 After, the same file:
 
-<!-- source: src/core/container/list/list.cs:52-55 -->
+<!-- source: src/core/container/list/list.cs:48-51 -->
 ```csharp
 partial struct List {
     internal Element root; // sentinel list element, only &root, root.prev, and root.next are used

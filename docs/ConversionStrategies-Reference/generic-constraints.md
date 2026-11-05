@@ -103,7 +103,7 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
-<!-- source: src/core/go/types/predicates.cs:686-693 -->
+<!-- source: src/core/go/types/predicates.cs:658-665 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */
@@ -297,7 +297,7 @@ The companion **shift-*count*** case —
 (the same coercion the shift-width machinery uses) — routes through the same bridge, with the constant
 operand materialized as the type parameter:
 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))` (a bare `(int)(EI)` is CS0030).
-<!-- src/core/internal/trace/base.cs:166 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))`.
+<!-- src/core/internal/trace/base.cs:162 `(uint8)1 << (int)(ConvertToUInt64<EI>((id % ConvertToType<EI>(8))))`.
 at the fix: cleared ~11 of internal/trace's index CS1503/CS0030 (17 -> 6) and its last two shift-count CS0030
 (6 -> 4). --> Guarded by `NamedNumericSliceIndex` (a generic `lookup[K ~uint64]`
 indexing by the type parameter and an arithmetic result, a `pick` indexing by a named `int64`, a
@@ -319,7 +319,7 @@ A **pointer** instantiation (`walkList(v, n.Names)` with `N=*Ident`) cannot: the
 does not implement the interface — its generated pointer adapter does. The call site (the last line
 below) projects the slice element-wise through the adapter, instantiating `N` as the interface itself:
 
-<!-- source: src/core/go/ast/walk.cs:18-24, 58 -->
+<!-- source: src/core/go/ast/walk.cs:18-24, 56 -->
 ```csharp
 internal static void walkList<N>(Visitor v, slice<N> list)
     where N : Node
