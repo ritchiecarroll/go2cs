@@ -1,8 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using debug = runtime.debug_package;
-using runtime;
+using Δruntime = runtime_package;
+using debug = go.runtime.debug_package;
+using go.runtime;
 
 partial class main_package {
 
@@ -21,8 +22,12 @@ internal static void Main() {
     foreach (var (_, setting) in bi.Settings) {
         var exprᴛ1 = setting.Key;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "GOOS"u8 || exprᴛ1 == "GOARCH"u8: {
+        case {} when exprᴛ1 == "GOOS"u8: {
             fmt.Printf("%s: %s\n"u8, setting.Key, setting.Value);
+            break;
+        }
+        case {} when exprᴛ1 == "GOARCH"u8: {
+            fmt.Println("GOARCH is runtime.GOARCH:", setting.Value == Δruntime.GOARCH);
             break;
         }}
 

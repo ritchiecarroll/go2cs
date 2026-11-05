@@ -41,8 +41,8 @@ namespace go;
 /// Layout: open addressing with linear probing over inline (key, value) slots, kept at most half full
 /// and grown by copy. Reads take no lock: a slot's value is written before its key is published with
 /// a release store, and readers acquire the key first; a grown table is published whole. Inserts take
-/// one lock. A hit is one table load, a multiply-shift hash, an acquire load and a reference compare
-/// (about 0.5 ns over a hoisted field, measured).
+/// one lock. A hit is two independent static loads, a multiply-shift hash, an acquire load, a
+/// reference compare and one 16-byte copy through the returned ref, with no frame of its own to zero.
 /// </para>
 /// </remarks>
 internal static class StringLiteralCache
@@ -53,50 +53,66 @@ internal static class StringLiteralCache
         public @string Value;
     }
 
-    private sealed class Table(int log2)
-    {
-        public readonly Slot[] Slots = new Slot[1 << log2];
-        public readonly int Shift = 64 - log2;
-        public int Count;
-    }
-
     private const int InitialLog2 = 8;
 
-    private static Table s_table = new(InitialLog2);
+    // The table is two statics, not one object, so a hit loads both at once instead of a chain. A
+    // grown table is still published whole: s_slots is filled, then published, then s_shift. A reader
+    // acquires s_shift BEFORE it reads s_slots, so it sees a table at least as new as its shift; and
+    // tables only grow, so an older shift indexes a newer table in bounds (it probes a wrong slot and
+    // misses, and Slow re-derives the shift from the table it reads). s_count is guarded by s_lock.
+    private static Slot[] s_slots = NewSlots(InitialLog2);
+    private static int s_shift = 64 - InitialLog2;
+    private static int s_count;
     private static readonly Lock s_lock = new();
 
+    private static Slot[] NewSlots(int log2) => new Slot[1 << log2];
+
+    // Where a small conversion that is not cached lands, so every path returns a ref and the caller
+    // copies once. Read through the returned ref at once: this thread's next one overwrites it.
+    [ThreadStatic]
+    private static @string t_uncached;
+
+    // The largest backing t_uncached may hold, so it never keeps a large one alive (see Uncached).
+    internal const int UncachedSlotLimit = 256;
+
     // Fibonacci hashing of the object address: frozen literals are laid out consecutively, and a
-    // multiply by 2^64/phi spreads an arithmetic progression evenly over the top bits.
+    // multiply by 2^64/phi spreads an arithmetic progression evenly over the top bits. The address is
+    // taken by value, through the first character (a fixed offset into the object): reinterpreting
+    // the reference with Unsafe.As takes the PARAMETER's address and spills it to the frame.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Index(string s, int shift) =>
-        (int)((ulong)Unsafe.As<string, nint>(ref s) * 0x9E3779B97F4A7C15UL >> shift);
+    private static unsafe int Index(string s, int shift) =>
+        (int)((ulong)Unsafe.AsPointer(ref Unsafe.AsRef(in s.GetPinnableReference())) * 0x9E3779B97F4A7C15UL >> shift);
 
     /// <summary>
     /// Converts a C# string to <see cref="@string"/>, returning the shared conversion when the string
     /// is a literal already converted once.
     /// </summary>
+    /// <remarks>
+    /// Returned by ref so the hit and the miss merge on an address, not on a <see cref="@string"/>
+    /// temporary the caller's frame would zero on every call. Copy it out before converting again.
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static @string Get(string? value)
+    public static ref readonly @string Get(string? value)
     {
         if (value is not null)
         {
-            Table table = s_table;
-            ref Slot slot = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(table.Slots), Index(value, table.Shift));
+            int shift = Volatile.Read(ref s_shift);
+            ref Slot slot = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(s_slots), Index(value, shift));
 
             if (ReferenceEquals(Volatile.Read(ref slot.Key), value))
-                return slot.Value;
+                return ref slot.Value;
         }
 
-        return Slow(value);
+        return ref Slow(value);
     }
 
     // The probe continuation. Kept free of @string locals (see Miss).
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static @string Slow(string? value)
+    private static ref readonly @string Slow(string? value)
     {
         if (value is not null)
         {
-            Slot[] slots = s_table.Slots;
+            Slot[] slots = s_slots;
             int mask = slots.Length - 1;
             int i = Index(value, 64 - BitOperations.Log2((uint)slots.Length));
             string? key;
@@ -104,13 +120,13 @@ internal static class StringLiteralCache
             while ((key = Volatile.Read(ref slots[i].Key)) is not null)
             {
                 if (ReferenceEquals(key, value))
-                    return slots[i].Value;
+                    return ref slots[i].Value;
 
                 i = (i + 1) & mask;
             }
         }
 
-        return Miss(value);
+        return ref Miss(value);
     }
 
     // Today's conversion, byte for byte: AllocationCounter.Utf8ToBytes is Encoding.UTF8.GetBytes
@@ -119,36 +135,52 @@ internal static class StringLiteralCache
     // by legacy-SSE ReadyToRun code (UTF-8 transcoding with tiering off), measured ~50 ns of AVX/SSE
     // transition penalty per call on Haswell.
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static @string Miss(string? value)
+    private static ref readonly @string Miss(string? value)
     {
         byte[] bytes = AllocationCounter.Utf8ToBytes(value);
 
         if (value is null || GC.GetGeneration(value) != int.MaxValue)
-            return new @string(bytes);
+            return ref Uncached(bytes);
 
-        return Insert(value, bytes);
+        return ref Insert(value, bytes);
     }
 
+    // A conversion that is not cached lands where the caller can copy it from: a small one in this
+    // thread's slot, which allocates nothing; a large one in a box of its own, so the slot never keeps
+    // a large backing alive after the caller has dropped it.
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static @string Insert(string key, byte[] bytes)
+    private static ref readonly @string Uncached(byte[] bytes)
+    {
+        if (bytes.Length > UncachedSlotLimit)
+            return ref new StrongBox<@string>(new @string(bytes)).Value;
+
+        t_uncached = new @string(bytes);
+        return ref t_uncached;
+    }
+
+    // Returns a ref to the slot's value: a published slot is never rewritten, and a table a grow
+    // replaced keeps its values, so the ref stays valid.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static ref readonly @string Insert(string key, byte[] bytes)
     {
         @string value = new(bytes);
 
         lock (s_lock)
         {
-            Table table = s_table;
-            ref Slot slot = ref Find(table, key, out bool found);
+            Slot[] slots = s_slots;
+            ref Slot slot = ref Find(slots, key, out bool found);
 
             // Another thread converted this literal first: return ITS value, so every evaluation of
             // one literal yields one backing array, as a hoisted field does.
             if (found)
-                return slot.Value;
+                return ref slot.Value;
 
-            if ((table.Count + 1) * 2 > table.Slots.Length)
+            if ((s_count + 1) * 2 > slots.Length)
             {
-                Table grown = new(64 - table.Shift + 1);
+                int log2 = BitOperations.Log2((uint)slots.Length) + 1;
+                Slot[] grown = NewSlots(log2);
 
-                foreach (Slot old in table.Slots)
+                foreach (Slot old in slots)
                 {
                     if (old.Key is null)
                         continue;
@@ -156,29 +188,28 @@ internal static class StringLiteralCache
                     Find(grown, old.Key, out _) = old;
                 }
 
-                grown.Count = table.Count;
                 slot = ref Find(grown, key, out _);
                 slot.Value = value;
                 slot.Key = key;
-                grown.Count++;
-                Volatile.Write(ref s_table, grown);
+                Volatile.Write(ref s_slots, grown);
+                Volatile.Write(ref s_shift, 64 - log2);
             }
             else
             {
                 slot.Value = value;
                 Volatile.Write(ref slot.Key, key);
-                table.Count++;
             }
-        }
 
-        return value;
+            s_count++;
+
+            return ref slot.Value;
+        }
     }
 
-    private static ref Slot Find(Table table, string key, out bool found)
+    private static ref Slot Find(Slot[] slots, string key, out bool found)
     {
-        Slot[] slots = table.Slots;
         int mask = slots.Length - 1;
-        int i = Index(key, table.Shift);
+        int i = Index(key, 64 - BitOperations.Log2((uint)slots.Length));
 
         while (true)
         {
@@ -202,12 +233,12 @@ internal static class StringLiteralCache
     }
 
     /// <summary>Number of literals converted and cached so far (diagnostics and tests).</summary>
-    internal static int Count => s_table.Count;
+    internal static int Count => Volatile.Read(ref s_count);
 
     /// <summary>Whether this exact string instance has a cached conversion (diagnostics and tests).</summary>
     internal static bool Contains(string value)
     {
-        Find(s_table, value, out bool found);
+        Find(s_slots, value, out bool found);
         return found;
     }
 }

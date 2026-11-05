@@ -1,0 +1,1274 @@
+; Assembly listing for method go.main_package:run(nint):nint (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rsp based frame
+; partially interruptible
+; No PGO data
+; 3 inlinees with PGO data; 44 single block inlinees; 27 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     r15
+       push     r14
+       push     r13
+       push     rdi
+       push     rsi
+       push     rbp
+       push     rbx
+       sub      rsp, 256
+       xor      eax, eax
+       mov      qword ptr [rsp+0x58], rax
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqu  ymmword ptr [rsp+0x60], ymm4
+       vmovdqu  ymmword ptr [rsp+0x80], ymm4
+       vmovdqu  ymmword ptr [rsp+0xA0], ymm4
+       vmovdqu  ymmword ptr [rsp+0xC0], ymm4
+       vmovdqu  ymmword ptr [rsp+0xE0], ymm4
+       mov      rbx, rcx
+ 
+G_M000_IG02:                ;; offset=0x0049
+       xor      ebp, ebp
+       mov      rcx, 0x7FFE99112D20
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       test     byte  ptr [(reloc 0x7ffe99111520)], 1
+       je       G_M000_IG86
+ 
+G_M000_IG03:                ;; offset=0x006A
+       mov      r8, 0x1BF70C09D88
+       mov      r8, gword ptr [r8]
+       mov      rcx, rsi
+       xor      edx, edx
+       call     [System.Collections.Generic.Dictionary`2[go.string,nint]:.ctor(int,System.Collections.Generic.IEqualityComparer`1[go.string]):this]
+       cmp      byte  ptr [(reloc 0x7ffe9847b2c8)], 0
+       je       SHORT G_M000_IG05
+ 
+G_M000_IG04:                ;; offset=0x008B
+       mov      rcx, qword ptr GS:[0x0058]
+       mov      rcx, qword ptr [rcx+0x48]
+       add      rcx, 636
+       inc      qword ptr [rcx+0x10]
+ 
+G_M000_IG05:                ;; offset=0x00A3
+       mov      gword ptr [rsp+0xF8], rsi
+       xor      r14d, r14d
+       cmp      r14, rbx
+       jge      G_M000_IG54
+ 
+G_M000_IG06:                ;; offset=0x00B7
+       test     byte  ptr [(reloc 0x7ffe98783b28)], 1
+       je       G_M000_IG87
+ 
+G_M000_IG07:                ;; offset=0x00C4
+       mov      rax, 0x1BF70C00BC0
+       mov      rcx, gword ptr [rax]
+       lea      r8, bword ptr [rcx+0x08]
+       mov      rax, r14
+       cqo      
+       idiv     rdx:rax, qword ptr [rcx+0x18]
+       mov      rcx, r8
+       call     [go.slice`1[go.string]:get_Item(nint):byref:this]
+       mov      rsi, gword ptr [rax]
+       mov      edi, dword ptr [rax+0x08]
+       mov      r15d, dword ptr [rax+0x0C]
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC5A0
+       mov      gword ptr [rsp+0x50], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x50]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      r13, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [r13], rax
+       je       SHORT G_M000_IG09
+ 
+G_M000_IG08:                ;; offset=0x0140
+       lea      rcx, [rsp+0xD8]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG10
+ 
+G_M000_IG09:                ;; offset=0x0153
+       vmovdqu  xmm0, xmmword ptr [r13+0x08]
+       vmovdqu  xmmword ptr [rsp+0xD8], xmm0
+ 
+G_M000_IG10:                ;; offset=0x0162
+       mov      ecx, dword ptr [rsp+0xE4]
+       movsxd   rdx, r15d
+       movsxd   r8, ecx
+       cmp      rdx, r8
+       jl       G_M000_IG22
+ 
+G_M000_IG11:                ;; offset=0x0178
+       movsxd   rdx, ecx
+       movsxd   rcx, r15d
+       cmp      rdx, rcx
+       ja       G_M000_IG88
+       mov      rcx, rsi
+       test     rcx, rcx
+       jne      SHORT G_M000_IG12
+       mov      rcx, 0x1BF23BD62A0
+ 
+G_M000_IG12:                ;; offset=0x0199
+       mov      r8, gword ptr [rsp+0xD8]
+       mov      eax, dword ptr [rsp+0xE0]
+       mov      r10d, dword ptr [rsp+0xE4]
+       mov      r9d, edi
+       mov      r11d, edx
+       add      r9, r11
+       mov      r11d, dword ptr [rcx+0x08]
+       cmp      r9, r11
+       ja       G_M000_IG89
+       mov      r9d, edi
+       lea      rcx, bword ptr [rcx+r9+0x10]
+       test     r8, r8
+       jne      SHORT G_M000_IG13
+       xor      r9, r9
+       xor      r11d, r11d
+       jmp      SHORT G_M000_IG14
+ 
+G_M000_IG13:                ;; offset=0x01DB
+       mov      r9d, eax
+       mov      r11d, r10d
+       add      r9, r11
+       mov      r11d, dword ptr [r8+0x08]
+       cmp      r9, r11
+       ja       G_M000_IG89
+       mov      eax, eax
+       lea      r9, bword ptr [r8+rax+0x10]
+       mov      r11d, r10d
+ 
+G_M000_IG14:                ;; offset=0x01FB
+       cmp      edx, r11d
+       jne      G_M000_IG21
+ 
+G_M000_IG15:                ;; offset=0x0204
+       mov      r8d, r11d
+       cmp      r8, 4
+       je       SHORT G_M000_IG17
+ 
+G_M000_IG16:                ;; offset=0x020D
+       mov      rdx, r9
+       call     [System.SpanHelpers:SequenceEqual(byref,byref,nuint):bool]
+       jmp      SHORT G_M000_IG18
+ 
+G_M000_IG17:                ;; offset=0x0218
+       mov      eax, dword ptr [rcx]
+       cmp      eax, dword ptr [r9]
+       sete     al
+       movzx    rax, al
+ 
+G_M000_IG18:                ;; offset=0x0223
+       test     eax, eax
+       je       SHORT G_M000_IG22
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BD6548
+       mov      gword ptr [rsp+0x48], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x48]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       jne      G_M000_IG38
+ 
+G_M000_IG19:                ;; offset=0x0279
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0xC8], xmm0
+ 
+G_M000_IG20:                ;; offset=0x0287
+       jmp      G_M000_IG39
+ 
+G_M000_IG21:                ;; offset=0x028C
+       xor      eax, eax
+       jmp      SHORT G_M000_IG18
+ 
+G_M000_IG22:                ;; offset=0x0290
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC5D0
+       mov      gword ptr [rsp+0x40], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x40]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      r13, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [r13], rax
+       je       SHORT G_M000_IG23
+       lea      rcx, [rsp+0xB0]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG24
+ 
+G_M000_IG23:                ;; offset=0x02F2
+       vmovdqu  xmm0, xmmword ptr [r13+0x08]
+       vmovdqu  xmmword ptr [rsp+0xB0], xmm0
+ 
+G_M000_IG24:                ;; offset=0x0301
+       mov      gword ptr [rsp+0x58], rsi
+       mov      dword ptr [rsp+0x60], edi
+       mov      dword ptr [rsp+0x64], r15d
+       lea      rcx, [rsp+0x58]
+       lea      rdx, [rsp+0xB0]
+       call     [go.internal.stringslite_package:HasPrefix(go.string,go.string):bool]
+       test     eax, eax
+       je       G_M000_IG51
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC5F0
+       mov      gword ptr [rsp+0x38], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x38]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG25
+       lea      rcx, [rsp+0xA0]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG26
+ 
+G_M000_IG25:                ;; offset=0x038B
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0xA0], xmm0
+ 
+G_M000_IG26:                ;; offset=0x0399
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0x98], rcx
+       cmp      byte  ptr [(reloc 0x7ffe9847c0d8)], 0
+       je       SHORT G_M000_IG28
+       mov      rcx, gword ptr [rsp+0xF8]
+       test     rcx, rcx
+       je       SHORT G_M000_IG27
+       mov      eax, dword ptr [rcx+0x38]
+       sub      eax, dword ptr [rcx+0x40]
+       test     eax, eax
+       jg       SHORT G_M000_IG28
+ 
+G_M000_IG27:                ;; offset=0x03C3
+       mov      rcx, 0x7FFE98785250
+       call     CORINFO_HELP_NEWSFAST
+       mov      rdx, rax
+       lea      rdi, bword ptr [rdx+0x08]
+       lea      rsi, bword ptr [rsp+0xA0]
+       call     CORINFO_HELP_ASSIGN_BYREF
+       movsq    
+       mov      rcx, rdx
+       call     [go.GoEqualityComparer:CheckHashable(System.Object)]
+ 
+G_M000_IG28:                ;; offset=0x03F1
+       cmp      gword ptr [rsp+0xF8], 0
+       jne      SHORT G_M000_IG30
+       xor      edx, edx
+       mov      qword ptr [rsp+0x98], rdx
+ 
+G_M000_IG29:                ;; offset=0x0406
+       call     [go.builtin:GoZero[nint]():nint]
+       mov      r8, rax
+       jmp      SHORT G_M000_IG36
+ 
+G_M000_IG30:                ;; offset=0x0411
+       mov      rcx, gword ptr [rsp+0xF8]
+       cmp      byte  ptr [rcx], cl
+ 
+G_M000_IG31:                ;; offset=0x041B
+       vmovdqu  xmm0, xmmword ptr [rsp+0xA0]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG32:                ;; offset=0x042A
+       lea      rdx, [rsp+0x58]
+       call     [System.Collections.Generic.Dictionary`2[go.string,nint]:FindValue(go.string):byref:this]
+       test     rax, rax
+       jne      SHORT G_M000_IG34
+       xor      eax, eax
+       mov      qword ptr [rsp+0x98], rax
+ 
+G_M000_IG33:                ;; offset=0x0444
+       jmp      SHORT G_M000_IG35
+ 
+G_M000_IG34:                ;; offset=0x0446
+       mov      rax, qword ptr [rax]
+       mov      qword ptr [rsp+0x98], rax
+       mov      eax, 1
+ 
+G_M000_IG35:                ;; offset=0x0456
+       test     eax, eax
+       je       SHORT G_M000_IG29
+       mov      r8, qword ptr [rsp+0x98]
+ 
+G_M000_IG36:                ;; offset=0x0462
+       vmovdqu  xmm0, xmmword ptr [rsp+0xA0]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG37:                ;; offset=0x0471
+       lea      rdx, [rsp+0x58]
+       inc      r8
+       lea      rcx, [rsp+0xF8]
+       call     [go.map`2[go.string,nint]:set_Item(go.string,nint):this]
+       jmp      G_M000_IG51
+ 
+G_M000_IG38:                ;; offset=0x048C
+       lea      rcx, [rsp+0xC8]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+ 
+G_M000_IG39:                ;; offset=0x049D
+       xor      ecx, ecx
+       mov      qword ptr [rsp+0xC0], rcx
+       cmp      byte  ptr [(reloc 0x7ffe9847c0d8)], 0
+       je       SHORT G_M000_IG41
+       mov      rcx, gword ptr [rsp+0xF8]
+       test     rcx, rcx
+       je       SHORT G_M000_IG40
+       mov      eax, dword ptr [rcx+0x38]
+       sub      eax, dword ptr [rcx+0x40]
+       test     eax, eax
+       jg       SHORT G_M000_IG41
+ 
+G_M000_IG40:                ;; offset=0x04C7
+       mov      rcx, 0x7FFE98785250
+       call     CORINFO_HELP_NEWSFAST
+       mov      rdx, rax
+       lea      rdi, bword ptr [rdx+0x08]
+       lea      rsi, bword ptr [rsp+0xC8]
+       call     CORINFO_HELP_ASSIGN_BYREF
+       movsq    
+       mov      rcx, rdx
+       call     [go.GoEqualityComparer:CheckHashable(System.Object)]
+ 
+G_M000_IG41:                ;; offset=0x04F5
+       cmp      gword ptr [rsp+0xF8], 0
+       jne      SHORT G_M000_IG43
+       xor      edx, edx
+       mov      qword ptr [rsp+0xC0], rdx
+ 
+G_M000_IG42:                ;; offset=0x050A
+       call     [go.builtin:GoZero[nint]():nint]
+       mov      r8, rax
+       jmp      SHORT G_M000_IG49
+ 
+G_M000_IG43:                ;; offset=0x0515
+       mov      rcx, gword ptr [rsp+0xF8]
+       cmp      byte  ptr [rcx], cl
+ 
+G_M000_IG44:                ;; offset=0x051F
+       vmovdqu  xmm0, xmmword ptr [rsp+0xC8]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG45:                ;; offset=0x052E
+       lea      rdx, [rsp+0x58]
+       call     [System.Collections.Generic.Dictionary`2[go.string,nint]:FindValue(go.string):byref:this]
+       test     rax, rax
+       jne      SHORT G_M000_IG47
+       xor      eax, eax
+       mov      qword ptr [rsp+0xC0], rax
+ 
+G_M000_IG46:                ;; offset=0x0548
+       jmp      SHORT G_M000_IG48
+ 
+G_M000_IG47:                ;; offset=0x054A
+       mov      rax, qword ptr [rax]
+       mov      qword ptr [rsp+0xC0], rax
+       mov      eax, 1
+ 
+G_M000_IG48:                ;; offset=0x055A
+       test     eax, eax
+       je       SHORT G_M000_IG42
+       mov      r8, qword ptr [rsp+0xC0]
+ 
+G_M000_IG49:                ;; offset=0x0566
+       vmovdqu  xmm0, xmmword ptr [rsp+0xC8]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG50:                ;; offset=0x0575
+       lea      rdx, [rsp+0x58]
+       inc      r8
+       lea      rcx, [rsp+0xF8]
+       call     [go.map`2[go.string,nint]:set_Item(go.string,nint):this]
+       movsxd   rax, r15d
+       add      rbp, rax
+ 
+G_M000_IG51:                ;; offset=0x0591
+       mov      rax, 0x1BF70C00BC8
+       mov      rcx, gword ptr [rax]
+       lea      r8, bword ptr [rcx+0x08]
+       mov      rax, r14
+       cqo      
+       idiv     rdx:rax, qword ptr [rcx+0x18]
+       mov      rcx, r8
+       call     [go.slice`1[go.string]:get_Item(nint):byref:this]
+ 
+G_M000_IG52:                ;; offset=0x05B4
+       vmovdqu  xmm0, xmmword ptr [rax]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG53:                ;; offset=0x05BE
+       lea      rcx, [rsp+0x58]
+       call     [go.main_package:classify(go.string):nint]
+       add      rbp, rax
+       lea      rcx, [rsp+0xE8]
+       mov      rdx, rax
+       call     [go.main_package:kindName(nint):go.string]
+       movsxd   rax, dword ptr [rsp+0xF4]
+       add      rbp, rax
+       inc      r14
+       cmp      r14, rbx
+       jl       G_M000_IG06
+ 
+G_M000_IG54:                ;; offset=0x05F4
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BD6548
+       mov      gword ptr [rsp+0x30], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x30]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG56
+ 
+G_M000_IG55:                ;; offset=0x0642
+       lea      rcx, [rsp+0x88]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG57
+ 
+G_M000_IG56:                ;; offset=0x0655
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0x88], xmm0
+ 
+G_M000_IG57:                ;; offset=0x0663
+       cmp      byte  ptr [(reloc 0x7ffe9847c0d8)], 0
+       je       SHORT G_M000_IG60
+ 
+G_M000_IG58:                ;; offset=0x066C
+       mov      rcx, gword ptr [rsp+0xF8]
+       test     rcx, rcx
+       je       SHORT G_M000_IG59
+       mov      eax, dword ptr [rcx+0x38]
+       sub      eax, dword ptr [rcx+0x40]
+       test     eax, eax
+       jg       SHORT G_M000_IG60
+ 
+G_M000_IG59:                ;; offset=0x0683
+       mov      rcx, 0x7FFE98785250
+       call     CORINFO_HELP_NEWSFAST
+       mov      rdx, rax
+       lea      rdi, bword ptr [rdx+0x08]
+       lea      rsi, bword ptr [rsp+0x88]
+       call     CORINFO_HELP_ASSIGN_BYREF
+       movsq    
+       mov      rcx, rdx
+       call     [go.GoEqualityComparer:CheckHashable(System.Object)]
+ 
+G_M000_IG60:                ;; offset=0x06B1
+       cmp      gword ptr [rsp+0xF8], 0
+       jne      SHORT G_M000_IG63
+ 
+G_M000_IG61:                ;; offset=0x06BC
+       xor      edx, edx
+       mov      qword ptr [rsp+0x80], rdx
+ 
+G_M000_IG62:                ;; offset=0x06C6
+       call     [go.builtin:GoZero[nint]():nint]
+       mov      rsi, rax
+       jmp      SHORT G_M000_IG69
+ 
+G_M000_IG63:                ;; offset=0x06D1
+       mov      rcx, gword ptr [rsp+0xF8]
+       cmp      byte  ptr [rcx], cl
+ 
+G_M000_IG64:                ;; offset=0x06DB
+       vmovdqu  xmm0, xmmword ptr [rsp+0x88]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG65:                ;; offset=0x06EA
+       lea      rdx, [rsp+0x58]
+       call     [System.Collections.Generic.Dictionary`2[go.string,nint]:FindValue(go.string):byref:this]
+       test     rax, rax
+       jne      SHORT G_M000_IG67
+       xor      eax, eax
+       mov      qword ptr [rsp+0x80], rax
+ 
+G_M000_IG66:                ;; offset=0x0704
+       jmp      SHORT G_M000_IG68
+ 
+G_M000_IG67:                ;; offset=0x0706
+       mov      rax, qword ptr [rax]
+       mov      qword ptr [rsp+0x80], rax
+       mov      eax, 1
+ 
+G_M000_IG68:                ;; offset=0x0716
+       test     eax, eax
+       je       SHORT G_M000_IG62
+       mov      rsi, qword ptr [rsp+0x80]
+ 
+G_M000_IG69:                ;; offset=0x0722
+       lea      rbx, [rsi+2*rsi]
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC5F0
+       mov      gword ptr [rsp+0x28], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x28]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG71
+ 
+G_M000_IG70:                ;; offset=0x0774
+       lea      rcx, [rsp+0x70]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG72
+ 
+G_M000_IG71:                ;; offset=0x0784
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0x70], xmm0
+ 
+G_M000_IG72:                ;; offset=0x078F
+       cmp      byte  ptr [(reloc 0x7ffe9847c0d8)], 0
+       je       SHORT G_M000_IG75
+ 
+G_M000_IG73:                ;; offset=0x0798
+       mov      rcx, gword ptr [rsp+0xF8]
+       test     rcx, rcx
+       je       SHORT G_M000_IG74
+       mov      eax, dword ptr [rcx+0x38]
+       sub      eax, dword ptr [rcx+0x40]
+       test     eax, eax
+       jg       SHORT G_M000_IG75
+ 
+G_M000_IG74:                ;; offset=0x07AF
+       mov      rcx, 0x7FFE98785250
+       call     CORINFO_HELP_NEWSFAST
+       mov      rdx, rax
+       lea      rdi, bword ptr [rdx+0x08]
+       lea      rsi, bword ptr [rsp+0x70]
+       call     CORINFO_HELP_ASSIGN_BYREF
+       movsq    
+       mov      rcx, rdx
+       call     [go.GoEqualityComparer:CheckHashable(System.Object)]
+ 
+G_M000_IG75:                ;; offset=0x07DA
+       cmp      gword ptr [rsp+0xF8], 0
+       jne      SHORT G_M000_IG78
+ 
+G_M000_IG76:                ;; offset=0x07E5
+       xor      edx, edx
+       mov      qword ptr [rsp+0x68], rdx
+ 
+G_M000_IG77:                ;; offset=0x07EC
+       call     [go.builtin:GoZero[nint]():nint]
+       jmp      SHORT G_M000_IG84
+ 
+G_M000_IG78:                ;; offset=0x07F4
+       mov      rcx, gword ptr [rsp+0xF8]
+       cmp      byte  ptr [rcx], cl
+ 
+G_M000_IG79:                ;; offset=0x07FE
+       vmovdqu  xmm0, xmmword ptr [rsp+0x70]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG80:                ;; offset=0x080A
+       lea      rdx, [rsp+0x58]
+       call     [System.Collections.Generic.Dictionary`2[go.string,nint]:FindValue(go.string):byref:this]
+       test     rax, rax
+       jne      SHORT G_M000_IG82
+       xor      eax, eax
+       mov      qword ptr [rsp+0x68], rax
+ 
+G_M000_IG81:                ;; offset=0x0821
+       jmp      SHORT G_M000_IG83
+ 
+G_M000_IG82:                ;; offset=0x0823
+       mov      rax, qword ptr [rax]
+       mov      qword ptr [rsp+0x68], rax
+       mov      eax, 1
+ 
+G_M000_IG83:                ;; offset=0x0830
+       test     eax, eax
+       je       SHORT G_M000_IG77
+       mov      rax, qword ptr [rsp+0x68]
+ 
+G_M000_IG84:                ;; offset=0x0839
+       add      rbx, rbp
+       add      rax, rbx
+ 
+G_M000_IG85:                ;; offset=0x083F
+       add      rsp, 256
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r13
+       pop      r14
+       pop      r15
+       ret      
+ 
+G_M000_IG86:                ;; offset=0x0851
+       mov      rcx, 0x7FFE99111108
+       call     CORINFO_HELP_GET_NONGCSTATIC_BASE
+       jmp      G_M000_IG03
+ 
+G_M000_IG87:                ;; offset=0x0865
+       mov      rcx, 0x7FFE98783AC0
+       call     CORINFO_HELP_GET_GCSTATIC_BASE
+       jmp      G_M000_IG07
+ 
+G_M000_IG88:                ;; offset=0x0879
+       movsxd   r8, r15d
+       xor      ecx, ecx
+       call     [go.golib.RuntimeErrorPanic:LengthSliceBoundsOutOfRange(long,long,long):go.PanicException]
+       mov      rcx, rax
+       call     CORINFO_HELP_THROW
+       int3     
+ 
+G_M000_IG89:                ;; offset=0x088D
+       call     [System.ThrowHelper:ThrowArgumentOutOfRangeException()]
+       int3     
+ 
+; Total bytes of code 2196
+
+; Assembly listing for method go.main_package:classify(go.string):nint (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rsp based frame
+; partially interruptible
+; No PGO data
+; 21 inlinees with PGO data; 42 single block inlinees; 7 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       sub      rsp, 40
+ 
+G_M000_IG02:                ;; offset=0x0004
+       mov      rdx, gword ptr [rcx]
+       mov      r8d, dword ptr [rcx+0x08]
+       mov      ecx, dword ptr [rcx+0x0C]
+       test     rdx, rdx
+       jne      SHORT G_M000_IG04
+ 
+G_M000_IG03:                ;; offset=0x0013
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG05
+ 
+G_M000_IG04:                ;; offset=0x001A
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG05:                ;; offset=0x0037
+       cmp      r10d, 4
+       jne      SHORT G_M000_IG08
+ 
+G_M000_IG06:                ;; offset=0x003D
+       mov      r9, 0x1BF70994338
+       mov      eax, dword ptr [rax]
+       cmp      eax, dword ptr [r9]
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       je       SHORT G_M000_IG08
+       mov      eax, 1
+ 
+G_M000_IG07:                ;; offset=0x005B
+       add      rsp, 40
+       ret      
+ 
+G_M000_IG08:                ;; offset=0x0060
+       test     rdx, rdx
+       jne      SHORT G_M000_IG10
+ 
+G_M000_IG09:                ;; offset=0x0065
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG11
+ 
+G_M000_IG10:                ;; offset=0x006C
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG11:                ;; offset=0x0089
+       cmp      r10d, 5
+       jne      SHORT G_M000_IG13
+       mov      r9, 0x1BF70994330
+       mov      r10d, dword ptr [rax]
+       mov      eax, dword ptr [rax+0x01]
+       mov      r11d, dword ptr [r9]
+       xor      r10d, r11d
+       xor      eax, dword ptr [r9+0x01]
+       or       eax, r10d
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       je       SHORT G_M000_IG13
+       mov      eax, 2
+ 
+G_M000_IG12:                ;; offset=0x00BB
+       add      rsp, 40
+       ret      
+ 
+G_M000_IG13:                ;; offset=0x00C0
+       test     rdx, rdx
+       jne      SHORT G_M000_IG15
+ 
+G_M000_IG14:                ;; offset=0x00C5
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG16
+ 
+G_M000_IG15:                ;; offset=0x00CC
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG16:                ;; offset=0x00E9
+       cmp      r10d, 5
+       jne      SHORT G_M000_IG17
+       mov      r9, 0x1BF70994320
+       mov      r10d, dword ptr [rax]
+       mov      eax, dword ptr [rax+0x01]
+       mov      r11d, dword ptr [r9]
+       xor      r10d, r11d
+       xor      eax, dword ptr [r9+0x01]
+       or       eax, r10d
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       jne      G_M000_IG25
+ 
+G_M000_IG17:                ;; offset=0x011A
+       test     rdx, rdx
+       jne      SHORT G_M000_IG19
+ 
+G_M000_IG18:                ;; offset=0x011F
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG20
+ 
+G_M000_IG19:                ;; offset=0x0126
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG20:                ;; offset=0x0143
+       cmp      r10d, 7
+       jne      SHORT G_M000_IG21
+       mov      r9, 0x1BF70994308
+       mov      r10d, dword ptr [rax]
+       mov      eax, dword ptr [rax+0x03]
+       mov      r11d, dword ptr [r9]
+       xor      r10d, r11d
+       xor      eax, dword ptr [r9+0x03]
+       or       eax, r10d
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       jne      SHORT G_M000_IG25
+ 
+G_M000_IG21:                ;; offset=0x0170
+       test     rdx, rdx
+       jne      SHORT G_M000_IG23
+ 
+G_M000_IG22:                ;; offset=0x0175
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG24
+ 
+G_M000_IG23:                ;; offset=0x017C
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG24:                ;; offset=0x0199
+       cmp      r10d, 6
+       jne      SHORT G_M000_IG27
+       mov      r9, 0x1BF70994328
+       mov      r10d, dword ptr [rax]
+       mov      eax, dword ptr [rax+0x02]
+       mov      r11d, dword ptr [r9]
+       xor      r10d, r11d
+       xor      eax, dword ptr [r9+0x02]
+       or       eax, r10d
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       je       SHORT G_M000_IG27
+ 
+G_M000_IG25:                ;; offset=0x01C6
+       mov      eax, 3
+ 
+G_M000_IG26:                ;; offset=0x01CB
+       add      rsp, 40
+       ret      
+ 
+G_M000_IG27:                ;; offset=0x01D0
+       test     rdx, rdx
+       jne      SHORT G_M000_IG29
+ 
+G_M000_IG28:                ;; offset=0x01D5
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG30
+ 
+G_M000_IG29:                ;; offset=0x01DC
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG30:                ;; offset=0x01F9
+       cmp      r10d, 5
+       jne      SHORT G_M000_IG31
+       mov      r9, 0x1BF70994318
+       mov      r10d, dword ptr [rax]
+       mov      eax, dword ptr [rax+0x01]
+       mov      r11d, dword ptr [r9]
+       xor      r10d, r11d
+       xor      eax, dword ptr [r9+0x01]
+       or       eax, r10d
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       jne      SHORT G_M000_IG35
+ 
+G_M000_IG31:                ;; offset=0x0226
+       test     rdx, rdx
+       jne      SHORT G_M000_IG33
+ 
+G_M000_IG32:                ;; offset=0x022B
+       xor      rax, rax
+       xor      r10d, r10d
+       jmp      SHORT G_M000_IG34
+ 
+G_M000_IG33:                ;; offset=0x0232
+       mov      r9d, r8d
+       mov      eax, ecx
+       add      rax, r9
+       mov      r10d, dword ptr [rdx+0x08]
+       cmp      rax, r10
+       ja       SHORT G_M000_IG38
+       lea      rax, bword ptr [rdx+r9+0x10]
+       mov      r10d, ecx
+ 
+G_M000_IG34:                ;; offset=0x024B
+       cmp      r10d, 5
+       jne      SHORT G_M000_IG36
+       mov      rcx, 0x1BF70994310
+       mov      edx, dword ptr [rax]
+       mov      eax, dword ptr [rax+0x01]
+       mov      r8d, dword ptr [rcx]
+       xor      edx, r8d
+       xor      eax, dword ptr [rcx+0x01]
+       or       eax, edx
+       sete     al
+       movzx    rax, al
+       test     eax, eax
+       je       SHORT G_M000_IG36
+ 
+G_M000_IG35:                ;; offset=0x0275
+       mov      eax, 4
+       jmp      SHORT G_M000_IG37
+ 
+G_M000_IG36:                ;; offset=0x027C
+       xor      eax, eax
+ 
+G_M000_IG37:                ;; offset=0x027E
+       add      rsp, 40
+       ret      
+ 
+G_M000_IG38:                ;; offset=0x0283
+       call     [System.ThrowHelper:ThrowArgumentOutOfRangeException()]
+       int3     
+ 
+; Total bytes of code 650
+
+; Assembly listing for method go.main_package:kindName(nint):go.string (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rsp based frame
+; partially interruptible
+; No PGO data
+; 0 inlinees with PGO data; 8 single block inlinees; 4 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     rsi
+       push     rbx
+       sub      rsp, 136
+       xor      eax, eax
+       mov      qword ptr [rsp+0x48], rax
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqu  ymmword ptr [rsp+0x50], ymm4
+       vmovdqa  xmmword ptr [rsp+0x70], xmm4
+       mov      qword ptr [rsp+0x80], rax
+       mov      rbx, rcx
+ 
+G_M000_IG02:                ;; offset=0x002B
+       dec      rdx
+       cmp      rdx, 3
+       ja       G_M000_IG09
+ 
+G_M000_IG03:                ;; offset=0x0038
+       cmp      edx, 3
+       ja       G_M000_IG09
+ 
+G_M000_IG04:                ;; offset=0x0041
+       mov      ecx, edx
+       lea      rdx, [reloc @RWD00]
+       mov      edx, dword ptr [rdx+4*rcx]
+       lea      rax, G_M000_IG02
+       add      rdx, rax
+       jmp      rdx
+ 
+G_M000_IG05:                ;; offset=0x0059
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BD77D8
+       mov      gword ptr [rsp+0x40], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x40]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG06
+       lea      rcx, [rsp+0x78]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG07
+ 
+G_M000_IG06:                ;; offset=0x00B7
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0x78], xmm0
+ 
+G_M000_IG07:                ;; offset=0x00C2
+       vmovdqu  xmm0, xmmword ptr [rsp+0x78]
+       vmovdqu  xmmword ptr [rbx], xmm0
+ 
+G_M000_IG08:                ;; offset=0x00CC
+       jmp      SHORT G_M000_IG12
+ 
+G_M000_IG09:                ;; offset=0x00CE
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC8C8
+       mov      gword ptr [rsp+0x28], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x28]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG10
+       lea      rcx, [rsp+0x48]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG11
+ 
+G_M000_IG10:                ;; offset=0x012C
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0x48], xmm0
+ 
+G_M000_IG11:                ;; offset=0x0137
+       vmovdqu  xmm0, xmmword ptr [rsp+0x48]
+       vmovdqu  xmmword ptr [rbx], xmm0
+ 
+G_M000_IG12:                ;; offset=0x0141
+       mov      rax, rbx
+ 
+G_M000_IG13:                ;; offset=0x0144
+       add      rsp, 136
+       pop      rbx
+       pop      rsi
+       ret      
+ 
+G_M000_IG14:                ;; offset=0x014E
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC8E8
+       mov      gword ptr [rsp+0x30], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x30]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG15
+       lea      rcx, [rsp+0x58]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG16
+ 
+G_M000_IG15:                ;; offset=0x01AC
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0x58], xmm0
+ 
+G_M000_IG16:                ;; offset=0x01B7
+       vmovdqu  xmm0, xmmword ptr [rsp+0x58]
+       vmovdqu  xmmword ptr [rbx], xmm0
+ 
+G_M000_IG17:                ;; offset=0x01C1
+       jmp      G_M000_IG12
+ 
+G_M000_IG18:                ;; offset=0x01C6
+       mov      rcx, 0x1BF70C043B8
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, gword ptr [rcx+0x08]
+       cmp      byte  ptr [rdx], dl
+       add      rdx, 16
+       mov      rax, 0x1BF23BDC910
+       mov      gword ptr [rsp+0x38], rax
+       mov      r8, 0x9E3779B97F4A7C15
+       imul     r8, qword ptr [rsp+0x38]
+       mov      ecx, dword ptr [rcx+0x10]
+       shrx     rcx, r8, rcx
+       movsxd   rcx, ecx
+       lea      rcx, [rcx+2*rcx]
+       lea      rsi, bword ptr [rdx+8*rcx]
+       cmp      gword ptr [rsi], rax
+       je       SHORT G_M000_IG19
+       lea      rcx, [rsp+0x68]
+       mov      rdx, rax
+       call     [go.StringLiteralCache:Slow(System.String):go.string]
+       jmp      SHORT G_M000_IG20
+ 
+G_M000_IG19:                ;; offset=0x0224
+       vmovdqu  xmm0, xmmword ptr [rsi+0x08]
+       vmovdqu  xmmword ptr [rsp+0x68], xmm0
+ 
+G_M000_IG20:                ;; offset=0x022F
+       vmovdqu  xmm0, xmmword ptr [rsp+0x68]
+       vmovdqu  xmmword ptr [rbx], xmm0
+ 
+G_M000_IG21:                ;; offset=0x0239
+       jmp      G_M000_IG12
+ 
+RWD00  	dd	0000002Eh ; case G_M000_IG05
+       	dd	0000002Eh ; case G_M000_IG05
+       	dd	0000019Bh ; case G_M000_IG18
+       	dd	00000123h ; case G_M000_IG14
+
+; Total bytes of code 574
+
+; Assembly listing for method go.sync_package:Get(byref):System.Object (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rbp based frame
+; fully interruptible
+; No PGO data
+; 2 inlinees with PGO data; 3 single block inlinees; 3 inlinees without PGO data
+
+G_M000_IG01:                ;; offset=0x0000
+       push     rbp
+       push     r14
+       push     rdi
+       push     rsi
+       push     rbx
+       sub      rsp, 80
+       lea      rbp, [rsp+0x70]
+       xor      eax, eax
+       mov      qword ptr [rbp-0x48], rax
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqa  xmmword ptr [rbp-0x40], xmm4
+       mov      qword ptr [rbp-0x30], rax
+       mov      rbx, rcx
+ 
+G_M000_IG02:                ;; offset=0x0025
+       lea      rcx, [rbp-0x38]
+       mov      rdx, rbx
+       call     [go.sync_package:pin(byref):System.ValueTuple`2[go.sync_package+poolLocal,nint]]
+       mov      rsi, gword ptr [rbp-0x38]
+       mov      rdi, qword ptr [rbp-0x30]
+       lea      rcx, bword ptr [rsi+0x08]
+       xor      rax, rax
+       mov      r14, rax
+       xchg     gword ptr [rcx], r14
+       test     r14, r14
+       jne      G_M000_IG12
+ 
+G_M000_IG03:                ;; offset=0x004F
+       mov      gword ptr [rbp-0x50], rsi
+       xor      ecx, ecx
+       mov      dword ptr [rbp-0x24], ecx
+ 
+G_M000_IG04:                ;; offset=0x0058
+       mov      rcx, rsi
+       call     System.Threading.Monitor:TryEnter_FastPath(System.Object):bool
+       test     eax, eax
+       jne      SHORT G_M000_IG06
+ 
+G_M000_IG05:                ;; offset=0x0064
+       mov      rcx, rsi
+       call     [System.Threading.Monitor:Enter_Slowpath(System.Object)]
+ 
+G_M000_IG06:                ;; offset=0x006D
+       mov      dword ptr [rbp-0x24], 1
+       mov      rcx, gword ptr [rsi+0x10]
+       test     rcx, rcx
+       je       SHORT G_M000_IG07
+       cmp      byte  ptr [rcx+0x1C], 0
+       jne      SHORT G_M000_IG07
+       mov      rax, qword ptr [rcx]
+       mov      rax, qword ptr [rax+0x40]
+       call     [rax+0x28]go.ж`1[go.sync_package+poolChain]:get_ValueSlot():byref:this
+       jmp      SHORT G_M000_IG08
+ 
+G_M000_IG07:                ;; offset=0x008F
+       xor      rax, rax
+ 
+G_M000_IG08:                ;; offset=0x0091
+       lea      rcx, [rbp-0x48]
+       mov      rdx, rax
+       call     [go.sync_package:popHead(byref):System.ValueTuple`2[System.Object,bool]]
+       mov      r14, gword ptr [rbp-0x48]
+ 
+G_M000_IG09:                ;; offset=0x00A2
+       mov      rcx, rsi
+       call     System.Threading.Monitor:Exit_FastPath(System.Object):int
+       test     eax, eax
+       je       SHORT G_M000_IG11
+ 
+G_M000_IG10:                ;; offset=0x00AE
+       mov      ecx, eax
+       mov      rdx, rsi
+       call     [System.Threading.Monitor:Exit_Slowpath(int,System.Object)]
+ 
+G_M000_IG11:                ;; offset=0x00B9
+       test     r14, r14
+       jne      SHORT G_M000_IG12
+       mov      rcx, rbx
+       mov      rdx, rdi
+       call     [go.sync_package:getSlow(byref,nint):System.Object]
+       mov      r14, rax
+ 
+G_M000_IG12:                ;; offset=0x00CD
+       test     r14, r14
+       jne      SHORT G_M000_IG14
+ 
+G_M000_IG13:                ;; offset=0x00D2
+       mov      rax, gword ptr [rbx+0x08]
+       test     rax, rax
+       je       SHORT G_M000_IG14
+       mov      rcx, gword ptr [rax+0x08]
+       call     [rax+0x18]System.Func`1[System.__Canon]:Invoke():System.__Canon:this
+       mov      r14, rax
+ 
+G_M000_IG14:                ;; offset=0x00E5
+       mov      rax, r14
+ 
+G_M000_IG15:                ;; offset=0x00E8
+       add      rsp, 80
+       pop      rbx
+       pop      rsi
+       pop      rdi
+       pop      r14
+       pop      rbp
+       ret      
+ 
+G_M000_IG16:                ;; offset=0x00F3
+       sub      rsp, 40
+ 
+G_M000_IG17:                ;; offset=0x00F7
+       cmp      dword ptr [rbp-0x24], 0
+       je       SHORT G_M000_IG18
+       mov      rcx, gword ptr [rbp-0x50]
+       call     System.Threading.Monitor:Exit_FastPath(System.Object):int
+       test     eax, eax
+       je       SHORT G_M000_IG18
+       mov      ecx, eax
+       mov      rdx, gword ptr [rbp-0x50]
+       call     [System.Threading.Monitor:Exit_Slowpath(int,System.Object)]
+ 
+G_M000_IG18:                ;; offset=0x0116
+       nop      
+ 
+G_M000_IG19:                ;; offset=0x0117
+       add      rsp, 40
+       ret      
+ 
+; Total bytes of code 284
+

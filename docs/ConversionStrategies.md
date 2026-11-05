@@ -1024,7 +1024,7 @@ Settings with no managed value (`-compiler`, `-buildmode`, `GOAMD64`, `vcs.*`) a
 converted outside a module carries no stamp, and a replaced dependency is reported without its replacement,
 which can be a local path:
 
-<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:192-194 -->
+<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:193-195 -->
 ```xml
     <AssemblyAttribute Include="go.GoModInfoAttribute">
       <_Parameter1>path&#9;go2cs/BuildInfoSettings&#10;mod&#9;go2cs/BuildInfoSettings&#9;(devel)&#9;&#10;</_Parameter1>
@@ -1814,7 +1814,7 @@ that imports `fmt` gets these lines in its `.csproj`:
 **`$(GoStdLibVersion)` follows the Go minor doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it to that minor with a float. For
 example, Go 1.N.P gives `1.N.*`, and restore takes the newest published `1.N.x.y` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:835-836 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:310 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:836-837 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:310 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
@@ -11271,7 +11271,7 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 ([Struct Types](#struct-types)), and `default!` is its zero value
 ([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
 Go's for the target architecture, here amd64.
-<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3855-3876#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3855-3876#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#c8dfe1, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -12416,7 +12416,7 @@ converter's list can likewise name the operating systems it covers.
      (`//go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond`);
      src/core/runtime/trace/flightrecorder_impl.cs:34 (`runtime_traceAdvance`), :36 (`runtime_traceClockNow`);
      src/core/runtime/trace/flightrecorder.cs:188-191 (`go.runtime_package.traceClockUnitsPerSecond()`);
-     the push row src/go2cs/linknameOperations.go:814 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
+     the push row src/go2cs/linknameOperations.go:813 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
 <!-- math/bits: src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`, with
      AggressiveInlining on the line before it, as on Add64, :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
      and Sub64, :133 `public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow)`; the reason and its linux/amd64

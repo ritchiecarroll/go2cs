@@ -406,10 +406,12 @@ The published [performance comparison](Performance.md) measures converted C# aga
 and under Native AOT, and [Tuning converted code](Tuning.md) says which deployment and runtime settings to choose.
 The follow-ups run off the critical path:
 
-- **A re-baseline on the published 1.26.10.1 packages**, measured against 1.24.13.7 in the same
-  session, which is also the before picture for the .NET 11 measurement stage. It brings the
-  TLS-handshake benchmark, already in the suite, into the published table, and profiles the crypto
-  paths behind the handshake gap.
+- **The re-baseline on the published 1.26.10.2 packages** is measured, against 1.24.13.7 in the
+  same session, and its numbers go into the published comparison next. It is also the before picture
+  for the .NET 11 measurement stage, and it brings the TLS-handshake benchmark, already in the suite,
+  into the published table. Its follow-ups for 1.26.10.3 are planned: tracing a full-optimization
+  slowdown in two benchmarks, and a start-up cost in the ReadyToRun build. Profiling the crypto paths
+  behind the handshake gap is planned too.
 - **Start-up cost of a converted process** (planned). A converted process pays .NET's process start,
   package initialization and compiling its code paths each time it starts: a converted `crypto/tls`
   helper takes about 10 s to start and run its handshake, where Go's takes about 85 ms. The planned
@@ -475,10 +477,12 @@ Smaller converter items, unscheduled. The first is recorded in the
 [struct-types reference](ConversionStrategies-Reference/struct-types.md#a-global-addressed-only-by-the-packages-own-_testgo-is-still-heap-boxed);
 the rest are tracked in `src/go2cs/ToDo.md`:
 
-- **The address of another package's variable.** Taking the address of a variable that another
-  package exports, and that is not itself a pointer, gives a pointer to a copy, so writes through it
-  are lost. That covers `&otherpkg.V`, a pointer-receiver method value such as `f := otherpkg.V.Reset`,
-  and `flag.BoolVar(&otherpkg.Debug, ...)`. It is a current limitation;
+- **The address of another package's pointer- or interface-typed variable.** A variable another
+  package exports with a value type has its own storage, so `&otherpkg.V`, a pointer-receiver method
+  value such as `f := otherpkg.V.Reset`, and `flag.BoolVar(&otherpkg.Debug, ...)` reach the variable
+  itself, as in Go. Two kinds still give a pointer to a copy, so writes through it are lost: a
+  variable whose type is a pointer or an interface, such as `&otherpkg.ErrMissing`, and a variable
+  whose storage lives somewhere else, such as `runtime.MemProfileRate`.
   [Limitations](Limitations.md#what-converts-but-doesnt-behave-exactly-like-go) and
   [Known issues](KnownIssues.md#writes-through-the-address-of-another-packages-pointer-or-interface-variable-are-lost)
   give the workarounds.

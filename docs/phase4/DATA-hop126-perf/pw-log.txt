@@ -1,0 +1,39 @@
+start 2026-11-05 04:28:15
+drop newest=1793858467.2364877000 /c/go2cs-perf/drop1262/aot-manifest.composed.tsv files=161
+arms 33
+5f6c396f238c610c0f6297a449426a629c8b1a77807342b3fe31c8f3bcf6c39c */c/go2cs/scratch/p1262/hp/C/aot/PerfStringMatch.exe
+729ba8ef34fa459dfd5bbecfc51535de5f05c541dc7d0020c7b1aafb1bb69012 */c/go2cs/scratch/p1262/hp/C0/aot/PerfStringMatch.exe
+ad83322c646f40d96af5311a887a9b2a10a8972800d7dd887d408088ae635a93 */c/go2cs/scratch/p1262/hp/H/aot/PerfStringMatch.exe
+3a7b4d5e1aee1aa8ec33a0c8a85453b3f016353e528e5c063b3704da02948333 */c/go2cs/scratch/p1262/hp/P/aot/PerfStringMatch.exe
+74337d69ab6f621a148196d1532dc896f83a9d431d11ce446206f591d03af907 */c/go2cs/scratch/p1262/hp/C/jit/golib.dll
+ceb78579e43355a69bbc09331ddc5630a8a834e9de9b9fc3b30444dd20ae42e6 */c/go2cs/scratch/p1262/hp/C0/jit/golib.dll
+aa0768eafd1d9a1c4b12cb42d88b583e71bd7b11d862a93171bad4ec23b32085 */c/go2cs/scratch/p1262/hp/H/jit/golib.dll
+aa0768eafd1d9a1c4b12cb42d88b583e71bd7b11d862a93171bad4ec23b32085 */c/go2cs/scratch/p1262/hp/P/jit/golib.dll
+== warm-control-DISCARDED 04:28:19
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== control-start 04:28:23
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+== arms 04:28:26
+SM-jit: verified 8 arms, output equal
+SM-jit: 11 rounds done
+SM-tc0: verified 8 arms, output equal
+SM-tc0: 11 rounds done
+SM-aot: verified 8 arms, output equal
+SM-aot: 11 rounds done
+Churn-tc0: verified 5 arms, output equal
+Churn-tc0: 11 rounds done
+Shell-tc0: verified 4 arms, output equal
+Shell-tc0: 11 rounds done
+== control-end 04:41:01
+PerfFib: verified 1 arms, output equal
+PerfFib: 11 rounds done
+PerfSieve: verified 1 arms, output equal
+PerfSieve: 11 rounds done
+drop newest=1793858467.2364877000 /c/go2cs-perf/drop1262/aot-manifest.composed.tsv files=161
+end 2026-11-05 04:41:04 rc=0

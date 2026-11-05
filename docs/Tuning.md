@@ -20,7 +20,7 @@ A converted program can run three ways. All three run the same converted code; t
 | **Native AOT** | `dotnet publish -r <rid> -p:PublishAot=true` | entirely ahead of time, to a native executable with no JIT |
 
 Which wins depends on what the program spends its time on. The `win-x64` comparisons below come from the
-performance comparison's table, measured on an earlier converter release; that page dates it.
+performance comparison's Go 1.23.1 table under History, measured on an earlier converter release; that page dates it.
 
 - **Start time.** On `win-x64`, a Native AOT program started in roughly an eighth of the time the same program took
   under the JIT, though still slower than Go. On `linux-x64`, ReadyToRun cut a converted program's median start time by about a
@@ -110,9 +110,23 @@ does not apply to Native AOT. On `win-x64` (an AMD Ryzen 5 PRO 6650U):
 - Published with ReadyToRun, the same benchmark ran about 30% faster, and the trivial program took about 30 ms longer
   to start.
 
-The environment variable overrides the project setting for one run.
-`<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>` restores .NET's own default. A C# application that references
-converted packages keeps .NET's default unless it sets the `runtimeconfig.json` value itself.
+**It trades start time for steady-state speed.** Hot methods reach optimized code sooner, and the program pays for it
+in a slightly longer start, most visibly under ReadyToRun. When start time matters more to your program, restore
+.NET's own delay in the converted project file:
+
+```xml
+<GoCallCountingDelayMs>runtime</GoCallCountingDelayMs>
+```
+
+or for one build or publish, `dotnet publish -c Release -p:GoCallCountingDelayMs=runtime`. Any other value is a delay
+in milliseconds. The setting applies to an executable project; the environment variable overrides it for one run. A
+C# application that references converted packages keeps .NET's default unless it sets the `runtimeconfig.json` value
+itself.
+
+<!-- The property and its values: src/go2cs/csproj-template.xml, the GoCallCountingDelayMs PropertyGroup line (empty ->
+     0) and the RuntimeHostConfigurationOption ItemGroup, conditioned on OutputType != Library and the value != runtime;
+     the template's comment: "Another value is a delay in milliseconds; `runtime` keeps .NET's own default." -->
+
 
 <!-- Source: docs/phase4/DESIGN-jit-inlining-tiering-publish.md section 9 (seat #53 P2, G-LAPTOP, .NET 10.0.11, 15
      interleaved rounds, A/A band per program and metric). JIT build: PerfTlsHandshake wall 4,161 -> 2,804 ms

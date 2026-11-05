@@ -1,0 +1,176 @@
+40a94f828c08efb6494eb4a2ff7c19279d651815 docs: Consuming Go from C# states the CS8981 NoWarn in the present tense, without release history (
+5fa4718d87fd2a1a37d838805580551692e46c8d Merge claude/p2-board-deferloop (a701d36c18): BOARD row -- a deferred or go method call on an array
+d269ef477b7c1fac0b324ed10af42b2529772dcc plan: go.* 1.26.10.2, the first fix release on the Go 1.26 line -- the cross-package exported-varia
+20340f86084d90a8776cfb93a97a8832ab396ff4 batch 48: merge claude/g-perf-s0-r2 (1b5e72a214) -- perf re-baseline S0: release legs measured as a
+62ae00e43ef07a5b251a87c3dfab756eaf6b9468 plan: a dotnet tool installer for go2cs that needs no Go installation (PROPOSED, exploratory, the o
+8af1b08496fa1978781bbc08a21e91b98b32f20d plans: the go2cs dotnet tool is ACCEPTED for 1.26.10.2 (the owner) -- download design, ID go2cs, to
+745e0b7fe2fa555c1b2e849ace25c9787991249d plans: the owner rules signing for every shipped Windows go2cs executable (tool packages and the Gi
+7c71410f1af04bfe3d3c6c2bc7c4faa12e950f90 plan (dotnet tool): the tour can optionally use the tool's provisioned Go, so a user with only the 
+0319a4394ffdc3ade27e3d720fe3afcac70ee85b Merge claude/g-design-crosspkg-box (ea11f84a16): DESIGN-crosspkg-exported-box ACCEPTED -- the 1.26.
+2a1698bc2100a47d951fcd60d19711d525bc3482 batch 49: merge claude/r-docs-followup (187adbd295) -- the owner's OQ-1 ruling: no fleet language o
+7f18406fd29d7ee4750c614aa9a8238caf623cfa plan (1.26.10.2): seat #13, visitor-facing disclosure reasons on the proof pages (R); two limitatio
+22e47f50d3c2a45f6dde337f661d2ed2d7dbd94f batch 50: merge claude/p1-cli-paths (e00a8191c5) -- seat #5: single-file input names its output fil
+8fcde27cd4af241b5ed9b5c03c4496453f374687 batch 50: merge claude/p1-resumable-push (9b1086d8a3) -- seat #6: a resumable, rate-aware NuGet pus
+835d279b5414dc0b12ea10ed7cc533dbe7942d64 batch 50: merge claude/p1-signed-binaries (ec1a305a9c) -- seat #12: Authenticode-signed Windows rel
+b769aa3bc218b61efbe2d7c1ce1ae6c8dcce03ed batch 50: merge claude/c1-darwin-harness-2 (d780a56fbc) -- seat #8: darwin harness items (per-OS ta
+d9b8e5ac0efe6508a285a3084612e152d5f943a0 batch 50: merge claude/r-site-exclude (5a40cf1f5b) -- the published site excludes PLAN-/DESIGN- rec
+b5222827ba9dac294d8a6ce81c5df7586820c7c1 batch 51: merge claude/h-golib-quiet-build (6010e45cfd) -- seat #7: golib and go2cs-gen build Relea
+ef51d9312f1da72dbee345a47c17bb522556eab6 batch 51: merge claude/r-disclosure-reasons (1fbcac0c16) -- seat #13: 330 disclosure texts in 44 ma
+3eea809d440fad6fc45aa4c841d6bd334a1334c9 batch 51: merge claude/c1-nugetgo-folderfeed (ef4a47c7f2) -- os-matrix nugetgo-behavior takes a git
+21d8d5f525575b4e53d14843cd7238fe0273767f batch 52: merge claude/g-staticbox-r2 (26f34d987d) -- 1.26.10.2 seat #2: a package-level box is a S
+16e9c9123ee8bcfcd5993d4daa242c5af1c64f7e batch 52: merge claude/c2-nugetgo-wave3-tools (430f3ad68a) -- nugetgo wave tooling: the generated R
+43752cff98f5343fe091a174789d4f170f88a9ce batch 52: merge claude/c2-nugetgo-wave3-uuid-disclosure (c992731142) -- uuid TestVersion6 disclosed
+4373e4ca8b0a7f88d148489e5120f658de11c508 batch 53: merge claude/p2-seat4-defer-elem (fd26d63d78) -- 1.26.10.2 seat #4: a deferred or go meth
+e82ade4bf0dd26b17750ce334e3316d3a39b7c91 batch 53: merge claude/p2-dotnet-tool-land (7c3cc668dd) -- 1.26.10.2 seat #11: the go2cs dotnet too
+56329a1d76ba8b8d62720d5d9ccb6812224a9a64 batch 53: merge claude/c2-nugetgo-wave3-cobra-pack (6824556058) -- nugetgo pack: a caller-stated co
+71a2363e5e3cd27c6ccede220442c879bdbf707b batch 53: merge claude/c2-nugetgo-runbook-localfeed (7f907588c8) -- nugetgo runbook: the local-fold
+5b50cf05dfb91b6d76c94fe895aa8b8bebb50e50 batch 54: merge claude/c2-nugetgo-samples (0158158085) -- sample programs for the seven wave module
+aeb74c7b406e3778f9b8b12c014a6486b6e96315 batch 54: merge claude/c2-board-nugetmap-heading (b9aaa088ec) -- BOARD row: the convert log's prove
+1032b413ab791b48f6cd0e80665f86882e4a8fd5 batch 55: merge claude/r-stack-reserve (bf08ec26f2) -- 1.26.10.2 seat #3: a goroutine the converter
+9256098b59e5846525ddd533ddccad53b043bdea batch 56: merge claude/g-crosspkg-box (0be174e8b4) -- 1.26.10.2 seat #1: an exported package-level 
+e6b7f24f81ada41299bcddaecfacc9f69740a359 batch 56: merge claude/r-stack-ceiling (9dfa388508) -- BOARD: seat #3 refinement ceiling measured (
+579e1d1efc661fc81714ebff416b19603aee9a52 batch 57: merge claude/g-aot-1247-note (4179cfa98d) -- KnownIssues: on go.* 1.24.13.7 and earlier a
+39f85c0e15864bfd52658d15ece5468f4b2df727 batch 58: merge claude/g-census-oid (c7639d937e) -- coord census: the ipv4 arm admits three EXACT O
+51f2c03c441baec7801839f9052d0f54254f46cb plan 1.26.10.2: seat #9 as ruled (crypto/tls ReadyToRun opt-in, 480 s measured bank rule); seat #14
+5f5aa6fbaf00264166f721a66d500025c3982d49 batch 59: merge claude/g-crossgen2-cycle-row (e1d5127161) -- BOARD: crossgen2 still expands golib's
+9bb7bb7bf87e9b5c6208cdff33fa50706352adca batch 60: merge claude/p2-seat10-elem-compare (83181a6037) -- 1.26.10.2 seat #10: an element-addres
+04fb9d8d88f95decbc52948372c2a5452c1868ed batch 61: merge claude/r-cs-readability (699fb23e57) -- Conversion Strategies readability pass: go«
+2c2145051135e8e019ef65f16f9cca55698361d5 batch 61: merge claude/g-crossgen2-s0-amend (a257254dcf) -- BOARD: the crossgen2 nest is composite-
+a131e701cd62c9f5065d6489b59ec0478cf52ce6 batch 61: merge claude/p2-seat10-elem-compare (3e1ebdadca) -- BOARD: seat #10's row names the pre-e
+382983f1df8112d695de8517b4acf85ef3a0a967 batch 62: merge claude/p1-seat9-r2r (5dc2509dd3) -- 1.26.10.2 seat #9: the crypto/tls test host is 
+f57648805cf5efc0108c1aa6e593c5105acb0411 batch 62: merge claude/p2-seat16-native-eq (ca6482cd9b) -- 1.26.10.2 seat #16: a pointer to a nativ
+4f43b0ed668b639b21eae04a34bde8a373af5833 batch 63: merge claude/h-seat15-typeswitch-int (0d93cedd27) -- 1.26.10.2 seat #15: a type switch's 
+915dabca534e4f485cac477f57ecd26b95297e97 batch 64: merge claude/p2-native-eq-guard (9f7f23e2d6) -- behavioral NativeViewPointerEquality (lin
+a93662afc622cb9780ac9ae984b8e78476d546c0 batch 65: merge claude/p1-seat14-r2r-cycle (cab5454873) -- 1.26.10.2 seat #14: the nine single-file
+4e0fbed6683933546dd67f9a0686917e2d58ee9c batch 65: merge claude/coord-goglyph-wording -- Conversion Strategies names go«É's last character i
+013379399d7829f960bfdfa7cb7644edc08ef170 batch 66: merge claude/h-seat17-gotypename (f7cf303da1) -- 1.26.10.2 seat #17: golib names a Go int
+f75e0c53ec523161f1990db7a407c9249c9ed326 batch 66: merge claude/g-perf-timing-docs (ec53a71e8c) -- perf plan: the control void test, no rela
+43d71ecdca44fd6a2496dec3e4da69bae640bbcb plan 1.26.10.2: the re-bank legs -- linux (R-WSL, P1, P2) and darwin (C1, 15 dispatches) re-read ev
+5931bad29b7da09c17b14d23cb9bfd1d5ff94464 batch 68: merge claude/c2-evidence-dir (6841458725) -- the roster guard reads darwin evidence from 
+f2d6b3e56fe20c651026d720afbd474ad8016425 plan: the visual-parity train inside go.* 1.26.10.2 (all 17 review items, a deferred-corpus window,
+9e6f0bd664bb6fe432e35913bdaf50b0183a4411 batch 70: merge claude/c1-oracle-fatal-banner (81c95c5947) -- the sweep's oracle check no longer re
+21f5b9112596b8df6eb40a89e6630d988369087e batch 71: merge claude/g-seat18-aot-marshal (ca26c289d9) -- 1.26.10.2 seat #18: golib native struct
+466b8847ee5713ccd1afebfc2fbbe9b228255252 batch 72: merge claude/c1-seat22-pcensus (8d39ef85ec) -- parity seat #22: pcensus, the per-item cen
+ab561214148cea4b2bf9bd9a6a6ab719e9a63250 batch 72: merge claude/c2-doc-sample-audit (53ec2466c9) -- every C# sample in the visitor docs matc
+84c29302ff147e06fe256510a297d6345c9f129d docs: KnownIssues -- the 1.26.10.1 Native AOT system-call failure is measured on linux-x64 and osx-
+56e4fba06fe577e14d34516055d627375f2283bd batch 72 fix-up: pcensus's count golden compares line content (a windows checkout pins eol=crlf), a
+50f14bcaf62a1ed009642727f156449f74631908 batch 73: merge claude/h-seat19-elseif-r2 (f25a4892c8) -- parity seat #19 (E1):  on one line and  b
+79aeb62dacd56530c856f9f2b8f43b54300c9837 batch 74: merge claude/r-seat36-fieldview-aot (343639c971) -- 1.26.10.2 seat #36: golib field-view 
+e9f05d8c0981184d04882555c9333f41fbecfb0a batch 75: merge claude/c1-darwin-disclosures (b9f93babb8) -- runtime disclosures: darwin joins Test
+3b36ee7dfef06dc765e41fdafe98681c47752a7a batch 76: merge claude/p1-seat20-nil-default-r2 (6f1f9378cb) -- parity seat #20 (N1 stage 1 + D1): 
+a4711608e10886e16a623a7b8fcdd2558891b326 goldens: re-baseline the 11 windows-exclusive projects for #20 (N1 + D1) on the i7 (pcensus: 103 pa
+1f8a1ae12de657ebae705bc3c2ddb13ff9b43317 batch 77: merge claude/c1-tour-generated-tab (62fbb897cc) -- the tour of go2cs gains a Generated Co
+848d2b445f500d4ed8c1ea33520de43ece902883 batch 77: merge claude/c1-darwin-disc-board (d04cb69c06) -- BOARD row for the darwin runtime disclo
+b150301cc7143e3fdc0deea7950a6bd360d550c7 batch 77: merge claude/p1-seat37-perf-aot-reuse (349d2de004) -- seat #37: the perf runner's AOT reu
+b17f4351a3678284678a54c453fa6741a4481f87 batch 77: merge claude/g-p1-field-properties-design (be847865c3) -- design record for parity seat #
+482caf78e53e1602f13fd79bfa919bfba660d347 batch 78: merge claude/h-seat27-small4-r2 (7bd0b0fb22) -- parity seat #27, the small four: IIFEs re
+0e0c1efbdcd1e4214ec299fedf11bba581fee4f3 batch 79: merge claude/p1-seat21-struct-new-r2 (2122bf87a2) -- parity seat #21, Z1: a Go struct zer
+df6f6ba3173ff7cffa4f4ac2a78201ea3e73445f batch 79: merge claude/g-seat35-value-fastpath-r2 (03ec80b163) -- parity seat #35: StandardBox<T>.V
+2c737cfdfcd20278e3d04e8151779384e95086da goldens: re-baseline the 3 windows-exclusive projects for #21 (Z1) on the i7
+6298556cbc969eb708eb6e13329ae8162c71a29c batch 80: merge claude/c2-seat25-r5-r2 (889d03e7e2) -- parity seat #25, R5: un-aliased pointer para
+fd6b526a6678c7957d538914111ca95e4e0ec763 batch 80: merge claude/c2-seat26-n2-r2 (8f032ced27) -- parity seat #26, N2: a named numeric convert
+cb43bf292ed9fce24a06e611a8903816559164f7 goldens: re-mint batch 80 overlaps (#25/#26 share CrossPkgLib and DeferTypelessReturns) and the 2 w
+9390c32e54044df3950bff528a9d8c66b44af300 goldens: re-mint the 3 projects #25 (R5) moves that its own list missed -- 2 windows-exclusive (Sys
+cf6adea3d8598ded92f127fc0a2922832b025746 batch 81: merge claude/c2-seat33-godefer-const-r2 (ea14f3981c) -- parity seat #33, GD: a go/defer c
+904c363f6713bc461e0c3be52bc3ed488f067497 goldens: re-mint the windows-exclusive SystemCertVerify for #33 (GD) on the i7
+3d6155ed3a652312ec768856bc7df528e00a7381 batch 82: merge claude/c2-seat39-sheetpaste (63fce37bd6) -- seat #39 (tooling): Test-SheetPaste.ps1
+2639c6f3e98ba81687774c72d128fac30911cd67 batch 83: merge claude/p2-seat23-rune-lit-r3 (f897166ad2) -- parity seat #23, C1: rune literals dro
+03d19d9279fb1e7f64c41ca0183d203c75433d6a goldens: re-mint the 4 windows-exclusive projects for #23 (C1) on the i7
+53918293a10313207f9501d22e16ff25efdab4fb batch 84: merge claude/h-seat28-patswitch-r2 (0360c1c9c5) -- parity seat #28, S1: a non-constant ta
+61f79a2d8ffa793f4da18b339bce5854cea10aa9 batch 85: merge claude/c2-seat40-functype-name (e770f493fd) -- seat #40 (golib): a C# char is Go's 
+a8e7c6002e09080f15c31f7cf1e3ce259e35e175 goldens: re-mint #40's FuncTypeVerbs at the batch 85 merge on the i7 (cut before #23 and #28, whose
+97a3a7c6b92f275f366e04ac89ddd4aaff59086d batch 86: merge claude/p2-seat24-nil-compare-r2 (227f4f8748) -- parity seat #24, N1 stage 2: a slic
+f62cd53f45980b6dfcab06d5cf73a7519ba6c43f goldens: re-mint the windows-exclusive WsaSendtoRoundTrip for #24 (N1b), and the 2 projects #24 sha
+8949c45b1b092f2696837b7ef8c26f2238fb351e batch 87: merge claude/h-seat29-heapfold-r2 (b13815e194) -- parity seat #29, H2: a single-LHS := he
+cdd4db4eae788e287f97b1f2d322195e6b6d6d88 goldens: re-mint NilCompareShapes at the batch 87 merge on the i7 (#24's same-package collections.c
+6341102e53091f5a65616aa464f1e4faa8e97f4c batch 88: merge claude/p2-seat29-linux-mint (fc25efc4f3) -- #29's two linux-native goldens, SendtoS
+06799fd57fde8d04ed21b46ee543e4224ed3e3f0 batch 89: merge claude/c2-seat41-host-golden (6fdc21cdfb) -- seat #41: an imported alias declares i
+801497a338874fff38893ad8afc290d2fc29ed5c batch 89: revert d0c61d8ec9 (#41's src/core delta) -- inside the parity window seats land no emitte
+1c39cc5352d4981aeb478a87626e850d351e9771 goldens: re-mint #41's 11 windows-exclusive projects and the 29 windows-runnable projects it shares
+33ef3d995cdc9e9c5a0fa6e438fbec5aaa014f90 docs: re-cite 4 samples to master's src/core lines at batch 89 (#41 had re-cited them against its s
+340ba0cc780a8d9cc1528e0deca03dc7edf77fd8 goldens: re-mint the windows-exclusive WindowsNewCallback for #41 at the batch 89 merge on the i7 (
+54ff0665d5b0f5e10aa7a30f61c27206ad02eef3 batch 90: merge claude/g-seat31-field-properties (e6356e0ed2) -- parity seat #31, P1: p.f through a
+bd0aa85bd340af324dd2cd10bcd076dddf282feb docs: re-cite 7 provenance notes at the batch 90 merge (#31's citations, shifted by batches 87-89's
+a0f01321ebe69701a8baac302c04760806fff576 pcensus: a file no whole-file Block anchors keeps its runs' refusals whole; PerSide rules admit onl
+552ac3b621cacd1d39f853f1103c605e12951698 go2cs-gen (red): a field type naming another generator's type, at any depth, must resolve from outs
+e1d2184cd6cc68f75b5d89a05ef603e36baffdae go2cs-gen: FieldAccessGenerator roots an unresolved type at the struct's package class, in field, e
+f31ac325dd06f69e530374cf0c6758422d127f01 goldens: re-mint HeapFoldShapes and PointerFieldSelectors at the batch 90 merge on the i7 (#29's ne
+c81637bbacd4e6fbe8a41663ab14c84f86e16652 batch 91: merge claude/h-seat34-aot-gaps-r2 (1d8cb94557) -- seat #34: under Native AOT, go2cs-gen r
+984f526a51f230823f36df5f1c86406f60034020 batch 91: merge claude/c2-seat42-defer-line (4077dabe65) -- seat #42: a deferred or spawned call na
+c2c544eb53e21a187f5768416042aa5fbed93e8b goldens: re-mint #42s 5 windows-exclusive projects and the 13 projects #34 and #42 share with batch
+99ef93a148b81ca3036ce6f18390cd5722463a9d batch 92: merge claude/p2-seat30-linux-mint (78d6e7f034) -- parity seat #30, L1: slice literals as 
+d6463bcaf76d2c5cdb37dc328f602e4308a1cb31 goldens: re-mint the 128 windows-runnable projects #30 shares with batches 85-91 (and its merge con
+07cf242e951f54303038d60a1fbe125c271f4b06 docs: re-cite at the batch 92 merge -- one pointers.md sample takes #29's fold and #30's literal to
+23d46f3aa58ddaf42a4d8ff6d955eb84017b8a54 pcensus: restore the two closing braces the batch 92 merge dropped between #31's TestP1RecordBlockP
+0528e9e884cc0b8749355c19ef981875c894e71a goldens: re-mint 5 later-seat tests at the batch 92 merge on the i7 (AotReflectGaps, FuncTypeVerbs,
+7979dec811759a77527d801d9cde7118174a5a07 docs: re-copy the nil-and-zero-values sample after batch 92's last re-mint (NilCompareShapes' colle
+6e308e4b91d3316ee82a72c4e31d3a9b2ca79891 batch 93: merge claude/c1-seat38-eol-align (5dc84a3c8) -- seat #38, class J: a Go trailing-comment 
+e6b3b892ad1e66eec1768dfe0e29cc23564df16e batch 94: merge claude/c2-seat43-comment-residue (c3eabaf6de) -- seat #43: the Go comments C# still
+2f9c2909027cec0ae84fe6ec28d592de9460e740 batch 95: merge claude/c2-seat43-comment-residue (60529ea100) -- #43's census follow-up: commentcen
+99195664ce558ed502392bb7a350a4a78e0c8fef batch 95: merge claude/p2-linux-exclusive-sweep (fbac10868c) -- the 3 linux-exclusive goldens #31 l
+c5a0034c28daa68237b8458a67795196930961bb symbols.json: the Action-cast note reads (Action)(default), matching the generated symbols.go seat 
+6f009ae6b2f1995198f388080b5c7a4f61e13510 batch 96: merge claude/c2-seat44-pcensus-items (58fa369eed) -- seat #44 (instrument): pcensus items
+914659c9ff41870142f74ac2b207943031f0fed6 batch 97: merge claude/c2-seat44-pcensus-items (1bdd9f258c) -- seat #44 follow-up: pcensus A1 also 
+7072ef590490d09d4a60022ffd2f2e4d3373969a batch 98: merge claude/c2-seat44-pcensus-items (25bb90dc7e) -- seat #44 follow-up 2: CM reads a run
+718fd42b94d66d72a0388a9a4efe7415bdc35ecc batch 99: merge claude/g-seat45-test-records (9ef1ea2f7d) -- seat #45: the two #31 defects R0's run
+62d6d3f9c67c43051fc43849bd22d826d59f1a4a batch 100: merge claude/g-seat32-field-token-r3 (4e0a8e02dc) -- parity seat #32, P2: &p.f reads p.·
+ccceaa54ef9cf582b0c2ea18eee1f1618a73c81c batch 101: merge claude/p2-seat32-linux-mint (a3e0d5ad10) -- #32's linux-exclusive golden NativeFie
+e23365a17e608722aecdd1abb36cca6f22b0ec61 batch 102: merge claude/c2-seat47-errorf-indent (30aa01791d) -- seat #47: TestingRuntimeTests' byte
+af28a5ff639791104e012afb24bda85f27e302a1 batch 103: merge claude/g-seat31b-promoted-fields (8806ec2f97) -- parity seat #31b: a promoted fiel
+0c9169c45622e97a18fc96f5b00f7fcbf5057a9f batch 103: merge claude/coord-consuming-note (cfdae64d28) -- ConsumingGoFromCSharp: the examples' p
+d8c6baacbc00e72158b5e92723d08ef5b5013211 batch 104: merge claude/g-ladder-identity (dccd65112d) -- DESIGN record: the end regen's ladder ide
+893d48976f7895400a029050be2c4d6bcc980fdd batch 105: merge claude/g-seat49-tests-l3-csproj (a03e44a832) -- seat #49: when the -stdlib merge f
+3f4cdffd96788fcf368e67535a6c5780bffe0a96 batch 106: merge claude/r-seat46-viewof-fastpath (768bb76098) -- seat #46: the field-view cache's h
+dc79cc89d0308695fecce9c60d33b4a60bdda1af batch 107: merge claude/p2-seat48-linux-mints (3700db99a9, on H's claude/h-seat48-bare-go-attrs 8bf
+aaec1d4ca8d19e75284cacec91df208bbd1a8937 batch 108: merge claude/g-seat50-tuning-guide (d9e55f7545) -- seat #50: docs/Tuning.md, the user-fa
+1dacbdf4b648fc73bc2eb6b5394881860b5032f6 batch 109: merge claude/g-seat52-close (531faf7fc4) -- seat #52 closed: the DESIGN record of litera
+5bf0fcb694a32b063b635a950fa9fbf10d156ee5 batch 110: merge claude/g-seat53-jit-publish (5c795dbaf7) -- seat #53: in hoist mode (the -stdlib d
+2334e8949c1da76d27847e7bbb0987958308fc74 batch 111: merge claude/h-seat55-caller-resolver-r1 (0cbd831beb) -- seat #55: the runtime caller-li
+8c2f09b68eac8fbddbd03567db44d29538ef52cb batch 112: merge claude/r-seat54-slice-lit-lines (5b1846bf21) -- seat #54: builtin.slice<T>(T[]) ca
+8b993b7b1d793b6bcf64435cb95852aa5272d3cf BOARD: WATCH -- GoroutinePanicAfterDeferredDone's Go oracle races runtime.main's bounded wait on a 
+530cc5222563dbfe89beb9b0a4fe4740b690799a batch 113: merge claude/g-s53-i9-readings (74a5982171) -- seat #53 follow-ups: the ReadyToRun guard
+de5696c935e4bfcc292b49ea837e902e0b182191 batch 114: merge claude/g-perf-argv-guard (1e3f492cdb) -- the perf headline guard: the Performance 
+257a4588df746838be6066b434cd301d3ff3712e batch 115: merge claude/i9-s53-p1-readings (48e0f5ba3c) -- seat #53 data: the i9 P1 readings (Forma
+6e3cb826226d7e557e695d05e54d2a5c1445a7b4 batch 116: merge claude/i9-panic-after-done-oracle (2e619b9966) -- GoroutinePanicAfterDeferredDone'
+1e17378868d05592fc14889a6776c441ecd3f771 batch 117: merge claude/h-seat51-stdlib-plain-r2 (59b0798e4c) -- seat #51: the converted standard l
+c9173b54549fb8b68e9fd8a4ca0b93f85508e9b6 batch 118: merge claude/r-r2r-guard-osmachine (3ec2e06042) -- the ReadyToRun guard reads CoreCLR's 
+c5a4637bbafa625e5d1d33a2b18e4e0b036ac341 batch 119: merge claude/h-pkgslice-tier0-disclosure (ec03c7d59f) -- docs only: the Tier0 caller-lin
+bbf1725aa75c64eb9a0d749cc0ca81a3327b6c32 batch 120: merge claude/g-main-return-wait (db3ca2ec7e) -- a returning main waits on whether a goro
+8128e46ca309e518f304c8845bf534ba5b271ea7 batch 121: merge claude/g-runbook-tests-regen (48989797ed) -- docs only: GoCorpusMigration H4a, a d
+97bc0f699ef6954415fefb2b777ea464f0f3e8d6 batch 122: merge claude/g-seat45-followup (82b7347b11) -- #45's reference-model predicate no longer
+f9ab7bdb214635c4e65e898301dab6196e184a64 batch 123: merge claude/r-memstats-pause-disclosure (581ca1193a) -- disclosures gain optionalRecord
+d3a05a0162e4554356e26eeb88beae93f65f915a batch 124: merge claude/g-threadcputime-test-race (bd5ddd2c76) -- GolibTests only, golib unchanged:
+64d145b2c4645db89a1854e6792b7972ca437d89 batch 125: merge claude/coord-census-rule6-arity (e9f3bbffcd) -- the identifier census's rule 6 rea
+d95801abf757b4b5e0f061e7771b94311d4e9d5d batch 126: merge claude/r-mrw-linux (d6f59ba351) -- docs + data only: the main-return-wait linux le
+09b92ab10e2b2192bc700a73afd36b87fa5a4bd3 batch 127: merge claude/h-endregen (535fbe60cf) -- the END REGEN: production on three targets by bi
+e1df8da69aab55c3cdc2157d2843a846815bffb4 batch 128: merge claude/h-restore-probe-board (b199670bd6) -- docs only: the BOARD row for H's rest
+56039a371d52895c9da6886f4e231a8ee86dc7b7 batch 129: merge claude/g-aot-frozen-token-holder (e45b1e7c1b) -- a darwin Native AOT publish that 
+dbb2d8f985d7cc9629c62fc5e00e8931f7108ff5 batch 130: merge claude/g-kit-rc-guards (eb29b9fba5) -- the windows re-bank kit takes R's two linux
+c214dcfad0a3158f271c1a4b9bea39a456f546d9 batch 131 (1/3): merge claude/c1-mrw-macos (9e703e720b) -- the main-return-wait macOS JIT leg's log
+a90531c0ca095737a8737f839ba3b20aef05d349 batch 131 (2/3): merge claude/c1-aot-holder (12283e0e38) -- the darwin Native AOT confirm of batch 
+f6666d98a21ad4c3f992c959769f844ee6422ceb batch 131 (3/3): DESIGN-main-return-wait section 7 gains the dated darwin Native AOT close (run 414
+6f2bf7e95e765b8e057b813e95ede89b0cad362c batch 132: merge claude/g-freeze-recut (beb08ba655) -- the 1.26.10.2 re-bank deal re-cut at the fre
+03c1adf14aeda0b9ea057e63eb7ffc63d3bb50d9 batch 133: merge claude/r-linux-kit-1262 (c69226c211) -- R's frozen linux re-bank kit on a ref, so 
+09d205c94fdbc1d21cc0d52e951de4431c6ed146 batch 134: merge claude/c2-tests-fieldaccess-refs (c0b4ccdf4f) -- a white-box -tests project refere
+0e857031fecd5cd24944775947f263639d869814 batch 135: merge claude/g-heap-byvalue (4828b65f84) -- golib heap<T>(T target, out –∂<T>) takes its
+b6b616058df9c8cfb4d913e20346adcf73a2a638 batch 136: merge claude/g-addr-byvalue (628eb3e32f) -- golib ·èë<T>(T target) takes its value BY VA
+8271c5cd16ecb8a2b81707c64ed75777b25b8ca6 batch 137: merge claude/p1-plan-fixes-1262 (e8ea658f14) -- docs only: every unattended `src\clean-b
+b0d7216febf8e4ec62af0907544c66c6e1c4f112 batch 137: merge claude/c2-nugetgo-1261002-prep (3070a6159a) -- docs only: PLAN-nugetgo-wave-1-26-1
+30bd2fe34c215be619139a3c07584ab2efa18887 batch 138: merge claude/g-sdk-floor-400 (19bcb5995e) -- the repo's global.json SDK floor moves from
+25e3b6ede6b07867554d4a1227418234d2e2a7db batch 139: merge claude/h-bank-seat-1262 (0f4a9456f9) -- the pre-refreeze bank seat: seven disclosu
+8153cb5adde7c49a951d96a380c971b3085cc3b8 batch 140: merge claude/g-repass-briefs (0945026f34) -- docs and data only: PLAN-release-1-26-10-2.
+1c3cd68d29958b7cbe6683cdbd5fb25f26c860d7 batch 140: merge claude/c1-board-mathbig-amend (c22c1c17ad) -- docs only: an append-only, dated BOA
+f8271bd73db379652378532231be61b6279c3c94 batch 141: merge claude/h-bank-seat2-1262 (d8e872f4be) -- bank seat 2: math/big TestMulUnbalanced's
+3a765bf5de5d66dfac1bd0b1592f0c44d623daa0 batch 142: merge claude/g-repass-recut-d (c62fedca31) -- docs and data only: the re-pass re-cut, MO
+263576e2de377b12fb03fc383ebff95b9adbae64 batch 143: merge claude/h-regen-1262 (9331aee75d) -- the final fixed-point regen: a seeded L3 three
+d9dd8f54994297f34be694b7a4594fc6ea826024 batch 143: merge claude/g-board-syslog-csproj (9e08746948) -- docs and data only: a POST-HOP BOARD 
+56ba05d7bae11a471d4cbec2105ca851ff3d57ae batch 144: merge claude/h-bank-1262c (40e5f4ea85) -- THE BANK OF RECORD for go.* 1.26.10.2, read at
+52e9b10c41faf30cd356fe3d5c837d465cfd757b batch 144: merge claude/i9-sweep-1262c -- windows re-pass evidence at the freeze tip d9dd8f5499 (i9
+8daba6cb5f038ec4e8d19ab9fc55122e32a2e8f5 batch 144: merge claude/h-sweep-1262c -- windows re-pass evidence at the freeze tip d9dd8f5499 (H-S
+677cf7c341ec6287d9e6f52a7bbefc4d3ec60ae7 batch 144: merge claude/g-sweep-1262c -- windows re-pass evidence at the freeze tip d9dd8f5499 (G-S
+d374c2b6f933ab49b0d78fc8a18ae51b57328559 batch 145: merge claude/g-darwin-ruledcount-b (ad7b8282c6) -- the darwin ruled-count table (validat
+cae6b0c467dc64d9d0006a17ec28d7b576210d3b batch 146: merge claude/h-bank-report-1262 (42d6b7b5c5) -- the closing-checks BANK REPORT for go.* 
+c4df2fc0661f872e4d98ee2856549b4f9ea694ae batch 146: merge claude/p1-readmes-1262 (047d30036d) -- release controls H12.2 and H12.3 for 1.26.1
+9e395570fe0881422961661107f58a83f33bfc43 batch 147: merge claude/g-dot2-docs (5cd9f695e9) -- the go.* 1.26.10.2 announcement, landed as the 
+553184ff7164022d25b5ed523b87608d8b388ffa batch 148: merge claude/coord-tool-nuspec-win (ab752ded02) -- release fix found by the owner's 1.26
+1ca308d85ff3352de42f576eb6511744c231c976 release: go2cs converted stdlib 1.26.10.2

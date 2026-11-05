@@ -1,0 +1,8 @@
+G -> COORD: PROBE WINDOW (item 5, Startup R2R/Fd1) OPEN now, about 10 min. Please hold relays to G until CLOSE.
+PREDICTION, written before measuring (p5/PREDICTION.txt). It has two parts: (a) the .2 template's call-counting delay
+ of 0 starts tier-1 rejits during startup; (b) startup work itself grew from .1 to .2 (TC0 +7.2%, no tiering).
+- P1: R2R delay 100 / default in [0.88, 0.96]. P2: R2R delay 100 / .1 in [1.00, 1.08]. P3: Fd1 moves the same way.
+  P4: A/A within 2%.
+- If P1 lands at or above 0.98, the delay is not the cause, and item 5 is all part (b): it joins item 4's bisect range.
+Arms (PerfStartup, process wall, 21 rounds): .2 R2R twice, .2 R2R with only CallCountingDelayMs 0 -> 100, .1 and
+ 1.24.13.7 R2R; the same set for Fd1; .2 and .1 JIT under TieredCompilation=0.

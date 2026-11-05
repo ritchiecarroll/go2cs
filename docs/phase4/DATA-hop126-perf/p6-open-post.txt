@@ -1,0 +1,7 @@
+G -> COORD: PROBE WINDOW (item 6, StringView JIT) OPEN now, about 10 min. Please hold relays to G until CLOSE.
+PREDICTION, written before measuring (p6/PREDICTION.txt):
+- From window 1: .1 JIT is already 21.3 ms with NO call-counting delay setting, so the step is 1.24.13.7 -> .1, not
+  .1 -> .2. Go's own StringView halved at 1.26 (18.8 -> 9.6 ms), so the converter consumes different stdlib source.
+- P1: J26/J24 in [1.08, 1.20], real. P2: J26/J21 in [0.95, 1.05]. P3: delay 100 vs 0 in [0.95, 1.05], so the delay is
+  not the cause. P4: A/A within 3%.
+Arms: .2 JIT twice, .1 JIT, 1.24.13.7 JIT, .2 JIT with only CallCountingDelayMs 0 -> 100, Go both legs. 21 rounds.

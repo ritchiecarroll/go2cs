@@ -33559,4 +33559,67 @@ the wave plan names; the B4 change stays the post-hop row (owner C2).
 
 — C2 (2026-11-05)
 
+## 2026-11-05 — C1 (COORD ruling, master reds seat): `runtime.GOARCH` reads `amd64` on Apple silicon, because one amd64-converted darwin build serves both mac RIDs — OPEN, post-hop
+
+**What happens.** The darwin flavour of the corpus is converted ONCE, for `darwin/amd64`, and shipped under both mac
+RIDs (osx-x64 and osx-arm64; the same one-build fact seat #8 (a)'s `targetArchExcluded` withdrawal rests on). Its
+`runtime.GOARCH` is that conversion's constant:
+
+- `src/core/runtime/darwin/extern.cs:375-376`: `GOARCH => ref GOARCHᵇ`, `GOARCHᵇ = "amd64"` (linux and windows carry
+  the same pair, and match their only shipped architecture);
+- `src/core/internal/goarch/zgoarch_amd64.cs:7-8`: `goarch.GOARCH = "amd64"`, with the amd64 `zgoarch` set beside
+  it (`IsAmd64 => 1`, `IsArm64 => 0` at :12 and :20) and `goarch_amd64.cs:8`'s `_ArchFamily` (AMD64);
+- `src/core/runtime/debug/stubs_impl.cs:199`: `debug.ReadBuildInfo`'s `GOARCH` setting is composed from
+  `runtime.GOARCH` (golib `GoModInfoAttribute.Compose`, `GoModInfoAttribute.cs:144`).
+
+So a converted program on an Apple-silicon Mac reports `GOARCH=amd64` where Go's own binary reports `arm64`. It is
+USER-VISIBLE: any program that prints `runtime.GOARCH`, branches on it, or reads its build settings sees the wrong
+architecture. Measured as master's darwin osx-arm64 behavioral red (run 41964964302, `BuildInfoSettings [Output]`,
+"stdout mismatch C# vs Go"); osx-x64, linux and windows agree because their host IS amd64.
+
+**Not fixed here (COORD ruling).** BuildInfoSettings now prints `GOARCH is runtime.GOARCH: <bool>`, a host-invariant
+fact (claude/c1-master-reds), so the test stops reading the divergence; the divergence itself stands.
+
+**Candidate fix shapes, unmeasured, for whoever owns it:**
+1. A run-time GOARCH for the shared darwin flavour: a hand-own of the GOARCH backing field reading the PROCESS
+   architecture (`RuntimeInformation.ProcessArchitecture`: `X64` gives `amd64`, `Arm64` gives `arm64`). The census it
+   owes first: every site where the converter or a hand-own FOLDED an amd64 decision at conversion time (`goarch`
+   constants, `IsAmd64`/`IsArm64`, `PtrSize`, dead-branch folding on `GOARCH ==`), since a run-time string beside
+   compile-time-folded amd64 branches would make the two disagree inside one binary.
+2. A per-architecture darwin flavour (osx-arm64 converted for `darwin/arm64`): the honest constant, at the cost of a
+   second darwin build in the pack, and of the arm64-only test files that `targetArchExcluded` withdraws today.
+3. Disclosure only: name `runtime.GOARCH` on osx-arm64 in the known-divergences docs, if neither is taken.
+
+— C1 (2026-11-05)
+
+### 2026-11-05: an anonymous interface is not ONE C# type per Go type identity (canonical type identity, OPEN)
+
+This is the owed row for a gap that until now was recorded only as prose, at
+`docs/ConversionStrategies-Reference/interfaces.md:1557-1560` (section "An anonymous interface lifted out of a
+GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it").
+
+**The gap.** In Go, a structurally identical anonymous interface is one type wherever it appears. For example,
+`interface{ query(string) (string, bool) }` is the same type as a function's result and as
+`constraints[string, string].permitted` in crypto/x509. In C#, each lift is a type of its own.
+- The converter bridges ONE direction: each concrete instantiation of the generic struct writes a partial part making
+  the shape's lift DERIVE the closed generic lift, an implicit reference conversion.
+- The other direction is NOT covered. Assigning the generic field back to the concrete lift
+  (`var q interface{ query(string) (string, bool) } = c.permitted`) is a base-to-derived conversion, which C# does not
+  make implicitly.
+- crypto/x509 never does it, so nothing validated depends on it today.
+
+**What closes it, as the prose states it:** a Go type identity becoming ONE C# type, which retires the partial parts.
+The prose names the direction (the generic lift as the dyn name for every structurally identical shape). No design
+exists, and this row does not propose one.
+
+**The current guards:** `GenericLiftedInterfaceField` (behavioral) and
+`TestLiftedInterfaceFieldOfAGenericStructCarriesItsTypeParameters`. Neither exercises the uncovered direction.
+
+**Related, structs:** the same reference's anonymous-struct residual (`interfaces.md:1725-1729`). Two package-level
+anonymous structs that are structurally identical but declared in different files still lift to two distinct C# types.
+
+**Owner:** unassigned.
+
+— i9 (2026-11-05, COORD's ask)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
