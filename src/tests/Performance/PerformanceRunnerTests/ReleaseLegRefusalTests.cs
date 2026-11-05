@@ -253,6 +253,47 @@ public class ReleaseLegRefusalTests
         Assert.AreNotEqual(a, edited);
     }
 
+    // The two host-specific inputs a converted consumer project carries (PLAN-perf-rebaseline.md section 10, P0):
+    // package_info.cs's GoPositionMap names each Go file by its ABSOLUTE path under the --work root, and the project's
+    // GoInputDigest folds in a hash of the converter executable's bytes. Two boxes converting the same program in
+    // different roots must hash equal; any real change to the program must not.
+    private static (string, string)[] ConsumerProgram(string goFile, string digest, string cs = "class PerfFib {}\n",
+        string blob = "AAgWgoKUooKClKaClJTmgpSUgoI=", string csprojTail = "") =>
+    [
+        ("PerfFib.cs", cs),
+        ("package_info.cs", $"// header\n[assembly: go.GoPositionMap(\"{goFile}\", \"PerfFib.cs\", \"{blob}\", \"15-21:1\")]\n"),
+        ("PerfFib.csproj", $"<Project>\n  <PropertyGroup>\n    <GoInputDigest>{digest}</GoInputDigest>\n  </PropertyGroup>{csprojTail}\n</Project>\n"),
+    ];
+
+    [TestMethod]
+    public void TwoBoxesWithDifferentWorkRootsAndConverterDigestsHashEqual()
+    {
+        string i9 = ConsumerProject.SourceHash(ConsumerProgram("D:/go2cs-perf/work/go1.26.10.2/src/PerfFib/PerfFib.go",
+            "sha256-a771c1a5c00fe62d275a6024aac1784778e8c02c29a188f771727a0365afadb1"));
+        string g = ConsumerProgram("C:/go2cs/scratch/perf/w126102/go1.26.10.2/src/PerfFib/PerfFib.go",
+            "sha256-cd916fbd6941023da1c75b8ea2fce857fb201bccfac9c05f65a5f4d8fc2986ac") is var p ? ConsumerProject.SourceHash(p) : "";
+        string backslashes = ConsumerProject.SourceHash(ConsumerProgram(@"C:\\work\\go1.26.10.2\\src\\PerfFib\\PerfFib.go", "sha256-0"));
+
+        Assert.AreEqual(i9, g, "the same program converted in two --work roots, by two converter builds, hashed differently");
+        Assert.AreEqual(i9, backslashes, "a backslash-separated GoPositionMap path hashed differently");
+    }
+
+    [TestMethod]
+    public void TheMaskHidesNoRealChangeToTheProgram()
+    {
+        string baseline = ConsumerProject.SourceHash(ConsumerProgram("D:/w/src/PerfFib/PerfFib.go", "sha256-1"));
+
+        Assert.AreNotEqual(baseline, ConsumerProject.SourceHash(ConsumerProgram("D:/w/src/PerfFib/PerfFib.go", "sha256-1",
+            cs: "class PerfFib { int x; }\n")), "a converted-source edit hashed equal");
+        Assert.AreNotEqual(baseline, ConsumerProject.SourceHash(ConsumerProgram("D:/w/src/PerfFib/PerfFib.go", "sha256-1",
+            blob: "AAgWgoKUooKClKaClJTmgpSUgoX=")), "a changed GoPositionMap payload hashed equal");
+        Assert.AreNotEqual(baseline, ConsumerProject.SourceHash(ConsumerProgram("D:/w/src/PerfFib/Other.go", "sha256-1")),
+            "a different Go file name in GoPositionMap hashed equal");
+        Assert.AreNotEqual(baseline, ConsumerProject.SourceHash(ConsumerProgram("D:/w/src/PerfFib/PerfFib.go", "sha256-1",
+            csprojTail: "\n  <ItemGroup><PackageReference Include=\"go.lib\" Version=\"1.26.10.2\" /></ItemGroup>")),
+            "a project change outside GoInputDigest hashed equal");
+    }
+
     [TestMethod]
     public void BuildOutputAndGeneratedCopiesAreNotTheProgram()
     {

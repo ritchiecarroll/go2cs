@@ -172,8 +172,9 @@ namespace PerformanceRunner
 
         /// <summary>
         /// The identity of a converted program across two boxes: SHA-256 over every <c>.cs</c> and <c>.csproj</c> of
-        /// its project, keyed by relative path (forward slashes) in ordinal order, line endings stripped of CR. Build
-        /// output and the generators' copies are not the program and are excluded by the caller.
+        /// its project, keyed by relative path (forward slashes) in ordinal order, line endings stripped of CR, and its
+        /// two host-specific inputs masked (<see cref="MaskHostSpecific"/>). Build output and the generators' copies
+        /// are not the program and are excluded by the caller.
         /// </summary>
         internal static string SourceHash(IEnumerable<(string RelativePath, string Contents)> files)
         {
@@ -183,11 +184,36 @@ namespace PerformanceRunner
             {
                 hash.AppendData(Encoding.UTF8.GetBytes(relativePath.Replace('\\', '/')));
                 hash.AppendData([0]);
-                hash.AppendData(Encoding.UTF8.GetBytes(contents.Replace("\r", "")));
+                hash.AppendData(Encoding.UTF8.GetBytes(MaskHostSpecific(contents.Replace("\r", ""))));
                 hash.AppendData([0]);
             }
 
             return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
+        }
+
+        // GoPositionMap's first argument is the Go file's ABSOLUTE path under the --work root, which differs by box;
+        // only its file name identifies the program (a package's files are one directory, so names are unique).
+        private static readonly Regex s_positionMapPath = new(@"(GoPositionMap\(\s*"")([^""]*)("")", RegexOptions.CultureInvariant);
+
+        // GoInputDigest folds in a hash of the converter executable's own bytes, so two builds of one converter differ.
+        private static readonly Regex s_inputDigest = new(@"(<GoInputDigest>)[^<]*(</GoInputDigest>)", RegexOptions.CultureInvariant);
+
+        /// <summary>
+        /// Masks the two inputs a converted consumer project carries that name the box rather than the program
+        /// (PLAN-perf-rebaseline.md section 10, P0): GoPositionMap's absolute Go file path becomes its file name, and
+        /// GoInputDigest's value becomes empty. Everything else, the position map's payload included, is hashed as
+        /// written.
+        /// </summary>
+        internal static string MaskHostSpecific(string contents)
+        {
+            string masked = s_positionMapPath.Replace(contents, m =>
+            {
+                string path = m.Groups[2].Value;
+                int cut = Math.Max(path.LastIndexOf('/'), path.LastIndexOf('\\'));
+                return m.Groups[1].Value + path[(cut + 1)..] + m.Groups[3].Value;
+            });
+
+            return s_inputDigest.Replace(masked, "$1$2");
         }
 
         /// <summary>
