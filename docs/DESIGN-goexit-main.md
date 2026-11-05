@@ -82,7 +82,7 @@ while the main thread is parked.
 
 <!-- The filter: src/core/golib/GoFrame.cs:672 (`public static bool IsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)`),
 :683 (`if (ex is not GoexitException)`). A Goexit raised INSIDE a deferred call is already caught there:
-:366 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1353
+:366 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1357
 (`private static void Unregister(Goroutine goroutine)`), :983 (`internal static bool AllGoroutinesForeverBlocked()`),
 :1030 (`internal static bool IsProvableDeadlock(`). The backstop: src/core/golib/runtime/MainExit.cs:145
 (`internal static void InstallBackstop(UnhandledExceptionEventHandler backstop) =>`). The deadlock text:
