@@ -2443,6 +2443,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeParamTypedNil() => CheckTarget("TypeParamTypedNil");
 
     [TestMethod]
+    public void CheckTypeParamUntypedConst() => CheckTarget("TypeParamUntypedConst");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]

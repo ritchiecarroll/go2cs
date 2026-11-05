@@ -5882,6 +5882,10 @@ Even the constant `0` in `n <= 0` goes through `ConvertToType`, because C# canno
 an `Int` either. The long `where` clause is what an integer-only type set becomes: every arithmetic,
 bitwise, shift and comparison interface.
 
+The same holds wherever Go gives a constant the parameter's type: a returned `1`, an argument, a composite
+literal element, and the `1` in `1 << n`, which takes the shift's type. That shift becomes
+`ConvertToType<T>(1).Lsh(n)`, so a count at or past the type argument's width yields 0, as in Go.
+
 **Full detail:** [Reference → Generic Constraints](ConversionStrategies-Reference/generic-constraints.md#generic-constraints) — array and map type sets, pointer and self-referential constraints, unions such as `string | []byte`, per-field equality in generic structs, and how explicit type arguments are chosen, including when an untyped constant argument decides one.
 
 ---
