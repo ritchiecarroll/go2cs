@@ -432,4 +432,12 @@ PLAN section 6, step 5: the launch demo and the standing integration test.
          src/tools/nugetgo as seat #39 (2026-10-28). Those copies bound -Path as a plain [string[]], so under pwsh -File
          `-Path a.md b.md` checked a.md alone; measured on the S1 and S2 sheets: "1 file(s), 6 submission(s)" against
          "2 file(s), 12 submission(s)" for the two positionally. -->
+12. **A module test can write into its own module directory.** cobra's `TestDeadcodeElimination` writes
+    `test_deadcode/` beside its source, and `go mod download` leaves the module directory read-only. A run without
+    root's file capabilities, which cobra's permission tests need, then fails it on the Go side (Go "fail", C#
+    "pass"). Give such a run a private module cache (`GOMODCACHE`) made writable with `chmod -R u+w`; it is an
+    environment fact, not a disclosure.
+    <!-- 2026-11-05: the go.* 1.26.10.2 wave's cobra rev 1, first run: "could not write test program: open
+         test_deadcode/test_deadcode_elimination.go: no such file or directory". With the cache chmod u+w it read
+         405 + 0, the reading the 1.26.10.1 wave had banked; COORD ruled it accepted (2026-11-05). -->
 
