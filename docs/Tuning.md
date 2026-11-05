@@ -253,7 +253,7 @@ describes both forms.
      four PerfStringMatch Native AOT images timed on both boxes under one protocol (G's cross-box PROTOCOL v3, A/A per
      arm, 21 rounds; the i9's runs 1-2 recorded invalid, run 3 valid): hoisted/plain 0.909 (G-LAPTOP, floor 1.2%) and
      0.945 (i9, floor 1.8%). On G alone, the same pair under the default JIT read 0.752 and under TC0 0.794
-     (docs/phase4/DATA-hop126-perf.md section 8.4, the policy pair table). The 10-30 Test 1 reading (AOT 1.004) was its
+     (docs/phase4/DATA-hop126-perf.md section 8.4.4; the cross-box pair is section 9.4). The 10-30 Test 1 reading (AOT 1.004) was its
      own images (893d48976f) and does not reproduce on the i9 with these. The owner kept plain as the default for user
      programs (2026-11-05, "Keep plain"); -hoist-literals stays the opt-in. -->
 

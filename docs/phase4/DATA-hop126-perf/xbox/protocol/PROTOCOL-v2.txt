@@ -1,0 +1,18 @@
+CROSS-BOX LITERAL-POLICY CHECK -- PROTOCOL v2 (G, amended 2026-11-05 after run1 was found invalid, BEFORE any rerun).
+Run1 (v1, 11 rounds) is recorded as INVALID: rule 2 (an idle dotnet-hosted pwsh terminal counted as a toolchain process)
+and rule 3 (C and C0 A/A at +1.22% and +1.57%) failed. It is not read as a result.
+RUN (Git Bash): bash /c/go2cs-perf/xbox-literal/run.sh
+ - ROUNDS defaults to 21 (v1: 11); export ROUNDS only if COORD rules another count.
+ - armab is framework-dependent and needs a .NET 10 runtime (export DOTNET_ROOT if .NET 10 is not machine-wide). The
+   images are self-contained Native AOT.
+ - Each run writes its own out-<timestamp>/ folder. Nothing may build during it. It takes about 6-9 minutes.
+VALID ONLY IF ALL of these hold (from out-<timestamp>/run.log):
+ 1. "end ... rc=0" (armab verified all 8 arms: exit 0, outputs equal), and manifest.sha256 checked OK at the start.
+ 2. "build/toolchain processes: 0" at "box start" and at "box end", on AC power (name the power plan).
+    AMENDED: a dotnet.exe whose command line runs pwsh.dll (an interactive PowerShell host, such as an idle terminal)
+    is NOT a build. census.ps1 lists it under "admitted pwsh hosts" with its cpu_s. It is admitted only if the same
+    PID is listed at both box start and box end, with cpu_s growth under 1.0 s (idle across the run).
+ 3. Each A/A pair (X against X-AA) agrees within 1%. Unchanged from v1, and not loosened after run1.
+ 4. The Fib control's bootstrap 95% interval holds 0 (Sieve is reported only).
+REPORT BACK: the whole out-<timestamp>/ folder (run.log, sm-aot.tsv, ctl-start.tsv, ctl-end.tsv), and the CPU line.
+G runs the same v2 bundle on G, so both boxes are read under one protocol.
