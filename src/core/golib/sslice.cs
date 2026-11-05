@@ -190,10 +190,29 @@ public ref struct sslice<T>
         ToSpan().Clear();
     }
 
-    public Enumerator GetEnumerator()
+    /// <summary>Gets an enumerator over the values: <c>foreach (var v in s)</c>, as for <see cref="slice{T}"/>.</summary>
+    public Span<T>.Enumerator GetEnumerator()
     {
-        return new Enumerator(ToSpan());
+        return ToSpan().GetEnumerator();
     }
+
+    /// <summary>
+    /// What <see cref="builtin.range{T}(sslice{T})"/> returns: the (index, value) pairs, Go's <c>range s</c> over a
+    /// variadic parameter, for <c>foreach (var (i, v) in range(s))</c>.
+    /// </summary>
+    public readonly ref struct RangeOver
+    {
+        private readonly Span<T> m_span;
+
+        internal RangeOver(Span<T> span)
+        {
+            m_span = span;
+        }
+
+        public RangeEnumerator GetEnumerator() => new(m_span);
+    }
+
+    internal RangeOver Range() => new(ToSpan());
 
     public static implicit operator sslice<T>(Span<T> source)
     {
@@ -210,12 +229,13 @@ public ref struct sslice<T>
         return source.ToSlice();
     }
 
-    public ref struct Enumerator
+    /// <summary>The (index, value) enumerator <c>foreach (var (i, v) in range(s))</c> drives.</summary>
+    public ref struct RangeEnumerator
     {
         private readonly Span<T> m_span;
         private int m_index;
 
-        internal Enumerator(Span<T> span)
+        internal RangeEnumerator(Span<T> span)
         {
             m_span = span;
             m_index = -1;

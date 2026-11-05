@@ -87,14 +87,10 @@ internal static class ISliceTypeTemplate
                 // packages sat behind one diagnostic.
                 ISlice? ISlice.Append(object[] elems) => ((ISlice)m_value).Append(elems);
 
-                // Forwards the CONCRETE struct enumerator, not IEnumerator<(nint, T)>: `foreach` binds
-                // GetEnumerator by pattern, so a named slice type ranges with zero heap traffic exactly
-                // like the slice<T> it wraps. Returning the interface here would box on every loop entry.
-                // ISlice<T> -> IArray<T> declares its own GetEnumerator() over (nint, T), so that member
-                // becomes explicit — the boxing path, taken only when a consumer asks for the interface.
+                // Forwards the CONCRETE struct enumerator over the VALUES, as slice<T> enumerates them:
+                // `foreach` binds GetEnumerator by pattern, so a named slice type enumerates with zero heap
+                // traffic exactly like the slice<T> it wraps. Go's range pairs are builtin.range(x).
                 public global::go.slice<{{targetTypeName}}>.Enumerator GetEnumerator() => m_value.GetEnumerator();
-
-                global::System.Collections.Generic.IEnumerator<(nint, {{targetTypeName}})> global::go.IArray<{{targetTypeName}}>.GetEnumerator() => ((global::go.IArray<{{targetTypeName}}>)m_value).GetEnumerator();
 
                 global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)m_value).GetEnumerator();
 
