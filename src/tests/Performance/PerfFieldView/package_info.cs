@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,6 +41,10 @@ using static go.main_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// The struct types whose fields this package reaches through a pointer, as Go spells it, `p.f`:
+// go2cs-gen emits a field property on the pointer for each of their fields.
+[assembly: GoFieldAccess(typeof(point))]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -52,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("PerfFieldView.go", "PerfFieldView.cs", "AA8ywoKUpsKClKqCgoKCgqaClIKCgoKCpoKCgpSCgriCgqaCgg==")]
+[assembly: GoPositionMap("PerfFieldView.go", "PerfFieldView.cs", "AA8ywoKUpsKClKqCgoKCgqaClIKCgoKCpoKCgpSCgriCgqaCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

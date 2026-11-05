@@ -47,7 +47,7 @@ public static nint Perimeter(this Tri t) {
 }
 
 internal static nint run(nint n) {
-    var shapes = new Shape[]{new Rect(3, 4), new Circle(2), new Tri(6, 3, 7), new Rect(1, 9), new Circle(5), new Tri(4, 4, 6)}.slice();
+    var shapes = slice<Shape>([new Rect(3, 4), new Circle(2), new Tri(6, 3, 7), new Rect(1, 9), new Circle(5), new Tri(4, 4, 6)]);
     nint total = 0;
 
     for (nint i = 0; i < n; i++) {

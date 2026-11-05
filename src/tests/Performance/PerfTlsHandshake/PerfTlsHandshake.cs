@@ -77,7 +77,7 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
     GoFrame ᒐ = default;
     try {
         var serverConf = Ꮡ(new tls.Config(
-            Certificates: new tls.Certificate[]{cert}.slice(),
+            Certificates: slice<tls.Certificate>([cert]),
             MinVersion: tls.VersionTLS13,
             MaxVersion: tls.VersionTLS13
         ));
@@ -88,7 +88,7 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
         ));
 
         var (ln, err) = Δnet.Listen("tcp", "127.0.0.1:0");
-        if (err != default!) {
+        if (err != nil) {
             throw panic(err);
         }
         var lnʗ1 = ln;
@@ -104,12 +104,12 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
                 defer(ᴛ1 => close(ᴛ1), doneʗ1, ref ᒐ);
                 for (nint i = 0; i < n; i++) {
                     var (c, errΔ1) = lnʗ2.Accept();
-                    if (errΔ1 != default!) {
+                    if (errΔ1 != nil) {
                         return;
                     }
                     var s = tls.Server(c, serverConfʗ1);
                     {
-                        var errΔ2 = s.Handshake(); if (errΔ2 == default!) {
+                        var errΔ2 = s.Handshake(); if (errΔ2 == nil) {
                             Δio.CopyN(Δio.Discard, new tls_ConnжReader(s), 1);
                         }
                     }
@@ -121,35 +121,35 @@ internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificat
         });
 
         nint count = 0;
-        uint16 version = default!;
-        uint16 suite = default!;
+        uint16 version = default;
+        uint16 suite = default;
         for (nint i = 0; i < n; i++) {
             var (c, errΔ3) = Δnet.Dial("tcp", ln.Addr().String());
-            if (errΔ3 != default!) {
+            if (errΔ3 != nil) {
                 throw panic(errΔ3);
             }
             var t = tls.Client(c, clientConf);
             {
-                var errΔ4 = t.Handshake(); if (errΔ4 != default!) {
+                var errΔ4 = t.Handshake(); if (errΔ4 != nil) {
                     throw panic(errΔ4);
                 }
             }
             var st = t.ConnectionState();
             (version, suite) = (st.Version, st.CipherSuite);
-            t.Write(new byte[]{0}.slice());
+            t.Write(slice<byte>([0]));
             t.Close();
             count++;
         }
         ᐸꟷ(done);
         return (count, version, suite);
     }
-    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 internal static void Main() {
     var (cert, err) = tls.X509KeyPair(localhostCert, localhostKey);
-    if (err != default!) {
+    if (err != nil) {
         throw panic(err);
     }
 
