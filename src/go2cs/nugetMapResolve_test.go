@@ -188,7 +188,7 @@ func TestNuGetMapReportNamesWhatWasAppliedAndWhy(t *testing.T) {
 		{module: "github.com/c/c", version: "v0.1.0", note: "no mapping in any source"},
 	}
 
-	report := formatNuGetMapReport(decisions, []string{"go2cs.nuget.lock disagrees for X"})
+	report := formatNuGetMapReport(decisions, []string{"go2cs.nuget.lock disagrees for X"}, nugetMapSourceList(nugetMapOptions{sources: []string{"mine.txt"}}))
 
 	for _, want := range []string{
 		"id.a", "canonical", "registry", "PackageReference id.a [1.300.0.1]",
