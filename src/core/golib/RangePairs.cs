@@ -27,10 +27,12 @@ namespace go;
 /// evaluate the operand there either.
 /// </para>
 /// <para>
-/// A slice, a variadic parameter's stack slice and an array bind their own overloads by identity. A named slice or
-/// array type, or a type parameter whose core type is one, binds <see cref="range{T}(IArray{T})"/>, which reads the
-/// sequence through its length and indexer. None of these is ambiguous with the integer <see cref="range{T}(T)"/>: its
-/// constraint rejects them.
+/// A slice, a variadic parameter's stack slice and an array bind their own overloads by identity, and so does the
+/// snapshot an array value's range copies (<see cref="array{T}.ΔRangeSnapshot"/>). A named slice type names its element
+/// type, <c>range&lt;Word&gt;(x)</c>, so its conversion to <see cref="slice{T}"/> binds the slice overload: inference
+/// cannot see through that conversion. A named array type, or a type parameter whose core type is a slice or an array,
+/// binds <see cref="range{T}(IArray{T})"/>, which reads the sequence through its length and indexer. None of these is
+/// ambiguous with the integer <see cref="range{T}(T)"/>: its constraint rejects them.
 /// </para>
 /// </remarks>
 public static partial class builtin
@@ -61,6 +63,28 @@ public static partial class builtin
     /// <typeparam name="T">Element type.</typeparam>
     /// <param name="p">Pointer to the array.</param>
     public static array<T>.RangeOver range<T>(ж<array<T>> p) => new(p.Value);
+
+    /// <summary>
+    /// Enumerates the (index, value) pairs of the copy an array value's range takes: Go's <c>range a</c> over an array
+    /// with a value variable, which ranges a copy of the array (see <see cref="array{T}.ΔRangeSnapshot"/>).
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="snapshot">The copy, taken when the loop starts.</param>
+    public static array<T>.RangeSnapshot range<T>(array<T>.RangeSnapshot snapshot) => snapshot;
+
+    /// <summary>
+    /// Enumerates the indices of a <c>*[N]T</c>, 0..N-1, from its type's length: the pointer is neither dereferenced nor
+    /// read, so a nil one ranges N times, as Go's does.
+    /// </summary>
+    /// <typeparam name="TArray">The array type, an <see cref="array{T}"/> or a named array.</typeparam>
+    /// <param name="p">Pointer to the array, evaluated once as Go evaluates the range operand; possibly nil.</param>
+    /// <param name="length">N, the array type's length, which the converter knows statically.</param>
+    /// <returns>The indices, as Go's <c>int</c>.</returns>
+    /// <remarks>
+    /// Go's length of a <c>*[N]T</c> is the constant N; golib's array carries its length in the value, not the type, so
+    /// only the caller knows N.
+    /// </remarks>
+    public static RangeOverInt<nint> range<TArray>(ж<TArray> p, nint length) where TArray : IArray => range(length);
 
     /// <summary>
     /// Enumerates the (index, value) pairs of a named slice or array type, or of a type parameter whose core type is
