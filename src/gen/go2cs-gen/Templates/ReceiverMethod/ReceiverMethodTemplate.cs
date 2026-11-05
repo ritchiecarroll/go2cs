@@ -38,6 +38,17 @@ internal class ReceiverMethodTemplate : TemplateBase
     // Required for the same reason NoInlining is.
     public required string? OverloadResolutionPriority;
 
+    // Whether the SOURCE method is a Go VALUE-receiver method (`this T`, or a by-ref receiver marked
+    // [GoCopyBound]) rather than a pointer-receiver one. Go's method set of *T holds T's value methods, and
+    // `p.M()` on a pointer dereferences p and copies the pointee into the receiver AT THE CALL. The twin does
+    // exactly that: `~` is Go's `*p` (golib's operator, RuntimeErrorPanic.NilPointerDereference on nil, Go's
+    // text), its result is copied into a local, and the primary runs on the copy, so a mutation of the
+    // receiver inside M never reaches *p. The twin's own frame is go2cs-gen output, which the traceback and
+    // runtime.Caller never count (managed_impl.cs, classifyGoSourceFrame), so a nil panic still names the
+    // caller's line, as Go's implicit dereference does. It lets the converter write Go's `p.M()` as `p.M()`
+    // rather than `(~p).M()` (convSelectorExpr.go, the value-receiver-through-pointer call).
+    public bool ValueReceiver;
+
     private string ForwarderAttributes
     {
         get
@@ -49,7 +60,7 @@ internal class ReceiverMethodTemplate : TemplateBase
             if (OverloadResolutionPriority is not null)
                 attributes += $", global::System.Runtime.CompilerServices.OverloadResolutionPriority({OverloadResolutionPriority})";
 
-            // The forwarder calls the user's pointer-receiver method: Just My Code steps through it.
+            // The forwarder calls the user's method: Just My Code steps through it.
             attributes += $", {NonUserCodeAttribute}";
 
             return $"[{attributes}]";
@@ -91,7 +102,16 @@ internal class ReceiverMethodTemplate : TemplateBase
     private bool IsRefReturnPrimary =>
         Method.ReturnType.StartsWith("ref ", StringComparison.Ordinal);
 
-    public override string TemplateBody => IsRefReturnPrimary
+    public override string TemplateBody => ValueReceiver
+        ? $$"""
+            {{ForwarderAttributes}}
+            {{TargetScope}} static {{Method.ReturnType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
+            {
+                var {{ReceiverParamName}} = ~{{ReceiverBoxName}};
+                {{ReturnStatement}}{{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
+            }
+        """
+        : IsRefReturnPrimary
         ? $$"""
             {{ForwarderAttributes}}
             {{TargetScope}} static {{ReceiverParamType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
