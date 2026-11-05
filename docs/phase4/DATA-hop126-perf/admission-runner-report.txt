@@ -1,0 +1,199 @@
+**Environment:** AMD Ryzen 5 PRO 6650U with Radeon Graphics · Microsoft Windows 10.0.26300 · .NET SDK 10.0.400 · 2026-11-05
+
+Columns (RID and shape): Go = `windows/amd64`, default `GOAMD64`; C# (JIT) = framework-dependent, `win-x64` apphost; C# (ReadyToRun) = `win-x64`, self-contained, partial trim, ReadyToRun (the converter template's own `dotnet publish -c Release -r win-x64`); C# (Native AOT) = `win-x64`, self-contained, partial trim, default instruction set, published on another box and admitted by its manifest. Diagnostic arms: Tc0 = the JIT binary with `DOTNET_TieredCompilation=0`; Fd1 = `win-x64`, framework-dependent, untrimmed, ReadyToRun. Median of 1 runs (1 for the review rows), 1 discarded warmup, legs interleaved. Workload time is in-program; the Startup row is process wall time.
+
+### Leg go1.26.10.2: go.* 1.26.10.2
+
+Template default: the version the converter writes floats to the newest matching release on the feed, which resolved to 1.26.10.2.
+
+C# (ReadyToRun) in this leg, as published: own code IL-only, golib ReadyToRun.
+
+| Benchmark | Go | C# (JIT) | C# (ReadyToRun) | C# (Native AOT) |
+|---|---:|---:|---:|---:|
+| Startup | 23.6 | 501.2 (21.19×) | 374.8 (15.85×) | 183.2 (7.75×) |
+| Fib | 117.9 | 102.7 (0.87×) | 103.0 (0.87×) | 184.9 (1.57×) |
+| Sieve | 50.3 | 144.8 (2.88×) | 147.2 (2.92×) | 332.2 (6.60×) |
+| MatMul | 112.4 | 219.3 (1.95×) | 216.9 (1.93×) | 750.8 (6.68×) |
+| String | 108.8 | 293.4 (2.70×) | 663.0 (6.10×) | 1,424.1 (13.09×) |
+| StringView | 9.9 | 22.7 (2.29×) | 21.9 (2.21×) | 20.3 (2.05×) |
+| StringMatch | 174.2 | 823.4 (4.73×) | 819.5 (4.70×) | 1,308.7 (7.51×) |
+| Map | 691.8 | 278.3 (0.40×) | 262.1 (0.38×) | 320.9 (0.46×) |
+| Sort | 143.2 | 259.4 (1.81×) | 261.1 (1.82×) | 564.6 (3.94×) |
+| Channel | 48.7 | 80.2 (1.65×) | 70.9 (1.46×) | 120.9 (2.48×) |
+| IfaceCall | 184.6 | 341.9 (1.85×) | 373.8 (2.03×) | 579.6 (3.14×) |
+| Iface | 89.3 | 410.2 (4.59×) | 378.3 (4.23×) | 585.2 (6.55×) |
+| IfaceShell | 22.3 | 615.0 (27.60×) | 587.0 (26.34×) | 1,213.3 (54.45×) |
+| IfaceShellChurn | 35.2 | 1,128.9 (32.10×) | 1,113.7 (31.67×) | 1,759.5 (50.03×) |
+| FieldView | 51.6 | 1,800.4 (34.87×) | 1,964.0 (38.04×) | 2,370.6 (45.92×) |
+| RefLower | 242.7 | 513.2 (2.11×) | 540.0 (2.22×) | 663.0 (2.73×) |
+| TlsHandshake | 125.5 | 1,077.0 (8.58×) | 1,073.7 (8.56×) | 2,593.7 (20.67×) |
+
+### Leg go1.24.13.7: go.* 1.24.13.7
+
+Template default: the version the converter writes floats to the newest matching release on the feed, which resolved to 1.24.13.7.
+
+C# (ReadyToRun) in this leg, as published: own code ReadyToRun.
+
+| Benchmark | Go | C# (JIT) | C# (ReadyToRun) | C# (Native AOT) |
+|---|---:|---:|---:|---:|
+| Startup | 25.3 | 605.6 (23.93×) | 342.1 (13.51×) | 620.2 (24.50×) |
+| Fib | 123.2 | 175.6 (1.43×) | 181.0 (1.47×) | 182.0 (1.48×) |
+| Sieve | 50.3 | 141.2 (2.81×) | 388.3 (7.71×) | 315.3 (6.26×) |
+| MatMul | 102.0 | 219.7 (2.15×) | 640.1 (6.27×) | 758.3 (7.43×) |
+| String | 101.6 | 740.6 (7.29×) | 1,653.4 (16.28×) | 1,419.6 (13.98×) |
+| StringView | 19.0 | 19.5 (1.03×) | 662.5 (34.84×) | 24.2 (1.27×) |
+| StringMatch | 214.1 | 899.5 (4.20×) | 1,560.6 (7.29×) | 1,196.5 (5.59×) |
+| Map | 718.4 | 452.5 (0.63×) | 633.7 (0.88×) | 319.4 (0.44×) |
+| Sort | 144.7 | 415.7 (2.87×) | 359.4 (2.48×) | 558.2 (3.86×) |
+| Channel | 49.6 | 116.0 (2.34×) | 159.7 (3.22×) | 117.5 (2.37×) |
+| IfaceCall | 434.9 | 403.7 (0.93×) | 1,535.4 (3.53×) | 539.9 (1.24×) |
+| Iface | 91.4 | 520.0 (5.69×) | 866.8 (9.48×) | 570.9 (6.24×) |
+| IfaceShell | 23.4 | 1,009.0 (43.07×) | 1,015.6 (43.35×) | 1,536.9 (65.60×) |
+| IfaceShellChurn | 58.4 | 1,542.8 (26.41×) | 1,316.7 (22.54×) | 1,620.0 (27.73×) |
+| FieldView | 40.2 | 7,277.3 (180.86×) | 10,191.2 (253.28×) | 6,223.0 (154.66×) |
+| RefLower | 240.8 | 623.4 (2.59×) | 661.1 (2.75×) | 1,885.4 (7.83×) |
+| TlsHandshake | 124.8 | 2,392.5 (19.17×) | 1,861.1 (14.91×) | n/a |
+
+### Diagnostics (record only)
+
+| Benchmark | Leg | Arm | Median | Min..Max | Runs |
+|---|---|---|---:|---:|---:|
+| Startup | go1.26.10.2 | Go | 23.6 | 23.6..23.6 | 1 |
+| Startup | go1.26.10.2 | Jit | 501.2 | 501.2..501.2 | 1 |
+| Startup | go1.26.10.2 | ReadyToRun | 374.8 | 374.8..374.8 | 1 |
+| Startup | go1.26.10.2 | Aot | 183.2 | 183.2..183.2 | 1 |
+| Startup | go1.24.13.7 | Go | 25.3 | 25.3..25.3 | 1 |
+| Startup | go1.24.13.7 | Jit | 605.6 | 605.6..605.6 | 1 |
+| Startup | go1.24.13.7 | ReadyToRun | 342.1 | 342.1..342.1 | 1 |
+| Startup | go1.24.13.7 | Aot | 620.2 | 620.2..620.2 | 1 |
+| Fib | go1.26.10.2 | Go | 117.9 | 117.9..117.9 | 1 |
+| Fib | go1.26.10.2 | Jit | 102.7 | 102.7..102.7 | 1 |
+| Fib | go1.26.10.2 | ReadyToRun | 103.0 | 103.0..103.0 | 1 |
+| Fib | go1.26.10.2 | Aot | 184.9 | 184.9..184.9 | 1 |
+| Fib | go1.24.13.7 | Go | 123.2 | 123.2..123.2 | 1 |
+| Fib | go1.24.13.7 | Jit | 175.6 | 175.6..175.6 | 1 |
+| Fib | go1.24.13.7 | ReadyToRun | 181.0 | 181.0..181.0 | 1 |
+| Fib | go1.24.13.7 | Aot | 182.0 | 182.0..182.0 | 1 |
+| Sieve | go1.26.10.2 | Go | 50.3 | 50.3..50.3 | 1 |
+| Sieve | go1.26.10.2 | Jit | 144.8 | 144.8..144.8 | 1 |
+| Sieve | go1.26.10.2 | ReadyToRun | 147.2 | 147.2..147.2 | 1 |
+| Sieve | go1.26.10.2 | Aot | 332.2 | 332.2..332.2 | 1 |
+| Sieve | go1.24.13.7 | Go | 50.3 | 50.3..50.3 | 1 |
+| Sieve | go1.24.13.7 | Jit | 141.2 | 141.2..141.2 | 1 |
+| Sieve | go1.24.13.7 | ReadyToRun | 388.3 | 388.3..388.3 | 1 |
+| Sieve | go1.24.13.7 | Aot | 315.3 | 315.3..315.3 | 1 |
+| MatMul | go1.26.10.2 | Go | 112.4 | 112.4..112.4 | 1 |
+| MatMul | go1.26.10.2 | Jit | 219.3 | 219.3..219.3 | 1 |
+| MatMul | go1.26.10.2 | ReadyToRun | 216.9 | 216.9..216.9 | 1 |
+| MatMul | go1.26.10.2 | Aot | 750.8 | 750.8..750.8 | 1 |
+| MatMul | go1.24.13.7 | Go | 102.0 | 102.0..102.0 | 1 |
+| MatMul | go1.24.13.7 | Jit | 219.7 | 219.7..219.7 | 1 |
+| MatMul | go1.24.13.7 | ReadyToRun | 640.1 | 640.1..640.1 | 1 |
+| MatMul | go1.24.13.7 | Aot | 758.3 | 758.3..758.3 | 1 |
+| String | go1.26.10.2 | Go | 108.8 | 108.8..108.8 | 1 |
+| String | go1.26.10.2 | Jit | 293.4 | 293.4..293.4 | 1 |
+| String | go1.26.10.2 | ReadyToRun | 663.0 | 663.0..663.0 | 1 |
+| String | go1.26.10.2 | Aot | 1,424.1 | 1,424.1..1,424.1 | 1 |
+| String | go1.24.13.7 | Go | 101.6 | 101.6..101.6 | 1 |
+| String | go1.24.13.7 | Jit | 740.6 | 740.6..740.6 | 1 |
+| String | go1.24.13.7 | ReadyToRun | 1,653.4 | 1,653.4..1,653.4 | 1 |
+| String | go1.24.13.7 | Aot | 1,419.6 | 1,419.6..1,419.6 | 1 |
+| StringView | go1.26.10.2 | Go | 9.9 | 9.9..9.9 | 1 |
+| StringView | go1.26.10.2 | Jit | 22.7 | 22.7..22.7 | 1 |
+| StringView | go1.26.10.2 | ReadyToRun | 21.9 | 21.9..21.9 | 1 |
+| StringView | go1.26.10.2 | Aot | 20.3 | 20.3..20.3 | 1 |
+| StringView | go1.24.13.7 | Go | 19.0 | 19.0..19.0 | 1 |
+| StringView | go1.24.13.7 | Jit | 19.5 | 19.5..19.5 | 1 |
+| StringView | go1.24.13.7 | ReadyToRun | 662.5 | 662.5..662.5 | 1 |
+| StringView | go1.24.13.7 | Aot | 24.2 | 24.2..24.2 | 1 |
+| StringMatch | go1.26.10.2 | Go | 174.2 | 174.2..174.2 | 1 |
+| StringMatch | go1.26.10.2 | Jit | 823.4 | 823.4..823.4 | 1 |
+| StringMatch | go1.26.10.2 | ReadyToRun | 819.5 | 819.5..819.5 | 1 |
+| StringMatch | go1.26.10.2 | Aot | 1,308.7 | 1,308.7..1,308.7 | 1 |
+| StringMatch | go1.24.13.7 | Go | 214.1 | 214.1..214.1 | 1 |
+| StringMatch | go1.24.13.7 | Jit | 899.5 | 899.5..899.5 | 1 |
+| StringMatch | go1.24.13.7 | ReadyToRun | 1,560.6 | 1,560.6..1,560.6 | 1 |
+| StringMatch | go1.24.13.7 | Aot | 1,196.5 | 1,196.5..1,196.5 | 1 |
+| Map | go1.26.10.2 | Go | 691.8 | 691.8..691.8 | 1 |
+| Map | go1.26.10.2 | Jit | 278.3 | 278.3..278.3 | 1 |
+| Map | go1.26.10.2 | ReadyToRun | 262.1 | 262.1..262.1 | 1 |
+| Map | go1.26.10.2 | Aot | 320.9 | 320.9..320.9 | 1 |
+| Map | go1.24.13.7 | Go | 718.4 | 718.4..718.4 | 1 |
+| Map | go1.24.13.7 | Jit | 452.5 | 452.5..452.5 | 1 |
+| Map | go1.24.13.7 | ReadyToRun | 633.7 | 633.7..633.7 | 1 |
+| Map | go1.24.13.7 | Aot | 319.4 | 319.4..319.4 | 1 |
+| Sort | go1.26.10.2 | Go | 143.2 | 143.2..143.2 | 1 |
+| Sort | go1.26.10.2 | Jit | 259.4 | 259.4..259.4 | 1 |
+| Sort | go1.26.10.2 | ReadyToRun | 261.1 | 261.1..261.1 | 1 |
+| Sort | go1.26.10.2 | Aot | 564.6 | 564.6..564.6 | 1 |
+| Sort | go1.24.13.7 | Go | 144.7 | 144.7..144.7 | 1 |
+| Sort | go1.24.13.7 | Jit | 415.7 | 415.7..415.7 | 1 |
+| Sort | go1.24.13.7 | ReadyToRun | 359.4 | 359.4..359.4 | 1 |
+| Sort | go1.24.13.7 | Aot | 558.2 | 558.2..558.2 | 1 |
+| Channel | go1.26.10.2 | Go | 48.7 | 48.7..48.7 | 1 |
+| Channel | go1.26.10.2 | Jit | 80.2 | 80.2..80.2 | 1 |
+| Channel | go1.26.10.2 | ReadyToRun | 70.9 | 70.9..70.9 | 1 |
+| Channel | go1.26.10.2 | Aot | 120.9 | 120.9..120.9 | 1 |
+| Channel | go1.24.13.7 | Go | 49.6 | 49.6..49.6 | 1 |
+| Channel | go1.24.13.7 | Jit | 116.0 | 116.0..116.0 | 1 |
+| Channel | go1.24.13.7 | ReadyToRun | 159.7 | 159.7..159.7 | 1 |
+| Channel | go1.24.13.7 | Aot | 117.5 | 117.5..117.5 | 1 |
+| IfaceCall | go1.26.10.2 | Go | 184.6 | 184.6..184.6 | 1 |
+| IfaceCall | go1.26.10.2 | Jit | 341.9 | 341.9..341.9 | 1 |
+| IfaceCall | go1.26.10.2 | ReadyToRun | 373.8 | 373.8..373.8 | 1 |
+| IfaceCall | go1.26.10.2 | Aot | 579.6 | 579.6..579.6 | 1 |
+| IfaceCall | go1.24.13.7 | Go | 434.9 | 434.9..434.9 | 1 |
+| IfaceCall | go1.24.13.7 | Jit | 403.7 | 403.7..403.7 | 1 |
+| IfaceCall | go1.24.13.7 | ReadyToRun | 1,535.4 | 1,535.4..1,535.4 | 1 |
+| IfaceCall | go1.24.13.7 | Aot | 539.9 | 539.9..539.9 | 1 |
+| Iface | go1.26.10.2 | Go | 89.3 | 89.3..89.3 | 1 |
+| Iface | go1.26.10.2 | Jit | 410.2 | 410.2..410.2 | 1 |
+| Iface | go1.26.10.2 | ReadyToRun | 378.3 | 378.3..378.3 | 1 |
+| Iface | go1.26.10.2 | Aot | 585.2 | 585.2..585.2 | 1 |
+| Iface | go1.24.13.7 | Go | 91.4 | 91.4..91.4 | 1 |
+| Iface | go1.24.13.7 | Jit | 520.0 | 520.0..520.0 | 1 |
+| Iface | go1.24.13.7 | ReadyToRun | 866.8 | 866.8..866.8 | 1 |
+| Iface | go1.24.13.7 | Aot | 570.9 | 570.9..570.9 | 1 |
+| IfaceShell | go1.26.10.2 | Go | 22.3 | 22.3..22.3 | 1 |
+| IfaceShell | go1.26.10.2 | Jit | 615.0 | 615.0..615.0 | 1 |
+| IfaceShell | go1.26.10.2 | ReadyToRun | 587.0 | 587.0..587.0 | 1 |
+| IfaceShell | go1.26.10.2 | Aot | 1,213.3 | 1,213.3..1,213.3 | 1 |
+| IfaceShell | go1.24.13.7 | Go | 23.4 | 23.4..23.4 | 1 |
+| IfaceShell | go1.24.13.7 | Jit | 1,009.0 | 1,009.0..1,009.0 | 1 |
+| IfaceShell | go1.24.13.7 | ReadyToRun | 1,015.6 | 1,015.6..1,015.6 | 1 |
+| IfaceShell | go1.24.13.7 | Aot | 1,536.9 | 1,536.9..1,536.9 | 1 |
+| IfaceShellChurn | go1.26.10.2 | Go | 35.2 | 35.2..35.2 | 1 |
+| IfaceShellChurn | go1.26.10.2 | Jit | 1,128.9 | 1,128.9..1,128.9 | 1 |
+| IfaceShellChurn | go1.26.10.2 | ReadyToRun | 1,113.7 | 1,113.7..1,113.7 | 1 |
+| IfaceShellChurn | go1.26.10.2 | Aot | 1,759.5 | 1,759.5..1,759.5 | 1 |
+| IfaceShellChurn | go1.24.13.7 | Go | 58.4 | 58.4..58.4 | 1 |
+| IfaceShellChurn | go1.24.13.7 | Jit | 1,542.8 | 1,542.8..1,542.8 | 1 |
+| IfaceShellChurn | go1.24.13.7 | ReadyToRun | 1,316.7 | 1,316.7..1,316.7 | 1 |
+| IfaceShellChurn | go1.24.13.7 | Aot | 1,620.0 | 1,620.0..1,620.0 | 1 |
+| FieldView | go1.26.10.2 | Go | 51.6 | 51.6..51.6 | 1 |
+| FieldView | go1.26.10.2 | Jit | 1,800.4 | 1,800.4..1,800.4 | 1 |
+| FieldView | go1.26.10.2 | ReadyToRun | 1,964.0 | 1,964.0..1,964.0 | 1 |
+| FieldView | go1.26.10.2 | Aot | 2,370.6 | 2,370.6..2,370.6 | 1 |
+| FieldView | go1.24.13.7 | Go | 40.2 | 40.2..40.2 | 1 |
+| FieldView | go1.24.13.7 | Jit | 7,277.3 | 7,277.3..7,277.3 | 1 |
+| FieldView | go1.24.13.7 | ReadyToRun | 10,191.2 | 10,191.2..10,191.2 | 1 |
+| FieldView | go1.24.13.7 | Aot | 6,223.0 | 6,223.0..6,223.0 | 1 |
+| RefLower | go1.26.10.2 | Go | 242.7 | 242.7..242.7 | 1 |
+| RefLower | go1.26.10.2 | Jit | 513.2 | 513.2..513.2 | 1 |
+| RefLower | go1.26.10.2 | ReadyToRun | 540.0 | 540.0..540.0 | 1 |
+| RefLower | go1.26.10.2 | Aot | 663.0 | 663.0..663.0 | 1 |
+| RefLower | go1.24.13.7 | Go | 240.8 | 240.8..240.8 | 1 |
+| RefLower | go1.24.13.7 | Jit | 623.4 | 623.4..623.4 | 1 |
+| RefLower | go1.24.13.7 | ReadyToRun | 661.1 | 661.1..661.1 | 1 |
+| RefLower | go1.24.13.7 | Aot | 1,885.4 | 1,885.4..1,885.4 | 1 |
+| TlsHandshake | go1.26.10.2 | Go | 125.5 | 125.5..125.5 | 1 |
+| TlsHandshake | go1.26.10.2 | Jit | 1,077.0 | 1,077.0..1,077.0 | 1 |
+| TlsHandshake | go1.26.10.2 | ReadyToRun | 1,073.7 | 1,073.7..1,073.7 | 1 |
+| TlsHandshake | go1.26.10.2 | Aot | 2,593.7 | 2,593.7..2,593.7 | 1 |
+| TlsHandshake | go1.24.13.7 | Go | 124.8 | 124.8..124.8 | 1 |
+| TlsHandshake | go1.24.13.7 | Jit | 2,392.5 | 2,392.5..2,392.5 | 1 |
+| TlsHandshake | go1.24.13.7 | ReadyToRun | 1,861.1 | 1,861.1..1,861.1 | 1 |
+
+### Refused (not timed)
+
+- go1.24.13.7/PerfTlsHandshake: no AOT binary was shipped
