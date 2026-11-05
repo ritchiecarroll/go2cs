@@ -1022,7 +1022,7 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 	sets := map[string][]string{}
 
 	base, baseTarget, baseRemainder, note := "", "", "", ""
-	needsUnsafe := false
+	needsUnsafe, needsFriend := false, false
 
 	pkg := companionPackage(rawPath, emissions)
 	converts := func(i int) bool { return i < len(converted) && converted[i][pkg] }
@@ -1073,7 +1073,11 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 			needsUnsafe = true
 		}
 
-		remainder := stripPlatformReferences(unsafeBlocksUnion(string(contents), true))
+		if strings.Contains(string(contents), friendAssemblyAccessGroup) {
+			needsFriend = true
+		}
+
+		remainder := stripPlatformReferences(friendAccessUnion(unsafeBlocksUnion(string(contents), true), true))
 
 		if len(base) == 0 {
 			base, baseTarget, baseRemainder = string(contents), target, remainder
@@ -1086,7 +1090,7 @@ func mergePlatformProjectFile(rawPath string, targets []string, emissions []*pla
 	}
 
 	shared, deltas, _ := splitPlatformReferenceSets(sets)
-	merged, err := renderPlatformReferences(unsafeBlocksUnion(base, needsUnsafe), shared, deltas)
+	merged, err := renderPlatformReferences(friendAccessUnion(unsafeBlocksUnion(base, needsUnsafe), needsFriend), shared, deltas)
 
 	if err != nil {
 		return base, note, fmt.Errorf("failed to compose conditioned references for %q: %w", rawPath, err)
@@ -1119,6 +1123,21 @@ func unsafeBlocksUnion(contents string, needsUnsafe bool) string {
 	}
 
 	return strings.Replace(contents, unsafeBlocksDisabled, unsafeBlocksEnabled, 1)
+}
+
+// friendAccessUnion gives a merged project file the friend-access group (insertFriendAssemblyAccess) when ANY
+// converting target emitted it. The writer emits the group when the target being converted sees in-package test
+// files, and those can be GOOS-constrained: log/syslog's only one, syslog_test.go, is `!windows`, so linux and
+// darwin emitted the group and windows did not, and the merge kept windows' copy (BOARD 2026-11-03, G). A
+// .csproj is ONE file serving every platform, so this takes the union for the reason unsafeBlocksUnion does:
+// InternalsVisibleTo grants access and uses none, so it is inert where nothing needs it, while its absence
+// leaves the linux and darwin packages without the go2cs.SynthesizedStructs grant reflect.StructOf relies on.
+func friendAccessUnion(contents string, needsFriend bool) string {
+	if !needsFriend || strings.Contains(contents, friendAssemblyAccessGroup) {
+		return contents
+	}
+
+	return insertFriendAssemblyAccess(contents)
 }
 
 // stripPlatformReferences returns a project file with every reference removed — the unconditioned
