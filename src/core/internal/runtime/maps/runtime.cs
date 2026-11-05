@@ -105,7 +105,7 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
     for (; ; seq = seq.next()) {
         var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -125,7 +125,7 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abiꓸMapType> Ꮡtyp, ж<
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -185,7 +185,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
     for (; ; seq = seq.next()) {
         var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -205,7 +205,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abiꓸMapType> Ꮡ
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -282,7 +282,7 @@ outer:
         var h2Hash = h2(hash);
         for (; ; seq = seq.next()) {
             var g = t.Ꮡgroups.group(Ꮡtyp, seq.offset);
-            var match = (~g.ctrls()).matchH2(h2Hash);
+            var match = g.ctrls().matchH2(h2Hash);
 
             // Look for an existing slot containing this key.
             while (match != 0) {
@@ -311,7 +311,7 @@ outer:
 
             // No existing slot for this key in this group. Is this the end
             // of the probe sequence?
-            match = (~g.ctrls()).matchEmpty();
+            match = g.ctrls().matchEmpty();
             if (match != 0) {
                 // Finding an empty slot means we've reached the end of
                 // the probe sequence.
@@ -368,7 +368,7 @@ outer:
             if (firstDeletedGroup.data == nil) {
                 // Since we already checked for empty slots
                 // above, matches here must be deleted slots.
-                match = (~g.ctrls()).matchEmptyOrDeleted();
+                match = g.ctrls().matchEmptyOrDeleted();
                 if (match != 0) {
                     firstDeletedGroup = g;
                     firstDeletedSlot = match.first();

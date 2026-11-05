@@ -117,12 +117,12 @@ public static ж<Encoding> URLEncoding = NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZ
 // RawStdEncoding is the standard raw, unpadded base64 encoding,
 // as defined in RFC 4648 section 3.2.
 // This is the same as [StdEncoding] but omits padding characters.
-public static ж<Encoding> RawStdEncoding = (~StdEncoding).WithPadding(NoPadding);
+public static ж<Encoding> RawStdEncoding = StdEncoding.WithPadding(NoPadding);
 
 // RawURLEncoding is the unpadded alternate base64 encoding defined in RFC 4648.
 // It is typically used in URLs and file names.
 // This is the same as [URLEncoding] but omits padding characters.
-public static ж<Encoding> RawURLEncoding = (~URLEncoding).WithPadding(NoPadding);
+public static ж<Encoding> RawURLEncoding = URLEncoding.WithPadding(NoPadding);
 
 /*
  * Encoder

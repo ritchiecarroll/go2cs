@@ -194,7 +194,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
     for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -213,7 +213,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref tab
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -230,7 +230,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
     for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -249,7 +249,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi�
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -280,7 +280,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
     var h2Hash = h2(hash);
     for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         // Look for an existing slot containing this key.
         while (match != 0) {
@@ -308,7 +308,7 @@ public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abiꓸMapT
 
         // No existing slot for this key in this group. Is this the end
         // of the probe sequence?
-        match = (~g.ctrls()).matchEmptyOrDeleted();
+        match = g.ctrls().matchEmptyOrDeleted();
         if (match == 0) {
             continue; // nothing but filled slots. Keep probing.
         }
@@ -400,7 +400,7 @@ internal static void uncheckedPutSlot(this ref table t, ж<abiꓸMapType> Ꮡtyp
     for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
 
-        var match = (~g.ctrls()).matchEmptyOrDeleted();
+        var match = g.ctrls().matchEmptyOrDeleted();
         if (match != 0) {
             var i = match.first();
 
@@ -435,7 +435,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
     var h2Hash = h2(hash);
     for (; ; seq = seq.next()) {
         var g = t.groups.group(Ꮡtyp, seq.offset);
-        var match = (~g.ctrls()).matchH2(h2Hash);
+        var match = g.ctrls().matchH2(h2Hash);
 
         while (match != 0) {
             var i = match.first();
@@ -481,7 +481,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
                 // Otherwise, we create a tombstone to mark the
                 // slot as deleted.
                 bool tombstone = default;
-                if ((~g.ctrls()).matchEmpty() != 0) {
+                if (g.ctrls().matchEmpty() != 0) {
                     g.ctrls().set(i, ctrlEmpty);
                     t.growthLeft++;
                 } else {
@@ -495,7 +495,7 @@ public static bool Delete(this ref table t, ж<abiꓸMapType> Ꮡtyp, ж<ΔMap> 
             match = match.removeFirst();
         }
 
-        match = (~g.ctrls()).matchEmpty();
+        match = g.ctrls().matchEmpty();
         if (match != 0) {
             // Finding an empty slot means we've reached the end of
             // the probe sequence.
@@ -533,7 +533,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
     // Trace the probe sequence of every full entry.
     for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
         var g = t.groups.group(Ꮡtyp, i);
-        var match = (~g.ctrls()).matchFull();
+        var match = g.ctrls().matchFull();
         while (match != 0) {
             var j = match.first();
             match = match.removeFirst();
@@ -555,14 +555,14 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
                     break; // reached group of element in probe sequence
                 }
                 var gΔ1 = t.groups.group(Ꮡtyp, seq.offset);
-                var mΔ1 = (~gΔ1.ctrls()).matchEmptyOrDeleted();
+                var mΔ1 = gΔ1.ctrls().matchEmptyOrDeleted();
                 if (mΔ1 != 0) { // must be deleted, not empty, as we haven't found our key yet
                     // Mark this group's tombstone as required.
                     needed[seq.offset / 32] |= (uint32)(((uint32)1 << (int)(seq.offset % 32)));
                 }
             }
         }
-        if ((~g.ctrls()).matchEmpty() != 0) {
+        if (g.ctrls().matchEmpty() != 0) {
             // Also mark non-tombstone-containing groups, so we don't try
             // to remove tombstones from them below.
             needed[i / 32] |= (uint32)(((uint32)1 << (int)(i % 32)));
@@ -578,7 +578,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
             continue;
         }
         var g = t.groups.group(Ꮡtyp, i);
-        var mΔ2 = (~g.ctrls()).matchEmptyOrDeleted(); // must be deleted
+        var mΔ2 = g.ctrls().matchEmptyOrDeleted(); // must be deleted
         cnt += mΔ2.count();
     }
     if (cnt * 10 < (nint)t.capacity) { // Can we restore 10% of capacity?
@@ -591,7 +591,7 @@ internal static void pruneTombstones(this ref table t, ж<abiꓸMapType> Ꮡtyp,
             continue;
         }
         var g = t.groups.group(Ꮡtyp, i);
-        var mΔ3 = (~g.ctrls()).matchEmptyOrDeleted(); // must be deleted
+        var mΔ3 = g.ctrls().matchEmptyOrDeleted(); // must be deleted
         while (mΔ3 != 0) {
             var k = mΔ3.first();
             mΔ3 = mΔ3.removeFirst();
@@ -638,7 +638,7 @@ public static void Clear(this ref table t, ж<abiꓸMapType> Ꮡtyp) {
     if (fullTest) {
         for (var i = (uint64)0; i <= t.groups.lengthMask; i++) {
             var g = t.groups.group(Ꮡtyp, i);
-            if ((~g.ctrls()).anyFull()) {
+            if (g.ctrls().anyFull()) {
                 typedmemclr(typ.Group, g.data);
             }
             g.ctrls().setEmpty();
@@ -1055,7 +1055,7 @@ next:
             }
 
             if (groupMatch == 0) {
-                groupMatch = (~it.group.ctrls()).matchFull();
+                groupMatch = it.group.ctrls().matchFull();
 
                 if (slotIdxΔ1 != 0) {
                     // Starting in the middle of the group.
