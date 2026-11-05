@@ -10,9 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-global using timeꓸLocation = go.time_package.ΔLocation;
-global using timeꓸMonth = go.time_package.ΔMonth;
-global using timeꓸWeekday = go.time_package.ΔWeekday;
 // </ImportedTypeAliases>
 
 using go;
@@ -52,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("PerfMatMul.go", "PerfMatMul.cs", "AAcWgoKClIKCgoKCgriCgoKClLiCgpSmgpSCgqaCgg==")]
+[assembly: GoPositionMap("PerfMatMul.go", "PerfMatMul.cs", "AAcWgoKClIKCgoKCgriCgoKClLiCgpSmgpSCgqaCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -18,7 +18,7 @@ internal static partial nint run(nint n) {
             total += (v & 4095);
         }
         doneʗ1.ᐸꟷ(total);
-    });
+    }, GoStack.Bounded);
 
     for (nint i = 0; i < n; i++) {
         ch.ᐸꟷ(i);
