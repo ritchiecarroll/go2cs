@@ -1,0 +1,41 @@
+start 2026-11-05 03:00:23 conv=7871e564020be20e dotnet=10.0.400 go=go1.26.10
+Recursively converting module at C:\go2cs\scratch\p1262\hp\P\src\PerfStringMatch
+Closure: 66 packages discovered — converting 1 app + 0 third-party, referencing 64 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStringMatch
+
+Recursive conversion complete in 1.62s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\hp\P\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\hp\P\out\Directory.Build.targets
+P convert rc=0
+P hoisted fields in the program: 0
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.03
+P jit rc=0
+P aot rc=0 wall=1034s exe=183959552
+Recursively converting module at C:\go2cs\scratch\p1262\hp\H\src\PerfStringMatch
+Closure: 66 packages discovered — converting 1 app + 0 third-party, referencing 64 stdlib (1 skipped)
+Converting 1 packages in dependency order...
+[1/1] Converting go2cs/PerfStringMatch
+
+Recursive conversion complete in 1.82s: 1/1 packages converted
+Per-project solutions generated: 1 (one .slnx next to each converted .csproj)
+Build file generated: C:\go2cs\scratch\p1262\hp\H\out\Directory.Build.props
+Build file generated: C:\go2cs\scratch\p1262\hp\H\out\Directory.Build.targets
+H convert rc=0
+H hoisted fields in the program: 7
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.24
+H jit rc=0
+H aot rc=0 wall=1012s exe=183960064
+      "runtime.win-x64.Microsoft.DotNet.ILCompiler/10.0.11": {
+    "runtime.win-x64.Microsoft.DotNet.ILCompiler/10.0.11": {

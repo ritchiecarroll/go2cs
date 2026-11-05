@@ -1,0 +1,12 @@
+LITERAL-POLICY PAIR PREDICTION, written 2026-11-05 before the pair is built or timed. PerfStringMatch at the shipping commit
+(.2 converter 7871e564, go.* 1.26.10.2 packages): P = default plain literals (StringLiteralCache), H = -hoist-literals.
+Hoist mode hoists only readable VALUE-SLOT literals. kindName's four returns, the HasPrefix needles and the map keys are
+value slots; classify's switch cases are comparisons, so they likely stay plain. So H removes about half of the 6-7 cache
+hits per iteration, not all of them (X3's pre-hop emission had them all hoisted).
+PREDICT H / P (medians, 11 rounds; each arm has its own A/A):
+ TC0          [0.90, 0.96]  (X3 vs hop on the full-hoist emission was 0.891)
+ default JIT  [0.90, 0.97]  (the in-tree hop pair was 0.88 under default tiering)
+ Native AOT   [0.90, 0.96]
+ A/A per arm within 3% (JIT) and 1% (AOT).
+If H/P is at or above 0.98 in all three, hoist mode buys nothing on this row and the owner's choice is free. If it is
+at or below 0.90, hoist mode reaches the whole pre-hop gain despite leaving the cases plain.
