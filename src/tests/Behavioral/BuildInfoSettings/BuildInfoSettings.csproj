@@ -186,6 +186,7 @@
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/debug/runtime.debug.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>
