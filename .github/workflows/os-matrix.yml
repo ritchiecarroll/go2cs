@@ -1288,6 +1288,10 @@ jobs:
           $lines | ForEach-Object { Write-Host $_ }
           & ./.github/annotate-summary.ps1 -Title "oracle arch probe darwin/$($env:RID)" -Lines $lines
 
+          # A measurement never fails its leg: a cross-compiled arm64 binary cannot run on the Intel runner, and that
+          # exit code skipped osx-x64's sweep (run 42120588421).
+          exit 0
+
       - name: Sweep shard — filtered validated sweep
         if: needs.plan.outputs.stage == 'sweep-shard'
         shell: pwsh
