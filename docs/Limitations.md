@@ -64,7 +64,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   connection.
   <!-- [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
        the limit would take (internal record, unlinked 2026-10-26, OQ-1). -->
-  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1234 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1256 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble), stack);`.
        The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
        threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
        Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
@@ -72,8 +72,8 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`. A
   deadlock on an ordinary channel or lock blocks forever. Break in with a debugger: each goroutine is a
   thread named `goroutine-N`.
-  <!-- src/core/golib/runtime/Goroutine.cs:1004 `internal static bool IsForeverWait(WaitReason reason) =>`
-       and :1058 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
+  <!-- src/core/golib/runtime/Goroutine.cs:1014 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :1073 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** A goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), and
   `main` gets the first thread's stack, usually far less. Recursion past that ends the process with no
   panic and no deferred calls, so run deep recursion in a goroutine. A goroutine the converter proves cannot

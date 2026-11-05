@@ -165,6 +165,13 @@ public ref struct GoFrame
         PanicException? owned = GoFuncRoot.ClaimPanic(state);
         GoexitException? exiting = null;
 
+        // A Goexit the MAIN goroutine raised, which this frame's own catch took (Capture). Claimed here, as the
+        // panic is: a frame called from another frame's deferred sequence claims nothing and leaves it alone.
+        bool mainGoexit = state.MainGoexitCaught;
+
+        if (mainGoexit)
+            state.MainGoexitCaught = false;
+
         if (m_count > 0)
         {
             // The panic this deferred sequence is handling, if any. It stays observable through
@@ -244,7 +251,7 @@ public ref struct GoFrame
                             recoveryCompleted = true;
                         }
                     }
-                    catch (Exception ex) when (IsPanic(ex, out PanicException? raised))
+                    catch (Exception ex) when (ex is not GoexitException && IsPanic(ex, out PanicException? raised))
                     {
                         // Raised from the normal-return loop: its delegate is still in its slot.
                         if (handling is null)
@@ -414,6 +421,12 @@ public ref struct GoFrame
         // of them raised a panic that is still unrecovered (thrown above).
         if (exiting is not null)
             throw exiting;
+
+        // Main's Goexit, caught by this frame: its deferred calls have run, so it goes on to the next deferring frame
+        // out, and past the outermost one to golib's main-thread park (MainGoexit). Thrown from the finally, it
+        // replaces the catch's return, so the function does not return to its caller, as Go's Goexit does not.
+        if (mainGoexit)
+            throw new GoexitException(fromMain: true);
 
         // This frame returns normally. With no outer sequence handling a panic, nothing is in flight on the
         // goroutine any more (a recovery completed here, or a C# catch stopped the panic): it leaves Go's
@@ -674,6 +687,15 @@ public ref struct GoFrame
         if (RuntimeErrorPanic.TryAsPanic(ex, out panic))
             return true;
 
+        // A Goexit the MAIN goroutine raised: this frame must catch it, or nothing runs its deferred calls (main has
+        // no goroutine root, and an unhandled exception runs no finally). The marker parks nothing recover() can read
+        // (Capture). Every other GoexitException still fails this filter. docs/DESIGN-goexit-main.md.
+        if (ex is GoexitException { FromMain: true })
+        {
+            panic = new MainGoexitMarker();
+            return true;
+        }
+
         // A non-panic exception fails the filter and propagates unchanged — but PRESERVE it first:
         // the filter's first pass is the one reliable point every foreign exception crosses before
         // any finally runs its defers, and a deferred `panic(recover())` in those defers would
@@ -708,6 +730,14 @@ public ref struct GoFrame
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public static void Capture(PanicException panic)
     {
+        // Main's Goexit is not a panic: no recover() may read it, and nothing counts it as running a panic's deferred
+        // calls. The frame's Run claims the mark, runs the deferred calls, and raises the Goexit again.
+        if (panic is MainGoexitMarker)
+        {
+            GoThreadState.Current.MainGoexitCaught = true;
+            return;
+        }
+
         GoFuncRoot.InFlightForeignException = null; // a REAL panic supersedes any preserved foreign unwind
         panic.Recovered = false; // a panic arriving at a catch is in flight: unrecovered by definition
         GoFuncRoot.CapturedPanicValue = panic;
@@ -718,3 +748,10 @@ public ref struct GoFrame
         MainExit.PanicDefersStarted(GoThreadState.Current);
     }
 }
+
+/// <summary>
+/// <see cref="GoFrame.IsPanic"/>'s answer for a Goexit the MAIN goroutine raised: what lets the emitted catch take it
+/// without that catch changing. It is never thrown, so the sites that catch a <see cref="PanicException"/> by type
+/// (channel operations, the test host) never see one; <see cref="GoFrame.Capture"/> parks nothing for it.
+/// </summary>
+internal sealed class MainGoexitMarker() : PanicException(null);

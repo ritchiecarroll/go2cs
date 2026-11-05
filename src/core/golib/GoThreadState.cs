@@ -55,6 +55,10 @@ internal sealed class GoThreadState
     // callee's first line: Go's "called directly by the deferred function" rule (GoFrame.TakeDeferredCall).
     internal bool DeferredCallPending;
 
+    // Set by GoFrame.Capture when a deferring frame's catch takes a Goexit the MAIN goroutine raised, and taken by that
+    // frame's Run, which raises it again once its deferred calls have run (docs/DESIGN-goexit-main.md).
+    internal bool MainGoexitCaught;
+
     // The panic sequences (see GoFrame): how many deferring Runs are live on this thread, and the entries a
     // panic writes, allocated on the first panic and reused.
     internal int SequenceDepth;
@@ -81,6 +85,7 @@ internal sealed class GoThreadState
         InFlightForeign = null;
         RecoverablePanic = null;
         DeferredCallPending = false;
+        MainGoexitCaught = false;
         SequenceDepth = 0;
 
         if (Sequences is { } entries)

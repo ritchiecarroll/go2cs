@@ -439,6 +439,16 @@ public sealed class Goroutine
     /// </remarks>
     public static int UserCount => Volatile.Read(ref s_count) - Volatile.Read(ref s_systemCount);
 
+    // Whether the main goroutine has ended by runtime.Goexit, its deferred calls all run (MainGoexit.Park). Its
+    // registry entry stays, since nothing unregisters main; the dead-program checks read this instead.
+    private static volatile bool s_mainExited;
+
+    /// <summary>Marks the main goroutine as ended by <c>runtime.Goexit</c>: the dead-program checks count it as blocked for good.</summary>
+    internal static void MarkMainExited() => s_mainExited = true;
+
+    /// <summary>Whether the main goroutine has ended by <c>runtime.Goexit</c>.</summary>
+    internal static bool MainExited => s_mainExited;
+
     /// <summary>
     /// Indicates whether the calling thread is running a goroutine body rather than the main
     /// goroutine.
@@ -1034,14 +1044,19 @@ public sealed class Goroutine
         }
 
         List<(WaitReason Reason, bool Readied, bool IsMain)> users = new(live.Length);
+        bool mainExited = s_mainExited;
 
         foreach (Goroutine goroutine in live)
         {
-            if (goroutine.CountsAsUser)
-                users.Add((goroutine.Reason, goroutine.IsReadied, ReferenceEquals(goroutine, s_main)));
+            bool isMain = ReferenceEquals(goroutine, s_main);
+
+            // A main ended by Goexit is not running, whatever its entry last recorded: it is left out here and counted
+            // as blocked for good below, as Go's checkdead finds no main among the goroutines it counts.
+            if (goroutine.CountsAsUser && !(isMain && mainExited))
+                users.Add((goroutine.Reason, goroutine.IsReadied, isMain));
         }
 
-        return IsProvableDeadlock(users);
+        return IsProvableDeadlock(users, mainExited);
     }
 
     /// <summary>
@@ -1055,9 +1070,16 @@ public sealed class Goroutine
     /// rather than reports once main returns. GolibTests ForeverWaitDeadlockDecisionTests pins the table,
     /// including the named residual (an ordinary channel or sync wait anywhere means no report).
     /// </remarks>
-    internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)
+    internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users) =>
+        IsProvableDeadlock(users, mainExited: false);
+
+    /// <summary>
+    /// <see cref="IsProvableDeadlock(IEnumerable{ValueTuple{WaitReason, bool, bool}})"/>, where a main that ended by
+    /// <c>runtime.Goexit</c> (<paramref name="mainExited"/>) is blocked for good: the goroutines left decide alone.
+    /// </summary>
+    internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users, bool mainExited)
     {
-        bool mainBlocked = false;
+        bool mainBlocked = mainExited;
 
         foreach ((WaitReason reason, bool readied, bool isMain) in users)
         {
