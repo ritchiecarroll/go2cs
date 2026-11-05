@@ -347,6 +347,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckConstraintProxyEmbeddedInterface() => CheckTarget("ConstraintProxyEmbeddedInterface");
 
     [TestMethod]
+    public void CheckCrashGoroutineCreatedBy() => CheckTarget("CrashGoroutineCreatedBy");
+
+    [TestMethod]
     public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
 
     [TestMethod]

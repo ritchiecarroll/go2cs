@@ -361,6 +361,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]
+    public void CheckCrashGoroutineCreatedBy() => CheckTarget("CrashGoroutineCreatedBy");
+
+    [TestMethod]
     public void CheckCrossPackageArrayZeroValue() => CheckTarget("CrossPackageArrayZeroValue");
 
     [TestMethod]
