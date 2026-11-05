@@ -279,7 +279,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
                 break;
             }
             buf = append(bufᴷ, buf, (byte)word);
-            word >>= (int)(8);
+            word >>= 8;
         }
     }
 
