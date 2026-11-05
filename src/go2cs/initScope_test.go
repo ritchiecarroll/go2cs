@@ -281,6 +281,7 @@ func main() {
 // signature line to its closing brace.
 func initScopeBodies(t *testing.T) map[string]string {
 	t.Helper()
+	isolateConverterPathGlobals(t)
 
 	lines := convertWithoutComments(t, initScopeSource)
 	bodies := map[string]string{}
