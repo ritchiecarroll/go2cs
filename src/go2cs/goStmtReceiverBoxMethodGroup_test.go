@@ -105,11 +105,11 @@ func main() {
 	// written as a partial method's implementing part (the no-inline carrier).
 	for _, want := range []string{
 		"internal static partial void start(this ж<tracker> Ꮡt)",
-		"goǃ(Ꮡt.loop, GoStack.Bounded);",
+		"goǃ(Ꮡt.loop);",
 		"internal static partial void startArg(this ж<tracker> Ꮡt)",
-		"goǃ(Ꮡt.loopArg, (nint)9, GoStack.Bounded);",
+		"goǃ(Ꮡt.loopArg, (nint)9);",
 		"internal static partial void startInner(this ж<tracker> Ꮡt)",
-		"goǃ(Ꮡt.Ꮡin.send, GoStack.Bounded);", // the embed's address property (parity seat #32)
+		"goǃ(Ꮡt.Ꮡin.send);", // the embed's address property (parity seat #32)
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("want %q: a go statement's box method group needs the receiver box in scope:\n%s", want, mainCs)
@@ -121,7 +121,7 @@ func main() {
 		"internal static void stop(this ж<tracker> Ꮡt)",
 		"defer(Ꮡt.bump, ref ᒐ);",
 		"internal static partial void other(this ref tracker t, ж<tracker> o)",
-		"goǃ(o.loop, GoStack.Bounded);",
+		"goǃ(o.loop);",
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)

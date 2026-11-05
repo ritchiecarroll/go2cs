@@ -83,6 +83,7 @@ var positionMapRecords = map[string][]string{}
 func claimPositionMapTarget(target string) string {
 	packageLock.Lock()
 	delete(positionMapRecords, target)
+	delete(boundedGoRecords, target)
 	packageLock.Unlock()
 
 	return target
@@ -522,7 +523,7 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 		return
 	}
 
-	stripped, entries, thunks := extractPositionAndThunkSentinels(text)
+	stripped, entries, thunks, bounded := extractPositionAndThunkSentinels(text)
 
 	v.outputBuilder.Reset()
 	v.outputBuilder.WriteString(stripped)
@@ -579,6 +580,9 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 	packageLock.Lock()
 	positionMapRecords[target] = append(positionMapRecords[target], record)
 	packageLock.Unlock()
+
+	// The bounded go statements this file holds (goroutineStackRecords.go), recorded in the same compilation's info file.
+	recordBoundedGoSites(target, positionMapCsName(outputFileName), bounded)
 }
 
 // goSourcePositionMapsProseLines returns the <GoSourcePositionMaps> section's explanatory comment.
@@ -694,17 +698,18 @@ func positionMapCsName(outputFileName string) string {
 // check below already treats it as whitespace (strings.TrimSpace trims '\r'), and rejoining on
 // "\n" reproduces it verbatim, so no separate strip/re-add step is needed for round-trip fidelity.
 func extractPositionSentinels(text string) (string, []positionEntry) {
-	stripped, entries, _ := extractPositionAndThunkSentinels(text)
+	stripped, entries, _, _ := extractPositionAndThunkSentinels(text)
 	return stripped, entries
 }
 
 // extractPositionAndThunkSentinels is extractPositionSentinels that also answers the thunk sites the text
-// marks (thunkBodySentinel), in emitted order: each at the line it sits on and the column of the text that
-// follows it once every sentinel is stripped.
-func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []thunkSite) {
+// marks (thunkBodySentinel) and the bounded goǃ invocations (boundedGoSentinel), in emitted order: each at the
+// line it sits on and the column of the text that follows it once every sentinel is stripped.
+func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []thunkSite, []boundedGoSite) {
 	lines := strings.Split(text, "\n")
 	entries := make([]positionEntry, 0, len(lines))
 	var thunks []thunkSite
+	var bounded []boundedGoSite
 	bound := 0
 
 	for index, line := range lines {
@@ -742,6 +747,11 @@ func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []t
 				continue
 			}
 
+			if lineText == BoundedGoSentinelMark {
+				bounded = append(bounded, boundedGoSite{csLine: index + 1, column: len(utf16.Encode([]rune(rebuilt.String()))) + 1})
+				continue
+			}
+
 			if err == nil {
 				marks = append(marks, positionMark{
 					goLine:  goLine,
@@ -771,7 +781,7 @@ func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []t
 		}
 	}
 
-	return strings.Join(lines, "\n"), entries, thunks
+	return strings.Join(lines, "\n"), entries, thunks, bounded
 }
 
 // encodeThunkSites renders the THUNK half of a record: one `<line>:<column>` per marked thunk body, comma-joined

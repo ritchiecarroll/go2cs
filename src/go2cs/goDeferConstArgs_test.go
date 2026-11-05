@@ -124,7 +124,7 @@ func main() {
 		// With no constant, every argument stays eager and binds to its own temp.
 		`defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), a, c, ref ᒐ);`,
 		// A method-group or delegate-value launch keeps its form; its string constant renders at the site.
-		`goǃ(bʗ1.say, (@string)"hello", GoStack.Bounded);`,
+		`goǃ(bʗ1.say, (@string)"hello");`,
 		`goǃ(fʗ1, (@string)"via func value");`,
 	} {
 		if !strings.Contains(mainCs, want) {

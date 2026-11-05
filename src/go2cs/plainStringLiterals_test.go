@@ -485,9 +485,9 @@ func TestGoDeferConstantArgumentsMoveIntoTheThunk(t *testing.T) {
 
 	for _, want := range []string{
 		`defer(() => note("deferred argument value"), ref ᒐ);`,
-		`goǃ(() => note("goroutine argument value"), GoStack.Bounded);`,
+		`goǃ(() => note("goroutine argument value"));`,
 		`defer(() => show("deferred any value"), ref ᒐ);`,
-		`goǃ(() => show("goroutine any value"), GoStack.Bounded);`,
+		`goǃ(() => show("goroutine any value"));`,
 	} {
 		if !strings.Contains(plain, want) {
 			t.Errorf("want the constant inside the thunk's call %q:\n%s", want, plain)
@@ -504,7 +504,7 @@ func TestGoDeferConstantArgumentsMoveIntoTheThunk(t *testing.T) {
 
 	for _, want := range []string{
 		`defer(note, deferredArgumentValueˢ, ref ᒐ);`,
-		`goǃ(note, goroutineArgumentValueˢ, GoStack.Bounded);`,
+		`goǃ(note, goroutineArgumentValueˢ);`,
 		`private static readonly object deferredAnyValueˢ = (@string)"deferred any value"u8;`,
 		`private static readonly object goroutineAnyValueˢ = (@string)"goroutine any value"u8;`,
 	} {
@@ -580,7 +580,7 @@ func TestADeferredCaptureListCastsEveryStringLiteral(t *testing.T) {
 	for _, want := range []string{
 		`defer(() => note("aa", "bb", "hh"), ref ᒐ);`,
 		`defer(() => any1("cc"), ref ᒐ);`,
-		`goǃ(() => note("dd", "ee", "ii"), GoStack.Bounded);`,
+		`goǃ(() => note("dd", "ee", "ii"));`,
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want the constants inside the thunk's call %q:\n%s", want, emitted)
@@ -663,10 +663,10 @@ func TestAGoStatementCaptureListCastsEveryStringLiteral(t *testing.T) {
 	}
 
 	for _, want := range []string{
-		`goǃ(() => f("xx"), GoStack.Bounded);`,
-		`goǃ(() => g("yy"), GoStack.Bounded);`,
-		`goǃ(() => fv("aa", "bb", "cc"), GoStack.Bounded);`,
-		`goǃ(() => two("tt", 1), GoStack.Bounded);`,
+		`goǃ(() => f("xx"));`,
+		`goǃ(() => g("yy"));`,
+		`goǃ(() => fv("aa", "bb", "cc"));`,
+		`goǃ(() => two("tt", 1));`,
 	} {
 		if !strings.Contains(emitted, want) {
 			t.Errorf("want the constants inside the thunk's call %q:\n%s", want, emitted)
