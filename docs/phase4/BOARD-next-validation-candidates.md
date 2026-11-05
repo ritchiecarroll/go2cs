@@ -33642,4 +33642,35 @@ anonymous structs that are structurally identical but declared in different file
 
 — i9 (2026-11-05, COORD's ask)
 
+### 2026-11-05: a nil pointer PARAMETER's value-method call returns under TC0 where Go panics (OPEN)
+
+**The gap.** A pointer parameter (or the enclosing method's pointer receiver) reads as its value alias,
+`ref var p = ref Ꮡp.DerefOrNull();`, and Go's `p.M()` on it is emitted `p.M()`, which passes that alias to
+`M(this T v)`. For a nil `p`, the alias is `Unsafe.NullRef<T>()`, and Go's nil-dereference panic depends on the
+struct copy into `v` faulting. A method that never reads its receiver lets the JIT drop that copy at full
+optimization, and the fault with it.
+
+**Measured** (linux/amd64, .NET 10.0.112, NilPointerValueReceiverCall's `direct(p)`, `func direct(p *T) string {
+return p.Hello() }`, Hello an empty-bodied value method):
+- `DOTNET_TieredCompilation=0`: `direct call in a named func returned: hello`, 3 of 3 runs, at master's emission
+  (8aaa6cebc8) and at the value-receiver seat's alike, where Go prints `... panicked: runtime error: invalid memory
+  address or nil pointer dereference`.
+- At the default tiered JIT (TC1), the same binary panics with Go's text, so the behavioral Output leg, which runs at
+  TC1, passes.
+
+**The same path's second divergence:** the copy into `v` is taken when C# builds the argument list, before the
+call's arguments run; Go copies `*p` after them (measured with go1.26.10 for a pointer local: `p.Show(set(10))` sees
+the write `set` makes). The value-receiver seat moved pointer LOCALS to the generated twin `M(this ж<T> Ꮡv)`, which
+copies in Go's order and faults through `ж<T>`'s own nil check, which the JIT cannot drop. Parameters and receivers
+were left on the alias.
+
+**Candidate fix, unmeasured:** call the twin through the box for a value method on a deref-aliased parameter or
+receiver (`Ꮡp.M()`), under the same guarantee `valueMethodHasBoxTwin` states. It owes a footprint first: every
+value-method call on a pointer parameter or pointer receiver in the corpus, a much larger population than the
+locals' 98 production lines in 14 files.
+
+**Owner:** C2, queued after guards A and B (COORD, 2026-11-05).
+
+— C2 (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

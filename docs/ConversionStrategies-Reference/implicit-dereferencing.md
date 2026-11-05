@@ -38,6 +38,37 @@ These keep the deref, because no property serves them as Go spells them:
 
 The deref keeps two rules of its own. When the field access is the **LHS of an assignment** and the chain is *nested*, every dereference in the base takes the assignable `.Value` form, not `~`: `(~o).stack` yields a value (an rvalue), so assigning to a field through it is not a variable/property (CS0131). The converter propagates the assignment context down the selector chain, emitting `o.Value.stack.hi = …` where the property does not serve. **`++`/`--`** reads *and* writes its operand, so `(~mp).ncgocall++` (a field of an rvalue) is CS1059 and the converter emits the assignable `mp.Value.ncgocall++` there too.
 
+**A value-receiver method called through a pointer local reads as Go spells it, `p.M()`.** go2cs-gen's
+`RecvGenerator` gives each Go value method `M(this T v, …)` of a converted package a twin over the box,
+`M(this ж<T> Ꮡv, …)`, whose body is `var v = ~Ꮡv; return v.M(…);`. The twin copies the pointee after the call's
+arguments are evaluated and calls the method on that copy, which is Go's order: in `p.Show(set(10))`, where `set`
+writes `p.X`, the method sees the written value, and a nil `p` panics only after `set` has run. A write the method
+makes to its receiver reaches the copy, never `*p`. The twin is a generated frame, so a Go traceback does not show
+it. golib's method-set readers treat it as the same Go method as its original: the `*T` method table holds the
+original once, and reflect's call through a nil `*T` raises Go's panicwrap text
+(`TypeExtensions.GetGoMethodSetCandidates`).
+<!-- the call: src/go2cs/convSelectorExpr.go valueMethodHasBoxTwin; the twin: src/gen/go2cs-gen/RecvGenerator.cs (the
+     finder's ValueMethods) and Templates/ReceiverMethod/ReceiverMethodTemplate.cs (ValueReceiver).
+     Go's order measured with go1.26.10: `p.Show(bump())` prints the value bump wrote, and a nil p panics after the
+     argument ran; the old `(~p).Show(bump())` copied first (ValueReceiverArgumentOrder at master: 4 of 5 lines
+     differed from Go). -->
+
+These keep `(~p).M()`:
+- a method named like a member of `ж<T>` (`Value`, `of`, `field`, …; `src/go2cs/fieldAccessCollisions.txt`): the
+  box's member would bind before the twin. Its receiver is copied before the arguments run;
+- a method of a package the converter never emits (`testing`, `unsafe`): a hand-owned package
+  (`[assembly: GoHandOwnedPackage]`) gets no twins;
+- a method the manual registry displaces (`manualConversionTypes`, `manualConversionFuncs`), or a method of a type
+  a hand-owned file of the package declares: the receiver form of its body is the hand author's.
+
+A pointer **parameter**, or the enclosing method's pointer receiver, already reads as its value alias (`ref var p =
+ref Ꮡp.DerefOrNull()`), and `p.M()` there passes that alias to `M(this T v)`, which copies it before the arguments
+run. A method VALUE (`f := p.M`) is not a call and copies at evaluation, as Go does
+([Function values and method values](value-receiver-delegates.md)). (Guarded by `ValueReceiverArgumentOrder` and
+`NilPointerValueReceiverCall`, both output-compared with Go; `TestValueMethodThroughAPointerReadsAsGoSpellsIt` for the
+emission and its controls; GenTests' `ValueReceiverBoxTwinTests` for the twin; GolibTests' `ValueMethodTwinTests`
+for the method-set readers.)
+
 **An INDEX-expression assignment target takes the same `.Value` write path where the deref remains.** The
 field property serves `req.Header[k] = vv` directly; this rule governs the shapes above that keep the deref. When the assignment LHS
 is an index over a field reached through a pointer local — net/http client.go's redirect loop
