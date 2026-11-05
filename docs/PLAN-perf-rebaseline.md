@@ -294,3 +294,103 @@ the same rule.
   1.24.13.7 leg.
 - **O4: the source findings are recorded** in the BOARD row of 2026-10-23 (section 6 cites it). IfaceCall creep and
   Channel join the review rows.
+
+## 10. The 1.26.10.2 run (G's run plan, 2026-11-04, for COORD's ruling)
+
+COORD's order of 2026-11-04 starts section 7's step 2: go.\* 1.26.10.2 is published (tag `nuget-1.26.10.2`), and the
+column the page banks is measured against it. Nothing is timed before H's re-transpiled tree lands on master and the
+i9's AOT images arrive. This section is the instance; sections 1 to 8 still hold unless it says otherwise.
+
+**The legs, paired in one session.** Section 1's rule stands: only a same-session pair is evidence. So the 1.24.13.7
+leg is TIMED again beside the new one. It is not rebuilt where its binaries still exist.
+
+| leg | role | converter | packages | Go | AOT images |
+|:--|:--|:--|:--|:--|:--|
+| `go1.26.10.2` | the column the page banks | the release record's, shipped by the i9 | 1.26.10.2 from nuget.org | go1.26.10 | new, from the i9 (below) |
+| `go1.24.13.7` | the comparand | as in October | 1.24.13.7 from nuget.org | go1.24.13 | October's folding-off set, re-verified |
+| `go1.26.10.1` | DIAGNOSTIC, window 1 only | as in October | 1.26.10.1 from nuget.org | go1.26.10 | none |
+
+- The `.1` leg reads the `.1` to `.2` step directly. That step carries the cross-package variable boxes, the
+  call-counting delay of 0, plain literals in the converted standard library, and the ReadyToRun change. It goes to
+  the DATA file, not the page.
+- The runner re-converts and re-builds every leg's JIT and ReadyToRun binaries before the window: October kept only
+  the reports. The source hashes it records must equal October's for the two old legs.
+
+**The arms.** "What a consumer gets by default" is named per verb:
+- **JIT** (`dotnet build -c Release`, framework-dependent) is what a consumer gets from `dotnet run`. It is the
+  published C# column, as before. At `.2` the converter's template sets the call-counting delay to 0, and the
+  headline guard reads that from the template.
+- **ReadyToRun** (`dotnet publish -c Release -r win-x64`, the template default) is **what a consumer gets by
+  default from a publish**. At `.2` (seat #53) golib and the packages are ReadyToRun and the program's own code is
+  IL, so it tiers up under the JIT. At 1.24.13.7 and 1.26.10.1 the program's own code was ReadyToRun too. The
+  column legend states each leg's shape, from the release report's line.
+- **Native AOT** (`PublishAot`, the template default at `.2`, no folding property).
+- **Go**, each leg's own pin.
+- Diagnostic arms, which go to the DATA file and never to the page:
+  - **Fd1** (framework-dependent ReadyToRun) and **TC0** (JIT under `DOTNET_TieredCompilation=0`), as in October;
+  - **Sort under `DOTNET_TieredPGO=0`**;
+  - **R2Ru**, NEW: the `.2` leg published with `<GoReadyToRunUserCode>true</GoReadyToRunUserCode>`, seat #53's own
+    opt-in. Tuning.md states its tradeoff; this measures it per program;
+  - **AOTnf**: the `.2` leg's Native AOT published with `IlcFoldIdenticalMethodBodies=false`. The 1.24.13.7 AOT leg
+    can only publish with folding off, so this pairs like with like. The page's AOT column stays the template
+    default, and History names the 1.24.13.7 property as in section 7's fairness check.
+
+**The programs.** All 17 `Perf*` mains: the 14 table rows plus FieldView, IfaceShellChurn and TlsHandshake.
+TlsHandshake's AOT image exited 2 at 1.26.10.1 (NativeStructMarshal; seat #18 fixed it for `.2`), so this is its
+first AOT reading. S3's Verify decides: a failure is section 8's rule 5, and the cell reads n/a.
+
+**Repetitions and the noise floor**, as sections 5 and 6 rule:
+- Each binary gets one discarded warmup, then 5 runs. The legs interleave run by run, and the published number is
+  the median.
+- PERF-REVIEW rows take 11 runs, with their spread reported. They are Startup, Sort, RefLower, Iface, IfaceCall and
+  Channel, plus FieldView's AOT (October read it about 10x slower at 1.26.10.1, unconfirmed).
+- **The A/A null:** one fixed JIT binary and one fixed AOT binary, read at the start and the end of each window,
+  after a discarded warm read. It is the floor for every delta in that window.
+- **The control:** the 1.24.13 Go Fib and Sieve binaries, at the start, the middle and the end. Fib carries the void
+  test (the bootstrap 95 % interval of the start-to-end drift, 5,000 resamples, against the null); Sieve is reported.
+- A regression or an improvement is section 8's: the ratio moves by more than the larger of the column's null and
+  the row's own spread.
+
+**Windows.** Each has its own null and control, a process census by path at its start and end, and a check that
+the newest file time and the file count under `C:\go2cs-perf` did not move. COORD holds every relay and share copy
+to G-LAPTOP while a window is open; G posts its open and its close.
+- **Window 1:** Go, JIT, ReadyToRun, Fd1, R2Ru, TC0 and PGO0-Sort, for the three legs (the `.1` leg is JIT and
+  ReadyToRun only). About 100 to 120 minutes.
+- **Window 2:** the AOT column, the AOTnf set, the RefLower and Iface second publishes, and the licence row if it is
+  needed. About 60 to 75 minutes.
+
+**The published packages, as a consumer gets them.**
+- Every leg converts with its own converter and `-recurse=nuget` at the leg's version. The project reaches
+  `go.lib`, `go.gen` and the `go.*` packages only by `PackageReference`; the runner refuses a project reference into
+  `src/core`, or a restore that resolves no `go.*` package.
+- The restore uses a FRESH `NUGET_PACKAGES` folder for this session (`C:\go2cs-perf\nuget-126102`), so no package
+  built on this box under the same version can stand in for nuget.org's.
+- The DATA file records the resolved `go.lib` package's SHA-512 against nuget.org's.
+
+**Before the i9 publishes (P0, G's seat).** The runner's `SourceHash` stops covering its two host-specific inputs:
+`package_info.cs`'s `GoPositionMap` line (an absolute path under `--work`) and the project's `GoInputDigest` (a
+hash of the converter executable). Section 7 deferred this fix to "after window 2 and before the 1.26.10.2
+re-publish", which is now. It lands red-first, and the i9 builds at a SHA that carries it, so the two boxes' source
+hashes compare without a path rewrite.
+
+**The exact list the i9 builds**, at the master SHA COORD names once H's tree has landed:
+1. The `.2` converter, built from the release record, plus its SHA-256. G converts with this same executable.
+2. **17** Native AOT images, the template default: `dotnet publish -c Release -r win-x64 -p:PublishAot=true`. These
+   form the `go1.26.10.2` drop.
+3. **2** second publishes, PerfRefLower and PerfIface, same command (`go1.26.10.2-2`). Their pair spread is those
+   rows' own A/A.
+4. **17** AOTnf images, the same command plus `-p:IlcFoldIdenticalMethodBodies=false` (`go1.26.10.2-nf`).
+5. **The 1.24.13.7 leg depends on the i9's ILC.** If the i9's ILC is still 10.0.14, the version October's images
+   embed, October's 1.24.13.7 set is reused after its SHA-256 check. If the ILC moved, the i9 re-publishes the
+   1.24.13.7 leg (folding off, as in October; 17 images plus the 2 seconds), so the AOT pair shares one ILC, and
+   G re-licenses on Sieve (section 4, step 5) before window 2.
+
+Each image ships with a manifest line: program, drop, SHA-256, size, ILC, SDK, publish wall, peak working set, the
+masked source hash, and the publish command line. No PDBs. That is 36 images, or 55 if the 1.24.13.7 leg is
+re-published, at about 300 MB each, so G needs 30 GB free before the drop lands (91 GB free today).
+
+**After the windows.** G posts the results file (raw runs, medians, nulls, controls, hashes, box state, and every
+diagnostic arm) and the PERF-REVIEW list. That list reads the RefLower/Iface layout lottery against the pair
+spread, Sort's tiering against TC0 and PGO0, FieldView's AOT, and anything new: regressions under section 8's rule,
+including any `.1` to `.2` step the diagnostic leg shows. S5 then banks the page at 1.26.10.2, through the fairness
+check.
