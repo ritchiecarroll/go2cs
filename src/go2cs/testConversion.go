@@ -1050,8 +1050,10 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	// are references (fieldAccessReceiverImports). The TARGET GOOS's file, because the records differ by GOOS: only
 	// darwin's net records internal/routebsd structs.
 	if model == testProjectWhiteboxReference {
-		referenceImports = append(referenceImports, fieldAccessReceiverImports(
-			platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform)), production.PkgPath, referenceImports)...)
+		productionInfoFile := platformPackageInfoPath(outputPath, goosOfTarget(options.targetPlatform))
+		referenceImports = append(referenceImports, fieldAccessReceiverImports(productionInfoFile, production.PkgPath, referenceImports)...)
+		referenceImports = append(referenceImports, fieldAccessFieldTypeImports(productionInfoFile, production,
+			[]*packages.Package{production, internal, external}, compileExcluded, referenceImports)...)
 	}
 
 	// Close the reference set under the C# DECLARATION edges the converter emits
@@ -5279,6 +5281,135 @@ func fieldAccessRecordTargets(line string) []string {
 	}
 
 	return targets
+}
+
+// fieldAccessFieldTypeImports returns the packages of the FIELD types of a production package's [GoFieldAccess]
+// receivers, for the fields a test file selects by name, less the roots, testing and the already-referenced set. It is
+// the receiver edge's second half (fieldAccessReceiverImports): `p.f` through a pointer weighs every visible extension
+// block that declares f, and ranking production's block on ж<T> binds the type of T's field f as well as T. jwt.tests
+// on go.* 1.26.10.2 failed CS0012 ×3 on `claims.Issuer`: jwt records x509.Certificate, whose Issuer is a pkix.Name, and
+// crypto/x509/pkix is in no test import. A field no test selects by name is never a candidate, so its type stays out.
+func fieldAccessFieldTypeImports(productionInfoFile string, production *packages.Package, roots []*packages.Package, compileExcluded map[string]bool, referenced []string) []string {
+	data, err := os.ReadFile(productionInfoFile)
+	if err != nil || production == nil || production.Types == nil {
+		return nil
+	}
+
+	// The packages a record can name: the production package and its import closure.
+	closure := map[string]*types.Package{}
+	var visit func(pkg *packages.Package)
+
+	visit = func(pkg *packages.Package) {
+		if pkg == nil || pkg.Types == nil || closure[pkg.PkgPath] != nil {
+			return
+		}
+
+		closure[pkg.PkgPath] = pkg.Types
+
+		for _, imported := range pkg.Imports {
+			visit(imported)
+		}
+	}
+
+	visit(production)
+
+	qualifierPackage := func(qualifier string) *types.Package {
+		qualifier = strings.TrimPrefix(qualifier, "global::")
+
+		for path, pkg := range closure {
+			namespace := convertImportPathToNamespace(path, PackageSuffix)
+
+			if qualifier == RootNamespace+"."+namespace || (!strings.Contains(qualifier, ".") && qualifier == namespace) {
+				return pkg
+			}
+		}
+
+		return nil
+	}
+
+	// The field names the test files select.
+	selected := hashset.HashSet[string]{}
+
+	for _, root := range roots {
+		if root == nil || root.TypesInfo == nil || root.Fset == nil {
+			continue
+		}
+
+		for expr, selection := range root.TypesInfo.Selections {
+			if selection.Kind() != types.FieldVal {
+				continue
+			}
+
+			file := filepath.Clean(root.Fset.Position(expr.Pos()).Filename)
+
+			if strings.HasSuffix(file, "_test.go") && !compileExcluded[file] {
+				selected.Add(selection.Obj().Name())
+			}
+		}
+	}
+
+	excluded := hashset.NewHashSet(referenced)
+	excluded.Add("testing")
+
+	for _, root := range roots {
+		if root != nil {
+			excluded.Add(root.PkgPath)
+		}
+	}
+
+	found := hashset.HashSet[string]{}
+
+	for _, line := range strings.Split(string(data), "\n") {
+		rest, ok := strings.CutPrefix(strings.TrimSpace(strings.TrimSuffix(line, "\r")), fieldAccessRecordPrefix)
+		if !ok {
+			continue
+		}
+
+		rendered, _, _ := strings.Cut(rest, ")")
+		rendered, _, _ = strings.Cut(rendered, "<")
+		pkg, typeName := production.Types, rendered
+
+		if match := packageQualifierPattern.FindStringSubmatchIndex(rendered); match != nil {
+			if pkg = qualifierPackage(rendered[match[2]:match[3]]); pkg == nil {
+				continue
+			}
+
+			typeName = strings.TrimPrefix(rendered[match[3]:], ".")
+		}
+
+		object, isTypeName := pkg.Scope().Lookup(typeName).(*types.TypeName)
+		if !isTypeName {
+			continue
+		}
+
+		structType, isStruct := object.Type().Underlying().(*types.Struct)
+		if !isStruct {
+			continue
+		}
+
+		for i := range structType.NumFields() {
+			field := structType.Field(i)
+
+			if !selected.Contains(field.Name()) {
+				continue
+			}
+
+			for _, mentioned := range namedTypesIn(field.Type()) {
+				if mentioned.Obj() == nil || mentioned.Obj().Pkg() == nil || !closureWalkable(mentioned) {
+					continue
+				}
+
+				if path := mentioned.Obj().Pkg().Path(); !excluded.Contains(path) {
+					found.Add(path)
+				}
+			}
+		}
+	}
+
+	result := found.Keys()
+	sort.Strings(result)
+
+	return result
 }
 
 // conversionRecordPrefixes are the emitted assembly-attribute line prefixes whose GENERIC ARGUMENT
