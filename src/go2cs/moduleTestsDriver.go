@@ -282,7 +282,7 @@ func convertAndActOnPackageTests(inputDir string, outputDir string, options Opti
 	if options.testAction == "convert" || options.testAction == "all" {
 		collectSiblingTestClosure(inputDir, options)
 
-		if err := processConversion(inputDir, true, outputDir, options); err != nil {
+		if err := stallWatch(pkgPath, func() error { return processConversion(inputDir, true, outputDir, options) }); err != nil {
 			return fmt.Errorf("conversion: %w", err)
 		}
 	}
