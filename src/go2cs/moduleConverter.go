@@ -251,12 +251,13 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 		Mode:       mode,
 		Dir:        moduleDir,
 		BuildFlags: m.options.loaderBuildFlags(),
+		Env:        converterLoaderEnv(),
 	}
 
 	targetParts := strings.Split(m.options.targetPlatform, "/")
 
 	if len(targetParts) == 2 {
-		cfg.Env = append(os.Environ(), "GOOS="+targetParts[0], "GOARCH="+targetParts[1])
+		cfg.Env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
 	}
 
 	pkgs, err := packages.Load(cfg, "./...")

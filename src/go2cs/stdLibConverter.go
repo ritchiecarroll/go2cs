@@ -284,7 +284,7 @@ func stdLibLoadConfig(options Options, mode packages.LoadMode, dir string) *pack
 		Mode:       mode,
 		Dir:        dir,
 		BuildFlags: options.loaderBuildFlags(),
-		Env:        append(os.Environ(), "GO111MODULE=off"), // Disable module mode
+		Env:        converterLoaderEnv("GO111MODULE=off"), // Disable module mode
 	}
 
 	// Set the target platform in the environment if specified
