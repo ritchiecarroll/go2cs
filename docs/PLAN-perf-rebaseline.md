@@ -260,7 +260,8 @@ they convert with the same converter executables in the same `--work` root. For 
 G-LAPTOP converts with the i9's two executables, and the gate rewrites the path prefix to the i9's root
 (G-LAPTOP has no D: drive); it matched all 27 manifest lines that had landed, and a hash taken without the rewrite
 does not match. The runner fix masks both lines, with a test that fails first, after window 2 and before the
-1.26.10.2 re-publish. Each leg's converter is built from its release's record commit, never from the tag: the tag
+1.26.10.2 re-publish. **Done at P0 (2026-11-04, section 10):** `ConsumerProject.MaskHostSpecific` reduces the
+`GoPositionMap` path to its file name and empties `GoInputDigest` before hashing. Each leg's converter is built from its release's record commit, never from the tag: the tag
 sits one commit earlier, where `corpus-release.txt` still names the previous release.
 
 ## 8. What a regression triggers
