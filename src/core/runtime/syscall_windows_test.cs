@@ -325,7 +325,7 @@ public static partial void TestBlockingCallback(ж<testing.T> t) {
         for (nint i = 0; i < 10; i++) {
             cʗ1.ᐸꟷ(ᐸꟷ(cʗ1));
         }
-    }, GoStack.Bounded);
+    });
     var cʗ2 = c;
     nestedCall(t, () => {
         for (nint i = 0; i < 10; i++) {
@@ -1625,7 +1625,7 @@ public static partial void BenchmarkChanToChanPing(ж<testing.B> Ꮡb) {
             ᐸꟷ(ch1ʗ1);
             ch2ʗ1.ᐸꟷ(1);
         }
-    }, GoStack.Bounded);
+    });
     for (nint i = 0; i < n; i++) {
         ch1.ᐸꟷ(1);
         ᐸꟷ(ch2);

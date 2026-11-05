@@ -428,7 +428,7 @@ public static partial void BenchmarkAllocation(ж<testing.B> Ꮡb) {
                 }
             }
             resultʗ1.ᐸꟷ(x);
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < ngo; i++) {
         ᐸꟷ(result);
@@ -1058,7 +1058,7 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> t) {
                 }
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
-            }, GoStack.Bounded);
+            });
         }
 
         // Make sure the GC completes.

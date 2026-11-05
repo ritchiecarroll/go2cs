@@ -526,6 +526,65 @@ func TestUnsafeBlocksTakesTheUnionInEitherDirection(t *testing.T) {
 	}
 }
 
+// The friend-access group (InternalsVisibleTo the package's tests and go2cs.SynthesizedStructs) is emitted
+// only when the CONVERTING target sees in-package test files, and those can be GOOS-constrained: log/syslog's
+// syslog_test.go is !windows, so linux and darwin emit the group and windows does not (BOARD 2026-11-03, G).
+// One .csproj serves every platform, so the merge carries the UNION, as it does for <AllowUnsafeBlocks>: the
+// grant is inert where nothing uses it, and its absence costs the platforms that do. Measured both ways round,
+// since the reference flavour can be either side.
+func TestPlatformMergeTakesTheFriendAccessUnion(t *testing.T) {
+	const rawPath = "log/syslog/log.syslog.csproj"
+
+	without := flatProjectFile([]string{refErrors, refIO})
+	with := insertFriendAssemblyAccess(without)
+
+	if with == without {
+		t.Fatalf("test setup: insertFriendAssemblyAccess found no anchor in the rendered template")
+	}
+
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+
+	for _, windowsHasGroup := range []bool{false, true} {
+		emissions := make([]*platformEmission, 0, len(targets))
+
+		for _, target := range targets {
+			contents := with
+
+			if (target == "windows/amd64") != windowsHasGroup {
+				contents = without
+			}
+
+			root := t.TempDir()
+			file := filepath.Join(root, "core", filepath.FromSlash(rawPath))
+
+			if err := os.MkdirAll(filepath.Dir(file), 0755); err != nil {
+				t.Fatalf("mkdir: %v", err)
+			}
+
+			if err := os.WriteFile(file, []byte(contents), 0644); err != nil {
+				t.Fatalf("write: %v", err)
+			}
+
+			emissions = append(emissions, &platformEmission{target: target, root: root, artifacts: map[string]artifactState{rawPath: {}}})
+		}
+
+		merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions, nil)
+
+		if err != nil {
+			t.Fatalf("windows carries the group = %v: mergePlatformProjectFile: %v", windowsHasGroup, err)
+		}
+
+		if merged != with {
+			t.Errorf("windows carries the group = %v: the merge did not carry the friend-access union\n--- want ---\n%s\n--- got ---\n%s",
+				windowsHasGroup, with, merged)
+		}
+
+		if len(note) != 0 {
+			t.Errorf("windows carries the group = %v: a difference the union expresses was still reported: %q", windowsHasGroup, note)
+		}
+	}
+}
+
 // platformPackageInfoPath is the READING half of L3: 27 packages' package_info.cs move into a
 // per-GOOS folder, and every dependent's conversion reads them.
 func TestPlatformPackageInfoPathResolution(t *testing.T) {

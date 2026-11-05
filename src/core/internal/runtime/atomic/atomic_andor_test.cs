@@ -44,7 +44,7 @@ public static partial void TestAnd32(ж<testing.T> t) {
                 atomic.And(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
@@ -89,7 +89,7 @@ public static partial void TestAnd64(ж<testing.T> t) {
                 atomic.And64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < 64; i++) {
         ᐸꟷ(done);
@@ -130,7 +130,7 @@ public static partial void TestOr32(ж<testing.T> t) {
                 atomic.Or32(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < 32; i++) {
         ᐸꟷ(done);
@@ -172,7 +172,7 @@ public static partial void TestOr64(ж<testing.T> t) {
                 atomic.Or64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
     }
     for (nint i = 0; i < 64; i++) {
         ᐸꟷ(done);

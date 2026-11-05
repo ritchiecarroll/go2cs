@@ -236,6 +236,17 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		result.WriteString(v.indent(v.indentLevel))
 	}
 
+	// A goroutine proved unable to recurse starts on golib's small stack reservation rather than the Go-scale default
+	// (goroutineStackAnalysis.go); everything else keeps the default. The mark is a record in the info file, written from
+	// the sentinel ahead of `go\u01C3`, so the statement reads as any other (goroutineStackRecords.go); an emission no info file
+	// owns keeps the visible argument.
+	bounded, _ := goroutineStackBounded(goStmt.Call, v.info)
+	recorded := bounded && v.boundedGoRecordable()
+
+	if recorded {
+		result.WriteString(boundedGoSentinel())
+	}
+
 	// The following is basically "go!". We use the unicode bang-type character
 	// as a valid C# identifier symbol, where the standard "!" is not. This is
 	// to disambiguate the method name from the namespace when calling function.
@@ -333,9 +344,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		}
 	}
 
-	// A goroutine proved unable to recurse starts on golib's small stack reservation rather than the Go-scale default
-	// (goroutineStackAnalysis.go); everything else keeps the default, unmarked.
-	if bounded, _ := goroutineStackBounded(goStmt.Call, v.info); bounded {
+	if bounded && !recorded {
 		result.WriteString(", GoStack.Bounded")
 	}
 

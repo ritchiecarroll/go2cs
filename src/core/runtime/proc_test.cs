@@ -41,7 +41,7 @@ internal static partial void perpetuumMobile() {
         break;
     }
     default: {
-        goǃ(perpetuumMobile, GoStack.Bounded);
+        goǃ(perpetuumMobile);
         break;
     }}
 }
@@ -73,7 +73,7 @@ public static partial void TestStopTheWorldDeadlock(ж<testing.T> t) {
         }
         complʗ2.ᐸꟷ(true);
     });
-    goǃ(perpetuumMobile, GoStack.Bounded);
+    goǃ(perpetuumMobile);
     ᐸꟷ(compl);
     ᐸꟷ(compl);
     stop.ᐸꟷ(true);
@@ -170,7 +170,7 @@ public static partial void TestGoroutineParallelism(ж<testing.T> t) {
                         atomic.StoreUint32(Ꮡx, expected + 1);
                     }
                     doneʗ1.ᐸꟷ(true);
-                }, p, GoStack.Bounded);
+                }, p);
             }
             for (nint p = 0; p < P; p++) {
                 ᐸꟷ(done);
@@ -232,7 +232,7 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> t, bool loa
                         }
                         while (atomic.LoadUint32(ᏑxΔ1) != (uint32)P) {
                         }
-                    }, GoStack.Bounded);
+                    });
                 }
                 ᐸꟷ(doneΔ1);
             }
@@ -267,9 +267,9 @@ internal static partial void testGoroutineParallelism2(ж<testing.T> t, bool loa
                                 atomic.StoreUint32(Ꮡx, expected + 1);
                             }
                             doneʗ3.ᐸꟷ(true);
-                        }, p2, GoStack.Bounded);
+                        }, p2);
                     }
-                }, p, GoStack.Bounded);
+                }, p);
             }
             for (nint p = 0; p < P; p++) {
                 ᐸꟷ(done);
@@ -318,7 +318,7 @@ public static partial void TestTimerFairness(ж<testing.T> t) {
                     return;
                 }}
             }
-        }, GoStack.Bounded);
+        });
     }
 
     var timer = time.After(20 * time.Millisecond);
@@ -634,7 +634,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
                     break;
                 }}
             }
-        }, GoStack.Bounded);
+        });
 
         // Ping-pong b.N times
         var (ping, pong) = (new channel<bool>(0), new channel<bool>(0));
@@ -648,7 +648,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
             }
             close(stopʗ2);
             doneʗ2.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         var doneʗ3 = done;
         var pingʗ2 = ping;
         var pongʗ2 = pong;
@@ -657,7 +657,7 @@ public static partial void BenchmarkPingPongHog(ж<testing.B> Ꮡb) {
                 pingʗ2.ᐸꟷ(ᐸꟷ(pongʗ2));
             }
             doneʗ3.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         b.ResetTimer();
         ping.ᐸꟷ(true); // Start ping-pong
         ᐸꟷ(stop);
@@ -694,7 +694,7 @@ public static partial void TestPreemptSplitBig(ж<testing.T> t) {
         }
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
         var stop = new channel<nint>(0);
-        goǃ(ᴛ1 => big(ᴛ1), stop, GoStack.Bounded);
+        goǃ(ᴛ1 => big(ᴛ1), stop);
         for (nint i = 0; i < 3; i++) {
             time.Sleep(10 * time.Microsecond); // let big start running
             Δruntime.GC();
@@ -881,7 +881,7 @@ internal static partial void warmupScheduler(nint targetThreadCount) {
             // spin a bit more to ensure they are all running on separate CPUs.
             doWork(time.Millisecond);
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
 }
@@ -911,7 +911,7 @@ public static partial void BenchmarkCreateGoroutinesSingle(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         goǃ(() => {
             Ꮡwg.Done();
-        }, GoStack.Bounded);
+        });
     }
     Ꮡwg.Wait();
 }

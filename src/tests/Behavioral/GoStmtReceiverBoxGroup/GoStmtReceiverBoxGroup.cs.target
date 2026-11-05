@@ -31,15 +31,15 @@ internal static void bump(this ref tracker t) {
 }
 
 internal static partial void start(this ж<tracker> Ꮡt) {
-    goǃ(Ꮡt.loop, GoStack.Bounded);
+    goǃ(Ꮡt.loop);
 }
 
 internal static partial void startArg(this ж<tracker> Ꮡt) {
-    goǃ(Ꮡt.loopArg, (nint)9, GoStack.Bounded);
+    goǃ(Ꮡt.loopArg, (nint)9);
 }
 
 internal static partial void startInner(this ж<tracker> Ꮡt) {
-    goǃ(Ꮡt.Ꮡin.send, GoStack.Bounded);
+    goǃ(Ꮡt.Ꮡin.send);
 }
 
 internal static void stop(this ж<tracker> Ꮡt) {
@@ -52,7 +52,7 @@ internal static void stop(this ж<tracker> Ꮡt) {
 }
 
 internal static partial void other(this ref tracker t, ж<tracker> o) {
-    goǃ(o.loop, GoStack.Bounded);
+    goǃ(o.loop);
 }
 
 internal static void Main() {

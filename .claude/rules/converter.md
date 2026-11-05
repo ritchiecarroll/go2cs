@@ -78,7 +78,7 @@ Full taxonomy: [`docs/Architecture.md`](docs/Architecture.md).
   must be > 0; on run/compare handed to BOTH sides (`go test -timeout` and the host's own `-timeout`)
   so they agree, the child killed a minute later as a safety net.
 - `-convert-timeout <dur>` — the `-stdlib` driver's cap on ONE package's conversion; default `10m`,
-  must be > 0 (`log.Fatal` otherwise).
+  must be > 0 (`log.Fatal` otherwise). A package that hits it STOPS the run, exit 1 (since 2026-11-05).
 - `-go2cspath <dir>` — runtime/stdlib root and default output root (default `~/go2cs`; env
   `GO2CSPATH`); also the root each imported package's `package_info.cs` is read from to mint the
   emitted `<ImportedTypeAliases>` block. A single-package or `-tests` conversion whose root is not a

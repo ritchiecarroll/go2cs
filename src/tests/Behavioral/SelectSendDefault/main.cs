@@ -61,7 +61,7 @@ internal static partial void unbufferedWithReceiver() {
     var gotʗ1 = got;
     goǃ(() => {
         gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
-    }, GoStack.Bounded);
+    });
 
     var sent = false;
 
@@ -202,7 +202,7 @@ internal static partial void blockingSendStillBlocks() {
     goǃ(() => {
         time.Sleep(20 * time.Millisecond);
         gotʗ1.ᐸꟷ(ᐸꟷ(chʗ1));
-    }, GoStack.Bounded);
+    });
 
     var selᴛ13 = ch.ᐸꟷ(42, ꓸꓸꓸ);
     switch (select(selᴛ13)) {

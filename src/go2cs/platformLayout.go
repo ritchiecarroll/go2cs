@@ -143,6 +143,21 @@ func platformLayoutPath(packageOutputPath string, goos string, fileName string) 
 	return filepath.Join(platformLayoutDir(packageOutputPath, goos, fileName), fileName)
 }
 
+// reviewSiblingLayoutPath returns where a whole-file hand-own's `<baseName>.cs.auto` review sibling is written: the
+// `<goos>` folder when the tree already holds the sibling there, and otherwise beside its hand-owned `.cs`, flat or
+// per-GOOS. The first arm is a FLAT hand-own whose emission differs by GOOS (runtime/runtime2.cs): the three-target
+// merge keeps one sibling per GOOS folder for it (mergeReviewSiblings), and a single-target reconvert must write its
+// flavour back there rather than lay a flat sibling beside them.
+func reviewSiblingLayoutPath(packageOutputPath string, goos string, baseName string) string {
+	sibling := baseName + ".cs.auto"
+
+	if dir := platformLayoutDir(packageOutputPath, goos, sibling); dir != packageOutputPath {
+		return filepath.Join(dir, sibling)
+	}
+
+	return platformLayoutPath(packageOutputPath, goos, baseName+".cs") + ".auto"
+}
+
 // platformPackageInfoPath resolves the `package_info.cs` a CONSUMER of an already-converted package
 // should read — the mirror of platformLayoutDir, for the reading side.
 //

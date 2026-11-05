@@ -252,7 +252,7 @@ public static partial void ExampleNewTicker() {
         goǃ(() => {
             Δtime.Sleep((Δtime.Duration)(10000000000L));
             doneʗ1.ᐸꟷ(true);
-        }, GoStack.Bounded);
+        });
         for (;;) {
             var selᴛ3 = done;
             var selᴛ4 = ticker.C;

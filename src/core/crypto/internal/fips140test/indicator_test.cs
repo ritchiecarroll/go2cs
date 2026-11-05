@@ -67,7 +67,7 @@ public static partial void TestIndicator(ж<testing.T> t) {
         fips140.ResetServiceIndicator();
         fips140.RecordApproved();
         close(Ꮡdone.ValueSlot);
-    }, GoStack.Bounded);
+    });
     ᐸꟷ(done);
     if (fips140.ServiceIndicator()) {
         t.Error(indicatorShouldBeFalseIfˢ5);
@@ -80,7 +80,7 @@ public static partial void TestIndicator(ж<testing.T> t) {
         fips140.ResetServiceIndicator();
         fips140.RecordNonApproved();
         close(Ꮡdone.ValueSlot);
-    }, GoStack.Bounded);
+    });
     ᐸꟷ(done);
     if (!fips140.ServiceIndicator()) {
         t.Error(indicatorShouldBeTrueIfˢ3);

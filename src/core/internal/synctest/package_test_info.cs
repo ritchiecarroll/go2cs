@@ -36,6 +36,26 @@ using static global::go.@internal.synctest_test_package;
 [assembly: GoFieldAccess(typeof(go.os.exec_package.Cmd))]
 [assembly: GoFieldAccess(typeof(time_package.Timer))]
 
+// The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
+// their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
+[assembly: GoBoundedGoroutine("synctest_test.cs", 105, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 223, 13)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 301, 13)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 305, 13)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 699, 13)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 733, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 879, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 989, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1026, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1065, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1068, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1079, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1084, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1126, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1127, 13)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1131, 9)]
+[assembly: GoBoundedGoroutine("synctest_test.cs", 1132, 13)]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.

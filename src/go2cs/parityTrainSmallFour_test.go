@@ -27,8 +27,8 @@ import (
 //   - for (;;): Go's `for {` emits `for (;;)`, and a three-clause loop without a condition `for (init; ; post)`,
 //     where both wrote golib's constant-true `ᐧ`.
 //   - Shift-assign: a compound `<<=`/`>>=` whose count is an integer literal drops the `(int)(N)` cast. A
-//     non-constant count keeps its guarded `LshAssign`/`RshAssign` form, and a named-numeric left operand keeps
-//     its cast for the generated count overloads.
+//     non-constant count keeps its guarded `LshAssign`/`RshAssign` form. A named-numeric left operand kept its cast
+//     here until the next train's seat A dropped it too (parityShiftCountCast_test.go).
 
 const smallFourFixture = `package main
 
@@ -146,7 +146,7 @@ func TestSmallFourEmission(t *testing.T) {
 		},
 		"direction": {`ch.AsRecvOnly()`, `ch.AsSendOnly()`},
 		"loops":     {`for (;;) {`, `for (nint j = 0; ; j++) {`},
-		"shifts":    {`x <<= 3;`, `x >>= 2;`, `x.LshAssign(n);`, `h.bits <<= 4;`, `h.bits.RshAssign(n);`, `c <<= (int)(1);`},
+		"shifts":    {`x <<= 3;`, `x >>= 2;`, `x.LshAssign(n);`, `h.bits <<= 4;`, `h.bits.RshAssign(n);`, `c <<= 1;`},
 	}
 
 	for item, fragments := range wants {

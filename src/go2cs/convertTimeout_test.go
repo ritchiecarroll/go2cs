@@ -10,7 +10,9 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -181,4 +183,67 @@ func readConverterSource(t *testing.T, name string) string {
 	}
 
 	return string(contents)
+}
+
+// TestStdLibTimeoutStopsTheRun drives the -stdlib loop over two packages through stdLibProcessConversion, with the
+// first package's work blocked past a 20ms cap. A fired cap abandons its conversion goroutine, which keeps running on
+// the converter's package-global state, so the driver must not start the next package beside it (COORD ruling
+// 2026-11-05, option (a): end the run at the first timeout). Reproduced before the fix: a full -stdlib run at a
+// 1500ms cap died at its 146th of 358 packages on visitFile's "Multiple package names encountered: ecdh and fiat".
+func TestStdLibTimeoutStopsTheRun(t *testing.T) {
+	root := t.TempDir()
+	release := make(chan struct{})
+	defer close(release)
+
+	var lock sync.Mutex
+	var started []string
+
+	saved := stdLibProcessConversion
+	stdLibProcessConversion = func(inputPath string, isDir bool, outputPath string, options Options) error {
+		lock.Lock()
+		started = append(started, filepath.Base(inputPath))
+		lock.Unlock()
+
+		if filepath.Base(inputPath) == "first" {
+			<-release
+		}
+
+		return nil
+	}
+
+	defer func() { stdLibProcessConversion = saved }()
+
+	graph := NewDependencyGraph()
+	graph.AddPackage("example.com/first", filepath.Join(root, "first"))
+	graph.AddPackage("example.com/second", filepath.Join(root, "second"))
+	graph.sortedQueue = []string{"example.com/first", "example.com/second"}
+
+	converter := &StdLibConverter{go2csPath: root, options: Options{convertTimeout: 20 * time.Millisecond}, graph: graph, totalCount: 2, startTime: time.Now()}
+	err := converter.convertAllPackages()
+
+	lock.Lock()
+	ran := append([]string(nil), started...)
+	lock.Unlock()
+
+	if len(ran) != 1 || ran[0] != "first" {
+		t.Errorf("packages started: %v, want only the first: the second must not start beside an abandoned conversion", ran)
+	}
+
+	if err == nil || !strings.Contains(err.Error(), "example.com/first") || !strings.Contains(err.Error(), "timed out") {
+		t.Errorf("convertAllPackages = %v, want an error naming the timed-out package, so main exits 1", err)
+	}
+
+	resume, readErr := os.ReadFile(filepath.Join(root, "failed_packages.txt"))
+
+	if readErr != nil || strings.Fields(string(resume)) == nil || strings.Join(strings.Fields(string(resume)), " ") != "example.com/first example.com/second" {
+		t.Errorf("failed_packages.txt = %q (%v), want both packages, so -stdlib with that list resumes the run", resume, readErr)
+	}
+
+	progress, _ := os.ReadFile(filepath.Join(root, "stdlib_conversion_progress.txt"))
+
+	for _, want := range []string{"TIMED OUT", "NOT CONVERTED"} {
+		if !strings.Contains(string(progress), want) {
+			t.Errorf("the progress file does not mark a package %s:\n%s", want, progress)
+		}
+	}
 }
