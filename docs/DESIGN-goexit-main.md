@@ -1,7 +1,9 @@
 # `runtime.Goexit` from the main goroutine — a design
 
-> **STATUS: PROPOSED (lane C2, 2026-10-25; branch `claude/c2-design-goexit-main`, cut from the 1.26 hop tip
-> `9b0269c2e8`).** Design only: no code lands from this note. It is ruled for the **first .2 seat**, not the hop. The
+> **STATUS: IMPLEMENTED (C1, 2026-11-05; branch `claude/c1-goexit-main`), as ruled by COORD (D1: Q1 the hybrid
+> marker, Q2 the entry point sized by a census and not built, Q3 Go's behaviour in the test host). See
+> [As built](#as-built). PROPOSED by lane C2, 2026-10-25, on `claude/c2-design-goexit-main` from the 1.26 hop tip
+> `9b0269c2e8`, as design only. It is ruled for the **first .2 seat**, not the hop. The
 > mechanism changes the filter and the tail of golib's deferring frame, the hottest exception path the runtime has,
 > and after the freeze that puts every roster row in its re-read set.
 >
@@ -39,8 +41,8 @@ frames run their deferred calls during the unwind, and the goroutine root swallo
 goroutine, `runtime.Goexit` throws `NotSupportedException` naming the Goexit design record, and the program exits 2
 with that message instead of Go's.
 
-<!-- src/core/runtime/managed_impl.cs:1510 (`if (!Goroutine.OnGoroutine)`), :1522 (`throw new GoexitException();`).
-The goroutine root: src/core/golib/runtime/Goroutine.cs:455 (`public static bool OnGoroutine => t_current is { IsMain: false };`). -->
+<!-- src/core/runtime/managed_impl.cs:1514 (`if (!Goroutine.OnGoroutine)`), :1525 (`throw new GoexitException();`).
+The goroutine root: src/core/golib/runtime/Goroutine.cs:465 (`public static bool OnGoroutine => t_current is { IsMain: false };`). -->
 
 ## Why the goroutine shape does not carry over
 
@@ -80,11 +82,11 @@ The design uses those frames as the chain of catch points:
 `os.Exit` and a panic on another goroutine keep their existing paths: both end the process from their own thread
 while the main thread is parked.
 
-<!-- The filter: src/core/golib/GoFrame.cs:672 (`public static bool IsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)`),
-:683 (`if (ex is not GoexitException)`). A Goexit raised INSIDE a deferred call is already caught there:
-:366 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1381
-(`private static void Unregister(Goroutine goroutine)`), :1011 (`internal static bool AllGoroutinesForeverBlocked()`),
-:1058 (`internal static bool IsProvableDeadlock(`). The backstop: src/core/golib/runtime/MainExit.cs:145
+<!-- The filter: src/core/golib/GoFrame.cs:685 (`public static bool IsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)`),
+:705 (`if (ex is not GoexitException)`). A Goexit raised INSIDE a deferred call is already caught there:
+:373 (`catch (GoexitException goexit)`). The registry and the detector: src/core/golib/runtime/Goroutine.cs:1403
+(`private static void Unregister(Goroutine goroutine)`), :1021 (`internal static bool AllGoroutinesForeverBlocked()`),
+:1073 (`internal static bool IsProvableDeadlock(`). The backstop: src/core/golib/runtime/MainExit.cs:148
 (`internal static void InstallBackstop(UnhandledExceptionEventHandler backstop) =>`). The deadlock text:
 src/core/golib/runtime/FatalError.cs:16 (`return "all goroutines are asleep - deadlock!";`). -->
 
@@ -154,7 +156,63 @@ brings its own `Main`. This design does not recommend it for the size of the res
    build their child programs with the real Go toolchain, so they do not reach this path.
 5. **Cost.** The Performance suite's panic and defer cases, JIT and Native AOT, before and after.
 
+## As built
+
+Built as designed, with the rulings below; the rest of this note is the design as proposed.
+
+- **Q1, the marker: the hybrid.** The thrown type stays `GoexitException`, now carrying `FromMain`.
+  `GoFrame.IsPanic` answers a from-main one with an internal, non-recoverable `MainGoexitMarker`, which is never
+  thrown, so the five sites that catch `PanicException` by type (golib `channel.cs` three times, the test host's
+  `TestExecution.cs`, runtime `managed_impl.cs`) never see one. `GoFrame.Capture` parks nothing for the marker and
+  sets the thread's `MainGoexitCaught`. The frame's `Run` claims that mark on entry, as it claims a panic, so a frame
+  called from another frame's deferred sequence leaves it alone. Its deferred calls run with nothing recoverable, and
+  it throws a fresh from-main Goexit from its `finally`. A recovered panic in a deferred call lets the Goexit go on
+  (Go's `TestRecoveredPanicAfterGoexit`); an unrecovered one replaces it. `Run`'s own loop filter excludes
+  `GoexitException`, so a from-main Goexit raised by a deferred call takes the existing Goexit path through it.
+- **Departure from step 1:** main is marked exited at the PARK, once its deferred calls have all run, not when Goexit
+  is called. While its deferred calls run, main is running, in Go as here.
+- **The park** (`golib.MainGoexit.Park`) runs from `MainExit`'s backstop wrapper, BEFORE the wrapper claims a crash
+  report: claiming one would make a goroutine that panics later wait behind a report main never writes. It waits for
+  the other user goroutines, prints Go's line alone (Go prints no traceback: there is no goroutine left), and exits 2.
+  A fatal report already begun on another goroutine wins.
+- **Step 5** is an `IsProvableDeadlock` overload taking `mainExited`; the pinned two-argument decision table is
+  unchanged.
+- **Q3, the test host:** `RunTests` catches main's Goexit around `TestMain` on its own thread and parks there, so
+  `Task.Wait` never wraps it in an `AggregateException`.
+- **A thread with no goroutine identity** keeps a `NotSupportedException`, reworded: it has no goroutine to end.
+- **Q2, the generated entry point: sized, NOT built.** The census COORD ordered, of hand-written `try`/`finally` that
+  user code can reach below a main Goexit, found no live, observable case. A `finally` is skipped only above main's
+  outermost DEFERRING frame, and every converted Go `defer` is one, so only hand-written C# that calls user code
+  inside a `finally` with no converted deferring frame above it counts:
+  - `sync.OnceFunc`/`OnceValue`/`OnceValues` (hand-owned `oncefunc.cs`): the `finally` clears `f`, which nothing can
+    observe, and `Once.Do` above it is converted, so its deferring frame is a handler anyway. `recordUnwind` now reads
+    a `null` value from the marker, the value it already held for a Goexit.
+  - `sync.Mutex.Lock` (hand-owned `mutex.cs`): the `finally` wraps `gate.Wait()`, which runs no user code.
+  - Park scopes: a parked thread cannot raise a Goexit, and an exited main is left out of the deadlock check.
+  - `iter.Pull`'s `next` is converted; the Goexit is raised after the coroutine switch returns.
+  The remaining hand-owned `finally` blocks are syscall and host plumbing that calls no user callback.
+
+**Readings** (linux cloud box, Release, master `8aaa6cebc` as base):
+
+- `GoexitFromMain`: every arm red at the base on the gate's `NotSupportedException`; after, all six arms match
+  `go run` byte for byte. The behavioral runner passes it and `GoexitDefers` in all four phases, and
+  `GoroutinePanicExitCode`.
+- GolibTests: 2402 total, 0 failed, 47 skipped, `MainGoexitTests` (six methods) among them.
+- Cost: the Performance suite has no panic or defer row, so the measurement was a one-axis A/B outside it. One Go
+  program (20M calls of a function with one deferred closure; 200K panics recovered by the frame's own deferred call),
+  converted once and built twice against the two golib builds, 9 alternating runs each, default tiering, 4 cores:
+
+  | | defer ns/op, median (min..max) | panic+recover ns/op, median (min..max) |
+  |:--|--:|--:|
+  | base `8aaa6cebc` | 43.18 (40.99..47.99) | 3424.2 (3336.4..3866.3) |
+  | this change | 43.72 (41.71..46.26) | 3465.8 (3301.1..3964.1) |
+
+  Both deltas are inside the single-process spread, and the floors split in opposite directions (+0.72 ns, -35 ns):
+  no cost is separable at this resolution. Go reads 5.47 and 248.5 on the same box. Native AOT was not measured.
+
 ## Open questions
+
+Ruled by COORD on 2026-11-05; the rulings are recorded under [As built](#as-built).
 
 1. **The marker's shape.** `IsPanic`'s `out` parameter is a `PanicException` that `recover()` reads. The marker can be a
    dedicated non-recoverable subclass, or the filter can return the exception through a second channel. The first keeps
