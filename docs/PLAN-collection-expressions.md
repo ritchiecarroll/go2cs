@@ -1,7 +1,13 @@
 # PLAN — Go slice literals as C# collection expressions, `[1, 2, 3]`
 <!-- {% raw %} — Jekyll/Liquid guard: this plan quotes Go composite-literal syntax that Liquid would otherwise parse. -->
 
-> **STATUS: PROPOSED, 2026-11-05 (P2), for the owner. Design and census only: no converter, golib, generator or
+> **STATUS: RULED, 2026-11-05.** The owner ruled, verbatim: "Yes, in .3", with the recommended options: **4.1 (a)**,
+> the pair loop is `foreach (var (i, v) in range(s))` and the index-only loop `range(len(s))`; **4.2 (a)**, a bare
+> `[…]` in every targeted position; **4.3 (a)**, slices only, named slice types a later item. The consumer break
+> (§5) and the nugetgo rebuild wave are accepted as part of .3. Built on `claude/p2-collection-expressions`; the
+> three-target `-stdlib` regen runs after class K's and H's init-scope regens, never beside them.
+>
+> **Was: PROPOSED, 2026-11-05 (P2), for the owner. Design and census only: no converter, golib, generator or
 > corpus file was changed.** Measured at master `8aaa6cebc8` against go1.26.10. The owner approved the feature on
 > 2026-10-27 and confirmed on 2026-11-05 that the 1.26.10.3 release is its conversion boundary (COORD's dispatch).
 > It is the largest .3 item, so it goes to the owner with a size before any build.
@@ -221,4 +227,6 @@ Written before the census output was read ([`predictions.txt`](phase4/data/colle
 ## 8. What the owner rules
 
 4.1 (a or b), 4.2 (a or b), 4.3 (a or b), and whether to build at 7 to 10 lane-days for .3.
+
+**RULED 2026-11-05:** "Yes, in .3" — 4.1 (a), 4.2 (a), 4.3 (a), at the plan's 7 to 10 lane-days.
 <!-- {% endraw %} -->
