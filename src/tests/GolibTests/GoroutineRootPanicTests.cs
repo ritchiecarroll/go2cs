@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using go.golib;
@@ -105,6 +106,47 @@ public class GoroutineRootPanicTests
         StringAssert.Contains(s_observed.StackTrace, nameof(dereferenceNilPointer),
             "the synthesized panic was never thrown at the fault; adoption must have snapshotted it");
         Assert.IsNull(s_contained, "a runtime-error panic is a panic — never containment's business");
+    }
+
+    [TestMethod]
+    public void CrashNamesTheGoroutineThePanicEscapedAndOnlyForThatPanic()
+    {
+        // Go's crash report names the goroutine that panicked. The escape disposes the root's scope before golib's
+        // backstop reports, so the root records the goroutine in its first-pass filter, keyed on the panic: this
+        // thread runs the root and lives on, and a later report here is about some other panic.
+        //
+        // A thread of its own, as a goroutine's is: the test's thread may already carry an identity, and a root entered
+        // there mints none. The escape is caught on that thread, above the root, where the real path's backstop runs.
+        Goroutine inside = null, afterEscape = null, named = null, namedForOther = null;
+        Exception escaped = null;
+
+        Thread thread = new(() =>
+        {
+            try
+            {
+                Goroutine.Run(() =>
+                {
+                    inside = Goroutine.Current;
+                    raiseExplicitPanic();
+                });
+            }
+            catch (PanicException ex)
+            {
+                escaped = ex;
+                afterEscape = Goroutine.Current;
+                named = Goroutine.Crashing(ex);
+                namedForOther = Goroutine.Crashing(new PanicException("another panic"));
+            }
+        });
+
+        thread.Start();
+        thread.Join();
+
+        Assert.IsNotNull(escaped, "the panic must escape the root");
+        Assert.IsNotNull(inside, "the root must have run the body as a goroutine");
+        Assert.IsNull(afterEscape, "the escape must have retired the goroutine's identity before the report");
+        Assert.AreSame(inside, named, "the report of the escaped panic must name the goroutine it escaped");
+        Assert.IsNull(namedForOther, "a panic that escaped no root on this thread must not be named after the earlier escape");
     }
 
     [TestMethod]
