@@ -82,6 +82,12 @@ import (
 func launchUpper(done chan string) {
 	go func() { done <- strings.ToUpper(Unsafe) }()
 }
+
+// launchUpper above is a partial carrier, which names no attribute and so demands no namespace; this literal
+// writes [MethodImpl(MethodImplOptions.NoInlining)] itself.
+func upperLauncher(done chan string) func() {
+	return func() { go func() { done <- strings.ToUpper(Unsafe) }() }
+}
 `)
 
 	// CONTROL -- the same two demands in a file with no using static.
@@ -96,6 +102,12 @@ func main() {
 	done := make(chan string)
 	go launch(done)
 	println(<-done, total(counter{v: 1}), gauge{v: 2}.v)
+}
+
+// main above is a partial carrier, which names no attribute and so demands no namespace; this literal writes
+// [MethodImpl(MethodImplOptions.NoInlining)] itself.
+func spawner(done chan string) func() {
+	return func() { go launch(done) }
 }
 `)
 
