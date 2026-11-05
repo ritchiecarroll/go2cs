@@ -1,0 +1,328 @@
+== 2026-11-05 01:21:51 A0-dot7 = b0ef977fdae21168905fe898f6da5e5605288d97 go1.24.13 (go1.24.13) dotnet 10.0.400
+   A0-dot7/PerfIfaceShellChurn: source OVERLAID from 1ca308d85f
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 147.0s)
+   A0-dot7/PerfIfaceShellChurn runner rc=0 exe sha256 1129ba6f27c46a2c
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 44.7s)
+   A0-dot7/PerfStringMatch runner rc=0 exe sha256 61d2e29ea6caa75c
+== 2026-11-05 01:25:22 A1-prehop = ae0c4c6e43d3c48420e519e9eb03574b071dbe51 go1.24.13 (go1.24.13) dotnet 10.0.400
+   A1-prehop/PerfIfaceShellChurn: source OVERLAID from 1ca308d85f
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 181.4s)
+   A1-prehop/PerfIfaceShellChurn runner rc=0 exe sha256 fca65dd679a9f156
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 43.5s)
+   A1-prehop/PerfStringMatch runner rc=0 exe sha256 d204a7d371a49f02
+== 2026-11-05 01:29:32 A2-hop = 458b159eea5632ef9cf5e96c69e38ae7f5604dd5 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 228.3s)
+   A2-hop/PerfIfaceShellChurn runner rc=0 exe sha256 6d47ebc187ea7c0d
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 46.9s)
+   A2-hop/PerfStringMatch runner rc=0 exe sha256 82accba07aff7eba
+== 2026-11-05 01:34:27 A3-dot1 = 5100d1b16cd83c60da5a0d147c41aebf4982f153 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 213.3s)
+   A3-dot1/PerfIfaceShellChurn runner rc=0 exe sha256 824056d62b13850f
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 47.2s)
+   A3-dot1/PerfStringMatch runner rc=0 exe sha256 31f754e379118905
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 3 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 28.3s)
+   A3-dot1/PerfStartup runner rc=0 exe sha256 02ba55c1ed7cf5c1
+== 2026-11-05 01:39:50 B9-dot2 = 1ca308d85ff3352de42f576eb6511744c231c976 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(123,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 3 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 201.2s)
+   B9-dot2/PerfStartup runner rc=0 exe sha256 23226f50d96d77bb
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 47.8s)
+   B9-dot2/PerfStringMatch runner rc=0 exe sha256 4e842c07805c3bc6
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 57.7s)
+   B9-dot2/PerfIfaceShellChurn runner rc=0 exe sha256 44ca5c552f16b688
+== 2026-11-05 01:54:36 X3-hoplib-preemit = 458b159eea5632ef9cf5e96c69e38ae7f5604dd5 go1.26.10, program emission from prehop
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+
+PASS  (1 projects, 2.7s)
+   X3-hoplib-preemit/PerfIfaceShellChurn: emission replaced by prehop's (PerfIfaceShellChurn.cs package_info.cs )
+go2cs performance runner: 1 project(s), phases [Build], 5 measured run(s), AOT disabled
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 212.1s)
+   X3-hoplib-preemit/PerfIfaceShellChurn runner rc=0 exe sha256 6d47ebc187ea7c0d
+go2cs performance runner: 1 project(s), phases [Transpile], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+
+PASS  (1 projects, 1.4s)
+   X3-hoplib-preemit/PerfStringMatch: emission replaced by prehop's (PerfStringMatch.cs package_info.cs )
+go2cs performance runner: 1 project(s), phases [Build], 5 measured run(s), AOT disabled
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 45.9s)
+   X3-hoplib-preemit/PerfStringMatch runner rc=0 exe sha256 82accba07aff7eba
+== 2026-11-05 01:59:28 X4-prelib-hopemit = ae0c4c6e43d3c48420e519e9eb03574b071dbe51 go1.24.13, program emission from hop
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+
+PASS  (1 projects, 4.8s)
+   X4-prelib-hopemit/PerfIfaceShellChurn: emission replaced by hop's (PerfIfaceShellChurn.cs package_info.cs )
+go2cs performance runner: 1 project(s), phases [Build], 5 measured run(s), AOT disabled
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 168.1s)
+   X4-prelib-hopemit/PerfIfaceShellChurn runner rc=0 exe sha256 fca65dd679a9f156
+go2cs performance runner: 1 project(s), phases [Transpile], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+
+PASS  (1 projects, 1.4s)
+   X4-prelib-hopemit/PerfStringMatch: emission replaced by hop's (PerfStringMatch.cs package_info.cs )
+go2cs performance runner: 1 project(s), phases [Build], 5 measured run(s), AOT disabled
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 41.9s)
+   X4-prelib-hopemit/PerfStringMatch runner rc=0 exe sha256 d204a7d371a49f02
+== 2026-11-05 02:10:06 B44-a93662afc6 = a93662afc622cb9780ac9ae984b8e78476d546c0 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(120,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 3 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 204.3s)
+   B44-a93662afc6/PerfStartup runner rc=0 exe sha256 b93311a8fe19754f
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 48.0s)
+   B44-a93662afc6/PerfStringMatch runner rc=0 exe sha256 22e980bb04e837e2
+== 2026-11-05 02:14:39 B88-801497a338 = 801497a338874fff38893ad8afc290d2fc29ed5c go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(120,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 3 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 196.3s)
+   B88-801497a338/PerfStartup runner rc=0 exe sha256 16a41bd7c226ba72
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 48.2s)
+   B88-801497a338/PerfStringMatch runner rc=0 exe sha256 ff1173ab6751ef46
+== 2026-11-05 02:19:06 B132-de5696c935 = de5696c935e4bfcc292b49ea837e902e0b182191 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(123,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 3 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 193.4s)
+   B132-de5696c935/PerfStartup runner rc=0 exe sha256 3a95efc465a9b474
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 5 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 55.4s)
+   B132-de5696c935/PerfStringMatch runner rc=0 exe sha256 b4520b9afe743bd1
+== 2026-11-05 02:41:54 A2-hop = 458b159eea5632ef9cf5e96c69e38ae7f5604dd5 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 2 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 2 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 2)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (2 projects, 196.6s)
+   A2-hop/PerfIfaceShell runner rc=0 exe sha256 7149a38c6b68860e
+== 2026-11-05 02:45:29 B9-dot2 = 1ca308d85ff3352de42f576eb6511744c231c976 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(123,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 2 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+Building go2cs.exe (converter sources changed)...
+[Transpile] 2 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 2)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (2 projects, 228.4s)
+   B9-dot2/PerfIfaceShell runner rc=0 exe sha256 43966948dc07c919
+== 2026-11-05 02:49:36 X5-hop-nocache = 458b159eea5632ef9cf5e96c69e38ae7f5604dd5 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(121,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 222.3s)
+   X5-hop-nocache/PerfIfaceShellChurn runner rc=0 exe sha256 6d47ebc187ea7c0d
+go2cs performance runner: 2 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Transpile] 2 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 2)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (2 projects, 78.3s)
+   X5-hop-nocache/PerfIfaceShell runner rc=0 exe sha256 7149a38c6b68860e
+== 2026-11-05 02:55:03 X6-dot2-nocache = 1ca308d85ff3352de42f576eb6511744c231c976 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(123,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 1)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (1 projects, 225.8s)
+   X6-dot2-nocache/PerfIfaceShellChurn runner rc=0 exe sha256 44ca5c552f16b688
+go2cs performance runner: 2 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+[Transpile] 2 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 6 shared dependencies... ok
+[Build]    C# JIT (one-shot parallel build of 2)... build-all reported errors; attributing per project...
+[Build]    C# JIT per-project: 0 failed
+
+PASS  (2 projects, 75.8s)
+   X6-dot2-nocache/PerfIfaceShell runner rc=0 exe sha256 43966948dc07c919
+== 2026-11-05 04:42:26 B143-64d145b2c4 = 64d145b2c4645db89a1854e6792b7972ca437d89 go1.26.10 (go1.26.10) dotnet 10.0.400
+C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\Program.cs(123,27): warning CS7022: The entry point of the program is global code; ignoring 'Runner.Main(string[])' entry point. [C:\go2cs\abw\g-bisect\src\tests\Performance\PerformanceRunner\PerformanceRunner.csproj]
+go2cs performance runner: 1 project(s), phases [Transpile, Build], 5 measured run(s), AOT disabled
+[Headline] inherited DOTNET_/COMPlus_ variables admitted: DOTNET_CLI_USE_MSBUILD_SERVER, DOTNET_ROOT, DOTNET_ROOT_X64
+Building go2cs.exe (converter sources changed)...
+[Transpile] 1 project(s)... ok
+[Build]    Go binaries... ok
+[Build]    pre-building 3 shared dependencies... 
