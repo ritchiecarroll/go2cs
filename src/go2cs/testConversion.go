@@ -809,7 +809,7 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 		Dir:        inputPath,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: append(os.Environ(),
+		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}
@@ -1953,7 +1953,7 @@ func collectSiblingTestClosure(inputPath string, options Options) {
 		Dir:        absolute,
 		Tests:      true,
 		BuildFlags: options.loaderBuildFlags(),
-		Env: append(os.Environ(),
+		Env: converterLoaderEnv(
 			fmt.Sprintf("GOOS=%s", targetParts[0]),
 			fmt.Sprintf("GOARCH=%s", targetParts[1])),
 	}, ".")
