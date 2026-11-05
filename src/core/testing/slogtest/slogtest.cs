@@ -13,7 +13,6 @@ using reflect = reflect_package;
 using runtime = runtime_package;
 using testing = testing_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using log;
 
 partial class slogtest_package {

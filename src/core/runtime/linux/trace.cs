@@ -184,7 +184,6 @@ using tracev2 = @internal.trace.tracev2_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 using @internal.trace;
-using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 

@@ -9,7 +9,6 @@ using strconv = @internal.strconv_package;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using go.sync;
 
 partial class syscall_package {

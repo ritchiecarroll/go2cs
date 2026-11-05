@@ -217,7 +217,7 @@ would infer a different `T`:
 x := max(u8, 1)
 x += 100
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:104-105 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:103-104 -->
 ```csharp
 var x = max(u8, (uint8)1);
 x += 100;

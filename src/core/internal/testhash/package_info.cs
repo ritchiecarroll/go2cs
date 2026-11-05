@@ -56,7 +56,7 @@ using static go.@internal.testhash_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/testhash/hash.go", "hash.cs", "ABYooqaCgoKUgoKUgoKCgpSCgpSCgoKCgpSClIKClIIAEAqUgoKUgoKCpqaClKaCuICCyICS7IKClIKCgqaUgriCgpSmgoKCgpSCyoKCgpSCgoKUpoKkgoKUgpSCyoKClIKCpoKClKaCpoLMkpSClIKCpoK6kpSClIKmgqamgoKC", "24-60:1;65-98:1;101-116:2;118-134:3;137-163:4;166-189:5")]
+[assembly: GoPositionMap("internal/testhash/hash.go", "hash.cs", "ABUooqaCgoKUgoKUgoKCgpSCgpSCgoKCgpSClIKClIIAEAqUgoKUgoKCpqaClKaCuICCyICS7IKClIKCgqaUgriCgpSmgoKCgpSCyoKCgpSCgoKUpoKkgoKUgpSCyoKClIKCpoKClKaCpoLMkpSClIKCpoK6kpSClIKmgqamgoKC", "24-60:1;65-98:1;101-116:2;118-134:3;137-163:4;166-189:5")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -139,7 +139,6 @@ using Δhttp = global::go.net.http_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using sync = sync_package;
-using System.Runtime.CompilerServices;
 using encoding;
 using global::go.go;
 using global::go.net;

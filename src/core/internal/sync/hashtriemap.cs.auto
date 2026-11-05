@@ -13,7 +13,6 @@ using abi = go.@internal.abi_package;
 using goarch = go.@internal.goarch_package;
 using atomic = sync.atomic_package;
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
 using go.@internal;
 using sync;
 

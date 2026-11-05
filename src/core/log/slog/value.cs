@@ -11,7 +11,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using time = time_package;
 using @unsafe = unsafe_package;
-using System.Runtime.CompilerServices;
 using io = io_package;
 using ꓸꓸꓸAttr = Span<slog_package.Attr>;
 

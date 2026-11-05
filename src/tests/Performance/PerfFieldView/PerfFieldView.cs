@@ -36,10 +36,10 @@ internal static ж<element> Mul(this ж<element> Ꮡe, ж<element> Ꮡa, ж<elem
 }
 
 internal static ж<point> step(this ж<point> Ꮡp) {
-    Ꮡp.of(point.Ꮡx).Add(Ꮡp.of(point.Ꮡy), Ꮡp.of(point.Ꮡz));
-    Ꮡp.of(point.Ꮡy).Mul(Ꮡp.of(point.Ꮡz), Ꮡp.of(point.Ꮡx));
-    Ꮡp.of(point.Ꮡz).Add(Ꮡp.of(point.Ꮡx), Ꮡp.of(point.Ꮡy));
-    Ꮡp.of(point.Ꮡz).Mul(Ꮡp.of(point.Ꮡz), Ꮡp.of(point.Ꮡy));
+    Ꮡp.Ꮡx.Add(Ꮡp.Ꮡy, Ꮡp.Ꮡz);
+    Ꮡp.Ꮡy.Mul(Ꮡp.Ꮡz, Ꮡp.Ꮡx);
+    Ꮡp.Ꮡz.Add(Ꮡp.Ꮡx, Ꮡp.Ꮡy);
+    Ꮡp.Ꮡz.Mul(Ꮡp.Ꮡz, Ꮡp.Ꮡy);
     return Ꮡp;
 }
 

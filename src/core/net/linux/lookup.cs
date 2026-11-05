@@ -12,7 +12,6 @@ using netip = net.netip_package;
 using Δsync = sync_package;
 using dnsmessage = vendor.golang.org.x.net.dns.dnsmessage_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using net;
 using time = time_package;
 using vendor.golang.org.x.net.dns;

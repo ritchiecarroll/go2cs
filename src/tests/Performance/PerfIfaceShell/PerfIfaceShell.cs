@@ -24,7 +24,7 @@ internal partial interface run_type /*dyn*/ {
 }
 
 internal static nint run(nint n) {
-    var values = new any[]{(counter)3, Ꮡ(new box(n: 5))}.slice();
+    var values = slice<any>([(counter)3, Ꮡ(new box(n: 5))]);
     nint total = 0;
 
     for (nint i = 0; i < n; i++) {

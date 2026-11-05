@@ -106,7 +106,6 @@ using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using @internal.syscall;
-using System.Runtime.CompilerServices;
 using fs = go.io.fs_package;
 using path;
 using sync;

@@ -1295,6 +1295,8 @@ namespace PerformanceRunner
 
                   --leg <spec>          name=<leg>;go2cs=<converter exe>;version=<go.* version>;go=<go exe>.
                                         Each program is converted by that converter with -recurse=nuget.
+                                        Optional ;pin=true sets -p:GoStdLibVersion=<version> on the leg's
+                                        builds and publishes, for an older release a later one now shadows.
                   --work <dir>          Scratch root for the legs' conversions, builds and report.md.
                   --aot-manifest <file> Tab-separated: leg program sha256 sourceHash size ilc sdk.
                   --aot-drop <dir>      Shipped binaries at <dir>/<leg>/<program>.exe; one is timed only
@@ -1411,9 +1413,9 @@ namespace PerformanceRunner
         /// <paramref name="headline"/> and not run.
         /// </summary>
         internal static ProcResult? ExecHeadline(List<HeadlineRefusal> headline, string column, HeadlineCommand command,
-            string application, string argv, string workingDir, int timeoutMs, Dictionary<string, string>? environment = null)
+            string application, string argv, string workingDir, int timeoutMs, Dictionary<string, string>? environment = null, string? pinnedVersion = null)
         {
-            IReadOnlyList<HeadlineRefusal> refused = Headline.ArgvRefusals(column, command, argv);
+            IReadOnlyList<HeadlineRefusal> refused = Headline.ArgvRefusals(column, command, argv, pinnedVersion);
 
             if (refused.Count > 0)
             {

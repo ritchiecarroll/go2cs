@@ -21,10 +21,20 @@ namespace PerformanceRunner
     /// <summary>
     /// One release leg: the converter that converts the programs, the package version their project files must
     /// reference, and the Go toolchain that builds the Go column. Spelled on the command line as
-    /// <c>name=1.26;go2cs=C:\...\go2cs.exe;version=1.26.10.1;go=C:\...\go.exe</c>.
+    /// <c>name=1.26;go2cs=C:\...\go2cs.exe;version=1.26.10.1;go=C:\...\go.exe</c>, with an optional <c>pin=true</c>.
+    /// <para>
+    /// A converted program floats: its Directory.Build.props sets <c>GoStdLibVersion</c> to <c>1.26.*</c>, which restores
+    /// the newest matching release on the feed, so an older leg stops resolving to itself once a later release
+    /// publishes. <c>pin=true</c> pins the leg the way that props file tells a consumer to, with
+    /// <c>-p:GoStdLibVersion=&lt;version&gt;</c> on every build and publish of the leg; the headline guard admits exactly
+    /// that property at exactly that value. Off by default: an unpinned leg measures what a consumer gets.
+    /// </para>
     /// </summary>
-    internal sealed record ReleaseLeg(string Name, string Converter, string PackageVersion, string Go)
+    internal sealed record ReleaseLeg(string Name, string Converter, string PackageVersion, string Go, bool Pin = false)
     {
+        /// <summary>The version this leg's builds and publishes pin, or null for an unpinned leg.</summary>
+        internal string? PinnedVersion => Pin ? PackageVersion : null;
+
         internal static ReleaseLeg Parse(string spec)
         {
             Dictionary<string, string> parts = new(StringComparer.OrdinalIgnoreCase);
@@ -48,7 +58,12 @@ namespace PerformanceRunner
             if (parts["name"].IndexOfAny(['/', '\\', ' ', '\t']) >= 0)
                 throw new FormatException($"--leg \"{spec}\": a leg name names a folder; it takes no separator or space");
 
-            return new ReleaseLeg(parts["name"], parts["go2cs"], parts["version"], parts["go"]);
+            bool pin = false;
+
+            if (parts.TryGetValue("pin", out string? pinValue) && !bool.TryParse(pinValue, out pin))
+                throw new FormatException($"--leg \"{spec}\": pin= takes true or false, not \"{pinValue}\"");
+
+            return new ReleaseLeg(parts["name"], parts["go2cs"], parts["version"], parts["go"], pin);
         }
     }
 
@@ -172,8 +187,9 @@ namespace PerformanceRunner
 
         /// <summary>
         /// The identity of a converted program across two boxes: SHA-256 over every <c>.cs</c> and <c>.csproj</c> of
-        /// its project, keyed by relative path (forward slashes) in ordinal order, line endings stripped of CR. Build
-        /// output and the generators' copies are not the program and are excluded by the caller.
+        /// its project, keyed by relative path (forward slashes) in ordinal order, line endings stripped of CR, and its
+        /// two host-specific inputs masked (<see cref="MaskHostSpecific"/>). Build output and the generators' copies
+        /// are not the program and are excluded by the caller.
         /// </summary>
         internal static string SourceHash(IEnumerable<(string RelativePath, string Contents)> files)
         {
@@ -183,11 +199,36 @@ namespace PerformanceRunner
             {
                 hash.AppendData(Encoding.UTF8.GetBytes(relativePath.Replace('\\', '/')));
                 hash.AppendData([0]);
-                hash.AppendData(Encoding.UTF8.GetBytes(contents.Replace("\r", "")));
+                hash.AppendData(Encoding.UTF8.GetBytes(MaskHostSpecific(contents.Replace("\r", ""))));
                 hash.AppendData([0]);
             }
 
             return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
+        }
+
+        // GoPositionMap's first argument is the Go file's ABSOLUTE path under the --work root, which differs by box;
+        // only its file name identifies the program (a package's files are one directory, so names are unique).
+        private static readonly Regex s_positionMapPath = new(@"(GoPositionMap\(\s*"")([^""]*)("")", RegexOptions.CultureInvariant);
+
+        // GoInputDigest folds in a hash of the converter executable's own bytes, so two builds of one converter differ.
+        private static readonly Regex s_inputDigest = new(@"(<GoInputDigest>)[^<]*(</GoInputDigest>)", RegexOptions.CultureInvariant);
+
+        /// <summary>
+        /// Masks the two inputs a converted consumer project carries that name the box rather than the program
+        /// (PLAN-perf-rebaseline.md section 10, P0): GoPositionMap's absolute Go file path becomes its file name, and
+        /// GoInputDigest's value becomes empty. Everything else, the position map's payload included, is hashed as
+        /// written.
+        /// </summary>
+        internal static string MaskHostSpecific(string contents)
+        {
+            string masked = s_positionMapPath.Replace(contents, m =>
+            {
+                string path = m.Groups[2].Value;
+                int cut = Math.Max(path.LastIndexOf('/'), path.LastIndexOf('\\'));
+                return m.Groups[1].Value + path[(cut + 1)..] + m.Groups[3].Value;
+            });
+
+            return s_inputDigest.Replace(masked, "$1$2");
         }
 
         /// <summary>

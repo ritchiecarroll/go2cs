@@ -11,7 +11,6 @@ using netip = net.netip_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
-using System.Runtime.CompilerServices;
 using net;
 
 partial class net_package {

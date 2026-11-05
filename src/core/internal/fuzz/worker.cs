@@ -16,7 +16,6 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using sync = global::go.sync_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using crypto;
 using encoding;
 using global::go;

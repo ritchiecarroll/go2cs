@@ -6,7 +6,7 @@ using time = time_package;
 
 partial class main_package {
 
-internal static slice<@string> lines = new @string[]{
+internal static slice<@string> lines = slice<@string>([
     "//go:build linux && amd64",
     "// regular comment line",
     "package main",
@@ -17,24 +17,25 @@ internal static slice<@string> lines = new @string[]{
     "//go:build windows",
     "var y = false",
     "// another comment"
-}.slice();
+]);
 
-internal static slice<@string> words = new @string[]{"true", "false", "linux", "windows", "amd64", "arm64", "ignore", "main"}.slice();
+internal static slice<@string> words = slice<@string>(["true", "false", "linux", "windows", "amd64", "arm64", "ignore", "main"]);
 
 internal static nint classify(@string w) {
     var exprᴛ1 = w;
-    if (exprᴛ1 == "true"u8) {
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "true"u8: {
         return 1;
     }
-    if (exprᴛ1 == "false"u8) {
+    case {} when exprᴛ1 == "false"u8: {
         return 2;
     }
-    if (exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8) {
+    case {} when exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8: {
         return 3;
     }
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
+    case {} when exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8: {
         return 4;
-    }
+    }}
 
     return 0;
 }
@@ -60,11 +61,10 @@ internal static nint run(nint n) {
 
     for (nint i = 0; i < n; i++) {
         @string line = lines[i % len(lines)];
-        if (strings.HasPrefix(line, "//go:build")){
+        if (strings.HasPrefix(line, "//go:build")) {
             counts["build"]++;
             total += len(line);
-        } else 
-        if (strings.HasPrefix(line, "// ")) {
+        } else if (strings.HasPrefix(line, "// ")) {
             counts["comment"]++;
         }
 

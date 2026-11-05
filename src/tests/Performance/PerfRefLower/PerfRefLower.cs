@@ -15,8 +15,8 @@ internal static void cmov(ref uint64 @out, uint64 cond, uint64 a, uint64 b) {
 }
 
 internal static void norm(ref array<uint64> @out, uint64 k) {
-    uint64 c0 = default!;
-    uint64 c1 = default!;
+    uint64 c0 = default;
+    uint64 c1 = default;
     cmov(ref c0, k, @out[0] ^ k, @out[0] + k);
     cmov(ref c1, @out[1] & 1, @out[1] + c0, @out[1] ^ c0);
     @out[0] = c0;
@@ -29,7 +29,7 @@ internal static void mix(ref felem e, ref felem t, uint64 k) {
     norm(ref nonnil(ref e).x, k);
     norm(ref nonnil(ref t).x, k + 1);
     for (nint i = 0; i < 4; i++) {
-        uint64 s = default!;
+        uint64 s = default;
         cmov(ref s, t.x[i] & 1, e.x[i] + t.x[i], e.x[i] ^ t.x[i]);
         e.x[i] = s;
     }

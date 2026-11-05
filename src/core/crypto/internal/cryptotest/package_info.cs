@@ -67,7 +67,7 @@ using static go.crypto.@internal.cryptotest_package;
 [assembly: GoPositionMap("crypto/internal/cryptotest/blockmode.go", "blockmode.cs", "ABEmooKClKaCkqaSppKUgoCCtoKUgoKCABQKgpSCgpC2kpSCgpSCgriSlJSCgpSCgsqSlJSUgriCgsqSlIKmgpKCgqaCgriCgpSCyoKCgriClJKmgpSC3JKUgoKCpoKkgoKUgpSCuJKUgqaCgpC2goKQtoKCkMikgoKCsMiSlIKUkoKUlII=", "28-30:1;32-34:2;36-52:3;58-61:1;60-60:1.1;63-74:2;76-90:3;92-109:4;111-161:5;151-153:5.1;165-187:6;189-209:7;198-198:7.1;203-203:7.2;208-208:7.3;212-219:8;217-217:8.1;221-236:9")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/fetchmodule.go", "fetchmodule.cs", "ACQmsriCgoKAgqSUgoCCgILGgpSmlIKClIaAgrY=")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/fips140.go", "fips140.cs", "AAsYgoKAgg==")]
-[assembly: GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABYsooKClKaCgoI=")]
+[assembly: GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABUsooKClKaCgoI=")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABcoxIKCpoKCgqaApIKAgpSmgpT+guaCgoKUpLa2", "33-33:1;39-47:2")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/methods.go", "methods.cs", "AA0sAAoCgoKClIKClLiigoKmgpSCgqaCgoKClIK4")]
 [assembly: GoPositionMap("crypto/internal/cryptotest/stream.go", "stream.cs", "ABEkABEYpIKmuISCgpSClIKUgoKCAAcQhIKClIKmgpSmgoKC7oKUgoKUgoK4goKClISylIKC3IKUlJSCuIKCyoKUgoKUgpSioKSC3IKUgpSCgqakgoKAtoKCgLaCgoDagpSCgqaUgoKUlKaCgoKClJSCAAoUxIKUgoKCkLaCgoKUyIKUgpQ=", "32-87:1;40-59:1.1;43-57:1.1.1;63-86:1.2;66-84:1.2.1;89-100:2;102-118:3;109-116:3.1;120-137:4;139-157:5;149-155:5.1;150-150:5.1.1;159-187:6;170-185:6.1;174-174:6.1.1;179-179:6.1.2;184-184:6.1.3;189-220:7;229-236:1;235-235:1.1;238-244:2;243-243:2.1")]

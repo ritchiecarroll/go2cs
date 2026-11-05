@@ -13,7 +13,6 @@ using http = go.net.http_package;
 using url = go.net.url_package;
 using strings = strings_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go.net;
 
 partial class httputil_package {

@@ -178,7 +178,7 @@ or `defer` beside the thunk, numbered `ᴛ1`, `ᴛ2`, … in order:
 	f := report
 	go f("via func value")
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:127-139 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:126-138 -->
 ```csharp
     nint n = 3;
     goǃ(ᴛ1 => pair("square:", ᴛ1), n * n);
@@ -220,7 +220,7 @@ effects included:
 	x = 2
 	seq = 100
 ```
-<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:146-153 -->
+<!-- source: src/tests/Behavioral/GoDeferConstArgs/main.cs.target:145-152 -->
 ```csharp
         nint x = 1;
         defer(ᴛ1 => showPair("x was", ᴛ1), x, ref ᒐ);
@@ -460,7 +460,7 @@ func two() (int, string)              //  Go:
 defer show(two())                     //      two() runs at the defer; show runs at unwind
 ```
 
-<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:66 -->
+<!-- source: src/tests/Behavioral/DeferMultiValueSpread/DeferMultiValueSpread.cs.target:65 -->
 ```csharp
 defer(ᴛ1 => show(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
 ```
@@ -985,7 +985,7 @@ literal's capture copies were then written inside the call (`goǃ((` `var doneʗ
 CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three unwrap the parentheses, so
 the copy is a statement before the call and the deferred literal reads its variables by reference:
 
-<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:16-28 -->
+<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:15-27 -->
 ```csharp
     var doneʗ1 = done;
     goǃ(() => {

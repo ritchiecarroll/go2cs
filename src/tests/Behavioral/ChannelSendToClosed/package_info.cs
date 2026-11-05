@@ -43,7 +43,7 @@ using static go.main_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("ChannelSendToClosed.cs", 12, 9)]
+[assembly: GoBoundedGoroutine("ChannelSendToClosed.cs", 11, 9)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ChannelSendToClosed.go", "ChannelSendToClosed.cs", "+oKCgpKClKaC", "8-13:1")]
+[assembly: GoPositionMap("ChannelSendToClosed.go", "ChannelSendToClosed.cs", "6oKCgpKClKaC", "8-13:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -99,6 +99,9 @@ Each step is the runbook's; this list fixes the values and the order.
 3. **cobra's kit, from the local feed.** The same driver, with `-Feed` set to a folder that holds S1's pflag and
    mousetrap release candidates beside go.* 1.26.10.2, and
    `-ThirdPartyPackage github.com/spf13/pflag=nugetgo.github.com.spf13.pflag@1.0.9.2,github.com/inconshreveable/mousetrap=nugetgo.github.com.inconshreveable.mousetrap@1.1.0.1`.
+   Run it without root's file capabilities (`capsh --drop=cap_dac_override,cap_dac_read_search`) and with a private
+   module cache made writable (`chmod -R u+w`): Go itself fails `TestDeadcodeElimination` when it cannot create
+   `test_deadcode/` in a read-only module directory (runbook Traps, 12).
 4. **The restore check of section 3, for all seven.** Then COORD rules sections 1-3 green.
 5. **The conversion repositories (runbook 4.5).** Each of the seven conversion commits and its `nuget-<PV>` tag is
    pushed.

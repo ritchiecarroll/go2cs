@@ -360,7 +360,7 @@ internal static class MethodSet
         string? boundDelegate = Delegate(compilation, shape.Parameters, shape.Variadic, shape.Returns);
 
         string? Bound(string bind, string call) =>
-            boundDelegate is null ? null : $"{bind} return {boundDelegate}(({lambda}) => {call});";
+            boundDelegate is null ? null : $"{bind}\r\n                    return {boundDelegate}(({lambda}) => {call});";
 
         string? Unbound(string receiverType, string call) =>
             Delegate(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns) is { } unboundDelegate

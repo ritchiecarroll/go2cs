@@ -15,10 +15,10 @@ internal static nint run(nint n) {
         buf = buf[..0];
         nint v = i;
         if (v == 0) {
-            buf = append(bufᴷ, buf, (byte)((rune)'0'));
+            buf = append(bufᴷ, buf, (byte)'0');
         }
         while (v > 0) {
-            buf = append(buf, (byte)((rune)'0' + v % 10));
+            buf = append(buf, (byte)('0' + v % 10));
             v /= 10;
         }
 

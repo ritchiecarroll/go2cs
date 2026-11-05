@@ -305,7 +305,7 @@ public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
 
 **Row 2 — an address-taken local comes home from the heap** (`ForVariants`; two counted objects per unmanaged local removed, and the per-iteration boxing scaffold of a labeled loop collapses to one plain loop variable):
 
-<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs:10-15, 95-97 -->
+<!-- source: src/tests/Behavioral/ForVariants/ForVariants.cs:9-96 -->
 ```csharp
 nint i = 0;
 
@@ -557,7 +557,7 @@ A pointer **local** assigned nil is unaffected — a local already *is* the box,
 1. **Compare the box, not the value alias.** The loop guard `p != nil` must emit `Ꮡp != nil` (the box). Each binary operand's pointer context is otherwise taken from the *other* operand's pointer-ness, and `nil` is not a pointer type — so the param would convert in value form (`p != nil`, comparing a `node` struct value, the wrong thing). The converter forces the box form for a deref'd pointer *parameter* in a `==`/`!=` comparison. This is safe only for a parameter: a pointer *local* is already the box, and forcing it would emit a non-existent `Ꮡlocal`.
 2. **Nil-deferring re-alias.** On the final step `p.next` is nil, so `Ꮡp = p.next` repoints the box to nil; re-aliasing through the plain `Ꮡp.Value` getter would then throw a nil-pointer dereference before the guard is re-checked. The deref/re-alias instead routes through the golib `ж<T>` extension `Ꮡp.DerefOrNull()`, which binds `Unsafe.NullRef<T>` when the box is nil — legal to HOLD, faulting only on USE — rather than throwing at the bind. The entry alias uses it too, so an empty-list call (`sumList(nil)`) binds without faulting at entry.
 
-<!-- source: src/tests/Behavioral/PointerParamNilWalk/main.cs:14-23 -->
+<!-- source: src/tests/Behavioral/PointerParamNilWalk/main.cs:13-22 -->
 ```csharp
 internal static nint sumList(ж<node> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();

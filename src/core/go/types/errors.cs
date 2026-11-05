@@ -10,8 +10,6 @@ using token = global::go.go.token_package;
 using static global::go.@internal.types.errors_package;
 using runtime = runtime_package;
 using strings = strings_package;
-using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
-using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 using io = io_package;

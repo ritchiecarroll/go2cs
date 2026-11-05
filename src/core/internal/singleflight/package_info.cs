@@ -59,7 +59,7 @@ using static go.@internal.singleflight_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/singleflight/singleflight.go", "singleflight.cs", "ACte8oKClICCgoKCpIKCgpSCqsKCgoKUgIKCgoKkgoKClJSowpSCgoKUgpQAAhAACgKCgoKClIKClA==")]
+[assembly: GoPositionMap("internal/singleflight/singleflight.go", "singleflight.cs", "ACpe8oKClICCgoKCpIKCgpSCqsKCgoKUgIKCgoKkgoKClJSowpSCgoKUgpQAAhAACgKCgoKClIKClA==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
