@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="github.com.golang-jwt.jwt.v5.csproj" DefaultStartup="true" />
+  </Folder>
+</Solution>
