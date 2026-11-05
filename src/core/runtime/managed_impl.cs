@@ -1501,18 +1501,21 @@ partial class runtime_package
     // recover calls in those deferred functions will return nil.
     public static void Goexit()
     {
-        // Calling Goexit from the MAIN goroutine terminates main without returning while the
-        // program keeps running its other goroutines — and crashes with "no goroutines" once they
-        // all exit. That needs a live-goroutine registry and a main-thread parking protocol the
-        // managed model does not have yet (DESIGN-goexit.md option A), so the main-goroutine case
-        // stays GATED rather than silently doing something else: ending the process here would
-        // kill goroutines Go would keep running. The gate is honest and loud, never a no-op.
+        // Calling Goexit from the MAIN goroutine terminates main without returning while the program keeps
+        // running its other goroutines, and dies with "no goroutines (main called runtime.Goexit) - deadlock!"
+        // once none can run. The exception carries the mark: every deferring frame on main's stack catches it
+        // and runs its deferred calls (GoFrame), and past the outermost one golib parks the main thread until
+        // the other goroutines are done (golib.MainGoexit). docs/DESIGN-goexit-main.md.
+        if (Goroutine.Current is { IsMain: true })
+            throw new GoexitException(fromMain: true);
+
+        // A thread with no goroutine identity at all (a host thread that never ran Go code) is no goroutine for
+        // Goexit to end; Go has no such state.
         if (!Goroutine.OnGoroutine)
         {
             throw new NotSupportedException(
-                "runtime.Goexit from the main goroutine is not supported: main-goroutine Goexit " +
-                "must leave the other goroutines running (see docs/phase4/DESIGN-goexit.md). " +
-                "Goexit from a goroutine is fully supported.");
+                "runtime.Goexit on a thread that runs no goroutine is not supported: Goexit ends the calling " +
+                "goroutine, and this thread has none.");
         }
 
         // The goroutine case: unwind. GoFunc's finally-based defer machinery runs this goroutine's

@@ -631,7 +631,20 @@ public static class TestHost
         if (registry.TestMain is null)
             return m.Run();
 
-        registry.TestMain(new StandardBox<testing_package.M>(m));
+        try
+        {
+            registry.TestMain(new StandardBox<testing_package.M>(m));
+        }
+        catch (Exception ex) when (MainGoexit.Is(ex))
+        {
+            // TestMain runs on the main goroutine, so a runtime.Goexit there ends main as it would a program's: Go's
+            // test binary keeps running its other goroutines and dies with "no goroutines (main called
+            // runtime.Goexit) - deadlock!", status 2. Caught HERE, on this thread, rather than left to fault the Task
+            // that runs it: Task.Wait would wrap it in an AggregateException and report a host failure instead.
+            // docs/DESIGN-goexit-main.md, COORD's D1 ruling (Q3).
+            MainGoexit.Park();
+        }
+
         return runner.HasRun ? runner.ExitCode : 0;
     }
 
