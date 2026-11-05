@@ -822,13 +822,7 @@ namespace PerformanceRunner
             Console.WriteLine(failed == 0 ? "ok" : $"{failed} failed");
         }
 
-        internal static string FilterTimingLines(string output)
-        {
-            return string.Join('\n', output
-                .Replace("\r", "")
-                .Split('\n')
-                .Where(l => !l.StartsWith("elapsed_ns:", StringComparison.Ordinal)));
-        }
+        internal static string FilterTimingLines(string output) => TimingLines.Filter(output);
 
         // ---- Phase: Measure ----
 
@@ -877,19 +871,7 @@ namespace PerformanceRunner
             }
         }
 
-        internal static double ParseInnerMs(string stdOut)
-        {
-            foreach (string line in stdOut.Split('\n'))
-            {
-                if (!line.StartsWith("elapsed_ns:", StringComparison.Ordinal))
-                    continue;
-
-                if (long.TryParse(line["elapsed_ns:".Length..].Trim(), out long ns))
-                    return ns / 1_000_000.0;
-            }
-
-            return 0.0;
-        }
+        internal static double ParseInnerMs(string stdOut) => TimingLines.TotalMs(stdOut);
 
         internal static (int exitCode, string stdOut, double wallMs, long peakBytes) RunMeasured(string exe, string workDir,
             Dictionary<string, string>? environment = null)
