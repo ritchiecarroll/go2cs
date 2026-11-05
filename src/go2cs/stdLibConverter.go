@@ -761,10 +761,14 @@ func runPackageConversionWithTimeout(timeout time.Duration, convert func() error
 // convertPackage converts a single package
 func (c *StdLibConverter) convertPackage(inputPath, outputPath string) error {
 	return runPackageConversionWithTimeout(c.packageConvertTimeout(), func() error {
-		// Call the existing processConversion function
-		return processConversion(inputPath, true, outputPath, c.options)
+		// Call the existing processConversion function (through a variable a driver test can replace)
+		return stdLibProcessConversion(inputPath, true, outputPath, c.options)
 	})
 }
+
+// stdLibProcessConversion is the conversion convertPackage runs: processConversion, except in a test of the driver
+// loop, which replaces it with work it controls (a real conversion cannot be abandoned safely in a test).
+var stdLibProcessConversion = processConversion
 
 // GenerateDependencyGraph creates a visual representation of the dependency graph
 func (c *StdLibConverter) GenerateDependencyGraph() error {
