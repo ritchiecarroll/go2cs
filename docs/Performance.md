@@ -202,8 +202,9 @@ window, and the Native AOT ratio to the same Go binaries timed again in the Nati
 - **TlsHandshake's Native AOT cell is its first reading.** Under `go.*` 1.24.13.7 that program's Native AOT publish
   cannot link (`LNK1183`, an object file past the COFF format's 4 GiB limit), so the History table reads n/a there.
 - **Two rows are slower under full optimization than with 1.24.13.7.** IfaceShellChurn and StringMatch take longer
-  under Native AOT than they did with the 1.24.13.7 packages, while both are faster under the JIT and ReadyToRun; the
-  cause is being addressed.
+  under Native AOT than they did with the 1.24.13.7 packages, while both are faster under the JIT and ReadyToRun. Both causes are
+  identified: StringMatch pays a per-use conversion of its string literals, and IfaceShellChurn pays its
+  interface-shell cache on every miss.
 
 <!-- Sources, all docs/phase4/DATA-hop126-perf.md: the table, section 3 (ratios as that section states them, which
      divide the rounded medians; the runner's own report, DATA-hop126-perf/w1-runner-report.txt, divides unrounded
