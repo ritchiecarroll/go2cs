@@ -1,0 +1,13 @@
+generator	files	chars	parse_ms	normalize_ms	linepass_ms
+Type	444	3037261	233.4	1484.1	45.4
+FieldAccess	1	730311	88.7	645.5	5.2
+Recv	323	300785	46.8	93.6	2.7
+PartialStub	143	95986	8.5	35.7	0.7
+MemberRecord	44	11788	1.1	21.8	0.1
+NoInliningPartial	12	10961	0.8	29.8	0.1
+Implement	7	10593	1.1	3.7	0.1
+ImplicitConv	9	6679	0.4	1.8	0.1
+NativeArrayOpener	1	6590	0.5	17.9	0.0
+EscapeRegistry	2	5123	1.0	2.1	0.0
+LazyHolder	10	4539	0.4	1.5	0.0
+TOTAL	996	4220616	382.7	2337.6	54.4
