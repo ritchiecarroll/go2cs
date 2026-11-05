@@ -33673,4 +33673,38 @@ control repeated twice in a row inside the test, so a first-use cost shows as th
 
 — C1 (2026-11-05)
 
+## 2026-11-05 — P2 (COORD ruling, claude/p2-convert-timeout-overlap): a `-stdlib` package that hits `-convert-timeout` kept converting beside the next one — FIXED on the seat branch: a timeout now stops the run
+
+**What happened.** `runPackageConversionWithTimeout` (`src/go2cs/stdLibConverter.go`) runs one package's conversion on
+a goroutine and returns when the cap fires, but nothing stops that goroutine. It kept running on the converter's
+package-global state (`resetPackageState`, `packageStateOperations.go`) while the driver converted the next package,
+which the driver's own comment calls inherently sequential. Found by reading the code during the stall-warning
+re-check (D2), then reproduced at master `118c037943` on linux with a plain converter binary and seeded roots:
+
+- full `-stdlib` at `-convert-timeout 1500ms`: 9 packages timed out (runtime, reflect, syscall, os, archive/tar,
+  compress/flate, math/big, nistec/fiat, nistec), and at its 146th of 358 packages the RUN DIED on visitFile's
+  `log.Fatalf("Multiple package names encountered: ecdh and fiat")`. Exit 1, 212 packages never converted, and the
+  root left half-written: their seeded copies stood, and so did runtime's `runtime2.cs.auto`, which the abandoned
+  runtime conversion never wrote in the 74 s it had (a clean runtime conversion takes 24 s there);
+- `ecdh` reported "Completed" while two abandoned conversions ran, and its emission matched the clean run, so silent
+  damage to a successor's emission was not observed; the crash and the lost writes were;
+- a `-race` converter on a four-package run reported no race: the converter's log and stdout locks give the two
+  goroutines happens-before edges, so the race detector is not an instrument for this class.
+
+**Why it matters.** It is safety-floor item 1's class inside one process: a conversion overlapping another
+corrupts state and reads like a converter defect. The cap's default is 10m, so it fires only on a hung or very
+slow package, which is exactly when an operator least expects the next packages to be suspect.
+
+**Ruled and fixed (option (a)).** The first timeout ends the run. The timed-out package is marked `TIMED OUT` and
+every later one `NOT CONVERTED` in `stdlib_conversion_progress.txt`; both go into `failed_packages.txt`, so `-stdlib`
+with that list resumes; `convertAllPackages` returns an error, main exits 1 before the abandoned goroutine can write
+more, and the solution and attribution steps are skipped. `TestStdLibTimeoutStopsTheRun` (`convertTimeout_test.go`)
+was red on all five assertions before the fix. The flag help, `docs/CommandLine.md` and the converter rules line say
+a timeout stops the run.
+
+**Noted, not ruled:** one child process per package, killed at the cap, is the design if the fleet ever needs a
+run to continue past a timeout. A cancellable walk was not recommended: a loop between checkpoints would still overlap.
+
+— P2 (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
