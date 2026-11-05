@@ -2457,6 +2457,32 @@ becomes `y.LshAssign(s);`, which evaluates `y` once and stores the result back i
 <!-- src/core/golib/GoShift.cs:120-129 (`ref this` LshAssign/RshAssign); golden
      src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:30 `y.LshAssign(s);` for main.go:44 `y <<= s`. -->
 
+A map element has no reference to pass, so its compound shift is written out. When the map and the key can be
+read twice without effect, Go's `m[1] >>= 40` becomes `m[1] = m[1].Rsh(…)`. Otherwise the map and the key go
+to golib's `RshAssign`, so the key is still evaluated once:
+
+<!-- source: src/tests/Behavioral/MapIndexShiftCount/main.go:110 -->
+```go
+m[key()] >>= wide
+```
+<!-- source: src/tests/Behavioral/MapIndexShiftCount/main.cs.target:115 -->
+```csharp
+m.RshAssign(key(), wide);
+```
+
+A type parameter constrained to integers takes the same rule. .NET's own shift operator masks the count to
+the type argument's width, so the converter calls golib's generic `Lsh` and `Rsh`, which read the width from
+the type argument. The count is measured against the narrowest type the constraint allows:
+
+<!-- source: src/tests/Behavioral/MapIndexShiftCount/main.go:45 -->
+```go
+x <<= n
+```
+<!-- source: src/tests/Behavioral/MapIndexShiftCount/main.cs.target:46 -->
+```csharp
+x = x.Lsh(n);
+```
+
 **A count provably below the width keeps C#'s own operator.** That covers a constant in range, such as
 `x >> 4`, and a count masked or reduced below the width, such as `k & 63`, or `k % 64` when `k` is unsigned. These are most shifts
 in real code. Continuing the same example:

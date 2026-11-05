@@ -68,6 +68,28 @@ first cut also widened the constant-left shape, and io/fs's emission failed CS00
 `GoShiftSemantics`, extended with `1 << 32`, `1<<32 + 1`, a compound form and a negative count under
 `recover`.)
 
+**A map element and a type parameter take the guard too.**<!-- 2026-11-05, P1's BOARD finding of that day. Before,
+compoundShiftGuarded excluded a map index, so `m[1] >>= 40` on a uint32 element read as `>> 8`, and an integer type
+parameter shifted through .NET's IShiftOperators, whose byte operator is `(byte)(x << (n & 7))`, so `x <<= 9` on a
+uint8 type argument read as `<< 1`. Census of std (windows, linux, darwin; tests included on linux) and of the
+behavioral corpus: 0 such sites outside MapIndexShiftCount, so the stdlib emission did not move on any target. -->
+A map element has no ref for `RshAssign`. One whose map and key can be read twice without effect is written
+`m[k] = m[k].Rsh(n)`; any other takes the map and the key, `m.RshAssign(key(), n)`, golib's `IMap` twin, so the key
+is evaluated once. An integer type parameter is measured against the narrowest width its constraint allows (8 for
+`~uint8 | ~uint32`), and a count not provably below it takes golib's generic guard: `x.Lsh(n)` for a binary shift,
+`x = x.Lsh(n)` for a compound one whose target can be read twice, and `GoShift.LshAssign(ref s[f()], n)` otherwise,
+since a `ref this` receiver of a type parameter needs a struct constraint a Go constraint never carries. The generic
+`Lsh<T>` and `Rsh<T>` take the width from the type argument's size and shift by width - 1 and then by 1 for a count
+at or past it, which gives 0, or the sign fill for a signed right shift, without knowing the sign. They are
+additive: overload resolution keeps the non-generic overloads for every basic receiver.<!-- src/go2cs/convBinaryExpr.go
+compoundShiftGuarded, typeParamShiftWidth, compoundShiftForm and the binary site after emitGuardedShift's basic call;
+src/core/golib/GoShift.cs, the "a TYPE PARAMETER target" and "a MAP ELEMENT target" sections; golden
+src/tests/Behavioral/MapIndexShiftCount/main.cs.target lines 46 (`x = x.Lsh(n);`), 66 (`m[1] = m[1].Rsh((uint64)40);`)
+and 115 (`m.RshAssign(key(), wide);`). -->
+(Guarded by the `MapIndexShiftCount` behavioral test, whose 15 arms include both negative counts and a key that
+counts its calls, the converter's `TestMapElementAndTypeParameterShiftsTakeTheGoSemanticsGuard`, and GolibTests'
+`GoShiftGenericGuardTests`, which also reads each basic receiver's bound overload from an expression tree.)
+
 In the standard library's production code no signed non-constant count is on a named receiver. (Guarded by
 the `NegativeShiftCount` behavioral test, which runs each negative-count shape under `recover` against Go,
 checks the `runtime.Error` assertion, and keeps non-negative, unsigned-huge and masked controls. Also by
