@@ -1657,14 +1657,14 @@ partial struct compareTestsᴛ1 /*dyn*/ {
     internal slice<byte> a, b;
     internal nint i;
 }
-[GoLazy] partial class lazyᴛcompareTests { internal static slice<compareTestsᴛ1> compareTests = slice<compareTestsᴛ1>([
+[GoLazy] partial class lazyᴛcompareTests { internal static slice<compareTestsᴛ1> compareTests = [
 ```
 
 The range and the heap box in `main.cs`:
 
 <!-- source: src/tests/Behavioral/AnonStructCrossFile/main.cs.target:8-10, 14 -->
 ```csharp
-foreach (var (_, vᴛ1) in compareTests) {
+foreach (var (_, vᴛ1) in range(compareTests)) {
     ref var tt = ref heap(new compareTestsᴛ1(), out var Ꮡtt);
     tt = vᴛ1;
 …

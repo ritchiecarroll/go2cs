@@ -476,7 +476,7 @@ When a heap-boxed **ref-local is used by VALUE** (its address is not taken) and 
 
 <!-- source: src/tests/Behavioral/FuncLitArgCapture/main.cs:38-48 -->
 ```csharp
-ref var p = ref heap<payload>(new payload(vals: slice<nint>([1, 2, 3, 4])), out var Ꮡp);
+ref var p = ref heap<payload>(new payload(vals: [1, 2, 3, 4]), out var Ꮡp);
 var @out = new channel<nint>(1);
 var outʗ1 = @out;
 var pʗ1 = p;

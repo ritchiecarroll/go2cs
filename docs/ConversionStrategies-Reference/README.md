@@ -442,7 +442,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Range-over-integer covers EVERY integer type, and the iteration variable keeps the operand's width](labels-and-loop-variables.md#range-over-integer-covers-every-integer-type-and-the-iteration-variable-keeps-the-operands-width)
   - [An index-only range over a slice or array reads no element](labels-and-loop-variables.md#an-index-only-range-over-a-slice-or-array-reads-no-element)
   - [A blank scalar range variable never emits as `_`](labels-and-loop-variables.md#a-blank-scalar-range-variable-never-emits-as-_)
-  - [`for range` over a slice allocates NOTHING — `slice<T>.GetEnumerator()` returns a struct](labels-and-loop-variables.md#for-range-over-a-slice-allocates-nothing--slicetgetenumerator-returns-a-struct)
+  - [`for range` over a slice allocates NOTHING — `range(s)` and `GetEnumerator()` return structs](labels-and-loop-variables.md#for-range-over-a-slice-allocates-nothing--ranges-and-getenumerator-return-structs)
   - [`range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `ΔRangeSnapshot()`](labels-and-loop-variables.md#range-over-an-array-value-iterates-a-copy--the-snapshot-is-the-range-expressions-δrangesnapshot)
 - **[The `go.golib` support namespace](golib-namespace.md)**
   - [Foreign renamed types reference the recorded imported-type alias](golib-namespace.md#foreign-renamed-types-reference-the-recorded-imported-type-alias)
