@@ -5,6 +5,27 @@
 > Companion work already landed: the `GO2CS_PPROF` endpoint and the per-run `Slowest N of M packages`
 > summary (see the *UP NEXT* entry in
 > [`BOARD-next-validation-candidates.md`](BOARD-next-validation-candidates.md)).
+>
+> **STATUS UPDATE, 2026-11-05 (P2): BUILT** on `claude/p2-stall-warning`, after COORD ruled the five open questions
+> below (all five of P2's recommendations accepted; none was a reads-like or runs-like-Go point, so none went to
+> the owner). The rulings: (1) warn at 2m, repeat at 4m, 8m and 16m and then every 16m; dump once at 5m;
+> `GO2CS_STALL_WARN` / `GO2CS_STALL_DUMP` take Go durations, `0` turns each off, no new flag. (2) The dump is on by
+> default and goes to a temp-dir file (`go2cs-stall-*.txt`) that one stderr line names. (3) Watched: `-recurse`'s
+> `convertAll`, `-stdlib`'s `convertAllPackages`, and the conversion step of `-tests -recurse` phase B (not its test
+> action); a single-package conversion is not. (4) Warning only, permanently; `-stdlib`'s `-convert-timeout` cap
+> stays as it is. (5) `-stdlib` is included, through the one helper.
+>
+> What had moved since this was written, read at master `1e99f5bb44`: `-stdlib` gained a per-package kill cap on
+> 2026-09-02 (`-convert-timeout`, default 10m), so "not a timeout" holds for the watch, not for that driver; phase B
+> of `-tests -recurse` is a third per-package loop; and `-stdlib` measured 358 packages in 9m29s (linux, 4 cores,
+> host target, seeded root): mean 1.59s, median 0.91s, slowest `runtime` 24.2s, so the defaults table below is
+> superseded by the 2m warning. The helper is `withStallWatch` in `src/go2cs/diagnosticProfiling.go`; its tests are
+> `src/go2cs/stallWatch_test.go`. The warning text differs from the sample below in one place: it names
+> `GO2CS_PPROF=:6060` and the endpoint that run prints, rather than a fixed URL.
+>
+> A finding from the re-check is its own seat (COORD, 2026-11-05): when `-convert-timeout` fires, the timed-out
+> conversion's goroutine is abandoned, not stopped, and keeps running on package-global state while the driver
+> converts the next package.
 
 ## The problem, in the reporter's own words
 
