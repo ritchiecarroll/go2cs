@@ -28293,6 +28293,21 @@ and a golden re-baseline: about 2-3 days. Red first: the pinned arm above, flipp
 
 — R (read at hop tip 017dafb1f2, 2026-10-24)
 
+**2026-11-05 — option B cut (R, claude/r-b1-deferred-closure-marker, on master 4dc48b62e2).** The converter marks a Go
+func literal handed straight to `defer` (plain, parenthesized, and the argument form, which passes its literal to
+`defer` itself) at its `{` and its first statement, the lambda's first sequence point in Debug and in Release; the
+sites ride as the `GoPositionMap` record's eighth argument. `spliceableSite` accepts an ends-at-Run site whose last Go
+frame is a recorded closure (`isRecordedDeferredClosure`), so `runtime.Callers` and the crash traceback print Go's
+chain. Red first in three places: the converter's `TestDeferredClosureSitesAreRecordedAndNothingElse`, GolibTests'
+`DeferredClosureChainTests` (Debug and Release positions; the unrecorded, no-PDB and thunk arms refused), and the new
+behavioral `DeferredClosurePanicChain` against `go run`. `CrashReportTests.ARefusedChainPrintsExactlyWhatItAlwaysHas`
+does not flip: its probe carries no record, which is now the older-artifact shape it pins.
+Footprint (two-seeded, three targets): 65 `package_info.cs`, 134 record lines, each only gaining its eighth argument
+(windows 94, linux 93, darwin 93); std tests 21 records in 19 files, 18 stale committed test records left for their
+rebank; 101 behavioral `package_info.cs`. Residuals, each a missing splice and never a wrong frame: the variadic and
+multi-value spread forms (a thunk invokes the literal, so the thunk is the deferred function), a literal inside a
+function hand-converted in `*_impl.cs`, and a deployment with no symbol file.
+
 ## 2026-10-24 — R: a crash traceback loses every frame between a panic's first deferring frame and its last re-raise, so a panic that crosses two or more deferring frames prints only the top of Go's traceback — OPEN, post-hop (fix F: golib records each re-catch's stretch of the trace)
 
 **What diverges.** Go prints the whole goroutine stack. The converted program, for a panic that crosses deferring
