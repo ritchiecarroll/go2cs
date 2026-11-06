@@ -78,7 +78,7 @@ using static go.@internal.poll_package;
 [assembly: GoPositionMap("internal/poll/hook_unix.go", "hook_unix.cs", "AAsYtg==")]
 [assembly: GoPositionMap("internal/poll/iovec_unix.go", "iovec_unix.cs", "AAoWgg==")]
 [assembly: GoPositionMap("internal/poll/sendfile.go", "sendfile.cs", "/g==")]
-[assembly: GoPositionMap("internal/poll/sendfile_unix.go", "sendfile_unix.cs", "AAw8ABMCuNyGgqaCgoKYqAAIAoKUgpSUgqaCyoKClIKCgpQABxCCAAgOgpSCAA0U7IK4AAgKwrbGgoIADBqCxoKCyrY=", "41-43:1;51-53:2;60-62:1")]
+[assembly: GoPositionMap("internal/poll/sendfile_unix.go", "sendfile_unix.cs", "AAw8ABMCuNyGgqaCgoKYqAAIAoKUgpSUgqaCyoKClIKCgpQABxCCAAgOgpSCAA0U7IK4AAgKwrbGgoIADBqCxoKCyrY=", "41-43:1;51-53:2;60-62:1", "", "", "", "65:21,66:13")]
 [assembly: GoPositionMap("internal/poll/sock_cloexec.go", "sock_cloexec.cs", "ABAgooKClA==")]
 [assembly: GoPositionMap("internal/poll/sockopt.go", "sockopt.cs", "AAoY4oKUgtjygpSC2OKClILY4oKUgg==")]
 [assembly: GoPositionMap("internal/poll/sockopt_linux.go", "sockopt_linux.cs", "AAkU4oKUgg==")]

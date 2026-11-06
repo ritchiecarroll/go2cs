@@ -78,7 +78,7 @@ using static go.mime.multipart_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACgbigpiCgoKmgoKCgqaUkoKCpoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgpSCloSClIKCgoKCgpSmgoKClKbmooKCgoKCpgAMHJKCgoKCgoLKAA0gkoKClIKCgpSClAAVKIKClA==", "62-81:1")]
+[assembly: GoPositionMap("mime/multipart/formdata.go", "formdata.cs", "ABQoAAEYAAoCqIIACgbigpiCgoKmgoKCgqaUkoKCpoKCgriCgoIAESSClIKClIKClIKCgoKUgpSClJSCgpSasoKCpqaUlIKClIKClIKokoKCgoKUgpS4goKUgoKCgqaCgpSCloSClIKCgoKCgpSmgoKClKbmooKCgoKCpgAMHJKCgoKCgoLKAA0gkoKClIKCgpSClAAVKIKClA==", "62-81:1", "", "", "", "75:21,76:13")]
 [assembly: GoPositionMap("mime/multipart/multipart.go", "multipart.cs", "AC9YAB1AxoKUgpTssoKUgoK45oKCgoKCAAMU4oIAEiaigpSCAAoGgriClKaCgoKCpqaCgoKCpoKUqqIACBKCgriCgoKUgoLcgpSCgpSCgoKClAACGgAKApSClKSkpoLKgpSkpKaC7oKClAACHgAMAoKClJSUgriCgpSUlIK4poKCABc0lIKCgoKmAAIS4gACENKmooKUgpSCgpTclIKmgoKCgpSCppSmgqaU7oKCpr6ygpSCgqbugpSCyoKClK7CgpQ=", "", "", "133=NewReaderSize/1/1/1")]
 [assembly: GoPositionMap("mime/multipart/readmimeheader.go", "readmimeheader.cs", "AAse")]
 [assembly: GoPositionMap("mime/multipart/writer.go", "writer.cs", "ABs4ot6SAAoS4oKmgpSCgoKUlLSCtpSCqqKmgpSmgoKCgpSu4oKCpoKClKaCgqaCgoKUpoKmAAEcAAwCAAgKooKCgqqigpSqorqSgoKUgqqigoKUlIIACBKCguaygpSCgpQ=", "", "", "31=randomBoundary/1/1/2;180=escapeQuotes/1/1/1,Sprintf/1/1/1;188=escapeQuotes/1/2/1,escapeQuotes/2/2/1")]

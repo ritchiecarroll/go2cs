@@ -75,7 +75,7 @@ using static go.@internal.trace.traceviewer_package;
 [assembly: GoPositionMap("internal/trace/traceviewer/histogram.go", "histogram.cs", "ABculpKCgpSCgpSCgpSClKiSqLKCppSCgoK4goKUgpSmgpSCqIKC")]
 [assembly: GoPositionMap("internal/trace/traceviewer/http.go", "http.cs", "ABEegpKCggAtVgDJAYoDgoKUAAoWguaCgoKClIIAiAGOAoI=", "16-21:1;279-286:1")]
 [assembly: GoPositionMap("internal/trace/traceviewer/mmu.go", "mmu.cs", "ADFWgsqSpIKkgpS4AAsQgoKClAAQIqKCgoKClJSSgoKUgqaokoKCgqaCgoKCyoKCgpSmlIKCgpSCpoKmgoKCgoKCgpSClLiCgoIAzAGQA7KCgoKmgoKCgpSWkoKmgoKCAAgShJKigqY=", "49-59:1;101-109:1")]
-[assembly: GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ADQykqKClJKCgpSCgoKUgoKUpoKCgpSSgpSCgpSCgIKCpICCgqSCgpSCgoKUgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMoACAaCgoKUgoKU", "26-81:1;30-34:1.1;52-55:1.2")]
+[assembly: GoPositionMap("internal/trace/traceviewer/pprof.go", "pprof.cs", "ADQykqKClJKCgpSCgoKUgoKUpoKCgpSSgpSCgpSCgIKCpICCgqSCgpSCgoKUgoKiAAkSggAHEIKCgoKCgoKCgtyClAAJFIKUlMoACAaCgoKUgoKU", "26-81:1;30-34:1.1;52-55:1.2", "", "", "", "85:25,86:17")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

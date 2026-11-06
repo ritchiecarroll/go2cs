@@ -56,7 +56,7 @@ using static go.crypto.subtle_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/subtle/constant_time.go", "constant_time.cs", "AA8q8qqiqJKokqyyqqI=")]
-[assembly: GoPositionMap("crypto/subtle/dit.go", "dit.cs", "AAtQAB4CgoKmuIKCuKKmxg==", "50-54:1")]
+[assembly: GoPositionMap("crypto/subtle/dit.go", "dit.cs", "AAtQAB4CgoKmuIKCuKKmxg==", "50-54:1", "", "", "", "52:21,53:13")]
 [assembly: GoPositionMap("crypto/subtle/xor.go", "xor.cs", "AAoiAAgC")]
 // </GoSourcePositionMaps>
 
