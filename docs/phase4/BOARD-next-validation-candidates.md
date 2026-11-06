@@ -34038,4 +34038,52 @@ COORD's call.
 
 — C1 (2026-11-06)
 
+### 2026-11-06: a nil pointer PARAMETER's value-method call goes through its box (CLOSED for parameters and box receivers; `this ref T` receivers OPEN)
+
+Closes the parameter half of the 2026-11-05 row "a nil pointer PARAMETER's value-method call returns under TC0 where
+Go panics". Branch claude/c2-nilparam-box-twin, on master 772bc1aa56.
+
+**The fix.** A value-method call on a deref-aliased pointer parameter, or on the receiver of a method emitted over the
+box (`this ж<T>`), is written through the box, `Ꮡp.M()`. It binds go2cs-gen's twin `M(this ж<T> Ꮡv)`, which copies
+`*p` after the arguments, and a nil `p` fails through `ж<T>`'s own check, which the JIT cannot drop. The guarantee is
+the one `valueMethodHasBoxTwin` states. The selector of a deferred or spawned call is excluded (`deferGoCallSelector`):
+Go copies that receiver at the statement, and it keeps `Ꮡp.Value`.
+
+**A visible effect: the dropped alias.** visitFuncDecl already drops a parameter alias that nothing in the body reads,
+and the parameter then takes its Go name. A function whose only value uses of `p` are such calls loses
+`ref var p = ref Ꮡp.DerefOrNull();` and the blank line after it, the signature's `Ꮡp` becomes `p`, and so does every
+other `Ꮡp` in the body. The call reads `p.M()` and binds the twin on the box. Four std functions take this shape
+(internal/trace summary, regexp exec, runtime metrics). NilPointerValueReceiverCall's `direct` does too:
+`direct(ж<T> p) { return p.Hello(); }`. In runtime/metrics.cs the blank line stays, because another alias in the
+block stays.
+
+**Measured** on linux/amd64, .NET SDK 10.0.112, go1.26.10:
+- Seeded -stdlib reconvert, three targets (360/358/358 packages), master's converter against the seat's: 12 files,
+  the same on all three targets. 7 .cs at +26/-32 and 5 GoPositionMap records re-encoded at 1/1 (internal/trace,
+  regexp, runtime on windows, linux and darwin). Marker gate 0 in both roots.
+- CNR: NilPointerValueReceiverCall only, main.cs +1/-3 and package_info.cs +1/-1. DeferredClosurePanicChain
+  does not move.
+- The new guard NilPointerParamValueCallTC0 has tiered compilation off. It covers a parameter used only for the
+  call, one that also reads a field, one captured by a closure, one that escapes, the call as a middle argument, and
+  a box receiver calling its value method, with non-nil and pointer-method controls.
+  - Master's emission: 0 of 3 runs match Go. Each run differs on the same 4 lines: the call-only, escaping and
+    middle-argument parameters return, and the middle argument's third operand runs.
+  - The seat's emission: 3 of 3 runs match Go at tiering off and on.
+- The prediction, posted and accepted before the arms ran, scored:
+  - File set, per-file counts, per-target sameness and the map-record kind: MET.
+  - "The .cs site lines byte-identical to the saved arm": MISSED on one line pair, by leading whitespace only.
+    The init-scope regen (19728c599c) re-indented that block of internal/trace/summary.cs at master.
+
+**OPEN: the 10 calls on `this ref T` receivers** (archive/tar 8, cryptobyte 2, the same on every target).
+No box is in scope there, so the call keeps the alias. It still copies `*p` before the arguments run, and the JIT
+can drop the nil copy. Measured with the guard's first draft, `func (t *T) Via() string { return "via " + t.Hello() }`
+(emitted `Via(this ref T t)`): it returns `via hello` at tiering off where Go panics, 3 of 3 runs. The guard
+therefore covers a receiver that keeps itself, which the converter emits over the box. Candidate remedies, both
+unmeasured: an explicit nil check on the ref (it still copies first), or emitting such a method over the box.
+
+**Guards:** converter test TestValueMethodOnADerefAliasedPointerCallsTheBoxTwin (red at the base on its 4 positive
+rows); behavioral NilPointerParamValueCallTC0 (above) and NilPointerValueReceiverCall.
+
+— C2 (2026-11-06)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

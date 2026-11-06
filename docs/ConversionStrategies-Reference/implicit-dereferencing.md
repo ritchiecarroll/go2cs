@@ -61,13 +61,29 @@ These keep `(~p).M()`:
 - a method the manual registry displaces (`manualConversionTypes`, `manualConversionFuncs`), or a method of a type
   a hand-owned file of the package declares: the receiver form of its body is the hand author's.
 
-A pointer **parameter**, or the enclosing method's pointer receiver, already reads as its value alias (`ref var p =
-ref Ꮡp.DerefOrNull()`), and `p.M()` there passes that alias to `M(this T v)`, which copies it before the arguments
-run. A method VALUE (`f := p.M`) is not a call and copies at evaluation, as Go does
-([Function values and method values](value-receiver-delegates.md)). (Guarded by `ValueReceiverArgumentOrder` and
-`NilPointerValueReceiverCall`, both output-compared with Go; `TestValueMethodThroughAPointerReadsAsGoSpellsIt` for the
-emission and its controls; GenTests' `ValueReceiverBoxTwinTests` for the twin; GolibTests' `ValueMethodTwinTests`
-for the method-set readers.)
+A pointer **parameter**, or the receiver of a method emitted over the box (`this ж<T>`), reads as its value alias
+(`ref var p = ref Ꮡp.DerefOrNull()`), a null ref when `p` is nil. A value-method call on it goes through the box,
+`Ꮡp.M()`, and binds the same twin, so `*p` is copied after the arguments and a nil `p` panics through `ж<T>`'s own
+check. Called on the alias, `M(this T v)` would copy the null ref while the arguments are still being built, and the
+optimizing JIT drops that copy for a method that never reads its receiver, so with tiered compilation off a nil call
+returns where Go panics. A parameter whose every value use is such a call keeps no alias: the converter drops an
+unused alias, and the parameter then takes its Go name (`direct(ж<T> p) { return p.Hello(); }`). Two shapes keep the
+alias:
+- a receiver emitted as `this ref T` has no box in scope, so its value-method calls still copy before the arguments
+  run (an open row on the BOARD: 10 calls in archive/tar and cryptobyte);
+- the selector of a deferred or spawned call keeps `Ꮡp.Value`, the copy Go takes at the `defer` or `go` statement.
+
+A method VALUE (`f := p.M`) is not a call and copies at evaluation, as Go does
+([Function values and method values](value-receiver-delegates.md)). (Guarded by `ValueReceiverArgumentOrder`,
+`NilPointerValueReceiverCall` and, with tiered compilation off, `NilPointerParamValueCallTC0`, all output-compared with
+Go; `TestValueMethodThroughAPointerReadsAsGoSpellsIt` and `TestValueMethodOnADerefAliasedPointerCallsTheBoxTwin` for
+the emission and its controls; GenTests' `ValueReceiverBoxTwinTests` for the twin; GolibTests' `ValueMethodTwinTests`
+for the method-set readers.) <!-- the parameter route: src/go2cs/convSelectorExpr.go exprHasReceiverBoxInScope and
+identBoxExpr. Measured 2026-11-06 on linux/amd64 at master 772bc1aa56, NilPointerParamValueCallTC0 at tiering off:
+master's emission differs from Go on 4 lines in 3 of 3 runs (the call-only, escaping and middle-argument parameters
+return "hello", and the receiver that keeps itself returns "via hello"); through the box it matches Go in 3 of 3 runs
+at tiering off and on. A `this ref T` receiver measured the same way (`func (t *T) Via() string { return "via " +
+t.Hello() }`, emitted `Via(this ref T t)`) returns "via hello" at tiering off where Go panics. -->
 
 **An INDEX-expression assignment target takes the same `.Value` write path where the deref remains.** The
 field property serves `req.Header[k] = vv` directly; this rule governs the shapes above that keep the deref. When the assignment LHS
