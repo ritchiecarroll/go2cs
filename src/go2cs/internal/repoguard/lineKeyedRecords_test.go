@@ -50,6 +50,12 @@ import (
 // 1442 thunks fail. A table line that is blank is NOT a failure: 75 mapped lines are legitimately blank,
 // a statement whose emission starts with a separator line.
 //
+// WHAT (b) CANNOT SEE: a GoPositionMap record that is stale but still FITS its file. Rule (b) checks that a table
+// is well formed and inside the file, not that it is this file's table, so a shift that keeps every mapped line,
+// calls key and thunk inside the file passes. Two narrower rules close the shapes measured so far: (a)'s ordinal for
+// a bounded record, and testInfoPositionMapCopies_test.go for a test info's copy of a production record. A
+// production package_info.cs record shifted inside its own file has no witness short of re-emitting the package.
+//
 // POSITIVE CONTROL: TestLineKeyedRecordScannerFires plants one violation per rule and a clean control.
 
 var (
