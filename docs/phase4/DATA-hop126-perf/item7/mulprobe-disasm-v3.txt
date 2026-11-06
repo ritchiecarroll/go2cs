@@ -1,0 +1,57 @@
+# dumpbin /disasm of mulprobe.exe, IlcInstructionSet=x86-64-v3 (the positive control); the four spelling bodies
+mulprobe_P__A_BigMulOut:
+  0000000140034C30: 50                 push        rax
+  0000000140034C31: 48 89 54 24 18     mov         qword ptr [rsp+18h],rdx
+  0000000140034C36: 48 8D 04 24        lea         rax,[rsp]
+  0000000140034C3A: 4C 8B 54 24 18     mov         r10,qword ptr [rsp+18h]
+  0000000140034C3F: 48 8B D1           mov         rdx,rcx
+  0000000140034C42: C4 C2 B3 F6 CA     mulx        rcx,r9,r10
+  0000000140034C47: 4C 89 08           mov         qword ptr [rax],r9
+  0000000140034C4A: 48 8B C1           mov         rax,rcx
+  0000000140034C4D: 48 8B 0C 24        mov         rcx,qword ptr [rsp]
+  0000000140034C51: 49 89 08           mov         qword ptr [r8],rcx
+  0000000140034C54: 48 83 C4 08        add         rsp,8
+  0000000140034C58: C3                 ret
+mulprobe_P__B_BigMul128:
+  0000000140034C60: 50                 push        rax
+  0000000140034C61: 48 8D 04 24        lea         rax,[rsp]
+  0000000140034C65: C4 C2 AB F6 D0     mulx        rdx,r10,r8
+  0000000140034C6A: 4C 89 10           mov         qword ptr [rax],r10
+  0000000140034C6D: 48 8B 04 24        mov         rax,qword ptr [rsp]
+  0000000140034C71: 48 89 01           mov         qword ptr [rcx],rax
+  0000000140034C74: 48 89 51 08        mov         qword ptr [rcx+8],rdx
+  0000000140034C78: 48 8B C1           mov         rax,rcx
+  0000000140034C7B: 48 83 C4 08        add         rsp,8
+  0000000140034C7F: C3                 ret
+mulprobe_P__C_Widen:
+  0000000140034C80: 50                 push        rax
+  0000000140034C81: 48 8D 04 24        lea         rax,[rsp]
+  0000000140034C85: C4 C2 AB F6 D0     mulx        rdx,r10,r8
+  0000000140034C8A: 4C 89 10           mov         qword ptr [rax],r10
+  0000000140034C8D: 48 8B 04 24        mov         rax,qword ptr [rsp]
+  0000000140034C91: 48 89 01           mov         qword ptr [rcx],rax
+  0000000140034C94: 48 89 51 08        mov         qword ptr [rcx+8],rdx
+  0000000140034C98: 48 8B C1           mov         rax,rcx
+  0000000140034C9B: 48 83 C4 08        add         rsp,8
+  0000000140034C9F: C3                 ret
+mulprobe_P__D_WidenSplit:
+  0000000140034CA0: 48 83 EC 48        sub         rsp,48h
+  0000000140034CA4: 33 C0              xor         eax,eax
+  0000000140034CA6: 48 89 44 24 30     mov         qword ptr [rsp+30h],rax
+  0000000140034CAB: 48 89 54 24 58     mov         qword ptr [rsp+58h],rdx
+  0000000140034CB0: 48 8D 44 24 30     lea         rax,[rsp+30h]
+  0000000140034CB5: 4C 8B 54 24 58     mov         r10,qword ptr [rsp+58h]
+  0000000140034CBA: 48 8B D1           mov         rdx,rcx
+  0000000140034CBD: C4 C2 B3 F6 D2     mulx        rdx,r9,r10
+  0000000140034CC2: 4C 89 08           mov         qword ptr [rax],r9
+  0000000140034CC5: 48 8B 4C 24 30     mov         rcx,qword ptr [rsp+30h]
+  0000000140034CCA: 49 89 08           mov         qword ptr [r8],rcx
+  0000000140034CCD: 48 89 4C 24 20     mov         qword ptr [rsp+20h],rcx
+  0000000140034CD2: 48 89 54 24 28     mov         qword ptr [rsp+28h],rdx
+  0000000140034CD7: 48 8D 54 24 20     lea         rdx,[rsp+20h]
+  0000000140034CDC: 48 8D 4C 24 38     lea         rcx,[rsp+38h]
+  0000000140034CE1: 41 B8 40 00 00 00  mov         r8d,40h
+  0000000140034CE7: E8 E4 96 FD FF     call        S_P_CoreLib_System_UInt128__op_UnsignedRightShift
+  0000000140034CEC: 48 8B 44 24 38     mov         rax,qword ptr [rsp+38h]
+  0000000140034CF1: 48 83 C4 48        add         rsp,48h
+  0000000140034CF5: C3                 ret

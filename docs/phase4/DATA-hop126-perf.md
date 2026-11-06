@@ -655,6 +655,43 @@ Every table below, in ms (variant against baseline):
 | StringView | 29.4 | 20.9 | 1.405 | +40.5% | 18.6% | **moved** |
 | TlsHandshake | 1513.4 | 1071.6 | 1.412 | +41.2% | 2.8% | **moved** |
 
+### 10.x  GoReadyToRunUserCode (R2Ru) against the template's ReadyToRun, all 17 programs (a reader run, 2026-11-05)
+
+Inserted at the end of §10 after §11 landed, at COORD's ruling for the Tuning page, which needs the table under `GoReadyToRunUserCode`. NO new measurement: the
+reader `r2ruread.sh` runs over window 1's existing R2Ru samples (§5, `w1-r2ru-rest.tsv` and `w1-r2ru-review.tsv`):
+- the window's own `.2` R2R binary against the R2Ru publish of the same tree;
+- 5 rounds, or 11 for the review rows.
+
+Window 1 took no per-arm A/A for these arms. So each cell's floor is the LARGER of its two arms' IQRs and window 1's JIT
+A/A null (2.8%), and it is stated so in every row. A cell moves only beyond its floor, in either direction. Values are
+medians in ms: in-program time, except Startup's process wall.
+
+**Result: R2Ru moves 11 of 17 rows, ALL slower, and none faster.** Startup, Sort, RefLower, FieldView, Fib and
+TlsHandshake stay within. Seat #53's IL-only default is the faster publish everywhere it differs (§5 already read this
+direction).
+
+| program | R2Ru | R2R | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| Channel | 117.1 | 79.9 | 1.466 | +46.6% | 37.0% | **moved** |
+| Fib | 108.7 | 110.8 | 0.981 | -1.9% | 38.8% | within |
+| FieldView | 1909.0 | 1933.6 | 0.987 | -1.3% | 2.8% | within |
+| Iface | 660.4 | 376.1 | 1.756 | +75.6% | 4.2% | **moved** |
+| IfaceCall | 1458.1 | 339.6 | 4.294 | +329.4% | 2.8% | **moved** |
+| IfaceShell | 728.4 | 574.6 | 1.268 | +26.8% | 3.0% | **moved** |
+| IfaceShellChurn | 1188.1 | 1071.7 | 1.109 | +10.9% | 2.8% | **moved** |
+| Map | 268.9 | 248.9 | 1.080 | +8.0% | 2.8% | **moved** |
+| MatMul | 589.4 | 213.8 | 2.757 | +175.7% | 4.6% | **moved** |
+| RefLower | 524.7 | 535.0 | 0.981 | -1.9% | 2.8% | within |
+| Sieve | 265.2 | 139.5 | 1.901 | +90.1% | 3.1% | **moved** |
+| Sort | 255.0 | 254.4 | 1.003 | +0.3% | 3.1% | within |
+| Startup | 374.1 | 374.2 | 1.000 | -0.0% | 2.8% | within |
+| String | 1995.5 | 653.5 | 3.054 | +205.4% | 3.1% | **moved** |
+| StringMatch | 1215.2 | 804.7 | 1.510 | +51.0% | 6.3% | **moved** |
+| StringView | 605.2 | 21.8 | 27.792 | +2679.2% | 12.4% | **moved** |
+| TlsHandshake | 1079.6 | 1073.7 | 1.006 | +0.6% | 2.8% | within |
+
+Raw: `DATA-hop126-perf/sweep/r2ru-verdict.tsv` and the reader `r2ruread.sh`; samples are §5's `w1-r2ru-*.tsv`.
+
 
 ---
 
@@ -774,3 +811,64 @@ P1's extension-scan family.
 - Step B, approved, diagnostic only: one AOT image with BMI2 in `IlcInstructionSet`, to confirm cause 2. The shipping
   default is untouched; any instruction-set or portability change is the owner's call.
 - A design note on making `IsZeroSize` fold under ILC (cause 1), with options, footprint, risk and the expected gain.
+
+### 11.5 Amended 2026-11-05: the multiply scan, the cause-1 design note (option A ruled), and a probe trap
+
+Neither probe below was timed. Each is a small program built as a Native AOT image on G (ILC 10.0.11, SDK 10.0.400; the
+i9's is 10.0.14) and read with `dumpbin /disasm`. The sources and the disassembly are in [`item7/`](DATA-hop126-perf/item7/).
+
+**Step B's status.** The i9's first v3 build was refused by ILC in 30 s: G's request spelled the level `x86-x64-v3`, and
+this ILC accepts `x86-64-v3`. The rerun with that one token corrected is building, TlsHandshake first. On COORD's ask,
+the other 16 programs follow at v3, so the owner sees what the level buys across the suite and not only here.
+
+**The multiply scan: no C# spelling reaches a hardware multiply at the AOT baseline** (`mulprobe-*`). Reflection over
+.NET 10.0.11 shows no widening multiply on `X86Base` or `X86Base.X64`, which carry `DivRem` only. The one explicit
+64x64->128 intrinsic is `Bmi2.X64.MultiplyNoFlags`, which needs BMI2. Four spellings, each a non-inlined method in one
+image at the default instruction set:
+
+| spelling | default instruction set | `x86-64-v3` (positive control) |
+|:--|:--|:--|
+| `Math.BigMul(x, y, out lo)`, today's `bits_impl.cs` | call to `BigMul`'s software fallback | `mulx` |
+| `Math.BigMul(x, y)` returning `UInt128` | the same call | `mulx` |
+| `(UInt128)x * y` | the same call | `mulx` |
+| the same, split to hi/lo | the same call, plus a call for `UInt128 >>` | `mulx`, still with the `>>` call |
+
+All four print the same product. ILC 10.0.11 refuses a bare `bmi2`, so `x86-64-v3` is the narrowest named level that
+includes BMI2. Cause 2 is therefore an instruction-set decision for the owner, and Step B's timing prices it; there is no
+corpus spelling to change.
+
+**The cause-1 design note, and COORD's ruling.** `zsprobe-*` is a miniature of `slice<T>`'s indexer, with
+`GoZeroSizeFacts<T>`'s reflective initializer copied. It is built with the template's `TrimMode=partial`, and every
+variant prints the JIT's answers. Each gate spelling's indexer body, by element type:
+
+| gate | `nuint` | struct, no references | struct holding a reference | empty struct |
+|:--|:--|:--|:--|:--|
+| today: `static readonly IsZeroSize` | class-constructor check | class-constructor check | class-constructor check | class-constructor check |
+| A: a pre-gate, then the cached value | folded | class-constructor check | folded | class-constructor check |
+| B: an emitted marker interface, as a type test | folded | folded | folded | folded, to the zero path |
+
+"Folded" means no class-constructor check, no static read and no zero-size branch: 31 instructions against today's 54.
+Pre-gate A is `!typeof(T).IsValueType || typeof(T).IsPrimitive || typeof(T).IsEnum ||
+RuntimeHelpers.IsReferenceOrContainsReferences<T>()`; when it holds, the answer is false and the cached classification is
+never read.
+
+- **A** is golib only, one file: `IsZeroSize` becomes an inlined property, and the reflective field moves to a nested
+  holder. Its risk for genuinely zero-size types is none by construction. Every term is a case `Classify` itself answers
+  false: its own first line, and a reference field always has size. It covers TlsHandshake's `nuint`, so up to the
+  measured +448 ms (about 18% of the 2,534 ms AOT median). It also covers the `bool`, `float64` and `int` slices of
+  Sieve, MatMul and Sort, which run 2.2-3.4x their JIT under AOT; their share is unprofiled.
+- **B** is generator output or visible emission, plus hand marks. It is a second copy of the rule, computed at compile
+  time, and a generic struct whose zero-size-ness depends on a type argument cannot carry a static marker. A missed
+  marker silently changes Go behavior: `make([]T, MaxInt)` panics, and `&s[i]` stops being one address.
+- **Preinitialization** is not an option: ILC's preinitializer does not run reflection.
+
+**RULED (COORD): A.** R implements it, with a guard that the pre-gate holding implies `Classify` is false and a
+disassembly proof. G prices it: AOT images of TlsHandshake, Sieve, MatMul and Sort with that golib, timed against D26. B
+stays a later item, only if a profile shows slices of reference-free structs hot.
+
+**A probe trap, kept because it is the hazard itself** (`zsprobe-trap-outputs.txt`). G's first probe build used the AOT
+default, full trim. Its copied `Classify` called a bare `GetFields`, which saw NO fields on a 16-byte struct and so
+classified it as zero-size. Every element then aliased one slot: the loops summed 56 where the JIT summed 28.
+golib guards exactly this: `GoFieldMetadata.InstanceFields` refuses a value type wider than one byte that reports no
+fields, and the template's `TrimMode=partial` keeps converted assemblies whole. Built partial, the probe agrees with the
+JIT. Any classification that leans on reflection metadata under AOT needs both of those.
