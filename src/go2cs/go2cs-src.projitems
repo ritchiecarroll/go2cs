@@ -149,6 +149,7 @@
     <None Include="$(MSBuildThisFileDirectory)csReservedTypeNames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojMetadata_test.go" />
     <None Include="$(MSBuildThisFileDirectory)csprojTemplate_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)singleFileComposite_test.go" />
     <None Include="$(MSBuildThisFileDirectory)deadPointerParamAlias_test.go" />
     <None Include="$(MSBuildThisFileDirectory)declaredNotImplemented_test.go" />
     <None Include="$(MSBuildThisFileDirectory)descriptorCompanion.go" />
