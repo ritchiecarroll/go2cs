@@ -63,8 +63,8 @@ using static go.@internal.coverage.decodemeta_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKAgqSClKaUgoCCyIKCpoKmgqaCpoKqwoK4goCCpKaCuIKAgsiCgpSCpoKClIIACBKCgg==", "", "", "140=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
-[assembly: GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4tyAgqSmopSmgILIgoKCyoK4goKAgqSCuIKCgIKkgtyCgoKUgpSCgpSCpqaCgoKCgpSClIKqoqyyrLKssgACFPKCgoKCpoKUgoKUAAIUAAgGgpSClIKmgqaCgpSCgIKkgIKk", "", "", "189=Sum/1/1/1,Sprintf/1/1/1")]
+[assembly: GoPositionMap("internal/coverage/decodemeta/decode.go", "decode.cs", "AB4+goK4gIKkgIKkpqKClIKUppSCgriCgqaCpoKmgqaCqsKCuIKAgqSmgriCgILIgoKUgqaCgpSCAAgSgoI=", "", "", "136=ReadULEB128/1/5/2,ReadULEB128/2/5/3,ReadULEB128/3/5/4,ReadULEB128/4/5/5,ReadULEB128/5/5/6")]
+[assembly: GoPositionMap("internal/coverage/decodemeta/decodefile.go", "decodefile.cs", "ACla4tyClKailKaCuIKCgsqCuIKCgpSCuIKCgpSC3IKCgpSClIKClIKmpoKCgoKClIKUgqqirLKssqyyAAIU8oKCgoKmgpSCgpQAAhQACAaClIKUgqaCpoKClIKAgqSAgqQ=", "", "", "181=Sum/1/1/1,Sprintf/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

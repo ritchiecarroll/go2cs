@@ -521,12 +521,10 @@ internal static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token>
     var (size, numCodegens) = w.dynamicSize(w.literalEncoding, w.offsetEncoding, 0);
 
     // Store bytes, if we don't get a reasonable improvement.
-    {
-        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
-            w.writeStoredHeader(len(input), eof);
-            w.writeBytes(input);
-            return;
-        }
+    var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
+        w.writeStoredHeader(len(input), eof);
+        w.writeBytes(input);
+        return;
     }
 
     // Write Huffman table.
@@ -655,12 +653,10 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
     (var size, numCodegens) = w.dynamicSize(w.literalEncoding, huffOffset, 0);
 
     // Store bytes, if we don't get a reasonable improvement.
-    {
-        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
-            w.writeStoredHeader(len(input), eof);
-            w.writeBytes(input);
-            return;
-        }
+    var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
+        w.writeStoredHeader(len(input), eof);
+        w.writeBytes(input);
+        return;
     }
 
     // Huffman.

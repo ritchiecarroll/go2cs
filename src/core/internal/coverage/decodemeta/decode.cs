@@ -50,10 +50,8 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
 internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    {
-        var err = binary.Read(new slicereader_ReaderжReader(d.r), binary.LittleEndian, Ꮡd.Ꮡhdr); if (err != nil) {
-            return err;
-        }
+    var err = binary.Read(new slicereader_ReaderжReader(d.r), binary.LittleEndian, Ꮡd.Ꮡhdr); if (err != nil) {
+        return err;
     }
     if (d.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= after readHeader: %+v\n"u8, d.hdr);
@@ -64,10 +62,8 @@ internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) {
 internal static error readStringTable(this ref CoverageMetaDataDecoder d) {
     // Seek to the correct location to read the string table.
     var stringTableLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * d.hdr.NumFuncs);
-    {
-        var (_, err) = d.r.Seek(stringTableLocation, io.SeekStart); if (err != nil) {
-            return err;
-        }
+    var (_, err) = d.r.Seek(stringTableLocation, io.SeekStart); if (err != nil) {
+        return err;
     }
 
     // Read the table itself.

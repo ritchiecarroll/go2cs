@@ -163,28 +163,22 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         switch (l.Resource.Kind) {
         case var ᴛ2 when ᴛ2 == trace.ResourceGoroutine: {
             var id = l.Resource.Goroutine();
-            {
-                var (_, ok) = v.gs[id, ꟷ]; if (!ok) {
-                    e.Errorf("label for invalid goroutine %d", id);
-                }
+            if (v.gs[id, ꟷ] is not (_, true)) {
+                e.Errorf("label for invalid goroutine %d", id);
             }
             break;
         }
         case var ᴛ2 when ᴛ2 == trace.ResourceProc: {
             var id = l.Resource.Proc();
-            {
-                var (_, ok) = v.ps[id, ꟷ]; if (!ok) {
-                    e.Errorf("label for invalid proc %d", id);
-                }
+            if (v.ps[id, ꟷ] is not (_, true)) {
+                e.Errorf("label for invalid proc %d", id);
             }
             break;
         }
         case var ᴛ2 when ᴛ2 == trace.ResourceThread: {
             var id = l.Resource.Thread();
-            {
-                var (_, ok) = v.ms[id, ꟷ]; if (!ok) {
-                    e.Errorf("label for invalid thread %d", id);
-                }
+            if (v.ms[id, ꟷ] is not (_, true)) {
+                e.Errorf("label for invalid thread %d", id);
             }
             break;
         }}
@@ -361,13 +355,11 @@ public static error Event(this ж<Validator> Ꮡv, traceꓸEvent ev) {
         // We can see a task end without a begin, so ignore a task without information.
         // Instead, if we've seen the task begin, just make sure the task end lines up.
         var t = ev.Task();
-        {
-            var (typ, ok) = v.tasks[t.ID, ꟷ]; if (ok) {
-                if (t.Type != typ) {
-                    e.Errorf("task end type %q doesn't match task start type %q for task %d", t.Type, typ, t.ID);
-                }
-                delete(v.tasks, t.ID);
+        if (v.tasks[t.ID, ꟷ] is (var typ, true)) {
+            if (t.Type != typ) {
+                e.Errorf("task end type %q doesn't match task start type %q for task %d", t.Type, typ, t.ID);
             }
+            delete(v.tasks, t.ID);
         }
         break;
     }

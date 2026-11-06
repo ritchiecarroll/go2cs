@@ -50,10 +50,8 @@ internal static reflectꓸType nameType = reflect.TypeFor<Name>();
 // getTypeInfo returns the typeInfo structure with details necessary
 // for marshaling and unmarshaling typ.
 internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
-    {
-        var (tiΔ1, ok) = ᏑtinfoMap.Load(typ); if (ok) {
-            return (tiΔ1._<ж<typeInfo>>(), default);
-        }
+    var (tiΔ1, ok) = ᏑtinfoMap.Load(typ); if (ok) {
+        return (tiΔ1._<ж<typeInfo>>(), default);
     }
 
     var tinfo = Ꮡ(new typeInfo());
@@ -83,10 +81,8 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
                         var finfoΔ1 = vᴛ1;
 
                         finfoΔ1.idx = appendꓸꓸꓸ(slice<nint>([i]), finfoΔ1.idx);
-                        {
-                            var errΔ2 = addFieldInfo(typ, tinfo, ref finfoΔ1); if (errΔ2 != nil) {
-                                return (default, errΔ2);
-                            }
+                        var errΔ2 = addFieldInfo(typ, tinfo, ref finfoΔ1); if (errΔ2 != nil) {
+                            return (default, errΔ2);
                         }
                     }
                     continue;
@@ -122,10 +118,8 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
 
     // Split the tag from the xml namespace if necessary.
     @string tag = f.Tag.Get(xmlˢ);
-    {
-        var (ns, t, ok) = strings.Cut(tag, " "); if (ok) {
-            (finfo.xmlns, tag) = (ns, t);
-        }
+    var (ns, t, ok) = strings.Cut(tag, " "); if (ok) {
+        (finfo.xmlns, tag) = (ns, t);
     }
 
     // Parse flags.
@@ -169,25 +163,23 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
 
         // Validate the flags used.
         var valid = true;
-        {
-            fieldFlags mode = (fieldFlags)(finfo.flags & fMode);
-            switch (mode) {
-            case var ᴛ when ᴛ == (fieldFlags)(0): {
-                finfo.flags |= (fieldFlags)(fElement);
-                break;
-            }
-            case var ᴛ when ᴛ == fAttr || ᴛ == fCDATA || ᴛ == fCharData || ᴛ == fInnerXML || ᴛ == fComment || ᴛ == fAny || ᴛ == (fieldFlags)((fieldFlags)(fAny | fAttr)): {
-                if (f.Name == xmlName || tag != ""u8 && mode != fAttr) {
-                    valid = false;
-                }
-                break;
-            }
-            default: {
-                // This will also catch multiple modes in a single field.
-                valid = false;
-                break;
-            }}
+        fieldFlags mode = (fieldFlags)(finfo.flags & fMode);
+        switch (mode) {
+        case var ᴛ when ᴛ == (fieldFlags)(0): {
+            finfo.flags |= (fieldFlags)(fElement);
+            break;
         }
+        case var ᴛ when ᴛ == fAttr || ᴛ == fCDATA || ᴛ == fCharData || ᴛ == fInnerXML || ᴛ == fComment || ᴛ == fAny || ᴛ == (fieldFlags)((fieldFlags)(fAny | fAttr)): {
+            if (f.Name == xmlName || tag != ""u8 && mode != fAttr) {
+                valid = false;
+            }
+            break;
+        }
+        default: {
+            // This will also catch multiple modes in a single field.
+            valid = false;
+            break;
+        }}
         if ((fieldFlags)(finfo.flags & fMode) == fAny) {
             finfo.flags |= (fieldFlags)(fElement);
         }
@@ -218,12 +210,10 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         // If the name part of the tag is completely empty, get
         // default from XMLName of underlying struct if feasible,
         // or field name otherwise.
-        {
-            var xmlname = lookupXMLName(f.Type); if (xmlname != nil) {
-                (finfo.xmlns, finfo.name) = (xmlname.xmlns, xmlname.name);
-            } else {
-                finfo.name = f.Name;
-            }
+        var xmlname = lookupXMLName(f.Type); if (xmlname != nil) {
+            (finfo.xmlns, finfo.name) = (xmlname.xmlns, xmlname.name);
+        } else {
+            finfo.name = f.Name;
         }
         return (finfo, default);
     }

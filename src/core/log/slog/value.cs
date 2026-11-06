@@ -190,16 +190,14 @@ public static Value GroupValue(params ꓸꓸꓸAttr @asʗp) {
     // Remove empty groups.
     // It is simpler overall to do this at construction than
     // to check each Group recursively for emptiness.
-    {
-        nint n = countEmptyGroups(@as); if (n > 0) {
-            var as2 = new slice<Attr>(0, len(@as) - n);
-            foreach (var (_, a) in @as) {
-                if (!a.Value.isEmptyGroup()) {
-                    as2 = builtin.append(as2, a);
-                }
+    nint n = countEmptyGroups(@as); if (n > 0) {
+        var as2 = new slice<Attr>(0, len(@as) - n);
+        foreach (var (_, a) in @as) {
+            if (!a.Value.isEmptyGroup()) {
+                as2 = builtin.append(as2, a);
             }
-            @as = as2;
         }
+        @as = as2;
     }
     return new Value(num: (uint64)len(@as), any: new groupptr(@unsafe.SliceData(@as)));
 }
@@ -304,10 +302,8 @@ public static Value AnyValue(any v) {
 public static any Any(this Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == KindAny: {
-        {
-            var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
-                return (ΔKind)(nint)k;
-            }
+        var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
+            return (ΔKind)(nint)k;
         }
         return v.any;
     }
@@ -348,10 +344,8 @@ public static any Any(this Value v) {
 // the methods Int64, Float64, and so on, which panic if v is of the
 // wrong kind, String never panics.
 public static @string String(this Value v) {
-    {
-        var (sp, ok) = v.any._<stringptr>(ᐧ); if (ok) {
-            return @unsafe.String(sp, v.num);
-        }
+    var (sp, ok) = v.any._<stringptr>(ᐧ); if (ok) {
+        return @unsafe.String(sp, v.num);
     }
     slice<byte> buf = default;
     return (@string)v.append(buf);
@@ -364,11 +358,9 @@ internal static @string str(this Value v) {
 // Int64 returns v's value as an int64. It panics
 // if v is not a signed integer.
 public static int64 Int64(this Value v) {
-    {
-        ΔKind g = v.Kind();
-        ΔKind w = KindInt64; if (g != w) {
-            throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
-        }
+    ΔKind g = v.Kind();
+    ΔKind w = KindInt64; if (g != w) {
+        throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
     }
     return (int64)v.num;
 }
@@ -376,11 +368,9 @@ public static int64 Int64(this Value v) {
 // Uint64 returns v's value as a uint64. It panics
 // if v is not an unsigned integer.
 public static uint64 Uint64(this Value v) {
-    {
-        ΔKind g = v.Kind();
-        ΔKind w = KindUint64; if (g != w) {
-            throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
-        }
+    ΔKind g = v.Kind();
+    ΔKind w = KindUint64; if (g != w) {
+        throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
     }
     return v.num;
 }
@@ -388,11 +378,9 @@ public static uint64 Uint64(this Value v) {
 // Bool returns v's value as a bool. It panics
 // if v is not a bool.
 public static bool Bool(this Value v) {
-    {
-        ΔKind g = v.Kind();
-        ΔKind w = KindBool; if (g != w) {
-            throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
-        }
+    ΔKind g = v.Kind();
+    ΔKind w = KindBool; if (g != w) {
+        throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
     }
     return v.@bool();
 }
@@ -404,11 +392,9 @@ internal static bool @bool(this Value v) {
 // Duration returns v's value as a [time.Duration]. It panics
 // if v is not a time.Duration.
 public static time.Duration Duration(this Value v) {
-    {
-        ΔKind g = v.Kind();
-        ΔKind w = KindDuration; if (g != w) {
-            throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
-        }
+    ΔKind g = v.Kind();
+    ΔKind w = KindDuration; if (g != w) {
+        throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
     }
 
     return v.duration();
@@ -421,11 +407,9 @@ internal static time.Duration duration(this Value v) {
 // Float64 returns v's value as a float64. It panics
 // if v is not a float64.
 public static float64 Float64(this Value v) {
-    {
-        ΔKind g = v.Kind();
-        ΔKind w = KindFloat64; if (g != w) {
-            throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
-        }
+    ΔKind g = v.Kind();
+    ΔKind w = KindFloat64; if (g != w) {
+        throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
     }
 
     return v.@float();
@@ -438,11 +422,9 @@ internal static float64 @float(this Value v) {
 // Time returns v's value as a [time.Time]. It panics
 // if v is not a time.Time.
 public static time.Time Time(this Value v) {
-    {
-        ΔKind g = v.Kind();
-        ΔKind w = KindTime; if (g != w) {
-            throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
-        }
+    ΔKind g = v.Kind();
+    ΔKind w = KindTime; if (g != w) {
+        throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
     }
     return v.time();
 }
@@ -475,10 +457,8 @@ public static ΔLogValuer LogValuer(this Value v) {
 // Group returns v's value as a []Attr.
 // It panics if v's [Kind] is not [KindGroup].
 public static slice<Attr> Group(this Value v) {
-    {
-        var (sp, ok) = v.any._<groupptr>(ᐧ); if (ok) {
-            return @unsafe.Slice((ж<Attr>)(sp), v.num);
-        }
+    var (sp, ok) = v.any._<groupptr>(ᐧ); if (ok) {
+        return @unsafe.Slice((ж<Attr>)(sp), v.num);
     }
     throw panic("Group: bad kind");
 }
@@ -592,10 +572,8 @@ public static Value /*rv*/ Resolve(this Value v) {
     try {
         var orig = v;
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    rv = AnyValue(fmt.Errorf("LogValue panicked\n%s"u8, stack(3, 5)));
-                }
+            var r = recover(); if (r != nil) {
+                rv = AnyValue(fmt.Errorf("LogValue panicked\n%s"u8, stack(3, 5)));
             }
         }, ref ᒐ);
 

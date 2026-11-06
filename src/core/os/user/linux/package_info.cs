@@ -66,9 +66,9 @@ using static go.os.user_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("os/user/listgroups_unix.go", "listgroups_unix.cs", "ABQmgoKUgoKmgoKCppSCgoKCgoKUAAkUgsoABxCClJSUlJSCuIKClJSCgqampqKCgpSk", "", "", "", "111:21")]
-[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
-[assembly: GoPositionMap("os/user/lookup_stubs.go", "lookup_stubs.cs", "ABougqaCgqaSAAcQpIKUgtqClIKClIKClJSmgoCC2qaCgIKk", "", "", "38=currentGID/1/1/2,Getenv/1/1/3")]
-[assembly: GoPositionMap("os/user/lookup_unix.go", "lookup_unix.cs", "ABM4AAkCpoKCyoKClKaClMqCgqa4gu6CgpSCgriClIKU3IKCgpSCsoKmgtyUgIKkuIKAgoKCpKaCgIKCgqSqooKClIKygqaChJSAgqSAgqQAChaCuIKCgpSAgoKCpKaCgIKCgqSmooKClJLWooKClJLWooKClJLWooKClJI=", "99-117:1;146-175:1", "", "", "228:21,243:21,258:21,273:21")]
+[assembly: GoPositionMap("os/user/lookup.go", "lookup.cs", "AA4cntKAkoKUggALGKKClKqigpSqoqqiqJI=", "22-22:1")]
+[assembly: GoPositionMap("os/user/lookup_stubs.go", "lookup_stubs.cs", "ABougqaCgqaSAAcQpIKUgtqClIKClIKClJSmgoLKpoKClA==", "", "", "38=currentGID/1/1/2,Getenv/1/1/3")]
+[assembly: GoPositionMap("os/user/lookup_unix.go", "lookup_unix.cs", "ABM4AAkCpoKCyoKClKaClMqCgqa4gu6CgpSCgriClIKU3IKCgpSCsoKmgtyUgpS4goKCgpSmgoKCgpSqooKClIKygqaChJSClIKUAAoWgriCgoKUgoKClKaCgoKClKaigoKUktaigoKUktaigoKUktaigoKUkg==", "99-117:1;146-175:1", "", "", "214:21,229:21,244:21,259:21")]
 [assembly: GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
 // </GoSourcePositionMaps>
 

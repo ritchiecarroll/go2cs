@@ -74,11 +74,9 @@ internal static void randinit() {
         while (len(startupRand) > 0) {
             var buf = new slice<byte>(8);
             for (;;) {
-                {
-                    var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
-                        byteorder.BEPutUint64(buf, x);
-                        break;
-                    }
+                var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
+                    byteorder.BEPutUint64(buf, x);
+                    break;
                 }
                 ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Refill();
             }
@@ -137,11 +135,9 @@ internal static uint64 bootstrapRand() {
         fatal(randinitMissedˢ);
     }
     for (;;) {
-        {
-            var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
-                unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
-                return x;
-            }
+        var (x, ok) = ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Next(); if (ok) {
+            unlock(ᏑglobalRand.of(globalRandᴛ1.Ꮡlock));
+            return x;
         }
         ᏑglobalRand.of(globalRandᴛ1.Ꮡstate).Refill();
     }

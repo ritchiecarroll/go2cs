@@ -38,10 +38,8 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
     }
     case ж<ast.ExprStmt> sΔ1: {
         // calling the predeclared (possibly parenthesized) panic() function is terminating
-        {
-            var (call, ok) = ast.Unparen(sΔ1.X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
-                return true;
-            }
+        var (call, ok) = ast.Unparen(sΔ1.X)._<ж<ast.CallExpr>>(ᐧ); if (ok && check.isPanic[call]) {
+            return true;
         }
         break;
     }
@@ -91,10 +89,8 @@ internal static bool isTerminating(this ref Checker check, ast.Stmt s, @string l
 internal static bool isTerminatingList(this ref Checker check, slice<ast.Stmt> list, @string label) {
     // trailing empty statements are permitted - skip them
     for (nint i = len(list) - 1; i >= 0; i--) {
-        {
-            var (_, ok) = list[i]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
-                return check.isTerminating(list[i], label);
-            }
+        var (_, ok) = list[i]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
+            return check.isTerminating(list[i], label);
         }
     }
     return false; // all statements are empty

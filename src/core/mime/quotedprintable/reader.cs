@@ -50,15 +50,11 @@ internal static (byte b, error err) readHexByte(slice<byte> v) {
     }
     byte hb = default;
     byte lb = default;
-    {
-        (hb, err) = fromHex(v[0]); if (err != nil) {
-            return (0, err);
-        }
+    (hb, err) = fromHex(v[0]); if (err != nil) {
+        return (0, err);
     }
-    {
-        (lb, err) = fromHex(v[1]); if (err != nil) {
-            return (0, err);
-        }
+    (lb, err) = fromHex(v[1]); if (err != nil) {
+        return (0, err);
     }
     return ((byte)((byte)(hb << 4) | lb), default);
 }

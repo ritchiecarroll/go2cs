@@ -196,7 +196,10 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	result := strings.Builder{}
 	wroteDecls := false
 
+	savedCallSelector := v.deferGoCallSelector
+	v.deferGoCallSelector, _ = ast.Unparen(goStmt.Call.Fun).(*ast.SelectorExpr)
 	callExpr := strings.TrimSpace(v.convCallExpr(goStmt.Call, lambdaContext))
+	v.deferGoCallSelector = savedCallSelector
 
 	// The receiver snapshot splits the rendered call exactly as visitDeferStmt's does.
 	recvArg := ""

@@ -152,10 +152,8 @@ public static void AddLine(this ж<ΔFile> Ꮡf, nint offset) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
-    {
-        nint i = len(f.lines); if ((i == 0 || f.lines[i - 1] < offset) && offset < f.size) {
-            f.lines = append(f.lines, offset);
-        }
+    nint i = len(f.lines); if ((i == 0 || f.lines[i - 1] < offset) && offset < f.size) {
+        f.lines = append(f.lines, offset);
     }
     f.mutex.Unlock();
 }
@@ -303,10 +301,8 @@ public static void AddLineColumnInfo(this ж<ΔFile> Ꮡf, nint offset, @string 
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
-    {
-        nint i = len(f.infos); if ((i == 0 || f.infos[i - 1].Offset < offset) && offset < f.size) {
-            f.infos = append(f.infos, new lineInfo(offset, filename, line, column));
-        }
+    nint i = len(f.infos); if ((i == 0 || f.infos[i - 1].Offset < offset) && offset < f.size) {
+        f.infos = append(f.infos, new lineInfo(offset, filename, line, column));
     }
     f.mutex.Unlock();
 }
@@ -399,27 +395,23 @@ internal static (@string filename, nint line, nint column) unpack(this ж<ΔFile
     }
     if (adjusted && len(f.infos) > 0) {
         // few files have extra line infos
-        {
-            nint i = searchLineInfos(f.infos, offset); if (i >= 0) {
-                var alt = Ꮡ(f.infos, i);
-                filename = alt.Filename;
-                {
-                    nint iΔ1 = searchInts(f.lines, alt.Offset); if (iΔ1 >= 0) {
-                        // i+1 is the line at which the alternative position was recorded
-                        nint d = line - (iΔ1 + 1); // line distance from alternative position base
-                        line = alt.Line + d;
-                        if (alt.Column == 0) {
-                            // alternative column is unknown => relative column is unknown
-                            // (the current specification for line directives requires
-                            // this to apply until the next PosBase/line directive,
-                            // not just until the new newline)
-                            column = 0;
-                        } else if (d == 0) {
-                            // the alternative position base is on the current line
-                            // => column is relative to alternative column
-                            column = alt.Column + (offset - alt.Offset);
-                        }
-                    }
+        nint i = searchLineInfos(f.infos, offset); if (i >= 0) {
+            var alt = Ꮡ(f.infos, i);
+            filename = alt.Filename;
+            nint iΔ1 = searchInts(f.lines, alt.Offset); if (iΔ1 >= 0) {
+                // i+1 is the line at which the alternative position was recorded
+                nint d = line - (iΔ1 + 1); // line distance from alternative position base
+                line = alt.Line + d;
+                if (alt.Column == 0) {
+                    // alternative column is unknown => relative column is unknown
+                    // (the current specification for line directives requires
+                    // this to apply until the next PosBase/line directive,
+                    // not just until the new newline)
+                    column = 0;
+                } else if (d == 0) {
+                    // the alternative position base is on the current line
+                    // => column is relative to alternative column
+                    column = alt.Column + (offset - alt.Offset);
                 }
             }
         }
@@ -661,23 +653,19 @@ internal static ж<ΔFile> @file(this ж<FileSet> Ꮡs, ΔPos p) {
     bool ᒐd1 = false;
     try {
         // common case: p is in last file.
-        {
-            var f = Ꮡs.Ꮡlast.Load(); if (f != nil && f.@base <= (nint)p && (nint)p <= f.@base + f.size) {
-                return f;
-            }
+        var f = Ꮡs.Ꮡlast.Load(); if (f != nil && f.@base <= (nint)p && (nint)p <= f.@base + f.size) {
+            return f;
         }
 
         Ꮡs.Ꮡmutex.RLock();
         ᒐd1 = true;
 
         var (pn, _) = Ꮡs.Ꮡtree.locate(new Δkey((nint)p, (nint)p));
-        {
-            var n = pn.ValueSlot; if (n != nil) {
-                // Update cache of last file. A race is ok,
-                // but an exclusive lock causes heavy contention.
-                Ꮡs.Ꮡlast.Store(n.@file);
-                return n.@file;
-            }
+        var n = pn.ValueSlot; if (n != nil) {
+            // Update cache of last file. A race is ok,
+            // but an exclusive lock causes heavy contention.
+            Ꮡs.Ꮡlast.Store(n.@file);
+            return n.@file;
         }
         return default;
     }
@@ -705,10 +693,8 @@ public static ΔPosition /*pos*/ PositionFor(this ж<FileSet> Ꮡs, ΔPos p, boo
     ΔPosition pos = default;
 
     if (p != NoPos) {
-        {
-            var f = Ꮡs.@file(p); if (f != nil) {
-                return f.position(p, adjusted);
-            }
+        var f = Ꮡs.@file(p); if (f != nil) {
+            return f.position(p, adjusted);
         }
     }
     return pos;

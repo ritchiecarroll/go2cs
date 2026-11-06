@@ -554,18 +554,14 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
             ΔType t = default;
             switch (tval.type()) {
             case Offset toff: {
-                {
-                    (t, Ꮡerr.ValueSlot) = Ꮡd.readType(name, r.clone(), toff, typeCacheʗ1, Ꮡfixups); if (Ꮡerr.ValueSlot != nil) {
-                        return default;
-                    }
+                (t, Ꮡerr.ValueSlot) = Ꮡd.readType(name, r.clone(), toff, typeCacheʗ1, Ꮡfixups); if (Ꮡerr.ValueSlot != nil) {
+                    return default;
                 }
                 break;
             }
             case uint64 toff: {
-                {
-                    (t, Ꮡerr.ValueSlot) = Ꮡd.sigToType(toff); if (Ꮡerr.ValueSlot != nil) {
-                        return default;
-                    }
+                (t, Ꮡerr.ValueSlot) = Ꮡd.sigToType(toff); if (Ꮡerr.ValueSlot != nil) {
+                    return default;
                 }
                 break;
             }
@@ -590,10 +586,8 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
             var t = @new<ArrayType>();
             typ = new ArrayTypeжΔType(t);
             typeCache[off] = new ArrayTypeжΔType(t);
-            {
-                t.Type = typeOf(e); if (err != nil) {
-                    goto Error;
-                }
+            t.Type = typeOf(e); if (err != nil) {
+                goto Error;
             }
             (t.StrideBitSize, _) = e.Val(AttrStrideSize)._<int64>(ᐧ);
 
@@ -672,18 +666,16 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
                     // clang writes out 'complex' instead of 'complex float' or 'complex double'.
                     // clang also writes out a byte size that we can use to distinguish.
                     // See issue 8694.
-                    {
-                        var (byteSize, _) = e.Val(AttrByteSize)._<int64>(ᐧ);
-                        switch (byteSize) {
-                        case 8: {
-                            nameΔ2 = complexFloatˢ;
-                            break;
-                        }
-                        case 16: {
-                            nameΔ2 = complexDoubleˢ;
-                            break;
-                        }}
+                    var (byteSize, _) = e.Val(AttrByteSize)._<int64>(ᐧ);
+                    switch (byteSize) {
+                    case 8: {
+                        nameΔ2 = complexFloatˢ;
+                        break;
                     }
+                    case 16: {
+                        nameΔ2 = complexDoubleˢ;
+                        break;
+                    }}
                 }
                 break;
             }
@@ -764,10 +756,8 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
                     continue;
                 }
                 var f = @new<StructField>();
-                {
-                    f.Type = typeOf(kid); if (err != nil) {
-                        goto Error;
-                    }
+                f.Type = typeOf(kid); if (err != nil) {
+                    goto Error;
                 }
                 switch (kid.Val(AttrDataMemberLoc).type()) {
                 case slice<byte> loc: {
@@ -828,10 +818,8 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
             var t = @new<QualType>();
             typ = new QualTypeжΔType(t);
             typeCache[off] = new QualTypeжΔType(t);
-            {
-                t.Type = typeOf(e); if (err != nil) {
-                    goto Error;
-                }
+            t.Type = typeOf(e); if (err != nil) {
+                goto Error;
             }
             switch (e.Tag) {
             case var ᴛ2 when ᴛ2 == TagConstType: {
@@ -907,10 +895,8 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
             var t = @new<FuncType>();
             typ = new FuncTypeжΔType(t);
             typeCache[off] = new FuncTypeжΔType(t);
-            {
-                t.ReturnType = typeOf(e); if (err != nil) {
-                    goto Error;
-                }
+            t.ReturnType = typeOf(e); if (err != nil) {
+                goto Error;
             }
             t.ParamType = new slice<ΔType>(0, 8);
             for (var kid = next(); kid != nil; kid = next()) {
@@ -921,10 +907,8 @@ internal static (ΔType, error) readType(this ж<Data> Ꮡd, @string name, typeR
                     break;
                 }
                 case var ᴛ2 when ᴛ2 == TagFormalParameter: {
-                    {
-                        tkidΔ1 = typeOf(kid); if (err != nil) {
-                            goto Error;
-                        }
+                    tkidΔ1 = typeOf(kid); if (err != nil) {
+                        goto Error;
                     }
                     break;
                 }

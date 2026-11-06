@@ -66,11 +66,9 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
 
         // avoid "declared but not used" errors
         // (don't use Checker.use - we don't want to evaluate too much)
-        {
-            var (v, _) = obj._<ж<Var>>(ᐧ); if (v != nil && v.pkg == check.pkg) {
-                /* see Checker.use1 */
-                check.usedVars[v] = true;
-            }
+        var (v, _) = obj._<ж<Var>>(ᐧ); if (v != nil && v.pkg == check.pkg) {
+            /* see Checker.use1 */
+            check.usedVars[v] = true;
         }
         return;
     }
@@ -97,10 +95,8 @@ internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.I
     // If so, mark the respective package as used.
     // (This code is only needed for dot-imports. Without them,
     // we only have to mark variables, see *Var case below).
-    {
-        var pkgName = check.dotImportMap[new dotImportKey(scope, obj.Name())]; if (pkgName != nil) {
-            check.usedPkgNames[pkgName] = true;
-        }
+    var pkgName = check.dotImportMap[new dotImportKey(scope, obj.Name())]; if (pkgName != nil) {
+        check.usedPkgNames[pkgName] = true;
     }
 
     switch (obj.type()) {
@@ -200,15 +196,13 @@ internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, ΔType 
     // the middle of type-checking parameter declarations that might belong
     // to interface methods. Delay this check to the end of type-checking.
     check.later(() => {
-        {
-            var (t, _) = typ.Underlying()._<ж<Interface>>(ᐧ); if (t != nil) {
-                var tset = computeInterfaceTypeSet(Ꮡcheck, e.Pos(), t); // TODO(gri) is this the correct position?
-                if (!tset.IsMethodSet()) {
-                    if (tset.comparable) {
-                        Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface is (or embeds) comparable", typ);
-                    } else {
-                        Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface contains type constraints", typ);
-                    }
+        var (t, _) = typ.Underlying()._<ж<Interface>>(ᐧ); if (t != nil) {
+            var tset = computeInterfaceTypeSet(Ꮡcheck, e.Pos(), t); // TODO(gri) is this the correct position?
+            if (!tset.IsMethodSet()) {
+                if (tset.comparable) {
+                    Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface is (or embeds) comparable", typ);
+                } else {
+                    Ꮡcheck.softErrorf(new ast_Exprᴠpositioner(e), MisplacedConstraintIface, "cannot use type %s outside a type constraint: interface contains type constraints", typ);
                 }
             }
         }
@@ -374,13 +368,11 @@ internal static ΔType /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0,
             var typΔ2 = @new<Array>();
             // Provide a more specific error when encountering a [...] array
             // rather than leaving it to the handling of the ... expression.
-            {
-                var (_, ok) = e.Len._<ж<ast.Ellipsis>>(ᐧ); if (ok) {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(e.Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢ);
-                    typΔ2.len = -1;
-                } else {
-                    typΔ2.len = Ꮡcheck.arrayLength(e.Len);
-                }
+            var (_, ok) = e.Len._<ж<ast.Ellipsis>>(ᐧ); if (ok) {
+                Ꮡcheck.error(new ast_Exprᴠpositioner(e.Len), BadDotDotDotSyntax, invalidUseOfArrayOutsideˢ);
+                typΔ2.len = -1;
+            } else {
+                typΔ2.len = Ꮡcheck.arrayLength(e.Len);
             }
             typΔ2.elem = Ꮡcheck.varType(e.Elt);
             if (typΔ2.len >= 0) {
@@ -522,10 +514,8 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             res = typ; goto ᒐdone; // error already reported
         }
         // typ must be a generic Alias or Named type (but not a *Signature)
-        {
-            var (_, ok) = typ._<ж<ΔSignature>>(ᐧ); if (ok) {
-                throw panic("unexpected generic signature");
-            }
+        var (_, ok) = typ._<ж<ΔSignature>>(ᐧ); if (ok) {
+            throw panic("unexpected generic signature");
         }
         var gtyp = typ._<ΔgenericType>();
 
@@ -558,17 +548,15 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             var tparams = instʗ1.TypeParams().list();
             if (Ꮡcheck.validateTArgLen(Ꮡix.Value.Pos(), name, len(tparams), len(targsʗ1))) {
                 // check type constraints
-                {
-                    var (i, err) = Ꮡcheck.verify(Ꮡix.Value.Pos(), instʗ1.TypeParams().list(), targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
-                        // best position for error reporting
-                        tokenꓸPos pos = Ꮡix.Value.Pos();
-                        if (i < len(Ꮡix.Value.indices)) {
-                            pos = Ꮡix.Value.indices[i].Pos();
-                        }
-                        Ꮡcheck.softErrorf((atPos)pos, InvalidTypeArg, "%v", err);
-                    } else {
-                        Ꮡcheck.Ꮡmono.recordInstance(Ꮡcheck.Value.pkg, Ꮡix.Value.Pos(), tparams, targsʗ1, Ꮡix.Value.indices);
+                var (i, err) = Ꮡcheck.verify(Ꮡix.Value.Pos(), instʗ1.TypeParams().list(), targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
+                    // best position for error reporting
+                    tokenꓸPos pos = Ꮡix.Value.Pos();
+                    if (i < len(Ꮡix.Value.indices)) {
+                        pos = Ꮡix.Value.indices[i].Pos();
                     }
+                    Ꮡcheck.softErrorf((atPos)pos, InvalidTypeArg, "%v", err);
+                } else {
+                    Ꮡcheck.Ꮡmono.recordInstance(Ꮡcheck.Value.pkg, Ꮡix.Value.Pos(), tparams, targsʗ1, Ꮡix.Value.indices);
                 }
             }
         }).describef(new indexedExprжpositioner(Ꮡix), "verify instantiation %s", inst);
@@ -594,19 +582,15 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
     // attempt at a parameterized type declaration with missing
     // constraint. Provide an error message that mentions array
     // length.
-    {
-        var (name, _) = e._<ж<ast.Ident>>(ᐧ); if (name != nil) {
-            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(name.Name);
-            if (obj == nil) {
-                Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "undefined array length %s or missing type constraint", name.Name);
-                return -1;
-            }
-            {
-                var (_, ok) = obj._<ж<Const>>(ᐧ); if (!ok) {
-                    Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "invalid array length %s", name.Name);
-                    return -1;
-                }
-            }
+    var (name, _) = e._<ж<ast.Ident>>(ᐧ); if (name != nil) {
+        var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(name.Name);
+        if (obj == nil) {
+            Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "undefined array length %s or missing type constraint", name.Name);
+            return -1;
+        }
+        var (_, ok) = obj._<ж<Const>>(ᐧ); if (!ok) {
+            Ꮡcheck.errorf(new ast_Identжpositioner(name), InvalidArrayLen, "invalid array length %s", name.Name);
+            return -1;
         }
     }
 
@@ -620,14 +604,10 @@ internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) {
     }
 
     if (isUntyped(x.typ) || isInteger(x.typ)) {
-        {
-            var val = constant.ToInt(x.val); if (val.Kind() == constant.Int) {
-                if (representableConst(val, Ꮡcheck, Typ[Int], nil)) {
-                    {
-                        var (n, ok) = constant.Int64Val(val); if (ok && n >= 0) {
-                            return n;
-                        }
-                    }
+        var val = constant.ToInt(x.val); if (val.Kind() == constant.Int) {
+            if (representableConst(val, Ꮡcheck, Typ[Int], nil)) {
+                var (n, ok) = constant.Int64Val(val); if (ok && n >= 0) {
+                    return n;
                 }
             }
         }

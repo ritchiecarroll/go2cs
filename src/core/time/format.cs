@@ -217,147 +217,145 @@ internal static bool startsWithLowerCase(@string str) {
 //go:linkname nextStdChunk
 internal static (@string prefix, nint std, @string suffix) nextStdChunk(@string layout) {
     for (nint i = 0; i < len(layout); i++) {
-        {
-            nint c = (nint)layout[i];
-            switch (c) {
-            case 'J': { // January, Jan
-                if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "Jan") {
-                    if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "January") {
-                        return (layout.slice(0, i), stdLongMonth, layout.slice(i + 7));
+        nint c = (nint)layout[i];
+        switch (c) {
+        case 'J': { // January, Jan
+            if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "Jan") {
+                if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "January") {
+                    return (layout.slice(0, i), stdLongMonth, layout.slice(i + 7));
+                }
+                if (!startsWithLowerCase(layout.slice(i + 3))) {
+                    return (layout.slice(0, i), stdMonth, layout.slice(i + 3));
+                }
+            }
+            break;
+        }
+        case 'M': { // Monday, Mon, MST
+            if (len(layout) >= i + 3) {
+                if (layout.slice(i, i + 3) == "Mon") {
+                    if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "Monday") {
+                        return (layout.slice(0, i), stdLongWeekDay, layout.slice(i + 6));
                     }
                     if (!startsWithLowerCase(layout.slice(i + 3))) {
-                        return (layout.slice(0, i), stdMonth, layout.slice(i + 3));
+                        return (layout.slice(0, i), stdWeekDay, layout.slice(i + 3));
                     }
                 }
-                break;
+                if (layout.slice(i, i + 3) == "MST") {
+                    return (layout.slice(0, i), stdTZ, layout.slice(i + 3));
+                }
             }
-            case 'M': { // Monday, Mon, MST
-                if (len(layout) >= i + 3) {
-                    if (layout.slice(i, i + 3) == "Mon") {
-                        if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "Monday") {
-                            return (layout.slice(0, i), stdLongWeekDay, layout.slice(i + 6));
-                        }
-                        if (!startsWithLowerCase(layout.slice(i + 3))) {
-                            return (layout.slice(0, i), stdWeekDay, layout.slice(i + 3));
-                        }
-                    }
-                    if (layout.slice(i, i + 3) == "MST") {
-                        return (layout.slice(0, i), stdTZ, layout.slice(i + 3));
-                    }
-                }
-                break;
-            }
-            case '0': { // 01, 02, 03, 04, 05, 06, 002
-                if (len(layout) >= i + 2 && '1' <= layout[i + 1] && layout[i + 1] <= '6') {
-                    return (layout.slice(0, i), std0x[(byte)(layout[i + 1] - '1')], layout.slice(i + 2));
-                }
-                if (len(layout) >= i + 3 && layout[i + 1] == '0' && layout[i + 2] == '2') {
-                    return (layout.slice(0, i), stdZeroYearDay, layout.slice(i + 3));
-                }
-                break;
-            }
-            case '1': { // 15, 1
-                if (len(layout) >= i + 2 && layout[i + 1] == '5') {
-                    return (layout.slice(0, i), stdHour, layout.slice(i + 2));
-                }
-                return (layout.slice(0, i), stdNumMonth, layout.slice(i + 1));
-            }
-            case '2': { // 2006, 2
-                if (len(layout) >= i + 4 && layout.slice(i, i + 4) == "2006") {
-                    return (layout.slice(0, i), stdLongYear, layout.slice(i + 4));
-                }
-                return (layout.slice(0, i), stdDay, layout.slice(i + 1));
-            }
-            case '_': { // _2, _2006, __2
-                if (len(layout) >= i + 2 && layout[i + 1] == '2') {
-                    // _2006 is really a literal _, followed by stdLongYear
-                    if (len(layout) >= i + 5 && layout.slice(i + 1, i + 5) == "2006") {
-                        return (layout.slice(0, i + 1), stdLongYear, layout.slice(i + 5));
-                    }
-                    return (layout.slice(0, i), stdUnderDay, layout.slice(i + 2));
-                }
-                if (len(layout) >= i + 3 && layout[i + 1] == '_' && layout[i + 2] == '2') {
-                    return (layout.slice(0, i), stdUnderYearDay, layout.slice(i + 3));
-                }
-                break;
-            }
-            case '3': {
-                return (layout.slice(0, i), stdHour12, layout.slice(i + 1));
-            }
-            case '4': {
-                return (layout.slice(0, i), stdMinute, layout.slice(i + 1));
-            }
-            case '5': {
-                return (layout.slice(0, i), stdSecond, layout.slice(i + 1));
-            }
-            case 'P': { // PM
-                if (len(layout) >= i + 2 && layout[i + 1] == 'M') {
-                    return (layout.slice(0, i), stdPM, layout.slice(i + 2));
-                }
-                break;
-            }
-            case 'p': { // pm
-                if (len(layout) >= i + 2 && layout[i + 1] == 'm') {
-                    return (layout.slice(0, i), stdpm, layout.slice(i + 2));
-                }
-                break;
-            }
-            case '-': { // -070000, -07:00:00, -0700, -07:00, -07
-                if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "-070000") {
-                    return (layout.slice(0, i), stdNumSecondsTz, layout.slice(i + 7));
-                }
-                if (len(layout) >= i + 9 && layout.slice(i, i + 9) == "-07:00:00") {
-                    return (layout.slice(0, i), stdNumColonSecondsTZ, layout.slice(i + 9));
-                }
-                if (len(layout) >= i + 5 && layout.slice(i, i + 5) == "-0700") {
-                    return (layout.slice(0, i), stdNumTZ, layout.slice(i + 5));
-                }
-                if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "-07:00") {
-                    return (layout.slice(0, i), stdNumColonTZ, layout.slice(i + 6));
-                }
-                if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "-07") {
-                    return (layout.slice(0, i), stdNumShortTZ, layout.slice(i + 3));
-                }
-                break;
-            }
-            case 'Z': { // Z070000, Z07:00:00, Z0700, Z07:00,
-                if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "Z070000") {
-                    return (layout.slice(0, i), stdISO8601SecondsTZ, layout.slice(i + 7));
-                }
-                if (len(layout) >= i + 9 && layout.slice(i, i + 9) == "Z07:00:00") {
-                    return (layout.slice(0, i), stdISO8601ColonSecondsTZ, layout.slice(i + 9));
-                }
-                if (len(layout) >= i + 5 && layout.slice(i, i + 5) == "Z0700") {
-                    return (layout.slice(0, i), stdISO8601TZ, layout.slice(i + 5));
-                }
-                if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "Z07:00") {
-                    return (layout.slice(0, i), stdISO8601ColonTZ, layout.slice(i + 6));
-                }
-                if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "Z07") {
-                    return (layout.slice(0, i), stdISO8601ShortTZ, layout.slice(i + 3));
-                }
-                break;
-            }
-            case '.' or ',': { // ,000, or .000, or ,999, or .999 - repeated digits for fractional seconds.
-                if (i + 1 < len(layout) && (layout[i + 1] == '0' || layout[i + 1] == '9')) {
-                    var ch = layout[i + 1];
-                    nint j = i + 1;
-                    while (j < len(layout) && layout[j] == ch) {
-                        j++;
-                    }
-                    // String of digits must end here - only fractional second is all digits.
-                    if (!isDigit(layout, j)) {
-                        nint code = stdFracSecond0;
-                        if (layout[i + 1] == '9') {
-                            code = stdFracSecond9;
-                        }
-                        nint stdΔ2 = stdFracSecond(code, j - (i + 1), c);
-                        return (layout.slice(0, i), stdΔ2, layout.slice(j));
-                    }
-                }
-                break;
-            }}
+            break;
         }
+        case '0': { // 01, 02, 03, 04, 05, 06, 002
+            if (len(layout) >= i + 2 && '1' <= layout[i + 1] && layout[i + 1] <= '6') {
+                return (layout.slice(0, i), std0x[(byte)(layout[i + 1] - '1')], layout.slice(i + 2));
+            }
+            if (len(layout) >= i + 3 && layout[i + 1] == '0' && layout[i + 2] == '2') {
+                return (layout.slice(0, i), stdZeroYearDay, layout.slice(i + 3));
+            }
+            break;
+        }
+        case '1': { // 15, 1
+            if (len(layout) >= i + 2 && layout[i + 1] == '5') {
+                return (layout.slice(0, i), stdHour, layout.slice(i + 2));
+            }
+            return (layout.slice(0, i), stdNumMonth, layout.slice(i + 1));
+        }
+        case '2': { // 2006, 2
+            if (len(layout) >= i + 4 && layout.slice(i, i + 4) == "2006") {
+                return (layout.slice(0, i), stdLongYear, layout.slice(i + 4));
+            }
+            return (layout.slice(0, i), stdDay, layout.slice(i + 1));
+        }
+        case '_': { // _2, _2006, __2
+            if (len(layout) >= i + 2 && layout[i + 1] == '2') {
+                // _2006 is really a literal _, followed by stdLongYear
+                if (len(layout) >= i + 5 && layout.slice(i + 1, i + 5) == "2006") {
+                    return (layout.slice(0, i + 1), stdLongYear, layout.slice(i + 5));
+                }
+                return (layout.slice(0, i), stdUnderDay, layout.slice(i + 2));
+            }
+            if (len(layout) >= i + 3 && layout[i + 1] == '_' && layout[i + 2] == '2') {
+                return (layout.slice(0, i), stdUnderYearDay, layout.slice(i + 3));
+            }
+            break;
+        }
+        case '3': {
+            return (layout.slice(0, i), stdHour12, layout.slice(i + 1));
+        }
+        case '4': {
+            return (layout.slice(0, i), stdMinute, layout.slice(i + 1));
+        }
+        case '5': {
+            return (layout.slice(0, i), stdSecond, layout.slice(i + 1));
+        }
+        case 'P': { // PM
+            if (len(layout) >= i + 2 && layout[i + 1] == 'M') {
+                return (layout.slice(0, i), stdPM, layout.slice(i + 2));
+            }
+            break;
+        }
+        case 'p': { // pm
+            if (len(layout) >= i + 2 && layout[i + 1] == 'm') {
+                return (layout.slice(0, i), stdpm, layout.slice(i + 2));
+            }
+            break;
+        }
+        case '-': { // -070000, -07:00:00, -0700, -07:00, -07
+            if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "-070000") {
+                return (layout.slice(0, i), stdNumSecondsTz, layout.slice(i + 7));
+            }
+            if (len(layout) >= i + 9 && layout.slice(i, i + 9) == "-07:00:00") {
+                return (layout.slice(0, i), stdNumColonSecondsTZ, layout.slice(i + 9));
+            }
+            if (len(layout) >= i + 5 && layout.slice(i, i + 5) == "-0700") {
+                return (layout.slice(0, i), stdNumTZ, layout.slice(i + 5));
+            }
+            if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "-07:00") {
+                return (layout.slice(0, i), stdNumColonTZ, layout.slice(i + 6));
+            }
+            if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "-07") {
+                return (layout.slice(0, i), stdNumShortTZ, layout.slice(i + 3));
+            }
+            break;
+        }
+        case 'Z': { // Z070000, Z07:00:00, Z0700, Z07:00,
+            if (len(layout) >= i + 7 && layout.slice(i, i + 7) == "Z070000") {
+                return (layout.slice(0, i), stdISO8601SecondsTZ, layout.slice(i + 7));
+            }
+            if (len(layout) >= i + 9 && layout.slice(i, i + 9) == "Z07:00:00") {
+                return (layout.slice(0, i), stdISO8601ColonSecondsTZ, layout.slice(i + 9));
+            }
+            if (len(layout) >= i + 5 && layout.slice(i, i + 5) == "Z0700") {
+                return (layout.slice(0, i), stdISO8601TZ, layout.slice(i + 5));
+            }
+            if (len(layout) >= i + 6 && layout.slice(i, i + 6) == "Z07:00") {
+                return (layout.slice(0, i), stdISO8601ColonTZ, layout.slice(i + 6));
+            }
+            if (len(layout) >= i + 3 && layout.slice(i, i + 3) == "Z07") {
+                return (layout.slice(0, i), stdISO8601ShortTZ, layout.slice(i + 3));
+            }
+            break;
+        }
+        case '.' or ',': { // ,000, or .000, or ,999, or .999 - repeated digits for fractional seconds.
+            if (i + 1 < len(layout) && (layout[i + 1] == '0' || layout[i + 1] == '9')) {
+                var ch = layout[i + 1];
+                nint j = i + 1;
+                while (j < len(layout) && layout[j] == ch) {
+                    j++;
+                }
+                // String of digits must end here - only fractional second is all digits.
+                if (!isDigit(layout, j)) {
+                    nint code = stdFracSecond0;
+                    if (layout[i + 1] == '9') {
+                        code = stdFracSecond9;
+                    }
+                    nint stdΔ2 = stdFracSecond(code, j - (i + 1), c);
+                    return (layout.slice(0, i), stdΔ2, layout.slice(j));
+                }
+            }
+            break;
+        }}
     }
     return (layout, 0, "");
 }
@@ -644,39 +642,37 @@ public static @string GoString(this Time t) {
     buf = append(buf, ((@string)", ").ꓸꓸꓸ);
     buf = appendInt(buf, t.Nanosecond(), 0);
     buf = append(buf, ((@string)", ").ꓸꓸꓸ);
-    {
-        var loc = t.Location();
-        switch (loc) {
-        case var ᴛ when ᴛ == ΔUTC || ᴛ == default: {
-            buf = append(buf, ((@string)"time.UTC").ꓸꓸꓸ);
-            break;
-        }
-        case var ᴛ when ᴛ == ΔLocal: {
-            buf = append(buf, ((@string)"time.Local").ꓸꓸꓸ);
-            break;
-        }
-        default: {
-            // there are several options for how we could display this, none of
-            // which are great:
-            //
-            // - use Location(loc.name), which is not technically valid syntax
-            // - use LoadLocation(loc.name), which will cause a syntax error when
-            // embedded and also would require us to escape the string without
-            // importing fmt or strconv
-            // - try to use FixedZone, which would also require escaping the name
-            // and would represent e.g. "America/Los_Angeles" daylight saving time
-            // shifts inaccurately
-            // - use the pointer format, which is no worse than you'd get with the
-            // old fmt.Sprintf("%#v", t) format.
-            //
-            // Of these, Location(loc.name) is the least disruptive. This is an edge
-            // case we hope not to hit too often.
-            buf = append(buf, ((@string)@"time.Location(").ꓸꓸꓸ);
-            buf = append(buf, quote(loc.name).ꓸꓸꓸ);
-            buf = append(bufᴷ, buf, (byte)')');
-            break;
-        }}
+    var loc = t.Location();
+    switch (loc) {
+    case var ᴛ when ᴛ == ΔUTC || ᴛ == default: {
+        buf = append(buf, ((@string)"time.UTC").ꓸꓸꓸ);
+        break;
     }
+    case var ᴛ when ᴛ == ΔLocal: {
+        buf = append(buf, ((@string)"time.Local").ꓸꓸꓸ);
+        break;
+    }
+    default: {
+        // there are several options for how we could display this, none of
+        // which are great:
+        //
+        // - use Location(loc.name), which is not technically valid syntax
+        // - use LoadLocation(loc.name), which will cause a syntax error when
+        // embedded and also would require us to escape the string without
+        // importing fmt or strconv
+        // - try to use FixedZone, which would also require escaping the name
+        // and would represent e.g. "America/Los_Angeles" daylight saving time
+        // shifts inaccurately
+        // - use the pointer format, which is no worse than you'd get with the
+        // old fmt.Sprintf("%#v", t) format.
+        //
+        // Of these, Location(loc.name) is the least disruptive. This is an edge
+        // case we hope not to hit too often.
+        buf = append(buf, ((@string)@"time.Location(").ꓸꓸꓸ);
+        buf = append(buf, quote(loc.name).ꓸꓸꓸ);
+        buf = append(bufᴷ, buf, (byte)')');
+        break;
+    }}
     buf = append(buf, (byte)')');
     return (@string)buf;
 }
@@ -1122,10 +1118,8 @@ internal static (@string, error) skip(@string value, @string prefix) {
 public static (Time, error) Parse(@string layout, @string value) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     if (layout == RFC3339 || layout == RFC3339Nano) {
-        {
-            var (t, ok) = parseRFC3339(value, ΔLocal); if (ok) {
-                return (t, default);
-            }
+        var (t, ok) = parseRFC3339(value, ΔLocal); if (ok) {
+            return (t, default);
         }
     }
     return parse(layout, value, ΔUTC, ΔLocal);
@@ -1139,10 +1133,8 @@ public static (Time, error) Parse(@string layout, @string value) {
 public static (Time, error) ParseInLocation(@string layout, @string value, ж<ΔLocation> loc) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     if (layout == RFC3339 || layout == RFC3339Nano) {
-        {
-            var (t, ok) = parseRFC3339(value, loc); if (ok) {
-                return (t, default);
-            }
+        var (t, ok) = parseRFC3339(value, loc); if (ok) {
+            return (t, default);
         }
     }
     return parse(layout, value, loc, loc);
@@ -1653,10 +1645,8 @@ internal static (nint length, bool ok) parseTimeZone(@string value) {
         if (nUpper >= len(value)) {
             break;
         }
-        {
-            var c = value[nUpper]; if (c < 'A' || 'Z' < c) {
-                break;
-            }
+        var c = value[nUpper]; if (c < 'A' || 'Z' < c) {
+            break;
         }
     }
     switch (nUpper) {
@@ -1737,10 +1727,8 @@ internal static (nint ns, @string rangeErrString, error err) parseNanoseconds<by
         value = value[..10];
         nbytes = 10;
     }
-    {
-        (ns, err) = atoi(value.slice(1, nbytes)); if (err != nil) {
-            return (ns, rangeErrString, err);
-        }
+    (ns, err) = atoi(value.slice(1, nbytes)); if (err != nil) {
+        return (ns, rangeErrString, err);
     }
     if (ns < 0) {
         rangeErrString = fractionalSecondˢ;

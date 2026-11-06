@@ -102,10 +102,8 @@ internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) {
 
     // Since this is a lot like a free, we need to make sure
     // we update the searchAddr just like free does.
-    {
-        var b = (new offAddr(c.@base)); if (b.lessThan(Δp.searchAddr)) {
-            Δp.searchAddr = b;
-        }
+    var b = (new offAddr(c.@base)); if (b.lessThan(Δp.searchAddr)) {
+        Δp.searchAddr = b;
     }
     Δp.update(c.@base, pageCachePages, false, false);
     c = new pageCache();

@@ -7,10 +7,8 @@ partial class main_package {
 // type Compressor is a methodless func type — rendered inline as its base delegate
 
 internal static Func<nint, nint> lookup(any i) {
-    {
-        var (c, ok) = i._<Func<nint, nint>>(ᐧ); if (ok) {
-            return c;
-        }
+    var (c, ok) = i._<Func<nint, nint>>(ᐧ); if (ok) {
+        return c;
     }
     return default;
 }

@@ -129,10 +129,8 @@ internal static (workerComm comm, error err) getWorkerComm() {
     ref var fuzzInFD = ref heap(new uintptr(), out var ᏑfuzzInFD);
     ref var fuzzOutFD = ref heap(new uintptr(), out var ᏑfuzzOutFD);
     ref var memFileFD = ref heap(new uintptr(), out var ᏑmemFileFD);
-    {
-        var (_, errΔ1) = fmt.Sscanf(v, "%x,%x,%x"u8, ᏑfuzzInFD, ᏑfuzzOutFD, ᏑmemFileFD); if (errΔ1 != nil) {
-            return (new workerComm(), fmt.Errorf("parsing GO_TEST_FUZZ_WORKER_HANDLES=%s: %v"u8, v, errΔ1));
-        }
+    var (_, errΔ1) = fmt.Sscanf(v, "%x,%x,%x"u8, ᏑfuzzInFD, ᏑfuzzOutFD, ᏑmemFileFD); if (errΔ1 != nil) {
+        return (new workerComm(), fmt.Errorf("parsing GO_TEST_FUZZ_WORKER_HANDLES=%s: %v"u8, v, errΔ1));
     }
 
     var fuzzIn = os.NewFile(fuzzInFD, fuzzInˢ);

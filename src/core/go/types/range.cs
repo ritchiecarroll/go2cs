@@ -53,29 +53,27 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
         Ꮡcheck.expr(nil, Ꮡx, rangeVar);
 
         if (isTypes2 && x.mode != invalid && sValue == nil && !check.hasCallOrRecv) {
-            {
-                var (t, ok) = arrayPtrDeref(x.typ.Underlying())._<ж<Array>>(ᐧ); if (ok) {
-                    for (;;) {
-                        // Put constant info on the thing inside parentheses.
-                        // That's where (*../noder/writer).expr expects it.
-                        // See issue 73476.
-                        var (p, okΔ1) = rangeVar._<ж<ast.ParenExpr>>(ᐧ);
-                        if (!okΔ1) {
-                            break;
-                        }
-                        rangeVar = p.X;
+            var (t, ok) = arrayPtrDeref(x.typ.Underlying())._<ж<Array>>(ᐧ); if (ok) {
+                for (;;) {
+                    // Put constant info on the thing inside parentheses.
+                    // That's where (*../noder/writer).expr expects it.
+                    // See issue 73476.
+                    var (p, okΔ1) = rangeVar._<ж<ast.ParenExpr>>(ᐧ);
+                    if (!okΔ1) {
+                        break;
                     }
-                    // Override type of rangeVar to be a constant
-                    // (and thus side-effects will not be computed
-                    // by the backend).
-                    check.record(Ꮡ(new operand(
-                        mode: constant_,
-                        expr: rangeVar,
-                        typ: new BasicжΔType(Typ[Int]),
-                        val: constant.MakeInt64(t.len),
-                        id: x.id
-                    )));
+                    rangeVar = p.X;
                 }
+                // Override type of rangeVar to be a constant
+                // (and thus side-effects will not be computed
+                // by the backend).
+                check.record(Ꮡ(new operand(
+                    mode: constant_,
+                    expr: rangeVar,
+                    typ: new BasicжΔType(Typ[Int]),
+                    val: constant.MakeInt64(t.len),
+                    id: x.id
+                )));
             }
         }
 
@@ -132,20 +130,18 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
 
                 // determine lhs variable
                 ж<Var> obj = default;
-                {
-                    var (ident, _) = lhsΔ1._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
-                        // declare new variable
-                        @string name = ident.Name;
-                        obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default);
-                        check.recordDef(ident, new VarжObject(obj));
-                        // _ variables don't count as new variables
-                        if (name != "_"u8) {
-                            vars = append(varsᴷ, vars, obj);
-                        }
-                    } else {
-                        Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), InvalidSyntaxTree, "cannot declare %s", lhsΔ1);
-                        obj = newVar(LocalVar, lhsΔ1.Pos(), check.pkg, "_", default); // dummy variable
+                var (ident, _) = lhsΔ1._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
+                    // declare new variable
+                    @string name = ident.Name;
+                    obj = newVar(LocalVar, ident.Pos(), check.pkg, name, default);
+                    check.recordDef(ident, new VarжObject(obj));
+                    // _ variables don't count as new variables
+                    if (name != "_"u8) {
+                        vars = append(varsᴷ, vars, obj);
                     }
+                } else {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(lhsΔ1), InvalidSyntaxTree, "cannot declare %s", lhsΔ1);
+                    obj = newVar(LocalVar, lhsΔ1.Pos(), check.pkg, "_", default); // dummy variable
                 }
                 assert(obj.typ == nil);
 
@@ -262,10 +258,8 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ж<
 
     var (rtyp, err) = commonUnder(orig, (ΔType t, ΔType u) => {
         // A channel must permit receive operations.
-        {
-            var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && ch.dir == SendOnly) {
-                return typeErrorf("receive from send-only channel %s", t);
-            }
+        var (ch, _) = u._<ж<Chan>>(ᐧ); if (ch != nil && ch.dir == SendOnly) {
+            return typeErrorf("receive from send-only channel %s", t);
         }
         return default;
     });

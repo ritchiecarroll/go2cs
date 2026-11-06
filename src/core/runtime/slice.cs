@@ -334,22 +334,20 @@ internal static Δsliceᴛ growsliceNoAlias(@unsafe.Pointer oldPtr, nint newLen,
 
     var s = growslice(oldPtr, newLen, oldCap, num, Ꮡet);
     if (goexperiment.RuntimeFreegc && oldPtr != nil && oldPtr != s.Δarray) {
-        {
-            var gp = getg(); if ((uintptr)oldPtr < (~gp).stack.lo || (~gp).stack.hi <= (uintptr)oldPtr) {
-                // oldPtr does not point into the current stack, and it is not
-                // the data pointer for s after the grow, so attempt to free it.
-                // (Note that freegc also verifies that oldPtr does not point into our stack,
-                // but checking here first is slightly cheaper for the case when
-                // oldPtr is on the stack and freegc would be a no-op.)
-                //
-                // TODO(thepudds): it may be that oldPtr==s.array only when elemsize==0,
-                // so perhaps we could prohibit growsliceNoAlias being called in that case
-                // and eliminate that check here, or alternatively, we could lean into
-                // freegc being a no-op for zero-sized allocations (that is, no check of
-                // oldPtr != s.array here and just let freegc return quickly).
-                var noscan = !et.Pointers();
-                freegc(oldPtr, (uintptr)oldCap * et.Size_, noscan);
-            }
+        var gp = getg(); if ((uintptr)oldPtr < (~gp).stack.lo || (~gp).stack.hi <= (uintptr)oldPtr) {
+            // oldPtr does not point into the current stack, and it is not
+            // the data pointer for s after the grow, so attempt to free it.
+            // (Note that freegc also verifies that oldPtr does not point into our stack,
+            // but checking here first is slightly cheaper for the case when
+            // oldPtr is on the stack and freegc would be a no-op.)
+            //
+            // TODO(thepudds): it may be that oldPtr==s.array only when elemsize==0,
+            // so perhaps we could prohibit growsliceNoAlias being called in that case
+            // and eliminate that check here, or alternatively, we could lean into
+            // freegc being a no-op for zero-sized allocations (that is, no check of
+            // oldPtr != s.array here and just let freegc return quickly).
+            var noscan = !et.Pointers();
+            freegc(oldPtr, (uintptr)oldCap * et.Size_, noscan);
         }
     }
     return s;

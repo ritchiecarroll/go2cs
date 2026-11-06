@@ -163,19 +163,15 @@ internal static nint min3(slice<ж<batchCursor>> b, nint i0, nint i1, nint i2) {
         minT = b[i0].ev.time;
     }
     if (i1 < len(b)) {
-        {
-            var t = b[i1].ev.time; if (t < minT) {
-                minT = t;
-                minIdx = i1;
-            }
+        var t = b[i1].ev.time; if (t < minT) {
+            minT = t;
+            minIdx = i1;
         }
     }
     if (i2 < len(b)) {
-        {
-            var t = b[i2].ev.time; if (t < minT) {
-                minT = t;
-                minIdx = i2;
-            }
+        var t = b[i2].ev.time; if (t < minT) {
+            minT = t;
+            minIdx = i2;
         }
     }
     return minIdx;

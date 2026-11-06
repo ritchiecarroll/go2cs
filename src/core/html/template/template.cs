@@ -129,10 +129,8 @@ internal static error escape(this ж<Template> Ꮡt) {
             if (t.Tree == nil) {
                 return fmt.Errorf("template: %q is an incomplete or empty template"u8, t.Name());
             }
-            {
-                var err = escapeTemplate(Ꮡt, new parse.ListNodeжNode(t.text.Root), t.Name()); if (err != nil) {
-                    return err;
-                }
+            var err = escapeTemplate(Ꮡt, new parse.ListNodeжNode(t.text.Root), t.Name()); if (err != nil) {
+                return err;
             }
         } else if (!AreEqual(t.escapeErr, escapeOK)) {
             return t.escapeErr;
@@ -153,10 +151,8 @@ internal static error escape(this ж<Template> Ꮡt) {
 public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var err = Ꮡt.escape(); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡt.escape(); if (err != nil) {
+        return err;
     }
     return t.text.Execute(wr, data);
 }
@@ -234,10 +230,8 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
 
         var (ret, err) = t.text.Parse(text);
@@ -274,10 +268,8 @@ public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string
     try {
         ref var t = ref Ꮡt.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = Ꮡt.checkCanParse(); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
 
         t.nameSpace.Ꮡmu.Lock();
@@ -393,11 +385,9 @@ internal static ж<Template> @new(this ref Template t, @string name) {
         nil,
         t.nameSpace
     ));
-    {
-        var (existing, ok) = tmpl.set[name, ꟷ]; if (ok) {
-            var emptyTmpl = New(existing.Name());
-            existing.Value = emptyTmpl.Value;
-        }
+    var (existing, ok) = tmpl.set[name, ꟷ]; if (ok) {
+        var emptyTmpl = New(existing.Name());
+        existing.Value = emptyTmpl.Value;
     }
     tmpl.set[name] = tmpl;
     return tmpl;
@@ -562,10 +552,8 @@ public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pa
 
 // parseGlob is the implementation of the function and method ParseGlob.
 internal static (ж<Template>, error) parseGlob(ж<Template> t, @string pattern) {
-    {
-        var errΔ1 = t.checkCanParse(); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = t.checkCanParse(); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     var (filenames, err) = filepath.Glob(pattern);
     if (err != nil) {

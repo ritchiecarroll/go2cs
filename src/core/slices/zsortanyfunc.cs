@@ -347,10 +347,8 @@ internal static void stableCmpFunc<E>(slice<E> data, nint n, Func<E, E, nint> cm
             a = b;
             b += 2 * blockSize;
         }
-        {
-            nint m = a + blockSize; if (m < n) {
-                symMergeCmpFunc(data, a, m, n, cmp);
-            }
+        nint m = a + blockSize; if (m < n) {
+            symMergeCmpFunc(data, a, m, n, cmp);
         }
         blockSize *= 2;
     }

@@ -52,10 +52,8 @@ internal static void recovered(@string label, Func<bool> f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(label, "panic:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(label, "panic:", r);
             }
         }, ref ᒐ);
         fmt.Println(label, f());

@@ -704,10 +704,8 @@ internal static error validateFromPunycode(ж<Profile> Ꮡp, @string s) {
         if (sz == 0) {
             return ((runeError)utf8.RuneError);
         }
-        {
-            var c = p.simplify(((info)v).category()); if (c != valid && c != deviation) {
-                return new labelErrorжerror(Ꮡ(new labelError(s, "V6")));
-            }
+        var c = p.simplify(((info)v).category()); if (c != valid && c != deviation) {
+            return new labelErrorжerror(Ꮡ(new labelError(s, "V6")));
         }
         i += sz;
     }
@@ -812,10 +810,8 @@ internal static error /*err*/ validateLabel(this ref Profile p, @string s) {
         if (x.isViramaModifier()) {
             st = joinStates[st][joinVirama];
         }
-        {
-            i += sz; if (i == len(s)) {
-                break;
-            }
+        i += sz; if (i == len(s)) {
+            break;
         }
         (v, sz) = trie.lookupString(s.slice(i));
         x = (info)v;

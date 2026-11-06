@@ -1171,10 +1171,8 @@ public static Duration Round(this Duration d, Duration m) {
         if (lessThanHalf(r, m)) {
             return d + r;
         }
-        {
-            var d1 = d - m + r; if (d1 < d) {
-                return d1;
-            }
+        var d1 = d - m + r; if (d1 < d) {
+            return d1;
         }
         return minDuration; // overflow
     }
@@ -1617,12 +1615,10 @@ public static error UnmarshalBinary(this ref Time t, slice<byte> data) {
 
     if (offset == -1 * 60) {
         t.setLoc(ᏑutcLoc);
+    } else if (ΔLocal.lookup(t.unixSec()) is var (_, localoff, _, _, _) && offset == localoff) {
+        t.setLoc(ΔLocal);
     } else {
-        var (_, localoff, _, _, _) = ΔLocal.lookup(t.unixSec()); if (offset == localoff) {
-            t.setLoc(ΔLocal);
-        } else {
-            t.setLoc(FixedZone(""u8, offset));
-        }
+        t.setLoc(FixedZone(""u8, offset));
     }
 
     return default;

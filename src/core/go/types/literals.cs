@@ -158,15 +158,13 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         // composite literal type present - use it
         // [...]T array types may only appear with composite literals.
         // Check for them here so we don't have to handle ... in general.
-        {
-            var (atyp, _) = e.Type._<ж<ast.ArrayType>>(ᐧ); if (atyp != nil && isdddArray(ref (atyp).DerefOrNull())) {
-                // We have an "open" [...]T array type.
-                // Create a new ArrayType with unknown length (-1)
-                // and finish setting it up after analyzing the literal.
-                typ = new ArrayжΔType(Ꮡ(new Array(len: -1, elem: Ꮡcheck.varType(atyp.Elt))));
-                @base = typ;
-                break;
-            }
+        var (atyp, _) = e.Type._<ж<ast.ArrayType>>(ᐧ); if (atyp != nil && isdddArray(ref (atyp).DerefOrNull())) {
+            // We have an "open" [...]T array type.
+            // Create a new ArrayType with unknown length (-1)
+            // and finish setting it up after analyzing the literal.
+            typ = new ArrayжΔType(Ꮡ(new Array(len: -1, elem: Ꮡcheck.varType(atyp.Elt))));
+            @base = typ;
+            break;
         }
         typ = Ꮡcheck.typ(e.Type);
         @base = typ;
@@ -178,10 +176,8 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         @base = typ;
         // *T implies &T{}
         var (u, _) = commonUnder(@base, default);
-        {
-            var (b, ok) = deref(u); if (ok) {
-                @base = b;
-            }
+        var (b, ok) = deref(u); if (ok) {
+            @base = b;
         }
         isElem = true;
         break;
@@ -206,74 +202,68 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             // we mention the struct type only if it clarifies the error
             // (e.g., a duplicate field error doesn't need the struct type).
             var fields = utyp.fields;
-            {
-                var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok) {
-                    // all elements must have keys
-                    var visited = new slice<bool>(len(fields));
-                    foreach (var (_, eΔ1) in e.Elts) {
-                        var (kv, _) = eΔ1._<ж<ast.KeyValueExpr>>(ᐧ);
-                        if (kv == nil) {
-                            Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
-                            continue;
-                        }
-                        var (key, _) = kv.Key._<ж<ast.Ident>>(ᐧ);
-                        // do all possible checks early (before exiting due to errors)
-                        // so we don't drop information on the floor
-                        Ꮡcheck.expr(nil, Ꮡx, (~kv).Value);
-                        if (key == nil) {
-                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), InvalidLitField, "invalid field name %s in struct literal", kv.Key);
-                            continue;
-                        }
-                        nint i = fieldIndex(fields, check.pkg, key.Name, false);
-                        if (i < 0) {
-                            Object alt = default;
-                            {
-                                nint j = fieldIndex(fields, check.pkg, key.Name, true); if (j >= 0) {
-                                    alt = new VarжObject(fields[j]);
-                                }
-                            }
-                            @string msg = Ꮡcheck.lookupError(@base, key.Name, alt, true);
-                            Ꮡcheck.error(new ast_Exprᴠpositioner(kv.Key), MissingLitField, msg);
-                            continue;
-                        }
-                        var fld = fields[i];
-                        check.recordUse(key, new VarжObject(fld));
-                        var etyp = fld.typ;
-                        Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
-                        // 0 <= i < len(fields)
-                        if (visited[i]) {
-                            Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal", key.Name);
-                            continue;
-                        }
-                        visited[i] = true;
+            var (_, ok) = e.Elts[0]._<ж<ast.KeyValueExpr>>(ᐧ); if (ok) {
+                // all elements must have keys
+                var visited = new slice<bool>(len(fields));
+                foreach (var (_, eΔ1) in e.Elts) {
+                    var (kv, _) = eΔ1._<ж<ast.KeyValueExpr>>(ᐧ);
+                    if (kv == nil) {
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(eΔ1), MixedStructLit, mixtureOfFieldValueAndˢ);
+                        continue;
                     }
-                } else {
-                    // no element must have a key
-                    foreach (var (i, eΔ2) in e.Elts) {
-                        {
-                            var (kv, _) = eΔ2._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                                Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢ);
-                                continue;
-                            }
-                        }
-                        Ꮡcheck.expr(nil, Ꮡx, eΔ2);
-                        if (i >= len(fields)) {
-                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidStructLit, "too many values in struct literal of type %s", @base);
-                            break; // cannot continue
-                        }
-                        // i < len(fields)
-                        var fld = fields[i];
-                        if (!fld.of(Var.Ꮡobject).Exported() && fld.pkg != check.pkg) {
-                            Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnexportedLitField, "implicit assignment to unexported field %s in struct literal of type %s", fld.name, @base);
-                            continue;
-                        }
-                        var etyp = fld.typ;
-                        Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                    var (key, _) = kv.Key._<ж<ast.Ident>>(ᐧ);
+                    // do all possible checks early (before exiting due to errors)
+                    // so we don't drop information on the floor
+                    Ꮡcheck.expr(nil, Ꮡx, (~kv).Value);
+                    if (key == nil) {
+                        Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), InvalidLitField, "invalid field name %s in struct literal", kv.Key);
+                        continue;
                     }
-                    if (len(e.Elts) < len(fields)) {
-                        Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s", @base);
-                        // ok to continue
+                    nint i = fieldIndex(fields, check.pkg, key.Name, false);
+                    if (i < 0) {
+                        Object alt = default;
+                        nint j = fieldIndex(fields, check.pkg, key.Name, true); if (j >= 0) {
+                            alt = new VarжObject(fields[j]);
+                        }
+                        @string msg = Ꮡcheck.lookupError(@base, key.Name, alt, true);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(kv.Key), MissingLitField, msg);
+                        continue;
                     }
+                    var fld = fields[i];
+                    check.recordUse(key, new VarжObject(fld));
+                    var etyp = fld.typ;
+                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                    // 0 <= i < len(fields)
+                    if (visited[i]) {
+                        Ꮡcheck.errorf(new ast_KeyValueExprжpositioner(kv), DuplicateLitField, "duplicate field name %s in struct literal", key.Name);
+                        continue;
+                    }
+                    visited[i] = true;
+                }
+            } else {
+                // no element must have a key
+                foreach (var (i, eΔ2) in e.Elts) {
+                    var (kv, _) = eΔ2._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
+                        Ꮡcheck.error(new ast_KeyValueExprжpositioner(kv), MixedStructLit, mixtureOfFieldValueAndˢ);
+                        continue;
+                    }
+                    Ꮡcheck.expr(nil, Ꮡx, eΔ2);
+                    if (i >= len(fields)) {
+                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidStructLit, "too many values in struct literal of type %s", @base);
+                        break; // cannot continue
+                    }
+                    // i < len(fields)
+                    var fld = fields[i];
+                    if (!fld.of(Var.Ꮡobject).Exported() && fld.pkg != check.pkg) {
+                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), UnexportedLitField, "implicit assignment to unexported field %s in struct literal of type %s", fld.name, @base);
+                        continue;
+                    }
+                    var etyp = fld.typ;
+                    Ꮡcheck.assignment(Ꮡx, etyp, structLiteralˢ);
+                }
+                if (len(e.Elts) < len(fields)) {
+                    Ꮡcheck.errorf(inNode(new ast.CompositeLitжNode(Ꮡe), e.Rbrace), InvalidStructLit, "too few values in struct literal of type %s", @base);
+                    // ok to continue
                 }
             }
             break;
@@ -353,13 +343,11 @@ internal static void compositeLit(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
             foreach (var (_, vᴛ1) in e.Elts) {
                 var eΔ4 = vᴛ1;
 
-                {
-                    var (kv, _) = eΔ4._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                        // Ideally, we should also "use" kv.Key but we can't know
-                        // if it's an externally defined struct key or not. Going
-                        // forward anyway can lead to other errors. Give up instead.
-                        eΔ4 = kv.Value.Value;
-                    }
+                var (kv, _) = eΔ4._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
+                    // Ideally, we should also "use" kv.Key but we can't know
+                    // if it's an externally defined struct key or not. Going
+                    // forward anyway can lead to other errors. Give up instead.
+                    eΔ4 = kv.Value.Value;
                 }
                 Ꮡcheck.use(eΔ4);
             }
@@ -401,24 +389,20 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
         // determine and check index
         var validIndex = false;
         var eval = e;
-        {
-            var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                {
-                    var (typΔ1, i) = Ꮡcheck.index(kv.Key, length); if (isValid(typΔ1)) {
-                        if (i >= 0) {
-                            index = i;
-                            validIndex = true;
-                        } else {
-                            Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), InvalidLitIndex, "index %s must be integer constant", kv.Key);
-                        }
-                    }
+        var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
+            var (typΔ1, i) = Ꮡcheck.index(kv.Key, length); if (isValid(typΔ1)) {
+                if (i >= 0) {
+                    index = i;
+                    validIndex = true;
+                } else {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), InvalidLitIndex, "index %s must be integer constant", kv.Key);
                 }
-                eval = kv.Value.Value;
-            } else if (length >= 0 && index >= length) {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), OversizeArrayLit, "index %d is out of bounds (>= %d)", index, length);
-            } else {
-                validIndex = true;
             }
+            eval = kv.Value.Value;
+        } else if (length >= 0 && index >= length) {
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(e), OversizeArrayLit, "index %d is out of bounds (>= %d)", index, length);
+        } else {
+            validIndex = true;
         }
 
         // if we have a valid index, check for duplicate entries

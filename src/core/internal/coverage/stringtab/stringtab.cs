@@ -37,10 +37,8 @@ public static uint32 Nentries(this ref Writer stw) {
 // Lookup looks up string 's' in the writer's table, adding
 // a new entry if need be, and returning an index into the table.
 public static uint32 Lookup(this ref Writer stw, @string s) {
-    {
-        var (idxΔ1, ok) = stw.stab[s, ꟷ]; if (ok) {
-            return idxΔ1;
-        }
+    var (idxΔ1, ok) = stw.stab[s, ꟷ]; if (ok) {
+        return idxΔ1;
     }
     if (stw.frozen) {
         throw panic("internal error: string table previously frozen");
@@ -75,12 +73,10 @@ public static error Write(this ж<Writer> Ꮡstw, io.Writer w) {
     error wr128(nuint v) {
         Ꮡstw.Value.tmp = Ꮡstw.Value.tmp[..0];
         Ꮡstw.Value.tmp = uleb128.AppendUleb128(Ꮡstw.Value.tmp, v);
-        {
-            var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != nil) {
-                return fmt.Errorf("writing string table: %v"u8, err);
-            } else if (nw != len(Ꮡstw.Value.tmp)) {
-                return fmt.Errorf("short write emitting stringtab uleb"u8);
-            }
+        var (nw, err) = w.Write(Ꮡstw.Value.tmp); if (err != nil) {
+            return fmt.Errorf("writing string table: %v"u8, err);
+        } else if (nw != len(Ꮡstw.Value.tmp)) {
+            return fmt.Errorf("short write emitting stringtab uleb"u8);
         }
         return default;
     }

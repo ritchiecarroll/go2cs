@@ -28,16 +28,14 @@ partial struct armsᴛ1 /*dyn*/ {
 ]); }
 
 internal static void Main() {
-    {
-        @string arm = Δos.Getenv("GOEXIT_MAIN_ARM"); if (arm != ""u8) {
-            foreach (var (_, a) in arms) {
-                if (a.name[..1] == arm) {
-                    a.run();
-                }
+    @string arm = Δos.Getenv("GOEXIT_MAIN_ARM"); if (arm != ""u8) {
+        foreach (var (_, a) in arms) {
+            if (a.name[..1] == arm) {
+                a.run();
             }
-            fmt.Println("unreachable: main returned");
-            return;
         }
+        fmt.Println("unreachable: main returned");
+        return;
     }
 
     foreach (var (_, a) in arms) {
@@ -197,12 +195,10 @@ internal static void parent(@string name) {
     var err = cmd.Run();
 
     nint code = 0;
-    {
-        var (exit, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
-            code = exit.Value.ProcessState.ExitCode();
-        } else if (err != nil) {
-            code = -1;
-        }
+    var (exit, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
+        code = exit.Value.ProcessState.ExitCode();
+    } else if (err != nil) {
+        code = -1;
     }
 
     fmt.Println("== arm", name);
@@ -213,10 +209,8 @@ internal static void parent(@string name) {
     }
 
     @string first = "";
-    {
-        var scanner = bufio.NewScanner(new bytes_BufferжReader(Ꮡstderr)); if (scanner.Scan()) {
-            first = scanner.Text();
-        }
+    var scanner = bufio.NewScanner(new bytes_BufferжReader(Ꮡstderr)); if (scanner.Scan()) {
+        first = scanner.Text();
     }
     fmt.Println("  stderr first line:", first);
     fmt.Println("  exit status:", code);

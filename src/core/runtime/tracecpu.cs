@@ -151,10 +151,8 @@ internal static bool traceReadCPU(uintptr gen) {
         var recordLen = data[0];
         var timestamp = data[1];
         var ppid = data[2] >> 1;
-        {
-            var hasP = (data[2] & 0b1) != 0; if (!hasP) {
-                ppid = ~(uint64)0;
-            }
+        var hasP = (data[2] & 0b1) != 0; if (!hasP) {
+            ppid = ~(uint64)0;
         }
         var goid = data[3];
         var mpid = data[4];
@@ -292,13 +290,11 @@ internal static void traceCPUSample(ж<g> Ꮡgp, ж<m> Ꮡmp, ж<Δp> Ꮡpp, sli
         osyield();
     }
 
-    {
-        var log = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, (ulong)(gen % 2)).Load(); if (log != nil) {
-            // Note: we don't pass a tag pointer here (how should profiling tags
-            // interact with the execution tracer?), but if we did we'd need to be
-            // careful about write barriers. See the long comment in profBuf.write.
-            log.write(nil, (int64)now, hdr[..], stk);
-        }
+    var log = ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑcpuLogWrite, (ulong)(gen % 2)).Load(); if (log != nil) {
+        // Note: we don't pass a tag pointer here (how should profiling tags
+        // interact with the execution tracer?), but if we did we'd need to be
+        // careful about write barriers. See the long comment in profBuf.write.
+        log.write(nil, (int64)now, hdr[..], stk);
     }
 
     ᏑΔtrace.of(runtime_package.Δtraceᴛ1.ᏑsignalLock).Store(0);

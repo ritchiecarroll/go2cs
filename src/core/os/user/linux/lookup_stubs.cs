@@ -73,10 +73,8 @@ internal static (ж<User>, error) current() {
 }
 
 internal static @string currentUID() {
-    {
-        nint id = os.Getuid(); if (id >= 0) {
-            return strconv.Itoa(id);
-        }
+    nint id = os.Getuid(); if (id >= 0) {
+        return strconv.Itoa(id);
     }
     // Note: Windows returns -1, but this file isn't used on
     // Windows anyway, so this empty return path shouldn't be
@@ -85,10 +83,8 @@ internal static @string currentUID() {
 }
 
 internal static @string currentGID() {
-    {
-        nint id = os.Getgid(); if (id >= 0) {
-            return strconv.Itoa(id);
-        }
+    nint id = os.Getgid(); if (id >= 0) {
+        return strconv.Itoa(id);
     }
     return ""u8;
 }

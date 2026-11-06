@@ -316,14 +316,12 @@ internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref ((StaticBox
 
 // walkDir recursively descends path, calling walkDirFn.
 internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirEntry, error, error> walkDirFn) {
-    {
-        var errΔ1 = walkDirFn(path, d, default); if (errΔ1 != nil || !d.IsDir()) {
-            if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
-                // Successfully skipped directory.
-                errΔ1 = default;
-            }
-            return errΔ1;
+    var errΔ1 = walkDirFn(path, d, default); if (errΔ1 != nil || !d.IsDir()) {
+        if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
+            // Successfully skipped directory.
+            errΔ1 = default;
         }
+        return errΔ1;
     }
 
     var (dirs, err) = os.ReadDir(path);
@@ -340,13 +338,11 @@ internal static error walkDir(@string path, fs.DirEntry d, Func<@string, fs.DirE
 
     foreach (var (_, d1) in dirs) {
         @string path1 = Join(path, d1.Name());
-        {
-            var errΔ2 = walkDir(path1, d1, walkDirFn); if (errΔ2 != nil) {
-                if (AreEqual(errΔ2, SkipDir)) {
-                    break;
-                }
-                return errΔ2;
+        var errΔ2 = walkDir(path1, d1, walkDirFn); if (errΔ2 != nil) {
+            if (AreEqual(errΔ2, SkipDir)) {
+                break;
             }
+            return errΔ2;
         }
     }
     return default;
@@ -375,10 +371,8 @@ internal static error walk(@string path, fs.FileInfo info, Func<@string, fs.File
         @string filename = Join(path, name);
         var (fileInfo, errΔ1) = lstat(filename);
         if (errΔ1 != nil) {
-            {
-                var errΔ2 = walkFn(filename, fileInfo, errΔ1); if (errΔ2 != nil && !AreEqual(errΔ2, SkipDir)) {
-                    return errΔ2;
-                }
+            var errΔ2 = walkFn(filename, fileInfo, errΔ1); if (errΔ2 != nil && !AreEqual(errΔ2, SkipDir)) {
+                return errΔ2;
             }
         } else {
             errΔ1 = walk(filename, fileInfo, walkFn);

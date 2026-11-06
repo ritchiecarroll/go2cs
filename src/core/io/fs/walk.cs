@@ -69,14 +69,12 @@ public static error SkipAll = errors.New("skip everything and stop the walk");
 
 // walkDir recursively descends path, calling walkDirFn.
 internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, DirEntry, error, error> walkDirFn) {
-    {
-        var errΔ1 = walkDirFn(name, d, default); if (errΔ1 != nil || !d.IsDir()) {
-            if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
-                // Successfully skipped directory.
-                errΔ1 = default;
-            }
-            return errΔ1;
+    var errΔ1 = walkDirFn(name, d, default); if (errΔ1 != nil || !d.IsDir()) {
+        if (AreEqual(errΔ1, SkipDir) && d.IsDir()) {
+            // Successfully skipped directory.
+            errΔ1 = default;
         }
+        return errΔ1;
     }
 
     var (dirs, err) = ReadDir(fsys, name);
@@ -93,13 +91,11 @@ internal static error walkDir(FS fsys, @string name, DirEntry d, Func<@string, D
 
     foreach (var (_, d1) in dirs) {
         @string name1 = path.Join(name, d1.Name());
-        {
-            var errΔ2 = walkDir(fsys, name1, d1, walkDirFn); if (errΔ2 != nil) {
-                if (AreEqual(errΔ2, SkipDir)) {
-                    break;
-                }
-                return errΔ2;
+        var errΔ2 = walkDir(fsys, name1, d1, walkDirFn); if (errΔ2 != nil) {
+            if (AreEqual(errΔ2, SkipDir)) {
+                break;
             }
+            return errΔ2;
         }
     }
     return default;

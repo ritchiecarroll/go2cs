@@ -457,17 +457,15 @@ internal static (int64, bool) parseByteCount(@string s) {
         return (0, false);
     }
     // The one before that must always be a digit or 'i'.
-    {
-        var c = s[len(s) - 2]; if (c >= '0' && c <= '9') {
-            // Trivial 'B' suffix.
-            var (nΔ2, errΔ2) = strconv.ParseInt(s.slice(0, len(s) - 1), 10, 64);
-            if (errΔ2 != nil || nΔ2 < 0) {
-                return (0, false);
-            }
-            return (nΔ2, true);
-        } else if (c != 'i') {
+    var c = s[len(s) - 2]; if (c >= '0' && c <= '9') {
+        // Trivial 'B' suffix.
+        var (nΔ2, errΔ2) = strconv.ParseInt(s.slice(0, len(s) - 1), 10, 64);
+        if (errΔ2 != nil || nΔ2 < 0) {
             return (0, false);
         }
+        return (nΔ2, true);
+    } else if (c != 'i') {
+        return (0, false);
     }
     // Finally, we need at least 4 characters now, for the unit
     // prefix and at least one digit.
@@ -551,10 +549,8 @@ internal static nint findnull(ж<byte> s) {
     for (;;) {
         @string t = ~Ꮡ(new stringStruct(ptr.Value, safeLen)).Reinterpret<stringStruct, @string>();
         // Check one page at a time.
-        {
-            nint i = bytealg.IndexByteString(t, 0); if (i != -1) {
-                return offset + i;
-            }
+        nint i = bytealg.IndexByteString(t, 0); if (i != -1) {
+            return offset + i;
         }
         // Move to next page
         ptr = (@unsafe.Pointer)((uintptr)ptr + (uintptr)safeLen);

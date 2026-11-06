@@ -292,21 +292,15 @@ internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡ
         return (default, err);
     }
     var c = newUDPConn(fd);
-    {
-        var ip4 = gaddr.IP.To4(); if (ip4 != nil) {
-            {
-                var errΔ1 = listenIPv4MulticastUDP(ref (c).DerefOrNull(), ifi, ip4); if (errΔ1 != nil) {
-                    c.of(UDPConn.Ꮡconn).Close();
-                    return (default, errΔ1);
-                }
-            }
-        } else {
-            {
-                var errΔ2 = listenIPv6MulticastUDP(ref (c).DerefOrNull(), ifi, gaddr.IP); if (errΔ2 != nil) {
-                    c.of(UDPConn.Ꮡconn).Close();
-                    return (default, errΔ2);
-                }
-            }
+    var ip4 = gaddr.IP.To4(); if (ip4 != nil) {
+        var errΔ1 = listenIPv4MulticastUDP(ref (c).DerefOrNull(), ifi, ip4); if (errΔ1 != nil) {
+            c.of(UDPConn.Ꮡconn).Close();
+            return (default, errΔ1);
+        }
+    } else {
+        var errΔ2 = listenIPv6MulticastUDP(ref (c).DerefOrNull(), ifi, gaddr.IP); if (errΔ2 != nil) {
+            c.of(UDPConn.Ꮡconn).Close();
+            return (default, errΔ2);
         }
     }
     return (c, default);
@@ -314,10 +308,8 @@ internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡ
 
 internal static error listenIPv4MulticastUDP(ref UDPConn c, ж<Interface> ifi, IP ip) {
     if (ifi != nil) {
-        {
-            var err = setIPv4MulticastInterface(c.fd, ifi); if (err != nil) {
-                return err;
-            }
+        var err = setIPv4MulticastInterface(c.fd, ifi); if (err != nil) {
+            return err;
         }
     }
     {
@@ -335,10 +327,8 @@ internal static error listenIPv4MulticastUDP(ref UDPConn c, ж<Interface> ifi, I
 
 internal static error listenIPv6MulticastUDP(ref UDPConn c, ж<Interface> ifi, IP ip) {
     if (ifi != nil) {
-        {
-            var err = setIPv6MulticastInterface(c.fd, ifi); if (err != nil) {
-                return err;
-            }
+        var err = setIPv6MulticastInterface(c.fd, ifi); if (err != nil) {
+            return err;
         }
     }
     {

@@ -31,11 +31,9 @@ internal static (nint, Δsyscall.Sockaddr, @string, error) accept(nint s) {
     if (err != nil) {
         return (-1, default, acceptˢ, err);
     }
-    {
-        err = Δsyscall.SetNonblock(ns, true); if (err != nil) {
-            CloseFunc(ns);
-            return (-1, default, setnonblockˢ, err);
-        }
+    err = Δsyscall.SetNonblock(ns, true); if (err != nil) {
+        CloseFunc(ns);
+        return (-1, default, setnonblockˢ, err);
     }
     return (ns, sa, "", default);
 }

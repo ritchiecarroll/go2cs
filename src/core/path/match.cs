@@ -79,10 +79,8 @@ Pattern:
         // check that the remainder of the pattern is syntactically valid.
         while (len(pattern) > 0) {
             (_, chunk, pattern) = scanChunk(pattern);
-            {
-                var (_, _, errΔ3) = matchChunk(chunk, ""u8); if (errΔ3 != nil) {
-                    return (false, errΔ3);
-                }
+            var (_, _, errΔ3) = matchChunk(chunk, ""u8); if (errΔ3 != nil) {
+                return (false, errΔ3);
             }
         }
         return (false, default);
@@ -168,17 +166,13 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                 }
                 rune loΔ1 = default;
                 rune hiΔ1 = default;
-                {
-                    (loΔ1, chunk, err) = getEsc(chunk); if (err != nil) {
-                        return ("", false, err);
-                    }
+                (loΔ1, chunk, err) = getEsc(chunk); if (err != nil) {
+                    return ("", false, err);
                 }
                 hiΔ1 = loΔ1;
                 if (chunk[0] == '-') {
-                    {
-                        (hiΔ1, chunk, err) = getEsc(chunk[1..]); if (err != nil) {
-                            return ("", false, err);
-                        }
+                    (hiΔ1, chunk, err) = getEsc(chunk[1..]); if (err != nil) {
+                        return ("", false, err);
                     }
                 }
                 match = match || loΔ1 <= r && r <= hiΔ1;

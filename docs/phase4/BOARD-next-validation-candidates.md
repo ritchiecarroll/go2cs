@@ -33874,4 +33874,47 @@ it; the division over runs usually hides one or three objects. No banked row was
 
 — P2 (2026-11-05)
 
+### 2026-11-05: a deferred or spawned value-method call through a pointer LOCAL copied *p late (batch 189, OPEN then CLOSED)
+
+**The defect.** Batch 189 (586cf44726, claude/c2-value-recv-box-twins) writes a value-method call
+through a pointer local as `p.M()`, which binds go2cs-gen's `M(this ж<T> Ꮡv)` twin. The twin copies `*p`
+inside its body, after the call's arguments, as Go does for an ordinary call. visitDeferStmt and
+visitGoStmt split the rendered call at its last dot and snapshot the text before the dot as the
+receiver, evaluated at the statement. Before batch 189 that text was `(~p)`, a copy. After it, it was
+`p`, the box, so the twin copied `*p` only when the deferred or spawned call ran. Go copies `*p` at the
+defer or go statement.
+
+**Measured** (linux/amd64, a 6-function probe converted, built and run against go1.26.10's `go run`):
+- master 586cf44726, 4 of 6 lines differ from Go:
+  - `p := &path{"pointee"}; defer p.Done(); *p = path{"replaced"}` printed `done replaced`
+  - `defer p.Pop(k)` printed `pop 1 replaced`
+  - `go p.Run(&wg)` printed `run replaced`
+  - a nil `p` ran past `defer p.Done()`, where Go panics at the statement
+- A pointer PARAMETER was not affected: it renders as its deref alias, so the receiver text was already
+  `Ꮡp.Value`.
+- Found by the nil-param seat's CNR, which extends the twin to parameters. That moved
+  DeferValueReceiverSnapshot and DeferLambdaReceiverCopy to `replaced` where Go prints `pointee`.
+- Neither guard had a pointer-local case, which is why batch 189's legs stayed green.
+
+**The fix** (claude/c2-defer-recv-copy). While visitDeferStmt/visitGoStmt render the deferred or spawned
+call's own selector (`deferGoCallSelector`), convSelectorExpr leaves the twin spelling off for it. The
+snapshot is `(~p)` again: a copy at the statement, which also fails a nil `p` there. Every other call
+through a pointer keeps the twin.
+
+**Guards:**
+- converter test TestDeferredValueMethodThroughAPointerCopiesAtTheStatement, red at the base on its 3
+  pointer-local rows; its parameter row and plain-call control hold at both;
+- behavioral DeferGoPointerValueReceiver, the 6 probe cases Output-compared with Go: red at master on 4
+  lines, matching Go with the fix at TC1 and TC0.
+
+**Footprint, predicted zero before the arm ran, and zero:**
+- Batch 189's own measured diff (98 std lines in 14 files, 12 behavioral lines in 9 projects) holds no
+  `defer(` or `goǃ(` registration line.
+- A seeded three-target -stdlib reconvert with the fix is byte-identical to master's root (360/358/358
+  packages, 0 files differ).
+- CNR: 0 drift over the existing behavioral packages; the only new output is DeferGoPointerValueReceiver
+  itself.
+
+— C2 (2026-11-05)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

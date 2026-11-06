@@ -264,10 +264,8 @@ internal static void pushHead(this ж<poolChain> Ꮡc, any val) {
 internal static (any, bool) popHead(this ref poolChain c) {
     var d = c.head;
     while (d != nil) {
-        {
-            var (val, ok) = d.of(poolChainElt.ᏑpoolDequeue).popHead(); if (ok) {
-                return (val, ok);
-            }
+        var (val, ok) = d.of(poolChainElt.ᏑpoolDequeue).popHead(); if (ok) {
+            return (val, ok);
         }
         // There may still be unconsumed elements in the
         // previous dequeue, so try backing up.
@@ -291,10 +289,8 @@ internal static (any, bool) popTail(this ж<poolChain> Ꮡc) {
         // safe to drop d from the chain.
         var d2 = d.of(poolChainElt.Ꮡnext).Load();
 
-        {
-            var (val, ok) = d.of(poolChainElt.ᏑpoolDequeue).popTail(); if (ok) {
-                return (val, ok);
-            }
+        var (val, ok) = d.of(poolChainElt.ᏑpoolDequeue).popTail(); if (ok) {
+            return (val, ok);
         }
 
         if (d2 == nil) {

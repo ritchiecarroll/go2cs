@@ -387,38 +387,36 @@ public static nint EncodeRune(slice<byte> p, rune r) {
 
 internal static nint encodeRuneNonASCII(slice<byte> p, rune r) {
     // Negative values are erroneous. Making it unsigned addresses the problem.
-    {
-        var i = (uint32)r;
-        switch (ᐧ) {
-        case {} when i <= rune2Max: {
-            _ = p[1]; // eliminate bounds checks
-            p[0] = (byte)((byte)t2 | (byte)(r >> 6));
-            p[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
-            return 2;
-        }
-        case {} when (i < surrogateMin) || (surrogateMax < i && i <= rune3Max): {
-            _ = p[2]; // eliminate bounds checks
-            p[0] = (byte)((byte)t3 | (byte)(r >> 12));
-            p[1] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
-            p[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
-            return 3;
-        }
-        case {} when i > rune3Max && i <= MaxRune: {
-            _ = p[3]; // eliminate bounds checks
-            p[0] = (byte)((byte)t4 | (byte)(r >> 18));
-            p[1] = (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx));
-            p[2] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
-            p[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
-            return 4;
-        }
-        default: {
-            _ = p[2]; // eliminate bounds checks
-            p[0] = runeErrorByte0;
-            p[1] = runeErrorByte1;
-            p[2] = runeErrorByte2;
-            return 3;
-        }}
+    var i = (uint32)r;
+    switch (ᐧ) {
+    case {} when i <= rune2Max: {
+        _ = p[1]; // eliminate bounds checks
+        p[0] = (byte)((byte)t2 | (byte)(r >> 6));
+        p[1] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
+        return 2;
     }
+    case {} when (i < surrogateMin) || (surrogateMax < i && i <= rune3Max): {
+        _ = p[2]; // eliminate bounds checks
+        p[0] = (byte)((byte)t3 | (byte)(r >> 12));
+        p[1] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
+        p[2] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
+        return 3;
+    }
+    case {} when i > rune3Max && i <= MaxRune: {
+        _ = p[3]; // eliminate bounds checks
+        p[0] = (byte)((byte)t4 | (byte)(r >> 18));
+        p[1] = (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx));
+        p[2] = (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx));
+        p[3] = (byte)((byte)tx | (byte)((byte)r & (byte)maskx));
+        return 4;
+    }
+    default: {
+        _ = p[2]; // eliminate bounds checks
+        p[0] = runeErrorByte0;
+        p[1] = runeErrorByte1;
+        p[2] = runeErrorByte2;
+        return 3;
+    }}
 }
 
 // AppendRune appends the UTF-8 encoding of r to the end of p and
@@ -434,22 +432,20 @@ public static slice<byte> AppendRune(slice<byte> p, rune r) {
 
 internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
     // Negative values are erroneous. Making it unsigned addresses the problem.
-    {
-        var i = (uint32)r;
-        switch (ᐧ) {
-        case {} when i <= rune2Max: {
-            return append(p, (byte)((byte)t2 | (byte)(r >> 6)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
-        }
-        case {} when (i < surrogateMin) || (surrogateMax < i && i <= rune3Max): {
-            return append(p, (byte)((byte)t3 | (byte)(r >> 12)), (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
-        }
-        case {} when i > rune3Max && i <= MaxRune: {
-            return append(p, (byte)((byte)t4 | (byte)(r >> 18)), (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
-        }
-        default: {
-            return append(p, (byte)(runeErrorByte0), (byte)(runeErrorByte1), (byte)(runeErrorByte2));
-        }}
+    var i = (uint32)r;
+    switch (ᐧ) {
+    case {} when i <= rune2Max: {
+        return append(p, (byte)((byte)t2 | (byte)(r >> 6)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
     }
+    case {} when (i < surrogateMin) || (surrogateMax < i && i <= rune3Max): {
+        return append(p, (byte)((byte)t3 | (byte)(r >> 12)), (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
+    }
+    case {} when i > rune3Max && i <= MaxRune: {
+        return append(p, (byte)((byte)t4 | (byte)(r >> 18)), (byte)((byte)tx | (byte)((byte)(r >> 12) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)(r >> 6) & (byte)maskx)), (byte)((byte)tx | (byte)((byte)r & (byte)maskx)));
+    }
+    default: {
+        return append(p, (byte)(runeErrorByte0), (byte)(runeErrorByte1), (byte)(runeErrorByte2));
+    }}
 }
 
 // RuneCount returns the number of runes in p. Erroneous and short
@@ -458,11 +454,9 @@ public static nint RuneCount(slice<byte> p) {
     nint np = len(p);
     nint n = default;
     for (; n < np; n++) {
-        {
-            var c = p[n]; if (c >= RuneSelf) {
-                // non-ASCII slow path
-                return n + RuneCountInString((sstring)(p.slice(n)));
-            }
+        var c = p[n]; if (c >= RuneSelf) {
+            // non-ASCII slow path
+            return n + RuneCountInString((sstring)(p.slice(n)));
         }
     }
     return n;

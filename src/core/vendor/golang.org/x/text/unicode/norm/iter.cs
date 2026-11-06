@@ -246,97 +246,89 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
     nint inCopyStart = i.p;
     nint outCopyStart = 0;
     for (;;) {
-        {
-            nint sz = (nint)i.info.size; if (sz <= 1) {
-                i.rb.ss = 0;
-                nint p = i.p;
-                i.p++; // ASCII or illegal byte.  Either way, advance by 1.
-                if (i.p >= i.rb.nsrc) {
-                    i.setDone();
-                    return i.returnSlice(p, i.p);
-                } else if (i.rb.src._byte(i.p) < utf8.RuneSelf) {
-                    i.next = i.asciiF;
-                    return i.returnSlice(p, i.p);
-                }
-                outp++;
-            } else {
-                var d = i.info.Decomposition(); if (d != nil) {
-                    // Note: If leading CCC != 0, then len(d) == 2 and last is also non-zero.
-                    // Case 1: there is a leftover to copy.  In this case the decomposition
-                    // must begin with a modifier and should always be appended.
-                    // Case 2: no leftover. Simply return d if followed by a ccc == 0 value.
-                    nint p = outp + len(d);
-                    if (outp > 0) {
-                        i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
-                        // TODO: this condition should not be possible, but we leave it
-                        // in for defensive purposes.
-                        if (p > len(i.buf)) {
-                            return i.buf.slice(0, outp);
-                        }
-                    } else if (i.info.multiSegment()) {
-                        // outp must be 0 as multi-segment decompositions always
-                        // start a new segment.
-                        if (i.multiSeg == nil) {
-                            i.multiSeg = d;
-                            i.next = nextMulti;
-                            return nextMulti(Ꮡi);
-                        }
-                        // We are in the last segment.  Treat as normal decomposition.
-                        d = i.multiSeg;
-                        i.multiSeg = default;
-                        p = len(d);
-                    }
-                    var prevCCΔ1 = i.info.tccc;
-                    {
-                        i.p += sz; if (i.p >= i.rb.nsrc) {
-                            i.setDone();
-                            i.info = new ΔProperties(); // Force BoundaryBefore to succeed.
-                        } else {
-                            i.info = i.rb.f.info(i.rb.src, i.p);
-                        }
-                    }
-                    var exprᴛ1 = i.rb.ss.next(i.info);
-                    var matchᴛ1 = false;
-                    if (exprᴛ1 == ssOverflow) {
-                        i.next = nextCGJDecompose;
-                        fallthrough = true;
-                    }
-                    if (fallthrough || !matchᴛ1 && exprᴛ1 == ssStarter) { matchᴛ1 = true;
-                        if (outp > 0) {
-                            copy(i.buf.slice(outp), d);
-                            return i.buf.slice(0, p);
-                        }
-                        return d;
-                    }
-                    copy(i.buf.slice(outp), d);
-                    outp = p;
-                    (inCopyStart, outCopyStart) = (i.p, outp);
-                    if (i.info.ccc < prevCCΔ1) {
-                        goto doNorm;
-                    }
-                    continue;
-                } else {
-                    var r = i.rb.src.hangul(i.p); if (r != 0) {
-                        outp = decomposeHangul(i.buf[..], r);
-                        i.p += hangulUTF8Size;
-                        (inCopyStart, outCopyStart) = (i.p, outp);
-                        if (i.p >= i.rb.nsrc) {
-                            i.setDone();
-                            break;
-                        } else if (i.rb.src.hangul(i.p) != 0) {
-                            i.next = nextHangul;
-                            return i.buf.slice(0, outp);
-                        }
-                    } else {
-                        nint p = outp + sz;
-                        if (p > len(i.buf)) {
-                            break;
-                        }
-                        outp = p;
-                        i.p += sz;
-                    }
-                }
+        nint sz = (nint)i.info.size; if (sz <= 1) {
+            i.rb.ss = 0;
+            nint p = i.p;
+            i.p++; // ASCII or illegal byte.  Either way, advance by 1.
+            if (i.p >= i.rb.nsrc) {
+                i.setDone();
+                return i.returnSlice(p, i.p);
+            } else if (i.rb.src._byte(i.p) < utf8.RuneSelf) {
+                i.next = i.asciiF;
+                return i.returnSlice(p, i.p);
             }
+            outp++;
+        } else if (i.info.Decomposition() is var d && d != nil) {
+            // Note: If leading CCC != 0, then len(d) == 2 and last is also non-zero.
+            // Case 1: there is a leftover to copy.  In this case the decomposition
+            // must begin with a modifier and should always be appended.
+            // Case 2: no leftover. Simply return d if followed by a ccc == 0 value.
+            nint p = outp + len(d);
+            if (outp > 0) {
+                i.rb.src.copySlice(i.buf.slice(outCopyStart), inCopyStart, i.p);
+                // TODO: this condition should not be possible, but we leave it
+                // in for defensive purposes.
+                if (p > len(i.buf)) {
+                    return i.buf.slice(0, outp);
+                }
+            } else if (i.info.multiSegment()) {
+                // outp must be 0 as multi-segment decompositions always
+                // start a new segment.
+                if (i.multiSeg == nil) {
+                    i.multiSeg = d;
+                    i.next = nextMulti;
+                    return nextMulti(Ꮡi);
+                }
+                // We are in the last segment.  Treat as normal decomposition.
+                d = i.multiSeg;
+                i.multiSeg = default;
+                p = len(d);
+            }
+            var prevCCΔ1 = i.info.tccc;
+            i.p += sz; if (i.p >= i.rb.nsrc) {
+                i.setDone();
+                i.info = new ΔProperties(); // Force BoundaryBefore to succeed.
+            } else {
+                i.info = i.rb.f.info(i.rb.src, i.p);
+            }
+            var exprᴛ1 = i.rb.ss.next(i.info);
+            var matchᴛ1 = false;
+            if (exprᴛ1 == ssOverflow) {
+                i.next = nextCGJDecompose;
+                fallthrough = true;
+            }
+            if (fallthrough || !matchᴛ1 && exprᴛ1 == ssStarter) { matchᴛ1 = true;
+                if (outp > 0) {
+                    copy(i.buf.slice(outp), d);
+                    return i.buf.slice(0, p);
+                }
+                return d;
+            }
+            copy(i.buf.slice(outp), d);
+            outp = p;
+            (inCopyStart, outCopyStart) = (i.p, outp);
+            if (i.info.ccc < prevCCΔ1) {
+                goto doNorm;
+            }
+            continue;
+        } else if (i.rb.src.hangul(i.p) is var r && r != 0) {
+            outp = decomposeHangul(i.buf[..], r);
+            i.p += hangulUTF8Size;
+            (inCopyStart, outCopyStart) = (i.p, outp);
+            if (i.p >= i.rb.nsrc) {
+                i.setDone();
+                break;
+            } else if (i.rb.src.hangul(i.p) != 0) {
+                i.next = nextHangul;
+                return i.buf.slice(0, outp);
+            }
+        } else {
+            nint p = outp + sz;
+            if (p > len(i.buf)) {
+                break;
+            }
+            outp = p;
+            i.p += sz;
         }
         if (i.p >= i.rb.nsrc) {
             i.setDone();
@@ -344,13 +336,11 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
         }
         var prevCC = i.info.tccc;
         i.info = i.rb.f.info(i.rb.src, i.p);
-        {
-            ssState v = i.rb.ss.next(i.info); if (v == ssStarter) {
-                break;
-            } else if (v == ssOverflow) {
-                i.next = nextCGJDecompose;
-                break;
-            }
+        ssState v = i.rb.ss.next(i.info); if (v == ssStarter) {
+            break;
+        } else if (v == ssOverflow) {
+            i.next = nextCGJDecompose;
+            break;
         }
         if (i.info.ccc < prevCC) {
             goto doNorm;
@@ -375,21 +365,17 @@ internal static slice<byte> doNormDecomposed(ж<Iter> Ꮡi) {
 
     for (;;) {
         Ꮡi.Ꮡrb.insertUnsafe(i.rb.src, i.p, i.info);
-        {
-            i.p += (nint)i.info.size; if (i.p >= i.rb.nsrc) {
-                i.setDone();
-                break;
-            }
+        i.p += (nint)i.info.size; if (i.p >= i.rb.nsrc) {
+            i.setDone();
+            break;
         }
         i.info = i.rb.f.info(i.rb.src, i.p);
         if (i.info.ccc == 0) {
             break;
         }
-        {
-            ssState s = i.rb.ss.next(i.info); if (s == ssOverflow) {
-                i.next = nextCGJDecompose;
-                break;
-            }
+        ssState s = i.rb.ss.next(i.info); if (s == ssOverflow) {
+            i.next = nextCGJDecompose;
+            break;
         }
     }
     // new segment or too many combining characters: exit normalization
@@ -438,13 +424,11 @@ internal static slice<byte> nextComposed(ж<Iter> Ꮡi) {
             break;
         }
         i.info = i.rb.f.info(i.rb.src, i.p);
-        {
-            ssState v = i.rb.ss.next(i.info); if (v == ssStarter) {
-                break;
-            } else if (v == ssOverflow) {
-                i.next = nextCGJCompose;
-                break;
-            }
+        ssState v = i.rb.ss.next(i.info); if (v == ssStarter) {
+            break;
+        } else if (v == ssOverflow) {
+            i.next = nextCGJCompose;
+            break;
         }
         if (i.info.ccc < prevCC) {
             goto doNorm;
@@ -474,20 +458,16 @@ internal static slice<byte> doNormComposed(ж<Iter> Ꮡi) {
 
     // First rune should already be inserted.
     for (;;) {
-        {
-            i.p += (nint)i.info.size; if (i.p >= i.rb.nsrc) {
-                i.setDone();
-                break;
-            }
+        i.p += (nint)i.info.size; if (i.p >= i.rb.nsrc) {
+            i.setDone();
+            break;
         }
         i.info = i.rb.f.info(i.rb.src, i.p);
-        {
-            ssState s = i.rb.ss.next(i.info); if (s == ssStarter) {
-                break;
-            } else if (s == ssOverflow) {
-                i.next = nextCGJCompose;
-                break;
-            }
+        ssState s = i.rb.ss.next(i.info); if (s == ssStarter) {
+            break;
+        } else if (s == ssOverflow) {
+            i.next = nextCGJCompose;
+            break;
         }
         Ꮡi.Ꮡrb.insertUnsafe(i.rb.src, i.p, i.info);
     }

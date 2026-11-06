@@ -55,10 +55,8 @@ public static error Fchdir(this ж<FD> Ꮡfd) {
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.Fchdir(fd.Sysfd);
@@ -87,10 +85,8 @@ public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) {
             if (err != nil) {
                 n = 0;
                 if (AreEqual(err, Δsyscall.EAGAIN) && fd.pd.pollable()) {
-                    {
-                        err = fd.pd.waitRead(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitRead(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
             }
@@ -109,10 +105,8 @@ public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) 
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return (0, err);
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return (0, err);
         }
         ᒐd1 = true;
         return Δsyscall.Seek(fd.Sysfd, offset, whence);

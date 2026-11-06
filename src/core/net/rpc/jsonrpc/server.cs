@@ -65,10 +65,8 @@ internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Reques
     ref var r = ref Ꮡr.DerefOrNull();
 
     c.req.reset();
-    {
-        var err = c.dec.Decode(Ꮡc.Ꮡreq); if (err != nil) {
-            return err;
-        }
+    var err = c.dec.Decode(Ꮡc.Ꮡreq); if (err != nil) {
+        return err;
     }
     r.ServiceMethod = c.req.Method;
 

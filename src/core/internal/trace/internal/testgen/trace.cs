@@ -42,10 +42,8 @@ public static void ΔMain(version.Version ver, Action<ж<Trace>> f) {
         f(trace);
 
         // Write out the generator's state.
-        {
-            var (_, errΔ1) = @out.Write(trace.Generate()); if (errΔ1 != nil) {
-                throw panic(errΔ1.Error());
-            }
+        var (_, errΔ1) = @out.Write(trace.Generate()); if (errΔ1 != nil) {
+            throw panic(errΔ1.Error());
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -169,10 +167,8 @@ internal static raw.Event createEvent(this ref Trace t, tracev2.EventType ev, sl
 
     var spec = t.specs[ev];
     if (ev != tracev2.EvStack) {
-        {
-            nint arity = len(spec.Args); if (len(args) != arity) {
-                throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
-            }
+        nint arity = len(spec.Args); if (len(args) != arity) {
+            throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
         }
     }
     return new raw.Event(
@@ -229,10 +225,8 @@ public static uint64 String(this ref ΔGeneration g, @string s) {
     if (len(s) == 0) {
         return 0;
     }
-    {
-        var (idΔ1, ok) = g.strings[s, ꟷ]; if (ok) {
-            return idΔ1;
-        }
+    var (idΔ1, ok) = g.strings[s, ꟷ]; if (ok) {
+        return idΔ1;
     }
     var id = (uint64)(len(g.strings) + 1);
     g.strings[s] = id;
@@ -253,10 +247,8 @@ public static uint64 Stack(this ref ΔGeneration g, slice<trace.StackFrame> stk)
     stack stkc = new();
     copy(stkc.stk[..], stk);
     stkc.len = len(stk);
-    {
-        var (idΔ1, ok) = g.stacks[stkc, ꟷ]; if (ok) {
-            return idΔ1;
-        }
+    var (idΔ1, ok) = g.stacks[stkc, ꟷ]; if (ok) {
+        return idΔ1;
     }
     var id = (uint64)(len(g.stacks) + 1);
     g.stacks[stkc] = id;
@@ -404,10 +396,8 @@ public static void Event(this ref ΔBatch b, @string name, params ꓸꓸꓸany a
         argOff = 1;
     }
     var spec = b.gen.trace.specs[ev];
-    {
-        nint arity = len(spec.Args) - argOff; if (len(args) != arity) {
-            throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
-        }
+    nint arity = len(spec.Args) - argOff; if (len(args) != arity) {
+        throw panic(fmt.Sprintf("expected %d args for %s, got %d"u8, arity, spec.Name, len(args)));
     }
     foreach (var (i, arg) in args) {
         uintArgs = append(uintArgs, b.uintArgFor(arg, spec.Args[i + argOff]));

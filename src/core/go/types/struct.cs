@@ -216,10 +216,8 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
     }
     case ж<ast.StarExpr> eΔ1: {
         // *T is valid, but **T is not
-        {
-            var (_, ok) = eΔ1.X._<ж<ast.StarExpr>>(ᐧ); if (!ok) {
-                return embeddedFieldIdent(eΔ1.X);
-            }
+        var (_, ok) = eΔ1.X._<ж<ast.StarExpr>>(ᐧ); if (!ok) {
+            return embeddedFieldIdent(eΔ1.X);
         }
         break;
     }
@@ -238,14 +236,12 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
 internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, tokenꓸPos pos, Object obj) {
     ref var oset = ref Ꮡoset.DerefOrNull();
 
-    {
-        var alt = oset.insert(obj); if (alt != nil) {
-            var err = Ꮡcheck.newError(DuplicateDecl);
-            err.addf((atPos)pos, "%s redeclared", obj.Name());
-            err.addAltDecl(alt);
-            err.report();
-            return false;
-        }
+    var alt = oset.insert(obj); if (alt != nil) {
+        var err = Ꮡcheck.newError(DuplicateDecl);
+        err.addf((atPos)pos, "%s redeclared", obj.Name());
+        err.addAltDecl(alt);
+        err.report();
+        return false;
     }
     return true;
 }
@@ -255,10 +251,8 @@ internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
 
     if (Ꮡt != nil) {
         if (t.Kind == token.STRING) {
-            {
-                var (val, err) = strconv.Unquote(t.Value); if (err == nil) {
-                    return val;
-                }
+            var (val, err) = strconv.Unquote(t.Value); if (err == nil) {
+                return val;
             }
         }
         Ꮡcheck.errorf(new ast_BasicLitжpositioner(Ꮡt), InvalidSyntaxTree, "incorrect tag syntax: %q", t.Value);

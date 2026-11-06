@@ -13,10 +13,8 @@ public static error Fsync(this ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return ignoringEINTR(() => Δsyscall.Fsync(Ꮡfd.Value.Sysfd));

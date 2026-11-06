@@ -171,25 +171,19 @@ internal static void declare(this ref resolver r, any decl, any data, ж<ast.Sco
         obj.Data = data;
         // Identifiers (for receiver type parameters) are written to the scope, but
         // never set as the resolved object. See go.dev/issue/50956.
-        {
-            var (_, ok) = decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
-                ident.Obj = obj;
-            }
+        var (_, ok) = decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
+            ident.Obj = obj;
         }
         if (ident.Name != "_"u8) {
             if (debugResolve) {
                 r.trace(declaringSVˢ, ident.Name, ident.Pos());
             }
-            {
-                var alt = scope.Insert(obj); if (alt != nil && r.declErr != nil) {
-                    @string prevDecl = ""u8;
-                    {
-                        tokenꓸPos pos = alt.Pos(); if (pos.IsValid()) {
-                            prevDecl = r.sprintf("\n\tprevious declaration at %v", pos);
-                        }
-                    }
-                    r.declErr(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, ident.Name, prevDecl));
+            var alt = scope.Insert(obj); if (alt != nil && r.declErr != nil) {
+                @string prevDecl = ""u8;
+                tokenꓸPos pos = alt.Pos(); if (pos.IsValid()) {
+                    prevDecl = r.sprintf("\n\tprevious declaration at %v", pos);
                 }
+                r.declErr(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, ident.Name, prevDecl));
             }
         }
     }
@@ -209,24 +203,20 @@ internal static void shortVarDecl(this ref resolver r, ж<ast.AssignStmt> Ꮡdec
     // the same type, and at least one of the non-blank variables is new.
     nint n = 0; // number of new variables
     foreach (var (_, x) in decl.Lhs) {
-        {
-            var (ident, isIdent) = x._<ж<ast.Ident>>(ᐧ); if (isIdent) {
-                assert(ident.Obj == nil, identifierAlreadyˢ);
-                var obj = ast.NewObj(ast.Var, ident.Name);
-                // remember corresponding assignment for other tools
-                obj.Decl = Ꮡdecl.OrTypedNil();
-                ident.Obj = obj;
-                if (ident.Name != "_"u8) {
-                    if (debugResolve) {
-                        r.trace(declaringSVˢ, ident.Name, ident.Pos());
-                    }
-                    {
-                        var alt = r.topScope.Insert(obj); if (alt != nil) {
-                            ident.Obj = alt; // redeclaration
-                        } else {
-                            n++; // new declaration
-                        }
-                    }
+        var (ident, isIdent) = x._<ж<ast.Ident>>(ᐧ); if (isIdent) {
+            assert(ident.Obj == nil, identifierAlreadyˢ);
+            var obj = ast.NewObj(ast.Var, ident.Name);
+            // remember corresponding assignment for other tools
+            obj.Decl = Ꮡdecl.OrTypedNil();
+            ident.Obj = obj;
+            if (ident.Name != "_"u8) {
+                if (debugResolve) {
+                    r.trace(declaringSVˢ, ident.Name, ident.Pos());
+                }
+                var alt = r.topScope.Insert(obj); if (alt != nil) {
+                    ident.Obj = alt; // redeclaration
+                } else {
+                    n++; // new declaration
                 }
             }
         }
@@ -263,21 +253,17 @@ internal static void resolve(this ref resolver r, ж<ast.Ident> Ꮡident, bool c
         return;
     }
     for (var s = r.topScope; s != nil; s = s.Outer) {
-        {
-            var obj = s.Lookup(ident.Name); if (obj != nil) {
-                if (debugResolve) {
-                    r.trace(resolvedVSToVˢ, ident.Pos(), ident.Name, obj.OrTypedNil());
-                }
-                assert(obj.Name != ""u8, objWithNoNameˢ);
-                // Identifiers (for receiver type parameters) are written to the scope,
-                // but never set as the resolved object. See go.dev/issue/50956.
-                {
-                    var (_, ok) = obj.Decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
-                        ident.Obj = obj;
-                    }
-                }
-                return;
+        var obj = s.Lookup(ident.Name); if (obj != nil) {
+            if (debugResolve) {
+                r.trace(resolvedVSToVˢ, ident.Pos(), ident.Name, obj.OrTypedNil());
             }
+            assert(obj.Name != ""u8, objWithNoNameˢ);
+            // Identifiers (for receiver type parameters) are written to the scope,
+            // but never set as the resolved object. See go.dev/issue/50956.
+            var (_, ok) = obj.Decl._<ж<ast.Ident>>(ᐧ); if (!ok) {
+                ident.Obj = obj;
+            }
+            return;
         }
     }
     // all local scopes are known, so any unresolved identifier
@@ -299,10 +285,8 @@ internal static void walkExprs(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
 internal static void walkLHS(this ж<resolver> Ꮡr, slice<ast.Expr> list) {
     foreach (var (_, expr) in list) {
         var exprΔ1 = ast.Unparen(expr);
-        {
-            var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != nil) {
-                ast.Walk(new resolverжVisitor(Ꮡr), exprΔ1);
-            }
+        var (_, ok) = exprΔ1._<ж<ast.Ident>>(ᐧ); if (!ok && exprΔ1 != nil) {
+            ast.Walk(new resolverжVisitor(Ꮡr), exprΔ1);
         }
     }
 }
@@ -362,22 +346,18 @@ internal static ast.Visitor Visit(this ж<resolver> Ꮡr, ast.Node node) {
                 ast.Walk(new resolverжVisitor(Ꮡr), n.Type);
             }
             foreach (var (_, e) in n.Elts) {
-                {
-                    var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
-                        // See go.dev/issue/45160: try to resolve composite lit keys, but don't
-                        // collect them as unresolved if resolution failed. This replicates
-                        // existing behavior when resolving during parsing.
-                        {
-                            var (ident, _) = kv.Key._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
-                                r.resolve(ident, false);
-                            } else {
-                                ast.Walk(new resolverжVisitor(Ꮡr), kv.Key);
-                            }
-                        }
-                        ast.Walk(new resolverжVisitor(Ꮡr), (~kv).Value);
+                var (kv, _) = e._<ж<ast.KeyValueExpr>>(ᐧ); if (kv != nil) {
+                    // See go.dev/issue/45160: try to resolve composite lit keys, but don't
+                    // collect them as unresolved if resolution failed. This replicates
+                    // existing behavior when resolving during parsing.
+                    var (ident, _) = kv.Key._<ж<ast.Ident>>(ᐧ); if (ident != nil) {
+                        r.resolve(ident, false);
                     } else {
-                        ast.Walk(new resolverжVisitor(Ꮡr), e);
+                        ast.Walk(new resolverжVisitor(Ꮡr), kv.Key);
                     }
+                    ast.Walk(new resolverжVisitor(Ꮡr), (~kv).Value);
+                } else {
+                    ast.Walk(new resolverжVisitor(Ꮡr), e);
                 }
             }
             break;
@@ -664,10 +644,8 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
         return; // nothing to do
     }
     var typ = recv.List[0].Type;
-    {
-        var (ptr, ok) = typ._<ж<ast.StarExpr>>(ᐧ); if (ok) {
-            typ = ptr.X;
-        }
+    var (ptr, ok) = typ._<ж<ast.StarExpr>>(ᐧ); if (ok) {
+        typ = ptr.X;
     }
 
     slice<ast.Expr> declareExprs = default; // exprs to declare
@@ -689,14 +667,12 @@ internal static void walkRecv(this ж<resolver> Ꮡr, ж<ast.FieldList> Ꮡrecv)
         break;
     }}
     foreach (var (_, expr) in declareExprs) {
-        {
-            var (id, _) = expr._<ж<ast.Ident>>(ᐧ); if (id != nil) {
-                r.declare(expr, default, r.topScope, ast.Typ, id);
-            } else {
-                // The receiver type parameter expression is invalid, but try to resolve
-                // it anyway for consistency.
-                resolveExprs = append(resolveExprs, expr);
-            }
+        var (id, _) = expr._<ж<ast.Ident>>(ᐧ); if (id != nil) {
+            r.declare(expr, default, r.topScope, ast.Typ, id);
+        } else {
+            // The receiver type parameter expression is invalid, but try to resolve
+            // it anyway for consistency.
+            resolveExprs = append(resolveExprs, expr);
         }
     }
     foreach (var (_, expr) in resolveExprs) {

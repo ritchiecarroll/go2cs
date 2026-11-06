@@ -230,10 +230,8 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
 public static Model YCbCrModel = ModelFunc(yCbCrModel);
 
 internal static Color yCbCrModel(Color c) {
-    {
-        var (_, ok) = c._<YCbCr>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<YCbCr>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, _) = c.RGBA();
     var (y, u, v) = RGBToYCbCr((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(b >> 8));
@@ -368,10 +366,8 @@ public static (uint32, uint32, uint32, uint32) RGBA(this CMYK c) {
 public static Model CMYKModel = ModelFunc(cmykModel);
 
 internal static Color cmykModel(Color c) {
-    {
-        var (_, ok) = c._<CMYK>(ᐧ); if (ok) {
-            return c;
-        }
+    var (_, ok) = c._<CMYK>(ᐧ); if (ok) {
+        return c;
     }
     var (r, g, b, _) = c.RGBA();
     var (cc, mm, yy, kk) = RGBToCMYK((uint8)(r >> 8), (uint8)(g >> 8), (uint8)(b >> 8));

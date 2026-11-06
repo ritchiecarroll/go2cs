@@ -285,21 +285,19 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
         err = ErrSyntax;
         return (value, multibyte, tail, err);
     }
-    {
-        var cΔ1 = s[0];
-        switch (ᐧ) {
-        case {} when cΔ1 == quote && (quote == (byte)'\'' || quote == (byte)'"'): {
-            err = ErrSyntax;
-            return (value, multibyte, tail, err);
-        }
-        case {} when cΔ1 >= utf8.RuneSelf: {
-            var (r, size) = utf8.DecodeRuneInString(s);
-            return (r, true, s.slice(size), default);
-        }
-        case {} when cΔ1 is not (byte)'\\': {
-            return ((rune)s[0], false, s[1..], default);
-        }}
+    var cΔ1 = s[0];
+    switch (ᐧ) {
+    case {} when cΔ1 == quote && (quote == (byte)'\'' || quote == (byte)'"'): {
+        err = ErrSyntax;
+        return (value, multibyte, tail, err);
     }
+    case {} when cΔ1 >= utf8.RuneSelf: {
+        var (r, size) = utf8.DecodeRuneInString(s);
+        return (r, true, s.slice(size), default);
+    }
+    case {} when cΔ1 is not (byte)'\\': {
+        return ((rune)s[0], false, s[1..], default);
+    }}
 
     // hard case: c is backslash
     if (len(s) <= 1) {

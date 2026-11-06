@@ -12,10 +12,8 @@ partial class os_package {
 // wrapSyscallError takes an error and a syscall name. If the error is
 // a syscall.Errno, it wraps it in an os.SyscallError using the syscall name.
 internal static error wrapSyscallError(@string name, error err) {
-    {
-        var (_, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
-            err = NewSyscallError(name, err);
-        }
+    var (_, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
+        err = NewSyscallError(name, err);
     }
     return err;
 }

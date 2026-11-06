@@ -82,10 +82,8 @@ internal static (ж<PrivateKey>, error) newPrivateKeyFromSeed(ж<PrivateKey> Ꮡ
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     fips140.RecordApproved();
-    {
-        nint l = len(seed); if (l != seedSize) {
-            return (default, errors.New("ed25519: bad seed length: "u8 + strconv.Itoa(l)));
-        }
+    nint l = len(seed); if (l != seedSize) {
+        return (default, errors.New("ed25519: bad seed length: "u8 + strconv.Itoa(l)));
     }
     copy(priv.seed[..], seed);
     precomputePrivateKey(Ꮡpriv);
@@ -118,10 +116,8 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     fips140.RecordApproved();
-    {
-        nint l = len(privBytes); if (l != privateKeySize) {
-            return (default, errors.New("ed25519: bad private key length: "u8 + strconv.Itoa(l)));
-        }
+    nint l = len(privBytes); if (l != privateKeySize) {
+        return (default, errors.New("ed25519: bad private key length: "u8 + strconv.Itoa(l)));
     }
 
     copy(priv.seed[..], privBytes[..32]);
@@ -130,10 +126,8 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<PrivateKey> Ꮡpriv, sl
     hs.Write(priv.seed[..]);
     var h = hs.Sum(new slice<byte>(0, sha512Size));
 
-    {
-        var (_, err) = Ꮡpriv.Ꮡs.SetBytesWithClamping(h[..32]); if (err != nil) {
-            throw panic("ed25519: internal error: setting scalar failed");
-        }
+    var (_, err) = Ꮡpriv.Ꮡs.SetBytesWithClamping(h[..32]); if (err != nil) {
+        throw panic("ed25519: internal error: setting scalar failed");
     }
     // Note that we are not decompressing the public key point here,
     // because it takes > 20% of the time of a signature generation.
@@ -157,16 +151,12 @@ private static readonly @string ed25519BadPublicKeyˢᵇ = "ed25519: bad public 
 internal static (ж<ΔPublicKey>, error) newPublicKey(ж<ΔPublicKey> Ꮡpub, slice<byte> pubBytes) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
-    {
-        nint l = len(pubBytes); if (l != publicKeySize) {
-            return (default, errors.New("ed25519: bad public key length: "u8 + strconv.Itoa(l)));
-        }
+    nint l = len(pubBytes); if (l != publicKeySize) {
+        return (default, errors.New("ed25519: bad public key length: "u8 + strconv.Itoa(l)));
     }
     // SetBytes checks that the point is on the curve.
-    {
-        var (_, err) = Ꮡpub.Ꮡa.SetBytes(pubBytes); if (err != nil) {
-            return (default, errors.New(ed25519BadPublicKeyˢ));
-        }
+    var (_, err) = Ꮡpub.Ꮡa.SetBytes(pubBytes); if (err != nil) {
+        return (default, errors.New(ed25519BadPublicKeyˢ));
     }
     copy(pub.aBytes[..], pubBytes);
     return (Ꮡpub, default);
@@ -234,10 +224,8 @@ internal static (slice<byte>, error) signCtx(slice<byte> signature, ж<PrivateKe
     // FIPS 186-5 specifies Ed25519 and Ed25519ph (with context), but not Ed25519ctx.
     fips140.RecordNonApproved();
     // Note that per RFC 8032, Section 5.1, the context SHOULD NOT be empty.
-    {
-        nint l = len(context); if (l > 255) {
-            return (default, errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l)));
-        }
+    nint l = len(context); if (l > 255) {
+        return (default, errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l)));
     }
     return (signWithDom(signature, priv, message, domPrefixCtx, context), default);
 }
@@ -316,10 +304,8 @@ public static error VerifyCtx(ж<ΔPublicKey> pub, slice<byte> message, slice<by
     fipsSelfTest();
     // FIPS 186-5 specifies Ed25519 and Ed25519ph (with context), but not Ed25519ctx.
     fips140.RecordNonApproved();
-    {
-        nint l = len(context); if (l > 255) {
-            return errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l));
-        }
+    nint l = len(context); if (l > 255) {
+        return errors.New("ed25519: bad Ed25519ctx context length: "u8 + strconv.Itoa(l));
     }
     return verifyWithDom(pub, message, sig, domPrefixCtx, context);
 }
@@ -331,10 +317,8 @@ private static readonly @string ed25519InvalidSignatureˢᵇ = "ed25519: invalid
 internal static error verifyWithDom(ж<ΔPublicKey> Ꮡpub, slice<byte> message, slice<byte> sig, @string domPrefix, @string context) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
-    {
-        nint l = len(sig); if (l != signatureSize) {
-            return errors.New("ed25519: bad signature length: "u8 + strconv.Itoa(l));
-        }
+    nint l = len(sig); if (l != signatureSize) {
+        return errors.New("ed25519: bad signature length: "u8 + strconv.Itoa(l));
     }
 
     if ((byte)(sig[63] & 224) != 0) {

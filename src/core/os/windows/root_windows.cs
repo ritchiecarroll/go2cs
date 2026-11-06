@@ -162,10 +162,8 @@ internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string na
 internal static (syscallꓸHandle, error) openat(syscallꓸHandle dirfd, @string name, uint64 flag, FileMode perm) {
     var (h, err) = windows.Openat(dirfd, name, flag | (uint64)syscall.O_CLOEXEC | (uint64)windows.O_NOFOLLOW_ANY, syscallMode(perm));
     if (AreEqual(err, syscall.ELOOP) || AreEqual(err, syscall.ENOTDIR)) {
-        {
-            var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
-                return (syscall.InvalidHandle, ((errSymlink)link));
-            }
+        var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
+            return (syscall.InvalidHandle, ((errSymlink)link));
         }
     }
     return (h, err);
@@ -292,10 +290,8 @@ internal static error rootSymlink(ж<Root> r, @string oldname, @string newname) 
         // Prepend newname's directory to it to make a path relative to the root.
         // For example, if oldname=old and newname=a\new, destPath=a\old.
         @string destPath = oldname;
-        {
-            @string dir = dirname(newname); if (dir != "."u8) {
-                destPath = dir + @"\"u8 + oldname;
-            }
+        @string dir = dirname(newname); if (dir != "."u8) {
+            destPath = dir + @"\"u8 + oldname;
         }
         var (fi, errΔ2) = r.Stat(destPath);
         if (errΔ2 == nil && fi.IsDir()) {
@@ -343,10 +339,8 @@ internal static error chmodat(syscallꓸHandle parent, @string name, FileMode mo
         defer(syscall.CloseHandle, h, ref ᒐ);
 
         ref var d = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡd);
-        {
-            var errΔ1 = syscall.GetFileInformationByHandle(h, Ꮡd); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = syscall.GetFileInformationByHandle(h, Ꮡd); if (errΔ1 != nil) {
+            return errΔ1;
         }
         var attrs = d.FileAttributes;
 
@@ -396,10 +390,8 @@ internal static error chtimesat(syscallꓸHandle dirfd, @string name, time.Time 
     try {
         var (h, err) = windows.Openat(dirfd, name, (uint64)(8590458880L | (uint64)windows.O_WRITE_ATTRS), 0);
         if (AreEqual(err, syscall.ELOOP) || AreEqual(err, syscall.ENOTDIR)) {
-            {
-                var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
-                    return ((errSymlink)link);
-                }
+            var (link, errΔ1) = readReparseLinkAt(dirfd, name); if (errΔ1 == nil) {
+                return ((errSymlink)link);
             }
         }
         if (err != nil) {

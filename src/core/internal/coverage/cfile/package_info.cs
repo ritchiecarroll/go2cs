@@ -63,9 +63,9 @@ using static go.@internal.coverage.cfile_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/coverage/cfile/apis.go", "apis.cs", "ABEikoKUqJKClIKUgqiSgpSokoKUgqaCgpSCpoK4qJKCgpSCADt4goKUgoKmgoKmpg==")]
-[assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFOgAbKClIKCgoKmgoKmgoKCpoCCgoLagoKUgoKUpoKCgpSsxO6Cpu6UgoKCooKClJSCgoLKgoKigIKkgoKClIKCyoKmgoKClKqigoKUgqaU7oCCyIKAgrassoKUgIKCgtykgpSmgriCAAcQgIKkgriAgqSAgtqAgraokoCCpAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKAgraCgIK2rNKAgqSAgtqAgrassuaylIKigpSmgpSCgoKUpoKCgpSCgriCgoKCyoKCgoKmlIKmgoKCpgAIEoKCgoKCgIKUggAIEKaCgILIlIKmAAoQ0oKCgpSCgqrCgoCCpAACENKmgoKUgpSCgoKCooKClJSCgg==", "455-461:1", "", "191=Getenv/1/1/2;267=Getenv/1/1/2;323=Getenv/1/1/4")]
+[assembly: GoPositionMap("internal/coverage/cfile/emit.go", "emit.cs", "ACRKAFOgAbKClIKCgoKmgoKmgoKCpoKCgsqCgpSCgpSmgoKClKzE7oKm7pSCgoKigoKUlIKCgsqCgqKClIKCgpSCgsqCpoKCgpSqooKClIKmlO6CuIKCpqyygpSCgoLMpIKUpoK4ggAHEICCpIK4gIKkgILagIK2qJKClAACEAAIBoKCgpSCgoKCpqzSgoKCgoKCgpQAAhwADQKCgpSCpoKCpoKCpqzSgIKkgILagIK2rLLmspSCooKUpoKUgoKClKaCgoKUgoK4goKCgsqCgoKCppSCpoKCgqYACBKCgoKCgoKUggAHEKaCgriUgqYAChDSgoKClIKCqsKCgpQAAhDSpoKClIKUgoKCgqKCgpSUgoI=", "455-461:1", "", "189=Getenv/1/1/2;263=Getenv/1/1/2;313=Getenv/1/1/4")]
 [assembly: GoPositionMap("internal/coverage/cfile/hooks.go", "hooks.cs", "AAo4ABYIgoKU")]
-[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgIKkgIIACBCCgqiSgoKCgoKUkoKC3AAIEoKCgoKUgILIgoCCgILqgILIgoCCpIKAgsgADBbkgoKUkpSCgoKUgoKUgoCCyKaygoKUkoKCgpSCgoKClIK4goCUgILGgoKU6IKAgtqCgoKCgoKUgoKCgoKAgraCgoKmgpSCgpS4AAkOhqKCgpSAggAIEIKCgIKkgoKAgrYAAhLigpSmgoKCgoKUgqaClIKUgoKCpqaClA==", "69-74:1;138-140:1;159-193:2", "", "90=NewFormatter/1/1/2", "202:29")]
+[assembly: GoPositionMap("internal/coverage/cfile/testsupport.go", "testsupport.cs", "AB484oKCuILKgpSCAAcQgoKokoKCgoKClJKCgtwACBKCgoKClIK4goKCyoK4goKUgoK4AAwW5IKClJKUgoKClIKClIKCuKaygoKUkoKCgpSCgoKClIK4gpSCpoKClOiCgsqCgoKCgoKUgoKCgoKCpoKCgqaClIKClLgACQ6GooKClIIABxCCgoKUgoKCpgACEuKClKaCgoKCgpSCpoKUgpSCgoKmpoKU", "69-74:1;138-140:1;159-193:2", "", "86=NewFormatter/1/1/2", "184:29")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

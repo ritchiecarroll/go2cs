@@ -112,18 +112,16 @@ internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8>
                 // reading more.
                 break;
             }
-            {
-                (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == nil) {
-                    if (((sstring)(cr.buf[..])) != "\r\n"u8) {
-                        cr.err = errors.New(malformedChunkedEncodingˢ);
-                        break;
-                    }
-                } else {
-                    if (AreEqual(cr.err, io.EOF)) {
-                        cr.err = io.ErrUnexpectedEOF;
-                    }
+            (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == nil) {
+                if (((sstring)(cr.buf[..])) != "\r\n"u8) {
+                    cr.err = errors.New(malformedChunkedEncodingˢ);
                     break;
                 }
+            } else {
+                if (AreEqual(cr.err, io.EOF)) {
+                    cr.err = io.ErrUnexpectedEOF;
+                }
+                break;
             }
             cr.checkEnd = false;
         }
@@ -189,12 +187,10 @@ internal static (slice<byte>, error) readChunkLine(ж<bufio.Reader> Ꮡb) {
     // which explicitly rejects a clarification permitting \n as a chunk terminator.
     //
     // Verify that the line ends in a CRLF, and that no CRs appear before the end.
-    {
-        nint idx = bytes.IndexByte(p, (byte)'\r'); if (idx == -1) {
-            return (default, errors.New(chunkedLineEndsWithBareˢ));
-        } else if (idx != len(p) - 2) {
-            return (default, errors.New(invalidCrInChunkedLineˢ));
-        }
+    nint idx = bytes.IndexByte(p, (byte)'\r'); if (idx == -1) {
+        return (default, errors.New(chunkedLineEndsWithBareˢ));
+    } else if (idx != len(p) - 2) {
+        return (default, errors.New(invalidCrInChunkedLineˢ));
     }
     p = p.slice(0, len(p) - 2); // trim CRLF
 
@@ -265,29 +261,21 @@ internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte>
         return (0, default);
     }
 
-    {
-        (_, err) = fmt.Fprintf(cw.Wire, "%x\r\n"u8, len(data)); if (err != nil) {
-            return (0, err);
-        }
+    (_, err) = fmt.Fprintf(cw.Wire, "%x\r\n"u8, len(data)); if (err != nil) {
+        return (0, err);
     }
-    {
-        (n, err) = cw.Wire.Write(data); if (err != nil) {
-            return (n, err);
-        }
+    (n, err) = cw.Wire.Write(data); if (err != nil) {
+        return (n, err);
     }
     if (n != len(data)) {
         err = io.ErrShortWrite;
         return (n, err);
     }
-    {
-        (_, err) = io.WriteString(cw.Wire, "\r\n"); if (err != nil) {
-            return (n, err);
-        }
+    (_, err) = io.WriteString(cw.Wire, "\r\n"); if (err != nil) {
+        return (n, err);
     }
-    {
-        var (bw, ok) = cw.Wire._<ж<FlushAfterChunkWriter>>(ᐧ); if (ok) {
-            err = bw.Value.Writer.Value.Flush();
-        }
+    var (bw, ok) = cw.Wire._<ж<FlushAfterChunkWriter>>(ᐧ); if (ok) {
+        err = bw.Value.Writer.Value.Flush();
     }
     return (n, err);
 }

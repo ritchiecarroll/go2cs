@@ -142,10 +142,8 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     }
     r.wroteCGIHeader = true;
     fmt.Fprintf(new bufWriterжWriter(r.w), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
-    {
-        var (_, hasType) = r.header[contentTypeˢ, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
-            r.header.Set(contentTypeˢ, http.DetectContentType(p));
-        }
+    var (_, hasType) = r.header[contentTypeˢ, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
+        r.header.Set(contentTypeˢ, http.DetectContentType(p));
     }
     r.header.Write(new bufWriterжWriter(r.w));
     r.w.Value.Writer.Value.WriteString("\r\n");
@@ -238,10 +236,8 @@ internal static partial error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡre
         }
 
         beginRequest br = new();
-        {
-            var err = br.read(rec.content()); if (err != nil) {
-                return err;
-            }
+        var err = br.read(rec.content()); if (err != nil) {
+            return err;
         }
         if (br.role != roleResponder) {
             c.conn.writeEndRequest(rec.h.Id, 0, statusUnknownRole);

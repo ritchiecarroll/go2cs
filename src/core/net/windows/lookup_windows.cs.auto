@@ -64,11 +64,9 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
     goǃ(() => {
         GoFrame ᒐ = default;
         try {
-            {
-                var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                    chʗ1.ᐸꟷ(new lookupProtocol_result(err: mapErr(errΔ1)));
-                    return;
-                }
+            var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
+                chʗ1.ᐸꟷ(new lookupProtocol_result(err: mapErr(errΔ1)));
+                return;
             }
             defer(releaseThread, ref ᒐ);
             runtime.LockOSThread();
@@ -84,10 +82,8 @@ internal static partial (nint, error) lookupProtocol(context.Context ctx, @strin
     switch (select(ᐸꟷ(selᴛ13, ꓸꓸꓸ), ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
     case 0 when selᴛ13.ꟷᐳ(out var r): {
         if (r.err != nil) {
-            {
-                var (proto, err) = lookupProtocolMap(name); if (err == nil) {
-                    return (proto, default);
-                }
+            var (proto, err) = lookupProtocolMap(name); if (err == nil) {
+                return (proto, default);
             }
             r.err = new DNSErrorжerror(newDNSError(r.err, name, ""u8));
         }
@@ -120,10 +116,8 @@ internal static (slice<@string>, error) lookupHost(this ж<Resolver> Ꮡr, conte
 }
 
 internal static partial (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name) {
-    {
-        var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
-            return Ꮡr.goLookupIP(ctx, network, name, order, conf);
-        }
+    var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
+        return Ꮡr.goLookupIP(ctx, network, name, order, conf);
     }
 
     // TODO(bradfitz,brainman): use ctx more. See TODO below.
@@ -142,10 +136,8 @@ internal static partial (slice<IPAddr>, error) lookupIP(this ж<Resolver> Ꮡr, 
     (slice<IPAddr>, error) getaddr() {
         GoFrame ᒐ = default;
         try {
-            {
-                var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                    return (default, new DNSErrorжerror(newDNSError(mapErr(errΔ1), name, ""u8)));
-                }
+            var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
+                return (default, new DNSErrorжerror(newDNSError(mapErr(errΔ1), name, ""u8)));
             }
             defer(releaseThread, ref ᒐ);
             ref var hints = ref heap<syscall.AddrinfoW>(new syscall.AddrinfoW(
@@ -237,10 +229,8 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
         }
 
         // TODO(bradfitz): finish ctx plumbing
-        {
-            var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                return (0, new DNSErrorжerror(newDNSError(mapErr(errΔ1), network + "/"u8 + service, ""u8)));
-            }
+        var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
+            return (0, new DNSErrorжerror(newDNSError(mapErr(errΔ1), network + "/"u8 + service, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
 
@@ -283,10 +273,8 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
         ref var result = ref heap<ж<syscall.AddrinfoW>>(out var Ꮡresult);
         var e = syscall.GetAddrInfoW(nil, servicep, Ꮡhints, Ꮡresult);
         if (e != nil) {
-            {
-                var (port, errΔ2) = lookupPortMap(network, service); if (errΔ2 == nil) {
-                    return (port, default);
-                }
+            var (port, errΔ2) = lookupPortMap(network, service); if (errΔ2 == nil) {
+                return (port, default);
             }
 
             // The _WSATYPE_NOT_FOUND error is returned by GetAddrInfoW
@@ -321,27 +309,21 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
 internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
-                return Ꮡr.goLookupCNAME(ctx, name, order, conf);
-            }
+        var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name); if (order != hostLookupCgo) {
+            return Ꮡr.goLookupCNAME(ctx, name, order, conf);
         }
 
         // TODO(bradfitz): finish ctx plumbing
-        {
-            var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                return ("", new DNSErrorжerror(newDNSError(mapErr(errΔ1), name, ""u8)));
-            }
+        var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
+            return ("", new DNSErrorжerror(newDNSError(mapErr(errΔ1), name, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
         ref var rec = ref heap<ж<syscall.DNSRecord>>(out var Ꮡrec);
         var e = syscall.DnsQuery(name, syscall.DNS_TYPE_CNAME, 0, nil, Ꮡrec, nil);
         // windows returns DNS_INFO_NO_RECORDS if there are no CNAME-s
-        {
-            var (errno, ok) = e._<syscall.Errno>(ᐧ); if (ok && errno == syscall.DNS_INFO_NO_RECORDS) {
-                // if there are no aliases, the canonical name is the input name
-                return (absDomainName(name), default);
-            }
+        var (errno, ok) = e._<syscall.Errno>(ᐧ); if (ok && errno == syscall.DNS_INFO_NO_RECORDS) {
+            // if there are no aliases, the canonical name is the input name
+            return (absDomainName(name), default);
         }
         if (e != nil) {
             return ("", new DNSErrorжerror(newDNSError(winError("dnsquery"u8, e), name, ""u8)));
@@ -368,10 +350,8 @@ internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡ
             return Ꮡr.goLookupSRV(ctx, service, proto, name);
         }
         // TODO(bradfitz): finish ctx plumbing
-        {
-            var err = acquireThread(ctx); if (err != nil) {
-                return ("", default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
-            }
+        var err = acquireThread(ctx); if (err != nil) {
+            return ("", default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
         @string target = default;
@@ -406,10 +386,8 @@ internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.
             return Ꮡr.goLookupMX(ctx, name);
         }
         // TODO(bradfitz): finish ctx plumbing.
-        {
-            var err = acquireThread(ctx); if (err != nil) {
-                return (default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
-            }
+        var err = acquireThread(ctx); if (err != nil) {
+            return (default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
         ref var rec = ref heap<ж<syscall.DNSRecord>>(out var Ꮡrec);
@@ -438,10 +416,8 @@ internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.
             return Ꮡr.goLookupNS(ctx, name);
         }
         // TODO(bradfitz): finish ctx plumbing.
-        {
-            var err = acquireThread(ctx); if (err != nil) {
-                return (default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
-            }
+        var err = acquireThread(ctx); if (err != nil) {
+            return (default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
         ref var rec = ref heap<ж<syscall.DNSRecord>>(out var Ꮡrec);
@@ -469,10 +445,8 @@ internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, contex
             return Ꮡr.goLookupTXT(ctx, name);
         }
         // TODO(bradfitz): finish ctx plumbing.
-        {
-            var err = acquireThread(ctx); if (err != nil) {
-                return (default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
-            }
+        var err = acquireThread(ctx); if (err != nil) {
+            return (default, new DNSErrorжerror(newDNSError(mapErr(err), name, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
         ref var rec = ref heap<ж<syscall.DNSRecord>>(out var Ꮡrec);
@@ -500,17 +474,13 @@ internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, contex
 internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
     GoFrame ᒐ = default;
     try {
-        {
-            var (order, conf) = systemConf().addrLookupOrder(Ꮡr, addr); if (order != hostLookupCgo) {
-                return Ꮡr.goLookupPTR(ctx, addr, order, conf);
-            }
+        var (order, conf) = systemConf().addrLookupOrder(Ꮡr, addr); if (order != hostLookupCgo) {
+            return Ꮡr.goLookupPTR(ctx, addr, order, conf);
         }
 
         // TODO(bradfitz): finish ctx plumbing.
-        {
-            var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
-                return (default, new DNSErrorжerror(newDNSError(mapErr(errΔ1), addr, ""u8)));
-            }
+        var errΔ1 = acquireThread(ctx); if (errΔ1 != nil) {
+            return (default, new DNSErrorжerror(newDNSError(mapErr(errΔ1), addr, ""u8)));
         }
         defer(releaseThread, ref ᒐ);
         var (arpa, err) = reverseaddr(addr);

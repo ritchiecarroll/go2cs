@@ -47,15 +47,11 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
             // contains test code but no functions (which is fine). In this
             // case there is no need to emit anything.
         } else {
-            {
-                var errΔ1 = emitMetaDataToDirectory(dir, ml); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var errΔ1 = emitMetaDataToDirectory(dir, ml); if (errΔ1 != nil) {
+                return errΔ1;
             }
-            {
-                var errΔ2 = emitCounterDataToDirectory(dir); if (errΔ2 != nil) {
-                    return errΔ2;
-                }
+            var errΔ2 = emitCounterDataToDirectory(dir); if (errΔ2 != nil) {
+                return errΔ2;
             }
         }
 
@@ -102,43 +98,31 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
             if (!strings.Contains(p.MetaFile, hashstring)) {
                 continue;
             }
-            {
-                var errΔ4 = ts.processPod(p, importpaths); if (errΔ4 != nil) {
-                    return errΔ4;
-                }
+            var errΔ4 = ts.processPod(p, importpaths); if (errΔ4 != nil) {
+                return errΔ4;
             }
         }
 
         @string metafilespath = filepath.Join(dir, coverage.MetaFilesFileName);
-        {
-            var (_, errΔ5) = os.Stat(metafilespath); if (errΔ5 == nil) {
-                {
-                    var errΔ6 = ts.readAuxMetaFiles(metafilespath, importpaths); if (errΔ6 != nil) {
-                        return errΔ6;
-                    }
-                }
+        var (_, errΔ5) = os.Stat(metafilespath); if (errΔ5 == nil) {
+            var errΔ6 = ts.readAuxMetaFiles(metafilespath, importpaths); if (errΔ6 != nil) {
+                return errΔ6;
             }
         }
 
         // Emit percent.
-        {
-            var errΔ7 = ts.cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ7 != nil) {
-                return errΔ7;
-            }
+        var errΔ7 = ts.cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ7 != nil) {
+            return errΔ7;
         }
 
         // Emit text output.
         if (tf != nil) {
-            {
-                var errΔ8 = ts.cf.EmitTextual(selpkgs, new os.FileжWriter(tf)); if (errΔ8 != nil) {
-                    return errΔ8;
-                }
+            var errΔ8 = ts.cf.EmitTextual(selpkgs, new os.FileжWriter(tf)); if (errΔ8 != nil) {
+                return errΔ8;
             }
             tfClosed = true;
-            {
-                var errΔ9 = tf.Close(); if (errΔ9 != nil) {
-                    return fmt.Errorf("closing %s: %v"u8, cfile, errΔ9);
-                }
+            var errΔ9 = tf.Close(); if (errΔ9 != nil) {
+                return fmt.Errorf("closing %s: %v"u8, cfile, errΔ9);
             }
         }
 
@@ -180,10 +164,8 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
             return fmt.Errorf("internal error: counter mode clash: %q from test harness, %q from data file %s"u8, ts.cmode.String(), newmode.String(), p.MetaFile);
         }
         var newgran = mfr.CounterGranularity();
-        {
-            var errΔ1 = ts.cm.SetModeAndGranularity(p.MetaFile, cmode, newgran); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = ts.cm.SetModeAndGranularity(p.MetaFile, cmode, newgran); if (errΔ1 != nil) {
+            return errΔ1;
         }
 
         // A map to store counter data, indexed by pkgid/fnid tuple.
@@ -217,14 +199,10 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
 
                     // NB: sanity check on pkg and func IDs?
                     var key = new pkfunc(pk: data.PkgIdx, fcn: data.FuncIdx);
-                    {
-                        var (prev, found) = pmmʗ1[key, ꟷ]; if (found) {
-                            // Note: no overflow reporting here.
-                            {
-                                var (errΔ4, _) = Ꮡts.Value.cm.MergeCounters(data.Counters, prev); if (errΔ4 != nil) {
-                                    return fmt.Errorf("processing counter data file %s: %v"u8, cdf, errΔ4);
-                                }
-                            }
+                    var (prev, found) = pmmʗ1[key, ꟷ]; if (found) {
+                        // Note: no overflow reporting here.
+                        var (errΔ4, _) = Ꮡts.Value.cm.MergeCounters(data.Counters, prev); if (errΔ4 != nil) {
+                            return fmt.Errorf("processing counter data file %s: %v"u8, cdf, errΔ4);
                         }
                     }
                     var c = Ꮡts.of(tstate.ᏑBatchCounterAlloc).AllocateCounters(len(data.Counters));
@@ -239,10 +217,8 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
 
         // Read counter data files.
         foreach (var (_, cdf) in p.CounterDataFiles) {
-            {
-                var errΔ5 = readcdf(cdf); if (errΔ5 != nil) {
-                    return errΔ5;
-                }
+            var errΔ5 = readcdf(cdf); if (errΔ5 != nil) {
+                return errΔ5;
             }
         }
 
@@ -260,11 +236,9 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
             ref var fd = ref heap(new coverage.FuncDesc(), out var Ꮡfd);
             var nf = pd.NumFuncs();
             for (var fnIdx = (uint32)0; fnIdx < nf; fnIdx++) {
-                {
-                    var errΔ6 = pd.ReadFunc(fnIdx, Ꮡfd); if (errΔ6 != nil) {
-                        return fmt.Errorf("reading meta-data file %s: %v"u8,
-                            p.MetaFile, errΔ6);
-                    }
+                var errΔ6 = pd.ReadFunc(fnIdx, Ꮡfd); if (errΔ6 != nil) {
+                    return fmt.Errorf("reading meta-data file %s: %v"u8,
+                        p.MetaFile, errΔ6);
                 }
                 var key = new pkfunc(pk: pkIdx, fcn: fnIdx);
                 var (counters, haveCounters) = pmm[key, ꟷ];
@@ -301,10 +275,8 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
     if (err != nil) {
         return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, err);
     }
-    {
-        var errΔ1 = json.Unmarshal(data, Ꮡmfc); if (errΔ1 != nil) {
-            return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, errΔ1);
-        }
+    var errΔ1 = json.Unmarshal(data, Ꮡmfc); if (errΔ1 != nil) {
+        return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, errΔ1);
     }
 
     // Walk through each available aux meta-file. If we've already
@@ -314,17 +286,13 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
     // (no counters) and invoke processPod on it.
     foreach (var i in range(mfc.ImportPaths)) {
         @string p = mfc.ImportPaths[i];
-        {
-            var (_, ok) = importpaths[p, ꟷ]; if (ok) {
-                continue;
-            }
+        var (_, ok) = importpaths[p, ꟷ]; if (ok) {
+            continue;
         }
         pods.Pod pod = default;
         pod.MetaFile = mfc.MetaFileFragments[i];
-        {
-            var errΔ2 = Ꮡts.processPod(pod, importpaths); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = Ꮡts.processPod(pod, importpaths); if (errΔ2 != nil) {
+            return errΔ2;
         }
     }
     return default;

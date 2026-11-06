@@ -71,14 +71,12 @@ internal static bool cookieNumWithinMax(nint cookieNum) {
     if (httpcookiemaxnum.Value() == ""u8) {
         return withinDefaultMax;
     }
-    {
-        var (customMax, err) = strconv.Atoi(httpcookiemaxnum.Value()); if (err == nil) {
-            var withinCustomMax = customMax == 0 || cookieNum <= customMax;
-            if (withinDefaultMax != withinCustomMax) {
-                httpcookiemaxnum.IncNonDefault();
-            }
-            return withinCustomMax;
+    var (customMax, err) = strconv.Atoi(httpcookiemaxnum.Value()); if (err == nil) {
+        var withinCustomMax = customMax == 0 || cookieNum <= customMax;
+        if (withinDefaultMax != withinCustomMax) {
+            httpcookiemaxnum.IncNonDefault();
         }
+        return withinCustomMax;
     }
     return withinDefaultMax;
 }
@@ -276,10 +274,8 @@ internal static slice<ж<ΔCookie>> readSetCookies(ΔHeader h) {
     }
     var cookies = new slice<ж<ΔCookie>>(0, cookieCount);
     foreach (var (_, line) in h[setCookieˢ]) {
-        {
-            var (cookie, err) = ParseSetCookie(line); if (err == nil) {
-                cookies = append(cookies, cookie);
-            }
+        var (cookie, err) = ParseSetCookie(line); if (err == nil) {
+            cookies = append(cookies, cookie);
         }
     }
     return cookies;
@@ -289,10 +285,8 @@ internal static slice<ж<ΔCookie>> readSetCookies(ΔHeader h) {
 // The provided cookie must have a valid Name. Invalid cookies may be
 // silently dropped.
 public static void SetCookie(ResponseWriter w, ж<ΔCookie> cookie) {
-    {
-        @string v = cookie.String(); if (v != ""u8) {
-            w.Header().Add(setCookieˢ, v);
-        }
+    @string v = cookie.String(); if (v != ""u8) {
+        w.Header().Add(setCookieˢ, v);
     }
 }
 
@@ -656,10 +650,8 @@ internal static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid
     }
     var buf = new slice<byte>(0, builtin.len(v));
     for (nint i = 0; i < builtin.len(v); i++) {
-        {
-            var b = v[i]; if (valid(b)) {
-                buf = append(bufᴷ, buf, b);
-            }
+        var b = v[i]; if (valid(b)) {
+            buf = append(bufᴷ, buf, b);
         }
     }
     return (@string)buf;

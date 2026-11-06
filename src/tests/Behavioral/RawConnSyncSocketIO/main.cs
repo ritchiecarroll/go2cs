@@ -87,10 +87,8 @@ internal static syscall.RawConn rawOf(ж<Δnet.TCPConn> c) {
 
 internal static @string readFull(ж<Δnet.TCPConn> c, nint n) {
     var b = new slice<byte>(n);
-    {
-        var (_, err) = Δio.ReadFull(new net_TCPConnжReader(c), b); if (err != nil) {
-            return "<"u8 + err.Error() + ">"u8;
-        }
+    var (_, err) = Δio.ReadFull(new net_TCPConnжReader(c), b); if (err != nil) {
+        return "<"u8 + err.Error() + ">"u8;
     }
     return (@string)b;
 }
@@ -146,10 +144,8 @@ internal static void Main() {
         var clientʗ2 = client;
         var serverʗ2 = server;
         step("1 raw write", () => {
-            {
-                var err = writeRawConn(rawOf(clientʗ2), slice<byte>("raw hello"u8)); if (err != nil) {
-                    return "write: "u8 + err.Error();
-                }
+            var err = writeRawConn(rawOf(clientʗ2), slice<byte>("raw hello"u8)); if (err != nil) {
+                return "write: "u8 + err.Error();
             }
             return readFull(serverʗ2, len("raw hello"));
         });
@@ -157,10 +153,8 @@ internal static void Main() {
         var clientʗ3 = client;
         var serverʗ3 = server;
         step("2 raw read", () => {
-            {
-                var (_, err) = serverʗ3.Write(slice<byte>("plain reply"u8)); if (err != nil) {
-                    return "write: "u8 + err.Error();
-                }
+            var (_, err) = serverʗ3.Write(slice<byte>("plain reply"u8)); if (err != nil) {
+                return "write: "u8 + err.Error();
             }
             return rawReadFull(clientʗ3, len("plain reply"));
         });
@@ -206,17 +200,13 @@ internal static void Main() {
                         defer(Ꮡwg.Done, ref ᒐ);
                         var msg = slice<byte>([tag, tag, tag, tag]);
                         for (nint r = 0; r < rounds; r++) {
-                            {
-                                var err = writeRawConn(rawOf(from), msg); if (err != nil) {
-                                    resultsʗ1[i] = fmt.Sprintf("round %d write: %v"u8, r, err);
-                                    return;
-                                }
+                            var err = writeRawConn(rawOf(from), msg); if (err != nil) {
+                                resultsʗ1[i] = fmt.Sprintf("round %d write: %v"u8, r, err);
+                                return;
                             }
-                            {
-                                @string got = rawReadFull(to, len(msg)); if (got != ((sstring)msg)) {
-                                    resultsʗ1[i] = fmt.Sprintf("round %d read %q"u8, r, got);
-                                    return;
-                                }
+                            @string got = rawReadFull(to, len(msg)); if (got != ((sstring)msg)) {
+                                resultsʗ1[i] = fmt.Sprintf("round %d read %q"u8, r, got);
+                                return;
                             }
                         }
                         resultsʗ1[i] = fmt.Sprintf("%c ok"u8, tag);

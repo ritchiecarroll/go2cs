@@ -550,10 +550,8 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, ni
     }
     // If this type is already in progress, it's a recursive type (e.g. map[string]*T).
     // Return the pointer to the op we're already building.
-    {
-        var opPtr = inProgress[rt]; if (opPtr != nil) {
-            return (opPtr, ut.indir);
-        }
+    var opPtr = inProgress[rt]; if (opPtr != nil) {
+        return (opPtr, ut.indir);
     }
     var typ = ut.@base;
     nint indir = ut.indir;

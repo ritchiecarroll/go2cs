@@ -150,10 +150,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
     // Read and decode Plan 9 magic
     array<byte> magic = new(4);
-    {
-        var (_, errΔ1) = r.ReadAt(magic[..], 0); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = r.ReadAt(magic[..], 0); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     var (_, err) = parseMagic(magic[..]);
     if (err != nil) {
@@ -161,10 +159,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     }
 
     var ph = @new<prog>();
-    {
-        var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, ph.OrTypedNil()); if (errΔ2 != nil) {
-            return (default, errΔ2);
-        }
+    var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, ph.OrTypedNil()); if (errΔ2 != nil) {
+        return (default, errΔ2);
     }
 
     var f = Ꮡ(new File(FileHeader: new FileHeader(
@@ -178,10 +174,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     ));
 
     if ((ph.Magic & (uint32)Magic64) != 0) {
-        {
-            var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, f.of(File.ᏑEntry)); if (errΔ3 != nil) {
-                return (default, errΔ3);
-            }
+        var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, f.of(File.ᏑEntry)); if (errΔ3 != nil) {
+            return (default, errΔ3);
         }
         f.PtrSize = 8;
         f.LoadAddress = 0x200000;
@@ -306,10 +300,8 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
                 if (!ok) {
                     return new formatErrorжerror(Ꮡ(new formatError(-1, "bad filename code", eltIdx)));
                 }
-                {
-                    nint nΔ3 = len(ts.Name); if (nΔ3 > 0 && ts.Name[nΔ3 - 1] != '/') {
-                        ts.Name += "/"u8;
-                    }
+                nint nΔ3 = len(ts.Name); if (nΔ3 > 0 && ts.Name[nΔ3 - 1] != '/') {
+                    ts.Name += "/"u8;
                 }
                 ts.Name += elt;
             }

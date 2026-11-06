@@ -77,10 +77,8 @@ partial struct Bubble {
 // Acquire returns a reference to the current goroutine's bubble.
 // The bubble will not become idle until Release is called.
 public static ж<Bubble> Acquire() {
-    {
-        var b = acquire(); if (b != nil) {
-            return Ꮡ(new Bubble(b));
-        }
+    var b = acquire(); if (b != nil) {
+        return Ꮡ(new Bubble(b));
     }
     return default;
 }

@@ -193,11 +193,9 @@ internal static @string operandString(ref operand x, Func<ж<Package>, @string> 
 
     // <val>
     if (x.mode == constant_) {
-        {
-            @string s = x.val.String(); if (s != expr) {
-                buf.WriteByte((byte)' ');
-                buf.WriteString(s);
-            }
+        @string s = x.val.String(); if (s != expr) {
+            buf.WriteByte((byte)' ');
+            buf.WriteString(s);
         }
     }
 
@@ -449,15 +447,13 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
     }
 
     // If V is an interface, check if a missing type assertion is the problem.
-    {
-        var (Vi, _) = Vu._<ж<Interface>>(ᐧ); if (Vi != nil && Vp == nil) {
-            if (check.implements(T, V, false, nil)) {
-                // T implements V, so give hint about type assertion.
-                if (Ꮡcause != nil) {
-                    cause = needTypeAssertionˢ;
-                }
-                return (false, IncompatibleAssign);
+    var (Vi, _) = Vu._<ж<Interface>>(ᐧ); if (Vi != nil && Vp == nil) {
+        if (check.implements(T, V, false, nil)) {
+            // T implements V, so give hint about type assertion.
+            if (Ꮡcause != nil) {
+                cause = needTypeAssertionˢ;
             }
+            return (false, IncompatibleAssign);
         }
     }
 
@@ -466,10 +462,8 @@ internal static (bool, errors.Code) assignableTo(this ж<operand> Ꮡx, ж<Check
     // and at least one of V or T is not a named type.
     {
         var (Vc, ok) = Vu._<ж<Chan>>(ᐧ); if (ok && Vc.dir == SendRecv) {
-            {
-                var (Tc, okΔ1) = Tu._<ж<Chan>>(ᐧ); if (okΔ1 && Identical(Vc.elem, Tc.elem)) {
-                    return (!hasName(V) || !hasName(T), InvalidChanAssign);
-                }
+            var (Tc, okΔ1) = Tu._<ж<Chan>>(ᐧ); if (okΔ1 && Identical(Vc.elem, Tc.elem)) {
+                return (!hasName(V) || !hasName(T), InvalidChanAssign);
             }
         }
     }

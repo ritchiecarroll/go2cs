@@ -65,10 +65,8 @@ internal static ж<Ident> fieldName(Expr x) {
         return t;
     }
     case ж<SelectorExpr> t: {
-        {
-            var (_, ok) = t.X._<ж<Ident>>(ᐧ); if (ok) {
-                return t.Sel;
-            }
+        var (_, ok) = t.X._<ж<Ident>>(ᐧ); if (ok) {
+            return t.Sel;
         }
         break;
     }
@@ -133,15 +131,11 @@ internal static slice<Expr> filterExprList(slice<Expr> list, Func<@string, bool>
             break;
         }
         case ж<KeyValueExpr> x: {
-            {
-                var (xΔ1, ok) = x.Key._<ж<Ident>>(ᐧ); if (ok && !filter(xΔ1.Name)) {
-                    continue;
-                }
+            var (xΔ1, ok) = x.Key._<ж<Ident>>(ᐧ); if (ok && !filter(xΔ1.Name)) {
+                continue;
             }
-            {
-                var (xΔ2, ok) = (~x).Value._<ж<CompositeLit>>(ᐧ); if (ok) {
-                    filterCompositeLit(ref (xΔ2).DerefOrNull(), filter, export);
-                }
+            if ((~x).Value._<ж<CompositeLit>>(out var xΔ2)) {
+                filterCompositeLit(ref (xΔ2).DerefOrNull(), filter, export);
             }
             break;
         }}
@@ -346,24 +340,22 @@ public static MergeMode FilterImportDuplicates => 4;
 // the given function declaration. If the AST is incorrect for the
 // receiver, it assumes a function instead.
 internal static @string nameOf(ref FuncDecl f) {
-    {
-        var r = f.Recv; if (r != nil && len(r.List) == 1) {
-            // looks like a correct receiver declaration
-            var t = r.List[0].Type;
-            // dereference pointer receiver types
-            {
-                var (p, _) = t._<ж<StarExpr>>(ᐧ); if (p != nil) {
-                    t = p.X;
-                }
+    var r = f.Recv; if (r != nil && len(r.List) == 1) {
+        // looks like a correct receiver declaration
+        var t = r.List[0].Type;
+        // dereference pointer receiver types
+        {
+            var (p, _) = t._<ж<StarExpr>>(ᐧ); if (p != nil) {
+                t = p.X;
             }
-            // the receiver type must be a type name
-            {
-                var (p, _) = t._<ж<Ident>>(ᐧ); if (p != nil) {
-                    return p.Name + "."u8 + f.Name.Name;
-                }
-            }
-            // otherwise assume a function instead
         }
+        // the receiver type must be a type name
+        {
+            var (p, _) = t._<ж<Ident>>(ᐧ); if (p != nil) {
+                return p.Name + "."u8 + f.Name.Name;
+            }
+        }
+        // otherwise assume a function instead
     }
     return f.Name.Name;
 }
@@ -461,25 +453,21 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
                     // TODO(gri): Expand this filtering to other
                     //            entities (const, type, vars) if
                     //            multiple declarations are common.
-                    {
-                        var (fΔ1, isFun) = d._<ж<FuncDecl>>(ᐧ); if (isFun) {
-                            @string name = nameOf(ref (fΔ1).DerefOrNull());
-                            {
-                                var (j, exists) = funcs[name, ꟷ]; if (exists) {
-                                    // function declared already
-                                    if (decls[j] != nil && decls[j]._<ж<FuncDecl>>().Doc == nil) {
-                                        // existing declaration has no documentation;
-                                        // ignore the existing declaration
-                                        decls[j] = default;
-                                    } else {
-                                        // ignore the new declaration
-                                        d = default;
-                                    }
-                                    n++; // filtered an entry
-                                } else {
-                                    funcs[name] = iΔ2;
-                                }
+                    var (fΔ1, isFun) = d._<ж<FuncDecl>>(ᐧ); if (isFun) {
+                        @string name = nameOf(ref (fΔ1).DerefOrNull());
+                        var (j, exists) = funcs[name, ꟷ]; if (exists) {
+                            // function declared already
+                            if (decls[j] != nil && decls[j]._<ж<FuncDecl>>().Doc == nil) {
+                                // existing declaration has no documentation;
+                                // ignore the existing declaration
+                                decls[j] = default;
+                            } else {
+                                // ignore the new declaration
+                                d = default;
                             }
+                            n++; // filtered an entry
+                        } else {
+                            funcs[name] = iΔ2;
                         }
                     }
                 }
@@ -512,18 +500,16 @@ public static ж<File> MergePackageFiles(ж<Package> Ꮡpkg, MergeMode mode) {
         foreach (var (_, filename) in filenames) {
             var f = pkg.Files[filename];
             foreach (var (_, imp) in f.Imports) {
-                {
-                    @string path = imp.Path.Value.Value; if (!seen[path]) {
-                        // TODO: consider handling cases where:
-                        // - 2 imports exist with the same import path but
-                        //   have different local names (one should probably
-                        //   keep both of them)
-                        // - 2 imports exist but only one has a comment
-                        // - 2 imports exist and they both have (possibly
-                        //   different) comments
-                        imports = append(imports, imp);
-                        seen[path] = true;
-                    }
+                @string path = imp.Path.Value.Value; if (!seen[path]) {
+                    // TODO: consider handling cases where:
+                    // - 2 imports exist with the same import path but
+                    //   have different local names (one should probably
+                    //   keep both of them)
+                    // - 2 imports exist but only one has a comment
+                    // - 2 imports exist and they both have (possibly
+                    //   different) comments
+                    imports = append(imports, imp);
+                    seen[path] = true;
                 }
             }
         }

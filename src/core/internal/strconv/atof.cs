@@ -233,54 +233,52 @@ internal static (uint64 mantissa, nint exp, bool neg, bool trunc, bool hex, nint
     nint dp = 0;
 loop:
     for (; i < len(s); i++) {
-        {
-            var c = s[i];
-            switch (ᐧ) {
-            case {} when c is (byte)'_': {
-                underscores = true;
-                continue;
-                break;
-            }
-            case {} when c is (byte)'.': {
-                if (sawdot) {
-                    goto break_loop;
-                }
-                sawdot = true;
-                dp = nd;
-                continue;
-                break;
-            }
-            case {} when (byte)'0' <= c && c <= (byte)'9': {
-                sawdigits = true;
-                if (c == '0' && nd == 0) { // ignore leading zeros
-                    dp--;
-                    continue;
-                }
-                nd++;
-                if (ndMant < maxMantDigits) {
-                    mantissa *= @base;
-                    mantissa += (uint64)((byte)(c - '0'));
-                    ndMant++;
-                } else if (c != '0') {
-                    trunc = true;
-                }
-                continue;
-                break;
-            }
-            case {} when @base == 16 && (byte)'a' <= lower(c) && lower(c) <= (byte)'f': {
-                sawdigits = true;
-                nd++;
-                if (ndMant < maxMantDigits) {
-                    mantissa *= 16;
-                    mantissa += (uint64)((byte)(lower(c) - 'a' + 10));
-                    ndMant++;
-                } else {
-                    trunc = true;
-                }
-                continue;
-                break;
-            }}
+        var c = s[i];
+        switch (ᐧ) {
+        case {} when c is (byte)'_': {
+            underscores = true;
+            continue;
+            break;
         }
+        case {} when c is (byte)'.': {
+            if (sawdot) {
+                goto break_loop;
+            }
+            sawdot = true;
+            dp = nd;
+            continue;
+            break;
+        }
+        case {} when (byte)'0' <= c && c <= (byte)'9': {
+            sawdigits = true;
+            if (c == '0' && nd == 0) { // ignore leading zeros
+                dp--;
+                continue;
+            }
+            nd++;
+            if (ndMant < maxMantDigits) {
+                mantissa *= @base;
+                mantissa += (uint64)((byte)(c - '0'));
+                ndMant++;
+            } else if (c != '0') {
+                trunc = true;
+            }
+            continue;
+            break;
+        }
+        case {} when @base == 16 && (byte)'a' <= lower(c) && lower(c) <= (byte)'f': {
+            sawdigits = true;
+            nd++;
+            if (ndMant < maxMantDigits) {
+                mantissa *= 16;
+                mantissa += (uint64)((byte)(lower(c) - 'a' + 10));
+                ndMant++;
+            } else {
+                trunc = true;
+            }
+            continue;
+            break;
+        }}
         break;
 continue_loop:;
     }
@@ -627,10 +625,8 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
     nint n = default;
     error err = default;
 
-    {
-        var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
-            return ((float32)val, nΔ1, default);
-        }
+    var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
+        return ((float32)val, nΔ1, default);
     }
 
     (var mantissa, var exp, var neg, var trunc, var hex, n, var ok) = readFloat(s);
@@ -647,10 +643,8 @@ internal static (float32 f, nint n, error err) atof32(@string s) {
         // Try pure floating-point arithmetic conversion, and if that fails,
         // the Eisel-Lemire algorithm.
         if (!trunc) {
-            {
-                var (fΔ2, okΔ2) = atof32exact(mantissa, exp, neg); if (okΔ2) {
-                    return (fΔ2, n, default);
-                }
+            var (fΔ2, okΔ2) = atof32exact(mantissa, exp, neg); if (okΔ2) {
+                return (fΔ2, n, default);
             }
         }
         var (fΔ3, okΔ3) = eiselLemire32(mantissa, exp, neg);
@@ -686,10 +680,8 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
     nint n = default;
     error err = default;
 
-    {
-        var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
-            return (val, nΔ1, default);
-        }
+    var (val, nΔ1, okΔ1) = special(s); if (okΔ1) {
+        return (val, nΔ1, default);
     }
 
     (var mantissa, var exp, var neg, var trunc, var hex, n, var ok) = readFloat(s);
@@ -706,10 +698,8 @@ internal static (float64 f, nint n, error err) atof64(@string s) {
         // Try pure floating-point arithmetic conversion, and if that fails,
         // the Eisel-Lemire algorithm.
         if (!trunc) {
-            {
-                var (fΔ2, okΔ2) = atof64exact(mantissa, exp, neg); if (okΔ2) {
-                    return (fΔ2, n, default);
-                }
+            var (fΔ2, okΔ2) = atof64exact(mantissa, exp, neg); if (okΔ2) {
+                return (fΔ2, n, default);
             }
         }
         var (fΔ3, okΔ3) = eiselLemire64(mantissa, exp, neg);

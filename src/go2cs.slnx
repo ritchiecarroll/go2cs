@@ -652,6 +652,7 @@
     <Project Path="tests/Behavioral/InferredForeignTypeNoImport/InferredForeignTypeNoImport.csproj" />
     <Project Path="tests/Behavioral/InitFrameNames/InitFrameNames.csproj" />
     <Project Path="tests/Behavioral/InitOrderTupleSpecs/InitOrderTupleSpecs.csproj" />
+    <Project Path="tests/Behavioral/InitStatementScope/InitStatementScope.csproj" />
     <Project Path="tests/Behavioral/InterfaceAssertionMapKey/InterfaceAssertionMapKey.csproj" />
     <Project Path="tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
     <Project Path="tests/Behavioral/InterfaceEqualityTyped/InterfaceEqualityTyped.csproj" />
@@ -1212,6 +1213,7 @@
     <Project Path="tests/Behavioral/ValueAdapterDynamicType/colorlike/ValueAdapterDynamicType.colorlike.csproj" />
     <Project Path="tests/Behavioral/ValuePunBits/ValuePunBits.csproj" />
     <Project Path="tests/Behavioral/ValueReceiverArgumentOrder/ValueReceiverArgumentOrder.csproj" />
+    <Project Path="tests/Behavioral/DeferGoPointerValueReceiver/DeferGoPointerValueReceiver.csproj" />
     <Project Path="tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
     <Project Path="tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
     <Project Path="tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />

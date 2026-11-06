@@ -19,10 +19,8 @@ internal static void secondWriteOps() {
     nint sum = 0;
 
     foreach (var (_, t) in tests) {
-        {
-            var (op, ok) = t._<secondWriteOps_readOp>(ᐧ); if (ok) {
-                sum += op.cnt;
-            }
+        var (op, ok) = t._<secondWriteOps_readOp>(ᐧ); if (ok) {
+            sum += op.cnt;
         }
     }
 

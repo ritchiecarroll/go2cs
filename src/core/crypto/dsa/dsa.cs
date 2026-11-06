@@ -133,10 +133,8 @@ GeneratePrimes:
         }
 
         for (nint i = 0; i < 4 * L; i++) {
-            {
-                var (_, err) = io.ReadFull(rand, pBytes); if (err != nil) {
-                    return err;
-                }
+            var (_, err) = io.ReadFull(rand, pBytes); if (err != nil) {
+                return err;
             }
 
             pBytes[len(pBytes) - 1] |= (byte)(1);

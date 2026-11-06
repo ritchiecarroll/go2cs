@@ -57,7 +57,7 @@ using static go.@internal.testlog_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/testlog/exit.go", "exit.cs", "AAsi8oKCAA8qAAwCgoKi")]
-[assembly: GoPositionMap("internal/testlog/log.go", "log.cs", "ACJCwoK8ooKClKiSgILKkoCCypKAgg==")]
+[assembly: GoPositionMap("internal/testlog/log.go", "log.cs", "ACJCwoK8ooKClKiSgrqSgrqSgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

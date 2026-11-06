@@ -34,10 +34,8 @@ internal static void @try(@string name, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(name, "panicked:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(name, "panicked:", r);
             }
         }, ref ᒐ);
         fmt.Println(name, "returned:", f());

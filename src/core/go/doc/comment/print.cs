@@ -197,10 +197,8 @@ public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
 // blankBefore reports whether the block x requires a blank line before it.
 // All blocks do, except for Lists that return false from x.BlankBefore().
 internal static bool blankBefore(Block x) {
-    {
-        var (xΔ1, ok) = x._<ж<List>>(ᐧ); if (ok) {
-            return xΔ1.BlankBefore();
-        }
+    var (xΔ1, ok) = x._<ж<List>>(ᐧ); if (ok) {
+        return xΔ1.BlankBefore();
     }
     return true;
 }

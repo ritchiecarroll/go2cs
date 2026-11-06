@@ -200,10 +200,8 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     if (ka.curveID == 0) {
         return (default, errors.New(tlsNoSupportedEllipticˢ2));
     }
-    {
-        var (_, okΔ1) = curveForCurveID(ka.curveID); if (!okΔ1) {
-            return (default, errors.New(tlsCurvePreferencesˢ));
-        }
+    var (_, okΔ1) = curveForCurveID(ka.curveID); if (!okΔ1) {
+        return (default, errors.New(tlsCurvePreferencesˢ));
     }
 
     var (key, err) = generateECDHEKey(config.rand(), ka.curveID);
@@ -356,10 +354,8 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
         return errors.New(tlsServerSelectedˢ5);
     }
 
-    {
-        var (_, ok) = curveForCurveID(ka.curveID); if (!ok) {
-            return errors.New(tlsServerSelectedˢ4);
-        }
+    var (_, ok) = curveForCurveID(ka.curveID); if (!ok) {
+        return errors.New(tlsServerSelectedˢ4);
     }
 
     var (key, err) = generateECDHEKey(config.rand(), ka.curveID);
@@ -401,10 +397,8 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
             return errServerKeyExchange;
         }
         var signed = slices.Concat<slice<byte>, byte>(clientHello.random, serverHello.random, serverECDHEParams);
-        {
-            var errΔ1 = verifyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ1 != nil) {
-                return errors.New("tls: invalid signature by the server certificate: "u8 + errΔ1.Error());
-            }
+        var errΔ1 = verifyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ1 != nil) {
+            return errors.New("tls: invalid signature by the server certificate: "u8 + errΔ1.Error());
         }
     } else {
         (sigType, sigHash, err) = legacyTypeAndHashFromPublicKey(cert.PublicKey);
@@ -415,10 +409,8 @@ internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж
             return errServerKeyExchange;
         }
         var signed = hashForServerKeyExchange(sigType, clientHello.random, serverHello.random, serverECDHEParams);
-        {
-            var errΔ2 = verifyLegacyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ2 != nil) {
-                return errors.New("tls: invalid signature by the server certificate: "u8 + errΔ2.Error());
-            }
+        var errΔ2 = verifyLegacyHandshakeSignature(sigType, cert.PublicKey, sigHash, signed, sig); if (errΔ2 != nil) {
+            return errors.New("tls: invalid signature by the server certificate: "u8 + errΔ2.Error());
         }
     }
 

@@ -71,10 +71,8 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
         conf.lastChecked = now;
 
         time.Time mtime = default;
-        {
-            var (fi, err) = os.Stat(nssConfigPath); if (err == nil) {
-                mtime = fi.ModTime();
-            }
+        var (fi, err) = os.Stat(nssConfigPath); if (err == nil) {
+            mtime = fi.ModTime();
         }
         if (mtime.Equal(conf.nssConf.mtime)) {
             return;

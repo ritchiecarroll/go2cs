@@ -166,10 +166,8 @@ internal static bool bigIntEqual(ж<bigꓸInt> Ꮡa, ж<bigꓸInt> Ꮡb) {
 // where the private part is kept in, for example, a hardware module. Common
 // uses should use the Sign* functions in this package directly.
 public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
-    {
-        var (pssOpts, ok) = opts._<ж<PSSOptions>>(ᐧ); if (ok) {
-            return SignPSS(rand, Ꮡpriv, pssOpts.Hash, digest, pssOpts);
-        }
+    var (pssOpts, ok) = opts._<ж<PSSOptions>>(ᐧ); if (ok) {
+        return SignPSS(rand, Ꮡpriv, pssOpts.Hash, digest, pssOpts);
     }
 
     return SignPKCS1v15(rand, Ꮡpriv, opts.HashFunc(), digest);
@@ -199,23 +197,17 @@ public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡ
         break;
     }
     case ж<PKCS1v15DecryptOptions> optsΔ1: {
-        {
-            nint l = optsΔ1.SessionKeyLen; if (l > 0) {
-                plaintext = new slice<byte>(l);
-                {
-                    var (_, errΔ1) = io.ReadFull(rand, plaintext); if (errΔ1 != nil) {
-                        return (default, errΔ1);
-                    }
-                }
-                {
-                    var errΔ2 = DecryptPKCS1v15SessionKey(rand, Ꮡpriv, ciphertext, plaintext); if (errΔ2 != nil) {
-                        return (default, errΔ2);
-                    }
-                }
-                return (plaintext, default);
-            } else {
-                return DecryptPKCS1v15(rand, Ꮡpriv, ciphertext);
+        nint l = optsΔ1.SessionKeyLen; if (l > 0) {
+            plaintext = new slice<byte>(l);
+            var (_, errΔ1) = io.ReadFull(rand, plaintext); if (errΔ1 != nil) {
+                return (default, errΔ1);
             }
+            var errΔ2 = DecryptPKCS1v15SessionKey(rand, Ꮡpriv, ciphertext, plaintext); if (errΔ2 != nil) {
+                return (default, errΔ2);
+            }
+            return (plaintext, default);
+        } else {
+            return DecryptPKCS1v15(rand, Ꮡpriv, ciphertext);
         }
         break;
     }
@@ -344,10 +336,8 @@ private static readonly @string cryptoRsaGeneratedKeyˢᵇ = "crypto/rsa: genera
 //
 // [Minimum key size]: https://pkg.go.dev/crypto/rsa#hdr-Minimum_key_size
 public static (ж<PrivateKey>, error) GenerateKey(io.Reader random, nint bits) {
-    {
-        var errΔ1 = checkKeySize(bits); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = checkKeySize(bits); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     if (boring.Enabled && rand.IsDefaultReader(random) && (bits == 2048 || bits == 3072 || bits == 4096)) {

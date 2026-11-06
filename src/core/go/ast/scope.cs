@@ -43,10 +43,8 @@ public static ж<Object> /*alt*/ Insert(this ref Scope s, ж<Object> Ꮡobj) {
     ж<Object> alt = default;
     ref var obj = ref Ꮡobj.DerefOrNull();
 
-    {
-        alt = s.Objects[obj.Name]; if (alt == nil) {
-            s.Objects[obj.Name] = Ꮡobj;
-        }
+    alt = s.Objects[obj.Name]; if (alt == nil) {
+        s.Objects[obj.Name] = Ꮡobj;
     }
     return alt;
 }
@@ -152,10 +150,8 @@ public static tokenꓸPos Pos(this ref Object obj) {
     }
     case ж<AssignStmt> d: {
         foreach (var (_, x) in d.Lhs) {
-            {
-                var (ident, isIdent) = x._<ж<Ident>>(ᐧ); if (isIdent && ident.Name == name) {
-                    return ident.Pos();
-                }
+            var (ident, isIdent) = x._<ж<Ident>>(ᐧ); if (isIdent && ident.Name == name) {
+                return ident.Pos();
             }
         }
         break;

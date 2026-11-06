@@ -67,9 +67,9 @@ using static go.vendor.golang.org.x.net.http2.hpack_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/encode.go", "encode.cs", "AB1GotyCgqzSlIKCgpSCpoKClIKCpoKUpoKClAACFAAKAoKCpoKCpqyygpSClIKokgACFPKCgoK6kqqigoKCAAIU8oKCAAIU8oKCgpSUgoKqooKCggACENKCgpSCgoKUAAIQ0oKCgoKClIKUAAIQ0oKUgpQ=")]
 [assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/hpack.go", "hpack.cs", "ABUsgu6CAAsiwuaCgoKUqAANGgAUOLLKgoKCypzCrLIAAhTwqKCqoqyyAAoWgoKmgoKCqJKCgoKUprimxIKUgpSCyoKuAAgCgoKQkoCSgIKkgIKkAAkMsoKClIKmsri4gpSCgqaCgozSgpSClIKCptwABxSAooDswoLK2tra2qaokoKCgpSCgpSCqJKCgoKmgoKCgoKClJSCgqaCgpSCgoKCpoKCpoKClIKmgoKCpoKUAAgItoKmgoKClIKUgoKmAAEUAAoCgpSClIKClIKmgoKCgoKCgoKUgoKmrvKClIKCgpTclIKUgoIABxCCgpSCgoKCgpSCgg==", "221-221:1;222-222:2")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/huffman.go", "huffman.cs", "AAwcztKCgoKAgqTYsoKCgoCCpPqa0oK4ooKCgoKCgoKClIKClIKCgpS4goKClIKUgpSCgoKUppSAlLYAECaCAAYQgoKmgoKUlJSClIKCgoKClJSCpIKCgs6muIKCgoKCgoKCuICCqoKCtpSkpIKkgqaCqqKCgpQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/huffman.go", "huffman.cs", "AAwcztKCgoKClNiygoKCgpT6mtKCuKKCgoKCgoKCgpSCgpSCgoKUuIKCgpSClIKUgoKClKaUlKYAECaCAAYQgoKmgoKUlJSClIKCgoKClJSCpIKCgs6muIKCgoKCgoKCuIKqgoKmlKSkgqSCpoKqooKClA==")]
 [assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/static_table.go", "static_table.cs", "7A==")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/tables.go", "tables.cs", "AClagoKokqiSgoKCqJKClIKCgoKUgIK2goKUgoKUAAIgAA8CgoCCtoCCpKrCgpSCgpSmAIIChgQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http2/hpack/tables.go", "tables.cs", "AClagoKokqiSgoKCqJKClIKCgoKUgqaCgpSCgpQAAiAADwKCgqaAgqSqwoKUgoKUpgCCAoYE")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http2;

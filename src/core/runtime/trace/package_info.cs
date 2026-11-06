@@ -61,12 +61,12 @@ using static go.runtime.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgoKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAYIIKCgqIAAhQACAKClIKCAAgSlrKClKyyAAIQ5qam")]
+[assembly: GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgoKCggAVLIKClAAHFLLalKaqsoKosqaCAAYgABgggoKCogACFAAIAoKUgoIACBKWsoKUrLIAAhDmpqY=")]
 [assembly: GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
 [assembly: GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
-[assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuICCtoKokoKUgqaCrLAAAhAADAKClKaUpgAHEIKCpoKClKaClIKCgrgAGzTG")]
+[assembly: GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuIKmgqiSgpSCpoKssAACEAAMAoKUppSmAAcQgoKmgoKUpoKUgoKCuAAbNMY=")]
 [assembly: GoPositionMap("runtime/trace/recorder.go", "recorder.cs", "ABIq8pSSlILKgoKUgoKUgpSCgpSmgpSClIKU5oKmpgAHEIKCuIKUgpSCgqYACRSCqNySABcykg==", "24-31:1")]
-[assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB060oKUgoKClIKUgIKCgoKk1tKClJSCgoKUgpSC1tKClIKCgpSClICCgoKCpNbSgpSUgoKClIKUgtailJSAgraCpqKClIKCgqa4gpS4ooCCAAkSgoKClIKCgpSCpoKCgpSClIKUgoK4goKCgoKUgpSCyoKo", "157-198:1")]
+[assembly: GoPositionMap("runtime/trace/subscribe.go", "subscribe.cs", "AB060oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILW0oKUgoKClIKUgoKCgpTW0oKUlIKCgpSClILWopSUgqaCpqKClIKCgqa4gpS4ooIACBKCgoKUgoKClIKmgoKClIKUgpSCgriCgoKCgpSClILKgqg=", "157-198:1")]
 [assembly: GoPositionMap("runtime/trace/trace.go", "trace.cs", "AHLsAbKqog==")]
 // </GoSourcePositionMaps>
 

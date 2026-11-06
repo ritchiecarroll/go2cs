@@ -108,10 +108,8 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
             if (newOffset - r.offset < (int64)len(buf)) {
                 b = buf.slice(0, (nint)(newOffset - r.offset));
             }
-            {
-                var (_, err) = r.Read(b); if (err != nil) {
-                    return (0, err);
-                }
+            var (_, err) = r.Read(b); if (err != nil) {
+                return (0, err);
             }
         }
         break;

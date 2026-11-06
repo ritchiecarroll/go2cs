@@ -40,10 +40,8 @@ internal static bool empty(this substMap m) {
 }
 
 internal static ΔType lookup(this substMap m, ж<TypeParam> tpar) {
-    {
-        var t = m[tpar]; if (t != nil) {
-            return t;
-        }
+    var t = m[tpar]; if (t != nil) {
+        return t;
     }
     return new TypeParamжΔType(tpar);
 }
@@ -316,10 +314,8 @@ internal static ж<Var> var_(this ж<subster> Ꮡsubst, ж<Var> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (Ꮡv != nil) {
-        {
-            var typ = Ꮡsubst.typ(v.typ); if (!AreEqual(typ, v.typ)) {
-                return cloneVar(Ꮡv, typ);
-            }
+        var typ = Ꮡsubst.typ(v.typ); if (!AreEqual(typ, v.typ)) {
+            return cloneVar(Ꮡv, typ);
         }
     }
     return Ꮡv;
@@ -355,15 +351,13 @@ internal static slice<T> /*out*/ substList<T>(slice<T> @in, Func<T, T> subst) {
     slice<T> @out = default;
 
     foreach (var (i, t) in @in) {
-        {
-            var u = subst(t); if (!AreEqual(u, t)) {
-                if (@out == nil) {
-                    // lazily allocate a new slice on first substitution
-                    @out = new slice<T>(len(@in));
-                    copy(@out, @in);
-                }
-                @out[i] = u;
+        var u = subst(t); if (!AreEqual(u, t)) {
+            if (@out == nil) {
+                // lazily allocate a new slice on first substitution
+                @out = new slice<T>(len(@in));
+                copy(@out, @in);
             }
+            @out[i] = u;
         }
     }
     return @out;
@@ -373,10 +367,8 @@ internal static ж<Func> func_(this ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf != nil) {
-        {
-            var typ = Ꮡsubst.typ(f.typ); if (!AreEqual(typ, f.typ)) {
-                return cloneFunc(Ꮡf, typ);
-            }
+        var typ = Ꮡsubst.typ(f.typ); if (!AreEqual(typ, f.typ)) {
+            return cloneFunc(Ꮡf, typ);
         }
     }
     return Ꮡf;
@@ -394,10 +386,8 @@ internal static ж<Func> cloneFunc(ж<Func> Ꮡf, ΔType typ) {
 internal static ж<ΔTerm> term(this ж<subster> Ꮡsubst, ж<ΔTerm> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    {
-        var typ = Ꮡsubst.typ(t.typ); if (!AreEqual(typ, t.typ)) {
-            return NewTerm(t.tilde, typ);
-        }
+    var typ = Ꮡsubst.typ(t.typ); if (!AreEqual(typ, t.typ)) {
+        return NewTerm(t.tilde, typ);
     }
     return Ꮡt;
 }

@@ -171,16 +171,14 @@ internal static void dirList(ResponseWriter w, ж<Request> r, File f) {
     // Stat on every entry of a directory on Unix.
     anyDirs dirs = default;
     error err = default;
-    {
-        var (d, ok) = f._<fs.ReadDirFile>(ᐧ); if (ok) {
-            dirEntryDirs list = default;
-            (list, err) = d.ReadDir(-1);
-            dirs = list;
-        } else {
-            fileInfoDirs list = default;
-            (list, err) = f.Readdir(-1);
-            dirs = list;
-        }
+    var (d, ok) = f._<fs.ReadDirFile>(ᐧ); if (ok) {
+        dirEntryDirs list = default;
+        (list, err) = d.ReadDir(-1);
+        dirs = list;
+    } else {
+        fileInfoDirs list = default;
+        (list, err) = f.Readdir(-1);
+        dirs = list;
     }
 
     if (err != nil) {
@@ -411,11 +409,9 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
             // does not request multiple parts might not support
             // multipart responses."
             var ra = ranges[0];
-            {
-                var (_, errΔ6) = content.Seek(ra.start, io.SeekStart); if (errΔ6 != nil) {
-                    serveError(w, errΔ6.Error(), StatusRequestedRangeNotSatisfiable);
-                    return;
-                }
+            var (_, errΔ6) = content.Seek(ra.start, io.SeekStart); if (errΔ6 != nil) {
+                serveError(w, errΔ6.Error(), StatusRequestedRangeNotSatisfiable);
+                return;
             }
             sendSize = ra.length;
             code = StatusPartialContent;
@@ -445,17 +441,13 @@ internal static partial void serveContent(ResponseWriter w, ref Request r, @stri
                         pwʗ1.CloseWithError(errΔ7);
                         return;
                     }
-                    {
-                        var (_, errΔ8) = content.Seek(ra.start, io.SeekStart); if (errΔ8 != nil) {
-                            pwʗ1.CloseWithError(errΔ8);
-                            return;
-                        }
+                    var (_, errΔ8) = content.Seek(ra.start, io.SeekStart); if (errΔ8 != nil) {
+                        pwʗ1.CloseWithError(errΔ8);
+                        return;
                     }
-                    {
-                        var (_, errΔ9) = io.CopyN(part, content, ra.length); if (errΔ9 != nil) {
-                            pwʗ1.CloseWithError(errΔ9);
-                            return;
-                        }
+                    var (_, errΔ9) = io.CopyN(part, content, ra.length); if (errΔ9 != nil) {
+                        pwʗ1.CloseWithError(errΔ9);
+                        return;
                     }
                 }
                 mwʗ1.Close();
@@ -608,10 +600,8 @@ internal static condResult checkIfUnmodifiedSince(ref Request r, time.Time modti
     // The Last-Modified header truncates sub-second precision so
     // the modtime needs to be truncated too.
     modtime = modtime.Truncate(time.ΔSecond);
-    {
-        nint ret = modtime.Compare(t); if (ret <= 0) {
-            return condTrue;
-        }
+    nint ret = modtime.Compare(t); if (ret <= 0) {
+        return condTrue;
     }
     return condFalse;
 }
@@ -669,10 +659,8 @@ internal static condResult checkIfModifiedSince(ref Request r, time.Time modtime
     // The Last-Modified header truncates sub-second precision so
     // the modtime needs to be truncated too.
     modtime = modtime.Truncate(time.ΔSecond);
-    {
-        nint ret = modtime.Compare(t); if (ret <= 0) {
-            return condFalse;
-        }
+    nint ret = modtime.Compare(t); if (ret <= 0) {
+        return condFalse;
     }
     return condTrue;
 }
@@ -923,10 +911,8 @@ internal static (@string msg, nint httpStatus) toHTTPError(error err) {
 // localRedirect gives a Moved Permanently response.
 // It does not convert relative paths to absolute paths like Redirect does.
 internal static void localRedirect(ResponseWriter w, ref Request r, @string newPath) {
-    {
-        @string q = r.URL.RawQuery; if (q != ""u8) {
-            newPath += "?"u8 + q;
-        }
+    @string q = r.URL.RawQuery; if (q != ""u8) {
+        newPath += "?"u8 + q;
     }
     w.Header().Set(locationˢ, newPath);
     w.WriteHeader(StatusMovedPermanently);
@@ -1180,15 +1166,11 @@ internal static UntypedInt defaultMaxContentRanges => 200;
 
 internal static nint maxContentRanges() {
     nint maxRanges = defaultMaxContentRanges;
-    {
-        @string v = httpservecontentmaxranges.Value(); if (v != ""u8) {
-            {
-                var (n, err) = strconv.Atoi(v); if (err == nil && n >= 0) {
-                    maxRanges = n;
-                    if (maxRanges == 0) {
-                        maxRanges = math.MaxInt;
-                    }
-                }
+    @string v = httpservecontentmaxranges.Value(); if (v != ""u8) {
+        var (n, err) = strconv.Atoi(v); if (err == nil && n >= 0) {
+            maxRanges = n;
+            if (maxRanges == 0) {
+                maxRanges = math.MaxInt;
             }
         }
     }

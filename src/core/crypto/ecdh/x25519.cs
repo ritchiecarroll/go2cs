@@ -50,10 +50,8 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, i
     }
     r = rand.CustomReader(r);
     var key = new slice<byte>(x25519PrivateKeySize);
-    {
-        var (_, err) = io.ReadFull(r, key); if (err != nil) {
-            return (default, err);
-        }
+    var (_, err) = io.ReadFull(r, key); if (err != nil) {
+        return (default, err);
     }
     return Ꮡc.NewPrivateKey(key);
 }

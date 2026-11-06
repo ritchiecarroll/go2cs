@@ -45,10 +45,8 @@ partial struct Decoder {
 public static ж<Decoder> NewDecoder(io.Reader r) {
     var dec = @new<Decoder>();
     // We use the ability to read bytes as a plausible surrogate for buffering.
-    {
-        var (_, ok) = r._<io.ByteReader>(ᐧ); if (!ok) {
-            r = new bufio_ReaderжReader(bufio.NewReader(r));
-        }
+    var (_, ok) = r._<io.ByteReader>(ᐧ); if (!ok) {
+        r = new bufio_ReaderжReader(bufio.NewReader(r));
     }
     dec.r = r;
     dec.wireType = new map<typeId, ж<wireType>>();

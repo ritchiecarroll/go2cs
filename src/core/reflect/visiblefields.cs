@@ -68,23 +68,21 @@ internal static void walk(this ref visibleFieldsWalker w, ΔType t) {
         var f = t.Field(i);
         w.index = builtin.append(w.index, i);
         var add = true;
-        {
-            var (oldIndex, ok) = w.byName[f.Name, ꟷ]; if (ok) {
-                var old = Ꮡ(w.fields, oldIndex);
-                if (len(w.index) == len(old.Index)) {
-                    // Fields with the same name at the same depth
-                    // cancel one another out. Set the field name
-                    // to empty to signify that has happened, and
-                    // there's no need to add this field.
-                    old.Name = ""u8;
-                    add = false;
-                } else if (len(w.index) < len(old.Index)) {
-                    // The old field loses because it's deeper than the new one.
-                    old.Name = ""u8;
-                } else {
-                    // The old field wins because it's shallower than the new one.
-                    add = false;
-                }
+        var (oldIndex, ok) = w.byName[f.Name, ꟷ]; if (ok) {
+            var old = Ꮡ(w.fields, oldIndex);
+            if (len(w.index) == len(old.Index)) {
+                // Fields with the same name at the same depth
+                // cancel one another out. Set the field name
+                // to empty to signify that has happened, and
+                // there's no need to add this field.
+                old.Name = ""u8;
+                add = false;
+            } else if (len(w.index) < len(old.Index)) {
+                // The old field loses because it's deeper than the new one.
+                old.Name = ""u8;
+            } else {
+                // The old field wins because it's shallower than the new one.
+                add = false;
             }
         }
         if (add) {

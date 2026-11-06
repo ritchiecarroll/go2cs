@@ -121,20 +121,16 @@ internal static nint compare(reflectꓸValue aVal, reflectꓸValue bVal) {
     }
     case var ᴛ when ᴛ == reflect.Struct: {
         for (nint i = 0; i < aVal.NumField(); i++) {
-            {
-                nint c = compare(aVal.Field(i), bVal.Field(i)); if (c != 0) {
-                    return c;
-                }
+            nint c = compare(aVal.Field(i), bVal.Field(i)); if (c != 0) {
+                return c;
             }
         }
         return 0;
     }
     case var ᴛ when ᴛ == reflect.Array: {
         for (nint i = 0; i < aVal.Len(); i++) {
-            {
-                nint c = compare(aVal.Index(i), bVal.Index(i)); if (c != 0) {
-                    return c;
-                }
+            nint c = compare(aVal.Index(i), bVal.Index(i)); if (c != 0) {
+                return c;
             }
         }
         return 0;

@@ -197,10 +197,8 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
     if (gcd.IsZero() == 1 || gcd.Bits()[0] == 0) {
         return (default, errors.New(rsaInternalErrorGcdABIsˢ2));
     }
-    {
-        nuint rem = b.DivShortVarTime(gcd.Bits()[0]); if (rem != 0) {
-            return (default, errors.New(rsaInternalErrorBIsNotˢ));
-        }
+    nuint rem = b.DivShortVarTime(gcd.Bits()[0]); if (rem != 0) {
+        return (default, errors.New(rsaInternalErrorBIsNotˢ));
     }
 
     return bigmod.NewModulusProduct(a.Bytes(Ꮡp), b.Bytes(Ꮡq));
@@ -219,10 +217,8 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
 
     var b = new slice<byte>((bits + 7) / 8);
     for (;;) {
-        {
-            var err = drbg.ReadWithReader(rand, b); if (err != nil) {
-                return (default, err);
-            }
+        var err = drbg.ReadWithReader(rand, b); if (err != nil) {
+            return (default, err);
         }
         // Clear the most significant bits to reach the desired size. We use a
         // mask rather than right-shifting b[0] to make it easier to inject test
@@ -451,10 +447,8 @@ internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byt
         return (false, errors.New(incorrectLengthˢ));
     }
     var b = bigmod.NewNat();
-    {
-        var (_, err) = b.SetBytes(bb, mr.w); if (err != nil) {
-            return (false, err);
-        }
+    var (_, err) = b.SetBytes(bb, mr.w); if (err != nil) {
+        return (false, err);
     }
     if (b.IsZero() == 1 || b.IsOne() == 1 || b.IsMinusOne(mr.w) == 1) {
         return (false, errors.New(outOfRangeCandidateˢ));

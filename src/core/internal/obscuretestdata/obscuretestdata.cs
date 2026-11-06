@@ -55,18 +55,14 @@ public static (@string path, error err) DecodeToTempFile(@string name) {
         if (err != nil) {
             (path, err) = ("", err); goto ᒐdone;
         }
-        {
-            var (_, errΔ1) = io.Copy(new os.FileжWriter(tmp), base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f))); if (errΔ1 != nil) {
-                tmp.Close();
-                os.Remove(tmp.Name());
-                (path, err) = ("", errΔ1); goto ᒐdone;
-            }
+        var (_, errΔ1) = io.Copy(new os.FileжWriter(tmp), base64.NewDecoder(base64.StdEncoding, new os_FileжReader(f))); if (errΔ1 != nil) {
+            tmp.Close();
+            os.Remove(tmp.Name());
+            (path, err) = ("", errΔ1); goto ᒐdone;
         }
-        {
-            var errΔ2 = tmp.Close(); if (errΔ2 != nil) {
-                os.Remove(tmp.Name());
-                (path, err) = ("", errΔ2); goto ᒐdone;
-            }
+        var errΔ2 = tmp.Close(); if (errΔ2 != nil) {
+            os.Remove(tmp.Name());
+            (path, err) = ("", errΔ2); goto ᒐdone;
         }
         (path, err) = (tmp.Name(), default);
     }

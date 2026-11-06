@@ -42,15 +42,11 @@ internal static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Func<@strin
             break;
         }
         case ж<ast.KeyValueExpr> x: {
-            {
-                var (xΔ1, ok) = x.Key._<ж<ast.Ident>>(ᐧ); if (ok && !filter(xΔ1.Name)) {
-                    continue;
-                }
+            var (xΔ1, ok) = x.Key._<ж<ast.Ident>>(ᐧ); if (ok && !filter(xΔ1.Name)) {
+                continue;
             }
-            {
-                var (xΔ2, ok) = (~x).Value._<ж<ast.CompositeLit>>(ᐧ); if (ok) {
-                    filterCompositeLit(ref (xΔ2).DerefOrNull(), filter, export);
-                }
+            if ((~x).Value._<ж<ast.CompositeLit>>(out var xΔ2)) {
+                filterCompositeLit(ref (xΔ2).DerefOrNull(), filter, export);
             }
             break;
         }}
@@ -91,14 +87,10 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     nint j = 0;
     foreach (var (_, field) in list) {
         var keepField = true;
-        {
-            nint n = len(field.Names); if (n == 0) {
-                // anonymous field
-                {
-                    var (fname, _) = baseTypeName(field.Type); if (fname == name) {
-                        keepField = false;
-                    }
-                }
+        nint n = len(field.Names); if (n == 0) {
+            // anonymous field
+            var (fname, _) = baseTypeName(field.Type); if (fname == name) {
+                keepField = false;
             }
         }
         if (keepField) {
@@ -127,36 +119,34 @@ internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<nam
     nint j = 0;
     foreach (var (_, field) in list) {
         var keepField = false;
-        {
-            nint n = len(field.Names); if (n == 0) {
-                // anonymous field or embedded type or union element
-                @string fname = r.recordAnonymousField(parent, field.Type);
-                if (fname != ""u8) {
-                    if (token.IsExported(fname)) {
-                        keepField = true;
-                    } else if (ityp != nil && predeclaredTypes[fname]) {
-                        // possibly an embedded predeclared type; keep it for now but
-                        // remember this interface so that it can be fixed if name is also
-                        // defined locally
-                        keepField = true;
-                        r.remember(fname, ityp);
-                    }
-                } else {
-                    // If we're operating on an interface, assume that this is an embedded
-                    // type or union element.
-                    //
-                    // TODO(rfindley): consider traversing into approximation/unions
-                    // elements to see if they are entirely unexported.
-                    keepField = ityp != nil;
+        nint n = len(field.Names); if (n == 0) {
+            // anonymous field or embedded type or union element
+            @string fname = r.recordAnonymousField(parent, field.Type);
+            if (fname != ""u8) {
+                if (token.IsExported(fname)) {
+                    keepField = true;
+                } else if (ityp != nil && predeclaredTypes[fname]) {
+                    // possibly an embedded predeclared type; keep it for now but
+                    // remember this interface so that it can be fixed if name is also
+                    // defined locally
+                    keepField = true;
+                    r.remember(fname, ityp);
                 }
             } else {
-                field.Names = filterIdentList(field.Names);
-                if (len(field.Names) < n) {
-                    removedFields = true;
-                }
-                if (len(field.Names) > 0) {
-                    keepField = true;
-                }
+                // If we're operating on an interface, assume that this is an embedded
+                // type or union element.
+                //
+                // TODO(rfindley): consider traversing into approximation/unions
+                // elements to see if they are entirely unexported.
+                keepField = ityp != nil;
+            }
+        } else {
+            field.Names = filterIdentList(field.Names);
+            if (len(field.Names) < n) {
+                removedFields = true;
+            }
+            if (len(field.Names) > 0) {
+                keepField = true;
             }
         }
         if (keepField) {
@@ -277,16 +267,14 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
     case ж<ast.TypeSpec> s: {
         // Don't filter type parameters here, by analogy with function parameters
         // which are not filtered for top-level function declarations.
-        {
-            @string name = s.Name.Name; if (token.IsExported(name)) {
-                r.filterType(r.lookupType(s.Name.Name), s.Type);
-                return true;
-            } else if (IsPredeclared(name)) {
-                if (r.shadowedPredecl == nil) {
-                    r.shadowedPredecl = new map<@string, bool>();
-                }
-                r.shadowedPredecl[name] = true;
+        @string name = s.Name.Name; if (token.IsExported(name)) {
+            r.filterType(r.lookupType(s.Name.Name), s.Type);
+            return true;
+        } else if (IsPredeclared(name)) {
+            if (r.shadowedPredecl == nil) {
+                r.shadowedPredecl = new map<@string, bool>();
             }
+            r.shadowedPredecl[name] = true;
         }
         break;
     }}
@@ -302,14 +290,12 @@ internal static ast.Expr copyConstType(ast.Expr typ, tokenꓸPos pos) {
         return new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: typΔ1.Name, NamePos: pos)));
     }
     case ж<ast.SelectorExpr> typΔ1: {
-        {
-            var (id, ok) = typΔ1.X._<ж<ast.Ident>>(ᐧ); if (ok) {
-                // presumably a qualified identifier
-                return new ast.SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(
-                    Sel: ast.NewIdent(typΔ1.Sel.Name),
-                    X: new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: id.Name, NamePos: pos)))
-                )));
-            }
+        var (id, ok) = typΔ1.X._<ж<ast.Ident>>(ᐧ); if (ok) {
+            // presumably a qualified identifier
+            return new ast.SelectorExprжExpr(Ꮡ(new ast.SelectorExpr(
+                Sel: ast.NewIdent(typΔ1.Sel.Name),
+                X: new ast.IdentжExpr(Ꮡ(new ast.Ident(Name: id.Name, NamePos: pos)))
+            )));
         }
         break;
     }}

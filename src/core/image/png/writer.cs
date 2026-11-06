@@ -70,10 +70,8 @@ partial interface opaquer {
 
 // Returns whether or not the image is fully opaque.
 internal static bool opaque(image.Image m) {
-    {
-        var (o, ok) = m._<opaquer>(ᐧ); if (ok) {
-            return o.Opaque();
-        }
+    var (o, ok) = m._<opaquer>(ᐧ); if (ok) {
+        return o.Opaque();
     }
     var b = m.Bounds();
     for (nint y = b.Min.Y; y < b.Max.Y; y++) {
@@ -606,10 +604,8 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
             }
 
             // Write the compressed bytes.
-            {
-                var (_, err) = e.zw.Write(cr[f]); if (err != nil) {
-                    return err;
-                }
+            var (_, err) = e.zw.Write(cr[f]); if (err != nil) {
+                return err;
             }
 
             // The current row for y is the previous row for y+1.
@@ -708,10 +704,8 @@ public static error Encode(this ж<Encoder> Ꮡenc, io.Writer w, image.Image m) 
 
         color.Palette pal = default;
         // cbP8 encoding needs PalettedImage's ColorIndexAt method.
-        {
-            var (_, ok) = m._<image.PalettedImage>(ᐧ); if (ok) {
-                (pal, _) = m.ColorModel()._<color.Palette>(ᐧ);
-            }
+        var (_, ok) = m._<image.PalettedImage>(ᐧ); if (ok) {
+            (pal, _) = m.ColorModel()._<color.Palette>(ᐧ);
         }
         if (pal != nil) {
             if (len(pal) <= 2) {

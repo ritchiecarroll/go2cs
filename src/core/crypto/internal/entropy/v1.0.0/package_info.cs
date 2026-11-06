@@ -55,7 +55,7 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/entropy.go", "entropy.cs", "ABQmwgAHHPiygIIAHDgABhDSgpSClJSClICCpICCpAAIEoIABhbCgoKCpqaCgpSClIKUlIKCygAGHgAMAoKCgoKCgqaCpgAGJgAQAoKCgoKUgqY=", "", "", "121=HighPrecisionNow/1/2/2,HighPrecisionNow/2/2/3")]
+[assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/entropy.go", "entropy.cs", "ABQmwgAHHPiyggAbOAAGENKClIKUlIKUgIKkgIKkAAgSggAGFsKCgoKmpoKClIKUgpSUgoLKAAYeAAwCgoKCgoKCpoKmAAYmABACgoKCgpSCpg==", "", "", "119=HighPrecisionNow/1/2/2,HighPrecisionNow/2/2/3")]
 [assembly: GoPositionMap("crypto/internal/entropy/v1.0.0/sha384.go", "sha384.cs", "AA4cAAoWopSCgoKCgoKClIKCgpSmgoKmgqaCgqiSgoKCgpSClKaCgoKCgoKCgqYAUqYBooKCgpSCgoKUuJSChJaCgoKCgoKCpoKCgoKCgoKmgoKogoKCgoKCgoKC", "", "", "190=RotateLeft64/3/3/1;191=RotateLeft64/3/3/1")]
 // </GoSourcePositionMaps>
 

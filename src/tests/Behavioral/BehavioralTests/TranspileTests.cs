@@ -1006,6 +1006,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]
+    public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
+
+    [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]
@@ -2636,6 +2639,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
+
+    [TestMethod]
+    public void CheckDeferGoPointerValueReceiver() => CheckTarget("DeferGoPointerValueReceiver");
 
     [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");

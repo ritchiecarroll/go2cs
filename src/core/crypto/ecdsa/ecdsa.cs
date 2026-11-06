@@ -647,10 +647,8 @@ internal static bool verifyFIPS<P>(ж<ecdsa.Curve<P>> c, ref PublicKey pub, slic
     if (err != nil) {
         return false;
     }
-    {
-        var errΔ1 = ecdsa.Verify(c, k, hash, Ꮡ(new ecdsa.Signature(R: r, S: s))); if (errΔ1 != nil) {
-            return false;
-        }
+    var errΔ1 = ecdsa.Verify(c, k, hash, Ꮡ(new ecdsa.Signature(R: r, S: s))); if (errΔ1 != nil) {
+        return false;
     }
     return true;
 }

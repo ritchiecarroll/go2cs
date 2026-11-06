@@ -17,10 +17,8 @@ internal static void handlePanic(ref error err) {
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
 
-        {
-            var e = recover(calledByDefer); if (e != nil) {
-                err = fmt.Errorf("recovered: %v"u8, e);
-            }
+        var e = recover(calledByDefer); if (e != nil) {
+            err = fmt.Errorf("recovered: %v"u8, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

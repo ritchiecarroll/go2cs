@@ -748,10 +748,8 @@ internal static (uintptr @base, uintptr i) cgoCheckUnknownPointer(@unsafe.Pointe
         var tp = span.typePointersOfUnchecked(@base);
         for (;;) {
             uintptr addr = default;
-            {
-                (tp, addr) = tp.next(@base + span.elemsize); if (addr == 0) {
-                    break;
-                }
+            (tp, addr) = tp.next(@base + span.elemsize); if (addr == 0) {
+                break;
             }
             @unsafe.Pointer pp = ~(ж<@unsafe.Pointer>)(uintptr)((@unsafe.Pointer)addr);
             if (cgoIsGoPointer(pp) && !isPinned(pp)) {

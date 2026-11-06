@@ -60,10 +60,8 @@ internal static void initMPTCPavailable() {
 
 internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     if (supportsMultipathTCP()) {
-        {
-            var (conn, err) = Ꮡsd.doDialTCPProto(ctx, laddr, raddr, _IPPROTO_MPTCP); if (err == nil) {
-                return (conn, default);
-            }
+        var (conn, err) = Ꮡsd.doDialTCPProto(ctx, laddr, raddr, _IPPROTO_MPTCP); if (err == nil) {
+            return (conn, default);
         }
     }
 
@@ -78,10 +76,8 @@ internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context
 
 internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     if (supportsMultipathTCP()) {
-        {
-            var (dial, err) = Ꮡsl.listenTCPProto(ctx, laddr, _IPPROTO_MPTCP); if (err == nil) {
-                return (dial, default);
-            }
+        var (dial, err) = Ꮡsl.listenTCPProto(ctx, laddr, _IPPROTO_MPTCP); if (err == nil) {
+            return (dial, default);
         }
     }
 

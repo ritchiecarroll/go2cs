@@ -744,40 +744,36 @@ internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string me
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var p = ref Ꮡp.DerefOrNull();
 
-        {
-            var err = recover(calledByDefer); if (err != nil) {
-                // If it's a nil pointer, just say "<nil>". The likeliest causes are a
-                // Stringer that fails to guard against nil or a nil pointer for a
-                // value receiver, and in either case, "<nil>" is a nice result.
-                {
-                    var v = reflect.ValueOf(arg); if (v.Kind() == reflect.ΔPointer && v.IsNil()) {
-                        p.buf.writeString(nilAngleString);
-                        return;
-                    }
-                }
-                // Otherwise print a concise panic message. Most of the time the panic
-                // value will print itself nicely.
-                if (p.panicking) {
-                    // Nested panics; the recursion in printArg cannot succeed.
-                    throw panic(err);
-                }
-
-                var oldFlags = p.fmt.fmtFlags;
-                // For this output we want default behavior.
-                p.fmt.clearflags();
-
-                p.buf.writeString(percentBangString);
-                p.buf.writeRune(verb);
-                p.buf.writeString(panicString);
-                p.buf.writeString(method);
-                p.buf.writeString(methodˢ);
-                p.panicking = true;
-                Ꮡp.printArg(err, 'v');
-                p.panicking = false;
-                p.buf.writeByte((byte)')');
-
-                p.fmt.fmtFlags = oldFlags;
+        var err = recover(calledByDefer); if (err != nil) {
+            // If it's a nil pointer, just say "<nil>". The likeliest causes are a
+            // Stringer that fails to guard against nil or a nil pointer for a
+            // value receiver, and in either case, "<nil>" is a nice result.
+            var v = reflect.ValueOf(arg); if (v.Kind() == reflect.ΔPointer && v.IsNil()) {
+                p.buf.writeString(nilAngleString);
+                return;
             }
+            // Otherwise print a concise panic message. Most of the time the panic
+            // value will print itself nicely.
+            if (p.panicking) {
+                // Nested panics; the recursion in printArg cannot succeed.
+                throw panic(err);
+            }
+
+            var oldFlags = p.fmt.fmtFlags;
+            // For this output we want default behavior.
+            p.fmt.clearflags();
+
+            p.buf.writeString(percentBangString);
+            p.buf.writeRune(verb);
+            p.buf.writeString(panicString);
+            p.buf.writeString(method);
+            p.buf.writeString(methodˢ);
+            p.panicking = true;
+            Ꮡp.printArg(err, 'v');
+            p.panicking = false;
+            p.buf.writeByte((byte)')');
+
+            p.fmt.fmtFlags = oldFlags;
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1016,187 +1012,181 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
     p.arg = default;
     p.value = value;
 
-    {
-        var f = value;
-        var exprᴛ1 = value.Kind();
-        var matchᴛ1 = false;
-        if (exprᴛ1 == reflect.Invalid) { matchᴛ1 = true;
-            if (depth == 0) {
-                p.buf.writeString(invReflectString);
-            } else {
-                switch (verb) {
-                case 'v': {
-                    p.buf.writeString(nilAngleString);
-                    break;
-                }
-                default: {
-                    Ꮡp.badVerb(verb);
-                    break;
-                }}
-            }
-        }
-        else if (exprᴛ1 == reflect.ΔBool) { matchᴛ1 = true;
-            Ꮡp.fmtBool(f.Bool(), verb);
-        }
-        else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) { matchᴛ1 = true;
-            Ꮡp.fmtInteger((uint64)f.Int(), signed, verb);
-        }
-        else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) { matchᴛ1 = true;
-            Ꮡp.fmtInteger(f.Uint(), unsigned, verb);
-        }
-        else if (exprᴛ1 == reflect.Float32) { matchᴛ1 = true;
-            Ꮡp.fmtFloat(f.Float(), 32, verb);
-        }
-        else if (exprᴛ1 == reflect.Float64) { matchᴛ1 = true;
-            Ꮡp.fmtFloat(f.Float(), 64, verb);
-        }
-        else if (exprᴛ1 == reflect.Complex64) { matchᴛ1 = true;
-            Ꮡp.fmtComplex(f.Complex(), 64, verb);
-        }
-        else if (exprᴛ1 == reflect.Complex128) { matchᴛ1 = true;
-            Ꮡp.fmtComplex(f.Complex(), 128, verb);
-        }
-        else if (exprᴛ1 == reflect.ΔString) { matchᴛ1 = true;
-            Ꮡp.fmtString(f.String(), verb);
-        }
-        else if (exprᴛ1 == reflect.Map) { matchᴛ1 = true;
-            if (p.fmt.sharpV) {
-                p.buf.writeString(f.Type().String());
-                if (f.IsNil()) {
-                    p.buf.writeString(nilParenString);
-                    return;
-                }
-                p.buf.writeByte((byte)'{');
-            } else {
-                p.buf.writeString(mapString);
-            }
-            var sorted = fmtsort.Sort(f);
-            foreach (var (i, m) in sorted) {
-                if (i > 0) {
-                    if (p.fmt.sharpV) {
-                        p.buf.writeString(commaSpaceString);
-                    } else {
-                        p.buf.writeByte((byte)' ');
-                    }
-                }
-                Ꮡp.printValue(m.Key, verb, depth + 1);
-                p.buf.writeByte((byte)':');
-                Ꮡp.printValue(m.Value, verb, depth + 1);
-            }
-            if (p.fmt.sharpV) {
-                p.buf.writeByte((byte)'}');
-            } else {
-                p.buf.writeByte((byte)']');
-            }
-        }
-        else if (exprᴛ1 == reflect.Struct) { matchᴛ1 = true;
-            if (p.fmt.sharpV) {
-                p.buf.writeString(f.Type().String());
-            }
-            p.buf.writeByte((byte)'{');
-            for (nint i = 0; i < f.NumField(); i++) {
-                if (i > 0) {
-                    if (p.fmt.sharpV) {
-                        p.buf.writeString(commaSpaceString);
-                    } else {
-                        p.buf.writeByte((byte)' ');
-                    }
-                }
-                if (p.fmt.plusV || p.fmt.sharpV) {
-                    {
-                        @string name = f.Type().Field(i).Name; if (name != ""u8) {
-                            p.buf.writeString(name);
-                            p.buf.writeByte((byte)':');
-                        }
-                    }
-                }
-                Ꮡp.printValue(getField(f, i), verb, depth + 1);
-            }
-            p.buf.writeByte((byte)'}');
-        }
-        else if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true;
-            var valueΔ2 = f.Elem();
-            if (!valueΔ2.IsValid()) {
-                if (p.fmt.sharpV) {
-                    p.buf.writeString(f.Type().String());
-                    p.buf.writeString(nilParenString);
-                } else {
-                    p.buf.writeString(nilAngleString);
-                }
-            } else {
-                Ꮡp.printValue(valueΔ2, verb, depth + 1);
-            }
-        }
-        else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
+    var f = value;
+    var exprᴛ1 = value.Kind();
+    var matchᴛ1 = false;
+    if (exprᴛ1 == reflect.Invalid) { matchᴛ1 = true;
+        if (depth == 0) {
+            p.buf.writeString(invReflectString);
+        } else {
             switch (verb) {
-            case 's' or 'q' or 'x' or 'X': {
-                // Handle byte and uint8 slices and arrays special for the above verbs.
-                var t = f.Type();
-                if (t.Elem().Kind() == reflect.Uint8) {
-                    slice<byte> bytes = default;
-                    if (f.Kind() == reflect.ΔSlice || f.CanAddr()) {
-                        bytes = f.Bytes();
-                    } else {
-                        // We have an array, but we cannot Bytes() a non-addressable array,
-                        // so we build a slice by hand. This is a rare case but it would be nice
-                        // if reflection could help a little more.
-                        bytes = new slice<byte>(f.Len());
-                        foreach (var i in range(bytes)) {
-                            bytes[i] = (byte)f.Index(i).Uint();
-                        }
-                    }
-                    Ꮡp.fmtBytes(bytes, verb, t.String());
-                    return;
-                }
+            case 'v': {
+                p.buf.writeString(nilAngleString);
+                break;
+            }
+            default: {
+                Ꮡp.badVerb(verb);
                 break;
             }}
+        }
+    }
+    else if (exprᴛ1 == reflect.ΔBool) { matchᴛ1 = true;
+        Ꮡp.fmtBool(f.Bool(), verb);
+    }
+    else if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) { matchᴛ1 = true;
+        Ꮡp.fmtInteger((uint64)f.Int(), signed, verb);
+    }
+    else if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) { matchᴛ1 = true;
+        Ꮡp.fmtInteger(f.Uint(), unsigned, verb);
+    }
+    else if (exprᴛ1 == reflect.Float32) { matchᴛ1 = true;
+        Ꮡp.fmtFloat(f.Float(), 32, verb);
+    }
+    else if (exprᴛ1 == reflect.Float64) { matchᴛ1 = true;
+        Ꮡp.fmtFloat(f.Float(), 64, verb);
+    }
+    else if (exprᴛ1 == reflect.Complex64) { matchᴛ1 = true;
+        Ꮡp.fmtComplex(f.Complex(), 64, verb);
+    }
+    else if (exprᴛ1 == reflect.Complex128) { matchᴛ1 = true;
+        Ꮡp.fmtComplex(f.Complex(), 128, verb);
+    }
+    else if (exprᴛ1 == reflect.ΔString) { matchᴛ1 = true;
+        Ꮡp.fmtString(f.String(), verb);
+    }
+    else if (exprᴛ1 == reflect.Map) { matchᴛ1 = true;
+        if (p.fmt.sharpV) {
+            p.buf.writeString(f.Type().String());
+            if (f.IsNil()) {
+                p.buf.writeString(nilParenString);
+                return;
+            }
+            p.buf.writeByte((byte)'{');
+        } else {
+            p.buf.writeString(mapString);
+        }
+        var sorted = fmtsort.Sort(f);
+        foreach (var (i, m) in sorted) {
+            if (i > 0) {
+                if (p.fmt.sharpV) {
+                    p.buf.writeString(commaSpaceString);
+                } else {
+                    p.buf.writeByte((byte)' ');
+                }
+            }
+            Ꮡp.printValue(m.Key, verb, depth + 1);
+            p.buf.writeByte((byte)':');
+            Ꮡp.printValue(m.Value, verb, depth + 1);
+        }
+        if (p.fmt.sharpV) {
+            p.buf.writeByte((byte)'}');
+        } else {
+            p.buf.writeByte((byte)']');
+        }
+    }
+    else if (exprᴛ1 == reflect.Struct) { matchᴛ1 = true;
+        if (p.fmt.sharpV) {
+            p.buf.writeString(f.Type().String());
+        }
+        p.buf.writeByte((byte)'{');
+        for (nint i = 0; i < f.NumField(); i++) {
+            if (i > 0) {
+                if (p.fmt.sharpV) {
+                    p.buf.writeString(commaSpaceString);
+                } else {
+                    p.buf.writeByte((byte)' ');
+                }
+            }
+            if (p.fmt.plusV || p.fmt.sharpV) {
+                @string name = f.Type().Field(i).Name; if (name != ""u8) {
+                    p.buf.writeString(name);
+                    p.buf.writeByte((byte)':');
+                }
+            }
+            Ꮡp.printValue(getField(f, i), verb, depth + 1);
+        }
+        p.buf.writeByte((byte)'}');
+    }
+    else if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true;
+        var valueΔ2 = f.Elem();
+        if (!valueΔ2.IsValid()) {
             if (p.fmt.sharpV) {
                 p.buf.writeString(f.Type().String());
-                if (f.Kind() == reflect.ΔSlice && f.IsNil()) {
-                    p.buf.writeString(nilParenString);
-                    return;
-                }
-                p.buf.writeByte((byte)'{');
-                for (nint i = 0; i < f.Len(); i++) {
-                    if (i > 0) {
-                        p.buf.writeString(commaSpaceString);
-                    }
-                    Ꮡp.printValue(f.Index(i), verb, depth + 1);
-                }
-                p.buf.writeByte((byte)'}');
+                p.buf.writeString(nilParenString);
             } else {
-                p.buf.writeByte((byte)'[');
-                for (nint i = 0; i < f.Len(); i++) {
-                    if (i > 0) {
-                        p.buf.writeByte((byte)' ');
+                p.buf.writeString(nilAngleString);
+            }
+        } else {
+            Ꮡp.printValue(valueΔ2, verb, depth + 1);
+        }
+    }
+    else if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true;
+        switch (verb) {
+        case 's' or 'q' or 'x' or 'X': {
+            // Handle byte and uint8 slices and arrays special for the above verbs.
+            var t = f.Type();
+            if (t.Elem().Kind() == reflect.Uint8) {
+                slice<byte> bytes = default;
+                if (f.Kind() == reflect.ΔSlice || f.CanAddr()) {
+                    bytes = f.Bytes();
+                } else {
+                    // We have an array, but we cannot Bytes() a non-addressable array,
+                    // so we build a slice by hand. This is a rare case but it would be nice
+                    // if reflection could help a little more.
+                    bytes = new slice<byte>(f.Len());
+                    foreach (var i in range(bytes)) {
+                        bytes[i] = (byte)f.Index(i).Uint();
                     }
-                    Ꮡp.printValue(f.Index(i), verb, depth + 1);
                 }
-                p.buf.writeByte((byte)']');
+                Ꮡp.fmtBytes(bytes, verb, t.String());
+                return;
             }
-        }
-        else if (exprᴛ1 == reflect.ΔPointer) { matchᴛ1 = true;
-            // pointer to array or slice or struct? ok at top level
-            // but not embedded (avoid loops)
-            if (depth == 0 && (uintptr)f.UnsafePointer() != nil) {
-                {
-                    var a = f.Elem();
-                    switch (a.Kind()) {
-                    case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.Struct || ᴛ == reflect.Map: {
-                        p.buf.writeByte((byte)'&');
-                        Ꮡp.printValue(a, verb, depth + 1);
-                        return;
-                    }}
+            break;
+        }}
+        if (p.fmt.sharpV) {
+            p.buf.writeString(f.Type().String());
+            if (f.Kind() == reflect.ΔSlice && f.IsNil()) {
+                p.buf.writeString(nilParenString);
+                return;
+            }
+            p.buf.writeByte((byte)'{');
+            for (nint i = 0; i < f.Len(); i++) {
+                if (i > 0) {
+                    p.buf.writeString(commaSpaceString);
                 }
+                Ꮡp.printValue(f.Index(i), verb, depth + 1);
             }
-            fallthrough = true;
+            p.buf.writeByte((byte)'}');
+        } else {
+            p.buf.writeByte((byte)'[');
+            for (nint i = 0; i < f.Len(); i++) {
+                if (i > 0) {
+                    p.buf.writeByte((byte)' ');
+                }
+                Ꮡp.printValue(f.Index(i), verb, depth + 1);
+            }
+            p.buf.writeByte((byte)']');
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔUnsafePointer)) {
-            Ꮡp.fmtPointer(f, verb);
+    }
+    else if (exprᴛ1 == reflect.ΔPointer) { matchᴛ1 = true;
+        // pointer to array or slice or struct? ok at top level
+        // but not embedded (avoid loops)
+        if (depth == 0 && (uintptr)f.UnsafePointer() != nil) {
+            var a = f.Elem();
+            switch (a.Kind()) {
+            case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.Struct || ᴛ == reflect.Map: {
+                p.buf.writeByte((byte)'&');
+                Ꮡp.printValue(a, verb, depth + 1);
+                return;
+            }}
         }
-        else if (!matchᴛ1) { /* default: */
-            p.unknownType(f);
-        }
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func || exprᴛ1 == reflect.ΔUnsafePointer)) {
+        Ꮡp.fmtPointer(f, verb);
+    }
+    else if (!matchᴛ1) { /* default: */
+        p.unknownType(f);
     }
 }
 
@@ -1211,30 +1201,28 @@ internal static (nint num, bool isInt, nint newArgNum) intFromArg(slice<any> a, 
         (num, isInt) = a[argNum]._<nint>(ᐧ); // Almost always OK.
         if (!isInt) {
             // Work harder.
-            {
-                var v = reflect.ValueOf(a[argNum]);
-                switch (v.Kind()) {
-                case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
-                    var n = v.Int();
-                    if ((int64)(nint)n == n) {
-                        num = (nint)n;
-                        isInt = true;
-                    }
-                    break;
+            var v = reflect.ValueOf(a[argNum]);
+            switch (v.Kind()) {
+            case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+                var n = v.Int();
+                if ((int64)(nint)n == n) {
+                    num = (nint)n;
+                    isInt = true;
                 }
-                case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
-                    var n = v.Uint();
-                    if ((int64)n >= 0 && (uint64)(nint)n == n) {
-                        num = (nint)n;
-                        isInt = true;
-                    }
-                    break;
-                }
-                default: {
-                    // Already 0, false.
-                    break;
-                }}
+                break;
             }
+            case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+                var n = v.Uint();
+                if ((int64)n >= 0 && (uint64)(nint)n == n) {
+                    num = (nint)n;
+                    isInt = true;
+                }
+                break;
+            }
+            default: {
+                // Already 0, false.
+                break;
+            }}
         }
         newArgNum = argNum + 1;
         if (tooLarge(num)) {

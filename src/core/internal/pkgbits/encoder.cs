@@ -117,11 +117,9 @@ public static array<byte> /*fingerprint*/ DumpTo(this ж<PkgEncoder> Ꮡpw, io.W
 // StringIdx adds a string value to the strings section, if not
 // already present, and returns its index.
 public static RelElemIdx StringIdx(this ref PkgEncoder pw, @string s) {
-    {
-        var (idxΔ1, ok) = pw.stringsIdx[s, ꟷ]; if (ok) {
-            assert(pw.elems[SectionString][idxΔ1] == s);
-            return idxΔ1;
-        }
+    var (idxΔ1, ok) = pw.stringsIdx[s, ꟷ]; if (ok) {
+        assert(pw.elems[SectionString][idxΔ1] == s);
+        return idxΔ1;
     }
 
     var idx = (RelElemIdx)(int32)len(pw.elems[SectionString]);
@@ -226,10 +224,8 @@ internal static void rawVarint(this ref Encoder w, int64 x) {
 internal static nint rawReloc(this ref Encoder w, SectionKind k, RelElemIdx idx) {
     var e = new RefTableEntry(k, idx);
     if (w.RelocMap != nil) {
-        {
-            var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
-                return (nint)iΔ1;
-            }
+        var (iΔ1, ok) = w.RelocMap[e, ꟷ]; if (ok) {
+            return (nint)iΔ1;
         }
     } else {
         w.RelocMap = new map<RefTableEntry, uint32>();

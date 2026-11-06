@@ -82,10 +82,8 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
     {
         var (ok, indir) = implementsInterface(ut.user, gobEncoderInterfaceType); if (ok) {
             (ut.externalEnc, ut.encIndir) = (xGob, indir);
-        } else {
-            var (okΔ1, indirΔ1) = implementsInterface(ut.user, binaryMarshalerInterfaceType); if (okΔ1) {
-                (ut.externalEnc, ut.encIndir) = (xBinary, indirΔ1);
-            }
+        } else if (implementsInterface(ut.user, binaryMarshalerInterfaceType) is var (okΔ1, indirΔ1) && okΔ1) {
+            (ut.externalEnc, ut.encIndir) = (xBinary, indirΔ1);
         }
     }
 
@@ -98,10 +96,8 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
     {
         var (ok, indir) = implementsInterface(ut.user, gobDecoderInterfaceType); if (ok) {
             (ut.externalDec, ut.decIndir) = (xGob, indir);
-        } else {
-            var (okΔ1, indirΔ1) = implementsInterface(ut.user, binaryUnmarshalerInterfaceType); if (okΔ1) {
-                (ut.externalDec, ut.decIndir) = (xBinary, indirΔ1);
-            }
+        } else if (implementsInterface(ut.user, binaryUnmarshalerInterfaceType) is var (okΔ1, indirΔ1) && okΔ1) {
+            (ut.externalDec, ut.decIndir) = (xBinary, indirΔ1);
         }
     }
 
@@ -141,15 +137,13 @@ internal static (bool success, int8 indir) implementsInterface(reflectꓸType ty
         if (rt.Implements(gobEncDecType)) {
             return (true, indir);
         }
-        {
-            var p = rt; if (p.Kind() == reflect.ΔPointer) {
-                indir++;
-                if (indir > 100) { // insane number of indirections
-                    return (false, 0);
-                }
-                rt = p.Elem();
-                continue;
+        var p = rt; if (p.Kind() == reflect.ΔPointer) {
+            indir++;
+            if (indir > 100) { // insane number of indirections
+                return (false, 0);
             }
+            rt = p.Elem();
+            continue;
         }
         break;
     }
@@ -338,10 +332,8 @@ internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
 
     // Move the id space upwards to allow for growth in the predefined world
     // without breaking existing files.
-    {
-        nint nextId = len(idToTypeSlice); if (nextId > firstUserId) {
-            throw panic(fmt.Sprintln("nextId too large:", nextId));
-        }
+    nint nextId = len(idToTypeSlice); if (nextId > firstUserId) {
+        throw panic(fmt.Sprintln("nextId too large:", nextId));
     }
     idToTypeSlice = idToTypeSlice[..(int)(firstUserId)];
     registerBasics();
@@ -488,10 +480,8 @@ internal static @string safeString(this ж<structType> Ꮡs, map<typeId, bool> s
     if (Ꮡs == nil) {
         return nilˢ;
     }
-    {
-        var (_, ok) = seen[s.Id, ꟷ]; if (ok) {
-            return s.Name;
-        }
+    var (_, ok) = seen[s.Id, ꟷ]; if (ok) {
+        return s.Name;
     }
     seen[s.Id] = true;
     @string str = s.Name + " = struct { "u8;
@@ -536,111 +526,109 @@ internal static (ΔgobType, error) newTypeObject(@string name, ref userTypeInfo 
         }, ref ᒐ);
         // Install the top-level type before the subtypes (e.g. struct before
         // fields) so recursive types can be constructed safely.
-        {
-            var t = rt;
-            switch (t.Kind()) {
-            // All basic types are easy: they are predefined.
-            case var ᴛ when ᴛ == reflect.ΔBool: {
-                return (tBool.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
-                return (tInt.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
-                return (tUint.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
-                return (tFloat.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
-                return (tComplex.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.ΔString: {
-                return (tString.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.ΔInterface: {
-                return (tInterface.gobType(), default);
-            }
-            case var ᴛ when ᴛ == reflect.Array: {
-                var at = newArrayType(name);
-                types[rt] = new arrayTypeжΔgobType(at);
-                (type0, err) = getBaseType(""u8, t.Elem());
-                if (err != nil) {
-                    return (default, err);
-                }
-                // Historical aside:
-                // For arrays, maps, and slices, we set the type id after the elements
-                // are constructed. This is to retain the order of type id allocation after
-                // a fix made to handle recursive types, which changed the order in
-                // which types are built. Delaying the setting in this way preserves
-                // type ids while allowing recursive types to be described. Structs,
-                // done below, were already handling recursion correctly so they
-                // assign the top-level id before those of the field.
-                at.init(type0, t.Len());
-                return (new arrayTypeжΔgobType(at), default);
-            }
-            case var ᴛ when ᴛ == reflect.Map: {
-                var mt = newMapType(name);
-                types[rt] = new mapTypeжΔgobType(mt);
-                (type0, err) = getBaseType(""u8, t.Key());
-                if (err != nil) {
-                    return (default, err);
-                }
-                (type1, err) = getBaseType(""u8, t.Elem());
-                if (err != nil) {
-                    return (default, err);
-                }
-                mt.init(type0, type1);
-                return (new mapTypeжΔgobType(mt), default);
-            }
-            case var ᴛ when ᴛ == reflect.ΔSlice: {
-                // []byte == []uint8 is a special case
-                if (t.Elem().Kind() == reflect.Uint8) {
-                    return (tBytes.gobType(), default);
-                }
-                var st = newSliceType(name);
-                types[rt] = new sliceTypeжΔgobType(st);
-                (type0, err) = getBaseType(t.Elem().Name(), t.Elem());
-                if (err != nil) {
-                    return (default, err);
-                }
-                st.init(type0);
-                return (new sliceTypeжΔgobType(st), default);
-            }
-            case var ᴛ when ᴛ == reflect.Struct: {
-                var st = newStructType(name);
-                types[rt] = new structTypeжΔgobType(st);
-                idToTypeSlice[st.of(structType.ᏑCommonType).id()] = new structTypeжΔgobType(st);
-                for (nint i = 0; i < t.NumField(); i++) {
-                    var f = t.Field(i);
-                    if (!isSent(ref f)) {
-                        continue;
-                    }
-                    var typ = userType(f.Type).@base;
-                    @string tname = typ.Name();
-                    if (tname == ""u8) {
-                        var tΔ2 = userType(f.Type).@base;
-                        tname = tΔ2.String();
-                    }
-                    var (gt, errΔ2) = getBaseType(tname, f.Type);
-                    if (errΔ2 != nil) {
-                        return (default, errΔ2);
-                    }
-                    // Some mutually recursive types can cause us to be here while
-                    // still defining the element. Fix the element type id here.
-                    // We could do this more neatly by setting the id at the start of
-                    // building every type, but that would break binary compatibility.
-                    if (gt.id() == 0) {
-                        setTypeId(gt);
-                    }
-                    st.Field = append(st.Field, new fieldType(f.Name, gt.id()));
-                }
-                return (new structTypeжΔgobType(st), default);
-            }
-            default: {
-                return (default, errors.New("gob NewTypeObject can't handle type: "u8 + rt.String()));
-            }}
+        var t = rt;
+        switch (t.Kind()) {
+        // All basic types are easy: they are predefined.
+        case var ᴛ when ᴛ == reflect.ΔBool: {
+            return (tBool.gobType(), default);
         }
+        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+            return (tInt.gobType(), default);
+        }
+        case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+            return (tUint.gobType(), default);
+        }
+        case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+            return (tFloat.gobType(), default);
+        }
+        case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
+            return (tComplex.gobType(), default);
+        }
+        case var ᴛ when ᴛ == reflect.ΔString: {
+            return (tString.gobType(), default);
+        }
+        case var ᴛ when ᴛ == reflect.ΔInterface: {
+            return (tInterface.gobType(), default);
+        }
+        case var ᴛ when ᴛ == reflect.Array: {
+            var at = newArrayType(name);
+            types[rt] = new arrayTypeжΔgobType(at);
+            (type0, err) = getBaseType(""u8, t.Elem());
+            if (err != nil) {
+                return (default, err);
+            }
+            // Historical aside:
+            // For arrays, maps, and slices, we set the type id after the elements
+            // are constructed. This is to retain the order of type id allocation after
+            // a fix made to handle recursive types, which changed the order in
+            // which types are built. Delaying the setting in this way preserves
+            // type ids while allowing recursive types to be described. Structs,
+            // done below, were already handling recursion correctly so they
+            // assign the top-level id before those of the field.
+            at.init(type0, t.Len());
+            return (new arrayTypeжΔgobType(at), default);
+        }
+        case var ᴛ when ᴛ == reflect.Map: {
+            var mt = newMapType(name);
+            types[rt] = new mapTypeжΔgobType(mt);
+            (type0, err) = getBaseType(""u8, t.Key());
+            if (err != nil) {
+                return (default, err);
+            }
+            (type1, err) = getBaseType(""u8, t.Elem());
+            if (err != nil) {
+                return (default, err);
+            }
+            mt.init(type0, type1);
+            return (new mapTypeжΔgobType(mt), default);
+        }
+        case var ᴛ when ᴛ == reflect.ΔSlice: {
+            // []byte == []uint8 is a special case
+            if (t.Elem().Kind() == reflect.Uint8) {
+                return (tBytes.gobType(), default);
+            }
+            var st = newSliceType(name);
+            types[rt] = new sliceTypeжΔgobType(st);
+            (type0, err) = getBaseType(t.Elem().Name(), t.Elem());
+            if (err != nil) {
+                return (default, err);
+            }
+            st.init(type0);
+            return (new sliceTypeжΔgobType(st), default);
+        }
+        case var ᴛ when ᴛ == reflect.Struct: {
+            var st = newStructType(name);
+            types[rt] = new structTypeжΔgobType(st);
+            idToTypeSlice[st.of(structType.ᏑCommonType).id()] = new structTypeжΔgobType(st);
+            for (nint i = 0; i < t.NumField(); i++) {
+                var f = t.Field(i);
+                if (!isSent(ref f)) {
+                    continue;
+                }
+                var typ = userType(f.Type).@base;
+                @string tname = typ.Name();
+                if (tname == ""u8) {
+                    var tΔ2 = userType(f.Type).@base;
+                    tname = tΔ2.String();
+                }
+                var (gt, errΔ2) = getBaseType(tname, f.Type);
+                if (errΔ2 != nil) {
+                    return (default, errΔ2);
+                }
+                // Some mutually recursive types can cause us to be here while
+                // still defining the element. Fix the element type id here.
+                // We could do this more neatly by setting the id at the start of
+                // building every type, but that would break binary compatibility.
+                if (gt.id() == 0) {
+                    setTypeId(gt);
+                }
+                st.Field = append(st.Field, new fieldType(f.Name, gt.id()));
+            }
+            return (new structTypeжΔgobType(st), default);
+        }
+        default: {
+            return (default, errors.New("gob NewTypeObject can't handle type: "u8 + rt.String()));
+        }}
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -797,10 +785,8 @@ internal static ref atomic.Value typeInfoMap => ref ((StaticBox<atomic.Value>)�
 internal static map<reflectꓸType, ж<typeInfo>> typeInfoMapInit = new map<reflectꓸType, ж<typeInfo>>(16);
 
 internal static ж<typeInfo> lookupTypeInfo(reflectꓸType rt) {
-    {
-        var mΔ1 = typeInfoMapInit; if (mΔ1 != nil) {
-            return mΔ1[rt];
-        }
+    var mΔ1 = typeInfoMapInit; if (mΔ1 != nil) {
+        return mΔ1[rt];
     }
     var (m, _) = ᏑtypeInfoMap.Load()._<map<reflectꓸType, ж<typeInfo>>>(ᐧ);
     return m[rt];
@@ -812,10 +798,8 @@ internal static (ж<typeInfo>, error) getTypeInfo(ref userTypeInfo ut) {
         // We want the user type, not the base type.
         rt = ut.user;
     }
-    {
-        var info = lookupTypeInfo(rt); if (info != nil) {
-            return (info, default);
-        }
+    var info = lookupTypeInfo(rt); if (info != nil) {
+        return (info, default);
     }
     return buildTypeInfo(ref ut, rt);
 }
@@ -828,10 +812,8 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
         ᏑtypeLock.Lock();
         defer(ᏑtypeLock.Unlock, ref ᒐ);
 
-        {
-            var infoΔ1 = lookupTypeInfo(rt); if (infoΔ1 != nil) {
-                return (infoΔ1, default);
-            }
+        var infoΔ1 = lookupTypeInfo(rt); if (infoΔ1 != nil) {
+            return (infoΔ1, default);
         }
 
         var (gt, err) = getBaseType(rt.Name(), rt);
@@ -862,36 +844,32 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
             rt = ut.user;
         } else {
             var t = info.id.gobType();
-            {
-                var typ = rt;
-                switch (typ.Kind()) {
-                case var ᴛ when ᴛ == reflect.Array: {
-                    info.wire.ArrayT = t._<ΔgobType, ж<arrayType>>();
-                    break;
-                }
-                case var ᴛ when ᴛ == reflect.Map: {
-                    info.wire.MapT = t._<ΔgobType, ж<mapType>>();
-                    break;
-                }
-                case var ᴛ when ᴛ == reflect.ΔSlice: {
-                    // []byte == []uint8 is a special case handled separately
-                    if (typ.Elem().Kind() != reflect.Uint8) {
-                        info.wire.SliceT = t._<ΔgobType, ж<sliceType>>();
-                    }
-                    break;
-                }
-                case var ᴛ when ᴛ == reflect.Struct: {
-                    info.wire.StructT = t._<ΔgobType, ж<structType>>();
-                    break;
-                }}
+            var typ = rt;
+            switch (typ.Kind()) {
+            case var ᴛ when ᴛ == reflect.Array: {
+                info.wire.ArrayT = t._<ΔgobType, ж<arrayType>>();
+                break;
             }
+            case var ᴛ when ᴛ == reflect.Map: {
+                info.wire.MapT = t._<ΔgobType, ж<mapType>>();
+                break;
+            }
+            case var ᴛ when ᴛ == reflect.ΔSlice: {
+                // []byte == []uint8 is a special case handled separately
+                if (typ.Elem().Kind() != reflect.Uint8) {
+                    info.wire.SliceT = t._<ΔgobType, ж<sliceType>>();
+                }
+                break;
+            }
+            case var ᴛ when ᴛ == reflect.Struct: {
+                info.wire.StructT = t._<ΔgobType, ж<structType>>();
+                break;
+            }}
         }
 
-        {
-            var mΔ1 = typeInfoMapInit; if (mΔ1 != nil) {
-                mΔ1[rt] = info;
-                return (info, default);
-            }
+        var mΔ1 = typeInfoMapInit; if (mΔ1 != nil) {
+            mΔ1[rt] = info;
+            return (info, default);
         }
 
         // Create new map with old contents plus new entry.
@@ -990,27 +968,25 @@ public static void Register(any value) {
     // Dereference one pointer looking for a named type.
     @string star = ""u8;
     if (rt.Name() == ""u8) {
-        {
-            var pt = rt; if (pt.Kind() == reflect.ΔPointer) {
-                star = "*";
-                // NOTE: The following line should be rt = pt.Elem() to implement
-                // what the comment above claims, but fixing it would break compatibility
-                // with existing gobs.
-                //
-                // Given package p imported as "full/p" with these definitions:
-                //     package p
-                //     type T1 struct { ... }
-                // this table shows the intended and actual strings used by gob to
-                // name the types:
-                //
-                // Type      Correct string     Actual string
-                //
-                // T1        full/p.T1          full/p.T1
-                // *T1       *full/p.T1         *p.T1
-                //
-                // The missing full path cannot be fixed without breaking existing gob decoders.
-                rt = pt;
-            }
+        var pt = rt; if (pt.Kind() == reflect.ΔPointer) {
+            star = "*";
+            // NOTE: The following line should be rt = pt.Elem() to implement
+            // what the comment above claims, but fixing it would break compatibility
+            // with existing gobs.
+            //
+            // Given package p imported as "full/p" with these definitions:
+            //     package p
+            //     type T1 struct { ... }
+            // this table shows the intended and actual strings used by gob to
+            // name the types:
+            //
+            // Type      Correct string     Actual string
+            //
+            // T1        full/p.T1          full/p.T1
+            // *T1       *full/p.T1         *p.T1
+            //
+            // The missing full path cannot be fixed without breaking existing gob decoders.
+            rt = pt;
         }
     }
     if (rt.Name() != ""u8) {

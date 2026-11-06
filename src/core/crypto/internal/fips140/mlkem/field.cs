@@ -192,15 +192,11 @@ internal static (T, error) polyByteDecode<T>(slice<byte> b)
         var d = (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16;
         const uint32 mask12 = 0b1111_1111_1111;
         error err = default;
-        {
-            (f[i], err) = fieldCheckReduced((uint16)((uint32)(d & mask12))); if (err != nil) {
-                return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
-            }
+        (f[i], err) = fieldCheckReduced((uint16)((uint32)(d & mask12))); if (err != nil) {
+            return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
         }
-        {
-            (f[i + 1], err) = fieldCheckReduced((uint16)(d >> 12)); if (err != nil) {
-                return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
-            }
+        (f[i + 1], err) = fieldCheckReduced((uint16)(d >> 12)); if (err != nil) {
+            return (new T{}, errors.New(mlkemInvalidPolynomialˢ));
         }
         b = b[3..];
     }
@@ -215,13 +211,11 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     slice<byte> head = default;
     slice<byte> tail = default;
 
-    {
-        nint total = len(@in) + n; if (cap(@in) >= total) {
-            head = @in.slice(0, total);
-        } else {
-            head = new slice<byte>(total);
-            copy(head, @in);
-        }
+    nint total = len(@in) + n; if (cap(@in) >= total) {
+        head = @in.slice(0, total);
+    } else {
+        head = new slice<byte>(total);
+        copy(head, @in);
     }
     tail = head.slice(len(@in));
     return (head, tail);

@@ -118,10 +118,8 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         }
 
         // Strip terminator if present.
-        {
-            nint l = builtin.len(value); if (l >= 2 && value[l - 1] == 0 && value[l - 2] == 0) {
-                value = value.slice(0, l - 2);
-            }
+        nint l = builtin.len(value); if (l >= 2 && value[l - 1] == 0 && value[l - 2] == 0) {
+            value = value.slice(0, l - 2);
         }
 
         var s = new slice<uint16>(0, builtin.len(value) / 2);
@@ -503,10 +501,8 @@ internal static error forEachSAN(cryptobyte.String derʗp, Func<nint, slice<byte
         if (!der.ReadAnyASN1(Ꮡsan, Ꮡtag)) {
             return errors.New(x509InvalidSubjectˢ2);
         }
-        {
-            var err = callback((nint)((cryptobyte_asn1.Tag)(tag ^ 0x80)), san); if (err != nil) {
-                return err;
-            }
+        var err = callback((nint)((cryptobyte_asn1.Tag)(tag ^ 0x80)), san); if (err != nil) {
+            return err;
         }
     }
 
@@ -532,30 +528,24 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
         switch (tag) {
         case var ᴛ when ᴛ == nameTypeEmail: {
             @string email = (@string)data;
-            {
-                var errΔ5 = isIA5String(email); if (errΔ5 != nil) {
-                    return errors.New(x509SanRfc822NameIsˢ);
-                }
+            var errΔ5 = isIA5String(email); if (errΔ5 != nil) {
+                return errors.New(x509SanRfc822NameIsˢ);
             }
             emailAddresses = append(emailAddresses, email);
             break;
         }
         case var ᴛ when ᴛ == nameTypeDNS: {
             @string name = (@string)data;
-            {
-                var errΔ6 = isIA5String(name); if (errΔ6 != nil) {
-                    return errors.New(x509SanDNSNameIsˢ);
-                }
+            var errΔ6 = isIA5String(name); if (errΔ6 != nil) {
+                return errors.New(x509SanDNSNameIsˢ);
             }
             dnsNames = append(dnsNames, (@string)name);
             break;
         }
         case var ᴛ when ᴛ == nameTypeURI: {
             @string uriStr = (@string)data;
-            {
-                var errΔ7 = isIA5String(uriStr); if (errΔ7 != nil) {
-                    return errors.New(x509Sanˢ);
-                }
+            var errΔ7 = isIA5String(uriStr); if (errΔ7 != nil) {
+                return errors.New(x509Sanˢ);
             }
             var (uri, errΔ8) = url.Parse(uriStr);
             if (errΔ8 != nil) {
@@ -630,12 +620,10 @@ internal static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseE
         if (!der.ReadASN1ObjectIdentifier(Ꮡeku)) {
             return (default, default, errors.New(x509InvalidExtendedKeyˢ));
         }
-        {
-            var (extKeyUsage, ok) = extKeyUsageFromOID(eku); if (ok) {
-                extKeyUsages = append(extKeyUsagesᴷ, extKeyUsages, extKeyUsage);
-            } else {
-                unknownUsages = append(unknownUsagesᴷ, unknownUsages, eku);
-            }
+        var (extKeyUsage, ok) = extKeyUsageFromOID(eku); if (ok) {
+            extKeyUsages = append(extKeyUsagesᴷ, extKeyUsages, extKeyUsage);
+        } else {
+            unknownUsages = append(unknownUsagesᴷ, unknownUsages, eku);
         }
     }
     extKeyUsages = move2heap(extKeyUsagesᴷ, extKeyUsages);
@@ -773,10 +761,8 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
             switch (tag) {
             case var ᴛ when ᴛ == dnsTag: {
                 @string domain = (@string)(slice<byte>)value;
-                {
-                    var errΔ5 = isIA5String(domain); if (errΔ5 != nil) {
-                        return (default, default, default, default, errors.New("x509: invalid constraint value: "u8 + errΔ5.Error()));
-                    }
+                var errΔ5 = isIA5String(domain); if (errΔ5 != nil) {
+                    return (default, default, default, default, errors.New("x509: invalid constraint value: "u8 + errΔ5.Error()));
                 }
 
                 if (!domainNameValid(domain, true)) {
@@ -814,19 +800,15 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
             }
             case var ᴛ when ᴛ == emailTag: {
                 @string constraint = (@string)(slice<byte>)value;
-                {
-                    var errΔ6 = isIA5String(constraint); if (errΔ6 != nil) {
-                        return (default, default, default, default, errors.New("x509: invalid constraint value: "u8 + errΔ6.Error()));
-                    }
+                var errΔ6 = isIA5String(constraint); if (errΔ6 != nil) {
+                    return (default, default, default, default, errors.New("x509: invalid constraint value: "u8 + errΔ6.Error()));
                 }
 
                 // If the constraint contains an @ then
                 // it specifies an exact mailbox name.
                 if (strings.Contains(constraint, "@")) {
-                    {
-                        var (_, ok) = parseRFC2821Mailbox(constraint); if (!ok) {
-                            return (default, default, default, default, fmt.Errorf("x509: failed to parse rfc822Name constraint %q"u8, constraint));
-                        }
+                    var (_, ok) = parseRFC2821Mailbox(constraint); if (!ok) {
+                        return (default, default, default, default, fmt.Errorf("x509: failed to parse rfc822Name constraint %q"u8, constraint));
                     }
                 } else {
                     if (!domainNameValid(constraint, true)) {
@@ -838,10 +820,8 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
             }
             case var ᴛ when ᴛ == uriTag: {
                 @string domain = (@string)(slice<byte>)value;
-                {
-                    var errΔ7 = isIA5String(domain); if (errΔ7 != nil) {
-                        return (default, default, default, default, errors.New("x509: invalid constraint value: "u8 + errΔ7.Error()));
-                    }
+                var errΔ7 = isIA5String(domain); if (errΔ7 != nil) {
+                    return (default, default, default, default, errors.New("x509: invalid constraint value: "u8 + errΔ7.Error()));
                 }
 
                 if (net.ParseIP(domain) != nil) {
@@ -867,15 +847,11 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
         return (dnsNames, ips, emails, uriDomains, default);
     }
 
-    {
-        (@out.PermittedDNSDomains, @out.PermittedIPRanges, @out.PermittedEmailAddresses, @out.PermittedURIDomains, err) = getValues(permitted); if (err != nil) {
-            return (false, err);
-        }
+    (@out.PermittedDNSDomains, @out.PermittedIPRanges, @out.PermittedEmailAddresses, @out.PermittedURIDomains, err) = getValues(permitted); if (err != nil) {
+        return (false, err);
     }
-    {
-        (@out.ExcludedDNSDomains, @out.ExcludedIPRanges, @out.ExcludedEmailAddresses, @out.ExcludedURIDomains, err) = getValues(excluded); if (err != nil) {
-            return (false, err);
-        }
+    (@out.ExcludedDNSDomains, @out.ExcludedIPRanges, @out.ExcludedEmailAddresses, @out.ExcludedURIDomains, err) = getValues(excluded); if (err != nil) {
+        return (false, err);
     }
     @out.PermittedDNSDomainsCritical = e.Critical;
 
@@ -1061,10 +1037,8 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
                 }
                 @out.PolicyIdentifiers = new slice<asn1.ObjectIdentifier>(0, builtin.len(@out.Policies));
                 foreach (var (_, oid) in @out.Policies) {
-                    {
-                        var (oidΔ1, ok) = oid.toASN1OID(); if (ok) {
-                            @out.PolicyIdentifiers = append(@out.PolicyIdentifiers, oidΔ1);
-                        }
+                    var (oidΔ1, ok) = oid.toASN1OID(); if (ok) {
+                        @out.PolicyIdentifiers = append(@out.PolicyIdentifiers, oidΔ1);
                     }
                 }
                 break;

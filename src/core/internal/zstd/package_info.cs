@@ -64,13 +64,13 @@ using static go.@internal.zstd_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/zstd/bits.go", "bits.cs", "ABg0kgAGEqKCgpSCgoKUqJKCgoKokoKCupIAECDSgoKUAAcQqJKCpoKCrLKCgpSCgoKClKiS", "", "", "94=LeadingZeros8/1/1/6")]
-[assembly: GoPositionMap("internal/zstd/block.go", "block.cs", "ABAi0oK4gqaAgraCgpSCgpSUlIKCppSCppSmABcyABs20oKmgoKCpoKCgoKClIKUgpSCyoKUgoKUuIKCgqaCgqaCgqbs0oKmgoK4gpSCuO6ClIKAgraCgriClJSCgpSUgpSUgIK2goK4gpSUAAoI1pKCpoKCpoKCpoKCyoKCgqaCgpSCgpSUgoKUlIKClLiCgoKUgpSUtIKCtIKCgrSCgoLIgpSCgpSUgoKUlIKClMqCuIKUgoKmgoCC2pSCpgAICLKCAAcQgoKCgoKClIKClIKUyoKCgpSClA==")]
-[assembly: GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABswAAgCgoCCtoKCysqmpqaUlIKAgra4goKCgoKAgraCgoKCgIL+lIKmgqaCpoKClIKCpoKClIKmgoKUlIKUgpSUgoK4gqaCppSAgrYACAyygpSUgoKUgoK4goKCgoKCgoK4gqaCgoKUgqaUgoKmABQsABowkoK4goKUgpSCgoKUlOiSgriCABQqgoKUgpQABxIAFzKSgriCgpSClIKCgpSU3AAbOAAQIg==")]
+[assembly: GoPositionMap("internal/zstd/block.go", "block.cs", "ABAi0oK4gqaCpoKClIKClJSUgoKmlIKmlKYAFzIAGzbSgqaCgoKmgoKCgoKUgpSClILKgpSCgpS4goKCpoKCpoKCpuzSgqaCgriClIK47oKUgoCCtoKCuIKUlIKClJSClJSCpoKCuIKUlAAKCNaSgqaCgqaCgqaCgsqCgoKmgoKUgoKUlIKClJSCgpS4goKClIKUlLSCgrSCgoK0goKCyIKUgoKUlIKClJSCgpTKgriClIKCpoKCypSCpgAICLKCAAcQgoKCgoKClIKClIKUyoKCgpSClA==")]
+[assembly: GoPositionMap("internal/zstd/fse.go", "fse.cs", "ABswAAgCgoKmgoLKyqamppSUgoKmuIKCgoKCgqaCgoKCgu6UgqaCpoKmgoKUgoKmgoKUgqaCgpSUgpSClJSCgriCpoKmlIKmAAgMsoKUlIKClIKCuIKCgoKCgoKCuIKmgoKClIKmlIKCpgAULAAaMJKCuIKClIKUgoKClJTokoK4ggAUKoKClIKUAAcSABcykoK4goKUgpSCgoKUlNwAGzgAECI=")]
 [assembly: GoPositionMap("internal/zstd/huff.go", "huff.cs", "ABguAAsCgqaClIKClIKUgoKUlIKmgoKmgoKmgoLcgoKCgpSCgoKmgoKUlIKmgpSUgoKUgoKCpoKClJSCpoKmuIKClIKCgoLcgoKCgpSCgqaCpoKCpoLKgoKUgoKUgpSCgpSC3IKCgoKmgoKUgoKCgpSm")]
 [assembly: GoPositionMap("internal/zstd/literals.go", "literals.cs", "AAoc0oK4gpSClAALDMKUgpS0gpSCtIKUguyCppSClIKmgpSCgoK4AAkKwqqUgpSCgoKClMaClIKCgrSClIKCguyCpoKCpoK4gqaCgpSUgpSCuILugoKUpoKm6OaCgqaCgpSCgqaCgoKCpgAJCuaClILcgoKmgoKClIKClJSCgpSClIKUgsqSgqaSgqaSgqaSgqaCgoKUlJSCgpSClJKClIKmgoKmgoKmgoKmgoKClIKCpoKClIKClIKCpg==", "289-295:1")]
 [assembly: GoPositionMap("internal/zstd/window.go", "window.cs", "ABQqkoKClIKCqJKokoKUgqaCgoKCuIKCgoKUpoKUgs6igoKUgoKClIKCpoKClA==")]
 [assembly: GoPositionMap("internal/zstd/xxhash.go", "xxhash.cs", "ABo8oqaClIKmgpSCqJKUgoKCpoKCgoKCgoKmgoKCgoKmgoK6koKClIiCgoKmlIKCgoKCgoKClIKCgoKUgoKCgqaCgoKClKiSgoKCqJKCgoI=", "", "", "87=RotateLeft64/2/4/1,RotateLeft64/3/4/2,RotateLeft64/4/4/3")]
-[assembly: GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEawAZKCgqqiuIKCgoKCgoIADyKygIKkgoKosoCCpIKCqLKCgIKklKiygoCCtgAMCJKCpoCUgpS2gIKUgoCCpIKmtqaAgqSUlIKCpoKClKaCpoKCuIKAgraUlICCuqKUgoKCgoKCpoLKgpSCgtyCgoKUtLS0tLTsgqiSgqaUgoKmgoKCgoKCgpSokpSAgraUgoKCpoCCpoKClIKClIKCuIKClIK2goKClIIADAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKAgraCgoKmlKaqooKClAAIEoKmgqaCpoKClKaCpoKClA==")]
+[assembly: GoPositionMap("internal/zstd/zstd.go", "zstd.cs", "AEawAZKCgqqiuIKCgoKCgoIADyKygpSCgqiygpSCgqiygoKUlKiygoKmAAwIkoKmgJSClLaClIKClIKmpqaAgqSUlIKCpoKClKaCpoKCuIKCppSUgIK6opSCgoKCgoKmgsqClIKC3IKCgpS0tLS0tOyCqJKCppSCgqaCgoKCgoKClKiSlIKmlIKCgqaCpoKClIKClIKCuIKClIKmgoKClIIADAiypoCCtpSUgoLKgriUgoCCpIK0goCCpIKCgpS0goCCpLSmgoKUpoKmgpSCpoKCpoKCgqaUpqqigoKUAAgSgqaCpoKmgoKUpoKmgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

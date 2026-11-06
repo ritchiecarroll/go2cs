@@ -60,10 +60,8 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
         return (default, errors.New(cryptoRsaUseOfPkcs1V15ˢ));
     }
 
-    {
-        var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = checkPublicKeySize(ref (Ꮡpub).DerefOrNull()); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     nint k = pub.Size();
@@ -123,10 +121,8 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader random, ж<PublicKe
 public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
 
     if (boring.Enabled) {
@@ -195,10 +191,8 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader random, ж<PrivateK
 public static error DecryptPKCS1v15SessionKey(io.Reader random, ж<PrivateKey> Ꮡpriv, slice<byte> ciphertext, slice<byte> key) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
-    {
-        var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = checkPublicKeySize(ref nonnil(ref priv).PublicKey); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     nint k = Ꮡpriv.of(PrivateKey.ᏑPublicKey).Size();

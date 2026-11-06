@@ -63,21 +63,17 @@ internal static error loadMimeGlobsFile(@string filename) {
                 //   not useful
                 continue;
             }
-            {
-                var (_, ok) = ᏑmimeTypes.Load(extension); if (ok) {
-                    // We've already seen this extension.
-                    // The file is in weight order, so we keep
-                    // the first entry that we see.
-                    continue;
-                }
+            var (_, ok) = ᏑmimeTypes.Load(extension); if (ok) {
+                // We've already seen this extension.
+                // The file is in weight order, so we keep
+                // the first entry that we see.
+                continue;
             }
 
             setExtensionType(extension, fields[1]);
         }
-        {
-            var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
-                throw panic(errΔ1);
-            }
+        var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
+            throw panic(errΔ1);
         }
         return default;
     }
@@ -109,10 +105,8 @@ internal static void loadMimeFile(@string filename) {
                 setExtensionType("."u8 + ext, mimeType);
             }
         }
-        {
-            var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
-                throw panic(errΔ1);
-            }
+        var errΔ1 = scanner.Err(); if (errΔ1 != nil) {
+            throw panic(errΔ1);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -121,10 +115,8 @@ internal static void loadMimeFile(@string filename) {
 
 internal static void initMimeUnix() {
     foreach (var (_, filename) in mimeGlobs) {
-        {
-            var err = loadMimeGlobsFile(filename); if (err == nil) {
-                return; // Stop checking more files if mimetype database is found.
-            }
+        var err = loadMimeGlobsFile(filename); if (err == nil) {
+            return; // Stop checking more files if mimetype database is found.
         }
     }
 

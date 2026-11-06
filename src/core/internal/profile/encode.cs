@@ -94,11 +94,9 @@ internal static void preEncode(this ref Profile p) {
     p.dropFramesX = addString(strings, p.DropFrames);
     p.keepFramesX = addString(strings, p.KeepFrames);
 
-    {
-        var pt = p.PeriodType; if (pt != nil) {
-            pt.typeX = addString(strings, pt.Type);
-            pt.unitX = addString(strings, pt.Unit);
-        }
+    var pt = p.PeriodType; if (pt != nil) {
+        pt.typeX = addString(strings, pt.Type);
+        pt.unitX = addString(strings, pt.Unit);
     }
 
     p.stringTable = new slice<@string>(len(strings));
@@ -128,10 +126,8 @@ internal static void encode(this ref Profile p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 8, p.keepFramesX);
     encodeInt64Opt(ref (b).DerefOrNull(), 9, p.TimeNanos);
     encodeInt64Opt(ref (b).DerefOrNull(), 10, p.DurationNanos);
-    {
-        var pt = p.PeriodType; if (pt != nil && (pt.typeX != 0 || pt.unitX != 0)) {
-            encodeMessage(b, 11, new ValueTypeжmessage(p.PeriodType));
-        }
+    var pt = p.PeriodType; if (pt != nil && (pt.typeX != 0 || pt.unitX != 0)) {
+        encodeMessage(b, 11, new ValueTypeжmessage(p.PeriodType));
     }
     encodeInt64Opt(ref (b).DerefOrNull(), 12, p.Period);
 }
@@ -235,14 +231,12 @@ internal static error postDecode(this ж<Profile> Ꮡp) {
         l.Mapping = mappings[l.mappingIDX];
         l.mappingIDX = 0;
         foreach (var (i, ln) in l.Line) {
-            {
-                var id = ln.functionIDX; if (id != 0) {
-                    l.Line[i].Function = functions[id];
-                    if (l.Line[i].Function == nil) {
-                        return fmt.Errorf("Function ID %d not found"u8, id);
-                    }
-                    l.Line[i].functionIDX = 0;
+            var id = ln.functionIDX; if (id != 0) {
+                l.Line[i].Function = functions[id];
+                if (l.Line[i].Function == nil) {
+                    return fmt.Errorf("Function ID %d not found"u8, id);
                 }
+                l.Line[i].functionIDX = 0;
             }
         }
         locations[l.ID] = l;

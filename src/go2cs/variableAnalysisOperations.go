@@ -1977,6 +1977,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 	// Start traversal
 	visitNode(funcDecl.Body)
+
+	// Every name the body declares is final now, so the init blocks can be weighed against them.
+	v.analyzeInitScopes(funcDecl.Body)
 }
 
 func (v *Visitor) processPotentialCapture(ident *ast.Ident) {

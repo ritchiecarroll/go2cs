@@ -54,10 +54,8 @@ partial struct formatter {
 // parseString parses bytes as a NUL-terminated C-style string.
 // If a NUL byte is not found then the whole slice is returned as a string.
 internal static @string parseString(this ref parser _, slice<byte> b) {
-    {
-        nint i = bytes.IndexByte(b, 0); if (i >= 0) {
-            return (@string)(b.slice(0, i));
-        }
+    nint i = bytes.IndexByte(b, 0); if (i >= 0) {
+        return (@string)(b.slice(0, i));
     }
     return (@string)b;
 }
@@ -186,10 +184,8 @@ internal static void formatOctal(this ref formatter f, slice<byte> b, int64 x) {
 
     @string s = strconv.FormatInt(x, 8);
     // Add leading zeros, but leave room for a NUL.
-    {
-        nint n = len(b) - len(s) - 1; if (n > 0) {
-            s = strings.Repeat("0", n) + s;
-        }
+    nint n = len(b) - len(s) - 1; if (n > 0) {
+        s = strings.Repeat("0", n) + s;
     }
     f.formatString(b, s);
 }
@@ -223,17 +219,15 @@ internal static (time.Time, error) parsePAXTime(@string s) {
     // Initialize an array with '0's to handle right padding automatically.
     var nanoDigits = new byte[]{(byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0'}.array();
     foreach (var i in range(len(sn))) {
-        {
-            var c = sn[i];
-            switch (ᐧ) {
-            case {} when c < (byte)'0' || c > (byte)'9': {
-                return (new time.Time(), ErrHeader);
-            }
-            case {} when i < len(nanoDigits): {
-                nanoDigits[i] = c;
-                break;
-            }}
+        var c = sn[i];
+        switch (ᐧ) {
+        case {} when c < (byte)'0' || c > (byte)'9': {
+            return (new time.Time(), ErrHeader);
         }
+        case {} when i < len(nanoDigits): {
+            nanoDigits[i] = c;
+            break;
+        }}
     }
     var (nsecs, _) = strconv.ParseInt((@string)(nanoDigits[..]), 10, 64); // Must succeed after validation
     if (len(ss) > 0 && ss[0] == '-') {

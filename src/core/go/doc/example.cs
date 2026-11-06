@@ -70,11 +70,9 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
         nint numDecl = 0;     // number of non-import declarations in the file
         slice<ж<Example>> flist = default;
         foreach (var (_, decl) in @file.Decls) {
-            {
-                var (g, okΔ1) = decl._<ж<ast.GenDecl>>(ᐧ); if (okΔ1 && g.Tok != token.IMPORT) {
-                    numDecl++;
-                    continue;
-                }
+            var (g, okΔ1) = decl._<ж<ast.GenDecl>>(ᐧ); if (okΔ1 && g.Tok != token.IMPORT) {
+                numDecl++;
+                continue;
             }
             var (f, ok) = decl._<ж<ast.FuncDecl>>(ᐧ);
             if (!ok || f.Recv != nil) {
@@ -89,15 +87,11 @@ public static slice<ж<Example>> Examples(params ꓸꓸꓸжastꓸFile testFiles
             if (!isTest(name, exampleˢ)) {
                 continue;
             }
-            {
-                var @params = f.Type.Params; if (len(@params.List) != 0) {
-                    continue; // function has params; not a valid example
-                }
+            var @params = f.Type.Params; if (len(@params.List) != 0) {
+                continue; // function has params; not a valid example
             }
-            {
-                var results = f.Type.Results; if (results != nil && len(results.List) != 0) {
-                    continue; // function has results; not a valid example
-                }
+            var results = f.Type.Results; if (results != nil && len(results.List) != 0) {
+                continue; // function has results; not a valid example
             }
             if (f.Body == nil) { // ast.File.Body nil dereference (see issue 28044)
                 continue;
@@ -141,24 +135,20 @@ internal static ж<lazyregexp.Regexp> outputPrefix = lazyregexp.New(@"(?i)^[[:sp
 internal static (@string output, bool unordered, bool ok) exampleOutput(ж<ast.BlockStmt> b, slice<ж<ast.CommentGroup>> comments) {
     bool unordered = default;
 
-    {
-        var (_, last) = lastComment(b, comments); if (last != nil) {
-            // test that it begins with the correct prefix
-            @string text = last.Text();
-            {
-                var loc = outputPrefix.FindStringSubmatchIndex(text); if (loc != nil) {
-                    if (loc[2] != -1) {
-                        unordered = true;
-                    }
-                    text = text.slice(loc[1]);
-                    // Strip zero or more spaces followed by \n or a single space.
-                    text = strings.TrimLeft(text, " ");
-                    if (len(text) > 0 && text[0] == '\n') {
-                        text = text[1..];
-                    }
-                    return (text, unordered, true);
-                }
+    var (_, last) = lastComment(b, comments); if (last != nil) {
+        // test that it begins with the correct prefix
+        @string text = last.Text();
+        var loc = outputPrefix.FindStringSubmatchIndex(text); if (loc != nil) {
+            if (loc[2] != -1) {
+                unordered = true;
             }
+            text = text.slice(loc[1]);
+            // Strip zero or more spaces followed by \n or a single space.
+            text = strings.TrimLeft(text, " ");
+            if (len(text) > 0 && text[0] == '\n') {
+                text = text[1..];
+            }
+            return (text, unordered, true);
         }
     }
     return ("", false, false); // no suitable comment found
@@ -308,10 +298,8 @@ internal static ж<ast.File> playExample(ref ast.File @file, ref ast.FuncDecl f)
     // Include documentation belonging to blank imports.
     slice<ж<ast.CommentGroup>> comments = default;
     foreach (var (_, s) in blankImports) {
-        {
-            var c = s._<ж<ast.ImportSpec>>().Doc; if (c != nil) {
-                comments = append(comments, c);
-            }
+        var c = s._<ж<ast.ImportSpec>>().Doc; if (c != nil) {
+            comments = append(comments, c);
         }
     }
 
@@ -402,13 +390,11 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
         case ж<ast.Ident> e: {
             if (e.Obj == nil && e.Name != "_"u8) {
                 unresolvedʗ1[e.Name] = true;
-            } else {
-                var d = topDeclsʗ1[e.Obj]; if (d != nil) {
-                    usedObjsʗ1[e.Obj] = true;
-                    if (!usedDeclsʗ1[d]) {
-                        usedDeclsʗ1[d] = true;
-                        ᏑdepDecls.ValueSlot = append(ᏑdepDecls.ValueSlot, d);
-                    }
+            } else if (topDeclsʗ1[e.Obj] is var d && d != nil) {
+                usedObjsʗ1[e.Obj] = true;
+                if (!usedDeclsʗ1[d]) {
+                    usedDeclsʗ1[d] = true;
+                    ᏑdepDecls.ValueSlot = append(ᏑdepDecls.ValueSlot, d);
                 }
             }
             return true;
@@ -562,10 +548,8 @@ internal static bool hasIota(ast.Spec s) {
     foreach (var n in range<ast.Node>(ast.Preorder(s).Invoke)) {
         // Check that this is the special built-in "iota" identifier, not
         // a user-defined shadow.
-        {
-            var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && id.Name == "iota"u8 && id.Obj == nil) {
-                return true;
-            }
+        var (id, ok) = n._<ж<ast.Ident>>(ᐧ); if (ok && id.Name == "iota"u8 && id.Obj == nil) {
+            return true;
         }
     }
     return false;
@@ -629,14 +613,12 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
     foreach (var (_, vᴛ1) in @file.Decls) {
         var d = vᴛ1;
 
-        {
-            var (fΔ1, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && isTest(fΔ1.Name.Name, exampleˢ)) {
-                // Copy the FuncDecl, as it may be used elsewhere.
-                ref var newF = ref heap<ast.FuncDecl>(fΔ1.Value, out var ᏑnewF);
-                newF.Name = ast.NewIdent(mainˢ);
-                (newF.Body, comments) = stripOutputComment(fΔ1.Body, comments);
-                d = new ast.FuncDeclжDecl(ᏑnewF);
-            }
+        var (fΔ1, ok) = d._<ж<ast.FuncDecl>>(ᐧ); if (ok && isTest(fΔ1.Name.Name, exampleˢ)) {
+            // Copy the FuncDecl, as it may be used elsewhere.
+            ref var newF = ref heap<ast.FuncDecl>(fΔ1.Value, out var ᏑnewF);
+            newF.Name = ast.NewIdent(mainˢ);
+            (newF.Body, comments) = stripOutputComment(fΔ1.Body, comments);
+            d = new ast.FuncDeclжDecl(ᏑnewF);
         }
         decls = append(declsᴷ, decls, d);
     }

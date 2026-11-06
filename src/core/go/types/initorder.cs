@@ -41,16 +41,14 @@ internal static void initOrder(this ж<Checker> Ꮡcheck) {
         fmt.Println(objectDependencyGraphˢ);
         foreach (var (obj, d) in check.objMap) {
             // only print objects that may appear in the dependency graph
-            {
-                var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
-                    if (len(d.deps) > 0) {
-                        fmt.Printf("\t%s depends on\n"u8, objΔ1.Name());
-                        foreach (var (dep, _) in d.deps) {
-                            fmt.Printf("\t\t%s\n"u8, dep.Name());
-                        }
-                    } else {
-                        fmt.Printf("\t%s has no dependencies\n"u8, objΔ1.Name());
+            var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
+                if (len(d.deps) > 0) {
+                    fmt.Printf("\t%s depends on\n"u8, objΔ1.Name());
+                    foreach (var (dep, _) in d.deps) {
+                        fmt.Printf("\t\t%s\n"u8, dep.Name());
                     }
+                } else {
+                    fmt.Printf("\t%s has no dependencies\n"u8, objΔ1.Name());
                 }
             }
         }
@@ -165,10 +163,8 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
         if (AreEqual(d, to)) {
             return slice<Object>([d]);
         }
-        {
-            var P = findPath(objMap, d, to, seen); if (P != nil) {
-                return append(P, d);
-            }
+        var P = findPath(objMap, d, to, seen); if (P != nil) {
+            return append(P, d);
         }
     }
 
@@ -245,10 +241,8 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     var M = new map<dependency, ж<graphNode>>();
     foreach (var (obj, _) in objMap) {
         // only consider nodes that may be an initialization dependency
-        {
-            var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
-                M[objΔ1] = Ꮡ(new graphNode(obj: objΔ1));
-            }
+        var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
+            M[objΔ1] = Ꮡ(new graphNode(obj: objΔ1));
         }
     }
 
@@ -259,12 +253,10 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
         // for each dependency obj -> d (= deps[i]), create graph edges n->s and s->n
         foreach (var (d, _) in objMap[obj].deps) {
             // only consider nodes that may be an initialization dependency
-            {
-                var (dΔ1, _) = d._<dependency>(ᐧ); if (dΔ1 != nil) {
-                    var dΔ2 = M[dΔ1];
-                    n.Ꮡsucc.add(dΔ2);
-                    dΔ2.Ꮡpred.add(n);
-                }
+            var (dΔ1, _) = d._<dependency>(ᐧ); if (dΔ1 != nil) {
+                var dΔ2 = M[dΔ1];
+                n.Ꮡsucc.add(dΔ2);
+                dΔ2.Ꮡpred.add(n);
             }
         }
     }
@@ -272,12 +264,10 @@ internal static slice<ж<graphNode>> dependencyGraph(map<Object, ж<declInfo>> o
     slice<ж<graphNode>> G = default; // separate non-functions and functions
     slice<ж<graphNode>> funcG = default;
     foreach (var (_, n) in M) {
-        {
-            var (_, ok) = n.obj._<ж<Func>>(ᐧ); if (ok) {
-                funcG = append(funcGᴷ, funcG, n);
-            } else {
-                G = append(G, n);
-            }
+        var (_, ok) = n.obj._<ж<Func>>(ᐧ); if (ok) {
+            funcG = append(funcGᴷ, funcG, n);
+        } else {
+            G = append(G, n);
         }
     }
 

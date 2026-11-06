@@ -14,10 +14,8 @@ public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, 
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
 
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return Δsyscall.SetsockoptIPMreqn(fd.Sysfd, level, name, mreq);

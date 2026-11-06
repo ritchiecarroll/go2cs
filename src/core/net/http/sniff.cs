@@ -29,10 +29,8 @@ public static @string DetectContentType(slice<byte> data) {
     }
 
     foreach (var (_, sig) in sniffSignatures) {
-        {
-            @string ct = sig.match(data, firstNonWS); if (ct != ""u8) {
-                return ct;
-            }
+        @string ct = sig.match(data, firstNonWS); if (ct != ""u8) {
+            return ct;
         }
     }
 

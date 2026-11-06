@@ -73,10 +73,8 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
 public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
-    {
-        var err = p.compatible(Ꮡpb); if (err != nil) {
-            return err;
-        }
+    var err = p.compatible(Ꮡpb); if (err != nil) {
+        return err;
     }
 
     var baseVals = new slice<int64>(len(p.SampleType));
@@ -163,13 +161,11 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
     // account for the remapped mapping. Add current values to the
     // existing sample.
     var k = s.key();
-    {
-        var (ss, ok) = pm.samples[k, ꟷ]; if (ok) {
-            foreach (var (i, v) in src.Value) {
-                ss.Value.Value[i] += v;
-            }
-            return ss;
+    var (ss, ok) = pm.samples[k, ꟷ]; if (ok) {
+        foreach (var (i, v) in src.Value) {
+            ss.Value.Value[i] += v;
         }
+        return ss;
     }
     copy((~s).Value, src.Value);
     pm.samples[k] = s;
@@ -219,11 +215,9 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
         return default;
     }
 
-    {
-        var (lΔ1, ok) = pm.locationsByID[src.ID, ꟷ]; if (ok) {
-            pm.locationsByID[src.ID] = lΔ1;
-            return lΔ1;
-        }
+    if (pm.locationsByID[src.ID, ꟷ] is (var lΔ1, true)) {
+        pm.locationsByID[src.ID] = lΔ1;
+        return lΔ1;
     }
 
     var mi = pm.mapMapping(src.Mapping);
@@ -240,11 +234,9 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
     // Check memoization table. Must be done on the remapped location to
     // account for the remapped mapping ID.
     var k = l.key();
-    {
-        var (ll, ok) = pm.locations[k, ꟷ]; if (ok) {
-            pm.locationsByID[src.ID] = ll;
-            return ll;
-        }
+    if (pm.locations[k, ꟷ] is (var ll, true)) {
+        pm.locationsByID[src.ID] = ll;
+        return ll;
     }
     pm.locationsByID[src.ID] = l;
     pm.locations[k] = l;
@@ -287,20 +279,16 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
         return new mapInfo();
     }
 
-    {
-        var (miΔ1, ok) = pm.mappingsByID[src.ID, ꟷ]; if (ok) {
-            return miΔ1;
-        }
+    if (pm.mappingsByID[src.ID, ꟷ] is (var miΔ1, true)) {
+        return miΔ1;
     }
 
     // Check memoization tables.
     var mk = src.key();
-    {
-        var (mΔ1, ok) = pm.mappings[mk, ꟷ]; if (ok) {
-            var miΔ2 = new mapInfo(mΔ1, (int64)mΔ1.Start - (int64)src.Start);
-            pm.mappingsByID[src.ID] = miΔ2;
-            return miΔ2;
-        }
+    if (pm.mappings[mk, ꟷ] is (var mΔ1, true)) {
+        var miΔ2 = new mapInfo(mΔ1, (int64)mΔ1.Start - (int64)src.Start);
+        pm.mappingsByID[src.ID] = miΔ2;
+        return miΔ2;
     }
     var m = Ꮡ(new Mapping(
         ID: (uint64)(len(pm.p.Mapping) + 1),
@@ -375,17 +363,13 @@ internal static ж<Function> mapFunction(this ref profileMerger pm, ж<Function>
     if (Ꮡsrc == nil) {
         return default;
     }
-    {
-        var (fΔ1, ok) = pm.functionsByID[src.ID, ꟷ]; if (ok) {
-            return fΔ1;
-        }
+    if (pm.functionsByID[src.ID, ꟷ] is (var fΔ1, true)) {
+        return fΔ1;
     }
     var k = src.key();
-    {
-        var (fΔ2, ok) = pm.functions[k, ꟷ]; if (ok) {
-            pm.functionsByID[src.ID] = fΔ2;
-            return fΔ2;
-        }
+    if (pm.functions[k, ꟷ] is (var fΔ2, true)) {
+        pm.functionsByID[src.ID] = fΔ2;
+        return fΔ2;
     }
     var f = Ꮡ(new Function(
         ID: (uint64)(len(pm.p.Function) + 1),
@@ -419,10 +403,8 @@ partial struct functionKey {
 // their combined profile.
 internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
     foreach (var (_, s) in srcs[1..]) {
-        {
-            var err = srcs[0].compatible(s); if (err != nil) {
-                return (default, err);
-            }
+        var err = srcs[0].compatible(s); if (err != nil) {
+            return (default, err);
         }
     }
 
@@ -441,11 +423,9 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
             period = s.Period;
         }
         foreach (var (_, c) in s.Comments) {
-            {
-                var seen = seenComments[c]; if (!seen) {
-                    comments = append(comments, c);
-                    seenComments[c] = true;
-                }
+            var seen = seenComments[c]; if (!seen) {
+                comments = append(comments, c);
+                seenComments[c] = true;
             }
         }
         if (defaultSampleType == ""u8) {

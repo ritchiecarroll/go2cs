@@ -169,17 +169,13 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                 }
                 rune loΔ1 = default;
                 rune hiΔ1 = default;
-                {
-                    (loΔ1, chunk, err) = getEsc(chunk); if (err != nil) {
-                        return ("", false, err);
-                    }
+                (loΔ1, chunk, err) = getEsc(chunk); if (err != nil) {
+                    return ("", false, err);
                 }
                 hiΔ1 = loΔ1;
                 if (chunk[0] == '-') {
-                    {
-                        (hiΔ1, chunk, err) = getEsc(chunk[1..]); if (err != nil) {
-                            return ("", false, err);
-                        }
+                    (hiΔ1, chunk, err) = getEsc(chunk[1..]); if (err != nil) {
+                        return ("", false, err);
                     }
                 }
                 match = match || loΔ1 <= r && r <= hiΔ1;
@@ -269,16 +265,12 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     }
 
     // Check pattern is well-formed.
-    {
-        var (_, errΔ1) = Match(pattern, ""u8); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = Match(pattern, ""u8); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     if (!hasMeta(pattern)) {
-        {
-            (_, err) = os.Lstat(pattern); if (err != nil) {
-                return (default, default);
-            }
+        (_, err) = os.Lstat(pattern); if (err != nil) {
+            return (default, default);
         }
         return (slice<@string>([pattern]), default);
     }

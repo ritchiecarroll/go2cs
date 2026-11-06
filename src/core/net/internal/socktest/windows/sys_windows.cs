@@ -29,13 +29,11 @@ public static (syscallꓸHandle s, error err) WSASocket(this ж<Switch> Ꮡsw, i
             (s, err) = (syscall.InvalidHandle, err); goto ᒐdone;
         }
         (s, so.Err) = windows.WSASocket(family, sotype, proto, protinfo, group, flags);
-        {
-            err = af.apply(so); if (err != nil) {
-                if (so.Err == nil) {
-                    syscall.Closesocket(s);
-                }
-                (s, err) = (syscall.InvalidHandle, err); goto ᒐdone;
+        err = af.apply(so); if (err != nil) {
+            if (so.Err == nil) {
+                syscall.Closesocket(s);
             }
+            (s, err) = (syscall.InvalidHandle, err); goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -73,10 +71,8 @@ public static error /*err*/ Closesocket(this ж<Switch> Ꮡsw, syscallꓸHandle 
             goto ᒐdone;
         }
         so.Err = syscall.Closesocket(s);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -114,10 +110,8 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, syscallꓸHandle s, s
             goto ᒐdone;
         }
         so.Err = syscall.Connect(s, sa);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -154,10 +148,8 @@ public static error /*err*/ ConnectEx(this ж<Switch> Ꮡsw, syscallꓸHandle s,
             goto ᒐdone;
         }
         so.Err = syscall.ConnectEx(s, sa, b, n, nwr, o);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -194,10 +186,8 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, syscallꓸHandle s, ni
             goto ᒐdone;
         }
         so.Err = syscall.Listen(s, backlog);
-        {
-            err = af.apply(so); if (err != nil) {
-                goto ᒐdone;
-            }
+        err = af.apply(so); if (err != nil) {
+            goto ᒐdone;
         }
 
         Ꮡsw.Ꮡsmu.Lock();
@@ -234,10 +224,8 @@ public static error AcceptEx(this ж<Switch> Ꮡsw, syscallꓸHandle ls, syscall
             return err;
         }
         so.Err = syscall.AcceptEx(ls, @as, b, rxdatalen, laddrlen, raddrlen, rcvd, overlapped);
-        {
-            err = af.apply(so); if (err != nil) {
-                return err;
-            }
+        err = af.apply(so); if (err != nil) {
+            return err;
         }
 
         Ꮡsw.Ꮡsmu.Lock();

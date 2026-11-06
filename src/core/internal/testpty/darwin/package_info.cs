@@ -57,7 +57,7 @@ using static go.@internal.testpty_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/testpty/pty.go", "pty.cs", "ABQqgqaCpoCkmrI=")]
-[assembly: GoPositionMap("internal/testpty/pty_darwin.go", "pty_darwin.cs", "ABgasoKClICCgqSAgoKkgoKClA==")]
+[assembly: GoPositionMap("internal/testpty/pty_darwin.go", "pty_darwin.cs", "ABgasoKClIKClIKClIKCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

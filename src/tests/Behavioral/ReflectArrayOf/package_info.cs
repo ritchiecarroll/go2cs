@@ -50,7 +50,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA5IgriygoCCtoLqgoKUpoIAARqCloKCgoKogqiCgpaCloKogqiCgpSCgpaCroKCAAEcgpbMgoKCAAISkLaC", "42-46:1;165-165:1", "", "16=Kind/1/1/1,Len/1/1/1,Elem/1/1/1,Size/1/1/1,Align/1/1/1,Name/1/1/1;56=AssignableTo/1/1/1,Comparable/1/1/1;60=Len/1/2/1,Elem/1/2/1,Elem/2/2/1,Len/2/2/1,Size/1/1/1;71=TypeOf/1/1/1;75=TypeOf/1/1/1;87=TypeOf/1/1/1;97=ArrayOf/2/2/1,TypeOf/1/3/1,SliceOf/1/2/2,TypeOf/2/3/2,PointerTo/1/1/3,SliceOf/2/2/3,TypeOf/3/3/3;105=Interface/2/2/1;115=Kind/1/1/1,Elem/1/1/1,Size/1/1/1,Align/1/1/1,Name/1/1/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA5IgriygoKmguqCgpSmggABGoKWgoKCgqiCqIKCloKWgqiCqIKClIKCloKugoIAARyClsyCgoIAAhKQtoI=", "42-46:1;165-165:1", "", "16=Kind/1/1/1,Len/1/1/1,Elem/1/1/1,Size/1/1/1,Align/1/1/1,Name/1/1/1;54=AssignableTo/1/1/1,Comparable/1/1/1;58=Len/1/2/1,Elem/1/2/1,Elem/2/2/1,Len/2/2/1,Size/1/1/1;69=TypeOf/1/1/1;73=TypeOf/1/1/1;85=TypeOf/1/1/1;95=ArrayOf/2/2/1,TypeOf/1/3/1,SliceOf/1/2/2,TypeOf/2/3/2,PointerTo/1/1/3,SliceOf/2/2/3,TypeOf/3/3/3;103=Interface/2/2/1;113=Kind/1/1/1,Elem/1/1/1,Size/1/1/1,Align/1/1/1,Name/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

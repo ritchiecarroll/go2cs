@@ -22,10 +22,8 @@ partial struct objset /*map[@string, Object]*/; // initialized lazily
 // Otherwise it inserts obj and returns nil.
 internal static Object insert(this ref objset s, Object obj) {
     @string id = obj.Id();
-    {
-        var alt = (s)[id]; if (alt != nil) {
-            return alt;
-        }
+    var alt = (s)[id]; if (alt != nil) {
+        return alt;
     }
     if (s == nil) {
         s = new map<@string, Object>();

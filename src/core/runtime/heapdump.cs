@@ -178,17 +178,15 @@ internal static void dumptype(ж<_type> Ꮡt) {
     dumpint((uint64)(uintptr)Ꮡt);
     dumpint((uint64)t.Size_);
     var rt = toRType(Ꮡt);
-    {
-        var x = Ꮡt.Uncommon(); if (x == nil || rt.nameOff(x.PkgPath).Name() == ""u8) {
-            dumpstr(rt.@string());
-        } else {
-            @string pkgpath = rt.nameOff(x.PkgPath).Name();
-            @string name = rt.name();
-            dumpint((uint64)((uintptr)len(pkgpath) + 1 + (uintptr)len(name)));
-            dwrite(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(pkgpath)), (uintptr)len(pkgpath));
-            dwritebyte((byte)'.');
-            dwrite(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(name)), (uintptr)len(name));
-        }
+    var x = Ꮡt.Uncommon(); if (x == nil || rt.nameOff(x.PkgPath).Name() == ""u8) {
+        dumpstr(rt.@string());
+    } else {
+        @string pkgpath = rt.nameOff(x.PkgPath).Name();
+        @string name = rt.name();
+        dumpint((uint64)((uintptr)len(pkgpath) + 1 + (uintptr)len(name)));
+        dwrite(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(pkgpath)), (uintptr)len(pkgpath));
+        dwritebyte((byte)'.');
+        dwrite(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(name)), (uintptr)len(name));
     }
     dumpbool(!t.IsDirectIface() || t.Pointers());
 }
@@ -771,10 +769,8 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
     var tp = s.typePointersOf(Δp, size);
     for (;;) {
         uintptr addr = default;
-        {
-            (tp, addr) = tp.next(Δp + size); if (addr == 0) {
-                break;
-            }
+        (tp, addr) = tp.next(Δp + size); if (addr == 0) {
+            break;
         }
         var i = (addr - Δp) / (uintptr)goarch.PtrSize;
         tmpbuf[i / 8] |= (byte)((byte)(1 << (int)(i % 8)));

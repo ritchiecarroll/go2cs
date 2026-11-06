@@ -535,10 +535,8 @@ internal static slice<byte> fmtF(slice<byte> dst, bool neg, decimalSlice d, nint
         dst = append(dst, (byte)'.');
         for (nint i = 0; i < prec; i++) {
             var ch = (byte)'0';
-            {
-                nint j = d.dp + i; if (0 <= j && j < d.nd) {
-                    ch = d.d[j];
-                }
+            nint j = d.dp + i; if (0 <= j && j < d.nd) {
+                ch = d.d[j];
             }
             dst = append(dst, ch);
         }

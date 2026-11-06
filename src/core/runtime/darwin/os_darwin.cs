@@ -102,10 +102,8 @@ private static readonly @string semawakeupOnDarwinSignalˢᵇ = "semawakeup on D
 internal static void semawakeup(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
-    {
-        var g = getg(); if (g == (~(~g).m).gsignal) {
-            @throw(semawakeupOnDarwinSignalˢ);
-        }
+    var g = getg(); if (g == (~(~g).m).gsignal) {
+        @throw(semawakeupOnDarwinSignalˢ);
     }
     pthread_mutex_lock(Ꮡmp.of(m.Ꮡmutex));
     mp.count++;

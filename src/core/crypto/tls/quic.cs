@@ -231,10 +231,8 @@ public static partial error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
         return quicError(errors.New(tlsConfigMinVersionMustˢ));
     }
     goǃ((ᴛ0, ᴛ1) => ᴛ0.HandshakeContext(ᴛ1), Ꮡq.Value.conn, ctx);
-    {
-        var (_, ok) = ᐸꟷ(q.conn.quic.blockedc, ꟷ); if (!ok) {
-            return q.conn.handshakeErr;
-        }
+    var (_, ok) = ᐸꟷ(q.conn.quic.blockedc, ꟷ); if (!ok) {
+        return q.conn.handshakeErr;
     }
     return default;
 }
@@ -243,28 +241,24 @@ public static partial error Start(this ж<QUICConn> Ꮡq, context.Context ctx) {
 // It returns an event with a Kind of [QUICNoEvent] when no events are available.
 public static QUICEvent NextEvent(this ref QUICConn q) {
     var qs = q.conn.quic;
-    {
-        nint last = qs.nextEvent - 1; if (last >= 0 && len(qs.events[last].Data) > 0) {
-            // Write over some of the previous event's data,
-            // to catch callers erroneously retaining it.
-            qs.events[last].Data[0] = 0;
-        }
+    nint last = qs.nextEvent - 1; if (last >= 0 && len(qs.events[last].Data) > 0) {
+        // Write over some of the previous event's data,
+        // to catch callers erroneously retaining it.
+        qs.events[last].Data[0] = 0;
     }
     if (qs.nextEvent >= len(qs.events) && qs.waitingForDrain) {
         qs.waitingForDrain = false;
         ᐸꟷ(qs.signalc);
         ᐸꟷ(qs.blockedc);
     }
-    {
-        var err = q.conn.handshakeErr; if (err != nil) {
-            if (qs.errorReturned) {
-                return new QUICEvent(Kind: QUICNoEvent);
-            }
-            qs.errorReturned = true;
-            qs.events = default;
-            qs.nextEvent = 0;
-            return new QUICEvent(Kind: QUICErrorEvent, Err: q.conn.handshakeErr);
+    var err = q.conn.handshakeErr; if (err != nil) {
+        if (qs.errorReturned) {
+            return new QUICEvent(Kind: QUICNoEvent);
         }
+        qs.errorReturned = true;
+        qs.events = default;
+        qs.nextEvent = 0;
+        return new QUICEvent(Kind: QUICErrorEvent, Err: q.conn.handshakeErr);
     }
     if (qs.nextEvent >= len(qs.events)) {
         qs.events = qs.events[..0];
@@ -328,10 +322,8 @@ public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level
             if (len(b) < 4 + n) {
                 return default;
             }
-            {
-                var err = q.conn.handlePostHandshakeMessage(); if (err != nil) {
-                    q.conn.handshakeErr = err;
-                }
+            var err = q.conn.handlePostHandshakeMessage(); if (err != nil) {
+                q.conn.handshakeErr = err;
             }
         }
         if (q.conn.handshakeErr != nil) {
@@ -426,10 +418,8 @@ internal static error quicError(error err) {
     if (err == nil) {
         return default;
     }
-    {
-        var (_, okΔ1) = errors.AsType<AlertError>(err); if (okΔ1) {
-            return err;
-        }
+    var (_, okΔ1) = errors.AsType<AlertError>(err); if (okΔ1) {
+        return err;
     }
     var (a, ok) = errors.AsType<alert>(err);
     if (!ok) {
@@ -444,10 +434,8 @@ internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     while (c.hand.Len() < n) {
-        {
-            var err = Ꮡc.quicWaitForSignal(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡc.quicWaitForSignal(); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -506,10 +494,8 @@ internal static error quicResumeSession(this ж<Conn> Ꮡc, ж<SessionState> ses
     ));
     c.quic.waitingForDrain = true;
     while (c.quic.waitingForDrain) {
-        {
-            var err = Ꮡc.quicWaitForSignal(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡc.quicWaitForSignal(); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -538,10 +524,8 @@ internal static (slice<byte>, error) quicGetTransportParameters(this ж<Conn> �
         ));
     }
     while (c.quic.transportParams == nil) {
-        {
-            var err = Ꮡc.quicWaitForSignal(); if (err != nil) {
-                return (default, err);
-            }
+        var err = Ꮡc.quicWaitForSignal(); if (err != nil) {
+            return (default, err);
         }
     }
     return (c.quic.transportParams, default);

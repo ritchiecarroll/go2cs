@@ -108,15 +108,11 @@ private static readonly @string chmodˢᵇ = "chmod"u8;
 internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var err = Ꮡf.checkValid(chmodˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(chmodˢ); if (err != nil) {
+        return err;
     }
-    {
-        var e = Ꮡf.of(File.Ꮡpfd).Fchmod(syscallMode(mode)); if (e != nil) {
-            return f.wrapErr(chmodˢ, e);
-        }
+    var e = Ꮡf.of(File.Ꮡpfd).Fchmod(syscallMode(mode)); if (e != nil) {
+        return f.wrapErr(chmodˢ, e);
     }
     return default;
 }
@@ -162,15 +158,11 @@ private static readonly @string chownˢᵇ = "chown"u8;
 public static error Chown(this ж<File> Ꮡf, nint uid, nint gid) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var err = Ꮡf.checkValid(chownˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(chownˢ); if (err != nil) {
+        return err;
     }
-    {
-        var e = Ꮡf.of(File.Ꮡpfd).Fchown(uid, gid); if (e != nil) {
-            return f.wrapErr(chownˢ, e);
-        }
+    var e = Ꮡf.of(File.Ꮡpfd).Fchown(uid, gid); if (e != nil) {
+        return f.wrapErr(chownˢ, e);
     }
     return default;
 }
@@ -185,15 +177,11 @@ private static readonly @string truncateˢᵇ = "truncate"u8;
 public static error Truncate(this ж<File> Ꮡf, int64 size) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var err = Ꮡf.checkValid(truncateˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(truncateˢ); if (err != nil) {
+        return err;
     }
-    {
-        var e = Ꮡf.of(File.Ꮡpfd).Ftruncate(size); if (e != nil) {
-            return f.wrapErr(truncateˢ, e);
-        }
+    var e = Ꮡf.of(File.Ꮡpfd).Ftruncate(size); if (e != nil) {
+        return f.wrapErr(truncateˢ, e);
     }
     return default;
 }
@@ -208,15 +196,11 @@ private static readonly @string syncˢᵇ = "sync"u8;
 public static error Sync(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    {
-        var err = Ꮡf.checkValid(syncˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(syncˢ); if (err != nil) {
+        return err;
     }
-    {
-        var e = Ꮡf.of(File.Ꮡpfd).Fsync(); if (e != nil) {
-            return f.wrapErr(syncˢ, e);
-        }
+    var e = Ꮡf.of(File.Ꮡpfd).Fsync(); if (e != nil) {
+        return f.wrapErr(syncˢ, e);
     }
     return default;
 }
@@ -230,10 +214,8 @@ public static error Sync(this ж<File> Ꮡf) {
 // If there is an error, it will be of type [*PathError].
 public static error Chtimes(@string name, time.Time atime, time.Time mtime) {
     var utimes = chtimesUtimes(atime, mtime);
-    {
-        var e = syscall.UtimesNano(fixLongPath(name), utimes[0..]); if (e != nil) {
-            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimes", Path: name, Err: e)));
-        }
+    var e = syscall.UtimesNano(fixLongPath(name), utimes[0..]); if (e != nil) {
+        return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimes", Path: name, Err: e)));
     }
     return default;
 }
@@ -263,17 +245,13 @@ public static error Chdir(this ж<File> Ꮡf) {
             return err;
         }
     }
-    {
-        var e = Ꮡf.of(File.Ꮡpfd).Fchdir(); if (e != nil) {
-            return f.wrapErr(chdirˢ, e);
-        }
+    var e = Ꮡf.of(File.Ꮡpfd).Fchdir(); if (e != nil) {
+        return f.wrapErr(chdirˢ, e);
     }
-    {
-        var log = testlog.Logger(); if (log != nil) {
-            var (wd, err) = Getwd();
-            if (err == nil) {
-                log.Chdir(wd);
-            }
+    var log = testlog.Logger(); if (log != nil) {
+        var (wd, err) = Getwd();
+        if (err == nil) {
+            log.Chdir(wd);
         }
     }
     return default;
@@ -285,10 +263,8 @@ private static readonly @string setDeadlineˢᵇ = "SetDeadline"u8;
 
 // setDeadline sets the read and write deadline.
 internal static error setDeadline(this ж<File> Ꮡf, time.Time t) {
-    {
-        var err = Ꮡf.checkValid(setDeadlineˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(setDeadlineˢ); if (err != nil) {
+        return err;
     }
     return Ꮡf.of(File.Ꮡpfd).SetDeadline(t);
 }
@@ -299,10 +275,8 @@ private static readonly @string setReadDeadlineˢᵇ = "SetReadDeadline"u8;
 
 // setReadDeadline sets the read deadline.
 internal static error setReadDeadline(this ж<File> Ꮡf, time.Time t) {
-    {
-        var err = Ꮡf.checkValid(setReadDeadlineˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(setReadDeadlineˢ); if (err != nil) {
+        return err;
     }
     return Ꮡf.of(File.Ꮡpfd).SetReadDeadline(t);
 }
@@ -313,10 +287,8 @@ private static readonly @string setWriteDeadlineˢᵇ = "SetWriteDeadline"u8;
 
 // setWriteDeadline sets the write deadline.
 internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) {
-    {
-        var err = Ꮡf.checkValid(setWriteDeadlineˢ); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡf.checkValid(setWriteDeadlineˢ); if (err != nil) {
+        return err;
     }
     return Ꮡf.of(File.Ꮡpfd).SetWriteDeadline(t);
 }

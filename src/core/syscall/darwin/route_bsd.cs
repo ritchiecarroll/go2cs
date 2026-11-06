@@ -355,12 +355,10 @@ public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<
             b = b.slice(any.Msglen);
             continue;
         }
-        {
-            var m = any.toRoutingMessage(b); if (m == nil) {
-                nskips++;
-            } else {
-                msgs = append(msgsᴷ, msgs, m);
-            }
+        var m = any.toRoutingMessage(b); if (m == nil) {
+            nskips++;
+        } else {
+            msgs = append(msgsᴷ, msgs, m);
         }
         b = b.slice(any.Msglen);
     }

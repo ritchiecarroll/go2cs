@@ -216,10 +216,8 @@ public static @string Base(@string path) {
         path = path.slice(0, len(path) - 1);
     }
     // Find the last element
-    {
-        nint i = bytealg.LastIndexByteString(path, (byte)'/'); if (i >= 0) {
-            path = path.slice(i + 1);
-        }
+    nint i = bytealg.LastIndexByteString(path, (byte)'/'); if (i >= 0) {
+        path = path.slice(i + 1);
     }
     // If empty now, it had only slashes.
     if (path == ""u8) {

@@ -132,10 +132,8 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
             if (ctx.Err() != nil) {
                 Ꮡfd.Ꮡpfd.SetWriteDeadline(aLongTimeAgo);
             } else {
-                {
-                    var (deadline, ok) = ctx.Deadline(); if (ok && !deadline.IsZero()) {
-                        Ꮡfd.Ꮡpfd.SetWriteDeadline(deadline);
-                    }
+                var (deadline, ok) = ctx.Deadline(); if (ok && !deadline.IsZero()) {
+                    Ꮡfd.Ꮡpfd.SetWriteDeadline(deadline);
                 }
 
                 var done = new channel<EmptyStruct>(0);
@@ -177,10 +175,8 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                 throw panic("unexpected type in connect");
                 break;
             }}
-            {
-                var err = syscall.Bind(fd.pfd.Sysfd, la); if (err != nil) {
-                    return (default, os.NewSyscallError(bindˢ, err));
-                }
+            var err = syscall.Bind(fd.pfd.Sysfd, la); if (err != nil) {
+                return (default, os.NewSyscallError(bindˢ, err));
             }
         }
 
@@ -225,10 +221,8 @@ internal static (syscallꓸSockaddr, error) connect(this ж<netFD> Ꮡfd, contex
                     return (default, mapErr(ctx.Err()));
                 }
                 default: {
-                    {
-                        var (_, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
-                            err = os.NewSyscallError(connectexˢ, err);
-                        }
+                    var (_, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
+                        err = os.NewSyscallError(connectexˢ, err);
                     }
                     return (default, err);
                 }}
@@ -282,11 +276,9 @@ internal static (ж<netFD>, error) accept(this ж<netFD> Ꮡfd) {
         poll.CloseFunc(s);
         return (default, err);
     }
-    {
-        var errΔ1 = netfd.init(); if (errΔ1 != nil) {
-            Ꮡfd.Close();
-            return (default, errΔ1);
-        }
+    var errΔ1 = netfd.init(); if (errΔ1 != nil) {
+        Ꮡfd.Close();
+        return (default, errΔ1);
     }
 
     // Get local and peer addr out of AcceptEx buffer.
@@ -314,10 +306,8 @@ internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     // Disassociate the IOCP from the socket,
     // it is not safe to share a duplicated handle
     // that is associated with IOCP.
-    {
-        var errΔ1 = Ꮡfd.Ꮡpfd.DisassociateIOCP(); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = Ꮡfd.Ꮡpfd.DisassociateIOCP(); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     syscallꓸHandle h = default;
     ref var syserr = ref heap<error>(out var Ꮡsyserr);

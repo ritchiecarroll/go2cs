@@ -263,10 +263,8 @@ public static void TestAEAD(ж<testing.T> t, Func<(cipher.AEAD, error)> mAEAD) {
                             if (isDeterministic(aeadʗ17)) {
                                 var ciphertext = @out.slice(len(prefix));
                                 // Check that the appended ciphertext wasn't affected by the prefix
-                                {
-                                    var expectedCT = sealMsg(tΔ13, aeadʗ17, default, nonce, plaintext, addData); if (!bytes.Equal(ciphertext, expectedCT)) {
-                                        tΔ13.Errorf("Seal behavior affected by pre-existing data in dst; got %s, want %s", truncateHex(ciphertext), truncateHex(expectedCT));
-                                    }
+                                var expectedCT = sealMsg(tΔ13, aeadʗ17, default, nonce, plaintext, addData); if (!bytes.Equal(ciphertext, expectedCT)) {
+                                    tΔ13.Errorf("Seal behavior affected by pre-existing data in dst; got %s, want %s", truncateHex(ciphertext), truncateHex(expectedCT));
                                 }
                             }
                         }

@@ -176,17 +176,15 @@ internal static ж<ΔSignature> /*res*/ instantiateSignature(this ж<Checker> �
         check.later(() => {
             var tparams = Ꮡtyp.Value.TypeParams().list();
             // check type constraints
-            {
-                var (i, err) = Ꮡcheck.verify(pos, tparams, targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
-                    // best position for error reporting
-                    tokenꓸPos posΔ1 = pos;
-                    if (i < len(xlistʗ1)) {
-                        posΔ1 = xlistʗ1[i].Pos();
-                    }
-                    Ꮡcheck.softErrorf((atPos)posΔ1, InvalidTypeArg, "%s", err);
-                } else {
-                    Ꮡcheck.Ꮡmono.recordInstance(Ꮡcheck.Value.pkg, pos, tparams, targsʗ1, xlistʗ1);
+            var (i, err) = Ꮡcheck.verify(pos, tparams, targsʗ1, Ꮡcheck.Value.context()); if (err != nil) {
+                // best position for error reporting
+                tokenꓸPos posΔ1 = pos;
+                if (i < len(xlistʗ1)) {
+                    posΔ1 = xlistʗ1[i].Pos();
                 }
+                Ꮡcheck.softErrorf((atPos)posΔ1, InvalidTypeArg, "%s", err);
+            } else {
+                Ꮡcheck.Ꮡmono.recordInstance(Ꮡcheck.Value.pkg, pos, tparams, targsʗ1, xlistʗ1);
             }
         }).describef((atPos)pos, "verify instantiation");
 
@@ -233,38 +231,34 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
         }
         var T = x.typ;
         x.mode = invalid;
-        {
-            nint n = len(call.Args);
-            switch (n) {
-            case 0: {
-                Ꮡcheck.errorf(inNode(new ast.CallExprжNode(Ꮡcall), call.Rparen), WrongArgCount, "missing argument in conversion to %s", T);
-                break;
-            }
-            case 1: {
-                Ꮡcheck.expr(nil, Ꮡx, call.Args[0]);
-                if (x.mode != invalid) {
-                    if (hasDots(ref (Ꮡcall).DerefOrNull())) {
-                        Ꮡcheck.errorf(new ast_Exprᴠpositioner(call.Args[0]), BadDotDotDotSyntax, "invalid use of ... in conversion to %s", T);
+        nint n = len(call.Args);
+        switch (n) {
+        case 0: {
+            Ꮡcheck.errorf(inNode(new ast.CallExprжNode(Ꮡcall), call.Rparen), WrongArgCount, "missing argument in conversion to %s", T);
+            break;
+        }
+        case 1: {
+            Ꮡcheck.expr(nil, Ꮡx, call.Args[0]);
+            if (x.mode != invalid) {
+                if (hasDots(ref (Ꮡcall).DerefOrNull())) {
+                    Ꮡcheck.errorf(new ast_Exprᴠpositioner(call.Args[0]), BadDotDotDotSyntax, "invalid use of ... in conversion to %s", T);
+                    break;
+                }
+                var (t, _) = T.Underlying()._<ж<Interface>>(ᐧ); if (t != nil && !isTypeParam(T)) {
+                    if (!t.IsMethodSet()) {
+                        Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), MisplacedConstraintIface, "cannot use interface %s in conversion (contains specific type constraints or is comparable)", T);
                         break;
                     }
-                    {
-                        var (t, _) = T.Underlying()._<ж<Interface>>(ᐧ); if (t != nil && !isTypeParam(T)) {
-                            if (!t.IsMethodSet()) {
-                                Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), MisplacedConstraintIface, "cannot use interface %s in conversion (contains specific type constraints or is comparable)", T);
-                                break;
-                            }
-                        }
-                    }
-                    Ꮡcheck.conversion(Ꮡx, T);
                 }
-                break;
+                Ꮡcheck.conversion(Ꮡx, T);
             }
-            default: {
-                Ꮡcheck.use(call.Args.ꓸꓸꓸ);
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(call.Args[n - 1]), WrongArgCount, "too many arguments in conversion to %s", T);
-                break;
-            }}
+            break;
         }
+        default: {
+            Ꮡcheck.use(call.Args.ꓸꓸꓸ);
+            Ꮡcheck.errorf(new ast_Exprᴠpositioner(call.Args[n - 1]), WrongArgCount, "too many arguments in conversion to %s", T);
+            break;
+        }}
         x.expr = new ast.CallExprжExpr(Ꮡcall);
         return Δconversion;
     }
@@ -289,10 +283,8 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
     // If the operand type is a type parameter, all types in its type set
     // must have a common underlying type, which must be a signature.
     var (u, err) = commonUnder(x.typ, (ΔType t, ΔType uΔ1) => {
-        {
-            var (_, ok) = uΔ1._<ж<ΔSignature>>(ᐧ); if (uΔ1 != nil && !ok) {
-                return typeErrorf("%s is not a function", t);
-            }
+        var (_, ok) = uΔ1._<ж<ΔSignature>>(ᐧ); if (uΔ1 != nil && !ok) {
+            return typeErrorf("%s is not a function", t);
         }
         return default;
     });
@@ -393,17 +385,15 @@ internal static exprKind callExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, �
 internal static slice<ж<operand>> /*xlist*/ exprList(this ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
     slice<ж<operand>> xlist = default;
 
-    {
-        nint n = len(elist); if (n == 1) {
-            (xlist, _) = Ꮡcheck.multiExpr(elist[0], false);
-        } else if (n > 1) {
-            // multiple (possibly invalid) values
-            xlist = new slice<ж<operand>>(n);
-            foreach (var (i, e) in elist) {
-                ref var x = ref heap(new operand(), out var Ꮡx);
-                Ꮡcheck.expr(nil, Ꮡx, e);
-                xlist[i] = Ꮡx;
-            }
+    nint n = len(elist); if (n == 1) {
+        (xlist, _) = Ꮡcheck.multiExpr(elist[0], false);
+    } else if (n > 1) {
+        // multiple (possibly invalid) values
+        xlist = new slice<ж<operand>>(n);
+        foreach (var (i, e) in elist) {
+            ref var x = ref heap(new operand(), out var Ꮡx);
+            Ꮡcheck.expr(nil, Ꮡx, e);
+            xlist[i] = Ꮡx;
         }
     }
     return xlist;
@@ -428,11 +418,9 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
                 // type arguments must only exist for partially instantiated functions
                 foreach (var (i, x) in resList) {
                     if (i < len(targsList)) {
-                        {
-                            nint nΔ1 = len(targsList[i]); if (nΔ1 > 0) {
-                                // x must be a partially instantiated function
-                                assert(nΔ1 < x.typ._<ж<ΔSignature>>().TypeParams().Len());
-                            }
+                        nint nΔ1 = len(targsList[i]); if (nΔ1 > 0) {
+                            // x must be a partially instantiated function
+                            assert(nΔ1 < x.typ._<ж<ΔSignature>>().TypeParams().Len());
                         }
                     }
                 }
@@ -451,37 +439,33 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
             // single value (possibly a partially instantiated function), or a multi-valued expression
             var e = elist[0];
             ref var x = ref heap(new operand(), out var Ꮡx);
-            {
-                var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
-                    // x is a generic function.
-                    var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
-                    if (targs != nil) {
-                        // x was not instantiated: collect the (partial) type arguments.
-                        targsList = slice<slice<ΔType>>([targs]);
-                        // Update x.expr so that we can record the partially instantiated function.
-                        x.expr = ix.orig;
-                    } else {
-                        // x was instantiated: we must record it here because we didn't
-                        // use the usual expression evaluators.
-                        check.record(Ꮡx);
-                    }
-                    resList = slice<ж<operand>>([Ꮡx]);
+            var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
+                // x is a generic function.
+                var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
+                if (targs != nil) {
+                    // x was not instantiated: collect the (partial) type arguments.
+                    targsList = slice<slice<ΔType>>([targs]);
+                    // Update x.expr so that we can record the partially instantiated function.
+                    x.expr = ix.orig;
                 } else {
-                    // x is not a function instantiation (it may still be a generic function).
-                    Ꮡcheck.rawExpr(nil, Ꮡx, e, default, true);
-                    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
-                    {
-                        var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
-                            // x is a function call returning multiple values; it cannot be generic.
-                            resList = new slice<ж<operand>>(t.Len());
-                            foreach (var (i, v) in t.vars) {
-                                resList[i] = Ꮡ(new operand(mode: value, expr: e, typ: v.typ));
-                            }
-                        } else {
-                            // x is exactly one value (possibly invalid or uninstantiated generic function).
-                            resList = slice<ж<operand>>([Ꮡx]);
-                        }
+                    // x was instantiated: we must record it here because we didn't
+                    // use the usual expression evaluators.
+                    check.record(Ꮡx);
+                }
+                resList = slice<ж<operand>>([Ꮡx]);
+            } else {
+                // x is not a function instantiation (it may still be a generic function).
+                Ꮡcheck.rawExpr(nil, Ꮡx, e, default, true);
+                Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(Δbuiltinᴛ)) | (nuint)(1 << (int)(typexpr))));
+                var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
+                    // x is a function call returning multiple values; it cannot be generic.
+                    resList = new slice<ж<operand>>(t.Len());
+                    foreach (var (i, v) in t.vars) {
+                        resList[i] = Ꮡ(new operand(mode: value, expr: e, typ: v.typ));
                     }
+                } else {
+                    // x is exactly one value (possibly invalid or uninstantiated generic function).
+                    resList = slice<ж<operand>>([Ꮡx]);
                 }
             }
         } else if (n > 1) {
@@ -490,24 +474,22 @@ internal static (slice<ж<operand>> resList, slice<slice<ΔType>> targsList) gen
             targsList = new slice<slice<ΔType>>(n);
             foreach (var (i, e) in elist) {
                 ref var x = ref heap(new operand(), out var Ꮡx);
-                {
-                    var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
-                        // x is a generic function.
-                        var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
-                        if (targs != nil) {
-                            // x was not instantiated: collect the (partial) type arguments.
-                            targsList[i] = targs;
-                            // Update x.expr so that we can record the partially instantiated function.
-                            x.expr = ix.orig;
-                        } else {
-                            // x was instantiated: we must record it here because we didn't
-                            // use the usual expression evaluators.
-                            check.record(Ꮡx);
-                        }
+                var ix = unpackIndexedExpr(e); if (ix != nil && Ꮡcheck.indexExpr(Ꮡx, ix)) {
+                    // x is a generic function.
+                    var targs = Ꮡcheck.funcInst(nil, x.Pos(), Ꮡx, ix, infer);
+                    if (targs != nil) {
+                        // x was not instantiated: collect the (partial) type arguments.
+                        targsList[i] = targs;
+                        // Update x.expr so that we can record the partially instantiated function.
+                        x.expr = ix.orig;
                     } else {
-                        // x is exactly one value (possibly invalid or uninstantiated generic function).
-                        Ꮡcheck.genericExpr(Ꮡx, e);
+                        // x was instantiated: we must record it here because we didn't
+                        // use the usual expression evaluators.
+                        check.record(Ꮡx);
                     }
+                } else {
+                    // x is exactly one value (possibly invalid or uninstantiated generic function).
+                    Ꮡcheck.genericExpr(Ꮡx, e);
                 }
                 resList[i] = Ꮡx;
             }
@@ -650,34 +632,32 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     if (enableReverseTypeInference) {
         foreach (var (i, arg) in args) {
             // generic arguments cannot have a defined (*Named) type - no need for underlying type below
-            {
-                var (asig, _) = arg.typ._<ж<ΔSignature>>(ᐧ); if (asig != nil && asig.TypeParams().Len() > 0) {
-                    // The argument type is a generic function signature. This type is
-                    // pointer-identical with (it's copied from) the type of the generic
-                    // function argument and thus the function object.
-                    // Before we change the type (type parameter renaming, below), make
-                    // a clone of it as otherwise we implicitly modify the object's type
-                    // (go.dev/issues/63260).
-                    asig = clone<ΔSignature>(asig);
-                    // Rename type parameters for cases like f(g, g); this gives each
-                    // generic function argument a unique type identity (go.dev/issues/59956).
-                    // TODO(gri) Consider only doing this if a function argument appears
-                    //           multiple times, which is rare (possible optimization).
-                    var (atparams, tmp) = Ꮡcheck.renameTParams(call.Pos(), asig.TypeParams().list(), new ΔSignatureжΔType(asig));
-                    asig = tmp._<ж<ΔSignature>>();
-                    asig.tparams = Ꮡ(new TypeParamList(atparams)); // renameTParams doesn't touch associated type parameters
-                    arg.typ = new ΔSignatureжΔType(asig);          // new type identity for the function argument
-                    tparams = appendꓸꓸꓸ(tparams, atparams);
-                    // add partial list of type arguments, if any
-                    if (i < len(atargs)) {
-                        targs = appendꓸꓸꓸ(targs, atargs[i]);
-                    }
-                    // make sure targs and tparams have the same length
-                    while (len(targs) < len(tparams)) {
-                        targs = append(targs, (ΔType)(default));
-                    }
-                    genericArgs = append(genericArgsᴷ, genericArgs, i);
+            var (asig, _) = arg.typ._<ж<ΔSignature>>(ᐧ); if (asig != nil && asig.TypeParams().Len() > 0) {
+                // The argument type is a generic function signature. This type is
+                // pointer-identical with (it's copied from) the type of the generic
+                // function argument and thus the function object.
+                // Before we change the type (type parameter renaming, below), make
+                // a clone of it as otherwise we implicitly modify the object's type
+                // (go.dev/issues/63260).
+                asig = clone<ΔSignature>(asig);
+                // Rename type parameters for cases like f(g, g); this gives each
+                // generic function argument a unique type identity (go.dev/issues/59956).
+                // TODO(gri) Consider only doing this if a function argument appears
+                //           multiple times, which is rare (possible optimization).
+                var (atparams, tmp) = Ꮡcheck.renameTParams(call.Pos(), asig.TypeParams().list(), new ΔSignatureжΔType(asig));
+                asig = tmp._<ж<ΔSignature>>();
+                asig.tparams = Ꮡ(new TypeParamList(atparams)); // renameTParams doesn't touch associated type parameters
+                arg.typ = new ΔSignatureжΔType(asig);          // new type identity for the function argument
+                tparams = appendꓸꓸꓸ(tparams, atparams);
+                // add partial list of type arguments, if any
+                if (i < len(atargs)) {
+                    targs = appendꓸꓸꓸ(targs, atargs[i]);
                 }
+                // make sure targs and tparams have the same length
+                while (len(targs) < len(tparams)) {
+                    targs = append(targs, (ΔType)(default));
+                }
+                genericArgs = append(genericArgsᴷ, genericArgs, i);
             }
         }
     }
@@ -783,112 +763,108 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
     // so we don't need a "package" mode for operands: package names
     // can only appear in qualified identifiers which are mapped to
     // selector expressions.
-    {
-        var (ident, ok) = e.X._<ж<ast.Ident>>(ᐧ); if (ok) {
-            var objΔ1 = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(ident.Name);
-            {
-                var (pname, _) = objΔ1._<ж<PkgName>>(ᐧ); if (pname != nil) {
-                    assert(pname.pkg == check.pkg);
-                    check.recordUse(ident, new PkgNameжObject(pname));
-                    check.usedPkgNames[pname] = true;
-                    var pkg = pname.imported;
+    if (e.X._<ж<ast.Ident>>(out var ident)) {
+        var objΔ1 = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(ident.Name);
+        var (pname, _) = objΔ1._<ж<PkgName>>(ᐧ); if (pname != nil) {
+            assert(pname.pkg == check.pkg);
+            check.recordUse(ident, new PkgNameжObject(pname));
+            check.usedPkgNames[pname] = true;
+            var pkg = pname.imported;
 
-                    Object exp = default;
-                    var funcMode = value;
-                    if (pkg.cgo) {
-                        // cgo special cases C.malloc: it's
-                        // rewritten to _CMalloc and does not
-                        // support two-result calls.
-                        if (sel == "malloc"u8) {
-                            sel = cMallocˢ;
+            Object exp = default;
+            var funcMode = value;
+            if (pkg.cgo) {
+                // cgo special cases C.malloc: it's
+                // rewritten to _CMalloc and does not
+                // support two-result calls.
+                if (sel == "malloc"u8) {
+                    sel = cMallocˢ;
+                } else {
+                    funcMode = cgofunc;
+                }
+                foreach (var (_, prefix) in cgoPrefixes.ΔRangeSnapshot()) {
+                    // cgo objects are part of the current package (in file
+                    // _cgo_gotypes.go). Use regular lookup.
+                    exp = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(prefix + sel);
+                    if (exp != nil) {
+                        break;
+                    }
+                }
+                if (exp == nil) {
+                    if (isValidName(sel)) {
+                        Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe)); // cast to ast.Expr to silence vet
+                    }
+                    goto ΔError;
+                }
+                Ꮡcheck.objDecl(exp);
+            } else {
+                exp = pkg.scope.Lookup(sel);
+                if (exp == nil) {
+                    if (!pkg.fake && isValidName(sel)) {
+                        // Try to give a better error message when selector matches an object name ignoring case.
+                        var exps = pkg.scope.lookupIgnoringCase(sel, true);
+                        if (len(exps) >= 1) {
+                            // report just the first one
+                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe), exps[0].Name());
                         } else {
-                            funcMode = cgofunc;
-                        }
-                        foreach (var (_, prefix) in cgoPrefixes.ΔRangeSnapshot()) {
-                            // cgo objects are part of the current package (in file
-                            // _cgo_gotypes.go). Use regular lookup.
-                            exp = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(prefix + sel);
-                            if (exp != nil) {
-                                break;
-                            }
-                        }
-                        if (exp == nil) {
-                            if (isValidName(sel)) {
-                                Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe)); // cast to ast.Expr to silence vet
-                            }
-                            goto ΔError;
-                        }
-                        Ꮡcheck.objDecl(exp);
-                    } else {
-                        exp = pkg.scope.Lookup(sel);
-                        if (exp == nil) {
-                            if (!pkg.fake && isValidName(sel)) {
-                                // Try to give a better error message when selector matches an object name ignoring case.
-                                var exps = pkg.scope.lookupIgnoringCase(sel, true);
-                                if (len(exps) >= 1) {
-                                    // report just the first one
-                                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s (but have %s)", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe), exps[0].Name());
-                                } else {
-                                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe));
-                                }
-                            }
-                            goto ΔError;
-                        }
-                        if (!exp.Exported()) {
-                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UnexportedName, "name %s not exported by package %s", sel, pkg.name);
-                            // ok to continue
+                            Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UndeclaredImportedName, "undefined: %s", (ast.Expr)new ast.SelectorExprжExpr(Ꮡe));
                         }
                     }
-                    check.recordUse(e.Sel, exp);
-
-                    // Simplified version of the code for *ast.Idents:
-                    // - imported objects are always fully initialized
-                    switch (exp.type()) {
-                    case ж<Const> expΔ1: {
-                        assert(expΔ1.Val() != nil);
-                        x.mode = constant_;
-                        x.typ = expΔ1.typ;
-                        x.val = expΔ1.val;
-                        break;
-                    }
-                    case ж<TypeName> expΔ1: {
-                        x.mode = typexpr;
-                        x.typ = expΔ1.typ;
-                        break;
-                    }
-                    case ж<Var> expΔ1: {
-                        x.mode = variable;
-                        x.typ = expΔ1.typ;
-                        if (pkg.cgo && strings.HasPrefix(expΔ1.name, cvarˢ)) {
-                            x.typ = x.typ._<ж<Pointer>>().@base;
-                        }
-                        break;
-                    }
-                    case ж<Func> expΔ1: {
-                        x.mode = funcMode;
-                        x.typ = expΔ1.typ;
-                        if (pkg.cgo && strings.HasPrefix(expΔ1.name, cmacroˢ)) {
-                            x.mode = value;
-                            x.typ = x.typ._<ж<ΔSignature>>().results.vars[0].typ;
-                        }
-                        break;
-                    }
-                    case ж<Builtin> expΔ1: {
-                        x.mode = Δbuiltinᴛ;
-                        x.typ = expΔ1.typ;
-                        x.id = expΔ1.id;
-                        break;
-                    }
-                    default: {
-                        var expΔ1 = exp;
-                        Ꮡcheck.dump(vUnexpectedObjectVˢ, e.Sel.Pos(), expΔ1);
-                        throw panic("unreachable");
-                        break;
-                    }}
-                    x.expr = new ast.SelectorExprжExpr(Ꮡe);
-                    return;
+                    goto ΔError;
+                }
+                if (!exp.Exported()) {
+                    Ꮡcheck.errorf(new ast_Identжpositioner(e.Sel), UnexportedName, "name %s not exported by package %s", sel, pkg.name);
+                    // ok to continue
                 }
             }
+            check.recordUse(e.Sel, exp);
+
+            // Simplified version of the code for *ast.Idents:
+            // - imported objects are always fully initialized
+            switch (exp.type()) {
+            case ж<Const> expΔ1: {
+                assert(expΔ1.Val() != nil);
+                x.mode = constant_;
+                x.typ = expΔ1.typ;
+                x.val = expΔ1.val;
+                break;
+            }
+            case ж<TypeName> expΔ1: {
+                x.mode = typexpr;
+                x.typ = expΔ1.typ;
+                break;
+            }
+            case ж<Var> expΔ1: {
+                x.mode = variable;
+                x.typ = expΔ1.typ;
+                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cvarˢ)) {
+                    x.typ = x.typ._<ж<Pointer>>().@base;
+                }
+                break;
+            }
+            case ж<Func> expΔ1: {
+                x.mode = funcMode;
+                x.typ = expΔ1.typ;
+                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cmacroˢ)) {
+                    x.mode = value;
+                    x.typ = x.typ._<ж<ΔSignature>>().results.vars[0].typ;
+                }
+                break;
+            }
+            case ж<Builtin> expΔ1: {
+                x.mode = Δbuiltinᴛ;
+                x.typ = expΔ1.typ;
+                x.id = expΔ1.id;
+                break;
+            }
+            default: {
+                var expΔ1 = exp;
+                Ꮡcheck.dump(vUnexpectedObjectVˢ, e.Sel.Pos(), expΔ1);
+                throw panic("unreachable");
+                break;
+            }}
+            x.expr = new ast.SelectorExprжExpr(Ꮡe);
+            return;
         }
     }
 
@@ -1048,10 +1024,8 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                     // includes the methods of typ.
                     // Variables are addressable, so we can always take their
                     // address.
-                    {
-                        var (_, ok) = typ._<ж<Pointer>>(ᐧ); if (!ok && !IsInterface(typ)) {
-                            typ = new PointerжΔType(Ꮡ(new Pointer(@base: typ)));
-                        }
+                    var (_, ok) = typ._<ж<Pointer>>(ᐧ); if (!ok && !IsInterface(typ)) {
+                        typ = new PointerжΔType(Ꮡ(new Pointer(@base: typ)));
                     }
                 }
                 // If we created a synthetic pointer type above, we will throw
@@ -1063,17 +1037,15 @@ internal static void selector(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<as
                 // of checker once we rely on MethodSet lookup instead of individual
                 // lookup.
                 var mset = NewMethodSet(typ);
-                {
-                    var m = mset.Lookup(check.pkg, sel); if (m == nil || !AreEqual(m.obj, objΔ2)) {
-                        Ꮡcheck.dump(vSVSˢ, e.Pos(), typ, objΔ2.name, m.OrTypedNil());
-                        Ꮡcheck.dump("%s\n", mset.OrTypedNil());
-                        // Caution: MethodSets are supposed to be used externally
-                        // only (after all interface types were completed). It's
-                        // now possible that we get here incorrectly. Not urgent
-                        // to fix since we only run this code in debug mode.
-                        // TODO(gri) fix this eventually.
-                        throw panic("method sets and lookup don't agree");
-                    }
+                var m = mset.Lookup(check.pkg, sel); if (m == nil || !AreEqual(m.obj, objΔ2)) {
+                    Ꮡcheck.dump(vSVSˢ, e.Pos(), typ, objΔ2.name, m.OrTypedNil());
+                    Ꮡcheck.dump("%s\n", mset.OrTypedNil());
+                    // Caution: MethodSets are supposed to be used externally
+                    // only (after all interface types were completed). It's
+                    // now possible that we get here incorrectly. Not urgent
+                    // to fix since we only run this code in debug mode.
+                    // TODO(gri) fix this eventually.
+                    throw panic("method sets and lookup don't agree");
                 }
             }
 
@@ -1156,17 +1128,13 @@ internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
         ж<Var> v = default;
         bool v_used = default;
         if (lhs) {
-            {
-                var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(n.Name); if (obj != nil) {
-                    // It's ok to mark non-local variables, but ignore variables
-                    // from other packages to avoid potential race conditions with
-                    // dot-imported variables.
-                    {
-                        var (w, _) = obj._<ж<Var>>(ᐧ); if (w != nil && w.pkg == check.pkg) {
-                            v = w;
-                            v_used = check.usedVars[v];
-                        }
-                    }
+            var obj = Ꮡcheck.of(Checker.Ꮡenvironment).lookup(n.Name); if (obj != nil) {
+                // It's ok to mark non-local variables, but ignore variables
+                // from other packages to avoid potential race conditions with
+                // dot-imported variables.
+                var (w, _) = obj._<ж<Var>>(ᐧ); if (w != nil && w.pkg == check.pkg) {
+                    v = w;
+                    v_used = check.usedVars[v];
                 }
             }
         }

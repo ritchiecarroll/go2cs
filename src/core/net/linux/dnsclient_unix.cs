@@ -63,36 +63,26 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
 
     id = (uint16)randInt();
     ref var b = ref heap<dnsmessage.Builder>(dnsmessage.NewBuilder(new slice<byte>(2, 514), new dnsmessage.Header(ID: id, RecursionDesired: true, AuthenticData: ad)), out var Ꮡb);
-    {
-        var errΔ1 = b.StartQuestions(); if (errΔ1 != nil) {
-            return (0, default, default, errΔ1);
-        }
+    var errΔ1 = b.StartQuestions(); if (errΔ1 != nil) {
+        return (0, default, default, errΔ1);
     }
-    {
-        var errΔ2 = Ꮡb.Question(q); if (errΔ2 != nil) {
-            return (0, default, default, errΔ2);
-        }
+    var errΔ2 = Ꮡb.Question(q); if (errΔ2 != nil) {
+        return (0, default, default, errΔ2);
     }
 
     if (netedns0.Value() == "0"u8) {
         netedns0.IncNonDefault();
     } else {
         // Accept packets up to maxDNSPacketSize.  RFC 6891.
-        {
-            var errΔ3 = b.StartAdditionals(); if (errΔ3 != nil) {
-                return (0, default, default, errΔ3);
-            }
+        var errΔ3 = b.StartAdditionals(); if (errΔ3 != nil) {
+            return (0, default, default, errΔ3);
         }
         dnsmessage.ResourceHeader rh = new();
-        {
-            var errΔ4 = rh.SetEDNS0(maxDNSPacketSize, dnsmessage.RCodeSuccess, false); if (errΔ4 != nil) {
-                return (0, default, default, errΔ4);
-            }
+        var errΔ4 = rh.SetEDNS0(maxDNSPacketSize, dnsmessage.RCodeSuccess, false); if (errΔ4 != nil) {
+            return (0, default, default, errΔ4);
         }
-        {
-            var errΔ5 = Ꮡb.OPTResource(rh, new dnsmessageꓸOPTResource()); if (errΔ5 != nil) {
-                return (0, default, default, errΔ5);
-            }
+        var errΔ5 = Ꮡb.OPTResource(rh, new dnsmessageꓸOPTResource()); if (errΔ5 != nil) {
+            return (0, default, default, errΔ5);
         }
     }
 
@@ -157,17 +147,13 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip
 internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip(Conn c, uint16 id, dnsmessageꓸQuestion query, slice<byte> b) {
     query = query.ΔClone();
 
-    {
-        var (_, errΔ1) = c.Write(b); if (errΔ1 != nil) {
-            return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ1);
-        }
+    var (_, errΔ1) = c.Write(b); if (errΔ1 != nil) {
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ1);
     }
 
     b = new slice<byte>(1280); // 1280 is a reasonable initial size for IP over Ethernet, see RFC 4035
-    {
-        var (_, errΔ2) = Δio.ReadFull(new ConnᴠReader(c), b[..2]); if (errΔ2 != nil) {
-            return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ2);
-        }
+    var (_, errΔ2) = Δio.ReadFull(new ConnᴠReader(c), b[..2]); if (errΔ2 != nil) {
+        return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ2);
     }
     nint l = (nint)b[0] << 8 | (nint)b[1];
     if (l > len(b)) {
@@ -218,28 +204,22 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<R
             if (errΔ1 != nil) {
                 return (new dnsmessage.Parser(), new dnsmessage.Header(), errΔ1);
             }
-            {
-                var (d, ok) = ctxΔ1.Deadline(); if (ok && !d.IsZero()) {
-                    c.SetDeadline(d);
-                }
+            var (d, ok) = ctxΔ1.Deadline(); if (ok && !d.IsZero()) {
+                c.SetDeadline(d);
             }
             dnsmessage.Parser p = default;
             dnsmessage.Header h = default;
-            {
-                var (_, ok) = c._<PacketConn>(ᐧ); if (ok) {
-                    (p, h, errΔ1) = dnsPacketRoundTrip(c, id, q, udpReq);
-                } else {
-                    (p, h, errΔ1) = dnsStreamRoundTrip(c, id, q, tcpReq);
-                }
+            if (c._<PacketConn>(out _)) {
+                (p, h, errΔ1) = dnsPacketRoundTrip(c, id, q, udpReq);
+            } else {
+                (p, h, errΔ1) = dnsStreamRoundTrip(c, id, q, tcpReq);
             }
             c.Close();
             if (errΔ1 != nil) {
                 return (new dnsmessage.Parser(), new dnsmessage.Header(), mapErr(errΔ1));
             }
-            {
-                var errΔ2 = p.SkipQuestion(); if (!AreEqual(errΔ2, dnsmessage.ErrSectionDone)) {
-                    return (new dnsmessage.Parser(), new dnsmessage.Header(), errInvalidDNSResponse);
-                }
+            var errΔ2 = p.SkipQuestion(); if (!AreEqual(errΔ2, dnsmessage.ErrSectionDone)) {
+                return (new dnsmessage.Parser(), new dnsmessage.Header(), errInvalidDNSResponse);
             }
             // RFC 5966 indicates that when a client receives a UDP response with
             // the TC flag set, it should take the TC flag as an indication that it
@@ -309,10 +289,8 @@ internal static error skipToAnswer(ж<dnsmessage.Parser> Ꮡp, dnsmessage.Type q
         if (h.Type == qtype) {
             return default;
         }
-        {
-            var errΔ1 = p.SkipAnswer(); if (errΔ1 != nil) {
-                return errCannotUnmarshalDNSMessage;
-            }
+        var errΔ1 = p.SkipAnswer(); if (errΔ1 != nil) {
+            return errCannotUnmarshalDNSMessage;
         }
     }
 }
@@ -333,10 +311,8 @@ internal static (dnsmessage.RCode, bool) extractExtendedRCode(dnsmessage.Parser 
         if (ahdr.Type == dnsmessage.TypeOPT) {
             return (ahdr.ExtendedRCode(hdr.RCode), hasAdd);
         }
-        {
-            var errΔ1 = p.SkipAdditional(); if (errΔ1 != nil) {
-                return (hdr.RCode, hasAdd);
-            }
+        var errΔ1 = p.SkipAdditional(); if (errΔ1 != nil) {
+            return (hdr.RCode, hasAdd);
         }
     }
 }
@@ -370,37 +346,31 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
                 var dnsErr = newDNSError(errΔ1, name, server);
                 // Set IsTemporary for socket-level errors. Note that this flag
                 // may also be used to indicate a SERVFAIL response.
-                {
-                    var (_, ok) = errΔ1._<ж<OpError>>(ᐧ); if (ok) {
-                        dnsErr.IsTemporary = true;
-                    }
+                var (_, ok) = errΔ1._<ж<OpError>>(ᐧ); if (ok) {
+                    dnsErr.IsTemporary = true;
                 }
                 lastErr = new DNSErrorжerror(dnsErr);
                 continue;
             }
 
-            {
-                var errΔ2 = checkHeader(Ꮡp, h); if (errΔ2 != nil) {
-                    if (AreEqual(errΔ2, errNoSuchHost)) {
-                        // The name does not exist, so trying
-                        // another server won't help.
-                        return (p, server, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server)));
-                    }
-                    lastErr = new DNSErrorжerror(newDNSError(errΔ2, name, server));
-                    continue;
+            var errΔ2 = checkHeader(Ꮡp, h); if (errΔ2 != nil) {
+                if (AreEqual(errΔ2, errNoSuchHost)) {
+                    // The name does not exist, so trying
+                    // another server won't help.
+                    return (p, server, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server)));
                 }
+                lastErr = new DNSErrorжerror(newDNSError(errΔ2, name, server));
+                continue;
             }
 
-            {
-                var errΔ3 = skipToAnswer(Ꮡp, qtype); if (errΔ3 != nil) {
-                    if (AreEqual(errΔ3, errNoSuchHost)) {
-                        // The name does not exist, so trying
-                        // another server won't help.
-                        return (p, server, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server)));
-                    }
-                    lastErr = new DNSErrorжerror(newDNSError(errΔ3, name, server));
-                    continue;
+            var errΔ3 = skipToAnswer(Ꮡp, qtype); if (errΔ3 != nil) {
+                if (AreEqual(errΔ3, errNoSuchHost)) {
+                    // The name does not exist, so trying
+                    // another server won't help.
+                    return (p, server, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, server)));
                 }
+                lastErr = new DNSErrorжerror(newDNSError(errΔ3, name, server));
+                continue;
             }
 
             return (p, server, default);
@@ -484,10 +454,8 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) {
         }
         default: {
             time.Time mtime = default;
-            {
-                var (fi, err) = os.Stat(name); if (err == nil) {
-                    mtime = fi.ModTime();
-                }
+            var (fi, err) = os.Stat(name); if (err == nil) {
+                mtime = fi.ModTime();
             }
             if (mtime.Equal(Ꮡconf.ᏑdnsConfig.Load().mtime)) {
                 return;
@@ -541,24 +509,20 @@ internal static (dnsmessage.Parser, @string, error) lookup(this ж<Resolver> Ꮡ
         if (err == nil) {
             break;
         }
-        {
-            var (nerr, ok) = err._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()) {
-                // If we hit a temporary error with StrictErrors enabled,
-                // stop immediately instead of trying more names.
-                break;
-            }
+        var (nerr, ok) = err._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()) {
+            // If we hit a temporary error with StrictErrors enabled,
+            // stop immediately instead of trying more names.
+            break;
         }
     }
     if (err == nil) {
         return (p, server, default);
     }
-    {
-        var (errΔ1, ok) = err._<ж<DNSError>>(ᐧ); if (ok) {
-            // Show original name passed to lookup, not suffixed one.
-            // In general we might have tried many suffixes; showing
-            // just one is misleading. See also golang.org/issue/6324.
-            errΔ1.Name = name;
-        }
+    if (err._<ж<DNSError>>(out var errΔ1)) {
+        // Show original name passed to lookup, not suffixed one.
+        // In general we might have tried many suffixes; showing
+        // just one is misleading. See also golang.org/issue/6324.
+        errΔ1.Name = name;
     }
     return (new dnsmessage.Parser(), "", err);
 }
@@ -641,10 +605,8 @@ internal static map<ΔhostLookupOrder, @string> lookupOrderName = new map<Δhost
 };
 
 internal static @string String(this ΔhostLookupOrder o) {
-    {
-        var (s, ok) = lookupOrderName[o, ꟷ]; if (ok) {
-            return s;
-        }
+    var (s, ok) = lookupOrderName[o, ꟷ]; if (ok) {
+        return s;
     }
     return "hostLookupOrder="u8 + strconv.Itoa((nint)o) + "??"u8;
 }
@@ -686,11 +648,9 @@ internal static (slice<IPAddr> addrs, @string canonical) goLookupIPFiles(@string
     (var addr, canonical) = lookupStaticHost(name);
     foreach (var (_, haddr) in addr) {
         var (haddrΔ1, zone) = splitHostZone(haddr);
-        {
-            var ip = ParseIP(haddrΔ1); if (ip != nil) {
-                var addrΔ1 = new IPAddr(IP: ip, Zone: zone);
-                addrs = append(addrs, addrΔ1);
-            }
+        var ip = ParseIP(haddrΔ1); if (ip != nil) {
+            var addrΔ1 = new IPAddr(IP: ip, Zone: zone);
+            addrs = append(addrs, addrΔ1);
         }
     }
     sortByRFC6724(addrs);
@@ -800,15 +760,13 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         foreach (var (_, qtype) in qtypes) {
             var result = responseFn(fqdn, qtype);
             if (result.error != nil) {
-                {
-                    var (nerr, ok) = result.error._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()) {
-                        // This error will abort the nameList loop.
-                        hitStrictError = true;
-                        lastErr = result.error;
-                    } else if (lastErr == nil || fqdn == name + "."u8) {
-                        // Prefer error for original name.
-                        lastErr = result.error;
-                    }
+                var (nerr, ok) = result.error._<ΔError>(ᐧ); if (ok && nerr.Temporary() && Ꮡr.strictErrors()) {
+                    // This error will abort the nameList loop.
+                    hitStrictError = true;
+                    lastErr = result.error;
+                } else if (lastErr == nil || fqdn == name + "."u8) {
+                    // Prefer error for original name.
+                    lastErr = result.error;
                 }
                 continue;
             }
@@ -890,15 +848,13 @@ loop:
                     break;
                 }
                 default: {
-                    {
-                        var errΔ10 = result.p.SkipAnswer(); if (errΔ10 != nil) {
-                            lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
-                                Err: errCannotUnmarshalDNSMessage.Error(),
-                                Name: name,
-                                Server: result.server
-                            )));
-                            goto break_loop;
-                        }
+                    var errΔ10 = result.p.SkipAnswer(); if (errΔ10 != nil) {
+                        lastErr = new DNSErrorжerror(Ꮡ(new DNSError(
+                            Err: errCannotUnmarshalDNSMessage.Error(),
+                            Name: name,
+                            Server: result.server
+                        )));
+                        goto break_loop;
                     }
                     continue;
                     break;
@@ -918,13 +874,11 @@ break_loop:;
             break;
         }
     }
-    {
-        var (lastErrΔ1, ok) = lastErr._<ж<DNSError>>(ᐧ); if (ok) {
-            // Show original name passed to lookup, not suffixed one.
-            // In general we might have tried many suffixes; showing
-            // just one is misleading. See also golang.org/issue/6324.
-            lastErrΔ1.Name = name;
-        }
+    if (lastErr._<ж<DNSError>>(out var lastErrΔ1)) {
+        // Show original name passed to lookup, not suffixed one.
+        // In general we might have tried many suffixes; showing
+        // just one is misleading. See also golang.org/issue/6324.
+        lastErrΔ1.Name = name;
     }
     sortByRFC6724(addrs);
     if (len(addrs) == 0 && !(network == "CNAME"u8 && cname.Length > 0)) {
@@ -979,13 +933,11 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, err) = Ꮡr.lookup(ctx, arpa, dnsmessage.TypePTR, conf);
     if (err != nil) {
-        {
-            var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && dnsErr.IsNotFound) {
-                if (order == hostLookupDNSFiles) {
-                    var names = lookupStaticAddr(addr);
-                    if (len(names) > 0) {
-                        return (names, default);
-                    }
+        var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && dnsErr.IsNotFound) {
+            if (order == hostLookupDNSFiles) {
+                var names = lookupStaticAddr(addr);
+                if (len(names) > 0) {
+                    return (names, default);
                 }
             }
         }

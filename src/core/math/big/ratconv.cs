@@ -39,10 +39,8 @@ public static error Scan(this ж<ΔRat> Ꮡz, fmt.ScanState s, rune ch) {
     if (!strings.ContainsRune(efgEFGvˢ, ch)) {
         return errors.New(ratScanInvalidVerbˢ);
     }
-    {
-        var (_, ok) = Ꮡz.SetString((@string)tok); if (!ok) {
-            return errors.New(ratScanInvalidSyntaxˢ);
-        }
+    var (_, ok) = Ꮡz.SetString((@string)tok); if (!ok) {
+        return errors.New(ratScanInvalidSyntaxˢ);
     }
     return default;
 }
@@ -76,31 +74,23 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         // len(s) > 0
 
         // parse fraction a/b, if any
-        {
-            nint sep = strings.Index(s, "/"); if (sep >= 0) {
-                {
-                    var (_, ok) = Ꮡz.Ꮡa.SetString(s.slice(0, sep), 0); if (!ok) {
-                        return (default, false);
-                    }
-                }
-                var rΔ1 = strings.NewReader(s.slice(sep + 1));
-                error errΔ1 = default;
-                {
-                    (z.b.abs, _, _, errΔ1) = z.b.abs.scan(new strings_ReaderжByteScanner(rΔ1), 0, false); if (errΔ1 != nil) {
-                        return (default, false);
-                    }
-                }
-                // entire string must have been consumed
-                {
-                    (_, errΔ1) = rΔ1.ReadByte(); if (!AreEqual(errΔ1, io.EOF)) {
-                        return (default, false);
-                    }
-                }
-                if (len(z.b.abs) == 0) {
-                    return (default, false);
-                }
-                return (Ꮡz.norm(), true);
+        nint sep = strings.Index(s, "/"); if (sep >= 0) {
+            var (_, ok) = Ꮡz.Ꮡa.SetString(s.slice(0, sep), 0); if (!ok) {
+                return (default, false);
             }
+            var rΔ1 = strings.NewReader(s.slice(sep + 1));
+            error errΔ1 = default;
+            (z.b.abs, _, _, errΔ1) = z.b.abs.scan(new strings_ReaderжByteScanner(rΔ1), 0, false); if (errΔ1 != nil) {
+                return (default, false);
+            }
+            // entire string must have been consumed
+            (_, errΔ1) = rΔ1.ReadByte(); if (!AreEqual(errΔ1, io.EOF)) {
+                return (default, false);
+            }
+            if (len(z.b.abs) == 0) {
+                return (default, false);
+            }
+            return (Ꮡz.norm(), true);
         }
 
         // parse floating-point number
@@ -129,10 +119,8 @@ public static (ж<ΔRat>, bool) SetString(this ж<ΔRat> Ꮡz, @string s) {
         }
 
         // there should be no unread characters left
-        {
-            (_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
-                return (default, false);
-            }
+        (_, err) = r.ReadByte(); if (!AreEqual(err, io.EOF)) {
+            return (default, false);
         }
 
         // special-case 0 (see also issue #16176)
@@ -501,10 +489,8 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         Δnat t = default;                                 // temporaries
         Δnat r = default;
         for (;;) {
-            {
-                (_, r) = t.div(stk, r, q, f); if (len(r) != 0) {
-                    break; // f doesn't divide q evenly
-                }
+            (_, r) = t.div(stk, r, q, f); if (len(r) != 0) {
+                break; // f doesn't divide q evenly
             }
             tab = append(tabᴷ, tab, f);
             f = ((Δnat)default).sqr(stk, f); // nat(nil) to ensure a new f for each table entry
@@ -519,20 +505,16 @@ public static (nint n, bool exact) FloatPrec(this ж<ΔRat> Ꮡx) {
         // The same reasoning applies to the subsequent factors.
         nuint p5 = default;
         for (nint i = len(tab) - 1; i >= 0; i--) {
-            {
-                (t, r) = t.div(stk, r, q, tab[i]); if (len(r) == 0) {
-                    p5 += fp * (((nuint)1).Lsh((int64)(i))); // tab[i] == 5^(fp·2^i)
-                    q = q.set(t);
-                }
+            (t, r) = t.div(stk, r, q, tab[i]); if (len(r) == 0) {
+                p5 += fp * (((nuint)1).Lsh((int64)(i))); // tab[i] == 5^(fp·2^i)
+                q = q.set(t);
             }
         }
 
         // If fp != 1, we may still have multiples of 5 left.
         for (;;) {
-            {
-                (t, r) = t.div(stk, r, q, natFive); if (len(r) != 0) {
-                    break;
-                }
+            (t, r) = t.div(stk, r, q, natFive); if (len(r) != 0) {
+                break;
             }
             p5++;
             q = q.set(t);

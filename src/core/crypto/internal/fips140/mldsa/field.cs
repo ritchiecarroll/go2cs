@@ -823,13 +823,11 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
     slice<byte> head = default;
     slice<byte> tail = default;
 
-    {
-        nint total = len(@in) + n; if (cap(@in) >= total) {
-            head = @in.slice(0, total);
-        } else {
-            head = new slice<byte>(total);
-            copy(head, @in);
-        }
+    nint total = len(@in) + n; if (cap(@in) >= total) {
+        head = @in.slice(0, total);
+    } else {
+        head = new slice<byte>(total);
+        copy(head, @in);
     }
     tail = head.slice(len(@in));
     return (head, tail);

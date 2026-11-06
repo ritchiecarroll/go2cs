@@ -442,19 +442,15 @@ internal static void decUint8Slice(ж<decInstr> i, ж<decoderState> Ꮡstate, re
             }
             value.SetLen(ln);
             var sub = value.Slice(iΔ1, ln);
-            {
-                var (_, err) = state.b.Read(sub.Bytes()); if (err != nil) {
-                    errorf("error decoding []byte at %d: %s", iΔ1, err);
-                }
+            var (_, err) = state.b.Read(sub.Bytes()); if (err != nil) {
+                errorf("error decoding []byte at %d: %s", iΔ1, err);
             }
             iΔ1 = ln;
         }
     } else {
         value.SetLen(n);
-        {
-            var (_, err) = state.b.Read(value.Bytes()); if (err != nil) {
-                errorf("error decoding []byte: %s", err);
-            }
+        var (_, err) = state.b.Read(value.Bytes()); if (err != nil) {
+            errorf("error decoding []byte: %s", err);
         }
     }
 }
@@ -658,10 +654,8 @@ internal static void decodeArrayHelper(this ref Decoder dec, ж<decoderState> �
 internal static void decodeArray(this ref Decoder dec, ж<decoderState> Ꮡstate, reflectꓸValue value, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length, error ovfl, Func<ж<decoderState>, reflectꓸValue, nint, error, bool> helper) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    {
-        var n = state.decodeUint(); if (n != (uint64)length) {
-            errorf("length mismatch in decodeArray");
-        }
+    var n = state.decodeUint(); if (n != (uint64)length) {
+        errorf("length mismatch in decodeArray");
     }
     dec.decodeArrayHelper(Ꮡstate, value, elemOp, length, ovfl, helper);
 }
@@ -724,10 +718,8 @@ internal static void ignoreArrayHelper(this ref Decoder dec, ж<decoderState> �
 internal static void ignoreArray(this ref Decoder dec, ж<decoderState> Ꮡstate, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue> elemOp, nint length) {
     ref var state = ref Ꮡstate.DerefOrNull();
 
-    {
-        var n = state.decodeUint(); if (n != (uint64)length) {
-            errorf("length mismatch in ignoreArray");
-        }
+    var n = state.decodeUint(); if (n != (uint64)length) {
+        errorf("length mismatch in ignoreArray");
     }
     dec.ignoreArrayHelper(Ꮡstate, elemOp, length);
 }
@@ -963,10 +955,8 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
 
     // If this type is already in progress, it's a recursive type (e.g. map[string]*T).
     // Return the pointer to the op we're already building.
-    {
-        var opPtr = inProgress[rt]; if (opPtr != nil) {
-            return opPtr;
-        }
+    var opPtr = inProgress[rt]; if (opPtr != nil) {
+        return opPtr;
     }
     var typ = ut.@base;
     ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>(out var Ꮡop);
@@ -1017,12 +1007,10 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                     break;
                 }
                 typeId elemId = default;
-                {
-                    var tt = builtinIdToType(wireId); if (tt != nil) {
-                        elemId = tt._<ΔgobType, ж<sliceType>>().Elem;
-                    } else {
-                        elemId = dec.wireType[wireId].SliceT.Elem;
-                    }
+                var tt = builtinIdToType(wireId); if (tt != nil) {
+                    elemId = tt._<ΔgobType, ж<sliceType>>().Elem;
+                } else {
+                    elemId = dec.wireType[wireId].SliceT.Elem;
                 }
                 var elemOp = Ꮡdec.decOpFor(elemId, t.Elem(), name, inProgress);
                 var ovfl = overflow(name);
@@ -1086,10 +1074,8 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
         }
         // If this type is already in progress, it's a recursive type (e.g. map[string]*T).
         // Return the pointer to the op we're already building.
-        {
-            var opPtr = inProgress[wireId]; if (opPtr != nil) {
-                return opPtr;
-            }
+        var opPtr = inProgress[wireId]; if (opPtr != nil) {
+            return opPtr;
         }
         ref var op = ref heap<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>(out var Ꮡop);
         (op, var ok) = decIgnoreOpMap[wireId, ꟷ];
@@ -1200,10 +1186,8 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> gobD
 // GobEncoder/Decoder pairs.
 // Structs are considered ok; fields will be checked later.
 internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typeId fw, map<reflectꓸType, typeId> inProgress) {
-    {
-        var (rhs, okΔ1) = inProgress[fr, ꟷ]; if (okΔ1) {
-            return rhs == fw;
-        }
+    var (rhs, okΔ1) = inProgress[fr, ꟷ]; if (okΔ1) {
+        return rhs == fw;
     }
     inProgress[fr] = fw;
     var ut = userType(fr);
@@ -1220,69 +1204,65 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
     if (ut.externalDec != 0) { // This test trumps all others.
         return true;
     }
-    {
-        var t = ut.@base;
-        switch (t.Kind()) {
-        default: {
-            // chan, etc: cannot handle.
+    var t = ut.@base;
+    switch (t.Kind()) {
+    default: {
+        // chan, etc: cannot handle.
+        return false;
+    }
+    case var ᴛ when ᴛ == reflect.ΔBool: {
+        return fw == tBool;
+    }
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        return fw == tInt;
+    }
+    case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
+        return fw == tUint;
+    }
+    case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
+        return fw == tFloat;
+    }
+    case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
+        return fw == tComplex;
+    }
+    case var ᴛ when ᴛ == reflect.ΔString: {
+        return fw == tString;
+    }
+    case var ᴛ when ᴛ == reflect.ΔInterface: {
+        return fw == tInterface;
+    }
+    case var ᴛ when ᴛ == reflect.Array: {
+        if (!ok || wire.ArrayT == nil) {
             return false;
         }
-        case var ᴛ when ᴛ == reflect.ΔBool: {
-            return fw == tBool;
-        }
-        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
-            return fw == tInt;
-        }
-        case var ᴛ when ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr: {
-            return fw == tUint;
-        }
-        case var ᴛ when ᴛ == reflect.Float32 || ᴛ == reflect.Float64: {
-            return fw == tFloat;
-        }
-        case var ᴛ when ᴛ == reflect.Complex64 || ᴛ == reflect.Complex128: {
-            return fw == tComplex;
-        }
-        case var ᴛ when ᴛ == reflect.ΔString: {
-            return fw == tString;
-        }
-        case var ᴛ when ᴛ == reflect.ΔInterface: {
-            return fw == tInterface;
-        }
-        case var ᴛ when ᴛ == reflect.Array: {
-            if (!ok || wire.ArrayT == nil) {
-                return false;
-            }
-            var Δarray = wire.ArrayT;
-            return t.Len() == Δarray.Len && dec.compatibleType(t.Elem(), Δarray.Elem, inProgress);
-        }
-        case var ᴛ when ᴛ == reflect.Map: {
-            if (!ok || wire.MapT == nil) {
-                return false;
-            }
-            var MapType = wire.MapT;
-            return dec.compatibleType(t.Key(), MapType.Key, inProgress) && dec.compatibleType(t.Elem(), MapType.Elem, inProgress);
-        }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
-            // Is it an array of bytes?
-            if (t.Elem().Kind() == reflect.Uint8) {
-                return fw == tBytes;
-            }
-            // Extract and compare element types.
-            ж<sliceType> sw = default;
-            {
-                var tt = builtinIdToType(fw); if (tt != nil) {
-                    (sw, _) = tt._<ж<sliceType>>(ᐧ);
-                } else if (wire != nil) {
-                    sw = wire.SliceT;
-                }
-            }
-            var elem = userType(t.Elem()).@base;
-            return sw != nil && dec.compatibleType(elem, sw.Elem, inProgress);
-        }
-        case var ᴛ when ᴛ == reflect.Struct: {
-            return true;
-        }}
+        var Δarray = wire.ArrayT;
+        return t.Len() == Δarray.Len && dec.compatibleType(t.Elem(), Δarray.Elem, inProgress);
     }
+    case var ᴛ when ᴛ == reflect.Map: {
+        if (!ok || wire.MapT == nil) {
+            return false;
+        }
+        var MapType = wire.MapT;
+        return dec.compatibleType(t.Key(), MapType.Key, inProgress) && dec.compatibleType(t.Elem(), MapType.Elem, inProgress);
+    }
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        // Is it an array of bytes?
+        if (t.Elem().Kind() == reflect.Uint8) {
+            return fw == tBytes;
+        }
+        // Extract and compare element types.
+        ж<sliceType> sw = default;
+        var tt = builtinIdToType(fw); if (tt != nil) {
+            (sw, _) = tt._<ж<sliceType>>(ᐧ);
+        } else if (wire != nil) {
+            sw = wire.SliceT;
+        }
+        var elem = userType(t.Elem()).@base;
+        return sw != nil && dec.compatibleType(elem, sw.Elem, inProgress);
+    }
+    case var ᴛ when ᴛ == reflect.Struct: {
+        return true;
+    }}
 }
 
 // typeString returns a human-readable description of the type identified by remoteId.
@@ -1293,11 +1273,9 @@ internal static @string typeString(this ж<Decoder> Ꮡdec, typeId remoteId) {
 
         ᏑtypeLock.Lock();
         defer(ᏑtypeLock.Unlock, ref ᒐ);
-        {
-            var t = idToType(remoteId); if (t != nil) {
-                // globally known type.
-                return t.@string();
-            }
+        var t = idToType(remoteId); if (t != nil) {
+            // globally known type.
+            return t.@string();
         }
         return dec.wireType[remoteId].@string();
     }
@@ -1363,16 +1341,14 @@ internal static (ж<decEngine> engine, error err) compileDec(this ж<Decoder> �
         ж<structType> wireStruct = default;
         // Builtin types can come from global pool; the rest must be defined by the decoder.
         // Also we know we're decoding a struct now, so the client must have sent one.
-        {
-            var t = builtinIdToType(remoteId); if (t != nil) {
-                (wireStruct, _) = t._<ж<structType>>(ᐧ);
-            } else {
-                var wire = dec.wireType[remoteId];
-                if (wire == nil) {
-                    error_(errBadType);
-                }
-                wireStruct = wire.StructT;
+        var t = builtinIdToType(remoteId); if (t != nil) {
+            (wireStruct, _) = t._<ж<structType>>(ᐧ);
+        } else {
+            var wire = dec.wireType[remoteId];
+            if (wire == nil) {
+                error_(errBadType);
             }
+            wireStruct = wire.StructT;
         }
         if (wireStruct == nil) {
             errorf("type mismatch in decoder: want struct type %s; got non-struct", rt);
@@ -1421,15 +1397,13 @@ internal static (ж<ж<decEngine>> enginePtr, error err) getDecEnginePtr(this ж
         decoderMap = new map<typeId, ж<ж<decEngine>>>();
         dec.decoderCache[rt] = decoderMap;
     }
-    {
-        (enginePtr, ok) = decoderMap[remoteId, ꟷ]; if (!ok) {
-            // To handle recursive types, mark this engine as underway before compiling.
-            enginePtr = @new<ж<decEngine>>();
-            decoderMap[remoteId] = enginePtr;
-            (enginePtr.ValueSlot, err) = Ꮡdec.compileDec(remoteId, Ꮡut);
-            if (err != nil) {
-                delete(decoderMap, remoteId);
-            }
+    (enginePtr, ok) = decoderMap[remoteId, ꟷ]; if (!ok) {
+        // To handle recursive types, mark this engine as underway before compiling.
+        enginePtr = @new<ж<decEngine>>();
+        decoderMap[remoteId] = enginePtr;
+        (enginePtr.ValueSlot, err) = Ꮡdec.compileDec(remoteId, Ꮡut);
+        if (err != nil) {
+            delete(decoderMap, remoteId);
         }
     }
     return (enginePtr, err);
@@ -1448,20 +1422,18 @@ internal static (ж<ж<decEngine>> enginePtr, error err) getIgnoreEnginePtr(this
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     bool ok = default;
-    {
-        (enginePtr, ok) = dec.ignorerCache[wireId, ꟷ]; if (!ok) {
-            // To handle recursive types, mark this engine as underway before compiling.
-            enginePtr = @new<ж<decEngine>>();
-            dec.ignorerCache[wireId] = enginePtr;
-            var wire = dec.wireType[wireId];
-            if (wire != nil && wire.StructT != nil) {
-                (enginePtr.ValueSlot, err) = Ꮡdec.compileDec(wireId, userType(emptyStructType));
-            } else {
-                enginePtr.ValueSlot = Ꮡdec.compileIgnoreSingle(wireId);
-            }
-            if (err != nil) {
-                delete(dec.ignorerCache, wireId);
-            }
+    (enginePtr, ok) = dec.ignorerCache[wireId, ꟷ]; if (!ok) {
+        // To handle recursive types, mark this engine as underway before compiling.
+        enginePtr = @new<ж<decEngine>>();
+        dec.ignorerCache[wireId] = enginePtr;
+        var wire = dec.wireType[wireId];
+        if (wire != nil && wire.StructT != nil) {
+            (enginePtr.ValueSlot, err) = Ꮡdec.compileDec(wireId, userType(emptyStructType));
+        } else {
+            enginePtr.ValueSlot = Ꮡdec.compileIgnoreSingle(wireId);
+        }
+        if (err != nil) {
+            delete(dec.ignorerCache, wireId);
         }
     }
     return (enginePtr, err);
@@ -1489,17 +1461,15 @@ internal static void decodeValue(this ж<Decoder> Ꮡdec, typeId wireId, reflect
         }
         value = decAlloc(value);
         var engine = enginePtr.ValueSlot;
-        {
-            var st = @base; if (st.Kind() == reflect.Struct && ut.externalDec == 0) {
-                var wt = dec.wireType[wireId];
-                if (engine.numInstr == 0 && st.NumField() > 0 && wt != nil && len(wt.StructT.Field) > 0) {
-                    @string name = @base.Name();
-                    errorf("type mismatch: no fields matched compiling decoder for %s", name);
-                }
-                Ꮡdec.decodeStruct(engine, value);
-            } else {
-                Ꮡdec.decodeSingle(engine, value);
+        var st = @base; if (st.Kind() == reflect.Struct && ut.externalDec == 0) {
+            var wt = dec.wireType[wireId];
+            if (engine.numInstr == 0 && st.NumField() > 0 && wt != nil && len(wt.StructT.Field) > 0) {
+                @string name = @base.Name();
+                errorf("type mismatch: no fields matched compiling decoder for %s", name);
             }
+            Ꮡdec.decodeStruct(engine, value);
+        } else {
+            Ꮡdec.decodeSingle(engine, value);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

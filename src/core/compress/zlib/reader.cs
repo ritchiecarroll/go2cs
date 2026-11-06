@@ -102,14 +102,12 @@ internal static (nint, error) Read(this ref reader z, slice<byte> p) {
     }
 
     // Finished file; check checksum.
-    {
-        var (_, err) = io.ReadFull(new flate_ReaderᴠReader(z.r), z.scratch[0..4]); if (err != nil) {
-            if (AreEqual(err, io.EOF)) {
-                err = io.ErrUnexpectedEOF;
-            }
-            z.err = err;
-            return (n, z.err);
+    var (_, err) = io.ReadFull(new flate_ReaderᴠReader(z.r), z.scratch[0..4]); if (err != nil) {
+        if (AreEqual(err, io.EOF)) {
+            err = io.ErrUnexpectedEOF;
         }
+        z.err = err;
+        return (n, z.err);
     }
     // ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
     var checksum = binary.BigEndian.Uint32(z.scratch[..4]);
@@ -133,12 +131,10 @@ internal static error Close(this ref reader z) {
 
 internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     z = new reader(decompressor: z.decompressor);
-    {
-        var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
-            z.r = fr;
-        } else {
-            z.r = new bufio_ReaderжReader(bufio.NewReader(r));
-        }
+    var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
+        z.r = fr;
+    } else {
+        z.r = new bufio_ReaderжReader(bufio.NewReader(r));
     }
 
     // Read the header (RFC 1950 section 2.2.).

@@ -28,11 +28,9 @@ internal static void bytepadWrite(ж<SHAKE> c, slice<byte> data, nint rate) {
     var rateEnc = leftEncode((uint64)rate);
     c.Write(rateEnc);
     c.Write(data);
-    {
-        nint padlen = rate - rem((len(rateEnc) + len(data)), rate); if (padlen < rate) {
-            const nint maxRate = /* rateK256 */ 168;
-            c.Write(new slice<byte>(padlen, maxRate)); // explicit cap to allow stack allocation
-        }
+    nint padlen = rate - rem((len(rateEnc) + len(data)), rate); if (padlen < rate) {
+        const nint maxRate = /* rateK256 */ 168;
+        c.Write(new slice<byte>(padlen, maxRate)); // explicit cap to allow stack allocation
     }
 }
 
@@ -125,10 +123,8 @@ public static error UnmarshalBinary(this ref SHAKE s, slice<byte> b) {
     if (len(b) < marshaledSize) {
         return errors.New(sha3InvalidHashStateˢ);
     }
-    {
-        var err = s.d.UnmarshalBinary(b[..(int)(marshaledSize)]); if (err != nil) {
-            return err;
-        }
+    var err = s.d.UnmarshalBinary(b[..(int)(marshaledSize)]); if (err != nil) {
+        return err;
     }
     s.initBlock = bytes.Clone(b[(int)(marshaledSize)..]);
     return default;

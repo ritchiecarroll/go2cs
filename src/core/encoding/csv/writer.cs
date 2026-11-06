@@ -56,28 +56,22 @@ public static error Write(this ref Writer w, slice<@string> record) {
         var field = vᴛ1;
 
         if (n > 0) {
-            {
-                var (_, errΔ1) = w.w.WriteRune(w.Comma); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var (_, errΔ1) = w.w.WriteRune(w.Comma); if (errΔ1 != nil) {
+                return errΔ1;
             }
         }
 
         // If we don't have to have a quoted field then just
         // write out the field and continue to the next field.
         if (!w.fieldNeedsQuotes(field)) {
-            {
-                var (_, errΔ2) = w.w.WriteString(field); if (errΔ2 != nil) {
-                    return errΔ2;
-                }
+            var (_, errΔ2) = w.w.WriteString(field); if (errΔ2 != nil) {
+                return errΔ2;
             }
             continue;
         }
 
-        {
-            var errΔ3 = w.w.WriteByte((byte)'"'); if (errΔ3 != nil) {
-                return errΔ3;
-            }
+        var errΔ3 = w.w.WriteByte((byte)'"'); if (errΔ3 != nil) {
+            return errΔ3;
         }
         while (len(field) > 0) {
             // Search for special characters.
@@ -87,10 +81,8 @@ public static error Write(this ref Writer w, slice<@string> record) {
             }
 
             // Copy verbatim everything before the special character.
-            {
-                var (_, errΔ4) = w.w.WriteString(field.slice(0, i)); if (errΔ4 != nil) {
-                    return errΔ4;
-                }
+            var (_, errΔ4) = w.w.WriteString(field.slice(0, i)); if (errΔ4 != nil) {
+                return errΔ4;
             }
             field = field.slice(i);
 
@@ -122,10 +114,8 @@ public static error Write(this ref Writer w, slice<@string> record) {
                 }
             }
         }
-        {
-            var errΔ6 = w.w.WriteByte((byte)'"'); if (errΔ6 != nil) {
-                return errΔ6;
-            }
+        var errΔ6 = w.w.WriteByte((byte)'"'); if (errΔ6 != nil) {
+            return errΔ6;
         }
     }
     error err = default;

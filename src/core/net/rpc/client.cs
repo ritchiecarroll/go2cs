@@ -245,15 +245,11 @@ partial struct gobClientCodec {
 internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> r, any body) {
     error err = default;
 
-    {
-        err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
-            return err;
-        }
+    err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
+        return err;
     }
-    {
-        err = c.enc.Encode(body); if (err != nil) {
-            return err;
-        }
+    err = c.enc.Encode(body); if (err != nil) {
+        return err;
     }
     return c.encBuf.Flush();
 }

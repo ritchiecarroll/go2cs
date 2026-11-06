@@ -1,0 +1,40 @@
+// mulprobe -- item 7 Step B's multiply scan (COORD 2026-11-05): which C# spellings of a 64x64->128 unsigned multiply
+// does ILC compile to the x64 one-operand MUL at the DEFAULT (baseline) instruction set? Each spelling is its own
+// non-inlined method so the image's disassembly shows its body alone. Not timed.
+using System;
+using System.Runtime.CompilerServices;
+
+static class P
+{
+    // A: today's golib/corpus spelling (bits_impl.cs Mul / Mul64).
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static ulong A_BigMulOut(ulong x, ulong y, out ulong lo) => Math.BigMul(x, y, out lo);
+
+    // B: the UInt128-returning overload.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static UInt128 B_BigMul128(ulong x, ulong y) => Math.BigMul(x, y);
+
+    // C: widen one operand, UInt128 operator *.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static UInt128 C_Widen(ulong x, ulong y) => (UInt128)x * y;
+
+    // D: C, split back to hi/lo the way a bits.Mul body would.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static ulong D_WidenSplit(ulong x, ulong y, out ulong lo)
+    {
+        UInt128 p = (UInt128)x * y;
+        lo = (ulong)p;
+        return (ulong)(p >> 64);
+    }
+
+    static int Main(string[] args)
+    {
+        ulong x = (ulong)args.Length + 0xFFFF_FFFF_FFFF_FFF1UL, y = 0xFEDC_BA98_7654_3210UL;
+        ulong ha = A_BigMulOut(x, y, out ulong la);
+        UInt128 b = B_BigMul128(x, y), c = C_Widen(x, y);
+        ulong hd = D_WidenSplit(x, y, out ulong ld);
+        bool same = b == c && (ulong)(b >> 64) == ha && (ulong)b == la && hd == ha && ld == la;
+        Console.WriteLine($"{ha:x16} {la:x16} same={same}");
+        return same ? 0 : 1;
+    }
+}

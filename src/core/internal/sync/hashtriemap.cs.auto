@@ -139,10 +139,8 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
                     // We found an existing entry, which is as far as we can go.
                     // If it stays this way, we'll have to replace it with an
                     // indirect node.
-                    {
-                        var (v, ok) = n.entry().lookup(key); if (ok) {
-                            (result, loaded) = (v, true); goto ᒐdone;
-                        }
+                    var (v, ok) = n.entry().lookup(key); if (ok) {
+                        (result, loaded) = (v, true); goto ᒐdone;
                     }
                     haveInsertPoint = true;
                     break;
@@ -174,11 +172,9 @@ public static (V result, bool loaded) LoadOrStore<K, V>(this ж<HashTrieMap<K, V
         ж<Δentry<K, V>> oldEntry = default;
         if (n != nil) {
             oldEntry = n.entry();
-            {
-                var (v, ok) = oldEntry.lookup(key); if (ok) {
-                    // Easy case: by loading again, it turns out exactly what we wanted is here!
-                    (result, loaded) = (v, true); goto ᒐdone;
-                }
+            var (v, ok) = oldEntry.lookup(key); if (ok) {
+                // Easy case: by loading again, it turns out exactly what we wanted is here!
+                (result, loaded) = (v, true); goto ᒐdone;
             }
         }
         var newEntry = newEntryNode(key, value);
@@ -518,13 +514,11 @@ internal static (ж<Δindirect<K, V>> i, nuint hashShift, ж<atomic.Pointer<node
             }
             if ((~n).isEntry) {
                 // We found an entry. Check if it matches.
-                {
-                    var (_, ok) = n.entry().lookupWithValue(key, value, valEqual); if (!ok) {
-                        // No match, comparison failed.
-                        i = default;
-                        n = default;
-                        return (i, hashShift, slot, n);
-                    }
+                var (_, ok) = n.entry().lookupWithValue(key, value, valEqual); if (!ok) {
+                    // No match, comparison failed.
+                    i = default;
+                    n = default;
+                    return (i, hashShift, slot, n);
                 }
                 // We've got a match. Prepare to perform an operation on the key.
                 found = true;
@@ -693,10 +687,8 @@ internal static (ж<Δentry<K, V>>, V, bool) swap<K, V>(this ж<Δentry<K, V>> �
     if (AreEqual(head.key, key)) {
         // Return the new head of the list.
         var eΔ1 = newEntryNode(key, @new);
-        {
-            var chain = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load(); if (chain != nil) {
-                eΔ1.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(chain);
-            }
+        var chain = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load(); if (chain != nil) {
+            eΔ1.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(chain);
         }
         return (eΔ1, head.value, true);
     }
@@ -728,10 +720,8 @@ internal static (ж<Δentry<K, V>>, bool) compareAndSwap<K, V>(this ж<Δentry<K
         // Return the new head of the list.
         var eΔ1 = newEntryNode(key, @new);
         System.GC.KeepAlive(Ꮡold);
-        {
-            var chain = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load(); if (chain != nil) {
-                eΔ1.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(chain);
-            }
+        var chain = Ꮡhead.of(sync_package.Δentry<K, V>.Ꮡoverflow).Load(); if (chain != nil) {
+            eΔ1.of(sync_package.Δentry<K, V>.Ꮡoverflow).Store(chain);
         }
         return (eΔ1, true);
     }

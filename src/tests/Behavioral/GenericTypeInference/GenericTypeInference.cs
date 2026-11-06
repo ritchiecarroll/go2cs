@@ -103,10 +103,8 @@ public static bool EqualMaps<M, K, V>(M m1, M m2)
         return false;
     }
     foreach (var (k, v1) in m1) {
-        {
-            var (v2, ok) = m2[k, ꟷ]; if (!ok || !AreEqual(v1, v2)) {
-                return false;
-            }
+        var (v2, ok) = m2[k, ꟷ]; if (!ok || !AreEqual(v1, v2)) {
+            return false;
         }
     }
     return true;

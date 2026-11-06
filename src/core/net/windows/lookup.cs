@@ -92,10 +92,8 @@ internal static (nint port, error error) lookupPortMap(@string network, @string 
     var exprᴛ1 = network;
     switch (ᐧ) {
     case {} when exprᴛ1 == "ip"u8: { // no hints
-        {
-            var (p, err) = lookupPortMapWithNetwork(tcpˢ, "ip", service); if (err == nil) {
-                return (p, default);
-            }
+        var (p, err) = lookupPortMapWithNetwork(tcpˢ, "ip", service); if (err == nil) {
+            return (p, default);
         }
         return lookupPortMapWithNetwork(udpˢ, "ip", service);
     }
@@ -109,18 +107,14 @@ internal static (nint port, error error) lookupPortMap(@string network, @string 
 }
 
 internal static (nint port, error error) lookupPortMapWithNetwork(@string network, @string errNetwork, @string service) {
-    {
-        var (m, ok) = services[network, ꟷ]; if (ok) {
-            array<byte> lowerService = new(25); /* maxPortBufSize */
-            nint n = copy(lowerService[..], service);
-            lowerASCIIBytes(lowerService.slice(0, n));
-            {
-                var (portΔ1, okΔ1) = m[tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
-                    return (portΔ1, default);
-                }
-            }
-            return (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), errNetwork + "/"u8 + service, ""u8)));
+    var (m, ok) = services[network, ꟷ]; if (ok) {
+        array<byte> lowerService = new(25); /* maxPortBufSize */
+        nint n = copy(lowerService[..], service);
+        lowerASCIIBytes(lowerService.slice(0, n));
+        var (portΔ1, okΔ1) = m[tmpstring(lowerService.slice(0, n)), ꟷ]; if (okΔ1 && n == len(service)) {
+            return (portΔ1, default);
         }
+        return (0, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errUnknownPort), errNetwork + "/"u8 + service, ""u8)));
     }
     return (0, new DNSErrorжerror(Ꮡ(new DNSError(Err: "unknown network", Name: errNetwork + "/"u8 + service))));
 }
@@ -215,10 +209,8 @@ public static (slice<@string> addrs, error err) LookupHost(this ж<Resolver> Ꮡ
     if (host == ""u8) {
         return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
     }
-    {
-        var (_, errΔ1) = netip.ParseAddr(host); if (errΔ1 == nil) {
-            return (slice<@string>([host]), default);
-        }
+    var (_, errΔ1) = netip.ParseAddr(host); if (errΔ1 == nil) {
+        return (slice<@string>([host]), default);
     }
     return Ꮡr.lookupHost(ctx, host);
 }
@@ -291,10 +283,8 @@ public static (slice<netipꓸAddr>, error) LookupNetIP(this ж<Resolver> Ꮡr, c
     }
     var ret = new slice<netipꓸAddr>(0, len(ips));
     foreach (var (_, ip) in ips) {
-        {
-            var (a, ok) = netip.AddrFromSlice(ip); if (ok) {
-                ret = append(ret, a);
-            }
+        var (a, ok) = netip.AddrFromSlice(ip); if (ok) {
+            ret = append(ret, a);
         }
     }
     return (ret, default);
@@ -361,10 +351,8 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
     // can be overridden by tests. This is needed by net/http, so it
     // uses a context key instead of unexported variables.
     var resolverFunc = (context.Context p1, @string p2, @string p3) => Ꮡr.lookupIP(p1, p2, p3);
-    {
-        var (alt, _) = ctx.Value(new nettrace.LookupIPAltResolverKey())._<Func<context.Context, @string, @string, (slice<IPAddr>, error)>>(ᐧ); if (alt != nil) {
-            resolverFunc = alt;
-        }
+    var (alt, _) = ctx.Value(new nettrace.LookupIPAltResolverKey())._<Func<context.Context, @string, @string, (slice<IPAddr>, error)>>(ᐧ); if (alt != nil) {
+        resolverFunc = alt;
     }
 
     // We don't want a cancellation of ctx to affect the
@@ -419,10 +407,8 @@ internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> �
         lookupGroupCancel();
         var err = rΔ1.Err;
         if (err != nil) {
-            {
-                var (_, ok) = err._<ж<DNSError>>(ᐧ); if (!ok) {
-                    err = new DNSErrorжerror(newDNSError(mapErr(err), host, ""u8));
-                }
+            var (_, ok) = err._<ж<DNSError>>(ᐧ); if (!ok) {
+                err = new DNSErrorжerror(newDNSError(mapErr(err), host, ""u8));
             }
         }
         if (trace != nil && trace.DNSDone != nil) {
@@ -809,14 +795,12 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
             ))));
         }
         if (h.Type != dnsmessage.TypeSRV) {
-            {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
-                    return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message",
-                        Name: name,
-                        Server: server
-                    ))));
-                }
+            var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                return ("", default, new DNSErrorжerror(Ꮡ(new DNSError(
+                    Err: "cannot unmarshal DNS message",
+                    Name: name,
+                    Server: server
+                ))));
             }
             continue;
         }
@@ -858,14 +842,12 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
             ))));
         }
         if (h.Type != dnsmessage.TypeMX) {
-            {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
-                    return (default, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message",
-                        Name: name,
-                        Server: server
-                    ))));
-                }
+            var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                    Err: "cannot unmarshal DNS message",
+                    Name: name,
+                    Server: server
+                ))));
             }
             continue;
         }
@@ -906,14 +888,12 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
             ))));
         }
         if (h.Type != dnsmessage.TypeNS) {
-            {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
-                    return (default, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message",
-                        Name: name,
-                        Server: server
-                    ))));
-                }
+            var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                    Err: "cannot unmarshal DNS message",
+                    Name: name,
+                    Server: server
+                ))));
             }
             continue;
         }
@@ -952,14 +932,12 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
             ))));
         }
         if (h.Type != dnsmessage.TypeTXT) {
-            {
-                var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
-                    return (default, new DNSErrorжerror(Ꮡ(new DNSError(
-                        Err: "cannot unmarshal DNS message",
-                        Name: name,
-                        Server: server
-                    ))));
-                }
+            var errΔ2 = p.SkipAnswer(); if (errΔ2 != nil) {
+                return (default, new DNSErrorжerror(Ꮡ(new DNSError(
+                    Err: "cannot unmarshal DNS message",
+                    Name: name,
+                    Server: server
+                ))));
             }
             continue;
         }

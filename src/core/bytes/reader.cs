@@ -110,11 +110,9 @@ public static (rune ch, nint size, error err) ReadRune(this ref Reader r) {
         return (0, 0, io.EOF);
     }
     r.prevRune = (nint)r.i;
-    {
-        var c = r.s[(nint)(r.i)]; if (c < utf8.RuneSelf) {
-            r.i++;
-            return ((rune)c, 1, default);
-        }
+    var c = r.s[(nint)(r.i)]; if (c < utf8.RuneSelf) {
+        r.i++;
+        return ((rune)c, 1, default);
     }
     (ch, size) = utf8.DecodeRune(r.s.slice((nint)(r.i)));
     r.i += (int64)size;

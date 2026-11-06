@@ -44,11 +44,9 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
         return false;
     }
     case var ᴛ when ᴛ == value: {
-        {
-            var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
-                // function instantiation
-                return true;
-            }
+        var (sig, _) = x.typ.Underlying()._<ж<ΔSignature>>(ᐧ); if (sig != nil && sig.TypeParams().Len() > 0) {
+            // function instantiation
+            return true;
         }
         break;
     }}
@@ -87,13 +85,11 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
         break;
     }
     case ж<Pointer> typ: {
-        {
-            var (typΔ1, _) = typ.@base.Underlying()._<ж<Array>>(ᐧ); if (typΔ1 != nil) {
-                valid = true;
-                length = typΔ1.len;
-                x.mode = variable;
-                x.typ = typΔ1.elem;
-            }
+        var (typΔ1, _) = typ.@base.Underlying()._<ж<Array>>(ᐧ); if (typΔ1 != nil) {
+            valid = true;
+            length = typΔ1.len;
+            x.mode = variable;
+            x.typ = typΔ1.elem;
         }
         break;
     }
@@ -148,11 +144,9 @@ internal static bool /*isFuncInst*/ indexExpr(this ж<Checker> Ꮡcheck, ж<oper
                 break;
             }
             case ж<Pointer> t: {
-                {
-                    var (tΔ1, _) = t.@base.Underlying()._<ж<Array>>(ᐧ); if (tΔ1 != nil) {
-                        l = tΔ1.len;
-                        eΔ1 = tΔ1.elem;
-                    }
+                var (tΔ1, _) = t.@base.Underlying()._<ж<Array>>(ᐧ); if (tΔ1 != nil) {
+                    l = tΔ1.len;
+                    eΔ1 = tΔ1.elem;
                 }
                 break;
             }
@@ -338,12 +332,10 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
         break;
     }
     case ж<Pointer> u: {
-        {
-            var (uΔ1, _) = u.@base.Underlying()._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
-                valid = true;
-                length = uΔ1.len;
-                x.typ = new SliceжΔType(Ꮡ(new Slice(elem: uΔ1.elem)));
-            }
+        var (uΔ1, _) = u.@base.Underlying()._<ж<Array>>(ᐧ); if (uΔ1 != nil) {
+            valid = true;
+            length = uΔ1.len;
+            x.typ = new SliceжΔType(Ꮡ(new Slice(elem: uΔ1.elem)));
         }
         break;
     }
@@ -381,10 +373,8 @@ internal static void sliceExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<a
             if (length >= 0) {
                 max = length + 1;
             }
-            {
-                var (_, v) = Ꮡcheck.index(expr, max); if (v >= 0) {
-                    xΔ1 = v;
-                }
+            var (_, v) = Ꮡcheck.index(expr, max); if (v >= 0) {
+                xΔ1 = v;
             }
             break;
         }

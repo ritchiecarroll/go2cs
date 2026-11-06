@@ -72,10 +72,8 @@ internal static @string dumpTraceToText(ж<testing.T> t, slice<byte> b) {
         if (errΔ1 != nil) {
             t.Fatalf("dumping trace: %v", errΔ1);
         }
-        {
-            var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
-                t.Fatalf("dumping trace: %v", errΔ2);
-            }
+        var errΔ2 = tw.WriteEvent(ev); if (errΔ2 != nil) {
+            t.Fatalf("dumping trace: %v", errΔ2);
         }
     }
     return sb.String();
@@ -93,10 +91,8 @@ internal static @string dumpTraceToFile(ж<testing.T> t, @string testName, slice
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        {
-            var (_, errΔ1) = io.Copy(new os.FileжWriter(f), new bytes_ReaderжReader(bytes.NewReader(b))); if (errΔ1 != nil) {
-                t.Fatalf("writing trace dump to %q: %v", f.Name(), errΔ1);
-            }
+        var (_, errΔ1) = io.Copy(new os.FileжWriter(f), new bytes_ReaderжReader(bytes.NewReader(b))); if (errΔ1 != nil) {
+            t.Fatalf("writing trace dump to %q: %v", f.Name(), errΔ1);
         }
         return f.Name();
     }

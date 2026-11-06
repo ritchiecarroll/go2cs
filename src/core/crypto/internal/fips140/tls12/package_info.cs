@@ -56,7 +56,7 @@ using static go.crypto.@internal.fips140.tls12_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/tls12/cast.go", "cast.cs", "ABAegoK4uAAHEICCpA==", "16-37:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/tls12/cast.go", "cast.cs", "ABAegoK4uAAHEIKU", "16-37:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/tls12/tls12.go", "tls12.cs", "AA8iwoKClIKCqLKCgpSCgoKCgoKUgoIACBLmgpSCxoLGtg==")]
 // </GoSourcePositionMaps>
 

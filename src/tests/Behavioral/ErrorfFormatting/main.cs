@@ -14,10 +14,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println(fmt.Errorf("recovered: %v"u8, r));
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println(fmt.Errorf("recovered: %v"u8, r));
                 }
             }, ref ᒐ);
             throw panic("kaboom");

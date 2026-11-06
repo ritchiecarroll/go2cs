@@ -65,11 +65,9 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
         if (len(targs) != len(tparams)) {
             return (default, fmt.Errorf("got %d type arguments but %s has %d type parameters"u8, len(targs), orig, len(tparams)));
         }
-        {
-            ref var i = ref heap<nint>(out var Ꮡi);
-            (i, var err) = (((ж<Checker>)nil)).verify(nopos, tparams, targs, Ꮡctxt); if (err != nil) {
-                return (default, new ArgumentErrorжerror(Ꮡ(new ArgumentError(i, err))));
-            }
+        ref var i = ref heap<nint>(out var Ꮡi);
+        (i, var err) = (((ж<Checker>)nil)).verify(nopos, tparams, targs, Ꮡctxt); if (err != nil) {
+            return (default, new ArgumentErrorжerror(Ꮡ(new ArgumentError(i, err))));
         }
     }
 
@@ -134,10 +132,8 @@ internal static ΔType /*res*/ instance(this ж<Checker> Ꮡcheck, tokenꓸPos p
     // typ may already have been instantiated with identical type arguments. In
     // that case, re-use the existing instance.
     foreach (var (i, ctxtΔ2) in ctxts) {
-        {
-            var inst = ctxtΔ2.lookup(hashes[i], orig, targs); if (inst != nil) {
-                return updateContexts(inst);
-            }
+        var inst = ctxtΔ2.lookup(hashes[i], orig, targs); if (inst != nil) {
+            return updateContexts(inst);
         }
     }
 
@@ -265,10 +261,8 @@ internal static bool implements(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, b
     if (!isValid(Vu) || !isValid(Tu)) {
         return true; // avoid follow-on errors
     }
-    {
-        var (p, _) = Vu._<ж<Pointer>>(ᐧ); if (p != nil && !isValid(p.@base.Underlying())) {
-            return true; // avoid follow-on errors (see go.dev/issue/49541 for an example)
-        }
+    var (p, _) = Vu._<ж<Pointer>>(ᐧ); if (p != nil && !isValid(p.@base.Underlying())) {
+        return true; // avoid follow-on errors (see go.dev/issue/49541 for an example)
     }
 
     @string verb = implementˢ;

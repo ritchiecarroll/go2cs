@@ -18,16 +18,12 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
         ref var fd = ref Ꮡfd.DerefOrNull();
         ref var v = ref Ꮡv.DerefOrNull();
 
-        {
-            var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
-                return (0, errΔ1);
-            }
+        var errΔ1 = Ꮡfd.writeLock(); if (errΔ1 != nil) {
+            return (0, errΔ1);
         }
         ᒐd1 = true;
-        {
-            var errΔ2 = fd.pd.prepareWrite(fd.isFile); if (errΔ2 != nil) {
-                return (0, errΔ2);
-            }
+        var errΔ2 = fd.pd.prepareWrite(fd.isFile); if (errΔ2 != nil) {
+            return (0, errΔ2);
         }
 
         slice<Δsyscall.Iovec> iovecs = default;
@@ -83,10 +79,8 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
                     continue;
                 }
                 if (AreEqual(err, Δsyscall.EAGAIN)) {
-                    {
-                        err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
-                            continue;
-                        }
+                    err = fd.pd.waitWrite(fd.isFile); if (err == nil) {
+                        continue;
                     }
                 }
                 break;

@@ -259,12 +259,10 @@ internal static (@string host, @string zone) splitHostZone(@string s) {
 
     // The IPv6 scoped addressing zone identifier starts after the
     // last percent sign.
-    {
-        nint i = bytealg.LastIndexByteString(s, (byte)'%'); if (i > 0) {
-            (host, zone) = (s.slice(0, i), s.slice(i + 1));
-        } else {
-            host = s;
-        }
+    nint i = bytealg.LastIndexByteString(s, (byte)'%'); if (i > 0) {
+        (host, zone) = (s.slice(0, i), s.slice(i + 1));
+    } else {
+        host = s;
     }
     return (host, zone);
 }
@@ -296,15 +294,11 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     switch (ᐧ) {
     case {} when exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8 || exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8: {
         if (addr != ""u8) {
-            {
-                (host, port, err) = SplitHostPort(addr); if (err != nil) {
-                    return (default, err);
-                }
+            (host, port, err) = SplitHostPort(addr); if (err != nil) {
+                return (default, err);
             }
-            {
-                (portnum, err) = Ꮡr.LookupPort(ctx, net, port); if (err != nil) {
-                    return (default, err);
-                }
+            (portnum, err) = Ꮡr.LookupPort(ctx, net, port); if (err != nil) {
+                return (default, err);
             }
         }
         break;
