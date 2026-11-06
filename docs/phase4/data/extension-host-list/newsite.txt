@@ -1,0 +1,6 @@
+== newsite 07:37:58
+rc=1
+  Failed EveryGeneratorSiteThatWritesAStaticClassIsCensused [565 ms]
+   Assert.AreEqual failed. Expected:<0>. Actual:<1>. a generator site writes a static class the census does not cover; give it a case asserting its host is listed (or the reason it holds no extension method): FieldAccessGenerator:Source (2)
+Failed!  - Failed:     1, Passed:     0, Skipped:     0, Total:     1, Duration: 584 ms - GenTests.dll (net10.0)
+== done 07:38:04

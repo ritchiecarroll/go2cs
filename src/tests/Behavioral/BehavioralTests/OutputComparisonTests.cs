@@ -1595,6 +1595,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckOsGetpagesize() => CheckTarget("OsGetpagesize");
 
     [TestMethod]
+    public void CheckP521CurveBytes() => CheckTarget("P521CurveBytes");
+
+    [TestMethod]
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
 
     [TestMethod]

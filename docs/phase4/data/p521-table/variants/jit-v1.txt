@@ -1,0 +1,1 @@
+  89: JIT compiled go.math.bits_package:Mul64(ulong,ulong) [FullOpts, IL size=16, code size=38]

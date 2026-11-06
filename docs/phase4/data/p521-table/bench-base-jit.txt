@@ -1,0 +1,30 @@
+first_SBM_us 210044 second_SBM_us 5228 jit_in_first_us 107261
+fiat Mul               min       2338.6 ns  median       2405.0 ns
+fiat Square            min       2401.9 ns  median       2714.6 ns
+fiat Add               min         85.0 ns  median         85.6 ns
+@new P521Element       min         21.3 ns  median         21.8 ns
+NewP521Point           min        113.3 ns  median        115.1 ns
+point Add              min      36446.4 ns  median      36706.3 ns
+point Double           min      43912.6 ns  median      44722.4 ns
+ScalarBaseMult         min    5139634.0 ns  median    5248258.5 ns
+gc0 327 gc1 2 gc2 1
+first_SBM_us 207607 second_SBM_us 6074 jit_in_first_us 107193
+fiat Mul               min       2322.2 ns  median       2368.6 ns
+fiat Square            min       2427.0 ns  median       2468.8 ns
+fiat Add               min         83.2 ns  median         83.5 ns
+@new P521Element       min         22.1 ns  median         23.2 ns
+NewP521Point           min        126.3 ns  median        127.5 ns
+point Add              min      36539.0 ns  median      37207.7 ns
+point Double           min      43842.8 ns  median      45072.8 ns
+ScalarBaseMult         min    5229841.0 ns  median    5377923.5 ns
+gc0 327 gc1 2 gc2 1
+first_SBM_us 207179 second_SBM_us 5369 jit_in_first_us 104594
+fiat Mul               min       2302.0 ns  median       2369.6 ns
+fiat Square            min       2421.1 ns  median       2436.0 ns
+fiat Add               min         87.7 ns  median         88.3 ns
+@new P521Element       min         21.9 ns  median         23.5 ns
+NewP521Point           min        116.1 ns  median        118.3 ns
+point Add              min      36849.5 ns  median      37442.9 ns
+point Double           min      43877.6 ns  median      44166.7 ns
+ScalarBaseMult         min    5167766.0 ns  median    5297546.5 ns
+gc0 327 gc1 2 gc2 1

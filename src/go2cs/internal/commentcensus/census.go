@@ -30,6 +30,11 @@ import (
 
 var goosDirs = map[string]bool{"windows": true, "linux": true, "darwin": true}
 
+// handOwnMarker is the hand-own attribute on a line of its own, bare or qualified, the predicate repoguard's
+// hand-own guards use. A file that only mentions GoManualConversion (go2cs's placeholder for a displaced func
+// names it in a comment) is converted output, and the census reads it.
+var handOwnMarker = regexp.MustCompile(`(?m)^\s*\[module:\s*(?:go\.)?GoManualConversion\]`)
+
 type pair struct {
 	pkg, base, cs, gofile, flavor string
 }
@@ -71,7 +76,7 @@ func findPairs(core, goroot string) []pair {
 			}
 		}
 		data, err := os.ReadFile(path)
-		if err != nil || strings.Contains(string(data), "GoManualConversion") {
+		if err != nil || handOwnMarker.Match(data) {
 			return nil
 		}
 		base := strings.TrimSuffix(name, ".cs")
@@ -982,7 +987,7 @@ type Pair struct {
 }
 
 // FindPairs pairs every converted production .cs under core with its Go source under goroot/src, skipping
-// hand-owned files ([module: GoManualConversion], *_impl.cs), test files, package_info.cs and golib. A file
+// hand-owned files (a `[module: GoManualConversion]` attribute line, *_impl.cs), test files, package_info.cs and golib. A file
 // converted per GOOS is read from the flat copy when there is one, else from the windows, linux, darwin flavour
 // in that order.
 func FindPairs(core, goroot string) []Pair {

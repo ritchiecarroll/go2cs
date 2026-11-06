@@ -1805,6 +1805,16 @@ behavioral divergence, an added branch shows up as nothing.
 > *(Edited in place 2026-10-01, §7 lesson 60: missing the comm step let sha3's fabricated `array<T>` class return
 > while H6 passed. Edited in place 2026-10-12: the guard landed. Its first run named
 > `runtime/pprof/pprof_impl.cs`, which `b415d4d9d9` had deleted after the hop with no record.)*
+>
+> **A displaced function whose hand-owned body re-implements its ALGORITHM is pinned by source text.**
+> [`handOwnSourcePins_test.go`](../src/go2cs/internal/repoguard/handOwnSourcePins_test.go) holds the SHA-256 of
+> each such Go function at the pin, from `func` to its closing brace, and fails when the incoming GOROOT
+> changes it, naming the hand-owned file. Neither the marker census nor `.cs.auto` sees these: the body is
+> displaced inside a converted file, so there is no whole-file sibling to diff, and the placeholder keeps
+> compiling against a body written for the old text. **When it fires: re-derive the hand-own against the
+> new upstream body, re-run the tests the finding names, then update the pin.** A comment-only change does
+> not fire. The first entries are fiat's `p521Mul` and `p521Square` (`fiat/p521_impl.cs`).
+> *(Added 2026-11-06, the p521-table seat.)*
 
 **The instrument** is `.cs.auto` — the converter's answer to *"what would the automatic conversion of
 this file be, today, from this Go tree?"*

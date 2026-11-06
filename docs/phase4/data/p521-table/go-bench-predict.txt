@@ -1,0 +1,16 @@
+cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
+BenchmarkMul/P521-8 	11460556	       189.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P521-8 	12609558	       186.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkMul/P521-8 	12210061	       190.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P521-8         	14865596	       159.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P521-8         	14386065	       162.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSquare/P521-8         	15063435	       178.7 ns/op	       0 B/op	       0 allocs/op
+ok  	crypto/internal/fips140/nistec/fiat	45.901s
+cpu: Intel(R) Core(TM) i7-8665U CPU @ 1.90GHz
+BenchmarkScalarMult/P521-8  	    1014	   2386497 ns/op	       0 B/op	       0 allocs/op
+BenchmarkScalarMult/P521-8  	     985	   2172812 ns/op	       0 B/op	       0 allocs/op
+BenchmarkScalarMult/P521-8  	     914	   5042724 ns/op	       0 B/op	       0 allocs/op
+BenchmarkScalarBaseMult/P521-8         	    3786	   1101163 ns/op	       0 B/op	       0 allocs/op
+BenchmarkScalarBaseMult/P521-8         	    3783	    877405 ns/op	       0 B/op	       0 allocs/op
+BenchmarkScalarBaseMult/P521-8         	    3886	    573996 ns/op	       0 B/op	       0 allocs/op
+ok  	crypto/internal/fips140/nistec	86.819s
