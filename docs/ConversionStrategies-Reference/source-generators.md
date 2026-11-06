@@ -201,7 +201,7 @@ generator writes the overload that takes a pointer (`ж<Reader>`), and the runti
 to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
 Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:221 -->
+<!-- source: src/core/bufio/bufio.cs:218 -->
 ```csharp
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 ```
@@ -215,7 +215,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:938 -->
+<!-- source: src/core/time/time.cs:936 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```

@@ -103,7 +103,7 @@ emitted `<…>` list and `where` clauses (a breadcrumb comment preserves the Go 
 classification treats a `p P` exactly like a `p *T` (`paramPointerType` — deref alias, `Ꮡ` box naming),
 so the entire existing pointer machinery applies unchanged:
 
-<!-- source: src/core/go/types/predicates.cs:658-665 -->
+<!-- source: src/core/go/types/predicates.cs:610-617 -->
 ```csharp
 internal static ж<T> clone<T>(ж<T> Ꮡp)
     /* where P : *T (erased: P renders as ж<T>) */

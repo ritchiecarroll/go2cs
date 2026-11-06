@@ -220,7 +220,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 
 <!-- sources, one per row, top to bottom (every C# form is copied from real emission):
   src/core/bufio/bufio.cs:17#3ddbb0 · src/core/bufio/bufio.cs:14#a6e909 ·
-  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#840b80 + src/core/image/png/reader.cs:1264#c96c26 ·
+  src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#840b80 + src/core/image/png/reader.cs:1260#c96c26 ·
   (the lazy holder: src/core/unicode/tables.cs:2887 `[GoLazy] partial class lazyᴛ_Lu {`) ·
   src/core/reflect/all_test.cs:64#626291 + src/core/reflect/go2cs_test_host.cs:1#0abf19 ·
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:189#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
@@ -245,7 +245,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/PanicRecover/PanicRecover.cs.target:17,34#32103d · src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:74#4f87df ·
   src/tests/Behavioral/SelectStatement/SelectStatement.cs.target:10,31,73,76#5da42c · src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:5#5f67f9 ·
   src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:30#3e7716 · src/core/io/io.cs:84#df5e5e ·
-  src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:47#64aa80 + src/core/reflect/type.cs:1261#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
+  src/tests/Behavioral/ReflectValueSingles/ReflectValueSingles.cs.target:47#64aa80 + src/core/reflect/type.cs:1251#6bb2cb + src/core/golib/GoReflect.cs:19#9c197b ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.go:25#c3ddc3 + PointerToPointer.cs.target:24,32#78f549 + src/core/golib/ж.cs:871#3d6147 ·
   src/tests/Behavioral/ClosureSelfShadowCapture/main.cs.target:22#fb95b4 · src/tests/Behavioral/UnsafeOperations/UnsafeOperations.cs.target:80,97#9f6365 ·
   src/core/math/dim_asm.cs:11#710d59 · src/core/unicode/utf8/utf8.cs:20#83c559 (the Comments row: placement is best effort, see the Comments section)
@@ -315,13 +315,13 @@ code does not use, so they never clash with a Go name.
 Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer) come from golib, the
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
-<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:52#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:36#201bcf and UnsafeOperations.cs.target:26#216378; NilPointerValueReceiverCall/main.cs.target:49#0e574a; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:328#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:106#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:14#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:19#4be793, ChannelRendezvous/main.cs.target:22#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:261-262#a94661; SStringTwinPilot/main.cs.target:31#034d50; src/core/encoding/json/package_info.cs:14#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1175#a8d8ac), ChannelRendezvous/main.cs.target:23#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:34#6193c1, ChannelRendezvous/main.cs.target:24#e54771; GoCallVariations.cs.target:9#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:40#af46cf; src/core/io/fs/sub.cs:83#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:48#810daf; ExprSwitch.cs.target:245#743672; AppendOfMake/AppendOfMake.cs.target:66#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:33#2a5223;
+<!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:52#1114ce; UnsafeOperations/UnsafeOperations.cs.target:26#216378; GoCallVariations.cs.target:36#201bcf and UnsafeOperations.cs.target:26#216378; NilPointerValueReceiverCall/main.cs.target:49#0e574a; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:326#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:106#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:14#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:19#4be793, ChannelRendezvous/main.cs.target:22#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; StringLiteralHoisting/main.cs.target:48#b6f816, src/core/internal/strconv/atoi.cs:261-262#a94661; SStringTwinPilot/main.cs.target:31#034d50; src/core/encoding/json/package_info.cs:14#3f709d;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1118#a8d8ac), ChannelRendezvous/main.cs.target:23#b87223; AnyStringLitChanSend/main.cs.target:51#b6232f, GoCallVariations.cs.target:34#6193c1, ChannelRendezvous/main.cs.target:24#e54771; GoCallVariations.cs.target:9#e0e8ae; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:40#af46cf; src/core/io/fs/sub.cs:79#6201ad, ExprSwitch.cs.target:91#7667f8, src/core/strings/iter.cs:48#810daf; ExprSwitch.cs.target:245#743672; AppendOfMake/AppendOfMake.cs.target:66#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:33#2a5223;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:17#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:38#eed889; AdapterNameInterfaceCollision/main.cs.target:25#b09b5a; GoCallVariations.cs.target:43#1baedb; GoCallVariations.cs.target:44#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:26#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:42#9f1df3, ж.FieldRefBox.cs:80#8f6484, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:284#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:73#c69f13).
 Buffer.Ꮡoff: PointerToPointer/PointerToPointer.cs.target:47 `PrintValPtr(Ꮡb.Ꮡoff);` for Go PointerToPointer.go:49 `PrintValPtr(&b.off)`; the static field-reference members are generated by src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:2085#94522c (FieldReferences). ᒐdone: NamedReturnDefer/main.cs.target:87#c704c8; [GoRecv]: ReservedNameShadows/main.cs.target:60#61198f.
-/*<-*/: SelectStatement/SelectStatement.cs.target:64#02eb99; _<T>(): TypeAssert/TypeAssert.cs.target:62#73a99c (comma-ok: src/core/io/fs/sub.cs:83#6201ad); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39#63d00a; break_/continue_: ForVariants/ForVariants.cs.target:61#c4196f (goto break_scan;) and :65#108b29 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17#023ae0.
+/*<-*/: SelectStatement/SelectStatement.cs.target:64#02eb99; _<T>(): TypeAssert/TypeAssert.cs.target:62#73a99c (comma-ok: src/core/io/fs/sub.cs:79#6201ad); ᴋ: src/core/internal/syscall/unix/linux/getrandom.cs:39#63d00a; break_/continue_: ForVariants/ForVariants.cs.target:61#c4196f (goto break_scan;) and :65#108b29 (continue_scan:;); main_point: LiftedLocalTypes/main.cs.target:17#023ae0.
 Glyph constants: src/go2cs/symbols.go, generated from src/core/go2cs/symbols.json (DescriptorCarrierSuffix in src/go2cs/visitTypeSpec.go, DescriptorCompanionSuffix in src/go2cs/descriptorCompanion.go). Values of ᐧ, ᐧᐧ, ꟷ and ꓸꓸꓸ: src/core/golib/builtin.cs:172-208#3c2428. The slice spread s.ꓸꓸꓸ: src/core/golib/slice.cs:654#e07a2f.
 Overload discriminators: the comma-ok overloads take a `bool _` whose value is unused: golib builtin.cs:748#0a8a17 (receive), map.cs:456#629bdd (map index), builtin.cs:3741-3746#ab6e8c (type assertion); the converter passes ꟷ (false) for receive/map and ᐧ (true) for type assertion. The select marker ꓸꓸꓸ is `public static readonly NilType ꓸꓸꓸ = nil;` (builtin.cs:198-209#4ddddc), whose doc comment says the channel operation then returns a SelectOp case descriptor that registers the pending operation with the select.
 ᐧᐧ: builtin.cs:174-186#9f29d1, `public static readonly bool ᐧᐧ = true;` for a leading constant-true case of a tagless switch; a foldable `when true` makes C# reject the later cases. The summary's Expression Switch section does not cover it, so the row links the reference: docs/ConversionStrategies-Reference/expression-switch.md:40#e2a6d2.
@@ -489,7 +489,7 @@ partial struct Outer {
 For example, `GoFrame` is the golib type of the local that runs a function's deferred calls
 ([Defer / Panic / Recover](#defer--panic--recover)), so a Go struct named `GoFrame` becomes `ΔGoFrame`:
 
-<!-- reserved-name list: src/go2cs/identifierNaming.go:171-181#9e0a65; type-vs-method rename: src/core/time/time.cs:328 `partial struct ΔMonth /*num:nint*/;` (Go type Month and method Time.Month); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:43-54#9ee30e) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
+<!-- reserved-name list: src/go2cs/identifierNaming.go:171-181#9e0a65; type-vs-method rename: src/core/time/time.cs:326 `partial struct ΔMonth /*num:nint*/;` (Go type Month and method Time.Month); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:43-54#9ee30e) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.go:45 -->
 ```go
 type GoFrame struct{ k int }
@@ -2005,7 +2005,7 @@ package's `windows/` folder, which holds the files that differ between target op
 ```go
 	O_RDONLY int = syscall.O_RDONLY // open the file read-only.
 ```
-<!-- source: src/core/os/windows/file.cs:86 -->
+<!-- source: src/core/os/windows/file.cs:84 -->
 ```csharp
 public const nint O_RDONLY = /* syscall.O_RDONLY */ 0; // open the file read-only.
 ```
@@ -2583,7 +2583,7 @@ func (d Duration) Seconds() float64 {
 	return float64(sec) + float64(nsec)/1e9
 }
 ```
-<!-- source: src/core/time/time.cs:938-1127 -->
+<!-- source: src/core/time/time.cs:936-1119 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 …
@@ -2695,7 +2695,7 @@ const (
 	December
 )
 ```
-<!-- source: src/core/time/time.cs:328-341 -->
+<!-- source: src/core/time/time.cs:326-339 -->
 ```csharp
 partial struct ΔMonth /*num:nint*/;
 
@@ -5097,7 +5097,7 @@ fmt.Println(fmt.Sprintf("xxx"u8));
 
 Go's `func Sprintf(format string, a ...any) string` is declared this way in the converted `fmt` package:
 
-<!-- source: src/core/fmt/print.cs:272-273 and :280 -->
+<!-- source: src/core/fmt/print.cs:268-269 and :276 -->
 ```csharp
 public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
@@ -11116,7 +11116,7 @@ internal static void Main() {
 `iter u = default!;` is Go's zero value for `var u iter` ([Nil and Zero Values](#nil-and-zero-values)).
 The `!` only silences C# nullable warnings.
 <!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:90-91 and main.cs.target:80-81 (c := chunk{}; c.alloc(5) stays c.alloc(5)); src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:51; main.cs.target:48 (internal static void alloc(this ref chunk c, uint16 n) {) -->
-<!-- Moved to the reference (pointers.md): a method that keeps its receiver as a pointer takes this ж<T>, and a variable used as its receiver lives in a heap box, so b.Grow(n) becomes Ꮡb.Grow(n) (src/core/strings/strings.cs:527-528#aa42c9; src/core/strings/builder.cs:81#4f777e). -->
+<!-- Moved to the reference (pointers.md): a method that keeps its receiver as a pointer takes this ж<T>, and a variable used as its receiver lives in a heap box, so b.Grow(n) becomes Ꮡb.Grow(n) (src/core/strings/strings.cs:523-524#aa42c9; src/core/strings/builder.cs:77#4f777e). -->
 
 **A pointer method on a pointer local is called the same way.** For a `this ref` method the
 [source generators](#source-generators) add a second overload whose receiver is the box, `this ж<T>`.
@@ -12375,7 +12375,7 @@ converter's list can likewise name the operating systems it covers.
 <!-- src/core/runtime/trace_impl.cs:59 (`public static error StartTrace()`), :106
      (`//go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond`);
      src/core/runtime/trace/flightrecorder_impl.cs:34 (`runtime_traceAdvance`), :36 (`runtime_traceClockNow`);
-     src/core/runtime/trace/flightrecorder.cs:188-191 (`go.runtime_package.traceClockUnitsPerSecond()`);
+     src/core/runtime/trace/flightrecorder.cs:186-189 (`go.runtime_package.traceClockUnitsPerSecond()`);
      the push row src/go2cs/linknameOperations.go:813 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
 <!-- math/bits: src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`, with
      AggressiveInlining on the line before it, as on Add64, :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,

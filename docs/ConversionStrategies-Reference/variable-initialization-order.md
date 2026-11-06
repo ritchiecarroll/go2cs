@@ -17,7 +17,7 @@ var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx")
 
 In `syscall_windows.cs` the variable is a bare field beside the method that sets it:
 
-<!-- source: src/core/syscall/windows/syscall_windows.cs:558-559 -->
+<!-- source: src/core/syscall/windows/syscall_windows.cs:554-555 -->
 ```csharp
 internal static ж<LazyProc> procSetFilePointerEx;
 internal static void initᴛprocSetFilePointerEx() { procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx"); }

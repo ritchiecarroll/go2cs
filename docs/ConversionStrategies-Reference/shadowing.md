@@ -1123,11 +1123,9 @@ sort's own convenience methods are exactly this shape, and they called themselve
 ```go
 func (x StringSlice) Sort() { Sort(x) }
 ```
-<!-- source: src/core/sort/sort.cs:186-188 -->
+<!-- source: src/core/sort/sort.cs:159 -->
 ```csharp
-public static void Sort(this StringSlice x) {
-    Sort((Interface)(x));
-}
+public static void Sort(this StringSlice x) { Sort((Interface)(x)); }
 ```
 
 The converter casts the first argument to the function's interface parameter type wherever the argument's

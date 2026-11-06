@@ -154,7 +154,7 @@ func (r *Reader) Read(b []byte) (n int, err error) {
 	}
 ```
 
-<!-- source: src/core/strings/reader.cs:40-47 -->
+<!-- source: src/core/strings/reader.cs:38-45 -->
 ```csharp
 // Read implements the [io.Reader] interface.
 public static (nint n, error err) Read(this ref Reader r, slice<byte> b) {
@@ -363,7 +363,7 @@ var (
 )
 ```
 
-<!-- source: src/core/encoding/csv/reader.cs:89-95 -->
+<!-- source: src/core/encoding/csv/reader.cs:87-93 -->
 ```csharp
 // These are the errors that can be returned in [ParseError.Err].
 public static error ErrBareQuote = errors.New("bare \" in non-quoted-field");
@@ -467,7 +467,7 @@ emitted C# line: after one space, or at the column of its gofmt-aligned run (bel
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1173-1175 -->
+<!-- source: src/core/strings/strings.cs:1167-1169 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -517,7 +517,7 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:708-714 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:696-702 -->
 ```csharp
             if (t == L) {
                 // no change
@@ -576,7 +576,7 @@ Above a label:
 	case exp > 0 && exp <= 15+22: // int * 10^k
 ```
 
-<!-- source: src/core/internal/strconv/atof.cs:484-491 -->
+<!-- source: src/core/internal/strconv/atof.cs:483-490 -->
 ```csharp
     switch (ᐧ) {
     case {} when exp is 0: {
@@ -638,7 +638,7 @@ An empty block:
 		}
 ```
 
-<!-- source: src/core/encoding/xml/xml.cs:1202-1208 -->
+<!-- source: src/core/encoding/xml/xml.cs:1196-1202 -->
 ```csharp
         if (b == '\r') {
             d.buf.WriteByte((byte)'\n');

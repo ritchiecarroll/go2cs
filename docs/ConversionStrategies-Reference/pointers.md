@@ -454,7 +454,7 @@ check = func(pc uint32, m []bool) (ok bool) {
 
 The assignment statement's position is that of `check` on its left, which precedes the literal on its right — yet the RHS is evaluated *first*, so the store to `check` unambiguously happens after the literal exists. Scored as read-only-after-capture, the capture would take the snapshot path (`var checkʗ1 = check;` hoisted **above** the assignment) and every recursive call would invoke the still-**null** delegate: a `NullReferenceException` on the first recursion. In regexp's `makeOnePass` that is the entire ambiguity check, so `^.$` — and most of the package — would fail to compile. So the scan also counts a write whose syntactic extent *contains* a referencing literal (`w.pos < lit.pos < w.end`), which routes the capture to shared storage; `check` escapes, so it takes the by-box form and the recursion resolves against the box the assignment fills:
 
-<!-- source: src/core/regexp/onepass.cs:332, 340, 350, 482 -->
+<!-- source: src/core/regexp/onepass.cs:331, 339, 349, 481 -->
 ```csharp
 ref var check = ref heap<Func<uint32, slice<bool>, bool>>(out var Ꮡcheck);
 …
@@ -516,7 +516,7 @@ A **MAP** composite literal whose value or key type is a pointer boxes its eleme
 **A box accessor's qualifier names the class that DECLARES the type, which under `-tests` can be the bridge.** The accessor `Type.Ꮡfield` in `receiver.of(Type.Ꮡfield)` package-qualifies whenever a bare name could be shadowed (see [Field address of a collision-renamed heap-boxed local](#field-address-of-a-collision-renamed-heap-boxed-local-uses-the-raw-box-name)). For a type an internal `_test.go` declares, the production `<pkg>_package` class is the wrong qualifier — the white-box emission unit is the bridge (`<pkg>_internal_test_package`), so the reference resolves to nothing (CS0117). `database/sql`'s `fakedb_test.go` is the corpus instance and it is forced into the qualifying path: `type table struct { mu sync.Mutex; … }` sits beside `func (db *fakeDB) table(string) (*table, bool)`, so the *type* is Δ-renamed, and Δ-renamed always qualifies — every one of the six `t.mu.Lock()`/`Unlock()` sites would emit `sql_package.Δtable.Ꮡmu`. The qualifier resolves through `packageScopeClassName`, the same helper that already draws the production/bridge line for package-level *value* references, so both halves stay addressable from the one bridge file. Production conversions are unaffected by construction — outside `-tests` there is no class override and the helper returns the production class. (Guarded by the `TestTestVariantBoxAccessorNamesBridgeDeclaringClass` converter test, which asserts both directions: the bridge class appears and the production class does not.)
 
 **Reassigning a captured pointer parameter inside a closure.** The repoint-and-re-alias above (`Ꮡp = …; p = ref Ꮡp.DerefOrNull();`) rebinds a `ref`-local. Inside a CLOSURE that captured the parameter that is illegal: the re-aliased value var is an ENCLOSING `ref`-local, and C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509 `buildChains`'s `considerCandidate` closure does `if sigChecks == nil { sigChecks = new(int) }` on the captured `*int` parameter). The box reassignment `Ꮡp = …` is legal (it writes the captured box field, hoisted to a closure field), so only the ref-local refresh is dropped inside a lambda:
-<!-- source: src/core/crypto/x509/windows/verify.cs:787-790 -->
+<!-- source: src/core/crypto/x509/windows/verify.cs:785-788 -->
 ```csharp
 if (sigChecks == nil) {
     sigChecks = @new<nint>();
@@ -766,7 +766,7 @@ data := make([]byte, unsafe.Sizeof(hdr))
 // …
 f.Type = Type(bo.Uint16(data[unsafe.Offsetof(hdr.Type):]))
 ```
-<!-- source: src/core/debug/elf/file.cs:360, 364 -->
+<!-- source: src/core/debug/elf/file.cs:358, 362 -->
 ```csharp
 var data = new slice<byte>((nint)(/* unsafe.Sizeof(hdr) */ (uintptr)52));
 …
@@ -1093,7 +1093,7 @@ func int32Hash(i uint32, seed uintptr) uintptr {
 }
 ```
 
-<!-- source: src/core/runtime/alg.cs:406-412 -->
+<!-- source: src/core/runtime/alg.cs:392-398 -->
 ```csharp
 internal static uintptr int32Hash(uint32 iʗp, uintptr seed) {
     ref var i = ref heap(iʗp, out var Ꮡi);
