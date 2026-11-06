@@ -4739,7 +4739,7 @@ for Go's `...`, and `ꓸꓸꓸT` is a file-level alias for C# `Span<T>`. The par
 suffix, which marks an incoming parameter the body redeclares, so the body can declare the Go name `xs`
 as a slice ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 <!-- A type-parameter element type has no legal alias name and keeps `params Span<T>`. -->
-<!-- The ʗp suffix is also used for a boxed VALUE parameter (src/go2cs/convFuncLit.go:675#b268ee, :722#0e4ad6, :796#075a45), so it is not glossed as "pack"; glyph table: this page's Reading Converted Code section (#reading-converted-code-names-and-glyphs). -->
+<!-- The ʗp suffix is also used for a boxed VALUE parameter (src/go2cs/convFuncLit.go:679#b268ee, :726#0e4ad6, :800#075a45), so it is not glossed as "pack"; glyph table: this page's Reading Converted Code section (#reading-converted-code-names-and-glyphs). -->
 
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:10-19 -->
 ```go
@@ -11796,7 +11796,7 @@ puts the frame back into `runtime.Callers` and the crash report, printed `name(.
 It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
 the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
 the frames the CLR reports.
-<!-- src/core/runtime/managed_impl.cs:4944 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+<!-- src/core/runtime/managed_impl.cs:5010 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
      the printed form :1956 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
      PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
      (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
@@ -12329,8 +12329,8 @@ statement, which converted code writes as golib's `goǃ(…)` ([Goroutines](#gor
 that starts a goroutine carries its own record, kept by hand, that maps each `goǃ(` line to the Go `go`
 statement it replaces and no other line. A traceback's `created by` line then names the Go position, as
 Go's does.
-<!-- the converter's record: src/go2cs/positionMapOperations.go:595 (`Go source positions are recorded here, one`)
-     and :600 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
+<!-- the converter's record: src/go2cs/positionMapOperations.go:674 (`Go source positions are recorded here, one`)
+     and :679 (`or has none - golib, the BCL and hand-written conversions - and reports its own C# position.`).
      A hand-kept record: src/core/sync/waitgroup.cs:28 (`[assembly: go.GoPositionMap("sync/waitgroup.go", "waitgroup.cs", "APUB3AMAANsD")]`),
      for its goǃ( at :246 (`goǃ(() => {`). Guard: src/go2cs/internal/repoguard/handOwnedGoStatementPositions_test.go:283
      (`func TestHandOwnedGoStatementsMapToGo(t *testing.T) {`), which requires one record per

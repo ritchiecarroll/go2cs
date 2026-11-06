@@ -68,7 +68,7 @@ using static go.@internal.testenv_package;
 [assembly: GoPositionMap("internal/testenv/exec.go", "exec.cs", "ABlCAAwCgoKClILIgugACxi4yoKClIKCrsKUgoKCgpSUpgAEErKUgoKClIKCAAkUAAgCgpSmgqaClJQADBYACgKClKqIpoKCgoKUyoKCAAsYlLjKgqLc3JSUlKKClIK4qsKC", "206-222:1;225-232:2")]
 [assembly: GoPositionMap("internal/testenv/opt.go", "opt.cs", "AAgUkg==")]
 [assembly: GoPositionMap("internal/testenv/testenv.go", "testenv.cs", "ACpGAAUWAAkC6qLKprbcgoKUgoKCgpSCgpSCpgAIEoKCgoKClIKClIKmrLKCgpSCgrqkqqKCgr6ypJSqooKCAAMQwoKCgsqClKaS3AAOHoKCpoKCgpSmgoKmgoKCgpSUlIKCgoKUAAUa8oKCgpSClOiSgpSmnKKkgsyirLKCgpSCgrqSpoKCgpSCgoKClIKClKiSgoK8ogAOIrKClIKCgpS+soKCvrKCgrqSgqqigoKCusiqooKCuJSCgoIACAiCgoK6kqSUrsKCguqSgoIADxQACAKUgoKCppSCgoKCgqaCgpSCgpSCyoCCzKKssoKU")]
-[assembly: GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABEiwqT+goKUgpSCgpSCgpTI")]
+[assembly: GoPositionMap("internal/testenv/testenv_notwin.go", "testenv_notwin.cs", "ABEiwqT+goKUgpSCgpSCgpTI", "", "", "", "", "38:25,39:17")]
 [assembly: GoPositionMap("internal/testenv/testenv_unix.go", "testenv_unix.cs", "ABImgoKmgrjIuIKm")]
 // </GoSourcePositionMaps>
 

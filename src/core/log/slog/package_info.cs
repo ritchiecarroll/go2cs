@@ -82,14 +82,14 @@ using static go.log.slog_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("log/slog/attr.go", "attr.cs", "ABEkkqiSqqKokqiSqJKqoqiSAAIUAAkCAAIQ8qaCmIKClKqiqJKmgqqi")]
-[assembly: GoPositionMap("log/slog/handler.go", "handler.cs", "AGDIAYLcgqwACAKCgoKCgoKC1oKmggBLmAGUAAscooKClKbmgpSUgoKCgoKCuIKCgqamlNaCgoKq8oKCgqaCgpSCgoKCgpS4goKCgpSmgoKClJSCgoKClJSCgpSCgoLWxIKCgoKC3IKCyoKCgoKCgpSUgoKmlIKmupKClAAOHoKCxqLugoKUpoKClIKClKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoKCgqaUpoKmgoKClIKUuIKUypSClIKClIK4gpSmgqaCgoKUlIKUlKiSgpSCgoK0grSkpoKCgoKmgpQACArCktyCgri4goKUlIK0pKKClLiKwoKCgoLKyICigKKAooA=", "350-355:1;586-601:1", "", "213=Clip/1/2/3,Clip/2/2/5;424=New/1/1/5")]
-[assembly: GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAj4AHgLosqaUgoKmopS0tOqAgtbGtLSCgoCClNakAAgSlKaCgrjCgpSSgpSCpoKmgoIADRDSgJKApIKCgoKClIKUgpS0tLTGgoKkgoKUgoKClIKCggAIEoKClIKCgoKUlIKUAA0a", "159-167:1;184-184:1;185-185:2")]
-[assembly: GoPositionMap("log/slog/level.go", "level.cs", "ADl2AAkCgoKUgoKUppSkpKS82AACENKCgpSqoqqiAAIQ0ubSgoK4goKCgoKCpqS0tLS0lILqoAALGJKokqaCqqKqoqqigoKUgg==", "60-69:1;127-131:1")]
+[assembly: GoPositionMap("log/slog/handler.go", "handler.cs", "AGDIAYLcgqwACAKCgoKCgoKC1oKmggBLmAGUAAscooKClKbmgpSUgoKCgoKCuIKCgqamlNaCgoKq8oKCgqaCgpSCgoKCgpS4goKCgpSmgoKClJSCgoKClJSCgpSCgoLWxIKCgoKC3IKCyoKCgoKCgpSUgoKmlIKmupKClAAOHoKCxqLugoKUpoKClIKClKaCggAGEqKCgoKUgqaCupKClKSCgryigoKCpqzSgoKCgqaUpoKmgoKClIKUuIKUypSClIKClIK4gpSmgqaCgoKUlIKUlKiSgpSCgoK0grSkpoKCgoKmgpQACArCktyCgri4goKUlIK0pKKClLiKwoKCgoLKyICigKKAooA=", "350-355:1;586-601:1", "", "213=Clip/1/2/3,Clip/2/2/5;424=New/1/1/5", "", "630:21,631:13")]
+[assembly: GoPositionMap("log/slog/json_handler.go", "json_handler.cs", "ABw80oKUAAkYoqqipoIAAj4AHgLosqaUgoKmopS0tOqAgtbGtLSCgoCClNakAAgSlKaCgrjCgpSSgpSCpoKmgoIADRDSgJKApIKCgoKClIKUgpS0tLTGgoKkgoKUgoKClIKCggAIEoKClIKCgoKUlIKUAA0a", "159-167:1;184-184:1;185-185:2", "", "", "", "199:21,201:13")]
+[assembly: GoPositionMap("log/slog/level.go", "level.cs", "ADl2AAkCgoKUgoKUppSkpKS82AACENKCgpSqoqqiAAIQ0ubSgoK4goKCgoKCpqS0tLS0lILqoAALGJKokqaCqqKqoqqigoKUgg==", "60-69:1;127-131:1", "", "", "", "147:21,148:13")]
 [assembly: GoPositionMap("log/slog/logger.go", "logger.cs", "ABtYABgCgoKmgqiQrvLugoKCAAsYgoKClIKEkoK4goKCAAwagoKokKrigpSCggACEgAIAoKUgoKokoKUqLKokoKUrLIAAhoADAKosqiyqLKosqiyqLKosqiyqLKs0oKUgpSCgpSClIKCqLKClIKUgoKUgpSCgqiyqLKosqiyqLKosqiyqLKosqiy")]
 [assembly: GoPositionMap("log/slog/multi_handler.go", "multi_handler.cs", "AAsasoKCAAkUgoKCpqaygoKCgrimgoKClKaCgoKU")]
 [assembly: GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAoOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgqYABRbilIKUprYAFyjCgoKUgpSClKiwqtKCpoKC")]
 [assembly: GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABo40oKUAAkYoqqipoIAAkoAJAKmopS0tIKCgqaClJSClLSkrLKCpoKClKaCgpSCgqaClIKUgoKUlA==")]
-[assembly: GoPositionMap("log/slog/value.go", "value.cs", "ADp8ABAagoKUAAYQkpSkxKSkpLS+sqiSqJKokqiSqJKCgpQACRyiypSCgpS4qJKq+IKCgoKmlKiSgoKCpgACJAAPApSkpKSkpKSkpKSkpKSkpKSkpKSktL6ylIKUpKSkpKSkpKSkpM6ygpSCpoKqopKUqqKSlKqikpSmgqqikqamgqqikqamgqqikpSokpSClKS0zKKqooKUpoKssoKCgpSUpKSkpKSkypKCyqqilKSkpKSkpKSkpAAOKgAKAoKCgriCgpSUggAKBoKCgoKUgoKCgoKCgpSCgoKm", "502-506:1")]
+[assembly: GoPositionMap("log/slog/value.go", "value.cs", "ADp8ABAagoKUAAYQkpSkxKSkpLS+sqiSqJKokqiSqJKCgpQACRyiypSCgpS4qJKq+IKCgoKmlKiSgoKCpgACJAAPApSkpKSkpKSkpKSkpKSkpKSkpKSktL6ylIKUpKSkpKSkpKSkpM6ygpSCpoKqopKUqqKSlKqikpSmgqqikqamgqqikqamgqqikpSokpSClKS0zKKqooKUpoKssoKCgpSUpKSkpKSkypKCyqqilKSkpKSkpKSkpAAOKgAKAoKCgriCgpSUggAKBoKCgoKUgoKCgoKCgpSCgoKm", "502-506:1", "", "", "", "574:21,575:13")]
 // </GoSourcePositionMaps>
 
 namespace go.log;

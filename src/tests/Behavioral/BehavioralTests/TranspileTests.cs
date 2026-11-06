@@ -469,6 +469,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferVariadicCallee() => CheckTarget("DeferVariadicCallee");
 
     [TestMethod]
+    public void CheckDeferredClosurePanicChain() => CheckTarget("DeferredClosurePanicChain");
+
+    [TestMethod]
     public void CheckDefinedArrayChainSlice() => CheckTarget("DefinedArrayChainSlice");
 
     [TestMethod]

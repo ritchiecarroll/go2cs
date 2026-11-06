@@ -49,7 +49,7 @@ using static go.CaptureModeValueParamLib_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("lib.go", "lib.cs", "AAss4oKCpoLogqqC", "23-27:1")]
+[assembly: GoPositionMap("lib.go", "lib.cs", "AAss4oKCpoLogqqC", "23-27:1", "", "", "", "19:21,20:13")]
 // </GoSourcePositionMaps>
 
 namespace go;

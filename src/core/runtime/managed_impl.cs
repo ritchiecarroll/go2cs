@@ -2951,7 +2951,7 @@ partial class runtime_package
             foreach (object attribute in assembly.GetCustomAttributes(typeof(GoPositionMapAttribute), false))
             {
                 if (attribute is GoPositionMapAttribute map && map.CsFile.Length > 0)
-                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls, map.Thunks);
+                    records[map.CsFile] = new GoPositionMapRecord(map.GoFile, map.Table, map.FuncLits, map.MethodValues, map.Calls, map.Thunks, map.Closures);
             }
         }
         catch (Exception)
@@ -3093,42 +3093,52 @@ partial class runtime_package
         remapModuleSource(goFile, normalizeModuleSourceRemap((moduleRoot, stagedRoot)) is { } entry ? (entry.From, entry.To) : null);
 
     // One converted file's recorded position map.
-    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "", string thunks = "")
+    private sealed class GoPositionMapRecord(string goFile, string table, string funcLits = "", string methodValues = "", string calls = "", string thunks = "",
+        string closures = "")
     {
         private Dictionary<int, string[]>? m_methodValues;
 
         private HashSet<(int line, int column)>? m_thunks;
 
+        private HashSet<(int line, int column)>? m_closures;
+
         // HasThunks is false for a record without a thunk list, so a lambda of such a file is never read for one.
         public bool HasThunks => thunks.Length > 0;
+
+        // HasClosures is false for a record without a deferred-closure list, so a lambda of such a file is never read for one.
+        public bool HasClosures => closures.Length > 0;
 
         // IsThunkSite answers whether a lambda whose first sequence point is (line, column) is a go/defer thunk
         // (GoPositionMapAttribute.Thunks). A malformed entry drops the whole list: every lambda of the file then
         // stays a frame, today's answer, rather than one being elided that Go shows.
-        public bool IsThunkSite(int line, int column)
+        public bool IsThunkSite(int line, int column) => (m_thunks ??= decodeSites(thunks)).Contains((line, column));
+
+        // IsDeferredClosureSite answers whether a lambda whose first sequence point is (line, column) is a Go func literal
+        // handed straight to defer (GoPositionMapAttribute.Closures). A malformed entry drops the whole list: every
+        // panic such a closure raises then keeps the refusal, today's answer, rather than one splicing a frame Go does
+        // not show.
+        public bool IsDeferredClosureSite(int line, int column) => (m_closures ??= decodeSites(closures)).Contains((line, column));
+
+        // A `<csLine>:<column>` list, comma-joined; empty when any entry is malformed.
+        private static HashSet<(int line, int column)> decodeSites(string encoded)
         {
-            if (m_thunks is null)
+            HashSet<(int, int)> decoded = [];
+
+            foreach (string entry in encoded.Split(',', StringSplitOptions.RemoveEmptyEntries))
             {
-                HashSet<(int, int)> decoded = [];
+                int colon = entry.IndexOf(':');
 
-                foreach (string entry in thunks.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                if (colon <= 0 || !int.TryParse(entry.AsSpan(0, colon), out int site) || site <= 0 ||
+                    !int.TryParse(entry.AsSpan(colon + 1), out int at) || at <= 0)
                 {
-                    int colon = entry.IndexOf(':');
-
-                    if (colon <= 0 || !int.TryParse(entry.AsSpan(0, colon), out int site) || site <= 0 ||
-                        !int.TryParse(entry.AsSpan(colon + 1), out int at) || at <= 0)
-                    {
-                        decoded.Clear();
-                        break;
-                    }
-
-                    decoded.Add((site, at));
+                    decoded.Clear();
+                    break;
                 }
 
-                m_thunks = decoded;
+                decoded.Add((site, at));
             }
 
-            return m_thunks.Contains((line, column));
+            return decoded;
         }
 
         // One later-line call of a statement (GoPositionMapAttribute.Calls).
@@ -4094,16 +4104,18 @@ partial class runtime_package
     //   - one that ends at the DEFERRING FUNCTION (its own catch caught the panic first): the site's
     //     last Go frame is that function, checked again against the next live Go frame by method, and
     //     dropped, since the live walk reports it;
-    //   - one that ends at the RUN, in exactly two cases, and the chain then continues with the panic
+    //   - one that ends at the RUN, in exactly three cases, and the chain then continues with the panic
     //     Beneath, whose gopanic called the deferred call: the zero-argument nil-deferred-func thunk
-    //     (no Go frame of its own; its fault frames alone), or the deferred delegate that is itself the
-    //     panic's first catcher (SiteIsTheDeferredCall; all its Go frames stay). Every OTHER panic a
-    //     deferred call raises is refused: the converter's defer wrappers (`() => c()` for a named func
-    //     type, `defer panic(v)`'s thunk, the lambdas for a call whose results are dropped) are
-    //     indistinguishable at run time from Go's closures, and Go ELIDES its deferwrap except over the
-    //     panic machinery, so any of them would splice a frame Go does not show, or misname one Go does
-    //     (COORD's verification of the re-cut, B2 and C3). A stated missing splice until the converter
-    //     marks its defer wrappers.
+    //     (no Go frame of its own; its fault frames alone), the deferred delegate that is itself the
+    //     panic's first catcher (SiteIsTheDeferredCall; all its Go frames stay), or a Go func literal
+    //     handed straight to defer, whose frame is the site's last Go frame (all its Go frames stay).
+    //     Every OTHER panic a deferred call raises is refused: the converter's defer wrappers (`() => c()`
+    //     for a named func type, `defer panic(v)`'s thunk, the lambdas for a call whose results are
+    //     dropped) look like Go's closures at run time, and Go ELIDES its deferwrap except over the panic
+    //     machinery, so any of them would splice a frame Go does not show, or misname one Go does (COORD's
+    //     verification of the re-cut, B2 and C3). The converter's DEFERRED-CLOSURE record is what tells a
+    //     closure from a wrapper (isRecordedDeferredClosure); without it, or without a symbol file to read
+    //     the lambda's position from, the closure is refused as before.
     // Only the fault kinds golib tags where the panic is RAISED are spliced: an explicit panic(v), a nil
     // dereference and an integer divide. Every other runtime error (goPanicIndex, the goPanicSlice family,
     // panicdottypeE/I, mapassign, closechan, ...: a runtime frame that is not modelled) is refused, and an
@@ -4244,9 +4256,13 @@ partial class runtime_package
         if (link.FaultKind == PanicFaultKind.Memory && adapterBeforeFirstGoFrame(raw))
             return null;
 
-        // An ends-at-Run site: only the nil-func thunk, or the deferred delegate that caught first.
+        // An ends-at-Run site: only the nil-func thunk, the deferred delegate that caught first, or a Go func literal
+        // handed straight to defer that raised the panic itself or through its callees, Go's `main.main.func1` and
+        // `panic(...)` above the deferring function. Its frame is the site's last Go frame, the one the Run called; the
+        // converter's closure record is what tells it from a converter thunk there, which Go elides (isRecordedDeferredClosure).
         if (link.SiteEndsAtRun && !link.SiteIsTheDeferredCall &&
-            !(site.Count == 0 && link.FaultKind == PanicFaultKind.Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod))
+            !(site.Count == 0 && link.FaultKind == PanicFaultKind.Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod) &&
+            !(site.Count > 0 && isRecordedDeferredClosure(site[^1].GetMethod())))
             return null;
 
         return (site, raw);
@@ -4498,6 +4514,56 @@ partial class runtime_package
             return false;
 
         return goPositionMapRecord(method, goSourcePath(file)) is { HasThunks: true } record && record.IsThunkSite(line, column);
+    }
+
+    // Whether a converted lambda is a Go func literal handed straight to defer (`defer func() { r := recover(); panic(r)
+    // }()`, emitted `defer(() => { ... }, ref ᒐ)`). Such a closure has no deferring frame of its own, so a panic it raises
+    // is first caught by the deferring function's GoFrame.Run, exactly like a panic a converter thunk raises; Go prints
+    // the closure's frame and elides the thunk, and only the converter knows which lambda is which. Its file's
+    // GoPositionMap record lists each such closure by its lambda's first sequence point (GoPositionMapAttribute.Closures).
+    // Read only when a panic chain is spliced, never at capture: an assembly with no closure record, or with no symbol
+    // file to read the lambda's position from, answers false, and the chain keeps its refusal.
+    private static bool isRecordedDeferredClosure(System.Reflection.MethodBase? method)
+    {
+        if (method is null || !method.Name.Contains(">b__", StringComparison.Ordinal))
+            return false;
+
+        System.Reflection.Assembly? assembly = method.DeclaringType?.Assembly ?? method.Module.Assembly;
+
+        if (assembly is null)
+            return false;
+
+        Dictionary<string, GoPositionMapRecord>? records;
+
+        lock (s_positionMapLock)
+        {
+            if (!s_positionMaps.TryGetValue(assembly, out records))
+            {
+                records = readGoPositionMaps(assembly);
+                s_positionMaps[assembly] = records;
+            }
+        }
+
+        bool anyClosure = false;
+
+        foreach (GoPositionMapRecord candidate in records.Values)
+        {
+            if (candidate.HasClosures)
+            {
+                anyClosure = true;
+                break;
+            }
+        }
+
+        if (!anyClosure)
+            return false;
+
+        (string? file, int line, int column) = methodSourceStart(method);
+
+        if (file is null || line <= 0)
+            return false;
+
+        return goPositionMapRecord(method, goSourcePath(file)) is { HasClosures: true } record && record.IsDeferredClosureSite(line, column);
     }
 
     // Interns one observed call site to its process-lifetime token -- the managed spelling of "a PC":

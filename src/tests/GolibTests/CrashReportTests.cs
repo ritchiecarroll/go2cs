@@ -380,10 +380,10 @@ public class CrashReportTests
             "expected Go's chain: the deferred function, panic, the deferring function -- read: " + string.Join(" | ", frames));
     }
 
-    // C2's shape: a deferred CLOSURE that recovers and re-panics. Go prints main.main.func1, panic, main.main; splicePanic
-    // refuses this chain (a closure and a converter defer wrapper are indistinguishable at run time), so the crash keeps
-    // its old single frame, exactly. This pins TODAY's output: the converter-marked-closure seat (option B, post-hop)
-    // moves it, and must move it here, visibly.
+    // C2's shape: a deferred CLOSURE that recovers and re-panics. Go prints main.main.func1, panic, main.main. This probe
+    // carries no GoPositionMap record, so its closure reads as an older artifact's: splicePanic cannot tell it from a
+    // converter defer wrapper and refuses the chain, and the crash keeps its old single frame, exactly. The converter's
+    // DEFERRED-CLOSURE record (B1) moves a recorded closure to Go's chain: DeferredClosureChainTests, the same shape.
     [TestMethod]
     public void ARefusedChainPrintsExactlyWhatItAlwaysHas()
     {

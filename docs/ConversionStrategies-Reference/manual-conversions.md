@@ -3636,7 +3636,7 @@ levels. Anything the IL cannot prove keeps the frames the trace has, and an impl
 nil dereference) inside an inlinee is not covered, since a statement cannot say which instruction faulted. Nothing
 is emitted for this and nothing runs off the panic path. Guarded by GolibTests' `PanicFramesInlinedPanicTests`,
 including the controls where the IL names no single callee.
-<!-- src/core/runtime/managed_impl.cs:4927 (`INLINED PANIC SITES`), :4935 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
+<!-- src/core/runtime/managed_impl.cs:4993 (`INLINED PANIC SITES`), :5001 (`NEVER A GUESS. A frame is added only when the IL proves which one`);
      src/tests/GolibTests/PanicFramesInlinedPanicTests.cs:14 (`AN EXPLICIT PANIC RAISED INSIDE A GO FUNCTION THE JIT INLINED`). -->
 
 ## `runtime.Stack(all: true)` enumerates every goroutine, and each one names the wait it is parked on
@@ -3796,10 +3796,31 @@ that closure (`defer(() => where("x"), ref ᒐ)`, `goǃ(ᴛ1 => f(ᴛ1, "c"), v)
 carries no mark on it. The file's `GoPositionMap` record does instead: its seventh argument lists each
 thunk by its body's 1-based line and UTF-16 column, which is the lambda's first sequence point. The
 Go-frame filter elides a compiler-generated lambda whose first sequence point is a listed site. A Go
-func literal is never listed: the converter emits it as a block lambda whose first sequence point is the
-line below its `=> {`, so it cannot sit at a thunk's position even when the Go source puts both on one
-line. The behavioral `DeferThunkFrames` (tiering on) and `LineMarkerDeferEndTC0` (tiering off) pin every
-shape against `go run`.
+func literal is never listed there: the converter emits it as a block lambda, whose first sequence point is
+its `{` in a Debug build and its first statement in a Release build, never the expression that follows a
+thunk's `=> `, so it cannot sit at a thunk's position even when the Go source puts both on one line. The
+behavioral `DeferThunkFrames` (tiering on) and `LineMarkerDeferEndTC0` (tiering off) pin every shape
+against `go run`.
+
+**A panic a deferred Go CLOSURE raises shows Go's chain.** When a deferred call panics, the rest of the
+deferred sequence runs on top of `runtime.gopanic`, so Go's `runtime.Callers` from inside a later deferred
+call, and its crash traceback, read that call, then `gopanic`, then the deferred function that raised the
+panic, then the deferring function (`f.func1 | runtime.gopanic | f.func2 | f`, where `func2` raised). The runtime splices that chain where it can prove which
+deferred function raised it. A Go func literal handed straight to `defer` is caught first by the deferring
+function's own `GoFrame.Run`, exactly as a converter thunk is, and Go prints the closure's frame where it
+elides the thunk. So the converter records each such literal in the file's `GoPositionMap` record: its
+eighth argument lists the lambda's `{` and its first statement, the first sequence point in each
+configuration. A site whose last Go frame is a listed closure is spliced; any other closure is not. The
+literal is listed in its plain, parenthesized and argument forms
+(`defer((@string v) => { … }, "argument", ref ᒐ)`). It is not listed in the variadic or multi-value spread
+forms, where a thunk invokes the literal (`defer((ᴛ1, ᴛ2) => ((Action…)((…) => { … }))(ᴛ1, ᴛ2), …)`), so
+the thunk is the deferred function. That chain is not spliced: Go shows the literal's frame there, and this
+prints the deferring function alone. A missing splice, never a wrong frame. The same holds for a literal
+inside a function hand-converted in a `*_impl.cs`, which the converter does not emit, and for an assembly
+whose records predate the eighth argument. The read is the thunk rule's symbol read and shares its
+no-symbol-file behavior: no PDB, no splice. Pinned by the behavioral `DeferredClosurePanicChain` against
+`go run`, by GolibTests' `DeferredClosureChainTests` (Debug and Release positions, the unrecorded, no-PDB
+and thunk refusals), and by the converter's `TestDeferredClosureSitesAreRecordedAndNothingElse`.<!-- B1, 2026-11-05, the BOARD row of 2026-10-24 ("a panic raised by a deferred Go CLOSURE loses its frames", option B): the record half is positionMapOperations.go's markDeferredClosureBody/ClosureSentinelMark; the splice is managed_impl.cs's isRecordedDeferredClosure in spliceableSite. -->
 
 The position is a symbol-file property, so this is the **one symbol read a capture makes**. It is asked
 only of a lambda in an assembly whose records list a thunk, and the answer is cached per method: an

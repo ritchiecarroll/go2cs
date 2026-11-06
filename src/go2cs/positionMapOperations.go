@@ -118,6 +118,83 @@ func (v *Visitor) thunkBodySentinel() string {
 	return PositionSentinel + ThunkSentinelMark + PositionSentinel
 }
 
+// ClosureSentinelMark is the content of a DEFERRED-CLOSURE sentinel, SENTINEL 000 SENTINEL. Decimal like the thunk's,
+// for the same reason, and never a statement's Go line.
+const ClosureSentinelMark = "000"
+
+// markDeferredClosureBody marks the lambda body of a Go func literal handed straight to defer, so its file's
+// GoPositionMap record lists it (encodeThunkSites over the closure sites; runtime's isRecordedDeferredClosure). A
+// panic such a closure raises is first caught by the deferring function's GoFrame.Run, exactly as one a converter thunk
+// raises; Go prints the closure's frame and elides the thunk, and the record is what tells the two apart at run time.
+// The runtime matches the lambda's FIRST SEQUENCE POINT, which a Debug build puts at a block body's `{` and a Release
+// build at its first statement, so a block body is marked at both; a collapsed body is an expression, the same in both.
+func (v *Visitor) markDeferredClosureBody(body string) string {
+	if v.fset == nil {
+		return body
+	}
+
+	sentinel := PositionSentinel + ClosureSentinelMark + PositionSentinel
+
+	if !strings.HasPrefix(body, "{") {
+		return sentinel + body
+	}
+
+	if statement := firstStatementOffset(body); statement > 0 {
+		return sentinel + body[:statement] + sentinel + body[statement:]
+	}
+
+	return sentinel + body
+}
+
+// firstStatementOffset finds where a block's first statement starts: the first line after the block's `{` that holds
+// code, past its indentation and any sentinel ahead of it, or 0 when the block holds none (`{ }`). A blank line, or one
+// that opens with a comment, holds no sequence point and is passed over.
+func firstStatementOffset(block string) int {
+	line := strings.Index(block, "\n")
+
+	for line >= 0 && line+1 < len(block) {
+		at := line + 1
+
+		for {
+			for at < len(block) && (block[at] == ' ' || block[at] == '\t') {
+				at++
+			}
+
+			if !strings.HasPrefix(block[at:], PositionSentinel) {
+				break
+			}
+
+			end := strings.Index(block[at+1:], PositionSentinel)
+
+			if end < 0 {
+				return 0
+			}
+
+			at += end + 2
+		}
+
+		rest := block[at:]
+
+		switch {
+		case strings.HasPrefix(rest, "}"):
+			return 0
+		case rest == "" || rest[0] == '\r' || rest[0] == '\n' || strings.HasPrefix(rest, "//") || strings.HasPrefix(rest, "/*"):
+			next := strings.Index(rest, "\n")
+
+			if next < 0 {
+				return 0
+			}
+
+			line = at + next
+			continue
+		}
+
+		return at
+	}
+
+	return 0
+}
+
 // thunkSite is one marked thunk body: its 1-based emitted C# line and 1-based UTF-16 column, the units a
 // portable PDB's sequence point counts in.
 type thunkSite struct {
@@ -523,7 +600,7 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 		return
 	}
 
-	stripped, entries, thunks, bounded := extractPositionAndThunkSentinels(text)
+	stripped, entries, thunks, bounded, closures := extractPositionAndThunkSentinels(text)
 	bounded = assignBoundedGoOrdinals(stripped, bounded)
 
 	v.outputBuilder.Reset()
@@ -553,14 +630,16 @@ func (v *Visitor) finalizePositionMap(outputFileName string) {
 	// only when the file declares literals — a three-argument record stays exactly what it was,
 	// and an older artifact without the argument simply answers the runtime's fallback derivation.
 	//
-	// The METHOD-VALUE half is the optional fifth argument, the PER-CALL half the optional sixth and the
-	// THUNK half the optional seventh, so a file that records a later one passes an empty string for each
-	// earlier one it lacks; a file that records none keeps exactly the record it had.
+	// The METHOD-VALUE half is the optional fifth argument, the PER-CALL half the optional sixth, the
+	// THUNK half the optional seventh and the DEFERRED-CLOSURE half the optional eighth, so a file that
+	// records a later one passes an empty string for each earlier one it lacks; a file that records none
+	// keeps exactly the record it had.
 	optional := []string{
 		encodeFuncLitNames(v.funcLitEntries),
 		encodeMethodValueNames(v.methodValueEntries),
 		encodePositionCalls(entries),
 		encodeThunkSites(thunks),
+		encodeThunkSites(closures),
 	}
 
 	for len(optional) > 0 && optional[len(optional)-1] == "" {
@@ -699,18 +778,20 @@ func positionMapCsName(outputFileName string) string {
 // check below already treats it as whitespace (strings.TrimSpace trims '\r'), and rejoining on
 // "\n" reproduces it verbatim, so no separate strip/re-add step is needed for round-trip fidelity.
 func extractPositionSentinels(text string) (string, []positionEntry) {
-	stripped, entries, _, _ := extractPositionAndThunkSentinels(text)
+	stripped, entries, _, _, _ := extractPositionAndThunkSentinels(text)
 	return stripped, entries
 }
 
 // extractPositionAndThunkSentinels is extractPositionSentinels that also answers the thunk sites the text
-// marks (thunkBodySentinel) and the bounded goǃ invocations (boundedGoSentinel), in emitted order: each at the
-// line it sits on and the column of the text that follows it once every sentinel is stripped.
-func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []thunkSite, []boundedGoSite) {
+// marks (thunkBodySentinel), the bounded goǃ invocations (boundedGoSentinel) and the deferred closures' bodies
+// (markDeferredClosureBody), in emitted order: each at the line it sits on and the column of the text that
+// follows it once every sentinel is stripped.
+func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []thunkSite, []boundedGoSite, []thunkSite) {
 	lines := strings.Split(text, "\n")
 	entries := make([]positionEntry, 0, len(lines))
 	var thunks []thunkSite
 	var bounded []boundedGoSite
+	var closures []thunkSite
 	bound := 0
 
 	for index, line := range lines {
@@ -753,6 +834,11 @@ func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []t
 				continue
 			}
 
+			if lineText == ClosureSentinelMark {
+				closures = append(closures, thunkSite{csLine: index + 1, column: len(utf16.Encode([]rune(rebuilt.String()))) + 1})
+				continue
+			}
+
 			if err == nil {
 				marks = append(marks, positionMark{
 					goLine:  goLine,
@@ -782,7 +868,7 @@ func extractPositionAndThunkSentinels(text string) (string, []positionEntry, []t
 		}
 	}
 
-	return strings.Join(lines, "\n"), entries, thunks, bounded
+	return strings.Join(lines, "\n"), entries, thunks, bounded, closures
 }
 
 // encodeThunkSites renders the THUNK half of a record: one `<line>:<column>` per marked thunk body, comma-joined
