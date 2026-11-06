@@ -223,13 +223,13 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22#840b80 + src/core/image/png/reader.cs:1264#c96c26 ·
   (the lazy holder: src/core/unicode/tables.cs:2887 `[GoLazy] partial class lazyᴛ_Lu {`) ·
   src/core/reflect/all_test.cs:64#626291 + src/core/reflect/go2cs_test_host.cs:1#0abf19 ·
-  src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:187#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
+  src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:189#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17#ee46fb + src/core/internal/strconv/atoi.cs:135#4606f0 ·
-  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:168#07f377 (from src/go2cs/csproj-template.xml:153#07f377) ·
+  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:170#07f377 (from src/go2cs/csproj-template.xml:155#07f377) ·
   src/core/encoding/gob/codec_test.cs:1206#1265b9 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:52#dd67ea ·
-  src/tests/Behavioral/SliceAliasing/main.cs.target:12#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:141#9a82dc ·
+  src/tests/Behavioral/SliceAliasing/main.cs.target:12#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:143#9a82dc ·
   src/tests/Behavioral/NamedReturnDefer/main.cs.target:41#f6bf33 · src/tests/Behavioral/ShadowedCompoundAssign/main.cs.target:10#434a84 ·
   src/core/internal/strconv/atoi.cs:265#193b08 · src/tests/Behavioral/MapCommaOk/main.cs.target:10#dea2f1 ·
   src/tests/Behavioral/RangeStatements/RangeStatements.cs.target:8#407329 · src/tests/Behavioral/LocalStringConstHoist/main.cs.target:21#3af542 + src/core/internal/strconv/atoi.cs:261-262#a94661 ·
@@ -626,7 +626,7 @@ say why.
 [`builtin`](../src/core/golib/builtin.cs) class with `using static`. So a call such as `len(ch)` reads as it
 does in Go. The same project file also maps Go's sized numeric names, and `any`, to .NET types:
 
-<!-- source: src/tests/Behavioral/ChannelCapLen/ChannelCapLen.csproj:138-153 -->
+<!-- source: src/tests/Behavioral/ChannelCapLen/ChannelCapLen.csproj:140-155 -->
 ```xml
     <Using Include="go.builtin" Static="True" />
 …
@@ -983,7 +983,7 @@ has `<OutputType>Exe</OutputType>`, and `registry`'s has `<OutputType>Library</O
 imported package is its own project, and the importer references it. The project file also defines the
 `GoInit` alias and compiles `package_info.cs` ahead of the other files:
 
-<!-- source: src/tests/Behavioral/BlankImportSideEffects/BlankImportSideEffects.csproj:4-190 -->
+<!-- source: src/tests/Behavioral/BlankImportSideEffects/BlankImportSideEffects.csproj:4-192 -->
 ```xml
     <OutputType>Exe</OutputType>
 …
@@ -1021,7 +1021,7 @@ Settings with no managed value (`-compiler`, `-buildmode`, `GOAMD64`, `vcs.*`) a
 converted outside a module carries no stamp, and a replaced dependency is reported without its replacement,
 which can be a local path:
 
-<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:193-195 -->
+<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:195-197 -->
 ```xml
     <AssemblyAttribute Include="go.GoModInfoAttribute">
       <_Parameter1>path&#9;go2cs/BuildInfoSettings&#10;mod&#9;go2cs/BuildInfoSettings&#9;(devel)&#9;&#10;</_Parameter1>
@@ -1044,7 +1044,7 @@ defaults to `windows`; a build sets another target with, for example, `-p:GoTarg
 with OS subfolders keeps a `package_info.cs` in each one, and the project compiles the chosen target's
 copy first. The `Exists` conditions let one project file serve both layouts:
 
-<!-- source: src/core/os/os.csproj:177-201 -->
+<!-- source: src/core/os/os.csproj:179-203 -->
 ```xml
   <PropertyGroup Condition="'$(GoTargetOS)'==''">
     <GoTargetOS>windows</GoTargetOS>
@@ -1847,7 +1847,7 @@ rules further down this section):
      src/go2cs/hoistedLiteralOperations.go:1737 `func structStaticReadAccessorDecl(`; the GoBigConst field, for an
      int-kind value that fits neither int64 nor uint64: src/go2cs/visitValueSpec.go:1192-1199 `writeUntypedConst(true)`, e.g.
      src/core/math/big/arith.cs:23-24 `internal static ref readonly GoBigConst _B => ref _Bᵇ;` … `private static readonly GoBigConst _Bᵇ`
-     (the accessor over its backing field); the alias: src/go2cs/csproj-template.xml:154 `Alias="GoBigConst"`. -->
+     (the accessor over its backing field); the alias: src/go2cs/csproj-template.xml:156 `Alias="GoBigConst"`. -->
 
 When the value is computed, a `/* … */` comment beside it keeps the Go expression.
 
@@ -2231,7 +2231,7 @@ case has its own paragraph in this section.
 Each converted project declares them. So `uint8` is C#'s `byte`, `int64` is `long`, and `rune` is `int`.
 Go's `byte` stays C#'s own `byte`, the same type as `uint8`.
 <!-- each project file carries lines such as `<Using Include="System.Int32" Alias="rune" />`:
-     src/core/bufio/bufio.csproj:168#07f377, from src/go2cs/csproj-template.xml:142-153#9dcfa6 -->
+     src/core/bufio/bufio.csproj:170#07f377, from src/go2cs/csproj-template.xml:144-155#9dcfa6 -->
 
 **`uintptr` is its own type.** It becomes golib's [`uintptr`](../src/core/golib/uintptr.cs), a small struct
 that holds one `nuint`. It is not an alias, because Go treats `uint` and `uintptr` as different types, and
@@ -2813,7 +2813,7 @@ aliases, as it does for the fixed-width integers ([Integer Types and Arithmetic]
 halves from golib, go2cs's [runtime library](#the-golib-runtime-library). Both C# floating-point types follow
 IEEE 754, as Go's do, so infinities, NaN and negative zero behave as in Go: a float divided by zero gives
 `+Inf` or `-Inf`, with no panic.
-<!-- aliases: src/go2cs/csproj-template.xml:150-152 `Alias="float32" … Alias="complex128"`; complex64:
+<!-- aliases: src/go2cs/csproj-template.xml:152-154 `Alias="float32" … Alias="complex128"`; complex64:
      src/core/golib/complex64.cs:18 `public readonly struct complex64`, :34-35 `float m_real; … float m_imaginary;`.
      Divide by zero: probe, go2cs at 8c091fc3aa, `fmt.Println(1/z, -1/z)` -> `fmt.Println(1D / z, -1D / z);`,
      Go prints `+Inf -Inf`. -->
@@ -4466,7 +4466,7 @@ Go's type names stay readable too. Go's `int` appears as C# `nint`, a native-siz
 such as `uint32` and `int64` keep their Go spelling: each converted project declares them as aliases
 of the C# types. `uintptr` is golib's own `uintptr` struct
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
-<!-- uintptr is a golib struct, not a project alias: src/core/golib/uintptr.cs:39#d446ed; project aliases such as `<Using Include="System.UInt32" Alias="uint32" />` (src/core/bufio/bufio.csproj:159#1a4b9a). -->
+<!-- uintptr is a golib struct, not a project alias: src/core/golib/uintptr.cs:39#d446ed; project aliases such as `<Using Include="System.UInt32" Alias="uint32" />` (src/core/bufio/bufio.csproj:161#1a4b9a). -->
 
 **Literals and `make`.** A slice literal is golib's `slice<T>` builtin over a C# collection expression, an
 array literal a plain C# array turned into a Go value with `.array()`, and `make` calls a constructor. So
@@ -8064,7 +8064,7 @@ Go's `defer`, `panic` and `recover` become a C# `try`/`catch`/`finally` plus thr
 [golib](#the-golib-runtime-library), go2cs's runtime library. The function body stays inline, so it still
 reads like the Go. You will notice a local named `ᒐ`, `defer(…, ref ᒐ)` calls, and `throw panic(x)`.
 
-<!-- src/tests/Behavioral/DeferSimple/DeferSimple.csproj:138 `<Using Include="go.builtin" Static="True" />` -->
+<!-- src/tests/Behavioral/DeferSimple/DeferSimple.csproj:140 `<Using Include="go.builtin" Static="True" />` -->
 `defer`, `panic` and `recover` are static methods of golib's [`builtin`](../src/core/golib/builtin.cs)
 class. Every converted project imports that class with a project-wide `using static`, so the calls need
 no class name, as in Go ([Built-in Functions](#built-in-functions)).
