@@ -361,3 +361,52 @@ func TestCommentAfterAConverterNoteIsTrailing(t *testing.T) {
 		}
 	}
 }
+
+// The census leaves out a hand-owned file, and a file is hand-owned when it carries the attribute
+// `[module: GoManualConversion]` (or `[module: go.GoManualConversion]`) on a line of its own, the predicate
+// repoguard's hand-own guards use. A converted file can MENTION the marker without carrying it: the
+// placeholder go2cs writes for a displaced func names it in a comment. Such a file is converted output and is
+// in the census. Fixtures: the placeholder (in), the marker as a string in code (in), the attribute bare,
+// qualified and indented (out).
+func TestHandOwnIsTheAttributeLineNotAMention(t *testing.T) {
+	const placeholder = "// go2cs generated this placeholder — func boolToUint8 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])"
+
+	files := map[string]string{
+		"placeholder": "namespace go;\n\n" + placeholder + "\n\npartial class p_package {\n} // end p_package\n",
+		"instring":    "namespace go;\n\npartial class p_package {\n\nstatic readonly @string marker = \"[module: GoManualConversion]\";\n\n} // end p_package\n",
+		"handown":     "[module: GoManualConversion]\n\nnamespace go;\n\npartial class p_package {\n} // end p_package\n",
+		"qualified":   "[module: go.GoManualConversion]\n\nnamespace go;\n\npartial class p_package {\n} // end p_package\n",
+		"indented":    "  [module:  GoManualConversion]\n\nnamespace go;\n\npartial class p_package {\n} // end p_package\n",
+	}
+	want := []string{"instring", "placeholder"}
+
+	core, goroot := t.TempDir(), t.TempDir()
+
+	if err := os.MkdirAll(core+"/p", 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.MkdirAll(goroot+"/src/p", 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	for base, cs := range files {
+		if err := os.WriteFile(core+"/p/"+base+".cs", []byte(cs), 0o644); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(goroot+"/src/p/"+base+".go", []byte("package p\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var got []string
+
+	for _, p := range FindPairs(core, goroot) {
+		got = append(got, p.Base)
+	}
+
+	if !slices.Equal(got, want) {
+		t.Errorf("paired %v, want %v (a mention of GoManualConversion is not the attribute)", got, want)
+	}
+}
