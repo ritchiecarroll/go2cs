@@ -1,0 +1,10 @@
+exec->hook                             median   44.6 ms  jit   0.0  loads   0.0
+hook->golib load                       median   35.6 ms  jit   0.0  loads   0.2
+init burst (to 1st method-set)         median  301.1 ms  jit  32.5  loads  28.5
+1st method-set (ext scan)              median  243.2 ms  jit   0.9  loads   0.7
+after scan -> Main (test pkg vars)     median  264.8 ms  jit  52.5  loads   0.1
+Main -> TestMain (preload, rescan)     median   79.1 ms  jit  13.2  loads   4.6
+TestMain -> exit                       median   15.8 ms  jit   2.6  loads   0.0
+(pkcs1 JIT at)                         median  647.8 ms  jit   0.0  loads   0.0
+(exit)                                 median 1003.0 ms  jit   0.0  loads   0.0
+JIT by owner (all threads): {'hook/stub': 15.6, 'System': 16.8, 'host': 0.0, 'golib generic/runtime': 39.0, 'converted std': 42.6, 'other': 0.1}

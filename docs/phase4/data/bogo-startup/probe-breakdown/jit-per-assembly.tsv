@@ -1,0 +1,12 @@
+owner	jit_ms_median	methods_median
+golib	40.83	122
+crypto.internal.fips140.nistec.fiat	26.58	4
+System.*	17.21	25
+crypto.internal.fips140.ecdsa	5.66	3
+(IL stubs)	4.01	13
+internal.cpu	3.78	1
+flag	3.39	7
+crypto.internal.fips140.edwards25519.field	1.11	4
+math.bits	0.82	3
+math.big	0.48	1
+(other)	0.15	1

@@ -2641,6 +2641,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
 
     [TestMethod]
+    public void CheckDeferGoPointerValueReceiver() => CheckTarget("DeferGoPointerValueReceiver");
+
+    [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]

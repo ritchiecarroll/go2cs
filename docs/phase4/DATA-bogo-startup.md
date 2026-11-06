@@ -130,3 +130,179 @@ The single-worker medians did not move. The whole-run rate did, from 1,695 to 1,
   - Native AOT for this one host, re-tried on a box with more memory, or after golib's generic nest is broken.
 
 — P1 (2026-11-05)
+
+## 8. The probe launch, broken down (appended 2026-11-06)
+
+> **State: MEASURED (2026-11-06), the same box, master `b0b48783dc`.** Measurement only: no converter, golib or
+> pipeline change rides with this section. The instruments were a start-up hook and two scratch builds that were
+> never committed. Raw readings, the hook's source and the scratch patches are in
+> [`data/bogo-startup/probe-breakdown/`](data/bogo-startup/probe-breakdown/). The prediction was posted before the
+> first run (mailbox `35d43f2cb`) and is scored in 8.6.
+
+### 8.1 Method
+
+- **The launch.** The host from §3's arm (a), rebuilt at `b0b48783dc`, run directly as
+  `crypto.tls.tests -bogo-mode -is-handshaker-supported` with `DOTNET_TieredCompilation=0`, from the runner's
+  directory. Each arm is 1 warm-up and 24 timed launches. Run this way the probe reads **950 ms** (p25 to p75: 935
+  to 975). Through the runner it read 1.01 s in §3.
+- **Hook** (`instrument/StartupHook.cs`, loaded through `DOTNET_STARTUP_HOOKS`, no packages). It records:
+  - the time from exec to the hook;
+  - `AppDomain.AssemblyLoad`;
+  - an in-process `EventListener` on the runtime provider, with the AssemblyLoader, Loader and JIT keywords (and
+    TypeLoad in one arm);
+  - golib's `ScanProbeForTest` delegate, which the extension-method scan calls once per assembly it scans.
+  `perf` is not on the box. `dotnet-trace` was not installed, so there are no stack samples.
+- **Scratch build 1** timed `builtin.initPackage` per package. It read about 0 for every package. A package's
+  module initializer runs implicitly, before `RuntimeHelpers.RunModuleConstructor` is reached, so the timer cannot
+  see package init. **Scratch build 2** added phase marks: test-host entry, the reference-closure preload, the
+  extension-method scan, each method-set computation, and the `TestMain` call.
+- **Controls.** The hook without the listener costs nothing measurable: 948 ms against 950 ms. With the listener,
+  the hook's own exit timestamp reads 985 to 1,020 ms, 4 to 7% over. Scratch build 2 without instruments reads
+  937 ms. Type-load events slow the launch by 0.49 s, so that arm is used for counts only.
+
+### 8.2 Where the time goes, by phase
+
+These are medians of 24 launches of scratch build 2 with every instrument on, whose exit reads 1,003 ms. Phase
+boundaries are the hook, golib's load, the marks and exit.
+
+| phase | ms | JIT inside | loads inside |
+|:--|--:|--:|--:|
+| exec to hook: runtime start and the 512 MB bundle (the runtime alone takes 28 ms, §5) | 45 | 0 | 0 |
+| hook to golib loaded (mostly the listener's own setup; 8 ms with the listener off) | 36 | 0 | 0 |
+| **package init**: golib loaded to the first method-set question | **301** | 33 | 29 |
+| **golib's extension-method scan**, inside that first method-set question | **243** | 1 | 1 |
+| **the test package's own variables**: from the scan's end to the test host's `Run` | **265** | 53 | 0 |
+| `Run` to `TestMain`: the closure preload (15 ms) and a second scan (19 to 22 ms) | 79 | 13 | 5 |
+| `TestMain` to exit: `flag.Parse`, `bogoShim` prints `No`, `os.Exit` | 16 | 3 | 0 |
+
+- **Package init ends about 0.90 s into the 0.95 s launch.** The host's module initializer forces every import
+  before `Main`, so everything before `Run` is package init, the extension scan included.
+- **The extension scan.** The first method-set question during package init calls golib's `GetExtensionMethods`
+  (`TypeExtensions.ExtensionMethodRegistry.cs`). Which package's init asks it is not identified; there are no
+  stacks. The scan runs `GetTypes()` on every loaded go2cs assembly and `GetMethods` on every top-level sealed
+  class. On the host with the listener off:
+  - pass 0 scans 179 assemblies in 207 ms;
+  - pass 1 takes 17 ms. It runs because 4 assemblies loaded during pass 0, and each `AssemblyLoad` clears the
+    cache;
+  - pass 2 takes 18 ms, after the preload's loads clear the cache again.
+  Of pass 0, converted std is 185 ms, golib 11 ms, the host 7 ms and System 0.3 ms. golib is scanned because its
+  name, `golib`, does not match the `go.golib.` skip prefix.
+- **The test package's variables.** These are `handshake_test.go:554` to `:575`, which Go also evaluates at start.
+  The split is read from first-JIT timestamps, so it is inferred:
+
+  | part | ms |
+  |:--|--:|
+  | before the first RSA key | 13 |
+  | two RSA keys (`ParsePKCS1PrivateKey`) | 15 |
+  | the P-521 ECDSA key | 179 |
+  | the P-256 and Ed25519 keys and the rest | 60 |
+
+  164 ms of the P-521 key is the P-521 generator-table build, with no JIT or load inside it. The P-256 part
+  includes 27 ms of JIT of four `fiat` P-256 methods.
+- **Type loading.** A probe loads 31,927 distinct types: 10,199 System generic instantiations, 3,253 golib boxes
+  and collections, and 18,475 others, mostly nested types of converted package classes. With type-load events on,
+  about 0.19 s moves from unattributed time into type-load intervals. So type loading is about 0.19 s, inferred by
+  that difference, not measured directly.
+
+### 8.3 Per assembly
+
+The columns are measured on the host with no scratch code:
+- load: AssemblyLoadStart to Stop;
+- scan: pass-0 time of golib's extension scan on that assembly;
+- JIT: methods whose type belongs to that package.
+
+Init is measured only for the host's own variables, by the marks. Every other package's init is inside the 301 ms
+package-init phase and cannot be split per package with these instruments. The top 20 by total:
+
+| # | assembly | load ms | scan ms | JIT ms | init ms | total ms |
+|--:|:--|--:|--:|--:|--:|--:|
+| 1 | crypto.tls.tests (the host) | — | 6.6 | (in init) | 264.8 | 271.4 |
+| 2 | golib | 0.11 | 10.9 | 40.8 | — | 51.8 |
+| 3 | runtime | 0.12 | 33.1 | 0 | — | 33.2 |
+| 4 | crypto.internal.fips140.nistec.fiat | 0.07 | 1.8 | 26.6 | — | 28.4 |
+| 5 | System.* (58 assemblies, together) | 4.1 | 0.3 | 17.2 | — | 21.6 |
+| 6 | crypto.ed25519 | 16.16 | 0.5 | 0 | — | 16.7 |
+| 7 | net | 0.09 | 11.0 | 0 | — | 11.1 |
+| 8 | crypto.tls | 0.10 | 8.9 | 0 | — | 9.0 |
+| 9 | crypto.x509 | 0.07 | 8.6 | 0 | — | 8.6 |
+| 10 | crypto.internal.fips140.ecdsa | 0.07 | 1.0 | 5.7 | — | 6.7 |
+| 11 | reflect | 0.07 | 6.5 | 0 | — | 6.5 |
+| 12 | flag | 0.15 | 1.7 | 3.4 | — | 5.2 |
+| 13 | syscall | 0.15 | 4.9 | 0 | — | 5.0 |
+| 14 | unique | 0.07 | 4.9 | 0 | — | 5.0 |
+| 15 | vendor.golang.org.x.net.dns.dnsmessage | 0.09 | 4.2 | 0 | — | 4.3 |
+| 16 | internal.abi | 0.08 | 4.1 | 0 | — | 4.2 |
+| 17 | internal.cpu | 0.08 | 0.2 | 3.8 | — | 4.0 |
+| 18 | os | 0.10 | 3.9 | 0 | — | 4.0 |
+| 19 | regexp | 0.06 | 3.6 | 0 | — | 3.7 |
+| 20 | html.template | 0.08 | 3.5 | 0 | — | 3.6 |
+
+- 242 assemblies load: the host, golib, 182 converted std and 58 System. A load costs 0.06 to 0.15 ms, and loads
+  total 34 ms. The one exception is crypto.ed25519, whose single load reads 16 ms; its cause is not isolated.
+- golib's JIT is 122 instantiations of golib generics over converted types (`ж<T>`, `FieldRefWrappers`, `StandardBox`),
+  41 ms. All JIT on the main thread is 184 methods and 104 ms.
+- **Shares.** These are of the 985 ms that 8.2's phase medians sum to, by whose code runs:
+
+  | share | where the time goes |
+  |:--|:--|
+  | 8% | runtime start and the hook (36 ms of it is the listener) |
+  | 31% | package init of converted std and golib, not separable per package |
+  | 25% | golib's extension scan, 27% with the second scan; its cost scales with converted std (185 of 203 ms in pass 0) |
+  | 27% | the host's own variables, spent in converted std crypto |
+  | 10% | the test host from `Run` to exit, the second scan included |
+
+  Generator output is compiled into each package's own assembly, so it cannot be separated by assembly. JIT method
+  names do not mark it either.
+
+### 8.4 Levers, ranked by expected saving (none implemented)
+
+1. **Replace the extension-method scan.** Up to about 0.26 s (243 ms plus the 19 to 22 ms second scan), about 27%.
+   - Read a per-assembly list of extension methods written at build time (by the converter or a generator) instead
+     of reflecting over every type.
+   - Keep the cache across assembly loads by adding the new assembly's entries, instead of clearing it. That saves
+     about 35 ms of rescans here.
+   - Skip golib by its real name: 11 ms.
+   This is a narrower scan, not lazy init. The scan is already lazy, but package init asks the question.
+2. **The test package's variables.** About 0.26 s, of which 0.18 s is the P-521 key. Go evaluates these at start
+   too, so lazy init would change behavior and is not a lever. The levers are:
+   - the speed of converted P-521 arithmetic: the generator-table build is 164 ms of ReadyToRun code with no JIT
+     inside;
+   - ReadyToRun coverage for the four `fiat` P-256 methods that JIT anyway: 27 ms.
+3. **The package-init phase.** About 0.30 s.
+   - Fewer assemblies (a composite already) can save at most the 29 ms of loads.
+   - Trimming the closure helps only with packages the binary does not import. The probe initializes every package
+     the test binary imports, as Go does.
+   - The remaining roughly 0.24 s of init code and type loading needs a per-package timer the converter emits,
+     because module initializers run implicitly. That instrument is a later seat.
+4. **JIT residue.** About 0.10 s: golib generic instantiations 41 ms, `fiat` 27 ms, System 17 ms. The lever is
+   ReadyToRun instantiation coverage.
+5. **The test host's `Run`.** About 0.08 s: the preload (15 ms) and the second scan, which lever 1 would remove.
+
+### 8.5 What this changes
+
+The 0.95 s is three roughly equal parts plus a small rest:
+- package init, about 0.30 s;
+- golib's extension-method scan, about 0.25 s;
+- the test package's own key variables, about 0.26 s.
+
+It is not mostly JIT or assembly loading. Lever 1 is golib-only and does not touch emission. Lever 2's P-521 cost
+is converted std performance, measured here in its start-up role only.
+
+### 8.6 The prediction, scored
+
+| predicted | measured | score |
+|:--|:--|:--|
+| 230 to 260 assemblies; System 30 to 70 | 242; System 58 | MET |
+| loads 0.05 to 0.25 s | 0.034 s | MISSED, under the band |
+| JIT 0.10 to 0.45 s and the largest single part | 0.104 s with 184 methods; the scan (0.24 s) and the host's variables (0.26 s) are larger | MISSED; the falsifier fired on "largest" |
+| package init code 0.20 to 0.50 s | about 0.24 s, inside the 0.30 s phase | MET as a total |
+| top 20 packages hold at least 60%; unicode in the top 5 | not measurable: the per-package timer was blind | NOT SCORED |
+| converted std at least 70%; golib at most 15%; System at most 10% | golib's scan 25 to 27%; System about 2%; converted std's own share not separable | MISSED on golib |
+| phases close within 10% of the wall | phases close; 0.24 s is not attributed per package | MET per phase, MISSED per package (the falsifier fired) |
+| hook alone within +5%; with the listener within +30% | +0% and +4 to 7% | MET |
+
+The misses share one cause. I predicted from §5's "loading about 240 assemblies and running their package
+inits", read loading as costly, and had no model of golib doing reflection during init. The scan, and the test
+package's P-521 key, were outside the prediction.
+
+— P1 (2026-11-06)

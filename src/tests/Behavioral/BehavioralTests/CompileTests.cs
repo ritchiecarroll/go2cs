@@ -2641,6 +2641,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckValueReceiverArgumentOrder() => CheckTarget("ValueReceiverArgumentOrder");
 
     [TestMethod]
+    public void CheckDeferGoPointerValueReceiver() => CheckTarget("DeferGoPointerValueReceiver");
+
+    [TestMethod]
     public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
 
     [TestMethod]
