@@ -1,0 +1,29 @@
+== dropA 07:33:19
+rc=1
+  Failed TheListYieldsExactlyTheMetadataWalksExtensionMethods [44 ms]
+   Assert.AreEqual failed. Expected:<0>. Actual:<31>. compress.flate: hosts the walk finds and the list omits: go.compress.flate_package_asserts
+context: hosts the walk finds and the list omits: go.context_package_asserts
+crypto.cipher: hosts the walk finds and the list omits: go.crypto.cipher_package_asserts
+crypto: hosts the walk finds and the list omits: go.crypto_package_asserts
+crypto.internal.fips140.drbg: hosts the walk finds and the list omits: go.crypto.internal.fips140.drbg_package_asserts
+crypto.internal.fips140.ecdsa: hosts the walk finds and the list omits: go.crypto.internal.fips140.ecdsa_package_asserts
+crypto.internal.fips140.hmac: hosts the walk finds and the list omits: go.crypto.internal.fips140.hmac_package_asserts
+encoding.binary: hosts the walk finds and the list omits: go.encoding.binary_package_asserts
+encoding: hosts the walk finds and the list omits: go.encoding_package_asserts
+errors: hosts the walk finds and the list omits: go.errors_package_asserts
+flag: hosts the walk finds and the list omits: go.flag_package_asserts
+fmt: hosts the walk finds and the list omits: go.fmt_package_asserts
+hash: hosts the walk finds and the list omits: go.hash_package_asserts
+internal.bisect: hosts the walk finds and the list omits: go.internal.bisect_package_asserts
+internal.profile: hosts the walk finds and the list omits: go.internal.profile_package_asserts
+internal.reflectlite: hosts the walk finds and the list omits: go.internal.reflectlite_package_asserts
+internal.testenv: hosts the walk finds and the list omits: go.internal.testenv_package_asserts
+internal.testlog: hosts the walk finds and the list omits: go.internal.testlog_package_asserts
+== done 07:37:36
+== dropA 07:37:36
+rc=1
+  Failed TheInterfaceAssertsClassIsListed [119 ms]
+   CollectionAssert.Contains failed. 
+     at go2cs.Tests.ExtensionHostListTests.TheInterfaceAssertsClassIsListed() in <tree>/src/tests/GenTests/ExtensionHostListTests.cs:line 106
+Failed!  - Failed:     1, Passed:     8, Skipped:     0, Total:     9, Duration: 3 s - GenTests.dll (net10.0)
+== done 07:37:43
