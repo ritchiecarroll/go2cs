@@ -184,7 +184,7 @@ public static partial class TypeExtensions
             (MethodInfo, Type)[] methods = extended?.Methods ?? [];
 
             if (found.Count > 0)
-                methods = [.. methods, .. found];
+                methods = methods.Concat(found).ToArray();
 
             latest = new ExtensionScan(methods, nowVisited?.ToImmutable() ?? visited, generation);
 
