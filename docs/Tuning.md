@@ -110,7 +110,7 @@ time; the ratio is PGO off against the default:
 <!-- Source: docs/phase4/DATA-hop126-perf.md section 10, the tuning sweep (G-LAPTOP, win-x64, AMD Ryzen 5 PRO 6650U,
      SDK 10.0.400 / runtime 10.0.11; 11 interleaved rounds per program, every arm twice as its own A/A; a cell moves
      only beyond the larger of its two arms' A/A gaps and IQRs). The table "TieredPGO=0 under JIT (JG/JP)": the moved
-     rows only, numbers as the record gives them (variant = JIT plain under DOTNET_TieredPGO=0, baseline = JIT plain
+     rows only, numbers as the record gives them, each the mean of its arm's two A/A medians (variant = JIT plain under DOTNET_TieredPGO=0, baseline = JIT plain
      with the defaults). Only the JIT was swept with PGO off. Raw: docs/phase4/DATA-hop126-perf/sweep/sweep-verdict.tsv
      (rows JG/JP), samples sww-arms-1.tsv and sww-arms-2.tsv. -->
 
@@ -166,8 +166,8 @@ itself.
 [performance suite's](Performance.md) programs ran with the template's delay of 0 and with .NET's own 100 ms. These
 programs run for about 0.1 to 2.5 s, so the delay decides how much of each run executes before the optimized code
 arrives. In a long-running service the delay is only a start-up transient, so the table overstates what the setting
-costs once a service is warm. With the delay at 100, 14 of the 17 programs are slower under the JIT and 12 under
-ReadyToRun. Startup is the one program that is faster. Most of the JIT speed-up from go.\* 1.26.10.1 to 1.26.10.2
+costs once a service is warm. With the delay at 100, 13 of the 17 programs are slower under the JIT and 11 under
+ReadyToRun; Startup is faster under both. Most of the JIT speed-up from go.\* 1.26.10.1 to 1.26.10.2
 is this setting: with the delay at 100, the 1.26.10.2 JIT times sit on 1.26.10.1's. Medians in ms, in-program time
 except Startup's process wall time; the ratio is delay 100 against delay 0:
 
@@ -194,7 +194,7 @@ apply to it.
 <!-- Source: docs/phase4/DATA-hop126-perf.md section 10, the tuning sweep (G-LAPTOP, win-x64, AMD Ryzen 5 PRO 6650U,
      SDK 10.0.400 / runtime 10.0.11; 11 interleaved rounds per program, every arm twice as its own A/A; a cell moves
      only beyond the larger of its two arms' A/A gaps and IQRs). The tables "Delay 100 under JIT (JD/JP)" and "Delay
-     100 under ReadyToRun (RD/RP)": the moved rows only, numbers as the record gives them (variant = delay 100,
+     100 under ReadyToRun (RD/RP)": the moved rows only, numbers as the record gives them, each the mean of its arm's two A/A medians (variant = delay 100,
      baseline = the template's 0). The D arms are copies of the plain JIT and R2R folders with only runtimeconfig.json's
      CallCountingDelayMs changed from 0 to 100. The headline and the start-up-transient framing: the same section
      ("Fib 213.4 against 213.0, String 734.3 against 735.1, Map 470.9 against 473.3, Sort 434.8 against 450.0"). Raw:
