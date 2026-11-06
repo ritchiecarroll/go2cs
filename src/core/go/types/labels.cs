@@ -37,15 +37,13 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
         @string msg = default;
         errors.Code code = default;
         @string name = jmp.Label.Name;
-        {
-            var alt = all.Lookup(name); if (alt != nil) {
-                msg = gotoSJumpsIntoBlockˢ;
-                code = JumpIntoBlock;
-                alt._<ж<Label>>().used = true; // avoid another error
-            } else {
-                msg = labelSNotDeclaredˢ;
-                code = UndeclaredLabel;
-            }
+        var alt = all.Lookup(name); if (alt != nil) {
+            msg = gotoSJumpsIntoBlockˢ;
+            code = JumpIntoBlock;
+            alt._<ж<Label>>().used = true; // avoid another error
+        } else {
+            msg = labelSNotDeclaredˢ;
+            code = UndeclaredLabel;
         }
         Ꮡcheck.errorf(new ast_Identжpositioner(jmp.Label), code, msg, name);
     }
@@ -55,10 +53,8 @@ internal static void labels(this ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody
         var obj = vᴛ1;
 
         obj = resolve(name, obj);
-        {
-            var lbl = obj._<ж<Label>>(); if (!lbl.used) {
-                Ꮡcheck.softErrorf(new Labelжpositioner(lbl), UnusedLabel, "label %s declared and not used", lbl.name);
-            }
+        var lbl = obj._<ж<Label>>(); if (!lbl.used) {
+            Ꮡcheck.softErrorf(new Labelжpositioner(lbl), UnusedLabel, "label %s declared and not used", lbl.name);
         }
     }
 }
@@ -92,10 +88,8 @@ internal static void insert(this ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
 // or an enclosing block with the given label name, or nil.
 internal static ж<ast.LabeledStmt> gotoTarget(this ж<block> Ꮡb, @string name) {
     for (var s = Ꮡb; s != nil; s = s.parent) {
-        {
-            var t = s.labels[name]; if (t != nil) {
-                return t;
-            }
+        var t = s.labels[name]; if (t != nil) {
+            return t;
         }
     }
     return default;
@@ -105,10 +99,8 @@ internal static ж<ast.LabeledStmt> gotoTarget(this ж<block> Ꮡb, @string name
 // statement with the given label name, or nil.
 internal static ж<ast.LabeledStmt> enclosingTarget(this ж<block> Ꮡb, @string name) {
     for (var s = Ꮡb; s != nil; s = s.parent) {
-        {
-            var t = s.lstmt; if (t != nil && t.Label.Name == name) {
-                return t;
-            }
+        var t = s.lstmt; if (t != nil && t.Label.Name == name) {
+            return t;
         }
     }
     return default;
@@ -149,10 +141,8 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
     stmtBranches = (ж<ast.LabeledStmt> lstmtΔ2, ast.Stmt s) => {
         switch (s.type()) {
         case ж<ast.DeclStmt> sΔ1: {
-            {
-                var (d, _) = sΔ1.Decl._<ж<ast.GenDecl>>(ᐧ); if (d != nil && d.Tok == token.VAR) {
-                    recordVarDeclʗ1(d.Pos());
-                }
+            var (d, _) = sΔ1.Decl._<ж<ast.GenDecl>>(ᐧ); if (d != nil && d.Tok == token.VAR) {
+                recordVarDeclʗ1(d.Pos());
             }
             break;
         }
@@ -161,18 +151,16 @@ internal static slice<ж<ast.BranchStmt>> blockBranches(this ж<Checker> Ꮡchec
             {
                 @string name = sΔ1.Label.Name; if (name != "_"u8) {
                     var lbl = NewLabel(sΔ1.Label.Pos(), Ꮡcheck.Value.pkg, name);
-                    {
-                        var alt = all.Insert(new LabelжObject(lbl)); if (alt != nil) {
-                            var err = Ꮡcheck.newError(DuplicateLabel);
-                            err.soft = true;
-                            err.addf(new Labelжpositioner(lbl), "label %s already declared", name);
-                            err.addAltDecl(alt);
-                            err.report();
-                            // ok to continue
-                        } else {
-                            bʗ2.insert(sΔ1);
-                            Ꮡcheck.Value.recordDef(sΔ1.Label, new LabelжObject(lbl));
-                        }
+                    var alt = all.Insert(new LabelжObject(lbl)); if (alt != nil) {
+                        var err = Ꮡcheck.newError(DuplicateLabel);
+                        err.soft = true;
+                        err.addf(new Labelжpositioner(lbl), "label %s already declared", name);
+                        err.addAltDecl(alt);
+                        err.report();
+                        // ok to continue
+                    } else {
+                        bʗ2.insert(sΔ1);
+                        Ꮡcheck.Value.recordDef(sΔ1.Label, new LabelжObject(lbl));
                     }
                     // resolve matching forward jumps and remove them from fwdJumps
                     nint i = 0;

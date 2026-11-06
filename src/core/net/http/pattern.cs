@@ -121,10 +121,8 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         method = s;
         @string rest = ""u8;
         var found = false;
-        {
-            nint iΔ1 = strings.IndexAny(s, " \t"); if (iΔ1 >= 0) {
-                (method, rest, found) = (s.slice(0, iΔ1), strings.TrimLeft(s.slice(iΔ1 + 1), " \t"), true);
-            }
+        nint iΔ1 = strings.IndexAny(s, " \t"); if (iΔ1 >= 0) {
+            (method, rest, found) = (s.slice(0, iΔ1), strings.TrimLeft(s.slice(iΔ1 + 1), " \t"), true);
         }
         if (!found) {
             rest = method;
@@ -144,11 +142,9 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
         }
         p.host = rest.slice(0, i);
         rest = rest.slice(i);
-        {
-            nint j = strings.IndexByte(p.host, (byte)'{'); if (j >= 0) {
-                off += j;
-                (_ᴛ1, err) = (default, errors.New(hostContainsMissingˢ)); goto ᒐdone;
-            }
+        nint j = strings.IndexByte(p.host, (byte)'{'); if (j >= 0) {
+            off += j;
+            (_ᴛ1, err) = (default, errors.New(hostContainsMissingˢ)); goto ᒐdone;
         }
         // At this point, rest is the path.
         off += i;
@@ -175,43 +171,41 @@ internal static (ж<pattern>, error err) parsePattern(@string s) {
             }
             @string seg = default;
             (seg, rest) = (rest.slice(0, iΔ2), rest.slice(iΔ2));
-            {
-                nint iΔ3 = strings.IndexByte(seg, (byte)'{'); if (iΔ3 < 0) {
-                    // Literal.
-                    seg = pathUnescape(seg);
-                    p.segments = append(p.segments, new segment(s: seg));
-                } else {
-                    // Wildcard.
-                    if (iΔ3 != 0) {
-                        (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ)); goto ᒐdone;
-                    }
-                    if (seg[builtin.len(seg) - 1] != '}') {
-                        (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ2)); goto ᒐdone;
-                    }
-                    @string name = seg.slice(1, builtin.len(seg) - 1);
-                    if (name == "$"u8) {
-                        if (builtin.len(rest) != 0) {
-                            (_ᴛ1, err) = (default, errors.New(notAtEndˢ)); goto ᒐdone;
-                        }
-                        p.segments = append(p.segments, new segment(s: "/"));
-                        break;
-                    }
-                    (name, var multi) = strings.CutSuffix(name, "...");
-                    if (multi && builtin.len(rest) != 0) {
-                        (_ᴛ1, err) = (default, errors.New(wildcardNotAtEndˢ)); goto ᒐdone;
-                    }
-                    if (name == ""u8) {
-                        (_ᴛ1, err) = (default, errors.New(emptyWildcardˢ)); goto ᒐdone;
-                    }
-                    if (!isValidWildcardName(name)) {
-                        (_ᴛ1, err) = (default, fmt.Errorf("bad wildcard name %q"u8, name)); goto ᒐdone;
-                    }
-                    if (seenNames[name]) {
-                        (_ᴛ1, err) = (default, fmt.Errorf("duplicate wildcard name %q"u8, name)); goto ᒐdone;
-                    }
-                    seenNames[name] = true;
-                    p.segments = append(p.segments, new segment(s: name, wild: true, multi: multi));
+            nint iΔ3 = strings.IndexByte(seg, (byte)'{'); if (iΔ3 < 0) {
+                // Literal.
+                seg = pathUnescape(seg);
+                p.segments = append(p.segments, new segment(s: seg));
+            } else {
+                // Wildcard.
+                if (iΔ3 != 0) {
+                    (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ)); goto ᒐdone;
                 }
+                if (seg[builtin.len(seg) - 1] != '}') {
+                    (_ᴛ1, err) = (default, errors.New(badWildcardSegmentMustˢ2)); goto ᒐdone;
+                }
+                @string name = seg.slice(1, builtin.len(seg) - 1);
+                if (name == "$"u8) {
+                    if (builtin.len(rest) != 0) {
+                        (_ᴛ1, err) = (default, errors.New(notAtEndˢ)); goto ᒐdone;
+                    }
+                    p.segments = append(p.segments, new segment(s: "/"));
+                    break;
+                }
+                (name, var multi) = strings.CutSuffix(name, "...");
+                if (multi && builtin.len(rest) != 0) {
+                    (_ᴛ1, err) = (default, errors.New(wildcardNotAtEndˢ)); goto ᒐdone;
+                }
+                if (name == ""u8) {
+                    (_ᴛ1, err) = (default, errors.New(emptyWildcardˢ)); goto ᒐdone;
+                }
+                if (!isValidWildcardName(name)) {
+                    (_ᴛ1, err) = (default, fmt.Errorf("bad wildcard name %q"u8, name)); goto ᒐdone;
+                }
+                if (seenNames[name]) {
+                    (_ᴛ1, err) = (default, fmt.Errorf("duplicate wildcard name %q"u8, name)); goto ᒐdone;
+                }
+                seenNames[name] = true;
+                p.segments = append(p.segments, new segment(s: name, wild: true, multi: multi));
             }
         }
         (_ᴛ1, err) = (p, default);
@@ -507,12 +501,10 @@ internal static @string commonPath(ref pattern p1, ref pattern p2) {
     slice<segment> segs1 = default;
     slice<segment> segs2 = default;
     for ((segs1, segs2) = (p1.segments, p2.segments); builtin.len(segs1) > 0 && builtin.len(segs2) > 0; (segs1, segs2) = (segs1[1..], segs2[1..])) {
-        {
-            var s1 = segs1[0]; if (s1.wild) {
-                writeSegment(Ꮡb, segs2[0]);
-            } else {
-                writeSegment(Ꮡb, s1);
-            }
+        var s1 = segs1[0]; if (s1.wild) {
+            writeSegment(Ꮡb, segs2[0]);
+        } else {
+            writeSegment(Ꮡb, s1);
         }
     }
     if (builtin.len(segs1) > 0) {

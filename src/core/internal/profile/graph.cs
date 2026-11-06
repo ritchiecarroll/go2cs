@@ -89,18 +89,16 @@ public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, in
     ref var n = ref Ꮡn.DerefOrNull();
     ref var to = ref Ꮡto.DerefOrNull();
 
-    {
-        var e = n.Out.FindTo(Ꮡto); if (e != nil) {
-            e.WeightDiv += dv;
-            e.Weight += v;
-            if (residual) {
-                e.Residual = true;
-            }
-            if (!inline) {
-                e.Inline = false;
-            }
-            return;
+    var e = n.Out.FindTo(Ꮡto); if (e != nil) {
+        e.WeightDiv += dv;
+        e.Weight += v;
+        if (residual) {
+            e.Residual = true;
         }
+        if (!inline) {
+            e.Inline = false;
+        }
+        return;
     }
 
     var info = Ꮡ(new Edge(Src: Ꮡn, Dest: Ꮡto, WeightDiv: dv, Weight: v, Residual: residual, Inline: inline));
@@ -126,10 +124,8 @@ public static slice<@string> NameComponents(this ref NodeInfo i) {
     if (i.Address != 0) {
         name = append(name, fmt.Sprintf("%016x"u8, i.Address));
     }
-    {
-        @string fun = i.Name; if (fun != ""u8) {
-            name = append(name, fun);
-        }
+    @string fun = i.Name; if (fun != ""u8) {
+        name = append(name, fun);
     }
 
     switch (ᐧ) {
@@ -172,17 +168,13 @@ partial struct NodePtrSet /*map[ж<Node>, bool]*/;
 // If kept is non-nil, nodes are only added if they can be located on it.
 public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet kept) {
     if (kept != nil) {
-        {
-            var (_, ok) = kept[info, ꟷ]; if (!ok) {
-                return default;
-            }
+        var (_, ok) = kept[info, ꟷ]; if (!ok) {
+            return default;
         }
     }
 
-    {
-        var (nΔ1, ok) = nm[info, ꟷ]; if (ok) {
-            return nΔ1;
-        }
+    if (nm[info, ꟷ] is (var nΔ1, true)) {
+        return nΔ1;
     }
 
     var n = Ꮡ(new Node(
@@ -281,10 +273,8 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
         // in the program. Without a branch profile this is just an
         // approximation.
         nint i = 1;
-        {
-            nint last = len(sample.Location) - 1; if (last < i) {
-                i = last;
-            }
+        nint last = len(sample.Location) - 1; if (last < i) {
+            i = last;
         }
         for (; i >= 0; i--) {
             var l = sample.Location[i];
@@ -413,16 +403,12 @@ internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Li
     ref var o = ref Ꮡo.DerefOrNull();
 
     @string objfile = default;
-    {
-        var m = l.Mapping; if (m != nil && m.File != ""u8) {
-            objfile = m.File;
-        }
+    var m = l.Mapping; if (m != nil && m.File != ""u8) {
+        objfile = m.File;
     }
 
-    {
-        var ni = nodeInfo(ref (Ꮡl).DerefOrNull(), li, objfile, ref (Ꮡo).DerefOrNull()); if (ni != nil) {
-            return nm.FindOrInsertNode(ni.Value, o.KeptNodes);
-        }
+    var ni = nodeInfo(ref (Ꮡl).DerefOrNull(), li, objfile, ref (Ꮡo).DerefOrNull()); if (ni != nil) {
+        return nm.FindOrInsertNode(ni.Value, o.KeptNodes);
     }
     return default;
 }

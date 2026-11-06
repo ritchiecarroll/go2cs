@@ -289,18 +289,14 @@ public static @string GoString(this nativeEndian _) {
 // Read returns [io.ErrUnexpectedEOF].
 public static error Read(io.Reader r, ByteOrder order, any data) {
     // Fast path for basic types and slices.
-    {
-        var (n, _) = intDataSize(data); if (n != 0) {
-            var bs = new slice<byte>(n);
-            {
-                var (_, err) = io.ReadFull(r, bs); if (err != nil) {
-                    return err;
-                }
-            }
+    var (n, _) = intDataSize(data); if (n != 0) {
+        var bs = new slice<byte>(n);
+        var (_, err) = io.ReadFull(r, bs); if (err != nil) {
+            return err;
+        }
 
-            if (decodeFast(bs, order, data)) {
-                return default;
-            }
+        if (decodeFast(bs, order, data)) {
+            return default;
         }
     }
 
@@ -336,15 +332,13 @@ public static error Read(io.Reader r, ByteOrder order, any data) {
 // It returns an error if buf is too small, otherwise the number of
 // bytes consumed from buf.
 public static (nint, error) Decode(slice<byte> buf, ByteOrder order, any data) {
-    {
-        var (n, _) = intDataSize(data); if (n != 0) {
-            if (len(buf) < n) {
-                return (0, errBufferTooSmall);
-            }
+    var (n, _) = intDataSize(data); if (n != 0) {
+        if (len(buf) < n) {
+            return (0, errBufferTooSmall);
+        }
 
-            if (decodeFast(buf, order, data)) {
-                return (n, default);
-            }
+        if (decodeFast(buf, order, data)) {
+            return (n, default);
         }
     }
 
@@ -500,16 +494,14 @@ internal static bool decodeFast(slice<byte> bs, ByteOrder order, any data) {
 // with blank (_) field names.
 public static error Write(io.Writer w, ByteOrder order, any data) {
     // Fast path for basic types and slices.
-    {
-        var (n, bs) = intDataSize(data); if (n != 0) {
-            if (bs == nil) {
-                bs = new slice<byte>(n);
-                encodeFast(bs, order, data);
-            }
-
-            var (_, errΔ1) = w.Write(bs);
-            return errΔ1;
+    var (n, bs) = intDataSize(data); if (n != 0) {
+        if (bs == nil) {
+            bs = new slice<byte>(n);
+            encodeFast(bs, order, data);
         }
+
+        var (_, errΔ1) = w.Write(bs);
+        return errΔ1;
     }
 
     // Fallback to reflect-based encoding.
@@ -532,15 +524,13 @@ public static error Write(io.Writer w, ByteOrder order, any data) {
 // bytes written into buf.
 public static (nint, error) Encode(slice<byte> buf, ByteOrder order, any data) {
     // Fast path for basic types and slices.
-    {
-        var (n, _) = intDataSize(data); if (n != 0) {
-            if (len(buf) < n) {
-                return (0, errBufferTooSmall);
-            }
-
-            encodeFast(buf, order, data);
-            return (n, default);
+    var (n, _) = intDataSize(data); if (n != 0) {
+        if (len(buf) < n) {
+            return (0, errBufferTooSmall);
         }
+
+        encodeFast(buf, order, data);
+        return (n, default);
     }
 
     // Fallback to reflect-based encoding.
@@ -564,12 +554,10 @@ public static (nint, error) Encode(slice<byte> buf, ByteOrder order, any data) {
 // It returns the (possibly extended) buffer containing data or an error.
 public static (slice<byte>, error) Append(slice<byte> buf, ByteOrder order, any data) {
     // Fast path for basic types and slices.
-    {
-        var (n, _) = intDataSize(data); if (n != 0) {
-            var (bufΔ1, posΔ1) = ensure(buf, n);
-            encodeFast(posΔ1, order, data);
-            return (bufΔ1, default);
-        }
+    var (n, _) = intDataSize(data); if (n != 0) {
+        var (bufΔ1, posΔ1) = ensure(buf, n);
+        encodeFast(posΔ1, order, data);
+        return (bufΔ1, default);
     }
 
     // Fallback to reflect-based encoding.
@@ -1082,12 +1070,10 @@ internal static void value(this ref decoder d, reflectꓸValue v) {
             // but creating the StructField info for each field is
             // costly (run "go test -bench=ReadStruct" and compare
             // results when making changes to this code).
-            {
-                var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8) {
-                    d.value(vΔ2);
-                } else {
-                    d.skip(vΔ2);
-                }
+            var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8) {
+                d.value(vΔ2);
+            } else {
+                d.skip(vΔ2);
             }
         }
         break;
@@ -1171,12 +1157,10 @@ internal static void value(this ref encoder e, reflectꓸValue v) {
         nint l = v.NumField();
         for (nint i = 0; i < l; i++) {
             // see comment for corresponding code in decoder.value()
-            {
-                var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8) {
-                    e.value(vΔ2);
-                } else {
-                    e.skip(vΔ2);
-                }
+            var vΔ2 = v.Field(i); if (vΔ2.CanSet() || t.Field(i).Name != "_"u8) {
+                e.value(vΔ2);
+            } else {
+                e.skip(vΔ2);
             }
         }
         break;

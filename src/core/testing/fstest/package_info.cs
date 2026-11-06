@@ -71,8 +71,8 @@ using static go.testing.fstest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWkpKWkoKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClICCgoKUpJSokoKClIKUrLKCgpSmgoKUgoKUgpSCgqaCpoKCgtwADBaCpoKmgqaC7qSSAAgSgKKAooCigKKAooCigKKApIIACRSApICkgoKUgpSCgqaC2LSkgpSCpoKClIKClAAKFoCigKKCpoKCgpSClIKClII=", "106-108:1")]
-[assembly: GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABYCgIKkgoCCkoKCgqaCgpSAgqS2pqKCgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAwK9IKCgpSCgoKCqJKClJSCgpSCtIK0gqSCgoKU2LTagoKCgriCgoKCuICC2qaAgqSSgoKClKaAgqSSgoKCgpSCgoKUgoKUgoKUgoKmpoCCgoKClJSCguyCgoKUlIKCuKKmkqiSqJKo0oCCuJKCgoKCgoKClJS0tLS0tpTKgILIgoKCgoKUpoKmgpSUgoKCuIKCgpSCpoKCpoKClLSCtIK2qqKCgoKUgoKCgpSClIKmgoKClIKmgoKmgoLKgoKClIKCpoCCgoKClIKCyICCgoKClIKClIKCgt7SgoKCgpTKgoKmgoKCgoKClIKUlIKmgqaCgpSmAAwI0qaCgoKmgoKCgqaAgtqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgILEpIKCgvqygoKClLqyuIKUgILugIIABxCCgII=", "474-482:1;510-515:2;568-568:1;600-606:1", "", "", "252:21,267:21,694:21")]
+[assembly: GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWkpKWkoKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClIKCgpSUlKiSgoKUgpSssoKClKaCgpSCgpSClIKCpoKmgoKC3AAMFoKmgqaCpoLupJIACBKAooCigKKAooCigKKAooCkggAJFICkgKSCgpSClIKCpoLYtKSClIKmgoKUgoKUAAoWgKKAooKmgoKClIKUgoKUgg==", "106-108:1")]
+[assembly: GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABYCgIKkgoKSgoKCpoKClIKUpqaigoKCgoKUgpSCgoKClJSCgqaClAAKGLKmgoKCgpSCgoKClAAMCvSCgoKUgoKCgqiSgpSUgoKUgrSCtIKkgoKClNi02oKCgoK4goKCgriCyqaClJKCgoKUpoKUkoKCgoKUgoKClIKClIKClIKCpqaCgoKClJSCgtyCgoKUlIKCuKKmkqiSqJKo0oKokoKCgoKCgoKUlLS0tLS2lMqCuIKCgoKClKaCpoKUlIKCgriCgoKUgqaCgqaCgpS0grSCtqqigoKClIKCgoKUgpSCpoKCgpSCpoKCpoKCyoKCgpSCgqaAgoKCgpSCgsiAgoKCgpSCgpSCgoLe0oKCgoKUyoKCpoKCgoKCgpSClJSCpoKmgoKUpgAMCNKmgoKCpoKCgoKmgsqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgrSkgoKC+rKCgoKUurK4gpSAgu6AggAHEIKC", "474-482:1;510-515:2;568-568:1;600-606:1", "", "", "244:21,257:21,676:21")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

@@ -176,29 +176,27 @@ public static (time.Time, error) ParseDate(@string date) {
 
     // RFC 5322: zone = (FWS ( "+" / "-" ) 4DIGIT) / obs-zone
     // zone length is always 5 chars unless obsolete (obs-zone)
-    {
-        nint ind = strings.IndexAny(p.s, "+-"); if (ind != -1 && builtin.len(p.s) >= ind + 5) {
-            date = p.s.slice(0, ind + 5);
-            p.s = p.s.slice(ind + 5);
-        } else {
-            nint indΔ1 = strings.Index(p.s, "T");
-            if (indΔ1 == 0) {
-                // In this case we have the following date formats:
-                // * Thu, 20 Nov 1997 09:55:06 MDT
-                // * Thu, 20 Nov 1997 09:55:06 MDT (MDT)
-                // * Thu, 20 Nov 1997 09:55:06 MDT (This comment)
-                indΔ1 = strings.Index(p.s[1..], "T");
-                if (indΔ1 != -1) {
-                    indΔ1++;
-                }
+    nint ind = strings.IndexAny(p.s, "+-"); if (ind != -1 && builtin.len(p.s) >= ind + 5) {
+        date = p.s.slice(0, ind + 5);
+        p.s = p.s.slice(ind + 5);
+    } else {
+        nint indΔ1 = strings.Index(p.s, "T");
+        if (indΔ1 == 0) {
+            // In this case we have the following date formats:
+            // * Thu, 20 Nov 1997 09:55:06 MDT
+            // * Thu, 20 Nov 1997 09:55:06 MDT (MDT)
+            // * Thu, 20 Nov 1997 09:55:06 MDT (This comment)
+            indΔ1 = strings.Index(p.s[1..], "T");
+            if (indΔ1 != -1) {
+                indΔ1++;
             }
+        }
 
-            if (indΔ1 != -1 && builtin.len(p.s) >= indΔ1 + 5) {
-                // The last letter T of the obsolete time zone is checked when no standard time zone is found.
-                // If T is misplaced, the date to parse is garbage.
-                date = p.s.slice(0, indΔ1 + 1);
-                p.s = p.s.slice(indΔ1 + 1);
-            }
+        if (indΔ1 != -1 && builtin.len(p.s) >= indΔ1 + 5) {
+            // The last letter T of the obsolete time zone is checked when no standard time zone is found.
+            // If T is misplaced, the date to parse is garbage.
+            date = p.s.slice(0, indΔ1 + 1);
+            p.s = p.s.slice(indΔ1 + 1);
         }
     }
     if (!p.skipCFWS()) {
@@ -950,10 +948,8 @@ internal static bool skipCFWS(this ref addrParser p) {
             break;
         }
 
-        {
-            var (_, ok) = p.consumeComment(); if (!ok) {
-                return false;
-            }
+        var (_, ok) = p.consumeComment(); if (!ok) {
+            return false;
         }
 
         p.skipSpace();

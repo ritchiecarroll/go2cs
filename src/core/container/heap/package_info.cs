@@ -55,7 +55,7 @@ using static go.container.heap_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("container/heap/heap.go", "heap.cs", "ACdS1IKCvKKCrLKCgoKqooKCgoKmrsKCuIKCgoKUgriCgoKCgpSCgIKkgpSClA==")]
+[assembly: GoPositionMap("container/heap/heap.go", "heap.cs", "ACdS1IKCvKKCrLKCgoKqooKCgoKmrsKCuIKCgoKUgriCgoKCgpSCgpSClIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.container;

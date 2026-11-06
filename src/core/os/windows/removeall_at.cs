@@ -55,16 +55,12 @@ internal static error removeAll(@string path) {
         var parentʗ1 = parent;
         defer(() => parentʗ1.Close(), ref ᒐ);
 
-        {
-            var errΔ1 = removeAllFrom((syscallꓸHandle)parent.Fd(), @base); if (errΔ1 != nil) {
-                {
-                    var (pathErr, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
-                        pathErr.Path = parentDir + ((@string)(rune)PathSeparator) + pathErr.Path;
-                        errΔ1 = new fs.PathErrorжerror(pathErr);
-                    }
-                }
-                return errΔ1;
+        var errΔ1 = removeAllFrom((syscallꓸHandle)parent.Fd(), @base); if (errΔ1 != nil) {
+            var (pathErr, ok) = errΔ1._<ж<PathError>>(ᐧ); if (ok) {
+                pathErr.Path = parentDir + ((@string)(rune)PathSeparator) + pathErr.Path;
+                errΔ1 = new fs.PathErrorжerror(pathErr);
             }
+            return errΔ1;
         }
         return default;
     }
@@ -106,11 +102,9 @@ internal static error removeAllFrom(syscallꓸHandle parentFd, @string @base) {
                 // Not a directory; return the error from the removefileat.
                 return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "unlinkat", Path: @base, Err: uErr)));
             }
-            {
-                var (_, ok) = errΔ1._<errSymlink>(ᐧ); if (ok) {
-                    // Not a user-visible error.
-                    errΔ1 = uErr;
-                }
+            var (_, ok) = errΔ1._<errSymlink>(ᐧ); if (ok) {
+                // Not a user-visible error.
+                errΔ1 = uErr;
             }
             recurseErr = new fs.PathErrorжerror(Ꮡ(new PathError(Op: "openfdat", Path: @base, Err: errΔ1)));
             break;
@@ -133,10 +127,8 @@ internal static error removeAllFrom(syscallꓸHandle parentFd, @string @base) {
             foreach (var (_, name) in names) {
                 var errΔ2 = removeAllFrom((syscallꓸHandle)@file.Fd(), name);
                 if (errΔ2 != nil) {
-                    {
-                        var (pathErr, ok) = errΔ2._<ж<PathError>>(ᐧ); if (ok) {
-                            pathErr.Path = @base + ((@string)(rune)PathSeparator) + pathErr.Path;
-                        }
+                    var (pathErr, ok) = errΔ2._<ж<PathError>>(ᐧ); if (ok) {
+                        pathErr.Path = @base + ((@string)(rune)PathSeparator) + pathErr.Path;
                     }
                     numErr++;
                     if (recurseErr == nil) {

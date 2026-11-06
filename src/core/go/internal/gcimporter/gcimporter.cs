@@ -38,10 +38,8 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> fset, 
             id = path;
 
             // No need to re-import if the package was imported completely before.
-            {
-                pkg = packages[id]; if (pkg != nil && pkg.Complete()) {
-                    goto ᒐdone;
-                }
+            pkg = packages[id]; if (pkg != nil && pkg.Complete()) {
+                goto ᒐdone;
             }
             var (f, errΔ1) = lookup(path);
             if (errΔ1 != nil) {
@@ -59,10 +57,8 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> fset, 
             }
 
             // no need to re-import if the package was imported completely before
-            {
-                pkg = packages[id]; if (pkg != nil && pkg.Complete()) {
-                    goto ᒐdone;
-                }
+            pkg = packages[id]; if (pkg != nil && pkg.Complete()) {
+                goto ᒐdone;
             }
 
             // open file

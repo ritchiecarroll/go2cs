@@ -211,10 +211,8 @@ public static (ж<GCMWithXORCounterNonce>, error) NewGCMForQUIC(ж<aes.Block> ci
         return (default, err);
     }
     var gcm = Ꮡ(new GCMWithXORCounterNonce(g: g.Value));
-    {
-        var errΔ1 = gcm.SetNoncePrefixAndMask(iv); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var errΔ1 = gcm.SetNoncePrefixAndMask(iv); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     return (gcm, default);
 }

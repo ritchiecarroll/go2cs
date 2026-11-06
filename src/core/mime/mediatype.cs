@@ -24,20 +24,18 @@ private static readonly @string utf8ˢ3ᵇ = "utf-8''"u8;
 // FormatMediaType returns the empty string.
 public static @string FormatMediaType(@string t, map<@string, @string> param) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    {
-        var (major, sub, ok) = strings.Cut(t, "/"); if (!ok) {
-            if (!isToken(t)) {
-                return ""u8;
-            }
-            Ꮡb.WriteString(strings.ToLower(t));
-        } else {
-            if (!isToken(major) || !isToken(sub)) {
-                return ""u8;
-            }
-            Ꮡb.WriteString(strings.ToLower(major));
-            Ꮡb.WriteByte((byte)'/');
-            Ꮡb.WriteString(strings.ToLower(sub));
+    var (major, sub, ok) = strings.Cut(t, "/"); if (!ok) {
+        if (!isToken(t)) {
+            return ""u8;
         }
+        Ꮡb.WriteString(strings.ToLower(t));
+    } else {
+        if (!isToken(major) || !isToken(sub)) {
+            return ""u8;
+        }
+        Ꮡb.WriteString(strings.ToLower(major));
+        Ꮡb.WriteByte((byte)'/');
+        Ꮡb.WriteString(strings.ToLower(sub));
     }
 
     foreach (var (_, attribute) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(param))) {
@@ -107,10 +105,8 @@ internal static error checkMediaTypeDisposition(@string s) {
         return default;
     }
     bool ok = default;
-    {
-        (rest, ok) = strings.CutPrefix(rest, "/"); if (!ok) {
-            return errNoSlashAfterFirstToken;
-        }
+    (rest, ok) = strings.CutPrefix(rest, "/"); if (!ok) {
+        return errNoSlashAfterFirstToken;
     }
     (var subtype, rest) = consumeToken(rest);
     if (subtype == ""u8) {
@@ -180,24 +176,18 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
         }
 
         var pmap = @params;
-        {
-            var (baseName, _, ok) = strings.Cut(key, "*"); if (ok) {
-                if (continuation == nil) {
-                    continuation = new map<@string, map<@string, @string>>();
-                }
-                {
-                    (pmap, ok) = continuation[baseName, ꟷ]; if (!ok) {
-                        continuation[baseName] = new map<@string, @string>();
-                        pmap = continuation[baseName];
-                    }
-                }
+        var (baseName, _, ok) = strings.Cut(key, "*"); if (ok) {
+            if (continuation == nil) {
+                continuation = new map<@string, map<@string, @string>>();
+            }
+            (pmap, ok) = continuation[baseName, ꟷ]; if (!ok) {
+                continuation[baseName] = new map<@string, @string>();
+                pmap = continuation[baseName];
             }
         }
-        {
-            var (vΔ1, exists) = pmap[key, ꟷ]; if (exists && vΔ1 != value) {
-                // Duplicate parameter names are incorrect, but we allow them if they are equal.
-                return ("", default, errDuplicateParamName);
-            }
+        var (vΔ1, exists) = pmap[key, ꟷ]; if (exists && vΔ1 != value) {
+            // Duplicate parameter names are incorrect, but we allow them if they are equal.
+            return ("", default, errDuplicateParamName);
         }
         pmap[key] = value;
         v = rest;
@@ -208,27 +198,21 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (key, pieceMap) in continuation) {
         @string singlePartKey = key + "*"u8;
-        {
-            var (vΔ2, ok) = pieceMap[singlePartKey, ꟷ]; if (ok) {
-                {
-                    var (decv, okΔ1) = decode2231Enc(vΔ2); if (okΔ1) {
-                        @params[key] = decv;
-                    }
-                }
-                continue;
+        if (pieceMap[singlePartKey, ꟷ] is (var vΔ2, true)) {
+            var (decv, okΔ1) = decode2231Enc(vΔ2); if (okΔ1) {
+                @params[key] = decv;
             }
+            continue;
         }
 
         buf.Reset();
         var valid = false;
         for (nint n = 0; ; n++) {
             @string simplePart = fmt.Sprintf("%s*%d"u8, key, n);
-            {
-                var (vΔ3, okΔ2) = pieceMap[simplePart, ꟷ]; if (okΔ2) {
-                    valid = true;
-                    Ꮡbuf.WriteString(vΔ3);
-                    continue;
-                }
+            var (vΔ3, okΔ2) = pieceMap[simplePart, ꟷ]; if (okΔ2) {
+                valid = true;
+                Ꮡbuf.WriteString(vΔ3);
+                continue;
             }
             @string encodedPart = simplePart + "*"u8;
             var (vΔ4, ok) = pieceMap[encodedPart, ꟷ];
@@ -237,10 +221,8 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
             }
             valid = true;
             if (n == 0) {
-                {
-                    var (decv, okΔ3) = decode2231Enc(vΔ4); if (okΔ3) {
-                        Ꮡbuf.WriteString(decv);
-                    }
+                var (decv, okΔ3) = decode2231Enc(vΔ4); if (okΔ3) {
+                    Ꮡbuf.WriteString(decv);
                 }
             } else {
                 var (decv, _) = percentHexUnescape(vΔ4);
@@ -349,10 +331,8 @@ internal static (@string param, @string value, @string rest) consumeMediaParam(@
 
     rest = strings.TrimLeftFunc(v, Δunicode.IsSpace);
     bool ok = default;
-    {
-        (rest, ok) = strings.CutPrefix(rest, ";"); if (!ok) {
-            return ("", "", v);
-        }
+    (rest, ok) = strings.CutPrefix(rest, ";"); if (!ok) {
+        return ("", "", v);
     }
 
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
@@ -363,10 +343,8 @@ internal static (@string param, @string value, @string rest) consumeMediaParam(@
     }
 
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
-    {
-        (rest, ok) = strings.CutPrefix(rest, "="); if (!ok) {
-            return ("", "", v);
-        }
+    (rest, ok) = strings.CutPrefix(rest, "="); if (!ok) {
+        return ("", "", v);
     }
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
     (value, var rest2) = consumeValue(rest);

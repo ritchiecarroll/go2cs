@@ -294,10 +294,8 @@ internal static error runAsProcessOwner(Func<error> f) {
         }
         defer(() => prevToken.Close(), ref ᒐ);
         if (!isProcessToken) {
-            {
-                err = windows.RevertToSelf(); if (err != nil) {
-                    return fmt.Errorf("os/user: failed to revert to self: %w"u8, err);
-                }
+            err = windows.RevertToSelf(); if (err != nil) {
+                return fmt.Errorf("os/user: failed to revert to self: %w"u8, err);
             }
             defer(() => {
                 ᏑimpersonationRollbackErr.ValueSlot = windows.ImpersonateLoggedOnUser(prevToken);

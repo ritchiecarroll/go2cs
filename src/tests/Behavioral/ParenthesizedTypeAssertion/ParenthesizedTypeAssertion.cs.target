@@ -13,10 +13,8 @@ partial struct point {
 internal static void Main() {
     any data = new Map(new map<@string, any>{["a"] = (nint)1});
 
-    {
-        var (mΔ1, okΔ1) = data._<Map>(ᐧ); if (okΔ1) {
-            fmt.Println("comma-ok:", len(mΔ1), mΔ1["a"]);
-        }
+    var (mΔ1, okΔ1) = data._<Map>(ᐧ); if (okΔ1) {
+        fmt.Println("comma-ok:", len(mΔ1), mΔ1["a"]);
     }
 
     var m = data._<Map>();
@@ -27,10 +25,8 @@ internal static void Main() {
     fmt.Println("mismatch:", ok);
 
     any p = Ꮡ(new point(1, 2));
-    {
-        var (pt, okΔ2) = p._<ж<point>>(ᐧ); if (okΔ2) {
-            fmt.Println("pointer:", pt.x + pt.y);
-        }
+    var (pt, okΔ2) = p._<ж<point>>(ᐧ); if (okΔ2) {
+        fmt.Println("pointer:", pt.x + pt.y);
     }
 }
 

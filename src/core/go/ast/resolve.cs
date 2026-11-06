@@ -40,10 +40,8 @@ internal static void declare(this ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope
     }
     if (alt != nil) {
         @string prevDecl = ""u8;
-        {
-            tokenꓸPos pos = alt.Pos(); if (pos.IsValid()) {
-                prevDecl = fmt.Sprintf("\n\tprevious declaration at %s"u8, p.fset.Position(pos));
-            }
+        tokenꓸPos pos = alt.Pos(); if (pos.IsValid()) {
+            prevDecl = fmt.Sprintf("\n\tprevious declaration at %s"u8, p.fset.Position(pos));
         }
         p.error(obj.Pos(), fmt.Sprintf("%s redeclared in this block%s"u8, obj.Name, prevDecl));
     }
@@ -54,11 +52,9 @@ internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
 
     for (; Ꮡscope != nil; Ꮡscope = scope.Outer) {
         scope = ref Ꮡscope.DerefOrNull();
-        {
-            var obj = scope.Lookup(ident.Name); if (obj != nil) {
-                ident.Obj = obj;
-                return true;
-            }
+        var obj = scope.Lookup(ident.Name); if (obj != nil) {
+            ident.Obj = obj;
+            return true;
         }
     }
     return false;
@@ -98,19 +94,17 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
     var pkgScope = NewScope(universe);
     foreach (var (_, @file) in files) {
         // package names must match
-        {
-            @string name = @file.Name.Name;
-            switch (ᐧ) {
-            case {} when pkgName == ""u8: {
-                pkgName = name;
-                break;
-            }
-            case {} when name != pkgName: {
-                p.errorf(@file.Package, "package %s; expected %s", name, pkgName);
-                continue; // ignore this file
-                break;
-            }}
+        @string name = @file.Name.Name;
+        switch (ᐧ) {
+        case {} when pkgName == ""u8: {
+            pkgName = name;
+            break;
         }
+        case {} when name != pkgName: {
+            p.errorf(@file.Package, "package %s; expected %s", name, pkgName);
+            continue; // ignore this file
+            break;
+        }}
 
         // collect top-level file objects in package scope
         foreach (var (_, obj) in @file.Scope.Objects) {

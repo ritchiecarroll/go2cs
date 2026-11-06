@@ -92,12 +92,10 @@ public static ж<http.Request> NewRequestWithContext(context.Context ctx, @strin
         if (AreEqual(body, http.NoBody)) {
             req.ContentLength = 0;
         }
-        {
-            var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok) {
-                req.Body = rc;
-            } else {
-                req.Body = io.NopCloser(body);
-            }
+        var (rc, ok) = body._<io.ReadCloser>(ᐧ); if (ok) {
+            req.Body = rc;
+        } else {
+            req.Body = io.NopCloser(body);
         }
     }
 

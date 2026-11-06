@@ -242,10 +242,8 @@ internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Conte
     if (d.Timeout != 0) { // including negative, for historical reasons
         earliest = now.Add(d.Timeout);
     }
-    {
-        var (dΔ1, ok) = ctx.Deadline(); if (ok) {
-            earliest = minNonzeroTime(earliest, dΔ1);
-        }
+    var (dΔ1, ok) = ctx.Deadline(); if (ok) {
+        earliest = minNonzeroTime(earliest, dΔ1);
     }
     return minNonzeroTime(earliest, d.Deadline);
 }
@@ -552,13 +550,11 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
 
         // Shadow the nettrace (if any) during resolve so Connect events don't fire for DNS lookups.
         var resolveCtx = ctx;
-        {
-            var (trace, _) = ctx.Value(new nettrace.TraceKey())._<ж<nettrace.Trace>>(ᐧ); if (trace != nil) {
-                ref var shadow = ref heap<nettrace.Trace>(trace.Value, out var Ꮡshadow);
-                shadow.ConnectStart = default;
-                shadow.ConnectDone = default;
-                resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(), Ꮡshadow);
-            }
+        var (trace, _) = ctx.Value(new nettrace.TraceKey())._<ж<nettrace.Trace>>(ᐧ); if (trace != nil) {
+            ref var shadow = ref heap<nettrace.Trace>(trace.Value, out var Ꮡshadow);
+            shadow.ConnectStart = default;
+            shadow.ConnectDone = default;
+            resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(), Ꮡshadow);
         }
 
         var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢ, network, address, d.LocalAddr);
@@ -595,12 +591,10 @@ internal static partial (context.Context, Action) dialCtx(this ref Dialer d, con
     Action cancel2 = default;
     if (!deadline.IsZero()) {
         testHookStepTime();
-        {
-            var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
-                context.Context subCtx = default;
-                (subCtx, cancel1) = context.WithDeadline(ctx, deadline);
-                ctx = subCtx;
-            }
+        var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
+            context.Context subCtx = default;
+            (subCtx, cancel1) = context.WithDeadline(ctx, deadline);
+            ctx = subCtx;
         }
     }
     {

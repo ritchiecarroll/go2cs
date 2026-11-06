@@ -606,12 +606,10 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         return errors.New(jpegImageIsTooLargeToˢ);
     }
     encoder e = new();
-    {
-        var (ww, ok) = w._<writer>(ᐧ); if (ok) {
-            e.w = ww;
-        } else {
-            e.w = new bufio_Writerжwriter(bufio.NewWriter(w));
-        }
+    var (ww, ok) = w._<writer>(ᐧ); if (ok) {
+        e.w = ww;
+    } else {
+        e.w = new bufio_Writerжwriter(bufio.NewWriter(w));
     }
     // Clip quality to [1, 100].
     nint quality = DefaultQuality;

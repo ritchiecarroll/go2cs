@@ -2068,14 +2068,10 @@ partial interface transcriptHash {
 // extension ordering and other malleable fields, which may cause differences
 // between what was received and what we marshal.
 internal static error transcriptMsg(handshakeMessage msg, transcriptHash h) {
-    {
-        var (msgWithOrig, ok) = msg._<handshakeMessageWithOriginalBytes>(ᐧ); if (ok) {
-            {
-                var orig = msgWithOrig.originalBytes(); if (orig != nil) {
-                    h.Write(msgWithOrig.originalBytes());
-                    return default;
-                }
-            }
+    var (msgWithOrig, ok) = msg._<handshakeMessageWithOriginalBytes>(ᐧ); if (ok) {
+        var orig = msgWithOrig.originalBytes(); if (orig != nil) {
+            h.Write(msgWithOrig.originalBytes());
+            return default;
         }
     }
 

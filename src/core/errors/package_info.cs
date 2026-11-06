@@ -68,7 +68,7 @@ using static go.errors_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("errors/errors.go", "errors.cs", "AD+AAaIABxCCAA8g")]
 [assembly: GoPositionMap("errors/join.go", "join.cs", "AAooAAsCgoKCpoKUpoKCpu6mgqaCgoKmpoI=")]
-[assembly: GoPositionMap("errors/wrap.go", "wrap.cs", "AA8i4oaClAACKgASAoKmggAKBoKCgpSAgqSUgoLGgoKmtAAENAAVAoKUgpSCgoKUgoKU5oKCgoKUgIKklIKCxoKClIKmtMoAAR4ADQKCgpSCpoKCgIKkgIKClIK2lIKCxoKClICCtrQ=")]
+[assembly: GoPositionMap("errors/wrap.go", "wrap.cs", "AA8i4oaClAACKgASAoKmggAKBoKCgpSAgqSUgoLGgoKmtAAENAAVAoKUgpSCgoKUgoKU5oKCgoKUgIKklIKCxoKClIKmtMoAAR4ADQKCgpSCpoKCgpSAgoKUgraUgoLGgoKUgqa0")]
 // </GoSourcePositionMaps>
 
 namespace go;

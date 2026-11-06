@@ -283,19 +283,15 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
     if (val.CanInterface()) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        {
-            var (unmarshaler, ok) = reflect.TypeAssert<UnmarshalerAttr>(val); if (ok) {
-                return unmarshaler.UnmarshalXMLAttr(attr);
-            }
+        var (unmarshaler, ok) = reflect.TypeAssert<UnmarshalerAttr>(val); if (ok) {
+            return unmarshaler.UnmarshalXMLAttr(attr);
         }
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
         if (pv.CanInterface()) {
-            {
-                var (unmarshaler, ok) = reflect.TypeAssert<UnmarshalerAttr>(pv); if (ok) {
-                    return unmarshaler.UnmarshalXMLAttr(attr);
-                }
+            var (unmarshaler, ok) = reflect.TypeAssert<UnmarshalerAttr>(pv); if (ok) {
+                return unmarshaler.UnmarshalXMLAttr(attr);
             }
         }
     }
@@ -304,19 +300,15 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
     if (val.CanInterface()) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        {
-            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(val); if (ok) {
-                return textUnmarshaler.UnmarshalText(slice<byte>(attr.Value));
-            }
+        var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(val); if (ok) {
+            return textUnmarshaler.UnmarshalText(slice<byte>(attr.Value));
         }
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
         if (pv.CanInterface()) {
-            {
-                var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
-                    return textUnmarshaler.UnmarshalText(slice<byte>(attr.Value));
-                }
+            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
+                return textUnmarshaler.UnmarshalText(slice<byte>(attr.Value));
             }
         }
     }
@@ -329,11 +321,9 @@ internal static error unmarshalAttr(this ref Decoder d, reflectꓸValue val, Att
         val.SetLen(n + 1);
 
         // Recur to read element into slice.
-        {
-            var err = d.unmarshalAttr(val.Index(n), attr); if (err != nil) {
-                val.SetLen(n);
-                return err;
-            }
+        var err = d.unmarshalAttr(val.Index(n), attr); if (err != nil) {
+            val.SetLen(n);
+            return err;
         }
         return default;
     }
@@ -368,12 +358,10 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
             if (errΔ1 != nil) {
                 return errΔ1;
             }
-            {
-                ref var t = ref heap<StartElement>(out var Ꮡt);
-                (t, var ok) = tok._<StartElement>(ᐧ); if (ok) {
-                    Ꮡstart = Ꮡt; start = ref Ꮡstart.DerefOrNull();
-                    break;
-                }
+            ref var t = ref heap<StartElement>(out var Ꮡt);
+            (t, var ok) = tok._<StartElement>(ᐧ); if (ok) {
+                Ꮡstart = Ꮡt; start = ref Ꮡstart.DerefOrNull();
+                break;
             }
         }
     }
@@ -397,39 +385,31 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
     if (val.CanInterface()) {
         // This is an unmarshaler with a non-pointer receiver,
         // so it's likely to be incorrect, but we do what we're told.
-        {
-            var (unmarshaler, ok) = reflect.TypeAssert<Unmarshaler>(val); if (ok) {
+        var (unmarshaler, ok) = reflect.TypeAssert<Unmarshaler>(val); if (ok) {
+            return Ꮡd.unmarshalInterface(unmarshaler, Ꮡstart);
+        }
+    }
+
+    if (val.CanAddr()) {
+        var pv = val.Addr();
+        if (pv.CanInterface()) {
+            var (unmarshaler, ok) = reflect.TypeAssert<Unmarshaler>(pv); if (ok) {
                 return Ꮡd.unmarshalInterface(unmarshaler, Ꮡstart);
             }
         }
     }
 
-    if (val.CanAddr()) {
-        var pv = val.Addr();
-        if (pv.CanInterface()) {
-            {
-                var (unmarshaler, ok) = reflect.TypeAssert<Unmarshaler>(pv); if (ok) {
-                    return Ꮡd.unmarshalInterface(unmarshaler, Ꮡstart);
-                }
-            }
-        }
-    }
-
     if (val.CanInterface()) {
-        {
-            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(val); if (ok) {
-                return d.unmarshalTextInterface(textUnmarshaler);
-            }
+        var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(val); if (ok) {
+            return d.unmarshalTextInterface(textUnmarshaler);
         }
     }
 
     if (val.CanAddr()) {
         var pv = val.Addr();
         if (pv.CanInterface()) {
-            {
-                var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
-                    return d.unmarshalTextInterface(textUnmarshaler);
-                }
+            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
+                return d.unmarshalTextInterface(textUnmarshaler);
             }
         }
     }
@@ -446,156 +426,146 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
     ж<typeInfo> tinfo = default;
     error err = default;
 
-    {
-        var v = val;
-        switch (v.Kind()) {
-        default: {
-            return errors.New("unknown type "u8 + v.Type().String());
-        }
-        case var ᴛ when ᴛ == reflect.ΔInterface: {
-            // TODO: For now, simply ignore the field. In the near
-            //       future we may choose to unmarshal the start
-            //       element on it, if not nil.
-            return d.Skip();
-        }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
-            var typ = v.Type();
-            if (typ.Elem().Kind() == reflect.Uint8) {
-                // []byte
-                saveData = v;
-                break;
-            }
-
-            // Slice of element values.
-            // Grow slice.
-            nint n = v.Len();
-            v.Grow(1);
-            v.SetLen(n + 1);
-
-            // Recur to read element into slice.
-            {
-                var errΔ6 = Ꮡd.unmarshal(v.Index(n), Ꮡstart); if (errΔ6 != nil) {
-                    v.SetLen(n);
-                    return errΔ6;
-                }
-            }
-            return default;
-        }
-        case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.ΔString: {
+    var v = val;
+    switch (v.Kind()) {
+    default: {
+        return errors.New("unknown type "u8 + v.Type().String());
+    }
+    case var ᴛ when ᴛ == reflect.ΔInterface: {
+        // TODO: For now, simply ignore the field. In the near
+        //       future we may choose to unmarshal the start
+        //       element on it, if not nil.
+        return d.Skip();
+    }
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        var typ = v.Type();
+        if (typ.Elem().Kind() == reflect.Uint8) {
+            // []byte
             saveData = v;
             break;
         }
-        case var ᴛ when ᴛ == reflect.Struct: {
-            var typ = v.Type();
-            if (AreEqual(typ, nameType)) {
-                v.Set(reflect.ValueOf(start.Name));
-                break;
-            }
 
-            sv = v;
-            (tinfo, err) = getTypeInfo(typ);
-            if (err != nil) {
-                return err;
-            }
+        // Slice of element values.
+        // Grow slice.
+        nint n = v.Len();
+        v.Grow(1);
+        v.SetLen(n + 1);
 
-            // Validate and assign element name.
-            if (tinfo.xmlname != nil) {
-                var finfo = tinfo.xmlname;
-                if (finfo.name != ""u8 && finfo.name != start.Name.Local) {
-                    return ((UnmarshalError)("expected element type <"u8 + finfo.name + "> but have <"u8 + start.Name.Local + ">"u8));
-                }
-                if (finfo.xmlns != ""u8 && finfo.xmlns != start.Name.Space) {
-                    @string e = "expected element <"u8 + finfo.name + "> in name space "u8 + finfo.xmlns + " but have "u8;
-                    if (start.Name.Space == ""u8) {
-                        e += "no name space"u8;
-                    } else {
-                        e += start.Name.Space;
-                    }
-                    return ((UnmarshalError)e);
-                }
-                var fv = finfo.value(sv, initNilPointers);
-                {
-                    var (_, ok) = reflect.TypeAssert<Name>(fv); if (ok) {
-                        fv.Set(reflect.ValueOf(start.Name));
-                    }
-                }
-            }
+        // Recur to read element into slice.
+        var errΔ6 = Ꮡd.unmarshal(v.Index(n), Ꮡstart); if (errΔ6 != nil) {
+            v.SetLen(n);
+            return errΔ6;
+        }
+        return default;
+    }
+    case var ᴛ when ᴛ == reflect.ΔBool || ᴛ == reflect.Float32 || ᴛ == reflect.Float64 || ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64 || ᴛ == reflect.ΔUint || ᴛ == reflect.Uint8 || ᴛ == reflect.Uint16 || ᴛ == reflect.Uint32 || ᴛ == reflect.Uint64 || ᴛ == reflect.Uintptr || ᴛ == reflect.ΔString: {
+        saveData = v;
+        break;
+    }
+    case var ᴛ when ᴛ == reflect.Struct: {
+        var typ = v.Type();
+        if (AreEqual(typ, nameType)) {
+            v.Set(reflect.ValueOf(start.Name));
+            break;
+        }
 
-            // Assign attributes.
-            foreach (var (_, a) in start.Attr) {
-                var handled = false;
-                nint any = -1;
-                foreach (var i in range(tinfo.fields)) {
-                    var finfo = Ꮡ(tinfo.fields, i);
-                    switch ((fieldFlags)(finfo.flags & fMode)) {
-                    case var ᴛ2 when ᴛ2 == fAttr: {
-                        var strv = finfo.value(sv, initNilPointers);
-                        if (a.Name.Local == finfo.name && (finfo.xmlns == ""u8 || finfo.xmlns == a.Name.Space)) {
-                            {
-                                var errΔ8 = d.unmarshalAttr(strv, a); if (errΔ8 != nil) {
-                                    return errΔ8;
-                                }
-                            }
-                            handled = true;
-                        }
-                        break;
-                    }
-                    case var ᴛ2 when ᴛ2 == (fieldFlags)((fieldFlags)(fAny | fAttr)): {
-                        if (any == -1) {
-                            any = i;
-                        }
-                        break;
-                    }}
-                }
-                if (!handled && any >= 0) {
-                    var finfo = Ꮡ(tinfo.fields, any);
-                    var strv = finfo.value(sv, initNilPointers);
-                    {
-                        var errΔ9 = d.unmarshalAttr(strv, a); if (errΔ9 != nil) {
-                            return errΔ9;
-                        }
-                    }
-                }
-            }
+        sv = v;
+        (tinfo, err) = getTypeInfo(typ);
+        if (err != nil) {
+            return err;
+        }
 
-            // Determine whether we need to save character data or comments.
+        // Validate and assign element name.
+        if (tinfo.xmlname != nil) {
+            var finfo = tinfo.xmlname;
+            if (finfo.name != ""u8 && finfo.name != start.Name.Local) {
+                return ((UnmarshalError)("expected element type <"u8 + finfo.name + "> but have <"u8 + start.Name.Local + ">"u8));
+            }
+            if (finfo.xmlns != ""u8 && finfo.xmlns != start.Name.Space) {
+                @string e = "expected element <"u8 + finfo.name + "> in name space "u8 + finfo.xmlns + " but have "u8;
+                if (start.Name.Space == ""u8) {
+                    e += "no name space"u8;
+                } else {
+                    e += start.Name.Space;
+                }
+                return ((UnmarshalError)e);
+            }
+            var fv = finfo.value(sv, initNilPointers);
+            var (_, ok) = reflect.TypeAssert<Name>(fv); if (ok) {
+                fv.Set(reflect.ValueOf(start.Name));
+            }
+        }
+
+        // Assign attributes.
+        foreach (var (_, a) in start.Attr) {
+            var handled = false;
+            nint any = -1;
             foreach (var i in range(tinfo.fields)) {
                 var finfo = Ꮡ(tinfo.fields, i);
                 switch ((fieldFlags)(finfo.flags & fMode)) {
-                case var ᴛ2 when ᴛ2 == fCDATA || ᴛ2 == fCharData: {
-                    if (!saveData.IsValid()) {
-                        saveData = finfo.value(sv, initNilPointers);
-                    }
-                    break;
-                }
-                case var ᴛ2 when ᴛ2 == fComment: {
-                    if (!saveComment.IsValid()) {
-                        saveComment = finfo.value(sv, initNilPointers);
-                    }
-                    break;
-                }
-                case var ᴛ2 when ᴛ2 == fAny || ᴛ2 == (fieldFlags)((fieldFlags)(fAny | fElement)): {
-                    if (!saveAny.IsValid()) {
-                        saveAny = finfo.value(sv, initNilPointers);
-                    }
-                    break;
-                }
-                case var ᴛ2 when ᴛ2 == fInnerXML: {
-                    if (!saveXML.IsValid()) {
-                        saveXML = finfo.value(sv, initNilPointers);
-                        if (d.saved == nil) {
-                            saveXMLIndex = 0;
-                            d.saved = @new<bytes.Buffer>();
-                        } else {
-                            saveXMLIndex = d.savedOffset();
+                case var ᴛ2 when ᴛ2 == fAttr: {
+                    var strv = finfo.value(sv, initNilPointers);
+                    if (a.Name.Local == finfo.name && (finfo.xmlns == ""u8 || finfo.xmlns == a.Name.Space)) {
+                        var errΔ8 = d.unmarshalAttr(strv, a); if (errΔ8 != nil) {
+                            return errΔ8;
                         }
+                        handled = true;
+                    }
+                    break;
+                }
+                case var ᴛ2 when ᴛ2 == (fieldFlags)((fieldFlags)(fAny | fAttr)): {
+                    if (any == -1) {
+                        any = i;
                     }
                     break;
                 }}
             }
-            break;
-        }}
-    }
+            if (!handled && any >= 0) {
+                var finfo = Ꮡ(tinfo.fields, any);
+                var strv = finfo.value(sv, initNilPointers);
+                var errΔ9 = d.unmarshalAttr(strv, a); if (errΔ9 != nil) {
+                    return errΔ9;
+                }
+            }
+        }
+
+        // Determine whether we need to save character data or comments.
+        foreach (var i in range(tinfo.fields)) {
+            var finfo = Ꮡ(tinfo.fields, i);
+            switch ((fieldFlags)(finfo.flags & fMode)) {
+            case var ᴛ2 when ᴛ2 == fCDATA || ᴛ2 == fCharData: {
+                if (!saveData.IsValid()) {
+                    saveData = finfo.value(sv, initNilPointers);
+                }
+                break;
+            }
+            case var ᴛ2 when ᴛ2 == fComment: {
+                if (!saveComment.IsValid()) {
+                    saveComment = finfo.value(sv, initNilPointers);
+                }
+                break;
+            }
+            case var ᴛ2 when ᴛ2 == fAny || ᴛ2 == (fieldFlags)((fieldFlags)(fAny | fElement)): {
+                if (!saveAny.IsValid()) {
+                    saveAny = finfo.value(sv, initNilPointers);
+                }
+                break;
+            }
+            case var ᴛ2 when ᴛ2 == fInnerXML: {
+                if (!saveXML.IsValid()) {
+                    saveXML = finfo.value(sv, initNilPointers);
+                    if (d.saved == nil) {
+                        saveXMLIndex = 0;
+                        d.saved = @new<bytes.Buffer>();
+                    } else {
+                        saveXMLIndex = d.savedOffset();
+                    }
+                }
+                break;
+            }}
+        }
+        break;
+    }}
 
     // Find end element.
     // Process sub-elements along the way.
@@ -620,18 +590,14 @@ Loop:
                 }
                 if (!consumed && saveAny.IsValid()) {
                     consumed = true;
-                    {
-                        var errΔ11 = Ꮡd.unmarshal(saveAny, Ꮡt); if (errΔ11 != nil) {
-                            return errΔ11;
-                        }
+                    var errΔ11 = Ꮡd.unmarshal(saveAny, Ꮡt); if (errΔ11 != nil) {
+                        return errΔ11;
                     }
                 }
             }
             if (!consumed) {
-                {
-                    var errΔ12 = d.Skip(); if (errΔ12 != nil) {
-                        return errΔ12;
-                    }
+                var errΔ12 = d.Skip(); if (errΔ12 != nil) {
+                    return errΔ12;
                 }
             }
             break;
@@ -663,38 +629,28 @@ continue_Loop:;
 break_Loop:;
 
     if (saveData.IsValid() && saveData.CanInterface()) {
-        {
-            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(saveData); if (ok) {
-                {
-                    var errΔ13 = textUnmarshaler.UnmarshalText(data); if (errΔ13 != nil) {
-                        return errΔ13;
-                    }
-                }
-                saveData = new reflectꓸValue();
+        var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(saveData); if (ok) {
+            var errΔ13 = textUnmarshaler.UnmarshalText(data); if (errΔ13 != nil) {
+                return errΔ13;
             }
+            saveData = new reflectꓸValue();
         }
     }
 
     if (saveData.IsValid() && saveData.CanAddr()) {
         var pv = saveData.Addr();
         if (pv.CanInterface()) {
-            {
-                var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
-                    {
-                        var errΔ14 = textUnmarshaler.UnmarshalText(data); if (errΔ14 != nil) {
-                            return errΔ14;
-                        }
-                    }
-                    saveData = new reflectꓸValue();
+            var (textUnmarshaler, ok) = reflect.TypeAssert<encoding.TextUnmarshaler>(pv); if (ok) {
+                var errΔ14 = textUnmarshaler.UnmarshalText(data); if (errΔ14 != nil) {
+                    return errΔ14;
                 }
+                saveData = new reflectꓸValue();
             }
         }
     }
 
-    {
-        var errΔ15 = copyValue(saveData, data); if (errΔ15 != nil) {
-            return errΔ15;
-        }
+    var errΔ15 = copyValue(saveData, data); if (errΔ15 != nil) {
+        return errΔ15;
     }
 
     {
@@ -872,10 +828,8 @@ break_Loop:;
                 return (true, errΔ1);
             }
             if (!consumed2) {
-                {
-                    var errΔ2 = d.Skip(); if (errΔ2 != nil) {
-                        return (true, errΔ2);
-                    }
+                var errΔ2 = d.Skip(); if (errΔ2 != nil) {
+                    return (true, errΔ2);
                 }
             }
             break;

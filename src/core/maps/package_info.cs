@@ -56,7 +56,7 @@ using static go.maps_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("maps/iter.go", "iter.cs", "AAkY0oKCggAFEtKCgoIABRLSgoKCAAUQwoK8ooKC", "13-19:1;26-32:1;39-45:1")]
-[assembly: GoPositionMap("maps/maps.go", "maps.cs", "AA4i0oKUgoCCtqrSgpSCgIK2rOjUgpSu8oK6soKC")]
+[assembly: GoPositionMap("maps/maps.go", "maps.cs", "AA4i0oKUgoKmqtKClIKCpqzo1IKUrvKCurKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

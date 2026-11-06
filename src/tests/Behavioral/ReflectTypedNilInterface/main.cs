@@ -144,12 +144,10 @@ internal static void Main() {
     var sh = new main_sh(S: stamp);
     var si2 = reflect.ValueOf(sh).Field(0).Interface();
     fmt.Printf("shell-tier: printed=%v type=%v\n"u8, fmt.Sprint(si2), reflect.TypeOf(si2));
-    {
-        var (e, ok) = si2._<error>(ᐧ); if (ok) {
-            fmt.Printf("  assert error ok=true Error()=%q\n"u8, e.Error());
-        } else {
-            fmt.Println("  assert error ok=false");
-        }
+    var (e, ok) = si2._<error>(ᐧ); if (ok) {
+        fmt.Printf("  assert error ok=true Error()=%q\n"u8, e.Error());
+    } else {
+        fmt.Println("  assert error ok=false");
     }
 }
 

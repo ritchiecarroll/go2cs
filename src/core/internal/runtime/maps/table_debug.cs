@@ -51,15 +51,13 @@ internal static void checkInvariants(this ref table t, ж<abiꓸMapType> Ꮡtyp,
                     continue;
                 }
 
-                {
-                    var (_, ok) = t.Get(Ꮡtyp, Ꮡm, key); if (!ok) {
-                        var hash = typ.Hasher(key, m.seed);
-                        print((@string)"invariant failed: slot(", i, (@string)"/", j, (@string)"): key ");
-                        dump(key, typ.Key.Size_);
-                        print((@string)" not found [hash=", hash, (@string)", h2=", h2(hash), (@string)" h1=", h1(hash), (@string)"]\n");
-                        t.Print(Ꮡtyp, Ꮡm);
-                        throw panic("invariant failed: slot: key not found");
-                    }
+                var (_, ok) = t.Get(Ꮡtyp, Ꮡm, key); if (!ok) {
+                    var hash = typ.Hasher(key, m.seed);
+                    print((@string)"invariant failed: slot(", i, (@string)"/", j, (@string)"): key ");
+                    dump(key, typ.Key.Size_);
+                    print((@string)" not found [hash=", hash, (@string)", h2=", h2(hash), (@string)" h1=", h1(hash), (@string)"]\n");
+                    t.Print(Ꮡtyp, Ꮡm);
+                    throw panic("invariant failed: slot: key not found");
                 }
                 break;
             }}

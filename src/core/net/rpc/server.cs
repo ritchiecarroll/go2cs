@@ -277,10 +277,8 @@ internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name
         return errors.New(str);
     }
 
-    {
-        var (_, dup) = Ꮡserver.ᏑserviceMap.LoadOrStore(sname, s.OrTypedNil()); if (dup) {
-            return errors.New("rpc: service already defined: "u8 + sname);
-        }
+    var (_, dup) = Ꮡserver.ᏑserviceMap.LoadOrStore(sname, s.OrTypedNil()); if (dup) {
+        return errors.New("rpc: service already defined: "u8 + sname);
     }
     return default;
 }
@@ -335,13 +333,11 @@ internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ,
             continue;
         }
         // The return type of the method must be error.
-        {
-            var returnType = mtype.Out(0); if (!AreEqual(returnType, typeOfError)) {
-                if (logErr) {
-                    log.Printf("rpc.Register: return type of method %q is %q, must be error\n", mname, returnType);
-                }
-                continue;
+        var returnType = mtype.Out(0); if (!AreEqual(returnType, typeOfError)) {
+            if (logErr) {
+                log.Printf("rpc.Register: return type of method %q is %q, must be error\n", mname, returnType);
             }
+            continue;
         }
         methods[mname] = Ꮡ(new methodType(method: method, ArgType: argType, ReplyType: replyType));
     }
@@ -437,27 +433,23 @@ internal static readonly object rpcGobErrorEncodingBodyˢ = (@string)"rpc: gob e
 internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> r, any body) {
     error err = default;
 
-    {
-        err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
-            if (c.encBuf.Flush() == nil) {
-                // Gob couldn't encode the header. Should not happen, so if it does,
-                // shut down the connection to signal that the connection is broken.
-                log.Println(rpcGobErrorEncodingˢ, err);
-                c.Close();
-            }
-            return err;
+    err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
+        if (c.encBuf.Flush() == nil) {
+            // Gob couldn't encode the header. Should not happen, so if it does,
+            // shut down the connection to signal that the connection is broken.
+            log.Println(rpcGobErrorEncodingˢ, err);
+            c.Close();
         }
+        return err;
     }
-    {
-        err = c.enc.Encode(body); if (err != nil) {
-            if (c.encBuf.Flush() == nil) {
-                // Was a gob problem encoding the body but the header has been written.
-                // Shut down the connection to signal that the connection is broken.
-                log.Println(rpcGobErrorEncodingBodyˢ, err);
-                c.Close();
-            }
-            return err;
+    err = c.enc.Encode(body); if (err != nil) {
+        if (c.encBuf.Flush() == nil) {
+            // Was a gob problem encoding the body but the header has been written.
+            // Shut down the connection to signal that the connection is broken.
+            log.Println(rpcGobErrorEncodingBodyˢ, err);
+            c.Close();
         }
+        return err;
     }
     return c.encBuf.Flush();
 }
@@ -622,10 +614,8 @@ internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, ref
         argIsValue = true;
     }
     // argv guaranteed to be a pointer now.
-    {
-        err = codec.ReadRequestBody(argv.Interface()); if (err != nil) {
-            return (service, mtype, req, argv, replyv, keepReading, err);
-        }
+    err = codec.ReadRequestBody(argv.Interface()); if (err != nil) {
+        return (service, mtype, req, argv, replyv, keepReading, err);
     }
     if (argIsValue) {
         argv = argv.Elem();

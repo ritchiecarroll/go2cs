@@ -428,10 +428,8 @@ internal static ref _TypeSet invalidTypeSet => ref ((StaticBox<_TypeSet>)Ꮡinva
 internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union>, ж<_TypeSet>> unionSets, tokenꓸPos pos, ж<Union> Ꮡutyp) {
     ref var utyp = ref Ꮡutyp.DerefOrNull();
 
-    {
-        var (tset, _) = unionSets[Ꮡutyp, ꟷ]; if (tset != nil) {
-            return tset;
-        }
+    var (tset, _) = unionSets[Ꮡutyp, ꟷ]; if (tset != nil) {
+        return tset;
     }
 
     // avoid infinite recursion (see also computeInterfaceTypeSet)
@@ -443,21 +441,19 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union
 
         termlist terms = default;
         var u = (~t).typ.Underlying();
-        {
-            var (ui, _) = u._<ж<Interface>>(ᐧ); if (ui != nil) {
-                // For now we don't permit type parameters as constraints.
-                assert(!isTypeParam((~t).typ));
-                terms = computeInterfaceTypeSet(check, pos, ui).terms;
-            } else if (!isValid(u)) {
-                continue;
-            } else {
-                if ((~t).tilde && !Identical((~t).typ, u)) {
-                    // There is no underlying type which is t.typ.
-                    // The corresponding type set is empty.
-                    t = default; // ∅ term
-                }
-                terms = new termlist(new ж<Δterm>[]{t.Reinterpret<ΔTerm, Δterm>()}.slice());
+        var (ui, _) = u._<ж<Interface>>(ᐧ); if (ui != nil) {
+            // For now we don't permit type parameters as constraints.
+            assert(!isTypeParam((~t).typ));
+            terms = computeInterfaceTypeSet(check, pos, ui).terms;
+        } else if (!isValid(u)) {
+            continue;
+        } else {
+            if ((~t).tilde && !Identical((~t).typ, u)) {
+                // There is no underlying type which is t.typ.
+                // The corresponding type set is empty.
+                t = default; // ∅ term
             }
+            terms = new termlist(new ж<Δterm>[]{t.Reinterpret<ΔTerm, Δterm>()}.slice());
         }
         // The type set of a union expression is the union
         // of the type sets of each term.

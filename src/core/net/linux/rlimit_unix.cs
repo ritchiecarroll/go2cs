@@ -20,10 +20,8 @@ partial class net_package {
 // there we will return a meaningful "too many open files" error.
 internal static nint concurrentThreadsLimit() {
     ref var rlim = ref heap(new syscall.Rlimit(), out var Ꮡrlim);
-    {
-        var err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, Ꮡrlim); if (err != nil) {
-            return 500;
-        }
+    var err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, Ꮡrlim); if (err != nil) {
+        return 500;
     }
     var r = rlim.Cur;
     if (r > 500) {

@@ -96,10 +96,8 @@ internal static void @try(@string label, Func<@string> f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Printf("%-36s PANIC %v\n"u8, label, r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Printf("%-36s PANIC %v\n"u8, label, r);
             }
         }, ref ᒐ);
         fmt.Printf("%-36s %s\n"u8, label, f());

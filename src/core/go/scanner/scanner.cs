@@ -521,30 +521,28 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
     }
 
     // exponent
-    {
-        var e = lower(s.ch); if (e == 'e' || e == 'p') {
-            switch (ᐧ) {
-            case {} when e == 'e' && prefix != 0 && prefix != '0': {
-                s.errorf(s.offset, "%q exponent requires decimal mantissa", s.ch);
-                break;
-            }
-            case {} when e == 'p' && prefix != 'x': {
-                s.errorf(s.offset, "%q exponent requires hexadecimal mantissa", s.ch);
-                break;
-            }}
-            s.next();
-            tok = token.FLOAT;
-            if (s.ch == '+' || s.ch == '-') {
-                s.next();
-            }
-            nint ds = s.digits(10, nil);
-            digsep |= (nint)(ds);
-            if ((ds & 1) == 0) {
-                s.error(s.offset, exponentHasNoDigitsˢ);
-            }
-        } else if (prefix == 'x' && tok == token.FLOAT) {
-            s.error(s.offset, hexadecimalMantissaˢ);
+    var e = lower(s.ch); if (e == 'e' || e == 'p') {
+        switch (ᐧ) {
+        case {} when e == 'e' && prefix != 0 && prefix != '0': {
+            s.errorf(s.offset, "%q exponent requires decimal mantissa", s.ch);
+            break;
         }
+        case {} when e == 'p' && prefix != 'x': {
+            s.errorf(s.offset, "%q exponent requires hexadecimal mantissa", s.ch);
+            break;
+        }}
+        s.next();
+        tok = token.FLOAT;
+        if (s.ch == '+' || s.ch == '-') {
+            s.next();
+        }
+        nint ds = s.digits(10, nil);
+        digsep |= (nint)(ds);
+        if ((ds & 1) == 0) {
+            s.error(s.offset, exponentHasNoDigitsˢ);
+        }
+    } else if (prefix == 'x' && tok == token.FLOAT) {
+        s.error(s.offset, hexadecimalMantissaˢ);
     }
 
     // suffix 'i'
@@ -558,10 +556,8 @@ internal static (token.Token, @string) scanNumber(this ref Scanner s) {
         s.errorf(invalid, "invalid digit %q in %s", lit[invalid - offs], litname(prefix));
     }
     if ((digsep & 2) != 0) {
-        {
-            nint i = invalidSep(lit); if (i >= 0) {
-                s.error(offs + i, mustSeparateSuccessiveˢ);
-            }
+        nint i = invalidSep(lit); if (i >= 0) {
+            s.error(offs + i, mustSeparateSuccessiveˢ);
         }
     }
 
@@ -928,226 +924,224 @@ scanAgain:
 
     // determine token value
     var insertSemi = false;
-    {
-        var ch = s.ch;
-        switch (ᐧ) {
-        case {} when isLetter(ch): {
-            lit = s.scanIdentifier();
-            if (len(lit) > 1) {
-                // keywords are longer than one letter - avoid lookup otherwise
-                tok = token.Lookup(lit);
-                switch (tok) {
-                case var ᴛ when ᴛ == token.IDENT || ᴛ == token.BREAK || ᴛ == token.CONTINUE || ᴛ == token.FALLTHROUGH || ᴛ == token.RETURN: {
-                    insertSemi = true;
-                    break;
-                }}
-            } else {
+    var ch = s.ch;
+    switch (ᐧ) {
+    case {} when isLetter(ch): {
+        lit = s.scanIdentifier();
+        if (len(lit) > 1) {
+            // keywords are longer than one letter - avoid lookup otherwise
+            tok = token.Lookup(lit);
+            switch (tok) {
+            case var ᴛ when ᴛ == token.IDENT || ᴛ == token.BREAK || ᴛ == token.CONTINUE || ᴛ == token.FALLTHROUGH || ᴛ == token.RETURN: {
                 insertSemi = true;
-                tok = token.IDENT;
+                break;
+            }}
+        } else {
+            insertSemi = true;
+            tok = token.IDENT;
+        }
+        break;
+    }
+    case {} when isDecimal(ch) || ch == '.' && isDecimal((rune)s.peek()): {
+        insertSemi = true;
+        (tok, lit) = s.scanNumber();
+        break;
+    }
+    default: {
+        s.next(); // always make progress
+        switch (ch) {
+        case var ᴛ when ᴛ == eof: {
+            if (s.insertSemi) {
+                s.insertSemi = false; // EOF consumed
+                return (pos, token.SEMICOLON, "\n");
+            }
+            tok = token.EOF;
+            break;
+        }
+        case '\n': {
+            // we only reach here if s.insertSemi was
+            // set in the first place and exited early
+            // from s.skipWhitespace()
+            s.insertSemi = false; // newline consumed
+            return (pos, token.SEMICOLON, "\n");
+        }
+        case '"': {
+            insertSemi = true;
+            tok = token.STRING;
+            lit = s.scanString();
+            s.stringEnd = pos + ((tokenꓸPos)len(lit));
+            break;
+        }
+        case '\'': {
+            insertSemi = true;
+            tok = token.CHAR;
+            lit = s.scanRune();
+            break;
+        }
+        case '`': {
+            insertSemi = true;
+            tok = token.STRING;
+            nint rawLen = default;
+            (lit, rawLen) = s.scanRawString();
+            s.stringEnd = pos + ((tokenꓸPos)rawLen);
+            break;
+        }
+        case ':': {
+            tok = s.switch2(token.COLON, token.DEFINE);
+            break;
+        }
+        case '.': {
+            // fractions starting with a '.' are handled by outer switch
+            tok = token.PERIOD;
+            if (s.ch == '.' && s.peek() == '.') {
+                s.next();
+                s.next(); // consume last '.'
+                tok = token.ELLIPSIS;
             }
             break;
         }
-        case {} when isDecimal(ch) || ch == '.' && isDecimal((rune)s.peek()): {
+        case ',': {
+            tok = token.COMMA;
+            break;
+        }
+        case ';': {
+            tok = token.SEMICOLON;
+            lit = ";";
+            break;
+        }
+        case '(': {
+            tok = token.LPAREN;
+            break;
+        }
+        case ')': {
             insertSemi = true;
-            (tok, lit) = s.scanNumber();
+            tok = token.RPAREN;
+            break;
+        }
+        case '[': {
+            tok = token.LBRACK;
+            break;
+        }
+        case ']': {
+            insertSemi = true;
+            tok = token.RBRACK;
+            break;
+        }
+        case '{': {
+            tok = token.LBRACE;
+            break;
+        }
+        case '}': {
+            insertSemi = true;
+            tok = token.RBRACE;
+            break;
+        }
+        case '+': {
+            tok = s.switch3(token.ADD, token.ADD_ASSIGN, '+', token.INC);
+            if (tok == token.INC) {
+                insertSemi = true;
+            }
+            break;
+        }
+        case '-': {
+            tok = s.switch3(token.SUB, token.SUB_ASSIGN, '-', token.DEC);
+            if (tok == token.DEC) {
+                insertSemi = true;
+            }
+            break;
+        }
+        case '*': {
+            tok = s.switch2(token.MUL, token.MUL_ASSIGN);
+            break;
+        }
+        case '/': {
+            if (s.ch == '/' || s.ch == '*') {
+                // comment
+                var (comment, nlOffset) = s.scanComment();
+                if (s.insertSemi && nlOffset != 0) {
+                    // For /*...*/ containing \n, return
+                    // COMMENT then artificial SEMICOLON.
+                    s.nlPos = s.@file.Pos(nlOffset);
+                    s.insertSemi = false;
+                } else {
+                    insertSemi = s.insertSemi; // preserve insertSemi info
+                }
+                if ((Mode)(s.mode & ScanComments) == 0) {
+                    // skip comment
+                    goto scanAgain;
+                }
+                tok = token.COMMENT;
+                lit = comment;
+            } else {
+                // division
+                tok = s.switch2(token.QUO, token.QUO_ASSIGN);
+            }
+            break;
+        }
+        case '%': {
+            tok = s.switch2(token.REM, token.REM_ASSIGN);
+            break;
+        }
+        case '^': {
+            tok = s.switch2(token.XOR, token.XOR_ASSIGN);
+            break;
+        }
+        case '<': {
+            if (s.ch == '-') {
+                s.next();
+                tok = token.ARROW;
+            } else {
+                tok = s.switch4(token.LSS, token.LEQ, '<', token.SHL, token.SHL_ASSIGN);
+            }
+            break;
+        }
+        case '>': {
+            tok = s.switch4(token.GTR, token.GEQ, '>', token.SHR, token.SHR_ASSIGN);
+            break;
+        }
+        case '=': {
+            tok = s.switch2(token.ASSIGN, token.EQL);
+            break;
+        }
+        case '!': {
+            tok = s.switch2(token.NOT, token.NEQ);
+            break;
+        }
+        case '&': {
+            if (s.ch == '^') {
+                s.next();
+                tok = s.switch2(token.AND_NOT, token.AND_NOT_ASSIGN);
+            } else {
+                tok = s.switch3(token.AND, token.AND_ASSIGN, '&', token.LAND);
+            }
+            break;
+        }
+        case '|': {
+            tok = s.switch3(token.OR, token.OR_ASSIGN, '|', token.LOR);
+            break;
+        }
+        case '~': {
+            tok = token.TILDE;
             break;
         }
         default: {
-            s.next(); // always make progress
-            switch (ch) {
-            case var ᴛ when ᴛ == eof: {
-                if (s.insertSemi) {
-                    s.insertSemi = false; // EOF consumed
-                    return (pos, token.SEMICOLON, "\n");
-                }
-                tok = token.EOF;
-                break;
-            }
-            case '\n': {
-                // we only reach here if s.insertSemi was
-                // set in the first place and exited early
-                // from s.skipWhitespace()
-                s.insertSemi = false; // newline consumed
-                return (pos, token.SEMICOLON, "\n");
-            }
-            case '"': {
-                insertSemi = true;
-                tok = token.STRING;
-                lit = s.scanString();
-                s.stringEnd = pos + ((tokenꓸPos)len(lit));
-                break;
-            }
-            case '\'': {
-                insertSemi = true;
-                tok = token.CHAR;
-                lit = s.scanRune();
-                break;
-            }
-            case '`': {
-                insertSemi = true;
-                tok = token.STRING;
-                nint rawLen = default;
-                (lit, rawLen) = s.scanRawString();
-                s.stringEnd = pos + ((tokenꓸPos)rawLen);
-                break;
-            }
-            case ':': {
-                tok = s.switch2(token.COLON, token.DEFINE);
-                break;
-            }
-            case '.': {
-                // fractions starting with a '.' are handled by outer switch
-                tok = token.PERIOD;
-                if (s.ch == '.' && s.peek() == '.') {
-                    s.next();
-                    s.next(); // consume last '.'
-                    tok = token.ELLIPSIS;
-                }
-                break;
-            }
-            case ',': {
-                tok = token.COMMA;
-                break;
-            }
-            case ';': {
-                tok = token.SEMICOLON;
-                lit = ";";
-                break;
-            }
-            case '(': {
-                tok = token.LPAREN;
-                break;
-            }
-            case ')': {
-                insertSemi = true;
-                tok = token.RPAREN;
-                break;
-            }
-            case '[': {
-                tok = token.LBRACK;
-                break;
-            }
-            case ']': {
-                insertSemi = true;
-                tok = token.RBRACK;
-                break;
-            }
-            case '{': {
-                tok = token.LBRACE;
-                break;
-            }
-            case '}': {
-                insertSemi = true;
-                tok = token.RBRACE;
-                break;
-            }
-            case '+': {
-                tok = s.switch3(token.ADD, token.ADD_ASSIGN, '+', token.INC);
-                if (tok == token.INC) {
-                    insertSemi = true;
-                }
-                break;
-            }
-            case '-': {
-                tok = s.switch3(token.SUB, token.SUB_ASSIGN, '-', token.DEC);
-                if (tok == token.DEC) {
-                    insertSemi = true;
-                }
-                break;
-            }
-            case '*': {
-                tok = s.switch2(token.MUL, token.MUL_ASSIGN);
-                break;
-            }
-            case '/': {
-                if (s.ch == '/' || s.ch == '*') {
-                    // comment
-                    var (comment, nlOffset) = s.scanComment();
-                    if (s.insertSemi && nlOffset != 0) {
-                        // For /*...*/ containing \n, return
-                        // COMMENT then artificial SEMICOLON.
-                        s.nlPos = s.@file.Pos(nlOffset);
-                        s.insertSemi = false;
-                    } else {
-                        insertSemi = s.insertSemi; // preserve insertSemi info
-                    }
-                    if ((Mode)(s.mode & ScanComments) == 0) {
-                        // skip comment
-                        goto scanAgain;
-                    }
-                    tok = token.COMMENT;
-                    lit = comment;
+            // next reports unexpected BOMs - don't repeat
+            if (ch != bom) {
+                // Report an informative error for U+201[CD] quotation
+                // marks, which are easily introduced via copy and paste.
+                if (ch == '“' || ch == '”') {
+                    s.errorf(s.@file.Offset(pos), "curly quotation mark %q (use neutral %q)", ch, (rune)'"');
                 } else {
-                    // division
-                    tok = s.switch2(token.QUO, token.QUO_ASSIGN);
+                    s.errorf(s.@file.Offset(pos), "illegal character %#U", ch);
                 }
-                break;
             }
-            case '%': {
-                tok = s.switch2(token.REM, token.REM_ASSIGN);
-                break;
-            }
-            case '^': {
-                tok = s.switch2(token.XOR, token.XOR_ASSIGN);
-                break;
-            }
-            case '<': {
-                if (s.ch == '-') {
-                    s.next();
-                    tok = token.ARROW;
-                } else {
-                    tok = s.switch4(token.LSS, token.LEQ, '<', token.SHL, token.SHL_ASSIGN);
-                }
-                break;
-            }
-            case '>': {
-                tok = s.switch4(token.GTR, token.GEQ, '>', token.SHR, token.SHR_ASSIGN);
-                break;
-            }
-            case '=': {
-                tok = s.switch2(token.ASSIGN, token.EQL);
-                break;
-            }
-            case '!': {
-                tok = s.switch2(token.NOT, token.NEQ);
-                break;
-            }
-            case '&': {
-                if (s.ch == '^') {
-                    s.next();
-                    tok = s.switch2(token.AND_NOT, token.AND_NOT_ASSIGN);
-                } else {
-                    tok = s.switch3(token.AND, token.AND_ASSIGN, '&', token.LAND);
-                }
-                break;
-            }
-            case '|': {
-                tok = s.switch3(token.OR, token.OR_ASSIGN, '|', token.LOR);
-                break;
-            }
-            case '~': {
-                tok = token.TILDE;
-                break;
-            }
-            default: {
-                // next reports unexpected BOMs - don't repeat
-                if (ch != bom) {
-                    // Report an informative error for U+201[CD] quotation
-                    // marks, which are easily introduced via copy and paste.
-                    if (ch == '“' || ch == '”') {
-                        s.errorf(s.@file.Offset(pos), "curly quotation mark %q (use neutral %q)", ch, (rune)'"');
-                    } else {
-                        s.errorf(s.@file.Offset(pos), "illegal character %#U", ch);
-                    }
-                }
-                insertSemi = s.insertSemi; // preserve insertSemi info
-                tok = token.ILLEGAL;
-                lit = (@string)ch;
-                break;
-            }}
+            insertSemi = s.insertSemi; // preserve insertSemi info
+            tok = token.ILLEGAL;
+            lit = (@string)ch;
             break;
         }}
-    }
+        break;
+    }}
     if ((Mode)(s.mode & dontInsertSemis) == 0) {
         s.insertSemi = insertSemi;
     }

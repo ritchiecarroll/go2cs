@@ -233,10 +233,8 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, tokenꓸPo
             break;
         }
         case ж<Named> typΔ1: {
-            {
-                nint src = Ꮡw.Value.localNamedVertex(pkg, typΔ1.Origin()); if (src >= 0) {
-                    flowʗ1(src, new NamedжΔType(typΔ1));
-                }
+            nint src = Ꮡw.Value.localNamedVertex(pkg, typΔ1.Origin()); if (src >= 0) {
+                flowʗ1(src, new NamedжΔType(typΔ1));
             }
 
             var targs = typΔ1.TypeArgs();
@@ -311,10 +309,8 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> pkg, ж<
         return -1; // package scope, no ambient type parameters
     }
 
-    {
-        var (idxΔ1, ok) = w.nameIdx[obj, ꟷ]; if (ok) {
-            return idxΔ1;
-        }
+    if (w.nameIdx[obj, ꟷ] is (var idxΔ1, true)) {
+        return idxΔ1;
     }
 
     nint idx = -1;
@@ -323,18 +319,14 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> pkg, ж<
     // parameters that it's implicitly parameterized by.
     for (var scope = obj.of(TypeName.Ꮡobject).Parent(); scope != root; scope = scope.Parent()) {
         foreach (var (_, elem) in scope.elems) {
-            {
-                var (elemΔ1, ok) = elem._<ж<TypeName>>(ᐧ); if (ok && !elemΔ1.IsAlias() && cmpPos(elemΔ1.of(TypeName.Ꮡobject).Pos(), obj.of(TypeName.Ꮡobject).Pos()) < 0) {
-                    {
-                        var (tpar, okΔ1) = elemΔ1.of(TypeName.Ꮡobject).Type()._<ж<TypeParam>>(ᐧ); if (okΔ1) {
-                            if (idx < 0) {
-                                idx = len(w.vertices);
-                                w.vertices = append(w.vertices, new monoVertex(obj: obj));
-                            }
-
-                            w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.of(TypeName.Ꮡobject).Pos(), new TypeParamжΔType(tpar));
-                        }
+            var (elemΔ1, ok) = elem._<ж<TypeName>>(ᐧ); if (ok && !elemΔ1.IsAlias() && cmpPos(elemΔ1.of(TypeName.Ꮡobject).Pos(), obj.of(TypeName.Ꮡobject).Pos()) < 0) {
+                var (tpar, okΔ1) = elemΔ1.of(TypeName.Ꮡobject).Type()._<ж<TypeParam>>(ᐧ); if (okΔ1) {
+                    if (idx < 0) {
+                        idx = len(w.vertices);
+                        w.vertices = append(w.vertices, new monoVertex(obj: obj));
                     }
+
+                    w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.of(TypeName.Ꮡobject).Pos(), new TypeParamжΔType(tpar));
                 }
             }
         }
@@ -351,18 +343,14 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> pkg, ж<
 internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar) {
     ref var tpar = ref Ꮡtpar.DerefOrNull();
 
-    {
-        var (x, ok) = w.canon[Ꮡtpar, ꟷ]; if (ok) {
-            Ꮡtpar = x; tpar = ref Ꮡtpar.DerefOrNull();
-        }
+    if (w.canon[Ꮡtpar, ꟷ] is (var x, true)) {
+        Ꮡtpar = x; tpar = ref Ꮡtpar.DerefOrNull();
     }
 
     var obj = tpar.Obj();
 
-    {
-        var (idxΔ1, ok) = w.nameIdx[obj, ꟷ]; if (ok) {
-            return idxΔ1;
-        }
+    if (w.nameIdx[obj, ꟷ] is (var idxΔ1, true)) {
+        return idxΔ1;
     }
 
     if (w.nameIdx == nil) {

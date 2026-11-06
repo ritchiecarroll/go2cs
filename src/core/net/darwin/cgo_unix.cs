@@ -60,11 +60,9 @@ internal partial struct doBlockingWithCtx_result<T> /*dyn*/ {
 internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @string lookupName, Func<(T, error)> blocking) {
     GoFrame ᒐ = default;
     try {
-        {
-            var err = acquireThread(ctx); if (err != nil) {
-                T zero = GoZero<T>();
-                return (zero, new DNSErrorжerror(newDNSError(mapErr(err), lookupName, ""u8)));
-            }
+        var err = acquireThread(ctx); if (err != nil) {
+            T zero = GoZero<T>();
+            return (zero, new DNSErrorжerror(newDNSError(mapErr(err), lookupName, ""u8)));
         }
 
         if (ctx.Done() == nil) {
@@ -351,24 +349,18 @@ internal static (slice<@string> names, error err) cgoLookupAddrPTR(@string addr,
             return (default, new DNSErrorжerror(newDNSError((addrinfoErrno)gerrno, addr, ""u8)));
         }}
     }
-    {
-        nint i = bytealg.IndexByte(b, 0); if (i != -1) {
-            b = b.slice(0, i);
-        }
+    nint i = bytealg.IndexByte(b, 0); if (i != -1) {
+        b = b.slice(0, i);
     }
     return (slice<@string>([absDomainName((@string)b)]), default);
 }
 
 internal static (ж<_C_struct_sockaddr>, _C_socklen_t) cgoSockaddr(IP ip, @string zone) {
-    {
-        var ip4 = ip.To4(); if (ip4 != nil) {
-            return (cgoSockaddrInet4(ip4), (_C_socklen_t)syscall.SizeofSockaddrInet4);
-        }
+    var ip4 = ip.To4(); if (ip4 != nil) {
+        return (cgoSockaddrInet4(ip4), (_C_socklen_t)syscall.SizeofSockaddrInet4);
     }
-    {
-        var ip6 = ip.To16(); if (ip6 != nil) {
-            return (cgoSockaddrInet6(ip6, zoneCache.index(zone)), (_C_socklen_t)syscall.SizeofSockaddrInet6);
-        }
+    var ip6 = ip.To16(); if (ip6 != nil) {
+        return (cgoSockaddrInet6(ip6, zoneCache.index(zone)), (_C_socklen_t)syscall.SizeofSockaddrInet6);
     }
     return (default, 0);
 }
@@ -410,10 +402,8 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
             clear(memSlice);
             state = Ꮡ(memSlice, 0).Reinterpret<byte, _C_struct___res_state>();
         }
-        {
-            var errΔ1 = _C_res_ninit(state); if (errΔ1 != nil) {
-                return (default, errors.New("res_ninit failure: "u8 + errΔ1.Error()));
-            }
+        var errΔ1 = _C_res_ninit(state); if (errΔ1 != nil) {
+            return (default, errors.New("res_ninit failure: "u8 + errΔ1.Error()));
         }
         defer(_C_res_nclose, state, ref ᒐ);
 
@@ -454,10 +444,8 @@ internal static (slice<dnsmessage.Resource>, error) cgoResSearch(@string hostnam
         }
 
         dnsmessage.Parser p = default;
-        {
-            var (_, errΔ2) = p.Start(@unsafe.Slice(buf, size)); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var (_, errΔ2) = p.Start(@unsafe.Slice(buf, size)); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
         p.SkipAllQuestions();
         (var resources, err) = p.AllAnswers();

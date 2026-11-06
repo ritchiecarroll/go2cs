@@ -40,10 +40,8 @@ internal static ж<importReader> newImportReader(@string name, io.Reader r) {
     // Per https://golang.org/ref/spec#Source_code_representation:
     // a compiler may ignore a UTF-8-encoded byte order mark (U+FEFF)
     // if it is the first Unicode code point in the source text.
-    {
-        var (leadingBytes, err) = b.Peek(3); if (err == nil && bytes.Equal(leadingBytes, bom)) {
-            b.Discard(3);
-        }
+    var (leadingBytes, err) = b.Peek(3); if (err == nil && bytes.Equal(leadingBytes, bom)) {
+        b.Discard(3);
     }
     return Ꮡ(new importReader(
         b: b,
@@ -114,10 +112,8 @@ internal static void readRest(this ref importReader r) {
 // If skipSpace is set, peekByte skips leading spaces and comments.
 internal static byte peekByte(this ref importReader r, bool skipSpace) {
     if (r.err != nil) {
-        {
-            r.nerr++; if (r.nerr > 10000) {
-                throw panic("go/build: import reader looping");
-            }
+        r.nerr++; if (r.nerr > 10000) {
+            throw panic("go/build: import reader looping");
         }
         return 0;
     }

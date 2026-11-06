@@ -433,19 +433,15 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
                 // stack by trying to add it to the inlining deck before assuming
                 // that the deck is complete.
                 if (len(b.deck.pcs) > 0) {
-                    {
-                        var added = b.deck.tryAdd(addr, l.firstPCFrames, l.firstPCSymbolizeResult); if (added) {
-                            stk = stk[1..];
-                            continue;
-                        }
+                    var added = b.deck.tryAdd(addr, l.firstPCFrames, l.firstPCSymbolizeResult); if (added) {
+                        stk = stk[1..];
+                        continue;
                     }
                 }
 
                 // first record the location if there is any pending accumulated info.
-                {
-                    var id = Ꮡb.emitLocation(); if (id > 0) {
-                        locs = append(locs, id);
-                    }
+                var id = Ꮡb.emitLocation(); if (id > 0) {
+                    locs = append(locs, id);
                 }
 
                 // then, record the cached location.
@@ -466,10 +462,8 @@ internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuil
 
         var (frames, symbolizeResult) = allFrames(addr);
         if (len(frames) == 0) { // runtime.goexit.
-            {
-                var id = Ꮡb.emitLocation(); if (id > 0) {
-                    locs = append(locs, id);
-                }
+            var id = Ꮡb.emitLocation(); if (id > 0) {
+                locs = append(locs, id);
             }
             stk = stk[1..];
             continue;
@@ -575,25 +569,23 @@ internal static void reset(this ref pcDeck d) {
 // since the stack trace is already fully expanded) and the symbolizeResult
 // to the deck. If it fails the caller needs to flush the deck and retry.
 internal static bool /*success*/ tryAdd(this ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
-    {
-        nint existing = len(d.frames); if (existing > 0) {
-            // 'd.frames' are all expanded from one 'pc' and represent all
-            // inlined functions so we check only the last one.
-            ref var newFrame = ref heap<runtime.Frame>(frames[0], out var ᏑnewFrame);
-            ref var last = ref heap<runtime.Frame>(d.frames[existing - 1], out var Ꮡlast);
-            if (last.Func != nil) { // the last frame can't be inlined. Flush.
-                return false;
-            }
-            if (last.Entry == 0 || newFrame.Entry == 0) { // Possibly not a Go function. Don't try to merge.
-                return false;
-            }
+    nint existing = len(d.frames); if (existing > 0) {
+        // 'd.frames' are all expanded from one 'pc' and represent all
+        // inlined functions so we check only the last one.
+        ref var newFrame = ref heap<runtime.Frame>(frames[0], out var ᏑnewFrame);
+        ref var last = ref heap<runtime.Frame>(d.frames[existing - 1], out var Ꮡlast);
+        if (last.Func != nil) { // the last frame can't be inlined. Flush.
+            return false;
+        }
+        if (last.Entry == 0 || newFrame.Entry == 0) { // Possibly not a Go function. Don't try to merge.
+            return false;
+        }
 
-            if (last.Entry != newFrame.Entry) { // newFrame is for a different function.
-                return false;
-            }
-            if (runtime_FrameSymbolName(Ꮡlast) == runtime_FrameSymbolName(ᏑnewFrame)) { // maybe recursion.
-                return false;
-            }
+        if (last.Entry != newFrame.Entry) { // newFrame is for a different function.
+            return false;
+        }
+        if (runtime_FrameSymbolName(Ꮡlast) == runtime_FrameSymbolName(ᏑnewFrame)) { // maybe recursion.
+            return false;
         }
     }
     d.pcs = append(d.pcs, pc);

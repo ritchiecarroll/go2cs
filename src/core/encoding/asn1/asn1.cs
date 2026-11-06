@@ -133,10 +133,8 @@ internal static (int64 ret, error err) parseInt64(slice<byte> bytes) {
 // parseInt32 treats the given bytes as a big-endian, signed integer and returns
 // the result.
 internal static (int32, error) parseInt32(slice<byte> bytes) {
-    {
-        var errΔ1 = checkInteger(bytes); if (errΔ1 != nil) {
-            return (0, errΔ1);
-        }
+    var errΔ1 = checkInteger(bytes); if (errΔ1 != nil) {
+        return (0, errΔ1);
     }
     var (ret64, err) = parseInt64(bytes);
     if (err != nil) {
@@ -153,10 +151,8 @@ internal static ж<bigꓸInt> bigOne = big.NewInt(1);
 // parseBigInt treats the given bytes as a big-endian, signed integer and returns
 // the result.
 internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
-    {
-        var err = checkInteger(bytes); if (err != nil) {
-            return (default, err);
-        }
+    var err = checkInteger(bytes); if (err != nil) {
+        return (default, err);
     }
     var ret = @new<bigꓸInt>();
     if (len(bytes) > 0 && (byte)(bytes[0] & 0x80) == 0x80) {
@@ -377,11 +373,9 @@ internal static (time.Time ret, error err) parseUTCTime(slice<byte> bytes) {
         return (ret, err);
     }
 
-    {
-        @string serialized = ret.Format(formatStr); if (serialized != s) {
-            err = fmt.Errorf("asn1: time did not serialize back to the original value and may be invalid: given %q, but serialized as %q"u8, s, serialized);
-            return (ret, err);
-        }
+    @string serialized = ret.Format(formatStr); if (serialized != s) {
+        err = fmt.Errorf("asn1: time did not serialize back to the original value and may be invalid: given %q, but serialized as %q"u8, s, serialized);
+        return (ret, err);
     }
 
     if (ret.Year() >= 2050) {
@@ -405,16 +399,12 @@ internal static (time.Time ret, error err) parseGeneralizedTime(slice<byte> byte
     @string formatStr = formatStrᶜ;
     @string s = (@string)bytes;
 
-    {
-        (ret, err) = time.Parse(formatStr, s); if (err != nil) {
-            return (ret, err);
-        }
+    (ret, err) = time.Parse(formatStr, s); if (err != nil) {
+        return (ret, err);
     }
 
-    {
-        @string serialized = ret.Format(formatStr); if (serialized != s) {
-            err = fmt.Errorf("asn1: time did not serialize back to the original value and may be invalid: given %q, but serialized as %q"u8, s, serialized);
-        }
+    @string serialized = ret.Format(formatStr); if (serialized != s) {
+        err = fmt.Errorf("asn1: time did not serialize back to the original value and may be invalid: given %q, but serialized as %q"u8, s, serialized);
     }
 
     return (ret, err);
@@ -561,10 +551,8 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
     }
 
     // Strip terminator if present.
-    {
-        nint l = len(bmpString); if (l >= 2 && bmpString[l - 1] == 0 && bmpString[l - 2] == 0) {
-            bmpString = bmpString.slice(0, l - 2);
-        }
+    nint l = len(bmpString); if (l >= 2 && bmpString[l - 1] == 0 && bmpString[l - 2] == 0) {
+        bmpString = bmpString.slice(0, l - 2);
     }
 
     var s = new slice<uint16>(0, len(bmpString) / 2);
@@ -795,87 +783,85 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }
 
     // Deal with the ANY type.
-    {
-        var ifaceType = fieldType; if (ifaceType.Kind() == reflect.ΔInterface && ifaceType.NumMethod() == 0) {
-            tagAndLength tΔ1 = default;
-            (tΔ1, offset, err) = parseTagAndLength(bytes, offset);
-            if (err != nil) {
-                return (offset, err);
-            }
-            if (invalidLength(offset, tΔ1.length, len(bytes))) {
-                err = new SyntaxError("data truncated");
-                return (offset, err);
-            }
-            any result = default;
-            if (!tΔ1.isCompound && tΔ1.@class == ClassUniversal) {
-                var innerBytesΔ1 = bytes.slice(offset, offset + tΔ1.length);
-                switch (tΔ1.tag) {
-                case var ᴛ when ᴛ == TagBoolean: {
-                    (result, err) = parseBool(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagPrintableString: {
-                    (result, err) = parsePrintableString(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagNumericString: {
-                    (result, err) = parseNumericString(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagIA5String: {
-                    (result, err) = parseIA5String(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagT61String: {
-                    (result, err) = parseT61String(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagUTF8String: {
-                    (result, err) = parseUTF8String(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagInteger: {
-                    (result, err) = parseInt64(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagBitString: {
-                    (result, err) = parseBitString(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagOID: {
-                    (result, err) = parseObjectIdentifier(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagUTCTime: {
-                    (result, err) = parseUTCTime(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagGeneralizedTime: {
-                    (result, err) = parseGeneralizedTime(innerBytesΔ1);
-                    break;
-                }
-                case var ᴛ when ᴛ == TagOctetString: {
-                    result = innerBytesΔ1;
-                    break;
-                }
-                case var ᴛ when ᴛ == TagBMPString: {
-                    (result, err) = parseBMPString(innerBytesΔ1);
-                    break;
-                }
-                default: {
-                    // If we don't know how to handle the type, we just leave Value as nil.
-                    break;
-                }}
-            }
-            offset += tΔ1.length;
-            if (err != nil) {
-                return (offset, err);
-            }
-            if (result != nil) {
-                v.Set(reflect.ValueOf(result));
-            }
+    var ifaceType = fieldType; if (ifaceType.Kind() == reflect.ΔInterface && ifaceType.NumMethod() == 0) {
+        tagAndLength tΔ1 = default;
+        (tΔ1, offset, err) = parseTagAndLength(bytes, offset);
+        if (err != nil) {
             return (offset, err);
         }
+        if (invalidLength(offset, tΔ1.length, len(bytes))) {
+            err = new SyntaxError("data truncated");
+            return (offset, err);
+        }
+        any result = default;
+        if (!tΔ1.isCompound && tΔ1.@class == ClassUniversal) {
+            var innerBytesΔ1 = bytes.slice(offset, offset + tΔ1.length);
+            switch (tΔ1.tag) {
+            case var ᴛ when ᴛ == TagBoolean: {
+                (result, err) = parseBool(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagPrintableString: {
+                (result, err) = parsePrintableString(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagNumericString: {
+                (result, err) = parseNumericString(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagIA5String: {
+                (result, err) = parseIA5String(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagT61String: {
+                (result, err) = parseT61String(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagUTF8String: {
+                (result, err) = parseUTF8String(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagInteger: {
+                (result, err) = parseInt64(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagBitString: {
+                (result, err) = parseBitString(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagOID: {
+                (result, err) = parseObjectIdentifier(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagUTCTime: {
+                (result, err) = parseUTCTime(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagGeneralizedTime: {
+                (result, err) = parseGeneralizedTime(innerBytesΔ1);
+                break;
+            }
+            case var ᴛ when ᴛ == TagOctetString: {
+                result = innerBytesΔ1;
+                break;
+            }
+            case var ᴛ when ᴛ == TagBMPString: {
+                (result, err) = parseBMPString(innerBytesΔ1);
+                break;
+            }
+            default: {
+                // If we don't know how to handle the type, we just leave Value as nil.
+                break;
+            }}
+        }
+        offset += tΔ1.length;
+        if (err != nil) {
+            return (offset, err);
+        }
+        if (result != nil) {
+            v.Set(reflect.ValueOf(result));
+        }
+        return (offset, err);
     }
 
     (var t, offset, err) = parseTagAndLength(bytes, offset);
@@ -1042,124 +1028,122 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
         err = err1;
         return (offset, err);
     }}
-    {
-        var val = v;
-        switch (val.Kind()) {
-        case var ᴛ when ᴛ == reflect.ΔBool: {
-            var (parsedBool, err1) = parseBool(innerBytes);
+    var val = v;
+    switch (val.Kind()) {
+    case var ᴛ when ᴛ == reflect.ΔBool: {
+        var (parsedBool, err1) = parseBool(innerBytes);
+        if (err1 == nil) {
+            val.SetBool(parsedBool);
+        }
+        err = err1;
+        return (offset, err);
+    }
+    case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
+        if (val.Type().Size() == 4) {
+            var (parsedInt, err1) = parseInt32(innerBytes);
             if (err1 == nil) {
-                val.SetBool(parsedBool);
+                val.SetInt((int64)parsedInt);
             }
             err = err1;
-            return (offset, err);
+        } else {
+            var (parsedInt, err1) = parseInt64(innerBytes);
+            if (err1 == nil) {
+                val.SetInt(parsedInt);
+            }
+            err = err1;
         }
-        case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
-            if (val.Type().Size() == 4) {
-                var (parsedInt, err1) = parseInt32(innerBytes);
-                if (err1 == nil) {
-                    val.SetInt((int64)parsedInt);
-                }
-                err = err1;
-            } else {
-                var (parsedInt, err1) = parseInt64(innerBytes);
-                if (err1 == nil) {
-                    val.SetInt(parsedInt);
-                }
-                err = err1;
-            }
-            return (offset, err);
-        }
-        // TODO(dfc) Add support for the remaining integer types
-        case var ᴛ when ᴛ == reflect.Struct: {
-            var structType = fieldType;
+        return (offset, err);
+    }
+    // TODO(dfc) Add support for the remaining integer types
+    case var ᴛ when ᴛ == reflect.Struct: {
+        var structType = fieldType;
 
-            for (nint i = 0; i < structType.NumField(); i++) {
-                if (!structType.Field(i).IsExported()) {
-                    err = new StructuralError("struct contains unexported fields");
-                    return (offset, err);
-                }
-            }
-
-            if (structType.NumField() > 0 && AreEqual(structType.Field(0).Type, rawContentsType)) {
-                var bytesΔ2 = bytes.slice(initOffset, offset);
-                val.Field(0).Set(reflect.ValueOf((RawContent)bytesΔ2));
-            }
-
-            nint innerOffset = 0;
-            for (nint i = 0; i < structType.NumField(); i++) {
-                var field = structType.Field(i);
-                if (i == 0 && AreEqual(field.Type, rawContentsType)) {
-                    continue;
-                }
-                (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)), depth);
-                if (err != nil) {
-                    return (offset, err);
-                }
-            }
-            // We allow extra bytes at the end of the SEQUENCE because
-            // adding elements to the end has been used in X.509 as the
-            // version numbers have increased.
-            return (offset, err);
-        }
-        case var ᴛ when ᴛ == reflect.ΔSlice: {
-            var sliceType = fieldType;
-            if (sliceType.Elem().Kind() == reflect.Uint8) {
-                val.Set(reflect.MakeSlice(sliceType, len(innerBytes), len(innerBytes)));
-                reflect.Copy(val, reflect.ValueOf(innerBytes));
+        for (nint i = 0; i < structType.NumField(); i++) {
+            if (!structType.Field(i).IsExported()) {
+                err = new StructuralError("struct contains unexported fields");
                 return (offset, err);
             }
-            var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem(), depth);
-            if (err1 == nil) {
-                val.Set(newSlice);
+        }
+
+        if (structType.NumField() > 0 && AreEqual(structType.Field(0).Type, rawContentsType)) {
+            var bytesΔ2 = bytes.slice(initOffset, offset);
+            val.Field(0).Set(reflect.ValueOf((RawContent)bytesΔ2));
+        }
+
+        nint innerOffset = 0;
+        for (nint i = 0; i < structType.NumField(); i++) {
+            var field = structType.Field(i);
+            if (i == 0 && AreEqual(field.Type, rawContentsType)) {
+                continue;
             }
-            err = err1;
+            (innerOffset, err) = parseField(val.Field(i), innerBytes, innerOffset, parseFieldParameters(field.Tag.Get(asn1ˢ)), depth);
+            if (err != nil) {
+                return (offset, err);
+            }
+        }
+        // We allow extra bytes at the end of the SEQUENCE because
+        // adding elements to the end has been used in X.509 as the
+        // version numbers have increased.
+        return (offset, err);
+    }
+    case var ᴛ when ᴛ == reflect.ΔSlice: {
+        var sliceType = fieldType;
+        if (sliceType.Elem().Kind() == reflect.Uint8) {
+            val.Set(reflect.MakeSlice(sliceType, len(innerBytes), len(innerBytes)));
+            reflect.Copy(val, reflect.ValueOf(innerBytes));
             return (offset, err);
         }
-        case var ᴛ when ᴛ == reflect.ΔString: {
-            @string vΔ3 = default;
-            switch (universalTag) {
-            case var ᴛ2 when ᴛ2 == TagPrintableString: {
-                (vΔ3, err) = parsePrintableString(innerBytes);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == TagNumericString: {
-                (vΔ3, err) = parseNumericString(innerBytes);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == TagIA5String: {
-                (vΔ3, err) = parseIA5String(innerBytes);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == TagT61String: {
-                (vΔ3, err) = parseT61String(innerBytes);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == TagUTF8String: {
-                (vΔ3, err) = parseUTF8String(innerBytes);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == TagGeneralString: {
-                // GeneralString is specified in ISO-2022/ECMA-35,
-                // A brief review suggests that it includes structures
-                // that allow the encoding to change midstring and
-                // such. We give up and pass it as an 8-bit string.
-                (vΔ3, err) = parseT61String(innerBytes);
-                break;
-            }
-            case var ᴛ2 when ᴛ2 == TagBMPString: {
-                (vΔ3, err) = parseBMPString(innerBytes);
-                break;
-            }
-            default: {
-                err = new SyntaxError(fmt.Sprintf("internal error: unknown string type %d"u8, universalTag));
-                break;
-            }}
-            if (err == nil) {
-                val.SetString(vΔ3);
-            }
-            return (offset, err);
-        }}
+        var (newSlice, err1) = parseSequenceOf(innerBytes, sliceType, sliceType.Elem(), depth);
+        if (err1 == nil) {
+            val.Set(newSlice);
+        }
+        err = err1;
+        return (offset, err);
     }
+    case var ᴛ when ᴛ == reflect.ΔString: {
+        @string vΔ3 = default;
+        switch (universalTag) {
+        case var ᴛ2 when ᴛ2 == TagPrintableString: {
+            (vΔ3, err) = parsePrintableString(innerBytes);
+            break;
+        }
+        case var ᴛ2 when ᴛ2 == TagNumericString: {
+            (vΔ3, err) = parseNumericString(innerBytes);
+            break;
+        }
+        case var ᴛ2 when ᴛ2 == TagIA5String: {
+            (vΔ3, err) = parseIA5String(innerBytes);
+            break;
+        }
+        case var ᴛ2 when ᴛ2 == TagT61String: {
+            (vΔ3, err) = parseT61String(innerBytes);
+            break;
+        }
+        case var ᴛ2 when ᴛ2 == TagUTF8String: {
+            (vΔ3, err) = parseUTF8String(innerBytes);
+            break;
+        }
+        case var ᴛ2 when ᴛ2 == TagGeneralString: {
+            // GeneralString is specified in ISO-2022/ECMA-35,
+            // A brief review suggests that it includes structures
+            // that allow the encoding to change midstring and
+            // such. We give up and pass it as an 8-bit string.
+            (vΔ3, err) = parseT61String(innerBytes);
+            break;
+        }
+        case var ᴛ2 when ᴛ2 == TagBMPString: {
+            (vΔ3, err) = parseBMPString(innerBytes);
+            break;
+        }
+        default: {
+            err = new SyntaxError(fmt.Sprintf("internal error: unknown string type %d"u8, universalTag));
+            break;
+        }}
+        if (err == nil) {
+            val.SetString(vΔ3);
+        }
+        return (offset, err);
+    }}
     err = new StructuralError("unsupported: "u8 + v.Type().String());
     return (offset, err);
 }

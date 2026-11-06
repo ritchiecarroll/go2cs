@@ -212,10 +212,8 @@ private static readonly @string newProfBufBufferTooLargeˢᵇ = "newProfBuf: buf
 // newProfBuf returns a new profiling buffer with room for
 // a header of hdrsize words and a buffer of at least bufwords words.
 internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
-    {
-        nint min = 2 + hdrsize + 1; if (bufwords < min) {
-            bufwords = min;
-        }
+    nint min = 2 + hdrsize + 1; if (bufwords < min) {
+        bufwords = min;
     }
 
     // Buffer sizes must be power of two, so that we don't have to
@@ -382,10 +380,8 @@ internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read
         nint tiΔ1 = (nint)(rPrev.tagCount() % (uint32)len(b.tags));
         for (nint i = 0; i < ntagΔ1; i++) {
             b.tags[tiΔ1] = default;
-            {
-                tiΔ1++; if (tiΔ1 == len(b.tags)) {
-                    tiΔ1 = 0;
-                }
+            tiΔ1++; if (tiΔ1 == len(b.tags)) {
+                tiΔ1 = 0;
             }
         }
         Ꮡb.Ꮡr.store(br);

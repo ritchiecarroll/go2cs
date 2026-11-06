@@ -509,10 +509,8 @@ public static nint MaxCap(this ref Regexp re) {
         m = re.Cap;
     }
     foreach (var (_, sub) in re.Sub) {
-        {
-            nint n = sub.MaxCap(); if (m < n) {
-                m = n;
-            }
+        nint n = sub.MaxCap(); if (m < n) {
+            m = n;
         }
     }
     return m;

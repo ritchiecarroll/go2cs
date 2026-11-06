@@ -16,10 +16,8 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
         // On Linux, the fchmodat syscall silently ignores the AT_SYMLINK_NOFOLLOW flag.
         // We need to use fchmodat2 instead.
         // syscall.Fchmodat handles this.
-        {
-            var errΔ1 = syscall.Fchmodat(dirfd, path, mode, flags); if (!AreEqual(errΔ1, syscall.EOPNOTSUPP)) {
-                return errΔ1;
-            }
+        var errΔ1 = syscall.Fchmodat(dirfd, path, mode, flags); if (!AreEqual(errΔ1, syscall.EOPNOTSUPP)) {
+            return errΔ1;
         }
 
         // This kernel doesn't appear to support fchmodat2 (added in Linux 6.6).
@@ -37,14 +35,12 @@ public static error Fchmodat(nint dirfd, @string path, uint32 mode, nint flags) 
         // Check to see if this file is a symlink.
         // (We passed O_NOFOLLOW above, but O_PATH|O_NOFOLLOW will open a symlink.)
         ref var st = ref heap(new syscall.Stat_t(), out var Ꮡst);
-        {
-            var errΔ2 = syscall.Stat(procPath, Ꮡst); if (errΔ2 != nil) {
-                if (AreEqual(errΔ2, syscall.ENOENT)) {
-                    // /proc has probably not been mounted. Give up.
-                    return syscall.EOPNOTSUPP;
-                }
-                return errΔ2;
+        var errΔ2 = syscall.Stat(procPath, Ꮡst); if (errΔ2 != nil) {
+            if (AreEqual(errΔ2, syscall.ENOENT)) {
+                // /proc has probably not been mounted. Give up.
+                return syscall.EOPNOTSUPP;
             }
+            return errΔ2;
         }
         if ((st.Mode & (uint32)syscall.S_IFMT) == syscall.S_IFLNK) {
             // fchmodat on the proc FD for a symlink apparently gives inconsistent

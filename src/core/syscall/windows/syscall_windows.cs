@@ -158,10 +158,8 @@ public static @string Error(this Errno e) {
     var cache = false;
     switch (e) {
     case var ᴛ when ᴛ == ERROR_FILE_NOT_FOUND || ᴛ == ERROR_PATH_NOT_FOUND: {
-        {
-            var (cached, ok) = ᏑerrnoErrorCache.Load(e); if (ok) {
-                return cached._<@string>();
-            }
+        var (cached, ok) = ᏑerrnoErrorCache.Load(e); if (ok) {
+            return cached._<@string>();
         }
         cache = true;
         break;
@@ -408,12 +406,10 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     // This bit range can be used by the caller to specify the file flags
     // passed to CreateFile. It is an error to use if the bits can't be
     // mapped to the supported FILE_FLAG_* constants.
-    {
-        var fileFlags = (uint32)flag & (uint32)fileFlagsMask; if ((fileFlags & ~(uint32)validFileFlagsMask) == 0) {
-            attrs |= (uint32)(fileFlags);
-        } else {
-            return (InvalidHandle, oserror.ErrInvalid);
-        }
+    var fileFlags = (uint32)flag & (uint32)fileFlagsMask; if ((fileFlags & ~(uint32)validFileFlagsMask) == 0) {
+        attrs |= (uint32)(fileFlags);
+    } else {
+        return (InvalidHandle, oserror.ErrInvalid);
     }
 
     switch (accessFlags) {
@@ -468,11 +464,9 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     if ((flag & (nint)o_DIRECTORY) != 0) {
         // Check if the file is a directory, else return ENOTDIR.
         ref var fi = ref heap(new ByHandleFileInformation(), out var Ꮡfi);
-        {
-            var errΔ1 = GetFileInformationByHandle(h, Ꮡfi); if (errΔ1 != nil) {
-                CloseHandle(h);
-                return (InvalidHandle, errΔ1);
-            }
+        var errΔ1 = GetFileInformationByHandle(h, Ꮡfi); if (errΔ1 != nil) {
+            CloseHandle(h);
+            return (InvalidHandle, errΔ1);
         }
         if ((fi.FileAttributes & (uint32)FILE_ATTRIBUTE_DIRECTORY) == 0) {
             CloseHandle(h);
@@ -486,10 +480,8 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
             // ERROR_INVALID_PARAMETER means truncation is not supported on this file handle.
             // Unix's O_TRUNC specification says to ignore O_TRUNC on named pipes and terminal devices.
             // We do the same here.
-            {
-                var (t, err1) = GetFileType(h); if (err1 == nil && (t == FILE_TYPE_PIPE || t == FILE_TYPE_CHAR)) {
-                    err = default;
-                }
+            var (t, err1) = GetFileType(h); if (err1 == nil && (t == FILE_TYPE_PIPE || t == FILE_TYPE_CHAR)) {
+                err = default;
             }
         }
         if (err != nil) {
@@ -1285,10 +1277,8 @@ internal static (ж<ProcessEntry32>, error) getProcessEntry(nint pid) {
         defer(CloseHandle, snapshot, ref ᒐ);
         ref var procEntry = ref heap(new ProcessEntry32(), out var ᏑprocEntry);
         procEntry.Size = (uint32)/* unsafe.Sizeof(procEntry) */ (uintptr)568;
-        {
-            err = Process32First(snapshot, ᏑprocEntry); if (err != nil) {
-                return (default, err);
-            }
+        err = Process32First(snapshot, ᏑprocEntry); if (err != nil) {
+            return (default, err);
         }
         for (;;) {
             if (procEntry.ProcessID == (uint32)pid) {

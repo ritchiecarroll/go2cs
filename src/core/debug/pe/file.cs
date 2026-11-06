@@ -76,10 +76,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     var sr = io.NewSectionReader(r, 0, 9223372036854775807L);
 
     array<byte> dosheader = new(96);
-    {
-        var (_, errΔ1) = r.ReadAt(dosheader[0..], 0); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = r.ReadAt(dosheader[0..], 0); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     int64 @base = default;
     if (dosheader[0] == 'M' && dosheader[1] == 'Z') {
@@ -94,10 +92,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         @base = (int64)0;
     }
     sr.Seek(@base, io.SeekStart);
-    {
-        var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), binary.LittleEndian, f.ᏑFileHeader); if (errΔ2 != nil) {
-            return (default, errΔ2);
-        }
+    var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), binary.LittleEndian, f.ᏑFileHeader); if (errΔ2 != nil) {
+        return (default, errΔ2);
     }
     switch (f.FileHeader.Machine) {
     case var ᴛ when ᴛ == IMAGE_FILE_MACHINE_AMD64 || ᴛ == IMAGE_FILE_MACHINE_ARM64 || ᴛ == IMAGE_FILE_MACHINE_ARMNT || ᴛ == IMAGE_FILE_MACHINE_I386 || ᴛ == IMAGE_FILE_MACHINE_RISCV32 || ᴛ == IMAGE_FILE_MACHINE_RISCV64 || ᴛ == IMAGE_FILE_MACHINE_RISCV128 || ᴛ == IMAGE_FILE_MACHINE_UNKNOWN: {
@@ -142,10 +138,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     f.Sections = new slice<ж<ΔSection>>(f.FileHeader.NumberOfSections);
     for (nint i = 0; i < (nint)f.FileHeader.NumberOfSections; i++) {
         var sh = @new<SectionHeader32>();
-        {
-            var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.LittleEndian, sh.OrTypedNil()); if (errΔ3 != nil) {
-                return (default, errΔ3);
-            }
+        var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.LittleEndian, sh.OrTypedNil()); if (errΔ3 != nil) {
+            return (default, errΔ3);
         }
         var (name, errΔ4) = sh.fullName(f.StringTable);
         if (errΔ4 != nil) {
@@ -267,15 +261,11 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
             if (errΔ2 != nil) {
                 return (default, errΔ2);
             }
-            {
-                var (_, errΔ3) = io.ReadFull(r, dbuf); if (errΔ3 != nil) {
-                    return (default, errΔ3);
-                }
+            var (_, errΔ3) = io.ReadFull(r, dbuf); if (errΔ3 != nil) {
+                return (default, errΔ3);
             }
-            {
-                var errΔ4 = r.Close(); if (errΔ4 != nil) {
-                    return (default, errΔ4);
-                }
+            var errΔ4 = r.Close(); if (errΔ4 != nil) {
+                return (default, errΔ4);
             }
             b = dbuf;
         }
@@ -291,10 +281,8 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         if (suffix == ""u8) {
             continue;
         }
-        {
-            var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
-                continue;
-            }
+        var (_, ok) = dat[suffix, ꟷ]; if (!ok) {
+            continue;
         }
 
         var (b, errΔ5) = sectionData(s);
@@ -315,11 +303,9 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
         if (suffix == ""u8) {
             continue;
         }
-        {
-            var (_, ok) = dat[suffix, ꟷ]; if (ok) {
-                // Already handled.
-                continue;
-            }
+        var (_, ok) = dat[suffix, ꟷ]; if (ok) {
+            // Already handled.
+            continue;
         }
 
         var (b, errΔ6) = sectionData(s);
@@ -619,10 +605,8 @@ internal static (slice<DataDirectory>, error) readDataDirectories(io.ReadSeeker 
     }
 
     var dd = new slice<DataDirectory>((nint)(n));
-    {
-        var err = binary.Read(r, binary.LittleEndian, dd); if (err != nil) {
-            return (default, fmt.Errorf("failure to read data directories: %v"u8, err));
-        }
+    var err = binary.Read(r, binary.LittleEndian, dd); if (err != nil) {
+        return (default, fmt.Errorf("failure to read data directories: %v"u8, err));
     }
 
     return (dd, default);

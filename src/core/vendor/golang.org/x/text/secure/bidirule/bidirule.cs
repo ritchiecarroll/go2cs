@@ -163,10 +163,8 @@ public static bidiꓸDirection DirectionString(@string s) {
 // Valid reports whether b conforms to the BiDi rule.
 public static bool Valid(slice<byte> b) {
     Transformer t = default;
-    {
-        var (n, ok) = t.advance(b); if (!ok || n < len(b)) {
-            return false;
-        }
+    var (n, ok) = t.advance(b); if (!ok || n < len(b)) {
+        return false;
     }
     return t.isFinal();
 }
@@ -174,10 +172,8 @@ public static bool Valid(slice<byte> b) {
 // ValidString reports whether s conforms to the BiDi rule.
 public static bool ValidString(@string s) {
     Transformer t = default;
-    {
-        var (n, ok) = t.advanceString(s); if (!ok || n < len(s)) {
-            return false;
-        }
+    var (n, ok) = t.advanceString(s); if (!ok || n < len(s)) {
+        return false;
     }
     return t.isFinal();
 }
@@ -292,25 +288,23 @@ internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s)
             t.state = ruleInvalid;
             return (n, false);
         }
-        {
-            var tr = transitions[t.state].Clone();
-            switch (ᐧ) {
-            case {} when (uint16)(tr[0].mask & c) != 0: {
-                t.state = tr[0].next;
-                break;
-            }
-            case {} when (uint16)(tr[1].mask & c) != 0: {
-                t.state = tr[1].next;
-                break;
-            }
-            default: {
-                t.state = ruleInvalid;
-                if (t.isRTL()) {
-                    return (n, false);
-                }
-                break;
-            }}
+        var tr = transitions[t.state].Clone();
+        switch (ᐧ) {
+        case {} when (uint16)(tr[0].mask & c) != 0: {
+            t.state = tr[0].next;
+            break;
         }
+        case {} when (uint16)(tr[1].mask & c) != 0: {
+            t.state = tr[1].next;
+            break;
+        }
+        default: {
+            t.state = ruleInvalid;
+            if (t.isRTL()) {
+                return (n, false);
+            }
+            break;
+        }}
         n += sz;
     }
     return (n, true);
@@ -341,25 +335,23 @@ internal static (nint n, bool ok) advanceString(this ref Transformer t, @string 
             t.state = ruleInvalid;
             return (n, false);
         }
-        {
-            var tr = transitions[t.state].Clone();
-            switch (ᐧ) {
-            case {} when (uint16)(tr[0].mask & c) != 0: {
-                t.state = tr[0].next;
-                break;
-            }
-            case {} when (uint16)(tr[1].mask & c) != 0: {
-                t.state = tr[1].next;
-                break;
-            }
-            default: {
-                t.state = ruleInvalid;
-                if (t.isRTL()) {
-                    return (n, false);
-                }
-                break;
-            }}
+        var tr = transitions[t.state].Clone();
+        switch (ᐧ) {
+        case {} when (uint16)(tr[0].mask & c) != 0: {
+            t.state = tr[0].next;
+            break;
         }
+        case {} when (uint16)(tr[1].mask & c) != 0: {
+            t.state = tr[1].next;
+            break;
+        }
+        default: {
+            t.state = ruleInvalid;
+            if (t.isRTL()) {
+                return (n, false);
+            }
+            break;
+        }}
         n += sz;
     }
     return (n, true);

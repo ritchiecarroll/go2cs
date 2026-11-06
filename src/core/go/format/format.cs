@@ -60,11 +60,9 @@ public static error Node(io.Writer dst, ж<token.FileSet> fset, any node) {
         break;
     }
     case ж<printer.CommentedNode> n: {
-        {
-            var (f, ok) = n.Node._<ж<ast.File>>(ᐧ); if (ok) {
-                @file = f;
-                cnode = n;
-            }
+        var (f, ok) = n.Node._<ж<ast.File>>(ᐧ); if (ok) {
+            @file = f;
+            cnode = n;
         }
         break;
     }}

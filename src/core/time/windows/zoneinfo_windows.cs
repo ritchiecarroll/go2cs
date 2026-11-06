@@ -50,15 +50,11 @@ internal static (bool matched, error err2) matchZoneKey(registry.Key zones, @str
             (dlt, err) = k.GetMUIStringValue(muiDltˢ);
         }
         if (err != nil) { // Fallback to Std and Dlt
-            {
-                (std, _, err) = k.GetStringValue(stdˢ); if (err != nil) {
-                    (matched, err2) = (false, err); goto ᒐdone;
-                }
+            (std, _, err) = k.GetStringValue(stdˢ); if (err != nil) {
+                (matched, err2) = (false, err); goto ᒐdone;
             }
-            {
-                (dlt, _, err) = k.GetStringValue(dltˢ); if (err != nil) {
-                    (matched, err2) = (false, err); goto ᒐdone;
-                }
+            (dlt, _, err) = k.GetStringValue(dltˢ); if (err != nil) {
+                (matched, err2) = (false, err); goto ᒐdone;
             }
         }
 
@@ -155,15 +151,13 @@ internal static int64 pseudoUnix(nint year, ref syscall.Systemtime d) {
         i += 7;
     }
     day += i;
-    {
-        nint week = (nint)d.Day - 1; if (week < 4) {
-            day += week * 7;
-        } else {
-            // "Last" instance of the day.
-            day += 4 * 7;
-            if (day > daysIn((ΔMonth)(nint)d.Month, year)) {
-                day -= 7;
-            }
+    nint week = (nint)d.Day - 1; if (week < 4) {
+        day += week * 7;
+    } else {
+        // "Last" instance of the day.
+        day += 4 * 7;
+        if (day > daysIn((ΔMonth)(nint)d.Month, year)) {
+            day -= 7;
         }
     }
     return t.sec() + (int64)(day - 1) * (int64)secondsPerDay + internalToUnix;
@@ -272,11 +266,9 @@ internal static ref syscall.Timezoneinformation aus => ref ((StaticBox<syscall.T
 
 internal static void initLocal() {
     ref var i = ref heap(new syscall.Timezoneinformation(), out var Ꮡi);
-    {
-        var (_, err) = syscall.GetTimeZoneInformation(Ꮡi); if (err != nil) {
-            localLoc.name = utcˢ;
-            return;
-        }
+    var (_, err) = syscall.GetTimeZoneInformation(Ꮡi); if (err != nil) {
+        localLoc.name = utcˢ;
+        return;
     }
     initLocalFromTZI(Ꮡi);
 }

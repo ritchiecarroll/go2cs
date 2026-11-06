@@ -45,10 +45,8 @@ internal static @string /*msg*/ recoverText(Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    msg = fmt.Sprintf("%v"u8, r);
-                }
+            var r = recover(); if (r != nil) {
+                msg = fmt.Sprintf("%v"u8, r);
             }
         }, ref ᒐ);
         f();

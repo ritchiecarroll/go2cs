@@ -106,10 +106,8 @@ internal static void Main() {
     var stdoutʗ1 = stdout;
     step("1 stdout, stderr, stdout", () => {
         foreach (var (_, w) in slice<main_type>([new(stdoutʗ1, "stdout line\n"), new(stderrʗ1, "stderr line\n"), new(stdoutʗ1, "stdout again\n")])) {
-            {
-                var (_, err) = w.f.Write(slice<byte>(w.text)); if (err != nil) {
-                    return w.f.Name() + " write: "u8 + err.Error();
-                }
+            var (_, err) = w.f.Write(slice<byte>(w.text)); if (err != nil) {
+                return w.f.Name() + " write: "u8 + err.Error();
             }
         }
         return strconv.Quote(readLines(serverʗ1, 3));
@@ -127,10 +125,8 @@ internal static void Main() {
     var serverʗ2 = server;
     var stderrʗ3 = stderr;
     step("3 read through stderr", () => {
-        {
-            var (_, err) = serverʗ2.Write(slice<byte>("reply\n"u8)); if (err != nil) {
-                return "server write: "u8 + err.Error();
-            }
+        var (_, err) = serverʗ2.Write(slice<byte>("reply\n"u8)); if (err != nil) {
+            return "server write: "u8 + err.Error();
         }
         return strconv.Quote(readLines(stderrʗ3, 1));
     });
@@ -196,10 +192,8 @@ internal static void Main() {
             keep = append(keep, first, second);
 
             if (round == 0) {
-                {
-                    var (_, err) = first.Write(slice<byte>("before close\n"u8)); if (err != nil) {
-                        return "first write: "u8 + err.Error();
-                    }
+                var (_, err) = first.Write(slice<byte>("before close\n"u8)); if (err != nil) {
+                    return "first write: "u8 + err.Error();
                 }
                 before = readLines(server4, 1);
             }
@@ -235,19 +229,15 @@ internal static void Main() {
 internal static partial @string consecutiveWrites(bool skipOnSuccess) {
     var (server7, client7) = pipe();
     if (skipOnSuccess) {
-        {
-            var err = syscall.SetFileCompletionNotificationModes(client7, syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS); if (err != nil) {
-                return "SetFileCompletionNotificationModes: "u8 + err.Error();
-            }
+        var err = syscall.SetFileCompletionNotificationModes(client7, syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS); if (err != nil) {
+            return "SetFileCompletionNotificationModes: "u8 + err.Error();
         }
     }
     var f = os.NewFile((uintptr)client7, "f");
 
     for (nint i = 1; i <= 8; i++) {
-        {
-            var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != nil) {
-                return fmt.Sprintf("small write %d: %v"u8, i, err);
-            }
+        var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != nil) {
+            return fmt.Sprintf("small write %d: %v"u8, i, err);
         }
         Ꮡwritten.Add(1);
     }
@@ -273,10 +263,8 @@ internal static partial @string consecutiveWrites(bool skipOnSuccess) {
     });
 
     for (nint i = 1; i <= large; i++) {
-        {
-            var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != nil || n != chunk) {
-                return fmt.Sprintf("large write %d: n=%d err=%v"u8, i, n, err);
-            }
+        var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != nil || n != chunk) {
+            return fmt.Sprintf("large write %d: n=%d err=%v"u8, i, n, err);
         }
         Ꮡwritten.Add(1);
     }

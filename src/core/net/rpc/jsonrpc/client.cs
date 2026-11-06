@@ -83,10 +83,8 @@ internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Respo
     ref var r = ref Ꮡr.DerefOrNull();
 
     c.resp.reset();
-    {
-        var err = c.dec.Decode(Ꮡc.Ꮡresp); if (err != nil) {
-            return err;
-        }
+    var err = c.dec.Decode(Ꮡc.Ꮡresp); if (err != nil) {
+        return err;
     }
 
     c.mutex.Lock();

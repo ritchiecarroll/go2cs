@@ -82,10 +82,8 @@ internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, oper
         // recorded as type parameters.
         assert(!isValid(typ) || allBasic(typ, IsConstType));
     }
-    {
-        var m = check.Types; if (m != nil) {
-            m[x] = new TypeAndValue(mode, typ, val);
-        }
+    var m = check.Types; if (m != nil) {
+        m[x] = new TypeAndValue(mode, typ, val);
     }
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
@@ -125,23 +123,21 @@ internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slic
     }
     var (t0, t1) = (a[0].typ, a[1].typ);
     assert(isTyped(t0) && isTyped(t1) && (allBoolean(t1) || AreEqual(t1, universeError)));
-    {
-        var m = check.Types; if (m != nil) {
-            for (;;) {
-                var tv = m[x];
-                assert(tv.Type != nil); // should have been recorded already
-                tokenꓸPos pos = x.Pos();
-                tv.Type = new TupleжΔType(NewTuple(
-                    newVar(LocalVar, pos, check.pkg, ""u8, t0),
-                    newVar(LocalVar, pos, check.pkg, ""u8, t1)));
-                m[x] = tv;
-                // if x is a parenthesized expression (p.X), update p.X
-                var (p, _) = x._<ж<ast.ParenExpr>>(ᐧ);
-                if (p == nil) {
-                    break;
-                }
-                x = p.X;
+    var m = check.Types; if (m != nil) {
+        for (;;) {
+            var tv = m[x];
+            assert(tv.Type != nil); // should have been recorded already
+            tokenꓸPos pos = x.Pos();
+            tv.Type = new TupleжΔType(NewTuple(
+                newVar(LocalVar, pos, check.pkg, ""u8, t0),
+                newVar(LocalVar, pos, check.pkg, ""u8, t1)));
+            m[x] = tv;
+            // if x is a parenthesized expression (p.X), update p.X
+            var (p, _) = x._<ж<ast.ParenExpr>>(ᐧ);
+            if (p == nil) {
+                break;
             }
+            x = p.X;
         }
     }
     check.recordCommaOkTypesInSyntax(x, t0, t1);
@@ -157,39 +153,31 @@ internal static void recordInstance(this ref Checker check, ast.Expr expr, slice
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
     assert(typ != nil);
-    {
-        var m = check.Instances; if (m != nil) {
-            m[ident] = new Instance(newTypeList(targs), typ);
-        }
+    var m = check.Instances; if (m != nil) {
+        m[ident] = new Instance(newTypeList(targs), typ);
     }
 }
 
 internal static void recordDef(this ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
-    {
-        var m = check.Defs; if (m != nil) {
-            m[id] = obj;
-        }
+    var m = check.Defs; if (m != nil) {
+        m[id] = obj;
     }
 }
 
 internal static void recordUse(this ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     assert(obj != nil);
-    {
-        var m = check.Uses; if (m != nil) {
-            m[id] = obj;
-        }
+    var m = check.Uses; if (m != nil) {
+        m[id] = obj;
     }
 }
 
 internal static void recordImplicit(this ref Checker check, ast.Node node, Object obj) {
     assert(node != nil);
     assert(obj != nil);
-    {
-        var m = check.Implicits; if (m != nil) {
-            m[node] = obj;
-        }
+    var m = check.Implicits; if (m != nil) {
+        m[node] = obj;
     }
 }
 
@@ -198,20 +186,16 @@ internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr
 
     assert(obj != nil && (recv == nil || len(index) > 0));
     check.recordUse(x.Sel, obj);
-    {
-        var m = check.Selections; if (m != nil) {
-            m[Ꮡx] = Ꮡ(new Selection(kind, recv, obj, index, indirect));
-        }
+    var m = check.Selections; if (m != nil) {
+        m[Ꮡx] = Ꮡ(new Selection(kind, recv, obj, index, indirect));
     }
 }
 
 internal static void recordScope(this ref Checker check, ast.Node node, ж<ΔScope> scope) {
     assert(node != nil);
     assert(scope != nil);
-    {
-        var m = check.Scopes; if (m != nil) {
-            m[node] = scope;
-        }
+    var m = check.Scopes; if (m != nil) {
+        m[node] = scope;
     }
 }
 

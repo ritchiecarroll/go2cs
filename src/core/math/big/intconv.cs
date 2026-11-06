@@ -173,28 +173,24 @@ public static void Format(this ж<ΔInt> Ꮡx, fmt.State s, rune ch) {
 
     // determine field pad from width: the least number of characters to output
     nint length = len(sign) + len(prefix) + zeros + len(digits);
-    {
-        var (width, widthSet) = s.Width(); if (widthSet && length < width) { // pad as specified
-            {
-                nint d = width - length;
-                switch (ᐧ) {
-                case {} when s.Flag('-'): {
-                    // pad on the right with spaces; supersedes '0' when both specified
-                    right = d;
-                    break;
-                }
-                case {} when s.Flag('0') && !precisionSet: {
-                    // pad with zeros unless precision also specified
-                    zeros = d;
-                    break;
-                }
-                default: {
-                    // pad on the left with spaces
-                    left = d;
-                    break;
-                }}
-            }
+    var (width, widthSet) = s.Width(); if (widthSet && length < width) { // pad as specified
+        nint d = width - length;
+        switch (ᐧ) {
+        case {} when s.Flag('-'): {
+            // pad on the right with spaces; supersedes '0' when both specified
+            right = d;
+            break;
         }
+        case {} when s.Flag('0') && !precisionSet: {
+            // pad with zeros unless precision also specified
+            zeros = d;
+            break;
+        }
+        default: {
+            // pad on the left with spaces
+            left = d;
+            break;
+        }}
     }
 
     // print number as [left pad][sign][prefix][zero pad][digits][right pad]
@@ -241,10 +237,8 @@ internal static (bool neg, error err) scanSign(io.ByteScanner r) {
     error err = default;
 
     byte ch = default;
-    {
-        (ch, err) = r.ReadByte(); if (err != nil) {
-            return (false, err);
-        }
+    (ch, err) = r.ReadByte(); if (err != nil) {
+        return (false, err);
     }
     switch (ch) {
     case (byte)'-': {

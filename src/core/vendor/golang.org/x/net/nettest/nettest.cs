@@ -180,18 +180,16 @@ public static bool TestableNetwork(@string network) {
 // TestableAddress reports whether address of network is testable on
 // the current platform configuration.
 public static bool TestableAddress(@string network, @string address) {
-    {
-        var ss = strings.Split(network, ":");
-        var exprᴛ1 = ss[0];
-        switch (ᐧ) {
-        case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
-            // Abstract unix domain sockets, a Linux-ism.
-            if (address[0] == '@' && runtime.GOOS != "linux"u8) {
-                return false;
-            }
-            break;
-        }}
-    }
+    var ss = strings.Split(network, ":");
+    var exprᴛ1 = ss[0];
+    switch (ᐧ) {
+    case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
+        // Abstract unix domain sockets, a Linux-ism.
+        if (address[0] == '@' && runtime.GOOS != "linux"u8) {
+            return false;
+        }
+        break;
+    }}
     return true;
 }
 
@@ -206,10 +204,8 @@ public static (net.Listener, error) NewLocalListener(@string network) {
     switch (ᐧ) {
     case {} when exprᴛ1 == "tcp"u8: {
         if (canListenTCP4OnLoopback) {
-            {
-                var (ln, err) = net.Listen(tcp4ˢ, "127.0.0.1:0"); if (err == nil) {
-                    return (ln, default);
-                }
+            var (ln, err) = net.Listen(tcp4ˢ, "127.0.0.1:0"); if (err == nil) {
+                return (ln, default);
             }
         }
         if (canListenTCP6OnLoopback) {
@@ -255,10 +251,8 @@ public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
     switch (ᐧ) {
     case {} when exprᴛ1 == "udp"u8: {
         if (canListenTCP4OnLoopback) {
-            {
-                var (c, err) = net.ListenPacket(udp4ˢ, "127.0.0.1:0"); if (err == nil) {
-                    return (c, default);
-                }
+            var (c, err) = net.ListenPacket(udp4ˢ, "127.0.0.1:0"); if (err == nil) {
+                return (c, default);
             }
         }
         if (canListenTCP6OnLoopback) {
@@ -378,10 +372,8 @@ public static (ж<net.Interface>, error) RoutedInterface(@string network, net.Fl
         if ((net.Flags)(ifi.Flags & flags) != flags) {
             continue;
         }
-        {
-            var (_, ok) = hasRoutableIP(network, Ꮡifi); if (!ok) {
-                continue;
-            }
+        var (_, ok) = hasRoutableIP(network, Ꮡifi); if (!ok) {
+            continue;
         }
         return (Ꮡifi, default);
     }
@@ -422,10 +414,8 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
     var exprᴛ1 = network;
     switch (ᐧ) {
     case {} when exprᴛ1 == "ip4"u8: {
-        {
-            var ipΔ5 = ip.To4(); if (ipΔ5 != nil) {
-                return (ipΔ5, true);
-            }
+        var ipΔ5 = ip.To4(); if (ipΔ5 != nil) {
+            return (ipΔ5, true);
         }
         break;
     }
@@ -433,23 +423,17 @@ internal static (net.IP, bool) routableIP(@string network, net.IP ip) {
         if (ip.IsLoopback()) { // addressing scope of the loopback address depends on each implementation
             return (default, false);
         }
-        {
-            var ipΔ6 = ip.To16(); if (ipΔ6 != nil && ipΔ6.To4() == nil) {
-                return (ipΔ6, true);
-            }
+        var ipΔ6 = ip.To16(); if (ipΔ6 != nil && ipΔ6.To4() == nil) {
+            return (ipΔ6, true);
         }
         break;
     }
     default: {
-        {
-            var ipΔ7 = ip.To4(); if (ipΔ7 != nil) {
-                return (ipΔ7, true);
-            }
+        var ipΔ7 = ip.To4(); if (ipΔ7 != nil) {
+            return (ipΔ7, true);
         }
-        {
-            var ipΔ8 = ip.To16(); if (ipΔ8 != nil) {
-                return (ipΔ8, true);
-            }
+        var ipΔ8 = ip.To16(); if (ipΔ8 != nil) {
+            return (ipΔ8, true);
         }
         break;
     }}

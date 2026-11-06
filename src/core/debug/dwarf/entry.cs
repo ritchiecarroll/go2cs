@@ -42,10 +42,8 @@ private static readonly @string abbrevˢᵇ = "abbrev"u8;
 internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off, nint vers) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    {
-        var (mΔ1, ok) = d.abbrevCache[off, ꟷ]; if (ok) {
-            return (mΔ1, default);
-        }
+    var (mΔ1, ok) = d.abbrevCache[off, ꟷ]; if (ok) {
+        return (mΔ1, default);
     }
 
     var data = d.abbrev;
@@ -398,10 +396,8 @@ public static @string GoString(this Class i) {
 //
 //	v, ok := e.Val(AttrSibling).(int64)
 public static any Val(this ref Entry e, Attr a) {
-    {
-        var f = e.AttrField(a); if (f != nil) {
-            return f.Val;
-        }
+    var f = e.AttrField(a); if (f != nil) {
+        return f.Val;
     }
     return default;
 }
@@ -951,10 +947,8 @@ internal static void collectDwarf5BaseOffsets(this ref ΔReader r, ж<unit> Ꮡu
         return;
     }
     u.unit5 = @new<unit5>();
-    {
-        var err = r.d.collectDwarf5BaseOffsets(Ꮡu); if (err != nil) {
-            r.err = err;
-        }
+    var err = r.d.collectDwarf5BaseOffsets(Ꮡu); if (err != nil) {
+        r.err = err;
     }
 }
 
@@ -1126,10 +1120,8 @@ public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry>
     }
 
     ж<unit> u = default;
-    {
-        nint uidx = Ꮡd.offsetToUnit(e.Offset); if (uidx >= 0 && uidx < len(d.unit)) {
-            u = Ꮡ(d.unit, uidx);
-        }
+    nint uidx = Ꮡd.offsetToUnit(e.Offset); if (uidx >= 0 && uidx < len(d.unit)) {
+        u = Ꮡ(d.unit, uidx);
     }
 
     if (u != nil && u.vers >= 5 && d.rngLists != nil) {
@@ -1208,14 +1200,10 @@ internal static (ж<Entry>, uint64, error) baseAddressForEntry(this ж<Data> Ꮡ
         }
     }
 
-    {
-        var (cuEntry, cuEntryOK) = cu.Val(AttrEntrypc)._<uint64>(ᐧ); if (cuEntryOK) {
-            return (cu, cuEntry, default);
-        } else {
-            var (cuLow, cuLowOK) = cu.Val(AttrLowpc)._<uint64>(ᐧ); if (cuLowOK) {
-                return (cu, cuLow, default);
-            }
-        }
+    var (cuEntry, cuEntryOK) = cu.Val(AttrEntrypc)._<uint64>(ᐧ); if (cuEntryOK) {
+        return (cu, cuEntry, default);
+    } else if (cu.Val(AttrLowpc)._<uint64>(out var cuLow)) {
+        return (cu, cuLow, default);
     }
 
     return (cu, 0, default);

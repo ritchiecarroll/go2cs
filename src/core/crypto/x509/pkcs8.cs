@@ -52,20 +52,14 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
     error err = default;
 
     ref var privKey = ref heap(new pkcs8(), out var ᏑprivKey);
-    {
-        var (_, errΔ1) = asn1.Unmarshal(der, ᏑprivKey); if (errΔ1 != nil) {
-            {
-                var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new ecPrivateKey())); if (errΔ2 == nil) {
-                    return (default, errors.New(x509FailedToParsePrivateˢ));
-                }
-            }
-            {
-                var (_, errΔ3) = asn1.Unmarshal(der, Ꮡ(new pkcs1PrivateKey())); if (errΔ3 == nil) {
-                    return (default, errors.New(x509FailedToParsePrivateˢ3));
-                }
-            }
-            return (default, errΔ1);
+    var (_, errΔ1) = asn1.Unmarshal(der, ᏑprivKey); if (errΔ1 != nil) {
+        var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new ecPrivateKey())); if (errΔ2 == nil) {
+            return (default, errors.New(x509FailedToParsePrivateˢ));
         }
+        var (_, errΔ3) = asn1.Unmarshal(der, Ꮡ(new pkcs1PrivateKey())); if (errΔ3 == nil) {
+            return (default, errors.New(x509FailedToParsePrivateˢ3));
+        }
+        return (default, errΔ1);
     }
     switch (ᐧ) {
     case {} when privKey.Algo.Algorithm.Equal(oidPublicKeyRSA): {
@@ -78,10 +72,8 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
     case {} when privKey.Algo.Algorithm.Equal(oidPublicKeyECDSA): {
         var bytes = privKey.Algo.Parameters.FullBytes;
         var namedCurveOID = @new<asn1.ObjectIdentifier>();
-        {
-            var (_, errΔ7) = asn1.Unmarshal(bytes, namedCurveOID.OrTypedNil()); if (errΔ7 != nil) {
-                namedCurveOID = default;
-            }
+        var (_, errΔ7) = asn1.Unmarshal(bytes, namedCurveOID.OrTypedNil()); if (errΔ7 != nil) {
+            namedCurveOID = default;
         }
         (key, err) = parseECPrivateKey(namedCurveOID, privKey.PrivateKey);
         if (err != nil) {
@@ -96,10 +88,8 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
             }
         }
         ref var curvePrivateKey = ref heap<slice<byte>>(out var ᏑcurvePrivateKey);
-        {
-            var (_, errΔ8) = asn1.Unmarshal(privKey.PrivateKey, ᏑcurvePrivateKey); if (errΔ8 != nil) {
-                return (default, fmt.Errorf("x509: invalid Ed25519 private key: %v"u8, errΔ8));
-            }
+        var (_, errΔ8) = asn1.Unmarshal(privKey.PrivateKey, ᏑcurvePrivateKey); if (errΔ8 != nil) {
+            return (default, fmt.Errorf("x509: invalid Ed25519 private key: %v"u8, errΔ8));
         }
         {
             nint l = builtin.len(curvePrivateKey); if (l != ed25519.SeedSize) {
@@ -115,10 +105,8 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
             }
         }
         ref var curvePrivateKey = ref heap<slice<byte>>(out var ᏑcurvePrivateKey);
-        {
-            var (_, errΔ9) = asn1.Unmarshal(privKey.PrivateKey, ᏑcurvePrivateKey); if (errΔ9 != nil) {
-                return (default, fmt.Errorf("x509: invalid X25519 private key: %v"u8, errΔ9));
-            }
+        var (_, errΔ9) = asn1.Unmarshal(privKey.PrivateKey, ᏑcurvePrivateKey); if (errΔ9 != nil) {
+            return (default, fmt.Errorf("x509: invalid X25519 private key: %v"u8, errΔ9));
         }
         var (ᴛ1, ᴛ2) = ecdh.X25519().NewPrivateKey(curvePrivateKey);
         return (ᴛ1.OrTypedNil(), ᴛ2);
@@ -174,10 +162,8 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
                 FullBytes: oidBytes
             )
         );
-        {
-            (privKey.PrivateKey, err) = marshalECPrivateKeyWithOID(k, default); if (err != nil) {
-                return (default, errors.New("x509: failed to marshal EC private key while building PKCS#8: "u8 + err.Error()));
-            }
+        (privKey.PrivateKey, err) = marshalECPrivateKeyWithOID(k, default); if (err != nil) {
+            return (default, errors.New("x509: failed to marshal EC private key while building PKCS#8: "u8 + err.Error()));
         }
         break;
     }
@@ -198,10 +184,8 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
                 Algorithm: oidPublicKeyX25519
             );
             error err = default;
-            {
-                (privKey.PrivateKey, err) = asn1.Marshal(k.Bytes()); if (err != nil) {
-                    return (default, fmt.Errorf("x509: failed to marshal private key: %v"u8, err));
-                }
+            (privKey.PrivateKey, err) = asn1.Marshal(k.Bytes()); if (err != nil) {
+                return (default, fmt.Errorf("x509: failed to marshal private key: %v"u8, err));
             }
         } else {
             var (oid, ok) = oidFromECDHCurve(k.Curve());
@@ -218,10 +202,8 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
                     FullBytes: oidBytes
                 )
             );
-            {
-                (privKey.PrivateKey, err) = marshalECDHPrivateKey(k); if (err != nil) {
-                    return (default, errors.New("x509: failed to marshal EC private key while building PKCS#8: "u8 + err.Error()));
-                }
+            (privKey.PrivateKey, err) = marshalECDHPrivateKey(k); if (err != nil) {
+                return (default, errors.New("x509: failed to marshal EC private key while building PKCS#8: "u8 + err.Error()));
             }
         }
         break;

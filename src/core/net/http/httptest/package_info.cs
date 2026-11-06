@@ -72,9 +72,9 @@ using static go.net.http.httptest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAMNAAXAoKUgoKUpoKClIKUtLTEpIKUgIKU/pSCpoLu")]
+[assembly: GoPositionMap("net/http/httptest/httptest.go", "httptest.cs", "ABMmkgAMNAAXAoKUgoKUpoKClIKUtLTEpIKUgpTulIKmgu4=")]
 [assembly: GoPositionMap("net/http/httptest/recorder.go", "recorder.cs", "AC5mkgALHsKCgoKUAAgU8oKUgqaUgoKCgpSmqrSCgpSClKq0goKUgpSqopSkpJSmAAsYgrqSgqaCgoKClKqigpQACCQADwKClIKU7oKClIKClJSUgIKCgpKClJSCgpSCgsiCgpSClIKmAAIQ0oKClIKClA==")]
-[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD16goKCgpSUgoKAgrYADhyCgriCgoKmqqKCggACEuIACg6ygqaCgriSgpSClJSWgoKCgoL6soKUgpSCgqaCgpSUgoKClJSClIKClIKC3IKSgpSClJSCgoKCqqKCggAGEuKCgoKCggASJoK4gqTKgILIgoCCyKLk0oKCgoKClKKm0oKCgoKUAAcQgpKC+MaoogACEuKmgoKigqK6woKygpSUgIKkgriCgsrGgIKClNaAgoKUpILqgIKmxoK0uqCoooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "123=newLocalListener/1/1/1", "284:25,357:21")]
+[assembly: GoPositionMap("net/http/httptest/server.go", "server.cs", "AD16goKCgpSUgoKCpgAOHIKCuIKCgqaqooKCAAIS4gAKDrKCpoKCuJKClIKUlJaCgoKCgvqygpSClIKCpoKClJSCgoKUlIKUgoKUgoLcgpKClIKUlIKCgoKqooKCAAYS4oKCgoKCABImgriCpMqAgsiCgrii5NKCgoKCgpSiptKCgoKClAAHEIKSgvjGqKIAAhLipoKCooKiusKCsoKUlIKUgriCgsrGgIKClNaAgoKUpILqgIKmxoK0uqCoooKC", "137-145:1;200-208:1;339-342:1;349-402:1", "", "121=newLocalListener/1/1/1", "282:25,353:21")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;

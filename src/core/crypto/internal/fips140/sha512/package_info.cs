@@ -56,7 +56,7 @@ using static go.crypto.@internal.fips140.sha512_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/sha512/cast.go", "cast.cs", "AAwagoK4AAkUgoKAgqQ=", "14-35:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/sha512/cast.go", "cast.cs", "AAwagoK4AAkUgoKClA==", "14-35:1")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512.go", "sha512.cs", "AE2gAYKUgoKCgoKCgrSCgoKCgoKCtIKCgoKCgoK0goKCgoKCgrSkggAMFoKmgpS0tLS0pIKCgoKCgoKCgoKCAAgGgoKUAA0MlIKUgoKCgoKCgoKCgoKCpoKmgoKokoKCqJKCgqiSgoKokoKCpoKmgKTCgoKCgoKCgpSUgoKClIKUpoKUgoKCprSCgoKCgpS4griClIKmgoKCgoKCgoKCpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512block.go", "sha512block.cs", "AA0aAFKmAYKCgoKUgoKCloKCgpSmlJSCgoKCgoKCpoKCgoKCgoKUpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/sha512/sha512block_noasm.go", "sha512block_noasm.cs", "AAgSgg==")]

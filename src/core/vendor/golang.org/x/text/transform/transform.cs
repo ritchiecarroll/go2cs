@@ -250,10 +250,8 @@ public static (nint n, error err) Write(this ref Writer w, slice<byte> data) {
     }
     for (;;) {
         var (nDst, nSrc, errΔ1) = w.t.Transform(w.dst, src, false);
-        {
-            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != nil) {
-                return (n, werr);
-            }
+        var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != nil) {
+            return (n, werr);
         }
         src = src.slice(nSrc);
         if (w.n == 0) {
@@ -312,10 +310,8 @@ public static error Close(this ref Writer w) {
     var src = w.src.slice(0, w.n);
     for (;;) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, true);
-        {
-            var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != nil) {
-                return werr;
-            }
+        var (_, werr) = w.w.Write(w.dst.slice(0, nDst)); if (werr != nil) {
+            return werr;
         }
         if (!AreEqual(err, ErrShortDst)) {
             return err;
@@ -373,11 +369,9 @@ partial struct chain {
 }
 
 internal static void fatalError(this ref chain c, nint errIndex, error err) {
-    {
-        nint i = errIndex + 1; if (i > c.errStart) {
-            c.errStart = i;
-            c.err = err;
-        }
+    nint i = errIndex + 1; if (i > c.errStart) {
+        c.errStart = i;
+        c.err = err;
     }
 }
 
@@ -544,32 +538,30 @@ internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slic
     error err = default;
 
     for ((var r, nint sz) = ((rune)0, 0); len(src) > 0; src = src.slice(sz)) {
-        {
-            r = (rune)src[0]; if (r < utf8.RuneSelf) {
-                sz = 1;
-            } else {
-                (r, sz) = utf8.DecodeRune(src);
+        r = (rune)src[0]; if (r < utf8.RuneSelf) {
+            sz = 1;
+        } else {
+            (r, sz) = utf8.DecodeRune(src);
 
-                if (sz == 1) {
-                    // Invalid rune.
-                    if (!atEOF && !utf8.FullRune(src)) {
-                        err = ErrShortSrc;
+            if (sz == 1) {
+                // Invalid rune.
+                if (!atEOF && !utf8.FullRune(src)) {
+                    err = ErrShortSrc;
+                    break;
+                }
+                // We replace illegal bytes with RuneError. Not doing so might
+                // otherwise turn a sequence of invalid UTF-8 into valid UTF-8.
+                // The resulting byte sequence may subsequently contain runes
+                // for which t(r) is true that were passed unnoticed.
+                if (!t(r)) {
+                    if (nDst + 3 > len(dst)) {
+                        err = ErrShortDst;
                         break;
                     }
-                    // We replace illegal bytes with RuneError. Not doing so might
-                    // otherwise turn a sequence of invalid UTF-8 into valid UTF-8.
-                    // The resulting byte sequence may subsequently contain runes
-                    // for which t(r) is true that were passed unnoticed.
-                    if (!t(r)) {
-                        if (nDst + 3 > len(dst)) {
-                            err = ErrShortDst;
-                            break;
-                        }
-                        nDst += copy(dst.slice(nDst), "\uFFFD"u8);
-                    }
-                    nSrc++;
-                    continue;
+                    nDst += copy(dst.slice(nDst), "\uFFFD"u8);
                 }
+                nSrc++;
+                continue;
             }
         }
 
@@ -612,10 +604,8 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     if (s == ""u8) {
         // Fast path for the common case for empty input. Results in about a
         // 86% reduction of running time for BenchmarkStringLowerEmpty.
-        {
-            var (_, _, errΔ1) = t.Transform(default, default, true); if (errΔ1 == nil) {
-                return ("", 0, default);
-            }
+        var (_, _, errΔ1) = t.Transform(default, default, true); if (errΔ1 == nil) {
+            return ("", 0, default);
         }
     }
 

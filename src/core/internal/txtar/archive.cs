@@ -104,10 +104,8 @@ internal static (slice<byte> before, @string name, slice<byte> after) findFileMa
 
     nint i = default;
     for (;;) {
-        {
-            (name, after) = isMarker(data.slice(i)); if (name != ""u8) {
-                return (data.slice(0, i), name, after);
-            }
+        (name, after) = isMarker(data.slice(i)); if (name != ""u8) {
+            return (data.slice(0, i), name, after);
         }
         nint j = bytes.Index(data.slice(i), newlineMarker);
         if (j < 0) {
@@ -126,10 +124,8 @@ internal static (@string name, slice<byte> after) isMarker(slice<byte> data) {
     if (!bytes.HasPrefix(data, marker)) {
         return ("", default);
     }
-    {
-        nint i = bytes.IndexByte(data, (byte)'\n'); if (i >= 0) {
-            (data, after) = (data.slice(0, i), data.slice(i + 1));
-        }
+    nint i = bytes.IndexByte(data, (byte)'\n'); if (i >= 0) {
+        (data, after) = (data.slice(0, i), data.slice(i + 1));
     }
     if (!(bytes.HasSuffix(data, markerEnd) && len(data) >= len(marker) + len(markerEnd))) {
         return ("", default);

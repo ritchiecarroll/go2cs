@@ -157,11 +157,9 @@ internal static void initOp(this ref valAny v, ж<op> Ꮡx) {
 
     // Figure out this value's function.
     foreach (var (_, arg) in x.args) {
-        {
-            var fn = arg.fn; if (fn != nil) {
-                fn.attach(Ꮡx);
-                break;
-            }
+        var fn = arg.fn; if (fn != nil) {
+            fn.attach(Ꮡx);
+            break;
         }
     }
 }

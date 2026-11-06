@@ -21,28 +21,22 @@ internal static void Main() {
     };
     any logf = (((Actionꓸꓸꓸ<@string, any>)(fn))).OrTypedNilFunc();
 
-    {
-        var (fnΔ1, ok) = logf._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
-            fnΔ1("value=%v flag=%v", (nint)42, true);
-        } else {
-            fmt.Println("no match");
-        }
+    if (logf._<Actionꓸꓸꓸ<@string, any>>(out var fnΔ1)) {
+        fnΔ1("value=%v flag=%v", (nint)42, true);
+    } else {
+        fmt.Println("no match");
     }
 
     any notFn = plainˢ;
-    {
-        var (_, ok) = notFn._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok) {
-            fmt.Println("unexpected match");
-        } else {
-            fmt.Println("no match for string");
-        }
+    if (notFn._<Actionꓸꓸꓸ<@string, any>>(out _)) {
+        fmt.Println("unexpected match");
+    } else {
+        fmt.Println("no match for string");
     }
 
     any plain = @string (@string s) => s + "!"u8;
-    {
-        var (fnΔ2, ok) = plain._<Func<@string, @string>>(ᐧ); if (ok) {
-            fmt.Println(fnΔ2("ok"));
-        }
+    if (plain._<Func<@string, @string>>(out var fnΔ2)) {
+        fmt.Println(fnΔ2("ok"));
     }
 
     any direct = ((Funcꓸꓸꓸ<any, @string>)(@string (params ꓸꓸꓸany argsʗp) => {

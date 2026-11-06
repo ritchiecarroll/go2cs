@@ -41,12 +41,17 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 		}
 	}
 
-	if typeSwitchStmt.Init != nil {
-		// Any declared variable will be scoped to switch statement, so create a sub-block for it
+	// Any declared variable is scoped to the switch statement, so it gets a sub-block, unless
+	// analyzeInitScopes cleared the init to be a statement of the enclosing block, as Go writes it.
+	initBraced := typeSwitchStmt.Init != nil && v.initScopeShapes[typeSwitchStmt] != initScopeDropped
+
+	if initBraced {
 		v.outputBuilder.WriteString(v.newline)
 		v.writeOutput("{")
 		v.indentLevel++
+	}
 
+	if typeSwitchStmt.Init != nil {
 		v.visitStmt(typeSwitchStmt.Init, []StmtContext{})
 	}
 
@@ -432,7 +437,7 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 	}
 
 	// Close any locally scoped declared variable sub-block
-	if typeSwitchStmt.Init != nil {
+	if initBraced {
 		v.indentLevel--
 		v.outputBuilder.WriteString(v.newline)
 		v.writeOutput("}")

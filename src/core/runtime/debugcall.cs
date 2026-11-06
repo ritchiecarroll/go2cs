@@ -42,14 +42,12 @@ internal static @string debugCallCheck(uintptr pc) {
     if (getg() != (~(~getg()).m).curg) {
         return debugCallSystemStack;
     }
-    {
-        var sp = sys.GetCallerSP(); if (!((~getg()).stack.lo < sp && sp <= (~getg()).stack.hi)) {
-            // Fast syscalls (nanotime) and racecall switch to the
-            // g0 stack without switching g. We can't safely make
-            // a call in this state. (We can't even safely
-            // systemstack.)
-            return debugCallSystemStack;
-        }
+    var sp = sys.GetCallerSP(); if (!((~getg()).stack.lo < sp && sp <= (~getg()).stack.hi)) {
+        // Fast syscalls (nanotime) and racecall switch to the
+        // g0 stack without switching g. We can't safely make
+        // a call in this state. (We can't even safely
+        // systemstack.)
+        return debugCallSystemStack;
     }
 
     // Switch to the system stack to avoid overflowing the user
@@ -77,11 +75,9 @@ internal static @string debugCallCheck(uintptr pc) {
         // when locks are held), but there are enough tightly
         // coded sequences (e.g., defer handling) that it's
         // better to play it safe.
-        {
-            @string pfx = runtimeˢ; if (len(name) > len(pfx) && name.slice(0, len(pfx)) == pfx) {
-                ret = debugCallRuntime;
-                return;
-            }
+        @string pfx = runtimeˢ; if (len(name) > len(pfx) && name.slice(0, len(pfx)) == pfx) {
+            ret = debugCallRuntime;
+            return;
         }
 
         // Check that this isn't an unsafe-point.

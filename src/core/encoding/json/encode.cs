@@ -325,16 +325,14 @@ internal static readonly ж<sync.Pool> ᏑencodeStatePool = new StaticBox<sync.P
 internal static ref sync.Pool encodeStatePool => ref ((StaticBox<sync.Pool>)ᏑencodeStatePool).ValueSlot;
 
 internal static ж<encodeState> newEncodeState() {
-    {
-        var v = ᏑencodeStatePool.Get(); if (v != nil) {
-            var e = v._<ж<encodeState>>();
-            e.of(encodeState.ᏑBuffer).Reset();
-            if (len(e.ptrSeen) > 0) {
-                throw panic("ptrEncoder.encode should have emptied ptrSeen via defers");
-            }
-            e.ptrLevel = 0;
-            return e;
+    var v = ᏑencodeStatePool.Get(); if (v != nil) {
+        var e = v._<ж<encodeState>>();
+        e.of(encodeState.ᏑBuffer).Reset();
+        if (len(e.ptrSeen) > 0) {
+            throw panic("ptrEncoder.encode should have emptied ptrSeen via defers");
         }
+        e.ptrLevel = 0;
+        return e;
     }
     return Ꮡ(new encodeState(ptrSeen: new map<any, EmptyStruct>()));
 }
@@ -351,16 +349,12 @@ internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts 
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    {
-                        ref var je = ref heap<jsonError>(out var Ꮡje);
-                        (je, var ok) = r._<jsonError>(ᐧ); if (ok) {
-                            err = je.error;
-                        } else {
-                            throw panic(r);
-                        }
-                    }
+            var r = recover(); if (r != nil) {
+                ref var je = ref heap<jsonError>(out var Ꮡje);
+                (je, var ok) = r._<jsonError>(ᐧ); if (ok) {
+                    err = je.error;
+                } else {
+                    throw panic(r);
                 }
             }
         }, ref ᒐ);
@@ -412,10 +406,8 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> valueEncoder(r
 }
 
 internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(reflectꓸType t) {
-    {
-        var (fiΔ1, ok) = ᏑencoderCache.Load(t); if (ok) {
-            return fiΔ1._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
-        }
+    var (fiΔ1, ok) = ᏑencoderCache.Load(t); if (ok) {
+        return fiΔ1._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
     }
 
     // To deal with recursive types, populate the map with an
@@ -829,10 +821,8 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
                 // We're a large number of nested ptrEncoder.encode calls deep;
                 // start checking if we've run into a pointer cycle.
                 @unsafe.Pointer ptr = (uintptr)v.UnsafePointer();
-                {
-                    var (_, ok) = e.ptrSeen[@unsafe.Pointer.OrTypedNil(ptr), ꟷ]; if (ok) {
-                        e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
-                    }
+                var (_, ok) = e.ptrSeen[@unsafe.Pointer.OrTypedNil(ptr), ꟷ]; if (ok) {
+                    e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
                 }
                 e.ptrSeen[@unsafe.Pointer.OrTypedNil(ptr)] = new EmptyStruct();
                 defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡe.Value.ptrSeen, @unsafe.Pointer.OrTypedNil(ptr), ref ᒐ);
@@ -845,10 +835,8 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
         ж<reflect.MapIter> mi = v.MapRange();
         error err = default;
         for (nint i = 0; mi.Next(); i++) {
-            {
-                (sv[i].ks, err) = resolveKeyName(mi.Key()); if (err != nil) {
-                    e.error(fmt.Errorf("json: encoding error for type %q: %q"u8, v.Type().String(), err.Error()));
-                }
+            (sv[i].ks, err) = resolveKeyName(mi.Key()); if (err != nil) {
+                e.error(fmt.Errorf("json: encoding error for type %q: %q"u8, v.Type().String(), err.Error()));
             }
             sv[i].v = mi.Value();
         }
@@ -927,10 +915,8 @@ internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect�
                 // Here we use a struct to memorize the pointer to the first element of the slice
                 // and its length.
                 ref var ptr = ref heap<encode_ptr>(new encode_ptr(@unsafe.Pointer.OrTypedNil((uintptr)v.UnsafePointer()), v.Len()), out var Ꮡptr);
-                {
-                    var (_, ok) = e.ptrSeen[ptr, ꟷ]; if (ok) {
-                        e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
-                    }
+                var (_, ok) = e.ptrSeen[ptr, ꟷ]; if (ok) {
+                    e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
                 }
                 e.ptrSeen[ptr] = new EmptyStruct();
                 defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡe.Value.ptrSeen, ptr, ref ᒐ);
@@ -996,10 +982,8 @@ internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflectꓸ
                 // We're a large number of nested ptrEncoder.encode calls deep;
                 // start checking if we've run into a pointer cycle.
                 var ptr = v.Interface();
-                {
-                    var (_, ok) = e.ptrSeen[ptr, ꟷ]; if (ok) {
-                        e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
-                    }
+                var (_, ok) = e.ptrSeen[ptr, ꟷ]; if (ok) {
+                    e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, fmt.Sprintf("encountered a cycle via %s"u8, v.Type())))));
                 }
                 e.ptrSeen[ptr] = new EmptyStruct();
                 defer((ᴛ1, ᴛ2) => delete(ᴛ1, ᴛ2), Ꮡe.Value.ptrSeen, ptr, ref ᒐ);
@@ -1076,14 +1060,12 @@ internal static (@string, error) resolveKeyName(reflectꓸValue k) {
     if (k.Kind() == reflect.ΔString) {
         return (k.String(), default);
     }
-    {
-        var (tm, ok) = reflect.TypeAssert<encoding.TextMarshaler>(k); if (ok) {
-            if (k.Kind() == reflect.ΔPointer && k.IsNil()) {
-                return ("", default);
-            }
-            var (buf, err) = tm.MarshalText();
-            return ((@string)buf, err);
+    var (tm, ok) = reflect.TypeAssert<encoding.TextMarshaler>(k); if (ok) {
+        if (k.Kind() == reflect.ΔPointer && k.IsNil()) {
+            return ("", default);
         }
+        var (buf, err) = tm.MarshalText();
+        return ((@string)buf, err);
     }
     switch (k.Kind()) {
     case var ᴛ when ᴛ == reflect.ΔInt || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
@@ -1101,51 +1083,49 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
     dst = append(dst, (byte)'"');
     nint start = 0;
     for (nint i = 0; i < len(src); ) {
-        {
-            var b = src[i]; if (b < utf8.RuneSelf) {
-                if (htmlSafeSet[b] || (!escapeHTML && safeSet[b])) {
-                    i++;
-                    continue;
-                }
-                dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
-                switch (b) {
-                case (byte)'\\' or (byte)'"': {
-                    dst = append(dst, (byte)'\\', b);
-                    break;
-                }
-                case (byte)'\b': {
-                    dst = append(dst, (byte)'\\', (byte)'b');
-                    break;
-                }
-                case (byte)'\f': {
-                    dst = append(dst, (byte)'\\', (byte)'f');
-                    break;
-                }
-                case (byte)'\n': {
-                    dst = append(dst, (byte)'\\', (byte)'n');
-                    break;
-                }
-                case (byte)'\r': {
-                    dst = append(dst, (byte)'\\', (byte)'r');
-                    break;
-                }
-                case (byte)'\t': {
-                    dst = append(dst, (byte)'\\', (byte)'t');
-                    break;
-                }
-                default: {
-                    // This encodes bytes < 0x20 except for \b, \f, \n, \r and \t.
-                    // If escapeHTML is set, it also escapes <, >, and &
-                    // because they can lead to security holes when
-                    // user-controlled strings are rendered into JSON
-                    // and served to some browsers.
-                    dst = append(dst, (byte)'\\', (byte)'u', (byte)'0', (byte)'0', hex[(b >> 4)], hex[(byte)(b & 0xF)]);
-                    break;
-                }}
+        var b = src[i]; if (b < utf8.RuneSelf) {
+            if (htmlSafeSet[b] || (!escapeHTML && safeSet[b])) {
                 i++;
-                start = i;
                 continue;
             }
+            dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
+            switch (b) {
+            case (byte)'\\' or (byte)'"': {
+                dst = append(dst, (byte)'\\', b);
+                break;
+            }
+            case (byte)'\b': {
+                dst = append(dst, (byte)'\\', (byte)'b');
+                break;
+            }
+            case (byte)'\f': {
+                dst = append(dst, (byte)'\\', (byte)'f');
+                break;
+            }
+            case (byte)'\n': {
+                dst = append(dst, (byte)'\\', (byte)'n');
+                break;
+            }
+            case (byte)'\r': {
+                dst = append(dst, (byte)'\\', (byte)'r');
+                break;
+            }
+            case (byte)'\t': {
+                dst = append(dst, (byte)'\\', (byte)'t');
+                break;
+            }
+            default: {
+                // This encodes bytes < 0x20 except for \b, \f, \n, \r and \t.
+                // If escapeHTML is set, it also escapes <, >, and &
+                // because they can lead to security holes when
+                // user-controlled strings are rendered into JSON
+                // and served to some browsers.
+                dst = append(dst, (byte)'\\', (byte)'u', (byte)'0', (byte)'0', hex[(b >> 4)], hex[(byte)(b & 0xF)]);
+                break;
+            }}
+            i++;
+            start = i;
+            continue;
         }
         // TODO(https://go.dev/issue/56948): Use generic utf8 functionality.
         // For now, cast only a small portion of byte slices to a string
@@ -1429,10 +1409,8 @@ internal static structFields typeFields(reflectꓸType t) {
     foreach (var (i, field) in fields) {
         exactNameIndex[field.name] = Ꮡ(fields, i);
         // For historical reasons, first folded match takes precedence.
-        {
-            var (_, ok) = foldedNameIndex[tmpstring(foldName(field.nameBytes)), ꟷ]; if (!ok) {
-                foldedNameIndex[((@string)foldName(field.nameBytes))] = Ꮡ(fields, i);
-            }
+        var (_, ok) = foldedNameIndex[tmpstring(foldName(field.nameBytes)), ꟷ]; if (!ok) {
+            foldedNameIndex[((@string)foldName(field.nameBytes))] = Ꮡ(fields, i);
         }
     }
     return new structFields(fields, exactNameIndex, foldedNameIndex);
@@ -1459,10 +1437,8 @@ internal static ref sync.Map fieldCache => ref ((StaticBox<sync.Map>)ᏑfieldCac
 
 // cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
 internal static structFields cachedTypeFields(reflectꓸType t) {
-    {
-        var (fΔ1, ok) = ᏑfieldCache.Load(t); if (ok) {
-            return fΔ1._<structFields>();
-        }
+    var (fΔ1, ok) = ᏑfieldCache.Load(t); if (ok) {
+        return fΔ1._<structFields>();
     }
     var (f, _) = ᏑfieldCache.LoadOrStore(t, typeFields(t));
     return f._<structFields>();

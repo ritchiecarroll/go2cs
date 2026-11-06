@@ -63,7 +63,7 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AF60AfIABxCigoCCtgACGgALBKaC5qKCgoKCgoKmgpSCpqaCgqaCuICCtoKUrLKClIKClIKUgoKCgoK4lIKCgriCgqamgoCCpICCtqKCgqaCgoK4gIKCyIKClJSCpqaAgoK2lO6ClIKCgpSAgqS43rKCgIKkgoKUqqCkAAkUgpSmgoKCpgANGoLuggAHEIKClAAIFIKClIKU", "", "", "103=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/http/httpproxy/proxy.go", "proxy.cs", "AF60AfIABxCigoKmAAIaAAsEpoLmooKCgoKCgqaClIKmpoKCpoK4gqaClKyygpSCgpSClIKCgoKCuJSCgoK4goKmpoKAgqSAgraigoKmgoKCuICCgsiCgpSUgqamgoKmlO6ClIKCgpSAgqS43rKCgpSCgpSqoKQACRSClKaCgoKmAA0agu6CAAcQgoKUAAgUgoKUgpQ=", "", "", "103=getEnvAny/1/3/1,getEnvAny/2/3/2,getEnvAny/3/3/3,Getenv/1/1/4")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http;

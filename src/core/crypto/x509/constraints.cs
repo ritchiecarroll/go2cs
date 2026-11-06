@@ -399,10 +399,8 @@ internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) {
     if (!dnc.permitted && builtin.len(s) > 0 && s[0] == '*') {
         s = strings.ToLower(s);
         @string trimmed = trimFirstLabel(s);
-        {
-            var (constraintΔ1, found) = dnc.parentConstraints[trimmed, ꟷ]; if (found) {
-                return (constraintΔ1, true);
-            }
+        var (constraintΔ1, found) = dnc.parentConstraints[trimmed, ꟷ]; if (found) {
+            return (constraintΔ1, true);
         }
     }
     return ("", false);
@@ -459,10 +457,8 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
 
 internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailbox s) {
     if (builtin.len(ec.fullEmails) > 0) {
-        {
-            var (_, ok) = ec.fullEmails[s, ꟷ]; if (ok) {
-                return (fmt.Sprintf("%s@%s"u8, s.local, s.domain), true);
-            }
+        var (_, ok) = ec.fullEmails[s, ꟷ]; if (ok) {
+            return (fmt.Sprintf("%s@%s"u8, s.local, s.domain), true);
         }
     }
     if (ec.dnsConstraints == nil) {
@@ -490,17 +486,13 @@ internal static error checkConstraints<T, V, P>(constraints<T, V> c, V s, P p)
     where P : /* string | net.IP | parsedURI | rfc2821Mailbox */ new()
 {
     if (c.permitted != nil) {
-        {
-            var (_, found) = c.permitted.query(s); if (!found) {
-                return fmt.Errorf("%s %q is not permitted by any constraint"u8, c.constraintType, p);
-            }
+        var (_, found) = c.permitted.query(s); if (!found) {
+            return fmt.Errorf("%s %q is not permitted by any constraint"u8, c.constraintType, p);
         }
     }
     if (c.excluded != nil) {
-        {
-            var (constraint, found) = c.excluded.query(s); if (found) {
-                return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, (constraint).OrTypedNilOf());
-            }
+        var (constraint, found) = c.excluded.query(s); if (found) {
+            return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, (constraint).OrTypedNilOf());
         }
     }
     return default;
@@ -517,40 +509,32 @@ partial struct chainConstraints {
 
 internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
     foreach (var (_, ip) in ips) {
-        {
-            var err = checkConstraints(cc.ip, ip, ip); if (err != nil) {
-                return err;
-            }
+        var err = checkConstraints(cc.ip, ip, ip); if (err != nil) {
+            return err;
         }
     }
     foreach (var (_, d) in dns) {
         if (!domainNameValid(d, false)) {
             return fmt.Errorf("x509: cannot parse dnsName %q"u8, d);
         }
-        {
-            var err = checkConstraints(cc.dns, d, d); if (err != nil) {
-                return err;
-            }
+        var err = checkConstraints(cc.dns, d, d); if (err != nil) {
+            return err;
         }
     }
     foreach (var (_, u) in uris) {
         if (!domainNameValid(u.domain, false)) {
             return fmt.Errorf("x509: internal error: URI SAN %q failed to parse"u8, u);
         }
-        {
-            var err = checkConstraints(cc.uri, u.domain, u); if (err != nil) {
-                return err;
-            }
+        var err = checkConstraints(cc.uri, u.domain, u); if (err != nil) {
+            return err;
         }
     }
     foreach (var (_, e) in emails) {
         if (!domainNameValid(e.domain, false)) {
             return fmt.Errorf("x509: cannot parse rfc822Name %q"u8, e);
         }
-        {
-            var err = checkConstraints(cc.email, e, e); if (err != nil) {
-                return err;
-            }
+        var err = checkConstraints(cc.email, e, e); if (err != nil) {
+            return err;
         }
     }
     return default;
@@ -608,10 +592,8 @@ internal static error checkChainConstraints(slice<ж<Certificate>> chain) {
         }
 
         for (var n = currentConstraints; n != nil; n = n.next) {
-            {
-                var errΔ1 = n.check(c.DNSNames, uris, emails, c.IPAddresses); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var errΔ1 = n.check(c.DNSNames, uris, emails, c.IPAddresses); if (errΔ1 != nil) {
+                return errΔ1;
             }
         }
     }

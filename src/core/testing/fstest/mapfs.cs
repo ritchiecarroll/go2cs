@@ -142,14 +142,12 @@ internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name
             dir = name.slice(0, i + j);
             i += j;
         }
-        {
-            var @file = fsys[dir]; if (@file != nil && @file.Mode.Type() == fs.ModeSymlink) {
-                @string target = (@string)@file.Data;
-                if (path.IsAbs(target)) {
-                    return ("", false);
-                }
-                return fsys.resolveSymlinks(path.Join(path.Dir(dir), target) + name.slice(i));
+        var @file = fsys[dir]; if (@file != nil && @file.Mode.Type() == fs.ModeSymlink) {
+            @string target = (@string)@file.Data;
+            if (path.IsAbs(target)) {
+                return ("", false);
             }
+            return fsys.resolveSymlinks(path.Join(path.Dir(dir), target) + name.slice(i));
         }
         i += len("/");
     }

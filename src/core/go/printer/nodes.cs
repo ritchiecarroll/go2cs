@@ -389,17 +389,15 @@ internal static void parameters(this ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfiel
 
         // if the closing ")" is on a separate line from the last parameter,
         // print an additional "," and line break
-        {
-            nint closing = p.lineFor(fields.Closing); if (0 < prevLine && prevLine < closing) {
-                Ꮡp.print(token.COMMA);
-                Ꮡp.linebreak(closing, 0, ignore, true);
-            } else if (mode == typeTParam && Ꮡfields.NumFields() == 1 && combinesWithName(stripParensAlways(fields.List[0].Type))) {
-                // A type parameter list [P T] where the name P and the type expression T syntactically
-                // combine to another valid (value) expression requires a trailing comma, as in [P *T,]
-                // (or an enclosing interface as in [P interface(*T)]), so that the type parameter list
-                // is not parsed as an array length [P*T].
-                Ꮡp.print(token.COMMA);
-            }
+        nint closing = p.lineFor(fields.Closing); if (0 < prevLine && prevLine < closing) {
+            Ꮡp.print(token.COMMA);
+            Ꮡp.linebreak(closing, 0, ignore, true);
+        } else if (mode == typeTParam && Ꮡfields.NumFields() == 1 && combinesWithName(stripParensAlways(fields.List[0].Type))) {
+            // A type parameter list [P T] where the name P and the type expression T syntactically
+            // combine to another valid (value) expression requires a trailing comma, as in [P *T,]
+            // (or an enclosing interface as in [P interface(*T)]), so that the type parameter list
+            // is not parsed as an array length [P*T].
+            Ꮡp.print(token.COMMA);
         }
 
         // unindent if we indented
@@ -943,17 +941,15 @@ internal static void expr1(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nin
         break;
     }
     case ж<ast.ParenExpr> x: {
-        {
-            var (_, hasParens) = x.X._<ж<ast.ParenExpr>>(ᐧ); if (hasParens) {
-                // don't print parentheses around an already parenthesized expression
-                // TODO(gri) consider making this more general and incorporate precedence levels
-                Ꮡp.expr0(x.X, depth);
-            } else {
-                Ꮡp.print(token.LPAREN);
-                Ꮡp.expr0(x.X, reduceDepth(depth)); // parentheses undo one level of depth
-                p.setPos(x.Rparen);
-                Ꮡp.print(token.RPAREN);
-            }
+        var (_, hasParens) = x.X._<ж<ast.ParenExpr>>(ᐧ); if (hasParens) {
+            // don't print parentheses around an already parenthesized expression
+            // TODO(gri) consider making this more general and incorporate precedence levels
+            Ꮡp.expr0(x.X, depth);
+        } else {
+            Ꮡp.print(token.LPAREN);
+            Ꮡp.expr0(x.X, reduceDepth(depth)); // parentheses undo one level of depth
+            p.setPos(x.Rparen);
+            Ꮡp.print(token.RPAREN);
         }
         break;
     }
@@ -1254,10 +1250,8 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
 }
 
 internal static bool possibleSelectorExpr(this ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
-    {
-        var (x, ok) = expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
-            return Ꮡp.selectorExpr(x, depth, true);
-        }
+    var (x, ok) = expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
+        return Ꮡp.selectorExpr(x, depth, true);
     }
     Ꮡp.expr1(expr, prec1, depth);
     return false;
@@ -1271,16 +1265,14 @@ internal static bool selectorExpr(this ж<printer> Ꮡp, ж<ast.SelectorExpr> �
 
     Ꮡp.expr1(x.X, token.HighestPrec, depth);
     Ꮡp.print(token.PERIOD);
-    {
-        nint line = p.lineFor(x.Sel.Pos()); if (p.pos.IsValid() && p.pos.Line < line) {
-            Ꮡp.print(indent, newline);
-            p.setPos(x.Sel.Pos());
-            Ꮡp.print(x.Sel.OrTypedNil());
-            if (!isMethod) {
-                Ꮡp.print(unindent);
-            }
-            return true;
+    nint line = p.lineFor(x.Sel.Pos()); if (p.pos.IsValid() && p.pos.Line < line) {
+        Ꮡp.print(indent, newline);
+        p.setPos(x.Sel.Pos());
+        Ꮡp.print(x.Sel.OrTypedNil());
+        if (!isMethod) {
+            Ꮡp.print(unindent);
         }
+        return true;
     }
     p.setPos(x.Sel.Pos());
     Ꮡp.print(x.Sel.OrTypedNil());
@@ -1312,30 +1304,28 @@ internal static void stmtList(this ж<printer> Ꮡp, slice<ast.Stmt> list, nint 
     nint i = 0;
     foreach (var (_, s) in list) {
         // ignore empty statements (was issue 3466)
-        {
-            var (_, isEmpty) = s._<ж<ast.EmptyStmt>>(ᐧ); if (!isEmpty) {
-                // nindent == 0 only for lists of switch/select case clauses;
-                // in those cases each clause is a new section
-                if (len(p.output) > 0) {
-                    // only print line break if we are not at the beginning of the output
-                    // (i.e., we are not printing only a partial program)
-                    Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, i == 0 || nindent == 0 || p.linesFrom(line) > 0);
-                }
-                p.recordLine(Ꮡline);
-                Ꮡp.stmt(s, nextIsRBrace && i == len(list) - 1);
-                // labeled statements put labels on a separate line, but here
-                // we only care about the start line of the actual statement
-                // without label - correct line for each label
-                for (var t = s; ; ) {
-                    var (lt, _) = t._<ж<ast.LabeledStmt>>(ᐧ);
-                    if (lt == nil) {
-                        break;
-                    }
-                    line++;
-                    t = lt.Stmt;
-                }
-                i++;
+        var (_, isEmpty) = s._<ж<ast.EmptyStmt>>(ᐧ); if (!isEmpty) {
+            // nindent == 0 only for lists of switch/select case clauses;
+            // in those cases each clause is a new section
+            if (len(p.output) > 0) {
+                // only print line break if we are not at the beginning of the output
+                // (i.e., we are not printing only a partial program)
+                Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, i == 0 || nindent == 0 || p.linesFrom(line) > 0);
             }
+            p.recordLine(Ꮡline);
+            Ꮡp.stmt(s, nextIsRBrace && i == len(list) - 1);
+            // labeled statements put labels on a separate line, but here
+            // we only care about the start line of the actual statement
+            // without label - correct line for each label
+            for (var t = s; ; ) {
+                var (lt, _) = t._<ж<ast.LabeledStmt>>(ᐧ);
+                if (lt == nil) {
+                    break;
+                }
+                line++;
+                t = lt.Stmt;
+            }
+            i++;
         }
     }
     if (nindent > 0) {
@@ -1397,10 +1387,8 @@ internal static ast.Expr stripParens(ast.Expr x) {
 }
 
 internal static ast.Expr stripParensAlways(ast.Expr x) {
-    {
-        var (xΔ1, ok) = x._<ж<ast.ParenExpr>>(ᐧ); if (ok) {
-            return stripParensAlways(xΔ1.X);
-        }
+    var (xΔ1, ok) = x._<ж<ast.ParenExpr>>(ᐧ); if (ok) {
+        return stripParensAlways(xΔ1.X);
     }
     return x;
 }
@@ -1502,17 +1490,15 @@ internal static void stmt(this ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrac
         Ꮡp.expr(new ast.IdentжExpr(s.Label));
         p.setPos(s.Colon);
         Ꮡp.print(token.COLON, indent);
-        {
-            var (e, isEmpty) = s.Stmt._<ж<ast.EmptyStmt>>(ᐧ); if (isEmpty) {
-                if (!nextIsRBrace) {
-                    Ꮡp.print(newline);
-                    p.setPos(e.Pos());
-                    Ꮡp.print(token.SEMICOLON);
-                    break;
-                }
-            } else {
-                Ꮡp.linebreak(p.lineFor(s.Stmt.Pos()), 1, ignore, true);
+        var (e, isEmpty) = s.Stmt._<ж<ast.EmptyStmt>>(ᐧ); if (isEmpty) {
+            if (!nextIsRBrace) {
+                Ꮡp.print(newline);
+                p.setPos(e.Pos());
+                Ꮡp.print(token.SEMICOLON);
+                break;
             }
+        } else {
+            Ꮡp.linebreak(p.lineFor(s.Stmt.Pos()), 1, ignore, true);
         }
         Ꮡp.stmt(s.Stmt, nextIsRBrace);
         break;
@@ -1927,33 +1913,31 @@ internal static void genDecl(this ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
         // group of parenthesized declarations
         p.setPos(d.Lparen);
         Ꮡp.print(token.LPAREN);
-        {
-            nint n = len(d.Specs); if (n > 0) {
-                Ꮡp.print(indent, formfeed);
-                if (n > 1 && (d.Tok == token.CONST || d.Tok == token.VAR)) {
-                    // two or more grouped const/var declarations:
-                    // determine if the type column must be kept
-                    var keepType = keepTypeColumn(d.Specs);
-                    ref var line = ref heap(new nint(), out var Ꮡline);
-                    foreach (var (i, s) in d.Specs) {
-                        if (i > 0) {
-                            Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0);
-                        }
-                        p.recordLine(Ꮡline);
-                        Ꮡp.valueSpec(s._<ж<ast.ValueSpec>>(), keepType[i]);
+        nint n = len(d.Specs); if (n > 0) {
+            Ꮡp.print(indent, formfeed);
+            if (n > 1 && (d.Tok == token.CONST || d.Tok == token.VAR)) {
+                // two or more grouped const/var declarations:
+                // determine if the type column must be kept
+                var keepType = keepTypeColumn(d.Specs);
+                ref var line = ref heap(new nint(), out var Ꮡline);
+                foreach (var (i, s) in d.Specs) {
+                    if (i > 0) {
+                        Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0);
                     }
-                } else {
-                    ref var line = ref heap(new nint(), out var Ꮡline);
-                    foreach (var (i, s) in d.Specs) {
-                        if (i > 0) {
-                            Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0);
-                        }
-                        p.recordLine(Ꮡline);
-                        Ꮡp.spec(s, n, false);
-                    }
+                    p.recordLine(Ꮡline);
+                    Ꮡp.valueSpec(s._<ж<ast.ValueSpec>>(), keepType[i]);
                 }
-                Ꮡp.print(unindent, formfeed);
+            } else {
+                ref var line = ref heap(new nint(), out var Ꮡline);
+                foreach (var (i, s) in d.Specs) {
+                    if (i > 0) {
+                        Ꮡp.linebreak(p.lineFor(s.Pos()), 1, ignore, p.linesFrom(line) > 0);
+                    }
+                    p.recordLine(Ꮡline);
+                    Ꮡp.spec(s, n, false);
+                }
             }
+            Ꮡp.print(unindent, formfeed);
         }
         p.setPos(d.Rparen);
         Ꮡp.print(token.RPAREN);
@@ -1994,10 +1978,8 @@ internal static nint /*size*/ nodeSize(this ref printer p, ast.Node n, nint maxS
     // recursively. For deep composite literal nests, this can
     // lead to an exponential algorithm. Remember previous
     // results to prune the recursion (was issue 1628).
-    {
-        var (sizeΔ1, found) = p.nodeSizes[n, ꟷ]; if (found) {
-            return sizeΔ1;
-        }
+    var (sizeΔ1, found) = p.nodeSizes[n, ꟷ]; if (found) {
+        return sizeΔ1;
     }
 
     size = maxSize + 1; // assume n doesn't fit
@@ -2008,10 +1990,8 @@ internal static nint /*size*/ nodeSize(this ref printer p, ast.Node n, nint maxS
     // in RawFormat
     ref var cfg = ref heap<Config>(new Config(Mode: RawFormat), out var Ꮡcfg);
     ref var counter = ref heap(new sizeCounter(), out var Ꮡcounter);
-    {
-        var err = Ꮡcfg.fprint(new sizeCounterжWriter(Ꮡcounter), p.fset, n, p.nodeSizes); if (err != nil) {
-            return size;
-        }
+    var err = Ꮡcfg.fprint(new sizeCounterжWriter(Ꮡcounter), p.fset, n, p.nodeSizes); if (err != nil) {
+        return size;
     }
     if (counter.size <= maxSize && !counter.hasNewline) {
         // n fits in a single line
@@ -2023,13 +2003,9 @@ internal static nint /*size*/ nodeSize(this ref printer p, ast.Node n, nint maxS
 
 // numLines returns the number of lines spanned by node n in the original source.
 internal static nint numLines(this ref printer p, ast.Node n) {
-    {
-        tokenꓸPos from = n.Pos(); if (from.IsValid()) {
-            {
-                tokenꓸPos to = n.End(); if (to.IsValid()) {
-                    return p.lineFor(to) - p.lineFor(from) + 1;
-                }
-            }
+    tokenꓸPos from = n.Pos(); if (from.IsValid()) {
+        tokenꓸPos to = n.End(); if (to.IsValid()) {
+            return p.lineFor(to) - p.lineFor(from) + 1;
         }
     }
     return infinity;

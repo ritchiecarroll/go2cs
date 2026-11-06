@@ -255,10 +255,8 @@ internal static reflectꓸType valuerReflectType = reflect.TypeFor<Valuer>();
 //
 // This function is mirrored in the database/sql package.
 internal static (Value v, error err) callValuerValue(Valuer vr) {
-    {
-        var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
-            return (default, default);
-        }
+    var rv = reflect.ValueOf(vr); if (rv.Kind() == reflect.ΔPointer && rv.IsNil() && rv.Type().Elem().Implements(valuerReflectType)) {
+        return (default, default);
     }
     return vr.Value();
 }

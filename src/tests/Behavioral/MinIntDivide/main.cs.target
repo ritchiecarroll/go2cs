@@ -75,10 +75,8 @@ internal static T quoAny<T>(T a, T b)
 }
 
 internal static @string localRem() {
-    {
-        var rem = builtin.rem(i64, (int64)m1); if (rem == 0) {
-            return fmt.Sprint(rem);
-        }
+    var rem = builtin.rem(i64, (int64)m1); if (rem == 0) {
+        return fmt.Sprint(rem);
     }
 
     return "nonzero";
@@ -111,10 +109,8 @@ internal static void arm(@string @class, Func<@string> f) {
         }
 
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    fmt.Println(@class + ": panic:", r);
-                }
+            var r = recover(); if (r != nil) {
+                fmt.Println(@class + ": panic:", r);
             }
         }, ref ᒐ);
 

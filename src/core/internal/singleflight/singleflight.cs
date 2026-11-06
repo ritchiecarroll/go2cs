@@ -52,13 +52,11 @@ public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string ke
     if (g.m == nil) {
         g.m = new map<@string, ж<call>>();
     }
-    {
-        var (cΔ1, ok) = g.m[key, ꟷ]; if (ok) {
-            cΔ1.dups++;
-            g.mu.Unlock();
-            cΔ1.Ꮡwg.Wait();
-            return (cΔ1.val, cΔ1.err, true);
-        }
+    var (cΔ1, ok) = g.m[key, ꟷ]; if (ok) {
+        cΔ1.dups++;
+        g.mu.Unlock();
+        cΔ1.Ꮡwg.Wait();
+        return (cΔ1.val, cΔ1.err, true);
     }
     var c = @new<call>();
     c.Ꮡwg.Add(1);
@@ -79,13 +77,11 @@ public static partial /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string 
     if (g.m == nil) {
         g.m = new map<@string, ж<call>>();
     }
-    {
-        var (cΔ1, ok) = g.m[key, ꟷ]; if (ok) {
-            cΔ1.dups++;
-            cΔ1.chans = append(cΔ1.chans, ch.AsSendOnly());
-            g.mu.Unlock();
-            return ch.AsRecvOnly();
-        }
+    var (cΔ1, ok) = g.m[key, ꟷ]; if (ok) {
+        cΔ1.dups++;
+        cΔ1.chans = append(cΔ1.chans, ch.AsSendOnly());
+        g.mu.Unlock();
+        return ch.AsRecvOnly();
     }
     var c = Ꮡ(new call(chans: slice<channel/*<-*/<Result>>([ch])));
     c.Ꮡwg.Add(1);

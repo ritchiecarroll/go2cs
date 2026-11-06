@@ -27,10 +27,8 @@ public static (ж<ΔScope>, Object) LookupParent(this ж<ΔScope> Ꮡs, @string 
 
     for (; Ꮡs != nil; Ꮡs = s.parent) {
         s = ref Ꮡs.DerefOrNull();
-        {
-            var obj = s.Lookup(name); if (obj != nil && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
-                return (Ꮡs, obj);
-            }
+        var obj = s.Lookup(name); if (obj != nil && (!pos.IsValid() || cmpPos(obj.scopePos(), pos) <= 0)) {
+            return (Ꮡs, obj);
         }
     }
     return (default, default);
@@ -67,10 +65,8 @@ public static ж<ΔScope> Innermost(this ж<ΔScope> Ꮡs, tokenꓸPos pos) {
     // discontiguous, so iterate over the package's files.
     if (s.parent == Universe) {
         foreach (var (_, sΔ1) in s.children) {
-            {
-                var inner = sΔ1.Innermost(pos); if (inner != nil) {
-                    return inner;
-                }
+            var inner = sΔ1.Innermost(pos); if (inner != nil) {
+                return inner;
             }
         }
     }

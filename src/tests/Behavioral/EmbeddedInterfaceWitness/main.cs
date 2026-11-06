@@ -38,20 +38,16 @@ internal static @string Write(this holder h, @string s) {
 }
 
 internal static void check(@string label, any value) {
-    {
-        var (rw, ok) = value._<iolike.ReadWriter>(ᐧ); if (ok) {
-            fmt.Println(label, "ReadWriter: yes", rw.Read(), rw.Write("x"));
-        } else {
-            fmt.Println(label, "ReadWriter: no");
-        }
+    if (value._<iolike.ReadWriter>(out var rw)) {
+        fmt.Println(label, "ReadWriter: yes", rw.Read(), rw.Write("x"));
+    } else {
+        fmt.Println(label, "ReadWriter: no");
     }
 
-    {
-        var (r, ok) = value._<iolike.Reader>(ᐧ); if (ok) {
-            fmt.Println(label, "Reader: yes", r.Read());
-        } else {
-            fmt.Println(label, "Reader: no");
-        }
+    if (value._<iolike.Reader>(out var r)) {
+        fmt.Println(label, "Reader: yes", r.Read());
+    } else {
+        fmt.Println(label, "Reader: no");
     }
 
     fmt.Println(label, "NumMethod:", reflect.TypeOf(value).NumMethod());
@@ -76,12 +72,10 @@ public static void LocalPromotion() {
 
     any v = w;
 
-    {
-        var (r, ok) = v._<iolike.Reader>(ᐧ); if (ok) {
-            fmt.Println("local assert:", r.Read());
-        } else {
-            fmt.Println("local assert: no");
-        }
+    var (r, ok) = v._<iolike.Reader>(ᐧ); if (ok) {
+        fmt.Println("local assert:", r.Read());
+    } else {
+        fmt.Println("local assert: no");
     }
 }
 
@@ -93,12 +87,10 @@ partial struct conflicted {
 internal static void checkConflicted() {
     any v = new conflicted(Base: new iolike.Base(Tag: "conf"));
 
-    {
-        var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok) {
-            fmt.Println("conflicted Reader: yes");
-        } else {
-            fmt.Println("conflicted Reader: no");
-        }
+    var (_, ok) = v._<iolike.Reader>(ᐧ); if (ok) {
+        fmt.Println("conflicted Reader: yes");
+    } else {
+        fmt.Println("conflicted Reader: no");
     }
 
     fmt.Println("conflicted NumMethod:", reflect.TypeOf(v).NumMethod());
@@ -128,22 +120,18 @@ internal static @string Write(this ref pointerOnly p, @string s) {
 internal static void checkPointerOnly() {
     any ptr = Ꮡ(new pointerOnly());
 
-    {
-        var (rw, ok) = ptr._<iolike.ReadWriter>(ᐧ); if (ok) {
-            fmt.Println("pointerOnly ptr: yes", rw.Write("x"));
-        } else {
-            fmt.Println("pointerOnly ptr: no");
-        }
+    if (ptr._<iolike.ReadWriter>(out var rw)) {
+        fmt.Println("pointerOnly ptr: yes", rw.Write("x"));
+    } else {
+        fmt.Println("pointerOnly ptr: no");
     }
 
     any val = new pointerOnly();
 
-    {
-        var (_, ok) = val._<iolike.ReadWriter>(ᐧ); if (ok) {
-            fmt.Println("pointerOnly val: yes");
-        } else {
-            fmt.Println("pointerOnly val: no");
-        }
+    if (val._<iolike.ReadWriter>(out _)) {
+        fmt.Println("pointerOnly val: yes");
+    } else {
+        fmt.Println("pointerOnly val: no");
     }
 
     fmt.Println("pointerOnly NumMethod ptr:", reflect.TypeOf(ptr).NumMethod(), "val:", reflect.TypeOf(val).NumMethod());

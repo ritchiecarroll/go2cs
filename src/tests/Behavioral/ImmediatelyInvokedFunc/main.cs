@@ -18,10 +18,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("recovered:", r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("recovered:", r);
                 }
             }, ref ᒐ);
             throw panic("boom");
@@ -67,10 +65,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println(label, "recovered:", r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println(label, "recovered:", r);
                 }
             }, ref ᒐ);
             throw panic("argboom");

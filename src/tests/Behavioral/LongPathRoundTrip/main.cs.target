@@ -38,11 +38,9 @@ internal static void Main() {
 
         fmt.Println("exceeds MAX_PATH:", len(deep) > 260);
 
-        {
-            var errΔ1 = os.MkdirAll(deep, 493); if (errΔ1 != nil) {
-                fmt.Println("mkdirall failed:", errΔ1);
-                return;
-            }
+        var errΔ1 = os.MkdirAll(deep, 493); if (errΔ1 != nil) {
+            fmt.Println("mkdirall failed:", errΔ1);
+            return;
         }
 
         (var dirInfo, err) = os.Stat(deep);
@@ -53,11 +51,9 @@ internal static void Main() {
         @string @file = deep + sep + name;
         @string payload = "the quick brown fox jumps over the lazy dog";
 
-        {
-            var errΔ2 = os.WriteFile(@file, slice<byte>(payload), 420); if (errΔ2 != nil) {
-                fmt.Println("writefile failed:", errΔ2);
-                return;
-            }
+        var errΔ2 = os.WriteFile(@file, slice<byte>(payload), 420); if (errΔ2 != nil) {
+            fmt.Println("writefile failed:", errΔ2);
+            return;
         }
 
         (var data, err) = os.ReadFile(@file);
@@ -81,10 +77,8 @@ internal static void Main() {
 
         @string second = deep + sep + "another.dat"u8;
 
-        {
-            var errΔ3 = os.WriteFile(second, slice<byte>([1, 2, 3]), 420); if (errΔ3 != nil) {
-                fmt.Println("second writefile failed:", errΔ3);
-            }
+        var errΔ3 = os.WriteFile(second, slice<byte>([1, 2, 3]), 420); if (errΔ3 != nil) {
+            fmt.Println("second writefile failed:", errΔ3);
         }
 
         (var entries, err) = os.ReadDir(deep);

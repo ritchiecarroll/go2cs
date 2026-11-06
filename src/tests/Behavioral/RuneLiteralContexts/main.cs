@@ -153,14 +153,12 @@ internal static partial void Main() {
             break;
         }}
 
-        {
-            var d = c;
-            switch (ᐧ) {
-            case {} when d is (byte)'.': {
-                fmt.Println("true-tag dot");
-                break;
-            }}
-        }
+        var d = c;
+        switch (ᐧ) {
+        case {} when d is (byte)'.': {
+            fmt.Println("true-tag dot");
+            break;
+        }}
 
     }
 }

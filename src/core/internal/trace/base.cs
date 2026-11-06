@@ -64,10 +64,8 @@ internal static extraStringID addExtraString(this ref evTable t, @string s) {
     if (t.extraStringIDs == nil) {
         t.extraStringIDs = new map<@string, extraStringID>();
     }
-    {
-        var (idΔ1, ok) = t.extraStringIDs[s, ꟷ]; if (ok) {
-            return idΔ1;
-        }
+    var (idΔ1, ok) = t.extraStringIDs[s, ꟷ]; if (ok) {
+        return idΔ1;
     }
     t.nextExtra++;
     var id = t.nextExtra;
@@ -105,10 +103,8 @@ internal static error insert<EI, E>(this ref dataTable<EI, E> d, EI id, E data)
     if (d.sparse == nil) {
         d.sparse = new map<EI, E>();
     }
-    {
-        var (existing, ok) = d.get(id); if (ok) {
-            return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, (data).OrTypedNilOf(), id, (data).OrTypedNilOf(), (existing).OrTypedNilOf());
-        }
+    var (existing, ok) = d.get(id); if (ok) {
+        return fmt.Errorf("multiple %Ts with the same ID: id=%d, new=%v, existing=%v"u8, (data).OrTypedNilOf(), id, (data).OrTypedNilOf(), (existing).OrTypedNilOf());
     }
     d.sparse[id] = data;
     return default;
@@ -181,10 +177,8 @@ internal static (E, bool) get<EI, E>(this ref dataTable<EI, E> d, EI id)
             return (d.dense[(nint)(ConvertToUInt64<EI>(id))], true);
         }
     } else if (d.sparse != nil) {
-        {
-            var (data, ok) = d.sparse[id, ꟷ]; if (ok) {
-                return (data, true);
-            }
+        var (data, ok) = d.sparse[id, ꟷ]; if (ok) {
+            return (data, true);
         }
     }
     return (@new<E>().ValueSlot, false);

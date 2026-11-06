@@ -162,15 +162,13 @@ internal static @string htmlReplacer(@string s, slice<@string> replacementTable,
         // width will not be utf8.Runelen(r) and we will overrun the buffer.
         (r, w) = utf8.DecodeRuneInString(s.slice(i));
         if ((nint)r < len(replacementTable)) {
-            {
-                @string repl = replacementTable[r]; if (len(repl) != 0) {
-                    if (written == 0) {
-                        b.Grow(len(s));
-                    }
-                    b.WriteString(s.slice(written, i));
-                    b.WriteString(repl);
-                    written = i + w;
+            @string repl = replacementTable[r]; if (len(repl) != 0) {
+                if (written == 0) {
+                    b.Grow(len(s));
                 }
+                b.WriteString(s.slice(written, i));
+                b.WriteString(repl);
+                written = i + w;
             }
         } else if (badRunes) {
             // No-op.
@@ -263,11 +261,9 @@ internal static @string htmlNameFilter(params ꓸꓸꓸany argsʗp) {
         return filterFailsafe;
     }
     s = strings.ToLower(s);
-    {
-        var tΔ1 = attrType(s); if (tΔ1 != contentTypePlain) {
-            // TODO: Split attr and element name part filters so we can recognize known attributes.
-            return filterFailsafe;
-        }
+    var tΔ1 = attrType(s); if (tΔ1 != contentTypePlain) {
+        // TODO: Split attr and element name part filters so we can recognize known attributes.
+        return filterFailsafe;
     }
     foreach (var (_, r) in s) {
         switch (ᐧ) {

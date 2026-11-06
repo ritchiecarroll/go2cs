@@ -18,10 +18,8 @@ internal static void directCycles(this ж<Checker> Ꮡcheck) {
 
     var pathIdx = new map<ж<TypeName>, nint>();
     foreach (var (_, obj) in check.objList) {
-        {
-            var (tname, ok) = obj._<ж<TypeName>>(ᐧ); if (ok) {
-                Ꮡcheck.directCycle(tname, pathIdx);
-            }
+        var (tname, ok) = obj._<ж<TypeName>>(ᐧ); if (ok) {
+            Ꮡcheck.directCycle(tname, pathIdx);
         }
     }
 }
@@ -135,12 +133,10 @@ internal static bool finiteSize(this ж<Checker> Ꮡcheck, ΔType t) {
                 return tΔ1.finite;
             }
 
-            {
-                var (i, ok) = check.objPathIdx[new TypeNameжObject(tΔ1.obj), ꟷ]; if (ok) {
-                    var cycle = check.objPath.slice(i);
-                    Ꮡcheck.cycleError(cycle, firstInSrc(cycle));
-                    return false;
-                }
+            var (i, ok) = check.objPathIdx[new TypeNameжObject(tΔ1.obj), ꟷ]; if (ok) {
+                var cycle = check.objPath.slice(i);
+                Ꮡcheck.cycleError(cycle, firstInSrc(cycle));
+                return false;
             }
             check.push(new TypeNameжObject(tΔ1.obj));
             defer(Ꮡcheck.pop, ref ᒐ);

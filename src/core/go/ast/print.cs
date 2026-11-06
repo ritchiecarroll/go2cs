@@ -55,10 +55,8 @@ internal static error /*err*/ fprint(io.Writer w, ж<token.FileSet> fset, any x,
 
         // install error handler
         defer(() => {
-            {
-                var e = recover(); if (e != nil) {
-                    err = e._<localError>().err; // re-panics if it's not a localError
-                }
+            var e = recover(); if (e != nil) {
+                err = e._<localError>().err; // re-panics if it's not a localError
             }
         }, ref ᒐ);
 
@@ -138,10 +136,8 @@ partial struct localError {
 internal static void printf(this ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
-    {
-        var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
-            throw panic(new localError(err));
-        }
+    var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
+        throw panic(new localError(err));
     }
 }
 
@@ -188,13 +184,11 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         // to keep track of objects that have been printed
         // already and print the respective line number instead
         var ptr = x.Interface();
-        {
-            var (line, exists) = p.ptrmap[ptr, ꟷ]; if (exists) {
-                Ꮡp.printf("(obj @ %d)", line);
-            } else {
-                p.ptrmap[ptr] = p.line;
-                Ꮡp.print(x.Elem());
-            }
+        var (line, exists) = p.ptrmap[ptr, ꟷ]; if (exists) {
+            Ꮡp.printf("(obj @ %d)", line);
+        } else {
+            p.ptrmap[ptr] = p.line;
+            Ꮡp.print(x.Elem());
         }
         break;
     }
@@ -214,11 +208,9 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         break;
     }
     case var ᴛ when ᴛ == reflect.ΔSlice: {
-        {
-            var (s, ok) = x.Interface()._<slice<byte>>(ᐧ); if (ok) {
-                Ꮡp.printf("%#q", s);
-                return;
-            }
+        var (s, ok) = x.Interface()._<slice<byte>>(ᐧ); if (ok) {
+            Ꮡp.printf("%#q", s);
+            return;
         }
         Ꮡp.printf("%s (len = %d) {", x.Type(), x.Len());
         if (x.Len() > 0) {
@@ -242,18 +234,16 @@ internal static void print(this ж<printer> Ꮡp, reflectꓸValue x) {
         for ((nint i, nint n) = (0, t.NumField()); i < n; i++) {
             // exclude non-exported fields because their
             // values cannot be accessed via reflection
-            {
-                @string name = t.Field(i).Name; if (IsExported(name)) {
-                    var value = x.Field(i);
-                    if (p.filter == nil || p.filter(name, value)) {
-                        if (first) {
-                            Ꮡp.printf("\n");
-                            first = false;
-                        }
-                        Ꮡp.printf("%s: ", name);
-                        Ꮡp.print(value);
+            @string name = t.Field(i).Name; if (IsExported(name)) {
+                var value = x.Field(i);
+                if (p.filter == nil || p.filter(name, value)) {
+                    if (first) {
                         Ꮡp.printf("\n");
+                        first = false;
                     }
+                    Ꮡp.printf("%s: ", name);
+                    Ꮡp.print(value);
+                    Ꮡp.printf("\n");
                 }
             }
         }

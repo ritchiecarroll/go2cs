@@ -299,10 +299,8 @@ internal static void nextBlock(this ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     while (f.nb < 1 + 2) {
-        {
-            f.err = f.moreBits(); if (f.err != nil) {
-                return;
-            }
+        f.err = f.moreBits(); if (f.err != nil) {
+            return;
         }
     }
     f.final = (f.b & 1) == 1;
@@ -324,10 +322,8 @@ internal static void nextBlock(this ж<decompressor> Ꮡf) {
     }
     case 2: {
         // compressed, dynamic Huffman tables
-        {
-            f.err = Ꮡf.readHuffman(); if (f.err != nil) {
-                break;
-            }
+        f.err = Ꮡf.readHuffman(); if (f.err != nil) {
+            break;
         }
         f.hl = Ꮡf.Ꮡh1;
         f.hd = Ꮡf.Ꮡh2;
@@ -383,10 +379,8 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
 
     // HLIT[5], HDIST[5], HCLEN[4].
     while (f.nb < 5 + 5 + 4) {
-        {
-            var err = f.moreBits(); if (err != nil) {
-                return err;
-            }
+        var err = f.moreBits(); if (err != nil) {
+            return err;
         }
     }
     nint nlit = (nint)(f.b & 0x1F) + 257;
@@ -407,10 +401,8 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
     // (HCLEN+4)*3 bits: code lengths in the magic codeOrder order.
     for (nint i = 0; i < nclen; i++) {
         while (f.nb < 3) {
-            {
-                var err = f.moreBits(); if (err != nil) {
-                    return err;
-                }
+            var err = f.moreBits(); if (err != nil) {
+                return err;
             }
         }
         f.codebits.Value[codeOrder[i]] = (nint)(f.b & 0x7);
@@ -467,10 +459,8 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             break;
         }}
         while (f.nb < nb) {
-            {
-                var errΔ1 = f.moreBits(); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var errΔ1 = f.moreBits(); if (errΔ1 != nil) {
+                return errΔ1;
             }
         }
         rep += (nint)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1));
@@ -586,11 +576,9 @@ readLiteral:
         }}
         if (n > 0) {
             while (f.nb < n) {
-                {
-                    err = f.moreBits(); if (err != nil) {
-                        f.err = err;
-                        return;
-                    }
+                err = f.moreBits(); if (err != nil) {
+                    f.err = err;
+                    return;
                 }
             }
             length += (nint)(f.b & (uint32)(((uint32)1).Lsh(n) - 1));
@@ -601,22 +589,18 @@ readLiteral:
         nint dist = default;
         if (f.hd == nil) {
             while (f.nb < 5) {
-                {
-                    err = f.moreBits(); if (err != nil) {
-                        f.err = err;
-                        return;
-                    }
+                err = f.moreBits(); if (err != nil) {
+                    f.err = err;
+                    return;
                 }
             }
             dist = (nint)bits.Reverse8((uint8)((f.b & 0x1F) << 3));
             f.b >>= 5;
             f.nb -= 5;
         } else {
-            {
-                (dist, err) = f.huffSym(f.hd); if (err != nil) {
-                    f.err = err;
-                    return;
-                }
+            (dist, err) = f.huffSym(f.hd); if (err != nil) {
+                f.err = err;
+                return;
             }
         }
 
@@ -630,11 +614,9 @@ readLiteral:
             // have 1 bit in bottom of dist, need nb more.
             nint extra = (dist & 1).Lsh(nb);
             while (f.nb < nb) {
-                {
-                    err = f.moreBits(); if (err != nil) {
-                        f.err = err;
-                        return;
-                    }
+                err = f.moreBits(); if (err != nil) {
+                    f.err = err;
+                    return;
                 }
             }
             extra |= (nint)((nint)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
@@ -809,12 +791,10 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
 }
 
 internal static void makeReader(this ref decompressor f, io.Reader r) {
-    {
-        var (rr, ok) = r._<Reader>(ᐧ); if (ok) {
-            f.rBuf = default;
-            f.r = rr;
-            return;
-        }
+    var (rr, ok) = r._<Reader>(ᐧ); if (ok) {
+        f.rBuf = default;
+        f.r = rr;
+        return;
     }
     // Reuse rBuf if possible. Invariant: rBuf is always created (and owned) by decompressor.
     if (f.rBuf != nil) {

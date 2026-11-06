@@ -191,209 +191,201 @@ internal static (any, error) parseCorpusValue(slice<byte> line) {
     }
     var arg = call.Args[0];
 
-    {
-        var (arrayType, okΔ1) = call.Fun._<ж<ast.ArrayType>>(ᐧ); if (okΔ1) {
-            if (arrayType.Len != nil) {
-                return (default, fmt.Errorf("expected []byte or primitive type"u8));
-            }
-            var (elt, okΔ2) = arrayType.Elt._<ж<ast.Ident>>(ᐧ);
-            if (!okΔ2 || elt.Name != "byte"u8) {
-                return (default, fmt.Errorf("expected []byte"u8));
-            }
-            (var lit, okΔ2) = arg._<ж<ast.BasicLit>>(ᐧ);
-            if (!okΔ2 || lit.Kind != token.STRING) {
-                return (default, fmt.Errorf("string literal required for type []byte"u8));
-            }
-            var (s, errΔ1) = strconv.Unquote((~lit).Value);
-            if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
-            return (slice<byte>(s), default);
+    var (arrayType, okΔ1) = call.Fun._<ж<ast.ArrayType>>(ᐧ); if (okΔ1) {
+        if (arrayType.Len != nil) {
+            return (default, fmt.Errorf("expected []byte or primitive type"u8));
         }
+        var (elt, okΔ2) = arrayType.Elt._<ж<ast.Ident>>(ᐧ);
+        if (!okΔ2 || elt.Name != "byte"u8) {
+            return (default, fmt.Errorf("expected []byte"u8));
+        }
+        (var lit, okΔ2) = arg._<ж<ast.BasicLit>>(ᐧ);
+        if (!okΔ2 || lit.Kind != token.STRING) {
+            return (default, fmt.Errorf("string literal required for type []byte"u8));
+        }
+        var (s, errΔ1) = strconv.Unquote((~lit).Value);
+        if (errΔ1 != nil) {
+            return (default, errΔ1);
+        }
+        return (slice<byte>(s), default);
     }
 
     ж<ast.Ident> idType = default;
-    {
-        var (selector, okΔ3) = call.Fun._<ж<ast.SelectorExpr>>(ᐧ); if (okΔ3) {
-            var (xIdent, okΔ4) = selector.X._<ж<ast.Ident>>(ᐧ);
-            if (!okΔ4 || xIdent.Name != "math"u8) {
-                return (default, fmt.Errorf("invalid selector type"u8));
+    var (selector, okΔ3) = call.Fun._<ж<ast.SelectorExpr>>(ᐧ); if (okΔ3) {
+        var (xIdent, okΔ4) = selector.X._<ж<ast.Ident>>(ᐧ);
+        if (!okΔ4 || xIdent.Name != "math"u8) {
+            return (default, fmt.Errorf("invalid selector type"u8));
+        }
+        var exprᴛ1 = selector.Sel.Name;
+        switch (ᐧ) {
+        case {} when exprᴛ1 == "Float64frombits"u8: {
+            idType = Ꮡ(new ast.Ident(Name: "float64-bits"));
+            break;
+        }
+        case {} when exprᴛ1 == "Float32frombits"u8: {
+            idType = Ꮡ(new ast.Ident(Name: "float32-bits"));
+            break;
+        }
+        default: {
+            return (default, fmt.Errorf("invalid selector type"u8));
+        }}
+    } else {
+        (idType, okΔ3) = call.Fun._<ж<ast.Ident>>(ᐧ);
+        if (!okΔ3) {
+            return (default, fmt.Errorf("expected []byte or primitive type"u8));
+        }
+        if (idType.Name == "bool"u8) {
+            var (id, okΔ5) = arg._<ж<ast.Ident>>(ᐧ);
+            if (!okΔ5) {
+                return (default, fmt.Errorf("malformed bool"u8));
             }
-            var exprᴛ1 = selector.Sel.Name;
-            switch (ᐧ) {
-            case {} when exprᴛ1 == "Float64frombits"u8: {
-                idType = Ꮡ(new ast.Ident(Name: "float64-bits"));
-                break;
-            }
-            case {} when exprᴛ1 == "Float32frombits"u8: {
-                idType = Ꮡ(new ast.Ident(Name: "float32-bits"));
-                break;
-            }
-            default: {
-                return (default, fmt.Errorf("invalid selector type"u8));
-            }}
-        } else {
-            (idType, okΔ3) = call.Fun._<ж<ast.Ident>>(ᐧ);
-            if (!okΔ3) {
-                return (default, fmt.Errorf("expected []byte or primitive type"u8));
-            }
-            if (idType.Name == "bool"u8) {
-                var (id, okΔ5) = arg._<ж<ast.Ident>>(ᐧ);
-                if (!okΔ5) {
-                    return (default, fmt.Errorf("malformed bool"u8));
-                }
-                if (id.Name == "true"u8) {
-                    return (true, default);
-                } else if (id.Name == "false"u8) {
-                    return (false, default);
-                } else {
-                    return (default, fmt.Errorf("true or false required for type bool"u8));
-                }
+            if (id.Name == "true"u8) {
+                return (true, default);
+            } else if (id.Name == "false"u8) {
+                return (false, default);
+            } else {
+                return (default, fmt.Errorf("true or false required for type bool"u8));
             }
         }
     }
 
     @string val = default;
     token.Token kind = default;
-    {
-        var (op, okΔ6) = arg._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ6) {
-            switch (op.X.type()) {
-            case ж<ast.BasicLit> lit: {
-                if (op.Op != token.SUB) {
-                    return (default, fmt.Errorf("unsupported operation on int/float: %v"u8, op.Op));
-                }
-                // Special case for negative numbers.
-                val = op.Op.String() + (~lit).Value; // e.g. "-" + "124"
-                kind = lit.Kind;
-                break;
+    var (op, okΔ6) = arg._<ж<ast.UnaryExpr>>(ᐧ); if (okΔ6) {
+        switch (op.X.type()) {
+        case ж<ast.BasicLit> lit: {
+            if (op.Op != token.SUB) {
+                return (default, fmt.Errorf("unsupported operation on int/float: %v"u8, op.Op));
             }
-            case ж<ast.Ident> lit: {
-                if (lit.Name != "Inf"u8) {
-                    return (default, fmt.Errorf("expected operation on int or float type"u8));
-                }
-                if (op.Op == token.SUB) {
-                    val = infˢ;
-                } else {
-                    val = infˢ2;
-                }
-                kind = token.FLOAT;
-                break;
-            }
-            default: {
-                var lit = op.X;
+            // Special case for negative numbers.
+            val = op.Op.String() + (~lit).Value; // e.g. "-" + "124"
+            kind = lit.Kind;
+            break;
+        }
+        case ж<ast.Ident> lit: {
+            if (lit.Name != "Inf"u8) {
                 return (default, fmt.Errorf("expected operation on int or float type"u8));
-            }}
-        } else {
-            switch (arg.type()) {
-            case ж<ast.BasicLit> lit: {
-                (val, kind) = (lit.Value.Value, lit.Kind);
-                break;
             }
-            case ж<ast.Ident> lit: {
-                if (lit.Name != "NaN"u8) {
-                    return (default, fmt.Errorf("literal value required for primitive type"u8));
-                }
-                (val, kind) = (naNˢ, token.FLOAT);
-                break;
+            if (op.Op == token.SUB) {
+                val = infˢ;
+            } else {
+                val = infˢ2;
             }
-            default: {
-                var lit = arg;
-                return (default, fmt.Errorf("literal value required for primitive type"u8));
-            }}
-        }
-    }
-
-    {
-        @string typ = idType.Name;
-        var exprᴛ2 = typ;
-        switch (ᐧ) {
-        case {} when exprᴛ2 == "string"u8: {
-            if (kind != token.STRING) {
-                return (default, fmt.Errorf("string literal value required for type string"u8));
-            }
-            var (ᴛ1, ᴛ2) = strconv.Unquote(val);
-            return (ᴛ1, ᴛ2);
-        }
-        case {} when exprᴛ2 == "byte"u8 || exprᴛ2 == "rune"u8: {
-            if (kind == token.INT) {
-                var exprᴛ3 = typ;
-                switch (ᐧ) {
-                case {} when exprᴛ3 == "rune"u8: {
-                    return parseInt(val, typ);
-                }
-                case {} when exprᴛ3 == "byte"u8: {
-                    return parseUint(val, typ);
-                }}
-            }
-            if (kind != token.CHAR) {
-                return (default, fmt.Errorf("character literal required for byte/rune types"u8));
-            }
-            nint n = len(val);
-            if (n < 2) {
-                return (default, fmt.Errorf("malformed character literal, missing single quotes"u8));
-            }
-            var (code, _, _, errΔ3) = strconv.UnquoteChar(val.slice(1, n - 1), (byte)'\'');
-            if (errΔ3 != nil) {
-                return (default, errΔ3);
-            }
-            if (typ == "rune"u8) {
-                return (code, default);
-            }
-            if (code >= 256) {
-                return (default, fmt.Errorf("can only encode single byte to a byte type"u8));
-            }
-            return ((byte)code, default);
-        }
-        case {} when exprᴛ2 == "int"u8 || exprᴛ2 == "int8"u8 || exprᴛ2 == "int16"u8 || exprᴛ2 == "int32"u8 || exprᴛ2 == "int64"u8: {
-            if (kind != token.INT) {
-                return (default, fmt.Errorf("integer literal required for int types"u8));
-            }
-            return parseInt(val, typ);
-        }
-        case {} when exprᴛ2 == "uint"u8 || exprᴛ2 == "uint8"u8 || exprᴛ2 == "uint16"u8 || exprᴛ2 == "uint32"u8 || exprᴛ2 == "uint64"u8: {
-            if (kind != token.INT) {
-                return (default, fmt.Errorf("integer literal required for uint types"u8));
-            }
-            return parseUint(val, typ);
-        }
-        case {} when exprᴛ2 == "float32"u8: {
-            if (kind != token.FLOAT && kind != token.INT) {
-                return (default, fmt.Errorf("float or integer literal required for float32 type"u8));
-            }
-            var (v, errΔ4) = strconv.ParseFloat(val, 32);
-            return ((float32)v, errΔ4);
-        }
-        case {} when exprᴛ2 == "float64"u8: {
-            if (kind != token.FLOAT && kind != token.INT) {
-                return (default, fmt.Errorf("float or integer literal required for float64 type"u8));
-            }
-            var (ᴛ1, ᴛ2) = strconv.ParseFloat(val, 64);
-            return (ᴛ1, ᴛ2);
-        }
-        case {} when exprᴛ2 == "float32-bits"u8: {
-            if (kind != token.INT) {
-                return (default, fmt.Errorf("integer literal required for math.Float32frombits type"u8));
-            }
-            var (bits, errΔ5) = parseUint(val, uint32ˢ);
-            if (errΔ5 != nil) {
-                return (default, errΔ5);
-            }
-            return (math.Float32frombits(bits._<uint32>()), default);
-        }
-        case {} when exprᴛ2 == "float64-bits"u8: {
-            if (kind != token.FLOAT && kind != token.INT) {
-                return (default, fmt.Errorf("integer literal required for math.Float64frombits type"u8));
-            }
-            var (bits, errΔ6) = parseUint(val, uint64ˢ);
-            if (errΔ6 != nil) {
-                return (default, errΔ6);
-            }
-            return (math.Float64frombits(bits._<uint64>()), default);
+            kind = token.FLOAT;
+            break;
         }
         default: {
-            return (default, fmt.Errorf("expected []byte or primitive type"u8));
+            var lit = op.X;
+            return (default, fmt.Errorf("expected operation on int or float type"u8));
+        }}
+    } else {
+        switch (arg.type()) {
+        case ж<ast.BasicLit> lit: {
+            (val, kind) = (lit.Value.Value, lit.Kind);
+            break;
+        }
+        case ж<ast.Ident> lit: {
+            if (lit.Name != "NaN"u8) {
+                return (default, fmt.Errorf("literal value required for primitive type"u8));
+            }
+            (val, kind) = (naNˢ, token.FLOAT);
+            break;
+        }
+        default: {
+            var lit = arg;
+            return (default, fmt.Errorf("literal value required for primitive type"u8));
         }}
     }
+
+    @string typ = idType.Name;
+    var exprᴛ2 = typ;
+    switch (ᐧ) {
+    case {} when exprᴛ2 == "string"u8: {
+        if (kind != token.STRING) {
+            return (default, fmt.Errorf("string literal value required for type string"u8));
+        }
+        var (ᴛ1, ᴛ2) = strconv.Unquote(val);
+        return (ᴛ1, ᴛ2);
+    }
+    case {} when exprᴛ2 == "byte"u8 || exprᴛ2 == "rune"u8: {
+        if (kind == token.INT) {
+            var exprᴛ3 = typ;
+            switch (ᐧ) {
+            case {} when exprᴛ3 == "rune"u8: {
+                return parseInt(val, typ);
+            }
+            case {} when exprᴛ3 == "byte"u8: {
+                return parseUint(val, typ);
+            }}
+        }
+        if (kind != token.CHAR) {
+            return (default, fmt.Errorf("character literal required for byte/rune types"u8));
+        }
+        nint n = len(val);
+        if (n < 2) {
+            return (default, fmt.Errorf("malformed character literal, missing single quotes"u8));
+        }
+        var (code, _, _, errΔ3) = strconv.UnquoteChar(val.slice(1, n - 1), (byte)'\'');
+        if (errΔ3 != nil) {
+            return (default, errΔ3);
+        }
+        if (typ == "rune"u8) {
+            return (code, default);
+        }
+        if (code >= 256) {
+            return (default, fmt.Errorf("can only encode single byte to a byte type"u8));
+        }
+        return ((byte)code, default);
+    }
+    case {} when exprᴛ2 == "int"u8 || exprᴛ2 == "int8"u8 || exprᴛ2 == "int16"u8 || exprᴛ2 == "int32"u8 || exprᴛ2 == "int64"u8: {
+        if (kind != token.INT) {
+            return (default, fmt.Errorf("integer literal required for int types"u8));
+        }
+        return parseInt(val, typ);
+    }
+    case {} when exprᴛ2 == "uint"u8 || exprᴛ2 == "uint8"u8 || exprᴛ2 == "uint16"u8 || exprᴛ2 == "uint32"u8 || exprᴛ2 == "uint64"u8: {
+        if (kind != token.INT) {
+            return (default, fmt.Errorf("integer literal required for uint types"u8));
+        }
+        return parseUint(val, typ);
+    }
+    case {} when exprᴛ2 == "float32"u8: {
+        if (kind != token.FLOAT && kind != token.INT) {
+            return (default, fmt.Errorf("float or integer literal required for float32 type"u8));
+        }
+        var (v, errΔ4) = strconv.ParseFloat(val, 32);
+        return ((float32)v, errΔ4);
+    }
+    case {} when exprᴛ2 == "float64"u8: {
+        if (kind != token.FLOAT && kind != token.INT) {
+            return (default, fmt.Errorf("float or integer literal required for float64 type"u8));
+        }
+        var (ᴛ1, ᴛ2) = strconv.ParseFloat(val, 64);
+        return (ᴛ1, ᴛ2);
+    }
+    case {} when exprᴛ2 == "float32-bits"u8: {
+        if (kind != token.INT) {
+            return (default, fmt.Errorf("integer literal required for math.Float32frombits type"u8));
+        }
+        var (bits, errΔ5) = parseUint(val, uint32ˢ);
+        if (errΔ5 != nil) {
+            return (default, errΔ5);
+        }
+        return (math.Float32frombits(bits._<uint32>()), default);
+    }
+    case {} when exprᴛ2 == "float64-bits"u8: {
+        if (kind != token.FLOAT && kind != token.INT) {
+            return (default, fmt.Errorf("integer literal required for math.Float64frombits type"u8));
+        }
+        var (bits, errΔ6) = parseUint(val, uint64ˢ);
+        if (errΔ6 != nil) {
+            return (default, errΔ6);
+        }
+        return (math.Float64frombits(bits._<uint64>()), default);
+    }
+    default: {
+        return (default, fmt.Errorf("expected []byte or primitive type"u8));
+    }}
 }
 
 // parseInt returns an integer of value val and type typ.

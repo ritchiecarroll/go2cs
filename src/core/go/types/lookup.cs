@@ -110,16 +110,12 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     // not have found it for T (see also go.dev/issue/8590).
     {
         var t = asNamed(T); if (t != nil) {
-            {
-                var (p, _) = t.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
-                    (obj, index, indirect) = lookupFieldOrMethodImpl(new PointerжΔType(p), false, pkg, name, foldCase);
-                    {
-                        var (_, ok) = obj._<ж<Func>>(ᐧ); if (ok) {
-                            return (default, default, false);
-                        }
-                    }
-                    return (obj, index, indirect);
+            var (p, _) = t.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
+                (obj, index, indirect) = lookupFieldOrMethodImpl(new PointerжΔType(p), false, pkg, name, foldCase);
+                var (_, ok) = obj._<ж<Func>>(ᐧ); if (ok) {
+                    return (default, default, false);
                 }
+                return (obj, index, indirect);
             }
         }
     }
@@ -132,14 +128,10 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     // we are ok here because only fields are accepted as results.
     const bool enableTParamFieldLookup = false; // see go.dev/issue/51576
     if (enableTParamFieldLookup && obj == nil && isTypeParam(T)) {
-        {
-            var (t, _) = commonUnder(T, default); if (t != nil) {
-                (obj, index, indirect) = lookupFieldOrMethodImpl(t, addressable, pkg, name, foldCase);
-                {
-                    var (_, ok) = obj._<ж<Var>>(ᐧ); if (!ok) {
-                        (obj, index, indirect) = (default, default, false); // accept fields (variables) only
-                    }
-                }
+        var (t, _) = commonUnder(T, default); if (t != nil) {
+            (obj, index, indirect) = lookupFieldOrMethodImpl(t, addressable, pkg, name, foldCase);
+            var (_, ok) = obj._<ж<Var>>(ᐧ); if (!ok) {
+                (obj, index, indirect) = (default, default, false); // accept fields (variables) only
             }
         }
     }
@@ -178,10 +170,8 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
 
     // *typ where typ is an interface (incl. a type parameter) has no methods.
     if (isPtr) {
-        {
-            var (_, ok) = typ.Underlying()._<ж<Interface>>(ᐧ); if (ok) {
-                return (obj, index, indirect);
-            }
+        var (_, ok) = typ.Underlying()._<ж<Interface>>(ᐧ); if (ok) {
+            return (obj, index, indirect);
         }
     }
 
@@ -205,34 +195,28 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
 
             // If we have a named type, we may have associated methods.
             // Look for those first.
-            {
-                var named = asNamed(typΔ1); if (named != nil) {
-                    {
-                        var alt = seen.lookup(named); if (alt != nil) {
-                            // We have seen this type before, at a more shallow depth
-                            // (note that multiples of this type at the current depth
-                            // were consolidated before). The type at that depth shadows
-                            // this same type at the current depth, so we can ignore
-                            // this one.
-                            continue;
-                        }
-                    }
-                    seen.add(named);
+            var named = asNamed(typΔ1); if (named != nil) {
+                var alt = seen.lookup(named); if (alt != nil) {
+                    // We have seen this type before, at a more shallow depth
+                    // (note that multiples of this type at the current depth
+                    // were consolidated before). The type at that depth shadows
+                    // this same type at the current depth, so we can ignore
+                    // this one.
+                    continue;
+                }
+                seen.add(named);
 
-                    // look for a matching attached method
-                    {
-                        var (i, m) = named.lookupMethod(pkg, name, foldCase); if (m != nil) {
-                            // potential match
-                            // caution: method may not have a proper signature yet
-                            index = concat(e.index, i);
-                            if (obj != nil || e.multiples) {
-                                return (default, index, false); // collision
-                            }
-                            obj = new FuncжObject(m);
-                            indirect = e.indirect;
-                            continue; // we can't have a matching field or interface method
-                        }
+                // look for a matching attached method
+                var (i, m) = named.lookupMethod(pkg, name, foldCase); if (m != nil) {
+                    // potential match
+                    // caution: method may not have a proper signature yet
+                    index = concat(e.index, i);
+                    if (obj != nil || e.multiples) {
+                        return (default, index, false); // collision
                     }
+                    obj = new FuncжObject(m);
+                    indirect = e.indirect;
+                    continue; // we can't have a matching field or interface method
                 }
             }
 
@@ -292,12 +276,10 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
             //        contains m and the argument list can be assigned to the parameter
             //        list of m. If x is addressable and &x's method set contains m, x.m()
             //        is shorthand for (&x).m()".
-            {
-                var (f, _) = obj._<ж<Func>>(ᐧ); if (f != nil) {
-                    // determine if method has a pointer receiver
-                    if (f.hasPtrRecv() && !indirect && !addressable) {
-                        return (default, default, true); // pointer/addressable receiver required
-                    }
+            var (f, _) = obj._<ж<Func>>(ᐧ); if (f != nil) {
+                // determine if method has a pointer receiver
+                if (f.hasPtrRecv() && !indirect && !addressable) {
+                    return (default, default, true); // pointer/addressable receiver required
                 }
             }
             return (obj, index, indirect);
@@ -328,15 +310,13 @@ internal static slice<embeddedType> consolidateMultiples(slice<embeddedType> lis
     nint n = 0;                        // number of entries w/ unique type
     var prev = new map<ΔType, nint>(); // index at which type was previously seen
     foreach (var (_, e) in list) {
-        {
-            var (i, found) = lookupType(prev, e.typ); if (found) {
-                list[i].multiples = true;
-                // ignore this entry
-            } else {
-                prev[e.typ] = n;
-                list[n] = e;
-                n++;
-            }
+        var (i, found) = lookupType(prev, e.typ); if (found) {
+            list[i].multiples = true;
+            // ignore this entry
+        } else {
+            prev[e.typ] = n;
+            list[n] = e;
+            n++;
         }
     }
     return list.slice(0, n);
@@ -437,77 +417,75 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
     ж<Func> m = default; // method on T we're trying to implement
     ж<Func> f = default; // method on V, if found (state is one of ok, wrongName, wrongSig)
 
-    {
-        var (u, _) = V.Underlying()._<ж<Interface>>(ᐧ); if (u != nil) {
-            var tset = u.typeSet();
-            foreach (var (_, vᴛ1) in methods) {
-                m = vᴛ1;
+    var (u, _) = V.Underlying()._<ж<Interface>>(ᐧ); if (u != nil) {
+        var tset = u.typeSet();
+        foreach (var (_, vᴛ1) in methods) {
+            m = vᴛ1;
 
-                (_, f) = tset.LookupMethod(m.pkg, m.name, false);
+            (_, f) = tset.LookupMethod(m.pkg, m.name, false);
 
-                if (f == nil) {
-                    if (!@static) {
-                        continue;
-                    }
-                    state = notFound;
-                    break;
+            if (f == nil) {
+                if (!@static) {
+                    continue;
                 }
-
-                if (!equivalent(f.typ, m.typ)) {
-                    state = wrongSig;
-                    break;
-                }
+                state = notFound;
+                break;
             }
-        } else {
-            foreach (var (_, vᴛ2) in methods) {
-                m = vᴛ2;
 
-                var (obj, index, indirect) = lookupFieldOrMethodImpl(V, false, m.pkg, m.name, false);
+            if (!equivalent(f.typ, m.typ)) {
+                state = wrongSig;
+                break;
+            }
+        }
+    } else {
+        foreach (var (_, vᴛ2) in methods) {
+            m = vᴛ2;
 
-                // check if m is ambiguous, on *V, or on V with case-folding
-                if (obj == nil) {
-                    switch (ᐧ) {
-                    case {} when index != nil: {
-                        state = ambigSel;
-                        break;
-                    }
-                    case {} when indirect: {
-                        state = ptrRecv;
-                        break;
-                    }
-                    default: {
-                        state = notFound;
-                        (obj, _, _) = lookupFieldOrMethodImpl(V, false, m.pkg, m.name, true /* fold case */);
-                        (f, _) = obj._<ж<Func>>(ᐧ);
-                        if (f != nil) {
-                            state = wrongName;
-                            if (f.name == m.name) {
-                                // If the names are equal, f must be unexported
-                                // (otherwise the package wouldn't matter).
-                                state = unexported;
-                            }
+            var (obj, index, indirect) = lookupFieldOrMethodImpl(V, false, m.pkg, m.name, false);
+
+            // check if m is ambiguous, on *V, or on V with case-folding
+            if (obj == nil) {
+                switch (ᐧ) {
+                case {} when index != nil: {
+                    state = ambigSel;
+                    break;
+                }
+                case {} when indirect: {
+                    state = ptrRecv;
+                    break;
+                }
+                default: {
+                    state = notFound;
+                    (obj, _, _) = lookupFieldOrMethodImpl(V, false, m.pkg, m.name, true /* fold case */);
+                    (f, _) = obj._<ж<Func>>(ᐧ);
+                    if (f != nil) {
+                        state = wrongName;
+                        if (f.name == m.name) {
+                            // If the names are equal, f must be unexported
+                            // (otherwise the package wouldn't matter).
+                            state = unexported;
                         }
-                        break;
-                    }}
+                    }
                     break;
-                }
+                }}
+                break;
+            }
 
-                // we must have a method (not a struct field)
-                (f, _) = obj._<ж<Func>>(ᐧ);
-                if (f == nil) {
-                    state = field;
-                    break;
-                }
+            // we must have a method (not a struct field)
+            (f, _) = obj._<ж<Func>>(ᐧ);
+            if (f == nil) {
+                state = field;
+                break;
+            }
 
-                // methods may not have a fully set up signature yet
-                if (Ꮡcheck != nil) {
-                    Ꮡcheck.objDecl(new FuncжObject(f));
-                }
+            // methods may not have a fully set up signature yet
+            if (Ꮡcheck != nil) {
+                Ꮡcheck.objDecl(new FuncжObject(f));
+            }
 
-                if (!equivalent(f.typ, m.typ)) {
-                    state = wrongSig;
-                    break;
-                }
+            if (!equivalent(f.typ, m.typ)) {
+                state = wrongSig;
+                break;
             }
         }
     }
@@ -611,16 +589,14 @@ internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, ΔType V, ΔType T
 // hasInvalidEmbeddedFields reports whether T is a struct (or a pointer to a struct) that contains
 // (directly or indirectly) embedded fields with invalid types.
 internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> seen) {
-    {
-        var (S, _) = derefStructPtr(T).Underlying()._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
-            if (seen == nil) {
-                seen = new map<ж<Struct>, bool>();
-            }
-            seen[S] = true;
-            foreach (var (_, f) in S.fields) {
-                if (f.embedded && (!isValid(f.typ) || hasInvalidEmbeddedFields(f.typ, seen))) {
-                    return true;
-                }
+    var (S, _) = derefStructPtr(T).Underlying()._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
+        if (seen == nil) {
+            seen = new map<ж<Struct>, bool>();
+        }
+        seen[S] = true;
+        foreach (var (_, f) in S.fields) {
+            if (f.embedded && (!isValid(f.typ) || hasInvalidEmbeddedFields(f.typ, seen))) {
+                return true;
             }
         }
     }
@@ -635,10 +611,8 @@ internal static bool isInterfacePtr(ΔType T) {
 // check may be nil.
 internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, ΔType T) {
     assert(isInterfacePtr(T));
-    {
-        var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ); if (isTypeParam(p.@base)) {
-            return Ꮡcheck.sprintf("type %s is pointer to type parameter, not type parameter", T);
-        }
+    var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ); if (isTypeParam(p.@base)) {
+        return Ꮡcheck.sprintf("type %s is pointer to type parameter, not type parameter", T);
     }
     return Ꮡcheck.sprintf("type %s is pointer to interface, not interface", T);
 }
@@ -696,17 +670,15 @@ internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType
 // with an underlying pointer type!) and returns its base and true.
 // Otherwise it returns (typ, false).
 internal static (ΔType, bool) deref(ΔType typ) {
-    {
-        var (p, _) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (p != nil) {
-            // p.base should never be nil, but be conservative
-            if (p.@base == nil) {
-                if (debug) {
-                    throw panic("pointer with nil base type (possibly due to an invalid cyclic declaration)");
-                }
-                return (new BasicжΔType(Typ[Invalid]), true);
+    var (p, _) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (p != nil) {
+        // p.base should never be nil, but be conservative
+        if (p.@base == nil) {
+            if (debug) {
+                throw panic("pointer with nil base type (possibly due to an invalid cyclic declaration)");
             }
-            return (p.@base, true);
+            return (new BasicжΔType(Typ[Invalid]), true);
         }
+        return (p.@base, true);
     }
     return (typ, false);
 }
@@ -714,13 +686,9 @@ internal static (ΔType, bool) deref(ΔType typ) {
 // derefStructPtr dereferences typ if it is a (named or unnamed) pointer to a
 // (named or unnamed) struct and returns its base. Otherwise it returns typ.
 internal static ΔType derefStructPtr(ΔType typ) {
-    {
-        var (p, _) = typ.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
-            {
-                var (_, ok) = p.@base.Underlying()._<ж<Struct>>(ᐧ); if (ok) {
-                    return p.@base;
-                }
-            }
+    var (p, _) = typ.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
+        var (_, ok) = p.@base.Underlying()._<ж<Struct>>(ᐧ); if (ok) {
+            return p.@base;
         }
     }
     return typ;

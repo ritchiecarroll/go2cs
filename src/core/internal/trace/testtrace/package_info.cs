@@ -73,10 +73,10 @@ using static go.@internal.trace.testtrace_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/trace/testtrace/expectation.go", "expectation.cs", "ABYukgACENKClIKUgpSokoKCgoLWgoKUgoKUtJSUpoKCgpSCgpQ=")]
-[assembly: GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSAgraCgpQ=")]
-[assembly: GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABookoKUuILulIK4uIKUgoKUgoKClIKCgpSClICCtqailIKCgpSSgIKk", "", "", "", "95:21")]
+[assembly: GoPositionMap("internal/trace/testtrace/format.go", "format.cs", "ABAikoKClIKUgpSClIKClIKCgpSCgoKUgpSCpoKClA==")]
+[assembly: GoPositionMap("internal/trace/testtrace/helpers.go", "helpers.cs", "ABookoKUuILulIK4uIKUgoKUgoKClIKCgpSClIKmpqKUgoKClJKClA==", "", "", "", "93:21")]
 [assembly: GoPositionMap("internal/trace/testtrace/platforms.go", "platforms.cs", "AA0cooKUqqLalA==")]
-[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoCC1oKAgtaCgIIAExyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgIKClAAKEKSmgoKmgoKCpoKCpoKCgpSCgpSmwsiClIKUgoKUgpSCgpSCgoKClKa0griUggAIEqKmgg==", "368-384:1")]
+[assembly: GoPositionMap("internal/trace/testtrace/validation.go", "validation.cs", "ADFgkgAJHMKs4qaCgpSmuJSUgoLugoKUgpSClIKUgoKUgpSCyrSClKaClKbWpoK4gpSUgoLGgoLGgoIAEhyCgqaCkoKUgpSClIKCgpSUgpSCpoKCgoKUgpSCppSCgoKUgpTqgpKClIKUgpSCgoKUlIKUgqaCgoKClIKUgoKCgpSClAAIDIKUgpS0gsaClOiClJSUpuqCgoKUAAkQpKaCgqaCgoKmgoKmgoKClIKClKbCyIKUgpSCgpSClIKClIKCgoKUprSCuJSCAAgSoqaC", "368-384:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;

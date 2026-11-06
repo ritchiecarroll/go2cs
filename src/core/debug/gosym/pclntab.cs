@@ -408,10 +408,8 @@ internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) {
 
 // funcName returns the name of the function found at off.
 internal static @string funcName(this ref LineTable t, uint32 off) {
-    {
-        var (sΔ1, ok) = t.funcNames[off, ꟷ]; if (ok) {
-            return sΔ1;
-        }
+    var (sΔ1, ok) = t.funcNames[off, ꟷ]; if (ok) {
+        return sΔ1;
     }
     nint i = bytes.IndexByte(t.funcnametab.slice((nint)(off)), 0);
     @string s = (@string)(t.funcnametab.slice((nint)(off), (nint)(off + (uint32)i)));
@@ -421,10 +419,8 @@ internal static @string funcName(this ref LineTable t, uint32 off) {
 
 // stringFrom returns a Go string found at off from a position.
 internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32 off) {
-    {
-        var (sΔ1, ok) = t.strings[off, ꟷ]; if (ok) {
-            return sΔ1;
-        }
+    var (sΔ1, ok) = t.strings[off, ꟷ]; if (ok) {
+        return sΔ1;
     }
     nint i = bytes.IndexByte(arr.slice((nint)(off)), 0);
     @string s = (@string)(arr.slice((nint)(off), (nint)(off + (uint32)i)));
@@ -696,10 +692,8 @@ internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc
             @file = ""u8; goto ᒐdone;
         }
         var cuoff = f.cuOffset();
-        {
-            var fnoff = t.binary.Uint32(t.cutab.slice((nint)((cuoff + (uint32)fno) * 4))); if (fnoff != ~(uint32)0) {
-                @file = t.stringFrom(t.filetab, fnoff); goto ᒐdone;
-            }
+        var fnoff = t.binary.Uint32(t.cutab.slice((nint)((cuoff + (uint32)fno) * 4))); if (fnoff != ~(uint32)0) {
+            @file = t.stringFrom(t.filetab, fnoff); goto ᒐdone;
         }
         @file = ""u8;
     }

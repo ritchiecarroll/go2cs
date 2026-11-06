@@ -165,27 +165,25 @@ internal static (nint pid, Errno err1) forkAndExecInChild(ж<byte> argv0, slice<
     }
 
     // User and groups
-    {
-        cred = sys.Credential; if (cred != nil) {
-            ngroups = (uintptr)len(cred.Groups);
-            groups = (uintptr)0;
-            if (ngroups > 0) {
-                groups = (uintptr)Ꮡ(cred.Groups, 0);
-            }
-            if (!cred.NoSetGroups) {
-                (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgroups_trampoline), ngroups, groups, 0);
-                if (err1 != 0) {
-                    goto childerror;
-                }
-            }
-            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgid_trampoline), (uintptr)cred.Gid, 0, 0);
+    cred = sys.Credential; if (cred != nil) {
+        ngroups = (uintptr)len(cred.Groups);
+        groups = (uintptr)0;
+        if (ngroups > 0) {
+            groups = (uintptr)Ꮡ(cred.Groups, 0);
+        }
+        if (!cred.NoSetGroups) {
+            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgroups_trampoline), ngroups, groups, 0);
             if (err1 != 0) {
                 goto childerror;
             }
-            (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setuid_trampoline), (uintptr)cred.Uid, 0, 0);
-            if (err1 != 0) {
-                goto childerror;
-            }
+        }
+        (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setgid_trampoline), (uintptr)cred.Gid, 0, 0);
+        if (err1 != 0) {
+            goto childerror;
+        }
+        (_, _, err1) = rawSyscall(abi.FuncPCABI0(libc_setuid_trampoline), (uintptr)cred.Uid, 0, 0);
+        if (err1 != 0) {
+            goto childerror;
         }
     }
 

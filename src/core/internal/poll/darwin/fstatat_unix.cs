@@ -14,10 +14,8 @@ public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
-        {
-            var err = Ꮡfd.incref(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡfd.incref(); if (err != nil) {
+            return err;
         }
         ᒐd1 = true;
         return ignoringEINTR(() => unix.Fstatat(Ꮡfd.Value.Sysfd, name, s, flags));

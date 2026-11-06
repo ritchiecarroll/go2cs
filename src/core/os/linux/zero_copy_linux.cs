@@ -81,10 +81,8 @@ internal static (int64 written, bool handled, error err) spliceToFile(this ж<Fi
 
     int64 remain = default;
     ж<Δio.LimitedReader> lr = default;
-    {
-        (lr, r, remain) = tryLimitedReader(r); if (remain <= 0) {
-            return (0, true, default);
-        }
+    (lr, r, remain) = tryLimitedReader(r); if (remain <= 0) {
+        return (0, true, default);
     }
 
     var (pfd, _) = getPollFDAndNetwork(r);
@@ -121,10 +119,8 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
 
     int64 remain = default;
     ж<Δio.LimitedReader> lr = default;
-    {
-        (lr, r, remain) = tryLimitedReader(r); if (remain <= 0) {
-            return (0, true, default);
-        }
+    (lr, r, remain) = tryLimitedReader(r); if (remain <= 0) {
+        return (0, true, default);
     }
 
     ж<File> src = default;

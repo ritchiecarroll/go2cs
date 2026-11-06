@@ -61,7 +61,7 @@ using static go.go.format_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("go/format/format.go", "format.cs", "ACVOAAQcAAoEkoKUtICCguqGooKClIKUlKaCgrgAAhYACAKCgoKmpqamgoKCppSmuA==")]
+[assembly: GoPositionMap("go/format/format.go", "format.cs", "ACVOAAQcAAoEkoKUtIKC2oaigoKUgpSUpoKCuAACFgAIAoKCgqampqaCgoKmlKa4")]
 [assembly: GoPositionMap("go/format/internal.go", "internal.cs", "ABouAAgOuILugoKCpoKUyoIACBKCgoKUgsqUgri4rAAFEISSgoKUypKCgpSUgsqCgoKUtLaClILKgoKCgpTKgrimgoKUqqI=", "45-50:1;69-81:2")]
 // </GoSourcePositionMaps>
 

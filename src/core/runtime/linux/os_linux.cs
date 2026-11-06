@@ -259,11 +259,9 @@ internal static void sysargs(int32 argc, ж<ж<byte>> argv) {
     // now argv+n is auxv
     var auxvp = (ж<array<uintptr>>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(argv), (uintptr)n * (uintptr)goarch.PtrSize));
 
-    {
-        nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
-            auxv = auxvp.slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
-            return;
-        }
+    nint pairsΔ1 = sysauxv(auxvp.slice()); if (pairsΔ1 != 0) {
+        auxv = auxvp.slice(0, pairsΔ1 * 2, pairsΔ1 * 2);
+        return;
     }
     // In some situations we don't get a loader-provided
     // auxv, such as when loaded as a library on Android.
@@ -763,10 +761,8 @@ internal static (kernelVersion kv, bool ok) getKernelVersion() {
     bool ok = default;
 
     ref var buf = ref heap(new linux.Utsname(), out var Ꮡbuf);
-    {
-        var e = linux.Uname(Ꮡbuf); if (e != 0) {
-            return (new kernelVersion(), false);
-        }
+    var e = linux.Uname(Ꮡbuf); if (e != 0) {
+        return (new kernelVersion(), false);
     }
     @string rel = gostringnocopy(Ꮡbuf.at(linux.Utsname.ᏑRelease, 0));
     (var major, var minor, _, ok) = parseRelease(rel);
@@ -814,15 +810,11 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
     }
 
     bool more = default;
-    {
-        (major, more, ok) = next(); if (!ok || !more) {
-            return (0, 0, 0, false);
-        }
+    (major, more, ok) = next(); if (!ok || !more) {
+        return (0, 0, 0, false);
     }
-    {
-        (minor, more, ok) = next(); if (!ok) {
-            return (0, 0, 0, false);
-        }
+    (minor, more, ok) = next(); if (!ok) {
+        return (0, 0, 0, false);
     }
     if (!more) {
         return (major, minor, 0, true);

@@ -27,10 +27,8 @@ public static error /*err*/ Errorf(sstring format, params ꓸꓸꓸany aʗp) {
 
     // This function has been split in a somewhat unnatural way
     // so that both it and the errors.New call can be inlined.
-    {
-        err = errorf(format, a.ꓸꓸꓸ); if (err != nil) {
-            return err;
-        }
+    err = errorf(format, a.ꓸꓸꓸ); if (err != nil) {
+        return err;
     }
     // No formatting was needed. We can avoid some allocations and other work.
     // See https://go.dev/cl/708836 for details.
@@ -69,10 +67,8 @@ internal static error errorf(@string format, params ꓸꓸꓸany aʗp) {
             if (i > 0 && p.wrappedErrs[i - 1] == argNum) {
                 continue;
             }
-            {
-                var (e, ok) = a[argNum]._<error>(ᐧ); if (ok) {
-                    errs = append(errs, e);
-                }
+            var (e, ok) = a[argNum]._<error>(ᐧ); if (ok) {
+                errs = append(errs, e);
             }
         }
         err = new wrapErrorsжerror(Ꮡ(new wrapErrors(s, errs)));

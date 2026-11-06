@@ -587,6 +587,7 @@ type Visitor struct {
 	deadUnsafePointerBoxes  map[*ast.CallExpr]bool        // `unsafe.Pointer(x)` conversions whose wrapper object an enclosing `uintptr(…)` reads straight back — emitted without it (see markDeadUnsafePointerBox)
 	identNames              map[*ast.Ident]string         // Local identifiers to adjusted names map
 	isReassigned            map[*ast.Ident]bool           // Local identifiers to reassignment status map
+	initScopeShapes         map[ast.Stmt]initScopeShape   // Per-func: how a head if/switch/type switch emits its init (analyzeInitScopes)
 
 	// The per-file warning entry facts (warningEntries.go): the locals the emission referenced by
 	// name, the locals it declared with a constant initializer, and the package variables it

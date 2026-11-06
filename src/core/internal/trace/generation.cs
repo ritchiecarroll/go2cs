@@ -81,10 +81,8 @@ internal static (ж<generation>, error) readGeneration(ж<bufio.Reader> r, versi
         if (g.minTs == 0 || b.time < g.minTs) {
             g.minTs = b.time;
         }
-        {
-            var errΔ1 = processBatch(g, b, ver); if (errΔ1 != nil) {
-                return (default, errΔ1);
-            }
+        var errΔ1 = processBatch(g, b, ver); if (errΔ1 != nil) {
+            return (default, errΔ1);
         }
     }
 
@@ -156,10 +154,8 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGenerationWithSpil
         // Process the spilled batch, which contains real data.
         g.gen = spill.gen;
         g.minTs = spill.batch.time;
-        {
-            var err = processBatch(g, spill.batch.Value, ver); if (err != nil) {
-                return (default, default, err);
-            }
+        var err = processBatch(g, spill.batch.Value, ver); if (err != nil) {
+            return (default, default, err);
         }
         Ꮡspill = default; spill = ref Ꮡspill.DerefOrNull();
     }
@@ -208,10 +204,8 @@ internal static (ж<generation>, ж<spilledBatch>, error) readGenerationWithSpil
         if (g.minTs == 0 || b.time < g.minTs) {
             g.minTs = b.time;
         }
-        {
-            var errΔ1 = processBatch(g, b, ver); if (errΔ1 != nil) {
-                return (default, default, errΔ1);
-            }
+        var errΔ1 = processBatch(g, b, ver); if (errΔ1 != nil) {
+            return (default, default, errΔ1);
         }
     }
 
@@ -301,10 +295,8 @@ internal static error processBatch(ж<generation> Ꮡg, batch b, version.Version
         return errors.New(internalErrorˢ3);
     }
     default: {
-        {
-            var (_, ok) = g.batches[b.m, ꟷ]; if (!ok) {
-                g.batchMs = builtin.append(g.batchMs, b.m);
-            }
+        var (_, ok) = g.batches[b.m, ꟷ]; if (!ok) {
+            g.batchMs = builtin.append(g.batchMs, b.m);
         }
         g.batches[b.m] = builtin.append(g.batches[b.m], b);
         break;
@@ -395,10 +387,8 @@ internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable
         // Add the string to the map.
         @string s = sb.String();
         sb.Reset();
-        {
-            var errΔ2 = stringTable.insert((stringID)id, s); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = stringTable.insert((stringID)id, s); if (errΔ2 != nil) {
+            return errΔ2;
         }
     }
     return default;
@@ -466,23 +456,19 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
             }
             frames = builtin.append(frames, pc);
 
-            {
-                var (_, ok) = pcs[pc, ꟷ]; if (!ok) {
-                    pcs[pc] = new frame(
-                        pc: pc,
-                        funcID: ((stringID)funcID),
-                        fileID: ((stringID)fileID),
-                        line: line
-                    );
-                }
+            var (_, ok) = pcs[pc, ꟷ]; if (!ok) {
+                pcs[pc] = new frame(
+                    pc: pc,
+                    funcID: ((stringID)funcID),
+                    fileID: ((stringID)fileID),
+                    line: line
+                );
             }
         }
 
         // Add the stack to the map.
-        {
-            var errΔ3 = stackTable.insert((stackID)id, new stack(pcs: frames)); if (errΔ3 != nil) {
-                return errΔ3;
-            }
+        var errΔ3 = stackTable.insert((stackID)id, new stack(pcs: frames)); if (errΔ3 != nil) {
+            return errΔ3;
         }
     }
     return default;

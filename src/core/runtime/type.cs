@@ -70,10 +70,8 @@ internal static @string name(this Δrtype t) {
 // method, in that it returns the package path for struct and interface
 // types, not just named types.
 internal static @string pkgpath(this Δrtype t) {
-    {
-        var u = t.uncommon(); if (u != nil) {
-            return t.nameOff(u.PkgPath).Name();
-        }
+    var u = t.uncommon(); if (u != nil) {
+        return t.nameOff(u.PkgPath).Name();
     }
     switch (t.Type.Value.Kind()) {
     case var ᴛ when ᴛ == abi.Struct: {
@@ -397,10 +395,8 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
         }
         return (ж<_type>)(uintptr)(resΔ1);
     }
-    {
-        var t = md.typemap[off]; if (t != nil) {
-            return t;
-        }
+    var t = md.typemap[off]; if (t != nil) {
+        return t;
     }
     var res = md.types + (uintptr)off;
     if (res > md.etypes) {
@@ -551,10 +547,8 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
     ref var v = ref Ꮡv.DerefOrNull();
 
     var tp = new _typePair(Ꮡt, Ꮡv);
-    {
-        var (_, ok) = seen[tp, ꟷ]; if (ok) {
-            return true;
-        }
+    var (_, ok) = seen[tp, ꟷ]; if (ok) {
+        return true;
     }
 
     // mark these types as seen, and thus equivalent which prevents an infinite loop if

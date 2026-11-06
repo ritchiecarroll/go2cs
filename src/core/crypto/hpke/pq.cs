@@ -161,26 +161,20 @@ public static (ΔPublicKey, error) NewHybridPublicKey(crypto.Encapsulator pq, ж
 
     switch (t.Curve()) {
     case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
-        {
-            var (_, ok) = pq._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default, errors.New(invalidPqKemForX25519ˢ));
-            }
+        if (!pq._<ж<mlkem.EncapsulationKey768>>(out _)) {
+            return (default, errors.New(invalidPqKemForX25519ˢ));
         }
         return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768X25519, Ꮡt, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
-        {
-            var (_, ok) = pq._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default, errors.New(invalidPqKemForP256ˢ));
-            }
+        if (!pq._<ж<mlkem.EncapsulationKey768>>(out _)) {
+            return (default, errors.New(invalidPqKemForP256ˢ));
         }
         return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem768P256, Ꮡt, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
-        {
-            var (_, ok) = pq._<ж<mlkem.EncapsulationKey1024>>(ᐧ); if (!ok) {
-                return (default, errors.New(invalidPqKemForP384ˢ));
-            }
+        if (!pq._<ж<mlkem.EncapsulationKey1024>>(out _)) {
+            return (default, errors.New(invalidPqKemForP384ˢ));
         }
         return (new hybridPublicKeyжΔPublicKey(Ꮡ(new hybridPublicKey(mlkem1024P384, Ꮡt, pq))), default);
     }
@@ -331,26 +325,20 @@ internal static (PrivateKey, error) NewPrivateKey(this ж<hybridKEM> Ꮡkem, sli
 internal static (PrivateKey, error) newHybridPrivateKey(crypto.Decapsulator pq, ecdh.KeyExchanger t, slice<byte> seed) {
     switch (t.Curve()) {
     case var ᴛ when AreEqual(ᴛ, ecdh.X25519()): {
-        {
-            var (_, ok) = pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default, errors.New(invalidPqKemForX25519ˢ));
-            }
+        if (!pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(out _)) {
+            return (default, errors.New(invalidPqKemForX25519ˢ));
         }
         return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768X25519, bytes.Clone(seed), t, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P256()): {
-        {
-            var (_, ok) = pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(ᐧ); if (!ok) {
-                return (default, errors.New(invalidPqKemForP256ˢ));
-            }
+        if (!pq.Encapsulator()._<ж<mlkem.EncapsulationKey768>>(out _)) {
+            return (default, errors.New(invalidPqKemForP256ˢ));
         }
         return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem768P256, bytes.Clone(seed), t, pq))), default);
     }
     case var ᴛ when AreEqual(ᴛ, ecdh.P384()): {
-        {
-            var (_, ok) = pq.Encapsulator()._<ж<mlkem.EncapsulationKey1024>>(ᐧ); if (!ok) {
-                return (default, errors.New(invalidPqKemForP384ˢ));
-            }
+        if (!pq.Encapsulator()._<ж<mlkem.EncapsulationKey1024>>(out _)) {
+            return (default, errors.New(invalidPqKemForP384ˢ));
         }
         return (new hybridPrivateKeyжPrivateKey(Ꮡ(new hybridPrivateKey(mlkem1024P384, bytes.Clone(seed), t, pq))), default);
     }

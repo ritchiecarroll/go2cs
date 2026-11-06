@@ -115,10 +115,8 @@ public static ΔType Rhs(this ref Alias a) {
 // Consequently, the result is never an alias type.
 // Returns nil if the alias is incomplete.
 public static ΔType Unalias(ΔType t) {
-    {
-        var (a0, _) = t._<ж<Alias>>(ᐧ); if (a0 != nil) {
-            return unalias(a0);
-        }
+    var (a0, _) = t._<ж<Alias>>(ᐧ); if (a0 != nil) {
+        return unalias(a0);
     }
     return t;
 }

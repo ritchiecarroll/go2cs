@@ -112,46 +112,42 @@ internal static bool discard(this ref parser p, uint64 n) {
     if (n > math.MaxInt) {
         return false;
     }
-    {
-        nint noff = p.off + (nint)n; if (noff < p.off || noff > len(p.data)) {
-            return false;
-        } else {
-            p.off = noff;
-        }
+    nint noff = p.off + (nint)n; if (noff < p.off || noff > len(p.data)) {
+        return false;
+    } else {
+        p.off = noff;
     }
     return true;
 }
 
 internal static (ж<parser>, error) newParser(io.Reader r, version.Version ver) {
     slice<byte> buf = default;
-    {
-        var (seeker, ok) = r._<io.Seeker>(ᐧ); if (ok) {
-            // Determine the size of the reader so that we can allocate a buffer
-            // without having to grow it later.
-            var (cur, err) = seeker.Seek(0, io.SeekCurrent);
-            if (err != nil) {
-                return (default, err);
-            }
-            (var end, err) = seeker.Seek(0, io.SeekEnd);
-            if (err != nil) {
-                return (default, err);
-            }
-            (_, err) = seeker.Seek(cur, io.SeekStart);
-            if (err != nil) {
-                return (default, err);
-            }
+    var (seeker, ok) = r._<io.Seeker>(ᐧ); if (ok) {
+        // Determine the size of the reader so that we can allocate a buffer
+        // without having to grow it later.
+        var (cur, err) = seeker.Seek(0, io.SeekCurrent);
+        if (err != nil) {
+            return (default, err);
+        }
+        (var end, err) = seeker.Seek(0, io.SeekEnd);
+        if (err != nil) {
+            return (default, err);
+        }
+        (_, err) = seeker.Seek(cur, io.SeekStart);
+        if (err != nil) {
+            return (default, err);
+        }
 
-            buf = new slice<byte>((nint)(end - cur));
-            (_, err) = io.ReadFull(r, buf);
-            if (err != nil) {
-                return (default, err);
-            }
-        } else {
-            error err = default;
-            (buf, err) = io.ReadAll(r);
-            if (err != nil) {
-                return (default, err);
-            }
+        buf = new slice<byte>((nint)(end - cur));
+        (_, err) = io.ReadFull(r, buf);
+        if (err != nil) {
+            return (default, err);
+        }
+    } else {
+        error err = default;
+        (buf, err) = io.ReadAll(r);
+        if (err != nil) {
+            return (default, err);
         }
     }
     return (Ꮡ(new parser(data: buf, ver: ver, timerGoids: new map<uint64, bool>())), default);
@@ -211,10 +207,8 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
         p.pcs = new map<uint64, Frame>();
         p.inlineStringsMapping = new map<@string, nint>();
 
-        {
-            var errΔ1 = p.collectBatchesAndCPUSamples(); if (errΔ1 != nil) {
-                return (new Trace(), errΔ1);
-            }
+        var errΔ1 = p.collectBatchesAndCPUSamples(); if (errΔ1 != nil) {
+            return (new Trace(), errΔ1);
         }
 
         var (events, err) = p.parseEventBatches();
@@ -244,10 +238,8 @@ internal static (Trace, error) parse(this ж<parser> Ꮡp) {
             }
         }
 
-        {
-            var errΔ2 = Ꮡp.postProcessTrace(events); if (errΔ2 != nil) {
-                return (new Trace(), errΔ2);
-            }
+        var errΔ2 = Ꮡp.postProcessTrace(events); if (errΔ2 != nil) {
+            return (new Trace(), errΔ2);
         }
 
         var res = new Trace(
@@ -700,10 +692,8 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
     case var ᴛ when ᴛ == EvString: {
         if ((flags & (nuint)skipStrings) != 0) {
             // String dictionary entry [ID, length, string].
-            {
-                var (_, errΔ7) = p.readVal(); if (errΔ7 != nil) {
-                    return errMalformedVarint;
-                }
+            var (_, errΔ7) = p.readVal(); if (errΔ7 != nil) {
+                return errMalformedVarint;
             }
             var (ln, err) = p.readVal();
             if (err != nil) {
@@ -746,10 +736,8 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
         return default;
     }
     case var ᴛ when ᴛ == EvBatch: {
-        {
-            var want = (byte)2; if (narg != want) {
-                return fmt.Errorf("EvBatch has wrong number of arguments: got %d, want %d"u8, narg, want);
-            }
+        var want = (byte)2; if (narg != want) {
+            return fmt.Errorf("EvBatch has wrong number of arguments: got %d, want %d"u8, narg, want);
         }
 
         // -1 because we've already read the first byte of the batch
@@ -797,10 +785,8 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 }
             } else {
                 for (nint i = 0; i < (nint)narg; i++) {
-                    {
-                        var (_, err) = p.readVal(); if (err != nil) {
-                            return fmt.Errorf("failed to read event %d argument: %w"u8, typ, errMalformedVarint);
-                        }
+                    var (_, err) = p.readVal(); if (err != nil) {
+                        return fmt.Errorf("failed to read event %d argument: %w"u8, typ, errMalformedVarint);
                     }
                 }
             }
@@ -812,12 +798,10 @@ internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> 
                 return fmt.Errorf("failed to read event %d argument: %w"u8, typ, err);
             }
 
-            {
-                var limit = (uint64)2048; if (v > limit) {
-                    // At the time of Go 1.19, v seems to be at most 128. Set 2048
-                    // as a generous upper limit and guard against malformed traces.
-                    return fmt.Errorf("failed to read event %d argument: length-prefixed argument too big: %d bytes, limit is %d"u8, typ, v, limit);
-                }
+            var limit = (uint64)2048; if (v > limit) {
+                // At the time of Go 1.19, v seems to be at most 128. Set 2048
+                // as a generous upper limit and guard against malformed traces.
+                return fmt.Errorf("failed to read event %d argument: length-prefixed argument too big: %d bytes, limit is %d"u8, typ, v, limit);
             }
 
             if ((flags & (nuint)skipArgs) == 0 || typ == EvCPUSample) {
@@ -1002,10 +986,8 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
                 var line = raw.args[2 + i * 4 + 3];
                 stk[i] = pc;
 
-                {
-                    var (_, ok) = p.pcs[pc, ꟷ]; if (!ok) {
-                        p.pcs[pc] = new Frame(PC: pc, Fn: fn, File: @file, Line: (nint)line);
-                    }
+                var (_, ok) = p.pcs[pc, ꟷ]; if (!ok) {
+                    p.pcs[pc] = new Frame(PC: pc, Fn: fn, File: @file, Line: (nint)line);
                 }
             }
             p.stacks[id] = stk;
@@ -1056,15 +1038,13 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
             // e.Args 0: taskID, 1:keyID, 2: stackID, 3: messageID
             // raw.sargs 0: message
 
-            {
-                var (id, ok) = p.inlineStringsMapping[raw.sargs[0], ꟷ]; if (ok) {
-                    ev.Args[3] = (uint64)id;
-                } else {
-                    nint idΔ1 = len(p.inlineStrings);
-                    p.inlineStringsMapping[raw.sargs[0]] = idΔ1;
-                    p.inlineStrings = builtin.append(p.inlineStrings, raw.sargs[0]);
-                    ev.Args[3] = (uint64)idΔ1;
-                }
+            var (id, ok) = p.inlineStringsMapping[raw.sargs[0], ꟷ]; if (ok) {
+                ev.Args[3] = (uint64)id;
+            } else {
+                nint idΔ1 = len(p.inlineStrings);
+                p.inlineStringsMapping[raw.sargs[0]] = idΔ1;
+                p.inlineStrings = builtin.append(p.inlineStrings, raw.sargs[0]);
+                ev.Args[3] = (uint64)idΔ1;
             }
             break;
         }}
@@ -1258,10 +1238,8 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
                     return err;
                 }
             }
-            {
-                var (_, ok) = gs[ev.Args[0], ꟷ]; if (ok) {
-                    return fmt.Errorf("g %d already exists (time %d)"u8, ev.Args[0], ev.Ts);
-                }
+            if (gs[ev.Args[0], ꟷ] is (_, true)) {
+                return fmt.Errorf("g %d already exists (time %d)"u8, ev.Args[0], ev.Ts);
             }
             gs[ev.Args[0]] = new postProcessTrace_gdesc(state: gRunnable, ev: ev, evCreate: ev);
             break;
@@ -1408,10 +1386,8 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
         }
         case var ᴛ when ᴛ == EvUserTaskCreate: {
             var taskid = ev.Args[0];
-            {
-                var (prevEv, ok) = tasks[taskid, ꟷ]; if (ok) {
-                    return fmt.Errorf("task id conflicts (id:%d), %q vs %q"u8, taskid, ev.OrTypedNil(), prevEv.OrTypedNil());
-                }
+            if (tasks[taskid, ꟷ] is (var prevEv, true)) {
+                return fmt.Errorf("task id conflicts (id:%d), %q vs %q"u8, taskid, ev.OrTypedNil(), prevEv.OrTypedNil());
             }
             tasks[ev.Args[0]] = ev;
             break;

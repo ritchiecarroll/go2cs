@@ -38,10 +38,8 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     if (dir == "."u8) {
         return (fsys, default);
     }
-    {
-        var (fsysΔ1, ok) = fsys._<SubFS>(ᐧ); if (ok) {
-            return fsysΔ1.Sub(dir);
-        }
+    var (fsysΔ1, ok) = fsys._<SubFS>(ᐧ); if (ok) {
+        return fsysΔ1.Sub(dir);
     }
     return (new subFSжFS(Ꮡ(new subFS(fsys, dir))), default);
 }
@@ -82,13 +80,9 @@ internal static (@string rel, bool ok) shorten(this ref subFS f, @string name) {
 
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
 internal static error fixErr(this ref subFS f, error err) {
-    {
-        var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
-            {
-                var (@short, okΔ1) = f.shorten(e.Path); if (okΔ1) {
-                    e.Path = @short;
-                }
-            }
+    var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
+        var (@short, okΔ1) = f.shorten(e.Path); if (okΔ1) {
+            e.Path = @short;
         }
     }
     return err;
@@ -163,10 +157,8 @@ internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
 
 internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
     // Check pattern is well-formed.
-    {
-        var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
-            return (default, errΔ1);
-        }
+    var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
+        return (default, errΔ1);
     }
     if (pattern == "."u8) {
         return (slice<@string>(["."]), default);

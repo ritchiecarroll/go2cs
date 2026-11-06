@@ -121,21 +121,19 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
 
     // Create new storage for the argument.
     ж<S> argv = default;
-    {
-        var size = @unsafe.Sizeof(arg); if (size < maxTinySize && argType.PtrBytes == 0) {
-            // Side-step the tiny allocator to avoid liveness issues, since this box
-            // will be treated like a root by the GC. We model the box as an array of
-            // uintptrs to guarantee maximum allocator alignment.
-            //
-            // TODO(mknyszek): Consider just making space in cleanupFn for this. The
-            // unfortunate part of this is it would grow specialCleanup by 16 bytes, so
-            // while there wouldn't be an allocation, *every* cleanup would take the
-            // memory overhead hit.
-            var box = Ꮡ(new array<uintptr>(2));
-            argv = box.Reinterpret<array<uintptr>, S>();
-        } else {
-            argv = @new<S>();
-        }
+    var size = @unsafe.Sizeof(arg); if (size < maxTinySize && argType.PtrBytes == 0) {
+        // Side-step the tiny allocator to avoid liveness issues, since this box
+        // will be treated like a root by the GC. We model the box as an array of
+        // uintptrs to guarantee maximum allocator alignment.
+        //
+        // TODO(mknyszek): Consider just making space in cleanupFn for this. The
+        // unfortunate part of this is it would grow specialCleanup by 16 bytes, so
+        // while there wouldn't be an allocation, *every* cleanup would take the
+        // memory overhead hit.
+        var box = Ꮡ(new array<uintptr>(2));
+        argv = box.Reinterpret<array<uintptr>, S>();
+    } else {
+        argv = @new<S>();
     }
     argv.ValueSlot = arg;
 
@@ -172,10 +170,8 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S arg
         var tp = cSpan.typePointersOfUnchecked(cBase);
         for (;;) {
             uintptr addr = default;
-            {
-                (tp, addr) = tp.next(cBase + cSpan.elemsize); if (addr == 0) {
-                    break;
-                }
+            (tp, addr) = tp.next(cBase + cSpan.elemsize); if (addr == 0) {
+                break;
             }
             var ptrΔ1 = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
             if (ptrΔ1 >= @base && ptrΔ1 < @base + span.elemsize) {
@@ -486,12 +482,10 @@ internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
         }
         pp.Value.cleanups = b;
     }
-    {
-        var full = b.enqueue(c); if (full) {
-            Ꮡq.of(cleanupQueue.Ꮡfull).push(b.of(cleanupBlock.Ꮡlfnode));
-            pp.Value.cleanups = default;
-            Ꮡq.addWork(1);
-        }
+    var full = b.enqueue(c); if (full) {
+        Ꮡq.of(cleanupQueue.Ꮡfull).push(b.of(cleanupBlock.Ꮡlfnode));
+        pp.Value.cleanups = default;
+        Ꮡq.addWork(1);
     }
     pp.Value.cleanupsQueued++;
     releasem(ref (mp).DerefOrNull());

@@ -39,10 +39,8 @@ internal static void Main() {
     for (nint i = 0; ; i++) {
         var (ᴛ3, ᴛ4) = next();
         if (!(keep(ᴛ3, ᴛ4))) break;
-        {
-            count++; if (count > 10) {
-                break;
-            }
+        count++; if (count > 10) {
+            break;
         }
         if (i % 2 == 0) {
             continue;

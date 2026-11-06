@@ -143,12 +143,10 @@ internal static void emitMetaData() {
         return;
     }
 
-    {
-        var errΔ1 = emitMetaDataToDirectory(goCoverDir, ml); if (errΔ1 != nil) {
-            fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage meta-data emit failed: %v\n"u8, errΔ1);
-            if (os.Getenv(gocoverdebugˢ) != ""u8) {
-                throw panic("meta-data write failure");
-            }
+    var errΔ1 = emitMetaDataToDirectory(goCoverDir, ml); if (errΔ1 != nil) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage meta-data emit failed: %v\n"u8, errΔ1);
+        if (os.Getenv(gocoverdebugˢ) != ""u8) {
+            throw panic("meta-data write failure");
         }
     }
 }
@@ -222,10 +220,8 @@ internal static (slice<rtcov.CovMetaBlob>, error) prepareForMetaEmit() {
     foreach (var (_, vᴛ2) in ml) {
         var entry = vᴛ2.ΔClone();
 
-        {
-            var (_, err) = h.Write(entry.Hash[..]); if (err != nil) {
-                return (default, err);
-            }
+        var (_, err) = h.Write(entry.Hash[..]); if (err != nil) {
+            return (default, err);
         }
         tlen += (uint64)entry.Len;
         var ecm = (coverage.CounterMode)entry.CounterMode;
@@ -271,18 +267,14 @@ internal static error emitMetaDataToDirectory(@string outdir, slice<rtcov.CovMet
     ));
 
     // Open output files.
-    {
-        var errΔ1 = s.openOutputFiles(finalHash, finalMetaLen, metaDataFile); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = s.openOutputFiles(finalHash, finalMetaLen, metaDataFile); if (errΔ1 != nil) {
+        return errΔ1;
     }
 
     // Emit meta-data file only if needed (may already be present).
     if (s.needMetaDataFile()) {
-        {
-            var errΔ2 = s.emitMetaDataFile(finalHash, finalMetaLen); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = s.emitMetaDataFile(finalHash, finalMetaLen); if (errΔ2 != nil) {
+            return errΔ2;
         }
     }
     return default;
@@ -295,12 +287,10 @@ internal static void emitCounterData() {
     if (goCoverDir == ""u8 || !finalHashComputed || covProfileAlreadyEmitted) {
         return;
     }
-    {
-        var err = emitCounterDataToDirectory(goCoverDir); if (err != nil) {
-            fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage counter data emit failed: %v\n"u8, err);
-            if (os.Getenv(gocoverdebugˢ) != ""u8) {
-                throw panic("counter-data write failure");
-            }
+    var err = emitCounterDataToDirectory(goCoverDir); if (err != nil) {
+        fmt.Fprintf(new os.FileжWriter(os.Stderr), "error: coverage counter data emit failed: %v\n"u8, err);
+        if (os.Getenv(gocoverdebugˢ) != ""u8) {
+            throw panic("counter-data write failure");
         }
     }
 }
@@ -362,10 +352,8 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
 internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) {
-    {
-        var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != nil) {
+        return err;
     }
     return default;
 }
@@ -435,17 +423,13 @@ internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte>
     }
 
     if (((fileType)(which & (nint)metaDataFile)) != 0) {
-        {
-            var errΔ1 = s.openMetaFile(metaHash, metaLen); if (errΔ1 != nil) {
-                return errΔ1;
-            }
+        var errΔ1 = s.openMetaFile(metaHash, metaLen); if (errΔ1 != nil) {
+            return errΔ1;
         }
     }
     if (((fileType)(which & (nint)counterDataFile)) != 0) {
-        {
-            var errΔ2 = s.openCounterFile(metaHash); if (errΔ2 != nil) {
-                return errΔ2;
-            }
+        var errΔ2 = s.openCounterFile(metaHash); if (errΔ2 != nil) {
+            return errΔ2;
         }
     }
     return default;
@@ -570,13 +554,11 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
                 fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
                 reportErrorInHardcodedList((int32)i, ipk, funcId, nCtrs);
             } else if (ipk < 0) {
-                {
-                    var (newId, ok) = s.pkgmap[(nint)ipk, ꟷ]; if (ok) {
-                        pkgId = (uint32)newId;
-                    } else {
-                        fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
-                        reportErrorInHardcodedList((int32)i, ipk, funcId, nCtrs);
-                    }
+                var (newId, ok) = s.pkgmap[(nint)ipk, ꟷ]; if (ok) {
+                    pkgId = (uint32)newId;
+                } else {
+                    fmt.Fprintf(new os.FileжWriter(os.Stderr), "\n"u8);
+                    reportErrorInHardcodedList((int32)i, ipk, funcId, nCtrs);
                 }
             } else {
                 // The package ID value stored in the counter array
@@ -588,10 +570,8 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
             }
 
             tcounters = rdCounters(counters, tcounters);
-            {
-                var err = f(pkgId, funcId, tcounters); if (err != nil) {
-                    return err;
-                }
+            var err = f(pkgId, funcId, tcounters); if (err != nil) {
+                return err;
             }
 
             // Skip over this function.
@@ -634,10 +614,8 @@ internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ arra
     finalHash = finalHash.Clone();
 
     var cfw = encodecounter.NewCoverageDataWriter(w, coverage.CtrULeb128);
-    {
-        var err = cfw.Write(finalHash, capturedOsArgs, new emitStateжCounterVisitor(Ꮡs)); if (err != nil) {
-            return err;
-        }
+    var err = cfw.Write(finalHash, capturedOsArgs, new emitStateжCounterVisitor(Ꮡs)); if (err != nil) {
+        return err;
     }
     return default;
 }

@@ -597,22 +597,20 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
         }
         for (nint iΔ1 = 2; iΔ1 < len(idstr); iΔ1++) {
             id <<= 4;
-            {
-                var c = idstr[iΔ1];
-                switch (ᐧ) {
-                case {} when (byte)'0' <= c && c <= (byte)'9': {
-                    id |= (uint64)((uint64)((byte)(c - '0')));
-                    break;
-                }
-                case {} when (byte)'a' <= c && c <= (byte)'f': {
-                    id |= (uint64)((uint64)((byte)(c - 'a' + 10)));
-                    break;
-                }
-                case {} when (byte)'A' <= c && c <= (byte)'F': {
-                    id |= (uint64)((uint64)((byte)(c - 'A' + 10)));
-                    break;
-                }}
+            var c = idstr[iΔ1];
+            switch (ᐧ) {
+            case {} when (byte)'0' <= c && c <= (byte)'9': {
+                id |= (uint64)((uint64)((byte)(c - '0')));
+                break;
             }
+            case {} when (byte)'a' <= c && c <= (byte)'f': {
+                id |= (uint64)((uint64)((byte)(c - 'a' + 10)));
+                break;
+            }
+            case {} when (byte)'A' <= c && c <= (byte)'F': {
+                id |= (uint64)((uint64)((byte)(c - 'A' + 10)));
+                break;
+            }}
         }
     } else {
         if (idstr == ""u8 || len(idstr) > 64) { // min 1 digit, max 64 digits
@@ -621,17 +619,15 @@ public static (@string @short, uint64 id, bool ok) CutMarker(@string line) {
         // parse binary
         for (nint iΔ2 = 0; iΔ2 < len(idstr); iΔ2++) {
             id <<= 1;
-            {
-                var c = idstr[iΔ2];
-                switch (c) {
-                default: {
-                    return (line, 0, false);
-                }
-                case (byte)'0' or (byte)'1': {
-                    id |= (uint64)((uint64)((byte)(c - '0')));
-                    break;
-                }}
+            var c = idstr[iΔ2];
+            switch (c) {
+            default: {
+                return (line, 0, false);
             }
+            case (byte)'0' or (byte)'1': {
+                id |= (uint64)((uint64)((byte)(c - '0')));
+                break;
+            }}
         }
     }
 

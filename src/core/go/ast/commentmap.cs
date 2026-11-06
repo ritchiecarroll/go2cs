@@ -169,11 +169,9 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
         // process comments before current node
         while (r.end.Offset <= qpos.Offset) {
             // determine recent node group
-            {
-                var top = stack.pop(r.comment.Pos()); if (top != nil) {
-                    pg = top;
-                    pgend = fset.Position(pg.End());
-                }
+            var top = stack.pop(r.comment.Pos()); if (top != nil) {
+                pg = top;
+                pgend = fset.Position(pg.End());
             }
             // Try to associate a comment first with a node group
             // (i.e., a node of "importance" such as a declaration);
@@ -237,11 +235,9 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
 // and returns the new node. Comments that were associated with the
 // old node are associated with the new node.
 public static Node Update(this CommentMap cmap, Node old, Node @new) {
-    {
-        var list = cmap[old]; if (len(list) > 0) {
-            delete(cmap, old);
-            cmap[@new] = appendꓸꓸꓸ(cmap[@new], list);
-        }
+    var list = cmap[old]; if (len(list) > 0) {
+        delete(cmap, old);
+        cmap[@new] = appendꓸꓸꓸ(cmap[@new], list);
     }
     return @new;
 }
@@ -254,10 +250,8 @@ public static CommentMap Filter(this CommentMap cmap, Node node) {
     var cmapʗ1 = cmap;
     var umapʗ1 = umap;
     Inspect(node, (Node n) => {
-        {
-            var g = cmapʗ1[n]; if (len(g) > 0) {
-                umapʗ1[n] = g;
-            }
+        var g = cmapʗ1[n]; if (len(g) > 0) {
+            umapʗ1[n] = g;
         }
         return true;
     });
@@ -339,12 +333,10 @@ public static @string String(this CommentMap cmap) {
         var comment = cmap[node];
         // print name of identifiers; print node type for other nodes
         @string s = default;
-        {
-            var (ident, ok) = node._<ж<Ident>>(ᐧ); if (ok) {
-                s = ident.Name;
-            } else {
-                s = fmt.Sprintf("%T"u8, node);
-            }
+        var (ident, ok) = node._<ж<Ident>>(ᐧ); if (ok) {
+            s = ident.Name;
+        } else {
+            s = fmt.Sprintf("%T"u8, node);
         }
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%p  %20s:  %s\n"u8, node, s, summary(comment));
     }

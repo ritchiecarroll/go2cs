@@ -161,10 +161,8 @@ internal static nint countAttrs(slice<any> args) {
     nint n = 0;
     for (nint i = 0; i < len(args); i++) {
         n++;
-        {
-            var (_, ok) = args[i]._<@string>(ᐧ); if (ok) {
-                i++;
-            }
+        var (_, ok) = args[i]._<@string>(ᐧ); if (ok) {
+            i++;
         }
     }
     return n;

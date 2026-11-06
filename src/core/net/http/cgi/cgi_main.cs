@@ -153,11 +153,9 @@ internal static void childCGIProcess() {
         if (req.FormValue(noBodyˢ) == "1"u8) {
             return;
         }
-        {
-            var (eb, ok) = req.Form[exactBodyˢ, ꟷ]; if (ok) {
-                io.WriteString(new http_ResponseWriterᴠWriter(rw), eb[0]);
-                return;
-            }
+        var (eb, ok) = req.Form[exactBodyˢ, ꟷ]; if (ok) {
+            io.WriteString(new http_ResponseWriterᴠWriter(rw), eb[0]);
+            return;
         }
         if (req.FormValue(writeForeverˢ) == "1"u8) {
             io.Copy(new http_ResponseWriterᴠWriter(rw), (neverEnding)(rune)'a');

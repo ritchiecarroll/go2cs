@@ -30,7 +30,73 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 	hoistBuf := &strings.Builder{}
 	var cond string
 
-	if ifStmt.Init == nil {
+	// Whether the init keeps its block (initScopeOperations.go): a head if as analyzeInitScopes
+	// decided, an else-if when its init cannot fold into the condition.
+	braced := false
+
+	if ifStmt.Init != nil && !elseIf && v.initScopeShapes[ifStmt] == initScopeDropped {
+		// The init is a statement of the enclosing block, as Go writes it: `init; if (cond) {`.
+		v.visitStmt(ifStmt.Init, []StmtContext{})
+
+		v.hoistedDecls = hoistBuf
+		cond = v.convExpr(ifStmt.Cond, nil)
+		v.hoistedDecls = savedHoist
+
+		if hoistBuf.Len() > 0 {
+			v.outputBuilder.WriteString(hoistBuf.String())
+			v.writeOutput("")
+		} else {
+			v.outputBuilder.WriteRune(' ')
+		}
+	} else if ifStmt.Init != nil && (elseIf || v.initScopeShapes[ifStmt] == initScopeFolded) {
+		// Emit the init and the condition exactly as the block would hold them, then fold the init
+		// into the condition when its text allows; otherwise the captured text becomes the block.
+		v.indentLevel++
+
+		v.pushBlock()
+		v.visitStmt(ifStmt.Init, []StmtContext{})
+		initText := v.popBlockAppend(false)
+
+		v.hoistedDecls = hoistBuf
+		cond = v.convExpr(ifStmt.Cond, nil)
+		v.hoistedDecls = savedHoist
+
+		folded, ok := "", false
+
+		if hoistBuf.Len() == 0 && !v.initScopeHasClosure(ifStmt.Init) && !v.initScopeHasClosure(ifStmt.Cond) {
+			folded, ok = v.foldIfInit(ifStmt, initText, cond, elseIf)
+		}
+
+		if ok {
+			v.indentLevel--
+
+			if !elseIf {
+				v.outputBuilder.WriteString(v.newline)
+				v.writeOutput("")
+			}
+
+			// The init's own position records stay with it, on the line its text now sits on.
+			v.outputBuilder.WriteString(positionSentinelsOf(initText))
+			cond = folded
+		} else {
+			if !elseIf {
+				v.showWarning("@visitIfStmt - an init analyzeInitScopes folded did not fold; its block is kept: %s", v.getPrintedNode(ifStmt.Init))
+			}
+
+			braced = true
+			v.indentLevel--
+			v.writeInitBlockOpen(elseIf)
+			v.indentLevel++
+			v.outputBuilder.WriteString(initText)
+
+			if hoistBuf.Len() > 0 {
+				v.outputBuilder.WriteString(hoistBuf.String())
+				v.writeOutput("")
+			} else {
+				v.outputBuilder.WriteRune(' ')
+			}
+		}
+	} else if ifStmt.Init == nil {
 		// Convert the condition first: on a hoist the buffer supplies the leading newline + the decls.
 		v.hoistedDecls = hoistBuf
 		cond = v.convExpr(ifStmt.Cond, nil)
@@ -46,15 +112,8 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 			v.writeOutput("")
 		}
 	} else {
-		// Any declared variable will be scoped to if statement, so create a sub-block for it; an
-		// else-if opens it on the `} else ` line, the line Go's init clause sits on
-		if elseIf {
-			v.outputBuilder.WriteRune('{')
-		} else {
-			v.outputBuilder.WriteString(v.newline)
-			v.writeOutput("{")
-		}
-
+		braced = true
+		v.writeInitBlockOpen(elseIf)
 		v.indentLevel++
 
 		v.visitStmt(ifStmt.Init, []StmtContext{})
@@ -106,9 +165,21 @@ func (v *Visitor) visitIfStmtChain(ifStmt *ast.IfStmt, elseIf bool) {
 		}
 	}
 
-	if ifStmt.Init != nil {
+	if braced {
 		v.indentLevel--
 		v.outputBuilder.WriteString(v.newline)
 		v.writeOutput("}")
+	}
+}
+
+// writeInitBlockOpen opens the block an init keeps. Any declared variable is scoped to the if
+// statement, so it gets a sub-block; an else-if opens it on the `} else ` line, the line Go's init
+// clause sits on.
+func (v *Visitor) writeInitBlockOpen(elseIf bool) {
+	if elseIf {
+		v.outputBuilder.WriteRune('{')
+	} else {
+		v.outputBuilder.WriteString(v.newline)
+		v.writeOutput("{")
 	}
 }

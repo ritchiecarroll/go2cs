@@ -210,23 +210,21 @@ internal static slice<int32> bitCounts(this ref huffmanEncoder h, slice<literalN
             levels[l.level - 1].needed = 2;
         }
 
-        {
-            l.needed--; if (l.needed == 0) {
-                // We've done everything we need to do for this level.
-                // Continue calculating one level up. Fill in nextPairFreq
-                // of that level with the sum of the two nodes we've just calculated on
-                // this level.
-                if (l.level == maxBits) {
-                    // All done!
-                    break;
-                }
-                levels[l.level + 1].nextPairFreq = prevFreq + l.lastFreq;
-                level++;
-            } else {
-                // If we stole from below, move down temporarily to replenish it.
-                while (levels[level - 1].needed > 0) {
-                    level--;
-                }
+        l.needed--; if (l.needed == 0) {
+            // We've done everything we need to do for this level.
+            // Continue calculating one level up. Fill in nextPairFreq
+            // of that level with the sum of the two nodes we've just calculated on
+            // this level.
+            if (l.level == maxBits) {
+                // All done!
+                break;
+            }
+            levels[l.level + 1].nextPairFreq = prevFreq + l.lastFreq;
+            level++;
+        } else {
+            // If we stole from below, move down temporarily to replenish it.
+            while (levels[level - 1].needed > 0) {
+                level--;
             }
         }
     }

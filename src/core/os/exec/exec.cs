@@ -420,10 +420,8 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
                     stack = new slice<byte>(2 * len(stack));
                 }
 
-                {
-                    nint i = bytes.Index(stack, slice<byte>("\nos/exec.Command("u8)); if (i >= 0) {
-                        stack = stack.slice(i + 1);
-                    }
+                nint i = bytes.Index(stack, slice<byte>("\nos/exec.Command("u8)); if (i >= 0) {
+                    stack = stack.slice(i + 1);
                 }
                 cmd.createdByStack = stack;
             }
@@ -465,12 +463,10 @@ public static partial ж<Cmd> Command(@string name, params ꓸꓸꓸstring argʗ
         // Note that we don't cache anything here for relative paths, because
         // cmd.Dir may be set after we return from this function and that may
         // cause the command to resolve to a different extension.
-        {
-            var (lp, err) = lookExtensions(name, ""u8); if (err == nil) {
-                (cmd.cachedLookExtensions.@in, cmd.cachedLookExtensions.@out) = (name, lp);
-            } else {
-                cmd.Err = err;
-            }
+        var (lp, err) = lookExtensions(name, ""u8); if (err == nil) {
+            (cmd.cachedLookExtensions.@in, cmd.cachedLookExtensions.@out) = (name, lp);
+        } else {
+            cmd.Err = err;
         }
     }
     return cmd;
@@ -569,10 +565,8 @@ internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) {
         if (skipStdinCopyError(errΔ2)) {
             errΔ2 = default;
         }
-        {
-            var err1 = pwʗ1.Close(); if (errΔ2 == nil) {
-                errΔ2 = err1;
-            }
+        var err1 = pwʗ1.Close(); if (errΔ2 == nil) {
+            errΔ2 = err1;
         }
         return errΔ2;
     });
@@ -646,10 +640,8 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // thread state (for example, Linux or Plan 9 name spaces), the new
 // process will inherit the caller's thread state.
 public static error Run(this ж<Cmd> Ꮡc) {
-    {
-        var err = Ꮡc.Start(); if (err != nil) {
-            return err;
-        }
+    var err = Ꮡc.Start(); if (err != nil) {
+        return err;
     }
     return Ꮡc.Wait();
 }
@@ -848,22 +840,20 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
 
     error err = default;
     if (c.Cancel != nil) {
-        {
-            var interruptErr = c.Cancel(); if (interruptErr == nil) {
-                // We appear to have successfully interrupted the command, so any
-                // program behavior from this point may be due to ctx even if the
-                // command exits with code 0.
-                err = c.ctx.Err();
-            } else if (errors.Is(interruptErr, os.ErrProcessDone)) {
-                // The process already finished: we just didn't notice it yet.
-                // (Perhaps c.Wait hadn't been called, or perhaps it happened to race with
-                // c.ctx being canceled.) Don't inject a needless error.
-            } else {
-                err = new wrappedError(
-                    prefix: "exec: canceling Cmd",
-                    err: interruptErr
-                );
-            }
+        var interruptErr = c.Cancel(); if (interruptErr == nil) {
+            // We appear to have successfully interrupted the command, so any
+            // program behavior from this point may be due to ctx even if the
+            // command exits with code 0.
+            err = c.ctx.Err();
+        } else if (errors.Is(interruptErr, os.ErrProcessDone)) {
+            // The process already finished: we just didn't notice it yet.
+            // (Perhaps c.Wait hadn't been called, or perhaps it happened to race with
+            // c.ctx being canceled.) Don't inject a needless error.
+        } else {
+            err = new wrappedError(
+                prefix: "exec: canceling Cmd",
+                err: interruptErr
+            );
         }
     }
     if (c.WaitDelay == 0) {
@@ -885,19 +875,17 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
     }}
 
     var killed = false;
-    {
-        var killErr = c.Process.Kill(); if (killErr == nil) {
-            // We appear to have killed the process. c.Process.Wait should return a
-            // non-nil error to c.Wait unless the Kill signal races with a successful
-            // exit, and if that does happen we shouldn't report a spurious error,
-            // so don't set err to anything here.
-            killed = true;
-        } else if (!errors.Is(killErr, os.ErrProcessDone)) {
-            err = new wrappedError(
-                prefix: "exec: killing Cmd",
-                err: killErr
-            );
-        }
+    var killErr = c.Process.Kill(); if (killErr == nil) {
+        // We appear to have killed the process. c.Process.Wait should return a
+        // non-nil error to c.Wait unless the Kill signal races with a successful
+        // exit, and if that does happen we shouldn't report a spurious error,
+        // so don't set err to anything here.
+        killed = true;
+    } else if (!errors.Is(killErr, os.ErrProcessDone)) {
+        err = new wrappedError(
+            prefix: "exec: killing Cmd",
+            err: killErr
+        );
     }
 
     if (c.goroutineErr != nil) {
@@ -1010,13 +998,11 @@ public static error Wait(this ж<Cmd> Ꮡc) {
         }
     }
 
-    {
-        var goroutineErr = Ꮡc.awaitGoroutines(timer); if (err == nil) {
-            // Report an error from the copying goroutines only if the program otherwise
-            // exited normally on its own. Otherwise, the copying error may be due to the
-            // abnormal termination.
-            err = goroutineErr;
-        }
+    var goroutineErr = Ꮡc.awaitGoroutines(timer); if (err == nil) {
+        // Report an error from the copying goroutines only if the program otherwise
+        // exited normally on its own. Otherwise, the copying error may be due to the
+        // abnormal termination.
+        err = goroutineErr;
     }
     closeDescriptors(c.parentIOPipes);
     c.parentIOPipes = default;
@@ -1112,10 +1098,8 @@ public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
 
     var err = Ꮡc.Run();
     if (err != nil && captureErr) {
-        {
-            var (ee, ok) = err._<ж<ExitError>>(ᐧ); if (ok) {
-                ee.Stderr = c.Stderr._<ж<prefixSuffixSaver>>().Bytes();
-            }
+        var (ee, ok) = err._<ж<ExitError>>(ᐧ); if (ok) {
+            ee.Stderr = c.Stderr._<ж<prefixSuffixSaver>>().Bytes();
         }
     }
     return (stdout.Bytes(), err);
@@ -1253,11 +1237,9 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
     p = w.fill(Ꮡw.Ꮡprefix, p);
 
     // Only keep the last w.N bytes of suffix data.
-    {
-        nint overage = len(p) - w.N; if (overage > 0) {
-            p = p.slice(overage);
-            w.skipped += (int64)overage;
-        }
+    nint overage = len(p) - w.N; if (overage > 0) {
+        p = p.slice(overage);
+        w.skipped += (int64)overage;
     }
     p = w.fill(Ꮡw.Ꮡsuffix, p);
 
@@ -1279,12 +1261,10 @@ internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice
 internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
-    {
-        nint remain = w.N - len(dst); if (remain > 0) {
-            nint add = min(len(p), remain);
-            dst = appendꓸꓸꓸ(dst, p.slice(0, add));
-            p = p.slice(add);
-        }
+    nint remain = w.N - len(dst); if (remain > 0) {
+        nint add = min(len(p), remain);
+        dst = appendꓸꓸꓸ(dst, p.slice(0, add));
+        p = p.slice(add);
     }
     return p;
 }
@@ -1344,12 +1324,10 @@ internal static (slice<@string>, error) environ(this ref Cmd c) {
                 // https://go.dev/issue/50599) to avoid unintended collateral damage we
                 // only implicitly update PWD when Env is nil. That way, we're much
                 // less likely to override an intentional change to the variable.
-                {
-                    var (pwd, absErr) = filepath.Abs(c.Dir); if (absErr == nil) {
-                        env = append(env, "PWD="u8 + pwd);
-                    } else if (err == nil) {
-                        err = absErr;
-                    }
+                var (pwd, absErr) = filepath.Abs(c.Dir); if (absErr == nil) {
+                    env = append(env, "PWD="u8 + pwd);
+                } else if (err == nil) {
+                    err = absErr;
                 }
                 break;
             }}

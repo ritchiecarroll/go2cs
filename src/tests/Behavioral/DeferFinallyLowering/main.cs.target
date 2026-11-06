@@ -118,10 +118,8 @@ internal static void withLit(this ж<box> Ꮡx) {
         void f() {
             GoFrame ᒐ = default;
             try {
-                {
-                    var r = recoverChecked(); if (r != nil) {
-                        fmt.Println("inner recovered", r);
-                    }
+                var r = recoverChecked(); if (r != nil) {
+                    fmt.Println("inner recovered", r);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -178,10 +176,8 @@ internal static void writeShape(this ж<box> Ꮡx, bool isFile) {
     try {
         ref var x = ref Ꮡx.DerefOrNull();
 
-        {
-            @string id = x.a.id; if (id == ""u8) {
-                return;
-            }
+        @string id = x.a.id; if (id == ""u8) {
+            return;
         }
 
         ᒐd1 = true;
@@ -221,10 +217,8 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var r = recover(); if (r != nil) {
-                        fmt.Println("recovered", r);
-                    }
+                var r = recover(); if (r != nil) {
+                    fmt.Println("recovered", r);
                 }
             }, ref ᒐ);
 

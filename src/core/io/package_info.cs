@@ -93,9 +93,9 @@ using static go.io_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoCCpAACFgALAoKUgoKClIKCgpQAAhTyAAISAAkCgoKUlJQAAh4ADAIAAhTygpSq9oCCtoCCpIKCgIKClLaUgoKCgoKCgqaCgoKUgoKmgoKUpqywAAsWsoKUgpSCgqqigoKCuJQADBqygpSAgqSCgqaSlIKUpLS0pIKUgqaygpSCgIKCgoKUpKiQrMIACRiiprKCgqaCgqaCpoKUpLSkgpSCAAIQ0gAHELKCgoCCtsrslIKmgqaUgsiygoKCgoKCgoKUAAQSwoCCpO6A7ICkgq4ACAbKgoSSgoKCgoKUgriCgoKUgqaUgoKC")]
-[assembly: GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKAgoK2gqaClIKUlKamgqaygoKAgpSkgoKClJSCppzigoLusoKCgpSCgqamlLKCgoCClIKUpIKUgoKmAAISAAgCgoKAgpS2")]
-[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiotKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKAgqSokoKAgqQABxbSqqIAAhDSAAcW0qqiAAIS4gACJAAPAuo=", "72-72:1;103-103:1")]
+[assembly: GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoKUAAIWAAsCgpSCgoKUgoKClAACFPIAAhIACQKCgpSUlAACHgAMAgACFPKClKr2gqaClIKCgoKUppSCgoKCgoKCpoKCgpSCgqaCgpSmrLAACxaygpSClIKCqqKCgoK4lAAMGrKClIKUgoKmkpSClKS0tKSClIKmsoKUgoKCgoKUlKiQrMIACRiiprKCgqaCgqaCpoKUpLSkgpSCAAIQ0gAHELKCgoKmyuyUgqaCppSCyLKCgoKCgoKCgpQABBLCgpTugOyApIKuAAgGyoKEkoKCgoKClIK4goKClIKmlIKCgg==")]
+[assembly: GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKCgqaCpoKUgpSUpqaCprKCgoKUlIKCgpSUgqac4oKC7rKCgoKUgoKmppSygoKClIKUlIKUgoKmAAISAAgCgoKClKY=")]
+[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiotKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKClKiSgoKUAAcW0qqiAAIQ0gAHFtKqogACEuIAAiQADwLq", "72-72:1;103-103:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

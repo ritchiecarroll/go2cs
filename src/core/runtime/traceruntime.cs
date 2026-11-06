@@ -611,10 +611,8 @@ internal static void GoCreateSyscall(this traceLocker tl, ж<g> Ꮡgp) {
 // the C thread is destroyed.
 internal static void GoDestroySyscall(this traceLocker tl) {
     // Write the status for the goroutine if necessary.
-    {
-        var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
-            tl.writer().writeGoStatus((~gp).goid, (int64)(~tl.mp).procid, tracev2.GoSyscall, false, 0 /* no stack */).end();
-        }
+    var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
+        tl.writer().writeGoStatus((~gp).goid, (int64)(~tl.mp).procid, tracev2.GoSyscall, false, 0 /* no stack */).end();
     }
 
     // We might have a P left over on the thread from the last cgo callback,

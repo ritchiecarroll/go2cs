@@ -78,10 +78,8 @@ internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, 
                 default: {
                     break;
                 }}
-                {
-                    var errΔ2 = Ꮡfd.Ꮡpfd.Init(fd.net, true); if (errΔ2 != nil) {
-                        (rsa, ret) = (default, errΔ2); goto ᒐdone;
-                    }
+                var errΔ2 = Ꮡfd.Ꮡpfd.Init(fd.net, true); if (errΔ2 != nil) {
+                    (rsa, ret) = (default, errΔ2); goto ᒐdone;
                 }
                 runtime.KeepAlive(Ꮡfd.OrTypedNil());
                 (rsa, ret) = (default, default); goto ᒐdone;
@@ -182,10 +180,8 @@ internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, 
                     // The runtime poller can wake us up spuriously;
                     // see issues 14548 and 19289. Check that we are
                     // really connected; if not, wait again.
-                    {
-                        var (rsaΔ2, errΔ3) = syscall.Getpeername(fd.pfd.Sysfd); if (errΔ3 == nil) {
-                            (rsa, ret) = (rsaΔ2, default); goto ᒐdone;
-                        }
+                    var (rsaΔ2, errΔ3) = syscall.Getpeername(fd.pfd.Sysfd); if (errΔ3 == nil) {
+                        (rsa, ret) = (rsaΔ2, default); goto ᒐdone;
                     }
                     break;
                 }
@@ -214,17 +210,13 @@ internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) {
         return (default, err);
     }
 
-    {
-        (netfd, err) = newFD(d, fd.family, fd.sotype, fd.net); if (err != nil) {
-            poll.CloseFunc(d);
-            return (default, err);
-        }
+    (netfd, err) = newFD(d, fd.family, fd.sotype, fd.net); if (err != nil) {
+        poll.CloseFunc(d);
+        return (default, err);
     }
-    {
-        err = netfd.init(); if (err != nil) {
-            netfd.Close();
-            return (default, err);
-        }
+    err = netfd.init(); if (err != nil) {
+        netfd.Close();
+        return (default, err);
     }
     var (lsa, _) = syscall.Getsockname(netfd.pfd.Sysfd);
     netfd.setAddr(netfd.addrFunc()(lsa), netfd.addrFunc()(rsa));

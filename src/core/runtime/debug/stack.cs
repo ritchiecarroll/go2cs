@@ -83,12 +83,10 @@ public static error SetCrashOutput(ж<os.File> f, CrashOptions opts) {
         runtime.KeepAlive(f.OrTypedNil()); // prevent finalization before dup
         fd = (uintptr)fd2;
     }
-    {
-        var prev = runtime_setCrashFD(fd); if (prev != ~(uintptr)0) {
-            // We use NewFile+Close because it is portable
-            // unlike syscall.Close, whose parameter type varies.
-            os.NewFile(prev, ""u8).Close(); // ignore error
-        }
+    var prev = runtime_setCrashFD(fd); if (prev != ~(uintptr)0) {
+        // We use NewFile+Close because it is portable
+        // unlike syscall.Close, whose parameter type varies.
+        os.NewFile(prev, ""u8).Close(); // ignore error
     }
     return default;
 }

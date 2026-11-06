@@ -136,10 +136,8 @@ public static (ж<Profile>, error) Parse(io.Reader r) {
         return (default, fmt.Errorf("parsing profile: %w"u8, err));
     }
 
-    {
-        var errΔ2 = p.CheckValid(); if (errΔ2 != nil) {
-            return (default, fmt.Errorf("malformed profile: %v"u8, errΔ2));
-        }
+    var errΔ2 = p.CheckValid(); if (errΔ2 != nil) {
+        return (default, fmt.Errorf("malformed profile: %v"u8, errΔ2));
     }
     return (p, default);
 }
@@ -234,19 +232,15 @@ public static error CheckValid(this ref Profile p) {
             return fmt.Errorf("multiple locations with same id: %d"u8, l.ID);
         }
         locations[l.ID] = l;
-        {
-            var m = l.Mapping; if (m != nil) {
-                if (m.ID == 0 || mappings[m.ID] != m) {
-                    return fmt.Errorf("inconsistent mapping %p: %d"u8, m.OrTypedNil(), m.ID);
-                }
+        var m = l.Mapping; if (m != nil) {
+            if (m.ID == 0 || mappings[m.ID] != m) {
+                return fmt.Errorf("inconsistent mapping %p: %d"u8, m.OrTypedNil(), m.ID);
             }
         }
         foreach (var (_, ln) in l.Line) {
-            {
-                var f = ln.Function; if (f != nil) {
-                    if (f.ID == 0 || functions[f.ID] != f) {
-                        return fmt.Errorf("inconsistent function %p: %d"u8, f.OrTypedNil(), f.ID);
-                    }
+            var f = ln.Function; if (f != nil) {
+                if (f.ID == 0 || functions[f.ID] != f) {
+                    return fmt.Errorf("inconsistent function %p: %d"u8, f.OrTypedNil(), f.ID);
                 }
             }
         }
@@ -308,10 +302,8 @@ public static @string String(this ref Profile p) {
     var ssᴷ = new stackAppend<@string>();
 
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
-    {
-        var pt = p.PeriodType; if (pt != nil) {
-            ss = append(ssᴷ, ss, fmt.Sprintf("PeriodType: %s %s"u8, pt.Type, pt.Unit));
-        }
+    var pt = p.PeriodType; if (pt != nil) {
+        ss = append(ssᴷ, ss, fmt.Sprintf("PeriodType: %s %s"u8, pt.Type, pt.Unit));
     }
     ss = append(ss, fmt.Sprintf("Period: %d"u8, p.Period));
     if (p.TimeNanos != 0) {
@@ -357,26 +349,22 @@ public static @string String(this ref Profile p) {
     ss = append(ss, (@string)"Locations");
     foreach (var (_, l) in p.Location) {
         @string locStr = fmt.Sprintf("%6d: %#x "u8, l.ID, l.Address);
-        {
-            var m = l.Mapping; if (m != nil) {
-                locStr = locStr + fmt.Sprintf("M=%d "u8, m.ID);
-            }
+        var m = l.Mapping; if (m != nil) {
+            locStr = locStr + fmt.Sprintf("M=%d "u8, m.ID);
         }
         if (len(l.Line) == 0) {
             ss = append(ss, locStr);
         }
         foreach (var li in range(l.Line)) {
             @string lnStr = "??";
-            {
-                var fn = l.Line[li].Function; if (fn != nil) {
-                    lnStr = fmt.Sprintf("%s %s:%d s=%d"u8,
-                        fn.Name,
-                        fn.Filename,
-                        l.Line[li].ΔLine,
-                        fn.StartLine);
-                    if (fn.Name != fn.SystemName) {
-                        lnStr = lnStr + "("u8 + fn.SystemName + ")"u8;
-                    }
+            var fn = l.Line[li].Function; if (fn != nil) {
+                lnStr = fmt.Sprintf("%s %s:%d s=%d"u8,
+                    fn.Name,
+                    fn.Filename,
+                    l.Line[li].ΔLine,
+                    fn.StartLine);
+                if (fn.Name != fn.SystemName) {
+                    lnStr = lnStr + "("u8 + fn.SystemName + ")"u8;
                 }
             }
             ss = append(ss, locStr + lnStr);
@@ -418,10 +406,8 @@ public static @string String(this ref Profile p) {
 public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
-    {
-        var err = p.Compatible(Ꮡpb); if (err != nil) {
-            return err;
-        }
+    var err = p.Compatible(Ꮡpb); if (err != nil) {
+        return err;
     }
 
     Ꮡpb = Ꮡpb.Copy(); pb = ref Ꮡpb.DerefOrNull();
@@ -555,10 +541,8 @@ public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@stri
         return err;
     }
     foreach (var (_, fn) in p.Function) {
-        {
-            var (dd, ok) = demangled[fn.SystemName, ꟷ]; if (ok) {
-                fn.Name = dd;
-            }
+        var (dd, ok) = demangled[fn.SystemName, ꟷ]; if (ok) {
+            fn.Name = dd;
         }
     }
     return default;

@@ -541,27 +541,25 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
                 startingField = 1;
             }
 
-            {
-                nint n1 = n - startingField;
-                switch (n1) {
-                case 0: {
-                    return (((bytesEncoder)default), default);
-                }
-                case 1: {
-                    return makeField(v.Field(startingField), parseFieldParameters(t.Field(startingField).Tag.Get(asn1ˢ)));
-                }
-                default: {
-                    var m = new slice<encoder>(n1);
-                    for (nint i = 0; i < n1; i++) {
-                        (m[i], err) = makeField(v.Field(i + startingField), parseFieldParameters(t.Field(i + startingField).Tag.Get(asn1ˢ)));
-                        if (err != nil) {
-                            return (default, err);
-                        }
-                    }
-
-                    return (((multiEncoder)m), default);
-                }}
+            nint n1 = n - startingField;
+            switch (n1) {
+            case 0: {
+                return (((bytesEncoder)default), default);
             }
+            case 1: {
+                return makeField(v.Field(startingField), parseFieldParameters(t.Field(startingField).Tag.Get(asn1ˢ)));
+            }
+            default: {
+                var m = new slice<encoder>(n1);
+                for (nint i = 0; i < n1; i++) {
+                    (m[i], err) = makeField(v.Field(i + startingField), parseFieldParameters(t.Field(i + startingField).Tag.Get(asn1ˢ)));
+                    if (err != nil) {
+                        return (default, err);
+                    }
+                }
+
+                return (((multiEncoder)m), default);
+            }}
             break;
         }
         case var ᴛ when ᴛ == reflect.ΔSlice: {
@@ -572,31 +570,29 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
 
             fieldParameters fp = default;
 
-            {
-                nint l = v.Len();
-                switch (l) {
-                case 0: {
-                    return (((bytesEncoder)default), default);
-                }
-                case 1: {
-                    return makeField(v.Index(0), fp);
-                }
-                default: {
-                    var m = new slice<encoder>(l);
-
-                    for (nint i = 0; i < l; i++) {
-                        (m[i], err) = makeField(v.Index(i), fp);
-                        if (err != nil) {
-                            return (default, err);
-                        }
-                    }
-
-                    if (@params.set) {
-                        return (((setEncoder)m), default);
-                    }
-                    return (((multiEncoder)m), default);
-                }}
+            nint l = v.Len();
+            switch (l) {
+            case 0: {
+                return (((bytesEncoder)default), default);
             }
+            case 1: {
+                return makeField(v.Index(0), fp);
+            }
+            default: {
+                var m = new slice<encoder>(l);
+
+                for (nint i = 0; i < l; i++) {
+                    (m[i], err) = makeField(v.Index(i), fp);
+                    if (err != nil) {
+                        return (default, err);
+                    }
+                }
+
+                if (@params.set) {
+                    return (((setEncoder)m), default);
+                }
+                return (((multiEncoder)m), default);
+            }}
             break;
         }
         case var ᴛ when ᴛ == reflect.ΔString: {

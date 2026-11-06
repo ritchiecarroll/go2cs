@@ -274,11 +274,9 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
             @throw(runtimeNetpollFailedˢ);
         }
         var key = packNetpollKey(netpollSourceTimer, nil);
-        {
-            var errnoΔ2 = stdcall(_NtAssociateWaitCompletionPacket, (~mp).waitIocpHandle, iocphandle, (~mp).waitIocpTimer, key, 0, 0, 0, (uintptr)Ꮡsignaled); if (errnoΔ2 != 0) {
-                println((@string)"runtime: NtAssociateWaitCompletionPacket failed; errno=", errnoΔ2);
-                @throw(runtimeNetpollFailedˢ);
-            }
+        var errnoΔ2 = stdcall(_NtAssociateWaitCompletionPacket, (~mp).waitIocpHandle, iocphandle, (~mp).waitIocpTimer, key, 0, 0, 0, (uintptr)Ꮡsignaled); if (errnoΔ2 != 0) {
+            println((@string)"runtime: NtAssociateWaitCompletionPacket failed; errno=", errnoΔ2);
+            @throw(runtimeNetpollFailedˢ);
         }
     }
     else if (exprᴛ1 == windows.STATUS_PENDING) {

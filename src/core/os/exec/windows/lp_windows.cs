@@ -49,10 +49,8 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
         // like "foo.bat.exe" will resolve instead of failing.
     }
     foreach (var (_, e) in exts) {
-        {
-            @string f = @file + e; if (chkStat(f) == nil) {
-                return (f, default);
-            }
+        @string f = @file + e; if (chkStat(f) == nil) {
+            return (f, default);
         }
     }
     if (hasExt(@file)) {
@@ -62,10 +60,8 @@ internal static (@string, error) findExecutable(@string @file, slice<@string> ex
 }
 
 internal static (@string, error) lookPath(@string @file) {
-    {
-        var err = validateLookPath(@file); if (err != nil) {
-            return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
-        }
+    var err = validateLookPath(@file); if (err != nil) {
+        return ("", new ΔErrorжerror(Ꮡ(new ΔError(@file, err))));
     }
 
     return lookPathExts(@file, pathExt());
@@ -81,23 +77,19 @@ internal static (@string, error) lookPath(@string @file) {
 // "C:\foo\example.com" would be returned as-is even if the
 // program is actually "C:\foo\example.com.exe".
 internal static (@string, error) lookExtensions(@string path, @string dir) {
-    {
-        var errΔ1 = validateLookPath(path); if (errΔ1 != nil) {
-            return ("", new ΔErrorжerror(Ꮡ(new ΔError(path, errΔ1))));
-        }
+    var errΔ1 = validateLookPath(path); if (errΔ1 != nil) {
+        return ("", new ΔErrorжerror(Ꮡ(new ΔError(path, errΔ1))));
     }
 
     if (filepath.Base(path) == path) {
         path = "."u8 + ((@string)(rune)filepath.Separator) + path;
     }
     var exts = pathExt();
-    {
-        @string extΔ1 = filepath.Ext(path); if (extΔ1 != ""u8) {
-            foreach (var (_, e) in exts) {
-                if (strings.EqualFold(extΔ1, e)) {
-                    // Assume that path has already been resolved.
-                    return (path, default);
-                }
+    @string extΔ1 = filepath.Ext(path); if (extΔ1 != ""u8) {
+        foreach (var (_, e) in exts) {
+            if (strings.EqualFold(extΔ1, e)) {
+                // Assume that path has already been resolved.
+                return (path, default);
             }
         }
     }
@@ -169,17 +161,13 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
     // See also go.dev/issue/43947.
     @string dotf = default;
     error dotErr = default;
-    {
-        var (_, found) = os.LookupEnv("NoDefaultCurrentDirectoryInExePath"); if (!found) {
-            {
-                var (f, err) = findExecutable(filepath.Join(".", @file), exts); if (err == nil) {
-                    if (execerrdot.Value() == "0"u8) {
-                        execerrdot.IncNonDefault();
-                        return (f, default);
-                    }
-                    (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
-                }
+    var (_, found) = os.LookupEnv("NoDefaultCurrentDirectoryInExePath"); if (!found) {
+        var (f, err) = findExecutable(filepath.Join(".", @file), exts); if (err == nil) {
+            if (execerrdot.Value() == "0"u8) {
+                execerrdot.IncNonDefault();
+                return (f, default);
             }
+            (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
         }
     }
 
@@ -191,38 +179,36 @@ internal static (@string, error) lookPathExts(@string @file, slice<@string> exts
             continue;
         }
 
-        {
-            var (f, err) = findExecutable(filepath.Join(dir, @file), exts); if (err == nil) {
-                if (dotErr != nil) {
-                    // https://go.dev/issue/53536: if we resolved a relative path implicitly,
-                    // and it is the same executable that would be resolved from the explicit %PATH%,
-                    // prefer the explicit name for the executable (and, likely, no error) instead
-                    // of the equivalent implicit name with ErrDot.
-                    //
-                    // Otherwise, return the ErrDot for the implicit path as soon as we find
-                    // out that the explicit one doesn't match.
-                    var (dotfi, dotfiErr) = os.Lstat(dotf);
-                    var (fi, fiErr) = os.Lstat(f);
-                    if (dotfiErr != nil || fiErr != nil || !os.SameFile(dotfi, fi)) {
-                        return (dotf, dotErr);
-                    }
+        var (f, err) = findExecutable(filepath.Join(dir, @file), exts); if (err == nil) {
+            if (dotErr != nil) {
+                // https://go.dev/issue/53536: if we resolved a relative path implicitly,
+                // and it is the same executable that would be resolved from the explicit %PATH%,
+                // prefer the explicit name for the executable (and, likely, no error) instead
+                // of the equivalent implicit name with ErrDot.
+                //
+                // Otherwise, return the ErrDot for the implicit path as soon as we find
+                // out that the explicit one doesn't match.
+                var (dotfi, dotfiErr) = os.Lstat(dotf);
+                var (fi, fiErr) = os.Lstat(f);
+                if (dotfiErr != nil || fiErr != nil || !os.SameFile(dotfi, fi)) {
+                    return (dotf, dotErr);
                 }
-
-                if (!filepath.IsAbs(f)) {
-                    if (execerrdot.Value() != "0"u8) {
-                        // If this is the same relative path that we already found,
-                        // dotErr is non-nil and we already checked it above.
-                        // Otherwise, record this path as the one to which we must resolve,
-                        // with or without a dotErr.
-                        if (dotErr == nil) {
-                            (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
-                        }
-                        continue;
-                    }
-                    execerrdot.IncNonDefault();
-                }
-                return (f, default);
             }
+
+            if (!filepath.IsAbs(f)) {
+                if (execerrdot.Value() != "0"u8) {
+                    // If this is the same relative path that we already found,
+                    // dotErr is non-nil and we already checked it above.
+                    // Otherwise, record this path as the one to which we must resolve,
+                    // with or without a dotErr.
+                    if (dotErr == nil) {
+                        (dotf, dotErr) = (f, new ΔErrorжerror(Ꮡ(new ΔError(@file, ErrDot))));
+                    }
+                    continue;
+                }
+                execerrdot.IncNonDefault();
+            }
+            return (f, default);
         }
     }
 

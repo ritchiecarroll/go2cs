@@ -294,10 +294,8 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
                     if (len(kv) == len(rawKey)) {
                         (bi, err) = (default, fmt.Errorf("build line missing '=' after quoted key"u8)); goto ᒐdone;
                     }
-                    {
-                        var c = kv[len(rawKey)]; if (c != '=') {
-                            (bi, err) = (default, fmt.Errorf("unexpected character after quoted key: %q"u8, c)); goto ᒐdone;
-                        }
+                    var c = kv[len(rawKey)]; if (c != '=') {
+                        (bi, err) = (default, fmt.Errorf("unexpected character after quoted key: %q"u8, c)); goto ᒐdone;
                     }
                     (key, _) = strconv.Unquote(rawKey);
                     rawValue = kv.slice(len(rawKey) + 1);

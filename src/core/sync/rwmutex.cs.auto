@@ -124,11 +124,9 @@ public static void RUnlock(this ж<RWMutex> Ꮡrw) {
         race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(Ꮡrw.of(RWMutex.ᏑwriterSem)));
         race.Disable();
     }
-    {
-        var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Add(-1); if (r < 0) {
-            // Outlined slow-path to allow the fast-path to be inlined
-            Ꮡrw.rUnlockSlow(r);
-        }
+    var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Add(-1); if (r < 0) {
+        // Outlined slow-path to allow the fast-path to be inlined
+        Ꮡrw.rUnlockSlow(r);
     }
     if (race.Enabled) {
         race.Enable();

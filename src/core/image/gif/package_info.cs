@@ -67,8 +67,8 @@ using static go.image.gif_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmqMSAgpS2lIKClIKmgoKClJSAgtiAgraCyIKUpsqCgoKUgoKUgoKAgpSAgtimgoKCgpSSgoKUpoKCgpSClLTogoKmtJSCgILsgoKClIKUgqaCgoKUgsqCgIKkgpSCgoKCgpSClObCgoKUgoKCgqaClJSClJSAgtyCgoKUtoKClIKmgoKSgIKClAANGoCCgpTagIKCgsiCgoLcgqaCgoLKgoIACQaCgIKkgoKCggARJIKU3IKCgpSAgqQACBIABhCygoKCgoKCgoKCgqaqooKAgqQAIEaigoCCpAALGKqigoCCpO6C", "", "", "", "451:21")]
-[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoCCtqamgpSCgpSmgoKUpoKClKaCgpQACAaCgpSCgriCgpSAgoKCgoKCgoKCgpS4goKCyIKCgoKCgoKClIKCgoIACQiCgpSCgpTGgIKUgqSCgpSClJSmgoKCgpYACgaygqaCgqaCgoKUgoKmgoKCgpSAgoLIgoKCgoKUlKaClJSClIKCgoKC3IKAgpSCgoKUyoKmgsiCgpSUgoKCgIKCgoKmgoKCgsiCABkowoKmgqa4gpSCgoKCgoCCyICClLaCgoKClJSCgujEgoKmgoKUgpSCpoKCgIKCgoLayoKClNyCgoKm", "", "", "247=Equal/2/2/1;518=Dx/1/1/5,Dy/1/1/6")]
+[assembly: GoPositionMap("image/gif/reader.go", "reader.cs", "ABUqgoIAIlaCgoKUpoKCgpQAKV6CgpSCgpSCpoKCgriCgoKCuIKCqqKClIKCgriCggACFgAIApSClKamgoKCgoKC3IKCgoKmqMSClKaUgoKUgqaCgoKUlILIgqaCyIKUpsqCgoKUgoKUgoKClIK4poKCgoKUkoKClKaCgoKUgpS06IKCprSUgoLcgoKClIKUgqaCgoKUgsqCgpSClIKCgoKClIKU5sKCgpSCgoKCpoKUlIKUlILcgoKClKaCgpSCpoKCkoKClAAMGoKClMqCgoK4goKC3IKmgoKCyoKCAAkGgoKUgoKCggARJIKU3IKCgpSClAAIEgAGELKCgoKCgoKCgoKCpqqigoKUACBGooKClAALGKqigoKU7oI=", "", "", "", "435:21")]
+[assembly: GoPositionMap("image/gif/writer.go", "writer.cs", "ABw2goKUACJEgqaCpoKCuIKCgriCgqqigoKmpqaClIKClKaCgpSmgoKUpoKClAAIBoKClIKCuIKClIKCgoKCgoKCgoKUuIKCgriCgoKCgoKCgpSCgoKCAAkIgoKUgoKUxoKUgpSCgpSClJSmgoKCgpYACgaygqaCgqaCgoKUgoKmgoKCgpSCgriCgoKCgpSUpoKUlIKUgoKCgoLcgoKUgoKClMqCpoK4goKUlIKCgoKCgoKmgoKCgriCABkowoKmgqa4gpSCgoKCgoK4gpSmgoKCgpSUgoLoxIKCpoKClIKUgqaCgoKCgoLKyoKClNyCgoKm", "", "", "241=Equal/2/2/1;500=Dx/1/1/5,Dy/1/1/6")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

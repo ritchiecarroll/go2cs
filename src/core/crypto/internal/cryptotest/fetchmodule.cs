@@ -45,21 +45,15 @@ public static @string FetchModule(ж<testing.T> t, @string module, @string versi
     var (@out, err) = testenv.CleanCmdEnv(testenv.Command(new testing_TжTB(t), testenv.GoToolPath(new testing_TжTB(t)), envˢ, gomodcacheˢ)).Output();
     if (err != nil) {
         t.Errorf("%s env GOMODCACHE: %v\n%s", testenv.GoToolPath(new testing_TжTB(t)), err, @out);
-        {
-            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
-                t.Logf("%s", ee.Stderr);
-            }
+        var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
+            t.Logf("%s", ee.Stderr);
         }
         t.FailNow();
     }
     var modcacheOk = false;
-    {
-        @string gomodcache = (@string)bytes.TrimSpace(@out); if (gomodcache != ""u8) {
-            {
-                var (_, errΔ1) = os.Stat(gomodcache); if (errΔ1 == nil) {
-                    modcacheOk = true;
-                }
-            }
+    @string gomodcache = (@string)bytes.TrimSpace(@out); if (gomodcache != ""u8) {
+        var (_, errΔ1) = os.Stat(gomodcache); if (errΔ1 == nil) {
+            modcacheOk = true;
         }
     }
     if (!modcacheOk) {
@@ -75,10 +69,8 @@ public static @string FetchModule(ж<testing.T> t, @string module, @string versi
         t.Fatalf("failed to download %s@%s: %s\n%s\n", module, version, err, output);
     }
     ref var j = ref heap(new FetchModule_j(), out var Ꮡj);
-    {
-        var errΔ2 = json.Unmarshal(output, Ꮡj); if (errΔ2 != nil) {
-            t.Fatalf("failed to parse 'go mod download': %s\n%s\n", errΔ2, output);
-        }
+    var errΔ2 = json.Unmarshal(output, Ꮡj); if (errΔ2 != nil) {
+        t.Fatalf("failed to parse 'go mod download': %s\n%s\n", errΔ2, output);
     }
 
     return j.Dir;

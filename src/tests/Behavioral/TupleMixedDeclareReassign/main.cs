@@ -75,10 +75,8 @@ internal static (slice<nint> hw, nint count) fill(nint n) {
     hw = new slice<nint>(n);
     bool ok = default;
     for (nint i = 0; i < n; i++) {
-        {
-            (hw[i], ok) = pairAt(i); if (!ok) {
-                continue;
-            }
+        (hw[i], ok) = pairAt(i); if (!ok) {
+            continue;
         }
         count++;
     }

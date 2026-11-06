@@ -344,10 +344,8 @@ internal static void walk(this ж<state> Ꮡs, reflectꓸValue dot, parse.Node n
         break;
     }
     case ж<parse.TextNode> nodeΔ1: {
-        {
-            var (_, err) = s.wr.Write(nodeΔ1.Text); if (err != nil) {
-                s.writeError(err);
-            }
+        var (_, err) = s.wr.Write(nodeΔ1.Text); if (err != nil) {
+            s.writeError(err);
         }
         break;
     }
@@ -451,10 +449,8 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
 
         s.at(new parse.RangeNodeжNode(Ꮡr));
         defer(() => {
-            {
-                var rΔ1 = recover(); if (rΔ1 != nil && !AreEqual(rΔ1, walkBreak)) {
-                    throw panic(rΔ1);
-                }
+            var rΔ1 = recover(); if (rΔ1 != nil && !AreEqual(rΔ1, walkBreak)) {
+                throw panic(rΔ1);
             }
         }, ref ᒐ);
         defer(Ꮡs.pop, Ꮡs.Value.mark(), ref ᒐ);
@@ -491,10 +487,8 @@ internal static void walkRange(this ж<state> Ꮡs, reflectꓸValue dot, ж<pars
                 defer(Ꮡs.pop, mark, ref ᒐ);
                 defer(() => {
                     // Consume panic(walkContinue)
-                    {
-                        var rΔ2 = recover(); if (rΔ2 != nil && !AreEqual(rΔ2, walkContinue)) {
-                            throw panic(rΔ2);
-                        }
+                    var rΔ2 = recover(); if (rΔ2 != nil && !AreEqual(rΔ2, walkContinue)) {
+                        throw panic(rΔ2);
                     }
                 }, ref ᒐ);
                 Ꮡs.walk(elem, new parse.ListNodeжNode(Ꮡr.Value.List));
@@ -859,10 +853,8 @@ internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot,
     if (ptr.Kind() != reflect.ΔInterface && ptr.Kind() != reflect.ΔPointer && ptr.CanAddr()) {
         ptr = ptr.Addr();
     }
-    {
-        var method = ptr.MethodByName(fieldName); if (method.IsValid()) {
-            return s.evalCall(dot, method, false, node, fieldName, args, final);
-        }
+    var method = ptr.MethodByName(fieldName); if (method.IsValid()) {
+        return s.evalCall(dot, method, false, node, fieldName, args, final);
     }
     var hasArgs = len(args) > 1 || !isMissing(final);
     // It's not a method; must be a field of a struct or an element of a map.
@@ -915,12 +907,10 @@ internal static reflectꓸValue evalField(this ref state s, reflectꓸValue dot,
     case var ᴛ when ᴛ == reflect.ΔPointer: {
         var etyp = receiver.Type().Elem();
         if (etyp.Kind() == reflect.Struct) {
-            {
-                var (_, ok) = etyp.FieldByName(fieldName); if (!ok) {
-                    // If there's no such field, say "can't evaluate"
-                    // instead of "nil pointer evaluating".
-                    break;
-                }
+            var (_, ok) = etyp.FieldByName(fieldName); if (!ok) {
+                // If there's no such field, say "can't evaluate"
+                // instead of "nil pointer evaluating".
+                break;
             }
         }
         if (isNil) {
@@ -957,10 +947,8 @@ internal static reflectꓸValue evalCall(this ref state s, reflectꓸValue dot, 
     } else if (numIn != typ.NumIn()) {
         s.errorf("wrong number of args for %s: want %d got %d", name, typ.NumIn(), numIn);
     }
-    {
-        var errΔ1 = goodFunc(name, typ); if (errΔ1 != nil) {
-            s.errorf("%v", errΔ1);
-        }
+    var errΔ1 = goodFunc(name, typ); if (errΔ1 != nil) {
+        s.errorf("%v", errΔ1);
     }
 
     reflectꓸValue unwrap(reflectꓸValue vΔ1) {
@@ -1174,12 +1162,10 @@ internal static reflectꓸValue evalArg(this ref state s, reflectꓸValue dot, r
 
 internal static reflectꓸValue evalBool(this ref state s, reflectꓸType typ, parse.Node n) {
     s.at(n);
-    {
-        var (nΔ1, ok) = n._<ж<parse.BoolNode>>(ᐧ); if (ok) {
-            var value = reflect.New(typ).Elem();
-            value.SetBool(nΔ1.True);
-            return value;
-        }
+    var (nΔ1, ok) = n._<ж<parse.BoolNode>>(ᐧ); if (ok) {
+        var value = reflect.New(typ).Elem();
+        value.SetBool(nΔ1.True);
+        return value;
     }
     s.errorf("expected bool; found %s", n);
     throw panic("not reached");
@@ -1187,12 +1173,10 @@ internal static reflectꓸValue evalBool(this ref state s, reflectꓸType typ, p
 
 internal static reflectꓸValue evalString(this ref state s, reflectꓸType typ, parse.Node n) {
     s.at(n);
-    {
-        var (nΔ1, ok) = n._<ж<parse.StringNode>>(ᐧ); if (ok) {
-            var value = reflect.New(typ).Elem();
-            value.SetString(nΔ1.Text);
-            return value;
-        }
+    var (nΔ1, ok) = n._<ж<parse.StringNode>>(ᐧ); if (ok) {
+        var value = reflect.New(typ).Elem();
+        value.SetString(nΔ1.Text);
+        return value;
     }
     s.errorf("expected string; found %s", n);
     throw panic("not reached");
@@ -1200,12 +1184,10 @@ internal static reflectꓸValue evalString(this ref state s, reflectꓸType typ,
 
 internal static reflectꓸValue evalInteger(this ref state s, reflectꓸType typ, parse.Node n) {
     s.at(n);
-    {
-        var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsInt) {
-            var value = reflect.New(typ).Elem();
-            value.SetInt(nΔ1.Int64);
-            return value;
-        }
+    var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsInt) {
+        var value = reflect.New(typ).Elem();
+        value.SetInt(nΔ1.Int64);
+        return value;
     }
     s.errorf("expected integer; found %s", n);
     throw panic("not reached");
@@ -1213,12 +1195,10 @@ internal static reflectꓸValue evalInteger(this ref state s, reflectꓸType typ
 
 internal static reflectꓸValue evalUnsignedInteger(this ref state s, reflectꓸType typ, parse.Node n) {
     s.at(n);
-    {
-        var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsUint) {
-            var value = reflect.New(typ).Elem();
-            value.SetUint(nΔ1.Uint64);
-            return value;
-        }
+    var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsUint) {
+        var value = reflect.New(typ).Elem();
+        value.SetUint(nΔ1.Uint64);
+        return value;
     }
     s.errorf("expected unsigned integer; found %s", n);
     throw panic("not reached");
@@ -1226,24 +1206,20 @@ internal static reflectꓸValue evalUnsignedInteger(this ref state s, reflectꓸ
 
 internal static reflectꓸValue evalFloat(this ref state s, reflectꓸType typ, parse.Node n) {
     s.at(n);
-    {
-        var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsFloat) {
-            var value = reflect.New(typ).Elem();
-            value.SetFloat(nΔ1.Float64);
-            return value;
-        }
+    var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsFloat) {
+        var value = reflect.New(typ).Elem();
+        value.SetFloat(nΔ1.Float64);
+        return value;
     }
     s.errorf("expected float; found %s", n);
     throw panic("not reached");
 }
 
 internal static reflectꓸValue evalComplex(this ref state s, reflectꓸType typ, parse.Node n) {
-    {
-        var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsComplex) {
-            var value = reflect.New(typ).Elem();
-            value.SetComplex(nΔ1.Complex128);
-            return value;
-        }
+    var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsComplex) {
+        var value = reflect.New(typ).Elem();
+        value.SetComplex(nΔ1.Complex128);
+        return value;
     }
     s.errorf("expected complex; found %s", n);
     throw panic("not reached");

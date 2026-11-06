@@ -192,25 +192,17 @@ internal static error collectDwarf5BaseOffsets(this ж<Data> Ꮡd, ж<unit> Ꮡu
         // detected at some later point.
         return b.err;
     }
-    {
-        var (iAddrBase, ok) = cu.Val(AttrAddrBase)._<int64>(ᐧ); if (ok) {
-            u.unit5.addrBase = (uint64)iAddrBase;
-        }
+    if (cu.Val(AttrAddrBase)._<int64>(out var iAddrBase)) {
+        u.unit5.addrBase = (uint64)iAddrBase;
     }
-    {
-        var (iStrOffsetsBase, ok) = cu.Val(AttrStrOffsetsBase)._<int64>(ᐧ); if (ok) {
-            u.unit5.strOffsetsBase = (uint64)iStrOffsetsBase;
-        }
+    if (cu.Val(AttrStrOffsetsBase)._<int64>(out var iStrOffsetsBase)) {
+        u.unit5.strOffsetsBase = (uint64)iStrOffsetsBase;
     }
-    {
-        var (iRngListsBase, ok) = cu.Val(AttrRnglistsBase)._<int64>(ᐧ); if (ok) {
-            u.unit5.rngListsBase = (uint64)iRngListsBase;
-        }
+    if (cu.Val(AttrRnglistsBase)._<int64>(out var iRngListsBase)) {
+        u.unit5.rngListsBase = (uint64)iRngListsBase;
     }
-    {
-        var (iLocListsBase, ok) = cu.Val(AttrLoclistsBase)._<int64>(ᐧ); if (ok) {
-            u.unit5.locListsBase = (uint64)iLocListsBase;
-        }
+    if (cu.Val(AttrLoclistsBase)._<int64>(out var iLocListsBase)) {
+        u.unit5.locListsBase = (uint64)iLocListsBase;
     }
     return default;
 }

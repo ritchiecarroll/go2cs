@@ -21,15 +21,13 @@ internal static slice<byte> foldName(slice<byte> @in) {
 internal static slice<byte> appendFoldedName(slice<byte> @out, slice<byte> @in) {
     for (nint i = 0; i < len(@in); ) {
         // Handle single-byte ASCII.
-        {
-            var c = @in[i]; if (c < utf8.RuneSelf) {
-                if ('a' <= c && c <= 'z') {
-                    c -= (byte)((rune)'a' - (rune)'A');
-                }
-                @out = append(@out, c);
-                i++;
-                continue;
+        var c = @in[i]; if (c < utf8.RuneSelf) {
+            if ('a' <= c && c <= 'z') {
+                c -= (byte)((rune)'a' - (rune)'A');
             }
+            @out = append(@out, c);
+            i++;
+            continue;
         }
         // Handle multi-byte Unicode.
         var (r, n) = utf8.DecodeRune(@in.slice(i));

@@ -68,7 +68,7 @@ using static go.math.rand_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("math/rand/exp.go", "exp.cs", "ABI88oKCgoKClIKUgsoANmwAQoQB")]
 [assembly: GoPositionMap("math/rand/normal.go", "normal.cs", "ABIugoKUAAIU8oKCgoKUppSCgoKCpoKUlILKABw4ACJE")]
-[assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADFmwqaCgoIAECiigqrCgIKCtoKokKaQppKClKiQppKCqqKClIKUgoKClKqigpSClIKCgpQAAhgACQKCgoKCgoKCgqaqooKUgpSoABEigoKClKjIgoKClKqi3IKCgpSssoIACBKCgoKUgoK+0pSklKaygoKCgoKClJSUgoKUgoIADRqmmKKAgriSgoKClNzupqgACRKCpoKmgqbCgoKCAAIsABMCgpSUpoKAgoIACxaClJS8oKigqKCooKaQqrCqsKqwqKCooKigqrAAAhDgAAIUAAgAAAIS8P6ygoKCprKCgoKmooKCqMKCgoKqooKUutKCgoI=")]
+[assembly: GoPositionMap("math/rand/rand.go", "rand.cs", "ADFmwqaCgoIAECiigqrCgoKmgqiQppCmkoKUqJCmkoKqooKUgpSCgoKUqqKClIKUgoKClAACGAAJAoKCgoKCgoKCpqqigpSClKgAESKCgoKUqMiCgoKUqqLcgoKClKyyggAIEoKCgpSCgr7SlKSUprKCgoKCgoKUlJSCgpSCggANGqaYooKokoKCgpTc7qaoAAkSgqaCpoKmwoKCggACLAATAoKUlKaCgoIAChaClJS8oKigqKCooKaQqrCqsKqwqKCooKigqrAAAhDgAAIUAAgAAAIS8P6ygoKCprKCgoKmooKCqMKCgoKqooKUutKCgoI=")]
 [assembly: GoPositionMap("math/rand/rng.go", "rng.cs", "ABQwAKABxgKSvIKCgoKUqJKClIKClIKmgoKCgoKCgoKCgoLMkqiSgoKmgoKmgoI=")]
 [assembly: GoPositionMap("math/rand/zipf.go", "zipf.cs", "ABo2gqaCruKCgpSCgoKCgoKCgoKqwoKUlIKCgoKCgpSCpg==")]
 // </GoSourcePositionMaps>

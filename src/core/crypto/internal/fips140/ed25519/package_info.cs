@@ -62,7 +62,7 @@ using static go.crypto.@internal.fips140.ed25519_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("crypto/internal/fips140/ed25519/cast.go", "cast.cs", "ABIegq7CgriCgpSmgoKmgraCgtyCAAkUgoKCgpSCgpQ=", "16-18:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/ed25519/ed25519.go", "ed25519.cs", "ACBGgoKCgqaCgqaCggAHEIKCqJKCpqKCgoKCpoKCpqKCgIKkgoKmooKClIKClIKUpoKCpqKCgIK2lIKClICC2pSUpoKC5qKAgraAgqSCABAgpoKmgoKCpqaCpoKCgoCCpICCpKamgqaClJSAgqSmooKCgoKUgoKCgoKCppSCgoKClIKCgoKCgoKmlIKUpoKmgoKCpoKCgoCCpICCpKaClIKAgqTmooCCtoKmgoKCgpSCgoKCgoKCpoKCuIKUgpQ=")]
+[assembly: GoPositionMap("crypto/internal/fips140/ed25519/ed25519.go", "ed25519.cs", "ACBGgoKCgqaCgqaCggAHEIKCqJKCpqKCgoKCpoKCpqKCgpSCgqaigoKUgoKUgpSmgoKmooKCppSCgpSCypSUpoKC5qKCpoKUggAQIKaCpoKCgqamgqaCgoKAgqSAgqSmpoKmgpSUgpSmooKCgoKUgoKCgoKCppSCgoKClIKCgoKCgoKmlIKUpoKmgoKCpoKCgoCCpICCpKaClIKClOaigqaCpoKCgoKUgoKCgoKCgqaCgriClIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

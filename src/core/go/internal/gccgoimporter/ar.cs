@@ -122,10 +122,8 @@ internal static (io.ReadSeeker, error) standardArExportData(io.ReadSeeker archiv
             size++;
         }
         off += size;
-        {
-            var (_, errΔ2) = archive.Seek(off, io.SeekStart); if (errΔ2 != nil) {
-                return (default, errΔ2);
-            }
+        var (_, errΔ2) = archive.Seek(off, io.SeekStart); if (errΔ2 != nil) {
+            return (default, errΔ2);
         }
     }
 }
@@ -174,10 +172,8 @@ internal static (io.ReadSeeker, error) aixBigArExportData(io.ReadSeeker archive)
 // This is only safe because there won't be any concurrent seeks
 // while this code is executing.
 internal static io.ReaderAt readerAtFromSeeker(io.ReadSeeker rs) {
-    {
-        var (ret, ok) = rs._<io.ReaderAt>(ᐧ); if (ok) {
-            return ret;
-        }
+    var (ret, ok) = rs._<io.ReaderAt>(ᐧ); if (ok) {
+        return ret;
     }
     return new seekerReadAt(rs);
 }
@@ -187,10 +183,8 @@ partial struct seekerReadAt {
 }
 
 internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) {
-    {
-        var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != nil) {
-            return (0, err);
-        }
+    var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != nil) {
+        return (0, err);
     }
     return sra.seeker.Read(p);
 }

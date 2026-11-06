@@ -280,27 +280,25 @@ private static readonly @string rightCommentᵇ = "*/"u8;
 internal static stateFn lexText(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
-    {
-        nint x = strings.Index(l.input.slice(l.pos), l.leftDelim); if (x >= 0) {
-            if (x > 0) {
-                l.pos += ((Pos)x);
-                // Do we trim any trailing space?
-                Pos trimLength = (Pos)0;
-                Pos delimEnd = l.pos + ((Pos)len(l.leftDelim));
-                if (hasLeftTrimMarker(l.input.slice(delimEnd))) {
-                    trimLength = rightTrimLength(l.input.slice(l.start, l.pos));
-                }
-                l.pos -= trimLength;
-                l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
-                var i = l.thisItem(itemText);
-                l.pos += trimLength;
-                l.ignore();
-                if (len(i.val) > 0) {
-                    return l.emitItem(i);
-                }
+    nint x = strings.Index(l.input.slice(l.pos), l.leftDelim); if (x >= 0) {
+        if (x > 0) {
+            l.pos += ((Pos)x);
+            // Do we trim any trailing space?
+            Pos trimLength = (Pos)0;
+            Pos delimEnd = l.pos + ((Pos)len(l.leftDelim));
+            if (hasLeftTrimMarker(l.input.slice(delimEnd))) {
+                trimLength = rightTrimLength(l.input.slice(l.start, l.pos));
             }
-            return lexLeftDelim;
+            l.pos -= trimLength;
+            l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
+            var i = l.thisItem(itemText);
+            l.pos += trimLength;
+            l.ignore();
+            if (len(i.val) > 0) {
+                return l.emitItem(i);
+            }
         }
+        return lexLeftDelim;
     }
     l.pos = (Pos)len(l.input);
     // Correctly reached EOF.
@@ -419,77 +417,75 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
         }
         return l.errorf("unclosed left paren");
     }
-    {
-        var r = l.next();
-        var matchᴛ1 = false;
-        if (r == eof) { matchᴛ1 = true;
-            return l.errorf("unclosed action");
-        }
-        if (isSpace(r)) { matchᴛ1 = true;
-            l.backup(); // Put space back in case we have " -}}".
-            return lexSpace;
-        }
-        if (r is '=') { matchᴛ1 = true;
-            return l.emit(itemAssign);
-        }
-        if (r is ':') { matchᴛ1 = true;
-            if (l.next() != '=') {
-                return l.errorf("expected :=");
-            }
-            return l.emit(itemDeclare);
-        }
-        if (r is '|') { matchᴛ1 = true;
-            return l.emit(itemPipe);
-        }
-        if (r is '"') { matchᴛ1 = true;
-            return lexQuote;
-        }
-        if (r is '`') { matchᴛ1 = true;
-            return lexRawQuote;
-        }
-        if (r is '$') { matchᴛ1 = true;
-            return lexVariable;
-        }
-        if (r is '\'') { matchᴛ1 = true;
-            return lexChar;
-        }
-        if (r is '.') { matchᴛ1 = true;
-            // special look-ahead for ".field" so we don't break l.backup().
-            if (l.pos < ((Pos)len(l.input))) {
-                var rΔ2 = l.input[l.pos];
-                if (rΔ2 < '0' || '9' < rΔ2) {
-                    return lexField;
-                }
-            } // '.' can start a number.
-            fallthrough = true;
-        }
-        if (fallthrough || !matchᴛ1 && (r == '+' || r == '-' || ('0' <= r && r <= '9'))) { matchᴛ1 = true;
-            l.backup();
-            return lexNumber;
-        }
-        if (isAlphaNumeric(r)) { matchᴛ1 = true;
-            l.backup();
-            return lexIdentifier;
-        }
-        if (r is '(') { matchᴛ1 = true;
-            l.parenDepth++;
-            return l.emit(itemLeftParen);
-        }
-        if (r is ')') { matchᴛ1 = true;
-            l.parenDepth--;
-            if (l.parenDepth < 0) {
-                return l.errorf("unexpected right paren");
-            }
-            return l.emit(itemRightParen);
-        }
-        if (r <= unicode.MaxASCII && unicode.IsPrint(r)) {
-            return l.emit(itemChar);
-        }
-        if (!matchᴛ1) { /* default: */
-            return l.errorf("unrecognized character in action: %#U", r);
-        }
-        return default;
+    var r = l.next();
+    var matchᴛ1 = false;
+    if (r == eof) { matchᴛ1 = true;
+        return l.errorf("unclosed action");
     }
+    if (isSpace(r)) { matchᴛ1 = true;
+        l.backup(); // Put space back in case we have " -}}".
+        return lexSpace;
+    }
+    if (r is '=') { matchᴛ1 = true;
+        return l.emit(itemAssign);
+    }
+    if (r is ':') { matchᴛ1 = true;
+        if (l.next() != '=') {
+            return l.errorf("expected :=");
+        }
+        return l.emit(itemDeclare);
+    }
+    if (r is '|') { matchᴛ1 = true;
+        return l.emit(itemPipe);
+    }
+    if (r is '"') { matchᴛ1 = true;
+        return lexQuote;
+    }
+    if (r is '`') { matchᴛ1 = true;
+        return lexRawQuote;
+    }
+    if (r is '$') { matchᴛ1 = true;
+        return lexVariable;
+    }
+    if (r is '\'') { matchᴛ1 = true;
+        return lexChar;
+    }
+    if (r is '.') { matchᴛ1 = true;
+        // special look-ahead for ".field" so we don't break l.backup().
+        if (l.pos < ((Pos)len(l.input))) {
+            var rΔ2 = l.input[l.pos];
+            if (rΔ2 < '0' || '9' < rΔ2) {
+                return lexField;
+            }
+        } // '.' can start a number.
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && (r == '+' || r == '-' || ('0' <= r && r <= '9'))) { matchᴛ1 = true;
+        l.backup();
+        return lexNumber;
+    }
+    if (isAlphaNumeric(r)) { matchᴛ1 = true;
+        l.backup();
+        return lexIdentifier;
+    }
+    if (r is '(') { matchᴛ1 = true;
+        l.parenDepth++;
+        return l.emit(itemLeftParen);
+    }
+    if (r is ')') { matchᴛ1 = true;
+        l.parenDepth--;
+        if (l.parenDepth < 0) {
+            return l.errorf("unexpected right paren");
+        }
+        return l.emit(itemRightParen);
+    }
+    if (r <= unicode.MaxASCII && unicode.IsPrint(r)) {
+        return l.emit(itemChar);
+    }
+    if (!matchᴛ1) { /* default: */
+        return l.errorf("unrecognized character in action: %#U", r);
+    }
+    return default;
 }
 
 // lexSpace scans a run of space characters.
@@ -524,39 +520,37 @@ internal static stateFn lexIdentifier(ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     for (;;) {
-        {
-            var r = l.next();
+        var r = l.next();
+        switch (ᐧ) {
+        case {} when isAlphaNumeric(r): {
+            // absorb.
+            break;
+        }
+        default: {
+            l.backup();
+            @string word = l.input.slice(l.start, l.pos);
+            if (!l.atTerminator()) {
+                return l.errorf("bad character %#U", r);
+            }
             switch (ᐧ) {
-            case {} when isAlphaNumeric(r): {
-                // absorb.
-                break;
+            case {} when key[word] > itemKeyword: {
+                itemType item = key[word];
+                if (item == itemBreak && !l.options.breakOK || item == itemContinue && !l.options.continueOK) {
+                    return l.emit(itemIdentifier);
+                }
+                return l.emit(item);
+            }
+            case {} when word[0] is (byte)'.': {
+                return l.emit(itemField);
+            }
+            case {} when (word == "true"u8) || (word == "false"u8): {
+                return l.emit(itemBool);
             }
             default: {
-                l.backup();
-                @string word = l.input.slice(l.start, l.pos);
-                if (!l.atTerminator()) {
-                    return l.errorf("bad character %#U", r);
-                }
-                switch (ᐧ) {
-                case {} when key[word] > itemKeyword: {
-                    itemType item = key[word];
-                    if (item == itemBreak && !l.options.breakOK || item == itemContinue && !l.options.continueOK) {
-                        return l.emit(itemIdentifier);
-                    }
-                    return l.emit(item);
-                }
-                case {} when word[0] is (byte)'.': {
-                    return l.emit(itemField);
-                }
-                case {} when (word == "true"u8) || (word == "false"u8): {
-                    return l.emit(itemBool);
-                }
-                default: {
-                    return l.emit(itemIdentifier);
-                }}
-                break;
+                return l.emit(itemIdentifier);
             }}
-        }
+            break;
+        }}
     }
 }
 
@@ -629,10 +623,8 @@ Loop:
         var matchᴛ1 = false;
         if (exprᴛ1 is '\\') { matchᴛ1 = true;
             do {
-                {
-                    var r = l.next(); if (r != eof && r != '\n') {
-                        break;
-                    }
+                var r = l.next(); if (r != eof && r != '\n') {
+                    break;
                 }
                 fallthrough = true;
             } while (false);
@@ -659,14 +651,12 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
     if (!l.scanNumber()) {
         return l.errorf("bad number syntax: %q", l.input.slice(l.start, l.pos));
     }
-    {
-        var sign = l.peek(); if (sign == '+' || sign == '-') {
-            // Complex: 1+2i. No spaces, must end in 'i'.
-            if (!l.scanNumber() || l.input[l.pos - 1] != 'i') {
-                return l.errorf("bad number syntax: %q", l.input.slice(l.start, l.pos));
-            }
-            return l.emit(itemComplex);
+    var sign = l.peek(); if (sign == '+' || sign == '-') {
+        // Complex: 1+2i. No spaces, must end in 'i'.
+        if (!l.scanNumber() || l.input[l.pos - 1] != 'i') {
+            return l.errorf("bad number syntax: %q", l.input.slice(l.start, l.pos));
         }
+        return l.emit(itemComplex);
     }
     return l.emit(itemNumber);
 }
@@ -718,10 +708,8 @@ Loop:
         var matchᴛ1 = false;
         if (exprᴛ1 is '\\') { matchᴛ1 = true;
             do {
-                {
-                    var r = l.next(); if (r != eof && r != '\n') {
-                        break;
-                    }
+                var r = l.next(); if (r != eof && r != '\n') {
+                    break;
                 }
                 fallthrough = true;
             } while (false);

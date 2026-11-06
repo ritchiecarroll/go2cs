@@ -84,10 +84,8 @@ internal static void addValueFuncs(map<@string, reflectꓸValue> @out, FuncMap @
         if (v.Kind() != reflect.Func) {
             throw panic("value for " + name + " not a function");
         }
-        {
-            var err = goodFunc(name, v.Type()); if (err != nil) {
-                throw panic(err);
-            }
+        var err = goodFunc(name, v.Type()); if (err != nil) {
+            throw panic(err);
         }
         @out[name] = v;
     }
@@ -104,22 +102,20 @@ internal static void addFuncs(FuncMap @out, FuncMap @in) {
 // goodFunc reports whether the function or method has the right result signature.
 internal static error goodFunc(@string name, reflectꓸType typ) {
     // We allow functions with 1 result or 2 results where the second is an error.
-    {
-        nint numOut = typ.NumOut();
-        switch (ᐧ) {
-        case {} when numOut is 1: {
-            return default;
-        }
-        case {} when numOut == 2 && AreEqual(typ.Out(1), errorType): {
-            return default;
-        }
-        case {} when numOut is 2: {
-            return fmt.Errorf("invalid function signature for %s: second return value should be error; is %s"u8, name, typ.Out(1));
-        }
-        default: {
-            return fmt.Errorf("function %s has %d return values; should be 1 or 2"u8, name, typ.NumOut());
-        }}
+    nint numOut = typ.NumOut();
+    switch (ᐧ) {
+    case {} when numOut is 1: {
+        return default;
     }
+    case {} when numOut == 2 && AreEqual(typ.Out(1), errorType): {
+        return default;
+    }
+    case {} when numOut is 2: {
+        return fmt.Errorf("invalid function signature for %s: second return value should be error; is %s"u8, name, typ.Out(1));
+    }
+    default: {
+        return fmt.Errorf("function %s has %d return values; should be 1 or 2"u8, name, typ.NumOut());
+    }}
 }
 
 // goodName reports whether the function name is a valid identifier.
@@ -154,10 +150,8 @@ internal static (reflectꓸValue v, bool isBuiltin, bool ok) findFunction(@strin
         if (Ꮡtmpl != nil && tmpl.common != nil) {
             Ꮡtmpl.of(Template.ᏑmuFuncs).RLock();
             defer(Ꮡtmpl.of(Template.ᏑmuFuncs).RUnlock, ref ᒐ);
-            {
-                var fn = tmpl.execFuncs[name]; if (fn.IsValid()) {
-                    (v, isBuiltin, ok) = (fn, false, true); goto ᒐdone;
-                }
+            var fn = tmpl.execFuncs[name]; if (fn.IsValid()) {
+                (v, isBuiltin, ok) = (fn, false, true); goto ᒐdone;
             }
         }
         {
@@ -243,10 +237,8 @@ internal static (reflectꓸValue, error) index(reflectꓸValue item, params ꓸ�
 
         index = indirectInterface(index);
         bool isNil = default;
-        {
-            (item, isNil) = indirect(item); if (isNil) {
-                return (new reflectꓸValue(), fmt.Errorf("index of nil pointer"u8));
-            }
+        (item, isNil) = indirect(item); if (isNil) {
+            return (new reflectꓸValue(), fmt.Errorf("index of nil pointer"u8));
         }
         switch (item.Kind()) {
         case var ᴛ when ᴛ == reflect.Array || ᴛ == reflect.ΔSlice || ᴛ == reflect.ΔString: {
@@ -297,10 +289,8 @@ internal static (reflectꓸValue, error) Δslice(reflectꓸValue item, params �
         return (new reflectꓸValue(), fmt.Errorf("slice of untyped nil"u8));
     }
     bool isNil = default;
-    {
-        (item, isNil) = indirect(item); if (isNil) {
-            return (new reflectꓸValue(), fmt.Errorf("slice of nil pointer"u8));
-        }
+    (item, isNil) = indirect(item); if (isNil) {
+        return (new reflectꓸValue(), fmt.Errorf("slice of nil pointer"u8));
     }
     if (len(indexes) > 3) {
         return (new reflectꓸValue(), fmt.Errorf("too many slice indexes: %d"u8, len(indexes)));
@@ -409,10 +399,8 @@ internal static (reflectꓸValue, error) call(@string name, reflectꓸValue fn, 
         }
 
         error err = default;
-        {
-            (argv[i], err) = prepareArg(arg, argType); if (err != nil) {
-                return (new reflectꓸValue(), fmt.Errorf("arg %d: %w"u8, i, err));
-            }
+        (argv[i], err) = prepareArg(arg, argType); if (err != nil) {
+            return (new reflectꓸValue(), fmt.Errorf("arg %d: %w"u8, i, err));
         }
     }
     return safeCall(fn, argv);
@@ -426,15 +414,11 @@ internal static (reflectꓸValue val, error err) safeCall(reflectꓸValue fun, s
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            {
-                var r = recover(); if (r != nil) {
-                    {
-                        var (e, ok) = r._<error>(ᐧ); if (ok) {
-                            err = e;
-                        } else {
-                            err = fmt.Errorf("%v"u8, r);
-                        }
-                    }
+            var r = recover(); if (r != nil) {
+                var (e, ok) = r._<error>(ᐧ); if (ok) {
+                    err = e;
+                } else {
+                    err = fmt.Errorf("%v"u8, r);
                 }
             }
         }, ref ᒐ);

@@ -63,7 +63,7 @@ using static go.@internal.trace.raw_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("internal/trace/raw/event.go", "event.cs", "ACBAwpSCgoKCgoKUgoKCgpSUgoKmgoKUqJKCgoKUgoKClA==")]
 [assembly: GoPositionMap("internal/trace/raw/reader.go", "reader.cs", "ABg0koKSgpSokqiSgoKUgpSClIKCgoKUgoKUgoKUpoKCgoKmAAcQooKCgoKUlLaigoKUgoKCgpSU")]
-[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB86koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgIKklIKCgpS4lKKCgoKClIKUgpSCgqa20oKCgpSCgpSCgpSmgoKCgpSCgqaClIKCgoKmgpSmgoKClIKClA==")]
+[assembly: GoPositionMap("internal/trace/raw/textreader.go", "textreader.cs", "AB86koKCgpSCgpSCgpSCgpSCgpSCgoKCgqaokqiSgoKUgoKClIKCgpSCgoKCgpSClIKClKaCgoKClIKUgoKmAAcQgoKCgpSUgoKClLiUooKCgoKUgpSClIKCprbSgoKClIKClIKClKaCgoKClIKCpoKUgoKCgqaClKaCgoKUgoKU")]
 [assembly: GoPositionMap("internal/trace/raw/textwriter.go", "textwriter.cs", "ABIqkoKClKikgriC")]
 [assembly: GoPositionMap("internal/trace/raw/writer.go", "writer.cs", "ABw8koKopIK4poKClIKCgsqCuIKCgriCgpQ=")]
 // </GoSourcePositionMaps>

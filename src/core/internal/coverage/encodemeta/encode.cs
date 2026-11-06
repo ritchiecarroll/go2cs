@@ -103,12 +103,10 @@ internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.Wri
 
 internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
     nint ew = len(f.encoded);
-    {
-        var (nw, err) = w.Write(f.encoded); if (err != nil) {
-            return (0, err);
-        } else if (ew != nw) {
-            return (0, fmt.Errorf("short write emitting coverage meta-data"u8));
-        }
+    var (nw, err) = w.Write(f.encoded); if (err != nil) {
+        return (0, err);
+    } else if (ew != nw) {
+        return (0, fmt.Errorf("short write emitting coverage meta-data"u8));
     }
     return (off + (int64)ew, default);
 }
@@ -123,12 +121,10 @@ internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker
     b.tmp = b.tmp[..0];
     b.tmp = append(b.tmp, (byte)0, (byte)0, (byte)0, (byte)0);
     binary.LittleEndian.PutUint32(b.tmp, v);
-    {
-        var (nw, err) = w.Write(b.tmp); if (err != nil) {
-            b.reportWriteError(err);
-        } else if (nw != 4) {
-            b.reportWriteError(fmt.Errorf("short write"u8));
-        }
+    var (nw, err) = w.Write(b.tmp); if (err != nil) {
+        b.reportWriteError(err);
+    } else if (nw != 4) {
+        b.reportWriteError(fmt.Errorf("short write"u8));
     }
 }
 

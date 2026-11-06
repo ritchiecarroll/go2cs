@@ -253,10 +253,8 @@ internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @st
     }
     if (d.LookupPackage != nil) {
         // Give LookupPackage a chance.
-        {
-            var (path, okΔ1) = d.LookupPackage(pkg); if (okΔ1) {
-                return (path, true);
-            }
+        var (path, okΔ1) = d.LookupPackage(pkg); if (okΔ1) {
+            return (path, true);
         }
     }
     return DefaultLookupPackage(pkg);
@@ -399,10 +397,8 @@ Spans:
         if (i >= len(lines)) {
             break;
         }
-        {
-            watchdog--; if (watchdog < 0) {
-                throw panic("go/doc/comment: internal error: not making progress");
-            }
+        watchdog--; if (watchdog < 0) {
+            throw panic("go/doc/comment: internal error: not making progress");
         }
 
         spanKind kind = default;
@@ -620,10 +616,8 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
     // allow "'" for possessive "'s" only
     for (@string b = line; ; ) {
         bool ok = default;
-        {
-            (_, b, ok) = strings.Cut(b, "'"); if (!ok) {
-                break;
-            }
+        (_, b, ok) = strings.Cut(b, "'"); if (!ok) {
+            break;
         }
         if (b != "s"u8 && !strings.HasPrefix(b, "s ")) {
             return false; // ' not followed by s and then end-of-word
@@ -633,10 +627,8 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
     // allow "." when followed by non-space
     for (@string b = line; ; ) {
         bool ok = default;
-        {
-            (_, b, ok) = strings.Cut(b, "."); if (!ok) {
-                break;
-            }
+        (_, b, ok) = strings.Cut(b, "."); if (!ok) {
+            break;
         }
         if (b == ""u8 || strings.HasPrefix(b, " ")) {
             return false; // not followed by non-space
@@ -735,10 +727,8 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
     ref var text = ref heap<slice<@string>>(out var Ꮡtext);
     void flush() {
         if (Ꮡitem.ValueSlot != nil) {
-            {
-                var para = Ꮡd.Value.paragraph(Ꮡtext.ValueSlot); if (para != nil) {
-                    Ꮡitem.ValueSlot.Content = append(Ꮡitem.ValueSlot.Content, para);
-                }
+            var para = Ꮡd.Value.paragraph(Ꮡtext.ValueSlot); if (para != nil) {
+                Ꮡitem.ValueSlot.Content = append(Ꮡitem.ValueSlot.Content, para);
             }
         }
         Ꮡtext.ValueSlot = default;
@@ -747,16 +737,14 @@ internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool
     foreach (var (_, vᴛ1) in lines) {
         var line = vᴛ1;
 
-        {
-            ref var n = ref heap<@string>(out var Ꮡn);
-            (n, var after, var ok) = listMarker(line); if (ok && (n != ""u8) == (num != ""u8)) {
-                // start new list item
-                flush();
+        ref var n = ref heap<@string>(out var Ꮡn);
+        (n, var after, var ok) = listMarker(line); if (ok && (n != ""u8) == (num != ""u8)) {
+            // start new list item
+            flush();
 
-                item = Ꮡ(new ListItem(Number: n));
-                list.Items = append(list.Items, item);
-                line = after;
-            }
+            item = Ꮡ(new ListItem(Number: n));
+            list.Items = append(list.Items, item);
+            line = after;
         }
         line = strings.TrimSpace(line);
         if (line == ""u8) {
@@ -784,21 +772,19 @@ internal static (@string num, @string rest, bool ok) listMarker(@string line) {
     }
 
     // Can we find a marker?
-    {
-        var (r, n) = utf8.DecodeRuneInString(line); if (r == '•' || r == '*' || r == '+' || r == '-') {
-            (num, rest) = ("", line.slice(n));
-        } else if ('0' <= line[0] && line[0] <= '9') {
-            nint nΔ1 = 1;
-            while (nΔ1 < len(line) && '0' <= line[nΔ1] && line[nΔ1] <= '9') {
-                nΔ1++;
-            }
-            if (nΔ1 >= len(line) || (line[nΔ1] != '.' && line[nΔ1] != ')')) {
-                return ("", "", false);
-            }
-            (num, rest) = (line.slice(0, nΔ1), line.slice(nΔ1 + 1));
-        } else {
+    var (r, n) = utf8.DecodeRuneInString(line); if (r == '•' || r == '*' || r == '+' || r == '-') {
+        (num, rest) = ("", line.slice(n));
+    } else if ('0' <= line[0] && line[0] <= '9') {
+        nint nΔ1 = 1;
+        while (nΔ1 < len(line) && '0' <= line[nΔ1] && line[nΔ1] <= '9') {
+            nΔ1++;
+        }
+        if (nΔ1 >= len(line) || (line[nΔ1] != '.' && line[nΔ1] != ')')) {
             return ("", "", false);
         }
+        (num, rest) = (line.slice(0, nΔ1), line.slice(nΔ1 + 1));
+    } else {
+        return ("", "", false);
     }
 
     if (!indented(rest) || strings.TrimSpace(rest) == ""u8) {
@@ -853,23 +839,19 @@ internal static slice<ΔText> parseLinkedText(this ж<parseDoc> Ꮡd, @string te
         }
         case (byte)']': {
             if (start >= 0) {
-                {
-                    var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok) {
-                        def.Used = true;
-                        flush(start);
-                        @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(
-                            Text: d.parseText(default, text.slice(start + 1, i), false),
-                            URL: def.URL
-                        )))));
-                        wrote = i + 1;
-                    } else {
-                        var (link, okΔ1) = d.docLink(text.slice(start + 1, i), text.slice(0, start), text.slice(i + 1)); if (okΔ1) {
-                            flush(start);
-                            link.Text = d.parseText(default, text.slice(start + 1, i), false);
-                            @out = append(@out, (ΔText)(new DocLinkжΔText(link)));
-                            wrote = i + 1;
-                        }
-                    }
+                var (def, ok) = d.links[tmpstring(buf), ꟷ]; if (ok) {
+                    def.Used = true;
+                    flush(start);
+                    @out = append(@out, (ΔText)(new LinkжΔText(Ꮡ(new Link(
+                        Text: d.parseText(default, text.slice(start + 1, i), false),
+                        URL: def.URL
+                    )))));
+                    wrote = i + 1;
+                } else if (d.docLink(text.slice(start + 1, i), text.slice(0, start), text.slice(i + 1)) is var (link, okΔ1) && okΔ1) {
+                    flush(start);
+                    link.Text = d.parseText(default, text.slice(start + 1, i), false);
+                    @out = append(@out, (ΔText)(new DocLinkжΔText(link)));
+                    wrote = i + 1;
                 }
             }
             start = -1;
@@ -916,16 +898,12 @@ internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string
         (pkg, recv, _) = splitDocName(pkg);
     }
     if (pkg != ""u8) {
-        {
-            (pkg, ok) = d.lookupPkg(pkg); if (!ok) {
-                return (default, false);
-            }
+        (pkg, ok) = d.lookupPkg(pkg); if (!ok) {
+            return (default, false);
         }
     } else {
-        {
-            ok = d.lookupSym(recv, name); if (!ok) {
-                return (default, false);
-            }
+        ok = d.lookupSym(recv, name); if (!ok) {
+            return (default, false);
         }
     }
     link = Ꮡ(new DocLink(
@@ -1266,14 +1244,12 @@ internal static (@string id, bool ok) ident(@string s) {
     // Scan [\pL_][\pL_0-9]*
     nint n = 0;
     while (n < len(s)) {
-        {
-            var c = s[n]; if (c < utf8.RuneSelf) {
-                if (isIdentASCII(c) && (n > 0 || c < '0' || c > '9')) {
-                    n++;
-                    continue;
-                }
-                break;
+        var c = s[n]; if (c < utf8.RuneSelf) {
+            if (isIdentASCII(c) && (n > 0 || c < '0' || c > '9')) {
+                n++;
+                continue;
             }
+            break;
         }
         var (r, nr) = utf8.DecodeRuneInString(s.slice(n));
         if (unicode.IsLetter(r)) {

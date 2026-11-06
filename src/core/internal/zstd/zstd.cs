@@ -109,10 +109,8 @@ public static void Reset(this ref Reader r, io.Reader input) {
 public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        var err = Ꮡr.refillIfNeeded(); if (err != nil) {
-            return (0, err);
-        }
+    var err = Ꮡr.refillIfNeeded(); if (err != nil) {
+        return (0, err);
     }
     nint n = copy(p, r.buffer.slice(r.off));
     r.off += n;
@@ -123,10 +121,8 @@ public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
 public static (byte, error) ReadByte(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    {
-        var err = Ꮡr.refillIfNeeded(); if (err != nil) {
-            return (0, err);
-        }
+    var err = Ꮡr.refillIfNeeded(); if (err != nil) {
+        return (0, err);
     }
     var ret = r.buffer[r.off];
     r.off++;
@@ -138,10 +134,8 @@ internal static error refillIfNeeded(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     while (r.off >= builtin.len(r.buffer)) {
-        {
-            var err = Ꮡr.refill(); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡr.refill(); if (err != nil) {
+            return err;
         }
         r.off = 0;
     }
@@ -153,10 +147,8 @@ internal static error refill(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.sawFrameHeader) {
-        {
-            var err = r.readFrameHeader(); if (err != nil) {
-                return err;
-            }
+        var err = r.readFrameHeader(); if (err != nil) {
+            return err;
         }
     }
     return Ꮡr.readBlock();
@@ -188,22 +180,18 @@ retry:
         }
     }
 
-    {
-        var magic = binary.LittleEndian.Uint32(r.scratch[..4]); if (magic != 0xfd2fb528U) {
-            if (magic >= 0x184d2a50 && magic <= 0x184d2a5f) {
-                // This is a skippable frame.
-                r.blockOffset += (int64)relativeOffset + 4;
-                {
-                    var err = r.skipFrame(); if (err != nil) {
-                        return err;
-                    }
-                }
-                r.readOneFrame = true;
-                goto retry;
+    var magic = binary.LittleEndian.Uint32(r.scratch[..4]); if (magic != 0xfd2fb528U) {
+        if (magic >= 0x184d2a50 && magic <= 0x184d2a5f) {
+            // This is a skippable frame.
+            r.blockOffset += (int64)relativeOffset + 4;
+            var err = r.skipFrame(); if (err != nil) {
+                return err;
             }
-
-            return r.makeError(relativeOffset, invalidMagicNumberˢ);
+            r.readOneFrame = true;
+            goto retry;
         }
+
+        return r.makeError(relativeOffset, invalidMagicNumberˢ);
     }
 
     relativeOffset += 4;
@@ -241,10 +229,8 @@ retry:
 
     // Dictionary_ID_Flag. RFC 3.1.1.1.1.6.
     nint dictionaryIdSize = 0;
-    {
-        var dictIdFlag = (byte)(descriptor & 3); if (dictIdFlag != 0) {
-            dictionaryIdSize = ((nint)1).Lsh((uint64)((byte)(dictIdFlag - 1)));
-        }
+    var dictIdFlag = (byte)(descriptor & 3); if (dictIdFlag != 0) {
+        dictionaryIdSize = ((nint)1).Lsh((uint64)((byte)(dictIdFlag - 1)));
     }
 
     relativeOffset++;
@@ -353,10 +339,8 @@ retry:
 internal static error skipFrame(this ref Reader r) {
     nint relativeOffset = 0;
 
-    {
-        var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != nil) {
-            return r.wrapNonEOFError(relativeOffset, errΔ1);
-        }
+    var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != nil) {
+        return r.wrapNonEOFError(relativeOffset, errΔ1);
     }
 
     relativeOffset += 4;
@@ -367,32 +351,30 @@ internal static error skipFrame(this ref Reader r) {
         return default;
     }
 
-    {
-        var (seeker, ok) = r.r._<io.Seeker>(ᐧ); if (ok) {
-            r.blockOffset += (int64)relativeOffset;
-            // Implementations of Seeker do not always detect invalid offsets,
-            // so check that the new offset is valid by comparing to the end.
-            var (prev, errΔ2) = seeker.Seek(0, io.SeekCurrent);
-            if (errΔ2 != nil) {
-                return r.wrapError(0, errΔ2);
-            }
-            (var end, errΔ2) = seeker.Seek(0, io.SeekEnd);
-            if (errΔ2 != nil) {
-                return r.wrapError(0, errΔ2);
-            }
-            if (prev > end - (int64)size) {
-                r.blockOffset += end - prev;
-                return r.makeEOFError(0);
-            }
-
-            // The new offset is valid, so seek to it.
-            (_, errΔ2) = seeker.Seek(prev + (int64)size, io.SeekStart);
-            if (errΔ2 != nil) {
-                return r.wrapError(0, errΔ2);
-            }
-            r.blockOffset += (int64)size;
-            return default;
+    var (seeker, ok) = r.r._<io.Seeker>(ᐧ); if (ok) {
+        r.blockOffset += (int64)relativeOffset;
+        // Implementations of Seeker do not always detect invalid offsets,
+        // so check that the new offset is valid by comparing to the end.
+        var (prev, errΔ2) = seeker.Seek(0, io.SeekCurrent);
+        if (errΔ2 != nil) {
+            return r.wrapError(0, errΔ2);
         }
+        (var end, errΔ2) = seeker.Seek(0, io.SeekEnd);
+        if (errΔ2 != nil) {
+            return r.wrapError(0, errΔ2);
+        }
+        if (prev > end - (int64)size) {
+            r.blockOffset += end - prev;
+            return r.makeEOFError(0);
+        }
+
+        // The new offset is valid, so seek to it.
+        (_, errΔ2) = seeker.Seek(prev + (int64)size, io.SeekStart);
+        if (errΔ2 != nil) {
+            return r.wrapError(0, errΔ2);
+        }
+        r.blockOffset += (int64)size;
+        return default;
     }
 
     var (n, err) = io.CopyN(io.Discard, r.r, (int64)size);
@@ -503,10 +485,8 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         }
         // Check for checksum at end of frame. RFC 3.1.1.
         if (r.hasChecksum) {
-            {
-                var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != nil) {
-                    return r.wrapNonEOFError(0, err);
-                }
+            var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != nil) {
+                return r.wrapNonEOFError(0, err);
             }
 
             var inputChecksum = binary.LittleEndian.Uint32(r.scratch[..4]);

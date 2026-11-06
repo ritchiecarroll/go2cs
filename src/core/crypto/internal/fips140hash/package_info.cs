@@ -56,7 +56,7 @@ using static go.crypto.@internal.fips140hash_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140hash/hash.go", "hash.cs", "AA0eAAQQ4oCCpKrC", "33-33:1")]
+[assembly: GoPositionMap("crypto/internal/fips140hash/hash.go", "hash.cs", "AA0eAAQQ4oKUqsI=", "33-33:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

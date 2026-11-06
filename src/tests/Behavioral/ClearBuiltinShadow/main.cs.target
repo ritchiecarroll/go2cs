@@ -29,10 +29,8 @@ internal static void recover(this ж<guard> Ꮡg) {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var g = ref Ꮡg.DerefOrNull();
 
-        {
-            var e = builtin.recover(calledByDefer); if (e != nil) {
-                g.err = fmt.Errorf("recovered: %v"u8, e);
-            }
+        var e = builtin.recover(calledByDefer); if (e != nil) {
+            g.err = fmt.Errorf("recovered: %v"u8, e);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

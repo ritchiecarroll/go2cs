@@ -119,10 +119,8 @@ public static Object Insert(this ж<ΔScope> Ꮡs, Object obj) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @string name = obj.Name();
-    {
-        var alt = s.Lookup(name); if (alt != nil) {
-            return alt;
-        }
+    var alt = s.Lookup(name); if (alt != nil) {
+        return alt;
     }
     s.insert(name, obj);
     // TODO(gri) Can we always set the parent to s (or is there
@@ -216,10 +214,8 @@ internal static Object resolve(@string name, Object obj) {
             lazy.Ꮡonce.Do(() => {
                 var objΔ1 = lazyʗ1.resolve();
 
-                {
-                    var (_, okΔ1) = objΔ1._<ж<lazyObject>>(ᐧ); if (okΔ1) {
-                        throw panic("recursive lazy object");
-                    }
+                var (_, okΔ1) = objΔ1._<ж<lazyObject>>(ᐧ); if (okΔ1) {
+                    throw panic("recursive lazy object");
                 }
                 if (objΔ1.Name() != name) {
                     throw panic("lazy object has unexpected name");

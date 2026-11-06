@@ -67,7 +67,7 @@ using static go.debug.plan9obj_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("debug/plan9obj/file.go", "file.cs", "AEOIAZKokAAVKoKCgpSCqJKCgpSCgoKUgqyygoKClKaCgpSU+qKEkoCCpIKCpoKAgrYACRKCgIKkgoKmAAcWlJSCgsqCgoKmpoKCgoKUgqaCgpSCpoKUgoKWkoKCgoKmlIKCgoLIgpSCgpSUqqKCgoKUgqaCgpKCgoKCgpS0goKCgpSAgqS2lKSUgqbK9pKCgqaCgqaqooKCpg==", "267-270:1;277-304:2")]
+[assembly: GoPositionMap("debug/plan9obj/file.go", "file.cs", "AEOIAZKokAAVKoKCgpSCqJKCgpSCgoKUgqyygoKClKaCgpSU+qKEkoKUgoKmgoKmAAkSgoKUgoKmAAcWlJSCgsqCgoKmpoKCgoKUgqaCgpSCpoKUgoKWkoKCgoKmlIKCgoLIgpSCgpSUqqKCgoKUgqaCgpKCgoKCgpS0goKCgpSClLaUpJSCpsr2koKCpoKCpqqigoKm", "267-270:1;277-304:2")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

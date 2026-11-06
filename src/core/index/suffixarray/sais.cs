@@ -832,10 +832,8 @@ internal static void induceL_8_32(slice<byte> text, slice<int32> sa, slice<int32
         nint kΔ1 = j - 1;
         var c1Δ1 = text[kΔ1];
         if (kΔ1 > 0) {
-            {
-                var c0Δ1 = text[kΔ1 - 1]; if (c0Δ1 < c1Δ1) {
-                    kΔ1 = -kΔ1;
-                }
+            var c0Δ1 = text[kΔ1 - 1]; if (c0Δ1 < c1Δ1) {
+                kΔ1 = -kΔ1;
             }
         }
 
@@ -879,10 +877,8 @@ internal static void induceS_8_32(slice<byte> text, slice<int32> sa, slice<int32
         nint k = j - 1;
         var c1 = text[k];
         if (k > 0) {
-            {
-                var c0 = text[k - 1]; if (c0 <= c1) {
-                    k = -k;
-                }
+            var c0 = text[k - 1]; if (c0 <= c1) {
+                k = -k;
             }
         }
 

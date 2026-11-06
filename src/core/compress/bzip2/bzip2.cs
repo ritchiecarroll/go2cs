@@ -255,10 +255,8 @@ internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) {
             if (b != 'B' || z != 'Z') {
                 return (0, ((StructuralError)(@string)badMagicValueInˢ));
             }
-            {
-                var errΔ1 = Ꮡbz2.setup(false); if (errΔ1 != nil) {
-                    return (0, errΔ1);
-                }
+            var errΔ1 = Ꮡbz2.setup(false); if (errΔ1 != nil) {
+                return (0, errΔ1);
             }
             break;
         }}

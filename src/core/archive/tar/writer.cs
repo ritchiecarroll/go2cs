@@ -53,15 +53,11 @@ public static error Flush(this ref Writer tw) {
     if (tw.err != nil) {
         return tw.err;
     }
-    {
-        var nb = tw.curr.logicalRemaining(); if (nb > 0) {
-            return fmt.Errorf("archive/tar: missed writing %d bytes"u8, nb);
-        }
+    var nb = tw.curr.logicalRemaining(); if (nb > 0) {
+        return fmt.Errorf("archive/tar: missed writing %d bytes"u8, nb);
     }
-    {
-        (_, tw.err) = tw.w.Write(zeroBlock.slice(0, (nint)(tw.pad))); if (tw.err != nil) {
-            return tw.err;
-        }
+    (_, tw.err) = tw.w.Write(zeroBlock.slice(0, (nint)(tw.pad))); if (tw.err != nil) {
+        return tw.err;
     }
     tw.pad = 0;
     return default;
@@ -75,10 +71,8 @@ public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
-    {
-        var errΔ1 = tw.Flush(); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = tw.Flush(); if (errΔ1 != nil) {
+        return errΔ1;
     }
     tw.hdr = hdr; // Shallow copy of Header
 
@@ -128,10 +122,8 @@ internal static error writeUSTARHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr)
 
     // Check if we can use USTAR prefix/suffix splitting.
     @string namePrefix = default;
-    {
-        var (prefix, suffix, ok) = splitUSTARPath(hdr.Name); if (ok) {
-            (namePrefix, hdr.Name) = (prefix, suffix);
-        }
+    var (prefix, suffix, ok) = splitUSTARPath(hdr.Name); if (ok) {
+        (namePrefix, hdr.Name) = (prefix, suffix);
     }
 
     // Pack the main header.
@@ -273,18 +265,14 @@ internal static error writeGNUHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     @string longName = longNameᶜ;
     if (len(hdr.Name) > nameSize) {
         @string data = hdr.Name + "\x00"u8;
-        {
-            var err = Ꮡtw.writeRawFile(longName, data, TypeGNULongName, FormatGNU); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡtw.writeRawFile(longName, data, TypeGNULongName, FormatGNU); if (err != nil) {
+            return err;
         }
     }
     if (len(hdr.Linkname) > nameSize) {
         @string data = hdr.Linkname + "\x00"u8;
-        {
-            var err = Ꮡtw.writeRawFile(longName, data, TypeGNULongLink, FormatGNU); if (err != nil) {
-                return err;
-            }
+        var err = Ꮡtw.writeRawFile(longName, data, TypeGNULongLink, FormatGNU); if (err != nil) {
+            return err;
         }
     }
 
@@ -347,10 +335,8 @@ internal static error writeGNUHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     // Write the extended sparse map and setup the sparse writer if necessary.
     if (len(spd) > 0) {
         // Use tw.w since the sparse map is not accounted for in hdr.Size.
-        {
-            var (_, err) = tw.w.Write(spb); if (err != nil) {
-                return err;
-            }
+        var (_, err) = tw.w.Write(spb); if (err != nil) {
+            return err;
         }
         tw.curr = new sparseFileWriterжfileWriter(Ꮡ(new sparseFileWriter(tw.curr, spd, 0)));
     }
@@ -427,10 +413,8 @@ internal static error writeRawFile(this ж<Writer> Ꮡtw, @string name, @string 
     }
 
     // Write the header and data.
-    {
-        var errΔ1 = tw.writeRawHeader(Ꮡtw.Ꮡblk, (int64)len(data), flag); if (errΔ1 != nil) {
-            return errΔ1;
-        }
+    var errΔ1 = tw.writeRawHeader(Ꮡtw.Ꮡblk, (int64)len(data), flag); if (errΔ1 != nil) {
+        return errΔ1;
     }
     var (_, err) = io.WriteString(new WriterжWriter(Ꮡtw), data);
     return err;
@@ -482,16 +466,14 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
                 return err;
             }
             @string linkTarget = ""u8;
-            {
-                var typ = d.Type(); if (typ == fs.ModeSymlink) {
-                    error errΔ1 = default;
-                    (linkTarget, errΔ1) = fs.ReadLink(fsys, name);
-                    if (errΔ1 != nil) {
-                        return errΔ1;
-                    }
-                } else if (!typ.IsRegular() && typ != fs.ModeDir) {
-                    return errors.New(tarCannotAddNonRegularˢ);
+            var typ = d.Type(); if (typ == fs.ModeSymlink) {
+                error errΔ1 = default;
+                (linkTarget, errΔ1) = fs.ReadLink(fsys, name);
+                if (errΔ1 != nil) {
+                    return errΔ1;
                 }
+            } else if (!typ.IsRegular() && typ != fs.ModeDir) {
+                return errors.New(tarCannotAddNonRegularˢ);
             }
             (var h, err) = FileInfoHeader(info, linkTarget);
             if (err != nil) {
@@ -501,10 +483,8 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
             if (d.IsDir()) {
                 h.Name += "/"u8;
             }
-            {
-                var errΔ2 = Ꮡtw.WriteHeader(h); if (errΔ2 != nil) {
-                    return errΔ2;
-                }
+            var errΔ2 = Ꮡtw.WriteHeader(h); if (errΔ2 != nil) {
+                return errΔ2;
             }
             if (!d.Type().IsRegular()) {
                 return default;
@@ -714,10 +694,8 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
 
     var (rs, ok) = r._<io.ReadSeeker>(ᐧ);
     if (ok) {
-        {
-            var (_, errΔ1) = rs.Seek(0, io.SeekCurrent); if (errΔ1 != nil) {
-                ok = false; // Not all io.Seeker can really seek
-            }
+        var (_, errΔ1) = rs.Seek(0, io.SeekCurrent); if (errΔ1 != nil) {
+            ok = false; // Not all io.Seeker can really seek
         }
     }
     if (!ok) {

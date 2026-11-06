@@ -19,12 +19,10 @@ public static iter.Seq<slice<byte>> Lines(slice<byte> s) {
     return (Func<slice<byte>, bool> yield) => {
         while (len(s) > 0) {
             slice<byte> line = default;
-            {
-                nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
-                    (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
-                } else {
-                    (line, s) = (s, default);
-                }
+            nint i = IndexByte(s, (byte)'\n'); if (i >= 0) {
+                (line, s) = (s.slice(0, i + 1), s.slice(i + 1));
+            } else {
+                (line, s) = (s, default);
             }
             if (!yield(line.slice(0, len(line), len(line)))) {
                 return;

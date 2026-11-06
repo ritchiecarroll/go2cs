@@ -33,10 +33,8 @@ internal static @string inspect(any n) {
 
 internal static (@string, @string) classifyVia(any v) {
     any unwrap(any vΔ1) {
-        {
-            var (p, ok) = vΔ1._<ж<node>>(ᐧ); if (ok) {
-                return p.inner;
-            }
+        var (p, ok) = vΔ1._<ж<node>>(ᐧ); if (ok) {
+            return p.inner;
         }
         return vΔ1;
     }

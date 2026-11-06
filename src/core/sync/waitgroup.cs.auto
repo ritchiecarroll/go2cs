@@ -260,20 +260,18 @@ public static partial void Go(this ж<WaitGroup> Ꮡwg, Action f) {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                {
-                    var x = recover(); if (x != nil) {
-                        // f panicked, which will be fatal because
-                        // this is a new goroutine.
-                        //
-                        // Calling Done will unblock Wait in the main goroutine,
-                        // allowing it to race with the fatal panic and
-                        // possibly even exit the process (os.Exit(0))
-                        // before the panic completes.
-                        //
-                        // This is almost certainly undesirable,
-                        // so instead avoid calling Done and simply panic.
-                        throw panic(x);
-                    }
+                var x = recover(); if (x != nil) {
+                    // f panicked, which will be fatal because
+                    // this is a new goroutine.
+                    //
+                    // Calling Done will unblock Wait in the main goroutine,
+                    // allowing it to race with the fatal panic and
+                    // possibly even exit the process (os.Exit(0))
+                    // before the panic completes.
+                    //
+                    // This is almost certainly undesirable,
+                    // so instead avoid calling Done and simply panic.
+                    throw panic(x);
                 }
 
                 // f completed normally, or abruptly using goexit.

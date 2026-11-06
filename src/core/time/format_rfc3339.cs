@@ -154,12 +154,10 @@ internal static (Time, bool) parseRFC3339<bytes>(bytes s, ж<ΔLocation> local)
         t.addSec(-(int64)zoneOffset);
 
         // Use local zone with the given offset if possible.
-        {
-            var (_, offset, _, _, _) = local.lookup(t.unixSec()); if (offset == zoneOffset) {
-                t.setLoc(local);
-            } else {
-                t.setLoc(FixedZone(""u8, zoneOffset));
-            }
+        var (_, offset, _, _, _) = local.lookup(t.unixSec()); if (offset == zoneOffset) {
+            t.setLoc(local);
+        } else {
+            t.setLoc(FixedZone(""u8, zoneOffset));
         }
     }
     return (t, true);

@@ -149,10 +149,8 @@ internal static void buildCommonHeaderMaps() {
 // used on the wire for HTTP/2 and HTTP/3 requests.
 public static (@string lower, bool ascii) LowerHeader(@string v) {
     buildCommonHeaderMapsOnce();
-    {
-        var (s, ok) = commonLowerHeader[v, ꟷ]; if (ok) {
-            return (s, true);
-        }
+    var (s, ok) = commonLowerHeader[v, ꟷ]; if (ok) {
+        return (s, true);
     }
     return asciiToLower(v);
 }
@@ -160,10 +158,8 @@ public static (@string lower, bool ascii) LowerHeader(@string v) {
 // CanonicalHeader canonicalizes a header name. (For example, "host" becomes "Host".)
 public static @string CanonicalHeader(@string v) {
     buildCommonHeaderMapsOnce();
-    {
-        var (s, ok) = commonCanonHeader[v, ꟷ]; if (ok) {
-            return s;
-        }
+    var (s, ok) = commonCanonHeader[v, ꟷ]; if (ok) {
+        return s;
     }
     return textproto.CanonicalMIMEHeaderKey(v);
 }
@@ -262,10 +258,8 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
     ref var req = ref heap<Request>(param.Request, out var Ꮡreq);
 
     // Check for invalid connection-level headers.
-    {
-        var errΔ1 = checkConnHeaders(req.Header); if (errΔ1 != nil) {
-            return (res, errΔ1);
-        }
+    var errΔ1 = checkConnHeaders(req.Header); if (errΔ1 != nil) {
+        return (res, errΔ1);
     }
 
     if (req.URL == nil) {
@@ -318,15 +312,11 @@ public static (EncodeHeadersResult res, error) EncodeHeaders(context.Context ctx
     // Check for any invalid headers+trailers and return an error before we
     // potentially pollute our hpack state. (We want to be able to
     // continue to reuse the hpack encoder for future requests)
-    {
-        @string errΔ2 = validateHeaders(req.Header); if (errΔ2 != ""u8) {
-            return (res, fmt.Errorf("invalid HTTP header %s"u8, errΔ2));
-        }
+    @string errΔ2 = validateHeaders(req.Header); if (errΔ2 != ""u8) {
+        return (res, fmt.Errorf("invalid HTTP header %s"u8, errΔ2));
     }
-    {
-        @string errΔ3 = validateHeaders(req.Trailer); if (errΔ3 != ""u8) {
-            return (res, fmt.Errorf("invalid HTTP trailer %s"u8, errΔ3));
-        }
+    @string errΔ3 = validateHeaders(req.Trailer); if (errΔ3 != ""u8) {
+        return (res, fmt.Errorf("invalid HTTP trailer %s"u8, errΔ3));
     }
 
     (var trailers, err) = commaSeparatedTrailers(req.Trailer);
@@ -652,10 +642,8 @@ public static ServerRequestResult NewServerRequest(ServerRequestParam rp) {
         delete(rp.Header, "Expect"u8);
     }
     // Merge Cookie headers into one "; "-delimited value.
-    {
-        var cookies = rp.Header[cookieˢ2]; if (len(cookies) > 1) {
-            rp.Header[cookieˢ2] = slice<@string>([strings.Join(cookies, "; ")]);
-        }
+    var cookies = rp.Header[cookieˢ2]; if (len(cookies) > 1) {
+        rp.Header[cookieˢ2] = slice<@string>([strings.Join(cookies, "; ")]);
     }
 
     // Setup Trailers

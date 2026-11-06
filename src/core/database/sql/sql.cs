@@ -67,10 +67,8 @@ public static void Register(@string name, driver.Driver driverΔ1) {
         if (driverΔ1 == nil) {
             throw panic("sql: Register driver is nil");
         }
-        {
-            var (_, dup) = drivers[name, ꟷ]; if (dup) {
-                throw panic("sql: Register called twice for driver " + name);
-            }
+        var (_, dup) = drivers[name, ꟷ]; if (dup) {
+            throw panic("sql: Register called twice for driver " + name);
         }
         drivers[name] = driverΔ1;
     }
@@ -495,14 +493,12 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     }
     var v = (any)(n.V).OrTypedNilOf();
     // See issue 69728.
-    {
-        var (valuer, ok) = v._<driver.Valuer>(ᐧ); if (ok) {
-            var (val, err) = callValuerValue(valuer);
-            if (err != nil) {
-                return (val, err);
-            }
-            v = val;
+    var (valuer, ok) = v._<driver.Valuer>(ᐧ); if (ok) {
+        var (val, err) = callValuerValue(valuer);
+        if (err != nil) {
+            return (val, err);
         }
+        v = val;
     }
     // See issue 69837.
     return driver.DefaultParameterConverter.ConvertValue(v);
@@ -671,10 +667,8 @@ internal static error resetSession(this ж<driverConn> Ꮡdc, context.Context ct
         if (!dc.needReset) {
             return default;
         }
-        {
-            var (cr, ok) = dc.ci._<driver.SessionResetter>(ᐧ); if (ok) {
-                return cr.ResetSession(ctx);
-            }
+        var (cr, ok) = dc.ci._<driver.SessionResetter>(ᐧ); if (ok) {
+            return cr.ResetSession(ctx);
         }
         return default;
     }
@@ -696,10 +690,8 @@ internal static bool validateConnection(this ж<driverConn> Ꮡdc, bool needsRes
         if (needsReset) {
             dc.needReset = true;
         }
-        {
-            var (cv, ok) = dc.ci._<driver.Validator>(ᐧ); if (ok) {
-                return cv.IsValid();
-            }
+        var (cv, ok) = dc.ci._<driver.Validator>(ᐧ); if (ok) {
+            return cv.IsValid();
         }
         return true;
     }
@@ -994,14 +986,12 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
         return (default, fmt.Errorf("sql: unknown driver %q (forgotten import?)"u8, driverName));
     }
 
-    {
-        var (driverCtx, okΔ1) = driveri._<driver.DriverContext>(ᐧ); if (okΔ1) {
-            var (connector, err) = driverCtx.OpenConnector(dataSourceName);
-            if (err != nil) {
-                return (default, err);
-            }
-            return (OpenDB(connector), default);
+    var (driverCtx, okΔ1) = driveri._<driver.DriverContext>(ᐧ); if (okΔ1) {
+        var (connector, err) = driverCtx.OpenConnector(dataSourceName);
+        if (err != nil) {
+            return (default, err);
         }
+        return (OpenDB(connector), default);
     }
 
     return (OpenDB(new dsnConnector(dsn: dataSourceName, driver: driveri)), default);
@@ -1086,12 +1076,10 @@ public static error Close(this ж<DB> Ꮡdb) {
         }
     }
     db.stop();
-    {
-        var (c, ok) = db.connector._<io.Closer>(ᐧ); if (ok) {
-            var err1 = c.Close();
-            if (err1 != nil) {
-                err = err1;
-            }
+    var (c, ok) = db.connector._<io.Closer>(ᐧ); if (ok) {
+        var err1 = c.Close();
+        if (err1 != nil) {
+            err = err1;
         }
     }
     return err;
@@ -1337,12 +1325,10 @@ internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLocke
 
         if (len(db.freeConn) > 0) {
             var c = db.freeConn[0];
-            {
-                var d2 = c.returnedAt.Sub(idleSince); if (d2 < d) {
-                    // Ensure idle connections are cleaned up as soon as
-                    // possible.
-                    d = d2;
-                }
+            var d2 = c.returnedAt.Sub(idleSince); if (d2 < d) {
+                // Ensure idle connections are cleaned up as soon as
+                // possible.
+                d = d2;
             }
         }
     }
@@ -1361,12 +1347,10 @@ internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLocke
                 db.freeConn[last] = default;
                 db.freeConn = db.freeConn.slice(0, last);
                 i--;
-            } else {
-                var d2 = c.createdAt.Sub(expiredSince); if (d2 < d) {
-                    // Prevent connections sitting the freeConn when they
-                    // have expired by updating our next deadline d.
-                    d = d2;
-                }
+            } else if (c.createdAt.Sub(expiredSince) is var d2 && d2 < d) {
+                // Prevent connections sitting the freeConn when they
+                // have expired by updating our next deadline d.
+                d = d2;
             }
         }
         db.maxLifetimeClosed += (int64)len(closing) - idleClosing;
@@ -1551,11 +1535,9 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
         db.mu.Unlock();
 
         // Reset the session if required.
-        {
-            var errΔ1 = conn.resetSession(ctx); if (errors.Is(errΔ1, driver.ErrBadConn)) {
-                conn.Close();
-                return (default, errΔ1);
-            }
+        var errΔ1 = conn.resetSession(ctx); if (errors.Is(errΔ1, driver.ErrBadConn)) {
+            conn.Close();
+            return (default, errΔ1);
         }
 
         return (conn, default);
@@ -1633,11 +1615,9 @@ internal static (ж<driverConn>, error) conn(this ж<DB> Ꮡdb, context.Context 
             }
 
             // Reset the session if required.
-            {
-                var errΔ2 = ret.conn.resetSession(ctx); if (errors.Is(errΔ2, driver.ErrBadConn)) {
-                    ret.conn.Close();
-                    return (default, errΔ2);
-                }
+            var errΔ2 = ret.conn.resetSession(ctx); if (errors.Is(errΔ2, driver.ErrBadConn)) {
+                ret.conn.Close();
+                return (default, errΔ2);
             }
             return (ret.conn, ret.err);
         }}
@@ -1779,24 +1759,22 @@ internal static bool putConnDBLocked(this ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, er
     if (db.maxOpen > 0 && db.numOpen > db.maxOpen) {
         return false;
     }
-    {
-        var (req, ok) = db.connRequests.TakeRandom(); if (ok) {
-            if (err == nil) {
-                dc.inUse = true;
-            }
-            req.ᐸꟷ(new connRequest(
-                conn: Ꮡdc,
-                err: err
-            ));
-            return true;
-        } else if (err == nil && !db.closed) {
-            if (db.maxIdleConnsLocked() > len(db.freeConn)) {
-                db.freeConn = append(db.freeConn, Ꮡdc);
-                Ꮡdb.startCleanerLocked();
-                return true;
-            }
-            db.maxIdleClosed++;
+    var (req, ok) = db.connRequests.TakeRandom(); if (ok) {
+        if (err == nil) {
+            dc.inUse = true;
         }
+        req.ᐸꟷ(new connRequest(
+            conn: Ꮡdc,
+            err: err
+        ));
+        return true;
+    } else if (err == nil && !db.closed) {
+        if (db.maxIdleConnsLocked() > len(db.freeConn)) {
+            db.freeConn = append(db.freeConn, Ꮡdc);
+            Ꮡdb.startCleanerLocked();
+            return true;
+        }
+        db.maxIdleClosed++;
     }
     return false;
 }
@@ -3103,10 +3081,8 @@ internal static (ж<driverConn> dc, Action<error> ΔreleaseConn, ж<driverStmt> 
     error err = default;
     ref var s = ref Ꮡs.DerefOrNull();
 
-    {
-        err = s.stickyErr; if (err != nil) {
-            return (dc, ΔreleaseConn, ds, err);
-        }
+    err = s.stickyErr; if (err != nil) {
+        return (dc, ΔreleaseConn, ds, err);
     }
     s.mu.Lock();
     if (s.closed) {
@@ -3600,10 +3576,8 @@ public static error Err(this ж<Rows> Ꮡrs) {
         // are done, in which case the user might've canceled their own context
         // before calling Rows.Err.
         if (!rs.hitEOF) {
-            {
-                var errp = Ꮡrs.ᏑcontextDone.Load(); if (errp != nil) {
-                    return errp.ValueSlot;
-                }
+            var errp = Ꮡrs.ᏑcontextDone.Load(); if (errp != nil) {
+                return errp.ValueSlot;
             }
         }
 
@@ -3924,10 +3898,8 @@ internal static void closemuRUnlockIfHeldByScan(this ж<Rows> Ꮡrs) {
 
 internal static bool scanArgsContainRawBytes(slice<any> args) {
     foreach (var (_, a) in args) {
-        {
-            var (_, ok) = a._<ж<RawBytes>>(ᐧ); if (ok) {
-                return true;
-            }
+        var (_, ok) = a._<ж<RawBytes>>(ᐧ); if (ok) {
+            return true;
         }
     }
     return false;
@@ -3972,10 +3944,8 @@ internal static error close(this ж<Rows> Ꮡrs, error errʗp) {
         withLock(new driverConnжLocker(rs.dc), () => {
             Ꮡerr.ValueSlot = Ꮡrs.Value.rowsi.Close();
         });
-        {
-            var fn = rowsCloseHook(); if (fn != nil) {
-                fn(Ꮡrs, Ꮡerr);
-            }
+        var fn = rowsCloseHook(); if (fn != nil) {
+            fn(Ꮡrs, Ꮡerr);
         }
         if (rs.cancel != nil) {
             rs.cancel();
@@ -4038,10 +4008,8 @@ public static error Scan(this ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
         }
 
         if (!r.rows.Next()) {
-            {
-                var errΔ1 = r.rows.Err(); if (errΔ1 != nil) {
-                    return errΔ1;
-                }
+            var errΔ1 = r.rows.Err(); if (errΔ1 != nil) {
+                return errΔ1;
             }
             return ErrNoRows;
         }

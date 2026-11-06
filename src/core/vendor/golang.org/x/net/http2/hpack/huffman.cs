@@ -24,10 +24,8 @@ public static (nint, error) HuffmanDecode(io.Writer w, slice<byte> v) {
         var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
         buf.Reset();
         defer(ᏑbufPool.Put, buf.OrTypedNil(), ref ᒐ);
-        {
-            var err = huffmanDecode(buf, 0, v); if (err != nil) {
-                return (0, err);
-            }
+        var err = huffmanDecode(buf, 0, v); if (err != nil) {
+            return (0, err);
         }
         return w.Write(buf.Bytes());
     }
@@ -42,10 +40,8 @@ public static (@string, error) HuffmanDecodeToString(slice<byte> v) {
         var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
         buf.Reset();
         defer(ᏑbufPool.Put, buf.OrTypedNil(), ref ᒐ);
-        {
-            var err = huffmanDecode(buf, 0, v); if (err != nil) {
-                return ("", err);
-            }
+        var err = huffmanDecode(buf, 0, v); if (err != nil) {
+            return ("", err);
         }
         return (buf.String(), default);
     }
@@ -115,11 +111,9 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         // Both are decoding errors per RFC 7541 section 5.2.
         return ErrInvalidHuffman;
     }
-    {
-        nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((cur & mask) != mask) {
-            // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
-            return ErrInvalidHuffman;
-        }
+    nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((cur & mask) != mask) {
+        // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
+        return ErrInvalidHuffman;
     }
 
     return default;
@@ -203,15 +197,13 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         }
     }
     // Add padding bits if necessary
-    {
-        nuint over = n % 8; if (over > 0) {
-            UntypedInt eosCode = 0x3fffffff;
-            UntypedInt eosNBits = 30;
-            const uint64 eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
-            nuint pad = 8 - over;
-            x = (x.Lsh(pad)) | (eosPadByte.Rsh(over));
-            n += pad; // 8 now divides into n exactly
-        }
+    nuint over = n % 8; if (over > 0) {
+        UntypedInt eosCode = 0x3fffffff;
+        UntypedInt eosNBits = 30;
+        const uint64 eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
+        nuint pad = 8 - over;
+        x = (x.Lsh(pad)) | (eosPadByte.Rsh(over));
+        n += pad; // 8 now divides into n exactly
     }
     // n in (0, 8, 16, 24, 32)
     switch (n / 8) {

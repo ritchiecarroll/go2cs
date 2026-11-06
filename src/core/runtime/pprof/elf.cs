@@ -27,10 +27,8 @@ internal static (@string, error) elfBuildID(@string @file) {
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
 
-        {
-            var (_, errΔ1) = f.ReadAt(buf[..64], 0); if (errΔ1 != nil) {
-                return ("", errΔ1);
-            }
+        var (_, errΔ1) = f.ReadAt(buf[..64], 0); if (errΔ1 != nil) {
+            return ("", errΔ1);
         }
 
         // ELF file begins with \x7F E L F.
@@ -79,15 +77,11 @@ internal static (@string, error) elfBuildID(@string @file) {
         }}
 
         for (nint i = 0; i < shnum; i++) {
-            {
-                var (_, errΔ2) = f.ReadAt(buf.slice(0, (nint)(shentsize)), shoff + (int64)i * shentsize); if (errΔ2 != nil) {
-                    return ("", errΔ2);
-                }
+            var (_, errΔ2) = f.ReadAt(buf.slice(0, (nint)(shentsize)), shoff + (int64)i * shentsize); if (errΔ2 != nil) {
+                return ("", errΔ2);
             }
-            {
-                var typ = byteOrder.Uint32(buf[4..]); if (typ != 7) { // SHT_NOTE
-                    continue;
-                }
+            var typ = byteOrder.Uint32(buf[4..]); if (typ != 7) { // SHT_NOTE
+                continue;
             }
             int64 off = default;
             int64 size = default;
@@ -102,10 +96,8 @@ internal static (@string, error) elfBuildID(@string @file) {
             }
             size += off;
             while (off < size) {
-                {
-                    var (_, errΔ3) = f.ReadAt(buf[..16], off); if (errΔ3 != nil) { // room for header + name GNU\x00
-                        return ("", errΔ3);
-                    }
+                var (_, errΔ3) = f.ReadAt(buf[..16], off); if (errΔ3 != nil) { // room for header + name GNU\x00
+                    return ("", errΔ3);
                 }
                 nint nameSize = (nint)byteOrder.Uint32(buf[0..]);
                 nint descSize = (nint)byteOrder.Uint32(buf[4..]);
@@ -118,10 +110,8 @@ internal static (@string, error) elfBuildID(@string @file) {
                 if (descSize > len(buf)) {
                     return ("", errBadELF);
                 }
-                {
-                    var (_, errΔ4) = f.ReadAt(buf.slice(0, descSize), descOff); if (errΔ4 != nil) {
-                        return ("", errΔ4);
-                    }
+                var (_, errΔ4) = f.ReadAt(buf.slice(0, descSize), descOff); if (errΔ4 != nil) {
+                    return ("", errΔ4);
                 }
                 return (fmt.Sprintf("%x"u8, buf.slice(0, descSize)), default);
             }

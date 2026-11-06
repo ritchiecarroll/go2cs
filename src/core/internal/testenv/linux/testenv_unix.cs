@@ -21,20 +21,18 @@ internal static bool syscallIsNotSupported(error err) {
         return false;
     }
 
-    {
-        var (errno, ok) = errors.AsType<Δsyscall.Errno>(err); if (ok) {
-            switch (errno) {
-            case var ᴛ when ᴛ == Δsyscall.EPERM || ᴛ == Δsyscall.EROFS: {
-                // User lacks permission: either the call requires root permission and the
-                // user is not root, or the call is denied by a container security policy.
-                return true;
-            }
-            case var ᴛ when ᴛ == Δsyscall.EINVAL: {
-                // Some containers return EINVAL instead of EPERM if a system call is
-                // denied by security policy.
-                return true;
-            }}
+    var (errno, ok) = errors.AsType<Δsyscall.Errno>(err); if (ok) {
+        switch (errno) {
+        case var ᴛ when ᴛ == Δsyscall.EPERM || ᴛ == Δsyscall.EROFS: {
+            // User lacks permission: either the call requires root permission and the
+            // user is not root, or the call is denied by a container security policy.
+            return true;
         }
+        case var ᴛ when ᴛ == Δsyscall.EINVAL: {
+            // Some containers return EINVAL instead of EPERM if a system call is
+            // denied by security policy.
+            return true;
+        }}
     }
 
     if (errors.Is(err, fs.ErrPermission) || errors.Is(err, errors.ErrUnsupported)) {

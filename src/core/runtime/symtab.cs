@@ -1004,10 +1004,8 @@ internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
         return "?";
     }
     // Make sure the cu index and file offset are valid
-    {
-        var fileoff = datap.cutab[f.cuOffset + (uint32)fileno]; if (fileoff != ~(uint32)0) {
-            return gostringnocopy(Ꮡ(datap.filetab, fileoff));
-        }
+    var fileoff = datap.cutab[f.cuOffset + (uint32)fileno]; if (fileoff != ~(uint32)0) {
+        return gostringnocopy(Ꮡ(datap.filetab, fileoff));
     }
     // pcln section is corrupt.
     return "?";

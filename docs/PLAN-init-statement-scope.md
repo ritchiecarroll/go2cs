@@ -1,7 +1,11 @@
 # PLAN — init statements without scope braces
 
-> **STATUS: PROPOSED (H, 2026-11-04). A scout for an owner ask. It changes no converter code and no emission.**
-> Document type: a [strategy plan](doctrine/ProcessGlossary.md#plan), proposed and not yet ruled. Every number was
+> **STATUS: RULED (2026-11-05).** The owner, asked "Should H implement the brace-dropping plan, without the rename,
+> for .3?", answered: *"Yes, no rename"*. Section 5 is the scope: (a), the else-if shapes and the `ok` rescue land;
+> the Δ rename and merging sibling declarations stay out. Implemented in `src/go2cs/initScopeOperations.go`.
+>
+> Proposed by H, 2026-11-04, as a scout for an owner ask.
+> Document type: a [strategy plan](doctrine/ProcessGlossary.md#plan). Every number was
 > measured at master `33589333b2` (batch 155) on H. The instruments are in
 > [`phase4/probes/h-init-scope-census/`](phase4/probes/h-init-scope-census/README.md), and section 7 gives the
 > commands that reproduce them.

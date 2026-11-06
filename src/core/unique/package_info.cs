@@ -66,7 +66,7 @@ using static go.unique_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuICCpIKUlIK4goKUpu6kgoKCgJS2yIKU3JSSlNzkgqaCpoKCgoKUgoKCgoKClIKClK7CgoKCgpSCgoKClIKClJSClJSClJSCuIKCyoKClAAHEIKClKaCgoKCgpSCpgAJFKKClKaigpQAEyyCpoKCgqYAChaCgoKCAAYU0oKCgpSUqLKCgpSUrOSCgpSUgriCgoKCgpSUlK4=", "136-138:1")]
+[assembly: GoPositionMap("unique/canonmap.go", "canonmap.cs", "ABo0goKUgoKCgqaypIKCgpSCgpSCgpSUptKkgoKCgpSCgoKClIKClIKUuIKUgpSUgriCgpSm7qSCgoKUpsiClNyUkpTc5IKmgqaCgoKClIKCgoKCgpSCgpSuwoKCgoKUgoKCgpSCgpSUgpSUgpSUgriCgsqCgpQABxCCgpSmgoKCgoKUgqYACRSigpSmooKUABMsgqaCgoKmAAoWgoKCggAGFNKCgoKUlKiygoKUlKzkgoKUlIK4goKCgoKUlJSu", "136-138:1")]
 [assembly: GoPositionMap("unique/handle.go", "handle.cs", "ABk0oqzEgoKUgoKClKaClJQ=")]
 // </GoSourcePositionMaps>
 

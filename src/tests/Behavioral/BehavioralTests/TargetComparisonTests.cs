@@ -1009,6 +1009,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInitOrderTupleSpecs() => CheckTarget("InitOrderTupleSpecs");
 
     [TestMethod]
+    public void CheckInitStatementScope() => CheckTarget("InitStatementScope");
+
+    [TestMethod]
     public void CheckInlineConstraintLift() => CheckTarget("InlineConstraintLift");
 
     [TestMethod]

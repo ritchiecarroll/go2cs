@@ -206,10 +206,8 @@ public static error CloseRead(this ж<TCPConn> Ꮡc) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.closeRead(); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = c.fd.closeRead(); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -222,10 +220,8 @@ public static error CloseWrite(this ж<TCPConn> Ꮡc) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = c.fd.closeWrite(); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = c.fd.closeWrite(); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -250,10 +246,8 @@ public static error SetLinger(this ж<TCPConn> Ꮡc, nint sec) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = setLinger(c.fd, sec); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = setLinger(c.fd, sec); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -266,10 +260,8 @@ public static error SetKeepAlive(this ж<TCPConn> Ꮡc, bool keepalive) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = setKeepAlive(c.fd, keepalive); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = setKeepAlive(c.fd, keepalive); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -285,10 +277,8 @@ public static error SetKeepAlivePeriod(this ж<TCPConn> Ꮡc, time.Duration d) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = setKeepAliveIdle(c.fd, d); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = setKeepAliveIdle(c.fd, d); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -303,10 +293,8 @@ public static error SetNoDelay(this ж<TCPConn> Ꮡc, bool noDelay) {
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = setNoDelay(c.fd, noDelay); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
-        }
+    var err = setNoDelay(c.fd, noDelay); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "set", Net: c.fd.net, Source: c.fd.laddr, Addr: c.fd.raddr, Err: err)));
     }
     return default;
 }
@@ -451,10 +439,8 @@ public static error Close(this ж<TCPListener> Ꮡl) {
     if (!Ꮡl.ok()) {
         return syscall.EINVAL;
     }
-    {
-        var err = l.close(); if (err != nil) {
-            return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err)));
-        }
+    var err = l.close(); if (err != nil) {
+        return new OpErrorжerror(Ꮡ(new OpError(Op: "close", Net: l.fd.net, Source: default, Addr: l.fd.laddr, Err: err)));
     }
     return default;
 }

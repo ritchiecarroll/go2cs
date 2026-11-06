@@ -102,20 +102,14 @@ internal static (ж<ecdsa.PrivateKey> key, error err) parseECPrivateKey(ж<asn1.
     ref var namedCurveOID = ref ᏑnamedCurveOID.DerefOrNull();
 
     ref var privKey = ref heap(new ecPrivateKey(), out var ᏑprivKey);
-    {
-        var (_, errΔ1) = asn1.Unmarshal(der, ᏑprivKey); if (errΔ1 != nil) {
-            {
-                var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8())); if (errΔ2 == nil) {
-                    return (default, errors.New(x509FailedToParsePrivateˢ2));
-                }
-            }
-            {
-                var (_, errΔ3) = asn1.Unmarshal(der, Ꮡ(new pkcs1PrivateKey())); if (errΔ3 == nil) {
-                    return (default, errors.New(x509FailedToParsePrivateˢ3));
-                }
-            }
-            return (default, errors.New("x509: failed to parse EC private key: "u8 + errΔ1.Error()));
+    var (_, errΔ1) = asn1.Unmarshal(der, ᏑprivKey); if (errΔ1 != nil) {
+        var (_, errΔ2) = asn1.Unmarshal(der, Ꮡ(new pkcs8())); if (errΔ2 == nil) {
+            return (default, errors.New(x509FailedToParsePrivateˢ2));
         }
+        var (_, errΔ3) = asn1.Unmarshal(der, Ꮡ(new pkcs1PrivateKey())); if (errΔ3 == nil) {
+            return (default, errors.New(x509FailedToParsePrivateˢ3));
+        }
+        return (default, errors.New("x509: failed to parse EC private key: "u8 + errΔ1.Error()));
     }
     if (privKey.Version != ecPrivKeyVersion) {
         return (default, fmt.Errorf("x509: unknown EC private key version %d"u8, privKey.Version));
