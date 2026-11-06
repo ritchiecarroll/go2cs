@@ -1312,10 +1312,15 @@ jobs:
           $log = Join-Path $art "sweep-$goos-$rid.log"
           $sweepExit = 0
           $skipBuild = $false
+
+          # The osx-arm64 runner converts the darwin/amd64 corpus and runs its converted host as a NATIVE arm64 process,
+          # so its oracle runs at arm64 too, not as amd64 under Rosetta (COORD's osx-arm64 oracle seat, ruling (A); the
+          # converter's -test-oracle-goarch). Every other leg's host runs at the target's own arch: nothing is passed.
+          $oracleGoarch = if ($env:RID -eq 'osx-arm64') { 'arm64' } else { '' }
           $failedRows = [System.Collections.Generic.List[string]]::new()
 
           foreach ($name in $names) {
-              & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -IgnoreDiskPreflight *>&1 |
+              & ./src/run-validated-sweep.ps1 -Filter $name -Exact -SkipBuild:$skipBuild -TestTimeout $env:SWEEP_TEST_TIMEOUT -TestOracleGoarch $oracleGoarch -IgnoreDiskPreflight *>&1 |
                   Tee-Object -FilePath $log -Append
 
               $rowExit = $LASTEXITCODE

@@ -465,6 +465,7 @@
     <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapSourceWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleBuildFailure_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)oracleArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTestArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)orphanDisclosureCheck_test.go" />
     <None Include="$(MSBuildThisFileDirectory)packageClassNaming_test.go" />

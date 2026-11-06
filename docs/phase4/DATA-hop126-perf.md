@@ -872,3 +872,153 @@ classified it as zero-size. Every element then aliased one slot: the loops summe
 golib guards exactly this: `GoFieldMetadata.InstanceFields` refuses a value type wider than one byte that reports no
 fields, and the template's `TrimMode=partial` keeps converted assemblies whole. Built partial, the probe agrees with the
 JIT. Any classification that leans on reflection metadata under AOT needs both of those.
+
+### 11.6 Amended 2026-11-06: Step B priced, the x86-64-v3 suite picture, and what a v3 baseline refuses
+
+Raw files are in [`item7/stepb/`](DATA-hop126-perf/item7/stepb/). Every timing line is `win-x64` on G (Ryzen 5 PRO 6650U,
+runtime 10.0.11). The images were built by the i9 (SDK 10.0.403, ILC 10.0.14) with the drop's recipe; a v3 image adds
+`-p:IlcInstructionSet=x86-64-v3` and nothing else. Each v3 image's ILC response file carries exactly one instruction-set
+line, `--instruction-set:x86-64-v3`, and the default-instruction-set (D26) response files carry none. Every image was
+sha256-checked against the i9's post and its folder manifest before any timing.
+
+**Step B, TlsHandshake (window 21:54-21:57 on 11-05, valid).** D26 2544.8 ms against v3 2288.6 ms: **0.899**, -256 ms,
+floor 1.37%, MOVED. The Fib control drifted -4.49%, and its 95% interval [-22.12%, +1.00%] holds 0. The prediction of about
+0.85 (all of the 373 ms) recovered about 69% of that.
+
+The v3 image's disassembly was read by symbol extent through a name->address lookup (`symfind`, dbghelp `SymFromName`). As
+a control, on the baseline image it returns exactly the addresses §11.3 recorded.
+- `math/bits.Mul` is 12 instructions around `mulx`, and `Math.BigMul`'s software fallback is absent from the image.
+- `slice<UIntPtr>.get_Item` is unchanged: the same `GoZeroSizeFacts<UIntPtr>` class-constructor check (cause 1).
+- The hot caller `bigmod.addMulVVW` has the same shape at both levels: 4 calls to `get_Item` and one NON-INLINED call to
+  `bits.Mul` per iteration, whose `(hi, lo)` comes back through a stack buffer. That fits the ~117 ms v3 did not recover.
+  `bits_impl.cs`'s `Mul` carries no inlining attribute on the strength of a JIT-only measurement. Inlining it went to R as
+  a separable second commit on the zero-size seat; it is priced below once built.
+
+**The v3 suite, first window (00:25-00:42 on 11-06): INVALID as worded.** The validity rule stated before the run was
+"every arm's A/A under 3%", and 3 of 68 arms broke it, all of them D26 arms: Channel 11.77%, Map 8.94%, StringView 7.94%.
+Channel and Map are wide in every arm (largest IQRs 21.7% and 20.9%); StringView's D26-AA had a slow tail. The Fib control
+held (-2.60%, [-3.10%, +1.63%]); Sieve, reported only, drifted -8.72% with an interval excluding 0. The predictions,
+stated in the OPEN post and **scored as worded, 1 of 4 HIT**:
+
+| prediction | result |
+|:--|:--|
+| TlsHandshake repeats 0.899 within its floor | HIT (0.902) |
+| at least 2 other programs move faster | FAILED: none |
+| no program moves slower | FAILED: StringMatch and IfaceShellChurn |
+| suite geomean 0.95-0.99 | FAILED: about 1.000 |
+
+The window's provisional table, V3/D26, recorded as PROVISIONAL:
+
+| program | ratio | change | floor | reading |
+|:--|--:|--:|--:|:--|
+| Channel | 1.032 | +3.2% | 21.7% | within (disturbed) |
+| Fib | 1.000 | +0.0% | 2.3% | within |
+| FieldView | 0.996 | -0.4% | 1.5% | within |
+| Iface | 1.001 | +0.1% | 1.9% | within |
+| IfaceCall | 0.978 | -2.2% | 7.7% | within |
+| IfaceShell | 0.957 | -4.3% | 6.1% | within |
+| IfaceShellChurn | 1.035 | +3.5% | 1.7% | moved |
+| Map | 1.016 | +1.6% | 20.9% | within (disturbed) |
+| MatMul | 1.006 | +0.6% | 1.6% | within |
+| RefLower | 0.987 | -1.3% | 1.7% | within |
+| Sieve | 1.052 | +5.2% | 18.2% | within |
+| Sort | 0.994 | -0.6% | 1.4% | within |
+| Startup | 1.008 | +0.8% | 5.4% | within |
+| String | 1.029 | +2.9% | 6.1% | within |
+| StringMatch | 1.053 | +5.3% | 1.3% | moved |
+| StringView | 0.961 | -3.9% | 14.5% | within (disturbed) |
+| TlsHandshake | 0.902 | -9.8% | 1.1% | moved |
+
+**The rerun (00:44-00:51 on 11-06), on COORD's ruling made before it ran.** Five programs at 21 rounds per arm, with
+everything else unchanged: the three disturbed rows, plus StringMatch and IfaceShellChurn as REPLICATION of the two
+unexpected slower rows. Validity was split so that no amendment could reach the decisive rows:
+- StringMatch and IfaceShellChurn kept the original A/A < 3%.
+- Channel, Map and StringView could use "A/A < 3% or under the larger IQR of the pair". Those rows read noise-bound, with
+  no claim unless MOVED.
+
+All five passed. StringMatch (0.09/0.06%), IfaceShellChurn (0.24/0.05%), Map (1.11/0.52%) and StringView (0.04/1.47%)
+passed the original rule. Channel (6.68/8.08% against IQRs of 15.53/12.85%) passed only the amended one. The Fib control
+held (-2.26%, [-3.91%, +3.46%]). The 12 untouched rows stand from the first window on PER-ROW validity: each passed its own
+A/A, and the control held.
+
+**The final v3 picture, 17 programs.** V3/D26, ms medians (in-program time; Startup is process wall). The rows for
+Channel, Map, StringView, StringMatch and IfaceShellChurn come from the rerun:
+
+| program | v3 | D26 | ratio | change | floor | reading |
+|:--|--:|--:|--:|--:|--:|:--|
+| TlsHandshake | 2295.0 | 2543.2 | 0.902 | -9.8% | 1.1% | **moved faster** |
+| StringMatch | 1352.6 | 1292.1 | 1.047 | +4.7% | 1.0% | **moved slower** (replicates 1.053) |
+| IfaceShellChurn | 1752.1 | 1700.3 | 1.030 | +3.0% | 1.5% | **moved slower** (replicates 1.035) |
+| IfaceShell | 1221.4 | 1276.2 | 0.957 | -4.3% | 6.1% | within |
+| IfaceCall | 543.5 | 555.7 | 0.978 | -2.2% | 7.7% | within |
+| RefLower | 647.7 | 656.2 | 0.987 | -1.3% | 1.7% | within |
+| Sort | 548.1 | 551.4 | 0.994 | -0.6% | 1.4% | within |
+| FieldView | 2361.6 | 2372.1 | 0.996 | -0.4% | 1.5% | within |
+| Fib | 179.9 | 179.9 | 1.000 | +0.0% | 2.3% | within |
+| Iface | 577.8 | 577.4 | 1.001 | +0.1% | 1.9% | within |
+| Map | 294.5 | 293.7 | 1.003 | +0.3% | 4.8% | within |
+| MatMul | 743.7 | 739.1 | 1.006 | +0.6% | 1.6% | within |
+| StringView | 19.2 | 19.0 | 1.008 | +0.8% | 10.5% | within |
+| Startup | 171.0 | 169.6 | 1.008 | +0.8% | 5.4% | within |
+| Channel | 113.3 | 112.0 | 1.011 | +1.1% | 15.5% | within; noise-bound, no claim |
+| String | 1443.7 | 1402.3 | 1.029 | +2.9% | 6.1% | within |
+| Sieve | 321.2 | 305.4 | 1.052 | +5.2% | 18.2% | within |
+
+Suite geomean of the 17 ratios is **1.000**, and **1.006** without TlsHandshake. On this box, x86-64-v3 buys
+TlsHandshake's multiply and nothing else. It costs StringMatch about 5% and IfaceShellChurn about 3%.
+
+**StringMatch's mechanism: `vzeroupper` on every exit of the byte comparer that string equality reaches.** The i9 built a
+matched pair, each with its own native PDB:
+- default `f99efb3c…` (size-equal to D26) and v3 `f1058d1c…` (the timed v3 image itself);
+- the same converted tree (masked identity `bd2da796`), and ILC response files that differ in exactly the one
+  instruction-set line.
+
+Hot functions were compared by symbol extent (`sm-hot-sizes.txt`, `sm-cmp.sh`); the program compares strings of 10 bytes
+or fewer.
+- `classify`, golib's `@string` equality, `HasPrefix` and the `StringLiteralCache` methods are the same length at both
+  levels.
+- `run` and `kindName` are re-encoded to VEX instruction for instruction: 321 against 320 and 151 against 150
+  instructions, the same calls, and no `vzeroupper`.
+- `System.SpanHelpers.SequenceEqual(ref byte, ref byte, nuint)` grows from 72 to 98 instructions (240 to 336 bytes).
+  - At v3 it adds a 32-byte `ymm` loop, and the compiler places `vzeroupper` before every one of its three returns. That
+    includes the scalar return that lengths under 16 bytes take (`dis-sm-v3-SequenceEqual.txt`, `0x14008B6AC`).
+  - Every short compare also gains one more length test (`cmp r8,20h`).
+  - The default body has neither (`dis-sm-default-SequenceEqual.txt`).
+
+Among the functions compared, the executed-path difference is extra work in every equal-length string compare (the map's hashing and lookup helpers were not in the compared set):
+- one compare and a `vzeroupper`, per call;
+- in a function that never touches a `ymm` register on that path.
+
+This is consistent in direction with the replicated +4.7%. Its cost per call on this Zen 3+ part is not measured here.
+Seen from the corpus, it is the same trade the instruction set makes everywhere: wider vector paths in shared .NET helpers,
+paid for by short inputs.
+
+**What a v3 baseline refuses (portability).** From Microsoft's own sources, at the `release/10.0` branch of dotnet/runtime:
+- [The Native AOT optimizing guide](https://github.com/dotnet/runtime/blob/release/10.0/src/coreclr/nativeaot/docs/optimizing.md)
+  says the default "targets the minimum instruction set supported by the target OS and architecture", and that with
+  `IlcInstructionSet` "the native binary will require the instruction sets to be supported by the hardware in order to run".
+- ILC's group table (`CorInfoInstructionSet.cs`) defines x86-64-v3 as `x86-64-v2 avx2`. Its `avx2` group is AVX2, BMI1,
+  BMI2, F16C, FMA and LZCNT; v2 adds the SSE3-SSE4.2 and POPCNT group. `ilc --help` (10.0.11) lists x86-64-v3 among its
+  predefined groups.
+- At start-up the Native AOT runtime's `DetectCPUFeatures` (`nativeaot/Runtime/startup.cpp`) compares the CPU against the
+  image's required features. When any is missing, it prints "The required instruction sets are not supported by the current
+  CPU." and calls `RhFailFast()`. The program does not run at all, and there is no fallback path.
+- Microsoft's documents name no processor models. By the vendors' feature tables (not Microsoft's), the CPUs that lack AVX2,
+  BMI2 or FMA include:
+  - Intel cores before Haswell (2013): Sandy Bridge and Ivy Bridge;
+  - Intel's low-power Atom-class cores through Tremont, including the Celeron and Pentium Silver N-series;
+  - Pentium Gold and Celeron parts of the Skylake through Comet Lake generations, which ship with AVX disabled;
+  - AMD before Excavator (2015), and AMD's Jaguar and Puma low-power cores;
+  - virtual machines whose hypervisor masks AVX, and x64 emulation layers that do not expose AVX2.
+
+**Open from this section: the pricing window**, as COORD amended it on 2026-11-06 before any image was built.
+- The i9 found that the drop recipe restores golib and `go.math.bits` from nuget.org's 1.26.10.2 packages, so A and AI built
+  that way would carry neither change.
+- So the arms are source-reference builds (`-go2cspath` at each arm's worktree) with a base arm:
+  - B0 at `f0ed6c71f6` (TlsHandshake, Sieve, MatMul, Sort);
+  - A at `2393238b8a`, R's zero-size pre-gate (the same four);
+  - AI at `32a0372d23`, A plus the `Mul` inline (TlsHandshake).
+- The readings are A/B0 and AI/A. D26 is not an arm, and AIv3 is skipped (a TlsHandshake publish takes about 1,535 s).
+- The disassembly gates come before any timing.
+- The predictions stated 2026-11-05 carry over to the new base: A against base 0.80-0.90 for TlsHandshake; at least 2 of
+  Sieve, MatMul and Sort moved faster; AI/A 0.88-0.96.

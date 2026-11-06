@@ -9,6 +9,7 @@
 
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace go;
 
@@ -51,11 +52,44 @@ namespace go;
 internal static class GoZeroSizeFacts<T>
 {
     /// <summary>
-    /// Whether <typeparamref name="T"/> occupies no storage in Go. A <c>static readonly</c> per closed
-    /// <typeparamref name="T"/>, so every gate written against it folds at JIT time and no ordinary
-    /// element type pays for the branch.
+    /// Whether <typeparamref name="T"/> occupies no storage in Go. Every gate written against it folds to a
+    /// constant for an ordinary element type, under the JIT and under Native AOT alike, so no such type pays for
+    /// the branch.
     /// </summary>
-    internal static readonly bool IsZeroSize = GoZeroSizeFacts.Classify(typeof(T));
+    /// <remarks>
+    /// It was a <c>static readonly</c> set by <see cref="GoZeroSizeFacts.Classify"/>, which the JIT folds once the
+    /// static initializer has run. ILC cannot preinitialize a reflective initializer, so under Native AOT every
+    /// read site kept a lazy class-constructor check and every <see cref="slice{T}"/> element read became a
+    /// non-inlined call: TlsHandshake's <c>slice&lt;nuint&gt;</c> reads cost about 18% of its AOT time (G's item 7,
+    /// cause 1). The <see cref="CertainlyHasStorage"/> pre-gate decides from the type alone, and only a
+    /// reference-free struct ever reads the reflective answer.
+    /// </remarks>
+    internal static bool IsZeroSize
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => !CertainlyHasStorage && Classified.IsZeroSize;
+    }
+
+    /// <summary>
+    /// The pre-gate: true when <typeparamref name="T"/>'s type alone proves it occupies storage. A reference, a
+    /// primitive, an enum, or a value type that holds a reference is never zero-size (see
+    /// <see cref="GoZeroSizeFacts.Classify"/>). Each term is a JIT and ILC intrinsic over a closed
+    /// <typeparamref name="T"/>, so this folds at compile time. GolibTests' <c>ZeroSizePreGateTests</c> proves
+    /// that pre-gate-true implies Classify-false over every value type it loads.
+    /// </summary>
+    internal static bool CertainlyHasStorage
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => !typeof(T).IsValueType || typeof(T).IsPrimitive || typeof(T).IsEnum || RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+    }
+
+    // The reflective answer, read only when the pre-gate cannot decide (a reference-free struct). It lives in its
+    // own holder so that its static initializer is not this class's: a read site the pre-gate decides touches no
+    // static field at all.
+    private static class Classified
+    {
+        internal static readonly bool IsZeroSize = GoZeroSizeFacts.Classify(typeof(T));
+    }
 
     /// <summary>
     /// The ONE element every zero-size value of <typeparamref name="T"/> is — golib's
