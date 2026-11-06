@@ -3,7 +3,7 @@
 > **STATUS: PROPOSED (C1, 2026-11-06; branch `claude/c1-aes-trio-scout` from master `4aebdadc1a`), design only.**
 > COORD dispatched this scout for the AES trio on osx-arm64, recorded in the BOARD's 2026-11-05 GOARCH row
 > (amendment of 2026-11-06). There is no implementation until COORD rules. The recommendation is
-> [option 3](#option-3-recommended-go-s-arm64-branch-for-an-arm64-process). The rulings it asks for are listed in
+> [option 3](#option-3-recommended-gos-arm64-branch-for-an-arm64-process). The rulings it asks for are listed in
 > [Open questions](#open-questions).
 
 ## The divergence
