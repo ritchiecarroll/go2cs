@@ -2419,6 +2419,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTestingStructZeroLiteral() => CheckTarget("TestingStructZeroLiteral");
 
     [TestMethod]
+    public void CheckThisRefReceiverTC0() => CheckTarget("ThisRefReceiverTC0");
+
+    [TestMethod]
     public void CheckTraceUserAnnotations() => CheckTarget("TraceUserAnnotations");
 
     [TestMethod]
