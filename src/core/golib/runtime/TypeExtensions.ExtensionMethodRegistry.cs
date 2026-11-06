@@ -54,10 +54,13 @@ namespace go.golib;
 //   CreateStaticDelegate, so that method is on the frozen emitted surface even though golib itself
 //   uses it only from error.cs; `builtin`'s equality tail reads GetEqualityOperator.
 //
-//   The scan skips the framework (`System.*`, `Microsoft.*`, `netstandard`, `WindowsBase`) and
-//   golib's own satellite assemblies, and considers only sealed, non-nested, non-generic static
-//   classes — which is exactly the shape the converter emits and a large saving over walking
-//   every type in the BCL.
+//   The scan skips the framework (`System.*`, `Microsoft.*`, `netstandard`, `WindowsBase`), golib
+//   itself and golib's satellite assemblies, and considers only sealed, non-nested, non-generic
+//   static classes — which is exactly the shape the converter emits and a large saving over
+//   walking every type in the BCL. golib is skipped by IDENTITY, not by name: its extension methods
+//   are C# helpers (GoShift's Rsh/Lsh on the builtin integers, slice and Must helpers), never Go
+//   methods, and Go's predeclared types have empty method sets. The name prefix `go.golib.` alone
+//   missed golib's own assembly name, `golib`, so a builtin uint64 "had" Rsh.
 //
 // CACHE INVALIDATION IS SHARED WITH THE SIBLING FILE — READ THIS BEFORE ADDING A CACHE
 //   Assemblies load LATE. A converted program's package assemblies are not all present when the
@@ -203,7 +206,10 @@ public static partial class TypeExtensions
         if (string.IsNullOrEmpty(name))
             return;
 
-        // Ignore extensions methods from the .NET framework
+        // Ignore extension methods from the .NET framework, and golib's own: they are C# helpers, not Go methods
+        if (assembly == typeof(TypeExtensions).Assembly)
+            return;
+
         if (name.StartsWith("System.") || name.StartsWith("netstandard") || name.StartsWith("Microsoft.") || name.StartsWith("WindowsBase") || name.StartsWith("go.golib."))
             return;
 
