@@ -29,14 +29,14 @@ using static global::go.@internal.runtime.atomic_test_package;
 
 // The go statements whose goroutine the converter proved cannot recurse, by the file, line and column of
 // their goǃ call: go2cs-gen starts each on golib's bounded stack reservation rather than the Go-scale default.
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 42, 9)]
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 87, 9)]
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 128, 9)]
-[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 170, 9)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 196, 9)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 239, 9)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 279, 9)]
-[assembly: GoBoundedGoroutine("atomic_test.cs", 319, 9)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 42, 9, 0)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 87, 9, 1)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 128, 9, 2)]
+[assembly: GoBoundedGoroutine("atomic_andor_test.cs", 170, 9, 3)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 196, 9, 1)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 239, 9, 2)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 279, 9, 3)]
+[assembly: GoBoundedGoroutine("atomic_test.cs", 319, 9, 4)]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
