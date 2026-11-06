@@ -90,6 +90,14 @@ public record MethodInfo
     // Defaults true so a MethodInfo built without semantic type info keeps the prior behavior.
     public bool IsInvokerForwardable { get; init; } = true;
 
+    // For an interface member that is not invoker-forwardable ONLY because its last parameter is a Go variadic tail
+    // (`params Span<T>`): the delegate type golib's reflect builds for its signature, which is the type a generated
+    // method-set arm's bound delegate has (MethodSet.DelegateType). The object shell forwards such a member through that
+    // delegate, bound per dynamic value by golib's AdapterBinder, so an interface with a variadic method still gets the
+    // shell that needs no MakeGenericType, the one Native AOT can always build. Null otherwise, and when no delegate
+    // family declares the signature.
+    public string? VariadicDelegate { get; init; }
+
     // True when this method's signature can be re-declared faithfully from the recorded Parameters:
     // those carry the parameter TYPE only, so a member declared with a ref-kind modifier (`in`/`ref`/
     // `out`) — which no converted Go interface has, but a hand-written base such as the io stub's
@@ -323,6 +331,37 @@ public static class MethodSyntaxExtensions
         };
     }
 
+    // MethodInfo.VariadicDelegate's rule: every parameter but a last `Span<T>` and the return survive the invoker's object
+    // round-trip, nothing is by-ref or generic, and golib declares a delegate family for the signature.
+    internal static string? VariadicDelegateType(IMethodSymbol method, Compilation compilation)
+    {
+        if (method.IsGenericMethod || method.ReturnsByRef || method.ReturnsByRefReadonly || method.Parameters.Length == 0 ||
+            !method.ReturnsVoid && !IsInvokerForwardableType(method.ReturnType))
+        {
+            return null;
+        }
+
+        IParameterSymbol tail = method.Parameters[method.Parameters.Length - 1];
+
+        if (tail.RefKind != RefKind.None || MethodSet.SpanElement(tail.Type) is not { } element)
+            return null;
+
+        List<string> parameters = [];
+
+        for (int i = 0; i < method.Parameters.Length - 1; i++)
+        {
+            IParameterSymbol parameter = method.Parameters[i];
+
+            if (parameter.RefKind != RefKind.None || parameter.HasExplicitDefaultValue || !IsInvokerForwardableType(parameter.Type))
+                return null;
+
+            parameters.Add(parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+        }
+
+        return MethodSet.DelegateType(compilation, parameters, element.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            method.ReturnsVoid ? "" : method.ReturnType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+    }
+
     public static MethodInfo GetMethodInfo(this MethodDeclarationSyntax methodDeclaration, Compilation compilation)
     {
         SemanticModel semanticModel = compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
@@ -367,9 +406,15 @@ public static class MethodSyntaxExtensions
             methodDeclaration.ParameterList.Parameters.All(param =>
                 param.Type is null || IsInvokerForwardableType(semanticModel.GetTypeInfo(param.Type).Type));
 
+        string? variadicDelegate = signatureRenderable && typeParameters.Length == 0 && !invokerForwardable &&
+            semanticModel.GetDeclaredSymbol(methodDeclaration) is IMethodSymbol { IsExtensionMethod: false } declared
+                ? VariadicDelegateType(declared, semanticModel.Compilation)
+                : null;
+
         return new MethodInfo()
         {
             Name = methodDeclaration.Identifier.Text,
+            VariadicDelegate = variadicDelegate,
             ReturnType = methodDeclaration.GetReturnType(semanticModel),
             ReturnTypeIsPublic = IsEffectivelyPublicType(semanticModel.GetTypeInfo(methodDeclaration.ReturnType).Type),
             // Receiver excluded (the `this`-modified parameter): its type is the embed itself,
@@ -474,7 +519,7 @@ public static class MethodSyntaxExtensions
         return refPrefix + GlobalQualify(typeSymbol?.ToDisplayString() ?? "object");
     }
 
-    public static MethodInfo GetMethodInfo(this IMethodSymbol methodSymbol)
+    public static MethodInfo GetMethodInfo(this IMethodSymbol methodSymbol, Compilation? compilation = null)
     {
         // Convert parameters to the required tuple format
         (string type, string name)[] parameters = methodSymbol.Parameters.ToParameterInfos();
@@ -525,6 +570,7 @@ public static class MethodSyntaxExtensions
         return new MethodInfo
         {
             Name = methodSymbol.Name,
+            VariadicDelegate = compilation is not null && !invokerForwardable && !methodSymbol.IsExtensionMethod ? VariadicDelegateType(methodSymbol, compilation) : null,
             ReturnType = GlobalQualify(methodSymbol.ReturnType.ToDisplayString()),
             ReturnTypeIsPublic = IsEffectivelyPublicType(methodSymbol.ReturnType),
             // The parameter-side twin of ReturnTypeIsPublic (W3a's promoted-member-forwarding site,

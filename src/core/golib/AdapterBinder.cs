@@ -358,7 +358,7 @@ public static class AdapterBinder
 
         try
         {
-            if (!TryBindMethodSet(valueType, spec.MethodNames, out GoShellBinding? binding))
+            if (!TryBindMethodSet(valueType, spec, out GoShellBinding? binding))
                 return null;
 
             ConstructorInfo? ctor = spec.ObjectShell.GetConstructor(CtorFlags, null, [typeof(object), typeof(GoShellBinding)], null);
@@ -379,14 +379,16 @@ public static class AdapterBinder
     // Resolves one receiver method per interface method, honoring Go's receiver rule: a pointer
     // source prefers its ж-receiver overload and otherwise calls the value-receiver method on the
     // DEREFERENCED pointee; a value source has only the by-value half to draw from.
-    private static bool TryBindMethodSet(Type valueType, string[] methodNames, [NotNullWhen(true)] out GoShellBinding? binding)
+    private static bool TryBindMethodSet(Type valueType, GoInterfaceShellAttribute spec, [NotNullWhen(true)] out GoShellBinding? binding)
     {
         GoTypeExtensions.ResolveReceiverElement(valueType, out Type element, out bool isPointer);
 
         binding = null;
 
-        MethodInvoker[] invokers = new MethodInvoker[methodNames.Length];
+        string[] methodNames = spec.MethodNames;
+        MethodInvoker?[] invokers = new MethodInvoker?[methodNames.Length];
         bool[] dereference = new bool[methodNames.Length];
+        Func<object, Delegate>?[]? variadic = null;
 
         for (int i = 0; i < methodNames.Length; i++)
         {
@@ -399,12 +401,63 @@ public static class AdapterBinder
             if (bound is null)
                 return false;
 
+            // A member the shell forwards through a bound delegate: its variadic tail is a Span no invoker can box.
+            if (VariadicDelegateType(spec, methodNames[i]) is { } delegateType)
+            {
+                if (VariadicBinder(element, isPointer, bound, byPtr, delegateType) is not { } bind)
+                    return false;
+
+                variadic ??= new Func<object, Delegate>?[methodNames.Length];
+                variadic[i] = bind;
+                continue;
+            }
+
             invokers[i] = MethodInvoker.Create(bound);
             dereference[i] = isPointer && ReferenceEquals(bound, byVal);
         }
 
-        binding = new GoShellBinding(invokers, dereference, isPointer ? valueType : null);
+        binding = new GoShellBinding(invokers, dereference, isPointer ? valueType : null, variadic);
         return true;
+    }
+
+    // The delegate type the object shell casts member `name` to, when the shell forwards it through a bound delegate.
+    private static Type? VariadicDelegateType(GoInterfaceShellAttribute spec, string name)
+    {
+        if (spec.VariadicMethods is not { } names || spec.VariadicDelegates is not { } types)
+            return null;
+
+        int index = Array.IndexOf(names, name);
+
+        return index >= 0 && index < types.Length ? types[index] : null;
+    }
+
+    // Binds a variadic member to a dynamic value: the bound delegate of type `delegateType` over that value, built by
+    // code compiled ahead of time, so neither tier needs a MakeGenericType over a struct, which Native AOT cannot close.
+    // Decided here, once per (type, interface), by building one over a zero receiver; null when neither route answers,
+    // which the caller reads as a MISS before any shell is handed out.
+    //  1. The element type's generated method set (go2cs-gen's IGoMethodSet): its bound arm for the method, reached
+    //     through *T for a pointer source. It covers every converted value type, a promoted method included.
+    //  2. For a pointer source, the method's ж<X>-receiver form closed over the box: CreateDelegate needs no
+    //     instantiation for a reference-typed first argument. It covers a hand-owned type with no generated method set
+    //     (testing's T, B and F), whose pointer methods are written with a ж<X> overload.
+    private static Func<object, Delegate>? VariadicBinder(Type element, bool isPointer, MethodInfo bound, MethodInfo? byPtr, Type delegateType)
+    {
+        if (GoReflect.GeneratedMethodSet(element) is { } methodSet)
+        {
+            string name = bound.Name;
+            object? zero = isPointer ? null : GoTypeOps.Uninitialized(element);
+
+            if ((isPointer || zero is not null) && methodSet.ᴛMethod(name, isPointer, true, zero)?.GetType() == delegateType)
+                return target => methodSet.ᴛMethod(name, isPointer, true, target)!;
+        }
+
+        if (isPointer && byPtr is not null && !byPtr.ContainsGenericParameters &&
+            Delegate.CreateDelegate(delegateType, null, byPtr, false) is not null)
+        {
+            return target => Delegate.CreateDelegate(delegateType, target, byPtr);
+        }
+
+        return null;
     }
 
     // Every way a shell can fail to materialize is a MISS: an AOT-unavailable instantiation
@@ -436,15 +489,43 @@ public static class AdapterBinder
 /// </remarks>
 public sealed class GoShellBinding
 {
-    private readonly MethodInvoker[] m_invokers;
+    private readonly MethodInvoker?[] m_invokers;
     private readonly bool[] m_dereference;
     private readonly PropertyInfo? m_pointee;
+    private readonly Func<object, Delegate>?[]? m_variadic;
 
-    internal GoShellBinding(MethodInvoker[] invokers, bool[] dereference, Type? boxType)
+    internal GoShellBinding(MethodInvoker?[] invokers, bool[] dereference, Type? boxType, Func<object, Delegate>?[]? variadic = null)
     {
         m_invokers = invokers;
         m_dereference = dereference;
         m_pointee = boxType?.GetProperty(nameof(ж<int>.Value));
+        m_variadic = variadic;
+    }
+
+    /// <summary>
+    /// Binds the members forwarded through a bound delegate (<see cref="GoInterfaceShellAttribute.VariadicMethods"/>)
+    /// to <paramref name="target"/>, once, when a shell is built for it.
+    /// </summary>
+    /// <param name="target">The Go dynamic value as held by the shell — a receiver box or a boxed value.</param>
+    /// <returns>
+    /// The delegates at their interface method indices, <c>null</c> at every other index; <c>null</c> when the
+    /// interface has no such member.
+    /// </returns>
+    /// <remarks>
+    /// A delegate bound over a boxed value holds a COPY of it, the copy Go's interface value holds; one bound over a
+    /// receiver box reads the pointee at each call, as Go's method value through a pointer does.
+    /// </remarks>
+    public Delegate?[]? BindVariadic(object target)
+    {
+        if (m_variadic is null)
+            return null;
+
+        Delegate?[] delegates = new Delegate?[m_variadic.Length];
+
+        for (int i = 0; i < delegates.Length; i++)
+            delegates[i] = m_variadic[i]?.Invoke(target);
+
+        return delegates;
     }
 
     /// <summary>
@@ -461,7 +542,7 @@ public sealed class GoShellBinding
         if (m_dereference[index] && m_pointee is not null)
             target = m_pointee.GetValue(target)!;
 
-        MethodInvoker invoker = m_invokers[index];
+        MethodInvoker invoker = m_invokers[index]!;
 
         // The bound members are static extension methods, so MethodInvoker's `obj` is always null
         // and the RECEIVER occupies the first invoker argument -- which is why each arm below is
